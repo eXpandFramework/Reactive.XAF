@@ -1,0 +1,1 @@
+This namespace DevExpress.XAF.Modules is used for projects that contain XAF modules. For example the [DevExpress.XAF.Modules.ModelViewInheritance](https://github.com/eXpandFramework/Packages/tree/master/src/Modules/Agnostic/ModelViewIneritance) module

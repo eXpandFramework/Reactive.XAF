@@ -1,0 +1,15 @@
+# https://aka.ms/yaml
+resources:
+- repo: self
+trigger: none
+queue:
+  name: Hosted VS2017
+  demands: 
+  - msbuild
+  - visualstudio
+steps:
+- powershell: |
+   .\go.ps1 -msbuild "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\msbuild.exe" -packageSources $(DXApiFeed)
+  displayName: 'Build'
+  failOnStderr: true
+

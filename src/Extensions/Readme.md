@@ -1,0 +1,1 @@
+This namespace `DevExpress.XAF.Extensions` is used for projects that contain *static* extension classes. For example the `DevExpress.XAF.Extensions.Model` namespace contain platform agnostic classes that extend the XAF application model.
