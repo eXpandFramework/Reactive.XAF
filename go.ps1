@@ -1,5 +1,5 @@
 param(
-    [string]$version="18.2.300.1",
+    [string]$version="18.2.300.2",
     [string]$packageSources="https://nuget.devexpress.com/88luCgoeuPFTrDrTDcc6zKg22U2cVcTm3vdKCv88I7PHF9St6i/api",
     [string[]] $filter=@("*.nuspec"),# $filter=@("*SystemEx*.nuspec","Numeric*.nuspec"),
     [Parameter(ValueFromPipeline = $true)]
