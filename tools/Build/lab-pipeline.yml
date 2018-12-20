@@ -28,7 +28,7 @@ steps:
   displayName: 'NuGet push'
   inputs:
     command: push
-    packagesToPush: '$(System.DefaultWorkingDirectory)/**/*.nupkg'
+    packagesToPush: '$(System.DefaultWorkingDirectory)/bin/nuget/*.nupkg'
     publishVstsFeed: '1884bfa2-32ec-403a-ac30-771c5b8e4872'
     allowPackageConflicts: true
 - task: PublishPipelineArtifact@0
