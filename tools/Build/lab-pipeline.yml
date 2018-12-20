@@ -19,18 +19,26 @@ steps:
     testAssemblyVer2: |
      .\bin\DevExpress.XAF.Agnostic.Specifications.dll
     uiTests: true
+    runInParallel: true
+    runTestsInIsolation: true
+    codeCoverageEnabled: true
+    rerunFailedTests: true
+- task: PublishTestResults@2
+  displayName: 'Publish Test Results **/TEST-*.xml'
+  inputs:
+    testResultsFormat: XUnit
+- task: PublishCodeCoverageResults@1
+  displayName: 'Publish code coverage from $(System.DefaultWorkingDirectory)/**/*coverage.xml'
+  inputs:
+    codeCoverageTool: Cobertura
+    summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/*coverage.xml'
+    reportDirectory: '$(System.DefaultWorkingDirectory)/**/coverage'
+    failIfCoverageEmpty: true
 - task: PublishPipelineArtifact@0
   displayName: 'Publish Pipeline Artifact'
   inputs:
     artifactName: package
     targetPath: bin/nuget
-- task: PublishCodeCoverageResults@1
-  displayName: 'Publish code coverage from ''$(System.DefaultWorkingDirectory)/**/*coverage.xml''
-  inputs:
-    codeCoverageTool: Cobertura
-    summaryFileLocation: '''$(System.DefaultWorkingDirectory)/**/*coverage.xml''
-    reportDirectory: '$(System.DefaultWorkingDirectory)/**/coverage'
-    failIfCoverageEmpty: true
 - task: NuGetCommand@2
   displayName: 'NuGet push'
   inputs:
