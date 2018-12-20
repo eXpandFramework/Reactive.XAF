@@ -29,7 +29,7 @@ steps:
   inputs:
     command: push
     packagesToPush: '$(System.DefaultWorkingDirectory)/**/*.nupkg'
-    publishVstsFeed: '1884bfa2-32ec-403a-ac30-771c5b8e4872
+    publishVstsFeed: '1884bfa2-32ec-403a-ac30-771c5b8e4872'
     allowPackageConflicts: true
 - task: PublishPipelineArtifact@0
   displayName: 'Publish Pipeline Artifact'
