@@ -10,7 +10,7 @@ queue:
   - visualstudio
 steps:
 - powershell: |
-   .\go.ps1 -msbuild "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\msbuild.exe" -packageSources $(DXApiFeed)
+   .\go.ps1 -msbuild "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\msbuild.exe" -packageSources $(DXApiFeed) -version $(Build.BuildNumber)
   displayName: 'Build'
   failOnStderr: true
 - task: VSTest@2
