@@ -15,14 +15,18 @@ properties {
     $build = $true
 }
 
-task default  -depends DiscoverMSBuild, Clean,Init , UpdateProjects,RestoreNuggets,Compile ,CreateNuspec,PackNuspec,PublishNuget
+task default  -depends DiscoverMSBuild, Clean,ChangeAssemblyInfo,Init , UpdateProjects,RestoreNuggets,Compile ,CreateNuspec,PackNuspec,PublishNuget
 
 task Init {
     New-Item "$PSScriptRoot\bin" -ItemType Directory -Force |Out-Null
 }
 
 task ChangeAssemblyInfo {
-    
+    Get-ChildItem "*AssemblyInfo.cs" -Recurse|ForEach-Object{
+        $c=Get-Content $_ 
+        $result = $c -creplace 'Version\("([^"]*)', "Version(""$version"
+        Set-Content $_ -Value $result
+    }
 }
 
 task UpdateProjects {
@@ -35,7 +39,6 @@ task RestoreNuggets {
             Push-Location $_.DirectoryName
             if ($packageSources){
                 $sources= "https://api.nuget.org/v3/index.json;$packageSources"
-                $sources
                 & $nugetExe restore -source $sources
             }
             else {

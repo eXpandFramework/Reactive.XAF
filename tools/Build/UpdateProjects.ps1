@@ -53,6 +53,9 @@ function UpdateXAFNugetReferences($xml,$filename) {
             $_.Include=$referenceName
             $assemblyPath="$rootLocation\bin\"
             $hintPath=GetRelativePath $filename $assemblyPath
+            if (!$_.HintPath){
+                $_.AppendChild($_.OwnerDocument.CreateElement("HintPath", $xml.DocumentElement.NamespaceURI))
+            }
             $_.HintPath="$hintPath\$($_.Include).dll"
         }
     }

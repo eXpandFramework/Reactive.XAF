@@ -8,8 +8,8 @@
 | <img src="http://expandframework.com/images/site/logo.png" width=150 height=68 alt="eXpandFramework logo"/> | Build | Nuget
 |----------|--------|--------
 **Stable**|[![Build status](https://dev.azure.com/eXpandDevOps/eXpandFramework/_apis/build/status/eXpandFramework.Packages)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=16)|`nuget.exe list "tags:expandframework+packages"`
-**Lab**|[![Build status](https://dev.azure.com/eXpandDevOps/eXpandFramework/_apis/build/status/eXpandFramework.Packages-lab)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=23)|[Package Source](https://pkgs.dev.azure.com/eXpandDevOps/_packaging/Lab-Nuget/nuget/v3/index.json)
-<sub><sup>[How do I set up this package source in Visual Studio?](https://go.microsoft.com/fwlink/?linkid=698608)</sup></sub>
+**Lab**|[![Build status](https://dev.azure.com/eXpandDevOps/eXpandFramework/_apis/build/status/eXpandFramework.Packages-lab)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=23)|[https://xpandnugetserver.azurewebsites.net/](https://pkgs.dev.azure.com/eXpandDevOps/_packaging/Lab-Nuget/nuget/v3/index.json)
+<sub><sup>[How do I set up a package source in Visual Studio?](https://go.microsoft.com/fwlink/?linkid=698608)</sup></sub>
 
 # About
 In the `Packages` repo you can find low dependency DevExpress XAF modules distributed as nugets.
