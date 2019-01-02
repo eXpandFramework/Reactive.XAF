@@ -1,5 +1,5 @@
 # https://aka.ms/yaml
-name: 18.2.400.$(Rev:.rr)
+name: 18.2.400$(Rev:.rr)
 resources:
 - repo: self
 trigger: none
@@ -10,8 +10,14 @@ queue:
   - visualstudio
 steps:
 - powershell: |
-   write-host $(Build.BuildNumber)
-   #.\go.ps1 -msbuild "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\msbuild.exe" -packageSources $(DXApiFeed)
+   .\go.ps1 -msbuild "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\msbuild.exe" -packageSources $(DXApiFeed) -version $(Build.BuildNumber)
   displayName: 'Build'
   failOnStderr: true
+- task: NuGetCommand@2
+  displayName: 'NuGet push'
+  inputs:
+    command: push
+    nuGetFeedType: external
+    packagesToPush: '$(System.DefaultWorkingDirectory)/bin/nuget/*.nupkg'
+    publishFeedCredentials: Nuget.org
 
