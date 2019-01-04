@@ -1,4 +1,4 @@
-﻿namespace DevExpress.XAF.Modules.ModelViewIneritance {
+﻿namespace DevExpress.XAF.Modules.ModelViewInheritance {
 	partial class ModelViewIneritanceModule {
 		/// <summary> 
 		/// Required designer variable.

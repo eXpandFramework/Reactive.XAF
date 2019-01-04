@@ -7,7 +7,7 @@ using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
 using DevExpress.XAF.Extensions.Model;
 
-namespace DevExpress.XAF.Modules.ModelViewIneritance {
+namespace DevExpress.XAF.Modules.ModelViewInheritance {
 
     [ModelAbstractClass]
     public interface IModelObjectViewMergedDifferences : IModelView {

@@ -8,7 +8,7 @@ using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.Model.NodeGenerators;
 using DevExpress.XAF.Extensions.Model;
 
-namespace DevExpress.XAF.Modules.ModelViewIneritance{
+namespace DevExpress.XAF.Modules.ModelViewInheritance{
     public class ModelViewInheritanceUpdater : ModelNodesGeneratorUpdater<ModelViewsNodesGenerator> {
         public static bool Disabled;
 

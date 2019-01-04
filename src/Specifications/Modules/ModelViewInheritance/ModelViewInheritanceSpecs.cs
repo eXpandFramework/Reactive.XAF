@@ -4,7 +4,7 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.XAF.Agnostic.Specifications.Artifacts;
 using DevExpress.XAF.Agnostic.Specifications.Modules.ModelViewInheritance.BOModel;
-using DevExpress.XAF.Modules.ModelViewIneritance;
+using DevExpress.XAF.Modules.ModelViewInheritance;
 using DevExpress.XAF.Modules.Reactive.Services;
 using Xunit;
 

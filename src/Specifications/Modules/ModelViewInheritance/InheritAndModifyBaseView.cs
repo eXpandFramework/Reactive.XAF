@@ -7,7 +7,7 @@ using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.XAF.Agnostic.Specifications.Modules.ModelViewInheritance.BOModel;
 using DevExpress.XAF.Extensions.Model;
-using DevExpress.XAF.Modules.ModelViewIneritance;
+using DevExpress.XAF.Modules.ModelViewInheritance;
 using Shouldly;
 
 namespace DevExpress.XAF.Agnostic.Specifications.Modules.ModelViewInheritance{

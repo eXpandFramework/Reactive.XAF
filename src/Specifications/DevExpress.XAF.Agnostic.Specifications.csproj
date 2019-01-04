@@ -141,8 +141,8 @@
     <Reference Include="DevExpress.XAF.Extensions.Model">
       <HintPath>..\..\bin\DevExpress.XAF.Extensions.Model.dll</HintPath>
     </Reference>
-    <Reference Include="DevExpress.XAF.Modules.ModelViewIneritance">
-      <HintPath>..\..\bin\DevExpress.XAF.Modules.ModelViewIneritance.dll</HintPath>
+    <Reference Include="DevExpress.XAF.Modules.ModelViewInheritance">
+      <HintPath>..\..\bin\DevExpress.XAF.Modules.ModelViewInheritance.dll</HintPath>
     </Reference>
     <Reference Include="DevExpress.XAF.Modules.Reactive">
       <HintPath>..\..\bin\DevExpress.XAF.Modules.Reactive.dll</HintPath>
@@ -238,7 +238,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\..\packages\xunit.analyzers.0.10.0\analyzers\dotnet\cs\xunit.analyzers.dll" />

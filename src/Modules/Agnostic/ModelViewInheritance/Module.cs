@@ -2,7 +2,7 @@
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 
-namespace DevExpress.XAF.Modules.ModelViewIneritance {
+namespace DevExpress.XAF.Modules.ModelViewInheritance {
     public sealed partial class ModelViewIneritanceModule : ModuleBase {
         public ModelViewIneritanceModule() {
             InitializeComponent();
