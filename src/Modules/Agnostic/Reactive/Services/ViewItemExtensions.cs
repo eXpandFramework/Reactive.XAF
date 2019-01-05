@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
-using DevExpress.Utils.Extensions;
 
 namespace DevExpress.XAF.Modules.Reactive.Services{
     public static class ListPropertyEditorExtensions{
@@ -23,7 +22,7 @@ namespace DevExpress.XAF.Modules.Reactive.Services{
         public static IObservable<(ViewItem viewItem, NestedFrame nestedFrame)> ToNestedFrames(this IObservable<ViewItem> source, params Type[] nestedObjectTypes){
             return source.Cast<IFrameContainer>()
                 .Where(container => container.Frame!=null)
-                .Select(container => (viewItem:container.CastTo<ViewItem>(),nestedFrame:container.Frame.CastTo<NestedFrame>()))
+                .Select(container => (viewItem: ((ViewItem) container),nestedFrame: ((NestedFrame) container.Frame)))
                 .Where(_ =>!nestedObjectTypes.Any()|| nestedObjectTypes.Any(type => type.IsAssignableFrom(_.nestedFrame.View.ObjectTypeInfo.Type)));
         }
 

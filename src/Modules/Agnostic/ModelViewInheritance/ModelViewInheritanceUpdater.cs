@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.Model.NodeGenerators;
+using DevExpress.XAF.Extensions;
 using DevExpress.XAF.Extensions.Model;
+using DevExpress.XAF.Extensions.TypesInfo;
 
 namespace DevExpress.XAF.Modules.ModelViewInheritance{
     public class ModelViewInheritanceUpdater : ModelNodesGeneratorUpdater<ModelViewsNodesGenerator> {
@@ -20,8 +23,9 @@ namespace DevExpress.XAF.Modules.ModelViewInheritance{
             if (Disabled )
                 return;
             var master = ((ModelApplicationBase) node.Application).Master;
-            var modulesDifferences = ((IModelSources)node.Application).Modules
-                .Select(module => ModuleApplication(node, module))
+            var modules = ((IModelSources)node.Application).Modules.ToArray();
+            var modulesDifferences = modules
+                .Select((module, i) => ModuleApplication(node, module,i==modules.Length-1))
                 .ToArray();
             foreach (var info in ModelInfos(modulesDifferences).Concat(AttributeInfos(node, modulesDifferences))){
                 UpdateModel(master, info,modulesDifferences);
@@ -55,28 +59,67 @@ namespace DevExpress.XAF.Modules.ModelViewInheritance{
                        ) ?? Enumerable.Empty<(int index, IModelMergedDifference difference, string objectViewId)>();
         }
 
-        private void UpdateModel(ModelNode master,(int index, IModelMergedDifference difference, string objectViewId) info,IModelApplication[] modulesDifferences){
+        private void UpdateModel(ModelNode master,(int index, IModelMergedDifference difference, string sourceViewId) info,IModelApplication[] modulesDifferences){
             var newViewId = info.difference.GetParent<IModelView>().Id;
             var modelApplications = modulesDifferences
                 .Where(application => application.Views!=null)
-                .Select(application => application.Views[info.objectViewId])
+                .Select(application => UpdateViewModel(info,application,master))
                 .Where(view => view!=null)
                 .ToArray();
             for (var index = 0; index < modelApplications.Length; index++){
                 var application = modelApplications[index];
                 var modelApplication = master.CreatorInstance.CreateModelApplication();
                 modelApplication.Id = $"{index}. {application.Id}";
-                var modelObjectView = application.Application.Views[info.objectViewId];
+                var modelObjectView = application.Application.Views[info.sourceViewId];
                 CreateViewInLayer(modelApplication, modelObjectView, newViewId);
                 ((ModelApplicationBase) master).InsertLayer(info.index+index, modelApplication);
             }
         }
 
-        private static IModelApplication ModuleApplication(ModelNode node, ModuleBase module){
+        private static IModelView UpdateViewModel((int index, IModelMergedDifference difference, string sourceViewId) info, IModelApplication application,ModelNode master){
+            var modelView = application.Views[info.sourceViewId];
+            var targetObjectView = info.difference.GetParent<IModelObjectView>();
+            if (modelView is IModelDetailView sourceDetailView &&sourceDetailView.Layout!=null){
+                var sourceModelClass = master.Application.Views[sourceDetailView.Id].AsObjectView.ModelClass;
+                var targetModelClass = master.Application.Views[targetObjectView.Id].AsObjectView.ModelClass;
+                if (sourceModelClass.OwnMembers.Count(member => member.MemberInfo.IsList) == 1 && targetModelClass.OwnMembers.Count(member => member.MemberInfo.IsList) > 0){
+                    var allGroups = sourceDetailView.Layout.GetItems<IModelViewLayoutElement>(node => node is IModelLayoutGroup layoutGroup
+                        ? layoutGroup: Enumerable.Empty<IModelViewLayoutElement>()).OfType<IModelLayoutGroup>();
+                    foreach (var group in allGroups){
+                        if (group.Id.EndsWith(ModelDetailViewLayoutNodesGenerator.LayoutGroupNameSuffix)){
+                            var tabs = group.Parent.AddNode<IModelTabbedGroup>(ModelDetailViewLayoutNodesGenerator.TabsLayoutGroupName);
+                            group.Id = group.Id.Replace(ModelDetailViewLayoutNodesGenerator.LayoutGroupNameSuffix, "");
+                            ModelEditorHelper.AddCloneNode((ModelNode) tabs, (ModelNode) group, group.Id);
+                            group.Remove();
+                        }
+                        else if (group.Id == sourceModelClass.TypeInfo.Name){
+                            group.Id = targetModelClass.TypeInfo.Name;
+                        }
+                    }
+                }
+            }
+
+            return modelView;
+        }
+
+        private static IModelApplication ModuleApplication(ModelNode node, ModuleBase module, bool isLastLayer){
             var creator = node.CreatorInstance;
             var application = creator.CreateModelApplication();
             application.Id = module.Name;
-            module.DiffsStore.Load(application);
+            if (isLastLayer && module.DiffsStore == ModelStoreBase.Empty && !XafTypesInfo.Instance.RuntimeMode()){
+                var assembly = module.GetType().Assembly;
+                var modelResourceName = assembly.GetManifestResourceNames().FirstOrDefault(s => s.EndsWith(".xafml"));
+                using (var stream = assembly.GetManifestResourceStream(modelResourceName)){
+                    using (var streamReader = new StreamReader(stream ?? throw new InvalidOperationException(module.Name))){
+                        var xml = streamReader.ReadToEnd();
+                        var stringModelStore = new StringModelStore(xml);
+                        stringModelStore.Load(application);
+                    }
+                }
+            }
+            else{
+                module.DiffsStore.Load(application);
+            }
             return application.Application;
         }
 
@@ -91,16 +134,19 @@ namespace DevExpress.XAF.Modules.ModelViewInheritance{
             if (modelViews[modelView.Id]!=null)
                 throw new NotSupportedException($"{modelView.Id} already exists");
             IModelView newNode;
-            if (modelView is IModelDetailView)
-                newNode = modelViews.AddNode<IModelDetailView>();
-            else
-            if (modelView is IModelListView)
-                newNode = modelViews.AddNode<IModelListView>();
-            else
-            if (modelView is IModelDashboardView)
-                newNode = modelViews.AddNode<IModelDashboardView>();
-            else
-                throw new NotImplementedException();
+            switch (modelView){
+                case IModelDetailView _:
+                    newNode = modelViews.AddNode<IModelDetailView>();
+                    break;
+                case IModelListView _:
+                    newNode = modelViews.AddNode<IModelListView>();
+                    break;
+                case IModelDashboardView _:
+                    newNode = modelViews.AddNode<IModelDashboardView>();
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
 
             new ModelXmlReader().ReadFromModel(newNode, modelView);
             newNode.Id = newViewId;

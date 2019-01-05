@@ -3,7 +3,6 @@ using System.Linq;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.Utils;
-using DevExpress.XAF.Extensions.Convert;
 using Fasterflect;
 
 namespace DevExpress.XAF.Extensions.Model {

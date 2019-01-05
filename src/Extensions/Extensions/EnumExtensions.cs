@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using Fasterflect;
 
-namespace DevExpress.XAF.Extensions.Enum {
+namespace DevExpress.XAF.Extensions {
     public static class EnumExtensions {
         public static bool IsPowerOfTwo(this int value) {
             return (value & (value - 1)) == 0;
@@ -43,7 +43,7 @@ namespace DevExpress.XAF.Extensions.Enum {
                         .Select(individualBitBinaryString => {
                                 //cast the individual binary strings back to their int value, and then into the enum value
                                 int intValueOfIndividualBit = Convert.ToInt32(individualBitBinaryString, 2);
-                                return (T)System.Enum.ToObject(typeof(T), intValueOfIndividualBit);
+                                return (T)Enum.ToObject(typeof(T), intValueOfIndividualBit);
                             });
 
                     foreach (T value in individualFlagsEnumValues) {
@@ -63,14 +63,14 @@ namespace DevExpress.XAF.Extensions.Enum {
             }
             return stringBuilder.ToString();
         }
-        public static IEnumerable<T> GetIndividualValues<T>(this System.Enum myEnum) where T : struct {
+        public static IEnumerable<T> GetIndividualValues<T>(this Enum myEnum) where T : struct {
             return myEnum
                 .ToString()
                 .Split(',')
-                .Select(x => (T)System.Enum.Parse(typeof(T), x.Trim()))
+                .Select(x => (T)Enum.Parse(typeof(T), x.Trim()))
                 .ToUniqueFlagEnumValues();
         }
-        public static FlagsEnumDifference<T> GetDifference<T>(this System.Enum source, System.Enum compare) where T : struct {
+        public static FlagsEnumDifference<T> GetDifference<T>(this Enum source, Enum compare) where T : struct {
             IEnumerable<T> sourceValues = source.GetIndividualValues<T>();
             IEnumerable<T> compareValues = compare.GetIndividualValues<T>().ToArray();
 
@@ -106,14 +106,14 @@ namespace DevExpress.XAF.Extensions.Enum {
                 return false;
             }
 
-            string[] names = System.Enum.GetNames(type);
+            string[] names = Enum.GetNames(type);
             if (names.Length == 0) {
                 value = type.CreateInstance();
                 return false;
             }
 
-            Type underlyingType = System.Enum.GetUnderlyingType(type);
-            Array values = System.Enum.GetValues(type);
+            Type underlyingType = Enum.GetUnderlyingType(type);
+            Array values = Enum.GetValues(type);
             // some enums like System.CodeDom.MemberAttributes *are* flags but are not declared with Flags...
             if ((!type.IsDefined(typeof(FlagsAttribute), true)) && (input.IndexOfAny(EnumSeperators) < 0))
                 return EnumToObject(type, underlyingType, names, values, input, out value);
@@ -156,7 +156,7 @@ namespace DevExpress.XAF.Extensions.Enum {
 
                 ul |= tokenUl;
             }
-            value = System.Enum.ToObject(type, ul);
+            value = Enum.ToObject(type, ul);
             return true;
         }
 

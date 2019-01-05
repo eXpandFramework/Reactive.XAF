@@ -9,12 +9,12 @@ using System.Xml;
 using System.Xml.Linq;
 using Fasterflect;
 
-namespace DevExpress.XAF.Extensions.String {
+namespace DevExpress.XAF.Extensions {
     /// <summary>
     /// Summary description for StringHelper.
     /// </summary>
     public static class StringExtensions {
-        private static readonly Regex _isGuid =
+        private static readonly Regex IsGuidRegex =
             new Regex(
                 @"^(\{){0,1}[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}(\}){0,1}$",
                 RegexOptions.Compiled);
@@ -23,10 +23,10 @@ namespace DevExpress.XAF.Extensions.String {
             return value.TrimEnd((char)1).Replace("&", "&amp;").Replace("'", "&apos;").Replace("\"", "&quot;").Replace("<", "&lt;").Replace(">", "&gt;");
         }
 
-        public static System.String XMLPrint(this System.String xml){
+        public static String XMLPrint(this String xml){
             if (string.IsNullOrEmpty(xml))
                 return xml;
-            System.String result = "";
+            String result = "";
 
             var mStream = new MemoryStream();
             var writer = new XmlTextWriter(mStream, Encoding.Unicode);
@@ -40,7 +40,7 @@ namespace DevExpress.XAF.Extensions.String {
                 mStream.Flush();
                 mStream.Position = 0;
                 var sReader = new StreamReader(mStream);
-                System.String formattedXML = sReader.ReadToEnd();
+                String formattedXML = sReader.ReadToEnd();
 
                 result = formattedXML;
             }
@@ -56,8 +56,8 @@ namespace DevExpress.XAF.Extensions.String {
         public static string XMLDecode(this string value) {
             return value.Replace("&amp;", "&").Replace("&apos;", "'").Replace("&quot;", "\"").Replace("&lt;", "<").Replace("&gt;", ">");
         }
-        public static System.String RemoveDiacritics(this System.String s) {
-            System.String normalizedString = s.Normalize(NormalizationForm.FormD);
+        public static String RemoveDiacritics(this String s) {
+            String normalizedString = s.Normalize(NormalizationForm.FormD);
             var stringBuilder = new StringBuilder();
 
             foreach (char c in normalizedString) {
@@ -100,7 +100,7 @@ namespace DevExpress.XAF.Extensions.String {
         }
 
         public static long Val(this string value) {
-            string returnVal = System.String.Empty;
+            string returnVal = String.Empty;
             MatchCollection collection = Regex.Matches(value, "\\d+");
             returnVal = collection.Cast<Match>().Aggregate(returnVal, (current, match) => current + match.ToString());
             return Convert.ToInt64(returnVal);
@@ -108,7 +108,7 @@ namespace DevExpress.XAF.Extensions.String {
 
         public static bool IsGuid(this string candidate) {
             if (candidate != null) {
-                if (_isGuid.IsMatch(candidate)) {
+                if (IsGuidRegex.IsMatch(candidate)) {
                     return true;
                 }
             }
@@ -139,8 +139,8 @@ namespace DevExpress.XAF.Extensions.String {
         public static string CleanCodeName(string name) {
             var regex = new Regex(@"[^\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nd}\p{Nl}\p{Mn}\p{Mc}\p{Cf}\p{Pc}\p{Lm}]");
             string ret = regex.Replace(name + "", "");
-            if (!(System.String.IsNullOrEmpty(ret)) && !Char.IsLetter(ret, 0) && !CodeDomProvider.CreateProvider("C#").IsValidIdentifier(ret))
-                ret = System.String.Concat("_", ret);
+            if (!(String.IsNullOrEmpty(ret)) && !Char.IsLetter(ret, 0) && !CodeDomProvider.CreateProvider("C#").IsValidIdentifier(ret))
+                ret = String.Concat("_", ret);
             return ret;
         }
     }

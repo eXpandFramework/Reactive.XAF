@@ -5,7 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace DevExpress.XAF.Extensions.Linq{
+namespace DevExpress.XAF.Extensions{
     public static class LinqExtensions{
         public static IEnumerable<T> TakeAllButLast<T>(this IEnumerable<T> source) {
             using (var it = source.GetEnumerator()){

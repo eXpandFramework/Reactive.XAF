@@ -12,10 +12,12 @@ queue:
 steps:
 - powershell: |
    .\go.ps1 -msbuild "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\msbuild.exe" -packageSources $(DXApiFeed) -version $(Build.BuildNumber)
+  # & "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\CommonExtensions\Microsoft\TestWindow\..\..\..\Extensions\TestPlatform\vstest.console.exe" ".\bin\DevExpress.XAF.Agnostic.Specifications.dll"
   displayName: 'Build'
   failOnStderr: true
 - task: VSTest@2
   displayName: 'VsTest - testAssemblies'
+  enabled: true
   inputs:
     testAssemblyVer2: |
      .\bin\DevExpress.XAF.Agnostic.Specifications.dll
@@ -25,8 +27,11 @@ steps:
     runTestsInIsolation: true
     codeCoverageEnabled: true
     rerunFailedTests: true
+- powershell: | 
+     & $(System.DefaultWorkingDirectory)\eXpandFramework\IssueNotifier\bin\win10-x64\IssueNotifier.exe -o apobekiaris -z eXpandFramework --r1 eXpand --r2 lab -p $(apobekiarisgithubpass) -v $(Build.BuildNumber)
 - task: NuGetCommand@2
   displayName: 'NuGet push'
+  enabled: false
   inputs:
     command: push
     packagesToPush: '$(System.DefaultWorkingDirectory)/bin/nuget/*.nupkg'

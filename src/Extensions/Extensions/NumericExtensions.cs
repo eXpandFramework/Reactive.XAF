@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace DevExpress.XAF.System.Numeric {
+namespace DevExpress.XAF.Extensions.System {
     /// <summary>
     /// Summary description for NumericHelper.
     /// </summary>

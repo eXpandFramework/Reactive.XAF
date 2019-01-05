@@ -1,13 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Utils;
 
-namespace DevExpress.XAF.Extensions.TypeInfo{
+namespace DevExpress.XAF.Extensions.TypesInfo{
     public static class TypesInfoExtensions {
+        public static bool RuntimeMode(this ITypesInfo typeInfo){
+            var devProcceses = new[]{".ExpressApp.ModelEditor", "devenv"};
+            var processName = Process.GetCurrentProcess().ProcessName;
+            var isInProccess = devProcceses.Any(s => processName.IndexOf(s, StringComparison.Ordinal) > -1);
+            return !isInProccess && LicenseManager.UsageMode != LicenseUsageMode.Designtime;
+        }
+
         public static IEnumerable<ITypeInfo> BaseInfos(this ITypeInfo typeInfo) {
             var baseInfo = typeInfo.Base;
             while (baseInfo != null) {
@@ -31,11 +40,11 @@ namespace DevExpress.XAF.Extensions.TypeInfo{
             return obj.GetType().GetTypeInfo();
         }
 
-        public static ExpressApp.DC.TypeInfo ToTypeInfo(this ITypeInfo typeinfo) {
-            return ((ExpressApp.DC.TypeInfo) typeinfo);
+        public static TypeInfo ToTypeInfo(this ITypeInfo typeinfo) {
+            return ((TypeInfo) typeinfo);
         }
 
-        public static ExpressApp.DC.TypeInfo ToTypeInfo(this Type type) {
+        public static TypeInfo ToTypeInfo(this Type type) {
             return type.GetTypeInfo().ToTypeInfo();
         }
 

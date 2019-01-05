@@ -10,7 +10,6 @@ namespace DevExpress.XAF.Agnostic.Specifications.Artifacts{
     }
 
     class TestModule2:ModuleBase{
-        
     }
 
 }

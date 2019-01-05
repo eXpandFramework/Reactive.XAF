@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using DevExpress.XAF.System.Numeric;
+using DevExpress.XAF.Extensions.System;
 
-namespace DevExpress.XAF.Extensions.System{
+namespace DevExpress.XAF.Extensions{
     public static class SystemExtensions{
 
         public static string CommonStart(this IEnumerable<string> strings) {

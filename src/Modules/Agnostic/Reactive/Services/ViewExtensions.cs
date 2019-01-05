@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
-using DevExpress.Utils.Extensions;
 using DevExpress.XAF.Modules.Reactive.Extensions;
 
 namespace DevExpress.XAF.Modules.Reactive.Services{
@@ -55,8 +54,8 @@ namespace DevExpress.XAF.Modules.Reactive.Services{
         public static IObservable<ListPropertyEditor> NestedListViews<TView>(this TView view, params Type[] objectTypes ) where TView : DetailView{
             var listPropertyEditors = view.GetItems<ListPropertyEditor>().Where(editor =>editor.Frame?.View != null).ToObservable();
             var nestedEditors = listPropertyEditors.SelectMany(editor => {
-                var detailView = editor.Frame.View.CastTo<ListView>().EditView;
-                return detailView != null ? detailView.CastTo<DetailView>().NestedListViews(objectTypes) : Observable.Never<ListPropertyEditor>();
+                var detailView = ((ListView) editor.Frame.View).EditView;
+                return detailView != null ? detailView.NestedListViews(objectTypes) : Observable.Never<ListPropertyEditor>();
             });
             return listPropertyEditors.Where(editor => objectTypes.Any(type => type.IsAssignableFrom(editor.Frame.View.ObjectTypeInfo.Type))).Merge(nestedEditors);
         }
