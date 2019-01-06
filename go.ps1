@@ -1,5 +1,5 @@
 param(
-    [string]$version="18.2.402.0",
+    [string]$version=$null,
     [string]$packageSources="C:\Program Files (x86)\DevExpress 18.2\Components\System\Components\packages",
     [string[]] $filter=@("*.nuspec"),# $filter=@("*SystemEx*.nuspec","Numeric*.nuspec"),
     [Parameter(ValueFromPipeline = $true)]
@@ -9,6 +9,7 @@ param(
     [bool]$build=$true,
     [bool]$cleanBin=$true
 )
+
 Import-Module "$PSScriptRoot\tools\psake\psake.psm1" -Force 
 Import-Module "$PSScriptRoot\tools\XpandPsUtils\XpandPsUtils.psm1" -Force 
 

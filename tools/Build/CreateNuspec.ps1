@@ -36,6 +36,16 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "DevExpress.XAF.Agnostic
     }
 
     $csproj.Project.ItemGroup.Reference.Include|Where-Object {"$_".StartsWith("DevExpress.XAF")}|ForEach-Object {
+        if (!$version){
+            $packageName=$_
+            Get-ChildItem $root *.csproj -Recurse|where{
+                $f=[System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
+                if ($f -eq $packageName){
+                    $assemblyInfo=get-content "$($_.DirectoryName)\Properties\AssemblyInfo.cs"
+                    $version=[System.Text.RegularExpressions.Regex]::Match($assemblyInfo,'Version\("([^"]*)').Groups[1].Value
+                }
+            }
+        }
         $packageInfo=[PSCustomObject]@{
             id      = $_
             version = $version

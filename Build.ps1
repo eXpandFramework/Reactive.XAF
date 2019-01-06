@@ -22,11 +22,11 @@ task Init {
 }
 
 task ChangeAssemblyInfo {
-    Get-ChildItem "*AssemblyInfo.cs" -Recurse|ForEach-Object{
-        $c=Get-Content $_ 
-        $result = $c -creplace 'Version\("([^"]*)', "Version(""$version"
-        Set-Content $_ -Value $result
-    }
+    # Get-ChildItem "*AssemblyInfo.cs" -Recurse|ForEach-Object{
+    #     $c=Get-Content $_ 
+    #     $result = $c -creplace 'Version\("([^"]*)', "Version(""$version"
+    #     Set-Content $_ -Value $result
+    # }
 }
 
 task UpdateProjects {
@@ -80,9 +80,26 @@ Task PackNuspec {
             nugetBin = $nugetBin
             nugetExe = $nugetExe
         }
-        $items=Get-ChildItem $("$PSScriptRoot"+"$nuspecFiles") -Include $filter -Recurse
+        $assemblyVersions=Get-ChildItem *.csproj -Recurse|foreach{
+            $assemblyInfo=get-content "$($_.DirectoryName)\Properties\AssemblyInfo.cs"
+            [PSCustomObject]@{
+                Name = [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
+                Version =[System.Text.RegularExpressions.Regex]::Match($assemblyInfo,'Version\("([^"]*)').Groups[1].Value
+            }
+        }
+        $items=Get-ChildItem $("$PSScriptRoot"+"$nuspecFiles") -Include $filter -Recurse|foreach{
+            $packageName=[System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
+            $v=$assemblyVersions|where{$_.name -eq $packageName}|Select -First 1
+            [PSCustomObject]@{
+                FullName = $_.FullName
+                Version = $v.Version
+                Basepath = $_.Directory.Parent.FullName
+            }
+        }
         Invoke-InParallel -InputObject $items -Parameter $packData -runspaceTimeout 30  -ScriptBlock {              
-            & $parameter.nugetExe pack $_.FullName -version $parameter.version -OutputDirectory $parameter.nugetBin -Basepath "$($_.DirectoryName)\.."   
+            $name=$_.FullName
+            $directory=$_.Basepath
+            & $parameter.nugetExe pack $name -OutputDirectory $parameter.nugetBin -Basepath $directory -Version $_.Version
         }
     }
 }
