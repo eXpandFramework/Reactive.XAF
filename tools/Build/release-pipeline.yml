@@ -9,9 +9,6 @@ queue:
   - visualstudio
 steps:
 - powershell: |
-   $script=Get-Content .\go.ps1
-   $version=[System.Text.RegularExpressions.Regex]::Match($script,'version=\"([^\"]*)\"').groups[1].Value
-   Write-Verbose -Verbose "##vso[build.updatebuildnumber]$version"
    .\go.ps1 -msbuild "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\msbuild.exe" -packageSources $(DXApiFeed) 
   displayName: 'Build'
   failOnStderr: true
