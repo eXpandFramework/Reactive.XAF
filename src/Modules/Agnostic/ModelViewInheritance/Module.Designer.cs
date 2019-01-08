@@ -1,5 +1,5 @@
 ﻿namespace DevExpress.XAF.Modules.ModelViewInheritance {
-	partial class ModelViewIneritanceModule {
+	partial class ModelViewInheritanceModule {
 		/// <summary> 
 		/// Required designer variable.
 		/// </summary>
@@ -24,7 +24,7 @@
 		/// </summary>
 		private void InitializeComponent() {
 			// 
-			// ModelViewIneritanceModule
+			// ModelViewInheritanceModule
 			// 
 			this.RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));
 		}

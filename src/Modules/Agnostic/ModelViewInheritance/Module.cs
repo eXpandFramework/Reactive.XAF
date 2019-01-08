@@ -3,8 +3,8 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 
 namespace DevExpress.XAF.Modules.ModelViewInheritance {
-    public sealed partial class ModelViewIneritanceModule : ModuleBase {
-        public ModelViewIneritanceModule() {
+    public sealed partial class ModelViewInheritanceModule : ModuleBase {
+        public ModelViewInheritanceModule() {
             InitializeComponent();
         }
 

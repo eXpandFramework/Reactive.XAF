@@ -39,10 +39,10 @@ namespace DevExpress.XAF.Agnostic.Specifications.Modules.ModelViewInheritance{
         }
 
 
-        private static ModelViewIneritanceModule CreateModelViewIneritanceModule(ViewType viewType, bool attribute,
+        private static ModelViewInheritanceModule CreateModelViewIneritanceModule(ViewType viewType, bool attribute,
             XafApplication application){
             CustomizeTypesInfo(viewType, attribute, application);
-            var modelViewIneritanceModule = new ModelViewIneritanceModule();
+            var modelViewIneritanceModule = new ModelViewInheritanceModule();
             
             return modelViewIneritanceModule;
         }
