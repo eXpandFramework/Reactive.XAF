@@ -77,29 +77,32 @@ namespace DevExpress.XAF.Modules.ModelViewInheritance{
         }
 
         private static IModelView UpdateViewModel((int index, IModelMergedDifference difference, string sourceViewId) info, IModelApplication application,ModelNode master){
-            var modelView = application.Views[info.sourceViewId];
+            var sourceModelView = application.Views[info.sourceViewId];
             var targetObjectView = info.difference.GetParent<IModelObjectView>();
-            if (modelView is IModelDetailView sourceDetailView &&sourceDetailView.Layout!=null){
-                var sourceModelClass = master.Application.Views[sourceDetailView.Id].AsObjectView.ModelClass;
-                var targetModelClass = master.Application.Views[targetObjectView.Id].AsObjectView.ModelClass;
-                if (sourceModelClass.OwnMembers.Count(member => member.MemberInfo.IsList) == 1 && targetModelClass.OwnMembers.Count(member => member.MemberInfo.IsList) > 0){
-                    var allGroups = sourceDetailView.Layout.GetItems<IModelViewLayoutElement>(node => node is IModelLayoutGroup layoutGroup
-                        ? layoutGroup: Enumerable.Empty<IModelViewLayoutElement>()).OfType<IModelLayoutGroup>();
-                    foreach (var group in allGroups){
-                        if (group.Id.EndsWith(ModelDetailViewLayoutNodesGenerator.LayoutGroupNameSuffix)){
-                            var tabs = group.Parent.AddNode<IModelTabbedGroup>(ModelDetailViewLayoutNodesGenerator.TabsLayoutGroupName);
-                            group.Id = group.Id.Replace(ModelDetailViewLayoutNodesGenerator.LayoutGroupNameSuffix, "");
-                            ModelEditorHelper.AddCloneNode((ModelNode) tabs, (ModelNode) group, group.Id);
-                            group.Remove();
+            if (sourceModelView is IModelDetailView sourceDetailView &&sourceDetailView.Layout!=null){
+                var sourceView = master.Application.Views[sourceDetailView.Id];
+                if (sourceView != null){
+                    var sourceModelClass = sourceView.AsObjectView.ModelClass;
+                    var targetModelClass = master.Application.Views[targetObjectView.Id].AsObjectView.ModelClass;
+                    if (sourceModelClass.OwnMembers.Count(member => member.MemberInfo.IsList) == 1 && targetModelClass.OwnMembers.Count(member => member.MemberInfo.IsList) > 0){
+                        var allGroups = sourceDetailView.Layout.GetItems<IModelViewLayoutElement>(node => node is IModelLayoutGroup layoutGroup
+                            ? layoutGroup: Enumerable.Empty<IModelViewLayoutElement>()).OfType<IModelLayoutGroup>();
+                        foreach (var group in allGroups){
+                            if (group.Id.EndsWith(ModelDetailViewLayoutNodesGenerator.LayoutGroupNameSuffix)){
+                                var tabs = group.Parent.AddNode<IModelTabbedGroup>(ModelDetailViewLayoutNodesGenerator.TabsLayoutGroupName);
+                                group.Id = group.Id.Replace(ModelDetailViewLayoutNodesGenerator.LayoutGroupNameSuffix, "");
+                                ModelEditorHelper.AddCloneNode((ModelNode) tabs, (ModelNode) group, group.Id);
+                                group.Remove();
+                            }
+                            else if (group.Id == sourceModelClass.TypeInfo.Name){
+                                group.Id = targetModelClass.TypeInfo.Name;
+                            }
                         }
-                        else if (group.Id == sourceModelClass.TypeInfo.Name){
-                            group.Id = targetModelClass.TypeInfo.Name;
-                        }
-                    }
+                    }   
                 }
             }
 
-            return modelView;
+            return sourceModelView;
         }
 
         private static IModelApplication ModuleApplication(ModelNode node, ModuleBase module, bool isLastLayer){
