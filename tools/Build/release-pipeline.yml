@@ -12,11 +12,8 @@ steps:
    .\go.ps1 -msbuild "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\msbuild.exe" -packageSources $(DXApiFeed) 
   displayName: 'Build'
   failOnStderr: true
-- task: NuGetCommand@2
-  displayName: 'NuGet push'
-  inputs:
-    command: push
-    nuGetFeedType: external
-    packagesToPush: '$(System.DefaultWorkingDirectory)/bin/nuget/*.nupkg'
-    publishFeedCredentials: Nuget.org
+- powershell: |
+   .\tools\build\PushNugets.ps1 -criteria "DevExpress.XAF*" -root $(System.DefaultWorkingDirectory)\bin -source "https://api.nuget.org/v3/index.json" -apiKey $(NugetApiKey)
+  displayName: 'Publish Nuggets'
+  failOnStderr: true
 
