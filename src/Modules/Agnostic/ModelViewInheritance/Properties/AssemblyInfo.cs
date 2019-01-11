@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("DevExpress.XAF.Modules.ModelViewInheritance")]
+[assembly: AssemblyTitle("Xpand.XAF.Modules.ModelViewInheritance")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("DevExpress.XAF.Modules.ModelViewInheritance")]
-[assembly: AssemblyCopyright("Copyright � 2018")]
+[assembly: AssemblyProduct("Xpand.XAF.Modules.ModelViewInheritance")]
+[assembly: AssemblyCopyright("Copyright eXpandFramework � 2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

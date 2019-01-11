@@ -1,6 +1,6 @@
 ﻿using DevExpress.ExpressApp;
 
-namespace DevExpress.XAF.Agnostic.Specifications.Artifacts{
+namespace Xpand.XAF.Agnostic.Specifications.Artifacts{
     class TestModule1:ModuleBase{
         
     }

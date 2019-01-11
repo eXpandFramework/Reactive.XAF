@@ -3,9 +3,8 @@ using System.Linq;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
-using DevExpress.XAF.Modules.Reactive.Services;
 
-namespace DevExpress.XAF.Modules.Reactive.Services{
+namespace Xpand.XAF.Modules.Reactive.Services{
     public static class DetailViewExtensions{
         public static IObservable<Frame> FrameAssigned(this IObservable<DetailView> source){
             var rootFrames = RxApp.FrameAssignedToController.ViewChanged().Where(tuple => tuple.frame.View.IsRoot).Select(tuple => tuple.frame);

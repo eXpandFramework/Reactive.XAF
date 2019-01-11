@@ -7,11 +7,11 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.Model.NodeGenerators;
-using DevExpress.XAF.Extensions;
-using DevExpress.XAF.Extensions.Model;
-using DevExpress.XAF.Extensions.TypesInfo;
+using Xpand.Source.Extensions.Linq;
+using Xpand.Source.Extensions.XAF.Model;
+using Xpand.Source.Extensions.XAF.TypesInfo;
 
-namespace DevExpress.XAF.Modules.ModelViewInheritance{
+namespace Xpand.XAF.Modules.ModelViewInheritance{
     public class ModelViewInheritanceUpdater : ModelNodesGeneratorUpdater<ModelViewsNodesGenerator> {
         public static bool Disabled;
 
@@ -151,7 +151,7 @@ namespace DevExpress.XAF.Modules.ModelViewInheritance{
                     throw new NotImplementedException();
             }
 
-            new ModelXmlReader().ReadFromModel(newNode, modelView);
+            newNode.ReadFromModel( modelView);
             newNode.Id = newViewId;
         }
 

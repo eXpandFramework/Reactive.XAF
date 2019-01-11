@@ -5,7 +5,7 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 
-namespace DevExpress.XAF.Modules.Reactive.Services{
+namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ListPropertyEditorExtensions{
         public static IObservable<ListPropertyEditor> FrameChanged(this IEnumerable<ListPropertyEditor> source){
             return source.ToObservable()

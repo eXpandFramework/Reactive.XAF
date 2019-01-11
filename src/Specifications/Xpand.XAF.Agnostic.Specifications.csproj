@@ -9,8 +9,8 @@
     <ProjectGuid>{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DevExpress.XAF.Agnostic.Specifications</RootNamespace>
-    <AssemblyName>DevExpress.XAF.Agnostic.Specifications</AssemblyName>
+    <RootNamespace>Xpand.XAF.Agnostic.Specifications</RootNamespace>
+    <AssemblyName>Xpand.XAF.Agnostic.Specifications</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -137,18 +137,6 @@
       <HintPath>..\..\packages\DevExpress.Utils.18.2.4\lib\net452\DevExpress.Utils.v18.2.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="DevExpress.XAF.Extensions.Model">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\bin\DevExpress.XAF.Extensions.Model.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.XAF.Modules.ModelViewInheritance">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\bin\DevExpress.XAF.Modules.ModelViewInheritance.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.XAF.Modules.Reactive">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\bin\DevExpress.XAF.Modules.Reactive.dll</HintPath>
-    </Reference>
     <Reference Include="DevExpress.Xpo.v18.2, Version=18.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <HintPath>..\..\packages\DevExpress.Xpo.18.2.4\lib\net452\DevExpress.Xpo.v18.2.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
@@ -211,6 +199,15 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="WindowsBase" />
+    <Reference Include="Xpand.Source.Extensions">
+      <HintPath>..\..\bin\Xpand.Source.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.ModelViewInheritance">
+      <HintPath>..\..\bin\Xpand.XAF.Modules.ModelViewInheritance.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Reactive">
+      <HintPath>..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
+    </Reference>
     <Reference Include="xunit.abstractions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
       <HintPath>..\..\packages\xunit.abstractions.2.0.3\lib\net35\xunit.abstractions.dll</HintPath>
       <Private>True</Private>
@@ -250,6 +247,8 @@
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\..\packages\xunit.analyzers.0.10.0\analyzers\dotnet\cs\xunit.analyzers.dll" />
+  </ItemGroup>
+  <ItemGroup>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

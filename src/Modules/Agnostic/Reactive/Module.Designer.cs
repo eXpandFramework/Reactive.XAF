@@ -1,4 +1,4 @@
-﻿namespace DevExpress.XAF.Modules.Reactive {
+﻿namespace Xpand.XAF.Modules.Reactive {
 	partial class ReactiveModule {
 		/// <summary> 
 		/// Required designer variable.

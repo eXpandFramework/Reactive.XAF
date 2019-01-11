@@ -1,11 +1,11 @@
 ﻿using System;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Xpo;
-using DevExpress.XAF.Modules.Reactive;
-using DevExpress.XAF.Modules.Reactive.Services;
 using Fasterflect;
+using Xpand.XAF.Modules.Reactive;
+using Xpand.XAF.Modules.Reactive.Services;
 
-namespace DevExpress.XAF.Agnostic.Specifications.Artifacts {
+namespace Xpand.XAF.Agnostic.Specifications.Artifacts {
     static class Extensions {
 
         public static void SetupDefaults(this XafApplication application, params ModuleBase[] modules) {

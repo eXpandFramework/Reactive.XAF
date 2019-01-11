@@ -1,6 +1,6 @@
 ﻿using DevExpress.Xpo;
 
-namespace DevExpress.XAF.Agnostic.Specifications.Modules.ModelViewInheritance.BOModel{
+namespace Xpand.XAF.Agnostic.Specifications.Modules.ModelViewInheritance.BOModel{
     public class AMvi: ABaseMvi{
         public AMvi(Session session) : base(session){
         }

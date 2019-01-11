@@ -7,9 +7,9 @@
     <ProjectGuid>{194C38C8-A636-4570-A46D-2E8FE04C94C4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DevExpress.XAF.Modules.ModelViewInheritance</RootNamespace>
-    <AssemblyName>DevExpress.XAF.Modules.ModelViewInheritance</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <RootNamespace>Xpand.XAF.Modules.ModelViewInheritance</RootNamespace>
+    <AssemblyName>Xpand.XAF.Modules.ModelViewInheritance</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <LangVersion>latest</LangVersion>
@@ -17,6 +17,7 @@
     <AssemblyOriginatorKeyFile>..\..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -47,17 +48,8 @@
       <HintPath>..\..\..\..\packages\DevExpress.ExpressApp.18.2.4\lib\net452\DevExpress.ExpressApp.v18.2.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="DevExpress.XAF.Extensions">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\bin\DevExpress.XAF.Extensions.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.XAF.Extensions.Model">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\bin\DevExpress.XAF.Extensions.Model.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.XAF.Extensions.TypesInfo">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\bin\DevExpress.XAF.Extensions.TypesInfo.dll</HintPath>
+    <Reference Include="Fasterflect, Version=2.1.3.0, Culture=neutral, PublicKeyToken=38d18473284c1ca7, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\packages\fasterflect.2.1.3\lib\net40\Fasterflect.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -68,6 +60,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\..\Extensions\Extensions\Linq\GetItems.cs">
+      <Link>LinkFiles\GetItems.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Extensions\Extensions\XAF\Model\GetParent.cs">
+      <Link>LinkFiles\GetParent.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Extensions\Extensions\XAF\Model\InsertLayer.cs">
+      <Link>LinkFiles\InsertLayer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Extensions\Extensions\XAF\Model\ReadFromModel.cs">
+      <Link>LinkFiles\ReadFromModel.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Extensions\Extensions\XAF\Model\Xml.cs">
+      <Link>LinkFiles\Xml.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\Extensions\Extensions\XAF\TypesInfo\RunTimeMode.cs">
+      <Link>LinkFiles\RunTimeMode.cs</Link>
+    </Compile>
     <Compile Include="ModelLogic.cs" />
     <Compile Include="ModelViewInheritanceUpdater.cs" />
     <Compile Include="Module.cs">

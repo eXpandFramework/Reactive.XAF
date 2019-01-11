@@ -1,0 +1,56 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.136
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Agnostic.Specifications", "Xpand.XAF.Agnostic.Specifications.csproj", "{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Modules", "Modules", "{05ECD54E-924F-4E78-8E29-DE3801A9F693}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extensions", "Extensions", "{E64C77EA-30F9-48D7-B7F5-735C54BEA79C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.Source.Extensions", "..\Extensions\Extensions\Xpand.Source.Extensions.csproj", "{90E34AE8-5130-4087-9720-B9980C1F22F1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Modules.ModelViewInheritance", "..\Modules\Agnostic\ModelViewInheritance\Xpand.XAF.Modules.ModelViewInheritance.csproj", "{194C38C8-A636-4570-A46D-2E8FE04C94C4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Modules.Reactive", "..\Modules\Agnostic\Reactive\Xpand.XAF.Modules.Reactive.csproj", "{58399364-9ACA-429F-A276-7F01E9E61D7D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		EasyTest|Any CPU = EasyTest|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
+		{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}.EasyTest|Any CPU.Build.0 = Release|Any CPU
+		{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{90E34AE8-5130-4087-9720-B9980C1F22F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{90E34AE8-5130-4087-9720-B9980C1F22F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{90E34AE8-5130-4087-9720-B9980C1F22F1}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
+		{90E34AE8-5130-4087-9720-B9980C1F22F1}.EasyTest|Any CPU.Build.0 = Release|Any CPU
+		{90E34AE8-5130-4087-9720-B9980C1F22F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{194C38C8-A636-4570-A46D-2E8FE04C94C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{194C38C8-A636-4570-A46D-2E8FE04C94C4}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
+		{194C38C8-A636-4570-A46D-2E8FE04C94C4}.EasyTest|Any CPU.Build.0 = Release|Any CPU
+		{194C38C8-A636-4570-A46D-2E8FE04C94C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58399364-9ACA-429F-A276-7F01E9E61D7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58399364-9ACA-429F-A276-7F01E9E61D7D}.EasyTest|Any CPU.ActiveCfg = EasyTest|Any CPU
+		{58399364-9ACA-429F-A276-7F01E9E61D7D}.EasyTest|Any CPU.Build.0 = EasyTest|Any CPU
+		{58399364-9ACA-429F-A276-7F01E9E61D7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{90E34AE8-5130-4087-9720-B9980C1F22F1} = {E64C77EA-30F9-48D7-B7F5-735C54BEA79C}
+		{194C38C8-A636-4570-A46D-2E8FE04C94C4} = {05ECD54E-924F-4E78-8E29-DE3801A9F693}
+		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {05ECD54E-924F-4E78-8E29-DE3801A9F693}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C0A41578-813B-4E26-B5DF-D979F1C0A7D7}
+	EndGlobalSection
+EndGlobal

@@ -1,7 +1,7 @@
 ﻿using DevExpress.Persistent.BaseImpl;
 using DevExpress.Xpo;
 
-namespace DevExpress.XAF.Agnostic.Specifications.Modules.ModelViewInheritance.BOModel{
+namespace Xpand.XAF.Agnostic.Specifications.Modules.ModelViewInheritance.BOModel{
     public class ABaseMvi: BaseObject{
         public ABaseMvi(Session session) : base(session){
         }

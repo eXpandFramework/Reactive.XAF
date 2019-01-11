@@ -2,9 +2,9 @@
 using System.Reactive.Subjects;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
-using DevExpress.XAF.Modules.Reactive.Services;
+using Xpand.XAF.Modules.Reactive.Services;
 
-namespace DevExpress.XAF.Modules.Reactive {
+namespace Xpand.XAF.Modules.Reactive {
     public sealed partial class ReactiveModule : ModuleBase {
         readonly Subject<ITypesInfo> _typesInfoSubject=new Subject<ITypesInfo>();
         public IObservable<ITypesInfo> TypesInfo;

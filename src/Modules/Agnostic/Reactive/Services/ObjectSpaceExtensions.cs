@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
-using DevExpress.XAF.Modules.Reactive.Extensions;
+using Xpand.XAF.Modules.Reactive.Extensions;
 
-namespace DevExpress.XAF.Modules.Reactive.Services{
+namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ObjectSpaceExtensions{
         public static IObservable<(NonPersistentObjectSpace objectSpace,ObjectsGettingEventArgs e)> ObjectsGetting(this IObservable<NonPersistentObjectSpace> source) {
             return source

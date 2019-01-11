@@ -5,7 +5,7 @@ using System.Reactive.Subjects;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 
-namespace DevExpress.XAF.Modules.Reactive.Controllers{
+namespace Xpand.XAF.Modules.Reactive.Controllers{
     public class RegisterActionsWindowController:WindowController{
         public static IObservable<Frame> WhenFrameAssigned => FrameAssignedSubject.TakeUntil(Terminator);
         static ReplaySubject<Func<RegisterActionsWindowController, ActionBase[]>> _subject=CreateSubject();

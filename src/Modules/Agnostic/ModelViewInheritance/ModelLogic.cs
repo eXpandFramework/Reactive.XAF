@@ -5,9 +5,10 @@ using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
-using DevExpress.XAF.Extensions.Model;
+using Xpand.Source.Extensions.XAF.Model;
 
-namespace DevExpress.XAF.Modules.ModelViewInheritance {
+
+namespace Xpand.XAF.Modules.ModelViewInheritance {
 
     [ModelAbstractClass]
     public interface IModelObjectViewMergedDifferences : IModelView {

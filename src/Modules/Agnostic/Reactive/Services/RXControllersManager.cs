@@ -4,7 +4,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Core;
 using DevExpress.ExpressApp.Model;
 
-namespace DevExpress.XAF.Modules.Reactive.Services{
+namespace Xpand.XAF.Modules.Reactive.Services{
     public class RXControllersManager : ControllersManager{
         static readonly Subject<Controller> ControllersSubject=new Subject<Controller>();
         public static IObservable<Controller> ControllersCreated=ControllersSubject;

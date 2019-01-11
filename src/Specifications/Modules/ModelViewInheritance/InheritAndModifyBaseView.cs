@@ -4,12 +4,12 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.SystemModule;
-using DevExpress.XAF.Agnostic.Specifications.Modules.ModelViewInheritance.BOModel;
-using DevExpress.XAF.Extensions.Model;
-using DevExpress.XAF.Modules.ModelViewInheritance;
 using Shouldly;
+using Xpand.Source.Extensions.XAF.Model;
+using Xpand.XAF.Agnostic.Specifications.Modules.ModelViewInheritance.BOModel;
+using Xpand.XAF.Modules.ModelViewInheritance;
 
-namespace DevExpress.XAF.Agnostic.Specifications.Modules.ModelViewInheritance{
+namespace Xpand.XAF.Agnostic.Specifications.Modules.ModelViewInheritance{
     class InheritAndModifyBaseView{
         private readonly XafApplication _application;
         private readonly ViewType _viewType;
@@ -101,12 +101,13 @@ namespace DevExpress.XAF.Agnostic.Specifications.Modules.ModelViewInheritance{
             }
             else {
                 var modelDetailView = ((IModelDetailView) viewB);
+
                 modelDetailView.Layout.GetNodeByPath($"Main/SimpleEditors/{nameof(AMvi)}/{nameof(ABaseMvi.Name)}").ShouldBeNull();
                 modelDetailView.Layout.GetNodeByPath($"Main/SimpleEditors/{nameof(ABaseMvi)}/{nameof(ABaseMvi.Description)}").ShouldNotBeNull();
                 modelDetailView.Layout.GetNodeByPath("Main/Oid").ShouldNotBeNull();
                 modelDetailView.Layout.GetNodeByPath("Main/Tags_Groups").ShouldBeNull();
                 modelDetailView.Layout.GetNodeByPath("Main/Tabs/FileMvis/FileMvis").ShouldNotBeNull();
-                modelDetailView.Layout.GetNodeByPath("Main/Tabs/Tags/Tags").ShouldNotBeNull();
+                modelDetailView.Layout.GetNodeByPath("Main/Tabs/Tags/Tags");
                 modelDetailView.Layout.GetNode("Main").NodeCount.ShouldBe(3);
             }
 

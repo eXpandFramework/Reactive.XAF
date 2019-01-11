@@ -5,7 +5,7 @@ using System.Reactive.Subjects;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 
-namespace DevExpress.XAF.Modules.Reactive.Controllers{
+namespace Xpand.XAF.Modules.Reactive.Controllers{
     public class RegisterActionsViewController:ViewController{
         static ReplaySubject<Func<RegisterActionsViewController, ActionBase[]>> _subject=CreateSubject();
 

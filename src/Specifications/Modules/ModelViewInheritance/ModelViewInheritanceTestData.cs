@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
 
-namespace DevExpress.XAF.Agnostic.Specifications.Modules.ModelViewInheritance{
+namespace Xpand.XAF.Agnostic.Specifications.Modules.ModelViewInheritance{
     public class ModelViewInheritanceTestData : IEnumerable<object[]>{
         public IEnumerator<object[]> GetEnumerator(){
             var items = new[]{ViewType.ListView, ViewType.DetailView}

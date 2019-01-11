@@ -4,9 +4,9 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
-using DevExpress.XAF.Modules.Reactive.Extensions;
+using Xpand.XAF.Modules.Reactive.Extensions;
 
-namespace DevExpress.XAF.Modules.Reactive.Services{
+namespace Xpand.XAF.Modules.Reactive.Services{
     public static class XafApplicationRXExtensions{
 
         public static void RegisterAsRX(this XafApplication application) {

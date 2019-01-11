@@ -4,7 +4,7 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
-namespace DevExpress.XAF.Modules.Reactive.Extensions{
+namespace Xpand.XAF.Modules.Reactive.Extensions{
 	class BufferUntilSubscribedObservable<T> : IConnectableObservable<T> {
 		private readonly IObservable<T> _source;
 		private readonly IScheduler _scheduler;

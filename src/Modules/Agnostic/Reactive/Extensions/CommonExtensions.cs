@@ -6,7 +6,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using DevExpress.ExpressApp;
 
-namespace DevExpress.XAF.Modules.Reactive.Extensions{
+namespace Xpand.XAF.Modules.Reactive.Extensions{
     public static class CommonExtensions{
         internal static bool Fits(this View view,ViewType viewType=ViewType.Any,Nesting nesting=Nesting.Any,Type objectType=null) {
             objectType = objectType ?? typeof(object);

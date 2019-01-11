@@ -4,10 +4,9 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Utils;
-using DevExpress.XAF.Modules.Reactive.Extensions;
-using DevExpress.XAF.Modules.Reactive.Services;
+using Xpand.XAF.Modules.Reactive.Extensions;
 
-namespace DevExpress.XAF.Modules.Reactive.Services{
+namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ActionExtensions{
 
         public static IObservable<(TAction action, BoolList boolList, BoolValueChangedEventArgs e)> ResultValueChanged<TAction>(

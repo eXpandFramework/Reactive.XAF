@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("DevExpress.XAF.Agnostic.Specifications")]
+[assembly: AssemblyTitle("Xpand.XAF.Agnostic.Specifications")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("DevExpress.XAF.Agnostic.Specifications")]
-[assembly: AssemblyCopyright("Copyright ©  2018")]
+[assembly: AssemblyProduct("Xpand.XAF.Agnostic.Specifications")]
+[assembly: AssemblyCopyright("Copyright eXpandFramework ©  2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,5 +32,6 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("18.2.403.0")]
+
 [assembly: AssemblyVersion("18.2.403.0")]
 [assembly: AssemblyFileVersion("18.2.403.0")]

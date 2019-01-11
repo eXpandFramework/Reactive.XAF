@@ -1,7 +1,7 @@
 ﻿using DevExpress.ExpressApp;
 using Moq;
 
-namespace DevExpress.XAF.Agnostic.Specifications.Artifacts{
+namespace Xpand.XAF.Agnostic.Specifications.Artifacts{
     class XafApplicationMock:Mock<XafApplication> {
         public XafApplicationMock() {
             CallBase = true;

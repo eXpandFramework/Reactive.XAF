@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 
-namespace DevExpress.XAF.Extensions{
+namespace DevExpress.XAF.Extensions.Convert{
     public static class ConvertExtensions {
         private const string ImplicitOperatorMethodName = "op_Implicit";
         private const string ExplicitOperatorMethodName = "op_Explicit";
@@ -418,10 +418,10 @@ namespace DevExpress.XAF.Extensions{
         private static bool TryChangeByIntermediateConversion(object value, Type destinationType, ref object result, CultureInfo culture, Conversion options) {
             if (value is char
                 && (destinationType == typeof(double) || destinationType == typeof(float))) {
-                return TryChangeCore(Convert.ToInt16(value), destinationType, ref result, culture, options);
+                return TryChangeCore(global::System.Convert.ToInt16(value), destinationType, ref result, culture, options);
             }
             if ((value is double || value is float) && destinationType == typeof(char)) {
-                return TryChangeCore(Convert.ToInt16(value), destinationType, ref result, culture, options);
+                return TryChangeCore(global::System.Convert.ToInt16(value), destinationType, ref result, culture, options);
             }
             return false;
         }

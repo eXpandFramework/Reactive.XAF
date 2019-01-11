@@ -4,11 +4,10 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp.SystemModule;
-using DevExpress.XAF.Modules.Reactive.Extensions;
-using DevExpress.XAF.Modules.Reactive.Services;
 using Fasterflect;
+using Xpand.XAF.Modules.Reactive.Extensions;
 
-namespace DevExpress.XAF.Modules.Reactive.Services{
+namespace Xpand.XAF.Modules.Reactive.Services{
     static class WindowTemplateService{
         internal static IObservable<Unit> UpdateStatus<T>(TimeSpan period,IObservable<T> messages){
             return UpdateStatus(Observable.Interval(period).ToUnit(), messages);

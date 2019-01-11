@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp.Utils;
-using DevExpress.XAF.Modules.Reactive.Extensions;
+using Xpand.XAF.Modules.Reactive.Extensions;
 
-namespace DevExpress.XAF.Modules.Reactive.Services{
+namespace Xpand.XAF.Modules.Reactive.Services{
     public static class BoolListExtensions{
 
         public static IObservable<(BoolList boolList, BoolValueChangedEventArgs e)> WhenResultValueChanged(

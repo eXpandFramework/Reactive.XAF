@@ -2,13 +2,14 @@
 using System.Linq;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
-using DevExpress.XAF.Agnostic.Specifications.Artifacts;
-using DevExpress.XAF.Agnostic.Specifications.Modules.ModelViewInheritance.BOModel;
 using DevExpress.XAF.Modules.ModelViewInheritance;
-using DevExpress.XAF.Modules.Reactive.Services;
+using Xpand.XAF.Agnostic.Specifications.Artifacts;
+using Xpand.XAF.Agnostic.Specifications.Modules.ModelViewInheritance.BOModel;
+using Xpand.XAF.Modules.ModelViewInheritance;
+using Xpand.XAF.Modules.Reactive.Services;
 using Xunit;
 
-namespace DevExpress.XAF.Agnostic.Specifications.Modules.ModelViewInheritance{
+namespace Xpand.XAF.Agnostic.Specifications.Modules.ModelViewInheritance{
     public class ModelViewInheritanceSpecs:BaseSpecs {
         [Theory]
         [ClassData(typeof(ModelViewInheritanceTestData))]
