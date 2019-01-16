@@ -1,20 +1,22 @@
 param(
-    [parameter()]
-    $root="..\..",
-    [parameter()]
-    $source="https://xpandnugetserver.azurewebsites.net/nuget",
-    [parameter()]
-    $criteria="DevExpress.XAF*",
-    [parameter()]
-    $apiKey=$null
+    $sourcesRoot="$PSScriptRoot\..\..",
+    $remotePackageSource="https://xpandnugetserver.azurewebsites.net/nuget",
+    $criteria=@("Xpand.XAF*","Xpand.VersionConverter*"),
+    $apiKey=$null,
+    $localPackageSource="$PSScriptRoot\..\..\bin"
 )
-set-location $root
+set-location $sourcesRoot
 $nugetExe="$PSScriptRoot\..\Nuget.exe"
-if ($source -like "*nuget.org*"){
-    $nugetResult=& $nugetExe  list -source $source id:$criteria
+if ($remotePackageSource -like "*nuget.org*"){
+    $nugetResult=$criteria|ForEach-Object{
+        & $nugetExe  list -source $remotePackageSource id:$_
+    }
 }
 else{
-    $nugetResult=& $nugetExe list -source $source|Where-Object{$_ -like $criteria}
+    $nugetResult=$criteria|ForEach-Object{
+        $item=$_
+        & $nugetExe list -source $remotePackageSource|Where-Object{$_ -like $item}
+    }
 }
 $packages=$nugetResult|ForEach-Object{
     $strings=$_.Split(' ')
@@ -24,14 +26,14 @@ $packages=$nugetResult|ForEach-Object{
     }
 }
 
-Get-ChildItem *.nupkg -Recurse|ForEach-Object{
+Get-ChildItem $localPackageSource *.nupkg -Recurse|ForEach-Object{
     $localPackageName=[System.IO.Path]::GetFileNameWithoutExtension($_)
-    $r=New-Object System.Text.RegularExpressions.Regex("[\d]{2}\.[\d]{1}\.[\d]*(\.[\d]*)?")
+    $r=New-Object System.Text.RegularExpressions.Regex("[\d]{1,2}\.[\d]{1}\.[\d]*(\.[\d]*)?")
     $localPackageVersion=$r.Match($localPackageName).Value
     $localPackageName=$localPackageName.Replace($localPackageVersion,"").Trim(".")
     $package=$packages|Where-Object{$_.name -eq $localPackageName  }
-    if ($package.Version -ne $localPackageVersion){
+    if (!$package -and $package.Version -ne $localPackageVersion){
         "Pushing $($_.FullName)"
-        & $nugetExe push $_.FullName -source $source -ApiKey $apikey
+        & $nugetExe push $_.FullName -source $remotePackageSource -ApiKey $apikey
     }
 }

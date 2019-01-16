@@ -1,3 +1,35 @@
+function Invoke-Retry {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Position=0, Mandatory=$true)]
+        [scriptblock]$ScriptBlock,
+
+        [Parameter(Position=1, Mandatory=$false)]
+        [int]$Maximum = 5
+    )
+
+    Begin {
+        $cnt = 0
+    }
+
+    Process {
+        do {
+            $cnt++
+            try {
+                $ScriptBlock.Invoke()
+                return
+            } catch {
+                [System.Threading.Thread]::Sleep([System.TimeSpan]::FromSeconds(1))
+                Write-Error $_.Exception.InnerException.Message -ErrorAction Continue
+            }
+        } while ($cnt -lt $Maximum)
+
+        # Throw an error after $Maximum unsuccessful invocations. Doesn't need
+        # a condition, since the function returns upon successful invocation.
+        throw 'Execution failed.'
+    }
+}
+
 function Update-AssemblyInfoBuild($path){
     if (!$path){
         $path= "."
@@ -184,7 +216,7 @@ function Restart-XpandPsUtils() {
     Import-Module XpandPsUtils -Force
 }
 
-function Remove-Nuget($id) {
+function Remove-NugetsFromConfig($id) {
     Get-ChildItem -Recurse -Filter '*.csproj' | ForEach-Object { $_.FullName } | False-XpandSpecificVersions
     CleanProjectCore
     Get-ChildItem -Recurse -Filter 'packages.config' | ForEach-Object { $_.FullName } | Write-XmlComment -xPath "//package[contains(@id,'$id')]"
@@ -362,3 +394,4 @@ Export-ModuleMember -function Show-Colors
 Export-ModuleMember -function Get-XpandVersion
 Export-ModuleMember -function Update-AssemblyInfoVersion
 Export-ModuleMember -function Update-AssemblyInfoBuild
+Export-ModuleMember -function Invoke-Retry

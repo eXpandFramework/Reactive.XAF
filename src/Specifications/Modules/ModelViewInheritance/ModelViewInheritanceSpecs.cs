@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
-using DevExpress.XAF.Modules.ModelViewInheritance;
 using Xpand.XAF.Agnostic.Specifications.Artifacts;
 using Xpand.XAF.Agnostic.Specifications.Modules.ModelViewInheritance.BOModel;
 using Xpand.XAF.Modules.ModelViewInheritance;

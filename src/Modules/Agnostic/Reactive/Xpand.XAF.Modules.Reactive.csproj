@@ -1,5 +1,6 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0">
   <PropertyGroup>
+    <DXVersion>18.2.3</DXVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
@@ -72,9 +73,9 @@
     <DebugType>full</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DevExpress.ExpressApp.v18.2, Version=18.2.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\packages\DevExpress.ExpressApp.18.2.4\lib\net452\DevExpress.ExpressApp.v18.2.dll</HintPath>
+    <Reference Include="DevExpress.ExpressApp.v18.2">
       <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\bin\DevExpress.ExpressApp.v18.2.dll</HintPath>
     </Reference>
     <Reference Include="Fasterflect, Version=2.1.3.0, Culture=neutral, PublicKeyToken=38d18473284c1ca7, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\packages\fasterflect.2.1.3\lib\net40\Fasterflect.dll</HintPath>

@@ -7,7 +7,7 @@ New-Item -Path "$root\bin\Nupkg" -ItemType Directory  -ErrorAction SilentlyConti
 & $root\tools\NuGet.exe spec -Force -verbosity quiet 
 $template = "$root\Package.nuspec"
 
-get-childitem "$root\src\" -Include "*.csproj" -Exclude "DevExpress.XAF.Agnostic.Specifications.*" -Recurse | ForEach-Object {
+get-childitem "$root\src\" -Include "*.csproj" -Exclude "*.Specifications.*","*.Source.*" -Recurse | ForEach-Object {
     [xml]$nuspec = Get-Content $template
     $metaData = $nuspec.Package.Metadata
     $metaData.dependencies.dependency.parentnode.removechild($metaData.dependencies.dependency)|Out-Null
@@ -17,15 +17,15 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "DevExpress.XAF.Agnostic
     $metaData.description=$metaData.id
     write-host "Creating Nuspec for $($metaData.Id)" -f "Blue"
     $relativeLocation=$_.DirectoryName.Replace($root,"").Replace("\","/")
-    $metaData.projectUrl = "https://github.com/eXpandFramework/Packages/blob/master/src$relativeLocation"
-    $metaData.licenseUrl = "https://github.com/eXpandFramework/Packages/blob/master/LICENSE"
+    $metaData.projectUrl = "https://github.com/eXpandFramework/XAF/blob/master/src$relativeLocation"
+    $metaData.licenseUrl = "https://github.com/eXpandFramework/XAF/blob/master/LICENSE"
     $metaData.iconUrl = "http://expandframework.com/images/site/eXpand-Sign.png"
     $metaData.authors="eXpandFramework"
     $metaData.owners="eXpandFramework"
-    $metaData.releaseNotes  ="https://github.com/eXpandFramework/Packages/releases"
+    $metaData.releaseNotes  ="https://github.com/eXpandFramework/XAF/releases"
     $metaData.copyright="eXpandFramework.com"
-    $nameTag=$metaData.id.Replace("DevExpress.XAF.Modules.","").Replace("DevExpress.XAF.Extensions.","")
-    $metaData.tags="DevExpress XAF, eXpandFramework, eXpressApp, Packages, $nameTag"
+    $nameTag=$metaData.id.Replace("Xpand.XAF.Modules.","").Replace("Xpand.XAF.Extensions.","")
+    $metaData.tags="DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  $nameTag"
     $AddDependency={
         param($psObj)
         $dependency = $nuspec.CreateElement("dependency")
@@ -34,11 +34,17 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "DevExpress.XAF.Agnostic
         $psObj.id
         $nuspec.SelectSingleNode("//dependencies").AppendChild($dependency)|Out-Null
     }
-
-    $csproj.Project.ItemGroup.Reference.Include|Where-Object {"$_".StartsWith("DevExpress.XAF")}|ForEach-Object {
+    $versionConverter=[PSCustomObject]@{
+        id      = "Xpand.VersionConverter"
+        version = "1.0.0"
+        targetFramework="net452"
+    }
+    Invoke-Command $AddDependency -ArgumentList $versionConverter
+    $targetFrameworkVersion="$($csproj.Project.PropertyGroup.TargetFrameworkVersion)".Substring(1).Replace(".","").Trim()      
+    $csproj.Project.ItemGroup.Reference.Include|Where-Object {"$_".StartsWith("Xpand.XAF")}|ForEach-Object {
         if (!$version){
             $packageName=$_
-            Get-ChildItem $root *.csproj -Recurse|where{
+            Get-ChildItem $root *.csproj -Recurse|Where-Object{
                 $f=[System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
                 if ($f -eq $packageName){
                     $assemblyInfo=get-content "$($_.DirectoryName)\Properties\AssemblyInfo.cs"
@@ -49,7 +55,7 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "DevExpress.XAF.Agnostic
         $packageInfo=[PSCustomObject]@{
             id      = $_
             version = $version
-            targetFramework="net461"
+            targetFramework=$targetFrameworkVersion
         }       
         $comma = $_.IndexOf(",")
         if ($comma -ne -1 ) {
@@ -74,10 +80,11 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "DevExpress.XAF.Agnostic
     $files = $nuspec.CreateElement("files")
     $nuspec.package.AppendChild($files)|Out-Null
 
-    "dll", "pdb"|foreach {
+    
+    "dll", "pdb"|ForEach-Object {
         $file = $nuspec.CreateElement("file")
         $file.SetAttribute("src", "$($metaData.Id).$_")
-        $file.SetAttribute("target", "lib\net461\$($metaData.Id).$_")
+        $file.SetAttribute("target", "lib\net$targetFrameworkVersion\$($metaData.Id).$_")
         $nuspec.SelectSingleNode("//files").AppendChild($file)|Out-Null
     }
     

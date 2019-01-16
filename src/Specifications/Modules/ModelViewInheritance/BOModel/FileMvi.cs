@@ -1,8 +1,8 @@
-﻿using DevExpress.Persistent.BaseImpl;
-using DevExpress.Xpo;
+﻿using DevExpress.Xpo;
+using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Agnostic.Specifications.Modules.ModelViewInheritance.BOModel{
-    public class FileMvi:FileAttachmentBase{
+    public class FileMvi:CustomBaseObject{
         public FileMvi(Session session) : base(session){
         }
 

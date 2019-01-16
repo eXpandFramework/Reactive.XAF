@@ -5,7 +5,7 @@ param(
 )
 $ErrorActionPreference="Stop"
 New-Item $nugetBin -ItemType Directory -Force|Out-Null
-& $nugetExe pack "$sourceDir\Tools\Xpand.VersionConverter.nuspec" -OutputDirectory $nugetBin -NoPackageAnalysis
+& $nugetExe pack "$sourceDir\Tools\Xpand.VersionConverter\Xpand.VersionConverter.nuspec" -OutputDirectory $nugetBin -NoPackageAnalysis
 if ($lastexitcode){
     throw 
 }

@@ -46,20 +46,32 @@ function GetRelativePath($fileName,$other) {
     Set-Location $location
     return $path
 }
+
 function UpdateXAFNugetReferences($xml,$filename) {
-    $xml.Project.ItemGroup.Reference|Where-Object{$_.Include -ne $null }|ForEach-Object{
-        $referenceName=GetReferenceName $_
-        if ($referenceName.StartsWith("DevExpress.XAF")){
-            $_.Include=$referenceName
-            $assemblyPath="$rootLocation\bin\"
-            $hintPath=GetRelativePath $filename $assemblyPath
-            if (!$_.HintPath){
-                $_.AppendChild($_.OwnerDocument.CreateElement("HintPath", $xml.DocumentElement.NamespaceURI))
-            }
-            $_.HintPath="$hintPath\$($_.Include).dll"
-        }
-    }
+     $xml.Project.ItemGroup.Reference|Where-Object{$_.Include }|ForEach-Object{
+         $referenceName=GetReferenceName $_
+         if ($referenceName.StartsWith("Xpand.XAF")){
+             $_.Include=$referenceName
+             UpdateHintPath $_ $fileName
+         }
+     }
 }
+
+function UpdateHintPath($reference,$filename){
+    $hintPath=GetRelativePath $filename "$rootLocation\bin\"
+    if (!$reference.HintPath){
+        $reference.AppendChild($reference.OwnerDocument.CreateElement("HintPath", $xml.DocumentElement.NamespaceURI))
+    }
+    $reference.HintPath="$hintPath\$($reference.Include).dll"
+}
+
+function UpdateDevExpressReferences($xml,$filename) {
+     $xml.Project.ItemGroup.Reference|Where-Object{$_.Include -like "DevExpress.*" }|ForEach-Object{
+        $_.Include=[System.Text.RegularExpressions.Regex]::replace($_.Include, ",.*", "")
+        UpdateHintPath $_ $fileName
+     }
+}
+
 function GetReferenceName($item){
     $comma=$item.Include.indexOf(",")
     $referenceName=$item.Include
@@ -84,6 +96,7 @@ Get-ChildItem -Filter *.csproj -Recurse |  ForEach-Object {
     UpdateLanguageVersion $projXml
     SetDebugSymbols $projXml
     UpdateXAFNugetReferences $projXml $fileName
+    UpdateDevExpressReferences $projXml $fileName
     RemoveLicxFiles $projXml
     $projXml.Save($fileName)
 } 

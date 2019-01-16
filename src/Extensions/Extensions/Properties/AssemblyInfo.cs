@@ -1,6 +1,8 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security;
+
 [assembly:InternalsVisibleTo("Xpand.XAF.Extensions,PublicKey="+
                              "0024000004800000940000000602000000240000525341310004000001000100df18f4f3de9ec4"+
                              "90707183c78a72914070a526bfb1818e1687442b137c2bfa9bf5e8533859a8efaa62aa2ea28e03"+
@@ -43,6 +45,8 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
-// [assembly: AssemblyVersion("18.2.403.0")]
-[assembly: AssemblyVersion("18.2.403.0")]
-[assembly: AssemblyFileVersion("18.2.403.0")]
+// [assembly: AssemblyVersion("1.0.0")]
+[assembly: AssemblyVersion("1.0.0")]
+[assembly: AssemblyFileVersion("1.0.0")]
+//[assembly:AllowPartiallyTrustedCallers]
+//[assembly: SecurityTransparent()]

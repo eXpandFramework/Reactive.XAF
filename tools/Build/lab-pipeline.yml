@@ -27,9 +27,20 @@ steps:
     packageType: runtime
     version: 2.2.0
 - powershell: |
-   $packages=(& $(System.DefaultWorkingDirectory)\Tools\Nuget.exe list -source "https://xpandnugetserver.azurewebsites.net/nuget"|where{$_ -like "DevExpress.XAF*"}|foreach{$_.Replace(" ",";")}) -join ":"
-   & "$(build.artifactstagingdirectory)\VersionUpdater\VersionUpdater.exe" -o $(GitHubUserName) -z eXpandFramework --r1 Packages -b lab -p $(GithubPass) -d $(System.DefaultworkingDirectory) -n $packages 
-    .\go.ps1 -msbuild "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\msbuild.exe" -packageSources $(DXApiFeed) 
+   $packages=(& $(System.DefaultWorkingDirectory)\Tools\Nuget.exe list -source "https://xpandnugetserver.azurewebsites.net/nuget"|where{$_ -like "Xpand.XAF*"}|Where{![system.string]::IsNullOrEmpty($_)}|foreach{$_.Replace(" ",";")}) -join ":"
+   $packages
+   if (!$packages){
+       $packages="DummyModule;1.0.0"
+   }
+   "Updating"
+   & "$(build.artifactstagingdirectory)\VersionUpdater\VersionUpdater.exe" -o $(GitHubUserName) -z eXpandFramework --r1 XAF -b lab -p $(GithubPass) -d $(System.DefaultworkingDirectory) -n $packages 
+   if ($LastExitCode){
+       throw
+   }
+  failOnStderr: true
+  displayName: VersionUpdater
+- powershell: |
+    .\go.ps1 -msbuild "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\msbuild.exe" -packageSources $(DXApiFeed) -cleanBin $false 
   displayName: 'Build'
   failOnStderr: true
 - task: VSTest@2
@@ -37,7 +48,7 @@ steps:
   enabled: true
   inputs:
     testAssemblyVer2: |
-     .\bin\DevExpress.XAF.Agnostic.Specifications.dll
+     .\bin\Xpand.XAF.Agnostic.Specifications.dll
     uiTests: true
     runInParallel: false
     diagnosticsEnabled: false
@@ -45,10 +56,12 @@ steps:
     codeCoverageEnabled: true
     rerunFailedTests: true
 - powershell: | 
-   .\tools\build\PushNugets.ps1 -criteria "DevExpress.XAF*" -root $(System.DefaultWorkingDirectory)\bin -source "https://xpandnugetserver.azurewebsites.net/nuget" -apiKey $(NugetApiKey)
+   .\tools\build\PushNugets.ps1 -sourcesRoot $(System.DefaultWorkingDirectory)\bin -remotePackageSource "https://xpandnugetserver.azurewebsites.net/nuget" -apiKey $(NugetApiKey)
   displayName: "Published Nugets"
   failOnStderr: true
+  enabled: true
 - task: DownloadBuildArtifacts@0
+  enabled: true
   displayName: 'Download IssueNotifier Build Artifacts'
   inputs:
     buildType: specific
@@ -56,15 +69,16 @@ steps:
     pipeline: $(issueNotifierPipeline)
     artifactName: IssueNotifier
 - powershell: | 
-     $msg="{Commits} relates to this task. Please update your nuget packages to version and test if the problem is gone.`r`n To access the `lab` packages you need to add our [NugetServer]({Options.NugetServer}) as a nuget package source in VS.`r`n If these packages are already integrated with `eXpandFramework` the bot will notify this issue again as soon as the release is ready."
-     & "$(build.artifactstagingdirectory)\IssueNotifier\IssueNotifier.exe" -o $(GitHubUserName) -z eXpandFramework --r1 eXpand --r2 Packages -b lab -p $(githubpass) -v $(Build.BuildNumber) --msg $msg 
+     $msg="{Commits} relates to this task. Please update your nuget packages to version and test if the problem is gone.`r`n To access the `lab` XAF packages you need to add our [NugetServer]({Options.NugetServer}) as a nuget package source in VS."
+     & "$(build.artifactstagingdirectory)\IssueNotifier\IssueNotifier.exe" -o $(GitHubUserName) -z eXpandFramework --r1 eXpand --r2 XAF -b lab -p $(githubpass) -v $(Build.BuildNumber) --msg $msg 
   displayName: 'IssueNotifier'
   failOnStderr: true
+  enabled: true
 - task: PublishPipelineArtifact@0
   displayName: 'Publish Pipeline Artifact'
   inputs:
     artifactName: Packages
-    targetPath: bin/nuget
+    targetPath: bin/Nupkg
 
 
 
