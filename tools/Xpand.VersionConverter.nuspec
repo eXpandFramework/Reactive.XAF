@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Xpand.VersionConverter</id>
+    <version>1.0.0</version>
+    <title>This package overrides the AfterBuild with targets that modify the DevExpress references in all Xpand.XAF.* assemblies to match the target prroject DevExpress version</title>
+    <authors>eXpandFramework</authors>
+    <owners>eXpandFramework</owners>
+	<projectUrl>https://github.com/eXpandFramework/XAF</projectUrl>
+	<iconUrl>http://expandframework.com/images/site/eXpand-Sign.png</iconUrl>
+	<licenseUrl>https://github.com/eXpandFramework/Packages/blob/master/LICENSE</lisenceUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>This package overrides the AfterBuild with targets that modify the DevExpress references in all Xpand.XAF.* assemblies to match the target prroject DevExpress version</description>
+    <language></language>
+  </metadata>
+  <files>
+    <file src="Xpand.VersionConverter.ps1" target="build\Xpand.VersionConverter.ps1" />
+    <file src="Xpand.VersionConverter.targets" target="build\Xpand.VersionConverter.targets" />
+    <file src="Xpand.VersionConverter.txt" target="content\Properties\Xpand.VersionConverter.txt" />
+  </files>
+</package>
