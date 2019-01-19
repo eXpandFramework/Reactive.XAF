@@ -32,7 +32,7 @@ Get-ChildItem $localPackageSource *.nupkg -Recurse|ForEach-Object{
     $localPackageVersion=$r.Match($localPackageName).Value
     $localPackageName=$localPackageName.Replace($localPackageVersion,"").Trim(".")
     $package=$packages|Where-Object{$_.name -eq $localPackageName  }
-    if (!$package -and $package.Version -ne $localPackageVersion){
+    if (!$package -or $package.Version -ne $localPackageVersion){
         "Pushing $($_.FullName)"
         & $nugetExe push $_.FullName -source $remotePackageSource -ApiKey $apikey
     }
