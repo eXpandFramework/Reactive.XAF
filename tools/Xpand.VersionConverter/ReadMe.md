@@ -1,7 +1,10 @@
-This package contains logic that runs on each build. 
+# About
+This package with instert logic logic that runs on each build. 
 
-It will modify the DevExpress references in all Xpand.XAF.* assemblies inside $(TargetDir).
+1. **Detects the current DevExpress version** by parsing the current project declaration and if not found does a lookup inside project $(TargetDir)
+2. Collects all DevExpress assembly references references **in all Xpand.XAF assemblies** inside project $(TargetDir).
+3. **Changes the reference version** in assembly references found.
+4. Change the reference name if DevExpress references are from different major.
 
-The DevExpress assembly reference will change to match the current project DevExpress version.
-
-<sub><sub>The current DX version is detected by first parsing the current project for a FullName DX assembly. If not found it will try in the $(TargetDir) to get the version of the first DX assembly found. </sub></sub>
+### Issues
+Use main project [issues](https://github.com/eXpandFramework/eXpand/issues/new/choose)
