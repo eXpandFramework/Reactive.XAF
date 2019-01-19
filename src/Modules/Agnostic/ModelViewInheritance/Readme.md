@@ -1,13 +1,17 @@
 # About
 
-The `ModuleViewInheritance` allows to replace the generator layer of a view by composing multiple unrelated view model differences.
+The `ModuleViewInheritance` module replaces the generator layer of a view by composing multiple unrelated view model differences.
 ## Installation 
 1. First you need the nuget package so issue this command to the VS Nuget package console `Install-Package DevExpress.XAF.Modules.ModelViewInheritance`. This only references the dependencies and step #2 is mandatory.
 2. [Ways to Register a Module](https://documentation.devexpress.com/eXpressAppFramework/118047/Concepts/Application-Solution-Components/Ways-to-Register-a-Module)
 or simply add the next call to your module constructor
 ```cs
-RequiredModuleTypes.Add(typeof(ModelViewInheritanceModule));
+RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.ModelViewInheritanceModule));
 ```
+## Versioning
+The module is **not bound** to **DevExpress versioning**, which means you can use the latest version with your old DevExpress projects [Read more](https://github.com/eXpandFramework/XAF/tree/master/tools/Xpand.VersionConverter).
+
+The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Issues
 Use main project [issues](https://github.com/eXpandFramework/eXpand/issues/new/choose)
 ## Details

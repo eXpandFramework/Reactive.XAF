@@ -23,5 +23,7 @@ There are two namespaces in the source, follow the links to read more.
 ## Versioning
 The modules are **not bound** to **DevExpress versioning**, which means you can use the latest version with your old DevExpress projects [Read more](https://github.com/eXpandFramework/XAF/tree/master/tools/Xpand.VersionConverter).
 
+The modules follow the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
+
 ### Issues
 Use main project [issues](https://github.com/eXpandFramework/eXpand/issues/new/choose)

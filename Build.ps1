@@ -6,7 +6,6 @@ properties {
     $packageSources=$null
     $nugetExe = "$PSScriptRoot\tools\Nuget.exe"
     $nugetBin = "$PSScriptRoot\bin\nuget\"
-    $version = $null
     $msbuild = $null
     $cleanBin = $null
     $nugetApiKey = $null
@@ -79,7 +78,7 @@ Task PublishNuget -precondition {return $nugetApiKey} {
 
 Task  CreateNuspec  {
     InvokeScript{
-        & .\tools\build\CreateNuspec.ps1 $version
+        & .\tools\build\CreateNuspec.ps1
     }
 }
 

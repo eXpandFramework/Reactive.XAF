@@ -1,4 +1,3 @@
-param($version="18.2.300.0")
 $ErrorActionPreference = "Stop"
 $root=[System.IO.Path]::GetFullPath("$PSScriptRoot\..\..\")
 
@@ -43,16 +42,13 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*.Specifications.*","*.
     Invoke-Command $AddDependency -ArgumentList $versionConverter
     $targetFrameworkVersion="$($csproj.Project.PropertyGroup.TargetFrameworkVersion)".Substring(1).Replace(".","").Trim()      
     $csproj.Project.ItemGroup.Reference.Include|Where-Object {"$_".StartsWith("Xpand.XAF")}|ForEach-Object {
-        if (!$version){
-            $packageName=$_
-            Get-ChildItem $root *.csproj -Recurse|Where-Object{
-                $f=[System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
-                if ($f -eq $packageName){
-                    $assemblyInfo=get-content "$($_.DirectoryName)\Properties\AssemblyInfo.cs"
-                    $version=[System.Text.RegularExpressions.Regex]::Match($assemblyInfo,'Version\("([^"]*)').Groups[1].Value
-                }
-            }
-        }
+        $packageName=$_
+        $version=Get-ChildItem $root *.csproj -Recurse|Where-Object{
+            [System.IO.Path]::GetFileNameWithoutExtension($_.FullName) -eq $packageName
+        }|ForEach-Object{
+            $assemblyInfo=get-content "$($_.DirectoryName)\Properties\AssemblyInfo.cs"
+            [System.Text.RegularExpressions.Regex]::Match($assemblyInfo,'Version\("([^"]*)').Groups[1].Value
+        }|Select-Object -First 1
         $packageInfo=[PSCustomObject]@{
             id      = $_
             version = $version
@@ -89,6 +85,11 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*.Specifications.*","*.
         $nuspec.SelectSingleNode("//files").AppendChild($file)|Out-Null
     }
     
+    $file=$nuspec.CreateElement("file")
+    $file.SetAttribute("src", "Readme.txt")
+    $file.SetAttribute("target", "")
+    $nuspec.SelectSingleNode("//files").AppendChild($file)|Out-Null
+
     New-Item -ItemType Directory -Path "$root\bin\nuspec" -Force -ErrorAction SilentlyContinue|Out-Null
     $nuspec.Save("$root\bin\nuspec\$($metadata.id).nuspec")
 

@@ -22,7 +22,7 @@ $assemblyVersions=Get-ChildItem "$sourceDir\src" "*.csproj" -Recurse|ForEach-Obj
         Version =[System.Text.RegularExpressions.Regex]::Match($assemblyInfo,'Version\("([^"]*)').Groups[1].Value
     }
 }
-
+Set-Content "$sourceDir\bin\Readme.txt" "BUILD THE PROJECT BEFORE OPENING THE MODEL EDITOR" 
 Get-ChildItem "$sourceDir\bin" "*.nuspec" -Recurse|ForEach-Object{
     $packageName=[System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
     $assembly=$assemblyVersions|Where-Object{$_.name -eq $packageName}

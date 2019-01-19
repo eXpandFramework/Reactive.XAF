@@ -11,7 +11,7 @@ workflow Install-AllDXNugets{
     $complete=0
     Foreach -parallel ($nuget in $psObj.Nugets)    { 
         InlineScript {
-            Import-Module "$($Using:psObj.ScriptRoot)\XpandPosh.psm1" -Force 
+            Import-Module $Using:psObj.XpandPosh -Force 
             Write-Output "Installing $($Using:nuget.Name) nuget"
             Invoke-Retry{
                 & $Using:psObj.NugetExe Install $Using:nuget.Name -source "$($Using:psObj.Source);https://xpandnugetserver.azurewebsites.net/nuget" -OutputDirectory $Using:psObj.OutputDirectory
@@ -23,12 +23,14 @@ workflow Install-AllDXNugets{
         Write-Progress -Id 1 -Activity $nuget.Name -PercentComplete $percentComplete
     }
 }
+
 $psObj=[PSCustomObject]@{
     OutputDirectory = $(Get-Item $temp).FullName
     Source=$dxSource
     NugetExe=(Get-Item $nugetExe).FullName
     Nugets=$nugets
     ScriptRoot=$PSScriptRoot
+    XpandPosh=(Get-Module XpandPosh).Path
 }
 Install-AllDXNugets -psObj $psObj
 "Flattening nugets..."
