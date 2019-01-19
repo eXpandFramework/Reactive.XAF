@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>Xpand.VersionConverter</id>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <title>This package overrides the AfterBuild with targets that modify the DevExpress references in all Xpand.XAF.* assemblies to match the target prroject DevExpress version</title>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
@@ -16,6 +16,6 @@
   <files>
     <file src="Xpand.VersionConverter.ps1" target="build\Xpand.VersionConverter.ps1" />
     <file src="Xpand.VersionConverter.targets" target="build\Xpand.VersionConverter.targets" />
-    <file src="ReadMe.md" target="content\ReadMe.md" />
+    <file src="ReadMe.md" target="content\Properties\Xpand.VersionConverter.ReadMe.md" />
   </files>
 </package>

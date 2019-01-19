@@ -6,6 +6,11 @@ Set-Location $root
 New-Item -Path "$root\bin\Nupkg" -ItemType Directory  -ErrorAction SilentlyContinue -Force |Out-Null
 & $root\tools\NuGet.exe spec -Force -verbosity quiet 
 $template = "$root\Package.nuspec"
+$versionConverter=[PSCustomObject]@{
+    id      = "Xpand.VersionConverter"
+    version = ([xml](get-content "$PsScriptRoot\..\Xpand.VersionConverter\Xpand.VersionConverter.nuspec")).package.metadata.version
+    targetFramework="net452"
+}
 
 get-childitem "$root\src\" -Include "*.csproj" -Exclude "*.Specifications.*","*.Source.*" -Recurse | ForEach-Object {
     [xml]$nuspec = Get-Content $template
@@ -34,11 +39,7 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*.Specifications.*","*.
         $psObj.id
         $nuspec.SelectSingleNode("//dependencies").AppendChild($dependency)|Out-Null
     }
-    $versionConverter=[PSCustomObject]@{
-        id      = "Xpand.VersionConverter"
-        version = "1.0.0"
-        targetFramework="net452"
-    }
+    
     Invoke-Command $AddDependency -ArgumentList $versionConverter
     $targetFrameworkVersion="$($csproj.Project.PropertyGroup.TargetFrameworkVersion)".Substring(1).Replace(".","").Trim()      
     $csproj.Project.ItemGroup.Reference.Include|Where-Object {"$_".StartsWith("Xpand.XAF")}|ForEach-Object {

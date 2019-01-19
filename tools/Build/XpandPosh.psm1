@@ -1,3 +1,52 @@
+function Remove-AllPackages{
+    param(
+        $source="https://api.nuget.org/v3/index.json",
+        $nuget=$null,
+        $apiKey=$null,
+        $filter=$null)
+
+
+    workflow Get-AllPackages {
+        param ($name,$nuget,$source="https://api.nuget.org/v3/index.json")
+
+        $packages=InlineScript {& $Using:nuget list $Using:name -source $Using:source}
+        foreach -parallel ($item in $packages) {
+            $package=$item.SubString(0,$item.IndexOf(" ")).Trim()
+            $versions=InlineScript{
+                & $Using:nuget list $Using:package -source $Using:source -PreRelease -AllVersions|Where-Object {$_ -like "$($Using:package) *"}|ForEach-Object{
+                    $_.SubString($_.IndexOf(" ")).Trim()
+                }
+            }
+            [PSCustomObject]@{
+                Name = $package
+                Versions=$versions
+            }
+        }
+    }
+
+
+    workflow Remove-Packages {
+        param (
+            $packages,$nuget,$apiKey,$source="https://api.nuget.org/v3/index.json"
+        )
+        foreach -parallel ($item in $packages) {
+            write-output "Deleting $($item.Name) $($item.Version)"
+            InlineScript{& $Using:nuget delete $Using:item.Name $Using:item.Version -source $Using:source -ApiKey $Using:apiKey -NonInteractive}
+        }
+    }
+
+    $packages=Get-AllPackages $filter $nuget $source|ForEach-Object{
+        $name=$_.Name
+        $_.Versions|ForEach-Object{
+            [PSCustomObject]@{
+                Name = $name
+                Version =$_
+            }
+        }
+    }
+    $packages
+    Remove-Packages $packages $nuget $apiKey $source
+}
 function Invoke-Retry {
     [CmdletBinding()]
     Param(
@@ -395,3 +444,4 @@ Export-ModuleMember -function Get-XpandVersion
 Export-ModuleMember -function Update-AssemblyInfoVersion
 Export-ModuleMember -function Update-AssemblyInfoBuild
 Export-ModuleMember -function Invoke-Retry
+Export-ModuleMember -function Remove-AllPackages
