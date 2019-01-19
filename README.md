@@ -7,8 +7,8 @@
 
 | <img src="http://expandframework.com/images/site/logo.png" width=150 height=68 alt="eXpandFramework logo"/> | Build | Nuget
 |----------|--------|--------
-**Stable**|[![Build Status](https://dev.azure.com/eXpandDevOps/eXpandFramework/_apis/build/status/Packages/XAF-Lab?branchName=lab)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=23?branchName=lab)|`nuget.exe list "tags:expandframework+XAF"`
-**Lab**|[![Build Status](https://dev.azure.com/eXpandDevOps/eXpandFramework/_apis/build/status/Packages/XAF-Lab?branchName=lab)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=23?branchName=lab)|[https://xpandnugetserver.azurewebsites.net/](https://pkgs.dev.azure.com/eXpandDevOps/_packaging/Lab-Nuget/nuget/v3/index.json)
+**Stable**|[![Build Status](https://dev.azure.com/eXpandDevOps/eXpandFramework/_apis/build/status/Packages/XAF-Lab?branchName=lab)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=23?branchName=lab)|`nuget.exe list Xpand.XAF`
+**Lab**|[![Build Status](https://dev.azure.com/eXpandDevOps/eXpandFramework/_apis/build/status/Packages/XAF-Lab?branchName=lab)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=23?branchName=lab)|`nuget.exe list Xpand.XAF -source https://xpandnugetserver.azurewebsites.net/nuget`
 <sub><sup>[How do I set up a package source in Visual Studio?](https://go.microsoft.com/fwlink/?linkid=698608)</sup></sub>
 
 # About

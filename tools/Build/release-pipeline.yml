@@ -13,7 +13,7 @@ steps:
   displayName: 'Build'
   failOnStderr: true
 - powershell: |
-   .\tools\build\PushNugets.ps1 -criteria "DevExpress.XAF*" -root $(System.DefaultWorkingDirectory)\bin -source "https://api.nuget.org/v3/index.json" -apiKey $(NugetApiKey)
+   .\tools\build\PushNugets.ps1 -sourcesRoot $(System.DefaultWorkingDirectory)\bin -remotePackageSource "https://api.nuget.org/v3/index.json" -apiKey $(NugetApiKey)
   displayName: 'Publish Nuggets'
   failOnStderr: true
 
