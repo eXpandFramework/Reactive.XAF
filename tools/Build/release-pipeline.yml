@@ -16,4 +16,8 @@ steps:
    .\tools\build\PushNugets.ps1 -sourcesRoot $(System.DefaultWorkingDirectory)\bin -remotePackageSource "https://api.nuget.org/v3/index.json" -apiKey $(NugetApiKey)
   displayName: 'Publish Nuggets'
   failOnStderr: true
-
+- task: PublishPipelineArtifact@0
+  displayName: 'Publish Pipeline Artifact'
+  inputs:
+    artifactName: Packages
+    targetPath: bin/Nupkg

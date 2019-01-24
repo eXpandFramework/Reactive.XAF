@@ -1,5 +1,4 @@
 # https://aka.ms/yaml
-name: 18.2.400$(Rev:.rr)
 resources:
 - repo: self
 trigger:

@@ -1,18 +1,21 @@
 param(
-    [string]$packageSources="C:\Program Files (x86)\DevExpress 18.2\Components\System\Components\packages",
-    [string]$msbuild=$null,
-    [string]$nugetApiKey=$null,
-    [bool]$build=$true,
-    [bool]$cleanBin=$true
+    [string]$packageSources = "C:\Program Files (x86)\DevExpress 18.2\Components\System\Components\packages",
+    [string]$msbuild = $null,
+    [string]$nugetApiKey = $null,
+    [string]$dxVersion = "18.2.4",
+    [bool]$build = $true,
+    [bool]$cleanBin = $true
 )
-
-Import-Module "$PSScriptRoot\tools\psake\psake.psm1" -Force 
-& "$PSScriptRoot\tools\Build\ImportXpandPosh.ps1"
-
-Invoke-psake  "$PSScriptRoot\Build.ps1" -properties @{
-    "cleanBin"= $cleanBin;
-    "msbuild"=$msbuild;
-    "nugetApiKey"=$nugetApiKey;
-    "packageSources"=$packageSources;
-    "build"=$build;
+$ErrorActionPreference = "Stop"
+& "$PSScriptRoot\tools\build\Install-Module.ps1" $([PSCustomObject]@{
+    Name = "psake"
+    Version ="4.7.4"
+})
+Invoke-XPsake  "$PSScriptRoot\Build.ps1" -properties @{
+    "cleanBin"       = $cleanBin;
+    "msbuild"        = $msbuild;
+    "nugetApiKey"    = $nugetApiKey;
+    "packageSources" = $packageSources;
+    "build"          = $build;
+    "dxVersion"          = $dxVersion;
 }

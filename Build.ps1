@@ -1,29 +1,37 @@
 Framework "4.6"
 $ErrorActionPreference = "Stop"
-. .\tools\Invoke-InParallel.ps1
+
 
 properties {
     $packageSources=$null
-    $nugetExe = "$PSScriptRoot\tools\Nuget.exe"
     $nugetBin = "$PSScriptRoot\bin\nuget\"
     $msbuild = $null
     $cleanBin = $null
     $nugetApiKey = $null
     $compile = $true
+    $dxVersion=$null
 }
 
-task default  -depends DiscoverMSBuild, Clean, Init, UpdateProjects, RestoreNuggets, Compile, CreateNuspec, PackNuspec, PublishNuget
+task default  -depends InstallModules, DiscoverMSBuild, Clean, Init, UpdateProjects, RestoreNuggets, Compile, CreateNuspec, PackNuspec, PublishNuget
+
+task InstallModules{
+    & "$PSScriptRoot\Tools\Build\Install-Module.ps1" $([PSCustomObject]@{
+        Name = "XpandPosh"
+        Version ="1.0.5"
+    })
+}
 
 task Init {
     InvokeScript{
         New-Item "$PSScriptRoot\bin" -ItemType Directory -Force |Out-Null
-        & .\tools\build\InstallDX.ps1 -dxSource $packageSources
+        Install-XNugetCommandLine
+        Install-XDX -dxSource $packageSources -binPath "$PSScriptRoot\bin" -sourcePath "$PSScriptRoot\src" -dxVersion $dxVersion
     }
 }
 
 task UpdateProjects {
     InvokeScript{
-        & .\tools\build\UpdateProjects.ps1
+        & "$PSScriptRoot\tools\build\UpdateProjects.ps1"
     }
 }
 
@@ -33,10 +41,10 @@ task RestoreNuggets {
             Push-Location $_.DirectoryName
             if ($packageSources){
                 $sources= "https://api.nuget.org/v3/index.json;$packageSources"
-                & $nugetExe restore -source $sources
+                & nuget restore -source $sources
             }
             else {
-                & $nugetExe restore
+                & nuget restore
             }
             Pop-Location
         }
@@ -71,14 +79,14 @@ task Compile -precondition {return $compile  } {
 Task PublishNuget -precondition {return $nugetApiKey} {
     InvokeScript{
         Get-ChildItem -Path $nugetBin -Filter *.nupkg|ForEach-Object {
-            & $nugetExe push $_.FullName $nugetApiKey -source https://api.nuget.org/v3/index.json
+            & nuget push $_.FullName $nugetApiKey -source https://api.nuget.org/v3/index.json
         }
     }
 }
 
 Task  CreateNuspec  {
     InvokeScript{
-        & .\tools\build\CreateNuspec.ps1
+        & "$PSScriptRoot\tools\build\CreateNuspec.ps1"
     }
 }
 
@@ -91,7 +99,7 @@ Task PackNuspec {
 Task DiscoverMSBuild {
     InvokeScript {
         if (!$msbuild) {
-            $script:msbuild = (FindMSBuild)
+            $script:msbuild = (Get-XMsBuildLocation)
         }
         else {
             $script:msbuild = $msbuild
@@ -105,19 +113,8 @@ task Clean -precondition {return $cleanBin} {
         if (Test-Path $bin) {
             Get-ChildItem $bin | Remove-Item -Force -Recurse
         }
-        Clear-ProjectDirectories
+        Clear-XProjectDirectories
     }
-}
-
-function FindMSBuild() {
-    if (!(Get-Module -ListAvailable -Name VSSetup)) {
-        Write-Host "VSSetup Module not found"
-        Install-PackageProvider -Name NuGet -Force
-		Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
-        Install-Module VSSetup -Scope CurrentUser
-    }
-    $path = Get-VSSetupInstance  | Select-VSSetupInstance -Product Microsoft.VisualStudio.Product.BuildTools -Latest |Select-Object -ExpandProperty InstallationPath
-    return join-path $path MSBuild\15.0\Bin\MSBuild.exe
 }
 
 task ? -Description "Helper to display task info" {
