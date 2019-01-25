@@ -3,7 +3,7 @@ param(
     $remotePackageSource="https://xpandnugetserver.azurewebsites.net/nuget",
     $criteria=@("Xpand.XAF*","Xpand.VersionConverter*"),
     $apiKey=$null,
-    $localPackageSource="$PSScriptRoot\..\..\bin"
+    $localPackageSource="$PSScriptRoot\..\..\bin\Nupkg"
 )
 set-location $sourcesRoot
 $nugetExe="$PSScriptRoot\..\Nuget.exe"
