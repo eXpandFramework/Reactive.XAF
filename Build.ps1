@@ -17,7 +17,7 @@ task default  -depends InstallModules, DiscoverMSBuild, Clean, Init, UpdateProje
 task InstallModules{
     & "$PSScriptRoot\Tools\Build\Install-Module.ps1" $([PSCustomObject]@{
         Name = "XpandPosh"
-        Version ="1.0.6"
+        Version ="1.0.7"
     })
 }
 
