@@ -17,7 +17,7 @@ task default  -depends InstallModules, DiscoverMSBuild, Clean, Init, UpdateProje
 task InstallModules{
     & "$PSScriptRoot\Tools\Build\Install-Module.ps1" $([PSCustomObject]@{
         Name = "XpandPosh"
-        Version ="1.0.5"
+        Version ="1.0.6"
     })
 }
 
@@ -126,7 +126,7 @@ function InvokeScript($sb,$maxRetries=0){
         exec $sb -maxRetries $maxRetries
     }
     catch {
-        Write-Warning $_.Exception
+        Write-Warning $_
         exit 1
     }
 }
