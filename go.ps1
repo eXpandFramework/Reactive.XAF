@@ -2,9 +2,10 @@ param(
     [string]$packageSources = "C:\Program Files (x86)\DevExpress 18.2\Components\System\Components\packages",
     [string]$msbuild = $null,
     [string]$nugetApiKey = $null,
-    [string]$dxVersion = "18.2.4",
+    [string]$dxVersion = "18.2.5",
     [bool]$build = $true,
-    [bool]$cleanBin = $true
+    [bool]$cleanBin = $true,
+    [string]$branch="master"
 )
 $ErrorActionPreference = "Stop"
 & "$PSScriptRoot\tools\build\Install-Module.ps1" $([PSCustomObject]@{
@@ -18,4 +19,5 @@ Invoke-XPsake  "$PSScriptRoot\Build.ps1" -properties @{
     "packageSources" = $packageSources;
     "build"          = $build;
     "dxVersion"          = $dxVersion;
+    "branch"=$branch;
 }

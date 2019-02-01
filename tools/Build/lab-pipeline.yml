@@ -46,7 +46,7 @@ steps:
   failOnStderr: true
   displayName: VersionUpdater
 - powershell: |
-    .\go.ps1 -msbuild "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\msbuild.exe" -packageSources $(DXApiFeed) -cleanBin $false 
+    .\go.ps1 -msbuild "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\msbuild.exe" -packageSources $(DXApiFeed) -cleanBin $false -branch lab 
   displayName: 'Build'
   failOnStderr: true
 - task: VSTest@2
