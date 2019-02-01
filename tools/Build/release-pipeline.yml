@@ -1,7 +1,16 @@
 # https://aka.ms/yaml
-resources:
-- repo: self
-trigger: none
+trigger: 
+   branches:
+     include:
+       - master
+   paths:
+     exclude:
+       - /src/Modules/ReadMe.md
+       - /src/Modules/Agnostic/Reactive/ReadMe.txt
+       - /src/Modules/Agnostic/ModelViewInheritance/ReadMe.md
+       - /src/tools/Xpand.VersionConverter/ReadMe.md
+       - /src/tools/build/*
+     
 queue:
   name: Hosted VS2017
   demands: 
