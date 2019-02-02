@@ -5,7 +5,7 @@ The `ModuleViewInheritance` module replaces the generator layer of a view by com
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 
 
-   `Install-Package DevExpress.XAF.Modules.ModelViewInheritance`.
+   `Install-Package Xpand.XAF.Modules.ModelViewInheritance`.
 
     The above only references the dependencies and nexts steps are mandatory.
 
