@@ -12,10 +12,10 @@ The modules are **not bound** to **DevExpress versioning**, which means you can 
 The modules follow the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 
 ## Platform agnostic modules list
-|PackageName|  Nuget.org |
-|---|---|
-|  [ModelViewInheritance](https://github.com/eXpandFramework/XAF/tree/master/src/Modules/Agnostic/ModelViewInheritance) |   ![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.ModelViewInheritance.svg?label=&style=flat)|
-|[Reactive](https://github.com/eXpandFramework/XAF/tree/master/src/Modules/Agnostic/Reactive)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.Reactive.svg?label=&style=flat)
+|PackageName|  Version | Downloads
+|---|---|---|
+|  [ModelViewInheritance](https://github.com/eXpandFramework/XAF/tree/master/src/Modules/Agnostic/ModelViewInheritance) |![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.ModelViewInheritance.svg?label=&style=flat)|   ![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.ModelViewInheritance.svg?label=&style=flat)
+|[Reactive](https://github.com/eXpandFramework/XAF/tree/master/src/Modules/Agnostic/Reactive)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.Reactive.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.Reactive.svg?label=&style=flat)
 
 
 ## Issues

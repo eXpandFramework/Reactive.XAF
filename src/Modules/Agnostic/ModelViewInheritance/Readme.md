@@ -1,4 +1,4 @@
-![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.ModelViewInheritance.svg?label=nuget.org&style=flat)
+![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.ModelViewInheritance.svg?&style=flat) ![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.ModelViewInheritance.svg?&style=flat)
 # About 
 
 The `ModuleViewInheritance` module replaces the generator layer of a view by composing multiple unrelated view model differences.
