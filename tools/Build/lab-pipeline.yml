@@ -76,7 +76,6 @@ steps:
     artifactName: IssueNotifier
 - powershell: | 
      $msg="{Commits} relates to this task. Please update your nuget packages to version and test if the problem is gone.`r`n To access the `lab` XAF packages you need to add our [NugetServer]({Options.NugetServer}) as a nuget package source in VS."
-     & "$(build.artifactstagingdirectory)\IssueNotifier\IssueNotifier.exe" -o $(GitHubUserName) -z eXpandFramework --r1 eXpand --r2 XAF -b lab -p $(githubpass) -v $(Build.BuildNumber) --msg $msg 
   displayName: 'IssueNotifier'
   failOnStderr: true
   enabled: true
