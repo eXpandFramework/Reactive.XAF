@@ -17,14 +17,14 @@ task default  -depends InstallModules, DiscoverMSBuild, Clean, Init, UpdateProje
 
 Task IndexSources{
     InvokeScript{
-        Update-XSymbols -symbolsFolder "$PSScriptRoot\bin" -user eXpandFramework -repository XAF -branch $branch -sourcesRoot "$PSScriptRoot\src" -filter "Xpand*.pdb"
+        Update-XSymbols -symbolsFolder "$PSScriptRoot\bin" -user eXpandFramework -repository XAF -branch $branch -sourcesRoot "$PSScriptRoot" -filter "Xpand*.pdb"
     }
 }
 task InstallModules{
     InvokeScript{
         & "$PSScriptRoot\Tools\Build\Install-Module.ps1" $([PSCustomObject]@{
             Name = "XpandPosh"
-            Version ="1.0.14"
+            Version ="1.0.15"
         })
     }
 }
