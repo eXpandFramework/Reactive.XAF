@@ -8,10 +8,15 @@ param(
     [string]$branch="master"
 )
 $ErrorActionPreference = "Stop"
-& "$PSScriptRoot\tools\build\Install-Module.ps1" $([PSCustomObject]@{
+@([PSCustomObject]@{
     Name = "psake"
     Version ="4.7.4"
-})
+},[PSCustomObject]@{
+    Name = "XpandPosh"
+    Version ="1.0.16"
+})|ForEach-Object{
+    & "$PSScriptRoot\tools\build\Install-Module.ps1" $_
+}
 Invoke-XPsake  "$PSScriptRoot\Build.ps1" -properties @{
     "cleanBin"       = $cleanBin;
     "msbuild"        = $msbuild;

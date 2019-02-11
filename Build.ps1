@@ -13,26 +13,17 @@ properties {
     $branch=$null
 }
 
-task default  -depends InstallModules, DiscoverMSBuild, Clean, Init, UpdateProjects, RestoreNuggets, Compile,IndexSources, CreateNuspec, PackNuspec, PublishNuget
+task default  -depends  DiscoverMSBuild, Clean, Init, UpdateProjects, RestoreNuggets, Compile,IndexSources, CreateNuspec, PackNuspec, PublishNuget
 
 Task IndexSources{
     InvokeScript{
         Update-XSymbols -symbolsFolder "$PSScriptRoot\bin" -user eXpandFramework -repository XAF -branch $branch -sourcesRoot "$PSScriptRoot" -filter "Xpand*.pdb"
     }
 }
-task InstallModules{
-    InvokeScript{
-        & "$PSScriptRoot\Tools\Build\Install-Module.ps1" $([PSCustomObject]@{
-            Name = "XpandPosh"
-            Version ="1.0.15"
-        })
-    }
-}
 
 task Init {
     InvokeScript{
         New-Item "$PSScriptRoot\bin" -ItemType Directory -Force |Out-Null
-        Install-XNugetCommandLine
         Install-XDX -dxSource $packageSources -binPath "$PSScriptRoot\bin" -sourcePath "$PSScriptRoot\src" -dxVersion $dxVersion
     }
 }
