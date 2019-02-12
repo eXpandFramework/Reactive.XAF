@@ -125,7 +125,8 @@ function InvokeScript($sb,$maxRetries=0){
         exec $sb -maxRetries $maxRetries
     }
     catch {
-        Write-Warning $_
+        Write-Error ($_.Exception | Format-List -Force | Out-String) -ErrorAction Continue
+        Write-Error ($_.InvocationInfo | Format-List -Force | Out-String) -ErrorAction Continue
         exit 1
     }
 }

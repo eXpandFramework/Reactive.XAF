@@ -6,16 +6,16 @@ param(
     $localPackageSource="$PSScriptRoot\..\..\bin\Nupkg"
 )
 set-location $sourcesRoot
-$nugetExe="$PSScriptRoot\..\Nuget.exe"
+
 if ($remotePackageSource -like "*nuget.org*"){
     $nugetResult=$criteria|ForEach-Object{
-        & $nugetExe  list -source $remotePackageSource id:$_
+        & nuget  list -source $remotePackageSource id:$_
     }
 }
 else{
     $nugetResult=$criteria|ForEach-Object{
         $item=$_
-        & $nugetExe list -source $remotePackageSource|Where-Object{$_ -like $item}
+        & nuget list -source $remotePackageSource|Where-Object{$_ -like $item}
     }
 }
 $packages=$nugetResult|ForEach-Object{
@@ -34,6 +34,6 @@ Get-ChildItem $localPackageSource *.nupkg -Recurse|ForEach-Object{
     $package=$packages|Where-Object{$_.name -eq $localPackageName  }
     if (!$package -or $package.Version -ne $localPackageVersion){
         "Pushing $($_.FullName)"
-        & $nugetExe push $_.FullName -source $remotePackageSource -ApiKey $apikey
+        & nuget push $_.FullName -source $remotePackageSource -ApiKey $apikey
     }
 }

@@ -3,7 +3,8 @@ $root=[System.IO.Path]::GetFullPath("$PSScriptRoot\..\..\")
 
 Set-Location $root
 New-Item -Path "$root\bin\Nupkg" -ItemType Directory  -ErrorAction SilentlyContinue -Force |Out-Null
-& $root\tools\NuGet.exe spec -Force -verbosity quiet 
+& NuGet spec -Force -verbosity quiet 
+
 $template = "$root\Package.nuspec"
 $versionConverter=[PSCustomObject]@{
     id      = "Xpand.VersionConverter"

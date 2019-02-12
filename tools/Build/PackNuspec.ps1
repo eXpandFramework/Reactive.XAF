@@ -1,17 +1,15 @@
 param(
     $nugetBin="$PSScriptRoot\..\..\bin\Nupkg",
-    $nugetExe="$PSScriptRoot\..\nuget.exe",
     $sourceDir="$PSScriptRoot\..\.."
 )
 $ErrorActionPreference="Stop"
 New-Item $nugetBin -ItemType Directory -Force|Out-Null
-& $nugetExe pack "$sourceDir\Tools\Xpand.VersionConverter\Xpand.VersionConverter.nuspec" -OutputDirectory $nugetBin -NoPackageAnalysis
+& Nuget pack "$sourceDir\Tools\Xpand.VersionConverter\Xpand.VersionConverter.nuspec" -OutputDirectory $nugetBin -NoPackageAnalysis
 if ($lastexitcode){
     throw 
 }
 $packData = [pscustomobject] @{
     nugetBin = $nugetBin
-    nugetExe = $nugetExe
 }
 
 set-location $sourceDir
@@ -28,7 +26,7 @@ Get-ChildItem "$sourceDir\bin" "*.nuspec" -Recurse|ForEach-Object{
     $assembly=$assemblyVersions|Where-Object{$_.name -eq $packageName}
     $name=$_.FullName
     $directory=$_.Directory.Parent.FullName
-    & $packData.nugetExe pack $name -OutputDirectory $($packData.nugetBin) -Basepath $directory -Version $($assembly.Version)
+    & Nuget pack $name -OutputDirectory $($packData.nugetBin) -Basepath $directory -Version $($assembly.Version)
     if ($lastexitcode){
         throw $_.Exception
     }
