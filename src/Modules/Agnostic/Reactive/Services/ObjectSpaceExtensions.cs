@@ -25,5 +25,15 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return Observable.Return(source).Disposed();
         }
 
+        public static IObservable<IObjectSpace> WhenModifyChanged(this IObjectSpace source){
+            return source.AsObservable().ModifyChanged();
+        }
+
+        public static IObservable<IObjectSpace> ModifyChanged(this IObservable<IObjectSpace> source) {
+            return source
+                .SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(h => item.ModifiedChanged += h, h => item.ModifiedChanged -= h)
+                    .Select(pattern => (IObjectSpace) pattern.Sender).TakeUntil(item.WhenDisposed()));
+        }
+
     }
 }
