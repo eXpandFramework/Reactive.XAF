@@ -8,10 +8,17 @@ using DevExpress.ExpressApp;
 
 namespace Xpand.XAF.Modules.Reactive.Extensions{
     public static class CommonExtensions{
+        public static IObservable<(TSource previous,TSource current)> CombineWithPrevious<TSource>(this IObservable<TSource> source){
+            return source
+                .Scan((previous:default(TSource), current:default(TSource)),(_, current) => (_.current, current))
+                .Select(t => (t.previous, t.current));
+        }
+
         internal static bool Fits(this View view,ViewType viewType=ViewType.Any,Nesting nesting=Nesting.Any,Type objectType=null) {
             objectType = objectType ?? typeof(object);
             return FitsCore(view, viewType)&&FitsCore(view,nesting)&&objectType.IsAssignableFrom(view.ObjectTypeInfo.Type);
         }
+
         private static bool FitsCore(View view, ViewType viewType){
             if (view == null)
                 return false;
@@ -48,9 +55,7 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
 
         public static IObservable<(TDisposable frame,EventArgs args)> Disposed<TDisposable>(this IObservable<TDisposable> source) where TDisposable:IComponent{
             return source
-                .SelectMany(item => {
-                    return Observable.FromEventPattern<EventHandler, EventArgs>(h => item.Disposed += h, h => item.Disposed -= h);
-                })
+                .SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(h => item.Disposed += h, h => item.Disposed -= h))
                 .Select(pattern => pattern)
                 .TransformPattern<EventArgs,TDisposable>();
         }
