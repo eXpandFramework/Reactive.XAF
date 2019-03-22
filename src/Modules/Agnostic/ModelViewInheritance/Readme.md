@@ -27,7 +27,7 @@ The module extends the model views nodes with the `IModelObjectViewMergedDiffere
 
 
 ### Tests
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Specifications/Modules/ModelViewInheritance)
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Modules/ModelViewInheritance)
 
 ### Examples
 The module is already integrated in `eXpandFramework` and is installed with all modules, so there is no need for explicit registration.
