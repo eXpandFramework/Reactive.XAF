@@ -22,6 +22,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
     }
     public static class FrameExtensions{
+        public static IObservable<T> TakeUntilDisposingMainWindow<T>(this IObservable<T> source){
+            return source.TakeUntil(TemplateContext.ApplicationWindow.Frames().DisposingFrame());
+        }
+
         public static IObservable<T> When<T>(this IObservable<T> source, Frame parentFrame,NestedFrame nestedFrame){
             return source
                 .Where(_ => nestedFrame?.View!=null&&parentFrame?.View!=null)
