@@ -5,9 +5,21 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using DevExpress.ExpressApp;
+using DevExpress.Persistent.Base;
 
 namespace Xpand.XAF.Modules.Reactive.Extensions{
     public static class CommonExtensions{
+        public static IObservable<TSource> Tracer<TSource>(this IObservable<TSource> source,bool verbose=false){
+            return source.Do(_ => {
+                if (verbose){
+                    Tracing.Tracer.LogVerboseText($"{_}");
+                }
+                else{
+                    Tracing.Tracer.LogText($"{_}");
+                }
+            });
+        }
+
         public static IObservable<(TSource previous,TSource current)> CombineWithPrevious<TSource>(this IObservable<TSource> source){
             return source
                 .Scan((previous:default(TSource), current:default(TSource)),(_, current) => (_.current, current))

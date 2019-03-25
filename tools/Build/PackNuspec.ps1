@@ -4,7 +4,7 @@ param(
 )
 $ErrorActionPreference="Stop"
 New-Item $nugetBin -ItemType Directory -Force|Out-Null
-& Nuget pack "$sourceDir\Tools\Xpand.VersionConverter\Xpand.VersionConverter.nuspec" -OutputDirectory $nugetBin -NoPackageAnalysis
+& (Get-XNugetPath) pack "$sourceDir\Tools\Xpand.VersionConverter\Xpand.VersionConverter.nuspec" -OutputDirectory $nugetBin -NoPackageAnalysis
 if ($lastexitcode){
     throw 
 }
@@ -26,7 +26,7 @@ Get-ChildItem "$sourceDir\bin" "*.nuspec" -Recurse|ForEach-Object{
     $assembly=$assemblyVersions|Where-Object{$_.name -eq $packageName}
     $name=$_.FullName
     $directory=$_.Directory.Parent.FullName
-    & Nuget pack $name -OutputDirectory $($packData.nugetBin) -Basepath $directory -Version $($assembly.Version)
+    & (Get-XNugetPath) pack $name -OutputDirectory $($packData.nugetBin) -Basepath $directory -Version $($assembly.Version)
     if ($lastexitcode){
         throw $_.Exception
     }

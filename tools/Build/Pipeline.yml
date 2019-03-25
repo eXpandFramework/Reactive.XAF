@@ -1,0 +1,38 @@
+# https://aka.ms/yaml
+variables:
+  - group: Keys
+trigger: 
+  branches:
+    include:
+      - lab
+      - master
+pool:
+  vmImage: vs2017-win2016
+steps:
+- checkout: self
+  clean: true
+- task: PowerShell@2
+  displayName: Build
+  inputs:
+    targetType: filePath
+    filePath: .\tools\build\pipeline.ps1 
+    arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(GitHubUserName) $(GitHubPass) $(DXApiFeed)
+- task: VSTest@2
+  displayName: 'VsTest - testAssemblies'
+  enabled: true
+  inputs:
+    testAssemblyVer2: |
+     .\bin\Xpand.XAF.Agnostic.Tests.dll
+    uiTests: true
+    runInParallel: false
+    diagnosticsEnabled: false
+    runTestsInIsolation: true
+    codeCoverageEnabled: true
+    rerunFailedTests: true 
+- powershell: | 
+- task: PowerShell@2
+  displayName: Publish
+  inputs:
+    targetType: filePath
+    filePath: .\tools\build\publishNugets.ps1 
+    arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(NugetApiKey) 

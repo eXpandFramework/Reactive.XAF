@@ -3,7 +3,7 @@ $root=[System.IO.Path]::GetFullPath("$PSScriptRoot\..\..\")
 
 Set-Location $root
 New-Item -Path "$root\bin\Nupkg" -ItemType Directory  -ErrorAction SilentlyContinue -Force |Out-Null
-& NuGet spec -Force -verbosity quiet 
+& (Get-NugetPath) spec -Force -verbosity quiet 
 
 $template = "$root\Package.nuspec"
 $versionConverter=[PSCustomObject]@{
@@ -12,7 +12,7 @@ $versionConverter=[PSCustomObject]@{
     targetFramework="net452"
 }
 
-get-childitem "$root\src\" -Include "*.csproj" -Exclude "*.Specifications.*","*.Source.*" -Recurse | ForEach-Object {
+get-childitem "$root\src\" -Include "*.csproj" -Exclude "*.Tests.*","*.Source.*" -Recurse | ForEach-Object {
     [xml]$nuspec = Get-Content $template
     $metaData = $nuspec.Package.Metadata
     $metaData.dependencies.dependency.parentnode.removechild($metaData.dependencies.dependency)|Out-Null

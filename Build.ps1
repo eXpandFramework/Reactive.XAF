@@ -17,14 +17,14 @@ task default  -depends  DiscoverMSBuild, Clean, Init, UpdateProjects, RestoreNug
 
 Task IndexSources{
     InvokeScript{
-        Update-XSymbols -symbolsFolder "$PSScriptRoot\bin" -user eXpandFramework -repository XAF -branch $branch -sourcesRoot "$PSScriptRoot" -filter "Xpand*.pdb"
+        Get-ChildItem "$PSScriptRoot\bin" Xpand.XAF.Modules.*.pdb| Update-XSymbols -SourcesRoot "$PSScriptRoot" -TargetRoot "https://raw.githubusercontent.com/eXpandFramework/DevExpress.XAF/$branch"
     }
 }
 
 task Init {
     InvokeScript{
         New-Item "$PSScriptRoot\bin" -ItemType Directory -Force |Out-Null
-        Install-XDX -dxSource $packageSources -binPath "$PSScriptRoot\bin" -sourcePath "$PSScriptRoot\src" -dxVersion $dxVersion
+        Install-XDevExpress -dxSource $packageSources -binPath "$PSScriptRoot\bin" -sourcePath "$PSScriptRoot\src" -dxVersion $dxVersion
     }
 }
 
@@ -40,7 +40,7 @@ task RestoreNuggets {
             Push-Location $_.DirectoryName
             if ($packageSources){
                 $sources= "https://api.nuget.org/v3/index.json;$packageSources"
-                & nuget restore -source $sources
+                & (Get-XNugetPath) restore -source $sources
             }
             else {
                 & nuget restore
@@ -60,19 +60,9 @@ task Compile -precondition {return $compile  } {
         & $script:msbuild "$PSScriptRoot\src\Modules\Modules.sln" /p:Configuration=Release /fl /v:m
     }
     InvokeScript{
-        write-host "Building Specifications" -f "Blue"
-        & $script:msbuild "$PSScriptRoot\src\Specifications\Specifications.sln" "/p:Configuration=Release;OutputPath=$PSScriptRoot\bin" /fl /v:m
+        write-host "Building Tests" -f "Blue"
+        & $script:msbuild "$PSScriptRoot\src\Tests\Tests.sln" "/p:Configuration=Release;OutputPath=$PSScriptRoot\bin" /fl /v:m
     }
-    
-    # Get-ChildItem *.csproj -Recurse|ForEach-Object{
-    #     [xml]$csProj=Get-Content $_.FullName
-    #     $csProj.Project.ItemGroup.Reference|Where{$_.Include -like "DevExpress*"}|ForEach-Object{
-    #         $_.ChildNodes|Where{$_.Name -eq "HintPath"}|ForEach-Object{
-    #             $_.ParentNode.RemoveChild($_)|out-null
-    #         }
-    #     }
-    #     $csProj.Save($_.FullName)
-    # }
 }
 
 Task PublishNuget -precondition {return $nugetApiKey} {
@@ -98,7 +88,7 @@ Task PackNuspec {
 Task DiscoverMSBuild {
     InvokeScript {
         if (!$msbuild) {
-            $script:msbuild = (Get-XMsBuildLocation)
+            $script:msbuild = (Get-XMsBuildPath)
         }
         else {
             $script:msbuild = $msbuild

@@ -13,10 +13,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         static readonly Subject<XafApplication> AppChanged=new Subject<XafApplication>();
         private static XafApplication _xafApplication;
         private static readonly IConnectableObservable<Window> MainWindowConObs;
+        private static readonly IConnectableObservable<XafApplication> ApplicationObs;
 
         static RxApp(){
-            AppChanged.Distinct().Select(application => application.WhenDisposed().FirstAsync()).Switch()
-                .Subscribe(tuple => { Reset(); });
+            AppChanged.Distinct().Select(application => application.WhenDisposed().FirstAsync()).Switch().Subscribe(tuple => { Reset(); });
+            ApplicationObs = AppChanged.Replay();
+            ApplicationObs.Connect();
             MainWindowConObs= AppChanged.Select(application =>  TemplateContext.ApplicationWindow.Frames().FirstAsync().Cast<Window>()).Switch().LastAsync().Replay();
             MainWindowConObs.Connect();
         }
@@ -32,7 +34,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return WindowTemplateService.UpdateStatus(period, messages);
         }
 
-        internal static IObservable<Frame> FrameAssignedToController => RegisterActionsWindowController.WhenFrameAssigned.TakeUntil(XafApplication.WhenDisposed());
+        internal static IObservable<Frame> FrameAssignedToController => RegisterActionsWindowController.WhenFrameAssigned.TakeUntil(AppChanged.Select(application => application.WhenDisposed()).Concat());
 
         public static IObservable<Frame> Frames(this TemplateContext templateContext){
             return FrameAssignedToController.Where(frame => frame.Context == templateContext);
@@ -51,12 +53,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return FrameAssignedToController.WhenFits(viewType, objectType, nesting, isPopupLookup);
         }
 
-        
-
-        
-        public static XafApplication XafApplication{
+        internal static XafApplication XafApplication{
             get => _xafApplication;
-            internal set{
+            set{
                 _xafApplication = value;
                 AppChanged.OnNext(value);
             }
@@ -76,11 +75,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
 
         public static IObservable<View> ViewCreated => Observable
-            .FromEventPattern<EventHandler<ViewCreatedEventArgs>, ViewCreatedEventArgs>(h => XafApplication.ViewCreated += h,
+            .FromEventPattern<EventHandler<ViewCreatedEventArgs>, ViewCreatedEventArgs>(
+                h => XafApplication.ViewCreated += h,
                 h => XafApplication.ViewCreated -= h)
             .Select(pattern => pattern.EventArgs.View)
-            .TakeUntil(XafApplication.WhenDisposed());
+            .TakeUntilDisposingMainWindow();
 
+        public static IObservable<XafApplication> Application => ApplicationObs;
         public static IObservable<Window> MainWindow => MainWindowConObs;
 
         public static IObservable<(Frame masterFrame, NestedFrame detailFrame)> MasterDetailFrames(Type masterType, Type childType){
@@ -90,7 +91,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return Frames(ViewType.DetailView, masterType)
                 .CombineLatest(nestedlListViews.WhenIsNotOnLookupPopupTemplate(),
                     (masterFrame, detailFrame) => (masterFrame, detailFrame))
-                .TakeUntil(XafApplication.WhenDisposed());
+                .TakeUntilDisposingMainWindow();
         }
 
         public static IObservable<(Frame masterFrame, NestedFrame detailFrame)> NestedDetailObjectChanged(Type nestedType, Type childType){

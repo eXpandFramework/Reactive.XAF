@@ -129,6 +129,7 @@
     <Compile Include="Services\ControllerExtensions.cs" />
     <Compile Include="Services\DetailViewExtensions.cs" />
     <Compile Include="Services\FrameExtensions.cs" />
+    <Compile Include="Services\ListEditorExtensions.cs" />
     <Compile Include="Services\ObjectSpaceExtensions.cs" />
     <Compile Include="Services\RXApp.cs" />
     <Compile Include="Services\RXControllersManager.cs" />

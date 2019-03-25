@@ -89,6 +89,7 @@
     <Compile Include="Linq\Split.cs" />
     <Compile Include="Linq\TakeAllByLast.cs" />
     <Compile Include="XAF\BaseImpl\CustomBaseObject.cs" />
+    <Compile Include="XAF\GetTypeInfo.cs" />
     <Compile Include="XAF\Model\GetNodeByPath.cs" />
     <Compile Include="XAF\Model\GetParent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
