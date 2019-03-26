@@ -1,4 +1,6 @@
 ![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.CloneMemberValue.svg?&style=flat) ![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.CloneMemberValue.svg?&style=flat)
+
+[![GitHub issues](https://img.shields.io/github/issues/eXpandFramework/expand/CloneMemberValue.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AXAF+CloneMemberValue) [![GitHub close issues](https://img.shields.io/github/issues-closed/eXpandFramework/eXpand/CloneMemberValue.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AXAF+CloneMemberValue)
 # About 
 
 The `ModuleViewInheritance` module will help you to selectively `clone` Bussiness object `members`. The application model can be used to `define` the cloning `context` (Views/Members). 

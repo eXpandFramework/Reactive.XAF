@@ -1,4 +1,6 @@
 ![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.ModelViewInheritance.svg?&style=flat) ![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.ModelViewInheritance.svg?&style=flat)
+
+[![GitHub issues](https://img.shields.io/github/issues/eXpandFramework/expand/ModelViewInheritance.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AXAF+ModelViewInheritance) [![GitHub close issues](https://img.shields.io/github/issues-closed/eXpandFramework/eXpand/ModelViewInheritance.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AXAF+ModelViewInheritance)
 # About 
 
 The `ModuleViewInheritance` module replaces the generator layer of a view by composing multiple unrelated view model differences.

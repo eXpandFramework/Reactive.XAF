@@ -12,7 +12,7 @@
 <sub><sup>[How do I set up a package source in Visual Studio?](https://go.microsoft.com/fwlink/?linkid=698608)</sup></sub>
 
 # About
-In the `XAF` repository you can find **low dependency** DevExpress XAF **modules** distributed as nugets only. 
+In the `DevExpress.XAF` repository you can find **low dependency** DevExpress XAF **modules** distributed as nugets only. 
 
 We aim for low dependency XAF modules so expect to see only a small set of classes per project. To learn more about each module navigate to its root `Readme` file.
 
@@ -26,4 +26,4 @@ The modules are **not bound** to **DevExpress versioning**, which means you can 
 The modules follow the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 
 ### Issues
-Use main project [issues](https://github.com/eXpandFramework/eXpand/issues/new/choose)
+Use main project [issues](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Question%2C+XAF&template=xaf--question.md&title=)
