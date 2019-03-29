@@ -18,7 +18,7 @@ steps:
     arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(GitHubUserName) $(GitHubPass) $(DXApiFeed)
 - task: VSTest@2
   displayName: 'VsTest - testAssemblies'
-  enabled: $(RunTests)
+  enabled: true
   inputs:
     testAssemblyVer2: |
      .\bin\Xpand.XAF.Agnostic.Tests.dll
