@@ -5,9 +5,8 @@ param(
     $Pass,
     $DXApiFeed
 )
-& "$SourcePath\go.ps1" -InstallModules
 $ErrorActionPreference = "Stop"
-# $VerbosePreference = "continue"
+& "$SourcePath\go.ps1" -InstallModules
 $packageSource = Get-XPackageFeed -Xpand
 
 $localPackages = Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse|ForEach-Object {
