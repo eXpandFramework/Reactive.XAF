@@ -9,11 +9,9 @@ Get-ChildItem "$rootLocation\src" *.csproj -Recurse|Select-Object|ForEach-Object
     $readMePath="$($_.DirectoryName)\Readme.md"
     if ((Test-path $readMePath) -and $packages.Contains($_.BaseName)) {
         $metadata=((Get-NugetPackageSearchMetadata -Name $_.BaseName -Source $packagesPath).DependencySets.Packages|ForEach-Object{
-            [PSCustomObject]@{
-                Name = $_.Id
-                Version=$_.VersionRange.MinVersion
-            }
-        })|Out-String
+            "$($_.Id)|$($_.VersionRange.MinVersion)`r`n"
+        })
+        $metadata="Name|Version`r`n----|----`r`n$metadata"
         $readMe=Get-Content $readMePath -Raw
         if ($readMe -notmatch "## Dependencies"){
             $readMe=$readMe.Replace("## Issues","## Dependencies`r`n## Issues")
@@ -22,7 +20,7 @@ Get-ChildItem "$rootLocation\src" *.csproj -Recurse|Select-Object|ForEach-Object
         $version=$csproj.Project.PropertyGroup.TargetFrameworkVersion|Select-Object -First 1
         $result = $readMe -creplace '## Dependencies([^#]*)', @"
 ## Dependencies
-`.NetFramework: $version`
+``.NetFramework: $version```r`n
 $metadata`r`n
 "@
         Set-Content $readMePath $result.Trim()

@@ -21,15 +21,13 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
-.NetFramework: v4.5.2
+`.NetFramework: v4.5.2`
 
-Name                   Version
-----                   -------
-Xpand.VersionConverter 1.0.4  
-fasterflect            2.1.3  
-System.ValueTuple      4.5.0  
-
-
+Name|Version
+----|----
+Xpand.VersionConverter|1.0.4
+ fasterflect|2.1.3
+ System.ValueTuple|4.5.0
 
 ## Issues
 For [Bugs](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Bug%2C+XAF,+ModelViewInheritance&template=xaf--bug-report.md&title=), [Questions](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Question%2C+XAF,+ModelViewInheritance&template=xaf--question.md&title=) or [Suggestions](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Enhancement%2C+XAF,+ModelViewInheritance&template=xaf--feature-request.md&title=) use main project issues.
