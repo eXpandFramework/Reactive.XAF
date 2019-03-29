@@ -7,7 +7,7 @@ param(
 )
 & "$SourcePath\go.ps1" -InstallModules
 $ErrorActionPreference = "Stop"
-$VerbosePreference = "continue"
+# $VerbosePreference = "continue"
 $packageSource = Get-XPackageFeed -Xpand
 
 $localPackages = Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse|ForEach-Object {
@@ -28,9 +28,11 @@ $publishedPackages = & (Get-XNugetPath) list Xpand.XAF.Modules -source $packageS
 
 $newPackages = $localPackages|Where-Object {!(($publishedPackages|Select-Object -ExpandProperty Name) -contains $_.Name) }|ForEach-Object {
     $localVersion = New-Object System.Version($_.LocalVersion)
+    $nextVersion=New-Object System.Version($localVersion.Major, $localVersion.Minor, $localVersion.Build)
     [PSCustomObject]@{
         Name        = $_.Name
-        NextVersion = New-Object System.Version($localVersion.Major, $localVersion.Minor, $localVersion.Build)
+        NextVersion = $nextVersion
+        LocalVersion =$localVersion
     }
 }
 $newPackages
@@ -44,7 +46,7 @@ $yArgs = @{
     Packages     = ($publishedPackages + $newPackages)
     SourcePath   = $SourcePath
 }
-$yArgs|Write-Output
+$yArgs.Packages|Write-Output
 Update-NugetProjectVersion @yArgs 
 
 $bArgs=@{

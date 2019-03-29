@@ -27,6 +27,21 @@ The module is not integrated with any `eXpandFramework` module. You have to inst
 The module is **not bound** to **DevExpress versioning**, which means you can use the latest version with your old DevExpress projects [Read more](https://github.com/eXpandFramework/XAF/tree/master/tools/Xpand.VersionConverter).
 
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
+## Dependencies
+.NetFramework: v4.6.1
+
+Name                                   Version
+----                                   -------
+Xpand.VersionConverter                 1.0.4  
+Xpand.XAF.Modules.Reactive             1.0.9  
+fasterflect                            2.1.3  
+System.Reactive                        4.1.3  
+System.Runtime.CompilerServices.Unsafe 4.5.2  
+System.Threading.Tasks.Extensions      4.5.2  
+System.ValueTuple                      4.5.0  
+
+
+
 ## Issues
 For [Bugs](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Bug%2C+XAF,+CloneMemberValue&template=xaf--bug-report.md&title=), [Questions](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Question%2C+XAF,+CloneMemberValue&template=xaf--question.md&title=) or [Suggestions](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Enhancement%2C+XAF,+CloneMemberValue&template=xaf--feature-request.md&title=) use main project issues.
 ## Details
@@ -55,4 +70,3 @@ private void DoSomethingForEachMemberValue((IModelObjectView modelObjectView, IM
 
 ### Tests
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Modules/CloneMemberValue)
-
