@@ -25,6 +25,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 
 Name|Version
 ----|----
+**DevExpress.ExpressApp**|**Any**
 Xpand.VersionConverter|1.0.4
  fasterflect|2.1.3
  System.ValueTuple|4.5.0

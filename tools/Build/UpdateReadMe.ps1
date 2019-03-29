@@ -11,12 +11,16 @@ Get-ChildItem "$rootLocation\src" *.csproj -Recurse|Select-Object|ForEach-Object
         $metadata=((Get-NugetPackageSearchMetadata -Name $_.BaseName -Source $packagesPath).DependencySets.Packages|ForEach-Object{
             "$($_.Id)|$($_.VersionRange.MinVersion)`r`n"
         })
-        $metadata="Name|Version`r`n----|----`r`n$metadata"
+        [xml]$csproj=Get-Content $_.FullName
+        $dxDepends=$csproj.Project.ItemGroup.Reference|Where-Object{$_.Include -like "DevExpress*"}|ForEach-Object{
+            "**$($_.Include -creplace '(.*)\.v[\d]{2}\.\d', '$1')**|**Any**"
+        }
+        $metadata="Name|Version`r`n----|----`r`n$dxDepends`r`n$metadata"
         $readMe=Get-Content $readMePath -Raw
         if ($readMe -notmatch "## Dependencies"){
             $readMe=$readMe.Replace("## Issues","## Dependencies`r`n## Issues")
         }
-        [xml]$csproj=Get-Content $_.FullName
+        
         $version=$csproj.Project.PropertyGroup.TargetFrameworkVersion|Select-Object -First 1
         $result = $readMe -creplace '## Dependencies([^#]*)', @"
 ## Dependencies
