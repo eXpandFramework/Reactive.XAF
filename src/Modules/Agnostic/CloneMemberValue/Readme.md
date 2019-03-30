@@ -18,7 +18,7 @@ The module uses the next two strategies:
 2. [Ways to Register a Module](https://documentation.devexpress.com/eXpressAppFramework/118047/Concepts/Application-Solution-Components/Ways-to-Register-a-Module)
 or simply add the next call to your module constructor
     ```cs
-    RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.CloneMemberValueModule));
+    RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.CloneMemberValue.CloneMemberValueModule));
     ```
 
 The module is not integrated with any `eXpandFramework` module. You have to install it as described.
