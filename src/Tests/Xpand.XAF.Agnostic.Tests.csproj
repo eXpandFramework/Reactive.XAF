@@ -1,4 +1,4 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0">
   <Import Project="..\..\packages\xunit.runner.visualstudio.2.4.1\build\net20\xunit.runner.visualstudio.props" Condition="Exists('..\..\packages\xunit.runner.visualstudio.2.4.1\build\net20\xunit.runner.visualstudio.props')" />
   <Import Project="..\..\packages\xunit.core.2.4.1\build\xunit.core.props" Condition="Exists('..\..\packages\xunit.core.2.4.1\build\xunit.core.props')" />
   <PropertyGroup>
@@ -153,10 +153,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\bin\Xpand.XAF.Modules.CloneMemberValue.dll</HintPath>
     </Reference>
-    <Reference Include="Xpand.XAF.Modules.MasterDetail, Version=1.0.9.0, Culture=neutral, PublicKeyToken=c52ffed5d5ff0958, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\bin\Xpand.XAF.Modules.MasterDetail.dll</HintPath>
-    </Reference>
     <Reference Include="Xpand.XAF.Modules.ModelViewInheritance">
       <HintPath>..\..\bin\Xpand.XAF.Modules.ModelViewInheritance.dll</HintPath>
     </Reference>
@@ -194,9 +190,6 @@
     <Compile Include="Modules\CloneMemberValue\BOModel\ACmv.cs" />
     <Compile Include="Modules\CloneMemberValue\BOModel\BCmv.cs" />
     <Compile Include="Modules\CloneMemberValue\CloneMemberValueTests.cs" />
-    <Compile Include="Modules\MasterDetail\BOModel\ChildMd.cs" />
-    <Compile Include="Modules\MasterDetail\BOModel\Md.cs" />
-    <Compile Include="Modules\MasterDetail\MasterDetailTests.cs" />
     <Compile Include="Modules\ModelViewInheritance\BOModel\ABaseMvi.cs" />
     <Compile Include="Modules\ModelViewInheritance\BOModel\AMvi.cs" />
     <Compile Include="Modules\ModelViewInheritance\BOModel\FileMvi.cs" />

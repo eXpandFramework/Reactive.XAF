@@ -60,6 +60,3 @@ The module is valuable in scenarios similar to:
 `EmailModule`, `XtraDashboardModule` ,`ExcelImporterModule` are modules that use the `ViewEditModeModule`. DetailViews. Example from ExcelImporter from the view tha maps the Excel columns with the BO members. 
 
 ![image](https://user-images.githubusercontent.com/159464/55381194-238e6500-552b-11e9-8314-f1b1132d09f3.png)
-
-
-
