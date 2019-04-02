@@ -23,7 +23,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
     }
     public static class FrameExtensions{
         public static IObservable<T> TakeUntilDisposingMainWindow<T>(this IObservable<T> source){
-            return source.TakeUntil(TemplateContext.ApplicationWindow.Frames().DisposingFrame());
+            var disposing = TemplateContext.ApplicationWindow.Windows().DisposingFrame().ToUnit()
+                .Merge(RxApp.Application.Disposed().Select(tuple => tuple).ToUnit())
+                .FirstAsync();
+            return source.TakeUntil(disposing);
         }
 
         public static IObservable<T> When<T>(this IObservable<T> source, Frame parentFrame,NestedFrame nestedFrame){

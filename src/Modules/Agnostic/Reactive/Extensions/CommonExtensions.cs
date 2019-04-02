@@ -20,6 +20,12 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
             });
         }
 
+        public static IObservable<TSource> WhenNotDefault<TSource>(this IObservable<TSource> source){
+            return source.Select(_ => (object)_).Where(o => o!=null)
+                .Select(o => (TSource)o)
+                .Where(_ =>!_.Equals(default(TSource)));
+        }
+
         public static IObservable<(TSource previous,TSource current)> CombineWithPrevious<TSource>(this IObservable<TSource> source){
             return source
                 .Scan((previous:default(TSource), current:default(TSource)),(_, current) => (_.current, current))

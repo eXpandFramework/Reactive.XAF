@@ -11,5 +11,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     handler => editor.NewObjectAdding -= handler)
                 .TransformPattern<NewObjectAddingEventArgs, ListEditor>();
         }
+
+        public static IObservable<(ListEditor editor, EventArgs e)> WhenProcessSelectedItem(this ListEditor editor){
+            return Observable.FromEventPattern<EventHandler, EventArgs>(
+                    handler => editor.ProcessSelectedItem += handler,
+                    handler => editor.ProcessSelectedItem -= handler)
+                .TransformPattern<EventArgs, ListEditor>();
+        }
     }
 }

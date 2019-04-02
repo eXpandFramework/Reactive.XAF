@@ -13,6 +13,8 @@ param(
     $assemblyFilter = "Xpand.XAF.*"
 )
 $ErrorActionPreference = "Stop"
+"projectFile=$projectFile"
+"targetPath=$targetPath"
 $projectFileInfo = Get-item $projectFile
 [xml]$csproj = Get-Content $projectFileInfo.FullName
 $references = $csproj.Project.ItemGroup.Reference
@@ -28,13 +30,13 @@ if (!(Test-Path $monoPath)) {
 }
 $bytes = [File]::ReadAllBytes($monoPath)
 [Assembly]::Load($bytes)|out-null
-$sourceAssemblyName = Invoke-Command {
+$devExpressAssemblyName = Invoke-Command {
 
-    "Finding DX assembly name"
+    Write-host "Finding DX assembly name"
     $dxAssemblyPath = (Get-ChildItem $targetPath "$referenceFilter*.dll" |Select-Object -First 1).FullName
     if ($dxAssemblyPath) {
         $dxAssembly = [AssemblyDefinition]::ReadAssembly($dxAssemblyPath)
-        "$sourceAssemblyName found from $dxAssemblyPath"
+        Write-host "$devExpressAssemblyName found from $dxAssemblyPath"
         $dxAssembly.Name
     }
     else {
@@ -42,7 +44,7 @@ $sourceAssemblyName = Invoke-Command {
         new-object System.Reflection.AssemblyName($name)
     }
 }|Select-Object -last 1
-if (!$sourceAssemblyName) {
+if (!$devExpressAssemblyName) {
     throw "Cannot find $referenceFilter version in $($projectFileInfo.Name)"
 }
 
@@ -54,22 +56,27 @@ $references|Where-Object {$_.Include -like $assemblyFilter}|ForEach-Object {
             $readerParams.ReadWrite = $true
             $moduleAssembly = [AssemblyDefinition]::ReadAssembly($modulePath, $readerParams)
             Write-host "Checking $modulePath references.." -f "Blue"
+            $moduleAssembly.MainModule.AssemblyReferences.ToArray()|Write-Verbose 
             $moduleAssembly.MainModule.AssemblyReferences.ToArray()|Where-Object {$_.FullName -like $referenceFilter}|ForEach-Object {
                 $nowReference = $_
-                if ($nowReference.Version -ne $sourceAssemblyName.Version) {
+                Write-Host "Checking $_ refrence"
+                if ($nowReference.Version -ne $devExpressAssemblyName.Version) {
                     $moduleAssembly.MainModule.AssemblyReferences.Remove($nowReference)
-                    $newMinor = "$($sourceAssemblyName.Version.Major).$($sourceAssemblyName.Version.Minor)"
+                    $newMinor = "$($devExpressAssemblyName.Version.Major).$($devExpressAssemblyName.Version.Minor)"
                     $newName = [Regex]::Replace($nowReference.Name, ".(v[\d]{2}\.\d)", ".v$newMinor")
                     $regex = New-Object Regex("PublicKeyToken=([\w]*)")
                     $token = $regex.Match($nowReference).Groups[1].Value
                     $regex = New-Object Regex("Culture=([\w]*)")
                     $culture = $regex.Match($nowReference).Groups[1].Value
-                    $newReference = [AssemblyNameReference]::Parse("$newName, Version=$($sourceAssemblyName.Version), Culture=$culture, PublicKeyToken=$token")
+                    $newReference = [AssemblyNameReference]::Parse("$newName, Version=$($devExpressAssemblyName.Version), Culture=$culture, PublicKeyToken=$token")
                     $moduleAssembly.MainModule.AssemblyReferences.Add($newreference)
                     $moduleAssembly.MainModule.Types|
                         ForEach-Object {$moduleAssembly.MainModule.GetTypeReferences()| Where-Object {$_.Scope -eq $nowReference}|
                             ForEach-Object {$_.Scope = $newReference}}
-                    Write-Host "$($_.Name) version changed from $($_.Version) to $($sourceAssemblyName.Version)" -f Green
+                    Write-Host "$($_.Name) version changed from $($_.Version) to $($devExpressAssemblyName.Version)" -f Green
+                }
+                else{
+                    Write-Host "Versions ($($nowReference.Version)) matched nothing to do."
                 }
             }
             $writeParams=New-Object WriterParameters

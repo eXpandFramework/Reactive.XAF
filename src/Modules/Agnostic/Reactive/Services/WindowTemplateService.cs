@@ -6,6 +6,7 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp.SystemModule;
 using Fasterflect;
 using Xpand.XAF.Modules.Reactive.Extensions;
+using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     static class WindowTemplateService{

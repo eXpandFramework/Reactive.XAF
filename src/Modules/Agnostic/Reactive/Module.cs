@@ -5,14 +5,14 @@ using DevExpress.ExpressApp.DC;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.Reactive {
-    public sealed partial class ReactiveModule : ModuleBase {
+    public sealed class ReactiveModule : ModuleBase {
         readonly Subject<ITypesInfo> _typesInfoSubject=new Subject<ITypesInfo>();
         public IObservable<ITypesInfo> TypesInfo;
+
         public ReactiveModule() {
             TypesInfo = _typesInfoSubject;
-            InitializeComponent();
+            RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));
         }
-
 
         public override void CustomizeTypesInfo(ITypesInfo typesInfo) {
             base.CustomizeTypesInfo(typesInfo);
@@ -22,7 +22,9 @@ namespace Xpand.XAF.Modules.Reactive {
 
         public override void Setup(XafApplication application) {
             base.Setup(application);
-            RxApp.XafApplication = application;
+            application.Connect()
+                .TakeUntilDisposingMainWindow()
+                .Subscribe();
         }
 
     }
