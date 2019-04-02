@@ -1,16 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
+using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.CloneMemberValue{
     public static class CloneMemberValueService{
+        public static IObservable<Unit> Connect(this ApplicationModulesManager modulesManager ){
+            return CloneMemberValues
+                .Tracer(true)
+                .TakeUntilDisposingMainWindow()
+                .ToUnit();
+        }
 
         public static IEnumerable<IModelCommonMemberViewItemCloneValue> CloneValueMemberViewItems(this IModelObjectView modelObjectView) {
             return (modelObjectView is IModelListView view? view.Columns.Cast<IModelCommonMemberViewItemCloneValue>()

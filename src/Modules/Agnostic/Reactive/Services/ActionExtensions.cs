@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
@@ -8,7 +9,12 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ActionExtensions{
-
+        public static IObservable<(TAction action, CancelEventArgs e)> WhenExecuting<TAction>(this TAction action) where TAction : ActionBase{
+            return Observable.FromEventPattern<CancelEventHandler, CancelEventArgs>(h => action.Executing += h,
+                    h => action.Executing -= h)
+                .TakeUntil(action.WhenDisposing())
+                .TransformPattern<CancelEventArgs, TAction>();
+        }
         public static IObservable<(TAction action, BoolList boolList, BoolValueChangedEventArgs e)> ResultValueChanged<TAction>(
             this TAction source,Func<TAction,BoolList> boolListSelector ) where TAction:ActionBase{
             return Observable.Return(boolListSelector(source)).ResultValueChanged()

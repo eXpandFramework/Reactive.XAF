@@ -3,7 +3,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 
 namespace Xpand.Source.Extensions.XAF.Model{
-    internal static partial class Extensions{
+    internal static partial class ModelExtensions{
         public static void ReadFromModel(this IModelNode modelNode,IModelNode readFrom){
             modelNode.ReadFromModel(  readFrom, null);
         }

@@ -3,7 +3,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 
 namespace Xpand.Source.Extensions.XAF.Model{
-    internal static partial class Extensions{
+    internal static partial class ModelExtensions{
         public static ModelNode GetNodeByPath(this IModelNode node, string path){
             string[] separator = {"/"};
             var strArray = path.Split(separator, StringSplitOptions.RemoveEmptyEntries);

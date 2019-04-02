@@ -8,11 +8,6 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class XafApplicationRXExtensions{
-
-        public static void RegisterAsRX(this XafApplication application) {
-            RxApp.XafApplication=application;
-        }
-
         public static void AddObjectSpaceProvider(this XafApplication application, IObjectSpaceProvider objectSpaceprovider) {
             application.WhenCreateCustomObjectSpaceProvider()
                 .Select(_ => {
@@ -34,6 +29,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .FromEventPattern<EventHandler<CreateCustomObjectSpaceProviderEventArgs>,CreateCustomObjectSpaceProviderEventArgs>(h => application.CreateCustomObjectSpaceProvider += h,h => application.CreateCustomObjectSpaceProvider -= h)
                 .TakeUntilDisposingMainWindow()
                 .TransformPattern<CreateCustomObjectSpaceProviderEventArgs,XafApplication>();
+        }
+
+        public static IObservable<(XafApplication application, CreateCustomTemplateEventArgs e)> WhenCreateCustomTemplate(this XafApplication application){
+            return Observable
+                .FromEventPattern<EventHandler<CreateCustomTemplateEventArgs>,CreateCustomTemplateEventArgs>(h => application.CreateCustomTemplate += h,h => application.CreateCustomTemplate -= h)
+                .TakeUntilDisposingMainWindow()
+                .TransformPattern<CreateCustomTemplateEventArgs,XafApplication>();
         }
 
         public static IObservable<(XafApplication application, ObjectSpaceCreatedEventArgs e)> ObjectSpaceCreated(this IObservable<XafApplication> source){
@@ -60,6 +62,14 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .TransformPattern<DetailViewCreatedEventArgs, XafApplication>();
         }
 
+        public static IObservable<(XafApplication application, DashboardViewCreatedEventArgs e)> WhenDashboardViewCreated(this XafApplication application){
+            return Observable
+                .FromEventPattern<EventHandler<DashboardViewCreatedEventArgs>, DashboardViewCreatedEventArgs>(
+                    h => application.DashboardViewCreated += h, h => application.DashboardViewCreated -= h)
+                .TakeUntilDisposingMainWindow()
+                .TransformPattern<DashboardViewCreatedEventArgs, XafApplication>();
+        }
+
         public static IObservable<(XafApplication application, ListViewCreatedEventArgs e)> ListViewCreated(this IObservable<XafApplication> source){
             return source.SelectMany(application => application.WhenListViewCreated());
         }
@@ -74,9 +84,14 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return application.AsObservable().ObjectViewCreated();
         }
 
+        public static IObservable<(XafApplication application, DashboardViewCreatedEventArgs e)> DashboardViewCreated(this IObservable<XafApplication> source){
+            return source.SelectMany(application => application.WhenDashboardViewCreated());
+        }
+
         public static IObservable<(XafApplication application, DetailViewCreatedEventArgs e)> DetailViewCreated(this IObservable<XafApplication> source){
             return source.SelectMany(application => application.WhenDetailViewCreated());
         }
+
         public static IObservable<(XafApplication application, ViewCreatedEventArgs e)> ObjectViewCreated(this IObservable<XafApplication> source){
             return source.ViewCreated().Where(_ => _.e.View is ObjectView);
         }
@@ -131,7 +146,5 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .TakeUntilDisposingMainWindow()
                 .TransformPattern<SetupEventArgs,XafApplication>();
         }
-
-
     }
 }

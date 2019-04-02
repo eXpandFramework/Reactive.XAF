@@ -13,7 +13,7 @@ properties {
     $branch=$null
 }
 
-task default  -depends  DiscoverMSBuild, Clean, Init, UpdateProjects, RestoreNuggets, Compile,IndexSources, CreateNuspec, PackNuspec, PublishNuget
+task default  -depends  DiscoverMSBuild, Clean, Init, UpdateProjects, RestoreNuggets, Compile,IndexSources, CreateNuspec, PackNuspec, PublishNuget ,UpdateReadMe
 
 Task IndexSources{
     InvokeScript{
@@ -31,6 +31,12 @@ task Init {
 task UpdateProjects {
     InvokeScript{
         & "$PSScriptRoot\tools\build\UpdateProjects.ps1"
+    }
+}
+
+task UpdateReadMe {
+    InvokeScript{
+        & "$PSScriptRoot\tools\build\UpdateReadMe.ps1"
     }
 }
 

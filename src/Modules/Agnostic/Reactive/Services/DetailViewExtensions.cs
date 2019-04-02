@@ -1,14 +1,27 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
+using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class DetailViewExtensions{
+        public static IObservable<(DetailView detailView, CancelEventArgs e)> WhenViewEditModeChanging(this DetailView detailView){
+            return Observable.FromEventPattern<EventHandler<CancelEventArgs>, CancelEventArgs>(
+                    h => detailView.ViewEditModeChanging += h, h => detailView.ViewEditModeChanging -= h)
+                .TakeUntil(detailView.WhenDisposingView())
+                .TransformPattern<CancelEventArgs, DetailView>();
+        }
+
+        public static IObservable<(DetailView detailView, CancelEventArgs e)> ViewEditModeChanging<T>(this IObservable<T> source) where T : DetailView{
+            return source.SelectMany(_ => _.WhenViewEditModeChanging());
+        }
         public static IObservable<Frame> FrameAssigned(this IObservable<DetailView> source){
-            var rootFrames = RxApp.FrameAssignedToController.ViewChanged().Where(tuple => tuple.frame.View.IsRoot).Select(tuple => tuple.frame);
-            return source.OfType<DetailView>().WhenChildrenCurrentObjectChanged<object>().Select(tuple => tuple.nestedFrame).Cast<Frame>().Concat(rootFrames );
+            throw new NotImplementedException();   
+//            var rootFrames = RxApp.FrameAssignedToController.ViewChanged().Where(tuple => tuple.frame.View.IsRoot).Select(tuple => tuple.frame);
+//            return source.OfType<DetailView>().WhenChildrenCurrentObjectChanged<object>().Select(tuple => tuple.nestedFrame).Cast<Frame>().Concat(rootFrames );
         }
 
         public static IObservable<(DetailView detailView, NestedFrame nestedFrame)>

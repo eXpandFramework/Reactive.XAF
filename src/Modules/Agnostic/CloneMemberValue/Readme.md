@@ -1,7 +1,9 @@
 ![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.CloneMemberValue.svg?&style=flat) ![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.CloneMemberValue.svg?&style=flat)
+
+[![GitHub issues](https://img.shields.io/github/issues/eXpandFramework/expand/CloneMemberValue.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AXAF+CloneMemberValue) [![GitHub close issues](https://img.shields.io/github/issues-closed/eXpandFramework/eXpand/CloneMemberValue.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AXAF+CloneMemberValue)
 # About 
 
-The `ModuleViewInheritance` module will help you to selectively `clone` Bussiness object `members`. The application model can be used to `define` the cloning `context` (Views/Members). 
+The `CloneMemberValue` module will help you to selectively `clone` Bussiness object `members`. The application model can be used to `define` the cloning `context` (Views/Members). 
 
 The module uses the next two strategies:
 1. It monitors the `DetailView` construction sequence and projects the result to a `Previous/Current` pair which is then used to clone if the context is valid.
@@ -25,6 +27,20 @@ The module is not integrated with any `eXpandFramework` module. You have to inst
 The module is **not bound** to **DevExpress versioning**, which means you can use the latest version with your old DevExpress projects [Read more](https://github.com/eXpandFramework/XAF/tree/master/tools/Xpand.VersionConverter).
 
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
+## Dependencies
+`.NetFramework: v4.6.1`
+
+Name|Version
+----|----
+**DevExpress.ExpressApp**|**Any**
+Xpand.VersionConverter|1.0.4
+ Xpand.XAF.Modules.Reactive|1.0.10
+ fasterflect|2.1.3
+ System.Reactive|4.1.3
+ System.Runtime.CompilerServices.Unsafe|4.5.2
+ System.Threading.Tasks.Extensions|4.5.2
+ System.ValueTuple|4.5.0
+
 ## Issues
 For [Bugs](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Bug%2C+XAF,+CloneMemberValue&template=xaf--bug-report.md&title=), [Questions](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Question%2C+XAF,+CloneMemberValue&template=xaf--question.md&title=) or [Suggestions](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Enhancement%2C+XAF,+CloneMemberValue&template=xaf--feature-request.md&title=) use main project issues.
 ## Details
@@ -53,4 +69,3 @@ private void DoSomethingForEachMemberValue((IModelObjectView modelObjectView, IM
 
 ### Tests
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Modules/CloneMemberValue)
-

@@ -1,32 +1,25 @@
 # https://aka.ms/yaml
+variables:
+  - group: Keys
 trigger: 
-   branches:
-     include:
-       - master
-   paths:
-     exclude:
-       - /src/Modules/ReadMe.md
-       - /src/Modules/Agnostic/Reactive/ReadMe.txt
-       - /src/Modules/Agnostic/ModelViewInheritance/ReadMe.md
-       - /src/tools/Xpand.VersionConverter/ReadMe.md
-       - /src/tools/build/*
-     
-queue:
-  name: Hosted VS2017
-  demands: 
-  - msbuild
-  - visualstudio
+  branches:
+    include:
+      - master
+pool:
+  vmImage: vs2017-win2016
 steps:
-- powershell: |
-   .\go.ps1 -msbuild "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\msbuild.exe" -packageSources $(DXApiFeed) -branch master
-  displayName: 'Build'
-  failOnStderr: true
-- powershell: |
-   .\tools\build\PushNugets.ps1 -sourcesRoot $(System.DefaultWorkingDirectory)\bin -remotePackageSource "https://api.nuget.org/v3/index.json" -apiKey $(NugetApiKey)
-  displayName: 'Publish Nuggets'
-  failOnStderr: true
-- task: PublishPipelineArtifact@0
-  displayName: 'Publish Pipeline Artifact'
+- checkout: self
+  clean: true
+- task: PowerShell@2
+  displayName: Build
   inputs:
-    artifactName: Packages
-    targetPath: bin/Nupkg
+    targetType: filePath
+    filePath: .\tools\build\release-pipeline.ps1 
+    arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(GitHubUserName) $(GitHubPass) $(DXApiFeed)
+- powershell: | 
+- task: PowerShell@2
+  displayName: Publish
+  inputs:
+    targetType: filePath
+    filePath: .\tools\build\publishNugets.ps1 
+    arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(NugetApiKey) 

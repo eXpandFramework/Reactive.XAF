@@ -1,7 +1,7 @@
 ﻿using DevExpress.ExpressApp.Model;
 
 namespace Xpand.Source.Extensions.XAF.Model{
-    internal static partial class Extensions{
+    internal static partial class ModelExtensions{
         public static TNode GetParent<TNode>(this IModelNode modelNode) where TNode : class, IModelNode{
             if (modelNode is TNode node)
                 return node;

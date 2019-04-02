@@ -5,7 +5,6 @@ trigger:
   branches:
     include:
       - lab
-      - master
 pool:
   vmImage: vs2017-win2016
 steps:
@@ -15,7 +14,7 @@ steps:
   displayName: Build
   inputs:
     targetType: filePath
-    filePath: .\tools\build\pipeline.ps1 
+    filePath: .\tools\build\lab-pipeline.ps1 
     arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(GitHubUserName) $(GitHubPass) $(DXApiFeed)
 - task: VSTest@2
   displayName: 'VsTest - testAssemblies'
