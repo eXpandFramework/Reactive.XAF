@@ -1,6 +1,6 @@
 [![GitHub stars](https://img.shields.io/github/stars/eXpandFramework/DevExpress.XAF.svg)](https://github.com/eXpandFramework/DevExpress.XAF/stargazers)  [![GitHub forks](https://img.shields.io/github/forks/eXpandFramework/DevExpress.XAF.svg)](https://github.com/eXpandFramework/DevExpress.XAF/network)
 
-[![Azure DevOps Tests](https://img.shields.io/azure-devops/tests/expandDevOps/expandframework/23.svg?logo=azuredevops)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=23) [![Azure DevOps Coverage](https://img.shields.io/azure-devops/coverage/eXpandDevOps/expandframework/23.svg?logo=azuredevops)](https://dev.azure.com/azuredevops-powershell/azuredevops-powershell/_build/latest?definitionId=23)
+[![Azure DevOps Tests](https://img.shields.io/azure-devops/tests/expandDevOps/expandframework/23.svg?logo=azuredevops)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=23) [![Azure DevOps Coverage](https://img.shields.io/azure-devops/coverage/eXpandDevOps/expandframework/23.svg?logo=azuredevops)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=23)
 
 [![GitHub issues](https://img.shields.io/github/issues/eXpandFramework/expand/XAF.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AXAF) [![GitHub close issues](https://img.shields.io/github/issues-closed/eXpandFramework/eXpand/XAF.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AXAF+)
 
