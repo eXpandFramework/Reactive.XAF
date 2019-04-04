@@ -14,7 +14,7 @@ $ErrorActionPreference = "Stop"
     Version ="4.7.4"
 },[PSCustomObject]@{
     Name = "XpandPosh"
-    Version ="1.5.8"
+    Version ="1.6.1"
 })|ForEach-Object{
     & "$PSScriptRoot\tools\build\Install-Module.ps1" $_
 }

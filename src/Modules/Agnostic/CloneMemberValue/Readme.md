@@ -33,7 +33,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 Name|Version
 ----|----
 **DevExpress.ExpressApp**|**Any**
-Xpand.VersionConverter|1.0.4
+Xpand.VersionConverter|1.0.5
  Xpand.XAF.Modules.Reactive|1.0.10
  fasterflect|2.1.3
  System.Reactive|4.1.3

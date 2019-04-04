@@ -4,62 +4,69 @@ using namespace System.IO.Compression
 using namespace System.Reflection
 using namespace System.Text.RegularExpressions
 using namespace Mono.Cecil
+using namespace Mono.Cecil.pdb
 param(
     [parameter(Mandatory)]
-    [string]$projectFile = $null,
+    [string]$projectFile  ,
     [parameter(Mandatory)]
-    $targetPath = $null,
-    $referenceFilter = "DevExpress*",
-    $assemblyFilter = "Xpand.XAF.*"
+    [string]$targetPath,
+    [string]$referenceFilter = "DevExpress*",
+    [string]$assemblyFilter = "Xpand.XAF.*"
 )
+ 
 $ErrorActionPreference = "Stop"
-"projectFile=$projectFile"
-"targetPath=$targetPath"
-$projectFileInfo = Get-item $projectFile
+
+Write-Host "Running Version Converter on project $projectFile with target $targetPath" -f Blue
+
+
+$projectFileInfo = Get-Item $projectFile
 [xml]$csproj = Get-Content $projectFileInfo.FullName
 $references = $csproj.Project.ItemGroup.Reference
-$dxReferences = $references|Where-Object {$_.Include -like "$referenceFilter"}
+$dxReferences = $references | Where-Object { $_.Include -like "$referenceFilter" }
 $root = $PSScriptRoot
 "Loading Mono.Cecil"
-$monoPath = "$root\mono.cecil.0.10.1\lib\net40\Mono.Cecil.dll"
-if (!(Test-Path $monoPath)) {
+$monoPath = "$root\mono.cecil.0.10.3\lib\net40"
+if (!(Test-Path "$monoPath\Mono.Cecil.dll")) {
     $client = New-Object System.Net.WebClient
-    $client.DownloadFile("https://www.nuget.org/api/v2/package/Mono.Cecil/0.10.1", "$root\mono.cecil.0.10.1.zip")
+    $client.DownloadFile("https://www.nuget.org/api/v2/package/Mono.Cecil/0.10.3", "$root\mono.cecil.0.10.3.zip")
     Add-Type -AssemblyName System.IO.Compression.FileSystem
-    [ZipFile]::ExtractToDirectory("$root\mono.cecil.0.10.1.zip", "$root\mono.cecil.0.10.1")
+    [ZipFile]::ExtractToDirectory("$root\mono.cecil.0.10.3.zip", "$root\mono.cecil.0.10.3")
 }
-$bytes = [File]::ReadAllBytes($monoPath)
-[Assembly]::Load($bytes)|out-null
+
+[Assembly]::Load([File]::ReadAllBytes("$monoPath\Mono.Cecil.dll")) | Out-Null
+[Assembly]::Load([File]::ReadAllBytes("$monoPath\Mono.Cecil.pdb.dll")) | Out-Null
 $devExpressAssemblyName = Invoke-Command {
 
-    Write-host "Finding DX assembly name"
-    $dxAssemblyPath = (Get-ChildItem $targetPath "$referenceFilter*.dll" |Select-Object -First 1).FullName
+    Write-Host "Finding DX assembly name"
+    $dxAssemblyPath = Get-ChildItem $targetPath "$referenceFilter*.dll" | Select-Object -First 1
     if ($dxAssemblyPath) {
-        $dxAssembly = [AssemblyDefinition]::ReadAssembly($dxAssemblyPath)
-        Write-host "$devExpressAssemblyName found from $dxAssemblyPath"
+        $dxAssembly = [AssemblyDefinition]::ReadAssembly($dxAssemblyPath.FullName)
+        Write-Host "$($dxAssembly.Name.Name) found from $($dxAssemblyPath.FullName)"
         $dxAssembly.Name
     }
     else {
-        $name = ($dxReferences|Where-Object {$_.Include -like "*Version*"}|Select-Object -First 1).Include
-        new-object System.Reflection.AssemblyName($name)
+        $name = ($dxReferences | Where-Object { $_.Include -like "*Version*" } | Select-Object -First 1).Include
+        New-Object System.Reflection.AssemblyName($name)
     }
-}|Select-Object -last 1
+} | Select-Object -last 1
 if (!$devExpressAssemblyName) {
     throw "Cannot find $referenceFilter version in $($projectFileInfo.Name)"
 }
 
-$references|Where-Object {$_.Include -like $assemblyFilter}|ForEach-Object {
-    "$targetPath\$([Path]::GetFileName($_.HintPath))", "$($projectFileInfo.DirectoryName)\$($_.HintPath)"|ForEach-Object {
-        if (Test-path $_) {
+$references | Where-Object { $_.Include -like $assemblyFilter } | ForEach-Object {
+    "$targetPath\$([Path]::GetFileName($_.HintPath))", "$($projectFileInfo.DirectoryName)\$($_.HintPath)" | ForEach-Object {
+        if (Test-Path $_) {
             $modulePath = (Get-Item $_).FullName
-            $readerParams = new-object ReaderParameters
+            $readerParams = New-Object ReaderParameters
             $readerParams.ReadWrite = $true
+            $readerParams.SymbolReaderProvider = New-Object PdbReaderProvider
+            $readerParams.ReadSymbols = $true
             $moduleAssembly = [AssemblyDefinition]::ReadAssembly($modulePath, $readerParams)
-            Write-host "Checking $modulePath references.." -f "Blue"
-            $moduleAssembly.MainModule.AssemblyReferences.ToArray()|Write-Verbose 
-            $moduleAssembly.MainModule.AssemblyReferences.ToArray()|Where-Object {$_.FullName -like $referenceFilter}|ForEach-Object {
+            Write-Host "Checking $modulePath references.." -f "Blue"
+            $moduleAssembly.MainModule.AssemblyReferences.ToArray() | Write-Verbose
+            $moduleAssembly.MainModule.AssemblyReferences.ToArray() | Where-Object { $_.FullName -like $referenceFilter } | ForEach-Object {
                 $nowReference = $_
-                Write-Host "Checking $_ refrence"
+                Write-Host "Checking $_ reference..."
                 if ($nowReference.Version -ne $devExpressAssemblyName.Version) {
                     $moduleAssembly.MainModule.AssemblyReferences.Remove($nowReference)
                     $newMinor = "$($devExpressAssemblyName.Version.Major).$($devExpressAssemblyName.Version.Minor)"
@@ -70,18 +77,21 @@ $references|Where-Object {$_.Include -like $assemblyFilter}|ForEach-Object {
                     $culture = $regex.Match($nowReference).Groups[1].Value
                     $newReference = [AssemblyNameReference]::Parse("$newName, Version=$($devExpressAssemblyName.Version), Culture=$culture, PublicKeyToken=$token")
                     $moduleAssembly.MainModule.AssemblyReferences.Add($newreference)
-                    $moduleAssembly.MainModule.Types|
-                        ForEach-Object {$moduleAssembly.MainModule.GetTypeReferences()| Where-Object {$_.Scope -eq $nowReference}|
-                            ForEach-Object {$_.Scope = $newReference}}
+                    $moduleAssembly.MainModule.Types | ForEach-Object {
+                        $moduleAssembly.MainModule.GetTypeReferences() | Where-Object { $_.Scope -eq $nowReference } |ForEach-Object { 
+                            $_.Scope = $newReference 
+                        }
+                    }
                     Write-Host "$($_.Name) version changed from $($_.Version) to $($devExpressAssemblyName.Version)" -f Green
                 }
-                else{
+                else {
                     Write-Host "Versions ($($nowReference.Version)) matched nothing to do."
                 }
             }
-            $writeParams=New-Object WriterParameters
-            $f=New-Object FileStream("$root\Xpand.snk",[FileMode]::Open)
-            $writeParams.StrongNameKeyPair=New-Object System.Reflection.StrongNameKeyPair ( $f)
+            $writeParams = New-Object WriterParameters
+            $writeParams.WriteSymbols=$true
+            $f = New-Object FileStream("$root\Xpand.snk", [FileMode]::Open)
+            $writeParams.StrongNameKeyPair = New-Object System.Reflection.StrongNameKeyPair ( $f)
             $moduleAssembly.Write($writeParams)
             $f.Dispose()
             $moduleAssembly.Dispose()   

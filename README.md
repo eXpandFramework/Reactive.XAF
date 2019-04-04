@@ -1,4 +1,6 @@
-[![GitHub stars](https://img.shields.io/github/stars/eXpandFramework/DevExpress.XAF.svg)](https://github.com/eXpandFramework/DevExpress.XAF/stargazers)  [![GitHub forks](https://img.shields.io/github/forks/eXpandFramework/DevExpress.XAF.svg)](https://github.com/eXpandFramework/DevExpress.XAF/network)
+[![GitHub stars](https://img.shields.io/github/stars/eXpandFramework/DevExpress.XAF.svg)](https://github.com/eXpandFramework/DevExpress.XAF/stargazers) **Star the project if you think it deserves it.** 
+
+[![GitHub forks](https://img.shields.io/github/forks/eXpandFramework/DevExpress.XAF.svg)](https://github.com/eXpandFramework/DevExpress.XAF/network) **Fork the project to extend and contribute.**
 
 [![Azure DevOps Tests](https://img.shields.io/azure-devops/tests/expandDevOps/expandframework/23.svg?logo=azuredevops)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=23) [![Azure DevOps Coverage](https://img.shields.io/azure-devops/coverage/eXpandDevOps/expandframework/23.svg?logo=azuredevops)](https://dev.azure.com/azuredevops-powershell/azuredevops-powershell/_build/latest?definitionId=23)
 
