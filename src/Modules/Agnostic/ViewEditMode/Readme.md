@@ -34,7 +34,7 @@ Name|Version
 ----|----
 **DevExpress.ExpressApp**|**Any**
 Xpand.VersionConverter|1.0.5
- Xpand.XAF.Modules.Reactive|1.0.10
+ Xpand.XAF.Modules.Reactive|1.0.11
  fasterflect|2.1.3
  System.Reactive|4.1.3
  System.Runtime.CompilerServices.Unsafe|4.5.2
