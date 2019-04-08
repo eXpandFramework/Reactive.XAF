@@ -3,10 +3,10 @@
 [![GitHub issues](https://img.shields.io/github/issues/eXpandFramework/expand/ViewEditMode.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AXAF+ViewEditMode) [![GitHub close issues](https://img.shields.io/github/issues-closed/eXpandFramework/eXpand/ViewEditMode.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AXAF+ViewEditMode)
 # About 
 
-The `ViewEditMode` module controls the state of DetailView.ViewEditMode. Choose `Edit` to open a `DetailView` in eit mode. 
+The `ViewEditMode` module controls the state of DetailView.ViewEditMode. Choose `Edit` mode to open a `DetailView` in edit mode. 
 
 The module uses the next two strategies:
-1. It monitors the `DetailView` creation and modifies the property according to model configuration. However later ViewEditoMode modifications are allowed.
+1. It monitors the `DetailView` creation and modifies its ViewEditMode property according to model configuration. However later ViewEditMode property modifications are allowed.
 2. It monitors the `ViewEditMode` modifiation and cancels it if the `LockViewEditMode` attribute is used.
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 
@@ -57,6 +57,8 @@ The module is valuable in scenarios similar to:
 1. When you want to `navigate` from a `ListView` to a `DetailView` without the intermediate view which is set to View ViewEditMode.
 2. When you develop a `master-detail` layout and you want to control the ViewEditMode state of your
 
-`EmailModule`, `XtraDashboardModule` ,`ExcelImporterModule` are modules that use the `ViewEditModeModule`. DetailViews. Example from ExcelImporter from the view tha maps the Excel columns with the BO members. 
+`XtraDashboardModule` ,`ExcelImporterModule` are modules that use the `ViewEditModeModule`.  
+
+Next screenshot is an example from ExcelImporter from the view tha maps the Excel columns with the BO members. 
 
 ![image](https://user-images.githubusercontent.com/159464/55381194-238e6500-552b-11e9-8314-f1b1132d09f3.png)

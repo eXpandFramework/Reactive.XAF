@@ -17,6 +17,7 @@ The modules follow the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |  [CloneMemberValue](https://github.com/eXpandFramework/XAF/tree/master/src/Modules/Agnostic/CloneMemberValue) |![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.CloneMemberValue.svg?label=&style=flat)|   ![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.CloneMemberValue.svg?label=&style=flat)
 |  [ModelViewInheritance](https://github.com/eXpandFramework/XAF/tree/master/src/Modules/Agnostic/ModelViewInheritance) |![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.ModelViewInheritance.svg?label=&style=flat)|   ![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.ModelViewInheritance.svg?label=&style=flat)
 |[Reactive](https://github.com/eXpandFramework/XAF/tree/master/src/Modules/Agnostic/Reactive)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.Reactive.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.Reactive.svg?label=&style=flat)
+|[ViewEditMode](https://github.com/eXpandFramework/XAF/tree/master/src/Modules/Agnostic/ViewEditMode)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.ViewEditMode.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.ViewEditMode.svg?label=&style=flat)
 
 
 ## Issues
