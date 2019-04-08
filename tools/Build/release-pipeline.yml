@@ -23,3 +23,4 @@ steps:
     targetType: filePath
     filePath: .\tools\build\publishNugets.ps1 
     arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(NugetApiKey) 
+    ignoreLASTEXITCODE: true

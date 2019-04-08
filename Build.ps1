@@ -13,7 +13,7 @@ properties {
     $branch=$null
 }
 
-task default  -depends  DiscoverMSBuild, Clean, Init, UpdateProjects, RestoreNuggets, Compile,IndexSources, CreateNuspec, PackNuspec, PublishNuget ,UpdateReadMe
+task default  -depends  DiscoverMSBuild, Clean, Init, UpdateProjects, RestoreNuggets, Compile,IndexSources, CreateNuspec, PackNuspec, UpdateReadMe
 
 Task IndexSources{
     InvokeScript{
@@ -61,10 +61,6 @@ task Compile -precondition {return $compile  } {
         write-host "Building Extensions" -f "Blue"
         & $script:msbuild "$PSScriptRoot\src\Extensions\Extensions.sln" /p:Configuration=Release /fl /v:m
     }
-    # InvokeScript{
-    #     write-host "Building Libs" -f "Blue"
-    #     & $script:msbuild "$PSScriptRoot\src\Libs\Xpand.Redirection\Xpand.Redirection.csproj" /p:Configuration=Release /fl /v:m
-    # }
     InvokeScript{
         write-host "Building Modules" -f "Blue"
         & $script:msbuild "$PSScriptRoot\src\Modules\Modules.sln" /p:Configuration=Release /fl /v:m
@@ -72,14 +68,6 @@ task Compile -precondition {return $compile  } {
     InvokeScript{
         write-host "Building Tests" -f "Blue"
         & $script:msbuild "$PSScriptRoot\src\Tests\Tests.sln" "/p:Configuration=Release;OutputPath=$PSScriptRoot\bin" /fl /v:m
-    }
-}
-
-Task PublishNuget -precondition {return $nugetApiKey} {
-    InvokeScript{
-        Get-ChildItem -Path $nugetBin -Filter *.nupkg|ForEach-Object {
-            & nuget push $_.FullName $nugetApiKey -source https://api.nuget.org/v3/index.json
-        }
     }
 }
 

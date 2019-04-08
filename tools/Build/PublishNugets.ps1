@@ -1,7 +1,7 @@
 param(
-    $Branch,
+    $Branch="master",
     $sourcesRoot="$PSScriptRoot\..\..",
-    $apiKey=$null,
+    $apiKey=(Get-NugetApiKey),
     $criteria=@("Xpand.XAF*","Xpand.VersionConverter*"),
     $localPackageSource="$PSScriptRoot\..\..\bin\Nupkg"
 )
