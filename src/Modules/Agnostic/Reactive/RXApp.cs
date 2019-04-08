@@ -8,10 +8,8 @@ using System.Reflection;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using Fasterflect;
-using Ryder;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
-using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
 namespace Xpand.XAF.Modules.Reactive{
 
@@ -53,7 +51,7 @@ namespace Xpand.XAF.Modules.Reactive{
 
         public static IObservable<Frame> Windows(this TemplateContext templateContext){
             return Application
-                .SelectMany(application => Redirection.Observe(_createWindowCore)
+                .SelectMany(application => Ryder.Redirection.Observe(_createWindowCore)
                     .Select(context => {
                         var window = new Window(application, (TemplateContext) context.Arguments[0],(ICollection<Controller>) context.Arguments[1],(bool) context.Arguments[2],(bool) context.Arguments[3]);
                         context.ReturnValue = window;
@@ -79,7 +77,7 @@ namespace Xpand.XAF.Modules.Reactive{
 
         public static IObservable<Frame> WindowsP{ get; } = Application
             .SelectMany(application => {
-                return Redirection.Observe(_createWindowCore)
+                return Ryder.Redirection.Observe(_createWindowCore)
                     .Select(context => {
                         var window = new Window(application, (TemplateContext) context.Arguments[0],
                             (ICollection<Controller>) context.Arguments[1], (bool) context.Arguments[2],

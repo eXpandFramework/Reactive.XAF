@@ -61,6 +61,10 @@ task Compile -precondition {return $compile  } {
         write-host "Building Extensions" -f "Blue"
         & $script:msbuild "$PSScriptRoot\src\Extensions\Extensions.sln" /p:Configuration=Release /fl /v:m
     }
+    # InvokeScript{
+    #     write-host "Building Libs" -f "Blue"
+    #     & $script:msbuild "$PSScriptRoot\src\Libs\Xpand.Redirection\Xpand.Redirection.csproj" /p:Configuration=Release /fl /v:m
+    # }
     InvokeScript{
         write-host "Building Modules" -f "Blue"
         & $script:msbuild "$PSScriptRoot\src\Modules\Modules.sln" /p:Configuration=Release /fl /v:m

@@ -9,7 +9,11 @@ Get-ChildItem "$rootLocation\src" *.csproj -Recurse|Select-Object|ForEach-Object
     $readMePath="$($_.DirectoryName)\Readme.md"
     if ((Test-path $readMePath) -and $packages.Contains($_.BaseName)) {
         $metadata=((Get-NugetPackageSearchMetadata -Name $_.BaseName -Source $packagesPath).DependencySets.Packages|ForEach-Object{
-            "$($_.Id)|$($_.VersionRange.MinVersion)`r`n"
+            $id=$_.Id
+            if ($id -like "Xpand.XAF*"){
+                $id="[$id](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/$id)"
+            }
+            "$id|$($_.VersionRange.MinVersion)`r`n"
         })
         [xml]$csproj=Get-Content $_.FullName
         $dxDepends=$csproj.Project.ItemGroup.Reference|Where-Object{$_.Include -like "DevExpress*"}|ForEach-Object{

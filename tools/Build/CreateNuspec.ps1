@@ -53,15 +53,15 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*.Tests.*", "*.Source.*
         $nuspec.SelectSingleNode("//group").AppendChild($dependency)|Out-Null
     }
     
-    
     $targetFrameworkVersion = "$($csproj.Project.PropertyGroup.TargetFrameworkVersion)".Substring(1).Trim()      
     $targetFrameworkAttribute=$nuspec.CreateAttribute("targetFramework")
     $targetFrameworkAttribute.Value=".NETFramework$targetFrameworkVersion"
     $groupElement=$nuspec.CreateElement("group")
     $groupElement.Attributes.Append($targetFrameworkAttribute)
     $nuspec.SelectSingleNode("//dependencies").AppendChild($groupElement)
-
-    Invoke-Command $AddDependency -ArgumentList $versionConverter
+    if ($metaData.id -like "Xpand.XAF*"){
+        Invoke-Command $AddDependency -ArgumentList $versionConverter
+    }
     $csproj.Project.ItemGroup.Reference.Include|Where-Object {"$_".StartsWith("Xpand.XAF")}|ForEach-Object {
         $packageName = $_
         $version = Get-ChildItem $root *.csproj -Recurse|Where-Object {
@@ -107,10 +107,12 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*.Tests.*", "*.Source.*
         $nuspec.SelectSingleNode("//files").AppendChild($file)|Out-Null
     }
     
-    $file = $nuspec.CreateElement("file")
-    $file.SetAttribute("src", "Readme.txt")
-    $file.SetAttribute("target", "")
-    $nuspec.SelectSingleNode("//files").AppendChild($file)|Out-Null
+    if ($metaData.id -like "Xpand.XAF*"){
+        $file = $nuspec.CreateElement("file")
+        $file.SetAttribute("src", "Readme.txt")
+        $file.SetAttribute("target", "")
+        $nuspec.SelectSingleNode("//files").AppendChild($file)|Out-Null
+    }
 
     New-Item -ItemType Directory -Path "$root\bin\nuspec" -Force -ErrorAction SilentlyContinue|Out-Null
     $nuspec.Save("$root\bin\nuspec\$($metadata.id).nuspec")
