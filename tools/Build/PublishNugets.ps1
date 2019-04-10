@@ -1,5 +1,5 @@
 param(
-    $Branch="master",
+    $Branch="lab",
     $sourcesRoot="$PSScriptRoot\..\..",
     $apiKey,
     $criteria=@("Xpand.XAF*","Xpand.VersionConverter*"),

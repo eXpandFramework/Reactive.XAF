@@ -79,7 +79,7 @@ Task  CreateNuspec  {
 
 Task PackNuspec {
     InvokeScript {
-        & .\tools\build\PackNuspec.ps1 
+        & .\tools\build\PackNuspec.ps1 -branch $branch
     }
 }
 

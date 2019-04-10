@@ -1,10 +1,22 @@
 param(
+    [parameter(Mandatory)]
+    $Branch,
     $nugetBin="$PSScriptRoot\..\..\bin\Nupkg",
     $sourceDir="$PSScriptRoot\..\.."
 )
 $ErrorActionPreference="Stop"
 New-Item $nugetBin -ItemType Directory -Force|Out-Null
-& (Get-XNugetPath) pack "$sourceDir\Tools\Xpand.VersionConverter\Xpand.VersionConverter.nuspec" -OutputDirectory $nugetBin -NoPackageAnalysis
+$versionConverterSpecPath="$sourceDir\Tools\Xpand.VersionConverter\Xpand.VersionConverter.nuspec"
+if ($Branch -match "lab"){
+    [xml]$versionConverterSpec=Get-XmlContent $versionConverterSpecPath
+    $v=New-Object System.Version($versionConverterSpec.Package.metadata.version)
+    if ($v.Revision -eq -1){
+        $versionConverterSpec.Package.metadata.version="$($versionConverterSpec.Package.metadata.version).0"
+    }
+    $versionConverterSpec.Save($versionConverterSpecPath)
+    return
+}
+& (Get-XNugetPath) pack $versionConverterSpecPath -OutputDirectory $nugetBin -NoPackageAnalysis
 if ($lastexitcode){
     throw 
 }

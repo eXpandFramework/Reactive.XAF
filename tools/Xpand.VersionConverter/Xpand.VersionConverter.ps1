@@ -42,7 +42,7 @@ public class MyDefaultAssemblyResolver : DefaultAssemblyResolver{
             return base.Resolve(name, parameters);
         }
         catch (AssemblyResolutionException){
-            var assemblyDefinition = AssemblyDefinition.ReadAssembly(string.Format(@"C:\Work\eXpandFramework\expand\Xpand.DLL\{0}.dll", name.Name));
+            var assemblyDefinition = AssemblyDefinition.ReadAssembly(string.Format(@"$targetPath\{0}.dll", name.Name));
             return assemblyDefinition;
         }
     }
