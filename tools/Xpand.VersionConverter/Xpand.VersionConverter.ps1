@@ -7,7 +7,7 @@ using namespace Mono.Cecil
 using namespace Mono.Cecil.pdb
 param(
     [parameter(Mandatory)]
-    [string]$projectFile  ,
+    [string]$projectFile,
     [parameter(Mandatory)]
     [string]$targetPath,
     [string]$referenceFilter = "DevExpress*",
@@ -15,10 +15,8 @@ param(
 )
  
 $ErrorActionPreference = "Stop"
-
+set-location $targetPath
 Write-Host "Running Version Converter on project $projectFile with target $targetPath" -f Blue
-
-
 $projectFileInfo = Get-Item $projectFile
 [xml]$csproj = Get-Content $projectFileInfo.FullName
 $references = $csproj.Project.ItemGroup.Reference
@@ -35,6 +33,21 @@ if (!(Test-Path "$monoPath\Mono.Cecil.dll")) {
 
 [Assembly]::Load([File]::ReadAllBytes("$monoPath\Mono.Cecil.dll")) | Out-Null
 [Assembly]::Load([File]::ReadAllBytes("$monoPath\Mono.Cecil.pdb.dll")) | Out-Null
+Add-Type @"
+using Mono.Cecil;
+public class MyDefaultAssemblyResolver : DefaultAssemblyResolver{
+
+    public override AssemblyDefinition Resolve(AssemblyNameReference name, ReaderParameters parameters){
+        try{
+            return base.Resolve(name, parameters);
+        }
+        catch (AssemblyResolutionException){
+            var assemblyDefinition = AssemblyDefinition.ReadAssembly(string.Format(@"C:\Work\eXpandFramework\expand\Xpand.DLL\{0}.dll", name.Name));
+            return assemblyDefinition;
+        }
+    }
+}
+"@ -ReferencedAssemblies @("$monoPath\Mono.Cecil.dll")
 $devExpressAssemblyName = Invoke-Command {
 
     Write-Host "Finding DX assembly name"
@@ -59,6 +72,7 @@ $references | Where-Object { $_.Include -like $assemblyFilter } | ForEach-Object
             $modulePath = (Get-Item $_).FullName
             $readerParams = New-Object ReaderParameters
             $readerParams.ReadWrite = $true
+            $readerParams.AssemblyResolver=New-Object MyDefaultAssemblyResolver
             $readerParams.SymbolReaderProvider = New-Object PdbReaderProvider
             $readerParams.ReadSymbols = $true
             $moduleAssembly = [AssemblyDefinition]::ReadAssembly($modulePath, $readerParams)

@@ -1,10 +1,10 @@
 ![](https://img.shields.io/nuget/v/Xpand.VersionConverter.svg?label=nuget.org&style=flat) ![](https://img.shields.io/nuget/dt/Xpand.VersionConverter.svg?style=flat)
 # Example
-3 years ago I develop a my cool 5 xaf modules about X domain. I installed the Xpand.VersionConverter nuget package, I compiled them and publish them on Nuget.
+3 years ago I develop a my cool 5 xaf modules about X domain. I used the `Xpand.VersionConverter` nuget package, I compiled them and publish on Nuget.
  
-3 years passed and I want to use them in a new project. I just need to install the nuget packages and they will work even if DX assemblies names change every year, because the Xpand.VersionConverter will patche the versions on each build. The **support cost** for my XAF modules closes to **zero**.
+3 years passed and I want to use them in a new project. I just need to install the nuget packages and they will work even if DevExpress assemblies names change every year (Major nuilds). This is the result of Xpand.VersionConverter that patches the version on each build. The **support cost** for my XAF modules closes to **zero**.
  
-The alternative is to have a full CI and support it (VERY COSTLY), version strategy bound to DX versioning just for being able to republish the packages. 
+The alternative is to have a full Continuous Integration pipeline and support it (VERY COSTLY), a version strategy bound to DevExpress versioning just for being able to republish the packages. 
 
 You might say that do not even know whats a CI (Continuous Integration) or perhaps I do not use a CI, but think again, storing the project, taking backups, git repository, open visual studio, Ctrl+F5 is actually a CI.
 ## Technicals
