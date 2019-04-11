@@ -11,7 +11,7 @@ $versionConverter = [PSCustomObject]@{
     version         = ([xml](get-content "$PsScriptRoot\..\Xpand.VersionConverter\Xpand.VersionConverter.nuspec")).package.metadata.version
     targetFramework = "net452"
 }
-
+$libs=Get-ChildItem $root\src\libs *.dll
 get-childitem "$root\src\" -Include "*.csproj" -Exclude "*.Tests.*", "*.Source.*" -Recurse | ForEach-Object {
     [xml]$nuspec = Get-Content $template
     $metaData = $nuspec.Package.Metadata
@@ -106,7 +106,26 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*.Tests.*", "*.Source.*
         $file.SetAttribute("target", "lib\net$targetFrameworkVersion\$($metaData.Id).$_")
         $nuspec.SelectSingleNode("//files").AppendChild($file)|Out-Null
     }
-    
+
+    [System.Environment]::CurrentDirectory= $_.DirectoryName
+    $csproj.Project.ItemGroup.Reference.HintPath|ForEach-Object{
+        if ($_){
+            $hintPath=[System.IO.Path]::GetFullPath($_)
+            $hintPath
+            if (Test-Path $hintPath){
+                if ($libs|Select-Object -ExpandProperty FullName|Where-Object{$_ -eq $hintPath}){
+                    $file = $nuspec.CreateElement("file")
+                    $libName=(Get-item $hintpath).Name
+                    $file.SetAttribute("src", "..\src\libs\$libName")
+                    
+                    $file.SetAttribute("target", "lib\net$targetFrameworkVersion\$libName")
+                    $nuspec.SelectSingleNode("//files").AppendChild($file)|Out-Null    
+                }
+            }
+        }
+        
+    }
+
     if ($metaData.id -like "Xpand.XAF*"){
         $file = $nuspec.CreateElement("file")
         $file.SetAttribute("src", "Readme.txt")
