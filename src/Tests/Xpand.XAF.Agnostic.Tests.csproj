@@ -146,6 +146,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\bin\Xpand.XAF.Modules.CloneMemberValue.dll</HintPath>
     </Reference>
+    <Reference Include="Xpand.XAF.Modules.MasterDetail">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\bin\Xpand.XAF.Modules.MasterDetail.dll</HintPath>
+    </Reference>
     <Reference Include="Xpand.XAF.Modules.ModelViewInheritance">
       <HintPath>..\..\bin\Xpand.XAF.Modules.ModelViewInheritance.dll</HintPath>
     </Reference>
@@ -178,6 +182,9 @@
     <Compile Include="Artifacts\ModuleMock.cs" />
     <Compile Include="Artifacts\XafApplicationMock.cs" />
     <Compile Include="Artifacts\BaseTest.cs" />
+    <Compile Include="Modules\MasterDetail\BOModel\Md.cs" />
+    <Compile Include="Modules\MasterDetail\BOModel\MdParent.cs" />
+    <Compile Include="Modules\MasterDetail\MasterDetailTests.cs" />
     <Compile Include="Modules\ViewEditMode\BOModel\VEM.cs" />
     <Compile Include="Modules\ViewEditMode\ViewEditModeTests.cs" />
     <Compile Include="Modules\CloneMemberValue\BOModel\ACmv.cs" />

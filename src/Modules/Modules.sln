@@ -17,6 +17,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Modules.ViewEditM
 		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Modules.MasterDetail", "Agnostic\MasterDetail\Xpand.XAF.Modules.MasterDetail.csproj", "{79060F89-8991-476F-B536-6DCB5492178E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,6 +53,12 @@ Global
 		{D9233585-0907-4561-9C53-14D9AD5EEC0E}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{D9233585-0907-4561-9C53-14D9AD5EEC0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D9233585-0907-4561-9C53-14D9AD5EEC0E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79060F89-8991-476F-B536-6DCB5492178E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79060F89-8991-476F-B536-6DCB5492178E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79060F89-8991-476F-B536-6DCB5492178E}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
+		{79060F89-8991-476F-B536-6DCB5492178E}.EasyTest|Any CPU.Build.0 = Release|Any CPU
+		{79060F89-8991-476F-B536-6DCB5492178E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79060F89-8991-476F-B536-6DCB5492178E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

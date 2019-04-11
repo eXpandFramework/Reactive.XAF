@@ -7,40 +7,39 @@ using System.Reactive.Subjects;
 using System.Reflection;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
+using DevExpress.ExpressApp.Editors;
 using Fasterflect;
+using Ryder;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.Reactive{
 
     public static class RxApp{
-        // ReSharper disable once UnusedMember.Local
-        private static readonly Destructor Finalise = new Destructor();
-        static readonly BehaviorSubject<XafApplication> _applicationSubject=new BehaviorSubject<XafApplication>(null);
-        private static readonly IConnectableObservable<Window> MainWindowConObs;
-        private static MethodInfo _createWindowCore;
+        static readonly BehaviorSubject<XafApplication> ApplicationSubject=new BehaviorSubject<XafApplication>(null);
+        private static readonly MethodInfo CreateNestedFrame;
+        private static readonly IObservable<RedirectionContext> WindowsRedirection;
+        private static readonly MethodInvoker CreateControllersOptimized;
+        private static readonly MethodInvoker CreateControllers;
 
-        private sealed class Destructor{
-            // ReSharper disable once EmptyDestructor
-            ~Destructor(){
-            
-            }
-        }
 
         internal static IObservable<XafApplication> Connect(this XafApplication application){
             return application.AsObservable()
-                .Do(_ => _applicationSubject.OnNext(_))
+                .Do(_ => ApplicationSubject.OnNext(_))
                 .Select(xafApplication => xafApplication);
         }
 
         static RxApp(){
-            _createWindowCore = typeof(XafApplication).Methods().First(info => info.Name=="CreateWindowCore");
-//            AppDomain.CurrentDomain.ProcessExit+=CurrentDomainOnDomainUnload;
-//            AppChanged.Distinct().Select(application => application.WhenDisposed().FirstAsync()).Switch()
-//                .Subscribe(tuple => { Reset(); });
-//            ApplicationObs = AppChanged.Repeat();
-            MainWindowConObs= _applicationSubject.Select(application =>  TemplateContext.ApplicationWindow.Windows().FirstAsync().Cast<Window>()).Concat().LastAsync().Replay();
-            MainWindowConObs.Connect();
+            var methodInfos = typeof(XafApplication).Methods();
+            CreateControllersOptimized = methodInfos.Where(info => info.Name=="CreateControllers"&&info.Parameters().Count==4).Select(info => info.DelegateForCallMethod()).First();
+            CreateControllers = methodInfos.Where(info => info.Name=="CreateControllers"&&info.Parameters().Count==3).Select(info => info.DelegateForCallMethod()).First();
+            CreateNestedFrame = methodInfos.First(info => info.Name==nameof(XafApplication.CreateNestedFrame));
+            WindowsRedirection = Redirection.Observe(methodInfos.First(info => info.Name=="CreateWindowCore"))
+                .Select(context => context)
+                .TakeUntilDisposingMainWindow()
+                .Publish().RefCount();
+//            MainWindowConObs= _applicationSubject.Select(application =>  TemplateContext.ApplicationWindow.Windows().FirstAsync().Cast<Window>()).Concat().LastAsync().Replay();
+//            MainWindowConObs.Connect();
         }
 
         public static IObservable<Unit> UpdateMainWindowStatus<T>(IObservable<T> messages,TimeSpan period=default){
@@ -50,14 +49,36 @@ namespace Xpand.XAF.Modules.Reactive{
         }
 
         public static IObservable<Frame> Windows(this TemplateContext templateContext){
+            
             return Application
-                .SelectMany(application => Ryder.Redirection.Observe(_createWindowCore)
+                .SelectMany(application => WindowsRedirection
                     .Select(context => {
                         var window = new Window(application, (TemplateContext) context.Arguments[0],(ICollection<Controller>) context.Arguments[1],(bool) context.Arguments[2],(bool) context.Arguments[3]);
                         context.ReturnValue = window;
                         return window;
-                    }))
-                .Where(window => window.Context==templateContext);
+                    })
+                )
+                .Where(window => window.Context==templateContext)
+                .Publish().AutoConnect();
+        }
+
+        public static IObservable<Frame> NestedFrames{
+            get{
+                return Application
+                    .SelectMany(application => Redirection.Observe(CreateNestedFrame)
+                        .Select(context => {
+                            var controllers = application.OptimizedControllersCreation
+                                ? (ICollection<Controller>) CreateControllersOptimized.Invoke(application,
+                                    typeof(Controller), true, (ICollection<Controller>) null,
+                                    (View) context.Arguments[2])
+                                : (ICollection<Controller>) CreateControllers.Invoke(application, typeof(Controller),
+                                    true, (ICollection<Controller>) null);
+
+                            var nestedFrame = new NestedFrame(application, (TemplateContext) context.Arguments[1], (ViewItem) context.Arguments[0], controllers);
+                            context.ReturnValue = nestedFrame;
+                            return nestedFrame;
+                        }));
+            }
         }
 
         public static IObservable<TController> GetControllers<TController>(this TemplateContext templateContext) where TController : Controller{
@@ -73,22 +94,9 @@ namespace Xpand.XAF.Modules.Reactive{
             throw new NotImplementedException();   
         }
 
-        public static IObservable<XafApplication> Application => _applicationSubject.WhenNotDefault();
+        public static IObservable<XafApplication> Application => ApplicationSubject.WhenNotDefault();
 
-        public static IObservable<Frame> WindowsP{ get; } = Application
-            .SelectMany(application => {
-                return Ryder.Redirection.Observe(_createWindowCore)
-                    .Select(context => {
-                        var window = new Window(application, (TemplateContext) context.Arguments[0],
-                            (ICollection<Controller>) context.Arguments[1], (bool) context.Arguments[2],
-                            (bool) context.Arguments[3]);
-                        context.ReturnValue = window;
-                        return window;
-                    });
-            })
-            .Publish().AutoConnect();
-
-        public static IObservable<Window> MainWindow => MainWindowConObs;
+        public static IObservable<Window> MainWindow => throw new NotImplementedException();
 
         public static IObservable<(Frame masterFrame, NestedFrame detailFrame)> MasterDetailFrames(Type masterType, Type childType){
             var nestedlListViews = Windows(ViewType.ListView, childType, Nesting.Nested)
