@@ -100,8 +100,6 @@
     <Compile Include="..\..\..\Extensions\Extensions\XAF\XafApplication\GetPlatform.cs">
       <Link>LinkFiles\GetPlatform.cs</Link>
     </Compile>
-    <Compile Include="MasterDetailActionsController.cs" />
-    <Compile Include="MasterDetailController.cs" />
     <Compile Include="MasterDetailService.cs" />
     <Compile Include="ModelLogic.cs" />
     <Compile Include="Module.cs">

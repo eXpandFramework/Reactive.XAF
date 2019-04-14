@@ -9,6 +9,24 @@ using DevExpress.Persistent.Base;
 
 namespace Xpand.XAF.Modules.Reactive.Extensions{
     public static class CommonExtensions{
+        public static IObservable<TC> MergeOrCombineLatest<TA, TB, TC>(
+            this IObservable<TA> a,
+            IObservable<TB> b,
+            Func<TA, TC> aResultSelector, // When A starts before B
+            Func<TB, TC> bResultSelector, // When B starts before A
+            Func<TA, TB, TC> bothResultSelector) // When both A and B have started
+        {
+            return
+                a.Publish(aa =>
+                    b.Publish(bb =>
+                        aa.CombineLatest(bb, bothResultSelector).Publish(xs =>
+                            aa
+                                .Select(aResultSelector)
+                                .Merge(bb.Select(bResultSelector))
+                                .TakeUntil(xs)
+                                .SkipLast(1)
+                                .Merge(xs))));
+        }
         public static IObservable<TSource> Tracer<TSource>(this IObservable<TSource> source,bool verbose=false){
             return source.Do(_ => {
                 if (verbose){

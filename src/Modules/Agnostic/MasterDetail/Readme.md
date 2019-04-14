@@ -1,20 +1,20 @@
-![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.ModelViewInheritance.svg?&style=flat) ![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.ModelViewInheritance.svg?&style=flat)
+![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.MasterDetail.svg?&style=flat) ![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.MasterDetail.svg?&style=flat)
 
-[![GitHub issues](https://img.shields.io/github/issues/eXpandFramework/expand/ModelViewInheritance.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AXAF+ModelViewInheritance) [![GitHub close issues](https://img.shields.io/github/issues-closed/eXpandFramework/eXpand/ModelViewInheritance.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AXAF+ModelViewInheritance)
+[![GitHub issues](https://img.shields.io/github/issues/eXpandFramework/expand/MasterDetail.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AXAF+MasterDetail) [![GitHub close issues](https://img.shields.io/github/issues-closed/eXpandFramework/eXpand/MasterDetail.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AXAF+MasterDetail)
 # About 
 
-The `ModuleViewInheritance` module replaces the generator layer of a view by composing multiple unrelated view model differences.
+The `MasterDetail` module can create master detail `XAF` views.
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 
 
-   `Install-Package Xpand.XAF.Modules.ModelViewInheritance`.
+   `Install-Package Xpand.XAF.Modules.MasterDetail`.
 
     The above only references the dependencies and nexts steps are mandatory.
 
 2. [Ways to Register a Module](https://documentation.devexpress.com/eXpressAppFramework/118047/Concepts/Application-Solution-Components/Ways-to-Register-a-Module)
 or simply add the next call to your module constructor
     ```cs
-    RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.ModelViewInheritanceModule));
+    RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.MasterDetailModule));
     ```
 ## Versioning
 The module is **not bound** to **DevExpress versioning**, which means you can use the latest version with your old DevExpress projects [Read more](https://github.com/eXpandFramework/XAF/tree/master/tools/Xpand.VersionConverter).
@@ -32,37 +32,26 @@ Xpand.VersionConverter|1.0.9
  System.ValueTuple|4.5.0
 
 ## Issues
-For [Bugs](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Bug%2C+XAF,+ModelViewInheritance&template=xaf--bug-report.md&title=), [Questions](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Question%2C+XAF,+ModelViewInheritance&template=xaf--question.md&title=) or [Suggestions](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Enhancement%2C+XAF,+ModelViewInheritance&template=xaf--feature-request.md&title=) use main project issues.
+For [Bugs](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Bug%2C+Standalone_XAF_Modules,+MasterDetail&template=standalone-xaf-modules--bug-report.md&title=), [Questions](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Question%2C+Standalone_XAF_Modules,+MasterDetail&template=standalone-xaf-modules--question.md&title=) or [Suggestions](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Enhancement%2C+Standalone_XAF_Modules,+MasterDetail&template=standalone-xaf-modules--feature-request.md&title=) use main project issues.
 ## Details
-The module extends the model views nodes with the `IModelObjectViewMergedDifferences` interface to allow model view differences composition. 
+The module satisfies the following conditions:
+1. If a `DashboardView` contains a `one ListView and one DetailView` of the `same type`, then it will be Master-Detail enabled. It can be disabled by setting the `IModelDashboardViewMasterDetail.MasterDetail` to false.
 
-![image](https://user-images.githubusercontent.com/159464/50849204-f80e3b00-137e-11e9-8c6c-0a93edffb954.png)
+   ![image](https://user-images.githubusercontent.com/159464/55990839-67af0180-5cb1-11e9-84cd-6ef0bb5d0137.png)
 
+3. Each time a ListView selection change, it will synchronize the DetailView CurrentObject with the selected from the ListView.
+2. `ALL CRUD` operations are `supported`. A valuable module for forcing the DetailView to open in edit mode is the [ViewEditMode](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/ViewEditMode).
+3. Conditional detailviews can be configured from the model by creating `IModelMasterDetailViewObjectTypeLinks`
+
+   ![image](https://user-images.githubusercontent.com/159464/55991766-b1005080-5cb3-11e9-9dc2-bee3dfb627ac.png)
 
 ### Tests
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Modules/ModelViewInheritance)
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Modules/MasterDetail)
 
 ### Examples
-The module is already integrated in `eXpandFramework` and is installed with all modules, so there is no need for explicit registration.
-
-Bellow are a few examples of how we use the module in `eXpandFramework`. 
+The module is integrated with the `ExcelImporter`, `XtraDashboard` modules.
 
 
-![image](https://user-images.githubusercontent.com/159464/50846982-1709ce80-1379-11e9-877a-6a2e277867a7.png)
+Next screenshot is an example from ExcelImporter from the view tha maps the Excel columns with the BO members. 
 
-to derive a version with `Remember Me` support as below:
-
-![image](https://user-images.githubusercontent.com/159464/50847225-b75ff300-1379-11e9-998d-bcc22bc4bd00.png)
-
-The next `WorldCreator`modified version of `PersistentMemberInfo`:
-
-![image](https://user-images.githubusercontent.com/159464/50848737-af09b700-137d-11e9-94f0-578a0a922455.png)
-
-
-is used to derive a version for the `PersistentCoreTypeMemberInfo` like:
-
-![image](https://user-images.githubusercontent.com/159464/50848552-399de680-137d-11e9-84dc-a1d574100b48.png)
-
-and in addition one for the `PersistentCollectionMemberInfo` 
-
-![image](https://user-images.githubusercontent.com/159464/50848410-e7f55c00-137c-11e9-8f4a-c9511d95455b.png)
+![image](https://user-images.githubusercontent.com/159464/55381194-238e6500-552b-11e9-8314-f1b1132d09f3.png)

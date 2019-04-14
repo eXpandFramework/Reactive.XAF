@@ -17,9 +17,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
         public static IObservable<(TAction action, BoolList boolList, BoolValueChangedEventArgs e)> ResultValueChanged<TAction>(
             this TAction source,Func<TAction,BoolList> boolListSelector ) where TAction:ActionBase{
-            return Observable.Return(boolListSelector(source)).ResultValueChanged()
-                .Select(tuple => (source,tuple.boolList, tuple.e))
-                .TakeUntil(WhenDisposing(source));
+            return Observable.Return(boolListSelector(source))
+                    .ResultValueChanged().Select(tuple => (source,tuple.boolList, tuple.e))
+                ;
         }
 
         public static IObservable<(SimpleAction simpleAction, SimpleActionExecuteEventArgs e, IObjectSpace objectSpace,
@@ -41,7 +41,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
 
 
-        public static IObservable<(TAction, EventArgs args)> WhenDisposing<TAction>(this TAction simpleAction) where TAction:ActionBase{
+        public static IObservable<Unit> WhenDisposing<TAction>(this TAction simpleAction) where TAction:ActionBase{
             return Disposing<TAction>(Observable.Return(simpleAction));
         }
 
@@ -50,15 +50,14 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Select(_ => _.action);
         }
 
-        public static IObservable<(TAction, EventArgs args)> Disposing<TAction>(
-            this IObservable<ActionBase> source) where TAction:ActionBase{
+        public static IObservable<Unit> Disposing<TAction>(
+            this IObservable<TAction> source) where TAction:ActionBase{
 
                 return source
-                    .SelectMany(item => {
-                        return Observable.FromEventPattern<EventHandler, EventArgs>(h => item.Disposing += h, h => item.Disposing -= h);
-                    })
+                    .SelectMany(item => Observable.Start(async () => await Observable.FromEventPattern<EventHandler, EventArgs>(h => item.Disposing += h,
+                        h => item.Disposing -= h))
                     .Select(pattern => pattern)
-                    .TransformPattern<EventArgs,TAction>()
+                    .ToUnit())
                 ;
 
         }
@@ -72,7 +71,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(TAction simpleAction, TActionBaseEventArgs e,IObjectSpace objectSpace,Controller controller,View view,XafApplication application)> Executed<TAction,TActionBaseEventArgs>(
             this IObservable<TAction> source)where TAction:ActionBase where TActionBaseEventArgs:ActionBaseEventArgs{
             
-            var observable = source
+            return source
                 .ExecutedPattern()
                 .Select(tuple => {
                     var e = (TActionBaseEventArgs) tuple.EventArgs;
@@ -80,7 +79,6 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     var view = controller.Frame.View;
                     return ((TAction) tuple.Sender, e,view.ObjectSpace,controller,view,controller.Application);
                 });
-            return observable.TakeUntil(Disposing<TAction>(source));
         }
 
         private static IObservable<EventPattern<ActionBaseEventArgs>> ExecutedPattern<TAction>(
@@ -88,8 +86,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source
                 .SelectMany(item => {
                     return Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(
-                        h => item.Executed += h, h => item.Executed -= h);
-                });
+                        h => item.Executed += h, h => item.Executed -= h)
+                        .TakeUntil(item.WhenDisposing().FirstAsync());
+                })
+                ;
 
 
         }

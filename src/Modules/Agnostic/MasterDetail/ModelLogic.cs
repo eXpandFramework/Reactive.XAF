@@ -12,6 +12,24 @@ namespace Xpand.XAF.Modules.MasterDetail{
     public interface IModelApplicationMasterDetail{
         IModelDashboardMasterDetail DashboardMasterDetail{ get; }
     }
+    [ModelAbstractClass]
+    public interface IModelDashboardViewMasterDetail : IModelDashboardView {
+        [Category(MasterDetailModule.CategoryName)]
+        [ModelBrowsable(typeof(ModelDashboardViewMasterDetailVisibilityCalculator))]
+        bool MasterDetail { get; set; }
+
+
+        [Category(MasterDetailModule.CategoryName)]
+        [ModelBrowsable(typeof(ModelDashboardViewMasterDetailVisibilityCalculator))]
+        IModelMasterDetailDetailViewObjectTypeLinks MasterDetailDetailViewObjectTypeLinks { get; }
+    }
+
+    [DomainLogic(typeof(IModelDashboardViewMasterDetail))]
+    public class ModelDashboardViewMasterDetailDomainLogic {
+        public static bool Get_MasterDetail(IModelDashboardViewMasterDetail dashboardViewMasterDetail) {
+            return new ModelDashboardViewMasterDetailVisibilityCalculator().IsVisible(dashboardViewMasterDetail, null);
+        }
+    }
 
     public interface IModelDashboardMasterDetail:IModelNode{
         IModelMasterDetailDetailViewObjectTypeLinks ObjectTypeLinks{ get; }
@@ -35,6 +53,7 @@ namespace Xpand.XAF.Modules.MasterDetail{
         [Browsable(false)]
         ITypeInfo TypeInfo { get; }
     }
+
     [DomainLogic(typeof(IModelMasterDetailViewObjectTypeLink))]
     public class ModelMasterDetailViewObjectTypeLinkLogic{
         public static ITypeInfo Get_TypeInfo(IModelMasterDetailViewObjectTypeLink link){
@@ -42,26 +61,10 @@ namespace Xpand.XAF.Modules.MasterDetail{
         }
 
     }
+
     public class MasterDetailViewObjectTypeLinkNodesGenerator : ModelNodesGeneratorBase {
         protected override void GenerateNodesCore(ModelNode node) {
 
-        }
-    }
-
-    [ModelAbstractClass]
-    public interface IModelDashboardViewMasterDetail : IModelDashboardView {
-        [Category(MasterDetailModule.CategoryName)]
-        [ModelBrowsable(typeof(ModelDashboardViewMasterDetailVisibilityCalculator))]
-        bool MasterDetail { get; set; }
-        [Category(MasterDetailModule.CategoryName)]
-        [ModelBrowsable(typeof(ModelDashboardViewMasterDetailVisibilityCalculator))]
-        IModelMasterDetailDetailViewObjectTypeLinks MasterDetailDetailViewObjectTypeLinks { get; }
-    }
-
-    [DomainLogic(typeof(IModelDashboardViewMasterDetail))]
-    public class ModelDashboardViewMasterDetailDomainLogic {
-        public static bool Get_MasterDetail(IModelDashboardViewMasterDetail dashboardViewMasterDetail) {
-            return new ModelDashboardViewMasterDetailVisibilityCalculator().IsVisible(dashboardViewMasterDetail, null);
         }
     }
 

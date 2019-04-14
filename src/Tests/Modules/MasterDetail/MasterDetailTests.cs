@@ -34,10 +34,11 @@ namespace Xpand.XAF.Agnostic.Tests.Modules.MasterDetail{
         [Fact]
         public async void Monitor_ListView_DetailView_dashboardViewItem_pair(){
             var xafApplication = DefaultMasterDetailModule().Application;
-            var modelDashboardView = NewModelDashboardView(xafApplication);
-
             var masterDetailDashoardViewItems = MasterDetailService.MasterDetailDashboardViewItems.Replay();
             masterDetailDashoardViewItems.Connect();
+            var modelDashboardView = NewModelDashboardView(xafApplication);
+
+            
 
             var dashboardView = xafApplication.CreateDashboardView(xafApplication.CreateObjectSpace(), modelDashboardView.Id, true);
             dashboardView.MockCreateControls();

@@ -12,7 +12,7 @@ namespace Xpand.Source.Extensions.XAF.XafApplication{
         Mobile
     }
 
-    internal static class XafApplicationExtensions{
+    internal static partial class XafApplicationExtensions{
         internal static Platform GetPlatform(this IEnumerable<ModuleBase> moduleBases){
             var modules = moduleBases as ModuleBase[] ?? moduleBases.ToArray();
 

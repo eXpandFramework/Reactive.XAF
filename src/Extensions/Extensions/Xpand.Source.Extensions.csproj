@@ -112,6 +112,7 @@
     <Compile Include="XAF\Model\ReadFromModel.cs" />
     <Compile Include="XAF\Model\Xml.cs" />
     <Compile Include="XAF\TypesInfo\RunTimeMode.cs" />
+    <Compile Include="XAF\XafApplication\CreateView.cs" />
     <Compile Include="XAF\XafApplication\GetPlatform.cs" />
   </ItemGroup>
   <ItemGroup>

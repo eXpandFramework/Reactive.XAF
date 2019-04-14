@@ -49,8 +49,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .TransformPattern<ObjectSpaceCreatedEventArgs,XafApplication>();
         }
 
-        public static IObservable<(XafApplication application, ViewCreatedEventArgs e)> ViewCreated(
-            this IObservable<XafApplication> source){
+        public static IObservable<View> ViewCreated(this IObservable<XafApplication> source){
             return source.SelectMany(application => application.WhenViewCreated());
         }
 
@@ -62,12 +61,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .TransformPattern<DetailViewCreatedEventArgs, XafApplication>();
         }
 
-        public static IObservable<(XafApplication application, DashboardViewCreatedEventArgs e)> WhenDashboardViewCreated(this XafApplication application){
+        public static IObservable<DashboardView> WhenDashboardViewCreated(this XafApplication application){
             return Observable
                 .FromEventPattern<EventHandler<DashboardViewCreatedEventArgs>, DashboardViewCreatedEventArgs>(
                     h => application.DashboardViewCreated += h, h => application.DashboardViewCreated -= h)
                 .TakeUntilDisposingMainWindow()
-                .TransformPattern<DashboardViewCreatedEventArgs, XafApplication>();
+                .Select(pattern => pattern.EventArgs.View);
         }
 
         public static IObservable<(XafApplication application, ListViewCreatedEventArgs e)> ListViewCreated(this IObservable<XafApplication> source){
@@ -80,11 +79,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .TakeUntilDisposingMainWindow()
                 .TransformPattern<ListViewCreatedEventArgs, XafApplication>();
         }
-        public static IObservable<(XafApplication application, ViewCreatedEventArgs e)> WhenObjectViewCreated(this XafApplication application){
+        public static IObservable<ObjectView> WhenObjectViewCreated(this XafApplication application){
             return application.AsObservable().ObjectViewCreated();
         }
 
-        public static IObservable<(XafApplication application, DashboardViewCreatedEventArgs e)> DashboardViewCreated(this IObservable<XafApplication> source){
+        public static IObservable<DashboardView> DashboardViewCreated(this IObservable<XafApplication> source){
             return source.SelectMany(application => application.WhenDashboardViewCreated());
         }
 
@@ -92,15 +91,15 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source.SelectMany(application => application.WhenDetailViewCreated());
         }
 
-        public static IObservable<(XafApplication application, ViewCreatedEventArgs e)> ObjectViewCreated(this IObservable<XafApplication> source){
-            return source.ViewCreated().Where(_ => _.e.View is ObjectView);
+        public static IObservable<ObjectView> ObjectViewCreated(this IObservable<XafApplication> source){
+            return source.ViewCreated().OfType<ObjectView>();
         }
 
-        public static IObservable<(XafApplication application, ViewCreatedEventArgs e)> WhenViewCreated(this XafApplication application){
+        public static IObservable<View> WhenViewCreated(this XafApplication application){
             return Observable
                 .FromEventPattern<EventHandler<ViewCreatedEventArgs>,ViewCreatedEventArgs>(h => application.ViewCreated += h,h => application.ViewCreated -= h)
                 .TakeUntilDisposingMainWindow()
-                .TransformPattern<ViewCreatedEventArgs,XafApplication>();
+                .Select(pattern => pattern.EventArgs.View);
         }
 
         public static IObservable<(XafApplication application, DatabaseVersionMismatchEventArgs e)> AlwaysUpdateOnDatabaseVersionMismatch(this XafApplication application){

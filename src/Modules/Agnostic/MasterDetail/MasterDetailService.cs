@@ -37,9 +37,9 @@ namespace Xpand.XAF.Modules.MasterDetail{
         private static IObservable<Unit> RefreshListView{
             get{
                 return MasterDetailDashboardViewItems
-                    .SelectMany(_ => _.detailViewItem.InnerView.ObjectSpace
-                        .WhenCommited()
-                        .Do(o => _.listViewItem.InnerView.ObjectSpace.Refresh()))
+                    .SelectMany(_ => _.detailViewItem.InnerView.ObjectSpace.WhenCommited()
+                            .Select(o => _.listViewItem.InnerView.ObjectSpace.Refresh())
+                    )
                     .ToUnit();
             }
         }
@@ -60,23 +60,23 @@ namespace Xpand.XAF.Modules.MasterDetail{
         public static IObservable<DashboardView> DashboardViewCreated{ get; } = RxApp.Application
             .Select(application => application)
             .DashboardViewCreated()
-            .Where(_ => ((IModelDashboardViewMasterDetail) _.e.View.Model).MasterDetail)
-            .Select(_ => _.e.View)
+            .Where(_ => ((IModelDashboardViewMasterDetail) _.Model).MasterDetail)
             .Publish()
             .AutoConnect();
 
         public static IObservable<(DashboardViewItem listViewItem, DashboardViewItem detailViewItem)> MasterDetailDashboardViewItems{get;}=DashboardViewCreated
-            .SelectMany(_ => _.WhenControlsCreated())
+            .SelectMany(_ => _.WhenControlsCreated().Do(tuple => {},() => {}))
             .SelectMany(_ => _.view.GetItems<DashboardViewItem>().Where(item => item.Model.View is IModelListView)
                 .SelectMany(listViewItem => _.view
                     .GetItems<DashboardViewItem>().Where(viewItem 
                         =>viewItem.Model.View is IModelDetailView && viewItem.Model.View.AsObjectView.ModelClass ==listViewItem.Model.View.AsObjectView.ModelClass)
                     .Select(detailViewItem => (listViewItem, detailViewItem))
                 )
-            );
+            )
+        .Publish().RefCount();
 
         private static IObservable<Unit> SynchronizeDetailView{ get; } = MasterDetailDashboardViewItems
-            .CombineLatest(RxApp.NestedFrames,DashboardViewCreated, (_, frame, dashboardView) => {
+            .CombineLatest(RxApp.NestedFrames.Merge(RxApp.Windows.When(TemplateContext.PopupWindow)),DashboardViewCreated, (_, frame, dashboardView) => {
                 var listView = ((ListView) _.listViewItem.InnerView);
                 var dashboardViewItem = _.detailViewItem;
                 var detailView = ((DetailView) dashboardViewItem.InnerView);

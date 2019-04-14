@@ -16,9 +16,9 @@ Get-ChildItem "$rootLocation\src" *.csproj -Recurse|Select-Object|ForEach-Object
             "$id|$($_.VersionRange.MinVersion)`r`n"
         })
         [xml]$csproj=Get-Content $_.FullName
-        $dxDepends=$csproj.Project.ItemGroup.Reference|Where-Object{$_.Include -like "DevExpress*"}|ForEach-Object{
-            "**$($_.Include -creplace '(.*)\.v[\d]{2}\.\d', '$1')**|**Any**"
-        }
+        $dxDepends=($csproj.Project.ItemGroup.Reference|Where-Object{$_.Include -like "DevExpress*"}|ForEach-Object{
+            "**$($_.Include -creplace '(.*)\.v[\d]{2}\.\d', '$1')**|**Any**`r`n"
+        }).Trim("`r`n")
         $metadata="Name|Version`r`n----|----`r`n$dxDepends`r`n$metadata"
         $readMe=Get-Content $readMePath -Raw
         if ($readMe -notmatch "## Dependencies"){

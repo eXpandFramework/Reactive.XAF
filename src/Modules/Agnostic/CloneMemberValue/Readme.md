@@ -42,7 +42,7 @@ Xpand.VersionConverter|1.0.9
  System.ValueTuple|4.5.0
 
 ## Issues
-For [Bugs](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Bug%2C+XAF,+CloneMemberValue&template=xaf--bug-report.md&title=), [Questions](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Question%2C+XAF,+CloneMemberValue&template=xaf--question.md&title=) or [Suggestions](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Enhancement%2C+XAF,+CloneMemberValue&template=xaf--feature-request.md&title=) use main project issues.
+For [Bugs](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Bug%2C+Standalone_XAF_Modules,+CloneMemberValue&template=standalone-xaf-modules--bug-report.md&title=), [Questions](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Question%2C+Standalone_XAF_Modules,+CloneMemberValue&template=standalone-xaf-modules--question.md&title=) or [Suggestions](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Enhancement%2C+Standalone_XAF_Modules,+CloneMemberValue&template=standalone-xaf-modules--feature-request.md&title=) use main project issues.
 ## Details
 The module extends the `IModelMember` nodes with the `IModelMemberCloneValue`. 
 

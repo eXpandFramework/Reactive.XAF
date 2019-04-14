@@ -5,6 +5,7 @@ using DevExpress.ExpressApp.Editors;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class WindowExtensions{
+
         public static IObservable<Window> ViewControllersActivated(this IObservable<Window> source){
             return source.SelectMany(item => {
                 return Observable.FromEventPattern<EventHandler, EventArgs>(

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
@@ -8,6 +9,49 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ViewExtensions{
+        
+        public static IObservable<T> WhenClosing<T>(this T view) where T : View{
+            return Observable.Return(view).Closing();
+        }
+
+        public static IObservable<T> Closing<T>(this IObservable<T> source) where T:View{
+            return source.Cast<View>().SelectMany(view => {
+                return Observable.FromEventPattern<EventHandler, EventArgs>(
+                    handler => view.Closing += handler,
+                    handler => view.Closing -= handler)
+                    .TakeUntil(view.WhenDisposingView().Select(unit => unit))
+                    ;
+            })
+            .Select(pattern => (T)pattern.Sender);
+        }
+        
+        public static IObservable<(T view, CancelEventArgs e)> WhenQueryCanClose<T>(this T view) where T : View{
+            return Observable.Return(view).QueryCanClose();
+        }
+
+        public static IObservable<(T view, CancelEventArgs e)> QueryCanClose<T>(this IObservable<T> source) where T:View{
+            return source.Cast<View>().SelectMany(view => {
+                return Observable.FromEventPattern<EventHandler<CancelEventArgs>, CancelEventArgs>(
+                    handler => view.QueryCanClose += handler,
+                    handler => view.QueryCanClose -= handler)
+                    .TakeUntil(view.WhenDisposingView().Select(unit => unit))
+                    ;
+            }).TransformPattern<CancelEventArgs,T>();
+        }
+        public static IObservable<(T view, CancelEventArgs e)> WhenQueryCanChangeCurrentObject<T>(this T view) where T : View{
+            return Observable.Return(view).QueryCanClose();
+        }
+
+        public static IObservable<(T view, CancelEventArgs e)> QueryCanChangeCurrentObject<T>(this IObservable<T> source) where T:View{
+            return source.Cast<View>().SelectMany(view => {
+                return Observable.FromEventPattern<EventHandler<CancelEventArgs>, CancelEventArgs>(
+                    handler => view.QueryCanChangeCurrentObject += handler,
+                    handler => view.QueryCanChangeCurrentObject -= handler)
+                    .TakeUntil(view.WhenDisposingView().Select(unit => unit))
+                    ;
+            }).TransformPattern<CancelEventArgs,T>();
+        }
+
         public static IObservable<(T view, EventArgs e)> WhenControlsCreated<T>(this T view) where T : View{
             return Observable.Return(view).ControlsCreated();
         }
@@ -17,7 +61,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 return Observable.FromEventPattern<EventHandler, EventArgs>(
                     handler => view.ControlsCreated += handler,
                     handler => view.ControlsCreated -= handler)
-                    .TakeUntil(WhenDisposingView(view));
+                    .TakeUntil(view.WhenDisposingView().Select(unit => unit))
+                    ;
             }).TransformPattern<EventArgs,T>();
         }
 
@@ -48,16 +93,17 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             }).TransformPattern<EventArgs,T>();
         }
         
-        public static IObservable<TView> WhenDisposingView<TView>(this TView view) where TView:View{
-            return Disposing(Observable.Return(view));
+        public static IObservable<Unit> WhenDisposingView<TView>(this TView view) where TView:View{
+            return Observable.Return(view).Disposing();
         }
 
-        public static IObservable<TView> Disposing<TView>(this IObservable<TView> source) where TView:View{
+        public static IObservable<Unit> Disposing<TView>(this IObservable<TView> source) where TView:View{
             return source.SelectMany(item => {
-                return Observable.FromEventPattern<EventHandler, EventArgs>(
-                    handler => item.Closing += handler,
-                    handler => item.Closing -= handler).Select(pattern => item);
-            });
+                return Observable.Start(async () => await Observable.FromEventPattern<CancelEventHandler, EventArgs>(
+                    handler => item.Disposing += handler,handler => item.Disposing -= handler).Select(pattern => item).FirstAsync());
+            })
+            .Merge()
+            .ToUnit();
         }
 
         public static IObservable<ListPropertyEditor> NestedListViews<TView>(this IObservable<TView> views, params Type[] objectTypes)
