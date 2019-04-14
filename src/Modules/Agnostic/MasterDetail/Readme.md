@@ -3,7 +3,7 @@
 [![GitHub issues](https://img.shields.io/github/issues/eXpandFramework/expand/MasterDetail.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AXAF+MasterDetail) [![GitHub close issues](https://img.shields.io/github/issues-closed/eXpandFramework/eXpand/MasterDetail.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AXAF+MasterDetail)
 # About 
 
-The `MasterDetail` module can create master detail `XAF` views.
+The `MasterDetail` module can help you create platform agnostic master detail `XAF` views using only the Model Editor. 
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 
 
@@ -35,12 +35,12 @@ Xpand.VersionConverter|1.0.9
 For [Bugs](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Bug%2C+Standalone_XAF_Modules,+MasterDetail&template=standalone-xaf-modules--bug-report.md&title=), [Questions](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Question%2C+Standalone_XAF_Modules,+MasterDetail&template=standalone-xaf-modules--question.md&title=) or [Suggestions](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Enhancement%2C+Standalone_XAF_Modules,+MasterDetail&template=standalone-xaf-modules--feature-request.md&title=) use main project issues.
 ## Details
 The module satisfies the following conditions:
-1. If a `DashboardView` contains a `one ListView and one DetailView` of the `same type`, then it will be Master-Detail enabled. It can be disabled by setting the `IModelDashboardViewMasterDetail.MasterDetail` to false.
+1. If a `DashboardView` contains a `one ListView and one DetailView` of the `same type`, then it will be Master-Detail `enabled by default`. It can be disabled by setting the `IModelDashboardViewMasterDetail.MasterDetail` to false.
 
    ![image](https://user-images.githubusercontent.com/159464/55990839-67af0180-5cb1-11e9-84cd-6ef0bb5d0137.png)
 
 3. Each time a ListView selection change, it will synchronize the DetailView CurrentObject with the selected from the ListView.
-2. `ALL CRUD` operations are `supported`. A valuable module for forcing the DetailView to open in edit mode is the [ViewEditMode](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/ViewEditMode).
+2. `ALL CRUD` operations are `supported`. A valuable module for forcing the DetailView to open in edit mode is the [ViewEditModeModule](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/ViewEditMode). Additionaly you can use the [AutoCommitModule](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/AutoCommit, for auto commiting the DetailView.
 3. Conditional detailviews can be configured from the model by creating `IModelMasterDetailViewObjectTypeLinks`
 
    ![image](https://user-images.githubusercontent.com/159464/55991766-b1005080-5cb3-11e9-9dc2-bee3dfb627ac.png)

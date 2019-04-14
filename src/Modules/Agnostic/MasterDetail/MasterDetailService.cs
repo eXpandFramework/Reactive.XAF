@@ -76,14 +76,18 @@ namespace Xpand.XAF.Modules.MasterDetail{
         .Publish().RefCount();
 
         private static IObservable<Unit> SynchronizeDetailView{ get; } = MasterDetailDashboardViewItems
-            .CombineLatest(RxApp.NestedFrames.Merge(RxApp.Windows.When(TemplateContext.PopupWindow)),DashboardViewCreated, (_, frame, dashboardView) => {
+            .Select(tuple => tuple)
+            .CombineLatest(RxApp.NestedFrames.Select(frame => frame),DashboardViewCreated.Select(view => view), (_, frame, dashboardView) => {
                 var listView = ((ListView) _.listViewItem.InnerView);
+                if (listView == null)
+                    return Observable.Never<Unit>();
                 var dashboardViewItem = _.detailViewItem;
                 var detailView = ((DetailView) dashboardViewItem.InnerView);
                 return listView.WhenSelectionChanged()
                     .Select(tuple => listView.SelectedObjects.Cast<object>().FirstOrDefault())
                     .DistinctUntilChanged()
-                    .Select(o => CreateDetailView(detailView, o, listView, dashboardViewItem, frame).CurrentObject);
+                    .Select(o => CreateDetailView(detailView, o, listView, dashboardViewItem, frame).CurrentObject)
+                    .ToUnit();
             })
             .Merge().ToUnit();
 

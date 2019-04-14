@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0">
   <Import Project="..\..\packages\xunit.runner.visualstudio.2.4.1\build\net20\xunit.runner.visualstudio.props" Condition="Exists('..\..\packages\xunit.runner.visualstudio.2.4.1\build\net20\xunit.runner.visualstudio.props')" />
   <Import Project="..\..\packages\xunit.core.2.4.1\build\xunit.core.props" Condition="Exists('..\..\packages\xunit.core.2.4.1\build\xunit.core.props')" />
   <PropertyGroup>
@@ -142,6 +142,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\bin\Xpand.Source.Extensions.dll</HintPath>
     </Reference>
+    <Reference Include="Xpand.XAF.Modules.AutoCommit, Version=0.0.1.0, Culture=neutral, PublicKeyToken=c52ffed5d5ff0958, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\bin\Xpand.XAF.Modules.AutoCommit.dll</HintPath>
+    </Reference>
     <Reference Include="Xpand.XAF.Modules.CloneMemberValue">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\bin\Xpand.XAF.Modules.CloneMemberValue.dll</HintPath>
@@ -185,6 +189,8 @@
     <Compile Include="Modules\MasterDetail\BOModel\Md.cs" />
     <Compile Include="Modules\MasterDetail\BOModel\MdParent.cs" />
     <Compile Include="Modules\MasterDetail\MasterDetailTests.cs" />
+    <Compile Include="Modules\AutoCommit\BOModel\AC.cs" />
+    <Compile Include="Modules\AutoCommit\AutoCommitTests.cs" />
     <Compile Include="Modules\ViewEditMode\BOModel\VEM.cs" />
     <Compile Include="Modules\ViewEditMode\ViewEditModeTests.cs" />
     <Compile Include="Modules\CloneMemberValue\BOModel\ACmv.cs" />

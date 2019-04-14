@@ -108,6 +108,7 @@
     <Compile Include="XAF\Model\GetNodeByPath.cs" />
     <Compile Include="XAF\Model\GetParent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="XAF\Model\GetValue.cs" />
     <Compile Include="XAF\Model\InsertLayer.cs" />
     <Compile Include="XAF\Model\ReadFromModel.cs" />
     <Compile Include="XAF\Model\Xml.cs" />
