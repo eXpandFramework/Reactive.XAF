@@ -4,9 +4,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Templates;
 using DevExpress.ExpressApp.Xpo;
-using Fasterflect;
 using Moq;
-using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Agnostic.Tests.Artifacts {
@@ -30,7 +28,6 @@ namespace Xpand.XAF.Agnostic.Tests.Artifacts {
 
         public static void RegisterDefaults(this XafApplication application, params ModuleBase[] modules){
             application.AlwaysUpdateOnDatabaseVersionMismatch().Subscribe();
-            application.Modules.Add((ReactiveModule)typeof(ReactiveModule).CreateInstance());
             application.Modules.AddRange(modules);
             application.RegisterInMemoryObjectSpaceProvider();
             MockFrameTemplate(application);

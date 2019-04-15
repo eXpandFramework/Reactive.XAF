@@ -21,14 +21,14 @@ using Xunit;
 namespace Xpand.XAF.Agnostic.Tests.Modules.MasterDetail{
     [Collection(nameof(XafTypesInfo))]
     public class MasterDetailTests:MasterDetailBaseTests {
+
    
         [Fact]
         public  void When_model_dashboardView_has_listview_detailview_for_the_same_type_is_masterdetail_enabled(){
-            var xafApplication = DefaultMasterDetailModule().Application;
-            var modelDashboardView = NewModelDashboardView(xafApplication);
-
-            ((IModelDashboardViewMasterDetail) modelDashboardView).MasterDetail.ShouldBe(true);
-            
+            using (var xafApplication = DefaultMasterDetailModule().Application){
+                var modelDashboardView = NewModelDashboardView(xafApplication);
+                ((IModelDashboardViewMasterDetail) modelDashboardView).MasterDetail.ShouldBe(true);
+            }
         }
 
         [Fact]
@@ -51,26 +51,28 @@ namespace Xpand.XAF.Agnostic.Tests.Modules.MasterDetail{
 
         [Fact]
         public async Task Handle_listView_process_selected_object_action(){
-            var xafApplication = DefaultMasterDetailModule().Application;
-            var modelDashboardView = NewModelDashboardView(xafApplication);
-            var masterDetailDashoardViewItems = MasterDetailService.MasterDetailDashboardViewItems.Replay();
-            masterDetailDashoardViewItems.Connect();
-            var dashboardView = xafApplication.CreateDashboardView(xafApplication.CreateObjectSpace(), modelDashboardView.Id, true);
-            dashboardView.MockCreateControls();
-            var viewItems = await masterDetailDashoardViewItems.FirstAsync();
-            var controller = viewItems.listViewItem.Frame.GetController<ListViewProcessCurrentObjectController>();
-            controller.ShouldNotBeNull();
-            controller.ProcessCurrentObjectAction.Active.Clear();
-            var selectionContext = Mock.Of<ISelectionContext>();
-            var value = new object();
-            Mock.Get(selectionContext).Setup(context => context.CurrentObject).Returns(value);
-            controller.ProcessCurrentObjectAction.SelectionContext = selectionContext;
-            var customProcessSelectedItem = controller.WhenCustomProcessSelectedItem().Replay();
-            customProcessSelectedItem.Connect();
+            using (var xafApplication = DefaultMasterDetailModule().Application){
+                var modelDashboardView = NewModelDashboardView(xafApplication);
+                var masterDetailDashoardViewItems = MasterDetailService.MasterDetailDashboardViewItems.Replay();
+                using (masterDetailDashoardViewItems.Connect()){
+                    var dashboardView = xafApplication.CreateDashboardView(xafApplication.CreateObjectSpace(), modelDashboardView.Id, true);
+                    dashboardView.MockCreateControls();
+                    var viewItems = await masterDetailDashoardViewItems.FirstAsync();
+                    var controller = viewItems.listViewItem.Frame.GetController<ListViewProcessCurrentObjectController>();
+                    controller.ShouldNotBeNull();
+                    controller.ProcessCurrentObjectAction.Active.Clear();
+                    var selectionContext = Mock.Of<ISelectionContext>();
+                    var value = new object();
+                    Mock.Get(selectionContext).Setup(context => context.CurrentObject).Returns(value);
+                    controller.ProcessCurrentObjectAction.SelectionContext = selectionContext;
+                    var customProcessSelectedItem = controller.WhenCustomProcessSelectedItem().Replay();
+                    customProcessSelectedItem.Connect();
 
-            controller.ProcessCurrentObjectAction.DoTheExecute(true);
+                    controller.ProcessCurrentObjectAction.DoTheExecute(true);
 
-            (await customProcessSelectedItem.FirstAsync()).e.Handled.ShouldBe(true);
+                    (await customProcessSelectedItem.FirstAsync()).e.Handled.ShouldBe(true);
+                }
+            }
         }
 
         [Fact]
@@ -161,6 +163,7 @@ namespace Xpand.XAF.Agnostic.Tests.Modules.MasterDetail{
 
         protected MasterDetailModule DefaultMasterDetailModule(){
             Application = new XafApplicationMock().Object;
+            Application.Title = "MasterDetailModule";
             var masterDetailModule = new MasterDetailModule();
             masterDetailModule.AdditionalExportedTypes.AddRange(new[]{typeof(Md),typeof(MdParent)});
             Application.SetupDefaults(masterDetailModule);

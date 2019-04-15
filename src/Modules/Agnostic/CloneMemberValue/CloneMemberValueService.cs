@@ -42,6 +42,7 @@ namespace Xpand.XAF.Modules.CloneMemberValue{
         }
 
         public static IObservable<(DetailView previous, DetailView current)> DetailViewPairs{ get; } = RxApp.Application
+            .WhenModule(typeof(CloneMemberValueModule))
             .DetailViewCreated()
             .Select(_ => _.e.View).Where(view => view.Model.CloneValueMemberViewItems().Any())
             .CombineWithPrevious().Where(_ => _.previous != null&&_.current.ObjectSpace.IsNewObject(_.current.CurrentObject))
@@ -49,6 +50,7 @@ namespace Xpand.XAF.Modules.CloneMemberValue{
             .Select(_ => _);
 
         public static IObservable<ListView> ListViews{ get;  }=RxApp.Application
+            .WhenModule(typeof(CloneMemberValueModule))
             .ListViewCreated().Where(_ => _.e.ListView.Model.CloneValueMemberViewItems().Any())
             .Select(_ => _.e.ListView).Where(view => view.Model.AllowEdit)
             .Publish().RefCount();

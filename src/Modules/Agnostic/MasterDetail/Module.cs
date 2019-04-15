@@ -9,15 +9,17 @@ namespace Xpand.XAF.Modules.MasterDetail{
         public const string CategoryName = "Xpand.XAF.Modules.MasterDetail";
 
         public MasterDetailModule(){
+
             RequiredModuleTypes.Add(typeof(SystemModule));
             RequiredModuleTypes.Add(typeof(ReactiveModule));
+            
         }
 
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
-
             moduleManager.Connect().Subscribe();
         }
+
 
         public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders){
             base.ExtendModelInterfaces(extenders);

@@ -12,7 +12,9 @@ namespace Xpand.XAF.Modules.ViewEditMode{
             return ViewEditModeAssigned.ToUnit().Merge(ViewEditModeChanged.ToUnit());
         }
 
-        public static IObservable<DetailView> ViewEditModeAssigned{ get; } = RxApp.Application.DetailViewCreated()
+        public static IObservable<DetailView> ViewEditModeAssigned{ get; } = RxApp.Application
+            .WhenModule(typeof(ViewEditModeModule))
+            .DetailViewCreated()
             .Select(_ => {
                 var detailView = _.e.View;
                 var viewEditMode = ((IModelDetailViewViewEditMode) detailView.Model).ViewEditMode;

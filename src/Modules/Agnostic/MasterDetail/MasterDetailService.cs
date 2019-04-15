@@ -20,6 +20,7 @@ namespace Xpand.XAF.Modules.MasterDetail{
     public static class MasterDetailService{
         public const string MasterDetailSaveAction = "MasterDetailSaveAction";
 
+
         internal static IObservable<Unit> Connect(this ApplicationModulesManager applicationModulesManager){
             var listViewProcessSelectedItem = ListViewProcessSelectedItem.Publish().AutoConnect();
             var connect = SynchronizeDetailView
@@ -58,7 +59,7 @@ namespace Xpand.XAF.Modules.MasterDetail{
         }
 
         public static IObservable<DashboardView> DashboardViewCreated{ get; } = RxApp.Application
-            .Select(application => application)
+            .WhenModule(typeof(MasterDetailModule))
             .DashboardViewCreated()
             .Where(_ => ((IModelDashboardViewMasterDetail) _.Model).MasterDetail)
             .Publish()

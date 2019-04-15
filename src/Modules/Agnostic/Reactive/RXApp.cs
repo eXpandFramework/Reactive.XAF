@@ -14,7 +14,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 namespace Xpand.XAF.Modules.Reactive{
 
     public static class RxApp{
-        static readonly BehaviorSubject<XafApplication> ApplicationSubject=new BehaviorSubject<XafApplication>(null);
+        static readonly ISubject<XafApplication> ApplicationSubject=Subject.Synchronize(new BehaviorSubject<XafApplication>(null));
         private static readonly IObservable<RedirectionContext> CreateWindowCore;
         private static readonly IObservable<RedirectionContext> OnPopupWindowCreated;
         private static readonly MethodInvoker CreateControllersOptimized;

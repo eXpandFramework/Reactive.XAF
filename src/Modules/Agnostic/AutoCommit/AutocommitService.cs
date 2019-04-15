@@ -19,16 +19,20 @@ namespace Xpand.XAF.Modules.AutoCommit{
             AsssignClientHanderSafe = clientSideEventsHelperType?.GetMethods().First(info =>info.Name=="AssignClientHandlerSafe" &&info.Parameters().Count==4).DelegateForCallMethod();
         }
         public static IObservable<ObjectView> ObjectViews => RxApp.Application
+            .WhenModule(typeof(AutoCommitModule))
             .ObjectViewCreated()
             .Where(objectView => ((IModelObjectViewAutoCommit) objectView.Model).AutoCommit);
 
-        public static IObservable<Unit> Connect(){
+        internal static IObservable<Unit> Connect(){
+
             return ObjectViews
                 .QueryCanClose()
                 .Merge(ObjectViews.QueryCanChangeCurrentObject())
                 .Do(_ => _.view.ObjectSpace.CommitChanges())
+                .TakeUntilDisposingMainWindow()
                 .ToUnit()
-                .Merge(ObjectViews.OfType<ListView>().ControlsCreated().Select(_ => BatchEditCommit(_.view)));
+                .Merge(ObjectViews.OfType<ListView>().ControlsCreated().Select(_ => BatchEditCommit(_.view)))
+                ;
         }
 
         private static Unit BatchEditCommit(ListView listView){

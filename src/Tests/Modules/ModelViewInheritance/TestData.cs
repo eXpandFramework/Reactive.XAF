@@ -9,7 +9,7 @@ namespace Xpand.XAF.Agnostic.Tests.Modules.ModelViewInheritance{
             var items = new[]{ViewType.ListView, ViewType.DetailView}
                 .SelectMany(viewType => new[]{true, false}
                     .Select(b => new object[]{viewType,b}));
-//            yield return new object[]{ViewType.ListView,false};
+//            yield return new object[]{ViewType.DetailView,true};
             foreach (var item in items){
                 yield return item;
             }

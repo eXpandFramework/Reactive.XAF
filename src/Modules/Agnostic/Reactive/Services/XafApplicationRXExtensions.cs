@@ -8,6 +8,11 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class XafApplicationRXExtensions{
+        public static IObservable<XafApplication> WhenModule(
+            this IObservable<XafApplication> source, Type moduleType){
+            return source.Where(_ => _.Modules.FindModule(moduleType)!=null);
+        }
+
         public static void AddObjectSpaceProvider(this XafApplication application, IObjectSpaceProvider objectSpaceprovider) {
             application.WhenCreateCustomObjectSpaceProvider()
                 .Select(_ => {
@@ -47,6 +52,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .FromEventPattern<EventHandler<ObjectSpaceCreatedEventArgs>,ObjectSpaceCreatedEventArgs>(h => application.ObjectSpaceCreated += h,h => application.ObjectSpaceCreated -= h)
                 .TakeUntilDisposingMainWindow()
                 .TransformPattern<ObjectSpaceCreatedEventArgs,XafApplication>();
+        }
+        public static IObservable<(XafApplication application, EventArgs e)> SetupComplete(this IObservable<XafApplication> source){
+            return source.SelectMany(application => application.WhenSetupComplete());
         }
 
         public static IObservable<View> ViewCreated(this IObservable<XafApplication> source){

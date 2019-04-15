@@ -5,6 +5,7 @@ using DevExpress.ExpressApp;
 using Xpand.XAF.Agnostic.Tests.Artifacts;
 using Xpand.XAF.Agnostic.Tests.Modules.ModelViewInheritance.BOModel;
 using Xpand.XAF.Modules.ModelViewInheritance;
+using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xunit;
 
@@ -43,7 +44,9 @@ namespace Xpand.XAF.Agnostic.Tests.Modules.ModelViewInheritance{
         private static ModelViewInheritanceModule CreateModelViewIneritanceModule(ViewType viewType, bool attribute,
             XafApplication application){
             CustomizeTypesInfo(viewType, attribute, application);
-            return new ModelViewInheritanceModule();
+            var modelViewInheritanceModule = new ModelViewInheritanceModule();
+            modelViewInheritanceModule.RequiredModuleTypes.Add(typeof(ReactiveModule));
+            return modelViewInheritanceModule;
         }
 
         private static void CustomizeTypesInfo(ViewType viewType, bool attribute, XafApplication application){
