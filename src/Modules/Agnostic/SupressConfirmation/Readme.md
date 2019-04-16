@@ -25,7 +25,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 
 Name|Version
 ----|----
-**DevExpress.Data**|**Any** **DevExpress.ExpressApp**|**Any**
+**DevExpress.ExpressApp**|**Any**
 Xpand.VersionConverter|1.0.9
  [Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/Xpand.XAF.Modules.Reactive)|1.2.1
  fasterflect|2.1.3

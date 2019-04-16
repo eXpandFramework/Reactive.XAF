@@ -11,20 +11,25 @@ $packageSource = Get-XPackageFeed -Xpand
 
 $localPackages = Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse|ForEach-Object {
     $name = [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
-    $nextVersion = Get-XpandVersion -Next -module $name
     $localVersion = Get-XpandVersion -XpandPath $_.DirectoryName -module $name
+    $nextVersion = Get-XpandVersion -Next -module $name
+    if (!$nextVersion){
+        $nextVersion=$localVersion
+    }
     [PSCustomObject]@{
         Name         = $name
         NextVersion  = $nextversion
         LocalVersion = $localVersion
     }
 }
-
+Write-Host "localPackages:" -f blue
+$localPackages
 $publishedPackages = & (Get-XNugetPath) list Xpand.XAF.Modules -source $packageSource| ConvertTo-PackageObject -LatestVersion| Where-Object {$_.Name -like "Xpand.XAF*"}| ForEach-Object {
     $publishedName = $_.Name
     $localPackages|Where-Object {$_.Name -eq $publishedName}
 }
-
+Write-Host "publishedPackages:" -f blue
+$publishedPackages
 $newPackages = $localPackages|Where-Object {!(($publishedPackages|Select-Object -ExpandProperty Name) -contains $_.Name) }|ForEach-Object {
     $localVersion = New-Object System.Version($_.LocalVersion)
     $nextVersion=New-Object System.Version($localVersion.Major, $localVersion.Minor, $localVersion.Build)
@@ -34,6 +39,7 @@ $newPackages = $localPackages|Where-Object {!(($publishedPackages|Select-Object 
         LocalVersion =$localVersion
     }
 }
+Write-host "newPackages:" -f blue
 $newPackages
                                                            
 $yArgs = @{
