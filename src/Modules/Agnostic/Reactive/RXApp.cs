@@ -15,11 +15,13 @@ namespace Xpand.XAF.Modules.Reactive{
 
     public static class RxApp{
         static readonly ISubject<XafApplication> ApplicationSubject=Subject.Synchronize(new BehaviorSubject<XafApplication>(null));
-        private static readonly IObservable<RedirectionContext> CreateWindowCore;
+        private static readonly MethodInvoker CreateWindowCore;
         private static readonly IObservable<RedirectionContext> OnPopupWindowCreated;
         private static readonly MethodInvoker CreateControllersOptimized;
         private static readonly MethodInvoker CreateControllers;
         private static readonly IObservable<RedirectionContext> NestedFrameRedirection;
+        private static readonly IObservable<RedirectionContext> CreateWindow;
+        private static readonly MemberGetter ViewApplication;
 
 
         internal static IObservable<XafApplication> Connect(this XafApplication application){
@@ -29,11 +31,13 @@ namespace Xpand.XAF.Modules.Reactive{
         }
 
         static RxApp(){
+            ViewApplication = typeof(CompositeView).Property("Application").DelegateForGetPropertyValue();
             var methodInfos = typeof(XafApplication).Methods();
             CreateControllersOptimized = methodInfos.Where(info => info.Name==nameof(CreateControllers)&&info.Parameters().Count==4).Select(info => info.DelegateForCallMethod()).First();
             CreateControllers = methodInfos.Where(info => info.Name==nameof(CreateControllers)&&info.Parameters().Count==3).Select(info => info.DelegateForCallMethod()).First();
-            CreateWindowCore = Redirection.Observe(methodInfos.First(info => info.Name==nameof(CreateWindowCore)))
-                .Publish().RefCount();
+            CreateWindowCore = methodInfos.First(info => info.Name == nameof(CreateWindowCore)).DelegateForCallMethod();
+            CreateWindow = Redirection.Observe(methodInfos.First(info => info.Name==nameof(XafApplication.CreateWindow)))
+                .Select(context => context).Publish().RefCount();
             
             OnPopupWindowCreated = Redirection.Observe(methodInfos.First(info => info.Name==nameof(OnPopupWindowCreated)))
                 .Publish().RefCount();
@@ -51,18 +55,22 @@ namespace Xpand.XAF.Modules.Reactive{
 
         public static IObservable<Window> Windows{
             get{
-                return Application
-                    .SelectMany(application => CreateWindowCore
-                        .Select(context => {
-                            var window = new Window(application, (TemplateContext) context.Arguments[0],
-                                (ICollection<Controller>) context.Arguments[1], (bool) context.Arguments[2],
-                                (bool) context.Arguments[3]);
-                            context.ReturnValue = window;
-                            return window;
-                        })
-                        .Merge(OnPopupWindowCreated.Select(context => (Window) context.Arguments[0]))
-                    )
-                    .Publish().AutoConnect();
+                return CreateWindow
+                    .Select(context => {
+                        var templateContext = (TemplateContext) context.Arguments[0];
+                        var controllers = (ICollection<Controller>) context.Arguments[1];
+                        var createAllControllers = (bool) context.Arguments[2];
+                        var isMain = (bool) context.Arguments[3];
+                        var view = (View) context.Arguments[4];
+                        var application = (XafApplication) context.Sender;
+
+                        var list = application.OptimizedControllersCreation
+                            ? CreateControllers(application,typeof(Controller), createAllControllers, controllers, view)
+                            : CreateControllers(application, typeof(Controller),createAllControllers, controllers);
+                        var window = (Window) CreateWindowCore(application,templateContext, list, isMain, true);
+                        context.ReturnValue = window;
+                        return window;
+                    });
             }
         }
 

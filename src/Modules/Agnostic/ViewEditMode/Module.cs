@@ -12,8 +12,8 @@ namespace Xpand.XAF.Modules.ViewEditMode {
             RequiredModuleTypes.Add(typeof(Reactive.ReactiveModule));
         }
 
-        public override void Setup(XafApplication application){
-            base.Setup(application);
+        public override void Setup(ApplicationModulesManager moduleManager){
+            base.Setup(moduleManager);
             ViewEditModeService.Connect()
                 .TakeUntilDisposingMainWindow()
                 .Subscribe();

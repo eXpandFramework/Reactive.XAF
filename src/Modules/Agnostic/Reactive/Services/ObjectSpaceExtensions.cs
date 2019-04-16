@@ -39,6 +39,16 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     .TransformPattern<ObjectsManipulatingEventArgs, IObjectSpace>();
         }
         
+        public static IObservable<(IObjectSpace objectSpace,ObjectChangedEventArgs e)> ObjectChanged(this IObservable<IObjectSpace> source) {
+            return source.SelectMany(item => item.WhenObjectChanged());
+        }
+
+        public static IObservable<(IObjectSpace objectSpace,ObjectChangedEventArgs e)> WhenObjectChanged(this IObjectSpace item) {
+            return Observable.FromEventPattern<EventHandler<ObjectChangedEventArgs>, ObjectChangedEventArgs>(h => item.ObjectChanged += h, h => item.ObjectChanged -= h)
+                    .TakeUntil(item.WhenDisposed())
+                    .TransformPattern<ObjectChangedEventArgs, IObjectSpace>();
+        }
+        
         public static IObservable<Unit> Disposed(this IObservable<IObjectSpace> source){
             
             return source

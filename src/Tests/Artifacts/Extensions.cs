@@ -23,8 +23,7 @@ namespace Xpand.XAF.Agnostic.Tests.Artifacts {
 
         public static void SetupDefaults(this XafApplication application, params ModuleBase[] modules) {
             application.RegisterDefaults(modules);
-            application.Setup();
-        }
+            application.Setup();        }
 
         public static void RegisterDefaults(this XafApplication application, params ModuleBase[] modules){
             application.AlwaysUpdateOnDatabaseVersionMismatch().Subscribe();

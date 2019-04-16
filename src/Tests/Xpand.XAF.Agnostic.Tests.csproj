@@ -73,6 +73,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\bin\DevExpress.ExpressApp.v18.2.dll</HintPath>
     </Reference>
+    <Reference Include="DevExpress.ExpressApp.Win.v18.2, Version=18.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="DevExpress.ExpressApp.Xpo.v18.2">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\bin\DevExpress.ExpressApp.Xpo.v18.2.dll</HintPath>
@@ -161,6 +164,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
     </Reference>
+    <Reference Include="Xpand.XAF.Modules.SupressConfirmation, Version=0.0.1.0, Culture=neutral, PublicKeyToken=c52ffed5d5ff0958, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\bin\Xpand.XAF.Modules.SupressConfirmation.dll</HintPath>
+    </Reference>
     <Reference Include="Xpand.XAF.Modules.ViewEditMode">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\bin\Xpand.XAF.Modules.ViewEditMode.dll</HintPath>
@@ -186,6 +193,8 @@
     <Compile Include="Artifacts\ModuleMock.cs" />
     <Compile Include="Artifacts\XafApplicationMock.cs" />
     <Compile Include="Artifacts\BaseTest.cs" />
+    <Compile Include="Modules\SupressConfirmation\SupressConfirmationTests.cs" />
+    <Compile Include="Modules\SupressConfirmation\BOModel\SC.cs" />
     <Compile Include="Modules\MasterDetail\BOModel\Md.cs" />
     <Compile Include="Modules\MasterDetail\BOModel\MdParent.cs" />
     <Compile Include="Modules\MasterDetail\MasterDetailTests.cs" />
