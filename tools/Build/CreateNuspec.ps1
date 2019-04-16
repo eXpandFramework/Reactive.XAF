@@ -1,5 +1,8 @@
+param(
+    $Branch,
+    $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\..\")
+)
 $ErrorActionPreference = "Stop"
-$root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\..\")
 
 Set-Location $root
 New-Item -Path "$root\bin\Nupkg" -ItemType Directory  -ErrorAction SilentlyContinue -Force |Out-Null
@@ -70,6 +73,9 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*.Tests.*", "*.Source.*
             $assemblyInfo = get-content "$($_.DirectoryName)\Properties\AssemblyInfo.cs"
             [System.Text.RegularExpressions.Regex]::Match($assemblyInfo, 'Version\("([^"]*)').Groups[1].Value
         }|Select-Object -First 1
+        if ($Branch -eq "lab"){
+            $version=(Find-Package $packageName -Source (Get-PackageFeed -Xpand)).Version
+        }
         $packageInfo = [PSCustomObject]@{
             id              = $_
             version         = $version

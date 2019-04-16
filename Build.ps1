@@ -73,7 +73,7 @@ task Compile -precondition {return $compile  } {
 
 Task  CreateNuspec  {
     InvokeScript{
-        & "$PSScriptRoot\tools\build\CreateNuspec.ps1"
+        & "$PSScriptRoot\tools\build\CreateNuspec.ps1" -branch $branch
     }
 }
 
