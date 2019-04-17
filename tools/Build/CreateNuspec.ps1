@@ -76,6 +76,7 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*.Tests.*", "*.Source.*
         if ($Branch -eq "lab"){
             $version=(Find-Package $packageName -Source (Get-PackageFeed -Xpand)).Version
         }
+        "$packageName version=$version"
         $packageInfo = [PSCustomObject]@{
             id              = $_
             version         = $version
