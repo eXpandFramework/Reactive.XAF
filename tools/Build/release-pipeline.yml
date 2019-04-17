@@ -15,7 +15,7 @@ steps:
   inputs:
     targetType: filePath
     filePath: .\tools\build\release-pipeline.ps1 
-    arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(GitHubUserName) $(GitHubPass) $(DXApiFeed)
+    arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(GitHubUserName) $(GitHubPass) $(DXApiFeed) $(build.artifactstagingdirectory)
 - powershell: | 
 - task: PowerShell@2
   displayName: Publish
@@ -24,3 +24,8 @@ steps:
     filePath: .\tools\build\publishNugets.ps1 
     arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(NugetApiKey) 
     ignoreLASTEXITCODE: true
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: Packages'
+  inputs:
+    PathtoPublish: '$(build.artifactstagingdirectory)'
+    ArtifactName: 'Xpand.XAF.Modules.Packages'

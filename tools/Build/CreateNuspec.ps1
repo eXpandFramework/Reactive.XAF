@@ -1,5 +1,4 @@
 param(
-    $Branch,
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\..\")
 )
 $ErrorActionPreference = "Stop"
@@ -67,14 +66,15 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*.Tests.*", "*.Source.*
     }
     $csproj.Project.ItemGroup.Reference.Include|Where-Object {"$_".StartsWith("Xpand.XAF")}|ForEach-Object {
         $packageName = $_
-        $version = Get-ChildItem $root *.csproj -Recurse|Where-Object {
+        $version= Get-ChildItem $root *.csproj -Recurse|Where-Object {
             [System.IO.Path]::GetFileNameWithoutExtension($_.FullName) -eq $packageName
         }|ForEach-Object {
             $assemblyInfo = get-content "$($_.DirectoryName)\Properties\AssemblyInfo.cs"
             [System.Text.RegularExpressions.Regex]::Match($assemblyInfo, 'Version\("([^"]*)').Groups[1].Value
         }|Select-Object -First 1
-        if ($Branch -eq "lab"){
-            $version=(Find-Package $packageName -Source (Get-PackageFeed -Xpand)).Version
+        $publishedVersion=(Find-Package $packageName -Source (Get-PackageFeed -Xpand)).Version
+        if ($version -lt $publishedVersion){
+            $version=$publishedVersion;
         }
         "$packageName version=$version"
         $packageInfo = [PSCustomObject]@{

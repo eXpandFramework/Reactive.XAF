@@ -1,9 +1,10 @@
 param(
     $Branch="lab",
     $SourcePath = "$PSScriptRoot\..\..",
-    $GitHubUserName="apobekiaris",
-    $Pass=$env:GithubPass,
-    $DXApiFeed
+    $GitHubUserName,
+    $Pass,
+    $DXApiFeed,
+    $artifactstagingdirectory
 )
 $ErrorActionPreference = "Stop"
 & "$SourcePath\go.ps1" -InstallModules
@@ -13,7 +14,7 @@ $localPackages = Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse|Inv
     $name = [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
     $localVersion = Get-XpandVersion -XpandPath $_.DirectoryName -module $name
     $nextVersion = Get-XpandVersion -Next -module $name
-    if (!$nextVersion){
+    if (!$nextVersion -or $localVersion -gt $nextVersion){
         $nextVersion=$localVersion
     }
     [PSCustomObject]@{
@@ -61,3 +62,8 @@ $bArgs=@{
 }
 & $SourcePath\go.ps1 @bArgs
 
+"$SourcePath\Bin\Nupkg","$SourcePath\Bin\Nuspec"|ForEach-Object{
+    Get-ChildItem $_ -Recurse |ForEach-Object{
+        Copy-Item $_.FullName -Destination $artifactstagingdirectory
+    }
+}
