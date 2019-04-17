@@ -14,7 +14,7 @@ if ($Branch -match "lab"){
         $versionConverterSpec.Package.metadata.version="$($versionConverterSpec.Package.metadata.version).0"
     }
     $versionConverterSpec.Save($versionConverterSpecPath)
-    return
+    
 }
 & (Get-XNugetPath) pack $versionConverterSpecPath -OutputDirectory $nugetBin -NoPackageAnalysis
 if ($lastexitcode){
@@ -41,6 +41,7 @@ Get-ChildItem "$sourceDir\bin" "*.nuspec" -Recurse|ForEach-Object{
     $assembly=$assemblyVersions|Where-Object{$_.name -eq $packageName}
     $name=$_.FullName
     $directory=$_.Directory.Parent.FullName
+    Write-Host "Packing $($assembly.Version) $name $version " -f Blue
     & (Get-XNugetPath) pack $name -OutputDirectory $($packData.nugetBin) -Basepath $directory -Version $($assembly.Version)
     if ($lastexitcode){
         throw $_.Exception

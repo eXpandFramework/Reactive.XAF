@@ -1,15 +1,15 @@
 param(
-    $Branch,
+    $Branch="lab",
     $SourcePath = "$PSScriptRoot\..\..",
-    $GitHubUserName,
-    $Pass,
+    $GitHubUserName="apobekiaris",
+    $Pass=$env:GithubPass,
     $DXApiFeed
 )
 $ErrorActionPreference = "Stop"
 & "$SourcePath\go.ps1" -InstallModules
 $packageSource = Get-XPackageFeed -Xpand
 
-$localPackages = Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse|ForEach-Object {
+$localPackages = Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse|Invoke-Parallel -script {
     $name = [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
     $localVersion = Get-XpandVersion -XpandPath $_.DirectoryName -module $name
     $nextVersion = Get-XpandVersion -Next -module $name
@@ -23,7 +23,8 @@ $localPackages = Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse|For
     }
 }
 Write-Host "localPackages:" -f blue
-$localPackages
+Write-Host $localPackages
+$localPackages|Write-Output
 $publishedPackages = & (Get-XNugetPath) list Xpand.XAF.Modules -source $packageSource| ConvertTo-PackageObject -LatestVersion| Where-Object {$_.Name -like "Xpand.XAF*"}| ForEach-Object {
     $publishedName = $_.Name
     $localPackages|Where-Object {$_.Name -eq $publishedName}
