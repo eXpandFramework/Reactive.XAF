@@ -4,7 +4,8 @@ param(
     $GitHubUserName,
     $Pass,
     $DXApiFeed,
-    $artifactstagingdirectory
+    $artifactstagingdirectory,
+    $WhatIf=$false
 )
 $ErrorActionPreference = "Stop"
 & "$SourcePath\go.ps1" -InstallModules
@@ -50,8 +51,12 @@ $yArgs = @{
     Repository   = "DevExpress.XAF"
     Branch       = $Branch
     Pass         = $Pass
-    Packages     = ($publishedPackages + $newPackages)
+    Packages     = $publishedPackages 
     SourcePath   = $SourcePath
+    WhatIf=$WhatIf
+}
+if ($newPackages){
+    $yArgs.Packages+=$newPackages
 }
 $yArgs.Packages|Write-Output
 Update-NugetProjectVersion @yArgs 

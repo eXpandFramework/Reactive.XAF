@@ -25,7 +25,7 @@ namespace Xpand.XAF.Modules.Reactive {
             var indexOf = args.Name.IndexOf(",", StringComparison.Ordinal);
             if (indexOf > -1){
                 var assemblyName = args.Name.Substring(0, indexOf);
-                var path = Path.Combine(binPath, assemblyName);
+                var path = $"{Path.Combine(binPath, assemblyName)}.dll";
                 if (File.Exists(path)){
                     return Assembly.LoadFile(path);
                 }
