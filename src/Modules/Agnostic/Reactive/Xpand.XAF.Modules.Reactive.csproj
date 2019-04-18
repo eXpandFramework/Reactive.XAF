@@ -80,9 +80,8 @@
     <Reference Include="Fasterflect, Version=2.1.3.0, Culture=neutral, PublicKeyToken=38d18473284c1ca7, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\packages\fasterflect.2.1.3\lib\net40\Fasterflect.dll</HintPath>
     </Reference>
-    <Reference Include="Ryder, Version=0.7.0.0, Culture=neutral, PublicKeyToken=68842a7a5e601e6b, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Libs\Ryder.dll</HintPath>
+    <Reference Include="Ryder, Version=0.8.0.0, Culture=neutral, PublicKeyToken=68842a7a5e601e6b, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\packages\Ryder.0.8.0\lib\net45\Ryder.dll</HintPath>
     </Reference>
     <Reference Include="System">
       <Name>System</Name>

@@ -21,7 +21,6 @@ namespace Xpand.XAF.Modules.Reactive{
         private static readonly MethodInvoker CreateControllers;
         private static readonly IObservable<RedirectionContext> NestedFrameRedirection;
         private static readonly IObservable<RedirectionContext> CreateWindow;
-        private static readonly MemberGetter ViewApplication;
 
 
         internal static IObservable<XafApplication> Connect(this XafApplication application){
@@ -31,7 +30,6 @@ namespace Xpand.XAF.Modules.Reactive{
         }
 
         static RxApp(){
-            ViewApplication = typeof(CompositeView).Property("Application").DelegateForGetPropertyValue();
             var methodInfos = typeof(XafApplication).Methods();
             CreateControllersOptimized = methodInfos.Where(info => info.Name==nameof(CreateControllers)&&info.Parameters().Count==4).Select(info => info.DelegateForCallMethod()).First();
             CreateControllers = methodInfos.Where(info => info.Name==nameof(CreateControllers)&&info.Parameters().Count==3).Select(info => info.DelegateForCallMethod()).First();
@@ -53,26 +51,24 @@ namespace Xpand.XAF.Modules.Reactive{
             return WindowTemplateService.UpdateStatus(period, messages);
         }
 
-        public static IObservable<Window> Windows{
-            get{
-                return CreateWindow
-                    .Select(context => {
-                        var templateContext = (TemplateContext) context.Arguments[0];
-                        var controllers = (ICollection<Controller>) context.Arguments[1];
-                        var createAllControllers = (bool) context.Arguments[2];
-                        var isMain = (bool) context.Arguments[3];
-                        var view = (View) context.Arguments[4];
-                        var application = (XafApplication) context.Sender;
+        public static IObservable<Window> Windows{ get; } = Redirection.Observe(typeof(XafApplication).Methods().First(info => info.Name==nameof(XafApplication.CreateWindow)))
+            .Select(context => context).Publish().RefCount()
+            .Select(context => {
+                var templateContext = (TemplateContext) context.Arguments[0];
+                var controllers = (ICollection<Controller>) context.Arguments[1];
+                var createAllControllers = (bool) context.Arguments[2];
+                var isMain = (bool) context.Arguments[3];
+                var view = (View) context.Arguments[4];
+                var application = (XafApplication) context.Sender;
 
-                        var list = application.OptimizedControllersCreation
-                            ? CreateControllers(application,typeof(Controller), createAllControllers, controllers, view)
-                            : CreateControllers(application, typeof(Controller),createAllControllers, controllers);
-                        var window = (Window) CreateWindowCore(application,templateContext, list, isMain, true);
-                        context.ReturnValue = window;
-                        return window;
-                    });
-            }
-        }
+                var list = application.OptimizedControllersCreation
+                    ? CreateControllers(application,typeof(Controller), createAllControllers, controllers, view)
+                    : CreateControllers(application, typeof(Controller),createAllControllers, controllers);
+//                        var dialogControllers = ((IEnumerable) list).Cast<Controller>().OfType<DialogController>().ToArray();
+                var window = (Window) CreateWindowCore(application,templateContext, list, isMain, true);
+                context.ReturnValue = window;
+                return window;
+            }).Publish().RefCount();
 
         public static IObservable<Frame> NestedFrames{
             get{

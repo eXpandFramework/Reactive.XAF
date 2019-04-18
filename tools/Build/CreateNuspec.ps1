@@ -13,7 +13,11 @@ $versionConverter = [PSCustomObject]@{
     version         = ([xml](get-content "$PsScriptRoot\..\Xpand.VersionConverter\Xpand.VersionConverter.nuspec")).package.metadata.version
     targetFramework = "net452"
 }
-$libs=Get-ChildItem $root\src\libs *.dll
+if (Test-path $root\src\libs){
+    
+    $libs=Get-ChildItem $root\src\libs *.dll
+}
+
 get-childitem "$root\src\" -Include "*.csproj" -Exclude "*.Tests.*", "*.Source.*" -Recurse | ForEach-Object {
     [xml]$nuspec = Get-Content $template
     $metaData = $nuspec.Package.Metadata

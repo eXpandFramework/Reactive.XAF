@@ -14,7 +14,7 @@ namespace Xpand.XAF.Modules.Reactive {
 
         public ReactiveModule() {
             
-            AppDomain.CurrentDomain.AssemblyResolve+=CurrentDomainOnAssemblyResolve;
+//            AppDomain.CurrentDomain.AssemblyResolve+=CurrentDomainOnAssemblyResolve;
             TypesInfo = _typesInfoSubject;
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));
         }
