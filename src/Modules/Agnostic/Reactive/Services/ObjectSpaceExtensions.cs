@@ -51,9 +51,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<Unit> Disposed(this IObservable<IObjectSpace> source){
             return Observable.Empty<Unit>();
-            return source
-                .SelectMany(item => Observable.FromEventPattern<EventHandler,EventArgs>(h => item.Disposed += h, h => item.Disposed -= h).FirstAsync())
-                .ToUnit();
+//            return source
+//                .SelectMany(item => Observable.FromEventPattern<EventHandler,EventArgs>(h => item.Disposed += h, h => item.Disposed -= h).FirstAsync())
+//                .ToUnit();
         }
         public static IObservable<Unit> WhenDisposed(this IObjectSpace source) {
             return Observable.Return(source).Disposed().FirstAsync();

@@ -6,11 +6,11 @@ using System.Security;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Xpand.XAF.Modules.SupressConfirmation")]
+[assembly: AssemblyTitle("Xpand.XAF.Modules.SuppressConfirmation")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Xpand.XAF.Modules.SupressConfirmation")]
+[assembly: AssemblyProduct("Xpand.XAF.Modules.SuppressConfirmation")]
 [assembly: AssemblyCopyright("Copyright eXpandFramework � 2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -30,7 +30,7 @@ using System.Security;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 
-[assembly: AssemblyVersion("0.0.6.0")]
-[assembly: AssemblyFileVersion("0.0.6.0")]
+[assembly: AssemblyVersion("0.0.7.0")]
+[assembly: AssemblyFileVersion("0.0.7.0")]
 //[assembly:AllowPartiallyTrustedCallers]
 //[assembly: SecurityTransparent()]

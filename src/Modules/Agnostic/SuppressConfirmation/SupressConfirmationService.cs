@@ -8,7 +8,7 @@ using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
-namespace Xpand.XAF.Modules.SupressConfirmation{
+namespace Xpand.XAF.Modules.SuppressConfirmation{
     public static class SupressConfirmationService{
         public const ModificationsHandlingMode ModificationsHandlingMode = (ModificationsHandlingMode) (-1);
 

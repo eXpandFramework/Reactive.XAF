@@ -6,12 +6,12 @@ using DevExpress.ExpressApp.SystemModule;
 using Shouldly;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Agnostic.Tests.Artifacts;
-using Xpand.XAF.Agnostic.Tests.Modules.SupressConfirmation.BOModel;
-using Xpand.XAF.Modules.SupressConfirmation;
+using Xpand.XAF.Agnostic.Tests.Modules.SuppressConfirmation.BOModel;
+using Xpand.XAF.Modules.SuppressConfirmation;
 using Xunit;
 
-namespace Xpand.XAF.Agnostic.Tests.Modules.SupressConfirmation{
-    [Xunit.Collection(nameof(XafTypesInfo))]
+namespace Xpand.XAF.Agnostic.Tests.Modules.SuppressConfirmation{
+    [Collection(nameof(XafTypesInfo))]
     public class SupressConfirmationTests : BaseTest{
 
         [Theory]

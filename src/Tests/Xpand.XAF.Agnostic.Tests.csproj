@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0">
   <Import Project="..\..\packages\xunit.runner.visualstudio.2.4.1\build\net20\xunit.runner.visualstudio.props" Condition="Exists('..\..\packages\xunit.runner.visualstudio.2.4.1\build\net20\xunit.runner.visualstudio.props')" />
   <Import Project="..\..\packages\xunit.core.2.4.1\build\xunit.core.props" Condition="Exists('..\..\packages\xunit.core.2.4.1\build\xunit.core.props')" />
   <PropertyGroup>
@@ -164,9 +164,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
     </Reference>
-    <Reference Include="Xpand.XAF.Modules.SupressConfirmation">
+    <Reference Include="Xpand.XAF.Modules.SuppressConfirmation, Version=0.0.7.0, Culture=neutral, PublicKeyToken=c52ffed5d5ff0958, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\bin\Xpand.XAF.Modules.SupressConfirmation.dll</HintPath>
+      <HintPath>..\..\bin\Xpand.XAF.Modules.SuppressConfirmation.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.ViewEditMode">
       <SpecificVersion>False</SpecificVersion>
@@ -193,8 +193,8 @@
     <Compile Include="Artifacts\ModuleMock.cs" />
     <Compile Include="Artifacts\XafApplicationMock.cs" />
     <Compile Include="Artifacts\BaseTest.cs" />
-    <Compile Include="Modules\SupressConfirmation\SupressConfirmationTests.cs" />
-    <Compile Include="Modules\SupressConfirmation\BOModel\SC.cs" />
+    <Compile Include="Modules\SuppressConfirmation\BOModel\SC.cs" />
+    <Compile Include="Modules\SuppressConfirmation\SuppressConfirmationTests.cs" />
     <Compile Include="Modules\MasterDetail\BOModel\Md.cs" />
     <Compile Include="Modules\MasterDetail\BOModel\MdParent.cs" />
     <Compile Include="Modules\MasterDetail\MasterDetailTests.cs" />

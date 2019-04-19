@@ -5,11 +5,11 @@
     <DXVersion>18.2.3</DXVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{0BA43E5E-67D8-4164-A42E-5E536E05D2D5}</ProjectGuid>
+    <ProjectGuid>{7D3556B8-8CF9-4622-94F1-0F28A7765D0E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Xpand.XAF.Modules.SupressConfirmation</RootNamespace>
-    <AssemblyName>Xpand.XAF.Modules.SupressConfirmation</AssemblyName>
+    <RootNamespace>Xpand.XAF.Modules.SuppressConfirmation</RootNamespace>
+    <AssemblyName>Xpand.XAF.Modules.SuppressConfirmation</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>

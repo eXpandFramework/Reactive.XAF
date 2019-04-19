@@ -4,7 +4,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
 using Xpand.XAF.Modules.Reactive;
 
-namespace Xpand.XAF.Modules.SupressConfirmation{
+namespace Xpand.XAF.Modules.SuppressConfirmation{
     public sealed class SupressConfirmationModule : ModuleBase{
         public const string CategoryName = "Xpand.XAF.Modules.SupressConfirmation";
 
