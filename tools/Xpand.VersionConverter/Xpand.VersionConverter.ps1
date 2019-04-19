@@ -16,7 +16,8 @@ param(
  
 $ErrorActionPreference = "Stop"
 set-location $targetPath
-Write-Host "Running Version Converter on project $projectFile with target $targetPath" -f Blue
+# $VerbosePreference="Continue"
+Write-Verbose "Running Version Converter on project $projectFile with target $targetPath" -f Blue
 $projectFileInfo = Get-Item $projectFile
 [xml]$csproj = Get-Content $projectFileInfo.FullName
 $references = $csproj.Project.ItemGroup.Reference
@@ -50,11 +51,11 @@ public class MyDefaultAssemblyResolver : DefaultAssemblyResolver{
 "@ -ReferencedAssemblies @("$monoPath\Mono.Cecil.dll")
 $devExpressAssemblyName = Invoke-Command {
 
-    Write-Host "Finding DX assembly name"
+    Write-Verbose "Finding DX assembly name"
     $dxAssemblyPath = Get-ChildItem $targetPath "$referenceFilter*.dll" | Select-Object -First 1
     if ($dxAssemblyPath) {
         $dxAssembly = [AssemblyDefinition]::ReadAssembly($dxAssemblyPath.FullName)
-        Write-Host "$($dxAssembly.Name.Name) found from $($dxAssemblyPath.FullName)"
+        Write-Verbose "$($dxAssembly.Name.Name) found from $($dxAssemblyPath.FullName)"
         $dxAssembly.Name
     }
     else {
@@ -76,11 +77,11 @@ $references | Where-Object { $_.Include -like $assemblyFilter } | ForEach-Object
             $readerParams.SymbolReaderProvider = New-Object PdbReaderProvider
             $readerParams.ReadSymbols = $true
             $moduleAssembly = [AssemblyDefinition]::ReadAssembly($modulePath, $readerParams)
-            Write-Host "Checking $modulePath references.." -f "Blue"
+            Write-Verbose "Checking $modulePath references.." -f "Blue"
             $moduleAssembly.MainModule.AssemblyReferences.ToArray() | Write-Verbose
             $moduleAssembly.MainModule.AssemblyReferences.ToArray() | Where-Object { $_.FullName -like $referenceFilter } | ForEach-Object {
                 $nowReference = $_
-                Write-Host "Checking $_ reference..."
+                Write-Verbose "Checking $_ reference..."
                 if ($nowReference.Version -ne $devExpressAssemblyName.Version) {
                     $moduleAssembly.MainModule.AssemblyReferences.Remove($nowReference)
                     $newMinor = "$($devExpressAssemblyName.Version.Major).$($devExpressAssemblyName.Version.Minor)"
@@ -96,10 +97,10 @@ $references | Where-Object { $_.Include -like $assemblyFilter } | ForEach-Object
                             $_.Scope = $newReference 
                         }
                     }
-                    Write-Host "$($_.Name) version changed from $($_.Version) to $($devExpressAssemblyName.Version)" -f Green
+                    Write-Verbose "$($_.Name) version changed from $($_.Version) to $($devExpressAssemblyName.Version)" -f Green
                 }
                 else {
-                    Write-Host "Versions ($($nowReference.Version)) matched nothing to do."
+                    Write-Verbose "Versions ($($nowReference.Version)) matched nothing to do."
                 }
             }
             $writeParams = New-Object WriterParameters
