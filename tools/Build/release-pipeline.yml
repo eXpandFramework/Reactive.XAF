@@ -16,6 +16,18 @@ steps:
     targetType: filePath
     filePath: .\tools\build\release-pipeline.ps1 
     arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(GitHubUserName) $(GitHubPass) $(DXApiFeed) $(build.artifactstagingdirectory)
+- task: VSTest@2
+  displayName: 'VsTest - testAssemblies'
+  enabled: true
+  inputs:
+    testAssemblyVer2: |
+     .\bin\Xpand.XAF.Agnostic.Tests.dll
+    uiTests: true
+    runInParallel: false
+    diagnosticsEnabled: false
+    runTestsInIsolation: true
+    codeCoverageEnabled: true
+    rerunFailedTests: true 
 - powershell: | 
 - task: PowerShell@2
   displayName: Publish
