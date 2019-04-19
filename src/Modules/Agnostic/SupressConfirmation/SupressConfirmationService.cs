@@ -13,10 +13,24 @@ namespace Xpand.XAF.Modules.SupressConfirmation{
         public const ModificationsHandlingMode ModificationsHandlingMode = (ModificationsHandlingMode) (-1);
 
         internal static IObservable<Unit> Connect(){
-            return Windows
-                .Select(DisableWebControllers).ToUnit()
-                .Merge(Windows.Select(ChangeModificationHandlingMode).Merge())
-                .TakeUntilDisposingMainWindow().ToUnit();
+            var viewSignal = RxApp.Application.WhenModule(typeof(SupressConfirmationModule))
+                .ObjectViewCreated()
+                .Where(view => ((IModelObjectViewSupressConfirmation) view.Model).SupressConfirmation)
+                .SelectMany(view => {
+                    var whenNewDetailViewObjectChangedOnce = Observable.Empty<Unit>();
+                    if (view is DetailView detailView && detailView.ObjectSpace.IsNewObject(detailView.CurrentObject)){
+                        whenNewDetailViewObjectChangedOnce = detailView.ObjectSpace.WhenObjectChanged()
+                            .Select(tuple => tuple).FirstAsync().ToUnit();
+                    }
+                    return whenNewDetailViewObjectChangedOnce
+                        .Merge(view.ObjectSpace.WhenCommited().Select(tuple => tuple).ToUnit()).ToUnit();
+                }).Publish().RefCount();
+            
+
+            return viewSignal.CombineLatest(Windows, (unit, frame) => ChangeModificationHandlingMode(frame)).Merge().ToUnit()
+                .Merge(Windows.Select(DisableWebControllers).ToUnit())
+                .TakeUntilDisposingMainWindow()
+                .ToUnit();
         }
 
         private static IObservable<Frame> DisableWebControllers(Frame window){
@@ -30,20 +44,8 @@ namespace Xpand.XAF.Modules.SupressConfirmation{
         }
 
         private static IObservable<Unit> ChangeModificationHandlingMode(Frame window){
-            void ChangeMode(){
-                window.GetController<ModificationsController>().ModificationsHandlingMode = ModificationsHandlingMode;
-            }
-            ChangeMode();
-            var whenNewDetailViewObjectChangedOnce=Observable.Empty<Unit>();
-            if (window.View is DetailView detailView&&detailView.ObjectSpace.IsNewObject(detailView.CurrentObject)){    
-                whenNewDetailViewObjectChangedOnce = detailView.ObjectSpace.WhenObjectChanged().FirstAsync().ToUnit();
-            }
-            return whenNewDetailViewObjectChangedOnce
-                .Merge(((ObjectView) window.View).ObjectSpace.WhenCommited().ToUnit())
-                .Select(_ => {
-                    ChangeMode();
-                    return Unit.Default;
-                });
+            window.GetController<ModificationsController>().ModificationsHandlingMode = ModificationsHandlingMode;
+            return Observable.Empty<Unit>();
         }
 
         public static IObservable<Frame> Windows{ get; } = RxApp.Windows.Cast<Frame>()
