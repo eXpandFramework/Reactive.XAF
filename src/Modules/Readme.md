@@ -19,7 +19,7 @@ The modules follow the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |[MasterDetail](http://MasterDetail.expandframework.com)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.MasterDetail.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.MasterDetail.svg?label=&style=flat)
 |  [ModelViewInheritance](http://ModelViewInheritance.expandframework.com) |![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.ModelViewInheritance.svg?label=&style=flat)|   ![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.ModelViewInheritance.svg?label=&style=flat)
 |[Reactive](http://reactive.expandframework.com)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.Reactive.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.Reactive.svg?label=&style=flat)
-|[SupressConfirmation](http://SupressConfirmation.expandframework.com)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.SupressConfirmation.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.SupressConfirmation.svg?label=&style=flat)
+|[SuppressConfirmation](http://SuppressConfirmation.expandframework.com)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.SuppressConfirmation.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.SuppressConfirmation.svg?label=&style=flat)
 |[ViewEditMode](http://viewEditMode.expandframework.com)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.ViewEditMode.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.ViewEditMode.svg?label=&style=flat)
 
 

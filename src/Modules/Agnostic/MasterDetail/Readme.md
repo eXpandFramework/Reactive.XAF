@@ -26,9 +26,10 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 Name|Version
 ----|----
 **DevExpress.Data**|**Any** **DevExpress.ExpressApp**|**Any**
-Xpand.VersionConverter|1.0.9
- [Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/Xpand.XAF.Modules.Reactive)|1.2.2
+Xpand.VersionConverter|1.0.10
+ [Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/Xpand.XAF.Modules.Reactive)|1.2.6.2
  fasterflect|2.1.3
+ Ryder|0.8.0
  System.ValueTuple|4.5.0
 
 ## Issues

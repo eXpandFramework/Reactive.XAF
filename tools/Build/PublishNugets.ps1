@@ -31,7 +31,8 @@ $packages=$nugetResult|ForEach-Object{
         Version = $strings[1]
     }
 }
-
+Write-Host "packages:" -f blue
+$packages
 Get-ChildItem $localPackageSource *.nupkg -Recurse|ForEach-Object{
     $localPackageName=[System.IO.Path]::GetFileNameWithoutExtension($_)
     $r=New-Object System.Text.RegularExpressions.Regex("[\d]{1,2}\.[\d]{1}\.[\d]*(\.[\d]*)?")
@@ -41,7 +42,7 @@ Get-ChildItem $localPackageSource *.nupkg -Recurse|ForEach-Object{
     "localPackageName=$localPackageName"
     $package=$packages|Where-Object{$_.name -eq $localPackageName  }
     "package=$package"
-    if (!$package -or $package.Version -lt $localPackageVersion){
+    if (!$package -or (([version]$package.Version) -lt ([version]$localPackageVersion))){
         "Pushing $($_.FullName)"
         & (Get-Nugetpath) push $_.FullName -source $remotePackageSource -ApiKey $apikey
     }

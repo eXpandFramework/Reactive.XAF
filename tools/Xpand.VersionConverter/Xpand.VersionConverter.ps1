@@ -17,7 +17,7 @@ param(
 $ErrorActionPreference = "Stop"
 set-location $targetPath
 # $VerbosePreference="Continue"
-Write-Verbose "Running Version Converter on project $projectFile with target $targetPath" -f Blue
+Write-Verbose "Running Version Converter on project $projectFile with target $targetPath"
 $projectFileInfo = Get-Item $projectFile
 [xml]$csproj = Get-Content $projectFileInfo.FullName
 $references = $csproj.Project.ItemGroup.Reference
@@ -77,7 +77,7 @@ $references | Where-Object { $_.Include -like $assemblyFilter } | ForEach-Object
             $readerParams.SymbolReaderProvider = New-Object PdbReaderProvider
             $readerParams.ReadSymbols = $true
             $moduleAssembly = [AssemblyDefinition]::ReadAssembly($modulePath, $readerParams)
-            Write-Verbose "Checking $modulePath references.." -f "Blue"
+            Write-Verbose "Checking $modulePath references.."
             $moduleAssembly.MainModule.AssemblyReferences.ToArray() | Write-Verbose
             $moduleAssembly.MainModule.AssemblyReferences.ToArray() | Where-Object { $_.FullName -like $referenceFilter } | ForEach-Object {
                 $nowReference = $_
@@ -97,7 +97,7 @@ $references | Where-Object { $_.Include -like $assemblyFilter } | ForEach-Object
                             $_.Scope = $newReference 
                         }
                     }
-                    Write-Verbose "$($_.Name) version changed from $($_.Version) to $($devExpressAssemblyName.Version)" -f Green
+                    Write-Verbose "$($_.Name) version changed from $($_.Version) to $($devExpressAssemblyName.Version)" 
                 }
                 else {
                     Write-Verbose "Versions ($($nowReference.Version)) matched nothing to do."
