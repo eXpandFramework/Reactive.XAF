@@ -20,7 +20,7 @@ namespace Xpand.XAF.Modules.Reactive{
         private static readonly MethodInvoker CreateControllersOptimized;
         private static readonly MethodInvoker CreateControllers;
         private static readonly IObservable<RedirectionContext> NestedFrameRedirection;
-        private static readonly IObservable<RedirectionContext> CreateWindow;
+        
 
 
         internal static IObservable<XafApplication> Connect(this XafApplication application){
@@ -34,8 +34,6 @@ namespace Xpand.XAF.Modules.Reactive{
             CreateControllersOptimized = methodInfos.Where(info => info.Name==nameof(CreateControllers)&&info.Parameters().Count==4).Select(info => info.DelegateForCallMethod()).First();
             CreateControllers = methodInfos.Where(info => info.Name==nameof(CreateControllers)&&info.Parameters().Count==3).Select(info => info.DelegateForCallMethod()).First();
             CreateWindowCore = methodInfos.First(info => info.Name == nameof(CreateWindowCore)).DelegateForCallMethod();
-            CreateWindow = Redirection.Observe(methodInfos.First(info => info.Name==nameof(XafApplication.CreateWindow)))
-                .Select(context => context).Publish().RefCount();
             
             OnPopupWindowCreated = Redirection.Observe(methodInfos.First(info => info.Name==nameof(OnPopupWindowCreated)))
                 .Publish().RefCount();
@@ -64,7 +62,6 @@ namespace Xpand.XAF.Modules.Reactive{
                 var list = application.OptimizedControllersCreation
                     ? CreateControllers(application,typeof(Controller), createAllControllers, controllers, view)
                     : CreateControllers(application, typeof(Controller),createAllControllers, controllers);
-//                        var dialogControllers = ((IEnumerable) list).Cast<Controller>().OfType<DialogController>().ToArray();
                 var window = (Window) CreateWindowCore(application,templateContext, list, isMain, true);
                 context.ReturnValue = window;
                 return window;
