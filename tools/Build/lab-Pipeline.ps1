@@ -11,12 +11,18 @@ $ErrorActionPreference = "Stop"
 & "$SourcePath\go.ps1" -InstallModules
 $packageSource = Get-XPackageFeed -Xpand
 
-$localPackages = Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse|Invoke-Parallel -script {
+$localPackages = Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse|Invoke-Parallel -VariablesToImport "Branch" -Script{
     $name = [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
     $localVersion = Get-XpandVersion -XpandPath $_.DirectoryName -module $name
     $nextVersion = Get-XpandVersion -Next -module $name
     if (!$nextVersion -or $localVersion -gt $nextVersion){
         $nextVersion=$localVersion
+    }
+    if ($Branch -eq "lab"){
+        $v=(New-Object System.Version($nextVersion))
+        if ($v.Revision -lt 1){
+            $nextVersion=New-Object System.Version($v.Major,$v.Minor,$v.Build,1)
+        }
     }
     [PSCustomObject]@{
         Name         = $name
@@ -26,7 +32,7 @@ $localPackages = Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse|Inv
 }
 Write-Host "localPackages:" -f blue
 Write-Host $localPackages
-$localPackages|Write-Output
+$localPackages|Out-String
 $publishedPackages = & (Get-XNugetPath) list Xpand.XAF.Modules -source $packageSource| ConvertTo-PackageObject -LatestVersion| Where-Object {$_.Name -like "Xpand.XAF*"}| ForEach-Object {
     $publishedName = $_.Name
     $localPackages|Where-Object {$_.Name -eq $publishedName}
@@ -58,6 +64,7 @@ $yArgs = @{
 if ($newPackages){
     $yArgs.Packages+=$newPackages
 }
+Write-Host "End-Packages:" -f blue
 $yArgs.Packages|Write-Output
 Update-NugetProjectVersion @yArgs 
 
