@@ -9,7 +9,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 namespace Xpand.XAF.Modules.ViewEditMode{
     public static class ViewEditModeService{
         internal static IObservable<Unit> Connect(){
-            return ViewEditModeAssigned.ToUnit().Merge(ViewEditModeChanged.ToUnit());
+            return ViewEditModeChanged.ToUnit();
         }
 
         public static IObservable<DetailView> ViewEditModeAssigned{ get; } = RxApp.Application

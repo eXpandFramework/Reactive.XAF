@@ -50,7 +50,7 @@ namespace Xpand.XAF.Modules.SupressConfirmation{
 
             .Merge(RxApp.NestedFrames.Cast<Frame>())
             .WhenModule(typeof(SupressConfirmationModule))
-            .ViewChanged()
+            .ViewChanged().Where(_ => _.frame.View is ObjectView)
             .Where(_ => ((IModelObjectViewSupressConfirmation) _.frame.View.Model).SupressConfirmation)
             .Select(_ => _.frame).Publish().RefCount();
 

@@ -20,7 +20,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source.SelectMany(item => {
                 return Observable
                     .FromEventPattern<EventHandler, EventArgs>(h => item.Committed += h, h => item.Committed -= h)
-                    .TakeUntil(item.WhenDisposed())
+//                    .TakeUntil(item.WhenDisposed())
                     .TransformPattern<EventArgs, IObjectSpace>();
             });
         }
@@ -50,16 +50,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
         
         public static IObservable<Unit> Disposed(this IObservable<IObjectSpace> source){
-            
+            return Observable.Empty<Unit>();
             return source
-                .SelectMany(item => Observable.Start(async () => 
-                    await Observable.FromEventPattern<EventHandler,EventArgs>(h => item.Disposed += h, h => item.Disposed -= h).FirstAsync())
-                )
-                .Merge()
+                .SelectMany(item => Observable.FromEventPattern<EventHandler,EventArgs>(h => item.Disposed += h, h => item.Disposed -= h).FirstAsync())
                 .ToUnit();
         }
         public static IObservable<Unit> WhenDisposed(this IObjectSpace source) {
-            return Observable.Return(source,Scheduler.Immediate).Disposed().FirstAsync();
+            return Observable.Return(source).Disposed().FirstAsync();
         }
 
         public static IObservable<IObjectSpace> WhenModifyChanged(this IObjectSpace source){
