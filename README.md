@@ -4,7 +4,7 @@
 
 [![Azure DevOps Tests](https://img.shields.io/azure-devops/tests/expandDevOps/expandframework/25.svg?logo=azuredevops)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=25) [![Azure DevOps Coverage](https://img.shields.io/azure-devops/coverage/eXpandDevOps/expandframework/25.svg?logo=azuredevops)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=25)
 
-[![GitHub issues](https://img.shields.io/github/issues/eXpandFramework/expand/XAF.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AXAF) [![GitHub close issues](https://img.shields.io/github/issues-closed/eXpandFramework/eXpand/XAF.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AXAF+)
+![GitHub issues by-label](https://img.shields.io/github/issues/expandframework/expand/Standalone_XAF_Modules.svg) [![GitHub close issues](https://img.shields.io/github/issues-closed/eXpandFramework/eXpand/Standalone_XAF_Modules.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AXAF+)
 
 
 | <img src="http://expandframework.com/images/site/logo.png" width=150 height=68 alt="eXpandFramework logo"/> | Build | Nuget
