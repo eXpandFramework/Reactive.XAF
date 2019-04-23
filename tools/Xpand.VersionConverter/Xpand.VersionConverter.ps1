@@ -6,24 +6,41 @@ using namespace System.Text.RegularExpressions
 using namespace Mono.Cecil
 using namespace Mono.Cecil.pdb
 param(
-    [parameter(Mandatory)]
-    [string]$projectFile,
-    [parameter(Mandatory)]
-    [string]$targetPath,
+    # [parameter(Mandatory)]
+    [string]$projectFile = "C:\Work\eXpandFramework\expand\Xpand\Xpand.ExpressApp.Modules\ExcelImporter\Xpand.ExpressApp.ExcelImporter.csproj",
+    # [parameter(Mandatory)]
+    [string]$targetPath = "C:\Work\eXpandFramework\expand\Xpand.DLL\",
     [string]$referenceFilter = "DevExpress*",
     [string]$assemblyFilter = "Xpand.XAF.*"
 )
- 
+# $VerbosePreference = "Continue"
 $ErrorActionPreference = "Stop"
 set-location $targetPath
-# $VerbosePreference="Continue"
+
+function Using-Object {
+    [CmdletBinding()]
+    param (
+        [Object]$InputObject,
+        [Parameter(Mandatory = $true)]
+        [scriptblock]$ScriptBlock
+    )
+
+    try {
+        . $ScriptBlock
+    }
+    finally {
+        if ($null -ne $InputObject -and $InputObject -is [System.IDisposable]) {
+            $InputObject.Dispose()
+        }
+    }
+}
 Write-Verbose "Running Version Converter on project $projectFile with target $targetPath"
 $projectFileInfo = Get-Item $projectFile
 [xml]$csproj = Get-Content $projectFileInfo.FullName
 $references = $csproj.Project.ItemGroup.Reference
 $dxReferences = $references | Where-Object { $_.Include -like "$referenceFilter" }
 $root = $PSScriptRoot
-"Loading Mono.Cecil"
+Write-Verbose "Loading Mono.Cecil"
 $monoPath = "$root\mono.cecil.0.10.3\lib\net40"
 if (!(Test-Path "$monoPath\Mono.Cecil.dll")) {
     $client = New-Object System.Net.WebClient
@@ -37,7 +54,6 @@ if (!(Test-Path "$monoPath\Mono.Cecil.dll")) {
 Add-Type @"
 using Mono.Cecil;
 public class MyDefaultAssemblyResolver : DefaultAssemblyResolver{
-
     public override AssemblyDefinition Resolve(AssemblyNameReference name, ReaderParameters parameters){
         try{
             return base.Resolve(name, parameters);
@@ -71,45 +87,51 @@ $references | Where-Object { $_.Include -like $assemblyFilter } | ForEach-Object
     "$targetPath\$([Path]::GetFileName($_.HintPath))", "$($projectFileInfo.DirectoryName)\$($_.HintPath)" | ForEach-Object {
         if (Test-Path $_) {
             $modulePath = (Get-Item $_).FullName
+            Write-Verbose "Checking $modulePath references.."
             $readerParams = New-Object ReaderParameters
             $readerParams.ReadWrite = $true
-            $readerParams.AssemblyResolver=New-Object MyDefaultAssemblyResolver
+            $readerParams.AssemblyResolver = New-Object MyDefaultAssemblyResolver
             $readerParams.SymbolReaderProvider = New-Object PdbReaderProvider
             $readerParams.ReadSymbols = $true
-            $moduleAssembly = [AssemblyDefinition]::ReadAssembly($modulePath, $readerParams)
-            Write-Verbose "Checking $modulePath references.."
-            $moduleAssembly.MainModule.AssemblyReferences.ToArray() | Write-Verbose
-            $moduleAssembly.MainModule.AssemblyReferences.ToArray() | Where-Object { $_.FullName -like $referenceFilter } | ForEach-Object {
-                $nowReference = $_
-                Write-Verbose "Checking $_ reference..."
-                if ($nowReference.Version -ne $devExpressAssemblyName.Version) {
-                    $moduleAssembly.MainModule.AssemblyReferences.Remove($nowReference)
-                    $newMinor = "$($devExpressAssemblyName.Version.Major).$($devExpressAssemblyName.Version.Minor)"
-                    $newName = [Regex]::Replace($nowReference.Name, ".(v[\d]{2}\.\d)", ".v$newMinor")
-                    $regex = New-Object Regex("PublicKeyToken=([\w]*)")
-                    $token = $regex.Match($nowReference).Groups[1].Value
-                    $regex = New-Object Regex("Culture=([\w]*)")
-                    $culture = $regex.Match($nowReference).Groups[1].Value
-                    $newReference = [AssemblyNameReference]::Parse("$newName, Version=$($devExpressAssemblyName.Version), Culture=$culture, PublicKeyToken=$token")
-                    $moduleAssembly.MainModule.AssemblyReferences.Add($newreference)
-                    $moduleAssembly.MainModule.Types | ForEach-Object {
-                        $moduleAssembly.MainModule.GetTypeReferences() | Where-Object { $_.Scope -eq $nowReference } |ForEach-Object { 
-                            $_.Scope = $newReference 
+            
+            Using-Object ($moduleAssembly = [AssemblyDefinition]::ReadAssembly($modulePath, $readerParams)) {
+                $moduleAssembly.MainModule.AssemblyReferences.ToArray() | Write-Verbose
+                $needPatching = $false
+                $moduleAssembly.MainModule.AssemblyReferences.ToArray() | Where-Object { $_.FullName -like $referenceFilter } | ForEach-Object {
+                    $nowReference = $_
+                    Write-Verbose "Checking $_ reference..."
+                    if ($nowReference.Version -ne $devExpressAssemblyName.Version) {
+                        $moduleAssembly.MainModule.AssemblyReferences.Remove($nowReference)
+                        $newMinor = "$($devExpressAssemblyName.Version.Major).$($devExpressAssemblyName.Version.Minor)"
+                        $newName = [Regex]::Replace($nowReference.Name, ".(v[\d]{2}\.\d)", ".v$newMinor")
+                        $regex = New-Object Regex("PublicKeyToken=([\w]*)")
+                        $token = $regex.Match($nowReference).Groups[1].Value
+                        $regex = New-Object Regex("Culture=([\w]*)")
+                        $culture = $regex.Match($nowReference).Groups[1].Value
+                        $newReference = [AssemblyNameReference]::Parse("$newName, Version=$($devExpressAssemblyName.Version), Culture=$culture, PublicKeyToken=$token")
+                        $moduleAssembly.MainModule.AssemblyReferences.Add($newreference)
+                        $moduleAssembly.MainModule.Types | ForEach-Object {
+                            $moduleAssembly.MainModule.GetTypeReferences() | Where-Object { $_.Scope -eq $nowReference } | ForEach-Object { 
+                                $_.Scope = $newReference 
+                            }
                         }
+                        Write-Verbose "$($_.Name) version changed from $($_.Version) to $($devExpressAssemblyName.Version)" 
+                        $needPatching = $true
                     }
-                    Write-Verbose "$($_.Name) version changed from $($_.Version) to $($devExpressAssemblyName.Version)" 
+                    else {
+                        Write-Verbose "Versions ($($nowReference.Version)) matched nothing to do."
+                    }
                 }
-                else {
-                    Write-Verbose "Versions ($($nowReference.Version)) matched nothing to do."
-                }
+                if ($needPatching) {
+                    Write-Verbose "Patching $modulePath"
+                    $writeParams = New-Object WriterParameters
+                    $writeParams.WriteSymbols = $true
+                    $key = [system.byte[]]::new(0)
+                    $key = [System.IO.File]::ReadAllBytes("$root\Xpand.snk")
+                    $writeParams.StrongNameKeyPair = [System.Reflection.StrongNameKeyPair]($key)
+                    $moduleAssembly.Write($writeParams)
+                }   
             }
-            $writeParams = New-Object WriterParameters
-            $writeParams.WriteSymbols=$true
-            $f = New-Object FileStream("$root\Xpand.snk", [FileMode]::Open)
-            $writeParams.StrongNameKeyPair = New-Object System.Reflection.StrongNameKeyPair ( $f)
-            $moduleAssembly.Write($writeParams)
-            $f.Dispose()
-            $moduleAssembly.Dispose()   
         }
     }
 }
