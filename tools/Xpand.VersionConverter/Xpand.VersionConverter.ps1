@@ -24,14 +24,19 @@ function Using-Object {
         [Parameter(Mandatory = $true)]
         [scriptblock]$ScriptBlock
     )
-
+    $killDomain
     try {
         . $ScriptBlock
+    }
+    catch{
+        $killDomain=$true
     }
     finally {
         if ($null -ne $InputObject -and $InputObject -is [System.IDisposable]) {
             $InputObject.Dispose()
-            Stop-Process -id $pid
+            if ($killDomain){
+                Stop-Process -id $pid
+            }
         }
     }
 }
