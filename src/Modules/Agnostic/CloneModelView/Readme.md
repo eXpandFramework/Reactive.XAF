@@ -46,8 +46,24 @@ Using the `CloneModelViewAttribute` in your Bussiness Objects you can:
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Modules/CloneModelView)
 
 ### Examples
-The module is integrated with the `ExcelImporter`.
+### Examples
+The module is integrated with the following eXpandFramework modules: `Dashboard, ExcelImporter, ModelDifference, System`,
 
-Next screenshot is an example from ExcelImporter from the view tha maps the Excel columns with the BO members. Both the DetailView and its nested ListView have CloneModelView set to true.
+Next snippet is taken from the ModelDifference module.
+```cs
+ [RuleCombinationOfPropertiesIsUnique("MDO_Unique_Name_Application", DefaultContexts.Save, nameof(Name)+"," +nameof(PersistentApplication)+","+nameof(DeviceCategory))]
+    [CreatableItem(false), NavigationItem("Default"), HideFromNewMenu]
+    [ModelDefault("Caption", Caption), ModelDefault("IsClonable", "True"), VisibleInReports(false)]
+    [CloneView(CloneViewType.DetailView, "MDO_DetailView",true)]
+    [CloneView(CloneViewType.ListView, "MDO_ListView_Tablet",true)]
+    [CloneView(CloneViewType.ListView, "MDO_ListView_Desktop",true)]
+    [CloneView(CloneViewType.ListView, "MDO_ListView_Mobile",true)]
+    [CloneView(CloneViewType.ListView, "MDO_ListView_All",true)]
+    [CloneView(CloneViewType.ListView, "MDO_ListView", true)]
+    [Appearance("Disable DeviceCategory for win models", AppearanceItemType.ViewItem,
+        "EndsWith([" + nameof(PersistentApplication) + "." + nameof(BaseObjects.PersistentApplication.ExecutableName) +"], '.exe')", 
+        Enabled = false, TargetItems = nameof(DeviceCategory))]
+    [RuleCombinationOfPropertiesIsUnique(nameof(PersistentApplication)+","+nameof(DifferenceType)+","+nameof(CombineOrder))]
+    public class ModelDifferenceObject : XpandCustomObject, IXpoModelDifference {
 
-![image](https://user-images.githubusercontent.com/159464/55381194-238e6500-552b-11e9-8314-f1b1132d09f3.png)
+```
