@@ -22,7 +22,8 @@ function UpdateModulesList($rootLocation, $packages) {
     set-content $path $allModulesReadMe.trim()
 }
 UpdateModulesList $rootLocation $packages
-function UpdateDependencies($_, $packagespath, $readMe, $readMePath) {
+function UpdateDependencies($_, $packagespath, $readMePath) {
+    $readMe = Get-Content $readMePath -Raw
     $metadata = ((Get-NugetPackageSearchMetadata -Name $_.BaseName -Source $packagesPath).DependencySets.Packages | ForEach-Object {
             $id = $_.Id
             if ($id -like "Xpand.XAF*") {
@@ -31,13 +32,13 @@ function UpdateDependencies($_, $packagespath, $readMe, $readMePath) {
             elseif ($id -eq "Xpand.VersionConverter") {
                 $id = "[$id](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)"
             }
-            "$id|$($_.VersionRange.MinVersion)`r`n"
+            "|$id|$($_.VersionRange.MinVersion)`r`n"
         })
     [xml]$csproj = Get-Content $_.FullName
     $dxDepends = ($csproj.Project.ItemGroup.Reference | Where-Object { $_.Include -like "DevExpress*" } | ForEach-Object {
-            "**$($_.Include -creplace '(.*)\.v[\d]{2}\.\d', '$1')**|**Any**`r`n"
+            "|**$($_.Include -creplace '(.*)\.v[\d]{2}\.\d', '$1')**|**Any**`r`n"
         })
-    $metadata = "<!-- -->|<!-- -->`r`n----|----`r`n$dxDepends$metadata"
+    $metadata = "|<!-- -->|<!-- -->`r`n|----|----`r`n$dxDepends$metadata"
 
     if ($readMe -notmatch "## Dependencies") {
         $readMe = $readMe.Replace("## Issues", "## Dependencies`r`n## Issues")
@@ -47,7 +48,8 @@ function UpdateDependencies($_, $packagespath, $readMe, $readMePath) {
     $result = $readMe -creplace '## Dependencies([^#]*)', "## Dependencies`r`n``.NetFramework: $version```r`n`r`n$metadata`r`n"
     Set-Content $readMePath $result.Trim()
 }
-function UpdateBadges($_, $packagespath, $readMe, $readMePath) {
+function UpdateBadges($_, $packagespath,  $readMePath) {
+    $readMe = Get-Content $readMePath -Raw
     $package = $_.BaseName.Replace("Xpand.XAF.Modules.","")
     $badges = @"
 ![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.$package.svg?&style=flat) ![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.$package.svg?&style=flat)
@@ -61,9 +63,8 @@ function UpdateModules($rootLocation, $packages) {
     Get-ChildItem "$rootLocation\src" *.csproj -Recurse | Select-Object | ForEach-Object {
         $readMePath = "$($_.DirectoryName)\Readme.md"
         if ((Test-path $readMePath) -and $packages.Contains($_.BaseName)) {
-            $readMe = Get-Content $readMePath -Raw
-            UpdateDependencies $_ $packagespath $readMe $readMePath
-            UpdateBadges $_ $packagespath $readMe $readMePath
+            UpdateDependencies $_ $packagespath $readMePath
+            UpdateBadges $_ $packagespath $readMePath
         }   
     }
 }

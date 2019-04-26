@@ -23,15 +23,15 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 ## Dependencies
 `.NetFramework: v4.6.1`
 
-<!-- -->|<!-- -->
-----|----
-**DevExpress.Data**|**Any**
- **DevExpress.ExpressApp**|**Any**
-[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.0.13
- [Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/Xpand.XAF.Modules.Reactive)|1.2.12.1
- fasterflect|2.1.3
- Ryder|0.8.0
- System.ValueTuple|4.5.0
+|<!-- -->|<!-- -->
+|----|----
+|**DevExpress.Data**|**Any**
+ |**DevExpress.ExpressApp**|**Any**
+|[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.0.14
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/Xpand.XAF.Modules.Reactive)|1.2.13
+ |fasterflect|2.1.3
+ |Ryder|0.8.0
+ |System.ValueTuple|4.5.0
 
 ## Issues
 For [Bugs](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Bug%2C+Standalone_XAF_Modules,+MasterDetail&template=standalone-xaf-modules--bug-report.md&title=), [Questions](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Question%2C+Standalone_XAF_Modules,+MasterDetail&template=standalone-xaf-modules--question.md&title=) or [Suggestions](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Enhancement%2C+Standalone_XAF_Modules,+MasterDetail&template=standalone-xaf-modules--feature-request.md&title=) use main project issues.

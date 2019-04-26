@@ -23,12 +23,12 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 ## Dependencies
 `.NetFramework: v4.5.2`
 
-<!-- -->|<!-- -->
-----|----
-**DevExpress.ExpressApp**|**Any**
-[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.0.13
- fasterflect|2.1.3
- System.ValueTuple|4.5.0
+|<!-- -->|<!-- -->
+|----|----
+|**DevExpress.ExpressApp**|**Any**
+|[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.0.14
+ |fasterflect|2.1.3
+ |System.ValueTuple|4.5.0
 
 ## Issues
 For [Bugs](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Bug%2C+Standalone_XAF_Modules,+ModelViewInheritance&template=standalone-xaf-modules--bug-report.md&title=), [Questions](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Question%2C+Standalone_XAF_Modules,+ModelViewInheritance&template=standalone-xaf-modules--question.md&title=) or [Suggestions](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Enhancement%2C+Standalone_XAF_Modules,+ModelViewInheritance&template=standalone-xaf-modules--feature-request.md&title=) use main project issues.
