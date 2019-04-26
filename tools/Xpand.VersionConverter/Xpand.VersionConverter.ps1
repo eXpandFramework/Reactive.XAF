@@ -13,7 +13,7 @@ param(
     [string]$referenceFilter = "DevExpress*",
     [string]$assemblyFilter = "Xpand.XAF.*"
 )
-# $VerbosePreference = "Continue"
+$VerbosePreference = "Continue"
 $ErrorActionPreference = "Stop"
 set-location $targetPath
 
@@ -28,13 +28,13 @@ function Using-Object {
     try {
         . $ScriptBlock
     }
-    catch{
-        $killDomain=$true
+    catch {
+        $killDomain = $true
     }
     finally {
         if ($null -ne $InputObject -and $InputObject -is [System.IDisposable]) {
             $InputObject.Dispose()
-            if ($killDomain){
+            if ($killDomain) {
                 Stop-Process -id $pid
             }
         }
@@ -85,18 +85,26 @@ $devExpressAssemblyName = Invoke-Command {
         if ($name) {
             New-Object System.Reflection.AssemblyName($name)
         }
-        else{
-            $hintPath=$dxReferences.HintPath|Where-Object{$_}
-            if ($hintPath ){
-                if ((Test-Path $hintPath)){
-                    $assembly=[Assembly]::LoadFile($hintPath)
+        else {
+            $hintPath = $dxReferences.HintPath | foreach-Object { 
+                if ($_){
+                    $path=$_
+                    if ( ![system.io.path]::IsPathRooted($path)) {
+                        $path= "$((Get-Item $projectFile).DirectoryName)\$_"
+                    }
+                    if (Test-Path $path){
+                        [System.IO.path]::GetFullPath($path)
+                    }
                 }
+            }|Where-Object{$_} | Select-Object -First 1
+            if ($hintPath ) {
+                $assembly = [Assembly]::LoadFile($hintPath)
             }
-            if (!$hintPath){
-                $name=$dxReferences.Include|Select-Object -First 1
-                $assembly=[Assembly]::LoadWithPartialName($name)
+            else {
+                $name = $dxReferences.Include | Select-Object -First 1
+                $assembly = [Assembly]::LoadWithPartialName($name)
             }
-            if ($assembly){
+            if ($assembly) {
                 $assembly.GetName()
             }
         }
