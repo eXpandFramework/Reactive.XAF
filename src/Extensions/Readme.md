@@ -5,6 +5,25 @@ There is no package or assembly though as the modules only link the methods they
 
 For example in the `Xpand.Source.Extensions.XAF.Model` namespace there is a `GetParent` method.
 
-https://github.com/eXpandFramework/XAF/blob/76e307ee628dba9df5296c00761e39cb1cb7c32d/src/Extensions/Extensions/XAF/Model/GetParent.cs#L5-L17
+```cs
+using DevExpress.ExpressApp.Model;
+
+namespace Xpand.Source.Extensions.XAF.Model{
+    internal static partial class Extensions{
+        public static TNode GetParent<TNode>(this IModelNode modelNode) where TNode : class, IModelNode{
+            if (modelNode is TNode node)
+                return node;
+            var parent = modelNode.Parent;
+            while (!(parent is TNode)) {
+                parent = parent.Parent;
+                if (parent == null)
+                    break;
+            }
+            return (TNode) parent;
+        }
+
+    }
+}
+```
 
 The consumer modules link/compile this file only, minimizing the dependencies.

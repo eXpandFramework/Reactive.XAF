@@ -1,6 +1,6 @@
 ![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.MasterDetail.svg?&style=flat) ![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.MasterDetail.svg?&style=flat)
 
-[![GitHub issues](https://img.shields.io/github/issues/eXpandFramework/expand/MasterDetail.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AXAF+MasterDetail) [![GitHub close issues](https://img.shields.io/github/issues-closed/eXpandFramework/eXpand/MasterDetail.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AXAF+MasterDetail)
+[![GitHub issues](https://img.shields.io/github/issues/eXpandFramework/expand/MasterDetail.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+MasterDetail) [![GitHub close issues](https://img.shields.io/github/issues-closed/eXpandFramework/eXpand/MasterDetail.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+MasterDetail)
 # About 
 
 The `MasterDetail` module can help you create platform agnostic master detail `XAF` views using only the Model Editor. 
@@ -23,11 +23,12 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 ## Dependencies
 `.NetFramework: v4.6.1`
 
-Name|Version
+<!-- -->|<!-- -->
 ----|----
-**DevExpress.Data**|**Any** **DevExpress.ExpressApp**|**Any**
-Xpand.VersionConverter|1.0.13
- [Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/Xpand.XAF.Modules.Reactive)|1.2.12
+**DevExpress.Data**|**Any**
+ **DevExpress.ExpressApp**|**Any**
+[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.0.13
+ [Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/Xpand.XAF.Modules.Reactive)|1.2.12.1
  fasterflect|2.1.3
  Ryder|0.8.0
  System.ValueTuple|4.5.0

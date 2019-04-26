@@ -16,7 +16,7 @@
 # About
 In the `DevExpress.XAF` repository you can find **low dependency** DevExpress XAF **modules** distributed as nugets only. 
 
-We aim for low dependency XAF modules so expect to see only a small set of classes per project. To learn more about each module navigate to its root `Readme` file.
+We aim for low dependency XAF modules so expect to see only a small set of classes per project. To learn more about each module navigate to its root `Readme` file or search the [Wiki](http://xaf.wiki.expandframework.com).
 
 There are two namespaces in the source, follow the links to read more. 
 1. The [DevExpress.XAF.Extensions](https://github.com/eXpandFramework/XAF/blob/master/src/Extensions/)

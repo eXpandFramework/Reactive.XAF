@@ -12,16 +12,16 @@ The modules are **not bound** to **DevExpress versioning**, which means you can 
 The modules follow the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 
 ## Platform agnostic modules list
-|PackageName|  Version | Downloads
+|PackageName|Version|Downloads
 |---|---|---|
-|[AutoCommit](http://AutoCommit.expandframework.com)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.AutoCommit.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.AutoCommit.svg?label=&style=flat)
-|  [CloneMemberValue](http://CloneMemberValue.expandframework.com) |![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.CloneMemberValue.svg?label=&style=flat)|   ![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.CloneMemberValue.svg?label=&style=flat)
-|[MasterDetail](http://MasterDetail.expandframework.com)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.MasterDetail.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.MasterDetail.svg?label=&style=flat)
-|  [ModelViewInheritance](http://ModelViewInheritance.expandframework.com) |![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.ModelViewInheritance.svg?label=&style=flat)|   ![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.ModelViewInheritance.svg?label=&style=flat)
-|[Reactive](http://reactive.expandframework.com)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.Reactive.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.Reactive.svg?label=&style=flat)
-|[SuppressConfirmation](http://SuppressConfirmation.expandframework.com)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.SuppressConfirmation.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.SuppressConfirmation.svg?label=&style=flat)
-|[ViewEditMode](http://viewEditMode.expandframework.com)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.ViewEditMode.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.ViewEditMode.svg?label=&style=flat)
-
+[AutoCommit](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/AutoCommit)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.AutoCommit.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.AutoCommit.svg?label=&style=flat)
+[CloneMemberValue](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/CloneMemberValue)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.CloneMemberValue.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.CloneMemberValue.svg?label=&style=flat)
+[CloneModelView](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/CloneModelView)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.CloneModelView.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.CloneModelView.svg?label=&style=flat)
+[MasterDetail](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/MasterDetail)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.MasterDetail.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.MasterDetail.svg?label=&style=flat)
+[ModelViewInheritance](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/ModelViewInheritance)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.ModelViewInheritance.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.ModelViewInheritance.svg?label=&style=flat)
+[Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/Reactive)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.Reactive.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.Reactive.svg?label=&style=flat)
+[SuppressConfirmation](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/SuppressConfirmation)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.SuppressConfirmation.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.SuppressConfirmation.svg?label=&style=flat)
+[ViewEditMode](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/ViewEditMode)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.ViewEditMode.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.ViewEditMode.svg?label=&style=flat)
 
 ## Issues
-Use main project [issues](https://github.com/eXpandFramework/eXpand/issues/new/choose)    
+Use main project [issues](https://github.com/eXpandFramework/eXpand/issues/new/choose)
