@@ -31,6 +31,7 @@ function Using-Object {
     finally {
         if ($null -ne $InputObject -and $InputObject -is [System.IDisposable]) {
             $InputObject.Dispose()
+            Stop-Process -id $pid
         }
     }
 }
