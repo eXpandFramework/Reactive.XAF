@@ -76,7 +76,7 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*.Tests.*", "*.Source.*
             $assemblyInfo = get-content "$($_.DirectoryName)\Properties\AssemblyInfo.cs"
             [System.Text.RegularExpressions.Regex]::Match($assemblyInfo, 'Version\("([^"]*)').Groups[1].Value
         }|Select-Object -First 1
-        $publishedVersion=(Find-Package $packageName -Source (Get-PackageFeed -Xpand)).Version
+        $publishedVersion=(Find-Package $packageName -Source (Get-PackageFeed -Xpand)|Select-Object -First 1).Version
         if (([version]$version) -lt ([version]$publishedVersion)){
             $version=$publishedVersion;
         }

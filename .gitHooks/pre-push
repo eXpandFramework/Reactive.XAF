@@ -1,4 +1,3 @@
 #!/bin/sh
 
 powershell $PWD/.GitHooks/UpdateWiki.ps1
-dev

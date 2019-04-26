@@ -153,6 +153,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\bin\Xpand.XAF.Modules.CloneMemberValue.dll</HintPath>
     </Reference>
+    <Reference Include="Xpand.XAF.Modules.CloneModelView">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\bin\Xpand.XAF.Modules.CloneModelView.dll</HintPath>
+    </Reference>
     <Reference Include="Xpand.XAF.Modules.MasterDetail">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\bin\Xpand.XAF.Modules.MasterDetail.dll</HintPath>
@@ -193,6 +197,8 @@
     <Compile Include="Artifacts\ModuleMock.cs" />
     <Compile Include="Artifacts\XafApplicationMock.cs" />
     <Compile Include="Artifacts\BaseTest.cs" />
+    <Compile Include="Modules\CloneModelView\CloneModelViewTests.cs" />
+    <Compile Include="Modules\CloneModelView\BOModel\CMV.cs" />
     <Compile Include="Modules\SuppressConfirmation\BOModel\SC.cs" />
     <Compile Include="Modules\SuppressConfirmation\SuppressConfirmationTests.cs" />
     <Compile Include="Modules\MasterDetail\BOModel\Md.cs" />

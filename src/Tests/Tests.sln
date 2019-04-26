@@ -30,6 +30,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Modules.AutoCommi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Modules.SuppressConfirmation", "..\Modules\Agnostic\SuppressConfirmation\Xpand.XAF.Modules.SuppressConfirmation.csproj", "{7D3556B8-8CF9-4622-94F1-0F28A7765D0E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Modules.CloneModelView", "..\Modules\Agnostic\CloneModelView\Xpand.XAF.Modules.CloneModelView.csproj", "{FB456706-C7F0-455C-B2F1-D75B143FDC28}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +79,11 @@ Global
 		{7D3556B8-8CF9-4622-94F1-0F28A7765D0E}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
 		{7D3556B8-8CF9-4622-94F1-0F28A7765D0E}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{7D3556B8-8CF9-4622-94F1-0F28A7765D0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB456706-C7F0-455C-B2F1-D75B143FDC28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB456706-C7F0-455C-B2F1-D75B143FDC28}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB456706-C7F0-455C-B2F1-D75B143FDC28}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
+		{FB456706-C7F0-455C-B2F1-D75B143FDC28}.EasyTest|Any CPU.Build.0 = Release|Any CPU
+		{FB456706-C7F0-455C-B2F1-D75B143FDC28}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -90,6 +97,7 @@ Global
 		{79060F89-8991-476F-B536-6DCB5492178E} = {05ECD54E-924F-4E78-8E29-DE3801A9F693}
 		{5685573C-15E0-43DF-B939-D842211BA5ED} = {05ECD54E-924F-4E78-8E29-DE3801A9F693}
 		{7D3556B8-8CF9-4622-94F1-0F28A7765D0E} = {05ECD54E-924F-4E78-8E29-DE3801A9F693}
+		{FB456706-C7F0-455C-B2F1-D75B143FDC28} = {05ECD54E-924F-4E78-8E29-DE3801A9F693}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C0A41578-813B-4E26-B5DF-D979F1C0A7D7}

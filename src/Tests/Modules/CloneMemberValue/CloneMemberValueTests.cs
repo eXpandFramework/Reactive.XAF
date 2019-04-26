@@ -47,16 +47,16 @@ namespace Xpand.XAF.Agnostic.Tests.Modules.CloneMemberValue{
             }
 
             var detailViews = CloneMemberValueService.DetailViewPairs.Replay();
-            var disposable = detailViews.Connect();
+            using (detailViews.Connect()){
+                var objectSpace1 = application.CreateObjectSpace();
+                var detailView1 = application.CreateDetailView(objectSpace1, objectSpace1.CreateObject<ACmv>());
+                var objectSpace2 = application.CreateObjectSpace();
+                var detailView2 = application.CreateDetailView(objectSpace2, objectSpace2.CreateObject<ACmv>());
 
-            var objectSpace1 = application.CreateObjectSpace();
-            var detailView1 = application.CreateDetailView(objectSpace1, objectSpace1.CreateObject<ACmv>());
-            var objectSpace2 = application.CreateObjectSpace();
-            var detailView2 = application.CreateDetailView(objectSpace2, objectSpace2.CreateObject<ACmv>());
-
-            var viewsTuple = await detailViews.FirstAsync();
-            viewsTuple.previous.ShouldBe(detailView1);
-            viewsTuple.current.ShouldBe(detailView2);
+                var viewsTuple = await detailViews.FirstAsync();
+                viewsTuple.previous.ShouldBe(detailView1);
+                viewsTuple.current.ShouldBe(detailView2);
+            }
         }
 
         [Fact]

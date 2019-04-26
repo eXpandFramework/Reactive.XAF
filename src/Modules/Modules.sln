@@ -32,6 +32,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Modules.SuppressC
 		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Modules.CloneModelView", "Agnostic\CloneModelView\Xpand.XAF.Modules.CloneModelView.csproj", "{FB456706-C7F0-455C-B2F1-D75B143FDC28}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,12 @@ Global
 		{7D3556B8-8CF9-4622-94F1-0F28A7765D0E}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{7D3556B8-8CF9-4622-94F1-0F28A7765D0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7D3556B8-8CF9-4622-94F1-0F28A7765D0E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB456706-C7F0-455C-B2F1-D75B143FDC28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB456706-C7F0-455C-B2F1-D75B143FDC28}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB456706-C7F0-455C-B2F1-D75B143FDC28}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
+		{FB456706-C7F0-455C-B2F1-D75B143FDC28}.EasyTest|Any CPU.Build.0 = Release|Any CPU
+		{FB456706-C7F0-455C-B2F1-D75B143FDC28}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB456706-C7F0-455C-B2F1-D75B143FDC28}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
