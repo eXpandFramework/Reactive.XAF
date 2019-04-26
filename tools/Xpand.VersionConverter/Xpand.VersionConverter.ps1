@@ -6,10 +6,10 @@ using namespace System.Text.RegularExpressions
 using namespace Mono.Cecil
 using namespace Mono.Cecil.pdb
 param(
-    # [parameter(Mandatory)]
-    [string]$projectFile = "C:\Work\eXpandFramework\expand\Xpand\Xpand.ExpressApp.Modules\ExcelImporter\Xpand.ExpressApp.ExcelImporter.csproj",
-    # [parameter(Mandatory)]
-    [string]$targetPath = "C:\Work\eXpandFramework\expand\Xpand.DLL\",
+    [parameter(Mandatory)]
+    [string]$projectFile ,
+    [parameter(Mandatory)]
+    [string]$targetPath ,
     [string]$referenceFilter = "DevExpress*",
     [string]$assemblyFilter = "Xpand.XAF.*"
 )
@@ -77,7 +77,24 @@ $devExpressAssemblyName = Invoke-Command {
     }
     else {
         $name = ($dxReferences | Where-Object { $_.Include -like "*Version*" } | Select-Object -First 1).Include
-        New-Object System.Reflection.AssemblyName($name)
+        if ($name) {
+            New-Object System.Reflection.AssemblyName($name)
+        }
+        else{
+            $hintPath=$dxReferences.HintPath|Where-Object{$_}
+            if ($hintPath ){
+                if ((Test-Path $hintPath)){
+                    $assembly=[Assembly]::LoadFile($hintPath)
+                }
+            }
+            if (!$hintPath){
+                $name=$dxReferences.Include|Select-Object -First 1
+                $assembly=[Assembly]::LoadWithPartialName($name)
+            }
+            if ($assembly){
+                $assembly.GetName()
+            }
+        }
     }
 } | Select-Object -last 1
 if (!$devExpressAssemblyName) {
