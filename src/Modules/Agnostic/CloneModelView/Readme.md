@@ -6,7 +6,7 @@
 
  
 
-The `CloneModelView` package can be used to enable specific CloneModelView scenarios by setting the `IModelObjectView.CloneModelView` attribute to true. The implemented CloneModelView scenarios are described in the details section.
+The `CloneModelView` package can be used to generate XAF model views in the generator layer, resulting in a clean model which is really important for monitoring and supporting purposes.
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 
 
@@ -35,11 +35,12 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 ## Issues
 For [Bugs](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Bug%2C+Standalone_XAF_Modules,+CloneModelView&template=standalone-xaf-modules--bug-report.md&title=), [Questions](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Question%2C+Standalone_XAF_Modules,+CloneModelView&template=standalone-xaf-modules--question.md&title=) or [Suggestions](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Enhancement%2C+Standalone_XAF_Modules,+CloneModelView&template=standalone-xaf-modules--feature-request.md&title=) use main project issues.
 ## Details
-The module satisfies the following conditions:
-1. When any `ObjectView` with `CloneModelView` enabled a signal will be created out of the [View.Closing](https://documentation.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.View.Closing.event) and the [QueryCanChangeCurrentObject](https://documentation.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.View.QueryCanChangeCurrentObject.event) events. For each signal emit the `View.ObjectSpace.CommitChanges()` is called.
-2. When the `ASPxListEditor` of any `ListView` with `AllowEdit` in `BatchEdit` mode and `CloneModelView` loses focus (`Client side`) then `View.ObjectSpace.CommitChanges()` is called.
+Using the `CloneModelViewAttribute` in your Bussiness Objects you can:
+1. Create one or many `DetailViews` or `ListViews` or `LookupListViews`.
+2. Additionaly for the generated view you can configure if it will be default.
+3. If you generate a `ListView` it is possible the related `DetailView`
 
-![image](https://user-images.githubusercontent.com/159464/56097334-50fbeb00-5efb-11e9-921b-08f6c2d5b607.png)
+
 
 ### Tests
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Modules/CloneModelView)
