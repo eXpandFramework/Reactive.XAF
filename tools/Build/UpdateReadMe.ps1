@@ -5,7 +5,7 @@ Set-Location $rootLocation
 
 $nuget = Get-NugetPath
 $packagesPath = "$rootLocation\bin\Nupkg\"
-$packages = & $nuget List -Source $packagesPath | ConvertTo-PackageObject | Select-Object -ExpandProperty Name
+$packages = & $nuget List -Source $packagesPath | ConvertTo-PackageObject | Select-Object -ExpandProperty Id
 function UpdateModulesList($rootLocation, $packages) {
     $moduleList = "|PackageName|Version|Downloads`r`n|---|---|---|`r`n"
     $packages | Where-Object { $_ -ne "Xpand.VersionConverter" } | ForEach-Object {

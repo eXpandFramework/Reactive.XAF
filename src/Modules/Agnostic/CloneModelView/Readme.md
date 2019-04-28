@@ -29,7 +29,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp**|**Any**
-|[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.0.16
+|[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.0.17
  |System.ValueTuple|4.5.0
 
 ## Issues
@@ -37,15 +37,14 @@ For [Bugs](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobek
 ## Details
 Using the `CloneModelViewAttribute` in your Bussiness Objects you can:
 1. Create one or many `DetailViews` or `ListViews` or `LookupListViews`.
-2. Additionaly for the generated view you can configure if it will be default.
-3. If you generate a `ListView` it is possible the related `DetailView`
+2. Additionaly for the cloned view you can configure if it will be the default view for the Bussiness Object.
+3. If you cloned a `ListView` it is possible the configure related `DetailView`
 
 
 
 ### Tests
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Modules/CloneModelView)
 
-### Examples
 ### Examples
 The module is integrated with the following eXpandFramework modules: `Dashboard, ExcelImporter, ModelDifference, System`,
 
