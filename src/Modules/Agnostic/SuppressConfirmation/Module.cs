@@ -5,10 +5,10 @@ using DevExpress.ExpressApp.SystemModule;
 using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.XAF.Modules.SuppressConfirmation{
-    public sealed class SupressConfirmationModule : ModuleBase{
+    public sealed class SuppressConfirmationModule : ModuleBase{
         public const string CategoryName = "Xpand.XAF.Modules.SupressConfirmation";
 
-        public SupressConfirmationModule(){
+        public SuppressConfirmationModule(){
             RequiredModuleTypes.Add(typeof(SystemModule));
             RequiredModuleTypes.Add(typeof(ReactiveModule));   
             
@@ -16,7 +16,7 @@ namespace Xpand.XAF.Modules.SuppressConfirmation{
 
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
-            SupressConfirmationService.Connect()
+            SuppressConfirmationService.Connect()
                 .Subscribe();
         }
 

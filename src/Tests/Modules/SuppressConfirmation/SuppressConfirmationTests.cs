@@ -12,14 +12,14 @@ using Xunit;
 
 namespace Xpand.XAF.Agnostic.Tests.Modules.SuppressConfirmation{
     [Collection(nameof(XafTypesInfo))]
-    public class SupressConfirmationTests : BaseTest{
+    public class SuppressConfirmationTests : BaseTest{
 
         [Theory]
         [InlineData(typeof(ListView))]
         [InlineData(typeof(DetailView))]
         public async Task Signal_When_Windows_with_SupressConfirmation_Enabled_ObjectView_changed(Type viewType){
             using (var application = DefaultAutoCommitModule().Application){
-                var windows = SupressConfirmationService.Windows.Replay();
+                var windows = SuppressConfirmationService.Windows.Replay();
                 using (windows.Connect()){
                     var window = application.CreateWindow(TemplateContext.View, null,true);
                     var objectView = application.CreateObjectView(viewType,typeof(SC));
@@ -36,7 +36,7 @@ namespace Xpand.XAF.Agnostic.Tests.Modules.SuppressConfirmation{
         [InlineData(typeof(DetailView))]
         public  void Change_Modification_Handling_Mode(Type viewType){
             using (var application = DefaultAutoCommitModule().Application){
-                var windows = SupressConfirmationService.Windows.Replay();
+                var windows = SuppressConfirmationService.Windows.Replay();
                 using (windows.Connect()){
                     var window = application.CreateWindow(TemplateContext.View, null,true);
                     var objectView = application.CreateObjectView(viewType,typeof(SC));
@@ -50,10 +50,10 @@ namespace Xpand.XAF.Agnostic.Tests.Modules.SuppressConfirmation{
         }
 
 
-        private SupressConfirmationModule DefaultAutoCommitModule(){
+        private SuppressConfirmationModule DefaultAutoCommitModule(){
             var application = new XafApplicationMock().Object;
             application.Title = "AutoCommitModule";
-            var supressConfirmationModule = new SupressConfirmationModule();
+            var supressConfirmationModule = new SuppressConfirmationModule();
             supressConfirmationModule.AdditionalExportedTypes.AddRange(new[]{typeof(SC)});
             application.SetupDefaults(supressConfirmationModule);
             

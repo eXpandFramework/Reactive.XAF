@@ -9,11 +9,11 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.SuppressConfirmation{
-    public static class SupressConfirmationService{
+    public static class SuppressConfirmationService{
         public const ModificationsHandlingMode ModificationsHandlingMode = (ModificationsHandlingMode) (-1);
 
         internal static IObservable<Unit> Connect(){
-            var viewSignal = RxApp.Application.WhenModule(typeof(SupressConfirmationModule))
+            var viewSignal = RxApp.Application.WhenModule(typeof(SuppressConfirmationModule))
                 .ObjectViewCreated()
                 .Where(view => ((IModelObjectViewSupressConfirmation) view.Model).SupressConfirmation)
                 .SelectMany(view => {
@@ -38,7 +38,7 @@ namespace Xpand.XAF.Modules.SuppressConfirmation{
             return window.Controllers.Cast<Controller>()
                 .Where(controller => strings.Any(name => controller.GetType().Name == name))
                 .Select(controller => {
-                    controller.Active[SupressConfirmationModule.CategoryName] = false;
+                    controller.Active[SuppressConfirmationModule.CategoryName] = false;
                     return window;
                 }).ToArray().ToObservable();
         }
@@ -51,7 +51,7 @@ namespace Xpand.XAF.Modules.SuppressConfirmation{
         public static IObservable<Frame> Windows{ get; } = RxApp.Windows.Cast<Frame>()
 
             .Merge(RxApp.NestedFrames.Cast<Frame>())
-            .WhenModule(typeof(SupressConfirmationModule))
+            .WhenModule(typeof(SuppressConfirmationModule))
             .ViewChanged().Where(_ => _.frame.View is ObjectView)
             .Where(_ => ((IModelObjectViewSupressConfirmation) _.frame.View.Model).SupressConfirmation)
             .Select(_ => _.frame).Publish().RefCount();

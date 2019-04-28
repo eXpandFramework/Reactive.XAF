@@ -77,7 +77,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SupressConfirmationService.cs" />
+    <Compile Include="SuppressConfirmationService.cs" />
     <Compile Include="ModelLogic.cs" />
     <Compile Include="Module.cs">
       <SubType>Component</SubType>
