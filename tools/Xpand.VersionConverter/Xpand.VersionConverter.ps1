@@ -14,7 +14,7 @@ param(
     [string]$assemblyFilter = "Xpand.XAF.*"
 )
 
-# $VerbosePreference = "Continue"
+$VerbosePreference = "Continue"
 $ErrorActionPreference = "Stop"
 
 function Use-Object {
@@ -50,7 +50,7 @@ function Get-MonoAssembly($path, [switch]$Write) {
     $readerParams.AssemblyResolver = New-Object MyDefaultAssemblyResolver
     [ModuleDefinition]::ReadModule($path, $readerParams).Assembly
 }
-function Get-DevExpressVersion($targetPath, $referenceFilter) {
+function Get-DevExpressVersion($targetPath, $referenceFilter,$dxReferences) {
     Write-Verbose "Finding DevExpress version..."
     $hintPath = $dxReferences.HintPath | foreach-Object { 
         if ($_) {
@@ -78,7 +78,10 @@ function Get-DevExpressVersion($targetPath, $referenceFilter) {
             }
         }
         else {
-            $dxReference=($dxReferences|Select-Object -First 1).Include
+            $include=($dxReferences|Select-Object -First 1).Include
+            $dxReference=[Regex]::Match($include, "DevExpress[^,]*", [RegexOptions]::IgnoreCase).Value
+            Write-Verbose "Include=$Include"
+            Write-Verbose "DxReference=$dxReference"
             $dxAssembly=Get-ChildItem "$env:windir\Microsoft.NET\assembly\GAC_MSIL"  *.dll -Recurse|Where-Object{$_ -like "*$dxReference.dll"}
             if ($dxAssembly){
                 Use-Object($assembly = Get-MonoAssembly $dxAssembly.FullName) {
@@ -176,7 +179,7 @@ public class MyDefaultAssemblyResolver : DefaultAssemblyResolver{
 }
 "@ -ReferencedAssemblies @("$monoPath\Mono.Cecil.dll")
 
-    $dxVersion = Get-DevExpressVersion $targetPath $referenceFilter
+    $dxVersion = Get-DevExpressVersion $targetPath $referenceFilter $dxReferences
     $references | Where-Object { $_.Include -like $assemblyFilter } | ForEach-Object {
         "$targetPath\$([Path]::GetFileName($_.HintPath))", "$($projectFileInfo.DirectoryName)\$($_.HintPath)" | ForEach-Object {
             if (Test-Path $_) {
