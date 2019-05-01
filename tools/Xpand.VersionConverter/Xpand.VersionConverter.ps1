@@ -106,7 +106,7 @@ function Update-Version($modulePath, $dxVersion) {
             $dxReference = $_
             Write-Verbose "Checking $_ reference..."
             if ($dxReference.Version -ne $dxVersion) {
-                $moduleReferences.Remove($dxReference)
+                $moduleReferences.Remove($dxReference)|Out-Null
                 $newMinor = "$($dxVersion.Major).$($dxVersion.Minor)"
                 $newName = [Regex]::Replace($dxReference.Name, ".(v[\d]{2}\.\d)", ".v$newMinor")
                 $regex = New-Object Regex("PublicKeyToken=([\w]*)")
@@ -179,7 +179,7 @@ public class MyDefaultAssemblyResolver : DefaultAssemblyResolver{
 }
 "@ -ReferencedAssemblies @("$monoPath\Mono.Cecil.dll")
 
-    $dxVersion = Get-DevExpressVersion $targetPath $referenceFilter $dxReferences
+    $dxVersion = Get-DevExpressVersion $targetPath $referenceFilter $dxReferences|Where-Object{$_}|Select-Object -First 1
     $references | Where-Object { $_.Include -like $assemblyFilter } | ForEach-Object {
         "$targetPath\$([Path]::GetFileName($_.HintPath))", "$($projectFileInfo.DirectoryName)\$($_.HintPath)" | ForEach-Object {
             if (Test-Path $_) {
