@@ -99,7 +99,7 @@ namespace Xpand.XAF.Agnostic.Tests.Modules.MasterDetail{
         }
 
         [Fact]
-        public async Task Refresh_listview_when_detailview_objectspace_commited(){
+        public async Task Refresh_listview_object_when_detailview_objectspace_commited(){
             var tuple = await When_list_view_selection_changed_synchronize_detailview_current_object();
 
             ((Md) tuple.detailViewItem.InnerView.CurrentObject).PropertyName = "updated";

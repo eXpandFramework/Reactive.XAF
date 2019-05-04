@@ -39,7 +39,8 @@ namespace Xpand.XAF.Modules.MasterDetail{
             get{
                 return MasterDetailDashboardViewItems
                     .SelectMany(_ => _.detailViewItem.InnerView.ObjectSpace.WhenCommited()
-                            .Select(o => _.listViewItem.InnerView.ObjectSpace.Refresh())
+                        .Select(tuple => _.listViewItem.InnerView.ObjectSpace)
+                        .Select(objectSpace => objectSpace.ReloadObject(objectSpace.GetObject(_.detailViewItem.InnerView.CurrentObject)))
                     )
                     .ToUnit();
             }
@@ -98,12 +99,9 @@ namespace Xpand.XAF.Modules.MasterDetail{
                 .ObjectTypeLinks
                 .FirstOrDefault(link => {
                     if (link.ModelClass.TypeInfo.Type == o.GetType()){
-                        var fitForCriteria =
-                            listView.ObjectSpace.IsObjectFitForCriteria(o, CriteriaOperator.Parse(link.Criteria));
-                        var b = !fitForCriteria.HasValue || fitForCriteria.Value;
-                        return b;
+                        var fitForCriteria = listView.ObjectSpace.IsObjectFitForCriteria(o, CriteriaOperator.Parse(link.Criteria));
+                        return !fitForCriteria.HasValue || fitForCriteria.Value;
                     }
-
                     return false;
                 });
             if (objectTypeLink != null){
