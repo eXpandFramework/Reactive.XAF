@@ -6,7 +6,8 @@ param(
     [bool]$build = $true,
     [bool]$cleanBin = $true,
     [string]$branch="master",
-    [switch]$InstallModules
+    [switch]$InstallModules,
+    [string[]]$taskList=@("Lab")
 )
 $ErrorActionPreference = "Stop"
 @([PSCustomObject]@{
@@ -14,7 +15,7 @@ $ErrorActionPreference = "Stop"
     Version ="4.7.4"
 },[PSCustomObject]@{
     Name = "XpandPosh"
-    Version ="1.9.8"
+    Version ="1.11.0"
 })|ForEach-Object{
     & "$PSScriptRoot\tools\build\Install-Module.ps1" $_
 }
@@ -29,4 +30,4 @@ Invoke-XPsake  "$PSScriptRoot\Build.ps1" -properties @{
     "build"          = $build;
     "dxVersion"          = $dxVersion;
     "branch"=$branch;
-}
+} -taskList $taskList

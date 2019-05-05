@@ -11,6 +11,7 @@ using DevExpress.ExpressApp.SystemModule;
 using DevExpress.Persistent.Base;
 using Xpand.Source.Extensions.XAF.ApplicationModulesManager;
 using Xpand.Source.Extensions.XAF.Frame;
+using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -40,7 +41,15 @@ namespace Xpand.XAF.Modules.MasterDetail{
                 return MasterDetailDashboardViewItems
                     .SelectMany(_ => _.detailViewItem.InnerView.ObjectSpace.WhenCommited()
                         .Select(tuple => _.listViewItem.InnerView.ObjectSpace)
-                        .Select(objectSpace => objectSpace.ReloadObject(objectSpace.GetObject(_.detailViewItem.InnerView.CurrentObject)))
+                        .Select(objectSpace => {
+                            if (_.listViewItem.Frame.Application.GetPlatform() == Platform.Win){
+                                objectSpace.ReloadObject(objectSpace.GetObject(_.detailViewItem.InnerView.CurrentObject));
+                            }
+                            else{
+                                objectSpace.Refresh();
+                            }
+                            return Unit.Default;
+                        })
                     )
                     .ToUnit();
             }
@@ -87,7 +96,8 @@ namespace Xpand.XAF.Modules.MasterDetail{
                 var detailView = ((DetailView) dashboardViewItem.InnerView);
                 return listView.WhenSelectionChanged()
                     .Select(tuple => listView.SelectedObjects.Cast<object>().FirstOrDefault())
-                    .DistinctUntilChanged()
+                    .WhenNotDefault()
+                    .DistinctUntilChanged(o => listView.ObjectSpace.GetKeyValue(o))
                     .Select(o => CreateDetailView(detailView, o, listView, dashboardViewItem, frame).CurrentObject)
                     .ToUnit();
             })
@@ -139,6 +149,16 @@ namespace Xpand.XAF.Modules.MasterDetail{
                 simpleAction.Active[MasterDetailModule.CategoryName] = false;
                 return simpleAction;
             }).AsObservable().FirstAsync();
+        }
+
+        public static IModelDashboardView NewModelDashboardView(this IModelApplication modelApplication, Type objectType){
+            var modelDashboardView = modelApplication.Views.AddNode<IModelDashboardView>();
+            var modelClass = modelApplication.BOModel.GetClass(objectType);
+            var modelListViewItem = modelDashboardView.Items.AddNode<IModelDashboardViewItem>();
+            modelListViewItem.View = modelClass.DefaultListView;
+            var modelDetailViewItem = modelDashboardView.Items.AddNode<IModelDashboardViewItem>();
+            modelDetailViewItem.View = modelClass.DefaultDetailView;
+            return modelDashboardView;
         }
 
         static IObservable<Unit> DisableListViewController(string typeName){

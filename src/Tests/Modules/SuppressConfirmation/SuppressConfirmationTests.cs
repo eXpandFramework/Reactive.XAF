@@ -7,6 +7,7 @@ using Shouldly;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Agnostic.Tests.Artifacts;
 using Xpand.XAF.Agnostic.Tests.Modules.SuppressConfirmation.BOModel;
+using Xpand.XAF.Modules.MasterDetail;
 using Xpand.XAF.Modules.SuppressConfirmation;
 using Xunit;
 
@@ -17,8 +18,8 @@ namespace Xpand.XAF.Agnostic.Tests.Modules.SuppressConfirmation{
         [Theory]
         [InlineData(typeof(ListView))]
         [InlineData(typeof(DetailView))]
-        public async Task Signal_When_Windows_with_SupressConfirmation_Enabled_ObjectView_changed(Type viewType){
-            using (var application = DefaultAutoCommitModule().Application){
+        public async Task Signal_When_Window_with_SupressConfirmation_Enabled_ObjectView_changed(Type viewType){
+            using (var application = DefaultSuppressConfirmationModule().Application){
                 var windows = SuppressConfirmationService.Windows.Replay();
                 using (windows.Connect()){
                     var window = application.CreateWindow(TemplateContext.View, null,true);
@@ -31,11 +32,28 @@ namespace Xpand.XAF.Agnostic.Tests.Modules.SuppressConfirmation{
             }
         }
 
+        [Fact]
+        public async Task Signal_When_DashboardView_with_SupressConfirmation_Enabled_ObjectView_changed(){
+            using (var application = DefaultSuppressConfirmationModule().Application){
+                var windows = SuppressConfirmationService.Windows.Replay();
+                using (windows.Connect()){
+                    var modelDashboardView = application.Model.NewModelDashboardView(typeof(SC));
+                    var dashboardView = application.CreateDashboardView(application.CreateObjectSpace(), modelDashboardView.Id, true);
+                    dashboardView.MockCreateControls();
+
+                    var frame = await windows.Take(1);
+                    frame.ShouldBeOfType<NestedFrame>();
+                    frame = await windows.Take(1);
+                    frame.ShouldBeOfType<NestedFrame>();
+                }
+            }
+        }
+
         [Theory]
         [InlineData(typeof(ListView))]
         [InlineData(typeof(DetailView))]
         public  void Change_Modification_Handling_Mode(Type viewType){
-            using (var application = DefaultAutoCommitModule().Application){
+            using (var application = DefaultSuppressConfirmationModule().Application){
                 var windows = SuppressConfirmationService.Windows.Replay();
                 using (windows.Connect()){
                     var window = application.CreateWindow(TemplateContext.View, null,true);
@@ -50,7 +68,7 @@ namespace Xpand.XAF.Agnostic.Tests.Modules.SuppressConfirmation{
         }
 
 
-        private SuppressConfirmationModule DefaultAutoCommitModule(){
+        private SuppressConfirmationModule DefaultSuppressConfirmationModule(){
             var application = new XafApplicationMock().Object;
             application.Title = "AutoCommitModule";
             var supressConfirmationModule = new SuppressConfirmationModule();

@@ -11,6 +11,7 @@ using Moq;
 using Shouldly;
 using Xpand.Source.Extensions.XAF.Action;
 using Xpand.Source.Extensions.XAF.Frame;
+using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Agnostic.Tests.Artifacts;
 using Xpand.XAF.Agnostic.Tests.Modules.MasterDetail.BOModel;
 using Xpand.XAF.Modules.MasterDetail;
@@ -22,11 +23,10 @@ namespace Xpand.XAF.Agnostic.Tests.Modules.MasterDetail{
     [Collection(nameof(XafTypesInfo))]
     public class MasterDetailTests:MasterDetailBaseTests {
 
-   
         [Fact]
         public  void When_model_dashboardView_has_listview_detailview_for_the_same_type_is_masterdetail_enabled(){
             using (var xafApplication = DefaultMasterDetailModule().Application){
-                var modelDashboardView = NewModelDashboardView(xafApplication);
+                var modelDashboardView = xafApplication.Model.NewModelDashboardView(typeof(Md));
                 ((IModelDashboardViewMasterDetail) modelDashboardView).MasterDetail.ShouldBe(true);
             }
         }
@@ -36,9 +36,7 @@ namespace Xpand.XAF.Agnostic.Tests.Modules.MasterDetail{
             var xafApplication = DefaultMasterDetailModule().Application;
             var masterDetailDashoardViewItems = MasterDetailService.MasterDetailDashboardViewItems.Replay();
             masterDetailDashoardViewItems.Connect();
-            var modelDashboardView = NewModelDashboardView(xafApplication);
-
-            
+            var modelDashboardView = xafApplication.Model.NewModelDashboardView(typeof(Md));
 
             var dashboardView = xafApplication.CreateDashboardView(xafApplication.CreateObjectSpace(), modelDashboardView.Id, true);
             dashboardView.MockCreateControls();
@@ -52,7 +50,7 @@ namespace Xpand.XAF.Agnostic.Tests.Modules.MasterDetail{
         [Fact]
         public async Task Handle_listView_process_selected_object_action(){
             using (var xafApplication = DefaultMasterDetailModule().Application){
-                var modelDashboardView = NewModelDashboardView(xafApplication);
+                var modelDashboardView = xafApplication.Model.NewModelDashboardView(typeof(Md));
                 var masterDetailDashoardViewItems = MasterDetailService.MasterDetailDashboardViewItems.Replay();
                 using (masterDetailDashoardViewItems.Connect()){
                     var dashboardView = xafApplication.CreateDashboardView(xafApplication.CreateObjectSpace(), modelDashboardView.Id, true);
@@ -75,8 +73,10 @@ namespace Xpand.XAF.Agnostic.Tests.Modules.MasterDetail{
             }
         }
 
-        [Fact]
-        public async Task<(DashboardViewItem listViewItem, DashboardViewItem detailViewItem)> When_list_view_selection_changed_synchronize_detailview_current_object(){
+        [Theory]
+        [InlineData(Platform.Agnostic)]
+        internal async Task<(DashboardViewItem listViewItem, DashboardViewItem detailViewItem)>
+            When_list_view_selection_changed_synchronize_detailview_current_object(Platform platform){
             var tuple = await ViewItems();
             var listView = ((ListView) tuple.listViewItem.InnerView);
             var md = listView.ObjectSpace.CreateObject<Md>();
@@ -98,9 +98,11 @@ namespace Xpand.XAF.Agnostic.Tests.Modules.MasterDetail{
                 .ShouldBe(true);
         }
 
-        [Fact]
-        public async Task Refresh_listview_object_when_detailview_objectspace_commited(){
-            var tuple = await When_list_view_selection_changed_synchronize_detailview_current_object();
+        [Theory]
+        [InlineData(Platform.Win)]
+        [InlineData(Platform.Web)]
+        internal async Task Refresh_listview_object_when_detailview_objectspace_commited(Platform platform){
+            var tuple = await When_list_view_selection_changed_synchronize_detailview_current_object(platform);
 
             ((Md) tuple.detailViewItem.InnerView.CurrentObject).PropertyName = "updated";
             tuple.detailViewItem.InnerView.ObjectSpace.CommitChanges();
@@ -113,7 +115,7 @@ namespace Xpand.XAF.Agnostic.Tests.Modules.MasterDetail{
 
         [Fact] 
         public async Task Configure_conditional_detailviews(){
-            var tuple = await When_list_view_selection_changed_synchronize_detailview_current_object();
+            var tuple = await When_list_view_selection_changed_synchronize_detailview_current_object(Platform.Agnostic);
 
             var detailViewObjectTypeLinks = ((IModelApplicationMasterDetail) Application.Model).DashboardMasterDetail.ObjectTypeLinks;
             var objectTypeLink = detailViewObjectTypeLinks.AddNode<IModelMasterDetailViewObjectTypeLink>();
@@ -134,8 +136,8 @@ namespace Xpand.XAF.Agnostic.Tests.Modules.MasterDetail{
     }
 
     public class MasterDetailBaseTests:BaseTest{
-        protected async Task<(DashboardViewItem listViewItem, DashboardViewItem detailViewItem)> ViewItems(XafApplication xafApplication){
-            var modelDashboardView = NewModelDashboardView(xafApplication);
+        internal async Task<(DashboardViewItem listViewItem, DashboardViewItem detailViewItem)> ViewItems(XafApplication xafApplication){
+            var modelDashboardView = xafApplication.Model.NewModelDashboardView(typeof(Md));
             var masterDetailDashoardViewItems = MasterDetailService.MasterDetailDashboardViewItems.Replay();
             masterDetailDashoardViewItems.Connect();
             var dashboardView = xafApplication.CreateDashboardView(xafApplication.CreateObjectSpace(), modelDashboardView.Id, true);
@@ -144,25 +146,15 @@ namespace Xpand.XAF.Agnostic.Tests.Modules.MasterDetail{
             return tuple;
         }
 
-        protected async Task<(DashboardViewItem listViewItem, DashboardViewItem detailViewItem)> ViewItems(){
-            var xafApplication = DefaultMasterDetailModule().Application;
+        internal async Task<(DashboardViewItem listViewItem, DashboardViewItem detailViewItem)> ViewItems(Platform platform=Platform.Agnostic){
+            var xafApplication = DefaultMasterDetailModule(platform).Application;
             return await ViewItems(xafApplication);
-        }
-
-        protected static IModelDashboardView NewModelDashboardView(XafApplication xafApplication){
-            var modelDashboardView = xafApplication.Model.Views.AddNode<IModelDashboardView>();
-            var modelClass = xafApplication.Model.BOModel.GetClass(typeof(Md));
-            var modelListViewItem = modelDashboardView.Items.AddNode<IModelDashboardViewItem>();
-            modelListViewItem.View = modelClass.DefaultListView;
-            var modelDetailViewItem = modelDashboardView.Items.AddNode<IModelDashboardViewItem>();
-            modelDetailViewItem.View = modelClass.DefaultDetailView;
-            return modelDashboardView;
         }
 
         public MockedXafApplication Application{ get; private set; }
 
-        protected MasterDetailModule DefaultMasterDetailModule(){
-            Application = new XafApplicationMock().Object;
+        internal MasterDetailModule DefaultMasterDetailModule(Platform platform=Platform.Agnostic){
+            Application = new XafApplicationMock(platform).Object;
             Application.Title = "MasterDetailModule";
             var masterDetailModule = new MasterDetailModule();
             masterDetailModule.AdditionalExportedTypes.AddRange(new[]{typeof(Md),typeof(MdParent)});

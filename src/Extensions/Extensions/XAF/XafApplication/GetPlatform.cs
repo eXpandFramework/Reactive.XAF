@@ -5,7 +5,7 @@ using System.Linq;
 using DevExpress.ExpressApp;
 
 namespace Xpand.Source.Extensions.XAF.XafApplication{
-    public enum Platform{
+    internal enum Platform{
         Agnostic,
         Win,
         Web,
