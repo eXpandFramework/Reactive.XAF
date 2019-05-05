@@ -42,7 +42,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
 
         public static IObservable<Unit> WhenDisposing<TAction>(this TAction simpleAction) where TAction:ActionBase{
-            return Disposing<TAction>(Observable.Return(simpleAction));
+            return Disposing(Observable.Return(simpleAction));
         }
 
         public static IObservable<TAction> WhenActionActivated<TAction>(this TAction simpleAction) where TAction:ActionBase{
@@ -52,13 +52,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<Unit> Disposing<TAction>(
             this IObservable<TAction> source) where TAction:ActionBase{
-
-                return source
+            return source
                     .SelectMany(item => Observable.Start(async () => await Observable.FromEventPattern<EventHandler, EventArgs>(h => item.Disposing += h,
                         h => item.Disposing -= h))
                     .Select(pattern => pattern)
-                    .ToUnit())
-                ;
+                    .ToUnit());
 
         }
 

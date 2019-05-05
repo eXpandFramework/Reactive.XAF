@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
@@ -33,9 +34,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
 
         public static IObservable<T> TakeUntilDisposingMainWindow<T>(this IObservable<T> source){
+//            return source;
             var disposing = RxApp.Windows.When(TemplateContext.ApplicationWindow).DisposingFrame().ToUnit()
                 .Merge(RxApp.Application.Disposed().Select(tuple => tuple).ToUnit())
-                .FirstAsync();
+                .FirstAsync()
+                ;
             return source.TakeUntil(disposing);
         }
 
@@ -54,15 +57,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source.SelectMany(_ => _.View != null ? _.AsObservable() : _.WhenViewChanged().Select(tuple => _))
                 .Where(frame => frame.View.Fits(viewType, nesting, objectType))
                 .Where(_ => {
-                    
                     if (isPopupLookup.HasValue){
                         var ispopupLookupTemplate = _.Template is ILookupPopupFrameTemplate;
-                        if (isPopupLookup.Value)
-                            return ispopupLookupTemplate;
-                        else
-                            return !ispopupLookupTemplate;
+                        return isPopupLookup.Value ? ispopupLookupTemplate : !ispopupLookupTemplate;
                     }
-
                     return true;
                 });
         }
@@ -84,7 +82,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 return Observable.FromEventPattern<EventHandler, EventArgs>(
                     handler => item.TemplateChanged += handler,
                     handler => item.TemplateChanged -= handler).Select(pattern => item)
-                    .TakeUntil(item.WhenDisposingFrame());
+                    .TakeUntil(item.WhenDisposingFrame())
+                    ;
             });
         }
 
@@ -93,7 +92,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 return Observable.FromEventPattern<EventHandler, EventArgs>(
                     handler => item.TemplateViewChanged += handler,
                     handler => item.TemplateViewChanged -= handler).Select(pattern => item)
-                    .TakeUntil(item.WhenDisposingFrame());
+                    .TakeUntil(item.WhenDisposingFrame())
+                    ;
             });
         }
 
@@ -101,15 +101,15 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return Observable.Return(source).TemplateChanged();
         }
 
-        public static IObservable<TFrame> WhenDisposingFrame<TFrame>(this TFrame source) where TFrame:Frame{
+        public static IObservable<Unit> WhenDisposingFrame<TFrame>(this TFrame source) where TFrame:Frame{
             return DisposingFrame(Observable.Return(source));
         }
 
-        public static IObservable<TFrame> DisposingFrame<TFrame>(this IObservable<TFrame> source) where TFrame:Frame{
-            return source.SelectMany(item => {
-                return Observable.FromEventPattern<EventHandler, EventArgs>(
+        public static IObservable<Unit> DisposingFrame<TFrame>(this IObservable<TFrame> source) where TFrame:Frame{
+            return source.SelectMany(async item => {
+                return await Observable.StartAsync(async () => await Observable.FromEventPattern<EventHandler, EventArgs>(
                     handler => item.Disposing += handler,
-                    handler => item.Disposing -= handler).Select(pattern => item);
+                    handler => item.Disposing -= handler).ToUnit());
             });
         }
     }

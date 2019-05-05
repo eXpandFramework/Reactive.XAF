@@ -44,8 +44,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
         public static IObservable<T> ViewControlsCreated<T>(this IObservable<T> controllers) where T:ViewController{
             return controllers.SelectMany(controller => {
                 return Observable.FromEventPattern<EventHandler, EventArgs>(
-                        handler => controller.ViewControlsCreated += handler,
-                        handler => controller.ViewControlsCreated -= handler).Select(pattern => controller)
+                    handler => controller.ViewControlsCreated += handler,
+                    handler => controller.ViewControlsCreated -= handler).Select(pattern => controller)
                     .TakeUntil(controller.WhenDeactivated());
             });
         }
@@ -59,20 +59,25 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
                 return Observable.FromEventPattern<EventHandler, EventArgs>(
                     handler => controller.Activated += handler,
                     handler => controller.Activated -= handler).Select(pattern => controller)
-                    .TakeUntil(controller.WhenDeactivated());
+                    .TakeUntil(controller.WhenDeactivated())
+                    ;
             }).Concat();
         }
 
         public static IObservable<T> WhenDeactivated<T>(this T controller) where T : Controller{
-            return Observable.Return(controller).Deactivated();
+            return Observable.FromEventPattern<EventHandler, EventArgs>(
+                    handler => controller.Deactivated += handler,
+                    handler => controller.Deactivated -= handler)
+                .Select(pattern => (T) pattern.Sender)
+                .TakeUntil(controller.WhenDisposed());
         }
 
         public static IObservable<T> Deactivated<T>(this IObservable<T> controllers) where T:Controller{
-            return controllers.Select(controller => {
+            return controllers.SelectMany(controller => {
                 return Observable.FromEventPattern<EventHandler, EventArgs>(
                     handler => controller.Deactivated += handler,
                     handler => controller.Deactivated -= handler).Select(pattern => controller);
-            }).Concat();
+            });
         }
 
         public static IObservable<T> FrameAssigned<T>(this IObservable<T> controllers,TemplateContext templateContext=default) where T:Controller{

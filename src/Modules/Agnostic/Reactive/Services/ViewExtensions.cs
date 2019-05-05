@@ -98,10 +98,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
 
         public static IObservable<Unit> Disposing<TView>(this IObservable<TView> source) where TView:View{
-            return Observable.Empty<Unit>();
-//            return source
-//                .Select(item => Observable.FromEventPattern<CancelEventHandler, EventArgs>(handler => item.Disposing += handler,handler => item.Disposing -= handler))
-//                .Concat().ToUnit();
+            return source
+                .SelectMany(item => Observable.StartAsync(async () => await Observable.FromEventPattern<CancelEventHandler, EventArgs>(handler => item.Disposing += handler,handler => item.Disposing -= handler)))
+                .ToUnit();
         }
 
         public static IObservable<ListPropertyEditor> NestedListViews<TView>(this IObservable<TView> views, params Type[] objectTypes)

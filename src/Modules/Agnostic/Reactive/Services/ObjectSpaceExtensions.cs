@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using Xpand.XAF.Modules.Reactive.Extensions;
@@ -20,8 +19,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source.SelectMany(item => {
                 return Observable
                     .FromEventPattern<EventHandler, EventArgs>(h => item.Committed += h, h => item.Committed -= h)
-//                    .TakeUntil(item.WhenDisposed())
-                    .TransformPattern<EventArgs, IObjectSpace>();
+                    .TransformPattern<EventArgs, IObjectSpace>()
+                    .TakeUntil(item.WhenDisposed());
             });
         }
 
@@ -50,13 +49,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
         
         public static IObservable<Unit> Disposed(this IObservable<IObjectSpace> source){
-            return Observable.Empty<Unit>();
-//            return source
-//                .SelectMany(item => Observable.FromEventPattern<EventHandler,EventArgs>(h => item.Disposed += h, h => item.Disposed -= h).FirstAsync())
-//                .ToUnit();
+            return source
+                .SelectMany(item => Observable.StartAsync(async () =>await Observable.FromEventPattern<EventHandler,EventArgs>(h => item.Disposed += h, h => item.Disposed -= h)))
+                .ToUnit();
         }
+
         public static IObservable<Unit> WhenDisposed(this IObjectSpace source) {
-            return Observable.Return(source).Disposed().FirstAsync();
+            return Observable.Return(source).Disposed();
         }
 
         public static IObservable<IObjectSpace> WhenModifyChanged(this IObjectSpace source){
@@ -67,7 +66,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source
                 .SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(h => item.ModifiedChanged += h, h => item.ModifiedChanged -= h)
                     .Select(pattern => (IObjectSpace) pattern.Sender)
-//                    .TakeUntil(item.WhenDisposed())
+                    .TakeUntil(item.WhenDisposed())
                 );
         }
 
