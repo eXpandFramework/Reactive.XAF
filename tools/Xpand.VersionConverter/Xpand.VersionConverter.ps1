@@ -8,13 +8,12 @@ using namespace System.Text.RegularExpressions
 using namespace Mono.Cecil
 using namespace Mono.Cecil.pdb
 param(
-    [string]$projectFile,
-    [string]$targetPath,
+    [string]$projectFile ,
+    [string]$targetPath ,
     [string]$referenceFilter = "DevExpress*",
     [string]$assemblyFilter = "Xpand.XAF.*"
 )
-
-$VerbosePreference = "Continue"
+# $VerbosePreference = "Continue"
 $ErrorActionPreference = "Stop"
 
 function Use-Object {
@@ -50,7 +49,7 @@ function Get-MonoAssembly($path, [switch]$Write) {
     $readerParams.AssemblyResolver = New-Object MyDefaultAssemblyResolver
     [ModuleDefinition]::ReadModule($path, $readerParams).Assembly
 }
-function Get-DevExpressVersion($targetPath, $referenceFilter,$dxReferences) {
+function Get-DevExpressVersion($targetPath, $referenceFilter, $dxReferences) {
     Write-Verbose "Finding DevExpress version..."
     $hintPath = $dxReferences.HintPath | foreach-Object { 
         if ($_) {
@@ -65,30 +64,24 @@ function Get-DevExpressVersion($targetPath, $referenceFilter,$dxReferences) {
     } | Where-Object { $_ } | Select-Object -First 1
     if ($hintPath ) {
         Write-Verbose "$($dxAssembly.Name.Name) found from $hintpath"
-        Use-Object($assembly = Get-MonoAssembly $hintPath) {
-            $assembly.name.version
-        }
+        [System.Diagnostics.FileVersionInfo]::GetVersionInfo($hintPath).FileVersion
     }
     else {
         $dxAssemblyPath = Get-ChildItem $targetPath "$referenceFilter*.dll" | Select-Object -First 1
         if ($dxAssemblyPath) {
             Write-Verbose "$($dxAssembly.Name.Name) found from $($dxAssemblyPath.FullName)"
-            Use-Object($assembly = Get-MonoAssembly $dxAssemblyPath.FullName) {
-                $assembly.name.version
-            }
+            [System.Diagnostics.FileVersionInfo]::GetVersionInfo($dxAssemblyPath.FullName).FileVersion
         }
         else {
-            $include=($dxReferences|Select-Object -First 1).Include
-            $dxReference=[Regex]::Match($include, "DevExpress[^,]*", [RegexOptions]::IgnoreCase).Value
+            $include = ($dxReferences | Select-Object -First 1).Include
+            $dxReference = [Regex]::Match($include, "DevExpress[^,]*", [RegexOptions]::IgnoreCase).Value
             Write-Verbose "Include=$Include"
             Write-Verbose "DxReference=$dxReference"
-            $dxAssembly=Get-ChildItem "$env:windir\Microsoft.NET\assembly\GAC_MSIL"  *.dll -Recurse|Where-Object{$_ -like "*$dxReference.dll"}
-            if ($dxAssembly){
-                Use-Object($assembly = Get-MonoAssembly $dxAssembly.FullName) {
-                    $assembly.name.version
-                }
+            $dxAssembly = Get-ChildItem "$env:windir\Microsoft.NET\assembly\GAC_MSIL"  *.dll -Recurse | Where-Object { $_ -like "*$dxReference.dll" }
+            if ($dxAssembly) {
+                [System.Diagnostics.FileVersionInfo]::GetVersionInfo($dxAssembly.FullName).FileVersion
             }
-            else{
+            else {
                 throw "Cannot find DevExpress Version"
             }
             
@@ -106,7 +99,7 @@ function Update-Version($modulePath, $dxVersion) {
             $dxReference = $_
             Write-Verbose "Checking $_ reference..."
             if ($dxReference.Version -ne $dxVersion) {
-                $moduleReferences.Remove($dxReference)|Out-Null
+                $moduleReferences.Remove($dxReference) | Out-Null
                 $newMinor = "$($dxVersion.Major).$($dxVersion.Minor)"
                 $newName = [Regex]::Replace($dxReference.Name, ".(v[\d]{2}\.\d)", ".v$newMinor")
                 $regex = New-Object Regex("PublicKeyToken=([\w]*)")
@@ -138,20 +131,37 @@ function Update-Version($modulePath, $dxVersion) {
         }   
     }
 }
+
+set-location $targetPath
+Write-Verbose "Running Version Converter on project $projectFile with target $targetPath"
+$projectFileInfo = Get-Item $projectFile
+[xml]$csproj = Get-Content $projectFileInfo.FullName
+$references = $csproj.Project.ItemGroup.Reference
+$dxReferences = $references | Where-Object { $_.Include -like "$referenceFilter" }    
+$dxVersion = Get-DevExpressVersion $targetPath $referenceFilter $dxReferences | Where-Object { $_ } | Select-Object -First 1
+$analyze = $references | Where-Object { 
+    if ($_.Include -like "$assemblyFilter") {
+        $packageFile = "$($projectFileInfo.DirectoryName)\$($_.HintPath)"
+        if (Test-Path $packageFile) {
+            $packageDir = (Get-Item $packageFile).DirectoryName
+            $exists = (Test-Path "$packageDir\VersionConverter.v.$dxVersion.DoNotDelete")
+            !$exists
+        }
+    }
+} | Select-Object -First 1
+if (!$analyze) {
+    Write-Verbose "All packages already patched for $dxversion"
+    return
+}
 try {
     $mtx = [Mutex]::OpenExisting("VersionConverterMutex")
 }
 catch {
-    $mtx = [Mutex]::new($true, "VersionConverterMutex")
+    $mtx = [Mutex]::new($false, "VersionConverterMutex")
 }
-
+$mtx.WaitOne() | Out-Null
 try {
-    set-location $targetPath
-    Write-Verbose "Running Version Converter on project $projectFile with target $targetPath"
-    $projectFileInfo = Get-Item $projectFile
-    [xml]$csproj = Get-Content $projectFileInfo.FullName
-    $references = $csproj.Project.ItemGroup.Reference
-    $dxReferences = $references | Where-Object { $_.Include -like "$referenceFilter" }
+    
     $root = $PSScriptRoot
     Write-Verbose "Loading Mono.Cecil"
     $monoPath = "$root\mono.cecil.0.10.3\lib\net40"
@@ -179,14 +189,24 @@ public class MyDefaultAssemblyResolver : DefaultAssemblyResolver{
 }
 "@ -ReferencedAssemblies @("$monoPath\Mono.Cecil.dll")
 
-    $dxVersion = Get-DevExpressVersion $targetPath $referenceFilter $dxReferences|Where-Object{$_}|Select-Object -First 1
+    
     $references | Where-Object { $_.Include -like $assemblyFilter } | ForEach-Object {
-        "$targetPath\$([Path]::GetFileName($_.HintPath))", "$($projectFileInfo.DirectoryName)\$($_.HintPath)" | ForEach-Object {
-            if (Test-Path $_) {
-                $modulePath = (Get-Item $_).FullName
-                Write-Verbose "Checking $modulePath references.."
-                Update-Version $modulePath $dxVersion
+        $packageFile = "$($projectFileInfo.DirectoryName)\$($_.HintPath)"
+        $packageDir = (Get-Item $packageFile).DirectoryName
+        Get-ChildItem $packageDir *VersionConverter.v.* -Exclude $dxVersion|ForEach-Object{
+            Remove-Item $_.FullName -Recurse -Force
+        }
+        $versionConverterFlag="$packageDir\VersionConverter.v.$dxVersion.DoNotDelete"
+        if (!(Test-Path $versionConverterFlag)){
+            "$targetPath\$([Path]::GetFileName($_.HintPath))", $packageFile | ForEach-Object {
+                if (Test-Path $_) {
+                    $modulePath = (Get-Item $_).FullName
+                    Write-Verbose "Checking $modulePath references.."
+                    Update-Version $modulePath $dxVersion
+                }
             }
+            Write-Verbose "Flag $versionConverterFlag"
+            New-Item $versionConverterFlag -ItemType Directory|Out-Null
         }
     }
 }
@@ -194,6 +214,11 @@ catch {
     throw $_.Exception
 }
 finally {
-    $mtx.ReleaseMutex()
-    $mtx.Dispose()
+    try {
+        $mtx.ReleaseMutex() | Out-Null
+        $mtx.Dispose() | Out-Null
+    }
+    catch {
+        
+    }
 }
