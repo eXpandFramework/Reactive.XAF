@@ -5,7 +5,7 @@ param(
     [string]$dxVersion = "18.2.7",
     [bool]$build = $true,
     [bool]$cleanBin = $true,
-    [string]$branch="master",
+    [string]$branch="lab",
     [switch]$InstallModules,
     [string[]]$taskList=@("Lab")
 )
