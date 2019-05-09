@@ -1,5 +1,8 @@
-﻿using System.Reactive.Linq;
+﻿using System.Diagnostics;
+using System.Reactive.Linq;
 using DevExpress.ExpressApp;
+using Mono.Cecil;
+using Mono.Cecil.Pdb;
 using Shouldly;
 using Xpand.XAF.Agnostic.Tests.Artifacts;
 using Xpand.XAF.Agnostic.Tests.Modules.ViewEditMode.BOModel;
@@ -10,6 +13,19 @@ using Xunit;
 namespace Xpand.XAF.Agnostic.Tests.Modules.ViewEditMode{
     [Collection(nameof(XafTypesInfo))]
     public class ViewEditModeTests : BaseTest{
+        public void MethodName(){
+            var readerParameters = new ReaderParameters();
+            readerParameters.ReadSymbols = true;
+            readerParameters.ReadWrite = true;
+            var fileName = @"C:\Work\eXpandFramework\Packages\bin\Xpand.XAF.Modules.CloneModelView.dll";
+            var assemblyDefinition = AssemblyDefinition.ReadAssembly(
+                fileName,
+                readerParameters);
+            var writerParameters = new WriterParameters() {WriteSymbols = true};
+
+            assemblyDefinition.Write(writerParameters);
+            Process.Start(@"C:\Work\eXpandFramework\Packages\IndexSources.ps1");
+        }
 
         [Theory]
         [InlineData(true,DevExpress.ExpressApp.Editors.ViewEditMode.Edit)]

@@ -7,7 +7,7 @@ param(
     [bool]$cleanBin = $true,
     [string]$branch="lab",
     [switch]$InstallModules,
-    [string[]]$taskList=@("Lab")
+    [string[]]$taskList=@("Release")
 )
 $ErrorActionPreference = "Stop"
 @([PSCustomObject]@{
