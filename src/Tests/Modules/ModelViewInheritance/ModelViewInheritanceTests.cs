@@ -15,7 +15,6 @@ namespace Xpand.XAF.Agnostic.Tests.Modules.ModelViewInheritance{
         [Theory]
         [ClassData(typeof(ModelViewInheritanceTestData))]
         public void Inherit_And_Modify_A_BaseView(ViewType viewType, bool attribute) {
-            
             ModelViewInheritanceUpdater.Disabled = true;
             var application = new XafApplicationMock().Object;
             var modelViewIneritanceModule = CreateModelViewIneritanceModule(viewType, attribute, application);

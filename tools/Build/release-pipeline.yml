@@ -28,6 +28,11 @@ steps:
     runTestsInIsolation: true
     codeCoverageEnabled: true
     rerunFailedTests: true 
+- task: PublishTestResults@2
+  inputs:
+    testRunner: VSTest
+    testResultsFiles: '**/*.trx'
+    failOnStandardError: 'true'
 - powershell: | 
 - task: PowerShell@2
   displayName: Publish
