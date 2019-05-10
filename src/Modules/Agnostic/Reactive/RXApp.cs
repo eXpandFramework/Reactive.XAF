@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Security;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using Fasterflect;
@@ -41,6 +43,37 @@ namespace Xpand.XAF.Modules.Reactive{
             var createNestedFrame = methodInfos.First(info => info.Name==nameof(XafApplication.CreateNestedFrame));
             NestedFrameRedirection = Redirection.Observe(createNestedFrame)
                 .Publish().RefCount();
+
+            WebChecks();
+        }
+
+        private static void WebChecks(){
+            var systemWebAssembly = AppDomain.CurrentDomain.GetAssemblies()
+                .FirstOrDefault(assembly => assembly.GetName().Name == "System.Web");
+            var httpContextType = systemWebAssembly?.Types().First(_ => _.Name == "HttpContext");
+            if (httpContextType != null){
+                Windows.When(TemplateContext.ApplicationWindowContextName)
+                    .TemplateChanged()
+                    .FirstAsync()
+                    .Subscribe(window => {
+                        var isAsync = (bool) window.Template.GetPropertyValue("IsAsync");
+                        if (!isAsync){
+                            var response = httpContextType.GetPropertyValue("Current").GetPropertyValue("Response");
+                            response.CallMethod("Write", "The current page is not async. Add Async=true to page declaration");
+                            response.CallMethod("End");
+                        }
+
+                        var section = ConfigurationManager.GetSection("system.web/httpRuntime");
+                        var values = section.GetPropertyValue("Values");
+                        var indexer = values.GetIndexer("targetFramework");
+                        if (indexer == null || new Version($"{indexer}") < Version.Parse("4.6.1")){
+                            var response = httpContextType.GetPropertyValue("Current").GetPropertyValue("Response");
+                            var message = @"The HttpRuntime use a SynchronizationContext not optimized for asynchronous pages. Please modify your web.config as: <httpRuntime requestValidationMode=""4.5"" targetFramework=""4.6.1"" />";
+                            response.CallMethod("Write",SecurityElement.Escape(message));
+                            response.CallMethod("End");
+                        }
+                    });
+            }
         }
 
         public static IObservable<Unit> UpdateMainWindowStatus<T>(IObservable<T> messages,TimeSpan period=default){
