@@ -12,7 +12,7 @@ The modules are **not bound** to **DevExpress versioning**, which means you can 
 The modules follow the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 
 ## Platform agnostic modules list
-|PackageName|Version|Downloads
+|PackageName|Version|[![Custom badge](https://img.shields.io/endpoint.svg?label=Nuget&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAF)](https://www.nuget.org/packages?q=Xpand.XAF) 
 |---|---|---|
 [AutoCommit](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/AutoCommit)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.AutoCommit.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.AutoCommit.svg?label=&style=flat)
 [CloneMemberValue](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/CloneMemberValue)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.CloneMemberValue.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.CloneMemberValue.svg?label=&style=flat)

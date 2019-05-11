@@ -1,3 +1,5 @@
+[![Custom badge](https://img.shields.io/endpoint.svg?label=Nuget.org&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAF)](https://www.nuget.org/packages?q=Xpand.XAF) 
+
 [![GitHub stars](https://img.shields.io/github/stars/eXpandFramework/DevExpress.XAF.svg)](https://github.com/eXpandFramework/DevExpress.XAF/stargazers) **Star the project if you think it deserves it.** 
 
 [![GitHub forks](https://img.shields.io/github/forks/eXpandFramework/DevExpress.XAF.svg)](https://github.com/eXpandFramework/DevExpress.XAF/network) **Fork the project to extend and contribute.**

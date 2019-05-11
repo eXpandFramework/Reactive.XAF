@@ -28,14 +28,12 @@ steps:
     runTestsInIsolation: true
     codeCoverageEnabled: true
     rerunFailedTests: true 
-
 - task: PowerShell@2
   displayName: CheckTests
   inputs:
     targetType: filePath
     filePath: .\tools\build\check-tests.ps1
     arguments: $(AzureToken) $(Build.DefinitionName) $(Build.BuildNumber)
-    
 - powershell: | 
 - task: PowerShell@2
   displayName: Publish
