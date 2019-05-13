@@ -68,7 +68,14 @@ namespace Tests.Artifacts {
                 var frameTemplateFactoryMock = new Mock<IFrameTemplateFactory>();
                 var frameTemplateMock = new Mock<System.Web.UI.Control>(){CallBase = true}.As<IFrameTemplate>();
                 frameTemplateMock.Setup(template => template.GetContainers()).Returns(new ActionContainerCollection());
-                frameTemplateFactoryMock.Setup(factory => factory.CreateTemplate(It.IsAny<TemplateContext>())).Returns(frameTemplateMock.Object);
+                frameTemplateFactoryMock.Setup(factory => factory.CreateTemplate(It.IsAny<TemplateContext>())).Returns(
+                    (TemplateContext context) => {
+                        if (context == TemplateContext.NestedFrame){
+                            return (IFrameTemplate) frameTemplateMock.As<ISupportActionsToolbarVisibility>().Object;
+                        }
+
+                        return frameTemplateMock.Object;
+                    });
                 webApplication.FrameTemplateFactory = frameTemplateFactoryMock.Object;
             }
             else{

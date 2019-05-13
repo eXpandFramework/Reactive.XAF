@@ -58,11 +58,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<(T view, EventArgs e)> ControlsCreated<T>(this IObservable<T> source) where T:View{
             return source.Cast<View>().SelectMany(view => {
-                return Observable.FromEventPattern<EventHandler, EventArgs>(
-                    handler => view.ControlsCreated += handler,
-                    handler => view.ControlsCreated -= handler)
-                    .TakeUntil(view.WhenDisposingView().Select(unit => unit))
-                    ;
+                return view.IsControlCreated
+                    ? Observable.Return(new EventPattern<EventArgs>(view, EventArgs.Empty))
+                    : Observable.FromEventPattern<EventHandler, EventArgs>(
+                            handler => view.ControlsCreated += handler,
+                            handler => view.ControlsCreated -= handler)
+                        .TakeUntil(view.WhenDisposingView().Select(unit => unit));
             }).TransformPattern<EventArgs,T>();
         }
 

@@ -14,11 +14,15 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.Reactive{
-    public static partial class RxApp{
+    internal static partial class RxApp{
         
         static readonly Subject<Frame> FramesSubject=new Subject<Frame>();
         static readonly Subject<Window> PopupWindowsSubject=new Subject<Window>();
         static RxApp(){
+            Frames = FramesSubject.DistinctUntilChanged()
+                .Merge(PopupWindows).Publish();
+            ((IConnectableObservable<Frame>) Frames).Connect();
+            Frames.Subscribe(frame => { });
             var harmony = new Harmony(typeof(RxApp).Namespace);
             PatchXafApplication(harmony);
             if (XafApplicationExtensions.ApplicationPlatform == Platform.Web){
@@ -31,13 +35,18 @@ namespace Xpand.XAF.Modules.Reactive{
             var createFrameMethodPatch = GetMethodInfo(nameof(CreateFrame));
             var frameMethods = new[]{
                 xafApplicationMethods.First(info => info.Name == nameof(XafApplication.CreateNestedFrame)),
-                xafApplicationMethods.First(info => info.Name == nameof(XafApplication.CreateFrame)),
-                xafApplicationMethods.First(info =>
-                    info.Name == nameof(XafApplication.CreateWindow) && info.Parameters().Count == 5)
+                xafApplicationMethods.First(info => info.Name == nameof(XafApplication.CreateFrame))
             };
             foreach (var frameMethod in frameMethods){
                 harmony.Patch(frameMethod, finalizer: new HarmonyMethod(createFrameMethodPatch));
             }
+
+            var createWindows = xafApplicationMethods.Where(info =>
+                info.Name == nameof(XafApplication.CreateWindow) );
+            foreach (var createWindow in createWindows){
+                harmony.Patch(createWindow, finalizer: new HarmonyMethod(GetMethodInfo(nameof(CreateWindow))));    
+            }
+            
 
             var createPopupWindow = xafApplicationMethods.First(info => info.Name == nameof(CreatePopupWindow)&&info.Parameters().Count==5);
             harmony.Patch(createPopupWindow, finalizer: new HarmonyMethod(GetMethodInfo(nameof(CreatePopupWindow))));
@@ -91,9 +100,9 @@ namespace Xpand.XAF.Modules.Reactive{
 
         internal static IObservable<Window> PopupWindows => PopupWindowsSubject;
         
-        internal static IObservable<Frame> Frames => FramesSubject.Merge(PopupWindows);
+        internal static IObservable<Frame> Frames{ get; }
 
-        
+
         public static IObservable<Window> MainWindow => throw new NotImplementedException();
 
         public static IObservable<(Frame masterFrame, NestedFrame detailFrame)> MasterDetailFrames(Type masterType, Type childType){

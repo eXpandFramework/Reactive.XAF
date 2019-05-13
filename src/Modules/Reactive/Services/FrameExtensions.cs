@@ -69,16 +69,16 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
 
         public static IObservable<T> TemplateChanged<T>(this IObservable<T> source,bool skipWindowsCtorAssigment=false) where T:Frame{
-//            var winWindowCreated = RxApp.Windows.Where(window => window.GetType().Name=="WinWindow").Cast<T>()
-//                .Select(frame => frame);
             return source.SelectMany(item => {
+                if (item.Template != null){
+                    return item.AsObservable();
+                }
                 return Observable.FromEventPattern<EventHandler, EventArgs>(
                         handler => item.TemplateChanged += handler,
                         handler => item.TemplateChanged -= handler)
                     .Select(pattern => item)
                     .TakeUntil(item.WhenDisposingFrame());
             });
-//            .Merge(winWindowCreated);
         }
 
         public static IObservable<TFrame> WhenTemplateChanged<TFrame>(this TFrame source) where TFrame : Frame{

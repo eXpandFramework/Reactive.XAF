@@ -12,11 +12,12 @@ The modules are **not bound** to **DevExpress versioning**, which means you can 
 The modules follow the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 
 ## Platform agnostic modules list
-|PackageName|Version|[![Custom badge](https://img.shields.io/endpoint.svg?label=Nuget&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAF)](https://www.nuget.org/packages?q=Xpand.XAF) 
+|PackageName|Version|Downloads
 |---|---|---|
 [AutoCommit](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/AutoCommit)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.AutoCommit.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.AutoCommit.svg?label=&style=flat)
 [CloneMemberValue](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/CloneMemberValue)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.CloneMemberValue.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.CloneMemberValue.svg?label=&style=flat)
 [CloneModelView](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/CloneModelView)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.CloneModelView.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.CloneModelView.svg?label=&style=flat)
+[HideToolBar](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/HideToolBar)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.HideToolBar.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.HideToolBar.svg?label=&style=flat)
 [MasterDetail](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/MasterDetail)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.MasterDetail.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.MasterDetail.svg?label=&style=flat)
 [ModelViewInheritance](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/ModelViewInheritance)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.ModelViewInheritance.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.ModelViewInheritance.svg?label=&style=flat)
 [Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/Reactive)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.Reactive.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.Reactive.svg?label=&style=flat)

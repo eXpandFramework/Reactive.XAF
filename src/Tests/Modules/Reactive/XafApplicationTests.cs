@@ -46,7 +46,7 @@ namespace Tests.Modules.Reactive{
                 var windows = application.WhenWindowCreated().Replay();
                 windows.Connect();
 
-                var window = application.CreateWindow(TemplateContext.ApplicationWindow, new List<Controller>(), true);
+                var window = application.CreateWindow(TemplateContext.ApplicationWindow, new List<Controller>(),true);
                 var popupWindow = application.CreatePopupWindow(TemplateContext.ApplicationWindow, null);
 
                 (await windows.Take(1)).ShouldBe(window);

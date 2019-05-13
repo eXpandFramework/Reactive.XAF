@@ -91,7 +91,8 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
 
         public static IObservable<(TDisposable frame,EventArgs args)> Disposed<TDisposable>(this IObservable<TDisposable> source) where TDisposable:IComponent{
             return source
-                .SelectMany(item => Observable.StartAsync(async () =>await Observable.FromEventPattern<EventHandler, EventArgs>(h => item.Disposed += h, h => item.Disposed -= h)))
+//                .SelectMany(item => Observable.StartAsync(async () =>await Observable.FromEventPattern<EventHandler, EventArgs>(h => item.Disposed += h, h => item.Disposed -= h)))
+                .SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(h => item.Disposed += h, h => item.Disposed -= h).FirstAsync())
                 .Select(pattern => pattern)
                 .TransformPattern<EventArgs,TDisposable>();
         }

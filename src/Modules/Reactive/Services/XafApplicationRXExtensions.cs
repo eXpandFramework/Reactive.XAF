@@ -8,6 +8,31 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class XafApplicationRXExtensions{
+//        public static IObservable<Frame> FrameTemplateChanged<T>(this IObservable<T> source,bool skipWindowsCtorAssigment = false) where T : XafApplication{
+//            return source.SelectMany(application => application.WhenFrameTemplateChanged());
+//        }
+
+//        public static IObservable<Frame> WhenFrameTemplateViewControlsCreated(this XafApplication application){
+//            return application.WhenFrameTemplateViewChanged()
+//                .SelectMany(frame =>frame.View.WhenControlsCreated().Select(_ => frame))
+//                ;
+//        }
+
+//        public static IObservable<Frame> WhenFrameTemplateViewChanged(this XafApplication application){
+//            return application.WhenFrameTemplateChanged().TemplateViewChanged();
+//        }
+
+//        public static IObservable<Frame> WhenFrameTemplateChanged(this XafApplication application,bool skipWindowsCtorAssigment = false){
+//            var winWindow = application.WhenWindowCreated().Where(window => !skipWindowsCtorAssigment&&window.GetType().Name == "WinWindow");
+//            return application
+//                .WhenFrameCreated()
+//                .Select(frame => frame)
+//                .TemplateChanged()
+//                .Select(frame => frame)
+//                .Merge(winWindow)
+//                .Select(frame => frame);
+//        }
+
         public static IObservable<XafApplication> WhenModule(
             this IObservable<XafApplication> source, Type moduleType){
             return source.Where(_ => _.Modules.FindModule(moduleType)!=null);

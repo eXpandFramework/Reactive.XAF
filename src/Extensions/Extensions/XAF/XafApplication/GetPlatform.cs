@@ -22,6 +22,7 @@ namespace Xpand.Source.Extensions.XAF.XafApplication{
             var httpContextType = systemWebAssembly?.Types().First(_ => _.Name == "HttpContext");
             ApplicationPlatform = httpContextType?.GetPropertyValue("Current") != null ? Platform.Web : Platform.Win;
         }
+        
         internal static Platform GetPlatform(this IEnumerable<ModuleBase> moduleBases){
             var modules = moduleBases as ModuleBase[] ?? moduleBases.ToArray();
             var application = modules.Select(_ => _.Application).FirstOrDefault(_ => _!=null);
@@ -62,7 +63,12 @@ namespace Xpand.Source.Extensions.XAF.XafApplication{
         }
 
         public static Platform GetPlatform(this DevExpress.ExpressApp.XafApplication application){
-            return ApplicationPlatform;
+            var appNames = new[]{"WinApplication","WebApplication"};
+            var baseType = application.GetType().BaseType;
+            while (baseType != null &&baseType.Namespace!=null&& (!appNames.Contains(baseType.Name)&&baseType.Namespace.StartsWith("DevExpress.ExpressApp"))){
+                baseType = baseType.BaseType;
+            }
+            return baseType?.Name=="WinApplication"?Platform.Win : Platform.Web;
         }
     }
 }

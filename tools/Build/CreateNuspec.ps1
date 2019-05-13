@@ -18,7 +18,7 @@ if (Test-path $root\src\libs){
     $libs=Get-ChildItem $root\src\libs *.dll
 }
 
-get-childitem "$root\src\" -Include "*.csproj" -Exclude "*.Tests.*", "*.Source.*" -Recurse | ForEach-Object {
+get-childitem "$root\src\" -Include "*.csproj" -Exclude "*Tests*", "*.Source.*" -Recurse | ForEach-Object {
     [xml]$nuspec = Get-Content $template
     $metaData = $nuspec.Package.Metadata
     $metaData.dependencies.dependency.parentnode.removechild($metaData.dependencies.dependency)|Out-Null
