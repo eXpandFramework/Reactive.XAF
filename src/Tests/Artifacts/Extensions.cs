@@ -21,7 +21,7 @@ namespace Xpand.XAF.Agnostic.Tests.Artifacts {
             view.CreateControls();
         }
 
-        public static void SetupDefaults(this XafApplication application, params ModuleBase[] modules) {
+        public static void SetupDefaults(this XafApplication application, params ModuleBase[] modules){
             application.RegisterDefaults(modules);
             application.Setup();        }
 
@@ -29,7 +29,7 @@ namespace Xpand.XAF.Agnostic.Tests.Artifacts {
             application.AlwaysUpdateOnDatabaseVersionMismatch().Subscribe();
             application.Modules.AddRange(modules);
             application.RegisterInMemoryObjectSpaceProvider();
-            MockFrameTemplate(application);
+//            MockFrameTemplate(application);
         }
 
         private static void MockFrameTemplate(XafApplication application){

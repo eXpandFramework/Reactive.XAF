@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0">
   <Import Project="..\..\packages\xunit.runner.visualstudio.2.4.1\build\net20\xunit.runner.visualstudio.props" Condition="Exists('..\..\packages\xunit.runner.visualstudio.2.4.1\build\net20\xunit.runner.visualstudio.props')" />
   <Import Project="..\..\packages\xunit.core.2.4.1\build\xunit.core.props" Condition="Exists('..\..\packages\xunit.core.2.4.1\build\xunit.core.props')" />
   <PropertyGroup>
@@ -219,6 +219,8 @@
     <Compile Include="Artifacts\ModuleMock.cs" />
     <Compile Include="Artifacts\XafApplicationMock.cs" />
     <Compile Include="Artifacts\BaseTest.cs" />
+    <Compile Include="Modules\Reactive\ReactiveTests.cs" />
+    <Compile Include="Modules\Reactive\BOModel\R.cs" />
     <Compile Include="Modules\CloneModelView\CloneModelViewTests.cs" />
     <Compile Include="Modules\CloneModelView\BOModel\CMV.cs" />
     <Compile Include="Modules\SuppressConfirmation\BOModel\SC.cs" />
@@ -250,6 +252,7 @@
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="Xpand.XAF.Agnostic.Tests.ruleset" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\..\packages\xunit.analyzers.0.10.0\analyzers\dotnet\cs\xunit.analyzers.dll" />

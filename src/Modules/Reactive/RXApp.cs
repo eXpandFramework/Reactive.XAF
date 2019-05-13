@@ -22,20 +22,18 @@ namespace Xpand.XAF.Modules.Reactive{
         private static readonly MethodInvoker CreateControllersOptimized;
         private static readonly MethodInvoker CreateControllers;
         private static readonly IObservable<RedirectionContext> NestedFrameRedirection;
-        
+        private static readonly IObservable<RedirectionContext> FrameRedirection;
+        private static readonly IObservable<RedirectionContext> WindowRedirection;
 
-
-        internal static IObservable<XafApplication> Connect(this XafApplication application){
-            return application.AsObservable()
-                .Do(_ => ApplicationSubject.OnNext(_))
-                .Select(xafApplication => xafApplication);
-        }
 
         static RxApp(){
             var methodInfos = typeof(XafApplication).Methods();
             CreateControllersOptimized = methodInfos.Where(info => info.Name==nameof(CreateControllers)&&info.Parameters().Count==4).Select(info => info.DelegateForCallMethod()).First();
             CreateControllers = methodInfos.Where(info => info.Name==nameof(CreateControllers)&&info.Parameters().Count==3).Select(info => info.DelegateForCallMethod()).First();
-            CreateWindowCore = methodInfos.First(info => info.Name == nameof(CreateWindowCore)).DelegateForCallMethod();
+            var methodInfo = methodInfos.First(info => info.Name == nameof(CreateWindowCore));
+            Redirection.Observe(methodInfo)
+                .Subscribe(context => { });
+            CreateWindowCore = methodInfo.DelegateForCallMethod();
             
             OnPopupWindowCreated = Redirection.Observe(methodInfos.First(info => info.Name==nameof(OnPopupWindowCreated)))
                 .Publish().RefCount();
@@ -43,8 +41,24 @@ namespace Xpand.XAF.Modules.Reactive{
             var createNestedFrame = methodInfos.First(info => info.Name==nameof(XafApplication.CreateNestedFrame));
             NestedFrameRedirection = Redirection.Observe(createNestedFrame)
                 .Publish().RefCount();
-
+            var createFrame = methodInfos.First(info => info.Name==nameof(XafApplication.CreateFrame));
+            FrameRedirection = Redirection.Observe(createFrame)
+                .Publish().RefCount();
+            var createWindowMethod = typeof(XafApplication).Methods()
+                .First(info =>info.Parameters().Count==5&& info.Name == nameof(XafApplication.CreateWindow));
+            var connectableObservable = Redirection.Observe(createWindowMethod).Publish();
+            connectableObservable.Connect();
+            connectableObservable.Subscribe();
+            WindowRedirection=connectableObservable;
+//            WindowRedirection.con;
             WebChecks();
+        }
+
+        internal static IObservable<Unit> Connect(this XafApplication application){
+            return application.AsObservable()
+                .Do(_ => ApplicationSubject.OnNext(_))
+                .ToUnit()
+                .Merge(Windows.ToUnit());
         }
 
         private static void WebChecks(){
@@ -82,25 +96,39 @@ namespace Xpand.XAF.Modules.Reactive{
             return WindowTemplateService.UpdateStatus(period, messages);
         }
 
-        public static IObservable<Window> Windows{ get; } = Redirection.Observe(typeof(XafApplication).Methods().First(info => info.Name==nameof(XafApplication.CreateWindow)))
-            .Select(context => context).Publish().RefCount()
-            .Select(context => {
-                var templateContext = (TemplateContext) context.Arguments[0];
-                var controllers = (ICollection<Controller>) context.Arguments[1];
-                var createAllControllers = (bool) context.Arguments[2];
-                var isMain = (bool) context.Arguments[3];
-                var view = (View) context.Arguments[4];
-                var application = (XafApplication) context.Sender;
+        public static IObservable<Window> Windows{
+            get{
+                return WindowRedirection
+                    .Select(context => {
+                        var t = (templateContext: (TemplateContext) context.Arguments[0],
+                            controllers: (ICollection<Controller>) context.Arguments[1],
+                            createAllControllers: (bool) context.Arguments[2], isMain: (bool) context.Arguments[3],
+                            view: (View) context.Arguments[4], application: (XafApplication) context.Sender);
 
-                var list = application.OptimizedControllersCreation
-                    ? CreateControllers(application,typeof(Controller), createAllControllers, controllers, view)
-                    : CreateControllers(application, typeof(Controller),createAllControllers, controllers);
-                var window = (Window) CreateWindowCore(application,templateContext, list, isMain, true);
-                context.ReturnValue = window;
-                return window;
-            }).Publish().RefCount();
+                        var list = t.application.OptimizedControllersCreation
+                            ? CreateControllers(t.application, typeof(Controller), t.createAllControllers, t.controllers,t.view)
+                            : CreateControllers(t.application, typeof(Controller), t.createAllControllers, t.controllers);
+                        var window = (Window) CreateWindowCore(t.application, t.templateContext, list, t.isMain, true);
+                        context.ReturnValue = window;
+                        return window;
+                    });
+            }
+        }
 
-        public static IObservable<Frame> NestedFrames{
+        public static IObservable<Frame> Frames{
+            get{
+                return FrameRedirection
+                    .Select(context => {
+                        var templateContext = ((TemplateContext) context.Arguments[0]);
+                        var controllers = ((ICollection<Controller>) CreateControllers(null,typeof(Controller),true,(ICollection<Controller>)null));
+                        return new Frame(null,templateContext,controllers);
+                    })
+                    .Merge(NestedFrames)
+                    .Merge(Windows);
+            }
+        }
+
+        public static IObservable<NestedFrame> NestedFrames{
             get{
                 return NestedFrameRedirection
                     .Select(context => {

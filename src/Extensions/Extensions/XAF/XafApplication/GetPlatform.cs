@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using DevExpress.ExpressApp;
+using Fasterflect;
 
 namespace Xpand.Source.Extensions.XAF.XafApplication{
     internal enum Platform{
@@ -13,9 +14,20 @@ namespace Xpand.Source.Extensions.XAF.XafApplication{
     }
 
     internal static partial class XafApplicationExtensions{
+        public static readonly Platform ApplicationPlatform;
+
+        static XafApplicationExtensions(){
+            var systemWebAssembly = AppDomain.CurrentDomain.GetAssemblies()
+                .FirstOrDefault(assembly => assembly.GetName().Name == "System.Web");
+            var httpContextType = systemWebAssembly?.Types().First(_ => _.Name == "HttpContext");
+            ApplicationPlatform = httpContextType?.GetPropertyValue("Current") != null ? Platform.Web : Platform.Win;
+        }
         internal static Platform GetPlatform(this IEnumerable<ModuleBase> moduleBases){
             var modules = moduleBases as ModuleBase[] ?? moduleBases.ToArray();
-
+            var application = modules.Select(_ => _.Application).FirstOrDefault(_ => _!=null);
+            if (application != null){
+                return application.GetPlatform();
+            }
             var webPlatformString = "Xaf.Platform.Web";
             var winPlatformString = "Xaf.Platform.Win";
             var mobilePlatformString = "Xaf.Platform.Mobile";
@@ -50,7 +62,7 @@ namespace Xpand.Source.Extensions.XAF.XafApplication{
         }
 
         public static Platform GetPlatform(this DevExpress.ExpressApp.XafApplication application){
-            return application.Modules.GetPlatform();
+            return ApplicationPlatform;
         }
     }
 }

@@ -77,14 +77,25 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .TransformPattern<ViewChangedEventArgs,TFrame>();
         }
 
-        public static IObservable<T> TemplateChanged<T>(this IObservable<T> source) where T:Frame{
+        public static IObservable<T> TemplateChanged<T>(this IObservable<T> source,bool skipWindowsCtorAssigment=false) where T:Frame{
+            var winWindowCreated = RxApp.Windows.Where(window => window.GetType().Name=="WinWindow").Cast<T>()
+                .Select(frame => frame);
             return source.SelectMany(item => {
                 return Observable.FromEventPattern<EventHandler, EventArgs>(
-                    handler => item.TemplateChanged += handler,
-                    handler => item.TemplateChanged -= handler).Select(pattern => item)
-                    .TakeUntil(item.WhenDisposingFrame())
-                    ;
-            });
+                        handler => item.TemplateChanged += handler,
+                        handler => item.TemplateChanged -= handler)
+                    .Select(pattern => item)
+                    .TakeUntil(item.WhenDisposingFrame());
+            })
+            .Merge(winWindowCreated);
+        }
+
+        public static IObservable<TFrame> WhenTemplateChanged<TFrame>(this TFrame source) where TFrame : Frame{
+            return Observable.Return(source).TemplateChanged();
+        }
+
+        public static IObservable<TFrame> WhenTemplateViewChanged<TFrame>(this TFrame source) where TFrame : Frame{
+            return Observable.Return(source).TemplateViewChanged();
         }
 
         public static IObservable<T> TemplateViewChanged<T>(this IObservable<T> source) where T:Frame{
@@ -95,10 +106,6 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     .TakeUntil(item.WhenDisposingFrame())
                     ;
             });
-        }
-
-        public static IObservable<TFrame> WhenTemplateChanged<TFrame>(this TFrame source) where TFrame : Frame{
-            return Observable.Return(source).TemplateChanged();
         }
 
         public static IObservable<Unit> WhenDisposingFrame<TFrame>(this TFrame source) where TFrame:Frame{
