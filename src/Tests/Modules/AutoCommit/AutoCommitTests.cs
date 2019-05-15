@@ -1,48 +1,59 @@
-﻿using System.Reactive.Linq;
+﻿using System.Reactive;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
+using AppDomainToolkit;
 using DevExpress.ExpressApp;
 using Shouldly;
+using Tests.Artifacts;
+using Tests.Modules.AutoCommit.BOModel;
 using Xpand.Source.Extensions.XAF.XafApplication;
-using Xpand.XAF.Agnostic.Tests.Artifacts;
-using Xpand.XAF.Agnostic.Tests.Modules.AutoCommit.BOModel;
 using Xpand.XAF.Modules.AutoCommit;
 using Xunit;
 
-namespace Xpand.XAF.Agnostic.Tests.Modules.AutoCommit{
-    [Collection(nameof(XafTypesInfo))]
+namespace Tests.Modules.AutoCommit{
+//    [Collection(nameof(XafTypesInfo))]
     public class AutoCommitTests : BaseTest{
 
-        [Fact]
-        public async Task Signal_When_AutoCommit_Enabled_ObjectView_Created(){
-            using (var application = DefaultAutoCommitModule().Application){
-                var objectViews = AutoCommitService.ObjectViews.Replay();
-                using (objectViews.Connect()){
-                    var listView = application.CreateObjectView<ListView>(typeof(AC));
-                    var detailView = application.CreateObjectView<DetailView>(typeof(AC));
+        [Theory]
+        [InlineData(Platform.Web)]
+        [InlineData(Platform.Win)]
+        internal async Task Signal_When_AutoCommit_Enabled_ObjectView_Created(Platform platform){
+            await RemoteFuncAsync.InvokeAsync(Domain, platform, async _ => {
+                var application = DefaultAutoCommitModule(_).Application;
+                var objectViews = application.WhenAutoCommitObjectViewCreated().Replay();
+                objectViews.Connect();
+                var listView = application.CreateObjectView<ListView>(typeof(AC));
+                var detailView = application.CreateObjectView<DetailView>(typeof(AC));
 
-                    (await objectViews.Take(1)).ShouldBe(listView);
-                    (await objectViews.Take(2)).ShouldBe(detailView);
-                }
-            }
+                (await objectViews.Take(1)).ShouldBe(listView);
+                (await objectViews.Take(2)).ShouldBe(detailView);
+                return Unit.Default;
+            });
+
         }
 
-        [Fact]
-        public async Task AutoCommit_When_object_view_closing(){
-            using (var application = DefaultAutoCommitModule().Application){
-                var objectViews = AutoCommitService.ObjectViews.Replay();
-                using (objectViews.Connect()){
-                    var detailView = application.CreateObjectView<DetailView>(typeof(AC));
-                    detailView.ObjectSpace.CreateObject<AC>();
+        [Theory]
+        [InlineData(Platform.Web)]
+        [InlineData(Platform.Win)]
+        internal async Task AutoCommit_When_object_view_closing(Platform platform){
+            await RemoteFuncAsync.InvokeAsync(Domain, platform, async _ => {
+                var application = DefaultAutoCommitModule(_).Application;
+                var objectViews = application.WhenAutoCommitObjectViewCreated().Replay();
+                objectViews.Connect();
+                var detailView = application.CreateObjectView<DetailView>(typeof(AC));
+                detailView.ObjectSpace.CreateObject<AC>();
 
-                    detailView.Close();
-                    await objectViews.FirstAsync();
-                    application.CreateObjectSpace().FindObject<AC>(null).ShouldNotBeNull();
-                }
-            }
+                detailView.Close();
+                await objectViews.FirstAsync();
+
+                application.CreateObjectSpace().FindObject<AC>(null).ShouldNotBeNull();
+
+                return Unit.Default;
+            });
         }
 
-        private AutoCommitModule DefaultAutoCommitModule(){
-            var application = new XafApplicationMock().Object;
+        private static AutoCommitModule DefaultAutoCommitModule(Platform platform){
+            var application = platform.NewApplication();
             application.Title = "AutoCommitModule";
             var autoCommitModule = new AutoCommitModule();
             autoCommitModule.AdditionalExportedTypes.AddRange(new[]{typeof(AC)});

@@ -1,7 +1,7 @@
 ﻿using DevExpress.Xpo;
 using Xpand.XAF.Persistent.BaseImpl;
 
-namespace Xpand.XAF.Agnostic.Tests.Modules.CloneMemberValue.BOModel{
+namespace Tests.Modules.CloneMemberValue.BOModel{
     public class ACmv:CustomBaseObject{
         public ACmv(Session session) : base(session){
         }

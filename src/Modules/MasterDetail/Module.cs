@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
 using Xpand.XAF.Modules.Reactive;
+using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.MasterDetail{
     public sealed class MasterDetailModule : ModuleBase{
@@ -17,7 +19,9 @@ namespace Xpand.XAF.Modules.MasterDetail{
 
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
-            moduleManager.Connect().Subscribe();
+            moduleManager.Connect(Application)
+                .TakeUntil(this.WhenDisposed())
+                .Subscribe();
         }
 
 

@@ -5,11 +5,11 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.SystemModule;
 using Shouldly;
+using Tests.Modules.ModelViewInheritance.BOModel;
 using Xpand.Source.Extensions.XAF.Model;
-using Xpand.XAF.Agnostic.Tests.Modules.ModelViewInheritance.BOModel;
 using Xpand.XAF.Modules.ModelViewInheritance;
 
-namespace Xpand.XAF.Agnostic.Tests.Modules.ModelViewInheritance{
+namespace Tests.Modules.ModelViewInheritance{
     class InheritAndModifyBaseView{
         private readonly XafApplication _application;
         private readonly ViewType _viewType;

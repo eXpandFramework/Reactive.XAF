@@ -33,15 +33,6 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source.Where(window => window.Context == templateContext);
         }
 
-        public static IObservable<T> TakeUntilDisposingMainWindow<T>(this IObservable<T> source){
-//            return source;
-            var disposing = RxApp.Windows.When(TemplateContext.ApplicationWindow).DisposingFrame().ToUnit()
-                .Merge(RxApp.Application.Disposed().Select(tuple => tuple).ToUnit())
-                .FirstAsync()
-                ;
-            return source.TakeUntil(disposing);
-        }
-
         public static IObservable<T> When<T>(this IObservable<T> source, Frame parentFrame,NestedFrame nestedFrame){
             return source
                 .Where(_ => nestedFrame?.View!=null&&parentFrame?.View!=null)
@@ -78,16 +69,16 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
 
         public static IObservable<T> TemplateChanged<T>(this IObservable<T> source,bool skipWindowsCtorAssigment=false) where T:Frame{
-            var winWindowCreated = RxApp.Windows.Where(window => window.GetType().Name=="WinWindow").Cast<T>()
-                .Select(frame => frame);
+//            var winWindowCreated = RxApp.Windows.Where(window => window.GetType().Name=="WinWindow").Cast<T>()
+//                .Select(frame => frame);
             return source.SelectMany(item => {
                 return Observable.FromEventPattern<EventHandler, EventArgs>(
                         handler => item.TemplateChanged += handler,
                         handler => item.TemplateChanged -= handler)
                     .Select(pattern => item)
                     .TakeUntil(item.WhenDisposingFrame());
-            })
-            .Merge(winWindowCreated);
+            });
+//            .Merge(winWindowCreated);
         }
 
         public static IObservable<TFrame> WhenTemplateChanged<TFrame>(this TFrame source) where TFrame : Frame{

@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
-using Xpand.XAF.Modules.Reactive.Services;
+using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.ViewEditMode {
     public sealed class ViewEditModeModule : ModuleBase{
@@ -14,8 +15,8 @@ namespace Xpand.XAF.Modules.ViewEditMode {
 
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
-            ViewEditModeService.Connect()
-                .TakeUntilDisposingMainWindow()
+            Application.Connect()
+                .TakeUntil(this.WhenDisposed())
                 .Subscribe();
         }
 

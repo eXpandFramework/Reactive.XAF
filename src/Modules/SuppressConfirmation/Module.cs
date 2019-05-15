@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
 using Xpand.XAF.Modules.Reactive;
+using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.SuppressConfirmation{
     public sealed class SuppressConfirmationModule : ModuleBase{
@@ -16,7 +18,8 @@ namespace Xpand.XAF.Modules.SuppressConfirmation{
 
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
-            SuppressConfirmationService.Connect()
+            Application.Connect()
+                .TakeUntil(this.WhenDisposed())
                 .Subscribe();
         }
 

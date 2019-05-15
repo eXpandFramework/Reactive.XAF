@@ -3,13 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.136
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Agnostic.Tests", "Xpand.XAF.Agnostic.Tests.csproj", "{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}"
-	ProjectSection(ProjectDependencies) = postProject
-		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
-		{194C38C8-A636-4570-A46D-2E8FE04C94C4} = {194C38C8-A636-4570-A46D-2E8FE04C94C4}
-		{90E34AE8-5130-4087-9720-B9980C1F22F1} = {90E34AE8-5130-4087-9720-B9980C1F22F1}
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Modules", "Modules", "{05ECD54E-924F-4E78-8E29-DE3801A9F693}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extensions", "Extensions", "{E64C77EA-30F9-48D7-B7F5-735C54BEA79C}"
@@ -32,10 +25,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Modules.SuppressC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Modules.ViewEditMode", "..\Modules\ViewEditMode\Xpand.XAF.Modules.ViewEditMode.csproj", "{D9233585-0907-4561-9C53-14D9AD5EEC0E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Modules.HideToolBar", "..\Modules\HideToolBar\Xpand.XAF.Modules.HideToolBar.csproj", "{B76C0852-B1B3-4663-98F5-808FA9AC2D30}"
-	ProjectSection(ProjectDependencies) = postProject
-		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
-	EndProjectSection
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests.csproj", "{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -44,12 +34,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
-		{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}.EasyTest|Any CPU.Build.0 = Release|Any CPU
-		{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{90E34AE8-5130-4087-9720-B9980C1F22F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{90E34AE8-5130-4087-9720-B9980C1F22F1}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
 		{90E34AE8-5130-4087-9720-B9980C1F22F1}.EasyTest|Any CPU.Build.0 = Release|Any CPU
@@ -86,12 +70,12 @@ Global
 		{D9233585-0907-4561-9C53-14D9AD5EEC0E}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
 		{D9233585-0907-4561-9C53-14D9AD5EEC0E}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{D9233585-0907-4561-9C53-14D9AD5EEC0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B76C0852-B1B3-4663-98F5-808FA9AC2D30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B76C0852-B1B3-4663-98F5-808FA9AC2D30}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B76C0852-B1B3-4663-98F5-808FA9AC2D30}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
-		{B76C0852-B1B3-4663-98F5-808FA9AC2D30}.EasyTest|Any CPU.Build.0 = Release|Any CPU
-		{B76C0852-B1B3-4663-98F5-808FA9AC2D30}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B76C0852-B1B3-4663-98F5-808FA9AC2D30}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}.EasyTest|Any CPU.ActiveCfg = EasyTest|Any CPU
+		{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}.EasyTest|Any CPU.Build.0 = EasyTest|Any CPU
+		{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -106,7 +90,6 @@ Global
 		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {05ECD54E-924F-4E78-8E29-DE3801A9F693}
 		{7D3556B8-8CF9-4622-94F1-0F28A7765D0E} = {05ECD54E-924F-4E78-8E29-DE3801A9F693}
 		{D9233585-0907-4561-9C53-14D9AD5EEC0E} = {05ECD54E-924F-4E78-8E29-DE3801A9F693}
-		{B76C0852-B1B3-4663-98F5-808FA9AC2D30} = {05ECD54E-924F-4E78-8E29-DE3801A9F693}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C0A41578-813B-4E26-B5DF-D979F1C0A7D7}

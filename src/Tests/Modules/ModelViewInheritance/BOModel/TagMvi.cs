@@ -1,7 +1,7 @@
 ﻿using DevExpress.Xpo;
 using Xpand.XAF.Persistent.BaseImpl;
 
-namespace Xpand.XAF.Agnostic.Tests.Modules.ModelViewInheritance.BOModel{
+namespace Tests.Modules.ModelViewInheritance.BOModel{
     public class TagMvi:CustomBaseObject{
         public TagMvi(Session session) : base(session){
         }

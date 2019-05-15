@@ -17,8 +17,8 @@ namespace Xpand.XAF.Modules.AutoCommit{
 
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
-            AutoCommitService.Connect()
-                .TakeUntil(this.WhenDisposed().Select(tuple => tuple))
+            Application.Connect()
+                .TakeUntil(this.WhenDisposed())
                 .Subscribe();
         }
 

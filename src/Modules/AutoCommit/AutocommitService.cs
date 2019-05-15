@@ -5,7 +5,6 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using Fasterflect;
 using Xpand.Source.Extensions.XAF.Model;
-using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
@@ -18,21 +17,25 @@ namespace Xpand.XAF.Modules.AutoCommit{
             var clientSideEventsHelperType = assemmbly?.GetType("DevExpress.ExpressApp.Web.Utils.ClientSideEventsHelper");
             AsssignClientHanderSafe = clientSideEventsHelperType?.GetMethods().First(info =>info.Name=="AssignClientHandlerSafe" &&info.Parameters().Count==4).DelegateForCallMethod();
         }
-        public static IObservable<ObjectView> ObjectViews => RxApp.Application
-            .WhenModule(typeof(AutoCommitModule))
-            .ObjectViewCreated()
-            .Where(objectView => ((IModelObjectViewAutoCommit) objectView.Model).AutoCommit);
 
-        internal static IObservable<Unit> Connect(){
+        public static IObservable<ObjectView> WhenAutoCommitObjectViewCreated(this XafApplication application){
+            return application
+                .WhenObjectViewCreated()
+                .Where(objectView => ((IModelObjectViewAutoCommit) objectView.Model).AutoCommit);
+        }
 
-            return ObjectViews
-                .QueryCanClose()
-                .Merge(ObjectViews.QueryCanChangeCurrentObject())
-                .Do(_ => _.view.ObjectSpace.CommitChanges())
-                .TakeUntilDisposingMainWindow()
-                .ToUnit()
-                .Merge(ObjectViews.OfType<ListView>().ControlsCreated().Select(_ => BatchEditCommit(_.view)))
-                ;
+        internal static IObservable<Unit> Connect(this XafApplication application){
+            if (application != null){
+                var objectViewCreated = application.WhenAutoCommitObjectViewCreated().Publish().RefCount();
+                return objectViewCreated
+                        .QueryCanClose()
+                        .Merge(objectViewCreated.QueryCanChangeCurrentObject())
+                        .Do(_ => _.view.ObjectSpace.CommitChanges())
+                        .ToUnit()
+                        .Merge(objectViewCreated.OfType<ListView>().ControlsCreated().Select(_ => BatchEditCommit(_.view)))
+                    ;
+            }
+            return Observable.Empty<Unit>();
         }
 
         private static Unit BatchEditCommit(ListView listView){

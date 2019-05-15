@@ -1,6 +1,6 @@
 $ErrorActionPreference = "Stop"
 $rootLocation="$PSScriptRoot\..\..\"
-Set-Location $rootLocation
+Set-Location "$rootLocation\src"
 
 "Xpand.XAF.*","DevExpress.*" | ForEach-Object{
     Update-HintPath $rootLocation "$rootLocation\bin\" $_

@@ -1,42 +1,61 @@
 ﻿using System;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
+using AppDomainToolkit;
 using DevExpress.ExpressApp;
-using Xpand.XAF.Agnostic.Tests.Artifacts;
-using Xpand.XAF.Agnostic.Tests.Modules.ModelViewInheritance.BOModel;
+using Tests.Artifacts;
+using Tests.Modules.ModelViewInheritance.BOModel;
+using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.ModelViewInheritance;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xunit;
 
-namespace Xpand.XAF.Agnostic.Tests.Modules.ModelViewInheritance{
-    [Collection(nameof(XafTypesInfo))]
+namespace Tests.Modules.ModelViewInheritance{
+//    [Collection(nameof(XafTypesInfo))]
     public class ModelViewInheritanceTests:BaseTest {
         [Theory]
         [ClassData(typeof(ModelViewInheritanceTestData))]
-        public void Inherit_And_Modify_A_BaseView(ViewType viewType, bool attribute) {
-            ModelViewInheritanceUpdater.Disabled = true;
-            var application = new XafApplicationMock().Object;
-            var modelViewIneritanceModule = CreateModelViewIneritanceModule(viewType, attribute, application);
-            var baseBoTypes = new[]{typeof(ABaseMvi),typeof(TagMvi)};
-            var boTypes = new[]{typeof(AMvi),typeof(FileMvi)};
-            modelViewIneritanceModule.AdditionalExportedTypes.AddRange(baseBoTypes.Concat(boTypes));
-            application.SetupDefaults(modelViewIneritanceModule);
-            var inheritAndModifyBaseView = new InheritAndModifyBaseView(application,viewType,attribute);
-            var models = inheritAndModifyBaseView.GetModels().ToArray();
-            ModelViewInheritanceUpdater.Disabled = false;
+        internal void Inherit_And_Modify_A_BaseView(ViewType viewType, bool attribute,Platform platform){
+            string[] models;
+            using (var appDomainContext = AppDomainContext.Create()){
+                models = RemoteFunc.Invoke(appDomainContext.Domain, viewType,attribute,platform, (t, a, p) => {
+                    ModelViewInheritanceUpdater.Disabled = true;
+                    using (var application = p.NewApplication()){
+                        var modelViewIneritanceModule = CreateModelViewIneritanceModule(t, a, application);
+                        var baseBoTypes = new[]{typeof(ABaseMvi),typeof(TagMvi)};
+                        var boTypes = new[]{typeof(AMvi),typeof(FileMvi)};
+                        modelViewIneritanceModule.AdditionalExportedTypes.AddRange(baseBoTypes.Concat(boTypes));
+                        application.SetupDefaults(modelViewIneritanceModule);
+                        var inheritAndModifyBaseView = new InheritAndModifyBaseView(application, t, a);
+                        var m = inheritAndModifyBaseView.GetModels().ToArray();
+                        ModelViewInheritanceUpdater.Disabled = false;
+                        return m;
+                    }
+                });
+            }
 
-            application = new XafApplicationMock().Object;
-            modelViewIneritanceModule = CreateModelViewIneritanceModule(viewType, attribute, application);
-            var testModule1 = new TestModule1{DiffsStore = new StringModelStore(models[0])};
-            testModule1.AdditionalExportedTypes.AddRange(baseBoTypes);
-            var testModule2 = new TestModule2{DiffsStore = new StringModelStore(models[1])};
-            testModule2.AdditionalExportedTypes.AddRange(boTypes);
+            
+            RemoteFunc.Invoke(Domain, viewType, attribute, platform, models, (t, a, p, m) => {
+                using (var application = p.NewApplication()){
+                    var modelViewIneritanceModule = CreateModelViewIneritanceModule(t, a, application);
+                    var testModule1 = new TestModule1{DiffsStore = new StringModelStore(m[0])};
+                    var baseBoTypes = new[]{typeof(ABaseMvi), typeof(TagMvi)};
+                    var boTypes = new[]{typeof(AMvi), typeof(FileMvi)};
+                    testModule1.AdditionalExportedTypes.AddRange(baseBoTypes);
+                    var testModule2 = new TestModule2{DiffsStore = new StringModelStore(m[1])};
+                    testModule2.AdditionalExportedTypes.AddRange(boTypes);
 
-            application.SetupDefaults(modelViewIneritanceModule,testModule1, testModule2,
-                new TestModule3{DiffsStore = new StringModelStore(models[2])});
+                    application.SetupDefaults(modelViewIneritanceModule, testModule1, testModule2,
+                        new TestModule3{DiffsStore = new StringModelStore(m[2])});
+                    var inheritAndModifyBaseView = new InheritAndModifyBaseView(application, t, a);
 
-            inheritAndModifyBaseView.Verify(application.Model);
+                    inheritAndModifyBaseView.Verify(application.Model);
+                }
+
+                return Unit.Default;
+            });
         }
 
 

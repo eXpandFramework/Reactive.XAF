@@ -1,7 +1,7 @@
 ﻿using DevExpress.Xpo;
 using Xpand.XAF.Persistent.BaseImpl;
 
-namespace Xpand.XAF.Agnostic.Tests.Modules.MasterDetail.BOModel{
+namespace Tests.Modules.MasterDetail.BOModel{
     public class Md:CustomBaseObject{
         public Md(Session session) : base(session){
         }

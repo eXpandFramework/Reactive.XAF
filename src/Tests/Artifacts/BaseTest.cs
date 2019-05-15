@@ -1,12 +1,23 @@
 ﻿using System;
-using DevExpress.ExpressApp;
-using DevExpress.ExpressApp.Xpo;
+using AppDomainToolkit;
+using IDisposable = System.IDisposable;
 
-namespace Xpand.XAF.Agnostic.Tests.Artifacts{
-    public abstract class BaseTest:IDisposable{
-        public virtual void Dispose(){
-            XpoTypesInfoHelper.Reset();
-            XafTypesInfo.HardReset();
+namespace Tests.Artifacts{
+    
+    public abstract class BaseTest : IDisposable{
+        
+        protected readonly IAppDomainContext AppDomainCtx;
+        protected AppDomain Domain;
+
+        protected BaseTest(){
+            AppDomainCtx = AppDomainContext.Create();
+            Domain = AppDomainCtx.Domain;
         }
+
+        public virtual void Dispose(){
+            AppDomainCtx.Dispose();
+        }
+
+        
     }
 }
