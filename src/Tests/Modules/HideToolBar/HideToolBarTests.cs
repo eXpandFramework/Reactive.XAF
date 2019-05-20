@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using AppDomainToolkit;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Templates;
 using DevExpress.ExpressApp.Templates.ActionContainers;
@@ -27,20 +25,16 @@ namespace Tests.Modules.HideToolBar{
         [InlineData(Platform.Web)]
         [InlineData(Platform.Win)]
         internal async Task Signal_When_frame_with_HideToolBar_Enabled_ListView_controls_created(Platform platform){
-            await RemoteFuncAsync.InvokeAsync(Domain, platform, async p => {
-                var application = DefaultHideToolBarModule(p).Application;
-                var nestedFrames = application.HideToolBarNestedFrames().Replay();
-                nestedFrames.Connect();
-                var nestedFrame = application.CreateNestedFrame(null, TemplateContext.NestedFrame);
-                nestedFrame.CreateTemplate();
-                var detailView = application.CreateObjectView<ListView>(typeof(HTBParent));
-                nestedFrame.SetView(detailView);
+            var application = DefaultHideToolBarModule(platform).Application;
+            var nestedFrames = application.HideToolBarNestedFrames().Replay();
+            nestedFrames.Connect();
+            var nestedFrame = application.CreateNestedFrame(null, TemplateContext.NestedFrame);
+            nestedFrame.CreateTemplate();
+            var detailView = application.CreateObjectView<ListView>(typeof(HTBParent));
+            nestedFrame.SetView(detailView);
 
 
-                (await nestedFrames.Take(1).WithTimeOut()).ShouldBe(nestedFrame);
-                return Unit.Default;
-
-            });
+            (await nestedFrames.Take(1).WithTimeOut()).ShouldBe(nestedFrame);
         }
 
 
@@ -100,14 +94,4 @@ namespace Tests.Modules.HideToolBar{
         }
     }
 
-    public class ApplicationMock<T>:Mock<T> where T : XafApplication{
-        public ApplicationMock(){
-            CallBase = true;
-        }
-
-        public sealed override bool CallBase{
-            get => base.CallBase;
-            set => base.CallBase = value;
-        }
-    }
 }

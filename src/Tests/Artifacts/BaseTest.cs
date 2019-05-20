@@ -1,27 +1,13 @@
-﻿using System;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
-using AppDomainToolkit;
+﻿using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Xpo;
 using IDisposable = System.IDisposable;
 
 namespace Tests.Artifacts{
     
     public abstract class BaseTest : IDisposable{
-        
-        protected readonly IAppDomainContext AppDomainCtx;
-        protected AppDomain Domain;
-
-        protected BaseTest(){
-            AppDomainCtx = AppDomainContext.Create();
-            Domain = AppDomainCtx.Domain;
-        }
-
-        
-
         public virtual void Dispose(){
-            AppDomainCtx.Dispose();
+            XpoTypesInfoHelper.Reset();
+            XafTypesInfo.HardReset();
         }
-
-        
     }
 }

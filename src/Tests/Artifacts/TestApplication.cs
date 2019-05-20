@@ -27,5 +27,10 @@ namespace Tests.Artifacts{
         }
     }
     public class TestWebApplication : WebApplication{
+        protected override bool CanLoadTypesInfo(){
+            return true;
+        }
+
+        protected override bool IsSharedModel => false;
     }
 }

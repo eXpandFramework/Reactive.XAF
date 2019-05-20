@@ -1,6 +1,5 @@
-﻿using System.Reactive;
-using System.Reactive.Linq;
-using AppDomainToolkit;
+﻿using System.Reactive.Linq;
+using DevExpress.ExpressApp;
 using Shouldly;
 using Tests.Artifacts;
 using Tests.Modules.ViewEditMode.BOModel;
@@ -10,7 +9,7 @@ using Xpand.XAF.Modules.ViewEditMode;
 using Xunit;
 
 namespace Tests.Modules.ViewEditMode{
-//    [Collection(nameof(XafTypesInfo))]
+    [Collection(nameof(XafTypesInfo))]
     public class ViewEditModeTests : BaseTest{
 
         [Theory]
@@ -19,30 +18,26 @@ namespace Tests.Modules.ViewEditMode{
         [InlineData(true,DevExpress.ExpressApp.Editors.ViewEditMode.Edit,Platform.Web)]
         [InlineData(false,DevExpress.ExpressApp.Editors.ViewEditMode.View,Platform.Web)]
         internal void Change_ViewEditMode_when_detailview_created(bool lockViewEditMode,DevExpress.ExpressApp.Editors.ViewEditMode viewEditMode,Platform platform){
-            RemoteFunc.Invoke(Domain, lockViewEditMode,viewEditMode,platform, (l, v, p) => {
-                var module = DefaultViewEditModeModule(p);
-                var application = module.Application;
-                var editMode = DevExpress.ExpressApp.Editors.ViewEditMode.Edit;
-                var viewViewEditMode = ((IModelDetailViewViewEditMode) application.Model.BOModel.GetClass(typeof(VEM)).DefaultDetailView);
-                viewViewEditMode.ViewEditMode=editMode;
-                viewViewEditMode.LockViewEditMode = l;
-                var viewEditModeChanged = application.WhenViewEditModeAssigned()
-                    .ViewEditModeChanging()
-                    .Select(_ => {
-                        _.e.Cancel = l;
-                        return _;
-                    })
-                    .Replay();
-                viewEditModeChanged.Connect();
-                var objectSpace = application.CreateObjectSpace();
-                var detailView = application.CreateDetailView(objectSpace, objectSpace.CreateObject<VEM>());
+            var module = DefaultViewEditModeModule(platform);
+            var application = module.Application;
+            var editMode = DevExpress.ExpressApp.Editors.ViewEditMode.Edit;
+            var viewViewEditMode = ((IModelDetailViewViewEditMode) application.Model.BOModel.GetClass(typeof(VEM)).DefaultDetailView);
+            viewViewEditMode.ViewEditMode=editMode;
+            viewViewEditMode.LockViewEditMode = lockViewEditMode;
+            var viewEditModeChanged = application.WhenViewEditModeAssigned()
+                .ViewEditModeChanging()
+                .Select(_ => {
+                    _.e.Cancel = lockViewEditMode;
+                    return _;
+                })
+                .Replay();
+            viewEditModeChanged.Connect();
+            var objectSpace = application.CreateObjectSpace();
+            var detailView = application.CreateDetailView(objectSpace, objectSpace.CreateObject<VEM>());
             
-                detailView.ViewEditMode.ShouldBe(editMode);
-                detailView.ViewEditMode=DevExpress.ExpressApp.Editors.ViewEditMode.View;
-                detailView.ViewEditMode.ShouldBe(v);
-
-                return Unit.Default;
-            });
+            detailView.ViewEditMode.ShouldBe(editMode);
+            detailView.ViewEditMode=DevExpress.ExpressApp.Editors.ViewEditMode.View;
+            detailView.ViewEditMode.ShouldBe(viewEditMode);
 
         }
 

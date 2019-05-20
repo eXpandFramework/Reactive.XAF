@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using AppDomainToolkit;
 using DevExpress.ExpressApp;
 using Shouldly;
 using Tests.Artifacts;
@@ -13,78 +11,66 @@ using Xpand.XAF.Modules.Reactive.Services;
 using Xunit;
 
 namespace Tests.Modules.Reactive{
-//    [Collection(nameof(XafTypesInfo))]
+    [Collection(nameof(XafTypesInfo))]
     public class XafApplicationTests : BaseTest{
         [Theory]
         [InlineData(Platform.Win)]
         [InlineData(Platform.Web)]
         internal async Task WhenFrameCreated(Platform platform){
-            await RemoteFuncAsync.InvokeAsync(Domain, platform, async _ => {
-                var application = DefaultReactiveModule(_).Application;
-                var frames = application.WhenFrameCreated().Replay();
-                frames.Connect();
+            var application = DefaultReactiveModule(platform).Application;
+            var frames = application.WhenFrameCreated().Replay();
+            frames.Connect();
 
-                var frame = application.CreateFrame(TemplateContext.View);
-                var window = application.CreateWindow(TemplateContext.ApplicationWindow, new List<Controller>(), true);
-                var nestedFrame = application.CreateNestedFrame(null,TemplateContext.ApplicationWindow);
-                var popupWindow = application.CreatePopupWindow(TemplateContext.ApplicationWindow, null);
+            var frame = application.CreateFrame(TemplateContext.View);
+            var window = application.CreateWindow(TemplateContext.ApplicationWindow, new List<Controller>(), true);
+            var nestedFrame = application.CreateNestedFrame(null,TemplateContext.ApplicationWindow);
+            var popupWindow = application.CreatePopupWindow(TemplateContext.ApplicationWindow, null);
                 
-                (await frames.Take(1)).ShouldBe(frame);
-                (await frames.Take(2)).ShouldBe(window);
-                (await frames.Take(3)).ShouldBe(nestedFrame);
-                (await frames.Take(4)).ShouldBe(popupWindow);
-                return Unit.Default;
-            });
+            (await frames.Take(1)).ShouldBe(frame);
+            (await frames.Take(2)).ShouldBe(window);
+            (await frames.Take(3)).ShouldBe(nestedFrame);
+            (await frames.Take(4)).ShouldBe(popupWindow);
         }
 
         [Theory]
         [InlineData(Platform.Win)]
         [InlineData(Platform.Web)]
         internal async Task WhenWindowCreated(Platform platform){
-            await RemoteFuncAsync.InvokeAsync(Domain, platform, async _ => {
-                var application = DefaultReactiveModule(_).Application;
-                var windows = application.WhenWindowCreated().Replay();
-                windows.Connect();
+            var application = DefaultReactiveModule(platform).Application;
+            var windows = application.WhenWindowCreated().Replay();
+            windows.Connect();
 
-                var window = application.CreateWindow(TemplateContext.ApplicationWindow, new List<Controller>(),true);
-                var popupWindow = application.CreatePopupWindow(TemplateContext.ApplicationWindow, null);
+            var window = application.CreateWindow(TemplateContext.ApplicationWindow, new List<Controller>(),true);
+            var popupWindow = application.CreatePopupWindow(TemplateContext.ApplicationWindow, null);
 
-                (await windows.Take(1)).ShouldBe(window);
-                (await windows.Take(2)).ShouldBe(popupWindow);
-                return Unit.Default;
-            });
+            (await windows.Take(1)).ShouldBe(window);
+            (await windows.Take(2)).ShouldBe(popupWindow);
         }
 
         [Theory]
         [InlineData(Platform.Win)]
         [InlineData(Platform.Web)]
         internal async Task WhenPopupWindowCreated(Platform platform){
-            await RemoteFuncAsync.InvokeAsync(Domain, platform, async _ => {
-                var application = DefaultReactiveModule(_).Application;
-                var windows = application.WhenPopupWindowCreated().Replay();
-                windows.Connect();
+            var application = DefaultReactiveModule(platform).Application;
+            var windows = application.WhenPopupWindowCreated().Replay();
+            windows.Connect();
 
-                var popupWindow = application.CreatePopupWindow(TemplateContext.ApplicationWindow, null);
+            var popupWindow = application.CreatePopupWindow(TemplateContext.ApplicationWindow, null);
 
-                (await windows.Take(1)).ShouldBe(popupWindow);
-                return Unit.Default;
-            });
+            (await windows.Take(1)).ShouldBe(popupWindow);
         }
 
         [Theory]
         [InlineData(Platform.Win)]
         [InlineData(Platform.Web)]
         internal async Task WHen_NestedFrameCreated(Platform platform){
-            await RemoteFuncAsync.InvokeAsync(Domain, platform, async _ => {
-                var application = DefaultReactiveModule(_).Application;
-                var nestedFrames = application.WhenNestedFrameCreated().Replay();
-                nestedFrames.Connect();
+            var application = DefaultReactiveModule(platform).Application;
+            var nestedFrames = application.WhenNestedFrameCreated().Replay();
+            nestedFrames.Connect();
 
-                var nestedFrame = application.CreateNestedFrame(null,TemplateContext.ApplicationWindow);
+            var nestedFrame = application.CreateNestedFrame(null,TemplateContext.ApplicationWindow);
 
-                (await nestedFrames.FirstAsync()).ShouldBe(nestedFrame);
-                return Unit.Default;
-            });
+            (await nestedFrames.FirstAsync()).ShouldBe(nestedFrame);
         }
 
 
