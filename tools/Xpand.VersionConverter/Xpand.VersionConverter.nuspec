@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>Xpand.VersionConverter</id>
-    <version>1.0.22.0</version>
+    <version>1.0.23.0</version>
     <title>This package overrides the AfterBuild with targets that modify the DevExpress references in all Xpand.XAF.* assemblies to match the target prroject DevExpress version</title>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
@@ -19,6 +19,11 @@
     <file src="Update-Symbols.ps1" target="build\Update-Symbols.ps1" />
     <file src="..\..\src\Xpand.key\Xpand.snk" target="build\Xpand.snk" />
     <file src="Xpand.VersionConverter.targets" target="build\Xpand.VersionConverter.targets" />
+    <file src="srcsrv\dbghelp.dll" target="build\srcsrv\dbghelp.dll" />
+    <file src="srcsrv\pdbstr.exe" target="build\srcsrv\pdbstr.exe" />
+    <file src="srcsrv\srcsrv.dll" target="build\srcsrv\srcsrv.dll" />
+    <file src="srcsrv\srcsrv.ini" target="build\srcsrv\srcsrv.ini" />
+    <file src="srcsrv\srctool.exe" target="build\srcsrv\srctool.exe" />
     <file src="ReadMe.md" target="content\Properties\Xpand.VersionConverter.ReadMe.md" />
   </files>
 </package>
