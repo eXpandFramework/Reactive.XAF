@@ -35,7 +35,7 @@ namespace Tests.Modules.SuppressConfirmation{
                 await windows.FirstAsync();
 
                 return Unit.Default;
-            });
+            }).WithTimeOut();
 
         }
 
@@ -57,7 +57,7 @@ namespace Tests.Modules.SuppressConfirmation{
                 frame = await windows.Take(1);
                 frame.ShouldBeOfType<NestedFrame>();
                 return Unit.Default;
-            });
+            }).WithTimeOut();
         }
 
         [Theory]

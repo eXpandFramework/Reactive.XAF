@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
+using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
@@ -16,7 +18,14 @@ using Control = System.Windows.Forms.Control;
 
 namespace Tests.Artifacts {
     static class Extensions {
+        public static async Task<T> WithTimeOut<T>(this Task<T> source, TimeSpan? timeout = null){
+            return await source.ToObservable().WithTimeOut(timeout);
+        }
 
+        public static async Task<T> WithTimeOut<T>(this IObservable<T> source, TimeSpan? timeout=null){
+            timeout = timeout ?? TimeSpan.FromSeconds(15);
+            return await source.Timeout(timeout.Value);
+        }
         public static Mock<T> GetMock<T>(this T t) where T:class{
             return Mock.Get(t);
         }

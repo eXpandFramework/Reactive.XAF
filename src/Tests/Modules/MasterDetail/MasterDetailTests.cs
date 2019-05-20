@@ -55,12 +55,12 @@ namespace Tests.Modules.MasterDetail{
                 window.SetView(dashboardView);
                 
 
-                var pair = await masterDetailDashoardViewItems.FirstAsync();
+                var pair = await masterDetailDashoardViewItems.FirstAsync().WithTimeOut();
 
                 (pair.listViewItem.Model.View as IModelListView).ShouldNotBeNull();
                 (pair.detailViewItem.Model.View as IModelDetailView).ShouldNotBeNull();
                 return Unit.Default;
-            });
+            }).WithTimeOut();
         }
 
         [Theory]
@@ -74,7 +74,7 @@ namespace Tests.Modules.MasterDetail{
                 masterDetailDashoardViewItems.Connect();
                 var dashboardView = xafApplication.CreateDashboardView(xafApplication.CreateObjectSpace(), modelDashboardView.Id, true);
                 dashboardView.MockCreateControls();
-                var viewItems = await masterDetailDashoardViewItems.FirstAsync();
+                var viewItems = await masterDetailDashoardViewItems.FirstAsync().WithTimeOut();
                 var controller = viewItems.listViewItem.Frame.GetController<ListViewProcessCurrentObjectController>();
                 controller.ShouldNotBeNull();
                 controller.ProcessCurrentObjectAction.Active.Clear();
@@ -87,9 +87,9 @@ namespace Tests.Modules.MasterDetail{
 
                 controller.ProcessCurrentObjectAction.DoTheExecute(true);
 
-                (await customProcessSelectedItem.FirstAsync()).e.Handled.ShouldBe(true);
+                (await customProcessSelectedItem.FirstAsync().WithTimeOut()).e.Handled.ShouldBe(true);
                 return Unit.Default;
-            });
+            }).WithTimeOut();
             
         }
 
@@ -98,14 +98,14 @@ namespace Tests.Modules.MasterDetail{
         [InlineData(Platform.Win)]
         internal async Task When_list_view_selection_changed_synchronize_detailview_current_object(Platform platform){
             await RemoteFuncAsync.InvokeAsync(Domain, platform, async _ => {
-                await When_list_view_selection_changed_synchronize_detailview_current_object_Core(_);
+                await When_list_view_selection_changed_synchronize_detailview_current_object_Core(_).WithTimeOut();
                 return Unit.Default;
-            });
+            }).WithTimeOut();
         }
 
         private static async Task<DashboardViewItemInfo> When_list_view_selection_changed_synchronize_detailview_current_object_Core(Platform platform){
             var xafApplication = DefaultMasterDetailModule(platform).Application;
-            var tuple = await ViewItems(xafApplication);
+            var tuple = await ViewItems(xafApplication).WithTimeOut();
             var listView = ((ListView) tuple.ListViewItem.InnerView);
             var md = listView.ObjectSpace.CreateObject<Md>();
             listView.ObjectSpace.CommitChanges();
@@ -124,13 +124,13 @@ namespace Tests.Modules.MasterDetail{
         internal async Task Master_Detail_Save_Action_is_active_when_detailview(Platform platform){
             await RemoteFuncAsync.InvokeAsync(Domain, platform, async _ => {
                 var xafApplication = DefaultMasterDetailModule(_).Application;
-                var valueTuple = await ViewItems(xafApplication);
+                var valueTuple = await ViewItems(xafApplication).WithTimeOut();
                 valueTuple.DetailViewItem.Frame.Actions()
                     .First(action => action.Id == MasterDetailService.MasterDetailSaveAction)
                     .Active[MasterDetailModule.CategoryName]
                     .ShouldBe(true);
                 return Unit.Default;
-            });
+            }).WithTimeOut();
         }
 
         [Theory]
@@ -138,7 +138,7 @@ namespace Tests.Modules.MasterDetail{
         [InlineData(Platform.Web)]
         internal async Task Refresh_listview_object_when_detailview_objectspace_commited(Platform platform){
             await RemoteFuncAsync.InvokeAsync(Domain, platform, async _ => {
-                var info = await When_list_view_selection_changed_synchronize_detailview_current_object_Core(_);
+                var info = await When_list_view_selection_changed_synchronize_detailview_current_object_Core(_).WithTimeOut();
                 ((Md) info.DetailViewItem.InnerView.CurrentObject).PropertyName = "updated";
                 info.DetailViewItem.InnerView.ObjectSpace.CommitChanges();
 
@@ -148,7 +148,7 @@ namespace Tests.Modules.MasterDetail{
                     .Select(md1 => md1.PropertyName).First()
                     .ShouldBe("updated");
                 return Unit.Default;
-            });
+            }).WithTimeOut();
         }
 
         [Theory]
@@ -156,7 +156,7 @@ namespace Tests.Modules.MasterDetail{
         [InlineData(Platform.Win)]
         internal async Task Configure_conditional_detailviews(Platform platform){
             await RemoteFuncAsync.InvokeAsync(Domain, platform, async _ => {
-                var info = await When_list_view_selection_changed_synchronize_detailview_current_object_Core(_);
+                var info = await When_list_view_selection_changed_synchronize_detailview_current_object_Core(_).WithTimeOut();
                 var application = info.DetailViewItem.Frame.Application;
                 var detailViewObjectTypeLinks = ((IModelApplicationMasterDetail) application.Model).DashboardMasterDetail.ObjectTypeLinks;
                 var objectTypeLink = detailViewObjectTypeLinks.AddNode<IModelMasterDetailViewObjectTypeLink>();
@@ -171,9 +171,9 @@ namespace Tests.Modules.MasterDetail{
                 detailView.Connect();
                 listView.Editor.CallMethod("OnSelectionChanged");
 
-                await detailView;                
+                await detailView.WithTimeOut();                
                 return Unit.Default;
-            });
+            }).WithTimeOut();
         }
 
         static async Task<DashboardViewItemInfo> ViewItems(XafApplication xafApplication){
@@ -182,7 +182,7 @@ namespace Tests.Modules.MasterDetail{
             masterDetailDashoardViewItems.Connect();
             var dashboardView = xafApplication.CreateDashboardView(xafApplication.CreateObjectSpace(), modelDashboardView.Id, true);
             dashboardView.MockCreateControls();
-            var tuple = await masterDetailDashoardViewItems.FirstAsync();
+            var tuple = await masterDetailDashoardViewItems.FirstAsync().WithTimeOut();
             return new DashboardViewItemInfo(){ListViewItem=tuple.listViewItem,DetailViewItem=tuple.detailViewItem};
         }
 

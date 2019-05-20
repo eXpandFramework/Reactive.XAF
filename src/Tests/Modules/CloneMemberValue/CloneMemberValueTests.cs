@@ -65,12 +65,12 @@ namespace Tests.Modules.CloneMemberValue{
                     var objectSpace2 = application.CreateObjectSpace();
                     var detailView2 = application.CreateDetailView(objectSpace2, objectSpace2.CreateObject<ACmv>());
 
-                    var viewsTuple = await detailViews.FirstAsync();
+                    var viewsTuple = await detailViews.FirstAsync().WithTimeOut();
                     viewsTuple.previous.ShouldBe(detailView1);
                     viewsTuple.current.ShouldBe(detailView2);
                 }    
                 return Unit.Default;
-            });
+            }).WithTimeOut();
             
         }
 
@@ -96,11 +96,11 @@ namespace Tests.Modules.CloneMemberValue{
                 var collectionSource = application.CreateCollectionSource(application.CreateObjectSpace(),typeof(ACmv),modelListView.Id);
                 application.CreateListView(modelListView, collectionSource, true);
 
-                var listView = await listViews.FirstAsync();
+                var listView = await listViews.FirstAsync().WithTimeOut();
 
                 listView.Model.ShouldBe(modelListView);    
                 return Unit.Default;
-            });
+            }).WithTimeOut();
             
             
         }
@@ -126,11 +126,11 @@ namespace Tests.Modules.CloneMemberValue{
                 listEditor.CallMethod("OnNewObjectAdding");
                 listEditor.CallMethod("OnNewObjectAdding");
 
-                var objectPair = await (objects).FirstAsync();
+                var objectPair = await (objects).FirstAsync().WithTimeOut();
                 objectPair.previous.ShouldBe(aCmv1);
                 objectPair.current.ShouldBe(aCmv2);    
                 return Unit.Default;
-            });
+            }).WithTimeOut();
             
         }
 
@@ -149,13 +149,13 @@ namespace Tests.Modules.CloneMemberValue{
                 var modelObjectView = application.FindModelClass(typeof(ACmv)).DefaultDetailView.AsObjectView;
                 ((IModelMemberCloneValue) modelObjectView.ModelClass.FindMember(nameof(ACmv.PrimitiveProperty))).CloneValue=true;
 
-                var clonedMembers = await (modelObjectView,(IObjectSpaceLink)aCmv1,(IObjectSpaceLink)aCmv2).AsObservable().CloneMembers();
+                var clonedMembers = await (modelObjectView,(IObjectSpaceLink)aCmv1,(IObjectSpaceLink)aCmv2).AsObservable().CloneMembers().WithTimeOut();
 
                 clonedMembers.currentObject.ShouldBe(aCmv2);
                 clonedMembers.previousObject.ShouldBe(aCmv1);
                 aCmv2.PrimitiveProperty.ShouldBe(aCmv1.PrimitiveProperty);
                 return Unit.Default;
-            });
+            }).WithTimeOut();
             
         }
 

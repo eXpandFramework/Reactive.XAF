@@ -37,10 +37,10 @@ namespace Tests.Modules.HideToolBar{
                 nestedFrame.SetView(detailView);
 
 
-                (await nestedFrames.Take(1)).ShouldBe(nestedFrame);
+                (await nestedFrames.Take(1).WithTimeOut()).ShouldBe(nestedFrame);
                 return Unit.Default;
 
-            });
+            }).WithTimeOut();
         }
 
 

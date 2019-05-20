@@ -1,4 +1,5 @@
-﻿using System.Reactive;
+﻿using System;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using AppDomainToolkit;
@@ -25,12 +26,14 @@ namespace Tests.Modules.AutoCommit{
                 var listView = application.CreateObjectView<ListView>(typeof(AC));
                 var detailView = application.CreateObjectView<DetailView>(typeof(AC));
 
-                (await objectViews.Take(1)).ShouldBe(listView);
-                (await objectViews.Take(2)).ShouldBe(detailView);
+                (await objectViews.Take(1).WithTimeOut()).ShouldBe(listView);
+                (await objectViews.Take(2).WithTimeOut()).ShouldBe(detailView);
                 return Unit.Default;
-            });
+            }).WithTimeOut();
 
         }
+
+        
 
         [Theory]
         [InlineData(Platform.Web)]
@@ -44,12 +47,12 @@ namespace Tests.Modules.AutoCommit{
                 detailView.ObjectSpace.CreateObject<AC>();
 
                 detailView.Close();
-                await objectViews.FirstAsync();
+                await objectViews.FirstAsync().WithTimeOut();
 
                 application.CreateObjectSpace().FindObject<AC>(null).ShouldNotBeNull();
 
                 return Unit.Default;
-            });
+            }).WithTimeOut();
         }
 
         private static AutoCommitModule DefaultAutoCommitModule(Platform platform){
