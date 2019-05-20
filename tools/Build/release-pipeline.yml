@@ -21,9 +21,9 @@ steps:
   enabled: true
   inputs:
     testAssemblyVer2: |
-     .\bin\Xpand.XAF.Agnostic.Tests.dll
+     .\bin\Tests.dll
     uiTests: true
-    runInParallel: false
+    runInParallel: true
     diagnosticsEnabled: false
     runTestsInIsolation: true
     codeCoverageEnabled: true

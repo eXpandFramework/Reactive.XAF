@@ -23,7 +23,7 @@ namespace Tests.Artifacts {
         }
 
         public static async Task<T> WithTimeOut<T>(this IObservable<T> source, TimeSpan? timeout=null){
-            timeout = timeout ?? TimeSpan.FromSeconds(15);
+            timeout = timeout ?? TimeSpan.FromSeconds(5);
             return await source.Timeout(timeout.Value);
         }
         public static Mock<T> GetMock<T>(this T t) where T:class{

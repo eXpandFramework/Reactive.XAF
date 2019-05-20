@@ -34,7 +34,7 @@ namespace Tests.Modules.Reactive{
                 (await frames.Take(3)).ShouldBe(nestedFrame);
                 (await frames.Take(4)).ShouldBe(popupWindow);
                 return Unit.Default;
-            }).WithTimeOut();
+            });
         }
 
         [Theory]
@@ -52,7 +52,7 @@ namespace Tests.Modules.Reactive{
                 (await windows.Take(1)).ShouldBe(window);
                 (await windows.Take(2)).ShouldBe(popupWindow);
                 return Unit.Default;
-            }).WithTimeOut();
+            });
         }
 
         [Theory]
@@ -68,7 +68,7 @@ namespace Tests.Modules.Reactive{
 
                 (await windows.Take(1)).ShouldBe(popupWindow);
                 return Unit.Default;
-            }).WithTimeOut();
+            });
         }
 
         [Theory]
@@ -84,7 +84,7 @@ namespace Tests.Modules.Reactive{
 
                 (await nestedFrames.FirstAsync()).ShouldBe(nestedFrame);
                 return Unit.Default;
-            }).WithTimeOut();
+            });
         }
 
 

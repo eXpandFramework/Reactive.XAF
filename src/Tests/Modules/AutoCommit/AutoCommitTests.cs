@@ -29,7 +29,7 @@ namespace Tests.Modules.AutoCommit{
                 (await objectViews.Take(1).WithTimeOut()).ShouldBe(listView);
                 (await objectViews.Take(2).WithTimeOut()).ShouldBe(detailView);
                 return Unit.Default;
-            }).WithTimeOut();
+            });
 
         }
 
@@ -52,7 +52,7 @@ namespace Tests.Modules.AutoCommit{
                 application.CreateObjectSpace().FindObject<AC>(null).ShouldNotBeNull();
 
                 return Unit.Default;
-            }).WithTimeOut();
+            });
         }
 
         private static AutoCommitModule DefaultAutoCommitModule(Platform platform){

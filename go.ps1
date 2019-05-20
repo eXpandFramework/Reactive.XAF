@@ -1,4 +1,4 @@
-param(
+﻿param(
     [string]$packageSources = "C:\Program Files (x86)\DevExpress 18.2\Components\System\Components\packages",
     [string]$msbuild = $null,
     [string]$nugetApiKey = $null,
@@ -7,7 +7,8 @@ param(
     [bool]$cleanBin = $true,
     [string]$branch="lab",
     [switch]$InstallModules,
-    [string[]]$taskList=@("Release")
+    [string[]]$taskList=@("Release"),
+    [string]$xpandPoshVersion = "2.2.3"
 )
 $ErrorActionPreference = "Stop"
 @([PSCustomObject]@{
@@ -15,7 +16,7 @@ $ErrorActionPreference = "Stop"
     Version ="4.7.4"
 },[PSCustomObject]@{
     Name = "XpandPosh"
-    Version ="2.2.2"
+    Version =$xpandPoshVersion
 })|ForEach-Object{
     & "$PSScriptRoot\tools\build\Install-Module.ps1" $_
 }

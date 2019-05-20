@@ -10,7 +10,7 @@ function UpdateModulesList($rootLocation, $packages) {
     $moduleList = "|PackageName|Version|Downloads`r`n|---|---|---|`r`n"
     $packages | Where-Object { $_ -ne "Xpand.VersionConverter" } | ForEach-Object {
         $name = $_.Replace("Xpand.XAF.Modules.", "")
-        $packageUri = "[$name](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/$name)"
+        $packageUri = "[$name](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/$name)"
         $version = "![](https://img.shields.io/nuget/v/$_.svg?label=&style=flat)"
         $downloads = "![](https://img.shields.io/nuget/dt/$_.svg?label=&style=flat)"
         $moduleList += "$packageUri|$version|$downloads`r`n"
@@ -27,7 +27,7 @@ function UpdateDependencies($_, $packagespath, $readMePath) {
     $metadata = ((Get-NugetPackageSearchMetadata -Name $_.BaseName -Source $packagesPath).DependencySets.Packages | ForEach-Object {
             $id = $_.Id
             if ($id -like "Xpand.XAF*") {
-                $id = "[$id](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/$id)"
+                $id = "[$id](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/$id)"
             }
             elseif ($id -eq "Xpand.VersionConverter") {
                 $id = "[$id](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)"

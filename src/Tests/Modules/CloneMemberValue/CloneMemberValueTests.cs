@@ -70,7 +70,7 @@ namespace Tests.Modules.CloneMemberValue{
                     viewsTuple.current.ShouldBe(detailView2);
                 }    
                 return Unit.Default;
-            }).WithTimeOut();
+            });
             
         }
 
@@ -100,7 +100,7 @@ namespace Tests.Modules.CloneMemberValue{
 
                 listView.Model.ShouldBe(modelListView);    
                 return Unit.Default;
-            }).WithTimeOut();
+            });
             
             
         }
@@ -130,7 +130,7 @@ namespace Tests.Modules.CloneMemberValue{
                 objectPair.previous.ShouldBe(aCmv1);
                 objectPair.current.ShouldBe(aCmv2);    
                 return Unit.Default;
-            }).WithTimeOut();
+            });
             
         }
 
@@ -155,7 +155,7 @@ namespace Tests.Modules.CloneMemberValue{
                 clonedMembers.previousObject.ShouldBe(aCmv1);
                 aCmv2.PrimitiveProperty.ShouldBe(aCmv1.PrimitiveProperty);
                 return Unit.Default;
-            }).WithTimeOut();
+            });
             
         }
 

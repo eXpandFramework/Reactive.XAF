@@ -60,7 +60,7 @@ namespace Tests.Modules.MasterDetail{
                 (pair.listViewItem.Model.View as IModelListView).ShouldNotBeNull();
                 (pair.detailViewItem.Model.View as IModelDetailView).ShouldNotBeNull();
                 return Unit.Default;
-            }).WithTimeOut();
+            });
         }
 
         [Theory]
@@ -89,7 +89,7 @@ namespace Tests.Modules.MasterDetail{
 
                 (await customProcessSelectedItem.FirstAsync().WithTimeOut()).e.Handled.ShouldBe(true);
                 return Unit.Default;
-            }).WithTimeOut();
+            });
             
         }
 
@@ -100,7 +100,7 @@ namespace Tests.Modules.MasterDetail{
             await RemoteFuncAsync.InvokeAsync(Domain, platform, async _ => {
                 await When_list_view_selection_changed_synchronize_detailview_current_object_Core(_).WithTimeOut();
                 return Unit.Default;
-            }).WithTimeOut();
+            });
         }
 
         private static async Task<DashboardViewItemInfo> When_list_view_selection_changed_synchronize_detailview_current_object_Core(Platform platform){
@@ -130,7 +130,7 @@ namespace Tests.Modules.MasterDetail{
                     .Active[MasterDetailModule.CategoryName]
                     .ShouldBe(true);
                 return Unit.Default;
-            }).WithTimeOut();
+            });
         }
 
         [Theory]
@@ -148,7 +148,7 @@ namespace Tests.Modules.MasterDetail{
                     .Select(md1 => md1.PropertyName).First()
                     .ShouldBe("updated");
                 return Unit.Default;
-            }).WithTimeOut();
+            });
         }
 
         [Theory]
@@ -173,7 +173,7 @@ namespace Tests.Modules.MasterDetail{
 
                 await detailView.WithTimeOut();                
                 return Unit.Default;
-            }).WithTimeOut();
+            });
         }
 
         static async Task<DashboardViewItemInfo> ViewItems(XafApplication xafApplication){

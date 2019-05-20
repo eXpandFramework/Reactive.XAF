@@ -40,7 +40,7 @@ namespace Tests.Modules.HideToolBar{
                 (await nestedFrames.Take(1).WithTimeOut()).ShouldBe(nestedFrame);
                 return Unit.Default;
 
-            }).WithTimeOut();
+            });
         }
 
 
