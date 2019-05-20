@@ -13,13 +13,17 @@ namespace Xpand.XAF.Modules.HideToolBar{
         public static IObservable<Frame> HideToolBarNestedFrames(this XafApplication application){
             return application
                 .WhenNestedFrameCreated()
+                .Select(frame => frame)
                 .TemplateChanged()
                 .Where(_ => _.Template is ISupportActionsToolbarVisibility)
                 .TemplateViewChanged()
                 .Where(frame => {
-                    var objectViewHideToolBar = frame.View.Model as IModelListViewHideToolBar;
-                    var hideToolBar = objectViewHideToolBar?.HideToolBar;
-                    return hideToolBar.HasValue&&hideToolBar.Value;
+                    if (frame.View.Model is IModelListViewHideToolBar modelListViewHideToolBar){
+                        var hideToolBar = modelListViewHideToolBar.HideToolBar;
+                        return hideToolBar.HasValue&&hideToolBar.Value;
+                    }
+
+                    return false;
                 })
                 .Publish().RefCount();
         }

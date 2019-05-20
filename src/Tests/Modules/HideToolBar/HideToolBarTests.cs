@@ -33,7 +33,7 @@ namespace Tests.Modules.HideToolBar{
                 nestedFrames.Connect();
                 var nestedFrame = application.CreateNestedFrame(null, TemplateContext.NestedFrame);
                 nestedFrame.CreateTemplate();
-                var detailView = application.CreateObjectView<DetailView>(typeof(HTBParent));
+                var detailView = application.CreateObjectView<ListView>(typeof(HTBParent));
                 nestedFrame.SetView(detailView);
 
 
