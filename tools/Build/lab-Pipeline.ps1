@@ -1,9 +1,9 @@
 param(
     $Branch="lab",
     $SourcePath = "$PSScriptRoot\..\..",
-    $GitHubUserName,
-    $Pass,
-    $DXApiFeed,
+    $GitHubUserName="apobekiaris",
+    $Pass=$env:GithubPass,
+    $DXApiFeed=(get-feed -dx),
     $artifactstagingdirectory,
     $WhatIf=$false
 )
@@ -25,25 +25,24 @@ $localPackages = Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse|Inv
         }
     }
     [PSCustomObject]@{
-        Name         = $name
+        Id         = $name
         NextVersion  = $nextversion
         LocalVersion = $localVersion
     }
 }
 Write-Host "localPackages:" -f blue
-Write-Host $localPackages
 $localPackages|Out-String
-$publishedPackages = & (Get-XNugetPath) list Xpand.XAF.Modules -source $packageSource| ConvertTo-PackageObject -LatestVersion| Where-Object {$_.Name -like "Xpand.XAF*"}| ForEach-Object {
-    $publishedName = $_.Name
-    $localPackages|Where-Object {$_.Name -eq $publishedName}
+$publishedPackages = & (Get-XNugetPath) list Xpand.XAF.Modules -source $packageSource| ConvertTo-PackageObject | Where-Object {$_.Id -like "Xpand.XAF*"}| ForEach-Object {
+    $publishedName = $_.Id
+    $localPackages|Where-Object {$_.Id -eq $publishedName}
 }
 Write-Host "publishedPackages:" -f blue
-$publishedPackages
-$newPackages = $localPackages|Where-Object {!(($publishedPackages|Select-Object -ExpandProperty Name) -contains $_.Name) }|ForEach-Object {
+$publishedPackages|Out-String
+$newPackages = $localPackages|Where-Object {!(($publishedPackages|Select-Object -ExpandProperty Id) -contains $_.Id) }|ForEach-Object {
     $localVersion = New-Object System.Version($_.LocalVersion)
     $nextVersion=New-Object System.Version($localVersion.Major, $localVersion.Minor, $localVersion.Build)
     [PSCustomObject]@{
-        Name        = $_.Name
+        Id        = $_.Id
         NextVersion = $nextVersion
         LocalVersion =$localVersion
     }
@@ -73,6 +72,7 @@ $bArgs=@{
     packageSources="$(Get-PackageFeed -Xpand);$DxApiFeed"
     tasklist="release"
 }
+
 & $SourcePath\go.ps1 @bArgs
 
 "$SourcePath\Bin\Nupkg","$SourcePath\Bin\Nuspec"|ForEach-Object{
