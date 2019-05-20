@@ -23,7 +23,7 @@ steps:
     testAssemblyVer2: |
      .\bin\Tests.dll
     uiTests: true
-    runInParallel: false
+    runInParallel: true
     diagnosticsEnabled: false
     runTestsInIsolation: true
     codeCoverageEnabled: true
