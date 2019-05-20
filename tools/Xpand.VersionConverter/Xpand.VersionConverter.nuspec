@@ -16,7 +16,6 @@
   <files>
     <file src="Xpand.VersionConverter.ps1" target="build\Xpand.VersionConverter.ps1" />
     <file src="Functions.ps1" target="build\Functions.ps1" />
-    <file src="Update-Symbols.ps1" target="build\Update-Symbols.ps1" />
     <file src="..\..\src\Xpand.key\Xpand.snk" target="build\Xpand.snk" />
     <file src="Xpand.VersionConverter.targets" target="build\Xpand.VersionConverter.targets" />
     <file src="srcsrv\dbghelp.dll" target="build\srcsrv\dbghelp.dll" />
