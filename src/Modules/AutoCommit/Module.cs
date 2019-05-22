@@ -3,11 +3,12 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
+using Xpand.Source.Extensions.XAF;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.AutoCommit{
-    public sealed class AutoCommitModule : ModuleBase{
+    public sealed class AutoCommitModule : XafModule{
         public const string CategoryName = "Xpand.XAF.Modules.AutoCommit";
 
         public AutoCommitModule(){
@@ -19,7 +20,7 @@ namespace Xpand.XAF.Modules.AutoCommit{
             base.Setup(moduleManager);
             Application.Connect()
                 .TakeUntil(this.WhenDisposed())
-                .Subscribe();
+                .Subscribe(unit => { }, () => { });
         }
 
         public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders){

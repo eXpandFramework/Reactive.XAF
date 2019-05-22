@@ -7,6 +7,7 @@ using Moq;
 
 namespace Tests.Artifacts{
     public class TestWinApplication : WinApplication{
+
         protected override LayoutManager CreateLayoutManagerCore(bool simple){
             var controlMock = new Mock<Control>(){CallBase = true};
             var layoutManagerMock = new Mock<LayoutManager>();

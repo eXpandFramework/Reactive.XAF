@@ -27,8 +27,6 @@ namespace Tests.Modules.AutoCommit{
 
         }
 
-        
-
         [Theory]
         [InlineData(Platform.Web)]
         [InlineData(Platform.Win)]

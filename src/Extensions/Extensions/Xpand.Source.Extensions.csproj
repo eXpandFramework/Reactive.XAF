@@ -108,7 +108,7 @@
     <Compile Include="XAF\BaseImpl\CustomBaseObject.cs" />
     <Compile Include="XAF\Frame\GetController.cs" />
     <Compile Include="XAF\Frame\Actions.cs" />
-    <Compile Include="XAF\GetTypeInfo.cs" />
+    <Compile Include="XAF\Object\GetTypeInfo.cs" />
     <Compile Include="XAF\Model\GetNodeByPath.cs" />
     <Compile Include="XAF\Model\GetParent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -119,6 +119,9 @@
     <Compile Include="XAF\TypesInfo\RunTimeMode.cs" />
     <Compile Include="XAF\XafApplication\CreateView.cs" />
     <Compile Include="XAF\XafApplication\GetPlatform.cs" />
+    <Compile Include="XAF\XafModule.cs">
+      <SubType>Component</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

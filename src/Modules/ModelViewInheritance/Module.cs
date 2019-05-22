@@ -1,9 +1,9 @@
-﻿using DevExpress.ExpressApp;
-using DevExpress.ExpressApp.Model;
+﻿using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
+using Xpand.Source.Extensions.XAF;
 
 namespace Xpand.XAF.Modules.ModelViewInheritance {
-    public sealed partial class ModelViewInheritanceModule : ModuleBase {
+    public sealed partial class ModelViewInheritanceModule : XafModule {
         public ModelViewInheritanceModule() {
             InitializeComponent();
         }

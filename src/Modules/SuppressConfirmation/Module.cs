@@ -3,17 +3,17 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
+using Xpand.Source.Extensions.XAF;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.SuppressConfirmation{
-    public sealed class SuppressConfirmationModule : ModuleBase{
+    public sealed class SuppressConfirmationModule : XafModule{
         public const string CategoryName = "Xpand.XAF.Modules.SupressConfirmation";
 
         public SuppressConfirmationModule(){
             RequiredModuleTypes.Add(typeof(SystemModule));
-            RequiredModuleTypes.Add(typeof(ReactiveModule));   
-            
+            RequiredModuleTypes.Add(typeof(ReactiveModule));
         }
 
         public override void Setup(ApplicationModulesManager moduleManager){

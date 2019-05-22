@@ -89,19 +89,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\Extensions\Extensions\XAF\Action\DoExecute.cs">
-      <Link>LinkFiles\DoExecute.cs</Link>
+      <Link>LinkedFiles\DoExecute.cs</Link>
     </Compile>
     <Compile Include="..\..\Extensions\Extensions\XAF\ApplicationModulesManager\RegisterAction.cs">
-      <Link>LinkFiles\RegisterAction.cs</Link>
+      <Link>LinkedFiles\RegisterAction.cs</Link>
     </Compile>
     <Compile Include="..\..\Extensions\Extensions\XAF\Frame\Actions.cs">
-      <Link>LinkFiles\Actions.cs</Link>
+      <Link>LinkedFiles\Actions.cs</Link>
     </Compile>
     <Compile Include="..\..\Extensions\Extensions\XAF\Frame\GetController.cs">
-      <Link>LinkFiles\GetController.cs</Link>
+      <Link>LinkedFiles\GetController.cs</Link>
     </Compile>
     <Compile Include="..\..\Extensions\Extensions\XAF\XafApplication\GetPlatform.cs">
-      <Link>LinkFiles\GetPlatform.cs</Link>
+      <Link>LinkedFiles\GetPlatform.cs</Link>
     </Compile>
     <Compile Include="MasterDetailService.cs" />
     <Compile Include="ModelLogic.cs" />

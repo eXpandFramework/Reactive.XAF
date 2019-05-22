@@ -2,10 +2,11 @@
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
+using Xpand.Source.Extensions.XAF;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.CloneMemberValue {
-    public sealed partial class CloneMemberValueModule : ModuleBase {
+    public sealed partial class CloneMemberValueModule : XafModule {
         public CloneMemberValueModule() {
             InitializeComponent();
         }
