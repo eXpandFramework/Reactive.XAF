@@ -22,62 +22,63 @@ namespace Xpand.XAF.Modules.CloneMemberValue{
             return Observable.Empty<Unit>();
         }
 
-        public static IEnumerable<IModelCommonMemberViewItemCloneValue> CloneValueMemberViewItems(this IModelObjectView modelObjectView) {
-            return (modelObjectView is IModelListView view? view.Columns.Cast<IModelCommonMemberViewItemCloneValue>()
-                    : ((IModelDetailView) modelObjectView).Items.OfType<IModelCommonMemberViewItemCloneValue>())
-                .Where(state => state.CloneValue);
+        public static IEnumerable<IModelCommonMemberViewItemCloneValue> CloneValueMemberViewItems(this ObjectView objectView) {
+            return (objectView is ListView view? view.Model.Columns.Cast<IModelCommonMemberViewItemCloneValue>()
+                    : ((DetailView) objectView).Model.Items.OfType<IModelCommonMemberViewItemCloneValue>())
+                .Where(state => state.CloneValue)
+                .Select(value => value);
         }
 
-        public static IObservable<(IModelObjectView modelObjectView, IMemberInfo MemberInfo, IObjectSpaceLink previousObject, IObjectSpaceLink currentObject)> CloneMembers(
-            this IObservable<(IModelObjectView modelObjectView,IObjectSpaceLink previous, IObjectSpaceLink current)> source){
+        public static IObservable<(ObjectView objectView, IMemberInfo MemberInfo, object previousObject, object currentObject)> CloneMembers(
+            this IObservable<(ObjectView objectView,object previous, object current)> source){
             
-            return  source.SelectMany(_ => _.modelObjectView
+            return  source.SelectMany(_ => _.objectView
                 .CloneValueMemberViewItems()
-                .Select(value => (_.modelObjectView, ((IModelMemberViewItem) value).ModelMember.MemberInfo,_.previous,_.current).CloneMemberValue()))
+                .Select(value => (_.objectView, ((IModelMemberViewItem) value).ModelMember.MemberInfo,_.previous,_.current).CloneMemberValue()))
                 ;
         }
 
-        public static IObservable<(IObjectSpaceLink previous, IObjectSpaceLink current)> NewObjectPairs(this ListEditor listEditor){
+        public static IObservable<(object previous, object current)> NewObjectPairs(this ListEditor listEditor){
             return listEditor.WhenNewObjectAdding()
-                .Select(_ => _.e.AddedObject).Cast<IObjectSpaceLink>()
+                .Select(_ => _.e.AddedObject).Cast<object>()
                 .CombineWithPrevious().Where(_ => _.previous != null);
         }
 
         public static IObservable<(DetailView previous, DetailView current)> WhenCloneMemberValueDetailViewPairs(this XafApplication application){
             return application
                 .WhenDetailViewCreated()
-                .Select(_ => _.e.View).Where(view => view.Model.CloneValueMemberViewItems().Any())
+                .Select(_ => _.e.View).Where(view => view.CloneValueMemberViewItems().Any())
                 .CombineWithPrevious().Where(_ => _.previous != null&&_.current.ObjectSpace.IsNewObject(_.current.CurrentObject))
                 .Publish().RefCount();
         }
 
         public static IObservable<ListView> WhenCloneMemberValueListViewCreated(this XafApplication application){
             return application
-                .WhenListViewCreated().Where(_ => _.e.ListView.Model.CloneValueMemberViewItems().Any())
+                .WhenListViewCreated().Where(_ => _.e.ListView.CloneValueMemberViewItems().Any())
                 .Select(_ => _.e.ListView).Where(view => view.Model.AllowEdit);
         }
 
-        public static IObservable<(IModelObjectView modelObjectView, IMemberInfo MemberInfo, IObjectSpaceLink previousObject, IObjectSpaceLink currentObject)> WhenCloneMemberValues(this XafApplication application){
+        public static IObservable<(ObjectView objectView, IMemberInfo MemberInfo, object previousObject, object currentObject)> WhenCloneMemberValues(this XafApplication application){
             return application.WhenCloneMemberValueDetailViewPairs()
-                .Select(_ => (_.current.Model.AsObjectView,(IObjectSpaceLink)_.previous.CurrentObject,(IObjectSpaceLink)_.current.CurrentObject))
+                .Select(_ => (((ObjectView) _.current),_.previous.CurrentObject,_.current.CurrentObject))
                 .Merge(application.WhenCloneMemberValueListViewCreated()
                     .ControlsCreated()
                     .SelectMany(_ => (_.view.Editor
                         .NewObjectPairs()
-                        .Select(tuple => (_.view.Model.AsObjectView,tuple.previous,tuple.current)))))
+                        .Select(tuple => (((ObjectView) _.view),tuple.previous,tuple.current)))))
                 .CloneMembers()
                 .Publish().RefCount();
         }
 
-        private static (IModelObjectView modelObjectView,IMemberInfo MemberInfo, IObjectSpaceLink previousObject, IObjectSpaceLink currentObject)
-            CloneMemberValue(this (IModelObjectView modelObjectView,IMemberInfo MemberInfo, IObjectSpaceLink previousObject, IObjectSpaceLink currentObject) _){
+        private static (ObjectView objectView,IMemberInfo MemberInfo, object previousObject, object currentObject)
+            CloneMemberValue(this (ObjectView objectView,IMemberInfo MemberInfo, object previousObject, object currentObject) _){
 
             var value = _.MemberInfo.GetValue(_.previousObject);
             if (_.MemberInfo.MemberTypeInfo.IsPersistent){
-                value = _.currentObject.ObjectSpace.GetObject(value);
+                value = _.objectView.ObjectSpace.GetObject(value);
             }
             _.MemberInfo.SetValue(_.currentObject, value);
-            return (_.modelObjectView,_.MemberInfo, _.previousObject, _.currentObject);
+            return (_.objectView,_.MemberInfo, _.previousObject, _.currentObject);
         }
     }
 }

@@ -19,20 +19,6 @@ namespace Tests.Modules.CloneMemberValue{
     [Collection(nameof(XafTypesInfo))]
     public class CloneMemberValueTests : BaseTest{
 
-        [Theory]
-        [InlineData(Platform.Web)]
-        [InlineData(Platform.Win)]
-        internal void Configure_which_members_are_cloned_from_the_model(Platform platform){
-            var cloneMemberValueModule = DefaultCloneMemberValueModule(platform);
-            var modelClass = cloneMemberValueModule.Application.Model.BOModel.GetClass(typeof(ACmv));
-            foreach (var member in modelClass.OwnMembers.Cast<IModelMemberCloneValue>().Skip(1)){
-                member.CloneValue = true;
-            }
-            
-            modelClass.DefaultDetailView.CloneValueMemberViewItems().Count().ShouldBe(1);
-            
-        }
-
         private static CloneMemberValueModule DefaultCloneMemberValueModule(Platform platform){
             var application = platform.NewApplication();
             var cloneMemberValueModule = new CloneMemberValueModule();
@@ -129,10 +115,10 @@ namespace Tests.Modules.CloneMemberValue{
             aCmv1.PrimitiveProperty = "test";
             var objectSpace2 = application.CreateObjectSpace();
             var aCmv2 = objectSpace2.CreateObject<ACmv>();
-            var modelObjectView = application.FindModelClass(typeof(ACmv)).DefaultDetailView.AsObjectView;
-            ((IModelMemberCloneValue) modelObjectView.ModelClass.FindMember(nameof(ACmv.PrimitiveProperty))).CloneValue=true;
+            var objectView = application.CreateObjectView<DetailView>(typeof(ACmv));
+            ((IModelMemberCloneValue) objectView.Model.ModelClass.FindMember(nameof(ACmv.PrimitiveProperty))).CloneValue=true;
 
-            var clonedMembers = await (modelObjectView,(IObjectSpaceLink)aCmv1,(IObjectSpaceLink)aCmv2).AsObservable().CloneMembers().WithTimeOut();
+            var clonedMembers = await ((ObjectView)objectView,(object)aCmv1,(object)aCmv2).AsObservable().CloneMembers().WithTimeOut();
 
             clonedMembers.currentObject.ShouldBe(aCmv2);
             clonedMembers.previousObject.ShouldBe(aCmv1);

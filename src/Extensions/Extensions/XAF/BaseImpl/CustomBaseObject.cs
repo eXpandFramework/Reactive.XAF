@@ -10,7 +10,7 @@ using DevExpress.Xpo.Metadata;
 // ReSharper disable once CheckNamespace
 namespace Xpand.XAF.Persistent.BaseImpl{
     [NonPersistent]
-    public abstract class CustomBaseObject : XPCustomObject,IObjectSpaceLink {
+    public abstract class CustomBaseObject : XPCustomObject {
                 
         [Persistent("Oid"), Key(true), VisibleInListView(false), VisibleInDetailView(false), VisibleInLookupListView(false), MemberDesignTimeVisibility(false)]
         private Guid _oid = Guid.Empty;
