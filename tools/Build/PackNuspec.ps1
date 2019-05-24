@@ -36,7 +36,7 @@ $assemblyVersions=Get-ChildItem "$sourceDir\src" "*.csproj" -Recurse|ForEach-Obj
 Get-ChildItem "$sourceDir\bin" "*.nuspec" -Recurse|ForEach-Object{
     $name=$_.BaseName.Replace("Xpand.XAF.Modules.","")
     $id="Xpand.XAF.Modules.$name.$name"+"Module"
-    Set-Content "$sourceDir\bin\Readme.txt" "BUILD THE PROJECT BEFORE OPENING THE MODEL EDITOR.`r`n`r`nThe package only adds the required references. To install the $id module add the next line in the constructor of your XAF module.`r`n`r`nRequiredModuleTypes.Add(typeof($id));" 
+    Set-Content "$sourceDir\bin\Readme.txt" "BUILD THE PROJECT BEFORE OPENING THE MODEL EDITOR.`r`n`r`nThe package only adds the required references. To install the $id module add the next line in the constructor of your XAF module.`r`n`r`nRequiredModuleTypes.Add(typeof($id));`r`n`r`nTo read the module documentation visit its wiki page @ https://github.com/eXpandFramework/DevExpress.XAF/wiki/$name" 
     $packageName=[System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
     $assembly=$assemblyVersions|Where-Object{$_.name -eq $packageName}
     $name=$_.FullName

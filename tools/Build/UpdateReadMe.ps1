@@ -59,12 +59,33 @@ function UpdateBadges($_, $packagespath,  $readMePath) {
     $readMe = [Regex]::replace($readMe, '(.*)# About', "$badges`r`n# About", [RegexOptions]::Singleline)
     Set-Content $readMePath $readMe.Trim()
 }
+function UpdateIssues($_, $packagespath,  $readMePath) {
+    $moduleName="$($_.BaseName)Module"
+    $readMe = Get-Content $readMePath -Raw
+    $regex = [regex] '(?isx)\#\#\ Issues([^#]*)'
+$result = $regex.Replace($readMe, @"
+## Issues-Debugging-Troubleshooting
+$1
+To ``Step in the source code`` you need to ``enable Source Server support`` in your Visual Studio/Tools/Options/Debugging/Enable Source Server Support. See also [How to boost your DevExpress Debugging Experience](https://github.com/eXpandFramework/DevExpress.XAF/wiki/How-to-boost-your-DevExpress-Debugging-Experience#1-index-the-symbols-to-your-custom-devexpresss-installation-location).
+
+If the package is installed in a way that you do not have access to uninstall it, then you can ``unload`` it with the next call when [XafApplication.SetupComplete](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.XafApplication.SetupComplete).
+``````ps1
+(($moduleName) Application.Modules.FindModule(typeof($moduleName))).Unload();
+``````
+
+"@
+)
+
+
+    Set-Content $readMePath $result.Trim()
+}
 function UpdateModules($rootLocation, $packages) {
     Get-ChildItem "$rootLocation\src" *.csproj -Recurse | Select-Object | ForEach-Object {
         $readMePath = "$($_.DirectoryName)\Readme.md"
         if ((Test-path $readMePath) -and $packages.Contains($_.BaseName)) {
             UpdateDependencies $_ $packagespath $readMePath
             UpdateBadges $_ $packagespath $readMePath
+            UpdateIssues $_ $packagespath $readMePath
         }   
     }
 }

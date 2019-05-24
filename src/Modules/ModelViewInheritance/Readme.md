@@ -26,12 +26,18 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp**|**Any**
-|[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.0.23
+|[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.0.24
  |fasterflect|2.1.3
  |System.ValueTuple|4.5.0
 
-## Issues
-For [Bugs](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Bug%2C+Standalone_XAF_Modules,+ModelViewInheritance&template=standalone-xaf-modules--bug-report.md&title=), [Questions](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Question%2C+Standalone_XAF_Modules,+ModelViewInheritance&template=standalone-xaf-modules--question.md&title=) or [Suggestions](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Enhancement%2C+Standalone_XAF_Modules,+ModelViewInheritance&template=standalone-xaf-modules--feature-request.md&title=) use main project issues.
+## Issues-Debugging-Troubleshooting
+
+To Step in the source code you need to enable Source Server support in your Visual Studio/Tools/Options/Debugging/Enable Source Server Support. See also [How to boost your DevExpress Debugging Experience](https://github.com/eXpandFramework/DevExpress.XAF/wiki/How-to-boost-your-DevExpress-Debugging-Experience#1-index-the-symbols-to-your-custom-devexpresss-installation-location).
+
+If the package is installed in a way that you do not have access to uninstall it, then you can use the next call when [XafApplication.SetupComplete](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.XafApplication.SetupComplete).
+```ps1
+((Xpand.XAF.Modules.ModelViewInheritanceModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.ModelViewInheritanceModule))).Unload();
+```
 ## Details
 The module extends the model views nodes with the `IModelObjectViewMergedDifferences` interface to allow model view differences composition. 
 
