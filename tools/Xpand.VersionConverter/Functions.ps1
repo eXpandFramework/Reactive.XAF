@@ -1,3 +1,37 @@
+function Install-MonoCecil($resolvePath) {
+    Write-Verbose "Loading Mono.Cecil"
+    $monoPath = "$PSScriptRoot\mono.cecil.0.10.3\lib\net40"
+    if (!(Test-Path "$monoPath\Mono.Cecil.dll")) {
+        $client = New-Object System.Net.WebClient
+        $client.DownloadFile("https://www.nuget.org/api/v2/package/Mono.Cecil/0.10.3", "$PSScriptRoot\mono.cecil.0.10.3.zip")
+        Add-Type -AssemblyName System.IO.Compression.FileSystem
+        [ZipFile]::ExtractToDirectory("$PSScriptRoot\mono.cecil.0.10.3.zip", "$PSScriptRoot\mono.cecil.0.10.3")
+    }
+
+    [System.Reflection.Assembly]::Load([File]::ReadAllBytes("$monoPath\Mono.Cecil.dll")) | Out-Null
+    [System.Reflection.Assembly]::Load([File]::ReadAllBytes("$monoPath\Mono.Cecil.pdb.dll")) | Out-Null
+    Add-Type @"
+using Mono.Cecil;
+public class MyDefaultAssemblyResolver : DefaultAssemblyResolver{
+    public override AssemblyDefinition Resolve(AssemblyNameReference name, ReaderParameters parameters){
+        try{
+            return base.Resolve(name, parameters);
+        }
+        catch (AssemblyResolutionException){
+            var assemblyDefinition = AssemblyDefinition.ReadAssembly(string.Format(@"$resolvePath\{0}.dll", name.Name));
+            return assemblyDefinition;
+        }
+    }
+}
+"@ -ReferencedAssemblies @("$monoPath\Mono.Cecil.dll")
+}
+function Remove-OtherVersionFlags {
+    param(
+        $PackageDir,
+        $DXVersion
+    )
+    Get-ChildItem $packageDir *VersionConverter.v.* -Exclude $dxVersion | ForEach-Object { Remove-Item $_.FullName -Recurse -Force }
+}
 function Use-Object {
     [CmdletBinding()]
     param (
@@ -31,8 +65,13 @@ function Get-MonoAssembly($path, [switch]$Write) {
     $readerParams.AssemblyResolver = New-Object MyDefaultAssemblyResolver
     [ModuleDefinition]::ReadModule($path, $readerParams).Assembly
 }
-function Get-DevExpressVersion($targetPath, $referenceFilter, $dxReferences) {
+function Get-DevExpressVersion($targetPath, $referenceFilter, $projectFile) {
     Write-Verbose "Finding DevExpress version..."
+    $projectFileInfo = Get-Item $projectFile
+    [xml]$csproj = Get-Content $projectFileInfo.FullName
+    $references = $csproj.Project.ItemGroup.Reference
+    $dxReferences = $references | Where-Object { $_.Include -like "$referenceFilter" }    
+
     $hintPath = $dxReferences.HintPath | foreach-Object { 
         if ($_) {
             $path = $_
@@ -59,7 +98,7 @@ function Get-DevExpressVersion($targetPath, $referenceFilter, $dxReferences) {
             $dxReference = [Regex]::Match($include, "DevExpress[^,]*", [RegexOptions]::IgnoreCase).Value
             Write-Verbose "Include=$Include"
             Write-Verbose "DxReference=$dxReference"
-            $dxAssembly = Get-ChildItem "$env:windir\Microsoft.NET\assembly\GAC_MSIL"  *.dll -Recurse | Where-Object { $_ -like "*$dxReference.dll" }
+            $dxAssembly = Get-ChildItem "$env:windir\Microsoft.NET\assembly\GAC_MSIL"  *.dll -Recurse | Where-Object { $_ -like "*$dxReference.dll" }| Select-Object -First 1
             if ($dxAssembly) {
                 [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($dxAssembly.FullName).FileVersion
             }
@@ -107,9 +146,9 @@ function Update-Version($modulePath, $dxVersion) {
             $writeParams.WriteSymbols = $true
             $key = [File]::ReadAllBytes("$PSScriptRoot\Xpand.snk")
             $writeParams.StrongNameKeyPair = [System.Reflection.StrongNameKeyPair]($key)
-            $pdbPath =Get-Item $modulePath
-            $pdbPath="$($pdbPath.DirectoryName)\$($pdbPath.BaseName).pdb"
-            $symbolSources=Get-SymbolSources $pdbPath
+            $pdbPath = Get-Item $modulePath
+            $pdbPath = "$($pdbPath.DirectoryName)\$($pdbPath.BaseName).pdb"
+            $symbolSources = Get-SymbolSources $pdbPath
             $moduleAssembly.Write($writeParams)
             Update-Symbols -pdb $pdbPath -SymbolSources $symbolSources
         }   

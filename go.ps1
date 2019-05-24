@@ -8,7 +8,7 @@
     [string]$branch="lab",
     [switch]$InstallModules,
     [string[]]$taskList=@("Release"),
-    [string]$xpandPoshVersion = "2.2.3"
+    [string]$xpandPoshVersion = "2.6.1"
 )
 $ErrorActionPreference = "Stop"
 @([PSCustomObject]@{
