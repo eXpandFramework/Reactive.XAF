@@ -56,7 +56,7 @@ The module extends the `IModelMember` nodes with the `IModelMemberCloneValue`.
 
 
 if logging is set to verbose all operations will be logged. 
-To obesrve the cloning operations in code use the next pattern in one of your modules.
+To observe the cloning operations in code use the next pattern in one of your modules.
 
 ```cs
 public override void Setup(XafApplication application){

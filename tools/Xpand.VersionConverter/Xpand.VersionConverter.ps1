@@ -24,6 +24,7 @@ $nugetPackageFoldersPath="$PSSCriptRoot\..\..\.."
 if ((Get-Item "$PSScriptRoot\..").BaseName -like "Xpand.VersionConverter*"){
     $nugetPackageFoldersPath="$PSSCriptRoot\..\.."
 }
+Write-Verbose "nugetPackageFoldersPath=$nugetPackageFoldersPath"
 $nugetPackageFolders=[Path]::GetFullPath($nugetPackageFoldersPath)
 $moduleDirectories=[Directory]::GetDirectories($nugetPackageFolders)|Where-Object{(Get-Item $_).BaseName -like "Xpand.XAF*"}
 if (!($moduleDirectories|where-Object{!(Get-ChildItem $_ "VersionConverter.v.$dxVersion.DoNotDelete" -Recurse|Select-Object -First 1)})){
@@ -41,20 +42,24 @@ $mtx.WaitOne() | Out-Null
 try {    
     Install-MonoCecil $targetPath
     $moduleDirectories|ForEach-Object{
-        $packageFile = (Get-ChildItem $_ Xpand.XAF*.dll -Recurse).FullName
-        $packageDir = (Get-Item $packageFile).DirectoryName
-        Remove-OtherVersionFlags $packageDir $dxVersion
-        $versionConverterFlag = "$packageDir\VersionConverter.v.$dxVersion.DoNotDelete"
-        if (!(Test-Path $versionConverterFlag)) {
-            "$targetPath\$([Path]::GetFileName($packageFile))", $packageFile | ForEach-Object {
-                if (Test-Path $_) {
-                    $modulePath = (Get-Item $_).FullName
-                    Write-Verbose "Checking $modulePath references.."
-                    Update-Version $modulePath $dxVersion
+        write-verbose "moduleDir=$_"
+        Get-ChildItem $_ Xpand.XAF*.dll -Recurse|ForEach-Object{
+            $packageFile = $_.FullName
+            Write-verbose "packageFile=$packageFile"
+            $packageDir = $_.DirectoryName
+            Remove-OtherVersionFlags $packageDir $dxVersion
+            $versionConverterFlag = "$packageDir\VersionConverter.v.$dxVersion.DoNotDelete"
+            if (!(Test-Path $versionConverterFlag)) {
+                "$targetPath\$([Path]::GetFileName($packageFile))", $packageFile | ForEach-Object {
+                    if (Test-Path $_) {
+                        $modulePath = (Get-Item $_).FullName
+                        Write-Verbose "Checking $modulePath references.."
+                        Update-Version $modulePath $dxVersion
+                    }
                 }
+                Write-Verbose "Flag $versionConverterFlag"
+                New-Item $versionConverterFlag -ItemType Directory | Out-Null
             }
-            Write-Verbose "Flag $versionConverterFlag"
-            New-Item $versionConverterFlag -ItemType Directory | Out-Null
         }
     }
 }
