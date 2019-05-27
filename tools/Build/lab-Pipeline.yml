@@ -2,6 +2,19 @@
 variables:
   - group: Keys
 trigger: 
+  paths:
+    exclude:
+      - src/Modules/Readme.md
+      - src/Modules/AutoCommit/Readme.md
+      - src/Modules/CloneMemberValue/Readme.md
+      - src/Modules/HideToolBar/Readme.md
+      - src/Modules/MasterDetail/Readme.md
+      - src/Modules/ModelViewInheritance/Readme.md
+      - src/Modules/ProgressBarViewItem/Readme.md
+      - src/Modules/Reactive/Readme.md
+      - src/Modules/SuppressConfirmation/Readme.md
+      - src/Modules/ViewEditMode/Readme.md
+      - ReadMe.md
   branches:
     include:
       - lab
