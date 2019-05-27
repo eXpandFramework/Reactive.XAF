@@ -2,12 +2,12 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>Xpand.VersionConverter</id>
-    <version>1.0.25.0</version>
+    <version>1.0.26.0</version>
     <title>This package modifies the DevExpress references in all Xpand.XAF.* assemblies to match the target prroject DevExpress version</title>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
 	<projectUrl>https://github.com/eXpandFramework/XAF</projectUrl>
-	<iconUrl>http://expandframework.com/images/site/eXpand-Sign.png</iconUrl>
+	<iconUrl>http://sign.expandframework.com</iconUrl>
 	<licenseUrl>https://github.com/eXpandFramework/Packages/blob/master/LICENSE</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>This package modifies the DevExpress references in all Xpand.XAF.* assemblies to match the target prroject DevExpress version</description>

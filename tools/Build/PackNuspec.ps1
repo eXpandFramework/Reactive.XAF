@@ -1,9 +1,10 @@
 param(
-    [parameter(Mandatory)]
-    $Branch,
+
+    $Branch="master",
     $nugetBin="$PSScriptRoot\..\..\bin\Nupkg",
     $sourceDir="$PSScriptRoot\..\.."
 )
+
 $ErrorActionPreference="Stop"
 New-Item $nugetBin -ItemType Directory -Force|Out-Null
 $versionConverterSpecPath="$sourceDir\Tools\Xpand.VersionConverter\Xpand.VersionConverter.nuspec"

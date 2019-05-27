@@ -43,7 +43,7 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*Tests*", "*.Source.*" 
     $relativeLocation = $_.DirectoryName.Replace($root, "").Replace("\", "/")
     $metaData.projectUrl = "https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src$relativeLocation"
     $metaData.licenseUrl = "https://github.com/eXpandFramework/XAF/blob/master/LICENSE"
-    $metaData.iconUrl = "http://expandframework.com/images/site/eXpand-Sign.png"
+    $metaData.iconUrl = "http://sign.expandframework.com"
     $metaData.authors = "eXpandFramework"
     $metaData.owners = "eXpandFramework"
     $metaData.releaseNotes = "https://github.com/eXpandFramework/XAF/releases"
