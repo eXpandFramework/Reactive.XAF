@@ -41,7 +41,7 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*Tests*", "*.Source.*" 
     
     write-host "Creating Nuspec for $($metaData.Id)" -f "Blue"
     $relativeLocation = $_.DirectoryName.Replace($root, "").Replace("\", "/")
-    $metaData.projectUrl = "https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src$relativeLocation"
+    $metaData.projectUrl = "https://github.com/eXpandFramework/DevExpress.XAF/blob/master/$relativeLocation"
     $metaData.licenseUrl = "https://github.com/eXpandFramework/XAF/blob/master/LICENSE"
     $metaData.iconUrl = "http://sign.expandframework.com"
     $metaData.authors = "eXpandFramework"
