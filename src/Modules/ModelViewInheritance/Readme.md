@@ -46,6 +46,18 @@ If the package is installed in a way that you do not have access to uninstall it
 ```
 #1-index-the-symbols-to-your-custom-devexpresss-installation-location).
 
+If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call when [XafApplication.SetupComplete](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.XafApplication.SetupComplete).
+```ps1
+((Xpand.XAF.Modules.ModelViewInheritanceModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.ModelViewInheritanceModule))).Unload();
+```
+#1-index-the-symbols-to-your-custom-devexpresss-installation-location).
+
+If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call when [XafApplication.SetupComplete](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.XafApplication.SetupComplete).
+```ps1
+((Xpand.XAF.Modules.ModelViewInheritanceModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.ModelViewInheritanceModule))).Unload();
+```
+#1-index-the-symbols-to-your-custom-devexpresss-installation-location).
+
 If the package is installed in a way that you do not have access to uninstall it, then you can use the next call when [XafApplication.SetupComplete](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.XafApplication.SetupComplete).
 ```ps1
 ((Xpand.XAF.Modules.ModelViewInheritanceModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.ModelViewInheritanceModule))).Unload();
