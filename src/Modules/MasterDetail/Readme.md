@@ -41,30 +41,6 @@ If the package is installed in a way that you do not have access to uninstall it
 ```ps1
 ((Xpand.XAF.Modules.MasterDetailModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.MasterDetailModule))).Unload();
 ```
-#1-index-the-symbols-to-your-custom-devexpresss-installation-location).
-
-If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call when [XafApplication.SetupComplete](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.XafApplication.SetupComplete).
-```ps1
-((Xpand.XAF.Modules.MasterDetailModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.MasterDetailModule))).Unload();
-```
-#1-index-the-symbols-to-your-custom-devexpresss-installation-location).
-
-If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call when [XafApplication.SetupComplete](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.XafApplication.SetupComplete).
-```ps1
-((Xpand.XAF.Modules.MasterDetailModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.MasterDetailModule))).Unload();
-```
-#1-index-the-symbols-to-your-custom-devexpresss-installation-location).
-
-If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call when [XafApplication.SetupComplete](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.XafApplication.SetupComplete).
-```ps1
-((Xpand.XAF.Modules.MasterDetailModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.MasterDetailModule))).Unload();
-```
-#1-index-the-symbols-to-your-custom-devexpresss-installation-location).
-
-If the package is installed in a way that you do not have access to uninstall it, then you can use the next call when [XafApplication.SetupComplete](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.XafApplication.SetupComplete).
-```ps1
-((Xpand.XAF.Modules.MasterDetailModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.MasterDetailModule))).Unload();
-```
 ## Details
 The module satisfies the following conditions:
 1. If a `DashboardView` contains a `one ListView and one DetailView` of the `same type`, then it will be Master-Detail `enabled by default`. It can be disabled by setting the `IModelDashboardViewMasterDetail.MasterDetail` to false.

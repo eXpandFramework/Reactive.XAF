@@ -14,15 +14,19 @@ namespace Xpand.Source.Extensions.XAF.XafApplication{
     }
 
     internal static partial class XafApplicationExtensions{
-        public static readonly Platform ApplicationPlatform;
+        public static Platform ApplicationPlatform;
 
         static XafApplicationExtensions(){
+            Init();
+        }
+
+        private static void Init(){
             var systemWebAssembly = AppDomain.CurrentDomain.GetAssemblies()
                 .FirstOrDefault(assembly => assembly.GetName().Name == "System.Web");
             var httpContextType = systemWebAssembly?.Types().First(_ => _.Name == "HttpContext");
             ApplicationPlatform = httpContextType?.GetPropertyValue("Current") != null ? Platform.Web : Platform.Win;
         }
-        
+
         internal static Platform GetPlatform(this IEnumerable<ModuleBase> moduleBases){
             var modules = moduleBases as ModuleBase[] ?? moduleBases.ToArray();
             var application = modules.Select(_ => _.Application).FirstOrDefault(_ => _!=null);

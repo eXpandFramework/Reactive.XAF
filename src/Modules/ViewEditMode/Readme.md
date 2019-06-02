@@ -49,30 +49,6 @@ If the package is installed in a way that you do not have access to uninstall it
 ```ps1
 ((Xpand.XAF.Modules.ViewEditModeModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.ViewEditModeModule))).Unload();
 ```
-#1-index-the-symbols-to-your-custom-devexpresss-installation-location).
-
-If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call when [XafApplication.SetupComplete](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.XafApplication.SetupComplete).
-```ps1
-((Xpand.XAF.Modules.ViewEditModeModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.ViewEditModeModule))).Unload();
-```
-#1-index-the-symbols-to-your-custom-devexpresss-installation-location).
-
-If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call when [XafApplication.SetupComplete](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.XafApplication.SetupComplete).
-```ps1
-((Xpand.XAF.Modules.ViewEditModeModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.ViewEditModeModule))).Unload();
-```
-#1-index-the-symbols-to-your-custom-devexpresss-installation-location).
-
-If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call when [XafApplication.SetupComplete](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.XafApplication.SetupComplete).
-```ps1
-((Xpand.XAF.Modules.ViewEditModeModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.ViewEditModeModule))).Unload();
-```
-#1-index-the-symbols-to-your-custom-devexpresss-installation-location).
-
-If the package is installed in a way that you do not have access to uninstall it, then you can use the next call when [XafApplication.SetupComplete](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.XafApplication.SetupComplete).
-```ps1
-((Xpand.XAF.Modules.ViewEditModeModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.ViewEditModeModule))).Unload();
-```
 ## Details
 The module extends the `IModelDetailView` interface with the `IModelDetailViewViewEditMode`. 
 

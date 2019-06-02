@@ -12,7 +12,7 @@ The modules are **not bound** to **DevExpress versioning**, which means you can 
 The modules follow the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 
 ## Platform agnostic modules list
-|PackageName|Version|Downloads
+|PackageName|Version|[![Custom badge](https://img.shields.io/endpoint.svg?label=Nuget.org&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAF)](https://www.nuget.org/packages?q=Xpand.XAF)
 |---|---|---|
 [AutoCommit](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/AutoCommit)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.AutoCommit.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.AutoCommit.svg?label=&style=flat)
 [CloneMemberValue](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/CloneMemberValue)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.CloneMemberValue.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.CloneMemberValue.svg?label=&style=flat)
@@ -20,6 +20,7 @@ The modules follow the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 [HideToolBar](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/HideToolBar)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.HideToolBar.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.HideToolBar.svg?label=&style=flat)
 [MasterDetail](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/MasterDetail)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.MasterDetail.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.MasterDetail.svg?label=&style=flat)
 [ModelViewInheritance](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/ModelViewInheritance)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.ModelViewInheritance.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.ModelViewInheritance.svg?label=&style=flat)
+[ProgressBarViewItem](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/ProgressBarViewItem)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.ProgressBarViewItem.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.ProgressBarViewItem.svg?label=&style=flat)
 [Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.Reactive.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.Reactive.svg?label=&style=flat)
 [SuppressConfirmation](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/SuppressConfirmation)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.SuppressConfirmation.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.SuppressConfirmation.svg?label=&style=flat)
 [ViewEditMode](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/ViewEditMode)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.ViewEditMode.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.ViewEditMode.svg?label=&style=flat)

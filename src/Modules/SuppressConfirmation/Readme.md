@@ -39,30 +39,6 @@ If the package is installed in a way that you do not have access to uninstall it
 ```ps1
 ((Xpand.XAF.Modules.SuppressConfirmationModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.SuppressConfirmationModule))).Unload();
 ```
-#1-index-the-symbols-to-your-custom-devexpresss-installation-location).
-
-If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call when [XafApplication.SetupComplete](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.XafApplication.SetupComplete).
-```ps1
-((Xpand.XAF.Modules.SuppressConfirmationModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.SuppressConfirmationModule))).Unload();
-```
-#1-index-the-symbols-to-your-custom-devexpresss-installation-location).
-
-If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call when [XafApplication.SetupComplete](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.XafApplication.SetupComplete).
-```ps1
-((Xpand.XAF.Modules.SuppressConfirmationModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.SuppressConfirmationModule))).Unload();
-```
-#1-index-the-symbols-to-your-custom-devexpresss-installation-location).
-
-If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call when [XafApplication.SetupComplete](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.XafApplication.SetupComplete).
-```ps1
-((Xpand.XAF.Modules.SuppressConfirmationModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.SuppressConfirmationModule))).Unload();
-```
-#1-index-the-symbols-to-your-custom-devexpresss-installation-location).
-
-If the package is installed in a way that you do not have access to uninstall it, then you can use the next call when [XafApplication.SetupComplete](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.XafApplication.SetupComplete).
-```ps1
-((Xpand.XAF.Modules.SuppressConfirmationModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.SuppressConfirmationModule))).Unload();
-```
 ## Details
 The module satisfies the following conditions:
 1. When any Window `ObjectView` `changed` with `SuppressConfirmation` enabled, a signal will be created out of the [Frame.ViewChanged](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.Frame.ViewChanged) event. For each signal emit the [ModificationsHandlingMode](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.SystemModule.ModificationsController.ModificationsHandlingMode) is set to not used.

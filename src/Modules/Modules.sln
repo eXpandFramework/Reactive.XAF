@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.136
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28917.182
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Modules.AutoCommit", "AutoCommit\Xpand.XAF.Modules.AutoCommit.csproj", "{5685573C-15E0-43DF-B939-D842211BA5ED}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -35,6 +35,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Modules.ViewEditM
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Modules.HideToolBar", "HideToolBar\Xpand.XAF.Modules.HideToolBar.csproj", "{B76C0852-B1B3-4663-98F5-808FA9AC2D30}"
+	ProjectSection(ProjectDependencies) = postProject
+		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Modules.ProgressBarViewItem", "ProgressBarViewItem\Xpand.XAF.Modules.ProgressBarViewItem.csproj", "{5B65629B-E5C9-4686-967B-9AF271EA47EA}"
 	ProjectSection(ProjectDependencies) = postProject
 		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
 	EndProjectSection
@@ -100,6 +105,12 @@ Global
 		{B76C0852-B1B3-4663-98F5-808FA9AC2D30}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{B76C0852-B1B3-4663-98F5-808FA9AC2D30}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B76C0852-B1B3-4663-98F5-808FA9AC2D30}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B65629B-E5C9-4686-967B-9AF271EA47EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B65629B-E5C9-4686-967B-9AF271EA47EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B65629B-E5C9-4686-967B-9AF271EA47EA}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
+		{5B65629B-E5C9-4686-967B-9AF271EA47EA}.EasyTest|Any CPU.Build.0 = Release|Any CPU
+		{5B65629B-E5C9-4686-967B-9AF271EA47EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B65629B-E5C9-4686-967B-9AF271EA47EA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -103,6 +103,9 @@
     <Compile Include="Linq\SkipLastN.cs" />
     <Compile Include="Linq\Split.cs" />
     <Compile Include="Linq\TakeAllByLast.cs" />
+    <Compile Include="System\AppDomain\AssemblyDevExpressExpressAppWeb.cs" />
+    <Compile Include="System\AppDomain\AssemblySystemWeb.cs" />
+    <Compile Include="System\String\CleanCodeName.cs" />
     <Compile Include="XAF\Action\DoExecute.cs" />
     <Compile Include="XAF\ApplicationModulesManager\RegisterAction.cs" />
     <Compile Include="XAF\BaseImpl\CustomBaseObject.cs" />

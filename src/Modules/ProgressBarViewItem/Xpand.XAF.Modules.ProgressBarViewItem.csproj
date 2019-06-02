@@ -5,11 +5,11 @@
     <DXVersion>18.2.3</DXVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{5685573C-15E0-43DF-B939-D842211BA5ED}</ProjectGuid>
+    <ProjectGuid>{5B65629B-E5C9-4686-967B-9AF271EA47EA}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Xpand.XAF.Modules.AutoCommit</RootNamespace>
-    <AssemblyName>Xpand.XAF.Modules.AutoCommit</AssemblyName>
+    <RootNamespace>Xpand.XAF.Modules.ProgressBarViewItem</RootNamespace>
+    <AssemblyName>Xpand.XAF.Modules.ProgressBarViewItem</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -74,7 +74,9 @@
     <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\packages\System.ValueTuple.4.5.0\lib\net461\System.ValueTuple.dll</HintPath>
     </Reference>
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
@@ -84,10 +86,16 @@
     <Compile Include="..\..\Extensions\Extensions\System\AppDomain\AssemblyDevExpressExpressAppWeb.cs">
       <Link>LinkedFiles\AssemblyDevExpressExpressAppWeb.cs</Link>
     </Compile>
-    <Compile Include="..\..\Extensions\Extensions\XAF\Model\GetValue.cs">
-      <Link>LinkedFiles\GetValue.cs</Link>
+    <Compile Include="..\..\Extensions\Extensions\System\AppDomain\AssemblySystemWeb.cs">
+      <Link>LinkedFiles\AssemblySystemWeb.cs</Link>
     </Compile>
-    <Compile Include="AutocommitService.cs" />
+    <Compile Include="..\..\Extensions\Extensions\System\String\CleanCodeName.cs">
+      <Link>LinkedFiles\CleanCodeName.cs</Link>
+    </Compile>
+    <Compile Include="..\..\extensions\extensions\xaf\xafapplication\GetPlatform.cs">
+      <Link>LinkedFiles\GetPlatform.cs</Link>
+    </Compile>
+    <Compile Include="ProgressBarViewItemBase.cs" />
     <Compile Include="ModelLogic.cs" />
     <Compile Include="Module.cs">
       <SubType>Component</SubType>
@@ -95,6 +103,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.136
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28917.182
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Modules", "Modules", "{05ECD54E-924F-4E78-8E29-DE3801A9F693}"
 EndProject
@@ -28,6 +28,11 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests.csproj", "{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Modules.HideToolBar", "..\Modules\HideToolBar\Xpand.XAF.Modules.HideToolBar.csproj", "{B76C0852-B1B3-4663-98F5-808FA9AC2D30}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Modules.ProgressBarViewItem", "..\Modules\ProgressBarViewItem\Xpand.XAF.Modules.ProgressBarViewItem.csproj", "{5B65629B-E5C9-4686-967B-9AF271EA47EA}"
+	ProjectSection(ProjectDependencies) = postProject
+		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -82,6 +87,10 @@ Global
 		{B76C0852-B1B3-4663-98F5-808FA9AC2D30}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
 		{B76C0852-B1B3-4663-98F5-808FA9AC2D30}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{B76C0852-B1B3-4663-98F5-808FA9AC2D30}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B65629B-E5C9-4686-967B-9AF271EA47EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B65629B-E5C9-4686-967B-9AF271EA47EA}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
+		{5B65629B-E5C9-4686-967B-9AF271EA47EA}.EasyTest|Any CPU.Build.0 = Release|Any CPU
+		{5B65629B-E5C9-4686-967B-9AF271EA47EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -97,6 +106,7 @@ Global
 		{7D3556B8-8CF9-4622-94F1-0F28A7765D0E} = {05ECD54E-924F-4E78-8E29-DE3801A9F693}
 		{D9233585-0907-4561-9C53-14D9AD5EEC0E} = {05ECD54E-924F-4E78-8E29-DE3801A9F693}
 		{B76C0852-B1B3-4663-98F5-808FA9AC2D30} = {05ECD54E-924F-4E78-8E29-DE3801A9F693}
+		{5B65629B-E5C9-4686-967B-9AF271EA47EA} = {05ECD54E-924F-4E78-8E29-DE3801A9F693}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C0A41578-813B-4E26-B5DF-D979F1C0A7D7}

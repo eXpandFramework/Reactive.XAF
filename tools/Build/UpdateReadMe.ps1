@@ -7,7 +7,7 @@ $nuget = Get-NugetPath
 $packagesPath = "$rootLocation\bin\Nupkg\"
 $packages = & $nuget List -Source $packagesPath | ConvertTo-PackageObject | Select-Object -ExpandProperty Id
 function UpdateModulesList($rootLocation, $packages) {
-    $moduleList = "|PackageName|Version|Downloads`r`n|---|---|---|`r`n"
+    $moduleList = "|PackageName|Version|[![Custom badge](https://img.shields.io/endpoint.svg?label=Nuget.org&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAF)](https://www.nuget.org/packages?q=Xpand.XAF)`r`n|---|---|---|`r`n"
     $packages | Where-Object { $_ -ne "Xpand.VersionConverter" } | ForEach-Object {
         $name = $_.Replace("Xpand.XAF.Modules.", "")
         $packageUri = "[$name](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/$name)"
@@ -62,7 +62,7 @@ function UpdateBadges($_, $packagespath,  $readMePath) {
 function UpdateIssues($_, $packagespath,  $readMePath) {
     $moduleName="$($_.BaseName)Module"
     $readMe = Get-Content $readMePath -Raw
-    $regex = [regex] '(?isx)\#\#\ Issues([^#]*)'
+    $regex = [regex] '(?isx)\#\#\ Issues(.*)\#\#\ Details'
 $result = $regex.Replace($readMe, @"
 ## Issues-Debugging-Troubleshooting
 $1
@@ -72,7 +72,7 @@ If the package is installed in a way that you do not have access to uninstall it
 ``````ps1
 (($moduleName) Application.Modules.FindModule(typeof($moduleName))).Unload();
 ``````
-
+## Details
 "@
 )
 

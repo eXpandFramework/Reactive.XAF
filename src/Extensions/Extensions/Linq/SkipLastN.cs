@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 
 namespace Xpand.Source.Extensions.Linq{
-    public static partial class Extensions{
+    internal static partial class Extensions{
         public static IEnumerable<T> SkipLastN<T>(this IEnumerable<T> source, int n){
             using (var it = source.GetEnumerator()){
                 bool hasRemainingItems;

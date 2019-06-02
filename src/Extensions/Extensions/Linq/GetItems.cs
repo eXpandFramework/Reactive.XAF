@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace Xpand.Source.Extensions.Linq{
-    public static partial class Extensions{
+    internal static partial class Extensions{
         public static IEnumerable<T> GetItems<T>(this IEnumerable collection,
             Func<T, IEnumerable> selector) {
             var stack = new Stack<IEnumerable<T>>();

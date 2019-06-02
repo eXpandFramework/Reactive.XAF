@@ -77,7 +77,8 @@ namespace Xpand.Source.Extensions.XAF.ApplicationModulesManager{
 
         private static Type NewControllerType<T>(string id) where T:Controller{
             var parent = typeof(T);
-            return ActionsModule.DefineType($"{id}{parent.Name}", TypeAttributes.Public, parent).CreateType();
+            var controllerType = ActionsModule.DefineType($"{id}{parent.Name}", TypeAttributes.Public, parent).CreateType();
+            return controllerType;
         }
 
         public static void RegisterAction<TViewController>(this DevExpress.ExpressApp.ApplicationModulesManager applicationModulesManager,

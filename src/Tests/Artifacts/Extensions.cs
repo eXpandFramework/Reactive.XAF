@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ using DevExpress.ExpressApp.Templates.ActionContainers;
 using DevExpress.ExpressApp.Web;
 using DevExpress.ExpressApp.Win;
 using DevExpress.ExpressApp.Xpo;
+using Fasterflect;
 using Moq;
 using Moq.Protected;
 using Xpand.Source.Extensions.XAF.XafApplication;
@@ -18,6 +20,7 @@ using Control = System.Windows.Forms.Control;
 
 namespace Tests.Artifacts {
     static class Extensions {
+
         public static async Task<T> WithTimeOut<T>(this Task<T> source, TimeSpan? timeout = null){
             return await source.ToObservable().WithTimeOut(timeout);
         }
@@ -45,6 +48,22 @@ namespace Tests.Artifacts {
             application.AlwaysUpdateOnDatabaseVersionMismatch().Subscribe();
             application.Modules.AddRange(modules);
             application.RegisterInMemoryObjectSpaceProvider();
+        }
+
+        public static T AddModule<T>(this XafApplication application,params Type[] additionalExportedTypes) where  T:ModuleBase, new(){
+            
+            application.Title = typeof(T).Name;
+            var module = new T();
+            module.AdditionalExportedTypes.AddRange(additionalExportedTypes);
+            application.SetupDefaults(module);
+            return module;
+        }
+
+        public static void Set(this Platform platform,Type type){
+            type.Assembly.Types()
+                .First(_ => _.Name == nameof(XafApplicationExtensions))
+                .SetFieldValue(nameof(XafApplicationExtensions.ApplicationPlatform), platform);
+            type.Methods(Flags.StaticPrivate, "Init").First().Invoke(null,null);
         }
 
         public static XafApplication NewApplication(this Platform platform){
