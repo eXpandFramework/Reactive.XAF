@@ -69,3 +69,11 @@ progressBarViewItem.SetFinishOptions(new MessageOptions(){});
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Modules/ProgressBarViewItem)
 ### Examples
 The module is integrated with the `ExcelImporter`.
+
+Next we see how it looks on Desktop:
+
+![win](https://user-images.githubusercontent.com/159464/58791920-ce8ad000-85fb-11e9-8a00-bd72e891c8b7.gif)
+
+and the same view on the web:
+
+![web2](https://user-images.githubusercontent.com/159464/58791676-53291e80-85fb-11e9-81de-6ed7db651219.gif)
