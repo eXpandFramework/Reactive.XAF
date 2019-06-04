@@ -69,41 +69,52 @@ function Get-DevExpressVersion($targetPath, $referenceFilter, $projectFile) {
     Write-Verbose "Finding DevExpress version..."
     $projectFileInfo = Get-Item $projectFile
     [xml]$csproj = Get-Content $projectFileInfo.FullName
-    $references = $csproj.Project.ItemGroup.Reference
-    $dxReferences = $references | Where-Object { $_.Include -like "$referenceFilter" }    
-
-    $hintPath = $dxReferences.HintPath | foreach-Object { 
-        if ($_) {
-            $path = $_
-            if (![path]::IsPathRooted($path)) {
-                $path = "$((Get-Item $projectFile).DirectoryName)\$_"
-            }
-            if (Test-Path $path) {
-                [path]::GetFullPath($path)
-            }
+    $dxReferences =$csproj.Project.ItemGroup.PackageReference
+    if ($dxReferences){
+        if ($dxReferences.Version){
+            [version]($dxReferences.Version|Select-Object -First 1)
         }
-    } | Where-Object { $_ } | Select-Object -First 1
-    if ($hintPath ) {
-        Write-Verbose "$($dxAssembly.Name.Name) found from $hintpath"
-        [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($hintPath).FileVersion
+        else{
+            throw "Cannot find DevExpress Version"
+        }
     }
-    else {
-        $dxAssemblyPath = Get-ChildItem $targetPath "$referenceFilter*.dll" | Select-Object -First 1
-        if ($dxAssemblyPath) {
-            Write-Verbose "$($dxAssembly.Name.Name) found from $($dxAssemblyPath.FullName)"
-            [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($dxAssemblyPath.FullName).FileVersion
+    else{
+        $references = $csproj.Project.ItemGroup.Reference
+        $dxReferences = $references | Where-Object { $_.Include -like "$referenceFilter" }    
+    
+        $hintPath = $dxReferences.HintPath | foreach-Object { 
+            if ($_) {
+                $path = $_
+                if (![path]::IsPathRooted($path)) {
+                    $path = "$((Get-Item $projectFile).DirectoryName)\$_"
+                }
+                if (Test-Path $path) {
+                    [path]::GetFullPath($path)
+                }
+            }
+        } | Where-Object { $_ } | Select-Object -First 1
+        if ($hintPath ) {
+            Write-Verbose "$($dxAssembly.Name.Name) found from $hintpath"
+            [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($hintPath).FileVersion
         }
         else {
-            $include = ($dxReferences | Select-Object -First 1).Include
-            $dxReference = [Regex]::Match($include, "DevExpress[^,]*", [RegexOptions]::IgnoreCase).Value
-            Write-Verbose "Include=$Include"
-            Write-Verbose "DxReference=$dxReference"
-            $dxAssembly = Get-ChildItem "$env:windir\Microsoft.NET\assembly\GAC_MSIL"  *.dll -Recurse | Where-Object { $_ -like "*$dxReference.dll" }| Select-Object -First 1
-            if ($dxAssembly) {
-                [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($dxAssembly.FullName).FileVersion
+            $dxAssemblyPath = Get-ChildItem $targetPath "$referenceFilter*.dll" | Select-Object -First 1
+            if ($dxAssemblyPath) {
+                Write-Verbose "$($dxAssembly.Name.Name) found from $($dxAssemblyPath.FullName)"
+                [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($dxAssemblyPath.FullName).FileVersion
             }
             else {
-                throw "Cannot find DevExpress Version"
+                $include = ($dxReferences | Select-Object -First 1).Include
+                $dxReference = [Regex]::Match($include, "DevExpress[^,]*", [RegexOptions]::IgnoreCase).Value
+                Write-Verbose "Include=$Include"
+                Write-Verbose "DxReference=$dxReference"
+                $dxAssembly = Get-ChildItem "$env:windir\Microsoft.NET\assembly\GAC_MSIL"  *.dll -Recurse | Where-Object { $_ -like "*$dxReference.dll" }| Select-Object -First 1
+                if ($dxAssembly) {
+                    [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($dxAssembly.FullName).FileVersion
+                }
+                else {
+                    throw "Cannot find DevExpress Version"
+                }
             }
         }
     }
