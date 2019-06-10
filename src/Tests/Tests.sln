@@ -34,6 +34,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Modules.ProgressB
 		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Modules.ModelMapper", "..\Modules\ModelMapper\Xpand.XAF.Modules.ModelMapper.csproj", "{F15810E7-4D84-4305-B9DE-74E7976C9018}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -91,6 +93,11 @@ Global
 		{5B65629B-E5C9-4686-967B-9AF271EA47EA}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
 		{5B65629B-E5C9-4686-967B-9AF271EA47EA}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{5B65629B-E5C9-4686-967B-9AF271EA47EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F15810E7-4D84-4305-B9DE-74E7976C9018}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F15810E7-4D84-4305-B9DE-74E7976C9018}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
+		{F15810E7-4D84-4305-B9DE-74E7976C9018}.EasyTest|Any CPU.Build.0 = Release|Any CPU
+		{F15810E7-4D84-4305-B9DE-74E7976C9018}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F15810E7-4D84-4305-B9DE-74E7976C9018}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -107,6 +114,7 @@ Global
 		{D9233585-0907-4561-9C53-14D9AD5EEC0E} = {05ECD54E-924F-4E78-8E29-DE3801A9F693}
 		{B76C0852-B1B3-4663-98F5-808FA9AC2D30} = {05ECD54E-924F-4E78-8E29-DE3801A9F693}
 		{5B65629B-E5C9-4686-967B-9AF271EA47EA} = {05ECD54E-924F-4E78-8E29-DE3801A9F693}
+		{F15810E7-4D84-4305-B9DE-74E7976C9018} = {05ECD54E-924F-4E78-8E29-DE3801A9F693}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C0A41578-813B-4E26-B5DF-D979F1C0A7D7}

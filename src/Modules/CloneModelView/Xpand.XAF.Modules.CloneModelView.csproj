@@ -63,10 +63,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\extensions\extensions\xaf\XafModule.cs">
-      <Link>LinkedFiles\XafModule.cs</Link>
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="CloneModelViewAttribute.cs" />
     <Compile Include="CloneViewType.cs" />
     <Compile Include="ModelViewClonerUpdater.cs" />
@@ -80,6 +76,9 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="Readme.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="LinkedFiles\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

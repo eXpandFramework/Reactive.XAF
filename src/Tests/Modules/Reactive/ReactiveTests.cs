@@ -1,10 +1,9 @@
-﻿using System.Reactive.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using Shouldly;
+using Tests.Artifacts;
+using Tests.Modules.AutoCommit.BOModel;
 using Xpand.Source.Extensions.XAF.XafApplication;
-using Xpand.XAF.Agnostic.Tests.Artifacts;
-using Xpand.XAF.Agnostic.Tests.Modules.AutoCommit.BOModel;
 using Xpand.XAF.Modules.AutoCommit;
 using Xunit;
 

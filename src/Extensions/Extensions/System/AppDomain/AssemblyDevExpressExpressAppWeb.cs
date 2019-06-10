@@ -4,7 +4,7 @@ using System.Reflection;
 using Fasterflect;
 
 namespace Xpand.Source.Extensions.System.AppDomain{
-    internal static partial class Extensions{
+    internal static partial class AppDomainExtensions{
         public static Assembly AssemblyDevExpressExpressAppWeb(this global::System.AppDomain appDomain){
             return appDomain.GetAssemblies().FirstOrDefault(_ => _.GetName().Name.StartsWith("DevExpress.ExpressApp.Web.v"));
         }

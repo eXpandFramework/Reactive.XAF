@@ -89,6 +89,10 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
             return source.Select(o => Unit.Default);
         }
 
+        public static IObservable<T> TakeUntilDisposed<T>(this IObservable<T> source,IComponent component) {
+            return source.TakeUntil(component.WhenDisposed());
+        }
+
         public static IObservable<(TDisposable frame,EventArgs args)> Disposed<TDisposable>(this IObservable<TDisposable> source) where TDisposable:IComponent{
             return source
 //                .SelectMany(item => Observable.StartAsync(async () =>await Observable.FromEventPattern<EventHandler, EventArgs>(h => item.Disposed += h, h => item.Disposed -= h)))

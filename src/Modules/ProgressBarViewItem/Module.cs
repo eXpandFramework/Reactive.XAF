@@ -1,8 +1,6 @@
 ﻿using System;
 using System.CodeDom.Compiler;
-using System.Collections.Generic;
 using System.Linq;
-using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.SystemModule;
 using Fasterflect;
@@ -11,7 +9,7 @@ using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.XAF.Modules.ProgressBarViewItem{
-    public sealed class ProgressBarViewItemModule : ModuleBase{
+    public sealed class ProgressBarViewItemModule : ReactiveModuleBase{
         public const string CategoryName = "Xpand.XAF.Modules.ProgressBarViewItem";
 
         public ProgressBarViewItemModule(){
@@ -55,18 +53,6 @@ namespace {GetType().Namespace}{{
             var type = compilerResults.CompiledAssembly.Types().First(_ =>!_.IsAbstract&& typeof(ProgressBarViewItemBase).IsAssignableFrom(_));
             editorDescriptorsFactory.List.Add(new ViewItemDescriptor(new ViewItemRegistration(typeof(IModelProgressBarViewItem),type,true)));
         }
-//        public override void Setup(ApplicationModulesManager moduleManager){
-//            base.Setup(moduleManager);
-//            Application.Connect()
-//                .TakeUntil(this.WhenDisposed())
-//                .Subscribe();
-//        }
-
-//        public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders){
-//            base.ExtendModelInterfaces(extenders);
-//            extenders.Add<IModelClass, IModelClassHideToolBar>();
-//            extenders.Add<IModelListView, IModelListViewHideToolBar>();
-//        }
 
     }
 }

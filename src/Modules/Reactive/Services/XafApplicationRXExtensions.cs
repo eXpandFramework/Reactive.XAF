@@ -67,7 +67,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return application.Modules.OfType<ReactiveModule>().ToObservable(Scheduler.Default)
                 .Repeat()
                 .FirstAsync()
-                .Select(_ => _.TypesInfo).Switch();
+                .Select(_ => _.ModifyTypesInfo).Switch();
         }
 
         public static IObservable<(XafApplication application, CreateCustomObjectSpaceProviderEventArgs e)> WhenCreateCustomObjectSpaceProvider(this XafApplication application){

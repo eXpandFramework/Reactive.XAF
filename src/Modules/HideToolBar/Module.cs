@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
-using Xpand.Source.Extensions.XAF;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.HideToolBar{
-    public sealed class HideToolBarModule : XafModule{
+    public sealed class HideToolBarModule : ReactiveModuleBase{
         public const string CategoryName = "Xpand.XAF.Modules.HideToolBar";
 
         public HideToolBarModule(){
@@ -19,7 +17,7 @@ namespace Xpand.XAF.Modules.HideToolBar{
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
             Application.Connect()
-                .TakeUntil(this.WhenDisposed())
+                .TakeUntilDisposed(this)
                 .Subscribe();
         }
 

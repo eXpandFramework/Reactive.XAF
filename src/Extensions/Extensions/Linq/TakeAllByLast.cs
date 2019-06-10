@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 
 namespace Xpand.Source.Extensions.Linq{
-    internal static partial class Extensions{
+    internal static partial class LinqExtensions{
         public static IEnumerable<T> TakeAllButLast<T>(this IEnumerable<T> source){
             using (var it = source.GetEnumerator()){
                 bool hasRemainingItems;

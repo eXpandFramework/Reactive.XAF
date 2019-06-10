@@ -160,12 +160,7 @@ namespace Tests.Modules.MasterDetail{
         }
 
         private static MasterDetailModule DefaultMasterDetailModule(Platform platform){
-            var application = platform.NewApplication();
-            application.Title = "MasterDetailModule";
-            var masterDetailModule = new MasterDetailModule();
-            masterDetailModule.AdditionalExportedTypes.AddRange(new[]{typeof(Md),typeof(MdParent)});
-            application.SetupDefaults(masterDetailModule);
-            return masterDetailModule;
+            return platform.NewApplication().AddModule<MasterDetailModule>(typeof(Md), typeof(MdParent));
         }
 
     }

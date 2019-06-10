@@ -73,6 +73,18 @@
     <Reference Include="Fasterflect, Version=2.1.3.0, Culture=neutral, PublicKeyToken=38d18473284c1ca7, processorArchitecture=MSIL">
       <HintPath>..\..\..\packages\fasterflect.2.1.3\lib\net40\Fasterflect.dll</HintPath>
     </Reference>
+    <Reference Include="Mono.Cecil, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Mono.Cecil.0.10.4\lib\net40\Mono.Cecil.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Mdb, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Mono.Cecil.0.10.4\lib\net40\Mono.Cecil.Mdb.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Pdb, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Mono.Cecil.0.10.4\lib\net40\Mono.Cecil.Pdb.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Rocks, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Mono.Cecil.0.10.4\lib\net40\Mono.Cecil.Rocks.dll</HintPath>
+    </Reference>
     <Reference Include="Ryder, Version=0.8.0.0, Culture=neutral, PublicKeyToken=68842a7a5e601e6b, processorArchitecture=MSIL">
       <HintPath>..\..\..\packages\Ryder.0.8.0\lib\net45\Ryder.dll</HintPath>
     </Reference>
@@ -98,19 +110,30 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Linq\DistinctBy.cs" />
     <Compile Include="Linq\FindIndex.cs" />
     <Compile Include="Linq\GetItems.cs" />
     <Compile Include="Linq\SkipLastN.cs" />
     <Compile Include="Linq\Split.cs" />
     <Compile Include="Linq\TakeAllByLast.cs" />
+    <Compile Include="MonoCecil\IsAssignableFrom.cs" />
+    <Compile Include="MonoCecil\IsSubclassOf.cs" />
+    <Compile Include="MonoCecil\BaseClasses.cs" />
+    <Compile Include="MonoCecil\ToType.cs" />
+    <Compile Include="System\AppDomain\ApplicationPath.cs" />
     <Compile Include="System\AppDomain\AssemblyDevExpressExpressAppWeb.cs" />
     <Compile Include="System\AppDomain\AssemblySystemWeb.cs" />
+    <Compile Include="System\Refelction\PropertyInfoAccessModifier.cs" />
+    <Compile Include="System\Refelction\IsNullAbleType.cs" />
     <Compile Include="System\String\CleanCodeName.cs" />
     <Compile Include="XAF\Action\DoExecute.cs" />
     <Compile Include="XAF\ApplicationModulesManager\RegisterAction.cs" />
     <Compile Include="XAF\BaseImpl\CustomBaseObject.cs" />
     <Compile Include="XAF\Frame\GetController.cs" />
     <Compile Include="XAF\Frame\Actions.cs" />
+    <Compile Include="XAF\Model\FastModelAccess.cs" />
+    <Compile Include="XAF\Model\AddNode.cs" />
+    <Compile Include="XAF\Model\Id.cs" />
     <Compile Include="XAF\Object\GetTypeInfo.cs" />
     <Compile Include="XAF\Model\GetNodeByPath.cs" />
     <Compile Include="XAF\Model\GetParent.cs" />
@@ -122,9 +145,6 @@
     <Compile Include="XAF\TypesInfo\RunTimeMode.cs" />
     <Compile Include="XAF\XafApplication\CreateView.cs" />
     <Compile Include="XAF\XafApplication\GetPlatform.cs" />
-    <Compile Include="XAF\XafModule.cs">
-      <SubType>Component</SubType>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

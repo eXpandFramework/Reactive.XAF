@@ -9,6 +9,7 @@ trigger:
       - src/Modules/CloneMemberValue/Readme.md
       - src/Modules/HideToolBar/Readme.md
       - src/Modules/MasterDetail/Readme.md
+      - src/Modules/ModelMapper/Readme.md
       - src/Modules/ModelViewInheritance/Readme.md
       - src/Modules/ProgressBarViewItem/Readme.md
       - src/Modules/Reactive/Readme.md
@@ -37,8 +38,8 @@ steps:
      .\bin\Tests.dll
     uiTests: true
     runInParallel: false
-    diagnosticsEnabled: false
-    runTestsInIsolation: true
+    diagnosticsEnabled: true
+    runTestsInIsolation: false
     codeCoverageEnabled: true
     rerunFailedTests: true 
 - task: PowerShell@2

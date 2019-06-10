@@ -67,7 +67,16 @@ namespace Tests.Artifacts {
         }
 
         public static XafApplication NewApplication(this Platform platform){
-            var application = platform == Platform.Web ? (XafApplication) new TestWebApplication() : new TestWinApplication();
+            XafApplication application;
+            if (platform == Platform.Web){
+                application = new TestWebApplication();
+            }
+            else if (platform == Platform.Win){
+                application = new TestWinApplication();
+            }
+            else{
+                application=new Mock<XafApplication>(){CallBase = true}.Object;
+            }
 
             var listEditorMock = new Mock<ListEditor>{CallBase = true};
             
@@ -106,8 +115,8 @@ namespace Tests.Artifacts {
                     });
                 webApplication.FrameTemplateFactory = frameTemplateFactoryMock.Object;
             }
-            else{
-                ((WinApplication) application).UseLightStyle = true;
+            else if (application is WinApplication winApplication){
+                winApplication.UseLightStyle = true;
             }
             return application;
         }

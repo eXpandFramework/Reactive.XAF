@@ -56,10 +56,9 @@ namespace Xpand.XAF.Modules.Reactive{
             return typeof(RxApp).GetMethods(BindingFlags.Static|BindingFlags.NonPublic).First(info => info.Name == methodName);
         }
 
-        internal static IObservable<Unit> Connect(this XafApplication application){
-            return application.AsObservable()
-                .ToUnit()
-                .Merge(application.WhenWindowCreated().ToUnit());
+        internal static IObservable<Unit> Connect(this ApplicationModulesManager applicationModulesManager){
+            return applicationModulesManager.AsObservable()
+                .ToUnit();
         }
 
         private static void WebChecks(){

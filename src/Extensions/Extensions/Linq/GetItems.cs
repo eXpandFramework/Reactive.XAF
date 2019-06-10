@@ -4,22 +4,28 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace Xpand.Source.Extensions.Linq{
-    internal static partial class Extensions{
-        public static IEnumerable<T> GetItems<T>(this IEnumerable collection,
-            Func<T, IEnumerable> selector) {
+    internal static partial class LinqExtensions{
+        public static IEnumerable<T> GetItems<T>(this IEnumerable collection,Func<T, IEnumerable> selector,Func<T,object> distincSelector=null) {
+            HashSet<object> hashSet=null;
+            if (distincSelector!=null){
+                hashSet=new HashSet<object>();
+            }
             var stack = new Stack<IEnumerable<T>>();
             stack.Push(collection.OfType<T>());
 
             while (stack.Count > 0) {
-                IEnumerable<T> items = stack.Pop();
-                foreach (var item in items) {
-                    yield return item;
+                var items = stack.Pop();
+                foreach (var item in items){
+                    var o = distincSelector?.Invoke(item);
+                    if (hashSet != null && !hashSet.Contains(o)){
+                        hashSet.Add(o);
+                        yield return item;
 
-                    IEnumerable<T> children = selector(item).OfType<T>();
-                    stack.Push(children);
+                        var children = selector(item).OfType<T>();
+                        stack.Push(children);
+                    }
                 }
             }
         }
-
     }
 }
