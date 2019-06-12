@@ -27,6 +27,7 @@ steps:
 - task: PowerShell@2
   displayName: Build
   inputs:
+    pwsh: true
     targetType: filePath
     filePath: .\tools\build\lab-pipeline.ps1 
     arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(GitHubUserName) $(GitHubPass) $(DXApiFeed) $(build.artifactstagingdirectory) $(AzureToken)
@@ -45,6 +46,7 @@ steps:
 - task: PowerShell@2
   displayName: CheckTests
   inputs:
+    pwsh: true
     targetType: filePath
     filePath: .\tools\build\check-tests.ps1
     arguments: $(AzureToken) $(Build.DefinitionName) $(Build.BuildNumber)
@@ -52,6 +54,7 @@ steps:
 - task: PowerShell@2
   displayName: Publish
   inputs:
+    pwsh: true
     targetType: filePath
     filePath: .\tools\build\publishNugets.ps1 
     arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(NugetApiKey) 
