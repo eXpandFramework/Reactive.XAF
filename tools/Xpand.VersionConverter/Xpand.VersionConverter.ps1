@@ -8,18 +8,31 @@ using namespace System.Text.RegularExpressions
 using namespace Mono.Cecil
 using namespace Mono.Cecil.pdb
 param(
-    [string]$projectFile ,
-    [string]$targetPath ,
+    [string]$projectFile ="C:\Users\Tolis\source\repos\Solution174\Solution174.Module\Solution174.Module.csproj",
+    [string]$targetPath ="C:\Users\Tolis\source\repos\Solution174\Solution174.Module\bin\Debug\",
+    [string]$DevExpressVersion,
+    [string]$VerboseOutput,
     [string]$referenceFilter = "DevExpress*",
     [string]$assemblyFilter = "Xpand.XAF.*"
 )
-$VerbosePreference = "Continue"
+
+$howToVerbose="Edit $projectFile and enable verbose messaging by adding <PropertyGroup><VersionConverterVerbose>Continue</VersionConverterVerbose>. Rebuild the project and send the output to support."
+if ($VerboseOutput){
+    $VerbosePreference = $VerboseOutput
+}
+
 $ErrorActionPreference = "Stop"
 . "$PSScriptRoot\Functions.ps1"
 
-Write-Verbose "Running Version Converter on project $projectFile with target $targetPath"
+Write-Verbose "Running VersionConverter on project $projectFile with target $targetPath"
 
 $dxVersion = Get-DevExpressVersion $targetPath $referenceFilter $projectFile 
+if (!$dxVersion){
+    Write-Warning "Cannot find DevExpress Version. You have the following options:`r`n1. $howToVerbose`r`n2. If your project has indirect references to DevExpress through another assembly then you can always force the DevExpressVersion by modifying your project to include <PropertyGroup><DevExpressVersion>19.1.3</DevExpressVersion>.`r`n This declaration can be solution wide if done in your directory.build.props file.`r`n"
+    throw "Check output warning message"
+}
+Write-Verbose "DxVersion=$dxVersion"
+
 $nugetPackageFoldersPath="$PSSCriptRoot\..\..\.."
 if ((Get-Item "$PSScriptRoot\..").BaseName -like "Xpand.VersionConverter*"){
     $nugetPackageFoldersPath="$PSSCriptRoot\..\.."
@@ -64,10 +77,10 @@ try {
     }
 }
 catch {
-     
-    Write-Error ($_.Exception | Format-List -Force | Out-String) -ErrorAction Continue
-    Write-Error ($_.InvocationInfo | Format-List -Force | Out-String) -ErrorAction Continue
-    exit 1
+    Write-Warning ($_.Exception | Format-List -Force | Out-String) -ErrorAction Continue
+    Write-Warning ($_.InvocationInfo | Format-List -Force | Out-String) -ErrorAction Continue
+    Write-Warning "`r`n$howToVerbose`r`n"
+    throw "Check output warning message"
 
 }
 finally {
