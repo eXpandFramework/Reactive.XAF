@@ -151,17 +151,21 @@ function Use-Object {
 }
 function Get-MonoAssembly($path, [switch]$ReadSymbols) {
     $readerParams = New-Object ReaderParameters
-    if ($Write) {
-        $readerParams.ReadWrite = $true
-        $readerParams.ReadSymbols = $ReadSymbols
-    }
+    $readerParams.ReadWrite = $true
+    $readerParams.ReadSymbols = $ReadSymbols
     $readerParams.AssemblyResolver = New-Object MyDefaultAssemblyResolver
     try {
         $m = [ModuleDefinition]::ReadModule($path, $readerParams)
         $m.Assembly
     }
     catch {
-        Get-MonoAssembly $path
+        if ($_.FullyQualifiedErrorId -eq "SymbolsNotMatchingException") {
+            Get-MonoAssembly $path
+        }
+        else {
+            Write-Warning "Fail to load $path"
+            throw $_.Exception
+        }
     }
 }
 function Get-DevExpressVersion($targetPath, $referenceFilter, $projectFile) {
@@ -266,7 +270,7 @@ function Get-DevExpressVersionFromReference {
     }
 }
 function Update-Version($modulePath, $dxVersion) {
-    Use-Object($moduleAssembly = Get-MonoAssembly $modulePath -Write) {
+    Use-Object($moduleAssembly = Get-MonoAssembly $modulePath -ReadSymbols) {
         $moduleReferences = $moduleAssembly.MainModule.AssemblyReferences
         Write-Verbose "References:`r`n"
         $moduleReferences | Write-Verbose
@@ -299,14 +303,16 @@ function Update-Version($modulePath, $dxVersion) {
         if ($needPatching) {
             Write-Verbose "Patching $modulePath"
             $writeParams = New-Object WriterParameters
-            $writeParams.WriteSymbols = $true
+            $writeParams.WriteSymbols = $moduleAssembly.MainModule.hassymbols
             $key = [File]::ReadAllBytes("$PSScriptRoot\Xpand.snk")
             $writeParams.StrongNameKeyPair = [System.Reflection.StrongNameKeyPair]($key)
-            $pdbPath = Get-Item $modulePath
-            $pdbPath = "$($pdbPath.DirectoryName)\$($pdbPath.BaseName).pdb"
-            $symbolSources = Get-SymbolSources $pdbPath
             $moduleAssembly.Write($writeParams)
-            Update-Symbols -pdb $pdbPath -SymbolSources $symbolSources
+            if ($writeParams.WriteSymbols) {
+                $pdbPath = Get-Item $modulePath
+                $pdbPath = "$($pdbPath.DirectoryName)\$($pdbPath.BaseName).pdb"
+                $symbolSources = Get-SymbolSources $pdbPath
+                Update-Symbols -pdb $pdbPath -SymbolSources $symbolSources
+            }
         }   
     }
 }
