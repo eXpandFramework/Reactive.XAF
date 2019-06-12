@@ -8,12 +8,12 @@ using namespace System.Text.RegularExpressions
 using namespace Mono.Cecil
 using namespace Mono.Cecil.pdb
 param(
-    [string]$projectFile ,
-    [string]$targetPath ,
+    [string]$projectFile ="C:\ws\dgv\WebCDB\pnc.dgv.cdb.Module.Web\pnc.dgv.cdb.Module.Web.csproj",
+    [string]$targetPath ="C:\ws\dgv\WebCDB\pnc.dgv.cdb.Module.Web\bin\Debug",
     [string]$referenceFilter = "DevExpress*",
     [string]$assemblyFilter = "Xpand.XAF.*"
 )
-# $VerbosePreference = "Continue"
+$VerbosePreference = "Continue"
 $ErrorActionPreference = "Stop"
 . "$PSScriptRoot\Functions.ps1"
 

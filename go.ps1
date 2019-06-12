@@ -8,15 +8,16 @@ param(
     [string]$branch="lab",
     [switch]$InstallModules,
     [string[]]$taskList=@("Release"),
-    [string]$xpandPoshVersion = "2.6.1"
+    [string]$XpandPwshVersion = "0.4.1",
+    [switch]$Release
 )
 $ErrorActionPreference = "Stop"
 @([PSCustomObject]@{
     Name = "psake"
     Version ="4.7.4"
 },[PSCustomObject]@{
-    Name = "XpandPosh"
-    Version =$xpandPoshVersion
+    Name = "XpandPwsh"
+    Version =$XpandPwshVersion
 })|ForEach-Object{
     & "$PSScriptRoot\tools\build\Install-Module.ps1" $_
 }
@@ -31,4 +32,5 @@ Invoke-XPsake  "$PSScriptRoot\Build.ps1" -properties @{
     "build"          = $build;
     "dxVersion"          = $dxVersion;
     "branch"=$branch;
+    "Release"=$Release;
 } -taskList $taskList

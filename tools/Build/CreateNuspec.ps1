@@ -1,5 +1,6 @@
 param(
-    $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\..\")
+    $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\..\"),
+    [switch]$Release
 )
 $ErrorActionPreference = "Stop"
 
@@ -81,6 +82,12 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*Tests*", "*.Source.*" 
             $version=$publishedVersion;
         }
         "$packageName version=$version"
+        if ($Release){
+            $v=$version
+            if ($v.Revision -gt 0){
+                $version=[version]"$($v.Major).$($v.Minor).$($v.Build).0"
+            }
+        }
         $packageInfo = [PSCustomObject]@{
             id              = $_
             version         = $version

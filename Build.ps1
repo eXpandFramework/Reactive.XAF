@@ -11,10 +11,11 @@ properties {
     $compile = $true
     $dxVersion=$null
     $branch=$null
+    $Release=$null
 }
 
 task Release  -depends  DiscoverMSBuild, Clean, Init, UpdateProjects, RestoreNuggets, Compile,IndexSources, CreateNuspec, PackNuspec, UpdateReadMe
-task lab  -depends  DiscoverMSBuild, Clean, Init, UpdateProjects, RestoreNuggets, Compile, CreateNuspec, PackNuspec
+
 
 Task IndexSources{
     InvokeScript{
@@ -74,7 +75,10 @@ task Compile -precondition {return $compile  } {
 
 Task  CreateNuspec  {
     InvokeScript{
-        & "$PSScriptRoot\tools\build\CreateNuspec.ps1" -branch $branch
+        $a=@{
+            Release=$Release
+        }
+        & "$PSScriptRoot\tools\build\CreateNuspec.ps1" @a
     }
 }
 
