@@ -33,7 +33,6 @@ steps:
     arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(GitHubUserName) $(GitHubPass) $(DXApiFeed) $(build.artifactstagingdirectory)
 - task: VSTest@2
   displayName: 'VsTest - testAssemblies'
-  enabled: true
   inputs:
     testAssemblyVer2: |
      .\bin\Tests.dll

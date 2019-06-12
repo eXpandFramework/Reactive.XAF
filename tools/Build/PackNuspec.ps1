@@ -39,17 +39,22 @@ Get-ChildItem "$sourceDir\bin" "*.nuspec" -Recurse|ForEach-Object{
     $id="Xpand.XAF.Modules.$name.$name"+"Module"
     $message=@"
     
-    The package only adds the required references. To install the $id module add the next line in the constructor of your XAF module.
-    
-    RequiredModuleTypes.Add(typeof($id));
+    ➤ ​̲𝗣​̲𝗟​̲𝗘​̲𝗔​̲𝗦​̲𝗘​̲ ​̲𝗦​̲𝗨​̲𝗦​̲𝗧​̲𝗔​̲𝗜​̲𝗡​̲ ​̲𝗢​̲𝗨​̲𝗥​̲ ​̲𝗔​̲𝗖​̲𝗧​̲𝗜​̲𝗩​̲𝗜​̲𝗧​̲𝗜​̲𝗘​̲𝗦
 
-    BUILD THE PROJECT BEFORE OPENING THE MODEL EDITOR
-    
-    To read the module documentation visit the wiki page @ https://github.com/eXpandFramework/DevExpress.XAF/wiki/$name"
+        ☞  Iғ ᴏᴜʀ ᴘᴀᴄᴋᴀɢᴇs ᴀʀᴇ ʜᴇʟᴘɪɴɢ ʏᴏᴜʀ ʙᴜsɪɴᴇss ᴀɴᴅ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ɢɪᴠᴇ ʙᴀᴄᴋ ᴄᴏɴsɪᴅᴇʀ ʙᴇᴄᴏᴍɪɴɢ ᴀ SPONSOR ᴏʀ ᴀ BACKER.
+            https://opencollective.com/expand
 
-    if you like our work please consider to give us a star https://github.com/eXpandFramework/DevExpress.XAF/stargazers
+        ☞  ɪғ ʏᴏᴜ ʟɪᴋᴇ ᴏᴜʀ ᴡᴏʀᴋ ᴘʟᴇᴀsᴇ ᴄᴏɴsɪᴅᴇʀ ᴛᴏ ɢɪᴠᴇ ᴜs ᴀ STAR.
+            https://github.com/eXpandFramework/DevExpress.XAF/stargazers 
 
-    If our packages are helping your business and you want to sustain our activities please consider becoming a sponor or a backer https://opencollective.com/expand.
+    ➤ ​​̲𝗣​̲𝗮​̲𝗰​̲𝗸​̲𝗮​̲𝗴​̲𝗲​̲ ​̲𝗻​̲𝗼​̲𝘁​̲𝗲​̲𝘀
+
+        ☞ Build the project before opening the model editor.
+
+        ☞ To read $id documentation visit the wiki page @ https://github.com/eXpandFramework/DevExpress.XAF/wiki/$name".
+        
+        ☞ The package only adds the required references. To install $id add the next line in the constructor of your XAF module.
+            RequiredModuleTypes.Add(typeof($id));
 "@
     Set-Content "$sourceDir\bin\Readme.txt" $message 
     $packageName=[System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
