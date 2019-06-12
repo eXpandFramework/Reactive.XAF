@@ -11,7 +11,7 @@ param(
     [string]$projectFile ="C:\Users\Tolis\source\repos\Solution174\Solution174.Module\Solution174.Module.csproj",
     [string]$targetPath ="C:\Users\Tolis\source\repos\Solution174\Solution174.Module\bin\Debug\",
     [string]$DevExpressVersion,
-    [string]$VerboseOutput,
+    [string]$VerboseOutput="Continue",
     [string]$referenceFilter = "DevExpress*",
     [string]$assemblyFilter = "Xpand.XAF.*"
 )
@@ -33,14 +33,14 @@ if (!$dxVersion){
 }
 Write-Verbose "DxVersion=$dxVersion"
 
-$nugetPackageFoldersPath="$PSSCriptRoot\..\..\.."
-if ((Get-Item "$PSScriptRoot\..").BaseName -like "Xpand.VersionConverter*"){
-    $nugetPackageFoldersPath="$PSSCriptRoot\..\.."
-}
-Write-Verbose "nugetPackageFoldersPath=$nugetPackageFoldersPath"
-$nugetPackageFolders=[Path]::GetFullPath($nugetPackageFoldersPath)
+$packagesFolder=Get-PackagesFolder
+Write-Verbose "nugetPackageFoldersPath=$packagesFolder"
+$nugetPackageFolders=[Path]::GetFullPath($packagesFolder)
 $moduleDirectories=[Directory]::GetDirectories($nugetPackageFolders)|Where-Object{(Get-Item $_).BaseName -like "Xpand.XAF*"}
-if (!($moduleDirectories|where-Object{!(Get-ChildItem $_ "VersionConverter.v.$dxVersion.DoNotDelete" -Recurse|Select-Object -First 1)})){
+Write-Verbose "moduleDirectories:"
+$moduleDirectories|Write-Verbose
+
+if (!(Get-UnPatchedPackages $moduleDirectories $dxversion)){
     Write-Verbose "All packages already patched for $dxversion"
     return
 }
@@ -53,16 +53,22 @@ catch {
 }
 $mtx.WaitOne() | Out-Null
 try {    
+    # $installedPackages=Get-InstalledPackages $projectFile $assemblyFilter|Select-Object -ExpandProperty Id
+    # Write-Verbose "installedPackages:`r`n"
+    # $installedPackages | Write-Verbose
+    
     Install-MonoCecil $targetPath
     $moduleDirectories|ForEach-Object{
-        write-verbose "moduleDir=$_"
-        Get-ChildItem $_ Xpand.XAF*.dll -Recurse|ForEach-Object{
+        write-verbose "`r`nmoduleDir=$_"
+        Get-ChildItem $_ Xpand.XAF*.dll -Recurse|
+        # Where-Object{$installedPackages.Contains($_.BaseName)}|
+        ForEach-Object{
             $packageFile = $_.FullName
             Write-verbose "packageFile=$packageFile"
             $packageDir = $_.DirectoryName
-            Remove-OtherVersionFlags $packageDir $dxVersion
             $versionConverterFlag = "$packageDir\VersionConverter.v.$dxVersion.DoNotDelete"
             if (!(Test-Path $versionConverterFlag)) {
+                Remove-OtherVersionFlags $packageDir $dxVersion
                 "$targetPath\$([Path]::GetFileName($packageFile))", $packageFile | ForEach-Object {
                     if (Test-Path $_) {
                         $modulePath = (Get-Item $_).FullName

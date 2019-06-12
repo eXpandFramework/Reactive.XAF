@@ -1,3 +1,96 @@
+function Get-UnPatchedPackages {
+    param(
+        $moduleDirectories,
+        $dxVersion
+    )
+    $unpatchedPackages = $moduleDirectories | ForEach-Object {
+        Get-ChildItem $_ "Xpand.XAF*.dll" -Recurse | ForEach-Object {
+            if (!(Test-Path "$($_.DirectoryName)\VersionConverter.v.$dxVersion.DoNotDelete")) {
+                $_.fullname
+            }
+        }
+    }
+    Write-Verbose "unpatchedPackages:"
+    $unpatchedPackages | Write-Verbose
+    $unpatchedPackages
+}
+function Get-InstalledPackages {
+    param(
+        $projectFile,
+        $assemblyFilter
+    )
+    [xml]$csproj = get-content $projectFile
+    $packagesFolder = Get-packagesfolder
+    
+    [array]$packageReferences = $csproj.Project.ItemGroup.PackageReference | ForEach-Object {
+        if ($_.Include -like "$assemblyFilter") {
+            [PSCustomObject]@{
+                Id      = $_.Include
+                Version = $_.Version
+            }
+        }
+    }
+    
+    [array]$dependencies = $packageReferences | ForEach-Object { Get-PackageDependencies $_ $packagesFolder $assemblyFilter $projectFile }
+    $dependencies + $packageReferences
+}
+
+function Get-PackageDependencies {
+    [CmdletBinding()]
+    param (
+        [parameter(ValueFromPipeline)]
+        $psObj,
+        $packagesFolder,
+        $assemblyFilter,
+        $projectFile
+    )
+    
+    begin {
+    }
+    
+    process {
+        $nuspecPath = "$packagesFolder\$($psObj.Id)\$($psObj.Version)\$($psObj.Id).nuspec"
+        if (!(Test-Path $nuspecPath)) {
+            Restore-Packages $projectFile
+            if (!(Test-Path $nuspecPath)) {
+                throw "$nuspecPath not found."
+            }
+        }
+        [xml]$nuspec = Get-Content $nuspecPath
+        
+        [array]$packages = $nuspec.package.metadata.dependencies.group.dependency | Where-Object { $_.id -like "$assemblyFilter" } | ForEach-Object {
+            [PSCustomObject]@{
+                Id      = $_.Id
+                Version = $_.Version
+            }
+        } 
+        
+        [array]$dependencies = $packages | ForEach-Object { Get-PackageDependencies $_ $packagesFolder $assemblyFilter $projectFile }
+        $dependencies + $packages
+        
+    }
+
+    end {
+    }
+}
+
+function Restore-Packages {
+    $nuget = "$PSScriptRoot\nuget.exe"
+    if (!(Test-Path $nuget)) {
+        $c = [System.Net.WebClient]::new()
+        $c.DownloadFile("https://dist.nuget.org/win-x86-commandline/latest/nuget.exe", $nuget)
+        $c.dispose()
+    }
+    & $nuget Restore $projectFile | Out-Null
+}
+function Get-PackagesFolder {
+    $packagesFolder = "$PSSCriptRoot\..\..\.."
+    if ((Get-Item "$PSScriptRoot\..").BaseName -like "Xpand.VersionConverter*") {
+        $packagesFolder = "$PSSCriptRoot\..\.."
+    }
+    $packagesFolder
+}
+
 function Install-MonoCecil($resolvePath) {
     Write-Verbose "Loading Mono.Cecil"
     $monoPath = "$PSScriptRoot\mono.cecil.0.10.3\lib\net40"
@@ -56,14 +149,20 @@ function Use-Object {
         }
     }
 }
-function Get-MonoAssembly($path, [switch]$Write) {
+function Get-MonoAssembly($path, [switch]$ReadSymbols) {
     $readerParams = New-Object ReaderParameters
     if ($Write) {
         $readerParams.ReadWrite = $true
-        $readerParams.ReadSymbols = $true
+        $readerParams.ReadSymbols = $ReadSymbols
     }
     $readerParams.AssemblyResolver = New-Object MyDefaultAssemblyResolver
-    [ModuleDefinition]::ReadModule($path, $readerParams).Assembly
+    try {
+        $m = [ModuleDefinition]::ReadModule($path, $readerParams)
+        $m.Assembly
+    }
+    catch {
+        Get-MonoAssembly $path
+    }
 }
 function Get-DevExpressVersion($targetPath, $referenceFilter, $projectFile) {
     try {
