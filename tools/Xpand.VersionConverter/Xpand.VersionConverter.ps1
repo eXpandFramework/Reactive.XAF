@@ -8,8 +8,8 @@ using namespace System.Text.RegularExpressions
 using namespace Mono.Cecil
 using namespace Mono.Cecil.pdb
 param(
-    [string]$projectFile ="C:\ws\dgv\WebCDB\pnc.dgv.cdb.Module.Web\pnc.dgv.cdb.Module.Web.csproj",
-    [string]$targetPath ="C:\ws\dgv\WebCDB\pnc.dgv.cdb.Module.Web\bin\Debug",
+    [string]$projectFile ,
+    [string]$targetPath ,
     [string]$referenceFilter = "DevExpress*",
     [string]$assemblyFilter = "Xpand.XAF.*"
 )
@@ -53,7 +53,7 @@ try {
                 "$targetPath\$([Path]::GetFileName($packageFile))", $packageFile | ForEach-Object {
                     if (Test-Path $_) {
                         $modulePath = (Get-Item $_).FullName
-                        Write-Verbose "Checking $modulePath references.."
+                        Write-Verbose "Checking $modulePath references..`r`n"
                         Update-Version $modulePath $dxVersion
                     }
                 }

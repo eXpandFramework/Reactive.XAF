@@ -69,19 +69,19 @@ function Get-DevExpressVersion($targetPath, $referenceFilter, $projectFile) {
     Write-Verbose "Finding DevExpress version..."
     $projectFileInfo = Get-Item $projectFile
     [xml]$csproj = Get-Content $projectFileInfo.FullName
-    $dxReferences =$csproj.Project.ItemGroup.PackageReference
-    if ($dxReferences){
-        if ($dxReferences.Version){
-            [version]($dxReferences.Version|Select-Object -First 1)
+    $packageReference = $csproj.Project.ItemGroup.PackageReference| Where-Object { $_.include -like $referenceFilter }
+    if ($packageReference) {
+        $version = ($packageReference ).Version | Select-Object -First 1
+        if ($packageReference) {
+            [version]$version
         }
-        else{
+        else {
             throw "Cannot find DevExpress Version"
         }
     }
-    else{
+    else {
         $references = $csproj.Project.ItemGroup.Reference
         $dxReferences = $references | Where-Object { $_.Include -like "$referenceFilter" }    
-    
         $hintPath = $dxReferences.HintPath | foreach-Object { 
             if ($_) {
                 $path = $_
@@ -108,7 +108,7 @@ function Get-DevExpressVersion($targetPath, $referenceFilter, $projectFile) {
                 $dxReference = [Regex]::Match($include, "DevExpress[^,]*", [RegexOptions]::IgnoreCase).Value
                 Write-Verbose "Include=$Include"
                 Write-Verbose "DxReference=$dxReference"
-                $dxAssembly = Get-ChildItem "$env:windir\Microsoft.NET\assembly\GAC_MSIL"  *.dll -Recurse | Where-Object { $_ -like "*$dxReference.dll" }| Select-Object -First 1
+                $dxAssembly = Get-ChildItem "$env:windir\Microsoft.NET\assembly\GAC_MSIL"  *.dll -Recurse | Where-Object { $_ -like "*$dxReference.dll" } | Select-Object -First 1
                 if ($dxAssembly) {
                     [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($dxAssembly.FullName).FileVersion
                 }
@@ -120,15 +120,60 @@ function Get-DevExpressVersion($targetPath, $referenceFilter, $projectFile) {
     }
 }
 
+function Get-DevExpressVersionFromReference {
+    param(
+        $csproj,
+        $targetPath,
+        $referenceFilter,
+        $projectFile
+    )
+    $references = $csproj.Project.ItemGroup.Reference
+    $dxReferences = $references | Where-Object { $_.Include -like "$referenceFilter" }    
+    $hintPath = $dxReferences.HintPath | foreach-Object { 
+        if ($_) {
+            $path = $_
+            if (![path]::IsPathRooted($path)) {
+                $path = "$((Get-Item $projectFile).DirectoryName)\$_"
+            }
+            if (Test-Path $path) {
+                [path]::GetFullPath($path)
+            }
+        }
+    } | Where-Object { $_ } | Select-Object -First 1
+    if ($hintPath ) {
+        Write-Verbose "$($dxAssembly.Name.Name) found from $hintpath"
+        [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($hintPath).FileVersion
+    }
+    else {
+        $dxAssemblyPath = Get-ChildItem $targetPath "$referenceFilter*.dll" | Select-Object -First 1
+        if ($dxAssemblyPath) {
+            Write-Verbose "$($dxAssembly.Name.Name) found from $($dxAssemblyPath.FullName)"
+            [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($dxAssemblyPath.FullName).FileVersion
+        }
+        else {
+            $include = ($dxReferences | Select-Object -First 1).Include
+            $dxReference = [Regex]::Match($include, "DevExpress[^,]*", [RegexOptions]::IgnoreCase).Value
+            Write-Verbose "Include=$Include"
+            Write-Verbose "DxReference=$dxReference"
+            $dxAssembly = Get-ChildItem "$env:windir\Microsoft.NET\assembly\GAC_MSIL"  *.dll -Recurse | Where-Object { $_ -like "*$dxReference.dll" } | Select-Object -First 1
+            if ($dxAssembly) {
+                [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($dxAssembly.FullName).FileVersion
+            }
+            else {
+                throw "Cannot find DevExpress Version"
+            }
+        }
+    }
+}
 function Update-Version($modulePath, $dxVersion) {
     Use-Object($moduleAssembly = Get-MonoAssembly $modulePath -Write) {
         $moduleReferences = $moduleAssembly.MainModule.AssemblyReferences
-        Write-Verbose "References:"
+        Write-Verbose "References:`r`n"
         $moduleReferences | Write-Verbose
         $needPatching = $false
         $moduleReferences.ToArray() | Where-Object { $_.FullName -like $referenceFilter } | ForEach-Object {
             $dxReference = $_
-            Write-Verbose "Checking $_ reference..."
+            Write-Verbose "`r`nChecking $_ reference...`r`n"
             if ($dxReference.Version -ne $dxVersion) {
                 $moduleReferences.Remove($dxReference) | Out-Null
                 $newMinor = "$($dxVersion.Major).$($dxVersion.Minor)"
@@ -144,11 +189,11 @@ function Update-Version($modulePath, $dxVersion) {
                         $_.Scope = $newReference 
                     }
                 }
-                Write-Verbose "$($_.Name) version will changed from $($_.Version) to $($dxVersion)" 
+                Write-Verbose "$($_.Name) version will changed from $($_.Version) to $($dxVersion)`r`n" 
                 $needPatching = $true
             }
             else {
-                Write-Verbose "Versions ($($dxReference.Version)) matched nothing to do."
+                Write-Verbose "Versions ($($dxReference.Version)) matched nothing to do.`r`n"
             }
         }
         if ($needPatching) {
