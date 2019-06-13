@@ -88,6 +88,7 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*Tests*", "*.Source.*" 
                 $version=[version]"$($v.Major).$($v.Minor).$($v.Build).0"
             }
         }
+        
         $packageInfo = [PSCustomObject]@{
             id              = $_
             version         = $version
@@ -101,18 +102,35 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*Tests*", "*.Source.*" 
     }
     
     
-    $csproj.Project.ItemGroup.None.Include |Where-Object {$_ -eq "packages.config"}|ForEach-Object {
-        $dir = [System.IO.Path]::GetDirectoryName($projectPath)
-        [xml]$xml = Get-Content "$($dir.ToString())\packages.config"
-        $xml.packages.package|ForEach-Object {
-            $packageInfo = [PSCustomObject]@{
-                id              = $_.id
-                version         = $_.version
-                targetFramework = $_.targetFramework
-            }
-            Invoke-Command $AddDependency -ArgumentList $packageInfo 
+    $packageReference = $csproj.Project.ItemGroup.PackageReference
+    $targetFrameworkVersion = ($csproj.Project.PropertyGroup.TargetFrameworkVersion | Select-Object -First 1 ).replace("v", "").replace(".", "")
+    $projectpath
+    $packageReference | Where-Object { $_.Include } | ForEach-Object {
+        $_.Include
+        $packageFramework=Get-PackageTargetFramework $_.Include $_.version "net" $targetFrameworkVersion
+        if (!$packageFramework){
+            throw "packageFramework not found for $($_.Include)"
         }
+        $packageInfo=[PSCustomObject]@{
+            Id      = $_.Include
+            Version = $_.Version
+            TargetFramework=$packageFramework
+        }
+        "packageInfo=$packageInfo"
+        Invoke-Command $AddDependency -ArgumentList $packageInfo 
     }
+    # $csproj.Project.ItemGroup.None.Include |Where-Object {$_ -eq "packages.config"}|ForEach-Object {
+    #     $dir = [System.IO.Path]::GetDirectoryName($projectPath)
+    #     [xml]$xml = Get-Content "$($dir.ToString())\packages.config"
+    #     $xml.packages.package|ForEach-Object {
+    #         $packageInfo = [PSCustomObject]@{
+    #             id              = $_.id
+    #             version         = $_.version
+    #             targetFramework = $_.targetFramework
+    #         }
+    #         Invoke-Command $AddDependency -ArgumentList $packageInfo 
+    #     }
+    # }
     
     $files = $nuspec.CreateElement("files")
     $nuspec.package.AppendChild($files)|Out-Null
