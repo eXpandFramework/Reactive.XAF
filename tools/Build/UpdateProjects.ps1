@@ -2,7 +2,7 @@ $ErrorActionPreference = "Stop"
 $rootLocation="$PSScriptRoot\..\..\"
 Set-Location "$rootLocation\src"
 
-"Xpand.XAF.HideTool*" | ForEach-Object{
+"Xpand.XAF.*" | ForEach-Object{
     Update-HintPath "$rootLocation" "$rootLocation\bin\" $_
 }
 Get-ChildItem -Filter *.csproj -Recurse |  ForEach-Object {

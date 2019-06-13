@@ -1,150 +1,43 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <DXVersion>18.2.3</DXVersion>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{58399364-9ACA-429F-A276-7F01E9E61D7D}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Xpand.XAF.Modules.Reactive</RootNamespace>
-    <AssemblyName>Xpand.XAF.Modules.Reactive</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <UpgradeBackupLocation>
-    </UpgradeBackupLocation>
-    <OldToolsVersion>3.5</OldToolsVersion>
-    <TargetFrameworkProfile />
-    <LangVersion>latest</LangVersion>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>pdbonly</DebugType>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <OutputPath>..\..\..\bin</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>..\..\..\bin</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <LangVersion>latest</LangVersion>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>..\..\..\bin</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <TargetFramework>net461</TargetFramework>
+    <FileUpgradeFlags />
+    <UpgradeBackupLocation />
     <LangVersion>latest</LangVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
     <DebugSymbols>true</DebugSymbols>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'EasyTest|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
     <OutputPath>..\..\..\bin</OutputPath>
-    <DefineConstants>TRACE;DEBUG;EASYTEST</DefineConstants>
+    <AssemblyTitle>Xpand.XAF.Modules.Reactive</AssemblyTitle>
+    <Product>Xpand.XAF.Modules.Reactive</Product>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <DebugType>pdbonly</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <LangVersion>latest</LangVersion>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-  </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-    <LangVersion>latest</LangVersion>
-    <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>pdbonly</DebugType>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <OutputPath>..\..\..\bin</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
-    <SignAssembly>true</SignAssembly>
-    <LangVersion>latest</LangVersion>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>pdbonly</DebugType>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <OutputPath>..\..\..\bin</OutputPath>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony, Version=2.0.0.0, Culture=neutral, PublicKeyToken=c52ffed5d5ff0958, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Libs\0Harmony.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="DevExpress.ExpressApp.v18.2">
-      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\bin\DevExpress.ExpressApp.v18.2.dll</HintPath>
-    </Reference>
-    <Reference Include="System">
-      <Name>System</Name>
-      <Private>False</Private>
+      <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="System.Configuration" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\Extensions\Extensions\XAF\XafApplication\GetPlatform.cs">
-      <Link>LinkedFiles\GetPlatform.cs</Link>
-    </Compile>
-    <Compile Include="Extensions\BufferUntilSubscribedObservable.cs" />
-    <Compile Include="Extensions\CommonExtensions.cs" />
-    <Compile Include="Module.cs">
+    <Compile Include="..\..\Extensions\Extensions\XAF\XafApplication\GetPlatform.cs" Link="LinkedFiles\GetPlatform.cs" />
+    <Compile Update="Module.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ReactiveModuleBase.cs">
+    <Compile Update="ReactiveModuleBase.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="RXApp.cs" />
-    <Compile Include="RxAppPatch.cs" />
-    <Compile Include="Services\ActionExtensions.cs" />
-    <Compile Include="Services\BoolListExtensions.cs" />
-    <Compile Include="Services\Controllers\ControllerExtensions.cs" />
-    <Compile Include="Services\Controllers\ListViewProcessCurrentObjectControllerExtensions.cs" />
-    <Compile Include="Services\DetailViewExtensions.cs" />
-    <Compile Include="Services\FrameExtensions.cs" />
-    <Compile Include="Services\ListEditorExtensions.cs" />
-    <Compile Include="Services\ObjectSpaceExtensions.cs" />
-    <Compile Include="Services\ViewExtensions.cs" />
-    <Compile Include="Services\ViewItemExtensions.cs" />
-    <Compile Include="Services\WindowExtensions.cs" />
-    <Compile Include="Services\Controllers\WindowTemplateControllerExtensions.cs" />
-    <Compile Include="Services\WindowTemplateService.cs" />
-    <Compile Include="Services\XafApplicationRXExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config">
-      <SubType>Designer</SubType>
-    </None>
+    <PackageReference Include="fasterflect" Version="2.1.3" />
+    <PackageReference Include="System.Reactive" Version="4.1.5" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="fasterflect">
-      <Version>2.1.3</Version>
-    </PackageReference>
-    <PackageReference Include="System.Reactive">
-      <Version>4.1.5</Version>
-    </PackageReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

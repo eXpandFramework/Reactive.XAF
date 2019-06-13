@@ -4,7 +4,7 @@ param(
     $nugetBin="$PSScriptRoot\..\..\bin\Nupkg",
     $sourceDir="$PSScriptRoot\..\.."
 )
-
+import-module XpandPwsh -Force -Prefix X
 $ErrorActionPreference="Stop"
 New-Item $nugetBin -ItemType Directory -Force|Out-Null
 $versionConverterSpecPath="$sourceDir\Tools\Xpand.VersionConverter\Xpand.VersionConverter.nuspec"

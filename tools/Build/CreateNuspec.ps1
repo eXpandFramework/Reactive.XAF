@@ -60,7 +60,7 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*Tests*", "*.Source.*" 
         $nuspec.SelectSingleNode("//group").AppendChild($dependency)|Out-Null
     }
     
-    $targetFrameworkVersion = "$($csproj.Project.PropertyGroup.TargetFrameworkVersion)".Substring(1).Trim()      
+    $targetFrameworkVersion = "$($csproj.Project.PropertyGroup.TargetFramework)".Substring(3)
     $targetFrameworkAttribute=$nuspec.CreateAttribute("targetFramework")
     $targetFrameworkAttribute.Value=".NETFramework$targetFrameworkVersion"
     $groupElement=$nuspec.CreateElement("group")
@@ -103,7 +103,7 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*Tests*", "*.Source.*" 
     
     
     $packageReference = $csproj.Project.ItemGroup.PackageReference
-    $targetFrameworkVersion = ($csproj.Project.PropertyGroup.TargetFrameworkVersion | Select-Object -First 1 ).replace("v", "").replace(".", "")
+    $targetFrameworkVersion = ($csproj.Project.PropertyGroup.TargetFramework| Select-Object -First 1).Substring(3)
     $projectpath
     $packageReference | Where-Object { $_.Include } | ForEach-Object {
         $_.Include
@@ -119,18 +119,6 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*Tests*", "*.Source.*" 
         "packageInfo=$packageInfo"
         Invoke-Command $AddDependency -ArgumentList $packageInfo 
     }
-    # $csproj.Project.ItemGroup.None.Include |Where-Object {$_ -eq "packages.config"}|ForEach-Object {
-    #     $dir = [System.IO.Path]::GetDirectoryName($projectPath)
-    #     [xml]$xml = Get-Content "$($dir.ToString())\packages.config"
-    #     $xml.packages.package|ForEach-Object {
-    #         $packageInfo = [PSCustomObject]@{
-    #             id              = $_.id
-    #             version         = $_.version
-    #             targetFramework = $_.targetFramework
-    #         }
-    #         Invoke-Command $AddDependency -ArgumentList $packageInfo 
-    #     }
-    # }
     
     $files = $nuspec.CreateElement("files")
     $nuspec.package.AppendChild($files)|Out-Null

@@ -61,15 +61,15 @@ task RestoreNuggets {
 task Compile -precondition {return $compile  } {
     InvokeScript{
         write-host "Building Extensions" -f "Blue"
-        & $script:msbuild "$PSScriptRoot\src\Extensions\Extensions.sln" /p:Configuration=Release /fl /v:m
+        & dotnet build "$PSScriptRoot\src\Extensions\Extensions.sln" /p:Configuration=Release /fl /v:m
     }
     InvokeScript{
         write-host "Building Modules" -f "Blue"
-        & $script:msbuild "$PSScriptRoot\src\Modules\Modules.sln" /p:Configuration=Release /fl /v:m
+        & dotnet build "$PSScriptRoot\src\Modules\Modules.sln" /p:Configuration=Release /fl /v:m
     }
     InvokeScript{
         write-host "Building Tests" -f "Blue"
-        & $script:msbuild "$PSScriptRoot\src\Tests\Tests.sln" "/p:Configuration=Release;OutputPath=$PSScriptRoot\bin" /fl /v:m
+        & dotnet build "$PSScriptRoot\src\Tests\Tests.sln" "/p:Configuration=Release;OutputPath=$PSScriptRoot\bin" /fl /v:m
     }
 }
 
