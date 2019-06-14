@@ -159,11 +159,11 @@ function Get-MonoAssembly($path, [switch]$ReadSymbols) {
         $m.Assembly
     }
     catch {
-        if ($_.FullyQualifiedErrorId -eq "SymbolsNotMatchingException") {
+        if ($_.FullyQualifiedErrorId -like "*Symbols*") {
             Get-MonoAssembly $path
         }
         else {
-            Write-Warning "Fail to load $path"
+            Write-Warning "$($_.FullyQualifiedErrorId) exception when loading $path"
             throw $_.Exception
         }
     }
