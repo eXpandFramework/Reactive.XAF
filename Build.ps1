@@ -44,32 +44,33 @@ task UpdateReadMe {
 
 task RestoreNuggets {
     InvokeScript{
-        Get-ChildItem *.sln -Recurse|ForEach-Object{
-            Push-Location $_.DirectoryName
-            if ($packageSources){
-                $sources= "https://api.nuget.org/v3/index.json;$packageSources"
-                & (Get-XNugetPath) restore -source $sources
-            }
-            else {
-                & nuget restore
-            }
-            Pop-Location
-        }
+        # Get-ChildItem *.sln -Recurse|ForEach-Object{
+        #     Push-Location $_.DirectoryName
+        #     if ($packageSources){
+        #         $sources= "https://api.nuget.org/v3/index.json;$packageSources"
+        #         & dotnet restore -s $sources
+        #     }
+        #     else {
+        #         & dotnet restore
+        #     }
+        #     Pop-Location
+        # }
     }
 }
 
 task Compile -precondition {return $compile  } {
+    $source="https://api.nuget.org/v3/index.json;$packageSources"
     InvokeScript{
         write-host "Building Extensions" -f "Blue"
-        & dotnet build "$PSScriptRoot\src\Extensions\Extensions.sln" /p:Configuration=Release /fl /v:m
+        & dotnet build "$PSScriptRoot\src\Extensions\Extensions.sln" --configuration Release --source $source
     }
     InvokeScript{
         write-host "Building Modules" -f "Blue"
-        & dotnet build "$PSScriptRoot\src\Modules\Modules.sln" /p:Configuration=Release /fl /v:m
+        & dotnet build "$PSScriptRoot\src\Modules\Modules.sln" --configuration Release --source $source
     }
     InvokeScript{
         write-host "Building Tests" -f "Blue"
-        & dotnet build "$PSScriptRoot\src\Tests\Tests.sln" "/p:Configuration=Release;OutputPath=$PSScriptRoot\bin" /fl /v:m
+        & dotnet build "$PSScriptRoot\src\Tests\Tests.sln" --configuration Release --source $source --output $PSScriptRoot\bin
     }
 }
 
