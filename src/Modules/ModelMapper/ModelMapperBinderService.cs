@@ -8,12 +8,12 @@ using Xpand.Source.Extensions.XAF.Model;
 namespace Xpand.XAF.Modules.ModelMapper{
     public static class ModelMapperBinderService{
         public static void BindTo(this IModelModelMap modelModelMap, object instance){
-            ((IModelNodeEnabled) modelModelMap).BindTo( instance);
+            ((IModelNodeDisabled) modelModelMap).BindTo( instance);
         }
 
-        private static void BindTo(this IModelNodeEnabled modelNodeEnabled, object instance){
-            if (modelNodeEnabled.NodeEnabled){
-                var modelNode = ((ModelNode) modelNodeEnabled);
+        private static void BindTo(this IModelNodeDisabled modelNodeDisabled, object instance){
+            if (!modelNodeDisabled.NodeDisabled){
+                var modelNode = ((ModelNode) modelNodeDisabled);
                 var modelNodeInfo = modelNode.NodeInfo;
                 var propertyInfos = instance.GetType().Properties();
                 var propertiesHashSet = new HashSet<string>(propertyInfos.Select(info => info.Name));
@@ -22,12 +22,12 @@ namespace Xpand.XAF.Modules.ModelMapper{
                     var propertyType = valueInfo.PropertyType == typeof(string)
                         ? valueInfo.PropertyType
                         : valueInfo.PropertyType.GetGenericArguments().First();
-                    var value = modelNodeEnabled.GetValue(valueInfo.Name, propertyType);
+                    var value = modelNodeDisabled.GetValue(valueInfo.Name, propertyType);
                     if (value != null) instance.TrySetPropertyValue(valueInfo.Name, value);
                 }
 
-                for (int i = 0; i < modelNodeEnabled.NodeCount; i++){
-                    if (modelNodeEnabled.GetNode(i) is IModelNodeEnabled nodeEnabled){
+                for (int i = 0; i < modelNodeDisabled.NodeCount; i++){
+                    if (modelNodeDisabled.GetNode(i) is IModelNodeDisabled nodeEnabled){
                         var propertyValue = instance.GetPropertyValue(nodeEnabled.Id());
                         if (propertyValue != null) (nodeEnabled).BindTo(propertyValue);
                     }

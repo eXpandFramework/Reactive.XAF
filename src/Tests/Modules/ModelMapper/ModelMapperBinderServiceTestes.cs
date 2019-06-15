@@ -41,7 +41,7 @@ namespace Tests.Modules.ModelMapper{
             modelModelMap.SetValue(nameof(StringValueTypeProperties.RWInteger),100);
             var stringValueTypeProperties = new StringValueTypeProperties{RWString = "shouldnotchange"};
 
-            modelModelMap.NodeEnabled = false;
+            modelModelMap.NodeDisabled = true;
             modelModelMap.BindTo(stringValueTypeProperties);
 
             stringValueTypeProperties.RWString.ShouldBe("shouldnotchange");
@@ -116,6 +116,16 @@ namespace Tests.Modules.ModelMapper{
 
             referenceTypeProperties.RStringValueTypeProperties.RWString.ShouldBe("test");
             
+        }
+
+        [Fact]
+        public void Apply_AllMapper_Contexts(){
+            throw new NotImplementedException();            
+        }
+
+        [Fact]
+        public void Apply_Root_Map_After_mapper_contexts(){
+            throw new NotImplementedException();            
         }
     
     }

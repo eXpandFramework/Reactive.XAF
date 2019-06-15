@@ -4,17 +4,17 @@ using DevExpress.ExpressApp.Model;
 using Xpand.Source.Extensions.XAF.Model;
 
 namespace Xpand.XAF.Modules.ModelMapper{
-    [DomainLogic(typeof(IModelNodeEnabled))]
+    [DomainLogic(typeof(IModelNodeDisabled))]
     public class ModelNodeEnabledDomainLogic{
-        public static IModelObjectView Get_ParentObjectView(IModelNodeEnabled modelNodeEnabled){
-            return modelNodeEnabled.GetParent<IModelObjectView>();
+        public static IModelObjectView Get_ParentObjectView(IModelNodeDisabled modelNodeDisabled){
+            return modelNodeDisabled.GetParent<IModelObjectView>();
         }
     }
 
-    public interface IModelNodeEnabled : IModelNode {
+    public interface IModelNodeDisabled : IModelNode {
         [DefaultValue(true)]
         [Category("Activation")]
-        bool NodeEnabled { get; set; }
+        bool NodeDisabled { get; set; }
         [Browsable(false)]
         IModelObjectView ParentObjectView { get; }
 

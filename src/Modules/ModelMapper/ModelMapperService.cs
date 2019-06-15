@@ -292,7 +292,7 @@ namespace Xpand.XAF.Modules.ModelMapper{
 
         private static string ModelCode(this Type type, AssemblyDefinition[] assemblyDefinitions,string imageName=null, string customName = null,string propertiesCode = null,string additionalPropertiesCode=null,Type baseType=null,HashSet<Type> mappedTypes=null){
             mappedTypes = mappedTypes ?? new HashSet<Type>();
-            baseType = baseType ?? typeof(IModelNodeEnabled);
+            baseType = baseType ?? typeof(IModelNodeDisabled);
             var assemblyName = type.Assembly.GetName().Name;
             var assemblyDefinition = assemblyDefinitions.First(definition => definition.Name.Name==assemblyName);
             var typeFullName = $"{type.FullName}";

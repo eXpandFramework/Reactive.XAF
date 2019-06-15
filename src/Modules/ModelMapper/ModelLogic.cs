@@ -39,7 +39,7 @@ namespace Xpand.XAF.Modules.ModelMapper{
     public static class ModelModelMapperContextsDomainLogic {
         public static IEnumerable<T> GetMappers<T>(this IModelModelMapperContexts contexts) where T:IModelModelMap{
             var modelMappers = contexts.SelectMany(mappers => mappers);
-            return modelMappers.Where(modelMapper => modelMapper.NodeEnabled).OfType<T>();
+            return modelMappers.Where(modelMapper => !modelMapper.NodeDisabled).OfType<T>();
         }
     }
 
@@ -107,7 +107,7 @@ namespace Xpand.XAF.Modules.ModelMapper{
     }
 
 //    [ModelEditorBrowsable(false)]
-    public interface IModelModelMap:IModelNodeEnabled{
+    public interface IModelModelMap:IModelNodeDisabled{
     }
 
 
