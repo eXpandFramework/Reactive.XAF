@@ -35,7 +35,7 @@ namespace Xpand.XAF.Modules.ModelMapper{
                 .Select(_ => _.extenderData.MapToModel())
                 .Concat(ModelMapperService.MappedTypes)
                 .Where(type => typeof(IModelNode).IsAssignableFrom(type))
-                .Select(_ => _.Assembly.GetType($"{_.Name}{ModelMapperService.ContainerSuffix}"));
+                .Select(_ => _.Assembly.GetTypes().First(type => typeof(IModelModelMapContainer).IsAssignableFrom(type)));
 
             return ModelExtenders.ToObservable()
                 .SelectMany(_ => mappedTypes.Select(extenderInterface => (_.targetIntefaceType,extenderInterface)))
@@ -44,9 +44,6 @@ namespace Xpand.XAF.Modules.ModelMapper{
 
         public static void Extend<TModelMapperConfiguration>(this (Type extenderType, TModelMapperConfiguration configuration) extenderData, Type targetInterface)
             where TModelMapperConfiguration : IModelMapperConfiguration{
-//            var interfaces = extenderData.GetInterfaces();
-//            if (interfaces.Any(type => typeof(IModelModelMap) == type))
-//                extenderInterface = extenderInterface.Assembly.GetType($"{extenderInterface.Name}{ModelMapperService.ContainerSuffix}");
             ModelExtenders.Add((targetInterface, extenderData));
         }
 

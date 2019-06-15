@@ -66,6 +66,10 @@ namespace Tests.Artifacts {
             type.Methods(Flags.StaticPrivate, "Init").First().Invoke(null,null);
         }
 
+        public static TModule NewModule<TModule>(Platform platform,params Type[] additionalExportedTypes) where  TModule:ModuleBase, new(){
+            return platform.NewApplication().AddModule<TModule>(additionalExportedTypes);
+        }
+
         public static XafApplication NewApplication(this Platform platform){
             XafApplication application;
             if (platform == Platform.Web){
@@ -75,7 +79,7 @@ namespace Tests.Artifacts {
                 application = new TestWinApplication();
             }
             else{
-                application=new Mock<XafApplication>(){CallBase = true}.Object;
+                throw new NotSupportedException("if implemented make sure all tests pass with TestExplorer and live testing");
             }
 
             var listEditorMock = new Mock<ListEditor>{CallBase = true};
@@ -115,8 +119,8 @@ namespace Tests.Artifacts {
                     });
                 webApplication.FrameTemplateFactory = frameTemplateFactoryMock.Object;
             }
-            else if (application is WinApplication winApplication){
-                winApplication.UseLightStyle = true;
+            else {
+                ((WinApplication) application).UseLightStyle = true;
             }
             return application;
         }

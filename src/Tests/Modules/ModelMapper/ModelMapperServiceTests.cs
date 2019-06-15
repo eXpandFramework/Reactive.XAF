@@ -6,12 +6,10 @@ using System.Reactive.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
-using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.XtraGrid.Views.Grid;
 using Fasterflect;
 using Shouldly;
-using Xpand.Source.Extensions.System.AppDomain;
 using Xpand.Source.Extensions.System.String;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.ModelMapper;
@@ -56,9 +54,8 @@ namespace Tests.Modules.ModelMapper{
 
 
         private static PropertyInfo[] ModelTypeProperties(Type modelType){
-            return modelType.Properties().Where(info =>
-                !ModelMapperService.ReservedPropertyNames.Contains(info.Name) &&
-                !info.Name.EndsWith(ModelMapperService.ContainerSuffix)&&info.Name!=ModelMapperService.ModelMappersNodeName).ToArray();
+            return modelType.Properties().Where(info =>!ModelMapperService.ReservedPropertyNames.Contains(info.Name) &&
+                info.Name!=ModelMapperService.ModelMappersNodeName).ToArray();
         }
 
         [Fact]
@@ -145,7 +142,7 @@ namespace Tests.Modules.ModelMapper{
             typeToMap.MapToModel();
             var modelType = await ModelMapperService.MappedTypes;
 
-            modelType.Name.ShouldBe($"IModel{typeToMap.FullName.CleanCodeName()}");
+            modelType.Name.ShouldBe($"IModel{typeToMap.Name}");
             
         }
 
@@ -161,9 +158,9 @@ namespace Tests.Modules.ModelMapper{
             var mappedTypes = ModelMapperService.MappedTypes.Replay();
             mappedTypes.Connect();
             var mappedType1 = await mappedTypes.Take(1);
-            mappedType1.Name.ShouldBe($"IModel{typeToMap1.FullName.CleanCodeName()}");
+            mappedType1.Name.ShouldBe($"IModel{typeToMap1.Name}");
             var mappedType2 = await mappedTypes.Take(2);
-            mappedType2.Name.ShouldBe($"IModel{typeToMap2.FullName.CleanCodeName()}");
+            mappedType2.Name.ShouldBe($"IModel{typeToMap2.Name}");
             mappedType1.Assembly.ShouldBe(mappedType2.Assembly);
         }
 
@@ -181,35 +178,16 @@ namespace Tests.Modules.ModelMapper{
         }
 
         [Fact]
-        public async Task Custom_Container_Name(){
-            InitializeMapperService(nameof(Custom_Container_Name));
-            var typeToMap = typeof(TestModelMapper);
-            var codeName = typeToMap.FullName.CleanCodeName();
-            var customContainerName = "Custom";
-            string customContainerPersistentName="customContainerPersistentName";
-
-            typeToMap.MapToModel(new ModelMapperConfiguration(){CustomContainerName = customContainerName,CustomContainerPersistentName = customContainerPersistentName});
-            var modelType = await ModelMapperService.MappedTypes;
-
-            var containerType = modelType.Assembly.GetType($"IModel{codeName}Container");
-            var propertyInfo = containerType.Properties().First();
-            propertyInfo.Name.ShouldBe(customContainerName);
-            var modelPersistentNameAttribute = propertyInfo.Attribute<ModelPersistentNameAttribute>();
-            modelPersistentNameAttribute.ShouldNotBeNull();
-            modelPersistentNameAttribute.Name.ShouldBe(customContainerPersistentName);
-        }
-
-        [Fact]
         public async Task Custom_Container_Image(){
             InitializeMapperService(nameof(Custom_Container_Image));
             var typeToMap = typeof(TestModelMapper);
-            var codeName = typeToMap.FullName.CleanCodeName();
+            var codeName = typeToMap.Name;
             var imageName = "ImageName";
             
             typeToMap.MapToModel(new ModelMapperConfiguration(){ImageName = imageName});
             var modelType = await ModelMapperService.MappedTypes;
 
-            var containerType = modelType.Assembly.GetType($"IModel{codeName}Container");
+            var containerType = modelType.Assembly.GetType($"IModel{codeName}{ModelMapperService.DefaultContainerSuffix}");
             var imageNameAttribute = containerType.Attribute<ImageNameAttribute>();
             imageNameAttribute.ShouldNotBeNull();
             imageNameAttribute.ImageName.ShouldBe(imageName);
@@ -276,13 +254,28 @@ namespace Tests.Modules.ModelMapper{
             typeToMap.MapToModel();
             var modelType = await ModelMapperService.MappedTypes;
 
-            var codeName = typeof(TestModelMapper).FullName.CleanCodeName();
-            var containerType = modelType.Assembly.GetType($"IModel{codeName}{ModelMapperService.ContainerSuffix}");
+            var containerType = modelType.Assembly.GetType($"IModel{typeToMap.Name}{ModelMapperService.DefaultContainerSuffix}");
             containerType.ShouldNotBeNull();
-            var propertyInfo = containerType.GetProperty(codeName);
+            var propertyInfo = containerType.GetProperty($"{typeToMap.Name}");
             propertyInfo.ShouldNotBeNull();
             propertyInfo.CanWrite.ShouldBeFalse();
+            propertyInfo.PropertyType.Name.ShouldBe($"IModel{typeToMap.Name}");
+        }
 
+        [Fact]
+        public async Task Custom_Container_Name(){
+            InitializeMapperService(nameof(Custom_Container_Name));
+            var typeToMap = typeof(TestModelMapper);
+            var containerName = "Custom";
+            string mapName="mapName";
+
+            typeToMap.MapToModel(new ModelMapperConfiguration(){ContainerName = containerName,MapName = mapName});
+            var modelType = await ModelMapperService.MappedTypes;
+
+            var containerType = modelType.Assembly.GetType($"IModel{containerName}");
+            var propertyInfo = containerType.Properties().First();
+            propertyInfo.Name.ShouldBe(mapName);
+            
         }
 
         [Fact]
@@ -293,8 +286,8 @@ namespace Tests.Modules.ModelMapper{
             typeToMap.MapToModel();
             var modelType = await ModelMapperService.MappedTypes;
             
-            var containerName = typeof(TestModelMapper).FullName.CleanCodeName();
-            var containerType = modelType.Assembly.GetType($"IModel{containerName}{ModelMapperService.ContainerSuffix}");
+            var containerName = typeof(TestModelMapper).Name;
+            var containerType = modelType.Assembly.GetType($"IModel{containerName}{ModelMapperService.DefaultContainerSuffix}");
             
             var propertyInfo = containerType.GetProperty(containerName)?.PropertyType.GetProperty(ModelMapperService.ModelMappersNodeName);
             propertyInfo.ShouldNotBeNull();

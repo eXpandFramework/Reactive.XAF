@@ -9,17 +9,19 @@ using Xpand.XAF.Modules.ModelMapper;
 using Xunit;
 
 namespace Tests.Modules.ModelMapper{
-    [Xunit.Collection(nameof(XafTypesInfo))]
-    public class ModelMapperBinderServiceTestes:ModelMapperBaseTest{
-        [Fact]
-        public void Bind_Only_NullAble_Properties_That_are_not_Null(){
+    [Collection(nameof(XafTypesInfo))]
+    public class ModelMapperBinderServiceTests:ModelMapperBaseTest{
+        [Theory]
+        [InlineData(Platform.Win)]
+        [InlineData(Platform.Web)]
+        internal void Bind_Only_NullAble_Properties_That_are_not_Null(Platform platform){
             var typeToMap=typeof(StringValueTypeProperties);
-            InitializeMapperService($"{nameof(Bind_Only_NullAble_Properties_That_are_not_Null)}{typeToMap.Name}");
+            InitializeMapperService($"{nameof(Bind_Only_NullAble_Properties_That_are_not_Null)}{typeToMap.Name}{platform}");
             typeToMap.MapToModel().Extend<IModelListView>();
-            var application = DefaultModelMapperModule(Platform.Agnostic).Application;
+            var application = DefaultModelMapperModule(platform).Application;
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
-            var cleanCodeName = typeToMap.FullName.CleanCodeName();
-            var modelModelMap = (IModelModelMap)modelListView.GetNode(cleanCodeName);
+            var mapName = typeToMap.ModelMapName();
+            var modelModelMap = (IModelModelMap)modelListView.GetNode(mapName);
             modelModelMap.SetValue(nameof(StringValueTypeProperties.RWInteger),100);
             var stringValueTypeProperties = new StringValueTypeProperties{RWString = "shouldnotchange"};
 
@@ -29,15 +31,17 @@ namespace Tests.Modules.ModelMapper{
             stringValueTypeProperties.RWString.ShouldBe("shouldnotchange");
         }
 
-        [Fact]
-        public void Do_not_bind_Disable_mode_nodes(){
+        [Theory]
+        [InlineData(Platform.Win)]
+        [InlineData(Platform.Web)]
+        internal void Do_not_bind_Disable_mode_nodes(Platform platform){
             Type typeToMap=typeof(StringValueTypeProperties);
-            InitializeMapperService($"{nameof(Do_not_bind_Disable_mode_nodes)}{typeToMap.Name}");
+            InitializeMapperService($"{nameof(Do_not_bind_Disable_mode_nodes)}{typeToMap.Name}{platform}");
             typeToMap.MapToModel().Extend<IModelListView>();
-            var application = DefaultModelMapperModule(Platform.Agnostic).Application;
+            var application = DefaultModelMapperModule(platform).Application;
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
-            var cleanCodeName = typeToMap.FullName.CleanCodeName();
-            var modelModelMap = (IModelModelMap)modelListView.GetNode(cleanCodeName);
+            var mapName = typeToMap.ModelMapName();
+            var modelModelMap = (IModelModelMap)modelListView.GetNode(mapName);
             modelModelMap.SetValue(nameof(StringValueTypeProperties.RWInteger),100);
             var stringValueTypeProperties = new StringValueTypeProperties{RWString = "shouldnotchange"};
 
@@ -48,30 +52,34 @@ namespace Tests.Modules.ModelMapper{
             stringValueTypeProperties.RWInteger.ShouldBe(0);
         }
 
-        [Fact]
-        public void Do_not_throw_if_target_object_properties_do_not_exist(){
+        [Theory]
+        [InlineData(Platform.Win)]
+        [InlineData(Platform.Web)]
+        internal void Do_not_throw_if_target_object_properties_do_not_exist(Platform platform){
             Type typeToMap=typeof(StringValueTypeProperties);
-            InitializeMapperService($"{nameof(Do_not_throw_if_target_object_properties_do_not_exist)}{typeToMap.Name}");
+            InitializeMapperService($"{nameof(Do_not_throw_if_target_object_properties_do_not_exist)}{typeToMap.Name}{platform}");
             typeToMap.MapToModel().Extend<IModelListView>();
-            var application = DefaultModelMapperModule(Platform.Agnostic).Application;
+            var application = DefaultModelMapperModule(platform).Application;
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
-            var cleanCodeName = typeToMap.FullName.CleanCodeName();
-            var modelModelMap = (IModelModelMap)modelListView.GetNode(cleanCodeName);
+            var mapName = typeToMap.ModelMapName();
+            var modelModelMap = (IModelModelMap)modelListView.GetNode(mapName);
             modelModelMap.Index = 100;
             var stringValueTypeProperties = new StringValueTypeProperties();
 
             modelModelMap.BindTo(stringValueTypeProperties);
         }
 
-        [Fact]
-        public void Bind_all_public_nullable_type_properties(){
+        [Theory]
+        [InlineData(Platform.Win)]
+        [InlineData(Platform.Web)]
+        internal void Bind_all_public_nullable_type_properties(Platform platform){
             Type typeToMap=typeof(StringValueTypeProperties);
-            InitializeMapperService($"{nameof(Bind_all_public_nullable_type_properties)}{typeToMap.Name}");
+            InitializeMapperService($"{nameof(Bind_all_public_nullable_type_properties)}{typeToMap.Name}{platform}");
             typeToMap.MapToModel().Extend<IModelListView>();
-            var application = DefaultModelMapperModule(Platform.Agnostic).Application;
+            var application = DefaultModelMapperModule(platform).Application;
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
-            var cleanCodeName = typeToMap.FullName.CleanCodeName();
-            var modelModelMap = (IModelModelMap)modelListView.GetNode(cleanCodeName);
+            var mapName = typeToMap.ModelMapName();
+            var modelModelMap = (IModelModelMap)modelListView.GetNode(mapName);
             modelModelMap.SetValue(nameof(StringValueTypeProperties.RWInteger),100);
             modelModelMap.SetValue(nameof(StringValueTypeProperties.NullAbleRWInteger),200);
             var stringValueTypeProperties = new StringValueTypeProperties();
@@ -82,15 +90,17 @@ namespace Tests.Modules.ModelMapper{
             stringValueTypeProperties.NullAbleRWInteger.ShouldBe(200);
         }
 
-        [Fact]
-        public void Bind_all_public_rw_string_properties(){
+        [Theory]
+        [InlineData(Platform.Win)]
+        [InlineData(Platform.Web)]
+        internal void Bind_all_public_rw_string_properties(Platform platform){
             Type typeToMap=typeof(StringValueTypeProperties);
-            InitializeMapperService($"{nameof(Bind_all_public_rw_string_properties)}{typeToMap.Name}");
+            InitializeMapperService($"{nameof(Bind_all_public_rw_string_properties)}{typeToMap.Name}{platform}");
             typeToMap.MapToModel().Extend<IModelListView>();
-            var application = DefaultModelMapperModule(Platform.Agnostic).Application;
+            var application = DefaultModelMapperModule(platform).Application;
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
-            var cleanCodeName = typeToMap.FullName.CleanCodeName();
-            var modelModelMap = (IModelModelMap)modelListView.GetNode(cleanCodeName);
+            var mapName = typeToMap.ModelMapName();
+            var modelModelMap = (IModelModelMap)modelListView.GetNode(mapName);
             modelModelMap.SetValue(nameof(StringValueTypeProperties.RWString),"test");
             var stringValueTypeProperties = new StringValueTypeProperties();
             
@@ -100,15 +110,17 @@ namespace Tests.Modules.ModelMapper{
 
         }
 
-        [Fact]
-        public void Bind_all_public_rw_nested_properties(){
+        [Theory]
+        [InlineData(Platform.Win)]
+        [InlineData(Platform.Web)]
+        internal void Bind_all_public_rw_nested_properties(Platform platform){
             Type typeToMap=typeof(ReferenceTypeProperties);
-            InitializeMapperService($"{nameof(Bind_all_public_rw_nested_properties)}{typeToMap.Name}");
+            InitializeMapperService($"{nameof(Bind_all_public_rw_nested_properties)}{typeToMap.Name}{platform}");
             typeToMap.MapToModel().Extend<IModelListView>();
-            var application = DefaultModelMapperModule(Platform.Agnostic).Application;
+            var application = DefaultModelMapperModule(platform).Application;
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
-            var cleanCodeName = typeToMap.FullName.CleanCodeName();
-            var modelModelMap = (IModelModelMap)modelListView.GetNode(cleanCodeName);
+            var mapName = typeToMap.ModelMapName();
+            var modelModelMap = (IModelModelMap)modelListView.GetNode(mapName);
             modelModelMap.GetNode(nameof(ReferenceTypeProperties.RStringValueTypeProperties)).SetValue(nameof(StringValueTypeProperties.RWString),"test");
             var referenceTypeProperties = new ReferenceTypeProperties();
 
@@ -118,14 +130,18 @@ namespace Tests.Modules.ModelMapper{
             
         }
 
-        [Fact]
-        public void Apply_AllMapper_Contexts(){
-            throw new NotImplementedException();            
+        [Theory]
+        [InlineData(Platform.Win,Skip = "not implemented")]
+        [InlineData(Platform.Web,Skip = "not implemented")]
+        internal void Apply_AllMapper_Contexts(Platform platform){
+            
         }
 
-        [Fact]
-        public void Apply_Root_Map_After_mapper_contexts(){
-            throw new NotImplementedException();            
+        [Theory]
+        [InlineData(Platform.Win,Skip = "not implemented")]
+        [InlineData(Platform.Web,Skip = "not implemented")]
+        internal void Apply_Root_Map_After_mapper_contexts(Platform platform){
+            
         }
     
     }

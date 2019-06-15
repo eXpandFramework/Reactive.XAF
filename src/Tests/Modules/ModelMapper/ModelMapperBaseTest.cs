@@ -7,7 +7,6 @@ using Tests.Modules.ModelMapper.BOModel;
 using Xpand.Source.Extensions.System.AppDomain;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.ModelMapper;
-using Xunit;
 
 namespace Tests.Modules.ModelMapper{
     public abstract class ModelMapperBaseTest:BaseTest{
@@ -30,11 +29,6 @@ namespace Tests.Modules.ModelMapper{
             }
             typeof(ModelMapperService).CallMethod(null, "Init");
             typeof(ModelMapperService).SetFieldValue("_modelMapperModuleVersion", typeof(ModelMapperModule).Assembly.GetName().Version);
-        }
-    }
-    public class ModelMapperFilesFixture<T> where T:ModelMapperBaseTest{
-        public ModelMapperFilesFixture(){
-            
         }
     }
 

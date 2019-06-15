@@ -12,6 +12,20 @@ using DevExpress.Persistent.Base;
 using Xpand.Source.Extensions.XAF.Model;
 
 namespace Xpand.XAF.Modules.ModelMapper{
+    [DomainLogic(typeof(IModelNodeDisabled))]
+    public class ModelNodeEnabledDomainLogic{
+        public static IModelObjectView Get_ParentObjectView(IModelNodeDisabled modelNodeDisabled){
+            return modelNodeDisabled.GetParent<IModelObjectView>();
+        }
+    }
+
+    public interface IModelNodeDisabled : IModelNode {
+        [Category("Activation")]
+        bool NodeDisabled { get; set; }
+        [Browsable(false)]
+        IModelObjectView ParentObjectView { get; }
+    }
+
     public interface IModelApplicationModelMapper{
         IModelModelMapper ModelMapper{ get; }         
     }
@@ -110,6 +124,9 @@ namespace Xpand.XAF.Modules.ModelMapper{
     public interface IModelModelMap:IModelNodeDisabled{
     }
 
+    public interface IModelModelMapContainer{
+        
+    }
 
     public class ModelMappersNodeGenerator:ModelNodesGeneratorBase{
         protected override void GenerateNodesCore(ModelNode node){

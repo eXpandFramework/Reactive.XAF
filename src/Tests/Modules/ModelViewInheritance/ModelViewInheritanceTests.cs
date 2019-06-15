@@ -18,33 +18,40 @@ namespace Tests.Modules.ModelViewInheritance{
         internal void Inherit_And_Modify_A_BaseView(ViewType viewType, bool attribute,Platform platform){
             string[] models;
             ModelViewInheritanceUpdater.Disabled = true;
-            using (var application = platform.NewApplication()){
-                var modelViewIneritanceModule = CreateModelViewIneritanceModule(viewType, attribute, application);
-                var baseBoTypes = new[]{typeof(ABaseMvi),typeof(TagMvi)};
-                var boTypes = new[]{typeof(AMvi),typeof(FileMvi)};
-                modelViewIneritanceModule.AdditionalExportedTypes.AddRange(baseBoTypes.Concat(boTypes));
-                application.SetupDefaults(modelViewIneritanceModule);
-                var inheritAndModifyBaseView = new InheritAndModifyBaseView(application, viewType, attribute);
-                models = inheritAndModifyBaseView.GetModels().ToArray();
-                ModelViewInheritanceUpdater.Disabled = false;
-            }
+//            using (var application = platform.NewApplication()){
+//                
+//            }
+            models = GetModels(viewType, attribute, platform);
 
-            
-            using (var application = platform.NewApplication()){
-                var modelViewIneritanceModule = CreateModelViewIneritanceModule(viewType, attribute, application);
-                var testModule1 = new TestModule1{DiffsStore = new StringModelStore(models[0])};
-                var baseBoTypes = new[]{typeof(ABaseMvi), typeof(TagMvi)};
-                var boTypes = new[]{typeof(AMvi), typeof(FileMvi)};
-                testModule1.AdditionalExportedTypes.AddRange(baseBoTypes);
-                var testModule2 = new TestModule2{DiffsStore = new StringModelStore(models[1])};
-                testModule2.AdditionalExportedTypes.AddRange(boTypes);
+//            Dispose();
+            var application = platform.NewApplication();
+            var modelViewIneritanceModule = CreateModelViewIneritanceModule(viewType, attribute, application);
+            var testModule1 = new TestModule1{DiffsStore = new StringModelStore(models[0])};
+            var baseBoTypes = new[]{typeof(ABaseMvi), typeof(TagMvi)};
+            var boTypes = new[]{typeof(AMvi), typeof(FileMvi)};
+            testModule1.AdditionalExportedTypes.AddRange(baseBoTypes);
+            var testModule2 = new TestModule2{DiffsStore = new StringModelStore(models[1])};
+            testModule2.AdditionalExportedTypes.AddRange(boTypes);
 
-                application.SetupDefaults(modelViewIneritanceModule, testModule1, testModule2,
-                    new TestModule3{DiffsStore = new StringModelStore(models[2])});
-                var inheritAndModifyBaseView = new InheritAndModifyBaseView(application, viewType, attribute);
+            application.SetupDefaults(modelViewIneritanceModule, testModule1, testModule2,
+                new TestModule3{DiffsStore = new StringModelStore(models[2])});
+            var inheritAndModifyBaseView = new InheritAndModifyBaseView(application, viewType, attribute);
 
-                inheritAndModifyBaseView.Verify(application.Model);
-            }
+            inheritAndModifyBaseView.Verify(application.Model);
+        }
+
+        private static string[] GetModels(ViewType viewType, bool attribute, Platform platform){
+            string[] models;
+            var application = platform.NewApplication();
+            var modelViewIneritanceModule = CreateModelViewIneritanceModule(viewType, attribute, application);
+            var baseBoTypes = new[]{typeof(ABaseMvi), typeof(TagMvi)};
+            var boTypes = new[]{typeof(AMvi), typeof(FileMvi)};
+            modelViewIneritanceModule.AdditionalExportedTypes.AddRange(baseBoTypes.Concat(boTypes));
+            application.SetupDefaults(modelViewIneritanceModule);
+            var inheritAndModifyBaseView = new InheritAndModifyBaseView(application, viewType, attribute);
+            models = inheritAndModifyBaseView.GetModels().ToArray();
+            ModelViewInheritanceUpdater.Disabled = false;
+            return models;
         }
 
 
