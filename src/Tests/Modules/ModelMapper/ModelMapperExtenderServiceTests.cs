@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Tests.Modules.ModelMapper{
     [Collection(nameof(XafTypesInfo))]
-    public class ExtendModelServiceTests : ModelMapperBaseTest{
+    public class ModelMapperExtenderServiceTests : ModelMapperBaseTest{
         [Theory]
         [InlineData(typeof(GridView),Platform.Win)]
         [InlineData(typeof(GridView),Platform.Web)]
@@ -23,8 +23,7 @@ namespace Tests.Modules.ModelMapper{
         internal void ExtendModel(Type typeToMap,Platform platform){
             InitializeMapperService($"{nameof(ExtendModel)}{typeToMap.Name}{platform}");
 
-
-            typeToMap.MapToModel().Extend<IModelListView>();
+            typeToMap.Extend<IModelListView>();
 
             var application = DefaultModelMapperModule(platform).Application;
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
@@ -37,9 +36,6 @@ namespace Tests.Modules.ModelMapper{
             defaultContext.ShouldNotBeNull();
             var modelMapper = defaultContext.GetNode(mapName);
             modelMapper.ShouldNotBeNull();
-
-            
-
         }
 
         [Theory]
@@ -49,7 +45,7 @@ namespace Tests.Modules.ModelMapper{
             InitializeMapperService($"{nameof(ModelMapperContexts)}{platform}");
             var typeToMap = typeof(TestModelMapper);
 
-            typeToMap.MapToModel().Extend<IModelListView>();
+            typeToMap.Extend<IModelListView>();
 
             var application = DefaultModelMapperModule(platform).Application;
             var modelModelMappers = ((IModelApplicationModelMapper) application.Model).ModelMapper.MapperContexts.First();
@@ -64,7 +60,7 @@ namespace Tests.Modules.ModelMapper{
             InitializeMapperService($"{nameof(Container_ModelMapperContexts)}{platform}");
             var typeToMap = typeof(TestModelMapper);
 
-            typeToMap.MapToModel().Extend<IModelListView>();
+            typeToMap.Extend<IModelListView>();
 
             var application = DefaultModelMapperModule(platform).Application;
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
@@ -91,8 +87,7 @@ namespace Tests.Modules.ModelMapper{
             InitializeMapperService($"{nameof(Container_Visibility)}{visibilityCriteria.CleanCodeName()}{platform}");
             var typeToMap = typeof(TestModelMapper);
 
-            typeToMap.MapToModel(new ModelMapperConfiguration(){VisibilityCriteria = visibilityCriteria})
-                .Extend<IModelListView>();
+            typeToMap.Extend<IModelListView>(new ModelMapperConfiguration(){VisibilityCriteria = visibilityCriteria});
 
             var application = DefaultModelMapperModule(platform).Application;
             var modelListView = application.Model.Views.OfType<IModelListView>().First();

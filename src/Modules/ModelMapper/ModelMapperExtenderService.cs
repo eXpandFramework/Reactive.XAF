@@ -9,11 +9,11 @@ using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.ModelMapper{
-    public static class ExtendModelService{
+    public static class ModelMapperExtenderService{
         private static HashSet<(Type targetIntefaceType, (Type extenderType, IModelMapperConfiguration configuration) extenderData)>
             ModelExtenders{ get; } =new HashSet<(Type targetIntefaceType, (Type extenderType, IModelMapperConfiguration configuration)extenderType)>();
 
-        static ExtendModelService(){
+        static ModelMapperExtenderService(){
             Init();
         }
 
@@ -32,8 +32,9 @@ namespace Xpand.XAF.Modules.ModelMapper{
 
         private static IObservable<(Type targetIntefaceType, Type extenderInterface)> AddExtenders(ModelInterfaceExtenders extenders){
             var mappedTypes = ModelExtenders.ToObservable()
-                .Select(_ => _.extenderData.MapToModel())
-                .Concat(ModelMapperService.MappedTypes)
+                .SelectMany(_ => _.extenderData.MapToModel())
+                .ModelInterfaces()
+//                .Concat(ModelMapperService.MappedTypes)
                 .Where(type => typeof(IModelNode).IsAssignableFrom(type))
                 .Select(_ => _.Assembly.GetTypes().First(type => typeof(IModelModelMapContainer).IsAssignableFrom(type)));
 
@@ -47,8 +48,10 @@ namespace Xpand.XAF.Modules.ModelMapper{
             ModelExtenders.Add((targetInterface, extenderData));
         }
 
-        public static void Extend<TTargetInterface,TModelMapperConfiguration>(this Type extenderType,TModelMapperConfiguration configuration=null ) where TTargetInterface : IModelNode where TModelMapperConfiguration:class,IModelMapperConfiguration{
-            configuration =configuration?? Activator.CreateInstance<TModelMapperConfiguration>();
+        public static void Extend<TTargetInterface>(this Type extenderType,IModelMapperConfiguration configuration ) 
+            where TTargetInterface : IModelNode {
+
+            configuration =configuration?? new ModelMapperConfiguration();
             (extenderType,configuration).Extend(typeof(TTargetInterface));
         }
 

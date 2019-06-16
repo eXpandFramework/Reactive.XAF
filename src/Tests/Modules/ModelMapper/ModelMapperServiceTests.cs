@@ -25,11 +25,10 @@ namespace Tests.Modules.ModelMapper{
             var typeToMap = typeof(StringValueTypeProperties);
             var propertiesToMap = typeToMap.Properties().Where(info => info.CanRead&&info.CanWrite).ToArray();
 
-            typeToMap.MapToModel();
-            var modelType = await ModelMapperService.MappedTypes;
+            var modelType = await typeToMap.MapToModel().ModelInterfaces();
+
 
             var modelTypeProperties = ModelTypeProperties(modelType);
-            
             foreach (var propertyInfo in propertiesToMap){
                 var modelProperty = modelTypeProperties.FirstOrDefault(info => info.Name==propertyInfo.Name);
                 modelProperty.ShouldNotBeNull(propertyInfo.Name);
@@ -64,8 +63,7 @@ namespace Tests.Modules.ModelMapper{
             var typeToMap = typeof(ReferenceTypeProperties);
             var propertiesToMap = typeToMap.Properties().ToArray();
 
-            typeToMap.MapToModel();
-            var modelType = await ModelMapperService.MappedTypes;
+            var modelType = await typeToMap.MapToModel().ModelInterfaces();
 
             var modelTypeProperties = ModelTypeProperties(modelType);
             
@@ -83,8 +81,7 @@ namespace Tests.Modules.ModelMapper{
             InitializeMapperService(nameof(Do_Not_Map_Already_Mapped_Properties));
             var typeToMap = typeof(SelfReferenceTypeProperties);
 
-            typeToMap.MapToModel();
-            var modelType = await ModelMapperService.MappedTypes;
+            var modelType = await typeToMap.MapToModel().ModelInterfaces();
 
             var modelTypeProperties = modelType.Properties();
 
@@ -99,8 +96,7 @@ namespace Tests.Modules.ModelMapper{
             InitializeMapperService(nameof(Map_Nested_type_properties));
             var typeToMap = typeof(NestedTypeProperties);
 
-            typeToMap.MapToModel();
-            var modelType = await ModelMapperService.MappedTypes;
+            var modelType = await typeToMap.MapToModel().ModelInterfaces();
 
             var modelTypeProperties = ModelTypeProperties(modelType);
             
@@ -113,8 +109,7 @@ namespace Tests.Modules.ModelMapper{
             InitializeMapperService(nameof(Do_Not_Map_Reserved_properties));
             var typeToMap = typeof(ResevredProperties);
 
-            typeToMap.MapToModel();
-            var modelType = await ModelMapperService.MappedTypes;
+            var modelType = await typeToMap.MapToModel().ModelInterfaces();
 
             var modelTypeProperties = ModelTypeProperties(modelType);
             
@@ -127,8 +122,7 @@ namespace Tests.Modules.ModelMapper{
             InitializeMapperService(nameof(Assembly_Version_Should_Match_Model_Mapper_Version));
             var typeToMap = typeof(TestModelMapper);
 
-            typeToMap.MapToModel();
-            var modelType = await ModelMapperService.MappedTypes;
+            var modelType = await typeToMap.MapToModel().ModelInterfaces();
 
             var modelMapperVersion = typeof(ModelMapperModule).Assembly.GetName().Version;
             modelType.Assembly.GetName().Version.ShouldBe(modelMapperVersion);
@@ -139,24 +133,20 @@ namespace Tests.Modules.ModelMapper{
         public async Task Map_DevExpress_Types(Type typeToMap){
             InitializeMapperService(nameof(Map_DevExpress_Types));
 
-            typeToMap.MapToModel();
-            var modelType = await ModelMapperService.MappedTypes;
+            var modelType = await typeToMap.MapToModel().ModelInterfaces();
 
             modelType.Name.ShouldBe($"IModel{typeToMap.Name}");
             
         }
 
         [Fact]
-        public async Task Map_Multiple_Objects_In_the_same_assembly(){
+        public async Task Map_Multiple_Objects_from_the_same_subscription_In_the_same_assembly(){
             var typeToMap1 = typeof(TestModelMapper);
             var typeToMap2 = typeof(StringValueTypeProperties);
-            InitializeMapperService(nameof(Map_Multiple_Objects_In_the_same_assembly));
+            InitializeMapperService(nameof(Map_Multiple_Objects_from_the_same_subscription_In_the_same_assembly));
 
-            
-            new[]{typeToMap1,typeToMap2}.MapToModel();
+            var mappedTypes = new[]{typeToMap1, typeToMap2}.MapToModel().ModelInterfaces();
 
-            var mappedTypes = ModelMapperService.MappedTypes.Replay();
-            mappedTypes.Connect();
             var mappedType1 = await mappedTypes.Take(1);
             mappedType1.Name.ShouldBe($"IModel{typeToMap1.Name}");
             var mappedType2 = await mappedTypes.Take(2);
@@ -165,13 +155,30 @@ namespace Tests.Modules.ModelMapper{
         }
 
         [Fact]
-        public void Do_Not_Map_Already_Mapped_Types(){
+        public async Task Map_Multiple_Objects_from_the_different_subscription_In_the_same_assembly(){
+            var typeToMap1 = typeof(TestModelMapper);
+            var typeToMap2 = typeof(StringValueTypeProperties);
+            InitializeMapperService(nameof(Map_Multiple_Objects_from_the_different_subscription_In_the_same_assembly));
+
+            await new[]{typeToMap1}.MapToModel();
+            await new[]{typeToMap2}.MapToModel();
+
+            ModelMapperService.Connect();
+            var mappedType1 = await ModelMapperService.MappedTypes.Take(1);
+            mappedType1.Name.ShouldBe($"IModel{typeToMap1.Name}");
+            var mappedType2 = await ModelMapperService.MappedTypes.Take(2);
+            mappedType2.Name.ShouldBe($"IModel{typeToMap2.Name}");
+            mappedType1.Assembly.ShouldBe(mappedType2.Assembly);
+        }
+
+        [Fact]
+        public async Task Do_Not_Map_Already_Mapped_Types(){
             var typeToMap1 = typeof(TestModelMapper);
             var typeToMap2 = typeof(TestModelMapper);
             InitializeMapperService(nameof(Do_Not_Map_Already_Mapped_Types));
 
-            typeToMap1.MapToModel();
-            typeToMap2.MapToModel();
+            await typeToMap1.MapToModel().ModelInterfaces();
+            await typeToMap2.MapToModel().ModelInterfaces();
             
             ModelMapperService.MappedTypes.ToEnumerable().Count().ShouldBe(1);
             
@@ -183,9 +190,11 @@ namespace Tests.Modules.ModelMapper{
             var typeToMap = typeof(TestModelMapper);
             var codeName = typeToMap.Name;
             var imageName = "ImageName";
-            
-            typeToMap.MapToModel(new ModelMapperConfiguration(){ImageName = imageName});
-            var modelType = await ModelMapperService.MappedTypes;
+
+            var modelType = await typeToMap.MapToModel(new ModelMapperConfiguration(){ImageName = imageName})
+                
+                .ModelInterfaces();
+
 
             var containerType = modelType.Assembly.GetType($"IModel{codeName}{ModelMapperService.DefaultContainerSuffix}");
             var imageNameAttribute = containerType.Attribute<ImageNameAttribute>();
@@ -198,8 +207,7 @@ namespace Tests.Modules.ModelMapper{
             InitializeMapperService(nameof(Copy_Attributes));
             var typeToMap = typeof(CopyAttributesClass);
 
-            typeToMap.MapToModel();
-            var modelType = await ModelMapperService.MappedTypes;
+            var modelType = await typeToMap.MapToModel().ModelInterfaces();
 
             var propertyInfos = modelType.Properties();
             propertyInfos.First(info => info.Name==nameof(CopyAttributesClass.AttributeNoParam))
@@ -226,8 +234,7 @@ namespace Tests.Modules.ModelMapper{
             
             var typeToMap = typeof(PrivateDescriptionAttributesClass);
 
-            typeToMap.MapToModel();
-            var modelType = await ModelMapperService.MappedTypes;
+            var modelType = await typeToMap.MapToModel().ModelInterfaces();
 
             modelType.Properties().First().GetCustomAttributes(typeof(DescriptionAttribute),false).Cast<DescriptionAttribute>().Any().ShouldBeTrue();
             
@@ -239,8 +246,7 @@ namespace Tests.Modules.ModelMapper{
             ModelMapperService.AttributesMap.Add(typeof(PrivateAttribute),(typeof(DescriptionAttribute),attribute => null));
             var typeToMap = typeof(ReplaceAttributesClass);
 
-            typeToMap.MapToModel();
-            var modelType = await ModelMapperService.MappedTypes;
+            var modelType = await typeToMap.MapToModel().ModelInterfaces();
 
             modelType.Properties().First().GetCustomAttributes(typeof(DescriptionAttribute),false).Cast<DescriptionAttribute>().Any().ShouldBeTrue();
             
@@ -251,8 +257,7 @@ namespace Tests.Modules.ModelMapper{
             InitializeMapperService(nameof(Container_Interface));
             var typeToMap = typeof(TestModelMapper);
 
-            typeToMap.MapToModel();
-            var modelType = await ModelMapperService.MappedTypes;
+            var modelType = await typeToMap.MapToModel().ModelInterfaces();
 
             var containerType = modelType.Assembly.GetType($"IModel{typeToMap.Name}{ModelMapperService.DefaultContainerSuffix}");
             containerType.ShouldNotBeNull();
@@ -269,8 +274,9 @@ namespace Tests.Modules.ModelMapper{
             var containerName = "Custom";
             string mapName="mapName";
 
-            typeToMap.MapToModel(new ModelMapperConfiguration(){ContainerName = containerName,MapName = mapName});
-            var modelType = await ModelMapperService.MappedTypes;
+            var modelType = await typeToMap
+                .MapToModel(new ModelMapperConfiguration(){ContainerName = containerName, MapName = mapName})
+                .ModelInterfaces();
 
             var containerType = modelType.Assembly.GetType($"IModel{containerName}");
             var propertyInfo = containerType.Properties().First();
@@ -283,9 +289,8 @@ namespace Tests.Modules.ModelMapper{
             InitializeMapperService(nameof(ModelMappers_Interface));
             var typeToMap = typeof(TestModelMapper);
 
-            typeToMap.MapToModel();
-            var modelType = await ModelMapperService.MappedTypes;
-            
+            var modelType = await typeToMap.MapToModel().ModelInterfaces();
+
             var containerName = typeof(TestModelMapper).Name;
             var containerType = modelType.Assembly.GetType($"IModel{containerName}{ModelMapperService.DefaultContainerSuffix}");
             
@@ -302,8 +307,7 @@ namespace Tests.Modules.ModelMapper{
             InitializeMapperService(nameof(Create_Model_Assembly_in_path_if_not_Exist),platform);
             var typeToMap = typeof(TestModelMapper);
 
-            typeToMap.MapToModel();
-            var mapToModel = await ModelMapperService.MappedTypes;
+            var mapToModel = await typeToMap.MapToModel().ModelInterfaces();
 
             File.Exists(mapToModel.Assembly.Location).ShouldBeTrue();
         }
@@ -313,8 +317,7 @@ namespace Tests.Modules.ModelMapper{
             InitializeMapperService(nameof(Do_Not_Map_If_Type_Assembly_Version_Not_Changed));
             var mappedType = typeof(TestModelMapper);
 
-            mappedType.MapToModel();
-            var mapToModel = await ModelMapperService.MappedTypes;
+            var mapToModel = await mappedType.MapToModel().ModelInterfaces();
 
             var modelMapperAttribute = mapToModel.Assembly.GetCustomAttributes(typeof(ModelMapperServiceAttribute),false)
                 .OfType<ModelMapperServiceAttribute>().FirstOrDefault(attribute => attribute.MappedType==mappedType.FullName&&attribute.MappedAssemmbly==mappedType.Assembly.GetName().Name);
@@ -330,18 +333,51 @@ namespace Tests.Modules.ModelMapper{
             modelMapperAttribute.Version.ShouldBe(version);
         }
 
-        [Fact]
-        public async Task Always_Map_If_ModelMapperModule_Version_Changed(){
-            
-            InitializeMapperService(nameof(Always_Map_If_ModelMapperModule_Version_Changed));
-            var mappedType = typeof(TestModelMapper);
-            mappedType.MapToModel();
-            await ModelMapperService.MappedTypes;
+        [Fact()]
+        public async Task Always_Map_If_Any_Type_Assembly_Version_Changed(){
+            var name = nameof(Do_Not_Map_If_Type_Assembly_Version_Not_Changed);
+            var mapperService = InitializeMapperService(name);
 
+            var dynamicType = CreateDynamicType(mapperService);
+
+            await new[]{typeof(TestModelMapper),dynamicType}.MapToModel().ModelInterfaces();
+            InitializeMapperService($"{name}",newAssemblyName:false);
+
+            var dynamicType2 = CreateDynamicType(mapperService, "2.0.0.0");
+            
+            var exception = Should.Throw<Exception>(async () => await new[]{typeof(TestModelMapper),dynamicType2}.MapToModel().ModelInterfaces());
+
+            exception.Message.ShouldStartWith("error CS0016: Could not write to output file");
+        }
+
+        [Fact()]
+        public async Task Always_Map_If_ModelMapperModule_Version_Changed(){
+            InitializeMapperService(nameof(Do_Not_Map_If_Type_Assembly_Version_Not_Changed));
+            var mappedType = typeof(TestModelMapper);
+            await mappedType.MapToModel().ModelInterfaces();
+            InitializeMapperService($"{nameof(Do_Not_Map_If_Type_Assembly_Version_Not_Changed)}",newAssemblyName:false);
             typeof(ModelMapperService).SetFieldValue("_modelMapperModuleVersion", new Version(2000,100,40));
 
+            var exception = Should.Throw<Exception>(async () => await mappedType.MapToModel().ModelInterfaces());
+
+            exception.Message.ShouldStartWith("error CS0016: Could not write to output file");
+        }
+
+        [Fact(Skip = "a")]
+        public async Task Always_Map_If_ModelMapperConfiguration_Changed(){
+            
+            InitializeMapperService(nameof(Always_Map_If_ModelMapperConfiguration_Changed));
+            var typeToMap = typeof(TestModelMapper);
+            var mappedTypes = await typeToMap.MapToModel()
+                .Select(type => ModelMapperService.MappedTypes).Switch();
+
+
+            mappedTypes.ShouldNotBeNull();
+
+            InitializeMapperService(nameof(Always_Map_If_ModelMapperConfiguration_Changed),newAssemblyName:false);
+
             var exception = Should.Throw<Exception>(async () => {
-                mappedType.MapToModel();
+                typeToMap.MapToModel(new ModelMapperConfiguration(){ContainerName = "changed"});
                 await ModelMapperService.MappedTypes;
             });
 

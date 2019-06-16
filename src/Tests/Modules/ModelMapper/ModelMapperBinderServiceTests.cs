@@ -3,7 +3,6 @@ using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using Shouldly;
-using Xpand.Source.Extensions.System.String;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.ModelMapper;
 using Xunit;
@@ -15,9 +14,10 @@ namespace Tests.Modules.ModelMapper{
         [InlineData(Platform.Win)]
         [InlineData(Platform.Web)]
         internal void Bind_Only_NullAble_Properties_That_are_not_Null(Platform platform){
+
             var typeToMap=typeof(StringValueTypeProperties);
             InitializeMapperService($"{nameof(Bind_Only_NullAble_Properties_That_are_not_Null)}{typeToMap.Name}{platform}");
-            typeToMap.MapToModel().Extend<IModelListView>();
+            typeToMap.Extend<IModelListView>();
             var application = DefaultModelMapperModule(platform).Application;
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
             var mapName = typeToMap.ModelMapName();
@@ -37,7 +37,7 @@ namespace Tests.Modules.ModelMapper{
         internal void Do_not_bind_Disable_mode_nodes(Platform platform){
             Type typeToMap=typeof(StringValueTypeProperties);
             InitializeMapperService($"{nameof(Do_not_bind_Disable_mode_nodes)}{typeToMap.Name}{platform}");
-            typeToMap.MapToModel().Extend<IModelListView>();
+            typeToMap.Extend<IModelListView>();
             var application = DefaultModelMapperModule(platform).Application;
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
             var mapName = typeToMap.ModelMapName();
@@ -58,7 +58,7 @@ namespace Tests.Modules.ModelMapper{
         internal void Do_not_throw_if_target_object_properties_do_not_exist(Platform platform){
             Type typeToMap=typeof(StringValueTypeProperties);
             InitializeMapperService($"{nameof(Do_not_throw_if_target_object_properties_do_not_exist)}{typeToMap.Name}{platform}");
-            typeToMap.MapToModel().Extend<IModelListView>();
+            typeToMap.Extend<IModelListView>();
             var application = DefaultModelMapperModule(platform).Application;
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
             var mapName = typeToMap.ModelMapName();
@@ -75,7 +75,7 @@ namespace Tests.Modules.ModelMapper{
         internal void Bind_all_public_nullable_type_properties(Platform platform){
             Type typeToMap=typeof(StringValueTypeProperties);
             InitializeMapperService($"{nameof(Bind_all_public_nullable_type_properties)}{typeToMap.Name}{platform}");
-            typeToMap.MapToModel().Extend<IModelListView>();
+            typeToMap.Extend<IModelListView>();
             var application = DefaultModelMapperModule(platform).Application;
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
             var mapName = typeToMap.ModelMapName();
@@ -96,7 +96,7 @@ namespace Tests.Modules.ModelMapper{
         internal void Bind_all_public_rw_string_properties(Platform platform){
             Type typeToMap=typeof(StringValueTypeProperties);
             InitializeMapperService($"{nameof(Bind_all_public_rw_string_properties)}{typeToMap.Name}{platform}");
-            typeToMap.MapToModel().Extend<IModelListView>();
+            typeToMap.Extend<IModelListView>();
             var application = DefaultModelMapperModule(platform).Application;
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
             var mapName = typeToMap.ModelMapName();
@@ -116,7 +116,7 @@ namespace Tests.Modules.ModelMapper{
         internal void Bind_all_public_rw_nested_properties(Platform platform){
             Type typeToMap=typeof(ReferenceTypeProperties);
             InitializeMapperService($"{nameof(Bind_all_public_rw_nested_properties)}{typeToMap.Name}{platform}");
-            typeToMap.MapToModel().Extend<IModelListView>();
+            typeToMap.Extend<IModelListView>();
             var application = DefaultModelMapperModule(platform).Application;
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
             var mapName = typeToMap.ModelMapName();

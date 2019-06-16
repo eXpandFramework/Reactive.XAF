@@ -3,11 +3,13 @@ using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
@@ -27,6 +29,10 @@ namespace Xpand.XAF.Modules.ModelMapper{
         public string MapName{ get; set; }
         public string ImageName{ get; set; }
         public string VisibilityCriteria{ get; set; }
+        [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
+        public override int GetHashCode(){
+            return $"{ContainerName}{MapName}{ImageName}{VisibilityCriteria}".GetHashCode();
+        }
     }
     public interface IModelMapperConfiguration{
         string VisibilityCriteria{ get;  }
@@ -34,20 +40,39 @@ namespace Xpand.XAF.Modules.ModelMapper{
         string MapName{ get; }
         string ImageName{ get; }
     }
+
+    [AttributeUsage(AttributeTargets.Assembly,AllowMultiple = true)]
+    public class ModelMapperModelConfigurationAttribute:Attribute{
+        public ModelMapperModelConfigurationAttribute(string typeName,int hashCode){
+            TypeName = typeName;
+            HashCode = hashCode;
+        }
+
+        public string TypeName{ get; }
+        public int HashCode{ get; }
+    }
+
+    [AttributeUsage(AttributeTargets.Assembly,AllowMultiple = true)]
+    public class ModelMapperServiceAttribute:Attribute{
+        public ModelMapperServiceAttribute(string mappedType,string mappedAssemmbly, string version){
+            MappedAssemmbly = mappedAssemmbly;
+            MappedType = mappedType;
+            Version = Version.Parse(version);
+        }
+
+        public string MappedAssemmbly{ get; }
+
+        public Version Version{ get; }
+        public string MappedType{ get;  }
+    }
+
     public static class ModelMapperService{
         public static string DefaultContainerSuffix="Map";
         public static string ModelMapperAssemblyName=null;
         public static string MapperAssemblyName="ModelMapperAssembly";
         public static string ModelMappersNodeName="ModelMappers";
         private static Platform _platform;
-        
-        
         private static Version _modelMapperModuleVersion;
-
-        static ModelMapperService(){
-            Init();
-        }
-
         public static List<string> ReservedPropertyNames{ get; }=new List<string>();
         public static List<Type> ReservedPropertyTypes{ get; }=new List<Type>();
         public static List<Type> ReservedAttributeTypes{ get; }=new List<Type>();
@@ -55,11 +80,23 @@ namespace Xpand.XAF.Modules.ModelMapper{
         static ISubject<(Type type,IModelMapperConfiguration configuration)> _typesToMap;
         private static string _outputAssembly;
 
+        static ModelMapperService(){
+            Init();
+        }
+
+        public static void Connect(){
+            _typesToMap.OnCompleted();
+        }
+
         private static void Init(){
             _typesToMap = Subject.Synchronize(new ReplaySubject<(Type type,IModelMapperConfiguration configuration)>());
-            MappedTypes = Observable.Defer(() => _typesToMap.Distinct(_ => _.type)
-                .GenerateCode().Compile()
-                .Publish().AutoConnect());
+            MappedTypes = Observable.Defer(() => {
+                var distinnctTypesToMap = Observable.Defer(() => _typesToMap.Distinct(_ => $"{_.type.AssemblyQualifiedName}{_.configuration?.GetHashCode()}"));
+                return distinnctTypesToMap
+                    .All(_ => _.TypeFromPath())
+                    .Select(_ =>!_? distinnctTypesToMap.GenerateCode().Compile(): Assembly.LoadFile(_outputAssembly).GetTypes()
+                                .Where(type => typeof(IModelModelMap).IsAssignableFrom(type)).ToObservable()).Switch();
+            }).Replay().AutoConnect();
             _modelMapperModuleVersion = typeof(ModelMapperService).Assembly.GetName().Version;
             _platform = XafApplicationExtensions.ApplicationPlatform;
             ReservedPropertyNames.Clear();
@@ -67,7 +104,7 @@ namespace Xpand.XAF.Modules.ModelMapper{
             ReservedPropertyTypes.AddRange(new[]{ typeof(Type)});
             ReservedAttributeTypes.Add(typeof(DefaultValueAttribute));
             AttributesMap.Clear();
-            ExtendModelService.Init();
+            ModelMapperExtenderService.Init();
             _outputAssembly = $@"{Path.GetDirectoryName(typeof(ModelMapperService).Assembly.Location)}\{ModelMapperAssemblyName}{MapperAssemblyName}{_platform}.dll";
         }
 
@@ -82,24 +119,22 @@ namespace Xpand.XAF.Modules.ModelMapper{
             });
         }
 
-        public static IObservable<((Type type,IModelMapperConfiguration configuration)[] typeData, (string code, IEnumerable<Assembly> references)? codeData)> GenerateCode(this IObservable<(Type type, IModelMapperConfiguration configuration)> source){
-            return source.Select(_ => {
-                    var mappedType = _.TypeFromPath();
-                    (string code, IEnumerable<Assembly> references)? codeData = null;
-                    var types = new[]{(mappedType, _.configuration)};
-                    if (mappedType == null){
-                        codeData = _.type.GenerateCode(_.configuration);
-                        types = new[]{(_.type, _.configuration)};
-                    }
 
-                    return (types, codeData);
-                })
+        static IObservable<((Type type, IModelMapperConfiguration configuration)[] typeData, (string code,IEnumerable<Assembly> references)? codeData)> 
+            GenerateCode(this IObservable<(Type type, IModelMapperConfiguration configuration)> source){
+
+            return source.Select(_ => (types:new[]{(_.type, _.configuration)}, codeData:_.type.GenerateCode(_.configuration)))
                 .Aggregate((acc, cu) => {
                     if (acc.codeData != null && cu.codeData != null){
                         var references = acc.codeData.Value.references.Concat(cu.codeData.Value.references).ToArray();
                         var types = acc.types.Concat(cu.types).ToArray();
-                        var code = $"{acc.codeData.Value.code}{Environment.NewLine}{cu.codeData.Value.code}";
-                        return (types, (code, references));
+                        var code = cu.codeData.Value.code;
+                        var assemblyAttributes=string.Join(Environment.NewLine,Regex.Matches(code, @"\[assembly:[^\]]*\]").Cast<Match>().Select(_ => _.Value));
+                        assemblyAttributes=Regex.Replace(assemblyAttributes, $@"\[assembly:{typeof(AssemblyVersionAttribute).FullName}[^\]]*\]", "");
+                        assemblyAttributes=Regex.Replace(assemblyAttributes, $@"\[assembly:{typeof(AssemblyFileVersionAttribute).FullName}[^\]]*\]", "");
+                        code=Regex.Replace(code, @"\[assembly:[^\]]*\]", "");
+                        var accCode = $"{assemblyAttributes}{Environment.NewLine}{acc.codeData.Value.code}{Environment.NewLine}{code}";
+                        return (types, (accCode, references));
                     }
 
                     return (cu.types, null);
@@ -108,31 +143,36 @@ namespace Xpand.XAF.Modules.ModelMapper{
 
         public static IObservable<Type> MappedTypes{ get;private set; }
 
-        public static Type MapToModel<TModelMapperConfiguration>(this (Type type, TModelMapperConfiguration configuration) type)
+        public static IObservable<Type> MapToModel<TModelMapperConfiguration>(this (Type type, TModelMapperConfiguration configuration) type)
             where TModelMapperConfiguration : IModelMapperConfiguration{
 
-            new[]{type}.MapToModel();
-            return type.type;
+            return new[]{type}.MapToModel();
         }
 
-        public static Type[] MapToModel(this IEnumerable<Type> types){
+        public static IObservable<Type> MapToModel(this IEnumerable<Type> types){
             return types.Select(_ => (_, new ModelMapperConfiguration())).ToArray().MapToModel();
         }
 
-        public static Type MapToModel(this Type type,IModelMapperConfiguration configuration=null){
-            return new []{(type,configuration)}.MapToModel().First();
+        public static IObservable<Type> ModelInterfaces(this IObservable<Type> source){
+            return source.Finally(Connect).Select(_ => MappedTypes).Switch();
         }
 
-        public static Type[] MapToModel<TModelMapperConfiguration>(this (Type type,TModelMapperConfiguration configuration)[] types) where TModelMapperConfiguration:IModelMapperConfiguration{
-            types.Select(_ => (_.type,(IModelMapperConfiguration)_.configuration)).ToObservable().Subscribe(_typesToMap);
-            return types.Select(_ => _.type).ToArray();
+        public static IObservable<Type> MapToModel(this Type type,IModelMapperConfiguration configuration=null){
+            return new []{(type,configuration)}.MapToModel();
         }
 
-        public static Type[] MapToModel<TModelMapperConfiguration>(this XafApplication application, params (Type type,TModelMapperConfiguration configuration)[] types) where TModelMapperConfiguration:IModelMapperConfiguration{
+        public static IObservable<Type> MapToModel<TModelMapperConfiguration>(this (Type type,TModelMapperConfiguration configuration)[] types) where TModelMapperConfiguration:IModelMapperConfiguration{
+            return types
+                .Select(_ => (_.type,(IModelMapperConfiguration)_.configuration)).ToObservable()
+                .Do(_ => _typesToMap.OnNext(_))
+                .Select(_ => _.type);
+        }
+
+        public static IObservable<Type> MapToModel<TModelMapperConfiguration>(this XafApplication application, params (Type type,TModelMapperConfiguration configuration)[] types) where TModelMapperConfiguration:IModelMapperConfiguration{
             return types.MapToModel();
         }
 
-        public static Type[] MapToModel(this ModuleBase moduleBase, params (Type type,IModelMapperConfiguration configuration)[] types){
+        public static IObservable<Type> MapToModel(this ModuleBase moduleBase, params (Type type,IModelMapperConfiguration configuration)[] types){
             return types.MapToModel();
         }
 
@@ -157,7 +197,7 @@ namespace Xpand.XAF.Modules.ModelMapper{
             }
 
             var code = String.Join(Environment.NewLine,
-                new[] {type.AssemblyAttributesCode(), typeCode, containerCode, modelMappersInterfaceCode}.Concat(additionalTypesCode));
+                new[] {type.AssemblyAttributesCode(configuration), typeCode, containerCode, modelMappersInterfaceCode}.Concat(additionalTypesCode));
 
             var allAssemblies = AllAssemblies(type, propertyInfos);
             return (code,allAssemblies);
@@ -171,28 +211,47 @@ namespace Xpand.XAF.Modules.ModelMapper{
             return configuration?.MapName??type.Name;
         }
 
-        private static Type TypeFromPath(this (Type type,IModelMapperConfiguration configuration) data){
+        private static bool TypeFromPath(this (Type type,IModelMapperConfiguration configuration) data){
             if (File.Exists(_outputAssembly)){
-                var typeVersion = data.type.Assembly.GetName().Version;
                 using (var assemblyDefinition = AssemblyDefinition.ReadAssembly(_outputAssembly)){
-                    var isMapped = assemblyDefinition.CustomAttributes.Any(attribute => {
-                        if (attribute.AttributeType.ToType() != typeof(ModelMapperServiceAttribute)) return false;
-                        return Version.Parse((string) attribute.ConstructorArguments.Last().Value) == typeVersion &&
-                               (string) attribute.ConstructorArguments.Skip(1).Take(1).First().Value == data.type.Assembly.GetName().Name &&
-                               (string) attribute.ConstructorArguments.First().Value==data.type.FullName;
-
-                    });
-
-                    if (isMapped){
-                        var versionAttribute = assemblyDefinition.CustomAttributes.First(attribute => attribute.AttributeType.ToType()==typeof(AssemblyFileVersionAttribute));
-                        if (Version.Parse(versionAttribute.ConstructorArguments.First().Value.ToString()) ==_modelMapperModuleVersion){
-                            return Assembly.LoadFile(_outputAssembly).GetType($"IModel{data.type.ModelMapName(data.configuration)}");
-                        }
+                    if (assemblyDefinition.IsMapped(data) && !assemblyDefinition.VersionChanged() && !assemblyDefinition.ConfigurationChanged(data)){
+                        return true;
                     }
                 }
             }
+            return false;
+        }
 
-            return null;
+        private static bool ConfigurationChanged(this AssemblyDefinition assemblyDefinition,(Type type, IModelMapperConfiguration configuration) data){
+            var configurationChanged = assemblyDefinition.CustomAttributes.Any(attribute => {
+                if (attribute.AttributeType.ToType() != typeof(ModelMapperModelConfigurationAttribute)) return false;
+                int hashCode = 0;
+                if (data.configuration != null) hashCode = data.configuration.GetHashCode();
+                var typeMatch = ((string) attribute.ConstructorArguments.First().Value) == data.type.FullName;
+                if (typeMatch){
+                    return !attribute.ConstructorArguments.Last().Value.Equals(hashCode);
+                }
+
+                return false;
+            });
+            return configurationChanged;
+        }
+
+        private static bool VersionChanged(this AssemblyDefinition assemblyDefinition){
+            var versionAttribute = assemblyDefinition.CustomAttributes.First(attribute =>
+                attribute.AttributeType.ToType() == typeof(AssemblyFileVersionAttribute));
+            return Version.Parse(versionAttribute.ConstructorArguments.First().Value.ToString()) !=_modelMapperModuleVersion;
+        }
+
+        private static bool IsMapped(this AssemblyDefinition assemblyDefinition,(Type type, IModelMapperConfiguration configuration) data){
+            var typeVersion = data.type.Assembly.GetName().Version;
+            var modelMapperServiceAttributes = assemblyDefinition.CustomAttributes.Where(attribute => attribute.AttributeType.ToType() == typeof(ModelMapperServiceAttribute)).ToArray();
+            return modelMapperServiceAttributes.Any(attribute => {
+                var mappedTypeVersion = Version.Parse((string) attribute.ConstructorArguments.Last().Value);
+                var mappedType = (string) attribute.ConstructorArguments.First().Value;
+                return mappedTypeVersion == typeVersion && mappedType==data.type.FullName;
+
+            });
         }
 
         private static IEnumerable<Assembly> AllAssemblies(Type type, PropertyInfo[] propertyInfos){
@@ -260,10 +319,17 @@ namespace Xpand.XAF.Modules.ModelMapper{
                 .ToArray();
         }
         
-        private static string AssemblyAttributesCode(this Type type){
-            var modelMapperServiceAttributeCode = $@"[assembly:{typeof(ModelMapperServiceAttribute).FullName}(""{type.FullName}"",""{type.Assembly.GetName().Name}"",""{type.Assembly.GetName().Version}"")]";
+        private static string AssemblyAttributesCode(this Type type,IModelMapperConfiguration configuration){
+            var modelMapperServiceAttributeCode = ModelMapperServiceAttributeCode(type);
             var assemblyVersionCode = $@"[assembly:{typeof(AssemblyVersionAttribute).FullName}(""{_modelMapperModuleVersion}"")]{Environment.NewLine}[assembly:{typeof(AssemblyFileVersionAttribute).FullName}(""{_modelMapperModuleVersion}"")]";
-            return $"{modelMapperServiceAttributeCode}{Environment.NewLine}{assemblyVersionCode}";
+            int hashCode = 0;
+            if (configuration != null) hashCode = configuration.GetHashCode();
+            var modelMapperConfigurationCode = $@"[assembly:{typeof(ModelMapperModelConfigurationAttribute).FullName}(""{type.FullName}"",{hashCode})]{Environment.NewLine}";
+            return string.Join(Environment.NewLine, modelMapperConfigurationCode, assemblyVersionCode, modelMapperServiceAttributeCode);
+        }
+
+        private static string ModelMapperServiceAttributeCode(this Type type){
+            return $@"[assembly:{typeof(ModelMapperServiceAttribute).FullName}(""{type.FullName}"",""{type.Assembly.GetName().Name}"",""{type.Assembly.GetName().Version}"")]";
         }
 
         private static string ContainerCode(this Type type, IModelMapperConfiguration configuration, string modelName,
@@ -470,19 +536,4 @@ namespace Xpand.XAF.Modules.ModelMapper{
             return compilerResults.CompiledAssembly;
         }
     }
-
-    [AttributeUsage(AttributeTargets.Assembly,AllowMultiple = true)]
-    public class ModelMapperServiceAttribute:Attribute{
-        public ModelMapperServiceAttribute(string mappedType,string mappedAssemmbly, string version){
-            MappedAssemmbly = mappedAssemmbly;
-            MappedType = mappedType;
-            Version = Version.Parse(version);
-        }
-
-        public string MappedAssemmbly{ get; }
-
-        public Version Version{ get; }
-        public string MappedType{ get;  }
-    }
-
 }
