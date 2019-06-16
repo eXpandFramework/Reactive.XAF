@@ -66,7 +66,7 @@ namespace Tests.Modules.ModelMapper{
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
             var mapName = typeToMap.ModelMapName();
             var modelMappersNode =
-                modelListView.GetNode(mapName).GetNode(ModelMapperService.ModelMappersNodeName);
+                modelListView.GetNode(mapName).GetNode(Xpand.XAF.Modules.ModelMapper.ModelMapperService.ModelMappersNodeName);
             modelMappersNode.ShouldNotBeNull();
             modelMappersNode.Index.ShouldBe(0);
             var defaultContext = modelMappersNode.GetNode(ModelMapperContextNodeGenerator.Default);

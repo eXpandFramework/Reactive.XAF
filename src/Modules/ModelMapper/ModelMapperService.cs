@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
@@ -29,9 +30,11 @@ namespace Xpand.XAF.Modules.ModelMapper{
         public string MapName{ get; set; }
         public string ImageName{ get; set; }
         public string VisibilityCriteria{ get; set; }
+        public bool DisableAttributeMapping{ get; set; }
+
         [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
         public override int GetHashCode(){
-            return $"{ContainerName}{MapName}{ImageName}{VisibilityCriteria}".GetHashCode();
+            return $"{ContainerName}{MapName}{ImageName}{VisibilityCriteria}{DisableAttributeMapping}".GetHashCode();
         }
     }
     public interface IModelMapperConfiguration{
@@ -39,6 +42,7 @@ namespace Xpand.XAF.Modules.ModelMapper{
         string ContainerName{ get; }
         string MapName{ get; }
         string ImageName{ get; }
+        bool DisableAttributeMapping{ get; }
     }
 
     [AttributeUsage(AttributeTargets.Assembly,AllowMultiple = true)]
@@ -84,8 +88,12 @@ namespace Xpand.XAF.Modules.ModelMapper{
             Init();
         }
 
-        public static void Connect(){
+        public static void Start(){
             _typesToMap.OnCompleted();
+        }
+
+        internal static IObservable<Unit> Connect(){
+            return Observable.Return(Unit.Default);
         }
 
         private static void Init(){
@@ -154,7 +162,7 @@ namespace Xpand.XAF.Modules.ModelMapper{
         }
 
         public static IObservable<Type> ModelInterfaces(this IObservable<Type> source){
-            return source.Finally(Connect).Select(_ => MappedTypes).Switch();
+            return source.Finally(Start).Select(_ => MappedTypes).Switch();
         }
 
         public static IObservable<Type> MapToModel(this Type type,IModelMapperConfiguration configuration=null){
@@ -190,7 +198,7 @@ namespace Xpand.XAF.Modules.ModelMapper{
             var modelMappersTypeName = $"IModel{containerName}{ModelMappersNodeName}";
             var modelMappersInterfaceCode = ModelMappersInterfaceCode( modelMappersTypeName);
 
-            var typeCode = type.TypeCode(mapName, modelMappersTypeName, assemblyDefinitions,configuration?.ImageName);
+            var typeCode = type.TypeCode(mapName, modelMappersTypeName, assemblyDefinitions,configuration?.ImageName,configuration?.DisableAttributeMapping);
 
             foreach (var assemblyDefinition in assemblyDefinitions){
                 assemblyDefinition.Dispose();
@@ -277,11 +285,13 @@ namespace Xpand.XAF.Modules.ModelMapper{
         }
 
 
-        private static string TypeCode(this Type type,string mapName, string modelMappersTypeName, AssemblyDefinition[] assemblyDefinitions,string imageName){
+        private static string TypeCode(this Type type, string mapName, string modelMappersTypeName,
+            AssemblyDefinition[] assemblyDefinitions, string imageName, bool? disableAttributeMapping = false){
+
             var domainLogic = $@"[{typeof(DomainLogicAttribute).FullName}(typeof({modelMappersTypeName}))]public class {modelMappersTypeName}DomainLogic{{public static int? Get_Index({modelMappersTypeName} mapper){{return 0;}}}}{Environment.NewLine}";
             string modelMappersPropertyCode = $"new int? Index{{get;set;}}{Environment.NewLine}{modelMappersTypeName} {ModelMappersNodeName} {{get;}}";
             var typeCode = type.ModelCode(assemblyDefinitions,imageName,mapName, additionalPropertiesCode: modelMappersPropertyCode,
-                baseType: typeof(IModelModelMap));
+                baseType: typeof(IModelModelMap),disableAttributeMapping:disableAttributeMapping);
             return $"{domainLogic}{typeCode}";
         }
 
@@ -347,7 +357,9 @@ namespace Xpand.XAF.Modules.ModelMapper{
             return browseableCode;
         }
 
-        private static string ModelCode(this Type type, AssemblyDefinition[] assemblyDefinitions,string imageName=null, string customName = null,string propertiesCode = null,string additionalPropertiesCode=null,Type baseType=null,HashSet<Type> mappedTypes=null){
+        private static string ModelCode(this Type type, AssemblyDefinition[] assemblyDefinitions,string imageName = null, string customName = null, string propertiesCode = null,
+            string additionalPropertiesCode = null, Type baseType = null, HashSet<Type> mappedTypes = null,bool? disableAttributeMapping=false){
+
             mappedTypes = mappedTypes ?? new HashSet<Type>();
             baseType = baseType ?? typeof(IModelNodeDisabled);
             var assemblyName = type.Assembly.GetName().Name;
@@ -362,7 +374,7 @@ namespace Xpand.XAF.Modules.ModelMapper{
                 typeDefinition=assemblyDefinition.MainModule.Types.First(definition => definition.FullName == typeFullName);
             }
             var properties = type.PublicProperties().Where(info => !mappedTypes.Contains(info.PropertyType)).ToArray();
-            propertiesCode = propertiesCode ?? properties.ModelCode(typeDefinition);
+            propertiesCode = propertiesCode ?? properties.ModelCode(typeDefinition,disableAttributeMapping);
             propertiesCode += $"{Environment.NewLine}{additionalPropertiesCode}";
             string imageCode = null;
             if (imageName!=null){
@@ -477,7 +489,7 @@ namespace Xpand.XAF.Modules.ModelMapper{
             return (typeDefinition.IsEnum&&typeDefinition.CustomAttributes.Any(attribute1 => attribute1.AttributeType.FullName==typeof(FlagsAttribute).FullName));
         }
 
-        private static string ModelCode(this IEnumerable<PropertyInfo> properties, TypeDefinition typeDefinition){
+        private static string ModelCode(this IEnumerable<PropertyInfo> properties, TypeDefinition typeDefinition,bool? disableAttributeMapping){
             return String.Join(Environment.NewLine,properties
                 .Select(info => {
                     string propertyCode=null;
@@ -498,17 +510,20 @@ namespace Xpand.XAF.Modules.ModelMapper{
                     else{
                         propertyCode=$"{info.PropertyType.ModelName()} {info.Name}{{get;}}";
                     }
-
-                    var customAttributes = typeDefinition.Properties
-                        .Where(definition => definition.Name==info.Name)
-                        .SelectMany(definition => definition.CustomAttributes)
-                        .Concat(typeDefinition.BaseClasses()
-                            .SelectMany(definition => definition.Properties.Where(definition1 => definition1.Name==info.Name)
-                                .SelectMany(definition1 => definition1.CustomAttributes))).ToArray();
-
+                    
                     if (propertyCode != null){
-                        var attributesCode=info.GetCustomAttributes(typeof(Attribute),false).Cast<Attribute>().ModelCode(customAttributes);
-                        return $"{attributesCode}\r\n{propertyCode}";    
+                        string attributesCode = null;
+                        if (!disableAttributeMapping.HasValue||!disableAttributeMapping.Value){
+                            var customAttributes = typeDefinition.Properties
+                                .Where(definition => definition.Name==info.Name)
+                                .SelectMany(definition => definition.CustomAttributes)
+                                .Concat(typeDefinition.BaseClasses()
+                                    .SelectMany(definition => definition.Properties.Where(definition1 => definition1.Name==info.Name)
+                                        .SelectMany(definition1 => definition1.CustomAttributes))).ToArray();
+                            attributesCode = $"{info.GetCustomAttributes(typeof(Attribute),false).Cast<Attribute>().ModelCode(customAttributes)}\r\n";
+                        }
+                        
+                        return $"{attributesCode}{propertyCode}";    
                     }
 
                     return null;

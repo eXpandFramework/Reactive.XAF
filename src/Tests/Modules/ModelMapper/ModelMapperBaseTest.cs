@@ -18,10 +18,15 @@ namespace Tests.Modules.ModelMapper{
             return platform.NewApplication().AddModule<ModelMapperModule>(typeof(MM));
         }
 
+        protected static PropertyInfo[] ModelTypeProperties(Type modelType){
+            return modelType.Properties().Where(info =>!Xpand.XAF.Modules.ModelMapper.ModelMapperService.ReservedPropertyNames.Contains(info.Name) &&
+                                                       info.Name!=Xpand.XAF.Modules.ModelMapper.ModelMapperService.ModelMappersNodeName).ToArray();
+        }
+
         internal Type CreateDynamicType(string name,string version="1.0.0.0"){
             var compilerParameters = new CompilerParameters{
                 CompilerOptions = "/t:library",
-                OutputAssembly = $@"{Path.GetDirectoryName(typeof(ModelMapperService).Assembly.Location)}\DynamicType{name}{version.Substring(0,1)}.dll"
+                OutputAssembly = $@"{Path.GetDirectoryName(typeof(ModelMapperModule).Assembly.Location)}\DynamicType{name}{version.Substring(0,1)}.dll"
             };
             
             var codeProvider = new CSharpCodeProvider();
@@ -42,7 +47,7 @@ public class {DynamicTypeName}{{
         internal string InitializeMapperService(string modelMapperAssemblyName,Platform platform=Platform.Agnostic,bool newAssemblyName=true ){
             var mapperAssemblyName = $"{GetType().Name}{modelMapperAssemblyName}{platform}".GetHashCode();
             if (newAssemblyName){
-                ModelMapperService.ModelMapperAssemblyName = $"{Guid.NewGuid():N}{mapperAssemblyName}";
+                Xpand.XAF.Modules.ModelMapper.ModelMapperService.ModelMapperAssemblyName = $"{Guid.NewGuid():N}{mapperAssemblyName}";
             }
             var applicationPath = AppDomain.CurrentDomain.ApplicationPath();
             var files = Directory.GetFiles(applicationPath,$"*{mapperAssemblyName}*.dll").ToArray();
@@ -54,8 +59,8 @@ public class {DynamicTypeName}{{
                     // ignored
                 }
             }
-            typeof(ModelMapperService).CallMethod(null, "Init");
-            typeof(ModelMapperService).SetFieldValue("_modelMapperModuleVersion", typeof(ModelMapperModule).Assembly.GetName().Version);
+            typeof(Xpand.XAF.Modules.ModelMapper.ModelMapperService).CallMethod(null, "Init");
+            typeof(Xpand.XAF.Modules.ModelMapper.ModelMapperService).SetFieldValue("_modelMapperModuleVersion", typeof(ModelMapperModule).Assembly.GetName().Version);
             return mapperAssemblyName.ToString();
         }
     }

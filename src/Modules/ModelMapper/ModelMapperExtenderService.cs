@@ -22,6 +22,7 @@ namespace Xpand.XAF.Modules.ModelMapper{
         }
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager applicationModulesManager){
+            
             var extendModel = applicationModulesManager.Modules.OfType<ReactiveModule>().ToObservable()
                 .SelectMany(module => module.ExtendModel);
             
@@ -31,12 +32,12 @@ namespace Xpand.XAF.Modules.ModelMapper{
         }
 
         private static IObservable<(Type targetIntefaceType, Type extenderInterface)> AddExtenders(ModelInterfaceExtenders extenders){
-            var mappedTypes = ModelExtenders.ToObservable()
-                .SelectMany(_ => _.extenderData.MapToModel())
-                .ModelInterfaces()
-//                .Concat(ModelMapperService.MappedTypes)
-                .Where(type => typeof(IModelNode).IsAssignableFrom(type))
-                .Select(_ => _.Assembly.GetTypes().First(type => typeof(IModelModelMapContainer).IsAssignableFrom(type)));
+            var mappedTypes = ModelMapperService.Connect()
+                .SelectMany(unit => ModelExtenders.ToObservable()
+                    .SelectMany(_ => _.extenderData.MapToModel())
+                    .ModelInterfaces()
+                    .Where(type => typeof(IModelNode).IsAssignableFrom(type))
+                    .Select(_ => _.Assembly.GetTypes().First(type => typeof(IModelModelMapContainer).IsAssignableFrom(type))));
 
             return ModelExtenders.ToObservable()
                 .SelectMany(_ => mappedTypes.Select(extenderInterface => (_.targetIntefaceType,extenderInterface)))
@@ -45,6 +46,7 @@ namespace Xpand.XAF.Modules.ModelMapper{
 
         public static void Extend<TModelMapperConfiguration>(this (Type extenderType, TModelMapperConfiguration configuration) extenderData, Type targetInterface)
             where TModelMapperConfiguration : IModelMapperConfiguration{
+            ModelMapperService.Connect().Wait();
             ModelExtenders.Add((targetInterface, extenderData));
         }
 

@@ -131,15 +131,15 @@ namespace Tests.Modules.ModelMapper{
         }
 
         [Theory]
-        [InlineData(Platform.Win,Skip = "not implemented")]
-        [InlineData(Platform.Web,Skip = "not implemented")]
+        [InlineData(Platform.Win,Skip = NotImplemented)]
+        [InlineData(Platform.Web,Skip = NotImplemented)]
         internal void Apply_AllMapper_Contexts(Platform platform){
             
         }
 
         [Theory]
-        [InlineData(Platform.Win,Skip = "not implemented")]
-        [InlineData(Platform.Web,Skip = "not implemented")]
+        [InlineData(Platform.Win,Skip = NotImplemented)]
+        [InlineData(Platform.Web,Skip = NotImplemented)]
         internal void Apply_Root_Map_After_mapper_contexts(Platform platform){
             
         }

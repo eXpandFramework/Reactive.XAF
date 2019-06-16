@@ -5,6 +5,7 @@ using IDisposable = System.IDisposable;
 
 namespace Tests.Artifacts{
     public abstract class BaseTest : IDisposable{
+        public const string NotImplemented = "NotImplemented";
         protected BaseTest(ITestOutputHelper output){
             Output = output;
         }
