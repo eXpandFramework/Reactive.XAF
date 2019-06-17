@@ -5,6 +5,7 @@ using DevExpress.ExpressApp.Model;
 using Shouldly;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.ModelMapper;
+using Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping;
 using Xunit;
 
 namespace Tests.Modules.ModelMapper{

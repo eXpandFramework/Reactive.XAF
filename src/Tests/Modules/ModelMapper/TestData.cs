@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using DevExpress.ExpressApp.Model;
+using DevExpress.Office.Utils;
 using DevExpress.Persistent.Base;
 
 namespace Tests.Modules.ModelMapper{
@@ -69,13 +70,49 @@ namespace Tests.Modules.ModelMapper{
     }
 
     class PrivateDescription:DescriptionAttribute{
-        
+        public PrivateDescription(string description) : base(description){
+        }
 
-        public override string Description =>GetType().Name ;
+        
     }
-    class PrivateDescriptionAttributesClass{
-        [PrivateDescription]
+
+    public class PrivateDescriptionAttributesClass{
+        public const string Description = "Private Description AttributesClass";
+        [PrivateDescription(Description)]
         public string PrivateAttribute{ get; set; }
+    }
+
+    public class DefaultValueAttributesClass{
+        [DefaultValue(null)]
+        public string PrivateAttribute{ get; set; }
+    }
+
+    public class FlagAttributesClass{
+        [FlagParameterAttribute(FlagEnum.Val2|FlagEnum.Val3)]
+        public string FlagPropertyValue{ get; set; }
+        [FlagParameterAttribute(FlagEnum.Val2)]
+        public string FlagProperty{ get; set; }
+    }
+
+    public class FlagParameterAttribute:Attribute{
+        public FlagParameterAttribute(FlagEnum flagEnum){
+            FlagEnum = flagEnum;
+        }
+
+        public FlagEnum FlagEnum{ get; }
+    }
+
+    [Flags]
+    public enum FlagEnum{
+        Val1=0,
+        Val2=1,
+        Val3=2
+    }
+
+    class EscapeAttributeString{
+        public const string Description = @"test with ""quotes""";
+        [Description(Description)]
+        public string Property{ get; set; }
     }
     internal class CopyAttributesClass{
         [Description][PrivateAttribute]

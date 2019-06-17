@@ -4,12 +4,12 @@ using System.Threading.Tasks;
 using Fasterflect;
 using Shouldly;
 using Xpand.Source.Extensions.System.String;
-using Xpand.XAF.Modules.ModelMapper;
+using Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping;
 using Xunit;
 
-namespace Tests.Modules.ModelMapper.ModelMapperService{
+namespace Tests.Modules.ModelMapper.ObjectMappingServiceTests{
     
-    public partial class ModelMapperServiceTests{
+    public partial class ObjectMappingServiceTests{
         [Fact]
         public async Task Do_Not_Map_Already_Mapped_Properties(){
             InitializeMapperService(nameof(Do_Not_Map_Already_Mapped_Properties));
@@ -54,7 +54,7 @@ namespace Tests.Modules.ModelMapper.ModelMapperService{
             await typeToMap1.MapToModel().ModelInterfaces();
             await typeToMap2.MapToModel().ModelInterfaces();
             
-            Xpand.XAF.Modules.ModelMapper.ModelMapperService.MappedTypes.ToEnumerable().Count().ShouldBe(1);
+            ObjectMappingService.MappedTypes.ToEnumerable().Count().ShouldBe(1);
             
         }
 
@@ -72,7 +72,7 @@ namespace Tests.Modules.ModelMapper.ModelMapperService{
             var version = modelMapperAttribute.Version;
 
             mappedType.MapToModel();
-            mapToModel = await Xpand.XAF.Modules.ModelMapper.ModelMapperService.MappedTypes;
+            mapToModel = await ObjectMappingService.MappedTypes;
 
             modelMapperAttribute = mapToModel.Assembly.GetCustomAttributes(typeof(ModelMapperServiceAttribute),false)
                 .OfType<ModelMapperServiceAttribute>().First(attribute => attribute.MappedType==mappedType.FullName&&attribute.MappedAssemmbly==mappedType.Assembly.GetName().Name);

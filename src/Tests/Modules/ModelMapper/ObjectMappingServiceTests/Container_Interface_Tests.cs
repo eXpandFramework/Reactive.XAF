@@ -4,12 +4,13 @@ using System.Threading.Tasks;
 using DevExpress.Persistent.Base;
 using Fasterflect;
 using Shouldly;
-using Xpand.XAF.Modules.ModelMapper;
+using Xpand.XAF.Modules.ModelMapper.Services;
+using Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping;
 using Xunit;
 
-namespace Tests.Modules.ModelMapper.ModelMapperService{
+namespace Tests.Modules.ModelMapper.ObjectMappingServiceTests{
     
-    public partial class ModelMapperServiceTests{
+    public partial class ObjectMappingServiceTests{
         [Fact]
         public async Task Custom_Container_Image(){
             InitializeMapperService(nameof(Custom_Container_Image));
@@ -22,7 +23,7 @@ namespace Tests.Modules.ModelMapper.ModelMapperService{
                 .ModelInterfaces();
 
 
-            var containerType = modelType.Assembly.GetType($"IModel{codeName}{Xpand.XAF.Modules.ModelMapper.ModelMapperService.DefaultContainerSuffix}");
+            var containerType = modelType.Assembly.GetType($"IModel{codeName}{ObjectMappingService.DefaultContainerSuffix}");
             var imageNameAttribute = containerType.Attribute<ImageNameAttribute>();
             imageNameAttribute.ShouldNotBeNull();
             imageNameAttribute.ImageName.ShouldBe(imageName);
@@ -36,7 +37,7 @@ namespace Tests.Modules.ModelMapper.ModelMapperService{
 
             var modelType = await typeToMap.MapToModel().ModelInterfaces();
 
-            var containerType = modelType.Assembly.GetType($"IModel{typeToMap.Name}{Xpand.XAF.Modules.ModelMapper.ModelMapperService.DefaultContainerSuffix}");
+            var containerType = modelType.Assembly.GetType($"IModel{typeToMap.Name}{ObjectMappingService.DefaultContainerSuffix}");
             containerType.ShouldNotBeNull();
             var propertyInfo = containerType.GetProperty($"{typeToMap.Name}");
             propertyInfo.ShouldNotBeNull();
@@ -69,9 +70,9 @@ namespace Tests.Modules.ModelMapper.ModelMapperService{
             var modelType = await typeToMap.MapToModel().ModelInterfaces();
 
             var containerName = typeof(TestModelMapper).Name;
-            var containerType = modelType.Assembly.GetType($"IModel{containerName}{Xpand.XAF.Modules.ModelMapper.ModelMapperService.DefaultContainerSuffix}");
+            var containerType = modelType.Assembly.GetType($"IModel{containerName}{ObjectMappingService.DefaultContainerSuffix}");
             
-            var propertyInfo = containerType.GetProperty(containerName)?.PropertyType.GetProperty(Xpand.XAF.Modules.ModelMapper.ModelMapperService.ModelMappersNodeName);
+            var propertyInfo = containerType.GetProperty(containerName)?.PropertyType.GetProperty(ObjectMappingService.ModelMappersNodeName);
             propertyInfo.ShouldNotBeNull();
             propertyInfo.CanWrite.ShouldBeFalse();
 

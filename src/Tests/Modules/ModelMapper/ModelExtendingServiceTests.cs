@@ -8,6 +8,8 @@ using Xpand.Source.Extensions.System.String;
 using Xpand.Source.Extensions.XAF.Model;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.ModelMapper;
+using Xpand.XAF.Modules.ModelMapper.Services;
+using Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping;
 using Xunit;
 
 namespace Tests.Modules.ModelMapper{
@@ -22,6 +24,7 @@ namespace Tests.Modules.ModelMapper{
         [InlineData(typeof(SelfReferenceTypeProperties),Platform.Web)]
         internal void ExtendModel(Type typeToMap,Platform platform){
             InitializeMapperService($"{nameof(ExtendModel)}{typeToMap.Name}{platform}");
+
 
             typeToMap.Extend<IModelListView>();
 
@@ -66,7 +69,7 @@ namespace Tests.Modules.ModelMapper{
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
             var mapName = typeToMap.ModelMapName();
             var modelMappersNode =
-                modelListView.GetNode(mapName).GetNode(Xpand.XAF.Modules.ModelMapper.ModelMapperService.ModelMappersNodeName);
+                modelListView.GetNode(mapName).GetNode(ObjectMappingService.ModelMappersNodeName);
             modelMappersNode.ShouldNotBeNull();
             modelMappersNode.Index.ShouldBe(0);
             var defaultContext = modelMappersNode.GetNode(ModelMapperContextNodeGenerator.Default);

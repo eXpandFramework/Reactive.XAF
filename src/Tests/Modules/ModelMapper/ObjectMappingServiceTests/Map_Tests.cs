@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -6,12 +7,12 @@ using DevExpress.XtraGrid.Views.Grid;
 using Fasterflect;
 using Shouldly;
 using Xpand.Source.Extensions.System.String;
-using Xpand.XAF.Modules.ModelMapper;
+using Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping;
 using Xunit;
 
-namespace Tests.Modules.ModelMapper.ModelMapperService{
+namespace Tests.Modules.ModelMapper.ObjectMappingServiceTests{
     
-    public partial class ModelMapperServiceTests{
+    public partial class ObjectMappingServiceTests{
         [Fact]
         public async Task Map_RW_StringValueType_Public_Properties(){
             InitializeMapperService(nameof(Map_RW_StringValueType_Public_Properties));
@@ -84,6 +85,10 @@ namespace Tests.Modules.ModelMapper.ModelMapperService{
             var modelType = await typeToMap.MapToModel().ModelInterfaces();
 
             modelType.Name.ShouldBe($"IModel{typeToMap.Name}");
+
+            var descriptionAttribute = modelType.Properties().Select(info => info.Attribute<DescriptionAttribute>())
+                .FirstOrDefault(attribute => attribute != null && attribute.Description.Contains(" ") );
+            descriptionAttribute.ShouldNotBeNull();
             
         }
 
@@ -111,10 +116,10 @@ namespace Tests.Modules.ModelMapper.ModelMapperService{
             await new[]{typeToMap1}.MapToModel();
             await new[]{typeToMap2}.MapToModel();
 
-            Xpand.XAF.Modules.ModelMapper.ModelMapperService.Start();
-            var mappedType1 = await Xpand.XAF.Modules.ModelMapper.ModelMapperService.MappedTypes.Take(1);
+            ObjectMappingService.Start();
+            var mappedType1 = await ObjectMappingService.MappedTypes.Take(1);
             mappedType1.Name.ShouldBe($"IModel{typeToMap1.Name}");
-            var mappedType2 = await Xpand.XAF.Modules.ModelMapper.ModelMapperService.MappedTypes.Take(2);
+            var mappedType2 = await ObjectMappingService.MappedTypes.Take(2);
             mappedType2.Name.ShouldBe($"IModel{typeToMap2.Name}");
             mappedType1.Assembly.ShouldBe(mappedType2.Assembly);
         }

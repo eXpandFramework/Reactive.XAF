@@ -7,11 +7,13 @@ using Fasterflect;
 using Shouldly;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.ModelMapper;
+using Xpand.XAF.Modules.ModelMapper.Services;
+using Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping;
 using Xunit;
 
-namespace Tests.Modules.ModelMapper.ModelMapperService{
+namespace Tests.Modules.ModelMapper.ObjectMappingServiceTests{
     [Collection(nameof(XafTypesInfo))]
-    public partial class ModelMapperServiceTests{
+    public partial class ObjectMappingServiceTests{
 
         [Fact]
         public async Task Assembly_Version_Should_Match_Model_Mapper_Version(){
@@ -38,7 +40,7 @@ namespace Tests.Modules.ModelMapper.ModelMapperService{
 
                 [Fact()]
         public async Task Always_Map_If_Any_Type_Assembly_Version_Changed(){
-            var name = nameof(Do_Not_Map_If_Type_Assembly_Version_Not_Changed);
+            var name = nameof(Always_Map_If_Any_Type_Assembly_Version_Changed);
             var mapperService = InitializeMapperService(name);
 
             var dynamicType = CreateDynamicType(mapperService);
@@ -55,11 +57,11 @@ namespace Tests.Modules.ModelMapper.ModelMapperService{
 
         [Fact()]
         public async Task Always_Map_If_ModelMapperModule_Version_Changed(){
-            InitializeMapperService(nameof(Do_Not_Map_If_Type_Assembly_Version_Not_Changed));
+            InitializeMapperService(nameof(Always_Map_If_ModelMapperModule_Version_Changed));
             var mappedType = typeof(TestModelMapper);
             await mappedType.MapToModel().ModelInterfaces();
-            InitializeMapperService($"{nameof(Do_Not_Map_If_Type_Assembly_Version_Not_Changed)}",newAssemblyName:false);
-            typeof(Xpand.XAF.Modules.ModelMapper.ModelMapperService).SetFieldValue("_modelMapperModuleVersion", new Version(2000,100,40));
+            InitializeMapperService($"{nameof(Always_Map_If_ModelMapperModule_Version_Changed)}",newAssemblyName:false);
+            typeof(ObjectMappingService).SetFieldValue("_modelMapperModuleVersion", new Version(2000,100,40));
 
             var exception = Should.Throw<Exception>(async () => await mappedType.MapToModel().ModelInterfaces());
 
