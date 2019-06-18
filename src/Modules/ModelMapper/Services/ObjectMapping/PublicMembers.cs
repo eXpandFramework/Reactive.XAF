@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -26,7 +27,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping{
         }
 
         public static void Start(){
-            
             _typesToMap.OnCompleted();
         }
 
@@ -34,13 +34,16 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping{
             return Observable.Return(Unit.Default);
         }
 
+        public static string OutPutAssembly =>
+            $@"{Path.GetDirectoryName(typeof(ObjectMappingService).Assembly.Location)}\{ModelMapperAssemblyName}{MapperAssemblyName}{ModelExtendingService.Platform}.dll";
+
         private static void Init(){
             _typesToMap = Subject.Synchronize(new ReplaySubject<(Type type,IModelMapperConfiguration configuration)>());
             MappedTypes = Observable.Defer(() => {
                 var distinnctTypesToMap = Observable.Defer(() => _typesToMap.Distinct(_ => $"{_.type.AssemblyQualifiedName}{_.configuration?.GetHashCode()}"));
                 return distinnctTypesToMap
                     .All(_ => _.TypeFromPath())
-                    .Select(_ =>!_? distinnctTypesToMap.GenerateCode().Compile(): Assembly.LoadFile(_outputAssembly).GetTypes()
+                    .Select(_ =>!_? distinnctTypesToMap.GenerateCode().Compile(): Assembly.LoadFile(OutputAssembly).GetTypes()
                                 .Where(type => typeof(IModelModelMap).IsAssignableFrom(type)).ToObservable()).Switch();
             }).Replay().AutoConnect();
             _modelMapperModuleVersion = typeof(ObjectMappingService).Assembly.GetName().Version;
@@ -50,7 +53,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping{
             ReservedPropertyTypes.AddRange(new[]{ typeof(Type)});
             ConnectAttributeRules();
             ModelExtendingService.Init();
-            InitCompile();
+            
         }
 
         public static IObservable<Type> MappedTypes{ get;private set; }

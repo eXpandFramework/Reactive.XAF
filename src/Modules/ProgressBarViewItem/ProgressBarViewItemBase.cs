@@ -21,38 +21,36 @@ namespace Xpand.XAF.Modules.ProgressBarViewItem{
     
     public abstract class ProgressBarViewItemBase:ViewItem,IComplexViewItem,IObserver<decimal>{
         readonly Subject<Unit> _breakLinksToControl=new Subject<Unit>();
-        static ProgressBarViewItemBase(){
-            Init();
-        }
-
-        private static void Init(){
-            _platform = XafApplicationExtensions.ApplicationPlatform;
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            if (_platform == Platform.Win){
-                var assemmbly = assemblies
-                    .FirstOrDefault(assembly => assembly.FullName.StartsWith("DevExpress.XtraEditors"));
-                _progressBarControlType = assemmbly?.GetType("DevExpress.XtraEditors.ProgressBarControl");
-            }
-            else if (_platform == Platform.Web){
-                var assemmbly = assemblies
-                    .FirstOrDefault(assembly => assembly.FullName.StartsWith("DevExpress.Web.v"));
-                _progressBarControlType = assemmbly?.GetType("DevExpress.Web.ASPxProgressBar");
-
-                _percentage = AppDomain.CurrentDomain.AssemblySystemWeb().TypeUnit().Percentage();
-                var assemblyDevExpressExpressAppWeb = AppDomain.CurrentDomain.AssemblyDevExpressExpressAppWeb();
-                _asssignClientHanderSafe = assemblyDevExpressExpressAppWeb.TypeClientSideEventsHelper().AsssignClientHanderSafe();
-
-                
-                var methodInfoGetShowMessageScript = assemblyDevExpressExpressAppWeb.GetType("DevExpress.ExpressApp.Web.PopupWindowManager").GetMethod("GetShowMessageScript",BindingFlags.Static|BindingFlags.NonPublic);
-                _delegateForGetShowMessageScript = methodInfoGetShowMessageScript.DelegateForCallMethod();
-            }
-        }
-
         private static Type _progressBarControlType;
         readonly Subject<decimal> _positionSubject=new Subject<decimal>();
-        private static Platform _platform;
+        private static Platform? _platform;
         private static MethodInvoker _percentage;
         private XafApplication _application;
+
+        private static void Init(Platform platform){
+            if (!_platform.HasValue){
+                _platform = platform;
+                var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+                if (_platform == Platform.Win){
+                    var assemmbly = assemblies
+                        .FirstOrDefault(assembly => assembly.FullName.StartsWith("DevExpress.XtraEditors"));
+                    _progressBarControlType = assemmbly?.GetType("DevExpress.XtraEditors.ProgressBarControl");
+                }
+                else if (_platform == Platform.Web){
+                    var assemmbly = assemblies
+                        .FirstOrDefault(assembly => assembly.FullName.StartsWith("DevExpress.Web.v"));
+                    _progressBarControlType = assemmbly?.GetType("DevExpress.Web.ASPxProgressBar");
+
+                    _percentage = AppDomain.CurrentDomain.AssemblySystemWeb().TypeUnit().Percentage();
+                    var assemblyDevExpressExpressAppWeb = AppDomain.CurrentDomain.AssemblyDevExpressExpressAppWeb();
+                    _asssignClientHanderSafe = assemblyDevExpressExpressAppWeb.TypeClientSideEventsHelper().AsssignClientHanderSafe();
+
+                
+                    var methodInfoGetShowMessageScript = assemblyDevExpressExpressAppWeb.GetType("DevExpress.ExpressApp.Web.PopupWindowManager").GetMethod("GetShowMessageScript",BindingFlags.Static|BindingFlags.NonPublic);
+                    _delegateForGetShowMessageScript = methodInfoGetShowMessageScript.DelegateForCallMethod();
+                }
+            }
+        }
 
         protected ProgressBarViewItemBase(IModelProgressBarViewItem info, Type classType)
             : base(classType, info.Id){
@@ -153,6 +151,8 @@ console.log('p='+previous);
 
         public void Setup(IObjectSpace objectSpace, XafApplication application){
             _application = application;
+            var platform = application.Modules.GetPlatform();
+            Init(platform);
         }
 
         public void OnNext(decimal value){

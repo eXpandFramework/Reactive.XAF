@@ -5,13 +5,15 @@ using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
-using Xpand.XAF.Modules.ModelMapper.Services;
+using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
-namespace Xpand.XAF.Modules.ModelMapper{
+namespace Xpand.XAF.Modules.ModelMapper.Services{
     public static class ModelExtendingService{
+        internal static Platform Platform{ get; private set; }
+
         private static HashSet<(Type targetIntefaceType, (Type extenderType, IModelMapperConfiguration configuration) extenderData)>
             ModelExtenders{ get; } =new HashSet<(Type targetIntefaceType, (Type extenderType, IModelMapperConfiguration configuration)extenderType)>();
 
@@ -24,7 +26,7 @@ namespace Xpand.XAF.Modules.ModelMapper{
         }
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager applicationModulesManager){
-            
+            Platform = applicationModulesManager.Modules.GetPlatform();
             var extendModel = applicationModulesManager.Modules.OfType<ReactiveModule>().ToObservable()
                 .SelectMany(module => module.ExtendModel);
             
@@ -46,6 +48,7 @@ namespace Xpand.XAF.Modules.ModelMapper{
                 .Do(_ => extenders.Add(_.targetIntefaceType,_.extenderInterface));
         }
 
+        
         public static void Extend<TModelMapperConfiguration>(this (Type extenderType, TModelMapperConfiguration configuration) extenderData, Type targetInterface)
             where TModelMapperConfiguration : IModelMapperConfiguration{
             ObjectMappingService.Connect().Wait();

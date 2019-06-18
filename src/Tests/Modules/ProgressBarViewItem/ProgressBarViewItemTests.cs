@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using DevExpress.Web;
 using DevExpress.XtraEditors;
+using Fasterflect;
 using Moq;
 using Shouldly;
 using Tests.Artifacts;
@@ -18,6 +19,7 @@ namespace Tests.Modules.ProgressBarViewItem{
     [Collection(nameof(XafTypesInfo))]
     public class ProgressBarViewItemTests : BaseTest{
         public ProgressBarViewItemTests(ITestOutputHelper output) : base(output){
+            typeof(ProgressBarViewItemBase).SetFieldValue("_platform", null);
         }
 
         [Theory]
@@ -38,7 +40,7 @@ namespace Tests.Modules.ProgressBarViewItem{
         internal void ProgressBarControl_Type(Platform platform,Type progressBarType){
             var application = DefaultProgressBarViewItemModule(platform).Application;
             var objectView = application.CreateObjectView<DetailView>(typeof(PBVI));
-
+            
             if (platform == Platform.Win){
                 var unused = new ProgressBarControl();
             }
@@ -47,6 +49,7 @@ namespace Tests.Modules.ProgressBarViewItem{
             }
             
             var progressBarViewItem = new Mock<ProgressBarViewItemBase>(Mock.Of<IModelProgressBarViewItem>(), GetType()){CallBase = true}.Object;
+            progressBarViewItem.Setup(null,application);
             progressBarViewItem.View=objectView;
             progressBarViewItem.CreateControl();
 
@@ -54,23 +57,24 @@ namespace Tests.Modules.ProgressBarViewItem{
         }
 
         private static ProgressBarViewItemModule DefaultProgressBarViewItemModule(Platform platform){
-            platform.Set(typeof(ProgressBarViewItemBase));
             return platform.NewApplication().AddModule<ProgressBarViewItemModule>(typeof(PBVI));
         }
+
 
 
         [Theory]
         [InlineData(Platform.Win)]
         internal async Task Can_Observe_an_asynchronous_sequencial_percentance_sequence(Platform platform){
-            platform.Set(typeof(ProgressBarViewItemBase));
             var signal = Observable.Interval(TimeSpan.FromMilliseconds(10))
                 .Select(l => (decimal)l)
                 .Take(100);
-            
+
+            var newApplication = platform.NewApplication();
+            newApplication.SetupDefaults();
             if (platform==Platform.Win){
                 var unused = new ProgressBarControl();
-
                 var progressBarViewItem = new Mock<ProgressBarViewItemBase>(Mock.Of<IModelProgressBarViewItem>(), GetType()){CallBase = true}.Object;
+                progressBarViewItem.Setup(null,newApplication);
                 progressBarViewItem.CreateControl();
                 progressBarViewItem.Start();
                 var progressBarControl = (ProgressBarControl) progressBarViewItem.Control;
@@ -82,18 +86,6 @@ namespace Tests.Modules.ProgressBarViewItem{
                 await whenPositionChanged.Take(100).WithTimeOut();
                 progressBarViewItem.Position.ShouldBe(0);
             }
-            else{
-                var progressBarViewItem = new Mock<ProgressBarViewItemBase>(Mock.Of<IModelProgressBarViewItem>(), GetType()){CallBase = true}.Object;
-                progressBarViewItem.CreateControl();
-                progressBarViewItem.Start();
-                
-
-            }
-
-            
-
-            
-            
         }
 
 

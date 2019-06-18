@@ -211,7 +211,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping{
         private static string ContainerCode(this Type type, IModelMapperConfiguration configuration, string modelName,
             AssemblyDefinition[] assemblyDefinitions, string mapName){
             var modelBrowseableCode = configuration.ModelBrowseableCode();
-            return type.ModelCode(assemblyDefinitions, configuration?.ImageName, $"{modelName}".Substring(6),
+            return type.ModelCode(assemblyDefinitions, null, $"{modelName}".Substring(6),
                 $"{modelBrowseableCode}IModel{mapName} {mapName}{{get;}}",baseType:typeof(IModelModelMapContainer));
         }
 

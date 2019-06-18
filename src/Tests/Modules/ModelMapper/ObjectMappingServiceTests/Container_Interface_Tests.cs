@@ -15,16 +15,12 @@ namespace Tests.Modules.ModelMapper.ObjectMappingServiceTests{
         public async Task Custom_Container_Image(){
             InitializeMapperService(nameof(Custom_Container_Image));
             var typeToMap = typeof(TestModelMapper);
-            var codeName = typeToMap.Name;
             var imageName = "ImageName";
 
             var modelType = await typeToMap.MapToModel(new ModelMapperConfiguration(){ImageName = imageName})
-                
                 .ModelInterfaces();
 
-
-            var containerType = modelType.Assembly.GetType($"IModel{codeName}{ObjectMappingService.DefaultContainerSuffix}");
-            var imageNameAttribute = containerType.Attribute<ImageNameAttribute>();
+            var imageNameAttribute = modelType.Attribute<ImageNameAttribute>();
             imageNameAttribute.ShouldNotBeNull();
             imageNameAttribute.ImageName.ShouldBe(imageName);
         }

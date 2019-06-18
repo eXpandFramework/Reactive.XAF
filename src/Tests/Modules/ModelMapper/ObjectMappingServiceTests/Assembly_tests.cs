@@ -38,7 +38,7 @@ namespace Tests.Modules.ModelMapper.ObjectMappingServiceTests{
             File.Exists(mapToModel.Assembly.Location).ShouldBeTrue();
         }
 
-                [Fact()]
+        [Fact()]
         public async Task Always_Map_If_Any_Type_Assembly_Version_Changed(){
             var name = nameof(Always_Map_If_Any_Type_Assembly_Version_Changed);
             var mapperService = InitializeMapperService(name);

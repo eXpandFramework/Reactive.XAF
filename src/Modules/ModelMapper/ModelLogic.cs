@@ -9,6 +9,7 @@ using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
+using Xpand.Source.Extensions.FunctionOperators;
 using Xpand.Source.Extensions.XAF.Model;
 
 namespace Xpand.XAF.Modules.ModelMapper{
@@ -63,12 +64,17 @@ namespace Xpand.XAF.Modules.ModelMapper{
             if (criteria != null){
                 node=node.GetNode(propertyName);
                 var criteriaOperator = CriteriaOperator.Parse(criteria);
-                var expressionEvaluator = new ExpressionEvaluator(new EvaluatorContextDescriptorDefault(node.GetType()),criteriaOperator );
-                return (bool) expressionEvaluator.Evaluate(node);
+                var expressionEvaluator = new ExpressionEvaluator(new EvaluatorContextDescriptorDefault(node.GetType()),criteriaOperator,customFunctions:CustomFunctions );
+                var isVisible = expressionEvaluator.Evaluate(node);
+                if (isVisible!=null){
+                    return  (bool) isVisible;
+                }
             }
 
             return true;
         }
+
+        public ICollection<ICustomFunctionOperator> CustomFunctions{ get; }=new List<ICustomFunctionOperator>(){new IsAssignableFromOperator()};
     }
 
     public class ModelMapperBrowsableAttribute:ModelBrowsableAttribute {
@@ -146,15 +152,15 @@ namespace Xpand.XAF.Modules.ModelMapper{
             }
         }
 
-        private static IEnumerable<IEnumerable<ITypeInfo>> GetTypeInfos(ModelNode node, ITypeInfo[] installedInfos){
-            var modelMembers = node.Application.BOModel.SelectMany(c => c.OwnMembers)
-                .Where(member => member.MemberInfo.FindAttributes<ModelMapperAttribute>().Any());
-            foreach (var modelMember in modelMembers){
-                foreach (var mapperAttribute in modelMember.MemberInfo.FindAttributes<ModelMapperAttribute>()){
-                    yield return installedInfos.Where(info => info.Type.Name == "IModel" + mapperAttribute.Mapper);
-                }
-            }
-        }
+//        private static IEnumerable<IEnumerable<ITypeInfo>> GetTypeInfos(ModelNode node, ITypeInfo[] installedInfos){
+//            var modelMembers = node.Application.BOModel.SelectMany(c => c.OwnMembers)
+//                .Where(member => member.MemberInfo.FindAttributes<ModelMapperAttribute>().Any());
+//            foreach (var modelMember in modelMembers){
+//                foreach (var mapperAttribute in modelMember.MemberInfo.FindAttributes<ModelMapperAttribute>()){
+//                    yield return installedInfos.Where(info => info.Type.Name == "IModel" + mapperAttribute.Mapper);
+//                }
+//            }
+//        }
 
         private ModelNode AddNode(ModelNode node, ITypeInfo typeInfo){
             var name = GetName(typeInfo);

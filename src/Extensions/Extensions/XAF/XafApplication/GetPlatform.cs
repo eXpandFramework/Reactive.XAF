@@ -14,7 +14,6 @@ namespace Xpand.Source.Extensions.XAF.XafApplication{
     }
 
     internal static partial class XafApplicationExtensions{
-        public static Platform ApplicationPlatform;
 
         static XafApplicationExtensions(){
             Init();
@@ -24,8 +23,10 @@ namespace Xpand.Source.Extensions.XAF.XafApplication{
             var systemWebAssembly = AppDomain.CurrentDomain.GetAssemblies()
                 .FirstOrDefault(assembly => assembly.GetName().Name == "System.Web");
             var httpContextType = systemWebAssembly?.Types().First(_ => _.Name == "HttpContext");
-            ApplicationPlatform = httpContextType?.GetPropertyValue("Current") != null ? Platform.Web : Platform.Win;
+            IsHosted = httpContextType?.GetPropertyValue("Current") != null;
         }
+
+        internal static bool IsHosted{ get; set; }
 
         internal static Platform GetPlatform(this IEnumerable<ModuleBase> moduleBases){
             var modules = moduleBases as ModuleBase[] ?? moduleBases.ToArray();

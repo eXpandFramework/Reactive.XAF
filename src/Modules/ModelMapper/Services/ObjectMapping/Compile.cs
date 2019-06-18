@@ -14,17 +14,17 @@ using Xpand.Source.Extensions.XAF.XafApplication;
 namespace Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping{
 
     public static partial class ObjectMappingService{
-        private static string _outputAssembly;
-        private static Platform _platform;
-        static void InitCompile(){
-            _platform = XafApplicationExtensions.ApplicationPlatform;
-            _outputAssembly = $@"{Path.GetDirectoryName(typeof(ObjectMappingService).Assembly.Location)}\{ModelMapperAssemblyName}{MapperAssemblyName}{_platform}.dll";
-        }
+
+
+        static string OutputAssembly =>
+            $@"{Path.GetDirectoryName(typeof(ObjectMappingService).Assembly.Location)}\{ModelMapperAssemblyName}{MapperAssemblyName}{ModelExtendingService.Platform}.dll";
+
+
         private static Assembly Compile(this IEnumerable<Assembly> references, string code){
             var codeProvider = new CSharpCodeProvider();
             var compilerParameters = new CompilerParameters{
                 CompilerOptions = "/t:library",
-                OutputAssembly = _outputAssembly
+                OutputAssembly = OutputAssembly
             };
             
             compilerParameters.ReferencedAssemblies.AddRange(references.Select(_ => _.Location).Distinct().ToArray());
@@ -41,8 +41,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping{
         }
 
         private static bool TypeFromPath(this (Type type,IModelMapperConfiguration configuration) data){
-            if (File.Exists(_outputAssembly)){
-                using (var assemblyDefinition = AssemblyDefinition.ReadAssembly(_outputAssembly)){
+            if (File.Exists(OutputAssembly)){
+                using (var assemblyDefinition = AssemblyDefinition.ReadAssembly(OutputAssembly)){
                     if (assemblyDefinition.IsMapped(data) && !assemblyDefinition.VersionChanged() && !assemblyDefinition.ConfigurationChanged(data)){
                         return true;
                     }

@@ -25,7 +25,7 @@ namespace Xpand.XAF.Modules.Reactive{
             Frames.Subscribe(frame => { });
             var harmony = new Harmony(typeof(RxApp).Namespace);
             PatchXafApplication(harmony);
-            if (XafApplicationExtensions.ApplicationPlatform == Platform.Web){
+            if (XafApplicationExtensions.IsHosted ){
                 WebChecks();
             }
         }

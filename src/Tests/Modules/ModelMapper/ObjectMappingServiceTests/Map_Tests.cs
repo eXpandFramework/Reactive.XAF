@@ -7,6 +7,8 @@ using DevExpress.XtraGrid.Views.Grid;
 using Fasterflect;
 using Shouldly;
 using Xpand.Source.Extensions.System.String;
+using Xpand.Source.Extensions.XAF.XafApplication;
+using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping;
 using Xunit;
 
@@ -78,18 +80,18 @@ namespace Tests.Modules.ModelMapper.ObjectMappingServiceTests{
         }
 
         [Theory]
-        [InlineData(typeof(GridView))]
-        public async Task Map_DevExpress_Types(Type typeToMap){
-            InitializeMapperService(nameof(Map_DevExpress_Types));
+        [InlineData(PredifinedModelMapperConfiguration.GridView,typeof(GridView),Platform.Win)]
+        internal async Task Map_DevExpressTypes(PredifinedModelMapperConfiguration configuration,Type assemblyToLoad,Platform platform){
 
-            var modelType = await typeToMap.MapToModel().ModelInterfaces();
+            InitializeMapperService($"{nameof(Map_DevExpressTypes)}{configuration}",platform);
+            
+            var modelType = await configuration.MapToModel().ModelInterfaces();
 
-            modelType.Name.ShouldBe($"IModel{typeToMap.Name}");
+            modelType.Name.ShouldBe($"IModel{configuration}");
 
             var descriptionAttribute = modelType.Properties().Select(info => info.Attribute<DescriptionAttribute>())
                 .FirstOrDefault(attribute => attribute != null && attribute.Description.Contains(" ") );
             descriptionAttribute.ShouldNotBeNull();
-            
         }
 
         [Fact]
