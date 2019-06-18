@@ -15,7 +15,7 @@ trigger:
       - src/Modules/Reactive/Readme.md
       - src/Modules/SuppressConfirmation/Readme.md
       - src/Modules/ViewEditMode/Readme.md
-      - ReadMe.md
+      - README.md
   branches:
     include:
       - master
