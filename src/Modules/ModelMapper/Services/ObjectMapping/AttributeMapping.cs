@@ -14,7 +14,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping{
         public PropertyInfo PropertyInfo{ get; set; }
     }
 
-    public static partial class ObjectMappingService{
+    public static partial class TypeMappingService{
          
         public static List<(string key, Action<CustomizeAttribute> action)> AtributeMappingRules{ get; } =
             new List<(string key, Action<CustomizeAttribute> action)>{

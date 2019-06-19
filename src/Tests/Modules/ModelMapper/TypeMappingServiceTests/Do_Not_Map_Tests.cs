@@ -7,7 +7,7 @@ using Xpand.Source.Extensions.System.String;
 using Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping;
 using Xunit;
 
-namespace Tests.Modules.ModelMapper.ObjectMappingServiceTests{
+namespace Tests.Modules.ModelMapper.TypeMappingServiceTests{
     
     public partial class ObjectMappingServiceTests{
         [Fact]
@@ -20,7 +20,9 @@ namespace Tests.Modules.ModelMapper.ObjectMappingServiceTests{
             var modelTypeProperties = modelType.Properties();
 
             modelTypeProperties.FirstOrDefault(info => info.Name==nameof(SelfReferenceTypeProperties.Self)).ShouldBeNull();
-            var nestedType = modelType.Assembly.GetType($"IModel{typeof(NestedSelfReferenceTypeProperties).FullName.CleanCodeName()}");
+            var mapName = typeof(NestedSelfReferenceTypeProperties).ModelMapName(typeToMap);
+            
+            var nestedType = modelType.Assembly.GetType(mapName);
             nestedType.ShouldNotBeNull();
             nestedType.Properties().Count.ShouldBe(0);
         }
@@ -54,7 +56,7 @@ namespace Tests.Modules.ModelMapper.ObjectMappingServiceTests{
             await typeToMap1.MapToModel().ModelInterfaces();
             await typeToMap2.MapToModel().ModelInterfaces();
             
-            ObjectMappingService.MappedTypes.ToEnumerable().Count().ShouldBe(1);
+            TypeMappingService.MappedTypes.ToEnumerable().Count().ShouldBe(1);
             
         }
 
@@ -72,7 +74,7 @@ namespace Tests.Modules.ModelMapper.ObjectMappingServiceTests{
             var version = modelMapperAttribute.Version;
 
             mappedType.MapToModel();
-            mapToModel = await ObjectMappingService.MappedTypes;
+            mapToModel = await TypeMappingService.MappedTypes;
 
             modelMapperAttribute = mapToModel.Assembly.GetCustomAttributes(typeof(ModelMapperServiceAttribute),false)
                 .OfType<ModelMapperServiceAttribute>().First(attribute => attribute.MappedType==mappedType.FullName&&attribute.MappedAssemmbly==mappedType.Assembly.GetName().Name);

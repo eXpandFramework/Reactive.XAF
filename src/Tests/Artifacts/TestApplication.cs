@@ -23,6 +23,10 @@ namespace Tests.Artifacts{
             return null;
         }
 
+        public override void StartSplash(){
+            
+        }
+
         protected override string GetModelAssemblyFilePath(){
             return null;
         }

@@ -8,7 +8,7 @@ using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping;
 using Xunit;
 
-namespace Tests.Modules.ModelMapper.ObjectMappingServiceTests{
+namespace Tests.Modules.ModelMapper.TypeMappingServiceTests{
     
     public partial class ObjectMappingServiceTests{
         [Fact]
@@ -33,7 +33,7 @@ namespace Tests.Modules.ModelMapper.ObjectMappingServiceTests{
 
             var modelType = await typeToMap.MapToModel().ModelInterfaces();
 
-            var containerType = modelType.Assembly.GetType($"IModel{typeToMap.Name}{ObjectMappingService.DefaultContainerSuffix}");
+            var containerType = modelType.Assembly.GetType($"IModel{typeToMap.Name}{TypeMappingService.DefaultContainerSuffix}");
             containerType.ShouldNotBeNull();
             var propertyInfo = containerType.GetProperty($"{typeToMap.Name}");
             propertyInfo.ShouldNotBeNull();
@@ -66,9 +66,9 @@ namespace Tests.Modules.ModelMapper.ObjectMappingServiceTests{
             var modelType = await typeToMap.MapToModel().ModelInterfaces();
 
             var containerName = typeof(TestModelMapper).Name;
-            var containerType = modelType.Assembly.GetType($"IModel{containerName}{ObjectMappingService.DefaultContainerSuffix}");
+            var containerType = modelType.Assembly.GetType($"IModel{containerName}{TypeMappingService.DefaultContainerSuffix}");
             
-            var propertyInfo = containerType.GetProperty(containerName)?.PropertyType.GetProperty(ObjectMappingService.ModelMappersNodeName);
+            var propertyInfo = containerType.GetProperty(containerName)?.PropertyType.GetProperty(TypeMappingService.ModelMappersNodeName);
             propertyInfo.ShouldNotBeNull();
             propertyInfo.CanWrite.ShouldBeFalse();
 

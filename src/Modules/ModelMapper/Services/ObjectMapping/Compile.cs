@@ -9,15 +9,11 @@ using DevExpress.ExpressApp.Model;
 using Microsoft.CSharp;
 using Mono.Cecil;
 using Xpand.Source.Extensions.MonoCecil;
-using Xpand.Source.Extensions.XAF.XafApplication;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping{
-
-    public static partial class ObjectMappingService{
-
-
+    public static partial class TypeMappingService{
         static string OutputAssembly =>
-            $@"{Path.GetDirectoryName(typeof(ObjectMappingService).Assembly.Location)}\{ModelMapperAssemblyName}{MapperAssemblyName}{ModelExtendingService.Platform}.dll";
+            $@"{Path.GetDirectoryName(typeof(TypeMappingService).Assembly.Location)}\{ModelMapperAssemblyName}{MapperAssemblyName}{ModelExtendingService.Platform}.dll";
 
 
         private static Assembly Compile(this IEnumerable<Assembly> references, string code){
@@ -83,15 +79,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping{
             });
         }
 
-        private static IObservable<Type> Compile(this IObservable<((Type type,IModelMapperConfiguration configuration)[] typeData, (string code, IEnumerable<Assembly> references)? codeData)> source){
-            return source.SelectMany(_ => {
-                if (_.codeData.HasValue){
-                    var assembly = _.codeData.Value.references.Compile(_.codeData.Value.code);
-                    return _.typeData.Select(data => assembly.GetType($"IModel{data.type.ModelMapName(data.configuration)}"));
-                }
-
-                return _.typeData.Select(data => data.type);
-            });
+        private static IObservable<Type> Compile(this IObservable<(string code,IEnumerable<Assembly> references)> source){
+            return source.SelectMany(_ => _.references.Compile(_.code).GetTypes().Where(type => typeof(IModelModelMap).IsAssignableFrom(type)));
         }
     }
 }

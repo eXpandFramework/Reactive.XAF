@@ -28,6 +28,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\Extensions\Extensions\FunctionOperators\IsAssignableFromOperator.cs" Link="LinkedFiles\IsAssignableFromOperator.cs" />
     <Compile Include="..\..\Extensions\Extensions\Linq\DistinctBy.cs" Link="LinkedFiles\DistinctBy.cs" />
     <Compile Include="..\..\Extensions\Extensions\Linq\GetItems.cs" Link="LinkedFiles\GetItems.cs" />
     <Compile Include="..\..\Extensions\Extensions\MonoCecil\BaseClasses.cs" Link="LinkedFiles\BaseClasses.cs" />
@@ -36,6 +37,7 @@
     <Compile Include="..\..\Extensions\Extensions\System\Refelction\IsNullAbleType.cs" Link="LinkedFiles\IsNullAbleType.cs" />
     <Compile Include="..\..\Extensions\Extensions\System\Refelction\PropertyInfoAccessModifier.cs" Link="LinkedFiles\PropertyInfoAccessModifier.cs" />
     <Compile Include="..\..\Extensions\Extensions\System\String\CleanCodeName.cs" Link="LinkedFiles\CleanCodeName.cs" />
+    <Compile Include="..\..\Extensions\Extensions\System\String\ToLiteral.cs" Link="LinkedFiles\ToLiteral.cs" />
     <Compile Include="..\..\Extensions\Extensions\XAF\Model\FastModelAccess.cs" Link="LinkedFiles\FastModelAccess.cs" />
     <Compile Include="..\..\Extensions\Extensions\XAF\Model\GetParent.cs" Link="LinkedFiles\GetParent.cs" />
     <Compile Include="..\..\Extensions\Extensions\XAF\Model\GetValue.cs" Link="LinkedFiles\GetValue.cs" />

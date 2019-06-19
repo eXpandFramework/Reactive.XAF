@@ -1,12 +1,18 @@
 ﻿using System;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Win.Editors;
+using DevExpress.Utils;
+using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
+using Fasterflect;
 using Shouldly;
+using Tests.Modules.ModelMapper.BOModel;
 using Xpand.Source.Extensions.System.String;
 using Xpand.Source.Extensions.XAF.Model;
 using Xpand.Source.Extensions.XAF.XafApplication;
@@ -18,6 +24,7 @@ using Xunit;
 namespace Tests.Modules.ModelMapper{
     [Collection(nameof(XafTypesInfo))]
     public class ModelMapperExtenderServiceTests : ModelMapperBaseTest{
+        private const string MMListViewNodePath = "Views/" + nameof(MM) + "_ListView";
         [Theory]
         [InlineData(typeof(TestModelMapper),Platform.Win)]
         [InlineData(typeof(TestModelMapper),Platform.Web)]
@@ -27,27 +34,41 @@ namespace Tests.Modules.ModelMapper{
             InitializeMapperService($"{nameof(ExtendModel_Any_Type)}{typeToMap.Name}{platform}");
 
             typeToMap.Extend<IModelListView>();
-
-            AssertExtendedModel(typeToMap, platform);
+            var application = DefaultModelMapperModule(platform).Application;
+            AssertExtendedModel(typeToMap, application, MMListViewNodePath);
         }
 
         [Theory]
-        [InlineData(PredifinedModelMapperConfiguration.GridView, typeof(GridView),Platform.Win)]
-        internal void ExtendModel_Prededined_Type(PredifinedModelMapperConfiguration configuration,Type typeToMap,Platform platform){
+        [InlineData(PredifinedModelMapperConfiguration.GridColumn, typeof(GridColumn),Platform.Win,MMListViewNodePath+"/Columns/Test")]
+        [InlineData(PredifinedModelMapperConfiguration.GridView, typeof(GridView),Platform.Win,MMListViewNodePath)]
+        internal void ExtendModel_Predefined_Type(PredifinedModelMapperConfiguration configuration,Type typeToMap,Platform platform,string nodePath){
             Assembly.LoadFile(typeToMap.Assembly.Location);
-            InitializeMapperService($"{nameof(ExtendModel_Prededined_Type)}{configuration}{platform}",platform);
+            InitializeMapperService($"{nameof(ExtendModel_Multiple_Predefined_Type)}{configuration}{platform}",platform);
 
             configuration.Extend();
-
-            AssertExtendedModel(typeToMap, platform);
+            var application = DefaultModelMapperModule(platform).Application;
+            AssertExtendedModel(typeToMap, application,nodePath);
         }
 
-        private void AssertExtendedModel(Type typeToMap, Platform platform){
+        [Fact]
+        internal void ExtendModel_Multiple_Predefined_Type(){
+            Assembly.LoadFile(typeof(GridView).Assembly.Location);
+            var platform = Platform.Win;
+            InitializeMapperService($"{nameof(ExtendModel_Multiple_Predefined_Type)}",platform);
+
+            var configuration = PredifinedModelMapperConfiguration.GridView|PredifinedModelMapperConfiguration.GridColumn;
+            configuration.Extend();
             var application = DefaultModelMapperModule(platform).Application;
-            var modelListView = application.Model.Views.OfType<IModelListView>().First();
+            AssertExtendedModel(typeof(GridView), application, MMListViewNodePath);
+            AssertExtendedModel(typeof(GridColumn), application, $"{MMListViewNodePath}/Columns/Test");
+        }
+
+        private void AssertExtendedModel(Type typeToMap, XafApplication application,string nodePath){
+            
+            var modelNode = application.Model.GetNodeByPath(nodePath);
             var mapName = typeToMap.ModelMapName();
-            modelListView.GetNode(mapName).ShouldNotBeNull();
-            var typeInfo = XafTypesInfo.Instance.FindTypeInfo(typeof(IModelModelMap)).Descendants.FirstOrDefault();
+            modelNode.GetNode(mapName).ShouldNotBeNull();
+            var typeInfo = XafTypesInfo.Instance.FindTypeInfo(typeof(IModelModelMap)).Descendants.FirstOrDefault(info => info.Name.EndsWith(typeToMap.Name));
             typeInfo.ShouldNotBeNull();
             typeInfo.Name.ShouldBe($"IModel{mapName}");
             var defaultContext =
@@ -56,6 +77,21 @@ namespace Tests.Modules.ModelMapper{
             defaultContext.ShouldNotBeNull();
             var modelMapper = defaultContext.GetNode(mapName);
             modelMapper.ShouldNotBeNull();
+        }
+
+        [Fact]
+        public async Task Extend_Multiple_Objects_with_common_types(){
+            var typeToMap1 = typeof(TestModelMapperCommonType1);
+            var typeToMap2 = typeof(TestModelMapperCommonType2);
+            InitializeMapperService(nameof(Extend_Multiple_Objects_with_common_types));
+
+            typeToMap1.Extend<IModelListView>();
+            typeToMap2.Extend<IModelColumn>();
+
+            var application = DefaultModelMapperModule(Platform.Win).Application;
+            var appearanceCell = application.Model.GetNodeByPath($@"{MMListViewNodePath}/Columns/Test/{nameof(TestModelMapperCommonType2)}/{nameof(TestModelMapperCommonType2.AppearanceCell)}");
+            appearanceCell.ShouldNotBeNull();
+            appearanceCell.GetNodeByPath($"{nameof(AppearanceObjectEx.TextOptions)}");
         }
 
         [Theory]
@@ -86,7 +122,7 @@ namespace Tests.Modules.ModelMapper{
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
             var mapName = typeToMap.ModelMapName();
             var modelMappersNode =
-                modelListView.GetNode(mapName).GetNode(ObjectMappingService.ModelMappersNodeName);
+                modelListView.GetNode(mapName).GetNode(TypeMappingService.ModelMappersNodeName);
             modelMappersNode.ShouldNotBeNull();
             modelMappersNode.Index.ShouldBe(0);
             var defaultContext = modelMappersNode.GetNode(ModelMapperContextNodeGenerator.Default);
@@ -100,15 +136,15 @@ namespace Tests.Modules.ModelMapper{
         }
 
         [Theory]
-        [InlineData("Parent.AllowEdit=?", true,false)]
-        [InlineData("Parent.AllowEdit=?", false,true)]
-        [InlineData(VisibilityCriteriaLeftOperand.IsAssignableFromModelListVideEditorType, true,typeof(WinColumnsListEditor))]
-        [InlineData("Parent."+nameof(IModelListView.EditorType)+"=?", true,typeof(GridListEditor))]
-        [InlineData(null, true,null)]
-        internal void Container_Visibility(object leftOperand, bool visibility,object rightOperand){
+        [InlineData("Parent.AllowEdit=?", true,false,null)]
+        [InlineData("Parent.AllowEdit=?", false,true,null)]
+        [InlineData(VisibilityCriteriaLeftOperand.IsAssignableFromModelListVideEditorType, true,typeof(WinColumnsListEditor),"Parent.")]
+        [InlineData("Parent."+nameof(IModelListView.EditorType)+"=?", true,typeof(GridListEditor),null)]
+        [InlineData(null, true,null,null)]
+        internal void Container_Visibility(object leftOperand, bool visibility,object rightOperand,string path){
             var visibilityCriteria = $"{CriteriaOperator.Parse($"{leftOperand}", rightOperand)}";
             if (leftOperand is VisibilityCriteriaLeftOperand visibilityCriteriaLeftOperand){
-                visibilityCriteria = visibilityCriteriaLeftOperand.GetVisibilityCriteria(rightOperand);
+                visibilityCriteria = visibilityCriteriaLeftOperand.GetVisibilityCriteria(rightOperand,path);
             }
 
             var platform = Platform.Win;

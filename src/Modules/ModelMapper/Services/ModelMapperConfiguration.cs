@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -21,23 +22,27 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
     }
 
     public enum VisibilityCriteriaLeftOperand{
-        [Description(IsAssignableFromOperator.OperatorName+ "(Parent."+nameof(IModelListView.EditorType)+",?)")]
+        [Description(IsAssignableFromOperator.OperatorName+ "({0}"+nameof(IModelListView.EditorType)+",?)")]
         IsAssignableFromModelListVideEditorType
     }
 
     public static class VisibilityCriteriaLeftOperandService{
-        public static string GetVisibilityCriteria(this VisibilityCriteriaLeftOperand leftOperand,object rightOperand){
+        public static string GetVisibilityCriteria(this VisibilityCriteriaLeftOperand leftOperand,object rightOperand,string path=""){
             if (leftOperand == VisibilityCriteriaLeftOperand.IsAssignableFromModelListVideEditorType){
                 rightOperand = ((Type) rightOperand).AssemblyQualifiedName;
             }
 
-            return CriteriaOperator.Parse(leftOperand.AsString(EnumFormat.Description), rightOperand).ToString();
+            var criteria = string.Format(leftOperand.AsString(EnumFormat.Description),path);
+            return CriteriaOperator.Parse(criteria, rightOperand).ToString();
         }
 
     }
 
+    [Flags]
     public enum PredifinedModelMapperConfiguration{
-        GridView
+        None,
+        GridView,
+        GridColumn
     }
 
     public static class PredifinedModelMapperConfigurationService{
@@ -57,32 +62,59 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         }
 
         public static void Extend(this PredifinedModelMapperConfiguration configuration,Action<ModelMapperConfiguration> configure = null){
-            var mapperConfiguration = configuration.ModelMapperConfiguration(configure);
-            (mapperConfiguration.MapData.typeToMap,mapperConfiguration).Extend(mapperConfiguration.MapData.modelType);
+            var results = FlagEnums.GetFlagMembers(configuration).Select(_ => _.Value)
+                .Select(_ => {
+                    var modelMapperConfiguration = _.ModelMapperConfiguration(configure);
+                    return (modelMapperConfiguration.MapData.typeToMap,modelMapperConfiguration);
+                });
+            
+            foreach (var result in results){
+                result.Extend(result.modelMapperConfiguration.MapData.modelType);    
+            }
+        }
+
+        public static IObservable<Type> MapToModel(this IEnumerable<PredifinedModelMapperConfiguration> configurations,Action<PredifinedModelMapperConfiguration,ModelMapperConfiguration> configure = null){
+            return configurations.Where(_ => _!=PredifinedModelMapperConfiguration.None)
+                .Select(_ =>_.ModelMapperConfiguration(configuration => configure?.Invoke(_, configuration)).MapData.typeToMap)
+                .MapToModel();
         }
 
         public static IObservable<Type> MapToModel(this PredifinedModelMapperConfiguration configuration,Action<ModelMapperConfiguration> configure=null){
-            var mapperConfiguration = configuration.ModelMapperConfiguration(configure);
-            return mapperConfiguration.MapData.typeToMap.MapToModel(mapperConfiguration);
+            return FlagEnums.GetFlagMembers(configuration).Select(_ => _.Value).MapToModel((mapperConfiguration, modelMapperConfiguration) => configure?.Invoke(modelMapperConfiguration));
         }
 
         private static ModelMapperConfiguration ModelMapperConfiguration(this PredifinedModelMapperConfiguration configuration,Action<ModelMapperConfiguration> configure){
             var mapperConfiguration = configuration.GetModelMapperConfiguration();
-            configure?.Invoke(mapperConfiguration);
-            return mapperConfiguration;
+            if (mapperConfiguration != null){
+                configure?.Invoke(mapperConfiguration);
+                return mapperConfiguration;
+            }
+
+            return null;
         }
 
         public static ModelMapperConfiguration GetModelMapperConfiguration(this PredifinedModelMapperConfiguration configuration){
             if (ModelExtendingService.Platform==Platform.Win){
-                if (configuration == PredifinedModelMapperConfiguration.GridView&&XtraGridAssembly!=null&&XAFWinAssembly!=null){
+                if (XtraGridAssembly!=null&&XAFWinAssembly!=null){
                     var rightOperand = XAFWinAssembly.GetType("DevExpress.ExpressApp.Win.Editors.GridListEditor");
-                    var visibilityCriteria = VisibilityCriteriaLeftOperand.IsAssignableFromModelListVideEditorType.GetVisibilityCriteria(rightOperand);
-                    var typeToMap=XtraGridAssembly.GetType("DevExpress.XtraGrid.Views.Grid.GridView");
-                    return new ModelMapperConfiguration {ImageName = "Grid_16x16",VisibilityCriteria =visibilityCriteria,MapData = (typeToMap,typeof(IModelListView))};
+                    if (configuration == PredifinedModelMapperConfiguration.GridView){
+//                        var visibilityCriteria = "";
+                        var visibilityCriteria = VisibilityCriteriaLeftOperand.IsAssignableFromModelListVideEditorType.GetVisibilityCriteria(rightOperand,"Parent.");
+                        var typeToMap=XtraGridAssembly.GetType("DevExpress.XtraGrid.Views.Grid.GridView");
+                        return new ModelMapperConfiguration {ImageName = "Grid_16x16",VisibilityCriteria =visibilityCriteria,MapData = (typeToMap,typeof(IModelListView))};
+                    }
+                    if (configuration == PredifinedModelMapperConfiguration.GridColumn){
+//                        var visibilityCriteria = VisibilityCriteriaLeftOperand.IsAssignableFromModelListVideEditorType.GetVisibilityCriteria(rightOperand,"Parent.Parent.");
+                        var visibilityCriteria = "";
+                        var typeToMap=XtraGridAssembly.GetType("DevExpress.XtraGrid.Columns.GridColumn");
+                        return new ModelMapperConfiguration {ImageName = @"Office2013\Columns_16x16",VisibilityCriteria =visibilityCriteria,MapData = (typeToMap,typeof(IModelColumn))};
+                    }
                 }
+                
+                throw new NotImplementedException();
             }
 
-            throw new NotImplementedException();
+            return null;
         }
     }
 

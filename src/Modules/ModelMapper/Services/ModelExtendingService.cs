@@ -5,6 +5,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
+using Fasterflect;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping;
 using Xpand.XAF.Modules.Reactive;
@@ -36,22 +37,31 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         }
 
         private static IObservable<(Type targetIntefaceType, Type extenderInterface)> AddExtenders(ModelInterfaceExtenders extenders){
-            var mappedTypes = ObjectMappingService.Connect()
+            var mappedContainers = TypeMappingService.Connect()
                 .SelectMany(unit => ModelExtenders.ToObservable()
                     .SelectMany(_ => _.extenderData.MapToModel())
                     .ModelInterfaces()
                     .Where(type => typeof(IModelNode).IsAssignableFrom(type))
-                    .Select(_ => _.Assembly.GetTypes().First(type => typeof(IModelModelMapContainer).IsAssignableFrom(type))));
+                    .SelectMany(ContainerTypes))
+                .Distinct().Replay().RefCount();
 
             return ModelExtenders.ToObservable()
-                .SelectMany(_ => mappedTypes.Select(extenderInterface => (_.targetIntefaceType,extenderInterface)))
+                .SelectMany(_ => mappedContainers.FirstAsync(type =>
+                        type.Attribute<ModelMapLinkAttribute>().LinkedTypeName == _.extenderData.extenderType.FullName)
+                    .Select(extenderInterface => (_.targetIntefaceType, extenderInterface)))
                 .Do(_ => extenders.Add(_.targetIntefaceType,_.extenderInterface));
         }
 
-        
+        private static IEnumerable<Type> ContainerTypes(Type type){
+            return type.Assembly.GetTypes()
+                .Where(_ => _.Name.EndsWith(TypeMappingService.DefaultContainerSuffix))
+                .Where(_ => _.GetInterfaces().Contains(typeof(IModelModelMapContainer)));
+        }
+
+
         public static void Extend<TModelMapperConfiguration>(this (Type extenderType, TModelMapperConfiguration configuration) extenderData, Type targetInterface)
             where TModelMapperConfiguration : IModelMapperConfiguration{
-            ObjectMappingService.Connect().Wait();
+            TypeMappingService.Connect().Wait();
             ModelExtenders.Add((targetInterface, extenderData));
         }
 

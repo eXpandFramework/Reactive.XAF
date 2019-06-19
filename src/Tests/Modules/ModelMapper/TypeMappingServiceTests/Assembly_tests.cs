@@ -11,7 +11,7 @@ using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping;
 using Xunit;
 
-namespace Tests.Modules.ModelMapper.ObjectMappingServiceTests{
+namespace Tests.Modules.ModelMapper.TypeMappingServiceTests{
     [Collection(nameof(XafTypesInfo))]
     public partial class ObjectMappingServiceTests{
 
@@ -61,7 +61,7 @@ namespace Tests.Modules.ModelMapper.ObjectMappingServiceTests{
             var mappedType = typeof(TestModelMapper);
             await mappedType.MapToModel().ModelInterfaces();
             InitializeMapperService($"{nameof(Always_Map_If_ModelMapperModule_Version_Changed)}",newAssemblyName:false);
-            typeof(ObjectMappingService).SetFieldValue("_modelMapperModuleVersion", new Version(2000,100,40));
+            typeof(TypeMappingService).SetFieldValue("_modelMapperModuleVersion", new Version(2000,100,40));
 
             var exception = Should.Throw<Exception>(async () => await mappedType.MapToModel().ModelInterfaces());
 
@@ -85,6 +85,13 @@ namespace Tests.Modules.ModelMapper.ObjectMappingServiceTests{
             });
 
             exception.Message.ShouldStartWith("error CS0016: Could not write to output file");
+        }
+
+        [Fact(Skip = NotImplemented)]
+        public async Task Always_Map_If_Additional_Type_is_mapped(){
+            
+            InitializeMapperService(nameof(Always_Map_If_Additional_Type_is_mapped));
+            
         }
     }
 

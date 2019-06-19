@@ -21,8 +21,8 @@ namespace Tests.Modules.ModelMapper{
         }
 
         protected static PropertyInfo[] ModelTypeProperties(Type modelType){
-            return modelType.Properties().Where(info =>!ObjectMappingService.ReservedPropertyNames.Contains(info.Name) &&
-                                                       info.Name!=ObjectMappingService.ModelMappersNodeName).ToArray();
+            return modelType.Properties().Where(info =>!TypeMappingService.ReservedPropertyNames.Contains(info.Name) &&
+                                                       info.Name!=TypeMappingService.ModelMappersNodeName).ToArray();
         }
 
         internal Type CreateDynamicType(string name,string version="1.0.0.0"){
@@ -50,7 +50,7 @@ public class {DynamicTypeName}{{
             typeof(ModelExtendingService).SetPropertyValue("Platform", platform);
             var mapperAssemblyName = $"{GetType().Name}{modelMapperAssemblyName}{platform}".GetHashCode();
             if (newAssemblyName){
-                ObjectMappingService.ModelMapperAssemblyName = $"{Guid.NewGuid():N}{mapperAssemblyName}";
+                TypeMappingService.ModelMapperAssemblyName = $"{Guid.NewGuid():N}{mapperAssemblyName}";
             }
             var applicationPath = AppDomain.CurrentDomain.ApplicationPath();
             var files = Directory.GetFiles(applicationPath,$"*{mapperAssemblyName}*.dll").ToArray();
@@ -62,8 +62,8 @@ public class {DynamicTypeName}{{
                     // ignored
                 }
             }
-            typeof(ObjectMappingService).CallMethod(null, "Init");
-            typeof(ObjectMappingService).SetFieldValue("_modelMapperModuleVersion", typeof(ModelMapperModule).Assembly.GetName().Version);
+            typeof(TypeMappingService).CallMethod(null, "Init");
+            typeof(TypeMappingService).SetFieldValue("_modelMapperModuleVersion", typeof(ModelMapperModule).Assembly.GetName().Version);
             return mapperAssemblyName.ToString();
         }
     }

@@ -70,7 +70,7 @@ namespace Xpand.Source.Extensions.XAF.XafApplication{
         public static Platform GetPlatform(this DevExpress.ExpressApp.XafApplication application){
             var appNames = new[]{"WinApplication","WebApplication"};
             var baseType = application.GetType().BaseType;
-            while (baseType != null &&baseType.Namespace!=null&& (!appNames.Contains(baseType.Name)&&baseType.Namespace.StartsWith("DevExpress.ExpressApp"))){
+            while (baseType != null &&baseType.Namespace!=null&& (!appNames.Contains(baseType.Name)&&!baseType.Namespace.StartsWith("DevExpress.ExpressApp"))){
                 baseType = baseType.BaseType;
             }
             return baseType?.Name=="WinApplication"?Platform.Win : Platform.Web;

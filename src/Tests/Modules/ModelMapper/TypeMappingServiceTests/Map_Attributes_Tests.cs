@@ -9,7 +9,7 @@ using Shouldly;
 using Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping;
 using Xunit;
 
-namespace Tests.Modules.ModelMapper.ObjectMappingServiceTests{
+namespace Tests.Modules.ModelMapper.TypeMappingServiceTests{
     
     public partial class ObjectMappingServiceTests:ModelMapperBaseTest{
         [Fact]
@@ -96,7 +96,7 @@ namespace Tests.Modules.ModelMapper.ObjectMappingServiceTests{
         public async Task Customize_Attributes_Mapping(){
             InitializeMapperService(nameof(Customize_Attributes_Mapping));
             var typeToMap = typeof(ReplaceAttributesClass);
-            ObjectMappingService.CustomizeAttributes.FirstAsync().Subscribe(attribute => {
+            TypeMappingService.CustomizeAttributes.FirstAsync().Subscribe(attribute => {
                 var data = attribute.Attributes.First();
                 attribute.Attributes.Clear();
                 attribute.Attributes.Add((new DescriptionAttribute(),data.customAttribute));
@@ -111,7 +111,7 @@ namespace Tests.Modules.ModelMapper.ObjectMappingServiceTests{
         public async Task Attribute_Mapping_Can_Be_Disabled(){
             InitializeMapperService(nameof(Attribute_Mapping_Can_Be_Disabled));
 
-            using (ObjectMappingService.CustomizeAttributes.Subscribe(attribute => { attribute.Attributes.Clear(); })){
+            using (TypeMappingService.CustomizeAttributes.Subscribe(attribute => { attribute.Attributes.Clear(); })){
                 var typeToMap = typeof(CopyAttributesClass);
 
                 var modelType = await typeToMap.MapToModel().ModelInterfaces();

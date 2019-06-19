@@ -12,7 +12,7 @@ using Xpand.Source.Extensions.System.Refelction;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping{
 
-    public static partial class ObjectMappingService{
+    public static partial class TypeMappingService{
         private static Version _modelMapperModuleVersion;
         private static IEnumerable<Assembly> AllAssemblies(Type type, PropertyInfo[] propertyInfos){
             return propertyInfos.Select(info => info.PropertyType)
@@ -36,7 +36,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping{
             return propertyInfos
                 .Where(_ => !_.PropertyType.IsValueType && typeof(string) != _.PropertyType && _.PropertyType != type)
                 .Select(_ => _.PropertyType)
-                .DistinctBy(_ => _.ModelName())
+                .DistinctBy(_ => (_,type).ModelName())
                 .ToArray();
         }
 

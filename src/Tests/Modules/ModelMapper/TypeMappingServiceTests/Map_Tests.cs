@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
 using Fasterflect;
 using Shouldly;
@@ -12,7 +13,7 @@ using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping;
 using Xunit;
 
-namespace Tests.Modules.ModelMapper.ObjectMappingServiceTests{
+namespace Tests.Modules.ModelMapper.TypeMappingServiceTests{
     
     public partial class ObjectMappingServiceTests{
         [Fact]
@@ -79,19 +80,53 @@ namespace Tests.Modules.ModelMapper.ObjectMappingServiceTests{
 
         }
 
-        [Theory]
-        [InlineData(PredifinedModelMapperConfiguration.GridView,typeof(GridView),Platform.Win)]
-        internal async Task Map_DevExpressTypes(PredifinedModelMapperConfiguration configuration,Type assemblyToLoad,Platform platform){
 
-            InitializeMapperService($"{nameof(Map_DevExpressTypes)}{configuration}",platform);
+        [Theory]
+        [InlineData(PredifinedModelMapperConfiguration.GridColumn,typeof(GridColumn),Platform.Win)]
+        [InlineData(PredifinedModelMapperConfiguration.GridView,typeof(GridView),Platform.Win)]
+        internal async Task Map_PredifinedConfigurations(PredifinedModelMapperConfiguration configuration,Type assemblyToLoad,Platform platform){
+
+            InitializeMapperService($"{nameof(Map_PredifinedConfigurations)}{configuration}",platform);
             
             var modelType = await configuration.MapToModel().ModelInterfaces();
 
             modelType.Name.ShouldBe($"IModel{configuration}");
 
-            var descriptionAttribute = modelType.Properties().Select(info => info.Attribute<DescriptionAttribute>())
+            var propertyInfos = modelType.Properties();
+            var descriptionAttribute = propertyInfos.Select(info => info.Attribute<DescriptionAttribute>())
                 .FirstOrDefault(attribute => attribute != null && attribute.Description.Contains(" ") );
             descriptionAttribute.ShouldNotBeNull();
+
+        }
+
+        [Fact]
+        internal void Map_All_PredifinedConfigurations(){
+
+            InitializeMapperService($"{nameof(Map_All_PredifinedConfigurations)}",Platform.Win);
+            var values = EnumsNET.Enums.GetValues<PredifinedModelMapperConfiguration>().ToArray();
+
+            var modelInterfaces = values.MapToModel().ModelInterfaces().Replay();
+            modelInterfaces.Connect();
+
+            var types = modelInterfaces.ToEnumerable().ToArray();
+            types.Length.ShouldBe(values.Length-1);
+            foreach (var configuration in values.Skip(1)){
+                types.FirstOrDefault(_ => _.Name==$"IModel{configuration.ToString()}").ShouldNotBeNull();
+            }
+        }
+        [Fact]
+        internal void Map_PredifinedConfigurations_Combination(){
+
+            InitializeMapperService($"{nameof(Map_All_PredifinedConfigurations)}",Platform.Win);
+            var mapperConfiguration = (PredifinedModelMapperConfiguration.GridView | PredifinedModelMapperConfiguration.GridColumn);
+
+            var modelInterfaces = mapperConfiguration.MapToModel().ModelInterfaces().Replay();
+            modelInterfaces.Connect();
+
+            var types = modelInterfaces.ToEnumerable().ToArray();
+            types.Length.ShouldBe(2);
+            types.First().Name.ShouldBe($"IModel{PredifinedModelMapperConfiguration.GridView}");
+            types.Last().Name.ShouldBe($"IModel{PredifinedModelMapperConfiguration.GridColumn}");
         }
 
         [Fact]
@@ -110,6 +145,27 @@ namespace Tests.Modules.ModelMapper.ObjectMappingServiceTests{
         }
 
         [Fact]
+        public async Task Map_Multiple_Objects_with_common_types(){
+            var typeToMap1 = typeof(TestModelMapperCommonType1);
+            var typeToMap2 = typeof(TestModelMapperCommonType2);
+            InitializeMapperService(nameof(Map_Multiple_Objects_with_common_types));
+
+            var mappedTypes = new[]{typeToMap1, typeToMap2}.MapToModel().ModelInterfaces();
+
+            var mappedType1 = await mappedTypes.Take(1);
+            mappedType1.Name.ShouldBe($"IModel{typeToMap1.Name}");
+            var appearenceCell = mappedType1.Properties().First(_ => _.Name==nameof(TestModelMapperCommonType1.AppearanceCell));
+            appearenceCell.ShouldNotBeNull();
+            appearenceCell.GetType().Properties("TextOptions").ShouldNotBeNull();
+            var mappedType2 = await mappedTypes.Take(2);
+            mappedType2.Name.ShouldBe($"IModel{typeToMap2.Name}");
+            appearenceCell = mappedType1.Properties().First(_ => _.Name==nameof(TestModelMapperCommonType2.AppearanceCell));
+            appearenceCell.ShouldNotBeNull();
+            appearenceCell.GetType().Properties("TextOptions").ShouldNotBeNull();
+            mappedType1.Assembly.ShouldBe(mappedType2.Assembly);
+        }
+
+        [Fact]
         public async Task Map_Multiple_Objects_from_the_different_subscription_In_the_same_assembly(){
             var typeToMap1 = typeof(TestModelMapper);
             var typeToMap2 = typeof(StringValueTypeProperties);
@@ -118,10 +174,10 @@ namespace Tests.Modules.ModelMapper.ObjectMappingServiceTests{
             await new[]{typeToMap1}.MapToModel();
             await new[]{typeToMap2}.MapToModel();
 
-            ObjectMappingService.Start();
-            var mappedType1 = await ObjectMappingService.MappedTypes.Take(1);
+            TypeMappingService.Start();
+            var mappedType1 = await TypeMappingService.MappedTypes.Take(1);
             mappedType1.Name.ShouldBe($"IModel{typeToMap1.Name}");
-            var mappedType2 = await ObjectMappingService.MappedTypes.Take(2);
+            var mappedType2 = await TypeMappingService.MappedTypes.Take(2);
             mappedType2.Name.ShouldBe($"IModel{typeToMap2.Name}");
             mappedType1.Assembly.ShouldBe(mappedType2.Assembly);
         }

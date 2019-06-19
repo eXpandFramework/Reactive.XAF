@@ -3,13 +3,28 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using DevExpress.ExpressApp.Model;
-using DevExpress.Office.Utils;
 using DevExpress.Persistent.Base;
+using DevExpress.Utils;
 
 namespace Tests.Modules.ModelMapper{
     public class TestModelMapper{
         public int Age{ get; set; }
         
+    }
+    public class TestModelMapperCommonType1{
+        public int Age{ get; set; }
+        public TestModelMapperCommon TestModelMapperCommon{ get;  }    =new TestModelMapperCommon();
+        public AppearanceObject AppearanceCell{ get; } = new AppearanceObjectEx();
+    }
+    public class TestModelMapperCommonType2{
+        public int Age{ get; set; }
+        public AppearanceObjectEx AppearanceCell{ get; } = new AppearanceObjectEx();
+        public TestModelMapperCommon TestModelMapperCommon{ get;  }=new TestModelMapperCommon();
+        
+    }
+
+    public class TestModelMapperCommon{
+        public string Test{ get; set; }
     }
 
     public class StringValueTypeProperties{
@@ -147,6 +162,18 @@ namespace Tests.Modules.ModelMapper{
 
     }
 
+    class BaseTypeProperties:BaseTypePropertiesBase{
+        
+
+        public class NestedTypeProperty{
+        }
+
+    }
+
+    class BaseTypePropertiesBase{
+        public string Test{ get; set; }
+        public AppearanceObjectEx AppearanceCell{ get; } = new AppearanceObjectEx();
+    }
     
     internal class ResevredProperties : IModelNode{
         public IEnumerable<string> Strings{ get; } = new List<string>();

@@ -12,7 +12,7 @@ using Fasterflect;
 using Mono.Cecil;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping{
-    public static partial class ObjectMappingService{
+    public static partial class TypeMappingService{
         public static string DefaultContainerSuffix="Map";
         public static string ModelMapperAssemblyName=null;
         public static string MapperAssemblyName="ModelMapperAssembly";
@@ -21,7 +21,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping{
         public static List<Type> ReservedPropertyTypes{ get; }=new List<Type>();
         static ISubject<(Type type,IModelMapperConfiguration configuration)> _typesToMap;
 
-        static ObjectMappingService(){
+        static TypeMappingService(){
             
             Init();
         }
@@ -35,18 +35,18 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping{
         }
 
         public static string OutPutAssembly =>
-            $@"{Path.GetDirectoryName(typeof(ObjectMappingService).Assembly.Location)}\{ModelMapperAssemblyName}{MapperAssemblyName}{ModelExtendingService.Platform}.dll";
+            $@"{Path.GetDirectoryName(typeof(TypeMappingService).Assembly.Location)}\{ModelMapperAssemblyName}{MapperAssemblyName}{ModelExtendingService.Platform}.dll";
 
         private static void Init(){
             _typesToMap = Subject.Synchronize(new ReplaySubject<(Type type,IModelMapperConfiguration configuration)>());
             MappedTypes = Observable.Defer(() => {
-                var distinnctTypesToMap = Observable.Defer(() => _typesToMap.Distinct(_ => $"{_.type.AssemblyQualifiedName}{_.configuration?.GetHashCode()}"));
+                var distinnctTypesToMap = Observable.Defer(() => _typesToMap.Distinct(_ => _.type));
                 return distinnctTypesToMap
                     .All(_ => _.TypeFromPath())
-                    .Select(_ =>!_? distinnctTypesToMap.GenerateCode().Compile(): Assembly.LoadFile(OutputAssembly).GetTypes()
+                    .Select(_ =>!_? distinnctTypesToMap.ModelCode().Compile(): Assembly.LoadFile(OutputAssembly).GetTypes()
                                 .Where(type => typeof(IModelModelMap).IsAssignableFrom(type)).ToObservable()).Switch();
             }).Replay().AutoConnect();
-            _modelMapperModuleVersion = typeof(ObjectMappingService).Assembly.GetName().Version;
+            _modelMapperModuleVersion = typeof(TypeMappingService).Assembly.GetName().Version;
             
             ReservedPropertyNames.Clear();
             ReservedPropertyNames.AddRange(typeof(IModelNode).Properties().Select(info => info.Name));
@@ -97,8 +97,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping{
             return configuration?.ContainerName?? $"{type.Name}{DefaultContainerSuffix}";
         }
 
-        public static string ModelMapName(this Type type, IModelMapperConfiguration configuration=null){
-            return configuration?.MapName??type.Name;
+        public static string ModelMapName(this Type type,Type rootType=null, IModelMapperConfiguration configuration=null){
+            if (rootType==null){
+                return configuration?.MapName??type.Name;
+            }
+
+            return (type, rootType).ModelName(configuration?.MapName);
         }
 
         public static void SetArgumentValue(this CustomAttribute customAttribute,

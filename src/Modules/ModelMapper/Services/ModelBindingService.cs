@@ -5,7 +5,7 @@ using Fasterflect;
 using Xpand.Source.Extensions.System.Refelction;
 using Xpand.Source.Extensions.XAF.Model;
 
-namespace Xpand.XAF.Modules.ModelMapper{
+namespace Xpand.XAF.Modules.ModelMapper.Services{
     public static class ModelBindingService{
         public static void BindTo(this IModelModelMap modelModelMap, object instance){
             ((IModelNodeDisabled) modelModelMap).BindTo( instance);
