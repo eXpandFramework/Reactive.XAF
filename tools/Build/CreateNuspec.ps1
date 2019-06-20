@@ -69,96 +69,17 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*Tests*", "*.Source.*" 
     if ($metaData.id -like "Xpand.XAF*"){
         Invoke-Command $AddDependency -ArgumentList $versionConverter
     }
-    $csproj.Project.ItemGroup.Reference.Include|Where-Object {"$_".StartsWith("Xpand.XAF")}|ForEach-Object {
-        $packageName = $_
-        $version= Get-ChildItem $root *.csproj -Recurse|Where-Object {
-            [System.IO.Path]::GetFileNameWithoutExtension($_.FullName) -eq $packageName
-        }|ForEach-Object {
-            $assemblyInfo = get-content "$($_.DirectoryName)\Properties\AssemblyInfo.cs"
-            [System.Text.RegularExpressions.Regex]::Match($assemblyInfo, 'Version\("([^"]*)').Groups[1].Value
-        }|Select-Object -First 1
-        $publishedVersion=(Find-Package $packageName -Source (Get-PackageFeed -Xpand)|Select-Object -First 1).Version
-        if (([version]$version) -lt ([version]$publishedVersion)){
-            $version=$publishedVersion;
-        }
-        "$packageName version=$version"
-        if ($Release){
-            $v=$version
-            if ($v.Revision -gt 0){
-                $version=[version]"$($v.Major).$($v.Minor).$($v.Build).0"
-            }
-        }
-        
-        $packageInfo = [PSCustomObject]@{
-            id              = $_
-            version         = $version
-            targetFramework = $targetFrameworkVersion.Replace(".", "")
-        }       
-        $comma = $_.IndexOf(",")
-        if ($comma -ne -1 ) {
-            $packageInfo.id = $_.Substring(0, $comma)
-        }
-        Invoke-Command $AddDependency -ArgumentList $packageInfo
-    }
-    
-    
-    $packageReference = $csproj.Project.ItemGroup.PackageReference
-    $targetFrameworkVersion = ($csproj.Project.PropertyGroup.TargetFramework| Select-Object -First 1).Substring(3)
-    $projectpath
-    $packageReference | Where-Object { $_.Include } | ForEach-Object {
-        $_.Include
-        $packageFramework=Get-PackageTargetFramework $_.Include $_.version "net" $targetFrameworkVersion
-        if (!$packageFramework){
-            throw "packageFramework not found for $($_.Include)"
-        }
-        $packageInfo=[PSCustomObject]@{
-            Id      = $_.Include
-            Version = $_.Version
-            TargetFramework=$packageFramework
-        }
-        "packageInfo=$packageInfo"
-        Invoke-Command $AddDependency -ArgumentList $packageInfo 
-    }
-    
-    $files = $nuspec.CreateElement("files")
-    $nuspec.package.AppendChild($files)|Out-Null
 
-    
-    "dll", "pdb"|ForEach-Object {
-        $file = $nuspec.CreateElement("file")
-        $file.SetAttribute("src", "$($metaData.Id).$_")
-        $file.SetAttribute("target", "lib\net$targetFrameworkVersion\$($metaData.Id).$_")
-        $nuspec.SelectSingleNode("//files").AppendChild($file)|Out-Null
+    $uArgs=@{
+        NuspecFilename="$root\bin\nuspec\$($metadata.id).nuspec"
+        ProjectFileName=$projectPath
+        ReferenceToPackageFilter="Xpand.XAF*"
+        PublishedSource=(Get-PackageFeed -Xpand)
+        Release=$Release
     }
-
-    [System.Environment]::CurrentDirectory= $_.DirectoryName
-    $csproj.Project.ItemGroup.Reference.HintPath|ForEach-Object{
-        if ($_){
-            $hintPath=[System.IO.Path]::GetFullPath($_)
-            $hintPath
-            if (Test-Path $hintPath){
-                if ($libs|Select-Object -ExpandProperty FullName|Where-Object{$_ -eq $hintPath}){
-                    $file = $nuspec.CreateElement("file")
-                    $libName=(Get-item $hintpath).Name
-                    $file.SetAttribute("src", "..\src\libs\$libName")
-                    
-                    $file.SetAttribute("target", "lib\net$targetFrameworkVersion\$libName")
-                    $nuspec.SelectSingleNode("//files").AppendChild($file)|Out-Null    
-                }
-            }
-        }
-        
-    }
-
-    if ($metaData.id -like "Xpand.XAF*"){
-        $file = $nuspec.CreateElement("file")
-        $file.SetAttribute("src", "Readme.txt")
-        $file.SetAttribute("target", "")
-        $nuspec.SelectSingleNode("//files").AppendChild($file)|Out-Null
-    }
-
+    $nuspec=Update-Nuspec @uArgs
     New-Item -ItemType Directory -Path "$root\bin\nuspec" -Force -ErrorAction SilentlyContinue|Out-Null
-    $nuspec.Save("$root\bin\nuspec\$($metadata.id).nuspec")
+    $nuspec.Save($NuspecFilename)
 
 } 
 Remove-Item $template 

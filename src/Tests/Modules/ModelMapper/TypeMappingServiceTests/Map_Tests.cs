@@ -1,20 +1,20 @@
-﻿using System;
+﻿using DevExpress.XtraGrid.Columns;
+using DevExpress.XtraGrid.Views.Grid;
+using Fasterflect;
+using Shouldly;
+using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using DevExpress.XtraGrid.Columns;
-using DevExpress.XtraGrid.Views.Grid;
-using Fasterflect;
-using Shouldly;
-using Xpand.Source.Extensions.System.String;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping;
 using Xunit;
 
-namespace Tests.Modules.ModelMapper.TypeMappingServiceTests{
-    
+namespace Tests.Modules.ModelMapper.TypeMappingServiceTests
+{
+
     public partial class ObjectMappingServiceTests{
         [Fact]
         public async Task Map_RW_StringValueType_Public_Properties(){
@@ -61,7 +61,7 @@ namespace Tests.Modules.ModelMapper.TypeMappingServiceTests{
             foreach (var propertyInfo in propertiesToMap){
                 var modelProperty = modelTypeProperties.FirstOrDefault(info => info.Name==propertyInfo.Name);
                 modelProperty.ShouldNotBeNull(propertyInfo.Name);
-                modelProperty.PropertyType.Name.ShouldBe($"IModel{propertyInfo.PropertyType.FullName.CleanCodeName()}");
+                modelProperty.PropertyType.Name.ShouldBe($"{propertyInfo.PropertyType.ModelMapName(typeToMap)}");
             }
 
             modelTypeProperties.Length.ShouldBe(propertiesToMap.Length);
