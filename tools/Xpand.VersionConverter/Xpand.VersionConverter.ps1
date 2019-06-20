@@ -8,8 +8,8 @@ using namespace System.Text.RegularExpressions
 using namespace Mono.Cecil
 using namespace Mono.Cecil.pdb
 param(
-    [string]$projectFile ="C:\Users\Tolis\source\repos\Solution174\Solution174.Module\Solution174.Module.csproj",
-    [string]$targetPath ="C:\Users\Tolis\source\repos\Solution174\Solution174.Module\bin\Debug\",
+    [string]$projectFile ,
+    [string]$targetPath ,
     [string]$DevExpressVersion,
     [string]$VerboseOutput="Continue",
     [string]$referenceFilter = "DevExpress*",
@@ -25,8 +25,13 @@ $ErrorActionPreference = "Stop"
 . "$PSScriptRoot\Functions.ps1"
 
 Write-Verbose "Running VersionConverter on project $projectFile with target $targetPath"
+if (!$DevExpressVersion){
+    $dxVersion = Get-DevExpressVersion $targetPath $referenceFilter $projectFile 
+}
+else{
+    $dxVersion=$DevExpressVersion
+}
 
-$dxVersion = Get-DevExpressVersion $targetPath $referenceFilter $projectFile 
 if (!$dxVersion){
     Write-Warning "Cannot find DevExpress Version. You have the following options:`r`n1. $howToVerbose`r`n2. If your project has indirect references to DevExpress through another assembly then you can always force the DevExpressVersion by modifying your project to include <PropertyGroup><DevExpressVersion>19.1.3</DevExpressVersion>.`r`n This declaration can be solution wide if done in your directory.build.props file.`r`n"
     throw "Check output warning message"
