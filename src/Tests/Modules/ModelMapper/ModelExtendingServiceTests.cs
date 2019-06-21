@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
@@ -10,7 +8,6 @@ using DevExpress.ExpressApp.Win.Editors;
 using DevExpress.Utils;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
-using Fasterflect;
 using Shouldly;
 using Tests.Modules.ModelMapper.BOModel;
 using Xpand.Source.Extensions.System.String;
@@ -80,7 +77,7 @@ namespace Tests.Modules.ModelMapper{
         }
 
         [Fact]
-        public async Task Extend_Multiple_Objects_with_common_types(){
+        public void Extend_Multiple_Objects_with_common_types(){
             var typeToMap1 = typeof(TestModelMapperCommonType1);
             var typeToMap2 = typeof(TestModelMapperCommonType2);
             InitializeMapperService(nameof(Extend_Multiple_Objects_with_common_types));

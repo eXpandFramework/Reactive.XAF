@@ -2,13 +2,13 @@ param(
     [string]$packageSources = "C:\Program Files (x86)\DevExpress 18.2\Components\System\Components\packages",
     [string]$msbuild = $null,
     [string]$nugetApiKey = $null,
-    [string]$dxVersion = "19.1.3",
+    [string]$dxVersion = "18.2.7",
     [bool]$build = $true,
     [bool]$cleanBin = $true,
     [string]$branch="lab",
     [switch]$InstallModules,
     [string[]]$taskList=@("Release"),
-    [string]$XpandPwshVersion = "0.8.0",
+    [string]$XpandPwshVersion = "0.9.2",
     [switch]$Release
 )
 $ErrorActionPreference = "Stop"

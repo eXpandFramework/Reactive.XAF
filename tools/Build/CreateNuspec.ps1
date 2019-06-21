@@ -76,6 +76,8 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*Tests*", "*.Source.*" 
         ReferenceToPackageFilter="Xpand.XAF*"
         PublishedSource=(Get-PackageFeed -Xpand)
         Release=$Release
+        ReadMe=$true
+
     }
     $nuspec=Update-Nuspec @uArgs
     New-Item -ItemType Directory -Path "$root\bin\nuspec" -Force -ErrorAction SilentlyContinue|Out-Null

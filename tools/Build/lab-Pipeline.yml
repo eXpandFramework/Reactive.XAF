@@ -40,7 +40,7 @@ steps:
     uiTests: true
     runInParallel: false
     diagnosticsEnabled: true
-    runTestsInIsolation: false
+    runTestsInIsolation: true
     codeCoverageEnabled: true
     rerunFailedTests: true 
 - task: PowerShell@2
