@@ -27,12 +27,12 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |----|----
 |**DevExpress.Data, Version=18.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL**|**Any**
  |**DevExpress.ExpressApp**|**Any**
-|[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.0.28
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|1.2.33.2
- |Enums.NET|2.3.2
+|Enums.NET|2.3.2
  |fasterflect|2.1.3
  |Mono.Cecil|0.10.4
  |System.Reactive|4.1.5
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|1.2.33
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.0.29
 
 ## Issues-Debugging-Troubleshooting
 
