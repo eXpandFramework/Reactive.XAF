@@ -4,6 +4,7 @@ variables:
 trigger: 
   paths:
     exclude:
+      - .github/FUNDING.yml
       - src/Modules/Readme.md
       - src/Modules/AutoCommit/Readme.md
       - src/Modules/CloneMemberValue/Readme.md
