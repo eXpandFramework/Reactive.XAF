@@ -44,6 +44,7 @@ steps:
     runTestsInIsolation: true
     codeCoverageEnabled: true
     rerunFailedTests: true 
+    rerunMaxAttempts: 3
 - task: PowerShell@2
   displayName: CheckTests
   inputs:

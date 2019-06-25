@@ -15,7 +15,7 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  CloneModelView</tags>
     <dependencies>
       <dependency id="System.ValueTuple" version="4.5.0" />
-      <dependency id="Xpand.VersionConverter" version="1.0.29.0" />
+      <dependency id="Xpand.VersionConverter" version="1.0.30.0" />
     </dependencies>
   </metadata>
   <files>

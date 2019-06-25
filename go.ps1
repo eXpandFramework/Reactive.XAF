@@ -1,4 +1,4 @@
-param(
+﻿param(
     [string]$packageSources = "C:\Program Files (x86)\DevExpress 18.2\Components\System\Components\packages",
     [string]$msbuild = $null,
     [string]$nugetApiKey = $null,
@@ -8,7 +8,7 @@ param(
     [string]$branch="lab",
     [switch]$InstallModules,
     [string[]]$taskList=@("Release"),
-    [string]$XpandPwshVersion = "0.9.10",
+    [string]$XpandPwshVersion = "0.9.11",
     [switch]$Release
 )
 $ErrorActionPreference = "Stop"

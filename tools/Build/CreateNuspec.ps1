@@ -7,8 +7,6 @@ $ErrorActionPreference = "Stop"
 Import-Module XpandPwsh -Force
 Set-Location $root
 New-Item -Path "$root\bin\Nupkg" -ItemType Directory  -ErrorAction SilentlyContinue -Force |Out-Null
-# & (Get-NugetPath) spec -Force -verbosity quiet 
-
 
 $versionConverter = [PSCustomObject]@{
     id              = "Xpand.VersionConverter"
@@ -28,6 +26,7 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*Tests*", "*.Source.*" 
         Release=$Release
         ReadMe=$true
         LibrariesFolder="$root\src\libs"
+        ProjectsRoot=$root
     }
     if ($Release){
         $uArgs.PublishedSource=(Get-PackageFeed -Nuget)
@@ -36,7 +35,7 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*Tests*", "*.Source.*" 
 
     $nuspecFileName="$root\tools\nuspec\$($_.BaseName).nuspec"
     [xml]$nuspec = Get-Content $nuspecFileName
-    $nuspec.package.metaData.Id =$_.BaseName
+    # $nuspec.package.metaData.Id = $_.BaseName
     $readMePath = "$($_.DirectoryName)\ReadMe.md"
     if (Test-Path $readMePath) {
         $readMe = Get-Content $readMePath -Raw
