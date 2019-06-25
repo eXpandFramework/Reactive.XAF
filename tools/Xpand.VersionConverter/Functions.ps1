@@ -93,29 +93,40 @@ function Get-PackagesFolder {
 
 function Install-MonoCecil($resolvePath) {
     Write-Verbose "Loading Mono.Cecil"
-    $monoPath = "$PSScriptRoot\mono.cecil.0.10.3\lib\net40"
+    $monoPath = "$PSScriptRoot\mono.cecil.0.10.4\lib\net40"
     if (!(Test-Path "$monoPath\Mono.Cecil.dll")) {
         $client = New-Object System.Net.WebClient
-        $client.DownloadFile("https://www.nuget.org/api/v2/package/Mono.Cecil/0.10.3", "$PSScriptRoot\mono.cecil.0.10.3.zip")
+        $client.DownloadFile("https://www.nuget.org/api/v2/package/Mono.Cecil/0.10.4", "$PSScriptRoot\mono.cecil.0.10.4.zip")
         Add-Type -AssemblyName System.IO.Compression.FileSystem
-        [ZipFile]::ExtractToDirectory("$PSScriptRoot\mono.cecil.0.10.3.zip", "$PSScriptRoot\mono.cecil.0.10.3")
+        [ZipFile]::ExtractToDirectory("$PSScriptRoot\mono.cecil.0.10.4.zip", "$PSScriptRoot\mono.cecil.0.10.4")
     }
 
     [System.Reflection.Assembly]::Load([File]::ReadAllBytes("$monoPath\Mono.Cecil.dll")) | Out-Null
     [System.Reflection.Assembly]::Load([File]::ReadAllBytes("$monoPath\Mono.Cecil.pdb.dll")) | Out-Null
+    $packagesFolder = Get-PackagesFolder 
     Add-Type @"
-using Mono.Cecil;
-public class MyDefaultAssemblyResolver : DefaultAssemblyResolver{
-    public override AssemblyDefinition Resolve(AssemblyNameReference name, ReaderParameters parameters){
-        try{
-            return base.Resolve(name, parameters);
-        }
-        catch (AssemblyResolutionException){
-            var assemblyDefinition = AssemblyDefinition.ReadAssembly(string.Format(@"$resolvePath\{0}.dll", name.Name));
-            return assemblyDefinition;
+    using System;
+    using System.Diagnostics;
+    using Mono.Cecil;
+    using System.IO;
+    
+    public class MyDefaultAssemblyResolver : DefaultAssemblyResolver{
+        public override AssemblyDefinition Resolve(AssemblyNameReference name, ReaderParameters parameters){
+            try{
+                return base.Resolve(name, parameters);
+            }
+            catch (AssemblyResolutionException){
+                var assemblies = Directory.GetFiles(@"$packagesFolder", string.Format("{0}.dll", name.Name),SearchOption.AllDirectories);
+                foreach (var assembly in assemblies){
+                    var fileVersion = new Version(FileVersionInfo.GetVersionInfo(assembly).FileVersion);
+                    if (fileVersion == name.Version){
+                        return AssemblyDefinition.ReadAssembly(assembly);
+                    }
+                }
+                return AssemblyDefinition.ReadAssembly(string.Format(@"$resolvePath\{0}.dll", name.Name));
+            }
         }
     }
-}
 "@ -ReferencedAssemblies @("$monoPath\Mono.Cecil.dll")
 }
 function Remove-OtherVersionFlags {
@@ -131,7 +142,7 @@ function Use-Object {
         [Object]$InputObject,
         [Parameter(Mandatory = $true)]
         [scriptblock]$ScriptBlock
-    )
+    )   
     $killDomain
     try {
         . $ScriptBlock
@@ -274,7 +285,6 @@ function Update-Version($modulePath, $dxVersion) {
         $moduleReferences = $moduleAssembly.MainModule.AssemblyReferences
         Write-Verbose "References:`r`n"
         $moduleReferences | Write-Verbose
-        $needPatching = $false
         $moduleReferences.ToArray() | Where-Object { $_.FullName -like $referenceFilter } | ForEach-Object {
             $dxReference = $_
             Write-Verbose "`r`nChecking $_ reference...`r`n"
@@ -282,7 +292,7 @@ function Update-Version($modulePath, $dxVersion) {
                 $moduleReferences.Remove($dxReference) | Out-Null
                 $newMinor = "$($dxVersion.Major).$($dxVersion.Minor)"
                 $newName = [Regex]::Replace($dxReference.Name, ".(v[\d]{2}\.\d)", ".v$newMinor")
-                $regex = New-Object Regex("PublicKeyToken=([\w]*)")
+                $regex = New-Object Regex("PublicKeyToken=([\w]*)") 
                 $token = $regex.Match($dxReference).Groups[1].Value
                 $regex = New-Object Regex("Culture=([\w]*)")
                 $culture = $regex.Match($dxReference).Groups[1].Value
@@ -293,27 +303,26 @@ function Update-Version($modulePath, $dxVersion) {
                         $_.Scope = $newReference 
                     }
                 }
-                Write-Verbose "$($_.Name) version will changed from $($_.Version) to $($dxVersion)`r`n" 
-                $needPatching = $true
+                Write-Verbose "$($_.Name) version will changed from $($_.Version.Major) to $($dxVersion)`r`n" 
+                Write-Verbose "Patching $modulePath"
+                $writeParams = New-Object WriterParameters
+                $writeParams.WriteSymbols = $moduleAssembly.MainModule.hassymbols
+                $key = [File]::ReadAllBytes("$PSScriptRoot\Xpand.snk")
+                $writeParams.StrongNameKeyPair = [System.Reflection.StrongNameKeyPair]($key)
+                $moduleAssembly.Write($writeParams)
+                if ($writeParams.WriteSymbols) {
+                    $pdbPath = Get-Item $modulePath
+                    $pdbPath = "$($pdbPath.DirectoryName)\$($pdbPath.BaseName).pdb"
+                    $symbolSources = Get-SymbolSources $pdbPath
+                    Update-Symbols -pdb $pdbPath -SymbolSources $symbolSources
+                }
+                break
             }
             else {
                 Write-Verbose "Versions ($($dxReference.Version)) matched nothing to do.`r`n"
             }
         }
-        if ($needPatching) {
-            Write-Verbose "Patching $modulePath"
-            $writeParams = New-Object WriterParameters
-            $writeParams.WriteSymbols = $moduleAssembly.MainModule.hassymbols
-            $key = [File]::ReadAllBytes("$PSScriptRoot\Xpand.snk")
-            $writeParams.StrongNameKeyPair = [System.Reflection.StrongNameKeyPair]($key)
-            $moduleAssembly.Write($writeParams)
-            if ($writeParams.WriteSymbols) {
-                $pdbPath = Get-Item $modulePath
-                $pdbPath = "$($pdbPath.DirectoryName)\$($pdbPath.BaseName).pdb"
-                $symbolSources = Get-SymbolSources $pdbPath
-                Update-Symbols -pdb $pdbPath -SymbolSources $symbolSources
-            }
-        }   
+         
     }
 }
 function Get-SymbolSources {
