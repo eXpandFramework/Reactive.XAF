@@ -10,7 +10,7 @@ using namespace Mono.Cecil.pdb
 param(
     [string]$projectFile ,
     [string]$targetPath ,
-    [string]$DevExpressVersion,
+    [Version]$DevExpressVersion,
     [string]$VerboseOutput="Continue",
     [string]$referenceFilter = "DevExpress*",
     [string]$assemblyFilter = "Xpand.XAF.*"
