@@ -10,7 +10,7 @@ using namespace Mono.Cecil.pdb
 param(
     [string]$projectFile ,
     [string]$targetPath ,
-    [Version]$DevExpressVersion,
+    $DevExpressVersion,
     [string]$VerboseOutput="Continue",
     [string]$referenceFilter = "DevExpress*",
     [string]$assemblyFilter = "Xpand.XAF.*"
@@ -20,7 +20,9 @@ $howToVerbose="Edit $projectFile and enable verbose messaging by adding <Propert
 if ($VerboseOutput){
     $VerbosePreference = $VerboseOutput
 }
-
+if ($DevExpressVersion){
+    [version]$DevExpressVersion=$DevExpressVersion
+}
 $ErrorActionPreference = "Stop"
 . "$PSScriptRoot\Functions.ps1"
 
