@@ -285,6 +285,7 @@ function Update-Version($modulePath, $dxVersion) {
         $moduleReferences = $moduleAssembly.MainModule.AssemblyReferences
         Write-Verbose "References:`r`n"
         $moduleReferences | Write-Verbose
+        $needsPatching = $false
         $moduleReferences.ToArray() | Where-Object { $_.FullName -like $referenceFilter } | ForEach-Object {
             $dxReference = $_
             Write-Verbose "`r`nChecking $_ reference...`r`n"
@@ -304,22 +305,26 @@ function Update-Version($modulePath, $dxVersion) {
                     }
                 }
                 Write-Verbose "$($_.Name) version will changed from $($_.Version.Major) to $($dxVersion)`r`n" 
-                Write-Verbose "Patching $modulePath"
-                $writeParams = New-Object WriterParameters
-                $writeParams.WriteSymbols = $moduleAssembly.MainModule.hassymbols
-                $key = [File]::ReadAllBytes("$PSScriptRoot\Xpand.snk")
-                $writeParams.StrongNameKeyPair = [System.Reflection.StrongNameKeyPair]($key)
-                $moduleAssembly.Write($writeParams)
-                if ($writeParams.WriteSymbols) {
-                    $pdbPath = Get-Item $modulePath
-                    $pdbPath = "$($pdbPath.DirectoryName)\$($pdbPath.BaseName).pdb"
-                    $symbolSources = Get-SymbolSources $pdbPath
-                    Update-Symbols -pdb $pdbPath -SymbolSources $symbolSources
-                }
-                break
+                $needsPatching = $true
             }
             else {
-                Write-Verbose "Versions ($($dxReference.Version)) matched nothing to do.`r`n"
+                Write-Verbose "$($_.Name) Version ($($dxReference.Version)) matched nothing to do.`r`n"
+            }
+        }
+        if ($needsPatching) {
+            Write-Verbose "Patching $modulePath"
+            $writeParams = New-Object WriterParameters
+            $writeParams.WriteSymbols = $moduleAssembly.MainModule.hassymbols
+            $key = [File]::ReadAllBytes("$PSScriptRoot\Xpand.snk")
+            $writeParams.StrongNameKeyPair = [System.Reflection.StrongNameKeyPair]($key)
+            if ($writeParams.WriteSymbols) {
+                $pdbPath = Get-Item $modulePath
+                $pdbPath = "$($pdbPath.DirectoryName)\$($pdbPath.BaseName).pdb"
+                $symbolSources = Get-SymbolSources $pdbPath
+            }
+            $moduleAssembly.Write($writeParams)
+            if ($writeParams.WriteSymbols -and $symbolSources -notmatch "is not source indexed") {
+                Update-Symbols -pdb $pdbPath -SymbolSources $symbolSources
             }
         }
          
