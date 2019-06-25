@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 using Mono.Cecil;
 using Xpand.Source.Extensions.System.String;
 
-namespace Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping{
+namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     public class CustomizeAttribute{
         public IList<(Attribute attribute,CustomAttribute customAttribute)> Attributes{ get; set; }
         public PropertyInfo PropertyInfo{ get; set; }
@@ -41,7 +41,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping{
         }
 
         private static void ConnectAttributeRules(){
-            CustomizeAttributesSubject
+            TypeMappingService.CustomizeAttributesSubject
                 .SelectMany(attribute => AtributeMappingRules.Select(_ => {
                     _.action(attribute);
                     return _;
@@ -67,10 +67,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping{
                 if (argument.Value is CustomAttributeArgument customAttributeArgument){
                     var typeReference = customAttributeArgument.Type;
                     var value = customAttributeArgument.Value;
-                    return typeReference.Resolve().IsEnum ? GetEnums(typeReference, value) : value ?? "null";
+                    return typeReference.Resolve().IsEnum ? TypeMappingService.GetEnums(typeReference, value) : value ?? "null";
                 }
                 var resolvedType = argument.Type.Resolve();
-                return resolvedType.IsEnum ? GetEnums(argument.Type, argument.Value) : argument.Value;
+                return resolvedType.IsEnum ? TypeMappingService.GetEnums(argument.Type, argument.Value) : argument.Value;
             }));
             return ctorArguments;
         }

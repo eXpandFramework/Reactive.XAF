@@ -15,8 +15,9 @@ using Xpand.Source.Extensions.XAF.Model;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.ModelMapper;
 using Xpand.XAF.Modules.ModelMapper.Services;
-using Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping;
+using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xunit;
+using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.TypeMappingService;
 
 namespace Tests.Modules.ModelMapper{
     [Collection(nameof(XafTypesInfo))]
@@ -36,9 +37,9 @@ namespace Tests.Modules.ModelMapper{
         }
 
         [Theory]
-        [InlineData(PredifinedModelMapperConfiguration.GridColumn, typeof(GridColumn),Platform.Win,MMListViewNodePath+"/Columns/Test")]
-        [InlineData(PredifinedModelMapperConfiguration.GridView, typeof(GridView),Platform.Win,MMListViewNodePath)]
-        internal void ExtendModel_Predefined_Type(PredifinedModelMapperConfiguration configuration,Type typeToMap,Platform platform,string nodePath){
+        [InlineData(PredifinedMap.GridColumn, typeof(GridColumn),Platform.Win,MMListViewNodePath+"/Columns/Test")]
+        [InlineData(PredifinedMap.GridView, typeof(GridView),Platform.Win,MMListViewNodePath)]
+        internal void ExtendModel_Predefined_Type(PredifinedMap configuration,Type typeToMap,Platform platform,string nodePath){
             Assembly.LoadFile(typeToMap.Assembly.Location);
             InitializeMapperService($"{nameof(ExtendModel_Multiple_Predefined_Type)}{configuration}{platform}",platform);
 
@@ -53,7 +54,7 @@ namespace Tests.Modules.ModelMapper{
             var platform = Platform.Win;
             InitializeMapperService($"{nameof(ExtendModel_Multiple_Predefined_Type)}",platform);
 
-            var configuration = PredifinedModelMapperConfiguration.GridView|PredifinedModelMapperConfiguration.GridColumn;
+            var configuration = PredifinedMap.GridView|PredifinedMap.GridColumn;
             configuration.Extend();
             var application = DefaultModelMapperModule(platform).Application;
             AssertExtendedModel(typeof(GridView), application, MMListViewNodePath);

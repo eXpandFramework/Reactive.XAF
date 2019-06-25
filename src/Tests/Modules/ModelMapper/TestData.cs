@@ -174,6 +174,12 @@ namespace Tests.Modules.ModelMapper{
         public string Test{ get; set; }
         public AppearanceObjectEx AppearanceCell{ get; } = new AppearanceObjectEx();
     }
+    class NonBrowsableProperties{
+        public string Test{ get; set; }
+        [Browsable(false)]
+        public string NonBroswsableTest{ get; set; }
+        
+    }
     
     internal class ResevredProperties : IModelNode{
         public IEnumerable<string> Strings{ get; } = new List<string>();

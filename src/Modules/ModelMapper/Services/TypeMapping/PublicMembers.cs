@@ -11,7 +11,7 @@ using DevExpress.ExpressApp.Model;
 using Fasterflect;
 using Mono.Cecil;
 
-namespace Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping{
+namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     public static partial class TypeMappingService{
         public static string DefaultContainerSuffix="Map";
         public static string ModelMapperAssemblyName=null;
@@ -35,7 +35,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping{
         }
 
         public static string OutPutAssembly =>
-            $@"{Path.GetDirectoryName(typeof(TypeMappingService).Assembly.Location)}\{ModelMapperAssemblyName}{MapperAssemblyName}{ModelExtendingService.Platform}.dll";
+            $@"{Path.GetDirectoryName(typeof(TypeMapping.TypeMappingService).Assembly.Location)}\{ModelMapperAssemblyName}{MapperAssemblyName}{ModelExtendingService.Platform}.dll";
 
         private static void Init(){
             _typesToMap = Subject.Synchronize(new ReplaySubject<(Type type,IModelMapperConfiguration configuration)>());
@@ -46,7 +46,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping{
                     .Select(_ =>!_? distinnctTypesToMap.ModelCode().Compile(): Assembly.LoadFile(OutputAssembly).GetTypes()
                                 .Where(type => typeof(IModelModelMap).IsAssignableFrom(type)).ToObservable()).Switch();
             }).Replay().AutoConnect();
-            _modelMapperModuleVersion = typeof(TypeMappingService).Assembly.GetName().Version;
+            _modelMapperModuleVersion = typeof(TypeMapping.TypeMappingService).Assembly.GetName().Version;
             
             ReservedPropertyNames.Clear();
             ReservedPropertyNames.AddRange(typeof(IModelNode).Properties().Select(info => info.Name));

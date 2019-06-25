@@ -3,9 +3,9 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Fasterflect;
 using Shouldly;
-using Xpand.Source.Extensions.System.String;
-using Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping;
+using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xunit;
+using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.TypeMappingService;
 
 namespace Tests.Modules.ModelMapper.TypeMappingServiceTests{
     
@@ -44,6 +44,20 @@ namespace Tests.Modules.ModelMapper.TypeMappingServiceTests{
             var modelTypeProperties = ModelTypeProperties(modelType);
             
             modelTypeProperties.Length.ShouldBe(0);
+
+        }
+
+        [Fact]
+        public async Task Do_Not_Map_Non_Browsablw_properties(){
+            InitializeMapperService(nameof(Do_Not_Map_Non_Browsablw_properties));
+            var typeToMap = typeof(NonBrowsableProperties);
+
+            var modelType = await typeToMap.MapToModel().ModelInterfaces();
+
+            var modelTypeProperties = ModelTypeProperties(modelType);
+            
+            modelTypeProperties.FirstOrDefault(info => info.Name==nameof(NonBrowsableProperties.NonBroswsableTest)).ShouldBeNull();
+            modelTypeProperties.FirstOrDefault(info => info.Name==nameof(NonBrowsableProperties.Test)).ShouldNotBeNull();
 
         }
 

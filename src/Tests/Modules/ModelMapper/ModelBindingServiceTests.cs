@@ -6,7 +6,7 @@ using Shouldly;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.ModelMapper;
 using Xpand.XAF.Modules.ModelMapper.Services;
-using Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping;
+using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xunit;
 
 namespace Tests.Modules.ModelMapper{

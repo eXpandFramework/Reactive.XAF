@@ -9,8 +9,9 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.ModelMapper.Services;
-using Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping;
+using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xunit;
+using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.TypeMappingService;
 
 namespace Tests.Modules.ModelMapper.TypeMappingServiceTests
 {
@@ -82,9 +83,9 @@ namespace Tests.Modules.ModelMapper.TypeMappingServiceTests
 
 
         [Theory]
-        [InlineData(PredifinedModelMapperConfiguration.GridColumn,typeof(GridColumn),Platform.Win)]
-        [InlineData(PredifinedModelMapperConfiguration.GridView,typeof(GridView),Platform.Win)]
-        internal async Task Map_PredifinedConfigurations(PredifinedModelMapperConfiguration configuration,Type assemblyToLoad,Platform platform){
+        [InlineData(PredifinedMap.GridColumn,typeof(GridColumn),Platform.Win)]
+        [InlineData(PredifinedMap.GridView,typeof(GridView),Platform.Win)]
+        internal async Task Map_PredifinedConfigurations(PredifinedMap configuration,Type assemblyToLoad,Platform platform){
 
             InitializeMapperService($"{nameof(Map_PredifinedConfigurations)}{configuration}",platform);
             
@@ -103,7 +104,7 @@ namespace Tests.Modules.ModelMapper.TypeMappingServiceTests
         internal void Map_All_PredifinedConfigurations(){
 
             InitializeMapperService($"{nameof(Map_All_PredifinedConfigurations)}",Platform.Win);
-            var values = EnumsNET.Enums.GetValues<PredifinedModelMapperConfiguration>().ToArray();
+            var values = EnumsNET.Enums.GetValues<PredifinedMap>().ToArray();
 
             var modelInterfaces = values.MapToModel().ModelInterfaces().Replay();
             modelInterfaces.Connect();
@@ -118,15 +119,15 @@ namespace Tests.Modules.ModelMapper.TypeMappingServiceTests
         internal void Map_PredifinedConfigurations_Combination(){
 
             InitializeMapperService($"{nameof(Map_All_PredifinedConfigurations)}",Platform.Win);
-            var mapperConfiguration = (PredifinedModelMapperConfiguration.GridView | PredifinedModelMapperConfiguration.GridColumn);
+            var mapperConfiguration = (PredifinedMap.GridView | PredifinedMap.GridColumn);
 
             var modelInterfaces = mapperConfiguration.MapToModel().ModelInterfaces().Replay();
             modelInterfaces.Connect();
 
             var types = modelInterfaces.ToEnumerable().ToArray();
             types.Length.ShouldBe(2);
-            types.First().Name.ShouldBe($"IModel{PredifinedModelMapperConfiguration.GridView}");
-            types.Last().Name.ShouldBe($"IModel{PredifinedModelMapperConfiguration.GridColumn}");
+            types.First().Name.ShouldBe($"IModel{PredifinedMap.GridView}");
+            types.Last().Name.ShouldBe($"IModel{PredifinedMap.GridColumn}");
         }
 
         [Fact]

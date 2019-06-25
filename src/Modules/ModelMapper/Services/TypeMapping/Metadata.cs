@@ -10,7 +10,7 @@ using Xpand.Source.Extensions.Linq;
 using Xpand.Source.Extensions.MonoCecil;
 using Xpand.Source.Extensions.System.Refelction;
 
-namespace Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping{
+namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
 
     public static partial class TypeMappingService{
         private static Version _modelMapperModuleVersion;
@@ -55,11 +55,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping{
 
                     return true;
                 })
-                .Where(info => info.AccessModifier()==AccessModifier.Public&& !ReservedPropertyNames.Contains(info.Name)&&!typeof(ICollection).IsAssignableFrom(info.PropertyType))
+                .Where(info => info.AccessModifier()==AccessModifier.Public&& !TypeMappingService.ReservedPropertyNames.Contains(info.Name)&&!typeof(ICollection).IsAssignableFrom(info.PropertyType))
                 .Where(info => {
                     if (info.PropertyType == typeof(string) || info.PropertyType.IsNullableType()) return true;
                     return !info.PropertyType.IsGenericType && info.PropertyType != type &&
-                           info.PropertyType != typeof(object) && ReservedPropertyTypes.Any(_ => info.PropertyType!=_);
+                           info.PropertyType != typeof(object) && TypeMappingService.ReservedPropertyTypes.Any(_ => info.PropertyType!=_);
                 })
                 .DistinctBy(info => info.Name);
         }

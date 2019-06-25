@@ -14,7 +14,7 @@ using Mono.Cecil;
 using Xpand.Source.Extensions.MonoCecil;
 using Xpand.Source.Extensions.System.String;
 
-namespace Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping{
+namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
     public class ModelMapperModelConfigurationAttribute : Attribute{
         public ModelMapperModelConfigurationAttribute(string typeName, int hashCode){
@@ -60,7 +60,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping{
             var mapName = type.ModelMapName( configuration:configuration);
             var containerCode = type.ContainerCode( configuration, $"IModel{containerName}", assemblyDefinitions, mapName);
 
-            var modelMappersTypeName = $"IModel{containerName}{ModelMappersNodeName}";
+            var modelMappersTypeName = $"IModel{containerName}{TypeMappingService.ModelMappersNodeName}";
             var modelMappersInterfaceCode = ModelMappersInterfaceCode( modelMappersTypeName);
 
             var typeCode = type.TypeCode(mapName, modelMappersTypeName, assemblyDefinitions,configuration?.ImageName);
@@ -196,7 +196,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping{
             AssemblyDefinition[] assemblyDefinitions, string imageName){
 
             var domainLogic = $@"[{typeof(DomainLogicAttribute).FullName}(typeof({modelMappersTypeName}))]{Environment.NewLine}public class {modelMappersTypeName}DomainLogic{{public static int? Get_Index({modelMappersTypeName} mapper){{return 0;}}}}{Environment.NewLine}";
-            string modelMappersPropertyCode = $"new int? Index{{get;set;}}{Environment.NewLine}{modelMappersTypeName} {ModelMappersNodeName} {{get;}}";
+            string modelMappersPropertyCode = $"new int? Index{{get;set;}}{Environment.NewLine}{modelMappersTypeName} {TypeMappingService.ModelMappersNodeName} {{get;}}";
             var typeCode = (type,type).ModelCode(assemblyDefinitions,imageName,mapName, additionalPropertiesCode: modelMappersPropertyCode,
                 baseType: typeof(IModelModelMap));
             

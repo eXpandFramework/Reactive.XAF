@@ -10,10 +10,10 @@ using Microsoft.CSharp;
 using Mono.Cecil;
 using Xpand.Source.Extensions.MonoCecil;
 
-namespace Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping{
+namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     public static partial class TypeMappingService{
         static string OutputAssembly =>
-            $@"{Path.GetDirectoryName(typeof(TypeMappingService).Assembly.Location)}\{ModelMapperAssemblyName}{MapperAssemblyName}{ModelExtendingService.Platform}.dll";
+            $@"{Path.GetDirectoryName(typeof(TypeMappingService).Assembly.Location)}\{TypeMappingService.ModelMapperAssemblyName}{TypeMappingService.MapperAssemblyName}{ModelExtendingService.Platform}.dll";
 
 
         private static Assembly Compile(this IEnumerable<Assembly> references, string code){
@@ -65,7 +65,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping{
         private static bool VersionChanged(this AssemblyDefinition assemblyDefinition){
             var versionAttribute = assemblyDefinition.CustomAttributes.First(attribute =>
                 attribute.AttributeType.ToType() == typeof(AssemblyFileVersionAttribute));
-            return Version.Parse(versionAttribute.ConstructorArguments.First().Value.ToString()) !=_modelMapperModuleVersion;
+            return Version.Parse(versionAttribute.ConstructorArguments.First().Value.ToString()) !=TypeMappingService._modelMapperModuleVersion;
         }
 
         private static bool IsMapped(this AssemblyDefinition assemblyDefinition,(Type type, IModelMapperConfiguration configuration) data){

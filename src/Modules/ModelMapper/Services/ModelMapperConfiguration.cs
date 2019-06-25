@@ -11,7 +11,7 @@ using EnumsNET;
 using Xpand.Source.Extensions.FunctionOperators;
 using Xpand.Source.Extensions.System.AppDomain;
 using Xpand.Source.Extensions.XAF.XafApplication;
-using Xpand.XAF.Modules.ModelMapper.Services.ObjectMapping;
+using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services{
     public interface IModelMapperConfiguration{
@@ -39,7 +39,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
     }
 
     [Flags]
-    public enum PredifinedModelMapperConfiguration{
+    public enum PredifinedMap{
         None,
         GridView,
         GridColumn
@@ -61,7 +61,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             }
         }
 
-        public static void Extend(this PredifinedModelMapperConfiguration configuration,Action<ModelMapperConfiguration> configure = null){
+        public static void Extend(this PredifinedMap configuration,Action<ModelMapperConfiguration> configure = null){
             var results = FlagEnums.GetFlagMembers(configuration).Select(_ => _.Value)
                 .Select(_ => {
                     var modelMapperConfiguration = _.ModelMapperConfiguration(configure);
@@ -73,17 +73,17 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             }
         }
 
-        public static IObservable<Type> MapToModel(this IEnumerable<PredifinedModelMapperConfiguration> configurations,Action<PredifinedModelMapperConfiguration,ModelMapperConfiguration> configure = null){
-            return configurations.Where(_ => _!=PredifinedModelMapperConfiguration.None)
+        public static IObservable<Type> MapToModel(this IEnumerable<PredifinedMap> configurations,Action<PredifinedMap,ModelMapperConfiguration> configure = null){
+            return configurations.Where(_ => _!=PredifinedMap.None)
                 .Select(_ =>_.ModelMapperConfiguration(configuration => configure?.Invoke(_, configuration)).MapData.typeToMap)
                 .MapToModel();
         }
 
-        public static IObservable<Type> MapToModel(this PredifinedModelMapperConfiguration configuration,Action<ModelMapperConfiguration> configure=null){
+        public static IObservable<Type> MapToModel(this PredifinedMap configuration,Action<ModelMapperConfiguration> configure=null){
             return FlagEnums.GetFlagMembers(configuration).Select(_ => _.Value).MapToModel((mapperConfiguration, modelMapperConfiguration) => configure?.Invoke(modelMapperConfiguration));
         }
 
-        private static ModelMapperConfiguration ModelMapperConfiguration(this PredifinedModelMapperConfiguration configuration,Action<ModelMapperConfiguration> configure){
+        private static ModelMapperConfiguration ModelMapperConfiguration(this PredifinedMap configuration,Action<ModelMapperConfiguration> configure){
             var mapperConfiguration = configuration.GetModelMapperConfiguration();
             if (mapperConfiguration != null){
                 configure?.Invoke(mapperConfiguration);
@@ -93,17 +93,17 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             return null;
         }
 
-        public static ModelMapperConfiguration GetModelMapperConfiguration(this PredifinedModelMapperConfiguration configuration){
+        public static ModelMapperConfiguration GetModelMapperConfiguration(this PredifinedMap configuration){
             if (ModelExtendingService.Platform==Platform.Win){
                 if (XtraGridAssembly!=null&&XAFWinAssembly!=null){
                     var rightOperand = XAFWinAssembly.GetType("DevExpress.ExpressApp.Win.Editors.GridListEditor");
-                    if (configuration == PredifinedModelMapperConfiguration.GridView){
+                    if (configuration == PredifinedMap.GridView){
 //                        var visibilityCriteria = "";
                         var visibilityCriteria = VisibilityCriteriaLeftOperand.IsAssignableFromModelListVideEditorType.GetVisibilityCriteria(rightOperand,"Parent.");
                         var typeToMap=XtraGridAssembly.GetType("DevExpress.XtraGrid.Views.Grid.GridView");
                         return new ModelMapperConfiguration {ImageName = "Grid_16x16",VisibilityCriteria =visibilityCriteria,MapData = (typeToMap,typeof(IModelListView))};
                     }
-                    if (configuration == PredifinedModelMapperConfiguration.GridColumn){
+                    if (configuration == PredifinedMap.GridColumn){
 //                        var visibilityCriteria = VisibilityCriteriaLeftOperand.IsAssignableFromModelListVideEditorType.GetVisibilityCriteria(rightOperand,"Parent.Parent.");
                         var visibilityCriteria = "";
                         var typeToMap=XtraGridAssembly.GetType("DevExpress.XtraGrid.Columns.GridColumn");
