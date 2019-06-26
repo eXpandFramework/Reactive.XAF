@@ -84,49 +84,42 @@ namespace Tests.Modules.ModelMapper.TypeMappingServiceTests{
             
         }
 
-//        [Fact]
-//        public async Task Do_not_Map_Attributes_With_DevExpress_Design_Parameters(){
-//
-//            InitializeMapperService(nameof(Do_not_Map_Attributes_With_DevExpress_Design_Parameters));
-//
-//            throw new NotImplementedException();
-//            
-//        }
 
         [Fact]
         public async Task Customize_Attributes_Mapping(){
             InitializeMapperService(nameof(Customize_Attributes_Mapping));
-            var typeToMap = typeof(ReplaceAttributesClass);
-            TypeMappingService.CustomizeAttributes.FirstAsync().Subscribe(attribute => {
+            TypeMappingService.AttributeMappingRules.Add(("Custom", attribute => {
                 var data = attribute.Attributes.First();
                 attribute.Attributes.Clear();
                 attribute.Attributes.Add((new DescriptionAttribute(),data.customAttribute));
-            });
+            }));
+            
+            var typeToMap = typeof(ReplaceAttributesClass);
+            
             var modelType = await typeToMap.MapToModel().ModelInterfaces();
 
             modelType.Properties().First().GetCustomAttributes(typeof(DescriptionAttribute),false).Cast<DescriptionAttribute>().Any().ShouldBeTrue();
-            
         }
 
         [Fact]
         public async Task Attribute_Mapping_Can_Be_Disabled(){
             InitializeMapperService(nameof(Attribute_Mapping_Can_Be_Disabled));
+            TypeMappingService.AttributeMappingRules.Add(("Disable", attribute => {
+                attribute.Attributes.Clear();
+            }));
+            var typeToMap = typeof(CopyAttributesClass);
 
-            using (TypeMappingService.CustomizeAttributes.Subscribe(attribute => { attribute.Attributes.Clear(); })){
-                var typeToMap = typeof(CopyAttributesClass);
+            var modelType = await typeToMap.MapToModel().ModelInterfaces();
 
-                var modelType = await typeToMap.MapToModel().ModelInterfaces();
-
-                var propertyInfos = modelType.Properties();
-                propertyInfos.First(info => info.Name==nameof(CopyAttributesClass.AttributeNoParam)).Attribute<DescriptionAttribute>().ShouldBeNull();
-                propertyInfos.First(info => info.Name==nameof(CopyAttributesClass.AttributePrivate)).Attribute<Attribute>().ShouldBeNull();
-                propertyInfos.First(info => info.Name==nameof(CopyAttributesClass.AttributeValueTypeParam)).Attribute<IndexAttribute>().ShouldBeNull();
-                propertyInfos.First(info => info.Name==nameof(CopyAttributesClass.AttributeDefaultVvalueAttribue)).Attribute<DefaultValueAttribute>().ShouldBeNull();
-                propertyInfos.First(info => info.Name==nameof(CopyAttributesClass.AttributeStringParam)).Attribute<DescriptionAttribute>().ShouldBeNull();
-                propertyInfos.First(info => info.Name==nameof(CopyAttributesClass.AttributeTwoParam)).Attribute<MyClassAttribute>().ShouldBeNull();
-                propertyInfos.First(info => info.Name==nameof(CopyAttributesClass.AttributeTypeParam)).Attribute<TypeConverterAttribute>().ShouldBeNull();
-                propertyInfos.First(info => info.Name==nameof(CopyAttributesClass.AttributeEnumParam)).Attribute<MyClassAttribute>().ShouldBeNull();
-            }
+            var propertyInfos = modelType.Properties();
+            propertyInfos.First(info => info.Name==nameof(CopyAttributesClass.AttributeNoParam)).Attribute<DescriptionAttribute>().ShouldBeNull();
+            propertyInfos.First(info => info.Name==nameof(CopyAttributesClass.AttributePrivate)).Attribute<Attribute>().ShouldBeNull();
+            propertyInfos.First(info => info.Name==nameof(CopyAttributesClass.AttributeValueTypeParam)).Attribute<IndexAttribute>().ShouldBeNull();
+            propertyInfos.First(info => info.Name==nameof(CopyAttributesClass.AttributeDefaultVvalueAttribue)).Attribute<DefaultValueAttribute>().ShouldBeNull();
+            propertyInfos.First(info => info.Name==nameof(CopyAttributesClass.AttributeStringParam)).Attribute<DescriptionAttribute>().ShouldBeNull();
+            propertyInfos.First(info => info.Name==nameof(CopyAttributesClass.AttributeTwoParam)).Attribute<MyClassAttribute>().ShouldBeNull();
+            propertyInfos.First(info => info.Name==nameof(CopyAttributesClass.AttributeTypeParam)).Attribute<TypeConverterAttribute>().ShouldBeNull();
+            propertyInfos.First(info => info.Name==nameof(CopyAttributesClass.AttributeEnumParam)).Attribute<MyClassAttribute>().ShouldBeNull();
         }
     }
 }

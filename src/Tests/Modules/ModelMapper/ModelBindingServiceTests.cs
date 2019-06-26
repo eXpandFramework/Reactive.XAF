@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Linq;
+using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using Shouldly;
+using Tests.Modules.ModelMapper.BOModel;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.ModelMapper;
 using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
+using Xpand.XAF.Modules.Reactive.Services;
 using Xunit;
 
 namespace Tests.Modules.ModelMapper{
@@ -144,6 +147,22 @@ namespace Tests.Modules.ModelMapper{
         [InlineData(Platform.Web,Skip = NotImplemented)]
         internal void Apply_Root_Map_After_mapper_contexts(Platform platform){
             
+        }
+
+        [Theory]
+        [InlineData(Platform.Win,Skip = NotImplemented)]
+        [InlineData(Platform.Web,Skip = NotImplemented)]
+        internal void Bind_ListEditor_ControlType(Platform platform){
+            Type typeToMap=typeof(StringValueTypeProperties);
+            InitializeMapperService($"{nameof(Bind_all_public_rw_string_properties)}{typeToMap.Name}{platform}");
+            typeToMap.Extend<IModelListView>();
+            var application = DefaultModelMapperModule(platform).Application;
+            var listView = application.CreateObjectView<ListView>(typeof(MM));
+            application.WhenListViewCreated()
+                .Select(_ => _.e.View).Cast<ListView>()
+                .ControlsCreated()
+                .Select(_ => _.view.Editor.WhenModelApplied()).Switch()
+                .Do(_ => ((void) _.sender.Control))
         }
     
     }

@@ -5,6 +5,13 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ListEditorExtensions{
+        public static IObservable<(ListEditor sender, EventArgs e)> WhenModelApplied(this ListEditor editor){
+            return Observable.FromEventPattern<EventHandler<EventArgs>, EventArgs>(
+                    handler => editor.ModelApplied += handler,
+                    handler => editor.ModelApplied -= handler)
+                .TransformPattern<EventArgs, ListEditor>();
+        }
+
         public static IObservable<(ListEditor editor, NewObjectAddingEventArgs e)> WhenNewObjectAdding(this ListEditor editor){
             return Observable.FromEventPattern<EventHandler<NewObjectAddingEventArgs>, NewObjectAddingEventArgs>(
                     handler => editor.NewObjectAdding += handler,

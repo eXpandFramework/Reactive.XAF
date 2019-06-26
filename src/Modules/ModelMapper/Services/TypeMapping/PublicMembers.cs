@@ -20,13 +20,16 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         public static List<string> ReservedPropertyNames{ get; }=new List<string>();
         public static List<Type> ReservedPropertyTypes{ get; }=new List<Type>();
         static ISubject<(Type type,IModelMapperConfiguration configuration)> _typesToMap;
+        public static List<(string key, Action<CustomizeAttribute> action)> AttributeMappingRules{ get; private set; }
+
+        public static List<(string key, Func<PropertyInfo,bool> action)> PropertyMappingRules{ get; private set; }
 
         static TypeMappingService(){
-            
             Init();
         }
 
         public static void Start(){
+            ConnectCustomizationRules();
             _typesToMap.OnCompleted();
         }
 
@@ -35,9 +38,16 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         public static string OutPutAssembly =>
-            $@"{Path.GetDirectoryName(typeof(TypeMapping.TypeMappingService).Assembly.Location)}\{ModelMapperAssemblyName}{MapperAssemblyName}{ModelExtendingService.Platform}.dll";
+            $@"{Path.GetDirectoryName(typeof(TypeMappingService).Assembly.Location)}\{ModelMapperAssemblyName}{MapperAssemblyName}{ModelExtendingService.Platform}.dll";
 
         private static void Init(){
+            PropertyMappingRules = new List<(string key, Func<PropertyInfo, bool> action)>{
+                ("Browsable", BrowsableRule)
+            };
+            AttributeMappingRules = new List<(string key, Action<CustomizeAttribute> action)>{
+                ("PrivateDescription", PrivateDescriptionRule),
+                ("DefaultValue", DefaultValueRule)
+            };
             _typesToMap = Subject.Synchronize(new ReplaySubject<(Type type,IModelMapperConfiguration configuration)>());
             MappedTypes = Observable.Defer(() => {
                 var distinnctTypesToMap = Observable.Defer(() => _typesToMap.Distinct(_ => _.type));
@@ -46,19 +56,17 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                     .Select(_ =>!_? distinnctTypesToMap.ModelCode().Compile(): Assembly.LoadFile(OutputAssembly).GetTypes()
                                 .Where(type => typeof(IModelModelMap).IsAssignableFrom(type)).ToObservable()).Switch();
             }).Replay().AutoConnect();
-            _modelMapperModuleVersion = typeof(TypeMapping.TypeMappingService).Assembly.GetName().Version;
+            _modelMapperModuleVersion = typeof(TypeMappingService).Assembly.GetName().Version;
             
             ReservedPropertyNames.Clear();
             ReservedPropertyNames.AddRange(typeof(IModelNode).Properties().Select(info => info.Name));
             ReservedPropertyTypes.AddRange(new[]{ typeof(Type)});
-            ConnectAttributeRules();
+            
             ModelExtendingService.Init();
             
         }
 
         public static IObservable<Type> MappedTypes{ get;private set; }
-
-        public static IObservable<CustomizeAttribute> CustomizeAttributes => CustomizeAttributesSubject;
 
         public static IObservable<Type> MapToModel<TModelMapperConfiguration>(this (Type type, TModelMapperConfiguration configuration) type)
             where TModelMapperConfiguration : IModelMapperConfiguration{

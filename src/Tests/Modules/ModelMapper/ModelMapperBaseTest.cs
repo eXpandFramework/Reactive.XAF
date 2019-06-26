@@ -47,6 +47,8 @@ public class {DynamicTypeName}{{
         }
 
         internal string InitializeMapperService(string modelMapperAssemblyName,Platform platform=Platform.Agnostic,bool newAssemblyName=true ){
+            TypeMappingService.AttributeMappingRules.Clear();
+            TypeMappingService.PropertyMappingRules.Clear();
             typeof(ModelExtendingService).SetPropertyValue("Platform", platform);
             var mapperAssemblyName = $"{GetType().Name}{modelMapperAssemblyName}{platform}".GetHashCode();
             if (newAssemblyName){

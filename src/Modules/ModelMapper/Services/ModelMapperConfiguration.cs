@@ -45,11 +45,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         GridColumn
     }
 
-    public static class PredifinedModelMapperConfigurationService{
+    public static class PredifinedMapService{
         private static readonly Assembly XAFWinAssembly;
         private static readonly Assembly XtraGridAssembly;
 
-        static PredifinedModelMapperConfigurationService(){
+        static PredifinedMapService(){
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             if (ModelExtendingService.Platform==Platform.Win){
                 XAFWinAssembly = assemblies.FirstOrDefault(_ => _.FullName.StartsWith("DevExpress.ExpressApp.Win."));

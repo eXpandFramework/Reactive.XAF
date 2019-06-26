@@ -35,6 +35,7 @@ namespace Tests.Modules.CloneModelView{
             modelView.ShouldNotBeNull();
             modelView.GetType().Name.ShouldBe($"Model{cloneViewType.ToString().Replace("Lookup", "")}");
             modelView.Id.ShouldBe(cloneViewId);
+            application.Dispose();
         } 
 
         [Theory]
@@ -58,6 +59,7 @@ namespace Tests.Modules.CloneModelView{
                 modelView.GetType().Name.ShouldBe($"Model{cloneViewType.ToString().Replace("Lookup", "")}");
                 modelView.Id.ShouldBe(viewId);    
             }
+            application.Dispose();
         } 
 
         [Theory]
@@ -77,6 +79,7 @@ namespace Tests.Modules.CloneModelView{
             var modelView = application.Model.Views[cloneViewId].AsObjectView;
                 
             ((IModelView) modelView.ModelClass.GetPropertyValue($"Default{cloneViewType}")).Id.ShouldBe(cloneViewId);
+            application.Dispose();
             
         }
 
@@ -97,6 +100,7 @@ namespace Tests.Modules.CloneModelView{
             }, platform).Application;
             var modelListView = (IModelListView) application.Model.Views[listViewId];
             modelListView.DetailView.Id.ShouldBe(detailViewId);
+            application.Dispose();
         }
 
         private static CloneModelViewModule DefaultCloneModelViewModule(Action<ITypesInfo> customizeTypesInfo,Platform platform){

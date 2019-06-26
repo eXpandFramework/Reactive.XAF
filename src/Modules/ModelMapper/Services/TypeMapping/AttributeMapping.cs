@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using Mono.Cecil;
 using Xpand.Source.Extensions.System.String;
 
@@ -15,12 +15,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     }
 
     public static partial class TypeMappingService{
-         
-        public static List<(string key, Action<CustomizeAttribute> action)> AtributeMappingRules{ get; } =
-            new List<(string key, Action<CustomizeAttribute> action)>{
-                ("PrivateDescription", PrivateDescriptionRule),
-                ("DefaultValue", DefaultValueRule)
-            };
 
         private static void DefaultValueRule(CustomizeAttribute customizeAttribute){
             var defaultValueAttributes = customizeAttribute.Attributes.Where(_ => _.attribute is DefaultValueAttribute).ToArray();
@@ -40,12 +34,25 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             }
         }
 
-        private static void ConnectAttributeRules(){
-            TypeMappingService.CustomizeAttributesSubject
-                .SelectMany(attribute => AtributeMappingRules.Select(_ => {
+        private static void ConnectCustomizationRules(){
+            CustomizeAttributesSubject
+                .SelectMany(attribute => AttributeMappingRules.Select(_ => {
                     _.action(attribute);
                     return _;
                 }))
+                .Subscribe();
+            CustomizePropertySelectionSubject
+                .Select(propertyInfos => {
+                    for (var index = propertyInfos.Count - 1; index >= 0; index--){
+                        var propertyInfo = propertyInfos[index];
+                        var ruleFail = PropertyMappingRules.Any(_ => !_.action(propertyInfo));
+                        if (ruleFail){
+                            propertyInfos.Remove(propertyInfo);
+                        }
+                    }
+
+                    return Unit.Default;
+                })
                 .Subscribe();
         }
 
@@ -67,10 +74,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 if (argument.Value is CustomAttributeArgument customAttributeArgument){
                     var typeReference = customAttributeArgument.Type;
                     var value = customAttributeArgument.Value;
-                    return typeReference.Resolve().IsEnum ? TypeMappingService.GetEnums(typeReference, value) : value ?? "null";
+                    return typeReference.Resolve().IsEnum ? GetEnums(typeReference, value) : value ?? "null";
                 }
                 var resolvedType = argument.Type.Resolve();
-                return resolvedType.IsEnum ? TypeMappingService.GetEnums(argument.Type, argument.Value) : argument.Value;
+                return resolvedType.IsEnum ? GetEnums(argument.Type, argument.Value) : argument.Value;
             }));
             return ctorArguments;
         }
@@ -80,16 +87,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 .Where(_ => _.attribute.CanBeMapped())
                 .Select(_ => _.customAttribute.AllArgsAreValid() ? $"[{_.attribute.GetType().FullName}({_.customAttribute.AttributeCtorArguments()})]" : null));
             return modelCode;
-        }
-
-        private static string AssemblyAttributes(string code){
-            var assemblyAttributes = string.Join(Environment.NewLine,
-                Regex.Matches(code, @"\[assembly:[^\]]*\]").Cast<Match>().Select(_ => _.Value));
-            assemblyAttributes = Regex.Replace(assemblyAttributes,
-                $@"\[assembly:{typeof(AssemblyVersionAttribute).FullName}[^\]]*\]", "");
-            assemblyAttributes = Regex.Replace(assemblyAttributes,
-                $@"\[assembly:{typeof(AssemblyFileVersionAttribute).FullName}[^\]]*\]", "");
-            return assemblyAttributes;
         }
 
         private static bool CanBeMapped(this Attribute attribute){

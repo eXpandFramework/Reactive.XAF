@@ -49,6 +49,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     }
     public static partial class TypeMappingService{
         private static readonly Subject<CustomizeAttribute> CustomizeAttributesSubject=new Subject<CustomizeAttribute>();
+        private static readonly Subject<List<PropertyInfo>> CustomizePropertySelectionSubject=new Subject<List<PropertyInfo>>();
         static ((string key,string code)[] code,IEnumerable<Assembly> references) ModelCode(this Type type,IModelMapperConfiguration configuration=null){
             var propertyInfos = type.PropertyInfos();
             var additionalTypes = propertyInfos.AdditionalTypes(type);
@@ -60,7 +61,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             var mapName = type.ModelMapName( configuration:configuration);
             var containerCode = type.ContainerCode( configuration, $"IModel{containerName}", assemblyDefinitions, mapName);
 
-            var modelMappersTypeName = $"IModel{containerName}{TypeMappingService.ModelMappersNodeName}";
+            var modelMappersTypeName = $"IModel{containerName}{ModelMappersNodeName}";
             var modelMappersInterfaceCode = ModelMappersInterfaceCode( modelMappersTypeName);
 
             var typeCode = type.TypeCode(mapName, modelMappersTypeName, assemblyDefinitions,configuration?.ImageName);
@@ -155,29 +156,23 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 if (propertyInfo.CanRead && propertyInfo.CanWrite){
                     string nullSign = null;
                     var infoPropertyType = propertyInfo.PropertyType.ToString();
-                    var isNullAble = propertyInfo.PropertyType.IsGenericType &&
-                                     propertyInfo.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>);
+                    var isNullAble = propertyInfo.PropertyType.IsGenericType && propertyInfo.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>);
                     if (propertyInfo.PropertyType.IsValueType){
                         nullSign = "?";
                     }
-
                     if (isNullAble){
                         infoPropertyType = propertyInfo.PropertyType.GenericTypeArguments.First().ToString();
                     }
-
                     propertyCode = $"{infoPropertyType.Replace("+", ".")}{nullSign} {propertyInfo.Name}{{get;set;}}";
                 }
             }
             else{
                 propertyCode = $"{(propertyInfo.PropertyType,data.rootType).ModelName()} {propertyInfo.Name}{{get;}}";
             }
-
             if (propertyCode != null){
                 var attributesCode = propertyInfo.AttributesCode(typeDefinition);
-
                 return $"{attributesCode}{propertyCode}";
             }
-
             return null;
         }
 
@@ -192,11 +187,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             return additionalTypesCode;
         }
 
-        private static (string key, string code) TypeCode(this Type type, string mapName, string modelMappersTypeName,
-            AssemblyDefinition[] assemblyDefinitions, string imageName){
+        private static (string key, string code) TypeCode(this Type type, string mapName, string modelMappersTypeName,AssemblyDefinition[] assemblyDefinitions, string imageName){
 
             var domainLogic = $@"[{typeof(DomainLogicAttribute).FullName}(typeof({modelMappersTypeName}))]{Environment.NewLine}public class {modelMappersTypeName}DomainLogic{{public static int? Get_Index({modelMappersTypeName} mapper){{return 0;}}}}{Environment.NewLine}";
-            string modelMappersPropertyCode = $"new int? Index{{get;set;}}{Environment.NewLine}{modelMappersTypeName} {TypeMappingService.ModelMappersNodeName} {{get;}}";
+            string modelMappersPropertyCode = $"new int? Index{{get;set;}}{Environment.NewLine}{modelMappersTypeName} {ModelMappersNodeName} {{get;}}";
             var typeCode = (type,type).ModelCode(assemblyDefinitions,imageName,mapName, additionalPropertiesCode: modelMappersPropertyCode,
                 baseType: typeof(IModelModelMap));
             
@@ -204,6 +198,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         private static (string key, string code) ModelMappersInterfaceCode(string modelMappersTypeName){
+
             string modelMapperContextContainerName=typeof(IModelMapperContextContainer).FullName;
             var nodesGeneratorName=typeof(ModelMapperContextNodeGenerator).FullName;
             var imageCode=$@"[{typeof(ImageNameAttribute).FullName}(""{ModelImageSource.ModelModelMapperContexts}"")]{Environment.NewLine}";
@@ -220,6 +215,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
 
         private static (string key, string code) ContainerCode(this Type type, IModelMapperConfiguration configuration, string modelName,
             AssemblyDefinition[] assemblyDefinitions, string mapName){
+
             var modelBrowseableCode = configuration.ModelBrowseableCode();
             var linkAttributeCode = $@"[{typeof(ModelMapLinkAttribute).FullName}(""{type.FullName}"")]{Environment.NewLine}";
             var containerCode = (type,Type.EmptyTypes.FirstOrDefault()).ModelCode(assemblyDefinitions, null, $"{modelName}".Substring(6),
@@ -251,7 +247,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             else{
                 typeDefinition=assemblyDefinition.MainModule.Types.First(definition => definition.FullName == typeFullName);
             }
-            var properties = data.typeToCode.PublicProperties().Where(info => !mappedTypes.Contains(info.PropertyType)).ToArray();
+            var properties = new List<PropertyInfo>(data.typeToCode.PublicProperties().Where(info => !mappedTypes.Contains(info.PropertyType)));
+            CustomizePropertySelectionSubject.OnNext(properties);
             propertiesCode = propertiesCode ?? String.Join(Environment.NewLine,properties.Select(propertyInfo =>
                                  (propertyInfo,data.rootType).ModelCode( typeDefinition)));
             propertiesCode += $"{Environment.NewLine}{additionalPropertiesCode}";

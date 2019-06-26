@@ -65,7 +65,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         private static bool VersionChanged(this AssemblyDefinition assemblyDefinition){
             var versionAttribute = assemblyDefinition.CustomAttributes.First(attribute =>
                 attribute.AttributeType.ToType() == typeof(AssemblyFileVersionAttribute));
-            return Version.Parse(versionAttribute.ConstructorArguments.First().Value.ToString()) !=TypeMappingService._modelMapperModuleVersion;
+            return Version.Parse(versionAttribute.ConstructorArguments.First().Value.ToString()) !=_modelMapperModuleVersion;
         }
 
         private static bool IsMapped(this AssemblyDefinition assemblyDefinition,(Type type, IModelMapperConfiguration configuration) data){

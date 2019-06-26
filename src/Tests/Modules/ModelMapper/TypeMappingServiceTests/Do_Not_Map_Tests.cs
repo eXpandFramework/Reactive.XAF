@@ -48,8 +48,8 @@ namespace Tests.Modules.ModelMapper.TypeMappingServiceTests{
         }
 
         [Fact]
-        public async Task Do_Not_Map_Non_Browsablw_properties(){
-            InitializeMapperService(nameof(Do_Not_Map_Non_Browsablw_properties));
+        public async Task Do_Not_Map_Non_Browsable_properties(){
+            InitializeMapperService(nameof(Do_Not_Map_Non_Browsable_properties));
             var typeToMap = typeof(NonBrowsableProperties);
 
             var modelType = await typeToMap.MapToModel().ModelInterfaces();
