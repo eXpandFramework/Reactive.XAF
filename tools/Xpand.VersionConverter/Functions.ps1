@@ -184,7 +184,7 @@ function Get-DevExpressVersion($targetPath, $referenceFilter, $projectFile) {
         Write-Verbose "Locating DevExpress version..."
         $projectFileInfo = Get-Item $projectFile
         [xml]$csproj = Get-Content $projectFileInfo.FullName
-        $packageReference = $csproj.Project.ItemGroup.PackageReference.Include | Where-Object { $_ -like "$referenceFilter" }
+        $packageReference = $csproj.Project.ItemGroup.PackageReference | Where-Object { $_.Include -like "$referenceFilter" }
         if ($packageReference) {
             $v = ($packageReference ).Version | Select-Object -First 1
             if ($packageReference) {
