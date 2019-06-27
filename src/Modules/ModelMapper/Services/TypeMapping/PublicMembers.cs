@@ -22,7 +22,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         static ISubject<(Type type,IModelMapperConfiguration configuration)> _typesToMap;
         public static List<(string key, Action<CustomizeAttribute> action)> AttributeMappingRules{ get; private set; }
 
-        public static List<(string key, Func<PropertyInfo,bool> action)> PropertyMappingRules{ get; private set; }
+        public static List<(string key, Action<List<PropertyInfo>> action)> PropertyMappingRules{ get; private set; }
 
         static TypeMappingService(){
             Init();
@@ -41,7 +41,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             $@"{Path.GetDirectoryName(typeof(TypeMappingService).Assembly.Location)}\{ModelMapperAssemblyName}{MapperAssemblyName}{ModelExtendingService.Platform}.dll";
 
         private static void Init(){
-            PropertyMappingRules = new List<(string key, Func<PropertyInfo, bool> action)>{
+            PropertyMappingRules = new List<(string key, Action<List<PropertyInfo>> action)>{
                 ("Browsable", BrowsableRule)
             };
             AttributeMappingRules = new List<(string key, Action<CustomizeAttribute> action)>{

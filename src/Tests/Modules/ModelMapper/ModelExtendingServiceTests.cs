@@ -9,7 +9,6 @@ using DevExpress.Utils;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
 using Shouldly;
-using Tests.Modules.ModelMapper.BOModel;
 using Xpand.Source.Extensions.System.String;
 using Xpand.Source.Extensions.XAF.Model;
 using Xpand.Source.Extensions.XAF.XafApplication;
@@ -22,7 +21,7 @@ using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.Ty
 namespace Tests.Modules.ModelMapper{
     [Collection(nameof(XafTypesInfo))]
     public class ModelMapperExtenderServiceTests : ModelMapperBaseTest{
-        private const string MMListViewNodePath = "Views/" + nameof(MM) + "_ListView";
+        
         [Theory]
         [InlineData(typeof(TestModelMapper),Platform.Win)]
         [InlineData(typeof(TestModelMapper),Platform.Web)]

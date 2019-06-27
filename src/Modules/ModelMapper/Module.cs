@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using Xpand.XAF.Modules.ModelMapper.Services;
@@ -20,6 +21,7 @@ namespace Xpand.XAF.Modules.ModelMapper {
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
             moduleManager.Connect()
+                .Merge(Application.BindConnect())
                 .TakeUntilDisposed(this)
                 .Subscribe();
         }

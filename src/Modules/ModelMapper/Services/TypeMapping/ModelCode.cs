@@ -47,9 +47,17 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
 
         public string LinkedTypeName{ get; }
     }
+
+    class CustomizeCode{
+        public string Key{ get; set; }
+        public string Code{ get; set; }
+        public Type Type{ get; set; }
+    }
     public static partial class TypeMappingService{
-        private static readonly Subject<CustomizeAttribute> CustomizeAttributesSubject=new Subject<CustomizeAttribute>();
-        private static readonly Subject<List<PropertyInfo>> CustomizePropertySelectionSubject=new Subject<List<PropertyInfo>>();
+        private static readonly Subject<CustomizeAttribute> CustomizeAttributes=new Subject<CustomizeAttribute>();
+        private static readonly Subject<List<PropertyInfo>> CustomizePropertySelection=new Subject<List<PropertyInfo>>();
+        internal static readonly Subject<CustomizeCode> ContainerPropertyCode=new Subject<CustomizeCode>();
+        
         static ((string key,string code)[] code,IEnumerable<Assembly> references) ModelCode(this Type type,IModelMapperConfiguration configuration=null){
             var propertyInfos = type.PropertyInfos();
             var additionalTypes = propertyInfos.AdditionalTypes(type);
@@ -130,7 +138,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             
             var customizeAttribute = new CustomizeAttribute()
                 {Attributes = new List<(Attribute attribute, CustomAttribute customAttribute)>(customAttributes), PropertyInfo = propertyInfo};
-            CustomizeAttributesSubject.OnNext(customizeAttribute);
+            CustomizeAttributes.OnNext(customizeAttribute);
             var attributesCode = $"{customizeAttribute.Attributes.ModelCode()}\r\n";
             return attributesCode;
         }
@@ -193,7 +201,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             string modelMappersPropertyCode = $"new int? Index{{get;set;}}{Environment.NewLine}{modelMappersTypeName} {ModelMappersNodeName} {{get;}}";
             var typeCode = (type,type).ModelCode(assemblyDefinitions,imageName,mapName, additionalPropertiesCode: modelMappersPropertyCode,
                 baseType: typeof(IModelModelMap));
-            
             return (typeCode.key, $"{domainLogic}{typeCode.code}");
         }
 
@@ -217,9 +224,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             AssemblyDefinition[] assemblyDefinitions, string mapName){
 
             var modelBrowseableCode = configuration.ModelBrowseableCode();
-            var linkAttributeCode = $@"[{typeof(ModelMapLinkAttribute).FullName}(""{type.FullName}"")]{Environment.NewLine}";
+            var linkAttributeCode = $@"[{typeof(ModelMapLinkAttribute).FullName}(""{type.AssemblyQualifiedName}"")]{Environment.NewLine}";
+            var propertiesCode = $"{modelBrowseableCode}IModel{mapName} {mapName}{{get;}}";
+            var customizeCode = new CustomizeCode(){Code = propertiesCode,Type=type};
+            ContainerPropertyCode.OnNext(customizeCode);
             var containerCode = (type,Type.EmptyTypes.FirstOrDefault()).ModelCode(assemblyDefinitions, null, $"{modelName}".Substring(6),
-                $"{modelBrowseableCode}IModel{mapName} {mapName}{{get;}}",baseType:typeof(IModelModelMapContainer));
+                customizeCode.Code,baseType:typeof(IModelModelMapContainer));
+            
             return (containerCode.key,$"{linkAttributeCode}{containerCode.code}");
         }
 
@@ -248,7 +259,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 typeDefinition=assemblyDefinition.MainModule.Types.First(definition => definition.FullName == typeFullName);
             }
             var properties = new List<PropertyInfo>(data.typeToCode.PublicProperties().Where(info => !mappedTypes.Contains(info.PropertyType)));
-            CustomizePropertySelectionSubject.OnNext(properties);
+            CustomizePropertySelection.OnNext(properties);
             propertiesCode = propertiesCode ?? String.Join(Environment.NewLine,properties.Select(propertyInfo =>
                                  (propertyInfo,data.rootType).ModelCode( typeDefinition)));
             propertiesCode += $"{Environment.NewLine}{additionalPropertiesCode}";

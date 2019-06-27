@@ -6,8 +6,10 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using DevExpress.Data.Filtering;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using EnumsNET;
+using Fasterflect;
 using Xpand.Source.Extensions.FunctionOperators;
 using Xpand.Source.Extensions.System.AppDomain;
 using Xpand.Source.Extensions.XAF.XafApplication;
@@ -65,11 +67,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             var results = FlagEnums.GetFlagMembers(configuration).Select(_ => _.Value)
                 .Select(_ => {
                     var modelMapperConfiguration = _.ModelMapperConfiguration(configure);
-                    return (modelMapperConfiguration.MapData.typeToMap,modelMapperConfiguration);
+                    return (modelMapperConfiguration.MapData.typeToMap,modelMapperConfiguration,map:_);
                 });
             
             foreach (var result in results){
-                result.Extend(result.modelMapperConfiguration.MapData.modelType);    
+                (result.typeToMap,result.modelMapperConfiguration).Extend(result.modelMapperConfiguration.MapData.modelType);    
             }
         }
 
@@ -93,19 +95,28 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             return null;
         }
 
+        public static object GetViewControl(this PredifinedMap configuration, CompositeView view, string model){
+            if (configuration == PredifinedMap.GridView){
+                return ((ListView) view).Editor.GetPropertyValue(PredifinedMap.GridView.ToString());
+            }
+            else if (configuration == PredifinedMap.GridColumn){
+                return PredifinedMap.GridView.GetViewControl(view,null).GetPropertyValue("Columns").GetIndexer(model);
+            }
+
+            throw new NotImplementedException(configuration.ToString());
+        }
+
         public static ModelMapperConfiguration GetModelMapperConfiguration(this PredifinedMap configuration){
             if (ModelExtendingService.Platform==Platform.Win){
                 if (XtraGridAssembly!=null&&XAFWinAssembly!=null){
                     var rightOperand = XAFWinAssembly.GetType("DevExpress.ExpressApp.Win.Editors.GridListEditor");
                     if (configuration == PredifinedMap.GridView){
-//                        var visibilityCriteria = "";
                         var visibilityCriteria = VisibilityCriteriaLeftOperand.IsAssignableFromModelListVideEditorType.GetVisibilityCriteria(rightOperand,"Parent.");
                         var typeToMap=XtraGridAssembly.GetType("DevExpress.XtraGrid.Views.Grid.GridView");
                         return new ModelMapperConfiguration {ImageName = "Grid_16x16",VisibilityCriteria =visibilityCriteria,MapData = (typeToMap,typeof(IModelListView))};
                     }
                     if (configuration == PredifinedMap.GridColumn){
-//                        var visibilityCriteria = VisibilityCriteriaLeftOperand.IsAssignableFromModelListVideEditorType.GetVisibilityCriteria(rightOperand,"Parent.Parent.");
-                        var visibilityCriteria = "";
+                        var visibilityCriteria = VisibilityCriteriaLeftOperand.IsAssignableFromModelListVideEditorType.GetVisibilityCriteria(rightOperand,"Parent.Parent.Parent");
                         var typeToMap=XtraGridAssembly.GetType("DevExpress.XtraGrid.Columns.GridColumn");
                         return new ModelMapperConfiguration {ImageName = @"Office2013\Columns_16x16",VisibilityCriteria =visibilityCriteria,MapData = (typeToMap,typeof(IModelColumn))};
                     }

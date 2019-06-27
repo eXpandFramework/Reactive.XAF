@@ -13,6 +13,14 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.TypeMappingService;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services{
+    
+    public class PredifinedMapAttribute:Attribute{
+        public PredifinedMapAttribute(PredifinedMap map){
+            Map = map;
+        }
+
+        public PredifinedMap Map{ get; }
+    }
     public static class ModelExtendingService{
         internal static Platform Platform{ get; private set; }
 
@@ -48,7 +56,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
 
             return ModelExtenders.ToObservable()
                 .SelectMany(_ => mappedContainers.FirstAsync(type =>
-                        type.Attribute<ModelMapLinkAttribute>().LinkedTypeName == _.extenderData.extenderType.FullName)
+                        type.Attribute<ModelMapLinkAttribute>().LinkedTypeName == _.extenderData.extenderType.AssemblyQualifiedName)
                     .Select(extenderInterface => (_.targetIntefaceType, extenderInterface)))
                 .Do(_ => extenders.Add(_.targetIntefaceType,_.extenderInterface));
         }

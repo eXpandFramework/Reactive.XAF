@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.Win.Editors;
 using Shouldly;
+using Tests.Artifacts;
 using Tests.Modules.ModelMapper.BOModel;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.ModelMapper;
 using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
-using Xpand.XAF.Modules.Reactive.Services;
 using Xunit;
 
 namespace Tests.Modules.ModelMapper{
@@ -150,19 +152,30 @@ namespace Tests.Modules.ModelMapper{
         }
 
         [Theory]
-        [InlineData(Platform.Win,Skip = NotImplemented)]
-        [InlineData(Platform.Web,Skip = NotImplemented)]
-        internal void Bind_ListEditor_ControlType(Platform platform){
-            Type typeToMap=typeof(StringValueTypeProperties);
-            InitializeMapperService($"{nameof(Bind_all_public_rw_string_properties)}{typeToMap.Name}{platform}");
-            typeToMap.Extend<IModelListView>();
+        [InlineData(Platform.Win,PredifinedMap.GridColumn | PredifinedMap.GridView)]
+        internal async Task Bind_ListEditor_Control(Platform platform,PredifinedMap predifinedMap){
+            InitializeMapperService($"{nameof(Bind_ListEditor_Control)}",platform);
+            predifinedMap.Extend();
+
+            
             var application = DefaultModelMapperModule(platform).Application;
+            application.MockListEditor((view, xafApplication, collectionSource) => {
+                if (platform == Platform.Win){
+                    return new GridListEditor(view);
+                }
+
+                throw new NotImplementedException();
+            });
+            var controlBound = ModelBindingService.ControlBound.Replay();
+            controlBound.Connect();
+
             var listView = application.CreateObjectView<ListView>(typeof(MM));
-            application.WhenListViewCreated()
-                .Select(_ => _.e.View).Cast<ListView>()
-                .ControlsCreated()
-                .Select(_ => _.view.Editor.WhenModelApplied()).Switch()
-                .Do(_ => ((void) _.sender.Control))
+            var frame = application.CreateFrame(TemplateContext.View);
+            frame.SetView(listView);
+            listView.CreateControls();
+
+            await controlBound.Take(3);
+
         }
     
     }

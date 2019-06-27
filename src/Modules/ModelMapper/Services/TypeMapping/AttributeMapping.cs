@@ -35,24 +35,19 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         private static void ConnectCustomizationRules(){
-            CustomizeAttributesSubject
-                .SelectMany(attribute => AttributeMappingRules.Select(_ => {
-                    _.action(attribute);
-                    return _;
-                }))
+            CustomizeAttributes
+                .SelectMany(customizeAttribute => AttributeMappingRules
+                    .Select(_ => {
+                        _.action(customizeAttribute);
+                        return Unit.Default;
+                    } ))
                 .Subscribe();
-            CustomizePropertySelectionSubject
-                .Select(propertyInfos => {
-                    for (var index = propertyInfos.Count - 1; index >= 0; index--){
-                        var propertyInfo = propertyInfos[index];
-                        var ruleFail = PropertyMappingRules.Any(_ => !_.action(propertyInfo));
-                        if (ruleFail){
-                            propertyInfos.Remove(propertyInfo);
-                        }
-                    }
-
-                    return Unit.Default;
-                })
+            CustomizePropertySelection
+                .SelectMany(propertyInfos => PropertyMappingRules
+                    .Select(_ => {
+                        _.action(propertyInfos);
+                        return Unit.Default;
+                    }))
                 .Subscribe();
         }
 

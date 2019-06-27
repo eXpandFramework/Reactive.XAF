@@ -15,6 +15,7 @@ using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.Ty
 
 namespace Tests.Modules.ModelMapper{
     public abstract class ModelMapperBaseTest:BaseTest{
+        protected const string MMListViewNodePath = "Views/" + nameof(MM) + "_ListView";
         public const string DynamicTypeName = "DynamicTypeName";
         internal ModelMapperModule DefaultModelMapperModule(Platform platform){
             return platform.NewApplication().AddModule<ModelMapperModule>(typeof(MM));
