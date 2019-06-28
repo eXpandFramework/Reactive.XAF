@@ -88,12 +88,6 @@ namespace Tests.Modules.ModelMapper.TypeMappingServiceTests{
             exception.Message.ShouldStartWith("error CS0016: Could not write to output file");
         }
 
-        [Fact(Skip = NotImplemented)]
-        public async Task Always_Map_If_Additional_Type_is_mapped(){
-            
-            InitializeMapperService(nameof(Always_Map_If_Additional_Type_is_mapped));
-            
-        }
     }
 
 }

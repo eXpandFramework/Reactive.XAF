@@ -16,14 +16,8 @@ namespace Tests.Modules.ModelViewInheritance{
         [Theory]
         [ClassData(typeof(ModelViewInheritanceTestData))]
         internal void Inherit_And_Modify_A_BaseView(ViewType viewType, bool attribute,Platform platform){
-            string[] models;
             ModelViewInheritanceUpdater.Disabled = true;
-//            using (var application = platform.NewApplication()){
-//                
-//            }
-            models = GetModels(viewType, attribute, platform);
-
-//            Dispose();
+            var models = GetModels(viewType, attribute, platform);
             var application = platform.NewApplication();
             var modelViewIneritanceModule = CreateModelViewIneritanceModule(viewType, attribute, application);
             var testModule1 = new TestModule1{DiffsStore = new StringModelStore(models[0])};
@@ -38,10 +32,10 @@ namespace Tests.Modules.ModelViewInheritance{
             var inheritAndModifyBaseView = new InheritAndModifyBaseView(application, viewType, attribute);
 
             inheritAndModifyBaseView.Verify(application.Model);
+            application.Dispose();
         }
 
         private static string[] GetModels(ViewType viewType, bool attribute, Platform platform){
-            string[] models;
             var application = platform.NewApplication();
             var modelViewIneritanceModule = CreateModelViewIneritanceModule(viewType, attribute, application);
             var baseBoTypes = new[]{typeof(ABaseMvi), typeof(TagMvi)};
@@ -49,8 +43,9 @@ namespace Tests.Modules.ModelViewInheritance{
             modelViewIneritanceModule.AdditionalExportedTypes.AddRange(baseBoTypes.Concat(boTypes));
             application.SetupDefaults(modelViewIneritanceModule);
             var inheritAndModifyBaseView = new InheritAndModifyBaseView(application, viewType, attribute);
-            models = inheritAndModifyBaseView.GetModels().ToArray();
+            var models = inheritAndModifyBaseView.GetModels().ToArray();
             ModelViewInheritanceUpdater.Disabled = false;
+            application.Dispose();
             return models;
         }
 

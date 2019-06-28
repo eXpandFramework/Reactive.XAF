@@ -28,7 +28,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 .Select(_ => _.e.View).Cast<ListView>()
                 .ControlsCreated()
                 .ViewModelProperties()
-                .Select(_ => { return BindTo(_); });
+                .Select(BindTo);
                 
         }
 
@@ -59,17 +59,23 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 var modelNode = ((ModelNode) modelNodeDisabled);
                 var modelNodeInfo = modelNode.NodeInfo;
                 var propertyInfos = instance.GetType().Properties(Flags.Public|Flags.Static|Flags.AllMembers).DistinctBy(info => info.Name).ToDictionary(info => info.Name,info => info);
+                var getValueMethod = modelNode.GetType().Methods(nameof(modelNode.GetValue)).First(info => info.GetGenericArguments().Any());
+                var modelValueInfos = modelNodeInfo.ValuesInfo.Where(info => IsValidInfo(info, propertyInfos))
+                    .Where(info => !TypeMappingService.ReservedPropertyNames.Contains(info.Name)).ToArray();
                 
-                var modelValueInfos = modelNodeInfo.ValuesInfo.Where(info => IsValidInfo(info, propertyInfos)).ToArray();
-                foreach (var valueInfo in modelValueInfos.Where(info => !TypeMappingService.ReservedPropertyNames.Contains(info.Name))){
-                    var propertyType = valueInfo.PropertyType == typeof(string)
-                        ? valueInfo.PropertyType
-                        : valueInfo.PropertyType.GetGenericArguments().First();
-                    var value = modelNodeDisabled.GetValue(valueInfo.Name, propertyType);
+                foreach (var valueInfo in modelValueInfos){
+//                    var propertyType = valueInfo.PropertyType == typeof(string)
+//                        ? valueInfo.PropertyType
+//                        : valueInfo.PropertyType.GetGenericArguments().First();
+
+//                    var method = getValueMethod.MakeGenericMethod(propertyType);
+//                    var type = method.CreateDelegateType();
+//                    var delegateForCallMethod = Delegate.CreateDelegate(type,modelNode, method);
+//                    var value = delegateForCallMethod.DynamicInvoke(valueInfo.Name);
+                    var value = modelNode.GetValue(valueInfo.Name);
                     if (value != null) propertyInfos[valueInfo.Name].SetValue(instance,value);
                 }
 
-                
                 for (int i = 0; i < modelNodeDisabled.NodeCount; i++){
                     if (modelNodeDisabled.GetNode(i) is IModelNodeDisabled nodeEnabled){
                         var propertyValue = propertyInfos[nodeEnabled.Id()].GetValue(instance);
@@ -80,7 +86,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         }
 
         private static bool IsValidInfo(ModelValueInfo info, Dictionary<string, PropertyInfo> properties){
-            return !info.IsReadOnly && (info.PropertyType.IsNullableType() || info.PropertyType == typeof(string)) && properties.ContainsKey(info.Name);
+            return !info.IsReadOnly &&  properties.ContainsKey(info.Name);
         }
     }
 }

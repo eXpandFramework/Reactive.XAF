@@ -3,7 +3,9 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.Web.Editors.ASPx;
 using DevExpress.ExpressApp.Win.Editors;
 using Shouldly;
 using Tests.Artifacts;
@@ -152,19 +154,17 @@ namespace Tests.Modules.ModelMapper{
         }
 
         [Theory]
-        [InlineData(Platform.Win,PredifinedMap.GridColumn | PredifinedMap.GridView)]
-        internal async Task Bind_ListEditor_Control(Platform platform,PredifinedMap predifinedMap){
+        [InlineData(Platform.Win,new[]{PredifinedMap.GridColumn , PredifinedMap.GridView})]
+        [InlineData(Platform.Web,new[]{PredifinedMap.GridViewColumn , PredifinedMap.ASPxGridView})]
+        internal async Task Bind_ListEditor_Control(Platform platform,PredifinedMap[] predifinedMaps){
             InitializeMapperService($"{nameof(Bind_ListEditor_Control)}",platform);
-            predifinedMap.Extend();
+            predifinedMaps.Extend();
 
-            
             var application = DefaultModelMapperModule(platform).Application;
             application.MockListEditor((view, xafApplication, collectionSource) => {
-                if (platform == Platform.Win){
-                    return new GridListEditor(view);
-                }
-
-                throw new NotImplementedException();
+                var listEditor = platform == Platform.Win ? (ListEditor) new GridListEditor(view) : new ASPxGridListEditor(view);
+                ((IComplexListEditor) listEditor).Setup(collectionSource, application);
+                return listEditor;
             });
             var controlBound = ModelBindingService.ControlBound.Replay();
             controlBound.Connect();

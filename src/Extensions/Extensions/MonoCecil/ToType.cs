@@ -15,7 +15,7 @@ namespace Xpand.Source.Extensions.MonoCecil{
                 throw new NotImplementedException();
             }
 
-            return Type.GetType($"{typeReference.FullName},{fullName}");
+            return Type.GetType($"{typeReference.FullName.Replace("/","+")},{fullName}");
         }
 
     }

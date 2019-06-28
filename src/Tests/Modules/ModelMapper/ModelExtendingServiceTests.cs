@@ -6,6 +6,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Win.Editors;
 using DevExpress.Utils;
+using DevExpress.Web;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
 using Shouldly;
@@ -38,6 +39,8 @@ namespace Tests.Modules.ModelMapper{
         [Theory]
         [InlineData(PredifinedMap.GridColumn, typeof(GridColumn),Platform.Win,MMListViewNodePath+"/Columns/Test")]
         [InlineData(PredifinedMap.GridView, typeof(GridView),Platform.Win,MMListViewNodePath)]
+        [InlineData(PredifinedMap.GridViewColumn, typeof(GridViewColumn),Platform.Web,MMListViewNodePath+"/Columns/Test")]
+        [InlineData(PredifinedMap.ASPxGridView, typeof(ASPxGridView),Platform.Web,MMListViewNodePath)]
         internal void ExtendModel_Predefined_Type(PredifinedMap configuration,Type typeToMap,Platform platform,string nodePath){
             Assembly.LoadFile(typeToMap.Assembly.Location);
             InitializeMapperService($"{nameof(ExtendModel_Multiple_Predefined_Type)}{configuration}{platform}",platform);
@@ -53,8 +56,9 @@ namespace Tests.Modules.ModelMapper{
             var platform = Platform.Win;
             InitializeMapperService($"{nameof(ExtendModel_Multiple_Predefined_Type)}",platform);
 
-            var configuration = PredifinedMap.GridView|PredifinedMap.GridColumn;
-            configuration.Extend();
+            
+            new[]{PredifinedMap.GridView,PredifinedMap.GridColumn}.Extend();
+
             var application = DefaultModelMapperModule(platform).Application;
             AssertExtendedModel(typeof(GridView), application, MMListViewNodePath);
             AssertExtendedModel(typeof(GridColumn), application, $"{MMListViewNodePath}/Columns/Test");

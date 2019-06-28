@@ -216,7 +216,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             return (modelMappersTypeName,modelMappersInterfaceCode);
         }
 
-                private static string ModelMapperServiceAttributeCode(this Type type){
+        private static string ModelMapperServiceAttributeCode(this Type type){
             return $@"[assembly:{typeof(ModelMapperServiceAttribute).FullName}(""{type.FullName}"",""{type.Assembly.GetName().Name}"",""{type.Assembly.GetName().Version}"")]";
         }
 

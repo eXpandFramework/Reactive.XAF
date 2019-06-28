@@ -55,13 +55,18 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
 
                     return true;
                 })
-                .Where(info => info.AccessModifier()==AccessModifier.Public&& !TypeMappingService.ReservedPropertyNames.Contains(info.Name)&&!typeof(ICollection).IsAssignableFrom(info.PropertyType))
+                .Where(IsValid)
                 .Where(info => {
                     if (info.PropertyType == typeof(string) || info.PropertyType.IsNullableType()) return true;
                     return !info.PropertyType.IsGenericType && info.PropertyType != type &&
-                           info.PropertyType != typeof(object) && TypeMappingService.ReservedPropertyTypes.Any(_ => info.PropertyType!=_);
+                           info.PropertyType != typeof(object) && ReservedPropertyTypes.Any(_ => info.PropertyType!=_);
                 })
                 .DistinctBy(info => info.Name);
+        }
+
+        private static bool IsValid(this PropertyInfo info){
+            return info.AccessModifier() == AccessModifier.Public && !ReservedPropertyNames.Contains(info.Name) &&
+                   (info.PropertyType == typeof(string) || !typeof(IEnumerable).IsAssignableFrom(info.PropertyType));
         }
 
 

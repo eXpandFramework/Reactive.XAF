@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Security.Principal;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Utils;
+using DevExpress.Web;
 
 namespace Tests.Modules.ModelMapper{
     public class TestModelMapper{
@@ -180,9 +182,16 @@ namespace Tests.Modules.ModelMapper{
         public string NonBroswsableTest{ get; set; }
         
     }
-    
-    internal class ResevredProperties : IModelNode{
+
+    internal class CollectionProperties {
         public IEnumerable<string> Strings{ get; } = new List<string>();
+        public IEnumerable<TestModelMapper> Tests{ get; } = new List<TestModelMapper>();
+        public IdentityReferenceCollection IdentityReferenceCollection{ get; } = new IdentityReferenceCollection();
+        
+    }
+
+    internal class ResevredProperties : IModelNode{
+        public string Item{ get; set; }
 
         public IModelNode GetNode(int index){
             throw new NotImplementedException();

@@ -66,6 +66,7 @@ public class {DynamicTypeName}{{
                 }
             }
             typeof(TypeMappingService).CallMethod(null, "Init");
+            typeof(PredifinedMapService).CallMethod(null, "Init");
             typeof(TypeMappingService).SetFieldValue("_modelMapperModuleVersion", typeof(ModelMapperModule).Assembly.GetName().Version);
             return mapperAssemblyName.ToString();
         }

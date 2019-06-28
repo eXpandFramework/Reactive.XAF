@@ -46,6 +46,18 @@ namespace Tests.Modules.ModelMapper.TypeMappingServiceTests{
             modelTypeProperties.Length.ShouldBe(0);
 
         }
+        [Fact]
+        public async Task Do_Not_Map_Collection_properties(){
+            InitializeMapperService(nameof(Do_Not_Map_Collection_properties));
+            var typeToMap = typeof(CollectionProperties);
+
+            var modelType = await typeToMap.MapToModel().ModelInterfaces();
+
+            var modelTypeProperties = ModelTypeProperties(modelType);
+            
+            modelTypeProperties.Length.ShouldBe(0);
+
+        }
 
         [Fact]
         public async Task Do_Not_Map_Non_Browsable_properties(){
