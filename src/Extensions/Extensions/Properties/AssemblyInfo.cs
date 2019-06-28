@@ -1,20 +1,8 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Security;
 
-[assembly:InternalsVisibleTo("Xpand.XAF.Extensions,PublicKey="+
-                             "0024000004800000940000000602000000240000525341310004000001000100df18f4f3de9ec4"+
-                             "90707183c78a72914070a526bfb1818e1687442b137c2bfa9bf5e8533859a8efaa62aa2ea28e03"+
-                             "623fef5531f8dd29d74f781a9e50743172dbe8d74b0106ceddfcda17f8dd1034f2896a56e1026f"+
-                             "aa2cc0e2def8dc1f519ad13924c44f16339a57ed97981a8777c7fa6025a11e54cc694e504d462a"+
-                             "400681c0")]
-[assembly:InternalsVisibleTo("Tests,PublicKey="+
-                             "0024000004800000940000000602000000240000525341310004000001000100df18f4f3de9ec4"+
-                             "90707183c78a72914070a526bfb1818e1687442b137c2bfa9bf5e8533859a8efaa62aa2ea28e03"+
-                             "623fef5531f8dd29d74f781a9e50743172dbe8d74b0106ceddfcda17f8dd1034f2896a56e1026f"+
-                             "aa2cc0e2def8dc1f519ad13924c44f16339a57ed97981a8777c7fa6025a11e54cc694e504d462a"+
-                             "400681c0")]
+
 
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
@@ -50,3 +38,33 @@ using System.Security;
 [assembly: AssemblyFileVersion("1.0.11.0")]
 //[assembly:AllowPartiallyTrustedCallers]
 //[assembly: SecurityTransparent()]
+[assembly:InternalsVisibleTo(XpandInfo.TestsLib+ ",PublicKey="+XpandInfo.Key)]
+[assembly:InternalsVisibleTo(XpandInfo.AutoCommit+ ",PublicKey="+XpandInfo.Key)]
+[assembly:InternalsVisibleTo(XpandInfo.Reactive+ ",PublicKey="+XpandInfo.Key)]
+[assembly:InternalsVisibleTo(XpandInfo.CloneMemberValue+ ",PublicKey="+XpandInfo.Key)]
+[assembly:InternalsVisibleTo(XpandInfo.CloneModelView+ ",PublicKey="+XpandInfo.Key)]
+[assembly:InternalsVisibleTo(XpandInfo.HideToolBar+ ",PublicKey="+XpandInfo.Key)]
+[assembly:InternalsVisibleTo(XpandInfo.MasterDetail+ ",PublicKey="+XpandInfo.Key)]
+[assembly:InternalsVisibleTo(XpandInfo.ModelMapper+ ",PublicKey="+XpandInfo.Key)]
+[assembly:InternalsVisibleTo(XpandInfo.ModelViewInheritance+ ",PublicKey="+XpandInfo.Key)]
+[assembly:InternalsVisibleTo(XpandInfo.ProgressBarViewItem+ ",PublicKey="+XpandInfo.Key)]
+[assembly:InternalsVisibleTo(XpandInfo.SuppressConfirmation+ ",PublicKey="+XpandInfo.Key)]
+[assembly:InternalsVisibleTo(XpandInfo.ViewEditMode+ ",PublicKey="+XpandInfo.Key)]
+
+// ReSharper disable once CheckNamespace
+public class XpandInfo{
+    public const string TestsLib = "TestsLib";
+    public const string AutoCommit = "Xpand.XAF.Modules.AutoCommit.Tests";
+    public const string Reactive = "Xpand.XAF.Modules.Reactive.Tests";
+    public const string CloneModelView = "Xpand.XAF.Modules.CloneModelView.Tests";
+    public const string CloneMemberValue = "Xpand.XAF.Modules.CloneMemberValue.Tests";
+    public const string HideToolBar = "Xpand.XAF.Modules.HideToolBar.Tests";
+    public const string MasterDetail = "Xpand.XAF.Modules.MasterDetail.Tests";
+    public const string ModelMapper = "Xpand.XAF.Modules.ModelMapper.Tests";
+    public const string ModelViewInheritance = "Xpand.XAF.Modules.ModelViewInheritance.Tests";
+    public const string ProgressBarViewItem = "Xpand.XAF.Modules.ProgressBarViewItem.Tests";
+    public const string SuppressConfirmation = "Xpand.XAF.Modules.SuppressConfirmation.Tests";
+    public const string ViewEditMode = "Xpand.XAF.Modules.ViewEditMode.Tests";
+    public const string Key =
+        "0024000004800000940000000602000000240000525341310004000001000100df18f4f3de9ec490707183c78a72914070a526bfb1818e1687442b137c2bfa9bf5e8533859a8efaa62aa2ea28e03623fef5531f8dd29d74f781a9e50743172dbe8d74b0106ceddfcda17f8dd1034f2896a56e1026faa2cc0e2def8dc1f519ad13924c44f16339a57ed97981a8777c7fa6025a11e54cc694e504d462a400681c0";
+}

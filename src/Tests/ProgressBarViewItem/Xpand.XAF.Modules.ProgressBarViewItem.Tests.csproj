@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net461</TargetFramework>
+    <OutputPath>..\..\..\bin</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <LangVersion>latest</LangVersion>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>pdbonly</DebugType>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="MasterDetail\**" />
+    <Compile Remove="ProgressBarViewItem\**" />
+    <EmbeddedResource Remove="MasterDetail\**" />
+    <EmbeddedResource Remove="ProgressBarViewItem\**" />
+    <None Remove="MasterDetail\**" />
+    <None Remove="ProgressBarViewItem\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Moq" Version="4.12.0" />
+    <PackageReference Include="Shouldly" Version="3.0.2" />
+    <PackageReference Include="System.Reactive" Version="4.1.5" />
+    <PackageReference Include="xunit" Version="2.4.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Extensions\Extensions\Xpand.Source.Extensions.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="DevExpress.ExpressApp.v18.2">
+      <HintPath>..\..\..\bin\DevExpress.ExpressApp.v18.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraEditors.v18.2">
+      <HintPath>..\..\..\bin\DevExpress.XtraEditors.v18.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Web.v18.2">
+      <HintPath>..\..\..\bin\DevExpress.Web.v18.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Data.v18.2">
+      <HintPath>..\..\..\bin\DevExpress.Data.v18.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Xpo.v18.2">
+      <HintPath>..\..\..\bin\DevExpress.Xpo.v18.2.dll</HintPath>
+    </Reference>
+    <Reference Include="Tests">
+      <HintPath>..\..\..\bin\TestsLib.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.ProgressBarViewItem">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.ProgressBarViewItem.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Reactive">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

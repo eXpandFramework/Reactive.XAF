@@ -36,9 +36,8 @@ steps:
   displayName: 'VsTest - testAssemblies'
   inputs:
     testAssemblyVer2: |
-     .\bin\Tests.dll
-    uiTests: true
-    runInParallel: false
+     .\bin\*.Tests.dll
+    runInParallel: true
     diagnosticsEnabled: false
     runTestsInIsolation: true
     codeCoverageEnabled: true

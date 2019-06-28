@@ -1,0 +1,77 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <ProjectGuid>{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}</ProjectGuid>
+    <TargetFramework>net461</TargetFramework>
+    <FileUpgradeFlags />
+    <UpgradeBackupLocation />
+    <LangVersion>latest</LangVersion>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
+    <DebugSymbols>true</DebugSymbols>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <OutputPath>..\..\..\bin</OutputPath>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <DebugType>pdbonly</DebugType>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Modules\**" />
+    <Compile Remove="Modules\MasterDetail\**" />
+    <EmbeddedResource Remove="Modules\**" />
+    <EmbeddedResource Remove="Modules\MasterDetail\**" />
+    <None Remove="Modules\**" />
+    <None Remove="Modules\MasterDetail\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="AppDomainExtensions.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Castle.Core" Version="4.4.0" />
+    <PackageReference Include="Enums.NET" Version="2.3.2" />
+    <PackageReference Include="fasterflect" Version="2.1.3" />
+    <PackageReference Include="Humanizer.Core" Version="2.6.2" />
+    <PackageReference Include="Mono.Cecil" Version="0.10.4" />
+    <PackageReference Include="Moq" Version="4.12.0" />
+    <PackageReference Include="Ryder" Version="0.8.0" />
+    <PackageReference Include="Shouldly" Version="3.0.2" />
+    <PackageReference Include="System.Data.Common" Version="4.3.0" />
+    <PackageReference Include="System.Drawing.Common" Version="4.5.1" />
+    <PackageReference Include="System.Reactive" Version="4.1.5" />
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+    <PackageReference Include="xunit" Version="2.4.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="DevExpress.ExpressApp.v18.2">
+      <HintPath>..\..\..\bin\DevExpress.ExpressApp.v18.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.ExpressApp.Web.v18.2">
+      <HintPath>..\..\..\bin\DevExpress.ExpressApp.Web.v18.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.ExpressApp.Win.v18.2">
+      <HintPath>..\..\..\bin\DevExpress.ExpressApp.Win.v18.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.ExpressApp.Xpo.v18.2">
+      <HintPath>..\..\..\bin\DevExpress.ExpressApp.Xpo.v18.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Web.v18.2">
+      <HintPath>..\..\..\bin\DevExpress.Web.v18.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Xpo.v18.2">
+      <HintPath>..\..\..\bin\DevExpress.Xpo.v18.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraGrid.v18.2">
+      <HintPath>..\..\..\bin\DevExpress.XtraGrid.v18.2.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web" />
+    <Reference Include="Xpand.Source.Extensions">
+      <HintPath>..\..\..\bin\Xpand.Source.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Reactive">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

@@ -37,14 +37,14 @@ steps:
   enabled: true
   inputs:
     testAssemblyVer2: |
-     .\bin\Tests.dll
-    uiTests: true
-    runInParallel: false
+     .\bin\*.Tests.dll
+    runInParallel: true
     diagnosticsEnabled: true
     runTestsInIsolation: true
     codeCoverageEnabled: true
     rerunFailedTests: true 
     rerunMaxAttempts: 3
+    
 - task: PowerShell@2
   displayName: CheckTests
   inputs:

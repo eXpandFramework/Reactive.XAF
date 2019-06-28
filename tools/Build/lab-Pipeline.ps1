@@ -5,7 +5,7 @@ param(
     $Pass = $env:GithubPass,
     $DXApiFeed  ,
     $artifactstagingdirectory,
-    $AzureToken  ,
+    $AzureToken  =(Get-AzureToken),
     $WhatIf = $false
 )
 $ErrorActionPreference = "Stop"
@@ -71,11 +71,12 @@ $yArgs = @{
 }
 if ($newPackages) {
     $yArgs.Packages += $newPackages
+    Update-NugetProjectVersion @yArgs 
 }
 Write-Host "End-Packages:" -f blue
 $yArgs.Packages | Write-Output
 
-Update-NugetProjectVersion @yArgs 
+
 
 $bArgs = @{
     packageSources = "$(Get-PackageFeed -Xpand);$DxApiFeed"

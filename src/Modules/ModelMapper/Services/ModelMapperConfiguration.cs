@@ -55,6 +55,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         GridView,
         [MapPlatform(Platform.Win)]
         GridColumn,
+        [MapPlatform(Platform.Win)]
+        AdvBandedGridView,
+        [MapPlatform(Platform.Win)]
+        BandedGridColumn,
         [MapPlatform(Platform.Web)]
         ASPxGridView,
         [MapPlatform(Platform.Web)]
@@ -125,11 +129,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         }
 
         public static object GetViewControl(this PredifinedMap configuration, CompositeView view, string model){
-            if (configuration == PredifinedMap.GridView){
+            if (new[]{PredifinedMap.GridView,PredifinedMap.AdvBandedGridView}.Any(_ => _==configuration)){
                 return ((ListView) view).Editor.GetPropertyValue(PredifinedMap.GridView.ToString());
             }
 
-            if (configuration == PredifinedMap.GridColumn){
+            if (new[]{PredifinedMap.GridColumn,PredifinedMap.BandedGridColumn}.Any(_ => _==configuration)){
                 return PredifinedMap.GridView.GetViewControl(view,null).GetPropertyValue("Columns").GetIndexer(model);
             }
             if (configuration == PredifinedMap.ASPxGridView){
@@ -148,6 +152,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 if (new[]{PredifinedMap.GridView,PredifinedMap.GridColumn}.Any(map => map==predifinedMap)){
                     return GridViewGridColumnConfiguration(predifinedMap,_xafWinAssembly, _xtraGridAssembly, "DevExpress.ExpressApp.Win.Editors.GridListEditor",
                         "DevExpress.XtraGrid.Views.Grid.GridView", "DevExpress.XtraGrid.Columns.GridColumn");
+                }
+                if (new[]{PredifinedMap.AdvBandedGridView,PredifinedMap.BandedGridColumn}.Any(map => map==predifinedMap)){
+                    return GridViewGridColumnConfiguration(predifinedMap,_xafWinAssembly, _xtraGridAssembly, "DevExpress.ExpressApp.Win.Editors.GridListEditor",
+                        "DevExpress.XtraGrid.Views.BandedGrid.AdvBandedGridView", "DevExpress.XtraGrid.Views.BandedGrid.BandedGridColumn");
                 }
             }
 

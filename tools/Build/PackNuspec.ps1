@@ -25,7 +25,7 @@ $packData = [pscustomobject] @{
 }
 
 set-location $sourceDir
-$assemblyVersions = Get-ChildItem "$sourceDir\src" "*.csproj" -Recurse | ForEach-Object {
+$assemblyVersions = Get-ChildItem "$sourceDir\src\Modules" "*.csproj" -Recurse | ForEach-Object {
     $assemblyInfo = get-content "$($_.DirectoryName)\Properties\AssemblyInfo.cs"
     [PSCustomObject]@{
         Name    = [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
