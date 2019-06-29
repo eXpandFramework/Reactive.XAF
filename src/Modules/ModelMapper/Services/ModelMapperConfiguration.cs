@@ -59,6 +59,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         AdvBandedGridView,
         [MapPlatform(Platform.Win)]
         BandedGridColumn,
+        [MapPlatform(Platform.Win)]
+        LayoutView,
+        [MapPlatform(Platform.Win)]
+        LayoutViewColumn,
         [MapPlatform(Platform.Web)]
         ASPxGridView,
         [MapPlatform(Platform.Web)]
@@ -129,12 +133,15 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         }
 
         public static object GetViewControl(this PredifinedMap configuration, CompositeView view, string model){
-            if (new[]{PredifinedMap.GridView,PredifinedMap.AdvBandedGridView}.Any(_ => _==configuration)){
-                return ((ListView) view).Editor.GetPropertyValue(PredifinedMap.GridView.ToString());
+            if (new[]{PredifinedMap.GridView,PredifinedMap.AdvBandedGridView,PredifinedMap.LayoutView}.Any(_ => _==configuration)){
+                return ((ListView) view).Editor.Control.GetPropertyValue("MainView");
             }
 
-            if (new[]{PredifinedMap.GridColumn,PredifinedMap.BandedGridColumn}.Any(_ => _==configuration)){
-                return PredifinedMap.GridView.GetViewControl(view,null).GetPropertyValue("Columns").GetIndexer(model);
+            if (new[]{PredifinedMap.GridColumn,PredifinedMap.BandedGridColumn,PredifinedMap.LayoutViewColumn}.Any(_ => _==configuration)){
+                var viewControl = PredifinedMap.GridView.GetViewControl(view,null);
+                var propertyInfo = viewControl.GetType().Properties().Where(info => info.Name == "Columns")
+                    .First(info => info.PropertyType.Name.StartsWith(configuration.ToString()));
+                return propertyInfo.GetValue(viewControl).GetIndexer(model);
             }
             if (configuration == PredifinedMap.ASPxGridView){
                 return ((ListView) view).Editor.GetPropertyValue("Grid");
@@ -157,6 +164,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                     return GridViewGridColumnConfiguration(predifinedMap,_xafWinAssembly, _xtraGridAssembly, "DevExpress.ExpressApp.Win.Editors.GridListEditor",
                         "DevExpress.XtraGrid.Views.BandedGrid.AdvBandedGridView", "DevExpress.XtraGrid.Views.BandedGrid.BandedGridColumn");
                 }
+                if (new[]{PredifinedMap.LayoutView,PredifinedMap.LayoutViewColumn}.Any(map => map==predifinedMap)){
+                    return GridViewGridColumnConfiguration(predifinedMap,_xafWinAssembly, _xtraGridAssembly, "DevExpress.ExpressApp.Win.Editors.GridListEditor",
+                        "DevExpress.XtraGrid.Views.Layout.LayoutView", "DevExpress.XtraGrid.Columns.LayoutViewColumn");
+                }
             }
 
             if (ModelExtendingService.Platform==Platform.Web){
@@ -172,12 +183,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         private static ModelMapperConfiguration GridViewGridColumnConfiguration(PredifinedMap predifinedMap ,Assembly xafWinAssembly, Assembly gridViewAssembly, string listEditorTypeName, string gridViewTypeName, string gridColumnTypeName){
             if (gridViewAssembly!=null&&xafWinAssembly!=null){
                 var rightOperand = xafWinAssembly.GetType(listEditorTypeName);
-                if (new[]{PredifinedMap.GridView,PredifinedMap.ASPxGridView,PredifinedMap.AdvBandedGridView, }.Any(map => map==predifinedMap)){
+                if (new[]{PredifinedMap.GridView,PredifinedMap.ASPxGridView,PredifinedMap.AdvBandedGridView, PredifinedMap.LayoutView}.Any(map => map==predifinedMap)){
                     var visibilityCriteria = VisibilityCriteriaLeftOperand.IsAssignableFromModelListVideEditorType.GetVisibilityCriteria(rightOperand,"Parent.");
                     var typeToMap=gridViewAssembly.GetType(gridViewTypeName);
                     return new ModelMapperConfiguration {ImageName = "Grid_16x16",VisibilityCriteria =visibilityCriteria,MapData = (typeToMap,typeof(IModelListView))};
                 }
-                if (new[]{PredifinedMap.GridViewColumn,PredifinedMap.GridColumn, PredifinedMap.BandedGridColumn}.Any(map => map==predifinedMap)){
+                if (new[]{PredifinedMap.GridViewColumn,PredifinedMap.GridColumn, PredifinedMap.BandedGridColumn,PredifinedMap.LayoutViewColumn}.Any(map => map==predifinedMap)){
                     var visibilityCriteria = VisibilityCriteriaLeftOperand.IsAssignableFromModelListVideEditorType.GetVisibilityCriteria(rightOperand,"Parent.Parent.Parent.");
                     var typeToMap=gridViewAssembly.GetType(gridColumnTypeName);
                     return new ModelMapperConfiguration {ImageName = @"Office2013\Columns_16x16",VisibilityCriteria =visibilityCriteria,MapData = (typeToMap,typeof(IModelColumn))};

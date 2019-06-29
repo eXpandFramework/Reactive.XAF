@@ -59,19 +59,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 var modelNode = ((ModelNode) modelNodeDisabled);
                 var modelNodeInfo = modelNode.NodeInfo;
                 var propertyInfos = instance.GetType().Properties(Flags.Public|Flags.Static|Flags.AllMembers).DistinctBy(info => info.Name).ToDictionary(info => info.Name,info => info);
-                var getValueMethod = modelNode.GetType().Methods(nameof(modelNode.GetValue)).First(info => info.GetGenericArguments().Any());
+                
                 var modelValueInfos = modelNodeInfo.ValuesInfo.Where(info => IsValidInfo(info, propertyInfos))
                     .Where(info => !TypeMappingService.ReservedPropertyNames.Contains(info.Name)).ToArray();
                 
                 foreach (var valueInfo in modelValueInfos){
-//                    var propertyType = valueInfo.PropertyType == typeof(string)
-//                        ? valueInfo.PropertyType
-//                        : valueInfo.PropertyType.GetGenericArguments().First();
-
-//                    var method = getValueMethod.MakeGenericMethod(propertyType);
-//                    var type = method.CreateDelegateType();
-//                    var delegateForCallMethod = Delegate.CreateDelegate(type,modelNode, method);
-//                    var value = delegateForCallMethod.DynamicInvoke(valueInfo.Name);
                     var value = modelNode.GetValue(valueInfo.Name);
                     if (value != null) propertyInfos[valueInfo.Name].SetValue(instance,value);
                 }

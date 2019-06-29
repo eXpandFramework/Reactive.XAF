@@ -5,6 +5,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
+using DevExpress.XtraGrid.Views.Layout;
 using EnumsNET;
 using Fasterflect;
 using Shouldly;
@@ -86,6 +87,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests
         [Theory]
         [InlineData(PredifinedMap.GridColumn,typeof(GridColumn),Platform.Win)]
         [InlineData(PredifinedMap.GridView,typeof(GridView),Platform.Win)]
+        [InlineData(PredifinedMap.LayoutViewColumn,typeof(LayoutViewColumn),Platform.Win)]
+        [InlineData(PredifinedMap.LayoutView,typeof(LayoutView),Platform.Win)]
         [InlineData(PredifinedMap.BandedGridColumn,typeof(GridColumn),Platform.Win)]
         [InlineData(PredifinedMap.AdvBandedGridView,typeof(GridView),Platform.Win)]
         [InlineData(PredifinedMap.ASPxGridView,typeof(GridView),Platform.Web)]

@@ -59,7 +59,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             _modelMapperModuleVersion = typeof(TypeMappingService).Assembly.GetName().Version;
             
             ReservedPropertyNames.Clear();
-            ReservedPropertyNames.AddRange(typeof(IModelNode).Properties().Select(info => info.Name).Concat(new[]{"Item"}));
+            ReservedPropertyNames.AddRange(typeof(IModelNode).Properties().Select(info => info.Name).Concat(new[]{"Item","IsReadOnly"}));
             ReservedPropertyTypes.AddRange(new[]{ typeof(Type)});
             
             ModelExtendingService.Init();

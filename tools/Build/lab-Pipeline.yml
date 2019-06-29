@@ -36,9 +36,10 @@ steps:
   displayName: 'VsTest - testAssemblies'
   enabled: true
   inputs:
-    testAssemblyVer2: |
-     .\bin\*.Tests.dll
-    runInParallel: true
+    searchFolder: '$(System.DefaultWorkingDirectory)\bin'
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: '*tests*.dll'
+    runInParallel: false
     diagnosticsEnabled: true
     runTestsInIsolation: true
     codeCoverageEnabled: true

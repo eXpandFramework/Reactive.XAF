@@ -9,8 +9,8 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Web.Editors.ASPx;
 using DevExpress.ExpressApp.Win.Editors;
 using DevExpress.Web;
+using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.BandedGrid;
-using DevExpress.XtraGrid.Views.Grid;
 using Shouldly;
 using TestsLib;
 using Xpand.Source.Extensions.XAF.XafApplication;
@@ -157,9 +157,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         [Theory]
-        [InlineData(Platform.Win,new[]{PredifinedMap.GridColumn , PredifinedMap.GridView},new[]{typeof(GridView),typeof(GridListEditor)})]
-        [InlineData(Platform.Web,new[]{PredifinedMap.GridViewColumn , PredifinedMap.ASPxGridView},new[]{typeof(ASPxGridView),typeof(ASPxGridListEditor)})]
-        [InlineData(Platform.Win,new[]{PredifinedMap.BandedGridColumn , PredifinedMap.AdvBandedGridView},new[]{typeof(AdvBandedGridView),typeof(GridListEditor)})]
+        [InlineData(Platform.Win,new[]{PredifinedMap.GridColumn , PredifinedMap.GridView},new[]{typeof(XafGridView),typeof(GridColumn),typeof(GridListEditor)})]
+        [InlineData(Platform.Web,new[]{PredifinedMap.GridViewColumn , PredifinedMap.ASPxGridView},new[]{typeof(ASPxGridView),typeof(GridViewColumn),typeof(ASPxGridListEditor)})]
+        [InlineData(Platform.Win,new[]{PredifinedMap.BandedGridColumn , PredifinedMap.AdvBandedGridView},new[]{typeof(XafAdvBandedGridView),typeof(BandedGridColumn),typeof(GridListEditor)})]
+        [InlineData(Platform.Win,new[]{PredifinedMap.LayoutViewColumn , PredifinedMap.LayoutView},new[]{typeof(XafLayoutView),typeof(LayoutViewColumn),typeof(GridListEditor)})]
         internal async Task Bind_ListEditor_Control(Platform platform,PredifinedMap[] predifinedMaps,Type[] controlTypes){
             controlTypes.ToObservable().Do(type => Assembly.LoadFile(type.Assembly.Location)).Subscribe();
             InitializeMapperService($"{nameof(Bind_ListEditor_Control)}",platform);
@@ -167,7 +168,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
             var application = DefaultModelMapperModule(platform).Application;
             application.MockListEditor((view, xafApplication, collectionSource) => {
-                var listEditor = platform == Platform.Win ? (ListEditor) new GridListEditor(view) : new ASPxGridListEditor(view);
+                var listEditor = platform == Platform.Win ? (ListEditor) new CustomGridListEditor(view,controlTypes.First(),controlTypes.Skip(1).First()) : new ASPxGridListEditor(view);
                 ((IComplexListEditor) listEditor).Setup(collectionSource, application);
                 return listEditor;
             });
@@ -175,11 +176,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             controlBound.Connect();
 
             var listView = application.CreateObjectView<ListView>(typeof(MM));
-            var frame = application.CreateFrame(TemplateContext.View);
-            frame.SetView(listView);
             listView.CreateControls();
 
-            await controlBound.Take(3);
+            await controlBound.Take(3).WithTimeOut(TimeSpan.FromSeconds(20));
 
         }
     

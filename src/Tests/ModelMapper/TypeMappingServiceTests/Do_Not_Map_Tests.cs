@@ -41,7 +41,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
             var modelType = await typeToMap.MapToModel().ModelInterfaces();
 
-            var modelTypeProperties = ModelMapperBaseTest.ModelTypeProperties(modelType);
+            var modelTypeProperties = ModelTypeProperties(modelType);
             
             modelTypeProperties.Length.ShouldBe(0);
 
@@ -53,7 +53,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
             var modelType = await typeToMap.MapToModel().ModelInterfaces();
 
-            var modelTypeProperties = ModelMapperBaseTest.ModelTypeProperties(modelType);
+            var modelTypeProperties = ModelTypeProperties(modelType);
             
             modelTypeProperties.Length.ShouldBe(0);
 
@@ -66,7 +66,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
             var modelType = await typeToMap.MapToModel().ModelInterfaces();
 
-            var modelTypeProperties = ModelMapperBaseTest.ModelTypeProperties(modelType);
+            var modelTypeProperties = ModelTypeProperties(modelType);
             
             modelTypeProperties.FirstOrDefault(info => info.Name==nameof(NonBrowsableProperties.NonBroswsableTest)).ShouldBeNull();
             modelTypeProperties.FirstOrDefault(info => info.Name==nameof(NonBrowsableProperties.Test)).ShouldNotBeNull();

@@ -191,6 +191,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
     internal class ResevredProperties : IModelNode{
         public string Item{ get; set; }
+        public bool IsReadOnly{ get; set; }
 
         public IModelNode GetNode(int index){
             throw new NotImplementedException();
