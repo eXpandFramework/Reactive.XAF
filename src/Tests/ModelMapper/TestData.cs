@@ -188,6 +188,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         public IdentityReferenceCollection IdentityReferenceCollection{ get; } = new IdentityReferenceCollection();
         
     }
+    internal class DXDesignTimeAttributeClass {
+        [TypeConverter("DevExpress.XtraGrid.TypeConverters.FieldNameTypeConverter, DevExpress.XtraGrid.v19.1.Design")]
+        public string Test{ get; set; }
+    }
 
     internal class ResevredProperties : IModelNode{
         public string Item{ get; set; }

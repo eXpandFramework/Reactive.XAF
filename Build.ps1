@@ -70,7 +70,7 @@ task Compile -precondition {return $compile  } {
     }
     InvokeScript{
         write-host "Building Tests" -f "Blue"
-        & dotnet build "$PSScriptRoot\src\Tests\Tests.sln" --configuration Debug --source $source --output $PSScriptRoot\bin
+        & dotnet build "$PSScriptRoot\src\Tests\Tests.sln" --configuration Debug --source $source 
     }
 }
 

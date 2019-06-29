@@ -2,8 +2,13 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
+using DevExpress.ExpressApp.Web.Editors.ASPx;
+using DevExpress.ExpressApp.Win.Editors;
+using DevExpress.Web;
 using DevExpress.XtraGrid.Columns;
+using DevExpress.XtraGrid.Views.BandedGrid;
 using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraGrid.Views.Layout;
 using EnumsNET;
@@ -85,16 +90,16 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests
 
 
         [Theory]
-        [InlineData(PredifinedMap.GridColumn,typeof(GridColumn),Platform.Win)]
-        [InlineData(PredifinedMap.GridView,typeof(GridView),Platform.Win)]
-        [InlineData(PredifinedMap.LayoutViewColumn,typeof(LayoutViewColumn),Platform.Win)]
-        [InlineData(PredifinedMap.LayoutView,typeof(LayoutView),Platform.Win)]
-        [InlineData(PredifinedMap.BandedGridColumn,typeof(GridColumn),Platform.Win)]
-        [InlineData(PredifinedMap.AdvBandedGridView,typeof(GridView),Platform.Win)]
-        [InlineData(PredifinedMap.ASPxGridView,typeof(GridView),Platform.Web)]
-        [InlineData(PredifinedMap.GridViewColumn,typeof(GridView),Platform.Web)]
-        internal async Task Map_PredifinedConfigurations(PredifinedMap configuration,Type assemblyToLoad,Platform platform){
-
+        [InlineData(PredifinedMap.GridColumn,new[]{typeof(GridColumn),typeof(GridListEditor)},Platform.Win)]
+        [InlineData(PredifinedMap.GridView,new[]{typeof(GridView),typeof(GridListEditor)},Platform.Win)]
+        [InlineData(PredifinedMap.LayoutViewColumn,new[]{typeof(LayoutViewColumn),typeof(GridListEditor)},Platform.Win)]
+        [InlineData(PredifinedMap.LayoutView,new[]{typeof(LayoutView),typeof(GridListEditor)},Platform.Win)]
+        [InlineData(PredifinedMap.BandedGridColumn,new[]{typeof(BandedGridColumn),typeof(GridListEditor)},Platform.Win)]
+        [InlineData(PredifinedMap.AdvBandedGridView,new[]{typeof(AdvBandedGridView),typeof(GridListEditor)},Platform.Win)]
+        [InlineData(PredifinedMap.ASPxGridView,new[]{typeof(ASPxGridView),typeof(ASPxGridListEditor)},Platform.Web)]
+        [InlineData(PredifinedMap.GridViewColumn,new[]{typeof(GridViewColumn),typeof(ASPxGridListEditor)},Platform.Web)]
+        internal async Task Map_PredifinedConfigurations(PredifinedMap configuration,Type[] assembliesToLoad,Platform platform){
+            assembliesToLoad.ToObservable().Do(type => Assembly.LoadFile(type.Assembly.Location)).Subscribe();
             InitializeMapperService($"{nameof(Map_PredifinedConfigurations)}{configuration}",platform);
             
             var modelType = await configuration.MapToModel().ModelInterfaces();

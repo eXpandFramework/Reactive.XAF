@@ -46,7 +46,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             };
             AttributeMappingRules = new List<(string key, Action<CustomizeAttribute> action)>{
                 ("PrivateDescription", PrivateDescriptionRule),
-                ("DefaultValue", DefaultValueRule)
+                ("DefaultValue", DefaultValueRule),
+                ("TypeConverterWithDXDesignTimeType", TypeConverterWithDXDesignTimeType)
             };
             _typesToMap = Subject.Synchronize(new ReplaySubject<(Type type,IModelMapperConfiguration configuration)>());
             MappedTypes = Observable.Defer(() => {

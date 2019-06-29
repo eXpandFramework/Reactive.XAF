@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net461</TargetFramework>
-    <OutputPath>..\..\..\bin</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <LangVersion>latest</LangVersion>
     <SignAssembly>true</SignAssembly>
@@ -9,6 +8,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>pdbonly</DebugType>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <OutputPath>..\..\..\bin</OutputPath>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Moq" Version="4.12.0" />

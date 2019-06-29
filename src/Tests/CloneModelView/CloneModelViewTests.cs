@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Reactive.Linq;
-using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using Fasterflect;

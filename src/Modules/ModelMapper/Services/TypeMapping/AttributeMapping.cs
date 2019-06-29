@@ -15,6 +15,15 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     }
 
     public static partial class TypeMappingService{
+        private static void TypeConverterWithDXDesignTimeType(CustomizeAttribute customizeAttribute){
+            var typeConverterAttributes = customizeAttribute.Attributes.Where(_ => _.attribute is TypeConverterAttribute).ToArray();
+            foreach (var attribute in typeConverterAttributes){
+                var converterTypeName = ((TypeConverterAttribute) attribute.attribute).ConverterTypeName;
+                if (converterTypeName.StartsWith("DevExpress") && converterTypeName.Contains("Design")){
+                    customizeAttribute.Attributes.Remove(attribute);
+                }
+            }
+        }
 
         private static void DefaultValueRule(CustomizeAttribute customizeAttribute){
             var defaultValueAttributes = customizeAttribute.Attributes.Where(_ => _.attribute is DefaultValueAttribute).ToArray();
@@ -61,7 +70,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                     return literal;
                 }
                 if (argument.Type.FullName == typeof(Type).FullName){
-                    return $"typeof({argument.Value})";
+                    var argumentValue = $"{argument.Value}";
+                    return $"typeof({argumentValue.Replace("/",".")})";
                 }
                 if (argument.Type.FullName == typeof(bool).FullName){
                     return argument.Value?.ToString().ToLower();

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.ComponentModel;
+using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Fasterflect;
@@ -31,6 +32,18 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         public async Task Do_not_map_Objects_with_no_mapable_properties(){
             InitializeMapperService(nameof(Do_not_map_Objects_with_no_mapable_properties));
 //            throw new NotImplementedException();
+        }
+
+//        [Fact()]
+        public async Task Do_Not_Map_TypeConverterAttributes_with_DevExpress_DesignTime_Types(){
+            InitializeMapperService(nameof(Do_Not_Map_TypeConverterAttributes_with_DevExpress_DesignTime_Types));
+            var typeToMap = typeof(DXDesignTimeAttributeClass);
+
+            var modelType = await typeToMap.MapToModel().ModelInterfaces();
+
+            var modelTypeProperties = ModelTypeProperties(modelType);
+            
+            modelTypeProperties.First().Attribute<TypeConverterAttribute>().ShouldBeNull();
         }
 
 

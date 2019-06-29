@@ -23,6 +23,7 @@ namespace Xpand.XAF.Modules.AutoCommit.Tests{
 
             (await objectViews.Take(1).WithTimeOut()).ShouldBe(listView);
             (await objectViews.Take(2).WithTimeOut()).ShouldBe(detailView);
+            application.Dispose();
 
         }
 
@@ -40,6 +41,7 @@ namespace Xpand.XAF.Modules.AutoCommit.Tests{
             await objectViews.FirstAsync().WithTimeOut();
 
             application.CreateObjectSpace().FindObject<AC>(null).ShouldNotBeNull();
+            application.Dispose();
 
         }
 

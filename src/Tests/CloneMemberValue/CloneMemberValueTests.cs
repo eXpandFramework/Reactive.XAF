@@ -48,7 +48,7 @@ namespace Xpand.XAF.Modules.CloneMemberValue.Tests{
                 viewsTuple.previous.ShouldBe(detailView1);
                 viewsTuple.current.ShouldBe(detailView2);
             }    
-            
+            application.Dispose();
         }
 
         [Theory]
@@ -75,6 +75,7 @@ namespace Xpand.XAF.Modules.CloneMemberValue.Tests{
             var listView = await listViews.FirstAsync().WithTimeOut();
 
             listView.Model.ShouldBe(modelListView);                
+            application.Dispose();
             
         }
 
@@ -101,6 +102,7 @@ namespace Xpand.XAF.Modules.CloneMemberValue.Tests{
             var objectPair = await (objects).FirstAsync().WithTimeOut();
             objectPair.previous.ShouldBe(aCmv1);
             objectPair.current.ShouldBe(aCmv2);                
+            application.Dispose();
         }
 
         [Theory]
@@ -122,6 +124,7 @@ namespace Xpand.XAF.Modules.CloneMemberValue.Tests{
             clonedMembers.currentObject.ShouldBe(aCmv2);
             clonedMembers.previousObject.ShouldBe(aCmv1);
             aCmv2.PrimitiveProperty.ShouldBe(aCmv1.PrimitiveProperty);            
+            application.Dispose();
         }
 
     }

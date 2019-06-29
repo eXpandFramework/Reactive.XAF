@@ -132,7 +132,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         private static string AttributesCode(this PropertyInfo propertyInfo,TypeDefinition typeDefinition){
             var customAttributes = typeDefinition.Properties
                 .Where(_ => _.Name == propertyInfo.Name)
-                .SelectMany(_ => _.CustomAttributes.Select(attribute => (attribute,propertyInfo)).AttributeData().Take(1))
+                .SelectMany(_ => _.CustomAttributes.Select(attribute => (attribute,propertyInfo)).AttributeData())
                 .ToArray();
 
             
