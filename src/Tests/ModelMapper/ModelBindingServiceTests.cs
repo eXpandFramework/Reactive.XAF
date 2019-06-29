@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Web.Editors.ASPx;
 using DevExpress.ExpressApp.Win.Editors;
+using DevExpress.Web;
+using DevExpress.XtraGrid.Views.BandedGrid;
+using DevExpress.XtraGrid.Views.Grid;
 using Shouldly;
 using TestsLib;
 using Xpand.Source.Extensions.XAF.XafApplication;
@@ -153,9 +157,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         [Theory]
-        [InlineData(Platform.Win,new[]{PredifinedMap.GridColumn , PredifinedMap.GridView})]
-        [InlineData(Platform.Web,new[]{PredifinedMap.GridViewColumn , PredifinedMap.ASPxGridView})]
-        internal async Task Bind_ListEditor_Control(Platform platform,PredifinedMap[] predifinedMaps){
+        [InlineData(Platform.Win,new[]{PredifinedMap.GridColumn , PredifinedMap.GridView},new[]{typeof(GridView),typeof(GridListEditor)})]
+        [InlineData(Platform.Web,new[]{PredifinedMap.GridViewColumn , PredifinedMap.ASPxGridView},new[]{typeof(ASPxGridView),typeof(ASPxGridListEditor)})]
+        [InlineData(Platform.Win,new[]{PredifinedMap.BandedGridColumn , PredifinedMap.AdvBandedGridView},new[]{typeof(AdvBandedGridView),typeof(GridListEditor)})]
+        internal async Task Bind_ListEditor_Control(Platform platform,PredifinedMap[] predifinedMaps,Type[] controlTypes){
+            controlTypes.ToObservable().Do(type => Assembly.LoadFile(type.Assembly.Location)).Subscribe();
             InitializeMapperService($"{nameof(Bind_ListEditor_Control)}",platform);
             predifinedMaps.Extend();
 

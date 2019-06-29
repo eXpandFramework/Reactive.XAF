@@ -172,12 +172,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         private static ModelMapperConfiguration GridViewGridColumnConfiguration(PredifinedMap predifinedMap ,Assembly xafWinAssembly, Assembly gridViewAssembly, string listEditorTypeName, string gridViewTypeName, string gridColumnTypeName){
             if (gridViewAssembly!=null&&xafWinAssembly!=null){
                 var rightOperand = xafWinAssembly.GetType(listEditorTypeName);
-                if (new[]{PredifinedMap.GridView,PredifinedMap.ASPxGridView}.Any(map => map==predifinedMap)){
+                if (new[]{PredifinedMap.GridView,PredifinedMap.ASPxGridView,PredifinedMap.AdvBandedGridView, }.Any(map => map==predifinedMap)){
                     var visibilityCriteria = VisibilityCriteriaLeftOperand.IsAssignableFromModelListVideEditorType.GetVisibilityCriteria(rightOperand,"Parent.");
                     var typeToMap=gridViewAssembly.GetType(gridViewTypeName);
                     return new ModelMapperConfiguration {ImageName = "Grid_16x16",VisibilityCriteria =visibilityCriteria,MapData = (typeToMap,typeof(IModelListView))};
                 }
-                if (new[]{PredifinedMap.GridViewColumn,PredifinedMap.GridColumn, }.Any(map => map==predifinedMap)){
+                if (new[]{PredifinedMap.GridViewColumn,PredifinedMap.GridColumn, PredifinedMap.BandedGridColumn}.Any(map => map==predifinedMap)){
                     var visibilityCriteria = VisibilityCriteriaLeftOperand.IsAssignableFromModelListVideEditorType.GetVisibilityCriteria(rightOperand,"Parent.Parent.Parent.");
                     var typeToMap=gridViewAssembly.GetType(gridColumnTypeName);
                     return new ModelMapperConfiguration {ImageName = @"Office2013\Columns_16x16",VisibilityCriteria =visibilityCriteria,MapData = (typeToMap,typeof(IModelColumn))};

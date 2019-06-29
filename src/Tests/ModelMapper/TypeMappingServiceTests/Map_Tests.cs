@@ -86,6 +86,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests
         [Theory]
         [InlineData(PredifinedMap.GridColumn,typeof(GridColumn),Platform.Win)]
         [InlineData(PredifinedMap.GridView,typeof(GridView),Platform.Win)]
+        [InlineData(PredifinedMap.BandedGridColumn,typeof(GridColumn),Platform.Win)]
+        [InlineData(PredifinedMap.AdvBandedGridView,typeof(GridView),Platform.Win)]
         [InlineData(PredifinedMap.ASPxGridView,typeof(GridView),Platform.Web)]
         [InlineData(PredifinedMap.GridViewColumn,typeof(GridView),Platform.Web)]
         internal async Task Map_PredifinedConfigurations(PredifinedMap configuration,Type assemblyToLoad,Platform platform){
