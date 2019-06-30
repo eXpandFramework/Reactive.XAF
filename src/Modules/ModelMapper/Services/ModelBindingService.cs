@@ -10,7 +10,6 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using Fasterflect;
 using Xpand.Source.Extensions.Linq;
-using Xpand.Source.Extensions.System.Refelction;
 using Xpand.Source.Extensions.XAF.Model;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -69,7 +68,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 }
 
                 for (int i = 0; i < modelNodeDisabled.NodeCount; i++){
-                    if (modelNodeDisabled.GetNode(i) is IModelNodeDisabled nodeEnabled){
+                    if (modelNodeDisabled.GetNode(i) is IModelNodeDisabled nodeEnabled && propertyInfos.ContainsKey(nodeEnabled.Id())){
                         var propertyValue = propertyInfos[nodeEnabled.Id()].GetValue(instance);
                         if (propertyValue != null) (nodeEnabled).BindTo(propertyValue);
                     }

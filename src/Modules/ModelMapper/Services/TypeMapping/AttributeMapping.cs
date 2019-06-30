@@ -12,6 +12,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     public class CustomizeAttribute{
         public IList<(Attribute attribute,CustomAttribute customAttribute)> Attributes{ get; set; }
         public PropertyInfo PropertyInfo{ get; set; }
+        public TypeDefinition TypeDefinition{ get; set; }
     }
 
     public static partial class TypeMappingService{
@@ -52,11 +53,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                     } ))
                 .Subscribe();
             CustomizePropertySelection
-                .SelectMany(propertyInfos => PropertyMappingRules
-                    .Select(_ => {
-                        _.action(propertyInfos);
-                        return Unit.Default;
-                    }))
+                .SelectMany(propertyInfos => {
+                    return PropertyMappingRules
+                        .Select(_ => {
+                            _.action(propertyInfos);
+                            return Unit.Default;
+                        });
+                })
                 .Subscribe();
         }
 
@@ -88,8 +91,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         static string ModelCode(this IEnumerable<(Attribute attribute,CustomAttribute customAttribute)> attributeData){
-            var modelCode = string.Join(Environment.NewLine, attributeData
-                .Where(_ => _.attribute.CanBeMapped())
+            var modelCode = string.Join(Environment.NewLine, attributeData.Where(_ => _.attribute.CanBeMapped())
                 .Select(_ => _.customAttribute.AllArgsAreValid() ? $"[{_.attribute.GetType().FullName}({_.customAttribute.AttributeCtorArguments()})]" : null));
             return modelCode;
         }

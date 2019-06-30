@@ -34,7 +34,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 //            throw new NotImplementedException();
         }
 
-//        [Fact()]
+        [Fact()]
         public async Task Do_Not_Map_TypeConverterAttributes_with_DevExpress_DesignTime_Types(){
             InitializeMapperService(nameof(Do_Not_Map_TypeConverterAttributes_with_DevExpress_DesignTime_Types));
             var typeToMap = typeof(DXDesignTimeAttributeClass);

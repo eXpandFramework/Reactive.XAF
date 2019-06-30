@@ -42,7 +42,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
 
         private static void Init(){
             PropertyMappingRules = new List<(string key, Action<List<PropertyInfo>> action)>{
-                ("Browsable", BrowsableRule)
+                ("Browsable", BrowsableRule),
             };
             AttributeMappingRules = new List<(string key, Action<CustomizeAttribute> action)>{
                 ("PrivateDescription", PrivateDescriptionRule),
@@ -51,12 +51,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             };
             _typesToMap = Subject.Synchronize(new ReplaySubject<(Type type,IModelMapperConfiguration configuration)>());
             MappedTypes = Observable.Defer(() => {
-                var distinnctTypesToMap = Observable.Defer(() => _typesToMap.Distinct(_ => _.type));
+                var distinnctTypesToMap = _typesToMap.Distinct(_ => _.type);
                 return distinnctTypesToMap
                     .All(_ => _.TypeFromPath())
                     .Select(_ =>!_? distinnctTypesToMap.ModelCode().Compile(): Assembly.LoadFile(OutputAssembly).GetTypes()
                                 .Where(type => typeof(IModelModelMap).IsAssignableFrom(type)).ToObservable()).Switch();
-            }).Replay().AutoConnect();
+            }).Publish().AutoConnect().Replay().AutoConnect();
             _modelMapperModuleVersion = typeof(TypeMappingService).Assembly.GetName().Version;
             
             ReservedPropertyNames.Clear();

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using Fasterflect;
@@ -58,15 +59,15 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 .Where(IsValid)
                 .Where(info => {
                     if (info.PropertyType == typeof(string) || info.PropertyType.IsNullableType()) return true;
-                    return !info.PropertyType.IsGenericType && info.PropertyType != type &&
-                           info.PropertyType != typeof(object) && ReservedPropertyTypes.Any(_ => info.PropertyType!=_);
+                    var propertyTypeIsReserved = ReservedPropertyTypes.Any(_ => info.PropertyType!=_);
+                    return !info.PropertyType.IsGenericType && info.PropertyType != type &&info.PropertyType != typeof(object) && propertyTypeIsReserved;
                 })
                 .DistinctBy(info => info.Name);
         }
 
         private static bool IsValid(this PropertyInfo info){
-            return info.AccessModifier() == AccessModifier.Public && !ReservedPropertyNames.Contains(info.Name) &&
-                   (info.PropertyType == typeof(string) || !typeof(IEnumerable).IsAssignableFrom(info.PropertyType));
+            var isValid = info.AccessModifier() == AccessModifier.Public && !ReservedPropertyNames.Contains(info.Name);
+            return isValid && !(typeof(IEnumerable).IsAssignableFrom(info.PropertyType) && info.PropertyType != typeof(string));
         }
 
 

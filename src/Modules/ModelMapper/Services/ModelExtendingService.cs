@@ -35,7 +35,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             ModelExtenders.Clear();
         }
 
-        internal static IObservable<Unit> Connect(this ApplicationModulesManager applicationModulesManager){
+        internal static IObservable<Unit> ConnectExtendingService(this ApplicationModulesManager applicationModulesManager){
             Platform = applicationModulesManager.Modules.GetPlatform();
             var extendModel = applicationModulesManager.Modules.OfType<ReactiveModule>().ToObservable()
                 .SelectMany(module => module.ExtendModel);

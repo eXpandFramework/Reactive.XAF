@@ -137,7 +137,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
 
             
             var customizeAttribute = new CustomizeAttribute()
-                {Attributes = new List<(Attribute attribute, CustomAttribute customAttribute)>(customAttributes), PropertyInfo = propertyInfo};
+                {Attributes = new List<(Attribute attribute, CustomAttribute customAttribute)>(customAttributes), PropertyInfo = propertyInfo,TypeDefinition = typeDefinition};
             CustomizeAttributes.OnNext(customizeAttribute);
             var attributesCode = $"{customizeAttribute.Attributes.ModelCode()}\r\n";
             return attributesCode;
@@ -259,7 +259,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 typeDefinition=assemblyDefinition.MainModule.Types.First(definition => definition.FullName == typeFullName);
             }
             var properties = new List<PropertyInfo>(data.typeToCode.PublicProperties().Where(info => !mappedTypes.Contains(info.PropertyType)));
-            CustomizePropertySelection.OnNext(properties);
+            if (propertiesCode == null){
+                CustomizePropertySelection.OnNext(properties);
+            }
             propertiesCode = propertiesCode ?? String.Join(Environment.NewLine,properties.Select(propertyInfo =>
                                  (propertyInfo,data.rootType).ModelCode( typeDefinition)));
             propertiesCode += $"{Environment.NewLine}{additionalPropertiesCode}";

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing.Design;
 using System.Linq;
 using DevExpress.Data.Filtering;
 using DevExpress.Data.Filtering.Helpers;
@@ -124,6 +125,16 @@ namespace Xpand.XAF.Modules.ModelMapper{
     [ImageName(ModelImageSource.ModelMappers)]
     public interface IModelModelMappers:IModelList<IModelModelMap>,IModelNode{
          
+    }
+
+    
+    public interface IModelDesignLayoutView : IModelNode {
+        IModelLayoutDesignStore DesignLayoutView{ get; }
+    }
+
+    public interface IModelLayoutDesignStore : IModelNodeDisabled {
+        [Browsable(false)]
+        string LayoutStore { get; set; }
     }
 
 //    [ModelEditorBrowsable(false)]

@@ -154,26 +154,46 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             throw new NotImplementedException(configuration.ToString());
         }
 
+        public static string GetTypeName(this PredifinedMap configuration){
+            if (configuration == PredifinedMap.AdvBandedGridView)
+                return "DevExpress.XtraGrid.Views.BandedGrid.AdvBandedGridView";
+            if (configuration == PredifinedMap.BandedGridColumn)
+                return "DevExpress.XtraGrid.Views.BandedGrid.BandedGridColumn";
+            if (configuration == PredifinedMap.GridView)
+                return "DevExpress.XtraGrid.Views.Grid.GridView";
+            if (configuration == PredifinedMap.GridColumn)
+                return "DevExpress.XtraGrid.Columns.GridColumn";
+            if (configuration == PredifinedMap.LayoutView)
+                return "DevExpress.XtraGrid.Views.Layout.LayoutView";
+            if (configuration == PredifinedMap.LayoutViewColumn)
+                return "DevExpress.XtraGrid.Columns.LayoutViewColumn";
+            if (configuration == PredifinedMap.ASPxGridView)
+                return "DevExpress.Web.ASPxGridView";
+            if (configuration == PredifinedMap.GridViewColumn)
+                return  "DevExpress.Web.GridViewColumn";
+            throw new NotImplementedException();
+        }
+
         public static ModelMapperConfiguration GetModelMapperConfiguration(this PredifinedMap predifinedMap){
             if (ModelExtendingService.Platform==Platform.Win){
                 if (new[]{PredifinedMap.GridView,PredifinedMap.GridColumn}.Any(map => map==predifinedMap)){
                     return GridViewGridColumnConfiguration(predifinedMap,_xafWinAssembly, _xtraGridAssembly, "DevExpress.ExpressApp.Win.Editors.GridListEditor",
-                        "DevExpress.XtraGrid.Views.Grid.GridView", "DevExpress.XtraGrid.Columns.GridColumn");
+                        PredifinedMap.GridView.GetTypeName(),PredifinedMap.GridColumn.GetTypeName() );
                 }
                 if (new[]{PredifinedMap.AdvBandedGridView,PredifinedMap.BandedGridColumn}.Any(map => map==predifinedMap)){
                     return GridViewGridColumnConfiguration(predifinedMap,_xafWinAssembly, _xtraGridAssembly, "DevExpress.ExpressApp.Win.Editors.GridListEditor",
-                        "DevExpress.XtraGrid.Views.BandedGrid.AdvBandedGridView", "DevExpress.XtraGrid.Views.BandedGrid.BandedGridColumn");
+                        PredifinedMap.AdvBandedGridView.GetTypeName(), PredifinedMap.BandedGridColumn.GetTypeName());
                 }
                 if (new[]{PredifinedMap.LayoutView,PredifinedMap.LayoutViewColumn}.Any(map => map==predifinedMap)){
                     return GridViewGridColumnConfiguration(predifinedMap,_xafWinAssembly, _xtraGridAssembly, "DevExpress.ExpressApp.Win.Editors.GridListEditor",
-                        "DevExpress.XtraGrid.Views.Layout.LayoutView", "DevExpress.XtraGrid.Columns.LayoutViewColumn");
+                        PredifinedMap.LayoutView.GetTypeName(), PredifinedMap.LayoutViewColumn.GetTypeName());
                 }
             }
 
             if (ModelExtendingService.Platform==Platform.Web){
                 if (new[]{PredifinedMap.ASPxGridView,PredifinedMap.GridViewColumn}.Any(map => map==predifinedMap)){
                     return GridViewGridColumnConfiguration(predifinedMap,_xafWebAssembly, _dxWebAssembly, "DevExpress.ExpressApp.Web.Editors.ASPx.ASPxGridListEditor",
-                        "DevExpress.Web.ASPxGridView", "DevExpress.Web.GridViewColumn");
+                        PredifinedMap.ASPxGridView.GetTypeName(),PredifinedMap.GridViewColumn.GetTypeName());
                 }
             }
 

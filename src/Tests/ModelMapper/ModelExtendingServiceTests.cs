@@ -167,6 +167,21 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
 
+        [Fact]
+        internal  void LayoutView_LayoutStore(){
+            var typeToExtend = typeof(LayoutView);
+            Assembly.LoadFile(typeToExtend.Assembly.Location);
+            InitializeMapperService($"{nameof(LayoutView_LayoutStore)}",Platform.Win);
+
+            PredifinedMap.LayoutView.Extend();
+            var application = DefaultModelMapperModule(Platform.Win).Application;
+
+            var modelListView = application.Model.Views.OfType<IModelListView>().First();
+
+            var modelMap = modelListView.GetNode(typeToExtend.ModelMapName());
+            modelMap.ShouldBeAssignableTo<IModelDesignLayoutView>();
+            modelMap.GetNode(nameof(IModelDesignLayoutView.DesignLayoutView)).ShouldNotBeNull();
+        }
 
     }
 }
