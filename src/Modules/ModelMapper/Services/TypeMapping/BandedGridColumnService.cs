@@ -20,6 +20,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 propertyInfos.Remove(propertyInfo);
                 var dynamicPropertyInfo = new DynamicPropertyInfo(propertyInfo);
                 dynamicPropertyInfo.RemoveAttribute(new BrowsableAttribute(false));
+                dynamicPropertyInfo.AddAttribute(new CategoryAttribute("Appearance"));
                 propertyInfos.Add(dynamicPropertyInfo);
             }
         }

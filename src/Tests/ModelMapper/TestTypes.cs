@@ -2,12 +2,25 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Reactive.Subjects;
 using System.Security.Principal;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Utils;
 
 namespace Xpand.XAF.Modules.ModelMapper.Tests{
+    public interface IModelPredifinedMapExtension{
+        
+    }
+    class ModelMapperTestModule:ModuleBase{
+        static readonly Subject<ApplicationModulesManager> ModulesManagerSubject=new Subject<ApplicationModulesManager>();
+        public IObservable<ApplicationModulesManager> ApplicationModulesManager{ get; }=ModulesManagerSubject;
+        public override void Setup(ApplicationModulesManager moduleManager){
+            base.Setup(moduleManager);
+            ModulesManagerSubject.OnNext(moduleManager);
+        }
+    }
     public class TestModelMapper{
         public int Age{ get; set; }
         

@@ -3,6 +3,7 @@ using System.CodeDom.Compiler;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using DevExpress.ExpressApp;
 using Fasterflect;
 using Microsoft.CSharp;
 using TestsLib;
@@ -16,13 +17,22 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
     public abstract class ModelMapperBaseTest:BaseTest{
         protected const string MMListViewNodePath = "Views/" + nameof(MM) + "_ListView";
         public const string DynamicTypeName = "DynamicTypeName";
-        internal ModelMapperModule DefaultModelMapperModule(Platform platform){
-            return platform.NewApplication().AddModule<ModelMapperModule>(typeof(MM));
+        internal ModelMapperModule DefaultModelMapperModule(Platform platform,params ModuleBase[] modules){
+            var xafApplication = platform.NewApplication();
+            xafApplication.Modules.AddRange(modules);
+            return xafApplication.AddModule<ModelMapperModule>(typeof(MM));
         }
 
         protected static PropertyInfo[] ModelTypeProperties(Type modelType){
             return modelType.Properties().Where(info =>!TypeMappingService.ReservedPropertyNames.Contains(info.Name) &&
                                                        info.Name!=TypeMappingService.ModelMappersNodeName).ToArray();
+        }
+
+        protected void ConfigureLayoutViewPredifinedMapService(PredifinedMap predifinedMap=PredifinedMap.LayoutView){
+            if (new[]{PredifinedMap.LayoutView,PredifinedMap.LayoutViewColumn}.Contains(predifinedMap)){
+                typeof(PredifinedMapService).Field("_xpandWinAssembly",Flags.Static|Flags.AnyVisibility).Set(GetType().Assembly);
+                typeof(PredifinedMapService).Field("_layoutViewListEditorTypeName",Flags.Static|Flags.AnyVisibility).Set(typeof(CustomGridListEditor).FullName);
+            }
         }
 
         internal Type CreateDynamicType(string name,string version="1.0.0.0"){

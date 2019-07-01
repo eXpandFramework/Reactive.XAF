@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using Fasterflect;
@@ -22,6 +23,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         public PredifinedMap Map{ get; }
     }
     public static class ModelExtendingService{
+        private static readonly Subject<Unit> ConnectedSubject=new Subject<Unit>();
         internal static Platform Platform{ get; private set; }
 
         private static HashSet<(Type targetIntefaceType, (Type extenderType, IModelMapperConfiguration configuration) extenderData)>
@@ -35,8 +37,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             ModelExtenders.Clear();
         }
 
+//        public static IObservable<Unit> Connected{ get; } = ConnectedSubject;
         internal static IObservable<Unit> ConnectExtendingService(this ApplicationModulesManager applicationModulesManager){
             Platform = applicationModulesManager.Modules.GetPlatform();
+            ConnectedSubject.OnNext(Unit.Default);
             var extendModel = applicationModulesManager.Modules.OfType<ReactiveModule>().ToObservable()
                 .SelectMany(module => module.ExtendModel);
             
@@ -50,8 +54,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 .SelectMany(unit => ModelExtenders.ToObservable()
                     .SelectMany(_ => _.extenderData.MapToModel())
                     .ModelInterfaces()
-                    .Where(type => typeof(IModelNode).IsAssignableFrom(type))
-                    .SelectMany(ContainerTypes))
+                    .Where(type => typeof(IModelNode).IsAssignableFrom(type)))
+                .SelectMany(type => type.ModelMapperContainerType())
                 .Distinct().Replay().RefCount();
 
             return ModelExtenders.ToObservable()
@@ -61,36 +65,31 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 .Do(_ => extenders.Add(_.targetIntefaceType,_.extenderInterface));
         }
 
-        private static IEnumerable<Type> ContainerTypes(Type type){
-            return type.Assembly.GetTypes()
-                .Where(_ => _.Name.EndsWith(TypeMappingService.DefaultContainerSuffix))
-                .Where(_ => _.GetInterfaces().Contains(typeof(IModelModelMapContainer)));
-        }
-
-
-        public static void Extend<TModelMapperConfiguration>(this (Type extenderType, TModelMapperConfiguration configuration) extenderData, Type targetInterface)
+        public static void Extend<TModelMapperConfiguration>(this ApplicationModulesManager modulesManager,(Type extenderType, TModelMapperConfiguration configuration) extenderData, Type targetInterface)
             where TModelMapperConfiguration : IModelMapperConfiguration{
+            if (modulesManager.Modules.FindModule<ModelMapperModule>()==null)
+                throw new NotSupportedException($"{typeof(ModelMapperModule)} is not registered");
             TypeMappingService.Connect().Wait();
             ModelExtenders.Add((targetInterface, extenderData));
         }
 
-        public static void Extend<TTargetInterface>(this Type extenderType,IModelMapperConfiguration configuration ) 
+        public static void Extend<TTargetInterface>(this ApplicationModulesManager modulesManager,Type extenderType,IModelMapperConfiguration configuration ) 
             where TTargetInterface : IModelNode {
 
             configuration =configuration?? new ModelMapperConfiguration();
-            (extenderType,configuration).Extend(typeof(TTargetInterface));
+            modulesManager.Extend((extenderType,configuration),typeof(TTargetInterface));
         }
 
-        public static void Extend<TTargetInterface>(this Type extenderType) where TTargetInterface : IModelNode{
-            (extenderType,new ModelMapperConfiguration()).Extend(typeof(TTargetInterface));
+        public static void Extend<TTargetInterface>(this ApplicationModulesManager modulesManager,Type extenderType) where TTargetInterface : IModelNode{
+            modulesManager.Extend((extenderType,new ModelMapperConfiguration()),typeof(TTargetInterface));
         }
 
-        public static void Extend<TTargetInterface>(this (Type extenderType, IModelMapperConfiguration configuration) extenderData) where TTargetInterface : IModelNode{
-            extenderData.Extend(typeof(TTargetInterface));
+        public static void Extend<TTargetInterface>(this ApplicationModulesManager modulesManager,(Type extenderType, IModelMapperConfiguration configuration) extenderData) where TTargetInterface : IModelNode{
+            modulesManager.Extend(extenderData,typeof(TTargetInterface));
         }
 
-        public static void Extend<TTargetInterface, TExtenderType>() where TTargetInterface : IModelNode where TExtenderType:class{
-            (typeof(TExtenderType),new ModelMapperConfiguration()).Extend(typeof(TTargetInterface));
+        public static void Extend<TTargetInterface, TExtenderType>(this ApplicationModulesManager modulesManager) where TTargetInterface : IModelNode where TExtenderType:class{
+            modulesManager.Extend((typeof(TExtenderType),new ModelMapperConfiguration()),typeof(TTargetInterface));
         }
     }
 }

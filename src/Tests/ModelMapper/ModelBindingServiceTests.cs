@@ -6,11 +6,15 @@ using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.PivotGrid;
+using DevExpress.ExpressApp.PivotGrid.Win;
 using DevExpress.ExpressApp.Web.Editors.ASPx;
 using DevExpress.ExpressApp.Win.Editors;
 using DevExpress.Web;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.BandedGrid;
+using DevExpress.XtraPivotGrid;
+using Fasterflect;
 using Shouldly;
 using TestsLib;
 using Xpand.Source.Extensions.XAF.XafApplication;
@@ -29,8 +33,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
             var typeToMap=typeof(StringValueTypeProperties);
             InitializeMapperService($"{nameof(Bind_Only_NullAble_Properties_That_are_not_Null)}{typeToMap.Name}{platform}");
-            typeToMap.Extend<IModelListView>();
-            var application = DefaultModelMapperModule(platform).Application;
+
+            var module = typeToMap.Extend<IModelListView>();
+            var application = DefaultModelMapperModule(platform,module).Application;
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
             var mapName = typeToMap.ModelMapName();
             var modelModelMap = (IModelModelMap)modelListView.GetNode(mapName);
@@ -49,8 +54,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         internal void Do_not_bind_Disable_mode_nodes(Platform platform){
             Type typeToMap=typeof(StringValueTypeProperties);
             InitializeMapperService($"{nameof(Do_not_bind_Disable_mode_nodes)}{typeToMap.Name}{platform}");
-            typeToMap.Extend<IModelListView>();
-            var application = DefaultModelMapperModule(platform).Application;
+            var module = typeToMap.Extend<IModelListView>();
+            var application = DefaultModelMapperModule(platform,module).Application;
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
             var mapName = typeToMap.ModelMapName();
             var modelModelMap = (IModelModelMap)modelListView.GetNode(mapName);
@@ -70,8 +75,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         internal void Do_not_throw_if_target_object_properties_do_not_exist(Platform platform){
             Type typeToMap=typeof(StringValueTypeProperties);
             InitializeMapperService($"{nameof(Do_not_throw_if_target_object_properties_do_not_exist)}{typeToMap.Name}{platform}");
-            typeToMap.Extend<IModelListView>();
-            var application = DefaultModelMapperModule(platform).Application;
+            var module = typeToMap.Extend<IModelListView>();
+            var application = DefaultModelMapperModule(platform,module).Application;
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
             var mapName = typeToMap.ModelMapName();
             var modelModelMap = (IModelModelMap)modelListView.GetNode(mapName);
@@ -87,8 +92,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         internal void Bind_all_public_nullable_type_properties(Platform platform){
             Type typeToMap=typeof(StringValueTypeProperties);
             InitializeMapperService($"{nameof(Bind_all_public_nullable_type_properties)}{typeToMap.Name}{platform}");
-            typeToMap.Extend<IModelListView>();
-            var application = DefaultModelMapperModule(platform).Application;
+            var module = typeToMap.Extend<IModelListView>();
+            var application = DefaultModelMapperModule(platform,module).Application;
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
             var mapName = typeToMap.ModelMapName();
             var modelModelMap = (IModelModelMap)modelListView.GetNode(mapName);
@@ -108,8 +113,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         internal void Bind_all_public_rw_string_properties(Platform platform){
             Type typeToMap=typeof(StringValueTypeProperties);
             InitializeMapperService($"{nameof(Bind_all_public_rw_string_properties)}{typeToMap.Name}{platform}");
-            typeToMap.Extend<IModelListView>();
-            var application = DefaultModelMapperModule(platform).Application;
+            var module = typeToMap.Extend<IModelListView>();
+            var application = DefaultModelMapperModule(platform,module).Application;
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
             var mapName = typeToMap.ModelMapName();
             var modelModelMap = (IModelModelMap)modelListView.GetNode(mapName);
@@ -128,8 +133,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         internal void Bind_all_public_rw_nested_properties(Platform platform){
             var typeToMap=typeof(ReferenceTypeProperties);
             InitializeMapperService($"{nameof(Bind_all_public_rw_nested_properties)}{typeToMap.Name}{platform}");
-            typeToMap.Extend<IModelListView>();
-            var application = DefaultModelMapperModule(platform).Application;
+            var module = typeToMap.Extend<IModelListView>();
+            var application = DefaultModelMapperModule(platform,module).Application;
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
             var mapName = typeToMap.ModelMapName();
             var modelModelMap = (IModelModelMap)modelListView.GetNode(mapName);
@@ -157,18 +162,21 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         [Theory]
-        [InlineData(Platform.Win,new[]{PredifinedMap.GridColumn , PredifinedMap.GridView},new[]{typeof(XafGridView),typeof(GridColumn),typeof(GridListEditor)})]
-        [InlineData(Platform.Web,new[]{PredifinedMap.GridViewColumn , PredifinedMap.ASPxGridView},new[]{typeof(ASPxGridView),typeof(GridViewColumn),typeof(ASPxGridListEditor)})]
-        [InlineData(Platform.Win,new[]{PredifinedMap.BandedGridColumn , PredifinedMap.AdvBandedGridView},new[]{typeof(XafAdvBandedGridView),typeof(BandedGridColumn),typeof(GridListEditor)})]
-        [InlineData(Platform.Win,new[]{PredifinedMap.LayoutViewColumn , PredifinedMap.LayoutView},new[]{typeof(XafLayoutView),typeof(LayoutViewColumn),typeof(GridListEditor)})]
-        internal async Task Bind_ListEditor_Control(Platform platform,PredifinedMap[] predifinedMaps,Type[] controlTypes){
+        [InlineData(Platform.Win,new[]{PredifinedMap.GridColumn , PredifinedMap.GridView},new[]{typeof(XafGridView),typeof(GridColumn),typeof(GridListEditor)},new Type[0],3)]
+        [InlineData(Platform.Web,new[]{PredifinedMap.GridViewColumn , PredifinedMap.ASPxGridView},new[]{typeof(ASPxGridView),typeof(GridViewColumn),typeof(ASPxGridListEditor)},new Type[0],3)]
+        [InlineData(Platform.Win,new[]{PredifinedMap.BandedGridColumn , PredifinedMap.AdvBandedGridView},new[]{typeof(XafAdvBandedGridView),typeof(BandedGridColumn),typeof(GridListEditor)},new Type[0],3)]
+        [InlineData(Platform.Win,new[]{PredifinedMap.LayoutViewColumn , PredifinedMap.LayoutView},new[]{typeof(XafLayoutView),typeof(LayoutViewColumn),typeof(CustomGridListEditor)},new Type[0],3)]
+        [InlineData(Platform.Win, new[]{PredifinedMap.PivotGridField,PredifinedMap.PivotGridControl},new[]{typeof(PivotGridControl), typeof(PivotGridListEditor)},new[]{typeof(PivotGridModule), typeof(PivotGridWindowsFormsModule)},3)]
+        internal async Task Bind_ListEditor_Control(Platform platform,PredifinedMap[] predifinedMaps,Type[] controlTypes,Type[] extraModules,int boundTypes){
             controlTypes.ToObservable().Do(type => Assembly.LoadFile(type.Assembly.Location)).Subscribe();
             InitializeMapperService($"{nameof(Bind_ListEditor_Control)}",platform);
-            predifinedMaps.Extend();
+            ConfigureLayoutViewPredifinedMapService(predifinedMaps.Last());
+            var module = predifinedMaps.Extend();
 
-            var application = DefaultModelMapperModule(platform).Application;
+            var application = DefaultModelMapperModule(platform,extraModules.Select(_ => _.CreateInstance()).Cast<ModuleBase>().Concat(new[]{module}).ToArray()).Application;
             application.MockListEditor((view, xafApplication, collectionSource) => {
-                var listEditor = platform == Platform.Win ? (ListEditor) new CustomGridListEditor(view,controlTypes.First(),controlTypes.Skip(1).First()) : new ASPxGridListEditor(view);
+                var listEditor = predifinedMaps.Last() == PredifinedMap.PivotGridControl? new PivotGridListEditor(view):
+                    platform == Platform.Win?(ListEditor) new CustomGridListEditor(view, controlTypes.First(), controlTypes.Skip(1).First()): new ASPxGridListEditor(view);
                 ((IComplexListEditor) listEditor).Setup(collectionSource, application);
                 return listEditor;
             });
@@ -176,11 +184,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             controlBound.Connect();
 
             var listView = application.CreateObjectView<ListView>(typeof(MM));
+            listView.Model.EditorType = controlTypes.Last();
+            listView.Model.BandsLayout.Enable = predifinedMaps.Contains(PredifinedMap.AdvBandedGridView);
             listView.CreateControls();
 
-            await controlBound.Take(3).WithTimeOut(TimeSpan.FromSeconds(20));
+            await controlBound.Take(boundTypes).WithTimeOut(TimeSpan.FromSeconds(10));
 
         }
-    
+
     }
 }

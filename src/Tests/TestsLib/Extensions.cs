@@ -52,10 +52,16 @@ namespace TestsLib {
 
         public static void RegisterDefaults(this XafApplication application, params ModuleBase[] modules){
             application.AlwaysUpdateOnDatabaseVersionMismatch().Subscribe();
-            application.Modules.AddRange(new[] {
+            var moduleBases = new[] {
                 new SystemModule(),
                 application is WinApplication ? (ModuleBase) new SystemWindowsFormsModule() : new SystemAspNetModule()
-            }.Concat(modules));
+            }.Concat(modules);
+            foreach (var moduleBase in moduleBases){
+                if (application.Modules.FindModule(moduleBase.GetType()) == null){
+                    application.Modules.Add(moduleBase);
+                }
+            }
+            
             application.RegisterInMemoryObjectSpaceProvider();
         }
 

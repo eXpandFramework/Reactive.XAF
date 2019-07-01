@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
@@ -11,12 +13,14 @@ using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.BandedGrid;
 using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraGrid.Views.Layout;
+using DevExpress.XtraPivotGrid;
 using Shouldly;
 using Xpand.Source.Extensions.System.String;
 using Xpand.Source.Extensions.XAF.Model;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
+using Xpand.XAF.Modules.Reactive;
 using Xunit;
 using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.TypeMappingService;
 
@@ -32,14 +36,16 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         internal void ExtendModel_Any_Type(Type typeToMap,Platform platform){
             InitializeMapperService($"{nameof(ExtendModel_Any_Type)}{typeToMap.Name}{platform}");
 
-            typeToMap.Extend<IModelListView>();
-            var application = DefaultModelMapperModule(platform).Application;
+            var module = typeToMap.Extend<IModelListView>();
+            var application = DefaultModelMapperModule(platform,module).Application;
             AssertExtendedModel(typeToMap, application, MMListViewNodePath);
         }
 
         [Theory]
         [InlineData(PredifinedMap.GridColumn, typeof(GridColumn),Platform.Win,MMListViewNodePath+"/Columns/Test")]
         [InlineData(PredifinedMap.GridView, typeof(GridView),Platform.Win,MMListViewNodePath)]
+        [InlineData(PredifinedMap.PivotGridControl, typeof(PivotGridControl),Platform.Win,MMListViewNodePath)]
+        [InlineData(PredifinedMap.PivotGridField, typeof(PivotGridField),Platform.Win,MMListViewNodePath+"/Columns/Test")]
         [InlineData(PredifinedMap.LayoutViewColumn, typeof(LayoutViewColumn),Platform.Win,MMListViewNodePath+"/Columns/Test")]
         [InlineData(PredifinedMap.LayoutView, typeof(LayoutView),Platform.Win,MMListViewNodePath)]
         [InlineData(PredifinedMap.BandedGridColumn, typeof(BandedGridColumn),Platform.Win,MMListViewNodePath+"/Columns/Test")]
@@ -49,9 +55,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         internal void ExtendModel_Predefined_Type(PredifinedMap configuration,Type typeToMap,Platform platform,string nodePath){
             Assembly.LoadFile(typeToMap.Assembly.Location);
             InitializeMapperService($"{nameof(ExtendModel_Multiple_Predefined_Type)}{configuration}{platform}",platform);
+            ConfigureLayoutViewPredifinedMapService(configuration);
 
-            configuration.Extend();
-            var application = DefaultModelMapperModule(platform).Application;
+            var module = configuration.Extend();
+            var application = DefaultModelMapperModule(platform,module).Application;
             AssertExtendedModel(typeToMap, application,nodePath);
         }
 
@@ -61,10 +68,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             var platform = Platform.Win;
             InitializeMapperService($"{nameof(ExtendModel_Multiple_Predefined_Type)}",platform);
 
-            
-            new[]{PredifinedMap.GridView,PredifinedMap.GridColumn}.Extend();
 
-            var application = DefaultModelMapperModule(platform).Application;
+            var module = new[]{PredifinedMap.GridView,PredifinedMap.GridColumn}.Extend();
+
+            var application = DefaultModelMapperModule(platform,module).Application;
             AssertExtendedModel(typeof(GridView), application, MMListViewNodePath);
             AssertExtendedModel(typeof(GridColumn), application, $"{MMListViewNodePath}/Columns/Test");
         }
@@ -86,15 +93,34 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         [Fact]
+        public async Task Extend_Existing_PredifinedMap(){
+            InitializeMapperService(nameof(Extend_Existing_PredifinedMap),Platform.Win);
+            var module = PredifinedMap.GridView.Extend();
+            module.ApplicationModulesManager
+                .FirstAsync()
+                .SelectMany(_ => _.ExtendMap(PredifinedMap.GridView))
+                .Subscribe(_ => {
+                    _.extenders.Add(_.targetInterface,typeof(IModelPredifinedMapExtension));
+                });
+            var application = DefaultModelMapperModule(Platform.Win,module).Application;
+            var modelListView = application.Model.Views.OfType<IModelListView>().First();
+            var modelNode = modelListView.GetNode(typeof(GridView).ModelMapName());
+
+            (modelNode is IModelPredifinedMapExtension).ShouldBeTrue();
+            
+        }
+
+        [Fact]
         public void Extend_Multiple_Objects_with_common_types(){
             var typeToMap1 = typeof(TestModelMapperCommonType1);
             var typeToMap2 = typeof(TestModelMapperCommonType2);
             InitializeMapperService(nameof(Extend_Multiple_Objects_with_common_types));
 
-            typeToMap1.Extend<IModelListView>();
-            typeToMap2.Extend<IModelColumn>();
+            var module = new ModelMapperTestModule();
+            typeToMap1.Extend<IModelListView>(module);
+            typeToMap2.Extend<IModelColumn>(module);
 
-            var application = DefaultModelMapperModule(Platform.Win).Application;
+            var application = DefaultModelMapperModule(Platform.Win,module).Application;
             var appearanceCell = application.Model.GetNodeByPath($@"{MMListViewNodePath}/Columns/Test/{nameof(TestModelMapperCommonType2)}/{nameof(TestModelMapperCommonType2.AppearanceCell)}");
             appearanceCell.ShouldNotBeNull();
             appearanceCell.GetNodeByPath($"{nameof(AppearanceObjectEx.TextOptions)}");
@@ -107,9 +133,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             InitializeMapperService($"{nameof(ModelMapperContexts)}{platform}");
             var typeToMap = typeof(TestModelMapper);
 
-            typeToMap.Extend<IModelListView>();
+            var module = typeToMap.Extend<IModelListView>();
 
-            var application = DefaultModelMapperModule(platform).Application;
+            var application = DefaultModelMapperModule(platform,module).Application;
             var modelModelMappers = ((IModelApplicationModelMapper) application.Model).ModelMapper.MapperContexts.First();
             modelModelMappers.Id().ShouldBe(ModelMapperContextNodeGenerator.Default);
             modelModelMappers.First().Id().ShouldBe(typeToMap.ModelMapName());
@@ -122,9 +148,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             InitializeMapperService($"{nameof(Container_ModelMapperContexts)}{platform}");
             var typeToMap = typeof(TestModelMapper);
 
-            typeToMap.Extend<IModelListView>();
+            var module = typeToMap.Extend<IModelListView>();
 
-            var application = DefaultModelMapperModule(platform).Application;
+            var application = DefaultModelMapperModule(platform,module).Application;
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
             var mapName = typeToMap.ModelMapName();
             var modelMappersNode =
@@ -157,9 +183,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             InitializeMapperService($"{nameof(Container_Visibility)}{visibilityCriteria.CleanCodeName()}{platform}");
             var typeToMap = typeof(TestModelMapper);
 
-            typeToMap.Extend<IModelListView>(new ModelMapperConfiguration(){VisibilityCriteria = visibilityCriteria});
+            var module = typeToMap.Extend<IModelListView>(null,new ModelMapperConfiguration(){VisibilityCriteria = visibilityCriteria});
 
-            var application = DefaultModelMapperModule(platform).Application;
+            var application = DefaultModelMapperModule(platform,module).Application;
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
             var modelMapName = typeToMap.ModelMapName();
             modelListView.IsPropertyVisible(modelMapName).ShouldBe(visibility);
@@ -172,9 +198,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             var typeToExtend = typeof(LayoutView);
             Assembly.LoadFile(typeToExtend.Assembly.Location);
             InitializeMapperService($"{nameof(LayoutView_LayoutStore)}",Platform.Win);
+            ConfigureLayoutViewPredifinedMapService();
 
-            PredifinedMap.LayoutView.Extend();
-            var application = DefaultModelMapperModule(Platform.Win).Application;
+            var module = PredifinedMap.LayoutView.Extend();
+            var application = DefaultModelMapperModule(Platform.Win,module).Application;
 
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
 

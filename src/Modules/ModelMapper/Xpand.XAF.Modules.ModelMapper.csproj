@@ -38,6 +38,7 @@
     <Compile Include="..\..\Extensions\Extensions\MonoCecil\ToType.cs" Link="LinkedFiles\ToType.cs" />
     <Compile Include="..\..\Extensions\Extensions\System\AppDomain\ApplicationPath.cs" Link="LinkedFiles\ApplicationPath.cs" />
     <Compile Include="..\..\Extensions\Extensions\System\Refelction\DelegateTypeFactory.cs" Link="LinkedFiles\DelegateTypeFactory.cs" />
+    <Compile Include="..\..\Extensions\Extensions\System\Refelction\DynamicPropertyInfo.cs" Link="LinkedFiles\DynamicPropertyInfo.cs" />
     <Compile Include="..\..\Extensions\Extensions\System\Refelction\IsNullAbleType.cs" Link="LinkedFiles\IsNullAbleType.cs" />
     <Compile Include="..\..\Extensions\Extensions\System\Refelction\PropertyInfoAccessModifier.cs" Link="LinkedFiles\PropertyInfoAccessModifier.cs" />
     <Compile Include="..\..\Extensions\Extensions\System\String\CleanCodeName.cs" Link="LinkedFiles\CleanCodeName.cs" />
@@ -58,6 +59,10 @@
     <PackageReference Include="Enums.NET" Version="2.3.2" />
     <PackageReference Include="fasterflect" Version="2.1.3" />
     <PackageReference Include="Mono.Cecil" Version="0.10.4" />
+    <PackageReference Include="System.Interactive" Version="3.2.0" />
     <PackageReference Include="System.Reactive" Version="4.1.5" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\" />
   </ItemGroup>
 </Project>

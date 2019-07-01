@@ -67,6 +67,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             
         }
 
+        public static IEnumerable<Type> ModelMapperContainerType(this Type type){
+            return type.Assembly.GetTypes()
+                .Where(_ => _.Name.EndsWith(DefaultContainerSuffix))
+                .Where(_ => _.GetInterfaces().Contains(typeof(IModelModelMapContainer)));
+        }
+
         public static IObservable<Type> MappedTypes{ get;private set; }
 
         public static IObservable<Type> MapToModel<TModelMapperConfiguration>(this (Type type, TModelMapperConfiguration configuration) type)
