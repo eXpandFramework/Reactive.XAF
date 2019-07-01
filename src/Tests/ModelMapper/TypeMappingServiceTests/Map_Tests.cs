@@ -110,6 +110,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests
             var descriptionAttribute = propertyInfos.Select(info => info.Attribute<DescriptionAttribute>())
                 .FirstOrDefault(attribute => attribute != null && attribute.Description.Contains(" ") );
             descriptionAttribute.ShouldNotBeNull();
+            if (configuration == PredifinedMap.BandedGridColumn){
+                propertyInfos.FirstOrDefault(info => info.Name==nameof(BandedGridColumn.ColVIndex)).ShouldNotBeNull();
+                propertyInfos.FirstOrDefault(info => info.Name==nameof(BandedGridColumn.RowIndex)).ShouldNotBeNull();
+            }
 
         }
 

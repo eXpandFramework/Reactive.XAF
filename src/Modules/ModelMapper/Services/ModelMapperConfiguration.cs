@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Reflection;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
@@ -14,6 +15,7 @@ using Xpand.Source.Extensions.FunctionOperators;
 using Xpand.Source.Extensions.System.AppDomain;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
+using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services{
     public interface IModelMapperConfiguration{
@@ -71,7 +73,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
 
     public static class PredifinedMapService{
         private static Assembly _xafWinAssembly;
-        private static Assembly _xtraGridAssembly;
+        private static Assembly _xpandWinAssembly;
+        private static Assembly _gridViewAssembly;
         private static Assembly _xafWebAssembly;
         private static Assembly _dxWebAssembly;
 
@@ -84,10 +87,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             if (ModelExtendingService.Platform==Platform.Win){
                 _xafWinAssembly = assemblies.FirstOrDefault(_ => _.FullName.StartsWith("DevExpress.ExpressApp.Win.v"));
                 var xtragrid = "DevExpress.XtraGrid.v";
-                _xtraGridAssembly = assemblies.FirstOrDefault(_ => _.FullName.StartsWith(xtragrid));
-                if (_xtraGridAssembly == null){
-                    _xtraGridAssembly=Assembly.LoadFile(Directory.GetFiles(AppDomain.CurrentDomain.ApplicationPath(), $"{xtragrid}*.dll").First());
+                _gridViewAssembly = assemblies.FirstOrDefault(_ => _.FullName.StartsWith(xtragrid));
+                if (_gridViewAssembly == null){
+                    _gridViewAssembly=Assembly.LoadFile(Directory.GetFiles(AppDomain.CurrentDomain.ApplicationPath(), $"{xtragrid}*.dll").First());
                 }
+                _xpandWinAssembly = assemblies.FirstOrDefault(_ => _.FullName.StartsWith("Xpand.ExpressApp.Win"));
             }
             if (ModelExtendingService.Platform==Platform.Web){
                 _xafWebAssembly = assemblies.FirstOrDefault(_ => _.FullName.StartsWith("DevExpress.ExpressApp.Web.v"));
@@ -113,6 +117,14 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
 
         public static IObservable<Type> MapToModel(this IEnumerable<PredifinedMap> configurations,Action<PredifinedMap,ModelMapperConfiguration> configure = null){
             return configurations.Where(_ => _!=PredifinedMap.None)
+                .ToObservable()
+                .SelectMany(_ => {
+                    if (_ == PredifinedMap.BandedGridColumn){
+                        return BandedGridColumnService.Connect().Select(unit => _);
+                    }
+
+                    return _.AsObservable();
+                })
                 .Select(_ =>_.ModelMapperConfiguration(configuration => configure?.Invoke(_, configuration))?.MapData.typeToMap)
                 .Where(_ => _!=null)
                 .MapToModel();
@@ -177,15 +189,15 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         public static ModelMapperConfiguration GetModelMapperConfiguration(this PredifinedMap predifinedMap){
             if (ModelExtendingService.Platform==Platform.Win){
                 if (new[]{PredifinedMap.GridView,PredifinedMap.GridColumn}.Any(map => map==predifinedMap)){
-                    return GridViewGridColumnConfiguration(predifinedMap,_xafWinAssembly, _xtraGridAssembly, "DevExpress.ExpressApp.Win.Editors.GridListEditor",
+                    return GridViewGridColumnConfiguration(predifinedMap,_xafWinAssembly, _gridViewAssembly, "DevExpress.ExpressApp.Win.Editors.GridListEditor",
                         PredifinedMap.GridView.GetTypeName(),PredifinedMap.GridColumn.GetTypeName() );
                 }
                 if (new[]{PredifinedMap.AdvBandedGridView,PredifinedMap.BandedGridColumn}.Any(map => map==predifinedMap)){
-                    return GridViewGridColumnConfiguration(predifinedMap,_xafWinAssembly, _xtraGridAssembly, "DevExpress.ExpressApp.Win.Editors.GridListEditor",
+                    return GridViewGridColumnConfiguration(predifinedMap,_xafWinAssembly, _gridViewAssembly, "DevExpress.ExpressApp.Win.Editors.GridListEditor",
                         PredifinedMap.AdvBandedGridView.GetTypeName(), PredifinedMap.BandedGridColumn.GetTypeName());
                 }
                 if (new[]{PredifinedMap.LayoutView,PredifinedMap.LayoutViewColumn}.Any(map => map==predifinedMap)){
-                    return GridViewGridColumnConfiguration(predifinedMap,_xafWinAssembly, _xtraGridAssembly, "DevExpress.ExpressApp.Win.Editors.GridListEditor",
+                    return GridViewGridColumnConfiguration(predifinedMap,_xpandWinAssembly, _gridViewAssembly, "Xpand.ExpressApp.Win.ListEditors.GridListEditors.LayoutView.LayoutViewListEditor",
                         PredifinedMap.LayoutView.GetTypeName(), PredifinedMap.LayoutViewColumn.GetTypeName());
                 }
             }
@@ -205,11 +217,15 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 var rightOperand = xafWinAssembly.GetType(listEditorTypeName);
                 if (new[]{PredifinedMap.GridView,PredifinedMap.ASPxGridView,PredifinedMap.AdvBandedGridView, PredifinedMap.LayoutView}.Any(map => map==predifinedMap)){
                     var visibilityCriteria = VisibilityCriteriaLeftOperand.IsAssignableFromModelListVideEditorType.GetVisibilityCriteria(rightOperand,"Parent.");
+                    var bandsLayout = predifinedMap == PredifinedMap.AdvBandedGridView;
+                    visibilityCriteria=CriteriaOperator.Parse($"{visibilityCriteria} AND Parent.BandsLayout.Enable=?", bandsLayout).ToString();
                     var typeToMap=gridViewAssembly.GetType(gridViewTypeName);
                     return new ModelMapperConfiguration {ImageName = "Grid_16x16",VisibilityCriteria =visibilityCriteria,MapData = (typeToMap,typeof(IModelListView))};
                 }
                 if (new[]{PredifinedMap.GridViewColumn,PredifinedMap.GridColumn, PredifinedMap.BandedGridColumn,PredifinedMap.LayoutViewColumn}.Any(map => map==predifinedMap)){
                     var visibilityCriteria = VisibilityCriteriaLeftOperand.IsAssignableFromModelListVideEditorType.GetVisibilityCriteria(rightOperand,"Parent.Parent.Parent.");
+                    var bandsLayout = predifinedMap == PredifinedMap.BandedGridColumn;
+                    visibilityCriteria=CriteriaOperator.Parse($"{visibilityCriteria} AND Parent.Parent.Parent.BandsLayout.Enable=?", bandsLayout).ToString();
                     var typeToMap=gridViewAssembly.GetType(gridColumnTypeName);
                     return new ModelMapperConfiguration {ImageName = @"Office2013\Columns_16x16",VisibilityCriteria =visibilityCriteria,MapData = (typeToMap,typeof(IModelColumn))};
                 }

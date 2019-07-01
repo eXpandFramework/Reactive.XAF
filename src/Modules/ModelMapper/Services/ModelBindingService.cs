@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -15,10 +16,17 @@ using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services{
-    public static class ModelBindingService{
-        static readonly Subject<object> ControlBoundSubject=new Subject<object>();
+    public class Parameter:HandledEventArgs{
+        public Parameter(object item){
+            Item = item;
+        }
 
-        public static IObservable<object> ControlBound => ControlBoundSubject;
+        public object Item{ get; }
+    }
+    public static class ModelBindingService{
+        static readonly Subject<object> ControlBingSubject=new Subject<object>();
+
+        public static IObservable<object> ControlBing => ControlBingSubject;
 
         internal static IObservable<Unit> BindConnect(this XafApplication application){
             if (application==null)
@@ -37,8 +45,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             var type = Type.GetType(mapInterface.Attribute<ModelMapLinkAttribute>().LinkedTypeName);
             var control = EnumsNET.Enums.GetMember<PredifinedMap>(type?.Name).Value.GetViewControl(_.view, _.model.Id());
             var modelMap = (IModelModelMap) _.info.GetValue(_.model);
-            modelMap.BindTo(control);
-            ControlBoundSubject.OnNext(control);
+            var parameter = new Parameter(control);
+            ControlBingSubject.OnNext(parameter);
+            if (!parameter.Handled){
+                modelMap.BindTo(parameter.Item);
+            }
             return Unit.Default;
         }
 
@@ -46,7 +57,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             return source.SelectMany(_ => _.view.Model.GetType().Properties()
                 .Select(info => (info, model: (IModelNode) _.view.Model, _.view)).Concat(_.view.Model.Columns
                     .SelectMany(column =>column.GetType().Properties().Select(info => (info, model: (IModelNode) column, _.view))))
-                .Where(info => typeof(IModelModelMap).IsAssignableFrom(info.info.PropertyType)&&_.view.Model.IsPropertyVisible(info.info.Name)));
+                .Where(info => typeof(IModelModelMap).IsAssignableFrom(info.info.PropertyType))
+                .Where(info => info.model.IsPropertyVisible(info.info.Name)));
         }
 
         public static void BindTo(this IModelModelMap modelModelMap, object instance){

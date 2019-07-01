@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using Fasterflect;
@@ -12,7 +11,6 @@ using Xpand.Source.Extensions.MonoCecil;
 using Xpand.Source.Extensions.System.Refelction;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
-
     public static partial class TypeMappingService{
         private static Version _modelMapperModuleVersion;
         private static IEnumerable<Assembly> AllAssemblies(Type type, PropertyInfo[] propertyInfos){

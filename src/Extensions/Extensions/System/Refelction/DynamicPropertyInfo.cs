@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using Fasterflect;
 
 namespace Xpand.Source.Extensions.System.Refelction{
     [ExcludeFromCodeCoverage]
@@ -16,6 +17,12 @@ namespace Xpand.Source.Extensions.System.Refelction{
             DeclaringType = declaringType;
             CanRead = canRead;
             CanWrite = canWrite;
+        }
+
+        public DynamicPropertyInfo(PropertyInfo propertyInfo):this(propertyInfo.Name,propertyInfo.PropertyType,propertyInfo.DeclaringType,propertyInfo.CanRead,propertyInfo.CanWrite){
+            foreach (var attribute in propertyInfo.Attributes()){
+                AddAttribute(attribute);
+            }
         }
 
         public override string Name{ get; }

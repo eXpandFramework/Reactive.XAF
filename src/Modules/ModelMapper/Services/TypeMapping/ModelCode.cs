@@ -53,6 +53,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         public string Code{ get; set; }
         public Type Type{ get; set; }
     }
+
     public static partial class TypeMappingService{
         private static readonly Subject<CustomizeAttribute> CustomizeAttributes=new Subject<CustomizeAttribute>();
         private static readonly Subject<List<PropertyInfo>> CustomizePropertySelection=new Subject<List<PropertyInfo>>();

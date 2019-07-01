@@ -172,7 +172,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                 ((IComplexListEditor) listEditor).Setup(collectionSource, application);
                 return listEditor;
             });
-            var controlBound = ModelBindingService.ControlBound.Replay();
+            var controlBound = ModelBindingService.ControlBing.Replay();
             controlBound.Connect();
 
             var listView = application.CreateObjectView<ListView>(typeof(MM));

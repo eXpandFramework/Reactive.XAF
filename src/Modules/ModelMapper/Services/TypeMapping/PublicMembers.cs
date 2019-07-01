@@ -42,7 +42,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
 
         private static void Init(){
             PropertyMappingRules = new List<(string key, Action<List<PropertyInfo>> action)>{
-                ("Browsable", BrowsableRule),
+                ("Browsable", BrowsableRule)
             };
             AttributeMappingRules = new List<(string key, Action<CustomizeAttribute> action)>{
                 ("PrivateDescription", PrivateDescriptionRule),
@@ -75,8 +75,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             return new[]{type}.MapToModel();
         }
 
+        public static IObservable<Type> MapToModel(this IObservable<Type> types){
+            return types.Select(_ => (_, new ModelMapperConfiguration())).MapToModel();
+        }
+
         public static IObservable<Type> MapToModel(this IEnumerable<Type> types){
-            return types.Select(_ => (_, new ModelMapperConfiguration())).ToArray().MapToModel();
+            return types.ToArray().ToObservable().MapToModel();
         }
 
         public static IObservable<Type> ModelInterfaces(this IObservable<Type> source){
@@ -87,11 +91,18 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             return new []{(type,configuration)}.MapToModel();
         }
 
-        public static IObservable<Type> MapToModel<TModelMapperConfiguration>(this (Type type,TModelMapperConfiguration configuration)[] types) where TModelMapperConfiguration:IModelMapperConfiguration{
+        public static IObservable<Type> MapToModel<TModelMapperConfiguration>(
+            this IObservable<(Type type, TModelMapperConfiguration configuration)> types)
+            where TModelMapperConfiguration : IModelMapperConfiguration{
             return types
-                .Select(_ => (_.type,(IModelMapperConfiguration)_.configuration)).ToObservable()
+                .Select(_ => (_.type, (IModelMapperConfiguration) _.configuration))
                 .Do(_ => _typesToMap.OnNext(_))
                 .Select(_ => _.type);
+        }
+
+        public static IObservable<Type> MapToModel<TModelMapperConfiguration>(this (Type type,TModelMapperConfiguration configuration)[] types) where TModelMapperConfiguration:IModelMapperConfiguration{
+            return types.ToObservable().MapToModel();
+
         }
 
         public static IObservable<Type> MapToModel<TModelMapperConfiguration>(this XafApplication application, params (Type type,TModelMapperConfiguration configuration)[] types) where TModelMapperConfiguration:IModelMapperConfiguration{
