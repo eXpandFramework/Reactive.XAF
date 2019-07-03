@@ -43,11 +43,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             var interfaces = _.model.GetType().GetInterfaces();
             var mapInterface = interfaces.First(type1 => type1.Property(_.info.Name) != null);
             var type = Type.GetType(mapInterface.Attribute<ModelMapLinkAttribute>().LinkedTypeName);
-            var control = EnumsNET.Enums.GetMember<PredifinedMap>(type?.Name).Value.GetViewControl(_.view, _.model.Id());
+            var model = _.model.Id();
+            var control = EnumsNET.Enums.GetMember<PredifinedMap>(type?.Name).Value.GetViewControl(_.view, model);
             var modelMap = (IModelModelMap) _.info.GetValue(_.model);
             var parameter = new Parameter(control);
             ControlBingSubject.OnNext(parameter);
-            if (!parameter.Handled){
+            if (!parameter.Handled&&parameter.Item!=null){
                 modelMap.BindTo(parameter.Item);
             }
             return Unit.Default;

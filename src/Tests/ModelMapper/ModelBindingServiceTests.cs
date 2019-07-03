@@ -4,6 +4,8 @@ using System.Reactive.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Chart;
+using DevExpress.ExpressApp.Chart.Win;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.PivotGrid;
@@ -11,6 +13,7 @@ using DevExpress.ExpressApp.PivotGrid.Win;
 using DevExpress.ExpressApp.Web.Editors.ASPx;
 using DevExpress.ExpressApp.Win.Editors;
 using DevExpress.Web;
+using DevExpress.XtraCharts;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.BandedGrid;
 using DevExpress.XtraPivotGrid;
@@ -167,19 +170,16 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         [InlineData(Platform.Win,new[]{PredifinedMap.BandedGridColumn , PredifinedMap.AdvBandedGridView},new[]{typeof(XafAdvBandedGridView),typeof(BandedGridColumn),typeof(GridListEditor)},new Type[0],3)]
         [InlineData(Platform.Win,new[]{PredifinedMap.LayoutViewColumn , PredifinedMap.LayoutView},new[]{typeof(XafLayoutView),typeof(LayoutViewColumn),typeof(CustomGridListEditor)},new Type[0],3)]
         [InlineData(Platform.Win, new[]{PredifinedMap.PivotGridField,PredifinedMap.PivotGridControl},new[]{typeof(PivotGridControl), typeof(PivotGridListEditor)},new[]{typeof(PivotGridModule), typeof(PivotGridWindowsFormsModule)},3)]
+        [InlineData(Platform.Win, new[]{PredifinedMap.Series,PredifinedMap.ChartControl},new[]{typeof(ChartControl), typeof(ChartListEditor)},new[]{typeof(ChartModule), typeof(ChartWindowsFormsModule)},2)]
         internal async Task Bind_ListEditor_Control(Platform platform,PredifinedMap[] predifinedMaps,Type[] controlTypes,Type[] extraModules,int boundTypes){
             controlTypes.ToObservable().Do(type => Assembly.LoadFile(type.Assembly.Location)).Subscribe();
             InitializeMapperService($"{nameof(Bind_ListEditor_Control)}",platform);
-            ConfigureLayoutViewPredifinedMapService(predifinedMaps.Last());
+            var predifinedMap = predifinedMaps.Last();
+            ConfigureLayoutViewPredifinedMapService(predifinedMap);
             var module = predifinedMaps.Extend();
 
             var application = DefaultModelMapperModule(platform,extraModules.Select(_ => _.CreateInstance()).Cast<ModuleBase>().Concat(new[]{module}).ToArray()).Application;
-            application.MockListEditor((view, xafApplication, collectionSource) => {
-                var listEditor = predifinedMaps.Last() == PredifinedMap.PivotGridControl? new PivotGridListEditor(view):
-                    platform == Platform.Win?(ListEditor) new CustomGridListEditor(view, controlTypes.First(), controlTypes.Skip(1).First()): new ASPxGridListEditor(view);
-                ((IComplexListEditor) listEditor).Setup(collectionSource, application);
-                return listEditor;
-            });
+            MockListEditor(platform, controlTypes, application, predifinedMap);
             var controlBound = ModelBindingService.ControlBing.Replay();
             controlBound.Connect();
 
@@ -192,5 +192,28 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
         }
 
+        private static void MockListEditor(Platform platform, Type[] controlTypes, XafApplication application,
+            PredifinedMap predifinedMap){
+            application.MockListEditor((view, xafApplication, collectionSource) => {
+                ListEditor listEditor;
+                if (predifinedMap == PredifinedMap.PivotGridControl){
+                    listEditor = new PivotGridListEditor(view);
+                }
+                else if (predifinedMap == PredifinedMap.ChartControl){
+                    listEditor = new ChartListEditor(view);
+                }
+                else
+                    listEditor = platform == Platform.Win
+                        ? (ListEditor) new CustomGridListEditor(view, controlTypes.First(),
+                            controlTypes.Skip(1).First())
+                        : new ASPxGridListEditor(view);
+
+                if (listEditor is IComplexListEditor complexListEditor){
+                    complexListEditor.Setup(collectionSource, application);
+                }
+
+                return listEditor;
+            });
+        }
     }
 }
