@@ -5,6 +5,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using DevExpress.Persistent.Base;
 using Fasterflect;
+using Mono.Cecil;
 using Shouldly;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xunit;
@@ -46,18 +47,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             propertyInfos.First(info => info.Name==nameof(CopyAttributesClass.AttributeEnumParam)).Attribute<MyClassAttribute>().ShouldNotBeNull();
         }
 
-        [Fact]
-        public async Task Do_not_Map_DefaultValueAttribute(){
-
-            InitializeMapperService(nameof(Do_not_Map_DefaultValueAttribute));
-            
-            var typeToMap = typeof(DefaultValueAttributesClass);
-
-            var modelType = await typeToMap.MapToModel().ModelInterfaces();
-
-            modelType.Properties().First().GetCustomAttributes(typeof(DefaultValueAttribute),false).Cast<DefaultValueAttribute>().Any().ShouldBeFalse();
-            
-        }
 
         [Fact]
         public async Task Escape_strings(){
@@ -70,28 +59,14 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
                 .Attribute<DescriptionAttribute>().Description.ShouldBe(EscapeAttributeString.Description);
         }
 
-        [Fact]
-        public async Task Do_not_Map_Attributes_With_Flag_Parameters(){
-
-            InitializeMapperService(nameof(Do_not_Map_Attributes_With_Flag_Parameters));
-            
-            var typeToMap = typeof(FlagAttributesClass);
-
-            var modelType = await typeToMap.MapToModel().ModelInterfaces();
-
-            modelType.Properties().First(info => info.Name==nameof(FlagAttributesClass.FlagPropertyValue)).Attribute<FlagParameterAttribute>().ShouldBeNull();
-            modelType.Properties().First(info => info.Name==nameof(FlagAttributesClass.FlagProperty)).Attribute<FlagParameterAttribute>().ShouldNotBeNull();
-            
-        }
-
 
         [Fact]
         public async Task Customize_Attributes_Mapping(){
             InitializeMapperService(nameof(Customize_Attributes_Mapping));
-            TypeMappingService.AttributeMappingRules.Add(("Custom", attribute => {
-                var data = attribute.Attributes.First();
-                attribute.Attributes.Clear();
-                attribute.Attributes.Add((new DescriptionAttribute(),data.customAttribute));
+            TypeMappingService.AttributeMappingRules.Add(("Custom", tuple => {
+                tuple.customAttributes.Clear();
+                var reference = tuple.propertyDefinition.Module.ImportReference(typeof(DescriptionAttribute).Constructor());
+                tuple.customAttributes.Add(new CustomAttribute(reference));
             }));
             
             var typeToMap = typeof(ReplaceAttributesClass);
@@ -104,8 +79,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [Fact]
         public async Task Attribute_Mapping_Can_Be_Disabled(){
             InitializeMapperService(nameof(Attribute_Mapping_Can_Be_Disabled));
-            TypeMappingService.AttributeMappingRules.Add(("Disable", attribute => {
-                attribute.Attributes.Clear();
+            TypeMappingService.AttributeMappingRules.Add(("Disable", tuple => {
+                tuple.customAttributes.Clear();
             }));
             var typeToMap = typeof(CopyAttributesClass);
 

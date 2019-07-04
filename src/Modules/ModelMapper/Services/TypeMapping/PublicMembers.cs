@@ -20,9 +20,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         public static List<string> ReservedPropertyNames{ get; }=new List<string>();
         public static List<Type> ReservedPropertyTypes{ get; }=new List<Type>();
         static ISubject<(Type type,IModelMapperConfiguration configuration)> _typesToMap;
-        public static List<(string key, Action<CustomizeAttribute> action)> AttributeMappingRules{ get; private set; }
+        public static List<(string key, Action<(PropertyDefinition propertyDefinition,List<CustomAttribute> customAttributes)> action)> AttributeMappingRules{ get; private set; }
 
-        public static List<(string key, Action<List<PropertyInfo>> action)> PropertyMappingRules{ get; private set; }
+        public static List<(string key, Action<(Type declaringType,List<PropertyInfo> propertyInfos)> action)> PropertyMappingRules{ get; private set; }
 
         static TypeMappingService(){
             Init();
@@ -41,12 +41,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             $@"{Path.GetDirectoryName(typeof(TypeMappingService).Assembly.Location)}\{ModelMapperAssemblyName}{MapperAssemblyName}{ModelExtendingService.Platform}.dll";
 
         private static void Init(){
-            PropertyMappingRules = new List<(string key, Action<List<PropertyInfo>> action)>{
+            PropertyMappingRules = new List<(string key, Action<(Type declaringType, List<PropertyInfo> propertyInfos)> action)>{
                 ("Browsable", BrowsableRule)
             };
-            AttributeMappingRules = new List<(string key, Action<CustomizeAttribute> action)>{
+            AttributeMappingRules = new List<(string key, Action<(PropertyDefinition propertyDefinition, List<CustomAttribute> customAttributes)> action)>{
                 ("PrivateDescription", PrivateDescriptionRule),
                 ("DefaultValue", DefaultValueRule),
+                ("NonPublicAttributeParameters", NonPublicAttributeParameters),
                 ("TypeConverterWithDXDesignTimeType", TypeConverterWithDXDesignTimeType)
             };
             _typesToMap = Subject.Synchronize(new ReplaySubject<(Type type,IModelMapperConfiguration configuration)>());
@@ -60,7 +61,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             _modelMapperModuleVersion = typeof(TypeMappingService).Assembly.GetName().Version;
             
             ReservedPropertyNames.Clear();
-            ReservedPropertyNames.AddRange(typeof(IModelNode).Properties().Select(info => info.Name).Concat(new[]{"Item","IsReadOnly"}));
+            ReservedPropertyNames.AddRange(typeof(IModelNode).Properties().Select(info => info.Name).Concat(new[]{"Item","IsReadOnly","Remove","Id"}));
             ReservedPropertyTypes.AddRange(new[]{ typeof(Type)});
             
             ModelExtendingService.Init();

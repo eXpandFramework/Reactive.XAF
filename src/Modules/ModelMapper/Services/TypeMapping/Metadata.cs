@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using Fasterflect;
@@ -22,9 +23,58 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 .Distinct();
         }
 
+        private static Type GetRealType(this Type type){
+            if (type.Name == "AnnotationShapePosition"){
+                Debug.WriteLine("");
+            }
+            if (type != typeof(string)){
+                if (typeof(IEnumerable).IsAssignableFrom(type)){
+                    if (type.IsGenericType){
+                        return type.GenericTypeArguments.First();
+                    }
+                    if (type.IsArray){
+                        return type.GetElementType();
+                    }
+
+                    if (typeof(ICollection).IsAssignableFrom(type)){
+                        var result = GetParameterType(type, "Add");
+                        if (result == null){
+                            result = GetParameterType(type, "CopyTo");
+                            if (result != null)
+                                return result;
+                        }
+                    }
+                    var interfaceType = type.GetInterfaces().FirstOrDefault(_ => _.IsGenericType&&typeof(IEnumerable).IsAssignableFrom(_));
+                    if (interfaceType!=null){
+                        return interfaceType.GenericTypeArguments.First();
+                    }
+
+                    return typeof(object);
+                }
+            }
+            return type;
+        }
+
+        private static Type GetParameterType(Type type,string name){
+            var methodInfo = type.Methods(name).FirstOrDefault(info => info.Parameters().Any(parameterInfo => parameterInfo.ParameterType!=typeof(object)));
+            if (methodInfo != null){
+                var parameterType = methodInfo.Parameters().First().ParameterType;
+                if (parameterType!=type&&parameterType!=typeof(Array)){
+                    return parameterType.GetRealType();
+                }
+
+                return parameterType;
+            }
+
+            return null;
+        }
+
         private static AssemblyDefinition[] AssemblyDefinitions(this Type type, Type[] types){
             return types
-                .Select(_ => _.Assembly)
+                .Select(_ => {
+                    var realType = _.GetRealType();
+                    return realType.Assembly;
+                })
                 .Concat(new[]{type}.Select(_ => _.Assembly))
                 .Distinct()
                 .Select(assembly => AssemblyDefinition.ReadAssembly(assembly.Location))
@@ -40,32 +90,35 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         private static PropertyInfo[] PropertyInfos(this Type type){
-            return type.PublicProperties()
-                .GetItems<PropertyInfo>(_ => _.PropertyType.PublicProperties(), info => info.PropertyType)
+            return type.PublicProperties(true)
+                .GetItems<PropertyInfo>(_ => {
+                    var publicProperties = _.PropertyType.GetRealType().PublicProperties(true).ToArray();
+                    return publicProperties;
+                }, info => info.PropertyType)
                 .ToArray();
         }
         
-        private static IEnumerable<PropertyInfo> PublicProperties(this Type type){
+        private static IEnumerable<PropertyInfo> PublicProperties(this Type type,bool includeCollections=false){
             return type.Properties(Flags.AllMembers)
-                .Where(info => {
-                    if (info.PropertyType.IsValueType || info.PropertyType == typeof(string)){
-                        return info.CanRead && info.CanWrite;
-                    }
-
-                    return true;
-                })
-                .Where(IsValid)
+                .Where(info => !info.PropertyType.IsValueType && info.PropertyType != typeof(string) ||info.CanRead && info.CanWrite)
+                .Where(info => info.IsValid(includeCollections))
                 .Where(info => {
                     if (info.PropertyType == typeof(string) || info.PropertyType.IsNullableType()) return true;
                     var propertyTypeIsReserved = ReservedPropertyTypes.Any(_ => info.PropertyType!=_);
+                    if (includeCollections && typeof(IEnumerable).IsAssignableFrom(info.PropertyType))
+                        return true;
                     return !info.PropertyType.IsGenericType && info.PropertyType != type &&info.PropertyType != typeof(object) && propertyTypeIsReserved;
                 })
                 .DistinctBy(info => info.Name);
         }
 
-        private static bool IsValid(this PropertyInfo info){
+        private static bool IsValid(this PropertyInfo info,bool includeCollections){
             var isValid = info.AccessModifier() == AccessModifier.Public && !ReservedPropertyNames.Contains(info.Name);
-            return isValid && !(typeof(IEnumerable).IsAssignableFrom(info.PropertyType) && info.PropertyType != typeof(string));
+            if (!isValid) return false;
+            if (includeCollections&&typeof(IEnumerable).IsAssignableFrom(info.PropertyType)){
+                return true;
+            }
+            return !(typeof(IEnumerable).IsAssignableFrom(info.PropertyType) && info.PropertyType != typeof(string));
         }
 
 

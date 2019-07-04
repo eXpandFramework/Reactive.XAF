@@ -12,6 +12,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
 
     internal static class LayoutViewService{
         public static IObservable<Unit> ConnectLayoutView(this ApplicationModulesManager applicationModulesManager){
+//            applicationModulesManager.ExtendMap(PredifinedMap.LayoutView)
+            return Observable.Empty<Unit>();
+            ;
             var extendModel = applicationModulesManager.Modules.OfType<ReactiveModule>().ToObservable()
                 .SelectMany(module => module.ExtendModel);
             return extendModel.Select(extenders => {

@@ -10,6 +10,15 @@ using DevExpress.Persistent.Base;
 using DevExpress.Utils;
 
 namespace Xpand.XAF.Modules.ModelMapper.Tests{
+    class CollectionsType{
+        public CollectionsType(){
+            TestModelMappersList = new List<TestModelMapper>();
+            TestModelMappersArray=new TestModelMapper[0];
+        }
+
+        public IList<TestModelMapper> TestModelMappersList{ get; }
+        public TestModelMapper[] TestModelMappersArray{ get; }
+    }
     public interface IModelPredifinedMapExtension{
         
     }
@@ -105,6 +114,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         
     }
 
+    class NonPublicAttributeClass{
+        [TypeConverter(typeof(NonPublicAttributeClass))]
+        public string Test{ get; set; }
+    }
     public class PrivateDescriptionAttributesClass{
         public const string Description = "Private Description AttributesClass";
         [PrivateDescription(Description)]
@@ -119,7 +132,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
     public class FlagAttributesClass{
         [FlagParameter(FlagEnum.Val2|FlagEnum.Val3)]
         public string FlagPropertyValue{ get; set; }
-        [FlagParameter(FlagEnum.Val2)]
+        [FlagParameter(FlagEnum.Val3)]
         public string FlagProperty{ get; set; }
     }
 

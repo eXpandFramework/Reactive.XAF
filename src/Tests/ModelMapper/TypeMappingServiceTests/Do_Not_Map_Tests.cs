@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Fasterflect;
 using Shouldly;
+using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xunit;
 using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.TypeMappingService;
@@ -100,6 +101,60 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Fact]
+        public async Task Do_not_Map_DefaultValueAttribute(){
+
+            InitializeMapperService(nameof(Do_not_Map_DefaultValueAttribute));
+            
+            var typeToMap = typeof(DefaultValueAttributesClass);
+
+            var modelType = await typeToMap.MapToModel().ModelInterfaces();
+
+            modelType.Properties().First().GetCustomAttributes(typeof(DefaultValueAttribute),false).Cast<DefaultValueAttribute>().Any().ShouldBeFalse();
+            
+        }
+
+        [Fact]
+        public async Task Do_not_Map_Attributes_With_Flag_Parameters(){
+
+            InitializeMapperService(nameof(Do_not_Map_Attributes_With_Flag_Parameters));
+            
+            var typeToMap = typeof(FlagAttributesClass);
+
+            var modelType = await typeToMap.MapToModel().ModelInterfaces();
+
+            modelType.Properties().First(info => info.Name==nameof(FlagAttributesClass.FlagPropertyValue)).Attribute<FlagParameterAttribute>().ShouldBeNull();
+            modelType.Properties().First(info => info.Name==nameof(FlagAttributesClass.FlagProperty)).Attribute<FlagParameterAttribute>().ShouldNotBeNull();
+            
+        }
+
+        [Fact]
+        public async Task Do_Not_Map_Attributes_With_Non_Public_Types_As_Parameters(){
+            var typeToMap1 = typeof(NonPublicAttributeClass);
+            InitializeMapperService(nameof(Do_Not_Map_Attributes_With_Non_Public_Types_As_Parameters));
+
+            var type = await typeToMap1.MapToModel().ModelInterfaces();
+
+            type.Property(nameof(NonPublicAttributeClass.Test)).Attributes().Any().ShouldBeFalse();
+            
+        }
+
+        
+        public async Task Do_Not_Map_PredifinedMap_Columns(){
+//            InitializeMapperService($"{nameof(Do_Not_Map_PredifinedMap_Columns)}",Platform.Win);
+//            ConfigureLayoutViewPredifinedMapService();
+//            var values = Enums.GetValues<PredifinedMap>().Where(map =>
+//                map.GetAttributes().OfType<MapPlatformAttribute>().Any(_ => _.Platform == platform.ToString())).ToArray();
+//
+//            var modelInterfaces = values.MapToModel().ModelInterfaces().Replay();
+//            modelInterfaces.Connect();
+//
+//            var types = modelInterfaces.ToEnumerable().ToArray();
+//            types.Length.ShouldBe(values.Length);
+//            foreach (var configuration in values){
+//                types.FirstOrDefault(_ => _.Name==$"IModel{configuration.ToString()}").ShouldNotBeNull();
+//            }
+        }
+
         public async Task Do_Not_Map_If_Type_Assembly_Version_Not_Changed(){
             InitializeMapperService(nameof(Do_Not_Map_If_Type_Assembly_Version_Not_Changed));
             var mappedType = typeof(TestModelMapper);

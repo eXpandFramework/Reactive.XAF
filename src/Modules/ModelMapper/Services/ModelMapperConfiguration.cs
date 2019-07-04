@@ -71,8 +71,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         PivotGridField,
         [MapPlatform(Platform.Win)]
         ChartControl,
-        [MapPlatform(Platform.Win)]
-        Series,
+//        [MapPlatform(Platform.Win)]
+//        Series,
         [MapPlatform(Platform.Web)]
         ASPxGridView,
         [MapPlatform(Platform.Web)]
@@ -187,9 +187,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             if (new[]{PredifinedMap.PivotGridField}.Any(_ =>_ == configuration)){
                 return GetColumns(PredifinedMap.PivotGridControl, configuration, view, model,"Fields");
             }
-            if (new[]{PredifinedMap.Series}.Any(_ =>_ == configuration)){
-                return GetColumns(PredifinedMap.ChartControl, configuration, view, model,"Series");
-            }
+//            if (new[]{PredifinedMap.Series}.Any(_ =>_ == configuration)){
+//                return GetColumns(PredifinedMap.ChartControl, configuration, view, model,"Series");
+//            }
 
             if (new[]{PredifinedMap.GridColumn,PredifinedMap.BandedGridColumn,PredifinedMap.LayoutViewColumn}.Any(_ => _==configuration)){
                 return GetColumns(PredifinedMap.GridView, configuration, view, model,"Columns");
@@ -224,8 +224,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 return "DevExpress.XtraPivotGrid.PivotGridControl";
             if (configuration == PredifinedMap.ChartControl)
                 return "DevExpress.XtraCharts.ChartControl";
-            if (configuration == PredifinedMap.Series)
-                return "DevExpress.XtraCharts.Series";
+//            if (configuration == PredifinedMap.Series)
+//                return "DevExpress.XtraCharts.Series";
             if (configuration == PredifinedMap.PivotGridField)
                 return "DevExpress.XtraPivotGrid.PivotGridField";
             if (configuration == PredifinedMap.GridColumn)
@@ -253,12 +253,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 }
                 if (new[]{PredifinedMap.ChartControl }.Any(map => map==predifinedMap)){
                     return GridViewGridColumnConfiguration(predifinedMap,_xafChartWinAssembly, _chartControlAssembly, "DevExpress.ExpressApp.Chart.Win.ChartListEditor",
-                        PredifinedMap.ChartControl.GetTypeName(),PredifinedMap.Series.GetTypeName() );
+                        PredifinedMap.ChartControl.GetTypeName(),null );
                 }
-                if (new[]{PredifinedMap.Series}.Any(map => map==predifinedMap)){
-                    return GridViewGridColumnConfiguration(predifinedMap,_xafChartWinAssembly, _seriesControlAssembly, "DevExpress.ExpressApp.Chart.Win.ChartListEditor",
-                        PredifinedMap.ChartControl.GetTypeName(),PredifinedMap.Series.GetTypeName() );
-                }
+//                if (new[]{PredifinedMap.Series}.Any(map => map==predifinedMap)){
+//                    return GridViewGridColumnConfiguration(predifinedMap,_xafChartWinAssembly, _seriesControlAssembly, "DevExpress.ExpressApp.Chart.Win.ChartListEditor",
+//                        PredifinedMap.ChartControl.GetTypeName(),PredifinedMap.Series.GetTypeName() );
+//                }
                 if (new[]{PredifinedMap.AdvBandedGridView,PredifinedMap.BandedGridColumn}.Any(map => map==predifinedMap)){
                     return GridViewGridColumnConfiguration(predifinedMap,_xafWinAssembly, _gridViewAssembly, "DevExpress.ExpressApp.Win.Editors.GridListEditor",
                         PredifinedMap.AdvBandedGridView.GetTypeName(), PredifinedMap.BandedGridColumn.GetTypeName());
@@ -287,9 +287,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                     var bandsLayout = predifinedMap == PredifinedMap.AdvBandedGridView;
                     visibilityCriteria=CriteriaOperator.Parse($"{visibilityCriteria} AND Parent.BandsLayout.Enable=?", bandsLayout).ToString();
                     var typeToMap=gridViewAssembly.GetType(gridViewTypeName);
+                    if (predifinedMap == PredifinedMap.ChartControl){
+                        ChartControlSeriesService.Connect().Subscribe();
+                    }
                     return new ModelMapperConfiguration {ImageName = "Grid_16x16",VisibilityCriteria =visibilityCriteria,MapData = (typeToMap,typeof(IModelListView))};
                 }
-                if (new[]{PredifinedMap.GridViewColumn,PredifinedMap.GridColumn, PredifinedMap.BandedGridColumn,PredifinedMap.LayoutViewColumn,PredifinedMap.PivotGridField,PredifinedMap.Series}.Any(map => map==predifinedMap)){
+                if (new[]{PredifinedMap.GridViewColumn,PredifinedMap.GridColumn, PredifinedMap.BandedGridColumn,PredifinedMap.LayoutViewColumn,PredifinedMap.PivotGridField}.Any(map => map==predifinedMap)){
                     var visibilityCriteria = VisibilityCriteriaLeftOperand.IsAssignableFromModelListVideEditorType.GetVisibilityCriteria(rightOperand,"Parent.Parent.Parent.");
                     var bandsLayout = predifinedMap == PredifinedMap.BandedGridColumn;
                     visibilityCriteria=CriteriaOperator.Parse($"{visibilityCriteria} AND Parent.Parent.Parent.BandsLayout.Enable=?", bandsLayout).ToString();

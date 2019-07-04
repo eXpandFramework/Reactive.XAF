@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reflection;
@@ -60,6 +62,23 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Fact]
+        public async Task Include_Collections(){
+            InitializeMapperService($"{nameof(Include_Collections)}");
+            var typeToMap = typeof(CollectionsType);
+            TypeMappingService.PropertyMappingRules.Add(("Collection", tuple => {
+                if (tuple.declaringType==typeof(CollectionsType)){
+                    tuple.propertyInfos.Add(typeof(CollectionsType).Property(nameof(CollectionsType.TestModelMappersList)));
+                    tuple.propertyInfos.Add(typeof(CollectionsType).Property(nameof(CollectionsType.TestModelMappersArray)));
+                }
+            }));
+            var modelType = await typeToMap.MapToModel().ModelInterfaces();
+            var modelTypeProperties = ModelTypeProperties(modelType);
+
+            modelTypeProperties.FirstOrDefault(info => info.Name==nameof(CollectionsType.TestModelMappersList)).ShouldNotBeNull();
+            modelTypeProperties.FirstOrDefault(info => info.Name==nameof(CollectionsType.TestModelMappersArray)).ShouldNotBeNull();
+        }
+
+        [Fact]
         public async Task Map_All_ReferenceType_Public_Properties(){
             InitializeMapperService(nameof(Map_All_ReferenceType_Public_Properties));
             var typeToMap = typeof(ReferenceTypeProperties);
@@ -97,7 +116,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [InlineData(PredifinedMap.GridView,new[]{typeof(GridView),typeof(GridListEditor)},Platform.Win)]
         [InlineData(PredifinedMap.PivotGridControl,new[]{typeof(PivotGridControl),typeof(PivotGridListEditor)},Platform.Win)]
         [InlineData(PredifinedMap.ChartControl,new[]{typeof(ChartControl),typeof(ChartListEditor)},Platform.Win)]
-        [InlineData(PredifinedMap.Series,new[]{typeof(Series),typeof(ChartListEditor)},Platform.Win)]
         [InlineData(PredifinedMap.PivotGridField,new[]{typeof(PivotGridField),typeof(PivotGridListEditor)},Platform.Win)]
         [InlineData(PredifinedMap.LayoutViewColumn,new[]{typeof(LayoutViewColumn),typeof(GridListEditor)},Platform.Win)]
         [InlineData(PredifinedMap.LayoutView,new[]{typeof(LayoutView),typeof(GridListEditor)},Platform.Win)]
@@ -114,19 +132,24 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             modelType.Name.ShouldBe($"IModel{configuration}");
             
             var propertyInfos = modelType.Properties();
+            propertyInfos.Count.ShouldBeGreaterThan(15);
             var descriptionAttribute = propertyInfos.Select(info => info.Attribute<DescriptionAttribute>())
                 .FirstOrDefault(attribute => attribute != null && attribute.Description.Contains(" ") );
             descriptionAttribute.ShouldNotBeNull();
+            AssertBandedGridColumn(configuration, propertyInfos);
+        }
+
+        private static void AssertBandedGridColumn(PredifinedMap configuration, IList<PropertyInfo> propertyInfos){
             if (configuration == PredifinedMap.BandedGridColumn){
-                var propertyInfo = propertyInfos.FirstOrDefault(info => info.Name==nameof(BandedGridColumn.ColVIndex));
+                var propertyInfo = propertyInfos.FirstOrDefault(info => info.Name == nameof(BandedGridColumn.ColVIndex));
                 propertyInfo.ShouldNotBeNull();
                 propertyInfo.Attribute<BrowsableAttribute>().ShouldBeNull();
-                propertyInfo = propertyInfos.FirstOrDefault(info => info.Name==nameof(BandedGridColumn.RowIndex));
+                propertyInfo = propertyInfos.FirstOrDefault(info => info.Name == nameof(BandedGridColumn.RowIndex));
                 propertyInfo.ShouldNotBeNull();
                 propertyInfo.Attribute<BrowsableAttribute>().ShouldBeNull();
             }
-
         }
+
 
         [Theory]
         [InlineData(Platform.Web)]

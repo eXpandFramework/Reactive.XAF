@@ -70,7 +70,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.HideToolB
 		{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC} = {6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MasterDetial", "MasterDetial", "{7BB06B29-3588-4F04-89B2-84245729175D}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MasterDetail", "MasterDetail", "{7BB06B29-3588-4F04-89B2-84245729175D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.MasterDetail.Tests", "MasterDetail\Xpand.XAF.Modules.MasterDetail.Tests.csproj", "{CE8D07AB-781C-4872-9AC0-45773A37B7BD}"
 	ProjectSection(ProjectDependencies) = postProject
