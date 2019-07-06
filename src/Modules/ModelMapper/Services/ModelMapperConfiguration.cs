@@ -139,8 +139,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             return modulesManager.Modules.OfType<ReactiveModule>().ToObservable()
                 .SelectMany(_ => _.ExtendModel).FirstAsync()
                 .SelectMany(extenders => TypeMappingService.MappedTypes.Where(type =>typeof(IModelModelMap).IsAssignableFrom(type))
-                    .SelectMany(type => type.ModelMapperContainerType().Where(containerType =>containerType.Attribute<ModelMapLinkAttribute>().LinkedTypeName.StartsWith(map.GetTypeName()))
-                        .Select(targetInterface => (extenders,type))))
+                    .SelectMany(type => type.ModelMapperContainerType()
+                        .Where(_ => _.Properties().Any(info => type.IsAssignableFrom(info.PropertyType)))
+                        .Where(_ =>_.Attribute<ModelMapLinkAttribute>().LinkedTypeName.StartsWith(map.GetTypeName()))
+                        .Select(_ => (extenders,type))))
                 .FirstAsync();
         }
 

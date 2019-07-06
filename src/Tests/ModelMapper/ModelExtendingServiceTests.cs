@@ -95,7 +95,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         [Fact]
         public void Extend_Existing_PredifinedMap(){
             InitializeMapperService(nameof(Extend_Existing_PredifinedMap),Platform.Win);
-            var module = PredifinedMap.GridView.Extend();
+            var module = new []{PredifinedMap.PivotGridControl,PredifinedMap.GridView}.Extend();
             module.ApplicationModulesManager
                 .FirstAsync()
                 .SelectMany(_ => _.ExtendMap(PredifinedMap.GridView))
