@@ -5,26 +5,25 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reflection;
-using DevExpress.ExpressApp.Model;
 using Microsoft.CSharp;
 using Mono.Cecil;
-using Xpand.Source.Extensions.MonoCecil;
+
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     public static partial class TypeMappingService{
         static string OutputAssembly =>
-            $@"{Path.GetDirectoryName(typeof(TypeMappingService).Assembly.Location)}\{TypeMappingService.ModelMapperAssemblyName}{TypeMappingService.MapperAssemblyName}{ModelExtendingService.Platform}.dll";
+            $@"{Path.GetDirectoryName(typeof(TypeMappingService).Assembly.Location)}\{ModelMapperAssemblyName}{MapperAssemblyName}{ModelExtendingService.Platform}.dll";
 
 
-        private static Assembly Compile(this IEnumerable<Assembly> references, string code){
+        private static Assembly Compile(this IEnumerable<string> references, string code){
             var codeProvider = new CSharpCodeProvider();
             var compilerParameters = new CompilerParameters{
-                CompilerOptions = "/t:library",
+                CompilerOptions = "/t:library /optimize",
                 OutputAssembly = OutputAssembly
             };
             
-            compilerParameters.ReferencedAssemblies.AddRange(references.Select(_ => _.Location).Distinct().ToArray());
-            compilerParameters.ReferencedAssemblies.Add(typeof(IModelNode).Assembly.Location);
+            var strings = references.Distinct().ToArray();
+            compilerParameters.ReferencedAssemblies.AddRange(strings);
 
             var compilerResults = codeProvider.CompileAssemblyFromSource(compilerParameters, code);
             if (compilerResults.Errors.Count > 0){
@@ -32,14 +31,14 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                     compilerResults.Errors.Cast<CompilerError>().Select(error => error.ToString()));
                 throw new Exception(message);
             }
-
-            return compilerResults.CompiledAssembly;
+            var compilerResultsCompiledAssembly = compilerResults.CompiledAssembly;
+            return compilerResultsCompiledAssembly;
         }
 
         private static bool TypeFromPath(this (Type type,IModelMapperConfiguration configuration) data){
             if (File.Exists(OutputAssembly)){
-                using (var assemblyDefinition = AssemblyDefinition.ReadAssembly(OutputAssembly)){
-                    if (assemblyDefinition.IsMapped(data) && !assemblyDefinition.VersionChanged() && !assemblyDefinition.ConfigurationChanged(data)){
+                using (var assembly = AssemblyDefinition.ReadAssembly(OutPutAssembly)){
+                    if (assembly.IsMapped(data) && !assembly.VersionChanged() && !assembly.ConfigurationChanged(data)){
                         return true;
                     }
                 }
@@ -47,9 +46,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             return false;
         }
 
-        private static bool ConfigurationChanged(this AssemblyDefinition assemblyDefinition,(Type type, IModelMapperConfiguration configuration) data){
-            var configurationChanged = assemblyDefinition.CustomAttributes.Any(attribute => {
-                if (attribute.AttributeType.ToType() != typeof(ModelMapperModelConfigurationAttribute)) return false;
+        private static bool ConfigurationChanged(this AssemblyDefinition assembly,(Type type, IModelMapperConfiguration configuration) data){
+            var configurationChanged = assembly.CustomAttributes.Any(attribute => {
+                if (attribute.AttributeType.FullName != typeof(ModelMapperModelConfigurationAttribute).FullName) return false;
                 int hashCode = 0;
                 if (data.configuration != null) hashCode = data.configuration.GetHashCode();
                 var typeMatch = ((string) attribute.ConstructorArguments.First().Value) == data.type.FullName;
@@ -62,15 +61,15 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             return configurationChanged;
         }
 
-        private static bool VersionChanged(this AssemblyDefinition assemblyDefinition){
-            var versionAttribute = assemblyDefinition.CustomAttributes.First(attribute =>
-                attribute.AttributeType.ToType() == typeof(AssemblyFileVersionAttribute));
+        private static bool VersionChanged(this AssemblyDefinition assembly){
+            var versionAttribute = assembly.CustomAttributes.First(attribute =>
+                attribute.AttributeType.FullName == typeof(AssemblyFileVersionAttribute).FullName);
             return Version.Parse(versionAttribute.ConstructorArguments.First().Value.ToString()) !=_modelMapperModuleVersion;
         }
 
-        private static bool IsMapped(this AssemblyDefinition assemblyDefinition,(Type type, IModelMapperConfiguration configuration) data){
+        private static bool IsMapped(this AssemblyDefinition assembly,(Type type, IModelMapperConfiguration configuration) data){
             var typeVersion = data.type.Assembly.GetName().Version;
-            var modelMapperServiceAttributes = assemblyDefinition.CustomAttributes.Where(attribute => attribute.AttributeType.ToType() == typeof(ModelMapperServiceAttribute)).ToArray();
+            var modelMapperServiceAttributes = assembly.CustomAttributes.Where(attribute => attribute.AttributeType.FullName == typeof(ModelMapperServiceAttribute).FullName).ToArray();
             return modelMapperServiceAttributes.Any(attribute => {
                 var mappedTypeVersion = Version.Parse((string) attribute.ConstructorArguments.Last().Value);
                 var mappedType = (string) attribute.ConstructorArguments.First().Value;
@@ -79,8 +78,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             });
         }
 
-        private static IObservable<Type> Compile(this IObservable<(string code,IEnumerable<Assembly> references)> source){
-            return source.SelectMany(_ => _.references.Compile(_.code).GetTypes().Where(type => typeof(IModelModelMap).IsAssignableFrom(type)));
+        private static IObservable<Type> Compile(this IObservable<(string code,IEnumerable<string> references)> source){
+            return source.SelectMany(_ => {
+                var assembly = _.references.Compile(_.code);
+                var types = assembly.GetTypes().Where(type => typeof(IModelModelMap).IsAssignableFrom(type));
+                return types;
+            });
         }
     }
 }

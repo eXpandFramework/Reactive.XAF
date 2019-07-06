@@ -128,14 +128,14 @@ namespace Xpand.XAF.Modules.ModelMapper{
     }
 
     
-    public interface IModelDesignLayoutView : IModelNode {
-        IModelLayoutDesignStore DesignLayoutView{ get; }
-    }
+//    public interface IModelDesignLayoutView : IModelNode {
+//        IModelLayoutDesignStore DesignLayoutView{ get; }
+//    }
 
-    public interface IModelLayoutDesignStore : IModelNodeDisabled {
-        [Browsable(false)]
-        string LayoutStore { get; set; }
-    }
+//    public interface IModelLayoutDesignStore : IModelNodeDisabled {
+//        [Browsable(false)]
+//        string LayoutStore { get; set; }
+//    }
 
 //    [ModelEditorBrowsable(false)]
     public interface IModelModelMap:IModelNodeDisabled{

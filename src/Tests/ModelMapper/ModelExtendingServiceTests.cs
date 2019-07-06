@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
@@ -22,7 +20,6 @@ using Xpand.Source.Extensions.XAF.Model;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
-using Xpand.XAF.Modules.Reactive;
 using Xunit;
 using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.TypeMappingService;
 
@@ -96,7 +93,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         [Fact]
-        public async Task Extend_Existing_PredifinedMap(){
+        public void Extend_Existing_PredifinedMap(){
             InitializeMapperService(nameof(Extend_Existing_PredifinedMap),Platform.Win);
             var module = PredifinedMap.GridView.Extend();
             module.ApplicationModulesManager

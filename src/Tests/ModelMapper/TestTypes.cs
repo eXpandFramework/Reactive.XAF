@@ -157,6 +157,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         public string Property{ get; set; }
     }
     internal class CopyAttributesClass{
+        [TypeConverter(typeof(ValueTypeContainer.NestedEnum))]
+        public string NestedTypeArgument{ get; set; }
         [Description][Private]
         public string AttributeNoParam{ get; set; }
         [Private]
@@ -216,6 +218,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
     }
     internal class DXDesignTimeAttributeClass {
         [TypeConverter("DevExpress.XtraGrid.TypeConverters.FieldNameTypeConverter, DevExpress.XtraGrid.v19.1.Design")]
+        [MyClass("","")]
         public string Test{ get; set; }
     }
 

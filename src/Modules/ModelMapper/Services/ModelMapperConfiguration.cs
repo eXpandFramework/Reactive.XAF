@@ -71,8 +71,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         PivotGridField,
         [MapPlatform(Platform.Win)]
         ChartControl,
-//        [MapPlatform(Platform.Win)]
-//        Series,
         [MapPlatform(Platform.Web)]
         ASPxGridView,
         [MapPlatform(Platform.Web)]
@@ -89,7 +87,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         private static Assembly _xafChartWinAssembly;
         private static Assembly _pivotGridControlAssembly;
         private static Assembly _chartControlAssembly;
-        private static Assembly _seriesControlAssembly;
         private static string _layoutViewListEditorTypeName;
 
         static PredifinedMapService(){
@@ -106,7 +103,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 _gridViewAssembly = assemblies.GetAssembly("DevExpress.XtraGrid.v");
                 _pivotGridControlAssembly = assemblies.GetAssembly("DevExpress.XtraPivotGrid.v");
                 _chartControlAssembly = assemblies.GetAssembly($"DevExpress.XtraCharts{XafAssemblyInfo.VersionSuffix}.UI");
-                _seriesControlAssembly = assemblies.GetAssembly($"DevExpress.XtraCharts{XafAssemblyInfo.VersionSuffix}",true);
                 _xpandWinAssembly = assemblies.GetAssembly("Xpand.ExpressApp.Win");
             }
 
@@ -187,10 +183,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             if (new[]{PredifinedMap.PivotGridField}.Any(_ =>_ == configuration)){
                 return GetColumns(PredifinedMap.PivotGridControl, configuration, view, model,"Fields");
             }
-//            if (new[]{PredifinedMap.Series}.Any(_ =>_ == configuration)){
-//                return GetColumns(PredifinedMap.ChartControl, configuration, view, model,"Series");
-//            }
-
             if (new[]{PredifinedMap.GridColumn,PredifinedMap.BandedGridColumn,PredifinedMap.LayoutViewColumn}.Any(_ => _==configuration)){
                 return GetColumns(PredifinedMap.GridView, configuration, view, model,"Columns");
             }
@@ -224,8 +216,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 return "DevExpress.XtraPivotGrid.PivotGridControl";
             if (configuration == PredifinedMap.ChartControl)
                 return "DevExpress.XtraCharts.ChartControl";
-//            if (configuration == PredifinedMap.Series)
-//                return "DevExpress.XtraCharts.Series";
             if (configuration == PredifinedMap.PivotGridField)
                 return "DevExpress.XtraPivotGrid.PivotGridField";
             if (configuration == PredifinedMap.GridColumn)
@@ -244,26 +234,27 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         public static ModelMapperConfiguration GetModelMapperConfiguration(this PredifinedMap predifinedMap){
             if (ModelExtendingService.Platform==Platform.Win){
                 if (new[]{PredifinedMap.GridView,PredifinedMap.GridColumn}.Any(map => map==predifinedMap)){
+                    CheckRequiredParameters(nameof(_xafWinAssembly), nameof(_gridViewAssembly));
                     return GridViewGridColumnConfiguration(predifinedMap,_xafWinAssembly, _gridViewAssembly, "DevExpress.ExpressApp.Win.Editors.GridListEditor",
                         PredifinedMap.GridView.GetTypeName(),PredifinedMap.GridColumn.GetTypeName() );
                 }
                 if (new[]{PredifinedMap.PivotGridControl,PredifinedMap.PivotGridField}.Any(map => map==predifinedMap)){
+                    CheckRequiredParameters(nameof(_xafPivotGridWinAssembly), nameof(_pivotGridControlAssembly));
                     return GridViewGridColumnConfiguration(predifinedMap,_xafPivotGridWinAssembly, _pivotGridControlAssembly, "DevExpress.ExpressApp.PivotGrid.Win.PivotGridListEditor",
                         PredifinedMap.PivotGridControl.GetTypeName(),PredifinedMap.PivotGridField.GetTypeName() );
                 }
                 if (new[]{PredifinedMap.ChartControl }.Any(map => map==predifinedMap)){
+                    CheckRequiredParameters(nameof(_xafChartWinAssembly), nameof(_chartControlAssembly));
                     return GridViewGridColumnConfiguration(predifinedMap,_xafChartWinAssembly, _chartControlAssembly, "DevExpress.ExpressApp.Chart.Win.ChartListEditor",
                         PredifinedMap.ChartControl.GetTypeName(),null );
                 }
-//                if (new[]{PredifinedMap.Series}.Any(map => map==predifinedMap)){
-//                    return GridViewGridColumnConfiguration(predifinedMap,_xafChartWinAssembly, _seriesControlAssembly, "DevExpress.ExpressApp.Chart.Win.ChartListEditor",
-//                        PredifinedMap.ChartControl.GetTypeName(),PredifinedMap.Series.GetTypeName() );
-//                }
                 if (new[]{PredifinedMap.AdvBandedGridView,PredifinedMap.BandedGridColumn}.Any(map => map==predifinedMap)){
+                    CheckRequiredParameters(nameof(_xafWinAssembly), nameof(_gridViewAssembly));
                     return GridViewGridColumnConfiguration(predifinedMap,_xafWinAssembly, _gridViewAssembly, "DevExpress.ExpressApp.Win.Editors.GridListEditor",
                         PredifinedMap.AdvBandedGridView.GetTypeName(), PredifinedMap.BandedGridColumn.GetTypeName());
                 }
                 if (new[]{PredifinedMap.LayoutView,PredifinedMap.LayoutViewColumn}.Any(map => map==predifinedMap)){
+                    CheckRequiredParameters(nameof(_xpandWinAssembly), nameof(_gridViewAssembly));
                     return GridViewGridColumnConfiguration(predifinedMap,_xpandWinAssembly, _gridViewAssembly, _layoutViewListEditorTypeName,
                         PredifinedMap.LayoutView.GetTypeName(), PredifinedMap.LayoutViewColumn.GetTypeName());
                 }
@@ -271,12 +262,21 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
 
             if (ModelExtendingService.Platform==Platform.Web){
                 if (new[]{PredifinedMap.ASPxGridView,PredifinedMap.GridViewColumn}.Any(map => map==predifinedMap)){
+                    CheckRequiredParameters(nameof(_xafWebAssembly), nameof(_dxWebAssembly));
                     return GridViewGridColumnConfiguration(predifinedMap,_xafWebAssembly, _dxWebAssembly, "DevExpress.ExpressApp.Web.Editors.ASPx.ASPxGridListEditor",
                         PredifinedMap.ASPxGridView.GetTypeName(),PredifinedMap.GridViewColumn.GetTypeName());
                 }
             }
 
             return null;
+        }
+
+        private static void CheckRequiredParameters(string xafAssemblyName, string controlAssemblyName){
+            foreach (var name in new[]{xafAssemblyName,controlAssemblyName}){
+                if (typeof(PredifinedMapService).Field(name,Flags.StaticPrivate).GetValue(null) == null){
+                    throw new NullReferenceException($"{name} check that {nameof(ModelMapperModule)} is added to the {nameof(ModuleBase.RequiredModuleTypes)} collection");
+                }    
+            }
         }
 
         private static ModelMapperConfiguration GridViewGridColumnConfiguration(PredifinedMap predifinedMap ,Assembly listEditorAssembly, Assembly gridViewAssembly, string listEditorTypeName, string gridViewTypeName, string gridColumnTypeName){

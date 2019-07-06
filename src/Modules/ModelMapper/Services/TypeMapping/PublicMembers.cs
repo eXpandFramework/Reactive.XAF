@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reactive;
@@ -8,8 +9,8 @@ using System.Reactive.Subjects;
 using System.Reflection;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
+using DevExpress.Persistent.Base;
 using Fasterflect;
-using Mono.Cecil;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     public static partial class TypeMappingService{
@@ -20,9 +21,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         public static List<string> ReservedPropertyNames{ get; }=new List<string>();
         public static List<Type> ReservedPropertyTypes{ get; }=new List<Type>();
         static ISubject<(Type type,IModelMapperConfiguration configuration)> _typesToMap;
-        public static List<(string key, Action<(PropertyDefinition propertyDefinition,List<CustomAttribute> customAttributes)> action)> AttributeMappingRules{ get; private set; }
-
-        public static List<(string key, Action<(Type declaringType,List<PropertyInfo> propertyInfos)> action)> PropertyMappingRules{ get; private set; }
+        public static List<(string key, Action<(Type declaringType,List<ModelMapperPropertyInfo> propertyInfos)> action)> PropertyMappingRules{ get; private set; }
 
         static TypeMappingService(){
             Init();
@@ -41,16 +40,16 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             $@"{Path.GetDirectoryName(typeof(TypeMappingService).Assembly.Location)}\{ModelMapperAssemblyName}{MapperAssemblyName}{ModelExtendingService.Platform}.dll";
 
         private static void Init(){
-            PropertyMappingRules = new List<(string key, Action<(Type declaringType, List<PropertyInfo> propertyInfos)> action)>{
-                ("Browsable", BrowsableRule)
-            };
-            AttributeMappingRules = new List<(string key, Action<(PropertyDefinition propertyDefinition, List<CustomAttribute> customAttributes)> action)>{
+            _customizePropertySelection =new Subject<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)>();
+            AdditionalReferences=new List<Type>(new []{typeof(IModelNode),typeof(DescriptionAttribute),typeof(AssemblyFileVersionAttribute),typeof(ImageNameAttribute),typeof(TypeMappingService)});
+            PropertyMappingRules = new List<(string key, Action<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)> action)>{
+                ("Browsable", BrowsableRule),
                 ("PrivateDescription", PrivateDescriptionRule),
                 ("DefaultValue", DefaultValueRule),
                 ("NonPublicAttributeParameters", NonPublicAttributeParameters),
                 ("TypeConverterWithDXDesignTimeType", TypeConverterWithDXDesignTimeType)
             };
-            _typesToMap = Subject.Synchronize(new ReplaySubject<(Type type,IModelMapperConfiguration configuration)>());
+            _typesToMap = new ReplaySubject<(Type type,IModelMapperConfiguration configuration)>();
             MappedTypes = Observable.Defer(() => {
                 var distinnctTypesToMap = _typesToMap.Distinct(_ => _.type);
                 return distinnctTypesToMap
@@ -75,7 +74,19 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         public static IObservable<Type> MappedTypes{ get;private set; }
+        public static List<Type> AdditionalReferences{ get; private set; }
 
+        public static IEnumerable<ModelMapperPropertyInfo> ToModelMapperPropertyInfo(this IEnumerable<PropertyInfo> source){
+            return source.Select(_ => _.ToModelMapperPropertyInfo());
+        }
+
+        public static ModelMapperPropertyInfo ToModelMapperPropertyInfo(this PropertyInfo propertyInfo){
+            return new ModelMapperPropertyInfo(propertyInfo);
+        }
+
+        public static IEnumerable<ModelMapperCustomAttributeData> ToModelMapperConfigurationData(this IEnumerable<CustomAttributeData> source){
+            return source.Select(_ => new ModelMapperCustomAttributeData(_.AttributeType, _.ConstructorArguments));
+        }
         public static IObservable<Type> MapToModel<TModelMapperConfiguration>(this (Type type, TModelMapperConfiguration configuration) type)
             where TModelMapperConfiguration : IModelMapperConfiguration{
 
@@ -130,14 +141,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             }
 
             return (type, rootType).ModelName(configuration?.MapName);
-        }
-
-        public static void SetArgumentValue(this CustomAttribute customAttribute,
-            CustomAttributeArgument argument, object value){
-
-            var arguments = customAttribute.ConstructorArguments;
-            arguments.Add(new CustomAttributeArgument(argument.Type, value));
-            arguments.Remove(argument);
         }
 
     }

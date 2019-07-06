@@ -23,7 +23,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                     .FirstOrDefault(type => type.Attribute<ModelMapLinkAttribute>().LinkedTypeName.StartsWith(PredifinedMap.LayoutView.GetTypeName()));
                 if (layoutViewExtenderType != null){
                     var mapType = layoutViewExtenderType.Properties().First(_ => typeof(IModelModelMap).IsAssignableFrom(_.PropertyType)).PropertyType;
-                    extenders.Add(mapType,typeof(IModelDesignLayoutView));
+//                    extenders.Add(mapType,typeof(IModelDesignLayoutView));
                 }
 
                 return Unit.Default;

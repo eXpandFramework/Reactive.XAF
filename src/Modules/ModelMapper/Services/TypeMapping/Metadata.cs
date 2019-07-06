@@ -1,32 +1,29 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using DevExpress.ExpressApp.Model;
 using Fasterflect;
-using Mono.Cecil;
 using Xpand.Source.Extensions.Linq;
-using Xpand.Source.Extensions.MonoCecil;
 using Xpand.Source.Extensions.System.Refelction;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     public static partial class TypeMappingService{
         private static Version _modelMapperModuleVersion;
-        private static IEnumerable<Assembly> AllAssemblies(Type type, PropertyInfo[] propertyInfos){
-            return propertyInfos.Select(info => info.PropertyType)
-                .Concat(new[]{type,typeof(DescriptionAttribute),typeof(ModelMapperServiceAttribute)})
-                .Concat(propertyInfos.SelectMany(info =>
-                    info.GetCustomAttributes(typeof(Attribute), false).Select(o => o.GetType())))
-                .Select(_ => _.Assembly)
-                .Distinct();
+        private static string[] AllAssemblies(this Type type, PropertyInfo[] propertyInfos){
+            return propertyInfos.Select(_ => _.PropertyType)
+                .Concat(propertyInfos.SelectMany(_ => _.GetCustomAttributesData())
+                    .SelectMany(_ => _.ConstructorArguments)
+                    .Select(_ => _.Value == null ? _.ArgumentType : _.Value.GetType()))
+                .Concat(new []{type})
+                .Concat(AdditionalReferences)
+                .Select(_ => _.Assembly.Location)
+                .Distinct()
+                .ToArray();
         }
 
         private static Type GetRealType(this Type type){
-            if (type.Name == "AnnotationShapePosition"){
-                Debug.WriteLine("");
-            }
             if (type != typeof(string)){
                 if (typeof(IEnumerable).IsAssignableFrom(type)){
                     if (type.IsGenericType){
@@ -69,32 +66,18 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             return null;
         }
 
-        private static AssemblyDefinition[] AssemblyDefinitions(this Type type, Type[] types){
-            return types
-                .Select(_ => {
-                    var realType = _.GetRealType();
-                    return realType.Assembly;
-                })
-                .Concat(new[]{type}.Select(_ => _.Assembly))
-                .Distinct()
-                .Select(assembly => AssemblyDefinition.ReadAssembly(assembly.Location))
-                .ToArray();
-        }
-
         private static Type[] AdditionalTypes(this PropertyInfo[] propertyInfos,Type type){
             return propertyInfos
                 .Where(_ => !_.PropertyType.IsValueType && typeof(string) != _.PropertyType && _.PropertyType != type)
                 .Select(_ => _.PropertyType)
                 .DistinctBy(_ => (_,type).ModelName())
+                .Where(_ => _.GetRealType()!=typeof(object))
                 .ToArray();
         }
 
         private static PropertyInfo[] PropertyInfos(this Type type){
             return type.PublicProperties(true)
-                .GetItems<PropertyInfo>(_ => {
-                    var publicProperties = _.PropertyType.GetRealType().PublicProperties(true).ToArray();
-                    return publicProperties;
-                }, info => info.PropertyType)
+                .GetItems<PropertyInfo>(_ => _.PropertyType.GetRealType().PublicProperties(true), info => info.PropertyType)
                 .ToArray();
         }
         
@@ -122,8 +105,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
 
-        private static object GetEnums(this TypeReference typeReference, object value){
-            var enumType = typeReference.ToType();
+        private static object GetEnums(this Type enumType, object value){
             if (EnumsNET.NonGeneric.NonGenericFlagEnums.IsFlagEnum(enumType)&&EnumsNET.NonGeneric.NonGenericFlagEnums.HasAnyFlags(enumType,value)){
                 return string.Join("|", EnumsNET.NonGeneric.NonGenericFlagEnums.GetFlagMembers(enumType, value)
                     .Select(member => $"{enumType.FullName}.{member.Name}"));
@@ -133,9 +115,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             return $"{enumType.FullName}.{name}";
         }
 
-        private static bool IsFlag(this TypeDefinition typeDefinition){
-            return (typeDefinition.IsEnum&&typeDefinition.CustomAttributes.Any(attribute1 => attribute1.AttributeType.FullName==typeof(FlagsAttribute).FullName));
-        }
 
     }
 }

@@ -5,11 +5,9 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using DevExpress.Persistent.Base;
 using Fasterflect;
-using Mono.Cecil;
 using Shouldly;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xunit;
-using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.TypeMappingService;
 
 namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
     
@@ -37,6 +35,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             var modelType = await typeToMap.MapToModel().ModelInterfaces();
 
             var propertyInfos = modelType.Properties();
+            propertyInfos.First(info => info.Name==nameof(CopyAttributesClass.NestedTypeArgument)).Attribute<TypeConverterAttribute>().ShouldNotBeNull();
             propertyInfos.First(info => info.Name==nameof(CopyAttributesClass.AttributeNoParam)).Attribute<DescriptionAttribute>().ShouldNotBeNull();
             propertyInfos.First(info => info.Name==nameof(CopyAttributesClass.AttributePrivate)).Attribute<Attribute>().ShouldBeNull();
             propertyInfos.First(info => info.Name==nameof(CopyAttributesClass.AttributeValueTypeParam)).Attribute<IndexAttribute>().ShouldNotBeNull();
@@ -63,10 +62,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [Fact]
         public async Task Customize_Attributes_Mapping(){
             InitializeMapperService(nameof(Customize_Attributes_Mapping));
-            TypeMappingService.AttributeMappingRules.Add(("Custom", tuple => {
-                tuple.customAttributes.Clear();
-                var reference = tuple.propertyDefinition.Module.ImportReference(typeof(DescriptionAttribute).Constructor());
-                tuple.customAttributes.Add(new CustomAttribute(reference));
+            TypeMappingService.PropertyMappingRules.Add(("Custom", tuple => {
+                tuple.propertyInfos.First().AddAttributeData(typeof(DescriptionAttribute));
             }));
             
             var typeToMap = typeof(ReplaceAttributesClass);
@@ -79,8 +76,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [Fact]
         public async Task Attribute_Mapping_Can_Be_Disabled(){
             InitializeMapperService(nameof(Attribute_Mapping_Can_Be_Disabled));
-            TypeMappingService.AttributeMappingRules.Add(("Disable", tuple => {
-                tuple.customAttributes.Clear();
+            TypeMappingService.PropertyMappingRules.Add(("Disable", tuple => {
+                foreach (var modelMapperPropertyInfo in tuple.propertyInfos){
+                    foreach (var modelMapperCustomAttributeData in modelMapperPropertyInfo.GetCustomAttributesData().ToArray()){
+                        modelMapperPropertyInfo.RemoveAttributeData(modelMapperCustomAttributeData);
+                    }
+                }
             }));
             var typeToMap = typeof(CopyAttributesClass);
 

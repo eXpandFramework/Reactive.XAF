@@ -4,7 +4,6 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Fasterflect;
 using Shouldly;
-using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xunit;
 using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.TypeMappingService;
@@ -155,6 +154,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 //            }
         }
 
+        [Fact]
         public async Task Do_Not_Map_If_Type_Assembly_Version_Not_Changed(){
             InitializeMapperService(nameof(Do_Not_Map_If_Type_Assembly_Version_Not_Changed));
             var mappedType = typeof(TestModelMapper);

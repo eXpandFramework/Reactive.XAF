@@ -34,11 +34,8 @@
     <Compile Include="..\..\Extensions\Extensions\FunctionOperators\IsAssignableFromOperator.cs" Link="LinkedFiles\IsAssignableFromOperator.cs" />
     <Compile Include="..\..\Extensions\Extensions\Linq\DistinctBy.cs" Link="LinkedFiles\DistinctBy.cs" />
     <Compile Include="..\..\Extensions\Extensions\Linq\GetItems.cs" Link="LinkedFiles\GetItems.cs" />
-    <Compile Include="..\..\Extensions\Extensions\MonoCecil\BaseClasses.cs" Link="LinkedFiles\BaseClasses.cs" />
-    <Compile Include="..\..\Extensions\Extensions\MonoCecil\ToType.cs" Link="LinkedFiles\ToType.cs" />
     <Compile Include="..\..\Extensions\Extensions\System\AppDomain\ApplicationPath.cs" Link="LinkedFiles\ApplicationPath.cs" />
     <Compile Include="..\..\Extensions\Extensions\System\Refelction\DelegateTypeFactory.cs" Link="LinkedFiles\DelegateTypeFactory.cs" />
-    <Compile Include="..\..\Extensions\Extensions\System\Refelction\DynamicPropertyInfo.cs" Link="LinkedFiles\DynamicPropertyInfo.cs" />
     <Compile Include="..\..\Extensions\Extensions\System\Refelction\IsNullAbleType.cs" Link="LinkedFiles\IsNullAbleType.cs" />
     <Compile Include="..\..\Extensions\Extensions\System\Refelction\PropertyInfoAccessModifier.cs" Link="LinkedFiles\PropertyInfoAccessModifier.cs" />
     <Compile Include="..\..\Extensions\Extensions\System\String\CleanCodeName.cs" Link="LinkedFiles\CleanCodeName.cs" />
