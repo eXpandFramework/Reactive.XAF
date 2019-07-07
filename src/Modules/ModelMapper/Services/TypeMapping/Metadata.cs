@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using DevExpress.ExpressApp.Model;
@@ -40,6 +41,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                             if (result != null)
                                 return result;
                         }
+                        else{
+                            return result;
+                        }
                     }
                     var interfaceType = type.GetInterfaces().FirstOrDefault(_ => _.IsGenericType&&typeof(IEnumerable).IsAssignableFrom(_));
                     if (interfaceType!=null){
@@ -69,9 +73,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         private static Type[] AdditionalTypes(this PropertyInfo[] propertyInfos,Type type){
             return propertyInfos
                 .Where(_ => !_.PropertyType.IsValueType && typeof(string) != _.PropertyType && _.PropertyType != type)
-                .Select(_ => _.PropertyType)
-                .DistinctBy(_ => (_,type).ModelName())
-                .Where(_ => _.GetRealType()!=typeof(object))
+                .SelectMany(_ => new []{_.PropertyType,_.PropertyType.GetRealType()}.Distinct())
+                .DistinctBy(_ => $"{(_,type).ModelName()}{_.GetRealType()}")
+                .Where(_ => _!=typeof(object))
                 .ToArray();
         }
 
@@ -86,11 +90,24 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 .Where(info => !info.PropertyType.IsValueType && info.PropertyType != typeof(string) ||info.CanRead && info.CanWrite)
                 .Where(info => info.IsValid(includeCollections))
                 .Where(info => {
+                    if (info.Name == "SelectedItems"){
+                        Debug.WriteLine("");
+                    }
                     if (info.PropertyType == typeof(string) || info.PropertyType.IsNullableType()) return true;
-                    var propertyTypeIsReserved = ReservedPropertyTypes.Any(_ => info.PropertyType!=_);
-                    if (includeCollections && typeof(IEnumerable).IsAssignableFrom(info.PropertyType))
-                        return true;
-                    return !info.PropertyType.IsGenericType && info.PropertyType != type &&info.PropertyType != typeof(object) && propertyTypeIsReserved;
+                    var propertyTypeIsReserved = ReservedPropertyTypes.Any(_ => info.PropertyType==_);
+                    if (propertyTypeIsReserved){
+                        return false;
+                    }
+
+                    var reservedPropertyInstances = ReservedPropertyInstances.Any(_ => _.IsAssignableFrom(info.PropertyType));
+                    if (reservedPropertyInstances){
+                        return false;
+                    }
+                    if (includeCollections && typeof(IEnumerable).IsAssignableFrom(info.PropertyType)){
+                        var realType = info.PropertyType.GetRealType();
+                        return !ReservedPropertyTypes.Contains(realType)&&!ReservedPropertyInstances.Any(_ => _.IsAssignableFrom(realType));
+                    }
+                    return !info.PropertyType.IsGenericType && info.PropertyType != type &&info.PropertyType != typeof(object) ;
                 })
                 .DistinctBy(info => info.Name);
         }

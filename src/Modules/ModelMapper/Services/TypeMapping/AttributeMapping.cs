@@ -33,9 +33,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
 
         private static void NonPublicAttributeParameters((Type declaringType, List<ModelMapperPropertyInfo> propertyInfos) tuple){
             foreach (var propertyInfo in tuple.propertyInfos.ToArray()){
-                var nonPublicArgumentDatas = propertyInfo.GetCustomAttributesData().Where(_ =>_.ConstructorArguments.Any(argument =>
-                    argument.ArgumentType.IsNotPublic ||
-                    argument.ArgumentType == typeof(Type) && ((Type) argument.Value).IsNotPublic)).ToArray();
+                var nonPublicArgumentDatas = propertyInfo.GetCustomAttributesData().Where(_ =>!_.ConstructorArguments.All(argument =>argument.ArgumentType == typeof(Type)
+                            ? ((Type) argument.Value).IsPublic: argument.ArgumentType.IsPublic)).ToArray();
                 foreach (var argumentData in nonPublicArgumentDatas){
                     propertyInfo.RemoveAttributeData(argumentData);
                 }

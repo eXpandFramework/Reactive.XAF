@@ -21,7 +21,6 @@ namespace Xpand.XAF.Modules.ModelMapper {
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
             moduleManager.ConnectExtendingService()
-                .Merge(moduleManager.ConnectLayoutView())
                 .Merge(Application.BindConnect())
                 .TakeUntilDisposed(this)
                 .Subscribe();

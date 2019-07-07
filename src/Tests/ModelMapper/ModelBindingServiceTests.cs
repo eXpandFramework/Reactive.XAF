@@ -175,7 +175,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             controlTypes.ToObservable().Do(type => Assembly.LoadFile(type.Assembly.Location)).Subscribe();
             InitializeMapperService($"{nameof(Bind_ListEditor_Control)}",platform);
             var predifinedMap = predifinedMaps.Last();
-            ConfigureLayoutViewPredifinedMapService(predifinedMap);
+            
             var module = predifinedMaps.Extend();
 
             var application = DefaultModelMapperModule(platform,extraModules.Select(_ => _.CreateInstance()).Cast<ModuleBase>().Concat(new[]{module}).ToArray()).Application;

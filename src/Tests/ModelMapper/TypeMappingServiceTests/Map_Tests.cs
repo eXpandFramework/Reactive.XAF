@@ -6,6 +6,7 @@ using System.Reactive.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp.Chart.Win;
+using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.PivotGrid.Win;
 using DevExpress.ExpressApp.Web.Editors.ASPx;
 using DevExpress.ExpressApp.Win.Editors;
@@ -60,21 +61,36 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             modelTypeProperties.Length.ShouldBe(propertiesToMap.Length);
         }
 
-        [Fact]
-        public async Task Include_Collections(){
+        [Theory]
+        [InlineData(typeof(CollectionsType), new[] {
+            nameof(CollectionsType.TestModelMappersList), nameof(CollectionsType.TestModelMappersArray),
+            nameof(CollectionsType.ValueTypeArray)
+        })]
+        public async Task Include_Collections(Type typeToMap,string[] collectionNames){
             InitializeMapperService($"{nameof(Include_Collections)}");
-            var typeToMap = typeof(CollectionsType);
-            TypeMappingService.PropertyMappingRules.Add(("Collection", tuple => {
-                if (tuple.declaringType==typeof(CollectionsType)){
-                    tuple.propertyInfos.Add(typeof(CollectionsType).Property(nameof(CollectionsType.TestModelMappersList)).ToModelMapperPropertyInfo());
-                    tuple.propertyInfos.Add(typeof(CollectionsType).Property(nameof(CollectionsType.TestModelMappersArray)).ToModelMapperPropertyInfo());
-                }
-            }));
+            
             var modelType = await typeToMap.MapToModel().ModelInterfaces();
             var modelTypeProperties = ModelTypeProperties(modelType);
 
-            modelTypeProperties.FirstOrDefault(info => info.Name==nameof(CollectionsType.TestModelMappersList)).ShouldNotBeNull();
-            modelTypeProperties.FirstOrDefault(info => info.Name==nameof(CollectionsType.TestModelMappersArray)).ShouldNotBeNull();
+            foreach (var collectionName in collectionNames){
+                modelTypeProperties.FirstOrDefault(info => info.Name==collectionName).ShouldNotBeNull();    
+            }
+
+        }
+
+        [Fact]
+        public async Task Create_Collections_For_RW_Properties(){
+            InitializeMapperService($"{nameof(Create_Collections_For_RW_Properties)}");
+            var typeToMap = typeof(RWPropeerties);
+            var modelType = await typeToMap.MapToModel().ModelInterfaces();
+            var modelTypeProperties = ModelTypeProperties(modelType);
+
+            var propertyInfo = modelTypeProperties.FirstOrDefault(info => info.Name==$"{nameof(RWPropeerties.Mapper)}s");
+            propertyInfo.ShouldNotBeNull();
+            typeof(IModelList).ShouldBeAssignableTo(propertyInfo.PropertyType);
+//            var subbClassType = propertyInfo.PropertyType.Assembly.GetType(typeof(TestModelMapperSubClass).ModelMapName());
+//            subbClassType.ShouldNotBeNull();
+//            propertyInfo.PropertyType.ShouldBeAssignableTo(subbClassType);
         }
 
         [Fact]
@@ -162,30 +178,32 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Theory]
-        [InlineData(PredifinedMap.GridColumn,new[]{typeof(GridColumn),typeof(GridListEditor)},Platform.Win)]
-        [InlineData(PredifinedMap.GridView,new[]{typeof(GridView),typeof(GridListEditor)},Platform.Win)]
-        [InlineData(PredifinedMap.PivotGridControl,new[]{typeof(PivotGridControl),typeof(PivotGridListEditor)},Platform.Win)]
-        [InlineData(PredifinedMap.ChartControl,new[]{typeof(ChartControl),typeof(ChartListEditor)},Platform.Win)]
-        [InlineData(PredifinedMap.PivotGridField,new[]{typeof(PivotGridField),typeof(PivotGridListEditor)},Platform.Win)]
-        [InlineData(PredifinedMap.LayoutViewColumn,new[]{typeof(LayoutViewColumn),typeof(GridListEditor)},Platform.Win)]
-        [InlineData(PredifinedMap.LayoutView,new[]{typeof(LayoutView),typeof(GridListEditor)},Platform.Win)]
-        [InlineData(PredifinedMap.BandedGridColumn,new[]{typeof(BandedGridColumn),typeof(GridListEditor)},Platform.Win)]
-        [InlineData(PredifinedMap.AdvBandedGridView,new[]{typeof(AdvBandedGridView),typeof(GridListEditor)},Platform.Win)]
-        [InlineData(PredifinedMap.ASPxGridView,new[]{typeof(ASPxGridView),typeof(ASPxGridListEditor)},Platform.Web)]
-        [InlineData(PredifinedMap.GridViewColumn,new[]{typeof(GridViewColumn),typeof(ASPxGridListEditor)},Platform.Web)]
-        internal async Task Map_PredifinedConfigurations(PredifinedMap configuration,Type[] assembliesToLoad,Platform platform){
+        [InlineData(PredifinedMap.GridColumn,new[]{typeof(GridColumn),typeof(GridListEditor)},Platform.Win,new[]{nameof(GridColumn.Summary)})]
+        [InlineData(PredifinedMap.GridView,new[]{typeof(GridView),typeof(GridListEditor)},Platform.Win,new[]{nameof(GridView.FormatRules)})]
+        [InlineData(PredifinedMap.PivotGridControl,new[]{typeof(PivotGridControl),typeof(PivotGridListEditor)},Platform.Win,new[]{nameof(PivotGridControl.FormatRules)})]
+        [InlineData(PredifinedMap.ChartControl,new[]{typeof(ChartControl),typeof(ChartListEditor)},Platform.Win,new[]{nameof(ChartControl.Series)})]
+        [InlineData(PredifinedMap.PivotGridField,new[]{typeof(PivotGridField),typeof(PivotGridListEditor)},Platform.Win,new[]{nameof(PivotGridField.CustomTotals)})]
+        [InlineData(PredifinedMap.LayoutViewColumn,new[]{typeof(LayoutViewColumn),typeof(GridListEditor)},Platform.Win,new[]{nameof(LayoutViewColumn.Summary)})]
+        [InlineData(PredifinedMap.LayoutView,new[]{typeof(LayoutView),typeof(GridListEditor)},Platform.Win,new[]{nameof(LayoutView.FormatRules)})]
+        [InlineData(PredifinedMap.BandedGridColumn,new[]{typeof(BandedGridColumn),typeof(GridListEditor)},Platform.Win,new[]{nameof(BandedGridColumn.Summary)})]
+        [InlineData(PredifinedMap.AdvBandedGridView,new[]{typeof(AdvBandedGridView),typeof(GridListEditor)},Platform.Win,new[]{nameof(AdvBandedGridView.FormatRules)})]
+        [InlineData(PredifinedMap.ASPxGridView,new[]{typeof(ASPxGridView),typeof(ASPxGridListEditor)},Platform.Web,new[]{nameof(ASPxGridView.Columns)})]
+        [InlineData(PredifinedMap.GridViewColumn,new[]{typeof(GridViewColumn),typeof(ASPxGridListEditor)},Platform.Web,new[]{nameof(GridViewColumn.Columns)})]
+        internal async Task Map_PredifinedConfigurations(PredifinedMap configuration,Type[] assembliesToLoad,Platform platform,string[] collectionNames){
             assembliesToLoad.ToObservable().Do(type => Assembly.LoadFile(type.Assembly.Location)).Subscribe();
             InitializeMapperService($"{nameof(Map_PredifinedConfigurations)}{configuration}",platform);
-            ConfigureLayoutViewPredifinedMapService(configuration);
             var modelType = await configuration.MapToModel().ModelInterfaces();
 
             modelType.Name.ShouldBe($"IModel{configuration}");
-            
+            modelType.Assembly.Location.ShouldBe("");
             var propertyInfos = modelType.Properties();
             propertyInfos.Count.ShouldBeGreaterThan(15);
             var descriptionAttribute = propertyInfos.Select(info => info.Attribute<DescriptionAttribute>())
                 .FirstOrDefault(attribute => attribute != null && attribute.Description.Contains(" ") );
             descriptionAttribute.ShouldNotBeNull();
+            foreach (var collectionName in collectionNames){
+                propertyInfos.FirstOrDefault(info => info.Name==collectionName).ShouldNotBeNull();    
+            }
             AssertBandedGridColumn(configuration, propertyInfos);
             
         }
@@ -208,10 +226,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         internal void Map_All_PredifinedConfigurations(Platform platform){
 
             InitializeMapperService($"{nameof(Map_All_PredifinedConfigurations)}",platform);
-            ConfigureLayoutViewPredifinedMapService();
+            
             var values = Enums.GetValues<PredifinedMap>().Where(map =>
                     map.GetAttributes().OfType<MapPlatformAttribute>().Any(_ => _.Platform == platform.ToString())).ToArray();
-
             var modelInterfaces = values.MapToModel().ModelInterfaces().Replay();
             modelInterfaces.Connect();
 
@@ -224,9 +241,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
         [Fact]
         internal void Map_PredifinedConfigurations_Combination(){
-
             InitializeMapperService($"{nameof(Map_All_PredifinedConfigurations)}",Platform.Win);
-            
 
             var modelInterfaces = new[]{PredifinedMap.GridView,PredifinedMap.GridColumn}.MapToModel().ModelInterfaces().Replay();
             modelInterfaces.Connect();
@@ -236,5 +251,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             types.First().Name.ShouldBe($"IModel{PredifinedMap.GridView}");
             types.Last().Name.ShouldBe($"IModel{PredifinedMap.GridColumn}");
         }
+    }
+
+    public class RWPropeerties{
+        public TestModelMapper Mapper{ get; set; }
+    }
+
+    class TestModelMapperSubClass:TestModelMapper{
+        
     }
 }

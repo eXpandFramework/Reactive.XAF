@@ -23,7 +23,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             return testModule;
         }
 
-
         public static ModelMapperTestModule Extend<T>(this Type extenderType, ModelMapperTestModule testModule = null,IModelMapperConfiguration configuration=null) where T : IModelNode{
             testModule = testModule ?? new ModelMapperTestModule();
             testModule.ApplicationModulesManager.FirstAsync()

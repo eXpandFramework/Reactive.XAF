@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reflection;
@@ -14,6 +15,7 @@ using DevExpress.XtraGrid.Views.BandedGrid;
 using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraGrid.Views.Layout;
 using DevExpress.XtraPivotGrid;
+using EnumsNET;
 using Shouldly;
 using Xpand.Source.Extensions.System.String;
 using Xpand.Source.Extensions.XAF.Model;
@@ -26,8 +28,8 @@ using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.Ty
 namespace Xpand.XAF.Modules.ModelMapper.Tests{
     [Collection(nameof(ModelMapperModule))]
     public class ModelMapperExtenderServiceTests : ModelMapperBaseTest{
-        
-        [Theory]
+
+        [WinFormsTheory]
         [InlineData(typeof(TestModelMapper),Platform.Win)]
         [InlineData(typeof(TestModelMapper),Platform.Web)]
         [InlineData(typeof(SelfReferenceTypeProperties),Platform.Win)]
@@ -54,8 +56,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         [InlineData(PredifinedMap.ASPxGridView, typeof(ASPxGridView),Platform.Web,MMListViewNodePath)]
         internal void ExtendModel_Predefined_Type(PredifinedMap configuration,Type typeToMap,Platform platform,string nodePath){
             Assembly.LoadFile(typeToMap.Assembly.Location);
-            InitializeMapperService($"{nameof(ExtendModel_Multiple_Predefined_Type)}{configuration}{platform}",platform);
-            ConfigureLayoutViewPredifinedMapService(configuration);
+            InitializeMapperService($"{nameof(ExtendModel_Predefined_Type)}{configuration}{platform}",platform);
 
             var module = configuration.Extend();
             var application = DefaultModelMapperModule(platform,module).Application;
@@ -78,24 +79,25 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             modelMapper.ShouldNotBeNull();
         }
 
-        [Fact]
-        internal void ExtendModel_Multiple_Predefined_Type(){
-            Assembly.LoadFile(typeof(GridView).Assembly.Location);
-            var platform = Platform.Win;
-            InitializeMapperService($"{nameof(ExtendModel_Multiple_Predefined_Type)}",platform);
+        [Theory]
+        [InlineData(Platform.Web)]
+        [InlineData(Platform.Win)]
+        internal void ExtendModel_All_Predefined_Maps(Platform platform){
+            InitializeMapperService($"{nameof(ExtendModel_All_Predefined_Maps)}",platform);
+            var values = Enums.GetValues<PredifinedMap>().Where(map =>
+                map.GetAttributes().OfType<MapPlatformAttribute>().Any(_ => _.Platform == platform.ToString())).ToArray();
 
+            var module = values.Extend();
 
-            var module = new[]{PredifinedMap.GridView,PredifinedMap.GridColumn}.Extend();
+            DefaultModelMapperModule(platform,module);
 
-            var application = DefaultModelMapperModule(platform,module).Application;
-            AssertExtendedModel(typeof(GridView), application, MMListViewNodePath);
-            AssertExtendedModel(typeof(GridColumn), application, $"{MMListViewNodePath}/Columns/Test");
         }
 
         [Fact]
         public void Extend_Existing_PredifinedMap(){
             InitializeMapperService(nameof(Extend_Existing_PredifinedMap),Platform.Win);
             var module = new []{PredifinedMap.PivotGridControl,PredifinedMap.GridView}.Extend();
+
             module.ApplicationModulesManager
                 .FirstAsync()
                 .SelectMany(_ => _.ExtendMap(PredifinedMap.GridView))
@@ -193,23 +195,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
 
-        [Fact(Skip = NotImplemented)]
-        internal  void LayoutView_LayoutStore(){
-//            var typeToExtend = typeof(LayoutView);
-//            Assembly.LoadFile(typeToExtend.Assembly.Location);
-//            InitializeMapperService($"{nameof(LayoutView_LayoutStore)}",Platform.Win);
-//            ConfigureLayoutViewPredifinedMapService();
-//
-//            var module = PredifinedMap.LayoutView.Extend();
-//            var application = DefaultModelMapperModule(Platform.Win,module).Application;
-//
-//            var modelListView = application.Model.Views.OfType<IModelListView>().First();
-//
-//            var modelMap = modelListView.GetNode(typeToExtend.ModelMapName());
-//            modelMap.ShouldBeAssignableTo<IModelDesignLayoutView>();
-//
-//            modelMap.GetNode(nameof(IModelDesignLayoutView.DesignLayoutView)).ShouldNotBeNull();
-        }
 
     }
 }

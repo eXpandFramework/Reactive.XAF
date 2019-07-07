@@ -11,10 +11,13 @@ using Xpand.Source.Extensions.System.AppDomain;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.ModelMapper.Tests.BOModel;
+using Xunit.Abstractions;
 using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.TypeMappingService;
 
 namespace Xpand.XAF.Modules.ModelMapper.Tests{
     public abstract class ModelMapperBaseTest:BaseTest{
+        
+
         protected const string MMListViewNodePath = "Views/" + nameof(MM) + "_ListView";
         public const string DynamicTypeName = "DynamicTypeName";
         internal ModelMapperModule DefaultModelMapperModule(Platform platform,params ModuleBase[] modules){
@@ -28,7 +31,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                                                        info.Name!=TypeMappingService.ModelMappersNodeName).ToArray();
         }
 
-        protected void ConfigureLayoutViewPredifinedMapService(PredifinedMap predifinedMap=PredifinedMap.LayoutView){
+        private void ConfigureLayoutViewPredifinedMapService(PredifinedMap predifinedMap=PredifinedMap.LayoutView){
             if (new[]{PredifinedMap.LayoutView,PredifinedMap.LayoutViewColumn}.Contains(predifinedMap)){
                 typeof(PredifinedMapService).Field("_xpandWinAssembly",Flags.Static|Flags.AnyVisibility).Set(GetType().Assembly);
                 typeof(PredifinedMapService).Field("_layoutViewListEditorTypeName",Flags.Static|Flags.AnyVisibility).Set(typeof(CustomGridListEditor).FullName);
@@ -77,6 +80,7 @@ public class {DynamicTypeName}{{
             typeof(TypeMappingService).CallMethod(null, "Init");
             typeof(PredifinedMapService).CallMethod(null, "Init");
             typeof(TypeMappingService).SetFieldValue("_modelMapperModuleVersion", typeof(ModelMapperModule).Assembly.GetName().Version);
+            ConfigureLayoutViewPredifinedMapService();
             return mapperAssemblyName.ToString();
         }
     }

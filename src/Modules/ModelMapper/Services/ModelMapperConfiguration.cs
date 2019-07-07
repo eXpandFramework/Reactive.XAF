@@ -237,27 +237,31 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             if (ModelExtendingService.Platform==Platform.Win){
                 if (new[]{PredifinedMap.GridView,PredifinedMap.GridColumn}.Any(map => map==predifinedMap)){
                     CheckRequiredParameters(nameof(_xafWinAssembly), nameof(_gridViewAssembly));
-                    return GridViewGridColumnConfiguration(predifinedMap,_xafWinAssembly, _gridViewAssembly, "DevExpress.ExpressApp.Win.Editors.GridListEditor",
+                    return GetConfiguration(predifinedMap,_xafWinAssembly, _gridViewAssembly, "DevExpress.ExpressApp.Win.Editors.GridListEditor",
                         PredifinedMap.GridView.GetTypeName(),PredifinedMap.GridColumn.GetTypeName() );
                 }
                 if (new[]{PredifinedMap.PivotGridControl,PredifinedMap.PivotGridField}.Any(map => map==predifinedMap)){
                     CheckRequiredParameters(nameof(_xafPivotGridWinAssembly), nameof(_pivotGridControlAssembly));
-                    return GridViewGridColumnConfiguration(predifinedMap,_xafPivotGridWinAssembly, _pivotGridControlAssembly, "DevExpress.ExpressApp.PivotGrid.Win.PivotGridListEditor",
+                    return GetConfiguration(predifinedMap,_xafPivotGridWinAssembly, _pivotGridControlAssembly, "DevExpress.ExpressApp.PivotGrid.Win.PivotGridListEditor",
                         PredifinedMap.PivotGridControl.GetTypeName(),PredifinedMap.PivotGridField.GetTypeName() );
                 }
                 if (new[]{PredifinedMap.ChartControl }.Any(map => map==predifinedMap)){
                     CheckRequiredParameters(nameof(_xafChartWinAssembly), nameof(_chartControlAssembly));
-                    return GridViewGridColumnConfiguration(predifinedMap,_xafChartWinAssembly, _chartControlAssembly, "DevExpress.ExpressApp.Chart.Win.ChartListEditor",
+                    var modelMapperConfiguration = GetConfiguration(predifinedMap,_xafChartWinAssembly, _chartControlAssembly, "DevExpress.ExpressApp.Chart.Win.ChartListEditor",
                         PredifinedMap.ChartControl.GetTypeName(),null );
+                    var chartListEditorVisibilityCriteria = ListViewVisibilityCriteria(_xafChartWinAssembly.GetType("DevExpress.ExpressApp.Chart.Win.ChartListEditor"));
+                    var pivotListEditorVisibilityCriteria = ListViewVisibilityCriteria(_xafPivotGridWinAssembly.GetType("DevExpress.ExpressApp.PivotGrid.Win.PivotGridListEditor"));
+                    modelMapperConfiguration.VisibilityCriteria=CriteriaOperator.Parse($"{chartListEditorVisibilityCriteria} OR {pivotListEditorVisibilityCriteria}").ToString();
+                    return modelMapperConfiguration;
                 }
                 if (new[]{PredifinedMap.AdvBandedGridView,PredifinedMap.BandedGridColumn}.Any(map => map==predifinedMap)){
                     CheckRequiredParameters(nameof(_xafWinAssembly), nameof(_gridViewAssembly));
-                    return GridViewGridColumnConfiguration(predifinedMap,_xafWinAssembly, _gridViewAssembly, "DevExpress.ExpressApp.Win.Editors.GridListEditor",
+                    return GetConfiguration(predifinedMap,_xafWinAssembly, _gridViewAssembly, "DevExpress.ExpressApp.Win.Editors.GridListEditor",
                         PredifinedMap.AdvBandedGridView.GetTypeName(), PredifinedMap.BandedGridColumn.GetTypeName());
                 }
                 if (new[]{PredifinedMap.LayoutView,PredifinedMap.LayoutViewColumn}.Any(map => map==predifinedMap)){
                     CheckRequiredParameters(nameof(_xpandWinAssembly), nameof(_gridViewAssembly));
-                    return GridViewGridColumnConfiguration(predifinedMap,_xpandWinAssembly, _gridViewAssembly, _layoutViewListEditorTypeName,
+                    return GetConfiguration(predifinedMap,_xpandWinAssembly, _gridViewAssembly, _layoutViewListEditorTypeName,
                         PredifinedMap.LayoutView.GetTypeName(), PredifinedMap.LayoutViewColumn.GetTypeName());
                 }
             }
@@ -265,7 +269,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             if (ModelExtendingService.Platform==Platform.Web){
                 if (new[]{PredifinedMap.ASPxGridView,PredifinedMap.GridViewColumn}.Any(map => map==predifinedMap)){
                     CheckRequiredParameters(nameof(_xafWebAssembly), nameof(_dxWebAssembly));
-                    return GridViewGridColumnConfiguration(predifinedMap,_xafWebAssembly, _dxWebAssembly, "DevExpress.ExpressApp.Web.Editors.ASPx.ASPxGridListEditor",
+                    return GetConfiguration(predifinedMap,_xafWebAssembly, _dxWebAssembly, "DevExpress.ExpressApp.Web.Editors.ASPx.ASPxGridListEditor",
                         PredifinedMap.ASPxGridView.GetTypeName(),PredifinedMap.GridViewColumn.GetTypeName());
                 }
             }
@@ -281,11 +285,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             }
         }
 
-        private static ModelMapperConfiguration GridViewGridColumnConfiguration(PredifinedMap predifinedMap ,Assembly listEditorAssembly, Assembly gridViewAssembly, string listEditorTypeName, string gridViewTypeName, string gridColumnTypeName){
+        private static ModelMapperConfiguration GetConfiguration(PredifinedMap predifinedMap,
+            Assembly listEditorAssembly, Assembly gridViewAssembly, string listEditorTypeName, string gridViewTypeName,string gridColumnTypeName){
             if (gridViewAssembly!=null&&listEditorAssembly!=null){
                 var rightOperand = listEditorAssembly.GetType(listEditorTypeName);
                 if (new[]{PredifinedMap.GridView,PredifinedMap.ASPxGridView,PredifinedMap.AdvBandedGridView, PredifinedMap.LayoutView,PredifinedMap.PivotGridControl,PredifinedMap.ChartControl}.Any(map => map==predifinedMap)){
-                    var visibilityCriteria = VisibilityCriteriaLeftOperand.IsAssignableFromModelListVideEditorType.GetVisibilityCriteria(rightOperand,"Parent.");
+                    var visibilityCriteria = ListViewVisibilityCriteria(rightOperand);
                     var bandsLayout = predifinedMap == PredifinedMap.AdvBandedGridView;
                     visibilityCriteria=CriteriaOperator.Parse($"{visibilityCriteria} AND Parent.BandsLayout.Enable=?", bandsLayout).ToString();
                     var typeToMap=gridViewAssembly.GetType(gridViewTypeName);
@@ -295,7 +300,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                     return new ModelMapperConfiguration {ImageName = "Grid_16x16",VisibilityCriteria =visibilityCriteria,MapData = (typeToMap,typeof(IModelListView))};
                 }
                 if (new[]{PredifinedMap.GridViewColumn,PredifinedMap.GridColumn, PredifinedMap.BandedGridColumn,PredifinedMap.LayoutViewColumn,PredifinedMap.PivotGridField}.Any(map => map==predifinedMap)){
-                    var visibilityCriteria = VisibilityCriteriaLeftOperand.IsAssignableFromModelListVideEditorType.GetVisibilityCriteria(rightOperand,"Parent.Parent.Parent.");
+                    var visibilityCriteria = ColumnVisibilityCriteria(rightOperand);
                     var bandsLayout = predifinedMap == PredifinedMap.BandedGridColumn;
                     visibilityCriteria=CriteriaOperator.Parse($"{visibilityCriteria} AND Parent.Parent.Parent.BandsLayout.Enable=?", bandsLayout).ToString();
                     var typeToMap=gridViewAssembly.GetType(gridColumnTypeName);
@@ -307,6 +312,20 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             }
 
             return null;
+        }
+
+        private static string ListViewVisibilityCriteria(Type rightOperand){
+            var visibilityCriteria =
+                VisibilityCriteriaLeftOperand.IsAssignableFromModelListVideEditorType.GetVisibilityCriteria(rightOperand,
+                    "Parent.");
+            return visibilityCriteria;
+        }
+
+        private static string ColumnVisibilityCriteria(Type rightOperand){
+            var visibilityCriteria =
+                VisibilityCriteriaLeftOperand.IsAssignableFromModelListVideEditorType.GetVisibilityCriteria(rightOperand,
+                    "Parent.Parent.Parent.");
+            return visibilityCriteria;
         }
     }
 

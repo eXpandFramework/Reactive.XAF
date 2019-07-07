@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
@@ -20,6 +22,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         public static string ModelMappersNodeName="ModelMappers";
         public static List<string> ReservedPropertyNames{ get; }=new List<string>();
         public static List<Type> ReservedPropertyTypes{ get; }=new List<Type>();
+        public static List<Type> ReservedPropertyInstances{ get; }=new List<Type>();
         static ISubject<(Type type,IModelMapperConfiguration configuration)> _typesToMap;
         public static List<(string key, Action<(Type declaringType,List<ModelMapperPropertyInfo> propertyInfos)> action)> PropertyMappingRules{ get; private set; }
 
@@ -60,8 +63,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             _modelMapperModuleVersion = typeof(TypeMappingService).Assembly.GetName().Version;
             
             ReservedPropertyNames.Clear();
-            ReservedPropertyNames.AddRange(typeof(IModelNode).Properties().Select(info => info.Name).Concat(new[]{"Item","IsReadOnly","Remove","Id"}));
-            ReservedPropertyTypes.AddRange(new[]{ typeof(Type)});
+            ReservedPropertyNames.AddRange(typeof(IModelNode).Properties().Select(info => info.Name).Concat(new[]{"Item","IsReadOnly","Remove","Id","Nodes","IsValid"}));
+            ReservedPropertyTypes.AddRange(new[]{ typeof(Type),typeof(IList),typeof(object)});
+            ReservedPropertyInstances.AddRange(new[]{ typeof(IDictionary)});
             
             ModelExtendingService.Init();
             

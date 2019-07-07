@@ -8,16 +8,19 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Utils;
+using DevExpress.Xpo;
 
 namespace Xpand.XAF.Modules.ModelMapper.Tests{
     class CollectionsType{
         public CollectionsType(){
             TestModelMappersList = new List<TestModelMapper>();
             TestModelMappersArray=new TestModelMapper[0];
+            ValueTypeArray=new string[0];
         }
 
         public IList<TestModelMapper> TestModelMappersList{ get; }
         public TestModelMapper[] TestModelMappersArray{ get; }
+        public string[] ValueTypeArray{ get; }
     }
     public interface IModelPredifinedMapExtension{
         
@@ -116,7 +119,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
     class NonPublicAttributeClass{
         [TypeConverter(typeof(NonPublicAttributeClass))]
+        [ValueConverter(typeof(InternalValueConverter))]
         public string Test{ get; set; }
+
+        internal class InternalValueConverter{
+        }
     }
     public class PrivateDescriptionAttributesClass{
         public const string Description = "Private Description AttributesClass";
