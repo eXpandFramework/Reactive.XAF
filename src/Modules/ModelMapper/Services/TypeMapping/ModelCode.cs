@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -46,21 +45,20 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     }
 
     public static partial class TypeMappingService{
-        private static Subject<(Type declaringType,List<ModelMapperPropertyInfo> propertyInfos)> _customizePropertySelection;
+        private static Subject<(Type declaringType,List<ModelMapperPropertyInfo> propertyInfos)> _customizeProperties;
+        private static Subject<ModelMapperType> _customizeTypes;
         
         static ((string key, string code)[] code, IEnumerable<string> references) ModelCode(this Type type,IModelMapperConfiguration configuration=null){
             var propertyInfos = type.PropertyInfos();
-            var infos = propertyInfos.Where(info => info.Name=="Polygons").ToArray();
-            var additionalTypes = propertyInfos.AdditionalTypes(type);
-            var firstOrDefault = additionalTypes.FirstOrDefault(type1 => type1.Name.Contains("PlanePolygon"));
+            var additionalTypes = propertyInfos.AdditionalTypes(type).Concat(AdditionalTypesList).ToArray();
+//            var first = additionalTypes.First(type1 => type1.Name=="ChartAppearance");
             var additionalTypesCode = type.AdditionalTypesCode( additionalTypes);
-            var @join = string.Join(Environment.NewLine, additionalTypesCode.Select(tuple => tuple.code));
             var containerName = type.ModelMapContainerName( configuration);
             var mapName = type.ModelMapName( configuration:configuration);
             var containerCode = type.ContainerCode( configuration, $"IModel{containerName}", mapName);
             var modelMappersTypeName = $"IModel{containerName}{ModelMappersNodeName}";
             var modelMappersInterfaceCode = ModelMappersInterfaceCode( modelMappersTypeName);
-            var typeCode = type.TypeCode(mapName, modelMappersTypeName, configuration?.ImageName);
+            var typeCode = type.TypeCode(mapName, modelMappersTypeName, configuration);
             var code = new []{typeCode,containerCode,modelMappersInterfaceCode}.Concat(additionalTypesCode).ToArray();
             var allAssemblies = type.AllAssemblies(propertyInfos);
             return (code,allAssemblies);
@@ -81,9 +79,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         private static string ModelCode(this (ModelMapperPropertyInfo propertyInfo,Type rootType) data){
-            if (data.propertyInfo.Name == "Mapper"){
-                Debug.WriteLine("");
-            }
             string propertyCode = null;
             var propertyInfo = data.propertyInfo;
             if (propertyInfo.PropertyType.IsValueType || propertyInfo.PropertyType == typeof(string)){
@@ -123,24 +118,22 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                     var realType = _.GetRealType();
                     (string, string) modelListCode = (null, null);
                     if (realType != _){
-                        if (realType.Name.Contains("Legend")){
-                            Debug.WriteLine("");
-                        }
                         mappedTypes.Add(realType);
                         modelListCode = ($"{modelCode.key}s",$"{Environment.NewLine}public interface {(realType,type).ModelName()}s:{typeof(IModelNode).FullName},{typeof(IModelList).FullName}<{modelCode.key}>{{}}");
                     }
                     return new[]{modelCode,modelListCode};
                 }).Where(_ => _!=default);
-            return additionalTypesCode.ToArray();
+            return additionalTypesCode.OrderBy(_ => _.Item1).ToArray();
         }
 
-        private static (string key, string code) TypeCode(this Type type, string mapName, string modelMappersTypeName, string imageName){
+        private static (string key, string code) TypeCode(this Type type, string mapName, string modelMappersTypeName, IModelMapperConfiguration configuration){
 
             var domainLogic = $@"[{typeof(DomainLogicAttribute).FullName}(typeof({modelMappersTypeName}))]{Environment.NewLine}public class {modelMappersTypeName}DomainLogic{{public static int? Get_Index({modelMappersTypeName} mapper){{return 0;}}}}{Environment.NewLine}";
             string modelMappersPropertyCode = $"new int? Index{{get;set;}}{Environment.NewLine}{modelMappersTypeName} {ModelMappersNodeName} {{get;}}";
-            var typeCode = (type,type).ModelCode(imageName,mapName, additionalPropertiesCode: modelMappersPropertyCode,
-                baseType: typeof(IModelModelMap));
-            return (typeCode.key, $"{domainLogic}{typeCode.code}");
+            var displayText = (configuration?.DisplayName ?? mapName).ToLiteral();
+            var displayNameAttribute=$@"[{typeof(ModelDisplayNameAttribute)}({displayText})]{Environment.NewLine}";
+            var typeCode = (type,type).ModelCode(configuration?.ImageName,mapName, additionalPropertiesCode: modelMappersPropertyCode,baseType: typeof(IModelModelMap));
+            return (typeCode.key, $"{domainLogic}{displayNameAttribute}{typeCode.code}");
         }
 
         private static (string key, string code) ModelMappersInterfaceCode(string modelMappersTypeName){
@@ -187,12 +180,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 typeToCode = data.typeToCode;
             }
 
+            
             if (propertiesCode == null){
-                var propertyInfos = typeToCode.PublicProperties(true)
+                var propertyInfos = typeToCode.PublicProperties()
                     .Where(info => !mappedTypes.Contains(info.PropertyType))
                     .ToModelMapperPropertyInfo();
                 var properties = new List<ModelMapperPropertyInfo>(propertyInfos);
-                _customizePropertySelection.OnNext((typeToCode,properties));
+                _customizeProperties.OnNext((typeToCode,properties));
                 propertiesCode =  String.Join(Environment.NewLine,properties.Select(propertyInfo =>(propertyInfo,data.rootType).ModelCode()));
             }
 
@@ -202,8 +196,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 imageCode = $@"[{typeof(ImageNameAttribute).FullName}({imageName.ToLiteral()})]{Environment.NewLine}";
             }
 
+            var modelMapperType = new ModelMapperType(typeToCode,data.rootType);
+            modelMapperType.BaseTypeFullNames.Add(baseType.FullName);
+            
+            _customizeTypes.OnNext(modelMapperType);
+            var baseTypes = string.Join(",",modelMapperType.BaseTypeFullNames);
             var modelName = $"{(typeToCode,data.rootType).ModelName(customName)}";
-            return (modelName,$"{imageCode}public interface {modelName}:{baseType.FullName}{{{Environment.NewLine}{propertiesCode}{Environment.NewLine}}}");
+            return (modelName,$"{imageCode}public interface {modelName}:{baseTypes}{{{Environment.NewLine}{propertiesCode}{Environment.NewLine}}}");
         }
 
         private static string ModelName(this (Type typeToCode,Type rootType) data,string customName=null){

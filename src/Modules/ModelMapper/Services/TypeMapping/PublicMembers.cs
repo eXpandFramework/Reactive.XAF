@@ -23,8 +23,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         public static List<string> ReservedPropertyNames{ get; }=new List<string>();
         public static List<Type> ReservedPropertyTypes{ get; }=new List<Type>();
         public static List<Type> ReservedPropertyInstances{ get; }=new List<Type>();
+        public static List<Type> AdditionalTypesList{ get; }=new List<Type>();
         static ISubject<(Type type,IModelMapperConfiguration configuration)> _typesToMap;
         public static List<(string key, Action<(Type declaringType,List<ModelMapperPropertyInfo> propertyInfos)> action)> PropertyMappingRules{ get; private set; }
+        public static List<(string key, Action<ModelMapperType> action)> TypeMappingRules{ get; private set; }
 
         static TypeMappingService(){
             Init();
@@ -43,8 +45,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             $@"{Path.GetDirectoryName(typeof(TypeMappingService).Assembly.Location)}\{ModelMapperAssemblyName}{MapperAssemblyName}{ModelExtendingService.Platform}.dll";
 
         private static void Init(){
-            _customizePropertySelection =new Subject<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)>();
+            _customizeProperties =new Subject<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)>();
+            _customizeTypes =new Subject<ModelMapperType>();
             AdditionalReferences=new List<Type>(new []{typeof(IModelNode),typeof(DescriptionAttribute),typeof(AssemblyFileVersionAttribute),typeof(ImageNameAttribute),typeof(TypeMappingService)});
+            TypeMappingRules = new List<(string key, Action<ModelMapperType> action)>();
             PropertyMappingRules = new List<(string key, Action<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)> action)>{
                 ("Browsable", BrowsableRule),
                 ("PrivateDescription", PrivateDescriptionRule),
@@ -123,7 +127,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         public static IObservable<Type> MapToModel<TModelMapperConfiguration>(this (Type type,TModelMapperConfiguration configuration)[] types) where TModelMapperConfiguration:IModelMapperConfiguration{
-            return types.ToObservable().MapToModel();
+            return types.ToObservable(Scheduler.Immediate).MapToModel();
 
         }
 

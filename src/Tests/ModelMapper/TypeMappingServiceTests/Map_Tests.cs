@@ -78,20 +78,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
         }
 
-        [Fact]
-        public async Task Create_Collections_For_RW_Properties(){
-            InitializeMapperService($"{nameof(Create_Collections_For_RW_Properties)}");
-            var typeToMap = typeof(RWPropeerties);
-            var modelType = await typeToMap.MapToModel().ModelInterfaces();
-            var modelTypeProperties = ModelTypeProperties(modelType);
-
-            var propertyInfo = modelTypeProperties.FirstOrDefault(info => info.Name==$"{nameof(RWPropeerties.Mapper)}s");
-            propertyInfo.ShouldNotBeNull();
-            typeof(IModelList).ShouldBeAssignableTo(propertyInfo.PropertyType);
-//            var subbClassType = propertyInfo.PropertyType.Assembly.GetType(typeof(TestModelMapperSubClass).ModelMapName());
-//            subbClassType.ShouldNotBeNull();
-//            propertyInfo.PropertyType.ShouldBeAssignableTo(subbClassType);
-        }
 
         [Fact]
         public async Task Map_All_ReferenceType_Public_Properties(){
@@ -179,23 +165,39 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
         [Theory]
         [InlineData(PredifinedMap.GridColumn,new[]{typeof(GridColumn),typeof(GridListEditor)},Platform.Win,new[]{nameof(GridColumn.Summary)})]
-        [InlineData(PredifinedMap.GridView,new[]{typeof(GridView),typeof(GridListEditor)},Platform.Win,new[]{nameof(GridView.FormatRules)})]
-        [InlineData(PredifinedMap.PivotGridControl,new[]{typeof(PivotGridControl),typeof(PivotGridListEditor)},Platform.Win,new[]{nameof(PivotGridControl.FormatRules)})]
-        [InlineData(PredifinedMap.ChartControl,new[]{typeof(ChartControl),typeof(ChartListEditor)},Platform.Win,new[]{nameof(ChartControl.Series)})]
-        [InlineData(PredifinedMap.PivotGridField,new[]{typeof(PivotGridField),typeof(PivotGridListEditor)},Platform.Win,new[]{nameof(PivotGridField.CustomTotals)})]
-        [InlineData(PredifinedMap.LayoutViewColumn,new[]{typeof(LayoutViewColumn),typeof(GridListEditor)},Platform.Win,new[]{nameof(LayoutViewColumn.Summary)})]
-        [InlineData(PredifinedMap.LayoutView,new[]{typeof(LayoutView),typeof(GridListEditor)},Platform.Win,new[]{nameof(LayoutView.FormatRules)})]
-        [InlineData(PredifinedMap.BandedGridColumn,new[]{typeof(BandedGridColumn),typeof(GridListEditor)},Platform.Win,new[]{nameof(BandedGridColumn.Summary)})]
-        [InlineData(PredifinedMap.AdvBandedGridView,new[]{typeof(AdvBandedGridView),typeof(GridListEditor)},Platform.Win,new[]{nameof(AdvBandedGridView.FormatRules)})]
-        [InlineData(PredifinedMap.ASPxGridView,new[]{typeof(ASPxGridView),typeof(ASPxGridListEditor)},Platform.Web,new[]{nameof(ASPxGridView.Columns)})]
-        [InlineData(PredifinedMap.GridViewColumn,new[]{typeof(GridViewColumn),typeof(ASPxGridListEditor)},Platform.Web,new[]{nameof(GridViewColumn.Columns)})]
+//        [InlineData(PredifinedMap.GridColumn,new[]{typeof(GridColumn),typeof(GridListEditor)},Platform.Win,new[]{nameof(GridColumn.Summary)})]
+//        [InlineData(PredifinedMap.GridView,new[]{typeof(GridView),typeof(GridListEditor)},Platform.Win,new[]{nameof(GridView.FormatRules)})]
+//        [InlineData(PredifinedMap.PivotGridControl,new[]{typeof(PivotGridControl),typeof(PivotGridListEditor)},Platform.Win,new[]{nameof(PivotGridControl.FormatRules)})]
+//        [InlineData(PredifinedMap.ChartControl,new[]{typeof(ChartControl),typeof(ChartListEditor)},Platform.Win,new[]{nameof(ChartControl.Series),"Diagrams"})]
+//        [InlineData(PredifinedMap.ChartControlDiagram3D,new[]{typeof(Diagram3D),typeof(ChartListEditor)},Platform.Win,new string[0])]
+//        [InlineData(PredifinedMap.ChartControlSimpleDiagram3D,new[]{typeof(SimpleDiagram3D),typeof(ChartListEditor)},Platform.Win,new string[0])]
+//        [InlineData(PredifinedMap.ChartControlFunnelDiagram3D,new[]{typeof(FunnelDiagram3D),typeof(ChartListEditor)},Platform.Win,new string[0])]
+//        [InlineData(PredifinedMap.ChartControlGanttDiagram,new[]{typeof(GanttDiagram),typeof(ChartListEditor)},Platform.Win,new string[0])]
+//        [InlineData(PredifinedMap.ChartControlPolarDiagram,new[]{typeof(PolarDiagram),typeof(ChartListEditor)},Platform.Win,new string[0])]
+//        [InlineData(PredifinedMap.ChartControlRadarDiagram,new[]{typeof(RadarDiagram),typeof(ChartListEditor)},Platform.Win,new string[0])]
+//        [InlineData(PredifinedMap.ChartControlSwiftPlotDiagram,new[]{typeof(SwiftPlotDiagram),typeof(ChartListEditor)},Platform.Win,new string[0])]
+//        [InlineData(PredifinedMap.ChartControlXYDiagram,new[]{typeof(XYDiagram),typeof(ChartListEditor)},Platform.Win,new string[0])]
+//        [InlineData(PredifinedMap.ChartControlXYDiagram2D,new[]{typeof(XYDiagram2D),typeof(ChartListEditor)},Platform.Win,new string[0])]
+//        [InlineData(PredifinedMap.ChartControlXYDiagram3D,new[]{typeof(XYDiagram3D),typeof(ChartListEditor)},Platform.Win,new string[0])]
+//        [InlineData(PredifinedMap.PivotGridField,new[]{typeof(PivotGridField),typeof(PivotGridListEditor)},Platform.Win,new[]{nameof(PivotGridField.CustomTotals)})]
+//        [InlineData(PredifinedMap.LayoutViewColumn,new[]{typeof(LayoutViewColumn),typeof(GridListEditor)},Platform.Win,new[]{nameof(LayoutViewColumn.Summary)})]
+//        [InlineData(PredifinedMap.LayoutView,new[]{typeof(LayoutView),typeof(GridListEditor)},Platform.Win,new[]{nameof(LayoutView.FormatRules)})]
+//        [InlineData(PredifinedMap.BandedGridColumn,new[]{typeof(BandedGridColumn),typeof(GridListEditor)},Platform.Win,new[]{nameof(BandedGridColumn.Summary)})]
+//        [InlineData(PredifinedMap.AdvBandedGridView,new[]{typeof(AdvBandedGridView),typeof(GridListEditor)},Platform.Win,new[]{nameof(AdvBandedGridView.FormatRules)})]
+//        [InlineData(PredifinedMap.ASPxGridView,new[]{typeof(ASPxGridView),typeof(ASPxGridListEditor)},Platform.Web,new[]{nameof(ASPxGridView.Columns)})]
+//        [InlineData(PredifinedMap.GridViewColumn,new[]{typeof(GridViewColumn),typeof(ASPxGridListEditor)},Platform.Web,new[]{nameof(GridViewColumn.Columns)})]
         internal async Task Map_PredifinedConfigurations(PredifinedMap configuration,Type[] assembliesToLoad,Platform platform,string[] collectionNames){
             assembliesToLoad.ToObservable().Do(type => Assembly.LoadFile(type.Assembly.Location)).Subscribe();
             InitializeMapperService($"{nameof(Map_PredifinedConfigurations)}{configuration}",platform);
             var modelType = await configuration.MapToModel().ModelInterfaces();
 
-            modelType.Name.ShouldBe($"IModel{configuration}");
-            modelType.Assembly.Location.ShouldBe("");
+            var modelTypeName = $"IModel{configuration}";
+            if (configuration.ToString().StartsWith(PredifinedMap.ChartControl.ToString()) &&
+                configuration != PredifinedMap.ChartControl){
+                modelTypeName = $"IModel{configuration.ToString().Replace(PredifinedMap.ChartControl.ToString(), "")}";
+            }
+            modelType.Name.ShouldBe(modelTypeName);
+            
             var propertyInfos = modelType.Properties();
             propertyInfos.Count.ShouldBeGreaterThan(15);
             var descriptionAttribute = propertyInfos.Select(info => info.Attribute<DescriptionAttribute>())
@@ -205,7 +207,17 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
                 propertyInfos.FirstOrDefault(info => info.Name==collectionName).ShouldNotBeNull();    
             }
             AssertBandedGridColumn(configuration, propertyInfos);
-            
+            AssertChartControl(configuration, propertyInfos, modelType);
+        }
+
+        private static void AssertChartControl(PredifinedMap configuration, IList<PropertyInfo> propertyInfos, Type modelType){
+            if (configuration == PredifinedMap.ChartControl){
+                propertyInfos.FirstOrDefault(info => nameof(ChartControl.Diagram) == info.Name).ShouldBeNull();
+                var propertyInfo = propertyInfos.FirstOrDefault(info => info.Name == $"{nameof(ChartControl.Diagram)}s");
+                propertyInfo.ShouldNotBeNull();
+                var type = modelType.Assembly.GetType(typeof(Diagram).ModelMapName(typeof(ChartControl)));
+                propertyInfo.PropertyType.GetInterfaces().ShouldContain(typeof(IModelList<>).MakeGenericType(type));
+            }
         }
 
         private static void AssertBandedGridColumn(PredifinedMap configuration, IList<PropertyInfo> propertyInfos){
@@ -221,21 +233,30 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
 
         [Theory]
-        [InlineData(Platform.Web)]
+//        [InlineData(Platform.Web)]
         [InlineData(Platform.Win)]
         internal void Map_All_PredifinedConfigurations(Platform platform){
 
             InitializeMapperService($"{nameof(Map_All_PredifinedConfigurations)}",platform);
             
-            var values = Enums.GetValues<PredifinedMap>().Where(map =>
-                    map.GetAttributes().OfType<MapPlatformAttribute>().Any(_ => _.Platform == platform.ToString())).ToArray();
+            var values = Enums.GetValues<PredifinedMap>()
+                .Where(map =>map.GetAttributes().OfType<MapPlatformAttribute>().Any(_ => _.Platform == platform.ToString()))
+                .Where(map => map!=PredifinedMap.ChartControlDiagram)
+                .Where(map => map.ToString().StartsWith(PredifinedMap.ChartControl.ToString()))
+                .ToArray();
             var modelInterfaces = values.MapToModel().ModelInterfaces().Replay();
             modelInterfaces.Connect();
 
             var types = modelInterfaces.ToEnumerable().ToArray();
+            types.First().Assembly.Location.ShouldBe("");
             types.Length.ShouldBe(values.Length);
             foreach (var configuration in values){
-                types.FirstOrDefault(_ => _.Name==$"IModel{configuration.ToString()}").ShouldNotBeNull();
+                var name = configuration.ToString();
+                if (configuration != PredifinedMap.ChartControl &&
+                    configuration.ToString().StartsWith(PredifinedMap.ChartControl.ToString())){
+                    name = configuration.ToString().Replace(PredifinedMap.ChartControl.ToString(), "");
+                }
+                types.FirstOrDefault(_ => _.Name==$"IModel{name}").ShouldNotBeNull();
             }
         }
 

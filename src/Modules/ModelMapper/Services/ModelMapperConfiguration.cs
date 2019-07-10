@@ -22,6 +22,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         string VisibilityCriteria{ get; }
         string ContainerName{ get; }
         string MapName{ get; }
+        string DisplayName{ get; }
         string ImageName{ get; }
     }
 
@@ -58,6 +59,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         [MapPlatform(Platform.Win)]
         GridColumn,
         [MapPlatform(Platform.Win)]
+        SchedulerControl,
+        [MapPlatform(Platform.Win)]
         AdvBandedGridView,
         [MapPlatform(Platform.Win)]
         BandedGridColumn,
@@ -71,6 +74,28 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         PivotGridField,
         [MapPlatform(Platform.Win)]
         ChartControl,
+        [MapPlatform(Platform.Win)]
+        ChartControlDiagram,
+        [MapPlatform(Platform.Win)]
+        ChartControlDiagram3D,
+        [MapPlatform(Platform.Win)]
+        ChartControlFunnelDiagram3D,
+        [MapPlatform(Platform.Win)]
+        ChartControlXYDiagram3D,
+        [MapPlatform(Platform.Win)]
+        ChartControlRadarDiagram,
+        [MapPlatform(Platform.Win)]
+        ChartControlSimpleDiagram3D,
+        [MapPlatform(Platform.Win)]
+        ChartControlPolarDiagram,
+        [MapPlatform(Platform.Win)]
+        ChartControlXYDiagram2D,
+        [MapPlatform(Platform.Win)]
+        ChartControlSwiftPlotDiagram,
+        [MapPlatform(Platform.Win)]
+        ChartControlXYDiagram,
+        [MapPlatform(Platform.Win)]
+        ChartControlGanttDiagram,
         [MapPlatform(Platform.Web)]
         ASPxGridView,
         [MapPlatform(Platform.Web)]
@@ -86,8 +111,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         private static Assembly _xafPivotGridWinAssembly;
         private static Assembly _xafChartWinAssembly;
         private static Assembly _pivotGridControlAssembly;
+        private static Assembly _chartUIControlAssembly;
         private static Assembly _chartControlAssembly;
         private static string _layoutViewListEditorTypeName;
+        private static Assembly _xafSchedulerControlAssembly;
+        private static Assembly _schedulerAssembly;
 
         static PredifinedMapService(){
             Init();
@@ -99,10 +127,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             if (ModelExtendingService.Platform == Platform.Win){
                 _xafWinAssembly = assemblies.GetAssembly("DevExpress.ExpressApp.Win.v");
                 _xafPivotGridWinAssembly = assemblies.GetAssembly("DevExpress.ExpressApp.PivotGrid.Win.v");
+                _xafSchedulerControlAssembly = assemblies.GetAssembly("DevExpress.ExpressApp.Scheduler.Win.v");
                 _xafChartWinAssembly = assemblies.GetAssembly("DevExpress.ExpressApp.Chart.Win.v");
                 _gridViewAssembly = assemblies.GetAssembly("DevExpress.XtraGrid.v");
+                _schedulerAssembly = assemblies.GetAssembly($"DevExpress.XtraScheduler.v{XafAssemblyInfo.VersionSuffix}",true);
                 _pivotGridControlAssembly = assemblies.GetAssembly("DevExpress.XtraPivotGrid.v");
-                _chartControlAssembly = assemblies.GetAssembly($"DevExpress.XtraCharts{XafAssemblyInfo.VersionSuffix}.UI");
+                _chartUIControlAssembly = assemblies.GetAssembly($"DevExpress.XtraCharts{XafAssemblyInfo.VersionSuffix}.UI");
+                _chartControlAssembly = assemblies.GetAssembly($"DevExpress.XtraCharts{XafAssemblyInfo.VersionSuffix}",true);
                 _xpandWinAssembly = assemblies.GetAssembly("Xpand.ExpressApp.Win");
             }
 
@@ -146,18 +177,39 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 .FirstAsync();
         }
 
+        public static void Extend(this ApplicationModulesManager modulesManager,params PredifinedMap[] maps){
+            foreach (var map in maps){
+                modulesManager.Extend(map);
+            }
+        }
+
+        public static void Extend(this ApplicationModulesManager modulesManager,Action<PredifinedMap,ModelMapperConfiguration> configure = null, params PredifinedMap[] maps){
+            foreach (var map in maps){
+                modulesManager.Extend(map,configuration => configure?.Invoke(map, configuration));
+            }
+        }
+
         public static void Extend(this ApplicationModulesManager modulesManager, PredifinedMap map,Action<ModelMapperConfiguration> configure = null){
             var modelMapperConfiguration = map.ModelMapperConfiguration(configure);
             var result = (modelMapperConfiguration.MapData.typeToMap, modelMapperConfiguration, map);
-            modulesManager.Extend((result.typeToMap, result.modelMapperConfiguration),result.modelMapperConfiguration.MapData.modelType);
+            if (map != PredifinedMap.ChartControl && map != PredifinedMap.ChartControlDiagram&&map.ToString().StartsWith(PredifinedMap.ChartControl.ToString())){
+                if (map!=PredifinedMap.ChartControlDiagram){
+                    map.MapToModel(configure).Wait();
+                }
+            }
+            else{
+                modulesManager.Extend((result.typeToMap, result.modelMapperConfiguration),result.modelMapperConfiguration.MapData.modelType);
+            }
+            
         }
 
         public static IObservable<Type> MapToModel(this IEnumerable<PredifinedMap> configurations,Action<PredifinedMap,ModelMapperConfiguration> configure = null){
-            return configurations.Where(_ => _!=PredifinedMap.None)
-                .ToObservable()
-                .Select(_ =>_.ModelMapperConfiguration(configuration => configure?.Invoke(_, configuration))?.MapData.typeToMap)
-                .Where(_ => _!=null)
-                .MapToModel();
+            var results = configurations.Where(_ => _!=PredifinedMap.None)
+                .Select(_ => {
+                    var modelMapperConfiguration = _.ModelMapperConfiguration(configuration => configure?.Invoke(_, configuration));
+                    return (modelMapperConfiguration.MapData.typeToMap,modelMapperConfiguration);
+                });
+            return results.ToObservable().MapToModel();
         }
 
         public static IObservable<Type> MapToModel(this PredifinedMap configuration,Action<ModelMapperConfiguration> configure=null){
@@ -179,8 +231,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 return ((ListView) view).Editor.Control.GetPropertyValue("MainView");
             }
 
-            if (new[]{PredifinedMap.PivotGridControl,PredifinedMap.ChartControl}.Any(_ =>_ == configuration)){
+            if (new[]{PredifinedMap.PivotGridControl,PredifinedMap.ChartControl,PredifinedMap.SchedulerControl}.Any(_ =>_ == configuration)){
                 return ((ListView) view).Editor.GetPropertyValue(configuration.ToString(),Flags.InstancePublicDeclaredOnly);
+            }
+            if (configuration!=PredifinedMap.ChartControl&&configuration.ToString().StartsWith(PredifinedMap.ChartControl.ToString())){
+                return PredifinedMap.ChartControl.GetViewControl(view, model).GetPropertyValue("Diagram");
             }
             if (new[]{PredifinedMap.PivotGridField}.Any(_ =>_ == configuration)){
                 return GetColumns(PredifinedMap.PivotGridControl, configuration, view, model,"Fields");
@@ -214,10 +269,15 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 return "DevExpress.XtraGrid.Views.BandedGrid.BandedGridColumn";
             if (configuration == PredifinedMap.GridView)
                 return "DevExpress.XtraGrid.Views.Grid.GridView";
+            if (configuration == PredifinedMap.SchedulerControl)
+                return "DevExpress.XtraScheduler.SchedulerControl";
             if (configuration == PredifinedMap.PivotGridControl)
                 return "DevExpress.XtraPivotGrid.PivotGridControl";
             if (configuration == PredifinedMap.ChartControl)
                 return "DevExpress.XtraCharts.ChartControl";
+            if (configuration.ToString().StartsWith(PredifinedMap.ChartControl.ToString())&&configuration!=PredifinedMap.ChartControl){
+                return $"DevExpress.XtraCharts.{configuration.ToString().Replace(PredifinedMap.ChartControl.ToString(),"")}";
+            }
             if (configuration == PredifinedMap.PivotGridField)
                 return "DevExpress.XtraPivotGrid.PivotGridField";
             if (configuration == PredifinedMap.GridColumn)
@@ -240,14 +300,19 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                     return GetConfiguration(predifinedMap,_xafWinAssembly, _gridViewAssembly, "DevExpress.ExpressApp.Win.Editors.GridListEditor",
                         PredifinedMap.GridView.GetTypeName(),PredifinedMap.GridColumn.GetTypeName() );
                 }
+                if (new[]{PredifinedMap.SchedulerControl}.Any(map => map==predifinedMap)){
+                    CheckRequiredParameters(nameof(_xafSchedulerControlAssembly), nameof(_schedulerAssembly));
+                    return GetConfiguration(predifinedMap,_xafSchedulerControlAssembly, _schedulerAssembly, "DevExpress.ExpressApp.Scheduler.Win.SchedulerListEditor",
+                        PredifinedMap.SchedulerControl.GetTypeName(),null );
+                }
                 if (new[]{PredifinedMap.PivotGridControl,PredifinedMap.PivotGridField}.Any(map => map==predifinedMap)){
                     CheckRequiredParameters(nameof(_xafPivotGridWinAssembly), nameof(_pivotGridControlAssembly));
                     return GetConfiguration(predifinedMap,_xafPivotGridWinAssembly, _pivotGridControlAssembly, "DevExpress.ExpressApp.PivotGrid.Win.PivotGridListEditor",
                         PredifinedMap.PivotGridControl.GetTypeName(),PredifinedMap.PivotGridField.GetTypeName() );
                 }
                 if (new[]{PredifinedMap.ChartControl }.Any(map => map==predifinedMap)){
-                    CheckRequiredParameters(nameof(_xafChartWinAssembly), nameof(_chartControlAssembly));
-                    var modelMapperConfiguration = GetConfiguration(predifinedMap,_xafChartWinAssembly, _chartControlAssembly, "DevExpress.ExpressApp.Chart.Win.ChartListEditor",
+                    CheckRequiredParameters(nameof(_xafChartWinAssembly), nameof(_chartUIControlAssembly));
+                    var modelMapperConfiguration = GetConfiguration(predifinedMap,_xafChartWinAssembly, _chartUIControlAssembly, "DevExpress.ExpressApp.Chart.Win.ChartListEditor",
                         PredifinedMap.ChartControl.GetTypeName(),null );
                     var chartListEditorVisibilityCriteria = ListViewVisibilityCriteria(_xafChartWinAssembly.GetType("DevExpress.ExpressApp.Chart.Win.ChartListEditor"));
                     var pivotListEditorVisibilityCriteria = ListViewVisibilityCriteria(_xafPivotGridWinAssembly.GetType("DevExpress.ExpressApp.PivotGrid.Win.PivotGridListEditor"));
@@ -258,6 +323,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                     CheckRequiredParameters(nameof(_xafWinAssembly), nameof(_gridViewAssembly));
                     return GetConfiguration(predifinedMap,_xafWinAssembly, _gridViewAssembly, "DevExpress.ExpressApp.Win.Editors.GridListEditor",
                         PredifinedMap.AdvBandedGridView.GetTypeName(), PredifinedMap.BandedGridColumn.GetTypeName());
+                }
+                if (predifinedMap!=PredifinedMap.ChartControl&&predifinedMap.ToString().StartsWith(PredifinedMap.ChartControl.ToString())){
+                    CheckRequiredParameters(nameof(_xafChartWinAssembly), nameof(_chartControlAssembly));
+                    return GetConfiguration(predifinedMap,_xafChartWinAssembly, _chartControlAssembly, "DevExpress.ExpressApp.Chart.Win.ChartListEditor",
+                        PredifinedMap.ChartControl.GetTypeName(), predifinedMap.GetTypeName());
                 }
                 if (new[]{PredifinedMap.LayoutView,PredifinedMap.LayoutViewColumn}.Any(map => map==predifinedMap)){
                     CheckRequiredParameters(nameof(_xpandWinAssembly), nameof(_gridViewAssembly));
@@ -286,28 +356,37 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         }
 
         private static ModelMapperConfiguration GetConfiguration(PredifinedMap predifinedMap,
-            Assembly listEditorAssembly, Assembly gridViewAssembly, string listEditorTypeName, string gridViewTypeName,string gridColumnTypeName){
-            if (gridViewAssembly!=null&&listEditorAssembly!=null){
+            Assembly listEditorAssembly, Assembly controlAssembly, string listEditorTypeName, string gridViewTypeName,string gridColumnTypeName){
+            if (controlAssembly!=null&&listEditorAssembly!=null){
                 var rightOperand = listEditorAssembly.GetType(listEditorTypeName);
-                if (new[]{PredifinedMap.GridView,PredifinedMap.ASPxGridView,PredifinedMap.AdvBandedGridView, PredifinedMap.LayoutView,PredifinedMap.PivotGridControl,PredifinedMap.ChartControl}.Any(map => map==predifinedMap)){
+                if (new[]{PredifinedMap.GridView, PredifinedMap.ASPxGridView, PredifinedMap.AdvBandedGridView,
+                    PredifinedMap.LayoutView, PredifinedMap.PivotGridControl, PredifinedMap.ChartControl,PredifinedMap.SchedulerControl 
+                }.Any(map => map == predifinedMap)){
                     var visibilityCriteria = ListViewVisibilityCriteria(rightOperand);
                     var bandsLayout = predifinedMap == PredifinedMap.AdvBandedGridView;
                     visibilityCriteria=CriteriaOperator.Parse($"{visibilityCriteria} AND Parent.BandsLayout.Enable=?", bandsLayout).ToString();
-                    var typeToMap=gridViewAssembly.GetType(gridViewTypeName);
+                    var typeToMap=controlAssembly.GetType(gridViewTypeName);
                     if (predifinedMap == PredifinedMap.ChartControl){
-                        ChartControlSeriesService.Connect().Subscribe();
+                        ChartControlService.Connect(typeToMap).Subscribe();
                     }
                     return new ModelMapperConfiguration {ImageName = "Grid_16x16",VisibilityCriteria =visibilityCriteria,MapData = (typeToMap,typeof(IModelListView))};
                 }
-                if (new[]{PredifinedMap.GridViewColumn,PredifinedMap.GridColumn, PredifinedMap.BandedGridColumn,PredifinedMap.LayoutViewColumn,PredifinedMap.PivotGridField}.Any(map => map==predifinedMap)){
+
+                if (new[]{PredifinedMap.GridViewColumn, PredifinedMap.GridColumn, PredifinedMap.BandedGridColumn,
+                    PredifinedMap.LayoutViewColumn, PredifinedMap.PivotGridField
+                }.Any(map => map == predifinedMap)){
                     var visibilityCriteria = ColumnVisibilityCriteria(rightOperand);
                     var bandsLayout = predifinedMap == PredifinedMap.BandedGridColumn;
                     visibilityCriteria=CriteriaOperator.Parse($"{visibilityCriteria} AND Parent.Parent.Parent.BandsLayout.Enable=?", bandsLayout).ToString();
-                    var typeToMap=gridViewAssembly.GetType(gridColumnTypeName);
+                    var typeToMap=controlAssembly.GetType(gridColumnTypeName);
                     if (predifinedMap == PredifinedMap.BandedGridColumn){
                         BandedGridColumnService.Connect().Subscribe();
                     }
                     return new ModelMapperConfiguration {ImageName = @"Office2013\Columns_16x16",VisibilityCriteria =visibilityCriteria,MapData = (typeToMap,typeof(IModelColumn))};
+                }
+                if (predifinedMap!=PredifinedMap.ChartControl&&predifinedMap.ToString().StartsWith(PredifinedMap.ChartControl.ToString())){
+                    var typeToMap=controlAssembly.GetType(predifinedMap.GetTypeName());
+                    return new ModelMapperConfiguration {MapData = (typeToMap,null)};
                 }
             }
 
@@ -335,10 +414,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         public string ImageName{ get; set; }
         public string VisibilityCriteria{ get; set; }
         internal (Type typeToMap,Type modelType) MapData{ get; set; }
+        public string DisplayName{ get; set; }
 
         [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
         public override int GetHashCode(){
-            return $"{ContainerName}{MapName}{ImageName}{VisibilityCriteria}".GetHashCode();
+            return $"{ContainerName}{MapName}{ImageName}{VisibilityCriteria}{DisplayName}".GetHashCode();
         }
 
 

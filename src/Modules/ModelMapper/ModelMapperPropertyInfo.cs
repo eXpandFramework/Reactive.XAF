@@ -1,14 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 
 namespace Xpand.XAF.Modules.ModelMapper{
-    [ExcludeFromCodeCoverage]
+    
+    public  class ModelMapperType{
+        public Type Type{ get; }
+        public Type TypeToMap{ get; }
+
+        public ModelMapperType(Type type, Type typeToMap){
+            Type = type;
+            TypeToMap = typeToMap;
+            BaseTypeFullNames=new List<string>();
+        }
+
+        public List<string> BaseTypeFullNames{ get; }
+    }
+
     public sealed class ModelMapperPropertyInfo : PropertyInfo{
         readonly List<ModelMapperCustomAttributeData> _customAttributeDatas = new List<ModelMapperCustomAttributeData>();
 
@@ -22,7 +34,13 @@ namespace Xpand.XAF.Modules.ModelMapper{
         }
 
         public ModelMapperPropertyInfo(PropertyInfo propertyInfo) : this(propertyInfo.Name,
-            propertyInfo.PropertyType, propertyInfo.DeclaringType, propertyInfo.GetCustomAttributesData().ToModelMapperConfigurationData()){
+            propertyInfo.PropertyType, propertyInfo.DeclaringType, CustomAttributeDatas(propertyInfo)){
+        }
+
+        private static IEnumerable<ModelMapperCustomAttributeData> CustomAttributeDatas(PropertyInfo propertyInfo){
+            return propertyInfo is ModelMapperPropertyInfo mapperPropertyInfo
+                ? mapperPropertyInfo._customAttributeDatas
+                : propertyInfo.GetCustomAttributesData().ToModelMapperConfigurationData();
         }
 
         public ModelMapperPropertyInfo(string name, Type propertyType,Type declaringType,IEnumerable<ModelMapperCustomAttributeData> customAttributeDatas = null) : this(name,

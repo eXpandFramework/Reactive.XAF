@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using DevExpress.ExpressApp.Model;
 using Fasterflect;
 using Xpand.Source.Extensions.Linq;
 using Xpand.Source.Extensions.System.Refelction;
@@ -14,9 +12,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         private static Version _modelMapperModuleVersion;
         private static string[] AllAssemblies(this Type type, PropertyInfo[] propertyInfos){
             return propertyInfos.Select(_ => _.PropertyType)
-                .Concat(propertyInfos.SelectMany(_ => _.GetCustomAttributesData())
-                    .SelectMany(_ => _.ConstructorArguments)
-                    .Select(_ => _.Value == null ? _.ArgumentType : _.Value.GetType()))
+                .Concat(propertyInfos.SelectMany(_ => {
+                    var data = _.GetCustomAttributesData();
+                    return data.Select(attributeData => attributeData.AttributeType).Concat(data
+                        .SelectMany(customAttributeData => customAttributeData.ConstructorArguments)
+                        .Select(argument => argument.Value == null ? argument.ArgumentType : argument.Value.GetType()));
+                }))
                 .Concat(new []{type})
                 .Concat(AdditionalReferences)
                 .Select(_ => _.Assembly.Location)
@@ -80,19 +81,16 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         private static PropertyInfo[] PropertyInfos(this Type type){
-            return type.PublicProperties(true)
-                .GetItems<PropertyInfo>(_ => _.PropertyType.GetRealType().PublicProperties(true), info => info.PropertyType)
+            return type.PublicProperties()
+                .GetItems<PropertyInfo>(_ => _.PropertyType.GetRealType().PublicProperties(), info => info.PropertyType)
                 .ToArray();
         }
         
-        private static IEnumerable<PropertyInfo> PublicProperties(this Type type,bool includeCollections=false){
-            return type.Properties(Flags.AllMembers)
+        private static IEnumerable<PropertyInfo> PublicProperties(this Type type){
+            var propertyInfos = type.Properties(Flags.AllMembers)
                 .Where(info => !info.PropertyType.IsValueType && info.PropertyType != typeof(string) ||info.CanRead && info.CanWrite)
-                .Where(info => info.IsValid(includeCollections))
+                .Where(IsValid)
                 .Where(info => {
-                    if (info.Name == "SelectedItems"){
-                        Debug.WriteLine("");
-                    }
                     if (info.PropertyType == typeof(string) || info.PropertyType.IsNullableType()) return true;
                     var propertyTypeIsReserved = ReservedPropertyTypes.Any(_ => info.PropertyType==_);
                     if (propertyTypeIsReserved){
@@ -103,19 +101,22 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                     if (reservedPropertyInstances){
                         return false;
                     }
-                    if (includeCollections && typeof(IEnumerable).IsAssignableFrom(info.PropertyType)){
+                    if (typeof(IEnumerable).IsAssignableFrom(info.PropertyType)){
                         var realType = info.PropertyType.GetRealType();
                         return !ReservedPropertyTypes.Contains(realType)&&!ReservedPropertyInstances.Any(_ => _.IsAssignableFrom(realType));
                     }
                     return !info.PropertyType.IsGenericType && info.PropertyType != type &&info.PropertyType != typeof(object) ;
                 })
                 .DistinctBy(info => info.Name);
+            
+            
+            return propertyInfos;
         }
 
-        private static bool IsValid(this PropertyInfo info,bool includeCollections){
+        private static bool IsValid(this PropertyInfo info){
             var isValid = info.AccessModifier() == AccessModifier.Public && !ReservedPropertyNames.Contains(info.Name);
             if (!isValid) return false;
-            if (includeCollections&&typeof(IEnumerable).IsAssignableFrom(info.PropertyType)){
+            if (typeof(IEnumerable).IsAssignableFrom(info.PropertyType)){
                 return true;
             }
             return !(typeof(IEnumerable).IsAssignableFrom(info.PropertyType) && info.PropertyType != typeof(string));

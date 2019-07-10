@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reflection;
@@ -61,6 +60,45 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             var module = configuration.Extend();
             var application = DefaultModelMapperModule(platform,module).Application;
             AssertExtendedModel(typeToMap, application,nodePath);
+        }
+
+        [Theory]
+        [InlineData(PredifinedMap.ChartControlRadarDiagram, typeof(Diagram3D),Platform.Win)]
+        [InlineData(PredifinedMap.ChartControlPolarDiagram, typeof(Diagram3D),Platform.Win)]
+        [InlineData(PredifinedMap.ChartControlXYDiagram2D, typeof(Diagram3D),Platform.Win)]
+        [InlineData(PredifinedMap.ChartControlXYDiagram, typeof(Diagram3D),Platform.Win)]
+        [InlineData(PredifinedMap.ChartControlSwiftPlotDiagram, typeof(Diagram3D),Platform.Win)]
+        [InlineData(PredifinedMap.ChartControlGanttDiagram, typeof(Diagram3D),Platform.Win)]
+        [InlineData(PredifinedMap.ChartControlFunnelDiagram3D, typeof(Diagram3D),Platform.Win)]
+        [InlineData(PredifinedMap.ChartControlDiagram3D, typeof(Diagram3D),Platform.Win)]
+        [InlineData(PredifinedMap.ChartControlSimpleDiagram3D, typeof(Diagram3D),Platform.Win)]
+        internal void ExtendModel_PredefinedChartDiagram(PredifinedMap configuration,Type typeToMap,Platform platform){
+            Assembly.LoadFile(typeToMap.Assembly.Location);
+            InitializeMapperService($"{nameof(ExtendModel_PredefinedChartDiagram)}{configuration}{platform}",platform);
+
+            var module = PredifinedMap.ChartControl.Extend();
+            configuration.Extend(module);
+            var application = DefaultModelMapperModule(platform,module).Application;
+            var modelListView = application.Model.Views.OfType<IModelListView>().First();
+            var modelNode = modelListView.GetNode(PredifinedMap.ChartControl.ToString());
+            modelNode= modelNode.GetNode("Diagrams");
+            var diagramType = modelNode.GetType().GetInterfaces().First(type =>type.IsGenericType&& type.GetGenericTypeDefinition()==typeof(IModelList<>)).GetGenericArguments().First();
+            var targetType = diagramType.Assembly.GetType($"IModel{configuration.ToString().Replace(PredifinedMap.ChartControl.ToString(),"")}");
+            diagramType.IsAssignableFrom(targetType).ShouldBeTrue();
+        }
+
+        [Fact]
+        internal void ExtendModel_All_PredefinedChartDiagram(){
+            Assembly.LoadFile(typeof(ChartControl).Assembly.Location);
+            Assembly.LoadFile(typeof(Diagram).Assembly.Location);
+            InitializeMapperService($"{nameof(ExtendModel_All_PredefinedChartDiagram)}",Platform.Win);
+
+            var module = PredifinedMap.ChartControl.Extend();
+            var diagrams = Enums.GetMembers<PredifinedMap>().Where(member =>
+                member.Name.StartsWith(PredifinedMap.ChartControl.ToString()) &&
+                member.Value != PredifinedMap.ChartControl&&member.Value != PredifinedMap.ChartControlDiagram).Select(member => member.Value).ToArray();
+            diagrams.Extend(module);
+            DefaultModelMapperModule(Platform.Win,module);
         }
 
         private void AssertExtendedModel(Type typeToMap, XafApplication application,string nodePath){
