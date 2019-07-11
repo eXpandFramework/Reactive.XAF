@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using DevExpress.ExpressApp.Chart.Win;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.PivotGrid.Win;
+using DevExpress.ExpressApp.Scheduler.Win;
 using DevExpress.ExpressApp.Web.Editors.ASPx;
 using DevExpress.ExpressApp.Win.Editors;
 using DevExpress.Web;
@@ -17,6 +18,7 @@ using DevExpress.XtraGrid.Views.BandedGrid;
 using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraGrid.Views.Layout;
 using DevExpress.XtraPivotGrid;
+using DevExpress.XtraScheduler;
 using EnumsNET;
 using Fasterflect;
 using Shouldly;
@@ -164,7 +166,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Theory]
-        [InlineData(PredifinedMap.GridColumn,new[]{typeof(GridColumn),typeof(GridListEditor)},Platform.Win,new[]{nameof(GridColumn.Summary)})]
+        [InlineData(PredifinedMap.SchedulerControl,new[]{typeof(SchedulerControl),typeof(SchedulerListEditor)},Platform.Win,new string[0])]
 //        [InlineData(PredifinedMap.GridColumn,new[]{typeof(GridColumn),typeof(GridListEditor)},Platform.Win,new[]{nameof(GridColumn.Summary)})]
 //        [InlineData(PredifinedMap.GridView,new[]{typeof(GridView),typeof(GridListEditor)},Platform.Win,new[]{nameof(GridView.FormatRules)})]
 //        [InlineData(PredifinedMap.PivotGridControl,new[]{typeof(PivotGridControl),typeof(PivotGridListEditor)},Platform.Win,new[]{nameof(PivotGridControl.FormatRules)})]
@@ -233,7 +235,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
 
         [Theory]
-//        [InlineData(Platform.Web)]
+        [InlineData(Platform.Web)]
         [InlineData(Platform.Win)]
         internal void Map_All_PredifinedConfigurations(Platform platform){
 
@@ -248,7 +250,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             modelInterfaces.Connect();
 
             var types = modelInterfaces.ToEnumerable().ToArray();
-            types.First().Assembly.Location.ShouldBe("");
             types.Length.ShouldBe(values.Length);
             foreach (var configuration in values){
                 var name = configuration.ToString();

@@ -74,7 +74,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         PivotGridField,
         [MapPlatform(Platform.Win)]
         ChartControl,
-        [MapPlatform(Platform.Win)]
+        
         ChartControlDiagram,
         [MapPlatform(Platform.Win)]
         ChartControlDiagram3D,
@@ -130,7 +130,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 _xafSchedulerControlAssembly = assemblies.GetAssembly("DevExpress.ExpressApp.Scheduler.Win.v");
                 _xafChartWinAssembly = assemblies.GetAssembly("DevExpress.ExpressApp.Chart.Win.v");
                 _gridViewAssembly = assemblies.GetAssembly("DevExpress.XtraGrid.v");
-                _schedulerAssembly = assemblies.GetAssembly($"DevExpress.XtraScheduler.v{XafAssemblyInfo.VersionSuffix}",true);
+                _schedulerAssembly = assemblies.GetAssembly($"DevExpress.XtraScheduler{XafAssemblyInfo.VersionSuffix}",true);
                 _pivotGridControlAssembly = assemblies.GetAssembly("DevExpress.XtraPivotGrid.v");
                 _chartUIControlAssembly = assemblies.GetAssembly($"DevExpress.XtraCharts{XafAssemblyInfo.VersionSuffix}.UI");
                 _chartControlAssembly = assemblies.GetAssembly($"DevExpress.XtraCharts{XafAssemblyInfo.VersionSuffix}",true);
@@ -368,6 +368,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                     var typeToMap=controlAssembly.GetType(gridViewTypeName);
                     if (predifinedMap == PredifinedMap.ChartControl){
                         ChartControlService.Connect(typeToMap).Subscribe();
+                    }
+                    if (predifinedMap == PredifinedMap.SchedulerControl){
+                        SchedulerControlService.Connect(typeToMap).Subscribe();
                     }
                     return new ModelMapperConfiguration {ImageName = "Grid_16x16",VisibilityCriteria =visibilityCriteria,MapData = (typeToMap,typeof(IModelListView))};
                 }

@@ -11,7 +11,6 @@ using Xpand.Source.Extensions.System.AppDomain;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.ModelMapper.Tests.BOModel;
-using Xunit.Abstractions;
 using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.TypeMappingService;
 
 namespace Xpand.XAF.Modules.ModelMapper.Tests{
@@ -61,6 +60,9 @@ public class {DynamicTypeName}{{
 
         internal string InitializeMapperService(string modelMapperAssemblyName,Platform platform=Platform.Agnostic,bool newAssemblyName=true ){
 
+            TypeMappingService.AdditionalTypesList.Clear();
+            TypeMappingService.AdditionalReferences.Clear();
+            TypeMappingService.TypeMappingRules.Clear();
             TypeMappingService.PropertyMappingRules.Clear();
             typeof(ModelExtendingService).SetPropertyValue("Platform", platform);
             var mapperAssemblyName = $"{GetType().Name}{modelMapperAssemblyName}{platform}".GetHashCode();

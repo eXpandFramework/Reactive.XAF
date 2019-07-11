@@ -14,6 +14,7 @@ using DevExpress.XtraGrid.Views.BandedGrid;
 using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraGrid.Views.Layout;
 using DevExpress.XtraPivotGrid;
+using DevExpress.XtraScheduler;
 using EnumsNET;
 using Shouldly;
 using Xpand.Source.Extensions.System.String;
@@ -44,6 +45,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         [Theory]
         [InlineData(PredifinedMap.GridColumn, typeof(GridColumn),Platform.Win,MMListViewNodePath+"/Columns/Test")]
         [InlineData(PredifinedMap.GridView, typeof(GridView),Platform.Win,MMListViewNodePath)]
+        [InlineData(PredifinedMap.SchedulerControl, typeof(SchedulerControl),Platform.Win,MMListViewNodePath)]
         [InlineData(PredifinedMap.PivotGridControl, typeof(PivotGridControl),Platform.Win,MMListViewNodePath)]
         [InlineData(PredifinedMap.ChartControl, typeof(ChartControl),Platform.Win,MMListViewNodePath)]
         [InlineData(PredifinedMap.PivotGridField, typeof(PivotGridField),Platform.Win,MMListViewNodePath+"/Columns/Test")]
@@ -60,6 +62,22 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             var module = configuration.Extend();
             var application = DefaultModelMapperModule(platform,module).Application;
             AssertExtendedModel(typeToMap, application,nodePath);
+        }
+
+        private void AssertExtendedModel(Type typeToMap, XafApplication application,string nodePath){
+            
+            var modelNode = application.Model.GetNodeByPath(nodePath);
+            var mapName = typeToMap.ModelMapName();
+            modelNode.GetNode(mapName).ShouldNotBeNull();
+            var typeInfo = XafTypesInfo.Instance.FindTypeInfo(typeof(IModelModelMap)).Descendants.FirstOrDefault(info => info.Name.EndsWith(typeToMap.Name));
+            typeInfo.ShouldNotBeNull();
+            typeInfo.Name.ShouldBe($"IModel{mapName}");
+            var defaultContext =
+                ((IModelApplicationModelMapper) application.Model).ModelMapper.MapperContexts.GetNode(
+                    ModelMapperContextNodeGenerator.Default);
+            defaultContext.ShouldNotBeNull();
+            var modelMapper = defaultContext.GetNode(mapName);
+            modelMapper.ShouldNotBeNull();
         }
 
         [Theory]
@@ -101,29 +119,14 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             DefaultModelMapperModule(Platform.Win,module);
         }
 
-        private void AssertExtendedModel(Type typeToMap, XafApplication application,string nodePath){
-            
-            var modelNode = application.Model.GetNodeByPath(nodePath);
-            var mapName = typeToMap.ModelMapName();
-            modelNode.GetNode(mapName).ShouldNotBeNull();
-            var typeInfo = XafTypesInfo.Instance.FindTypeInfo(typeof(IModelModelMap)).Descendants.FirstOrDefault(info => info.Name.EndsWith(typeToMap.Name));
-            typeInfo.ShouldNotBeNull();
-            typeInfo.Name.ShouldBe($"IModel{mapName}");
-            var defaultContext =
-                ((IModelApplicationModelMapper) application.Model).ModelMapper.MapperContexts.GetNode(
-                    ModelMapperContextNodeGenerator.Default);
-            defaultContext.ShouldNotBeNull();
-            var modelMapper = defaultContext.GetNode(mapName);
-            modelMapper.ShouldNotBeNull();
-        }
-
         [Theory]
         [InlineData(Platform.Web)]
         [InlineData(Platform.Win)]
         internal void ExtendModel_All_Predefined_Maps(Platform platform){
             InitializeMapperService($"{nameof(ExtendModel_All_Predefined_Maps)}",platform);
             var values = Enums.GetValues<PredifinedMap>().Where(map =>
-                map.GetAttributes().OfType<MapPlatformAttribute>().Any(_ => _.Platform == platform.ToString())).ToArray();
+                map.GetAttributes().OfType<MapPlatformAttribute>()
+                    .Any(_ => _.Platform == platform.ToString())).ToArray();
 
             var module = values.Extend();
 
