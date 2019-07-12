@@ -21,6 +21,9 @@
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
+    <Reference Include="Fasterflect.Netstandard">
+      <HintPath>..\..\Libs\Fasterflect.Netstandard.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\Extensions\Extensions\FunctionOperators\IsAssignableFromOperator.cs" Link="LinkedFiles\IsAssignableFromOperator.cs" />
@@ -46,7 +49,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Enums.NET" Version="2.3.2" />
-    <PackageReference Include="fasterflect" Version="2.1.3" />
     <PackageReference Include="Mono.Cecil" Version="0.10.4" />
     <PackageReference Include="System.Interactive" Version="3.2.0" />
     <PackageReference Include="System.Reactive" Version="4.1.5" />

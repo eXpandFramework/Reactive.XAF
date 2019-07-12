@@ -22,6 +22,9 @@
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="System.Configuration" />
+    <Reference Include="Fasterflect.Netstandard">
+      <HintPath>..\..\Libs\Fasterflect.Netstandard.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\Extensions\Extensions\XAF\XafApplication\GetPlatform.cs" Link="LinkedFiles\GetPlatform.cs" />
@@ -33,7 +36,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="fasterflect" Version="2.1.3" />
     <PackageReference Include="System.Reactive" Version="4.1.5" />
     <PackageReference Include="DevExpress.ExpressApp" Version="18.2.7" />
   </ItemGroup>

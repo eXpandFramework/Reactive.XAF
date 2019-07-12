@@ -18,6 +18,11 @@
     <None Remove="MasterDetail\**" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Fasterflect.Netstandard">
+      <HintPath>..\..\Libs\Fasterflect.Netstandard.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Moq" Version="4.12.0" />
     <PackageReference Include="Shouldly" Version="3.0.2" />
     <PackageReference Include="System.Reactive" Version="4.1.5" />

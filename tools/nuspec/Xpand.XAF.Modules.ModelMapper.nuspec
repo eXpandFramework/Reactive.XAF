@@ -17,7 +17,6 @@
       <dependency id="DevExpress.Data" version="18.2.7" />
       <dependency id="DevExpress.ExpressApp" version="18.2.7" />
       <dependency id="Enums.NET" version="2.3.2" />
-      <dependency id="fasterflect" version="2.1.3" />
       <dependency id="Mono.Cecil" version="0.10.4" />
       <dependency id="System.Interactive" version="3.2.0" />
       <dependency id="System.Reactive" version="4.1.5" />
@@ -28,6 +27,7 @@
   <files>
     <file src="Xpand.XAF.Modules.ModelMapper.dll" target="lib\net461\Xpand.XAF.Modules.ModelMapper.dll" />
     <file src="Xpand.XAF.Modules.ModelMapper.pdb" target="lib\net461\Xpand.XAF.Modules.ModelMapper.pdb" />
+    <file src="..\src\libs\Fasterflect.Netstandard.dll" target="lib\net461\Fasterflect.Netstandard.dll" />
     <file src="Readme.txt" target="" />
   </files>
 </package>

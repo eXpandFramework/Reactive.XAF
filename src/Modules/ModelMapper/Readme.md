@@ -28,7 +28,6 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |**DevExpress.Data**|**Any**
  |**DevExpress.ExpressApp**|**Any**
 |Enums.NET|2.3.2
- |fasterflect|2.1.3
  |Mono.Cecil|0.10.4
  |System.Interactive|3.2.0
  |System.Reactive|4.1.5
