@@ -14,13 +14,14 @@
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  CloneModelView</tags>
     <dependencies>
+      <dependency id="DevExpress.ExpressApp" version="18.2.7" />
       <dependency id="System.ValueTuple" version="4.5.0" />
       <dependency id="Xpand.VersionConverter" version="1.0.33.0" />
     </dependencies>
   </metadata>
   <files>
-    <file src="Xpand.XAF.Modules.CloneModelView.dll" target="lib\net452\Xpand.XAF.Modules.CloneModelView.dll" />
-    <file src="Xpand.XAF.Modules.CloneModelView.pdb" target="lib\net452\Xpand.XAF.Modules.CloneModelView.pdb" />
+    <file src="Xpand.XAF.Modules.CloneModelView.dll" target="lib\net461\Xpand.XAF.Modules.CloneModelView.dll" />
+    <file src="Xpand.XAF.Modules.CloneModelView.pdb" target="lib\net461\Xpand.XAF.Modules.CloneModelView.pdb" />
     <file src="Readme.txt" target="" />
   </files>
 </package>

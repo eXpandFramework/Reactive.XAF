@@ -13,14 +13,6 @@
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DevExpress.Data.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.Data.v18.2.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
-    <Reference Include="DevExpress.ExpressApp.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.ExpressApp.v18.2.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
@@ -44,5 +36,7 @@
     <PackageReference Include="Ryder" Version="0.8.0" />
     <PackageReference Include="System.Reactive" Version="4.1.5" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+    <PackageReference Include="DevExpress.Data" Version="18.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="18.2.7" />
   </ItemGroup>
 </Project>

@@ -17,7 +17,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
 
         private static Assembly Compile(this IEnumerable<string> references, string code){
             var codeProvider = new CSharpCodeProvider();
-//            var assembly = $@"{Path.GetDirectoryName(OutputAssembly)}\{MapperAssemblyName}{Guid.NewGuid():N}.dll";
             var compilerParameters = new CompilerParameters{
                 CompilerOptions = "/t:library /optimize",
                 OutputAssembly = OutputAssembly

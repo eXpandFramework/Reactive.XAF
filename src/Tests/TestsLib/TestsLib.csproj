@@ -43,35 +43,17 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="DevExpress.ExpressApp" Version="18.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp.Web" Version="18.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp.Win" Version="18.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Office.Core" Version="18.2.7" />
+    <PackageReference Include="DevExpress.RichEdit.Core" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Web" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Xpo" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Win" Version="18.2.7" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="DevExpress.ExpressApp.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.ExpressApp.v18.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.ExpressApp.Web.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.ExpressApp.Web.v18.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.ExpressApp.Win.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.ExpressApp.Win.v18.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.ExpressApp.Xpo.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.ExpressApp.Xpo.v18.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.Office.v18.2.Core">
-      <HintPath>..\..\..\bin\DevExpress.Office.v18.2.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.RichEdit.v18.2.Core">
-      <HintPath>..\..\..\bin\DevExpress.RichEdit.v18.2.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.Web.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.Web.v18.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.Xpo.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.Xpo.v18.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.XtraGrid.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.XtraGrid.v18.2.dll</HintPath>
-    </Reference>
     <Reference Include="System.Web" />
     <Reference Include="Xpand.Source.Extensions">
       <HintPath>..\..\..\bin\Xpand.Source.Extensions.dll</HintPath>

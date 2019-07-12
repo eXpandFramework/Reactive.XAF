@@ -32,10 +32,12 @@ function UpdateDependencies($_, $packagespath, $readMePath) {
             elseif ($id -eq "Xpand.VersionConverter") {
                 $id = "[$id](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)"
             }
-            "|$id|$($_.VersionRange.MinVersion)`r`n"
+            if ($id -notlike "DevExpress*"){
+                "|$id|$($_.VersionRange.MinVersion)`r`n"
+            }
         })
     [xml]$csproj = Get-Content $_.FullName
-    $dxDepends = ($csproj.Project.ItemGroup.Reference | Where-Object { $_.Include -like "DevExpress*" } | ForEach-Object {
+    $dxDepends = ($csproj.Project.ItemGroup.PackageReference | Where-Object { $_.Include -like "DevExpress*" } | ForEach-Object {
             "|**$($_.Include -creplace '(.*)\.v[\d]{2}\.\d', '$1')**|**Any**`r`n"
         })
     $metadata = "|<!-- -->|<!-- -->`r`n|----|----`r`n$dxDepends$metadata"

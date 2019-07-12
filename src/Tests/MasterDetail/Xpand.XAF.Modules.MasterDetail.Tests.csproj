@@ -23,20 +23,14 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="DevExpress.ExpressApp" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Data" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Xpo" Version="18.2.7" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Extensions\Extensions\Xpand.Source.Extensions.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="DevExpress.ExpressApp.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.ExpressApp.v18.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.Data.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.Data.v18.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.Xpo.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.Xpo.v18.2.dll</HintPath>
-    </Reference>
     <Reference Include="Tests">
       <HintPath>..\..\..\bin\TestsLib.dll</HintPath>
     </Reference>

@@ -14,7 +14,7 @@ properties {
     $Release=$null
 }
 
-task Release  -depends  DiscoverMSBuild, Clean, Init, UpdateProjects, RestoreNuggets, Compile,IndexSources, CreateNuspec, PackNuspec, UpdateReadMe
+task Release  -depends  DiscoverMSBuild, Clean, Init, UpdateProjects,  Compile,IndexSources, CreateNuspec, PackNuspec, UpdateReadMe
 
 
 Task IndexSources{
@@ -26,7 +26,7 @@ Task IndexSources{
 task Init {
     InvokeScript{
         New-Item "$PSScriptRoot\bin" -ItemType Directory -Force |Out-Null
-        Install-XDevExpress -dxSource $packageSources -binPath "$PSScriptRoot\bin" -sourcePath "$PSScriptRoot\src" -dxVersion $dxVersion
+        # Install-XDevExpress -dxSource $packageSources -binPath "$PSScriptRoot\bin" -sourcePath "$PSScriptRoot\src" -dxVersion $dxVersion
     }
 }
 
@@ -39,22 +39,6 @@ task UpdateProjects {
 task UpdateReadMe {
     InvokeScript{
         & "$PSScriptRoot\tools\build\UpdateReadMe.ps1"
-    }
-}
-
-task RestoreNuggets {
-    InvokeScript{
-        # Get-ChildItem *.sln -Recurse|ForEach-Object{
-        #     Push-Location $_.DirectoryName
-        #     if ($packageSources){
-        #         $sources= "https://api.nuget.org/v3/index.json;$packageSources"
-        #         & dotnet restore -s $sources
-        #     }
-        #     else {
-        #         & dotnet restore
-        #     }
-        #     Pop-Location
-        # }
     }
 }
 

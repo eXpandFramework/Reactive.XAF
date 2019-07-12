@@ -12,10 +12,6 @@
     <OutputPath>..\..\..\bin</OutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DevExpress.ExpressApp.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.ExpressApp.v18.2.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
@@ -39,5 +35,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="DevExpress.ExpressApp" Version="18.2.7" />
   </ItemGroup>
 </Project>

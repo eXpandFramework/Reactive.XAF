@@ -27,92 +27,38 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="DevExpress.ExpressApp.Chart" Version="18.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp.Chart.Win" Version="18.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp.PivotGrid.Win" Version="18.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp.PivotGrid" Version="18.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp.Scheduler" Version="18.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp.Scheduler.Win" Version="18.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Win" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Charts.Core" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Charts" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Win.Charts" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Win" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Win" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Printing.Core" Version="18.2.7" />
+    <PackageReference Include="DevExpress.PivotGrid.Core" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Win" Version="18.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp.Win" Version="18.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp.Web" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Office.Core" Version="18.2.7" />
+    <PackageReference Include="DevExpress.RichEdit.Core" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Web" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Utils" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Win" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Data" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Xpo" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Win.Scheduler" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Scheduler.Core" Version="18.2.7" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Extensions\Extensions\Xpand.Source.Extensions.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="DevExpress.ExpressApp.Chart.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.ExpressApp.Chart.v18.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.ExpressApp.Chart.Win.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.ExpressApp.Chart.Win.v18.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.ExpressApp.PivotGrid.Win.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.ExpressApp.PivotGrid.Win.v18.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.ExpressApp.PivotGrid.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.ExpressApp.PivotGrid.v18.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.ExpressApp.Scheduler.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.ExpressApp.Scheduler.v18.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.ExpressApp.Scheduler.Win.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.ExpressApp.Scheduler.Win.v18.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.ExpressApp.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.ExpressApp.v18.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.XtraBars.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.XtraBars.v18.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.Charts.v18.2.Core">
-      <HintPath>..\..\..\bin\DevExpress.Charts.v18.2.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.XtraCharts.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.XtraCharts.v18.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.XtraCharts.v18.2.UI">
-      <HintPath>..\..\..\bin\DevExpress.XtraCharts.v18.2.UI.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.XtraEditors.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.XtraEditors.v18.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.XtraLayout.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.XtraLayout.v18.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.Printing.v18.2.Core">
-      <HintPath>..\..\..\bin\DevExpress.Printing.v18.2.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.PivotGrid.v18.2.Core">
-      <HintPath>..\..\..\bin\DevExpress.PivotGrid.v18.2.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.XtraPivotGrid.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.XtraPivotGrid.v18.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.ExpressApp.Win.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.ExpressApp.Win.v18.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.ExpressApp.Web.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.ExpressApp.Web.v18.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.Office.v18.2.Core">
-      <HintPath>..\..\..\bin\DevExpress.Office.v18.2.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.RichEdit.v18.2.Core">
-      <HintPath>..\..\..\bin\DevExpress.RichEdit.v18.2.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.Web.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.Web.v18.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.Utils.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.Utils.v18.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.XtraGrid.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.XtraGrid.v18.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.Data.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.Data.v18.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.Xpo.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.Xpo.v18.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.XtraScheduler.v18.2">
-      <HintPath>..\..\..\bin\DevExpress.XtraScheduler.v18.2.dll</HintPath>
-    </Reference>
-    <Reference Include="DevExpress.XtraScheduler.v18.2.Core">
-      <HintPath>..\..\..\bin\DevExpress.XtraScheduler.v18.2.Core.dll</HintPath>
-    </Reference>
     <Reference Include="System.Web" />
     <Reference Include="Tests">
       <HintPath>..\..\..\bin\TestsLib.dll</HintPath>
