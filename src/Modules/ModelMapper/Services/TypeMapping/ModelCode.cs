@@ -60,8 +60,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             var modelMappersInterfaceCode = ModelMappersInterfaceCode( modelMappersTypeName);
             var typeCode = type.TypeCode(mapName, modelMappersTypeName, configuration);
             var code = new []{typeCode,containerCode,modelMappersInterfaceCode}.Concat(additionalTypesCode).ToArray();
-            var allAssemblies = type.AllAssemblies(propertyInfos);
-            return (code,allAssemblies);
+            var references = type.References(propertyInfos,additionalTypes);
+            return (code,references);
         }
 
         private static string AssemblyAttributesCode(this Type type,IModelMapperConfiguration configuration){

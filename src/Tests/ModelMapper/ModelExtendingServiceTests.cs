@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reflection;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.Win;
 using DevExpress.ExpressApp.Win.Editors;
 using DevExpress.Utils;
 using DevExpress.Web;
@@ -81,22 +83,22 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         [Theory]
-        [InlineData(PredifinedMap.ChartControlRadarDiagram, typeof(Diagram3D),Platform.Win)]
-        [InlineData(PredifinedMap.ChartControlPolarDiagram, typeof(Diagram3D),Platform.Win)]
-        [InlineData(PredifinedMap.ChartControlXYDiagram2D, typeof(Diagram3D),Platform.Win)]
-        [InlineData(PredifinedMap.ChartControlXYDiagram, typeof(Diagram3D),Platform.Win)]
-        [InlineData(PredifinedMap.ChartControlSwiftPlotDiagram, typeof(Diagram3D),Platform.Win)]
-        [InlineData(PredifinedMap.ChartControlGanttDiagram, typeof(Diagram3D),Platform.Win)]
-        [InlineData(PredifinedMap.ChartControlFunnelDiagram3D, typeof(Diagram3D),Platform.Win)]
+        [InlineData(PredifinedMap.ChartControlRadarDiagram, typeof(RadarDiagram),Platform.Win)]
+        [InlineData(PredifinedMap.ChartControlPolarDiagram, typeof(PolarDiagram),Platform.Win)]
+        [InlineData(PredifinedMap.ChartControlXYDiagram2D, typeof(XYDiagram2D),Platform.Win)]
+        [InlineData(PredifinedMap.ChartControlXYDiagram, typeof(XYDiagram),Platform.Win)]
+        [InlineData(PredifinedMap.ChartControlSwiftPlotDiagram, typeof(SwiftPlotDiagram),Platform.Win)]
+        [InlineData(PredifinedMap.ChartControlGanttDiagram, typeof(GanttDiagram),Platform.Win)]
+        [InlineData(PredifinedMap.ChartControlFunnelDiagram3D, typeof(FunnelDiagram3D),Platform.Win)]
         [InlineData(PredifinedMap.ChartControlDiagram3D, typeof(Diagram3D),Platform.Win)]
-        [InlineData(PredifinedMap.ChartControlSimpleDiagram3D, typeof(Diagram3D),Platform.Win)]
+        [InlineData(PredifinedMap.ChartControlSimpleDiagram3D, typeof(SimpleDiagram3D),Platform.Win)]
         internal void ExtendModel_PredefinedChartDiagram(PredifinedMap configuration,Type typeToMap,Platform platform){
-            Assembly.LoadFile(typeToMap.Assembly.Location);
             InitializeMapperService($"{nameof(ExtendModel_PredefinedChartDiagram)}{configuration}{platform}",platform);
 
             var module = PredifinedMap.ChartControl.Extend();
             configuration.Extend(module);
             var application = DefaultModelMapperModule(platform,module).Application;
+
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
             var modelNode = modelListView.GetNode(PredifinedMap.ChartControl.ToString());
             modelNode= modelNode.GetNode("Diagrams");

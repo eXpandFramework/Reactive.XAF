@@ -8,7 +8,8 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.Predifined{
     class ChartControlService{
-        public static IObservable<Unit> Connect(Type typeToMap){
+        public static IObservable<Unit> Connect(Type typeToMap, Assembly chartCoreAssembly){
+            
             var propertyInfo = typeToMap.Property("Diagram");
             var genericType = typeof(IList<>).MakeGenericType(propertyInfo.PropertyType);
             TypeMappingService.AdditionalTypesList.Add(genericType);
@@ -18,10 +19,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.Predifined{
         }
 
         private static void ChartDiagrams(ModelMapperType modelMapperType, PropertyInfo propertyInfo,Type chartControlType){
-            if (modelMapperType.TypeToMap == modelMapperType.Type &&propertyInfo.PropertyType != modelMapperType.TypeToMap &&
-                propertyInfo.PropertyType.IsAssignableFrom(modelMapperType.Type)){
-                var modelMapName = (propertyInfo.PropertyType).ModelMapName(chartControlType);
-                modelMapperType.BaseTypeFullNames.Add(modelMapName);
+            if (modelMapperType.TypeToMap == modelMapperType.Type){
+                if (propertyInfo.PropertyType != modelMapperType.TypeToMap && propertyInfo.PropertyType.IsAssignableFrom(modelMapperType.Type)){
+                    var modelMapName = (propertyInfo.PropertyType).ModelMapName(chartControlType);
+                    modelMapperType.BaseTypeFullNames.Add(modelMapName);
+                }
             }
             
         }

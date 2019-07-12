@@ -114,6 +114,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         private static Assembly _pivotGridControlAssembly;
         private static Assembly _chartUIControlAssembly;
         private static Assembly _chartControlAssembly;
+        private static Assembly _chartCoreAssembly;
         private static string _layoutViewListEditorTypeName;
         private static Assembly _xafSchedulerControlAssembly;
         private static Assembly _schedulerAssembly;
@@ -137,6 +138,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 _pivotGridControlAssembly = assemblies.GetAssembly("DevExpress.XtraPivotGrid.v");
                 _chartUIControlAssembly = assemblies.GetAssembly($"DevExpress.XtraCharts{XafAssemblyInfo.VersionSuffix}.UI");
                 _chartControlAssembly = assemblies.GetAssembly($"DevExpress.XtraCharts{XafAssemblyInfo.VersionSuffix}",true);
+                _chartCoreAssembly = assemblies.GetAssembly($"DevExpress.Charts{XafAssemblyInfo.VersionSuffix}.Core",true);
                 _xpandWinAssembly = assemblies.GetAssembly("Xpand.ExpressApp.Win");
             }
 
@@ -148,7 +150,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         }
 
         private static Assembly GetAssembly(this Assembly[] assemblies,string name,bool exactMatch=false){
-            var assembly = assemblies.FirstOrDefault(_ =>exactMatch?_.FullName==name: _.FullName.StartsWith(name));
+            var assembly = assemblies.FirstOrDefault(_ =>exactMatch?_.GetName().Name==name: _.GetName().Name.StartsWith(name));
 
             if (assembly == null){
                 var wildCard=exactMatch?"":"*";
@@ -370,7 +372,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                     visibilityCriteria=CriteriaOperator.Parse($"{visibilityCriteria} AND Parent.BandsLayout.Enable=?", bandsLayout).ToString();
                     var typeToMap=controlAssembly.GetType(gridViewTypeName);
                     if (predifinedMap == PredifinedMap.ChartControl){
-                        ChartControlService.Connect(typeToMap).Subscribe();
+                        ChartControlService.Connect(typeToMap,_chartCoreAssembly).Subscribe();
                     }
                     if (predifinedMap == PredifinedMap.SchedulerControl){
                         SchedulerControlService.Connect(typeToMap,_schedulerCoreAssembly).Subscribe();
@@ -392,6 +394,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 }
                 if (predifinedMap!=PredifinedMap.ChartControl&&predifinedMap.ToString().StartsWith(PredifinedMap.ChartControl.ToString())){
                     var typeToMap=controlAssembly.GetType(predifinedMap.GetTypeName());
+                    if (_chartCoreAssembly == null){
+                        throw new FileNotFoundException($"DevExpress.Charts{XafAssemblyInfo.VersionSuffix}.Core not found in path");
+                    }
+                    TypeMappingService.AdditionalReferences.Add(_chartCoreAssembly.GetTypes().First());
                     return new ModelMapperConfiguration {MapData = (typeToMap,null)};
                 }
             }

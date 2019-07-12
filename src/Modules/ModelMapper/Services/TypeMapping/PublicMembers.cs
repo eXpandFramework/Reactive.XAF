@@ -13,7 +13,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
-using Fasterflect;
+using DevExpress.Utils.Extensions;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     public static partial class TypeMappingService{
@@ -21,10 +21,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         public static string ModelMapperAssemblyName=null;
         public static string MapperAssemblyName="ModelMapperAssembly";
         public static string ModelMappersNodeName="ModelMappers";
-        public static List<string> ReservedPropertyNames{ get; }=new List<string>();
-        public static List<Type> ReservedPropertyTypes{ get; }=new List<Type>();
-        public static List<Type> ReservedPropertyInstances{ get; }=new List<Type>();
-        public static List<Type> AdditionalTypesList{ get; }=new List<Type>();
+        public static HashSet<string> ReservedPropertyNames{ get; }=new HashSet<string>();
+        public static HashSet<Type> ReservedPropertyTypes{ get; }=new HashSet<Type>();
+        public static HashSet<Type> ReservedPropertyInstances{ get; }=new HashSet<Type>();
+        public static HashSet<Type> AdditionalTypesList{ get; }=new HashSet<Type>();
+        public static HashSet<Type> AdditionalReferences{ get; }=new HashSet<Type>();
         static ISubject<(Type type,IModelMapperConfiguration configuration)> _typesToMap;
         public static List<(string key, Action<(Type declaringType,List<ModelMapperPropertyInfo> propertyInfos)> action)> PropertyMappingRules{ get; private set; }
         public static List<(string key, Action<ModelMapperType> action)> TypeMappingRules{ get; private set; }
@@ -48,7 +49,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         private static void Init(){
             _customizeProperties =new Subject<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)>();
             _customizeTypes =new Subject<ModelMapperType>();
-            AdditionalReferences=new List<Type>(new []{typeof(IModelNode),typeof(DescriptionAttribute),typeof(AssemblyFileVersionAttribute),typeof(ImageNameAttribute),typeof(TypeMappingService)});
+            
             TypeMappingRules = new List<(string key, Action<ModelMapperType> action)>(){
                 (nameof(WithNonPublicAttributeParameters), NonPublicAttributeParameters),
                 (nameof(GenericTypeArguments), GenericTypeArguments),
@@ -78,6 +79,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             ReservedPropertyNames.AddRange(names);
             ReservedPropertyTypes.AddRange(new[]{ typeof(Type),typeof(IList),typeof(object),typeof(Array),typeof(IComponent),typeof(ISite)});
             ReservedPropertyInstances.AddRange(new[]{ typeof(IDictionary)});
+            AdditionalReferences.AddRange(new []{typeof(IModelNode),typeof(DescriptionAttribute),typeof(AssemblyFileVersionAttribute),typeof(ImageNameAttribute),typeof(TypeMappingService)});
             var systemWebAssembly = AppDomain.CurrentDomain.GetAssemblies()
                 .FirstOrDefault(assembly => assembly.GetName().Name == "System.Web");
             if (systemWebAssembly != null){
@@ -95,7 +97,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         public static IObservable<Type> MappedTypes{ get;private set; }
-        public static List<Type> AdditionalReferences{ get; private set; }
+        
 
         public static IEnumerable<ModelMapperPropertyInfo> ToModelMapperPropertyInfo(this IEnumerable<PropertyInfo> source){
             return source.Select(_ => _.ToModelMapperPropertyInfo());

@@ -23,7 +23,7 @@ namespace Xpand.XAF.Modules.CloneModelView.Tests{
         [InlineData(CloneViewType.ListView,Platform.Web)]
         [InlineData(CloneViewType.DetailView,Platform.Web)]
         internal void Clone_Model_View(CloneViewType cloneViewType,Platform platform){
-            var cloneViewId = $"test_{cloneViewType}";
+            var cloneViewId = $"{nameof(Clone_Model_View)}_{cloneViewType}";
 
             var application = DefaultCloneModelViewModule(info => {
                 var cloneModelViewAttribute = new CloneModelViewAttribute(cloneViewType, cloneViewId);
@@ -40,7 +40,7 @@ namespace Xpand.XAF.Modules.CloneModelView.Tests{
         [InlineData(Platform.Web)]
         [InlineData(Platform.Win)]
         internal void Clone_multiple_Model_Views(Platform platform){
-            var cloneViewId = "test_";
+            var cloneViewId = $"{nameof(Clone_multiple_Model_Views)}_";
             var cloneViewTypes = Enum.GetValues(typeof(CloneViewType)).Cast<CloneViewType>();
             var application = DefaultCloneModelViewModule(info => {
                 foreach (var cloneViewType in cloneViewTypes){
@@ -68,7 +68,7 @@ namespace Xpand.XAF.Modules.CloneModelView.Tests{
         [InlineData(CloneViewType.ListView,Platform.Web)]
         [InlineData(CloneViewType.DetailView,Platform.Web)]
         internal void Clone_Model_View_and_make_it_default(CloneViewType cloneViewType,Platform platform){
-            var cloneViewId = $"test_{cloneViewType}";
+            var cloneViewId = $"{nameof(Clone_Model_View_and_make_it_default)}_{cloneViewType}";
 
             var application = DefaultCloneModelViewModule(info => {
                 var cloneModelViewAttribute = new CloneModelViewAttribute(cloneViewType, cloneViewId, true);
@@ -87,7 +87,7 @@ namespace Xpand.XAF.Modules.CloneModelView.Tests{
         [InlineData(CloneViewType.LookupListView,Platform.Web)]
         [InlineData(CloneViewType.ListView,Platform.Web)]
         internal void Clone_Model_ListView_and_change_its_detailview(CloneViewType cloneViewType,Platform platform){
-            var cloneViewId = "test_";
+            var cloneViewId = $"{nameof(Clone_Model_ListView_and_change_its_detailview)}_";
             var listViewId = $"{cloneViewId}{cloneViewType}";
             var detailViewId = $"{cloneViewType}DetailView";
             var application = DefaultCloneModelViewModule(info => {

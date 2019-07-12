@@ -10,19 +10,24 @@ using Xpand.Source.Extensions.System.Refelction;
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     public static partial class TypeMappingService{
         private static Version _modelMapperModuleVersion;
-        private static string[] AllAssemblies(this Type type, PropertyInfo[] propertyInfos){
-            return propertyInfos.Select(_ => _.PropertyType)
-                .Concat(propertyInfos.SelectMany(_ => {
-                    var data = _.GetCustomAttributesData();
-                    return data.Select(attributeData => attributeData.AttributeType).Concat(data
-                        .SelectMany(customAttributeData => customAttributeData.ConstructorArguments)
-                        .Select(argument => argument.Value == null ? argument.ArgumentType : argument.Value.GetType()));
-                }))
+        private static string[] References(this Type type, PropertyInfo[] propertyInfos,Type[] additionalTypes){
+            var referencedTypes = propertyInfos.SelectMany(_ => new[]{_.PropertyType,_.DeclaringType}).ToArray();
+            return referencedTypes
+                .Concat(additionalTypes.SelectMany(_ => _.GetCustomAttributesData().ReferecedTypes()))
+                .Concat(referencedTypes.SelectMany(_ => _.GetCustomAttributesData().ReferecedTypes()))
+                .Concat(propertyInfos.SelectMany(_ => _.GetCustomAttributesData().ReferecedTypes()))
                 .Concat(new []{type})
                 .Concat(AdditionalReferences)
                 .Select(_ => _.Assembly.Location)
                 .Distinct()
                 .ToArray();
+        }
+
+        private static IEnumerable<Type> ReferecedTypes(this IList<CustomAttributeData> attributeDatas){
+            return attributeDatas.Select(attributeData => attributeData.AttributeType).Concat(attributeDatas
+                .SelectMany(customAttributeData => customAttributeData.ConstructorArguments)
+                .Select(argument => argument.ArgumentType == typeof(Type) ? (Type) argument.Value : argument.ArgumentType))
+                .Where(_ => _!=null);
         }
 
         private static Type GetRealType(this Type type){

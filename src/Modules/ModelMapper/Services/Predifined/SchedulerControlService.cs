@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reflection;
 using DevExpress.ExpressApp.Model;
+using DevExpress.Utils.Extensions;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xpand.XAF.Modules.Reactive.Extensions;
 

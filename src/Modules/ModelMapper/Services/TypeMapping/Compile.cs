@@ -22,7 +22,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 OutputAssembly = OutputAssembly
             };
             
-            var strings = references.Distinct().ToArray();
+            var strings = references.ToArray();
             compilerParameters.ReferencedAssemblies.AddRange(strings);
 
             var compilerResults = codeProvider.CompileAssemblyFromSource(compilerParameters, code);
@@ -56,7 +56,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 var remove = type.Remove(chainTypes, propertyInfo);
                 if (!remove){
                     chainTypes += $"/{propertyInfo.PropertyType.FullName}";
-                    ch1 +=$"/{propertyInfo.PropertyType.FullName.Substring(propertyInfo.PropertyType.FullName.LastIndexOf("_"))}";
+                    ch1 +=$"/{propertyInfo.PropertyType.FullName.Substring(propertyInfo.PropertyType.FullName.LastIndexOf("_", StringComparison.Ordinal))}";
                     assemblyDefinition.RemoveRecursiveProperties(propertyInfo.PropertyType,chainTypes,ch1);
                     chainTypes = string.Join("/", chainTypes.Split('/').SkipLast(1));
                     ch1 = string.Join("/", ch1.Split('/').SkipLast(1));

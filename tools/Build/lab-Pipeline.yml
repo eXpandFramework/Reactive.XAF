@@ -38,13 +38,16 @@ steps:
   inputs:
     searchFolder: '$(System.DefaultWorkingDirectory)'
     testSelector: 'testAssemblies'
-    testAssemblyVer2: '**\*tests*.dll'
-    runInParallel: false
+    testAssemblyVer2: |
+      **\*Tests*.dll
+      !**\*TestAdapter.dll
+      !**\obj\**
+    runInParallel: true
     diagnosticsEnabled: true
     runTestsInIsolation: true
     codeCoverageEnabled: true
     rerunFailedTests: true 
-    rerunMaxAttempts: 3
+    rerunMaxAttempts: 1
     
     
 - task: PowerShell@2
