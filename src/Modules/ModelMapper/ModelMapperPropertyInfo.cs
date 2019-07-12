@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using Fasterflect;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 
 namespace Xpand.XAF.Modules.ModelMapper{
@@ -16,7 +16,13 @@ namespace Xpand.XAF.Modules.ModelMapper{
             Type = type;
             TypeToMap = typeToMap;
             BaseTypeFullNames=new List<string>();
+            CustomAttributeDatas = new List<ModelMapperCustomAttributeData>(type.GetCustomAttributesData()
+                .Where(data => data.AttributeType.Attributes<AttributeUsageAttribute>().All(attribute =>
+                    attribute.ValidOn == (AttributeTargets.All | AttributeTargets.Interface)))
+                .ToModelMapperConfigurationData());
         }
+
+        public List<ModelMapperCustomAttributeData> CustomAttributeDatas{ get; }
 
         public List<string> BaseTypeFullNames{ get; }
     }
@@ -117,9 +123,6 @@ namespace Xpand.XAF.Modules.ModelMapper{
         }
 
         public void RemoveAttribute(Type type){
-            if (Name == "ColVIndex"){
-                Debug.WriteLine("");
-            }
             var attributeData = _customAttributeDatas.First(_ => _.AttributeType==type);
             _customAttributeDatas.Remove(attributeData);
         }

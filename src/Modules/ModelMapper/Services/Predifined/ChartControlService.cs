@@ -6,17 +6,7 @@ using Fasterflect;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
-namespace Xpand.XAF.Modules.ModelMapper.Services{
-    class SchedulerControlService{
-        public static IObservable<Unit> Connect(Type typeToMap){
-//            var propertyInfo = typeToMap.Property("Diagram");
-//            var genericType = typeof(IList<>).MakeGenericType(propertyInfo.PropertyType);
-//            TypeMappingService.AdditionalTypesList.Add(genericType);
-//            TypeMappingService.PropertyMappingRules.Insert(0,(nameof(ChartDiagrams),data => ChartDiagrams(data,genericType,propertyInfo.Name)));
-//            TypeMappingService.TypeMappingRules.Insert(0,(nameof(ChartDiagrams),type => ChartDiagrams(type,propertyInfo,typeToMap)));
-            return Unit.Default.AsObservable();
-        }    
-    }
+namespace Xpand.XAF.Modules.ModelMapper.Services.Predifined{
     class ChartControlService{
         public static IObservable<Unit> Connect(Type typeToMap){
             var propertyInfo = typeToMap.Property("Diagram");

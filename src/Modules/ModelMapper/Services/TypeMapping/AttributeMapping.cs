@@ -31,14 +31,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             tuple.propertyInfos.Add(modelMapperPropertyInfo);
         }
 
-        private static void NonPublicAttributeParameters((Type declaringType, List<ModelMapperPropertyInfo> propertyInfos) tuple){
-            foreach (var propertyInfo in tuple.propertyInfos.ToArray()){
-                var nonPublicArgumentDatas = propertyInfo.GetCustomAttributesData().Where(_ =>!_.ConstructorArguments.All(argument =>argument.ArgumentType == typeof(Type)
-                            ? (((Type) argument.Value).IsPublic||(((Type) argument.Value).IsNested&&((Type) argument.Value).IsNestedPublic)): argument.ArgumentType.IsPublic)).ToArray();
-                foreach (var argumentData in nonPublicArgumentDatas){
-                    propertyInfo.RemoveAttributeData(argumentData);
-                }
-            }
+        private static ModelMapperCustomAttributeData[] WithNonPublicAttributeParameters(this IList<ModelMapperCustomAttributeData> attributeDatas){
+            var nonPublicArgumentDatas = attributeDatas.Where(_ => !_.ConstructorArguments.All(argument =>argument.ArgumentType == typeof(Type)
+                    ? (((Type) argument.Value).IsPublic ||(((Type) argument.Value).IsNested && ((Type) argument.Value).IsNestedPublic))
+                    : argument.ArgumentType.IsPublic)).ToArray();
+            return nonPublicArgumentDatas;
         }
 
         private static void DefaultValueRule((Type declaringType, List<ModelMapperPropertyInfo> propertyInfos) tuple){
@@ -119,6 +116,40 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                            NonGenericFlagEnums.GetFlagMembers(type, argument.Value).Count() == 1;
                 });
             return allArgsAreValid;
+        }
+
+        private static void NonPublicAttributeParameters(ModelMapperType modelMapperType){
+            foreach (var data in modelMapperType.CustomAttributeDatas.WithNonPublicAttributeParameters()){
+                modelMapperType.CustomAttributeDatas.Remove(data);
+            }
+        }
+
+        private static void NonPublicAttributeParameters((Type declaringType, List<ModelMapperPropertyInfo> propertyInfos) tuple){
+            foreach (var propertyInfo in tuple.propertyInfos.ToArray()){
+                foreach (var argumentData in propertyInfo.GetCustomAttributesData().WithNonPublicAttributeParameters()){
+                    propertyInfo.RemoveAttributeData(argumentData);
+                }
+            }
+        }
+
+        private static ModelMapperCustomAttributeData[] WithGenericTypeArguments(this IList<ModelMapperCustomAttributeData> attributeDatas){
+            return attributeDatas.Where(_ => _.ConstructorArguments.Any(argument =>
+                argument.ArgumentType == typeof(Type) && ((Type) argument.Value).IsGenericType)).ToArray();
+            
+        }
+
+        private static void GenericTypeArguments(ModelMapperType modelMapperType){
+            foreach (var argument in modelMapperType.CustomAttributeDatas.WithGenericTypeArguments()){
+                modelMapperType.CustomAttributeDatas.Remove(argument);
+            }
+        }
+
+        private static void GenericTypeArguments((Type declaringType, List<ModelMapperPropertyInfo> propertyInfos) data){
+            foreach (var propertyInfo in data.propertyInfos.ToArray()){
+                foreach (var argumentData in propertyInfo.GetCustomAttributesData().WithGenericTypeArguments()){
+                    propertyInfo.RemoveAttributeData(argumentData);
+                }
+            }
         }
     }
 }

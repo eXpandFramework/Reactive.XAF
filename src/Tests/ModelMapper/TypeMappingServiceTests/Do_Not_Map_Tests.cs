@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Fasterflect;
+using Mono.Cecil;
 using Shouldly;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xunit;
@@ -13,19 +14,33 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
     public partial class ObjectMappingServiceTests{
         [Fact]
         public async Task Do_Not_Map_Already_Mapped_Properties(){
+            
             InitializeMapperService(nameof(Do_Not_Map_Already_Mapped_Properties));
-            var typeToMap = typeof(SelfReferenceTypeProperties);
+            var typeToMap = typeof(RootType);
 
             var modelType = await typeToMap.MapToModel().ModelInterfaces();
-
+            
             var modelTypeProperties = modelType.Properties();
 
-            modelTypeProperties.FirstOrDefault(info => info.Name==nameof(SelfReferenceTypeProperties.Self)).ShouldBeNull();
-            var mapName = typeof(NestedSelfReferenceTypeProperties).ModelMapName(typeToMap);
-            
-            var nestedType = modelType.Assembly.GetType(mapName);
-            nestedType.ShouldNotBeNull();
-            nestedType.Properties().Count.ShouldBe(0);
+            modelTypeProperties.FirstOrDefault(info => info.Name==nameof(RootType.Self)).ShouldBeNull();
+            modelTypeProperties.FirstOrDefault(info => info.Name==nameof(RootType.Value)).ShouldNotBeNull();
+            var mapperInfo = modelTypeProperties.FirstOrDefault(info => info.Name==nameof(RootType.RootTestModelMapper));
+            mapperInfo.ShouldNotBeNull();
+            mapperInfo.PropertyType.Properties().FirstOrDefault(info => info.Name==nameof(TestModelMapper.Age)).ShouldNotBeNull();
+            var nestedInfo = modelTypeProperties.FirstOrDefault(info => info.Name==nameof(RootType.NestedType));
+            nestedInfo.ShouldNotBeNull();
+
+            nestedInfo.PropertyType.Properties().FirstOrDefault(info => info.Name==nameof(NestedType.RootType)).ShouldBeNull();
+            mapperInfo=nestedInfo.PropertyType.Properties().FirstOrDefault(info => info.Name==nameof(NestedType.NestedTestModelMapper));
+            mapperInfo.ShouldNotBeNull();
+            mapperInfo.PropertyType.Properties().FirstOrDefault(info => info.Name==nameof(TestModelMapper.Age)).ShouldNotBeNull();
+
+
+            var nested2Info = nestedInfo.PropertyType.Properties().FirstOrDefault(info => info.Name==nameof(NestedType.NestedType2));
+            nested2Info.ShouldNotBeNull();
+            nested2Info.PropertyType.Properties().FirstOrDefault(info => info.Name==nameof(NestedType2.Nested2TestModelMapper)).ShouldNotBeNull();
+            nested2Info.PropertyType.Properties().FirstOrDefault(info => info.Name==nameof(NestedType2.NestedType)).ShouldBeNull();
+
         }
 
         [Fact(Skip = NotImplemented)]

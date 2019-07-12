@@ -285,15 +285,35 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         public StringValueTypeProperties RStringValueTypeProperties{ get; }
     }
 
-    public class NestedSelfReferenceTypeProperties{
-        public NestedSelfReferenceTypeProperties(SelfReferenceTypeProperties selfReferenceTypeProperties){
-            SelfReferenceTypeProperties = selfReferenceTypeProperties;
-        }
-
-        public SelfReferenceTypeProperties SelfReferenceTypeProperties{ get; }
+    public class RWPropeerties{
+        public TestModelMapper Mapper{ get; set; }
     }
-    public class SelfReferenceTypeProperties{
-        public NestedSelfReferenceTypeProperties NestedSelfReferenceTypeProperties{ get; set; }
-        public SelfReferenceTypeProperties Self{ get; set; } 
+
+    class TestModelMapperSubClass:TestModelMapper{
+        
+    }
+
+    public class NestedType2{
+        public NestedType NestedType{ get; set; }
+        public TestModelMapper Nested2TestModelMapper{ get; set; }
+    }
+    public class NestedType3{
+        public NestedType NestedType{ get; set; }
+        public NestedType2 NestedType2{ get; set; }
+        public Image Image3{ get; set; }
+    }
+    public class NestedType{
+        public NestedType(RootType rootType){
+            RootType = rootType;
+        }
+        public TestModelMapper NestedTestModelMapper{ get; set; }
+        public RootType RootType{ get; }
+        public NestedType2 NestedType2{ get; set; } 
+    }
+    public class RootType{
+        public NestedType NestedType{ get; set; }
+        public RootType Self{ get; set; } 
+        public string Value{ get; set; } 
+        public TestModelMapper RootTestModelMapper{ get; set; }
     }
 }

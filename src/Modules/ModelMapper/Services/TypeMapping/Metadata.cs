@@ -114,11 +114,15 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         private static bool IsValid(this PropertyInfo info){
+
             var isValid = info.AccessModifier() == AccessModifier.Public && !ReservedPropertyNames.Contains(info.Name);
             if (!isValid) return false;
             if (typeof(IEnumerable).IsAssignableFrom(info.PropertyType)){
                 return true;
             }
+
+            if (info.PropertyType.IsInterface || info.PropertyType.IsAbstract)
+                return false;
             return !(typeof(IEnumerable).IsAssignableFrom(info.PropertyType) && info.PropertyType != typeof(string));
         }
 

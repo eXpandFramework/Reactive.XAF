@@ -29,6 +29,12 @@
     <Reference Include="DevExpress.XtraEditors.v18.2">
       <HintPath>..\..\..\bin\DevExpress.XtraEditors.v18.2.dll</HintPath>
     </Reference>
+    <Reference Include="DevExpress.Office.v18.2.Core">
+      <HintPath>..\..\..\bin\DevExpress.Office.v18.2.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.RichEdit.v18.2.Core">
+      <HintPath>..\..\..\bin\DevExpress.RichEdit.v18.2.Core.dll</HintPath>
+    </Reference>
     <Reference Include="DevExpress.Web.v18.2">
       <HintPath>..\..\..\bin\DevExpress.Web.v18.2.dll</HintPath>
     </Reference>

@@ -14,6 +14,7 @@ using Fasterflect;
 using Xpand.Source.Extensions.FunctionOperators;
 using Xpand.Source.Extensions.System.AppDomain;
 using Xpand.Source.Extensions.XAF.XafApplication;
+using Xpand.XAF.Modules.ModelMapper.Services.Predifined;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xpand.XAF.Modules.Reactive;
 
@@ -116,6 +117,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         private static string _layoutViewListEditorTypeName;
         private static Assembly _xafSchedulerControlAssembly;
         private static Assembly _schedulerAssembly;
+        private static Assembly _schedulerCoreAssembly;
 
         static PredifinedMapService(){
             Init();
@@ -131,6 +133,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 _xafChartWinAssembly = assemblies.GetAssembly("DevExpress.ExpressApp.Chart.Win.v");
                 _gridViewAssembly = assemblies.GetAssembly("DevExpress.XtraGrid.v");
                 _schedulerAssembly = assemblies.GetAssembly($"DevExpress.XtraScheduler{XafAssemblyInfo.VersionSuffix}",true);
+                _schedulerCoreAssembly = assemblies.GetAssembly($"DevExpress.XtraScheduler{XafAssemblyInfo.VersionSuffix}.Core",true);
                 _pivotGridControlAssembly = assemblies.GetAssembly("DevExpress.XtraPivotGrid.v");
                 _chartUIControlAssembly = assemblies.GetAssembly($"DevExpress.XtraCharts{XafAssemblyInfo.VersionSuffix}.UI");
                 _chartControlAssembly = assemblies.GetAssembly($"DevExpress.XtraCharts{XafAssemblyInfo.VersionSuffix}",true);
@@ -370,7 +373,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                         ChartControlService.Connect(typeToMap).Subscribe();
                     }
                     if (predifinedMap == PredifinedMap.SchedulerControl){
-                        SchedulerControlService.Connect(typeToMap).Subscribe();
+                        SchedulerControlService.Connect(typeToMap,_schedulerCoreAssembly).Subscribe();
                     }
                     return new ModelMapperConfiguration {ImageName = "Grid_16x16",VisibilityCriteria =visibilityCriteria,MapData = (typeToMap,typeof(IModelListView))};
                 }

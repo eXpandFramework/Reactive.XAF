@@ -29,11 +29,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
     [Collection(nameof(ModelMapperModule))]
     public class ModelMapperExtenderServiceTests : ModelMapperBaseTest{
 
-        [WinFormsTheory]
+        [Theory]
         [InlineData(typeof(TestModelMapper),Platform.Win)]
         [InlineData(typeof(TestModelMapper),Platform.Web)]
-        [InlineData(typeof(SelfReferenceTypeProperties),Platform.Win)]
-        [InlineData(typeof(SelfReferenceTypeProperties),Platform.Web)]
+        [InlineData(typeof(RootType),Platform.Win)]
+        [InlineData(typeof(RootType),Platform.Web)]
         internal void ExtendModel_Any_Type(Type typeToMap,Platform platform){
             InitializeMapperService($"{nameof(ExtendModel_Any_Type)}{typeToMap.Name}{platform}");
 

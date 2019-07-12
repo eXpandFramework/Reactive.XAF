@@ -11,6 +11,7 @@ using System.Reactive.Subjects;
 using System.Reflection;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
 using Fasterflect;
 
@@ -48,13 +49,17 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             _customizeProperties =new Subject<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)>();
             _customizeTypes =new Subject<ModelMapperType>();
             AdditionalReferences=new List<Type>(new []{typeof(IModelNode),typeof(DescriptionAttribute),typeof(AssemblyFileVersionAttribute),typeof(ImageNameAttribute),typeof(TypeMappingService)});
-            TypeMappingRules = new List<(string key, Action<ModelMapperType> action)>();
+            TypeMappingRules = new List<(string key, Action<ModelMapperType> action)>(){
+                (nameof(WithNonPublicAttributeParameters), NonPublicAttributeParameters),
+                (nameof(GenericTypeArguments), GenericTypeArguments),
+            };
             PropertyMappingRules = new List<(string key, Action<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)> action)>{
-                ("Browsable", BrowsableRule),
-                ("PrivateDescription", PrivateDescriptionRule),
-                ("DefaultValue", DefaultValueRule),
-                ("NonPublicAttributeParameters", NonPublicAttributeParameters),
-                ("TypeConverterWithDXDesignTimeType", TypeConverterWithDXDesignTimeType)
+                (nameof(GenericTypeArguments), GenericTypeArguments),
+                (nameof(BrowsableRule), BrowsableRule),
+                (nameof(PrivateDescriptionRule), PrivateDescriptionRule),
+                (nameof(DefaultValueRule), DefaultValueRule),
+                (nameof(WithNonPublicAttributeParameters), NonPublicAttributeParameters),
+                (nameof(TypeConverterWithDXDesignTimeType), TypeConverterWithDXDesignTimeType)
             };
             _typesToMap = new ReplaySubject<(Type type,IModelMapperConfiguration configuration)>();
             MappedTypes = Observable.Defer(() => {
@@ -67,10 +72,18 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             _modelMapperModuleVersion = typeof(TypeMappingService).Assembly.GetName().Version;
             
             ReservedPropertyNames.Clear();
-            ReservedPropertyNames.AddRange(typeof(IModelNode).Properties().Select(info => info.Name).Concat(new[]{"Item","IsReadOnly","Remove","Id","Nodes","IsValid"}));
-            ReservedPropertyTypes.AddRange(new[]{ typeof(Type),typeof(IList),typeof(object)});
+            var names = new []{typeof(ModelNode),typeof(IModelNode),typeof(ModelApplicationBase)}
+                .SelectMany(_ => _.GetMembers()).Select(_ => _.Name)
+                .Concat(new []{"Item","IsReadOnly","Remove","Id","Nodes","IsValid"}).Distinct();
+            ReservedPropertyNames.AddRange(names);
+            ReservedPropertyTypes.AddRange(new[]{ typeof(Type),typeof(IList),typeof(object),typeof(Array),typeof(IComponent),typeof(ISite)});
             ReservedPropertyInstances.AddRange(new[]{ typeof(IDictionary)});
-            
+            var systemWebAssembly = AppDomain.CurrentDomain.GetAssemblies()
+                .FirstOrDefault(assembly => assembly.GetName().Name == "System.Web");
+            if (systemWebAssembly != null){
+                var type = systemWebAssembly.GetType("System.Web.HttpCookie");
+                ReservedPropertyTypes.Add(type);
+            }
             ModelExtendingService.Init();
             
         }

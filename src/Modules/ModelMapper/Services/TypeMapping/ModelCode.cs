@@ -50,8 +50,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         
         static ((string key, string code)[] code, IEnumerable<string> references) ModelCode(this Type type,IModelMapperConfiguration configuration=null){
             var propertyInfos = type.PropertyInfos();
-            var additionalTypes = propertyInfos.AdditionalTypes(type).Concat(AdditionalTypesList).ToArray();
-//            var first = additionalTypes.First(type1 => type1.Name=="ChartAppearance");
+            var additionalTypes = propertyInfos.AdditionalTypes(type)
+                .Concat(AdditionalTypesList).Distinct().ToArray();
             var additionalTypesCode = type.AdditionalTypesCode( additionalTypes);
             var containerName = type.ModelMapContainerName( configuration);
             var mapName = type.ModelMapName( configuration:configuration);
@@ -103,7 +103,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             }
             if (propertyCode != null){
                 var attributesCode = $"{propertyInfo.GetCustomAttributesData().ModelCode()}\r\n";
-//                var attributesCode = "";
                 return $"{attributesCode}{propertyCode}";
             }
             return null;
@@ -112,18 +111,27 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         private static (string key,string code)[] AdditionalTypesCode(this Type type, Type[] additionalTypes){
             var mappedTypes = new HashSet<Type>(new[]{type});
             var additionalTypesCode = additionalTypes.Where(_ => !mappedTypes.Contains(_))
+//            var additionalTypesCode = additionalTypes
                 .SelectMany(_ => {
-                    var modelCode = (_,type).ModelCode(mappedTypes: mappedTypes);
-                    mappedTypes.Add(_);
+                    
+                    var modelCode = (_,type).ModelCode();
+//                    mappedTypes.Add(_);
                     var realType = _.GetRealType();
                     (string, string) modelListCode = (null, null);
                     if (realType != _){
-                        mappedTypes.Add(realType);
+                        mappedTypes.AddMappedType(realType);
+//                        mappedTypes.Add(realType);
                         modelListCode = ($"{modelCode.key}s",$"{Environment.NewLine}public interface {(realType,type).ModelName()}s:{typeof(IModelNode).FullName},{typeof(IModelList).FullName}<{modelCode.key}>{{}}");
                     }
                     return new[]{modelCode,modelListCode};
                 }).Where(_ => _!=default);
             return additionalTypesCode.OrderBy(_ => _.Item1).ToArray();
+        }
+
+        private static void AddMappedType(this HashSet<Type> mappedTypes,Type type){
+            if (!type.IsValueType && type != typeof(string)){
+                mappedTypes.Add(type);
+            }
         }
 
         private static (string key, string code) TypeCode(this Type type, string mapName, string modelMappersTypeName, IModelMapperConfiguration configuration){
@@ -173,7 +181,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         private static (string key, string code) ModelCode(this (Type typeToCode, Type rootType) data, string imageName = null,
             string customName = null, string propertiesCode = null,string additionalPropertiesCode = null, Type baseType = null, HashSet<Type> mappedTypes = null){
 
-            mappedTypes = mappedTypes ?? new HashSet<Type>();
+//            mappedTypes = mappedTypes ?? new HashSet<Type>();
             baseType = baseType ?? typeof(IModelNodeDisabled);
             var typeToCode =data.typeToCode==data.rootType?data.typeToCode: data.typeToCode.GetRealType();
             if (typeToCode == typeof(object)){
@@ -183,8 +191,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             
             if (propertiesCode == null){
                 var propertyInfos = typeToCode.PublicProperties()
-                    .Where(info => !mappedTypes.Contains(info.PropertyType))
-                    .ToModelMapperPropertyInfo();
+                    .Where(_ => mappedTypes == null || !mappedTypes.Contains(_.PropertyType))
+                    .Do(_ =>mappedTypes?.AddMappedType(_.PropertyType) )
+                    .Where(info => info.PropertyType!=data.rootType)
+                    .ToModelMapperPropertyInfo().ToArray();
                 var properties = new List<ModelMapperPropertyInfo>(propertyInfos);
                 _customizeProperties.OnNext((typeToCode,properties));
                 propertiesCode =  String.Join(Environment.NewLine,properties.Select(propertyInfo =>(propertyInfo,data.rootType).ModelCode()));
@@ -202,7 +212,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             _customizeTypes.OnNext(modelMapperType);
             var baseTypes = string.Join(",",modelMapperType.BaseTypeFullNames);
             var modelName = $"{(typeToCode,data.rootType).ModelName(customName)}";
-            return (modelName,$"{imageCode}public interface {modelName}:{baseTypes}{{{Environment.NewLine}{propertiesCode}{Environment.NewLine}}}");
+            var attributesCode = $"{modelMapperType.CustomAttributeDatas.ModelCode()}{Environment.NewLine}";
+            return (modelName,$"{imageCode}{Environment.NewLine}{attributesCode}public interface {modelName}:{baseTypes}{{{Environment.NewLine}{propertiesCode}{Environment.NewLine}}}");
         }
 
         private static string ModelName(this (Type typeToCode,Type rootType) data,string customName=null){
@@ -210,7 +221,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 return $"IModel{customName}";
             }
 
-            return $"IModel{data.typeToCode.Namespace.CleanCodeName()}{data.rootType.Name}{data.typeToCode.Name}";
+            if (data.typeToCode == data.rootType){
+                return $"IModel{data.rootType.Name}";
+            }
+            return $"IModel{data.rootType.Name}_{data.typeToCode.Namespace?.Replace(".","")}_{data.typeToCode.Name}";
         }
 
         private static IObservable<(string code, IEnumerable<string> references)> ModelCode(this IObservable<(Type type, IModelMapperConfiguration configuration)> source){
