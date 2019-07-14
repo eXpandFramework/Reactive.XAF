@@ -42,12 +42,13 @@ steps:
       **\*Tests*.dll
       !**\*TestAdapter.dll
       !**\obj\**
-    runInParallel: true
+    runInParallel: false
     diagnosticsEnabled: true
     runTestsInIsolation: true
     codeCoverageEnabled: true
     rerunFailedTests: true 
-    rerunMaxAttempts: 1
+    rerunMaxAttempts: 3
+    collectDumpOn: never
     
     
 - task: PowerShell@2

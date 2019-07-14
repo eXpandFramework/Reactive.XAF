@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reflection;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
-using DevExpress.ExpressApp.Win;
 using DevExpress.ExpressApp.Win.Editors;
 using DevExpress.Utils;
 using DevExpress.Web;
@@ -22,7 +20,9 @@ using Shouldly;
 using Xpand.Source.Extensions.System.String;
 using Xpand.Source.Extensions.XAF.Model;
 using Xpand.Source.Extensions.XAF.XafApplication;
+using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services;
+using Xpand.XAF.Modules.ModelMapper.Services.Predifined;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xunit;
 using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.TypeMappingService;
@@ -41,7 +41,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
             var module = typeToMap.Extend<IModelListView>();
             var application = DefaultModelMapperModule(platform,module).Application;
-            AssertExtendedModel(typeToMap, application, MMListViewNodePath);
+            AssertExtendedListViewModel(typeToMap, application, MMListViewNodePath);
         }
 
         [Theory]
@@ -63,10 +63,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
             var module = configuration.Extend();
             var application = DefaultModelMapperModule(platform,module).Application;
-            AssertExtendedModel(typeToMap, application,nodePath);
+            AssertExtendedListViewModel(typeToMap, application,nodePath);
         }
 
-        private void AssertExtendedModel(Type typeToMap, XafApplication application,string nodePath){
+        private void AssertExtendedListViewModel(Type typeToMap, XafApplication application,string nodePath){
             
             var modelNode = application.Model.GetNodeByPath(nodePath);
             var mapName = typeToMap.ModelMapName();
@@ -80,6 +80,44 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             defaultContext.ShouldNotBeNull();
             var modelMapper = defaultContext.GetNode(mapName);
             modelMapper.ShouldNotBeNull();
+        }
+
+        [Fact]
+        internal void Extend_PredifinedRepositoryItems(){
+
+            var predifinedMaps = Enums.GetValues<PredifinedMap>()
+                .Where(map => map.IsRepositoryItem())
+//                .Where(map => map==PredifinedMap.RepositoryItemProtectedContentTextEdit)
+                ;
+//                .Where(map => map == PredifinedMap.RepositoryItemMarqueeProgressBar);
+//                .Where(map => new[]{PredifinedMap.RepositoryItem,PredifinedMap.RepositoryItemButtonEdit}.Contains(map));
+            foreach (var predifinedMap in predifinedMaps){
+                try{
+                    InitializeMapperService($"{nameof(Extend_PredifinedRepositoryItems)}{predifinedMap}",Platform.Win);
+                    var module = predifinedMap.Extend();
+                    var application = DefaultModelMapperModule(Platform.Win,module).Application;
+                    var typeToMap = predifinedMap.GetTypeToMap();
+                    
+                    var modelNode = application.Model.GetNodeByPath(MMDetailViewTestItemNodePath);
+                    var mapName = RepositoryItemService.MapName;
+                    modelNode.GetNode(mapName).ShouldNotBeNull();
+                    modelNode = application.Model.GetNodeByPath(MMListViewTestItemNodePath);
+                    modelNode.GetNode(mapName).ShouldNotBeNull();
+                    var typeInfo = XafTypesInfo.Instance.FindTypeInfo(typeof(IModelModelMap)).Descendants.FirstOrDefault(info => info.Name.EndsWith(typeToMap.Name));
+                    typeInfo.ShouldNotBeNull();
+                    typeInfo.Name.ShouldBe($"IModel{typeToMap.ModelMapName()}");
+                    
+                    var defaultContext =((IModelApplicationModelMapper) application.Model).ModelMapper.MapperContexts.GetNode(ModelMapperContextNodeGenerator.Default);
+                    defaultContext.ShouldNotBeNull();
+                    var modelMapper = defaultContext.GetNode(predifinedMap.DisplayName());
+                    modelMapper.ShouldNotBeNull();
+                    application.Dispose();
+                    Dispose();
+                }
+                catch (Exception e){
+                    throw new Exception(predifinedMap.ToString(), e);
+                }
+            }
         }
 
         [Theory]
@@ -126,11 +164,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         [InlineData(Platform.Win)]
         internal void ExtendModel_All_Predefined_Maps(Platform platform){
             InitializeMapperService($"{nameof(ExtendModel_All_Predefined_Maps)}",platform);
-            var values = Enums.GetValues<PredifinedMap>().Where(map =>
-                map.GetAttributes().OfType<MapPlatformAttribute>()
-                    .Any(_ => _.Platform == platform.ToString())).ToArray();
+            var values = Enums.GetValues<PredifinedMap>()
+                .Where(map =>map.GetAttributes().OfType<MapPlatformAttribute>().Any(_ => _.Platform == platform.ToString()))
+                .ToArray();
 
-            var module = values.Extend();
+            var module = values.ToArray().Extend();
 
             DefaultModelMapperModule(platform,module);
 

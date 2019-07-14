@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp.Model;
+using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services;
 
 namespace Xpand.XAF.Modules.ModelMapper.Tests{

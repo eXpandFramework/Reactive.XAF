@@ -7,10 +7,13 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive {
     public sealed class ReactiveModule : ReactiveModuleBase {
-        static readonly Subject<ITypesInfo> TypesInfoSubject=new Subject<ITypesInfo>();
-        static readonly Subject<ModelInterfaceExtenders> ExtendModelSubject=new Subject<ModelInterfaceExtenders>();
-        public IObservable<ITypesInfo> ModifyTypesInfo{ get; }=TypesInfoSubject;
-        public IObservable<ModelInterfaceExtenders> ExtendModel{ get; }=ExtendModelSubject;
+        readonly Subject<ITypesInfo> _typesInfoSubject=new Subject<ITypesInfo>();
+        
+        readonly Subject<ModelInterfaceExtenders> _extendModelSubject=new Subject<ModelInterfaceExtenders>();
+
+        public IObservable<ITypesInfo> ModifyTypesInfo => _typesInfoSubject;
+
+        public IObservable<ModelInterfaceExtenders> ExtendModel=>_extendModelSubject;
 
         public ReactiveModule() {
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));
@@ -18,7 +21,7 @@ namespace Xpand.XAF.Modules.Reactive {
 
         public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders){
             base.ExtendModelInterfaces(extenders);
-            ExtendModelSubject.OnNext(extenders);
+            _extendModelSubject.OnNext(extenders);
         }
 
         public override void Setup(ApplicationModulesManager moduleManager){
@@ -30,7 +33,7 @@ namespace Xpand.XAF.Modules.Reactive {
 
         public override void CustomizeTypesInfo(ITypesInfo typesInfo) {
             base.CustomizeTypesInfo(typesInfo);
-            TypesInfoSubject.OnNext(typesInfo);
+            _typesInfoSubject.OnNext(typesInfo);
         }
 
 

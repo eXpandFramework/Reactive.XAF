@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Fasterflect;
 using Shouldly;
 using Xpand.Source.Extensions.XAF.XafApplication;
-using Xpand.XAF.Modules.ModelMapper.Services;
+using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xunit;
 using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.TypeMappingService;

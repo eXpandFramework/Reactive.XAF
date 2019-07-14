@@ -9,6 +9,7 @@ using Microsoft.CSharp;
 using TestsLib;
 using Xpand.Source.Extensions.System.AppDomain;
 using Xpand.Source.Extensions.XAF.XafApplication;
+using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.ModelMapper.Tests.BOModel;
 using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.TypeMappingService;
@@ -18,6 +19,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         
 
         protected const string MMListViewNodePath = "Views/" + nameof(MM) + "_ListView";
+        protected const string MMDetailViewNodePath = "Views/" + nameof(MM) + "_DetailView";
+        protected const string MMDetailViewTestItemNodePath = "Views/" + nameof(MM) + "_DetailView/Items/Test";
+        protected const string MMListViewTestItemNodePath = "Views/" + nameof(MM) + "_ListView/Columns/Test";
         public const string DynamicTypeName = "DynamicTypeName";
         internal ModelMapperModule DefaultModelMapperModule(Platform platform,params ModuleBase[] modules){
             var xafApplication = platform.NewApplication();
@@ -60,6 +64,7 @@ public class {DynamicTypeName}{{
 
         internal string InitializeMapperService(string modelMapperAssemblyName,Platform platform=Platform.Agnostic,bool newAssemblyName=true ){
 
+            TypeMappingService.ContainerMappingRules.Clear();
             TypeMappingService.AdditionalTypesList.Clear();
             TypeMappingService.AdditionalReferences.Clear();
             TypeMappingService.TypeMappingRules.Clear();

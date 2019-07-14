@@ -14,6 +14,9 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
 using DevExpress.Utils.Extensions;
+using Xpand.XAF.Modules.ModelMapper.Configuration;
+using Xpand.XAF.Modules.ModelMapper.Services.Predifined;
+using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     public static partial class TypeMappingService{
@@ -27,14 +30,23 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         public static HashSet<Type> AdditionalTypesList{ get; }=new HashSet<Type>();
         public static HashSet<Type> AdditionalReferences{ get; }=new HashSet<Type>();
         static ISubject<(Type type,IModelMapperConfiguration configuration)> _typesToMap;
+        private static ReplaySubject<(Type type, IModelMapperConfiguration configuration)> _mappingTypes;
         public static List<(string key, Action<(Type declaringType,List<ModelMapperPropertyInfo> propertyInfos)> action)> PropertyMappingRules{ get; private set; }
+        public static List<(string key, Action<(Type typeToMap,Result<(string key, string code)> data)> action)> ContainerMappingRules{ get; private set; }
         public static List<(string key, Action<ModelMapperType> action)> TypeMappingRules{ get; private set; }
 
         static TypeMappingService(){
             Init();
         }
 
-        public static void Start(){
+        static void Start(){
+            var repositoryItemTypes = EnumsNET.Enums.GetValues<PredifinedMap>().Where(map => map.IsRepositoryItem())
+                .Select(map => map.GetTypeToMap()).Where(type => type!=null)
+                .ToArray();
+            MappingTypes.Where(_ => repositoryItemTypes.Contains(_.type)).FirstOrDefaultAsync().WhenNotDefault()
+                .Select(unit => RepositoryItemService.Connect()).Switch().FirstOrDefaultAsync()
+                .Subscribe();
+            
             ConnectCustomizationRules();
             _typesToMap.OnCompleted();
         }
@@ -47,6 +59,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             $@"{Path.GetDirectoryName(typeof(TypeMappingService).Assembly.Location)}\{ModelMapperAssemblyName}{MapperAssemblyName}{ModelExtendingService.Platform}.dll";
 
         private static void Init(){
+            _customizeContainerCode=new Subject<(Type type, Result<(string key, string code)> data)>();
             _customizeProperties =new Subject<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)>();
             _customizeTypes =new Subject<ModelMapperType>();
             
@@ -54,6 +67,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 (nameof(WithNonPublicAttributeParameters), NonPublicAttributeParameters),
                 (nameof(GenericTypeArguments), GenericTypeArguments),
             };
+            ContainerMappingRules=new List<(string key, Action<(Type typeToMap, Result<(string key, string code)> data)> action)>();
             PropertyMappingRules = new List<(string key, Action<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)> action)>{
                 (nameof(GenericTypeArguments), GenericTypeArguments),
                 (nameof(BrowsableRule), BrowsableRule),
@@ -63,13 +77,15 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 (nameof(TypeConverterWithDXDesignTimeType), TypeConverterWithDXDesignTimeType)
             };
             _typesToMap = new ReplaySubject<(Type type,IModelMapperConfiguration configuration)>();
+            _mappingTypes = new ReplaySubject<(Type type, IModelMapperConfiguration configuration)>();
+            MappingTypes=_mappingTypes;
             MappedTypes = Observable.Defer(() => {
-                var distinnctTypesToMap = _typesToMap.Distinct(_ => _.type);
+                var distinnctTypesToMap = _typesToMap.Distinct(_ => _.type).Do(_mappingTypes);
                 return distinnctTypesToMap
                     .All(_ => _.TypeFromPath())
                     .Select(_ =>!_? distinnctTypesToMap.ModelCode().Compile(): Assembly.LoadFile(OutputAssembly).GetTypes()
                                 .Where(type => typeof(IModelModelMap).IsAssignableFrom(type)).ToObservable()).Switch();
-            }).Publish().AutoConnect().Replay().AutoConnect();
+            }).Publish().AutoConnect().Replay().AutoConnect().Distinct();
             _modelMapperModuleVersion = typeof(TypeMappingService).Assembly.GetName().Version;
             
             ReservedPropertyNames.Clear();
@@ -90,12 +106,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             
         }
 
-        public static IEnumerable<Type> ModelMapperContainerType(this Type type){
+        public static IEnumerable<Type> ModelMapperContainerTypes(this Type type){
             return type.Assembly.GetTypes()
                 .Where(_ => _.Name.EndsWith(DefaultContainerSuffix))
                 .Where(_ => _.GetInterfaces().Contains(typeof(IModelModelMapContainer)));
         }
 
+        public static IObservable<(Type type, IModelMapperConfiguration configuration)> MappingTypes{ get;private set; }
         public static IObservable<Type> MappedTypes{ get;private set; }
         
 
@@ -125,7 +142,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         public static IObservable<Type> ModelInterfaces(this IObservable<Type> source){
-            return source.Finally(Start).Select(_ => MappedTypes).Switch();
+            return source.Finally(Start).Select(_ => MappedTypes).Switch().Distinct();
         }
 
         public static IObservable<Type> MapToModel(this Type type,IModelMapperConfiguration configuration=null){
@@ -135,6 +152,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         public static IObservable<Type> MapToModel<TModelMapperConfiguration>(
             this IObservable<(Type type, TModelMapperConfiguration configuration)> types)
             where TModelMapperConfiguration : IModelMapperConfiguration{
+//            if (!maps.Contains(PredifinedMap.RepositoryItem) && maps.Any(map =>map.IsRepositoryItem())){
+//                maps = maps.Concat(new[]{PredifinedMap.RepositoryItem}).ToArray();
+//            }
             return types
                 .Select(_ => (_.type, (IModelMapperConfiguration) _.configuration))
                 .Do(_ => _typesToMap.OnNext(_))

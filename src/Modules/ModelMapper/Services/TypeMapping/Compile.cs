@@ -7,6 +7,7 @@ using System.Reactive.Linq;
 using System.Reflection;
 using Microsoft.CSharp;
 using Mono.Cecil;
+using Xpand.XAF.Modules.ModelMapper.Configuration;
 
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
@@ -32,7 +33,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 throw new Exception(message);
             }
 
-            
+//            return compilerResults.CompiledAssembly;
             return RemoveRecursiveProperties(OutputAssembly);
 
         }
@@ -56,10 +57,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 var remove = type.Remove(chainTypes, propertyInfo);
                 if (!remove){
                     chainTypes += $"/{propertyInfo.PropertyType.FullName}";
-                    ch1 +=$"/{propertyInfo.PropertyType.FullName.Substring(propertyInfo.PropertyType.FullName.LastIndexOf("_", StringComparison.Ordinal))}";
+//                    ch1 +=$"/{propertyInfo.PropertyType.FullName.Substring(propertyInfo.PropertyType.FullName.LastIndexOf("_", StringComparison.Ordinal))}";
                     assemblyDefinition.RemoveRecursiveProperties(propertyInfo.PropertyType,chainTypes,ch1);
                     chainTypes = string.Join("/", chainTypes.Split('/').SkipLast(1));
-                    ch1 = string.Join("/", ch1.Split('/').SkipLast(1));
+//                    ch1 = string.Join("/", ch1.Split('/').SkipLast(1));
                 }
             }
         }

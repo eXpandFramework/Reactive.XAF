@@ -9,8 +9,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             for (var index = info.propertyInfos.Count - 1; index >= 0; index--){
                 var propertyInfo = info.propertyInfos[index];
                 var isnotBrowsaable = propertyInfo.GetCustomAttributesData().Any(data =>
-                    typeof(BrowsableAttribute).IsAssignableFrom(data.AttributeType) &&
-                    data.ConstructorArguments.Any(argument => false.Equals(argument.Value)));
+                    (typeof(BrowsableAttribute).IsAssignableFrom(data.AttributeType) &&
+                     data.ConstructorArguments.Any(argument => false.Equals(argument.Value)))||typeof(ObsoleteAttribute).IsAssignableFrom(data.AttributeType));
                 if (isnotBrowsaable){
                     info.propertyInfos.Remove(propertyInfo);
                 }

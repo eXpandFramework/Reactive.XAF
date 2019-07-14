@@ -217,6 +217,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         
     }
 
+    class ObsoleteProperties{
+        public string Test{ get; set; }
+        [Obsolete()]
+        public string ObsoleteTest{ get; set; }
+        
+    }
+
     internal class CollectionProperties {
         public IEnumerable<string> Strings{ get; } = new List<string>();
         public IEnumerable<TestModelMapper> Tests{ get; } = new List<TestModelMapper>();

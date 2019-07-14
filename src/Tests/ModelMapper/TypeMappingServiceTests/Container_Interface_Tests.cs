@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using DevExpress.Persistent.Base;
 using Fasterflect;
 using Shouldly;
+using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xunit;

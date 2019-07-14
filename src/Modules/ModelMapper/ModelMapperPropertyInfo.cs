@@ -11,8 +11,13 @@ namespace Xpand.XAF.Modules.ModelMapper{
     public  class ModelMapperType{
         public Type Type{ get; }
         public Type TypeToMap{ get; }
+        public override string ToString(){
+            return $"{ModelName}, {Type.Name}, {TypeToMap.Name}";
+        }
 
-        public ModelMapperType(Type type, Type typeToMap){
+        public ModelMapperType(Type type, Type typeToMap, string modelName, string additionalPropertiesCode){
+            AdditionalPropertiesCode = additionalPropertiesCode;
+            ModelName = modelName;
             Type = type;
             TypeToMap = typeToMap;
             BaseTypeFullNames=new List<string>();
@@ -25,6 +30,8 @@ namespace Xpand.XAF.Modules.ModelMapper{
         public List<ModelMapperCustomAttributeData> CustomAttributeDatas{ get; }
 
         public List<string> BaseTypeFullNames{ get; }
+        public string ModelName{ get; set; }
+        public string AdditionalPropertiesCode{ get; set; }
     }
 
     public sealed class ModelMapperPropertyInfo : PropertyInfo{

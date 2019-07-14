@@ -21,6 +21,7 @@ using Fasterflect;
 using Shouldly;
 using TestsLib;
 using Xpand.Source.Extensions.XAF.XafApplication;
+using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xpand.XAF.Modules.ModelMapper.Tests.BOModel;

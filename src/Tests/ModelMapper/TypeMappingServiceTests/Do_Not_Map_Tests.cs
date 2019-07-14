@@ -90,6 +90,20 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Fact]
+        public async Task Do_Not_Map_Obsolete_properties(){
+            InitializeMapperService(nameof(Do_Not_Map_Obsolete_properties));
+            var typeToMap = typeof(ObsoleteProperties);
+
+            var modelType = await typeToMap.MapToModel().ModelInterfaces();
+
+            var modelTypeProperties = ModelTypeProperties(modelType);
+            
+            modelTypeProperties.FirstOrDefault(info => info.Name=="ObsoleteTest").ShouldBeNull();
+            modelTypeProperties.FirstOrDefault(info => info.Name==nameof(ObsoleteProperties.Test)).ShouldNotBeNull();
+
+        }
+
+        [Fact]
         public async Task Do_Not_Map_Already_Mapped_Types(){
             var typeToMap1 = typeof(TestModelMapper);
             var typeToMap2 = typeof(TestModelMapper);

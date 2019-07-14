@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -8,6 +9,7 @@ using System.Reflection;
 using EnumsNET.NonGeneric;
 using Fasterflect;
 using Xpand.Source.Extensions.System.String;
+using Xpand.XAF.Modules.ModelMapper.Configuration;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     public static partial class TypeMappingService{
@@ -62,10 +64,19 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
 
         private static void ConnectCustomizationRules(){
             _customizeProperties
-                .SelectMany(propertyInfos => {
+                .SelectMany(data => {
                     return PropertyMappingRules
                         .Select(_ => {
-                            _.action(propertyInfos);
+                            _.action(data);
+                            return Unit.Default;
+                        });
+                })
+                .Subscribe();
+            _customizeContainerCode
+                .SelectMany(data => {
+                    return ContainerMappingRules
+                        .Select(_ => {
+                            _.action(data);
                             return Unit.Default;
                         });
                 })
