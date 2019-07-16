@@ -135,6 +135,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Configuration{
         [MapPlatform(Platform.Web)]
         ASPxGridView,
         [MapPlatform(Platform.Web)]
-        GridViewColumn
+        GridViewColumn,
+        [MapPlatform(Platform.Web)]
+        ASPxHtmlEditor
     }
 }

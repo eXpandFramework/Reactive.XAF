@@ -7,12 +7,15 @@ using System.Reactive.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp.Chart.Win;
+using DevExpress.ExpressApp.HtmlPropertyEditor.Web;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.PivotGrid.Win;
 using DevExpress.ExpressApp.Scheduler.Win;
+using DevExpress.ExpressApp.TreeListEditors.Win;
 using DevExpress.ExpressApp.Web.Editors.ASPx;
 using DevExpress.ExpressApp.Win.Editors;
 using DevExpress.Web;
+using DevExpress.Web.ASPxHtmlEditor;
 using DevExpress.XtraCharts;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.BandedGrid;
@@ -180,6 +183,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [InlineData(PredifinedMap.AdvBandedGridView,new[]{typeof(AdvBandedGridView),typeof(GridListEditor)},Platform.Win,new[]{nameof(AdvBandedGridView.FormatRules)})]
         [InlineData(PredifinedMap.ASPxGridView,new[]{typeof(ASPxGridView),typeof(ASPxGridListEditor)},Platform.Web,new[]{nameof(ASPxGridView.Columns)})]
         [InlineData(PredifinedMap.GridViewColumn,new[]{typeof(GridViewColumn),typeof(ASPxGridListEditor)},Platform.Web,new[]{nameof(GridViewColumn.Columns)})]
+        [InlineData(PredifinedMap.ASPxHtmlEditor,new[]{typeof(ASPxHtmlEditor),typeof(ASPxHtmlPropertyEditor)},Platform.Web,new string[0])]
         internal async Task Map_Predifined_Configurations(PredifinedMap configuration, Type[] assembliesToLoad,Platform platform, string[] collectionNames){
             InitializeMapperService($"{nameof(Map_Predifined_Configurations)}{configuration}",platform);
             assembliesToLoad.ToObservable().Do(type => Assembly.LoadFile(type.Assembly.Location)).Subscribe();

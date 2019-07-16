@@ -23,6 +23,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         private static Assembly _winEditorsAssembly;
         private static Assembly _xafWebAssembly;
         private static Assembly _dxWebAssembly;
+        private static Assembly _dxHtmlEditorWebAssembly;
         private static Assembly _xafPivotGridWinAssembly;
         private static Assembly _xafChartWinAssembly;
         private static Assembly _pivotGridControlAssembly;
@@ -33,6 +34,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         private static Assembly _xafSchedulerControlAssembly;
         private static Assembly _schedulerAssembly;
         private static Assembly _schedulerCoreAssembly;
+        private static Assembly _xafHtmlEditorWebAssembly;
 
         static PredifinedMapService(){
             Init();
@@ -60,6 +62,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             if (ModelExtendingService.Platform == Platform.Web){
                 _xafWebAssembly = assemblies.GetAssembly("DevExpress.ExpressApp.Web.v");
                 _dxWebAssembly = assemblies.GetAssembly("DevExpress.Web.v");
+                _dxHtmlEditorWebAssembly = assemblies.GetAssembly("DevExpress.Web.ASPxHtmlEditor.v");
+                _xafHtmlEditorWebAssembly = assemblies.GetAssembly("DevExpress.ExpressApp.HtmlPropertyEditor.Web.v");
             }
 
         }
@@ -231,6 +235,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             }
             else if (predifinedMap==PredifinedMap.SchedulerControl){
                 assembly = _schedulerAssembly;
+            }
+            else if (predifinedMap==PredifinedMap.ASPxHtmlEditor){
+                assembly = _dxHtmlEditorWebAssembly;
+            }
+            else if (new[]{PredifinedMap.TreeList,PredifinedMap.TreeListColumn}.Any(map => map==predifinedMap)){
+                assembly = _dxTreeListWinAssembly;
             }
 
             return assembly?.GetType(predifinedMap.GetTypeName(),true);
