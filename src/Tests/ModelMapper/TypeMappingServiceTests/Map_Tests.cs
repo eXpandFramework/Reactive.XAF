@@ -201,7 +201,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 //        [InlineData(PredifinedMap.ASPxPopupControl,new[]{typeof(ASPxPopupControl)},Platform.Web,new string[0])]
 //        [InlineData(PredifinedMap.DashboardViewer,new[]{typeof(DashboardViewer)},Platform.Win,new string[0])]
 //        [InlineData(PredifinedMap.ASPxDateEdit,new[]{typeof(ASPxDateEdit)},Platform.Web,new string[0])]
-        [InlineData(PredifinedMap.ASPxHyperLink,new[]{typeof(ASPxHyperLink)},Platform.Web,new string[0])]
+//        [InlineData(PredifinedMap.ASPxHyperLink,new[]{typeof(ASPxHyperLink)},Platform.Web,new string[0])]
+        [InlineData(PredifinedMap.ASPxLookupDropDownEdit,new[]{typeof(ASPxLookupDropDownEdit)},Platform.Web,new string[0])]
 
         internal async Task Map_Predifined_Configurations(PredifinedMap predifinedMap, Type[] assembliesToLoad,Platform platform, string[] collectionNames){
             
@@ -288,21 +289,23 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             }
         }
 
-        private void AssertPredifinedConfigurationsMap(PredifinedMap configuration, string[] collectionNames,Type modelType, PropertyInfo[] propertyInfos){
-            var modelTypeName = $"IModel{configuration}";
-            if (configuration.ToString().StartsWith(PredifinedMap.ChartControl.ToString()) &&
-                configuration != PredifinedMap.ChartControl){
-                modelTypeName = $"IModel{configuration.ToString().Replace(PredifinedMap.ChartControl.ToString(), "")}";
+        private void AssertPredifinedConfigurationsMap(PredifinedMap predifinedMap, string[] collectionNames,Type modelType, PropertyInfo[] propertyInfos){
+            var modelTypeName = $"IModel{predifinedMap}";
+            if (predifinedMap.ToString().StartsWith(PredifinedMap.ChartControl.ToString()) &&
+                predifinedMap != PredifinedMap.ChartControl){
+                modelTypeName = $"IModel{predifinedMap.ToString().Replace(PredifinedMap.ChartControl.ToString(), "")}";
             }
 
             modelType.Name.ShouldBe(modelTypeName);
 
             propertyInfos.Length.ShouldBeGreaterThan(15);
-            var descriptionAttribute = propertyInfos.Select(info => info.Attribute<DescriptionAttribute>())
-                .FirstOrDefault(attribute => attribute != null && attribute.Description.Contains(" "));
-            descriptionAttribute.ShouldNotBeNull();
-            foreach (var collectionName in collectionNames){
-                propertyInfos.FirstOrDefault(info => info.Name == collectionName).ShouldNotBeNull();
+            if (new[]{PredifinedMap.ASPxLookupDropDownEdit}.All(map => map!=predifinedMap)){
+                var descriptionAttribute = propertyInfos.Select(info => info.Attribute<DescriptionAttribute>())
+                    .FirstOrDefault(attribute => attribute != null && attribute.Description.Contains(" "));
+                descriptionAttribute.ShouldNotBeNull();
+                foreach (var collectionName in collectionNames){
+                    propertyInfos.FirstOrDefault(info => info.Name == collectionName).ShouldNotBeNull();
+                }
             }
         }
 

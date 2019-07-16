@@ -258,6 +258,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             else if (new[]{PredifinedMap.ASPxUploadControl,PredifinedMap.ASPxPopupControl ,PredifinedMap.ASPxDateEdit,PredifinedMap.ASPxHyperLink,  }.Any(map => map==predifinedMap)){
                 assembly = _dxWebAssembly;
             }
+            else if (new[]{PredifinedMap.ASPxLookupDropDownEdit}.Any(map => map==predifinedMap)){
+                assembly = _xafWebAssembly;
+            }
             else if (new[]{PredifinedMap.DashboardDesigner,PredifinedMap.DashboardViewer}.Any(map => map==predifinedMap)){
                 assembly = _dashboardWinAssembly;
             }
@@ -354,6 +357,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 return "DevExpress.Web.ASPxDateEdit";
             if (predifinedMap == PredifinedMap.ASPxHyperLink)
                 return "DevExpress.Web.ASPxHyperLink";
+            if (predifinedMap == PredifinedMap.ASPxLookupDropDownEdit)
+                return "DevExpress.ExpressApp.Web.Editors.ASPx.ASPxLookupDropDownEdit";
             if (predifinedMap == PredifinedMap.ASPxScheduler)
                 return "DevExpress.Web.ASPxScheduler.ASPxScheduler";
             if (predifinedMap == PredifinedMap.ASPxHtmlEditor)
@@ -471,6 +476,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 }
                 if (new[]{PredifinedMap.ASPxDateEdit,PredifinedMap.ASPxHyperLink, }.Any(map => map==predifinedMap)){
                     CheckRequiredParameters(nameof(_dxWebAssembly), nameof(_dxWebAssembly));
+                    var typeToMap = predifinedMap.GetTypeToMap();
+                    return new ModelMapperConfiguration(){MapData = (typeToMap,new []{typeof(IModelPropertyEditor)})};
+                }
+                if (new[]{PredifinedMap.ASPxLookupDropDownEdit }.Any(map => map==predifinedMap)){
+                    CheckRequiredParameters(nameof(_xafWebAssembly), nameof(_xafWebAssembly));
                     var typeToMap = predifinedMap.GetTypeToMap();
                     return new ModelMapperConfiguration(){MapData = (typeToMap,new []{typeof(IModelPropertyEditor)})};
                 }

@@ -160,5 +160,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Configuration{
         ASPxDateEdit,
         [MapPlatform(Platform.Web)]
         ASPxHyperLink,
+        [MapPlatform(Platform.Web)]
+        ASPxLookupDropDownEdit,
     }
 }

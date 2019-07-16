@@ -7,6 +7,7 @@ using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.TreeListEditors.Win;
+using DevExpress.ExpressApp.Web.Editors.ASPx;
 using DevExpress.ExpressApp.Win.Editors;
 using DevExpress.ExpressApp.Win.Layout;
 using DevExpress.Utils;
@@ -77,7 +78,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 //        [InlineData(PredifinedMap.ASPxPopupControl, typeof(ASPxPopupControl),Platform.Web,MMListViewNodePath+","+MMDetailViewNodePath)]
 //        [InlineData(PredifinedMap.DashboardViewer, typeof(DashboardViewer),Platform.Win,MMDetailViewTestItemNodePath)]
 //        [InlineData(PredifinedMap.ASPxDateEdit, typeof(ASPxDateEdit),Platform.Web,MMDetailViewTestItemNodePath)]
-        [InlineData(PredifinedMap.ASPxHyperLink, typeof(ASPxHyperLink),Platform.Web,MMDetailViewTestItemNodePath)]
+//        [InlineData(PredifinedMap.ASPxHyperLink, typeof(ASPxHyperLink),Platform.Web,MMDetailViewTestItemNodePath)]
+        [InlineData(PredifinedMap.ASPxLookupDropDownEdit, typeof(ASPxLookupDropDownEdit),Platform.Web,MMDetailViewTestItemNodePath)]
         internal void ExtendModel_Predefined_Type(PredifinedMap configuration,Type typeToMap,Platform platform,string nodePath){
             Assembly.LoadFile(typeToMap.Assembly.Location);
             InitializeMapperService($"{nameof(ExtendModel_Predefined_Type)}{configuration}{platform}",platform);
