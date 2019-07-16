@@ -39,6 +39,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         private static Assembly _schedulerCoreAssembly;
         private static Assembly _xafHtmlEditorWebAssembly;
         private static Assembly _dxScedulerWebAssembly;
+        private static Assembly _layoutControlAssembly;
 
         static PredifinedMapService(){
             Init();
@@ -58,6 +59,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 _winEditorsAssembly = assemblies.GetAssembly($"DevExpress.XtraEditors{XafAssemblyInfo.VersionSuffix}",true);
                 _schedulerCoreAssembly = assemblies.GetAssembly($"DevExpress.XtraScheduler{XafAssemblyInfo.VersionSuffix}.Core",true);
                 _pivotGridControlAssembly = assemblies.GetAssembly("DevExpress.XtraPivotGrid.v");
+                _layoutControlAssembly = assemblies.GetAssembly("DevExpress.XtraLayout.v");
                 _dxTreeListWinAssembly = assemblies.GetAssembly("DevExpress.XtraTreeList.v");
                 _chartUIControlAssembly = assemblies.GetAssembly($"DevExpress.XtraCharts{XafAssemblyInfo.VersionSuffix}.UI");
                 _chartControlAssembly = assemblies.GetAssembly($"DevExpress.XtraCharts{XafAssemblyInfo.VersionSuffix}",true);
@@ -254,6 +256,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             else if (predifinedMap==PredifinedMap.SchedulerControl){
                 assembly = _schedulerWinAssembly;
             }
+            else if (predifinedMap==PredifinedMap.LayoutControl){
+                assembly = _layoutControlAssembly;
+            }
             else if (predifinedMap==PredifinedMap.ASPxHtmlEditor){
                 assembly = _dxHtmlEditorWebAssembly;
             }
@@ -285,6 +290,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 return "DevExpress.XtraGrid.Views.BandedGrid.BandedGridColumn";
             if (predifinedMap == PredifinedMap.GridView)
                 return "DevExpress.XtraGrid.Views.Grid.GridView";
+            if (predifinedMap == PredifinedMap.LayoutControl)
+                return "DevExpress.XtraLayout.LayoutControl";
             if (predifinedMap == PredifinedMap.TreeList)
                 return "DevExpress.XtraTreeList.TreeList";
             if (predifinedMap == PredifinedMap.TreeListColumn)
@@ -376,6 +383,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                     CheckRequiredParameters(nameof(_xpandWinAssembly), nameof(_gridViewAssembly));
                     return GetListViewConfiguration(predifinedMap,_xpandWinAssembly, _gridViewAssembly, _layoutViewListEditorTypeName,
                         PredifinedMap.LayoutView.GetTypeName(), PredifinedMap.LayoutViewColumn.GetTypeName());
+                }
+                if (new[]{PredifinedMap.LayoutControl}.Any(map => map==predifinedMap)){
+                    CheckRequiredParameters(nameof(_layoutControlAssembly), nameof(_layoutControlAssembly));
+                    return new ModelMapperConfiguration(){MapData = (predifinedMap.GetTypeToMap(),new []{typeof(IModelDetailView)})};
                 }
 
                 if (predifinedMap.IsRepositoryItem()){

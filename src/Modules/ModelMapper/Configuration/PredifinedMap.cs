@@ -23,6 +23,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Configuration{
         [MapPlatform(Platform.Win)]
         TreeListColumn,
         [MapPlatform(Platform.Win)]
+        LayoutControl,
+        [MapPlatform(Platform.Win)]
         RepositoryItem,
         [MapPlatform(Platform.Win)]
         RepositoryItemTextEdit,
