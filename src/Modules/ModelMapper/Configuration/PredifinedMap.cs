@@ -23,7 +23,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Configuration{
         [MapPlatform(Platform.Win)]
         TreeListColumn,
         [MapPlatform(Platform.Win)]
-        LayoutControl,
+        XafLayoutControl,
+        [MapPlatform(Platform.Win)]
+        SplitContainerControl,
         [MapPlatform(Platform.Win)]
         RepositoryItem,
         [MapPlatform(Platform.Win)]

@@ -15,10 +15,12 @@ using DevExpress.ExpressApp.Scheduler.Win;
 using DevExpress.ExpressApp.TreeListEditors.Win;
 using DevExpress.ExpressApp.Web.Editors.ASPx;
 using DevExpress.ExpressApp.Win.Editors;
+using DevExpress.ExpressApp.Win.Layout;
 using DevExpress.Web;
 using DevExpress.Web.ASPxHtmlEditor;
 using DevExpress.Web.ASPxScheduler;
 using DevExpress.XtraCharts;
+using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.BandedGrid;
 using DevExpress.XtraGrid.Views.Grid;
@@ -192,7 +194,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 //        [InlineData(PredifinedMap.TreeList,new[]{typeof(TreeList),typeof(TreeListEditor)},Platform.Win,new string[0])]
 //        [InlineData(PredifinedMap.TreeListColumn,new[]{typeof(TreeListColumn),typeof(TreeListEditor)},Platform.Win,new string[0])]
 //        [InlineData(PredifinedMap.ASPxScheduler,new[]{typeof(ASPxScheduler),typeof(ASPxSchedulerListEditor)},Platform.Web,new string[0])]
-        [InlineData(PredifinedMap.LayoutControl,new[]{typeof(LayoutControl),typeof(LayoutControl)},Platform.Win,new string[0])]
+//        [InlineData(PredifinedMap.XafLayoutControl,new[]{typeof(XafLayoutControl)},Platform.Win,new string[0])]
+        [InlineData(PredifinedMap.SplitContainerControl,new[]{typeof(SplitContainerControl)},Platform.Win,new string[0])]
 
         internal async Task Map_Predifined_Configurations(PredifinedMap predifinedMap, Type[] assembliesToLoad,Platform platform, string[] collectionNames){
             InitializeMapperService($"{nameof(Map_Predifined_Configurations)}{predifinedMap}",platform);

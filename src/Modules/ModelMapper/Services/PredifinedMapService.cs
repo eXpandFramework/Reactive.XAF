@@ -22,7 +22,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         private static Assembly _dxTreeListWinAssembly;
         private static Assembly _xpandWinAssembly;
         private static Assembly _gridViewAssembly;
-        private static Assembly _winEditorsAssembly;
+        private static Assembly _dxWinEditorsAssembly;
         private static Assembly _xafSchedulerWebAssembly;
         private static Assembly _xafWebAssembly;
         private static Assembly _dxWebAssembly;
@@ -39,7 +39,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         private static Assembly _schedulerCoreAssembly;
         private static Assembly _xafHtmlEditorWebAssembly;
         private static Assembly _dxScedulerWebAssembly;
-        private static Assembly _layoutControlAssembly;
+        private static Assembly _dxUtilsAssembly;
+
 
         static PredifinedMapService(){
             Init();
@@ -48,6 +49,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         private static void Init(){
             _layoutViewListEditorTypeName = "Xpand.ExpressApp.Win.ListEditors.GridListEditors.LayoutView.LayoutViewListEditor";
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            _dxUtilsAssembly = assemblies.GetAssembly("DevExpress.Utils.v");
             if (ModelExtendingService.Platform == Platform.Win){
                 _xafWinAssembly = assemblies.GetAssembly("DevExpress.ExpressApp.Win.v");
                 _xafPivotGridWinAssembly = assemblies.GetAssembly("DevExpress.ExpressApp.PivotGrid.Win.v");
@@ -56,10 +58,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 _xafTreeListWinAssembly = assemblies.GetAssembly("DevExpress.ExpressApp.TreeListEditors.Win.v");
                 _gridViewAssembly = assemblies.GetAssembly("DevExpress.XtraGrid.v");
                 _schedulerWinAssembly = assemblies.GetAssembly($"DevExpress.XtraScheduler{XafAssemblyInfo.VersionSuffix}",true);
-                _winEditorsAssembly = assemblies.GetAssembly($"DevExpress.XtraEditors{XafAssemblyInfo.VersionSuffix}",true);
+                _dxWinEditorsAssembly = assemblies.GetAssembly($"DevExpress.XtraEditors{XafAssemblyInfo.VersionSuffix}",true);
                 _schedulerCoreAssembly = assemblies.GetAssembly($"DevExpress.XtraScheduler{XafAssemblyInfo.VersionSuffix}.Core",true);
                 _pivotGridControlAssembly = assemblies.GetAssembly("DevExpress.XtraPivotGrid.v");
-                _layoutControlAssembly = assemblies.GetAssembly("DevExpress.XtraLayout.v");
                 _dxTreeListWinAssembly = assemblies.GetAssembly("DevExpress.XtraTreeList.v");
                 _chartUIControlAssembly = assemblies.GetAssembly($"DevExpress.XtraCharts{XafAssemblyInfo.VersionSuffix}.UI");
                 _chartControlAssembly = assemblies.GetAssembly($"DevExpress.XtraCharts{XafAssemblyInfo.VersionSuffix}",true);
@@ -243,10 +244,14 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 PredifinedMap.RepositoryItemLookupEdit, PredifinedMap.RepositoryItemObjectEdit,
                 PredifinedMap.RepositoryItemPopupExpressionEdit, PredifinedMap.RepositoryItemPopupCriteriaEdit,
                 PredifinedMap.RepositoryItemProtectedContentTextEdit, 
-            }.Contains(predifinedMap))
+            }.Contains(predifinedMap)||predifinedMap==PredifinedMap.XafLayoutControl)
                 assembly = _xafWinAssembly;
-            else if (predifinedMap.IsRepositoryItem())
-                assembly = _winEditorsAssembly;
+            else if (predifinedMap.IsRepositoryItem()){
+                assembly = _dxWinEditorsAssembly;
+            }
+            else if (predifinedMap==PredifinedMap.SplitContainerControl){
+                assembly = _dxUtilsAssembly;
+            }
             else if (new[]{PredifinedMap.PivotGridControl, PredifinedMap.PivotGridField}.Contains(predifinedMap)){
                 assembly = _pivotGridControlAssembly;
             }
@@ -255,9 +260,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             }
             else if (predifinedMap==PredifinedMap.SchedulerControl){
                 assembly = _schedulerWinAssembly;
-            }
-            else if (predifinedMap==PredifinedMap.LayoutControl){
-                assembly = _layoutControlAssembly;
             }
             else if (predifinedMap==PredifinedMap.ASPxHtmlEditor){
                 assembly = _dxHtmlEditorWebAssembly;
@@ -290,8 +292,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 return "DevExpress.XtraGrid.Views.BandedGrid.BandedGridColumn";
             if (predifinedMap == PredifinedMap.GridView)
                 return "DevExpress.XtraGrid.Views.Grid.GridView";
-            if (predifinedMap == PredifinedMap.LayoutControl)
-                return "DevExpress.XtraLayout.LayoutControl";
+            if (predifinedMap == PredifinedMap.XafLayoutControl)
+                return "DevExpress.ExpressApp.Win.Layout.XafLayoutControl";
+            if (predifinedMap == PredifinedMap.SplitContainerControl)
+                return "DevExpress.XtraEditors.SplitContainerControl";
             if (predifinedMap == PredifinedMap.TreeList)
                 return "DevExpress.XtraTreeList.TreeList";
             if (predifinedMap == PredifinedMap.TreeListColumn)
@@ -384,14 +388,18 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                     return GetListViewConfiguration(predifinedMap,_xpandWinAssembly, _gridViewAssembly, _layoutViewListEditorTypeName,
                         PredifinedMap.LayoutView.GetTypeName(), PredifinedMap.LayoutViewColumn.GetTypeName());
                 }
-                if (new[]{PredifinedMap.LayoutControl}.Any(map => map==predifinedMap)){
-                    CheckRequiredParameters(nameof(_layoutControlAssembly), nameof(_layoutControlAssembly));
+                if (new[]{PredifinedMap.XafLayoutControl}.Any(map => map==predifinedMap)){
+                    CheckRequiredParameters(nameof(_xpandWinAssembly), nameof(_xpandWinAssembly));
                     return new ModelMapperConfiguration(){MapData = (predifinedMap.GetTypeToMap(),new []{typeof(IModelDetailView)})};
+                }
+                if (new[]{PredifinedMap.SplitContainerControl}.Any(map => map==predifinedMap)){
+                    CheckRequiredParameters(nameof(_dxWinEditorsAssembly), nameof(_dxWinEditorsAssembly));
+                    return new ModelMapperConfiguration(){MapData = (predifinedMap.GetTypeToMap(),new []{typeof(IModelListViewSplitLayout)})};
                 }
 
                 if (predifinedMap.IsRepositoryItem()){
-                    var editorsAssembly = _winEditorsAssembly;
-                    var controlAssemblyName = nameof(_winEditorsAssembly);
+                    var editorsAssembly = _dxWinEditorsAssembly;
+                    var controlAssemblyName = nameof(_dxWinEditorsAssembly);
                     if (new[]{
                         PredifinedMap.RepositoryItemRtfEditEx, PredifinedMap.RepositoryItemLookupEdit,PredifinedMap.RepositoryItemProtectedContentTextEdit, 
                         PredifinedMap.RepositoryItemObjectEdit, PredifinedMap.RepositoryFieldPicker,

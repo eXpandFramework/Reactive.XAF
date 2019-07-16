@@ -7,11 +7,13 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.TreeListEditors.Win;
 using DevExpress.ExpressApp.Win.Editors;
+using DevExpress.ExpressApp.Win.Layout;
 using DevExpress.Utils;
 using DevExpress.Web;
 using DevExpress.Web.ASPxHtmlEditor;
 using DevExpress.Web.ASPxScheduler;
 using DevExpress.XtraCharts;
+using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.BandedGrid;
 using DevExpress.XtraGrid.Views.Grid;
@@ -67,7 +69,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 //        [InlineData(PredifinedMap.TreeList, typeof(TreeList),Platform.Win,MMListViewNodePath)]
 //        [InlineData(PredifinedMap.TreeListColumn, typeof(TreeListColumn),Platform.Win,MMListViewTestItemNodePath)]
 //        [InlineData(PredifinedMap.ASPxScheduler, typeof(ASPxScheduler),Platform.Web,MMListViewNodePath)]
-        [InlineData(PredifinedMap.LayoutControl, typeof(LayoutControl),Platform.Win,MMDetailViewNodePath)]
+//        [InlineData(PredifinedMap.XafLayoutControl, typeof(XafLayoutControl),Platform.Win,MMDetailViewNodePath)]
+        [InlineData(PredifinedMap.SplitContainerControl, typeof(SplitContainerControl),Platform.Win,MMListViewNodePath+"/SplitLayout")]
         internal void ExtendModel_Predefined_Type(PredifinedMap configuration,Type typeToMap,Platform platform,string nodePath){
             Assembly.LoadFile(typeToMap.Assembly.Location);
             InitializeMapperService($"{nameof(ExtendModel_Predefined_Type)}{configuration}{platform}",platform);
