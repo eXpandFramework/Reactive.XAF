@@ -13,6 +13,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         private static string[] References(this Type type, PropertyInfo[] propertyInfos,Type[] additionalTypes){
             var referencedTypes = propertyInfos.SelectMany(_ => new[]{_.PropertyType,_.DeclaringType}).ToArray();
             return referencedTypes
+                .Concat(additionalTypes.SelectMany(_ => _.PublicProperties().SelectMany(info => info.GetCustomAttributesData().ReferecedTypes())))
                 .Concat(additionalTypes.SelectMany(_ => _.GetCustomAttributesData().ReferecedTypes()))
                 .Concat(referencedTypes.SelectMany(_ => _.GetCustomAttributesData().ReferecedTypes()))
                 .Concat(propertyInfos.SelectMany(_ => _.GetCustomAttributesData().ReferecedTypes()))

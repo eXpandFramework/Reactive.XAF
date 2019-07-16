@@ -9,7 +9,6 @@ using System.Reflection;
 using EnumsNET.NonGeneric;
 using Fasterflect;
 using Xpand.Source.Extensions.System.String;
-using Xpand.XAF.Modules.ModelMapper.Configuration;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     public static partial class TypeMappingService{
@@ -57,7 +56,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 foreach (var attributeData in descriptionAttributes){
                     propertyInfo.RemoveAttributeData(attributeData);
                     var descriptionAttribute = (DescriptionAttribute)attributeData.AttributeType.TryCreateInstanceWithValues(attributeData.ConstructorArguments.First().Value);
-                    propertyInfo.AddAttributeData(typeof(DescriptionAttribute),new []{new CustomAttributeTypedArgument(descriptionAttribute.Description)});
+                    propertyInfo.AddAttributeData(typeof(DescriptionAttribute), new CustomAttributeTypedArgument(descriptionAttribute.Description));
                 }
             }
         }

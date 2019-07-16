@@ -23,6 +23,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         private static Assembly _xpandWinAssembly;
         private static Assembly _gridViewAssembly;
         private static Assembly _winEditorsAssembly;
+        private static Assembly _xafSchedulerWebAssembly;
         private static Assembly _xafWebAssembly;
         private static Assembly _dxWebAssembly;
         private static Assembly _dxHtmlEditorWebAssembly;
@@ -34,9 +35,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         private static Assembly _chartCoreAssembly;
         private static string _layoutViewListEditorTypeName;
         private static Assembly _xafSchedulerControlAssembly;
-        private static Assembly _schedulerAssembly;
+        private static Assembly _schedulerWinAssembly;
         private static Assembly _schedulerCoreAssembly;
         private static Assembly _xafHtmlEditorWebAssembly;
+        private static Assembly _dxScedulerWebAssembly;
 
         static PredifinedMapService(){
             Init();
@@ -52,7 +54,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 _xafChartWinAssembly = assemblies.GetAssembly("DevExpress.ExpressApp.Chart.Win.v");
                 _xafTreeListWinAssembly = assemblies.GetAssembly("DevExpress.ExpressApp.TreeListEditors.Win.v");
                 _gridViewAssembly = assemblies.GetAssembly("DevExpress.XtraGrid.v");
-                _schedulerAssembly = assemblies.GetAssembly($"DevExpress.XtraScheduler{XafAssemblyInfo.VersionSuffix}",true);
+                _schedulerWinAssembly = assemblies.GetAssembly($"DevExpress.XtraScheduler{XafAssemblyInfo.VersionSuffix}",true);
                 _winEditorsAssembly = assemblies.GetAssembly($"DevExpress.XtraEditors{XafAssemblyInfo.VersionSuffix}",true);
                 _schedulerCoreAssembly = assemblies.GetAssembly($"DevExpress.XtraScheduler{XafAssemblyInfo.VersionSuffix}.Core",true);
                 _pivotGridControlAssembly = assemblies.GetAssembly("DevExpress.XtraPivotGrid.v");
@@ -67,7 +69,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 _xafWebAssembly = assemblies.GetAssembly("DevExpress.ExpressApp.Web.v");
                 _dxWebAssembly = assemblies.GetAssembly("DevExpress.Web.v");
                 _dxHtmlEditorWebAssembly = assemblies.GetAssembly("DevExpress.Web.ASPxHtmlEditor.v");
+                _dxScedulerWebAssembly = assemblies.GetAssembly("DevExpress.Web.ASPxScheduler.v");
                 _xafHtmlEditorWebAssembly = assemblies.GetAssembly("DevExpress.ExpressApp.HtmlPropertyEditor.Web.v");
+                _xafSchedulerWebAssembly = assemblies.GetAssembly("DevExpress.ExpressApp.Scheduler.Web.v");
             }
 
         }
@@ -161,8 +165,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             return new[]{ predifinedMap}.MapToModel((mapperConfiguration, modelMapperConfiguration) => configure?.Invoke(modelMapperConfiguration));
         }
 
-        private static ModelMapperConfiguration ModelMapperConfiguration(this PredifinedMap configuration,Action<ModelMapperConfiguration> configure=null){
-            var mapperConfiguration = configuration.GetModelMapperConfiguration();
+        private static ModelMapperConfiguration ModelMapperConfiguration(this PredifinedMap predifinedMap,Action<ModelMapperConfiguration> configure=null){
+            var mapperConfiguration = predifinedMap.GetModelMapperConfiguration();
             if (mapperConfiguration != null){
                 configure?.Invoke(mapperConfiguration);
                 return mapperConfiguration;
@@ -197,10 +201,14 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             if (predifinedMap == PredifinedMap.ASPxGridView){
                 return ((ListView) view).Editor.GetPropertyValue("Grid");
             }
-
             if (predifinedMap == PredifinedMap.GridViewColumn){
                 return PredifinedMap.ASPxGridView.GetViewControl(view,null).GetPropertyValue("Columns",Flags.InstancePublicDeclaredOnly).GetIndexer(model);
             }
+            if (predifinedMap == PredifinedMap.ASPxScheduler){
+                return ((ListView) view).Editor.GetPropertyValue("SchedulerControl");
+            }
+
+            
 
             throw new NotImplementedException(predifinedMap.ToString());
         }
@@ -244,10 +252,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 assembly = _chartControlAssembly;
             }
             else if (predifinedMap==PredifinedMap.SchedulerControl){
-                assembly = _schedulerAssembly;
+                assembly = _schedulerWinAssembly;
             }
             else if (predifinedMap==PredifinedMap.ASPxHtmlEditor){
                 assembly = _dxHtmlEditorWebAssembly;
+            }
+            else if (predifinedMap==PredifinedMap.ASPxScheduler){
+                assembly = _dxScedulerWebAssembly;
             }
             else if (new[]{PredifinedMap.TreeList,PredifinedMap.TreeListColumn}.Any(map => map==predifinedMap)){
                 assembly = _dxTreeListWinAssembly;
@@ -311,6 +322,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 return "DevExpress.XtraGrid.Columns.LayoutViewColumn";
             if (predifinedMap == PredifinedMap.ASPxGridView)
                 return "DevExpress.Web.ASPxGridView";
+            if (predifinedMap == PredifinedMap.ASPxScheduler)
+                return "DevExpress.Web.ASPxScheduler.ASPxScheduler";
             if (predifinedMap == PredifinedMap.ASPxHtmlEditor)
                 return "DevExpress.Web.ASPxHtmlEditor.ASPxHtmlEditor";
             if (predifinedMap == PredifinedMap.GridViewColumn)
@@ -331,8 +344,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                         PredifinedMap.TreeList.GetTypeName(),PredifinedMap.TreeListColumn.GetTypeName() );
                 }
                 if (new[]{PredifinedMap.SchedulerControl}.Any(map => map==predifinedMap)){
-                    CheckRequiredParameters(nameof(_xafSchedulerControlAssembly), nameof(_schedulerAssembly));
-                    return GetListViewConfiguration(predifinedMap,_xafSchedulerControlAssembly, _schedulerAssembly, "DevExpress.ExpressApp.Scheduler.Win.SchedulerListEditor",
+                    CheckRequiredParameters(nameof(_xafSchedulerControlAssembly), nameof(_schedulerWinAssembly));
+                    return GetListViewConfiguration(predifinedMap,_xafSchedulerControlAssembly, _schedulerWinAssembly, "DevExpress.ExpressApp.Scheduler.Win.SchedulerListEditor",
                         PredifinedMap.SchedulerControl.GetTypeName(),null );
                 }
                 if (new[]{PredifinedMap.PivotGridControl,PredifinedMap.PivotGridField}.Any(map => map==predifinedMap)){
@@ -391,6 +404,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                     return GetListViewConfiguration(predifinedMap,_xafWebAssembly, _dxWebAssembly, "DevExpress.ExpressApp.Web.Editors.ASPx.ASPxGridListEditor",
                         PredifinedMap.ASPxGridView.GetTypeName(),PredifinedMap.GridViewColumn.GetTypeName());
                 }
+                if (new[]{PredifinedMap.ASPxScheduler}.Any(map => map==predifinedMap)){
+                    CheckRequiredParameters(nameof(_xafSchedulerWebAssembly), nameof(_dxScedulerWebAssembly));
+                    return GetListViewConfiguration(predifinedMap,_xafSchedulerWebAssembly, _dxScedulerWebAssembly, "DevExpress.ExpressApp.Scheduler.Web.ASPxSchedulerListEditor",
+                        PredifinedMap.ASPxScheduler.GetTypeName(),null);
+                }
                 if (new[]{PredifinedMap.ASPxHtmlEditor}.Any(map => map==predifinedMap)){
                     CheckRequiredParameters(nameof(_xafHtmlEditorWebAssembly), nameof(_dxWebAssembly));
                     var typeToMap = predifinedMap.GetTypeToMap();
@@ -414,7 +432,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             if (controlAssembly!=null&&listEditorAssembly!=null){
                 var rightOperand = listEditorAssembly.GetType(listEditorTypeName);
                 if (new[]{PredifinedMap.GridView, PredifinedMap.ASPxGridView, PredifinedMap.AdvBandedGridView,PredifinedMap.TreeList, 
-                    PredifinedMap.LayoutView, PredifinedMap.PivotGridControl, PredifinedMap.ChartControl,PredifinedMap.SchedulerControl 
+                    PredifinedMap.LayoutView, PredifinedMap.PivotGridControl, PredifinedMap.ChartControl,PredifinedMap.SchedulerControl ,PredifinedMap.ASPxScheduler, 
                 }.Any(map => map == predifinedMap)){
                     var visibilityCriteria = ListViewVisibilityCriteria(rightOperand);
                     var bandsLayout = predifinedMap == PredifinedMap.AdvBandedGridView;

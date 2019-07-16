@@ -8,6 +8,7 @@ using System.Reflection;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
+using Fasterflect;
 using Xpand.Source.Extensions.System.String;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 
@@ -67,7 +68,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             var modelMappersInterfaceCode = ModelMappersInterfaceCode( modelMappersTypeName);
             var typeCode = type.TypeCode(mapName, modelMappersTypeName, configuration);
             var code = new []{typeCode,containerCode,modelMappersInterfaceCode}.Concat(additionalTypesCode).ToArray();
-            var references = type.References(propertyInfos,additionalTypes);
+            var infos = propertyInfos.Concat(type.PublicProperties()).Distinct().ToArray();
+            var references = type.References(infos,additionalTypes);
             return (code,references);
         }
 
