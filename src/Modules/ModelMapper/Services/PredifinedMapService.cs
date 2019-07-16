@@ -33,6 +33,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         private static Assembly _chartUIControlAssembly;
         private static Assembly _chartControlAssembly;
         private static Assembly _chartCoreAssembly;
+        private static Assembly _dashboardWinAssembly;
         private static string _layoutViewListEditorTypeName;
         private static Assembly _xafSchedulerControlAssembly;
         private static Assembly _schedulerWinAssembly;
@@ -51,6 +52,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             _dxUtilsAssembly = assemblies.GetAssembly("DevExpress.Utils.v");
             if (ModelExtendingService.Platform == Platform.Win){
+                
                 _xafWinAssembly = assemblies.GetAssembly("DevExpress.ExpressApp.Win.v");
                 _xafPivotGridWinAssembly = assemblies.GetAssembly("DevExpress.ExpressApp.PivotGrid.Win.v");
                 _xafSchedulerControlAssembly = assemblies.GetAssembly("DevExpress.ExpressApp.Scheduler.Win.v");
@@ -58,6 +60,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 _xafTreeListWinAssembly = assemblies.GetAssembly("DevExpress.ExpressApp.TreeListEditors.Win.v");
                 _gridViewAssembly = assemblies.GetAssembly("DevExpress.XtraGrid.v");
                 _schedulerWinAssembly = assemblies.GetAssembly($"DevExpress.XtraScheduler{XafAssemblyInfo.VersionSuffix}",true);
+                _dashboardWinAssembly = assemblies.GetAssembly($"DevExpress.Dashboard{XafAssemblyInfo.VersionSuffix}.Win");
                 _dxWinEditorsAssembly = assemblies.GetAssembly($"DevExpress.XtraEditors{XafAssemblyInfo.VersionSuffix}",true);
                 _schedulerCoreAssembly = assemblies.GetAssembly($"DevExpress.XtraScheduler{XafAssemblyInfo.VersionSuffix}.Core",true);
                 _pivotGridControlAssembly = assemblies.GetAssembly("DevExpress.XtraPivotGrid.v");
@@ -252,6 +255,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             else if (predifinedMap==PredifinedMap.SplitContainerControl){
                 assembly = _dxUtilsAssembly;
             }
+            else if (predifinedMap==PredifinedMap.ASPxUploadControl){
+                assembly = _dxWebAssembly;
+            }
+            else if (predifinedMap==PredifinedMap.DashboardDesigner){
+                assembly = _dashboardWinAssembly;
+            }
             else if (new[]{PredifinedMap.PivotGridControl, PredifinedMap.PivotGridField}.Contains(predifinedMap)){
                 assembly = _pivotGridControlAssembly;
             }
@@ -296,6 +305,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 return "DevExpress.ExpressApp.Win.Layout.XafLayoutControl";
             if (predifinedMap == PredifinedMap.SplitContainerControl)
                 return "DevExpress.XtraEditors.SplitContainerControl";
+            if (predifinedMap == PredifinedMap.DashboardDesigner)
+                return "DevExpress.DashboardWin.DashboardDesigner";
             if (predifinedMap == PredifinedMap.TreeList)
                 return "DevExpress.XtraTreeList.TreeList";
             if (predifinedMap == PredifinedMap.TreeListColumn)
@@ -333,6 +344,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 return "DevExpress.XtraGrid.Columns.LayoutViewColumn";
             if (predifinedMap == PredifinedMap.ASPxGridView)
                 return "DevExpress.Web.ASPxGridView";
+            if (predifinedMap == PredifinedMap.ASPxUploadControl)
+                return "DevExpress.Web.ASPxUploadControl";
             if (predifinedMap == PredifinedMap.ASPxScheduler)
                 return "DevExpress.Web.ASPxScheduler.ASPxScheduler";
             if (predifinedMap == PredifinedMap.ASPxHtmlEditor)
@@ -396,6 +409,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                     CheckRequiredParameters(nameof(_dxWinEditorsAssembly), nameof(_dxWinEditorsAssembly));
                     return new ModelMapperConfiguration(){MapData = (predifinedMap.GetTypeToMap(),new []{typeof(IModelListViewSplitLayout)})};
                 }
+                if (new[]{PredifinedMap.DashboardDesigner}.Any(map => map==predifinedMap)){
+                    CheckRequiredParameters(nameof(_dashboardWinAssembly), nameof(_dashboardWinAssembly));
+                    return new ModelMapperConfiguration(){MapData = (predifinedMap.GetTypeToMap(),new []{typeof(IModelListView)})};
+                }
 
                 if (predifinedMap.IsRepositoryItem()){
                     var editorsAssembly = _dxWinEditorsAssembly;
@@ -430,6 +447,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 }
                 if (new[]{PredifinedMap.ASPxHtmlEditor}.Any(map => map==predifinedMap)){
                     CheckRequiredParameters(nameof(_xafHtmlEditorWebAssembly), nameof(_dxWebAssembly));
+                    var typeToMap = predifinedMap.GetTypeToMap();
+                    return new ModelMapperConfiguration(){MapData = (typeToMap,new []{typeof(IModelPropertyEditor)})};
+                }
+                if (new[]{PredifinedMap.ASPxUploadControl}.Any(map => map==predifinedMap)){
+                    CheckRequiredParameters(nameof(_dxWebAssembly), nameof(_dxWebAssembly));
                     var typeToMap = predifinedMap.GetTypeToMap();
                     return new ModelMapperConfiguration(){MapData = (typeToMap,new []{typeof(IModelPropertyEditor)})};
                 }

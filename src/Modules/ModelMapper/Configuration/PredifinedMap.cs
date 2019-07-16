@@ -27,6 +27,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Configuration{
         [MapPlatform(Platform.Win)]
         SplitContainerControl,
         [MapPlatform(Platform.Win)]
+        DashboardDesigner,
+        [MapPlatform(Platform.Win)]
         RepositoryItem,
         [MapPlatform(Platform.Win)]
         RepositoryItemTextEdit,
@@ -148,5 +150,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Configuration{
         ASPxHtmlEditor,
         [MapPlatform(Platform.Web)]
         ASPxScheduler,
+        [MapPlatform(Platform.Web)]
+        ASPxUploadControl,
     }
 }
