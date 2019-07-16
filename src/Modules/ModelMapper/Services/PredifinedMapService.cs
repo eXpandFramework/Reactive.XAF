@@ -255,7 +255,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             else if (predifinedMap==PredifinedMap.SplitContainerControl){
                 assembly = _dxUtilsAssembly;
             }
-            else if (predifinedMap==PredifinedMap.ASPxUploadControl){
+            else if (new[]{PredifinedMap.ASPxUploadControl,PredifinedMap.ASPxPopupControl }.Any(map => map==predifinedMap)){
                 assembly = _dxWebAssembly;
             }
             else if (predifinedMap==PredifinedMap.DashboardDesigner){
@@ -346,6 +346,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 return "DevExpress.Web.ASPxGridView";
             if (predifinedMap == PredifinedMap.ASPxUploadControl)
                 return "DevExpress.Web.ASPxUploadControl";
+            if (predifinedMap == PredifinedMap.ASPxPopupControl)
+                return "DevExpress.Web.ASPxPopupControl";
             if (predifinedMap == PredifinedMap.ASPxScheduler)
                 return "DevExpress.Web.ASPxScheduler.ASPxScheduler";
             if (predifinedMap == PredifinedMap.ASPxHtmlEditor)
@@ -454,6 +456,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                     CheckRequiredParameters(nameof(_dxWebAssembly), nameof(_dxWebAssembly));
                     var typeToMap = predifinedMap.GetTypeToMap();
                     return new ModelMapperConfiguration(){MapData = (typeToMap,new []{typeof(IModelPropertyEditor)})};
+                }
+                if (new[]{PredifinedMap.ASPxPopupControl}.Any(map => map==predifinedMap)){
+                    CheckRequiredParameters(nameof(_dxWebAssembly), nameof(_dxWebAssembly));
+                    var typeToMap = predifinedMap.GetTypeToMap();
+                    return new ModelMapperConfiguration(){MapData = (typeToMap,new []{typeof(IModelView)})};
                 }
             }
 

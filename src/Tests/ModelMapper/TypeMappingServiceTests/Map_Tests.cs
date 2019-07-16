@@ -197,7 +197,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 //        [InlineData(PredifinedMap.ASPxScheduler,new[]{typeof(ASPxScheduler),typeof(ASPxSchedulerListEditor)},Platform.Web,new string[0])]
 //        [InlineData(PredifinedMap.XafLayoutControl,new[]{typeof(XafLayoutControl)},Platform.Win,new string[0])]
 //        [InlineData(PredifinedMap.SplitContainerControl,new[]{typeof(SplitContainerControl)},Platform.Win,new string[0])]
-        [InlineData(PredifinedMap.DashboardDesigner,new[]{typeof(DashboardDesigner)},Platform.Win,new string[0])]
+//        [InlineData(PredifinedMap.DashboardDesigner,new[]{typeof(DashboardDesigner)},Platform.Win,new string[0])]
+        [InlineData(PredifinedMap.ASPxPopupControl,new[]{typeof(ASPxPopupControl)},Platform.Web,new string[0])]
 
         internal async Task Map_Predifined_Configurations(PredifinedMap predifinedMap, Type[] assembliesToLoad,Platform platform, string[] collectionNames){
             

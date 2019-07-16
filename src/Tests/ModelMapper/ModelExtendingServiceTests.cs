@@ -73,7 +73,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 //        [InlineData(PredifinedMap.XafLayoutControl, typeof(XafLayoutControl),Platform.Win,MMDetailViewNodePath)]
 //        [InlineData(PredifinedMap.SplitContainerControl, typeof(SplitContainerControl),Platform.Win,MMListViewNodePath+"/SplitLayout")]
 //        [InlineData(PredifinedMap.DashboardDesigner, typeof(DashboardDesigner),Platform.Win,MMListViewNodePath)]
-        [InlineData(PredifinedMap.ASPxUploadControl, typeof(ASPxUploadControl),Platform.Web,MMDetailViewTestItemNodePath)]
+//        [InlineData(PredifinedMap.ASPxUploadControl, typeof(ASPxUploadControl),Platform.Web,MMDetailViewTestItemNodePath)]
+        [InlineData(PredifinedMap.ASPxPopupControl, typeof(ASPxPopupControl),Platform.Web,MMListViewNodePath+","+MMDetailViewNodePath)]
         internal void ExtendModel_Predefined_Type(PredifinedMap configuration,Type typeToMap,Platform platform,string nodePath){
             Assembly.LoadFile(typeToMap.Assembly.Location);
             InitializeMapperService($"{nameof(ExtendModel_Predefined_Type)}{configuration}{platform}",platform);
@@ -84,10 +85,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         private void AssertExtendedListViewModel(Type typeToMap, XafApplication application,string nodePath){
-            
-            var modelNode = application.Model.GetNodeByPath(nodePath);
             var mapName = typeToMap.ModelMapName();
-            modelNode.GetNode(mapName).ShouldNotBeNull();
+            foreach (var s in nodePath.Split(',')){
+                var modelNode = application.Model.GetNodeByPath(s);
+                modelNode.GetNode(mapName).ShouldNotBeNull();
+            }
+            
             var typeInfo = XafTypesInfo.Instance.FindTypeInfo(typeof(IModelModelMap)).Descendants.FirstOrDefault(info => info.Name.EndsWith(typeToMap.Name));
             typeInfo.ShouldNotBeNull();
             typeInfo.Name.ShouldBe($"IModel{mapName}");

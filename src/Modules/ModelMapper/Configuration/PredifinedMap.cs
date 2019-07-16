@@ -152,5 +152,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Configuration{
         ASPxScheduler,
         [MapPlatform(Platform.Web)]
         ASPxUploadControl,
+        [MapPlatform(Platform.Web)]
+        ASPxPopupControl,
     }
 }
