@@ -15,9 +15,15 @@ namespace Xpand.XAF.Modules.ModelMapper.Configuration{
         None,
 
         [MapPlatform(Platform.Win)]
-        GridView=1,
+        GridView,
         [MapPlatform(Platform.Win)]
-        RepositoryItem=2,
+        GridColumn,
+        [MapPlatform(Platform.Win)]
+        TreeList,
+        [MapPlatform(Platform.Win)]
+        TreeListColumn,
+        [MapPlatform(Platform.Win)]
+        RepositoryItem,
         [MapPlatform(Platform.Win)]
         RepositoryItemTextEdit,
         [MapPlatform(Platform.Win)]
@@ -92,8 +98,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Configuration{
         RepositoryItemPopupBase,
         [MapPlatform(Platform.Win)]
         RepositoryItemPopupBaseAutoSearchEdit,
-        [MapPlatform(Platform.Win)]
-        GridColumn,
         [MapPlatform(Platform.Win)]
         SchedulerControl,
         [MapPlatform(Platform.Win)]

@@ -186,15 +186,19 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [InlineData(PredifinedMap.ASPxHtmlEditor,new[]{typeof(ASPxHtmlEditor),typeof(ASPxHtmlPropertyEditor)},Platform.Web,new string[0])]
         internal async Task Map_Predifined_Configurations(PredifinedMap configuration, Type[] assembliesToLoad,Platform platform, string[] collectionNames){
             InitializeMapperService($"{nameof(Map_Predifined_Configurations)}{configuration}",platform);
+//        [InlineData(PredifinedMap.TreeList,new[]{typeof(TreeList),typeof(TreeListEditor)},Platform.Win,new string[0])]
+        [InlineData(PredifinedMap.TreeListColumn,new[]{typeof(TreeListColumn),typeof(TreeListEditor)},Platform.Win,new string[0])]
+        internal async Task Map_Predifined_Configurations(PredifinedMap predifinedMap, Type[] assembliesToLoad,Platform platform, string[] collectionNames){
+            InitializeMapperService($"{nameof(Map_Predifined_Configurations)}{predifinedMap}",platform);
             assembliesToLoad.ToObservable().Do(type => Assembly.LoadFile(type.Assembly.Location)).Subscribe();
 
-            var modelType = await configuration.MapToModel().ModelInterfaces();
+            var modelType = await predifinedMap.MapToModel().ModelInterfaces();
             var propertyInfos = modelType.GetProperties();
 
-            AssertPredifinedConfigurationsMap(configuration, collectionNames, modelType, propertyInfos);
-            AssertBandedGridColumn(configuration, propertyInfos);
+            AssertPredifinedConfigurationsMap(predifinedMap, collectionNames, modelType, propertyInfos);
+            AssertBandedGridColumn(predifinedMap, propertyInfos);
             
-            AssertSchedulerControl(configuration, propertyInfos);
+            AssertSchedulerControl(predifinedMap, propertyInfos);
 
         }
 
