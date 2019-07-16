@@ -22,6 +22,7 @@ using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraGrid.Views.Layout;
 using DevExpress.XtraLayout;
 using DevExpress.XtraPivotGrid;
+using DevExpress.XtraRichEdit;
 using DevExpress.XtraScheduler;
 using DevExpress.XtraTreeList;
 using DevExpress.XtraTreeList.Columns;
@@ -80,7 +81,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 //        [InlineData(PredifinedMap.ASPxDateEdit, typeof(ASPxDateEdit),Platform.Web,MMDetailViewTestItemNodePath)]
 //        [InlineData(PredifinedMap.ASPxHyperLink, typeof(ASPxHyperLink),Platform.Web,MMDetailViewTestItemNodePath)]
 //        [InlineData(PredifinedMap.ASPxLookupDropDownEdit, typeof(ASPxLookupDropDownEdit),Platform.Web,MMDetailViewTestItemNodePath)]
-        [InlineData(PredifinedMap.ASPxLookupFindEdit, typeof(ASPxLookupFindEdit),Platform.Web,MMDetailViewTestItemNodePath)]
+//        [InlineData(PredifinedMap.ASPxLookupFindEdit, typeof(ASPxLookupFindEdit),Platform.Web,MMDetailViewTestItemNodePath)]
+        [InlineData(PredifinedMap.ASPxTokenBox, typeof(ASPxTokenBox),Platform.Web,MMDetailViewTestItemNodePath)]
+        [InlineData(PredifinedMap.ASPxComboBox, typeof(ASPxComboBox),Platform.Web,MMDetailViewTestItemNodePath)]
+        [InlineData(PredifinedMap.LabelControl, typeof(LabelControl),Platform.Win,MMDetailViewTestItemNodePath)]
+        [InlineData(PredifinedMap.RichEditControl, typeof(RichEditControl),Platform.Win,MMDetailViewTestItemNodePath)]
         internal void ExtendModel_Predefined_Type(PredifinedMap configuration,Type typeToMap,Platform platform,string nodePath){
             Assembly.LoadFile(typeToMap.Assembly.Location);
             InitializeMapperService($"{nameof(ExtendModel_Predefined_Type)}{configuration}{platform}",platform);

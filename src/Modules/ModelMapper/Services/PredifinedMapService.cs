@@ -34,6 +34,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         private static Assembly _chartControlAssembly;
         private static Assembly _chartCoreAssembly;
         private static Assembly _dashboardWinAssembly;
+        private static Assembly _xtraRichEditAssembly;
         private static string _layoutViewListEditorTypeName;
         private static Assembly _xafSchedulerControlAssembly;
         private static Assembly _schedulerWinAssembly;
@@ -55,6 +56,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 
                 _xafWinAssembly = assemblies.GetAssembly("DevExpress.ExpressApp.Win.v");
                 _xafPivotGridWinAssembly = assemblies.GetAssembly("DevExpress.ExpressApp.PivotGrid.Win.v");
+                _xtraRichEditAssembly = assemblies.GetAssembly("DevExpress.XtraRichEdit.v");
                 _xafSchedulerControlAssembly = assemblies.GetAssembly("DevExpress.ExpressApp.Scheduler.Win.v");
                 _xafChartWinAssembly = assemblies.GetAssembly("DevExpress.ExpressApp.Chart.Win.v");
                 _xafTreeListWinAssembly = assemblies.GetAssembly("DevExpress.ExpressApp.TreeListEditors.Win.v");
@@ -240,22 +242,34 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             if (new[]{
                 PredifinedMap.AdvBandedGridView, PredifinedMap.BandedGridColumn, PredifinedMap.GridView,
                 PredifinedMap.GridColumn, PredifinedMap.LayoutView, PredifinedMap.LayoutViewColumn
-            }.Contains(predifinedMap))
+            }.Contains(predifinedMap)){
                 assembly = _gridViewAssembly;
+            }
             else if (new[]{
                 PredifinedMap.RepositoryFieldPicker, PredifinedMap.RepositoryItemRtfEditEx,
                 PredifinedMap.RepositoryItemLookupEdit, PredifinedMap.RepositoryItemObjectEdit,
                 PredifinedMap.RepositoryItemPopupExpressionEdit, PredifinedMap.RepositoryItemPopupCriteriaEdit,
                 PredifinedMap.RepositoryItemProtectedContentTextEdit, 
-            }.Contains(predifinedMap)||predifinedMap==PredifinedMap.XafLayoutControl)
+            }.Contains(predifinedMap)||predifinedMap==PredifinedMap.XafLayoutControl){
                 assembly = _xafWinAssembly;
+            }
             else if (predifinedMap.IsRepositoryItem()){
                 assembly = _dxWinEditorsAssembly;
             }
             else if (predifinedMap==PredifinedMap.SplitContainerControl){
                 assembly = _dxUtilsAssembly;
             }
-            else if (new[]{PredifinedMap.ASPxUploadControl,PredifinedMap.ASPxPopupControl ,PredifinedMap.ASPxDateEdit,PredifinedMap.ASPxHyperLink,  }.Any(map => map==predifinedMap)){
+            else if (predifinedMap==PredifinedMap.RichEditControl){
+                assembly = _xtraRichEditAssembly;
+            }
+            else if (predifinedMap==PredifinedMap.LabelControl){
+                assembly = _dxWinEditorsAssembly;
+            }
+            else if (new[] {
+                PredifinedMap.ASPxUploadControl, PredifinedMap.ASPxPopupControl, PredifinedMap.ASPxDateEdit,
+                PredifinedMap.ASPxHyperLink, PredifinedMap.ASPxSpinEdit, PredifinedMap.ASPxTokenBox,
+                PredifinedMap.ASPxComboBox
+            }.Any(map => map == predifinedMap)){
                 assembly = _dxWebAssembly;
             }
             else if (new[]{PredifinedMap.ASPxLookupDropDownEdit,PredifinedMap.ASPxLookupFindEdit, }.Any(map => map==predifinedMap)){
@@ -304,6 +318,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 return "DevExpress.XtraGrid.Views.BandedGrid.BandedGridColumn";
             if (predifinedMap == PredifinedMap.GridView)
                 return "DevExpress.XtraGrid.Views.Grid.GridView";
+            if (predifinedMap == PredifinedMap.RichEditControl)
+                return "DevExpress.XtraRichEdit.RichEditControl";
             if (predifinedMap == PredifinedMap.XafLayoutControl)
                 return "DevExpress.ExpressApp.Win.Layout.XafLayoutControl";
             if (predifinedMap == PredifinedMap.SplitContainerControl)
@@ -318,6 +334,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 return "DevExpress.XtraTreeList.Columns.TreeListColumn";
             if (predifinedMap == PredifinedMap.RepositoryItem)
                 return "DevExpress.XtraEditors.Repository.RepositoryItem";
+            if (predifinedMap == PredifinedMap.LabelControl)
+                return "DevExpress.XtraEditors.LabelControl";
             if (predifinedMap.IsRepositoryItem()){
                 if (predifinedMap == PredifinedMap.RepositoryFieldPicker){
                     return $"DevExpress.ExpressApp.Win.Core.ModelEditor.{predifinedMap}";
@@ -357,6 +375,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 return "DevExpress.Web.ASPxDateEdit";
             if (predifinedMap == PredifinedMap.ASPxHyperLink)
                 return "DevExpress.Web.ASPxHyperLink";
+            if (predifinedMap == PredifinedMap.ASPxSpinEdit)
+                return "DevExpress.Web.ASPxSpinEdit";
+            if (predifinedMap == PredifinedMap.ASPxTokenBox)
+                return "DevExpress.Web.ASPxTokenBox";
+            if (predifinedMap == PredifinedMap.ASPxComboBox)
+                return "DevExpress.Web.ASPxComboBox";
             if (predifinedMap == PredifinedMap.ASPxLookupDropDownEdit)
                 return "DevExpress.ExpressApp.Web.Editors.ASPx.ASPxLookupDropDownEdit";
             if (predifinedMap == PredifinedMap.ASPxLookupFindEdit)
@@ -420,13 +444,22 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                     CheckRequiredParameters(nameof(_xpandWinAssembly), nameof(_xpandWinAssembly));
                     return new ModelMapperConfiguration(){MapData = (predifinedMap.GetTypeToMap(),new []{typeof(IModelDetailView)})};
                 }
-                if (new[]{PredifinedMap.SplitContainerControl}.Any(map => map==predifinedMap)){
+                if (new[]{PredifinedMap.SplitContainerControl, }.Any(map => map==predifinedMap)){
                     CheckRequiredParameters(nameof(_dxWinEditorsAssembly), nameof(_dxWinEditorsAssembly));
                     return new ModelMapperConfiguration(){MapData = (predifinedMap.GetTypeToMap(),new []{typeof(IModelListViewSplitLayout)})};
+                }
+                if (new[]{PredifinedMap.LabelControl, }.Any(map => map==predifinedMap)){
+                    CheckRequiredParameters(nameof(_dxWinEditorsAssembly), nameof(_dxWinEditorsAssembly));
+                    return new ModelMapperConfiguration(){MapData = (predifinedMap.GetTypeToMap(),new []{typeof(IModelPropertyEditor)})};
                 }
                 if (new[]{PredifinedMap.DashboardDesigner,PredifinedMap.DashboardViewer}.Any(map => map==predifinedMap)){
                     CheckRequiredParameters(nameof(_dashboardWinAssembly), nameof(_dashboardWinAssembly));
                     var mapData = (predifinedMap.GetTypeToMap(),new []{predifinedMap==PredifinedMap.DashboardDesigner?typeof(IModelListView):typeof(IModelPropertyEditor)});
+                    return new ModelMapperConfiguration(){MapData = mapData};
+                }
+                if (new[]{PredifinedMap.RichEditControl}.Any(map => map==predifinedMap)){
+                    CheckRequiredParameters(nameof(_xtraRichEditAssembly), nameof(_xtraRichEditAssembly));
+                    var mapData = (predifinedMap.GetTypeToMap(),new []{typeof(IModelPropertyEditor)});
                     return new ModelMapperConfiguration(){MapData = mapData};
                 }
 
@@ -476,7 +509,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                     var typeToMap = predifinedMap.GetTypeToMap();
                     return new ModelMapperConfiguration(){MapData = (typeToMap,new []{typeof(IModelView)})};
                 }
-                if (new[]{PredifinedMap.ASPxDateEdit,PredifinedMap.ASPxHyperLink, }.Any(map => map==predifinedMap)){
+                if (new[]{PredifinedMap.ASPxDateEdit,PredifinedMap.ASPxHyperLink, PredifinedMap.ASPxSpinEdit, PredifinedMap.ASPxTokenBox, PredifinedMap.ASPxComboBox, }.Any(map => map==predifinedMap)){
                     CheckRequiredParameters(nameof(_dxWebAssembly), nameof(_dxWebAssembly));
                     var typeToMap = predifinedMap.GetTypeToMap();
                     return new ModelMapperConfiguration(){MapData = (typeToMap,new []{typeof(IModelPropertyEditor)})};

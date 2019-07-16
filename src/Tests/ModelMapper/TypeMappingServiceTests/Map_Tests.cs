@@ -28,6 +28,7 @@ using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraGrid.Views.Layout;
 using DevExpress.XtraLayout;
 using DevExpress.XtraPivotGrid;
+using DevExpress.XtraRichEdit;
 using DevExpress.XtraScheduler;
 using DevExpress.XtraTreeList;
 using DevExpress.XtraTreeList.Columns;
@@ -203,7 +204,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 //        [InlineData(PredifinedMap.ASPxDateEdit,new[]{typeof(ASPxDateEdit)},Platform.Web,new string[0])]
 //        [InlineData(PredifinedMap.ASPxHyperLink,new[]{typeof(ASPxHyperLink)},Platform.Web,new string[0])]
 //        [InlineData(PredifinedMap.ASPxLookupDropDownEdit,new[]{typeof(ASPxLookupDropDownEdit)},Platform.Web,new string[0])]
-        [InlineData(PredifinedMap.ASPxLookupFindEdit,new[]{typeof(ASPxLookupFindEdit)},Platform.Web,new string[0])]
+//        [InlineData(PredifinedMap.ASPxLookupFindEdit,new[]{typeof(ASPxLookupFindEdit)},Platform.Web,new string[0])]
+//        [InlineData(PredifinedMap.ASPxSpinEdit,new[]{typeof(ASPxSpinEdit)},Platform.Web,new string[0])]
+        [InlineData(PredifinedMap.ASPxTokenBox,new[]{typeof(ASPxTokenBox)},Platform.Web,new string[0])]
+        [InlineData(PredifinedMap.ASPxComboBox,new[]{typeof(ASPxComboBox)},Platform.Web,new string[0])]
+        [InlineData(PredifinedMap.LabelControl,new[]{typeof(LabelControl)},Platform.Win,new string[0])]
+        [InlineData(PredifinedMap.RichEditControl,new[]{typeof(RichEditControl)},Platform.Win,new string[0])]
 
         internal async Task Map_Predifined_Configurations(PredifinedMap predifinedMap, Type[] assembliesToLoad,Platform platform, string[] collectionNames){
             

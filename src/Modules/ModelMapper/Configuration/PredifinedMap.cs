@@ -37,6 +37,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Configuration{
         [MapPlatform(Platform.Win)]
         RepositoryItemButtonEdit,
         [MapPlatform(Platform.Win)]
+        LabelControl,
+        [MapPlatform(Platform.Win)]
+        RichEditControl,
+        [MapPlatform(Platform.Win)]
         RepositoryItemComboBox,
         [MapPlatform(Platform.Win)]
         RepositoryItemDateEdit,
@@ -164,5 +168,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Configuration{
         ASPxLookupDropDownEdit,
         [MapPlatform(Platform.Web)]
         ASPxLookupFindEdit,
+        [MapPlatform(Platform.Web)]
+        ASPxSpinEdit,
+        [MapPlatform(Platform.Web)]
+        ASPxTokenBox,
+        [MapPlatform(Platform.Web)]
+        ASPxComboBox,
+        [MapPlatform(Platform.Web)]
+        FilterEditorControl,
     }
 }
