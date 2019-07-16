@@ -202,7 +202,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 //        [InlineData(PredifinedMap.DashboardViewer,new[]{typeof(DashboardViewer)},Platform.Win,new string[0])]
 //        [InlineData(PredifinedMap.ASPxDateEdit,new[]{typeof(ASPxDateEdit)},Platform.Web,new string[0])]
 //        [InlineData(PredifinedMap.ASPxHyperLink,new[]{typeof(ASPxHyperLink)},Platform.Web,new string[0])]
-        [InlineData(PredifinedMap.ASPxLookupDropDownEdit,new[]{typeof(ASPxLookupDropDownEdit)},Platform.Web,new string[0])]
+//        [InlineData(PredifinedMap.ASPxLookupDropDownEdit,new[]{typeof(ASPxLookupDropDownEdit)},Platform.Web,new string[0])]
+        [InlineData(PredifinedMap.ASPxLookupFindEdit,new[]{typeof(ASPxLookupFindEdit)},Platform.Web,new string[0])]
 
         internal async Task Map_Predifined_Configurations(PredifinedMap predifinedMap, Type[] assembliesToLoad,Platform platform, string[] collectionNames){
             
@@ -299,7 +300,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             modelType.Name.ShouldBe(modelTypeName);
 
             propertyInfos.Length.ShouldBeGreaterThan(15);
-            if (new[]{PredifinedMap.ASPxLookupDropDownEdit}.All(map => map!=predifinedMap)){
+            if (new[]{PredifinedMap.ASPxLookupDropDownEdit,PredifinedMap.ASPxLookupFindEdit, }.All(map => map!=predifinedMap)){
                 var descriptionAttribute = propertyInfos.Select(info => info.Attribute<DescriptionAttribute>())
                     .FirstOrDefault(attribute => attribute != null && attribute.Description.Contains(" "));
                 descriptionAttribute.ShouldNotBeNull();

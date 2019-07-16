@@ -162,5 +162,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Configuration{
         ASPxHyperLink,
         [MapPlatform(Platform.Web)]
         ASPxLookupDropDownEdit,
+        [MapPlatform(Platform.Web)]
+        ASPxLookupFindEdit,
     }
 }

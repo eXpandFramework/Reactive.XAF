@@ -79,7 +79,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 //        [InlineData(PredifinedMap.DashboardViewer, typeof(DashboardViewer),Platform.Win,MMDetailViewTestItemNodePath)]
 //        [InlineData(PredifinedMap.ASPxDateEdit, typeof(ASPxDateEdit),Platform.Web,MMDetailViewTestItemNodePath)]
 //        [InlineData(PredifinedMap.ASPxHyperLink, typeof(ASPxHyperLink),Platform.Web,MMDetailViewTestItemNodePath)]
-        [InlineData(PredifinedMap.ASPxLookupDropDownEdit, typeof(ASPxLookupDropDownEdit),Platform.Web,MMDetailViewTestItemNodePath)]
+//        [InlineData(PredifinedMap.ASPxLookupDropDownEdit, typeof(ASPxLookupDropDownEdit),Platform.Web,MMDetailViewTestItemNodePath)]
+        [InlineData(PredifinedMap.ASPxLookupFindEdit, typeof(ASPxLookupFindEdit),Platform.Web,MMDetailViewTestItemNodePath)]
         internal void ExtendModel_Predefined_Type(PredifinedMap configuration,Type typeToMap,Platform platform,string nodePath){
             Assembly.LoadFile(typeToMap.Assembly.Location);
             InitializeMapperService($"{nameof(ExtendModel_Predefined_Type)}{configuration}{platform}",platform);
