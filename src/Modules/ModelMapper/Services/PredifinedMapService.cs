@@ -258,7 +258,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             else if (new[]{PredifinedMap.ASPxUploadControl,PredifinedMap.ASPxPopupControl }.Any(map => map==predifinedMap)){
                 assembly = _dxWebAssembly;
             }
-            else if (predifinedMap==PredifinedMap.DashboardDesigner){
+            else if (new[]{PredifinedMap.DashboardDesigner,PredifinedMap.DashboardViewer}.Any(map => map==predifinedMap)){
                 assembly = _dashboardWinAssembly;
             }
             else if (new[]{PredifinedMap.PivotGridControl, PredifinedMap.PivotGridField}.Contains(predifinedMap)){
@@ -307,6 +307,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 return "DevExpress.XtraEditors.SplitContainerControl";
             if (predifinedMap == PredifinedMap.DashboardDesigner)
                 return "DevExpress.DashboardWin.DashboardDesigner";
+            if (predifinedMap == PredifinedMap.DashboardViewer)
+                return "DevExpress.DashboardWin.DashboardViewer";
             if (predifinedMap == PredifinedMap.TreeList)
                 return "DevExpress.XtraTreeList.TreeList";
             if (predifinedMap == PredifinedMap.TreeListColumn)
@@ -411,9 +413,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                     CheckRequiredParameters(nameof(_dxWinEditorsAssembly), nameof(_dxWinEditorsAssembly));
                     return new ModelMapperConfiguration(){MapData = (predifinedMap.GetTypeToMap(),new []{typeof(IModelListViewSplitLayout)})};
                 }
-                if (new[]{PredifinedMap.DashboardDesigner}.Any(map => map==predifinedMap)){
+                if (new[]{PredifinedMap.DashboardDesigner,PredifinedMap.DashboardViewer}.Any(map => map==predifinedMap)){
                     CheckRequiredParameters(nameof(_dashboardWinAssembly), nameof(_dashboardWinAssembly));
-                    return new ModelMapperConfiguration(){MapData = (predifinedMap.GetTypeToMap(),new []{typeof(IModelListView)})};
+                    var mapData = (predifinedMap.GetTypeToMap(),new []{predifinedMap==PredifinedMap.DashboardDesigner?typeof(IModelListView):typeof(IModelPropertyEditor)});
+                    return new ModelMapperConfiguration(){MapData = mapData};
                 }
 
                 if (predifinedMap.IsRepositoryItem()){

@@ -29,6 +29,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Configuration{
         [MapPlatform(Platform.Win)]
         DashboardDesigner,
         [MapPlatform(Platform.Win)]
+        DashboardViewer,
+        [MapPlatform(Platform.Win)]
         RepositoryItem,
         [MapPlatform(Platform.Win)]
         RepositoryItemTextEdit,
