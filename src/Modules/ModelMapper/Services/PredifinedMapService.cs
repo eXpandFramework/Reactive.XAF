@@ -255,7 +255,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             else if (predifinedMap==PredifinedMap.SplitContainerControl){
                 assembly = _dxUtilsAssembly;
             }
-            else if (new[]{PredifinedMap.ASPxUploadControl,PredifinedMap.ASPxPopupControl ,PredifinedMap.ASPxDateEdit, }.Any(map => map==predifinedMap)){
+            else if (new[]{PredifinedMap.ASPxUploadControl,PredifinedMap.ASPxPopupControl ,PredifinedMap.ASPxDateEdit,PredifinedMap.ASPxHyperLink,  }.Any(map => map==predifinedMap)){
                 assembly = _dxWebAssembly;
             }
             else if (new[]{PredifinedMap.DashboardDesigner,PredifinedMap.DashboardViewer}.Any(map => map==predifinedMap)){
@@ -352,6 +352,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 return "DevExpress.Web.ASPxPopupControl";
             if (predifinedMap == PredifinedMap.ASPxDateEdit)
                 return "DevExpress.Web.ASPxDateEdit";
+            if (predifinedMap == PredifinedMap.ASPxHyperLink)
+                return "DevExpress.Web.ASPxHyperLink";
             if (predifinedMap == PredifinedMap.ASPxScheduler)
                 return "DevExpress.Web.ASPxScheduler.ASPxScheduler";
             if (predifinedMap == PredifinedMap.ASPxHtmlEditor)
@@ -467,7 +469,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                     var typeToMap = predifinedMap.GetTypeToMap();
                     return new ModelMapperConfiguration(){MapData = (typeToMap,new []{typeof(IModelView)})};
                 }
-                if (new[]{PredifinedMap.ASPxDateEdit}.Any(map => map==predifinedMap)){
+                if (new[]{PredifinedMap.ASPxDateEdit,PredifinedMap.ASPxHyperLink, }.Any(map => map==predifinedMap)){
                     CheckRequiredParameters(nameof(_dxWebAssembly), nameof(_dxWebAssembly));
                     var typeToMap = predifinedMap.GetTypeToMap();
                     return new ModelMapperConfiguration(){MapData = (typeToMap,new []{typeof(IModelPropertyEditor)})};
