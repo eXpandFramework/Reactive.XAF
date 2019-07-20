@@ -9,6 +9,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Configuration{
     public enum VisibilityCriteriaLeftOperand{
         [Description(IsAssignableFromOperator.OperatorName+ "({0}"+nameof(IModelListView.EditorType)+",?)")]
         IsAssignableFromModelListVideEditorType,
+        [Description(PropertyExistsOperator.OperatorName+ "({0},?)")]
+        PropertyExists,
         [Description(IsAssignableFromOperator.OperatorName+ "({0}"+nameof(IModelCommonMemberViewItem.PropertyEditorType)+",?)")]
         IsAssignableFromModelCommonMemberViewItemPropertyEditorType
     }
@@ -19,6 +21,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Configuration{
                 rightOperand = ((Type) rightOperand).AssemblyQualifiedName;
             }
 
+            
             var criteria = string.Format(leftOperand.AsString(EnumFormat.Description),path);
             return CriteriaOperator.Parse(criteria, rightOperand).ToString();
         }

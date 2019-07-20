@@ -19,27 +19,38 @@ namespace Xpand.XAF.Modules.ModelMapper.Configuration{
         [MapPlatform(Platform.Win)]
         GridColumn,
         [MapPlatform(Platform.Win)]
-        TreeList,
+        AdvBandedGridView,
         [MapPlatform(Platform.Win)]
-        TreeListColumn,
+        BandedGridColumn,
         [MapPlatform(Platform.Win)]
         XafLayoutControl,
         [MapPlatform(Platform.Win)]
         SplitContainerControl,
         [MapPlatform(Platform.Win)]
+        LayoutView,
+        [MapPlatform(Platform.Win)]
+        LayoutViewColumn,
+        [MapPlatform(Platform.Win)]
+        TreeList,
+        [MapPlatform(Platform.Win)]
+        TreeListColumn,
+        
+        [MapPlatform(Platform.Win)]
         DashboardDesigner,
         [MapPlatform(Platform.Win)]
+        LabelControl,
+        [MapPlatform(Platform.Win)]
+        RichEditControl,
+        [MapPlatform(Platform.Win)]
         DashboardViewer,
+        [MapPlatform(Platform.Web)]
+        ASPxDashboard,
         [MapPlatform(Platform.Win)]
         RepositoryItem,
         [MapPlatform(Platform.Win)]
         RepositoryItemTextEdit,
         [MapPlatform(Platform.Win)]
         RepositoryItemButtonEdit,
-        [MapPlatform(Platform.Win)]
-        LabelControl,
-        [MapPlatform(Platform.Win)]
-        RichEditControl,
         [MapPlatform(Platform.Win)]
         RepositoryItemComboBox,
         [MapPlatform(Platform.Win)]
@@ -112,14 +123,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Configuration{
         RepositoryItemPopupBaseAutoSearchEdit,
         [MapPlatform(Platform.Win)]
         SchedulerControl,
-        [MapPlatform(Platform.Win)]
-        AdvBandedGridView,
-        [MapPlatform(Platform.Win)]
-        BandedGridColumn,
-        [MapPlatform(Platform.Win)]
-        LayoutView,
-        [MapPlatform(Platform.Win)]
-        LayoutViewColumn,
+        
         [MapPlatform(Platform.Win)]
         PivotGridControl,
         [MapPlatform(Platform.Win)]
@@ -173,8 +177,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Configuration{
         [MapPlatform(Platform.Web)]
         ASPxTokenBox,
         [MapPlatform(Platform.Web)]
-        ASPxComboBox,
-        [MapPlatform(Platform.Web)]
-        FilterEditorControl,
+        ASPxComboBox
     }
 }

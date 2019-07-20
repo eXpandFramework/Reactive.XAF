@@ -8,34 +8,32 @@ using System.Reflection;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
-using Fasterflect;
 using Xpand.Source.Extensions.System.String;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-    public class ModelMapperModelConfigurationAttribute : Attribute{
-        public ModelMapperModelConfigurationAttribute(string typeName, int hashCode){
-            TypeName = typeName;
+    public class ModelMapperServiceAttribute : Attribute{
+        public ModelMapperServiceAttribute( int hashCode){
             HashCode = hashCode;
         }
-
-        public string TypeName{ get; }
         public int HashCode{ get; }
     }
 
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-    public class ModelMapperServiceAttribute : Attribute{
-        public ModelMapperServiceAttribute(string mappedType, string mappedAssemmbly, string version){
+    public class ModelMapperTypeAttribute : Attribute{
+        public ModelMapperTypeAttribute(string mappedType, string mappedAssemmbly, int assemblyHashCode, int configurationHashCode){
             MappedAssemmbly = mappedAssemmbly;
+            ConfigurationHashCode = configurationHashCode;
             MappedType = mappedType;
-            Version = Version.Parse(version);
+            AssemblyHashCode = assemblyHashCode;
         }
 
         public string MappedAssemmbly{ get; }
 
-        public Version Version{ get; }
+        public int AssemblyHashCode{ get; }
         public string MappedType{ get; }
+        public int ConfigurationHashCode{ get; }
     }
 
     [AttributeUsage(AttributeTargets.Interface|AttributeTargets.Class)]
@@ -74,10 +72,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         private static string AssemblyAttributesCode(this Type type,IModelMapperConfiguration configuration){
-            var modelMapperServiceAttributeCode = ModelMapperServiceAttributeCode(type);
-            int hashCode = 0;
-            if (configuration != null) hashCode = configuration.GetHashCode();
-            var modelMapperConfigurationCode = $@"[assembly:{typeof(ModelMapperModelConfigurationAttribute).FullName}(""{type.FullName}"",{hashCode})]{Environment.NewLine}";
+            var modelMapperServiceAttributeCode = type.ModelMapperServiceAttributeCode(configuration);
+            
+            var modelMapperConfigurationCode = $@"[assembly:{typeof(ModelMapperServiceAttribute).FullName}({HashCode()})]{Environment.NewLine}";
             return string.Join(Environment.NewLine, modelMapperConfigurationCode, modelMapperServiceAttributeCode);
         }
 
@@ -170,8 +167,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             return (modelMappersTypeName,modelMappersInterfaceCode);
         }
 
-        private static string ModelMapperServiceAttributeCode(this Type type){
-            return $@"[assembly:{typeof(ModelMapperServiceAttribute).FullName}(""{type.FullName}"",""{type.Assembly.GetName().Name}"",""{type.Assembly.GetName().Version}"")]";
+        private static string ModelMapperServiceAttributeCode(this Type type, IModelMapperConfiguration configuration){
+            return $@"[assembly:{typeof(ModelMapperTypeAttribute).FullName}(""{type.FullName}"",""{type.Assembly.GetName().Name}"",{type.Assembly.ManifestModule.ModuleVersionId.GetHashCode()},{configuration.GetHashCode()})]";
         }
 
         private static (string key, string code) ContainerCode(this Type type, IModelMapperConfiguration configuration, string modelName, string mapName){
@@ -251,13 +248,17 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             return $"IModel{data.typeToCode.Namespace?.Replace(".","")}_{data.typeToCode.Name}";
         }
 
-        private static IObservable<(string code, IEnumerable<string> references)> ModelCode(this IObservable<(Type type, IModelMapperConfiguration configuration)> source){
+        private static IObservable<(string code, IEnumerable<string> references)> ModelCode(this IObservable<IModelMapperConfiguration> source){
 
-            var assemblyAttributes = source.Select(_ => _.type.AssemblyAttributesCode(_.configuration))
+            var assemblyAttributes = source.Select(_ => _.TypeToMap.AssemblyAttributesCode(_))
+                .Aggregate((acc, curr) => {
+                    acc += curr;
+                    return acc;
+                })
                 .Concat(Observable.Return(AssemblyVersionCode()))
-                .Select(_=>(code:_,references:new[]{typeof(ModelMapperAttribute).Assembly.Location}.AsEnumerable()));
+                .Select(_=>(code:_,references:new[]{typeof(ModelMapperModule).Assembly.Location}.AsEnumerable()));
             var typeCode = source.SelectMany(_ => {
-                    var code = _.type.ModelCode(_.configuration);
+                    var code = _.TypeToMap.ModelCode(_);
                     return code.code.Select(__ => (code: __, code.references));
                 })
                 .Distinct(_ => _.code.key)

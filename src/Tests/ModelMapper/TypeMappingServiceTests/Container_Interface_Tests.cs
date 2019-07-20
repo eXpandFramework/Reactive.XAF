@@ -5,7 +5,6 @@ using DevExpress.Persistent.Base;
 using Fasterflect;
 using Shouldly;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
-using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xunit;
 using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.TypeMappingService;
@@ -19,7 +18,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             var typeToMap = typeof(TestModelMapper);
             var imageName = "ImageName";
 
-            var modelType = await typeToMap.MapToModel(new ModelMapperConfiguration(){ImageName = imageName})
+            var modelType = await new ModelMapperConfiguration(typeToMap){ImageName = imageName}.MapToModel()
                 .ModelInterfaces();
 
             var imageNameAttribute = modelType.Attribute<ImageNameAttribute>();
@@ -50,8 +49,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             var containerName = "Custom";
             string mapName="mapName";
 
-            var modelType = await typeToMap
-                .MapToModel(new ModelMapperConfiguration(){ContainerName = containerName, MapName = mapName})
+            var modelType = await new ModelMapperConfiguration(typeToMap){ContainerName = containerName, MapName = mapName}
+                .MapToModel()
                 .ModelInterfaces();
 
             var containerType = modelType.Assembly.GetType($"IModel{containerName}");

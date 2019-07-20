@@ -113,15 +113,12 @@ namespace TestsLib {
         }
 
         static void MockEditorsFactory(this XafApplication application){
-            var listEditorMock = new Mock<ListEditor>{CallBase = true};
-            listEditorMock.Setup(editor => editor.SupportsDataAccessMode(CollectionSourceDataAccessMode.Client)).Returns(true);
-            listEditorMock.Setup(editor => editor.GetSelectedObjects()).Returns(new object[0]);
-            listEditorMock.Protected().Setup<object>("CreateControlsCore").Returns(application is WinApplication?(object) new GridControl():new ASPxGridView());
-            
+            var listEditorMock = ListEditorMock(application);
+
             var editorsFactoryMock = new Mock<IEditorsFactory>();
             application.EditorFactory =editorsFactoryMock.Object;
             application.MockListEditor( (view, xafApplication, collectionSource) => listEditorMock.Object);
-
+            
             editorsFactoryMock.Setup(_ => _.CreateDetailViewEditor(It.IsAny<bool>(), It.IsAny<IModelViewItem>(),
                     It.IsAny<Type>(), It.IsAny<XafApplication>(), It.IsAny<IObjectSpace>()))
                 .Returns((bool needProtectedContent, IModelViewItem modelViewItem, Type objectType, XafApplication app,
@@ -137,6 +134,15 @@ namespace TestsLib {
             
         }
 
+        public static Mock<ListEditor> ListEditorMock(this XafApplication application){
+            var listEditorMock = new Mock<ListEditor>{CallBase = true};
+            listEditorMock.Setup(editor => editor.SupportsDataAccessMode(CollectionSourceDataAccessMode.Client)).Returns(true);
+            listEditorMock.Setup(editor => editor.GetSelectedObjects()).Returns(new object[0]);
+            listEditorMock.Protected().Setup<object>("CreateControlsCore")
+                .Returns(application is WinApplication ? (object) new GridControl() : new ASPxGridView());
+            return listEditorMock;
+        }
+
         public static void MockListEditor(this XafApplication application,  Func<IModelListView,XafApplication,CollectionSourceBase,ListEditor> listEditor){
             var editorsFactoryMock = application.EditorFactory.GetMock();
             editorsFactoryMock.Setup(_ =>_.CreateListEditor(It.IsAny<IModelListView>(), It.IsAny<XafApplication>(),It.IsAny<CollectionSourceBase>()))
@@ -149,6 +155,21 @@ namespace TestsLib {
                 : new Mock<ASPxGridListEditor>(modelListView){CallBase = true}.Object;
             ((IComplexListEditor) listEditor).Setup(collectionSourceBase, application);
             return listEditor;
+        }
+
+        public static void MockDetailViewEditor(this XafApplication application,IModelPropertyEditor modelPropertyEditor,object controlInstance){
+            modelPropertyEditor.PropertyEditorType = typeof(CustomPropertyEditor);
+            application.EditorFactory.GetMock().Setup(factory => factory
+                    .CreateDetailViewEditor(false, It.IsAny<IModelViewItem>(),
+                        modelPropertyEditor.ModelMember.ModelClass.TypeInfo.Type, application, It.IsAny<IObjectSpace>()))
+                .Returns((bool needProtectedContent, IModelMemberViewItem modelViewItem, Type objectType,
+                    XafApplication xafApplication, IObjectSpace objectSpace) => {
+                    if (modelViewItem == modelPropertyEditor){
+                        return new CustomPropertyEditor(objectType, modelViewItem, controlInstance);
+                    }
+
+                    return new EditorsFactory().CreateDetailViewEditor(needProtectedContent, modelViewItem, objectType,application, objectSpace);
+                });
         }
 
         public static void MockFrameTemplate(this XafApplication application){

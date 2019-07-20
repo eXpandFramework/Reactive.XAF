@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Drawing.Design;
 using System.Linq;
 using DevExpress.Data.Filtering;
+using DevExpress.Data.Filtering.Exceptions;
 using DevExpress.Data.Filtering.Helpers;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
@@ -75,15 +76,17 @@ namespace Xpand.XAF.Modules.ModelMapper{
             return true;
         }
 
-        public ICollection<ICustomFunctionOperator> CustomFunctions{ get; }=new List<ICustomFunctionOperator>(){new IsAssignableFromOperator()};
+        public ICollection<ICustomFunctionOperator> CustomFunctions{ get; }=new List<ICustomFunctionOperator>(){new IsAssignableFromOperator(),new PropertyExistsOperator()};
     }
 
     public class ModelMapperBrowsableAttribute:ModelBrowsableAttribute {
-        public ModelMapperBrowsableAttribute(Type visibilityCalculatorType,string criteria) : base(visibilityCalculatorType){
+        public ModelMapperBrowsableAttribute(Type visibilityCalculatorType,string criteria,string validCriteria=null) : base(visibilityCalculatorType){
             Criteria = criteria;
+            ValidCriteria = validCriteria;
         }
 
         public string Criteria{ get; }
+        public string ValidCriteria{ get; }
     }
 
     

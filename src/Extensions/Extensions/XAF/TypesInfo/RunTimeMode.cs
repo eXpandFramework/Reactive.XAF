@@ -5,7 +5,7 @@ using System.Linq;
 using DevExpress.ExpressApp.DC;
 
 namespace Xpand.Source.Extensions.XAF.TypesInfo{
-    internal static class TypesInfoExtensions{
+    internal static partial class TypesInfoExtensions{
         public static bool RuntimeMode(this ITypesInfo typeInfo){
             var devProcceses = new[]{".ExpressApp.ModelEditor", "devenv"};
             var processName = Process.GetCurrentProcess().ProcessName;

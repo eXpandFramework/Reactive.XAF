@@ -4,6 +4,7 @@ using System.Linq;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Win.Editors;
+using DevExpress.XtraEditors.Repository;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.BandedGrid;
 using DevExpress.XtraGrid.Views.Base;
@@ -66,10 +67,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
     class CustomGridListEditor:GridListEditor,ISupportFooter{
         private readonly Type _viewType;
         private readonly Type _columnType;
+        private readonly RepositoryItem _repositoryItem;
 
-        public CustomGridListEditor(IModelListView model, Type viewType,Type columnType) : base(model){
+        public CustomGridListEditor(IModelListView model, Type viewType, Type columnType,
+            RepositoryItem repositoryItem=null) : base(model){
             _viewType = viewType;
             _columnType = columnType;
+            _repositoryItem = repositoryItem;
         }
 
         public override void ApplyModel(){
@@ -102,6 +106,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                 var column = (GridColumn) _columnType.CreateInstance();
                 column.Name = s;
                 column.FieldName = s;
+                column.ColumnEdit=_repositoryItem;
                 return column;
             }).ToArray();
             

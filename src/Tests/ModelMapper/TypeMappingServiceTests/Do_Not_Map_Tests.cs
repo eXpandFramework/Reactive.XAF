@@ -13,9 +13,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
     
     public partial class ObjectMappingServiceTests{
         [Fact]
-        public async Task Do_Not_Map_Already_Mapped_Properties(){
+        public async Task Do_Not_Map_If_recursion_detected(){
             
-            InitializeMapperService(nameof(Do_Not_Map_Already_Mapped_Properties));
+            InitializeMapperService(nameof(Do_Not_Map_If_recursion_detected));
             var typeToMap = typeof(RootType);
 
             var modelType = await typeToMap.MapToModel().ModelInterfaces();
@@ -26,14 +26,14 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             modelTypeProperties.FirstOrDefault(info => info.Name==nameof(RootType.Value)).ShouldNotBeNull();
             var mapperInfo = modelTypeProperties.FirstOrDefault(info => info.Name==nameof(RootType.RootTestModelMapper));
             mapperInfo.ShouldNotBeNull();
-            mapperInfo.PropertyType.Properties().FirstOrDefault(info => info.Name==nameof(TestModelMapper.Age)).ShouldNotBeNull();
+            mapperInfo.PropertyType.Properties().FirstOrDefault(info => info.Name==nameof(TestModelMapper.Name)).ShouldNotBeNull();
             var nestedInfo = modelTypeProperties.FirstOrDefault(info => info.Name==nameof(RootType.NestedType));
             nestedInfo.ShouldNotBeNull();
 
             nestedInfo.PropertyType.Properties().FirstOrDefault(info => info.Name==nameof(NestedType.RootType)).ShouldBeNull();
             mapperInfo=nestedInfo.PropertyType.Properties().FirstOrDefault(info => info.Name==nameof(NestedType.NestedTestModelMapper));
             mapperInfo.ShouldNotBeNull();
-            mapperInfo.PropertyType.Properties().FirstOrDefault(info => info.Name==nameof(TestModelMapper.Age)).ShouldNotBeNull();
+            mapperInfo.PropertyType.Properties().FirstOrDefault(info => info.Name==nameof(TestModelMapper.Name)).ShouldNotBeNull();
 
 
             var nested2Info = nestedInfo.PropertyType.Properties().FirstOrDefault(info => info.Name==nameof(NestedType.NestedType2));
@@ -155,42 +155,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         
-        public async Task Do_Not_Map_PredifinedMap_Columns(){
-//            InitializeMapperService($"{nameof(Do_Not_Map_PredifinedMap_Columns)}",Platform.Win);
-//            ConfigureLayoutViewPredifinedMapService();
-//            var values = Enums.GetValues<PredifinedMap>().Where(map =>
-//                map.GetAttributes().OfType<MapPlatformAttribute>().Any(_ => _.Platform == platform.ToString())).ToArray();
-//
-//            var modelInterfaces = values.MapToModel().ModelInterfaces().Replay();
-//            modelInterfaces.Connect();
-//
-//            var types = modelInterfaces.ToEnumerable().ToArray();
-//            types.Length.ShouldBe(values.Length);
-//            foreach (var configuration in values){
-//                types.FirstOrDefault(_ => _.Name==$"IModel{configuration.ToString()}").ShouldNotBeNull();
-//            }
-        }
 
-        [Fact]
-        public async Task Do_Not_Map_If_Type_Assembly_Version_Not_Changed(){
-            InitializeMapperService(nameof(Do_Not_Map_If_Type_Assembly_Version_Not_Changed));
-            var mappedType = typeof(TestModelMapper);
-
-            var mapToModel = await mappedType.MapToModel().ModelInterfaces();
-
-            var modelMapperAttribute = mapToModel.Assembly.GetCustomAttributes(typeof(ModelMapperServiceAttribute),false)
-                .OfType<ModelMapperServiceAttribute>().FirstOrDefault(attribute => attribute.MappedType==mappedType.FullName&&attribute.MappedAssemmbly==mappedType.Assembly.GetName().Name);
-            modelMapperAttribute.ShouldNotBeNull();
-
-            var version = modelMapperAttribute.Version;
-
-            mappedType.MapToModel();
-            mapToModel = await TypeMappingService.MappedTypes;
-
-            modelMapperAttribute = mapToModel.Assembly.GetCustomAttributes(typeof(ModelMapperServiceAttribute),false)
-                .OfType<ModelMapperServiceAttribute>().First(attribute => attribute.MappedType==mappedType.FullName&&attribute.MappedAssemmbly==mappedType.Assembly.GetName().Name);
-            modelMapperAttribute.Version.ShouldBe(version);
-        }
 
     }
 }
