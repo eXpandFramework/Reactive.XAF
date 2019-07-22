@@ -137,12 +137,5 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             });
         }
 
-        private static IObservable<Type> Compile(this IObservable<(string code,IEnumerable<string> references)> source){
-            return source.SelectMany(_ => {
-                var assembly = _.references.Compile(_.code);
-                var types = assembly.GetTypes().Where(type => typeof(IModelModelMap).IsAssignableFrom(type));
-                return types;
-            });
-        }
     }
 }

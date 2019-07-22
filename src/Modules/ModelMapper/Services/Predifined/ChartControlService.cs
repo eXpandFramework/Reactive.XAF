@@ -22,7 +22,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.Predifined{
         private static void ChartDiagrams(ModelMapperType modelMapperType, PropertyInfo propertyInfo,Type chartControlType){
             if (modelMapperType.TypeToMap == modelMapperType.Type){
                 if (propertyInfo.PropertyType != modelMapperType.TypeToMap && propertyInfo.PropertyType.IsAssignableFrom(modelMapperType.Type)){
-                    var modelMapName = (propertyInfo.PropertyType).ModelMapName(chartControlType);
+                    var modelMapName = (propertyInfo.PropertyType).ModelTypeName(chartControlType);
                     modelMapperType.BaseTypeFullNames.Add(modelMapName);
                 }
             }

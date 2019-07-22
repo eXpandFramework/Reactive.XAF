@@ -26,11 +26,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         
     }
     class ModelMapperTestModule:ModuleBase{
-        static readonly Subject<ApplicationModulesManager> ModulesManagerSubject=new Subject<ApplicationModulesManager>();
-        public IObservable<ApplicationModulesManager> ApplicationModulesManager{ get; }=ModulesManagerSubject;
+        readonly Subject<ApplicationModulesManager> _modulesManagerSubject=new Subject<ApplicationModulesManager>();
+        public IObservable<ApplicationModulesManager> ApplicationModulesManager=>_modulesManagerSubject;
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
-            ModulesManagerSubject.OnNext(moduleManager);
+            _modulesManagerSubject.OnNext(moduleManager);
         }
     }
     public class TestModelMapper{

@@ -13,8 +13,10 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
 using DevExpress.Utils.Extensions;
+using Fasterflect;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.Predifined;
+using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     public static partial class TypeMappingService{
@@ -76,8 +78,15 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 var distinnctTypesToMap = _typesToMap.Distinct(_ => _.TypeToMap).Do(_mappingTypes);
                 return distinnctTypesToMap
                     .All(_ => _.TypeFromPath())
-                    .Select(_ =>!_? distinnctTypesToMap.ModelCode().Compile(): Assembly.LoadFile(OutputAssembly).GetTypes()
-                                .Where(type => typeof(IModelModelMap).IsAssignableFrom(type)).ToObservable()).Switch();
+                    .Select(_ => {
+                        var assembly = !_? distinnctTypesToMap.ModelCode().Select(tuple => tuple.references.Compile(tuple.code)): Assembly.LoadFile(OutputAssembly).AsObservable();
+                        return assembly.SelectMany(assembly1 => {
+                            var types = assembly1.GetTypes()
+                                .Where(type => typeof(IModelModelMap).IsAssignableFrom(type))
+                                .Where(type => !type.Attributes<ModelAbstractClassAttribute>().Any()).ToArray();
+                            return types;
+                        });
+                    }).Switch();
             }).Publish().AutoConnect().Replay().AutoConnect().Distinct();
             _modelMapperModuleVersion = typeof(TypeMappingService).Assembly.GetName().Version;
             
@@ -99,6 +108,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             
         }
 
+        
+
         public static IEnumerable<Type> ModelMapperContainerTypes(this Type type){
             return type.Assembly.GetTypes()
                 .Where(_ => _.Name.EndsWith(DefaultContainerSuffix))
@@ -118,7 +129,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         public static IEnumerable<ModelMapperCustomAttributeData> ToModelMapperConfigurationData(this IEnumerable<CustomAttributeData> source){
-            return source.Select(_ => new ModelMapperCustomAttributeData(_.AttributeType, _.ConstructorArguments));
+            return source.Select(_ => new ModelMapperCustomAttributeData(_.AttributeType, _.ConstructorArguments.ToArray()));
         }
 
         public static IObservable<Type> MapToModel(this IModelMapperConfiguration configurations){
@@ -166,9 +177,14 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             return configuration?.ContainerName?? $"{type.Name}{DefaultContainerSuffix}";
         }
 
-        public static string ModelMapName(this Type type,Type rootType=null, IModelMapperConfiguration configuration=null){
+        public static IModelNode MapNode(this IModelNode modelNode,Type type){
+            return modelNode.GetNode(type.Name);
+        }
+
+        public static string ModelTypeName(this Type type,Type rootType=null, IModelMapperConfiguration configuration=null){
             if (rootType==null){
-                return configuration?.MapName??type.Name;
+                rootType = type;
+//                return configuration?.MapName??type.Name;
             }
 
             return (type, rootType).ModelName(configuration?.MapName);

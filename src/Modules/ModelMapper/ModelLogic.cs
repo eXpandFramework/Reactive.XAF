@@ -197,7 +197,7 @@ namespace Xpand.XAF.Modules.ModelMapper{
 //        }
 
         private static string GetName(ITypeInfo typeInfo){
-            var displayNameAttribute = typeInfo.FindAttribute<ModelDisplayNameAttribute>();
+            var displayNameAttribute = typeInfo.FindAttribute<ModelDisplayNameAttribute>(false);
             return displayNameAttribute != null ? displayNameAttribute.ModelDisplayName : typeInfo.Type.Name.Replace("IModel", "");
         }
     }

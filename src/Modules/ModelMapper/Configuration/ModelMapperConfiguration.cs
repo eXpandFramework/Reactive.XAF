@@ -11,6 +11,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Configuration{
         string ImageName{ get; }
         List<Type> TargetInterfaceTypes { get; }
         Type TypeToMap{ get; set; }
+        bool OmitContainer{ get; }
     }
 
 
@@ -27,6 +28,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Configuration{
         public List<Type> TargetInterfaceTypes{ get;  }
         public string VisibilityCriteria{ get; set; }
         public Type TypeToMap{ get;  set; }
+        public bool OmitContainer{ get; set; }
         public string DisplayName{ get; set; }
 
         [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]

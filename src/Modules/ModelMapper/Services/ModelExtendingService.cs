@@ -52,7 +52,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             var modelExtenders = ModelMapperConfigurations.Distinct(_ => _.TypeToMap).ToObservable();
             var mappedContainers = TypeMappingService.Connect()
                 .SelectMany(unit => modelExtenders
-                    .Select(_ => _.MapToModel().Select(type => type)).Switch()
+                    .Select(_ => _.MapToModel()).Switch()
                     .ModelInterfaces()
                     .Where(type => typeof(IModelNode).IsAssignableFrom(type)))
                 .SelectMany(type => type.ModelMapperContainerTypes())
@@ -70,7 +70,14 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             if (modulesManager.Modules.FindModule<ModelMapperModule>()==null)
                 throw new NotSupportedException($"{typeof(ModelMapperModule)} is not registered");
             TypeMappingService.Connect().Wait();
-            ModelMapperConfigurations.Add(configuration);
+            var installed = ModelMapperConfigurations.FirstOrDefault(_ => _.TypeToMap==configuration.TypeToMap);
+            if (installed != null){
+                installed.TargetInterfaceTypes.AddRange(configuration.TargetInterfaceTypes);
+            }
+            else{
+                ModelMapperConfigurations.Add(configuration);
+            }
+            
 
         }
         public static void Extend<TTargetInterface>(this ApplicationModulesManager modulesManager,Type extenderType) 

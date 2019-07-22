@@ -6,7 +6,7 @@ using System.Reflection;
 using Fasterflect;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 
-namespace Xpand.XAF.Modules.ModelMapper{
+namespace Xpand.XAF.Modules.ModelMapper.Services{
     
     public  class ModelMapperType{
         public Type Type{ get; }
@@ -126,7 +126,7 @@ namespace Xpand.XAF.Modules.ModelMapper{
         }
 
         public void AddAttributeData(Type attributeType,params CustomAttributeTypedArgument[] arguments) {
-            _customAttributeDatas.Add(new ModelMapperCustomAttributeData(attributeType,new List<CustomAttributeTypedArgument>(arguments)));
+            _customAttributeDatas.Add(new ModelMapperCustomAttributeData(attributeType,arguments));
         }
 
         public void RemoveAttribute(Type type){
@@ -136,9 +136,10 @@ namespace Xpand.XAF.Modules.ModelMapper{
     }
 
     public class ModelMapperCustomAttributeData:CustomAttributeData{
-        public ModelMapperCustomAttributeData(Type attributeType, IList<CustomAttributeTypedArgument> constructorArguments){
+
+        public ModelMapperCustomAttributeData(Type attributeType, params  CustomAttributeTypedArgument[] constructorArguments){
             AttributeType = attributeType;
-            ConstructorArguments = constructorArguments;
+            ConstructorArguments = new List<CustomAttributeTypedArgument>(constructorArguments);
         }
 
         public override IList<CustomAttributeTypedArgument> ConstructorArguments{ get; }

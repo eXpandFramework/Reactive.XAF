@@ -10,8 +10,8 @@ using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xunit;
 
 namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
-    
-    public partial class ObjectMappingServiceTests:ModelMapperBaseTest{
+    [Xunit.Collection(nameof(ModelMapperModule))]
+    public class MapAttributesTests:ModelMapperBaseTest{
         [Fact]
         public async Task Map_Private_DescriptionAttributes(){
             InitializeMapperService(nameof(Map_Private_DescriptionAttributes));

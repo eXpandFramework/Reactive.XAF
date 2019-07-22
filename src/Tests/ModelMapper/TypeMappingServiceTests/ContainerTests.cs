@@ -10,8 +10,8 @@ using Xunit;
 using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.TypeMappingService;
 
 namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
-    
-    public partial class ObjectMappingServiceTests{
+    [Xunit.Collection(nameof(ModelMapperModule))]
+    public class ContainerTests:ModelMapperBaseTest{
         [Fact]
         public async Task Custom_Container_Image(){
             InitializeMapperService(nameof(Custom_Container_Image));
@@ -39,7 +39,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             var propertyInfo = containerType.GetProperty($"{typeToMap.Name}");
             propertyInfo.ShouldNotBeNull();
             propertyInfo.CanWrite.ShouldBeFalse();
-            propertyInfo.PropertyType.Name.ShouldBe($"IModel{typeToMap.Name}");
+            propertyInfo.PropertyType.Name.ShouldBe(typeToMap.ModelTypeName());
         }
 
         [Fact]

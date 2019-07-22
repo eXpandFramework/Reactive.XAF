@@ -23,6 +23,17 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.Predifined{
         public static string RepositoryItemsMapName = "RepositoryItems";
         public static string PropertyEditorControlMapName = "Controls";
 
+        public static IObservable<Unit> Connect(){
+            var repositoryItemTypes = Enums.GetValues<PredifinedMap>().Where(map => map.IsRepositoryItem())
+                .Select(map => map.TypeToMap()).Where(type => type!=null)
+                .ToArray();
+            var propertyEditorControlTypes = Enums.GetValues<PredifinedMap>()
+                .Where(map => map.IsPropertyEditor())
+                .Select(map => map.TypeToMap()).Where(type => type!=null)
+                .ToArray();
+            return ConnectViewItemService(repositoryItemTypes, typeof(RepositoryItemBaseMap),RepositoryItemsMapName)
+                .Merge(ConnectViewItemService(propertyEditorControlTypes, typeof(PropertyEditorControlMap),PropertyEditorControlMapName));
+        }
 
         private static IObservable<Unit> Connect((Type typeToMap, string mapName, Type[] viewItemTypes) info){
             
@@ -37,15 +48,21 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.Predifined{
 
 
         private static void ViewItem(ModelMapperType modelMapperType, Type typeToMap, Type[] viewItemTypes){
-            
+            if (modelMapperType.Type == typeof(RepositoryItemBaseMap)||modelMapperType.Type == typeof(PropertyEditorControlMap)){
+                if (modelMapperType.CustomAttributeDatas.All(data => data.AttributeType != typeof(ModelAbstractClassAttribute))){
+                    modelMapperType.CustomAttributeDatas.Add(new ModelMapperCustomAttributeData(typeof(ModelAbstractClassAttribute)));
+                }
+                
+            }
 //            if (viewItemTypes.Select(type => $"IModel{type.Name}").Contains(modelMapperType.ModelName)) {
             if (viewItemTypes.Contains(modelMapperType.Type)) {
                 modelMapperType.BaseTypeFullNames.RemoveAll(s => new[]{typeof(IModelModelMapContainer).FullName}.Contains(s));
                 if (modelMapperType.TypeToMap != null){
-                    var modelMapName = typeToMap.ModelMapName(typeToMap);
+                    var modelMapName = typeToMap.ModelTypeName(typeToMap);
                     modelMapperType.BaseTypeFullNames.Add(modelMapName);
-                    var arguments = new List<CustomAttributeTypedArgument>(){new CustomAttributeTypedArgument($"{modelMapperType.Type.AssemblyQualifiedName}")};
-                    modelMapperType.CustomAttributeDatas.Add(new ModelMapperCustomAttributeData(typeof(ModelMapLinkAttribute),arguments));
+
+                    modelMapperType.CustomAttributeDatas.Add(new ModelMapperCustomAttributeData(typeof(ModelMapLinkAttribute),
+                        new CustomAttributeTypedArgument($"{modelMapperType.Type.AssemblyQualifiedName}")));
                     modelMapperType.BaseTypeFullNames.Add(typeof(IModelNode).FullName);
                 }
 
@@ -63,6 +80,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.Predifined{
             if (modelMapperType.TypeToMap==null&&viewItemTypes.Contains(modelMapperType.Type)){
                 if (modelMapperType.BaseTypeFullNames.Contains(typeof(IModelModelMapContainer).FullName)){
                     modelMapperType.BaseTypeFullNames.Remove(typeof(IModelModelMapContainer).FullName);
+                    modelMapperType.AdditionalPropertiesCode = null;
                 }
             }
         }
@@ -70,23 +88,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.Predifined{
         private static void ViewItem(Type typeToMap, (Type typeToMap, Result<(string key, string code)> data) data,string mapName){
             if (data.typeToMap == typeToMap){
                 var result = data.data;
-                var modelMapTypeName = typeToMap.ModelMapName(typeToMap);
+                var modelMapTypeName = typeToMap.ModelTypeName(typeToMap);
                 string code=$"{modelMapTypeName}s {mapName}{{get;}}";
                 result.Data=(mapName,code);
             }
         }
 
-        public static IObservable<Unit> Connect(){
-            var repositoryItemTypes = Enums.GetValues<PredifinedMap>().Where(map => map.IsRepositoryItem())
-                .Select(map => map.TypeToMap()).Where(type => type!=null)
-                .ToArray();
-            var propertyEditorControlTypes = Enums.GetValues<PredifinedMap>()
-                .Where(map => map.IsPropertyEditor())
-                .Select(map => map.TypeToMap()).Where(type => type!=null)
-                .ToArray();
-            return ConnectViewItemService(repositoryItemTypes, typeof(RepositoryItemBaseMap),RepositoryItemsMapName)
-                .Merge(ConnectViewItemService(propertyEditorControlTypes, typeof(PropertyEditorControlMap),PropertyEditorControlMapName));
-        }
 
         private static IObservable<Unit> ConnectViewItemService(Type[] viewItemTypes, Type typeToMap,string mapName){
             return TypeMappingService.MappingTypes.Where(_ => viewItemTypes.Contains(_.TypeToMap)).FirstOrDefaultAsync().WhenNotDefault()

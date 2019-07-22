@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -21,16 +20,20 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services{
     public class Parameter:HandledEventArgs{
-        public Parameter(object item){
+        public Parameter(object item, IModelNode model, ObjectView objectView){
             Item = item;
+            Model = model;
+            ObjectView = objectView;
         }
 
         public object Item{ get; }
+        public IModelNode Model{ get; }
+        public ObjectView ObjectView{ get; }
     }
     public static class ModelBindingService{
-        static readonly Subject<object> ControlBingSubject=new Subject<object>();
+        static readonly Subject<Parameter> ControlBindSubject=new Subject<Parameter>();
 
-        public static IObservable<object> ControlBing => ControlBingSubject;
+        public static IObservable<Parameter> ControlBind => ControlBindSubject;
 
         internal static IObservable<Unit> BindConnect(this XafApplication application){
             
@@ -41,15 +44,18 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             var viewItemBindData = controlsCreated.ViewItemData(ViewItemService.RepositoryItemsMapName)
                 .Merge(controlsCreated.ViewItemData(ViewItemService.PropertyEditorControlMapName,view => view is DetailView))
                 .Select(_ => {
-                    var enumMember = EnumsNET.Enums.GetMember<PredifinedMap>(_.modelMap.GetType().Name.Replace("Model",""));
-                    var control = enumMember.Value.GetViewControl(_.objectView, _.modelMap.Parent.Parent.Id());
-                    return (_.modelMap, control);
+                    var mapType = _.modelMap.GetType().GetInterfaces().First(type =>typeof(IModelModelMap) != type && typeof(IModelModelMap).IsAssignableFrom(type) &&
+                        type.Attribute<ModelAbstractClassAttribute>() == null);
+                    var controlType = Type.GetType(mapType.Attribute<ModelMapLinkAttribute>().LinkedTypeName);
+                    var predifinedMap = EnumsNET.Enums.GetValues<PredifinedMap>().First(map => map.TypeToMap()==controlType);
+                    var control = predifinedMap.GetViewControl(_.objectView, _.modelMap.Parent.Parent.Id());
+                    return (_.modelMap, control,_.objectView);
                 });
             return controlsCreated
                 .ViewModelProperties()
                 .Select(BindData).WhenNotDefault()
                 .Merge(viewItemBindData)
-                .Do(BindTo)
+                .Do(tuple => BindTo(tuple))
                 .ToUnit();
                 
         }
@@ -63,7 +69,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             });
         }
 
-        private static (IModelModelMap modelMap, object control) BindData((PropertyInfo info, IModelNode model, ObjectView view) data){
+        private static (IModelModelMap modelMap, object control,ObjectView view) BindData((PropertyInfo info, IModelNode model, ObjectView view) data){
             var interfaces = data.model.GetType().GetInterfaces();
             var mapInterface = interfaces.First(type1 => type1.Property(data.info.Name) != null);
             var type = Type.GetType(mapInterface.Attribute<ModelMapLinkAttribute>().LinkedTypeName);
@@ -71,16 +77,16 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             var control = EnumsNET.Enums.GetMember<PredifinedMap>(type?.Name).Value.GetViewControl(data.view, model);
             var modelMap = (IModelModelMap) data.info.GetValue(data.model);
             if (control!=null){
-                return (modelMap, control);
+                return (modelMap, control,data.view);
             }
             return default;
         }
 
-        private static void BindTo(this (IModelModelMap modelMap,object control) data){
-            var parameter = new Parameter(data.control);
-            ControlBingSubject.OnNext(parameter);
+        private static void BindTo(this (IModelNode model, object control, ObjectView view) data){
+            var parameter = new Parameter(data.control,data.model,data.view);
+            ControlBindSubject.OnNext(parameter);
             if (!parameter.Handled && parameter.Item != null){
-                data.modelMap.BindTo(parameter.Item);
+                data.model.BindTo(parameter.Item);
             }
         }
 
@@ -104,8 +110,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             return node.GetType().Properties().Select(info => (info, model: node,view:objectView));
         }
 
-        public static void BindTo(this IModelModelMap modelModelMap, object instance){
-            ((IModelNodeDisabled) modelModelMap).BindTo( instance);
+        public static void BindTo(this IModelNode modelNode, object instance){
+            ((IModelNodeDisabled) modelNode).BindTo( instance);
         }
 
         private static void BindTo(this IModelNodeDisabled modelNodeDisabled, object instance){
@@ -130,11 +136,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                             var propertyValue = info.GetValue(instance);
                             if (propertyValue != null) (nodeEnabled).BindTo(propertyValue);
                         }
-                        else if (node is IEnumerable enumerable){
+//                        else if (node is IEnumerable enumerable){
 //                            foreach (var childNode in enumerable.Cast<IModelNode>()){
 //                                childNode
 //                            }
-                        }
+//                        }
                     }
                     
                 }

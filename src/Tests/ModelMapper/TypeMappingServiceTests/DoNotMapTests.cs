@@ -3,15 +3,14 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Fasterflect;
-using Mono.Cecil;
 using Shouldly;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xunit;
 using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.TypeMappingService;
 
 namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
-    
-    public partial class ObjectMappingServiceTests{
+    [Collection(nameof(ModelMapperModule))]
+    public class DoNotMapTests:ModelMapperBaseTest{
         [Fact]
         public async Task Do_Not_Map_If_recursion_detected(){
             

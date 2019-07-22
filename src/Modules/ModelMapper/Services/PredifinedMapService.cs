@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reflection;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Layout;
 using DevExpress.ExpressApp.Model;
@@ -45,7 +47,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         private static Assembly _xafHtmlEditorWebAssembly;
         private static Assembly _dxScedulerWebAssembly;
         private static Assembly _dxUtilsAssembly;
-        private static Assembly _dashboardWebAssembly;
+        private static Assembly _dashboardWebWebFormsAssembly;
 
 
         static PredifinedMapService(){
@@ -78,7 +80,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             }
 
             if (ModelExtendingService.Platform == Platform.Web){
-                _dashboardWebAssembly = assemblies.GetAssembly($"DevExpress.Dashboard{XafAssemblyInfo.VersionSuffix}.Web");
+                _dashboardWebWebFormsAssembly = assemblies.GetAssembly($"DevExpress.Dashboard{XafAssemblyInfo.VersionSuffix}.Web.WebForms");
                 _xafWebAssembly = assemblies.GetAssembly("DevExpress.ExpressApp.Web.v");
                 _dxWebAssembly = assemblies.GetAssembly("DevExpress.Web.v");
                 _dxHtmlEditorWebAssembly = assemblies.GetAssembly("DevExpress.Web.ASPxHtmlEditor.v");
@@ -150,20 +152,27 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             var result = (modelMapperConfiguration.TypeToMap, modelMapperConfiguration, map);
             if (map.IsChartControlDiagram()){
                 if (map!=PredifinedMap.ChartControlDiagram){
-                    map.MapToModel(configure).Wait();
+                    map.MapToModel(configuration => {
+                        configuration.OmitContainer = true;
+                        configure?.Invoke(configuration);
+                    }).Wait();
                 }
             }
             else if (map.IsRepositoryItem() ){
                
                 new[]{map}.MapToModel((predifinedMap, configuration) => {
                     configuration.DisplayName = map.DisplayName();
+                    configuration.OmitContainer = true;
                     configure?.Invoke(configuration);
                 }).Wait();
                 result.modelMapperConfiguration.TypeToMap = typeof(RepositoryItemBaseMap);
                 modulesManager.Extend(result.modelMapperConfiguration);
             }
             else if (map.IsPropertyEditor()){
-                new[]{map}.MapToModel((predifinedMap, configuration) => configure?.Invoke(configuration)).Wait();
+                new[]{map}.MapToModel((predifinedMap, configuration) => {
+                    configuration.OmitContainer = true;
+                    configure?.Invoke(configuration);
+                }).Wait();
                 result.modelMapperConfiguration.TypeToMap = typeof(PropertyEditorControlMap);
                 modulesManager.Extend(result.modelMapperConfiguration);
             }
@@ -207,6 +216,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             throw new NotImplementedException(predifinedMap.ToString());
         }
 
+        public static IModelNode GetNode(this IModelNode modelNode, PredifinedMap predifinedMap){
+            return modelNode.GetNode(predifinedMap.TypeToMap().Name);
+        }
+
         public static object GetViewControl(this PredifinedMap predifinedMap, CompositeView view, string model){
             if (new[]{PredifinedMap.GridView,PredifinedMap.AdvBandedGridView,PredifinedMap.LayoutView}.Any(_ => _==predifinedMap)){
                 return ((ListView) view).Editor.Control.GetPropertyValue("MainView");
@@ -216,7 +229,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             }
 
             if (new[]{PredifinedMap.PivotGridControl,PredifinedMap.ChartControl,PredifinedMap.SchedulerControl}.Any(_ =>_ == predifinedMap)){
-                return ((ListView) view).Editor.GetPropertyValue(predifinedMap.ToString(),Flags.InstancePublicDeclaredOnly);
+                return ((ListView) view).Editor.GetPropertyValue(predifinedMap.ToString(),Flags.InstancePublic);
             }
             if (predifinedMap.IsChartControlDiagram()){
                 return PredifinedMap.ChartControl.GetViewControl(view, model).GetPropertyValue("Diagram");
@@ -272,10 +285,16 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
 
         private static object GetColumns(PredifinedMap container, PredifinedMap configuration, CompositeView view, string model,string columnsName){
             var viewControl = container.GetViewControl(view, null);
-            var columnsInfo = viewControl.GetType().Properties().Where(info => info.Name == columnsName);
-            var propertyInfo = columnsInfo.First(info => info.PropertyType.Name.StartsWith(configuration.ToString()));
-            var bindingName = view.ObjectTypeInfo.FindMember(model).BindingName;
-            return propertyInfo.GetValue(viewControl).GetIndexer(bindingName);
+            var columnInfos = viewControl.GetType().GetProperties().Where(info => info.Name == columnsName);
+            var propertyInfo = columnInfos.First();
+
+//            var enumerable = ((ListView) view).Model.Columns[model].ModelMember.MemberInfo is MemberPathInfo;
+//            if (enumerable){
+//                Debug.WriteLine("");
+//            }
+//            var bindingName = view.ObjectTypeInfo.FindMember(model).BindingName;
+            var propertyName = ((ListView) view).Model.Columns[model].PropertyName;
+            return propertyInfo.GetValue(viewControl).GetIndexer(propertyName);
         }
 
         public static bool IsChartControlDiagram(this PredifinedMap predifinedMap){
@@ -289,6 +308,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 PredifinedMap.ASPxLookupDropDownEdit, PredifinedMap.ASPxLookupFindEdit, PredifinedMap.ASPxSpinEdit,
                 PredifinedMap.ASPxTokenBox, PredifinedMap.ASPxUploadControl, PredifinedMap.ASPxDashboard,PredifinedMap.RichEditControl, 
             }.Any(map => map == predifinedMap);
+        }
+
+        public static string ModelTypeName(this PredifinedMap predifinedMap){
+            var typeToMap = predifinedMap.TypeToMap();
+            return typeToMap.ModelTypeName(typeToMap);
         }
 
         public static bool IsRepositoryItem(this PredifinedMap predifinedMap){
@@ -326,7 +350,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             else if (new[] {
                 PredifinedMap.ASPxUploadControl, PredifinedMap.ASPxPopupControl, PredifinedMap.ASPxDateEdit,
                 PredifinedMap.ASPxHyperLink, PredifinedMap.ASPxSpinEdit, PredifinedMap.ASPxTokenBox,
-                PredifinedMap.ASPxComboBox
+                PredifinedMap.ASPxComboBox,PredifinedMap.ASPxGridView, PredifinedMap.GridViewColumn, 
             }.Any(map => map == predifinedMap)){
                 assembly = _dxWebAssembly;
             }
@@ -337,13 +361,16 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 assembly = _dashboardWinAssembly;
             }
             else if (new[]{PredifinedMap.ASPxDashboard}.Any(map => map==predifinedMap)){
-                assembly = _dashboardWebAssembly;
+                assembly = _dashboardWebWebFormsAssembly;
             }
             else if (new[]{PredifinedMap.PivotGridControl, PredifinedMap.PivotGridField}.Contains(predifinedMap)){
                 assembly = _pivotGridControlAssembly;
             }
-            else if (predifinedMap==PredifinedMap.ChartControl||predifinedMap.IsChartControlDiagram()){
+            else if (predifinedMap.IsChartControlDiagram()){
                 assembly = _chartControlAssembly;
+            }
+            else if (predifinedMap==PredifinedMap.ChartControl){
+                assembly = _chartUIControlAssembly;
             }
             else if (predifinedMap==PredifinedMap.SchedulerControl){
                 assembly = _schedulerWinAssembly;
@@ -556,7 +583,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
 
             if (ModelExtendingService.Platform==Platform.Web){
                 if (new[]{PredifinedMap.ASPxDashboard}.Any(map => map==predifinedMap)){
-                    CheckRequiredParameters(nameof(_dashboardWebAssembly), nameof(_dashboardWebAssembly));
+                    CheckRequiredParameters(nameof(_dashboardWebWebFormsAssembly), nameof(_dashboardWebWebFormsAssembly));
                     return new ModelMapperConfiguration(predifinedMap.TypeToMap(),typeof(IModelPropertyEditor));
                 }
                 if (new[]{PredifinedMap.ASPxGridView,PredifinedMap.GridViewColumn}.Any(map => map==predifinedMap)){

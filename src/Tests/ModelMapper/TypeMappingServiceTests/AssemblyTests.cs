@@ -13,7 +13,7 @@ using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.Ty
 
 namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
     [Collection(nameof(ModelMapperModule))]
-    public partial class ObjectMappingServiceTests{
+    public class AssemblyTests:ModelMapperBaseTest{
 
         [Fact]
         public async Task Assembly_Version_Should_Match_Model_Mapper_Version(){
