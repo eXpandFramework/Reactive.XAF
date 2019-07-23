@@ -16,7 +16,7 @@ using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
 using Fasterflect;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
-using Xpand.XAF.Modules.ModelMapper.Services.Predifined;
+using Xpand.XAF.Modules.ModelMapper.Services.Predefined;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
@@ -150,8 +150,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         public static IObservable<Type> MapToModel<TModelMapperConfiguration>(this IObservable<TModelMapperConfiguration> configurations)
             where TModelMapperConfiguration : IModelMapperConfiguration{
 
-            //            if (!maps.Contains(PredifinedMap.RepositoryItem) && maps.Any(map =>map.IsRepositoryItem())){
-//                maps = maps.Concat(new[]{PredifinedMap.RepositoryItem}).ToArray();
+            //            if (!maps.Contains(PredefinedMap.RepositoryItem) && maps.Any(map =>map.IsRepositoryItem())){
+//                maps = maps.Concat(new[]{PredefinedMap.RepositoryItem}).ToArray();
 //            }
             return configurations
 //                .Select(_ => (_.TypeToMap, (IModelMapperConfiguration) _))

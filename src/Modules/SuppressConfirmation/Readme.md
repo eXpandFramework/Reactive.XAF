@@ -47,7 +47,7 @@ The module satisfies the following conditions:
 ![image](https://user-images.githubusercontent.com/159464/56219085-d2c05580-606e-11e9-9a8e-80e0a37b8285.png)
 
 ### Tests
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Modules/SuppressConfirmation)
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/SuppressConfirmation)
 
 ### Examples
 The module is integrated with the `ExcelImporter`.

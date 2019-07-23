@@ -39,7 +39,7 @@ using Xpand.Source.Extensions.XAF.Model;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services;
-using Xpand.XAF.Modules.ModelMapper.Services.Predifined;
+using Xpand.XAF.Modules.ModelMapper.Services.Predefined;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xunit;
 using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.TypeMappingService;
@@ -99,6 +99,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
         [Fact]
         public async Task Map_All_ReferenceType_Public_Properties(){
+            
             InitializeMapperService(nameof(Map_All_ReferenceType_Public_Properties));
             var typeToMap = typeof(ReferenceTypeProperties);
             var propertiesToMap = typeToMap.Properties().ToArray();
@@ -186,55 +187,55 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
         [Theory]
 
-        [InlineData(PredifinedMap.GridColumn,new[]{typeof(GridColumn),typeof(GridListEditor)},Platform.Win,new[]{nameof(GridColumn.Summary)})]
-        [InlineData(PredifinedMap.GridView,new[]{typeof(GridView),typeof(GridListEditor)},Platform.Win,new[]{nameof(GridView.FormatRules)})]
-        [InlineData(PredifinedMap.PivotGridControl,new[]{typeof(PivotGridControl),typeof(PivotGridListEditor)},Platform.Win,new[]{nameof(PivotGridControl.FormatRules)})]
-        [InlineData(PredifinedMap.PivotGridField,new[]{typeof(PivotGridField),typeof(PivotGridListEditor)},Platform.Win,new[]{nameof(PivotGridField.CustomTotals)})]
-        [InlineData(PredifinedMap.LayoutViewColumn,new[]{typeof(LayoutViewColumn),typeof(GridListEditor)},Platform.Win,new[]{nameof(LayoutViewColumn.Summary)})]
-        [InlineData(PredifinedMap.LayoutView,new[]{typeof(LayoutView),typeof(GridListEditor)},Platform.Win,new[]{nameof(LayoutView.FormatRules)})]
-        [InlineData(PredifinedMap.BandedGridColumn,new[]{typeof(BandedGridColumn),typeof(GridListEditor)},Platform.Win,new[]{nameof(BandedGridColumn.Summary)})]
-        [InlineData(PredifinedMap.AdvBandedGridView,new[]{typeof(AdvBandedGridView),typeof(GridListEditor)},Platform.Win,new[]{nameof(AdvBandedGridView.FormatRules)})]
-        [InlineData(PredifinedMap.ASPxGridView,new[]{typeof(ASPxGridView),typeof(ASPxGridListEditor)},Platform.Web,new[]{nameof(ASPxGridView.Columns)})]
-        [InlineData(PredifinedMap.GridViewColumn,new[]{typeof(GridViewColumn),typeof(ASPxGridListEditor)},Platform.Web,new[]{nameof(GridViewColumn.Columns)})]
-        [InlineData(PredifinedMap.ASPxHtmlEditor,new[]{typeof(ASPxHtmlEditor),typeof(ASPxHtmlPropertyEditor)},Platform.Web,new string[0])]
-        [InlineData(PredifinedMap.TreeList,new[]{typeof(TreeList),typeof(TreeListEditor)},Platform.Win,new string[0])]
-        [InlineData(PredifinedMap.TreeListColumn,new[]{typeof(TreeListColumn),typeof(TreeListEditor)},Platform.Win,new string[0])]
-        [InlineData(PredifinedMap.SchedulerControl,new[]{typeof(SchedulerControl),typeof(SchedulerListEditor)},Platform.Win,new[]{nameof(SchedulerControl.DataBindings)})]
-        [InlineData(PredifinedMap.ASPxScheduler,new[]{typeof(ASPxScheduler),typeof(ASPxSchedulerListEditor)},Platform.Web,new string[0])]
-        [InlineData(PredifinedMap.XafLayoutControl,new[]{typeof(XafLayoutControl)},Platform.Win,new string[0])]
-        [InlineData(PredifinedMap.SplitContainerControl,new[]{typeof(SplitContainerControl)},Platform.Win,new string[0])]
-        [InlineData(PredifinedMap.DashboardDesigner,new[]{typeof(DashboardDesigner)},Platform.Win,new string[0])]
-        [InlineData(PredifinedMap.ASPxPopupControl,new[]{typeof(ASPxPopupControl)},Platform.Web,new string[0])]
-        [InlineData(PredifinedMap.DashboardViewer,new[]{typeof(DashboardViewer)},Platform.Win,new string[0])]
-        [InlineData(PredifinedMap.ASPxDashboard,new[]{typeof(ASPxDashboard)},Platform.Web,new string[0])]
-        [InlineData(PredifinedMap.ASPxDateEdit,new[]{typeof(ASPxDateEdit)},Platform.Web,new string[0])]
-        [InlineData(PredifinedMap.ASPxHyperLink,new[]{typeof(ASPxHyperLink)},Platform.Web,new string[0])]
-        [InlineData(PredifinedMap.ASPxLookupDropDownEdit,new[]{typeof(ASPxLookupDropDownEdit)},Platform.Web,new string[0])]
-        [InlineData(PredifinedMap.ASPxLookupFindEdit,new[]{typeof(ASPxLookupFindEdit)},Platform.Web,new string[0])]
-        [InlineData(PredifinedMap.ASPxSpinEdit,new[]{typeof(ASPxSpinEdit)},Platform.Web,new string[0])]
-        [InlineData(PredifinedMap.ASPxTokenBox,new[]{typeof(ASPxTokenBox)},Platform.Web,new string[0])]
-        [InlineData(PredifinedMap.ASPxComboBox,new[]{typeof(ASPxComboBox)},Platform.Web,new string[0])]
-        [InlineData(PredifinedMap.LabelControl,new[]{typeof(LabelControl)},Platform.Win,new string[0])]
-        [InlineData(PredifinedMap.RichEditControl,new[]{typeof(RichEditControl)},Platform.Win,new string[0])]
+        [InlineData(PredefinedMap.GridColumn,new[]{typeof(GridColumn),typeof(GridListEditor)},Platform.Win,new[]{nameof(GridColumn.Summary)})]
+        [InlineData(PredefinedMap.GridView,new[]{typeof(GridView),typeof(GridListEditor)},Platform.Win,new[]{nameof(GridView.FormatRules)})]
+        [InlineData(PredefinedMap.PivotGridControl,new[]{typeof(PivotGridControl),typeof(PivotGridListEditor)},Platform.Win,new[]{nameof(PivotGridControl.FormatRules)})]
+        [InlineData(PredefinedMap.PivotGridField,new[]{typeof(PivotGridField),typeof(PivotGridListEditor)},Platform.Win,new[]{nameof(PivotGridField.CustomTotals)})]
+        [InlineData(PredefinedMap.LayoutViewColumn,new[]{typeof(LayoutViewColumn),typeof(GridListEditor)},Platform.Win,new[]{nameof(LayoutViewColumn.Summary)})]
+        [InlineData(PredefinedMap.LayoutView,new[]{typeof(LayoutView),typeof(GridListEditor)},Platform.Win,new[]{nameof(LayoutView.FormatRules)})]
+        [InlineData(PredefinedMap.BandedGridColumn,new[]{typeof(BandedGridColumn),typeof(GridListEditor)},Platform.Win,new[]{nameof(BandedGridColumn.Summary)})]
+        [InlineData(PredefinedMap.AdvBandedGridView,new[]{typeof(AdvBandedGridView),typeof(GridListEditor)},Platform.Win,new[]{nameof(AdvBandedGridView.FormatRules)})]
+        [InlineData(PredefinedMap.ASPxGridView,new[]{typeof(ASPxGridView),typeof(ASPxGridListEditor)},Platform.Web,new[]{nameof(ASPxGridView.Columns)})]
+        [InlineData(PredefinedMap.GridViewColumn,new[]{typeof(GridViewColumn),typeof(ASPxGridListEditor)},Platform.Web,new[]{nameof(GridViewColumn.Columns)})]
+        [InlineData(PredefinedMap.ASPxHtmlEditor,new[]{typeof(ASPxHtmlEditor),typeof(ASPxHtmlPropertyEditor)},Platform.Web,new string[0])]
+        [InlineData(PredefinedMap.TreeList,new[]{typeof(TreeList),typeof(TreeListEditor)},Platform.Win,new string[0])]
+        [InlineData(PredefinedMap.TreeListColumn,new[]{typeof(TreeListColumn),typeof(TreeListEditor)},Platform.Win,new string[0])]
+        [InlineData(PredefinedMap.SchedulerControl,new[]{typeof(SchedulerControl),typeof(SchedulerListEditor)},Platform.Win,new[]{nameof(SchedulerControl.DataBindings)})]
+        [InlineData(PredefinedMap.ASPxScheduler,new[]{typeof(ASPxScheduler),typeof(ASPxSchedulerListEditor)},Platform.Web,new string[0])]
+        [InlineData(PredefinedMap.XafLayoutControl,new[]{typeof(XafLayoutControl)},Platform.Win,new string[0])]
+        [InlineData(PredefinedMap.SplitContainerControl,new[]{typeof(SplitContainerControl)},Platform.Win,new string[0])]
+        [InlineData(PredefinedMap.DashboardDesigner,new[]{typeof(DashboardDesigner)},Platform.Win,new string[0])]
+        [InlineData(PredefinedMap.ASPxPopupControl,new[]{typeof(ASPxPopupControl)},Platform.Web,new string[0])]
+        [InlineData(PredefinedMap.DashboardViewer,new[]{typeof(DashboardViewer)},Platform.Win,new string[0])]
+        [InlineData(PredefinedMap.ASPxDashboard,new[]{typeof(ASPxDashboard)},Platform.Web,new string[0])]
+        [InlineData(PredefinedMap.ASPxDateEdit,new[]{typeof(ASPxDateEdit)},Platform.Web,new string[0])]
+        [InlineData(PredefinedMap.ASPxHyperLink,new[]{typeof(ASPxHyperLink)},Platform.Web,new string[0])]
+        [InlineData(PredefinedMap.ASPxLookupDropDownEdit,new[]{typeof(ASPxLookupDropDownEdit)},Platform.Web,new string[0])]
+        [InlineData(PredefinedMap.ASPxLookupFindEdit,new[]{typeof(ASPxLookupFindEdit)},Platform.Web,new string[0])]
+        [InlineData(PredefinedMap.ASPxSpinEdit,new[]{typeof(ASPxSpinEdit)},Platform.Web,new string[0])]
+        [InlineData(PredefinedMap.ASPxTokenBox,new[]{typeof(ASPxTokenBox)},Platform.Web,new string[0])]
+        [InlineData(PredefinedMap.ASPxComboBox,new[]{typeof(ASPxComboBox)},Platform.Web,new string[0])]
+        [InlineData(PredefinedMap.LabelControl,new[]{typeof(LabelControl)},Platform.Win,new string[0])]
+        [InlineData(PredefinedMap.RichEditControl,new[]{typeof(RichEditControl)},Platform.Win,new string[0])]
 
-        internal async Task Map_Predifined_Configurations(PredifinedMap predifinedMap, Type[] assembliesToLoad,Platform platform, string[] collectionNames){
+        internal async Task Map_Predefined_Configurations(PredefinedMap PredefinedMap, Type[] assembliesToLoad,Platform platform, string[] collectionNames){
             
-            InitializeMapperService($"{nameof(Map_Predifined_Configurations)}{predifinedMap}",platform);
+            InitializeMapperService($"{nameof(Map_Predefined_Configurations)}{PredefinedMap}",platform);
             assembliesToLoad.ToObservable().Do(type => Assembly.LoadFile(type.Assembly.Location)).Subscribe();
 
-            var modelType = await predifinedMap.MapToModel().ModelInterfaces().FirstAsync();
+            var modelType = await PredefinedMap.MapToModel().ModelInterfaces().FirstAsync();
             var propertyInfos = modelType.GetProperties();
 
-            AssertPredifinedConfigurationsMap(predifinedMap, collectionNames, modelType, propertyInfos);
-            AssertBandedGridColumn(predifinedMap, propertyInfos);
+            AssertPredefinedConfigurationsMap(PredefinedMap, collectionNames, modelType, propertyInfos);
+            AssertBandedGridColumn(PredefinedMap, propertyInfos);
             
-            AssertSchedulerControl(predifinedMap, propertyInfos);
+            AssertSchedulerControl(PredefinedMap, propertyInfos);
 
         }
 
         [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
-        private void AssertSchedulerControl(PredifinedMap predifinedMap, IList<PropertyInfo> propertyInfos){
-            if (predifinedMap == PredifinedMap.SchedulerControl){
+        private void AssertSchedulerControl(PredefinedMap PredefinedMap, IList<PropertyInfo> propertyInfos){
+            if (PredefinedMap == PredefinedMap.SchedulerControl){
                 var storageInfo = propertyInfos.FirstOrDefault(info => nameof(SchedulerControl.Storage) == info.Name);
                 storageInfo.ShouldNotBeNull();
                 var propertyInfo = storageInfo.PropertyType.Property(nameof(SchedulerStorage.Appointments)).PropertyType.Property(nameof(AppointmentStorage.Labels));
@@ -246,20 +247,20 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
         [Theory]
         [InlineData(Platform.Win)]
-        internal async Task Map_PredifinedMap_RepositoryItems(Platform platform){
-            var predifinedMaps = Enums.GetValues<PredifinedMap>().Where(map => map.IsRepositoryItem())
+        internal async Task Map_PredefinedMap_RepositoryItems(Platform platform){
+            var PredefinedMaps = Enums.GetValues<PredefinedMap>().Where(map => map.IsRepositoryItem())
                 .Where(map => map.Attribute<MapPlatformAttribute>().Platform == platform.ToString());
-//                .Where(map => map==PredifinedMap.RepositoryItem);
+//                .Where(map => map==PredefinedMap.RepositoryItem);
 
-            await Map_PredifinedMap_ViewItems(platform, predifinedMaps, typeof(RepositoryItemBaseMap).ModelTypeName(), ViewItemService.RepositoryItemsMapName,true);
+            await Map_PredefinedMap_ViewItems(platform, PredefinedMaps, typeof(RepositoryItemBaseMap).ModelTypeName(), ViewItemService.RepositoryItemsMapName,true);
         }
 
-        private async Task Map_PredifinedMap_ViewItems(Platform platform, IEnumerable<PredifinedMap> predifinedMaps,string mapTypeName, string mapPropertyName,bool checkDescription=false){
-            foreach (var predifinedMap in predifinedMaps){
+        private async Task Map_PredefinedMap_ViewItems(Platform platform, IEnumerable<PredefinedMap> PredefinedMaps,string mapTypeName, string mapPropertyName,bool checkDescription=false){
+            foreach (var PredefinedMap in PredefinedMaps){
                 try{
-                    InitializeMapperService($"{nameof(Map_PredifinedMap_ViewItems)}{predifinedMap}", platform);
+                    InitializeMapperService($"{nameof(Map_PredefinedMap_ViewItems)}{PredefinedMap}", platform);
 
-                    var replay = predifinedMap.MapToModel().ModelInterfaces().Replay();
+                    var replay = PredefinedMap.MapToModel().ModelInterfaces().Replay();
                     replay.Connect();
                     await replay;
                     var modelTypes = replay.ToEnumerable().ToArray();
@@ -287,7 +288,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
                     var baseType = modelTypes.First().Assembly.GetType(mapTypeName);
                     propertyInfo.PropertyType.ModelListItemType().ShouldBe(baseType);
                     var realType = modelTypes.First().Assembly.GetTypes()
-                        .FirstOrDefault(type => type.Name == predifinedMap.ModelTypeName());
+                        .FirstOrDefault(type => type.Name == PredefinedMap.ModelTypeName());
                     realType.ShouldNotBeNull();
                     realType.GetInterfaces().ShouldContain(baseType);
                     realType.Property(TypeMappingService.ModelMappersNodeName).ShouldBeNull();
@@ -295,7 +296,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
                     Dispose();
                 }
                 catch (Exception e){
-                    throw new Exception(predifinedMap.ToString(), e);
+                    throw new Exception(PredefinedMap.ToString(), e);
                 }
             }
         }
@@ -303,33 +304,33 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [Theory]
         [InlineData(Platform.Win)]
         [InlineData(Platform.Web)]
-        internal async Task Map_PredifinedMap_PropertyEditor_Controls(Platform platform){
-            var predifinedMaps = Enums.GetValues<PredifinedMap>().Where(map => map.IsPropertyEditor())
+        internal async Task Map_PredefinedMap_PropertyEditor_Controls(Platform platform){
+            var PredefinedMaps = Enums.GetValues<PredefinedMap>().Where(map => map.IsPropertyEditor())
                 .Where(map => map.Attribute<MapPlatformAttribute>().Platform==platform.ToString());
             
-            await Map_PredifinedMap_ViewItems(platform, predifinedMaps, typeof(PropertyEditorControlMap).ModelTypeName(), ViewItemService.PropertyEditorControlMapName);
+            await Map_PredefinedMap_ViewItems(platform, PredefinedMaps, typeof(PropertyEditorControlMap).ModelTypeName(), ViewItemService.PropertyEditorControlMapName);
         }
 
         [Theory]
-        [InlineData(PredifinedMap.ChartControl,new[]{typeof(ChartControl),typeof(ChartListEditor)},Platform.Win,new[]{nameof(ChartControl.Series),"Diagrams"})]
-        [InlineData(PredifinedMap.ChartControlDiagram3D,new[]{typeof(Diagram3D),typeof(ChartListEditor)},Platform.Win,new string[0])]
-        [InlineData(PredifinedMap.ChartControlSimpleDiagram3D,new[]{typeof(SimpleDiagram3D),typeof(ChartListEditor)},Platform.Win,new string[0])]
-        [InlineData(PredifinedMap.ChartControlFunnelDiagram3D,new[]{typeof(FunnelDiagram3D),typeof(ChartListEditor)},Platform.Win,new string[0])]
-        [InlineData(PredifinedMap.ChartControlGanttDiagram,new[]{typeof(GanttDiagram),typeof(ChartListEditor)},Platform.Win,new string[0])]
-        [InlineData(PredifinedMap.ChartControlPolarDiagram,new[]{typeof(PolarDiagram),typeof(ChartListEditor)},Platform.Win,new string[0])]
-        [InlineData(PredifinedMap.ChartControlRadarDiagram,new[]{typeof(RadarDiagram),typeof(ChartListEditor)},Platform.Win,new string[0])]
-        [InlineData(PredifinedMap.ChartControlSwiftPlotDiagram,new[]{typeof(SwiftPlotDiagram),typeof(ChartListEditor)},Platform.Win,new string[0])]
-        [InlineData(PredifinedMap.ChartControlXYDiagram,new[]{typeof(XYDiagram),typeof(ChartListEditor)},Platform.Win,new string[0])]
-        [InlineData(PredifinedMap.ChartControlXYDiagram2D,new[]{typeof(XYDiagram2D),typeof(ChartListEditor)},Platform.Win,new string[0])]
-        [InlineData(PredifinedMap.ChartControlXYDiagram3D,new[]{typeof(XYDiagram3D),typeof(ChartListEditor)},Platform.Win,new string[0])]
-        internal async Task Map_Predifined_ChartControl_Configurations(PredifinedMap configuration,Type[] assembliesToLoad,Platform platform,string[] collectionNames){
-            InitializeMapperService($"{nameof(Map_Predifined_ChartControl_Configurations)}{configuration}",platform);
+        [InlineData(PredefinedMap.ChartControl,new[]{typeof(ChartControl),typeof(ChartListEditor)},Platform.Win,new[]{nameof(ChartControl.Series),"Diagrams"})]
+        [InlineData(PredefinedMap.ChartControlDiagram3D,new[]{typeof(Diagram3D),typeof(ChartListEditor)},Platform.Win,new string[0])]
+        [InlineData(PredefinedMap.ChartControlSimpleDiagram3D,new[]{typeof(SimpleDiagram3D),typeof(ChartListEditor)},Platform.Win,new string[0])]
+        [InlineData(PredefinedMap.ChartControlFunnelDiagram3D,new[]{typeof(FunnelDiagram3D),typeof(ChartListEditor)},Platform.Win,new string[0])]
+        [InlineData(PredefinedMap.ChartControlGanttDiagram,new[]{typeof(GanttDiagram),typeof(ChartListEditor)},Platform.Win,new string[0])]
+        [InlineData(PredefinedMap.ChartControlPolarDiagram,new[]{typeof(PolarDiagram),typeof(ChartListEditor)},Platform.Win,new string[0])]
+        [InlineData(PredefinedMap.ChartControlRadarDiagram,new[]{typeof(RadarDiagram),typeof(ChartListEditor)},Platform.Win,new string[0])]
+        [InlineData(PredefinedMap.ChartControlSwiftPlotDiagram,new[]{typeof(SwiftPlotDiagram),typeof(ChartListEditor)},Platform.Win,new string[0])]
+        [InlineData(PredefinedMap.ChartControlXYDiagram,new[]{typeof(XYDiagram),typeof(ChartListEditor)},Platform.Win,new string[0])]
+        [InlineData(PredefinedMap.ChartControlXYDiagram2D,new[]{typeof(XYDiagram2D),typeof(ChartListEditor)},Platform.Win,new string[0])]
+        [InlineData(PredefinedMap.ChartControlXYDiagram3D,new[]{typeof(XYDiagram3D),typeof(ChartListEditor)},Platform.Win,new string[0])]
+        internal async Task Map_Predefined_ChartControl_Configurations(PredefinedMap configuration,Type[] assembliesToLoad,Platform platform,string[] collectionNames){
+            InitializeMapperService($"{nameof(Map_Predefined_ChartControl_Configurations)}{configuration}",platform);
             assembliesToLoad.ToObservable().Do(type => Assembly.LoadFile(type.Assembly.Location)).Subscribe();
 
             var modelType = await configuration.MapToModel().ModelInterfaces();
             var propertyInfos = modelType.GetProperties();
-            AssertPredifinedConfigurationsMap(configuration, collectionNames, modelType, propertyInfos);
-            if (configuration == PredifinedMap.ChartControl){
+            AssertPredefinedConfigurationsMap(configuration, collectionNames, modelType, propertyInfos);
+            if (configuration == PredefinedMap.ChartControl){
                 propertyInfos.FirstOrDefault(info => nameof(ChartControl.Diagram) == info.Name).ShouldBeNull();
                 var propertyInfo = propertyInfos.FirstOrDefault(info => info.Name == $"{nameof(ChartControl.Diagram)}s");
                 propertyInfo.ShouldNotBeNull();
@@ -338,12 +339,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             }
         }
 
-        private void AssertPredifinedConfigurationsMap(PredifinedMap predifinedMap, string[] collectionNames,Type modelType, PropertyInfo[] propertyInfos){
-            var modelTypeName = predifinedMap.ModelTypeName();
+        private void AssertPredefinedConfigurationsMap(PredefinedMap PredefinedMap, string[] collectionNames,Type modelType, PropertyInfo[] propertyInfos){
+            var modelTypeName = PredefinedMap.ModelTypeName();
             modelType.Name.ShouldBe(modelTypeName);
 
             propertyInfos.Length.ShouldBeGreaterThan(15);
-            if (new[]{PredifinedMap.ASPxLookupDropDownEdit,PredifinedMap.ASPxLookupFindEdit, }.All(map => map!=predifinedMap)){
+            if (new[]{PredefinedMap.ASPxLookupDropDownEdit,PredefinedMap.ASPxLookupFindEdit, }.All(map => map!=PredefinedMap)){
                 var descriptionAttribute = propertyInfos.Select(info => info.Attribute<DescriptionAttribute>())
                     .FirstOrDefault(attribute => attribute != null && attribute.Description.Contains(" "));
                 descriptionAttribute.ShouldNotBeNull();
@@ -353,8 +354,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             }
         }
 
-        private static void AssertBandedGridColumn(PredifinedMap configuration, IList<PropertyInfo> propertyInfos){
-            if (configuration == PredifinedMap.BandedGridColumn){
+        private static void AssertBandedGridColumn(PredefinedMap configuration, IList<PropertyInfo> propertyInfos){
+            if (configuration == PredefinedMap.BandedGridColumn){
                 var propertyInfo = propertyInfos.FirstOrDefault(info => info.Name == nameof(BandedGridColumn.ColVIndex));
                 propertyInfo.ShouldNotBeNull();
                 propertyInfo.Attribute<BrowsableAttribute>().ShouldBeNull();
@@ -368,10 +369,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [Theory]
         [InlineData(Platform.Web)]
         [InlineData(Platform.Win)]
-        internal void Map_All_PredifinedConfigurations(Platform platform){
+        internal void Map_All_PredefinedConfigurations(Platform platform){
             Assembly.LoadFile(typeof(ChartControl).Assembly.Location);
-            InitializeMapperService($"{nameof(Map_All_PredifinedConfigurations)}",platform);
-            var values = Enums.GetValues<PredifinedMap>()
+            InitializeMapperService($"{nameof(Map_All_PredefinedConfigurations)}",platform);
+            var values = Enums.GetValues<PredefinedMap>()
                 .Where(map =>map.GetAttributes().OfType<MapPlatformAttribute>().Any(_ => _.Platform == platform.ToString()))
                 .ToArray();
             var modelInterfaces = values.MapToModel().ModelInterfaces().Replay();
@@ -387,15 +388,15 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Fact]
-        internal void Map_PredifinedConfigurations_Combination(){
-            InitializeMapperService($"{nameof(Map_All_PredifinedConfigurations)}",Platform.Win);
+        internal void Map_PredefinedConfigurations_Combination(){
+            InitializeMapperService($"{nameof(Map_All_PredefinedConfigurations)}",Platform.Win);
 
-            var modelInterfaces = new[]{PredifinedMap.GridView,PredifinedMap.GridColumn}.MapToModel().ModelInterfaces().Replay();
+            var modelInterfaces = new[]{PredefinedMap.GridView,PredefinedMap.GridColumn}.MapToModel().ModelInterfaces().Replay();
             modelInterfaces.Connect();
 
             var types = modelInterfaces.ToEnumerable().ToArray();
             types.Length.ShouldBe(2);
-            var modelNames = new[]{PredifinedMap.GridView,PredifinedMap.GridColumn }.Select(map => map.ModelTypeName()).ToArray();
+            var modelNames = new[]{PredefinedMap.GridView,PredefinedMap.GridColumn }.Select(map => map.ModelTypeName()).ToArray();
             modelNames.ShouldContain(types.First().Name);
             modelNames.ShouldContain(types.Last().Name);
             

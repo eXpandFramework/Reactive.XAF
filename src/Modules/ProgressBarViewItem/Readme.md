@@ -66,7 +66,7 @@ progressBarViewItem.SetFinishOptions(new MessageOptions(){});
 
 
 ### Tests
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Modules/ProgressBarViewItem)
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/ProgressBarViewItem)
 ### Examples
 The module is integrated with the `ExcelImporter`.
 

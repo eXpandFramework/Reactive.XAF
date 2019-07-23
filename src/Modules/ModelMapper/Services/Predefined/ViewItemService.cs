@@ -10,7 +10,7 @@ using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
-namespace Xpand.XAF.Modules.ModelMapper.Services.Predifined{
+namespace Xpand.XAF.Modules.ModelMapper.Services.Predefined{
     
     public abstract class RepositoryItemBaseMap{
         
@@ -24,10 +24,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.Predifined{
         public static string PropertyEditorControlMapName = "Controls";
 
         public static IObservable<Unit> Connect(){
-            var repositoryItemTypes = Enums.GetValues<PredifinedMap>().Where(map => map.IsRepositoryItem())
+            var repositoryItemTypes = Enums.GetValues<PredefinedMap>().Where(map => map.IsRepositoryItem())
                 .Select(map => map.TypeToMap()).Where(type => type!=null)
                 .ToArray();
-            var propertyEditorControlTypes = Enums.GetValues<PredifinedMap>()
+            var propertyEditorControlTypes = Enums.GetValues<PredefinedMap>()
                 .Where(map => map.IsPropertyEditor())
                 .Select(map => map.TypeToMap()).Where(type => type!=null)
                 .ToArray();

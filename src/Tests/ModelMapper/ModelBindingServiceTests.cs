@@ -40,7 +40,7 @@ using Xpand.Source.Extensions.XAF.TypesInfo;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services;
-using Xpand.XAF.Modules.ModelMapper.Services.Predifined;
+using Xpand.XAF.Modules.ModelMapper.Services.Predefined;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xpand.XAF.Modules.ModelMapper.Tests.BOModel;
 using Xunit;
@@ -211,14 +211,14 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         [Theory]
-        [InlineData(Platform.Web,new[]{PredifinedMap.ASPxPopupControl },new[]{typeof(ASPxPopupControl)},new Type[0],0)]
-        [InlineData(Platform.Win,new[]{PredifinedMap.XafLayoutControl },new[]{typeof(XafLayoutControl)},new Type[0],0)]
-        internal async Task Bind_DetailView_Maps(Platform platform,PredifinedMap[] predifinedMaps,Type[] controlTypes,Type[] extraModules,int boundTypes){
+        [InlineData(Platform.Web,new[]{PredefinedMap.ASPxPopupControl },new[]{typeof(ASPxPopupControl)},new Type[0],0)]
+        [InlineData(Platform.Win,new[]{PredefinedMap.XafLayoutControl },new[]{typeof(XafLayoutControl)},new Type[0],0)]
+        internal async Task Bind_DetailView_Maps(Platform platform,PredefinedMap[] predefinedMaps,Type[] controlTypes,Type[] extraModules,int boundTypes){
             controlTypes.ToObservable().Do(type => Assembly.LoadFile(type.Assembly.Location)).Subscribe();
-            InitializeMapperService($"{nameof(Bind_DetailView_Maps)}{predifinedMaps.First()}",platform);
+            InitializeMapperService($"{nameof(Bind_DetailView_Maps)}{predefinedMaps.First()}",platform);
             
 
-            var module = predifinedMaps.Extend();
+            var module = predefinedMaps.Extend();
             var application = DefaultModelMapperModule(platform,extraModules.Select(_ => {
                 var instance = _.CreateInstance();
                 return instance;
@@ -231,31 +231,31 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             detailView.CreateControls();
             var task = controlBound.Take(boundTypes).WithTimeOut(TimeSpan.FromSeconds(10));
             if (boundTypes>0){
-                await task;
+                await task.WithTimeOut(TimeSpan.FromSeconds(10));
             }
 
         }
 
         [Theory]
-        [InlineData(Platform.Win,new[]{PredifinedMap.GridColumn , PredifinedMap.GridView},new[]{typeof(XafGridView),typeof(GridColumn),typeof(GridListEditor)},new Type[0],3)]
-        [InlineData(Platform.Web,new[]{PredifinedMap.GridViewColumn , PredifinedMap.ASPxGridView},new[]{typeof(ASPxGridView),typeof(GridViewColumn),typeof(ASPxGridListEditor)},new Type[0],3)]
-        [InlineData(Platform.Win,new[]{PredifinedMap.BandedGridColumn , PredifinedMap.AdvBandedGridView},new[]{typeof(XafAdvBandedGridView),typeof(BandedGridColumn),typeof(GridListEditor)},new Type[0],3)]
+        [InlineData(Platform.Win,new[]{PredefinedMap.GridColumn , PredefinedMap.GridView},new[]{typeof(XafGridView),typeof(GridColumn),typeof(GridListEditor)},new Type[0],3)]
+        [InlineData(Platform.Web,new[]{PredefinedMap.GridViewColumn , PredefinedMap.ASPxGridView},new[]{typeof(ASPxGridView),typeof(GridViewColumn),typeof(ASPxGridListEditor)},new Type[0],3)]
+        [InlineData(Platform.Win,new[]{PredefinedMap.BandedGridColumn , PredefinedMap.AdvBandedGridView},new[]{typeof(XafAdvBandedGridView),typeof(BandedGridColumn),typeof(GridListEditor)},new Type[0],3)]
         
-        [InlineData(Platform.Win,new[]{PredifinedMap.LayoutViewColumn , PredifinedMap.LayoutView},new[]{typeof(XafLayoutView),typeof(LayoutViewColumn),typeof(CustomGridListEditor)},new Type[0],3)]
-        [InlineData(Platform.Win,new[]{PredifinedMap.SplitContainerControl },new[]{typeof(SplitContainerControl)},new Type[0],1)]
-        [InlineData(Platform.Web,new[]{PredifinedMap.ASPxPopupControl },new[]{typeof(ASPxPopupControl)},new Type[0],0)]
-        [InlineData(Platform.Win,new[]{PredifinedMap.TreeListColumn , PredifinedMap.TreeList},new[]{typeof(TreeList),typeof(TreeListColumn),typeof(TreeListEditor)},new[]{typeof(TreeListEditorsModuleBase),typeof(TreeListEditorsWindowsFormsModule)},3)]
-        [InlineData(Platform.Win,new[]{PredifinedMap.DashboardDesigner },new[]{typeof(DashboardDesigner)},new[]{typeof(DashboardsModule),typeof(DashboardsWindowsFormsModule)},0)]
+        [InlineData(Platform.Win,new[]{PredefinedMap.LayoutViewColumn , PredefinedMap.LayoutView},new[]{typeof(XafLayoutView),typeof(LayoutViewColumn),typeof(CustomGridListEditor)},new Type[0],3)]
+        [InlineData(Platform.Win,new[]{PredefinedMap.SplitContainerControl },new[]{typeof(SplitContainerControl)},new Type[0],1)]
+        [InlineData(Platform.Web,new[]{PredefinedMap.ASPxPopupControl },new[]{typeof(ASPxPopupControl)},new Type[0],0)]
+        [InlineData(Platform.Win,new[]{PredefinedMap.TreeListColumn , PredefinedMap.TreeList},new[]{typeof(TreeList),typeof(TreeListColumn),typeof(TreeListEditor)},new[]{typeof(TreeListEditorsModuleBase),typeof(TreeListEditorsWindowsFormsModule)},3)]
+        [InlineData(Platform.Win,new[]{PredefinedMap.DashboardDesigner },new[]{typeof(DashboardDesigner)},new[]{typeof(DashboardsModule),typeof(DashboardsWindowsFormsModule)},0)]
 
-        [InlineData(Platform.Win, new[]{PredifinedMap.PivotGridField, PredifinedMap.PivotGridControl},new[]{typeof(PivotGridControl), typeof(PivotGridListEditor)},new[]{typeof(PivotGridModule), typeof(PivotGridWindowsFormsModule)}, 3)]
-        [InlineData(Platform.Win, new[]{PredifinedMap.ChartControl},new[]{typeof(ChartControl), typeof(ChartListEditor)},new[]{typeof(ChartModule), typeof(ChartWindowsFormsModule)},1)]
-        [InlineData(Platform.Win, new[]{PredifinedMap.SchedulerControl},new[]{typeof(SchedulerControl), typeof(SchedulerListEditor)},new[]{typeof(SchedulerModuleBase), typeof(SchedulerWindowsFormsModule)}, 1)]
-        internal async Task Bind_ListView_Maps(Platform platform,PredifinedMap[] predifinedMaps,Type[] controlTypes,Type[] extraModules,int boundTypes){
+        [InlineData(Platform.Win, new[]{PredefinedMap.PivotGridField, PredefinedMap.PivotGridControl},new[]{typeof(PivotGridControl), typeof(PivotGridListEditor)},new[]{typeof(PivotGridModule), typeof(PivotGridWindowsFormsModule)}, 3)]
+        [InlineData(Platform.Win, new[]{PredefinedMap.ChartControl},new[]{typeof(ChartControl), typeof(ChartListEditor)},new[]{typeof(ChartModule), typeof(ChartWindowsFormsModule)},1)]
+        [InlineData(Platform.Win, new[]{PredefinedMap.SchedulerControl},new[]{typeof(SchedulerControl), typeof(SchedulerListEditor)},new[]{typeof(SchedulerModuleBase), typeof(SchedulerWindowsFormsModule)}, 1)]
+        internal async Task Bind_ListView_Maps(Platform platform,PredefinedMap[] predefinedMaps,Type[] controlTypes,Type[] extraModules,int boundTypes){
             controlTypes.ToObservable().Do(type => Assembly.LoadFile(type.Assembly.Location)).Subscribe();
-            InitializeMapperService($"{nameof(Bind_ListView_Maps)}{predifinedMaps.First()}",platform);
-            var predifinedMap = predifinedMaps.Last();
+            InitializeMapperService($"{nameof(Bind_ListView_Maps)}{predefinedMaps.First()}",platform);
+            var predefinedMap = predefinedMaps.Last();
             
-            var module = predifinedMaps.Extend();
+            var module = predefinedMaps.Extend();
 
             var application = DefaultModelMapperModule(platform,extraModules.Select(_ => {
                 var instance = _.CreateInstance();
@@ -264,13 +264,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                 }
                 return instance;
             }).Cast<ModuleBase>().Concat(new[]{module}).ToArray()).Application;
-            MockListEditor(platform, controlTypes, application, predifinedMap,null);
+            MockListEditor(platform, controlTypes, application, predefinedMap,null);
             var controlBound = ModelBindingService.ControlBind.Replay();
             controlBound.Connect();
             
             var listView = application.CreateObjectView<ListView>(typeof(MM));
             listView.Model.EditorType = controlTypes.Last();
-            listView.Model.BandsLayout.Enable = predifinedMaps.Contains(PredifinedMap.AdvBandedGridView);
+            listView.Model.BandsLayout.Enable = predefinedMaps.Contains(PredefinedMap.AdvBandedGridView);
 
             listView.CreateControls();
             if (boundTypes>0){
@@ -283,13 +283,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         [InlineData(Platform.Win)]
         internal async Task Bind_PropertyEditor_Control(Platform platform){
             
-            var maps = EnumsNET.Enums.GetValues<PredifinedMap>().Where(map => map.IsPropertyEditor()&&map.Attribute<MapPlatformAttribute>().Platform==platform.ToString());
-            foreach (var predifinedMap in maps){
+            var maps = EnumsNET.Enums.GetValues<PredefinedMap>().Where(map => map.IsPropertyEditor()&&map.Attribute<MapPlatformAttribute>().Platform==platform.ToString());
+            foreach (var predefinedMap in maps){
                 try{
-                    var controlType = predifinedMap.Assembly().GetType(predifinedMap.GetTypeName());
-                    InitializeMapperService($"{nameof(Bind_PropertyEditor_Control)}{predifinedMap}",platform);
-                    var module = predifinedMap.Extend();
-                    var application = DefaultModelMapperModule(platform,predifinedMap.Modules().Select(_ => {
+                    var controlType = predefinedMap.Assembly().GetType(predefinedMap.GetTypeName());
+                    InitializeMapperService($"{nameof(Bind_PropertyEditor_Control)}{predefinedMap}",platform);
+                    var module = predefinedMap.Extend();
+                    var application = DefaultModelMapperModule(platform,predefinedMap.Modules().Select(_ => {
                         var instance = _.CreateInstance();
                         if (instance is DashboardsModule dashboardsModule){
                             dashboardsModule.DashboardDataType = typeof(DashboardData);
@@ -302,7 +302,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                     var modelPropertyEditor = ((IModelPropertyEditor) application.Model.GetNodeByPath(MMDetailViewTestItemNodePath));
                     var mapNode = modelPropertyEditor.GetNode(ViewItemService.PropertyEditorControlMapName);
                     var propertyEditorControlType = mapNode.ModelListItemType().ToTypeInfo();
-                    var typeInfo = propertyEditorControlType.Descendants.First(info => info.Type.Name==predifinedMap.ModelTypeName());
+                    var typeInfo = propertyEditorControlType.Descendants.First(info => info.Type.Name==predefinedMap.ModelTypeName());
                     mapNode.AddNode(typeInfo.Type);
                     application.MockDetailViewEditor( modelPropertyEditor, controlType.CreateInstance());
 
@@ -316,7 +316,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                     Dispose();
                 }
                 catch (Exception e){
-                    throw new Exception(predifinedMap.ToString(), e);
+                    throw new Exception(predefinedMap.ToString(), e);
                 }
             }
             
@@ -324,14 +324,15 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
         [Theory]
         [InlineData(typeof(ListView))]
-//        [InlineData(typeof(DetailView))]
+        [InlineData(typeof(DetailView))]
         internal async Task Bind_RepositoryItems(Type viewType){
+            
             var boundTypes = 2;
             var controlTypes =new[]{typeof(XafGridView),typeof(GridColumn)};
-            var predifinedMaps = new[]{PredifinedMap.RepositoryItem,PredifinedMap.RepositoryItemTextEdit };
+            var predefinedMaps = new[]{PredefinedMap.RepositoryItem,PredefinedMap.RepositoryItemTextEdit };
             controlTypes.ToObservable().Do(type => Assembly.LoadFile(type.Assembly.Location)).Subscribe();
-            InitializeMapperService($"{nameof(Bind_RepositoryItems)}{predifinedMaps.First()}",Platform.Win);
-            var module = predifinedMaps.Extend();
+            InitializeMapperService($"{nameof(Bind_RepositoryItems)}{predefinedMaps.First()}",Platform.Win);
+            var module = predefinedMaps.Extend();
             var application = DefaultModelMapperModule(Platform.Win,module).Application;
             var controlBound = ModelBindingService.ControlBind.Replay();
             controlBound.Connect();
@@ -340,7 +341,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             var controlInstance = new StringEdit();
             var repositoryItemTextEdit = controlInstance.Properties;
             if (viewType == typeof(ListView)){
-                MockListEditor(Platform.Win, controlTypes, application, PredifinedMap.GridView,repositoryItemTextEdit);
+                MockListEditor(Platform.Win, controlTypes, application, PredefinedMap.GridView,repositoryItemTextEdit);
             }
             else{
                 application.MockDetailViewEditor( modelPropertyEditor, controlInstance);
@@ -379,14 +380,14 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
 
         private static void MockListEditor(Platform platform, Type[] controlTypes, XafApplication application,
-            PredifinedMap predifinedMap, RepositoryItemTextEdit repositoryItemTextEdit){
+            PredefinedMap predefinedMap, RepositoryItemTextEdit repositoryItemTextEdit){
             application.MockListEditor((view, xafApplication, collectionSource) => {
                 ListEditor listEditor;
-                if (new[]{PredifinedMap.PivotGridControl,PredifinedMap.ChartControl,PredifinedMap.SchedulerControl,PredifinedMap.TreeList, }.Any(map => map==predifinedMap)){
+                if (new[]{PredefinedMap.PivotGridControl,PredefinedMap.ChartControl,PredefinedMap.SchedulerControl,PredefinedMap.TreeList, }.Any(map => map==predefinedMap)){
                     listEditor =
                         (ListEditor) Activator.CreateInstance(controlTypes.Last(), view);
                 }
-                else if (new[]{PredifinedMap.DashboardDesigner,PredifinedMap.SplitContainerControl}.Any(map => map == predifinedMap)){
+                else if (new[]{PredefinedMap.DashboardDesigner,PredefinedMap.SplitContainerControl}.Any(map => map == predefinedMap)){
                     return application.ListEditorMock().Object;
                 }
                 else

@@ -1,4 +1,5 @@
 ﻿using System;
+using DevExpress.Persistent.Base;
 using Xpand.Source.Extensions.XAF.XafApplication;
 
 namespace Xpand.XAF.Modules.ModelMapper.Configuration{
@@ -11,51 +12,72 @@ namespace Xpand.XAF.Modules.ModelMapper.Configuration{
         public string Platform{ get; }
     }
 
-    public enum PredifinedMap{
+    public enum PredefinedMap{
         None,
 
         [MapPlatform(Platform.Win)]
+        [ImageName(@"Office2013\Grid_16x16")]
         GridView,
         [MapPlatform(Platform.Win)]
+        [ImageName(@"Office2013\Grid_16x16")]
         GridColumn,
         [MapPlatform(Platform.Win)]
+        [ImageName("GridBandedRows_16x16")]
         AdvBandedGridView,
         [MapPlatform(Platform.Win)]
+        [ImageName("GridBandedRows_16x16")]
         BandedGridColumn,
         [MapPlatform(Platform.Win)]
+        [ImageName(@"GrayScaleImages\MoreLayoutOptions_16x16")]
         XafLayoutControl,
         [MapPlatform(Platform.Win)]
+        [ImageName(@"Office2013\AlignVerticalCenter_16x16")]
         SplitContainerControl,
         [MapPlatform(Platform.Win)]
+        [ImageName(@"Office2013\Cards_16x16")]
         LayoutView,
         [MapPlatform(Platform.Win)]
+        [ImageName(@"Office2013\Cards_16x16")]
         LayoutViewColumn,
         [MapPlatform(Platform.Win)]
+        [ImageName(@"TreeView_16x16")]
         TreeList,
         [MapPlatform(Platform.Win)]
+        [ImageName(@"TreeView_16x16")]
         TreeListColumn,
         
         [MapPlatform(Platform.Win)]
+        [ImageName(@"Action_CreateDashboard")]
         DashboardDesigner,
         [MapPlatform(Platform.Win)]
+        [ImageName(@"HorizontalAxisWithoutLabeling_16x16")]
         LabelControl,
         [MapPlatform(Platform.Win)]
+        [ImageName(@"RichEditBookmark_16x16")]
         RichEditControl,
         [MapPlatform(Platform.Win)]
+        [ImageName(@"Action_CreateDashboard")]
         DashboardViewer,
         [MapPlatform(Platform.Web)]
+        [ImageName(@"Action_CreateDashboard")]
         ASPxDashboard,
         [MapPlatform(Platform.Win)]
+
         RepositoryItem,
         [MapPlatform(Platform.Win)]
+        [ImageName(@"WithTextWrapping_TopLeft_16x16")]
         RepositoryItemTextEdit,
         [MapPlatform(Platform.Win)]
+        [ImageName(@"Action_Debug_Start")]
         RepositoryItemButtonEdit,
         [MapPlatform(Platform.Win)]
+        [ImageName(@"ComboBox_16x16")]
         RepositoryItemComboBox,
         [MapPlatform(Platform.Win)]
+        [ImageName(@"ADateOccurring_16x16")]
         RepositoryItemDateEdit,
         [MapPlatform(Platform.Win)]
+        [ImageName(@"HighlightField_16x16")]
         RepositoryFieldPicker,
         [MapPlatform(Platform.Win)]
         RepositoryItemPopupExpressionEdit,
@@ -122,13 +144,17 @@ namespace Xpand.XAF.Modules.ModelMapper.Configuration{
         [MapPlatform(Platform.Win)]
         RepositoryItemPopupBaseAutoSearchEdit,
         [MapPlatform(Platform.Win)]
+        [ImageName("Calendar_16x16")]
         SchedulerControl,
         
         [MapPlatform(Platform.Win)]
+        [ImageName("BOPivotChart_16x16")]
         PivotGridControl,
         [MapPlatform(Platform.Win)]
+        [ImageName("BOPivotChart_16x16")]
         PivotGridField,
         [MapPlatform(Platform.Win)]
+        [ImageName(@"GrayScaleImages\Chart_16x16")]
         ChartControl,
         [MapPlatform(Platform.Win)]
         ChartControlDiagram,
@@ -153,16 +179,20 @@ namespace Xpand.XAF.Modules.ModelMapper.Configuration{
         [MapPlatform(Platform.Win)]
         ChartControlGanttDiagram,
         [MapPlatform(Platform.Web)]
+        [ImageName("Grid_16x16")]
         ASPxGridView,
         [MapPlatform(Platform.Web)]
+        [ImageName("Grid_16x16")]
         GridViewColumn,
         [MapPlatform(Platform.Web)]
         ASPxHtmlEditor,
         [MapPlatform(Platform.Web)]
+        [ImageName("Calendar_16x16")]
         ASPxScheduler,
         [MapPlatform(Platform.Web)]
         ASPxUploadControl,
         [MapPlatform(Platform.Web)]
+        [ImageName(@"DevAV\ViewSetting_16x16")]
         ASPxPopupControl,
         [MapPlatform(Platform.Web)]
         ASPxDateEdit,

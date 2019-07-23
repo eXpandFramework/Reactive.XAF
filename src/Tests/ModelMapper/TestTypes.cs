@@ -22,7 +22,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         public TestModelMapper[] TestModelMappersArray{ get; }
         public string[] ValueTypeArray{ get; }
     }
-    public interface IModelPredifinedMapExtension{
+    public interface IModelPredefinedMapExtension{
         
     }
     class ModelMapperTestModule:ModuleBase{

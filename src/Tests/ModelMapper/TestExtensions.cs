@@ -27,74 +27,74 @@ using Xpand.XAF.Modules.ModelMapper.Services;
 
 namespace Xpand.XAF.Modules.ModelMapper.Tests{
     internal static class TestExtensions{
-        public static IEnumerable<Type> Modules(this PredifinedMap predifinedMap){
-            if (predifinedMap == PredifinedMap.DashboardViewer){
+        public static IEnumerable<Type> Modules(this PredefinedMap PredefinedMap){
+            if (PredefinedMap == PredefinedMap.DashboardViewer){
                 return new Type[]{typeof(DashboardsModule), typeof(DashboardsWindowsFormsModule)};
             }
             return Enumerable.Empty<Type>();
         }
 
-        public static Assembly Assembly(this PredifinedMap predifinedMap){
+        public static Assembly Assembly(this PredefinedMap PredefinedMap){
             Assembly assembly = null;
             if (new[]{
-                PredifinedMap.AdvBandedGridView, PredifinedMap.BandedGridColumn, PredifinedMap.GridView,
-                PredifinedMap.GridColumn, PredifinedMap.LayoutView, PredifinedMap.LayoutViewColumn
-            }.Contains(predifinedMap))
+                PredefinedMap.AdvBandedGridView, PredefinedMap.BandedGridColumn, PredefinedMap.GridView,
+                PredefinedMap.GridColumn, PredefinedMap.LayoutView, PredefinedMap.LayoutViewColumn
+            }.Contains(PredefinedMap))
                 assembly = typeof(GridView).Assembly;
             else if (new[]{
-                PredifinedMap.RepositoryFieldPicker, PredifinedMap.RepositoryItemRtfEditEx,
-                PredifinedMap.RepositoryItemLookupEdit, PredifinedMap.RepositoryItemObjectEdit,
-                PredifinedMap.RepositoryItemPopupExpressionEdit, PredifinedMap.RepositoryItemPopupCriteriaEdit,
-                PredifinedMap.RepositoryItemProtectedContentTextEdit
-            }.Contains(predifinedMap) || predifinedMap == PredifinedMap.XafLayoutControl)
+                PredefinedMap.RepositoryFieldPicker, PredefinedMap.RepositoryItemRtfEditEx,
+                PredefinedMap.RepositoryItemLookupEdit, PredefinedMap.RepositoryItemObjectEdit,
+                PredefinedMap.RepositoryItemPopupExpressionEdit, PredefinedMap.RepositoryItemPopupCriteriaEdit,
+                PredefinedMap.RepositoryItemProtectedContentTextEdit
+            }.Contains(PredefinedMap) || PredefinedMap == PredefinedMap.XafLayoutControl)
                 assembly = typeof(SystemWindowsFormsModule).Assembly;
-            else if (predifinedMap.IsRepositoryItem())
+            else if (PredefinedMap.IsRepositoryItem())
                 assembly = typeof(RepositoryItem).Assembly;
-            else if (predifinedMap == PredifinedMap.SplitContainerControl)
+            else if (PredefinedMap == PredefinedMap.SplitContainerControl)
                 assembly = typeof(SplitContainerControl).Assembly;
-            else if (predifinedMap == PredifinedMap.RichEditControl)
+            else if (PredefinedMap == PredefinedMap.RichEditControl)
                 assembly = typeof(RichEditControl).Assembly;
-            else if (predifinedMap == PredifinedMap.LabelControl)
+            else if (PredefinedMap == PredefinedMap.LabelControl)
                 assembly = typeof(LabelControl).Assembly;
             else if (new[]{
-                PredifinedMap.ASPxUploadControl, PredifinedMap.ASPxPopupControl, PredifinedMap.ASPxDateEdit,
-                PredifinedMap.ASPxHyperLink, PredifinedMap.ASPxSpinEdit, PredifinedMap.ASPxTokenBox,
-                PredifinedMap.ASPxComboBox
-            }.Any(map => map == predifinedMap))
+                PredefinedMap.ASPxUploadControl, PredefinedMap.ASPxPopupControl, PredefinedMap.ASPxDateEdit,
+                PredefinedMap.ASPxHyperLink, PredefinedMap.ASPxSpinEdit, PredefinedMap.ASPxTokenBox,
+                PredefinedMap.ASPxComboBox
+            }.Any(map => map == PredefinedMap))
                 assembly = typeof(ASPxComboBox).Assembly;
-            else if (new[]{PredifinedMap.ASPxLookupDropDownEdit, PredifinedMap.ASPxLookupFindEdit}.Any(map =>
-                map == predifinedMap))
+            else if (new[]{PredefinedMap.ASPxLookupDropDownEdit, PredefinedMap.ASPxLookupFindEdit}.Any(map =>
+                map == PredefinedMap))
                 assembly = typeof(ASPxLookupDropDownEdit).Assembly;
-            else if (new[]{PredifinedMap.DashboardDesigner, PredifinedMap.DashboardViewer}.Any(map =>
-                map == predifinedMap))
+            else if (new[]{PredefinedMap.DashboardDesigner, PredefinedMap.DashboardViewer}.Any(map =>
+                map == PredefinedMap))
                 assembly = typeof(DashboardDesigner).Assembly;
-            else if (new[]{PredifinedMap.ASPxDashboard}.Any(map => map == predifinedMap))
+            else if (new[]{PredefinedMap.ASPxDashboard}.Any(map => map == PredefinedMap))
                 assembly = typeof(ASPxDashboard).Assembly;
-            else if (new[]{PredifinedMap.PivotGridControl, PredifinedMap.PivotGridField}.Contains(predifinedMap))
+            else if (new[]{PredefinedMap.PivotGridControl, PredefinedMap.PivotGridField}.Contains(PredefinedMap))
                 assembly = typeof(PivotGridControl).Assembly;
-            else if (predifinedMap == PredifinedMap.ChartControl || predifinedMap.IsChartControlDiagram())
+            else if (PredefinedMap == PredefinedMap.ChartControl || PredefinedMap.IsChartControlDiagram())
                 assembly = typeof(ChartControl).Assembly;
-            else if (predifinedMap == PredifinedMap.SchedulerControl)
+            else if (PredefinedMap == PredefinedMap.SchedulerControl)
                 assembly = typeof(SchedulerControl).Assembly;
-            else if (predifinedMap == PredifinedMap.ASPxHtmlEditor)
+            else if (PredefinedMap == PredefinedMap.ASPxHtmlEditor)
                 assembly = typeof(ASPxHtmlEditor).Assembly;
-            else if (predifinedMap == PredifinedMap.ASPxScheduler)
+            else if (PredefinedMap == PredefinedMap.ASPxScheduler)
                 assembly = typeof(ASPxScheduler).Assembly;
-            else if (new[]{PredifinedMap.TreeList, PredifinedMap.TreeListColumn}.Any(map => map == predifinedMap))
+            else if (new[]{PredefinedMap.TreeList, PredefinedMap.TreeListColumn}.Any(map => map == PredefinedMap))
                 assembly = typeof(TreeList).Assembly;
             if (assembly == null){
-                throw new NotImplementedException(predifinedMap.ToString());
+                throw new NotImplementedException(PredefinedMap.ToString());
             }
             return assembly;
         }
 
-        public static ModelMapperTestModule Extend(this PredifinedMap map, ModelMapperTestModule testModule = null,
+        public static ModelMapperTestModule Extend(this PredefinedMap map, ModelMapperTestModule testModule = null,
             Action<ModelMapperConfiguration> configure = null){
             testModule = testModule ?? new ModelMapperTestModule();
             return new[]{map}.Extend(testModule, configure);
         }
 
-        public static ModelMapperTestModule Extend(this PredifinedMap[] maps, ModelMapperTestModule testModule = null,
+        public static ModelMapperTestModule Extend(this PredefinedMap[] maps, ModelMapperTestModule testModule = null,
             Action<ModelMapperConfiguration> configure = null){
             testModule = testModule ?? new ModelMapperTestModule();
             testModule.ApplicationModulesManager.FirstAsync()

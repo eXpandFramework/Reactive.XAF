@@ -54,7 +54,7 @@ The module satisfies the following conditions:
    ![image](https://user-images.githubusercontent.com/159464/55991766-b1005080-5cb3-11e9-9dc2-bee3dfb627ac.png)
 
 ### Tests
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Modules/MasterDetail)
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/MasterDetail)
 
 ### Examples
 The module is integrated with the `ExcelImporter`, `XtraDashboard` modules.

@@ -34,10 +34,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                                                        info.Name!=TypeMappingService.ModelMappersNodeName).ToArray();
         }
 
-        private void ConfigureLayoutViewPredifinedMapService(PredifinedMap predifinedMap=PredifinedMap.LayoutView){
-            if (new[]{PredifinedMap.LayoutView,PredifinedMap.LayoutViewColumn}.Contains(predifinedMap)){
-                typeof(PredifinedMapService).Field("_xpandWinAssembly",Flags.Static|Flags.AnyVisibility).Set(GetType().Assembly);
-                typeof(PredifinedMapService).Field("_layoutViewListEditorTypeName",Flags.Static|Flags.AnyVisibility).Set(typeof(CustomGridListEditor).FullName);
+        private void ConfigureLayoutViewPredefinedMapService(PredefinedMap PredefinedMap=PredefinedMap.LayoutView){
+            if (new[]{PredefinedMap.LayoutView,PredefinedMap.LayoutViewColumn}.Contains(PredefinedMap)){
+                typeof(PredefinedMapService).Field("_xpandWinAssembly",Flags.Static|Flags.AnyVisibility).Set(GetType().Assembly);
+                typeof(PredefinedMapService).Field("_layoutViewListEditorTypeName",Flags.Static|Flags.AnyVisibility).Set(typeof(CustomGridListEditor).FullName);
             }
         }
 
@@ -85,9 +85,9 @@ public class {DynamicTypeName}{{
                 }
             }
             typeof(TypeMappingService).CallMethod(null, "Init");
-            typeof(PredifinedMapService).CallMethod(null, "Init");
+            typeof(PredefinedMapService).CallMethod(null, "Init");
             typeof(TypeMappingService).SetFieldValue("_modelMapperModuleVersion", typeof(ModelMapperModule).Assembly.GetName().Version);
-            ConfigureLayoutViewPredifinedMapService();
+            ConfigureLayoutViewPredefinedMapService();
             return mapperAssemblyName.ToString();
         }
     }

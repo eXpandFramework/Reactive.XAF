@@ -30,6 +30,6 @@ If the package is installed in a way that you do not have access to uninstall it
 
 
 ### Tests
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Modules/Reactive)
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Reactive)
 
 ### Examples

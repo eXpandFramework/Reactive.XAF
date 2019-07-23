@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net461</TargetFramework>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
@@ -10,9 +10,16 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="DevExpress.ExpressApp.Dashboards" Version="18.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp.Dashboards.Web" Version="18.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp.Dashboards.Win" Version="18.2.7" />
     <PackageReference Include="DevExpress.ExpressApp.HtmlPropertyEditor.Web" Version="18.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp.Scheduler.Web" Version="18.2.7" />
     <PackageReference Include="DevExpress.ExpressApp.TreeListEditors" Version="18.2.7" />
     <PackageReference Include="DevExpress.ExpressApp.TreeListEditors.Win" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Persistent.BaseImpl" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Web.Scheduler" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Win.RichEdit" Version="18.2.7" />
     <PackageReference Include="Enums.NET" Version="2.3.2" />
     <PackageReference Include="Moq" Version="4.12.0" />
     <PackageReference Include="Shouldly" Version="3.0.2" />
@@ -54,9 +61,52 @@
     <ProjectReference Include="..\..\Extensions\Extensions\Xpand.Source.Extensions.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="ConcurrentCollections">
+      <HintPath>..\..\Libs\ConcurrentCollections.dll</HintPath>
+    </Reference>
+    <Reference Include="Swordfish.NET.CollectionsV3">
+      <HintPath>..\..\Libs\Swordfish.NET.CollectionsV3.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Design" />
     <Reference Include="System.Web" />
     <Reference Include="Tests">
       <HintPath>..\..\..\bin\TestsLib.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.ExpressApp">
+      <HintPath>..\..\..\..\expand\Demos\XVideoRental\XVideoRental.Win\bin\Debug\Xpand.ExpressApp.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.ExpressApp.Chart.Win">
+      <HintPath>..\..\..\..\expand\Demos\XVideoRental\XVideoRental.Win\bin\Debug\Xpand.ExpressApp.Chart.Win.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.ExpressApp.Dashboard">
+      <HintPath>..\..\..\..\expand\Demos\XVideoRental\XVideoRental.Win\bin\Debug\Xpand.ExpressApp.Dashboard.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.ExpressApp.MasterDetail">
+      <HintPath>..\..\..\..\expand\Demos\XVideoRental\XVideoRental.Win\bin\Debug\Xpand.ExpressApp.MasterDetail.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.ExpressApp.MasterDetail.Win">
+      <HintPath>..\..\..\..\expand\Demos\XVideoRental\XVideoRental.Win\bin\Debug\Xpand.ExpressApp.MasterDetail.Win.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.ExpressApp.PivotGrid.Win">
+      <HintPath>..\..\..\..\expand\Demos\XVideoRental\XVideoRental.Win\bin\Debug\Xpand.ExpressApp.PivotGrid.Win.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.ExpressApp.Scheduler">
+      <HintPath>..\..\..\..\expand\Demos\XVideoRental\XVideoRental.Win\bin\Debug\Xpand.ExpressApp.Scheduler.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.ExpressApp.Scheduler.Win">
+      <HintPath>..\..\..\..\expand\Demos\XVideoRental\XVideoRental.Win\bin\Debug\Xpand.ExpressApp.Scheduler.Win.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.ExpressApp.Win">
+      <HintPath>..\..\..\..\expand\Demos\XVideoRental\XVideoRental.Win\bin\Debug\Xpand.ExpressApp.Win.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.ExpressApp.XtraDashboard.Win">
+      <HintPath>..\..\..\..\expand\Demos\XVideoRental\XVideoRental.Win\bin\Debug\Xpand.ExpressApp.XtraDashboard.Win.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Persistent.Base">
+      <HintPath>..\..\..\..\expand\Demos\XVideoRental\XVideoRental.Win\bin\Debug\Xpand.Persistent.Base.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Persistent.BaseImpl">
+      <HintPath>..\..\..\..\expand\Demos\XVideoRental\XVideoRental.Win\bin\Debug\Xpand.Persistent.BaseImpl.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.ModelMapper">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.ModelMapper.dll</HintPath>

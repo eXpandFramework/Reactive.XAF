@@ -46,8 +46,8 @@ steps:
     diagnosticsEnabled: true
     runTestsInIsolation: true
     codeCoverageEnabled: true
-    rerunFailedTests: true 
-    rerunMaxAttempts: 3
+    rerunFailedTests: false 
+    rerunMaxAttempts: 1
     collectDumpOn: never
     
     

@@ -49,7 +49,7 @@ Using the `CloneModelViewAttribute` in your Bussiness Objects you can:
 
 
 ### Tests
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Modules/CloneModelView)
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/CloneModelView)
 
 ### Examples
 The module is integrated with the following eXpandFramework modules: `Dashboard, ExcelImporter, ModelDifference, System`,

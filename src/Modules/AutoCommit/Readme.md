@@ -47,7 +47,7 @@ The module satisfies the following conditions:
 ![image](https://user-images.githubusercontent.com/159464/56097334-50fbeb00-5efb-11e9-921b-08f6c2d5b607.png)
 
 ### Tests
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Modules/AutoCommit)
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/AutoCommit)
 
 ### Examples
 The module is integrated with the `ExcelImporter`.

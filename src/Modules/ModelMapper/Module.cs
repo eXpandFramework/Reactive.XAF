@@ -15,7 +15,7 @@ namespace Xpand.XAF.Modules.ModelMapper {
 
         public ModelMapperModule(){
             RequiredModuleTypes.Add(typeof(ReactiveModule));
-            _modelExtended = ModelExtendingService.Connected.Replay(1);
+            _modelExtended = ModelExtendingService.Connected.FirstAsync().Replay(1);
             _modelExtended.Connect();
         }
 

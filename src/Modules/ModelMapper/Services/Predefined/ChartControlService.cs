@@ -7,7 +7,7 @@ using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
-namespace Xpand.XAF.Modules.ModelMapper.Services.Predifined{
+namespace Xpand.XAF.Modules.ModelMapper.Services.Predefined{
     class ChartControlService{
         public static IObservable<Unit> Connect(Type typeToMap, Assembly chartCoreAssembly){
             var propertyInfo = typeToMap.Property("Diagram");
@@ -29,7 +29,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.Predifined{
         }
 
         private static void ChartDiagrams((Type declaringType, List<ModelMapperPropertyInfo> propertyInfos) data,Type type, string propertyInfoName){
-            if (data.declaringType.FullName == PredifinedMap.ChartControl.GetTypeName()){
+            if (data.declaringType.FullName == PredefinedMap.ChartControl.GetTypeName()){
                 data.propertyInfos.RemoveAll(info => info.Name == propertyInfoName);
                 data.propertyInfos.Add(new ModelMapperPropertyInfo("Diagrams",type,type.DeclaringType));
             }

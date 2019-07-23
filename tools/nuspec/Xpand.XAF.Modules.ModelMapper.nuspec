@@ -9,7 +9,8 @@
     <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/ModelMapper</projectUrl>
     <iconUrl>http://sign.expandframework.com</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>The `ModuleViewInheritance` module replaces the generator layer of a view by composing multiple unrelated view model differences.</description>
+    <description>The `ModelMapper` module **can map any type** to the XAF application model and in runtime bind it to the respective object instance. 
+The module **ships with 82 predefined maps** for all the common types such as GirdView, ASPxGridView, TreeList, Scheduler, Chart, Dashboards etc. More info in the Details section.</description>
     <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  ModelMapper</tags>
@@ -27,6 +28,8 @@
   <files>
     <file src="Xpand.XAF.Modules.ModelMapper.dll" target="lib\net461\Xpand.XAF.Modules.ModelMapper.dll" />
     <file src="Xpand.XAF.Modules.ModelMapper.pdb" target="lib\net461\Xpand.XAF.Modules.ModelMapper.pdb" />
+    <file src="..\src\libs\ConcurrentCollections.dll" target="lib\net461\ConcurrentCollections.dll" />
+    <file src="..\src\libs\Swordfish.NET.CollectionsV3.dll" target="lib\net461\Swordfish.NET.CollectionsV3.dll" />
     <file src="..\src\libs\Fasterflect.Netstandard.dll" target="lib\net461\Fasterflect.Netstandard.dll" />
     <file src="Readme.txt" target="" />
   </files>

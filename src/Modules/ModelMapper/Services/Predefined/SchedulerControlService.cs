@@ -10,7 +10,7 @@ using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
-namespace Xpand.XAF.Modules.ModelMapper.Services.Predifined{
+namespace Xpand.XAF.Modules.ModelMapper.Services.Predefined{
     public class SchedulerControlService{
         public const string PopupMenusMoelPropertyName = "PopupMenus";
 
@@ -27,7 +27,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.Predifined{
                 .Do(type => TypeMappingService.AdditionalTypesList.Add(type))
                 .Subscribe();
             
-            TypeMappingService.PropertyMappingRules.Insert(0,(PredifinedMap.SchedulerControl.ToString(),data => SchedulerStorage(data,typeToMap, types)));
+            TypeMappingService.PropertyMappingRules.Insert(0,(PredefinedMap.SchedulerControl.ToString(),data => SchedulerStorage(data,typeToMap, types)));
             return Unit.Default.AsObservable();
         }
 

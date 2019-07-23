@@ -47,7 +47,7 @@ The module satisfies the following conditions:
 ![image](https://user-images.githubusercontent.com/159464/58032948-418c4500-7b2c-11e9-96bc-f853bd4b9287.png)
 
 ### Tests
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Modules/HIdeToolBar)
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/HIdeToolBar)
 
 ### Examples
 The module is integrated with the `ExcelImporter`.

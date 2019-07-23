@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{F15810E7-4D84-4305-B9DE-74E7976C9018}</ProjectGuid>
     <TargetFramework>net461</TargetFramework>
@@ -13,6 +13,12 @@
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ConcurrentCollections">
+      <HintPath>..\..\Libs\ConcurrentCollections.dll</HintPath>
+    </Reference>
+    <Reference Include="Swordfish.NET.CollectionsV3">
+      <HintPath>..\..\Libs\Swordfish.NET.CollectionsV3.dll</HintPath>
+    </Reference>
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Windows" />
     <Reference Include="System.Windows.Forms" />
@@ -27,6 +33,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\Extensions\Extensions\FunctionOperators\IsAssignableFromOperator.cs" Link="LinkedFiles\IsAssignableFromOperator.cs" />
+    <Compile Include="..\..\Extensions\Extensions\FunctionOperators\PropertyExistsOperator.cs" Link="LinkedFiles\PropertyExistsOperator.cs" />
     <Compile Include="..\..\Extensions\Extensions\Linq\DistinctBy.cs" Link="LinkedFiles\DistinctBy.cs" />
     <Compile Include="..\..\Extensions\Extensions\Linq\GetItems.cs" Link="LinkedFiles\GetItems.cs" />
     <Compile Include="..\..\Extensions\Extensions\System\AppDomain\ApplicationPath.cs" Link="LinkedFiles\ApplicationPath.cs" />
@@ -39,6 +46,9 @@
     <Compile Include="..\..\Extensions\Extensions\XAF\Model\GetParent.cs" Link="LinkedFiles\GetParent.cs" />
     <Compile Include="..\..\Extensions\Extensions\XAF\Model\GetValue.cs" Link="LinkedFiles\GetValue.cs" />
     <Compile Include="..\..\Extensions\Extensions\XAF\Model\Id.cs" Link="LinkedFiles\Id.cs" />
+    <Compile Include="..\..\Extensions\Extensions\XAF\Model\ModelListType.cs" Link="LinkedFiles\ModelListType.cs" />
+    <Compile Include="..\..\Extensions\Extensions\XAF\Model\Nodes.cs" Link="LinkedFiles\Nodes.cs" />
+    <Compile Include="..\..\Extensions\Extensions\XAF\Model\ObjectViewItems.cs" Link="LinkedFiles\ObjectViewItems.cs" />
     <Compile Include="..\..\extensions\extensions\xaf\xafapplication\GetPlatform.cs" Link="LinkedFiles\GetPlatform.cs" />
     <Compile Update="Module.cs">
       <SubType>Component</SubType>

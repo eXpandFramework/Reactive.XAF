@@ -70,4 +70,4 @@ private void DoSomethingForEachMemberValue((IModelObjectView modelObjectView, IM
 
 
 ### Tests
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Modules/CloneMemberValue)
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/CloneMemberValue)

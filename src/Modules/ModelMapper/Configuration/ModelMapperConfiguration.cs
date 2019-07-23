@@ -17,9 +17,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Configuration{
 
 
     public class ModelMapperConfiguration : IModelMapperConfiguration{
-        public ModelMapperConfiguration(Type typeToMap,params Type[] types){
+        public ModelMapperConfiguration(Type typeToMap,params Type[] targetInterfaceTypes){
             TypeToMap = typeToMap;
-            TargetInterfaceTypes=new List<Type>(types);
+            TargetInterfaceTypes=new List<Type>(targetInterfaceTypes);
         }
 
         public string ContainerName{ get; set; }

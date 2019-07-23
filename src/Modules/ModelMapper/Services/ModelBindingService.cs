@@ -13,7 +13,7 @@ using Fasterflect;
 using Xpand.Source.Extensions.Linq;
 using Xpand.Source.Extensions.XAF.Model;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
-using Xpand.XAF.Modules.ModelMapper.Services.Predifined;
+using Xpand.XAF.Modules.ModelMapper.Services.Predefined;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -47,8 +47,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                     var mapType = _.modelMap.GetType().GetInterfaces().First(type =>typeof(IModelModelMap) != type && typeof(IModelModelMap).IsAssignableFrom(type) &&
                         type.Attribute<ModelAbstractClassAttribute>() == null);
                     var controlType = Type.GetType(mapType.Attribute<ModelMapLinkAttribute>().LinkedTypeName);
-                    var predifinedMap = EnumsNET.Enums.GetValues<PredifinedMap>().First(map => map.TypeToMap()==controlType);
-                    var control = predifinedMap.GetViewControl(_.objectView, _.modelMap.Parent.Parent.Id());
+                    var predefinedMap = EnumsNET.Enums.GetValues<PredefinedMap>().First(map => map.TypeToMap()==controlType);
+                    var control = predefinedMap.GetViewControl(_.objectView, _.modelMap.Parent.Parent.Id());
                     return (_.modelMap, control,_.objectView);
                 });
             return controlsCreated
@@ -74,7 +74,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             var mapInterface = interfaces.First(type1 => type1.Property(data.info.Name) != null);
             var type = Type.GetType(mapInterface.Attribute<ModelMapLinkAttribute>().LinkedTypeName);
             var model = data.model.Id();
-            var control = EnumsNET.Enums.GetMember<PredifinedMap>(type?.Name).Value.GetViewControl(data.view, model);
+            var control = EnumsNET.Enums.GetMember<PredefinedMap>(type?.Name).Value.GetViewControl(data.view, model);
             var modelMap = (IModelModelMap) data.info.GetValue(data.model);
             if (control!=null){
                 return (modelMap, control,data.view);

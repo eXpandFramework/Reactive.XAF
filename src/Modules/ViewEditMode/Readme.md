@@ -51,7 +51,7 @@ The module extends the `IModelDetailView` interface with the `IModelDetailViewVi
 ![image](https://user-images.githubusercontent.com/159464/55380067-b7f6c880-5527-11e9-96a1-053fd44095e7.png)
 
 ### Tests
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Modules/ViewEditMode)
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/ViewEditMode)
 
 ### Examples
 

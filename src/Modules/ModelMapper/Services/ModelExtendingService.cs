@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -18,7 +17,7 @@ using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.Ty
 namespace Xpand.XAF.Modules.ModelMapper.Services{
     
     public static class ModelExtendingService{
-        private static readonly Subject<Unit> ConnectedSubject=new Subject<Unit>();
+        private static readonly ISubject<Unit> ConnectedSubject=Subject.Synchronize(new Subject<Unit>());
         internal static Platform Platform{ get; private set; }
 
         public static IObservable<Unit> Connected => ConnectedSubject;
@@ -61,7 +60,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                     .SelectMany(extenderInterface => _.TargetInterfaceTypes.Select(targetInterfaceType => (targetInterfaceType, extenderInterface))))
                 .Do(_ => extenders.Add(_.targetInterfaceType,_.extenderInterface));
         }
-
 
         public static void Extend(this ApplicationModulesManager modulesManager, IModelMapperConfiguration configuration){
             if (modulesManager.Modules.FindModule<ModelMapperModule>()==null)
