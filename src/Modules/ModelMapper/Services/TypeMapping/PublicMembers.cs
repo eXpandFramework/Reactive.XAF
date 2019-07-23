@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -9,10 +10,10 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
+using ConcurrentCollections;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
-using DevExpress.Utils.Extensions;
 using Fasterflect;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.Predifined;
@@ -24,16 +25,16 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         public static string ModelMapperAssemblyName=null;
         public static string MapperAssemblyName="ModelMapperAssembly";
         public static string ModelMappersNodeName="ModelMappers";
-        public static HashSet<string> ReservedPropertyNames{ get; }=new HashSet<string>();
-        public static HashSet<Type> ReservedPropertyTypes{ get; }=new HashSet<Type>();
-        public static HashSet<Type> ReservedPropertyInstances{ get; }=new HashSet<Type>();
-        public static HashSet<Type> AdditionalTypesList{ get; }=new HashSet<Type>();
-        public static HashSet<Type> AdditionalReferences{ get; }=new HashSet<Type>();
+        public static ConcurrentHashSet<string> ReservedPropertyNames{ get; }=new ConcurrentHashSet<string>();
+        public static ConcurrentHashSet<Type> ReservedPropertyTypes{ get; }=new ConcurrentHashSet<Type>();
+        public static ConcurrentHashSet<Type> ReservedPropertyInstances{ get; }=new ConcurrentHashSet<Type>();
+        public static ConcurrentHashSet<Type> AdditionalTypesList{ get; }=new ConcurrentHashSet<Type>();
+        public static ConcurrentHashSet<Type> AdditionalReferences{ get; }=new ConcurrentHashSet<Type>();
         static ISubject<IModelMapperConfiguration> _typesToMap;
         private static ReplaySubject<IModelMapperConfiguration> _mappingTypes;
-        public static List<(string key, Action<(Type declaringType,List<ModelMapperPropertyInfo> propertyInfos)> action)> PropertyMappingRules{ get; private set; }
-        public static List<(string key, Action<(Type typeToMap,Result<(string key, string code)> data)> action)> ContainerMappingRules{ get; private set; }
-        public static List<(string key, Action<ModelMapperType> action)> TypeMappingRules{ get; private set; }
+        public static ObservableCollection<(string key, Action<(Type declaringType,List<ModelMapperPropertyInfo> propertyInfos)> action)> PropertyMappingRules{ get; private set; }
+        public static ObservableCollection<(string key, Action<(Type typeToMap,Result<(string key, string code)> data)> action)> ContainerMappingRules{ get; private set; }
+        public static ObservableCollection<(string key, Action<ModelMapperType> action)> TypeMappingRules{ get; private set; }
 
         static TypeMappingService(){
             Init();
@@ -58,12 +59,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             _customizeProperties =new Subject<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)>();
             _customizeTypes =new Subject<ModelMapperType>();
             
-            TypeMappingRules = new List<(string key, Action<ModelMapperType> action)>(){
+            TypeMappingRules = new ObservableCollection<(string key, Action<ModelMapperType> action)>(){
                 (nameof(WithNonPublicAttributeParameters), NonPublicAttributeParameters),
                 (nameof(GenericTypeArguments), GenericTypeArguments),
             };
-            ContainerMappingRules=new List<(string key, Action<(Type typeToMap, Result<(string key, string code)> data)> action)>();
-            PropertyMappingRules = new List<(string key, Action<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)> action)>{
+            ContainerMappingRules=new ObservableCollection<(string key, Action<(Type typeToMap, Result<(string key, string code)> data)> action)>();
+            PropertyMappingRules = new ObservableCollection<(string key, Action<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)> action)>{
                 (nameof(GenericTypeArguments), GenericTypeArguments),
                 (nameof(BrowsableRule), BrowsableRule),
                 (nameof(PrivateDescriptionRule), PrivateDescriptionRule),
@@ -91,13 +92,24 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             _modelMapperModuleVersion = typeof(TypeMappingService).Assembly.GetName().Version;
             
             ReservedPropertyNames.Clear();
-            var names = new []{typeof(ModelNode),typeof(IModelNode),typeof(ModelApplicationBase)}
+            new []{typeof(ModelNode),typeof(IModelNode),typeof(ModelApplicationBase)}
                 .SelectMany(_ => _.GetMembers()).Select(_ => _.Name)
-                .Concat(new []{"Item","IsReadOnly","Remove","Id","Nodes","IsValid"}).Distinct();
-            ReservedPropertyNames.AddRange(names);
-            ReservedPropertyTypes.AddRange(new[]{ typeof(Type),typeof(IList),typeof(object),typeof(Array),typeof(IComponent),typeof(ISite)});
-            ReservedPropertyInstances.AddRange(new[]{ typeof(IDictionary)});
-            AdditionalReferences.AddRange(new []{typeof(IModelNode),typeof(DescriptionAttribute),typeof(AssemblyFileVersionAttribute),typeof(ImageNameAttribute),typeof(TypeMappingService)});
+                .Concat(new []{"Item","IsReadOnly","Remove","Id","Nodes","IsValid"}).Distinct()
+                .ToObservable(Scheduler.Immediate)
+                .Do(name => ReservedPropertyNames.Add(name))
+                .Subscribe();
+            new[]{typeof(Type), typeof(IList), typeof(object), typeof(Array), typeof(IComponent), typeof(ISite)}
+                .ToObservable(Scheduler.Immediate)
+                .Do(type => ReservedPropertyTypes.Add(type))
+                .Subscribe();
+            new[]{typeof(IDictionary)}.ToObservable(Scheduler.Immediate)
+                .Do(type => ReservedPropertyInstances.Add(type))
+                .Subscribe();
+            new []{typeof(IModelNode),typeof(DescriptionAttribute),typeof(AssemblyFileVersionAttribute),typeof(ImageNameAttribute),typeof(TypeMappingService)}
+                .ToObservable(Scheduler.Immediate)
+                .Do(type => AdditionalReferences.Add(type))
+                .Subscribe();
+            
             var systemWebAssembly = AppDomain.CurrentDomain.GetAssemblies()
                 .FirstOrDefault(assembly => assembly.GetName().Name == "System.Web");
             if (systemWebAssembly != null){

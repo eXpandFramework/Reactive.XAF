@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using ConcurrentCollections;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using Fasterflect;
@@ -16,18 +17,13 @@ using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.Ty
 
 namespace Xpand.XAF.Modules.ModelMapper.Services{
     
-    public class PredifinedMapAttribute:Attribute{
-        public PredifinedMapAttribute(PredifinedMap map){
-            Map = map;
-        }
-
-        public PredifinedMap Map{ get; }
-    }
     public static class ModelExtendingService{
         private static readonly Subject<Unit> ConnectedSubject=new Subject<Unit>();
         internal static Platform Platform{ get; private set; }
 
-        private static HashSet<IModelMapperConfiguration> ModelMapperConfigurations{ get; } =new HashSet<IModelMapperConfiguration>();
+        public static IObservable<Unit> Connected => ConnectedSubject;
+
+        private static ConcurrentHashSet<IModelMapperConfiguration> ModelMapperConfigurations{ get; } =new ConcurrentHashSet<IModelMapperConfiguration>();
 
         static ModelExtendingService(){
             Init();
@@ -39,12 +35,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
 
         internal static IObservable<Unit> ConnectExtendingService(this ApplicationModulesManager applicationModulesManager){
             Platform = applicationModulesManager.Modules.GetPlatform();
-            ConnectedSubject.OnNext(Unit.Default);
+            
             var extendModel = applicationModulesManager.Modules.OfType<ReactiveModule>().ToObservable().FirstAsync()
                 .Select(module => module.ExtendModel).Switch().FirstAsync();
             
             return extendModel.Select(extenders => extenders)
                 .Select(AddExtenders).Switch()
+                .Finally(() => ConnectedSubject.OnNext(Unit.Default))
                 .ToUnit();
         }
 

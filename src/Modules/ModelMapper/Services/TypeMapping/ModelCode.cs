@@ -261,10 +261,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 })
                 .Concat(Observable.Return(AssemblyVersionCode()))
                 .Select(_=>(code:_,references:new[]{typeof(ModelMapperModule).Assembly.Location}.AsEnumerable()));
-            var modelCode = source.SelectMany(_ => {
+            var modelCode = source.SelectMany(_ => Observable.Start(() => {
                 var code = _.TypeToMap.ModelCode(_);
-                return code.code.Select(__ => (code: __, code.references));
-            }).Replay().RefCount();
+                return code.code.Select(__ => (code: __, code.references)).ToObservable();
+
+            }).Merge()).Replay().RefCount();
             var typeCode = modelCode
                 .ToEnumerable().GroupBy(_ => _.code.key).SelectMany(_ => _.OrderByDescending(tuple => tuple.code.map).Take(1))
                 .Select(_ => (_.code.code, _.references)).ToObservable();

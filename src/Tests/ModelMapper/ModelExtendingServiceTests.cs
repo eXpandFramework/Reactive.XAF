@@ -168,14 +168,14 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
         [Theory]
         [InlineData(PredifinedMap.ChartControlRadarDiagram, typeof(RadarDiagram),Platform.Win)]
-//        [InlineData(PredifinedMap.ChartControlPolarDiagram, typeof(PolarDiagram),Platform.Win)]
-//        [InlineData(PredifinedMap.ChartControlXYDiagram2D, typeof(XYDiagram2D),Platform.Win)]
-//        [InlineData(PredifinedMap.ChartControlXYDiagram, typeof(XYDiagram),Platform.Win)]
-//        [InlineData(PredifinedMap.ChartControlSwiftPlotDiagram, typeof(SwiftPlotDiagram),Platform.Win)]
-//        [InlineData(PredifinedMap.ChartControlGanttDiagram, typeof(GanttDiagram),Platform.Win)]
-//        [InlineData(PredifinedMap.ChartControlFunnelDiagram3D, typeof(FunnelDiagram3D),Platform.Win)]
-//        [InlineData(PredifinedMap.ChartControlDiagram3D, typeof(Diagram3D),Platform.Win)]
-//        [InlineData(PredifinedMap.ChartControlSimpleDiagram3D, typeof(SimpleDiagram3D),Platform.Win)]
+        [InlineData(PredifinedMap.ChartControlPolarDiagram, typeof(PolarDiagram),Platform.Win)]
+        [InlineData(PredifinedMap.ChartControlXYDiagram2D, typeof(XYDiagram2D),Platform.Win)]
+        [InlineData(PredifinedMap.ChartControlXYDiagram, typeof(XYDiagram),Platform.Win)]
+        [InlineData(PredifinedMap.ChartControlSwiftPlotDiagram, typeof(SwiftPlotDiagram),Platform.Win)]
+        [InlineData(PredifinedMap.ChartControlGanttDiagram, typeof(GanttDiagram),Platform.Win)]
+        [InlineData(PredifinedMap.ChartControlFunnelDiagram3D, typeof(FunnelDiagram3D),Platform.Win)]
+        [InlineData(PredifinedMap.ChartControlDiagram3D, typeof(Diagram3D),Platform.Win)]
+        [InlineData(PredifinedMap.ChartControlSimpleDiagram3D, typeof(SimpleDiagram3D),Platform.Win)]
         internal void ExtendModel_PredefinedChartDiagram(PredifinedMap configuration,Type typeToMap,Platform platform){
             InitializeMapperService($"{nameof(ExtendModel_PredefinedChartDiagram)}{configuration}{platform}",platform);
 
@@ -214,7 +214,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             var values = Enums.GetValues<PredifinedMap>()
                 .Where(map =>map.GetAttributes().OfType<MapPlatformAttribute>().Any(_ => _.Platform == platform.ToString()))
                 .ToArray();
-
+            
             var module = values.ToArray().Extend();
 
             DefaultModelMapperModule(platform,module);

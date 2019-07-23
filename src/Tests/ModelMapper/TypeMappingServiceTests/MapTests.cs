@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive.Linq;
@@ -145,19 +144,22 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Fact]
-        public async Task Map_Multiple_Objects_with_common_types(){
+        public void Map_Multiple_Objects_with_common_types(){
             var typeToMap1 = typeof(TestModelMapperCommonType1);
             var typeToMap2 = typeof(TestModelMapperCommonType2);
             InitializeMapperService(nameof(Map_Multiple_Objects_with_common_types));
 
-            var mappedTypes = new[]{typeToMap1, typeToMap2}.MapToModel().ModelInterfaces();
+            var mappedTypes = new List<Type>(new[]{typeToMap1, typeToMap2}.MapToModel().ModelInterfaces().ToEnumerable().ToArray());
 
-            var mappedType1 = await mappedTypes.Take(1);
-            mappedType1.Name.ShouldBe(typeToMap1.ModelTypeName());
+            var mappedType1 = mappedTypes[0];
+            var typesToMap = new[]{typeToMap1,typeToMap2}.Select(type => type.ModelTypeName());
+            typesToMap.ShouldContain(mappedType1.Name);
             var appearenceCell = mappedType1.Properties().First(_ => _.Name==nameof(TestModelMapperCommonType1.AppearanceCell));
             appearenceCell.ShouldNotBeNull();
             appearenceCell.GetType().Properties("TextOptions").ShouldNotBeNull();
-            var mappedType2 = await mappedTypes.Take(2);
+            mappedTypes.Remove(mappedType1);
+
+            var mappedType2 = mappedTypes[0];
             mappedType2.Name.ShouldBe(typeToMap2.ModelTypeName());
             appearenceCell = mappedType1.Properties().First(_ => _.Name==nameof(TestModelMapperCommonType2.AppearanceCell));
             appearenceCell.ShouldNotBeNull();
@@ -184,43 +186,43 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
         [Theory]
 
-//        [InlineData(PredifinedMap.GridColumn,new[]{typeof(GridColumn),typeof(GridListEditor)},Platform.Win,new[]{nameof(GridColumn.Summary)})]
-//        [InlineData(PredifinedMap.GridView,new[]{typeof(GridView),typeof(GridListEditor)},Platform.Win,new[]{nameof(GridView.FormatRules)})]
-//        [InlineData(PredifinedMap.PivotGridControl,new[]{typeof(PivotGridControl),typeof(PivotGridListEditor)},Platform.Win,new[]{nameof(PivotGridControl.FormatRules)})]
-//        [InlineData(PredifinedMap.PivotGridField,new[]{typeof(PivotGridField),typeof(PivotGridListEditor)},Platform.Win,new[]{nameof(PivotGridField.CustomTotals)})]
-//        [InlineData(PredifinedMap.LayoutViewColumn,new[]{typeof(LayoutViewColumn),typeof(GridListEditor)},Platform.Win,new[]{nameof(LayoutViewColumn.Summary)})]
-//        [InlineData(PredifinedMap.LayoutView,new[]{typeof(LayoutView),typeof(GridListEditor)},Platform.Win,new[]{nameof(LayoutView.FormatRules)})]
-//        [InlineData(PredifinedMap.BandedGridColumn,new[]{typeof(BandedGridColumn),typeof(GridListEditor)},Platform.Win,new[]{nameof(BandedGridColumn.Summary)})]
-//        [InlineData(PredifinedMap.AdvBandedGridView,new[]{typeof(AdvBandedGridView),typeof(GridListEditor)},Platform.Win,new[]{nameof(AdvBandedGridView.FormatRules)})]
-//        [InlineData(PredifinedMap.ASPxGridView,new[]{typeof(ASPxGridView),typeof(ASPxGridListEditor)},Platform.Web,new[]{nameof(ASPxGridView.Columns)})]
-//        [InlineData(PredifinedMap.GridViewColumn,new[]{typeof(GridViewColumn),typeof(ASPxGridListEditor)},Platform.Web,new[]{nameof(GridViewColumn.Columns)})]
-//        [InlineData(PredifinedMap.ASPxHtmlEditor,new[]{typeof(ASPxHtmlEditor),typeof(ASPxHtmlPropertyEditor)},Platform.Web,new string[0])]
-//        [InlineData(PredifinedMap.TreeList,new[]{typeof(TreeList),typeof(TreeListEditor)},Platform.Win,new string[0])]
-//        [InlineData(PredifinedMap.TreeListColumn,new[]{typeof(TreeListColumn),typeof(TreeListEditor)},Platform.Win,new string[0])]
+        [InlineData(PredifinedMap.GridColumn,new[]{typeof(GridColumn),typeof(GridListEditor)},Platform.Win,new[]{nameof(GridColumn.Summary)})]
+        [InlineData(PredifinedMap.GridView,new[]{typeof(GridView),typeof(GridListEditor)},Platform.Win,new[]{nameof(GridView.FormatRules)})]
+        [InlineData(PredifinedMap.PivotGridControl,new[]{typeof(PivotGridControl),typeof(PivotGridListEditor)},Platform.Win,new[]{nameof(PivotGridControl.FormatRules)})]
+        [InlineData(PredifinedMap.PivotGridField,new[]{typeof(PivotGridField),typeof(PivotGridListEditor)},Platform.Win,new[]{nameof(PivotGridField.CustomTotals)})]
+        [InlineData(PredifinedMap.LayoutViewColumn,new[]{typeof(LayoutViewColumn),typeof(GridListEditor)},Platform.Win,new[]{nameof(LayoutViewColumn.Summary)})]
+        [InlineData(PredifinedMap.LayoutView,new[]{typeof(LayoutView),typeof(GridListEditor)},Platform.Win,new[]{nameof(LayoutView.FormatRules)})]
+        [InlineData(PredifinedMap.BandedGridColumn,new[]{typeof(BandedGridColumn),typeof(GridListEditor)},Platform.Win,new[]{nameof(BandedGridColumn.Summary)})]
+        [InlineData(PredifinedMap.AdvBandedGridView,new[]{typeof(AdvBandedGridView),typeof(GridListEditor)},Platform.Win,new[]{nameof(AdvBandedGridView.FormatRules)})]
+        [InlineData(PredifinedMap.ASPxGridView,new[]{typeof(ASPxGridView),typeof(ASPxGridListEditor)},Platform.Web,new[]{nameof(ASPxGridView.Columns)})]
+        [InlineData(PredifinedMap.GridViewColumn,new[]{typeof(GridViewColumn),typeof(ASPxGridListEditor)},Platform.Web,new[]{nameof(GridViewColumn.Columns)})]
+        [InlineData(PredifinedMap.ASPxHtmlEditor,new[]{typeof(ASPxHtmlEditor),typeof(ASPxHtmlPropertyEditor)},Platform.Web,new string[0])]
+        [InlineData(PredifinedMap.TreeList,new[]{typeof(TreeList),typeof(TreeListEditor)},Platform.Win,new string[0])]
+        [InlineData(PredifinedMap.TreeListColumn,new[]{typeof(TreeListColumn),typeof(TreeListEditor)},Platform.Win,new string[0])]
         [InlineData(PredifinedMap.SchedulerControl,new[]{typeof(SchedulerControl),typeof(SchedulerListEditor)},Platform.Win,new[]{nameof(SchedulerControl.DataBindings)})]
         [InlineData(PredifinedMap.ASPxScheduler,new[]{typeof(ASPxScheduler),typeof(ASPxSchedulerListEditor)},Platform.Web,new string[0])]
-//        [InlineData(PredifinedMap.XafLayoutControl,new[]{typeof(XafLayoutControl)},Platform.Win,new string[0])]
-//        [InlineData(PredifinedMap.SplitContainerControl,new[]{typeof(SplitContainerControl)},Platform.Win,new string[0])]
-//        [InlineData(PredifinedMap.DashboardDesigner,new[]{typeof(DashboardDesigner)},Platform.Win,new string[0])]
-//        [InlineData(PredifinedMap.ASPxPopupControl,new[]{typeof(ASPxPopupControl)},Platform.Web,new string[0])]
-//        [InlineData(PredifinedMap.DashboardViewer,new[]{typeof(DashboardViewer)},Platform.Win,new string[0])]
-//        [InlineData(PredifinedMap.ASPxDashboard,new[]{typeof(ASPxDashboard)},Platform.Web,new string[0])]
-//        [InlineData(PredifinedMap.ASPxDateEdit,new[]{typeof(ASPxDateEdit)},Platform.Web,new string[0])]
-//        [InlineData(PredifinedMap.ASPxHyperLink,new[]{typeof(ASPxHyperLink)},Platform.Web,new string[0])]
-//        [InlineData(PredifinedMap.ASPxLookupDropDownEdit,new[]{typeof(ASPxLookupDropDownEdit)},Platform.Web,new string[0])]
-//        [InlineData(PredifinedMap.ASPxLookupFindEdit,new[]{typeof(ASPxLookupFindEdit)},Platform.Web,new string[0])]
-//        [InlineData(PredifinedMap.ASPxSpinEdit,new[]{typeof(ASPxSpinEdit)},Platform.Web,new string[0])]
-//        [InlineData(PredifinedMap.ASPxTokenBox,new[]{typeof(ASPxTokenBox)},Platform.Web,new string[0])]
-//        [InlineData(PredifinedMap.ASPxComboBox,new[]{typeof(ASPxComboBox)},Platform.Web,new string[0])]
-//        [InlineData(PredifinedMap.LabelControl,new[]{typeof(LabelControl)},Platform.Win,new string[0])]
-//        [InlineData(PredifinedMap.RichEditControl,new[]{typeof(RichEditControl)},Platform.Win,new string[0])]
+        [InlineData(PredifinedMap.XafLayoutControl,new[]{typeof(XafLayoutControl)},Platform.Win,new string[0])]
+        [InlineData(PredifinedMap.SplitContainerControl,new[]{typeof(SplitContainerControl)},Platform.Win,new string[0])]
+        [InlineData(PredifinedMap.DashboardDesigner,new[]{typeof(DashboardDesigner)},Platform.Win,new string[0])]
+        [InlineData(PredifinedMap.ASPxPopupControl,new[]{typeof(ASPxPopupControl)},Platform.Web,new string[0])]
+        [InlineData(PredifinedMap.DashboardViewer,new[]{typeof(DashboardViewer)},Platform.Win,new string[0])]
+        [InlineData(PredifinedMap.ASPxDashboard,new[]{typeof(ASPxDashboard)},Platform.Web,new string[0])]
+        [InlineData(PredifinedMap.ASPxDateEdit,new[]{typeof(ASPxDateEdit)},Platform.Web,new string[0])]
+        [InlineData(PredifinedMap.ASPxHyperLink,new[]{typeof(ASPxHyperLink)},Platform.Web,new string[0])]
+        [InlineData(PredifinedMap.ASPxLookupDropDownEdit,new[]{typeof(ASPxLookupDropDownEdit)},Platform.Web,new string[0])]
+        [InlineData(PredifinedMap.ASPxLookupFindEdit,new[]{typeof(ASPxLookupFindEdit)},Platform.Web,new string[0])]
+        [InlineData(PredifinedMap.ASPxSpinEdit,new[]{typeof(ASPxSpinEdit)},Platform.Web,new string[0])]
+        [InlineData(PredifinedMap.ASPxTokenBox,new[]{typeof(ASPxTokenBox)},Platform.Web,new string[0])]
+        [InlineData(PredifinedMap.ASPxComboBox,new[]{typeof(ASPxComboBox)},Platform.Web,new string[0])]
+        [InlineData(PredifinedMap.LabelControl,new[]{typeof(LabelControl)},Platform.Win,new string[0])]
+        [InlineData(PredifinedMap.RichEditControl,new[]{typeof(RichEditControl)},Platform.Win,new string[0])]
 
         internal async Task Map_Predifined_Configurations(PredifinedMap predifinedMap, Type[] assembliesToLoad,Platform platform, string[] collectionNames){
             
             InitializeMapperService($"{nameof(Map_Predifined_Configurations)}{predifinedMap}",platform);
             assembliesToLoad.ToObservable().Do(type => Assembly.LoadFile(type.Assembly.Location)).Subscribe();
 
-            var modelType = await predifinedMap.MapToModel().ModelInterfaces();
+            var modelType = await predifinedMap.MapToModel().ModelInterfaces().FirstAsync();
             var propertyInfos = modelType.GetProperties();
 
             AssertPredifinedConfigurationsMap(predifinedMap, collectionNames, modelType, propertyInfos);
@@ -338,11 +340,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
         private void AssertPredifinedConfigurationsMap(PredifinedMap predifinedMap, string[] collectionNames,Type modelType, PropertyInfo[] propertyInfos){
             var modelTypeName = predifinedMap.ModelTypeName();
-//            if (predifinedMap.ToString().StartsWith(PredifinedMap.ChartControl.ToString()) &&
-//                predifinedMap != PredifinedMap.ChartControl){
-//                modelTypeName = $"IModel{predifinedMap.ToString().Replace(PredifinedMap.ChartControl.ToString(), "")}";
-//            }
-
             modelType.Name.ShouldBe(modelTypeName);
 
             propertyInfos.Length.ShouldBeGreaterThan(15);
@@ -376,7 +373,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             InitializeMapperService($"{nameof(Map_All_PredifinedConfigurations)}",platform);
             var values = Enums.GetValues<PredifinedMap>()
                 .Where(map =>map.GetAttributes().OfType<MapPlatformAttribute>().Any(_ => _.Platform == platform.ToString()))
-//                .Where(map => map==PredifinedMap.GridViewColumn||map==PredifinedMap.ASPxGridView)
                 .ToArray();
             var modelInterfaces = values.MapToModel().ModelInterfaces().Replay();
             modelInterfaces.Connect();
@@ -399,8 +395,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
             var types = modelInterfaces.ToEnumerable().ToArray();
             types.Length.ShouldBe(2);
-            types.First().Name.ShouldBe(PredifinedMap.GridView.ModelTypeName());
-            types.Last().Name.ShouldBe(PredifinedMap.GridColumn.ModelTypeName());
+            var modelNames = new[]{PredifinedMap.GridView,PredifinedMap.GridColumn }.Select(map => map.ModelTypeName()).ToArray();
+            modelNames.ShouldContain(types.First().Name);
+            modelNames.ShouldContain(types.Last().Name);
+            
         }
     }
 

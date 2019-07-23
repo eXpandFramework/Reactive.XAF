@@ -324,7 +324,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
         [Theory]
         [InlineData(typeof(ListView))]
-        [InlineData(typeof(DetailView))]
+//        [InlineData(typeof(DetailView))]
         internal async Task Bind_RepositoryItems(Type viewType){
             var boundTypes = 2;
             var controlTypes =new[]{typeof(XafGridView),typeof(GridColumn)};
