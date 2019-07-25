@@ -5,7 +5,6 @@ $ErrorActionPreference = "Stop"
 properties {
     $packageSources=$null
     $nugetBin = "$PSScriptRoot\bin\nuget\"
-    $msbuild = $null
     $cleanBin = $null
     $nugetApiKey = $null
     $compile = $true
@@ -14,7 +13,7 @@ properties {
     $Release=$null
 }
 
-task Release  -depends  DiscoverMSBuild, Clean, Init, UpdateProjects,  Compile,IndexSources, CreateNuspec, PackNuspec, UpdateReadMe
+task Release  -depends   Clean, Init, UpdateProjects,  Compile,IndexSources, CreateNuspec, PackNuspec, UpdateReadMe
 
 
 Task IndexSources{
@@ -26,7 +25,6 @@ Task IndexSources{
 task Init {
     InvokeScript{
         New-Item "$PSScriptRoot\bin" -ItemType Directory -Force |Out-Null
-        # Install-XDevExpress -dxSource $packageSources -binPath "$PSScriptRoot\bin" -sourcePath "$PSScriptRoot\src" -dxVersion $dxVersion
     }
 }
 
@@ -46,15 +44,18 @@ task Compile -precondition {return $compile  } {
     $source="https://api.nuget.org/v3/index.json;$packageSources"
     InvokeScript{
         write-host "Building Extensions" -f "Blue"
-        & dotnet build "$PSScriptRoot\src\Extensions\Extensions.sln" --configuration Release --source $source
+        dotnet restore "$PSScriptRoot\src\Extensions\Extensions.sln" --source $source
+        dotnet msbuild "$PSScriptRoot\src\Extensions\Extensions.sln" "/p:configuration=Release" /WarnAsError
     }
     InvokeScript{
         write-host "Building Modules" -f "Blue"
-        & dotnet build "$PSScriptRoot\src\Modules\Modules.sln" --configuration Release --source $source
+        dotnet restore "$PSScriptRoot\src\Modules\Modules.sln" --source $source
+        dotnet msbuild "$PSScriptRoot\src\Modules\Modules.sln" "/p:configuration=Release" /WarnAsError
     }
     InvokeScript{
         write-host "Building Tests" -f "Blue"
-        & dotnet build "$PSScriptRoot\src\Tests\Tests.sln" --configuration Debug --source $source 
+        dotnet restore "$PSScriptRoot\src\Tests\Tests.sln" --source $source
+        dotnet msbuild "$PSScriptRoot\src\Tests\Tests.sln" 
     }
 }
 
@@ -73,16 +74,6 @@ Task PackNuspec {
     }
 }
 
-Task DiscoverMSBuild {
-    InvokeScript {
-        if (!$msbuild) {
-            $script:msbuild = (Get-XMsBuildPath)
-        }
-        else {
-            $script:msbuild = $msbuild
-        }
-    }
-}
 
 task Clean -precondition {return $cleanBin} {
     InvokeScript {

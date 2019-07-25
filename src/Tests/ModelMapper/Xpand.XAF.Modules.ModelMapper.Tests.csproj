@@ -72,42 +72,6 @@
     <Reference Include="Tests">
       <HintPath>..\..\..\bin\TestsLib.dll</HintPath>
     </Reference>
-    <Reference Include="Xpand.ExpressApp">
-      <HintPath>..\..\..\..\expand\Demos\XVideoRental\XVideoRental.Win\bin\Debug\Xpand.ExpressApp.dll</HintPath>
-    </Reference>
-    <Reference Include="Xpand.ExpressApp.Chart.Win">
-      <HintPath>..\..\..\..\expand\Demos\XVideoRental\XVideoRental.Win\bin\Debug\Xpand.ExpressApp.Chart.Win.dll</HintPath>
-    </Reference>
-    <Reference Include="Xpand.ExpressApp.Dashboard">
-      <HintPath>..\..\..\..\expand\Demos\XVideoRental\XVideoRental.Win\bin\Debug\Xpand.ExpressApp.Dashboard.dll</HintPath>
-    </Reference>
-    <Reference Include="Xpand.ExpressApp.MasterDetail">
-      <HintPath>..\..\..\..\expand\Demos\XVideoRental\XVideoRental.Win\bin\Debug\Xpand.ExpressApp.MasterDetail.dll</HintPath>
-    </Reference>
-    <Reference Include="Xpand.ExpressApp.MasterDetail.Win">
-      <HintPath>..\..\..\..\expand\Demos\XVideoRental\XVideoRental.Win\bin\Debug\Xpand.ExpressApp.MasterDetail.Win.dll</HintPath>
-    </Reference>
-    <Reference Include="Xpand.ExpressApp.PivotGrid.Win">
-      <HintPath>..\..\..\..\expand\Demos\XVideoRental\XVideoRental.Win\bin\Debug\Xpand.ExpressApp.PivotGrid.Win.dll</HintPath>
-    </Reference>
-    <Reference Include="Xpand.ExpressApp.Scheduler">
-      <HintPath>..\..\..\..\expand\Demos\XVideoRental\XVideoRental.Win\bin\Debug\Xpand.ExpressApp.Scheduler.dll</HintPath>
-    </Reference>
-    <Reference Include="Xpand.ExpressApp.Scheduler.Win">
-      <HintPath>..\..\..\..\expand\Demos\XVideoRental\XVideoRental.Win\bin\Debug\Xpand.ExpressApp.Scheduler.Win.dll</HintPath>
-    </Reference>
-    <Reference Include="Xpand.ExpressApp.Win">
-      <HintPath>..\..\..\..\expand\Demos\XVideoRental\XVideoRental.Win\bin\Debug\Xpand.ExpressApp.Win.dll</HintPath>
-    </Reference>
-    <Reference Include="Xpand.ExpressApp.XtraDashboard.Win">
-      <HintPath>..\..\..\..\expand\Demos\XVideoRental\XVideoRental.Win\bin\Debug\Xpand.ExpressApp.XtraDashboard.Win.dll</HintPath>
-    </Reference>
-    <Reference Include="Xpand.Persistent.Base">
-      <HintPath>..\..\..\..\expand\Demos\XVideoRental\XVideoRental.Win\bin\Debug\Xpand.Persistent.Base.dll</HintPath>
-    </Reference>
-    <Reference Include="Xpand.Persistent.BaseImpl">
-      <HintPath>..\..\..\..\expand\Demos\XVideoRental\XVideoRental.Win\bin\Debug\Xpand.Persistent.BaseImpl.dll</HintPath>
-    </Reference>
     <Reference Include="Xpand.XAF.Modules.ModelMapper">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.ModelMapper.dll</HintPath>
     </Reference>

@@ -14,12 +14,12 @@ namespace Xpand.XAF.Modules.HideToolBar.Tests.BOModel{
         public HTBChild(Session session) : base(session){
         }
 
-        HTBParent _hTBParent;
+        HTBParent _hTbParent;
 
         [Association("HTBParent-HTBChilds")]
         public HTBParent HTBParent{
-            get => _hTBParent;
-            set => SetPropertyValue(nameof(HTBParent), ref _hTBParent, value);
+            get => _hTbParent;
+            set => SetPropertyValue(nameof(HTBParent), ref _hTbParent, value);
         }
     }
 }
