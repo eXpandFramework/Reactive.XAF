@@ -67,16 +67,15 @@ $yArgs = @{
     Packages     = $publishedPackages 
     SourcePath   = $SourcePath
     CommitsSince = $labBuild.finishTime
+    ExcludeFilter = "Test"
     WhatIf       = $WhatIf
 }
 if ($newPackages) {
     $yArgs.Packages += $newPackages
-    Update-NugetProjectVersion @yArgs 
 }
 Write-Host "End-Packages:" -f blue
 $yArgs.Packages | Write-Output
-
-
+Update-NugetProjectVersion @yArgs -Verbose
 
 $bArgs = @{
     packageSources = "$(Get-PackageFeed -Xpand);$DxApiFeed"

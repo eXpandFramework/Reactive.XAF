@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
@@ -47,6 +48,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         private static Assembly _dxScedulerWebAssembly;
         private static Assembly _dxUtilsAssembly;
         private static Assembly _dashboardWebWebFormsAssembly;
+        private static string _dxAssemblyNamePostfix;
 
 
         static PredefinedMapService(){
@@ -56,36 +58,41 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         private static void Init(){
             _layoutViewListEditorTypeName = "Xpand.ExpressApp.Win.ListEditors.GridListEditors.LayoutView.LayoutViewListEditor";
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            _dxUtilsAssembly = assemblies.GetAssembly($"DevExpress.Utils{XafAssemblyInfo.VersionSuffix}");
+            var dxAssembly = assemblies.First(assembly => assembly.FullName.StartsWith("DevExpress"));
+            var regex = new Regex(@"\.v[\d]{2}\.[\d]");
+            var versionSuffix = regex.Match(dxAssembly.FullName).Value;
+            regex = new Regex(",.*");
+            _dxAssemblyNamePostfix = regex.Match(dxAssembly.FullName).Value;
+            _dxUtilsAssembly = assemblies.GetAssembly($"DevExpress.Utils{versionSuffix}");
             if (ModelExtendingService.Platform == Platform.Win){
                 
-                _xafWinAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.Win{XafAssemblyInfo.VersionSuffix}");
-                _xafPivotGridWinAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.PivotGrid.Win{XafAssemblyInfo.VersionSuffix}");
-                _xtraRichEditAssembly = assemblies.GetAssembly($"DevExpress.XtraRichEdit{XafAssemblyInfo.VersionSuffix}");
-                _xafSchedulerControlAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.Scheduler.Win{XafAssemblyInfo.VersionSuffix}");
-                _xafChartWinAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.Chart.Win{XafAssemblyInfo.VersionSuffix}");
-                _xafTreeListWinAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.TreeListEditors.Win{XafAssemblyInfo.VersionSuffix}");
-                _gridViewAssembly = assemblies.GetAssembly($"DevExpress.XtraGrid{XafAssemblyInfo.VersionSuffix}");
-                _schedulerWinAssembly = assemblies.GetAssembly($"DevExpress.XtraScheduler{XafAssemblyInfo.VersionSuffix}");
-                _dashboardWinAssembly = assemblies.GetAssembly($"DevExpress.Dashboard{XafAssemblyInfo.VersionSuffix}.Win");
-                _dxWinEditorsAssembly = assemblies.GetAssembly($"DevExpress.XtraEditors{XafAssemblyInfo.VersionSuffix}");
-                _schedulerCoreAssembly = assemblies.GetAssembly($"DevExpress.XtraScheduler{XafAssemblyInfo.VersionSuffix}.Core");
-                _pivotGridControlAssembly = assemblies.GetAssembly($"DevExpress.XtraPivotGrid{XafAssemblyInfo.VersionSuffix}");
-                _dxTreeListWinAssembly = assemblies.GetAssembly($"DevExpress.XtraTreeList{XafAssemblyInfo.VersionSuffix}");
-                _chartUIControlAssembly = assemblies.GetAssembly($"DevExpress.XtraCharts{XafAssemblyInfo.VersionSuffix}.UI");
-                _chartControlAssembly = assemblies.GetAssembly($"DevExpress.XtraCharts{XafAssemblyInfo.VersionSuffix}");
-                _chartCoreAssembly = assemblies.GetAssembly($"DevExpress.Charts{XafAssemblyInfo.VersionSuffix}.Core");
+                _xafWinAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.Win{versionSuffix}");
+                _xafPivotGridWinAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.PivotGrid.Win{versionSuffix}");
+                _xtraRichEditAssembly = assemblies.GetAssembly($"DevExpress.XtraRichEdit{versionSuffix}");
+                _xafSchedulerControlAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.Scheduler.Win{versionSuffix}");
+                _xafChartWinAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.Chart.Win{versionSuffix}");
+                _xafTreeListWinAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.TreeListEditors.Win{versionSuffix}");
+                _gridViewAssembly = assemblies.GetAssembly($"DevExpress.XtraGrid{versionSuffix}");
+                _schedulerWinAssembly = assemblies.GetAssembly($"DevExpress.XtraScheduler{versionSuffix}");
+                _dashboardWinAssembly = assemblies.GetAssembly($"DevExpress.Dashboard{versionSuffix}.Win");
+                _dxWinEditorsAssembly = assemblies.GetAssembly($"DevExpress.XtraEditors{versionSuffix}");
+                _schedulerCoreAssembly = assemblies.GetAssembly($"DevExpress.XtraScheduler{versionSuffix}.Core");
+                _pivotGridControlAssembly = assemblies.GetAssembly($"DevExpress.XtraPivotGrid{versionSuffix}");
+                _dxTreeListWinAssembly = assemblies.GetAssembly($"DevExpress.XtraTreeList{versionSuffix}");
+                _chartUIControlAssembly = assemblies.GetAssembly($"DevExpress.XtraCharts{versionSuffix}.UI");
+                _chartControlAssembly = assemblies.GetAssembly($"DevExpress.XtraCharts{versionSuffix}");
+                _chartCoreAssembly = assemblies.GetAssembly($"DevExpress.Charts{versionSuffix}.Core");
                 _xpandWinAssembly = assemblies.GetAssembly("Xpand.ExpressApp.Win",true);
             }
 
             if (ModelExtendingService.Platform == Platform.Web){
-                _dashboardWebWebFormsAssembly = assemblies.GetAssembly($"DevExpress.Dashboard{XafAssemblyInfo.VersionSuffix}.Web.WebForms");
-                _xafWebAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.Web{XafAssemblyInfo.VersionSuffix}");
-                _dxWebAssembly = assemblies.GetAssembly($"DevExpress.Web{XafAssemblyInfo.VersionSuffix}");
-                _dxHtmlEditorWebAssembly = assemblies.GetAssembly($"DevExpress.Web.ASPxHtmlEditor{XafAssemblyInfo.VersionSuffix}");
-                _dxScedulerWebAssembly = assemblies.GetAssembly($"DevExpress.Web.ASPxScheduler{XafAssemblyInfo.VersionSuffix}");
-                _xafHtmlEditorWebAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.HtmlPropertyEditor.Web{XafAssemblyInfo.VersionSuffix}");
-                _xafSchedulerWebAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.Scheduler.Web{XafAssemblyInfo.VersionSuffix}");
+                _dashboardWebWebFormsAssembly = assemblies.GetAssembly($"DevExpress.Dashboard{versionSuffix}.Web.WebForms");
+                _xafWebAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.Web{versionSuffix}");
+                _dxWebAssembly = assemblies.GetAssembly($"DevExpress.Web{versionSuffix}");
+                _dxHtmlEditorWebAssembly = assemblies.GetAssembly($"DevExpress.Web.ASPxHtmlEditor{versionSuffix}");
+                _dxScedulerWebAssembly = assemblies.GetAssembly($"DevExpress.Web.ASPxScheduler{versionSuffix}");
+                _xafHtmlEditorWebAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.HtmlPropertyEditor.Web{versionSuffix}");
+                _xafSchedulerWebAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.Scheduler.Web{versionSuffix}");
             }
 
         }
@@ -101,7 +108,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 }
 
                 try{
-                    return Assembly.Load($"{name}{XafAssemblyInfo.AssemblyNamePostfix}");
+                    return Assembly.Load($"{name}{_dxAssemblyNamePostfix}");
                 }
                 catch (FileNotFoundException){
                     
