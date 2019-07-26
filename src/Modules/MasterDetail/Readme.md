@@ -41,6 +41,7 @@ If the package is installed in a way that you do not have access to uninstall it
 ```ps1
 ((Xpand.XAF.Modules.MasterDetailModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.MasterDetailModule))).Unload();
 ```
+
 ## Details
 The module satisfies the following conditions:
 1. If a `DashboardView` contains a `one ListView and one DetailView` of the `same type`, then it will be Master-Detail `enabled by default`. It can be disabled by setting the `IModelDashboardViewMasterDetail.MasterDetail` to false.

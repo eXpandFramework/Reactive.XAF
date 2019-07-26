@@ -45,6 +45,7 @@ If the package is installed in a way that you do not have access to uninstall it
 ```ps1
 ((Xpand.XAF.Modules.ViewEditModeModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.ViewEditModeModule))).Unload();
 ```
+
 ## Details
 The module extends the `IModelDetailView` interface with the `IModelDetailViewViewEditMode`. 
 

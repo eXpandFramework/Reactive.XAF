@@ -64,6 +64,9 @@ function UpdateBadges($_, $packagespath,  $readMePath) {
 function UpdateIssues($_, $packagespath,  $readMePath) {
     $moduleName="$($_.BaseName)Module"
     $readMe = Get-Content $readMePath -Raw
+    if ($_ -like "*ModelMapper*"){
+        $additionalTroubleShooting="Currently the ModelMapper does not support the Visual Studio Model Editor. However you can use the `XpandModelEditor` found in the `Xpand.VSIX` package.`r`n"
+    }
     $regex = [regex] '(?isx)\#\#\ Issues(.*)\#\#\ Details'
 $result = $regex.Replace($readMe, @"
 ## Issues-Debugging-Troubleshooting
@@ -74,6 +77,7 @@ If the package is installed in a way that you do not have access to uninstall it
 ``````ps1
 (($moduleName) Application.Modules.FindModule(typeof($moduleName))).Unload();
 ``````
+$additionalTroubleShooting
 ## Details
 "@
 )

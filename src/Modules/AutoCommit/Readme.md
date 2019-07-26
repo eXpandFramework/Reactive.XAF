@@ -39,6 +39,7 @@ If the package is installed in a way that you do not have access to uninstall it
 ```ps1
 ((Xpand.XAF.Modules.AutoCommitModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.AutoCommitModule))).Unload();
 ```
+
 ## Details
 The module satisfies the following conditions:
 1. When any `ObjectView` with `AutoCommit` enabled a signal will be created out of the [View.Closing](https://documentation.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.View.Closing.event) and the [QueryCanChangeCurrentObject](https://documentation.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.View.QueryCanChangeCurrentObject.event) events. For each signal emit the `View.ObjectSpace.CommitChanges()` is called.

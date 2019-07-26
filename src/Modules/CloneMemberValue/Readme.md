@@ -45,6 +45,7 @@ If the package is installed in a way that you do not have access to uninstall it
 ```ps1
 ((Xpand.XAF.Modules.CloneMemberValueModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.CloneMemberValueModule))).Unload();
 ```
+
 ## Details
 The module extends the `IModelMember` nodes with the `IModelMemberCloneValue`. 
 

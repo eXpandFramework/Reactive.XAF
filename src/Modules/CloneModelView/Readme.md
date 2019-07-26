@@ -40,6 +40,7 @@ If the package is installed in a way that you do not have access to uninstall it
 ```ps1
 ((Xpand.XAF.Modules.CloneModelViewModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.CloneModelViewModule))).Unload();
 ```
+
 ## Details
 Using the `CloneModelViewAttribute` in your Bussiness Objects you can:
 1. Create one or many `DetailViews` or `ListViews` or `LookupListViews`.

@@ -43,6 +43,8 @@ If the package is installed in a way that you do not have access to uninstall it
 ```ps1
 ((Xpand.XAF.Modules.ModelMapperModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.ModelMapperModule))).Unload();
 ```
+Currently the ModelMapper does not support the Visual Studio Model Editor. However you can use the XpandModelEditor found in the Xpand.VSIX package.
+
 ## Details
 The `ModelMapper` module will transform any type to XAF model format and will extend the model with a simple call like:
 ```cs

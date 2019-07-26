@@ -39,6 +39,7 @@ If the package is installed in a way that you do not have access to uninstall it
 ```ps1
 ((Xpand.XAF.Modules.ProgressBarViewItemModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.ProgressBarViewItemModule))).Unload();
 ```
+
 ## Details
 The module registers a `ProgressViewItem` into the [ViewItems](https://docs.devexpress.com/eXpressAppFramework/112612/concepts/ui-construction/view-items) of your application.
 ![image](https://user-images.githubusercontent.com/159464/58765488-56c99080-857c-11e9-8522-4c716df019fd.png).

@@ -38,6 +38,7 @@ If the package is installed in a way that you do not have access to uninstall it
 ```ps1
 ((Xpand.XAF.Modules.ModelViewInheritanceModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.ModelViewInheritanceModule))).Unload();
 ```
+
 ## Details
 The module extends the model views nodes with the `IModelObjectViewMergedDifferences` interface to allow model view differences composition. 
 

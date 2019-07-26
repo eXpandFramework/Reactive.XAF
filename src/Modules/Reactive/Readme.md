@@ -26,6 +26,7 @@ If the package is installed in a way that you do not have access to uninstall it
 ```ps1
 ((Xpand.XAF.Modules.ReactiveModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.ReactiveModule))).Unload();
 ```
+
 ## Details
 
 

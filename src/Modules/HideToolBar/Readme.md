@@ -39,6 +39,7 @@ If the package is installed in a way that you do not have access to uninstall it
 ```ps1
 ((Xpand.XAF.Modules.HideToolBarModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.HideToolBarModule))).Unload();
 ```
+
 ## Details
 The module satisfies the following conditions:
 1. For all `Nested Frames` with `HIdeToolBar` attribute enabled a signal will be created out of the [Frame.TemplatedChanged](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.Frame.TemplateChanged) and the [Frame.TemplateViewChanged](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.Frame.TemplateViewChanged) events. For each signal emit the the ToolBar will be hidden.
