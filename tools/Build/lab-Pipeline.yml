@@ -53,6 +53,7 @@ steps:
     
 - task: PowerShell@2
   displayName: CheckTests
+  enabled: false
   inputs:
     pwsh: true
     targetType: filePath

@@ -18,7 +18,7 @@ namespace Xpand.XAF.Modules.HideToolBar{
                 .Where(_ => _.Template is ISupportActionsToolbarVisibility)
                 .TemplateViewChanged()
                 .Where(frame => {
-                    if (frame.View.Model is IModelListViewHideToolBar modelListViewHideToolBar){
+                    if (frame.View is ListView&& frame.View.Model is IModelListViewHideToolBar modelListViewHideToolBar){
                         var hideToolBar = modelListViewHideToolBar.HideToolBar;
                         return hideToolBar.HasValue&&hideToolBar.Value;
                     }
