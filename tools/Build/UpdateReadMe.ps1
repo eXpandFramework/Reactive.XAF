@@ -65,7 +65,7 @@ function UpdateIssues($_, $packagespath,  $readMePath) {
     $moduleName="$($_.BaseName)Module"
     $readMe = Get-Content $readMePath -Raw
     if ($_ -like "*ModelMapper*"){
-        $additionalTroubleShooting="Currently the ModelMapper does not support the Visual Studio Model Editor. However you can use the `XpandModelEditor` found in the `Xpand.VSIX` package.`r`n"
+        $additionalTroubleShooting="Currently the ModelMapper does not support the Visual Studio Model Editor. However you can use the `XpandModelEditor` found in the `Xpand.VSIX` package. Note that the XpandModelEditor is embedded and version agnostic so its one time only installation.`r`n"
     }
     $regex = [regex] '(?isx)\#\#\ Issues(.*)\#\#\ Details'
 $result = $regex.Replace($readMe, @"
