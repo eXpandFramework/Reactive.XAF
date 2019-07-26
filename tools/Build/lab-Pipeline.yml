@@ -44,16 +44,15 @@ steps:
       !**\obj\**
     runInParallel: false
     diagnosticsEnabled: true
-    runTestsInIsolation: true
+    runTestsInIsolation: false
     codeCoverageEnabled: true
-    rerunFailedTests: false 
-    rerunMaxAttempts: 1
+    rerunFailedTests: true 
+    rerunMaxAttempts: 3
     collectDumpOn: never
     
     
 - task: PowerShell@2
   displayName: CheckTests
-  enabled: false
   inputs:
     pwsh: true
     targetType: filePath

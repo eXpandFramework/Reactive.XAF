@@ -218,24 +218,24 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [InlineData(PredefinedMap.LabelControl,new[]{typeof(LabelControl)},Platform.Win,new string[0])]
         [InlineData(PredefinedMap.RichEditControl,new[]{typeof(RichEditControl)},Platform.Win,new string[0])]
 
-        internal async Task Map_Predefined_Configurations(PredefinedMap PredefinedMap, Type[] assembliesToLoad,Platform platform, string[] collectionNames){
+        internal async Task Map_Predefined_Configurations(PredefinedMap predefinedMap, Type[] assembliesToLoad,Platform platform, string[] collectionNames){
             
-            InitializeMapperService($"{nameof(Map_Predefined_Configurations)}{PredefinedMap}",platform);
+            InitializeMapperService($"{nameof(Map_Predefined_Configurations)}{predefinedMap}",platform);
             assembliesToLoad.ToObservable().Do(type => Assembly.LoadFile(type.Assembly.Location)).Subscribe();
 
-            var modelType = await PredefinedMap.MapToModel().ModelInterfaces().FirstAsync();
+            var modelType = await predefinedMap.MapToModel().ModelInterfaces().FirstAsync();
             var propertyInfos = modelType.GetProperties();
 
-            AssertPredefinedConfigurationsMap(PredefinedMap, collectionNames, modelType, propertyInfos);
-            AssertBandedGridColumn(PredefinedMap, propertyInfos);
+            AssertPredefinedConfigurationsMap(predefinedMap, collectionNames, modelType, propertyInfos);
+            AssertBandedGridColumn(predefinedMap, propertyInfos);
             
-            AssertSchedulerControl(PredefinedMap, propertyInfos);
+            AssertSchedulerControl(predefinedMap, propertyInfos);
 
         }
 
         [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
-        private void AssertSchedulerControl(PredefinedMap PredefinedMap, IList<PropertyInfo> propertyInfos){
-            if (PredefinedMap == PredefinedMap.SchedulerControl){
+        private void AssertSchedulerControl(PredefinedMap predefinedMap, IList<PropertyInfo> propertyInfos){
+            if (predefinedMap == PredefinedMap.SchedulerControl){
                 var storageInfo = propertyInfos.FirstOrDefault(info => nameof(SchedulerControl.Storage) == info.Name);
                 storageInfo.ShouldNotBeNull();
                 var propertyInfo = storageInfo.PropertyType.Property(nameof(SchedulerStorage.Appointments)).PropertyType.Property(nameof(AppointmentStorage.Labels));
@@ -248,19 +248,19 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [Theory]
         [InlineData(Platform.Win)]
         internal async Task Map_PredefinedMap_RepositoryItems(Platform platform){
-            var PredefinedMaps = Enums.GetValues<PredefinedMap>().Where(map => map.IsRepositoryItem())
+            var predefinedMaps = Enums.GetValues<PredefinedMap>().Where(map => map.IsRepositoryItem())
                 .Where(map => map.Attribute<MapPlatformAttribute>().Platform == platform.ToString());
 //                .Where(map => map==PredefinedMap.RepositoryItem);
 
-            await Map_PredefinedMap_ViewItems(platform, PredefinedMaps, typeof(RepositoryItemBaseMap).ModelTypeName(), ViewItemService.RepositoryItemsMapName,true);
+            await Map_PredefinedMap_ViewItems(platform, predefinedMaps, typeof(RepositoryItemBaseMap).ModelTypeName(), ViewItemService.RepositoryItemsMapName,true);
         }
 
-        private async Task Map_PredefinedMap_ViewItems(Platform platform, IEnumerable<PredefinedMap> PredefinedMaps,string mapTypeName, string mapPropertyName,bool checkDescription=false){
-            foreach (var PredefinedMap in PredefinedMaps){
+        private async Task Map_PredefinedMap_ViewItems(Platform platform, IEnumerable<PredefinedMap> predefinedMaps,string mapTypeName, string mapPropertyName,bool checkDescription=false){
+            foreach (var predefinedMap in predefinedMaps){
                 try{
-                    InitializeMapperService($"{nameof(Map_PredefinedMap_ViewItems)}{PredefinedMap}", platform);
+                    InitializeMapperService($"{nameof(Map_PredefinedMap_ViewItems)}{predefinedMap}", platform);
 
-                    var replay = PredefinedMap.MapToModel().ModelInterfaces().Replay();
+                    var replay = predefinedMap.MapToModel().ModelInterfaces().Replay();
                     replay.Connect();
                     await replay;
                     var modelTypes = replay.ToEnumerable().ToArray();
@@ -288,7 +288,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
                     var baseType = modelTypes.First().Assembly.GetType(mapTypeName);
                     propertyInfo.PropertyType.ModelListItemType().ShouldBe(baseType);
                     var realType = modelTypes.First().Assembly.GetTypes()
-                        .FirstOrDefault(type => type.Name == PredefinedMap.ModelTypeName());
+                        .FirstOrDefault(type => type.Name == predefinedMap.ModelTypeName());
                     realType.ShouldNotBeNull();
                     realType.GetInterfaces().ShouldContain(baseType);
                     realType.Property(TypeMappingService.ModelMappersNodeName).ShouldBeNull();
@@ -296,7 +296,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
                     Dispose();
                 }
                 catch (Exception e){
-                    throw new Exception(PredefinedMap.ToString(), e);
+                    throw new Exception(predefinedMap.ToString(), e);
                 }
             }
         }
@@ -305,10 +305,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [InlineData(Platform.Win)]
         [InlineData(Platform.Web)]
         internal async Task Map_PredefinedMap_PropertyEditor_Controls(Platform platform){
-            var PredefinedMaps = Enums.GetValues<PredefinedMap>().Where(map => map.IsPropertyEditor())
+            var predefinedMaps = Enums.GetValues<PredefinedMap>().Where(map => map.IsPropertyEditor())
                 .Where(map => map.Attribute<MapPlatformAttribute>().Platform==platform.ToString());
             
-            await Map_PredefinedMap_ViewItems(platform, PredefinedMaps, typeof(PropertyEditorControlMap).ModelTypeName(), ViewItemService.PropertyEditorControlMapName);
+            await Map_PredefinedMap_ViewItems(platform, predefinedMaps, typeof(PropertyEditorControlMap).ModelTypeName(), ViewItemService.PropertyEditorControlMapName);
         }
 
         [Theory]
@@ -339,12 +339,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             }
         }
 
-        private void AssertPredefinedConfigurationsMap(PredefinedMap PredefinedMap, string[] collectionNames,Type modelType, PropertyInfo[] propertyInfos){
-            var modelTypeName = PredefinedMap.ModelTypeName();
+        private void AssertPredefinedConfigurationsMap(PredefinedMap predefinedMap, string[] collectionNames,Type modelType, PropertyInfo[] propertyInfos){
+            var modelTypeName = predefinedMap.ModelTypeName();
             modelType.Name.ShouldBe(modelTypeName);
 
             propertyInfos.Length.ShouldBeGreaterThan(15);
-            if (new[]{PredefinedMap.ASPxLookupDropDownEdit,PredefinedMap.ASPxLookupFindEdit, }.All(map => map!=PredefinedMap)){
+            if (new[]{PredefinedMap.ASPxLookupDropDownEdit,PredefinedMap.ASPxLookupFindEdit, }.All(map => map!=predefinedMap)){
                 var descriptionAttribute = propertyInfos.Select(info => info.Attribute<DescriptionAttribute>())
                     .FirstOrDefault(attribute => attribute != null && attribute.Description.Contains(" "));
                 descriptionAttribute.ShouldNotBeNull();
