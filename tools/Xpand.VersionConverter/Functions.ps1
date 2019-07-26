@@ -129,12 +129,12 @@ function Install-MonoCecil($resolvePath) {
     }
 "@ -ReferencedAssemblies @("$monoPath\Mono.Cecil.dll")
 }
-function Remove-OtherVersionFlags {
+function Remove-PatchFlags {
     param(
         $PackageDir,
         $DXVersion
     )
-    Get-ChildItem $packageDir *VersionConverter.v.* -Exclude $dxVersion | ForEach-Object { Remove-Item $_.FullName -Recurse -Force }
+    Get-ChildItem $packageDir *VersionConverter.v.* | ForEach-Object { Remove-Item $_.FullName -Recurse -Force }
 }
 function Use-Object {
     [CmdletBinding()]

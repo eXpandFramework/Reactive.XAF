@@ -75,7 +75,7 @@ try {
             $packageDir = $_.DirectoryName
             $versionConverterFlag = "$packageDir\VersionConverter.v.$dxVersion.DoNotDelete"
             if (!(Test-Path $versionConverterFlag)) {
-                Remove-OtherVersionFlags $packageDir $dxVersion
+                Remove-PatchFlags $packageDir 
                 "$targetPath\$([Path]::GetFileName($packageFile))", $packageFile | ForEach-Object {
                     if (Test-Path $_) {
                         $modulePath = (Get-Item $_).FullName
