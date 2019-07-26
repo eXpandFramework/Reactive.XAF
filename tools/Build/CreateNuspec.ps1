@@ -4,7 +4,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-Import-Module XpandPwsh -Force
+
 Set-Location $root
 New-Item -Path "$root\bin\Nupkg" -ItemType Directory  -ErrorAction SilentlyContinue -Force |Out-Null
 
@@ -77,3 +77,10 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*Tests*", "*.Source.*" 
     $nuspec.Save($nuspecFileName)
 } 
 
+Get-ChildItem "$root\tools\nuspec" *.nuspec|ForEach-Object{
+    [xml]$nuspec=Get-Content $_.FullName
+    $nuspec.package.metaData.dependencies.dependency|Where-Object{$_.Id -like "DevExpress*"}|ForEach-Object{
+        $_.ParentNode.RemoveChild($_)
+    }
+    $nuspec.Save($_.FullName)
+}
