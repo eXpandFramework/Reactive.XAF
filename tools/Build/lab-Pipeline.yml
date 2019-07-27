@@ -1,4 +1,3 @@
-# https://aka.ms/yaml
 variables:
   - group: Keys
 trigger: 
@@ -24,7 +23,6 @@ pool:
   vmImage: windows-2019
 steps:
 - checkout: self
-  clean: true
 - task: PowerShell@2
   displayName: Build
   inputs:
@@ -32,42 +30,44 @@ steps:
     targetType: filePath
     filePath: .\tools\build\lab-pipeline.ps1 
     arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(GitHubUserName) $(GitHubPass) $(DXApiFeed) $(build.artifactstagingdirectory) $(AzureToken)
-- task: VSTest@2
-  displayName: 'VsTest - testAssemblies'
-  enabled: true
-  inputs:
-    searchFolder: '$(System.DefaultWorkingDirectory)'
-    testSelector: 'testAssemblies'
-    testAssemblyVer2: |
-      **\*Tests*.dll
-      !**\*TestAdapter.dll
-      !**\obj\**
-    runInParallel: false
-    diagnosticsEnabled: true
-    runTestsInIsolation: false
-    codeCoverageEnabled: true
-    rerunFailedTests: true 
-    rerunMaxAttempts: 3
-    collectDumpOn: never
-    
-    
-- task: PowerShell@2
-  displayName: CheckTests
-  inputs:
-    pwsh: true
-    targetType: filePath
-    filePath: .\tools\build\check-tests.ps1
-    arguments: $(AzureToken) $(Build.DefinitionName) $(Build.BuildNumber)
-- powershell: | 
-- task: PowerShell@2
-  displayName: Publish
-  inputs:
-    pwsh: true
-    targetType: filePath
-    filePath: .\tools\build\publishNugets.ps1 
-    arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(NugetApiKey) 
 - task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: Packages'
   inputs:
-    PathtoPublish: '$(build.artifactstagingdirectory)'
-    ArtifactName: 'Xpand.XAF.Modules.Packages'
+    PathtoPublish: '.\bin'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
+# - task: VSTest@2
+#   displayName: 'VsTest - testAssemblies'
+#   inputs:
+#     searchFolder: '$(System.DefaultWorkingDirectory)'
+#     testSelector: 'testAssemblies'
+#     testAssemblyVer2: |
+#       **\*Tests*.dll
+#       !**\*TestAdapter.dll
+#       !**\obj\**
+#     runInParallel: false
+#     diagnosticsEnabled: true
+#     runTestsInIsolation: false
+#     codeCoverageEnabled: true
+#     rerunFailedTests: true 
+#     rerunMaxAttempts: 3
+#     collectDumpOn: never
+# - task: PowerShell@2
+#   displayName: CheckTests
+#   inputs:
+#     pwsh: true
+#     targetType: filePath
+#     filePath: .\tools\build\check-tests.ps1
+#     arguments: $(AzureToken) $(Build.DefinitionName) $(Build.BuildNumber)
+# - powershell: | 
+# - task: PowerShell@2
+#   displayName: Publish
+#   inputs:
+#     pwsh: true
+#     targetType: filePath
+#     filePath: .\tools\build\publishNugets.ps1 
+#     arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(NugetApiKey) 
+# - task: PublishBuildArtifacts@1
+#   displayName: 'Publish Artifact: Packages'
+#   inputs:
+#     PathtoPublish: '$(build.artifactstagingdirectory)'
+#     ArtifactName: 'Xpand.XAF.Modules.Packages'
