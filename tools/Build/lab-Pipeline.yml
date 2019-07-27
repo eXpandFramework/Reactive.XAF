@@ -30,6 +30,11 @@ steps:
     targetType: filePath
     filePath: .\tools\build\lab-pipeline.ps1 
     arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(GitHubUserName) $(GitHubPass) $(DXApiFeed) $(build.artifactstagingdirectory) $(AzureToken)
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '.\bin'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
 # - task: VSTest@2
 #   displayName: 'VsTest - testAssemblies'
 #   inputs:
