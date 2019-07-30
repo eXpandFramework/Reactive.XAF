@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{D9233585-0907-4561-9C53-14D9AD5EEC0E}</ProjectGuid>
     <TargetFramework>net461</TargetFramework>
@@ -14,6 +14,9 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\..\Extensions\Extensions\XAF\Frame\GetController.cs" Link="LinkedFiles\GetController.cs" />
+  </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
@@ -34,5 +37,8 @@
   <ItemGroup>
     <PackageReference Include="System.Reactive" Version="4.1.5" />
     <PackageReference Include="DevExpress.ExpressApp" Version="18.2.7" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="LinkedFiles\" />
   </ItemGroup>
 </Project>
