@@ -29,7 +29,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         public static ConcurrentHashSet<Type> ReservedPropertyTypes{ get; }=new ConcurrentHashSet<Type>();
         public static ConcurrentHashSet<Type> ReservedPropertyInstances{ get; }=new ConcurrentHashSet<Type>();
         public static ConcurrentHashSet<Type> AdditionalTypesList{ get; }=new ConcurrentHashSet<Type>();
-        public static ConcurrentHashSet<Type> AdditionalReferences{ get; }=new ConcurrentHashSet<Type>();
+        public static ConcurrentHashSet<string> AdditionalReferences{ get; }=new ConcurrentHashSet<string>();
         static ISubject<IModelMapperConfiguration> _typesToMap;
         private static ReplaySubject<IModelMapperConfiguration> _mappingTypes;
         public static ObservableCollection<(string key, Action<(Type declaringType,List<ModelMapperPropertyInfo> propertyInfos)> action)> PropertyMappingRules{ get; private set; }
@@ -107,7 +107,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 .Subscribe();
             new []{typeof(IModelNode),typeof(DescriptionAttribute),typeof(AssemblyFileVersionAttribute),typeof(ImageNameAttribute),typeof(TypeMappingService)}
                 .ToObservable(Scheduler.Immediate)
-                .Do(type => AdditionalReferences.Add(type))
+                .Do(type => AdditionalReferences.Add(type.Assembly.Location))
                 .Subscribe();
             
             var systemWebAssembly = AppDomain.CurrentDomain.GetAssemblies()

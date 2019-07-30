@@ -683,7 +683,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                     if (_chartCoreAssembly == null){
                         throw new FileNotFoundException($"DevExpress.Charts{XafAssemblyInfo.VersionSuffix}.Core not found in path");
                     }
-                    TypeMappingService.AdditionalReferences.Add(_chartCoreAssembly.GetTypes().First());
+                    TypeMappingService.AdditionalReferences.Add(_chartCoreAssembly.GetTypes().First().Assembly.Location);
                     return new ModelMapperConfiguration (typeToMap);
                 }
             }

@@ -18,8 +18,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 .Concat(referencedTypes.SelectMany(_ => _.GetCustomAttributesData().ReferecedTypes()))
                 .Concat(propertyInfos.SelectMany(_ => _.GetCustomAttributesData().ReferecedTypes()))
                 .Concat(new []{type})
-                .Concat(AdditionalReferences)
                 .Select(_ => _.Assembly.Location)
+                .Concat(AdditionalReferences)
                 .Distinct()
                 .ToArray();
         }
