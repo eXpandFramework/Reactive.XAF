@@ -16,8 +16,12 @@ namespace Xpand.Source.Extensions.XAF.XafApplication{
         }
 
         public static TObjectView CreateObjectView<TObjectView>(this DevExpress.ExpressApp.XafApplication application,Type objectType) where TObjectView:ObjectView{
-            return (TObjectView) application.CreateObjectView(typeof(TObjectView), objectType);
-
+            var objectView = (TObjectView) application.CreateObjectView(typeof(TObjectView), objectType);
+            if (typeof(TObjectView) == typeof(DetailView)){
+                objectView.CurrentObject = objectView.ObjectSpace.CreateObject(objectType);
+                objectView.ObjectSpace.CommitChanges();
+            }
+            return objectView;
         }
 
     }
