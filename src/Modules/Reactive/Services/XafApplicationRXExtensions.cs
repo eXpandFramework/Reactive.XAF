@@ -46,6 +46,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return application.WhenFrameCreated().OfType<NestedFrame>();
         }
 
+        public static IObservable<Controller> ToController(this IObservable<Window> source,params string[] names){
+            return source.Select(_ => _.Controllers.Cast<Controller>().FirstOrDefault(controller =>
+                names.Contains(controller.Name)));
+        }
+
         public static IObservable<Window> WhenWindowCreated(this XafApplication application){
             return application.WhenFrameCreated().OfType<Window>();
         }
