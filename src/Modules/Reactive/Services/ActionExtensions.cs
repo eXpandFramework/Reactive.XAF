@@ -15,6 +15,15 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .TakeUntil(action.WhenDisposing())
                 .TransformPattern<CancelEventArgs, TAction>();
         }
+
+        public static IObservable<(TAction action, ActionBaseEventArgs e)> WhenExecuteCompleted<TAction>(this TAction action) where TAction:ActionBase{
+
+            return Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(h => action.ExecuteCompleted += h,
+                    h => action.ExecuteCompleted -= h)
+                .TakeUntil(action.WhenDisposing())
+                .TransformPattern<ActionBaseEventArgs, TAction>();
+        }
+
         public static IObservable<(TAction action, BoolList boolList, BoolValueChangedEventArgs e)> ResultValueChanged<TAction>(
             this TAction source,Func<TAction,BoolList> boolListSelector ) where TAction:ActionBase{
             return Observable.Return(boolListSelector(source))
@@ -53,8 +62,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<Unit> Disposing<TAction>(
             this IObservable<TAction> source) where TAction:ActionBase{
             return source
-                    .SelectMany(item => Observable.Start(async () => await Observable.FromEventPattern<EventHandler, EventArgs>(h => item.Disposing += h,
-                        h => item.Disposing -= h))
+                    .SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(h => item.Disposing += h,h => item.Disposing -= h)
                     .Select(pattern => pattern)
                     .ToUnit());
 
