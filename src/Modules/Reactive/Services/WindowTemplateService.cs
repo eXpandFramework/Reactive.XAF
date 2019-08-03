@@ -26,7 +26,6 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         private static IObservable<Unit> CustomizeStatusMessages<T>(this WindowTemplateController templateController,IObservable<T> other){
             return templateController.WhenCustomizeWindowStatusMessages()
                 .WithLatestFrom(other, (pattern, tuple) => (pattern, tuple))
-//                .TakeUntil(templateController.Frame.WhenDisposingFrame())
                 .SelectMany(tuple => GetMessages(tuple)
                     .Select(o => {
                         tuple.pattern.EventArgs.StatusMessages.Add($"{o}");
@@ -48,8 +47,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     templateController.UpdateWindowStatusMessage();
                     return templateController;
                 })
-                .Publish().RefCount()
-                .TakeUntil(RxApp.MainWindow);
+                .Publish().RefCount();
         }
     }
 }

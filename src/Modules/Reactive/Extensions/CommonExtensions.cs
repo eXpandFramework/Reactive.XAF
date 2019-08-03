@@ -5,6 +5,7 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Utils;
 using DevExpress.Persistent.Base;
 
 namespace Xpand.XAF.Modules.Reactive.Extensions{
@@ -81,6 +82,7 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
 
         public static IObservable<(TDisposable frame, EventArgs args)> WhenDisposed<TDisposable>(
             this TDisposable source) where TDisposable : IComponent{
+            Guard.ArgumentNotNull(source,nameof(source));
             return Observable.Return(source).Disposed();
         }
 
@@ -95,7 +97,6 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
 
         public static IObservable<(TDisposable frame,EventArgs args)> Disposed<TDisposable>(this IObservable<TDisposable> source) where TDisposable:IComponent{
             return source
-//                .SelectMany(item => Observable.StartAsync(async () =>await Observable.FromEventPattern<EventHandler, EventArgs>(h => item.Disposed += h, h => item.Disposed -= h)))
                 .SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(h => item.Disposed += h, h => item.Disposed -= h).FirstAsync())
                 .Select(pattern => pattern)
                 .TransformPattern<EventArgs,TDisposable>();

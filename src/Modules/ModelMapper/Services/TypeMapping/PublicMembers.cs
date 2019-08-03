@@ -23,8 +23,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     public static partial class TypeMappingService{
         public static string DefaultContainerSuffix="Map";
         public static string ModelMapperAssemblyName=null;
-        public static string MapperAssemblyName="ModelMapperAssembly";
+        public static string MapperAssemblyName="Mapper";
         public static string ModelMappersNodeName="ModelMappers";
+        private static readonly object OutPutAssemblyNamePattern=$"{ModelMapperAssemblyName}{MapperAssemblyName}{ModelExtendingService.Platform}";
+        static readonly string OutputAssembly =
+            $@"{Path.GetDirectoryName(Path.GetTempPath())}\{OutPutAssemblyNamePattern}{DateTime.Now.Ticks}.dll";
+
         public static ConcurrentHashSet<string> ReservedPropertyNames{ get; }=new ConcurrentHashSet<string>();
         public static ConcurrentHashSet<Type> ReservedPropertyTypes{ get; }=new ConcurrentHashSet<Type>();
         public static ConcurrentHashSet<Type> ReservedPropertyInstances{ get; }=new ConcurrentHashSet<Type>();

@@ -12,8 +12,7 @@ using Xpand.XAF.Modules.ModelMapper.Configuration;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     public static partial class TypeMappingService{
-        static string OutputAssembly =>
-            $@"{Path.GetDirectoryName(typeof(TypeMappingService).Assembly.Location)}\{ModelMapperAssemblyName}{MapperAssemblyName}{ModelExtendingService.Platform}.dll";
+        
 
 
         private static Assembly Compile(this IEnumerable<string> references, string code){
@@ -34,7 +33,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 throw new Exception(message);
             }
 
-//            return compilerResults.CompiledAssembly;
             var assembly = RemoveRecursiveProperties(OutputAssembly);
             Tracing.Tracer.LogText("ModelMapper assembly created");
             return assembly;
@@ -51,7 +49,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 assemblyDefinition.Write();
             }
 
-            return Assembly.LoadFile(OutPutAssembly);
+            return Assembly.LoadFile(assembly);
         }
 
         private static void RemoveRecursiveProperties(this AssemblyDefinition assemblyDefinition,TypeReference type,string chainTypes){
@@ -87,8 +85,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         private static bool TypeFromPath(this IModelMapperConfiguration configuration){
-            if (File.Exists(OutputAssembly)){
-                using (var assembly = AssemblyDefinition.ReadAssembly(OutPutAssembly)){
+            var assemblyPath = Directory.GetFiles($"{Path.GetDirectoryName(OutPutAssembly)}",$"{OutPutAssemblyNamePattern}*.dll").OrderByDescending(s => s).LastOrDefault();
+            if (assemblyPath!=null){
+                using (var assembly = AssemblyDefinition.ReadAssembly(assemblyPath)){
                     if (assembly.IsMapped(configuration) && !assembly.VersionChanged() && !assembly.ConfigurationChanged()){
                         return true;
                     }

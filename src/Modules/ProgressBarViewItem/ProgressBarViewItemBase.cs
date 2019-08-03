@@ -110,6 +110,7 @@ console.log('p='+previous);
         }
 
         public override void BreakLinksToControl(bool unwireEventsOnly){
+            _registerHandlerSubscription?.Dispose();
             _breakLinksToControl.OnNext(Unit.Default);
             base.BreakLinksToControl(unwireEventsOnly);
         }
@@ -129,14 +130,14 @@ console.log('p='+previous);
         private object _callBackManager;
         private string _clientInstancename;
         private static MethodInvoker _delegateForGetShowMessageScript;
+        private IDisposable _registerHandlerSubscription;
 
         protected override object CreateControlCore(){
             var instance = _progressBarControlType.CreateInstance();
             if (_platform == Platform.Web){
                 instance.SetPropertyValue("ClientInstanceName", _clientInstancename);
                 instance.SetPropertyValue("Width", _percentage(null, 100d));
-
-                View.WhenControlsCreated()
+                _registerHandlerSubscription = View.WhenControlsCreated()
                     .FirstAsync()
                     .Do(_ => {
                         _clientInstancename = Id.CleanCodeName();

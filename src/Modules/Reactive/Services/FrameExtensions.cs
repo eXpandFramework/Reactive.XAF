@@ -35,9 +35,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<T> When<T>(this IObservable<T> source, Frame parentFrame,NestedFrame nestedFrame){
             return source
-                .Where(_ => nestedFrame?.View!=null&&parentFrame?.View!=null)
-                .TakeUntil(parentFrame.View.WhenCurrentObjectChanged())
-                .TakeUntil(nestedFrame.WhenDisposingFrame().Merge(parentFrame.WhenDisposingFrame()));
+                .Where(_ => nestedFrame?.View!=null&&parentFrame?.View!=null);
         }
 
         internal static IObservable<TFrame> WhenFits<TFrame>(this IObservable<TFrame> source, ActionBase  action) where TFrame:Frame{
@@ -76,8 +74,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 return Observable.FromEventPattern<EventHandler, EventArgs>(
                         handler => item.TemplateChanged += handler,
                         handler => item.TemplateChanged -= handler)
-                    .Select(pattern => item)
-                    .TakeUntil(item.WhenDisposingFrame());
+                    .Select(pattern => item);
             });
         }
 
@@ -93,9 +90,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source.SelectMany(item => {
                 return Observable.FromEventPattern<EventHandler, EventArgs>(
                     handler => item.TemplateViewChanged += handler,
-                    handler => item.TemplateViewChanged -= handler).Select(pattern => item)
-                    .TakeUntil(item.WhenDisposingFrame())
-                    ;
+                    handler => item.TemplateViewChanged -= handler).Select(pattern => item);
             });
         }
 
@@ -104,11 +99,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
 
         public static IObservable<Unit> DisposingFrame<TFrame>(this IObservable<TFrame> source) where TFrame:Frame{
-            return source.SelectMany(async item => {
-                return await Observable.StartAsync(async () => await Observable.FromEventPattern<EventHandler, EventArgs>(
-                    handler => item.Disposing += handler,
-                    handler => item.Disposing -= handler).ToUnit());
-            });
+            return source.SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(
+                handler => item.Disposing += handler,
+                handler => item.Disposing -= handler)).ToUnit();
         }
     }
 }

@@ -11,7 +11,6 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(DetailView detailView, CancelEventArgs e)> WhenViewEditModeChanging(this DetailView detailView){
             return Observable.FromEventPattern<EventHandler<CancelEventArgs>, CancelEventArgs>(
                     h => detailView.ViewEditModeChanging += h, h => detailView.ViewEditModeChanging -= h)
-//                .TakeUntil(detailView.WhenDisposingView())
                 .TransformPattern<CancelEventArgs, DetailView>();
         }
 

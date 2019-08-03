@@ -25,6 +25,7 @@ namespace Xpand.XAF.Modules.ViewEditMode{
             var webModificationsController = application.WhenWindowCreated()
                 .ToController("DevExpress.ExpressApp.Web.SystemModule.WebModificationsController")
                 .Activated()
+                .When(ViewType.DetailView)
                 .Where(_ => {
                     var model = ((IModelDetailViewViewEditMode) _.Frame.View.Model);
                     return model.ViewEditMode == DevExpress.ExpressApp.Editors.ViewEditMode.View && model.LockViewEditMode;

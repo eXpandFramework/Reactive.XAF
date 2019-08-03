@@ -12,7 +12,6 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(TAction action, CancelEventArgs e)> WhenExecuting<TAction>(this TAction action) where TAction : ActionBase{
             return Observable.FromEventPattern<CancelEventHandler, CancelEventArgs>(h => action.Executing += h,
                     h => action.Executing -= h)
-                .TakeUntil(action.WhenDisposing())
                 .TransformPattern<CancelEventArgs, TAction>();
         }
 
@@ -20,7 +19,6 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
             return Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(h => action.ExecuteCompleted += h,
                     h => action.ExecuteCompleted -= h)
-                .TakeUntil(action.WhenDisposing())
                 .TransformPattern<ActionBaseEventArgs, TAction>();
         }
 
@@ -91,11 +89,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             this IObservable<TAction> source) where TAction : ActionBase{
             return source
                 .SelectMany(item => {
-                    return Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(
-                        h => item.Executed += h, h => item.Executed -= h)
-                        .TakeUntil(item.WhenDisposing().FirstAsync());
-                })
-                ;
+                    return Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(h => item.Executed += h, h => item.Executed -= h);
+                });
 
 
         }

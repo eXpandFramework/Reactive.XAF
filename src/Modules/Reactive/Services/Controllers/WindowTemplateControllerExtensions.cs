@@ -13,8 +13,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
             return controllers.Select(controller => {
                 return Observable.FromEventPattern<EventHandler<CustomizeWindowStatusMessagesEventArgs>,
                         CustomizeWindowStatusMessagesEventArgs>(h => controller.CustomizeWindowStatusMessages += h,
-                        h => controller.CustomizeWindowStatusMessages -= h)
-                    .TakeUntil(controller.WhenDeactivated());
+                        h => controller.CustomizeWindowStatusMessages -= h);
             }).Concat();
         }
     }

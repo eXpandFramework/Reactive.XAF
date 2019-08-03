@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
@@ -18,9 +19,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source.Cast<View>().SelectMany(view => {
                 return Observable.FromEventPattern<EventHandler, EventArgs>(
                     handler => view.Closing += handler,
-                    handler => view.Closing -= handler)
-                    .TakeUntil(view.WhenDisposingView().Select(unit => unit))
-                    ;
+                    handler => view.Closing -= handler);
             })
             .Select(pattern => (T)pattern.Sender);
         }
@@ -33,9 +32,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source.Cast<View>().SelectMany(view => {
                 return Observable.FromEventPattern<EventHandler<CancelEventArgs>, CancelEventArgs>(
                     handler => view.QueryCanClose += handler,
-                    handler => view.QueryCanClose -= handler)
-                    .TakeUntil(view.WhenDisposingView().Select(unit => unit))
-                    ;
+                    handler => view.QueryCanClose -= handler);
             }).TransformPattern<CancelEventArgs,T>();
         }
         public static IObservable<(T view, CancelEventArgs e)> WhenQueryCanChangeCurrentObject<T>(this T view) where T : View{
@@ -46,14 +43,15 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source.Cast<View>().SelectMany(view => {
                 return Observable.FromEventPattern<EventHandler<CancelEventArgs>, CancelEventArgs>(
                     handler => view.QueryCanChangeCurrentObject += handler,
-                    handler => view.QueryCanChangeCurrentObject -= handler)
-                    .TakeUntil(view.WhenDisposingView().Select(unit => unit))
-                    ;
+                    handler => view.QueryCanChangeCurrentObject -= handler);
             }).TransformPattern<CancelEventArgs,T>();
         }
 
         public static IObservable<(T view, EventArgs e)> WhenControlsCreated<T>(this T view) where T : View{
-            return Observable.Return(view).ControlsCreated();
+            return Observable.FromEventPattern<EventHandler, EventArgs>(
+                handler => view.ControlsCreated += handler,
+                handler => view.ControlsCreated -= handler).ObserveOn(Scheduler.Immediate).TransformPattern<EventArgs, T>();
+//            return Observable.Return(view).ControlsCreated();
         }
 
         public static IObservable<(T view, EventArgs e)> ControlsCreated<T>(this IObservable<T> source) where T:View{
@@ -62,8 +60,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     ? Observable.Return(new EventPattern<EventArgs>(view, EventArgs.Empty))
                     : Observable.FromEventPattern<EventHandler, EventArgs>(
                             handler => view.ControlsCreated += handler,
-                            handler => view.ControlsCreated -= handler)
-                        .TakeUntil(view.WhenDisposingView().Select(unit => unit));
+                            handler => view.ControlsCreated -= handler);
             }).TransformPattern<EventArgs,T>();
         }
 
@@ -75,9 +72,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source
                 .SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(
                         handler => item.SelectionChanged += handler,
-                        handler => item.SelectionChanged -= handler)
-                    .TakeUntil(WhenDisposingView(item))
-                )
+                        handler => item.SelectionChanged -= handler))
                 .TransformPattern<EventArgs,T>();
         }
 
@@ -89,8 +84,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source.SelectMany(item => {
                 return Observable.FromEventPattern<EventHandler, EventArgs>(
                     handler => item.CurrentObjectChanged += handler,
-                    handler => item.CurrentObjectChanged -= handler)
-                    .TakeUntil(WhenDisposingView(item));
+                    handler => item.CurrentObjectChanged -= handler);
             }).TransformPattern<EventArgs,T>();
         }
         

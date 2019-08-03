@@ -14,7 +14,6 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
                         return Observable.FromEventPattern<EventHandler<CustomProcessListViewSelectedItemEventArgs>,
                             CustomProcessListViewSelectedItemEventArgs>(h => controller.CustomProcessSelectedItem += h,
                             h => controller.CustomProcessSelectedItem -= h);
-//                    .TakeUntil(controller.WhenDeactivated());
                     })
                     .TransformPattern<CustomProcessListViewSelectedItemEventArgs,ListViewProcessCurrentObjectController>()
                 ;
