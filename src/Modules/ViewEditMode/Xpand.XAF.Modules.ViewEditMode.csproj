@@ -35,8 +35,8 @@
     <None Include="Readme.md" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="System.Reactive" Version="4.1.5" />
     <PackageReference Include="DevExpress.ExpressApp" Version="18.2.7" />
+    <PackageReference Include="System.Reactive" Version="4.1.6" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="LinkedFiles\" />
