@@ -98,9 +98,6 @@ namespace Xpand.XAF.Modules.Reactive{
         
         internal static IObservable<Frame> Frames{ get; }
 
-
-        public static IObservable<Window> MainWindow => throw new NotImplementedException();
-
         public static IObservable<(Frame masterFrame, NestedFrame detailFrame)> MasterDetailFrames(Type masterType, Type childType){
             throw new NotImplementedException();
 //            var nestedlListViews = Windows(ViewType.ListView, childType, Nesting.Nested)

@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using DevExpress.ExpressApp.SystemModule;
-using Fasterflect;
 using Xpand.XAF.Modules.Reactive.Extensions;
-using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     static class WindowTemplateService{
@@ -15,39 +10,40 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
 
         private static IObservable<Unit> UpdateStatus<T>(IObservable<Unit> refreshSignal, IObservable<T> messages){
-            return RxApp.MainWindow
-                .Select(_ => {
-                    var templateController = _.GetController<WindowTemplateController>();
-                    return templateController.UpdateStatusMessage(refreshSignal)
-                        .Zip(templateController.CustomizeStatusMessages(messages), (controller, tuple) => tuple);
-                }).Merge();
+            throw new NotImplementedException();
+//            return RxApp.MainWindow
+//                .Select(_ => {
+//                    var templateController = _.GetController<WindowTemplateController>();
+//                    return templateController.UpdateStatusMessage(refreshSignal)
+//                        .Zip(templateController.CustomizeStatusMessages(messages), (controller, tuple) => tuple);
+//                }).Merge();
         }
 
-        private static IObservable<Unit> CustomizeStatusMessages<T>(this WindowTemplateController templateController,IObservable<T> other){
-            return templateController.WhenCustomizeWindowStatusMessages()
-                .WithLatestFrom(other, (pattern, tuple) => (pattern, tuple))
-                .SelectMany(tuple => GetMessages(tuple)
-                    .Select(o => {
-                        tuple.pattern.EventArgs.StatusMessages.Add($"{o}");
-                        return o;
-                    }))
-                .ToUnit();
-        }
+//        private static IObservable<Unit> CustomizeStatusMessages<T>(this WindowTemplateController templateController,IObservable<T> other){
+//            return templateController.WhenCustomizeWindowStatusMessages()
+//                .WithLatestFrom(other, (pattern, tuple) => (pattern, tuple))
+//                .SelectMany(tuple => GetMessages(tuple)
+//                    .Select(o => {
+//                        tuple.pattern.EventArgs.StatusMessages.Add($"{o}");
+//                        return o;
+//                    }))
+//                .ToUnit();
+//        }
 
-        private static IEnumerable<object> GetMessages<T>((EventPattern<CustomizeWindowStatusMessagesEventArgs> pattern, T tuple) tuple){
-            var type = tuple.tuple.GetType();
-            return type.Name.StartsWith(nameof(ValueTuple)) ? type.Fields().Select(info => info.GetValue(tuple.tuple)) : type.Properties().Select(info => info.GetValue(tuple.tuple));
-        }
+//        private static IEnumerable<object> GetMessages<T>((EventPattern<CustomizeWindowStatusMessagesEventArgs> pattern, T tuple) tuple){
+//            var type = tuple.tuple.GetType();
+//            return type.Name.StartsWith(nameof(ValueTuple)) ? type.Fields().Select(info => info.GetValue(tuple.tuple)) : type.Properties().Select(info => info.GetValue(tuple.tuple));
+//        }
 
 
-        private static IObservable<WindowTemplateController> UpdateStatusMessage(
-            this WindowTemplateController templateController, IObservable<Unit> refreshSignal){
-            return refreshSignal
-                .Select(l => {
-                    templateController.UpdateWindowStatusMessage();
-                    return templateController;
-                })
-                .Publish().RefCount();
-        }
+//        private static IObservable<WindowTemplateController> UpdateStatusMessage(
+//            this WindowTemplateController templateController, IObservable<Unit> refreshSignal){
+//            return refreshSignal
+//                .Select(l => {
+//                    templateController.UpdateWindowStatusMessage();
+//                    return templateController;
+//                })
+//                .Publish().RefCount();
+//        }
     }
 }

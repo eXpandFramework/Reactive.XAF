@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Threading;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using Xpand.XAF.Modules.Reactive.Extensions;
@@ -51,8 +52,17 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 names.Contains(controller.Name))).WhenNotDefault();
         }
 
-        public static IObservable<Window> WhenWindowCreated(this XafApplication application){
-            return application.WhenFrameCreated().OfType<Window>();
+        public static IObservable<Window> WhenWindowCreated(this XafApplication application,bool isMain=false){
+            var windowCreated = application.WhenFrameCreated().OfType<Window>();
+            if (isMain){
+                return windowCreated.When(TemplateContext.ApplicationWindow)
+                    .TemplateViewChanged()
+                    .SelectMany(_ => Observable.Defer(() => Observable.Start(() => _.Application.MainWindow))
+                        .FirstAsync(window => window.Application.MainWindow!=null).Repeat().FirstAsync().Select(window => window))
+                    .OfType<Window>().FirstAsync();
+            }
+
+            return windowCreated;
         }
 
         public static IObservable<Window> WhenPopupWindowCreated(this XafApplication application){

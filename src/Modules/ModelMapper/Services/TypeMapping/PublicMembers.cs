@@ -26,8 +26,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         public static string MapperAssemblyName="Mapper";
         public static string ModelMappersNodeName="ModelMappers";
         private static readonly object OutPutAssemblyNamePattern=$"{ModelMapperAssemblyName}{MapperAssemblyName}{ModelExtendingService.Platform}";
-        static readonly string OutputAssembly =
-            $@"{Path.GetDirectoryName(Path.GetTempPath())}\{OutPutAssemblyNamePattern}{DateTime.Now.Ticks}.dll";
+        static string _outputAssembly =null;
 
         public static ConcurrentHashSet<string> ReservedPropertyNames{ get; }=new ConcurrentHashSet<string>();
         public static ConcurrentHashSet<Type> ReservedPropertyTypes{ get; }=new ConcurrentHashSet<Type>();
@@ -55,10 +54,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             return Observable.Return(Unit.Default);
         }
 
-        public static string OutPutAssembly =>
-            $@"{Path.GetDirectoryName(typeof(TypeMappingService).Assembly.Location)}\{ModelMapperAssemblyName}{MapperAssemblyName}{ModelExtendingService.Platform}.dll";
+        
 
         private static void Init(){
+            _outputAssembly = $@"{Path.GetDirectoryName(Path.GetTempPath())}\{OutPutAssemblyNamePattern}{DateTime.Now.Ticks}.dll";
             _customizeContainerCode=new Subject<(Type type, Result<(string key, string code)> data)>();
             _customizeProperties =new Subject<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)>();
             _customizeTypes =new Subject<ModelMapperType>();
@@ -84,7 +83,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 return distinnctTypesToMap
                     .All(_ => _.TypeFromPath())
                     .Select(_ => {
-                        var assembly = !_? distinnctTypesToMap.ModelCode().Select(tuple => tuple.references.Compile(tuple.code)): Assembly.LoadFile(OutputAssembly).AsObservable();
+                        var assembly = !_? distinnctTypesToMap.ModelCode().Select(tuple => tuple.references.Compile(tuple.code)): Assembly.LoadFile(_outputAssembly).AsObservable();
                         return assembly.SelectMany(assembly1 => {
                             var types = assembly1.GetTypes()
                                 .Where(type => typeof(IModelModelMap).IsAssignableFrom(type))

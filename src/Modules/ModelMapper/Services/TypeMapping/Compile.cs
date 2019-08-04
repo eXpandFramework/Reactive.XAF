@@ -20,7 +20,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             var codeProvider = new CSharpCodeProvider();
             var compilerParameters = new CompilerParameters{
                 CompilerOptions = "/t:library /optimize",
-                OutputAssembly = OutputAssembly
+                OutputAssembly = _outputAssembly
             };
             
             var strings = references.ToArray();
@@ -33,7 +33,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 throw new Exception(message);
             }
 
-            var assembly = RemoveRecursiveProperties(OutputAssembly);
+            var assembly = RemoveRecursiveProperties(_outputAssembly);
             Tracing.Tracer.LogText("ModelMapper assembly created");
             return assembly;
 
@@ -85,7 +85,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         private static bool TypeFromPath(this IModelMapperConfiguration configuration){
-            var assemblyPath = Directory.GetFiles($"{Path.GetDirectoryName(OutPutAssembly)}",$"{OutPutAssemblyNamePattern}*.dll").OrderByDescending(s => s).LastOrDefault();
+            var assemblyPath = Directory.GetFiles($"{Path.GetDirectoryName(_outputAssembly)}",$"{OutPutAssemblyNamePattern}*.dll").OrderByDescending(s => s).LastOrDefault();
             if (assemblyPath!=null){
                 using (var assembly = AssemblyDefinition.ReadAssembly(assemblyPath)){
                     if (assembly.IsMapped(configuration) && !assembly.VersionChanged() && !assembly.ConfigurationChanged()){
