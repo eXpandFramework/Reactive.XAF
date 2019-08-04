@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.SuppressConfirmation</id>
-    <version>0.0.41.0</version>
+    <version>0.0.42.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -14,9 +14,9 @@
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  SuppressConfirmation</tags>
     <dependencies>
-      <dependency id="System.Reactive" version="4.1.5" />
+      <dependency id="System.Reactive" version="4.1.6" />
       <dependency id="System.ValueTuple" version="4.5.0" />
-      <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.40.0" />
+      <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.41.0" />
       <dependency id="Xpand.VersionConverter" version="1.0.34.0" />
     </dependencies>
   </metadata>
