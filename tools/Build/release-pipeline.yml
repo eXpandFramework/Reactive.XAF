@@ -24,7 +24,6 @@ pool:
   vmImage: windows-2019
 steps:
 - checkout: self
-  clean: true
 - task: PowerShell@2
   displayName: Build
   inputs:
@@ -36,8 +35,10 @@ steps:
   displayName: 'VsTest - testAssemblies'
   inputs:
     testAssemblyVer2: |
-     .\bin\*.Tests.dll
-    runInParallel: true
+      **\*Tests*.dll
+      !**\*TestAdapter.dll
+      !**\obj\**
+    runInParallel: false
     diagnosticsEnabled: false
     runTestsInIsolation: true
     codeCoverageEnabled: true
