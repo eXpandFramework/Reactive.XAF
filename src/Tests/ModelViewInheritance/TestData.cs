@@ -12,7 +12,7 @@ namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{
                     .Select(b => (viewType,attribute:b))
                     .SelectMany(_ => new[]{Platform.Win,Platform.Web}
                         .Select(platform => new object[]{_.viewType,_.attribute,platform})));
-//            yield return new object[]{ViewType.DetailView,true,Platform.Win};
+//            yield return new object[]{ViewType.ListView,true,Platform.Web};
 //            yield return new object[]{ViewType.DetailView,false,Platform.Win};
             foreach (var item in items){
                 yield return item;

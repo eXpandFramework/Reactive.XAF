@@ -65,13 +65,17 @@ namespace TestsLib {
             application.RegisterInMemoryObjectSpaceProvider();
         }
 
+        public static ModuleBase AddModule(this XafApplication application,ModuleBase moduleBase,bool setup=true, params Type[] additionalExportedTypes){
+            application.Title = moduleBase.GetType().Name;
+            moduleBase.AdditionalExportedTypes.AddRange(additionalExportedTypes);
+            if (setup){
+                application.SetupDefaults(moduleBase);
+            }
+            return moduleBase;
+        }
+
         public static T AddModule<T>(this XafApplication application,params Type[] additionalExportedTypes) where  T:ModuleBase, new(){
-            
-            application.Title = typeof(T).Name;
-            var module = new T();
-            module.AdditionalExportedTypes.AddRange(additionalExportedTypes);
-            application.SetupDefaults(module);
-            return module;
+            return (T) application.AddModule(new T(),true, additionalExportedTypes);
         }
 
         public static TModule NewModule<TModule>(Platform platform,params Type[] additionalExportedTypes) where  TModule:ModuleBase, new(){
