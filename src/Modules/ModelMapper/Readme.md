@@ -32,7 +32,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |Mono.Cecil|0.10.4
  |System.Interactive|3.2.0
  |System.Reactive|4.1.6
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|1.2.42
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|1.2.41
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.0.34
 
 ## Issues-Debugging-Troubleshooting
@@ -148,9 +148,10 @@ XafLayoutControl | SplitContainerControl
  ![image](https://user-images.githubusercontent.com/159464/61749379-5050db80-adab-11e9-93de-24ea104aaac7.png)| ![image](https://user-images.githubusercontent.com/159464/61752097-34513800-adb3-11e9-9907-073be2e5843c.png)
 
 **ASPxPopupControl**
+
 DashboardView | ListView | DetailView
 ---------|----------|---------
- ![image](https://user-images.githubusercontent.com/159464/61752712-73808880-adb5-11e9-897e-081e8864882f.png) | ![image](https://user-images.githubusercontent.com/159464/61752825-ec7fe000-adb5-11e9-8217-2e125f992319.png) | ![image](https://user-images.githubusercontent.com/159464/61752720-7f6c4a80-adb5-11e9-832e-931a23b8a159.png)
+![image](https://user-images.githubusercontent.com/159464/61752712-73808880-adb5-11e9-897e-081e8864882f.png)|![image](https://user-images.githubusercontent.com/159464/61752825-ec7fe000-adb5-11e9-8217-2e125f992319.png)|![image](https://user-images.githubusercontent.com/159464/61752720-7f6c4a80-adb5-11e9-832e-931a23b8a159.png)
   
 ##### How to customize a map
 You can customize the map the following ways:
