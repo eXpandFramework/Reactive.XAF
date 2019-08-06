@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net461</TargetFramework>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
@@ -23,11 +23,13 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Extensions\Extensions\Xpand.Source.Extensions.csproj" />
-    <ProjectReference Include="..\..\Modules\CloneModelView\Xpand.XAF.Modules.CloneModelView.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Tests">
       <HintPath>..\..\..\bin\TestsLib.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.CloneModelView">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.CloneModelView.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.ModelViewInheritance">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.ModelViewInheritance.dll</HintPath>
