@@ -17,7 +17,7 @@ namespace Xpand.Source.Extensions.FunctionOperators{
 
         public object Evaluate(params object[] operands){
             var type = Type.GetType(operands[1].ToString());
-            return type.IsAssignableFrom((Type) operands[0]);
+            return type != null && type.IsAssignableFrom((Type) operands[0]);
         }
 
         public string Name{ get; } = OperatorName;

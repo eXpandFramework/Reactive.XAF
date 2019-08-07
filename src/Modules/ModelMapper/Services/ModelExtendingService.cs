@@ -20,19 +20,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         private static readonly ISubject<Unit> ConnectedSubject=Subject.Synchronize(new Subject<Unit>());
         internal static Platform Platform{ get; private set; }
 
-        public static IObservable<Unit> Connected => ConnectedSubject;
+        public static IObservable<Unit> Connected => Observable.Defer(() => ConnectedSubject);
 
         private static ConcurrentHashSet<IModelMapperConfiguration> ModelMapperConfigurations{ get; } =new ConcurrentHashSet<IModelMapperConfiguration>();
 
-        static ModelExtendingService(){
-            Init();
-        }
-
-        internal static void Init(){
-            ModelMapperConfigurations.Clear();
-        }
-
         internal static IObservable<Unit> ConnectExtendingService(this ApplicationModulesManager applicationModulesManager){
+            
             Platform = applicationModulesManager.Modules.GetPlatform();
             
             var extendModel = applicationModulesManager.Modules.OfType<ReactiveModule>().ToObservable().FirstAsync()
@@ -40,7 +33,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             
             return extendModel.Select(extenders => extenders)
                 .Select(AddExtenders).Switch()
-                .Finally(() => ConnectedSubject.OnNext(Unit.Default))
+                .Finally(() => {
+                    ConnectedSubject.OnNext(Unit.Default);
+                    ModelMapperConfigurations.Clear();
+                })
                 .ToUnit();
         }
 
@@ -55,8 +51,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 .Distinct().Replay().RefCount();
 
             return modelExtenders
-                .SelectMany(_ => mappedContainers.FirstAsync(type =>
-                        type.Attribute<ModelMapLinkAttribute>().LinkedTypeName == _.TypeToMap.AssemblyQualifiedName)
+                .SelectMany(_ => mappedContainers.FirstAsync(type =>type.Attribute<ModelMapLinkAttribute>().LinkedTypeName == _.TypeToMap.AssemblyQualifiedName)
                     .SelectMany(extenderInterface => _.TargetInterfaceTypes.Select(targetInterfaceType => (targetInterfaceType, extenderInterface))))
                 .Do(_ => extenders.Add(_.targetInterfaceType,_.extenderInterface));
         }

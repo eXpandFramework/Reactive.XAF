@@ -54,7 +54,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.Predefined{
                 }
                 
             }
-//            if (viewItemTypes.Select(type => $"IModel{type.Name}").Contains(modelMapperType.ModelName)) {
+
             if (viewItemTypes.Contains(modelMapperType.Type)) {
                 modelMapperType.BaseTypeFullNames.RemoveAll(s => new[]{typeof(IModelModelMapContainer).FullName}.Contains(s));
                 if (modelMapperType.TypeToMap != null){

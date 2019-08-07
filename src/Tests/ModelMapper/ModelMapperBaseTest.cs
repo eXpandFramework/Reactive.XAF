@@ -34,8 +34,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                                                        info.Name!=TypeMappingService.ModelMappersNodeName).ToArray();
         }
 
-        private void ConfigureLayoutViewPredefinedMapService(PredefinedMap PredefinedMap=PredefinedMap.LayoutView){
-            if (new[]{PredefinedMap.LayoutView,PredefinedMap.LayoutViewColumn}.Contains(PredefinedMap)){
+        private void ConfigureLayoutViewPredefinedMapService(PredefinedMap predefinedMap=PredefinedMap.LayoutView){
+            if (new[]{PredefinedMap.LayoutView,PredefinedMap.LayoutViewColumn}.Contains(predefinedMap)){
                 typeof(PredefinedMapService).Field("_xpandWinAssembly",Flags.Static|Flags.AnyVisibility).Set(GetType().Assembly);
                 typeof(PredefinedMapService).Field("_layoutViewListEditorTypeName",Flags.Static|Flags.AnyVisibility).Set(typeof(CustomGridListEditor).FullName);
             }

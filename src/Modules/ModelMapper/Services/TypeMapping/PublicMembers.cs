@@ -26,7 +26,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         public static string MapperAssemblyName="Mapper";
         public static string ModelMappersNodeName="ModelMappers";
         private static readonly object OutPutAssemblyNamePattern=$"{ModelMapperAssemblyName}{MapperAssemblyName}{ModelExtendingService.Platform}";
-        static string _outputAssembly =null;
+        static string _outputAssembly;
 
         public static ConcurrentHashSet<string> ReservedPropertyNames{ get; }=new ConcurrentHashSet<string>();
         public static ConcurrentHashSet<Type> ReservedPropertyTypes{ get; }=new ConcurrentHashSet<Type>();
@@ -44,19 +44,17 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         static void Start(){
+            
             ViewItemService.Connect().Subscribe();
             ConnectCustomizationRules();
             _typesToMap.OnCompleted();
         }
 
-
         internal static IObservable<Unit> Connect(){
             return Observable.Return(Unit.Default);
         }
 
-        
-
-        private static void Init(){
+        internal static void Init(){
             _outputAssembly = $@"{Path.GetDirectoryName(Path.GetTempPath())}\{OutPutAssemblyNamePattern}{DateTime.Now.Ticks}.dll";
             _customizeContainerCode=new Subject<(Type type, Result<(string key, string code)> data)>();
             _customizeProperties =new Subject<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)>();
@@ -119,7 +117,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 var type = systemWebAssembly.GetType("System.Web.HttpCookie");
                 ReservedPropertyTypes.Add(type);
             }
-            ModelExtendingService.Init();
+            
             
         }
 
@@ -153,11 +151,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         public static IObservable<Type> MapToModel<TModelMapperConfiguration>(this IObservable<TModelMapperConfiguration> configurations)
             where TModelMapperConfiguration : IModelMapperConfiguration{
 
-            //            if (!maps.Contains(PredefinedMap.RepositoryItem) && maps.Any(map =>map.IsRepositoryItem())){
-//                maps = maps.Concat(new[]{PredefinedMap.RepositoryItem}).ToArray();
-//            }
             return configurations
-//                .Select(_ => (_.TypeToMap, (IModelMapperConfiguration) _))
                 .Do(_ => _typesToMap.OnNext(_))
                 .Select(_ => _.TypeToMap);
         }
@@ -175,16 +169,15 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
 
-
-        public static IObservable<Type> ModelInterfaces(this IModelMapperConfiguration configuration){
+        internal static IObservable<Type> ModelInterfaces(this IModelMapperConfiguration configuration){
             return new[]{configuration}.ToObservable(Scheduler.Immediate).ModelInterfaces();
         }
 
-        public static IObservable<Type> ModelInterfaces(this IObservable<IModelMapperConfiguration> source){
+        internal static IObservable<Type> ModelInterfaces(this IObservable<IModelMapperConfiguration> source){
             return source.Select(_ => _.TypeToMap).ModelInterfaces();
         }
 
-        public static IObservable<Type> ModelInterfaces(this IObservable<Type> source){
+        internal static IObservable<Type> ModelInterfaces(this IObservable<Type> source){
             return source.Finally(Start).Select(_ => MappedTypes).Switch().Distinct();
         }
 

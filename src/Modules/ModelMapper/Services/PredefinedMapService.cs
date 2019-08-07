@@ -58,7 +58,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         private static void Init(){
             _layoutViewListEditorTypeName = "Xpand.ExpressApp.Win.ListEditors.GridListEditors.LayoutView.LayoutViewListEditor";
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            var dxAssembly = assemblies.First(assembly => assembly.FullName.StartsWith("DevExpress"));
+            var dxAssembly = assemblies.Where(_ => !_.FullName.Contains("Design")).First(assembly => assembly.FullName.StartsWith("DevExpress"));
             var regex = new Regex(@"\.v[\d]{2}\.[\d]");
             var versionSuffix = regex.Match(dxAssembly.FullName).Value;
             regex = new Regex(",.*");
@@ -167,6 +167,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         }
 
         public static void Extend(this ApplicationModulesManager modulesManager, PredefinedMap map,Action<ModelMapperConfiguration> configure = null){
+            if (!modulesManager.Modules.Any(_ => _ is ModelMapperModule)){
+                throw new NotSupportedException($"{nameof(ModelMapperModule)} not installed");
+            }
+
+            if (AppDomain.CurrentDomain.GetAssemblies().Count(_ => _.GetName().Name==typeof(ModelMapperModule).Assembly.GetName().Name) > 1){
+                throw new NotSupportedException("Multiple ModelMapper assemblies in the domain check your Model.DesignedDiffs.log if you are at design time");
+            }
             var modelMapperConfiguration = map.ModelMapperConfiguration(configure);
             var result = (modelMapperConfiguration.TypeToMap, modelMapperConfiguration, map);
             if (map.IsChartControlDiagram()){
@@ -203,10 +210,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
 
         public static IObservable<Type> MapToModel(this IEnumerable<PredefinedMap> predefinedMaps,Action<PredefinedMap,ModelMapperConfiguration> configure = null){
             var maps = predefinedMaps.Where(_ => _!=PredefinedMap.None).ToArray();
-//            if (!maps.Contains(PredefinedMap.RepositoryItem) && maps.Any(map =>map.ToString().StartsWith(PredefinedMap.RepositoryItem.ToString()))){
-//                maps = maps.Concat(new[]{PredefinedMap.RepositoryItem}).ToArray();
-//            }
-            
             var results = maps
                 .Select(_ => {
                     var modelMapperConfiguration = _.ModelMapperConfiguration(configuration => configure?.Invoke(_, configuration));
@@ -231,12 +234,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 configure?.Invoke(mapperConfiguration);
                 return mapperConfiguration;
             }
-
             throw new NotImplementedException(predefinedMap.ToString());
         }
 
         public static IModelNode GetNode(this IModelNode modelNode, PredefinedMap predefinedMap){
-            return modelNode.GetNode(predefinedMap.TypeToMap().Name);
+            return modelNode
+                .GetNode(predefinedMap.TypeToMap().Name);
         }
 
         public static object GetViewControl(this PredefinedMap predefinedMap, CompositeView view, string model){

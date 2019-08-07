@@ -111,8 +111,10 @@ namespace Xpand.XAF.Modules.CloneModelView.Tests{
                     return true;
                 })
                 .Subscribe();
-            application.Modules.Add(new ReactiveModule());
-            return application.AddModule<CloneModelViewModule>(typeof(CMV));
+            
+            var cloneModelViewModule = new CloneModelViewModule();
+            cloneModelViewModule.RequiredModuleTypes.Add(typeof(ReactiveModule));
+            return (CloneModelViewModule) application.AddModule(cloneModelViewModule,true, typeof(CMV));
         }
     }
 }
