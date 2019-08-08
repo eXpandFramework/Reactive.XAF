@@ -15,6 +15,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
 using Fasterflect;
+using Xpand.Source.Extensions.System.AppDomain;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.Predefined;
 using Xpand.XAF.Modules.Reactive.Extensions;
@@ -55,7 +56,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         internal static void Init(){
-            _outputAssembly = $@"{Path.GetDirectoryName(Path.GetTempPath())}\{OutPutAssemblyNamePattern}{DateTime.Now.Ticks}.dll";
+            var directoryName=$@"{Path.GetDirectoryName(Path.GetTempPath())}\{nameof(ModelMapperModule)}\{new DirectoryInfo(AppDomain.CurrentDomain.ApplicationPath()).Name}";
+            if (!Directory.Exists(directoryName)){
+                Directory.CreateDirectory(directoryName);
+            }
+            _outputAssembly = $@"{directoryName}\{OutPutAssemblyNamePattern}{DateTime.Now.Ticks}.dll";
             _customizeContainerCode=new Subject<(Type type, Result<(string key, string code)> data)>();
             _customizeProperties =new Subject<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)>();
             _customizeTypes =new Subject<ModelMapperType>();

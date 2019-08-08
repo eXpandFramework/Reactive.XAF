@@ -58,8 +58,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         private static void Init(){
             _layoutViewListEditorTypeName = "Xpand.ExpressApp.Win.ListEditors.GridListEditors.LayoutView.LayoutViewListEditor";
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            var dxAssembly = assemblies.Where(_ => !_.FullName.Contains("Design")).First(assembly => assembly.FullName.StartsWith("DevExpress"));
             var regex = new Regex(@"\.v[\d]{2}\.[\d]");
+            var dxAssembly = assemblies.Where(_ => !_.FullName.Contains("Design"))
+                .First(assembly => assembly.FullName.StartsWith("DevExpress") && regex.Match(assembly.FullName).Success);
             var versionSuffix = regex.Match(dxAssembly.FullName).Value;
             regex = new Regex(",.*");
             _dxAssemblyNamePostfix = regex.Match(dxAssembly.FullName).Value;
