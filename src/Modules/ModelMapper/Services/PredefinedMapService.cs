@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
@@ -19,6 +18,7 @@ using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.Predefined;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xpand.XAF.Modules.Reactive;
+using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services{
     public static class PredefinedMapService{
@@ -57,13 +57,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
 
         private static void Init(){
             _layoutViewListEditorTypeName = "Xpand.ExpressApp.Win.ListEditors.GridListEditors.LayoutView.LayoutViewListEditor";
+            var dxAssemblyName = typeof(ModelMapperModule).Assembly.GetReferencedAssemblies().First(_ => _.Name.Contains("DevExpress"));
+            var version = dxAssemblyName.Version;
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            var regex = new Regex(@"\.v[\d]{2}\.[\d]");
-            var dxAssembly = assemblies.Where(_ => !_.FullName.Contains("Design"))
-                .First(assembly => assembly.FullName.StartsWith("DevExpress") && regex.Match(assembly.FullName).Success);
-            var versionSuffix = regex.Match(dxAssembly.FullName).Value;
-            regex = new Regex(",.*");
-            _dxAssemblyNamePostfix = regex.Match(dxAssembly.FullName).Value;
+            var versionSuffix = $".v{version.Major}.{version.Minor}";
+            _dxAssemblyNamePostfix = dxAssemblyName.FullName.Substring(dxAssemblyName.FullName.IndexOf(",", StringComparison.Ordinal));
             _dxUtilsAssembly = assemblies.GetAssembly($"DevExpress.Utils{versionSuffix}");
             if (ModelExtendingService.Platform == Platform.Win){
                 
@@ -168,13 +166,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         }
 
         public static void Extend(this ApplicationModulesManager modulesManager, PredefinedMap map,Action<ModelMapperConfiguration> configure = null){
-            if (!modulesManager.Modules.Any(_ => _ is ModelMapperModule)){
-                throw new NotSupportedException($"{nameof(ModelMapperModule)} not installed");
-            }
-
-            if (AppDomain.CurrentDomain.GetAssemblies().Count(_ => _.GetName().Name==typeof(ModelMapperModule).Assembly.GetName().Name) > 1){
-                throw new NotSupportedException("Multiple ModelMapper assemblies in the domain check your Model.DesignedDiffs.log if you are at design time");
-            }
+            EvnviromentChecks(modulesManager);
             var modelMapperConfiguration = map.ModelMapperConfiguration(configure);
             var result = (modelMapperConfiguration.TypeToMap, modelMapperConfiguration, map);
             if (map.IsChartControlDiagram()){
@@ -207,6 +199,26 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 modulesManager.Extend(result.modelMapperConfiguration);
             }
             
+        }
+
+        private static void EvnviromentChecks(ApplicationModulesManager modulesManager){
+            var mapperModule = modulesManager.Modules.OfType<ModelMapperModule>().FirstOrDefault();
+            if (mapperModule == null){
+                throw new NotSupportedException($"{nameof(ModelMapperModule)} not installed");
+            }
+
+            try{
+                mapperModule.SetupCompleted.FirstAsync().Select(_ => _).Wait(TimeSpan.FromSeconds(1));
+            }
+            catch (TimeoutException){
+                throw new NotSupportedException($"{nameof(ModelMapperModule)} API consumers must have the module installed.");
+            }
+
+            if (AppDomain.CurrentDomain.GetAssemblies()
+                    .Count(_ => _.GetName().Name == typeof(ModelMapperModule).Assembly.GetName().Name) > 1){
+                throw new NotSupportedException(
+                    "Multiple ModelMapper assemblies in the domain check your Model.DesignedDiffs.log if you are at design time");
+            }
         }
 
         public static IObservable<Type> MapToModel(this IEnumerable<PredefinedMap> predefinedMaps,Action<PredefinedMap,ModelMapperConfiguration> configure = null){

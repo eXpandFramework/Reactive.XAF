@@ -10,6 +10,9 @@ using DevExpress.Persistent.Base;
 
 namespace Xpand.XAF.Modules.Reactive.Extensions{
     public static class CommonExtensions{
+        public static T Wait<T>(this IObservable<T> source, TimeSpan timeSpan){
+            return source.Timeout(timeSpan).Wait();
+        }
         public static IObservable<TC> MergeOrCombineLatest<TA, TB, TC>(
             this IObservable<TA> a,
             IObservable<TB> b,

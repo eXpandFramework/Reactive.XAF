@@ -106,9 +106,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         public static ModelMapperTestModule Extend(this PredefinedMap[] maps, ModelMapperTestModule testModule = null,
             Action<ModelMapperConfiguration> configure = null){
             testModule = testModule ?? new ModelMapperTestModule();
-            testModule.ApplicationModulesManager.FirstAsync()
-                .SelectMany(manager => maps.Select(map => {
-                    manager.Extend(map, configure);
+            testModule.ApplicationModulesManager.FirstAsync(_ => _.module==testModule)
+                .SelectMany(_ => maps.Select(map => {
+                    _.manager.Extend(map, configure);
                     return Unit.Default;
                 }))
                 .Subscribe();
@@ -119,10 +119,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             Action<ModelMapperConfiguration> configure, ModelMapperTestModule testModule = null){
             testModule = testModule ?? new ModelMapperTestModule();
             testModule.ApplicationModulesManager.FirstAsync()
-                .Do(manager => {
+                .Do(_ => {
                     var configuration = new ModelMapperConfiguration(extenderType);
                     configure?.Invoke(configuration);
-                    manager.Extend(configuration);
+                    _.manager.Extend(configuration);
                 })
                 .Subscribe();
             return testModule;
@@ -132,10 +132,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             Action<ModelMapperConfiguration> configure = null) where T : IModelNode{
             testModule = testModule ?? new ModelMapperTestModule();
             testModule.ApplicationModulesManager.FirstAsync()
-                .Do(manager => {
+                .Do(_ => {
                     var configuration = new ModelMapperConfiguration(extenderType, typeof(T));
                     configure?.Invoke(configuration);
-                    manager.Extend(configuration);
+                    _.manager.Extend(configuration);
                 })
                 .Subscribe();
             return testModule;

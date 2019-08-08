@@ -70,8 +70,11 @@ namespace TestsLib {
             moduleBase.AdditionalExportedTypes.AddRange(additionalExportedTypes);
             if (setup){
                 application.SetupDefaults(moduleBase);
+                return application.Modules.First(m => m.Name==moduleBase.Name);
             }
+
             return moduleBase;
+
         }
 
         public static T AddModule<T>(this XafApplication application,params Type[] additionalExportedTypes) where  T:ModuleBase, new(){

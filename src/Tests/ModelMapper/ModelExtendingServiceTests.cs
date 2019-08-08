@@ -228,7 +228,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
             module.ApplicationModulesManager
                 .FirstAsync()
-                .SelectMany(_ => _.ExtendMap(PredefinedMap.GridView))
+                .SelectMany(_ => _.manager.ExtendMap(PredefinedMap.GridView))
                 .Subscribe(_ => {
                     _.extenders.Add(_.targetInterface,typeof(IModelPredefinedMapExtension));
                 });
@@ -251,7 +251,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             
             module.ApplicationModulesManager
                 .FirstAsync()
-                .SelectMany(_ => _.ExtendMap(PredefinedMap))
+                .SelectMany(_ => _.manager.ExtendMap(PredefinedMap))
                 .Subscribe(_ => {
                     _.extenders.Add(_.targetInterface,typeof(IModelPredefinedMapExtension));
                 });

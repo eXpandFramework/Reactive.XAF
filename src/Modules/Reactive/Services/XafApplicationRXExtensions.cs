@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using System.Threading;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using Xpand.XAF.Modules.Reactive.Extensions;

@@ -219,10 +219,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             
 
             var module = predefinedMaps.Extend();
-            var application = DefaultModelMapperModule(platform,extraModules.Select(_ => {
-                var instance = _.CreateInstance();
+            var moduleBases = extraModules.Select(type => {
+                var instance = type.CreateInstance();
                 return instance;
-            }).Cast<ModuleBase>().Concat(new[]{module}).ToArray()).Application;
+            }).Cast<ModuleBase>().Concat(new[]{module}).ToArray();
+            var application = DefaultModelMapperModule(platform,moduleBases).Application;
 
             var controlBound = ModelBindingService.ControlBind.Replay();
             controlBound.Connect();
