@@ -55,6 +55,41 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         [Fact]
+        public void Get_PredefinedModelNode(){
+            InitializeMapperService($"{nameof(Customize_PredifienedMaps_TargetInterface)}",Platform.Win);
+
+            var module = PredefinedMap.GridView.Extend();
+            var application = DefaultModelMapperModule(Platform.Win,module).Application;
+
+            application.Model.Views.OfType<IModelListView>().First().GetNode(PredefinedMap.GridView).ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void Get_PredefinedViewItemMergedModelNode(){
+            InitializeMapperService($"{nameof(Customize_PredifienedMaps_TargetInterface)}",Platform.Win);
+
+            var module = new[]{PredefinedMap.RepositoryItem,PredefinedMap.RepositoryFieldPicker,PredefinedMap.RepositoryItemBlobBaseEdit}.Extend();
+            var application = DefaultModelMapperModule(Platform.Win,module).Application;
+            
+            var modelColumn = application.Model.GetNodeByPath(MMListViewTestItemNodePath);
+            
+            var repositoryItemModel = modelColumn.AddRepositoryItemNode(PredefinedMap.RepositoryItem);
+            repositoryItemModel.SetValue("Name","Base");
+            repositoryItemModel.SetValue("AccessibleName","AccessibleNameBase");
+            var repositoryFieldPickerModel = modelColumn.AddRepositoryItemNode(PredefinedMap.RepositoryFieldPicker);
+            repositoryFieldPickerModel.SetValue("Name","Derivved");
+            repositoryFieldPickerModel.SetValue("AccessibleName","AccessibleName");
+            var repositoryItemBlobBaseEdit = modelColumn.AddRepositoryItemNode(PredefinedMap.RepositoryItemBlobBaseEdit);
+            repositoryItemBlobBaseEdit.SetValue("Name","NotMerged");
+
+            var finalNode = modelColumn.GetRepositoryItemNode(PredefinedMap.RepositoryFieldPicker);
+            finalNode.GetValue<string>("Name").ShouldBe("Derivved");
+            finalNode.GetValue<string>("AccessibleName").ShouldBe("AccessibleName");
+
+            modelColumn.GetRepositoryItemNode(PredefinedMap.RepositoryItemBlobBaseEdit).GetValue<string>("Name").ShouldBe("NotMerged");
+        }
+
+        [Fact]
         internal void Customize_PredifienedMaps_TargetInterface(){
             InitializeMapperService($"{nameof(Customize_PredifienedMaps_TargetInterface)}",Platform.Win);
             
@@ -244,14 +279,14 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         [InlineData(Platform.Web,PredefinedMap.ASPxHyperLink)]
         [InlineData(Platform.Win,PredefinedMap.RichEditControl)]
         [InlineData(Platform.Win,PredefinedMap.RepositoryItem)]
-        internal void Extend_Existing_ViewItemMap(Platform platform,PredefinedMap PredefinedMap){
-            var mapPropertyName=PredefinedMap.IsRepositoryItem()?ViewItemService.RepositoryItemsMapName:ViewItemService.PropertyEditorControlMapName;
+        internal void Extend_Existing_ViewItemMap(Platform platform,PredefinedMap predefinedMap){
+            var mapPropertyName=predefinedMap.IsRepositoryItem()?ViewItemService.RepositoryItemsMapName:ViewItemService.PropertyEditorControlMapName;
             InitializeMapperService(nameof(Extend_Existing_ViewItemMap),platform);
-            var module = new []{PredefinedMap}.Extend();
+            var module = new []{predefinedMap}.Extend();
             
             module.ApplicationModulesManager
                 .FirstAsync()
-                .SelectMany(_ => _.manager.ExtendMap(PredefinedMap))
+                .SelectMany(_ => _.manager.ExtendMap(predefinedMap))
                 .Subscribe(_ => {
                     _.extenders.Add(_.targetInterface,typeof(IModelPredefinedMapExtension));
                 });

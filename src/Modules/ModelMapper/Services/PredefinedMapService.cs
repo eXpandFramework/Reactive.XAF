@@ -9,10 +9,12 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Layout;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.Persistent.Base;
 using Fasterflect;
 using Xpand.Source.Extensions.System.AppDomain;
+using Xpand.Source.Extensions.XAF.Model;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.Predefined;
@@ -250,9 +252,58 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             throw new NotImplementedException(predefinedMap.ToString());
         }
 
+        public static IModelNode AddControlsNode(this IModelNode modelNode, PredefinedMap predefinedMap,string id = null){
+            return AddViewItemNode(modelNode, predefinedMap, id, ViewItemService.PropertyEditorControlMapName);
+        }
+
+        public static IModelNode AddRepositoryItemNode(this IModelNode modelNode, PredefinedMap predefinedMap,string id=null){
+            return AddViewItemNode(modelNode, predefinedMap, id, ViewItemService.RepositoryItemsMapName);
+        }
+
+        private static IModelNode AddViewItemNode(IModelNode modelNode, PredefinedMap predefinedMap, string id,string mapName){
+            id = id ?? predefinedMap.ToString();
+            var node = modelNode.GetNode(mapName);
+            return node.AddNode(predefinedMap.TypeToMap().ModelType(), id);
+        }
+
+
+        public static IModelNode GetRepositoryItemNode(this IModelNode modelNode, PredefinedMap predefinedMap){
+            if (!predefinedMap.IsRepositoryItem()){
+                throw new ArgumentException($"{predefinedMap} is not repository");
+            }
+            return ViewItemNode(modelNode, predefinedMap, ViewItemService.RepositoryItemsMapName);
+        }
+
+        public static IModelNode GetControlsItemNode(this IModelNode modelNode, PredefinedMap predefinedMap){
+            return ViewItemNode(modelNode, predefinedMap, ViewItemService.PropertyEditorControlMapName);
+        }
+
+        private static IModelNode ViewItemNode(IModelNode modelNode, PredefinedMap predefinedMap, string mapName){
+            if (modelNode is IModelColumn || modelNode is IModelPropertyEditor){
+                return modelNode.GetNode(mapName).GetNode(predefinedMap);
+            }
+
+            throw new ArgumentException(
+                $"{nameof(modelNode)} should be ${nameof(IModelColumn)} or {nameof(IModelPropertyEditor)}");
+        }
+
         public static IModelNode GetNode(this IModelNode modelNode, PredefinedMap predefinedMap){
-            return modelNode
-                .GetNode(predefinedMap.TypeToMap().Name);
+            var modelListType = modelNode.ModelListType();
+            var typeToMap = predefinedMap.TypeToMap();
+            if (modelListType != null){
+                var modelNodes = modelNode.Nodes().Where(node => node.GetType()
+                    .GetInterfaces().Any(type => {
+                        var mapLinkAttribute = type.Attribute<ModelMapLinkAttribute>();
+                        return mapLinkAttribute != null &&Type.GetType(mapLinkAttribute.LinkedTypeName) == typeToMap;
+                    })).Cast<ModelNode>().ToArray();
+                var modelApplicationBase = ((ModelNode) modelNode).CreatorInstance.CreateModelApplication();
+                foreach (var node in modelNodes){
+                    modelApplicationBase.ReadFromModel(node);    
+                }
+                return modelApplicationBase;
+            }
+
+            return modelNode.GetNode(typeToMap.Name);
         }
 
         public static object GetViewControl(this PredefinedMap predefinedMap, CompositeView view, string model){

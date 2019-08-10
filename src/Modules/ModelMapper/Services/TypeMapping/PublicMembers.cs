@@ -194,6 +194,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             return modelNode.GetNode(type.Name);
         }
 
+        public static Type ModelType(this Type type, Type rootType = null,IModelMapperConfiguration configuration = null){
+            return DevExpress.ExpressApp.XafTypesInfo.Instance.FindTypeInfo(type.ModelTypeName(rootType, configuration)).Type;
+        }
+
         public static string ModelTypeName(this Type type,Type rootType=null, IModelMapperConfiguration configuration=null){
             if (rootType==null){
                 rootType = type;

@@ -60,6 +60,16 @@ typeToMap.ModelTypeName();
 typeToMap.ModelMapContainerName();
 typeToMap.ModelListType();
 typeToMap.ModelListItemType();
+//GetRepositoryItemNode, AddRepositoryItemNode, GetControlsItemNode, AddControlsItemNode
+var listView = (IModelListView)application.Model.Views["Customer_ListView"];
+var listViewColumn = listView.Columns["Name"];
+listViewColumn.GetRepositoryItemNode(PredefinedMap.RepositoryItemButtonEdit);
+listViewColumn.AddRepositoryItemNode(PredefinedMap.RepositoryItem);
+
+var detailView = (IModelDetailView)application.Model.Views["Customer_DetailView"];
+var modelPropertyEditor = detailView.Items["Name"];
+modelPropertyEditor.GetRepositoryItemNode(PredefinedMap.RepositoryItemButtonEdit);
+modelPropertyEditor.AddRepositoryItemNode(PredefinedMap.RepositoryItem);
 ```
 
 To extend an existing map you can use:

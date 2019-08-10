@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
@@ -78,10 +77,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
 
         public static IObservable<ITypesInfo> WhenCustomizingTypesInfo(this XafApplication application) {
-            return application.Modules.OfType<ReactiveModule>().ToObservable(Scheduler.Default)
-                .Repeat()
-                .FirstAsync()
-                .Select(_ => _.ModifyTypesInfo).Switch();
+            return application.Modules.OfType<ReactiveModule>().ToObservable()
+                .SelectMany(_ => _.SetupCompleted).Cast<ReactiveModule>().SelectMany(_ => _.ModifyTypesInfo);
         }
 
         public static IObservable<(XafApplication application, CreateCustomObjectSpaceProviderEventArgs e)> WhenCreateCustomObjectSpaceProvider(this XafApplication application){
