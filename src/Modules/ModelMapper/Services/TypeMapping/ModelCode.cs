@@ -74,8 +74,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
 
         private static string AssemblyAttributesCode(this Type type,IModelMapperConfiguration configuration){
             var modelMapperServiceAttributeCode = type.ModelMapperServiceAttributeCode(configuration);
-            
-            var modelMapperConfigurationCode = $@"[assembly:{typeof(ModelMapperServiceAttribute).FullName}({HashCode()})]{Environment.NewLine}";
+
+            var hashCode = HashCode();
+            var modelMapperConfigurationCode = $@"[assembly:{typeof(ModelMapperServiceAttribute).FullName}({hashCode})]{Environment.NewLine}";
             return string.Join(Environment.NewLine, modelMapperConfigurationCode, modelMapperServiceAttributeCode);
         }
 

@@ -39,7 +39,7 @@ steps:
       **\*Tests*.dll
       !**\*TestAdapter.dll
       !**\obj\**
-    runInParallel: true
+    runInParallel: false
     diagnosticsEnabled: true
     runTestsInIsolation: true
     codeCoverageEnabled: true

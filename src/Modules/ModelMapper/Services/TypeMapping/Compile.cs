@@ -85,7 +85,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         private static bool TypeFromPath(this IModelMapperConfiguration configuration){
-            var assemblyPath = Directory.GetFiles($"{Path.GetDirectoryName(_outputAssembly)}",$"{OutPutAssemblyNamePattern}*.dll").OrderByDescending(s => s).LastOrDefault();
+            var assemblyPath = GetLastAssemblyPath();
             if (assemblyPath!=null){
                 using (var assembly = AssemblyDefinition.ReadAssembly(assemblyPath)){
                     if (assembly.IsMapped(configuration) && !assembly.VersionChanged() && !assembly.ConfigurationChanged()){
@@ -96,23 +96,32 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             return false;
         }
 
+        private static string GetLastAssemblyPath(){
+            var assemblyPath = Directory
+                .GetFiles($"{Path.GetDirectoryName(_outputAssembly)}", $"{_outPutAssemblyNamePattern}*.dll")
+                .OrderByDescending(s => s).FirstOrDefault();
+            return assemblyPath;
+        }
+
         private static bool ConfigurationChanged(this AssemblyDefinition assembly){
             var configurationChanged = assembly.CustomAttributes.Any(attribute => {
                 if (attribute.AttributeType.FullName != typeof(ModelMapperServiceAttribute).FullName) return false;
                 var hashCode = HashCode();
-                return !attribute.ConstructorArguments.Last().Value.Equals(hashCode);
+                var storedHash = attribute.ConstructorArguments.Last().Value;
+                return !storedHash.Equals(hashCode);
             });
             return configurationChanged;
         }
 
         private static int HashCode(){
-            var hashCode = string.Join("", PropertyMappingRules.Select(_ => _.key)
-                    .Concat(TypeMappingRules.Select(_ => _.key))
-                    .Concat(AdditionalTypesList.Select(_ => _.FullName))
-                    .Concat(ReservedPropertyTypes.Select(type => type.ToString()))
-                    .Concat(ReservedPropertyNames)
-                    .Concat(ReservedPropertyInstances.Select(_ => _.FullName))
-                    .Concat(new[]{ModelMappersNodeName, MapperAssemblyName, ModelMapperAssemblyName, DefaultContainerSuffix}))
+            var text = string.Join(Environment.NewLine, PropertyMappingRules.Select(_ => _.key)
+                .Concat(TypeMappingRules.Select(_ => _.key))
+                .Concat(AdditionalTypesList.Select(_ => _.FullName))
+                .Concat(ReservedPropertyTypes.Select(type => type.FullName))
+                .Concat(ReservedPropertyNames)
+                .Concat(ReservedPropertyInstances.Select(_ => _.FullName))
+                .Concat(new[]{ModelMappersNodeName, MapperAssemblyName, ModelMapperAssemblyName, DefaultContainerSuffix}).OrderBy(s => s));
+            var hashCode = text
                 .GetHashCode();
             return hashCode;
         }

@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
@@ -24,9 +23,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     public static partial class TypeMappingService{
         public static string DefaultContainerSuffix="Map";
         public static string ModelMapperAssemblyName=null;
-        public static string MapperAssemblyName="Mapper";
+        public static string MapperAssemblyName="ModelMapperAssembly";
         public static string ModelMappersNodeName="ModelMappers";
-        private static readonly object OutPutAssemblyNamePattern=$"{ModelMapperAssemblyName}{MapperAssemblyName}{ModelExtendingService.Platform}";
+        private static object _outPutAssemblyNamePattern;
         static string _outputAssembly;
 
         public static ConcurrentHashSet<string> ReservedPropertyNames{ get; }=new ConcurrentHashSet<string>();
@@ -56,11 +55,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         internal static void Init(){
-            var directoryName=$@"{Path.GetDirectoryName(Path.GetTempPath())}\{nameof(ModelMapperModule)}\{new DirectoryInfo(AppDomain.CurrentDomain.ApplicationPath()).Name}";
-            if (!Directory.Exists(directoryName)){
-                Directory.CreateDirectory(directoryName);
-            }
-            _outputAssembly = $@"{directoryName}\{OutPutAssemblyNamePattern}{DateTime.Now.Ticks}.dll";
+            _outPutAssemblyNamePattern=$"{MapperAssemblyName}{ModelMapperAssemblyName}{ModelExtendingService.Platform}";
+            _outputAssembly = $@"{AppDomain.CurrentDomain.ApplicationPath()}\{_outPutAssemblyNamePattern}.dll";
             _customizeContainerCode=new Subject<(Type type, Result<(string key, string code)> data)>();
             _customizeProperties =new Subject<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)>();
             _customizeTypes =new Subject<ModelMapperType>();
@@ -86,7 +82,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 return distinnctTypesToMap
                     .All(_ => _.TypeFromPath())
                     .Select(_ => {
-                        var assembly = !_? distinnctTypesToMap.ModelCode().Select(tuple => tuple.references.Compile(tuple.code)): Assembly.LoadFile(_outputAssembly).AsObservable();
+                        var assembly = !_? distinnctTypesToMap.ModelCode().Select(tuple => tuple.references.Compile(tuple.code)): Assembly.LoadFile(GetLastAssemblyPath()).AsObservable();
                         return assembly.SelectMany(assembly1 => {
                             var types = assembly1.GetTypes()
                                 .Where(type => typeof(IModelModelMap).IsAssignableFrom(type))

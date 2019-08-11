@@ -75,10 +75,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
             var dynamicType2 = CreateDynamicType(mapperService, "2.0.0.0");
 
-            var second = await new[]{dynamicType2,typeof(TestModelMapper)}.MapToModel().ModelInterfaces();
+            var exception = Should.Throw<Exception>(async () => await new[]{dynamicType2,typeof(TestModelMapper)}.MapToModel().ModelInterfaces());
 
 
-            second.Assembly.ShouldNotBe(first.Assembly);
+            exception.Message.ShouldContain("CS0016");
         }
 
         [Fact()]
@@ -89,9 +89,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             InitializeMapperService($"{nameof(Always_Map_If_ModelMapperModule_HashCode_Changed)}",newAssemblyName:false);
             typeof(TypeMappingService).SetFieldValue("_modelMapperModuleVersion", new Version(2000,100,40));
 
-            var second = await mappedType.MapToModel().ModelInterfaces();
+            var exception = Should.Throw<Exception>(async () => await mappedType.MapToModel().ModelInterfaces());
 
-            second.Assembly.ShouldNotBe(first.Assembly);
+            exception.Message.ShouldContain("CS0016");
         }
 
         [Fact()]
@@ -106,9 +106,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
             InitializeMapperService(nameof(Always_Map_If_ModelMapperConfiguration_Changed),newAssemblyName:false);
 
-            var second = await typeToMap.MapToModel(type => new ModelMapperConfiguration(type){MapName = "changed"}).ModelInterfaces();
+            var exception = Should.Throw<Exception>(async () => await typeToMap.MapToModel(type => new ModelMapperConfiguration(type){MapName = "changed"}).ModelInterfaces());
 
-            second.Assembly.ShouldNotBe(mappedTypes.Assembly);
+            exception.Message.ShouldContain("CS0016");
         }
 
     }

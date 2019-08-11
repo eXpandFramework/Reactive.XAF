@@ -327,7 +327,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         [InlineData(typeof(ListView))]
         [InlineData(typeof(DetailView))]
         internal async Task Bind_RepositoryItems(Type viewType){
-            
             var boundTypes = 2;
             var controlTypes =new[]{typeof(XafGridView),typeof(GridColumn)};
             var predefinedMaps = new[]{PredefinedMap.RepositoryItem,PredefinedMap.RepositoryItemTextEdit };
@@ -365,10 +364,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             var concreteTypePropertyValue = CharacterCasing.Upper;
             var basePropertyValue = "AccessibleDescription";
             var repositoryItemsNode = objectView.Model.Items(nameof(MM.Test)).Cast<IModelNode>().First().GetNode(ViewItemService.RepositoryItemsMapName);
-//            var descendants = repositoryItemsNode.GetType().GetInterfaces()
-//                .Where(type => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IModelList<>))
-//                .Select(type => type.GenericTypeArguments.First()).First().ToTypeInfo().Descendants.ToArray();
-            var descendants = repositoryItemsNode.ModelListItemType().ToTypeInfo().Descendants.ToArray();
+
+            var modelListItemType = repositoryItemsNode.ModelListItemType();
+            
+            var descendants = modelListItemType.ToTypeInfo().Descendants.ToArray();
             var repositoryItemModelType = descendants.First().Type;
             var baseRepoNode = repositoryItemsNode.AddNode(repositoryItemModelType, "BaseRepo");
             (baseRepoNode is IModelModelMap).ShouldBeTrue();
