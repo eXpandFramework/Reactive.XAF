@@ -58,6 +58,7 @@ namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{
 
         private void CustomizeTypesInfo(ViewType viewType, bool attribute, XafApplication application){
             if (attribute){
+                application.Modules.Add(new ReactiveModule());
                 application.WhenCustomizingTypesInfo()
                     .FirstAsync(_=> {
                         _.FindTypeInfo(typeof(AMvi))

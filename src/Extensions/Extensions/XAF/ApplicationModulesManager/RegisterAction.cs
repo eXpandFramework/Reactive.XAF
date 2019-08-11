@@ -52,26 +52,28 @@ namespace Xpand.Source.Extensions.XAF.ApplicationModulesManager{
         
 
         public static ActionBase RegisterAction<TController>(this DevExpress.ExpressApp.ApplicationModulesManager applicationModulesManager,string id,Func<(TController controller,string id),ActionBase> actionBase) where TController:Controller{
-            var type = ActionsModule.Assembly.GetType($"{id}{typeof(TController).Name}");
-            var controllerType = type??NewControllerType<TController>(id);
-            var controller = (TController)controllerType.CreateInstance();
-            var action = actionBase((controller,id));
-            controller.Actions.Add(action);
-            if (type==null){
-                Redirection.Observe(controllerType.Constructor(), context => {
-                    var senderController = ((TController) context.Sender);
-                    void AfterConstruction(object sender, EventArgs args){
-                        var _ = ((TController) sender);
-                        _.AfterConstruction -= AfterConstruction;
-                        var controllerAction = actionBase((_, id));
-                        _.Actions.Add(controllerAction);
-                    }
-                    senderController.AfterConstruction+= AfterConstruction;
+            lock (ActionsModule){
+                var type = ActionsModule.Assembly.GetType($"{id}{typeof(TController).Name}");
+                var controllerType = type??NewControllerType<TController>(id);
+                var controller = (TController)controllerType.CreateInstance();
+                var action = actionBase((controller,id));
+                controller.Actions.Add(action);
+                if (type==null){
+                    Redirection.Observe(controllerType.Constructor(), context => {
+                        var senderController = ((TController) context.Sender);
+                        void AfterConstruction(object sender, EventArgs args){
+                            var _ = ((TController) sender);
+                            _.AfterConstruction -= AfterConstruction;
+                            var controllerAction = actionBase((_, id));
+                            _.Actions.Add(controllerAction);
+                        }
+                        senderController.AfterConstruction+= AfterConstruction;
                 
-                });
+                    });
+                }
+                applicationModulesManager.ControllersManager.RegisterController(controller);
+                return action;
             }
-            applicationModulesManager.ControllersManager.RegisterController(controller);
-            return action;
         }
 
 
