@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
 using System.Reactive;
 using System.Reflection;
 using Fasterflect;
@@ -31,6 +33,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.Predefined{
         private static void ChartDiagrams((Type declaringType, List<ModelMapperPropertyInfo> propertyInfos) data,Type type, string propertyInfoName){
             if (data.declaringType.FullName == PredefinedMap.ChartControl.GetTypeName()){
                 data.propertyInfos.RemoveAll(info => info.Name == propertyInfoName);
+                data.propertyInfos.First(info => info.Name=="Series").RemoveAttribute(typeof(DesignerSerializationVisibilityAttribute));
                 data.propertyInfos.Add(new ModelMapperPropertyInfo("Diagrams",type,type.DeclaringType));
             }
         }

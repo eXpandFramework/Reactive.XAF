@@ -147,6 +147,27 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             
         }
 
+        private static void BrowsableRule((Type declaringType, List<ModelMapperPropertyInfo> propertyInfos) info){
+            for (var index = info.propertyInfos.Count - 1; index >= 0; index--){
+                var propertyInfo = info.propertyInfos[index];
+                var isnotBrowsaable = propertyInfo.GetCustomAttributesData().Any(data =>
+                    (typeof(BrowsableAttribute).IsAssignableFrom(data.AttributeType) &&
+                     data.ConstructorArguments.Any(argument => false.Equals(argument.Value)))||typeof(ObsoleteAttribute).IsAssignableFrom(data.AttributeType));
+                if (isnotBrowsaable){
+                    info.propertyInfos.Remove(propertyInfo);
+                }
+            }
+        }
+
+        private static void DesignerSerializationVisibilityAttribute((Type declaringType, List<ModelMapperPropertyInfo> propertyInfos) data){
+            var infos = data.propertyInfos.Where(info => info.GetCustomAttributesData().Any(_ =>typeof(DesignerSerializationVisibilityAttribute).IsAssignableFrom(_.AttributeType) &&
+                _.ConstructorArguments.Any(argument => argument.ArgumentType==typeof(DesignerSerializationVisibility)&&(int)argument.Value== (int)DesignerSerializationVisibility.Hidden)))
+                .ToArray();
+            foreach (var info in infos){
+                info.AddAttributeData(typeof(BrowsableAttribute),new CustomAttributeTypedArgument(false));
+            }
+        }
+
         private static void GenericTypeArguments(ModelMapperType modelMapperType){
             foreach (var argument in modelMapperType.CustomAttributeDatas.WithGenericTypeArguments()){
                 modelMapperType.CustomAttributeDatas.Remove(argument);

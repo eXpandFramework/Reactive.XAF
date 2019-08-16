@@ -38,6 +38,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyFileVersion("1.0.11.0")]
 //[assembly:AllowPartiallyTrustedCallers]
 //[assembly: SecurityTransparent()]
+[assembly:InternalsVisibleTo(XpandInfo.Tests+ ",PublicKey="+XpandInfo.Key)]
 [assembly:InternalsVisibleTo(XpandInfo.TestsLib+ ",PublicKey="+XpandInfo.Key)]
 [assembly:InternalsVisibleTo(XpandInfo.AutoCommit+ ",PublicKey="+XpandInfo.Key)]
 [assembly:InternalsVisibleTo(XpandInfo.Reactive+ ",PublicKey="+XpandInfo.Key)]
@@ -53,6 +54,7 @@ using System.Runtime.InteropServices;
 
 // ReSharper disable once CheckNamespace
 public class XpandInfo{
+    public const string Tests = "Tests";
     public const string TestsLib = "TestsLib";
     public const string AutoCommit = "Xpand.XAF.Modules.AutoCommit.Tests";
     public const string Reactive = "Xpand.XAF.Modules.Reactive.Tests";

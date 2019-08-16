@@ -16,6 +16,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.Predefined{
                 string[] names = {"ColVIndex", "RowIndex"};
                 foreach (var info in data.propertyInfos.Where(info =>names.Contains(info.Name)).ToArray()){
                     info.RemoveAttribute(typeof(BrowsableAttribute));
+                    info.RemoveAttribute(typeof(DesignerSerializationVisibilityAttribute));
                     info.AddAttributeData(typeof(CategoryAttribute),new CustomAttributeTypedArgument("Appearance"));
                     var propertyInfo = data.propertyInfos.First(_ => _.Name == info.Name);
                     data.ReplacePropertyInfo(propertyInfo, info);

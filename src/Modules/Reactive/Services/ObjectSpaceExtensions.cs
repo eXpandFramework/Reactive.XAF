@@ -35,8 +35,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return Observable.Return(item).Commited();
         }
 
-        public static IObservable<(IObjectSpace objectSpace,EventArgs e)> WhenCommiting(this IObjectSpace item) {
-            return Observable.Return(item).Commited();
+        public static IObservable<(IObjectSpace objectSpace, CancelEventArgs e)> WhenCommiting(this IObjectSpace item){
+            return Observable.Return(item).Commiting();
         }
         
         public static IObservable<(IObjectSpace objectSpace,ObjectsManipulatingEventArgs e)> ObjectDeleted(this IObservable<IObjectSpace> source) {

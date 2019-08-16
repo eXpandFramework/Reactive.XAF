@@ -36,6 +36,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.Predefined{
             if (data.declaringType == typeToMap){
                 var propertyInfo = data.propertyInfos.First(info => info.Name=="Storage");
                 propertyInfo.RemoveAttribute(typeof(BrowsableAttribute));
+                propertyInfo.RemoveAttribute(typeof(DesignerSerializationVisibilityAttribute));
                 var last = propertyData.Last();
                 data.propertyInfos.Add(new ModelMapperPropertyInfo(last.property,last.listType,propertyInfo.DeclaringType));
             }

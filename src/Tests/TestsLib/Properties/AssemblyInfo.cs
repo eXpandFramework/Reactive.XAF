@@ -12,10 +12,11 @@ using System.Runtime.InteropServices;
 [assembly:InternalsVisibleTo(XpandInfo.ProgressBarViewItem+ ",PublicKey="+XpandInfo.Key)]
 [assembly:InternalsVisibleTo(XpandInfo.SuppressConfirmation+ ",PublicKey="+XpandInfo.Key)]
 [assembly:InternalsVisibleTo(XpandInfo.ViewEditMode+ ",PublicKey="+XpandInfo.Key)]
+[assembly:InternalsVisibleTo(XpandInfo.Tests+ ",PublicKey="+XpandInfo.Key)]
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Tests")]
+[assembly: AssemblyTitle("TestsLib")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]

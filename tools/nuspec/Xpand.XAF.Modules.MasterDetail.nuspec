@@ -14,7 +14,6 @@
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  MasterDetail</tags>
     <dependencies>
-      <dependency id="Ryder" version="0.8.0" />
       <dependency id="System.Reactive" version="4.1.6" />
       <dependency id="System.ValueTuple" version="4.5.0" />
       <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.46.0" />
@@ -24,6 +23,7 @@
   <files>
     <file src="Xpand.XAF.Modules.MasterDetail.dll" target="lib\net461\Xpand.XAF.Modules.MasterDetail.dll" />
     <file src="Xpand.XAF.Modules.MasterDetail.pdb" target="lib\net461\Xpand.XAF.Modules.MasterDetail.pdb" />
+    <file src="..\src\libs\0Harmony.dll" target="lib\net461\0Harmony.dll" />
     <file src="..\src\libs\Fasterflect.Netstandard.dll" target="lib\net461\Fasterflect.Netstandard.dll" />
     <file src="Readme.txt" target="" />
   </files>

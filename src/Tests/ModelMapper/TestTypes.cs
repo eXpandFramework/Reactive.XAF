@@ -129,6 +129,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         internal class InternalValueConverter{
         }
     }
+    class DesignerSerializationHiddenClass{
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public string Test{ get; set; }
+
+    }
     public class PrivateDescriptionAttributesClass{
         public const string Description = "Private Description AttributesClass";
         [PrivateDescription(Description)]

@@ -153,6 +153,17 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             
         }
 
+        [Fact]
+        public async Task Do_Not_Map_Properties_Marked_With_DesignerSerialization_Hidden(){
+            var typeToMap1 = typeof(DesignerSerializationHiddenClass);
+            InitializeMapperService(nameof(Do_Not_Map_Properties_Marked_With_DesignerSerialization_Hidden));
+
+            var type = await typeToMap1.MapToModel().ModelInterfaces();
+
+            type.Property(nameof(DesignerSerializationHiddenClass.Test)).ShouldBeNull();
+            
+        }
+
         
 
 

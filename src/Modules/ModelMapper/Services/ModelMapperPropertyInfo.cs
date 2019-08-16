@@ -130,7 +130,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         }
 
         public void RemoveAttribute(Type type){
-            var attributeData = _customAttributeDatas.First(_ => _.AttributeType==type);
+            var attributeData = _customAttributeDatas.FirstOrDefault(_ => _.AttributeType==type);
             _customAttributeDatas.Remove(attributeData);
         }
     }

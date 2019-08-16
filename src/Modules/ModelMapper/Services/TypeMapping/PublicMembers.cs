@@ -67,6 +67,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             };
             ContainerMappingRules=new ObservableCollection<(string key, Action<(Type typeToMap, Result<(string key, string code)> data)> action)>();
             PropertyMappingRules = new ObservableCollection<(string key, Action<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)> action)>{
+                (nameof(DesignerSerializationVisibilityAttribute), DesignerSerializationVisibilityAttribute),
                 (nameof(GenericTypeArguments), GenericTypeArguments),
                 (nameof(BrowsableRule), BrowsableRule),
                 (nameof(PrivateDescriptionRule), PrivateDescriptionRule),
