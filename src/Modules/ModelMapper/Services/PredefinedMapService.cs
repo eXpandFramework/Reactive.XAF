@@ -168,7 +168,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         }
 
         public static void Extend(this ApplicationModulesManager modulesManager, PredefinedMap map,Action<ModelMapperConfiguration> configure = null){
-            EvnviromentChecks(modulesManager);
+            EnvironmentChecks(modulesManager);
             var modelMapperConfiguration = map.ModelMapperConfiguration(configure);
             var result = (modelMapperConfiguration.TypeToMap, modelMapperConfiguration, map);
             if (map.IsChartControlDiagram()){
@@ -203,12 +203,17 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             
         }
 
-        private static void EvnviromentChecks(ApplicationModulesManager modulesManager){
+        private static void EnvironmentChecks(ApplicationModulesManager modulesManager){
+            
             var mapperModule = modulesManager.Modules.OfType<ModelMapperModule>().FirstOrDefault();
             if (mapperModule == null){
                 throw new NotSupportedException($"{nameof(ModelMapperModule)} not installed");
             }
-
+            if (AppDomain.CurrentDomain.GetAssemblies()
+                    .Count(_ => _.GetName().Name == typeof(ModelMapperModule).Assembly.GetName().Name) > 1){
+                throw new NotSupportedException(
+                    "Multiple ModelMapper assemblies in the domain check your Model.DesignedDiffs.log if you are at design time. Make sure ModelMapper is referenced from the same path.");
+            }
             try{
                 mapperModule.SetupCompleted.FirstAsync().Select(_ => _).Wait(TimeSpan.FromSeconds(1));
             }
@@ -216,11 +221,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 throw new NotSupportedException($"{nameof(ModelMapperModule)} API consumers must have the module installed.");
             }
 
-            if (AppDomain.CurrentDomain.GetAssemblies()
-                    .Count(_ => _.GetName().Name == typeof(ModelMapperModule).Assembly.GetName().Name) > 1){
-                throw new NotSupportedException(
-                    "Multiple ModelMapper assemblies in the domain check your Model.DesignedDiffs.log if you are at design time");
-            }
+            
         }
 
         public static IObservable<Type> MapToModel(this IEnumerable<PredefinedMap> predefinedMaps,Action<PredefinedMap,ModelMapperConfiguration> configure = null){
