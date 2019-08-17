@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
@@ -50,7 +49,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(T view, EventArgs e)> WhenControlsCreated<T>(this T view) where T : View{
             return Observable.FromEventPattern<EventHandler, EventArgs>(
                 handler => view.ControlsCreated += handler,
-                handler => view.ControlsCreated -= handler).ObserveOn(Scheduler.Immediate).TransformPattern<EventArgs, T>();
+                handler => view.ControlsCreated -= handler)
+                .TransformPattern<EventArgs, T>();
 //            return Observable.Return(view).ControlsCreated();
         }
 
