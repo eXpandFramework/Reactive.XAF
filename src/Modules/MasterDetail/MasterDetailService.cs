@@ -67,22 +67,20 @@ namespace Xpand.XAF.Modules.MasterDetail{
 
         public static IObservable<DashboardView> WhenMasterDetailDashboardViewCreated(this XafApplication application){
             return application.WhenDashboardViewCreated()
-                .Where(_ => ((IModelDashboardViewMasterDetail) _.Model).MasterDetail)
-                .Publish()
-                .AutoConnect();
+                .Where(_ => ((IModelDashboardViewMasterDetail) _.Model).MasterDetail);
         }
 
-        public static IObservable<(DashboardViewItem listViewItem, DashboardViewItem detailViewItem)> WhenMasterDetailDashboardViewItems(this XafApplication application){
+        public static IObservable<(DashboardViewItem listViewItem, DashboardViewItem detailViewItem)> WhenMasterDetailDashboardViewItems(this XafApplication application,Type objectType=null){
             return application.WhenMasterDetailDashboardViewCreated()
                 .SelectMany(_ => _.WhenControlsCreated().Do(tuple => {},() => {}))
-                .SelectMany(_ => _.view.GetItems<DashboardViewItem>().Where(item => item.Model.View is IModelListView)
-                    .SelectMany(listViewItem => _.view
-                        .GetItems<DashboardViewItem>().Where(viewItem 
+                .SelectMany(_ => _.view.GetItems<DashboardViewItem>()
+                    .Where(item => item.Model.View is IModelListView&&(objectType==null||item.Model.View.AsObjectView.ModelClass.TypeInfo.Type ==objectType))
+                    .SelectMany(listViewItem => _.view.GetItems<DashboardViewItem>().Where(viewItem 
                             =>viewItem.Model.View is IModelDetailView && viewItem.Model.View.AsObjectView.ModelClass ==listViewItem.Model.View.AsObjectView.ModelClass)
                         .Select(detailViewItem => (listViewItem, detailViewItem))
                     )
                 )
-                .Publish().RefCount();
+                ;
         }
 
         private static IObservable<Unit> WhenSynchronizeDetailView(this XafApplication application){
