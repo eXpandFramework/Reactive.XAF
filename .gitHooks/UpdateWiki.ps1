@@ -1,6 +1,9 @@
 set-location C:\Work\eXpandFramework\DevExpress.XAF.wiki\
-
 $root=(Get-Item "$PSScriptRoot\..").FullName
+$go=Get-Content "$root\go.ps1"
+if (!($go|Select-String "18.2.7")){
+    throw "18.2.7 not found"
+}
 Copy-Item "$root\Readme.md" ".\Home.md" -Force
 
 Get-ChildItem $root Readme.md -Recurse|Where-Object{$_.DirectoryName -ne $root}| ForEach-Object{

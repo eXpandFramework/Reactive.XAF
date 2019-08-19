@@ -25,6 +25,21 @@ Task IndexSources{
 task Init {
     InvokeScript{
         New-Item "$PSScriptRoot\bin" -ItemType Directory -Force |Out-Null
+        $versionMismatch=Get-ChildItem $PSScriptRoot *.csproj -Recurse|ForEach-Object{
+            $projectPath=$_.FullName
+            [xml]$csproj=Get-Content $projectPath
+            $csproj.project.itemgroup.packageReference|foreach-Object{
+                if ($_.Include -like "DevExpress*" -and $_.Version -ne $dxVersion){
+                    [PSCustomObject]@{
+                        Path = $projectPath
+                        Version=$_.Version
+                    }
+                }
+            }
+        }|Select-Object -First 1
+        if ($versionMismatch){
+            throw "$($versionMismatch.Path) use DX $($versionMismatch.Version) instaed of $dxversion"
+        }
     }
 }
 

@@ -9,8 +9,13 @@ param(
     $WhatIf = $false
 )
 $ErrorActionPreference = "Stop"
+
 & "$SourcePath\go.ps1" -InstallModules
 $packageSource = Get-XPackageFeed -Xpand
+if (!(Get-Module VSTeam -ListAvailable)) {
+    Install-Module VSTeam -Force
+}
+Set-VSTeamAccount -Account eXpandDevOps -PersonalAccessToken $AzureToken
 
 $localPackages = Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse | Invoke-Parallel -VariablesToImport "Branch" -Script {
     $name = [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
@@ -51,12 +56,10 @@ $newPackages = $localPackages | Where-Object { !(($publishedPackages | Select-Ob
 Write-host "newPackages:" -f blue
 $newPackages
 
-if (!(Get-Module VSTeam -ListAvailable)) {
-    Install-Module VSTeam -Force
-}
-Set-VSTeamAccount -Account eXpandDevOps -PersonalAccessToken $AzureToken
-$allBuilds = Get-VSTeamBuild -ProjectName eXpandFramework
-$labBuild = $allBuilds | Where-Object { $_.DefinitionName -eq "Xpand-Lab" -and $_.Result -eq "succeeded" } | Select-Object -first 1
+
+
+
+$labBuild = Get-VSTeamBuild -ResultFilter succeeded -ProjectName expandframework -top 1 -StatusFilter completed -Definitions 23
 
 $yArgs = @{
     Owner        = $GitHubUserName
@@ -74,7 +77,7 @@ if ($newPackages) {
     $yArgs.Packages += $newPackages
 }
 Write-Host "End-Packages:" -f blue
-$yArgs.Packages | Write-Output
+$yArgs.Packages 
 Update-NugetProjectVersion @yArgs -Verbose
 
 $bArgs = @{
