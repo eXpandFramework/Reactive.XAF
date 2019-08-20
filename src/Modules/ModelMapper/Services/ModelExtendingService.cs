@@ -43,9 +43,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         private static IObservable<(Type targetIntefaceType, Type extenderInterface)> AddExtenders(ModelInterfaceExtenders extenders){
             var modelExtenders = ModelMapperConfigurations.Distinct(_ => _.TypeToMap).ToObservable();
             var mappedContainers = TypeMappingService.Connect()
-                .SelectMany(unit => modelExtenders
-                    .Select(_ => _.MapToModel()).Switch()
-                    .ModelInterfaces()
+                .SelectMany(unit => modelExtenders.Tracer("ModelExtenders")
+                    .Select(_ => _.MapToModel().Tracer("MapToModel")).Switch()
+                    .ModelInterfaces().Tracer("ModelInterface")
                     .Where(type => typeof(IModelNode).IsAssignableFrom(type)))
                 .SelectMany(type => type.ModelMapperContainerTypes())
                 .Distinct().Replay().RefCount();

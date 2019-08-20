@@ -31,13 +31,16 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
                                 .SkipLast(1)
                                 .Merge(xs))));
         }
-        public static IObservable<TSource> Tracer<TSource>(this IObservable<TSource> source,bool verbose=false){
+        public static IObservable<TSource> Tracer<TSource>(this IObservable<TSource> source,string text=null,bool verbose=false){
+            if (!string.IsNullOrEmpty(text)){
+                text = $"{text}:";
+            }
             return source.Do(_ => {
                 if (verbose){
-                    Tracing.Tracer.LogVerboseText($"{_}");
+                    Tracing.Tracer.LogVerboseText($"{text}{_}");
                 }
                 else{
-                    Tracing.Tracer.LogText($"{_}");
+                    Tracing.Tracer.LogText($"{text}{_}");
                 }
             });
         }

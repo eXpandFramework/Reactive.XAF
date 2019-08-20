@@ -16,7 +16,7 @@ namespace Xpand.XAF.Modules.CloneMemberValue{
         public static IObservable<Unit> Connect(this ApplicationModulesManager modulesManager ,XafApplication application){
             if (application != null){
                 return application.WhenCloneMemberValues()
-                    .Tracer(true)
+                    .Tracer(verbose:true)
                     .ToUnit();
             }
             return Observable.Empty<Unit>();
