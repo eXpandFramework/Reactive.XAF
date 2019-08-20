@@ -56,9 +56,6 @@ $newPackages = $localPackages | Where-Object { !(($publishedPackages | Select-Ob
 Write-host "newPackages:" -f blue
 $newPackages
 
-
-
-
 $labBuild = Get-VSTeamBuild -ResultFilter succeeded -ProjectName expandframework -top 1 -StatusFilter completed -Definitions 23
 
 $yArgs = @{
@@ -78,7 +75,22 @@ if ($newPackages) {
 }
 Write-Host "End-Packages:" -f blue
 $yArgs.Packages 
-Update-NugetProjectVersion @yArgs -Verbose
+$updateVersion=Update-NugetProjectVersion @yArgs |Select-Object -Skip 1
+$updateVersion
+$reactiveVersionChanged=$updateVersion|select-string "Xpand.XAF.Modules.Reactive"
+if ($reactiveVersionChanged){
+    $reactiveModules=Get-ChildItem "$sourcePath\src\Modules" *.csproj -Recurse|ForEach-Object{
+        [xml]$csproj=Get-Content $_.FullName
+        $packageName=$_.BaseName
+        $csproj.project.itemgroup.reference.include|Where-Object{$_ -eq "Xpand.XAF.Modules.Reactive"}|ForEach-Object{$packageName}
+    }
+    $notChangedModules=$reactiveModules|Where-Object{!($updateVersion|Select-String $_)}
+    Get-ChildItem "$sourcePath\src\Modules" *.csproj -Recurse|ForEach-Object{
+        if ($notChangedModules -contains $_.BaseName){
+            Update-AssemblyInfo $_.DirectoryName -Revision
+        }
+    }
+}
 
 $bArgs = @{
     packageSources = "$(Get-PackageFeed -Xpand);$DxApiFeed"
