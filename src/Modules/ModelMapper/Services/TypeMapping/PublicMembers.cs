@@ -56,7 +56,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         internal static void Init(){
-            var path = DesignerOnlyCalculator.IsRunFromDesigner?Path.GetTempPath():AppDomain.CurrentDomain.ApplicationPath();
+            var tempPath = $@"{Path.GetTempPath()}\{nameof(ModelMapperModule)}";
+            if (!Directory.Exists(tempPath)){
+                Directory.CreateDirectory(tempPath);
+            }
+
+            var path = DesignerOnlyCalculator.IsRunFromDesigner?tempPath:AppDomain.CurrentDomain.ApplicationPath();
             _outPutAssemblyNamePattern=$"{MapperAssemblyName}{ModelMapperAssemblyName}{ModelExtendingService.Platform}";
             _outputAssembly = $@"{path}\{_outPutAssemblyNamePattern}.dll";
             _customizeContainerCode=new Subject<(Type type, Result<(string key, string code)> data)>();

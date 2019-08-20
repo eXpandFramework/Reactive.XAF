@@ -20,7 +20,6 @@ using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.Predefined;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xpand.XAF.Modules.Reactive;
-using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services{
     public static class PredefinedMapService{
@@ -51,6 +50,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         private static Assembly _dxUtilsAssembly;
         private static Assembly _dashboardWebWebFormsAssembly;
         private static string _dxAssemblyNamePostfix;
+        
 
 
         static PredefinedMapService(){
@@ -209,13 +209,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             if (mapperModule == null){
                 throw new NotSupportedException($"{nameof(ModelMapperModule)} not installed");
             }
-            if (AppDomain.CurrentDomain.GetAssemblies()
-                    .Count(_ => _.GetName().Name == typeof(ModelMapperModule).Assembly.GetName().Name) > 1){
-                throw new NotSupportedException(
-                    "Multiple ModelMapper assemblies in the domain check your Model.DesignedDiffs.log if you are at design time. Make sure ModelMapper is referenced from the same path.");
-            }
+//            if (AppDomain.CurrentDomain.GetAssemblies()
+//                    .Count(_ => _.GetName().Name == typeof(ModelMapperModule).Assembly.GetName().Name) > 1){
+//                throw new NotSupportedException(
+//                    "Multiple ModelMapper assemblies in the domain check your Model.DesignedDiffs.log if you are at design time. Make sure ModelMapper is referenced from the same path. Try deleting *ModelMapper*.dll from your system.");
+//            }
             try{
-                mapperModule.SetupCompleted.FirstAsync().Select(_ => _).Wait(TimeSpan.FromSeconds(1));
+//                mapperModule.SetupCompleted.FirstAsync().Select(_ => _).Wait(TimeSpan.FromSeconds(1));
             }
             catch (TimeoutException){
                 throw new NotSupportedException($"{nameof(ModelMapperModule)} API consumers must have the module installed.");
@@ -246,11 +246,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
 
         private static ModelMapperConfiguration ModelMapperConfiguration(this PredefinedMap predefinedMap,Action<ModelMapperConfiguration> configure=null){
             var mapperConfiguration = predefinedMap.GetModelMapperConfiguration();
-            if (mapperConfiguration != null){
-                configure?.Invoke(mapperConfiguration);
-                return mapperConfiguration;
-            }
-            throw new NotImplementedException(predefinedMap.ToString());
+            configure?.Invoke(mapperConfiguration);
+            return mapperConfiguration;
         }
 
         public static IModelNode AddControlsNode(this IModelNode modelNode, PredefinedMap predefinedMap,string id = null){
@@ -570,8 +567,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         }
 
         public static ModelMapperConfiguration GetModelMapperConfiguration(this PredefinedMap predefinedMap){
-            if (ModelExtendingService.Platform==Platform.Win){
+            if (true){
                 if (new[]{PredefinedMap.GridView,PredefinedMap.GridColumn}.Any(map => map==predefinedMap)){
+//                    _xafWinAssembly=AppDomain.CurrentDomain.GetAssemblies().First(assembly => assembly.GetName().Name==$"DevExpress.ExpressApp.Win{_versionSuffix}");
+//                    _gridViewAssembly=AppDomain.CurrentDomain.GetAssemblies().First(assembly => assembly.GetName().Name==$"DevExpress.XtraGrid{_versionSuffix}");
                     CheckRequiredParameters(nameof(_xafWinAssembly), nameof(_gridViewAssembly));
                     return GetListViewConfiguration(predefinedMap,_xafWinAssembly, _gridViewAssembly, "DevExpress.ExpressApp.Win.Editors.GridListEditor",
                         PredefinedMap.GridView.GetTypeName(),PredefinedMap.GridColumn.GetTypeName() );

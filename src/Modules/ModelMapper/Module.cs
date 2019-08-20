@@ -1,14 +1,19 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.Model.Core;
 using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
-namespace Xpand.XAF.Modules.ModelMapper {
+namespace Xpand.XAF.Modules.ModelMapper
+{
     public sealed class ModelMapperModule : ReactiveModuleBase {
         private readonly IConnectableObservable<Unit> _modelExtended;
         public ModelMapperModule(){
@@ -25,13 +30,38 @@ namespace Xpand.XAF.Modules.ModelMapper {
 
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
+            
+            CheckXpandVSIXInstalled();
             moduleManager.ConnectExtendingService()
                 .Merge(Application.BindConnect())
                 .TakeUntilDisposed(this)
-                .Subscribe();
+                .Subscribe(unit => {},exception => {});
         }
 
-        
+        private static void CheckXpandVSIXInstalled(){
+            if (DesignerOnlyCalculator.IsRunFromDesigner){
+                var result = Observable.Range(15, 10)
+                    .SelectMany(i => Observable
+                        .Start(() => System.Runtime.InteropServices.Marshal.GetActiveObject($"VisualStudio.DTE.{i}.0"))
+                        .OnErrorResumeNext(Observable.Never<object>())
+                        .Select(o => i)).FirstAsync()
+                    .SelectMany(i => {
+                        return Observable.Start(() => {
+                            var installed = Directory.GetDirectories($@"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}\appdata\local\microsoft\visualstudio")
+                                .Where(s => {
+                                    var directoryName = $"{new DirectoryInfo(s).Name}";
+                                    return !directoryName.EndsWith("Exp") &&directoryName.StartsWith(i.ToString());
+                                })
+                                .Any(s => Directory.GetFiles(s, "Xpand.VSIX.pkgdef", SearchOption.AllDirectories).Any());
+                            return (vs: i, installed);
+                        });
+                    }).FirstAsync()
+                    .ToTask().Result;
+                if (!result.installed){
+                    throw new NotSupportedException($"ModelMapper requires Xpand.VSIX which is not installed in VS {result.vs}");
+                }
+            }
+        }
     }
 
     
