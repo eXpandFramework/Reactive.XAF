@@ -42,8 +42,14 @@ using System.Runtime.InteropServices;
 [assembly:InternalsVisibleTo(XpandInfo.TestsLib+ ",PublicKey="+XpandInfo.Key)]
 [assembly:InternalsVisibleTo(XpandInfo.AutoCommit+ ",PublicKey="+XpandInfo.Key)]
 [assembly:InternalsVisibleTo(XpandInfo.Reactive+ ",PublicKey="+XpandInfo.Key)]
+[assembly:InternalsVisibleTo(XpandInfo.RefreshView+ ",PublicKey="+XpandInfo.Key)]
 [assembly:InternalsVisibleTo(XpandInfo.CloneMemberValue+ ",PublicKey="+XpandInfo.Key)]
+[assembly:InternalsVisibleTo(XpandInfo.RefreshView+ ",PublicKey="+XpandInfo.Key)]
 [assembly:InternalsVisibleTo(XpandInfo.CloneModelView+ ",PublicKey="+XpandInfo.Key)]
+[assembly:InternalsVisibleTo(XpandInfo.ReactiveLogger+ ",PublicKey="+XpandInfo.Key)]
+[assembly:InternalsVisibleTo(XpandInfo.OneView+ ",PublicKey="+XpandInfo.Key)]
+[assembly:InternalsVisibleTo(XpandInfo.GridListEditor+ ",PublicKey="+XpandInfo.Key)]
+[assembly:InternalsVisibleTo(XpandInfo.ReactiveLoggerHub+ ",PublicKey="+XpandInfo.Key)]
 [assembly:InternalsVisibleTo(XpandInfo.HideToolBar+ ",PublicKey="+XpandInfo.Key)]
 [assembly:InternalsVisibleTo(XpandInfo.MasterDetail+ ",PublicKey="+XpandInfo.Key)]
 [assembly:InternalsVisibleTo(XpandInfo.ModelMapper+ ",PublicKey="+XpandInfo.Key)]
@@ -58,7 +64,12 @@ public class XpandInfo{
     public const string TestsLib = "TestsLib";
     public const string AutoCommit = "Xpand.XAF.Modules.AutoCommit.Tests";
     public const string Reactive = "Xpand.XAF.Modules.Reactive.Tests";
+    public const string ReactiveLogger = "Xpand.XAF.Modules.Reactive.Logger.Tests";
+    public const string OneView = "Xpand.XAF.Modules.OneView.Tests";
+    public const string GridListEditor = "Xpand.XAF.Modules.GridListEditor.Tests";
+    public const string ReactiveLoggerHub = "Xpand.XAF.Modules.Reactive.Logger.Hub.Tests";
     public const string CloneModelView = "Xpand.XAF.Modules.CloneModelView.Tests";
+    public const string RefreshView = "Xpand.XAF.Modules.RefreshView.Tests";
     public const string CloneMemberValue = "Xpand.XAF.Modules.CloneMemberValue.Tests";
     public const string HideToolBar = "Xpand.XAF.Modules.HideToolBar.Tests";
     public const string MasterDetail = "Xpand.XAF.Modules.MasterDetail.Tests";

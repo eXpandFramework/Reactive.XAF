@@ -52,9 +52,7 @@
     <Compile Include="..\..\Extensions\Extensions\XAF\Model\ObjectViewItems.cs" Link="LinkedFiles\ObjectViewItems.cs" />
     <Compile Include="..\..\Extensions\Extensions\XAF\Model\ReadFromModel.cs" Link="LinkedFiles\ReadFromModel.cs" />
     <Compile Include="..\..\extensions\extensions\xaf\xafapplication\GetPlatform.cs" Link="LinkedFiles\GetPlatform.cs" />
-    <Compile Update="Module.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Update="Module.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Readme.md" />

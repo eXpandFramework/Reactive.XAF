@@ -82,4 +82,9 @@
       <HintPath>..\..\Libs\Fasterflect.Netstandard.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <ItemGroup>
+    <Compile Update="CustomGridListEditor.cs">
+      <SubType>Component</SubType>
+    </Compile>
+  </ItemGroup>
 </Project>

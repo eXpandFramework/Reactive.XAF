@@ -23,9 +23,7 @@
   <ItemGroup>
     <Compile Include="..\..\Extensions\Extensions\System\AppDomain\AssemblyDevExpressExpressAppWeb.cs" Link="LinkedFiles\AssemblyDevExpressExpressAppWeb.cs" />
     <Compile Include="..\..\Extensions\Extensions\XAF\Model\GetValue.cs" Link="LinkedFiles\GetValue.cs" />
-    <Compile Update="Module.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Update="Module.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Readme.md" />

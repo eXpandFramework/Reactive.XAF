@@ -23,9 +23,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\Extensions\Extensions\XAF\XafApplication\GetPlatform.cs" Link="LinkedFiles\GetPlatform.cs" />
-    <Compile Update="Module.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Update="Module.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Readme.md" />

@@ -75,7 +75,7 @@ namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{
             var boTypes = new[]{typeof(AMvi), typeof(FileMvi)};
             var modelViewInheritanceModule = new ModelViewInheritanceModule();
             modelViewInheritanceModule.RequiredModuleTypes.AddRange(modules);
-            application.AddModule(modelViewInheritanceModule,setup,baseBoTypes.Concat(boTypes).ToArray());
+            application.AddModule(modelViewInheritanceModule,null,setup,baseBoTypes.Concat(boTypes).ToArray());
             return modelViewInheritanceModule;
         }
 

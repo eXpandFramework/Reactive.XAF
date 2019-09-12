@@ -31,9 +31,7 @@
     <Compile Include="..\..\Extensions\Extensions\System\AppDomain\AssemblySystemWeb.cs" Link="LinkedFiles\AssemblySystemWeb.cs" />
     <Compile Include="..\..\Extensions\Extensions\System\String\CleanCodeName.cs" Link="LinkedFiles\CleanCodeName.cs" />
     <Compile Include="..\..\extensions\extensions\xaf\xafapplication\GetPlatform.cs" Link="LinkedFiles\GetPlatform.cs" />
-    <Compile Update="Module.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Update="Module.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Readme.md" />

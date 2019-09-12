@@ -53,8 +53,8 @@
     <PackageReference Include="system.buffers" Version="4.5.0" />
     <PackageReference Include="System.Interactive.Async" Version="3.2.0" />
     <PackageReference Include="akarnokd.reactive_extensions" Version="0.0.27-alpha" />
-    <PackageReference Include="DevExpress.ExpressApp" Version="19.1.5" />
-    <PackageReference Include="DevExpress.Xpo" Version="19.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Xpo" Version="18.2.7" />
     <PackageReference Include="System.Reactive" Version="4.1.6" />
   </ItemGroup>
   <ItemGroup>

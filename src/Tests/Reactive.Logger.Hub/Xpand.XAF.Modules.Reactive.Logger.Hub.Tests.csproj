@@ -10,10 +10,10 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" Version="19.1.5" />
-    <PackageReference Include="DevExpress.ExpressApp.Web" Version="19.1.5" />
-    <PackageReference Include="DevExpress.ExpressApp.Win" Version="19.1.5" />
-    <PackageReference Include="DevExpress.Persistent.BaseImpl" Version="19.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" Version="18.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp.Web" Version="18.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp.Win" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Persistent.BaseImpl" Version="18.2.7" />
     <PackageReference Include="Grpc" Version="1.22.0" />
     <PackageReference Include="Grpc.Core" Version="1.22.0" />
     <PackageReference Include="MessagePack" Version="1.7.3.7" />
@@ -27,9 +27,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="DevExpress.ExpressApp" Version="19.1.5" />
-    <PackageReference Include="DevExpress.Data" Version="19.1.5" />
-    <PackageReference Include="DevExpress.Xpo" Version="19.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Data" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Xpo" Version="18.2.7" />
     <PackageReference Include="Xunit.StaFact" Version="0.3.18" />
   </ItemGroup>
   <ItemGroup>

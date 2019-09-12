@@ -49,6 +49,36 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.ModelMapp
 		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.GridListEditor", "GridListEditor\Xpand.XAF.Modules.GridListEditor.csproj", "{D7B0A652-605F-4C0F-B543-FC3FBD568DF3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.OneView", "OneView\Xpand.XAF.Modules.OneView.csproj", "{4C3ED41A-EB50-4A59-9A38-0BDBC1967C06}"
+	ProjectSection(ProjectDependencies) = postProject
+		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Reactive.Logger", "Reactive.Logger\Xpand.XAF.Modules.Reactive.Logger.csproj", "{FCC60F32-B678-40B7-9226-9FBEB82B0FDA}"
+	ProjectSection(ProjectDependencies) = postProject
+		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Reactive.Logger.Client.Win", "Reactive.Logger.Client.Win\Xpand.XAF.Modules.Reactive.Logger.Client.Win.csproj", "{F929A9D2-7C98-4138-8F2B-C3D3A8464710}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D7B0A652-605F-4C0F-B543-FC3FBD568DF3} = {D7B0A652-605F-4C0F-B543-FC3FBD568DF3}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.RefreshView", "RefreshView\Xpand.XAF.Modules.RefreshView.csproj", "{4C65406D-13A1-488F-8945-9C38DBC6ECD5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Reactive.Logger.Hub", "Reactive.Logger.Hub\Xpand.XAF.Modules.Reactive.Logger.Hub.csproj", "{F81172D2-C7A6-4159-ADB7-38E8C1B1460D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{FCC60F32-B678-40B7-9226-9FBEB82B0FDA} = {FCC60F32-B678-40B7-9226-9FBEB82B0FDA}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -122,6 +152,42 @@ Global
 		{F15810E7-4D84-4305-B9DE-74E7976C9018}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{F15810E7-4D84-4305-B9DE-74E7976C9018}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F15810E7-4D84-4305-B9DE-74E7976C9018}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7B0A652-605F-4C0F-B543-FC3FBD568DF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7B0A652-605F-4C0F-B543-FC3FBD568DF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7B0A652-605F-4C0F-B543-FC3FBD568DF3}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7B0A652-605F-4C0F-B543-FC3FBD568DF3}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
+		{D7B0A652-605F-4C0F-B543-FC3FBD568DF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7B0A652-605F-4C0F-B543-FC3FBD568DF3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C3ED41A-EB50-4A59-9A38-0BDBC1967C06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C3ED41A-EB50-4A59-9A38-0BDBC1967C06}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C3ED41A-EB50-4A59-9A38-0BDBC1967C06}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C3ED41A-EB50-4A59-9A38-0BDBC1967C06}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
+		{4C3ED41A-EB50-4A59-9A38-0BDBC1967C06}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C3ED41A-EB50-4A59-9A38-0BDBC1967C06}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FCC60F32-B678-40B7-9226-9FBEB82B0FDA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FCC60F32-B678-40B7-9226-9FBEB82B0FDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FCC60F32-B678-40B7-9226-9FBEB82B0FDA}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{FCC60F32-B678-40B7-9226-9FBEB82B0FDA}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
+		{FCC60F32-B678-40B7-9226-9FBEB82B0FDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FCC60F32-B678-40B7-9226-9FBEB82B0FDA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F929A9D2-7C98-4138-8F2B-C3D3A8464710}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F929A9D2-7C98-4138-8F2B-C3D3A8464710}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F929A9D2-7C98-4138-8F2B-C3D3A8464710}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{F929A9D2-7C98-4138-8F2B-C3D3A8464710}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
+		{F929A9D2-7C98-4138-8F2B-C3D3A8464710}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F929A9D2-7C98-4138-8F2B-C3D3A8464710}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C65406D-13A1-488F-8945-9C38DBC6ECD5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C65406D-13A1-488F-8945-9C38DBC6ECD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C65406D-13A1-488F-8945-9C38DBC6ECD5}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C65406D-13A1-488F-8945-9C38DBC6ECD5}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
+		{4C65406D-13A1-488F-8945-9C38DBC6ECD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C65406D-13A1-488F-8945-9C38DBC6ECD5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F81172D2-C7A6-4159-ADB7-38E8C1B1460D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F81172D2-C7A6-4159-ADB7-38E8C1B1460D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F81172D2-C7A6-4159-ADB7-38E8C1B1460D}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{F81172D2-C7A6-4159-ADB7-38E8C1B1460D}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
+		{F81172D2-C7A6-4159-ADB7-38E8C1B1460D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F81172D2-C7A6-4159-ADB7-38E8C1B1460D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

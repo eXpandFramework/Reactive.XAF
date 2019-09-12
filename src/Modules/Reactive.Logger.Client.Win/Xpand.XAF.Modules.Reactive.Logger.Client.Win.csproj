@@ -50,11 +50,11 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp" Version="19.1.5" />
-    <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" Version="19.1.5" />
-    <PackageReference Include="DevExpress.ExpressApp.Win" Version="19.1.5" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="19.1.5" />
-    <PackageReference Include="DevExpress.Xpo" Version="19.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="18.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" Version="18.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp.Win" Version="18.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Xpo" Version="18.2.7" />
     <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
     <PackageReference Include="System.Reactive" Version="4.1.6" />
   </ItemGroup>
