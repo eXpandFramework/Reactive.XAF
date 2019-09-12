@@ -42,8 +42,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source.WhenFits(action.TargetViewType, action.TargetObjectType);
         }
 
-        internal static IObservable<TFrame> WhenFits<TFrame>(this IObservable<TFrame> source,ViewType viewType,Type objectType=null,Nesting nesting=Nesting.Any,bool? isPopupLookup=null) where TFrame:Frame{
-            return source.SelectMany(_ => _.View != null ? _.AsObservable() : _.WhenViewChanged().Select(tuple => _))
+        internal static IObservable<TFrame> WhenFits<TFrame>(this IObservable<TFrame> source,ViewType viewType,Type objectType=null,Nesting nesting=Nesting.Any,bool? isPopupLookup=null) where TFrame:Frame{            return source.SelectMany(_ => _.View != null ? _.AsObservable() : _.WhenViewChanged().Select(tuple => _))
                 .Where(frame => frame.View.Fits(viewType, nesting, objectType))
                 .Where(_ => {
                     if (isPopupLookup.HasValue){
@@ -54,8 +53,15 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 });
         }
 
-        public static IObservable<(TFrame frame, ViewChangedEventArgs args)> WhenViewChanged<TFrame>(
-            this TFrame source) where TFrame : Frame{
+        public static IObservable<Unit> WhenInvalid<TFrame>(this TFrame source) where TFrame : Frame{
+            return source.WhenViewChangedToNull().ToUnit().Merge(source.WhenDisposingFrame().ToUnit());
+        }
+
+        public static IObservable<(TFrame frame, ViewChangedEventArgs args)> WhenViewChangedToNull<TFrame>(this TFrame source)where TFrame : Frame{
+            return source.WhenViewChanged().Where(_ => _.frame.View == null);
+        }
+
+        public static IObservable<(TFrame frame, ViewChangedEventArgs args)> WhenViewChanged<TFrame>(this TFrame source) where TFrame : Frame{
             return Observable.Return(source).ViewChanged();
         }
 

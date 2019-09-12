@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProductVersion>9.0.30729</ProductVersion>
     <ProjectGuid>{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}</ProjectGuid>
@@ -29,6 +29,8 @@
   <ItemGroup>
     <PackageReference Include="Castle.Core" Version="4.4.0" />
     <PackageReference Include="Enums.NET" Version="2.3.2" />
+    <PackageReference Include="Grpc" Version="1.22.0" />
+    <PackageReference Include="Grpc.Core" Version="1.22.0" />
     <PackageReference Include="Humanizer.Core" Version="2.6.2" />
     <PackageReference Include="Mono.Cecil" Version="0.10.4" />
     <PackageReference Include="Moq" Version="4.12.0" />
@@ -42,16 +44,17 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="DevExpress.ExpressApp" Version="18.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Web" Version="18.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Win" Version="18.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="18.2.7" />
-    <PackageReference Include="DevExpress.Office.Core" Version="18.2.7" />
-    <PackageReference Include="DevExpress.RichEdit.Core" Version="18.2.7" />
-    <PackageReference Include="DevExpress.Web" Version="18.2.7" />
-    <PackageReference Include="DevExpress.Xpo" Version="18.2.7" />
-    <PackageReference Include="DevExpress.Win" Version="18.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="19.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Web" Version="19.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Win" Version="19.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="19.1.5" />
+    <PackageReference Include="DevExpress.Office.Core" Version="19.1.5" />
+    <PackageReference Include="DevExpress.RichEdit.Core" Version="19.1.5" />
+    <PackageReference Include="DevExpress.Web" Version="19.1.5" />
+    <PackageReference Include="DevExpress.Xpo" Version="19.1.5" />
+    <PackageReference Include="DevExpress.Win" Version="19.1.5" />
   </ItemGroup>
+  
   <ItemGroup>
     <Reference Include="Fasterflect.Netstandard">
       <HintPath>..\..\Libs\Fasterflect.Netstandard.dll</HintPath>
@@ -62,6 +65,12 @@
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Reactive.Logger">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Reactive.Logger.Hub">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.Hub.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

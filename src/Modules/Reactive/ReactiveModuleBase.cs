@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using DevExpress.ExpressApp;
+using Fasterflect;
 
 namespace Xpand.XAF.Modules.Reactive{
     public abstract partial class ReactiveModuleBase:ModuleBase{
@@ -15,5 +17,30 @@ namespace Xpand.XAF.Modules.Reactive{
         public IObservable<ReactiveModuleBase> SetupCompleted => Observable.Defer(() => SetupCompletedSubject.Select(module => module));
 
 
+        private static bool SetupModules(ApplicationModulesManager applicationModulesManager){
+            foreach(var module in applicationModulesManager.Modules) {
+                try {
+                    module.Setup(applicationModulesManager);
+                    if (module is ReactiveModuleBase reactiveModuleBase){
+                        reactiveModuleBase.SetupCompletedSubject.OnNext(reactiveModuleBase);
+                        reactiveModuleBase.SetupCompletedSubject.OnCompleted();
+                    }
+                }
+                catch(Exception e) {
+                    throw new InvalidOperationException($"Exception occurs while initializing the '{module.GetType().FullName}' module: {e.Message}", e);
+                }
+            }
+            foreach(var controller in ((ReadOnlyCollection<Controller>) applicationModulesManager.ControllersManager.GetPropertyValue("Controllers"))) {
+                if(controller is ISupportSetup supportSetupItem) {
+                    try {
+                        supportSetupItem.Setup(applicationModulesManager);
+                    }
+                    catch(Exception e) {
+                        throw new InvalidOperationException($"Exception occurs while initializing the '{controller.GetType().FullName}' controller: {e.Message}", e);
+                    }
+                }
+            }            
+            return false;
+        }
     }
 }

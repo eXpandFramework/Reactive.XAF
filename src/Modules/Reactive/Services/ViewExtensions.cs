@@ -5,13 +5,14 @@ using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
+using DevExpress.ExpressApp.Utils;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ViewExtensions{
         
         public static IObservable<T> WhenClosing<T>(this T view) where T : View{
-            return Observable.Return(view).Closing();
+            return Observable.Return(view).WhenNotDefault().Closing();
         }
 
         public static IObservable<T> Closing<T>(this IObservable<T> source) where T:View{
@@ -19,6 +20,32 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 return Observable.FromEventPattern<EventHandler, EventArgs>(
                     handler => view.Closing += handler,
                     handler => view.Closing -= handler);
+            })
+            .Select(pattern => (T)pattern.Sender);
+        }
+        public static IObservable<T> WhenActivated<T>(this T view) where T : View{
+            return Observable.Return(view).Activated();
+        }
+
+        public static IObservable<T> Activated<T>(this IObservable<T> source) where T:View{
+            return source.Cast<View>().SelectMany(view => {
+                return Observable.FromEventPattern<EventHandler, EventArgs>(
+                    handler => view.Activated += handler,
+                    handler => view.Activated -= handler);
+            })
+            .Select(pattern => (T)pattern.Sender);
+        }
+
+        public static IObservable<T> WhenClosed<T>(this T view) where T : View{
+            return view == null ? Observable.Empty<T>() : Observable.Return(view).Closed();
+        }
+
+        public static IObservable<T> Closed<T>(this IObservable<T> source) where T:View{
+            Guard.ArgumentNotNull(source,nameof(source));
+            return source.SelectMany(view => {
+                return Observable.FromEventPattern<EventHandler, EventArgs>(
+                    handler => view.Closed += handler,
+                    handler => view.Closed -= handler);
             })
             .Select(pattern => (T)pattern.Sender);
         }

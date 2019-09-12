@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{58399364-9ACA-429F-A276-7F01E9E61D7D}</ProjectGuid>
     <TargetFramework>net461</TargetFramework>
@@ -17,6 +17,14 @@
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Diagnostics\**" />
+    <EmbeddedResource Remove="Diagnostics\**" />
+    <None Remove="Diagnostics\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Xpand.XAF.Modules.Reactive.csproj.DotSettings" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="0Harmony, Version=2.0.0.0, Culture=neutral, PublicKeyToken=c52ffed5d5ff0958, processorArchitecture=MSIL">
       <HintPath>..\..\Libs\0Harmony.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
@@ -27,16 +35,24 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\Extensions\Extensions\XAF\XafApplication\GetPlatform.cs" Link="LinkedFiles\GetPlatform.cs" />
-    <Compile Update="Module.cs">
-      <SubType>Component</SubType>
+    <Compile Update="Properties\Text.Designer.cs">
+      <DependentUpon>Text.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="..\..\Extensions\Extensions\Linq\FromHierarchy.cs" Link="LinkedFiles\FromHierarchy.cs" />
+    <Compile Include="..\..\Extensions\Extensions\System\Exception\GetAllMessages.cs" Link="LinkedFiles\GetAllMessages.cs" />
+    <Compile Include="..\..\Extensions\Extensions\XAF\Model\Id.cs" Link="LinkedFiles\Id.cs" />
+    <Compile Include="..\..\Extensions\Extensions\XAF\Model\Nodes.cs" Link="LinkedFiles\Nodes.cs" />
+    <Compile Include="..\..\Extensions\Extensions\XAF\XafApplication\GetPlatform.cs" Link="LinkedFiles\GetPlatform.cs" />
+    <Compile Update="Module.cs" />
     <Compile Update="ReactiveModuleBase.cs">
       <SubType>Component</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp" Version="18.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="19.1.5" />
+    <PackageReference Include="System.Interactive" Version="4.0.0-preview.8.build.9" />
     <PackageReference Include="System.Reactive" Version="4.1.6" />
   </ItemGroup>
 </Project>

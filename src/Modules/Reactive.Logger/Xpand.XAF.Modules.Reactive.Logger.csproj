@@ -1,0 +1,56 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{FCC60F32-B678-40B7-9226-9FBEB82B0FDA}</ProjectGuid>
+    <TargetFramework>net461</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
+    <DebugSymbols>true</DebugSymbols>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <OutputPath>..\..\..\bin</OutputPath>
+    <AssemblyTitle>Xpand.XAF.Modules.ViewEditMode</AssemblyTitle>
+    <Product>Xpand.XAF.Modules.ViewEditMode</Product>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <DebugType>pdbonly</DebugType>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Model.DesignedDiffs.xafml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\Extensions\Extensions\Linq\ToRuns.cs" Link="LinkedFiles\ToRuns.cs" />
+    <Compile Include="..\..\Extensions\Extensions\System\Refelction\GetMemberInfo.cs" Link="LinkedFiles\GetMemberInfo.cs" />
+    <Compile Include="..\..\Extensions\Extensions\XAF\CollectionSource\CollectionSourceExtensions.cs" Link="LinkedFiles\CollectionSourceExtensions.cs" />
+    <Compile Include="..\..\Extensions\Extensions\XAF\Model\GetParent.cs" Link="LinkedFiles\GetParent.cs" />
+    <Compile Include="..\..\Extensions\Extensions\XAF\Model\Id.cs" Link="LinkedFiles\Id.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Xpand.XAF.Modules.Reactive">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Fasterflect.Netstandard">
+      <HintPath>..\..\Libs\Fasterflect.Netstandard.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Module.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Readme.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="akarnokd.reactive_extensions" Version="0.0.27-alpha" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="19.1.5" />
+    <PackageReference Include="DevExpress.Persistent.Base" Version="19.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" Version="19.1.5" />
+    <PackageReference Include="DevExpress.Xpo" Version="19.1.5" />
+    <PackageReference Include="System.Reactive" Version="4.1.6" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="LinkedFiles\" />
+  </ItemGroup>
+</Project>

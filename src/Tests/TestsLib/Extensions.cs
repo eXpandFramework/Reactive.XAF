@@ -21,6 +21,10 @@ using DevExpress.XtraGrid;
 using Moq;
 using Moq.Protected;
 using Xpand.Source.Extensions.XAF.XafApplication;
+using Xpand.XAF.Modules.Reactive;
+using Xpand.XAF.Modules.Reactive.Extensions;
+using Xpand.XAF.Modules.Reactive.Logger;
+using Xpand.XAF.Modules.Reactive.Logger.Hub;
 using Xpand.XAF.Modules.Reactive.Services;
 using EditorsFactory = DevExpress.ExpressApp.Editors.EditorsFactory;
 
@@ -53,11 +57,11 @@ namespace TestsLib {
         public static void RegisterDefaults(this XafApplication application, params ModuleBase[] modules){
             application.AlwaysUpdateOnDatabaseVersionMismatch().Subscribe();
             var moduleBases = new[] {
-                new SystemModule(),
+                new ReactiveLoggerHubModule(),new SystemModule(),
                 application is WinApplication ? (ModuleBase) new SystemWindowsFormsModule() : new SystemAspNetModule()
             }.Concat(modules);
             foreach (var moduleBase in moduleBases){
-                if (application.Modules.FindModule(moduleBase.GetType()) == null){
+                if (application.Modules.All(_ => moduleBase.GetType() != _.GetType())){
                     application.Modules.Add(moduleBase);
                 }
             }
@@ -65,8 +69,16 @@ namespace TestsLib {
             application.RegisterInMemoryObjectSpaceProvider();
         }
 
-        public static ModuleBase AddModule(this XafApplication application,ModuleBase moduleBase,bool setup=true, params Type[] additionalExportedTypes){
-            application.Title = moduleBase.GetType().Name;
+        public static IObservable<IModelReactiveLogger> ConfigureModel(this XafApplication application){
+            
+            return application.ReactiveModulesModel().ReactiveLogger()
+                .Do(logger => logger.TraceSources.Enabled = true);
+
+        }
+
+        public static ModuleBase AddModule(this XafApplication application,ModuleBase moduleBase,string title=null,bool setup=true, params Type[] additionalExportedTypes){
+            var applicationTitle = title??$"{moduleBase.GetType().Name}_Tests";
+            application.Title = applicationTitle;
             moduleBase.AdditionalExportedTypes.AddRange(additionalExportedTypes);
             if (setup){
                 application.SetupDefaults(moduleBase);
@@ -77,12 +89,16 @@ namespace TestsLib {
 
         }
 
-        public static T AddModule<T>(this XafApplication application,params Type[] additionalExportedTypes) where  T:ModuleBase, new(){
-            return (T) application.AddModule(new T(),true, additionalExportedTypes);
+        public static T AddModule<T>(this XafApplication application, string title,params Type[] additionalExportedTypes) where T : ModuleBase, new(){
+            return (T) application.AddModule(new T(),title,true, additionalExportedTypes);
         }
 
-        public static TModule NewModule<TModule>(Platform platform,params Type[] additionalExportedTypes) where  TModule:ModuleBase, new(){
-            return platform.NewApplication().AddModule<TModule>(additionalExportedTypes);
+        public static T AddModule<T>(this XafApplication application,params Type[] additionalExportedTypes) where  T:ModuleBase, new(){
+            return (T) application.AddModule(new T(),null,true, additionalExportedTypes);
+        }
+
+        public static TModule NewModule<TModule>(Platform platform,string title=null,params Type[] additionalExportedTypes) where  TModule:ModuleBase, new(){
+            return platform.NewApplication().AddModule<TModule>(title,additionalExportedTypes);
         }
 
         public static XafApplication NewApplication(this Platform platform){
@@ -96,7 +112,7 @@ namespace TestsLib {
             else{
                 throw new NotSupportedException("if implemented make sure all tests pass with TestExplorer and live testing");
             }
-
+            application.ConfigureModel().SubscribeReplay();
             application.MockEditorsFactory();
 
             if (application is WebApplication webApplication){
@@ -188,7 +204,7 @@ namespace TestsLib {
         }
 
         public static void RegisterInMemoryObjectSpaceProvider(this XafApplication application) {
-            application.AddObjectSpaceProvider(new XPObjectSpaceProvider(new MemoryDataStoreProvider()));
+            application.AddObjectSpaceProvider(new XPObjectSpaceProvider(new MemoryDataStoreProvider(),true));
         }
 
 

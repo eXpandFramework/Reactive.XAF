@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Application>
+  <ReactiveModules>
+    <ReactiveLogger>
+      
+      <TraceSources Enabled="True">
+        <TraceSourcedModule Id="GridListEditorModule" IsNewNode="True" />
+        <TraceSourcedModule Id="OneViewModule" IsNewNode="True" />
+        <TraceSourcedModule Id="RefreshViewModule" IsNewNode="True" />
+      </TraceSources>
+    </ReactiveLogger>
+  </ReactiveModules>
+  <SchemaModules>
+    <SchemaModule Name="SystemModule" Version="19.1.5.0" IsNewNode="True" />
+    <SchemaModule Name="SystemWindowsFormsModule" Version="19.1.5.0" IsNewNode="True" />
+  </SchemaModules>
+  <Templates>
+    <Template Id="DevExpress.ExpressApp.Win.Templates.Bars.LightStyleMainForm" IsNewNode="True" />
+    <Template Id="DevExpress.ExpressApp.Win.Templates.PopupForm" IsNewNode="True" />
+    <Template Id="DevExpress.ExpressApp.Win.Templates.Ribbon.LightStyleMainRibbonForm" IsNewNode="True" />
+  </Templates>
+</Application>

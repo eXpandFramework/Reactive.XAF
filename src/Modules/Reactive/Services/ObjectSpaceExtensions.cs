@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
@@ -7,6 +9,69 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ObjectSpaceExtensions{
+        public static IObservable<T> ModifiedExistingObject<T>(this XafApplication application,
+            Func<(IObjectSpace objectSpace,ObjectChangedEventArgs e),bool> filter = null){
+            filter = filter ?? (_ => true);
+            return application.AllModifiedObjects<T>(_ => filter(_) && !_.objectSpace.IsNewObject(_.e.Object));
+        }
+
+        public static IObservable<T> ModifiedNewObject<T>(this XafApplication application,
+            Func<(IObjectSpace objectSpace,ObjectChangedEventArgs e),bool> filter = null){
+            filter = filter ?? (_ => true);
+            return application.AllModifiedObjects<T>(_ => filter(_) && _.objectSpace.IsNewObject(_.e.Object));
+        }
+
+        public static IObservable<T> AllModifiedObjects<T>(this XafApplication application,Func<(IObjectSpace objectSpace,ObjectChangedEventArgs e),bool> filter=null ){
+            return application.WhenObjectSpaceCreated()
+                .SelectMany(_ => _.e.ObjectSpace.WhenObjectChanged()
+                    .Where(tuple => filter == null || filter(tuple))
+                    .SelectMany(tuple => tuple.objectSpace.ModifiedObjects.OfType<T>()))
+                ;
+        }
+
+        public static IObservable<IObjectSpace> ToObjectSpace(this IObjectSpaceProvider provider){
+            return Observable.Using(provider.CreateObjectSpace, space => space.AsObservable());
+        }
+
+        public static IObservable<IObjectSpace> ToObjectSpace(this XafApplication application){
+            return Observable.Using(application.CreateObjectSpace, space => space.AsObservable());
+        }
+
+        public static T GetObject<T>(this XafApplication application,T value){
+            return application.CreateObjectSpace().GetObject(value);
+        }
+
+        public static IObservable<T> ExistingObject<T>(this XafApplication application,Func<IQueryable<T>,IQueryable<T>> query=null){
+            return Observable.Using(application.CreateObjectSpace, space => space.ExistingObject(query));
+        }
+
+        public static IObservable<T> AnyObject<T>(this XafApplication application){
+            return application.NewObject<T>().Merge(application.ExistingObject<T>()).DistinctUntilChanged()
+                .TraceRX();
+        }
+
+        public static IObservable<T> WhenObjectCommited<T>(this IObservable<T> source) where T:IObjectSpaceLink{
+            return source.SelectMany(_ => _.ObjectSpace.WhenCommited().FirstAsync().Select(tuple => _));
+        }
+
+        public static IObservable<T> NewObject<T>(this IObjectSpace objectSpace){
+            return objectSpace.WhenCommiting()
+                .SelectMany(t => objectSpace.ModifiedObjects.OfType<T>().Where(r => t.objectSpace.IsNewObject(r)))
+                .TraceRX();
+        }
+
+        public static IObservable<T> NewObject<T>(this XafApplication application){
+            return application.WhenObjectSpaceCreated().SelectMany(_ => _.e.ObjectSpace.NewObject<T>());
+        }
+
+        public static IObservable<T> ExistingObject<T>(this IObjectSpace objectSpace,Func<IQueryable<T>,IQueryable<T>> query=null){
+            var objectsQuery = objectSpace.GetObjectsQuery<T>();
+            if (query != null){
+                objectsQuery = objectsQuery.Concat(query(objectsQuery));
+            }
+            return objectsQuery.ToObservable().TraceRX();
+        }
+
         public static IObservable<(NonPersistentObjectSpace objectSpace,ObjectsGettingEventArgs e)> ObjectsGetting(this IObservable<NonPersistentObjectSpace> source) {
             return source.SelectMany(item => item.WhenObjectsGetting());
         }
@@ -27,7 +92,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source.SelectMany(item => {
                 return Observable
                     .FromEventPattern<EventHandler<CancelEventArgs>, CancelEventArgs>(h => item.Committing += h, h => item.Committing -= h)
-                    .TransformPattern<CancelEventArgs, IObjectSpace>();
+                    .TransformPattern<CancelEventArgs, IObjectSpace>()
+                    .TraceRX();
             });
         }
 

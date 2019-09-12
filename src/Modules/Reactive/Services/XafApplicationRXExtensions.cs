@@ -1,12 +1,31 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
+using System.Windows.Forms;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.DC;
+using Fasterflect;
 using Xpand.XAF.Modules.Reactive.Extensions;
+using ListView = DevExpress.ExpressApp.ListView;
+using View = DevExpress.ExpressApp.View;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class XafApplicationRXExtensions{
+        public static IObservable<TSource> BufferUntilCompatibilityChecked1<TSource>(
+            this XafApplication application,IObservable<TSource> source){
+            var compatibilityCheckefd = application.WhenCompatibilityChecked().Select(xafApplication => xafApplication).FirstAsync();
+            return source.Buffer(compatibilityCheckefd).FirstAsync().SelectMany(list => list)
+                .Concat(Observable.Defer(() => source)).Select(source1 => source1);
+        }
+        public static IObservable<TSource> BufferUntilCompatibilityChecked<TSource>(
+            this XafApplication application,IObservable<TSource> source){
+            var compatibilityCheckefd = application.WhenCompatibilityChecked().Select(xafApplication => xafApplication).FirstAsync();
+            return source.Buffer(compatibilityCheckefd).FirstAsync().SelectMany(list => list)
+                .Concat(Observable.Defer(() => source)).Select(source1 => source1);
+        }
 //        public static IObservable<Frame> FrameTemplateChanged<T>(this IObservable<T> source,bool skipWindowsCtorAssigment = false) where T : XafApplication{
 //            return source.SelectMany(application => application.WhenFrameTemplateChanged());
 //        }
@@ -32,6 +51,22 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 //                .Select(frame => frame);
 //        }
 
+        public static IObservable<XafApplication> WhenCompatibilityChecked(this XafApplication application){
+            if ((bool) application.GetPropertyValue("IsCompatibilityChecked")){
+                return application.AsObservable();
+            }
+            return application.WhenObjectSpaceCreated().FirstAsync().To(application)
+                .Select(xafApplication => xafApplication)
+                .TraceRX();
+
+            return Observable.Defer(() =>
+                    Observable.Start(() =>
+                        Observable.While(() => !(bool) application.GetPropertyValue("IsCompatibilityChecked"),
+                            Observable.Empty<Unit>())).Merge())
+                .Concat(Unit.Default.AsObservable())
+                .To(application);
+        }
+
         public static IObservable<XafApplication> WhenModule(
             this IObservable<XafApplication> source, Type moduleType){
             return source.Where(_ => _.Modules.FindModule(moduleType)!=null);
@@ -45,7 +80,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return application.WhenFrameCreated().OfType<NestedFrame>();
         }
 
-        public static IObservable<T> ToController<T>(this IObservable<Window> source) where T : Controller{
+        public static IObservable<T> ToController<T>(this IObservable<Frame> source) where T : Controller{
             return source.SelectMany(window => window.Controllers.Cast<Controller>())
                 .Select(controller => controller).OfType<T>().Select(controller => controller);
         }
@@ -55,17 +90,35 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 names.Contains(controller.Name))).Select(controller => controller);
         }
 
+        public static IObservable<(ActionBase action, ActionBaseEventArgs e)> WhenActionExecuted<TController>(
+            this XafApplication application, Func<TController, ActionBase> action) where TController : Controller {
+            return application.WhenWindowCreated().ToController<TController>().SelectMany(_ => action(_).WhenExecuted());
+        }
+
+        public static IObservable<(ActionBase action, CancelEventArgs e)> WhenActionExecuting<TController>(
+            this XafApplication application, Func<TController, ActionBase> action) where TController : Controller {
+            return application.WhenWindowCreated().ToController<TController>().SelectMany(_ => action(_).WhenExecuting());
+        }
+
+        public static IObservable<(ActionBase action, ActionBaseEventArgs e)> WhenActionExecuteCompleted<TController>(
+            this XafApplication application, Func<TController, ActionBase> action) where TController : Controller {
+            return application.WhenWindowCreated().ToController<TController>().SelectMany(_ => action(_).WhenExecuteCompleted());
+        }
+
         public static IObservable<Window> WhenWindowCreated(this XafApplication application,bool isMain=false){
             var windowCreated = application.WhenFrameCreated().OfType<Window>();
-            if (isMain){
-                return windowCreated.When(TemplateContext.ApplicationWindow)
-                    .TemplateViewChanged()
-                    .SelectMany(_ => Observable.Defer(() => Observable.Start(() => _.Application.MainWindow))
-                        .FirstAsync(window => window.Application.MainWindow!=null).Repeat().FirstAsync().Select(window => window))
-                    .OfType<Window>().FirstAsync();
-            }
+            return isMain ? WhenMainWindowAvailable(application, windowCreated) : windowCreated.TraceRX();
+        }
 
-            return windowCreated;
+        private static IObservable<Window> WhenMainWindowAvailable(XafApplication application, IObservable<Window> windowCreated){
+            return windowCreated.When(TemplateContext.ApplicationWindow)
+                .TemplateChanged()
+                .SelectMany(_ => Observable.Interval(TimeSpan.FromMilliseconds(300))
+                    .ObserveOn((Control) _.Template)
+                    .Select(l => application.MainWindow))
+                .WhenNotDefault()
+                .Select(window => window).Publish().RefCount().FirstAsync()
+                .TraceRX();
         }
 
         public static IObservable<Window> WhenPopupWindowCreated(this XafApplication application){
@@ -81,21 +134,30 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Subscribe();
         }
 
+        public static IObservable<(XafApplication sender, EventArgs e)> WhenModelChanged(this XafApplication application){
+            return Observable.FromEventPattern<EventHandler,EventArgs>(h => application.ModelChanged += h,h => application.ModelChanged -= h)
+                .TransformPattern<EventArgs,XafApplication>()
+                .TraceRX();
+        }
+
         public static IObservable<ITypesInfo> WhenCustomizingTypesInfo(this XafApplication application) {
             return application.Modules.OfType<ReactiveModule>().ToObservable()
-                .SelectMany(_ => _.SetupCompleted).Cast<ReactiveModule>().SelectMany(_ => _.ModifyTypesInfo);
+                .SelectMany(_ => _.SetupCompleted).Cast<ReactiveModule>().SelectMany(_ => _.ModifyTypesInfo)
+                .TraceRX();
         }
 
         public static IObservable<(XafApplication application, CreateCustomObjectSpaceProviderEventArgs e)> WhenCreateCustomObjectSpaceProvider(this XafApplication application){
             return Observable
                 .FromEventPattern<EventHandler<CreateCustomObjectSpaceProviderEventArgs>,CreateCustomObjectSpaceProviderEventArgs>(h => application.CreateCustomObjectSpaceProvider += h,h => application.CreateCustomObjectSpaceProvider -= h)
-                .TransformPattern<CreateCustomObjectSpaceProviderEventArgs,XafApplication>();
+                .TransformPattern<CreateCustomObjectSpaceProviderEventArgs,XafApplication>()
+                .TraceRX();
         }
 
         public static IObservable<(XafApplication application, CreateCustomTemplateEventArgs e)> WhenCreateCustomTemplate(this XafApplication application){
             return Observable
                 .FromEventPattern<EventHandler<CreateCustomTemplateEventArgs>,CreateCustomTemplateEventArgs>(h => application.CreateCustomTemplate += h,h => application.CreateCustomTemplate -= h)
-                .TransformPattern<CreateCustomTemplateEventArgs,XafApplication>();
+                .TransformPattern<CreateCustomTemplateEventArgs,XafApplication>()
+                .TraceRX();
         }
 
         public static IObservable<(XafApplication application, ObjectSpaceCreatedEventArgs e)> ObjectSpaceCreated(this IObservable<XafApplication> source){
@@ -105,7 +167,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(XafApplication application, ObjectSpaceCreatedEventArgs e)> WhenObjectSpaceCreated(this XafApplication application){
             return Observable
                 .FromEventPattern<EventHandler<ObjectSpaceCreatedEventArgs>,ObjectSpaceCreatedEventArgs>(h => application.ObjectSpaceCreated += h,h => application.ObjectSpaceCreated -= h)
-                .TransformPattern<ObjectSpaceCreatedEventArgs,XafApplication>();
+                .TransformPattern<ObjectSpaceCreatedEventArgs,XafApplication>()
+                .TraceRX();
         }
         public static IObservable<(XafApplication application, EventArgs e)> SetupComplete(this IObservable<XafApplication> source){
             return source.SelectMany(application => application.WhenSetupComplete());
@@ -124,18 +187,27 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source.Select(_ => _.e.View);
         }
 
+        public static IObservable<Frame> WhenViewOnFrame(
+            this XafApplication application,Type objectType=null,ViewType viewType=ViewType.Any,Nesting nesting=Nesting.Any){
+            return application.WhenWindowCreated().TemplateViewChanged()
+                .SelectMany(window => (window.View.AsObservable().When(objectType, viewType, nesting)).To(window))
+                .TraceRX();
+        }
+
         public static IObservable<(XafApplication application, DetailViewCreatedEventArgs e)> WhenDetailViewCreated(this XafApplication application){
             return Observable
                 .FromEventPattern<EventHandler<DetailViewCreatedEventArgs>, DetailViewCreatedEventArgs>(
                     h => application.DetailViewCreated += h, h => application.DetailViewCreated -= h)
-                .TransformPattern<DetailViewCreatedEventArgs, XafApplication>();
+                .TransformPattern<DetailViewCreatedEventArgs, XafApplication>()
+                .Select(tuple => tuple)
+                .TraceRX();
         }
 
         public static IObservable<DashboardView> WhenDashboardViewCreated(this XafApplication application){
             return Observable
                 .FromEventPattern<EventHandler<DashboardViewCreatedEventArgs>, DashboardViewCreatedEventArgs>(
                     h => application.DashboardViewCreated += h, h => application.DashboardViewCreated -= h)
-                .Select(pattern => pattern.EventArgs.View);
+                .Select(pattern => pattern.EventArgs.View).TraceRX();
         }
 
         public static IObservable<(XafApplication application, ListViewCreatedEventArgs e)> ListViewCreated(this IObservable<XafApplication> source){
@@ -145,7 +217,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return Observable
                 .FromEventPattern<EventHandler<ListViewCreatedEventArgs>, ListViewCreatedEventArgs>(
                     h => application.ListViewCreated += h, h => application.ListViewCreated -= h)
-                .TransformPattern<ListViewCreatedEventArgs, XafApplication>();
+                .TransformPattern<ListViewCreatedEventArgs, XafApplication>().TraceRX();
         }
         public static IObservable<ObjectView> WhenObjectViewCreated(this XafApplication application){
             return application.AsObservable().ObjectViewCreated();
@@ -169,6 +241,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Select(pattern => pattern.EventArgs.View);
         }
 
+        public static IObservable<(Frame SourceFrame, Frame TargetFrame)> WhenViewShown(this XafApplication application){
+            return Observable
+                .FromEventPattern<EventHandler<ViewShownEventArgs>,ViewShownEventArgs>(h => application.ViewShown += h,h => application.ViewShown -= h)
+                .Select(pattern => (pattern.EventArgs.SourceFrame,pattern.EventArgs.TargetFrame))
+                .TraceRX();
+        }
+
         public static IObservable<(XafApplication application, DatabaseVersionMismatchEventArgs e)> AlwaysUpdateOnDatabaseVersionMismatch(this XafApplication application){
             return application.WhenDatabaseVersionMismatch().Select(tuple => {
                 tuple.e.Updater.Update();
@@ -186,26 +265,29 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(XafApplication application, LogonEventArgs e)> WhenLoggedOn(this XafApplication application){
             return Observable
                 .FromEventPattern<EventHandler<LogonEventArgs>,LogonEventArgs>(h => application.LoggedOn += h,h => application.LoggedOn -= h)
-                .TransformPattern<LogonEventArgs,XafApplication>();
+                .TransformPattern<LogonEventArgs,XafApplication>()
+                .TraceRX();
         }
 
         public static IObservable<(XafApplication application, EventArgs e)> WhenSetupComplete(this XafApplication application){
-            return Observable
-                .FromEventPattern<EventHandler<EventArgs>,
-                    EventArgs>(h => application.SetupComplete += h,h => application.SetupComplete -= h)
-                .TransformPattern<EventArgs,XafApplication>();
+            return Observable.FromEventPattern<EventHandler<EventArgs>,EventArgs>(h => application.SetupComplete += h,h => application.SetupComplete -= h)
+                .TransformPattern<EventArgs,XafApplication>()
+                .Select(tuple => tuple)
+                .TraceRX();
         }
 
         public static IObservable<(XafApplication application, CreateCustomModelDifferenceStoreEventArgs e)> WhenCreateCustomModelDifferenceStore(this XafApplication application){
             return Observable
                 .FromEventPattern<EventHandler<CreateCustomModelDifferenceStoreEventArgs>,CreateCustomModelDifferenceStoreEventArgs>(h => application.CreateCustomModelDifferenceStore += h,h => application.CreateCustomModelDifferenceStore -= h)
-                .TransformPattern<CreateCustomModelDifferenceStoreEventArgs,XafApplication>();
+                .TransformPattern<CreateCustomModelDifferenceStoreEventArgs,XafApplication>()
+                .TraceRX();
         }
 
         public static IObservable<(XafApplication application, SetupEventArgs e)> WhenSettingUp(this XafApplication application){
             return Observable
                 .FromEventPattern<EventHandler<SetupEventArgs>,SetupEventArgs>(h => application.SettingUp += h,h => application.SettingUp -= h)
-                .TransformPattern<SetupEventArgs,XafApplication>();
+                .TransformPattern<SetupEventArgs,XafApplication>()
+                .TraceRX();
         }
     }
 }

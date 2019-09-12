@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Application>
+  <Options UIType="MultipleWindowSDI" FormStyle="Ribbon" />
+  <ReactiveModules>
+    <OneView View="TraceEvent_ListView" />
+    <ReactiveLogger>
+      <TraceSources>
+        <TraceSourcedModule Id="GridListEditorModule" Level="Verbose" />
+        <TraceSourcedModule Id="OneViewModule" Level="Verbose" />
+        <TraceSourcedModule Id="ReactiveLoggerModule" Level="Verbose" />
+        
+        <TraceSourcedModule Id="RefreshViewModule" Level="Verbose" />
+      </TraceSources>
+    </ReactiveLogger>
+  </ReactiveModules>
+  <SchemaModules>
+    <SchemaModule Name="SystemModule" Version="19.1.5.0" IsNewNode="True" />
+    <SchemaModule Name="SystemWindowsFormsModule" Version="19.1.5.0" IsNewNode="True" />
+  </SchemaModules>
+</Application>

@@ -1,0 +1,59 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{8E006135-6815-49E6-A282-9D0F964937D3}</ProjectGuid>
+    <TargetFramework>net461</TargetFramework>
+    <FileUpgradeFlags />
+    <UpgradeBackupLocation />
+    <LangVersion>latest</LangVersion>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
+    <DebugSymbols>true</DebugSymbols>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <OutputPath>..\..\..\bin</OutputPath>
+    <AssemblyTitle>Xpand.XAF.Modules.Reactive</AssemblyTitle>
+    <Product>Xpand.XAF.Modules.Reactive</Product>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <DebugType>pdbonly</DebugType>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Diagnostics\**" />
+    <EmbeddedResource Remove="Diagnostics\**" />
+    <None Remove="Diagnostics\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Xpand.XAF.Modules.Reactive.csproj.DotSettings" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="0Harmony, Version=2.0.0.0, Culture=neutral, PublicKeyToken=c52ffed5d5ff0958, processorArchitecture=MSIL">
+      <HintPath>..\..\Libs\0Harmony.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="System.Configuration" />
+    <Reference Include="Fasterflect.Netstandard">
+      <HintPath>..\..\Libs\Fasterflect.Netstandard.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Reactive">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Properties\Text.Designer.cs">
+      <DependentUpon>Text.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Update="Module.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="DevExpress.ExpressApp" Version="19.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Win" Version="19.1.5" />
+    <PackageReference Include="System.Interactive" Version="4.0.0-preview.8.build.9" />
+    <PackageReference Include="System.Reactive" Version="4.1.6" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Extensions\" />
+    <Folder Include="HarmonyPatches\" />
+    <Folder Include="Services\Controllers\" />
+  </ItemGroup>
+</Project>

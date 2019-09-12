@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Application>
+  <BOModel>
+    <Class Name="Xpand.XAF.Modules.Reactive.Logger.TraceEvent">
+      <AppearanceRules>
+        <AppearanceRule Id="Dispose" Context="ListView" Criteria="[RXAction] = ##Enum#Xpand.XAF.Modules.Reactive.Logger.RXAction,Dispose#" FontColor="192, 0, 192" TargetItems="Action" Index="10001" IsNewNode="True" />
+        <AppearanceRule Id="OnCompeted" Context="ListView" Criteria="[RXAction] = ##Enum#Xpand.XAF.Modules.Reactive.Logger.RXAction,OnCompleted#" FontColor="128, 64, 0" TargetItems="Action" Index="10001" IsNewNode="True" />
+        <AppearanceRule Id="OnNext" Context="ListView" Criteria="[RXAction] = ##Enum#Xpand.XAF.Modules.Reactive.Logger.RXAction,OnNext#" FontColor="Green" TargetItems="Action" Index="10001" IsNewNode="True" />
+        <AppearanceRule Id="Subscribe" Context="ListView" Criteria="[RXAction] = ##Enum#Xpand.XAF.Modules.Reactive.Logger.RXAction,Subscribe#" FontColor="0, 0, 192" TargetItems="Action" Index="10001" IsNewNode="True" />
+        <AppearanceRule Id="GridListEditorModuleSource" Context="ListView" Criteria="[Source] = 'GridListEditorModule'" TargetItems="Source" FontColor="0, 0, 192" IsNewNode="True" />
+        <AppearanceRule Id="OneViewModuleSource" Context="ListView" Criteria="[Source] = 'OneViewModule'" TargetItems="Source" FontColor="255, 128, 128" IsNewNode="True" />
+        <AppearanceRule Id="ReactiveLoggerHubModuleSource" Context="ListView" Criteria="[Source] = 'ReactiveLoggerHubModule'" TargetItems="Source" FontColor="255, 128, 0" IsNewNode="True" />
+        <AppearanceRule Id="ReactiveLoggerModuleSource" Context="ListView" Criteria="[Source] = 'ReactiveLoggerModule'" TargetItems="Source" FontColor="128, 128, 255" IsNewNode="True" />
+        <AppearanceRule Id="ReactiveModuleSource" Context="ListView" Criteria="[Source] = 'ReactiveModule'" TargetItems="Source" FontColor="192, 0, 0" IsNewNode="True" />
+        <AppearanceRule Id="RefreshViewModuleSource" Context="ListView" Criteria="[Source] = 'RefreshViewModule'" TargetItems="Source" FontColor="0, 200, 12" IsNewNode="True" />
+      </AppearanceRules>
+    </Class>
+  </BOModel>
+  <Views>
+    <DetailView Id="TraceEvent_DetailView" AllowEdit="False" />
+    <ListView Id="TraceEvent_ListView" IsFooterVisible="True" DataAccessMode="Server" ShowAutoFilterRow="True" TopReturnedObjects="5000">
+      <Columns>
+        <ColumnInfo Id="DateTime" Width="248" Index="-1" />
+        <ColumnInfo Id="Line" Index="-1" />
+        <ColumnInfo Id="Message" Width="840" Index="-1" />
+        <ColumnInfo Id="ProcessId" Index="-1" />
+        <ColumnInfo Id="ThreadId" Index="-1" />
+        <ColumnInfo Id="Timestamp" Index="-1" SortOrder="Descending" SortIndex="0" />
+        <ColumnInfo Id="TraceEventType" Width="158" Index="-1" />
+        <ColumnInfo Id="Source" Width="124" Index="0" />
+        <ColumnInfo Id="Location" Index="1">
+          <Summary>
+            <ColumnSummaryItem Id="@6222179a-461a-4508-9c01-c8879c503df6" SummaryType="Count" IsNewNode="True" />
+          </Summary>
+        </ColumnInfo>
+        <ColumnInfo Id="Method" Index="2" />
+        <ColumnInfo Id="Action" Index="3" Width="58" />
+        <ColumnInfo Id="Called" Index="4" Width="37" />
+        <ColumnInfo Id="Value" Index="5" Width="1021" />
+      </Columns>
+    </ListView>
+  </Views>
+</Application>

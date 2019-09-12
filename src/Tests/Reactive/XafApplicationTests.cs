@@ -1,10 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading.Tasks;
+using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using Shouldly;
 using TestsLib;
 using Xpand.Source.Extensions.XAF.XafApplication;
+using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Tests.BOModel;
 using Xunit;
@@ -75,11 +78,25 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
 
         private static ReactiveModule DefaultReactiveModule(Platform platform){
             var application = platform.NewApplication();
-            application.Title = "ReactiveModule";
-            var reactiveModule = new ReactiveModule();
-            reactiveModule.AdditionalExportedTypes.AddRange(new[]{typeof(R)});
-            application.SetupDefaults(reactiveModule);
-            return reactiveModule;
+            return application.AddModule<ReactiveModule>(typeof(R));
         }
+
+        [Fact]
+        public void BufferUntilCompatibilityChecked(){
+            var source = new Subject<int>();
+            var application = DefaultReactiveModule(Platform.Win).Application;
+            var buffer = application.BufferUntilCompatibilityChecked(source).SubscribeReplay();
+            source.OnNext(1);
+            source.OnNext(2);
+            buffer.Test().Items.Count.ShouldBe(0);
+
+            application.CreateObjectSpace();
+            source.OnNext(3);
+
+            
+            buffer.Test().Items.Count.ShouldBe(3);
+
+        }
+
     }
 }

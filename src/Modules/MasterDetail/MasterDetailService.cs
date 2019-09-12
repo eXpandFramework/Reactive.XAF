@@ -61,7 +61,7 @@ namespace Xpand.XAF.Modules.MasterDetail{
                     .Active[MasterDetailModule.CategoryName] = true)
                 .Select(_ => _.detailViewItem.Frame.Actions<SimpleAction>().Where(action => action.Id == MasterDetailSaveAction)
                     .Select(action => action.WhenExecuted()).Merge()
-                    .Do(tuple => { tuple.objectSpace.CommitChanges(); }))
+                    .Do(tuple => { tuple.action.Controller.Frame.View.ObjectSpace.CommitChanges(); }))
                 .Merge().ToUnit();
         }
 
