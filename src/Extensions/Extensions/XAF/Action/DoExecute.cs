@@ -1,9 +1,11 @@
-﻿using DevExpress.ExpressApp;
+﻿using System;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Utils;
 
 namespace Xpand.Source.Extensions.XAF.Action{
     internal static class ActionExtensions{
+
         public static BoolList Clone(this BoolList boolList){
             var list = new BoolList();
             foreach (var key in boolList.GetKeys()){
