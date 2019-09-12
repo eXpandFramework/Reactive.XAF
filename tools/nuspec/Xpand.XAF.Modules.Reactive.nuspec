@@ -14,13 +14,14 @@
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Reactive</tags>
     <dependencies>
+      <dependency id="System.Interactive" version="4.0.0-preview.8.build.9" />
       <dependency id="System.Reactive" version="4.1.6" />
       <dependency id="Xpand.VersionConverter" version="1.0.34.0" />
     </dependencies>
   </metadata>
   <files>
-    <file src="Xpand.XAF.Modules.Reactive.dll" target="lib\net461\Xpand.XAF.Modules.Reactive.dll" />
-    <file src="Xpand.XAF.Modules.Reactive.pdb" target="lib\net461\Xpand.XAF.Modules.Reactive.pdb" />
+    <file src="Xpand.XAF.Modules.Reactive.dll" target="lib\net461\Xpand.XAF.Modules.Reactive." />
+    <file src="Xpand.XAF.Modules.Reactive.pdb" target="lib\net461\Xpand.XAF.Modules.Reactive." />
     <file src="..\src\libs\0Harmony.dll" target="lib\net461\0Harmony.dll" />
     <file src="..\src\libs\Fasterflect.Netstandard.dll" target="lib\net461\Fasterflect.Netstandard.dll" />
     <file src="Readme.txt" target="" />

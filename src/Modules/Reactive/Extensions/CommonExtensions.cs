@@ -173,7 +173,7 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
 
         internal static bool Fits(this View view,ViewType viewType=ViewType.Any,Nesting nesting=Nesting.Any,Type objectType=null) {
             objectType = objectType ?? typeof(object);
-            return FitsCore(view, viewType)&&FitsCore(view,nesting)&&objectType.IsAssignableFrom(view.ObjectTypeInfo.Type);
+            return FitsCore(view, viewType)&&FitsCore(view,nesting)&&objectType.IsAssignableFrom(view.ObjectTypeInfo?.Type);
         }
 
         private static bool FitsCore(View view, ViewType viewType){

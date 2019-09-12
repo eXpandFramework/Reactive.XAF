@@ -24,17 +24,22 @@
     <PackageReference Include="DevExpress.Data" Version="18.2.7" />
     <PackageReference Include="DevExpress.Xpo" Version="18.2.7" />
     <PackageReference Include="Xunit.StaFact" Version="0.3.18" />
-    
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Extensions\Extensions\Xpand.Source.Extensions.csproj" />
-    <ProjectReference Include="..\..\Modules\Reactive\Xpand.XAF.Modules.Reactive.csproj" />
-    <ProjectReference Include="..\..\Modules\RefreshView\Xpand.XAF.Modules.RefreshView.csproj" />
-    <ProjectReference Include="..\TestsLib\TestsLib.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="TestsLib">
       <HintPath>..\..\..\bin\TestsLib.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Source.Extensions">
+      <HintPath>..\..\..\bin\Xpand.Source.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.OneView">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.OneView.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Reactive">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.RefreshView">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.RefreshView.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

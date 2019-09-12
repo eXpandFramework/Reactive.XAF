@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Configuration;
-using System.Reactive.Linq;
 using System.Windows.Forms;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Security;
 using DevExpress.Persistent.Base;
 using DevExpress.XtraEditors;
-using Xpand.XAF.Modules.OneView;
-using Xpand.XAF.Modules.Reactive.Logger.Hub;
-using Xpand.XAF.Modules.Reactive.Services;
 
 
 namespace Xpand.XAF.Modules.Reactive.Logger.Client.Win {

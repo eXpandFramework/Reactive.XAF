@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
-using System.Reactive;
 using System.Reactive.Linq;
 using System.Windows.Forms;
 using DevExpress.ExpressApp;
@@ -26,30 +25,6 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source.Buffer(compatibilityCheckefd).FirstAsync().SelectMany(list => list)
                 .Concat(Observable.Defer(() => source)).Select(source1 => source1);
         }
-//        public static IObservable<Frame> FrameTemplateChanged<T>(this IObservable<T> source,bool skipWindowsCtorAssigment = false) where T : XafApplication{
-//            return source.SelectMany(application => application.WhenFrameTemplateChanged());
-//        }
-
-//        public static IObservable<Frame> WhenFrameTemplateViewControlsCreated(this XafApplication application){
-//            return application.WhenFrameTemplateViewChanged()
-//                .SelectMany(frame =>frame.View.WhenControlsCreated().Select(_ => frame))
-//                ;
-//        }
-
-//        public static IObservable<Frame> WhenFrameTemplateViewChanged(this XafApplication application){
-//            return application.WhenFrameTemplateChanged().TemplateViewChanged();
-//        }
-
-//        public static IObservable<Frame> WhenFrameTemplateChanged(this XafApplication application,bool skipWindowsCtorAssigment = false){
-//            var winWindow = application.WhenWindowCreated().Where(window => !skipWindowsCtorAssigment&&window.GetType().Name == "WinWindow");
-//            return application
-//                .WhenFrameCreated()
-//                .Select(frame => frame)
-//                .TemplateChanged()
-//                .Select(frame => frame)
-//                .Merge(winWindow)
-//                .Select(frame => frame);
-//        }
 
         public static IObservable<XafApplication> WhenCompatibilityChecked(this XafApplication application){
             if ((bool) application.GetPropertyValue("IsCompatibilityChecked")){
@@ -58,13 +33,6 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return application.WhenObjectSpaceCreated().FirstAsync().To(application)
                 .Select(xafApplication => xafApplication)
                 .TraceRX();
-
-            return Observable.Defer(() =>
-                    Observable.Start(() =>
-                        Observable.While(() => !(bool) application.GetPropertyValue("IsCompatibilityChecked"),
-                            Observable.Empty<Unit>())).Merge())
-                .Concat(Unit.Default.AsObservable())
-                .To(application);
         }
 
         public static IObservable<XafApplication> WhenModule(

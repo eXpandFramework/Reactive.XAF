@@ -5,6 +5,7 @@ VisualStudioVersion = 16.0.28917.182
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.AutoCommit", "AutoCommit\Xpand.XAF.Modules.AutoCommit.csproj", "{5685573C-15E0-43DF-B939-D842211BA5ED}"
 	ProjectSection(ProjectDependencies) = postProject
+		{8E006135-6815-49E6-A282-9D0F964937D3} = {8E006135-6815-49E6-A282-9D0F964937D3}
 		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
 	EndProjectSection
 EndProject
@@ -66,7 +67,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Reactive.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Reactive.Logger.Client.Win", "Reactive.Logger.Client.Win\Xpand.XAF.Modules.Reactive.Logger.Client.Win.csproj", "{F929A9D2-7C98-4138-8F2B-C3D3A8464710}"
 	ProjectSection(ProjectDependencies) = postProject
+		{4C3ED41A-EB50-4A59-9A38-0BDBC1967C06} = {4C3ED41A-EB50-4A59-9A38-0BDBC1967C06}
+		{FCC60F32-B678-40B7-9226-9FBEB82B0FDA} = {FCC60F32-B678-40B7-9226-9FBEB82B0FDA}
+		{8E006135-6815-49E6-A282-9D0F964937D3} = {8E006135-6815-49E6-A282-9D0F964937D3}
 		{D7B0A652-605F-4C0F-B543-FC3FBD568DF3} = {D7B0A652-605F-4C0F-B543-FC3FBD568DF3}
+		{F81172D2-C7A6-4159-ADB7-38E8C1B1460D} = {F81172D2-C7A6-4159-ADB7-38E8C1B1460D}
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.RefreshView", "RefreshView\Xpand.XAF.Modules.RefreshView.csproj", "{4C65406D-13A1-488F-8945-9C38DBC6ECD5}"
@@ -77,6 +82,11 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Reactive.Logger.Hub", "Reactive.Logger.Hub\Xpand.XAF.Modules.Reactive.Logger.Hub.csproj", "{F81172D2-C7A6-4159-ADB7-38E8C1B1460D}"
 	ProjectSection(ProjectDependencies) = postProject
 		{FCC60F32-B678-40B7-9226-9FBEB82B0FDA} = {FCC60F32-B678-40B7-9226-9FBEB82B0FDA}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Reactive.Win", "Reactive.Win\Xpand.XAF.Modules.Reactive.Win.csproj", "{8E006135-6815-49E6-A282-9D0F964937D3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
 	EndProjectSection
 EndProject
 Global
@@ -188,6 +198,12 @@ Global
 		{F81172D2-C7A6-4159-ADB7-38E8C1B1460D}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{F81172D2-C7A6-4159-ADB7-38E8C1B1460D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F81172D2-C7A6-4159-ADB7-38E8C1B1460D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E006135-6815-49E6-A282-9D0F964937D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E006135-6815-49E6-A282-9D0F964937D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E006135-6815-49E6-A282-9D0F964937D3}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E006135-6815-49E6-A282-9D0F964937D3}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
+		{8E006135-6815-49E6-A282-9D0F964937D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E006135-6815-49E6-A282-9D0F964937D3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

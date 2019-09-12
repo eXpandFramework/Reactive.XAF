@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProductVersion>9.0.30729</ProductVersion>
     <ProjectGuid>{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}</ProjectGuid>
@@ -54,7 +54,6 @@
     <PackageReference Include="DevExpress.Xpo" Version="18.2.7" />
     <PackageReference Include="DevExpress.Win" Version="18.2.7" />
   </ItemGroup>
-  
   <ItemGroup>
     <Reference Include="Fasterflect.Netstandard">
       <HintPath>..\..\Libs\Fasterflect.Netstandard.dll</HintPath>

@@ -28,9 +28,14 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*Tests*", "*.Source.*" 
         LibrariesFolder="$root\src\libs"
         ProjectsRoot=$root
     }
+    if (!(Test-Path $uArgs.NuspecFilename)){
+        Set-Location $root\tools\nuspec
+        & (Get-NugetPath) spec $_.BaseName
+    }
     if ($Release){
         $uArgs.PublishedSource=(Get-PackageFeed -Nuget)
     }
+    
     Update-Nuspec @uArgs 
 
     $nuspecFileName="$root\tools\nuspec\$($_.BaseName).nuspec"

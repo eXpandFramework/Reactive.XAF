@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <package>
   <metadata>
-    <id>Xpand.XAF.Modules.ViewEditMode</id>
-    <version>1.2.46.0</version>
+    <id>Xpand.XAF.Modules.OneView</id>
+    <version>0.0.1.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
-    <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/ViewEditMode</projectUrl>
+    <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/OneView</projectUrl>
     <iconUrl>http://sign.expandframework.com</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>The `ViewEditMode` module controls the state of DetailView.ViewEditMode. Choose `Edit` mode to open a `DetailView` in edit mode. 
@@ -16,7 +16,7 @@ The module uses the next two strategies:
 2. It monitors the `ViewEditMode` modifiation and cancels it if the `LockViewEditMode` attribute is used.</description>
     <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  ViewEditMode</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  OneView</tags>
     <dependencies>
       <dependency id="System.Reactive" version="4.1.6" />
       <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.46.0" />
@@ -24,8 +24,8 @@ The module uses the next two strategies:
     </dependencies>
   </metadata>
   <files>
-    <file src="Xpand.XAF.Modules.ViewEditMode.dll" target="lib\net461\Xpand.XAF.Modules.ViewEditMode." />
-    <file src="Xpand.XAF.Modules.ViewEditMode.pdb" target="lib\net461\Xpand.XAF.Modules.ViewEditMode." />
+    <file src="Xpand.XAF.Modules.OneView.dll" target="lib\net461\Xpand.XAF.Modules.OneView." />
+    <file src="Xpand.XAF.Modules.OneView.pdb" target="lib\net461\Xpand.XAF.Modules.OneView." />
     <file src="..\src\libs\Fasterflect.Netstandard.dll" target="lib\net461\Fasterflect.Netstandard.dll" />
     <file src="Readme.txt" target="" />
   </files>

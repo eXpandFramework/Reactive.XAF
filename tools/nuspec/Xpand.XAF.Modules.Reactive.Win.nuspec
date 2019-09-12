@@ -1,28 +1,28 @@
 <?xml version="1.0"?>
 <package>
   <metadata>
-    <id>Xpand.XAF.Modules.MasterDetail</id>
-    <version>0.0.47.0</version>
+    <id>Xpand.XAF.Modules.Reactive.Win</id>
+    <version>0.0.1.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
-    <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/MasterDetail</projectUrl>
+    <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/Reactive.Win</projectUrl>
     <iconUrl>http://sign.expandframework.com</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>The `MasterDetail` module can help you create platform agnostic master detail `XAF` views using only the Model Editor.</description>
+    <description>The `Reactive` module can be used to create XAF DSL implementations in a Reactive/Functional style.</description>
     <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  MasterDetail</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Reactive.Win</tags>
     <dependencies>
+      <dependency id="System.Interactive" version="4.0.0-preview.8.build.9" />
       <dependency id="System.Reactive" version="4.1.6" />
-      <dependency id="System.ValueTuple" version="4.5.0" />
       <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.46.0" />
       <dependency id="Xpand.VersionConverter" version="1.0.34.0" />
     </dependencies>
   </metadata>
   <files>
-    <file src="Xpand.XAF.Modules.MasterDetail.dll" target="lib\net461\Xpand.XAF.Modules.MasterDetail." />
-    <file src="Xpand.XAF.Modules.MasterDetail.pdb" target="lib\net461\Xpand.XAF.Modules.MasterDetail." />
+    <file src="Xpand.XAF.Modules.Reactive.Win.dll" target="lib\net461\Xpand.XAF.Modules.Reactive.Win." />
+    <file src="Xpand.XAF.Modules.Reactive.Win.pdb" target="lib\net461\Xpand.XAF.Modules.Reactive.Win." />
     <file src="..\src\libs\0Harmony.dll" target="lib\net461\0Harmony.dll" />
     <file src="..\src\libs\Fasterflect.Netstandard.dll" target="lib\net461\Fasterflect.Netstandard.dll" />
     <file src="Readme.txt" target="" />

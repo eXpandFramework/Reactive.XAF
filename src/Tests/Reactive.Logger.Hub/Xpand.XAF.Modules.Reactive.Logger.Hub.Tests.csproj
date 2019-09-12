@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net461</TargetFramework>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
@@ -33,12 +33,6 @@
     <PackageReference Include="Xunit.StaFact" Version="0.3.18" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Extensions\Extensions\Xpand.Source.Extensions.csproj" />
-    <ProjectReference Include="..\..\Modules\Reactive.Logger.Hub\Xpand.XAF.Modules.Reactive.Logger.Hub.csproj" />
-    <ProjectReference Include="..\..\Modules\Reactive.Logger\Xpand.XAF.Modules.Reactive.Logger.csproj" />
-    <ProjectReference Include="..\..\Modules\Reactive\Xpand.XAF.Modules.Reactive.csproj" />
-  </ItemGroup>
-  <ItemGroup>
     <Reference Include="0Harmony">
       <HintPath>..\..\Libs\0Harmony.dll</HintPath>
     </Reference>
@@ -46,11 +40,22 @@
       <HintPath>..\..\Libs\Fasterflect.Netstandard.dll</HintPath>
     </Reference>
     <Reference Include="MagicOnion">
-      <HintPath>..\..\..\..\MagicOnion\src\MagicOnion\bin\Debug\netstandard2.0\MagicOnion.dll</HintPath>
+      <HintPath>..\..\Libs\MagicOnion.dll</HintPath>
     </Reference>
     <Reference Include="Tests">
       <HintPath>..\..\..\bin\TestsLib.dll</HintPath>
     </Reference>
+    <Reference Include="Xpand.Source.Extensions">
+      <HintPath>..\..\..\bin\Xpand.Source.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Reactive">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Reactive.Logger">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Reactive.Logger.Hub">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.Hub.dll</HintPath>
+    </Reference>
   </ItemGroup>
-  
 </Project>

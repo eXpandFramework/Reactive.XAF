@@ -20,7 +20,7 @@ namespace Xpand.XAF.Modules.RefreshView {
 
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
-            Application.Connect()
+            Application?.Connect()
                 .TakeUntilDisposed(this)
                 .Subscribe();
         }

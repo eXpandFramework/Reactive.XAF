@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{F929A9D2-7C98-4138-8F2B-C3D3A8464710}</ProjectGuid>
     <TargetFramework>net461</TargetFramework>
@@ -19,12 +19,18 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>1701;1702</NoWarn>
     <PlatformTarget>AnyCPU</PlatformTarget>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
+    <LangVersion>latest</LangVersion>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>pdbonly</DebugType>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <OutputPath>..\..\..\bin</OutputPath>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Model.DesignedDiffs.log" />
     <None Remove="Model.xafml" />
     <None Remove="ReactiveLoggerClientWinApplication.Designer.log" />
-    
   </ItemGroup>
   <ItemGroup>
     <Content Include="Model.xafml">
@@ -33,11 +39,20 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MagicOnion">
-      <HintPath>..\..\..\..\MagicOnion\src\MagicOnion\bin\Debug\netstandard2.0\MagicOnion.dll</HintPath>
+      <HintPath>..\..\Libs\MagicOnion.dll</HintPath>
     </Reference>
     <Reference Include="System.Configuration" />
     <Reference Include="Fasterflect.Netstandard">
       <HintPath>..\..\Libs\Fasterflect.Netstandard.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.OneView">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.OneView.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Reactive">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Reactive.Logger.Hub">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.Hub.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -57,11 +72,5 @@
     <PackageReference Include="DevExpress.Xpo" Version="18.2.7" />
     <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
     <PackageReference Include="System.Reactive" Version="4.1.6" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\OneView\Xpand.XAF.Modules.OneView.csproj" />
-    <ProjectReference Include="..\Reactive.Logger.Hub\Xpand.XAF.Modules.Reactive.Logger.Hub.csproj" />
-    <ProjectReference Include="..\Reactive.Logger\Xpand.XAF.Modules.Reactive.Logger.csproj" />
-    <ProjectReference Include="..\Reactive\Xpand.XAF.Modules.Reactive.csproj" />
   </ItemGroup>
 </Project>

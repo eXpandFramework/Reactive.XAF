@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{F81172D2-C7A6-4159-ADB7-38E8C1B1460D}</ProjectGuid>
     <TargetFramework>net461</TargetFramework>
@@ -21,9 +21,8 @@
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
-    
     <Reference Include="MagicOnion">
-      <HintPath>..\..\..\..\MagicOnion\src\MagicOnion\bin\Debug\netstandard2.0\MagicOnion.dll</HintPath>
+      <HintPath>..\..\Libs\MagicOnion.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
@@ -36,7 +35,7 @@
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.dll</HintPath>
     </Reference>
     <Reference Include="MagicOnion">
-      <HintPath>..\..\..\..\MagicOnion\src\MagicOnion\bin\Debug\netstandard2.0\MagicOnion.dll</HintPath>
+      <HintPath>..\..\Libs\MagicOnion.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive.Win">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Win.dll</HintPath>

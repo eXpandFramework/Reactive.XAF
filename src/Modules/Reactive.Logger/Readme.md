@@ -1,6 +1,6 @@
-![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.ViewEditMode.svg?&style=flat) ![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.ViewEditMode.svg?&style=flat)
+![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.Reactive.Logger.svg?&style=flat) ![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.Reactive.Logger.svg?&style=flat)
 
-[![GitHub issues](https://img.shields.io/github/issues/eXpandFramework/expand/ViewEditMode.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+ViewEditMode) [![GitHub close issues](https://img.shields.io/github/issues-closed/eXpandFramework/eXpand/ViewEditMode.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+ViewEditMode)
+[![GitHub issues](https://img.shields.io/github/issues/eXpandFramework/expand/Reactive.Logger.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+Reactive.Logger) [![GitHub close issues](https://img.shields.io/github/issues-closed/eXpandFramework/eXpand/Reactive.Logger.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+Reactive.Logger)
 # About 
 
 The `ViewEditMode` module controls the state of DetailView.ViewEditMode. Choose `Edit` mode to open a `DetailView` in edit mode. 
@@ -33,7 +33,11 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp**|**Any**
-|System.Reactive|4.1.6
+ |**DevExpress.Persistent.Base**|**Any**
+ |**DevExpress.ExpressApp.ConditionalAppearance**|**Any**
+ |**DevExpress.Xpo**|**Any**
+|akarnokd.reactive_extensions|0.0.27-alpha
+ |System.Reactive|4.1.6
  |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|1.2.46
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.0.34
 
@@ -43,7 +47,7 @@ To `Step in the source code` you need to `enable Source Server support` in your 
 
 If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call when [XafApplication.SetupComplete](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.XafApplication.SetupComplete).
 ```ps1
-((Xpand.XAF.Modules.ViewEditModeModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.ViewEditModeModule))).Unload();
+((Xpand.XAF.Modules.Reactive.LoggerModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.Reactive.LoggerModule))).Unload();
 ```
 
 ## Details

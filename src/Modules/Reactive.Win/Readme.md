@@ -15,7 +15,8 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp**|**Any**
-|System.Reactive|4.1.6
+|System.Interactive|4.0.0-preview.8.build.9
+ |System.Reactive|4.1.6
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.0.34
 
 ## Issues-Debugging-Troubleshooting
@@ -28,9 +29,38 @@ If the package is installed in a way that you do not have access to uninstall it
 ```
 
 ## Details
+The module does not use controllers but only the existing or new XAF events where they are modeled as in observable with the prefix `When`. 
+
+Observables are nothing more than a Type however that provides operators/methods to combine,merge, zip, observeOn(Scheduler) using LINQ style syntax.
+
+For example to get the first Customer ListView created since your application start you may write.
+
+```cs
+ListView listView=await application.WhenListViewCreated().ToListView().When(typeof(Customer))
+```
+To get the first new Customer created you can write:
+```cs
+Customer listView=await application.NewObject<Customer>()
+```
+To add that customer to the first view created collectionsource you can write:
+```cs
+var listView = application.WhenListViewCreated().ToListView().When(typeof(Customer));
+var newCustomer = application.NewObject<Customer>();
+await newCustomer.CombineLatest(listView, (customer, view) => {
+    view.CollectionSource.Add(customer);
+    return customer;
+})
+```
+
+And so on, the sky is the limit here as you can write custom operators just like a common c# extension method that extends and returns an `IObservable<T>`
+
+
+
+
 
 
 ### Tests
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Reactive)
 
 ### Examples
+All Xpand.XAF.Modules that reference this package are developed the RX way.

@@ -21,8 +21,8 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="Xpand.XAF.Modules.ProgressBarViewItem.dll" target="lib\net461\Xpand.XAF.Modules.ProgressBarViewItem.dll" />
-    <file src="Xpand.XAF.Modules.ProgressBarViewItem.pdb" target="lib\net461\Xpand.XAF.Modules.ProgressBarViewItem.pdb" />
+    <file src="Xpand.XAF.Modules.ProgressBarViewItem.dll" target="lib\net461\Xpand.XAF.Modules.ProgressBarViewItem." />
+    <file src="Xpand.XAF.Modules.ProgressBarViewItem.pdb" target="lib\net461\Xpand.XAF.Modules.ProgressBarViewItem." />
     <file src="..\src\libs\Fasterflect.Netstandard.dll" target="lib\net461\Fasterflect.Netstandard.dll" />
     <file src="Readme.txt" target="" />
   </files>
