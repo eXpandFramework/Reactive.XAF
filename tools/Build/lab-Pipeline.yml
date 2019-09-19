@@ -32,10 +32,4 @@ jobs:
         distributionBatchType: basedOnAssembly
         customBatchSizeValue: 10000
         collectDumpOn: never
-    - task: PowerShell@2
-      displayName: CheckTests
-      inputs:
-        pwsh: true
-        targetType: filePath
-        filePath: .\tools\build\check-tests.ps1
-        arguments: $(AzureToken) $(Build.DefinitionName) $(Build.BuildNumber)
+    
