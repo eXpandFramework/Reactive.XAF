@@ -22,6 +22,7 @@ jobs:
         searchFolder: '$(System.DefaultWorkingDirectory)'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
+          **\*Reactive.Logger.Hub.Tests*.dll
           **\*Auto*.dll
           **\*CloneMemberValue*.dll
           **\*CloneModelView*.dll
