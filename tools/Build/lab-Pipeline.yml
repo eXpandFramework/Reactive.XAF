@@ -1,7 +1,7 @@
 jobs:
 - job: Test
   strategy:
-    parallel: 10
+    parallel: 2
 
   pool:
     vmImage: windows-2019
@@ -22,17 +22,9 @@ jobs:
         searchFolder: '$(System.DefaultWorkingDirectory)'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
-          **\*Reactive.Logger.Hub.Tests*.dll
+          **\*Inherit*.dll
           **\*Auto*.dll
           **\*CloneMemberValue*.dll
-          **\*CloneModelView*.dll
-          **\*GridListEditor*.dll
-          **\*HideToolBar*.dll
-          **\*MasterDetail*.dll
-          **\*ProgressBarViewItem*.dll
-          **\*SuppressConfirmation*.dll
-          **\*ViewEditMode*.dll
-          **\*Inherit*.dll
           !**\*TestAdapter.dll
           !**\obj\**
         
