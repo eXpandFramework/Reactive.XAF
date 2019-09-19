@@ -1,7 +1,7 @@
 jobs:
 - job: Test
   strategy:
-    parallel: 12
+    parallel: 10
     
   steps:
     - task: DownloadBuildArtifacts@0
