@@ -21,6 +21,7 @@ jobs:
       inputs:
         searchFolder: '$(System.DefaultWorkingDirectory)'
         testSelector: 'testAssemblies'
+        uiTests: true
         testAssemblyVer2: |
           
           **\*Reactive.Logger.Hub.Tests*.dll
@@ -29,7 +30,7 @@ jobs:
           !**\obj\**
         
         diagnosticsEnabled: true
-        runInParallel: true
+        runInParallel: false
         
         distributionBatchType: 'basedOnAssembly'
       
