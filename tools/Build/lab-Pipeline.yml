@@ -11,3 +11,26 @@ jobs:
         definition: '23'
         buildVersionToDownload: 'latest'
         targetPath: '$(Pipeline.Workspace)'
+    - task: VSTest@2
+      displayName: 'VsTest - testAssemblies'
+      inputs:
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: |
+          **\*Tests*.dll
+          !**\*TestAdapter.dll
+          !**\obj\**
+        runInParallel: false
+        diagnosticsEnabled: true
+        runTestsInIsolation: true
+        codeCoverageEnabled: true
+        rerunFailedTests: true 
+        rerunMaxAttempts: 3
+        collectDumpOn: never
+    - task: PowerShell@2
+      displayName: CheckTests
+      inputs:
+        pwsh: true
+        targetType: filePath
+        filePath: .\tools\build\check-tests.ps1
+        arguments: $(AzureToken) $(Build.DefinitionName) $(Build.BuildNumber)
