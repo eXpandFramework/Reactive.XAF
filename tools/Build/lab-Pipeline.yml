@@ -31,7 +31,7 @@ jobs:
           !**\obj\**
         
         diagnosticsEnabled: true
-        
+        runInParallel: true
         
         distributionBatchType: 'basedOnAssembly'
       
