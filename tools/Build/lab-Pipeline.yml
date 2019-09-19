@@ -29,6 +29,7 @@ jobs:
         codeCoverageEnabled: true
         rerunFailedTests: true 
         rerunMaxAttempts: 3
+        distributionBatchType: basedOnAssembly
         collectDumpOn: never
     - task: PowerShell@2
       displayName: CheckTests
