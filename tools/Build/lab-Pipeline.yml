@@ -1,7 +1,7 @@
 jobs:
 - job: Test
   strategy:
-    parallel: 11
+    parallel: 12
 
   pool:
     vmImage: windows-2019
@@ -30,6 +30,7 @@ jobs:
           **\*SuppressConfirmation*.dll
           **\*ViewEditMode*.dll
           **\*Xpand.XAF.Modules.Reactive.Tests*.dll
+          **\*Reactive.Logger.Hub.Tests*.dll
           **\*Inherit*.dll
           **\*Auto*.dll
           **\*CloneMemberValue*.dll
