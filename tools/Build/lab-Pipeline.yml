@@ -23,7 +23,7 @@ jobs:
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
           
-          **\*Xpand.XAF.Modules.Reactive.Tests*.dll
+          **\*Reactive.Logger.Hub.Tests*.dll
           
           !**\*TestAdapter.dll
           !**\obj\**
