@@ -13,6 +13,10 @@ namespace Xpand.XAF.Modules.AutoCommit{
             RequiredModuleTypes.Add(typeof(SystemModule));
             RequiredModuleTypes.Add(typeof(ReactiveModule));   
         }
+        public static ReactiveTraceSource TraceSource{ get; set; }
+        static AutoCommitModule(){
+            TraceSource=new ReactiveTraceSource(nameof(AutoCommitModule));
+        }
 
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);

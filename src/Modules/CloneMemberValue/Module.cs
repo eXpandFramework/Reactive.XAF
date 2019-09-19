@@ -11,6 +11,11 @@ namespace Xpand.XAF.Modules.CloneMemberValue{
             RequiredModuleTypes.Add(typeof(ReactiveModule));
         }
 
+        public static ReactiveTraceSource TraceSource{ get; set; }
+        static CloneMemberValueModule(){
+            TraceSource=new ReactiveTraceSource(nameof(CloneMemberValueModule));
+        }
+
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
             moduleManager.Connect(Application)

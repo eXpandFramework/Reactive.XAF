@@ -9,20 +9,20 @@
     <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/Reactive.Win</projectUrl>
     <iconUrl>http://sign.expandframework.com</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>The `Reactive` module can be used to create XAF DSL implementations in a Reactive/Functional style.</description>
+    <description>The `Reactive.Win` module is the platform specific version of the [Reactive module](https://github.com/eXpandFramework/DevExpress.XAF/tree/lab/src/Modules/Reactive). Refer to it for further information.</description>
     <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Reactive.Win</tags>
     <dependencies>
-      <dependency id="System.Interactive" version="4.0.0-preview.8.build.9" />
+      <dependency id="System.Interactive" version="3.2.0" />
       <dependency id="System.Reactive" version="4.1.6" />
-      <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.46.0" />
+      <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.47.0" />
       <dependency id="Xpand.VersionConverter" version="1.0.34.0" />
     </dependencies>
   </metadata>
   <files>
-    <file src="Xpand.XAF.Modules.Reactive.Win.dll" target="lib\net461\Xpand.XAF.Modules.Reactive.Win." />
-    <file src="Xpand.XAF.Modules.Reactive.Win.pdb" target="lib\net461\Xpand.XAF.Modules.Reactive.Win." />
+    <file src="Xpand.XAF.Modules.Reactive.Win.dll" target="lib\net461\Xpand.XAF.Modules.Reactive.Win.dll" />
+    <file src="Xpand.XAF.Modules.Reactive.Win.pdb" target="lib\net461\Xpand.XAF.Modules.Reactive.Win.pdb" />
     <file src="..\src\libs\0Harmony.dll" target="lib\net461\0Harmony.dll" />
     <file src="..\src\libs\Fasterflect.Netstandard.dll" target="lib\net461\Fasterflect.Netstandard.dll" />
     <file src="Readme.txt" target="" />

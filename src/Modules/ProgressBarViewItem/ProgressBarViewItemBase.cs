@@ -145,6 +145,7 @@ console.log('p='+previous);
                         _callBackManager = _application.MainWindow.Template.GetPropertyValue("CallbackManager");
                         _callBackManager.CallMethod("RegisterHandler", _handlerId, this);
                     })
+                    .TraceProgressBarViewItemModule()
                     .Subscribe();
             }
             return instance;

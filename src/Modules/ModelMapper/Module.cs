@@ -12,10 +12,16 @@ using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
-namespace Xpand.XAF.Modules.ModelMapper
-{
+namespace Xpand.XAF.Modules.ModelMapper{
     public sealed class ModelMapperModule : ReactiveModuleBase {
         private readonly IConnectableObservable<Unit> _modelExtended;
+
+        static ModelMapperModule(){
+            TraceSource=new ReactiveTraceSource(nameof(ModelMapperModule));
+        }
+
+        public static ReactiveTraceSource TraceSource{ get; set; }
+
         public ModelMapperModule(){
             RequiredModuleTypes.Add(typeof(ReactiveModule));
             _modelExtended = ModelExtendingService.Connected.FirstAsync().Replay(1);

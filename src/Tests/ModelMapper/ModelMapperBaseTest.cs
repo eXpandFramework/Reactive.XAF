@@ -23,10 +23,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         protected const string MMDetailViewTestItemNodePath = "Views/" + nameof(MM) + "_DetailView/Items/Test";
         protected const string MMListViewTestItemNodePath = "Views/" + nameof(MM) + "_ListView/Columns/Test";
         public const string DynamicTypeName = "DynamicTypeName";
-        internal ModelMapperModule DefaultModelMapperModule(Platform platform,params ModuleBase[] modules){
-            var xafApplication = platform.NewApplication();
+        internal ModelMapperModule DefaultModelMapperModule(string title,Platform platform,params ModuleBase[] modules){
+            var xafApplication = platform.NewApplication<ModelMapperModule>();
             xafApplication.Modules.AddRange(modules);
-            return xafApplication.AddModule<ModelMapperModule>(typeof(MM));
+            var modelMapperModule = xafApplication.AddModule<ModelMapperModule>(title,typeof(MM));
+            xafApplication.Logon();
+            xafApplication.CreateObjectSpace();
+            return modelMapperModule;
         }
 
         protected static PropertyInfo[] ModelTypeProperties(Type modelType){

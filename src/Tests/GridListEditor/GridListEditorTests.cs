@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Reactive.Linq;
+﻿using System.Reactive.Linq;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
@@ -57,9 +56,9 @@ namespace Xpand.XAF.Modules.GridListEditor.Tests{
 
 
         private static GridListEditorModule GridListEditorModule(string title,Platform platform=Platform.Win){
-            var application = platform.NewApplication();
+            var application = platform.NewApplication<GridListEditorModule>();
             application.EditorFactory=new EditorsFactory();
-            return application.AddModule<EmptyModule>(title,typeof(GLE)).Application.Modules.OfType<GridListEditorModule>().First();
+            return application.AddModule<GridListEditorModule>(title,typeof(GLE));
         }
     }
 }

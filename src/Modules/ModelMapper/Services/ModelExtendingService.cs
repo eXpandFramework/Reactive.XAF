@@ -41,11 +41,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         }
 
         private static IObservable<(Type targetIntefaceType, Type extenderInterface)> AddExtenders(ModelInterfaceExtenders extenders){
-            var modelExtenders = ModelMapperConfigurations.Distinct(_ => _.TypeToMap).ToObservable();
+            var modelExtenders = ModelExtenders().SubscribeReplay();
             var mappedContainers = TypeMappingService.Connect()
-                .SelectMany(unit => modelExtenders.Tracer("ModelExtenders")
-                    .Select(_ => _.MapToModel().Tracer("MapToModel")).Switch()
-                    .ModelInterfaces().Tracer("ModelInterface")
+                .SelectMany(unit => modelExtenders
+                    .Select(_ => _.MapToModel()).Switch()
+                    .ModelInterfaces()
                     .Where(type => typeof(IModelNode).IsAssignableFrom(type)))
                 .SelectMany(type => type.ModelMapperContainerTypes())
                 .Distinct().Replay().RefCount();
@@ -54,6 +54,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 .SelectMany(_ => mappedContainers.FirstAsync(type =>type.Attribute<ModelMapLinkAttribute>().LinkedTypeName == _.TypeToMap.AssemblyQualifiedName)
                     .SelectMany(extenderInterface => _.TargetInterfaceTypes.Select(targetInterfaceType => (targetInterfaceType, extenderInterface))))
                 .Do(_ => extenders.Add(_.targetInterfaceType,_.extenderInterface));
+        }
+
+        private static IObservable<IModelMapperConfiguration> ModelExtenders(){
+            return ModelMapperConfigurations.Distinct(_ => _.TypeToMap).ToObservable().TraceModelMapper();
         }
 
         public static void Extend(this ApplicationModulesManager modulesManager, IModelMapperConfiguration configuration){

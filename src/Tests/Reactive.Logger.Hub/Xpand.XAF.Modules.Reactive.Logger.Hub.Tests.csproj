@@ -10,17 +10,15 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="akarnokd.reactive_extensions" Version="0.0.27-alpha" />
     <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" Version="18.2.7" />
     <PackageReference Include="DevExpress.ExpressApp.Web" Version="18.2.7" />
     <PackageReference Include="DevExpress.ExpressApp.Win" Version="18.2.7" />
     <PackageReference Include="DevExpress.Persistent.BaseImpl" Version="18.2.7" />
-    <PackageReference Include="Grpc" Version="1.22.0" />
-    <PackageReference Include="Grpc.Core" Version="1.22.0" />
-    <PackageReference Include="MessagePack" Version="1.7.3.7" />
-    <PackageReference Include="Moq" Version="4.12.0" />
+    <PackageReference Include="Grpc.Core" Version="2.23.0" />
+    <PackageReference Include="MagicOnion" Version="2.4.0" />
+    <PackageReference Include="Moq" Version="4.13.0" />
     <PackageReference Include="Shouldly" Version="3.0.2" />
-    <PackageReference Include="System.Buffers" Version="4.5.0" />
-    <PackageReference Include="System.Interactive.Async" Version="3.2.0" />
     <PackageReference Include="System.Reactive" Version="4.1.6" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1">
@@ -38,9 +36,6 @@
     </Reference>
     <Reference Include="Fasterflect.Netstandard">
       <HintPath>..\..\Libs\Fasterflect.Netstandard.dll</HintPath>
-    </Reference>
-    <Reference Include="MagicOnion">
-      <HintPath>..\..\Libs\MagicOnion.dll</HintPath>
     </Reference>
     <Reference Include="Tests">
       <HintPath>..\..\..\bin\TestsLib.dll</HintPath>

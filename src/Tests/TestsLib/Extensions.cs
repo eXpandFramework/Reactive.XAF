@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
@@ -57,7 +58,8 @@ namespace TestsLib {
         public static void RegisterDefaults(this XafApplication application, params ModuleBase[] modules){
             application.AlwaysUpdateOnDatabaseVersionMismatch().Subscribe();
             var moduleBases = new[] {
-                new ReactiveLoggerHubModule(),new SystemModule(),
+                new ReactiveLoggerHubModule(),
+                new SystemModule(),
                 application is WinApplication ? (ModuleBase) new SystemWindowsFormsModule() : new SystemAspNetModule()
             }.Concat(modules);
             foreach (var moduleBase in moduleBases){
@@ -68,11 +70,38 @@ namespace TestsLib {
             
             application.RegisterInMemoryObjectSpaceProvider();
         }
-
-        public static IObservable<IModelReactiveLogger> ConfigureModel(this XafApplication application){
-            
-            return application.ReactiveModulesModel().ReactiveLogger()
-                .Do(logger => logger.TraceSources.Enabled = true);
+        static readonly Dictionary<string,int> ModulePorts=new Dictionary<string, int>(){
+            {"AutoCommitModule",61457 },
+            {"CloneMemberValueModule",61458 },
+            {"CloneModelViewModule",61459 },
+            {"GridListEditorModule",61460 },
+            {"HideToolBarModule",61461 },
+            {"ReactiveLoggerModule",61462 },
+            {"ReactiveLoggerHubModule",61463 },
+            {"MasterDetailModule",61464 },
+            {"ModelMapperModule",61465 },
+            {"ModelViewInheritanceModule",61466 },
+            {"OneViewModule",61467 },
+            {"ProgressBarViewItemModule",61468 },
+            {"ReactiveModule",61469 },
+            {"ReactiveWinModule",61470 },
+            {"RefreshViewModule",61471 },
+            {"SuppressConfirmationModule",61472 },
+            {"ViewEditModeModule",61473 },
+        };
+        public static IObservable<IModelReactiveLogger> ConfigureModel<TModule>(this XafApplication application) where TModule:ModuleBase{
+            return application.WhenModelChanged()
+                .Select(_ => {
+                    var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger;
+                    logger.TraceSources.Enabled = true;
+                    var port = ModulePorts[typeof(TModule).Name];
+                    var modelLoggerPortsList = ((IModelServerPorts) logger).LoggerPorts;
+                    modelLoggerPortsList.OfType<IModelLoggerServerPort>().First().Port = port;
+                    var clientRange = modelLoggerPortsList.OfType<IModelLoggerClientRange>().First();
+                    clientRange.StartPort = port;
+                    clientRange.EndPort = port+1;
+                    return logger;
+                });
 
         }
 
@@ -98,21 +127,22 @@ namespace TestsLib {
         }
 
         public static TModule NewModule<TModule>(Platform platform,string title=null,params Type[] additionalExportedTypes) where  TModule:ModuleBase, new(){
-            return platform.NewApplication().AddModule<TModule>(title,additionalExportedTypes);
+            return platform.NewApplication<TModule>().AddModule<TModule>(title,additionalExportedTypes);
         }
-
-        public static XafApplication NewApplication(this Platform platform){
+        
+        public static XafApplication NewApplication<TModule>(this Platform platform) where TModule:ModuleBase{
             XafApplication application;
+            
             if (platform == Platform.Web){
-                application = new TestWebApplication();
+                application = new TestWebApplication(typeof(TModule));
             }
             else if (platform == Platform.Win){
-                application = new TestWinApplication();
+                application = new TestWinApplication(typeof(TModule));
             }
             else{
                 throw new NotSupportedException("if implemented make sure all tests pass with TestExplorer and live testing");
             }
-            application.ConfigureModel().SubscribeReplay();
+            application.ConfigureModel<TModule>().SubscribeReplay();
             application.MockEditorsFactory();
 
             if (application is WebApplication webApplication){

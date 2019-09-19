@@ -17,10 +17,8 @@ namespace Xpand.XAF.Modules.OneView{
     public static class OneViewService{
         
         internal static IObservable<Unit> Connect(this  XafApplication application){
-            var showView = application.ShowView()
-                .TakeUntil(application.WhenDisposed())
-                .Publish();
-            showView.Connect();
+
+            var showView = application.ShowView().Publish().RefCount();
             return showView.EditModel(application)
                 .Merge(showView.ExitApplication(application))
                 .Merge(application.HideMainWindow())
@@ -32,7 +30,7 @@ namespace Xpand.XAF.Modules.OneView{
                 .SelectMany(controller => controller.AcceptAction.WhenExecuting().Select(tuple => tuple)));
             var closingView = Observable.Defer(() => showView.SelectMany(_ => _.CreatedView.WhenClosed())
                     .TakeUntil(editingModel))
-//                .Repeat()
+                .Repeat()
                 .Where(view => !(bool) application.GetFieldValue("exiting"))
                 .Do(view => application.Exit())
                 .Select(view => view);
@@ -66,31 +64,22 @@ namespace Xpand.XAF.Modules.OneView{
             return source.Trace(name, OneViewModule.TraceSource, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
         }
 
-
-        
-
         private static IObservable<ShowViewParameters> ShowView(this XafApplication application){
-            return application.ReactiveModulesModel().OneViewModel()
-                .Do(view => {
-                    ((IModelApplicationNavigationItems) view.Application).NavigationItems.StartupNavigationItem = null;
-                    ((IModelOptionsWin) view.Application.Options).UIType=UIType.MultipleWindowSDI;
-                })
-                .SelectMany(modelView => {
-                    return application.WhenMainFormShown().Select(window => {
-                        var showViewParameters = new ShowViewParameters();
-                        var dialogController = new OneViewDialogController();
-                        dialogController.AcceptAction.Caption = "Configure";
-                        dialogController.CancelAction.Active[""] = false;
-                        showViewParameters.Controllers.Add(dialogController);
-                        showViewParameters.NewWindowTarget = NewWindowTarget.Separate;
-                        showViewParameters.Context = TemplateContext.PopupWindow;
+            return application.WhenWindowCreated().When(TemplateContext.ApplicationWindow)
+                .Select(window => {
+                    var modelView = application.Model.ToReactiveModule<IModelReactiveModuleOneView>().OneView;
+                    var showViewParameters = new ShowViewParameters();
+                    var dialogController = new OneViewDialogController();
+                    dialogController.AcceptAction.Caption = "Configure";
+                    dialogController.CancelAction.Active[""] = false;
+                    showViewParameters.Controllers.Add(dialogController);
+                    showViewParameters.NewWindowTarget = NewWindowTarget.Separate;
+                    showViewParameters.Context = TemplateContext.PopupWindow;
 
-                        showViewParameters.TargetWindow = TargetWindow.NewWindow;
-                        showViewParameters.CreatedView = application.CreateView(modelView.View);
-                        application.ShowViewStrategy.ShowView(showViewParameters, new ShowViewSource(null, null));
-                        
-                        return showViewParameters;
-                    });
+                    showViewParameters.TargetWindow = TargetWindow.NewWindow;
+                    showViewParameters.CreatedView = application.CreateView(modelView.View);
+                    application.ShowViewStrategy.ShowView(showViewParameters, new ShowViewSource(null, null));
+                    return showViewParameters;
                 })
                 .TraceOneView();
         }

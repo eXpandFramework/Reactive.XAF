@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
@@ -24,17 +25,14 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         OnNext=4,
         OnCompleted=8,
         Dispose=16,
-        All=Subscribe|OnNext|OnCompleted|Dispose
+        OnError=32,
+        All=Subscribe|OnNext|OnCompleted|Dispose|OnError
     }
     public static class ReactiveLoggerService{
         
         
         private static readonly Subject<ITraceEvent> SavedTraceEventSubject=new Subject<ITraceEvent>();
 
-        public static IObservable<ReactiveTraceListener> RegisteredListener{get; private set; }
-
-
-//        private static IObservable<ReactiveTraceListener> _registerListener;
         public static IObservable<ITraceEvent> ListenerEvents{ get; private set; }
 
         public static IObservable<ITraceEvent> SavedTraceEvent{ get; }=SavedTraceEventSubject;
@@ -46,29 +44,15 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             }
 
             var listener = new ReactiveTraceListener(application.Title);
-            
-            
             ListenerEvents = listener.EventTrace.Publish().RefCount();
             
-            
-            
-//                .SelectMany(listener => application.BufferUntilCompatibilityChecked(listener.EventTrace.Select(_ => _)))
-//                .Publish().RefCount()
-//                .Select(_ => _);
-            var registeredListener = application.RegisterListener(listener)
-                    .TakeUntil(application.WhenDisposed())
-                    .Replay(1);
-            registeredListener.Connect();
-            RegisteredListener = registeredListener;
-            return application.BufferUntilCompatibilityChecked1(ListenerEvents.Select(_ => _))
+            return application.BufferUntilCompatibilityChecked(ListenerEvents.Select(_ => _))
                 .SaveEvent(application)
                 .ToUnit()
-                .Merge(RegisteredListener.ToUnit())
                 .Merge(ListenerEvents.RefreshViewDataSource(application))
+                .Merge(application.RegisterListener(listener),Scheduler.Immediate)
                 .Do(unit => {},() => {})
                 .ToUnit();
-                
-//                .Merge(startMessage)
         }
 
         public static IObservable<Unit> RefreshViewDataSource(this IObservable<ITraceEvent> events, XafApplication application){
@@ -77,6 +61,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                     var synchronizationContext = SynchronizationContext.Current;
                     return events.Throttle(TimeSpan.FromSeconds(1))
                         .TakeUntil(frame.WhenDisposingFrame())
+                        .DistinctUntilChanged(_ => _.TraceKey())
                         .ObserveOn(synchronizationContext) 
                         .SelectMany(e => {
                             if (e.Method != nameof(RefreshViewDataSource)){
@@ -101,8 +86,15 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             return application.WhenTraceEvent(typeof(TLocation), rxAction).Where(_ => _.Method == name);
         }
 
-        public static IObservable<ITraceEvent> WhenTrace(this XafApplication application, Type location = null,
-            RXAction rxAction = RXAction.All, params string[] methods){
+        public static IObservable<ITraceEvent> WhenTraceOnNext(this XafApplication application, params string[] methods){
+            return application.WhenTraceOnNext(location: null, methods);
+        }
+
+        public static IObservable<ITraceEvent> WhenTraceOnNext(this XafApplication application, Type location = null,params string[] methods){
+            return application.WhenTrace(location, RXAction.OnNext, methods);
+        }
+
+        public static IObservable<ITraceEvent> WhenTrace(this XafApplication application, Type location = null,RXAction rxAction = RXAction.All, params string[] methods){
             return application.Modules.ToTraceSource().ToObservable().SelectMany(_ =>
                 _.traceSource.Listeners.OfType<ReactiveTraceListener>().ToObservable().SelectMany(listener => listener.EventTrace))
                 .When(location, rxAction,methods);
@@ -114,6 +106,15 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             return source.Where(_ => location == null || _.Location == location.Name)
                 .Where(_ => !methods.Any() || methods.Contains(_.Method))
                 .Where(_ => rxAction == RXAction.All || _.RXAction.HasAnyFlag(rxAction));
+        }
+
+        public static IObservable<TraceEvent> WhenTraceOnSubscribeEvent(this XafApplication application,
+            params string[] methods){
+            return application.WhenTraceEvent(null, RXAction.Subscribe, methods);
+        }
+
+        public static IObservable<TraceEvent> WhenTraceOnNextEvent(this XafApplication application,params string[] methods){
+            return application.WhenTraceOnNextEvent(location: null, methods);
         }
 
         public static IObservable<TraceEvent> WhenTraceOnNextEvent(this XafApplication application, Type location = null,params string[] methods){
@@ -138,31 +139,30 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                     .Select(info => (module:m,traceSource:(TraceSource)info.GetValue(m)))).Where(o => o.traceSource!=null);
         }
 
-        private static IObservable<ReactiveTraceListener> RegisterListener(this XafApplication application,
+        private static IObservable<Unit> RegisterListener(this XafApplication application,
             ReactiveTraceListener traceListener){
-            
-            return application.ReactiveModulesModel().ReactiveLogger()
-                    .Select(logger => logger)
-                    .Select(model => model.GetActiveSources())
-                    .Do(modules => {
-                        foreach (var module in modules){
-                            var tuples = application.Modules.Where(m => m.Name==module.Id()).ToTraceSource();
-                            foreach (var tuple in tuples){
-                                tuple.traceSource.Switch.Level=module.Level;
-                                if (module.Level!=SourceLevels.Off){
-                                    if (!tuple.traceSource.Listeners.Contains(traceListener)){
-                                        tuple.traceSource.Listeners.Add(traceListener);
-                                    }
-                                }
-                            }    
+            var register = application.Modules.WhenListChanged().SelectMany(_ => _.list.ToTraceSource().ToObservable(Scheduler.Immediate))
+                .Do(_ => {
+                    if (!_.traceSource.Listeners.Contains(traceListener)){
+                        _.traceSource.Listeners.Add(traceListener);
+                    }
+                }).ToUnit();
+            var applyModel = application.ReactiveModulesModel().ReactiveLogger()
+                .Select(logger => logger)
+                .Select(model => model.GetActiveSources())
+                .Do(modules => {
+                    foreach (var module in modules){
+                        var tuples = application.Modules.Where(m => m.Name == module.Id()).ToTraceSource();
+                        foreach (var tuple in tuples){
+                            tuple.traceSource.Switch.Level = module.Level;
+                            if (!tuple.traceSource.Listeners.Contains(traceListener)){
+                                tuple.traceSource.Listeners.Add(traceListener);
+                            }
                         }
-                        
-                    })
-                .To(traceListener)
-                .IgnoreElements()
-                .Merge(traceListener.AsObservable())
-                .Select(listener => listener)
-                ;
+                    }
+                })
+                .ToUnit();
+            return register.Merge(applyModel);
         }
 //        static readonly ISubject<ITraceEvent> TraceEventSubject=new Subject<ITraceEvent>();
         internal  static  string ApplicationTitle{ get; set; }
@@ -185,18 +185,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         private static IObservable<TraceEvent> SaveEvent(this IObservable<ITraceEvent> events, XafApplication application){
             
             return events.Select(_ => _)
-//                .Select((_, i) => {
-//                    if (i == 0){
-//                        var activeSources = application.Model.ToReactiveModules<IModelReactiveModuleLogger>().ReactiveLogger.GetActiveSources().Select(module => module.Id()).ToArray();
-//                        foreach (var valueTuple in application.Modules.ToTraceSource().Where(tuple => activeSources.Contains(tuple.traceSource.Name))){
-//                            valueTuple.traceSource.TraceMessage(StartMessage);
-//                        }
-//                    }
-//
-//                    return _;
-//                })
-//                .Buffer(TimeSpan.FromSeconds(2)).WhenNotEmpty()
-                .SelectMany(list => application.ObjectSpaceProvider.ToObjectSpace().SelectMany(space => space.SaveTraceEvent(new[]{list})));
+                .Buffer(TimeSpan.FromSeconds(1)).WhenNotEmpty()
+                .SelectMany(list => application.ObjectSpaceProvider.ToObjectSpace().SelectMany(space => space.SaveTraceEvent(list)));
         }
 
         public static IObservable<TraceEvent> SaveTraceEvent(this IObjectSpace objectSpace, IList<ITraceEvent> traceEventMessages){

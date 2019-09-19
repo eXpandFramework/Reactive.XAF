@@ -9,24 +9,24 @@
     <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/Reactive.Logger</projectUrl>
     <iconUrl>http://sign.expandframework.com</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>The `ViewEditMode` module controls the state of DetailView.ViewEditMode. Choose `Edit` mode to open a `DetailView` in edit mode. 
+    <description>The `Reactive.Logger` module monitors calls to the Reactive delegates (OnNext, OnSubscribe, OnDispose, OnCompleted, OnError). All calls are saved to the application database. For more head to the details section.
 
 The module uses the next two strategies:
-1. It monitors the `DetailView` creation and modifies its ViewEditMode property according to model configuration. However later ViewEditMode property modifications are allowed.
-2. It monitors the `ViewEditMode` modifiation and cancels it if the `LockViewEditMode` attribute is used.</description>
+1. It monitors the `DetailView` creation and modifies its Reactive.Logger property according to model configuration. However later Reactive.Logger property modifications are allowed.
+2. It monitors the `Reactive.Logger` modifiation and cancels it if the `LockReactive.Logger` attribute is used.</description>
     <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Reactive.Logger</tags>
     <dependencies>
       <dependency id="akarnokd.reactive_extensions" version="0.0.27-alpha" />
       <dependency id="System.Reactive" version="4.1.6" />
-      <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.46.0" />
+      <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.47.0" />
       <dependency id="Xpand.VersionConverter" version="1.0.34.0" />
     </dependencies>
   </metadata>
   <files>
-    <file src="Xpand.XAF.Modules.Reactive.Logger.dll" target="lib\net461\Xpand.XAF.Modules.Reactive.Logger." />
-    <file src="Xpand.XAF.Modules.Reactive.Logger.pdb" target="lib\net461\Xpand.XAF.Modules.Reactive.Logger." />
+    <file src="Xpand.XAF.Modules.Reactive.Logger.dll" target="lib\net461\Xpand.XAF.Modules.Reactive.Logger.dll" />
+    <file src="Xpand.XAF.Modules.Reactive.Logger.pdb" target="lib\net461\Xpand.XAF.Modules.Reactive.Logger.pdb" />
     <file src="..\src\libs\Fasterflect.Netstandard.dll" target="lib\net461\Fasterflect.Netstandard.dll" />
     <file src="Readme.txt" target="" />
   </files>

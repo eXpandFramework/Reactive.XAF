@@ -8,7 +8,10 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 namespace Xpand.XAF.Modules.SuppressConfirmation{
     public sealed class SuppressConfirmationModule : ReactiveModuleBase{
         public const string CategoryName = "Xpand.XAF.Modules.SupressConfirmation";
-
+        public static ReactiveTraceSource TraceSource{ get; set; }
+        static SuppressConfirmationModule(){
+            TraceSource=new ReactiveTraceSource(nameof(SuppressConfirmationModule));
+        }
         public SuppressConfirmationModule(){
             RequiredModuleTypes.Add(typeof(SystemModule));
             RequiredModuleTypes.Add(typeof(ReactiveModule));

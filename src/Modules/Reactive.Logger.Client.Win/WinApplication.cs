@@ -1,6 +1,7 @@
 ﻿using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Win;
 using DevExpress.ExpressApp.Xpo;
+using Xpand.XAF.Modules.GridListEditor;
 using Xpand.XAF.Modules.OneView;
 using Xpand.XAF.Modules.Reactive.Logger.Hub;
 
@@ -14,7 +15,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Client.Win {
             DevExpress.Persistent.Base.PasswordCryptographer.SupportLegacySha512 = false;
 			DevExpress.ExpressApp.Utils.ImageLoader.Instance.UseSvgImages = true;
         }
-        private void InitializeDefaults() {
+        private void InitializeDefaults(){
+            Title = "RXLoggerClient";
             LinkNewObjectToParentImmediately = false;
             OptimizedControllersCreation = true;
             UseLightStyle = true;
@@ -27,7 +29,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Client.Win {
             InitializeDefaults();
             Modules.AddRange(new ModuleBase[]{
                 new ReactiveLoggerHubModule(),
-                new OneViewModule(),
+                new OneViewModule(),new GridListEditorModule() 
             });
         }
         protected override void CreateDefaultObjectSpaceProvider(CreateCustomObjectSpaceProviderEventArgs args) {

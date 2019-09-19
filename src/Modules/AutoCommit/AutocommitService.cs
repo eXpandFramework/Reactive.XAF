@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using Fasterflect;
 using Xpand.Source.Extensions.System.AppDomain;
@@ -19,21 +20,36 @@ namespace Xpand.XAF.Modules.AutoCommit{
         public static IObservable<ObjectView> WhenAutoCommitObjectViewCreated(this XafApplication application){
             return application
                 .WhenObjectViewCreated()
-                .Where(objectView => ((IModelObjectViewAutoCommit) objectView.Model).AutoCommit);
+                .Where(objectView => ((IModelObjectViewAutoCommit) objectView.Model).AutoCommit)
+                .TraceAutoCommit();
+        }
+
+        internal static IObservable<TSource> TraceAutoCommit<TSource>(this IObservable<TSource> source, string name = null,
+            Action<string> traceAction = null,
+            ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0){
+            return source.Trace(name, AutoCommitModule.TraceSource, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
         }
 
         internal static IObservable<Unit> Connect(this XafApplication application){
             if (application != null){
                 var objectViewCreated = application.WhenAutoCommitObjectViewCreated().Publish().RefCount();
-                return objectViewCreated
-                        .QueryCanClose()
-                        .Merge(objectViewCreated.QueryCanChangeCurrentObject())
-                        .Do(_ => _.view.ObjectSpace.CommitChanges())
-                        .ToUnit()
-                        .Merge(objectViewCreated.OfType<ListView>().ControlsCreated().Select(_ => BatchEditCommit(_.view)))
+                return AutoCommit(objectViewCreated)
                     ;
             }
             return Observable.Empty<Unit>();
+        }
+
+        private static IObservable<Unit> AutoCommit(IObservable<ObjectView> objectViewCreated){
+            return objectViewCreated
+                .QueryCanClose()
+                .Merge(objectViewCreated.QueryCanChangeCurrentObject())
+                .Do(_ => _.view.ObjectSpace.CommitChanges())
+                .ToUnit()
+                .Merge(objectViewCreated.OfType<ListView>().ControlsCreated().Select(_ => BatchEditCommit(_.view)))
+                .TraceAutoCommit();
         }
 
         private static Unit BatchEditCommit(ListView listView){

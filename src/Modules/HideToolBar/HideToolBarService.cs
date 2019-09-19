@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Templates;
 using Xpand.Source.Extensions.XAF.XafApplication;
@@ -10,6 +11,15 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.HideToolBar{
     public static class HideToolBarService{
+        internal static IObservable<TSource> TraceHideToolBarModule<TSource>(this IObservable<TSource> source, string name = null,
+            Action<string> traceAction = null,
+            ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0){
+            return source.Trace(name, HideToolBarModule.TraceSource, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
+        }
+
         public static IObservable<Frame> HideToolBarNestedFrames(this XafApplication application){
             return application
                 .WhenNestedFrameCreated()
@@ -25,28 +35,34 @@ namespace Xpand.XAF.Modules.HideToolBar{
 
                     return false;
                 })
+                .TraceHideToolBarModule()
                 .Publish().RefCount();
         }
 
         internal static IObservable<Unit> Connect(this XafApplication application){
             if (application != null){
                 return application.HideToolBarNestedFrames()
-                    .Do(HideToolBar)
+                    .HideToolBar()
                     .ToUnit();
             }
             return Observable.Empty<Unit>();
         }
 
-        public static void HideToolBar(this Frame frame){
-            if (frame.Application.GetPlatform()==Platform.Win){
-                var toolbarVisibilityController = frame.Controllers.Cast<Controller>().FirstOrDefault(controller =>
-                    controller.Name == "DevExpress.ExpressApp.Win.SystemModule.ToolbarVisibilityController");
-                if (toolbarVisibilityController != null){
-                    toolbarVisibilityController.Active[HideToolBarModule.CategoryName] = false;
+        public static IObservable<Frame> HideToolBar(this IObservable<Frame> source){
+            return source.Select(frame => {
+                if (frame.Application.GetPlatform() == Platform.Win){
+                    var toolbarVisibilityController = frame.Controllers.Cast<Controller>().FirstOrDefault(controller =>
+                        controller.Name == "DevExpress.ExpressApp.Win.SystemModule.ToolbarVisibilityController");
+                    if (toolbarVisibilityController != null){
+                        toolbarVisibilityController.Active[HideToolBarModule.CategoryName] = false;
+                    }
                 }
-            }
-            var visibility = frame.Template as ISupportActionsToolbarVisibility;
-            visibility?.SetVisible(false);
+
+                var visibility = frame.Template as ISupportActionsToolbarVisibility;
+                visibility?.SetVisible(false);
+                return frame;
+            }).TraceHideToolBarModule();
+
         }
     }
 }

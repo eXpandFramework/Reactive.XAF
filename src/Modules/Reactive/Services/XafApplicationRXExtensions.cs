@@ -12,13 +12,8 @@ using ListView = DevExpress.ExpressApp.ListView;
 using View = DevExpress.ExpressApp.View;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
+    
     public static class XafApplicationRXExtensions{
-        public static IObservable<TSource> BufferUntilCompatibilityChecked1<TSource>(
-            this XafApplication application,IObservable<TSource> source){
-            var compatibilityCheckefd = application.WhenCompatibilityChecked().Select(xafApplication => xafApplication).FirstAsync();
-            return source.Buffer(compatibilityCheckefd).FirstAsync().SelectMany(list => list)
-                .Concat(Observable.Defer(() => source)).Select(source1 => source1);
-        }
         public static IObservable<TSource> BufferUntilCompatibilityChecked<TSource>(
             this XafApplication application,IObservable<TSource> source){
             var compatibilityCheckefd = application.WhenCompatibilityChecked().Select(xafApplication => xafApplication).FirstAsync();
@@ -30,8 +25,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             if ((bool) application.GetPropertyValue("IsCompatibilityChecked")){
                 return application.AsObservable();
             }
-            return application.WhenObjectSpaceCreated().FirstAsync().To(application)
-                .Select(xafApplication => xafApplication)
+            return application.WhenObjectSpaceCreated().FirstAsync()
+                .Select(_ => _.application)
                 .TraceRX();
         }
 

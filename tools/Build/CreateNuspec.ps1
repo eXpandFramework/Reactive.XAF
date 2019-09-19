@@ -4,7 +4,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-
+# Import-XpandPwsh
 Set-Location $root
 New-Item -Path "$root\bin\Nupkg" -ItemType Directory  -ErrorAction SilentlyContinue -Force |Out-Null
 
@@ -33,7 +33,7 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*Tests*", "*.Source.*" 
         & (Get-NugetPath) spec $_.BaseName
     }
     if ($Release){
-        $uArgs.PublishedSource=(Get-PackageFeed -Nuget)
+        $uArgs.PublishedSource=(Get-Pack    ageFeed -Nuget)
     }
     
     Update-Nuspec @uArgs 

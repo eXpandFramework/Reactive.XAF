@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.SystemModule;
 using Xpand.XAF.Modules.Reactive.Extensions;
@@ -9,6 +10,15 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.SuppressConfirmation{
     public static class SuppressConfirmationService{
+        internal static IObservable<TSource> TraceSuppressConfirmationModule<TSource>(this IObservable<TSource> source, string name = null,
+            Action<string> traceAction = null,
+            ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0){
+            return source.Trace(name, SuppressConfirmationModule.TraceSource, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
+        }
+
         public const ModificationsHandlingMode ModificationsHandlingMode = (ModificationsHandlingMode) (-1);
 
         internal static IObservable<Unit> Connect(this XafApplication application){

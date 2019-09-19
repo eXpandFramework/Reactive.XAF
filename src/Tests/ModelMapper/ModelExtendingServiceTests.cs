@@ -50,56 +50,61 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             InitializeMapperService($"{nameof(ExtendModel_Any_Type)}{typeToMap.Name}{platform}");
 
             var module = typeToMap.Extend<IModelListView>();
-            var application = DefaultModelMapperModule(platform,module).Application;
-            AssertExtendedListViewModel(typeToMap, application, MMListViewNodePath);
+            using (var application = DefaultModelMapperModule(nameof(ExtendModel_Any_Type), platform, module).Application){
+                AssertExtendedListViewModel(typeToMap, application, MMListViewNodePath);
+            }
         }
 
         [Fact]
         public void Get_PredefinedModelNode(){
             InitializeMapperService($"{nameof(Customize_PredifienedMaps_TargetInterface)}",Platform.Win);
 
-            var module = PredefinedMap.GridView.Extend();
-            var application = DefaultModelMapperModule(Platform.Win,module).Application;
-
-            application.Model.Views.OfType<IModelListView>().First().GetNode(PredefinedMap.GridView).ShouldNotBeNull();
+            using (var module = PredefinedMap.GridView.Extend()){
+                using (var application = DefaultModelMapperModule(nameof(Get_PredefinedModelNode), Platform.Win, module).Application){
+                    application.Model.Views.OfType<IModelListView>().First().GetNode(PredefinedMap.GridView).ShouldNotBeNull();
+                }
+            }
         }
 
         [Fact]
         public void Get_PredefinedViewItemMergedModelNode(){
             InitializeMapperService($"{nameof(Customize_PredifienedMaps_TargetInterface)}",Platform.Win);
 
-            var module = new[]{PredefinedMap.RepositoryItem,PredefinedMap.RepositoryFieldPicker,PredefinedMap.RepositoryItemBlobBaseEdit}.Extend();
-            var application = DefaultModelMapperModule(Platform.Win,module).Application;
-            
-            var modelColumn = application.Model.GetNodeByPath(MMListViewTestItemNodePath);
-            
-            var repositoryItemModel = modelColumn.AddRepositoryItemNode(PredefinedMap.RepositoryItem);
-            repositoryItemModel.SetValue("Name","Base");
-            repositoryItemModel.SetValue("AccessibleName","AccessibleNameBase");
-            var repositoryFieldPickerModel = modelColumn.AddRepositoryItemNode(PredefinedMap.RepositoryFieldPicker);
-            repositoryFieldPickerModel.SetValue("Name","Derivved");
-            repositoryFieldPickerModel.SetValue("AccessibleName","AccessibleName");
-            var repositoryItemBlobBaseEdit = modelColumn.AddRepositoryItemNode(PredefinedMap.RepositoryItemBlobBaseEdit);
-            repositoryItemBlobBaseEdit.SetValue("Name","NotMerged");
+            using (var module = new[]{PredefinedMap.RepositoryItem, PredefinedMap.RepositoryFieldPicker, PredefinedMap.RepositoryItemBlobBaseEdit}.Extend()){
+                using (var application = DefaultModelMapperModule(nameof(Get_PredefinedViewItemMergedModelNode), Platform.Win, module).Application){
+                    var modelColumn = application.Model.GetNodeByPath(MMListViewTestItemNodePath);
+                    var repositoryItemModel = modelColumn.AddRepositoryItemNode(PredefinedMap.RepositoryItem);
+                    repositoryItemModel.SetValue("Name","Base");
+                    repositoryItemModel.SetValue("AccessibleName","AccessibleNameBase");
+                    var repositoryFieldPickerModel = modelColumn.AddRepositoryItemNode(PredefinedMap.RepositoryFieldPicker);
+                    repositoryFieldPickerModel.SetValue("Name","Derivved");
+                    repositoryFieldPickerModel.SetValue("AccessibleName","AccessibleName");
+                    var repositoryItemBlobBaseEdit = modelColumn.AddRepositoryItemNode(PredefinedMap.RepositoryItemBlobBaseEdit);
+                    repositoryItemBlobBaseEdit.SetValue("Name","NotMerged");
 
-            var finalNode = modelColumn.GetRepositoryItemNode(PredefinedMap.RepositoryFieldPicker);
-            finalNode.GetValue<string>("Name").ShouldBe("Derivved");
-            finalNode.GetValue<string>("AccessibleName").ShouldBe("AccessibleName");
+                    var finalNode = modelColumn.GetRepositoryItemNode(PredefinedMap.RepositoryFieldPicker);
+                    finalNode.GetValue<string>("Name").ShouldBe("Derivved");
+                    finalNode.GetValue<string>("AccessibleName").ShouldBe("AccessibleName");
 
-            modelColumn.GetRepositoryItemNode(PredefinedMap.RepositoryItemBlobBaseEdit).GetValue<string>("Name").ShouldBe("NotMerged");
+                    modelColumn.GetRepositoryItemNode(PredefinedMap.RepositoryItemBlobBaseEdit).GetValue<string>("Name").ShouldBe("NotMerged");
+                }
+            }
         }
 
         [Fact]
         internal void Customize_PredifienedMaps_TargetInterface(){
             InitializeMapperService($"{nameof(Customize_PredifienedMaps_TargetInterface)}",Platform.Win);
-            
-            var module = PredefinedMap.DashboardDesigner.Extend(null,configuration => {
+
+            using (var module = PredefinedMap.DashboardDesigner.Extend(null, configuration => {
                 configuration.TargetInterfaceTypes.Clear();
                 configuration.TargetInterfaceTypes.Add(typeof(IModelOptions));
-            });
-            var application = DefaultModelMapperModule(Platform.Win,module).Application;
+            })){
+                using (var application = DefaultModelMapperModule(nameof(Customize_PredifienedMaps_TargetInterface), Platform.Win, module).Application){
+                    application.Model.Options.GetNode(PredefinedMap.DashboardDesigner).ShouldNotBeNull();
+                }
+            }
 
-            application.Model.Options.GetNode(PredefinedMap.DashboardDesigner).ShouldNotBeNull();
+            
         }
 
         [Theory]
@@ -126,9 +131,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             Assembly.LoadFile(typeToMap.Assembly.Location);
             InitializeMapperService($"{nameof(ExtendModel_Predefined_Type)}{configuration}{platform}",platform);
 
-            var module = configuration.Extend();
-            var application = DefaultModelMapperModule(platform,module).Application;
-            AssertExtendedListViewModel(typeToMap, application,nodePath);
+            using (var module = configuration.Extend()){
+                using (var application = DefaultModelMapperModule(nameof(ExtendModel_Predefined_Type), platform, module).Application){
+                    AssertExtendedListViewModel(typeToMap, application,nodePath);
+                }
+            }
+
+            
         }
 
         private void AssertExtendedListViewModel(Type typeToMap, XafApplication application,string nodePath){
@@ -168,32 +177,37 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             foreach (var predefinedMap in predefinedMaps){
                 try{
                     InitializeMapperService($"{nameof(Extend_Predifiened_ViewItems)}{predefinedMap}", platform);
-                    var module = predefinedMap.Extend();
-                    var connectableObservable = TypeMappingService.MappedTypes.Replay();
-                    connectableObservable.Connect();
-                    var application = DefaultModelMapperModule(platform, module).Application;
-                    var typeToMap = predefinedMap.TypeToMap();
+                    using (var module = predefinedMap.Extend()){
+                        var connectableObservable = TypeMappingService.MappedTypes.Replay();
+                        connectableObservable.Connect();
+                        using (var application = DefaultModelMapperModule($"{nameof(Extend_Predifiened_ViewItems)}-{predefinedMap}", platform, module).Application){
+                            var typeToMap = predefinedMap.TypeToMap();
                     
-                    var modelNode = application.Model.GetNodeByPath(MMDetailViewTestItemNodePath);
+                            var modelNode = application.Model.GetNodeByPath(MMDetailViewTestItemNodePath);
                     
-                    modelNode.GetNode(mapPropertyName).ShouldNotBeNull();
-                    if (checkListViewColumns){
-                        modelNode = application.Model.GetNodeByPath(MMListViewTestItemNodePath);
-                        modelNode.GetNode(mapPropertyName).ShouldNotBeNull();
-                    }
-                    var typeInfo = XafTypesInfo.Instance.FindTypeInfo(typeof(IModelModelMap)).Descendants
-                        .FirstOrDefault(info => info.Name.EndsWith(typeToMap.Name));
-                    typeInfo.ShouldNotBeNull();
-                    typeInfo.Name.ShouldBe(typeToMap.ModelTypeName());
+                            modelNode.GetNode(mapPropertyName).ShouldNotBeNull();
+                            if (checkListViewColumns){
+                                modelNode = application.Model.GetNodeByPath(MMListViewTestItemNodePath);
+                                modelNode.GetNode(mapPropertyName).ShouldNotBeNull();
+                            }
+                            var typeInfo = XafTypesInfo.Instance.FindTypeInfo(typeof(IModelModelMap)).Descendants
+                                .FirstOrDefault(info => info.Name.EndsWith(typeToMap.Name));
+                            typeInfo.ShouldNotBeNull();
+                            typeInfo.Name.ShouldBe(typeToMap.ModelTypeName());
 
-                    var defaultContext =
-                        ((IModelApplicationModelMapper) application.Model).ModelMapper.MapperContexts.GetNode(
-                            ModelMapperContextNodeGenerator.Default);
-                    defaultContext.ShouldNotBeNull();
-                    var modelMapper = defaultContext.GetNode(predefinedMap.DisplayName());
-                    modelMapper.ShouldNotBeNull();
-                    application.Dispose();
-                    Dispose();
+                            var defaultContext =
+                                ((IModelApplicationModelMapper) application.Model).ModelMapper.MapperContexts.GetNode(
+                                    ModelMapperContextNodeGenerator.Default);
+                            defaultContext.ShouldNotBeNull();
+                            var modelMapper = defaultContext.GetNode(predefinedMap.DisplayName());
+                            modelMapper.ShouldNotBeNull();
+                            application.Dispose();
+                        }
+
+                        Dispose();
+                    }
+
+                    
                 }
                 catch (Exception e){
                     throw new Exception(predefinedMap.ToString(), e);
@@ -214,17 +228,18 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         internal void ExtendModel_PredefinedChartDiagram(PredefinedMap configuration,Type typeToMap,Platform platform){
             InitializeMapperService($"{nameof(ExtendModel_PredefinedChartDiagram)}{configuration}{platform}",platform);
 
-            var module = PredefinedMap.ChartControl.Extend();
-            configuration.Extend(module);
-            var application = DefaultModelMapperModule(platform,module).Application;
+            using (var module = PredefinedMap.ChartControl.Extend()){
+                configuration.Extend(module);
+                using (var application = DefaultModelMapperModule(nameof(ExtendModel_PredefinedChartDiagram), platform, module).Application){
+                    var modelListView = application.Model.Views.OfType<IModelListView>().First();
+                    var modelNode = modelListView.GetNode(PredefinedMap.ChartControl);
+                    modelNode= modelNode.GetNode("Diagrams");
 
-            var modelListView = application.Model.Views.OfType<IModelListView>().First();
-            var modelNode = modelListView.GetNode(PredefinedMap.ChartControl);
-            modelNode= modelNode.GetNode("Diagrams");
-
-            var diagramType = modelNode.ModelListItemType();
-            var targetType = diagramType.Assembly.GetType(configuration.ModelTypeName());
-            diagramType.IsAssignableFrom(targetType).ShouldBeTrue();
+                    var diagramType = modelNode.ModelListItemType();
+                    var targetType = diagramType.Assembly.GetType(configuration.ModelTypeName());
+                    diagramType.IsAssignableFrom(targetType).ShouldBeTrue();
+                }
+            }
         }
 
         [Fact]
@@ -233,12 +248,14 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             Assembly.LoadFile(typeof(Diagram).Assembly.Location);
             InitializeMapperService($"{nameof(ExtendModel_All_PredefinedChartDiagram)}",Platform.Win);
 
-            var module = PredefinedMap.ChartControl.Extend();
-            var diagrams = Enums.GetMembers<PredefinedMap>().Where(member =>
-                member.Name.StartsWith(PredefinedMap.ChartControl.ToString()) &&
-                member.Value != PredefinedMap.ChartControl&&member.Value != PredefinedMap.ChartControlDiagram).Select(member => member.Value).ToArray();
-            diagrams.Extend(module);
-            DefaultModelMapperModule(Platform.Win,module);
+            using (var module = PredefinedMap.ChartControl.Extend()){
+                var diagrams = Enums.GetMembers<PredefinedMap>().Where(member =>
+                    member.Name.StartsWith(PredefinedMap.ChartControl.ToString()) &&
+                    member.Value != PredefinedMap.ChartControl&&member.Value != PredefinedMap.ChartControlDiagram).Select(member => member.Value).ToArray();
+                diagrams.Extend(module);
+                using (DefaultModelMapperModule(nameof(ExtendModel_All_PredefinedChartDiagram), Platform.Win, module).Application){
+                }
+            }
         }
 
         [Theory]
@@ -249,30 +266,31 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             var values = Enums.GetValues<PredefinedMap>()
                 .Where(map =>map.GetAttributes().OfType<MapPlatformAttribute>().Any(_ => _.Platform == platform.ToString()))
                 .ToArray();
-            
-            var module = values.ToArray().Extend();
 
-            DefaultModelMapperModule(platform,module);
+            using (var module = values.ToArray().Extend()){
+                using (DefaultModelMapperModule(nameof(ExtendModel_All_Predefined_Maps), platform, module).Application){
 
+                }
+            }
         }
 
         [Fact]
         public void Extend_Existing_PredefinedMap(){
             InitializeMapperService(nameof(Extend_Existing_PredefinedMap),Platform.Win);
-            var module = new []{PredefinedMap.PivotGridControl,PredefinedMap.GridView}.Extend();
+            using (var module = new[]{PredefinedMap.PivotGridControl, PredefinedMap.GridView}.Extend()){
+                module.ApplicationModulesManager
+                    .FirstAsync()
+                    .SelectMany(_ => _.manager.ExtendMap(PredefinedMap.GridView))
+                    .Subscribe(_ => {
+                        _.extenders.Add(_.targetInterface,typeof(IModelPredefinedMapExtension));
+                    });
+                using (var application = DefaultModelMapperModule(nameof(Extend_Existing_PredefinedMap), Platform.Win, module).Application){
+                    var modelListView = application.Model.Views.OfType<IModelListView>().First();
+                    var modelNode = modelListView.GetNode(typeof(GridView).Name);
 
-            module.ApplicationModulesManager
-                .FirstAsync()
-                .SelectMany(_ => _.manager.ExtendMap(PredefinedMap.GridView))
-                .Subscribe(_ => {
-                    _.extenders.Add(_.targetInterface,typeof(IModelPredefinedMapExtension));
-                });
-            var application = DefaultModelMapperModule(Platform.Win,module).Application;
-            var modelListView = application.Model.Views.OfType<IModelListView>().First();
-            var modelNode = modelListView.GetNode(typeof(GridView).Name);
-
-            (modelNode is IModelPredefinedMapExtension).ShouldBeTrue();
-            
+                    (modelNode is IModelPredefinedMapExtension).ShouldBeTrue();
+                }
+            }
         }
 
         [Theory]
@@ -282,25 +300,25 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         internal void Extend_Existing_ViewItemMap(Platform platform,PredefinedMap predefinedMap){
             var mapPropertyName=predefinedMap.IsRepositoryItem()?ViewItemService.RepositoryItemsMapName:ViewItemService.PropertyEditorControlMapName;
             InitializeMapperService(nameof(Extend_Existing_ViewItemMap),platform);
-            var module = new []{predefinedMap}.Extend();
+            using (var module = new[]{predefinedMap}.Extend()){
+                module.ApplicationModulesManager
+                    .FirstAsync()
+                    .SelectMany(_ => _.manager.ExtendMap(predefinedMap))
+                    .Subscribe(_ => {
+                        _.extenders.Add(_.targetInterface,typeof(IModelPredefinedMapExtension));
+                    });
+                using (var application = DefaultModelMapperModule(nameof(Extend_Existing_ViewItemMap), platform, module).Application){
+                    var nodeByPath = application.Model.GetNodeByPath(MMDetailViewTestItemNodePath);
+                    nodeByPath.ShouldNotBeNull();
             
-            module.ApplicationModulesManager
-                .FirstAsync()
-                .SelectMany(_ => _.manager.ExtendMap(predefinedMap))
-                .Subscribe(_ => {
-                    _.extenders.Add(_.targetInterface,typeof(IModelPredefinedMapExtension));
-                });
-            var application = DefaultModelMapperModule(platform,module).Application;
-            var nodeByPath = application.Model.GetNodeByPath(MMDetailViewTestItemNodePath);
-            nodeByPath.ShouldNotBeNull();
-            
-            var listNode = nodeByPath.GetNode(mapPropertyName);
-            listNode.ShouldNotBeNull();
-            var baseType = listNode.ModelListItemType();
-            var modelType = baseType.ToTypeInfo().Descendants.First().Type;
+                    var listNode = nodeByPath.GetNode(mapPropertyName);
+                    listNode.ShouldNotBeNull();
+                    var baseType = listNode.ModelListItemType();
+                    var modelType = baseType.ToTypeInfo().Descendants.First().Type;
 
-            (listNode.AddNode(modelType) is IModelPredefinedMapExtension).ShouldBeTrue();
-            
+                    (listNode.AddNode(modelType) is IModelPredefinedMapExtension).ShouldBeTrue();
+                }
+            }
         }
 
         [Fact]
@@ -309,14 +327,16 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             var typeToMap2 = typeof(TestModelMapperCommonType2);
             InitializeMapperService(nameof(Extend_Multiple_Objects_with_common_types));
 
-            var module = new ModelMapperTestModule();
-            typeToMap1.Extend<IModelListView>(module);
-            typeToMap2.Extend<IModelColumn>(module);
+            using (var module = new ModelMapperTestModule()){
+                typeToMap1.Extend<IModelListView>(module);
+                typeToMap2.Extend<IModelColumn>(module);
 
-            var application = DefaultModelMapperModule(Platform.Win,module).Application;
-            var appearanceCell = application.Model.GetNodeByPath($@"{MMListViewNodePath}/Columns/Test/{nameof(TestModelMapperCommonType2)}/{nameof(TestModelMapperCommonType2.AppearanceCell)}");
-            appearanceCell.ShouldNotBeNull();
-            appearanceCell.GetNodeByPath($"{nameof(AppearanceObjectEx.TextOptions)}");
+                using (var application = DefaultModelMapperModule(nameof(Extend_Multiple_Objects_with_common_types), Platform.Win, module).Application){
+                    var appearanceCell = application.Model.GetNodeByPath($@"{MMListViewNodePath}/Columns/Test/{nameof(TestModelMapperCommonType2)}/{nameof(TestModelMapperCommonType2.AppearanceCell)}");
+                    appearanceCell.ShouldNotBeNull();
+                    appearanceCell.GetNodeByPath($"{nameof(AppearanceObjectEx.TextOptions)}");
+                }
+            }
         }
 
         [Theory]
@@ -326,12 +346,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             InitializeMapperService($"{nameof(ModelMapperContexts)}{platform}");
             var typeToMap = typeof(TestModelMapper);
 
-            var module = typeToMap.Extend<IModelListView>();
-
-            var application = DefaultModelMapperModule(platform,module).Application;
-            var modelModelMappers = ((IModelApplicationModelMapper) application.Model).ModelMapper.MapperContexts.First();
-            modelModelMappers.Id().ShouldBe(ModelMapperContextNodeGenerator.Default);
-            modelModelMappers.First().Id().ShouldBe(typeToMap.Name);
+            using (var module = typeToMap.Extend<IModelListView>()){
+                using (var application = DefaultModelMapperModule(nameof(ModelMapperContexts), platform, module).Application){
+                    var modelModelMappers = ((IModelApplicationModelMapper) application.Model).ModelMapper.MapperContexts.First();
+                    modelModelMappers.Id().ShouldBe(ModelMapperContextNodeGenerator.Default);
+                    modelModelMappers.First().Id().ShouldBe(typeToMap.Name);
+                }
+            }
         }
 
         [Theory]
@@ -341,23 +362,23 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             InitializeMapperService($"{nameof(Container_ModelMapperContexts)}{platform}");
             var typeToMap = typeof(TestModelMapper);
 
-            var module = typeToMap.Extend<IModelListView>();
-
-            var application = DefaultModelMapperModule(platform,module).Application;
-            var modelListView = application.Model.Views.OfType<IModelListView>().First();
-            var mapName = typeToMap.Name;
-            var modelMappersNode =
-                modelListView.GetNode(mapName).GetNode(TypeMappingService.ModelMappersNodeName);
-            modelMappersNode.ShouldNotBeNull();
-            modelMappersNode.Index.ShouldBe(0);
-            var defaultContext = modelMappersNode.GetNode(ModelMapperContextNodeGenerator.Default);
-            defaultContext.ShouldNotBeNull();
-            var modelModelMappers =
-                defaultContext.GetValue<IModelModelMappers>(nameof(IModelMapperContextContainer.Context));
-            modelModelMappers.ShouldNotBeNull();
-            modelModelMappers.ShouldBe(
-                ((IModelApplicationModelMapper) modelModelMappers.Application).ModelMapper.MapperContexts[
-                    ModelMapperContextNodeGenerator.Default]);
+            using (var module = typeToMap.Extend<IModelListView>()){
+                using (var application = DefaultModelMapperModule(nameof(Container_ModelMapperContexts), platform, module).Application){
+                    var modelListView = application.Model.Views.OfType<IModelListView>().First();
+                    var mapName = typeToMap.Name;
+                    var modelMappersNode = modelListView.GetNode(mapName).GetNode(TypeMappingService.ModelMappersNodeName);
+                    modelMappersNode.ShouldNotBeNull();
+                    modelMappersNode.Index.ShouldBe(0);
+                    var defaultContext = modelMappersNode.GetNode(ModelMapperContextNodeGenerator.Default);
+                    defaultContext.ShouldNotBeNull();
+                    var modelModelMappers =
+                        defaultContext.GetValue<IModelModelMappers>(nameof(IModelMapperContextContainer.Context));
+                    modelModelMappers.ShouldNotBeNull();
+                    modelModelMappers.ShouldBe(
+                        ((IModelApplicationModelMapper) modelModelMappers.Application).ModelMapper.MapperContexts[
+                            ModelMapperContextNodeGenerator.Default]);
+                }
+            }
         }
 
         [Theory]
@@ -379,25 +400,22 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             InitializeMapperService($"{nameof(Container_Visibility)}{visibilityCriteria.CleanCodeName()}{platform}");
             var typeToMap = typeof(TestModelMapper);
 
-            var module = typeToMap.Extend(configuration => {
+            using (var module = typeToMap.Extend(configuration => {
                 configuration.VisibilityCriteria = visibilityCriteria;
                 configuration.TargetInterfaceTypes.Add(typeof(IModelListView));
-                if (leftOperand is VisibilityCriteriaLeftOperand ){
+                if (leftOperand is VisibilityCriteriaLeftOperand){
                     configuration.TargetInterfaceTypes.Add(typeof(IModelOptions));
                 }
-            });
-
-            var application = DefaultModelMapperModule(platform,module).Application;
-            var modelListView = application.Model.Views.OfType<IModelListView>().First();
-            var modelMapName = typeToMap.Name;
-            modelListView.IsPropertyVisible(modelMapName).ShouldBe(visibility);
-            if (leftOperand is VisibilityCriteriaLeftOperand){
-                application.Model.Options.IsPropertyVisible(modelMapName).ShouldBe(false);
+            })){
+                using (var application = DefaultModelMapperModule(nameof(Container_Visibility), platform, module).Application){
+                    var modelListView = application.Model.Views.OfType<IModelListView>().First();
+                    var modelMapName = typeToMap.Name;
+                    modelListView.IsPropertyVisible(modelMapName).ShouldBe(visibility);
+                    if (leftOperand is VisibilityCriteriaLeftOperand){
+                        application.Model.Options.IsPropertyVisible(modelMapName).ShouldBe(false);
+                    }
+                }
             }
-
         }
-
-
-
     }
 }

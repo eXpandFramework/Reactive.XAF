@@ -12,7 +12,10 @@ namespace Xpand.XAF.Modules.ViewEditMode {
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));
             RequiredModuleTypes.Add(typeof(ReactiveModule));
         }
-
+        public static ReactiveTraceSource TraceSource{ get; set; }
+        static ViewEditModeModule(){
+            TraceSource=new ReactiveTraceSource(nameof(ViewEditModeModule));
+        }
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
             Application.Connect()

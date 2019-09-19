@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reactive.Subjects;
-using System.Text;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;

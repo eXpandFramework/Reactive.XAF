@@ -18,16 +18,20 @@ The module uses the next two strategies:
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Xpand-XAF-Modules-Reactive-Logger-Client-Win</tags>
     <dependencies>
+      <dependency id="MagicOnion" version="2.4.0" />
+      <dependency id="System.Buffers" version="4.5.0" />
       <dependency id="System.Collections.Immutable" version="1.5.0" />
       <dependency id="System.Reactive" version="4.1.6" />
+      <dependency id="Xpand.XAF.Modules.GridListEditor" version="0.0.1.0" />
       <dependency id="Xpand.XAF.Modules.OneView" version="0.0.1.0" />
-      <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.46.0" />
+      <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.47.0" />
       <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="0.0.1.0" />
     </dependencies>
   </metadata>
   <files>
-    <file src="Xpand.XAF.Modules.Reactive.Logger.Client.Win.exe" target="lib\net461\Xpand.XAF.Modules.Reactive.Logger.Client.Win." />
-    <file src="Xpand.XAF.Modules.Reactive.Logger.Client.Win.pdb" target="lib\net461\Xpand.XAF.Modules.Reactive.Logger.Client.Win." />
+    <file src="Xpand.XAF.Modules.Reactive.Logger.Client.Win.exe" target="lib\net461\Xpand.XAF.Modules.Reactive.Logger.Client.Win.exe" />
+    <file src="Xpand.XAF.Modules.Reactive.Logger.Client.Win.pdb" target="lib\net461\Xpand.XAF.Modules.Reactive.Logger.Client.Win.pdb" />
+    <file src="..\src\libs\MagicOnion.dll" target="lib\net461\MagicOnion.dll" />
     <file src="..\src\libs\Fasterflect.Netstandard.dll" target="lib\net461\Fasterflect.Netstandard.dll" />
     <file src="Readme.txt" target="" />
   </files>

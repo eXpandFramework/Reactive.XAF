@@ -7,6 +7,7 @@ using Fasterflect;
 using Microsoft.CSharp;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.Reactive;
+using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.ProgressBarViewItem{
     public sealed class ProgressBarViewItemModule : ReactiveModuleBase{
@@ -17,7 +18,10 @@ namespace Xpand.XAF.Modules.ProgressBarViewItem{
             RequiredModuleTypes.Add(typeof(ReactiveModule));   
         }
 
-
+        public static ReactiveTraceSource TraceSource{ get; set; }
+        static ProgressBarViewItemModule(){
+            TraceSource=new ReactiveTraceSource(nameof(ProgressBarViewItemModule));
+        }
         protected override void RegisterEditorDescriptors(EditorDescriptorsFactory editorDescriptorsFactory){
             base.RegisterEditorDescriptors(editorDescriptorsFactory);
             string callBackHandler = null;

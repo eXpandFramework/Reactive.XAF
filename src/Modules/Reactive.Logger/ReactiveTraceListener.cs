@@ -1,21 +1,21 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Reactive.Subjects;
 using System.Text.RegularExpressions;
-using Xpand.XAF.Modules.Reactive.Extensions;
+using Xpand.Source.Extensions.System.AppDomain;
 
 namespace Xpand.XAF.Modules.Reactive.Logger{
-    public class ReactiveTraceListener : TraceListener{
+    public class ReactiveTraceListener : TextWriterTraceListener{
         private readonly string _applicationTitle;
         readonly ISubject<ITraceEvent> _eventTraceSubject=Subject.Synchronize(new Subject<ITraceEvent>());
-
-        public ReactiveTraceListener(string applicationTitle){
+        private static readonly FileStream Stream = new Lazy<FileStream>(() =>
+            new FileStream($@"{AppDomain.CurrentDomain.ApplicationPath()}\{AppDomain.CurrentDomain.SetupInformation.ApplicationName}_RXLogger.log", FileMode.OpenOrCreate)).Value;
+        public ReactiveTraceListener(string applicationTitle) : base(Stream){
             _applicationTitle = applicationTitle;
         }
 
-
         public IObservable<ITraceEvent> EventTrace => _eventTraceSubject;
-
 
         public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string message){
             base.TraceEvent(eventCache, source, eventType, id, message);
@@ -48,12 +48,5 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             _eventTraceSubject.OnNext(traceEvent);
         }
 
-        public override void Write(string message){
-            
-        }
-
-        public override void WriteLine(string message){
-            
-        }
     }
 }

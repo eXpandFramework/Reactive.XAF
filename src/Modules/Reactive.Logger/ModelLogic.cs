@@ -1,12 +1,16 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Utils.Extensions;
+using Xpand.Source.Extensions.XAF.Model;
 
 namespace Xpand.XAF.Modules.Reactive.Logger{
     public interface IModelReactiveModuleLogger:IModelReactiveModule{
@@ -38,9 +42,45 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         bool Enabled{ get; set; }
     }
 
+    public class TraceEventAppearenceRulesGenerator:ModelNodesGeneratorUpdater<AppearanceRulesModelNodesGenerator>{
+        public static readonly Dictionary<Color, string> Modules=new Dictionary<Color, string>{
+            {Color.Black, nameof(ReactiveModule)},
+            {Color.DimGray, nameof(ReactiveLoggerModule)},
+            {Color.DarkOrange, "ReactiveLoggerHubModule"},
+            {Color.Blue, "AutoCommitModule"},
+            {Color.BlueViolet, "CloneMemberValueModule"},
+            {Color.Brown, "CloneModelViewModule"},
+            {Color.BurlyWood, "GridListEditorModule"},
+            {Color.CadetBlue, "HideToolBarModule"},
+            {Color.Chartreuse, "MasterDetailModule"},
+            {Color.Chocolate, "ModelMapperModule"},
+            {Color.DarkGoldenrod, "ModelViewInheritanceModule"},
+            {Color.DarkGray, "OneViewModule"},
+            {Color.DarkGreen, "ProgressBarViewItemModule"},
+            {Color.DarkKhaki, "RefreshViewModule"},
+            {Color.DarkMagenta, "SuppressConfirmationModule"},
+            {Color.DarkRed, "ViewEditModule"}
+        };
+
+        public override void UpdateNode(ModelNode node){
+            if (node.GetParent<IModelClass>().TypeInfo.Type==typeof(TraceEvent)){
+                foreach (var module in Modules){
+                    var modelAppearanceRule = node.AddNode<IModelAppearanceRule>($"{module.Value}Source");
+                    modelAppearanceRule.TargetItems = nameof(TraceEvent.Source);
+                    modelAppearanceRule.FontColor=module.Key;
+                    modelAppearanceRule.Context = "ListView";
+                    modelAppearanceRule.Criteria = "[" + nameof(TraceEvent.Source) + "] = '" + module.Value + "'";
+                }
+            }
+        }
+    }
     public class TraceSourcedModulesNodesGenerator:ModelNodesGeneratorBase{
         protected override void GenerateNodesCore(ModelNode node){
-            var modules = ((IModelSources) node.Application).Modules.ToTraceSource();
+            foreach (var module in TraceEventAppearenceRulesGenerator.Modules){
+                node.AddNode<IModelTraceSourcedModule>(module.Value);
+            }
+            var modules = TraceEventAppearenceRulesGenerator.Modules
+                .SelectMany(_ => ((IModelSources) node.Application).Modules.Where(m => m.Name==_.Value).ToTraceSource());
             foreach (var valueTuple in modules){
                 var moduleName = valueTuple.module.Name;
                 AddTraceSource(node, moduleName, valueTuple);

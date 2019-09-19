@@ -2,7 +2,6 @@
 <Application>
   <ReactiveModules>
     <ReactiveLogger>
-      
       <TraceSources Enabled="True">
         <TraceSourcedModule Id="GridListEditorModule" IsNewNode="True" />
         <TraceSourcedModule Id="OneViewModule" IsNewNode="True" />

@@ -56,7 +56,7 @@ namespace Xpand.XAF.Modules.ProgressBarViewItem.Tests{
         }
 
         private static ProgressBarViewItemModule DefaultProgressBarViewItemModule(Platform platform){
-            return platform.NewApplication().AddModule<ProgressBarViewItemModule>(typeof(PBVI));
+            return platform.NewApplication<ProgressBarViewItemModule>().AddModule<ProgressBarViewItemModule>(typeof(PBVI));
         }
 
 
@@ -68,7 +68,7 @@ namespace Xpand.XAF.Modules.ProgressBarViewItem.Tests{
                 .Select(l => (decimal)l)
                 .Take(100);
 
-            var newApplication = platform.NewApplication();
+            var newApplication = platform.NewApplication<ProgressBarViewItemModule>();
             newApplication.SetupDefaults();
             if (platform==Platform.Win){
                 var unused = new ProgressBarControl();

@@ -14,6 +14,11 @@ namespace Xpand.XAF.Modules.HideToolBar{
             RequiredModuleTypes.Add(typeof(ReactiveModule));   
         }
 
+        public static ReactiveTraceSource TraceSource{ get; set; }
+        static HideToolBarModule(){
+            TraceSource=new ReactiveTraceSource(nameof(HideToolBarModule));
+        }
+
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
             Application.Connect()

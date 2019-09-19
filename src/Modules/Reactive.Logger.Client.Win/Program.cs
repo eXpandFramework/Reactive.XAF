@@ -35,7 +35,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Client.Win {
             }
 #endif
 #if DEBUG
-            if(System.Diagnostics.Debugger.IsAttached && winApplication.CheckCompatibilityType == CheckCompatibilityType.DatabaseSchema) {
+            if(winApplication.CheckCompatibilityType == CheckCompatibilityType.DatabaseSchema) {
                 winApplication.DatabaseUpdateMode = DatabaseUpdateMode.UpdateDatabaseAlways;
             }
 #endif

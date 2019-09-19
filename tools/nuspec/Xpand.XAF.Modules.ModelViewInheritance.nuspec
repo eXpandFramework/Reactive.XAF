@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.ModelViewInheritance</id>
-    <version>1.1.37.0</version>
+    <version>1.1.38.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -14,14 +14,14 @@
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  ModelViewInheritance</tags>
     <dependencies>
-      <dependency id="Moq" version="4.12.0" />
+      <dependency id="Moq" version="4.13.0" />
       <dependency id="System.ValueTuple" version="4.5.0" />
       <dependency id="Xpand.VersionConverter" version="1.0.34.0" />
     </dependencies>
   </metadata>
   <files>
-    <file src="Xpand.XAF.Modules.ModelViewInheritance.dll" target="lib\net461\Xpand.XAF.Modules.ModelViewInheritance." />
-    <file src="Xpand.XAF.Modules.ModelViewInheritance.pdb" target="lib\net461\Xpand.XAF.Modules.ModelViewInheritance." />
+    <file src="Xpand.XAF.Modules.ModelViewInheritance.dll" target="lib\net461\Xpand.XAF.Modules.ModelViewInheritance.dll" />
+    <file src="Xpand.XAF.Modules.ModelViewInheritance.pdb" target="lib\net461\Xpand.XAF.Modules.ModelViewInheritance.pdb" />
     <file src="..\src\libs\Fasterflect.Netstandard.dll" target="lib\net461\Fasterflect.Netstandard.dll" />
     <file src="Readme.txt" target="" />
   </files>

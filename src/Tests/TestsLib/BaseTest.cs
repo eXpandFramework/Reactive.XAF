@@ -9,12 +9,17 @@ using IDisposable = System.IDisposable;
 namespace TestsLib{
     public abstract class BaseTest : IDisposable{
         
-        protected TimeSpan Timeout = TimeSpan.FromSeconds(Debugger.IsAttached?60:20);
+        protected TimeSpan Timeout = TimeSpan.FromSeconds(Debugger.IsAttached?120:5);
+
         static BaseTest(){
             TextListener = new TextWriterTraceListener($@"{AppDomain.CurrentDomain.ApplicationPath()}\reactive.log");
             var traceSourceSwitch = new SourceSwitch("SourceSwitch", "Verbose");
             TraceSource = new TraceSource(nameof(BaseTest)){Switch = traceSourceSwitch};
             TraceSource.Listeners.Add(TextListener);
+            
+        }
+
+        protected BaseTest(){
         }
 
         public static TextWriterTraceListener TextListener{ get; }
@@ -26,12 +31,7 @@ namespace TestsLib{
             Output = output;
         }
 
-        protected BaseTest(){
-        }
-
         public ITestOutputHelper Output{ get; }
-
-        
 
         public virtual void Dispose(){
             XpoTypesInfoHelper.Reset();

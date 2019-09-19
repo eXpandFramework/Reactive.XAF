@@ -15,6 +15,14 @@ using DevExpress.Persistent.Base;
 
 namespace Xpand.XAF.Modules.Reactive.Extensions{
     public static class CommonExtensions{
+        public static IObservable<T> StepInterval<T>(this IObservable<T> source, TimeSpan minDelay,IScheduler scheduler=null){
+            scheduler = scheduler ?? Scheduler.Default;
+            return source.Select(x => Observable.Empty<T>(scheduler)
+                .Delay(minDelay,scheduler)
+                .StartWith(scheduler,x)
+            ).Concat();
+        }
+
         public static IObservable<(T item, int length)> CountSubsequent<T>(this IObservable<T> source,Func<T,object> key){
             var eventTraceSubject = source.Publish().RefCount();
             return eventTraceSubject
@@ -80,6 +88,12 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
                 });
                 return new CompositeDisposable(disposable, cancelable);
             });
+        }
+
+        public static IObservable<(BindingListBase<T> list, ListChangedEventArgs e)> WhenListChanged<T>(this BindingListBase<T> listBase){
+            return Observable.FromEventPattern<ListChangedEventHandler,ListChangedEventArgs>(h => listBase.ListChanged += h, h => listBase.ListChanged -= h)
+                .TransformPattern<ListChangedEventArgs,BindingListBase<T>>();
+
         }
 
         public static IObservable<T> DoNotComplete<T>(this IObservable<T> source){

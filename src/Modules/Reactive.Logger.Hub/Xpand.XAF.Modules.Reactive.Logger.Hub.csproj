@@ -21,9 +21,6 @@
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="MagicOnion">
-      <HintPath>..\..\Libs\MagicOnion.dll</HintPath>
-    </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
@@ -34,20 +31,12 @@
     <Reference Include="Xpand.XAF.Modules.Reactive.Logger">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.dll</HintPath>
     </Reference>
-    <Reference Include="MagicOnion">
-      <HintPath>..\..\Libs\MagicOnion.dll</HintPath>
-    </Reference>
-    <Reference Include="Xpand.XAF.Modules.Reactive.Win">
-      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Win.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Module.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Grpc" Version="1.22.0" />
-    <PackageReference Include="Grpc.Core" Version="1.22.0" />
-    <PackageReference Include="MessagePack" Version="1.7.3.7" />
+    <PackageReference Include="MagicOnion" Version="2.4.0" />
     <PackageReference Include="Rx.Net.Plus" Version="1.1.10" />
     <PackageReference Include="system.buffers" Version="4.5.0" />
     <PackageReference Include="System.Interactive.Async" Version="3.2.0" />
@@ -58,8 +47,5 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="LinkedFiles\" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\GridListEditor\Xpand.XAF.Modules.GridListEditor.csproj" />
   </ItemGroup>
 </Project>

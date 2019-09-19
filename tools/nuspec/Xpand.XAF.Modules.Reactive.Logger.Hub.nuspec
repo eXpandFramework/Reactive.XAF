@@ -19,22 +19,19 @@ The module uses the next two strategies:
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Reactive.Logger.Hub</tags>
     <dependencies>
       <dependency id="akarnokd.reactive_extensions" version="0.0.27-alpha" />
-      <dependency id="Grpc" version="1.22.0" />
-      <dependency id="Grpc.Core" version="1.22.0" />
-      <dependency id="MessagePack" version="1.7.3.7" />
+      <dependency id="MagicOnion" version="2.4.0" />
       <dependency id="Rx.Net.Plus" version="1.1.10" />
       <dependency id="system.buffers" version="4.5.0" />
       <dependency id="System.Interactive.Async" version="3.2.0" />
       <dependency id="System.Reactive" version="4.1.6" />
-      <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.46.0" />
+      <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.47.0" />
       <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="0.0.1.0" />
-      <dependency id="Xpand.XAF.Modules.Reactive.Win" version="0.0.1.0" />
       <dependency id="Xpand.VersionConverter" version="1.0.34.0" />
     </dependencies>
   </metadata>
   <files>
-    <file src="Xpand.XAF.Modules.Reactive.Logger.Hub.dll" target="lib\net461\Xpand.XAF.Modules.Reactive.Logger.Hub." />
-    <file src="Xpand.XAF.Modules.Reactive.Logger.Hub.pdb" target="lib\net461\Xpand.XAF.Modules.Reactive.Logger.Hub." />
+    <file src="Xpand.XAF.Modules.Reactive.Logger.Hub.dll" target="lib\net461\Xpand.XAF.Modules.Reactive.Logger.Hub.dll" />
+    <file src="Xpand.XAF.Modules.Reactive.Logger.Hub.pdb" target="lib\net461\Xpand.XAF.Modules.Reactive.Logger.Hub.pdb" />
     <file src="..\src\libs\Fasterflect.Netstandard.dll" target="lib\net461\Fasterflect.Netstandard.dll" />
     <file src="Readme.txt" target="" />
   </files>

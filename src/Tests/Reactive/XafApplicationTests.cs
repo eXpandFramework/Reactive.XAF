@@ -77,7 +77,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
 
 
         private static ReactiveModule DefaultReactiveModule(Platform platform){
-            var application = platform.NewApplication();
+            var application = platform.NewApplication<ReactiveModule>();
             return application.AddModule<ReactiveModule>(typeof(R));
         }
 

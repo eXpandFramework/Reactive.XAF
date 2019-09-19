@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using DevExpress.Persistent.Base;
 using Microsoft.CSharp;
 using Mono.Cecil;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
+using Xpand.XAF.Modules.Reactive.Extensions;
 
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
@@ -15,7 +15,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         
 
 
-        private static Assembly Compile(this IEnumerable<string> references, string code){
+        private static IObservable<Assembly> Compile(this IEnumerable<string> references, string code){
             
             var codeProvider = new CSharpCodeProvider();
             var compilerParameters = new CompilerParameters{
@@ -34,8 +34,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             }
 
             var assembly = RemoveRecursiveProperties(_outputAssembly);
-            Tracing.Tracer.LogText("ModelMapper assembly created");
-            return assembly;
+            return assembly.AsObservable().TraceModelMapper();
 
         }
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.Model.Core;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Logger {
@@ -17,9 +18,18 @@ namespace Xpand.XAF.Modules.Reactive.Logger {
         }
 
         public static ReactiveTraceSource TraceSource{ get; set; }
-
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
+        }
+
+        public override void AddGeneratorUpdaters(ModelNodesGeneratorUpdaters updaters){
+            base.AddGeneratorUpdaters(updaters);
+            updaters.Add(new TraceEventAppearenceRulesGenerator());
+        }
+
+        public override void Setup(XafApplication application){
+            base.Setup(application);
+            
             this.Connect()
                 .TakeUntilDisposed(this)
                 .Subscribe();

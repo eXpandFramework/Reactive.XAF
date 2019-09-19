@@ -17,6 +17,10 @@ namespace Xpand.Source.Extensions.XAF.XafApplication{
             return application.CreateDetailView(application.CreateObjectSpace(), modelDetailView,true);
         }
 
+        public static CompositeView CreateView(this DevExpress.ExpressApp.XafApplication application,string viewId){
+            return application.CreateView(application.Model.Views[viewId]);
+        }
+
         public static CompositeView CreateView(this DevExpress.ExpressApp.XafApplication application,IModelView modelView){
             return (CompositeView) application.CallMethod("CreateView", modelView);
         }

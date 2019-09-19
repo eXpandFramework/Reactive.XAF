@@ -18,8 +18,13 @@
     <None Remove="MasterDetail\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Moq" Version="4.12.0" />
+    <PackageReference Include="Grpc.Core" Version="2.23.0" />
+    <PackageReference Include="MagicOnion" Version="2.4.0" />
+    <PackageReference Include="Moq" Version="4.13.0" />
+    <PackageReference Include="NUnit" Version="3.12.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.15.1" />
     <PackageReference Include="Shouldly" Version="3.0.2" />
+    <PackageReference Include="System.Buffers" Version="4.5.0" />
     <PackageReference Include="System.Reactive" Version="4.1.6" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1">

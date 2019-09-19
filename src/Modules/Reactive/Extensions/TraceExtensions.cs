@@ -9,8 +9,8 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
-using DevExpress.Utils.Extensions;
 using Fasterflect;
+using Xpand.Source.Extensions.Linq;
 using Xpand.Source.Extensions.System.Exception;
 
 namespace Xpand.XAF.Modules.Reactive.Extensions{
@@ -21,24 +21,20 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
     }
 
     public static class TraceExtensions{
-        public static ConcurrentDictionary<Type, Func<object, string>> DefaultMembers{ get; }
+        private static ConcurrentDictionary<Type, Func<object, string>> Serialization{ get; }
 
         static TraceExtensions(){
-            DefaultMembers=new ConcurrentDictionary<Type, Func<object,string>>();
-            string FrameViewId(object o){
-                var frame = o.CastTo<Frame>();
-                return $"{o.GetType().FullName} - ctx: {frame.Context} - id: {frame.View?.Id}";
-            }
-
-            DefaultMembers.TryAdd(typeof(Frame), FrameViewId);
-            DefaultMembers.TryAdd(typeof(Window), FrameViewId);
-            string CollectionSource(object o) => $"{o.GetType().Name} - {((CollectionSourceBase) o).ObjectTypeInfo.FullName}";
-            DefaultMembers.TryAdd(typeof(CollectionSource), CollectionSource);
-            DefaultMembers.TryAdd(typeof(ShowViewParameters), o => {
-                var showViewParameters = ((ShowViewParameters) o);
-                return $"{nameof(ShowViewParameters)} - {showViewParameters.CreatedView.Id} - {showViewParameters.Context}";
-            });
+            Serialization=new ConcurrentDictionary<Type, Func<object,string>>();
+            AddSerialization<Frame>(_ => $"{_.GetType().FullName} - ctx: {_.Context} - id: {_.View?.Id}");
+            AddSerialization<CollectionSourceBase>(_ => $"{_.GetType().Name} - {_.ObjectTypeInfo.FullName}");
+            AddSerialization<ShowViewParameters>(_ => $"{nameof(ShowViewParameters)} - {_.CreatedView.Id} - {_.Context}");
+            AddSerialization<ModuleBase>(_ => _.Name);
         }
+
+        public static bool AddSerialization<T>(Func<T,string> function){
+            return Serialization.TryAdd(typeof(T), o => function((T) o));
+        }
+
         internal static IObservable<TSource> TraceRX<TSource>(this IObservable<TSource> source, string name = null,
             Action<string> traceAction = null,
             ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
@@ -93,11 +89,19 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
 
         private static object CalculateValue(object v){
             var objectType = v.GetType();
-            if (DefaultMembers.TryGetValue(objectType, out var func)){
-                v = func(v);
-            }
-            else if (v is IModelNode){
-                v = $"{objectType.Name} - {((ModelNode) v).Id}";
+            var serialization = objectType.FromHierarchy(_ => _.BaseType)
+                .FirstOrDefault(_ => {
+                    if (Serialization.TryGetValue(_, out var func)){
+                        v = func(v);
+                        return true;
+                    }
+
+                    return false;
+                });
+            if (serialization==null){
+                if (v is IModelNode){
+                    v = $"{objectType.Name} - {((ModelNode) v).Id}";
+                }
             }
 
             var attributes = objectType.Attributes();

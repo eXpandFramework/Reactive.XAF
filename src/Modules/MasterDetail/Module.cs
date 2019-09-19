@@ -8,7 +8,10 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 namespace Xpand.XAF.Modules.MasterDetail{
     public sealed class MasterDetailModule : ReactiveModuleBase{
         public const string CategoryName = "Xpand.XAF.Modules.MasterDetail";
-
+        public static ReactiveTraceSource TraceSource{ get; set; }
+        static MasterDetailModule(){
+            TraceSource=new ReactiveTraceSource(nameof(MasterDetailModule));
+        }
         public MasterDetailModule(){
             RequiredModuleTypes.Add(typeof(SystemModule));
             RequiredModuleTypes.Add(typeof(ReactiveModule));

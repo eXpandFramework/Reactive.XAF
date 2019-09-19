@@ -35,16 +35,13 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |**DevExpress.ExpressApp**|**Any**
  |**DevExpress.Xpo**|**Any**
 |akarnokd.reactive_extensions|0.0.27-alpha
- |Grpc|1.22.0
- |Grpc.Core|1.22.0
- |MessagePack|1.7.3.7
+ |MagicOnion|2.4.0
  |Rx.Net.Plus|1.1.10
  |system.buffers|4.5.0
  |System.Interactive.Async|3.2.0
  |System.Reactive|4.1.6
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|1.2.46
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|1.2.47
  |[Xpand.XAF.Modules.Reactive.Logger](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Logger)|0.0.1
- |[Xpand.XAF.Modules.Reactive.Win](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Win)|0.0.1
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.0.34
 
 ## Issues-Debugging-Troubleshooting

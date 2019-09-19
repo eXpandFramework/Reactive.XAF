@@ -52,7 +52,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         internal static IObservable<Unit> Connect(){
-            return Observable.Return(Unit.Default);
+            return Observable.Return(Unit.Default).TraceModelMapper();
         }
 
         internal static void Init(){
@@ -90,7 +90,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 return distinnctTypesToMap
                     .All(_ => _.TypeFromPath())
                     .Select(_ => {
-                        var assembly = !_? distinnctTypesToMap.ModelCode().Select(tuple => tuple.references.Compile(tuple.code)): Assembly.LoadFile(GetLastAssemblyPath()).AsObservable();
+                        var assembly =!_? distinnctTypesToMap.ModelCode().SelectMany(tuple => tuple.references.Compile(tuple.code))
+                                : Assembly.LoadFile(GetLastAssemblyPath()).AsObservable();
                         return assembly.SelectMany(assembly1 => {
                             var types = assembly1.GetTypes()
                                 .Where(type => typeof(IModelModelMap).IsAssignableFrom(type))
@@ -162,7 +163,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
 
             return configurations
                 .Do(_ => _typesToMap.OnNext(_))
-                .Select(_ => _.TypeToMap);
+                .Select(_ => _.TypeToMap)
+                .TraceModelMapper();
         }
 
         public static IObservable<Type> MapToModel(this IObservable<Type> types,Func<Type,IModelMapperConfiguration> configSelector=null){
@@ -187,7 +189,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         internal static IObservable<Type> ModelInterfaces(this IObservable<Type> source){
-            return source.Finally(Start).Select(_ => MappedTypes).Switch().Distinct();
+            return source.Finally(Start).Select(_ => MappedTypes).Switch().Distinct().TraceModelMapper();
         }
 
         public static string ModelMapContainerName(this Type type, IModelMapperConfiguration configuration=null){

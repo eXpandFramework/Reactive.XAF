@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
@@ -16,14 +17,22 @@ namespace Xpand.XAF.Modules.CloneMemberValue{
         public static IObservable<Unit> Connect(this ApplicationModulesManager modulesManager ,XafApplication application){
             if (application != null){
                 return application.WhenCloneMemberValues()
-                    .Tracer(verbose:true)
                     .ToUnit();
             }
             return Observable.Empty<Unit>();
         }
+        internal static IObservable<TSource> TraceCloneMemberValueModule<TSource>(this IObservable<TSource> source, string name = null,
+            Action<string> traceAction = null,
+            ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0){
+            return source.Trace(name, CloneMemberValueModule.TraceSource, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
+        }
 
-        public static IEnumerable<IModelCommonMemberViewItemCloneValue> CloneValueMemberViewItems(this ObjectView objectView) {
-            return (objectView is ListView view? view.Model.Columns.Cast<IModelCommonMemberViewItemCloneValue>()
+        public static IEnumerable<IModelCommonMemberViewItemCloneValue> CloneValueMemberViewItems(this ObjectView objectView){
+            return (objectView is ListView view
+                    ? view.Model.Columns.Cast<IModelCommonMemberViewItemCloneValue>()
                     : ((DetailView) objectView).Model.Items.OfType<IModelCommonMemberViewItemCloneValue>())
                 .Where(state => state.CloneValue)
                 .Select(value => value);
@@ -31,11 +40,10 @@ namespace Xpand.XAF.Modules.CloneMemberValue{
 
         public static IObservable<(ObjectView objectView, IMemberInfo MemberInfo, object previousObject, object currentObject)> CloneMembers(
             this IObservable<(ObjectView objectView,object previous, object current)> source){
-            
-            return  source.SelectMany(_ => _.objectView
+
+            return source.SelectMany(_ => _.objectView
                 .CloneValueMemberViewItems()
-                .Select(value => (_.objectView, ((IModelMemberViewItem) value).ModelMember.MemberInfo,_.previous,_.current).CloneMemberValue()))
-                ;
+                .Select(value =>(_.objectView, ((IModelMemberViewItem) value).ModelMember.MemberInfo, _.previous, _.current).CloneMemberValue()));
         }
 
         public static IObservable<(object previous, object current)> NewObjectPairs(this ListEditor listEditor){
@@ -58,7 +66,8 @@ namespace Xpand.XAF.Modules.CloneMemberValue{
                 .Select(_ => _.e.ListView).Where(view => view.Model.AllowEdit);
         }
 
-        public static IObservable<(ObjectView objectView, IMemberInfo MemberInfo, object previousObject, object currentObject)> WhenCloneMemberValues(this XafApplication application){
+        public static IObservable<(ObjectView objectView, IMemberInfo MemberInfo, object previousObject, object currentObject)>
+            WhenCloneMemberValues(this XafApplication application){
             return application.WhenCloneMemberValueDetailViewPairs()
                 .Select(_ => (((ObjectView) _.current),_.previous.CurrentObject,_.current.CurrentObject))
                 .Merge(application.WhenCloneMemberValueListViewCreated()

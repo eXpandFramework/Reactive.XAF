@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.SystemModule;
@@ -20,33 +21,37 @@ namespace Xpand.XAF.Modules.SuppressConfirmation.Tests{
         [InlineData(typeof(ListView),Platform.Web)]
         [InlineData(typeof(DetailView),Platform.Web)]
         internal async Task Signal_When_Window_with_SupressConfirmation_Enabled_ObjectView_changed(Type viewType,Platform platform){
-            var application = DefaultSuppressConfirmationModule(platform).Application;
-            var windows = application.WhenSuppressConfirmationWindows().Replay();
-            windows.Connect();
-            var window = application.CreateWindow(TemplateContext.View, null, true);
-            var objectView = application.CreateObjectView(viewType, typeof(SC));
+            using (var application = DefaultSuppressConfirmationModule(platform).Application){
+                var windows = application.WhenSuppressConfirmationWindows().Replay();
+                windows.Connect();
+                var window = application.CreateWindow(TemplateContext.View, null, true);
+                var objectView = application.CreateObjectView(viewType, typeof(SC));
+                window.SetView(objectView);
 
-            window.SetView(objectView);
+                await windows.FirstAsync();
+            }
 
-            await windows.FirstAsync();
+            
         }
 
         [Theory]
         [InlineData(Platform.Win)]
         [InlineData(Platform.Web)]
         internal async Task Signal_When_DashboardView_with_SupressConfirmation_Enabled_ObjectView_changed(Platform platform){
-            var application = DefaultSuppressConfirmationModule(platform).Application;
-            var windows = application.WhenSuppressConfirmationWindows().Replay();
-            windows.Connect();
-            var modelDashboardView = application.Model.NewModelDashboardView(typeof(SC));
-            var dashboardView =
-                application.CreateDashboardView(application.CreateObjectSpace(), modelDashboardView.Id, true);
-            dashboardView.MockCreateControls();
+            using (var application = DefaultSuppressConfirmationModule(platform).Application){
+                var windows = application.WhenSuppressConfirmationWindows().Replay();
+                windows.Connect();
+                var modelDashboardView = application.Model.NewModelDashboardView(typeof(SC));
+                var dashboardView = application.CreateDashboardView(application.CreateObjectSpace(), modelDashboardView.Id, true);
+                dashboardView.MockCreateControls();
 
-            var frame = await windows.Take(1);
-            frame.ShouldBeOfType<NestedFrame>();
-            frame = await windows.Take(1);
-            frame.ShouldBeOfType<NestedFrame>();
+                var frame = await windows.Take(1);
+                frame.ShouldBeOfType<NestedFrame>();
+                frame = await windows.Take(1);
+                frame.ShouldBeOfType<NestedFrame>();
+            }
+
+            
         }
 
         [Theory]
@@ -55,21 +60,22 @@ namespace Xpand.XAF.Modules.SuppressConfirmation.Tests{
         [InlineData(typeof(ListView),Platform.Web)]
         [InlineData(typeof(DetailView),Platform.Web)]
         internal void Change_Modification_Handling_Mode(Type viewType,Platform platform){
-            var application = DefaultSuppressConfirmationModule(platform).Application;
-            var windows = application.WhenSuppressConfirmationWindows().Replay();
-            windows.Connect();
-            var window = application.CreateWindow(TemplateContext.View, null,true);
-            var objectView = application.CreateObjectView(viewType,typeof(SC));
-            objectView.CurrentObject = objectView.ObjectSpace.CreateObject(typeof(SC));
-            window.SetView(objectView);
-            objectView.ObjectSpace.CommitChanges();
+            using (var application = DefaultSuppressConfirmationModule(platform).Application){
+                var windows = application.WhenSuppressConfirmationWindows().Replay();
+                windows.Connect();
+                var window = application.CreateWindow(TemplateContext.View, null, true);
+                var objectView = application.CreateObjectView(viewType, typeof(SC));
+                objectView.CurrentObject = objectView.ObjectSpace.CreateObject(typeof(SC));
+                window.SetView(objectView);
+                objectView.ObjectSpace.CommitChanges();
 
-            window.GetController<ModificationsController>().ModificationsHandlingMode.ShouldBe((ModificationsHandlingMode) (-1));
+                window.GetController<ModificationsController>().ModificationsHandlingMode.ShouldBe((ModificationsHandlingMode) (-1));
+            }
         }
 
 
         private static SuppressConfirmationModule DefaultSuppressConfirmationModule(Platform platform){
-            var application = platform.NewApplication();
+            var application = platform.NewApplication<SuppressConfirmationModule>();
             application.Title = "AutoCommitModule";
             var supressConfirmationModule = new SuppressConfirmationModule();
             supressConfirmationModule.AdditionalExportedTypes.AddRange(new[]{typeof(SC)});

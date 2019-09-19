@@ -22,7 +22,7 @@ namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{
             ModelViewInheritanceUpdater.Disabled = true;
             var models = GetModels(viewType, attribute, platform);
 
-            var application = platform.NewApplication();
+            var application = platform.NewApplication<ModelViewInheritanceModule>();
             var module = CreateModelViewIneritanceModule(viewType, attribute, application,false);
             var testModule1 = new TestModule1{DiffsStore = new StringModelStore(models[0])};
             var baseBoTypes = new[]{typeof(ABaseMvi), typeof(TagMvi)};
@@ -40,7 +40,7 @@ namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{
         }
 
         private  string[] GetModels(ViewType viewType, bool attribute, Platform platform){
-            var application = platform.NewApplication();
+            var application = platform.NewApplication<ModelViewInheritanceModule>();
             CreateModelViewIneritanceModule(viewType, attribute, application);
             var inheritAndModifyBaseView = new InheritAndModifyBaseView(application, viewType, attribute);
             var models = inheritAndModifyBaseView.GetModels().ToArray();
@@ -82,7 +82,7 @@ namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{
         [Fact]
         public void Chained_Cloned_listview_merging(){
             string GetModel(){
-                var xafApplication = Platform.Win.NewApplication();
+                var xafApplication = Platform.Win.NewApplication<ModelViewInheritanceModule>();
                 var inheritanceModule = DefaultModelViewInheritancerModule(xafApplication, true, typeof(CloneModelViewModule));
                 var model = inheritanceModule.Application.Model;
                 var modelApplication = ((ModelApplicationBase) model).CreatorInstance.CreateModelApplication();
@@ -107,7 +107,7 @@ namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{
             
             var modelXml = GetModel();
 
-            var newApplication = Platform.Win.NewApplication();
+            var newApplication = Platform.Win.NewApplication<ModelViewInheritanceModule>();
             var module = DefaultModelViewInheritancerModule(newApplication,false, typeof(CloneModelViewModule));
             var testModule1 = new TestModule1{DiffsStore = new StringModelStore(modelXml)};
             testModule1.AdditionalExportedTypes.Add(typeof(Element));

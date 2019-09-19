@@ -30,10 +30,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Configuration{
         public Type TypeToMap{ get;  set; }
         public bool OmitContainer{ get; set; }
         public string DisplayName{ get; set; }
+        public override string ToString(){
+            return $"TypeToMap:{TypeToMap},ContainerName:{ContainerName},MapName:{MapName},ImageName:{ImageName},VisibilityCriteria:{VisibilityCriteria},DisplayName:{DisplayName}";
+        }
 
         [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
         public override int GetHashCode(){
-            return $"{ContainerName}{MapName}{ImageName}{VisibilityCriteria}{DisplayName}".GetHashCode();
+            return ToString().GetHashCode();
         }
 
 

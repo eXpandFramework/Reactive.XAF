@@ -5,7 +5,8 @@ param(
     $Pass = $env:GithubPass,
     $DXApiFeed  ,
     $artifactstagingdirectory,
-    $AzureToken  =(Get-AzureToken),
+    $bindirectory,
+    $AzureToken  ,
     $WhatIf = $false
 )
 $ErrorActionPreference = "Stop"
@@ -101,6 +102,7 @@ $bArgs = @{
 
 "$SourcePath\Bin\Nupkg", "$SourcePath\Bin\Nuspec" | ForEach-Object {
     Get-ChildItem $_ -Recurse | ForEach-Object {
-        Copy-Item $_.FullName -Destination $artifactstagingdirectory
+        Move-Item $_.FullName -Destination $artifactstagingdirectory
     }
 }
+

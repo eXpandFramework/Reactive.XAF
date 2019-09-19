@@ -45,6 +45,9 @@
     <Reference Include="Fasterflect.Netstandard">
       <HintPath>..\..\Libs\Fasterflect.Netstandard.dll</HintPath>
     </Reference>
+    <Reference Include="Xpand.XAF.Modules.GridListEditor">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.GridListEditor.dll</HintPath>
+    </Reference>
     <Reference Include="Xpand.XAF.Modules.OneView">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.OneView.dll</HintPath>
     </Reference>
@@ -70,6 +73,8 @@
     <PackageReference Include="DevExpress.ExpressApp.Win" Version="18.2.7" />
     <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="18.2.7" />
     <PackageReference Include="DevExpress.Xpo" Version="18.2.7" />
+    <PackageReference Include="MagicOnion" Version="2.4.0" />
+    <PackageReference Include="System.Buffers" Version="4.5.0" />
     <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
     <PackageReference Include="System.Reactive" Version="4.1.6" />
   </ItemGroup>

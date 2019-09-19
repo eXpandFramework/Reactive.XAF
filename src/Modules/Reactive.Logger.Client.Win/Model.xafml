@@ -1,16 +1,24 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Application>
-  <Options UIType="MultipleWindowSDI" FormStyle="Ribbon" />
+  <BOModel>
+    <Class Name="Xpand.XAF.Modules.Reactive.Logger.TraceEvent">
+      <AppearanceRules>
+        <AppearanceRule Id="ReactiveLoggerClient" Context="ListView" Criteria="[ApplicationTitle] != 'RXLoggerClient'" FontColor="SeaGreen" TargetItems="ApplicationTitle" Index="10001" IsNewNode="True" />
+      </AppearanceRules>
+    </Class>
+  </BOModel>
+  <Options UIType="MultipleWindowSDI" FormStyle="Ribbon" Skin="The Bezier" />
   <ReactiveModules>
+    <GridListEditor>
+      <GridListEditorRules>
+        <GridListEditorTopRow Id="Remember TraceEvent_ListView TopRownIndex" ListView="TraceEvent_ListView" IsNewNode="True" />
+      </GridListEditorRules>
+    </GridListEditor>
     <OneView View="TraceEvent_ListView" />
     <ReactiveLogger>
-      <TraceSources>
-        <TraceSourcedModule Id="GridListEditorModule" Level="Verbose" />
-        <TraceSourcedModule Id="OneViewModule" Level="Verbose" />
-        <TraceSourcedModule Id="ReactiveLoggerModule" Level="Verbose" />
-        
-        <TraceSourcedModule Id="RefreshViewModule" Level="Verbose" />
-      </TraceSources>
+      <LoggerPorts>
+        <LoggerServerPort Id="default server port 61456" Removed="True" />
+      </LoggerPorts>
     </ReactiveLogger>
   </ReactiveModules>
   <SchemaModules>

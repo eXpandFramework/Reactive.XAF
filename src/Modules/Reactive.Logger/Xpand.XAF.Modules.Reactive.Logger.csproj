@@ -19,6 +19,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\Extensions\Extensions\Linq\ToRuns.cs" Link="LinkedFiles\ToRuns.cs" />
+    <Compile Include="..\..\Extensions\Extensions\System\AppDomain\ApplicationPath.cs" Link="LinkedFiles\ApplicationPath.cs" />
     <Compile Include="..\..\Extensions\Extensions\System\Refelction\GetMemberInfo.cs" Link="LinkedFiles\GetMemberInfo.cs" />
     <Compile Include="..\..\Extensions\Extensions\XAF\CollectionSource\CollectionSourceExtensions.cs" Link="LinkedFiles\CollectionSourceExtensions.cs" />
     <Compile Include="..\..\Extensions\Extensions\XAF\Model\GetParent.cs" Link="LinkedFiles\GetParent.cs" />
