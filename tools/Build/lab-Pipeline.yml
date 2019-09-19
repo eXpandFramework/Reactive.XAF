@@ -23,6 +23,9 @@ jobs:
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
           **\*Auto*.dll
+          **\*CloneMemberValue*.dll
+          **\*CloneModelView*.dll
+          **\*GridListEditor*.dll
           **\*Inherit*.dll
           !**\*TestAdapter.dll
           !**\obj\**
