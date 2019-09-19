@@ -4,13 +4,16 @@ jobs:
     parallel: 12
     
   steps:
-    - task: DownloadPipelineArtifact@2
+    - task: DownloadBuildArtifacts@0
       inputs:
         buildType: 'specific'
         project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
-        definition: '23'
-        buildVersionToDownload: 'latest'
-        targetPath: '$(Pipeline.Workspace)'
+        pipeline: '23'
+        buildVersionToDownload: 'latestFromBranch'
+        branchName: 'refs/heads/lab'
+        downloadType: 'single'
+        downloadPath: '$(System.DefaultWorkingDirectory)'
+        artifactName: 'Xpand.XAF.Modules.Bin'
     - task: VSTest@2
       displayName: 'VsTest - testAssemblies'
       inputs:
