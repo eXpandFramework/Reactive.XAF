@@ -1,8 +1,10 @@
 jobs:
 - job: Test
   strategy:
-    parallel: 10
-    
+    parallel: 2
+
+  pool:
+    vmImage: windows-2019
   steps:
     - task: DownloadBuildArtifacts@0
       inputs:
@@ -20,16 +22,15 @@ jobs:
         searchFolder: '$(System.DefaultWorkingDirectory)'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
-          **\*Tests*.dll
+          **\*Auto*.dll
+          **\*Inherit*.dll
           !**\*TestAdapter.dll
           !**\obj\**
-        runInParallel: false
+        
         diagnosticsEnabled: true
-        runTestsInIsolation: true
-        codeCoverageEnabled: true
-        rerunFailedTests: true 
-        rerunMaxAttempts: 3
-        distributionBatchType: basedOnAssembly
-        customBatchSizeValue: 10000
+        
+        
+        distributionBatchType: 'basedOnAssembly'
+      
         collectDumpOn: never
     
