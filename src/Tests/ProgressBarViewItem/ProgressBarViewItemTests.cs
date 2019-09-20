@@ -17,7 +17,7 @@ using Xunit.Abstractions;
 namespace Xpand.XAF.Modules.ProgressBarViewItem.Tests{
     [Collection(nameof(ProgressBarViewItemModule))]
     public class ProgressBarViewItemTests : BaseTest{
-        public ProgressBarViewItemTests(ITestOutputHelper output) : base(output){
+        public ProgressBarViewItemTests() {
             typeof(ProgressBarViewItemBase).SetFieldValue("_platform", null);
         }
 

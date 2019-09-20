@@ -3,12 +3,14 @@ using System.Diagnostics;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Xpo;
 using Xpand.Source.Extensions.System.AppDomain;
-using Xunit.Abstractions;
+using Xpand.Source.Extensions.XAF.XafApplication;
 using IDisposable = System.IDisposable;
 
 namespace TestsLib{
     public abstract class BaseTest : IDisposable{
-        
+        internal Platform GetPlatform(string platformName){
+            return (Platform)Enum.Parse(typeof(Platform),platformName);
+        }
         protected TimeSpan Timeout = TimeSpan.FromSeconds(Debugger.IsAttached?120:5);
 
         static BaseTest(){
@@ -19,19 +21,14 @@ namespace TestsLib{
             
         }
 
-        protected BaseTest(){
-        }
-
         public static TextWriterTraceListener TextListener{ get; }
 
         public static TraceSource TraceSource{ get; }
 
         public const string NotImplemented = "NotImplemented";
-        protected BaseTest(ITestOutputHelper output){
-            Output = output;
-        }
+        
 
-        public ITestOutputHelper Output{ get; }
+        
 
         public virtual void Dispose(){
             XpoTypesInfoHelper.Reset();

@@ -11,82 +11,86 @@ using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.CloneModelView.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
-using Xunit;
+
 [assembly:NonParallelizable]
 namespace Xpand.XAF.Modules.CloneModelView.Tests{
-
-//    [Collection(nameof(CloneModelViewModule))]
     public class CloneModelViewTests : BaseTest{
-        
 
-//        [Xunit.Theory]
-//        [InlineData(CloneViewType.LookupListView, Platform.Win)]
-//        [InlineData(CloneViewType.ListView,Platform.Win)]
-//        [InlineData(CloneViewType.DetailView,Platform.Win)]
-//        [InlineData(CloneViewType.LookupListView,Platform.Web)]
-//        [InlineData(CloneViewType.ListView,Platform.Web)]
-//        [InlineData(CloneViewType.DetailView,Platform.Web)]
-//        internal void Clone_Model_View(CloneViewType cloneViewType, Platform platform){
-//
-//            var cloneViewId = $"{nameof(Clone_Model_View)}{platform}_{cloneViewType}";
-//
-//            var application = DefaultCloneModelViewModule(info => {
-//                var cloneModelViewAttribute = new CloneModelViewAttribute(cloneViewType, cloneViewId);
-//                info.FindTypeInfo(typeof(CMV)).AddAttribute(cloneModelViewAttribute);
-//            }, platform).Application;
-//            ((bool) application.GetPropertyValue("EnableModelCache")).ShouldBe(false);
-//                
-//            var modelView = application.Model.Views[cloneViewId];
-//            modelView.ShouldNotBeNull();
-//            modelView.GetType().Name.ShouldBe($"Model{cloneViewType.ToString().Replace("Lookup", "")}");
-//            modelView.Id.ShouldBe(cloneViewId);
-//            application.Dispose();
-//        }
-
-//        [Xunit.Theory]
-//        [InlineData(Platform.Web)]
-//        [InlineData(Platform.Win)]
-//        internal void Clone_multiple_Model_Views(Platform platform){
-//            var cloneViewId = $"{nameof(Clone_multiple_Model_Views)}{platform}_";
-//            var cloneViewTypes = Enum.GetValues(typeof(CloneViewType)).Cast<CloneViewType>();
-//            var application = DefaultCloneModelViewModule(info => {
-//                foreach (var cloneViewType in cloneViewTypes){
-//                    var cloneModelViewAttribute =
-//                        new CloneModelViewAttribute(cloneViewType, $"{cloneViewId}{cloneViewType}");
-//                    info.FindTypeInfo(typeof(CMV)).AddAttribute(cloneModelViewAttribute);
-//                }
-//            }, platform).Application;
-//            foreach (var cloneViewType in cloneViewTypes){
-//                var viewId = $"{cloneViewId}{cloneViewType}";
-//                var modelView = application.Model.Views[viewId];
-//                modelView.ShouldNotBeNull();
-//                modelView.GetType().Name.ShouldBe($"Model{cloneViewType.ToString().Replace("Lookup", "")}");
-//                modelView.Id.ShouldBe(viewId);
-//            }
-//
-//            application.Dispose();        }
-
-//        [Xunit.Theory]
-//        [InlineData(CloneViewType.LookupListView, Platform.Win)]
-//        [InlineData(CloneViewType.ListView, Platform.Win)]
-//        [InlineData(CloneViewType.DetailView, Platform.Win)]
-//        [InlineData(CloneViewType.LookupListView,Platform.Web)]
-//        [InlineData(CloneViewType.ListView,Platform.Web)]
-//        [InlineData(CloneViewType.DetailView,Platform.Web)]
-//        internal void Clone_Model_View_and_make_it_default(CloneViewType cloneViewType, Platform platform){
-//            var cloneViewId = $"{nameof(Clone_Model_View_and_make_it_default)}_{cloneViewType}{platform}";
-//
-//            var application = DefaultCloneModelViewModule(info => {
-//                var cloneModelViewAttribute = new CloneModelViewAttribute(cloneViewType, cloneViewId, true);
-//                info.FindTypeInfo(typeof(CMV)).AddAttribute(cloneModelViewAttribute);
-//            }, platform).Application;
-//            var modelView = application.Model.Views[cloneViewId].AsObjectView;
-//
-//            ((IModelView) modelView.ModelClass.GetPropertyValue($"Default{cloneViewType}")).Id
-//                .ShouldBe(cloneViewId);
-//            application.Dispose();        }
 
         
+        [TestCase(CloneViewType.LookupListView, nameof(Platform.Win))]
+        [TestCase(CloneViewType.ListView,nameof(Platform.Win))]
+        [TestCase(CloneViewType.DetailView,nameof(Platform.Win))]
+        [TestCase(CloneViewType.LookupListView,nameof(Platform.Web))]
+        [TestCase(CloneViewType.ListView,nameof(Platform.Web))]
+        [TestCase(CloneViewType.DetailView,nameof(Platform.Web))]
+        public void Clone_Model_View(CloneViewType cloneViewType, string platformName){
+            var platform = GetPlatform(platformName);
+
+            var cloneViewId = $"{nameof(Clone_Model_View)}{platform}_{cloneViewType}";
+
+            var application = DefaultCloneModelViewModule(info => {
+                var cloneModelViewAttribute = new CloneModelViewAttribute(cloneViewType, cloneViewId);
+                info.FindTypeInfo(typeof(CMV)).AddAttribute(cloneModelViewAttribute);
+            }, platform).Application;
+            ((bool) application.GetPropertyValue("EnableModelCache")).ShouldBe(false);
+                
+            var modelView = application.Model.Views[cloneViewId];
+            modelView.ShouldNotBeNull();
+            modelView.GetType().Name.ShouldBe($"Model{cloneViewType.ToString().Replace("Lookup", "")}");
+            modelView.Id.ShouldBe(cloneViewId);
+            application.Dispose();
+        }
+
+        
+        [TestCase(nameof(Platform.Web))]
+        [TestCase(nameof(Platform.Win))]
+        public void Clone_multiple_Model_Views(string platformName){
+            var platform = GetPlatform(platformName);
+            var cloneViewId = $"{nameof(Clone_multiple_Model_Views)}{platform}_";
+            var cloneViewTypes = Enum.GetValues(typeof(CloneViewType)).Cast<CloneViewType>();
+            var application = DefaultCloneModelViewModule(info => {
+                foreach (var cloneViewType in cloneViewTypes){
+                    var cloneModelViewAttribute =
+                        new CloneModelViewAttribute(cloneViewType, $"{cloneViewId}{cloneViewType}");
+                    info.FindTypeInfo(typeof(CMV)).AddAttribute(cloneModelViewAttribute);
+                }
+            }, platform).Application;
+            foreach (var cloneViewType in cloneViewTypes){
+                var viewId = $"{cloneViewId}{cloneViewType}";
+                var modelView = application.Model.Views[viewId];
+                modelView.ShouldNotBeNull();
+                modelView.GetType().Name.ShouldBe($"Model{cloneViewType.ToString().Replace("Lookup", "")}");
+                modelView.Id.ShouldBe(viewId);
+            }
+
+            application.Dispose();
+        }
+
+        
+        [TestCase(CloneViewType.LookupListView, nameof(Platform.Win))]
+        [TestCase(CloneViewType.ListView, nameof(Platform.Win))]
+        [TestCase(CloneViewType.DetailView, nameof(Platform.Win))]
+        [TestCase(CloneViewType.LookupListView,nameof(Platform.Web))]
+        [TestCase(CloneViewType.ListView,nameof(Platform.Web))]
+        [TestCase(CloneViewType.DetailView,nameof(Platform.Web))]
+        public void Clone_Model_View_and_make_it_default(CloneViewType cloneViewType, string platformName){
+            var platform = GetPlatform(platformName);
+            var cloneViewId = $"{nameof(Clone_Model_View_and_make_it_default)}_{cloneViewType}{platform}";
+
+            var application = DefaultCloneModelViewModule(info => {
+                var cloneModelViewAttribute = new CloneModelViewAttribute(cloneViewType, cloneViewId, true);
+                info.FindTypeInfo(typeof(CMV)).AddAttribute(cloneModelViewAttribute);
+            }, platform).Application;
+            var modelView = application.Model.Views[cloneViewId].AsObjectView;
+
+            ((IModelView) modelView.ModelClass.GetPropertyValue($"Default{cloneViewType}")).Id
+                .ShouldBe(cloneViewId);
+            application.Dispose();        }
+
+        
+
+
         [TestCase(CloneViewType.LookupListView, nameof(Platform.Win))]
         [TestCase(CloneViewType.LookupListView,nameof(Platform.Web))]
         [TestCase(CloneViewType.ListView, nameof(Platform.Win))]
