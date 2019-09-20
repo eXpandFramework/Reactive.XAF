@@ -30,7 +30,7 @@ jobs:
         
         diagnosticsEnabled: true
         runInParallel: true
-        
+        codeCoverageEnabled: true
         distributionBatchType: 'basedOnAssembly'
       
         collectDumpOn: never
