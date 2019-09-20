@@ -1,7 +1,7 @@
 jobs:
 - job: Test
   strategy:
-    parallel: 1
+    parallel: 15
 
   pool:
     vmImage: windows-2019
@@ -23,14 +23,13 @@ jobs:
         testSelector: 'testAssemblies'
         uiTests: true
         testAssemblyVer2: |
-          
-          **\*Reactive.Logger.Hub.Tests*.dll
-          
+          **\*Tests.dll
+          !**\*Reactive.Logger.Hub.Tests*.dll
           !**\*TestAdapter.dll
           !**\obj\**
         
         diagnosticsEnabled: true
-        runInParallel: false
+        runInParallel: true
         
         distributionBatchType: 'basedOnAssembly'
       
