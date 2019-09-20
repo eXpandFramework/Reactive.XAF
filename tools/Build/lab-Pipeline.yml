@@ -1,7 +1,7 @@
 jobs:
 - job: Test
   strategy:
-    parallel: 15
+    parallel: 1
 
   pool:
     vmImage: windows-2019
@@ -23,7 +23,7 @@ jobs:
         testSelector: 'testAssemblies'
         uiTests: true
         testAssemblyVer2: |
-          **\*Tests.dll
+          **\*CloneModelView.dll
           !**\*Reactive.Logger.Hub.Tests*.dll
           !**\*TestAdapter.dll
           !**\obj\**
