@@ -1,7 +1,9 @@
 ﻿using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
+using NUnit.Framework;
 using Shouldly;
 using TestsLib;
 using Xpand.Source.Extensions.XAF.XafApplication;
@@ -9,12 +11,13 @@ using Xpand.XAF.Modules.GridListEditor.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
-using Xunit;
+
 
 namespace Xpand.XAF.Modules.GridListEditor.Tests{
-    [Collection(nameof(GridListEditorModule))]
+    [NonParallelizable]
     public class GridListEditorTests : BaseTest{
-        [WinFormsFact]
+        [Test]
+        [Apartment(ApartmentState.STA)]
         public async Task Remember_WHen_Refresh_View_DataSource(){
             
             var application = GridListEditorModule(nameof(Remember_WHen_Refresh_View_DataSource)).Application;

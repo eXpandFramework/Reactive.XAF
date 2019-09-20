@@ -1,0 +1,24 @@
+jobs:
+- job: Test
+  strategy:
+    parallel: 15
+  pool:
+    vmImage: windows-2019
+  steps:
+    - task: VSTest@2
+      displayName: 'VsTest - testAssemblies'
+      inputs:
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: |
+          **\*Tests*.dll
+          !**\*Hub*.dll
+          !**\*TestAdapter.dll
+          !**\obj\**    
+        diagnosticsEnabled: true
+        runInParallel: true
+        codeCoverageEnabled: true
+        distributionBatchType: 'basedOnAssembly'
+      
+        collectDumpOn: never
+    

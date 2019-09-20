@@ -52,7 +52,7 @@ await newCustomer.CombineLatest(listView, (customer, view) => {
 })
 ```
 
-And so on, the sky is the limit here as you can write custom operators just like a common c# extension method that extends and returns an `IObservable<T>`
+And so on, the sky is the limit here as you can write custom operators just like a common c# extension method that extends and returns an `IObservable<T>`. All modules of this repository that have a dependency to the Reactive package are developed similar to the above example. Explore their docs, tests, source to find endless examples.
 
 
 

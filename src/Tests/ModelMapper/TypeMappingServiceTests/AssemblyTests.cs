@@ -4,20 +4,21 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Fasterflect;
+using NUnit.Framework;
 using Shouldly;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
-using Xunit;
 using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.TypeMappingService;
 
 namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
-    [Collection(nameof(ModelMapperModule))]
+    [NonParallelizable]
     public class AssemblyTests:ModelMapperBaseTest{
         [Theory]
-        [InlineData(Platform.Win)]
-        [InlineData(Platform.Web)]
-        internal async Task Create_Model_Assembly_in_path_if_not_Exist(Platform platform){
+        [TestCase(nameof(Platform.Win))]
+        [TestCase(nameof(Platform.Web))]
+        public async Task Create_Model_Assembly_in_path_if_not_Exist(string platformName){
+            var platform = GetPlatform(platformName);
             InitializeMapperService(nameof(Create_Model_Assembly_in_path_if_not_Exist),platform);
             var typeToMap = typeof(TestModelMapper);
 
@@ -26,7 +27,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             File.Exists(mapToModel.Assembly.Location).ShouldBeTrue();
         }
 
-        [Fact]
+        [Test]
         public async Task Assembly_Version_Should_Match_Model_Mapper_Version(){
             InitializeMapperService(nameof(Assembly_Version_Should_Match_Model_Mapper_Version));
             var typeToMap = typeof(TestModelMapper);
@@ -37,7 +38,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             modelType.Assembly.GetName().Version.ShouldBe(modelMapperVersion);
         }
 
-        [Fact]
+        [Test]
         public async Task Do_Not_Map_If_Type_Assembly_Version_Not_Changed(){
             InitializeMapperService(nameof(Do_Not_Map_If_Type_Assembly_Version_Not_Changed));
             var mappedType = typeof(TestModelMapper);
@@ -59,7 +60,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             modelMapperAttribute.AssemblyHashCode.ShouldBe(version);
         }
 
-        [Fact()]
+        [Test]
         public async Task Always_Map_If_Any_Type_Assembly_HashCode_Changed(){
 
             var name = nameof(Always_Map_If_Any_Type_Assembly_HashCode_Changed);
@@ -68,7 +69,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             await new[]{dynamicType,typeof(TestModelMapper)}.MapToModel().ModelInterfaces();
             InitializeMapperService($"{name}",newAssemblyName:false);
             dynamicType = CreateDynamicType(mapperService);
-            var first = await new[]{dynamicType,typeof(TestModelMapper)}.MapToModel().ModelInterfaces();
+            await new[]{dynamicType,typeof(TestModelMapper)}.MapToModel().ModelInterfaces();
 
 
             InitializeMapperService($"{name}",newAssemblyName:false);
@@ -81,11 +82,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             exception.Message.ShouldContain("CS0016");
         }
 
-        [Fact()]
+        [Test]
         public async Task Always_Map_If_ModelMapperModule_HashCode_Changed(){
             InitializeMapperService(nameof(Always_Map_If_ModelMapperModule_HashCode_Changed));
             var mappedType = typeof(TestModelMapper);
-            var first = await mappedType.MapToModel().ModelInterfaces();
+            await mappedType.MapToModel().ModelInterfaces();
             InitializeMapperService($"{nameof(Always_Map_If_ModelMapperModule_HashCode_Changed)}",newAssemblyName:false);
             typeof(TypeMappingService).SetFieldValue("_modelMapperModuleVersion", new Version(2000,100,40));
 
@@ -94,7 +95,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             exception.Message.ShouldContain("CS0016");
         }
 
-        [Fact()]
+        [Test]
         public async Task Always_Map_If_ModelMapperConfiguration_Changed(){
             
             InitializeMapperService(nameof(Always_Map_If_ModelMapperConfiguration_Changed));

@@ -1,14 +1,15 @@
 ﻿using System.Reactive.Subjects;
 using akarnokd.reactive_extensions;
+using NUnit.Framework;
 using Shouldly;
 using TestsLib;
 using Xpand.XAF.Modules.Reactive.Extensions;
-using Xunit;
+
 
 namespace Xpand.XAF.Modules.Reactive.Tests{
-    [Collection(nameof(ReactiveModule))]
+    [NonParallelizable]
     public class CommonExtensionsTests:BaseTest{
-        [Fact]
+        [Test]
         public void CountSubSequent(){
             var subject = new ReplaySubject<int>();
             subject.OnNext(0);

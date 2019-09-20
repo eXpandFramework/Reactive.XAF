@@ -2,9 +2,10 @@ param(
     $Branch = "lab",
     $sourcesRoot = "$PSScriptRoot\..\..",
     $apiKey,
-    $criteria = "Xpand.*",
-    $localPackageSource = "$PSScriptRoot\..\..\bin\Nupkg"
+    $localPackageSource = "$PSScriptRoot\..\..\bin\Nupkg",
+    $criteria = "Xpand.*"
 )
+Install-Module XpandPwsh -Force
 $remotePackageSource=Get-PackageFeed -Nuget
 if ($Branch -eq "lab"){
     $remotePackageSource=Get-PackageFeed -Xpand

@@ -6,16 +6,17 @@ using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.SystemModule;
 using Fasterflect;
 using Moq;
+using NUnit.Framework;
 using Shouldly;
 using TestsLib;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.CloneMemberValue.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
-using Xunit;
+
 
 namespace Xpand.XAF.Modules.CloneMemberValue.Tests{
-    [Collection(nameof(CloneMemberValueModule))]
+    [NonParallelizable]
     public class CloneMemberValueTests : BaseTest{
 
         private static CloneMemberValueModule DefaultCloneMemberValueModule(Platform platform,string title){
@@ -28,10 +29,11 @@ namespace Xpand.XAF.Modules.CloneMemberValue.Tests{
             return cloneMemberValueModule;
         }
 
-        [Theory]
-        [InlineData(Platform.Web)]
-        [InlineData(Platform.Win)]
-        internal async Task Collect_Previous_Current_DetailViews_with_cloneable_members(Platform platform){
+        
+        [TestCase(nameof(Platform.Web))]
+        [TestCase(nameof(Platform.Win))]
+        public async Task Collect_Previous_Current_DetailViews_with_cloneable_members(string platformName){
+            var platform = GetPlatform(platformName);
             using (var application = DefaultCloneMemberValueModule(platform,nameof(Collect_Previous_Current_DetailViews_with_cloneable_members)).Application){
                 
                 var modelClass = application.FindModelClass(typeof(ACmv));
@@ -53,10 +55,11 @@ namespace Xpand.XAF.Modules.CloneMemberValue.Tests{
             }
         }
 
-        [Theory]
-        [InlineData(Platform.Web)]
-        [InlineData(Platform.Win)]
-        internal async void Collect_editable_ListViews_with_clonable_members(Platform platform){
+        
+        [TestCase(nameof(Platform.Web))]
+        [TestCase(nameof(Platform.Win))]
+        public async Task Collect_editable_ListViews_with_clonable_members(string platformName){
+            var platform = GetPlatform(platformName);
             var cloneMemberValueModule = DefaultCloneMemberValueModule(platform,nameof(Collect_editable_ListViews_with_clonable_members));
             var application = cloneMemberValueModule.Application;
             var modelClass = application.FindModelClass(typeof(ACmv));
@@ -81,10 +84,10 @@ namespace Xpand.XAF.Modules.CloneMemberValue.Tests{
             
         }
 
-        [Theory]
-        [InlineData(Platform.Web)]
-        [InlineData(Platform.Win)]
-        internal async Task Collect_ListView_Previous_Current_New_Objects(Platform platform){
+        [TestCase(nameof(Platform.Web))]
+        [TestCase(nameof(Platform.Win))]
+        public async Task Collect_ListView_Previous_Current_New_Objects(string platformName){
+            var platform = GetPlatform(platformName);
             using (var application = DefaultCloneMemberValueModule(platform, nameof(Collect_ListView_Previous_Current_New_Objects)).Application){
                 var objectSpace = application.CreateObjectSpace();
                 var mock = new Mock<ListEditor>{CallBase = true};
@@ -108,10 +111,10 @@ namespace Xpand.XAF.Modules.CloneMemberValue.Tests{
             }
         }
 
-        [Theory]
-        [InlineData(Platform.Web)]
-        [InlineData(Platform.Win)]
-        internal async Task CloneMemberValues(Platform platform){
+        [TestCase(nameof(Platform.Web))]
+        [TestCase(nameof(Platform.Win))]
+        public async Task CloneMemberValues(string platformName){
+            var platform = GetPlatform(platformName);
             using (var application = DefaultCloneMemberValueModule(platform, nameof(CloneMemberValues)).Application){
                 var objectSpace1 = application.CreateObjectSpace();
                 var aCmv1 = objectSpace1.CreateObject<ACmv>();

@@ -33,6 +33,7 @@ using DevExpress.XtraScheduler;
 using DevExpress.XtraTreeList;
 using DevExpress.XtraTreeList.Columns;
 using Fasterflect;
+using NUnit.Framework;
 using Shouldly;
 using TestsLib;
 using Xpand.Source.Extensions.XAF.Model;
@@ -43,18 +44,18 @@ using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.ModelMapper.Services.Predefined;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xpand.XAF.Modules.ModelMapper.Tests.BOModel;
-using Xunit;
+
 using ListView = DevExpress.ExpressApp.ListView;
 using Task = System.Threading.Tasks.Task;
 
 namespace Xpand.XAF.Modules.ModelMapper.Tests{
-    [Collection(nameof(ModelMapperModule))]
+    [NonParallelizable]
     public class ModelMapperBinderServiceTests:ModelMapperBaseTest{
-        [Theory]
-        [InlineData(Platform.Win)]
-        [InlineData(Platform.Web)]
-        internal void Bind_Only_NullAble_Properties_That_are_not_Null(Platform platform){
-
+        
+        [TestCase(nameof(Platform.Win))]
+//        [TestCase(nameof(Platform.Web))]
+        public void Bind_Only_NullAble_Properties_That_are_not_Null(string platformName){
+            var platform = GetPlatform(platformName);
             var typeToMap=typeof(StringValueTypeProperties);
             InitializeMapperService($"{nameof(Bind_Only_NullAble_Properties_That_are_not_Null)}{typeToMap.Name}{platform}");
 
@@ -73,10 +74,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             }
         }
 
-        [Theory]
-        [InlineData(Platform.Win)]
-        [InlineData(Platform.Web)]
-        internal void Do_not_bind_Disable_mode_nodes(Platform platform){
+        
+        [TestCase(nameof(Platform.Win))]
+        [TestCase(nameof(Platform.Web))]
+        public void Do_not_bind_Disable_mode_nodes(string platformName){
+            var platform = GetPlatform(platformName);
             var typeToMap=typeof(StringValueTypeProperties);
             InitializeMapperService($"{nameof(Do_not_bind_Disable_mode_nodes)}{typeToMap.Name}{platform}");
             using (var module = typeToMap.Extend<IModelListView>()){
@@ -95,10 +97,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             }
         }
 
-        [Theory]
-        [InlineData(Platform.Win)]
-        [InlineData(Platform.Web)]
-        internal void Do_not_throw_if_target_object_properties_do_not_exist(Platform platform){
+        
+        [TestCase(nameof(Platform.Win))]
+        [TestCase(nameof(Platform.Web))]
+        public void Do_not_throw_if_target_object_properties_do_not_exist(string platformName){
+            var platform = GetPlatform(platformName);
             Type typeToMap=typeof(StringValueTypeProperties);
             InitializeMapperService($"{nameof(Do_not_throw_if_target_object_properties_do_not_exist)}{typeToMap.Name}{platform}");
             using (var module = typeToMap.Extend<IModelListView>()){
@@ -113,10 +116,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             }
         }
 
-        [Theory]
-        [InlineData(Platform.Win)]
-        [InlineData(Platform.Web)]
-        internal void Bind_all_public_nullable_type_properties(Platform platform){
+        
+        [TestCase(nameof(Platform.Win))]
+        [TestCase(nameof(Platform.Web))]
+        public void Bind_all_public_nullable_type_properties(string platformName){
+            var platform = GetPlatform(platformName);
             Type typeToMap=typeof(StringValueTypeProperties);
             InitializeMapperService($"{nameof(Bind_all_public_nullable_type_properties)}{typeToMap.Name}{platform}");
             using (var module = typeToMap.Extend<IModelListView>()){
@@ -135,10 +139,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             }
         }
 
-        [Theory]
-        [InlineData(Platform.Win)]
-        [InlineData(Platform.Web)]
-        internal void Bind_all_public_rw_string_properties(Platform platform){
+        
+        [TestCase(nameof(Platform.Win))]
+        [TestCase(nameof(Platform.Web))]
+        public void Bind_all_public_rw_string_properties(string platformName){
+            var platform = GetPlatform(platformName);
             Type typeToMap=typeof(StringValueTypeProperties);
             InitializeMapperService($"{nameof(Bind_all_public_rw_string_properties)}{typeToMap.Name}{platform}");
             using (var module = typeToMap.Extend<IModelListView>()){
@@ -155,10 +160,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             }
         }
 
-        [Theory]
-        [InlineData(Platform.Win)]
-        [InlineData(Platform.Web)]
-        internal void Bind_all_public_rw_nested_properties(Platform platform){
+        
+        [TestCase(nameof(Platform.Win))]
+        [TestCase(nameof(Platform.Web))]
+        public void Bind_all_public_rw_nested_properties(string platformName){
+            var platform = GetPlatform(platformName);
             var typeToMap=typeof(ReferenceTypeProperties);
             InitializeMapperService($"{nameof(Bind_all_public_rw_nested_properties)}{typeToMap.Name}{platform}");
             using (var module = typeToMap.Extend<IModelListView>()){
@@ -174,10 +180,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             }
         }
 
-        [Theory]
-        [InlineData(Platform.Win,Skip = NotImplemented)]
-//        [InlineData(Platform.Web)]
-        internal void Bind_IEnumerable_Properties(Platform platform){
+        
+        [TestCase(nameof(Platform.Win))]
+        [Ignore(NotImplemented)]
+//        [TestCase(nameof(Platform.Web))]
+        public void Bind_IEnumerable_Properties(string platformName){
             
 //            var typeToMap=typeof(CollectionsType);
 //            InitializeMapperService($"{nameof(Bind_IEnumerable_Properties)}{typeToMap.Name}{platform}");
@@ -199,24 +206,27 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             
         }
 
-        [Theory]
-        [InlineData(Platform.Win,Skip = NotImplemented)]
-        [InlineData(Platform.Web,Skip = NotImplemented)]
-        internal void Apply_AllMapper_Contexts(Platform platform){
+        
+        [TestCase(nameof(Platform.Win))]
+        [TestCase(nameof(Platform.Web))]
+        [Ignore(NotImplemented)]
+        public void Apply_AllMapper_Contexts(string platformName){
             
         }
 
-        [Theory]
-        [InlineData(Platform.Win,Skip = NotImplemented)]
-        [InlineData(Platform.Web,Skip = NotImplemented)]
-        internal void Apply_Root_Map_After_mapper_contexts(Platform platform){
+        
+        [TestCase(nameof(Platform.Win))]
+        [TestCase(nameof(Platform.Web))]
+        [Ignore(NotImplemented)]
+        public void Apply_Root_Map_After_mapper_contexts(string platformName){
             
         }
 
-        [Theory]
-        [InlineData(Platform.Web,new[]{PredefinedMap.ASPxPopupControl },new[]{typeof(ASPxPopupControl)},new Type[0],0)]
-        [InlineData(Platform.Win,new[]{PredefinedMap.XafLayoutControl },new[]{typeof(XafLayoutControl)},new Type[0],0)]
-        internal async Task Bind_DetailView_Maps(Platform platform,PredefinedMap[] predefinedMaps,Type[] controlTypes,Type[] extraModules,int boundTypes){
+        
+        [TestCase(nameof(Platform.Web),new[]{PredefinedMap.ASPxPopupControl },new[]{typeof(ASPxPopupControl)},new Type[0],0)]
+        [TestCase(nameof(Platform.Win),new[]{PredefinedMap.XafLayoutControl },new[]{typeof(XafLayoutControl)},new Type[0],0)]
+        public async Task Bind_DetailView_Maps(string platformName,PredefinedMap[] predefinedMaps,Type[] controlTypes,Type[] extraModules,int boundTypes){
+            var platform = GetPlatform(platformName);
             controlTypes.ToObservable().Do(type => Assembly.LoadFile(type.Assembly.Location)).Subscribe();
             InitializeMapperService($"{nameof(Bind_DetailView_Maps)}{predefinedMaps.First()}",platform);
 
@@ -247,21 +257,22 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             
         }
 
-        [Theory]
-        [InlineData(Platform.Win,new[]{PredefinedMap.GridColumn , PredefinedMap.GridView},new[]{typeof(XafGridView),typeof(GridColumn),typeof(GridListEditor)},new Type[0],3)]
-        [InlineData(Platform.Web,new[]{PredefinedMap.GridViewColumn , PredefinedMap.ASPxGridView},new[]{typeof(ASPxGridView),typeof(GridViewColumn),typeof(ASPxGridListEditor)},new Type[0],3)]
-        [InlineData(Platform.Win,new[]{PredefinedMap.BandedGridColumn , PredefinedMap.AdvBandedGridView},new[]{typeof(XafAdvBandedGridView),typeof(BandedGridColumn),typeof(GridListEditor)},new Type[0],3)]
         
-        [InlineData(Platform.Win,new[]{PredefinedMap.LayoutViewColumn , PredefinedMap.LayoutView},new[]{typeof(XafLayoutView),typeof(LayoutViewColumn),typeof(CustomGridListEditor)},new Type[0],3)]
-        [InlineData(Platform.Win,new[]{PredefinedMap.SplitContainerControl },new[]{typeof(SplitContainerControl)},new Type[0],1)]
-        [InlineData(Platform.Web,new[]{PredefinedMap.ASPxPopupControl },new[]{typeof(ASPxPopupControl)},new Type[0],0)]
-        [InlineData(Platform.Win,new[]{PredefinedMap.TreeListColumn , PredefinedMap.TreeList},new[]{typeof(TreeList),typeof(TreeListColumn),typeof(TreeListEditor)},new[]{typeof(TreeListEditorsModuleBase),typeof(TreeListEditorsWindowsFormsModule)},3)]
-        [InlineData(Platform.Win,new[]{PredefinedMap.DashboardDesigner },new[]{typeof(DashboardDesigner)},new[]{typeof(DashboardsModule),typeof(DashboardsWindowsFormsModule)},0)]
+        [TestCase(nameof(Platform.Win),new[]{PredefinedMap.GridColumn , PredefinedMap.GridView},new[]{typeof(XafGridView),typeof(GridColumn),typeof(GridListEditor)},new Type[0],3)]
+        [TestCase(nameof(Platform.Web),new[]{PredefinedMap.GridViewColumn , PredefinedMap.ASPxGridView},new[]{typeof(ASPxGridView),typeof(GridViewColumn),typeof(ASPxGridListEditor)},new Type[0],3)]
+        [TestCase(nameof(Platform.Win),new[]{PredefinedMap.BandedGridColumn , PredefinedMap.AdvBandedGridView},new[]{typeof(XafAdvBandedGridView),typeof(BandedGridColumn),typeof(GridListEditor)},new Type[0],3)]
+        
+        [TestCase(nameof(Platform.Win),new[]{PredefinedMap.LayoutViewColumn , PredefinedMap.LayoutView},new[]{typeof(XafLayoutView),typeof(LayoutViewColumn),typeof(CustomGridListEditor)},new Type[0],3)]
+        [TestCase(nameof(Platform.Win),new[]{PredefinedMap.SplitContainerControl },new[]{typeof(SplitContainerControl)},new Type[0],1)]
+        [TestCase(nameof(Platform.Web),new[]{PredefinedMap.ASPxPopupControl },new[]{typeof(ASPxPopupControl)},new Type[0],0)]
+        [TestCase(nameof(Platform.Win),new[]{PredefinedMap.TreeListColumn , PredefinedMap.TreeList},new[]{typeof(TreeList),typeof(TreeListColumn),typeof(TreeListEditor)},new[]{typeof(TreeListEditorsModuleBase),typeof(TreeListEditorsWindowsFormsModule)},3)]
+        [TestCase(nameof(Platform.Win),new[]{PredefinedMap.DashboardDesigner },new[]{typeof(DashboardDesigner)},new[]{typeof(DashboardsModule),typeof(DashboardsWindowsFormsModule)},0)]
 
-        [InlineData(Platform.Win, new[]{PredefinedMap.PivotGridField, PredefinedMap.PivotGridControl},new[]{typeof(PivotGridControl), typeof(PivotGridListEditor)},new[]{typeof(PivotGridModule), typeof(PivotGridWindowsFormsModule)}, 3)]
-        [InlineData(Platform.Win, new[]{PredefinedMap.ChartControl},new[]{typeof(ChartControl), typeof(ChartListEditor)},new[]{typeof(ChartModule), typeof(ChartWindowsFormsModule)},1)]
-        [InlineData(Platform.Win, new[]{PredefinedMap.SchedulerControl},new[]{typeof(SchedulerControl), typeof(SchedulerListEditor)},new[]{typeof(SchedulerModuleBase), typeof(SchedulerWindowsFormsModule)}, 1)]
-        internal async Task Bind_ListView_Maps(Platform platform,PredefinedMap[] predefinedMaps,Type[] controlTypes,Type[] extraModules,int boundTypes){
+        [TestCase(nameof(Platform.Win), new[]{PredefinedMap.PivotGridField, PredefinedMap.PivotGridControl},new[]{typeof(PivotGridControl), typeof(PivotGridListEditor)},new[]{typeof(PivotGridModule), typeof(PivotGridWindowsFormsModule)}, 3)]
+        [TestCase(nameof(Platform.Win), new[]{PredefinedMap.ChartControl},new[]{typeof(ChartControl), typeof(ChartListEditor)},new[]{typeof(ChartModule), typeof(ChartWindowsFormsModule)},1)]
+        [TestCase(nameof(Platform.Win), new[]{PredefinedMap.SchedulerControl},new[]{typeof(SchedulerControl), typeof(SchedulerListEditor)},new[]{typeof(SchedulerModuleBase), typeof(SchedulerWindowsFormsModule)}, 1)]
+        public async Task Bind_ListView_Maps(string platformName,PredefinedMap[] predefinedMaps,Type[] controlTypes,Type[] extraModules,int boundTypes){
+            var platform = GetPlatform(platformName);
             controlTypes.ToObservable().Do(type => Assembly.LoadFile(type.Assembly.Location)).Subscribe();
             InitializeMapperService($"{nameof(Bind_ListView_Maps)}{predefinedMaps.First()}",platform);
             var predefinedMap = predefinedMaps.Last();
@@ -296,11 +307,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                 }
             }
         }
-        [Theory]
-        [InlineData(Platform.Web)]
-        [InlineData(Platform.Win)]
-        internal async Task Bind_PropertyEditor_Control(Platform platform){
-            
+        
+        [TestCase(nameof(Platform.Web))]
+        [TestCase(nameof(Platform.Win))]
+        public async Task Bind_PropertyEditor_Control(string platformName){
+            var platform = GetPlatform(platformName);
             var maps = EnumsNET.Enums.GetValues<PredefinedMap>().Where(map => map.IsPropertyEditor()&&map.Attribute<MapPlatformAttribute>().Platform==platform.ToString());
             foreach (var predefinedMap in maps){
                 try{
@@ -348,10 +359,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             
 
         }
-        [Theory]
-        [InlineData(typeof(ListView))]
-        [InlineData(typeof(DetailView))]
-        internal async Task Bind_RepositoryItems(Type viewType){
+        
+        [TestCase(typeof(ListView))]
+        [TestCase(typeof(DetailView))]
+        public async Task Bind_RepositoryItems(Type viewType){
             var boundTypes = 2;
             var controlTypes =new[]{typeof(XafGridView),typeof(GridColumn)};
             var predefinedMaps = new[]{PredefinedMap.RepositoryItem,PredefinedMap.RepositoryItemTextEdit };

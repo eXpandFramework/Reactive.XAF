@@ -3,7 +3,7 @@
 [![GitHub issues](https://img.shields.io/github/issues/eXpandFramework/expand/OneView.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+OneView) [![GitHub close issues](https://img.shields.io/github/issues-closed/eXpandFramework/eXpand/OneView.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+OneView)
 # About 
 
-The `OneView` will display one view only with the option to edit the model. To learn how this is designed to work head to the details section.
+The `OneView` will display **one view only** with the option to edit the model. To learn how this is designed to work head to the details section.
 
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 
@@ -56,11 +56,5 @@ The module is tested on Azure for each build with these [tests](https://github.c
 
 ### Examples
 
-The module is used from the [Reactive.Logger.Client](https://github.com/eXpandFramework/DevExpress.XAF/tree/lab/src/Modules/Reactive.Logger.Client.Win) to display only one View the TraceEvent_ListView
+The module is used from the [Reactive.Logger.Client](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win) to display only one View the `TraceEvent_ListView`
 
-
-`XtraDashboardModule` ,`ExcelImporterModule` are modules that use the `OneViewModule`.  
-
-Next screenshot is an example from ExcelImporter from the view tha maps the Excel columns with the BO members. 
-
-![image](https://user-images.githubusercontent.com/159464/55381194-238e6500-552b-11e9-8314-f1b1132d09f3.png)

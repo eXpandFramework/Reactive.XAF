@@ -1,10 +1,12 @@
 ﻿using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.SystemModule;
+using NUnit.Framework;
 using Shouldly;
 using TestsLib;
 using Xpand.Source.Extensions.XAF.XafApplication;
@@ -14,13 +16,14 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Logger;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Win.Services;
-using Xunit;
+
 
 namespace Xpand.XAF.Modules.OneView.Tests{
-    [Collection(nameof(OneView.OneViewModule))]
+    [NonParallelizable]
     public class OneViewTests : BaseTest{
-        [WinFormsFact()]
-        public async Task Hide_MainWindow_Template_OnStart(){
+        [Test]
+        [Apartment(ApartmentState.STA)]
+        public  void Hide_MainWindow_Template_OnStart(){
             using (var application = OneViewModule(nameof(Hide_MainWindow_Template_OnStart)).Application){
 
                 var visibility = application.WhenViewOnFrame(typeof(OV))
@@ -40,7 +43,8 @@ namespace Xpand.XAF.Modules.OneView.Tests{
             }
         }
 
-        [WinFormsFact()]
+        [Test]
+        [Apartment(ApartmentState.STA)]
         public async Task Show_OneView_OnStart(){
             using (var application = (TestWinApplication) OneViewModule(nameof(Show_OneView_OnStart)).Application){
 
@@ -59,7 +63,8 @@ namespace Xpand.XAF.Modules.OneView.Tests{
             }
         }
 
-        [WinFormsFact()]
+        [Test]
+        [Apartment(ApartmentState.STA)]
         public async Task Exit_Application_On_View_Close(){
             using (var application = OneViewModule(nameof(Exit_Application_On_View_Close)).Application){
                 var closeView = application.WhenViewOnFrame(typeof(OV))
@@ -78,7 +83,8 @@ namespace Xpand.XAF.Modules.OneView.Tests{
         }
 
 
-        [WinFormsFact()]
+        [Test]
+        [Apartment(ApartmentState.STA)]
         public async Task Edit_Model(){
             using (var application = OneViewModule(nameof(Edit_Model)).Application){
                 application.WhenViewOnFrame(typeof(OV))

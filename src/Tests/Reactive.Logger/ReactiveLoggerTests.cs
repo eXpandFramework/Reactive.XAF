@@ -1,24 +1,24 @@
 ﻿using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
+using NUnit.Framework;
 using Shouldly;
 using TestsLib;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Logger.Tests.BOModel;
-using Xunit;
 
-namespace Xpand.XAF.Modules.Reactive.Logger.Tests
-{
-    [Collection(nameof(ReactiveLoggerModule))]
+namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
+    [NonParallelizable]
     public class ReactiveLoggerTests : BaseTest{
         [Theory]
-        [InlineData("NoLastEvent")]
-        [InlineData("DifferentLastEvent")]
-        [InlineData("SameLastEvent")]
+        [TestCase("NoLastEvent")]
+        [TestCase("DifferentLastEvent")]
+        [TestCase("SameLastEvent")]
         public void Update_traceEvent_calls(string when){
             
             using (var application = Platform.Win.NewApplication<ReactiveLoggerModule>()){
@@ -64,7 +64,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests
             }
         }
 
-        [Fact]
+        [Test]
         public  void Populate_TracedSource_Modules_to_Model(){
             
             using (var application = LoggerModule(nameof(Populate_TracedSource_Modules_to_Model)).Application){
@@ -84,7 +84,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests
         }
 
 
-        [WinFormsFact]
+        [Test]
+        [Apartment(ApartmentState.STA)]
         public async Task Save_TraceEvent(){
             
             using (var application = Platform.Win.NewApplication<ReactiveLoggerModule>()){
@@ -104,7 +105,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests
             }
         }
 
-        [WinFormsFact]
+        [Test]
+        [Apartment(ApartmentState.STA)]
         public async Task Refresh_TraceEvent_ListView_when_trace(){
             using (var application = Platform.Win.NewApplication<ReactiveLoggerModule>()){
                 application.AddModule<TestReactiveLoggerModule>();
@@ -124,7 +126,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests
             }
         }
 
-        [WinFormsFact]
+        [Test]
+        [Apartment(ApartmentState.STA)]
         public async Task Trace_Events_Before_CompatibityCheck(){
             using (var application = Platform.Win.NewApplication<ReactiveLoggerModule>()){
                 application.Title = nameof(Trace_Events_Before_CompatibityCheck);

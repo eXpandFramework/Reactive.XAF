@@ -1,26 +1,26 @@
 ﻿using System;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.SystemModule;
+using NUnit.Framework;
 using Shouldly;
 using TestsLib;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.MasterDetail;
 using Xpand.XAF.Modules.SuppressConfirmation.Tests.BOModel;
-using Xunit;
 
 namespace Xpand.XAF.Modules.SuppressConfirmation.Tests{
-    [Collection(nameof(SuppressConfirmationModule))]
+    [NonParallelizable]
     public class SuppressConfirmationTests : BaseTest{
 
-        [Theory]
-        [InlineData(typeof(ListView),Platform.Win)]
-        [InlineData(typeof(DetailView),Platform.Win)]
-        [InlineData(typeof(ListView),Platform.Web)]
-        [InlineData(typeof(DetailView),Platform.Web)]
-        internal async Task Signal_When_Window_with_SupressConfirmation_Enabled_ObjectView_changed(Type viewType,Platform platform){
+        
+        [TestCase(typeof(ListView),nameof(Platform.Win))]
+        [TestCase(typeof(DetailView),nameof(Platform.Win))]
+        [TestCase(typeof(ListView),nameof(Platform.Web))]
+        [TestCase(typeof(DetailView),nameof(Platform.Web))]
+        public async Task Signal_When_Window_with_SupressConfirmation_Enabled_ObjectView_changed(Type viewType,string platformName){
+            var platform = GetPlatform(platformName);
             using (var application = DefaultSuppressConfirmationModule(platform).Application){
                 var windows = application.WhenSuppressConfirmationWindows().Replay();
                 windows.Connect();
@@ -34,10 +34,11 @@ namespace Xpand.XAF.Modules.SuppressConfirmation.Tests{
             
         }
 
-        [Theory]
-        [InlineData(Platform.Win)]
-        [InlineData(Platform.Web)]
-        internal async Task Signal_When_DashboardView_with_SupressConfirmation_Enabled_ObjectView_changed(Platform platform){
+        
+        [TestCase(nameof(Platform.Win))]
+        [TestCase(nameof(Platform.Web))]
+        public async Task Signal_When_DashboardView_with_SupressConfirmation_Enabled_ObjectView_changed(string platformName){
+            var platform = GetPlatform(platformName);
             using (var application = DefaultSuppressConfirmationModule(platform).Application){
                 var windows = application.WhenSuppressConfirmationWindows().Replay();
                 windows.Connect();
@@ -54,12 +55,13 @@ namespace Xpand.XAF.Modules.SuppressConfirmation.Tests{
             
         }
 
-        [Theory]
-        [InlineData(typeof(ListView),Platform.Win)]
-        [InlineData(typeof(DetailView),Platform.Win)]
-        [InlineData(typeof(ListView),Platform.Web)]
-        [InlineData(typeof(DetailView),Platform.Web)]
-        internal void Change_Modification_Handling_Mode(Type viewType,Platform platform){
+        
+        [TestCase(typeof(ListView),nameof(Platform.Win))]
+        [TestCase(typeof(DetailView),nameof(Platform.Win))]
+        [TestCase(typeof(ListView),nameof(Platform.Web))]
+        [TestCase(typeof(DetailView),nameof(Platform.Web))]
+        public void Change_Modification_Handling_Mode(Type viewType,string platformName){
+            var platform = GetPlatform(platformName);
             using (var application = DefaultSuppressConfirmationModule(platform).Application){
                 var windows = application.WhenSuppressConfirmationWindows().Replay();
                 windows.Connect();

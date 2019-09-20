@@ -2,8 +2,10 @@
 using System.Collections;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
+using NUnit.Framework;
 using Shouldly;
 using TestsLib;
 using Xpand.Source.Extensions.XAF.XafApplication;
@@ -11,12 +13,13 @@ using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.RefreshView.Tests.BOModel;
-using Xunit;
+
 
 namespace Xpand.XAF.Modules.RefreshView.Tests{
-    [Collection(nameof(RefreshView.RefreshViewModule))]
+    [NonParallelizable]
     public class RefreshViewTests : BaseTest{
-        [Fact]
+        [Test]
+        [Apartment(ApartmentState.STA)]
         public async Task Refresh_ListView_When_Root(){
             using (var application = RefreshViewModule(nameof(Refresh_ListView_When_Root)).Application){
                 var items = application.Model.ToReactiveModule<IModelReactiveModuleRefreshView>().RefreshView.Items;
@@ -33,7 +36,7 @@ namespace Xpand.XAF.Modules.RefreshView.Tests{
                 var objectSpace = application.CreateObjectSpace();
                 objectSpace.CommitChanges();
 
-                await reloaded;
+                await reloaded.Timeout(Timeout);
                 application.CreateViewWindow().SetView(listView);
             
                 objectSpace = application.CreateObjectSpace();

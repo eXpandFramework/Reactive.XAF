@@ -1,26 +1,26 @@
 ﻿using System.Reactive.Linq;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
+using NUnit.Framework;
 using Shouldly;
 using TestsLib;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.AutoCommit.Tests.BOModel;
-using Xunit;
+using Xpand.XAF.Modules.Reactive.Extensions;
+
 
 namespace Xpand.XAF.Modules.AutoCommit.Tests{
-    [Collection(nameof(AutoCommitModule))]
+    [NonParallelizable]
     public class AutoCommitTests : BaseTest{
 
-        [Theory]
-        [InlineData(Platform.Web)]
-        [InlineData(Platform.Win)]
-        internal async Task Signal_When_AutoCommit_Enabled_ObjectView_Created(Platform platform){
-            using (var application = DefaultAutoCommitModule(platform,nameof(Signal_When_AutoCommit_Enabled_ObjectView_Created)).Application){
+        
+        [TestCase(nameof(Platform.Win))]
+        [TestCase(nameof(Platform.Web))]
+        public async Task Signal_When_AutoCommit_Enabled_ObjectView_Created(string platformName){
+            using (var application = DefaultAutoCommitModule(platformName,nameof(Signal_When_AutoCommit_Enabled_ObjectView_Created)).Application){
+
+                var objectViews = application.WhenAutoCommitObjectViewCreated().SubscribeReplay();
                 
-                
-                
-                var objectViews = application.WhenAutoCommitObjectViewCreated().Replay();
-                objectViews.Connect();
                 var listView = application.CreateObjectView<ListView>(typeof(AC));
                 var detailView = application.CreateObjectView<DetailView>(typeof(AC));
 
@@ -30,25 +30,22 @@ namespace Xpand.XAF.Modules.AutoCommit.Tests{
             }
         }
 
-        [Theory]
-        [InlineData(Platform.Web)]
-        [InlineData(Platform.Win)]
-        internal async Task AutoCommit_When_object_view_closing(Platform platform){
-            using (var application = DefaultAutoCommitModule(platform, nameof(AutoCommit_When_object_view_closing)).Application){
-                var objectViews = application.WhenAutoCommitObjectViewCreated().Replay();
-                objectViews.Connect();
+        [TestCase(nameof(Platform.Win))]
+        [TestCase(nameof(Platform.Web))]
+        public void AutoCommit_When_object_view_closing(string platformName){
+            
+            using (var application = DefaultAutoCommitModule(platformName, nameof(AutoCommit_When_object_view_closing)).Application){
                 var detailView = application.CreateObjectView<DetailView>(typeof(AC));
                 detailView.ObjectSpace.CreateObject<AC>();
 
                 detailView.Close();
-                await objectViews.FirstAsync().WithTimeOut();
 
                 application.CreateObjectSpace().FindObject<AC>(null).ShouldNotBeNull();
-                application.Dispose();
             }
         }
 
-        private static AutoCommitModule DefaultAutoCommitModule(Platform platform,string title){
+        private  AutoCommitModule DefaultAutoCommitModule(string platformName,string title){
+            var platform = GetPlatform(platformName);
             var autoCommitModule = new AutoCommitModule();
             var application = platform.NewApplication<AutoCommitModule>();
             application.Title = title;

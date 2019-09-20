@@ -3,11 +3,8 @@
 [![GitHub issues](https://img.shields.io/github/issues/eXpandFramework/expand/Reactive.Logger.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+Reactive.Logger) [![GitHub close issues](https://img.shields.io/github/issues-closed/eXpandFramework/eXpand/Reactive.Logger.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+Reactive.Logger)
 # About 
 
-The `Reactive.Logger` module monitors calls to the Reactive delegates (OnNext, OnSubscribe, OnDispose, OnCompleted, OnError). All calls are saved to the application database. For more head to the details section.
+The `Reactive.Logger` module monitors calls to the Reactive delegates (OnNext, OnSubscribe, OnDispose, OnCompleted, OnError) and persists the calls info in the application datastore. For more head to the details section.
 
-The module uses the next two strategies:
-1. It monitors the `DetailView` creation and modifies its Reactive.Logger property according to model configuration. However later Reactive.Logger property modifications are allowed.
-2. It monitors the `Reactive.Logger` modifiation and cancels it if the `LockReactive.Logger` attribute is used.
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 
 
@@ -51,23 +48,26 @@ If the package is installed in a way that you do not have access to uninstall it
 ```
 
 ## Details
-The module extends the `IModelReactiveModules` to provide a list of detected TraceSources allowing to configure them further.
+The module extends the `IModelReactiveModules` to provide a list TraceSources allowing to configure them further. All reactive modules will be in this list. 
 ![image](https://user-images.githubusercontent.com/159464/64830050-63c43a00-d5d7-11e9-919d-ac5df92646af.png)
 
 
 ![image](https://user-images.githubusercontent.com/159464/55380067-b7f6c880-5527-11e9-96a1-053fd44095e7.png)
+
 
 ### Tests
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Reactive.Logger)
 
 ### Examples
 
-The module is valuable in scenarios similar to:
-1. When you want to `navigate` from a `ListView` to a `DetailView` without the intermediate view which is set to View Reactive.Logger.
-2. When you develop a `master-detail` layout and you want to control the Reactive.Logger state of your
+The module  can be used with all packages that use the API from Xpand.XAF.Modules.Reactive. It will persist the calls to the datastore using the `TraceEvent` object. Below we analyze what the logger logs when used from the [Xpand.XAF.Modules.Reactive.Logger.Client.Win](https://github.com/eXpandFramework/DevExpress.XAF/tree/lab/src/Modules/Reactive.Logger.Client.Win). 
+![image](https://user-images.githubusercontent.com/159464/65377524-f2ab1380-dcb5-11e9-9861-c8c1d8381023.png)
+Clarification: The client application is designed to received the remote logs in real-time of other XAF applications, it does it using the RX API because the [ReactiveLogger](https://github.com/eXpandFramework/DevExpress.XAF/tree/lab/src/Modules/Reactive.Logger), [ReactiveLoggerHub](https://github.com/eXpandFramework/DevExpress.XAF/tree/lab/src/Modules/Reactive.Logger.Hub), [OneView](https://github.com/eXpandFramework/DevExpress.XAF/tree/lab/src/Modules/OneView), [GridListEditor](https://github.com/eXpandFramework/DevExpress.XAF/tree/lab/src/Modules/GridListEditor) and [Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/lab/src/Modules/Reactive    ) modules are installed, so this means it is like just any other XAF application and can log itself the same way. Let us analyze what we see when it starts reading it from bottom to top (Please give a brief to the previous links to understand better the analysis):
 
-`XtraDashboardModule` ,`ExcelImporterModule` are modules that use the `Reactive.LoggerModule`.  
+1. We have `7` subscriptions/rows (`7th column`) in the `RXLoggerClientApp (2nd column)` from the `OneView, Reactive, GridListEditor `modules (`3rd column`).  On `4th column` we have the `location` of each subscription. 
+So from bottom to top, we can see that the `OneViewModule ShowView and HideMainWindow `methods will execute, apparently doing what their names implies but we do not know when this will happen, at the moment its only a subscription. We also see the same with the `GridListEditor and its RememberTopRow `method. Finally there is the `ReactiveModule` that subscribed to emit `WhenWindowCreated 2 times and 1 WhenViewOneFrame`. 
+2. Now it's emit time `(OnNext) 6 times (7th column)` where we can understand that the the application `IsLoggedOn`. The `WhenWindowCreated called 3 times `which makes partially sense as we only had 2 subscription from step 1, probably the other one was before our analysis start. Next we see that an `ObjectSpace created` leading to `CompatibilityChecked`. Here we have again multiple emition from these method which makes it unclear what is happening but we can also guess depending on past and future calls. Either way we know that we are just after logon when at least one ObjectSpace was just created therefore the database exists.
+3. From step 2 we know we after logon therefore the user model is also merged giving the signal to the `ReactiveLoggerHubModule` which gets the 30 listening ports 61456, 61486 (last column) with the 
+4. Trash these rows as they do not tell us more than that an ObjectSpaceCreated or using the powerful DevExpress Grid,  filter out the Reactive modules calls as it tends to get chatty.
+5. The rest of the rows follow the same pattern with the GridListEditor and OneView modules on the lead.
 
-Next screenshot is an example from ExcelImporter from the view tha maps the Excel columns with the BO members. 
-
-![image](https://user-images.githubusercontent.com/159464/55381194-238e6500-552b-11e9-8314-f1b1132d09f3.png)

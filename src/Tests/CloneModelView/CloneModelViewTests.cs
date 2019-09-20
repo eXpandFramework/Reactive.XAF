@@ -12,12 +12,10 @@ using Xpand.XAF.Modules.CloneModelView.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 
-[assembly:NonParallelizable]
+
 namespace Xpand.XAF.Modules.CloneModelView.Tests{
+    [NonParallelizable]
     public class CloneModelViewTests : BaseTest{
-
-
-        
         [TestCase(CloneViewType.LookupListView, nameof(Platform.Win))]
         [TestCase(CloneViewType.ListView,nameof(Platform.Win))]
         [TestCase(CloneViewType.DetailView,nameof(Platform.Win))]

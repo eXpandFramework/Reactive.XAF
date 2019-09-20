@@ -12,7 +12,7 @@ param(
     [switch]$Release
 )
 $ErrorActionPreference = "Stop"
-
+Install-Module XpandPwsh -Force
 @([PSCustomObject]@{
     Name = "psake"
     Version ="4.7.4"

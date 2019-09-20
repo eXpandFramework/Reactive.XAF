@@ -5,14 +5,16 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using DevExpress.Persistent.Base;
 using Fasterflect;
+using NUnit.Framework;
 using Shouldly;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
-using Xunit;
+using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
+
 
 namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
-    [Xunit.Collection(nameof(ModelMapperModule))]
+    [NonParallelizable]
     public class MapAttributesTests:ModelMapperBaseTest{
-        [Fact]
+        [Test]
         public async Task Map_Private_DescriptionAttributes(){
             InitializeMapperService(nameof(Map_Private_DescriptionAttributes));
             
@@ -26,7 +28,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             descriptionAttribute.Description.ShouldBe(PrivateDescriptionAttributesClass.Description);
         }
 
-        [Fact]
+        [Test]
         public async Task Map_Attributes(){
             
             InitializeMapperService(nameof(Map_Attributes));
@@ -47,7 +49,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
 
-        [Fact]
+        [Test]
         public async Task Escape_strings(){
 
             InitializeMapperService(nameof(Escape_strings));
@@ -59,7 +61,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
 
-        [Fact]
+        [Test]
         public async Task Customize_Attributes_Mapping(){
             InitializeMapperService(nameof(Customize_Attributes_Mapping));
             TypeMappingService.PropertyMappingRules.Add(("Custom", tuple => {
@@ -73,7 +75,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             modelType.Properties().First().GetCustomAttributes(typeof(DescriptionAttribute),false).Cast<DescriptionAttribute>().Any().ShouldBeTrue();
         }
 
-        [Fact]
+        [Test]
         public async Task Attribute_Mapping_Can_Be_Disabled(){
             InitializeMapperService(nameof(Attribute_Mapping_Can_Be_Disabled));
             TypeMappingService.PropertyMappingRules.Add(("Disable", tuple => {

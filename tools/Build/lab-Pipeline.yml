@@ -1,35 +1,108 @@
 variables:
   - group: Keys
 trigger: 
-  paths:
-    exclude:
-      - .github/FUNDING.yml
-      - src/Modules/Readme.md
-      - src/Modules/AutoCommit/Readme.md
-      - src/Modules/CloneMemberValue/Readme.md
-      - src/Modules/HideToolBar/Readme.md
-      - src/Modules/MasterDetail/Readme.md
-      - src/Modules/ModelMapper/Readme.md
-      - src/Modules/ModelViewInheritance/Readme.md
-      - src/Modules/ProgressBarViewItem/Readme.md
-      - src/Modules/Reactive/Readme.md
-      - src/Modules/SuppressConfirmation/Readme.md
-      - src/Modules/ViewEditMode/Readme.md
-      - README.md
-  branches:
-    include:
-      - lab
-pool:
-  vmImage: windows-2019
-steps:
-- checkout: self
-- task: PowerShell@2
-  displayName: Build
-  inputs:
-    pwsh: true
-    targetType: filePath
-    filePath: .\tools\build\lab-pipeline.ps1 
-    arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(GitHubUserName) $(GitHubPass) $(DXApiFeed) $(build.artifactstagingdirectory) $(System.DefaultworkingDirectory)\bin $(AzureToken)
+    paths:
+      exclude:
+        - .github/FUNDING.yml
+        - src/Modules/Readme.md
+        - src/Modules/AutoCommit/Readme.md
+        - src/Modules/CloneMemberValue/Readme.md
+        - src/Modules/HideToolBar/Readme.md
+        - src/Modules/MasterDetail/Readme.md
+        - src/Modules/ModelMapper/Readme.md
+        - src/Modules/ModelViewInheritance/Readme.md
+        - src/Modules/ProgressBarViewItem/Readme.md
+        - src/Modules/Reactive/Readme.md
+        - src/Modules/SuppressConfirmation/Readme.md
+        - src/Modules/ViewEditMode/Readme.md
+        - README.md
+    branches:
+      include:
+        - lab
+jobs:
+- job: Build
+  strategy: 
+    parallel: 1
+  pool:
+    vmImage: windows-2019
+  steps:
+  - checkout: self
+  - task: PowerShell@2
+    displayName: Build
+    inputs:
+      pwsh: true
+      targetType: filePath
+      filePath: .\tools\build\lab-pipeline.ps1 
+      arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(GitHubUserName) $(GitHubPass) $(DXApiFeed) $(build.artifactstagingdirectory) $(System.DefaultworkingDirectory)\bin $(AzureToken)
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Packages'
+    inputs:
+      PathtoPublish: '$(build.artifactstagingdirectory)'
+      ArtifactName: 'Xpand.XAF.Modules.Packages'
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Packages'
+    inputs:
+      PathtoPublish: '$(System.DefaultworkingDirectory)\bin'
+      ArtifactName: 'Xpand.XAF.Modules.Bin'
+- job: Test
+  strategy:
+    parallel: 15
+  dependsOn: Build
+  pool:
+    vmImage: windows-2019
+  steps:
+    - checkout: none
+    - task: DownloadBuildArtifacts@0
+      inputs:
+        buildType: 'specific'
+        project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
+        pipeline: '23'
+        buildVersionToDownload: 'latestFromBranch'
+        branchName: 'refs/heads/lab'
+        downloadType: 'single'
+        downloadPath: '$(System.DefaultWorkingDirectory)'
+        artifactName: 'Xpand.XAF.Modules.Bin'
+    - task: VSTest@2
+      displayName: 'VsTest - testAssemblies'
+      inputs:
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: |
+          **\*Tests*.dll
+          !**\*Hub*.dll
+          !**\*TestAdapter.dll
+          !**\obj\**    
+        diagnosticsEnabled: true
+        runInParallel: true
+        codeCoverageEnabled: true
+        distributionBatchType: 'basedOnAssembly'
+      
+        collectDumpOn: never
+- job: Publish
+  strategy: 
+    parallel: 1
+  dependsOn: Test
+  pool:
+    vmImage: windows-2019
+  steps:
+  - checkout: self
+  - task: DownloadBuildArtifacts@0
+    inputs:
+      buildType: 'specific'
+      project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
+      pipeline: '23'
+      buildVersionToDownload: 'latestFromBranch'
+      branchName: 'refs/heads/lab'
+      downloadType: 'single'
+      downloadPath: '$(System.DefaultWorkingDirectory)'
+      artifactName: 'Xpand.XAF.Modules.Packages'
+  - task: PowerShell@2
+    displayName: Publish
+    inputs:
+      pwsh: true
+      targetType: filePath
+      filePath: .\tools\build\publishNugets.ps1 
+      arguments: $(Build.SourceBranchName) '$(System.DefaultWorkingDirectory)' $(NugetApiKey) '$(System.DefaultWorkingDirectory)'
 # - task: VSTest@2
 #   displayName: 'VsTest - testAssemblies'
 #   inputs:
@@ -54,6 +127,7 @@ steps:
 #     filePath: .\tools\build\check-tests.ps1
 #     arguments: $(AzureToken) $(Build.DefinitionName) $(Build.BuildNumber)
 # - powershell: | 
+
 # - task: PowerShell@2
 #   displayName: Publish
 #   inputs:
@@ -61,13 +135,4 @@ steps:
 #     targetType: filePath
 #     filePath: .\tools\build\publishNugets.ps1 
 #     arguments: $(Build.SourceBranchName) $(System.artifactstagingdirectory) $(NugetApiKey) 
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: Packages'
-  inputs:
-    PathtoPublish: '$(build.artifactstagingdirectory)'
-    ArtifactName: 'Xpand.XAF.Modules.Packages'
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: Packages'
-  inputs:
-    PathtoPublish: '$(System.DefaultworkingDirectory)\bin'
-    ArtifactName: 'Xpand.XAF.Modules.Bin'
+

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <DXVersion>18.2.3</DXVersion>
     <ProjectGuid>{5B65629B-E5C9-4686-967B-9AF271EA47EA}</ProjectGuid>
@@ -8,6 +8,7 @@
     <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
     <DebugSymbols>true</DebugSymbols>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <OutputPath>..\..\..\bin</OutputPath>
     <AssemblyTitle>Xpand.XAF.Modules.ProgressBarViewItem</AssemblyTitle>
     <Product>Xpand.XAF.Modules.ProgressBarViewItem</Product>

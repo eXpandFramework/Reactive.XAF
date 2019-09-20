@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Xpo;
+using NUnit.Framework;
 using Xpand.Source.Extensions.System.AppDomain;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using IDisposable = System.IDisposable;
@@ -18,7 +19,6 @@ namespace TestsLib{
             var traceSourceSwitch = new SourceSwitch("SourceSwitch", "Verbose");
             TraceSource = new TraceSource(nameof(BaseTest)){Switch = traceSourceSwitch};
             TraceSource.Listeners.Add(TextListener);
-            
         }
 
         public static TextWriterTraceListener TextListener{ get; }
@@ -27,10 +27,8 @@ namespace TestsLib{
 
         public const string NotImplemented = "NotImplemented";
         
-
-        
-
-        public virtual void Dispose(){
+        [TearDown]
+        public void Dispose(){
             XpoTypesInfoHelper.Reset();
             XafTypesInfo.HardReset();
         }

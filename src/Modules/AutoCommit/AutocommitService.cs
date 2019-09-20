@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
@@ -33,33 +32,30 @@ namespace Xpand.XAF.Modules.AutoCommit{
             return source.Trace(name, AutoCommitModule.TraceSource, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
         }
 
-        internal static IObservable<Unit> Connect(this XafApplication application){
-            if (application != null){
-                var objectViewCreated = application.WhenAutoCommitObjectViewCreated().Publish().RefCount();
-                return AutoCommit(objectViewCreated)
-                    ;
-            }
-            return Observable.Empty<Unit>();
+        internal static IObservable<View> Connect(this XafApplication application){
+            return application != null ? application.WhenAutoCommitObjectViewCreated().Publish().RefCount().AutoCommit() : Observable.Empty<View>();
         }
 
-        private static IObservable<Unit> AutoCommit(IObservable<ObjectView> objectViewCreated){
+        public static IObservable<View> AutoCommit(this  IObservable<ObjectView> objectViewCreated){
             return objectViewCreated
                 .QueryCanClose()
                 .Merge(objectViewCreated.QueryCanChangeCurrentObject())
-                .Do(_ => _.view.ObjectSpace.CommitChanges())
-                .ToUnit()
+                .Select(_ => {
+                    _.view.ObjectSpace.CommitChanges();
+                    return _.view;
+                })
                 .Merge(objectViewCreated.OfType<ListView>().ControlsCreated().Select(_ => BatchEditCommit(_.view)))
                 .TraceAutoCommit();
         }
 
-        private static Unit BatchEditCommit(ListView listView){
+        private static View BatchEditCommit(ListView listView){
             if (listView.AllowEdit&& $"{listView.Model.GetValue("InlineEditMode")}" == "Batch" && listView.Editor.Control.GetType().Name == "ASPxGridView") {
                 AsssignClientHanderSafe(null,listView.Editor.Control,"Init", GetInitScript(), "grid.Init");
                 AsssignClientHanderSafe(null, listView.Editor.Control,"BatchEditStartEditing", "function(s, e) { clearTimeout(s.timerHandle); }", "grid.BatchEditStartEditing");
                 AsssignClientHanderSafe(null, listView.Editor.Control,"BatchEditEndEditing", "function(s, e) { s.timerHandle = setTimeout(function() { s.UpdateEdit();}, 100); }", "grid.BatchEditEndEditing");
                 AsssignClientHanderSafe(null, listView.Editor.Control,"EndCallback", GetInitScript(), "grid.EndCallback");
             }
-            return Unit.Default;
+            return listView;
         }
 
         private static string GetInitScript() {

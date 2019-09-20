@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Threading;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Xpo;
 using DevExpress.Persistent.BaseImpl;
+using NUnit.Framework;
 using Shouldly;
 using TestsLib;
 using Xpand.Source.Extensions.XAF.CollectionSource;
@@ -13,17 +15,18 @@ using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Logger.Hub.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive.Services;
-using Xunit;
+
 using Task = System.Threading.Tasks.Task;
 
 namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
-    [Collection(nameof(ReactiveLoggerHubModule))]
+    [NonParallelizable]
     public class ReactiveLoggerHubTests : BaseTest{
         public ReactiveLoggerHubTests(){
             XpoTypesInfoHelper.GetXpoTypeInfoSource().XPDictionary.CollectClassInfos(GetType().Assembly);
         }
 
-        [WinFormsFact]
+        [Test]
+        [Apartment(ApartmentState.STA)]
         public async Task Start_Server_After_Logon(){
             
             using (var application = HubModule(nameof(Start_Server_After_Logon)).Application){
@@ -40,7 +43,9 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
             }
         }
 
-        [WinFormsFact(Skip = NotImplemented)]
+        [Test()]
+        [Apartment(ApartmentState.STA)]
+        [Ignore(NotImplemented)]
         public async Task Connect_Client(){
             
             using (var clientWinApp = new ClientWinApp()){
@@ -70,7 +75,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
             }
         }
 
-        [WinFormsFact]
+        [Test]
+        [Apartment(ApartmentState.STA)]
         public async Task Client_Detect_When_Hub_Is_Online(){
             
             using (var clientWinApp = new ClientWinApp()){
@@ -94,7 +100,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
         }
 
 
-        [WinFormsFact]
+        [Test]
+        [Apartment(ApartmentState.STA)]
         public async Task Display_TraceEvent_On_New_Client(){
             using (var application = Platform.Win.NewApplication<ReactiveLoggerHubModule>()){
                 
@@ -138,7 +145,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
             }
         }
 
-        [WinFormsFact]
+        [Test]
+        [Apartment(ApartmentState.STA)]
         public async Task Display_TraceEvent_On_Running_Client(){
             
             using (var clientWinApp = new ClientWinApp()){

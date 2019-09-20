@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{4C3ED41A-EB50-4A59-9A38-0BDBC1967C06}</ProjectGuid>
     <TargetFramework>net461</TargetFramework>
@@ -7,6 +7,7 @@
     <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
     <DebugSymbols>true</DebugSymbols>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <OutputPath>..\..\..\bin</OutputPath>
     <AssemblyTitle>Xpand.XAF.Modules.ViewEditMode</AssemblyTitle>
     <Product>Xpand.XAF.Modules.ViewEditMode</Product>

@@ -10,21 +10,23 @@ using DevExpress.ExpressApp.Win.SystemModule;
 using DevExpress.XtraBars;
 using Fasterflect;
 using Moq;
+using NUnit.Framework;
 using Shouldly;
 using TestsLib;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.HideToolBar.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive.Extensions;
-using Xunit;
+
 
 namespace Xpand.XAF.Modules.HideToolBar.Tests{
-    [Collection(nameof(HideToolBarModule))]
+    [NonParallelizable]
     public class HideToolBarTests : BaseTest{
 
-        [Theory]
-        [InlineData(Platform.Web)]
-        [InlineData(Platform.Win)]
-        internal async Task Signal_When_frame_with_HideToolBar_Enabled_ListView_controls_created(Platform platform){
+        
+        [TestCase(nameof(Platform.Web))]
+        [TestCase(nameof(Platform.Win))]
+        public async Task Signal_When_frame_with_HideToolBar_Enabled_ListView_controls_created(string platformName){
+            var platform = GetPlatform(platformName);
             using (var application = DefaultHideToolBarModule(platform, nameof(Signal_When_frame_with_HideToolBar_Enabled_ListView_controls_created)).Application){
                 var nestedFrames = application.HideToolBarNestedFrames().Replay();
                 nestedFrames.Connect();
@@ -48,10 +50,10 @@ namespace Xpand.XAF.Modules.HideToolBar.Tests{
             return templateMock;
         }
 
-        [Theory]
-        [InlineData(Platform.Web)]
-        [InlineData(Platform.Win)]
-        internal async Task Hide_Nested_ToolBar(Platform platform){
+        [TestCase(nameof(Platform.Web))]
+        [TestCase(nameof(Platform.Win))]
+        public async Task Hide_Nested_ToolBar(string platformName){
+            var platform = GetPlatform(platformName);
             using (var newApplication = platform.NewApplication<HideToolBarModule>()){
                 newApplication.Title = nameof(Hide_Nested_ToolBar);
                 var nestedFrame = new NestedFrame(newApplication, TemplateContext.NestedFrame, null, new List<Controller>());
@@ -73,8 +75,8 @@ namespace Xpand.XAF.Modules.HideToolBar.Tests{
             
         }
 
-        [Fact]
-        internal async Task Hide_ToolbarVisibilityController(){
+        [Test]
+        public async Task Hide_ToolbarVisibilityController(){
             using (var application = Platform.Win.NewApplication<HideToolBarModule>()){
                 application.Title = nameof(Hide_ToolbarVisibilityController);
                 var frame = new Frame(application, TemplateContext.ApplicationWindow);

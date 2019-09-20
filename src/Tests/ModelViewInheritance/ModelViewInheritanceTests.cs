@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
+using NUnit.Framework;
 using Shouldly;
 using TestsLib;
 using Xpand.Source.Extensions.XAF.XafApplication;
@@ -11,14 +12,23 @@ using Xpand.XAF.Modules.CloneModelView;
 using Xpand.XAF.Modules.ModelViewInheritance.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
-using Xunit;
+
 
 namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{
-    [Collection(nameof(ModelViewInheritanceModule))]
+    [NonParallelizable]
     public class ModelViewInheritanceTests:BaseTest {
-        [Theory]
-        [ClassData(typeof(ModelViewInheritanceTestData))]
-        internal void Inherit_And_Modify_A_BaseView(ViewType viewType, bool attribute,Platform platform){
+        
+        [TestCase(ViewType.DetailView,false,nameof(Platform.Win))]
+        [TestCase(ViewType.DetailView,true,nameof(Platform.Win))]
+        [TestCase(ViewType.DetailView,false,nameof(Platform.Web))]
+        [TestCase(ViewType.DetailView,true,nameof(Platform.Web))]
+        
+        [TestCase(ViewType.ListView,false,nameof(Platform.Win))]
+        [TestCase(ViewType.ListView,true,nameof(Platform.Win))]
+        [TestCase(ViewType.ListView,false,nameof(Platform.Web))]
+        [TestCase(ViewType.ListView,true,nameof(Platform.Web))]
+        public void Inherit_And_Modify_A_BaseView(ViewType viewType, bool attribute,string platformName){
+            var platform = GetPlatform(platformName);
             ModelViewInheritanceUpdater.Disabled = true;
             var models = GetModels(viewType, attribute, platform);
 
@@ -79,7 +89,7 @@ namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{
             return modelViewInheritanceModule;
         }
 
-        [Fact]
+        [Test]
         public void Chained_Cloned_listview_merging(){
             string GetModel(){
                 var xafApplication = Platform.Win.NewApplication<ModelViewInheritanceModule>();

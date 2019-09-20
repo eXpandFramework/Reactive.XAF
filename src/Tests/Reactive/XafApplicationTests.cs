@@ -4,21 +4,23 @@ using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
+using NUnit.Framework;
 using Shouldly;
 using TestsLib;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Tests.BOModel;
-using Xunit;
+
 
 namespace Xpand.XAF.Modules.Reactive.Tests{
-    [Collection(nameof(ReactiveModule))]
+    [NonParallelizable]
     public class XafApplicationTests : BaseTest{
-        [Theory]
-        [InlineData(Platform.Win)]
-        [InlineData(Platform.Web)]
-        internal async Task WhenFrameCreated(Platform platform){
+        
+        [TestCase(nameof(Platform.Win))]
+        [TestCase(nameof(Platform.Web))]
+        public async Task WhenFrameCreated(string platformName){
+            var platform = GetPlatform(platformName);
             var application = DefaultReactiveModule(platform).Application;
             var frames = application.WhenFrameCreated().Replay();
             frames.Connect();
@@ -34,10 +36,11 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             (await frames.Take(4)).ShouldBe(popupWindow);
         }
 
-        [Theory]
-        [InlineData(Platform.Win)]
-        [InlineData(Platform.Web)]
-        internal async Task WhenWindowCreated(Platform platform){
+        
+        [TestCase(nameof(Platform.Win))]
+        [TestCase(nameof(Platform.Web))]
+        public async Task WhenWindowCreated(string platformName){
+            var platform = GetPlatform(platformName);
             var application = DefaultReactiveModule(platform).Application;
             var windows = application.WhenWindowCreated().Replay();
             windows.Connect();
@@ -49,10 +52,11 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             (await windows.Take(2)).ShouldBe(popupWindow);
         }
 
-        [Theory]
-        [InlineData(Platform.Win)]
-        [InlineData(Platform.Web)]
-        internal async Task WhenPopupWindowCreated(Platform platform){
+        
+        [TestCase(nameof(Platform.Win))]
+        [TestCase(nameof(Platform.Web))]
+        public async Task WhenPopupWindowCreated(string platformName){
+            var platform = GetPlatform(platformName);
             var application = DefaultReactiveModule(platform).Application;
             var windows = application.WhenPopupWindowCreated().Replay();
             windows.Connect();
@@ -62,10 +66,11 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             (await windows.Take(1)).ShouldBe(popupWindow);
         }
 
-        [Theory]
-        [InlineData(Platform.Win)]
-        [InlineData(Platform.Web)]
-        internal async Task WHen_NestedFrameCreated(Platform platform){
+        
+        [TestCase(nameof(Platform.Win))]
+        [TestCase(nameof(Platform.Web))]
+        public async Task WHen_NestedFrameCreated(string platformName){
+            var platform = GetPlatform(platformName);
             var application = DefaultReactiveModule(platform).Application;
             var nestedFrames = application.WhenNestedFrameCreated().Replay();
             nestedFrames.Connect();
@@ -81,7 +86,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             return application.AddModule<ReactiveModule>(typeof(R));
         }
 
-        [Fact]
+        [Test]
         public void BufferUntilCompatibilityChecked(){
             var source = new Subject<int>();
             var application = DefaultReactiveModule(Platform.Win).Application;

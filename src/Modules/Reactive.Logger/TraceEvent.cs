@@ -49,16 +49,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             }
         }
 
-//        public static IObservable<ITraceEvent> CountTraceCalls(this IObservable<ITraceEvent> source){
-//            return source.CountSubsequent(TraceKey)
-//                .Select(_ => {
-//                    _.item.Called = _.length;
-//                return _.item;
-//            });
-//        }
-
         public static string TraceKey(this ITraceEvent _){
-            return $"{_.Location}{_.Action}{_.Value}{_.Source}{_.Method}";
+            return $"{_.Location}{_.Action}{_.Value}{_.Source}{_.Method}{_.Value}";
         }
 
         public static void MapTo(this ITraceEvent traceEvent,TraceEvent mapToEvent){
