@@ -23,7 +23,7 @@ jobs:
         testSelector: 'testAssemblies'
         uiTests: true
         testAssemblyVer2: |
-          **\*CloneModelView*.dll
+          **\*Tests*.dll
           !**\*Reactive.Logger.Hub.Tests*.dll
           !**\*TestAdapter.dll
           !**\obj\**
