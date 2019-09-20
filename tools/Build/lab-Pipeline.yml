@@ -1,7 +1,7 @@
 jobs:
 - job: Test
   strategy:
-    parallel: 1
+    parallel: 15
 
   pool:
     vmImage: windows-2019
