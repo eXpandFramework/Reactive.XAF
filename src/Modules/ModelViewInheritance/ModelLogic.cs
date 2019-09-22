@@ -22,13 +22,15 @@ namespace Xpand.XAF.Modules.ModelViewInheritance {
     [AttributeUsage(AttributeTargets.Class,AllowMultiple = true)]
     public class ModelMergedDifferencesAttribute : Attribute {
 
-        public ModelMergedDifferencesAttribute(string targetView, string sourceView) {
+        public ModelMergedDifferencesAttribute(string targetView, string sourceView,bool deepMerge=false) {
             TargetView = targetView;
             SourceView = sourceView;
+            DeepMerge = deepMerge;
         }
 
         public string TargetView { get; }
         public string SourceView { get; }
+        public bool DeepMerge{ get; }
     }
 
     public class MergedDifferencesGenerator : ModelNodesGeneratorBase {
@@ -40,6 +42,7 @@ namespace Xpand.XAF.Modules.ModelViewInheritance {
             foreach (var info in infos.Where(_ => _.TargetView==modelObjectView.Id&&node[_.TargetView]==null)){
                 var difference = node.AddNode<IModelMergedDifference>(info.TargetView);
                 difference.View = node.Application.Views[info.SourceView].AsObjectView;
+                difference.DeepMerge = info.DeepMerge;
             }
         }
     }
@@ -49,6 +52,7 @@ namespace Xpand.XAF.Modules.ModelViewInheritance {
         [Required]
         [RefreshProperties(RefreshProperties.All)]
         IModelObjectView View { get; set; }
+        bool DeepMerge{ get; set; }
         [Browsable(false)]
         IModelList<IModelObjectView> Views { get; }
     }

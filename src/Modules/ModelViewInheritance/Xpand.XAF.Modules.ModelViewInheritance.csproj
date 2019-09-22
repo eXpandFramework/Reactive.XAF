@@ -14,8 +14,7 @@
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
   <ItemGroup>
-  </ItemGroup>
-  <ItemGroup>
+    <Compile Include="..\..\Extensions\Extensions\Linq\FromHierarchy.cs" Link="LinkedFiles\FromHierarchy.cs" />
     <Compile Include="..\..\Extensions\Extensions\Linq\GetItems.cs" Link="LinkedFiles\GetItems.cs" />
     <Compile Include="..\..\Extensions\Extensions\XAF\Model\GetParent.cs" Link="LinkedFiles\GetParent.cs" />
     <Compile Include="..\..\Extensions\Extensions\XAF\Model\InsertLayer.cs" Link="LinkedFiles\InsertLayer.cs" />

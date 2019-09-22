@@ -44,6 +44,8 @@ The module extends the model views nodes with the `IModelObjectViewMergedDiffere
 
 ![image](https://user-images.githubusercontent.com/159464/50849204-f80e3b00-137e-11e9-8c6c-0a93edffb954.png)
 
+**v1.1.39**
+[#471](https://github.com/eXpandFramework/eXpand/issues/471). Adds the `DeepMerge` attribute which if enable the module will recourse and merge the source view differences. 
 
 ### Tests
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/ModelViewInheritance)

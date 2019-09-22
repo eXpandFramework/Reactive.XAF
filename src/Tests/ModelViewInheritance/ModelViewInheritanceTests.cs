@@ -89,43 +89,51 @@ namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{
             return modelViewInheritanceModule;
         }
 
-        [Test]
-        public void Chained_Cloned_listview_merging(){
+        [TestCase(true)]
+        [TestCase(false)]
+        public void Chained_Cloned_listview_merging(bool deepMerge){
             string GetModel(){
-                var xafApplication = Platform.Win.NewApplication<ModelViewInheritanceModule>();
-                var inheritanceModule = DefaultModelViewInheritancerModule(xafApplication, true, typeof(CloneModelViewModule));
-                var model = inheritanceModule.Application.Model;
-                var modelApplication = ((ModelApplicationBase) model).CreatorInstance.CreateModelApplication();
-                ModelApplicationHelper.AddLayer(((ModelApplicationBase) model), modelApplication);
+                string xml;
+                using (var xafApplication = Platform.Win.NewApplication<ModelViewInheritanceModule>()){
+                    var inheritanceModule = DefaultModelViewInheritancerModule(xafApplication, true, typeof(CloneModelViewModule));
+                    var model = inheritanceModule.Application.Model;
+                    var modelApplication = ((ModelApplicationBase) model).CreatorInstance.CreateModelApplication();
+                    ModelApplicationHelper.AddLayer(((ModelApplicationBase) model), modelApplication);
 
-                var elementListView = model.BOModel.GetClass(typeof(Element)).DefaultListView;
-                elementListView.Columns[nameof(Element.Street)].Index = -1;
-                var lvBase = ((IModelListView) model.Views[Element.ListViewBase]);
-                var mergedDifferences = ((IModelObjectViewMergedDifferences) lvBase).MergedDifferences;
-                var mergedDifference = mergedDifferences.AddNode<IModelMergedDifference>();
-                mergedDifference.View = elementListView;
-                mergedDifferences = ((IModelObjectViewMergedDifferences) model.Views[Element.ListViewBaseNested]).MergedDifferences;
-                mergedDifference = mergedDifferences.AddNode<IModelMergedDifference>();
-                mergedDifference.View = elementListView;
-                mergedDifference = mergedDifferences.AddNode<IModelMergedDifference>();
-                mergedDifference.View = lvBase;
-                var xml = modelApplication.Xml;
-                ModelApplicationHelper.RemoveLayer((ModelApplicationBase) xafApplication.Model);
+                    var elementListView = model.BOModel.GetClass(typeof(Element)).DefaultListView;
+                    elementListView.Columns[nameof(Element.Street)].Index = -1;
+                    var lvBase = ((IModelListView) model.Views[Element.ListViewBase]);
+                    var mergedDifferences = ((IModelObjectViewMergedDifferences) lvBase).MergedDifferences;
+                    var mergedDifference = mergedDifferences.AddNode<IModelMergedDifference>();
+                    mergedDifference.View = elementListView;
+                    mergedDifferences = ((IModelObjectViewMergedDifferences) model.Views[Element.ListViewBaseNested]).MergedDifferences;
+                    mergedDifference = mergedDifferences.AddNode<IModelMergedDifference>();
+                    mergedDifference.View = elementListView;
+                    mergedDifference.DeepMerge = deepMerge;
+                    if (!deepMerge){
+                        mergedDifference = mergedDifferences.AddNode<IModelMergedDifference>();
+                        mergedDifference.View = lvBase;
+                    }
+                    xml = modelApplication.Xml;
+                    ModelApplicationHelper.RemoveLayer((ModelApplicationBase) xafApplication.Model);
+                }
+
                 return xml;
             }
 
             
             var modelXml = GetModel();
 
-            var newApplication = Platform.Win.NewApplication<ModelViewInheritanceModule>();
-            var module = DefaultModelViewInheritancerModule(newApplication,false, typeof(CloneModelViewModule));
-            var testModule1 = new TestModule1{DiffsStore = new StringModelStore(modelXml)};
-            testModule1.AdditionalExportedTypes.Add(typeof(Element));
-            newApplication.SetupDefaults(module, testModule1,new CloneModelViewModule());
+            using (var newApplication = Platform.Win.NewApplication<ModelViewInheritanceModule>()){
+                var module = DefaultModelViewInheritancerModule(newApplication,false, typeof(CloneModelViewModule));
+                var testModule1 = new TestModule1{DiffsStore = new StringModelStore(modelXml)};
+                testModule1.AdditionalExportedTypes.Add(typeof(Element));
+                newApplication.SetupDefaults(module, testModule1,new CloneModelViewModule());
 
-            var listViewBase = ((IModelListView) newApplication.Model.Views[Element.ListViewBase]);
-            listViewBase.Columns[nameof(Element.Street)].Index.ShouldBe(-1);
-            ((IModelListView) newApplication.Model.Views[Element.ListViewBaseNested]).Columns[nameof(Element.Street)].Index.ShouldBe(-1);
+                var listViewBase = ((IModelListView) newApplication.Model.Views[Element.ListViewBase]);
+                listViewBase.Columns[nameof(Element.Street)].Index.ShouldBe(-1);
+                ((IModelListView) newApplication.Model.Views[Element.ListViewBaseNested]).Columns[nameof(Element.Street)].Index.ShouldBe(-1);
+            }
         }
     }
 
