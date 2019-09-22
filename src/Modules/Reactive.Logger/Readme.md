@@ -70,4 +70,3 @@ So from bottom to top, we can see that the `OneViewModule ShowView and HideMainW
 3. From step 2 we know we after logon therefore the user model is also merged giving the signal to the `ReactiveLoggerHubModule` which gets the 30 listening ports 61456, 61486 (last column) with the 
 4. Trash these rows as they do not tell us more than that an ObjectSpaceCreated or using the powerful DevExpress Grid,  filter out the Reactive modules calls as it tends to get chatty.
 5. The rest of the rows follow the same pattern with the GridListEditor and OneView modules on the lead.
-

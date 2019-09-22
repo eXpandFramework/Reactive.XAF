@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{F81172D2-C7A6-4159-ADB7-38E8C1B1460D}</ProjectGuid>
     <TargetFramework>net461</TargetFramework>

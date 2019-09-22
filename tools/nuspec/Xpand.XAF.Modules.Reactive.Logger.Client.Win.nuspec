@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <metadata>
-    <id>Xpand-XAF-Modules-Reactive-Logger-Client-Win</id>
+    <id>Xpand.XAF.Modules.Reactive.Logger.Client.Win</id>
     <version>0.0.1.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
@@ -9,14 +9,10 @@
     <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/Reactive.Logger.Client.Win</projectUrl>
     <iconUrl>http://sign.expandframework.com</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>The `ViewEditMode` module controls the state of DetailView.ViewEditMode. Choose `Edit` mode to open a `DetailView` in edit mode. 
-
-The module uses the next two strategies:
-1. It monitors the `DetailView` creation and modifies its ViewEditMode property according to model configuration. However later ViewEditMode property modifications are allowed.
-2. It monitors the `ViewEditMode` modifiation and cancels it if the `LockViewEditMode` attribute is used.</description>
+    <description>The `Reactive.Logger.Client.Win` is a XAF Windows Forms application capable to connect to any XAF application that has the [Reactive.Logger.Hub](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Hub) module installed. More in the details section.</description>
     <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Xpand-XAF-Modules-Reactive-Logger-Client-Win</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Reactive.Logger.Client.Win</tags>
     <dependencies>
       <dependency id="MagicOnion" version="2.4.0" />
       <dependency id="System.Buffers" version="4.5.0" />
@@ -26,6 +22,7 @@ The module uses the next two strategies:
       <dependency id="Xpand.XAF.Modules.OneView" version="0.0.1.0" />
       <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.47.0" />
       <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="0.0.1.0" />
+      <dependency id="Xpand.VersionConverter" version="1.0.34.0" />
     </dependencies>
   </metadata>
   <files>

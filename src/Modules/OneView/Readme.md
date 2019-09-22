@@ -57,4 +57,3 @@ The module is tested on Azure for each build with these [tests](https://github.c
 ### Examples
 
 The module is used from the [Reactive.Logger.Client](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win) to display only one View the `TraceEvent_ListView`
-

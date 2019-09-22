@@ -5,9 +5,6 @@
 
 The `Reactive.Logger.Client.Win` is a XAF Windows Forms application capable to connect to any XAF application that has the [Reactive.Logger.Hub](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Hub) module installed. More in the details section.
 
-The module uses the next two strategies:
-1. It monitors the `DetailView` creation and modifies its Reactive.Logger.Client.Win property according to model configuration. However later Reactive.Logger.Client.Win property modifications are allowed.
-2. It monitors the `Reactive.Logger.Client.Win` modifiation and cancels it if the `LockReactive.Logger.Client.Win` attribute is used.
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 
 
@@ -33,8 +30,18 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp**|**Any**
-|System.Reactive|4.1.6
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|1.2.46
+ |**DevExpress.ExpressApp.ConditionalAppearance**|**Any**
+ |**DevExpress.ExpressApp.Win**|**Any**
+ |**DevExpress.ExpressApp.Xpo**|**Any**
+ |**DevExpress.Xpo**|**Any**
+|MagicOnion|2.4.0
+ |System.Buffers|4.5.0
+ |System.Collections.Immutable|1.5.0
+ |System.Reactive|4.1.6
+ |[Xpand.XAF.Modules.GridListEditor](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.GridListEditor)|0.0.1
+ |[Xpand.XAF.Modules.OneView](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.OneView)|0.0.1
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|1.2.47
+ |[Xpand.XAF.Modules.Reactive.Logger.Hub](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Logger.Hub)|0.0.1
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.0.34
 
 ## Issues-Debugging-Troubleshooting

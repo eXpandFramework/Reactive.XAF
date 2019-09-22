@@ -8,11 +8,11 @@ param(
     [string]$branch="lab",
     [switch]$InstallModules,
     [string[]]$taskList=@("Release"),
-    [string]$XpandPwshVersion = "0.15.2",
+    [string]$XpandPwshVersion = "0.15.3",
     [switch]$Release
 )
 $ErrorActionPreference = "Stop"
-Install-Module XpandPwsh -Force
+
 @([PSCustomObject]@{
     Name = "psake"
     Version ="4.7.4"
