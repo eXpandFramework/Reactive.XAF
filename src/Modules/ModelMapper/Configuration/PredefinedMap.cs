@@ -183,7 +183,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Configuration{
         ASPxGridView,
         [MapPlatform(Platform.Web)]
         [ImageName("Grid_16x16")]
-        GridViewColumn,
+        GridViewDataColumn,
         [MapPlatform(Platform.Web)]
         ASPxHtmlEditor,
         [MapPlatform(Platform.Web)]

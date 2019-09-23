@@ -196,7 +196,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [TestCase(PredefinedMap.BandedGridColumn,new[]{typeof(BandedGridColumn),typeof(GridListEditor)},nameof(Platform.Win),new[]{nameof(BandedGridColumn.Summary)})]
         [TestCase(PredefinedMap.AdvBandedGridView,new[]{typeof(AdvBandedGridView),typeof(GridListEditor)},nameof(Platform.Win),new[]{nameof(AdvBandedGridView.FormatRules)})]
         [TestCase(PredefinedMap.ASPxGridView,new[]{typeof(ASPxGridView),typeof(ASPxGridListEditor)},nameof(Platform.Web),new[]{nameof(ASPxGridView.Columns)})]
-        [TestCase(PredefinedMap.GridViewColumn,new[]{typeof(GridViewColumn),typeof(ASPxGridListEditor)},nameof(Platform.Web),new[]{nameof(GridViewColumn.Columns)})]
+        [TestCase(PredefinedMap.GridViewDataColumn,new[]{typeof(GridViewColumn),typeof(ASPxGridListEditor)},nameof(Platform.Web),new[]{nameof(GridViewColumn.Columns)})]
         [TestCase(PredefinedMap.ASPxHtmlEditor,new[]{typeof(ASPxHtmlEditor),typeof(ASPxHtmlPropertyEditor)},nameof(Platform.Web),new string[0])]
         [TestCase(PredefinedMap.TreeList,new[]{typeof(TreeList),typeof(TreeListEditor)},nameof(Platform.Win),new string[0])]
         [TestCase(PredefinedMap.TreeListColumn,new[]{typeof(TreeListColumn),typeof(TreeListEditor)},nameof(Platform.Win),new string[0])]

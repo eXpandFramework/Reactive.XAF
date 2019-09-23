@@ -119,7 +119,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         [TestCase(PredefinedMap.LayoutView, typeof(LayoutView),nameof(Platform.Win),MMListViewNodePath)]
         [TestCase(PredefinedMap.BandedGridColumn, typeof(BandedGridColumn),nameof(Platform.Win),MMListViewNodePath+"/Columns/Test")]
         [TestCase(PredefinedMap.AdvBandedGridView, typeof(AdvBandedGridView),nameof(Platform.Win),MMListViewNodePath)]
-        [TestCase(PredefinedMap.GridViewColumn, typeof(GridViewColumn),nameof(Platform.Web),MMListViewNodePath+"/Columns/Test")]
+        [TestCase(PredefinedMap.GridViewDataColumn, typeof(GridViewColumn),nameof(Platform.Web),MMListViewNodePath+"/Columns/Test")]
         [TestCase(PredefinedMap.ASPxGridView, typeof(ASPxGridView),nameof(Platform.Web),MMListViewNodePath)]
         [TestCase(PredefinedMap.TreeList, typeof(TreeList),nameof(Platform.Win),MMListViewNodePath+",NavigationItems")]
         [TestCase(PredefinedMap.TreeListColumn, typeof(TreeListColumn),nameof(Platform.Win),MMListViewTestItemNodePath)]

@@ -330,7 +330,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             if (predefinedMap == PredefinedMap.ASPxGridView){
                 return ((ListView) view).Editor.GetPropertyValue("Grid");
             }
-            if (predefinedMap == PredefinedMap.GridViewColumn){
+            if (predefinedMap == PredefinedMap.GridViewDataColumn){
                 return PredefinedMap.ASPxGridView.GetViewControl(view,null).GetPropertyValue("Columns",Flags.InstancePublicDeclaredOnly).GetIndexer(model);
             }
             if (predefinedMap == PredefinedMap.ASPxScheduler){
@@ -428,7 +428,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             else if (new[] {
                 PredefinedMap.ASPxUploadControl, PredefinedMap.ASPxPopupControl, PredefinedMap.ASPxDateEdit,
                 PredefinedMap.ASPxHyperLink, PredefinedMap.ASPxSpinEdit, PredefinedMap.ASPxTokenBox,
-                PredefinedMap.ASPxComboBox,PredefinedMap.ASPxGridView, PredefinedMap.GridViewColumn, 
+                PredefinedMap.ASPxComboBox,PredefinedMap.ASPxGridView, PredefinedMap.GridViewDataColumn, 
             }.Any(map => map == predefinedMap)){
                 assembly = _dxWebAssembly;
             }
@@ -561,8 +561,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 return "DevExpress.Web.ASPxScheduler.ASPxScheduler";
             if (predefinedMap == PredefinedMap.ASPxHtmlEditor)
                 return "DevExpress.Web.ASPxHtmlEditor.ASPxHtmlEditor";
-            if (predefinedMap == PredefinedMap.GridViewColumn)
-                return  "DevExpress.Web.GridViewColumn";
+            if (predefinedMap == PredefinedMap.GridViewDataColumn)
+                return  "DevExpress.Web.GridViewDataColumn";
             throw new NotImplementedException(predefinedMap.ToString());
         }
 
@@ -666,10 +666,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                     CheckRequiredParameters(nameof(_dashboardWebWebFormsAssembly), nameof(_dashboardWebWebFormsAssembly));
                     return new ModelMapperConfiguration(predefinedMap.TypeToMap(),typeof(IModelPropertyEditor));
                 }
-                if (new[]{PredefinedMap.ASPxGridView,PredefinedMap.GridViewColumn}.Any(map => map==predefinedMap)){
+                if (new[]{PredefinedMap.ASPxGridView,PredefinedMap.GridViewDataColumn}.Any(map => map==predefinedMap)){
                     CheckRequiredParameters(nameof(_xafWebAssembly), nameof(_dxWebAssembly));
                     return GetListViewConfiguration(predefinedMap,_xafWebAssembly, _dxWebAssembly, "DevExpress.ExpressApp.Web.Editors.ASPx.ASPxGridListEditor",
-                        PredefinedMap.ASPxGridView.GetTypeName(),PredefinedMap.GridViewColumn.GetTypeName());
+                        PredefinedMap.ASPxGridView.GetTypeName(),PredefinedMap.GridViewDataColumn.GetTypeName());
                 }
                 if (new[]{PredefinedMap.ASPxScheduler}.Any(map => map==predefinedMap)){
                     CheckRequiredParameters(nameof(_xafSchedulerWebAssembly), nameof(_dxScedulerWebAssembly));
@@ -733,7 +733,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                     return new ModelMapperConfiguration(typeToMap, typeof(IModelListView)) {ImageName = predefinedMap.Attribute<ImageNameAttribute>().ImageName,VisibilityCriteria =visibilityCriteria};
                 }
 
-                if (new[]{PredefinedMap.GridViewColumn, PredefinedMap.GridColumn, PredefinedMap.BandedGridColumn,
+                if (new[]{PredefinedMap.GridViewDataColumn, PredefinedMap.GridColumn, PredefinedMap.BandedGridColumn,
                     PredefinedMap.LayoutViewColumn, PredefinedMap.PivotGridField,PredefinedMap.TreeListColumn
                 }.Any(map => map == predefinedMap)){
                     var visibilityCriteria = ColumnVisibilityCriteria(rightOperand);
