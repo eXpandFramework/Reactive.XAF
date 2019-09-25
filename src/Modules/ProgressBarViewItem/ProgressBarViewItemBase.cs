@@ -84,6 +84,7 @@ namespace Xpand.XAF.Modules.ProgressBarViewItem{
                 _asssignClientHanderSafe(null,Control,"Init", GetInitScript(), "grid.Init");
             }
             _positionSubject
+                .ObserveOn(synchronizationContext)
                 .Do(SetPosition)
                 .Finally(() => SetPosition(0))
                 .TakeUntil((_platform==Platform.Win?_breakLinksToControl.AsObservable():Observable.Empty<Unit>())) 
