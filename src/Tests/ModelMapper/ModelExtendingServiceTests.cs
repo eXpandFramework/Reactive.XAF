@@ -41,7 +41,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
     [NonParallelizable]
     public class ModelMapperExtenderServiceTests : ModelMapperBaseTest{
 
-        
         [TestCase(typeof(TestModelMapper),nameof(Platform.Win))]
         [TestCase(typeof(TestModelMapper),nameof(Platform.Web))]
         [TestCase(typeof(RootType),nameof(Platform.Win))]
@@ -119,7 +118,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         [TestCase(PredefinedMap.LayoutView, typeof(LayoutView),nameof(Platform.Win),MMListViewNodePath)]
         [TestCase(PredefinedMap.BandedGridColumn, typeof(BandedGridColumn),nameof(Platform.Win),MMListViewNodePath+"/Columns/Test")]
         [TestCase(PredefinedMap.AdvBandedGridView, typeof(AdvBandedGridView),nameof(Platform.Win),MMListViewNodePath)]
-        [TestCase(PredefinedMap.GridViewDataColumn, typeof(GridViewColumn),nameof(Platform.Web),MMListViewNodePath+"/Columns/Test")]
+        [TestCase(PredefinedMap.GridViewDataColumn, typeof(GridViewDataColumn),nameof(Platform.Web),MMListViewNodePath+"/Columns/Test")]
         [TestCase(PredefinedMap.ASPxGridView, typeof(ASPxGridView),nameof(Platform.Web),MMListViewNodePath)]
         [TestCase(PredefinedMap.TreeList, typeof(TreeList),nameof(Platform.Win),MMListViewNodePath+",NavigationItems")]
         [TestCase(PredefinedMap.TreeListColumn, typeof(TreeListColumn),nameof(Platform.Win),MMListViewTestItemNodePath)]

@@ -33,5 +33,11 @@
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
     </Reference>
+    <Reference Include="Xpand.XAF.Modules.Reactive.Logger">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Reactive.Logger.Hub">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.Hub.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>

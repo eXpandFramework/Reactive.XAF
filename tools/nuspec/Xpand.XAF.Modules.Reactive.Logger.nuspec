@@ -9,11 +9,7 @@
     <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/Reactive.Logger</projectUrl>
     <iconUrl>http://sign.expandframework.com</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>The `Reactive.Logger` module monitors calls to the Reactive delegates (OnNext, OnSubscribe, OnDispose, OnCompleted, OnError). All calls are saved to the application database. For more head to the details section.
-
-The module uses the next two strategies:
-1. It monitors the `DetailView` creation and modifies its Reactive.Logger property according to model configuration. However later Reactive.Logger property modifications are allowed.
-2. It monitors the `Reactive.Logger` modifiation and cancels it if the `LockReactive.Logger` attribute is used.</description>
+    <description>The `Reactive.Logger` module monitors calls to the Reactive delegates (OnNext, OnSubscribe, OnDispose, OnCompleted, OnError) and persists the calls info in the application datastore. For more head to the details section.</description>
     <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Reactive.Logger</tags>

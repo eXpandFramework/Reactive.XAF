@@ -259,7 +259,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
         
         [TestCase(nameof(Platform.Win),new[]{PredefinedMap.GridColumn , PredefinedMap.GridView},new[]{typeof(XafGridView),typeof(GridColumn),typeof(GridListEditor)},new Type[0],3)]
-        [TestCase(nameof(Platform.Web),new[]{PredefinedMap.GridViewDataColumn , PredefinedMap.ASPxGridView},new[]{typeof(ASPxGridView),typeof(GridViewColumn),typeof(ASPxGridListEditor)},new Type[0],3)]
+        [TestCase(nameof(Platform.Web),new[]{PredefinedMap.GridViewDataColumn , PredefinedMap.ASPxGridView},new[]{typeof(ASPxGridView),typeof(GridViewDataColumn),typeof(ASPxGridListEditor)},new Type[0],3)]
         [TestCase(nameof(Platform.Win),new[]{PredefinedMap.BandedGridColumn , PredefinedMap.AdvBandedGridView},new[]{typeof(XafAdvBandedGridView),typeof(BandedGridColumn),typeof(GridListEditor)},new Type[0],3)]
         
         [TestCase(nameof(Platform.Win),new[]{PredefinedMap.LayoutViewColumn , PredefinedMap.LayoutView},new[]{typeof(XafLayoutView),typeof(LayoutViewColumn),typeof(CustomGridListEditor)},new Type[0],3)]

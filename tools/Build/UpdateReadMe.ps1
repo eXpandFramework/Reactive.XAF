@@ -62,20 +62,18 @@ function UpdateBadges($_, $packagespath,  $readMePath) {
     Set-Content $readMePath $readMe.Trim()
 }
 function UpdateIssues($_, $packagespath,  $readMePath) {
-    $moduleName="$($_.BaseName)Module"
+    $moduleName=$_.BaseName.Substring($_.BaseName.LastIndexOf(".")+1)
+    $moduleName="$($_.BaseName).$($moduleName)Module"
     $readMe = Get-Content $readMePath -Raw
-    if ($_ -like "*ModelMapper*"){
-        $additionalTroubleShooting="Currently the ModelMapper does not support the Visual Studio Model Editor. However you can use the `XpandModelEditor` found in the `Xpand.VSIX` package. Note that the XpandModelEditor is embedded and version agnostic so its one time only installation.`r`n"
-    }
     $regex = [regex] '(?isx)\#\#\ Issues(.*)\#\#\ Details'
 $result = $regex.Replace($readMe, @"
 ## Issues-Debugging-Troubleshooting
 $1
 To ``Step in the source code`` you need to ``enable Source Server support`` in your Visual Studio/Tools/Options/Debugging/Enable Source Server Support. See also [How to boost your DevExpress Debugging Experience](https://github.com/eXpandFramework/DevExpress.XAF/wiki/How-to-boost-your-DevExpress-Debugging-Experience#1-index-the-symbols-to-your-custom-devexpresss-installation-location).
 
-If the package is installed in a way that you do not have access to uninstall it, then you can ``unload`` it with the next call when [XafApplication.SetupComplete](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.XafApplication.SetupComplete).
-``````ps1
-(($moduleName) Application.Modules.FindModule(typeof($moduleName))).Unload();
+If the package is installed in a way that you do not have access to uninstall it, then you can ``unload`` it with the next call at the contructor of your module.
+``````cs
+Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof($moduleName))
 ``````
 $additionalTroubleShooting
 ## Details

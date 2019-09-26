@@ -92,7 +92,7 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
 
         public static IObservable<(BindingListBase<T> list, ListChangedEventArgs e)> WhenListChanged<T>(this BindingListBase<T> listBase){
             return Observable.FromEventPattern<ListChangedEventHandler,ListChangedEventArgs>(h => listBase.ListChanged += h, h => listBase.ListChanged -= h)
-                .TransformPattern<ListChangedEventArgs,BindingListBase<T>>();
+                .Select(_ => (list:(BindingListBase<T>)_.Sender,e:_.EventArgs));
 
         }
 

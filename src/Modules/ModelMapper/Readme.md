@@ -39,11 +39,10 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 
 To `Step in the source code` you need to `enable Source Server support` in your Visual Studio/Tools/Options/Debugging/Enable Source Server Support. See also [How to boost your DevExpress Debugging Experience](https://github.com/eXpandFramework/DevExpress.XAF/wiki/How-to-boost-your-DevExpress-Debugging-Experience#1-index-the-symbols-to-your-custom-devexpresss-installation-location).
 
-If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call when [XafApplication.SetupComplete](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.XafApplication.SetupComplete).
-```ps1
-((Xpand.XAF.Modules.ModelMapperModule) Application.Modules.FindModule(typeof(Xpand.XAF.Modules.ModelMapperModule))).Unload();
+If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call at the contructor of your module.
+```cs
+Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.ModelMapper.ModelMapperModule))
 ```
-Currently the ModelMapper does not support the Visual Studio Model Editor. However you can use the XpandModelEditor found in the Xpand.VSIX package. Note that the XpandModelEditor is embedded and version agnostic so its one time only installation.
 
 ## Details
 The `ModelMapper` module will transform any type to XAF model format and will extend the model with a simple call like:

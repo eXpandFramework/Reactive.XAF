@@ -9,15 +9,20 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 namespace Xpand.XAF.Modules.Reactive{
     public abstract partial class ReactiveModuleBase:ModuleBase{
         internal ReplaySubject<ReactiveModuleBase> SetupCompletedSubject=new ReplaySubject<ReactiveModuleBase>(1);
-        public void Unload(){
-            Application.Modules.Remove(this);
-            Dispose();
+        static readonly Subject<ApplicationModulesManager> SettingUpSubject=new Subject<ApplicationModulesManager>();
+
+        public static void Unload(params Type[] modules){
+            SettingUpSubject.Do(_ => {
+                    foreach (var m in modules) _.Modules.Remove(_.Modules.FindModule(m));
+                })
+                .FirstAsync().Subscribe();
         }
 
         public IObservable<ReactiveModuleBase> SetupCompleted => Observable.Defer(() => SetupCompletedSubject.Select(module => module)).TraceRX();
 
 
         private static bool SetupModules(ApplicationModulesManager applicationModulesManager){
+            SettingUpSubject.OnNext(applicationModulesManager);
             foreach(var module in applicationModulesManager.Modules) {
                 try {
                     module.Setup(applicationModulesManager);

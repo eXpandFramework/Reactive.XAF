@@ -17,11 +17,14 @@ if (!(Get-Module VSTeam -ListAvailable)) {
     Install-Module VSTeam -Force
 }
 Set-VSTeamAccount -Account eXpandDevOps -PersonalAccessToken $AzureToken
-
-$localPackages = Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse | Invoke-Parallel -VariablesToImport "Branch" -Script {
+$officialPackages=Get-XpandPackages -PackageType XAF -Source Release
+$labPackages=Get-XpandPackages -PackageType XAF -Source Lab
+$DXVersion=Get-DevExpressVersion 
+# $localPackages = Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse | Invoke-Parallel -VariablesToImport "Branch" -Script {
+$localPackages = Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse |foreach {
     $name = [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
     $localVersion = Get-XpandVersion -XpandPath $_.DirectoryName -module $name
-    $nextVersion = Get-XpandVersion -Next -module $name
+    $nextVersion = Get-XpandVersion -Next -module $name -OfficialPackages $officialPackages -LabPackages $labPackages -DXVersion $DXVersion
     if (!$nextVersion -or $localVersion -gt $nextVersion) {
         $nextVersion = $localVersion
     }
@@ -39,7 +42,7 @@ $localPackages = Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse | I
 }
 Write-Host "localPackages:" -f blue
 $localPackages | Out-String
-$publishedPackages = & (Get-XNugetPath) list Xpand.XAF.Modules -source $packageSource | ConvertTo-PackageObject | Where-Object { $_.Id -like "Xpand.XAF*" } | ForEach-Object {
+$publishedPackages = $labPackages | ForEach-Object {
     $publishedName = $_.Id
     $localPackages | Where-Object { $_.Id -eq $publishedName }
 }

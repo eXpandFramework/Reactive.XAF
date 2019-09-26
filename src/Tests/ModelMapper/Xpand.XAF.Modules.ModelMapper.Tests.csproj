@@ -63,6 +63,9 @@
     <ProjectReference Include="..\..\Extensions\Extensions\Xpand.Source.Extensions.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\Libs\0Harmony.dll</HintPath>
+    </Reference>
     <Reference Include="ConcurrentCollections">
       <HintPath>..\..\Libs\ConcurrentCollections.dll</HintPath>
     </Reference>

@@ -9,7 +9,7 @@
     <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/OneView</projectUrl>
     <iconUrl>http://sign.expandframework.com</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>The `OneView` will display one view only with the option to edit the model. To learn how this is designed to work head to the details section.</description>
+    <description>The `OneView` will display **one view only** with the option to edit the model. To learn how this is designed to work head to the details section.</description>
     <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  OneView</tags>
