@@ -24,6 +24,18 @@ jobs:
         uiTests: true
         testAssemblyVer2: |
           **\*AutoCom*.dll
+          **\*CloneMemberValue*.dll
+          **\*CloneModelView*.dll
+          **\*GridListEditor*.dll
+          **\*HideToolBar*.dll
+          **\*Logger*.dll
+          **\*MasterDetail*.dll
+          **\*ModelViewInheritance*.dll
+          **\*OneView*.dll
+          **\*ProgressBarViewItem*.dll
+          **\*RefreshView*.dll
+          **\*SuppressConfirmation*.dll
+          **\*ViewEditMode*.dll
           !**\*Hub*.dll
           !**\*TestAdapter.dll
           !**\obj\**
