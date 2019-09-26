@@ -23,7 +23,7 @@ jobs:
         testSelector: 'testAssemblies'
         uiTests: true
         testAssemblyVer2: |
-          **\*Tests*.dll
+          **\*AutoCom*.dll
           !**\*Hub*.dll
           !**\*TestAdapter.dll
           !**\obj\**
