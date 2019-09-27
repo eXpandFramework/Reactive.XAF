@@ -38,10 +38,10 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |System.Buffers|4.5.0
  |System.Collections.Immutable|1.5.0
  |System.Reactive|4.1.6
- |[Xpand.XAF.Modules.GridListEditor](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.GridListEditor)|0.0.1
- |[Xpand.XAF.Modules.OneView](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.OneView)|0.0.1
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|1.2.47
- |[Xpand.XAF.Modules.Reactive.Logger.Hub](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Logger.Hub)|0.0.1
+ |[Xpand.XAF.Modules.GridListEditor](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.GridListEditor)|0.0.2
+ |[Xpand.XAF.Modules.OneView](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.OneView)|0.0.2
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|1.2.48
+ |[Xpand.XAF.Modules.Reactive.Logger.Hub](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Logger.Hub)|0.0.2
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.0.34
 
 ## Issues-Debugging-Troubleshooting

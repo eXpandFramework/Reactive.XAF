@@ -26,9 +26,9 @@ Get-ChildItem $localPackageSource *.nupkg -Recurse | ForEach-Object {
     $localPackageName = [System.IO.Path]::GetFileNameWithoutExtension($_)
     $r = New-Object System.Text.RegularExpressions.Regex("[\d]{1,2}\.[\d]{1}\.[\d]*(\.[\d]*)?")
     $localPackageVersion = $r.Match($localPackageName).Value
-    "localPackageVersion=$localPackageVersion"
     $localPackageName = $localPackageName.Replace($localPackageVersion, "").Trim(".")
-    "localPackageName=$localPackageName"
+    "localPackage=$localPackageName, $localPackageVersion"
+    
     $package = $packages | Where-Object { $_.Id -eq $localPackageName }
     "publishedPackage=$package"
     if (!$package -or (([version]$package.Version) -lt ([version]$localPackageVersion))) {
