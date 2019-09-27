@@ -46,7 +46,7 @@ jobs:
       ArtifactName: 'Xpand.XAF.Modules.Bin'
 - job: Test
   strategy:
-    parallel: 2
+    parallel: 15
   dependsOn: Build
   pool:
     vmImage: windows-2019
@@ -73,8 +73,7 @@ jobs:
         searchFolder: '$(System.DefaultWorkingDirectory)'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
-          **\*ModelMapp*.dll
-          **\*AutoCom*.dll
+          **\*Tests*.dll
           !**\*Hub*.dll
           !**\*TestAdapter.dll
           !**\obj\**    
