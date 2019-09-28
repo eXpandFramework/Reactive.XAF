@@ -18,7 +18,8 @@ task Release  -depends   Clean, Init, UpdateProjects,  Compile,IndexSources, Cre
 
 Task IndexSources{
     InvokeScript{
-        Get-ChildItem "$PSScriptRoot\bin" Xpand.XAF.Modules.*.pdb| Update-XSymbols -SourcesRoot "$PSScriptRoot" -TargetRoot "https://raw.githubusercontent.com/eXpandFramework/DevExpress.XAF/$branch"
+        $sha=Get-GitLastSha "https://github.com/eXpandFramework/DevExpress.XAF" $branch
+        Get-ChildItem "$PSScriptRoot\bin" Xpand.XAF.Modules.*.pdb| Update-XSymbols -SourcesRoot "$PSScriptRoot" -TargetRoot "https://raw.githubusercontent.com/eXpandFramework/DevExpress.XAF/$sha"
     }
 }
 
