@@ -12,7 +12,6 @@ param(
 $ErrorActionPreference = "Stop"
 
 & "$SourcePath\go.ps1" -InstallModules
-$packageSource = Get-XPackageFeed -Xpand
 if (!(Get-Module VSTeam -ListAvailable)) {
     Install-Module VSTeam -Force
 }
@@ -20,8 +19,7 @@ Set-VSTeamAccount -Account eXpandDevOps -PersonalAccessToken $AzureToken
 $officialPackages=Get-XpandPackages -PackageType XAF -Source Release
 $labPackages=Get-XpandPackages -PackageType XAF -Source Lab
 $DXVersion=Get-DevExpressVersion 
-# $localPackages = Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse | Invoke-Parallel -VariablesToImport "Branch" -Script {
-$localPackages = Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse |foreach {
+$localPackages = Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse |ForEach-Object {
     $name = [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
     $localVersion = Get-XpandVersion -XpandPath $_.DirectoryName -module $name
     $nextVersion = Get-XpandVersion -Next -module $name -OfficialPackages $officialPackages -LabPackages $labPackages -DXVersion $DXVersion

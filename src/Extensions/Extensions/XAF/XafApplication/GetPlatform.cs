@@ -73,7 +73,7 @@ namespace Xpand.Source.Extensions.XAF.XafApplication{
             while (baseType != null &&baseType.Namespace!=null&& (!appNames.Contains(baseType.Name)&&!baseType.Namespace.StartsWith("DevExpress.ExpressApp"))){
                 baseType = baseType.BaseType;
             }
-            return baseType?.Name=="WinApplication"?Platform.Win : Platform.Web;
+            return baseType?.Name=="WebApplication"?Platform.Web : Platform.Win;
         }
     }
 }
