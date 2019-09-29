@@ -59,6 +59,7 @@
     <PackageReference Include="DevExpress.Win.Scheduler" Version="18.2.7" />
     <PackageReference Include="DevExpress.Scheduler.Core" Version="18.2.7" />
     <PackageReference Include="Fasterflect.Xpand" Version="2.0.1" />
+    <PackageReference Include="Xpand.Collections" Version="1.0.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Extensions\Extensions\Xpand.Source.Extensions.csproj" />
@@ -66,12 +67,6 @@
   <ItemGroup>
     <Reference Include="0Harmony">
       <HintPath>..\..\Libs\0Harmony.dll</HintPath>
-    </Reference>
-    <Reference Include="ConcurrentCollections">
-      <HintPath>..\..\Libs\ConcurrentCollections.dll</HintPath>
-    </Reference>
-    <Reference Include="Swordfish.NET.CollectionsV3">
-      <HintPath>..\..\Libs\Swordfish.NET.CollectionsV3.dll</HintPath>
     </Reference>
     <Reference Include="System.Design" />
     <Reference Include="System.Web" />

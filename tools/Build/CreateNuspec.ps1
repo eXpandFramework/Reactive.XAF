@@ -25,7 +25,6 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*Tests*", "*.Source.*" 
         PublishedSource=(Get-PackageFeed -Xpand)
         Release=$Release
         ReadMe=$true
-        LibrariesFolder="$root\src\libs"
         ProjectsRoot=$root
     }
     if (!(Test-Path $uArgs.NuspecFilename)){

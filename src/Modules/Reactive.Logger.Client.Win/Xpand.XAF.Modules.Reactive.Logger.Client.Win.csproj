@@ -39,9 +39,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="MagicOnion">
-      <HintPath>..\..\Libs\MagicOnion.dll</HintPath>
-    </Reference>
     <Reference Include="System.Configuration" />
     <Reference Include="Xpand.XAF.Modules.GridListEditor">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.GridListEditor.dll</HintPath>

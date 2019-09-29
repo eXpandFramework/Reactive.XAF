@@ -26,10 +26,6 @@
     <None Remove="Xpand.XAF.Modules.Reactive.csproj.DotSettings" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="0Harmony, Version=2.0.0.0, Culture=neutral, PublicKeyToken=c52ffed5d5ff0958, processorArchitecture=MSIL">
-      <HintPath>..\..\Libs\0Harmony.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
     <Reference Include="System.Configuration" />
   </ItemGroup>
   <ItemGroup>
@@ -53,5 +49,6 @@
     <PackageReference Include="System.Interactive" Version="3.2.0" />
     <PackageReference Include="System.Reactive" Version="4.1.6" />
     <PackageReference Include="Fasterflect.Xpand" Version="2.0.1" />
+    <PackageReference Include="Xpand.Patcher" Version="1.0.1" />
   </ItemGroup>
 </Project>

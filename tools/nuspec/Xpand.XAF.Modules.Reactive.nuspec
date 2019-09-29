@@ -17,13 +17,13 @@
       <dependency id="Fasterflect.Xpand" version="2.0.1" />
       <dependency id="System.Interactive" version="3.2.0" />
       <dependency id="System.Reactive" version="4.1.6" />
+      <dependency id="Xpand.Patcher" version="1.0.1" />
       <dependency id="Xpand.VersionConverter" version="1.0.34.0" />
     </dependencies>
   </metadata>
   <files>
     <file src="Xpand.XAF.Modules.Reactive.dll" target="lib\net461\Xpand.XAF.Modules.Reactive.dll" />
     <file src="Xpand.XAF.Modules.Reactive.pdb" target="lib\net461\Xpand.XAF.Modules.Reactive.pdb" />
-    <file src="..\src\libs\0Harmony.dll" target="lib\net461\0Harmony.dll" />
     <file src="Readme.txt" target="" />
   </files>
 </package>

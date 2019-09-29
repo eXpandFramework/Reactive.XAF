@@ -14,12 +14,6 @@
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ConcurrentCollections">
-      <HintPath>..\..\Libs\ConcurrentCollections.dll</HintPath>
-    </Reference>
-    <Reference Include="Swordfish.NET.CollectionsV3">
-      <HintPath>..\..\Libs\Swordfish.NET.CollectionsV3.dll</HintPath>
-    </Reference>
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Windows" />
     <Reference Include="System.Windows.Forms" />
@@ -63,6 +57,7 @@
     <PackageReference Include="DevExpress.ExpressApp" Version="18.2.7" />
     <PackageReference Include="System.Reactive" Version="4.1.6" />
     <PackageReference Include="Fasterflect.Xpand" Version="2.0.1" />
+    <PackageReference Include="Xpand.Collections" Version="1.0.1" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />

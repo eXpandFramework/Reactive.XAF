@@ -20,6 +20,7 @@ The module **ships with 82 predefined maps** for all the common types such as Gi
       <dependency id="Mono.Cecil" version="0.11.0" />
       <dependency id="System.Interactive" version="3.2.0" />
       <dependency id="System.Reactive" version="4.1.6" />
+      <dependency id="Xpand.Collections" version="1.0.1" />
       <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.48.0" />
       <dependency id="Xpand.VersionConverter" version="1.0.34.0" />
     </dependencies>
@@ -27,8 +28,6 @@ The module **ships with 82 predefined maps** for all the common types such as Gi
   <files>
     <file src="Xpand.XAF.Modules.ModelMapper.dll" target="lib\net461\Xpand.XAF.Modules.ModelMapper.dll" />
     <file src="Xpand.XAF.Modules.ModelMapper.pdb" target="lib\net461\Xpand.XAF.Modules.ModelMapper.pdb" />
-    <file src="..\src\libs\ConcurrentCollections.dll" target="lib\net461\ConcurrentCollections.dll" />
-    <file src="..\src\libs\Swordfish.NET.CollectionsV3.dll" target="lib\net461\Swordfish.NET.CollectionsV3.dll" />
     <file src="Readme.txt" target="" />
   </files>
 </package>
