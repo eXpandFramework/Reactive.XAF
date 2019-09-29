@@ -28,9 +28,6 @@
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="Fasterflect.Netstandard">
-      <HintPath>..\..\Libs\Fasterflect.Netstandard.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\Extensions\Extensions\FunctionOperators\IsAssignableFromOperator.cs" Link="LinkedFiles\IsAssignableFromOperator.cs" />
@@ -65,6 +62,7 @@
     <PackageReference Include="DevExpress.Data" Version="18.2.7" />
     <PackageReference Include="DevExpress.ExpressApp" Version="18.2.7" />
     <PackageReference Include="System.Reactive" Version="4.1.6" />
+    <PackageReference Include="Fasterflect.Xpand" Version="2.0.1" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />

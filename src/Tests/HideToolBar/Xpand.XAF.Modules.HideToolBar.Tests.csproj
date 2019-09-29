@@ -19,9 +19,6 @@
     <None Remove="MasterDetail\**" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Fasterflect.Netstandard">
-      <HintPath>..\..\Libs\Fasterflect.Netstandard.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Grpc.Core" Version="2.23.0" />
@@ -38,6 +35,7 @@
     <PackageReference Include="DevExpress.Win" Version="18.2.7" />
     <PackageReference Include="DevExpress.Data" Version="18.2.7" />
     <PackageReference Include="DevExpress.Xpo" Version="18.2.7" />
+    <PackageReference Include="Fasterflect.Xpand" Version="2.0.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Extensions\Extensions\Xpand.Source.Extensions.csproj" />

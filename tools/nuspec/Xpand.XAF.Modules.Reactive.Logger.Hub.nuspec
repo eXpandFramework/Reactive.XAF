@@ -19,6 +19,7 @@ The module uses the next two strategies:
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Reactive.Logger.Hub</tags>
     <dependencies>
       <dependency id="akarnokd.reactive_extensions" version="0.0.27-alpha" />
+      <dependency id="Fasterflect.Xpand" version="2.0.1" />
       <dependency id="MagicOnion" version="2.4.0" />
       <dependency id="Rx.Net.Plus" version="1.1.10" />
       <dependency id="system.buffers" version="4.5.0" />
@@ -32,7 +33,6 @@ The module uses the next two strategies:
   <files>
     <file src="Xpand.XAF.Modules.Reactive.Logger.Hub.dll" target="lib\net461\Xpand.XAF.Modules.Reactive.Logger.Hub.dll" />
     <file src="Xpand.XAF.Modules.Reactive.Logger.Hub.pdb" target="lib\net461\Xpand.XAF.Modules.Reactive.Logger.Hub.pdb" />
-    <file src="..\src\libs\Fasterflect.Netstandard.dll" target="lib\net461\Fasterflect.Netstandard.dll" />
     <file src="Readme.txt" target="" />
   </files>
 </package>

@@ -14,6 +14,7 @@
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Reactive.Logger.Client.Win</tags>
     <dependencies>
+      <dependency id="Fasterflect.Xpand" version="2.0.1" />
       <dependency id="MagicOnion" version="2.4.0" />
       <dependency id="System.Buffers" version="4.5.0" />
       <dependency id="System.Collections.Immutable" version="1.5.0" />
@@ -29,7 +30,6 @@
     <file src="Xpand.XAF.Modules.Reactive.Logger.Client.Win.exe" target="lib\net461\Xpand.XAF.Modules.Reactive.Logger.Client.Win.exe" />
     <file src="Xpand.XAF.Modules.Reactive.Logger.Client.Win.pdb" target="lib\net461\Xpand.XAF.Modules.Reactive.Logger.Client.Win.pdb" />
     <file src="..\src\libs\MagicOnion.dll" target="lib\net461\MagicOnion.dll" />
-    <file src="..\src\libs\Fasterflect.Netstandard.dll" target="lib\net461\Fasterflect.Netstandard.dll" />
     <file src="Readme.txt" target="" />
   </files>
 </package>

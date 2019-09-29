@@ -14,6 +14,7 @@
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  GridListEditor</tags>
     <dependencies>
+      <dependency id="Fasterflect.Xpand" version="2.0.1" />
       <dependency id="System.Reactive" version="4.1.6" />
       <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.48.0" />
       <dependency id="Xpand.VersionConverter" version="1.0.34.0" />
@@ -22,7 +23,6 @@
   <files>
     <file src="Xpand.XAF.Modules.GridListEditor.dll" target="lib\net461\Xpand.XAF.Modules.GridListEditor.dll" />
     <file src="Xpand.XAF.Modules.GridListEditor.pdb" target="lib\net461\Xpand.XAF.Modules.GridListEditor.pdb" />
-    <file src="..\src\libs\Fasterflect.Netstandard.dll" target="lib\net461\Fasterflect.Netstandard.dll" />
     <file src="Readme.txt" target="" />
   </files>
 </package>

@@ -43,9 +43,6 @@
       <HintPath>..\..\Libs\MagicOnion.dll</HintPath>
     </Reference>
     <Reference Include="System.Configuration" />
-    <Reference Include="Fasterflect.Netstandard">
-      <HintPath>..\..\Libs\Fasterflect.Netstandard.dll</HintPath>
-    </Reference>
     <Reference Include="Xpand.XAF.Modules.GridListEditor">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.GridListEditor.dll</HintPath>
     </Reference>
@@ -78,5 +75,6 @@
     <PackageReference Include="System.Buffers" Version="4.5.0" />
     <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
     <PackageReference Include="System.Reactive" Version="4.1.6" />
+    <PackageReference Include="Fasterflect.Xpand" Version="2.0.1" />
   </ItemGroup>
 </Project>

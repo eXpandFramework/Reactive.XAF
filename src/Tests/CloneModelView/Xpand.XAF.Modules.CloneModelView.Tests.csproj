@@ -40,6 +40,7 @@
     <PackageReference Include="DevExpress.Data" Version="18.2.7" />
     <PackageReference Include="DevExpress.Xpo" Version="18.2.7" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.3" />
+    <PackageReference Include="Fasterflect.Xpand" Version="2.0.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Extensions\Extensions\Xpand.Source.Extensions.csproj" />
@@ -53,9 +54,6 @@
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
-    </Reference>
-    <Reference Include="Fasterflect.Netstandard">
-      <HintPath>..\..\Libs\Fasterflect.Netstandard.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

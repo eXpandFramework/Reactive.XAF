@@ -35,6 +35,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |**DevExpress.ExpressApp**|**Any**
  |**DevExpress.Xpo**|**Any**
 |akarnokd.reactive_extensions|0.0.27-alpha
+ |Fasterflect.Xpand|2.0.1
  |MagicOnion|2.4.0
  |Rx.Net.Plus|1.1.10
  |system.buffers|4.5.0

@@ -34,7 +34,8 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |**DevExpress.ExpressApp.Win**|**Any**
  |**DevExpress.ExpressApp.Xpo**|**Any**
  |**DevExpress.Xpo**|**Any**
-|MagicOnion|2.4.0
+|Fasterflect.Xpand|2.0.1
+ |MagicOnion|2.4.0
  |System.Buffers|4.5.0
  |System.Collections.Immutable|1.5.0
  |System.Reactive|4.1.6

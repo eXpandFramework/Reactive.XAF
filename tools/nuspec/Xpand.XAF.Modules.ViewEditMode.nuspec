@@ -18,6 +18,7 @@ The module uses the next two strategies:
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  ViewEditMode</tags>
     <dependencies>
+      <dependency id="Fasterflect.Xpand" version="2.0.1" />
       <dependency id="System.Reactive" version="4.1.6" />
       <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.48.0" />
       <dependency id="Xpand.VersionConverter" version="1.0.34.0" />
@@ -26,7 +27,6 @@ The module uses the next two strategies:
   <files>
     <file src="Xpand.XAF.Modules.ViewEditMode.dll" target="lib\net461\Xpand.XAF.Modules.ViewEditMode.dll" />
     <file src="Xpand.XAF.Modules.ViewEditMode.pdb" target="lib\net461\Xpand.XAF.Modules.ViewEditMode.pdb" />
-    <file src="..\src\libs\Fasterflect.Netstandard.dll" target="lib\net461\Fasterflect.Netstandard.dll" />
     <file src="Readme.txt" target="" />
   </files>
 </package>
