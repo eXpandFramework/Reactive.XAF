@@ -32,7 +32,7 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*Tests*", "*.Source.*" 
         & (Get-NugetPath) spec $_.BaseName
     }
     if ($Release){
-        $uArgs.PublishedSource=(Get-Pack    ageFeed -Nuget)
+        $uArgs.PublishedSource=(Get-PackageFeed -Nuget)
     }
     
     Update-Nuspec @uArgs 

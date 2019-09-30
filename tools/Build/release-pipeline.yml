@@ -39,7 +39,7 @@ jobs:
     inputs:
       pwsh: true
       targetType: filePath
-      filePath: .\tools\build\lab-pipeline.ps1 
+      filePath: .\tools\build\release-pipeline.ps1 
       arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(GitHubUserName) $(GitHubPass) $(DXApiFeed) $(build.artifactstagingdirectory) $(System.DefaultworkingDirectory)\bin $(AzureToken)
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Packages'
