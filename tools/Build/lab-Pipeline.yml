@@ -15,6 +15,12 @@ trigger:
         - src/Modules/Reactive/Readme.md
         - src/Modules/SuppressConfirmation/Readme.md
         - src/Modules/ViewEditMode/Readme.md
+        - src/Modules/RefreshView/Readme.md
+        - src/Modules/GridListEditor/Readme.md
+        - src/Modules/OneView/Readme.md
+        - src/Modules/Reactive.Logger/Readme.md
+        - src/Modules/Reactive.Logger.Hub/Readme.md
+        - src/Modules/Reactive.Logger.Client.Win/Readme.md
         - README.md
     branches:
       include:
@@ -57,16 +63,6 @@ jobs:
         buildType: 'current'
         downloadType: 'specific'
         downloadPath: '$(System.DefaultworkingDirectory)'
-    # - task: DownloadBuildArtifacts@0
-    #   inputs:
-    #     buildType: 'specific'
-    #     project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
-    #     pipeline: '23'
-    #     buildVersionToDownload: 'latestFromBranch'
-    #     branchName: 'refs/heads/lab'
-    #     downloadType: 'single'
-    #     downloadPath: '$(System.DefaultWorkingDirectory)'
-    #     artifactName: 'Xpand.XAF.Modules.Bin'
     - task: VSTest@2
       displayName: 'VsTest - testAssemblies'
       inputs:
@@ -103,36 +99,3 @@ jobs:
       targetType: filePath
       filePath: .\tools\build\publishNugets.ps1 
       arguments: $(Build.SourceBranchName) '$(System.DefaultWorkingDirectory)' $(NugetApiKey) '$(System.DefaultWorkingDirectory)'
-# - task: VSTest@2
-#   displayName: 'VsTest - testAssemblies'
-#   inputs:
-#     searchFolder: '$(System.DefaultWorkingDirectory)'
-#     testSelector: 'testAssemblies'
-#     testAssemblyVer2: |
-#       **\*Tests*.dll
-#       !**\*TestAdapter.dll
-#       !**\obj\**
-#     runInParallel: false
-#     diagnosticsEnabled: true
-#     runTestsInIsolation: true
-#     codeCoverageEnabled: true
-#     rerunFailedTests: true 
-#     rerunMaxAttempts: 3
-#     collectDumpOn: never
-# - task: PowerShell@2
-#   displayName: CheckTests
-#   inputs:
-#     pwsh: true
-#     targetType: filePath
-#     filePath: .\tools\build\check-tests.ps1
-#     arguments: $(AzureToken) $(Build.DefinitionName) $(Build.BuildNumber)
-# - powershell: | 
-
-# - task: PowerShell@2
-#   displayName: Publish
-#   inputs:
-#     pwsh: true
-#     targetType: filePath
-#     filePath: .\tools\build\publishNugets.ps1 
-#     arguments: $(Build.SourceBranchName) $(System.artifactstagingdirectory) $(NugetApiKey) 
-
