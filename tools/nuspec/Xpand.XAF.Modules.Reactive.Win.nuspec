@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Reactive.Win</id>
-    <version>0.0.2.0</version>
+    <version>0.0.5.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -14,11 +14,11 @@
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Reactive.Win</tags>
     <dependencies>
-      <dependency id="Fasterflect.Xpand" version="2.0.1" />
+      <dependency id="Fasterflect.Xpand" version="2.0.6" />
       <dependency id="System.Interactive" version="3.2.0" />
       <dependency id="System.Reactive" version="4.1.6" />
       <dependency id="Xpand.Patcher" version="1.0.1" />
-      <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.48.0" />
+      <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.51.0" />
       <dependency id="Xpand.VersionConverter" version="1.0.34.0" />
     </dependencies>
   </metadata>

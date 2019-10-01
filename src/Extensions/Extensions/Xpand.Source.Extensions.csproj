@@ -28,7 +28,7 @@
     <PackageReference Include="DevExpress.Printing.Core" Version="18.2.7" />
     <PackageReference Include="DevExpress.Utils" Version="18.2.7" />
     <PackageReference Include="DevExpress.Xpo" Version="18.2.7" />
-    <PackageReference Include="Fasterflect.Xpand" Version="2.0.1" />
+    <PackageReference Include="Fasterflect.Xpand" Version="2.0.6" />
     <PackageReference Include="Xpand.Patcher" Version="1.0.1" />
   </ItemGroup>
 </Project>

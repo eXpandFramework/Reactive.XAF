@@ -15,7 +15,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp**|**Any**
-|Fasterflect.Xpand|2.0.1
+|Fasterflect.Xpand|2.0.6
  |System.Interactive|3.2.0
  |System.Reactive|4.1.6
  |Xpand.Patcher|1.0.1
