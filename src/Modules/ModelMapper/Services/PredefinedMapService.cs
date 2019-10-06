@@ -23,6 +23,7 @@ using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services{
     public static class PredefinedMapService{
+        private static Assembly _xtraLayoutAssembly;
         private static Assembly _xafWinAssembly;
         private static Assembly _xafTreeListWinAssembly;
         private static Assembly _dxTreeListWinAssembly;
@@ -70,6 +71,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 _xafWinAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.Win{versionSuffix}");
                 _xafPivotGridWinAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.PivotGrid.Win{versionSuffix}");
                 _xtraRichEditAssembly = assemblies.GetAssembly($"DevExpress.XtraRichEdit{versionSuffix}");
+                _xtraLayoutAssembly = assemblies.GetAssembly($"DevExpress.XtraLayout{versionSuffix}");
                 _xafSchedulerControlAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.Scheduler.Win{versionSuffix}");
                 _xafChartWinAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.Chart.Win{versionSuffix}");
                 _xafTreeListWinAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.TreeListEditors.Win{versionSuffix}");
@@ -288,7 +290,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         public static IModelNode GetNode(this IModelNode modelNode, PredefinedMap predefinedMap){
             var modelListType = modelNode.ModelListType();
             var typeToMap = predefinedMap.TypeToMap();
-            if (modelListType != null){
+            if (modelListType != null&& !(modelNode is IModelLayoutGroup)){
                 var modelNodes = modelNode.Nodes().Where(node => node.GetType()
                     .GetInterfaces().Any(type => {
                         var mapLinkAttribute = type.Attribute<ModelMapLinkAttribute>();
@@ -459,6 +461,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             else if (predefinedMap==PredefinedMap.ASPxScheduler){
                 assembly = _dxScedulerWebAssembly;
             }
+            else if (predefinedMap==PredefinedMap.LayoutControlGroup){
+                assembly = _xtraLayoutAssembly;
+            }
             else if (new[]{PredefinedMap.TreeList,PredefinedMap.TreeListColumn}.Any(map => map==predefinedMap)){
                 assembly = _dxTreeListWinAssembly;
             }
@@ -492,6 +497,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 return "DevExpress.XtraRichEdit.RichEditControl";
             if (predefinedMap == PredefinedMap.XafLayoutControl)
                 return "DevExpress.ExpressApp.Win.Layout.XafLayoutControl";
+            if (predefinedMap == PredefinedMap.LayoutControlGroup)
+                return "DevExpress.XtraLayout.LayoutControlGroup";
             if (predefinedMap == PredefinedMap.SplitContainerControl)
                 return "DevExpress.XtraEditors.SplitContainerControl";
             if (predefinedMap == PredefinedMap.DashboardDesigner)
@@ -567,142 +574,141 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         }
 
         public static ModelMapperConfiguration GetModelMapperConfiguration(this PredefinedMap predefinedMap){
-            if (true){
-                if (new[]{PredefinedMap.GridView,PredefinedMap.GridColumn}.Any(map => map==predefinedMap)){
-//                    _xafWinAssembly=AppDomain.CurrentDomain.GetAssemblies().First(assembly => assembly.GetName().Name==$"DevExpress.ExpressApp.Win{_versionSuffix}");
-//                    _gridViewAssembly=AppDomain.CurrentDomain.GetAssemblies().First(assembly => assembly.GetName().Name==$"DevExpress.XtraGrid{_versionSuffix}");
-                    CheckRequiredParameters(nameof(_xafWinAssembly), nameof(_gridViewAssembly));
-                    return GetListViewConfiguration(predefinedMap,_xafWinAssembly, _gridViewAssembly, "DevExpress.ExpressApp.Win.Editors.GridListEditor",
-                        PredefinedMap.GridView.GetTypeName(),PredefinedMap.GridColumn.GetTypeName() );
+            if (new[]{PredefinedMap.GridView,PredefinedMap.GridColumn}.Any(map => map==predefinedMap)){
+                CheckRequiredParameters(nameof(_xafWinAssembly), nameof(_gridViewAssembly));
+                return GetListViewConfiguration(predefinedMap,_xafWinAssembly, _gridViewAssembly, "DevExpress.ExpressApp.Win.Editors.GridListEditor",
+                    PredefinedMap.GridView.GetTypeName(),PredefinedMap.GridColumn.GetTypeName() );
+            }
+            if (new[]{PredefinedMap.TreeList,PredefinedMap.TreeListColumn}.Any(map => map==predefinedMap)){
+                CheckRequiredParameters(nameof(_xafTreeListWinAssembly), nameof(_dxTreeListWinAssembly));
+                var listViewConfiguration = GetListViewConfiguration(predefinedMap,_xafTreeListWinAssembly, _dxTreeListWinAssembly, "DevExpress.ExpressApp.TreeListEditors.Win.TreeListEditor",
+                    PredefinedMap.TreeList.GetTypeName(),PredefinedMap.TreeListColumn.GetTypeName() );
+                if (predefinedMap == PredefinedMap.TreeList){
+                    listViewConfiguration.TargetInterfaceTypes.Add(typeof(IModelRootNavigationItems));
+                    listViewConfiguration.VisibilityCriteria =
+                        $"{VisibilityCriteriaLeftOperand.PropertyExists.GetVisibilityCriteria("EditorType", "Parent")} And {listViewConfiguration.VisibilityCriteria}";
                 }
-                if (new[]{PredefinedMap.TreeList,PredefinedMap.TreeListColumn}.Any(map => map==predefinedMap)){
-                    CheckRequiredParameters(nameof(_xafTreeListWinAssembly), nameof(_dxTreeListWinAssembly));
-                    var listViewConfiguration = GetListViewConfiguration(predefinedMap,_xafTreeListWinAssembly, _dxTreeListWinAssembly, "DevExpress.ExpressApp.TreeListEditors.Win.TreeListEditor",
-                        PredefinedMap.TreeList.GetTypeName(),PredefinedMap.TreeListColumn.GetTypeName() );
-                    if (predefinedMap == PredefinedMap.TreeList){
-                        listViewConfiguration.TargetInterfaceTypes.Add(typeof(IModelRootNavigationItems));
-                        listViewConfiguration.VisibilityCriteria =
-                            $"{VisibilityCriteriaLeftOperand.PropertyExists.GetVisibilityCriteria("EditorType", "Parent")} And {listViewConfiguration.VisibilityCriteria}";
-                    }
-                    return listViewConfiguration;
-                }
-                if (new[]{PredefinedMap.SchedulerControl}.Any(map => map==predefinedMap)){
-                    CheckRequiredParameters(nameof(_xafSchedulerControlAssembly), nameof(_schedulerWinAssembly));
-                    return GetListViewConfiguration(predefinedMap,_xafSchedulerControlAssembly, _schedulerWinAssembly, "DevExpress.ExpressApp.Scheduler.Win.SchedulerListEditor",
-                        PredefinedMap.SchedulerControl.GetTypeName(),null );
-                }
-                if (new[]{PredefinedMap.PivotGridControl,PredefinedMap.PivotGridField}.Any(map => map==predefinedMap)){
-                    CheckRequiredParameters(nameof(_xafPivotGridWinAssembly), nameof(_pivotGridControlAssembly));
-                    return GetListViewConfiguration(predefinedMap,_xafPivotGridWinAssembly, _pivotGridControlAssembly, "DevExpress.ExpressApp.PivotGrid.Win.PivotGridListEditor",
-                        PredefinedMap.PivotGridControl.GetTypeName(),PredefinedMap.PivotGridField.GetTypeName() );
-                }
-                if (new[]{PredefinedMap.ChartControl }.Any(map => map==predefinedMap)){
-                    CheckRequiredParameters(nameof(_xafChartWinAssembly), nameof(_chartUIControlAssembly));
-                    var modelMapperConfiguration = GetListViewConfiguration(predefinedMap,_xafChartWinAssembly, _chartUIControlAssembly, "DevExpress.ExpressApp.Chart.Win.ChartListEditor",
-                        PredefinedMap.ChartControl.GetTypeName(),null );
-                    var chartListEditorVisibilityCriteria = ListViewVisibilityCriteria(_xafChartWinAssembly.GetType("DevExpress.ExpressApp.Chart.Win.ChartListEditor"));
-                    var pivotListEditorVisibilityCriteria = ListViewVisibilityCriteria(_xafPivotGridWinAssembly.GetType("DevExpress.ExpressApp.PivotGrid.Win.PivotGridListEditor"));
-                    modelMapperConfiguration.VisibilityCriteria=CriteriaOperator.Parse($"{chartListEditorVisibilityCriteria} OR {pivotListEditorVisibilityCriteria}").ToString();
-                    return modelMapperConfiguration;
-                }
-                if (new[]{PredefinedMap.AdvBandedGridView,PredefinedMap.BandedGridColumn}.Any(map => map==predefinedMap)){
-                    CheckRequiredParameters(nameof(_xafWinAssembly), nameof(_gridViewAssembly));
-                    return GetListViewConfiguration(predefinedMap,_xafWinAssembly, _gridViewAssembly, "DevExpress.ExpressApp.Win.Editors.GridListEditor",
-                        PredefinedMap.AdvBandedGridView.GetTypeName(), PredefinedMap.BandedGridColumn.GetTypeName());
-                }
-                if (predefinedMap.IsChartControlDiagram()){
-                    CheckRequiredParameters(nameof(_xafChartWinAssembly), nameof(_chartControlAssembly));
-                    return GetListViewConfiguration(predefinedMap,_xafChartWinAssembly, _chartControlAssembly, "DevExpress.ExpressApp.Chart.Win.ChartListEditor",
-                        PredefinedMap.ChartControl.GetTypeName(), predefinedMap.GetTypeName());
-                }
-                if (new[]{PredefinedMap.LayoutView,PredefinedMap.LayoutViewColumn}.Any(map => map==predefinedMap)){
-                    CheckRequiredParameters(nameof(_xpandWinAssembly), nameof(_gridViewAssembly));
-                    return GetListViewConfiguration(predefinedMap,_xpandWinAssembly, _gridViewAssembly, _layoutViewListEditorTypeName,
-                        PredefinedMap.LayoutView.GetTypeName(), PredefinedMap.LayoutViewColumn.GetTypeName());
-                }
-                if (new[]{PredefinedMap.XafLayoutControl}.Any(map => map==predefinedMap)){
-                    CheckRequiredParameters(nameof(_xafWinAssembly), nameof(_xafWinAssembly));
-                    return new ModelMapperConfiguration(predefinedMap.TypeToMap(), typeof(IModelDetailView)){ImageName = predefinedMap.Attribute<ImageNameAttribute>().ImageName};
-                }
-                if (new[]{PredefinedMap.SplitContainerControl, }.Any(map => map==predefinedMap)){
-                    CheckRequiredParameters(nameof(_dxWinEditorsAssembly), nameof(_dxWinEditorsAssembly));
-                    return new ModelMapperConfiguration(predefinedMap.TypeToMap(), typeof(IModelListViewSplitLayout)){ImageName = predefinedMap.Attribute<ImageNameAttribute>().ImageName};
-                }
-                if (new[]{PredefinedMap.LabelControl, }.Any(map => map==predefinedMap)){
-                    CheckRequiredParameters(nameof(_dxWinEditorsAssembly), nameof(_dxWinEditorsAssembly));
-                    return new ModelMapperConfiguration(predefinedMap.TypeToMap(), typeof(IModelPropertyEditor));
-                }
-                if (new[]{PredefinedMap.DashboardDesigner,PredefinedMap.DashboardViewer}.Any(map => map==predefinedMap)){
-                    CheckRequiredParameters(nameof(_dashboardWinAssembly), nameof(_dashboardWinAssembly));
-                    return new ModelMapperConfiguration(predefinedMap.TypeToMap(),typeof(IModelPropertyEditor)){ImageName = predefinedMap.Attribute<ImageNameAttribute>().ImageName};
-                }
-                if (new[]{PredefinedMap.RichEditControl}.Any(map => map==predefinedMap)){
-                    CheckRequiredParameters(nameof(_xtraRichEditAssembly), nameof(_xtraRichEditAssembly));
-                    return new ModelMapperConfiguration(predefinedMap.TypeToMap(), typeof(IModelPropertyEditor)){ImageName = predefinedMap.Attribute<ImageNameAttribute>().ImageName};
-                }
-
-                if (predefinedMap.IsRepositoryItem()){
-                    var editorsAssembly = _dxWinEditorsAssembly;
-                    var controlAssemblyName = nameof(_dxWinEditorsAssembly);
-                    if (new[]{
-                        PredefinedMap.RepositoryItemRtfEditEx, PredefinedMap.RepositoryItemLookupEdit,PredefinedMap.RepositoryItemProtectedContentTextEdit, 
-                        PredefinedMap.RepositoryItemObjectEdit, PredefinedMap.RepositoryFieldPicker,
-                        PredefinedMap.RepositoryItemPopupExpressionEdit, PredefinedMap.RepositoryItemPopupCriteriaEdit
-                    }.Contains(predefinedMap)){
-                        controlAssemblyName = nameof(_xafWinAssembly);
-                        editorsAssembly = _xafWinAssembly;
-                    }
-                    CheckRequiredParameters(nameof(_xafWinAssembly), controlAssemblyName);
-                    var typeToMap = editorsAssembly.GetType(predefinedMap.GetTypeName());
-                    if (typeToMap == null){
-                        throw new NullReferenceException(predefinedMap.ToString());
-                    }
-                    return new ModelMapperConfiguration(typeToMap, typeof(IModelPropertyEditor), typeof(IModelColumn));
-                }
+                return listViewConfiguration;
+            }
+            if (new[]{PredefinedMap.SchedulerControl}.Any(map => map==predefinedMap)){
+                CheckRequiredParameters(nameof(_xafSchedulerControlAssembly), nameof(_schedulerWinAssembly));
+                return GetListViewConfiguration(predefinedMap,_xafSchedulerControlAssembly, _schedulerWinAssembly, "DevExpress.ExpressApp.Scheduler.Win.SchedulerListEditor",
+                    PredefinedMap.SchedulerControl.GetTypeName(),null );
+            }
+            if (new[]{PredefinedMap.PivotGridControl,PredefinedMap.PivotGridField}.Any(map => map==predefinedMap)){
+                CheckRequiredParameters(nameof(_xafPivotGridWinAssembly), nameof(_pivotGridControlAssembly));
+                return GetListViewConfiguration(predefinedMap,_xafPivotGridWinAssembly, _pivotGridControlAssembly, "DevExpress.ExpressApp.PivotGrid.Win.PivotGridListEditor",
+                    PredefinedMap.PivotGridControl.GetTypeName(),PredefinedMap.PivotGridField.GetTypeName() );
+            }
+            if (new[]{PredefinedMap.ChartControl }.Any(map => map==predefinedMap)){
+                CheckRequiredParameters(nameof(_xafChartWinAssembly), nameof(_chartUIControlAssembly));
+                var modelMapperConfiguration = GetListViewConfiguration(predefinedMap,_xafChartWinAssembly, _chartUIControlAssembly, "DevExpress.ExpressApp.Chart.Win.ChartListEditor",
+                    PredefinedMap.ChartControl.GetTypeName(),null );
+                var chartListEditorVisibilityCriteria = ListViewVisibilityCriteria(_xafChartWinAssembly.GetType("DevExpress.ExpressApp.Chart.Win.ChartListEditor"));
+                var pivotListEditorVisibilityCriteria = ListViewVisibilityCriteria(_xafPivotGridWinAssembly.GetType("DevExpress.ExpressApp.PivotGrid.Win.PivotGridListEditor"));
+                modelMapperConfiguration.VisibilityCriteria=CriteriaOperator.Parse($"{chartListEditorVisibilityCriteria} OR {pivotListEditorVisibilityCriteria}").ToString();
+                return modelMapperConfiguration;
+            }
+            if (new[]{PredefinedMap.AdvBandedGridView,PredefinedMap.BandedGridColumn}.Any(map => map==predefinedMap)){
+                CheckRequiredParameters(nameof(_xafWinAssembly), nameof(_gridViewAssembly));
+                return GetListViewConfiguration(predefinedMap,_xafWinAssembly, _gridViewAssembly, "DevExpress.ExpressApp.Win.Editors.GridListEditor",
+                    PredefinedMap.AdvBandedGridView.GetTypeName(), PredefinedMap.BandedGridColumn.GetTypeName());
+            }
+            if (predefinedMap.IsChartControlDiagram()){
+                CheckRequiredParameters(nameof(_xafChartWinAssembly), nameof(_chartControlAssembly));
+                return GetListViewConfiguration(predefinedMap,_xafChartWinAssembly, _chartControlAssembly, "DevExpress.ExpressApp.Chart.Win.ChartListEditor",
+                    PredefinedMap.ChartControl.GetTypeName(), predefinedMap.GetTypeName());
+            }
+            if (new[]{PredefinedMap.LayoutView,PredefinedMap.LayoutViewColumn}.Any(map => map==predefinedMap)){
+                CheckRequiredParameters(nameof(_xpandWinAssembly), nameof(_gridViewAssembly));
+                return GetListViewConfiguration(predefinedMap,_xpandWinAssembly, _gridViewAssembly, _layoutViewListEditorTypeName,
+                    PredefinedMap.LayoutView.GetTypeName(), PredefinedMap.LayoutViewColumn.GetTypeName());
+            }
+            if (new[]{PredefinedMap.XafLayoutControl }.Any(map => map==predefinedMap)){
+                CheckRequiredParameters(nameof(_xafWinAssembly), nameof(_xafWinAssembly));
+                return new ModelMapperConfiguration(predefinedMap.TypeToMap(), typeof(IModelDetailView)){ImageName = predefinedMap.Attribute<ImageNameAttribute>().ImageName};
+            }
+            if (new[]{PredefinedMap.LayoutControlGroup, }.Any(map => map==predefinedMap)){
+                CheckRequiredParameters(nameof(_xtraLayoutAssembly), nameof(_xtraLayoutAssembly));
+                LayoutGroupControlService.Connect().Subscribe();
+                return new ModelMapperConfiguration(predefinedMap.TypeToMap(), typeof(IModelLayoutGroup)){ImageName = predefinedMap.Attribute<ImageNameAttribute>().ImageName};
+            }
+            if (new[]{PredefinedMap.SplitContainerControl, }.Any(map => map==predefinedMap)){
+                CheckRequiredParameters(nameof(_dxWinEditorsAssembly), nameof(_dxWinEditorsAssembly));
+                return new ModelMapperConfiguration(predefinedMap.TypeToMap(), typeof(IModelListViewSplitLayout)){ImageName = predefinedMap.Attribute<ImageNameAttribute>().ImageName};
+            }
+            if (new[]{PredefinedMap.LabelControl, }.Any(map => map==predefinedMap)){
+                CheckRequiredParameters(nameof(_dxWinEditorsAssembly), nameof(_dxWinEditorsAssembly));
+                return new ModelMapperConfiguration(predefinedMap.TypeToMap(), typeof(IModelPropertyEditor));
+            }
+            if (new[]{PredefinedMap.DashboardDesigner,PredefinedMap.DashboardViewer}.Any(map => map==predefinedMap)){
+                CheckRequiredParameters(nameof(_dashboardWinAssembly), nameof(_dashboardWinAssembly));
+                return new ModelMapperConfiguration(predefinedMap.TypeToMap(),typeof(IModelPropertyEditor)){ImageName = predefinedMap.Attribute<ImageNameAttribute>().ImageName};
+            }
+            if (new[]{PredefinedMap.RichEditControl}.Any(map => map==predefinedMap)){
+                CheckRequiredParameters(nameof(_xtraRichEditAssembly), nameof(_xtraRichEditAssembly));
+                return new ModelMapperConfiguration(predefinedMap.TypeToMap(), typeof(IModelPropertyEditor)){ImageName = predefinedMap.Attribute<ImageNameAttribute>().ImageName};
             }
 
-            if (ModelExtendingService.Platform==Platform.Web){
-                if (new[]{PredefinedMap.ASPxDashboard}.Any(map => map==predefinedMap)){
-                    CheckRequiredParameters(nameof(_dashboardWebWebFormsAssembly), nameof(_dashboardWebWebFormsAssembly));
-                    return new ModelMapperConfiguration(predefinedMap.TypeToMap(),typeof(IModelPropertyEditor));
+            if (predefinedMap.IsRepositoryItem()){
+                var editorsAssembly = _dxWinEditorsAssembly;
+                var controlAssemblyName = nameof(_dxWinEditorsAssembly);
+                if (new[]{
+                    PredefinedMap.RepositoryItemRtfEditEx, PredefinedMap.RepositoryItemLookupEdit,PredefinedMap.RepositoryItemProtectedContentTextEdit, 
+                    PredefinedMap.RepositoryItemObjectEdit, PredefinedMap.RepositoryFieldPicker,
+                    PredefinedMap.RepositoryItemPopupExpressionEdit, PredefinedMap.RepositoryItemPopupCriteriaEdit
+                }.Contains(predefinedMap)){
+                    controlAssemblyName = nameof(_xafWinAssembly);
+                    editorsAssembly = _xafWinAssembly;
                 }
-                if (new[]{PredefinedMap.ASPxGridView,PredefinedMap.GridViewDataColumn}.Any(map => map==predefinedMap)){
-                    CheckRequiredParameters(nameof(_xafWebAssembly), nameof(_dxWebAssembly));
-                    return GetListViewConfiguration(predefinedMap,_xafWebAssembly, _dxWebAssembly, "DevExpress.ExpressApp.Web.Editors.ASPx.ASPxGridListEditor",
-                        PredefinedMap.ASPxGridView.GetTypeName(),PredefinedMap.GridViewDataColumn.GetTypeName());
+                CheckRequiredParameters(nameof(_xafWinAssembly), controlAssemblyName);
+                var typeToMap = editorsAssembly.GetType(predefinedMap.GetTypeName());
+                if (typeToMap == null){
+                    throw new NullReferenceException(predefinedMap.ToString());
                 }
-                if (new[]{PredefinedMap.ASPxScheduler}.Any(map => map==predefinedMap)){
-                    CheckRequiredParameters(nameof(_xafSchedulerWebAssembly), nameof(_dxScedulerWebAssembly));
-                    return GetListViewConfiguration(predefinedMap,_xafSchedulerWebAssembly, _dxScedulerWebAssembly, "DevExpress.ExpressApp.Scheduler.Web.ASPxSchedulerListEditor",
-                        PredefinedMap.ASPxScheduler.GetTypeName(),null);
-                }
-                if (new[]{PredefinedMap.ASPxHtmlEditor}.Any(map => map==predefinedMap)){
-                    CheckRequiredParameters(nameof(_xafHtmlEditorWebAssembly), nameof(_dxWebAssembly));
-                    var typeToMap = predefinedMap.TypeToMap();
-                    return new ModelMapperConfiguration(typeToMap, typeof(IModelPropertyEditor));
-                }
-                if (new[]{PredefinedMap.ASPxUploadControl}.Any(map => map==predefinedMap)){
-                    CheckRequiredParameters(nameof(_dxWebAssembly), nameof(_dxWebAssembly));
-                    var typeToMap = predefinedMap.TypeToMap();
-                    return new ModelMapperConfiguration(typeToMap, typeof(IModelPropertyEditor));
-                }
-                if (new[]{PredefinedMap.ASPxPopupControl}.Any(map => map==predefinedMap)){
-                    CheckRequiredParameters(nameof(_dxWebAssembly), nameof(_dxWebAssembly));
-                    var typeToMap = predefinedMap.TypeToMap();
-                    return new ModelMapperConfiguration(typeToMap, typeof(IModelObjectView),typeof(IModelDashboardView)){ImageName = predefinedMap.Attribute<ImageNameAttribute>().ImageName};
-                }
-                if (new[]{PredefinedMap.ASPxDateEdit,PredefinedMap.ASPxHyperLink, PredefinedMap.ASPxSpinEdit, PredefinedMap.ASPxTokenBox, PredefinedMap.ASPxComboBox, }.Any(map => map==predefinedMap)){
-                    CheckRequiredParameters(nameof(_dxWebAssembly), nameof(_dxWebAssembly));
-                    var typeToMap = predefinedMap.TypeToMap();
-                    return new ModelMapperConfiguration(typeToMap, typeof(IModelPropertyEditor));
-                }
-                if (new[]{PredefinedMap.ASPxLookupDropDownEdit ,PredefinedMap.ASPxLookupFindEdit, }.Any(map => map==predefinedMap)){
-                    CheckRequiredParameters(nameof(_xafWebAssembly), nameof(_xafWebAssembly));
-                    return new ModelMapperConfiguration(predefinedMap.TypeToMap(), typeof(IModelPropertyEditor));
-                }
+                return new ModelMapperConfiguration(typeToMap, typeof(IModelPropertyEditor), typeof(IModelColumn));
             }
 
-            return null;
+            if (new[]{PredefinedMap.ASPxDashboard}.Any(map => map==predefinedMap)){
+                CheckRequiredParameters(nameof(_dashboardWebWebFormsAssembly), nameof(_dashboardWebWebFormsAssembly));
+                return new ModelMapperConfiguration(predefinedMap.TypeToMap(),typeof(IModelPropertyEditor));
+            }
+            if (new[]{PredefinedMap.ASPxGridView,PredefinedMap.GridViewDataColumn}.Any(map => map==predefinedMap)){
+                CheckRequiredParameters(nameof(_xafWebAssembly), nameof(_dxWebAssembly));
+                return GetListViewConfiguration(predefinedMap,_xafWebAssembly, _dxWebAssembly, "DevExpress.ExpressApp.Web.Editors.ASPx.ASPxGridListEditor",
+                    PredefinedMap.ASPxGridView.GetTypeName(),PredefinedMap.GridViewDataColumn.GetTypeName());
+            }
+            if (new[]{PredefinedMap.ASPxScheduler}.Any(map => map==predefinedMap)){
+                CheckRequiredParameters(nameof(_xafSchedulerWebAssembly), nameof(_dxScedulerWebAssembly));
+                return GetListViewConfiguration(predefinedMap,_xafSchedulerWebAssembly, _dxScedulerWebAssembly, "DevExpress.ExpressApp.Scheduler.Web.ASPxSchedulerListEditor",
+                    PredefinedMap.ASPxScheduler.GetTypeName(),null);
+            }
+            if (new[]{PredefinedMap.ASPxHtmlEditor}.Any(map => map==predefinedMap)){
+                CheckRequiredParameters(nameof(_xafHtmlEditorWebAssembly), nameof(_dxWebAssembly));
+                var typeToMap = predefinedMap.TypeToMap();
+                return new ModelMapperConfiguration(typeToMap, typeof(IModelPropertyEditor));
+            }
+            if (new[]{PredefinedMap.ASPxUploadControl}.Any(map => map==predefinedMap)){
+                CheckRequiredParameters(nameof(_dxWebAssembly), nameof(_dxWebAssembly));
+                var typeToMap = predefinedMap.TypeToMap();
+                return new ModelMapperConfiguration(typeToMap, typeof(IModelPropertyEditor));
+            }
+            if (new[]{PredefinedMap.ASPxPopupControl}.Any(map => map==predefinedMap)){
+                CheckRequiredParameters(nameof(_dxWebAssembly), nameof(_dxWebAssembly));
+                var typeToMap = predefinedMap.TypeToMap();
+                return new ModelMapperConfiguration(typeToMap, typeof(IModelObjectView),typeof(IModelDashboardView)){ImageName = predefinedMap.Attribute<ImageNameAttribute>().ImageName};
+            }
+            if (new[]{PredefinedMap.ASPxDateEdit,PredefinedMap.ASPxHyperLink, PredefinedMap.ASPxSpinEdit, PredefinedMap.ASPxTokenBox, PredefinedMap.ASPxComboBox, }.Any(map => map==predefinedMap)){
+                CheckRequiredParameters(nameof(_dxWebAssembly), nameof(_dxWebAssembly));
+                var typeToMap = predefinedMap.TypeToMap();
+                return new ModelMapperConfiguration(typeToMap, typeof(IModelPropertyEditor));
+            }
+            if (new[]{PredefinedMap.ASPxLookupDropDownEdit ,PredefinedMap.ASPxLookupFindEdit, }.Any(map => map==predefinedMap)){
+                CheckRequiredParameters(nameof(_xafWebAssembly), nameof(_xafWebAssembly));
+                return new ModelMapperConfiguration(predefinedMap.TypeToMap(), typeof(IModelPropertyEditor));
+            }
+
+            throw new NotImplementedException(predefinedMap.ToString());
         }
 
         private static void CheckRequiredParameters(string xafAssemblyName, string controlAssemblyName){

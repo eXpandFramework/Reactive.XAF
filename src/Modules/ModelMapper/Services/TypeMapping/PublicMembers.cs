@@ -95,7 +95,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                         return assembly.SelectMany(assembly1 => {
                             var types = assembly1.GetTypes()
                                 .Where(type => typeof(IModelModelMap).IsAssignableFrom(type))
-                                .Where(type => !type.Attributes<ModelAbstractClassAttribute>().Any()).ToArray();
+                                .Where(type => !type.Attributes<ModelAbstractClassAttribute>().Any())
+                                .ToArray();
                             return types;
                         });
                     }).Switch();

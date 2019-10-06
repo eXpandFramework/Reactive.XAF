@@ -34,11 +34,14 @@ namespace Xpand.XAF.Modules.ModelMapper.Configuration{
         [ImageName(@"Office2013\AlignVerticalCenter_16x16")]
         SplitContainerControl,
         [MapPlatform(Platform.Win)]
-        [ImageName(@"Office2013\Cards_16x16")]
+        [ImageName(@"re-layout")]
         LayoutView,
         [MapPlatform(Platform.Win)]
-        [ImageName(@"Office2013\Cards_16x16")]
+        [ImageName(@"re-layout")]
         LayoutViewColumn,
+        [MapPlatform(Platform.Win)]
+        [ImageName(@"re-layout")]
+        LayoutControlGroup,
         [MapPlatform(Platform.Win)]
         [ImageName(@"TreeView_16x16")]
         TreeList,

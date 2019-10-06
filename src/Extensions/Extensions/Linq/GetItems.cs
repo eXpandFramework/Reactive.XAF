@@ -17,13 +17,20 @@ namespace Xpand.Source.Extensions.Linq{
                 var items = stack.Pop();
                 foreach (var item in items){
                     var o = distincSelector?.Invoke(item);
-                    if (hashSet != null && !hashSet.Contains(o)){
-                        hashSet.Add(o);
+                    if (hashSet != null ){
+                        if (!hashSet.Contains(o)){
+                            hashSet.Add(o);
+                            yield return item;
+                            var children = selector(item).OfType<T>();
+                            stack.Push(children);
+                        }
+                    }
+                    else{
                         yield return item;
-
                         var children = selector(item).OfType<T>();
                         stack.Push(children);
                     }
+                    
                 }
             }
         }

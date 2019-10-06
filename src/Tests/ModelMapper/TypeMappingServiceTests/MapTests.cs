@@ -27,6 +27,7 @@ using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.BandedGrid;
 using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraGrid.Views.Layout;
+using DevExpress.XtraLayout;
 using DevExpress.XtraPivotGrid;
 using DevExpress.XtraRichEdit;
 using DevExpress.XtraScheduler;
@@ -185,8 +186,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             mappedType1.Assembly.ShouldBe(mappedType2.Assembly);
         }
 
-        [Theory]
+        
 
+        [TestCase(PredefinedMap.LayoutControlGroup,new[]{typeof(LayoutControlGroup)},nameof(Platform.Win),new string[0])]
         [TestCase(PredefinedMap.GridColumn,new[]{typeof(GridColumn),typeof(GridListEditor)},nameof(Platform.Win),new[]{nameof(GridColumn.Summary)})]
         [TestCase(PredefinedMap.GridView,new[]{typeof(GridView),typeof(GridListEditor)},nameof(Platform.Win),new[]{nameof(GridView.FormatRules)})]
         [TestCase(PredefinedMap.PivotGridControl,new[]{typeof(PivotGridControl),typeof(PivotGridListEditor)},nameof(Platform.Win),new[]{nameof(PivotGridControl.FormatRules)})]
@@ -223,13 +225,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             assembliesToLoad.ToObservable().Do(type => Assembly.LoadFile(type.Assembly.Location)).Subscribe();
 
             var modelType = await predefinedMap.MapToModel().ModelInterfaces().FirstAsync();
+            
             var propertyInfos = modelType.GetProperties();
 
             AssertPredefinedConfigurationsMap(predefinedMap, collectionNames, modelType, propertyInfos);
             AssertBandedGridColumn(predefinedMap, propertyInfos);
-            
             AssertSchedulerControl(predefinedMap, propertyInfos);
-
         }
 
         [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
@@ -244,13 +245,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             }
         }
 
-        [Theory]
+        
         [TestCase(nameof(Platform.Win))]
         public async Task Map_PredefinedMap_RepositoryItems(string platformName){
             var platform = GetPlatform(platformName);
             var predefinedMaps = Enums.GetValues<PredefinedMap>().Where(map => map.IsRepositoryItem())
                 .Where(map => map.Attribute<MapPlatformAttribute>().Platform == platform.ToString());
-//                .Where(map => map==PredefinedMap.RepositoryItem);
 
             await Map_PredefinedMap_ViewItems(platform, predefinedMaps, typeof(RepositoryItemBaseMap).ModelTypeName(), ViewItemService.RepositoryItemsMapName,true);
         }
@@ -301,7 +301,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             }
         }
 
-        [Theory]
+        
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
         public async Task Map_PredefinedMap_PropertyEditor_Controls(string platformName){
@@ -312,7 +312,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             await Map_PredefinedMap_ViewItems(platform, predefinedMaps, typeof(PropertyEditorControlMap).ModelTypeName(), ViewItemService.PropertyEditorControlMapName);
         }
 
-        [Theory]
+        
         [TestCase(PredefinedMap.ChartControl,new[]{typeof(ChartControl),typeof(ChartListEditor)},nameof(Platform.Win),new[]{nameof(ChartControl.Series),"Diagrams"})]
         [TestCase(PredefinedMap.ChartControlDiagram3D,new[]{typeof(Diagram3D),typeof(ChartListEditor)},nameof(Platform.Win),new string[0])]
         [TestCase(PredefinedMap.ChartControlSimpleDiagram3D,new[]{typeof(SimpleDiagram3D),typeof(ChartListEditor)},nameof(Platform.Win),new string[0])]
@@ -368,7 +368,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
 
-        [Theory]
+        
         [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public void Map_All_PredefinedConfigurations(string platformName){

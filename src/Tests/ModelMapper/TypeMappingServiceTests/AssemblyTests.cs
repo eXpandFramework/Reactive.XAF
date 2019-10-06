@@ -14,7 +14,7 @@ using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.Ty
 namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
     [NonParallelizable]
     public class AssemblyTests:ModelMapperBaseTest{
-        [Theory]
+        
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
         public async Task Create_Model_Assembly_in_path_if_not_Exist(string platformName){

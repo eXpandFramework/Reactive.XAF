@@ -44,17 +44,17 @@ namespace TestsLib{
             return modelEditorForm;
         }
 
-        protected override LayoutManager CreateLayoutManagerCore(bool simple){
-            if (!simple){
-                var controlMock = new Mock<Control>(){CallBase = true};
-                var layoutManagerMock = new Mock<WinLayoutManager>(){CallBase = true};
-                layoutManagerMock.Setup(_ => _.LayoutControls(It.IsAny<IModelNode>(), It.IsAny<ViewItemsCollection>())).Returns(controlMock.Object);
-            
-                return layoutManagerMock.Object;
-            }
-
-            return new WinSimpleLayoutManager();
-        }
+//        protected override LayoutManager CreateLayoutManagerCore(bool simple){
+//            if (!simple){
+//                var controlMock = new Mock<Control>(){CallBase = true};
+//                var layoutManagerMock = new Mock<WinLayoutManager>(){CallBase = true};
+//                layoutManagerMock.Setup(_ => _.LayoutControls(It.IsAny<IModelNode>(), It.IsAny<ViewItemsCollection>())).Returns(controlMock.Object);
+//            
+//                return layoutManagerMock.Object;
+//            }
+//
+//            return new WinSimpleLayoutManager();
+//        }
 
         protected override string GetModelCacheFileLocationPath(){
             return null;

@@ -138,7 +138,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             }
         }
 
-        private static (string key, string code,bool map) TypeCode(this Type type, string mapName, string modelMappersTypeName, IModelMapperConfiguration configuration){
+        private static (string key, string code, bool map) TypeCode(this Type type, string mapName,
+            string modelMappersTypeName, IModelMapperConfiguration configuration){
 
             var domainLogic = $@"[{typeof(DomainLogicAttribute).FullName}(typeof({modelMappersTypeName}))]{Environment.NewLine}public class {modelMappersTypeName}DomainLogic{{public static int? Get_Index({modelMappersTypeName} mapper){{return 0;}}}}{Environment.NewLine}";
             var modelMappersPropertyCode = ModelMappersPropertyCode(modelMappersTypeName);
@@ -240,16 +241,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
 
         private static string ModelName(this (Type typeToCode,Type rootType) data,string customName=null){
             if (customName!=null){
-                if (!customName.StartsWith("IModel")){
-                    return $"IModel{customName}";
-                }
-
-                return customName;
+                return !customName.StartsWith("IModel") ? $"IModel{customName}" : customName;
             }
 
-            if (data.typeToCode == data.rootType){
-//                return $"IModel{data.rootType.Name}";
-            }
             return $"IModel{data.typeToCode.Namespace?.Replace(".","")}_{data.typeToCode.Name}";
         }
 
@@ -263,12 +257,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 .Concat(Observable.Return(AssemblyVersionCode()))
                 .Select(_=>(code:_,references:new[]{typeof(ModelMapperModule).Assembly.Location}.AsEnumerable()));
             var modelCode = source.SelectMany(_ => {
-//                var code = _.TypeToMap.ModelCode(_);
-//                return code.code.Select(__ => (code: __, code.references));
                 var merge = Observable.Start(() => {
                     var code = _.TypeToMap.ModelCode(_);
                     return code.code.Select(__ => (code: __, code.references)).ToArray();
-
                 });
                 return merge;
             }).Replay().RefCount();

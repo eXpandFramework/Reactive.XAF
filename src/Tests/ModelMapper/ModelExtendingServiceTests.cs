@@ -19,6 +19,7 @@ using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.BandedGrid;
 using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraGrid.Views.Layout;
+using DevExpress.XtraLayout;
 using DevExpress.XtraPivotGrid;
 using DevExpress.XtraScheduler;
 using DevExpress.XtraTreeList;
@@ -108,6 +109,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         
+        [TestCase(PredefinedMap.LayoutControlGroup, typeof(LayoutControlGroup),nameof(Platform.Win),MMDetailViewNodePath+"/Layout/Main")]
         [TestCase(PredefinedMap.GridColumn, typeof(GridColumn),nameof(Platform.Win),MMListViewNodePath+"/Columns/Test")]
         [TestCase(PredefinedMap.GridView, typeof(GridView),nameof(Platform.Win),MMListViewNodePath)]
         [TestCase(PredefinedMap.SchedulerControl, typeof(SchedulerControl),nameof(Platform.Win),MMListViewNodePath)]
@@ -128,17 +130,15 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         [TestCase(PredefinedMap.DashboardDesigner, typeof(DashboardDesigner),nameof(Platform.Win),MMDetailViewTestItemNodePath)]
         [TestCase(PredefinedMap.ASPxPopupControl, typeof(ASPxPopupControl),nameof(Platform.Web),MMListViewNodePath+","+MMDetailViewNodePath)]
         public void ExtendModel_Predefined_Type(PredefinedMap configuration,Type typeToMap,string platformName,string nodePath){
+
             var platform = GetPlatform(platformName);
             Assembly.LoadFile(typeToMap.Assembly.Location);
             InitializeMapperService($"{nameof(ExtendModel_Predefined_Type)}{configuration}{platform}",platform);
-
             using (var module = configuration.Extend()){
                 using (var application = DefaultModelMapperModule(nameof(ExtendModel_Predefined_Type), platform, module).Application){
                     AssertExtendedListViewModel(typeToMap, application,nodePath);
                 }
             }
-
-            
         }
 
         private void AssertExtendedListViewModel(Type typeToMap, XafApplication application,string nodePath){

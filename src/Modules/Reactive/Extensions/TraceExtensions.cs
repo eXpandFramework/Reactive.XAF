@@ -137,8 +137,7 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
             var action = traceAction;
             action = action ?? (s => {
                 if (traceSource != null){
-                    var id = traceSource.Name.GetHashCode();
-                    traceSource.TraceEvent(TraceEventType.Information, id,s);
+                    traceSource.TraceEvent(TraceEventType.Information, 0,s);
                 }
                 else{
                     System.Diagnostics.Trace.TraceInformation(s);

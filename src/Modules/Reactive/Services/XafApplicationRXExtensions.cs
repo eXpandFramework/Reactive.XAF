@@ -141,9 +141,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source.SelectMany(application => application.WhenViewCreated());
         }
 
-        public static IObservable<ListView> ToListView(
-            this IObservable<(XafApplication application, ListViewCreatedEventArgs e)> source){
+        public static IObservable<ListView> ToListView(this IObservable<(XafApplication application, ListViewCreatedEventArgs e)> source){
             return source.Select(_ => _.e.ListView);
+        }
+
+        public static IObservable<TView> ToObjectView<TView>(
+            this IObservable<(ObjectView view, EventArgs e)> source) where TView:View{
+            return source.Where(_ => _.view is TView).Select(_ => _.view).Cast<TView>();
         }
 
         public static IObservable<DetailView> ToDetailView(this IObservable<(XafApplication application, DetailViewCreatedEventArgs e)> source) {

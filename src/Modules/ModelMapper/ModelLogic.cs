@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing.Design;
 using System.Linq;
 using DevExpress.Data.Filtering;
-using DevExpress.Data.Filtering.Exceptions;
 using DevExpress.Data.Filtering.Helpers;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
@@ -104,8 +102,8 @@ namespace Xpand.XAF.Modules.ModelMapper{
 
             return ((IModelApplicationModelMapper) modelModelMappers.Application).ModelMapper.MapperContexts[id];
         }
-
     }
+
     public class ModelMapperContextNodeGenerator:ModelNodesGeneratorBase{
         public const string Default = "Default";
         public const string ModelMapperAttribute = "ModelMapperAttribute";
@@ -130,21 +128,10 @@ namespace Xpand.XAF.Modules.ModelMapper{
          
     }
 
-    
-//    public interface IModelDesignLayoutView : IModelNode {
-//        IModelLayoutDesignStore DesignLayoutView{ get; }
-//    }
-
-//    public interface IModelLayoutDesignStore : IModelNodeDisabled {
-//        [Browsable(false)]
-//        string LayoutStore { get; set; }
-//    }
-
-//    [ModelEditorBrowsable(false)]
     public interface IModelModelMap:IModelNodeDisabled{
     }
 
-    public interface IModelModelMapContainer{
+    public interface IModelModelMapContainer:IModelNode{
         
     }
 
@@ -158,43 +145,13 @@ namespace Xpand.XAF.Modules.ModelMapper{
                     AddNode(node, info);
                 }
             }
-            else if (node.Id == ModelMapperContextNodeGenerator.ModelMapperAttribute){
-//                foreach (var info in GetTypeInfos(node, modelMapperTypeInfos).SelectMany(infos => infos).Distinct()){
-//                    var modelNode = AddNode(node, info);
-//                    modelNode.Id = ModelMapperContextNodeGenerator.ModelMapperAttribute + "-" + modelNode.Id;
-//                }
-            }
+            
         }
 
-//        private static IEnumerable<IEnumerable<ITypeInfo>> GetTypeInfos(ModelNode node, ITypeInfo[] installedInfos){
-//            var modelMembers = node.Application.BOModel.SelectMany(c => c.OwnMembers)
-//                .Where(member => member.MemberInfo.FindAttributes<ModelMapperAttribute>().Any());
-//            foreach (var modelMember in modelMembers){
-//                foreach (var mapperAttribute in modelMember.MemberInfo.FindAttributes<ModelMapperAttribute>()){
-//                    yield return installedInfos.Where(info => info.Type.Name == "IModel" + mapperAttribute.Mapper);
-//                }
-//            }
-//        }
-
-        private ModelNode AddNode(ModelNode node, ITypeInfo typeInfo){
+        private void AddNode(ModelNode node, ITypeInfo typeInfo){
             var name = GetName(typeInfo);
-            return node.AddNode(name, typeInfo.Type);
+            node.AddNode(name, typeInfo.Type);
         }
-
-//        private IEnumerable<ITypeInfo> GetInstalledMappers(ITypeInfo[] typeInfos, IModelApplication application){
-//            return Enumerable.Empty<ITypeInfo>();
-//            var modules = ((IModelSources)application).Modules.ToArray();
-//            var moduleAssemblies = modules.Select(@base => @base.GetType().Assembly);
-//            var installedInfos = typeInfos.Where(info => moduleAssemblies.Contains(info.Type.Assembly));
-//
-////            var infos = typeInfos
-////                .Where(info => info.FindAttribute<ModuleUserAttribute>() != null)
-////                .Select(source => new{source, moduleUserAttribute = source.FindAttribute<ModuleUserAttribute>()})
-////                .Where(t => modules.Any(@base => t.moduleUserAttribute.ModuleType.IsInstanceOfType(@base)))
-////                .Select(t => t.source);
-////            return installedInfos.Concat(infos).Distinct();
-////            throw new NotImplementedException();
-//        }
 
         private static string GetName(ITypeInfo typeInfo){
             var displayNameAttribute = typeInfo.FindAttribute<ModelDisplayNameAttribute>(false);

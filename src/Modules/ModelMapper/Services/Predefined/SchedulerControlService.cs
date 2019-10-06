@@ -42,7 +42,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.Predefined{
             }
             else if (data.declaringType.FullName == "DevExpress.XtraScheduler.AppointmentStorage"){
                 foreach (var pData in propertyData.SkipLast(1)){
-//                foreach (var pData in propertyData){
                     var propertyInfo = data.propertyInfos.First(info => info.Name==pData.property);
                     data.propertyInfos.Remove(propertyInfo);
                     var modelMapperPropertyInfo = new ModelMapperPropertyInfo(pData.property,pData.listType,propertyInfo.DeclaringType);

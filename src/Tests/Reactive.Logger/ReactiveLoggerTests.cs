@@ -15,7 +15,7 @@ using Xpand.XAF.Modules.Reactive.Logger.Tests.BOModel;
 namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
     [NonParallelizable]
     public class ReactiveLoggerTests : BaseTest{
-        [Theory]
+        
         [TestCase("NoLastEvent")]
         [TestCase("DifferentLastEvent")]
         [TestCase("SameLastEvent")]
