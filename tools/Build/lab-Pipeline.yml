@@ -52,7 +52,7 @@ jobs:
       ArtifactName: 'Xpand.XAF.Modules.Bin'
 - job: Test
   strategy:
-    parallel: 10
+    parallel: 15
   dependsOn: Build
   pool:
     vmImage: windows-2019
