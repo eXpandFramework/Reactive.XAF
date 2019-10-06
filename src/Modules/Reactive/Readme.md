@@ -31,20 +31,46 @@ Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.Re
 ```
 
 ## Details
-The module does not use controllers but only the existing or new XAF events where they are modeled as in observable with the prefix `When`. 
+This module and all modules that use it as a dependency **do not use controllers**. Instead they use existing or new XAF events where they are modeled as operators with the prefix `When`. 
 
-Observables are nothing more than a Type however that provides operators/methods to combine,merge, zip, observeOn(Scheduler) using LINQ style syntax.
+Observables are nothing more than a Type which provides operators/methods to [CombineLatest](http://reactivex.io/documentation/operators/combinelatest.html), [Merge](http://reactivex.io/documentation/operators/Merge.html), [Zip](http://reactivex.io/documentation/operators/zip.html), [ObserveOn](http://reactivex.io/documentation/operators/combinelatest.html)(Scheduler) using LINQ style syntax see ([ReactiveX.IO](http://reactivex.io/documentation/operators.html)).
 
-For example to get the first Customer ListView created since your application start you may write.
+An operator is an c# extension method. Such methods are static and best practice is to designed them without storing state as they may be concurrent. To pass the state we use the operator (method) arguments and it return value. Existing operators are more than enough to handle any case and you should avoid custom `IObservable<T>`implementation as they may misbehave when concurrency introduced. 
+
+For more details see [RX Contract](http://reactivex.io/documentation/contract.html).
+
+For example to create an operator that emits when a XAF ListView created you may write:
+
+```cs
+public static IObservable<(XafApplication application, ListViewCreatedEventArgs e)> WhenListViewCreated(this XafApplication application){
+    return Observable
+        .FromEventPattern<EventHandler<ListViewCreatedEventArgs>, ListViewCreatedEventArgs>(
+            h => application.ListViewCreated += h, h => application.ListViewCreated -= h)
+        .TransformPattern<ListViewCreatedEventArgs, XafApplication>().TraceRX();
+}
+
+```
+The above `WhenListViewCreated` operator returns an `IObservable<(XafApplication application, ListViewCreatedEventArgs e)` which may be not so handy in some cases. So let's write another one that projects that type to a ListView
+```cs
+public static IObservable<ListView> ToListView(this IObservable<(XafApplication application, ListViewCreatedEventArgs e)> source){
+    return source.Select(_ => _.e.ListView);
+}
+
+```
+As you can see I used as input the output of the WhenListViewCreated and with the `Select` I can project it to any type I like. System.ValueTuple is a great help here as you most probably want to avoid polluting your code base with classes that do noting more than storing state in a property.
+
+The `Xpand.XAF.Modules.Reactive` modules already provides a great number of operators found at [Xpand.XAF.Modules.Reactive.Services](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive/Services) namespace.
+
+Now let's use the previous two operators to await the first Customer ListView created since our application start.
 
 ```cs
 ListView listView=await application.WhenListViewCreated().ToListView().When(typeof(Customer))
 ```
-To get the first new Customer created you can write:
+Similarly to get the first new Customer created we can write:
 ```cs
 Customer listView=await application.NewObject<Customer>()
 ```
-To add that customer to the first view created collectionsource you can write:
+Finally let's combine those await so to add that customer to the CollectionSource of the first view created:
 ```cs
 var listView = application.WhenListViewCreated().ToListView().When(typeof(Customer));
 var newCustomer = application.NewObject<Customer>();
