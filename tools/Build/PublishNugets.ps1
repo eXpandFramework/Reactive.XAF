@@ -9,26 +9,24 @@ if (!(Get-Module XpandPwsh -ListAvailable)){
     Install-Module XpandPwsh -Force
 }
 
-$remotePackageSource=Get-PackageFeed -Nuget
 
-if ($Branch -eq "lab"){
-    $remotePackageSource=Get-PackageFeed -Xpand
-}
-set-location $sourcesRoot
+
 $pArgs = @{
     PackageSource = "Release"
     Filter=$criteria
 }
+$remotePackageSource=Get-PackageFeed -Nuget
 if ($Branch -eq "lab") {
     $pArgs.PackageSource="Lab"
+    $remotePackageSource=Get-PackageFeed -Xpand
 }
 $packages =Find-XpandPackage  @pArgs
 
 Write-Host "remote-packages:" -f blue
-$packages
-$localPackages=Get-ChildItem $localPackageSource *.nupkg -Recurse | Sort-Object -Unique
+$packages|Write-Host
+$localPackages=Get-ChildItem $localPackageSource *.nupkg -Recurse | Sort-Object BaseName -Unique
 Write-Host "local-packages:" -f blue
-$localPackages
+$localPackages|Write-Host
 $localPackages| ForEach-Object {
     $localPackageName = [System.IO.Path]::GetFileNameWithoutExtension($_)
     $r = New-Object System.Text.RegularExpressions.Regex("[\d]{1,2}\.[\d]{1}\.[\d]*(\.[\d]*)?")
