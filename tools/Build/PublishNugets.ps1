@@ -1,12 +1,16 @@
 param(
-    $Branch = "lab",
+    $Branch = "master",
     $sourcesRoot = "$PSScriptRoot\..\..",
     $apiKey,
     $localPackageSource = "$PSScriptRoot\..\..\bin\Nupkg",
     $criteria = "Xpand.*"
 )
-Install-Module XpandPwsh -Force
+if (!(Get-Module XpandPwsh -ListAvailable)){
+    Install-Module XpandPwsh -Force
+}
+
 $remotePackageSource=Get-PackageFeed -Nuget
+
 if ($Branch -eq "lab"){
     $remotePackageSource=Get-PackageFeed -Xpand
 }
@@ -20,9 +24,12 @@ if ($Branch -eq "lab") {
 }
 $packages =Find-XpandPackage  @pArgs
 
-Write-Host "packages:" -f blue
+Write-Host "remote-packages:" -f blue
 $packages
-Get-ChildItem $localPackageSource *.nupkg -Recurse | ForEach-Object {
+$localPackages=Get-ChildItem $localPackageSource *.nupkg -Recurse | Sort-Object -Unique
+Write-Host "local-packages:" -f blue
+$localPackages
+$localPackages| ForEach-Object {
     $localPackageName = [System.IO.Path]::GetFileNameWithoutExtension($_)
     $r = New-Object System.Text.RegularExpressions.Regex("[\d]{1,2}\.[\d]{1}\.[\d]*(\.[\d]*)?")
     $localPackageVersion = $r.Match($localPackageName).Value
