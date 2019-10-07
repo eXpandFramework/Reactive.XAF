@@ -50,51 +50,52 @@ jobs:
     inputs:
       PathtoPublish: '$(System.DefaultworkingDirectory)\bin'
       ArtifactName: 'Xpand.XAF.Modules.Bin'
-# - job: Test
-#   strategy:
-#     parallel: 15
-#   dependsOn: Build
-#   pool:
-#     vmImage: windows-2019
-#   steps:
-#     - checkout: none
-#     - task: DownloadBuildArtifacts@0
-#       inputs:
-#         buildType: 'current'
-#         downloadType: 'specific'
-#         downloadPath: '$(System.DefaultworkingDirectory)'
-#     - task: VSTest@2
-#       displayName: 'VsTest - testAssemblies'
-#       inputs:
-#         searchFolder: '$(System.DefaultWorkingDirectory)'
-#         testSelector: 'testAssemblies'
-#         testAssemblyVer2: |
-#           **\*Tests*.dll
-#           !**\*Hub*.dll
-#           !**\*TestAdapter.dll
-#           !**\obj\**    
-#         diagnosticsEnabled: true
-#         codeCoverageEnabled: true
-#         distributionBatchType: 'basedOnAssembly'
-      
-#         collectDumpOn: never
-# - job: Publish
-#   strategy: 
-#     parallel: 1
-#   dependsOn: Test
-#   pool:
-#     vmImage: windows-2019
-#   steps:
-#   - checkout: self
-#   - task: DownloadBuildArtifacts@0
-#     inputs:
-#       buildType: 'current'
-#       downloadType: 'specific'
-#       downloadPath: '$(System.DefaultworkingDirectory)'
-#   - task: PowerShell@2
-#     displayName: Publish
-#     inputs:
-#       pwsh: true
-#       targetType: filePath
-#       filePath: .\tools\build\publishNugets.ps1 
-#       arguments: $(Build.SourceBranchName) '$(System.DefaultWorkingDirectory)' $(NugetApiKey) '$(System.DefaultWorkingDirectory)'
+- job: Test
+  strategy:
+    parallel: 10
+  dependsOn: Build
+  pool:
+    vmImage: windows-2019
+  steps:
+    - checkout: none
+    - task: DownloadBuildArtifacts@0
+      inputs:
+        buildType: 'current'
+        downloadType: 'specific'
+        downloadPath: '$(System.DefaultworkingDirectory)'
+    - task: VSTest@2
+      displayName: 'VsTest - testAssemblies'
+      inputs:
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: |
+          **\*Tests*.dll
+          !**\*Hub*.dll
+          !**\*TestAdapter.dll
+          !**\obj\**    
+        diagnosticsEnabled: true
+        codeCoverageEnabled: true
+        distributionBatchType: basedOnTestCases
+        runInParallel: false
+        runTestsInIsolation: true
+        collectDumpOn: never
+- job: Publish
+  strategy: 
+    parallel: 1
+  dependsOn: Test
+  pool:
+    vmImage: windows-2019
+  steps:
+  - checkout: self
+  - task: DownloadBuildArtifacts@0
+    inputs:
+      buildType: 'current'
+      downloadType: 'specific'
+      downloadPath: '$(System.DefaultworkingDirectory)'
+  - task: PowerShell@2
+    displayName: Publish
+    inputs:
+      pwsh: true
+      targetType: filePath
+      filePath: .\tools\build\publishNugets.ps1 
+      arguments: $(Build.SourceBranchName) '$(System.DefaultWorkingDirectory)' $(NugetApiKey) '$(System.DefaultWorkingDirectory)'
