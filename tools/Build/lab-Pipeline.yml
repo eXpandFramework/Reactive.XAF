@@ -77,7 +77,7 @@ jobs:
         runInParallel: true
         codeCoverageEnabled: true
         distributionBatchType: 'basedOnAssembly'
-      
+        runSettingsFile: .\Xpand.XAF.Modules.Bin\CodeCoverage.runsettings
         collectDumpOn: never
 - job: Publish
   strategy: 

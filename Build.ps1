@@ -26,6 +26,7 @@ Task IndexSources{
 task Init {
     InvokeScript{
         New-Item "$PSScriptRoot\bin" -ItemType Directory -Force |Out-Null
+        Copy-Item -path "$PSScriptRoot\CodeCoverage.runsettings"  -Destination "$PSScriptRoot\bin\CodeCoverage.runsettings"
         $versionMismatch=Get-ChildItem $PSScriptRoot *.csproj -Recurse|ForEach-Object{
             $projectPath=$_.FullName
             [xml]$csproj=Get-Content $projectPath
