@@ -74,7 +74,6 @@ jobs:
           !**\*TestAdapter.dll
           !**\obj\**    
         diagnosticsEnabled: true
-        runInParallel: true
         codeCoverageEnabled: true
         distributionBatchType: 'basedOnAssembly'
         runSettingsFile: .\Xpand.XAF.Modules.Bin\CodeCoverage.runsettings
