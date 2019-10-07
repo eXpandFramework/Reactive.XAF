@@ -51,7 +51,6 @@
     <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.15.1" />
     <PackageReference Include="Fasterflect.Xpand" Version="2.0.6" />
-    <PackageReference Include="Xpand.Patcher" Version="1.0.1" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Web" />
