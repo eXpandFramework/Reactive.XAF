@@ -404,6 +404,26 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             modelNames.ShouldContain(types.Last().Name);
             
         }
+
+        [Test]
+        public void Customize_TypeMapping(){
+            InitializeMapperService($"{nameof(Customize_TypeMapping)}",Platform.Win);
+            TypeMappingService.PropertyMappingRules.Add(("RemoveTreeListMap", _ => {
+                if (_.declaringType == PredefinedMap.TreeList.TypeToMap()){
+                    _.propertyInfos.Clear();
+                }
+            }));
+            
+            var modelInterfaces = new[]{PredefinedMap.GridView,PredefinedMap.TreeList}.MapToModel().ModelInterfaces().Replay();
+            modelInterfaces.Connect();
+
+            var types = modelInterfaces.ToEnumerable().ToArray();
+            types.Length.ShouldBe(2);
+            types.Last().GetProperties()
+                .FirstOrDefault(info => !TypeMappingService.ReservedPropertyNames.Contains(info.Name)&&info.Name!=TypeMappingService.ModelMappersNodeName)
+                .ShouldBeNull();
+            
+        }
     }
 
     

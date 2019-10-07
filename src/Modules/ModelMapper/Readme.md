@@ -164,7 +164,7 @@ DashboardView | ListView | DetailView
 ---------|----------|---------
 ![image](https://user-images.githubusercontent.com/159464/61752712-73808880-adb5-11e9-897e-081e8864882f.png)|![image](https://user-images.githubusercontent.com/159464/61752825-ec7fe000-adb5-11e9-8217-2e125f992319.png)|![image](https://user-images.githubusercontent.com/159464/61752720-7f6c4a80-adb5-11e9-832e-931a23b8a159.png)
   
-##### How to customize a map
+##### <u>How to customize a map</u>
 You can customize the map the following ways:
 1. On declaration using the ModelMapperConfiguration properties.
     ```cs
@@ -192,7 +192,7 @@ You can customize the map the following ways:
     }));
     ```
 Several real world examples are available at [Predefined](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/ModelMapper/Services/Predefined) namespace.
-##### How to bind a map
+##### <u>How to bind a map</u>
 
 All predefined maps are bound to the runtime instance automatically. The module when any view controls are created will search its model for IModelModelMap properties and use them to configure the related instances. It is possible to customize the process as in next snippet:
 
