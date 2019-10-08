@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
@@ -261,22 +260,17 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 var merge = Observable.Start(() => {
                     var code = _.TypeToMap.ModelCode(_);
                     return code.code.Select(__ => (code: __, code.references)).ToArray();
-                },ModelCodeScheduler);
+                });
                 return merge;
-            })
-            .SelectMany(_ => _);
-            var typeCode = modelCode.ToEnumerable()
-                .GroupBy(_ => _.code.key).SelectMany(_ => _.OrderByDescending(tuple => tuple.code.map).Take(1))
-                .ToObservable()
-                .TraceModelMapper()
-                .Select(_ => (_.code.code, _.references));
+            }).Replay().RefCount();
+            var typeCode = modelCode
+                .ToEnumerable().SelectMany(_ => _).GroupBy(_ => _.code.key).SelectMany(_ => _.OrderByDescending(tuple => tuple.code.map).Take(1))
+                .Select(_ => (_.code.code, _.references)).ToObservable();
             return assemblyAttributes.Concat(typeCode)
                 .Aggregate((acc, cu) => {
                     var code = string.Join(Environment.NewLine, acc.code, cu.code);
                     return (code, acc.references.Concat(cu.references).Distinct());
-                }).TraceModelMapper();
+                });
         }
-
-        public static IScheduler ModelCodeScheduler{ get; set; }=Scheduler.Default;
     }
 }
