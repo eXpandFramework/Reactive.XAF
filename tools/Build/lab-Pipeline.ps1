@@ -6,7 +6,7 @@ param(
     $DXApiFeed  ,
     $artifactstagingdirectory,
     $bindirectory,
-    $AzureToken  ,
+    $AzureToken  =(Get-AzureToken),
     $WhatIf = $false
 )
 $ErrorActionPreference = "Stop"
