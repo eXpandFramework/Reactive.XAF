@@ -8,10 +8,10 @@
           <CodeCoverage>
             <ModulePaths>
               <Include>
-                <ModulePath>.*Xpand.XAF.Modules.*\.dll$</ModulePath>
+                <ModulePath>.*Xpand\.XAF\.Modules.*\.dll$</ModulePath>
               </Include>
               <Exclude>
-                <ModulePath>.*Tests.dll</ModulePath>
+                <ModulePath>.*Tests\.dll</ModulePath>
                 <ModulePath>.*Hub.*</ModulePath>
               </Exclude>
             </ModulePaths>

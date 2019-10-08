@@ -64,6 +64,12 @@ function UpdateBadges($_, $packagespath,  $readMePath) {
 function UpdateIssues($_, $packagespath,  $readMePath) {
     $moduleName=$_.BaseName.Substring($_.BaseName.LastIndexOf(".")+1)
     $moduleName="$($_.BaseName).$($moduleName)Module"
+    if ($moduleName -like "*.hub.*"){
+        $moduleName="Xpand.XAF.Modules.Reactive.Logger.Hub.ReactiveLoggerHubModule"
+    }
+    elseif ($moduleName -like "*Logger*"){
+        $moduleName="Xpand.XAF.Modules.Reactive.Logger.ReactiveLoggerModule"
+    }
     $readMe = Get-Content $readMePath -Raw
     $regex = [regex] '(?isx)\#\#\ Issues(.*)\#\#\ Details'
 $result = $regex.Replace($readMe, @"
