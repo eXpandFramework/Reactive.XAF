@@ -2,7 +2,6 @@ using System;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
-using DevExpress.Utils.Extensions;
 using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.XAF.Modules.OneView{
@@ -22,7 +21,7 @@ namespace Xpand.XAF.Modules.OneView{
         }
 
         public static IModelOneView OneViewModel(this IModelReactiveModules reactiveModules){
-            return reactiveModules.CastTo<IModelReactiveModuleOneView>().OneView;
+            return ((IModelReactiveModuleOneView) reactiveModules).OneView;
         }
 
     }

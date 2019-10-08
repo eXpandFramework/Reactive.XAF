@@ -9,7 +9,6 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
-using DevExpress.Utils.Extensions;
 using Xpand.Source.Extensions.XAF.Model;
 
 namespace Xpand.XAF.Modules.Reactive.Logger{
@@ -22,7 +21,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             return source.Select(modules => modules.ReactiveLogger());
         }
         public static IModelReactiveLogger ReactiveLogger(this IModelReactiveModules reactiveModules){
-            return reactiveModules.CastTo<IModelReactiveModuleLogger>().ReactiveLogger;
+            return ((IModelReactiveModuleLogger) reactiveModules).ReactiveLogger;
         }
     }
     public interface IModelReactiveLogger:IModelNode{

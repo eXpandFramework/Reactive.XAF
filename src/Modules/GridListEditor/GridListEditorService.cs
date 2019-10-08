@@ -3,7 +3,6 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
-using DevExpress.Utils.Extensions;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -33,7 +32,7 @@ namespace Xpand.XAF.Modules.GridListEditor{
                 .SelectMany(frame => ModelRules(application, frame).To(frame));
             return listViewFrame.Select(frame => frame.View).Cast<ListView>()
                 .SelectMany(view => {
-                    var gridListEditor = view.Editor.CastTo<DevExpress.ExpressApp.Win.Editors.GridListEditor>();
+                    var gridListEditor = ((DevExpress.ExpressApp.Win.Editors.GridListEditor) view.Editor);
                     var topRowIndex = gridListEditor.GridView.TopRowIndex;
                     return view.CollectionSource.WhenCollectionReloaded()
                         .Do(_ => {

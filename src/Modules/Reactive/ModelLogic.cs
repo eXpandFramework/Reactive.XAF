@@ -2,7 +2,6 @@
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
-using DevExpress.Utils.Extensions;
 using Fasterflect;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -34,7 +33,7 @@ namespace Xpand.XAF.Modules.Reactive{
         }
 
         public static TModel ToReactiveModule<TModel>(this IModelApplication applicationModel) where TModel:IModelReactiveModule{
-            return applicationModel.CastTo<IModelApplicationReactiveModules>().ReactiveModules.CastTo<TModel>();
+            return ((TModel) ((IModelApplicationReactiveModules) applicationModel).ReactiveModules);
         }
     }
 }

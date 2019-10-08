@@ -3,7 +3,6 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
-using DevExpress.Utils.Extensions;
 using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.XAF.Modules.RefreshView{
@@ -22,7 +21,7 @@ namespace Xpand.XAF.Modules.RefreshView{
         }
 
         public static IModelRefreshView RefreshView(this IModelReactiveModules reactiveModules){
-            return reactiveModules.CastTo<IModelReactiveModuleRefreshView>().RefreshView;
+            return ((IModelReactiveModuleRefreshView) reactiveModules).RefreshView;
         }
 
     }

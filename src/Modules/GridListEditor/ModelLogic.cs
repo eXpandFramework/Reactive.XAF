@@ -3,7 +3,6 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
-using DevExpress.Utils.Extensions;
 using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.XAF.Modules.GridListEditor{
@@ -26,7 +25,7 @@ namespace Xpand.XAF.Modules.GridListEditor{
         }
 
         public static IModelGridListEditor GridListEditor(this IModelReactiveModules reactiveModules){
-            return reactiveModules.CastTo<IModelReactiveModuleGridListEditor>().GridListEditor;
+            return ((IModelReactiveModuleGridListEditor) reactiveModules).GridListEditor;
         }
 
     }
