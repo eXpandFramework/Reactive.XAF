@@ -36,7 +36,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |akarnokd.reactive_extensions|0.0.27-alpha
  |Fasterflect.Xpand|2.0.6
  |System.Reactive|4.1.6
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|1.2.52
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|1.2.54
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.0.34
 
 ## Issues-Debugging-Troubleshooting
@@ -52,9 +52,10 @@ Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.Re
 The module extends the `IModelReactiveModules` to provide a list TraceSources allowing to configure them further. All reactive modules will be in this list. 
 ![image](https://user-images.githubusercontent.com/159464/64830050-63c43a00-d5d7-11e9-919d-ac5df92646af.png)
 
+All messages are stored in the local database using the `TraceEvent` BO and you can visualize them in ListView as shown in the next shot.
+![image](https://user-images.githubusercontent.com/159464/66390603-ad842280-e9d3-11e9-840a-e3035bf0fefb.png)
 
-![image](https://user-images.githubusercontent.com/159464/55380067-b7f6c880-5527-11e9-96a1-053fd44095e7.png)
-
+All messages are buffered until after the logon where we have a valid database and then stored in the database. However there is also a file logging which happens on Realtime and can be found in path with the `_RXLogger.log` suffix.
 
 ### Tests
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Reactive.Logger)
