@@ -36,7 +36,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |akarnokd.reactive_extensions|0.0.27-alpha
  |Fasterflect.Xpand|2.0.6
  |System.Reactive|4.1.6
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|1.2.52
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|1.2.56
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.0.34
 
 ## Issues-Debugging-Troubleshooting
@@ -45,7 +45,7 @@ To `Step in the source code` you need to `enable Source Server support` in your 
 
 If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call at the contructor of your module.
 ```cs
-Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.Reactive.Logger.LoggerModule))
+Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.Reactive.Logger.ReactiveLoggerModule))
 ```
 
 ## Details
