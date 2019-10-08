@@ -13,6 +13,12 @@
               <Exclude>
                 <ModulePath>.*Tests\.dll</ModulePath>
                 <ModulePath>.*Hub.*</ModulePath>
+                <ModulePath>.*system.*</ModulePath>
+                <ModulePath>.*xunit.*</ModulePath>
+                <ModulePath>.*nunit.*</ModulePath>
+                <ModulePath>.*xpand\.source.*</ModulePath>
+                <ModulePath>.*testslib.*</ModulePath>
+
               </Exclude>
             </ModulePaths>
             <Functions>
