@@ -31,6 +31,7 @@ namespace TestsLib{
         public void Dispose(){
             XpoTypesInfoHelper.Reset();
             XafTypesInfo.HardReset();
+            GC.Collect();
         }
     }
 }
