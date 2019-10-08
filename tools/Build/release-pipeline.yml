@@ -115,7 +115,7 @@ jobs:
 - job: Publish
   strategy: 
     parallel: 1
-  dependsOn: Test
+  dependsOn: TestModelMapper
   pool:
     vmImage: windows-2019
   steps:
