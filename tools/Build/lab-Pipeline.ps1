@@ -78,19 +78,23 @@ if ($newPackages) {
 Write-Host "End-Packages:" -f blue
 $yArgs.Packages 
 $updateVersion=Update-NugetProjectVersion @yArgs |Select-Object -Skip 1
-$updateVersion
+"updateVersion=$updateVersion"
 $reactiveVersionChanged=$updateVersion|select-string "Xpand.XAF.Modules.Reactive"
+"reactiveVersionChanged=$reactiveVersionChanged"
 if ($reactiveVersionChanged){
     $reactiveModules=Get-ChildItem "$sourcePath\src\Modules" *.csproj -Recurse|ForEach-Object{
         [xml]$csproj=Get-Content $_.FullName
         $packageName=$_.BaseName
         $csproj.project.itemgroup.reference.include|Where-Object{$_ -eq "Xpand.XAF.Modules.Reactive"}|ForEach-Object{$packageName}
     }
-    $notChangedModules=$reactiveModules|Where-Object{!($updateVersion|Select-String $_)}
+    "reactiveModules:"
+    $reactiveModules|Write-Host
+    # $notChangedModules=$reactiveModules|Where-Object{!($updateVersion|Select-String $_)}
+    # "notChangedModules=$notChangedModules"
     Get-ChildItem "$sourcePath\src\Modules" *.csproj -Recurse|ForEach-Object{
-        if ($notChangedModules -contains $_.BaseName){
+        # if ($notChangedModules -contains $_.BaseName){
             Update-AssemblyInfo $_.DirectoryName -Revision
-        }
+        # }
     }
 }
 
