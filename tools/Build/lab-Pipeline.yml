@@ -78,6 +78,7 @@ jobs:
         distributionBatchType: basedOnTestCases
         runInParallel: false
         runTestsInIsolation: true
+        runSettingsFile: .\Xpand.XAF.Modules.Bin\CodeCoverage.runsettings
         collectDumpOn: never
 - job: TestPhase2
   strategy:
@@ -107,6 +108,7 @@ jobs:
         codeCoverageEnabled: true
         distributionBatchType: basedOnAssembly
         runInParallel: false
+        runSettingsFile: .\Xpand.XAF.Modules.Bin\CodeCoverage.runsettings
         runTestsInIsolation: true
         collectDumpOn: never
 - job: Publish
