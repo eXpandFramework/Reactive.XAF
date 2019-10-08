@@ -50,39 +50,69 @@ jobs:
     inputs:
       PathtoPublish: '$(System.DefaultworkingDirectory)\bin'
       ArtifactName: 'Xpand.XAF.Modules.Bin'
-# - job: Test
-#   strategy:
-#     parallel: 10
-#   dependsOn: Build
-#   pool:
-#     vmImage: windows-2019
-#   steps:
-#     - checkout: none
-#     - task: DownloadBuildArtifacts@0
-#       inputs:
-#         buildType: 'current'
-#         downloadType: 'specific'
-#         downloadPath: '$(System.DefaultworkingDirectory)'
-#     - task: VSTest@2
-#       displayName: 'VsTest - testAssemblies'
-#       inputs:
-#         searchFolder: '$(System.DefaultWorkingDirectory)'
-#         testSelector: 'testAssemblies'
-#         testAssemblyVer2: |
-#           **\*Tests*.dll
-#           !**\*Hub*.dll
-#           !**\*TestAdapter.dll
-#           !**\obj\**    
-#         diagnosticsEnabled: true
-#         codeCoverageEnabled: true
-#         distributionBatchType: basedOnTestCases
-#         runInParallel: false
-#         runTestsInIsolation: true
-#         collectDumpOn: never
+- job: TestModelMapper
+  strategy:
+    parallel: 10
+  dependsOn: Build
+  pool:
+    vmImage: windows-2019
+  steps:
+    - checkout: none
+    - task: DownloadBuildArtifacts@0
+      inputs:
+        buildType: 'current'
+        downloadType: 'specific'
+        downloadPath: '$(System.DefaultworkingDirectory)'
+    - task: VSTest@2
+      displayName: 'VsTest - testAssemblies'
+      inputs:
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: |
+          **\*ModelMapper*Tests*.dll
+          !**\*Hub*.dll
+          !**\*TestAdapter.dll
+          !**\obj\**    
+        diagnosticsEnabled: true
+        codeCoverageEnabled: true
+        distributionBatchType: basedOnTestCases
+        runInParallel: false
+        runTestsInIsolation: true
+        collectDumpOn: never
+- job: TestPhase2
+  strategy:
+    parallel: 14
+  dependsOn: TestModelMapper
+  pool:
+    vmImage: windows-2019
+  steps:
+    - checkout: none
+    - task: DownloadBuildArtifacts@0
+      inputs:
+        buildType: 'current'
+        downloadType: 'specific'
+        downloadPath: '$(System.DefaultworkingDirectory)'
+    - task: VSTest@2
+      displayName: 'VsTest - testAssemblies'
+      inputs:
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: |
+          **\*Tests*.dll
+          !**\*ModelMapper*.dll
+          !**\*Hub*.dll
+          !**\*TestAdapter.dll
+          !**\obj\**    
+        diagnosticsEnabled: true
+        codeCoverageEnabled: true
+        distributionBatchType: basedOnAssembly
+        runInParallel: false
+        runTestsInIsolation: true
+        collectDumpOn: never
 - job: Publish
   strategy: 
     parallel: 1
-  # dependsOn: Test
+  dependsOn: TestPhase2
   pool:
     vmImage: windows-2019
   steps:
