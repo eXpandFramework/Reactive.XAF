@@ -42,7 +42,6 @@
     <None Include="Readme.md" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="akarnokd.reactive_extensions" Version="0.0.27-alpha" />
     <PackageReference Include="DevExpress.ExpressApp" Version="18.2.7" />
     <PackageReference Include="DevExpress.Persistent.Base" Version="18.2.7" />
     <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" Version="18.2.7" />
