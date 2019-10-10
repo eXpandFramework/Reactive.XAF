@@ -23,6 +23,9 @@
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
+    <Reference Include="Xpand.XAF.Modules.Reactive.Win">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Win.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Module.cs" />
@@ -38,8 +41,5 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="LinkedFiles\" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Reactive.Win\Xpand.XAF.Modules.Reactive.Win.csproj" />
   </ItemGroup>
 </Project>
