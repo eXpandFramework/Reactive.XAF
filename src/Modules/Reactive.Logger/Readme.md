@@ -33,10 +33,9 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |**DevExpress.Persistent.Base**|**Any**
  |**DevExpress.ExpressApp.ConditionalAppearance**|**Any**
  |**DevExpress.Xpo**|**Any**
-|akarnokd.reactive_extensions|0.0.27-alpha
- |Fasterflect.Xpand|2.0.6
+|Fasterflect.Xpand|2.0.6
  |System.Reactive|4.1.6
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|1.2.56
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|1.2.57
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.0.34
 
 ## Issues-Debugging-Troubleshooting
