@@ -8,7 +8,7 @@ param(
     [string]$branch="lab",
     [switch]$InstallModules,
     [string[]]$taskList=@("Release"),
-    [string]$XpandPwshVersion = "0.17.6",
+    [string]$XpandPwshVersion = "0.17.7",
     [switch]$Release
 )
 $ErrorActionPreference = "Stop"
