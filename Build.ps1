@@ -11,8 +11,10 @@ properties {
     $dxVersion=$null
     $branch=$null
     $Release=$null
+    $CustomVersion=$false
 }
 
+task TestsRun  -depends Clean, Init, UpdateProjects,Compile
 task Release  -depends   Clean, Init, UpdateProjects,  Compile,IndexSources, CreateNuspec, PackNuspec, UpdateReadMe
 
 
@@ -39,7 +41,7 @@ task Init {
                 }
             }
         }|Select-Object -First 1
-        if ($versionMismatch){
+        if ($versionMismatch -and !$CustomVersion){
             throw "$($versionMismatch.Path) use DX $($versionMismatch.Version) instaed of $dxversion"
         }
     }
@@ -59,12 +61,12 @@ task UpdateReadMe {
 
 task Compile -precondition {return $compile  } {
     $source="https://api.nuget.org/v3/index.json;$packageSources"
-    InvokeScript{
+    InvokeScript -maxRetries 3 {
         write-host "Building Extensions" -f "Blue"
         dotnet restore "$PSScriptRoot\src\Extensions\Extensions.sln" --source $source
         dotnet msbuild "$PSScriptRoot\src\Extensions\Extensions.sln" "/p:configuration=Release" /WarnAsError
     }
-    InvokeScript{
+    InvokeScript -maxRetries 3{
         write-host "Building Modules" -f "Blue"
         dotnet restore "$PSScriptRoot\src\Modules\Modules.sln" --source $source
         dotnet msbuild "$PSScriptRoot\src\Modules\Modules.sln" "/p:configuration=Release" /WarnAsError

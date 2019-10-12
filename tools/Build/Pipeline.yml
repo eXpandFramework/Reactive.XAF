@@ -1,5 +1,6 @@
 variables:
   - group: Keys
+  
 trigger: 
     paths:
       exclude:
@@ -26,7 +27,7 @@ trigger:
       include:
         - master
 jobs:
-- job: Build
+- job: TestsRunBuild
   strategy: 
     parallel: 1
   pool:
@@ -39,21 +40,16 @@ jobs:
       pwsh: true
       targetType: filePath
       filePath: .\tools\build\pipeline.ps1 
-      arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(GitHubUserName) $(GitHubPass) $(DXApiFeed) $(build.artifactstagingdirectory) $(System.DefaultworkingDirectory)\bin $(AzureToken)
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: Packages'
-    inputs:
-      PathtoPublish: '$(build.artifactstagingdirectory)'
-      ArtifactName: 'Xpand.XAF.Modules.Packages'
+      arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(GitHubUserName) $(GitHubPass) $(DXApiFeed) $(build.artifactstagingdirectory) $(System.DefaultworkingDirectory)\bin $(AzureToken) $(Build.DefinitionName) 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Packages'
     inputs:
       PathtoPublish: '$(System.DefaultworkingDirectory)\bin'
       ArtifactName: 'Xpand.XAF.Modules.Bin'
-- job: TestPhase2
+- job: TestPhase1
   strategy:
     parallel: 14
-  dependsOn: Build
+  dependsOn: TestsRunBuild
   pool:
     vmImage: windows-2019
   steps:
@@ -75,7 +71,7 @@ jobs:
           !**\*TestAdapter.dll
           !**\obj\**    
         diagnosticsEnabled: true
-        overrideTestrunParameters: '/platform:x64'
+        # overrideTestrunParameters: '/platform:x64'
         codeCoverageEnabled: true
         distributionBatchType: basedOnAssembly
         runInParallel: false
@@ -85,7 +81,7 @@ jobs:
 - job: TestModelMapper
   strategy:
     parallel: 10
-  dependsOn: Build
+  dependsOn: TestPhase1
   pool:
     vmImage: windows-2019
   steps:
@@ -110,22 +106,24 @@ jobs:
         distributionBatchType: basedOnTestCases
         runInParallel: false
         runTestsInIsolation: true
-        overrideTestrunParameters: '/platform:x64'
+        # overrideTestrunParameters: '/platform:x64'
         runSettingsFile: .\Xpand.XAF.Modules.Bin\CodeCoverage.runsettings
         collectDumpOn: never
-- job: Publish
+- job: Release
+  dependsOn: TestModelMapper
   strategy: 
     parallel: 1
-  dependsOn: TestModelMapper
   pool:
     vmImage: windows-2019
   steps:
   - checkout: self
-  - task: DownloadBuildArtifacts@0
+  - task: PowerShell@2
+    displayName: Build
     inputs:
-      buildType: 'current'
-      downloadType: 'specific'
-      downloadPath: '$(System.DefaultworkingDirectory)'
+      pwsh: true
+      targetType: filePath
+      filePath: .\tools\build\pipeline.ps1 
+      arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(GitHubUserName) $(GitHubPass) $(DXApiFeed) $(build.artifactstagingdirectory) $(System.DefaultworkingDirectory)\bin $(AzureToken)
   - task: PowerShell@2
     displayName: Publish
     inputs:

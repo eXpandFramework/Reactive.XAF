@@ -6,17 +6,28 @@ param(
     $DXApiFeed  ,
     $artifactstagingdirectory,
     $bindirectory,
-    $AzureToken  =(Get-AzureToken),
+    $AzureToken = (Get-AzureToken),
+    $CustomVersion,
     $WhatIf = $false
+    
 )
 $ErrorActionPreference = "Stop"
+$regex = [regex] '(\d*\.\d*\.\d*)'
+$result = $regex.Match($CustomVersion).Groups[1].Value;
+if (!$result){
+    $CustomVersion="latest"
+}
 & "$SourcePath\go.ps1" -InstallModules
-$dxVersion=Get-DevExpressVersion -LatestVersionFeed $DXApiFeed
-if ($Branch -eq "master"){
-    $bArgs=@{
-        packageSources="$(Get-PackageFeed -Xpand);$DxApiFeed"
-        tasklist="release"
-        Release=$true
+$defaulVersion=Get-Content "$SourcePath\go.ps1"|Select-String dxVersion|Select-Object -First 1|ForEach-Object{
+    $regex = [regex] '"([^"]*)'
+    $regex.Match($_).Groups[1].Value;
+}
+
+if ($Branch -eq "master") {
+    $bArgs = @{
+        packageSources = "$(Get-PackageFeed -Xpand);$DxApiFeed"
+        tasklist       = "release"
+        Release        = $true
     }
     & $SourcePath\go.ps1 @bArgs
     return    
@@ -26,10 +37,10 @@ if (!(Get-Module VSTeam -ListAvailable)) {
     Install-Module VSTeam -Force
 }
 Set-VSTeamAccount -Account eXpandDevOps -PersonalAccessToken $AzureToken
-$officialPackages=Get-XpandPackages -PackageType XAF -Source Release
-$labPackages=Get-XpandPackages -PackageType XAF -Source Lab
-$DXVersion=Get-DevExpressVersion 
-$localPackages = (Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse)+(Get-ChildItem "$sourcePath\src\Extensions" "*.csproj" -Recurse) |ForEach-Object {
+$officialPackages = Get-XpandPackages -PackageType XAF -Source Release
+$labPackages = Get-XpandPackages -PackageType XAF -Source Lab
+$DXVersion = Get-DevExpressVersion 
+$localPackages = (Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse) + (Get-ChildItem "$sourcePath\src\Extensions" "*.csproj" -Recurse) | ForEach-Object {
     $name = [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
     $localVersion = Get-XpandVersion -XpandPath $_.DirectoryName -module $name
     $nextVersion = Get-XpandVersion -Next -module $name -OfficialPackages $officialPackages -LabPackages $labPackages -DXVersion $DXVersion
@@ -65,53 +76,59 @@ $newPackages = $localPackages | Where-Object { !(($publishedPackages | Select-Ob
         LocalVersion = $localVersion
     }
 }
-Write-host "newPackages:" -f blue
+Write-Host "newPackages:" -f blue
 $newPackages
 
 $labBuild = Get-VSTeamBuild -ResultFilter succeeded -ProjectName expandframework -top 1 -StatusFilter completed -Definitions 23
 
 $yArgs = @{
-    Owner        = $GitHubUserName
-    Organization = "eXpandFramework"
-    Repository   = "DevExpress.XAF"
-    Branch       = $Branch
-    Pass         = $Pass
-    Packages     = $publishedPackages 
-    SourcePath   = $SourcePath
-    CommitsSince = $labBuild.finishTime
+    Owner         = $GitHubUserName
+    Organization  = "eXpandFramework"
+    Repository    = "DevExpress.XAF"
+    Branch        = $Branch
+    Pass          = $Pass
+    Packages      = $publishedPackages 
+    SourcePath    = $SourcePath
+    CommitsSince  = $labBuild.finishTime
     ExcludeFilter = "Test"
-    WhatIf       = $WhatIf
+    WhatIf        = $WhatIf
 }
 if ($newPackages) {
     $yArgs.Packages += $newPackages
 }
 Write-Host "End-Packages:" -f blue
 $yArgs.Packages 
-$updateVersion=Update-NugetProjectVersion @yArgs |Select-Object -Skip 1
+$updateVersion = Update-NugetProjectVersion @yArgs | Select-Object -Skip 1
 "updateVersion=$updateVersion"
-$reactiveVersionChanged=$updateVersion|select-string "Xpand.XAF.Modules.Reactive"
+$reactiveVersionChanged = $updateVersion | Select-String "Xpand.XAF.Modules.Reactive"
 "reactiveVersionChanged=$reactiveVersionChanged"
-if ($reactiveVersionChanged){
-    $reactiveModules=Get-ChildItem "$sourcePath\src\Modules" *.csproj -Recurse|ForEach-Object{
-        [xml]$csproj=Get-Content $_.FullName
-        $packageName=$_.BaseName
-        $csproj.project.itemgroup.reference.include|Where-Object{$_ -eq "Xpand.XAF.Modules.Reactive"}|ForEach-Object{$packageName}
+if ($reactiveVersionChanged) {
+    $reactiveModules = Get-ChildItem "$sourcePath\src\Modules" *.csproj -Recurse | ForEach-Object {
+        [xml]$csproj = Get-Content $_.FullName
+        $packageName = $_.BaseName
+        $csproj.project.itemgroup.reference.include | Where-Object { $_ -eq "Xpand.XAF.Modules.Reactive" } | ForEach-Object { $packageName }
     }
     "reactiveModules:"
-    $reactiveModules|Write-Host
-    # $notChangedModules=$reactiveModules|Where-Object{!($updateVersion|Select-String $_)}
-    # "notChangedModules=$notChangedModules"
-    Get-ChildItem "$sourcePath\src\Modules" *.csproj -Recurse|ForEach-Object{
-        # if ($notChangedModules -contains $_.BaseName){
-            Update-AssemblyInfo $_.DirectoryName -Revision
-        # }
+    $reactiveModules | Write-Host
+    Get-ChildItem "$sourcePath\src\Modules" *.csproj -Recurse | ForEach-Object {
+        Update-AssemblyInfo $_.DirectoryName -Revision
     }
 }
-
+$taskList="Release"
+if ($CustomVersion){
+    $taskList="TestsRun"
+}
+if ($customVersion -eq "latest"){
+    $defaulVersion=$DXVersion
+}
 $bArgs = @{
     packageSources = "$(Get-PackageFeed -Xpand);$DxApiFeed"
-    tasklist       = "release"
+    tasklist       = $tasklist
+    Version        = $defaulVersion
+    CustomVersion  = !($customVersion)
 }
+"bArgs:"
+$bArgs|Out-String
 
 & $SourcePath\go.ps1 @bArgs
 
