@@ -11,6 +11,7 @@ param(
 )
 $ErrorActionPreference = "Stop"
 & "$SourcePath\go.ps1" -InstallModules
+$dxVersion=Get-DevExpressVersion -LatestVersionFeed $DXApiFeed
 if ($Branch -eq "master"){
     $bArgs=@{
         packageSources="$(Get-PackageFeed -Xpand);$DxApiFeed"

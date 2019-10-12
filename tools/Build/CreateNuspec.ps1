@@ -34,8 +34,7 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*Tests*" -Recurse | For
     if ($Release){
         $uArgs.PublishedSource=(Get-PackageFeed -Nuget)
     }
-    "uArgs:"
-    $uArgs
+    
     Update-Nuspec @uArgs 
 
     $nuspecFileName="$root\tools\nuspec\$($_.BaseName).nuspec"
@@ -48,11 +47,11 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*Tests*" -Recurse | For
             $nuspec.package.metaData.description = "$($matches[1])".Trim()
         }
         else {
-            $nuspec.package.metaData.description = $metaData.id
+            $nuspec.package.metaData.description = $nuspec.package.metaData.id
         }
     }
     else {
-        $nuspec.package.metaData.description = $metaData.id
+        $nuspec.package.metaData.description = $nuspec.package.metaData.id
     }
 
     $relativeLocation = $_.DirectoryName.Replace($root, "").Replace("\", "/")

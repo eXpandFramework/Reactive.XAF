@@ -3,7 +3,7 @@ param(
     $nugetBin = "$PSScriptRoot\..\..\bin\Nupkg",
     $sourceDir = "$PSScriptRoot\..\.."
 )
-import-module XpandPwsh -Force -Prefix X
+Import-Module XpandPwsh -Force -Prefix X
 $ErrorActionPreference = "Stop"
 New-Item $nugetBin -ItemType Directory -Force | Out-Null
 $versionConverterSpecPath = "$sourceDir\Tools\Xpand.VersionConverter\Xpand.VersionConverter.nuspec"
@@ -24,19 +24,20 @@ $packData = [pscustomobject] @{
     nugetBin = $nugetBin
 }
 
-set-location $sourceDir
-$assemblyVersions = Get-ChildItem "$sourceDir\src\Modules" "*.csproj" -Recurse | ForEach-Object {
-    $assemblyInfo = get-content "$($_.DirectoryName)\Properties\AssemblyInfo.cs"
+Set-Location $sourceDir
+$assemblyVersions = (Get-ChildItem "$sourceDir\src\Modules" "*.csproj" -Recurse)+(Get-ChildItem "$sourceDir\src\Extensions" "*.csproj" -Recurse) | ForEach-Object {
+    $assemblyInfo = Get-Content "$($_.DirectoryName)\Properties\AssemblyInfo.cs"
     [PSCustomObject]@{
         Name    = [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
         Version = [System.Text.RegularExpressions.Regex]::Match($assemblyInfo, 'Version\("([^"]*)').Groups[1].Value
     }
 }
 
-Get-ChildItem "$sourceDir\tools\nuspec" "*Xpand.XAF*.nuspec" -Recurse | ForEach-Object {
-    $name = $_.BaseName.Replace("Xpand.XAF.Modules.", "")
-    $id = "Xpand.XAF.Modules.$name.$name" + "Module"
-    $message = @"
+Get-ChildItem "$sourceDir\tools\nuspec" "Xpand*.nuspec" -Recurse | ForEach-Object {
+    if ($_ -like "Xpand.XAF*") {
+        $name = $_.BaseName.Replace("Xpand.XAF.Modules.", "")
+        $id = "Xpand.XAF.Modules.$name.$name" + "Module"
+        $message = @"
     
     ➤ ​̲𝗣​̲𝗟​̲𝗘​̲𝗔​̲𝗦​̲𝗘​̲ ​̲𝗦​̲𝗨​̲𝗦​̲𝗧​̲𝗔​̲𝗜​̲𝗡​̲ ​̲𝗢​̲𝗨​̲𝗥​̲ ​̲𝗔​̲𝗖​̲𝗧​̲𝗜​̲𝗩​̲𝗜​̲𝗧​̲𝗜​̲𝗘​̲𝗦
 
@@ -55,11 +56,12 @@ Get-ChildItem "$sourceDir\tools\nuspec" "*Xpand.XAF*.nuspec" -Recurse | ForEach-
         ☞ The package only adds the required references. To install $id add the next line in the constructor of your XAF module.
             RequiredModuleTypes.Add(typeof($id));
 "@
+    }
     Set-Content "$sourceDir\bin\Readme.txt" $message 
     $packageName = [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
     $assembly = $assemblyVersions | Where-Object { $_.name -eq $packageName }
     $name = $_.FullName
-    $directory = $_.Directory.Parent.FullName
+    
     Write-Host "Packing $($assembly.Version) $name $version " -f Blue
     & (Get-XNugetPath) pack $name -OutputDirectory $($packData.nugetBin) -Basepath "$sourceDir\bin" -Version $($assembly.Version)
     if ($lastexitcode) {
