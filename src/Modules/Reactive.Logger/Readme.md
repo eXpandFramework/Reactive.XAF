@@ -18,8 +18,6 @@ or simply add the next call to your module constructor
     RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.Reactive..Logger.ReactiveLoggerModule));
     ```
 
-The module is not integrated with any `eXpandFramework` module. You have to install it as described.
-
 ## Versioning
 The module is **not bound** to **DevExpress versioning**, which means you can use the latest version with your old DevExpress projects [Read more](https://github.com/eXpandFramework/XAF/tree/master/tools/Xpand.VersionConverter).
 
