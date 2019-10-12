@@ -18,32 +18,18 @@
     <Reference Include="System.Windows" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="WindowsBase" />
+    <Reference Include="Xpand.Extensions">
+      <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions.XAF">
+      <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
+    </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\Extensions\Extensions\FunctionOperators\IsAssignableFromOperator.cs" Link="LinkedFiles\IsAssignableFromOperator.cs" />
-    <Compile Include="..\..\Extensions\Extensions\FunctionOperators\PropertyExistsOperator.cs" Link="LinkedFiles\PropertyExistsOperator.cs" />
-    <Compile Include="..\..\Extensions\Extensions\Linq\DistinctBy.cs" Link="LinkedFiles\DistinctBy.cs" />
-    <Compile Include="..\..\Extensions\Extensions\Linq\GetItems.cs" Link="LinkedFiles\GetItems.cs" />
-    <Compile Include="..\..\Extensions\Extensions\System\AppDomain\ApplicationPath.cs" Link="LinkedFiles\ApplicationPath.cs" />
-    <Compile Include="..\..\Extensions\Extensions\System\Refelction\DelegateTypeFactory.cs" Link="LinkedFiles\DelegateTypeFactory.cs" />
-    <Compile Include="..\..\Extensions\Extensions\System\Refelction\IsNullAbleType.cs" Link="LinkedFiles\IsNullAbleType.cs" />
-    <Compile Include="..\..\Extensions\Extensions\System\Refelction\PropertyInfoAccessModifier.cs" Link="LinkedFiles\PropertyInfoAccessModifier.cs" />
-    <Compile Include="..\..\Extensions\Extensions\System\String\CleanCodeName.cs" Link="LinkedFiles\CleanCodeName.cs" />
-    <Compile Include="..\..\Extensions\Extensions\System\String\ToLiteral.cs" Link="LinkedFiles\ToLiteral.cs" />
-    <Compile Include="..\..\Extensions\Extensions\XAF\Model\AddNode.cs" Link="LinkedFiles\AddNode.cs" />
-    <Compile Include="..\..\Extensions\Extensions\XAF\Model\FastModelAccess.cs" Link="LinkedFiles\FastModelAccess.cs" />
-    <Compile Include="..\..\Extensions\Extensions\XAF\Model\GetParent.cs" Link="LinkedFiles\GetParent.cs" />
-    <Compile Include="..\..\Extensions\Extensions\XAF\Model\GetValue.cs" Link="LinkedFiles\GetValue.cs" />
-    <Compile Include="..\..\Extensions\Extensions\XAF\Model\Id.cs" Link="LinkedFiles\Id.cs" />
-    <Compile Include="..\..\Extensions\Extensions\XAF\Model\ModelListType.cs" Link="LinkedFiles\ModelListType.cs" />
-    <Compile Include="..\..\Extensions\Extensions\XAF\Model\Nodes.cs" Link="LinkedFiles\Nodes.cs" />
-    <Compile Include="..\..\Extensions\Extensions\XAF\Model\ObjectViewItems.cs" Link="LinkedFiles\ObjectViewItems.cs" />
-    <Compile Include="..\..\Extensions\Extensions\XAF\Model\ReadFromModel.cs" Link="LinkedFiles\ReadFromModel.cs" />
-    <Compile Include="..\..\extensions\extensions\xaf\xafapplication\GetPlatform.cs" Link="LinkedFiles\GetPlatform.cs" />
     <Compile Update="Module.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -58,8 +44,5 @@
     <PackageReference Include="System.Reactive" Version="4.1.6" />
     <PackageReference Include="Fasterflect.Xpand" Version="2.0.6" />
     <PackageReference Include="Xpand.Collections" Version="1.0.1" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Resources\" />
   </ItemGroup>
 </Project>

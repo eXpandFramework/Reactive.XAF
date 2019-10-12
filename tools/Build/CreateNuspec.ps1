@@ -15,13 +15,13 @@ $versionConverter = [PSCustomObject]@{
 }
 
 
-get-childitem "$root\src\" -Include "*.csproj" -Exclude "*Tests*", "*.Source.*" -Recurse | ForEach-Object {
+get-childitem "$root\src\" -Include "*.csproj" -Exclude "*Tests*" -Recurse | ForEach-Object {
     $projectPath = $_.FullName
     write-host "Creating Nuspec for $($_.baseName)" -f "Blue"
     $uArgs=@{
         NuspecFilename="$root\tools\nuspec\$($_.baseName).nuspec"
         ProjectFileName=$projectPath
-        ReferenceToPackageFilter="Xpand.XAF*"
+        ReferenceToPackageFilter="Xpand*"
         PublishedSource=(Get-PackageFeed -Xpand)
         Release=$Release
         ReadMe=$true
@@ -34,7 +34,8 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*Tests*", "*.Source.*" 
     if ($Release){
         $uArgs.PublishedSource=(Get-PackageFeed -Nuget)
     }
-    
+    "uArgs:"
+    $uArgs
     Update-Nuspec @uArgs 
 
     $nuspecFileName="$root\tools\nuspec\$($_.BaseName).nuspec"

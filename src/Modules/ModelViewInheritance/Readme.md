@@ -27,8 +27,9 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |----|----
 |**DevExpress.ExpressApp**|**Any**
 |Fasterflect.Xpand|2.0.6
- |Moq|4.13.0
  |System.ValueTuple|4.5.0
+ |Xpand.Extensions|0.0.1
+ |Xpand.Extensions.XAF|0.0.1
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.0.34
 
 ## Issues-Debugging-Troubleshooting

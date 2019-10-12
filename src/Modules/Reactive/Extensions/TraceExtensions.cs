@@ -10,8 +10,8 @@ using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using Fasterflect;
-using Xpand.Source.Extensions.Linq;
-using Xpand.Source.Extensions.System.Exception;
+using Xpand.Extensions.Exception;
+using Xpand.Extensions.Linq;
 
 namespace Xpand.XAF.Modules.Reactive.Extensions{
     public enum ObservableTraceStrategy{

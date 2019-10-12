@@ -3,7 +3,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Reactive.Subjects;
 using System.Text.RegularExpressions;
-using Xpand.Source.Extensions.System.AppDomain;
+using Xpand.Extensions.AppDomain;
+
 
 namespace Xpand.XAF.Modules.Reactive.Logger{
     public class ReactiveTraceListener : TextWriterTraceListener{

@@ -3,7 +3,7 @@ using System.ComponentModel;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp.Model;
 using EnumsNET;
-using Xpand.Source.Extensions.FunctionOperators;
+using Xpand.Extensions.XAF.FunctionOperators;
 
 namespace Xpand.XAF.Modules.ModelMapper.Configuration{
     public enum VisibilityCriteriaLeftOperand{

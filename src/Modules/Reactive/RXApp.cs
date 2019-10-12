@@ -7,7 +7,6 @@ using System.Reflection;
 using DevExpress.ExpressApp;
 using Fasterflect;
 using HarmonyLib;
-using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
@@ -22,9 +21,7 @@ namespace Xpand.XAF.Modules.Reactive{
             ((IConnectableObservable<Frame>) Frames).Connect();
             var harmony = new Harmony(typeof(RxApp).Namespace);
             PatchXafApplication(harmony);
-            if (XafApplicationExtensions.IsHosted ){
-//                WebChecks();
-            }
+
         }
 
         private static void PatchXafApplication(Harmony harmony){

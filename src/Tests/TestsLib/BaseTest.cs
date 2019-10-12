@@ -3,13 +3,13 @@ using System.Diagnostics;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Xpo;
 using NUnit.Framework;
-using Xpand.Source.Extensions.System.AppDomain;
-using Xpand.Source.Extensions.XAF.XafApplication;
+using Xpand.Extensions.AppDomain;
+using Xpand.Extensions.XAF.XafApplication;
 using IDisposable = System.IDisposable;
 
 namespace TestsLib{
     public abstract class BaseTest : IDisposable{
-        internal Platform GetPlatform(string platformName){
+        protected Platform GetPlatform(string platformName){
             return (Platform)Enum.Parse(typeof(Platform),platformName);
         }
         protected TimeSpan Timeout = TimeSpan.FromSeconds(Debugger.IsAttached?120:5);

@@ -5,7 +5,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.SystemModule;
 using Shouldly;
-using Xpand.Source.Extensions.XAF.Model;
+using Xpand.Extensions.XAF.Model;
 using Xpand.XAF.Modules.ModelViewInheritance.Tests.BOModel;
 
 namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{

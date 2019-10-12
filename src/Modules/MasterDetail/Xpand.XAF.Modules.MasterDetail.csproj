@@ -14,17 +14,15 @@
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Xpand.Extensions.XAF">
+      <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
+    </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\Extensions\Extensions\XAF\Action\DoExecute.cs" Link="LinkedFiles\DoExecute.cs" />
-    <Compile Include="..\..\Extensions\Extensions\XAF\ApplicationModulesManager\RegisterAction.cs" Link="LinkedFiles\RegisterAction.cs" />
-    <Compile Include="..\..\Extensions\Extensions\XAF\Frame\Actions.cs" Link="LinkedFiles\Actions.cs" />
-    <Compile Include="..\..\Extensions\Extensions\XAF\Frame\GetController.cs" Link="LinkedFiles\GetController.cs" />
-    <Compile Include="..\..\Extensions\Extensions\XAF\XafApplication\GetPlatform.cs" Link="LinkedFiles\GetPlatform.cs" />
     <Compile Update="Module.cs" />
   </ItemGroup>
   <ItemGroup>

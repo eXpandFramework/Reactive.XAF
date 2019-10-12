@@ -15,8 +15,9 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  ModelViewInheritance</tags>
     <dependencies>
       <dependency id="Fasterflect.Xpand" version="2.0.6" />
-      <dependency id="Moq" version="4.13.0" />
       <dependency id="System.ValueTuple" version="4.5.0" />
+      <dependency id="Xpand.Extensions" version="0.0.1.0" />
+      <dependency id="Xpand.Extensions.XAF" version="0.0.1.0" />
       <dependency id="Xpand.VersionConverter" version="1.0.34.0" />
     </dependencies>
   </metadata>

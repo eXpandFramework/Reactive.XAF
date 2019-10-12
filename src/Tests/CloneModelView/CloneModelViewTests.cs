@@ -7,7 +7,7 @@ using Fasterflect;
 using NUnit.Framework;
 using Shouldly;
 using TestsLib;
-using Xpand.Source.Extensions.XAF.XafApplication;
+using Xpand.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.CloneModelView.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;

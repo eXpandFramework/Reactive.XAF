@@ -27,6 +27,12 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Configuration" />
+    <Reference Include="Xpand.Extensions">
+      <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions.XAF">
+      <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Properties\Text.Designer.cs">
@@ -34,11 +40,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="..\..\Extensions\Extensions\Linq\FromHierarchy.cs" Link="LinkedFiles\FromHierarchy.cs" />
-    <Compile Include="..\..\Extensions\Extensions\System\Exception\GetAllMessages.cs" Link="LinkedFiles\GetAllMessages.cs" />
-    <Compile Include="..\..\Extensions\Extensions\XAF\Model\Id.cs" Link="LinkedFiles\Id.cs" />
-    <Compile Include="..\..\Extensions\Extensions\XAF\Model\Nodes.cs" Link="LinkedFiles\Nodes.cs" />
-    <Compile Include="..\..\Extensions\Extensions\XAF\XafApplication\GetPlatform.cs" Link="LinkedFiles\GetPlatform.cs" />
     <Compile Update="Module.cs" />
     <Compile Update="ReactiveModuleBase.cs">
       <SubType>Component</SubType>

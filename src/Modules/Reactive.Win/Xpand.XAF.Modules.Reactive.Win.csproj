@@ -48,8 +48,6 @@
     <PackageReference Include="Fasterflect.Xpand" Version="2.0.6" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Extensions\" />
-    <Folder Include="HarmonyPatches\" />
     <Folder Include="Services\Controllers\" />
   </ItemGroup>
 </Project>

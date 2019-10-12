@@ -11,7 +11,7 @@ using Moq;
 using NUnit.Framework;
 using Shouldly;
 using TestsLib;
-using Xpand.Source.Extensions.XAF.XafApplication;
+using Xpand.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.ProgressBarViewItem.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive.Extensions;
 

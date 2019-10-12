@@ -21,7 +21,7 @@ using DevExpress.Web;
 using DevExpress.XtraGrid;
 using Moq;
 using Moq.Protected;
-using Xpand.Source.Extensions.XAF.XafApplication;
+using Xpand.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Logger;
@@ -30,7 +30,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 using EditorsFactory = DevExpress.ExpressApp.Editors.EditorsFactory;
 
 namespace TestsLib {
-    internal static class Extensions {
+    public static class Extensions {
 
         public static async Task<T> WithTimeOut<T>(this Task<T> source, TimeSpan? timeout = null){
             return await source.ToObservable().WithTimeOut(timeout);

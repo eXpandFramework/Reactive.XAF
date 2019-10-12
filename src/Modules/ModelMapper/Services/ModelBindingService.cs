@@ -11,8 +11,8 @@ using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using Fasterflect;
-using Xpand.Source.Extensions.Linq;
-using Xpand.Source.Extensions.XAF.Model;
+using Xpand.Extensions.Linq;
+using Xpand.Extensions.XAF.Model;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.Predefined;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
@@ -173,11 +173,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                             var propertyValue = info.GetValue(instance);
                             if (propertyValue != null) (nodeEnabled).BindToModel(propertyValue);
                         }
-//                        else if (node is IEnumerable enumerable){
-//                            foreach (var childNode in enumerable.Cast<IModelNode>()){
-//                                childNode
-//                            }
-//                        }
                     }
                     
                 }

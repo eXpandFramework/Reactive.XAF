@@ -9,7 +9,7 @@ using DevExpress.ExpressApp.SystemModule;
 using NUnit.Framework;
 using Shouldly;
 using TestsLib;
-using Xpand.Source.Extensions.XAF.XafApplication;
+using Xpand.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.OneView.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;

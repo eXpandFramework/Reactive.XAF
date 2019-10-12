@@ -19,7 +19,7 @@ Set-VSTeamAccount -Account eXpandDevOps -PersonalAccessToken $AzureToken
 $officialPackages=Get-XpandPackages -PackageType XAF -Source Release
 $labPackages=Get-XpandPackages -PackageType XAF -Source Lab
 $DXVersion=Get-DevExpressVersion 
-$localPackages = Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse |ForEach-Object {
+$localPackages = (Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse)+(Get-ChildItem "$sourcePath\src\Extensions" "*.csproj" -Recurse) |ForEach-Object {
     $name = [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
     $localVersion = Get-XpandVersion -XpandPath $_.DirectoryName -module $name
     $nextVersion = Get-XpandVersion -Next -module $name -OfficialPackages $officialPackages -LabPackages $labPackages -DXVersion $DXVersion

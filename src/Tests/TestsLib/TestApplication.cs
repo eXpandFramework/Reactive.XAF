@@ -5,18 +5,14 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Windows.Forms;
-using DevExpress.ExpressApp.Layout;
-using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Web;
 using DevExpress.ExpressApp.Win;
-using DevExpress.ExpressApp.Win.Layout;
-using Moq;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Logger.Hub;
 
 namespace TestsLib{
     public class TestWinApplication : WinApplication,ITestApplication{
-        internal TestWinApplication(Type sutModule){
+        public TestWinApplication(Type sutModule){
             SUTModule = sutModule;
             TraceClientConnected = this.ClientConnect();
             TraceClientBroadcast = this.ClientBroadcast();

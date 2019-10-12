@@ -9,7 +9,8 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
-using Xpand.Source.Extensions.XAF.Model;
+using Xpand.Extensions.XAF.Model;
+
 
 namespace Xpand.XAF.Modules.Reactive.Logger{
     public interface IModelReactiveModuleLogger:IModelReactiveModule{

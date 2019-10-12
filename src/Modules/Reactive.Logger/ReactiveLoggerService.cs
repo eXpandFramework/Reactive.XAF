@@ -12,9 +12,9 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using DevExpress.ExpressApp;
 using DevExpress.Utils;
-using Xpand.Source.Extensions.System.Refelction;
-using Xpand.Source.Extensions.XAF.Model;
-using Xpand.Source.Extensions.XAF.XafApplication;
+using Xpand.Extensions.Reflection;
+using Xpand.Extensions.XAF.Model;
+using Xpand.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
@@ -167,9 +167,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                 .ToUnit();
             return register.Merge(applyModel);
         }
-//        static readonly ISubject<ITraceEvent> TraceEventSubject=new Subject<ITraceEvent>();
+
         internal  static  string ApplicationTitle{ get; set; }
-//        public static IObservable<ITraceEvent> TraceEvent => TraceEventSubject.CountSubsequent(_ => _.TraceKey()).UpdateTraceCalls();
 
         public static void TraceMessage(this TraceSource traceSource, string value,TraceEventType traceEventType=TraceEventType.Information){
             var traceEventMessage = new TraceEventMessage {

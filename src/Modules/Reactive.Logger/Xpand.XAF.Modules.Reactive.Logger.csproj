@@ -19,18 +19,15 @@
     <None Remove="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\Extensions\Extensions\Linq\ToRuns.cs" Link="LinkedFiles\ToRuns.cs" />
-    <Compile Include="..\..\Extensions\Extensions\System\AppDomain\ApplicationPath.cs" Link="LinkedFiles\ApplicationPath.cs" />
-    <Compile Include="..\..\Extensions\Extensions\System\Refelction\GetMemberInfo.cs" Link="LinkedFiles\GetMemberInfo.cs" />
-    <Compile Include="..\..\Extensions\Extensions\XAF\CollectionSource\CollectionSourceExtensions.cs" Link="LinkedFiles\CollectionSourceExtensions.cs" />
-    <Compile Include="..\..\Extensions\Extensions\XAF\Model\GetParent.cs" Link="LinkedFiles\GetParent.cs" />
-    <Compile Include="..\..\Extensions\Extensions\XAF\Model\Id.cs" Link="LinkedFiles\Id.cs" />
-    <Compile Include="..\..\Extensions\Extensions\XAF\XafApplication\GetPlatform.cs" Link="LinkedFiles\GetPlatform.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Xpand.Extensions">
+      <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions.XAF">
+      <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
+    </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
@@ -49,8 +46,5 @@
     <PackageReference Include="DevExpress.Xpo" Version="18.2.7" />
     <PackageReference Include="System.Reactive" Version="4.1.6" />
     <PackageReference Include="Fasterflect.Xpand" Version="2.0.6" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="LinkedFiles\" />
   </ItemGroup>
 </Project>

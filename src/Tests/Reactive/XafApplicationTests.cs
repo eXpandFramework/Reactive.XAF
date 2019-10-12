@@ -8,7 +8,7 @@ using DevExpress.ExpressApp;
 using NUnit.Framework;
 using Shouldly;
 using TestsLib;
-using Xpand.Source.Extensions.XAF.XafApplication;
+using Xpand.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Logger;
 using Xpand.XAF.Modules.Reactive.Logger.Hub;

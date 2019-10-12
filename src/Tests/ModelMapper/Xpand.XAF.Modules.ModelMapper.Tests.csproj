@@ -62,16 +62,16 @@
     <PackageReference Include="Xpand.Collections" Version="1.0.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Extensions\Extensions\Xpand.Source.Extensions.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="0Harmony">
-      <HintPath>..\..\Libs\0Harmony.dll</HintPath>
-    </Reference>
     <Reference Include="System.Design" />
     <Reference Include="System.Web" />
     <Reference Include="Tests">
-      <HintPath>..\..\..\bin\TestsLib.dll</HintPath>
+      <HintPath>..\..\..\bin\Xpand.TestsLib.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions">
+      <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions.XAF">
+      <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.ModelMapper">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.ModelMapper.dll</HintPath>
@@ -84,6 +84,9 @@
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive.Logger.Hub">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.Hub.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions.XAF.Xpo">
+      <HintPath>..\..\..\bin\Xpand.Extensions.XAF.Xpo.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

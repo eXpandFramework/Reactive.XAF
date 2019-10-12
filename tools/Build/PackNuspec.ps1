@@ -33,7 +33,7 @@ $assemblyVersions = Get-ChildItem "$sourceDir\src\Modules" "*.csproj" -Recurse |
     }
 }
 
-Get-ChildItem "$sourceDir\tools\nuspec" "*.nuspec" -Recurse | ForEach-Object {
+Get-ChildItem "$sourceDir\tools\nuspec" "*Xpand.XAF*.nuspec" -Recurse | ForEach-Object {
     $name = $_.BaseName.Replace("Xpand.XAF.Modules.", "")
     $id = "Xpand.XAF.Modules.$name.$name" + "Module"
     $message = @"

@@ -9,9 +9,9 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using Fasterflect;
-using Xpand.Source.Extensions.System.AppDomain;
-using Xpand.Source.Extensions.System.String;
-using Xpand.Source.Extensions.XAF.XafApplication;
+using Xpand.Extensions.AppDomain;
+using Xpand.Extensions.String;
+using Xpand.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.ProgressBarViewItem{

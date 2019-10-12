@@ -9,7 +9,7 @@ using System.Reflection;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
-using Xpand.Source.Extensions.System.String;
+using Xpand.Extensions.String;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{

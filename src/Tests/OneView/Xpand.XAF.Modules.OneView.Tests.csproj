@@ -27,11 +27,14 @@
     <PackageReference Include="DevExpress.Xpo" Version="18.2.7" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="TestsLib">
-      <HintPath>..\..\..\bin\TestsLib.dll</HintPath>
+    <Reference Include="Xpand.TestsLib">
+      <HintPath>..\..\..\bin\Xpand.TestsLib.dll</HintPath>
     </Reference>
-    <Reference Include="Xpand.Source.Extensions">
-      <HintPath>..\..\..\bin\Xpand.Source.Extensions.dll</HintPath>
+    <Reference Include="Xpand.Extensions">
+      <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions.XAF">
+      <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.OneView">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.OneView.dll</HintPath>
@@ -47,6 +50,9 @@
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive.Win">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Win.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions.XAF.Xpo">
+      <HintPath>..\..\..\bin\Xpand.Extensions.XAF.Xpo.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

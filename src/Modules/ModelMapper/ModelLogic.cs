@@ -9,8 +9,8 @@ using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
-using Xpand.Source.Extensions.FunctionOperators;
-using Xpand.Source.Extensions.XAF.Model;
+using Xpand.Extensions.XAF.FunctionOperators;
+using Xpand.Extensions.XAF.Model;
 
 namespace Xpand.XAF.Modules.ModelMapper{
     [DomainLogic(typeof(IModelNodeDisabled))]

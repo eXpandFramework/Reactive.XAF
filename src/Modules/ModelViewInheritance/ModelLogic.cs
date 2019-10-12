@@ -5,7 +5,7 @@ using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
-using Xpand.Source.Extensions.XAF.Model;
+using Xpand.Extensions.XAF.Model;
 
 
 namespace Xpand.XAF.Modules.ModelViewInheritance {
@@ -35,6 +35,7 @@ namespace Xpand.XAF.Modules.ModelViewInheritance {
 
     public class MergedDifferencesGenerator : ModelNodesGeneratorBase {
         protected override void GenerateNodesCore(ModelNode node){
+
             var modelObjectView = node.GetParent<IModelObjectView>();
             
             var typeInfo = modelObjectView.ModelClass.TypeInfo;

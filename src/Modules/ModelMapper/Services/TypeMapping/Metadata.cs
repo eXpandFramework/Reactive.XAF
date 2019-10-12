@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Fasterflect;
-using Xpand.Source.Extensions.Linq;
-using Xpand.Source.Extensions.System.Refelction;
+using Xpand.Extensions.Linq;
+using Xpand.Extensions.Reflection;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     public static partial class TypeMappingService{

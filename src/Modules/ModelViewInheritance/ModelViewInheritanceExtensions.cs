@@ -7,9 +7,9 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.Model.NodeGenerators;
-using Xpand.Source.Extensions.Linq;
-using Xpand.Source.Extensions.XAF.Model;
-using Xpand.Source.Extensions.XAF.TypesInfo;
+using Xpand.Extensions.Linq;
+using Xpand.Extensions.XAF.Model;
+using Xpand.Extensions.XAF.TypesInfo;
 
 namespace Xpand.XAF.Modules.ModelViewInheritance{
     internal static class ModelViewInheritanceExtensions{
@@ -75,7 +75,7 @@ namespace Xpand.XAF.Modules.ModelViewInheritance{
                 default:
                     throw new NotImplementedException();
             }
-
+            
             newNode.ReadFromModel( modelView);
             newNode.Id = newViewId;
         }

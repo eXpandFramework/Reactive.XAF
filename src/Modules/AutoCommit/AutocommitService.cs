@@ -3,8 +3,8 @@ using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using Fasterflect;
-using Xpand.Source.Extensions.System.AppDomain;
-using Xpand.Source.Extensions.XAF.Model;
+using Xpand.Extensions.AppDomain;
+using Xpand.Extensions.XAF.Model;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
@@ -13,6 +13,7 @@ namespace Xpand.XAF.Modules.AutoCommit{
         private static readonly MethodInvoker AsssignClientHanderSafe;
 
         static AutoCommitService(){
+            
             AsssignClientHanderSafe = AppDomain.CurrentDomain.AssemblyDevExpressExpressAppWeb()?.TypeClientSideEventsHelper()?.AsssignClientHanderSafe();
         }
 

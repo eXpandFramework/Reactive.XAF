@@ -30,17 +30,23 @@
     <PackageReference Include="Fasterflect.Xpand" Version="2.0.6" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Extensions\Extensions\Xpand.Source.Extensions.csproj" />
-  </ItemGroup>
-  <ItemGroup>
     <Reference Include="Tests">
-      <HintPath>..\..\..\bin\TestsLib.dll</HintPath>
+      <HintPath>..\..\..\bin\Xpand.TestsLib.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions">
+      <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions.XAF">
+      <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.CloneMemberValue">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.CloneMemberValue.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions.XAF.Xpo">
+      <HintPath>..\..\..\bin\Xpand.Extensions.XAF.Xpo.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>
