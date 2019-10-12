@@ -47,8 +47,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp" Version="18.2.7" />
-    <PackageReference Include="System.Interactive" Version="3.2.0" />
-    <PackageReference Include="System.Reactive" Version="4.1.6" />
+    <PackageReference Include="System.Interactive" Version="4.0.0" />
+    <PackageReference Include="System.Reactive" Version="4.2.0" />
     <PackageReference Include="Fasterflect.Xpand" Version="2.0.6" />
     <PackageReference Include="Xpand.Patcher" Version="1.0.1" />
   </ItemGroup>

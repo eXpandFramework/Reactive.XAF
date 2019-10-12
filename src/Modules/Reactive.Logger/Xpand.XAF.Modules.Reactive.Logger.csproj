@@ -44,7 +44,7 @@
     <PackageReference Include="DevExpress.Persistent.Base" Version="18.2.7" />
     <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" Version="18.2.7" />
     <PackageReference Include="DevExpress.Xpo" Version="18.2.7" />
-    <PackageReference Include="System.Reactive" Version="4.1.6" />
+    <PackageReference Include="System.Reactive" Version="4.2.0" />
     <PackageReference Include="Fasterflect.Xpand" Version="2.0.6" />
   </ItemGroup>
 </Project>
