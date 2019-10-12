@@ -14,6 +14,7 @@ using DevExpress.ExpressApp;
 using DevExpress.Utils;
 using Xpand.Source.Extensions.System.Refelction;
 using Xpand.Source.Extensions.XAF.Model;
+using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
@@ -51,11 +52,13 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                 .ToUnit()
                 .Merge(ListenerEvents.RefreshViewDataSource(application))
                 .Merge(application.RegisterListener(listener),Scheduler.Immediate)
-                .Do(unit => {},() => {})
                 .ToUnit();
         }
 
         public static IObservable<Unit> RefreshViewDataSource(this IObservable<ITraceEvent> events, XafApplication application){
+            if (application.GetPlatform()==Platform.Web){
+                return Observable.Empty<Unit>();
+            }
             return application.WhenViewOnFrame(typeof(TraceEvent),ViewType.ListView)
                 .SelectMany(frame => {
                     var synchronizationContext = SynchronizationContext.Current;
