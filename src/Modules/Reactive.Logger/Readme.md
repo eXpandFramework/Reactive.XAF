@@ -15,7 +15,7 @@ The `Reactive.Logger` module monitors calls to the Reactive delegates (OnNext, O
 2. [Ways to Register a Module](https://documentation.devexpress.com/eXpressAppFramework/118047/Concepts/Application-Solution-Components/Ways-to-Register-a-Module)
 or simply add the next call to your module constructor
     ```cs
-    RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.Reactive.LoggerModule));
+    RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.Reactive..Logger.ReactiveLoggerModule));
     ```
 
 The module is not integrated with any `eXpandFramework` module. You have to install it as described.
