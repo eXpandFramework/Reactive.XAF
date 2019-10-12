@@ -10,8 +10,17 @@ param(
     $WhatIf = $false
 )
 $ErrorActionPreference = "Stop"
-
 & "$SourcePath\go.ps1" -InstallModules
+if ($Branch -eq "master"){
+    $bArgs=@{
+        packageSources="$(Get-PackageFeed -Xpand);$DxApiFeed"
+        tasklist="release"
+        Release=$true
+    }
+    & $SourcePath\go.ps1 @bArgs
+    return    
+}
+
 if (!(Get-Module VSTeam -ListAvailable)) {
     Install-Module VSTeam -Force
 }

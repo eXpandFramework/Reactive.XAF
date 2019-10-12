@@ -18,6 +18,7 @@
                 <ModulePath>.*nunit.*</ModulePath>
                 <ModulePath>.*xpand\.source.*</ModulePath>
                 <ModulePath>.*testslib.*</ModulePath>
+                <ModulePath>.*extensions.*</ModulePath>
 
               </Exclude>
             </ModulePaths>

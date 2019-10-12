@@ -1,31 +1,30 @@
-# https://aka.ms/yaml
 variables:
   - group: Keys
 trigger: 
-  paths:
-    exclude:
-      - .github/FUNDING.yml
-      - src/Modules/Readme.md
-      - src/Modules/AutoCommit/Readme.md
-      - src/Modules/CloneMemberValue/Readme.md
-      - src/Modules/HideToolBar/Readme.md
-      - src/Modules/MasterDetail/Readme.md
-      - src/Modules/ModelMapper/Readme.md
-      - src/Modules/ModelViewInheritance/Readme.md
-      - src/Modules/ProgressBarViewItem/Readme.md
-      - src/Modules/Reactive/Readme.md
-      - src/Modules/SuppressConfirmation/Readme.md
-      - src/Modules/ViewEditMode/Readme.md
-      - src/Modules/RefreshView/Readme.md
-      - src/Modules/GridListEditor/Readme.md
-      - src/Modules/OneView/Readme.md
-      - src/Modules/Reactive.Logger/Readme.md
-      - src/Modules/Reactive.Logger.Hub/Readme.md
-      - src/Modules/Reactive.Logger.Client.Win/Readme.md
-      - README.md
-  branches:
-    include:
-      - master
+    paths:
+      exclude:
+        - .github/FUNDING.yml
+        - src/Modules/Readme.md
+        - src/Modules/AutoCommit/Readme.md
+        - src/Modules/CloneMemberValue/Readme.md
+        - src/Modules/HideToolBar/Readme.md
+        - src/Modules/MasterDetail/Readme.md
+        - src/Modules/ModelMapper/Readme.md
+        - src/Modules/ModelViewInheritance/Readme.md
+        - src/Modules/ProgressBarViewItem/Readme.md
+        - src/Modules/Reactive/Readme.md
+        - src/Modules/SuppressConfirmation/Readme.md
+        - src/Modules/ViewEditMode/Readme.md
+        - src/Modules/RefreshView/Readme.md
+        - src/Modules/GridListEditor/Readme.md
+        - src/Modules/OneView/Readme.md
+        - src/Modules/Reactive.Logger/Readme.md
+        - src/Modules/Reactive.Logger.Hub/Readme.md
+        - src/Modules/Reactive.Logger.Client.Win/Readme.md
+        - README.md
+    branches:
+      include:
+        - master
 jobs:
 - job: Build
   strategy: 
@@ -39,7 +38,7 @@ jobs:
     inputs:
       pwsh: true
       targetType: filePath
-      filePath: .\tools\build\release-pipeline.ps1 
+      filePath: .\tools\build\pipeline.ps1 
       arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(GitHubUserName) $(GitHubPass) $(DXApiFeed) $(build.artifactstagingdirectory) $(System.DefaultworkingDirectory)\bin $(AzureToken)
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Packages'
@@ -51,6 +50,38 @@ jobs:
     inputs:
       PathtoPublish: '$(System.DefaultworkingDirectory)\bin'
       ArtifactName: 'Xpand.XAF.Modules.Bin'
+- job: TestPhase2
+  strategy:
+    parallel: 14
+  dependsOn: Build
+  pool:
+    vmImage: windows-2019
+  steps:
+    - checkout: none
+    - task: DownloadBuildArtifacts@0
+      inputs:
+        buildType: 'current'
+        downloadType: 'specific'
+        downloadPath: '$(System.DefaultworkingDirectory)'
+    - task: VSTest@2
+      displayName: 'VsTest - testAssemblies'
+      inputs:
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: |
+          **\*Tests*.dll
+          !**\*ModelMapper*.dll
+          !**\*Hub*.dll
+          !**\*TestAdapter.dll
+          !**\obj\**    
+        diagnosticsEnabled: true
+        overrideTestrunParameters: '/platform:x64'
+        codeCoverageEnabled: true
+        distributionBatchType: basedOnAssembly
+        runInParallel: false
+        runSettingsFile: .\Xpand.XAF.Modules.Bin\CodeCoverage.runsettings
+        runTestsInIsolation: true
+        collectDumpOn: never
 - job: TestModelMapper
   strategy:
     parallel: 10
@@ -79,38 +110,8 @@ jobs:
         distributionBatchType: basedOnTestCases
         runInParallel: false
         runTestsInIsolation: true
+        overrideTestrunParameters: '/platform:x64'
         runSettingsFile: .\Xpand.XAF.Modules.Bin\CodeCoverage.runsettings
-        collectDumpOn: never
-- job: TestPhase2
-  strategy:
-    parallel: 14
-  dependsOn: TestModelMapper
-  pool:
-    vmImage: windows-2019
-  steps:
-    - checkout: none
-    - task: DownloadBuildArtifacts@0
-      inputs:
-        buildType: 'current'
-        downloadType: 'specific'
-        downloadPath: '$(System.DefaultworkingDirectory)'
-    - task: VSTest@2
-      displayName: 'VsTest - testAssemblies'
-      inputs:
-        searchFolder: '$(System.DefaultWorkingDirectory)'
-        testSelector: 'testAssemblies'
-        testAssemblyVer2: |
-          **\*Tests*.dll
-          !**\*ModelMapper*.dll
-          !**\*Hub*.dll
-          !**\*TestAdapter.dll
-          !**\obj\**    
-        diagnosticsEnabled: true
-        codeCoverageEnabled: true
-        distributionBatchType: basedOnAssembly
-        runInParallel: false
-        runSettingsFile: .\Xpand.XAF.Modules.Bin\CodeCoverage.runsettings
-        runTestsInIsolation: true
         collectDumpOn: never
 - job: Publish
   strategy: 
