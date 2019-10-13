@@ -27,96 +27,95 @@ trigger:
       include:
         - master
 jobs:
-- job: TestsRunBuild
-  strategy: 
-    parallel: 1
-  pool:
-    vmImage: windows-2019
-  variables:
-    - group: keys
-  steps:
-  - checkout: self
-  - task: PowerShell@2
-    displayName: Build
-    inputs:
-      pwsh: true
-      targetType: filePath
-      filePath: .\tools\build\pipeline.ps1 
-      arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(GitHubUserName) $(GitHubPass) $(DXApiFeed) $(build.artifactstagingdirectory) $(System.DefaultworkingDirectory)\bin $(AzureToken) $false $(Build.DefinitionName) 
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: Packages'
-    inputs:
-      PathtoPublish: '$(System.DefaultworkingDirectory)\bin'
-      ArtifactName: 'Xpand.XAF.Modules.Bin'
-- job: TestPhase1
-  strategy:
-    parallel: 14
-  dependsOn: TestsRunBuild
-  pool:
-    vmImage: windows-2019
-  variables:
-    - group: keys
-  steps:
-    - checkout: none
-    - task: DownloadBuildArtifacts@0
-      inputs:
-        buildType: 'current'
-        downloadType: 'specific'
-        downloadPath: '$(System.DefaultworkingDirectory)'
-    - task: VSTest@2
-      displayName: 'VsTest - testAssemblies'
-      inputs:
-        searchFolder: '$(System.DefaultWorkingDirectory)'
-        testSelector: 'testAssemblies'
-        testAssemblyVer2: |
-          **\*Tests*.dll
-          !**\*ModelMapper*.dll
-          !**\*Hub*.dll
-          !**\*TestAdapter.dll
-          !**\obj\**    
-        diagnosticsEnabled: true
-        # overrideTestrunParameters: '/platform:x64'
-        codeCoverageEnabled: true
-        distributionBatchType: basedOnAssembly
-        runInParallel: false
-        runSettingsFile: .\Xpand.XAF.Modules.Bin\CodeCoverage.runsettings
-        runTestsInIsolation: true
-        collectDumpOn: never
-- job: TestModelMapper
-  strategy:
-    parallel: 10
-  dependsOn: TestPhase1
-  pool:
-    vmImage: windows-2019
-  variables:
-    - group: keys
-  steps:
-    - checkout: none
-    - task: DownloadBuildArtifacts@0
-      inputs:
-        buildType: 'current'
-        downloadType: 'specific'
-        downloadPath: '$(System.DefaultworkingDirectory)'
-    - task: VSTest@2
-      displayName: 'VsTest - testAssemblies'
-      inputs:
-        searchFolder: '$(System.DefaultWorkingDirectory)'
-        testSelector: 'testAssemblies'
-        testAssemblyVer2: |
-          **\*ModelMapper*Tests*.dll
-          !**\*Hub*.dll
-          !**\*TestAdapter.dll
-          !**\obj\**    
-        diagnosticsEnabled: true
-        codeCoverageEnabled: true
-        distributionBatchType: basedOnTestCases
-        runInParallel: false
-        runTestsInIsolation: true
-        # overrideTestrunParameters: '/platform:x64'
-        runSettingsFile: .\Xpand.XAF.Modules.Bin\CodeCoverage.runsettings
-        collectDumpOn: never
+# - job: TestsRunBuild
+#   strategy: 
+#     parallel: 1
+#   pool:
+#     vmImage: windows-2019
+#   variables:
+#     - group: keys
+#   steps:
+#   - checkout: self
+#   - task: PowerShell@2
+#     displayName: Build
+#     inputs:
+#       pwsh: true
+#       targetType: filePath
+#       filePath: .\tools\build\pipeline.ps1 
+#       arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(GitHubUserName) $(GitHubPass) $(DXApiFeed) $(build.artifactstagingdirectory) $(System.DefaultworkingDirectory)\bin $(AzureToken) $false $(Build.DefinitionName) 
+#   - task: PublishBuildArtifacts@1
+#     displayName: 'Publish Artifact: Packages'
+#     inputs:
+#       PathtoPublish: '$(System.DefaultworkingDirectory)\bin'
+#       ArtifactName: 'Xpand.XAF.Modules.Bin'
+# - job: TestPhase1
+#   strategy:
+#     parallel: 14
+#   dependsOn: TestsRunBuild
+#   pool:
+#     vmImage: windows-2019
+#   variables:
+#     - group: keys
+#   steps:
+#     - checkout: none
+#     - task: DownloadBuildArtifacts@0
+#       inputs:
+#         buildType: 'current'
+#         downloadType: 'specific'
+#         downloadPath: '$(System.DefaultworkingDirectory)'
+#     - task: VSTest@2
+#       displayName: 'VsTest - testAssemblies'
+#       inputs:
+#         searchFolder: '$(System.DefaultWorkingDirectory)'
+#         testSelector: 'testAssemblies'
+#         testAssemblyVer2: |
+#           **\*Tests*.dll
+#           !**\*ModelMapper*.dll
+#           !**\*Hub*.dll
+#           !**\*TestAdapter.dll
+#           !**\obj\**    
+#         diagnosticsEnabled: true
+#         # overrideTestrunParameters: '/platform:x64'
+#         codeCoverageEnabled: true
+#         distributionBatchType: basedOnAssembly
+#         runInParallel: false
+#         runSettingsFile: .\Xpand.XAF.Modules.Bin\CodeCoverage.runsettings
+#         runTestsInIsolation: true
+#         collectDumpOn: never
+# - job: TestModelMapper
+#   strategy:
+#     parallel: 10
+#   dependsOn: TestPhase1
+#   pool:
+#     vmImage: windows-2019
+#   variables:
+#     - group: keys
+#   steps:
+#     - checkout: none
+#     - task: DownloadBuildArtifacts@0
+#       inputs:
+#         buildType: 'current'
+#         downloadType: 'specific'
+#         downloadPath: '$(System.DefaultworkingDirectory)'
+#     - task: VSTest@2
+#       displayName: 'VsTest - testAssemblies'
+#       inputs:
+#         searchFolder: '$(System.DefaultWorkingDirectory)'
+#         testSelector: 'testAssemblies'
+#         testAssemblyVer2: |
+#           **\*ModelMapper*Tests*.dll
+#           !**\*Hub*.dll
+#           !**\*TestAdapter.dll
+#           !**\obj\**    
+#         diagnosticsEnabled: true
+#         codeCoverageEnabled: true
+#         distributionBatchType: basedOnTestCases
+#         runInParallel: false
+#         runTestsInIsolation: true
+#         runSettingsFile: .\Xpand.XAF.Modules.Bin\CodeCoverage.runsettings
+#         collectDumpOn: never
 - job: Release
-  dependsOn: TestModelMapper
+  # dependsOn: TestModelMapper
   strategy: 
     parallel: 1
   pool:
@@ -138,4 +137,4 @@ jobs:
       pwsh: true
       targetType: filePath
       filePath: .\tools\build\publishNugets.ps1 
-      arguments: $(Build.SourceBranchName) '$(System.DefaultWorkingDirectory)' $(NugetApiKey) '$(System.DefaultWorkingDirectory)' $(pastBuild)
+      arguments: $(Build.SourceBranchName) '$(System.DefaultWorkingDirectory)' $(NugetApiKey) '$(System.DefaultWorkingDirectory)\bin\nupkg' $(pastBuild)

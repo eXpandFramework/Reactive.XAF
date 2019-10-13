@@ -12,7 +12,7 @@ param(
     $WhatIf = $false
     
 )
-if ($PastBuild){
+if ($PastBuild -ne "false"){
     return
 }
 "CustomVersion=$CustomVersion"
