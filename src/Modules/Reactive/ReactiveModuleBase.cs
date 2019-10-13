@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using DevExpress.ExpressApp;
@@ -13,6 +14,11 @@ namespace Xpand.XAF.Modules.Reactive{
 
         public static void Unload(params Type[] modules){
             SettingUpSubject.Do(_ => {
+                    foreach (var module in _.Modules.Where(m => m.RequiredModuleTypes.Any(type => modules.Contains(type)))){
+                        foreach (var type in modules){
+                            module.RequiredModuleTypes.Remove(type);
+                        }
+                    }
                     foreach (var m in modules) _.Modules.Remove(_.Modules.FindModule(m));
                 })
                 .FirstAsync().Subscribe();
