@@ -7,14 +7,13 @@ param(
     $artifactstagingdirectory,
     $bindirectory,
     $AzureToken = (Get-AzureToken),
-    $NugetApiKey,
     $PastBuild,
     $CustomVersion,
     $WhatIf = $false
     
 )
-
-if ($PastBuild -ne "false"){
+"PastBuild=$PastBuild"
+if ($PastBuild -and $PastBuild -ne "false"){
     return
 }
 "CustomVersion=$CustomVersion"
@@ -157,12 +156,12 @@ $bArgs|Out-String
 
 & $SourcePath\go.ps1 @bArgs
 
-"$SourcePath\Bin\Nupkg", "$SourcePath\Bin\Nuspec" | ForEach-Object {
-    Get-ChildItem $_ -Recurse | ForEach-Object {
-        Move-Item $_.FullName -Destination $artifactstagingdirectory
-    }
-}
+# "$SourcePath\Bin\Nupkg", "$SourcePath\Bin\Nuspec" | ForEach-Object {
+#     Get-ChildItem $_ -Recurse | ForEach-Object {
+#         Move-Item $_.FullName -Destination $artifactstagingdirectory
+#     }
+# }
 
-if ($AzureToken){
-    & "$PSScriptRoot\publishnugets.ps1" $Branch $sourcesRoot $NugetApiKey "$sourcesRoot\bin\Nupkg" $PastBuild
-}
+# if ($AzureToken){
+#     & "$PSScriptRoot\publishnugets.ps1" $Branch $sourcesRoot $NugetApiKey "$sourcesRoot\bin\Nupkg" $PastBuild
+# }
