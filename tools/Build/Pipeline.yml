@@ -1,5 +1,5 @@
 variables:
-  - group: Keys
+  PastBuild: false
   
 trigger: 
     paths:
@@ -32,6 +32,8 @@ jobs:
     parallel: 1
   pool:
     vmImage: windows-2019
+  variables:
+    - group: keys
   steps:
   - checkout: self
   - task: PowerShell@2
@@ -40,7 +42,7 @@ jobs:
       pwsh: true
       targetType: filePath
       filePath: .\tools\build\pipeline.ps1 
-      arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(GitHubUserName) $(GitHubPass) $(DXApiFeed) $(build.artifactstagingdirectory) $(System.DefaultworkingDirectory)\bin $(AzureToken) $(Build.DefinitionName) 
+      arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(GitHubUserName) $(GitHubPass) $(DXApiFeed) $(build.artifactstagingdirectory) $(System.DefaultworkingDirectory)\bin $(AzureToken) $false $(Build.DefinitionName) 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Packages'
     inputs:
@@ -52,6 +54,8 @@ jobs:
   dependsOn: TestsRunBuild
   pool:
     vmImage: windows-2019
+  variables:
+    - group: keys
   steps:
     - checkout: none
     - task: DownloadBuildArtifacts@0
@@ -84,6 +88,8 @@ jobs:
   dependsOn: TestPhase1
   pool:
     vmImage: windows-2019
+  variables:
+    - group: keys
   steps:
     - checkout: none
     - task: DownloadBuildArtifacts@0
@@ -115,6 +121,8 @@ jobs:
     parallel: 1
   pool:
     vmImage: windows-2019
+  variables:
+    - group: keys
   steps:
   - checkout: self
   - task: PowerShell@2
@@ -123,11 +131,11 @@ jobs:
       pwsh: true
       targetType: filePath
       filePath: .\tools\build\pipeline.ps1 
-      arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(GitHubUserName) $(GitHubPass) $(DXApiFeed) $(build.artifactstagingdirectory) $(System.DefaultworkingDirectory)\bin $(AzureToken)
+      arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(GitHubUserName) $(GitHubPass) $(DXApiFeed) $(build.artifactstagingdirectory) $(System.DefaultworkingDirectory)\bin $(AzureToken) $(PastBuild)
   - task: PowerShell@2
     displayName: Publish
     inputs:
       pwsh: true
       targetType: filePath
       filePath: .\tools\build\publishNugets.ps1 
-      arguments: $(Build.SourceBranchName) '$(System.DefaultWorkingDirectory)' $(NugetApiKey) '$(System.DefaultWorkingDirectory)'
+      arguments: $(Build.SourceBranchName) '$(System.DefaultWorkingDirectory)' $(NugetApiKey) '$(System.DefaultWorkingDirectory)' $(pastBuild)

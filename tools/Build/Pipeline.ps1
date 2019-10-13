@@ -7,17 +7,38 @@ param(
     $artifactstagingdirectory,
     $bindirectory,
     $AzureToken = (Get-AzureToken),
+    $PastBuild,
     $CustomVersion,
     $WhatIf = $false
     
 )
+if ($PastBuild){
+    return
+}
+"CustomVersion=$CustomVersion"
 $ErrorActionPreference = "Stop"
-$regex = [regex] '(\d*\.\d*\.\d*)'
+$regex = [regex] '(\d*\.\d*)'
 $result = $regex.Match($CustomVersion).Groups[1].Value;
+& "$SourcePath\go.ps1" -InstallModules
 if (!$result){
     $CustomVersion="latest"
 }
-& "$SourcePath\go.ps1" -InstallModules
+else{
+    $latestMinors=Get-NugetPackageSearchMetadata -Name DevExpress.Xpo -AllVersions -Source $DXApiFeed|ForEach-Object{
+        $v=$_.Identity.Version.Version
+        [PSCustomObject]@{
+            Version = $v
+            Minor="$($v.Major).$($v.Minor)"
+        }
+    }|Group-Object -Property Minor|ForEach-Object{
+        $_.Group|Select-Object -First 1 -ExpandProperty Version
+    }|Sort-Object -Descending
+    "latestMinors:"
+    $latestMinors
+    $CustomVersion=$latestMinors|Where-Object{"$($_.Major).$($_.Minor)" -eq $result}
+}
+"CustomVersion=$CustomVersion"
+
 $defaulVersion=Get-Content "$SourcePath\go.ps1"|Select-String dxVersion|Select-Object -First 1|ForEach-Object{
     $regex = [regex] '"([^"]*)'
     $regex.Match($_).Groups[1].Value;
@@ -115,12 +136,14 @@ if ($reactiveVersionChanged) {
     }
 }
 $taskList="Release"
-if ($CustomVersion){
-    $taskList="TestsRun"
-}
 if ($customVersion -eq "latest"){
     $defaulVersion=$DXVersion
 }
+elseif ($CustomVersion){
+    $taskList="TestsRun"
+    $defaulVersion=$CustomVersion
+}
+
 $bArgs = @{
     packageSources = "$(Get-PackageFeed -Xpand);$DxApiFeed"
     tasklist       = $tasklist

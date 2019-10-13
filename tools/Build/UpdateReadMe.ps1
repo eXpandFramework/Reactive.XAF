@@ -96,7 +96,12 @@ function UpdateModules($rootLocation, $packages) {
             UpdateDependencies $_ $packagespath $readMePath
             UpdateBadges $_ $packagespath $readMePath
             UpdateIssues $_ $packagespath $readMePath
+            Tests $_ $packagespath $readMePath
         }   
     }
+}
+
+function Tests($_, $packagespath,  $readMePath) {
+
 }
 UpdateModules $rootLocation $packages

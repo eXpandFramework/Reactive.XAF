@@ -3,8 +3,14 @@ param(
     $sourcesRoot = "$PSScriptRoot\..\..",
     $apiKey,
     $localPackageSource = "$PSScriptRoot\..\..\bin\Nupkg",
+    $PastBuild,
     $criteria = "Xpand.*"
+
 )
+
+if ($PastBuild){
+    return
+}
 if (!(Get-Module XpandPwsh -ListAvailable)){
     Install-Module XpandPwsh -Force
 }
