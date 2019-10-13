@@ -31,6 +31,7 @@ if ($Branch -eq "lab") {
     $pArgs.PackageSource="Lab"
     $remotePackageSource=Get-PackageFeed -Xpand
 }
+$args|Write-Output
 $packages =Find-XpandPackage  @pArgs
 
 Write-Host "remote-packages:`r`n$packages"

@@ -7,11 +7,13 @@ param(
     $artifactstagingdirectory,
     $bindirectory,
     $AzureToken = (Get-AzureToken),
+    $NugetApiKey,
     $PastBuild,
     $CustomVersion,
     $WhatIf = $false
     
 )
+
 if ($PastBuild -ne "false"){
     return
 }
@@ -161,3 +163,6 @@ $bArgs|Out-String
     }
 }
 
+if ($AzureToken){
+    & "$PSScriptRoot\publishnugets.ps1" $Branch $sourcesRoot $NugetApiKey "$sourcesRoot\bin\Nupkg" $PastBuild
+}

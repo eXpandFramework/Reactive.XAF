@@ -130,11 +130,11 @@ jobs:
       pwsh: true
       targetType: filePath
       filePath: .\tools\build\pipeline.ps1 
-      arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(GitHubUserName) $(GitHubPass) $(DXApiFeed) $(build.artifactstagingdirectory) $(System.DefaultworkingDirectory)\bin $(AzureToken) $(PastBuild)
-  - task: PowerShell@2
-    displayName: Publish
-    inputs:
-      pwsh: true
-      targetType: filePath
-      filePath: .\tools\build\publishNugets.ps1 
-      arguments: $(Build.SourceBranchName) '$(System.DefaultWorkingDirectory)' $(NugetApiKey) '$(System.DefaultWorkingDirectory)\bin\nupkg' $(pastBuild)
+      arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(GitHubUserName) $(GitHubPass) $(DXApiFeed) $(build.artifactstagingdirectory) $(System.DefaultworkingDirectory)\bin $(AzureToken) $(PastBuild) $(NugetApiKey)
+  # - task: PowerShell@2
+  #   displayName: Publish
+  #   inputs:
+  #     pwsh: true
+  #     targetType: filePath
+  #     filePath: .\tools\build\publishNugets.ps1 
+  #     arguments: $(Build.SourceBranchName) '$(System.DefaultWorkingDirectory)' $(NugetApiKey) '$(System.DefaultWorkingDirectory)\bin\nupkg' $(pastBuild)
