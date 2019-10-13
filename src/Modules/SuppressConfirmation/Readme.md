@@ -21,13 +21,13 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
-`.NetFramework: `
+`.NetFramework: net461`
 
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp**|**Any**
 |Fasterflect.Xpand|2.0.6
- |System.Reactive|4.1.6
+ |System.Reactive|4.2.0
  |System.ValueTuple|4.5.0
  |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|1.2.57
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.0.34
@@ -49,11 +49,12 @@ The module satisfies the following conditions:
 ![image](https://user-images.githubusercontent.com/159464/56219085-d2c05580-606e-11e9-9a8e-80e0a37b8285.png)
 
 ### Tests
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/SuppressConfirmation)
-
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.SuppressConfirmation.SuppressConfirmation). 
+All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
 ### Examples
 The module is integrated with the `ExcelImporter`.
 
 Next screenshot is an example from ExcelImporter from the view tha maps the Excel columns with the BO members. The editable DetailView on the right needs the SuppressConfirmation set to true, to get a natural flow UI without notifications.
 
 ![image](https://user-images.githubusercontent.com/159464/55381194-238e6500-552b-11e9-8314-f1b1132d09f3.png)
+

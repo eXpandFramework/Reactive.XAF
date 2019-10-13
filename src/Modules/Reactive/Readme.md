@@ -10,14 +10,14 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
-`.NetFramework: `
+`.NetFramework: net461`
 
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp**|**Any**
 |Fasterflect.Xpand|2.0.6
- |System.Interactive|3.2.0
- |System.Reactive|4.1.6
+ |System.Interactive|4.0.0
+ |System.Reactive|4.2.0
  |Xpand.Extensions|0.0.1
  |Xpand.Extensions.XAF|0.0.1
  |Xpand.Patcher|1.0.1
@@ -90,7 +90,8 @@ And so on, the sky is the limit here as you can write custom operators just like
 
 
 ### Tests
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Reactive)
-
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.Reactive.Reactive). 
+All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
 ### Examples
 All Xpand.XAF.Modules that reference this package are developed the RX way.
+

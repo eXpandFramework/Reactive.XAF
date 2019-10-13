@@ -24,7 +24,7 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
-`.NetFramework: `
+`.NetFramework: net461`
 
 |<!-- -->|<!-- -->
 |----|----
@@ -50,8 +50,8 @@ Using the `CloneModelViewAttribute` in your Bussiness Objects you can:
 
 
 ### Tests
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/CloneModelView)
-
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.CloneModelView.CloneModelView). 
+All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
 ### Examples
 The module is integrated with the following eXpandFramework modules: `Dashboard, ExcelImporter, ModelDifference, System`,
 
@@ -73,3 +73,4 @@ Next snippet is taken from the ModelDifference module.
     public class ModelDifferenceObject : XpandCustomObject, IXpoModelDifference {
 
 ```
+

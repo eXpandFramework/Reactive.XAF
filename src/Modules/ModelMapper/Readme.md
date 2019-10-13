@@ -22,7 +22,7 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
-`.NetFramework: `
+`.NetFramework: net461`
 
 |<!-- -->|<!-- -->
 |----|----
@@ -31,8 +31,9 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |Enums.NET|2.3.2
  |Fasterflect.Xpand|2.0.6
  |Mono.Cecil|0.11.0
- |System.Interactive|3.2.0
- |System.Reactive|4.1.6
+ |System.CodeDom|4.6.0
+ |System.Interactive|4.0.0
+ |System.Reactive|4.2.0
  |Xpand.Collections|1.0.1
  |Xpand.Extensions|0.0.1
  |Xpand.Extensions.XAF|0.0.1
@@ -208,3 +209,4 @@ modelNode.BindTo(objectInstance)
 The `BindTo` method will follow the hierarchy tree respecting the disabled nodes and will update all properties that are not null.
 ### Tests
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/ModelMapper)
+

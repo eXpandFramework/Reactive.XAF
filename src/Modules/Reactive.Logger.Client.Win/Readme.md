@@ -25,7 +25,7 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
-`.NetFramework: `
+`.NetFramework: net461`
 
 |<!-- -->|<!-- -->
 |----|----
@@ -35,10 +35,10 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |**DevExpress.ExpressApp.Xpo**|**Any**
  |**DevExpress.Xpo**|**Any**
 |Fasterflect.Xpand|2.0.6
- |MagicOnion|2.4.0
+ |MagicOnion|2.6.2
  |System.Buffers|4.5.0
- |System.Collections.Immutable|1.5.0
- |System.Reactive|4.1.6
+ |System.Collections.Immutable|1.6.0
+ |System.Reactive|4.2.0
  |[Xpand.XAF.Modules.GridListEditor](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.GridListEditor)|0.0.11
  |[Xpand.XAF.Modules.OneView](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.OneView)|0.0.11
  |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|1.2.57
@@ -67,7 +67,8 @@ The information can be overwhelming however simple filters, like the one applied
 
 The client is Hybrid logger and and uses both the Logger and the Hub so everything discussed there applies also here.
 ### Tests
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Reactive.Logger.Client.Win)
-
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.Reactive.Logger.ReactiveLogger). 
+All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
 ### Examples
 Head to [Reactive.Logger](https://github.com/eXpandFramework/DevExpress.XAF/tree/lab/src/Modules/Reactive.Logger)
+

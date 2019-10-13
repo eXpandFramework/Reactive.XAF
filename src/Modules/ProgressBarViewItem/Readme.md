@@ -21,13 +21,13 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
-`.NetFramework: `
+`.NetFramework: net461`
 
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp**|**Any**
 |Fasterflect.Xpand|2.0.6
- |System.Reactive|4.1.6
+ |System.Reactive|4.2.0
  |System.ValueTuple|4.5.0
  |Xpand.Extensions|0.0.1
  |Xpand.Extensions.XAF|0.0.1
@@ -70,7 +70,8 @@ progressBarViewItem.SetFinishOptions(new MessageOptions(){});
 
 
 ### Tests
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/ProgressBarViewItem)
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.ProgressBarViewItem.ProgressBarViewItem). 
+All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
 ### Examples
 The module is integrated with the `ExcelImporter`.
 
@@ -81,3 +82,4 @@ Next we see how it looks on Desktop:
 and the same view on the web:
 
 ![web2](https://user-images.githubusercontent.com/159464/58791676-53291e80-85fb-11e9-81de-6ed7db651219.gif)
+

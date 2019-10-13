@@ -12,6 +12,7 @@ properties {
     $branch=$null
     $Release=$null
     $CustomVersion=$false
+    $AzureToken=$null
 }
 
 task TestsRun  -depends Clean, Init, UpdateProjects,Compile
@@ -55,7 +56,7 @@ task UpdateProjects {
 
 task UpdateReadMe {
     InvokeScript{
-        & "$PSScriptRoot\tools\build\UpdateReadMe.ps1"
+        & "$PSScriptRoot\tools\build\UpdateReadMe.ps1" $AzureToken
     }
 }
 

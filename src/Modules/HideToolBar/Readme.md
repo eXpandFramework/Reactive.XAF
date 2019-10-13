@@ -21,13 +21,13 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
-`.NetFramework: `
+`.NetFramework: net461`
 
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp**|**Any**
 |Fasterflect.Xpand|2.0.6
- |System.Reactive|4.1.6
+ |System.Reactive|4.2.0
  |System.ValueTuple|4.5.0
  |Xpand.Extensions.XAF|0.0.1
  |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|1.2.57
@@ -50,11 +50,12 @@ The module satisfies the following conditions:
 ![image](https://user-images.githubusercontent.com/159464/58032948-418c4500-7b2c-11e9-96bc-f853bd4b9287.png)
 
 ### Tests
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/HIdeToolBar)
-
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.HideToolBar.HideToolBar). 
+All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
 ### Examples
 The module is integrated with the `ExcelImporter`.
 
 Next screenshot is an example from ExcelImporter from the view that maps the Excel columns with the BO members. On the right side the nested ListView has the HideToolBar set to true.
 
 ![image](https://user-images.githubusercontent.com/159464/55381194-238e6500-552b-11e9-8314-f1b1132d09f3.png)
+

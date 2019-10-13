@@ -25,7 +25,7 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
-`.NetFramework: `
+`.NetFramework: net461`
 
 |<!-- -->|<!-- -->
 |----|----
@@ -34,7 +34,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |**DevExpress.ExpressApp.ConditionalAppearance**|**Any**
  |**DevExpress.Xpo**|**Any**
 |Fasterflect.Xpand|2.0.6
- |System.Reactive|4.1.6
+ |System.Reactive|4.2.0
  |Xpand.Extensions|0.0.1
  |Xpand.Extensions.XAF|0.0.1
  |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|1.2.57
@@ -59,8 +59,8 @@ All messages are stored in the local database using the `TraceEvent` BO and you 
 All messages are buffered until after the logon where we have a valid database and then stored in the database. However there is also a file logging which happens on Realtime and can be found in path with the `_RXLogger.log` suffix.
 
 ### Tests
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Reactive.Logger)
-
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.Reactive.Logger.ReactiveLogger). 
+All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
 ### Examples
 
 The module  can be used with all packages that use the API from Xpand.XAF.Modules.Reactive. It will persist the calls to the datastore using the `TraceEvent` object. Below we analyze what the logger logs when used from the [Xpand.XAF.Modules.Reactive.Logger.Client.Win](https://github.com/eXpandFramework/DevExpress.XAF/tree/lab/src/Modules/Reactive.Logger.Client.Win). 
@@ -73,3 +73,4 @@ So from bottom to top, we can see that the `OneViewModule ShowView and HideMainW
 3. From step 2 we know we after logon therefore the user model is also merged giving the signal to the `ReactiveLoggerHubModule` which gets the 30 listening ports 61456, 61486 (last column) with the 
 4. Trash these rows as they do not tell us more than that an ObjectSpaceCreated or using the powerful DevExpress Grid,  filter out the Reactive modules calls as it tends to get chatty.
 5. The rest of the rows follow the same pattern with the GridListEditor and OneView modules on the lead.
+

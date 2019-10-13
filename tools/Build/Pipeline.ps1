@@ -17,7 +17,7 @@ if ($PastBuild){
 }
 "CustomVersion=$CustomVersion"
 $ErrorActionPreference = "Stop"
-$regex = [regex] '(\d*\.\d*)'
+$regex = [regex] '(\d{2}\.\d*)'
 $result = $regex.Match($CustomVersion).Groups[1].Value;
 & "$SourcePath\go.ps1" -InstallModules
 if (!$result){
@@ -32,7 +32,7 @@ else{
         }
     }|Group-Object -Property Minor|ForEach-Object{
         $_.Group|Select-Object -First 1 -ExpandProperty Version
-    }|Sort-Object -Descending
+    }|Sort-Object -Descending|Select-Object -First 6
     "latestMinors:"
     $latestMinors
     $CustomVersion=$latestMinors|Where-Object{"$($_.Major).$($_.Minor)" -eq $result}

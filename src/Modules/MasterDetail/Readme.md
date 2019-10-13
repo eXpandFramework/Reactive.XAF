@@ -21,14 +21,14 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
-`.NetFramework: `
+`.NetFramework: net461`
 
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.Data**|**Any**
  |**DevExpress.ExpressApp**|**Any**
 |Fasterflect.Xpand|2.0.6
- |System.Reactive|4.1.6
+ |System.Reactive|4.2.0
  |System.ValueTuple|4.5.0
  |Xpand.Extensions.XAF|0.0.1
  |Xpand.Patcher|1.0.1
@@ -57,8 +57,8 @@ The module satisfies the following conditions:
    ![image](https://user-images.githubusercontent.com/159464/55991766-b1005080-5cb3-11e9-9dc2-bee3dfb627ac.png)
 
 ### Tests
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/MasterDetail)
-
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.MasterDetail.MasterDetail). 
+All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
 ### Examples
 The module is integrated with the `ExcelImporter`, `XtraDashboard` modules.
 
@@ -66,3 +66,4 @@ The module is integrated with the `ExcelImporter`, `XtraDashboard` modules.
 Next screenshot is an example from ExcelImporter from the view tha maps the Excel columns with the BO members. 
 
 ![image](https://user-images.githubusercontent.com/159464/55381194-238e6500-552b-11e9-8314-f1b1132d09f3.png)
+
