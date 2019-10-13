@@ -9,8 +9,7 @@
     <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Extensions/Xpand.Extensions.Mono.Cecil</projectUrl>
     <iconUrl>http://sign.expandframework.com</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>
-    </description>
+    <description>Xpand.Extensions.Mono.Cecil</description>
     <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Xpand.Extensions.Mono.Cecil</tags>
@@ -18,6 +17,7 @@
       <dependency id="Fasterflect.Xpand" version="2.0.6" />
       <dependency id="Mono.Cecil" version="0.11.0" />
       <dependency id="System.CodeDom" version="4.6.0" />
+      <dependency id="Xpand.VersionConverter" version="1.0.35.0" />
     </dependencies>
   </metadata>
   <files>

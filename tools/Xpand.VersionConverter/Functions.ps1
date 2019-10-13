@@ -1,10 +1,11 @@
+
 function Get-UnPatchedPackages {
     param(
         $moduleDirectories,
         $dxVersion
     )
     $unpatchedPackages = $moduleDirectories | ForEach-Object {
-        Get-ChildItem $_ "Xpand.XAF*.dll" -Recurse | ForEach-Object {
+        (@(Get-ChildItem $_ "Xpand.XAF*.dll" -Recurse ) + @(Get-ChildItem $_ "Xpand.Extensions*.dll" -Recurse )) | ForEach-Object {
             if (!(Test-Path "$($_.DirectoryName)\VersionConverter.v.$dxVersion.DoNotDelete")) {
                 $_.fullname
             }
@@ -19,7 +20,7 @@ function Get-InstalledPackages {
         $projectFile,
         $assemblyFilter
     )
-    [xml]$csproj = get-content $projectFile
+    [xml]$csproj = Get-Content $projectFile
     $packagesFolder = Get-packagesfolder
     
     [array]$packageReferences = $csproj.Project.ItemGroup.PackageReference | ForEach-Object {
@@ -93,12 +94,13 @@ function Get-PackagesFolder {
 
 function Install-MonoCecil($resolvePath) {
     Write-Verbose "Loading Mono.Cecil"
-    $monoPath = "$PSScriptRoot\mono.cecil.0.10.4\lib\net40"
+    $cecilVersion = "0.10.4"
+    $monoPath = "$PSScriptRoot\mono.cecil.$cecilVersion\lib\net40"
     if (!(Test-Path "$monoPath\Mono.Cecil.dll")) {
         $client = New-Object System.Net.WebClient
-        $client.DownloadFile("https://www.nuget.org/api/v2/package/Mono.Cecil/0.10.4", "$PSScriptRoot\mono.cecil.0.10.4.zip")
+        $client.DownloadFile("https://www.nuget.org/api/v2/package/Mono.Cecil/$cecilVersion", "$PSScriptRoot\mono.cecil.$cecilVersion.zip")
         Add-Type -AssemblyName System.IO.Compression.FileSystem
-        [ZipFile]::ExtractToDirectory("$PSScriptRoot\mono.cecil.0.10.4.zip", "$PSScriptRoot\mono.cecil.0.10.4")
+        [ZipFile]::ExtractToDirectory("$PSScriptRoot\mono.cecil.$cecilVersion.zip", "$PSScriptRoot\mono.cecil.$cecilVersion")
     }
 
     [System.Reflection.Assembly]::Load([File]::ReadAllBytes("$monoPath\Mono.Cecil.dll")) | Out-Null
@@ -194,7 +196,7 @@ function Get-DevExpressVersion($targetPath, $referenceFilter, $projectFile) {
         else {
             $references = $csproj.Project.ItemGroup.Reference
             $dxReferences = $references.Include | Where-Object { $_ -like "$referenceFilter" }    
-            $hintPath = $dxReferences.HintPath | foreach-Object { 
+            $hintPath = $dxReferences.HintPath | ForEach-Object { 
                 if ($_) {
                     $path = $_
                     if (![path]::IsPathRooted($path)) {
@@ -205,34 +207,34 @@ function Get-DevExpressVersion($targetPath, $referenceFilter, $projectFile) {
                     }
                 }
             } | Where-Object { $_ } | Select-Object -First 1
-            if ($hintPath ) {
-                Write-Verbose "$($dxAssembly.Name.Name) found from $hintpath"
-                $version = [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($hintPath).FileVersion
+        if ($hintPath ) {
+            Write-Verbose "$($dxAssembly.Name.Name) found from $hintpath"
+            $version = [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($hintPath).FileVersion
+        }
+        else {
+            $dxAssemblyPath = Get-ChildItem $targetPath "$referenceFilter*.dll" | Select-Object -First 1
+            if ($dxAssemblyPath) {
+                Write-Verbose "$($dxAssembly.Name.Name) found from $($dxAssemblyPath.FullName)"
+                $version = [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($dxAssemblyPath.FullName).FileVersion
             }
             else {
-                $dxAssemblyPath = Get-ChildItem $targetPath "$referenceFilter*.dll" | Select-Object -First 1
-                if ($dxAssemblyPath) {
-                    Write-Verbose "$($dxAssembly.Name.Name) found from $($dxAssemblyPath.FullName)"
-                    $version = [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($dxAssemblyPath.FullName).FileVersion
-                }
-                else {
-                    $include = ($dxReferences | Select-Object -First 1)
-                    Write-Verbose "Include=$Include"
-                    $dxReference = [Regex]::Match($include, "DevExpress[^,]*", [RegexOptions]::IgnoreCase).Value
-                    Write-Verbose "DxReference=$dxReference"
-                    $dxAssembly = Get-ChildItem "$env:windir\Microsoft.NET\assembly\GAC_MSIL"  *.dll -Recurse | Where-Object { $_ -like "*$dxReference.dll" } | Select-Object -First 1
-                    if ($dxAssembly) {
-                        $version = [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($dxAssembly.FullName).FileVersion
-                    }
+                $include = ($dxReferences | Select-Object -First 1)
+                Write-Verbose "Include=$Include"
+                $dxReference = [Regex]::Match($include, "DevExpress[^,]*", [RegexOptions]::IgnoreCase).Value
+                Write-Verbose "DxReference=$dxReference"
+                $dxAssembly = Get-ChildItem "$env:windir\Microsoft.NET\assembly\GAC_MSIL"  *.dll -Recurse | Where-Object { $_ -like "*$dxReference.dll" } | Select-Object -First 1
+                if ($dxAssembly) {
+                    $version = [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($dxAssembly.FullName).FileVersion
                 }
             }
         }
-        $version
     }
-    catch {
-        Write-Warning "$_`r`n$howToVerbose`r`n"
-        throw "Check output warning message"
-    }
+    $version
+}
+catch {
+    Write-Warning "$_`r`n$howToVerbose`r`n"
+    throw "Check output warning message"
+}
 }
 
 function Get-DevExpressVersionFromReference {
@@ -244,7 +246,7 @@ function Get-DevExpressVersionFromReference {
     )
     $references = $csproj.Project.ItemGroup.Reference
     $dxReferences = $references | Where-Object { $_.Include -like "$referenceFilter" }    
-    $hintPath = $dxReferences.HintPath | foreach-Object { 
+    $hintPath = $dxReferences.HintPath | ForEach-Object { 
         if ($_) {
             $path = $_
             if (![path]::IsPathRooted($path)) {
@@ -255,30 +257,30 @@ function Get-DevExpressVersionFromReference {
             }
         }
     } | Where-Object { $_ } | Select-Object -First 1
-    if ($hintPath ) {
-        Write-Verbose "$($dxAssembly.Name.Name) found from $hintpath"
-        [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($hintPath).FileVersion
+if ($hintPath ) {
+    Write-Verbose "$($dxAssembly.Name.Name) found from $hintpath"
+    [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($hintPath).FileVersion
+}
+else {
+    $dxAssemblyPath = Get-ChildItem $targetPath "$referenceFilter*.dll" | Select-Object -First 1
+    if ($dxAssemblyPath) {
+        Write-Verbose "$($dxAssembly.Name.Name) found from $($dxAssemblyPath.FullName)"
+        [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($dxAssemblyPath.FullName).FileVersion
     }
     else {
-        $dxAssemblyPath = Get-ChildItem $targetPath "$referenceFilter*.dll" | Select-Object -First 1
-        if ($dxAssemblyPath) {
-            Write-Verbose "$($dxAssembly.Name.Name) found from $($dxAssemblyPath.FullName)"
-            [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($dxAssemblyPath.FullName).FileVersion
+        $include = ($dxReferences | Select-Object -First 1).Include
+        $dxReference = [Regex]::Match($include, "DevExpress[^,]*", [RegexOptions]::IgnoreCase).Value
+        Write-Verbose "Include=$Include"
+        Write-Verbose "DxReference=$dxReference"
+        $dxAssembly = Get-ChildItem "$env:windir\Microsoft.NET\assembly\GAC_MSIL"  *.dll -Recurse | Where-Object { $_ -like "*$dxReference.dll" } | Select-Object -First 1
+        if ($dxAssembly) {
+            [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($dxAssembly.FullName).FileVersion
         }
         else {
-            $include = ($dxReferences | Select-Object -First 1).Include
-            $dxReference = [Regex]::Match($include, "DevExpress[^,]*", [RegexOptions]::IgnoreCase).Value
-            Write-Verbose "Include=$Include"
-            Write-Verbose "DxReference=$dxReference"
-            $dxAssembly = Get-ChildItem "$env:windir\Microsoft.NET\assembly\GAC_MSIL"  *.dll -Recurse | Where-Object { $_ -like "*$dxReference.dll" } | Select-Object -First 1
-            if ($dxAssembly) {
-                [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($dxAssembly.FullName).FileVersion
-            }
-            else {
-                throw "Cannot find DevExpress Version"
-            }
+            throw "Cannot find DevExpress Version"
         }
     }
+}
 }
 function Update-Version($modulePath, $dxVersion) {
     Use-Object($moduleAssembly = Get-MonoAssembly $modulePath -ReadSymbols) {
@@ -340,7 +342,7 @@ function Get-SymbolSources {
     )
     
     begin {
-        if (!(test-path $dbgToolsPath)) {
+        if (!(Test-Path $dbgToolsPath)) {
             throw "srcsrv is invalid"
         }
     }
@@ -369,7 +371,7 @@ function Update-Symbols {
     )
     
     begin {
-        if (!(test-path $dbgToolsPath)) {
+        if (!(Test-Path $dbgToolsPath)) {
             throw "srcsrv is invalid"
         }
         if ($PSCmdlet.ParameterSetName -eq "Default") {

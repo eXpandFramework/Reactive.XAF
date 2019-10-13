@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Reactive.Logger.Hub</id>
-    <version>0.0.12.0</version>
+    <version>0.0.13.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -19,14 +19,13 @@ The module uses the next two strategies:
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Reactive.Logger.Hub</tags>
     <dependencies>
       <dependency id="Fasterflect.Xpand" version="2.0.6" />
-      <dependency id="MagicOnion" version="2.4.0" />
-      <dependency id="Rx.Net.Plus" version="1.1.10" />
+      <dependency id="MagicOnion" version="2.6.2" />
       <dependency id="system.buffers" version="4.5.0" />
-      <dependency id="System.Interactive.Async" version="3.2.0" />
-      <dependency id="System.Reactive" version="4.1.6" />
-      <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.57.0" />
-      <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="0.0.13.0" />
-      <dependency id="Xpand.VersionConverter" version="1.0.34.0" />
+      <dependency id="System.Interactive.Async" version="4.0.0" />
+      <dependency id="System.Reactive" version="4.2.0" />
+      <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.58.0" />
+      <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="0.0.14.0" />
+      <dependency id="Xpand.VersionConverter" version="1.0.35.0" />
     </dependencies>
   </metadata>
   <files>

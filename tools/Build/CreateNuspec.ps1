@@ -75,7 +75,7 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*Tests*" -Recurse | For
         $nuspec.SelectSingleNode("//ns:dependencies", $ns).AppendChild($dependency)|Out-Null
     }
     
-    if ($nuspec.package.metaData.id -like "Xpand.XAF*"){
+    if ($nuspec.package.metaData.id -like "Xpand.XAF*" -or $nuspec.package.metaData.id -like "Xpand.Extension*"){
         Invoke-Command $AddDependency -ArgumentList $versionConverter
     }
     $nuspec.Save($nuspecFileName)

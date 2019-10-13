@@ -9,12 +9,12 @@
     <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Extensions/Xpand.Extensions.XAF.Xpo</projectUrl>
     <iconUrl>http://sign.expandframework.com</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>
-    </description>
+    <description>Xpand.Extensions.XAF.Xpo</description>
     <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Xpand.Extensions.XAF.Xpo</tags>
     <dependencies>
+      <dependency id="Xpand.VersionConverter" version="1.0.35.0" />
     </dependencies>
   </metadata>
   <files>

@@ -12,8 +12,7 @@ param(
     [string]$targetPath ,
     $DevExpressVersion,
     [string]$VerboseOutput="Continue",
-    [string]$referenceFilter = "DevExpress*",
-    [string]$assemblyFilter = "Xpand.XAF.*"
+    [string]$referenceFilter = "DevExpress*"
 )
 
 $howToVerbose="Edit $projectFile and enable verbose messaging by adding <PropertyGroup><VersionConverterVerbose>Continue</VersionConverterVerbose>. Rebuild the project and send the output to support."
@@ -43,7 +42,10 @@ Write-Verbose "DxVersion=$dxVersion"
 $packagesFolder=Get-PackagesFolder
 Write-Verbose "nugetPackageFoldersPath=$packagesFolder"
 $nugetPackageFolders=[Path]::GetFullPath($packagesFolder)
-$moduleDirectories=[Directory]::GetDirectories($nugetPackageFolders)|Where-Object{(Get-Item $_).BaseName -like "Xpand.XAF*"}
+$moduleDirectories=[Directory]::GetDirectories($nugetPackageFolders)|Where-Object{
+    $baseName=(Get-Item $_).BaseName
+    $baseName -like "Xpand.XAF*" -or $baseName -like "Xpand.Extensions*"
+}
 Write-Verbose "moduleDirectories:"
 $moduleDirectories|Write-Verbose
 
@@ -67,7 +69,7 @@ try {
     Install-MonoCecil $targetPath
     $moduleDirectories|ForEach-Object{
         write-verbose "`r`nmoduleDir=$_"
-        Get-ChildItem $_ Xpand.XAF*.dll -Recurse|
+        (@(Get-ChildItem $_ Xpand.XAF*.dll -Recurse)+@(Get-ChildItem $_ Xpand.Extensions*.dll -Recurse))|
         # Where-Object{$installedPackages.Contains($_.BaseName)}|
         ForEach-Object{
             $packageFile = $_.FullName
