@@ -18,7 +18,10 @@ namespace Xpand.XAF.Modules.Reactive{
 
     public static class ReactiveModulesExtension{
         public static IObservable<IModelReactiveModules> ReactiveModulesModel(this XafApplication application){
-            return application.ReactiveModule(() => ((IModelApplicationReactiveModules) application.Model).ReactiveModules);
+            return application.ReactiveModule(() => {
+                var model =  application.Model as IModelApplicationReactiveModules;
+                return model?.ReactiveModules;
+            });
         }
 
         public static IObservable<TModel> ToReactiveModule<TModel>(this XafApplication application) where TModel:IModelReactiveModule{
@@ -29,7 +32,7 @@ namespace Xpand.XAF.Modules.Reactive{
             var applicationModel = (bool) application.GetFieldValue("isLoggedOn");
             return applicationModel
                 ? model().AsObservable()
-                : application.WhenLoggedOn().Select(_ => model());
+                : application.WhenLoggedOn().Select(_ => model()).WhenNotDefault();
         }
 
         public static TModel ToReactiveModule<TModel>(this IModelApplication applicationModel) where TModel:IModelReactiveModule{

@@ -2,13 +2,16 @@
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Model;
 using NUnit.Framework;
 using Shouldly;
 using TestsLib;
 using Xpand.Extensions.XAF.XafApplication;
+using Xpand.TestsLib;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Logger;
 using Xpand.XAF.Modules.Reactive.Logger.Hub;
@@ -120,12 +123,20 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
         }
 
         [Test]
+        [Apartment(ApartmentState.STA)]
         public void UnloadReactiveModule(){
             using (var application = Platform.Win.NewApplication<TestModule>()){
-                application.AddModule<TestModule>();
+                var testModule = application.AddModule<TestModule>();
                 application.Modules.OfType<ReactiveModule>().FirstOrDefault().ShouldBeNull();
                 application.Modules.OfType<ReactiveLoggerModule>().FirstOrDefault().ShouldBeNull();
                 application.Modules.OfType<ReactiveLoggerHubModule>().FirstOrDefault().ShouldBeNull();
+                testModule.RequiredModuleTypes.Contains(typeof(ReactiveModule)).ShouldBeFalse();
+                testModule.ModuleManager.Modules.Select(_ => _.GetType()).Contains(typeof(ReactiveModule)).ShouldBeFalse();
+                testModule.ModuleManager.Modules.Select(_ => _.GetType()).Contains(typeof(ReactiveLoggerModule)).ShouldBeFalse();
+                testModule.ModuleManager.Modules.Select(_ => _.GetType()).Contains(typeof(ReactiveLoggerHubModule)).ShouldBeFalse();
+                ((IModelSources)application.Model).Modules.FirstOrDefault(_ => _ is ReactiveModule).ShouldBeNull();
+                ((IModelSources)application.Model).Modules.FirstOrDefault(_ => _ is ReactiveLoggerModule).ShouldBeNull();
+                ((IModelSources)application.Model).Modules.FirstOrDefault(_ => _ is ReactiveLoggerHubModule).ShouldBeNull();
             }
         }
 

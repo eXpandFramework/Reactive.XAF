@@ -10,6 +10,7 @@ using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using Xpand.Extensions.XAF.Model;
+using Xpand.XAF.Modules.Reactive.Extensions;
 
 
 namespace Xpand.XAF.Modules.Reactive.Logger{
@@ -19,10 +20,11 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
 
     public static class ModelReactiveModuleLogger{
         public static IObservable<IModelReactiveLogger> ReactiveLogger(this IObservable<IModelReactiveModules> source){
-            return source.Select(modules => modules.ReactiveLogger());
+            return source.Select(modules => modules.ReactiveLogger()).WhenNotDefault();
         }
         public static IModelReactiveLogger ReactiveLogger(this IModelReactiveModules reactiveModules){
-            return ((IModelReactiveModuleLogger) reactiveModules).ReactiveLogger;
+            var modelReactiveModuleLogger = reactiveModules as IModelReactiveModuleLogger;
+            return modelReactiveModuleLogger?.ReactiveLogger;
         }
     }
     public interface IModelReactiveLogger:IModelNode{

@@ -91,6 +91,7 @@ namespace TestsLib {
         };
         public static IObservable<IModelReactiveLogger> ConfigureModel<TModule>(this XafApplication application) where TModule:ModuleBase{
             return application.WhenModelChanged()
+                .Where(_ => application.Modules.Any(m => m is ReactiveLoggerModule))
                 .Select(_ => {
                     var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger;
                     logger.TraceSources.Enabled = true;
