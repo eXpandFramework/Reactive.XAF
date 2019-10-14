@@ -89,16 +89,20 @@ namespace TestsLib {
             {"SuppressConfirmationModule",61472 },
             {"ViewEditModeModule",61473 },
         };
-        public static IObservable<IModelReactiveLogger> ConfigureModel<TModule>(this XafApplication application) where TModule:ModuleBase{
+        public static IObservable<IModelReactiveLogger> ConfigureModel<TModule>(this XafApplication application,bool transmitMessage=true) where TModule:ModuleBase{
+            
             return application.WhenModelChanged()
                 .Where(_ => application.Modules.Any(m => m is ReactiveLoggerModule))
                 .Select(_ => {
                     var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger;
-                    logger.TraceSources.Enabled = true;
+                    logger.TraceSources.Enabled = transmitMessage;
                     var port = ModulePorts[typeof(TModule).Name];
                     var modelLoggerPortsList = ((IModelServerPorts) logger).LoggerPorts;
-                    modelLoggerPortsList.OfType<IModelLoggerServerPort>().First().Port = port;
+                    var serverPort = modelLoggerPortsList.OfType<IModelLoggerServerPort>().First();
+                    serverPort.Port = port;
+                    serverPort.Enabled = logger.TraceSources.Enabled;
                     var clientRange = modelLoggerPortsList.OfType<IModelLoggerClientRange>().First();
+                    modelLoggerPortsList.Enabled = logger.TraceSources.Enabled;
                     clientRange.StartPort = port;
                     clientRange.EndPort = port+1;
                     return logger;
@@ -131,19 +135,19 @@ namespace TestsLib {
             return platform.NewApplication<TModule>().AddModule<TModule>(title,additionalExportedTypes);
         }
         
-        public static XafApplication NewApplication<TModule>(this Platform platform) where TModule:ModuleBase{
+        public static XafApplication NewApplication<TModule>(this Platform platform,bool transmitMessage=true) where TModule:ModuleBase{
             XafApplication application;
             
             if (platform == Platform.Web){
-                application = new TestWebApplication(typeof(TModule));
+                application = new TestWebApplication(typeof(TModule),transmitMessage);
             }
             else if (platform == Platform.Win){
-                application = new TestWinApplication(typeof(TModule));
+                application = new TestWinApplication(typeof(TModule),transmitMessage);
             }
             else{
                 throw new NotSupportedException("if implemented make sure all tests pass with TestExplorer and live testing");
             }
-            application.ConfigureModel<TModule>().SubscribeReplay();
+            application.ConfigureModel<TModule>(transmitMessage).SubscribeReplay();
             application.MockEditorsFactory();
 
             if (application is WebApplication webApplication){

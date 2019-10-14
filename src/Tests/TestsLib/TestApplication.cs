@@ -5,14 +5,19 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Windows.Forms;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Web;
 using DevExpress.ExpressApp.Win;
+using Xpand.Extensions.AppDomain;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Logger.Hub;
 
 namespace TestsLib{
     public class TestWinApplication : WinApplication,ITestApplication{
-        public TestWinApplication(Type sutModule){
+        private readonly bool _transmitMessage;
+
+        public TestWinApplication(Type sutModule,bool transmitMessage=true){
+            _transmitMessage = transmitMessage;
             SUTModule = sutModule;
             TraceClientConnected = this.ClientConnect();
             TraceClientBroadcast = this.ClientBroadcast();
@@ -25,8 +30,10 @@ namespace TestsLib{
         public Type SUTModule{ get; set; }
 
         protected override void Dispose(bool disposing){
-            TraceClientConnected.Wait();
-            TraceClientBroadcast.Wait();
+            if (_transmitMessage){
+                TraceClientConnected.Wait();
+                TraceClientBroadcast.Wait();
+            }
             base.Dispose(disposing);
         }
 
@@ -65,11 +72,15 @@ namespace TestsLib{
         }
 
         protected override string GetModelAssemblyFilePath(){
-            return null;
+
+            return $@"{AppDomain.CurrentDomain.ApplicationPath()}\ModelAssembly{Guid.NewGuid()}.dll";
         }
     }
     public class TestWebApplication : WebApplication,ITestApplication{
-        public TestWebApplication(Type sutModule){
+        private readonly bool _transmitMessage;
+
+        public TestWebApplication(Type sutModule,bool transmitMessage=true){
+            _transmitMessage = transmitMessage;
             SUTModule = sutModule;
             TraceClientConnected = this.ClientConnect();
             TraceClientBroadcast = this.ClientBroadcast();
@@ -81,9 +92,11 @@ namespace TestsLib{
             return true;
         }
         protected override void Dispose(bool disposing){
-            var timeout = TimeSpan.FromMilliseconds(5000);
-            TraceClientConnected.Timeout(timeout).Wait();
-            TraceClientBroadcast.Timeout(timeout).Wait();
+            if (_transmitMessage){
+                var timeout = TimeSpan.FromMilliseconds(5000);
+                TraceClientConnected.Timeout(timeout).Wait();
+                TraceClientBroadcast.Timeout(timeout).Wait();
+            }
             base.Dispose(disposing);
         }
 

@@ -179,6 +179,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 
         private static IObservable<IModelServerPorts> ModelLoggerPorts(this XafApplication application){
             return application.ToReactiveModule<IModelReactiveModuleLogger>().Select(logger => logger.ReactiveLogger).Cast<IModelServerPorts>()
+                .Where(ports => ports.LoggerPorts.Enabled)
                 .Select(logger => logger).Cast<IModelServerPorts>();
         }
 

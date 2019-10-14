@@ -14,9 +14,12 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
     }
     [ModelAbstractClass]
     public interface IModelLoggerPort : IModelNode{
+        
     }
 
     public interface IModelLoggerServerPort : IModelLoggerPort{
+        [DefaultValue(true)]
+        bool Enabled{ get; set; }
         [Required]
         [DefaultValue("localhost")]
         string Host{ get; set; }
@@ -26,7 +29,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 
     [ModelNodesGenerator(typeof(ModelServerPosrtsGenerator))]
     public interface IModelLoggerPortsList:IModelNode,IModelList<IModelLoggerPort>{
-        
+        [DefaultValue(true)]
+        bool Enabled{ get; set; }
     }
 
     public class ModelServerPosrtsGenerator:ModelNodesGeneratorBase{

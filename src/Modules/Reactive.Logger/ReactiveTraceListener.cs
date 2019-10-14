@@ -10,8 +10,10 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
     public class ReactiveTraceListener : TextWriterTraceListener{
         private readonly string _applicationTitle;
         readonly ISubject<ITraceEvent> _eventTraceSubject=Subject.Synchronize(new Subject<ITraceEvent>());
-        private static readonly FileStream Stream = new Lazy<FileStream>(() =>
-            new FileStream($@"{AppDomain.CurrentDomain.ApplicationPath()}\{AppDomain.CurrentDomain.SetupInformation.ApplicationName}_RXLogger.log", FileMode.OpenOrCreate)).Value;
+        private static readonly FileStream Stream = new Lazy<FileStream>(() => {
+            var path = $@"{AppDomain.CurrentDomain.ApplicationPath()}\{AppDomain.CurrentDomain.SetupInformation.ApplicationName}_RXLogger.log";
+            return  File.Open(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
+        }).Value;
         public ReactiveTraceListener(string applicationTitle) : base(Stream){
             _applicationTitle = applicationTitle;
         }

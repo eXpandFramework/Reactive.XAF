@@ -8,8 +8,6 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <OutputPath>..\..\..\bin</OutputPath>
-    <AssemblyTitle>Xpand.Extensions</AssemblyTitle>
-    <Product>Xpand.Extensions</Product>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <DebugType>pdbonly</DebugType>

@@ -1,9 +1,13 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
+using AppDomainToolkit;
 using DevExpress.ExpressApp;
 using NUnit.Framework;
 using Shouldly;
@@ -16,6 +20,7 @@ using Xpand.XAF.Modules.Reactive.Logger.Tests.BOModel;
 
 namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
     [NonParallelizable]
+    [Serializable]
     public class ReactiveLoggerTests : BaseTest{
         
         [TestCase("NoLastEvent")]
@@ -89,8 +94,18 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
         [Test]
         [Apartment(ApartmentState.STA)]
         public async Task Save_TraceEvent(){
-            
-            using (var application = Platform.Win.NewApplication<ReactiveLoggerModule>()){
+            await SaveTraceEvent(async () => {
+                var appDomainContext2 = AppDomainContext.Create(AppDomain.CurrentDomain.SetupInformation);
+                await RemoteFuncAsync.InvokeAsync(appDomainContext2.Domain, async () => {
+                    await SaveTraceEvent();
+                    return Unit.Default;
+                });
+                appDomainContext2.Dispose();
+            });
+        }
+
+        private static async Task SaveTraceEvent(Action action=null){
+            using (var application = Platform.Win.NewApplication<ReactiveLoggerModule>(false)){
                 application.AddModule<TestReactiveLoggerModule>();
                 application.Title = nameof(Save_TraceEvent);
                 application.Logon();
@@ -103,9 +118,11 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
                 await test;
                 var objectSpace = application.CreateObjectSpace();
                 objectSpace.GetObjectsQuery<TraceEvent>().FirstOrDefault(_ => _.Value.Contains("test")).ShouldNotBeNull();
-                
+
+                action?.Invoke();
             }
         }
+
 
         [Test]
         [Apartment(ApartmentState.STA)]
