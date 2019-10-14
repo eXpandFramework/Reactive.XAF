@@ -13,6 +13,7 @@ using TestsLib;
 using Xpand.Extensions.XAF.CollectionSource;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.Source.Extensions.XAF.XafApplication;
+using Xpand.TestsLib;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Logger.Hub.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive.Services;

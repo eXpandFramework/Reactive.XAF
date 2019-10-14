@@ -7,6 +7,7 @@ using NUnit.Framework;
 using Shouldly;
 using TestsLib;
 using Xpand.Extensions.XAF.XafApplication;
+using Xpand.TestsLib;
 using Xpand.XAF.Modules.GridListEditor.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;

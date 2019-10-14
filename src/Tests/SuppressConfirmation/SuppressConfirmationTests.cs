@@ -7,7 +7,7 @@ using NUnit.Framework;
 using Shouldly;
 using TestsLib;
 using Xpand.Extensions.XAF.XafApplication;
-using Xpand.Source.Extensions.XAF.XafApplication;
+using Xpand.TestsLib;
 using Xpand.XAF.Modules.MasterDetail;
 using Xpand.XAF.Modules.SuppressConfirmation.Tests.BOModel;
 

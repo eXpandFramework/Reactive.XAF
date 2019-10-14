@@ -7,7 +7,7 @@ using Xpand.Extensions.AppDomain;
 using Xpand.Extensions.XAF.XafApplication;
 using IDisposable = System.IDisposable;
 
-namespace TestsLib{
+namespace Xpand.TestsLib{
     public abstract class BaseTest : IDisposable{
         protected Platform GetPlatform(string platformName){
             return (Platform)Enum.Parse(typeof(Platform),platformName);
@@ -19,6 +19,19 @@ namespace TestsLib{
             var traceSourceSwitch = new SourceSwitch("SourceSwitch", "Verbose");
             TraceSource = new TraceSource(nameof(BaseTest)){Switch = traceSourceSwitch};
             TraceSource.Listeners.Add(TextListener);
+        }
+
+        protected void WriteLine(bool value){
+            TestContext.WriteLine(value);    
+        }
+        protected void WriteLine(char value){
+            TestContext.WriteLine(value);    
+        }
+        protected void WriteLine(char[] value){
+            TestContext.WriteLine(value);    
+        }
+        protected void WriteLine(decimal value){
+            TestContext.WriteLine(value);    
         }
 
         public static TextWriterTraceListener TextListener{ get; }

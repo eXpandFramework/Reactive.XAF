@@ -6,6 +6,7 @@ using NUnit.Framework;
 using Shouldly;
 using TestsLib;
 using Xpand.Extensions.XAF.XafApplication;
+using Xpand.TestsLib;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.ViewEditMode.Tests.BOModel;
 

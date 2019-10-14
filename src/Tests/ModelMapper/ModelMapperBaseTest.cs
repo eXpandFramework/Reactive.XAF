@@ -9,6 +9,7 @@ using Microsoft.CSharp;
 using TestsLib;
 using Xpand.Extensions.AppDomain;
 using Xpand.Extensions.XAF.XafApplication;
+using Xpand.TestsLib;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.ModelMapper.Tests.BOModel;
