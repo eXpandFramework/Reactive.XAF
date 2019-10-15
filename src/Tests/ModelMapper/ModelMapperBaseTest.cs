@@ -6,7 +6,6 @@ using System.Reflection;
 using DevExpress.ExpressApp;
 using Fasterflect;
 using Microsoft.CSharp;
-using TestsLib;
 using Xpand.Extensions.AppDomain;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;

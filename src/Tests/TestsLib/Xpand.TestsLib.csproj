@@ -29,6 +29,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Castle.Core" Version="4.4.0" />
+    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Persistent.BaseImpl" Version="18.2.7" />
     <PackageReference Include="Enums.NET" Version="2.3.2" />
     <PackageReference Include="Humanizer.Core" Version="2.7.9" />
     <PackageReference Include="Mono.Cecil" Version="0.11.0" />

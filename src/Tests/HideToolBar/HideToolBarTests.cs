@@ -12,7 +12,6 @@ using Fasterflect;
 using Moq;
 using NUnit.Framework;
 using Shouldly;
-using TestsLib;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;
 using Xpand.XAF.Modules.HideToolBar.Tests.BOModel;

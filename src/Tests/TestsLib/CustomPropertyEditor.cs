@@ -2,7 +2,7 @@
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 
-namespace TestsLib{
+namespace Xpand.TestsLib{
     public class CustomPropertyEditor : PropertyEditor{
         private readonly object _control;
 

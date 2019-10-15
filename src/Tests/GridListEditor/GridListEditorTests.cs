@@ -5,7 +5,6 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using NUnit.Framework;
 using Shouldly;
-using TestsLib;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;
 using Xpand.XAF.Modules.GridListEditor.Tests.BOModel;

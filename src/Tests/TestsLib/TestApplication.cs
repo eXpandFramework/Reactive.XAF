@@ -5,14 +5,13 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Windows.Forms;
-using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Web;
 using DevExpress.ExpressApp.Win;
 using Xpand.Extensions.AppDomain;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Logger.Hub;
 
-namespace TestsLib{
+namespace Xpand.TestsLib{
     public class TestWinApplication : WinApplication,ITestApplication{
         private readonly bool _transmitMessage;
 

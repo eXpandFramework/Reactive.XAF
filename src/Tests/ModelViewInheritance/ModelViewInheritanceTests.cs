@@ -6,7 +6,6 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using NUnit.Framework;
 using Shouldly;
-using TestsLib;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;
 using Xpand.XAF.Modules.CloneModelView;

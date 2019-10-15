@@ -9,7 +9,6 @@ using DevExpress.ExpressApp.Xpo;
 using DevExpress.Persistent.BaseImpl;
 using NUnit.Framework;
 using Shouldly;
-using TestsLib;
 using Xpand.Extensions.XAF.CollectionSource;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.Source.Extensions.XAF.XafApplication;
@@ -130,7 +129,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
                     var receive = TraceEventReceiver.TraceEvent.FirstAsync(_ => _.Method==nameof(XafApplicationRXExtensions.WhenDetailViewCreated)).SubscribeReplay();
                     var broadcast = TraceEventHub.Broadcasted.FirstAsync(_ => _.Method==nameof(XafApplicationRXExtensions.WhenDetailViewCreated))
                         .SubscribeReplay();
-                    application.WhenDetailViewCreated().SubscribeReplay();
+                    var detailViewCreated=application.WhenDetailViewCreated().FirstAsync().SubscribeReplay();
                     
                     
                     
@@ -139,7 +138,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
 
                     await broadcast.Timeout(Timeout);
                     await receive.Timeout(Timeout);
-
+                    await detailViewCreated.Timeout(Timeout);
                     var events = listView.CollectionSource.Objects<TraceEvent>().ToArray();
                     events.FirstOrDefault(_ => _.Method==nameof(XafApplicationRXExtensions.WhenDetailViewCreated)).ShouldNotBeNull();
                     events.FirstOrDefault(_ => _.Location==nameof(ReactiveLoggerHubService)).ShouldNotBeNull();
@@ -173,10 +172,11 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
                     
                     var viewCreated = clientWinApp.WhenTraceOnNextEvent(nameof(XafApplicationRXExtensions.WhenDetailViewCreated))
                         .FirstAsync().SubscribeReplay();
-                    application.WhenDetailViewCreated().SubscribeReplay();
+                    var whenDetailViewCreated = application.WhenDetailViewCreated().FirstAsync().SubscribeReplay();
                     application.CreateObjectView<DetailView>(typeof(RLH));
                     await viewCreated.Timeout(Timeout).ToTaskWithoutConfigureAwait();
                     await listView.CollectionSource.WhenCollectionReloaded().FirstAsync();
+                    await whenDetailViewCreated;
                     var events = listView.CollectionSource.Objects<TraceEvent>().ToArray();
                     events.FirstOrDefault(_ => _.Method==nameof(XafApplicationRXExtensions.WhenDetailViewCreated)).ShouldNotBeNull();
                     events.FirstOrDefault(_ => _.Location==nameof(ReactiveLoggerHubService)).ShouldNotBeNull();

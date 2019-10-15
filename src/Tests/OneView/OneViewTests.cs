@@ -8,7 +8,6 @@ using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.SystemModule;
 using NUnit.Framework;
 using Shouldly;
-using TestsLib;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;
 using Xpand.XAF.Modules.OneView.Tests.BOModel;
@@ -88,7 +87,7 @@ namespace Xpand.XAF.Modules.OneView.Tests{
         [Apartment(ApartmentState.STA)]
         public async Task Edit_Model(){
             using (var application = OneViewModule(nameof(Edit_Model)).Application){
-                application.WhenViewOnFrame(typeof(OV))
+                var whenViewOneFrame=application.WhenViewOnFrame(typeof(OV))
                     .SelectMany(frame => frame.Template.ToForm().WhenShown().To(frame))
                     .Do(frame => frame.GetController<DialogController>().AcceptAction.DoExecute())
                     .FirstAsync()
@@ -111,6 +110,7 @@ namespace Xpand.XAF.Modules.OneView.Tests{
                 testWinApplication.Start();
                 await editModel;
                 await showViewAfterModelEdit;
+                await whenViewOneFrame;
             }
         }
 

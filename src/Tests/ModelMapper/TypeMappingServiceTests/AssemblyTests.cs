@@ -51,7 +51,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
             var version = modelMapperAttribute.AssemblyHashCode;
 
-            mappedType.MapToModel();
+            
             
             mapToModel = await TypeMappingService.MappedTypes;
 

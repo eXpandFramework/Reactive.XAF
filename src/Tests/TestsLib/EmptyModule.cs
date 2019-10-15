@@ -1,6 +1,6 @@
 ﻿using DevExpress.ExpressApp;
 
-namespace TestsLib{
+namespace Xpand.TestsLib{
     public class EmptyModule:ModuleBase{
         
     }

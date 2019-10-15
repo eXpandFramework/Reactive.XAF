@@ -13,7 +13,7 @@ using Fasterflect;
 using Xpand.XAF.Modules.ModelMapper.Tests.BOModel;
 
 namespace Xpand.XAF.Modules.ModelMapper.Tests{
-    class XafLayoutView:LayoutView,IModelSynchronizersHolder{
+    public class XafLayoutView:LayoutView,IModelSynchronizersHolder{
         public IModelSynchronizer GetSynchronizer(Component component){
             throw new NotImplementedException();
         }
@@ -38,9 +38,19 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             
         }
 
-        public event EventHandler<CustomModelSynchronizerEventArgs> CustomModelSynchronizer;
+        private event EventHandler<CustomModelSynchronizerEventArgs> CustomModelSynchronizer;
+
+        event EventHandler<CustomModelSynchronizerEventArgs> IModelSynchronizersHolder.CustomModelSynchronizer{
+            add => this.CustomModelSynchronizer += value;
+            remove => this.CustomModelSynchronizer -= value;
+        }
+
+        protected virtual void OnCustomModelSynchronizer(CustomModelSynchronizerEventArgs e){
+            CustomModelSynchronizer?.Invoke(this, e);
+        }
     }
-    class XafAdvBandedGridView:AdvBandedGridView,IModelSynchronizersHolder{
+
+    public class XafAdvBandedGridView:AdvBandedGridView,IModelSynchronizersHolder{
         public IModelSynchronizer GetSynchronizer(Component component){
             throw new NotImplementedException();
         }
@@ -62,7 +72,16 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             
         }
 
-        public event EventHandler<CustomModelSynchronizerEventArgs> CustomModelSynchronizer;
+        private event EventHandler<CustomModelSynchronizerEventArgs> CustomModelSynchronizer;
+
+        event EventHandler<CustomModelSynchronizerEventArgs> IModelSynchronizersHolder.CustomModelSynchronizer{
+            add => this.CustomModelSynchronizer += value;
+            remove => this.CustomModelSynchronizer -= value;
+        }
+
+        protected virtual void OnCustomModelSynchronizer(CustomModelSynchronizerEventArgs e){
+            CustomModelSynchronizer?.Invoke(this, e);
+        }
     }
     class CustomGridListEditor:GridListEditor,ISupportFooter{
         private readonly Type _viewType;

@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using NUnit.Framework;
 using Shouldly;
-using TestsLib;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;

@@ -1,5 +1,5 @@
 ﻿using System;
-using TestsLib;
+using Xpand.TestsLib;
 
 namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
     class ClientWinApp:TestWinApplication,ILoggerHubClientApplication{

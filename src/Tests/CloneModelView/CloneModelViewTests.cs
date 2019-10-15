@@ -6,7 +6,6 @@ using DevExpress.ExpressApp.Model;
 using Fasterflect;
 using NUnit.Framework;
 using Shouldly;
-using TestsLib;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;
 using Xpand.XAF.Modules.CloneModelView.Tests.BOModel;

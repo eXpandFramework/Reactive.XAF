@@ -11,7 +11,6 @@ using Fasterflect;
 using Moq;
 using NUnit.Framework;
 using Shouldly;
-using TestsLib;
 using Xpand.Extensions.XAF.Action;
 using Xpand.Extensions.XAF.Frame;
 using Xpand.Extensions.XAF.XafApplication;

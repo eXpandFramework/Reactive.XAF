@@ -5,12 +5,15 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
+using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.ExpressApp.Templates;
 using DevExpress.ExpressApp.Templates.ActionContainers;
+using DevExpress.ExpressApp.Updating;
 using DevExpress.ExpressApp.Web;
 using DevExpress.ExpressApp.Web.Editors.ASPx;
 using DevExpress.ExpressApp.Web.SystemModule;
@@ -18,10 +21,14 @@ using DevExpress.ExpressApp.Win;
 using DevExpress.ExpressApp.Win.Editors;
 using DevExpress.ExpressApp.Win.SystemModule;
 using DevExpress.ExpressApp.Xpo;
+using DevExpress.Persistent.Base;
+using DevExpress.Persistent.BaseImpl;
+using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 using DevExpress.Web;
 using DevExpress.XtraGrid;
 using Moq;
 using Moq.Protected;
+using Xpand.Extensions.Linq;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
@@ -30,8 +37,11 @@ using Xpand.XAF.Modules.Reactive.Logger.Hub;
 using Xpand.XAF.Modules.Reactive.Services;
 using EditorsFactory = DevExpress.ExpressApp.Editors.EditorsFactory;
 
-namespace TestsLib {
+namespace Xpand.TestsLib {
     public static class Extensions {
+        public static void SetupSecurity(this XafApplication application) {
+            application.Security=new SecurityStrategyComplex(typeof(PermissionPolicyUser),typeof(PermissionPolicyRole),new AuthenticationStandard());
+        }
 
         public static async Task<T> WithTimeOut<T>(this Task<T> source, TimeSpan? timeout = null){
             return await source.ToObservable().WithTimeOut(timeout);
@@ -57,6 +67,9 @@ namespace TestsLib {
             application.Setup();        }
 
         public static void RegisterDefaults(this XafApplication application, params ModuleBase[] modules){
+            if (modules.Any()&&application.Security is SecurityStrategyComplex){
+                modules = modules.Add(new ModuleUpdaterModule()).ToArray();
+            }
             application.AlwaysUpdateOnDatabaseVersionMismatch().Subscribe();
             var moduleBases = new[] {
                 new ReactiveLoggerHubModule(),
@@ -246,6 +259,72 @@ namespace TestsLib {
             application.AddObjectSpaceProvider(new XPObjectSpaceProvider(new MemoryDataStoreProvider(),true));
         }
 
+
+    }
+
+    public class ModuleUpdaterModule : ModuleBase{
+        public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB){
+            return base.GetModuleUpdaters(objectSpace, versionFromDB).Add(new DefaultUserModuleUpdater(objectSpace, versionFromDB));
+        }
+    }
+
+    public class DefaultUserModuleUpdater : ModuleUpdater{
+        public DefaultUserModuleUpdater(IObjectSpace objectSpace, Version currentDBVersion) : base(objectSpace, currentDBVersion){
+        }
+
+        private PermissionPolicyRole CreateDefaultRole() {
+            PermissionPolicyRole defaultRole = ObjectSpace.FindObject<PermissionPolicyRole>(new BinaryOperator("Name", "Default"));
+            if(defaultRole == null) {
+                defaultRole = ObjectSpace.CreateObject<PermissionPolicyRole>();
+                defaultRole.Name = "Default";
+
+                defaultRole.AddObjectPermission<PermissionPolicyUser>(SecurityOperations.Read, "[Oid] = CurrentUserId()", SecurityPermissionState.Allow);
+                defaultRole.AddNavigationPermission(@"Application/NavigationItems/Items/Default/Items/MyDetails", SecurityPermissionState.Allow);
+                defaultRole.AddMemberPermission<PermissionPolicyUser>(SecurityOperations.Write, "ChangePasswordOnFirstLogon", "[Oid] = CurrentUserId()", SecurityPermissionState.Allow);
+                defaultRole.AddMemberPermission<PermissionPolicyUser>(SecurityOperations.Write, "StoredPassword", "[Oid] = CurrentUserId()", SecurityPermissionState.Allow);
+                defaultRole.AddTypePermissionsRecursively<PermissionPolicyRole>(SecurityOperations.Read, SecurityPermissionState.Deny);
+                defaultRole.AddTypePermissionsRecursively<ModelDifference>(SecurityOperations.ReadWriteAccess, SecurityPermissionState.Allow);
+                defaultRole.AddTypePermissionsRecursively<ModelDifferenceAspect>(SecurityOperations.ReadWriteAccess, SecurityPermissionState.Allow);
+                defaultRole.AddTypePermissionsRecursively<ModelDifference>(SecurityOperations.Create, SecurityPermissionState.Allow);
+                defaultRole.AddTypePermissionsRecursively<ModelDifferenceAspect>(SecurityOperations.Create, SecurityPermissionState.Allow);                
+            }
+            return defaultRole;
+        }
+
+        public override void UpdateDatabaseAfterUpdateSchema() {
+            base.UpdateDatabaseAfterUpdateSchema();
+            //string name = "MyName";
+            //DomainObject1 theObject = ObjectSpace.FindObject<DomainObject1>(CriteriaOperator.Parse("Name=?", name));
+            //if(theObject == null) {
+            //    theObject = ObjectSpace.CreateObject<DomainObject1>();
+            //    theObject.Name = name;
+            //}
+            PermissionPolicyUser sampleUser = ObjectSpace.FindObject<PermissionPolicyUser>(new BinaryOperator("UserName", "User"));
+            if(sampleUser == null) {
+                sampleUser = ObjectSpace.CreateObject<PermissionPolicyUser>();
+                sampleUser.UserName = "User";
+                sampleUser.SetPassword("");
+            }
+            PermissionPolicyRole defaultRole = CreateDefaultRole();
+            sampleUser.Roles.Add(defaultRole);
+
+            PermissionPolicyUser userAdmin = ObjectSpace.FindObject<PermissionPolicyUser>(new BinaryOperator("UserName", "Admin"));
+            if(userAdmin == null) {
+                userAdmin = ObjectSpace.CreateObject<PermissionPolicyUser>();
+                userAdmin.UserName = "Admin";
+                // Set a password if the standard authentication type is used
+                userAdmin.SetPassword("");
+            }
+            // If a role with the Administrators name doesn't exist in the database, create this role
+            PermissionPolicyRole adminRole = ObjectSpace.FindObject<PermissionPolicyRole>(new BinaryOperator("Name", "Administrators"));
+            if(adminRole == null) {
+                adminRole = ObjectSpace.CreateObject<PermissionPolicyRole>();
+                adminRole.Name = "Administrators";
+            }
+            adminRole.IsAdministrative = true;
+            userAdmin.Roles.Add(adminRole);
+            ObjectSpace.CommitChanges(); //This line persists created object(s).
+        }
 
     }
 }
