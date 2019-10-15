@@ -149,12 +149,9 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
     }
     public class ReactiveTraceSource:TraceSource{
         public ReactiveTraceSource(string name) : base(name){
-            Switch.Level=SourceLevels.Verbose;
+            
         }
 
-        public ReactiveTraceSource(string name, SourceLevels defaultLevel) : base(name, defaultLevel){
-            Switch.Level=SourceLevels.Verbose;
-        }
     }
 
 }

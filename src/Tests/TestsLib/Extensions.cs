@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
@@ -91,18 +92,21 @@ namespace TestsLib {
         };
         public static IObservable<IModelReactiveLogger> ConfigureModel<TModule>(this XafApplication application,bool transmitMessage=true) where TModule:ModuleBase{
             
-            return application.WhenModelChanged()
+            return application.WhenModelChanged().FirstAsync()
                 .Where(_ => application.Modules.Any(m => m is ReactiveLoggerModule))
                 .Select(_ => {
                     var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger;
-                    logger.TraceSources.Enabled = transmitMessage;
+                    logger.TraceSources.Enabled = true;
+                    foreach (var traceSource in logger.TraceSources){
+                        traceSource.Level=SourceLevels.Verbose;
+                    }
                     var port = ModulePorts[typeof(TModule).Name];
                     var modelLoggerPortsList = ((IModelServerPorts) logger).LoggerPorts;
                     var serverPort = modelLoggerPortsList.OfType<IModelLoggerServerPort>().First();
                     serverPort.Port = port;
-                    serverPort.Enabled = logger.TraceSources.Enabled;
+                    serverPort.Enabled = transmitMessage;
                     var clientRange = modelLoggerPortsList.OfType<IModelLoggerClientRange>().First();
-                    modelLoggerPortsList.Enabled = logger.TraceSources.Enabled;
+                    modelLoggerPortsList.Enabled = transmitMessage;
                     clientRange.StartPort = port;
                     clientRange.EndPort = port+1;
                     return logger;

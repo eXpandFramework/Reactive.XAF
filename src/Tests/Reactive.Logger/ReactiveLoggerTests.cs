@@ -17,6 +17,7 @@ using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Logger.Tests.BOModel;
+using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
     [NonParallelizable]
@@ -86,15 +87,30 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
                 
                 module.Level.ShouldBe(SourceLevels.Verbose);
             }
-
-            
         }
 
 
         [Test]
         [Apartment(ApartmentState.STA)]
+        public void Do_Not_Trace_If_TraceSources_Level_Off(){
+
+            Should.Throw<TimeoutException>(async () => {
+                await SaveTraceEvent(application => {
+                    application.WhenModelChanged().FirstAsync()
+                        .Select(_ => {
+                            var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>()
+                                .ReactiveLogger;
+                            logger.TraceSources[nameof(ReactiveLoggerModule)].Level = SourceLevels.Off;
+                            return Unit.Default;
+                        }).Subscribe();
+                });
+            });
+        }
+
+        [Test]
+        [Apartment(ApartmentState.STA)]
         public async Task Save_TraceEvent(){
-            await SaveTraceEvent(async () => {
+            await SaveTraceEvent(afterSaveTrace: async () => {
                 var appDomainContext2 = AppDomainContext.Create(AppDomain.CurrentDomain.SetupInformation);
                 await RemoteFuncAsync.InvokeAsync(appDomainContext2.Domain, async () => {
                     await SaveTraceEvent();
@@ -104,8 +120,9 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             });
         }
 
-        private static async Task SaveTraceEvent(Action action=null){
+        private static async Task SaveTraceEvent(Action<XafApplication> created=null, Action afterSaveTrace=null){
             using (var application = Platform.Win.NewApplication<ReactiveLoggerModule>(false)){
+                created?.Invoke(application);
                 application.AddModule<TestReactiveLoggerModule>();
                 application.Title = nameof(Save_TraceEvent);
                 application.Logon();
@@ -115,11 +132,11 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
 
                 ReactiveLoggerModule.TraceSource.TraceMessage("test");
 
-                await test;
+                await test.Timeout(TimeSpan.FromSeconds(1));
                 var objectSpace = application.CreateObjectSpace();
                 objectSpace.GetObjectsQuery<TraceEvent>().FirstOrDefault(_ => _.Value.Contains("test")).ShouldNotBeNull();
 
-                action?.Invoke();
+                afterSaveTrace?.Invoke();
             }
         }
 

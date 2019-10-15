@@ -32,9 +32,9 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
     }
 
     public static class ModelReactiveLoggerService{
-        public static IModelList<IModelTraceSourcedModule> GetActiveSources(this IModelReactiveLogger logger){
+        public static IEnumerable<IModelTraceSourcedModule> GetActiveSources(this IModelReactiveLogger logger){
             return logger.TraceSources.Enabled
-                ? (IModelList<IModelTraceSourcedModule>) logger.TraceSources
+                ? new CalculatedModelNodeList<IModelTraceSourcedModule>( logger.TraceSources.Where(_ => _.Level!=SourceLevels.Off))
                 : new CalculatedModelNodeList<IModelTraceSourcedModule>(Enumerable.Empty<IModelTraceSourcedModule>());
         }
 
@@ -100,7 +100,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
     }
 
     public interface IModelTraceSourcedModule:IModelNode{
-        [DefaultValue(SourceLevels.Verbose)]
+        [DefaultValue(SourceLevels.Off)]
         SourceLevels Level{ get; set; }
         
     }
