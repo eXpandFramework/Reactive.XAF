@@ -8,6 +8,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Xpo;
 using Fasterflect;
+using Xpand.XAF.Modules.Reactive.Services.Security;
 
 namespace Xpand.XAF.Modules.Reactive.Logger{
     public interface ITraceEvent{
@@ -93,6 +94,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
     [NavigationItem("Settings")]
     [DebuggerDisplay("{" + nameof(Location) + "}-{" + nameof(RXAction) + ("}-{" + nameof(Method) + "}"))]
     [DeferredDeletion(false)][OptimisticLocking(OptimisticLockingBehavior.NoLocking)]
+    [SecuredTypeAttrbute]
     public class TraceEvent : XPCustomObject,IObjectSpaceLink , ITraceEvent{
         public TraceEvent(Session session) : base(session){
         }

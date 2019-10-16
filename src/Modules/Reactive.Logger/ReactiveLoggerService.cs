@@ -46,14 +46,15 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
 
             var listener = new ReactiveTraceListener(application.Title);
             ListenerEvents = listener.EventTrace.Publish().RefCount();
-            
+
+
             return application.BufferUntilCompatibilityChecked(ListenerEvents.Select(_ => _))
                 .SaveEvent(application)
                 .ToUnit()
                 .Merge(ListenerEvents.RefreshViewDataSource(application))
-                .Merge(application.RegisterListener(listener),Scheduler.Immediate)
-                .ToUnit();
+                .Merge(application.RegisterListener(listener),Scheduler.Immediate);
         }
+
 
         public static IObservable<Unit> RefreshViewDataSource(this IObservable<ITraceEvent> events, XafApplication application){
             if (application.GetPlatform()==Platform.Web){

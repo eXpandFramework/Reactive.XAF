@@ -7,8 +7,11 @@ using System.Reflection;
 using DevExpress.ExpressApp;
 using Fasterflect;
 using HarmonyLib;
+using Xpand.Extensions.XAF.ApplicationModulesManager;
+using Xpand.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
+using Xpand.XAF.Modules.Reactive.Services.Security;
 
 namespace Xpand.XAF.Modules.Reactive{
     internal static partial class RxApp{
@@ -50,9 +53,22 @@ namespace Xpand.XAF.Modules.Reactive{
             return typeof(RxApp).GetMethods(BindingFlags.Static|BindingFlags.NonPublic).First(info => info.Name == methodName);
         }
 
-        internal static IObservable<Unit> Connect(this ApplicationModulesManager applicationModulesManager){
-            return applicationModulesManager.AsObservable()
+        private static IObservable<Unit> AddSecuredTypes(this ApplicationModulesManager applicationModulesManager){
+            return applicationModulesManager.Modules.OfType<ReactiveModule>().ToObservable()
+                .SelectMany(_ => _.ModifyTypesInfo)
+                .Select(_ =>_.PersistentTypes.Where(info => info.Attributes.OfType<SecuredTypeAttrbute>().Any())
+                        .Select(info => info.Type))
+                .Do(infos => {
+                    var xafApplication = applicationModulesManager.Application();
+                    xafApplication.AddAdditionalSecuredType(infos.ToArray());
+                })
                 .ToUnit();
+        }
+
+        internal static IObservable<Unit> Connect(this ApplicationModulesManager applicationModulesManager){
+            
+            return applicationModulesManager.AddSecuredTypes()
+                ;
         }
 
 //        private static void WebChecks(){

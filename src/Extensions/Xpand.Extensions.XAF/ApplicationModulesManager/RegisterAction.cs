@@ -8,7 +8,7 @@ using Fasterflect;
 using HarmonyLib;
 
 namespace Xpand.Extensions.XAF.ApplicationModulesManager{
-    public static class ApplicationModulesManagerExtensions{
+    public static partial class ApplicationModulesManagerExtensions{
         public static object Locker=new object();
         private static readonly Harmony Harmony;
         static readonly ConcurrentDictionary<Type,(string id,Func<(Controller controller, string id), ActionBase> actionBase)> ControllerCtorState=new ConcurrentDictionary<Type, (string id, Func<(Controller controller, string id), ActionBase> actionBase)>();

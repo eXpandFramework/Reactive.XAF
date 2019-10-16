@@ -18,4 +18,9 @@
     <PackageReference Include="System.Reflection.Emit" Version="4.6.0" />
     <PackageReference Include="Xpand.Patcher" Version="1.0.1" />
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Xpand.Extensions">
+      <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>

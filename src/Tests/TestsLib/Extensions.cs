@@ -39,8 +39,11 @@ using EditorsFactory = DevExpress.ExpressApp.Editors.EditorsFactory;
 
 namespace Xpand.TestsLib {
     public static class Extensions {
-        public static void SetupSecurity(this XafApplication application) {
-            application.Security=new SecurityStrategyComplex(typeof(PermissionPolicyUser),typeof(PermissionPolicyRole),new AuthenticationStandard());
+        public static void SetupSecurity(this XafApplication application){
+            application.Modules.Add(new SecurityModule());
+            application.Security = new SecurityStrategyComplex(typeof(PermissionPolicyUser),
+                typeof(PermissionPolicyRole),new AuthenticationStandard(typeof(PermissionPolicyUser),
+                    typeof(AuthenticationStandardLogonParameters)));
         }
 
         public static async Task<T> WithTimeOut<T>(this Task<T> source, TimeSpan? timeout = null){
@@ -113,15 +116,17 @@ namespace Xpand.TestsLib {
                     foreach (var traceSource in logger.TraceSources){
                         traceSource.Level=SourceLevels.Verbose;
                     }
-                    var port = ModulePorts[typeof(TModule).Name];
-                    var modelLoggerPortsList = ((IModelServerPorts) logger).LoggerPorts;
-                    var serverPort = modelLoggerPortsList.OfType<IModelLoggerServerPort>().First();
-                    serverPort.Port = port;
-                    serverPort.Enabled = transmitMessage;
-                    var clientRange = modelLoggerPortsList.OfType<IModelLoggerClientRange>().First();
-                    modelLoggerPortsList.Enabled = transmitMessage;
-                    clientRange.StartPort = port;
-                    clientRange.EndPort = port+1;
+                    var port = ModulePorts.Where(pair => pair.Key==typeof(TModule).Name).Select(pair => pair.Value).FirstOrDefault();
+                    if (port>0){
+                        var modelLoggerPortsList = ((IModelServerPorts) logger).LoggerPorts;
+                        var serverPort = modelLoggerPortsList.OfType<IModelLoggerServerPort>().First();
+                        serverPort.Port = port;
+                        serverPort.Enabled = transmitMessage;
+                        var clientRange = modelLoggerPortsList.OfType<IModelLoggerClientRange>().First();
+                        modelLoggerPortsList.Enabled = transmitMessage;
+                        clientRange.StartPort = port;
+                        clientRange.EndPort = port+1;
+                    }
                     return logger;
                 });
 
@@ -263,6 +268,16 @@ namespace Xpand.TestsLib {
     }
 
     public class ModuleUpdaterModule : ModuleBase{
+        public override void Setup(XafApplication application){
+            base.Setup(application);
+            application.LoggingOn+=ApplicationOnLoggingOn;
+        }
+
+        private void ApplicationOnLoggingOn(object sender, LogonEventArgs e){
+            ((AuthenticationStandardLogonParameters) e.LogonParameters).UserName = "User";
+        }
+
+
         public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB){
             return base.GetModuleUpdaters(objectSpace, versionFromDB).Add(new DefaultUserModuleUpdater(objectSpace, versionFromDB));
         }
@@ -273,7 +288,7 @@ namespace Xpand.TestsLib {
         }
 
         private PermissionPolicyRole CreateDefaultRole() {
-            PermissionPolicyRole defaultRole = ObjectSpace.FindObject<PermissionPolicyRole>(new BinaryOperator("Name", "Default"));
+            var defaultRole = ObjectSpace.FindObject<PermissionPolicyRole>(new BinaryOperator("Name", "Default"));
             if(defaultRole == null) {
                 defaultRole = ObjectSpace.CreateObject<PermissionPolicyRole>();
                 defaultRole.Name = "Default";
@@ -291,39 +306,35 @@ namespace Xpand.TestsLib {
             return defaultRole;
         }
 
-        public override void UpdateDatabaseAfterUpdateSchema() {
+        public override void UpdateDatabaseAfterUpdateSchema(){
             base.UpdateDatabaseAfterUpdateSchema();
-            //string name = "MyName";
-            //DomainObject1 theObject = ObjectSpace.FindObject<DomainObject1>(CriteriaOperator.Parse("Name=?", name));
-            //if(theObject == null) {
-            //    theObject = ObjectSpace.CreateObject<DomainObject1>();
-            //    theObject.Name = name;
-            //}
-            PermissionPolicyUser sampleUser = ObjectSpace.FindObject<PermissionPolicyUser>(new BinaryOperator("UserName", "User"));
-            if(sampleUser == null) {
+
+            var sampleUser = ObjectSpace.FindObject<PermissionPolicyUser>(new BinaryOperator("UserName", "User"));
+            if (sampleUser == null){
                 sampleUser = ObjectSpace.CreateObject<PermissionPolicyUser>();
                 sampleUser.UserName = "User";
                 sampleUser.SetPassword("");
             }
-            PermissionPolicyRole defaultRole = CreateDefaultRole();
+
+            var defaultRole = CreateDefaultRole();
             sampleUser.Roles.Add(defaultRole);
 
-            PermissionPolicyUser userAdmin = ObjectSpace.FindObject<PermissionPolicyUser>(new BinaryOperator("UserName", "Admin"));
-            if(userAdmin == null) {
+            var userAdmin = ObjectSpace.FindObject<PermissionPolicyUser>(new BinaryOperator("UserName", "Admin"));
+            if (userAdmin == null){
                 userAdmin = ObjectSpace.CreateObject<PermissionPolicyUser>();
                 userAdmin.UserName = "Admin";
-                // Set a password if the standard authentication type is used
                 userAdmin.SetPassword("");
             }
-            // If a role with the Administrators name doesn't exist in the database, create this role
-            PermissionPolicyRole adminRole = ObjectSpace.FindObject<PermissionPolicyRole>(new BinaryOperator("Name", "Administrators"));
-            if(adminRole == null) {
+
+            var adminRole = ObjectSpace.FindObject<PermissionPolicyRole>(new BinaryOperator("Name", "Administrators"));
+            if (adminRole == null){
                 adminRole = ObjectSpace.CreateObject<PermissionPolicyRole>();
                 adminRole.Name = "Administrators";
             }
+
             adminRole.IsAdministrative = true;
             userAdmin.Roles.Add(adminRole);
-            ObjectSpace.CommitChanges(); //This line persists created object(s).
+            ObjectSpace.CommitChanges();
         }
 
     }

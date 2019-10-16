@@ -19,7 +19,11 @@ namespace Xpand.XAF.Modules.Reactive{
                             module.RequiredModuleTypes.Remove(type);
                         }
                     }
-                    foreach (var m in modules) _.Modules.Remove(_.Modules.FindModule(m));
+                    foreach (var m in modules){
+                        var module = _.Modules.FindModule(m);
+                        _.Modules.Remove(module);
+                        module.Dispose();
+                    }
                 })
                 .FirstAsync().Subscribe();
         }
