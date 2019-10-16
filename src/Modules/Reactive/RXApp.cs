@@ -60,7 +60,7 @@ namespace Xpand.XAF.Modules.Reactive{
                         .Select(info => info.Type))
                 .Do(infos => {
                     var xafApplication = applicationModulesManager.Application();
-                    xafApplication.AddNonSecuredType(infos.ToArray());
+                    xafApplication?.AddNonSecuredType(infos.ToArray());
                 })
                 .ToUnit();
         }
