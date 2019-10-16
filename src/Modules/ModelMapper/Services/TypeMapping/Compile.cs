@@ -20,7 +20,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             var codeProvider = new CSharpCodeProvider();
             var compilerParameters = new CompilerParameters{
                 CompilerOptions = "/t:library /optimize",
-                OutputAssembly = _outputAssembly
+                OutputAssembly = OutputAssembly
             };
             
             var strings = references.ToArray();
@@ -33,10 +33,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 throw new Exception(message);
             }
 
-            var assembly = RemoveRecursiveProperties(_outputAssembly);
+            var assembly = RemoveRecursiveProperties(OutputAssembly);
             return assembly.AsObservable().TraceModelMapper();
 
         }
+
+        private static string OutputAssembly => string.Format(_outputAssembly,ModelExtendingService.Platform);
 
         private static Assembly RemoveRecursiveProperties(string assembly){
             
@@ -97,7 +99,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
 
         private static string GetLastAssemblyPath(){
             var assemblyPath = Directory
-                .GetFiles($"{Path.GetDirectoryName(_outputAssembly)}", $"{_outPutAssemblyNamePattern}*.dll")
+                .GetFiles($"{Path.GetDirectoryName(OutputAssembly)}", $"{Path.GetFileNameWithoutExtension(OutputAssembly)}*.dll")
                 .OrderByDescending(s => s).FirstOrDefault();
             return assemblyPath;
         }

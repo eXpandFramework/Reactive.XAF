@@ -162,8 +162,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             mappedTypes.Remove(mappedType1);
 
             var mappedType2 = mappedTypes[0];
-            mappedType2.Name.ShouldBe(typeToMap2.ModelTypeName());
-            appearenceCell = mappedType1.Properties().First(_ => _.Name==nameof(TestModelMapperCommonType2.AppearanceCell));
+            typesToMap.ShouldContain(mappedType2.Name);
+            appearenceCell = mappedType2.Properties().First(_ => _.Name==nameof(TestModelMapperCommonType2.AppearanceCell));
             appearenceCell.ShouldNotBeNull();
             appearenceCell.GetType().Properties("TextOptions").ShouldNotBeNull();
             mappedType1.Assembly.ShouldBe(mappedType2.Assembly);

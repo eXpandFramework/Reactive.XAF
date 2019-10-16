@@ -90,8 +90,9 @@ public class {DynamicTypeName}{{
             }
             typeof(TypeMappingService).CallMethod(null, "Init");
             typeof(PredefinedMapService).CallMethod(null, "Init");
+            var outPutAssembly = (string)typeof(TypeMappingService).GetFieldValue("_outputAssembly",Flags.StaticInstanceAnyVisibility);
             typeof(TypeMappingService).SetFieldValue("_outputAssembly",
-                $@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\{typeof(TypeMappingService).Field("_outPutAssemblyNamePattern",Flags.StaticAnyVisibility).GetValue(null)}.dll");
+                $@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\{Path.GetFileNameWithoutExtension(outPutAssembly)}.dll");
             typeof(TypeMappingService).SetFieldValue("_modelMapperModuleVersion", typeof(ModelMapperModule).Assembly.GetName().Version);
             ConfigureLayoutViewPredefinedMapService();
             return mapperAssemblyName.ToString();

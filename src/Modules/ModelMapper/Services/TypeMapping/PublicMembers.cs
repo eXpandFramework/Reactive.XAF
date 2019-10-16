@@ -26,7 +26,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         public static string ModelMapperAssemblyName=null;
         public static string MapperAssemblyName="ModelMapperAssembly";
         public static string ModelMappersNodeName="ModelMappers";
-        private static object _outPutAssemblyNamePattern;
+        
         static string _outputAssembly;
 
         public static ConcurrentHashSet<string> ReservedPropertyNames{ get; }=new ConcurrentHashSet<string>();
@@ -62,8 +62,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             }
 
             var path = DesignerOnlyCalculator.IsRunFromDesigner?tempPath:AppDomain.CurrentDomain.ApplicationPath();
-            _outPutAssemblyNamePattern=$"{MapperAssemblyName}{ModelMapperAssemblyName}{ModelExtendingService.Platform}";
-            _outputAssembly = $@"{path}\{_outPutAssemblyNamePattern}.dll";
+            
+            _outputAssembly = $@"{path}\{MapperAssemblyName}{ModelMapperAssemblyName}{{0}}.dll";
             _customizeContainerCode=new Subject<(Type type, Result<(string key, string code)> data)>();
             _customizeProperties =new Subject<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)>();
             _customizeTypes =new Subject<ModelMapperType>();

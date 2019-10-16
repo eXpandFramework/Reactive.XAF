@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using DevExpress.ExpressApp.Model;
 using Fasterflect;
 using NUnit.Framework;
 using Shouldly;
@@ -25,6 +26,18 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             var mapToModel = await typeToMap.MapToModel().ModelInterfaces();
 
             File.Exists(mapToModel.Assembly.Location).ShouldBeTrue();
+        }
+
+        [TestCase(typeof(TestModelMapper),nameof(Platform.Win))]
+        [TestCase(typeof(TestModelMapper),nameof(Platform.Web))]
+        public void Platform_Detection(Type typeToMap,string platformName){
+            var platform = GetPlatform(platformName);
+            InitializeMapperService($"{nameof(Platform_Detection)}{typeToMap.Name}{platform}");
+
+            var module = typeToMap.Extend<IModelListView>();
+            using (DefaultModelMapperModule(nameof(Platform_Detection), platform, module).Application){
+                typeToMap.ModelType().Assembly.GetName().Name.ShouldEndWith(platformName);
+            }
         }
 
         [Test]
