@@ -27,6 +27,9 @@ The modules follow the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 
 ### Compatibility Matrix
 [![Azure DevOps Coverage](https://img.shields.io/azure-devops/coverage/eXpandDevOps/expandframework/25.svg?logo=azuredevops)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=25)
+
+
+
 |XAF Version   | Release  | Lab|
 |---|---|---|
 |19.1.6|![Azure DevOps tests (compact)](https://img.shields.io/azure-devops/tests/expanddevops/expandframework/25?label=%20)|![Azure DevOps tests (compact)](https://img.shields.io/azure-devops/tests/expanddevops/expandframework/23?label=%20)
@@ -44,6 +47,7 @@ Use main project [issues](https://github.com/eXpandFramework/eXpand/issues/new?a
 ### Efficient Package Management
 
 Working with many nuget packages may be counter productive. So if you want to boost your productity make sure you go through the [Efficient Package Management](https://github.com/eXpandFramework/DevExpress.XAF/wiki/Efficient-package-management) wiki page.
+
 
 
 

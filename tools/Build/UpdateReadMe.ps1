@@ -185,7 +185,7 @@ $matrix = ($rowMatrix | ForEach-Object {
 
 $matrix = @"
 [![Azure DevOps Coverage](https://img.shields.io/azure-devops/coverage/eXpandDevOps/expandframework/25.svg?logo=azuredevops)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=25)
-
+`r`n`r`n
 |XAF Version   | Release  | Lab|
 |---|---|---|
 $matrix

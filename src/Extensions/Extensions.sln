@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions", "Xpand.Extensions\Xpand.Extensions.csproj", "{2856A16A-A776-4A9B-B2C1-518644B9B2F3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.XAF", "Xpand.Extensions.XAF\Xpand.Extensions.XAF.csproj", "{D7D2820D-ECD7-4375-8D7D-1D7DD29A8254}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2856A16A-A776-4A9B-B2C1-518644B9B2F3} = {2856A16A-A776-4A9B-B2C1-518644B9B2F3}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.XAF.Xpo", "Xpand.Extensions.XAF.Xpo\Xpand.Extensions.XAF.Xpo.csproj", "{21693314-46DA-47D2-9CC3-8C3A8E39C981}"
 EndProject
