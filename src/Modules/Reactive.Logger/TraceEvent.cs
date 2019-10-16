@@ -94,7 +94,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
     [NavigationItem("Settings")]
     [DebuggerDisplay("{" + nameof(Location) + "}-{" + nameof(RXAction) + ("}-{" + nameof(Method) + "}"))]
     [DeferredDeletion(false)][OptimisticLocking(OptimisticLockingBehavior.NoLocking)]
-    [SecuredTypeAttrbute]
+    [NonSecuredTypeAttrbute]
     public class TraceEvent : XPCustomObject,IObjectSpaceLink , ITraceEvent{
         public TraceEvent(Session session) : base(session){
         }

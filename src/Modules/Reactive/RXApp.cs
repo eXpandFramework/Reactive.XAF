@@ -53,21 +53,21 @@ namespace Xpand.XAF.Modules.Reactive{
             return typeof(RxApp).GetMethods(BindingFlags.Static|BindingFlags.NonPublic).First(info => info.Name == methodName);
         }
 
-        private static IObservable<Unit> AddSecuredTypes(this ApplicationModulesManager applicationModulesManager){
+        private static IObservable<Unit> AddNonSecuredTypes(this ApplicationModulesManager applicationModulesManager){
             return applicationModulesManager.Modules.OfType<ReactiveModule>().ToObservable()
                 .SelectMany(_ => _.ModifyTypesInfo)
-                .Select(_ =>_.PersistentTypes.Where(info => info.Attributes.OfType<SecuredTypeAttrbute>().Any())
+                .Select(_ =>_.PersistentTypes.Where(info => info.Attributes.OfType<NonSecuredTypeAttrbute>().Any())
                         .Select(info => info.Type))
                 .Do(infos => {
                     var xafApplication = applicationModulesManager.Application();
-                    xafApplication.AddAdditionalSecuredType(infos.ToArray());
+                    xafApplication.AddNonSecuredType(infos.ToArray());
                 })
                 .ToUnit();
         }
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager applicationModulesManager){
             
-            return applicationModulesManager.AddSecuredTypes()
+            return applicationModulesManager.AddNonSecuredTypes()
                 ;
         }
 

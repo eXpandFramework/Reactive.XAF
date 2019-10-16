@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Reflection;
 using DevExpress.ExpressApp;
 using Fasterflect;
 using HarmonyLib;
@@ -17,24 +17,18 @@ namespace Xpand.Extensions.XAF.XafApplication{
 
     public static partial class XafApplicationExtensions{
         private static Harmony _harmony;
-        private static Assembly _securityAssembly;
-        private static MemberGetter _additionalSecuredTypes;
-
+        private static ConcurrentBag<Type> _securedTypes;
         static XafApplicationExtensions(){
             Init();
         }
 
         private static void Init(){
+            _securedTypes=new ConcurrentBag<Type>();
             var assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
             var systemWebAssembly = assemblies.FirstOrDefault(assembly => assembly.GetName().Name == "System.Web");
             var httpContextType = systemWebAssembly?.Types().First(_ => _.Name == "HttpContext");
             IsHosted = httpContextType?.GetPropertyValue("Current") != null;
-            _securityAssembly = assemblies.FirstOrDefault(_ => _.GetName().Name.StartsWith("DevExpress.ExpressApp.Security"));
             _harmony = new Harmony(typeof(XafApplicationExtensions).Namespace);
-            if (_securityAssembly!=null){
-                _additionalSecuredTypes = _securityAssembly.GetType("DevExpress.ExpressApp.Security.SecurityStrategy")
-                    .Field("AdditionalSecuredTypes", Flags.Static | Flags.Public).DelegateForGetFieldValue();
-            }
         }
 
         public static bool IsHosted{ get; set; }
