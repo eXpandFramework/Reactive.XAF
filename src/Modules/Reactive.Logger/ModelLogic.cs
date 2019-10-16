@@ -100,7 +100,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
     }
 
     public interface IModelTraceSourcedModule:IModelNode{
-        [DefaultValue(SourceLevels.Off)]
+        [DefaultValue(SourceLevels.Verbose)]
         SourceLevels Level{ get; set; }
         
     }

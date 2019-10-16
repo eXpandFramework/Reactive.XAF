@@ -150,8 +150,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                         _.traceSource.Listeners.Add(traceListener);
                     }
                 }).ToUnit();
-            var applyModel = application.ReactiveModulesModel().ReactiveLogger()
-                .Select(logger => logger)
+            var applyModel = application.WhenModelChanged().Select(_ =>application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger)
                 .Select(model => model.GetActiveSources())
                 .Do(modules => {
                     foreach (var module in modules){
@@ -160,6 +159,11 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                             tuple.traceSource.Switch.Level = module.Level;
                             if (!tuple.traceSource.Listeners.Contains(traceListener)){
                                 tuple.traceSource.Listeners.Add(traceListener);
+                            }
+                            else{
+                                if (module.Level == SourceLevels.Off){
+                                    tuple.traceSource.Listeners.Remove(traceListener);
+                                }
                             }
                         }
                     }

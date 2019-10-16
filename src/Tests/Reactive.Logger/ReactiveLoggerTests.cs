@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using AppDomainToolkit;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Security;
+using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.XAF.XafApplication;
@@ -91,6 +93,14 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
 
         [Test]
         [Apartment(ApartmentState.STA)]
+        public async Task SaveTrace_When_AuthendiationStandard(){
+            await SaveTraceEvent(application => {
+                    application.SetupSecurity();
+                });
+        }
+
+        [Test]
+        [Apartment(ApartmentState.STA)]
         public void Do_Not_Trace_If_TraceSources_Level_Off(){
 
             Should.Throw<TimeoutException>(async () => {
@@ -124,12 +134,10 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
                 created?.Invoke(application);
                 application.AddModule<TestReactiveLoggerModule>();
                 application.Title = nameof(Save_TraceEvent);
-                application.Logon();
                 application.CreateObjectSpace();
-
                 var test = application.WhenTraceEvent().FirstAsync(_ => _.Value == "test").SubscribeReplay();
-
                 ReactiveLoggerModule.TraceSource.TraceMessage("test");
+                application.Logon();
 
                 await test.Timeout(TimeSpan.FromSeconds(1));
                 var objectSpace = application.CreateObjectSpace();
