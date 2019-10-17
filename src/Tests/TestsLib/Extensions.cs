@@ -138,7 +138,7 @@ namespace Xpand.TestsLib {
             moduleBase.AdditionalExportedTypes.AddRange(additionalExportedTypes);
             if (setup){
                 application.SetupDefaults(moduleBase);
-                return application.Modules.First(m => m.Name==moduleBase.Name);
+                return application.Modules.FirstOrDefault(m => m.Name==moduleBase.Name);
             }
 
             return moduleBase;

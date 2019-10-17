@@ -1,0 +1,200 @@
+[
+  {
+    "Id": "Xpand.XAF.Modules.AutoCommit",
+    "Version": {
+      "Major": 1,
+      "Minor": 0,
+      "Build": 9,
+      "Revision": -1,
+      "MajorRevision": -1,
+      "MinorRevision": -1
+    }
+  },
+  {
+    "Id": "Xpand.XAF.Modules.CloneMemberValue",
+    "Version": {
+      "Major": 1,
+      "Minor": 2,
+      "Build": 57,
+      "Revision": -1,
+      "MajorRevision": -1,
+      "MinorRevision": -1
+    }
+  },
+  {
+    "Id": "Xpand.XAF.Modules.CloneModelView",
+    "Version": {
+      "Major": 1,
+      "Minor": 0,
+      "Build": 7,
+      "Revision": -1,
+      "MajorRevision": -1,
+      "MinorRevision": -1
+    }
+  },
+  {
+    "Id": "Xpand.XAF.Modules.GridListEditor",
+    "Version": {
+      "Major": 0,
+      "Minor": 0,
+      "Build": 11,
+      "Revision": -1,
+      "MajorRevision": -1,
+      "MinorRevision": -1
+    }
+  },
+  {
+    "Id": "Xpand.XAF.Modules.HideToolBar",
+    "Version": {
+      "Major": 1,
+      "Minor": 0,
+      "Build": 8,
+      "Revision": -1,
+      "MajorRevision": -1,
+      "MinorRevision": -1
+    }
+  },
+  {
+    "Id": "Xpand.XAF.Modules.MasterDetail",
+    "Version": {
+      "Major": 1,
+      "Minor": 0,
+      "Build": 8,
+      "Revision": -1,
+      "MajorRevision": -1,
+      "MinorRevision": -1
+    }
+  },
+  {
+    "Id": "Xpand.XAF.Modules.ModelMapper",
+    "Version": {
+      "Major": 1,
+      "Minor": 1,
+      "Build": 51,
+      "Revision": -1,
+      "MajorRevision": -1,
+      "MinorRevision": -1
+    }
+  },
+  {
+    "Id": "Xpand.XAF.Modules.ModelViewInheritance",
+    "Version": {
+      "Major": 1,
+      "Minor": 1,
+      "Build": 47,
+      "Revision": -1,
+      "MajorRevision": -1,
+      "MinorRevision": -1
+    }
+  },
+  {
+    "Id": "Xpand.XAF.Modules.OneView",
+    "Version": {
+      "Major": 0,
+      "Minor": 0,
+      "Build": 11,
+      "Revision": -1,
+      "MajorRevision": -1,
+      "MinorRevision": -1
+    }
+  },
+  {
+    "Id": "Xpand.XAF.Modules.ProgressBarViewItem",
+    "Version": {
+      "Major": 1,
+      "Minor": 0,
+      "Build": 8,
+      "Revision": -1,
+      "MajorRevision": -1,
+      "MinorRevision": -1
+    }
+  },
+  {
+    "Id": "Xpand.XAF.Modules.Reactive",
+    "Version": {
+      "Major": 1,
+      "Minor": 2,
+      "Build": 57,
+      "Revision": -1,
+      "MajorRevision": -1,
+      "MinorRevision": -1
+    }
+  },
+  {
+    "Id": "Xpand.XAF.Modules.Reactive.Logger",
+    "Version": {
+      "Major": 0,
+      "Minor": 0,
+      "Build": 13,
+      "Revision": -1,
+      "MajorRevision": -1,
+      "MinorRevision": -1
+    }
+  },
+  {
+    "Id": "Xpand.XAF.Modules.Reactive.Logger.Client.Win",
+    "Version": {
+      "Major": 0,
+      "Minor": 0,
+      "Build": 12,
+      "Revision": -1,
+      "MajorRevision": -1,
+      "MinorRevision": -1
+    }
+  },
+  {
+    "Id": "Xpand.XAF.Modules.Reactive.Logger.Hub",
+    "Version": {
+      "Major": 0,
+      "Minor": 0,
+      "Build": 12,
+      "Revision": -1,
+      "MajorRevision": -1,
+      "MinorRevision": -1
+    }
+  },
+  {
+    "Id": "Xpand.XAF.Modules.Reactive.Win",
+    "Version": {
+      "Major": 0,
+      "Minor": 0,
+      "Build": 11,
+      "Revision": -1,
+      "MajorRevision": -1,
+      "MinorRevision": -1
+    }
+  },
+  {
+    "Id": "Xpand.XAF.Modules.RefreshView",
+    "Version": {
+      "Major": 0,
+      "Minor": 0,
+      "Build": 11,
+      "Revision": -1,
+      "MajorRevision": -1,
+      "MinorRevision": -1
+    }
+  },
+  {
+    "Id": "Xpand.XAF.Modules.SuppressConfirmation",
+    "Version": {
+      "Major": 1,
+      "Minor": 0,
+      "Build": 8,
+      "Revision": -1,
+      "MajorRevision": -1,
+      "MinorRevision": -1
+    }
+  },
+  {
+    "Id": "Xpand.XAF.Modules.ViewEditMode",
+    "Version": {
+      "Major": 1,
+      "Minor": 2,
+      "Build": 57,
+      "Revision": -1,
+      "MajorRevision": -1,
+      "MinorRevision": -1
+    }
+  }
+]

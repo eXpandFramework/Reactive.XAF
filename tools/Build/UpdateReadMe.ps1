@@ -171,7 +171,7 @@ $rowMatrix = $labRows | ForEach-Object {
     [PSCustomObject]@{
         Labid     = $_.id
         ReleaseId = ($releaseRows | Where-Object { $_.Version -eq $version } | Select-Object -ExpandProperty Id)
-        Version   = $version
+        Version   = "$($version.Major).$($version.Minor).$($version.Build)"
     }
 }
 $matrix = ($rowMatrix | ForEach-Object {

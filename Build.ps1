@@ -15,7 +15,7 @@ properties {
     $AzureToken=$null
 }
 
-task TestsRun  -depends Clean, Init, UpdateProjects,Compile
+task TestsRun  -depends Clean, Init, UpdateProjects,Compile, UpdateAllTests
 task Release  -depends   Clean, Init, UpdateProjects,  Compile,IndexSources, CreateNuspec, PackNuspec, UpdateReadMe
 
 
@@ -75,7 +75,7 @@ task Compile -precondition {return $compile  } {
     InvokeScript{
         write-host "Building Tests" -f "Blue"
         dotnet restore "$PSScriptRoot\src\Tests\Tests.sln" --source $source
-        dotnet msbuild "$PSScriptRoot\src\Tests\Tests.sln" "/p:OutDir=$PSScriptRoot\bin" 
+        dotnet msbuild "$PSScriptRoot\src\Tests\Tests.sln" "/p:configuration=Debug" /WarnAsError
     }
 }
 
@@ -91,6 +91,12 @@ Task  CreateNuspec  {
 Task PackNuspec {
     InvokeScript {
         & .\tools\build\PackNuspec.ps1 -branch $branch
+    }
+}
+
+Task UpdateAllTests {
+    InvokeScript {
+        & .\tools\build\UpdateAllTests.ps1 
     }
 }
 

@@ -1,0 +1,51 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputPath>..\..\..\bin</OutputPath>
+    <TargetFramework>net461</TargetFramework>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <LangVersion>latest</LangVersion>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>pdbonly</DebugType>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="DevExpress.ExpressApp.Win" Version="18.2.7" />
+    <PackageReference Include="Fasterflect.Xpand" Version="2.0.6" />
+    <PackageReference Include="Grpc.Core" Version="2.24.0" />
+    <PackageReference Include="MagicOnion" Version="2.6.2" />
+    <PackageReference Include="Moq" Version="4.13.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="Shouldly" Version="3.0.2" />
+    <PackageReference Include="System.Buffers" Version="4.5.0" />
+    <PackageReference Include="System.Reactive" Version="4.2.0" />
+    <PackageReference Include="NUnit" Version="3.12.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.15.1" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Data" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Xpo" Version="18.2.7" />
+    <PackageReference Include="Xpand.XAF.Modules.AutoCommit" Version="1.0.12" />
+    <PackageReference Include="Xpand.XAF.Modules.CloneMemberValue" Version="1.2.60" />
+    <PackageReference Include="Xpand.xaf.modules.CloneModelView" Version="1.0.10" />
+    <PackageReference Include="Xpand.xaf.modules.GridLIstEditor" Version="0.0.14" />
+    <PackageReference Include="Xpand.xaf.modules.HideToolBar" Version="1.0.11" />
+    <PackageReference Include="Xpand.xaf.modules.MasterDetail" Version="1.0.11" />
+    <PackageReference Include="Xpand.xaf.modules.ModelMapper" Version="1.1.54" />
+    <PackageReference Include="Xpand.xaf.modules.ModelViewInheritance" Version="1.1.50" />
+    <PackageReference Include="Xpand.xaf.modules.OneVIew" Version="0.0.14" />
+    <PackageReference Include="Xpand.xaf.modules.ProgressbarViewItem" Version="1.0.11" />
+    <PackageReference Include="Xpand.xaf.modules.Reactive.Logger" Version="0.0.16" />
+    <PackageReference Include="Xpand.xaf.modules.Reactive.Logger.hub" Version="0.0.15" />
+    <PackageReference Include="Xpand.xaf.modules.Reactive.Win" Version="0.0.14" />
+    <PackageReference Include="Xpand.xaf.modules.RefreshView" Version="0.0.14" />
+    <PackageReference Include="Xpand.xaf.modules.SuppressConfirmation" Version="1.0.11" />
+    <PackageReference Include="Xpand.XAF.Modules.ViewEditMode" Version="1.2.60" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Xpand.TestsLib">
+      <HintPath>..\..\..\..\bin\Xpand.TestsLib.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>
