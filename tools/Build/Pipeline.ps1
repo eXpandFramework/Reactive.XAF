@@ -13,7 +13,7 @@ param(
     
 )
 "PastBuild=$PastBuild"
-if ($PastBuild -and $PastBuild -ne "false"){
+if ($PastBuild -and $PastBuild -ne "false") {
     return
 }
 "CustomVersion=$CustomVersion"
@@ -21,26 +21,26 @@ $ErrorActionPreference = "Stop"
 $regex = [regex] '(\d{2}\.\d*)'
 $result = $regex.Match($CustomVersion).Groups[1].Value;
 & "$SourcePath\go.ps1" -InstallModules
-if (!$result){
-    $CustomVersion="latest"
+if (!$result) {
+    $CustomVersion = "latest"
 }
-else{
-    $latestMinors=Get-NugetPackageSearchMetadata -Name DevExpress.Xpo -AllVersions -Source $DXApiFeed|ForEach-Object{
-        $v=$_.Identity.Version.Version
+else {
+    $latestMinors = Get-NugetPackageSearchMetadata -Name DevExpress.Xpo -AllVersions -Source $DXApiFeed | ForEach-Object {
+        $v = $_.Identity.Version.Version
         [PSCustomObject]@{
             Version = $v
-            Minor="$($v.Major).$($v.Minor)"
+            Minor   = "$($v.Major).$($v.Minor)"
         }
-    }|Group-Object -Property Minor|ForEach-Object{
-        $_.Group|Select-Object -First 1 -ExpandProperty Version
-    }|Sort-Object -Descending|Select-Object -First 6
-    "latestMinors:"
-    $latestMinors
-    $CustomVersion=$latestMinors|Where-Object{"$($_.Major).$($_.Minor)" -eq $result}
+    } | Group-Object -Property Minor | ForEach-Object {
+        $_.Group | Select-Object -First 1 -ExpandProperty Version
+    } | Sort-Object -Descending | Select-Object -First 6
+"latestMinors:"
+$latestMinors
+$CustomVersion = $latestMinors | Where-Object { "$($_.Major).$($_.Minor)" -eq $result }
 }
 "CustomVersion=$CustomVersion"
 
-$defaulVersion=Get-Content "$SourcePath\go.ps1"|Select-String dxVersion|Select-Object -First 1|ForEach-Object{
+$defaulVersion = Get-Content "$SourcePath\go.ps1" | Select-String dxVersion | Select-Object -First 1 | ForEach-Object {
     $regex = [regex] '"([^"]*)'
     $regex.Match($_).Groups[1].Value;
 }
@@ -60,7 +60,9 @@ if (!(Get-Module VSTeam -ListAvailable)) {
 }
 Set-VSTeamAccount -Account eXpandDevOps -PersonalAccessToken $AzureToken
 $officialPackages = Get-XpandPackages -PackageType XAF -Source Release
-$labPackages = Get-XpandPackages -PackageType XAF -Source Lab
+$labPackages = Get-XpandPackages -PackageType XAFAll -Source Lab
+Write-Host "labPackages" -f Blue
+$labPackages|Out-String
 $DXVersion = Get-DevExpressVersion 
 $localPackages = (Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse) + (Get-ChildItem "$sourcePath\src\Extensions" "*.csproj" -Recurse) | ForEach-Object {
     $name = [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
@@ -99,7 +101,7 @@ $newPackages = $localPackages | Where-Object { !(($publishedPackages | Select-Ob
     }
 }
 Write-Host "newPackages:" -f blue
-$newPackages
+$newPackages|Out-String
 
 $labBuild = Get-VSTeamBuild -ResultFilter succeeded -ProjectName expandframework -top 1 -StatusFilter completed -Definitions 23
 
@@ -113,15 +115,17 @@ $yArgs = @{
     SourcePath    = $SourcePath
     CommitsSince  = $labBuild.finishTime
     ExcludeFilter = "Test"
+    Verbose       = $true
     WhatIf        = $WhatIf
 }
 if ($newPackages) {
     $yArgs.Packages += $newPackages
 }
 Write-Host "End-Packages:" -f blue
-$yArgs.Packages 
-$updateVersion = Update-NugetProjectVersion @yArgs | Select-Object -Skip 1
+$yArgs.Packages|out-string 
+$updateVersion = Update-NugetProjectVersion @yArgs 
 "updateVersion=$updateVersion"
+
 $reactiveVersionChanged = $updateVersion | Select-String "Xpand.XAF.Modules.Reactive"
 "reactiveVersionChanged=$reactiveVersionChanged"
 if ($reactiveVersionChanged) {
@@ -133,16 +137,18 @@ if ($reactiveVersionChanged) {
     "reactiveModules:"
     $reactiveModules | Write-Host
     Get-ChildItem "$sourcePath\src\Modules" *.csproj -Recurse | ForEach-Object {
-        Update-AssemblyInfo $_.DirectoryName -Revision
+        $name=$_.baseName
+        $version=$localPackages|Where-Object{$_.id -eq $name}|Select-Object -ExpandProperty NextVersion
+        Update-AssemblyInfoVersion -path "$($_.DirectoryName)" -version $version
     }
 }
-$taskList="Release"
-if ($customVersion -eq "latest"){
-    $defaulVersion=$DXVersion
+$taskList = "Release"
+if ($customVersion -eq "latest") {
+    $defaulVersion = $DXVersion
 }
-elseif ($CustomVersion){
-    $taskList="TestsRun"
-    $defaulVersion=$CustomVersion
+elseif ($CustomVersion) {
+    $taskList = "TestsRun"
+    $defaulVersion = $CustomVersion
 }
 
 $bArgs = @{
@@ -152,16 +158,7 @@ $bArgs = @{
     CustomVersion  = !($customVersion)
 }
 "bArgs:"
-$bArgs|Out-String
+$bArgs | Out-String
 
 & $SourcePath\go.ps1 @bArgs
 
-# "$SourcePath\Bin\Nupkg", "$SourcePath\Bin\Nuspec" | ForEach-Object {
-#     Get-ChildItem $_ -Recurse | ForEach-Object {
-#         Move-Item $_.FullName -Destination $artifactstagingdirectory
-#     }
-# }
-
-# if ($AzureToken){
-#     & "$PSScriptRoot\publishnugets.ps1" $Branch $sourcesRoot $NugetApiKey "$sourcesRoot\bin\Nupkg" $PastBuild
-# }
