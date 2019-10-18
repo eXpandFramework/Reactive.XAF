@@ -3,12 +3,13 @@ param(
     $SourcePath = "$PSScriptRoot\..\..",
     $GitHubUserName = "apobekiaris",
     $Pass = $env:GithubPass,
-    $DXApiFeed  ,
+    $DXApiFeed  =(Get-Feed -DX),
     $artifactstagingdirectory,
     $bindirectory,
     $AzureToken = (Get-AzureToken),
     $PastBuild,
-    $CustomVersion,
+    $CustomVersion="DevExpress.XAF-Lab-16.2",
+    $latest,
     $WhatIf = $false
     
 )
@@ -34,9 +35,9 @@ else {
     } | Group-Object -Property Minor | ForEach-Object {
         $_.Group | Select-Object -First 1 -ExpandProperty Version
     } | Sort-Object -Descending | Select-Object -First 6
-"latestMinors:"
-$latestMinors
-$CustomVersion = $latestMinors | Where-Object { "$($_.Major).$($_.Minor)" -eq $result }
+    "latestMinors:"
+    $latestMinors
+    $CustomVersion = $latestMinors | Where-Object { "$($_.Major).$($_.Minor)" -eq $result }
 }
 "CustomVersion=$CustomVersion"
 
@@ -44,7 +45,10 @@ $defaulVersion = Get-Content "$SourcePath\go.ps1" | Select-String dxVersion | Se
     $regex = [regex] '"([^"]*)'
     $regex.Match($_).Groups[1].Value;
 }
-
+if ($latest) {
+    $customVersion = $defaulVersion
+    "CustomVersion=$CustomVersion"
+}
 if ($Branch -eq "master") {
     $bArgs = @{
         packageSources = "$(Get-PackageFeed -Xpand);$DxApiFeed"
@@ -62,7 +66,7 @@ Set-VSTeamAccount -Account eXpandDevOps -PersonalAccessToken $AzureToken
 $officialPackages = Get-XpandPackages -PackageType XAF -Source Release
 $labPackages = Get-XpandPackages -PackageType XAFAll -Source Lab
 Write-Host "labPackages" -f Blue
-$labPackages|Out-String
+$labPackages | Out-String
 $DXVersion = Get-DevExpressVersion 
 $localPackages = (Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse) + (Get-ChildItem "$sourcePath\src\Extensions" "*.csproj" -Recurse) | ForEach-Object {
     $name = [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
@@ -101,7 +105,7 @@ $newPackages = $localPackages | Where-Object { !(($publishedPackages | Select-Ob
     }
 }
 Write-Host "newPackages:" -f blue
-$newPackages|Out-String
+$newPackages | Out-String
 
 $labBuild = Get-VSTeamBuild -ResultFilter succeeded -ProjectName expandframework -top 1 -StatusFilter completed -Definitions 23
 
@@ -122,7 +126,7 @@ if ($newPackages) {
     $yArgs.Packages += $newPackages
 }
 Write-Host "End-Packages:" -f blue
-$yArgs.Packages|out-string 
+$yArgs.Packages | Out-String 
 $updateVersion = Update-NugetProjectVersion @yArgs 
 "updateVersion=$updateVersion"
 
@@ -137,16 +141,16 @@ if ($reactiveVersionChanged) {
     "reactiveModules:"
     $reactiveModules | Write-Host
     Get-ChildItem "$sourcePath\src\Modules" *.csproj -Recurse | ForEach-Object {
-        $name=$_.baseName
-        $version=$localPackages|Where-Object{$_.id -eq $name}|Select-Object -ExpandProperty NextVersion
+        $name = $_.baseName
+        $version = $localPackages | Where-Object { $_.id -eq $name } | Select-Object -ExpandProperty NextVersion
         Update-AssemblyInfoVersion -path "$($_.DirectoryName)" -version $version
     }
-}
+}7
 $taskList = "Release"
 if ($customVersion -eq "latest") {
     $defaulVersion = $DXVersion
 }
-elseif ($CustomVersion) {
+elseif ($CustomVersion -and !$latest) {
     $taskList = "TestsRun"
     $defaulVersion = $CustomVersion
 }

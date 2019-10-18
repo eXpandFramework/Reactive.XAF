@@ -24,7 +24,7 @@ namespace Xpand.XAF.Modules.Reactive{
             });
         }
 
-        public static IObservable<TModel> ToReactiveModule<TModel>(this XafApplication application) where TModel:IModelReactiveModule{
+        public static IObservable<TModel> ToReactiveModule<TModel>(this XafApplication application) where TModel: class, IModelReactiveModule{
             return application.ReactiveModule(() => application.Model.ToReactiveModule<TModel>());
         }
 
@@ -35,8 +35,8 @@ namespace Xpand.XAF.Modules.Reactive{
                 : application.WhenLoggedOn().Select(_ => model()).WhenNotDefault();
         }
 
-        public static TModel ToReactiveModule<TModel>(this IModelApplication applicationModel) where TModel:IModelReactiveModule{
-            return ((TModel) ((IModelApplicationReactiveModules) applicationModel).ReactiveModules);
+        public static TModel ToReactiveModule<TModel>(this IModelApplication applicationModel) where TModel: class, IModelReactiveModule{
+            return ( ((IModelApplicationReactiveModules) applicationModel).ReactiveModules) as TModel;
         }
     }
 }

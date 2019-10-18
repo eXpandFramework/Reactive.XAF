@@ -19,7 +19,7 @@
       <dependency id="Xpand.Extensions" version="0.0.2.0" />
       <dependency id="Xpand.Extensions.XAF" version="0.0.2.0" />
       <dependency id="Xpand.Patcher" version="1.0.1" />
-      <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.61.0" />
+      <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.63.0" />
       <dependency id="Xpand.VersionConverter" version="1.0.35.0" />
     </dependencies>
   </metadata>

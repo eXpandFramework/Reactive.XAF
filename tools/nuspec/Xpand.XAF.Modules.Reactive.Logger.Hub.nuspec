@@ -23,7 +23,7 @@ The module uses the next two strategies:
       <dependency id="system.buffers" version="4.5.0" />
       <dependency id="System.Interactive.Async" version="4.0.0" />
       <dependency id="System.Reactive" version="4.2.0" />
-      <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.61.0" />
+      <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.63.0" />
       <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="0.0.16.0" />
       <dependency id="Xpand.VersionConverter" version="1.0.35.0" />
     </dependencies>

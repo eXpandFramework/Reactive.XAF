@@ -151,7 +151,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                         _.traceSource.Listeners.Add(traceListener);
                     }
                 }).ToUnit();
-            var applyModel = application.WhenModelChanged().Select(_ =>application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger)
+            var applyModel = application.WhenModelChanged()
+                .Select(_ =>application.Model.ToReactiveModule<IModelReactiveModuleLogger>()?.ReactiveLogger).WhenNotDefault()
                 .Select(model => model.GetActiveSources())
                 .Do(modules => {
                     foreach (var module in modules){

@@ -1,5 +1,6 @@
 variables:
   PastBuild: false
+  Latest: false
   
 trigger: 
     paths:
@@ -50,7 +51,7 @@ jobs:
       ArtifactName: 'Xpand.XAF.Modules.Bin'
 - job: TestPhase1
   strategy:
-    parallel: 14
+    parallel: 15
   dependsOn: TestsRunBuild
   pool:
     vmImage: windows-2019
@@ -69,7 +70,7 @@ jobs:
         searchFolder: '$(System.DefaultWorkingDirectory)'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
-          **\*Tests*.dll
+          **\*Tests.dll
           !**\*ModelMapper*.dll
           !**\*Hub*.dll
           !**\*TestAdapter.dll
@@ -103,7 +104,7 @@ jobs:
         searchFolder: '$(System.DefaultWorkingDirectory)'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
-          **\*ModelMapper*Tests*.dll
+          **\*ModelMapper*Tests.dll
           !**\*Hub*.dll
           !**\*TestAdapter.dll
           !**\obj\**    
@@ -130,7 +131,7 @@ jobs:
       pwsh: true
       targetType: filePath
       filePath: .\tools\build\pipeline.ps1 
-      arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(GitHubUserName) $(GitHubPass) $(DXApiFeed) $(build.artifactstagingdirectory) $(System.DefaultworkingDirectory)\bin $(AzureToken) $(PastBuild)
+      arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(GitHubUserName) $(GitHubPass) $(DXApiFeed) $(build.artifactstagingdirectory) $(System.DefaultworkingDirectory)\bin $(AzureToken) $(PastBuild) "" $(latest)
   - task: PowerShell@2
     displayName: Publish
     inputs:

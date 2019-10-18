@@ -30,7 +30,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |System.Reactive|4.2.0
  |System.ValueTuple|4.5.0
  |Xpand.Extensions.XAF|0.0.2
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|1.2.61
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|1.2.63
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.0.35
 
 ## Issues-Debugging-Troubleshooting

@@ -15,8 +15,8 @@ properties {
     $AzureToken=$null
 }
 
-task TestsRun  -depends Clean, Init, UpdateProjects,Compile, UpdateAllTests
-task Release  -depends   Clean, Init, UpdateProjects,  Compile,IndexSources, CreateNuspec, PackNuspec, UpdateReadMe
+task TestsRun  -depends Clean, Init, Compile, CreateNuspec, PackNuspec, UpdateAllTests
+task Release  -depends   Clean, Init, UpdateProjects,  Compile,IndexSources, CreateNuspec, PackNuspec, UpdateAllTests, UpdateReadMe
 
 
 Task IndexSources{
@@ -64,17 +64,17 @@ task Compile -precondition {return $compile  } {
     $source="https://api.nuget.org/v3/index.json;$packageSources"
     InvokeScript -maxRetries 3 {
         write-host "Building Extensions" -f "Blue"
-        dotnet restore "$PSScriptRoot\src\Extensions\Extensions.sln" --source $source
+        dotnet restore "$PSScriptRoot\src\Extensions\Extensions.sln" --source $source /WarnAsError
         dotnet msbuild "$PSScriptRoot\src\Extensions\Extensions.sln" "/p:configuration=Release" /WarnAsError
     }
     InvokeScript -maxRetries 3{
         write-host "Building Modules" -f "Blue"
-        dotnet restore "$PSScriptRoot\src\Modules\Modules.sln" --source $source
+        dotnet restore "$PSScriptRoot\src\Modules\Modules.sln" --source $source /WarnAsError
         dotnet msbuild "$PSScriptRoot\src\Modules\Modules.sln" "/p:configuration=Release" /WarnAsError
     }
     InvokeScript{
         write-host "Building Tests" -f "Blue"
-        dotnet restore "$PSScriptRoot\src\Tests\Tests.sln" --source $source
+        dotnet restore "$PSScriptRoot\src\Tests\Tests.sln" --source $source /WarnAsError
         dotnet msbuild "$PSScriptRoot\src\Tests\Tests.sln" "/p:configuration=Debug" /WarnAsError
     }
 }
@@ -90,13 +90,14 @@ Task  CreateNuspec  {
 
 Task PackNuspec {
     InvokeScript {
-        & .\tools\build\PackNuspec.ps1 -branch $branch
+        & "$PSScriptRoot\tools\build\PackNuspec.ps1" -branch $branch
     }
 }
 
 Task UpdateAllTests {
-    InvokeScript {
-        & .\tools\build\UpdateAllTests.ps1 
+    InvokeScript -maxRetries 3 {
+        $source="https://api.nuget.org/v3/index.json;$packageSources"
+        & "$PSScriptRoot\tools\build\UpdateAllTests.ps1" $PSScriptRoot $branch $source 
     }
 }
 
