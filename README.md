@@ -34,11 +34,11 @@ The modules follow the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 
 |XAF Version   | Release  | Lab|
 |---|---|---|
-|19.1.7|![Azure DevOps tests (compact)](https://img.shields.io/azure-devops/tests/expanddevops/expandframework/25?label=%20)|![Azure DevOps tests (compact)](https://img.shields.io/azure-devops/tests/expanddevops/expandframework/23?label=%20)
-|18.2.10||[![Build Status](https://dev.azure.com/eXpandDevOps/eXpandFramework/_apis/build/status/lab-Builds/DevExpress.XAF-Lab-18.2?branchName=lab)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=55&branchName=lab)<br>
-|18.1.12||[![Build Status](https://dev.azure.com/eXpandDevOps/eXpandFramework/_apis/build/status/lab-Builds/DevExpress.XAF-Lab-18.1?branchName=lab)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=56&branchName=lab)<br>
-|17.2.13||[![Build Status](https://dev.azure.com/eXpandDevOps/eXpandFramework/_apis/build/status/lab-Builds/DevExpress.XAF-Lab-17.2?branchName=lab)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=57&branchName=lab)<br>
-|17.1.15||[![Build Status](https://dev.azure.com/eXpandDevOps/eXpandFramework/_apis/build/status/lab-Builds/DevExpress.XAF-Lab-17.1?branchName=lab)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=58&branchName=lab)<br>
+|19.1.7||[![Build Status](https://dev.azure.com/eXpandDevOps/eXpandFramework/_apis/build/status/lab-Builds/DevExpress.XAF-Lab?branchName=lab)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=23&branchName=lab)
+|18.2.10||[![Build Status](https://dev.azure.com/eXpandDevOps/eXpandFramework/_apis/build/status/lab-Builds/DevExpress.XAF-Lab-18.2?branchName=lab)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=55&branchName=lab)
+|18.1.12||[![Build Status](https://dev.azure.com/eXpandDevOps/eXpandFramework/_apis/build/status/lab-Builds/DevExpress.XAF-Lab-18.1?branchName=lab)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=56&branchName=lab)
+|17.2.13||[![Build Status](https://dev.azure.com/eXpandDevOps/eXpandFramework/_apis/build/status/lab-Builds/DevExpress.XAF-Lab-17.2?branchName=lab)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=57&branchName=lab)
+|17.1.15||[![Build Status](https://dev.azure.com/eXpandDevOps/eXpandFramework/_apis/build/status/lab-Builds/DevExpress.XAF-Lab-17.1?branchName=lab)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=58&branchName=lab)
 |16.2.15||![Azure DevOps tests (compact)](https://img.shields.io/azure-devops/tests/expanddevops/expandframework/59?label=%20)
     "
 ### Issues
@@ -49,8 +49,3 @@ Use main project [issues](https://github.com/eXpandFramework/eXpand/issues/new?a
 ### Efficient Package Management
 
 Working with many nuget packages may be counter productive. So if you want to boost your productity make sure you go through the [Efficient Package Management](https://github.com/eXpandFramework/DevExpress.XAF/wiki/Efficient-package-management) wiki page.
-
-
-
-
-

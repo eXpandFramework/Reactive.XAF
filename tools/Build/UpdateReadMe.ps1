@@ -187,13 +187,16 @@ $rowMatrix = $labRows | ForEach-Object {
 $matrix = ($rowMatrix | ForEach-Object {
         $releaseId = $_.Releaseid
         $releasebadge = $null
-        if ($releaseId) {
+        if ($releaseId -and $Branch -eq "Release") {
             $releasebadge = "![Azure DevOps tests (compact)](https://img.shields.io/azure-devops/tests/expanddevops/expandframework/$($releaseId)?label=%20)"
+            if (!$_.Succeeded){
+                $releasebadge="$($_.Badge)"
+            }
         }
         $labBadge="![Azure DevOps tests (compact)](https://img.shields.io/azure-devops/tests/expanddevops/expandframework/$($_.LabId)?label=%20)"
         
-        if (!$_.Succeeded){
-            $labBadge="$($_.Badge)<br>"
+        if (!$_.Succeeded -and $Branch -eq "Lab"){
+            $labBadge="$($_.Badge)"
         }
         "|$($_.Version)|$releasebadge|$labBadge"
     }) -join [System.Environment]::NewLine
