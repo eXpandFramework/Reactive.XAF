@@ -56,7 +56,7 @@ task UpdateProjects {
 
 task UpdateReadMe {
     InvokeScript{
-        & "$PSScriptRoot\tools\build\UpdateReadMe.ps1" $AzureToken
+        & "$PSScriptRoot\tools\build\UpdateReadMe.ps1" 
     }
 }
 
@@ -75,6 +75,7 @@ task Compile -precondition {return $compile  } {
     InvokeScript{
         write-host "Building Tests" -f "Blue"
         dotnet restore "$PSScriptRoot\src\Tests\Tests.sln" --source $source /WarnAsError
+        
         dotnet msbuild "$PSScriptRoot\src\Tests\Tests.sln" "/p:configuration=Debug" /WarnAsError
     }
 }

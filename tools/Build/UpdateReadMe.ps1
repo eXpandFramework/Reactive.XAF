@@ -145,10 +145,12 @@ $latestMinors = Get-NugetPackageSearchMetadata -Name DevExpress.Xpo -AllVersions
 "latestMinors:"
 $latestMinors
 Set-VSTeamAccount -Account eXpandDevOps -PersonalAccessToken $AzureToken
-function GetMatrixRows($Branch) {
-    (Get-VSTeamBuild -ProjectName expandFramework | Select-Object -ExpandProperty Definition | Sort-Object Name -Unique | Where-Object { $_.name -like "DevExpress.XAF-$Branch*" } | ForEach-Object {
+function GetMatrixRows($Branch,$vsTeamBuilds) {
+    
+    ($vsTeamBuilds | Select-Object -ExpandProperty Definition | Sort-Object Name -Unique | Where-Object { $_.name -like "DevExpress.XAF-$Branch*" } | ForEach-Object {
+            $definitionName=$_.name
             $regex = [regex] '(\d{2}\.\d*)'
-            $result = $regex.Match($_.name).Groups[1].Value;
+            $result = $regex.Match($definitionName).Groups[1].Value;
             [version]$latestVersion = $latestMinors | Where-Object { "$($_.Major).$($_.minor)" -eq $result }
             $id = $_.Id
             if (!$latestVersion) {
@@ -158,20 +160,28 @@ function GetMatrixRows($Branch) {
                     $id = 25
                 }
             }
+            
+            $result=$vsTeamBuilds|Where-Object{$_.Definition.name -eq $definitionName}|Sort-Object FinishTime -Descending |Select-Object -ExpandProperty Result -First  1
+
             [PSCustomObject]@{
                 Version = $latestVersion
                 Id      = $id
+                Badge = "[![Build Status](https://dev.azure.com/eXpandDevOps/eXpandFramework/_apis/build/status/$Branch-Builds/$($_.name)?branchName=$Branch)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=$Id&branchName=$Branch)"
+                Succeeded =($result -eq "Succeeded")
             }
         } | Sort-Object Version -Descending)
 }
-$releaseRows = GetMatrixRows Release
-$labRows = GetMatrixRows lab
+$vsTeamBuilds=Get-VSTeamBuild -ProjectName expandFramework
+$releaseRows = GetMatrixRows Release $vsTeamBuilds
+$labRows = GetMatrixRows lab $vsTeamBuilds
 $rowMatrix = $labRows | ForEach-Object {
     $version = $_.Version
     [PSCustomObject]@{
         Labid     = $_.id
         ReleaseId = ($releaseRows | Where-Object { $_.Version -eq $version } | Select-Object -ExpandProperty Id)
         Version   = "$($version.Major).$($version.Minor).$($version.Build)"
+        Badge=$_.badge
+        Succeeded=$_.Succeeded
     }
 }
 $matrix = ($rowMatrix | ForEach-Object {
@@ -180,7 +190,12 @@ $matrix = ($rowMatrix | ForEach-Object {
         if ($releaseId) {
             $releasebadge = "![Azure DevOps tests (compact)](https://img.shields.io/azure-devops/tests/expanddevops/expandframework/$($releaseId)?label=%20)"
         }
-        "|$($_.Version)|$releasebadge|![Azure DevOps tests (compact)](https://img.shields.io/azure-devops/tests/expanddevops/expandframework/$($_.LabId)?label=%20)"
+        $labBadge="![Azure DevOps tests (compact)](https://img.shields.io/azure-devops/tests/expanddevops/expandframework/$($_.LabId)?label=%20)"
+        
+        if (!$_.Succeeded){
+            $labBadge="$($_.Badge)<br>"
+        }
+        "|$($_.Version)|$releasebadge|$labBadge"
     }) -join [System.Environment]::NewLine
 
 $matrix = @"
@@ -199,5 +214,5 @@ $matrix
 ### Issues
 "@)
 
-Set-Content "$rootLocation\Readme.md" $result 
+Set-Content "$rootLocation\Readme.md" $result.Trim("")
     

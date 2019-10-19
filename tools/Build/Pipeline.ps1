@@ -8,12 +8,13 @@ param(
     $bindirectory,
     $AzureToken = (Get-AzureToken),
     $PastBuild,
-    $CustomVersion="DevExpress.XAF-Lab-16.2",
+    $CustomVersion,
     $latest,
     $WhatIf = $false
     
 )
 "PastBuild=$PastBuild"
+"latest=$latest"
 if ($PastBuild -and $PastBuild -ne "false") {
     return
 }
