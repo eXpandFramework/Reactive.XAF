@@ -49,3 +49,8 @@ Use main project [issues](https://github.com/eXpandFramework/eXpand/issues/new?a
 ### Efficient Package Management
 
 Working with many nuget packages may be counter productive. So if you want to boost your productity make sure you go through the [Efficient Package Management](https://github.com/eXpandFramework/DevExpress.XAF/wiki/Efficient-package-management) wiki page.
+
+
+
+
+

@@ -15,10 +15,8 @@ The `Reactive.Logger` module monitors calls to the Reactive delegates (OnNext, O
 2. [Ways to Register a Module](https://documentation.devexpress.com/eXpressAppFramework/118047/Concepts/Application-Solution-Components/Ways-to-Register-a-Module)
 or simply add the next call to your module constructor
     ```cs
-    RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.Reactive.LoggerModule));
+    RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.Reactive..Logger.ReactiveLoggerModule));
     ```
-
-The module is not integrated with any `eXpandFramework` module. You have to install it as described.
 
 ## Versioning
 The module is **not bound** to **DevExpress versioning**, which means you can use the latest version with your old DevExpress projects [Read more](https://github.com/eXpandFramework/XAF/tree/master/tools/Xpand.VersionConverter).
@@ -35,10 +33,10 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |**DevExpress.Xpo**|**Any**
 |Fasterflect.Xpand|2.0.6
  |System.Reactive|4.2.0
- |Xpand.Extensions|0.0.2
- |Xpand.Extensions.XAF|0.0.2
+ |Xpand.Extensions|0.0.3
+ |Xpand.Extensions.XAF|0.0.3
  |Xpand.Patcher|1.0.1
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|1.2.63
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|1.2.64
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.0.35
 
 ## Issues-Debugging-Troubleshooting
