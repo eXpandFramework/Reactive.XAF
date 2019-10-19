@@ -36,7 +36,8 @@ namespace Xpand.XAF.Modules.Reactive{
         }
 
         public static TModel ToReactiveModule<TModel>(this IModelApplication applicationModel) where TModel: class, IModelReactiveModule{
-            return ( ((IModelApplicationReactiveModules) applicationModel).ReactiveModules) as TModel;
+            var modules = applicationModel as IModelApplicationReactiveModules;
+            return modules?.ReactiveModules as TModel;
         }
     }
 }

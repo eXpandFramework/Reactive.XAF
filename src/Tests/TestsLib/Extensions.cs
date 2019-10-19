@@ -75,10 +75,12 @@ namespace Xpand.TestsLib {
             }
             application.AlwaysUpdateOnDatabaseVersionMismatch().Subscribe();
             var moduleBases = new[] {
-                new ReactiveLoggerHubModule(),
                 new SystemModule(),
                 application is WinApplication ? (ModuleBase) new SystemWindowsFormsModule() : new SystemAspNetModule()
             }.Concat(modules);
+            if (((ITestApplication) application).TransmitMessage){
+                moduleBases=moduleBases.Add(new ReactiveLoggerHubModule());
+            }
             foreach (var moduleBase in moduleBases){
                 if (application.Modules.All(_ => moduleBase.GetType() != _.GetType())){
                     application.Modules.Add(moduleBase);
@@ -111,24 +113,32 @@ namespace Xpand.TestsLib {
             return application.WhenModelChanged().FirstAsync()
                 .Where(_ => application.Modules.Any(m => m is ReactiveLoggerModule))
                 .Select(_ => {
-                    var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger;
-                    logger.TraceSources.Enabled = true;
-                    foreach (var traceSource in logger.TraceSources){
-                        traceSource.Level=SourceLevels.Verbose;
+                    var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>()?.ReactiveLogger;
+                    if (logger != null){
+                        logger.TraceSources.Enabled = true;
+                        foreach (var traceSource in logger.TraceSources){
+                            traceSource.Level = SourceLevels.Verbose;
+                        }
+
+                        var port = ModulePorts.Where(pair => pair.Key == typeof(TModule).Name)
+                            .Select(pair => pair.Value).FirstOrDefault();
+                        if (port > 0 && logger is IModelServerPorts modelServerPorts){
+                            var modelLoggerPortsList = modelServerPorts.LoggerPorts;
+                            var serverPort = modelLoggerPortsList.OfType<IModelLoggerServerPort>().First();
+                            serverPort.Port = port;
+                            serverPort.Enabled = transmitMessage;
+                            var clientRange = modelLoggerPortsList.OfType<IModelLoggerClientRange>().First();
+                            modelLoggerPortsList.Enabled = transmitMessage;
+                            clientRange.StartPort = port;
+                            clientRange.EndPort = port + 1;
+                        }
+
+                        return logger;
                     }
-                    var port = ModulePorts.Where(pair => pair.Key==typeof(TModule).Name).Select(pair => pair.Value).FirstOrDefault();
-                    if (port>0){
-                        var modelLoggerPortsList = ((IModelServerPorts) logger).LoggerPorts;
-                        var serverPort = modelLoggerPortsList.OfType<IModelLoggerServerPort>().First();
-                        serverPort.Port = port;
-                        serverPort.Enabled = transmitMessage;
-                        var clientRange = modelLoggerPortsList.OfType<IModelLoggerClientRange>().First();
-                        modelLoggerPortsList.Enabled = transmitMessage;
-                        clientRange.StartPort = port;
-                        clientRange.EndPort = port+1;
-                    }
-                    return logger;
-                });
+
+                    return null;
+                })
+                .WhenDefault();
 
         }
 

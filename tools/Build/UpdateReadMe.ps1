@@ -13,7 +13,7 @@ $packagesPath = "$rootLocation\bin\Nupkg\"
 $packages = & $nuget List -Source $packagesPath | ConvertTo-PackageObject | Select-Object -ExpandProperty Id
 function UpdateModulesList($rootLocation, $packages) {
     $moduleList = "|PackageName|Version|[![Custom badge](https://img.shields.io/endpoint.svg?label=Nuget.org&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAF)](https://www.nuget.org/packages?q=Xpand.XAF)`r`n|---|---|---|`r`n"
-    $packages | Where-Object { $_ -ne "Xpand.VersionConverter" } | ForEach-Object {
+    $packages | Where-Object { $_ -ne "Xpand.VersionConverter" -and $_ -notlike "Xpand.Extensions*" } | ForEach-Object {
         $name = $_.Replace("Xpand.XAF.Modules.", "")
         $packageUri = "[$name](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/$name)"
         $version = "![](https://img.shields.io/nuget/v/$_.svg?label=&style=flat)"
@@ -126,8 +126,8 @@ function UpdateModules($rootLocation, $packages) {
     }
 }
 
-# UpdateModulesList $rootLocation $packages
-# UpdateModules $rootLocation $packages
+UpdateModulesList $rootLocation $packages
+UpdateModules $rootLocation $packages
 
 #compatibility matrix
 if (!$AzureToken){
@@ -162,11 +162,14 @@ function GetMatrixRows($Branch,$vsTeamBuilds) {
             }
             
             $result=$vsTeamBuilds|Where-Object{$_.Definition.name -eq $definitionName}|Sort-Object FinishTime -Descending |Select-Object -ExpandProperty Result -First  1
-
+            $brnachName=$Branch
+            if ($Branch -eq "Release"){
+                $brnachName="master"
+            }
             [PSCustomObject]@{
                 Version = $latestVersion
                 Id      = $id
-                Badge = "[![Build Status](https://dev.azure.com/eXpandDevOps/eXpandFramework/_apis/build/status/$Branch-Builds/$($_.name)?branchName=$Branch)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=$Id&branchName=$Branch)"
+                Badge = "[![Build Status](https://dev.azure.com/eXpandDevOps/eXpandFramework/_apis/build/status/$Branch-Builds/$($_.name)?branchName=$brnachName)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=$Id&branchName=$brnachName)"
                 Succeeded =($result -eq "Succeeded")
             }
         } | Sort-Object Version -Descending)
@@ -192,14 +195,10 @@ $matrix = ($rowMatrix | ForEach-Object {
         $releasebadge = $null
         if ($releaseId) {
             $releasebadge = "![Azure DevOps tests (compact)](https://img.shields.io/azure-devops/tests/expanddevops/expandframework/$($releaseId)?label=%20)"
-            if (!$_.ReleaseSucceeded){
-                $releasebadge="$($_.ReleaseBadge)"
-            }
+            $releasebadge="$($_.ReleaseBadge)<br>$releasebadge"
         }
         $labBadge="![Azure DevOps tests (compact)](https://img.shields.io/azure-devops/tests/expanddevops/expandframework/$($_.LabId)?label=%20)"
-        if (!$_.LabSucceeded){
-            $labBadge="$($_.LabBadge)"
-        }
+        $labBadge="$($_.LabBadge)<br>$labBadge"
         "|$($_.Version)|$releasebadge|$labBadge"
     }) -join [System.Environment]::NewLine
 

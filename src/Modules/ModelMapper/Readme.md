@@ -209,3 +209,4 @@ modelNode.BindTo(objectInstance)
 The `BindTo` method will follow the hierarchy tree respecting the disabled nodes and will update all properties that are not null.
 ### Tests
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/ModelMapper)
+

@@ -107,8 +107,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
                 await SaveTraceEvent(application => {
                     application.WhenModelChanged().FirstAsync()
                         .Select(_ => {
-                            var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>()
-                                .ReactiveLogger;
+                            var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger;
                             logger.TraceSources[nameof(ReactiveLoggerModule)].Level = SourceLevels.Off;
                             return Unit.Default;
                         }).Subscribe();

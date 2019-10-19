@@ -22,6 +22,8 @@ namespace Xpand.TestsLib{
             TraceClientBroadcast = this.ClientBroadcast();
         }
 
+        public bool TransmitMessage => _transmitMessage;
+
         public IObservable<Unit> TraceClientBroadcast{ get; set; }
 
 
@@ -83,8 +85,10 @@ namespace Xpand.TestsLib{
             SUTModule = sutModule;
             TraceClientConnected = this.ClientConnect();
             TraceClientBroadcast = this.ClientBroadcast();
+            TransmitMessage = transmitMessage;
         }
 
+        public bool TransmitMessage{ get;  }
         public IObservable<Unit> TraceClientBroadcast{ get; set; }
 
         protected override bool CanLoadTypesInfo(){
@@ -105,6 +109,7 @@ namespace Xpand.TestsLib{
     }
 
     public interface ITestApplication{
+        bool TransmitMessage{ get; }
         IObservable<Unit> TraceClientBroadcast{ get; set; }
         IObservable<Unit> TraceClientConnected{ get; set; }
         Type SUTModule{ get;  }
