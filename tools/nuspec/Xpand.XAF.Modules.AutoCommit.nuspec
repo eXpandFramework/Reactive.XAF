@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.AutoCommit</id>
-    <version>1.0.12.0</version>
+    <version>1.0.13.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -17,9 +17,9 @@
       <dependency id="Fasterflect.Xpand" version="2.0.6" />
       <dependency id="System.Reactive" version="4.2.0" />
       <dependency id="System.ValueTuple" version="4.5.0" />
-      <dependency id="Xpand.Extensions" version="0.0.2.0" />
-      <dependency id="Xpand.Extensions.XAF" version="0.0.2.0" />
-      <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.63.0" />
+      <dependency id="Xpand.Extensions" version="0.0.3.0" />
+      <dependency id="Xpand.Extensions.XAF" version="0.0.3.0" />
+      <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.64.0" />
       <dependency id="Xpand.VersionConverter" version="1.0.35.0" />
     </dependencies>
   </metadata>

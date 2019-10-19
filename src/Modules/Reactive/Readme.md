@@ -18,8 +18,8 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |Fasterflect.Xpand|2.0.6
  |System.Interactive|4.0.0
  |System.Reactive|4.2.0
- |Xpand.Extensions|0.0.2
- |Xpand.Extensions.XAF|0.0.2
+ |Xpand.Extensions|0.0.3
+ |Xpand.Extensions.XAF|0.0.3
  |Xpand.Patcher|1.0.1
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.0.35
 

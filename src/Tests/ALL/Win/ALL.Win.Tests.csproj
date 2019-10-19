@@ -26,22 +26,22 @@
     <PackageReference Include="DevExpress.ExpressApp" Version="18.2.7" />
     <PackageReference Include="DevExpress.Data" Version="18.2.7" />
     <PackageReference Include="DevExpress.Xpo" Version="18.2.7" />
-    <PackageReference Include="Xpand.XAF.Modules.AutoCommit" Version="1.0.12.0" />
-    <PackageReference Include="Xpand.XAF.Modules.CloneMemberValue" Version="1.2.60.0" />
-    <PackageReference Include="Xpand.xaf.modules.CloneModelView" Version="1.0.10.0" />
-    <PackageReference Include="Xpand.xaf.modules.GridLIstEditor" Version="0.0.14.0" />
-    <PackageReference Include="Xpand.xaf.modules.HideToolBar" Version="1.0.11.0" />
-    <PackageReference Include="Xpand.xaf.modules.MasterDetail" Version="1.0.11.0" />
-    <PackageReference Include="Xpand.xaf.modules.ModelMapper" Version="1.1.54.9" />
-    <PackageReference Include="Xpand.xaf.modules.ModelViewInheritance" Version="1.1.50.0" />
-    <PackageReference Include="Xpand.xaf.modules.OneVIew" Version="0.0.14.0" />
-    <PackageReference Include="Xpand.xaf.modules.ProgressbarViewItem" Version="1.0.11.0" />
-    <PackageReference Include="Xpand.xaf.modules.Reactive.Logger" Version="0.0.16.0" />
-    <PackageReference Include="Xpand.xaf.modules.Reactive.Logger.hub" Version="0.0.15.0" />
-    <PackageReference Include="Xpand.xaf.modules.Reactive.Win" Version="0.0.14.0" />
-    <PackageReference Include="Xpand.xaf.modules.RefreshView" Version="0.0.14.0" />
-    <PackageReference Include="Xpand.xaf.modules.SuppressConfirmation" Version="1.0.11.0" />
-    <PackageReference Include="Xpand.XAF.Modules.ViewEditMode" Version="1.2.60.0" />
+    <PackageReference Include="Xpand.XAF.Modules.AutoCommit" Version="1.0.13" />
+    <PackageReference Include="Xpand.XAF.Modules.CloneMemberValue" Version="1.2.61" />
+    <PackageReference Include="Xpand.xaf.modules.CloneModelView" Version="1.0.11" />
+    <PackageReference Include="Xpand.xaf.modules.GridLIstEditor" Version="0.0.15" />
+    <PackageReference Include="Xpand.xaf.modules.HideToolBar" Version="1.0.12" />
+    <PackageReference Include="Xpand.xaf.modules.MasterDetail" Version="1.0.12" />
+    <PackageReference Include="Xpand.xaf.modules.ModelMapper" Version="1.1.55" />
+    <PackageReference Include="Xpand.xaf.modules.ModelViewInheritance" Version="1.1.51" />
+    <PackageReference Include="Xpand.xaf.modules.OneVIew" Version="0.0.15" />
+    <PackageReference Include="Xpand.xaf.modules.ProgressbarViewItem" Version="1.0.12" />
+    <PackageReference Include="Xpand.xaf.modules.Reactive.Logger" Version="0.0.17" />
+    <PackageReference Include="Xpand.xaf.modules.Reactive.Logger.hub" Version="0.0.16" />
+    <PackageReference Include="Xpand.xaf.modules.Reactive.Win" Version="0.0.15" />
+    <PackageReference Include="Xpand.xaf.modules.RefreshView" Version="0.0.15" />
+    <PackageReference Include="Xpand.xaf.modules.SuppressConfirmation" Version="1.0.12" />
+    <PackageReference Include="Xpand.XAF.Modules.ViewEditMode" Version="1.2.61" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.TestsLib">
