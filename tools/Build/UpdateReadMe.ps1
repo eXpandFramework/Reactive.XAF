@@ -26,7 +26,7 @@ function UpdateModulesList($rootLocation, $packages) {
     $allModulesReadMe = [Regex]::replace($allModulesReadMe, "(## Platform agnostic modules list)(.*)(## Issues)", "`$1`r`n$moduleList`r`n`$3", [RegexOptions]::Singleline)
     Set-Content $path $allModulesReadMe.trim()
 }
-UpdateModulesList $rootLocation $packages
+
 function UpdateDependencies($_, $packagespath, $readMePath) {
     $readMe = Get-Content $readMePath -Raw
     $metadata = ((Get-NugetPackageSearchMetadata -Name $_.BaseName -Source $packagesPath).DependencySets.Packages | ForEach-Object {
@@ -126,8 +126,8 @@ function UpdateModules($rootLocation, $packages) {
     }
 }
 
-
-UpdateModules $rootLocation $packages
+# UpdateModulesList $rootLocation $packages
+# UpdateModules $rootLocation $packages
 
 #compatibility matrix
 if (!$AzureToken){
@@ -176,27 +176,29 @@ $releaseRows = GetMatrixRows Release $vsTeamBuilds
 $labRows = GetMatrixRows lab $vsTeamBuilds
 $rowMatrix = $labRows | ForEach-Object {
     $version = $_.Version
+    $release=$releaseRows | Where-Object { $_.Version -eq $version }
     [PSCustomObject]@{
         Labid     = $_.id
-        ReleaseId = ($releaseRows | Where-Object { $_.Version -eq $version } | Select-Object -ExpandProperty Id)
+        ReleaseId = ($release | Select-Object -ExpandProperty Id)
         Version   = "$($version.Major).$($version.Minor).$($version.Build)"
-        Badge=$_.badge
-        Succeeded=$_.Succeeded
+        ReleaseBadge=$release.badge
+        LabBadge=$_.badge
+        ReleaseSucceeded=$release.Succeeded
+        LabSucceeded=$_.Succeeded
     }
 }
 $matrix = ($rowMatrix | ForEach-Object {
         $releaseId = $_.Releaseid
         $releasebadge = $null
-        if ($releaseId -and $Branch -eq "Release") {
+        if ($releaseId) {
             $releasebadge = "![Azure DevOps tests (compact)](https://img.shields.io/azure-devops/tests/expanddevops/expandframework/$($releaseId)?label=%20)"
-            if (!$_.Succeeded){
-                $releasebadge="$($_.Badge)"
+            if (!$_.ReleaseSucceeded){
+                $releasebadge="$($_.ReleaseBadge)"
             }
         }
         $labBadge="![Azure DevOps tests (compact)](https://img.shields.io/azure-devops/tests/expanddevops/expandframework/$($_.LabId)?label=%20)"
-        
-        if (!$_.Succeeded -and $Branch -eq "Lab"){
-            $labBadge="$($_.Badge)"
+        if (!$_.LabSucceeded){
+            $labBadge="$($_.LabBadge)"
         }
         "|$($_.Version)|$releasebadge|$labBadge"
     }) -join [System.Environment]::NewLine
