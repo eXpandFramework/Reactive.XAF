@@ -34,7 +34,7 @@ The modules follow the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 
 |XAF Version   | Release  | Lab|
 |---|---|---|
-|19.1.7||[![Build Status](https://dev.azure.com/eXpandDevOps/eXpandFramework/_apis/build/status/lab-Builds/DevExpress.XAF-Lab?branchName=lab)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=23&branchName=lab)
+|19.1.7|![Azure DevOps tests (compact)](https://img.shields.io/azure-devops/tests/expanddevops/expandframework/25?label=%20)|[![Build Status](https://dev.azure.com/eXpandDevOps/eXpandFramework/_apis/build/status/lab-Builds/DevExpress.XAF-Lab?branchName=lab)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=23&branchName=lab)
 |18.2.10||[![Build Status](https://dev.azure.com/eXpandDevOps/eXpandFramework/_apis/build/status/lab-Builds/DevExpress.XAF-Lab-18.2?branchName=lab)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=55&branchName=lab)
 |18.1.12||[![Build Status](https://dev.azure.com/eXpandDevOps/eXpandFramework/_apis/build/status/lab-Builds/DevExpress.XAF-Lab-18.1?branchName=lab)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=56&branchName=lab)
 |17.2.13||[![Build Status](https://dev.azure.com/eXpandDevOps/eXpandFramework/_apis/build/status/lab-Builds/DevExpress.XAF-Lab-17.2?branchName=lab)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=57&branchName=lab)
