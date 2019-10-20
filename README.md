@@ -30,6 +30,7 @@ The modules follow the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 ### Compatibility Matrix
 
 **The source is tested against the latest Minor of each Major version for the last three years.**
+
 [![Azure DevOps Coverage](https://img.shields.io/azure-devops/coverage/eXpandDevOps/expandframework/25.svg?logo=azuredevops)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=25)
 
 
