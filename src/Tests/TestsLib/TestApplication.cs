@@ -40,6 +40,10 @@ namespace Xpand.TestsLib{
 
         readonly Subject<Form> _modelEditorForm=new Subject<Form>();
 
+        public TestWinApplication(){
+            
+        }
+
         public IObservable<Form> ModelEditorForm => Observable.AsObservable(_modelEditorForm);
 
         protected override Form CreateModelEditorForm(){

@@ -15,8 +15,8 @@ properties {
     $AzureToken=$null
 }
 
-task TestsRun  -depends Clean, Init, Compile, CreateNuspec, PackNuspec, UpdateAllTests
-task Release  -depends   Clean, Init, UpdateProjects,  Compile,IndexSources, CreateNuspec, PackNuspec, UpdateAllTests, UpdateReadMe
+task TestsRun  -depends Clean, Init, Compile, CreateNuspec, PackNuspec, UpdateAllTests,CompileTests
+task Release  -depends   Clean, Init, UpdateProjects,  Compile,IndexSources, CreateNuspec, PackNuspec, UpdateAllTests,CompileTests
 
 
 Task IndexSources{
@@ -60,23 +60,27 @@ task UpdateReadMe {
     }
 }
 
+task CompileTests -precondition {return $compile  } {
+    InvokeScript -maxRetries 3{
+        write-host "Building Tests" -f "Blue"
+        $source="https://api.nuget.org/v3/index.json;$packageSources"
+        $source="$source;$PSScriptRoot\Bin\Nupkg"
+        dotnet restore "$PSScriptRoot\src\Tests\Tests.sln" --source $packageSources --source (Get-PackageFeed -Nuget) --source  "$PSScriptRoot\Bin\Nupkg" /WarnAsError
+        
+        dotnet msbuild "$PSScriptRoot\src\Tests\Tests.sln" "/p:configuration=Debug" /WarnAsError
+    }
+}
+
 task Compile -precondition {return $compile  } {
-    $source="https://api.nuget.org/v3/index.json;$packageSources"
     InvokeScript -maxRetries 3 {
         write-host "Building Extensions" -f "Blue"
-        dotnet restore "$PSScriptRoot\src\Extensions\Extensions.sln" --source $source /WarnAsError
+        dotnet restore "$PSScriptRoot\src\Extensions\Extensions.sln" --source (Get-PackageFeed -nuget) --source $packageSources /WarnAsError
         dotnet msbuild "$PSScriptRoot\src\Extensions\Extensions.sln" "/p:configuration=Release" /WarnAsError
     }
     InvokeScript -maxRetries 3{
         write-host "Building Modules" -f "Blue"
-        dotnet restore "$PSScriptRoot\src\Modules\Modules.sln" --source $source /WarnAsError
+        dotnet restore "$PSScriptRoot\src\Modules\Modules.sln" --source (Get-PackageFeed -nuget) --source $packageSources /WarnAsError
         dotnet msbuild "$PSScriptRoot\src\Modules\Modules.sln" "/p:configuration=Release" /WarnAsError
-    }
-    InvokeScript{
-        write-host "Building Tests" -f "Blue"
-        dotnet restore "$PSScriptRoot\src\Tests\Tests.sln" --source $source /WarnAsError
-        
-        dotnet msbuild "$PSScriptRoot\src\Tests\Tests.sln" "/p:configuration=Debug" /WarnAsError
     }
 }
 
@@ -97,8 +101,7 @@ Task PackNuspec {
 
 Task UpdateAllTests {
     InvokeScript -maxRetries 3 {
-        $source="https://api.nuget.org/v3/index.json;$packageSources"
-        & "$PSScriptRoot\tools\build\UpdateAllTests.ps1" $PSScriptRoot $branch $source 
+        & "$PSScriptRoot\tools\build\UpdateAllTests.ps1" $PSScriptRoot $branch $packageSources
     }
 }
 

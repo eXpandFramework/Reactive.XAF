@@ -25,13 +25,7 @@ $packData = [pscustomobject] @{
 }
 
 Set-Location $sourceDir
-$assemblyVersions = (Get-ChildItem "$sourceDir\src\Modules" "*.csproj" -Recurse)+(Get-ChildItem "$sourceDir\src\Extensions" "*.csproj" -Recurse) | ForEach-Object {
-    $assemblyInfo = Get-Content "$($_.DirectoryName)\Properties\AssemblyInfo.cs"
-    [PSCustomObject]@{
-        Name    = [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
-        Version = [System.Text.RegularExpressions.Regex]::Match($assemblyInfo, 'Version\("([^"]*)').Groups[1].Value
-    }
-}
+$assemblyVersions = & "$sourceDir\tools\build\AssemblyVersions.ps1" $sourceDir
 
 Get-ChildItem "$sourceDir\tools\nuspec" "Xpand*.nuspec" -Recurse | ForEach-Object {
     if ($_ -like "Xpand.XAF*") {
@@ -59,11 +53,15 @@ Get-ChildItem "$sourceDir\tools\nuspec" "Xpand*.nuspec" -Recurse | ForEach-Objec
     }
     Set-Content "$sourceDir\bin\Readme.txt" $message 
     $packageName = [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
-    $assembly = $assemblyVersions | Where-Object { $_.name -eq $packageName }
+    $assemblyItem = $assemblyVersions | Where-Object { $_.name -eq $packageName }
     $name = $_.FullName
-    
-    Write-Host "Packing $($assembly.Version) $name $version " -f Blue
-    & (Get-XNugetPath) pack $name -OutputDirectory $($packData.nugetBin) -Basepath "$sourceDir\bin" -Version $($assembly.Version)
+    $version=$assemblyItem.Version
+    if ($packageName -like "*All"){
+        [xml]$coreNuspec=Get-Content "$sourceDir\tools\nuspec\$packagename.nuspec"
+        $version=$coreNuspec.package.metadata.Version
+    }
+    Write-Host "Packing $($assemblyItem.Version) $name $version " -f Blue
+    & (Get-XNugetPath) pack $name -OutputDirectory $($packData.nugetBin) -Basepath "$sourceDir\bin" -Version $version
     if ($lastexitcode) {
         throw $_.Exception
     }

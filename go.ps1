@@ -1,4 +1,4 @@
-param(
+﻿param(
     
     [string]$packageSources = "C:\Program Files (x86)\DevExpress 18.2\Components\System\Components\packages",
     [string]$msbuild = $null,
@@ -9,7 +9,7 @@ param(
     [string]$branch="lab",
     [switch]$InstallModules,
     [string[]]$taskList=@("Release"),
-    [string]$XpandPwshVersion = "0.20.1",
+    [string]$XpandPwshVersion = "0.21.0",
     [switch]$Release,
     [switch]$CustomVersion
 )

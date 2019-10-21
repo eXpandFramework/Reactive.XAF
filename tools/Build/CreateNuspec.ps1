@@ -6,38 +6,44 @@ param(
 $ErrorActionPreference = "Stop"
 # Import-XpandPwsh
 Set-Location $root
-New-Item -Path "$root\bin\Nupkg" -ItemType Directory  -ErrorAction SilentlyContinue -Force |Out-Null
+New-Item -Path "$root\bin\Nupkg" -ItemType Directory  -ErrorAction SilentlyContinue -Force | Out-Null
 
 $versionConverter = [PSCustomObject]@{
     id              = "Xpand.VersionConverter"
-    version         = ([xml](get-content "$PsScriptRoot\..\Xpand.VersionConverter\Xpand.VersionConverter.nuspec")).package.metadata.version
+    version         = ([xml](Get-Content "$PsScriptRoot\..\Xpand.VersionConverter\Xpand.VersionConverter.nuspec")).package.metadata.version
     targetFramework = "net452"
 }
 
-
-get-childitem "$root\src\" -Include "*.csproj" -Exclude "*Tests*" -Recurse | ForEach-Object {
+$AddDependency = {
+    param($psObj, $nuspec)
+    $dependency = $nuspec.CreateElement("dependency", $nuspec.DocumentElement.NamespaceURI)
+    $dependency.SetAttribute("id", $psObj.id)
+    $dependency.SetAttribute("version", $psObj.version)
+    $nuspec.SelectSingleNode("//ns:dependencies", $ns).AppendChild($dependency) | Out-Null
+}
+Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notlike "*Test*" } | ForEach-Object {
     $projectPath = $_.FullName
-    write-host "Creating Nuspec for $($_.baseName)" -f "Blue"
-    $uArgs=@{
-        NuspecFilename="$root\tools\nuspec\$($_.baseName).nuspec"
-        ProjectFileName=$projectPath
-        ReferenceToPackageFilter="Xpand*"
-        PublishedSource=(Get-PackageFeed -Xpand)
-        Release=$Release
-        ReadMe=$true
-        ProjectsRoot=$root
+    Write-Host "Creating Nuspec for $($_.baseName)" -f "Blue"
+    $uArgs = @{
+        NuspecFilename           = "$root\tools\nuspec\$($_.baseName).nuspec"
+        ProjectFileName          = $projectPath
+        ReferenceToPackageFilter = "Xpand*"
+        PublishedSource          = (Get-PackageFeed -Xpand)
+        Release                  = $Release
+        ReadMe                   = $true
+        ProjectsRoot             = $root
     }
-    if (!(Test-Path $uArgs.NuspecFilename)){
+    if (!(Test-Path $uArgs.NuspecFilename)) {
         Set-Location $root\tools\nuspec
         & (Get-NugetPath) spec $_.BaseName
     }
-    if ($Release){
-        $uArgs.PublishedSource=(Get-PackageFeed -Nuget)
+    if ($Release) {
+        $uArgs.PublishedSource = (Get-PackageFeed -Nuget)
     }
     
     Update-Nuspec @uArgs 
 
-    $nuspecFileName="$root\tools\nuspec\$($_.BaseName).nuspec"
+    $nuspecFileName = "$root\tools\nuspec\$($_.BaseName).nuspec"
     [xml]$nuspec = Get-Content $nuspecFileName
     # $nuspec.package.metaData.Id = $_.BaseName
     $readMePath = "$($_.DirectoryName)\ReadMe.md"
@@ -67,24 +73,10 @@ get-childitem "$root\src\" -Include "*.csproj" -Exclude "*Tests*" -Recurse | For
     
     $ns = New-Object System.Xml.XmlNamespaceManager($nuspec.NameTable)
     $ns.AddNamespace("ns", $nuspec.DocumentElement.NamespaceURI)
-    $AddDependency = {
-        param($psObj)
-        $dependency = $nuspec.CreateElement("dependency", $nuspec.DocumentElement.NamespaceURI)
-        $dependency.SetAttribute("id", $psObj.id)
-        $dependency.SetAttribute("version", $psObj.version)
-        $nuspec.SelectSingleNode("//ns:dependencies", $ns).AppendChild($dependency)|Out-Null
-    }
     
-    if ($nuspec.package.metaData.id -like "Xpand.XAF*" -or $nuspec.package.metaData.id -like "Xpand.Extension*"){
-        Invoke-Command $AddDependency -ArgumentList $versionConverter
+    if ($nuspec.package.metaData.id -like "Xpand.XAF*" -or $nuspec.package.metaData.id -like "Xpand.Extension*") {
+        Invoke-Command $AddDependency -ArgumentList @($versionConverter, $nuspec)
     }
     $nuspec.Save($nuspecFileName)
 } 
-
-Get-ChildItem "$root\tools\nuspec" *.nuspec|ForEach-Object{
-    [xml]$nuspec=Get-Content $_.FullName
-    $nuspec.package.metaData.dependencies.dependency|Where-Object{$_.Id -like "DevExpress*"}|ForEach-Object{
-        $_.ParentNode.RemoveChild($_)
-    }
-    $nuspec.Save($_.FullName)
-}
+& "$root\tools\build\UpdateAllNuspec.ps1" $root

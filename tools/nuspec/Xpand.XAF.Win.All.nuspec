@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>Xpand.XAF.Win.All</id>
+    <version>0.0.1.4</version>
+    <authors>eXpandFramework</authors>
+    <owners>eXpandFramework</owners>
+    <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/modules</projectUrl>
+    <iconUrl>http://sign.expandframework.com</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>All platform agnostic packages</description>
+    <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
+    <copyright>eXpandFramework.com</copyright>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Xpand.XAF.Win.All</tags>
+    <dependencies>
+      <dependency id="Xpand.XAF.Modules.GridListEditor" version="0.0.15.0" />
+      <dependency id="Xpand.XAF.Modules.OneView" version="0.0.15.0" />
+      <dependency id="Xpand.XAF.Modules.Reactive.Win" version="0.0.15.0" />
+      <dependency id="Xpand.XAF.Core.All" version="0.0.1.3" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="Readme.txt" target="" />
+  </files>
+</package>

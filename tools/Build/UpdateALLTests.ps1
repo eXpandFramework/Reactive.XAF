@@ -12,7 +12,7 @@ if ($branch -eq "master") {
 $ErrorActionPreference = "Stop"
 # Import-XpandPwsh
 $excludeFilter = "*client*;*extension*"
-$localPackages = Get-ChildItem "$root\tools\nuspec" *.nuspec | ForEach-Object {
+$localPackages = Get-ChildItem "$root\tools\nuspec" *ALL.nuspec | ForEach-Object {
     [xml]$nuspec = Get-Content $_.FullName
     $version = [version]$nuspec.package.metadata.Version
     if ($version.revision -eq 0) {
@@ -25,7 +25,7 @@ $localPackages = Get-ChildItem "$root\tools\nuspec" *.nuspec | ForEach-Object {
 }
 Write-Host "LocalPackages:" -f blue
 $localPackages | Out-String
-$remotePackages = Get-XpandPackages -PackageType XAF -Source $branch
+$remotePackages = Get-XpandPackages -PackageType XAF -Source $branch |Where-Object{$_.Name -like "*All"}
 Write-Host "remotePackages:" -f Blue
 $remotePackages | Out-String
 $latestPackages = (($localPackages + $remotePackages) | Group-Object Id | ForEach-Object {
@@ -40,20 +40,8 @@ $packages = $latestPackages | Where-Object {
 Write-Host "finalPackages:" -f Blue
 $packages | Out-String
 
-$csprojPath = "$root\src\Tests\All\Win\ALL.Win.Tests.csproj"
+$csprojPath = "$root\src\Tests\All\ALL.Win.Tests\ALL.Win.Tests.csproj"
 [xml]$csproj = Get-Content $csprojPath
-function CheckForNotInstalled($csproj, $filter, $packages) {
-    $ref = $csproj.project.itemgroup.PackageReference.Include | Where-Object { $_ -like "Xpand.*" }
-    $packages | Where-Object { !$filter -or $_.Id -like "*.$filter" } | ForEach-Object {
-        $id = $_.Id
-        $installed = $ref | Select-String $id
-        if (!$installed) {
-            throw "$id $($_.Version) not installed in ALL$Filter.Tests" 
-        }
-    }
-}
-CheckForNotInstalled $csproj ".Win" $packages
-CheckForNotInstalled $csproj "" $packages
 
 $csproj.Project.ItemGroup.PackageReference | Where-Object { $_.Include -like "Xpand.*" } | ForEach-Object {
     $pref = $_
@@ -67,11 +55,14 @@ $csproj.Project.ItemGroup.PackageReference | Where-Object { $_.Include -like "Xp
 }
 $csproj.Save($csprojPath)
 Get-Content $csprojPath -Raw
-Write-Host "Building ALLTests" -f Blue
-Get-ChildItem "$root\src\Tests\All" *.sln -Recurse | ForEach-Object {
-    dotnet restore $_.FullName --source "$source;$root\bin\Nupkg" /WarnAsError
-    dotnet msbuild $_.FullName "/p:configuration=Debug" /WarnAsError
-    $allTestsBin="$root\bin\All\Win"
-    New-Item $allTestsBin -ItemType Directory -Force -ErrorAction SilentlyContinue
-    Get-ChildItem "$root\src\Tests\ALL\Win\bin\Debug" *.*|Copy-Item -Destination $allTestsBin
-}
+Write-Host "Building TestApplication" -f Green
+$testApplication="$root\src\Tests\ALL\TestApplication\TestApplication.sln"
+# "dotnet restore $testApplication --source $source --source `"$root\bin\Nupkg`" --source $(Get-PackageFeed -Nuget) /WarnAsError"
+# dotnet restore $testApplication --source $source --source `"$root\bin\Nupkg`" --source $(Get-PackageFeed -Nuget) --packages (Get-NugetInstallationFolder GlobalPackagesFolder)
+$localSource="$root\bin\Nupkg"
+& (Get-MsBuildPath) $testApplication /WarnAsError /t:restore /p:RestoreAdditionalProjectSources=$source;$localSource; 
+# "dotnet msbuild $testApplication /p:configuration=Debug /WarnAsError --no-restore"
+# Remove-Item "$root\src\Tests\ALL\TestApplication\TestApplication.Web\obj" -Force -Recurse
+# dotnet msbuild $testApplication  --no-restore
+
+
