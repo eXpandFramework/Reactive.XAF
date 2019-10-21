@@ -48,8 +48,8 @@ $moduleDirectories=[Directory]::GetDirectories($nugetPackageFolders)|Where-Objec
 }
 Write-Verbose "moduleDirectories:"
 $moduleDirectories|Write-Verbose
-
-if (!(Get-UnPatchedPackages $moduleDirectories $dxversion)){
+$unpatchedPackages=Get-UnPatchedPackages $moduleDirectories $dxversion
+if (!$unpatchedPackages){
     Write-Verbose "All packages already patched for $dxversion"
     return
 }
@@ -69,7 +69,7 @@ try {
     Install-MonoCecil $targetPath
     $moduleDirectories|ForEach-Object{
         write-verbose "`r`nmoduleDir=$_"
-        (@(Get-ChildItem $_ Xpand.XAF*.dll -Recurse)+@(Get-ChildItem $_ Xpand.Extensions*.dll -Recurse))|
+        $unpatchedPackages|Get-Item|#Where-Object{$_.basename -eq "Xpand.XAF.Modules.Reactive" -or $_.basename -eq "Xpand.XAF.Modules.AutoCommit"}|
         # Where-Object{$installedPackages.Contains($_.BaseName)}|
         ForEach-Object{
             $packageFile = $_.FullName
@@ -78,10 +78,10 @@ try {
             $versionConverterFlag = "$packageDir\VersionConverter.v.$dxVersion.DoNotDelete"
             if (!(Test-Path $versionConverterFlag)) {
                 Remove-PatchFlags $packageDir 
-                "$targetPath\$([Path]::GetFileName($packageFile))", $packageFile | ForEach-Object {
+                @($packageFile) | ForEach-Object {
                     if (Test-Path $_) {
                         $modulePath = (Get-Item $_).FullName
-                        Write-Verbose "Checking $modulePath references..`r`n"
+                        Write-Verbose "Checking references: $modulePath ..`r`n"
                         Update-Version $modulePath $dxVersion
                     }
                 }

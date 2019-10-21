@@ -148,9 +148,6 @@
     <PackageReference Include="DevExpress.ExpressApp.Web.All">
       <Version>18.2.7</Version>
     </PackageReference>
-    <PackageReference Include="MSBuild.Microsoft.VisualStudio.Web.targets">
-      <Version>14.0.0.3</Version>
-    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Default.aspx" />

@@ -108,25 +108,46 @@ function Install-MonoCecil($resolvePath) {
     $packagesFolder = Get-PackagesFolder 
     Add-Type @"
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
-    using Mono.Cecil;
     using System.IO;
-    
+    using Mono.Cecil;
+
     public class MyDefaultAssemblyResolver : DefaultAssemblyResolver{
+        List<AssemblyDefinition> _resolvedDefinitions=new List<AssemblyDefinition>();
         public override AssemblyDefinition Resolve(AssemblyNameReference name, ReaderParameters parameters){
+            var definition = ResolveAssemblyDefinition(name, parameters);
+            _resolvedDefinitions.Add(definition);
+            return definition;
+        }
+
+        private AssemblyDefinition ResolveAssemblyDefinition(AssemblyNameReference name, ReaderParameters parameters){
             try{
                 return base.Resolve(name, parameters);
             }
             catch (AssemblyResolutionException){
-                var assemblies = Directory.GetFiles(@"$packagesFolder", string.Format("{0}.dll", name.Name),SearchOption.AllDirectories);
-                foreach (var assembly in assemblies){
-                    var fileVersion = new Version(FileVersionInfo.GetVersionInfo(assembly).FileVersion);
-                    if (fileVersion == name.Version){
-                        return AssemblyDefinition.ReadAssembly(assembly);
-                    }
-                }
-                return AssemblyDefinition.ReadAssembly(string.Format(@"$resolvePath\{0}.dll", name.Name));
+                return AssemblyDefinition(name);
             }
+        }
+
+        protected override void Dispose(bool disposing){
+            base.Dispose(disposing);
+            foreach (var resolvedDefinition in _resolvedDefinitions){
+                resolvedDefinition.Dispose();
+            }
+        }
+
+        private static AssemblyDefinition AssemblyDefinition(AssemblyNameReference name){
+            var assemblies = Directory.GetFiles(@"$packagesFolder", string.Format("{0}.dll", name.Name),
+                SearchOption.AllDirectories);
+            foreach (var assembly in assemblies){
+                var fileVersion = new Version(FileVersionInfo.GetVersionInfo(assembly).FileVersion);
+                if (fileVersion == name.Version){
+                    return Mono.Cecil.AssemblyDefinition.ReadAssembly(assembly);
+                }
+            }
+
+            return Mono.Cecil.AssemblyDefinition.ReadAssembly(string.Format(@"$resolvePath\{0}.dll", name.Name));
         }
     }
 "@ -ReferencedAssemblies @("$monoPath\Mono.Cecil.dll")
@@ -166,10 +187,17 @@ function Get-MonoAssembly($path, [switch]$ReadSymbols) {
     $readerParams = New-Object ReaderParameters
     $readerParams.ReadWrite = $true
     $readerParams.ReadSymbols = $ReadSymbols
-    $readerParams.AssemblyResolver = New-Object MyDefaultAssemblyResolver
+    $assemblyResolver = New-Object MyDefaultAssemblyResolver
+    $readerParams.AssemblyResolver = $assemblyResolver
     try {
+        if ($path -like "*Xpand.XAF.Modules.Reactive*") {
+            # $_
+        }
         $m = [ModuleDefinition]::ReadModule($path, $readerParams)
-        $m.Assembly
+        [PSCustomObject]@{
+            Assembly = $m.assembly
+            Resolver = $assemblyResolver
+        }
     }
     catch {
         if ($_.FullyQualifiedErrorId -like "*Symbols*") {
@@ -283,54 +311,62 @@ else {
 }
 }
 function Update-Version($modulePath, $dxVersion) {
-    Use-Object($moduleAssembly = Get-MonoAssembly $modulePath -ReadSymbols) {
-        $moduleReferences = $moduleAssembly.MainModule.AssemblyReferences
-        Write-Verbose "References:`r`n"
-        $moduleReferences | Write-Verbose
-        $needsPatching = $false
-        $moduleReferences.ToArray() | Where-Object { $_.FullName -like $referenceFilter } | ForEach-Object {
-            $dxReference = $_
-            Write-Verbose "`r`nChecking $_ reference...`r`n"
-            if ($dxReference.Version -ne $dxVersion) {
-                $moduleReferences.Remove($dxReference) | Out-Null
-                $newMinor = "$($dxVersion.Major).$($dxVersion.Minor)"
-                $newName = [Regex]::Replace($dxReference.Name, ".(v[\d]{2}\.\d)", ".v$newMinor")
-                $regex = New-Object Regex("PublicKeyToken=([\w]*)") 
-                $token = $regex.Match($dxReference).Groups[1].Value
-                $regex = New-Object Regex("Culture=([\w]*)")
-                $culture = $regex.Match($dxReference).Groups[1].Value
-                $newReference = [AssemblyNameReference]::Parse("$newName, Version=$($dxVersion), Culture=$culture, PublicKeyToken=$token")
-                $moduleReferences.Add($newreference)
-                $moduleAssembly.MainModule.Types | ForEach-Object {
-                    $moduleAssembly.MainModule.GetTypeReferences() | Where-Object { $_.Scope -eq $dxReference } | ForEach-Object { 
-                        $_.Scope = $newReference 
-                    }
+    $moduleAssemblyData = Get-MonoAssembly $modulePath -ReadSymbols
+    $moduleAssembly = $moduleAssemblyData.assembly
+    $moduleReferences = $moduleAssembly.MainModule.AssemblyReferences
+    Write-Verbose "References:`r`n"
+    $moduleReferences | Write-Verbose
+    $needsPatching = $false
+    $moduleReferences.ToArray() | Where-Object { $_.FullName -like $referenceFilter } | ForEach-Object {
+        $dxReference = $_
+        Write-Verbose "`r`nChecking reference $_...`r`n"
+        if ($dxReference.Version -ne $dxVersion) {
+            $moduleReferences.Remove($dxReference) | Out-Null
+            $newMinor = "$($dxVersion.Major).$($dxVersion.Minor)"
+            $newName = [Regex]::Replace($dxReference.Name, ".(v[\d]{2}\.\d)", ".v$newMinor")
+            $regex = New-Object Regex("PublicKeyToken=([\w]*)") 
+            $token = $regex.Match($dxReference).Groups[1].Value
+            $regex = New-Object Regex("Culture=([\w]*)")
+            $culture = $regex.Match($dxReference).Groups[1].Value
+            $newReference = [AssemblyNameReference]::Parse("$newName, Version=$($dxVersion), Culture=$culture, PublicKeyToken=$token")
+            $moduleReferences.Add($newreference)
+            $moduleAssembly.MainModule.Types | ForEach-Object {
+                $moduleAssembly.MainModule.GetTypeReferences() | Where-Object { $_.Scope -eq $dxReference } | ForEach-Object { 
+                    $_.Scope = $newReference 
                 }
-                Write-Verbose "$($_.Name) version will changed from $($_.Version.Major) to $($dxVersion)`r`n" 
-                $needsPatching = $true
             }
-            else {
-                Write-Verbose "$($_.Name) Version ($($dxReference.Version)) matched nothing to do.`r`n"
-            }
+            Write-Verbose "$($_.Name) version will changed from $($_.Version.Major) to $($dxVersion)`r`n" 
+            $needsPatching = $true
         }
-        if ($needsPatching) {
-            Write-Verbose "Patching $modulePath"
-            $writeParams = New-Object WriterParameters
-            $writeParams.WriteSymbols = $moduleAssembly.MainModule.hassymbols
-            $key = [File]::ReadAllBytes("$PSScriptRoot\Xpand.snk")
-            $writeParams.StrongNameKeyPair = [System.Reflection.StrongNameKeyPair]($key)
-            if ($writeParams.WriteSymbols) {
-                $pdbPath = Get-Item $modulePath
-                $pdbPath = "$($pdbPath.DirectoryName)\$($pdbPath.BaseName).pdb"
-                $symbolSources = Get-SymbolSources $pdbPath
-            }
-            $moduleAssembly.Write($writeParams)
-            if ($writeParams.WriteSymbols -and $symbolSources -notmatch "is not source indexed") {
+        else {
+            Write-Verbose "$($_.Name) Version ($($dxReference.Version)) matched nothing to do.`r`n"
+        }
+    }
+    if ($needsPatching) {
+        Write-Verbose "Patching $modulePath"
+        $writeParams = New-Object WriterParameters
+        $writeParams.WriteSymbols = $moduleAssembly.MainModule.hassymbols
+        $key = [File]::ReadAllBytes("$PSScriptRoot\Xpand.snk")
+        $writeParams.StrongNameKeyPair = [System.Reflection.StrongNameKeyPair]($key)
+        if ($writeParams.WriteSymbols) {
+            $pdbPath = Get-Item $modulePath
+            $pdbPath = "$($pdbPath.DirectoryName)\$($pdbPath.BaseName).pdb"
+            $symbolSources = Get-SymbolSources $pdbPath
+        }
+        $moduleAssembly.Write($writeParams)
+        Write-Verbose "Patched $modulePath"
+        if ($writeParams.WriteSymbols) {
+            Write-Verbose "Symbols $modulePath"
+            if ($symbolSources -notmatch "is not source indexed") {
                 Update-Symbols -pdb $pdbPath -SymbolSources $symbolSources
             }
+            else {
+                $symbolSources | Write-Verbose
+            }
         }
-         
     }
+    $moduleAssemblyData.Resolver.Dispose()
+    $moduleAssembly.Dispose()
 }
 function Get-SymbolSources {
     [CmdletBinding()]
