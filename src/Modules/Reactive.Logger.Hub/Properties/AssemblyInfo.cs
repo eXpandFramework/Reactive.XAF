@@ -6,11 +6,12 @@ using System.Security;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Xpand.XAF.Modules.ViewEditMode")]
+[assembly: AssemblyTitle("Xpand.XAF.Modules.Reactive.Logger.hub")]
+[assembly: AssemblyMetadata("Platform","Core")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Xpand.XAF.Modules.ViewEditMode")]
+[assembly: AssemblyProduct("Xpand.XAF.Modules.Reactive.Logger.Hub")]
 [assembly: AssemblyCopyright("Copyright eXpandFramework � 2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

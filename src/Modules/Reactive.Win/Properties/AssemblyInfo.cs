@@ -6,11 +6,12 @@ using System.Security;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Xpand.XAF.Modules.Reactive")]
+[assembly: AssemblyTitle("Xpand.XAF.Modules.Reactive.Win")]
+[assembly: AssemblyMetadata("Platform","Win")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Xpand.XAF.Modules.Reactive")]
+[assembly: AssemblyProduct("Xpand.XAF.Modules.Reactive.Win")]
 [assembly: AssemblyCopyright("Copyright eXpandFramework � 2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
