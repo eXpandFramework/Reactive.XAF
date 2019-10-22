@@ -106,6 +106,6 @@
     <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="18.2.7" />
     <PackageReference Include="DevExpress.Images" Version="18.2.7" />
     <PackageReference Include="DevExpress.Win.BonusSkins" Version="18.2.7" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="0.0.1.4" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="0.0.1.5" />
   </ItemGroup>
 </Project>

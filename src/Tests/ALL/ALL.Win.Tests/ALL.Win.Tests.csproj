@@ -55,7 +55,7 @@
     <PackageReference Include="DevExpress.ExpressApp" Version="18.2.7" />
     <PackageReference Include="DevExpress.Data" Version="18.2.7" />
     <PackageReference Include="DevExpress.Xpo" Version="18.2.7" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="0.0.1.4" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="0.0.1.5" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.TestsLib">
