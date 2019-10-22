@@ -223,7 +223,7 @@ function Get-DevExpressVersion($targetPath, $referenceFilter, $projectFile) {
         }
         else {
             $references = $csproj.Project.ItemGroup.Reference
-            $dxReferences = $references.Include | Where-Object { $_ -like "$referenceFilter" }    
+            $dxReferences = $references | Where-Object { $_.Include -like "$referenceFilter" }
             $hintPath = $dxReferences.HintPath | ForEach-Object { 
                 if ($_) {
                     $path = $_
