@@ -9,6 +9,8 @@
             <ModulePaths>
               <Include>
                 <ModulePath>.*Xpand\.XAF\.Modules.*\.dll$</ModulePath>
+                <ModulePath>.*All\.Win\.Tests.*\.dll$</ModulePath>
+                <ModulePath>.*All\.Web\.Tests.*\.dll$</ModulePath>
               </Include>
               <Exclude>
                 <ModulePath>.*Tests\.dll</ModulePath>
@@ -25,7 +27,7 @@
             <Functions>
               <Exclude>
                 <!-- Exclude methods in a class or namespace named UnitTest: -->
-                <Function>.*\.Source\..*</Function>
+                <!-- <Function>.*\.Source\..*</Function> -->
               </Exclude>
             </Functions>
             <!-- We recommend you do not change the following values: -->
