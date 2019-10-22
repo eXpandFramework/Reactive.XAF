@@ -41,7 +41,7 @@ namespace ALL.Win.Tests{
                 if (i==0){
                     attribute = document.CreateAttribute("FileName");
 //                    attribute.Value = @"C:\Work\eXpandFramework\XafEasyTestInCodeNUnit-master\XafEasyTestInCodeNUnit-master\TestApplication.Win\bin\EasyTest\net462\TestApplication.Win.exe";
-                    attribute.Value = $@"{AppDomain.CurrentDomain.ApplicationPath()}\TestWinApplication\TestApplication.Win.exe";
+                    attribute.Value = $@"{AppDomain.CurrentDomain.ApplicationPath()}\TestApplication.Win.exe";
 //                    attribute.Value = @"C:\Work\eXpandFramework\Packages\src\Tests\ALL\Win\bin\Debug\ALL.Win.Tests.exe";
                 }
                 else{
