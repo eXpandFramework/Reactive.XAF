@@ -11,6 +11,7 @@
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <ApplicationIcon />
     <OutputType>Library</OutputType>
+    
     <StartupObject>
     </StartupObject>
   </PropertyGroup>
@@ -22,6 +23,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>pdbonly</DebugType>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <OutputPath>..\..\..\..\bin\TestWinApplication</OutputPath>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Program.cs" />
@@ -55,7 +57,7 @@
     <PackageReference Include="DevExpress.ExpressApp" Version="18.2.7" />
     <PackageReference Include="DevExpress.Data" Version="18.2.7" />
     <PackageReference Include="DevExpress.Xpo" Version="18.2.7" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="0.0.1.5" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="0.0.1.6" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.TestsLib">
