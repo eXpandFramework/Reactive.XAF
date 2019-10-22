@@ -9,6 +9,7 @@
             <ModulePaths>
               <Include>
                 <ModulePath>.*Xpand\.XAF\.Modules.*\.dll$</ModulePath>
+                <ModulePath>.*All\.Win\.Tests.*\.dll$</ModulePath>
               </Include>
               <Exclude>
                 <ModulePath>.*Tests\.dll</ModulePath>
