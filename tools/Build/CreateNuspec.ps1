@@ -14,13 +14,7 @@ $versionConverter = [PSCustomObject]@{
     targetFramework = "net452"
 }
 
-$AddDependency = {
-    param($psObj, $nuspec)
-    $dependency = $nuspec.CreateElement("dependency", $nuspec.DocumentElement.NamespaceURI)
-    $dependency.SetAttribute("id", $psObj.id)
-    $dependency.SetAttribute("version", $psObj.version)
-    $nuspec.SelectSingleNode("//ns:dependencies", $ns).AppendChild($dependency) | Out-Null
-}
+
 Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notlike "*Test*" } | ForEach-Object {
     $projectPath = $_.FullName
     Write-Host "Creating Nuspec for $($_.baseName)" -f "Blue"
@@ -75,8 +69,8 @@ Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -not
     $ns.AddNamespace("ns", $nuspec.DocumentElement.NamespaceURI)
     
     if ($nuspec.package.metaData.id -like "Xpand.XAF*" -or $nuspec.package.metaData.id -like "Xpand.Extension*") {
-        Invoke-Command $AddDependency -ArgumentList @($versionConverter, $nuspec)
+        Add-NuspecDependency $versionConverter.Id $versionConverter.Version $nuspec
     }
     $nuspec.Save($nuspecFileName)
 } 
-& "$root\tools\build\UpdateAllNuspec.ps1" $root
+& "$root\tools\build\UpdateAllNuspec.ps1" $root 

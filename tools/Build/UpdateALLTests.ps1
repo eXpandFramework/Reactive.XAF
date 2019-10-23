@@ -62,19 +62,8 @@ Get-ChildItem "$root\src\Tests\All" *.csproj -Recurse|ForEach-Object{
 
 Write-Host "Building TestApplication" -f Green
 $testApplication = "$root\src\Tests\ALL\TestApplication\TestApplication.sln"
-# "dotnet restore $testApplication --source $source --source `"$root\bin\Nupkg`" --source $(Get-PackageFeed -Nuget) /WarnAsError"
-# dotnet restore $testApplication --source $source --source `"$root\bin\Nupkg`" --source $(Get-PackageFeed -Nuget) --packages (Get-NugetInstallationFolder GlobalPackagesFolder)
 $localSource = "$root\bin\Nupkg"
-$a = @($testApplication, "/WarnAsError", "/t:restore", "/p:RestoreAdditionalProjectSources=$source;$localSource")
-$a | Out-String
-
-$a = "$testApplication /WarnAsError /t:restore /p:RestoreSources=$localSource"
 & (Get-NugetPath) restore $testapplication -source "$source;$localsource;$(Get-PackageFeed -Nuget)"
-& (Get-MsBuildPath) $testApplication /WarnAsError /v:m #/t:restore "/p:RestoreSources=$source;$localSource"
-# Start-Process -filepath (Get-MsBuildPath) -ArgumentList $a -NoNewWindow
-# & $(Get-MsBuildPath) $a
-# "dotnet msbuild $testApplication /p:configuration=Debug /WarnAsError --no-restore"
-# Remove-Item "$root\src\Tests\ALL\TestApplication\TestApplication.Web\obj" -Force -Recurse
-# dotnet msbuild $testApplication  --no-restore
+& (Get-MsBuildPath) $testApplication /WarnAsError /v:m -maxcpucount:1
 
 

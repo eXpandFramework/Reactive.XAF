@@ -11,7 +11,6 @@
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <ApplicationIcon />
     <OutputType>Library</OutputType>
-    
     <StartupObject>
     </StartupObject>
   </PropertyGroup>
@@ -23,16 +22,10 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>pdbonly</DebugType>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <OutputPath>..\..\..\..\bin\TestWinApplication</OutputPath>
+    <OutputPath>..\..\..\..\bin</OutputPath>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Program.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Remove="Model.DesignedDiffs.xafml" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DevExpress.EasyTest" Version="18.2.7" />
@@ -46,7 +39,7 @@
     <PackageReference Include="DevExpress.Persistent.BaseImpl" Version="18.2.7" />
     <PackageReference Include="Fasterflect.Xpand" Version="2.0.6" />
     <PackageReference Include="Grpc.Core" Version="2.24.0" />
-    <PackageReference Include="MagicOnion" Version="2.6.2" />
+    <PackageReference Include="MagicOnion" Version="2.6.3" />
     <PackageReference Include="Moq" Version="4.13.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
     <PackageReference Include="Shouldly" Version="3.0.2" />
@@ -57,7 +50,7 @@
     <PackageReference Include="DevExpress.ExpressApp" Version="18.2.7" />
     <PackageReference Include="DevExpress.Data" Version="18.2.7" />
     <PackageReference Include="DevExpress.Xpo" Version="18.2.7" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="0.0.1.6" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="0.0.1.7" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.TestsLib">

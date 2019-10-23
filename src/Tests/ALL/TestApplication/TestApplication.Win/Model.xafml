@@ -1,2 +1,14 @@
 ﻿<?xml version="1.0" ?>
-<Application />
+
+<Application >
+  <NavigationItems>
+    <Items>
+      <Item Id="Reports">
+        <Items>
+          <Item Id="ReportsV2" Visible="False" />
+          <Item Id="Dashboards" Visible="False" />
+        </Items>
+      </Item>
+    </Items>
+  </NavigationItems>
+</Application>

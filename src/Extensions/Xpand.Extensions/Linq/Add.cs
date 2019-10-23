@@ -8,6 +8,7 @@ namespace Xpand.Extensions.Linq{
         }
 
         public static IEnumerable<TSource> Add<TSource>(this IEnumerable<TSource> source,TSource item){
+            source = source ?? Enumerable.Empty<TSource>();
             return source.Concat(new[]{item});
         }
 

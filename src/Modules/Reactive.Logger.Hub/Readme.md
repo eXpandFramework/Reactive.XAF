@@ -5,9 +5,7 @@
 
 The `Reactive.Logger.Hub` module can be used as a Server which you can install in your app to transmit the pipeLine flow or as a client that can connect and receive messages from the server. For more head to the details section.
 
-The module uses the next two strategies:
-1. It monitors the `DetailView` creation and modifies its Reactive.Logger.Hub property according to model configuration. However later Reactive.Logger.Hub property modifications are allowed.
-2. It monitors the `Reactive.Logger.Hub` modifiation and cancels it if the `LockReactive.Logger.Hub` attribute is used.
+
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 
 

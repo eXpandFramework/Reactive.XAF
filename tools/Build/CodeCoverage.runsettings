@@ -9,8 +9,6 @@
             <ModulePaths>
               <Include>
                 <ModulePath>.*Xpand\.XAF\.Modules.*\.dll$</ModulePath>
-                <ModulePath>.*All\.Win\.Tests.*\.dll$</ModulePath>
-                <ModulePath>.*All\.Web\.Tests.*\.dll$</ModulePath>
               </Include>
               <Exclude>
                 <ModulePath>.*Tests\.dll</ModulePath>
@@ -18,7 +16,6 @@
                 <ModulePath>.*system.*</ModulePath>
                 <ModulePath>.*xunit.*</ModulePath>
                 <ModulePath>.*nunit.*</ModulePath>
-                <ModulePath>.*xpand\.source.*</ModulePath>
                 <ModulePath>.*testslib.*</ModulePath>
                 <ModulePath>.*extensions.*</ModulePath>
 

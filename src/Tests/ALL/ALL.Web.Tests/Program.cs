@@ -1,18 +1,41 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Security;
+using DevExpress.ExpressApp.Win;
 using DevExpress.Persistent.Base;
+using DevExpress.Persistent.BaseImpl;
+using DevExpress.Xpo;
 using DevExpress.XtraEditors;
+using TestApplication.Win;
+using Xpand.Extensions.Linq;
+using Xpand.TestsLib;
+using Xpand.XAF.Modules.Reactive.Services;
 using FileLocation = DevExpress.Persistent.Base.FileLocation;
 
-namespace TestApplication.Win {
+namespace ALL.Win.Tests {
+    [DefaultClassOptions]
+    public class Customer:Person{
+        public Customer(Session session) : base(session){
+        }
+    }
+    public class WinModule:ModuleBase{
+        public WinModule(){
+            AdditionalExportedTypes.Add(typeof(Customer));
+        }
+    }
+
+    public class TestWinApplication:TestApplicationWindowsFormsApplication{
+        
+    }
     static class Program {
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main(){
-            
+        static void Main() {
+
             DevExpress.ExpressApp.Win.EasyTest.EasyTestRemotingRegistration.Register();
 
             WindowsFormsSettings.LoadApplicationSettings();
@@ -24,8 +47,10 @@ namespace TestApplication.Win {
             }
             Tracing.Initialize();
             var winApplication = new TestWinApplication();
-
             winApplication.Modules.Add(new WinModule());
+            
+            winApplication.RegisterInMemoryObjectSpaceProvider();
+            winApplication.AlwaysUpdateOnDatabaseVersionMismatch().Subscribe();
             try {
                 winApplication.Setup();
                 winApplication.Start();

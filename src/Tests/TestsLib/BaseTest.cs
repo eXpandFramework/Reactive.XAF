@@ -7,6 +7,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Xpo;
 using NUnit.Framework;
 using Xpand.Extensions.AppDomain;
+using Xpand.Extensions.Linq;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.Reactive;
 using IDisposable = System.IDisposable;
@@ -28,7 +29,7 @@ namespace Xpand.TestsLib{
         protected static object[] AgnosticModules(){
             return GetModules("Xpand.XAF.Modules*.dll").Where(o => {
                 var name = ((Type) o).Assembly.GetName().Name;
-                return !name.EndsWith(".Win")&&!name.EndsWith(".Web");
+                return !name.EndsWith(".Win")&&!name.EndsWith(".Web")&&!name.EndsWith(".Tests");
             }).ToArray();
         }
         protected static object[] Modules(){
@@ -45,7 +46,8 @@ namespace Xpand.TestsLib{
 
         private static object[] GetModules(string pattern){
             return Directory.GetFiles(AppDomain.CurrentDomain.ApplicationPath(),pattern)
-                .Select(s => Assembly.LoadFile(s).GetTypes().First(type => !type.IsAbstract&&typeof(ModuleBase).IsAssignableFrom(type)))
+                .Select(s => Assembly.LoadFile(s).GetTypes().FirstOrDefault(type => !type.IsAbstract&&typeof(ModuleBase).IsAssignableFrom(type)))
+                .WhereNotDefault()
                 .Cast<object>().ToArray();
         }
 

@@ -1,7 +1,9 @@
 param(
     $Branch = "master",
     $nugetBin = "$PSScriptRoot\..\..\bin\Nupkg",
-    $sourceDir = "$PSScriptRoot\..\.."
+    $sourceDir = "$PSScriptRoot\..\..",
+    $Filter ,
+    [switch]$SkipReadMe
 )
 Import-Module XpandPwsh -Force -Prefix X
 $ErrorActionPreference = "Stop"
@@ -20,14 +22,16 @@ if ($Branch -match "lab") {
 if ($lastexitcode) {
     throw 
 }
-$packData = [pscustomobject] @{
-    nugetBin = $nugetBin
-}
+
 
 Set-Location $sourceDir
 $assemblyVersions = & "$sourceDir\tools\build\AssemblyVersions.ps1" $sourceDir
 
-Get-ChildItem "$sourceDir\tools\nuspec" "Xpand*.nuspec" -Recurse | ForEach-Object {
+# Get-ChildItem "$sourceDir\tools\nuspec" "Xpand*$filter*.nuspec" -Recurse | ForEach-Object {
+$nuspecs=Get-ChildItem "$sourceDir\tools\nuspec" "Xpand*$filter*.nuspec" -Recurse
+
+$nugetPath=(Get-XNugetPath)
+$packScript={
     if ($_ -like "Xpand.XAF*") {
         $name = $_.BaseName.Replace("Xpand.XAF.Modules.", "")
         $id = "Xpand.XAF.Modules.$name.$name" + "Module"
@@ -51,7 +55,10 @@ Get-ChildItem "$sourceDir\tools\nuspec" "Xpand*.nuspec" -Recurse | ForEach-Objec
             RequiredModuleTypes.Add(typeof($id));
 "@
     }
-    Set-Content "$sourceDir\bin\Readme.txt" $message 
+    if (!$SkipReadMe){
+        Set-Content "$sourceDir\bin\Readme.txt" $message 
+    }
+    
     $packageName = [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
     $assemblyItem = $assemblyVersions | Where-Object { $_.name -eq $packageName }
     $name = $_.FullName
@@ -60,11 +67,22 @@ Get-ChildItem "$sourceDir\tools\nuspec" "Xpand*.nuspec" -Recurse | ForEach-Objec
         [xml]$coreNuspec=Get-Content "$sourceDir\tools\nuspec\$packagename.nuspec"
         $version=$coreNuspec.package.metadata.Version
     }
-    Write-Host "Packing $($assemblyItem.Version) $name $version " -f Blue
-    & (Get-XNugetPath) pack $name -OutputDirectory $($packData.nugetBin) -Basepath "$sourceDir\bin" -Version $version
+    # Write-Output "Packing $($assemblyItem.Version) $name $version " #-f Blue
+    Write-Output "$nugetPath pack $name -OutputDirectory $($nugetBin) -Basepath "$sourceDir\bin" -Version $version " #-f Blue
+    & $nugetPath pack $name -OutputDirectory $nugetBin -Basepath "$sourceDir\bin" -Version $version
     if ($lastexitcode) {
         throw $_.Exception
     }
 }
+if ($SkipReadMe){
+    $nuspecs | Invoke-Parallel -LimitConcurrency $([System.Environment]::ProcessorCount) -VariablesToImport @("assemblyVersions","SkipReadMe","nugetPath","sourceDir","nugetBin","SkipReadMe") -Script $packScript
+}
+else{
+    $nuspecs |ForEach-Object{
+        Invoke-Command $packScript
+    }
+}
+
+
 
     

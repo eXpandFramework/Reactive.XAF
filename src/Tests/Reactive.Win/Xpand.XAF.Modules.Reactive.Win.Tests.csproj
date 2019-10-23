@@ -13,7 +13,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Grpc.Core" Version="2.24.0" />
-    <PackageReference Include="MagicOnion" Version="2.6.2" />
+    <PackageReference Include="MagicOnion" Version="2.6.3" />
     <PackageReference Include="Moq" Version="4.13.0" />
     <PackageReference Include="Shouldly" Version="3.0.2" />
     <PackageReference Include="System.Reactive" Version="4.2.0" />

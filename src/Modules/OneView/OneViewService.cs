@@ -53,6 +53,7 @@ namespace Xpand.XAF.Modules.OneView{
                     window.Template.ToForm().Visible = false;
                 })
                 .ToUnit()
+                .TakeUntil(application.ToReactiveModule<IModelReactiveModuleOneView>().Where(view => view.OneView.View==null))
                 .TraceOneView();
         }
 
@@ -66,22 +67,27 @@ namespace Xpand.XAF.Modules.OneView{
 
         private static IObservable<ShowViewParameters> ShowView(this XafApplication application){
             return application.WhenWindowCreated().When(TemplateContext.ApplicationWindow)
-                .Select(window => {
+                .SelectMany(window => {
                     var modelView = application.Model.ToReactiveModule<IModelReactiveModuleOneView>().OneView;
-                    var showViewParameters = new ShowViewParameters();
-                    var dialogController = new OneViewDialogController();
-                    dialogController.AcceptAction.Caption = "Configure";
-                    dialogController.CancelAction.Active[""] = false;
-                    showViewParameters.Controllers.Add(dialogController);
-                    showViewParameters.NewWindowTarget = NewWindowTarget.Separate;
-                    showViewParameters.Context = TemplateContext.PopupWindow;
+                    if (modelView.View!=null){
+                        var showViewParameters = new ShowViewParameters();
+                        var dialogController = new OneViewDialogController();
+                        dialogController.AcceptAction.Caption = "Configure";
+                        dialogController.CancelAction.Active[""] = false;
+                        showViewParameters.Controllers.Add(dialogController);
+                        showViewParameters.NewWindowTarget = NewWindowTarget.Separate;
+                        showViewParameters.Context = TemplateContext.PopupWindow;
 
-                    showViewParameters.TargetWindow = TargetWindow.NewWindow;
-                    showViewParameters.CreatedView = application.CreateView(modelView.View);
-                    application.ShowViewStrategy.ShowView(showViewParameters, new ShowViewSource(null, null));
-                    return showViewParameters;
+                        showViewParameters.TargetWindow = TargetWindow.NewWindow;
+                        showViewParameters.CreatedView = application.CreateView(modelView.View);
+                        application.ShowViewStrategy.ShowView(showViewParameters, new ShowViewSource(null, null));
+                        return showViewParameters.AsObservable();
+                    }
+
+                    return Observable.Empty<ShowViewParameters>();
                 })
-                .TraceOneView();
+                .TraceOneView()
+                .WhenNotDefault();
         }
     }
 

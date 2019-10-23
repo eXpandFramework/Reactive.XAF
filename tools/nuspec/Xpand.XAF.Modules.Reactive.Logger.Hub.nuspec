@@ -9,17 +9,13 @@
     <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/Reactive.Logger.Hub</projectUrl>
     <iconUrl>http://sign.expandframework.com</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>The `Reactive.Logger.Hub` module can be used as a Server which you can install in your app to transmit the pipeLine flow or as a client that can connect and receive messages from the server. For more head to the details section.
-
-The module uses the next two strategies:
-1. It monitors the `DetailView` creation and modifies its Reactive.Logger.Hub property according to model configuration. However later Reactive.Logger.Hub property modifications are allowed.
-2. It monitors the `Reactive.Logger.Hub` modifiation and cancels it if the `LockReactive.Logger.Hub` attribute is used.</description>
+    <description>The `Reactive.Logger.Hub` module can be used as a Server which you can install in your app to transmit the pipeLine flow or as a client that can connect and receive messages from the server. For more head to the details section.</description>
     <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Reactive.Logger.Hub</tags>
     <dependencies>
       <dependency id="Fasterflect.Xpand" version="2.0.6" />
-      <dependency id="MagicOnion" version="2.6.2" />
+      <dependency id="MagicOnion" version="2.6.3" />
       <dependency id="system.buffers" version="4.5.0" />
       <dependency id="System.Interactive.Async" version="4.0.0" />
       <dependency id="System.Reactive" version="4.2.0" />

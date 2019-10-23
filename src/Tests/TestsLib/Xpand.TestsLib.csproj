@@ -29,10 +29,14 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Castle.Core" Version="4.4.0" />
+    <PackageReference Include="DevExpress.EasyTest" Version="18.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WebAdapter" Version="18.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="18.2.7" />
     <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="18.2.7" />
     <PackageReference Include="DevExpress.Persistent.BaseImpl" Version="18.2.7" />
     <PackageReference Include="Enums.NET" Version="2.3.2" />
     <PackageReference Include="Humanizer.Core" Version="2.7.9" />
+    <PackageReference Include="MagicOnion" Version="2.6.3" />
     <PackageReference Include="Mono.Cecil" Version="0.11.0" />
     <PackageReference Include="Moq" Version="4.13.0" />
     <PackageReference Include="Ryder" Version="0.8.0" />

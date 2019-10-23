@@ -34,7 +34,7 @@
     <Compile Update="Module.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MagicOnion" Version="2.6.2" />
+    <PackageReference Include="MagicOnion" Version="2.6.3" />
     <PackageReference Include="system.buffers" Version="4.5.0" />
     <PackageReference Include="System.Interactive.Async" Version="4.0.0" />
     <PackageReference Include="DevExpress.ExpressApp" Version="18.2.7" />

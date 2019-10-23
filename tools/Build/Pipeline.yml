@@ -49,9 +49,9 @@ jobs:
     inputs:
       PathtoPublish: '$(System.DefaultworkingDirectory)\bin'
       ArtifactName: 'Xpand.XAF.Modules.Bin'
-- job: TestPhase1
+- job: TestPhaseEasyTest
   strategy:
-    parallel: 15
+    parallel: 2
   dependsOn: TestsRunBuild
   pool:
     vmImage: windows-2019
@@ -70,18 +70,50 @@ jobs:
         searchFolder: '$(System.DefaultWorkingDirectory)'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
-          **\*Tests.dll
+          **\**All*Tests.dll
           !**\*ModelMapper*.dll
           !**\*Hub*.dll
           !**\*TestAdapter.dll
           !**\obj\**    
         diagnosticsEnabled: true
-        # overrideTestrunParameters: '/platform:x64'
         codeCoverageEnabled: true
         distributionBatchType: basedOnAssembly
         runInParallel: false
         runSettingsFile: .\Xpand.XAF.Modules.Bin\CodeCoverage.runsettings
         runTestsInIsolation: true
+        collectDumpOn: never
+- job: TestPhase1
+  strategy:
+    parallel: 2
+  dependsOn: TestPhaseEasyTest
+  pool:
+    vmImage: windows-2019
+  variables:
+    - group: keys
+  steps:
+    - checkout: none
+    - task: DownloadBuildArtifacts@0
+      inputs:
+        buildType: 'current'
+        downloadType: 'specific'
+        downloadPath: '$(System.DefaultworkingDirectory)'
+    - task: VSTest@2
+      displayName: 'VsTest - testAssemblies'
+      inputs:
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: |
+          **\**Tests.dll
+          !**\*ModelMapper*.dll
+          !**\*Hub*.dll
+          !**\*TestAdapter.dll
+          !**\obj\**    
+        diagnosticsEnabled: true
+        codeCoverageEnabled: true
+        distributionBatchType: basedOnAssembly
+        runInParallel: false
+        runSettingsFile: .\Xpand.XAF.Modules.Bin\CodeCoverage.runsettings
+        runTestsInIsolation: false
         collectDumpOn: never
 - job: TestModelMapper
   strategy:
@@ -104,10 +136,10 @@ jobs:
         searchFolder: '$(System.DefaultWorkingDirectory)'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
-          **\*ModelMapper*Tests.dll
+          **\*ModelMapper*.dll
           !**\*Hub*.dll
           !**\*TestAdapter.dll
-          !**\obj\**    
+          !**\obj\**   
         diagnosticsEnabled: true
         codeCoverageEnabled: true
         distributionBatchType: basedOnTestCases
