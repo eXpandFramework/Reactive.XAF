@@ -6,6 +6,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using Xpand.XAF.Modules.ModelMapper.Services;
@@ -26,6 +27,11 @@ namespace Xpand.XAF.Modules.ModelMapper{
             RequiredModuleTypes.Add(typeof(ReactiveModule));
             _modelExtended = ModelExtendingService.Connected.FirstAsync().Replay(1);
             _modelExtended.Connect();
+        }
+
+        public override void CustomizeLogics(CustomLogics customLogics){
+            base.CustomizeLogics(customLogics);
+            customLogics.RegisterLogic(typeof(IModelLayoutGroup),typeof(ModelLayoutGroupLogic));
         }
 
         public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders){

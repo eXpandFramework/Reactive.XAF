@@ -159,4 +159,18 @@ namespace Xpand.XAF.Modules.ModelMapper{
         }
     }
 
+    public static class ModelLayoutGroupLogic{
+        public static string Get_Caption(IModelLayoutGroup layoutGroup){
+            var count = layoutGroup.Count(_ => !(_ is IModelModelMap));
+            if (count == 1 && layoutGroup[0] is IModelLayoutViewItem){
+                IModelViewItem layoutItemModel = ((IModelLayoutViewItem) layoutGroup[0]).ViewItem;
+                if (layoutItemModel != null){
+                    return layoutItemModel.Caption;
+                }
+            }
+
+            return layoutGroup.Id;
+        }
+    }
+
 }
