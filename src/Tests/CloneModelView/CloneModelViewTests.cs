@@ -9,6 +9,7 @@ using Shouldly;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;
 using Xpand.XAF.Modules.CloneModelView.Tests.BOModel;
+using Xpand.XAF.Modules.ModelViewInheritance;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 
@@ -40,7 +41,20 @@ namespace Xpand.XAF.Modules.CloneModelView.Tests{
             application.Dispose();
         }
 
-        
+        [TestCase(CloneViewType.DetailView)]
+        public void Keep_ModelGenerators(CloneViewType cloneViewType){
+            var cloneViewId = $"{nameof(Keep_ModelGenerators)}_{cloneViewType}";
+            var cloneModelViewModule = new CloneModelViewModule();
+            cloneModelViewModule.RequiredModuleTypes.Add(typeof(ModelViewInheritanceModule));
+            var application = DefaultCloneModelViewModule(cloneModelViewModule,info => {
+                var typeInfo = info.FindTypeInfo(typeof(CMV));
+                typeInfo.AddAttribute(new CloneModelViewAttribute(cloneViewType, cloneViewId));
+                typeInfo.AddAttribute(new ModelMergedDifferencesAttribute(cloneViewId,$"CMV_{cloneViewType}"));
+            }, Platform.Win).Application;
+
+            ((IModelObjectViewMergedDifferences) application.Model.Views[cloneViewId]).MergedDifferences.Count.ShouldBe(1);
+        }
+
         [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public void Clone_multiple_Model_Views(string platformName){
@@ -108,8 +122,9 @@ namespace Xpand.XAF.Modules.CloneModelView.Tests{
             application.Dispose();
         }
 
-        private static CloneModelViewModule DefaultCloneModelViewModule(Action<ITypesInfo> customizeTypesInfo,Platform platform){
-            var cloneModelViewModule = new CloneModelViewModule();
+
+
+        private static CloneModelViewModule DefaultCloneModelViewModule(CloneModelViewModule cloneModelViewModule,Action<ITypesInfo> customizeTypesInfo,Platform platform){
             var application = platform.NewApplication<CloneModelViewModule>();
             application.Modules.Add(new ReactiveModule());
             application.WhenCustomizingTypesInfo().FirstAsync(info => {
@@ -121,6 +136,11 @@ namespace Xpand.XAF.Modules.CloneModelView.Tests{
 
             cloneModelViewModule.RequiredModuleTypes.Add(typeof(ReactiveModule));
             return (CloneModelViewModule) application.AddModule(cloneModelViewModule,null,true, typeof(CMV));
+        }
+
+        private static CloneModelViewModule DefaultCloneModelViewModule(Action<ITypesInfo> customizeTypesInfo,Platform platform){
+            var cloneModelViewModule = new CloneModelViewModule();
+            return DefaultCloneModelViewModule(cloneModelViewModule, customizeTypesInfo, platform);
         }
     }
 }

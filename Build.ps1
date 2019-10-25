@@ -30,7 +30,7 @@ task Init {
     InvokeScript{
         New-Item "$PSScriptRoot\bin" -ItemType Directory -Force |Out-Null
         Get-ChildItem "CodeCoverage.runsettings" -Recurse|Copy-Item -Destination "$PSScriptRoot\bin\CodeCoverage.runsettings" -Force
-        $versionMismatch=Get-ChildItem $PSScriptRoot *.csproj -Recurse|ForEach-Object{
+        $versionMismatch=Get-ChildItem $PSScriptRoot *.csproj -Recurse -Exclude "*TestApplication*"|ForEach-Object{
             $projectPath=$_.FullName
             [xml]$csproj=Get-Content $projectPath
             $csproj.project.itemgroup.packageReference|foreach-Object{

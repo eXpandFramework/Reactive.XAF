@@ -14,8 +14,6 @@
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
   <ItemGroup>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Update="Module.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -24,7 +22,13 @@
     <None Include="Readme.md" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Fasterflect.Xpand" Version="2.0.6" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
     <PackageReference Include="DevExpress.ExpressApp" Version="18.2.7" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Xpand.Extensions.XAF">
+      <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>

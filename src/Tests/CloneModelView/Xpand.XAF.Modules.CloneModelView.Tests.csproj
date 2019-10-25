@@ -47,6 +47,9 @@
     <Reference Include="Xpand.XAF.Modules.CloneModelView">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.CloneModelView.dll</HintPath>
     </Reference>
+    <Reference Include="Xpand.XAF.Modules.ModelViewInheritance">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.ModelViewInheritance.dll</HintPath>
+    </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
     </Reference>

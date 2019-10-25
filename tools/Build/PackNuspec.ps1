@@ -56,6 +56,7 @@ $packScript={
 "@
     }
     if (!$SkipReadMe){
+        Write-Host "ReadMe length $($message.Length)"
         Set-Content "$sourceDir\bin\Readme.txt" $message 
     }
     

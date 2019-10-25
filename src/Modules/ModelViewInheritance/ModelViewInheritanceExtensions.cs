@@ -57,28 +57,6 @@ namespace Xpand.XAF.Modules.ModelViewInheritance{
             return regexObj.Match(difference.Xml()).Groups[1].Value;
         }
 
-        static void CreateViewInLayer(this ModelApplicationBase modelApplication, IModelView modelView, string newViewId) {
-            var modelViews =modelApplication.Application.Views?? modelApplication.AddNode<IModelViews>();
-            if (modelViews[modelView.Id]!=null)
-                throw new NotSupportedException($"{modelView.Id} already exists");
-            IModelView newNode;
-            switch (modelView){
-                case IModelDetailView _:
-                    newNode = modelViews.AddNode<IModelDetailView>();
-                    break;
-                case IModelListView _:
-                    newNode = modelViews.AddNode<IModelListView>();
-                    break;
-                case IModelDashboardView _:
-                    newNode = modelViews.AddNode<IModelDashboardView>();
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-            
-            newNode.ReadFromModel( modelView);
-            newNode.Id = newViewId;
-        }
 
         internal static void UpdateModel(this (int index, (int? index, IModelView parentView, bool deepMerge) diffData, string objectViewId) info,
             IModelApplication[] modulesDifferences, ModelNode master){
@@ -93,7 +71,7 @@ namespace Xpand.XAF.Modules.ModelViewInheritance{
                 var modelApplication = master.CreatorInstance.CreateModelApplication();
                 modelApplication.Id = $"{index}. {application.Id}";
                 var modelObjectView = application.Application.Views[info.objectViewId];
-                modelApplication.CreateViewInLayer( modelObjectView, newViewId);
+                modelApplication.ReadViewInLayer( modelObjectView, newViewId);
                 ((ModelApplicationBase) master).InsertLayer(info.index+index, modelApplication);
             }
         }
