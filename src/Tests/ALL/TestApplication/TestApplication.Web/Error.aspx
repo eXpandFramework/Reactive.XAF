@@ -1,4 +1,3 @@
-﻿      
 We are currently unable to serve your request.
 You could go back and try again or restart the application.  
 Show Error details 

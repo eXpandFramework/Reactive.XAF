@@ -39,10 +39,12 @@ $packages = $latestPackages | Where-Object {
 }
 Write-Host "finalPackages:" -f Blue
 $packages | Out-String
+$defaultVersion = & "$root\Tools\Build\DefaultVersion.ps1"
 
-function UpdateAllPackagesVersion($csprojPath) {
+$testApplication = "$root\src\Tests\ALL\TestApplication\TestApplication.sln"
+function UpdateVersion($csprojPath,$defaulVersion,$testApplication ) {
     [xml]$csproj = Get-Content $csprojPath
-    Write-Host "Update All version $csprojPath"
+    Write-Host "Update All package version $csprojPath"
     $csproj.Project.ItemGroup.PackageReference | Where-Object { $_.Include -like "Xpand.*" } | ForEach-Object {
         $pref = $_
         $packages | Where-Object { $_.Id -eq $pref.Include } | ForEach-Object {
@@ -53,15 +55,31 @@ function UpdateAllPackagesVersion($csprojPath) {
         
         }
     }
+    Write-Host "Update DX version to $defaulVersion"
+    $csproj.Project.ItemGroup.PackageReference | Where-Object { $_.Include -like "DevExpress*" } | ForEach-Object {
+        Write-Host "Change $($_.Include) version to $defaultVersion"
+        $_.Version = $defaulVersion
+    }
+    $testAppDir = (Get-Item $testApplication).DirectoryName
+    Get-ChildItem $testAppDir -Include "*.aspx", "*.config" -Recurse | ForEach-Object {
+        $xml = Get-Content $_.FullName -Raw
+        $regex = [regex] '\d{2}\.\d{1,2}\.\d'
+        $result = $regex.Replace($xml, $defaultVersion)
+        
+        $regex = [regex] '\d{2}\.\d{1,2}'
+        $result = $regex.Replace($result, $defaultVersion.substring(0,$defaultVersion.lastindexof(".")))
+
+        Set-Content $_.FullName $result.Trim()
+    }
     $csproj.Save($csprojPath)
     Get-Content $csprojPath -Raw
 }
-Get-ChildItem "$root\src\Tests\All" *.csproj -Recurse|ForEach-Object{
-    UpdateAllPackagesVersion $_.FullName
+Get-ChildItem "$root\src\Tests\All" *.csproj -Recurse | ForEach-Object {
+    UpdateVersion $_.FullName $defaultVersion $testApplication
 }
 
 Write-Host "Building TestApplication" -f Green
-$testApplication = "$root\src\Tests\ALL\TestApplication\TestApplication.sln"
+
 $localSource = "$root\bin\Nupkg"
 & (Get-NugetPath) restore $testapplication -source "$source;$localsource;$(Get-PackageFeed -Nuget)"
 & (Get-MsBuildPath) $testApplication /WarnAsError /v:m -maxcpucount:1
