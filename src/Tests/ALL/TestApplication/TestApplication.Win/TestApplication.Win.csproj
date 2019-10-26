@@ -95,6 +95,6 @@
     <PackageReference Include="DevExpress.Images" Version="18.2.7" />
     <PackageReference Include="DevExpress.Win.BonusSkins" Version="18.2.7" />
     <PackageReference Include="Grpc.Core" Version="2.24.0" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="0.0.1.7" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="0.0.1.8" />
   </ItemGroup>
 </Project>

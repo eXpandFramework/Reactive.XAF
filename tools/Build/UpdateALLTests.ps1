@@ -81,7 +81,9 @@ Get-ChildItem "$root\src\Tests\All" *.csproj -Recurse | ForEach-Object {
 Write-Host "Building TestApplication" -f Green
 
 $localSource = "$root\bin\Nupkg"
-& (Get-NugetPath) restore $testapplication -source "$source;$localsource;$(Get-PackageFeed -Nuget)"
+$source="$localsource;$(Get-PackageFeed -Nuget);$(Get-PackageFeed -Xpand);$source"
+"Source=$source"
+& (Get-NugetPath) restore $testapplication -source $source
 & (Get-MsBuildPath) $testApplication /WarnAsError /v:m -maxcpucount:1
 
 

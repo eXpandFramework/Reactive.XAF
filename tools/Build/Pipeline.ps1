@@ -117,6 +117,20 @@ if ($newPackages) {
 }
 Write-Host "End-Packages:" -f blue
 $yArgs.Packages | Out-String 
+if ($Branch -eq "lab"){
+    Get-ChildItem $sourcePath *.csproj -Recurse|ForEach-Object{
+        $pName=$_.BaseName
+        $pDir=$_.DirectoryName
+        $yArgs.Packages|Where-Object{$_.id -eq $pName}|ForEach-Object{
+            $nextVersion=$_.NextVersion
+            $revision=[int]$nextVersion.Revision-1
+            $nowVersion=New-Object version ($nextVersion.Major,$nextVersion.Minor,$nextVersion.Build,$revision)
+            Write-Host "Update $pName version to $nowVersion"
+            Update-AssemblyInfoVersion $nowVersion $pDir
+        }
+    }
+}
+
 $updateVersion = Update-NugetProjectVersion @yArgs 
 "updateVersion=$updateVersion"
 

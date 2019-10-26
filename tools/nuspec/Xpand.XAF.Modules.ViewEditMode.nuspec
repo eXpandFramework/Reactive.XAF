@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.ViewEditMode</id>
-    <version>1.2.63.0</version>
+    <version>1.2.64.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -20,7 +20,7 @@ The module uses the next two strategies:
     <dependencies>
       <dependency id="Fasterflect.Xpand" version="2.0.6" />
       <dependency id="System.Reactive" version="4.2.0" />
-      <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.66.0" />
+      <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.67.0" />
       <dependency id="Xpand.VersionConverter" version="1.0.36.0" />
     </dependencies>
   </metadata>

@@ -39,7 +39,7 @@ Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -not
 
     $nuspecFileName = "$root\tools\nuspec\$($_.BaseName).nuspec"
     [xml]$nuspec = Get-Content $nuspecFileName
-    # $nuspec.package.metaData.Id = $_.BaseName
+
     $readMePath = "$($_.DirectoryName)\ReadMe.md"
     if (Test-Path $readMePath) {
         $readMe = Get-Content $readMePath -Raw
@@ -68,7 +68,7 @@ Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -not
     $ns = New-Object System.Xml.XmlNamespaceManager($nuspec.NameTable)
     $ns.AddNamespace("ns", $nuspec.DocumentElement.NamespaceURI)
     
-    if ($nuspec.package.metaData.id -like "Xpand.XAF*" -or $nuspec.package.metaData.id -like "Xpand.Extension*") {
+    if ($nuspec.package.metaData.id -like "Xpand.XAF*" -or $nuspec.package.metaData.id -like "Xpand.Extensions.XAF*") {
         Add-NuspecDependency $versionConverter.Id $versionConverter.Version $nuspec
     }
     $nuspec.Save($nuspecFileName)

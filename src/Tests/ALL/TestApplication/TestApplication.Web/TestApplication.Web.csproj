@@ -150,7 +150,7 @@
       <Version>7.0.3300</Version>
     </PackageReference>
     <PackageReference Include="Xpand.XAF.Web.All">
-      <Version>0.0.1</Version>
+      <Version>0.0.1.1</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>

@@ -62,13 +62,13 @@ $packScript={
     
     $packageName = [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
     $assemblyItem = $assemblyVersions | Where-Object { $_.name -eq $packageName }
-    $name = $_.FullName
+    
     $version=$assemblyItem.Version
     if ($packageName -like "*All"){
         [xml]$coreNuspec=Get-Content "$sourceDir\tools\nuspec\$packagename.nuspec"
         $version=$coreNuspec.package.metadata.Version
     }
-    # Write-Output "Packing $($assemblyItem.Version) $name $version " #-f Blue
+    $name = $_.FullName
     Write-Output "$nugetPath pack $name -OutputDirectory $($nugetBin) -Basepath "$sourceDir\bin" -Version $version " #-f Blue
     & $nugetPath pack $name -OutputDirectory $nugetBin -Basepath "$sourceDir\bin" -Version $version
     if ($lastexitcode) {

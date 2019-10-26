@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+  <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net461</TargetFramework>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
@@ -32,7 +32,6 @@
     <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" Version="18.2.7" />
     <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="18.2.7" />
     <PackageReference Include="DevExpress.ExpressApp.EasyTest.WebAdapter" Version="18.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.ScriptRecorder" Version="18.2.7" />
     <PackageReference Include="DevExpress.ExpressApp.Web" Version="18.2.7" />
     <PackageReference Include="DevExpress.ExpressApp.Web.All" Version="18.2.7" />
     <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="18.2.7" />
@@ -52,7 +51,7 @@
     <PackageReference Include="DevExpress.Xpo" Version="18.2.7" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
     <PackageReference Include="Unofficial.Microsoft.mshtml" Version="7.0.3300" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="0.0.1" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="0.0.1.1" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.TestsLib">
