@@ -67,7 +67,7 @@ task CompileTests -precondition {return $compile  } {
         $source="$source;$PSScriptRoot\Bin\Nupkg"
         dotnet restore "$PSScriptRoot\src\Tests\Tests.sln" --source $packageSources --source (Get-PackageFeed -Nuget) --source  "$PSScriptRoot\Bin\Nupkg" /WarnAsError
         
-        dotnet msbuild "$PSScriptRoot\src\Tests\Tests.sln" "/p:configuration=Debug" /WarnAsError
+        dotnet msbuild "$PSScriptRoot\src\Tests\Tests.sln" "/p:configuration=Debug" /WarnAsError /bl
     }
 }
 
@@ -75,12 +75,12 @@ task Compile -precondition {return $compile  } {
     InvokeScript -maxRetries 3 {
         write-host "Building Extensions" -f "Blue"
         dotnet restore "$PSScriptRoot\src\Extensions\Extensions.sln" --source (Get-PackageFeed -nuget) --source $packageSources /WarnAsError
-        dotnet msbuild "$PSScriptRoot\src\Extensions\Extensions.sln" "/p:configuration=Release" /WarnAsError
+        dotnet msbuild "$PSScriptRoot\src\Extensions\Extensions.sln" "/p:configuration=Release" /WarnAsError /bl
     }
     InvokeScript -maxRetries 3{
         write-host "Building Modules" -f "Blue"
         dotnet restore "$PSScriptRoot\src\Modules\Modules.sln" --source (Get-PackageFeed -nuget) --source $packageSources /WarnAsError
-        dotnet msbuild "$PSScriptRoot\src\Modules\Modules.sln" "/p:configuration=Release" /WarnAsError
+        dotnet msbuild "$PSScriptRoot\src\Modules\Modules.sln" "/p:configuration=Release" /WarnAsError /bl
     }
 }
 

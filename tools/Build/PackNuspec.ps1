@@ -32,7 +32,7 @@ $nuspecs=Get-ChildItem "$sourceDir\tools\nuspec" "Xpand*$filter*.nuspec" -Recurs
 
 $nugetPath=(Get-XNugetPath)
 $packScript={
-    if ($_ -like "Xpand.XAF*") {
+    if ($_.BaseName -like "Xpand.XAF*") {
         $name = $_.BaseName.Replace("Xpand.XAF.Modules.", "")
         $id = "Xpand.XAF.Modules.$name.$name" + "Module"
         $message = @"

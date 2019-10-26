@@ -171,3 +171,8 @@ jobs:
       targetType: filePath
       filePath: .\tools\build\publishNugets.ps1 
       arguments: $(Build.SourceBranchName) '$(System.DefaultWorkingDirectory)' $(NugetApiKey) '$(System.DefaultWorkingDirectory)\bin\Nupkg' $(pastBuild)
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Packages'
+    inputs:
+      PathtoPublish: '$(System.DefaultworkingDirectory)\bin'
+      ArtifactName: 'Release.Bin'
