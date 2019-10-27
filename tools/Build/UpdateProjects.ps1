@@ -13,7 +13,7 @@ Get-ChildItem -Filter *.csproj -Recurse |  ForEach-Object {
     Update-ProjectDebugSymbols $projXml
     Remove-ProjectLicenseFile $projXml
     Update-ProjectAutoGenerateBindingRedirects $projXml
-    if ($fileName -notlike "*.Tests.csproj" -and $fileName -notlike "*TestApplication*.csproj"){
+    if ($fileName -notlike "*.Tests.csproj" ){
         Update-OutputPath $projXml $fileName "$rootLocation\bin\"
     }
     $projXml.Save($fileName)

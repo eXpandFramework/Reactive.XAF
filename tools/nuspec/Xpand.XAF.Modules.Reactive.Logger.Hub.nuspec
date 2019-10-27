@@ -27,6 +27,5 @@
   <files>
     <file src="Xpand.XAF.Modules.Reactive.Logger.Hub.dll" target="lib\net461\Xpand.XAF.Modules.Reactive.Logger.Hub.dll" />
     <file src="Xpand.XAF.Modules.Reactive.Logger.Hub.pdb" target="lib\net461\Xpand.XAF.Modules.Reactive.Logger.Hub.pdb" />
-    <file src="Readme.txt" target="" />
   </files>
 </package>

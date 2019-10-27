@@ -31,6 +31,5 @@ The module **ships with 82 predefined maps** for all the common types such as Gi
   <files>
     <file src="Xpand.XAF.Modules.ModelMapper.dll" target="lib\net461\Xpand.XAF.Modules.ModelMapper.dll" />
     <file src="Xpand.XAF.Modules.ModelMapper.pdb" target="lib\net461\Xpand.XAF.Modules.ModelMapper.pdb" />
-    <file src="Readme.txt" target="" />
   </files>
 </package>

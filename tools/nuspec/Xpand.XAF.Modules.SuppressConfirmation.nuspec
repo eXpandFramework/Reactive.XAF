@@ -24,6 +24,5 @@
   <files>
     <file src="Xpand.XAF.Modules.SuppressConfirmation.dll" target="lib\net461\Xpand.XAF.Modules.SuppressConfirmation.dll" />
     <file src="Xpand.XAF.Modules.SuppressConfirmation.pdb" target="lib\net461\Xpand.XAF.Modules.SuppressConfirmation.pdb" />
-    <file src="Readme.txt" target="" />
   </files>
 </package>

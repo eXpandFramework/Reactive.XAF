@@ -23,6 +23,5 @@
   <files>
     <file src="Xpand.XAF.Modules.CloneModelView.dll" target="lib\net461\Xpand.XAF.Modules.CloneModelView.dll" />
     <file src="Xpand.XAF.Modules.CloneModelView.pdb" target="lib\net461\Xpand.XAF.Modules.CloneModelView.pdb" />
-    <file src="Readme.txt" target="" />
   </files>
 </package>

@@ -15,9 +15,9 @@ properties {
     $AzureToken=$null
 }
 
-task TestsRun  -depends Clean, Init, Compile, CreateNuspec, PackNuspec, UpdateAllTests,CompileTests
-task Release  -depends   Clean, Init, UpdateProjects,  Compile,IndexSources, CreateNuspec, PackNuspec, UpdateAllTests,CompileTests
 
+task Release  -depends   Clean, Init, UpdateProjects,  Compile,IndexSources, CreateNuspec, PackNuspec, UpdateAllTests,CompileTests
+task TestsRun  -depends Release
 
 Task IndexSources{
     InvokeScript{
@@ -28,7 +28,8 @@ Task IndexSources{
 
 task Init {
     InvokeScript{
-        New-Item "$PSScriptRoot\bin" -ItemType Directory -Force |Out-Null
+        New-Item "$PSScriptRoot\bin\ReactiveLoggerClient" -ItemType Directory -Force |Out-Null
+        
         Get-ChildItem "CodeCoverage.runsettings" -Recurse|Copy-Item -Destination "$PSScriptRoot\bin\CodeCoverage.runsettings" -Force
         $versionMismatch=Get-ChildItem $PSScriptRoot *.csproj -Recurse -Exclude "*TestApplication*"|ForEach-Object{
             $projectPath=$_.FullName
@@ -66,8 +67,7 @@ task CompileTests -precondition {return $compile  } {
         $source="https://api.nuget.org/v3/index.json;$packageSources"
         $source="$source;$PSScriptRoot\Bin\Nupkg"
         dotnet restore "$PSScriptRoot\src\Tests\Tests.sln" --source $packageSources --source (Get-PackageFeed -Nuget) --source  "$PSScriptRoot\Bin\Nupkg" /WarnAsError
-        
-        dotnet msbuild "$PSScriptRoot\src\Tests\Tests.sln" "/p:configuration=Debug" /WarnAsError /bl
+        dotnet msbuild "$PSScriptRoot\src\Tests\Tests.sln" "/bl:$PSScriptRoot\Bin\CompileTests.binlog" "/p:configuration=Debug" /WarnAsError 
     }
 }
 
@@ -75,12 +75,13 @@ task Compile -precondition {return $compile  } {
     InvokeScript -maxRetries 3 {
         write-host "Building Extensions" -f "Blue"
         dotnet restore "$PSScriptRoot\src\Extensions\Extensions.sln" --source (Get-PackageFeed -nuget) --source $packageSources /WarnAsError
-        dotnet msbuild "$PSScriptRoot\src\Extensions\Extensions.sln" "/p:configuration=Release" /WarnAsError /bl
+        & dotnet msbuild "$PSScriptRoot\src\Extensions\Extensions.sln" "/bl:$PSScriptRoot\Bin\Extensions.binlog" "/p:configuration=Release" 
     }
     InvokeScript -maxRetries 3{
         write-host "Building Modules" -f "Blue"
         dotnet restore "$PSScriptRoot\src\Modules\Modules.sln" --source (Get-PackageFeed -nuget) --source $packageSources /WarnAsError
-        dotnet msbuild "$PSScriptRoot\src\Modules\Modules.sln" "/p:configuration=Release" /WarnAsError /bl
+        set-location "$PSScriptRoot\src\Modules"
+        dotnet msbuild "$PSScriptRoot\src\Modules\Modules.sln" "/bl:$PSScriptRoot\Bin\Modules.binlog" "/p:configuration=Release" /WarnAsError 
     }
 }
 
@@ -109,9 +110,7 @@ Task UpdateAllTests {
 task Clean -precondition {return $cleanBin} {
     InvokeScript {
         $bin="$PSScriptRoot\bin\"
-        if (Test-Path $bin) {
-            Get-ChildItem $bin | Remove-Item -Force -Recurse
-        }
+        Remove-Item $bin -Recurse -Force -ErrorAction Continue
         Clear-XProjectDirectories
     }
 }

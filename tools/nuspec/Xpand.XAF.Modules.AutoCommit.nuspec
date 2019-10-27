@@ -26,6 +26,5 @@
   <files>
     <file src="Xpand.XAF.Modules.AutoCommit.dll" target="lib\net461\Xpand.XAF.Modules.AutoCommit.dll" />
     <file src="Xpand.XAF.Modules.AutoCommit.pdb" target="lib\net461\Xpand.XAF.Modules.AutoCommit.pdb" />
-    <file src="Readme.txt" target="" />
   </files>
 </package>

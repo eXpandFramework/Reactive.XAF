@@ -66,19 +66,9 @@ function UpdateBadges($_, $packagespath, $readMePath) {
     $readMe = [Regex]::replace($readMe, '(.*)# About', "$badges`r`n# About", [RegexOptions]::Singleline)
     Set-Content $readMePath $readMe.Trim()
 }
-function GetModuleName($_){
-    $moduleName = $_.BaseName.Substring($_.BaseName.LastIndexOf(".") + 1)
-    $moduleName = "$($_.BaseName).$($moduleName)Module"
-    if ($moduleName -like "*.hub.*") {
-        $moduleName = "Xpand.XAF.Modules.Reactive.Logger.Hub.ReactiveLoggerHubModule"
-    }
-    elseif ($moduleName -like "*Logger*") {
-        $moduleName = "Xpand.XAF.Modules.Reactive.Logger.ReactiveLoggerModule"
-    }
-    $moduleName
-}
+
 function UpdateIssues($_, $packagespath, $readMePath) {
-    $moduleName=GetModuleName $_
+    $moduleName=& "$PSScriptRoot\ModuleName.ps1" $_
     $readMe = Get-Content $readMePath -Raw
     $regex = [regex] '(?isx)\#\#\ Issues(.*)\#\#\ Details'
     $result = $regex.Replace($readMe, @"

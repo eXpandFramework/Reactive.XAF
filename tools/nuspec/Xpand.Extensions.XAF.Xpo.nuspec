@@ -20,6 +20,5 @@
   <files>
     <file src="Xpand.Extensions.XAF.Xpo.dll" target="lib\net461\Xpand.Extensions.XAF.Xpo.dll" />
     <file src="Xpand.Extensions.XAF.Xpo.pdb" target="lib\net461\Xpand.Extensions.XAF.Xpo.pdb" />
-    <file src="Readme.txt" target="" />
   </files>
 </package>

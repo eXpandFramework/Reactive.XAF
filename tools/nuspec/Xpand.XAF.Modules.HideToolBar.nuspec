@@ -25,6 +25,5 @@
   <files>
     <file src="Xpand.XAF.Modules.HideToolBar.dll" target="lib\net461\Xpand.XAF.Modules.HideToolBar.dll" />
     <file src="Xpand.XAF.Modules.HideToolBar.pdb" target="lib\net461\Xpand.XAF.Modules.HideToolBar.pdb" />
-    <file src="Readme.txt" target="" />
   </files>
 </package>

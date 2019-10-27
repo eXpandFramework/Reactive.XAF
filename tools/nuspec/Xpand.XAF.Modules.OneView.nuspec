@@ -25,6 +25,5 @@
   <files>
     <file src="Xpand.XAF.Modules.OneView.dll" target="lib\net461\Xpand.XAF.Modules.OneView.dll" />
     <file src="Xpand.XAF.Modules.OneView.pdb" target="lib\net461\Xpand.XAF.Modules.OneView.pdb" />
-    <file src="Readme.txt" target="" />
   </files>
 </package>

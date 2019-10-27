@@ -27,6 +27,5 @@ The module uses the next two strategies:
   <files>
     <file src="Xpand.XAF.Modules.ViewEditMode.dll" target="lib\net461\Xpand.XAF.Modules.ViewEditMode.dll" />
     <file src="Xpand.XAF.Modules.ViewEditMode.pdb" target="lib\net461\Xpand.XAF.Modules.ViewEditMode.pdb" />
-    <file src="Readme.txt" target="" />
   </files>
 </package>

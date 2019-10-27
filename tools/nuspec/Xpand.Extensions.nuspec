@@ -22,6 +22,5 @@
   <files>
     <file src="Xpand.Extensions.dll" target="lib\netstandard2.0\Xpand.Extensions.dll" />
     <file src="Xpand.Extensions.pdb" target="lib\netstandard2.0\Xpand.Extensions.pdb" />
-    <file src="Readme.txt" target="" />
   </files>
 </package>

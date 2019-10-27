@@ -23,6 +23,5 @@
   <files>
     <file src="Xpand.XAF.Modules.GridListEditor.dll" target="lib\net461\Xpand.XAF.Modules.GridListEditor.dll" />
     <file src="Xpand.XAF.Modules.GridListEditor.pdb" target="lib\net461\Xpand.XAF.Modules.GridListEditor.pdb" />
-    <file src="Readme.txt" target="" />
   </files>
 </package>

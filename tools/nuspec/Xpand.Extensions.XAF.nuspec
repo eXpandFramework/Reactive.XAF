@@ -24,6 +24,5 @@
   <files>
     <file src="Xpand.Extensions.XAF.dll" target="lib\net461\Xpand.Extensions.XAF.dll" />
     <file src="Xpand.Extensions.XAF.pdb" target="lib\net461\Xpand.Extensions.XAF.pdb" />
-    <file src="Readme.txt" target="" />
   </files>
 </package>

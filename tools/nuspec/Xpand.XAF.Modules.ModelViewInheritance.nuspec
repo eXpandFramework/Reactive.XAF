@@ -24,6 +24,5 @@
   <files>
     <file src="Xpand.XAF.Modules.ModelViewInheritance.dll" target="lib\net461\Xpand.XAF.Modules.ModelViewInheritance.dll" />
     <file src="Xpand.XAF.Modules.ModelViewInheritance.pdb" target="lib\net461\Xpand.XAF.Modules.ModelViewInheritance.pdb" />
-    <file src="Readme.txt" target="" />
   </files>
 </package>

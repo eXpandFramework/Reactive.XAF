@@ -25,6 +25,5 @@
   <files>
     <file src="Xpand.XAF.Modules.Reactive.Win.dll" target="lib\net461\Xpand.XAF.Modules.Reactive.Win.dll" />
     <file src="Xpand.XAF.Modules.Reactive.Win.pdb" target="lib\net461\Xpand.XAF.Modules.Reactive.Win.pdb" />
-    <file src="Readme.txt" target="" />
   </files>
 </package>

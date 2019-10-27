@@ -13,7 +13,8 @@
     <Product>TestApplication.Win</Product>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
-    <OutputPath>..\..\..\..\..\bin\TestApplicationWin</OutputPath>
+    <OutputPathSuffix>TestWinApplication</OutputPathSuffix>
+    <OutputPath>..\..\..\..\..\bin\TestWinApplication</OutputPath>
     <Configurations>Debug;Release;EasyTest</Configurations>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>

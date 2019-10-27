@@ -7,7 +7,9 @@ param(
 )
 Import-Module XpandPwsh -Force -Prefix X
 $ErrorActionPreference = "Stop"
+
 New-Item $nugetBin -ItemType Directory -Force | Out-Null
+Get-ChildItem $nugetBin|Remove-Item -Force -Recurse
 $versionConverterSpecPath = "$sourceDir\Tools\Xpand.VersionConverter\Xpand.VersionConverter.nuspec"
 if ($Branch -match "lab") {
     [xml]$versionConverterSpec = Get-XmlContent $versionConverterSpecPath
@@ -31,8 +33,38 @@ $assemblyVersions = & "$sourceDir\tools\build\AssemblyVersions.ps1" $sourceDir
 $nuspecs=Get-ChildItem "$sourceDir\tools\nuspec" "Xpand*$filter*.nuspec" -Recurse
 
 $nugetPath=(Get-XNugetPath)
+
 $packScript={
-    if ($_.BaseName -like "Xpand.XAF*") {
+    $name = $_.FullName
+    $basePath="$sourceDir\bin"
+    if ($name -like "*Client*"){
+        $basePath+="\ReactiveLoggerClient"
+    }
+    
+    $packageName = [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
+    $assemblyItem = $assemblyVersions | Where-Object { $_.name -eq $packageName }
+    
+    $version=$assemblyItem.Version
+    if ($packageName -like "*All"){
+        [xml]$coreNuspec=Get-Content "$sourceDir\tools\nuspec\$packagename.nuspec"
+        $version=$coreNuspec.package.metadata.Version
+    }
+ 
+    Write-Output "$nugetPath pack $name -OutputDirectory $($nugetBin) -Basepath $basePath -Version $version " #-f Blue
+    & $nugetPath pack $name -OutputDirectory $nugetBin -Basepath $basePath -Version $version
+    # if ($lastexitcode) {
+    #     throw $_.Exception
+    # }
+}
+$varsToImport=@("assemblyVersions","SkipReadMe","nugetPath","sourceDir","nugetBin","SkipReadMe")
+$conLimit=[System.Environment]::ProcessorCount
+$nuspecs | Invoke-Parallel -LimitConcurrency $conLimit -VariablesToImport $varsToImport -Script $packScript
+function AddReadMe{
+    param(
+        $BaseName,
+        $Directory
+    )
+    if ($BaseName -like "Xpand.XAF*") {
         $name = $_.BaseName.Replace("Xpand.XAF.Modules.", "")
         $id = "Xpand.XAF.Modules.$name.$name" + "Module"
         $message = @"
@@ -54,36 +86,20 @@ $packScript={
         ☞ The package only adds the required references. To install $id add the next line in the constructor of your XAF module.
             RequiredModuleTypes.Add(typeof($id));
 "@
+        Set-Content "$Directory\ReadMe.txt" $message
     }
-    if (!$SkipReadMe){
-        Write-Host "ReadMe length $($message.Length)"
-        Set-Content "$sourceDir\bin\Readme.txt" $message 
-    }
-    
-    $packageName = [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
-    $assemblyItem = $assemblyVersions | Where-Object { $_.name -eq $packageName }
-    
-    $version=$assemblyItem.Version
-    if ($packageName -like "*All"){
-        [xml]$coreNuspec=Get-Content "$sourceDir\tools\nuspec\$packagename.nuspec"
-        $version=$coreNuspec.package.metadata.Version
-    }
-    $name = $_.FullName
-    Write-Output "$nugetPath pack $name -OutputDirectory $($nugetBin) -Basepath "$sourceDir\bin" -Version $version " #-f Blue
-    & $nugetPath pack $name -OutputDirectory $nugetBin -Basepath "$sourceDir\bin" -Version $version
-    if ($lastexitcode) {
-        throw $_.Exception
+    else{
+        Remove-Item "$Directory\ReadMe.txt" -Force -ErrorAction SilentlyContinue
     }
 }
-if ($SkipReadMe){
-    $nuspecs | Invoke-Parallel -LimitConcurrency $([System.Environment]::ProcessorCount) -VariablesToImport @("assemblyVersions","SkipReadMe","nugetPath","sourceDir","nugetBin","SkipReadMe") -Script $packScript
+Get-ChildItem "$nugetBin" *.nupkg|ForEach-Object{
+    $zip="$($_.DirectoryName)\$($_.BaseName).zip" 
+    Move-Item $_ $zip
+    $unzipDir="$($_.DirectoryName)\$($_.BaseName)"
+    Expand-archive $zip $unzipDir
+    Remove-Item $zip
+    AddReadme $_.BaseName $unzipDir
+    Compress-Archive "$unzipDir\*.*" $zip
+    Move-Item $zip $_
+    Remove-Item $unzipDir -Force -Recurse
 }
-else{
-    $nuspecs |ForEach-Object{
-        Invoke-Command $packScript
-    }
-}
-
-
-
-    

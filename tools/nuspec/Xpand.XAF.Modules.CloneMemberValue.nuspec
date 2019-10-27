@@ -27,6 +27,5 @@ The module uses the next two strategies:
   <files>
     <file src="Xpand.XAF.Modules.CloneMemberValue.dll" target="lib\net461\Xpand.XAF.Modules.CloneMemberValue.dll" />
     <file src="Xpand.XAF.Modules.CloneMemberValue.pdb" target="lib\net461\Xpand.XAF.Modules.CloneMemberValue.pdb" />
-    <file src="Readme.txt" target="" />
   </files>
 </package>

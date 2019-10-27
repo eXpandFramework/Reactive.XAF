@@ -26,6 +26,5 @@
   <files>
     <file src="Xpand.XAF.Modules.MasterDetail.dll" target="lib\net461\Xpand.XAF.Modules.MasterDetail.dll" />
     <file src="Xpand.XAF.Modules.MasterDetail.pdb" target="lib\net461\Xpand.XAF.Modules.MasterDetail.pdb" />
-    <file src="Readme.txt" target="" />
   </files>
 </package>
