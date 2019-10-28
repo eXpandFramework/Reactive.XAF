@@ -24,7 +24,7 @@ Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -not
         ReferenceToPackageFilter = "Xpand*"
         PublishedSource          = (Get-PackageFeed -Xpand)
         Release                  = $Release
-        ReadMe                   = $true
+        ReadMe                   = $false
         ProjectsRoot             = $root
     }
     if (!(Test-Path $uArgs.NuspecFilename)) {

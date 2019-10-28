@@ -31,13 +31,11 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Model.DesignedDiffs.log" />
-    <None Remove="Model.xafml" />
+    <None Remove="Model.DesignedDiffs.xafml" />
     <None Remove="ReactiveLoggerClientWinApplication.Designer.log" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Model.xafml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Configuration" />
@@ -73,6 +71,6 @@
     <PackageReference Include="System.Buffers" Version="4.5.0" />
     <PackageReference Include="System.Collections.Immutable" Version="1.6.0" />
     <PackageReference Include="System.Reactive" Version="4.2.0" />
-    <PackageReference Include="Fasterflect.Xpand" Version="2.0.6" />
+    <PackageReference Include="Fasterflect.Xpand" Version="2.0.7" />
   </ItemGroup>
 </Project>

@@ -8,6 +8,9 @@ using DevExpress.XtraEditors;
 
 
 namespace Xpand.XAF.Modules.Reactive.Logger.Client.Win {
+    public class ReactiveLoggerClientWinModule:ModuleBase{
+        
+    }
     static class Program {
         /// <summary>
         /// The main entry point for the application.
@@ -26,6 +29,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Client.Win {
             }
             Tracing.Initialize();
             var winApplication = new ReactiveLoggerClientWinApplication();
+            winApplication.Modules.Add(new ReactiveLoggerClientWinModule());
             if(ConfigurationManager.ConnectionStrings["ConnectionString"] != null) {
                 winApplication.ConnectionString = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
             }

@@ -50,15 +50,21 @@ $packScript={
         $version=$coreNuspec.package.metadata.Version
     }
  
-    Write-Output "$nugetPath pack $name -OutputDirectory $($nugetBin) -Basepath $basePath -Version $version " #-f Blue
-    & $nugetPath pack $name -OutputDirectory $nugetBin -Basepath $basePath -Version $version
-    # if ($lastexitcode) {
-    #     throw $_.Exception
-    # }
+    try {
+        Write-Output "$nugetPath pack $name -OutputDirectory $($nugetBin) -Basepath $basePath -Version $version " #-f Blue
+        & $nugetPath pack $name -OutputDirectory $nugetBin -Basepath $basePath -Version $version
+    }
+    catch {
+        Write-Host "Name: $name"
+        Write-Host "$(Get-Content $name -Raw)"
+        throw
+    }
+    
 }
 $varsToImport=@("assemblyVersions","SkipReadMe","nugetPath","sourceDir","nugetBin","SkipReadMe")
 $conLimit=[System.Environment]::ProcessorCount
-$nuspecs | Invoke-Parallel -LimitConcurrency $conLimit -VariablesToImport $varsToImport -Script $packScript
+# $nuspecs | Invoke-Parallel -LimitConcurrency $conLimit -VariablesToImport $varsToImport -Script $packScript
+$nuspecs | ForEach-Object{Invoke-Command $packScript -ArgumentList $_}
 function AddReadMe{
     param(
         $BaseName,

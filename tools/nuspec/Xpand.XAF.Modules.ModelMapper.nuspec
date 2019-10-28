@@ -16,7 +16,7 @@ The module **ships with 82 predefined maps** for all the common types such as Gi
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  ModelMapper</tags>
     <dependencies>
       <dependency id="Enums.NET" version="2.3.2" />
-      <dependency id="Fasterflect.Xpand" version="2.0.6" />
+      <dependency id="Fasterflect.Xpand" version="2.0.7" />
       <dependency id="Mono.Cecil" version="0.11.0" />
       <dependency id="System.CodeDom" version="4.6.0" />
       <dependency id="System.Interactive" version="4.0.0" />

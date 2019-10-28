@@ -41,6 +41,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
     }
     [ModelNodesGenerator(typeof(TraceSourcedModulesNodesGenerator))]
     public interface IModelTraceSourcedModules:IModelNode,IModelList<IModelTraceSourcedModule>{
+        [DefaultValue(false)]
         bool Enabled{ get; set; }
     }
 

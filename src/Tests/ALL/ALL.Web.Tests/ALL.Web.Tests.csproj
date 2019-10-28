@@ -36,7 +36,7 @@
     <PackageReference Include="DevExpress.ExpressApp.Web.All" Version="18.2.7" />
     <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="18.2.7" />
     <PackageReference Include="DevExpress.Persistent.BaseImpl" Version="18.2.7" />
-    <PackageReference Include="Fasterflect.Xpand" Version="2.0.6" />
+    <PackageReference Include="Fasterflect.Xpand" Version="2.0.7" />
     <PackageReference Include="Grpc.Core" Version="2.24.0" />
     <PackageReference Include="MagicOnion" Version="2.6.3" />
     <PackageReference Include="Moq" Version="4.13.0" />

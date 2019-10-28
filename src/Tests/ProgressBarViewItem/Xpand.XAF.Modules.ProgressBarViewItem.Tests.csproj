@@ -27,7 +27,7 @@
     <PackageReference Include="DevExpress.Web" Version="18.2.7" />
     <PackageReference Include="DevExpress.Data" Version="18.2.7" />
     <PackageReference Include="DevExpress.Xpo" Version="18.2.7" />
-    <PackageReference Include="Fasterflect.Xpand" Version="2.0.6" />
+    <PackageReference Include="Fasterflect.Xpand" Version="2.0.7" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Tests">
