@@ -63,8 +63,8 @@ $packScript={
 }
 $varsToImport=@("assemblyVersions","SkipReadMe","nugetPath","sourceDir","nugetBin","SkipReadMe")
 $conLimit=[System.Environment]::ProcessorCount
-# $nuspecs | Invoke-Parallel -LimitConcurrency $conLimit -VariablesToImport $varsToImport -Script $packScript
-$nuspecs | ForEach-Object{Invoke-Command $packScript -ArgumentList $_}
+$nuspecs | Invoke-Parallel -LimitConcurrency $conLimit -VariablesToImport $varsToImport -Script $packScript
+# $nuspecs | ForEach-Object{Invoke-Command $packScript -ArgumentList $_}
 function AddReadMe{
     param(
         $BaseName,
@@ -98,14 +98,14 @@ function AddReadMe{
         Remove-Item "$Directory\ReadMe.txt" -Force -ErrorAction SilentlyContinue
     }
 }
-Get-ChildItem "$nugetBin" *.nupkg|ForEach-Object{
-    $zip="$($_.DirectoryName)\$($_.BaseName).zip" 
-    Move-Item $_ $zip
-    $unzipDir="$($_.DirectoryName)\$($_.BaseName)"
-    Expand-archive $zip $unzipDir
-    Remove-Item $zip
-    AddReadme $_.BaseName $unzipDir
-    Compress-Archive "$unzipDir\*.*" $zip
-    Move-Item $zip $_
-    Remove-Item $unzipDir -Force -Recurse
-}
+# Get-ChildItem "$nugetBin" *.nupkg|ForEach-Object{
+#     $zip="$($_.DirectoryName)\$($_.BaseName).zip" 
+#     Move-Item $_ $zip
+#     $unzipDir="$($_.DirectoryName)\$($_.BaseName)"
+#     Expand-archive $zip $unzipDir
+#     Remove-Item $zip
+#     AddReadme $_.BaseName $unzipDir
+#     Compress-Files "$unzipDir" $zip 
+#     Move-Item $zip $_
+#     Remove-Item $unzipDir -Force -Recurse
+# }

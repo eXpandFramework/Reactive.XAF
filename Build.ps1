@@ -16,7 +16,7 @@ properties {
 }
 
 
-task Release  -depends   Clean, Init, UpdateProjects,  Compile,IndexSources, CreateNuspec, PackNuspec, UpdateAllTests,CompileTests
+task Release  -depends   Clean, Init, UpdateProjects,  Compile,IndexSources, CreateNuspec, PackNuspec, CompileTests,UpdateAllTests
 task TestsRun  -depends Release
 
 Task IndexSources{
@@ -67,7 +67,7 @@ task CompileTests -precondition {return $compile  } {
         $source="https://api.nuget.org/v3/index.json;$packageSources"
         $source="$source;$PSScriptRoot\Bin\Nupkg"
         dotnet restore "$PSScriptRoot\src\Tests\Tests.sln" --source $packageSources --source (Get-PackageFeed -Nuget) --source  "$PSScriptRoot\Bin\Nupkg" /WarnAsError
-        dotnet msbuild "$PSScriptRoot\src\Tests\Tests.sln" "/bl:$PSScriptRoot\Bin\CompileTests.binlog" "/p:configuration=Debug" /WarnAsError 
+        dotnet msbuild "$PSScriptRoot\src\Tests\Tests.sln" "/bl:$PSScriptRoot\Bin\CompileTests.binlog" "/p:configuration=Debug" /WarnAsError /m /v:m
     }
 }
 
@@ -75,13 +75,13 @@ task Compile -precondition {return $compile  } {
     InvokeScript -maxRetries 3 {
         write-host "Building Extensions" -f "Blue"
         dotnet restore "$PSScriptRoot\src\Extensions\Extensions.sln" --source (Get-PackageFeed -nuget) --source $packageSources /WarnAsError
-        & dotnet msbuild "$PSScriptRoot\src\Extensions\Extensions.sln" "/bl:$PSScriptRoot\Bin\Extensions.binlog" "/p:configuration=Release" 
+        & dotnet msbuild "$PSScriptRoot\src\Extensions\Extensions.sln" "/bl:$PSScriptRoot\Bin\Extensions.binlog" "/p:configuration=Release" /m /v:m
     }
     InvokeScript -maxRetries 3{
         write-host "Building Modules" -f "Blue"
         dotnet restore "$PSScriptRoot\src\Modules\Modules.sln" --source (Get-PackageFeed -nuget) --source $packageSources /WarnAsError
         set-location "$PSScriptRoot\src\Modules"
-        dotnet msbuild "$PSScriptRoot\src\Modules\Modules.sln" "/bl:$PSScriptRoot\Bin\Modules.binlog" "/p:configuration=Release" /WarnAsError 
+        dotnet msbuild "$PSScriptRoot\src\Modules\Modules.sln" "/bl:$PSScriptRoot\Bin\Modules.binlog" "/p:configuration=Release" /WarnAsError /m /v:m
     }
 }
 

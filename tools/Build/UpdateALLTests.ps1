@@ -74,16 +74,18 @@ function UpdateVersion($csprojPath,$defaulVersion,$testApplication ) {
     $csproj.Save($csprojPath)
     Get-Content $csprojPath -Raw
 }
-Get-ChildItem "$root\src\Tests\All\TestApplication" *.csproj -Recurse | ForEach-Object {
+Get-ChildItem "$root\src\Tests\All\" *.csproj -Recurse | ForEach-Object {
     UpdateVersion $_.FullName $defaultVersion $testApplication
 }
 
 Write-Host "Building TestApplication" -f Green
 
 $localSource = "$root\bin\Nupkg"
-$source="$localsource;$(Get-PackageFeed -Nuget);$(Get-PackageFeed -Xpand);$source"
+$source="$localSource;$(Get-PackageFeed -Nuget);$(Get-PackageFeed -Xpand);$source"
 "Source=$source"
+
 & (Get-NugetPath) restore $testapplication -source $source
-& (Get-MsBuildPath) $testApplication /bl:$root\bin\TestApplication.binlog /WarnAsError /v:m -maxcpucount:1
+
+& (Get-MsBuildPath) $testApplication /bl:$root\bin\TestApplication.binlog /WarnAsError /v:m -m #/noconsolelogger
 
 
