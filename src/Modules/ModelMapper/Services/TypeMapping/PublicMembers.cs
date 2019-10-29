@@ -16,6 +16,8 @@ using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
 using Fasterflect;
 using Xpand.Extensions.AppDomain;
+using Xpand.Extensions.Linq;
+using Xpand.Extensions.Reflection;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.Predefined;
 using Xpand.XAF.Modules.Reactive.Extensions;
@@ -105,7 +107,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             
             ReservedPropertyNames.Clear();
             new []{typeof(ModelNode),typeof(IModelNode),typeof(ModelApplicationBase)}
-                .SelectMany(_ => _.GetMembers()).Select(_ => _.Name)
+                .SelectMany(_ => _.Members(MemberTypes.Property|MemberTypes.Method)
+                    .Where(info => info is MethodBase method? !method.IsPrivate
+                    : AccessModifier.Public.YieldItem().Add(AccessModifier.Protected)
+                        .Contains(((PropertyInfo) info).AccessModifier()))).Select(_ => _.Name)
                 .Concat(new []{"Item","IsReadOnly","Remove","Id","Nodes","IsValid"}).Distinct()
                 .ToObservable(Scheduler.Immediate)
                 .Do(name => ReservedPropertyNames.Add(name))
