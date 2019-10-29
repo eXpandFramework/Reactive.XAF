@@ -29,6 +29,7 @@ trigger:
         - master
 jobs:
 - job: TestsRunBuild
+  continueOnError: true
   strategy: 
     parallel: 1
   pool:
@@ -40,10 +41,24 @@ jobs:
   - task: PowerShell@2
     displayName: Build
     inputs:
+      targetType: 'inline'
+      script: |
+        $goArgs=@{
+          Branch ='$(Build.SourceBranchName)'
+          SourcePath ='$(System.DefaultworkingDirectory)'
+          GitHubUserName ='$(GitHubUserName)' 
+          Token ='$(GitHubToken)' 
+          DXApiFeed ='$(DXApiFeed) '
+          ArtifactStagingDirectory ='$(build.artifactstagingdirectory)' 
+          BinDirectory ='$(System.DefaultworkingDirectory)\bin '
+          AzureToken ='$(AzureToken)'
+          PastBuild =$false 
+          CustomVersion ='$(Build.DefinitionName)'
+        }
+        "goArgs:"
+        $goArgs|out-string
+        & .\tools\build\pipeline.ps1 @goArgs
       pwsh: true
-      targetType: filePath
-      filePath: .\tools\build\pipeline.ps1 
-      arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(GitHubUserName) $(GitHubPass) $(DXApiFeed) $(build.artifactstagingdirectory) $(System.DefaultworkingDirectory)\bin $(AzureToken) $false $(Build.DefinitionName)
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Packages'
     inputs:
@@ -53,6 +68,7 @@ jobs:
   strategy:
     parallel: 2
   dependsOn: TestsRunBuild
+  continueOnError: true
   pool:
     vmImage: windows-2019
   variables:
@@ -84,8 +100,9 @@ jobs:
         collectDumpOn: never
 - job: TestPhase1
   strategy:
-    parallel: 2
+    parallel: 14
   dependsOn: TestPhaseEasyTest
+  continueOnError: true
   pool:
     vmImage: windows-2019
   variables:
@@ -160,17 +177,44 @@ jobs:
   - task: PowerShell@2
     displayName: Build
     inputs:
+      targetType: 'inline'
+      script: |
+        $goArgs=@{
+          Branch ='$(Build.SourceBranchName)'
+          SourcePath ='$(System.DefaultworkingDirectory)'
+          GitHubUserName ='$(GitHubUserName)' 
+          Token ='$(GitHubToken)' 
+          DXApiFeed ='$(DXApiFeed) '
+          ArtifactStagingDirectory ='$(build.artifactstagingdirectory)' 
+          BinDirectory ='$(System.DefaultworkingDirectory)\bin '
+          AzureToken ='$(AzureToken)'
+          PastBuild =$false 
+          CustomVersion ='$(Build.DefinitionName)'
+        }
+        "goArgs:"
+        $goArgs|out-string
+        & .\tools\build\pipeline.ps1 @goArgs
       pwsh: true
-      targetType: filePath
-      filePath: .\tools\build\pipeline.ps1 
-      arguments: $(Build.SourceBranchName) $(System.DefaultworkingDirectory) $(GitHubUserName) $(GitHubPass) $(DXApiFeed) $(build.artifactstagingdirectory) $(System.DefaultworkingDirectory)\bin $(AzureToken) $(PastBuild) "" $(latest)
   - task: PowerShell@2
-    displayName: Publish
+    displayName: PublishNugets
     inputs:
+      targetType: 'inline'
+      script: |
+        $goArgs=@{
+          GitHubUserName ='$(GitHubUserName)' 
+          AzureToken ='$(AzureToken)'
+          Token ='$(GitHubToken)' 
+          Branch ='$(Build.SourceBranchName)'
+          SourcesRoot ='$(System.DefaultworkingDirectory)'
+          ApiKey ='$(NugetApiKey)'
+          LocalPackageSource ='$(System.DefaultWorkingDirectory)\bin\Nupkg' 
+          PastBuild =$(PastBuild) 
+          CustomVersion ='$(Build.DefinitionName)'
+        }
+        "goArgs:"
+        $goArgs|out-string
+        & .\tools\build\pipeline.ps1 @goArgs
       pwsh: true
-      targetType: filePath
-      filePath: .\tools\build\publishNugets.ps1 
-      arguments: $(Build.SourceBranchName) '$(System.DefaultWorkingDirectory)' $(NugetApiKey) '$(System.DefaultWorkingDirectory)\bin\Nupkg' $(pastBuild)
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Packages'
     inputs:

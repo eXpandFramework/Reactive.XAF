@@ -2,17 +2,18 @@ param(
     $Branch = "lab",
     $SourcePath = "$PSScriptRoot\..\..",
     $GitHubUserName = "apobekiaris",
-    $Pass = $env:GithubPass,
-    $DXApiFeed  =(Get-Feed -DX),
+    $Token = $env:GitHubToken,
+    $DXApiFeed  =$env:DXApiFeed,
     $artifactstagingdirectory,
     $bindirectory,
-    $AzureToken = (Get-AzureToken),
+    $AzureToken = $env:AzureToken,
     $PastBuild,
     $CustomVersion,
     $latest,
     $WhatIf = $false
     
 )
+
 "PastBuild=$PastBuild"
 "latest=$latest"
 if ($PastBuild -and $PastBuild -ne "false") {
@@ -100,11 +101,10 @@ $newPackages | Out-String
 $labBuild = Get-VSTeamBuild -ResultFilter succeeded -ProjectName expandframework -top 1 -StatusFilter completed -Definitions 23
 
 $yArgs = @{
-    Owner         = $GitHubUserName
     Organization  = "eXpandFramework"
     Repository    = "DevExpress.XAF"
     Branch        = $Branch
-    Pass          = $Pass
+    Token          = $Token
     Packages      = $publishedPackages 
     SourcePath    = $SourcePath
     CommitsSince  = $labBuild.finishTime
@@ -125,7 +125,7 @@ if ($Branch -eq "lab"){
             $nextVersion=$_.NextVersion
             $revision=[int]$nextVersion.Revision-1
             $nowVersion=New-Object version ($nextVersion.Major,$nextVersion.Minor,$nextVersion.Build,$revision)
-            Write-Host "Update $pName version to $nowVersion"
+            Write-Host "Update $pName version to latest $nowVersion"
             Update-AssemblyInfoVersion $nowVersion $pDir
         }
     }
@@ -149,21 +149,24 @@ if ($reactiveVersionChanged) {
         $version = $localPackages | Where-Object { $_.id -eq $name } | Select-Object -ExpandProperty NextVersion
         Update-AssemblyInfoVersion -path "$($_.DirectoryName)" -version $version
     }
-}7
+}
+
 $taskList = "Release"
+$newVersion=$defaulVersion
 if ($customVersion -eq "latest") {
-    $defaulVersion = $DXVersion
+    $newVersion = $DXVersion
 }
 elseif ($CustomVersion -and !$latest) {
     $taskList = "TestsRun"
-    $defaulVersion = $CustomVersion
+    $newVersion = $CustomVersion
 }
 
+Start-XpandProjectConverter -version $newVersion -path $SourcePath 
 $bArgs = @{
     packageSources = "$(Get-PackageFeed -Xpand);$DxApiFeed"
     tasklist       = $tasklist
-    Version        = $defaulVersion
-    CustomVersion  = !($customVersion)
+    dxVersion        = $newVersion
+    CustomVersion  = $newVersion -ne $defaulVersion
 }
 "bArgs:"
 $bArgs | Out-String

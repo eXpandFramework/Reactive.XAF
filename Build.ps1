@@ -102,7 +102,7 @@ Task PackNuspec {
 
 Task UpdateAllTests {
     InvokeScript -maxRetries 3 {
-        & "$PSScriptRoot\tools\build\UpdateAllTests.ps1" $PSScriptRoot $branch $packageSources
+        & "$PSScriptRoot\tools\build\UpdateAllTests.ps1" $PSScriptRoot $branch $packageSources $dxVersion
     }
 }
 
@@ -110,7 +110,7 @@ Task UpdateAllTests {
 task Clean -precondition {return $cleanBin} {
     InvokeScript {
         $bin="$PSScriptRoot\bin\"
-        Remove-Item $bin -Recurse -Force -ErrorAction Continue
+        Remove-Item $bin -Recurse -Force -ErrorAction SilentlyContinue
         Clear-XProjectDirectories
     }
 }

@@ -1,7 +1,8 @@
 param(
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\..\"),
     $branch = "lab",
-    $source
+    $source,
+    $dxVersion ="18.2.7"
 )
 if ($branch -eq "lab" -and !$source) {
     $source = Get-PackageFeed -Xpand
@@ -9,6 +10,7 @@ if ($branch -eq "lab" -and !$source) {
 if ($branch -eq "master") {
     $branch = "Release"
 }
+"dxVersion=$dxVersion"
 $ErrorActionPreference = "Stop"
 # Import-XpandPwsh
 $excludeFilter = "*client*;*extension*"
@@ -39,10 +41,10 @@ $packages = $latestPackages | Where-Object {
 }
 Write-Host "finalPackages:" -f Blue
 $packages | Out-String
-$defaultVersion = & "$root\Tools\Build\DefaultVersion.ps1"
+
 
 $testApplication = "$root\src\Tests\ALL\TestApplication\TestApplication.sln"
-function UpdateVersion($csprojPath,$defaulVersion,$testApplication ) {
+function UpdateVersion($csprojPath,$dxVersion,$testApplication ) {
     [xml]$csproj = Get-Content $csprojPath
     Write-Host "Update All package version $csprojPath"
     $csproj.Project.ItemGroup.PackageReference | Where-Object { $_.Include -like "Xpand.*" } | ForEach-Object {
@@ -55,19 +57,19 @@ function UpdateVersion($csprojPath,$defaulVersion,$testApplication ) {
         
         }
     }
-    Write-Host "Update DX version to $defaulVersion"
+    Write-Host "Update DX version to $dxVersion"
     $csproj.Project.ItemGroup.PackageReference | Where-Object { $_.Include -like "DevExpress*" } | ForEach-Object {
-        Write-Host "Change $($_.Include) version to $defaultVersion"
-        $_.Version = $defaulVersion
+        Write-Host "Change $($_.Include) version to $dxVersion"
+        $_.Version = $dxVersion
     }
     $testAppDir = (Get-Item $testApplication).DirectoryName
     Get-ChildItem $testAppDir -Include "*.aspx", "*.config" -Recurse | ForEach-Object {
         $xml = Get-Content $_.FullName -Raw
         $regex = [regex] '\d{2}\.\d{1,2}\.\d'
-        $result = $regex.Replace($xml, $defaultVersion)
+        $result = $regex.Replace($xml, $dxVersion)
         
         $regex = [regex] '\d{2}\.\d{1,2}'
-        $result = $regex.Replace($result, $defaultVersion.substring(0,$defaultVersion.lastindexof(".")))
+        $result = $regex.Replace($result, $dxVersion.substring(0,$dxVersion.lastindexof(".")))
 
         Set-Content $_.FullName $result.Trim()
     }
@@ -75,7 +77,7 @@ function UpdateVersion($csprojPath,$defaulVersion,$testApplication ) {
     Get-Content $csprojPath -Raw
 }
 Get-ChildItem "$root\src\Tests\All\" *.csproj -Recurse | ForEach-Object {
-    UpdateVersion $_.FullName $defaultVersion $testApplication
+    UpdateVersion $_.FullName $dxVersion $testApplication
 }
 
 Write-Host "Building TestApplication" -f Green
