@@ -17,21 +17,17 @@ using Xpand.XAF.Modules.Reactive.Services;
 namespace Xpand.XAF.Modules.CloneModelView.Tests{
     [NonParallelizable]
     public class CloneModelViewTests : BaseTest{
-        [TestCase(CloneViewType.LookupListView, nameof(Platform.Win))]
-        [TestCase(CloneViewType.ListView,nameof(Platform.Win))]
-        [TestCase(CloneViewType.DetailView,nameof(Platform.Win))]
-        [TestCase(CloneViewType.LookupListView,nameof(Platform.Web))]
-        [TestCase(CloneViewType.ListView,nameof(Platform.Web))]
-        [TestCase(CloneViewType.DetailView,nameof(Platform.Web))]
-        public void Clone_Model_View(CloneViewType cloneViewType, string platformName){
-            var platform = GetPlatform(platformName);
+        [TestCase(CloneViewType.LookupListView)]
+        [TestCase(CloneViewType.ListView)]
+        [TestCase(CloneViewType.DetailView)]
+        public void Clone_Model_View(CloneViewType cloneViewType){
 
-            var cloneViewId = $"{nameof(Clone_Model_View)}{platform}_{cloneViewType}";
+            var cloneViewId = $"{nameof(Clone_Model_View)}_{cloneViewType}";
 
             var application = DefaultCloneModelViewModule(info => {
                 var cloneModelViewAttribute = new CloneModelViewAttribute(cloneViewType, cloneViewId);
                 info.FindTypeInfo(typeof(CMV)).AddAttribute(cloneModelViewAttribute);
-            }, platform).Application;
+            }).Application;
             ((bool) application.GetPropertyValue("EnableModelCache")).ShouldBe(false);
                 
             var modelView = application.Model.Views[cloneViewId];
@@ -55,11 +51,11 @@ namespace Xpand.XAF.Modules.CloneModelView.Tests{
             ((IModelObjectViewMergedDifferences) application.Model.Views[cloneViewId]).MergedDifferences.Count.ShouldBe(1);
         }
 
-        [TestCase(nameof(Platform.Web))]
-        [TestCase(nameof(Platform.Win))]
-        public void Clone_multiple_Model_Views(string platformName){
-            var platform = GetPlatform(platformName);
-            var cloneViewId = $"{nameof(Clone_multiple_Model_Views)}{platform}_";
+        
+        [Test()]
+        public void Clone_multiple_Model_Views(){
+            
+            var cloneViewId = $"{nameof(Clone_multiple_Model_Views)}_";
             var cloneViewTypes = Enum.GetValues(typeof(CloneViewType)).Cast<CloneViewType>();
             var application = DefaultCloneModelViewModule(info => {
                 foreach (var cloneViewType in cloneViewTypes){
@@ -67,7 +63,7 @@ namespace Xpand.XAF.Modules.CloneModelView.Tests{
                         new CloneModelViewAttribute(cloneViewType, $"{cloneViewId}{cloneViewType}");
                     info.FindTypeInfo(typeof(CMV)).AddAttribute(cloneModelViewAttribute);
                 }
-            }, platform).Application;
+            }).Application;
             foreach (var cloneViewType in cloneViewTypes){
                 var viewId = $"{cloneViewId}{cloneViewType}";
                 var modelView = application.Model.Views[viewId];
@@ -80,20 +76,16 @@ namespace Xpand.XAF.Modules.CloneModelView.Tests{
         }
 
         
-        [TestCase(CloneViewType.LookupListView, nameof(Platform.Win))]
-        [TestCase(CloneViewType.ListView, nameof(Platform.Win))]
-        [TestCase(CloneViewType.DetailView, nameof(Platform.Win))]
-        [TestCase(CloneViewType.LookupListView,nameof(Platform.Web))]
-        [TestCase(CloneViewType.ListView,nameof(Platform.Web))]
-        [TestCase(CloneViewType.DetailView,nameof(Platform.Web))]
-        public void Clone_Model_View_and_make_it_default(CloneViewType cloneViewType, string platformName){
-            var platform = GetPlatform(platformName);
-            var cloneViewId = $"{nameof(Clone_Model_View_and_make_it_default)}_{cloneViewType}{platform}";
+        [TestCase(CloneViewType.LookupListView)]
+        [TestCase(CloneViewType.ListView)]
+        [TestCase(CloneViewType.DetailView)]
+        public void Clone_Model_View_and_make_it_default(CloneViewType cloneViewType){
+            var cloneViewId = $"{nameof(Clone_Model_View_and_make_it_default)}_{cloneViewType}";
 
             var application = DefaultCloneModelViewModule(info => {
                 var cloneModelViewAttribute = new CloneModelViewAttribute(cloneViewType, cloneViewId, true);
                 info.FindTypeInfo(typeof(CMV)).AddAttribute(cloneModelViewAttribute);
-            }, platform).Application;
+            }).Application;
             var modelView = application.Model.Views[cloneViewId].AsObjectView;
 
             ((IModelView) modelView.ModelClass.GetPropertyValue($"Default{cloneViewType}")).Id
@@ -103,12 +95,10 @@ namespace Xpand.XAF.Modules.CloneModelView.Tests{
         
 
 
-        [TestCase(CloneViewType.LookupListView, nameof(Platform.Win))]
-        [TestCase(CloneViewType.LookupListView,nameof(Platform.Web))]
-        [TestCase(CloneViewType.ListView, nameof(Platform.Win))]
-        [TestCase(CloneViewType.ListView,nameof(Platform.Web))]
-        public void Clone_Model_ListView_and_change_its_detailview(CloneViewType cloneViewType, string platform){
-            var cloneViewId = $"{nameof(Clone_Model_ListView_and_change_its_detailview)}{platform}_";
+        [TestCase(CloneViewType.LookupListView)]
+        [TestCase(CloneViewType.ListView)]
+        public void Clone_Model_ListView_and_change_its_detailview(CloneViewType cloneViewType){
+            var cloneViewId = $"{nameof(Clone_Model_ListView_and_change_its_detailview)}_";
             var listViewId = $"{cloneViewId}{cloneViewType}";
             var detailViewId = $"{cloneViewType}DetailView";
             var application = DefaultCloneModelViewModule(info => {
@@ -116,7 +106,7 @@ namespace Xpand.XAF.Modules.CloneModelView.Tests{
                 typeInfo.AddAttribute(new CloneModelViewAttribute(CloneViewType.DetailView, detailViewId));
                 typeInfo.AddAttribute(new CloneModelViewAttribute(cloneViewType, listViewId)
                     {DetailView = detailViewId});
-            }, (Platform) Enum.Parse(typeof(Platform),platform)).Application;
+            }).Application;
             var modelListView = (IModelListView) application.Model.Views[listViewId];
             modelListView.DetailView.Id.ShouldBe(detailViewId);
             application.Dispose();
@@ -138,7 +128,7 @@ namespace Xpand.XAF.Modules.CloneModelView.Tests{
             return (CloneModelViewModule) application.AddModule(cloneModelViewModule,null,true, typeof(CMV));
         }
 
-        private static CloneModelViewModule DefaultCloneModelViewModule(Action<ITypesInfo> customizeTypesInfo,Platform platform){
+        private static CloneModelViewModule DefaultCloneModelViewModule(Action<ITypesInfo> customizeTypesInfo,Platform platform=Platform.Win){
             var cloneModelViewModule = new CloneModelViewModule();
             return DefaultCloneModelViewModule(cloneModelViewModule, customizeTypesInfo, platform);
         }

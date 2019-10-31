@@ -9,7 +9,7 @@ param(
     [string]$branch="lab",
     [switch]$InstallModules,
     [string[]]$taskList=@("Release"),
-    [string]$XpandPwshVersion = "0.25.11",
+    [string]$XpandPwshVersion = "0.25.12",
     [switch]$Release,
     [switch]$CustomVersion
 )
@@ -29,7 +29,7 @@ if ($InstallModules){
     return
 }
 
-Invoke-XPsake  "$PSScriptRoot\Build.ps1" -properties @{
+Invoke-XPsake  "$PSScriptRoot\tools\build\Build.ps1" -properties @{
     "cleanBin"       = $cleanBin;
     "msbuild"        = $msbuild;
     "nugetApiKey"    = $nugetApiKey;

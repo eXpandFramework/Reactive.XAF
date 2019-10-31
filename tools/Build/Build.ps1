@@ -51,13 +51,13 @@ task Init {
 
 task UpdateProjects {
     InvokeScript{
-        & "$PSScriptRoot\tools\build\UpdateProjects.ps1"
+        & "$PSScriptRoot\UpdateProjects.ps1"
     }
 }
 
 task UpdateReadMe {
     InvokeScript{
-        & "$PSScriptRoot\tools\build\UpdateReadMe.ps1" 
+        & "$PSScriptRoot\UpdateReadMe.ps1" 
     }
 }
 
@@ -66,22 +66,22 @@ task CompileTests -precondition {return $compile  } {
         write-host "Building Tests" -f "Blue"
         $source="https://api.nuget.org/v3/index.json;$packageSources"
         $source="$source;$PSScriptRoot\Bin\Nupkg"
-        dotnet restore "$PSScriptRoot\src\Tests\Tests.sln" --source $packageSources --source (Get-PackageFeed -Nuget) --source  "$PSScriptRoot\Bin\Nupkg" /WarnAsError
-        dotnet msbuild "$PSScriptRoot\src\Tests\Tests.sln" "/bl:$PSScriptRoot\Bin\CompileTests.binlog" "/p:configuration=Debug" /WarnAsError /m /v:m
+        dotnet restore "$PSScriptRoot\..\..\src\Tests\Tests.sln" --source $packageSources --source (Get-PackageFeed -Nuget) --source  "$PSScriptRoot\Bin\Nupkg" /WarnAsError
+        dotnet msbuild "$PSScriptRoot\..\..\src\Tests\Tests.sln" "/bl:$PSScriptRoot\Bin\CompileTests.binlog" "/p:configuration=Debug" /WarnAsError /m /v:m
     }
 }
 
 task Compile -precondition {return $compile  } {
     InvokeScript -maxRetries 3 {
         write-host "Building Extensions" -f "Blue"
-        dotnet restore "$PSScriptRoot\src\Extensions\Extensions.sln" --source (Get-PackageFeed -nuget) --source $packageSources /WarnAsError
-        & dotnet msbuild "$PSScriptRoot\src\Extensions\Extensions.sln" "/bl:$PSScriptRoot\Bin\Extensions.binlog" "/p:configuration=Release" /m /v:m
+        dotnet restore "$PSScriptRoot\..\..\src\Extensions\Extensions.sln" --source (Get-PackageFeed -nuget) --source $packageSources /WarnAsError
+        & dotnet msbuild "$PSScriptRoot\..\..\src\Extensions\Extensions.sln" "/bl:$PSScriptRoot\Bin\Extensions.binlog" "/p:configuration=Release" /m /v:m
     }
     InvokeScript -maxRetries 3{
         write-host "Building Modules" -f "Blue"
-        dotnet restore "$PSScriptRoot\src\Modules\Modules.sln" --source (Get-PackageFeed -nuget) --source $packageSources /WarnAsError
-        set-location "$PSScriptRoot\src\Modules"
-        dotnet msbuild "$PSScriptRoot\src\Modules\Modules.sln" "/bl:$PSScriptRoot\Bin\Modules.binlog" "/p:configuration=Release" /WarnAsError /m /v:m
+        dotnet restore "$PSScriptRoot\..\..\src\Modules\Modules.sln" --source (Get-PackageFeed -nuget) --source $packageSources /WarnAsError
+        set-location "$PSScriptRoot\..\..\src\Modules"
+        dotnet msbuild "$PSScriptRoot\..\..\src\Modules\Modules.sln" "/bl:$PSScriptRoot\Bin\Modules.binlog" "/p:configuration=Release" /WarnAsError /m /v:m
     }
 }
 
@@ -90,19 +90,19 @@ Task  CreateNuspec  {
         $a=@{
             Release=$Release
         }
-        & "$PSScriptRoot\tools\build\CreateNuspec.ps1" @a
+        & "$PSScriptRoot\CreateNuspec.ps1" @a
     }
 }
 
 Task PackNuspec {
     InvokeScript {
-        & "$PSScriptRoot\tools\build\PackNuspec.ps1" -branch $branch
+        & "$PSScriptRoot\PackNuspec.ps1" -branch $branch
     }
 }
 
 Task UpdateAllTests {
     InvokeScript -maxRetries 3 {
-        & "$PSScriptRoot\tools\build\UpdateAllTests.ps1" $PSScriptRoot $branch $packageSources $dxVersion
+        & "$PSScriptRoot\UpdateAllTests.ps1" "$PSScriptRoot\..\..\" $branch $packageSources $dxVersion
     }
 }
 
