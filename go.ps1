@@ -39,4 +39,5 @@ Invoke-XPsake  "$PSScriptRoot\tools\build\Build.ps1" -properties @{
     "branch"=$branch;
     "Release"=$Release;
     "CustomVersion"=$CustomVersion;
+    "Root"=$PSScriptRoot;
 } -taskList $taskList

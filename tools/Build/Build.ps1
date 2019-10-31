@@ -12,7 +12,8 @@ properties {
     $branch=$null
     $Release=$null
     $CustomVersion=$false
-    $AzureToken=$null
+    $AzureToken=$null,
+    $Root="$nugetbin\..\..\"
 }
 
 
@@ -22,16 +23,18 @@ task TestsRun  -depends Release
 Task IndexSources{
     InvokeScript{
         $sha=Get-GitLastSha "https://github.com/eXpandFramework/DevExpress.XAF" $branch
-        Get-ChildItem "$PSScriptRoot\bin" Xpand.XAF.Modules.*.pdb| Update-XSymbols -SourcesRoot "$PSScriptRoot" -TargetRoot "https://raw.githubusercontent.com/eXpandFramework/DevExpress.XAF/$sha"
+        Get-ChildItem "$root\bin" Xpand.XAF.Modules.*.pdb| Update-XSymbols -SourcesRoot "$Root" -TargetRoot "https://raw.githubusercontent.com/eXpandFramework/DevExpress.XAF/$sha"
     }
 }
 
 task Init {
     InvokeScript{
-        New-Item "$PSScriptRoot\bin\ReactiveLoggerClient" -ItemType Directory -Force |Out-Null
+        "Create bin directory in $Root"
+        New-Item "$Root\bin" -ItemType Directory -Force 
+        New-Item "$Root\bin\ReactiveLoggerClient" -ItemType Directory -Force |Out-Null
         
-        Get-ChildItem "CodeCoverage.runsettings" -Recurse|Copy-Item -Destination "$PSScriptRoot\bin\CodeCoverage.runsettings" -Force
-        $versionMismatch=Get-ChildItem $PSScriptRoot *.csproj -Recurse -Exclude "*TestApplication*"|ForEach-Object{
+        Get-ChildItem "CodeCoverage.runsettings" -Recurse|Copy-Item -Destination "$Root\bin\CodeCoverage.runsettings" -Force
+        $versionMismatch=Get-ChildItem $Root *.csproj -Recurse -Exclude "*TestApplication*"|ForEach-Object{
             $projectPath=$_.FullName
             [xml]$csproj=Get-Content $projectPath
             $csproj.project.itemgroup.packageReference|foreach-Object{
@@ -65,23 +68,23 @@ task CompileTests -precondition {return $compile  } {
     InvokeScript -maxRetries 3{
         write-host "Building Tests" -f "Blue"
         $source="https://api.nuget.org/v3/index.json;$packageSources"
-        $source="$source;$PSScriptRoot\Bin\Nupkg"
-        dotnet restore "$PSScriptRoot\..\..\src\Tests\Tests.sln" --source $packageSources --source (Get-PackageFeed -Nuget) --source  "$PSScriptRoot\Bin\Nupkg" /WarnAsError
-        dotnet msbuild "$PSScriptRoot\..\..\src\Tests\Tests.sln" "/bl:$PSScriptRoot\Bin\CompileTests.binlog" "/p:configuration=Debug" /WarnAsError /m /v:m
+        $source="$source;$Root\Bin\Nupkg"
+        dotnet restore "$Root\src\Tests\Tests.sln" --source $packageSources --source (Get-PackageFeed -Nuget) --source  "$Root\Bin\Nupkg" /WarnAsError
+        dotnet msbuild "$Root\src\Tests\Tests.sln" "/bl:$Root\Bin\CompileTests.binlog" "/p:configuration=Debug" /WarnAsError /m /v:m
     }
 }
 
 task Compile -precondition {return $compile  } {
     InvokeScript -maxRetries 3 {
         write-host "Building Extensions" -f "Blue"
-        dotnet restore "$PSScriptRoot\..\..\src\Extensions\Extensions.sln" --source (Get-PackageFeed -nuget) --source $packageSources /WarnAsError
-        & dotnet msbuild "$PSScriptRoot\..\..\src\Extensions\Extensions.sln" "/bl:$PSScriptRoot\Bin\Extensions.binlog" "/p:configuration=Release" /m /v:m
+        dotnet restore "$Root\src\Extensions\Extensions.sln" --source (Get-PackageFeed -nuget) --source $packageSources /WarnAsError
+        & dotnet msbuild "$Root\src\Extensions\Extensions.sln" "/bl:$Root\Bin\Extensions.binlog" "/p:configuration=Release" /m /v:m
     }
     InvokeScript -maxRetries 3{
         write-host "Building Modules" -f "Blue"
-        dotnet restore "$PSScriptRoot\..\..\src\Modules\Modules.sln" --source (Get-PackageFeed -nuget) --source $packageSources /WarnAsError
-        set-location "$PSScriptRoot\..\..\src\Modules"
-        dotnet msbuild "$PSScriptRoot\..\..\src\Modules\Modules.sln" "/bl:$PSScriptRoot\Bin\Modules.binlog" "/p:configuration=Release" /WarnAsError /m /v:m
+        dotnet restore "$Root\src\Modules\Modules.sln" --source (Get-PackageFeed -nuget) --source $packageSources /WarnAsError
+        set-location "$Root\src\Modules"
+        dotnet msbuild "$Root\src\Modules\Modules.sln" "/bl:$Root\Bin\Modules.binlog" "/p:configuration=Release" /WarnAsError /m /v:m
     }
 }
 
@@ -102,14 +105,14 @@ Task PackNuspec {
 
 Task UpdateAllTests {
     InvokeScript -maxRetries 3 {
-        & "$PSScriptRoot\UpdateAllTests.ps1" "$PSScriptRoot\..\..\" $branch $packageSources $dxVersion
+        & "$PSScriptRoot\UpdateAllTests.ps1" "$Root" $branch $packageSources $dxVersion
     }
 }
 
 
 task Clean -precondition {return $cleanBin} {
     InvokeScript {
-        $bin="$PSScriptRoot\bin\"
+        $bin="$Root\bin\"
         Remove-Item $bin -Recurse -Force -ErrorAction SilentlyContinue
         Clear-XProjectDirectories
     }

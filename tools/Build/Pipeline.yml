@@ -29,7 +29,6 @@ trigger:
         - master
 jobs:
 - job: TestsRunBuild
-  continueOnError: true
   strategy: 
     parallel: 1
   pool:
@@ -68,7 +67,6 @@ jobs:
   strategy:
     parallel: 2
   dependsOn: TestsRunBuild
-  continueOnError: true
   pool:
     vmImage: windows-2019
   variables:
@@ -102,7 +100,6 @@ jobs:
   strategy:
     parallel: 14
   dependsOn: TestPhaseEasyTest
-  continueOnError: true
   pool:
     vmImage: windows-2019
   variables:

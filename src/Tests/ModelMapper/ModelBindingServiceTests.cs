@@ -181,33 +181,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             }
         }
 
-        
-        [TestCase(nameof(Platform.Win))]
-        [Ignore(NotImplemented)]
-//        [TestCase(nameof(Platform.Web))]
-        public void Bind_IEnumerable_Properties(string platformName){
-            
-//            var typeToMap=typeof(CollectionsType);
-//            InitializeMapperService($"{nameof(Bind_IEnumerable_Properties)}{typeToMap.Name}{platform}");
-//            var module = typeToMap.Extend<IModelListView>();
-//            var application = DefaultModelMapperModule(platform,module).Application;
-//            var modelListView = application.Model.Views.OfType<IModelListView>().First();
-//            var mapName = typeToMap.ModelMapName();
-//            var modelModelMap = (IModelModelMap)modelListView.GetNode(mapName);
-//            var modelNode = modelModelMap.GetNode(nameof(CollectionsType.TestModelMappersList)).AddNode();
-//            modelNode.SetValue(nameof(TestModelMapper.Name),"Test");
-//
-//            var collectionsType = new CollectionsType();
-//            var testModelMapper = new TestModelMapper();
-//            collectionsType.TestModelMappersList.Add(testModelMapper);
-//
-//            modelModelMap.BindTo(collectionsType);
-//
-//            testModelMapper.Name.ShouldBe("Test");
-            
-        }
 
-        
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
         [Ignore(NotImplemented)]
@@ -215,7 +189,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             
         }
 
-        
+
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
         [Ignore(NotImplemented)]
@@ -223,7 +197,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             
         }
 
-        
+
         [TestCase(nameof(Platform.Web),new[]{PredefinedMap.ASPxPopupControl },new[]{typeof(ASPxPopupControl)},new Type[0],0)]
         [TestCase(nameof(Platform.Win),new[]{PredefinedMap.XafLayoutControl },new[]{typeof(XafLayoutControl)},new Type[0],1)]
         [TestCase(nameof(Platform.Win),new[]{PredefinedMap.LayoutControlGroup },new[]{typeof(LayoutControlGroup)},new Type[0],1)]
@@ -254,8 +228,22 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                 }
             }
         }
-        
-        
+
+        [Test]
+        public void Bind_Two_Views(){
+            
+            
+//            InitializeMapperService($"{nameof(Bind_Two_Views)}{PredefinedMap.GridView}");
+//            using (var module = PredefinedMap.GridView.Extend()){
+//                using (var application = DefaultModelMapperModule(nameof(Bind_Two_Views), Platform.Win, module).Application){
+//                    var modelListView = application.Model.Views.OfType<IModelListView>().First();
+//                    var modelModelMap = (IModelModelMap)modelListView.MapNode(PredefinedMap.GridView.TypeToMap());
+//                    
+//                }
+//            }
+        }
+
+
         [TestCase(nameof(Platform.Win),new[]{PredefinedMap.GridColumn , PredefinedMap.GridView},new[]{typeof(XafGridView),typeof(GridColumn),typeof(GridListEditor)},new Type[0],3)]
         [TestCase(nameof(Platform.Web),new[]{PredefinedMap.GridViewDataColumn , PredefinedMap.ASPxGridView},new[]{typeof(ASPxGridView),typeof(GridViewDataColumn),typeof(ASPxGridListEditor)},new Type[0],3)]
         [TestCase(nameof(Platform.Win),new[]{PredefinedMap.BandedGridColumn , PredefinedMap.AdvBandedGridView},new[]{typeof(XafAdvBandedGridView),typeof(BandedGridColumn),typeof(GridListEditor)},new Type[0],3)]
