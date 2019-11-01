@@ -63,11 +63,6 @@ jobs:
     inputs:
       PathtoPublish: '$(System.DefaultworkingDirectory)\bin'
       ArtifactName: 'Xpand.XAF.Modules.Bin'
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: Packages'
-    inputs:
-      PathtoPublish: '$(System.DefaultworkingDirectory)'
-      ArtifactName: 'TestsRun'
 - job: TestPhaseEasyTest
   strategy:
     parallel: 2
@@ -98,7 +93,7 @@ jobs:
         codeCoverageEnabled: true
         distributionBatchType: basedOnAssembly
         runInParallel: false
-        runSettingsFile: .\Xpand.XAF.Modules.Bin\CodeCoverage.runsettings
+        runSettingsFile: .\Xpand.XAF.Modules.Bin\Tests.runsettings
         runTestsInIsolation: true
         collectDumpOn: never
 - job: TestPhase1
@@ -131,7 +126,7 @@ jobs:
         codeCoverageEnabled: true
         distributionBatchType: basedOnAssembly
         runInParallel: false
-        runSettingsFile: .\Xpand.XAF.Modules.Bin\CodeCoverage.runsettings
+        runSettingsFile: .\Xpand.XAF.Modules.Bin\Tests.runsettings
         runTestsInIsolation: false
         collectDumpOn: never
 - job: TestModelMapper
@@ -164,8 +159,9 @@ jobs:
         distributionBatchType: basedOnTestCases
         runInParallel: false
         runTestsInIsolation: true
-        runSettingsFile: .\Xpand.XAF.Modules.Bin\CodeCoverage.runsettings
+        runSettingsFile: .\Xpand.XAF.Modules.Bin\Tests.runsettings
         collectDumpOn: never
+        
 - job: Release
   dependsOn: TestModelMapper
   strategy: 
