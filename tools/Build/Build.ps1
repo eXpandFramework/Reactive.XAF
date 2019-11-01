@@ -92,6 +92,7 @@ Task  CreateNuspec  {
     InvokeScript{
         $a=@{
             Release=$Release
+            DxVersion=$dxVersion
         }
         & "$PSScriptRoot\CreateNuspec.ps1" @a
     }

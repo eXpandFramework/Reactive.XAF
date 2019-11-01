@@ -63,6 +63,11 @@ jobs:
     inputs:
       PathtoPublish: '$(System.DefaultworkingDirectory)\bin'
       ArtifactName: 'Xpand.XAF.Modules.Bin'
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Packages'
+    inputs:
+      PathtoPublish: '$(System.DefaultworkingDirectory)'
+      ArtifactName: 'TestsRun'
 - job: TestPhaseEasyTest
   strategy:
     parallel: 2
