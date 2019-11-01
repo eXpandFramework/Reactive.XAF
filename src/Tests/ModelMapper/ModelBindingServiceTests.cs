@@ -28,6 +28,7 @@ using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Repository;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.BandedGrid;
+using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraLayout;
 using DevExpress.XtraPivotGrid;
 using DevExpress.XtraScheduler;
@@ -230,15 +231,17 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         [Test]
-        public void Bind_Two_Views(){
-            
-            
-//            InitializeMapperService($"{nameof(Bind_Two_Views)}{PredefinedMap.GridView}");
+        public async Task Bind_Two_Views(){
+////            
+//            Assembly.LoadFile(typeof(XafGridView).Assembly.Location);
+//            InitializeMapperService($"{nameof(Bind_Two_Views)}{PredefinedMap.GridView}",Platform.Win);
 //            using (var module = PredefinedMap.GridView.Extend()){
 //                using (var application = DefaultModelMapperModule(nameof(Bind_Two_Views), Platform.Win, module).Application){
-//                    var modelListView = application.Model.Views.OfType<IModelListView>().First();
-//                    var modelModelMap = (IModelModelMap)modelListView.MapNode(PredefinedMap.GridView.TypeToMap());
-//                    
+//                    var bound = ModelBindingService.ControlBind.FirstAsync().SubscribeReplay();
+//                    application.CreateObjectView<ListView>(typeof(MM)).CreateControls();
+//
+//                    await bound;
+//
 //                }
 //            }
         }

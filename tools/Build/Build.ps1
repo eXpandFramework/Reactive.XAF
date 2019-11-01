@@ -33,7 +33,7 @@ task Init {
         New-Item "$Root\bin" -ItemType Directory -Force 
         New-Item "$Root\bin\ReactiveLoggerClient" -ItemType Directory -Force |Out-Null
         
-        Get-ChildItem "CodeCoverage.runsettings" -Recurse|Copy-Item -Destination "$Root\bin\CodeCoverage.runsettings" -Force
+        Get-ChildItem "Tests.runsettings" -Recurse|Copy-Item -Destination "$Root\bin\Tests.runsettings" -Force
         $versionMismatch=Get-ChildItem $Root *.csproj -Recurse -Exclude "*TestApplication*"|ForEach-Object{
             $projectPath=$_.FullName
             [xml]$csproj=Get-Content $projectPath
@@ -106,7 +106,7 @@ Task PackNuspec {
 
 Task UpdateAllTests {
     InvokeScript -maxRetries 3 {
-        & "$PSScriptRoot\UpdateAllTests.ps1" "$Root" $branch $packageSources $dxVersion
+        & "$Root\Tools\Build\UpdateAllTests.ps1" "$Root" $branch $packageSources $dxVersion
     }
 }
 

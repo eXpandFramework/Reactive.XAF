@@ -123,15 +123,7 @@ UpdateModules $rootLocation $packages
 if (!$AzureToken){
     return
 }
-$latestMinors = Get-NugetPackageSearchMetadata -Name DevExpress.Xpo -AllVersions -Source (Get-Feed -DX) | ForEach-Object {
-    $v = $_.Identity.Version.Version
-    [PSCustomObject]@{
-        Version = $v
-        Minor   = "$($v.Major).$($v.Minor)"
-    }
-} | Group-Object -Property Minor | ForEach-Object {
-    $_.Group | Select-Object -First 1 -ExpandProperty Version
-} | Sort-Object -Descending | Select-Object -First 6
+$latestMinors = Get-LatestMinorVersion "DevExpress.ExpressApp" (Get-Feed -DX)
 "latestMinors:"
 $latestMinors
 Set-VSTeamAccount -Account eXpandDevOps -PersonalAccessToken $AzureToken

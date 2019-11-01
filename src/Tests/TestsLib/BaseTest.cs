@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Xpo;
 using NUnit.Framework;
+using NUnit.Framework.Interfaces;
 using Xpand.Extensions.AppDomain;
 using Xpand.Extensions.Linq;
 using Xpand.Extensions.XAF.XafApplication;
@@ -79,7 +81,25 @@ namespace Xpand.TestsLib{
         public void Dispose(){
             XpoTypesInfoHelper.Reset();
             XafTypesInfo.HardReset();
-//            GC.Collect();
+            
+            if (TestContext.CurrentContext.Result.Outcome.Status == TestStatus.Failed){
+                var settingsPath = $"{AppDomain.CurrentDomain.ApplicationPath()}\\TestRun.Settings";
+                while (!File.Exists(settingsPath)){
+                    var parent = new DirectoryInfo($"{Path.GetDirectoryName(settingsPath)}").Parent;
+                    if (parent == null){
+                        settingsPath = null;
+                        break;
+                    }
+                    settingsPath = $"{parent.FullName}\\TestRun.Settings";
+                }
+
+                if (settingsPath != null){
+                    var settings=Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(settingsPath);
+                    var fileName = $"{settings.TestArtifactsDirectory}\\TestsRun.zip";
+                    ZipFile.CreateFromDirectory(settings.TestArtifactsDirectory,fileName,CompressionLevel.NoCompression, false);
+                    TestContext.AddTestAttachment(fileName);
+                }    
+            }
         }
     }
 }

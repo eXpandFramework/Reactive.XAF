@@ -59,10 +59,15 @@ jobs:
         & .\tools\build\pipeline.ps1 @goArgs
       pwsh: true
   - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: Packages'
+    displayName: 'Publish Artifact: Bin'
     inputs:
       PathtoPublish: '$(System.DefaultworkingDirectory)\bin'
-      ArtifactName: 'Xpand.XAF.Modules.Bin'
+      ArtifactName: 'Bin'
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Build'
+    inputs:
+      PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage'
+      ArtifactName: 'Build'
 - job: TestPhaseEasyTest
   strategy:
     parallel: 2
@@ -80,6 +85,7 @@ jobs:
         downloadPath: '$(System.DefaultworkingDirectory)'
     - task: VSTest@2
       displayName: 'VsTest - testAssemblies'
+      continueOnError: true
       inputs:
         searchFolder: '$(System.DefaultWorkingDirectory)'
         testSelector: 'testAssemblies'
@@ -93,7 +99,7 @@ jobs:
         codeCoverageEnabled: true
         distributionBatchType: basedOnAssembly
         runInParallel: false
-        runSettingsFile: .\Xpand.XAF.Modules.Bin\Tests.runsettings
+        runSettingsFile: .\bin\Tests.runsettings
         runTestsInIsolation: true
         collectDumpOn: never
 - job: TestPhase1
@@ -113,6 +119,7 @@ jobs:
         downloadPath: '$(System.DefaultworkingDirectory)'
     - task: VSTest@2
       displayName: 'VsTest - testAssemblies'
+      continueOnError: true
       inputs:
         searchFolder: '$(System.DefaultWorkingDirectory)'
         testSelector: 'testAssemblies'
@@ -126,7 +133,7 @@ jobs:
         codeCoverageEnabled: true
         distributionBatchType: basedOnAssembly
         runInParallel: false
-        runSettingsFile: .\Xpand.XAF.Modules.Bin\Tests.runsettings
+        runSettingsFile: .\bin\Tests.runsettings
         runTestsInIsolation: false
         collectDumpOn: never
 - job: TestModelMapper
@@ -139,6 +146,7 @@ jobs:
     - group: keys
   steps:
     - checkout: none
+    
     - task: DownloadBuildArtifacts@0
       inputs:
         buildType: 'current'
@@ -146,6 +154,7 @@ jobs:
         downloadPath: '$(System.DefaultworkingDirectory)'
     - task: VSTest@2
       displayName: 'VsTest - testAssemblies'
+      continueOnError: true
       inputs:
         searchFolder: '$(System.DefaultWorkingDirectory)'
         testSelector: 'testAssemblies'
@@ -159,11 +168,30 @@ jobs:
         distributionBatchType: basedOnTestCases
         runInParallel: false
         runTestsInIsolation: true
-        runSettingsFile: .\Xpand.XAF.Modules.Bin\Tests.runsettings
+        runSettingsFile: .\bin\Tests.runsettings
         collectDumpOn: never
-        
-- job: Release
+- job: CheckTests
   dependsOn: TestModelMapper
+  steps:
+    - checkout: none
+    - task: PowerShell@2
+      displayName: CheckTests
+      inputs:
+        pwsh: true
+        targetType: inline
+        script: |
+          Install-Module XpandPwsh -Scope CurrentUser -AllowClobber -Force
+          $BuildNumber='$(Build.BuildNumber)'
+          $testRunName="TestRun_$BuildName`_$BuildNumber"
+          "TestRunName=$testRunName"
+
+          $testRun=Invoke-AzureRestMethod '$(AzureToken)' eXpandDevOps eXpandFramework test/runs|Where-Object{$_.name -eq $testRunName}
+          $failedTests=$testRun.unanalyzedTests
+          if ($failedTests -gt 0){
+              throw "$failedTests test fail"
+          }
+- job: Release
+  dependsOn: CheckTests
   strategy: 
     parallel: 1
   pool:
@@ -182,11 +210,11 @@ jobs:
           SourcePath ='$(System.DefaultworkingDirectory)'
           GitHubUserName ='$(GitHubUserName)' 
           Token ='$(GitHubToken)' 
-          DXApiFeed ='$(DXApiFeed) '
+          DXApiFeed ='$(DXApiFeed)'
           ArtifactStagingDirectory ='$(build.artifactstagingdirectory)' 
           BinDirectory ='$(System.DefaultworkingDirectory)\bin '
           AzureToken ='$(AzureToken)'
-          PastBuild =$false 
+          PastBuild ='$(PastBuild)' 
           CustomVersion ='$(Build.DefinitionName)'
         }
         "goArgs:"
@@ -204,9 +232,10 @@ jobs:
           Token ='$(GitHubToken)' 
           Branch ='$(Build.SourceBranchName)'
           SourcesRoot ='$(System.DefaultworkingDirectory)'
+          DXApiFeed ='$(DXApiFeed)'
           ApiKey ='$(NugetApiKey)'
           LocalPackageSource ='$(System.DefaultWorkingDirectory)\bin\Nupkg' 
-          PastBuild =$(PastBuild) 
+          PastBuild ='$(PastBuild)' 
           CustomVersion ='$(Build.DefinitionName)'
         }
         "goArgs:"

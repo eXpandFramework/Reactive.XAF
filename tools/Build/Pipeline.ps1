@@ -28,7 +28,7 @@ if (!$result) {
     $CustomVersion = "latest"
 }
 else {
-    $latestMinors = Get-LatestMinorVersion "DevExpress.Xpo" $DXApiFeed
+    $latestMinors = Get-LatestMinorVersion "DevExpress.ExpressApp" (Get-Feed -DX)
     "latestMinors:"
     $latestMinors
     $CustomVersion = $latestMinors | Where-Object { "$($_.Major).$($_.Minor)" -eq $result }
@@ -123,10 +123,12 @@ if ($Branch -eq "lab"){
         $pDir=$_.DirectoryName
         $yArgs.Packages|Where-Object{$_.id -eq $pName}|ForEach-Object{
             $nextVersion=$_.NextVersion
-            $revision=[int]$nextVersion.Revision-1
-            $nowVersion=New-Object version ($nextVersion.Major,$nextVersion.Minor,$nextVersion.Build,$revision)
-            Write-Host "Update $pName version to latest $nowVersion"
-            Update-AssemblyInfoVersion $nowVersion $pDir
+            if ($nextVersion.Revision -gt -1){
+                $revision=[int]$nextVersion.Revision-1
+                $nowVersion=New-Object version ($nextVersion.Major,$nextVersion.Minor,$nextVersion.Build,$revision)
+                Write-Host "Update $pName version to latest $nowVersion"
+                Update-AssemblyInfoVersion $nowVersion $pDir
+            }
         }
     }
 }
@@ -173,3 +175,10 @@ $bArgs | Out-String
 
 & $SourcePath\go.ps1 @bArgs
 
+$stage="$SourcePath\buildstage"
+New-Item $stage -ItemType Directory -Force
+Set-Location $SourcePath
+Get-ChildItem -Exclude ".git","bin","buildstage"|Copy-Item -Destination $stage -Recurse -Force -ErrorAction Continue
+set-location $stage
+Clear-ProjectDirectories
+Copy-Item "$Sourcepath\Bin" "$stage\Bin" -Recurse -Force

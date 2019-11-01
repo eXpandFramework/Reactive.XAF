@@ -2,7 +2,7 @@ param(
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\..\"),
     $branch = "lab",
     $source,
-    $dxVersion ="18.2.7"
+    $dxVersion ="19.1.7"
 )
 if ($branch -eq "lab" -and !$source) {
     $source = Get-PackageFeed -Xpand
@@ -63,15 +63,18 @@ function UpdateVersion($csprojPath,$dxVersion,$testApplication ) {
         $_.Version = $dxVersion
     }
     $testAppDir = (Get-Item $testApplication).DirectoryName
+    $shortDxVersion=Get-DevExpressVersion $dxVersion
+    if (($dxVersion.ToCharArray()|Where-Object{$_ -eq "."}).Count -eq 2){
+        $dxVersion+=".0"
+    }
     Get-ChildItem $testAppDir -Include "*.aspx", "*.config" -Recurse | ForEach-Object {
         $xml = Get-Content $_.FullName -Raw
-        $regex = [regex] '\d{2}\.\d{1,2}\.\d'
-        $result = $regex.Replace($xml, $dxVersion)
-        
-        $regex = [regex] '\d{2}\.\d{1,2}'
-        $result = $regex.Replace($result, $dxVersion.substring(0,$dxVersion.lastindexof(".")))
-
+        $regex = [regex] '(?<name>DevExpress.*)v\d{2}\.\d{1,2}(.*)Version=([.\d]*)'
+        $result = $regex.Replace($xml, "`${name}v$shortDxVersion`$1Version=$dxversion")
         Set-Content $_.FullName $result.Trim()
+
+        "NewContent for $($_.BaseName):"
+        $result.Trim()
     }
     $csproj.Save($csprojPath)
     Get-Content $csprojPath -Raw
