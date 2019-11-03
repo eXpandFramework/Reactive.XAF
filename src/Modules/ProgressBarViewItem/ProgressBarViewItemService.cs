@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using Xpand.XAF.Modules.Reactive.Extensions;
+using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.XAF.Modules.ProgressBarViewItem{
     static class ProgressBarViewItemService{

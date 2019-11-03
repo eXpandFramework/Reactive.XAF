@@ -8,10 +8,10 @@ using Fasterflect;
 using Moq;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;
 using Xpand.XAF.Modules.CloneMemberValue.Tests.BOModel;
-using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 

@@ -5,7 +5,8 @@ using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.SystemModule;
-using Xpand.XAF.Modules.Reactive.Extensions;
+using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.SuppressConfirmation{

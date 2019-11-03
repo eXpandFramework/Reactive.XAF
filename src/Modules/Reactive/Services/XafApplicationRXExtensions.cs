@@ -7,6 +7,8 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.DC;
 using Fasterflect;
+using Xpand.Extensions.Reactive.Filter;
+using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using ListView = DevExpress.ExpressApp.ListView;
 using View = DevExpress.ExpressApp.View;

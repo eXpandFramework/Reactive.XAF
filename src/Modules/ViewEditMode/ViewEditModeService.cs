@@ -6,7 +6,9 @@ using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
-using Xpand.XAF.Modules.Reactive.Extensions;
+using Xpand.Extensions.Reactive.Filter;
+using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Controllers;
 

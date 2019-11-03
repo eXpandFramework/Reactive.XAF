@@ -6,7 +6,7 @@ using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using MagicOnion.Server.Hubs;
-using Xpand.XAF.Modules.Reactive.Extensions;
+using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
     public class TraceEventHub : StreamingHubBase<ITraceEventHub, ITraceEventHubReceiver>,ITraceEventHub{

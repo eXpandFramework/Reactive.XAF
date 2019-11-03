@@ -13,7 +13,7 @@
     <Product>Xpand.XAF.Modules.ViewEditMode</Product>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <DebugType>pdbonly</DebugType>
+    <DebugType>full</DebugType>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Model.DesignedDiffs.xafml" />
@@ -22,6 +22,10 @@
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Xpand.Extensions.Reactive">
+      <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.dll</HintPath>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>

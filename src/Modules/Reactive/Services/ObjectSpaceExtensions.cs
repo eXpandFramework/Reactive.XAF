@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
+using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
@@ -30,7 +30,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
 
         public static IObservable<IObjectSpace> ToObjectSpace(this IObjectSpaceProvider provider){
-            return Observable.Using(provider.CreateObjectSpace, space => space.AsObservable());
+            return provider == null ? Observable.Empty<IObjectSpace>() : Observable.Using(provider.CreateObjectSpace, space => space.AsObservable());
         }
 
         public static IObservable<IObjectSpace> ToObjectSpace(this XafApplication application){

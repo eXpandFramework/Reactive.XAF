@@ -4,9 +4,9 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
 using System.Reflection;
+using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
-using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.Predefined{
     class BandedGridColumnService{

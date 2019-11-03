@@ -4,8 +4,8 @@ using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using Fasterflect;
 using Xpand.Extensions.AppDomain;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.Model;
-using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.AutoCommit{

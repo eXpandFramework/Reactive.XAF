@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reactive;
 using System.Reactive.Linq;
+using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{

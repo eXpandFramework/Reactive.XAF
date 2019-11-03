@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Reactive;
 using DevExpress.ExpressApp.Model;
+using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
-using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.Predefined{
     public class LayoutGroupControlService{

@@ -12,7 +12,7 @@
     <OutputPath>..\..\..\bin\ReactiveLoggerClient</OutputPath>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <DebugType>pdbonly</DebugType>
+    <DebugType>full</DebugType>
     <OutputType>WinExe</OutputType>
     <ApplicationManifest>app1.manifest</ApplicationManifest>
     <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
@@ -25,7 +25,7 @@
     <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
     <LangVersion>latest</LangVersion>
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>pdbonly</DebugType>
+    <DebugType>full</DebugType>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <OutputPath>..\..\..\bin\ReactiveLoggerClient</OutputPath>
   </PropertyGroup>

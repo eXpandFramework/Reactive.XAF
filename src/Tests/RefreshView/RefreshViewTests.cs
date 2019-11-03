@@ -7,11 +7,12 @@ using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;
 using Xpand.XAF.Modules.Reactive;
-using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.RefreshView.Tests.BOModel;
 
@@ -37,7 +38,7 @@ namespace Xpand.XAF.Modules.RefreshView.Tests{
                 var objectSpace = application.CreateObjectSpace();
                 objectSpace.CommitChanges();
 
-                await reloaded.Timeout(Timeout);
+                await reloaded.Timeout(Timeout).ToTaskWithoutConfigureAwait();
                 application.CreateViewWindow().SetView(listView);
             
                 objectSpace = application.CreateObjectSpace();

@@ -6,8 +6,8 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.CSharp;
 using Mono.Cecil;
+using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
-using Xpand.XAF.Modules.Reactive.Extensions;
 
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{

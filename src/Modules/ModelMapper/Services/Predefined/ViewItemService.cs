@@ -6,9 +6,10 @@ using System.Reactive.Linq;
 using System.Reflection;
 using DevExpress.ExpressApp.Model;
 using EnumsNET;
+using Xpand.Extensions.Reactive.Filter;
+using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
-using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.Predefined{
     

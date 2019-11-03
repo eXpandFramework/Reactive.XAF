@@ -6,6 +6,8 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Utils;
+using Xpand.Extensions.Reactive.Filter;
+using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{

@@ -17,10 +17,10 @@ using DevExpress.Persistent.Base;
 using Fasterflect;
 using Xpand.Extensions.AppDomain;
 using Xpand.Extensions.Linq;
+using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reflection;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.Predefined;
-using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     public static partial class TypeMappingService{

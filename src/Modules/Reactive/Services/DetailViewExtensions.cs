@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
-using Xpand.XAF.Modules.Reactive.Extensions;
+using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class DetailViewExtensions{
@@ -57,7 +57,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 //                        .ToNestedFrames(nestedObjectTypes);
                     var objectChanged = detailView.WhenCurrentObjectChanged()
 //                        .FirstAsync()
-                        .SelectMany(tuple => { return viewItems.ToNestedFrames(nestedObjectTypes); });
+                        .SelectMany(tuple => viewItems.ToNestedFrames(nestedObjectTypes));
 //                        .Switch();
                     return objectChanged.Select(_ =>
                         (detailView, _.nestedFrame));

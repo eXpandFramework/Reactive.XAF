@@ -14,6 +14,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.XAF.Xpo", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.Mono.Cecil", "Xpand.Extensions.Mono.Cecil\Xpand.Extensions.Mono.Cecil.csproj", "{F7207D53-96FC-4617-A9D5-6D55FB6281FA}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.Reactive", "Xpand.Extensions.Reactive\Xpand.Extensions.Reactive\Xpand.Extensions.Reactive.csproj", "{FFD98CC7-7E8D-4E40-A062-65239BEFEBE6}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2856A16A-A776-4A9B-B2C1-518644B9B2F3} = {2856A16A-A776-4A9B-B2C1-518644B9B2F3}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +41,10 @@ Global
 		{F7207D53-96FC-4617-A9D5-6D55FB6281FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F7207D53-96FC-4617-A9D5-6D55FB6281FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F7207D53-96FC-4617-A9D5-6D55FB6281FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FFD98CC7-7E8D-4E40-A062-65239BEFEBE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFD98CC7-7E8D-4E40-A062-65239BEFEBE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFD98CC7-7E8D-4E40-A062-65239BEFEBE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFD98CC7-7E8D-4E40-A062-65239BEFEBE6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

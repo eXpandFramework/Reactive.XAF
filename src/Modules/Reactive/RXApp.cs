@@ -7,9 +7,9 @@ using System.Reflection;
 using DevExpress.ExpressApp;
 using Fasterflect;
 using HarmonyLib;
+using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ApplicationModulesManager;
 using Xpand.Extensions.XAF.XafApplication;
-using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Security;
 

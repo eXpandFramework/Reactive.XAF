@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
-using Xpand.XAF.Modules.Reactive.Extensions;
+using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services{
     internal static class ModelMapperService{

@@ -7,11 +7,12 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>pdbonly</DebugType>
+    <DebugType>full</DebugType>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="akarnokd.reactive_extensions" Version="0.0.27-alpha" />
     <PackageReference Include="Fasterflect.Xpand" Version="2.0.7" />
     <PackageReference Include="Grpc.Core" Version="2.24.0" />
     <PackageReference Include="MagicOnion" Version="2.6.3" />
@@ -30,6 +31,9 @@
     </Reference>
     <Reference Include="Xpand.Extensions">
       <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions.Reactive">
+      <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.Extensions.XAF">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>

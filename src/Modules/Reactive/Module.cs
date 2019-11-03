@@ -3,6 +3,7 @@ using System.Reactive.Subjects;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive {

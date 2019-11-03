@@ -11,7 +11,7 @@
     <OutputPath>..\..\..\bin</OutputPath>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <DebugType>pdbonly</DebugType>
+    <DebugType>full</DebugType>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -20,6 +20,9 @@
     <Reference Include="WindowsBase" />
     <Reference Include="Xpand.Extensions">
       <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions.Reactive">
+      <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.Extensions.XAF">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>

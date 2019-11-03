@@ -137,7 +137,6 @@ jobs:
         runTestsInIsolation: false
         collectDumpOn: never
 - job: TestModelMapper
-  condition: false
   strategy:
     parallel: 10
   dependsOn: TestPhase1

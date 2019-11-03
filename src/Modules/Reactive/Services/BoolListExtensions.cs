@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp.Utils;
-using Xpand.XAF.Modules.Reactive.Extensions;
+using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class BoolListExtensions{

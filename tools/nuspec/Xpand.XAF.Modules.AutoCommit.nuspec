@@ -18,6 +18,7 @@
       <dependency id="System.Reactive" version="4.2.0" />
       <dependency id="System.ValueTuple" version="4.5.0" />
       <dependency id="Xpand.Extensions" version="0.0.8.0" />
+      <dependency id="Xpand.Extensions.Reactive" version="0.0.1.0" />
       <dependency id="Xpand.Extensions.XAF" version="0.0.7.0" />
       <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.68.0" />
       <dependency id="Xpand.VersionConverter" version="1.0.36.0" />

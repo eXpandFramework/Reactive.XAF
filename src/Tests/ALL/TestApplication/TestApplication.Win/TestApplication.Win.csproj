@@ -20,11 +20,11 @@
     <AssemblyOriginatorKeyFile>..\..\..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
     <LangVersion>latest</LangVersion>
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>pdbonly</DebugType>
+    <DebugType>full</DebugType>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
+    <DebugType>full</DebugType>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
     <LangVersion>latest</LangVersion>
@@ -33,7 +33,7 @@
     <OutputPath>..\..\..\..\..\bin\TestWinApplication</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
+    <DebugType>full</DebugType>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
     <LangVersion>latest</LangVersion>
@@ -44,7 +44,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'EasyTest|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DefineConstants>TRACE;DEBUG;EASYTEST</DefineConstants>
-    <DebugType>pdbonly</DebugType>
+    <DebugType>full</DebugType>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
     <LangVersion>latest</LangVersion>
@@ -97,6 +97,6 @@
     <PackageReference Include="DevExpress.Win.BonusSkins" Version="18.2.10" />
     <PackageReference Include="Grpc.Core" Version="2.24.0" />
     <!-- <PackageReference Include="Xpand.XAF.Modules.Reactive" Version="1.2.67.3" /> -->
-    <PackageReference Include="Xpand.XAF.Win.All" Version="0.0.1.8" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="0.0.1.9" />
   </ItemGroup>
 </Project>

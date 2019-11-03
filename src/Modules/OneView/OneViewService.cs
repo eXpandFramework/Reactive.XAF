@@ -7,9 +7,11 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.ExpressApp.Win.SystemModule;
 using Fasterflect;
+using Xpand.Extensions.Reactive.Filter;
+using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.Reactive;
-using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Win.Services;
 

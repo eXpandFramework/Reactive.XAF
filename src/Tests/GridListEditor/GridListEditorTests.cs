@@ -5,11 +5,11 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;
 using Xpand.XAF.Modules.GridListEditor.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive;
-using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 

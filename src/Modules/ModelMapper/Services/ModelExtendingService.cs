@@ -7,11 +7,12 @@ using ConcurrentCollections;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using Fasterflect;
+using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using Xpand.XAF.Modules.Reactive;
-using Xpand.XAF.Modules.Reactive.Extensions;
 using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.TypeMappingService;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services{

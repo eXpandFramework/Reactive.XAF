@@ -6,7 +6,7 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>pdbonly</DebugType>
+    <DebugType>full</DebugType>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <ApplicationIcon />
@@ -20,7 +20,7 @@
     <AssemblyOriginatorKeyFile>..\..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
     <LangVersion>latest</LangVersion>
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>pdbonly</DebugType>
+    <DebugType>full</DebugType>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <OutputPath>..\..\..\..\bin\</OutputPath>
   </PropertyGroup>
@@ -51,7 +51,7 @@
     <PackageReference Include="DevExpress.Xpo" Version="18.2.10" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
     <PackageReference Include="Unofficial.Microsoft.mshtml" Version="7.0.3300" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="0.0.1.1" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="0.0.1.2" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.TestsLib">

@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.NetworkInformation;
+using System.Net;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using System.Threading;
 using DevExpress.ExpressApp;
 using Grpc.Core;
@@ -15,7 +15,10 @@ using MagicOnion.Client;
 using MagicOnion.Server;
 using MessagePack;
 using MessagePack.Resolvers;
-using Xpand.XAF.Modules.Reactive.Extensions;
+using Xpand.Extensions.Reactive.Filter;
+using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Transform.System.Net;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.XAF.Modules.Reactive.Services;
 using ListView = DevExpress.ExpressApp.ListView;
 
@@ -99,81 +102,53 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
             return application.WhenCompatibilityChecked()
                 .SelectMany(window => {
                     var loggerHub = application is ILoggerHubClientApplication
-                        ? application.ClientPortsList().ToObservable(Scheduler.Default)
-                            .SelectMany(port => port.ConnectClient()
-                                .TakeUntil(application.WhenDisposed()))
+                        ? DetectOnlineHub(application).ConnectClient()
+                            .TakeUntil(application.WhenDisposed())
                         : Observable.Empty<ITraceEventHub>();
                     return loggerHub;
                 })
                 ;
         }
 
-        public static IObservable<ITraceEventHub> ConnectClient(this (string host,int port) tuple){
-            return tuple.DetectOnlineHub()
-                .SelectMany(_ => {
-                    var newClient = _.ToServerPort().NewClient(Receiver);
-                    return newClient.ConnectAsync().ToObservable()
-//                            .Catch<Unit,Exception>(exception => Observable.Empty<Unit>())
-                        .Merge(Unit.Default.AsObservable())
-                        .Select(hub => tuple)
-                        .TraceRXLoggerHub().To(newClient)
-                        ;
-                })
-//                .Catch<ITraceEventHub,Exception>(exception => Observable.Empty<ITraceEventHub>())
-                .Retry();
+        public static IObservable<IPEndPoint> DetectOnlineHub(XafApplication application){
+            return application.ClientPortsList().ToArray().Listening();
         }
 
-        public static bool PortInUse(int port){
-            var inUse = false;
-            var ipProperties = IPGlobalProperties.GetIPGlobalProperties();
-            var ipEndPoints = ipProperties.GetActiveTcpListeners();
-            foreach (var endPoint in ipEndPoints)
-                if (endPoint.Port == port){
-                    inUse = true;
-                    break;
-                }
-            return inUse;
+        public static IObservable<ITraceEventHub> ConnectClient(this IObservable<IPEndPoint> source){
+            return source.SelectMany(point => {
+                var newClient = point.ToServerPort().NewClient(Receiver);
+                return newClient.ConnectAsync().ToObservable()
+                    .Merge(Unit.Default.AsObservable())
+                    .TraceRXLoggerHub().To(newClient);
+            })
+            .Retry();
         }
 
-        public static bool PortInUse(this (string host,int port) tuple){
-            return PortInUse(tuple.port);
-        }
-
-        public static IObservable<Unit> DetectOffLineHub(this (string host,int port) tuple){
-            return Observable.Defer(() => Observable.Start(() => Observable.While(() => tuple.PortInUse(),Observable.Empty<Unit>().Delay(TimeSpan.FromMilliseconds(500)))).Merge())
-                    .Concat(Unit.Default.AsObservable()).FirstAsync()
-                    .Select(unit => unit)
-                    .TraceRXLoggerHub();
-        }
-
-
-//        public static IObservable<(string host, int port)> DetectOnlineHub(this IEnumerable<(string Host, int port)> source){
-//            return Observable.Interval(TimeSpan.FromMilliseconds(300))
-//                .SelectMany(l => source.Where(_ => !_.PortInUse()));
-//        }
-
-        public static IObservable<(string host, int port)> DetectOnlineHub(this (string host,int port) tuple){
-            return Observable.Defer(() => Observable.Start(() => Observable.While(() => !tuple.PortInUse(),Observable.Empty<Unit>().Delay(TimeSpan.FromMilliseconds(500)))).Merge())
-                    .Select(unit => unit)
-                    .Concat(Unit.Default.AsObservable().Select(unit => unit)).FirstAsync()
-                    .RepeatWhen(ob =>ob.SelectMany(o => tuple.DetectOffLineHub().Select(unit => unit)))
-                    .Select(unit => tuple)
-                    .TraceRXLoggerHub()
-                    .Finally(() => { })
-                
-                ;
-        }
-
-        public static IEnumerable<(string Host, int port)> ClientPortsList(this XafApplication application){
+        public static IEnumerable<IPEndPoint> ClientPortsList(this XafApplication application){
+            
             return application.ModelLoggerPorts().SelectMany(ports => ports.LoggerPorts).OfType<IModelLoggerClientRange>()
                 .TraceRXLoggerHub()
                 .SelectMany(range => Enumerable.Range(range.StartPort, range.EndPort-range.StartPort)
-                    .Select(i => (range.Host, port: i))).ToEnumerable();
+                    .Select(port => {
+                        var host = range.Host;
+                        return IPEndPoint(host, port);
+                    })).Merge()
+                .ToEnumerable();
         }
 
-        public static IObservable<(string Host, int port)> ServerPortsList(this XafApplication application){
+        private static IObservable<IPEndPoint> IPEndPoint(string host, int port){
+            var isIP = Regex.IsMatch(host, @"\A\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b\z");
+            if (isIP){
+                return new IPEndPoint(IPAddress.Parse(host), port).AsObservable();
+            }
+
+            return Dns.GetHostAddressesAsync(host).ToObservable()
+                .Select(addresses => new IPEndPoint(addresses.Last(), port));
+        }
+
+        public static IObservable<IPEndPoint> ServerPortsList(this XafApplication application){
             return application.ModelLoggerPorts()
-                .SelectMany(ports => ports.LoggerPorts.OfType<IModelLoggerServerPort>().Select(_ => (_.Host,_.Port)))
+                .SelectMany(ports => ports.LoggerPorts.OfType<IModelLoggerServerPort>().Select(_ => IPEndPoint(_.Host,_.Port))).Merge()
                 .TraceRXLoggerHub();
         }
 
@@ -196,8 +171,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
             return server;
         }
 
-        private static ServerPort ToServerPort(this (string host,int port)tuple){
-            return new ServerPort(tuple.host, tuple.port, ServerCredentials.Insecure);
+        private static ServerPort ToServerPort(this IPEndPoint endPoint){
+            return new ServerPort(endPoint.Address.ToString(), endPoint.Port, ServerCredentials.Insecure);
         }
 
 

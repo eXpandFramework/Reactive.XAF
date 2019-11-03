@@ -5,7 +5,7 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Utils;
-using Xpand.XAF.Modules.Reactive.Extensions;
+using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ActionExtensions{

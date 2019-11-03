@@ -12,11 +12,12 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using Fasterflect;
 using Xpand.Extensions.Linq;
+using Xpand.Extensions.Reactive.Filter;
+using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.Model;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.Predefined;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
-using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services{

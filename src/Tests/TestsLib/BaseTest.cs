@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using DevExpress.ExpressApp;
@@ -64,6 +63,11 @@ namespace Xpand.TestsLib{
         protected void WriteLine(char value){
             TestContext.WriteLine(value);    
         }
+
+        protected void WriteLine(string value){
+            WriteLine(value.ToCharArray());
+        }
+
         protected void WriteLine(char[] value){
             TestContext.WriteLine(value);    
         }

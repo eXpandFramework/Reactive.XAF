@@ -9,11 +9,12 @@ using DevExpress.ExpressApp.Xpo;
 using DevExpress.Persistent.BaseImpl;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.CollectionSource;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;
-using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Logger.Hub.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive.Services;
 
@@ -23,11 +24,10 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
     [NonParallelizable]
     public class ReactiveLoggerHubTests : BaseTest{
         public ReactiveLoggerHubTests(){
-            XpoTypesInfoHelper.GetXpoTypeInfoSource().XPDictionary.CollectClassInfos(GetType().Assembly);
+//            XpoTypesInfoHelper.GetXpoTypeInfoSource().XPDictionary.CollectClassInfos(GetType().Assembly);
         }
 
         [Test]
-        [Apartment(ApartmentState.STA)]
         public async Task Start_Server_After_Logon(){
             
             using (var application = HubModule(nameof(Start_Server_After_Logon)).Application){
@@ -38,15 +38,14 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
                     .FirstAsync().SubscribeReplay();
 
                 application.Logon();
-                await startServer.Timeout(Timeout);
                 application.CreateObjectSpace();
-                await startServerSave.Timeout(Timeout);
+                await startServer.Timeout(Timeout).ToTaskWithoutConfigureAwait();
+
+                await startServerSave.Timeout(Timeout).ToTaskWithoutConfigureAwait();
             }
         }
 
         [Test()]
-        [Apartment(ApartmentState.STA)]
-        [Ignore(NotImplemented)]
         public async Task Connect_Client(){
             
             using (var clientWinApp = new ClientWinApp()){
@@ -77,7 +76,6 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
         }
 
         [Test]
-        [Apartment(ApartmentState.STA)]
         public async Task Client_Detect_When_Hub_Is_Online(){
             
             using (var clientWinApp = new ClientWinApp()){
@@ -87,7 +85,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
                 
                 var detectOnlineHubTrace = clientWinApp.WhenTraceOnNextEvent(nameof(ReactiveLoggerHubService.DetectOnlineHub))
                     .SubscribeReplay();
-                var detectOffline = clientWinApp.WhenTraceOnSubscribeEvent(nameof(ReactiveLoggerHubService.DetectOffLineHub)).SubscribeReplay();
+                
                 using (var application = Platform.Win.NewApplication<ReactiveLoggerHubModule>()){
                     
                     application.AddModule<RXLoggerHubTestsModule>(nameof(Client_Detect_When_Hub_Is_Online),typeof(RLH),typeof(BaseObject));
@@ -96,7 +94,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
                     await detectOnlineHubTrace.FirstAsync().Timeout(Timeout);
                 }
 
-                await detectOffline.FirstAsync().Timeout(Timeout);
+                
             }
         }
 
@@ -104,6 +102,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
         [Test]
         [Apartment(ApartmentState.STA)]
         public async Task Display_TraceEvent_On_New_Client(){
+            XpoTypesInfoHelper.GetXpoTypeInfoSource().XPDictionary.CollectClassInfos(GetType().Assembly);
             using (var application = Platform.Win.NewApplication<ReactiveLoggerHubModule>()){
                 
                 var startServer = application.WhenTraceOnNextEvent(nameof(ReactiveLoggerHubService.StartServer))
@@ -122,6 +121,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
 
                     
                     var listView = clientWinApp.CreateObjectView<ListView>(typeof(TraceEvent));
+                    var collectionReloaded = listView.CollectionSource.WhenCollectionReloaded().FirstAsync().SubscribeReplay();
                     clientWinApp.CreateViewWindow().SetView(listView);
                     
                     await connecting.Timeout(Timeout);
@@ -139,6 +139,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
                     await broadcast.Timeout(Timeout);
                     await receive.Timeout(Timeout);
                     await detailViewCreated.Timeout(Timeout);
+                    await collectionReloaded;
                     var events = listView.CollectionSource.Objects<TraceEvent>().ToArray();
                     events.FirstOrDefault(_ => _.Method==nameof(XafApplicationRXExtensions.WhenDetailViewCreated)).ShouldNotBeNull();
                     events.FirstOrDefault(_ => _.Location==nameof(ReactiveLoggerHubService)).ShouldNotBeNull();
@@ -149,7 +150,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
         [Test]
         [Apartment(ApartmentState.STA)]
         public async Task Display_TraceEvent_On_Running_Client(){
-            
+            XpoTypesInfoHelper.GetXpoTypeInfoSource().XPDictionary.CollectClassInfos(GetType().Assembly);
             using (var clientWinApp = new ClientWinApp()){
                 clientWinApp.EditorFactory=new EditorsFactory();
                 clientWinApp.AddModule<ReactiveLoggerHubModule>();

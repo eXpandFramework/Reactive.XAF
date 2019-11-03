@@ -9,8 +9,8 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.XAF.Model;
-using Xpand.XAF.Modules.Reactive.Extensions;
 
 
 namespace Xpand.XAF.Modules.Reactive.Logger{

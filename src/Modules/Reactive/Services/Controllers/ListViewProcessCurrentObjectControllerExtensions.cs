@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp.SystemModule;
-using Xpand.XAF.Modules.Reactive.Extensions;
+using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
     public static partial class ControllerExtensions{

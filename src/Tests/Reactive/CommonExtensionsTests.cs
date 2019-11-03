@@ -2,8 +2,9 @@
 using akarnokd.reactive_extensions;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.TestsLib;
-using Xpand.XAF.Modules.Reactive.Extensions;
 
 
 namespace Xpand.XAF.Modules.Reactive.Tests{

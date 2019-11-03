@@ -7,7 +7,7 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>pdbonly</DebugType>
+    <DebugType>full</DebugType>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
   </PropertyGroup>
@@ -27,6 +27,9 @@
     <PackageReference Include="DevExpress.Xpo" Version="18.2.10" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Xpand.Extensions.Reactive">
+      <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.dll</HintPath>
+    </Reference>
     <Reference Include="Xpand.TestsLib">
       <HintPath>..\..\..\bin\Xpand.TestsLib.dll</HintPath>
     </Reference>
