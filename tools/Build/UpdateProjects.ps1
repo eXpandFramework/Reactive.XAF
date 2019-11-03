@@ -10,7 +10,8 @@ Get-ChildItem -Filter *.csproj -Recurse |  ForEach-Object {
     [xml]$projXml = Get-Content $fileName
     Update-ProjectSign $projXml $fileName "$rootLocation\src\Xpand.key\xpand.snk"
     Update-ProjectLanguageVersion $projXml
-    Update-ProjectDebugSymbols $projXml
+    Update-ProjectProperty $projXml DebugSymbols true
+    Update-ProjectProperty $projXml DebugType full
     Remove-ProjectLicenseFile $projXml
     Update-ProjectAutoGenerateBindingRedirects $projXml
     if ($fileName -notlike "*.Tests.csproj" ){

@@ -13,16 +13,16 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Grpc.Core" Version="2.24.0" />
-    <PackageReference Include="DevExpress.ExpressApp.Dashboards" Version="18.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Dashboards.Web" Version="18.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Dashboards.Win" Version="18.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.HtmlPropertyEditor.Web" Version="18.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Scheduler.Web" Version="18.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.TreeListEditors" Version="18.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.TreeListEditors.Win" Version="18.2.7" />
-    <PackageReference Include="DevExpress.Persistent.BaseImpl" Version="18.2.7" />
-    <PackageReference Include="DevExpress.Web.Scheduler" Version="18.2.7" />
-    <PackageReference Include="DevExpress.Win.RichEdit" Version="18.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp.Dashboards" Version="18.2.10" />
+    <PackageReference Include="DevExpress.ExpressApp.Dashboards.Web" Version="18.2.10" />
+    <PackageReference Include="DevExpress.ExpressApp.Dashboards.Win" Version="18.2.10" />
+    <PackageReference Include="DevExpress.ExpressApp.HtmlPropertyEditor.Web" Version="18.2.10" />
+    <PackageReference Include="DevExpress.ExpressApp.Scheduler.Web" Version="18.2.10" />
+    <PackageReference Include="DevExpress.ExpressApp.TreeListEditors" Version="18.2.10" />
+    <PackageReference Include="DevExpress.ExpressApp.TreeListEditors.Win" Version="18.2.10" />
+    <PackageReference Include="DevExpress.Persistent.BaseImpl" Version="18.2.10" />
+    <PackageReference Include="DevExpress.Web.Scheduler" Version="18.2.10" />
+    <PackageReference Include="DevExpress.Win.RichEdit" Version="18.2.10" />
     <PackageReference Include="Enums.NET" Version="2.3.2" />
     <PackageReference Include="MagicOnion" Version="2.6.3" />
     <PackageReference Include="Moq" Version="4.13.0" />
@@ -32,33 +32,33 @@
     <PackageReference Include="System.Reactive" Version="4.2.0" />
     <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.15.1" />
-    <PackageReference Include="DevExpress.ExpressApp.Chart" Version="18.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Chart.Win" Version="18.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.PivotGrid.Win" Version="18.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.PivotGrid" Version="18.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Scheduler" Version="18.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Scheduler.Win" Version="18.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp" Version="18.2.7" />
-    <PackageReference Include="DevExpress.Win" Version="18.2.7" />
-    <PackageReference Include="DevExpress.Charts.Core" Version="18.2.7" />
-    <PackageReference Include="DevExpress.Charts" Version="18.2.7" />
-    <PackageReference Include="DevExpress.Win.Charts" Version="18.2.7" />
-    <PackageReference Include="DevExpress.Win" Version="18.2.7" />
-    <PackageReference Include="DevExpress.Win" Version="18.2.7" />
-    <PackageReference Include="DevExpress.Printing.Core" Version="18.2.7" />
-    <PackageReference Include="DevExpress.PivotGrid.Core" Version="18.2.7" />
-    <PackageReference Include="DevExpress.Win" Version="18.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Win" Version="18.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Web" Version="18.2.7" />
-    <PackageReference Include="DevExpress.Office.Core" Version="18.2.7" />
-    <PackageReference Include="DevExpress.RichEdit.Core" Version="18.2.7" />
-    <PackageReference Include="DevExpress.Web" Version="18.2.7" />
-    <PackageReference Include="DevExpress.Utils" Version="18.2.7" />
-    <PackageReference Include="DevExpress.Win" Version="18.2.7" />
-    <PackageReference Include="DevExpress.Data" Version="18.2.7" />
-    <PackageReference Include="DevExpress.Xpo" Version="18.2.7" />
-    <PackageReference Include="DevExpress.Win.Scheduler" Version="18.2.7" />
-    <PackageReference Include="DevExpress.Scheduler.Core" Version="18.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp.Chart" Version="18.2.10" />
+    <PackageReference Include="DevExpress.ExpressApp.Chart.Win" Version="18.2.10" />
+    <PackageReference Include="DevExpress.ExpressApp.PivotGrid.Win" Version="18.2.10" />
+    <PackageReference Include="DevExpress.ExpressApp.PivotGrid" Version="18.2.10" />
+    <PackageReference Include="DevExpress.ExpressApp.Scheduler" Version="18.2.10" />
+    <PackageReference Include="DevExpress.ExpressApp.Scheduler.Win" Version="18.2.10" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="18.2.10" />
+    <PackageReference Include="DevExpress.Win" Version="18.2.10" />
+    <PackageReference Include="DevExpress.Charts.Core" Version="18.2.10" />
+    <PackageReference Include="DevExpress.Charts" Version="18.2.10" />
+    <PackageReference Include="DevExpress.Win.Charts" Version="18.2.10" />
+    <PackageReference Include="DevExpress.Win" Version="18.2.10" />
+    <PackageReference Include="DevExpress.Win" Version="18.2.10" />
+    <PackageReference Include="DevExpress.Printing.Core" Version="18.2.10" />
+    <PackageReference Include="DevExpress.PivotGrid.Core" Version="18.2.10" />
+    <PackageReference Include="DevExpress.Win" Version="18.2.10" />
+    <PackageReference Include="DevExpress.ExpressApp.Win" Version="18.2.10" />
+    <PackageReference Include="DevExpress.ExpressApp.Web" Version="18.2.10" />
+    <PackageReference Include="DevExpress.Office.Core" Version="18.2.10" />
+    <PackageReference Include="DevExpress.RichEdit.Core" Version="18.2.10" />
+    <PackageReference Include="DevExpress.Web" Version="18.2.10" />
+    <PackageReference Include="DevExpress.Utils" Version="18.2.10" />
+    <PackageReference Include="DevExpress.Win" Version="18.2.10" />
+    <PackageReference Include="DevExpress.Data" Version="18.2.10" />
+    <PackageReference Include="DevExpress.Xpo" Version="18.2.10" />
+    <PackageReference Include="DevExpress.Win.Scheduler" Version="18.2.10" />
+    <PackageReference Include="DevExpress.Scheduler.Core" Version="18.2.10" />
     <PackageReference Include="Fasterflect.Xpand" Version="2.0.7" />
     <PackageReference Include="Xpand.Collections" Version="1.0.1" />
   </ItemGroup>

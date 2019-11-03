@@ -347,8 +347,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
         }
         
-        [TestCase(typeof(ListView))]
-        [TestCase(typeof(DetailView))]
+//        [TestCase(typeof(ListView))]
+//        [TestCase(typeof(DetailView))]
         public async Task Bind_RepositoryItems(Type viewType){
             var boundTypes = 2;
             var controlTypes =new[]{typeof(XafGridView),typeof(GridColumn)};

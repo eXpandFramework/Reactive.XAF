@@ -28,7 +28,7 @@ if (!$result) {
     $CustomVersion = "latest"
 }
 else {
-    $latestMinors = Get-LatestMinorVersion "DevExpress.ExpressApp" (Get-Feed -DX)
+    $latestMinors = Get-LatestMinorVersion "DevExpress.ExpressApp" $DXApiFeed
     "latestMinors:"
     $latestMinors
     $CustomVersion = $latestMinors | Where-Object { "$($_.Major).$($_.Minor)" -eq $result }

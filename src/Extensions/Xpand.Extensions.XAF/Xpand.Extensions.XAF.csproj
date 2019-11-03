@@ -13,7 +13,7 @@
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp" Version="18.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="18.2.10" />
     <PackageReference Include="Fasterflect.Xpand" Version="2.0.7" />
     <PackageReference Include="System.Reflection.Emit" Version="4.6.0" />
     <PackageReference Include="Xpand.Patcher" Version="1.0.1" />

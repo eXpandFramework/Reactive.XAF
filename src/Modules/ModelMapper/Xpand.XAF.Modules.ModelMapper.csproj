@@ -40,8 +40,8 @@
     <PackageReference Include="Mono.Cecil" Version="0.11.0" />
     <PackageReference Include="System.CodeDom" Version="4.6.0" />
     <PackageReference Include="System.Interactive" Version="4.0.0" />
-    <PackageReference Include="DevExpress.Data" Version="18.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp" Version="18.2.7" />
+    <PackageReference Include="DevExpress.Data" Version="18.2.10" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="18.2.10" />
     <PackageReference Include="System.Reactive" Version="4.2.0" />
     <PackageReference Include="Fasterflect.Xpand" Version="2.0.7" />
     <PackageReference Include="Xpand.Collections" Version="1.0.1" />
