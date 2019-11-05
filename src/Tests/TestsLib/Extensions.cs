@@ -205,11 +205,11 @@ namespace Xpand.TestsLib {
         }
 
         static void MockEditorsFactory(this XafApplication application){
-            var listEditorMock = ListEditorMock(application);
+            
 
             var editorsFactoryMock = new Mock<IEditorsFactory>();
             application.EditorFactory =editorsFactoryMock.Object;
-            application.MockListEditor( (view, xafApplication, collectionSource) => listEditorMock.Object);
+            application.MockListEditor( );
             
             editorsFactoryMock.Setup(_ => _.CreateDetailViewEditor(It.IsAny<bool>(), It.IsAny<IModelViewItem>(),
                     It.IsAny<Type>(), It.IsAny<XafApplication>(), It.IsAny<IObjectSpace>()))
@@ -235,7 +235,11 @@ namespace Xpand.TestsLib {
             return listEditorMock;
         }
 
-        public static void MockListEditor(this XafApplication application,  Func<IModelListView,XafApplication,CollectionSourceBase,ListEditor> listEditor){
+        public static void MockListEditor(this XafApplication application,  Func<IModelListView,XafApplication,CollectionSourceBase,ListEditor> listEditor=null){
+            listEditor = listEditor ?? ((view, xafApplication, arg3) => {
+                var listEditorMock = ListEditorMock(application);
+                return listEditorMock.Object;
+            });
             var editorsFactoryMock = application.EditorFactory.GetMock();
             editorsFactoryMock.Setup(_ =>_.CreateListEditor(It.IsAny<IModelListView>(), It.IsAny<XafApplication>(),It.IsAny<CollectionSourceBase>()))
                 .Returns((IModelListView modelListView, XafApplication app, CollectionSourceBase collectionSourceBase) =>listEditor(modelListView, application, collectionSourceBase));

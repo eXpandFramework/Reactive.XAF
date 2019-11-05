@@ -57,6 +57,23 @@ All messages are stored in the local database using the `TraceEvent` BO and you 
 
 All messages are buffered until after the logon where we have a valid database and then stored in the database. However there is also a file logging which happens on Realtime and can be found in path with the `_RXLogger.log` suffix.
 
+To initialize the TraceSources that operate before model e.g. ModelMapper add the following to your configuration file (see [How to: Create and Initialize Trace Sources](https://docs.microsoft.com/en-us/dotnet/framework/debug-trace-profile/how-to-create-and-initialize-trace-sources)).
+
+```xml
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>  
+  <system.diagnostics>  
+    <sources>  
+      <source name="ModelMapperModule" switchName="sourceSwitch" switchType="System.Diagnostics.SourceSwitch">  
+      </source>  
+    </sources>  
+    <switches>  
+      <add name="sourceSwitch" value="Verbose"/>  
+    </switches>  
+  </system.diagnostics>  
+</configuration>
+```
+
 ### Tests
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.Reactive.Logger.ReactiveLogger). 
 All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)

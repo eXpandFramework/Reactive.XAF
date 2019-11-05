@@ -48,7 +48,7 @@ namespace Xpand.XAF.Modules.ModelMapper{
             moduleManager.ConnectExtendingService()
                 .Merge(Application.BindConnect())
                 .TakeUntilDisposed(this)
-                .Subscribe(unit => {},exception => {});
+                .Subscribe();
         }
 
         private static void CheckXpandVSIXInstalled(){

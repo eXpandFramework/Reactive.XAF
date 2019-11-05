@@ -55,7 +55,7 @@ namespace Xpand.Extensions.Reactive.Utility{
                         observer.OnNext(v);
                     },
                     e => {
-                        Action("OnError", e.GetAllMessages(), traceAction.TraceError(traceSource));
+                        Action("OnError", e.GetAllInfo(), traceAction.TraceError(traceSource));
                         observer.OnError(e);
                     },
                     () => {

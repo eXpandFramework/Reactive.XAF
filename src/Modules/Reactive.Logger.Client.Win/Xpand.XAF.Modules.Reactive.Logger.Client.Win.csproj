@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{F929A9D2-7C98-4138-8F2B-C3D3A8464710}</ProjectGuid>
     <TargetFramework>net461</TargetFramework>
@@ -69,7 +69,6 @@
     <PackageReference Include="DevExpress.Xpo" Version="18.2.10" />
     <PackageReference Include="MagicOnion" Version="2.6.3" />
     <PackageReference Include="System.Buffers" Version="4.5.0" />
-    <PackageReference Include="System.Collections.Immutable" Version="1.6.0" />
     <PackageReference Include="System.Reactive" Version="4.2.0" />
     <PackageReference Include="Fasterflect.Xpand" Version="2.0.7" />
   </ItemGroup>
