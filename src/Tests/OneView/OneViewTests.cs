@@ -124,8 +124,10 @@ namespace Xpand.XAF.Modules.OneView.Tests{
         }
 
         private static void ConfigureModel(XafApplication application){
-            ((IModelApplicationNavigationItems)application.Model).NavigationItems.StartupNavigationItem.View =
-                application.FindModelListView(typeof(TraceEvent));
+            var startupNavigationItem = ((IModelApplicationNavigationItems)application.Model).NavigationItems.StartupNavigationItem;
+            if (startupNavigationItem != null){
+                startupNavigationItem.View = application.FindModelListView(typeof(TraceEvent));
+            }
             var oneView = application.Model.ToReactiveModule<IModelReactiveModuleOneView>().OneView;
             oneView.View = application.FindModelListView(typeof(OV));
         }

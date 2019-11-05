@@ -19,12 +19,20 @@ namespace Xpand.XAF.Modules.OneView{
     public static class OneViewService{
         
         internal static IObservable<Unit> Connect(this  XafApplication application){
-
+            var cleanStartupNavigationItem = CleanStartupNavigationItem(application);
             var showView = application.ShowView().Publish().RefCount();
             return showView.EditModel(application)
                 .Merge(showView.ExitApplication(application))
                 .Merge(application.HideMainWindow())
+                .Merge(cleanStartupNavigationItem)
                 ;
+        }
+
+        static IObservable<Unit> CleanStartupNavigationItem(this XafApplication application){
+            var cleanStartupNavigationItem = application.WhenModelChanged()
+                .Do(_ => ((IModelApplicationNavigationItems) _.sender.Model).NavigationItems.StartupNavigationItem = null)
+                .ToUnit();
+            return cleanStartupNavigationItem;
         }
 
         private static IObservable<Unit> ExitApplication(this IObservable<ShowViewParameters> showView,XafApplication application){

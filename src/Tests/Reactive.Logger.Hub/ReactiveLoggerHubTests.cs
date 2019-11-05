@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading;
 using akarnokd.reactive_extensions;
@@ -23,11 +24,8 @@ using Task = System.Threading.Tasks.Task;
 namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
     [NonParallelizable]
     public class ReactiveLoggerHubTests : BaseTest{
-        public ReactiveLoggerHubTests(){
-//            XpoTypesInfoHelper.GetXpoTypeInfoSource().XPDictionary.CollectClassInfos(GetType().Assembly);
-        }
-
         [Test]
+        [Apartment(ApartmentState.STA)]
         public async Task Start_Server_After_Logon(){
             
             using (var application = HubModule(nameof(Start_Server_After_Logon)).Application){
@@ -42,10 +40,12 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
                 await startServer.Timeout(Timeout).ToTaskWithoutConfigureAwait();
 
                 await startServerSave.Timeout(Timeout).ToTaskWithoutConfigureAwait();
+                
             }
         }
 
         [Test()]
+        [Apartment(ApartmentState.STA)]
         public async Task Connect_Client(){
             
             using (var clientWinApp = new ClientWinApp()){
@@ -55,6 +55,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
                 clientWinApp.CreateObjectSpace();
 
                 var connectClient = clientWinApp.WhenTraceOnNextEvent(nameof(ReactiveLoggerHubService.ConnectClient)).FirstAsync()
+                    .SubscribeOn(Scheduler.Default)
                     .SubscribeReplay();
                 using (var application = Platform.Win.NewApplication<ReactiveLoggerHubModule>()){
                     application.AddModule<RXLoggerHubTestsModule>(nameof(Connect_Client), typeof(RLH),typeof(BaseObject));
@@ -76,37 +77,13 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
         }
 
         [Test]
-        public async Task Client_Detect_When_Hub_Is_Online(){
-            
-            using (var clientWinApp = new ClientWinApp()){
-                clientWinApp.AddModule<ReactiveLoggerHubModule>(typeof(RLH),typeof(BaseObject));
-                clientWinApp.Logon();
-                clientWinApp.CreateObjectSpace();
-                
-                var detectOnlineHubTrace = clientWinApp.WhenTraceOnNextEvent(nameof(ReactiveLoggerHubService.DetectOnlineHub))
-                    .SubscribeReplay();
-                
-                using (var application = Platform.Win.NewApplication<ReactiveLoggerHubModule>()){
-                    
-                    application.AddModule<RXLoggerHubTestsModule>(nameof(Client_Detect_When_Hub_Is_Online),typeof(RLH),typeof(BaseObject));
-                    application.Logon();
-                    application.CreateObjectSpace();
-                    await detectOnlineHubTrace.FirstAsync().Timeout(Timeout);
-                }
-
-                
-            }
-        }
-
-
-        [Test]
         [Apartment(ApartmentState.STA)]
         public async Task Display_TraceEvent_On_New_Client(){
             XpoTypesInfoHelper.GetXpoTypeInfoSource().XPDictionary.CollectClassInfos(GetType().Assembly);
             using (var application = Platform.Win.NewApplication<ReactiveLoggerHubModule>()){
                 
                 var startServer = application.WhenTraceOnNextEvent(nameof(ReactiveLoggerHubService.StartServer))
-                    .FirstAsync().SubscribeReplay();
+                    .FirstAsync().SubscribeReplay().SubscribeOn(Scheduler.Default);
                 var connecting = TraceEventHub.Connecting.FirstAsync().SubscribeReplay();
                 application.AddModule<RXLoggerHubTestsModule>(nameof(Display_TraceEvent_On_New_Client),typeof(RLH));
                 application.Logon();
@@ -161,7 +138,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
                 
                 using (var application = Platform.Win.NewApplication<ReactiveLoggerHubModule>()){
                     var startServer = application.WhenTraceOnNextEvent(nameof(ReactiveLoggerHubService.StartServer))
-                        .FirstAsync().SubscribeReplay();
+                        .FirstAsync().SubscribeReplay().SubscribeOn(Scheduler.Default);
                     var connecting = TraceEventHub.Connecting.FirstAsync().SubscribeReplay();
                     
                     application.AddModule<RXLoggerHubTestsModule>(nameof(Display_TraceEvent_On_Running_Client),typeof(RLH));

@@ -85,7 +85,7 @@ namespace Xpand.TestsLib{
         public void Dispose(){
             XpoTypesInfoHelper.Reset();
             XafTypesInfo.HardReset();
-            GC.Collect();
+//            GC.Collect();
             if (TestContext.CurrentContext.Result.Outcome.Status == TestStatus.Failed){
 //                var settingsPath = $"{AppDomain.CurrentDomain.ApplicationPath()}\\TestRun.Settings";
 //                while (!File.Exists(settingsPath)){

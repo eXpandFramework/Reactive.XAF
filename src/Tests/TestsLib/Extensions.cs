@@ -90,7 +90,8 @@ namespace Xpand.TestsLib {
             
             application.RegisterInMemoryObjectSpaceProvider();
         }
-        static readonly Dictionary<string,int> ModulePorts=new Dictionary<string, int>(){
+
+        public static readonly Dictionary<string,int> ModulePorts=new Dictionary<string, int>(){
             {"AutoCommitModule",61457 },
             {"CloneMemberValueModule",61458 },
             {"CloneModelViewModule",61459 },

@@ -12,8 +12,8 @@ using Xpand.Extensions.Reactive.Utility;
 using Xpand.TestsLib;
 
 namespace Xpand.Extensions.Tests{
-    public class PortInUseTest:BaseTest{
-
+    public class SystemNetTransformTest:BaseTest{
+        [Test]
         public async Task Signal_When_In_Listening(){
             
             var portInUse = Enumerable.Range(10000,2).Select(port => new IPEndPoint(IPAddress.Loopback, port)).ToArray().Listening().SubscribeReplay();

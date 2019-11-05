@@ -232,18 +232,19 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
         [Test]
         public async Task Bind_Two_Views(){
-////            
-//            Assembly.LoadFile(typeof(XafGridView).Assembly.Location);
-//            InitializeMapperService($"{nameof(Bind_Two_Views)}{PredefinedMap.GridView}",Platform.Win);
-//            using (var module = PredefinedMap.GridView.Extend()){
-//                using (var application = DefaultModelMapperModule(nameof(Bind_Two_Views), Platform.Win, module).Application){
-//                    var bound = ModelBindingService.ControlBind.FirstAsync().SubscribeReplay();
-//                    application.CreateObjectView<ListView>(typeof(MM)).CreateControls();
-//
-//                    await bound;
-//
-//                }
-//            }
+//            
+            Assembly.LoadFile(typeof(XafGridView).Assembly.Location);
+            InitializeMapperService($"{nameof(Bind_Two_Views)}{PredefinedMap.GridView}",Platform.Win);
+            using (var module = PredefinedMap.GridView.Extend()){
+                using (var application = DefaultModelMapperModule(nameof(Bind_Two_Views), Platform.Win, module).Application){
+                    var bound = ModelBindingService.ControlBind.FirstAsync().SubscribeReplay();
+                    application.CreateObjectView<ListView>(typeof(MM)).CreateControls();
+
+                    
+                    await bound;
+
+                }
+            }
         }
 
 

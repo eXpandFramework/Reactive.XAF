@@ -48,7 +48,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 .Merge(controlsCreated.ViewItemBindData())
                 .Do(tuple => BindTo(tuple))
                 .ToUnit()
-                .Merge(application.BindLayoutGroupControl());
+                .Merge(application.BindLayoutGroupControl())
+                .TraceModelMapper();
                 
         }
 

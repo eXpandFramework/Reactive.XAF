@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -116,12 +117,13 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
         [Apartment(ApartmentState.STA)]
         public async Task Save_TraceEvent(){
             await SaveTraceEvent(afterSaveTrace: async () => {
-                var appDomainContext2 = AppDomainContext.Create(AppDomain.CurrentDomain.SetupInformation);
-                await RemoteFuncAsync.InvokeAsync(appDomainContext2.Domain, async () => {
-                    await SaveTraceEvent();
-                    return Unit.Default;
-                });
-                appDomainContext2.Dispose();
+                using (var appDomainContext2 = AppDomainContext.Create(AppDomain.CurrentDomain.SetupInformation)){
+                    await RemoteFuncAsync.InvokeAsync(appDomainContext2.Domain, async () => {
+                        await SaveTraceEvent();
+                        return Unit.Default;
+                    });
+                    appDomainContext2.Dispose();
+                }
             });
         }
 
@@ -131,7 +133,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
                 application.AddModule<TestReactiveLoggerModule>();
                 application.Title = nameof(Save_TraceEvent);
                 application.CreateObjectSpace();
-                var test = application.WhenTraceEvent().FirstAsync(_ => _.Value == "test").SubscribeReplay();
+                var test = application.WhenTraceEvent().FirstAsync(_ => _.Value == "test").SubscribeReplay(Scheduler.Default);
                 ReactiveLoggerModule.TraceSource.TraceMessage("test");
                 application.Logon();
 
