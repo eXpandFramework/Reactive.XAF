@@ -55,7 +55,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
     public class ModelMapperBinderServiceTests:ModelMapperBaseTest{
         
         [TestCase(nameof(Platform.Win))]
-//        [TestCase(nameof(Platform.Web))]
+        [TestCase(nameof(Platform.Web))]
         public void Bind_Only_NullAble_Properties_That_are_not_Null(string platformName){
             var platform = GetPlatform(platformName);
             var typeToMap=typeof(StringValueTypeProperties);
@@ -217,31 +217,38 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                     .Concat(new[]{module})
                     .ToArray();
                 using (var application = DefaultModelMapperModule(nameof(Bind_DetailView_Maps), platform, moduleBases).Application){
-                    var controlBound = ModelBindingService.ControlBind.Take(boundTypes).SubscribeReplay();
-
-                    var detailView = application.CreateObjectView<DetailView>(typeof(MM));
-                    detailView.CreateControls();
+                    var controlBound = ModelBindingService.ControlBind.SubscribeReplay();
+                    for (int i = 0; i < 2; i++){
+                        var detailView = application.CreateObjectView<DetailView>(typeof(MM));
+                        detailView.CreateControls();
                     
-                    if (boundTypes>0){
-                        await controlBound.Timeout(Timeout).ToTaskWithoutConfigureAwait();
+                        if (boundTypes>0){
+                            await controlBound.Take((i+1)*boundTypes).Timeout(Timeout).ToTaskWithoutConfigureAwait();
+                        }
+
+                        detailView.Close();
                     }
+                    
 
                 }
             }
         }
 
         [Test]
-        public async Task Bind_Two_Views(){
-//            
+        public async Task Bind_Subsequent_Views(){
             Assembly.LoadFile(typeof(XafGridView).Assembly.Location);
-            InitializeMapperService($"{nameof(Bind_Two_Views)}{PredefinedMap.GridView}",Platform.Win);
+            InitializeMapperService($"{nameof(Bind_Subsequent_Views)}{PredefinedMap.GridView}",Platform.Win);
             using (var module = PredefinedMap.GridView.Extend()){
-                using (var application = DefaultModelMapperModule(nameof(Bind_Two_Views), Platform.Win, module).Application){
+                using (var application = DefaultModelMapperModule(nameof(Bind_Subsequent_Views), Platform.Win, module).Application){
                     var bound = ModelBindingService.ControlBind.FirstAsync().SubscribeReplay();
-                    application.CreateObjectView<ListView>(typeof(MM)).CreateControls();
+                    application.Logon();
+                    application.CreateObjectSpace();
+                    application.MockListEditor();
+                    var listView = application.CreateObjectView<ListView>(typeof(MM));
+                    listView.CreateControls();
 
                     
-                    await bound;
+                    await bound.ToTaskWithoutConfigureAwait();
 
                 }
             }
@@ -283,14 +290,18 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                     MockListEditor(platform, controlTypes, application, predefinedMap,null);
                     var controlBound = ModelBindingService.ControlBind.Replay();
                     controlBound.Connect();
-            
-                    var listView = application.CreateObjectView<ListView>(typeof(MM));
-                    listView.Model.EditorType = controlTypes.Last();
-                    listView.Model.BandsLayout.Enable = predefinedMaps.Contains(PredefinedMap.AdvBandedGridView);
+                    for (int i = 0; i < 2; i++){
+                        
+                    
+                        var listView = application.CreateObjectView<ListView>(typeof(MM));
+                        listView.Model.EditorType = controlTypes.Last();
+                        listView.Model.BandsLayout.Enable = predefinedMaps.Contains(PredefinedMap.AdvBandedGridView);
 
-                    listView.CreateControls();
-                    if (boundTypes>0){
-                        await controlBound.Take(boundTypes).WithTimeOut(Timeout);
+                        listView.CreateControls();
+                    
+                        if (boundTypes>0){
+                            await controlBound.Take((boundTypes*(i+1))).WithTimeOut(Timeout);
+                        }
                     }
                 }
             }
@@ -348,8 +359,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
         }
         
-//        [TestCase(typeof(ListView))]
-//        [TestCase(typeof(DetailView))]
+        [TestCase(typeof(ListView))]
+        [TestCase(typeof(DetailView))]
         public async Task Bind_RepositoryItems(Type viewType){
             var boundTypes = 2;
             var controlTypes =new[]{typeof(XafGridView),typeof(GridColumn)};

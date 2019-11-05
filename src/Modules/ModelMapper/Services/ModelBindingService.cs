@@ -65,7 +65,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                     var control = predefinedMap.GetViewControl(_.objectView, _.modelMap.Parent.Parent.Id());
                     return (_.modelMap, control, _.objectView);
                 });
-            return viewItemBindData;
+            return viewItemBindData.TraceModelMapper();
         }
 
         private static IObservable<Unit> BindLayoutGroupControl(this XafApplication application){
@@ -90,9 +90,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                     return ((IModelNode) control.GetPropertyValue("Model")).ToBindableData(_.view)
                         .Select(tuple => BindData(tuple,control));
                 })
-                .Do(tuple => tuple.BindTo())
-                .ToUnit();
-            return bindLayoutGroupControl;
+                .TraceModelMapper()
+                .Do(tuple => tuple.BindTo());
+            return bindLayoutGroupControl.ToUnit();
         }
 
         private static IObservable<(ObjectView objectView, IModelModelMap modelMap)> ViewItemData(
@@ -127,7 +127,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             }
         }
 
-        private static IObservable<(IModelModelMap modelMap, object control, ObjectView view)> ViewModelProperties(this IObservable<(ObjectView view, EventArgs e)> source){
+        internal static IObservable<(IModelModelMap modelMap, object control, ObjectView view)> ViewModelProperties(this IObservable<(ObjectView view, EventArgs e)> source){
             return source.SelectMany(_ => {
                 var objectView = _.view;
                 var items = objectView.Model is IModelListView modelListView
@@ -139,7 +139,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 return viewData.Concat(viewItemData);
             })
             .Select(_ => BindData(_))
-            .WhenNotDefault();
+            .WhenNotDefault()
+            .TraceModelMapper();
         }
 
         private static IEnumerable<(PropertyInfo info, IModelNode model, ObjectView view)> ToBindableData(this IModelNode node,ObjectView objectView){
