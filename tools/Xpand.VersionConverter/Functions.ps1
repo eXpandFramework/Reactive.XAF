@@ -94,15 +94,7 @@ function Get-PackagesFolder {
 
 function Install-MonoCecil($resolvePath) {
     Write-Verbose "Loading Mono.Cecil"
-    $cecilVersion = "0.10.4"
-    $monoPath = "$PSScriptRoot\mono.cecil.$cecilVersion\lib\net40"
-    if (!(Test-Path "$monoPath\Mono.Cecil.dll")) {
-        $client = New-Object System.Net.WebClient
-        $client.DownloadFile("https://www.nuget.org/api/v2/package/Mono.Cecil/$cecilVersion", "$PSScriptRoot\mono.cecil.$cecilVersion.zip")
-        Add-Type -AssemblyName System.IO.Compression.FileSystem
-        [ZipFile]::ExtractToDirectory("$PSScriptRoot\mono.cecil.$cecilVersion.zip", "$PSScriptRoot\mono.cecil.$cecilVersion")
-    }
-
+    $monoPath = "$PSScriptRoot\mono.cecil"
     [System.Reflection.Assembly]::Load([File]::ReadAllBytes("$monoPath\Mono.Cecil.dll")) | Out-Null
     [System.Reflection.Assembly]::Load([File]::ReadAllBytes("$monoPath\Mono.Cecil.pdb.dll")) | Out-Null
     $packagesFolder = Get-PackagesFolder 

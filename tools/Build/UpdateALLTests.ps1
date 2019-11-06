@@ -2,7 +2,7 @@ param(
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\..\"),
     $branch = "lab",
     $source,
-    $dxVersion ="19.1.7"
+    $dxVersion = (& "$PSScriptRoot\DefaultVersion.ps1")
 )
 if ($branch -eq "lab" -and !$source) {
     $source = Get-PackageFeed -Xpand
@@ -53,8 +53,8 @@ function UpdateVersion($csprojPath,$dxVersion,$testApplication ) {
             if ($_.Version -ne ([version]$pref.Version)) {
                 Write-Host "$($_.Id) version changed from $($pref.Version) to $($_.Version)" -f Green
                 $pref.Version = $_.Version.ToString()
+                Invoke-PaketAdd $_.Id $_.Version -Force
             }
-        
         }
     }
     Write-Host "Update DX version to $dxVersion"
@@ -62,6 +62,9 @@ function UpdateVersion($csprojPath,$dxVersion,$testApplication ) {
         Write-Host "Change $($_.Include) version to $dxVersion"
         $_.Version = $dxVersion
     }
+    $csproj.Save($csprojPath)
+    Get-Content $csprojPath -Raw
+
     $testAppDir = (Get-Item $testApplication).DirectoryName
     $shortDxVersion=Get-DevExpressVersion $dxVersion
     if (($dxVersion.ToCharArray()|Where-Object{$_ -eq "."}).Count -eq 2){
@@ -76,8 +79,7 @@ function UpdateVersion($csprojPath,$dxVersion,$testApplication ) {
         "NewContent for $($_.BaseName):"
         $result.Trim()
     }
-    $csproj.Save($csprojPath)
-    Get-Content $csprojPath -Raw
+    
 }
 Get-ChildItem "$root\src\Tests\All\" *.csproj -Recurse | ForEach-Object {
     UpdateVersion $_.FullName $dxVersion $testApplication
@@ -88,8 +90,7 @@ Write-Host "Building TestApplication" -f Green
 $localSource = "$root\bin\Nupkg"
 $source="$localSource;$(Get-PackageFeed -Nuget);$(Get-PackageFeed -Xpand);$source"
 "Source=$source"
-
-& (Get-NugetPath) restore $testapplication -source $source
+& $root\.paket\paket.exe install
 
 & (Get-MsBuildPath) $testApplication /bl:$root\bin\TestApplication.binlog /WarnAsError /v:m -m #/noconsolelogger
 
