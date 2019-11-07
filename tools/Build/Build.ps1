@@ -17,9 +17,19 @@ properties {
 }
 
 
-task Release  -depends   Clean, Init, UpdateProjects,  Compile,IndexSources, CreateNuspec, PackNuspec, CompileTests,UpdateAllTests
+task Release  -depends   Clean,PaketRestore, Init, UpdateProjects,  Compile,IndexSources, CreateNuspec, PackNuspec, CompileTests,UpdateAllTests
 task TestsRun  -depends Release
 
+Task PaketRestore{
+    InvokeScript{
+        Set-Location $root
+        $env:FirstDXVersionSource=$packageSources.split(";")|Where-Object($_ -like "DevExpress")
+        $env:FirstDxVersion=$dxversion
+        if (!(Test-Path "$root\packages")){
+            Invoke-PaketRestore
+        }
+    }
+}
 Task IndexSources{
     InvokeScript{
         $sha=Get-GitLastSha "https://github.com/eXpandFramework/DevExpress.XAF" $branch
@@ -34,20 +44,20 @@ task Init {
         New-Item "$Root\bin\ReactiveLoggerClient" -ItemType Directory -Force |Out-Null
         
         Get-ChildItem "Tests.runsettings" -Recurse|Copy-Item -Destination "$Root\bin\Tests.runsettings" -Force
-        $versionMismatch=Get-ChildItem $Root *.csproj -Recurse -Exclude "*TestApplication*"|ForEach-Object{
-            $projectPath=$_.FullName
-            Get-PackageReference $projectPath|foreach-Object{
-                if ($_.Include -like "DevExpress*" -and $_.Version -ne $dxVersion){
-                    [PSCustomObject]@{
-                        Path = $projectPath
-                        Version=$_.Version
-                    }
-                }
-            }
-        }|Select-Object -First 1
-        if ($versionMismatch -and !$CustomVersion){
-            throw "$($versionMismatch.Path) use DX $($versionMismatch.Version) instaed of $dxversion"
-        }
+        # $versionMismatch=Get-ChildItem $Root *.csproj -Recurse -Exclude "*TestApplication*"|ForEach-Object{
+        #     $projectPath=$_.FullName
+        #     Get-PackageReference $projectPath|foreach-Object{
+        #         if ($_.Include -like "DevExpress*" -and $_.Version -ne $dxVersion){
+        #             [PSCustomObject]@{
+        #                 Path = $projectPath
+        #                 Version=$_.Version
+        #             }
+        #         }
+        #     }
+        # }|Select-Object -First 1
+        # if ($versionMismatch -and !$CustomVersion){
+        #     throw "$($versionMismatch.Path) use DX $($versionMismatch.Version) instaed of $dxversion"
+        # }
     }
 }
 
@@ -77,7 +87,8 @@ task Compile -precondition {return $compile  } {
     InvokeScript -maxRetries 3 {
         write-host "Building Extensions" -f "Blue"
         dotnet restore "$Root\src\Extensions\Extensions.sln" --source (Get-PackageFeed -nuget) --source $packageSources /WarnAsError
-        & dotnet msbuild "$Root\src\Extensions\Extensions.sln" "/bl:$Root\Bin\Extensions.binlog" "/p:configuration=Release" /m /v:m
+        & dotnet msbuild "$Root\src\Extensions\Extensions.sln" "/bl:$Root\Bin\Extensions.binlog" "/p:configuration=Release" /m /v:m /WarnAsError
+        
     }
     InvokeScript -maxRetries 3{
         write-host "Building Modules" -f "Blue"
@@ -125,6 +136,7 @@ task ? -Description "Helper to display task info" {
 function InvokeScript($sb,$maxRetries=0){
     try {
         exec $sb -maxRetries $maxRetries
+        Approve-LastExitCode
     }
     catch {
         Write-Error ($_.Exception | Format-List -Force | Out-String) -ErrorAction Continue

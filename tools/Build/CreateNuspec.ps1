@@ -1,7 +1,7 @@
 param(
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\..\"),
     [switch]$Release,
-    $dxVersion
+    $dxVersion=$env:FirstDxVersion
 )
 
 $ErrorActionPreference = "Stop"
@@ -15,7 +15,7 @@ $versionConverter = [PSCustomObject]@{
     targetFramework = "net452"
 }
 
-
+$allProjects=Get-ChildItem $root *.csproj -Recurse | Select-Object -ExpandProperty BaseName
 Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notlike "*Test*" } | ForEach-Object {
     $projectPath = $_.FullName
     Write-Host "Creating Nuspec for $($_.baseName)" -f "Blue"
@@ -26,7 +26,7 @@ Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -not
         PublishedSource          = (Get-PackageFeed -Xpand)
         Release                  = $Release
         ReadMe                   = $false
-        ProjectsRoot             = $root
+        AllProjects             = $allProjects
     }
     if (!(Test-Path $uArgs.NuspecFilename)) {
         Set-Location $root\tools\nuspec

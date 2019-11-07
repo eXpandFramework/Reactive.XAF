@@ -5,7 +5,7 @@ param(
     $dxVersion = (& "$PSScriptRoot\DefaultVersion.ps1")
 )
 if ($branch -eq "lab" -and !$source) {
-    $source = Get-PackageFeed -Xpand
+    $source = "$(Get-PackageFeed -Xpand);$(Get-PackageFeed -DX)"
 }
 if ($branch -eq "master") {
     $branch = "Release"
@@ -54,7 +54,7 @@ function UpdateVersion($csprojPath,$dxVersion,$testApplication ) {
             if ($_.Version -ne ([version]$pref.Version)) {
                 Write-Host "$($_.Id) version changed from $($pref.Version) to $($_.Version)" -f Green
                 $pref.Version = $_.Version.ToString()
-                Invoke-PaketAdd $_.Id $_.Version -Force
+                Invoke-PaketAdd -id $_.Id -version $_.Version -projectpath $csprojPath -Force
             }
         }
     }
@@ -85,13 +85,20 @@ function UpdateVersion($csprojPath,$dxVersion,$testApplication ) {
 Get-ChildItem "$root\src\Tests\All\" *.csproj -Recurse | ForEach-Object {
     UpdateVersion $_.FullName $dxVersion $testApplication
 }
-
+if (!(Test-Path "$root\src\Test\packages")){
+    Remove-Item "$root\src\Tests\All\\paket-files\paket.restore.cached" -ErrorAction SilentlyContinue
+    Invoke-PaketRestore
+}
 Write-Host "Building TestApplication" -f Green
 
 $localSource = "$root\bin\Nupkg"
 $source="$localSource;$(Get-PackageFeed -Nuget);$(Get-PackageFeed -Xpand);$source"
 "Source=$source"
-& $root\.paket\paket.exe install
-& (Get-MsBuildPath) $testApplication /bl:$root\bin\TestApplication.binlog /WarnAsError /v:m -m
+$testAppPAth=(Get-Item $testApplication).DirectoryName
+& (Get-NugetPath) restore "$testAppPAth\TestApplication.Win\TestApplication.Win.csproj" -source $source
+dotnet msbuild "$testAppPAth\TestApplication.Win\TestApplication.Win.csproj" /bl:$root\bin\TestWinApplication.binlog /WarnAsError /v:m -m 
+
+& (Get-NugetPath) restore "$testAppPAth\TestApplication.Web\TestApplication.Web.csproj" -source $source
+& (Get-MsBuildPath) "$testAppPAth\TestApplication.Web\TestApplication.Web.csproj" /bl:$root\bin\TestWebApplication.binlog /WarnAsError /v:m -m
 
 
