@@ -42,7 +42,7 @@ function UpdateDependencies($_, $packagespath, $readMePath) {
             }
         })
     [xml]$csproj = Get-Content $_.FullName
-    $dxDepends = ($csproj.Project.ItemGroup.PackageReference | Where-Object { $_.Include -like "DevExpress*" } | ForEach-Object {
+    $dxDepends = (Get-PackageReference $_.FullName | Where-Object { $_.Include -like "DevExpress*" } | ForEach-Object {
             "|**$($_.Include -creplace '(.*)\.v[\d]{2}\.\d', '$1')**|**Any**`r`n"
         })
     $metadata = "|<!-- -->|<!-- -->`r`n|----|----`r`n$dxDepends$metadata"

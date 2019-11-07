@@ -36,8 +36,7 @@ task Init {
         Get-ChildItem "Tests.runsettings" -Recurse|Copy-Item -Destination "$Root\bin\Tests.runsettings" -Force
         $versionMismatch=Get-ChildItem $Root *.csproj -Recurse -Exclude "*TestApplication*"|ForEach-Object{
             $projectPath=$_.FullName
-            [xml]$csproj=Get-Content $projectPath
-            $csproj.project.itemgroup.packageReference|foreach-Object{
+            Get-PackageReference $projectPath|foreach-Object{
                 if ($_.Include -like "DevExpress*" -and $_.Version -ne $dxVersion){
                     [PSCustomObject]@{
                         Path = $projectPath

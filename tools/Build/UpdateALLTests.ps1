@@ -47,7 +47,8 @@ $testApplication = "$root\src\Tests\ALL\TestApplication\TestApplication.sln"
 function UpdateVersion($csprojPath,$dxVersion,$testApplication ) {
     [xml]$csproj = Get-Content $csprojPath
     Write-Host "Update All package version $csprojPath"
-    $csproj.Project.ItemGroup.PackageReference | Where-Object { $_.Include -like "Xpand.*" } | ForEach-Object {
+    $packageReferences=Get-PackageReference $csprojPath
+    $packageReferences | Where-Object { $_.Include -like "Xpand.*" } | ForEach-Object {
         $pref = $_
         $packages | Where-Object { $_.Id -eq $pref.Include } | ForEach-Object {
             if ($_.Version -ne ([version]$pref.Version)) {
@@ -58,7 +59,7 @@ function UpdateVersion($csprojPath,$dxVersion,$testApplication ) {
         }
     }
     Write-Host "Update DX version to $dxVersion"
-    $csproj.Project.ItemGroup.PackageReference | Where-Object { $_.Include -like "DevExpress*" } | ForEach-Object {
+    $packageReferences | Where-Object { $_.Include -like "DevExpress*" } | ForEach-Object {
         Write-Host "Change $($_.Include) version to $dxVersion"
         $_.Version = $dxVersion
     }
@@ -91,7 +92,6 @@ $localSource = "$root\bin\Nupkg"
 $source="$localSource;$(Get-PackageFeed -Nuget);$(Get-PackageFeed -Xpand);$source"
 "Source=$source"
 & $root\.paket\paket.exe install
-
-& (Get-MsBuildPath) $testApplication /bl:$root\bin\TestApplication.binlog /WarnAsError /v:m -m #/noconsolelogger
+& (Get-MsBuildPath) $testApplication /bl:$root\bin\TestApplication.binlog /WarnAsError /v:m -m
 
 
