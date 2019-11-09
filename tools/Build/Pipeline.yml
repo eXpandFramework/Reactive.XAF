@@ -39,7 +39,11 @@ jobs:
   - checkout: self
   - task: PowerShell@2
     displayName: Build
+    continueOnError: true
     inputs:
+      ignoreLASTEXITCODE: true
+      failOnStderr: false
+      errorActionPreference: continue
       targetType: 'inline'
       script: |
         $goArgs=@{
@@ -63,11 +67,11 @@ jobs:
     inputs:
       PathtoPublish: '$(System.DefaultworkingDirectory)\bin'
       ArtifactName: 'Bin'
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: Build'
-    inputs:
-      PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage'
-      ArtifactName: 'Build'
+  # - task: PublishBuildArtifacts@1
+  #   displayName: 'Publish Artifact: Build'
+  #   inputs:
+  #     PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage'
+  #     ArtifactName: 'Build'
 - job: TestPhaseEasyTest
   strategy:
     parallel: 2

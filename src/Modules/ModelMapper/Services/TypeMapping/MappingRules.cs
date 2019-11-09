@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reflection;
-using EnumsNET.NonGeneric;
+using EnumsNET;
 using Fasterflect;
 using Xpand.Extensions.String;
 
@@ -121,8 +121,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             var allArgsAreValid = customAttributeData.ConstructorArguments
                 .All(argument => {
                     var type = argument.ArgumentType;
-                    return argument.Value is Type || !type.IsEnum || !NonGenericFlagEnums.IsFlagEnum(type) ||
-                           NonGenericFlagEnums.GetFlagMembers(type, argument.Value).Count() == 1;
+                    return argument.Value is Type || !type.IsEnum || !FlagEnums.IsFlagEnum(type) ||
+                           FlagEnums.GetFlagMembers(type, argument.Value).Count == 1;
                 });
             return allArgsAreValid;
         }

@@ -1,3 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{58399364-9ACA-429F-A276-7F01E9E61D7D}</ProjectGuid>
@@ -48,12 +49,5 @@
       <SubType>Component</SubType>
     </Compile>
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp" Version="18.2.10" />
-    <PackageReference Include="System.Interactive" Version="4.0.0" />
-    <PackageReference Include="System.Reactive" Version="4.2.0" />
-    <PackageReference Include="Fasterflect.Xpand" Version="2.0.7" />
-    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
-    <PackageReference Include="Xpand.Patcher" Version="1.0.1" />
-  </ItemGroup>
+  <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

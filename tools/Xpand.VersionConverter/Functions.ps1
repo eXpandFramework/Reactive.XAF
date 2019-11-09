@@ -216,7 +216,7 @@ function Get-PaketReferences {
         $paketDirectoryInfo = Get-Item $Path
         $paketReferencesFile = "$($paketDirectoryInfo.FullName)\paket.references"
         if (Test-Path $paketReferencesFile) {
-            $paketDependeciesFile = "$((Get-PaketPath $path).DirectoryName)\..\paket.dependencies"
+            $paketDependeciesFile = Get-PaketDependenciesPath
             $dependencies = Get-Content $paketDependeciesFile | ForEach-Object {
                 $regex = [regex] 'nuget ([^ ]*) ([^ ]*)'
                 $result = $regex.Match($_);
@@ -241,7 +241,7 @@ function Get-PaketReferences {
     }
 }
 
-function Get-PaketPath {
+function Get-PaketDependenciesPath {
     [CmdletBinding()]
     param (
         [string]$Path="."
@@ -252,13 +252,21 @@ function Get-PaketPath {
     }
     
     process {
-        $paketDirectoryInfo = Get-Item $Path
-        $paketDependeciesFile = "$($paketDirectoryInfo.FullName)\.paket\paket.exe"
+        $paketDirectoryInfo = (Get-Item $Path).Directory
+        if (!$paketDirectoryInfo){
+            $paketDirectoryInfo = Get-Item $Path
+        }
+        $paketDependeciesFile = "$($paketDirectoryInfo.FullName)\paket.dependencies"
         while (!(Test-Path $paketDependeciesFile)) {
             $paketDirectoryInfo = $paketDirectoryInfo.Parent
-            $paketDependeciesFile = "$($paketDirectoryInfo.FullName)\.paket\paket.exe"
+            if (!$paketDirectoryInfo){
+                return
+            }
+            $paketDependeciesFile = "$($paketDirectoryInfo.FullName)\paket.dependencies"
         }
-        Get-Item $paketDependeciesFile
+        $item=Get-Item $paketDependeciesFile
+        Set-Location $item.Directory.Parent.FullName
+        $item
     }
     
     end {

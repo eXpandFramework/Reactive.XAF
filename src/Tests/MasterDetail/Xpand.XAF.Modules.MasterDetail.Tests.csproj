@@ -1,3 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputPath>..\..\..\bin</OutputPath>
@@ -15,20 +16,6 @@
     <Compile Remove="MasterDetail\**" />
     <EmbeddedResource Remove="MasterDetail\**" />
     <None Remove="MasterDetail\**" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Grpc.Core" Version="2.24.0" />
-    <PackageReference Include="MagicOnion" Version="2.6.3" />
-    <PackageReference Include="Moq" Version="4.13.0" />
-    <PackageReference Include="Shouldly" Version="3.0.2" />
-    <PackageReference Include="System.Buffers" Version="4.5.0" />
-    <PackageReference Include="System.Reactive" Version="4.2.0" />
-    <PackageReference Include="NUnit" Version="3.12.0" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.15.1" />
-    <PackageReference Include="DevExpress.ExpressApp" Version="18.2.10" />
-    <PackageReference Include="DevExpress.Data" Version="18.2.10" />
-    <PackageReference Include="DevExpress.Xpo" Version="18.2.10" />
-    <PackageReference Include="Fasterflect.Xpand" Version="2.0.7" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Tests">
@@ -50,4 +37,5 @@
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.Xpo.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>

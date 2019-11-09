@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using EnumsNET;
 using Fasterflect;
 using Xpand.Extensions.Linq;
 using Xpand.Extensions.Reflection;
@@ -134,8 +135,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
 
 
         private static object GetEnums(this Type enumType, object value){
-            if (EnumsNET.NonGeneric.NonGenericFlagEnums.IsFlagEnum(enumType)&&EnumsNET.NonGeneric.NonGenericFlagEnums.HasAnyFlags(enumType,value)){
-                return string.Join("|", EnumsNET.NonGeneric.NonGenericFlagEnums.GetFlagMembers(enumType, value)
+            if (FlagEnums.IsFlagEnum(enumType)&&FlagEnums.HasAnyFlags(enumType,value)){
+                return string.Join("|", FlagEnums.GetFlagMembers(enumType, value)
                     .Select(member => $"{enumType.FullName}.{member.Name}"));
             }
 

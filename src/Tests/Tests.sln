@@ -3,6 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28917.182
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{60EFB26D-0B7F-424C-B440-8DF98EEB8017}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\paket.dependencies = ..\..\paket.dependencies
+		paket.dependencies = paket.dependencies
+	EndProjectSection
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.AutoCommit", "..\Modules\AutoCommit\Xpand.XAF.Modules.AutoCommit.csproj", "{5685573C-15E0-43DF-B939-D842211BA5ED}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.CloneMemberValue", "..\Modules\CloneMemberValue\Xpand.XAF.Modules.CloneMemberValue.csproj", "{6D9F55AA-D9C1-462E-9057-29EFC8DCC3BB}"

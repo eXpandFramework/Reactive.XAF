@@ -1,0 +1,21 @@
+strategy:max
+framework: auto-detect
+source "C:\Program Files (x86)\DevExpress 18.2\Components\System\Components\Packages"
+source https://api.nuget.org/v3/index.json
+source https://xpandnugetserver.azurewebsites.net/nuget
+
+nuget DevExpress.ExpressApp.Core.All 18.2.10
+nuget DevExpress.ExpressApp.Win.All 18.2.10
+nuget DevExpress.ExpressApp.Web.All 18.2.10
+nuget FasterFlect.Xpand
+nuget System.CodeDom
+nuget System.Reflection.Emit
+nuget Mono.Cecil
+nuget System.Reactive
+nuget Xpand.Patcher
+nuget Enums.NET
+nuget System.Interactive
+nuget Xpand.Collections
+nuget MagicOnion
+nuget System.Interactive.Async
+nuget System.ValueTuple

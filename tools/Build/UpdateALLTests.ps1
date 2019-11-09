@@ -44,61 +44,80 @@ $packages | Out-String
 
 
 $testApplication = "$root\src\Tests\ALL\TestApplication\TestApplication.sln"
-function UpdateVersion($csprojPath,$dxVersion,$testApplication ) {
+$global:versionChanged=$false
+function UpdateVersion($csprojPath, $dxVersion, $testApplication ) {
     [xml]$csproj = Get-Content $csprojPath
     Write-Host "Update All package version $csprojPath"
-    $packageReferences=Get-PackageReference $csprojPath
+    
+    $packageReferences = Get-PackageReference $csprojPath
     $packageReferences | Where-Object { $_.Include -like "Xpand.*" } | ForEach-Object {
         $pref = $_
         $packages | Where-Object { $_.Id -eq $pref.Include } | ForEach-Object {
             if ($_.Version -ne ([version]$pref.Version)) {
+                $global:versionChanged=$true
                 Write-Host "$($_.Id) version changed from $($pref.Version) to $($_.Version)" -f Green
                 $pref.Version = $_.Version.ToString()
                 Invoke-PaketAdd -id $_.Id -version $_.Version -projectpath $csprojPath -Force
             }
         }
     }
-    Write-Host "Update DX version to $dxVersion"
-    $packageReferences | Where-Object { $_.Include -like "DevExpress*" } | ForEach-Object {
-        Write-Host "Change $($_.Include) version to $dxVersion"
-        $_.Version = $dxVersion
-    }
-    $csproj.Save($csprojPath)
+    # Write-Host "Update DX version to $dxVersion"
+    
+    # $packageReferences | Where-Object { $_.Include -like "DevExpress*" } | ForEach-Object {
+    #     Write-Host "Change $($_.Include) version to $dxVersion"
+    #     $global:versionChanged=$true
+    #     $_.Version = $dxVersion
+        
+    # }
+    
     Get-Content $csprojPath -Raw
 
     $testAppDir = (Get-Item $testApplication).DirectoryName
-    $shortDxVersion=Get-DevExpressVersion $dxVersion
-    if (($dxVersion.ToCharArray()|Where-Object{$_ -eq "."}).Count -eq 2){
-        $dxVersion+=".0"
+    $shortDxVersion = Get-DevExpressVersion $dxVersion
+    if (($dxVersion.ToCharArray() | Where-Object { $_ -eq "." }).Count -eq 2) {
+        $dxVersion += ".0"
     }
     Get-ChildItem $testAppDir -Include "*.aspx", "*.config" -Recurse | ForEach-Object {
         $xml = Get-Content $_.FullName -Raw
         $regex = [regex] '(?<name>DevExpress.*)v\d{2}\.\d{1,2}(.*)Version=([.\d]*)'
         $result = $regex.Replace($xml, "`${name}v$shortDxVersion`$1Version=$dxversion")
         Set-Content $_.FullName $result.Trim()
-
-        "NewContent for $($_.BaseName):"
-        $result.Trim()
     }
     
 }
 Get-ChildItem "$root\src\Tests\All\" *.csproj -Recurse | ForEach-Object {
     UpdateVersion $_.FullName $dxVersion $testApplication
 }
-if (!(Test-Path "$root\src\Test\packages")){
-    Remove-Item "$root\src\Tests\All\\paket-files\paket.restore.cached" -ErrorAction SilentlyContinue
-    Invoke-PaketRestore
+Set-Location "$root\src\Tests\All"
+Invoke-Script {
+    if ($global:versionChanged){
+        Write-Host "Paket Install" -f Green
+        Invoke-PaketInstall
+    }
+    else{
+        Write-Host "Paket Restore" -f Green
+        if (Get-ChildItem ".\packages"){
+            Invoke-PaketRestore
+        }else{
+            Invoke-PaketRestore -Force
+        }
+        
+    }
 }
+
 Write-Host "Building TestApplication" -f Green
 
 $localSource = "$root\bin\Nupkg"
-$source="$localSource;$(Get-PackageFeed -Nuget);$(Get-PackageFeed -Xpand);$source"
+$source = "$localSource;$(Get-PackageFeed -Nuget);$(Get-PackageFeed -Xpand);$source"
 "Source=$source"
-$testAppPAth=(Get-Item $testApplication).DirectoryName
-& (Get-NugetPath) restore "$testAppPAth\TestApplication.Win\TestApplication.Win.csproj" -source $source
-dotnet msbuild "$testAppPAth\TestApplication.Win\TestApplication.Win.csproj" /bl:$root\bin\TestWinApplication.binlog /WarnAsError /v:m -m 
-
-& (Get-NugetPath) restore "$testAppPAth\TestApplication.Web\TestApplication.Web.csproj" -source $source
-& (Get-MsBuildPath) "$testAppPAth\TestApplication.Web\TestApplication.Web.csproj" /bl:$root\bin\TestWebApplication.binlog /WarnAsError /v:m -m
+$testAppPAth = (Get-Item $testApplication).DirectoryName
+Invoke-Script {
+    & (Get-NugetPath) restore "$testAppPAth\TestApplication.Web\TestApplication.Web.csproj" -source $source
+    & (Get-MsBuildPath) "$testAppPAth\TestApplication.Web\TestApplication.Web.csproj" /bl:$root\bin\TestWebApplication.binlog /WarnAsError /v:m -t:rebuild
+}
+Invoke-Script {
+    & (Get-NugetPath) restore "$testAppPAth\TestApplication.Web\TestApplication.Web.csproj" -source $source
+    & (Get-MsBuildPath) "$testAppPAth\TestApplication.Web\TestApplication.Web.csproj" /bl:$root\bin\TestWebApplication.binlog /WarnAsError /v:m -t:rebuild
+}
 
 

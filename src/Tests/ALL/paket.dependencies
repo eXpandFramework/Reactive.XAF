@@ -1,0 +1,37 @@
+strategy:max
+framework: auto-detect
+source "C:\Program Files (x86)\DevExpress 18.2\Components\System\Components\Packages"
+source "..\..\..\bin\Nupkg"
+source https://api.nuget.org/v3/index.json
+source https://xpandnugetserver.azurewebsites.net/nuget
+
+nuget akarnokd.reactive_extensions 
+nuget Castle.Core  
+nuget DevExpress.ExpressApp.Core.All 18.2.10  
+nuget DevExpress.ExpressApp.Win.All 18.2.10  
+nuget DevExpress.ExpressApp.Web.All 18.2.10  
+nuget DevExpress.ExpressApp.Security.Xpo 18.2.10  
+nuget DevExpress.EasyTest 18.2.10  
+nuget DevExpress.ExpressApp.EasyTest.WebAdapter 18.2.10  
+nuget DevExpress.ExpressApp.EasyTest.WinAdapter 18.2.10  
+nuget Enums.NET  
+nuget Fasterflect.Xpand  
+nuget Humanizer.Core  
+nuget MagicOnion  
+nuget Mono.Cecil  
+nuget Moq  
+nuget Newtonsoft.Json  
+nuget NUnit  
+nuget NUnit3TestAdapter  
+nuget Ryder  
+nuget Shouldly  
+nuget System.Data.Common  
+nuget System.Drawing.Common  
+nuget System.Interactive  
+nuget System.Reactive  
+nuget System.ValueTuple  
+nuget Unofficial.Microsoft.mshtml  
+nuget Xpand.Collections  
+nuget Xpand.Patcher  
+nuget Xpand.XAF.Web.All 0.0.2.2
+nuget Xpand.XAF.Win.All 0.0.2.2

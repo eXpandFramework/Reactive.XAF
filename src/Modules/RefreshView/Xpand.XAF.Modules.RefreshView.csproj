@@ -1,3 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{4C65406D-13A1-488F-8945-9C38DBC6ECD5}</ProjectGuid>
@@ -36,9 +37,5 @@
   <ItemGroup>
     <None Include="Readme.md" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp" Version="18.2.10" />
-    <PackageReference Include="System.Reactive" Version="4.2.0" />
-    <PackageReference Include="Fasterflect.Xpand" Version="2.0.7" />
-  </ItemGroup>
+  <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

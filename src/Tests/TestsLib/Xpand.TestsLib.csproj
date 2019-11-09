@@ -1,3 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProductVersion>9.0.30729</ProductVersion>
@@ -28,39 +29,6 @@
     <Compile Remove="AppDomainExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Castle.Core" Version="4.4.0" />
-    <PackageReference Include="DevExpress.EasyTest" Version="18.2.10" />
-    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WebAdapter" Version="18.2.10" />
-    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="18.2.10" />
-    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="18.2.10" />
-    <PackageReference Include="DevExpress.Persistent.BaseImpl" Version="18.2.10" />
-    <PackageReference Include="Enums.NET" Version="2.3.2" />
-    <PackageReference Include="Humanizer.Core" Version="2.7.9" />
-    <PackageReference Include="MagicOnion" Version="2.6.3" />
-    <PackageReference Include="Mono.Cecil" Version="0.11.0" />
-    <PackageReference Include="Moq" Version="4.13.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
-    <PackageReference Include="Ryder" Version="0.8.0" />
-    <PackageReference Include="Shouldly" Version="3.0.2" />
-    <PackageReference Include="System.Data.Common" Version="4.3.0" />
-    <PackageReference Include="System.Drawing.Common" Version="4.6.0" />
-    <PackageReference Include="System.Reactive" Version="4.2.0" />
-    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
-    <PackageReference Include="DevExpress.ExpressApp" Version="18.2.10" />
-    <PackageReference Include="DevExpress.ExpressApp.Web" Version="18.2.10" />
-    <PackageReference Include="DevExpress.ExpressApp.Win" Version="18.2.10" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="18.2.10" />
-    <PackageReference Include="DevExpress.Office.Core" Version="18.2.10" />
-    <PackageReference Include="DevExpress.RichEdit.Core" Version="18.2.10" />
-    <PackageReference Include="DevExpress.Web" Version="18.2.10" />
-    <PackageReference Include="DevExpress.Xpo" Version="18.2.10" />
-    <PackageReference Include="DevExpress.Win" Version="18.2.10" />
-    <PackageReference Include="NUnit" Version="3.12.0" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.15.1" />
-    <PackageReference Include="Fasterflect.Xpand" Version="2.0.7" />
-    <PackageReference Include="Xpand.Patcher" Version="1.0.1" />
-  </ItemGroup>
-  <ItemGroup>
     <Reference Include="System.Web" />
     <Reference Include="Xpand.Extensions">
       <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
@@ -81,4 +49,5 @@
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.Hub.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>

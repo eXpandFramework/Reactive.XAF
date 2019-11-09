@@ -3,6 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29319.158
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{4E97F4ED-E107-467E-8A1E-4F58BC1F9400}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\paket.dependencies = ..\..\paket.dependencies
+	EndProjectSection
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions", "Xpand.Extensions\Xpand.Extensions.csproj", "{2856A16A-A776-4A9B-B2C1-518644B9B2F3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.XAF", "Xpand.Extensions.XAF\Xpand.Extensions.XAF.csproj", "{D7D2820D-ECD7-4375-8D7D-1D7DD29A8254}"

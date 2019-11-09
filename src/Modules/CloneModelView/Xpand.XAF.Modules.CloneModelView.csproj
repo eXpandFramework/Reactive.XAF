@@ -1,3 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{FB456706-C7F0-455C-B2F1-D75B143FDC28}</ProjectGuid>
@@ -23,14 +24,9 @@
     <None Include="Readme.md" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Fasterflect.Xpand" Version="2.0.7" />
-    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
-    <PackageReference Include="DevExpress.ExpressApp" Version="18.2.10" />
-    <PackageReference Include="Xpand.Patcher" Version="1.0.1" />
-  </ItemGroup>
-  <ItemGroup>
     <Reference Include="Xpand.Extensions.XAF">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

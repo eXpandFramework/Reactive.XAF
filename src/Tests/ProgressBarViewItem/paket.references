@@ -1,0 +1,16 @@
+Grpc.Core
+MagicOnion
+Moq
+Shouldly
+System.Buffers
+System.Reactive
+NUnit
+NUnit3TestAdapter
+DevExpress.ExpressApp
+DevExpress.Win
+DevExpress.Office.Core
+DevExpress.RichEdit.Core
+DevExpress.Web
+DevExpress.Data
+DevExpress.Xpo
+Fasterflect.Xpand

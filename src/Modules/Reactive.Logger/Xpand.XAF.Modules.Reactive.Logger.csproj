@@ -1,3 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{FCC60F32-B678-40B7-9226-9FBEB82B0FDA}</ProjectGuid>
@@ -42,13 +43,5 @@
   <ItemGroup>
     <None Include="Readme.md" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp" Version="18.2.10" />
-    <PackageReference Include="DevExpress.Persistent.Base" Version="18.2.10" />
-    <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" Version="18.2.10" />
-    <PackageReference Include="DevExpress.Xpo" Version="18.2.10" />
-    <PackageReference Include="System.Reactive" Version="4.2.0" />
-    <PackageReference Include="Fasterflect.Xpand" Version="2.0.7" />
-    <PackageReference Include="Xpand.Patcher" Version="1.0.1" />
-  </ItemGroup>
+  <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

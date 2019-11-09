@@ -3,7 +3,7 @@ param(
     $SourcePath = "$PSScriptRoot\..\..",
     $GitHubUserName = "apobekiaris",
     $Token = $env:GitHubToken,
-    $DXApiFeed  =$env:DXApiFeed,
+    $DXApiFeed  =$env:DxFeed,
     $artifactstagingdirectory,
     $bindirectory,
     $AzureToken = $env:AzureToken,
@@ -13,6 +13,7 @@ param(
     $WhatIf = $false
     
 )
+
 
 "PastBuild=$PastBuild"
 "latest=$latest"
@@ -24,6 +25,10 @@ $ErrorActionPreference = "Stop"
 $regex = [regex] '(\d{2}\.\d*)'
 $result = $regex.Match($CustomVersion).Groups[1].Value;
 & "$SourcePath\go.ps1" -InstallModules
+$stage="$SourcePath\buildstage"
+Remove-Item $stage -force -recurse -ErrorAction SilentlyContinue
+dotnet tool restore
+
 if (!$result) {
     $CustomVersion = "latest"
 }
@@ -53,12 +58,14 @@ if ($Branch -eq "master") {
 if (!(Get-Module VSTeam -ListAvailable)) {
     Install-Module VSTeam -Force
 }
+
 Set-VSTeamAccount -Account eXpandDevOps -PersonalAccessToken $AzureToken
 $officialPackages = Get-XpandPackages -PackageType XAF -Source Release
 $labPackages = Get-XpandPackages -PackageType XAFAll -Source Lab
 Write-Host "labPackages" -f Blue
 $labPackages | Out-String
 $DXVersion = Get-DevExpressVersion 
+"DXVersion=$DXVersion"
 $localPackages = (Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse) + (Get-ChildItem "$sourcePath\src\Extensions" "*.csproj" -Recurse) | ForEach-Object {
     $name = [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
     $localVersion = Get-XpandVersion -XpandPath $_.DirectoryName -module $name
@@ -134,7 +141,8 @@ if ($Branch -eq "lab"){
 }
 
 $updateVersion = Update-NugetProjectVersion @yArgs 
-"updateVersion=$updateVersion"
+"updateVersion:"
+$updateVersion
 
 $reactiveVersionChanged = $updateVersion | Select-String "Xpand.XAF.Modules.Reactive"
 "reactiveVersionChanged=$reactiveVersionChanged"
@@ -163,7 +171,7 @@ elseif ($CustomVersion -and !$latest) {
     $newVersion = $CustomVersion
 }
 
-Start-XpandProjectConverter -version $newVersion -path $SourcePath 
+
 $bArgs = @{
     packageSources = "$(Get-PackageFeed -Xpand);$DxApiFeed"
     tasklist       = $tasklist
@@ -172,10 +180,23 @@ $bArgs = @{
 }
 "bArgs:"
 $bArgs | Out-String
+$SourcePath,"$SourcePath\src\tests","$SourcePath\src\tests\all"|ForEach-Object{
+    Set-Location $_
+    Move-PaketSource 0 $DXApiFeed
+}
+Start-XpandProjectConverter -version $newVersion -path $SourcePath -SkipInstall
 
+if ($newVersion -ne $defaulVersion){
+    Set-Location $SourcePath
+    "PaketInstall $SourcePath (due to different Version)"
+    Invoke-PaketInstall
+    Set-Location "$SourcePath\src\Tests"
+    "PaketInstall $SourcePath\src\Tests (due to different Version)"
+    Invoke-PaketInstall
+}
 & $SourcePath\go.ps1 @bArgs
 
-$stage="$SourcePath\buildstage"
+
 New-Item $stage -ItemType Directory -Force
 Set-Location $SourcePath
 Get-ChildItem -Exclude ".git","bin","buildstage"|Copy-Item -Destination $stage -Recurse -Force -ErrorAction Continue

@@ -1,3 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{F15810E7-4D84-4305-B9DE-74E7976C9018}</ProjectGuid>
@@ -38,15 +39,5 @@
   <ItemGroup>
     <None Include="Readme.md" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Enums.NET" Version="2.3.2" />
-    <PackageReference Include="Mono.Cecil" Version="0.11.0" />
-    <PackageReference Include="System.CodeDom" Version="4.6.0" />
-    <PackageReference Include="System.Interactive" Version="4.0.0" />
-    <PackageReference Include="DevExpress.Data" Version="18.2.10" />
-    <PackageReference Include="DevExpress.ExpressApp" Version="18.2.10" />
-    <PackageReference Include="System.Reactive" Version="4.2.0" />
-    <PackageReference Include="Fasterflect.Xpand" Version="2.0.7" />
-    <PackageReference Include="Xpand.Collections" Version="1.0.1" />
-  </ItemGroup>
+  <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

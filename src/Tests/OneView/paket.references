@@ -1,0 +1,14 @@
+akarnokd.reactive_extensions
+DevExpress.ExpressApp.Win
+DevExpress.ExpressApp.Xpo
+Grpc.Core
+MagicOnion
+Moq
+Shouldly
+System.Buffers
+System.Reactive
+NUnit
+NUnit3TestAdapter
+DevExpress.ExpressApp
+DevExpress.Data
+DevExpress.Xpo
