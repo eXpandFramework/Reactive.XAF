@@ -1,12 +1,7 @@
 DevExpress.ExpressApp.Win
-Grpc.Core
 akarnokd.reactive_extensions
 MagicOnion
 Moq
 Shouldly
-System.Reactive
 NUnit
 NUnit3TestAdapter
-DevExpress.ExpressApp
-DevExpress.Data
-DevExpress.Xpo

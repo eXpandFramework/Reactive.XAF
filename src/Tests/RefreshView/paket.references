@@ -1,12 +1,7 @@
 DevExpress.ExpressApp.Win
-Grpc.Core
 MagicOnion
 Moq
 Shouldly
-System.Buffers
 System.Reactive
 NUnit
 NUnit3TestAdapter
-DevExpress.ExpressApp
-DevExpress.Data
-DevExpress.Xpo

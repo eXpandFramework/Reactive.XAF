@@ -1,13 +1,9 @@
-Grpc.Core
 MagicOnion
 Moq
 NUnit
 NUnit3TestAdapter
 Shouldly
-System.Buffers
 System.Reactive
 DevExpress.ExpressApp
-DevExpress.Data
 DevExpress.Xpo
-System.Threading.Tasks.Extensions
 Fasterflect.Xpand

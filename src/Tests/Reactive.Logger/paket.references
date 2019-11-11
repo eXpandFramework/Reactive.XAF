@@ -2,16 +2,9 @@ akarnokd.reactive_extensions
 DevExpress.ExpressApp.ConditionalAppearance
 DevExpress.ExpressApp.Security.Xpo
 DevExpress.ExpressApp.Web
-DevExpress.ExpressApp.Xpo
 DevExpress.Persistent.BaseImpl
-Grpc.Core
 MagicOnion
 Moq
 Shouldly
-System.Buffers
-System.Reactive
 NUnit
 NUnit3TestAdapter
-DevExpress.ExpressApp
-DevExpress.Data
-DevExpress.Xpo

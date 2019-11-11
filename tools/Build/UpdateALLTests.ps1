@@ -96,12 +96,7 @@ Invoke-Script {
     }
     else{
         Write-Host "Paket Restore" -f Green
-        if (Get-ChildItem ".\packages"){
-            Invoke-PaketRestore
-        }else{
-            Invoke-PaketRestore -Force
-        }
-        
+        Invoke-PaketRestore
     }
 }
 
@@ -111,13 +106,13 @@ $localSource = "$root\bin\Nupkg"
 $source = "$localSource;$(Get-PackageFeed -Nuget);$(Get-PackageFeed -Xpand);$source"
 "Source=$source"
 $testAppPAth = (Get-Item $testApplication).DirectoryName
+# Invoke-Script {
+#     & (Get-NugetPath) restore "$testAppPAth\TestApplication.Win\TestApplication.Win.csproj" -source $source
+#     & (Get-MsBuildPath) "$testAppPAth\TestApplication.Win\TestApplication.Win.csproj" /bl:$root\bin\TestWebApplication.binlog /WarnAsError /v:m -t:rebuild
+# }
 Invoke-Script {
-    & (Get-NugetPath) restore "$testAppPAth\TestApplication.Web\TestApplication.Web.csproj" -source $source
-    & (Get-MsBuildPath) "$testAppPAth\TestApplication.Web\TestApplication.Web.csproj" /bl:$root\bin\TestWebApplication.binlog /WarnAsError /v:m -t:rebuild
-}
-Invoke-Script {
-    & (Get-NugetPath) restore "$testAppPAth\TestApplication.Web\TestApplication.Web.csproj" -source $source
-    & (Get-MsBuildPath) "$testAppPAth\TestApplication.Web\TestApplication.Web.csproj" /bl:$root\bin\TestWebApplication.binlog /WarnAsError /v:m -t:rebuild
+    & (Get-NugetPath) restore "$testAppPAth\TestApplication.sln" -source $source
+    & (Get-MsBuildPath) "$testAppPAth\TestApplication.sln" /bl:$root\bin\TestWebApplication.binlog /WarnAsError /v:m -t:rebuild
 }
 
 

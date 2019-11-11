@@ -3,14 +3,9 @@ DevExpress.ExpressApp.ConditionalAppearance
 DevExpress.ExpressApp.Web
 DevExpress.ExpressApp.Win
 DevExpress.Persistent.BaseImpl
-Grpc.Core
 MagicOnion
 Moq
 Shouldly
-System.Reactive
 NUnit
 NUnit3TestAdapter
-DevExpress.ExpressApp
-DevExpress.Data
-DevExpress.Xpo
 Fasterflect.Xpand

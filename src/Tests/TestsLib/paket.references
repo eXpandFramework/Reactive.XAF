@@ -1,4 +1,3 @@
-Castle.Core
 DevExpress.EasyTest
 DevExpress.ExpressApp.EasyTest.WebAdapter
 DevExpress.ExpressApp.EasyTest.WinAdapter
@@ -15,16 +14,8 @@ Shouldly
 System.Data.Common
 System.Drawing.Common
 System.Reactive
-System.ValueTuple
-DevExpress.ExpressApp
 DevExpress.ExpressApp.Web
 DevExpress.ExpressApp.Win
-DevExpress.ExpressApp.Xpo
-DevExpress.Office.Core
-DevExpress.RichEdit.Core
-DevExpress.Web
-DevExpress.Xpo
-DevExpress.Win
 NUnit
 NUnit3TestAdapter
 Fasterflect.Xpand
