@@ -112,7 +112,7 @@ $testAppPAth = (Get-Item $testApplication).DirectoryName
 # }
 Invoke-Script {
     & (Get-NugetPath) restore "$testAppPAth\TestApplication.sln" -source $source
-    & (Get-MsBuildPath) "$testAppPAth\TestApplication.sln" /bl:$root\bin\TestWebApplication.binlog /WarnAsError /v:m -t:rebuild
+    & (Get-MsBuildPath) "$testAppPAth\TestApplication.sln" /bl:$root\bin\TestWebApplication.binlog /WarnAsError /v:m -t:rebuild -m
 }
 
 

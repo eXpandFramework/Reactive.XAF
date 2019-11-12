@@ -30,7 +30,7 @@ namespace ALL.Win.Tests{
         [Apartment(ApartmentState.STA)]
         public void Win_EasyTest(){
             var winAdapter = new WinAdapter();
-            var testApplication = winAdapter.RunWinApplication($@"{AppDomain.CurrentDomain.ApplicationPath()}\TestWinApplication\TestApplication.Win.exe");
+            var testApplication = winAdapter.RunWinApplication($@"{AppDomain.CurrentDomain.ApplicationPath()}\TestApplication.Win.exe");
 
             var commandAdapter = winAdapter.CreateCommandAdapter();
             

@@ -19,7 +19,7 @@
       <dependency id="Grpc.Core" version="2.25" />
       <dependency id="Grpc.Core.Api" version="2.25" />
       <dependency id="MagicOnion" version="2.6.3" />
-      <dependency id="MessagePack" version="1.8.74" />
+      <dependency id="MessagePack" version="1.7.3.7" />
       <dependency id="Microsoft.Bcl.AsyncInterfaces" version="1.0" />
       <dependency id="Microsoft.NETCore.Platforms" version="3.0" />
       <dependency id="Microsoft.NETCore.Targets" version="3.0" />
