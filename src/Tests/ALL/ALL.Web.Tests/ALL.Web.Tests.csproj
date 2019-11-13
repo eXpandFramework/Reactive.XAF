@@ -14,8 +14,8 @@
     <OutputType>Library</OutputType>
     <StartupObject>
     </StartupObject>
-    <OutputPathSuffix>TestWebApplication\bin</OutputPathSuffix>
-    <OutputPath>..\..\..\..\bin\TestWebApplication\bin</OutputPath>
+    <OutputPathSuffix>AllTestWeb</OutputPathSuffix>
+    <OutputPath>..\..\..\..\bin\AllTestWeb</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -25,7 +25,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <OutputPath>..\..\..\..\bin\TestWebApplication\bin</OutputPath>
+    <OutputPath>..\..\..\..\bin\AllTestWeb</OutputPath>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Program.cs" />

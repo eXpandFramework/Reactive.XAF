@@ -10,7 +10,7 @@ param(
     $PastBuild,
     $CustomVersion,
     $latest,
-    $WhatIf = $false
+    $Convert 
     
 )
 
@@ -117,7 +117,6 @@ $yArgs = @{
     CommitsSince  = $labBuild.finishTime
     ExcludeFilter = "Test"
     Verbose       = $true
-    WhatIf        = $WhatIf
 }
 if ($newPackages) {
     $yArgs.Packages += $newPackages
@@ -189,10 +188,10 @@ Start-XpandProjectConverter -version $newVersion -path $SourcePath -SkipInstall
 if ($newVersion -ne $defaulVersion){
     Set-Location $SourcePath
     "PaketInstall $SourcePath (due to different Version)"
-    Invoke-PaketInstall
-    Set-Location "$SourcePath\src\Tests"
-    "PaketInstall $SourcePath\src\Tests (due to different Version)"
-    Invoke-PaketInstall
+    Invoke-PaketInstall -Strict
+} 
+if ($Convert){
+    return
 }
 & $SourcePath\go.ps1 @bArgs
 

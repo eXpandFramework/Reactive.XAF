@@ -8,6 +8,8 @@ using namespace System.Text.RegularExpressions
 using namespace Mono.Cecil
 using namespace Mono.Cecil.pdb
 param(
+    [string]$projectFile ,
+    [string]$targetPath ,
     $DevExpressVersion,
     [string]$VerboseOutput="Continue",
     [string]$referenceFilter = "DevExpress*"
@@ -52,8 +54,11 @@ if (!$unpatchedPackages){
 }
 "--- moduleDirectories:"
 $moduleDirectories
-"--- unpatchedPackages:"
-$unpatchedPackages
+if ($unpatchedPackages){
+    Write-Host "--- unpatchedPackages:" -f Yellow
+    $unpatchedPackages
+}
+
 try {
     $mtx = [Mutex]::OpenExisting("VersionConverterMutex")
 }
@@ -62,9 +67,6 @@ catch {
 }
 $mtx.WaitOne() | Out-Null
 try {    
-    # $installedPackages=Get-InstalledPackages $projectFile $assemblyFilter|Select-Object -ExpandProperty Id
-    # Write-Verbose "installedPackages:`r`n"
-    # $installedPackages | Write-Verbose
     
     Install-MonoCecil $targetPath
     $moduleDirectories|ForEach-Object{

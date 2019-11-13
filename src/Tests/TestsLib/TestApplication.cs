@@ -33,8 +33,8 @@ namespace Xpand.TestsLib{
 
         protected override void Dispose(bool disposing){
             if (_transmitMessage){
-                TraceClientConnected.Wait();
-                TraceClientBroadcast.Wait();
+//                TraceClientConnected.ToTaskWithoutConfigureAwait().GetAwaiter().GetResult();
+//                TraceClientBroadcast.ToTaskWithoutConfigureAwait().GetAwaiter().GetResult();
             }
             base.Dispose(disposing);
         }
@@ -101,9 +101,9 @@ namespace Xpand.TestsLib{
         }
         protected override void Dispose(bool disposing){
             if (_transmitMessage){
-                var timeout = TimeSpan.FromMilliseconds(5000);
-                TraceClientConnected.Timeout(timeout).Wait();
-                TraceClientBroadcast.Timeout(timeout).Wait();
+//                var timeout = TimeSpan.FromMilliseconds(5000);
+//                TraceClientConnected.Timeout(timeout).Wait();
+//                TraceClientBroadcast.Timeout(timeout).Wait();
             }
             base.Dispose(disposing);
         }

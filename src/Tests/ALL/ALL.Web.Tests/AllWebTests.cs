@@ -29,7 +29,7 @@ namespace ALL.Web.Tests{
         [Test]
         public void Web_EasyTest(){
             var webAdapter = new WebAdapter();
-            var testApplication = webAdapter.RunWebApplication($@"{AppDomain.CurrentDomain.ApplicationPath()}\..\","65377");
+            var testApplication = webAdapter.RunWebApplication($@"{AppDomain.CurrentDomain.ApplicationPath()}\..\TestWebApplication\","65377");
 
             var commandAdapter = webAdapter.CreateCommandAdapter();
             

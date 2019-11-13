@@ -45,33 +45,7 @@ $packages | Out-String
 
 $testApplication = "$root\src\Tests\ALL\TestApplication\TestApplication.sln"
 $global:versionChanged=$false
-function UpdateVersion($csprojPath, $dxVersion, $testApplication ) {
-    [xml]$csproj = Get-Content $csprojPath
-    Write-Host "Update All package version $csprojPath"
-    
-    $packageReferences = Get-PackageReference $csprojPath
-    $packageReferences | Where-Object { $_.Include -like "Xpand.*" } | ForEach-Object {
-        $pref = $_
-        $packages | Where-Object { $_.Id -eq $pref.Include } | ForEach-Object {
-            if ($_.Version -ne ([version]$pref.Version)) {
-                $global:versionChanged=$true
-                Write-Host "$($_.Id) version changed from $($pref.Version) to $($_.Version)" -f Green
-                $pref.Version = $_.Version.ToString()
-                Invoke-PaketAdd -id $_.Id -version $_.Version -projectpath $csprojPath -Force
-            }
-        }
-    }
-    # Write-Host "Update DX version to $dxVersion"
-    
-    # $packageReferences | Where-Object { $_.Include -like "DevExpress*" } | ForEach-Object {
-    #     Write-Host "Change $($_.Include) version to $dxVersion"
-    #     $global:versionChanged=$true
-    #     $_.Version = $dxVersion
-        
-    # }
-    
-    Get-Content $csprojPath -Raw
-
+function UpdateVersion( $dxVersion, $testApplication ) {
     $testAppDir = (Get-Item $testApplication).DirectoryName
     $shortDxVersion = Get-DevExpressVersion $dxVersion
     if (($dxVersion.ToCharArray() | Where-Object { $_ -eq "." }).Count -eq 2) {
@@ -86,8 +60,24 @@ function UpdateVersion($csprojPath, $dxVersion, $testApplication ) {
     
 }
 Get-ChildItem "$root\src\Tests\All\" *.csproj -Recurse | ForEach-Object {
-    UpdateVersion $_.FullName $dxVersion $testApplication
+    UpdateVersion $dxVersion $testApplication
 }
+Set-Location $root\src\Tests\All\
+$depsFile=Get-PaketDependenciesPath
+$depsRaw=Get-Content $depsFile -Raw
+"Win","Web"|ForEach-Object{
+    $regex = [regex] "(nuget Xpand\.XAF\.$_[^ ]*) (?<version>(\d\.)*\d)"
+    $platform=$_
+    $version=($packages|Where-Object{$_.Id -match $platform}).Version
+    $result = $regex.Replace($depsRaw, "`$1 $version")
+    if ($result.Trim() -ne $depsRaw.Trim()){
+        $global:versionChanged=$true;
+    }
+    $depsRaw=$result
+    Set-Content $depsFile $result.Trim()
+}
+
+
 Set-Location "$root\src\Tests\All"
 Invoke-Script {
     if ($global:versionChanged){

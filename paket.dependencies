@@ -5,7 +5,7 @@ source "C:\Program Files (x86)\DevExpress 18.2\Components\System\Components\Pack
 source https://api.nuget.org/v3/index.json
 source https://xpandnugetserver.azurewebsites.net/nuget
 
-nuget akarnokd.reactive_extensions 
+nuget akarnokd.reactive_extensions 0.0.27-alpha
 nuget DevExpress.ExpressApp.Core.All 18.2.10
 nuget DevExpress.ExpressApp.Win.All 18.2.10
 nuget DevExpress.ExpressApp.Web.All 18.2.10
@@ -13,24 +13,24 @@ nuget DevExpress.EasyTest 18.2.10
 nuget DevExpress.ExpressApp.EasyTest.WebAdapter 18.2.10  
 nuget DevExpress.ExpressApp.EasyTest.WinAdapter 18.2.10  
 nuget DevExpress.ExpressApp.Security.Xpo 18.2.10  
-nuget Enums.NET
-nuget FasterFlect.Xpand
-nuget Mono.Cecil
-nuget Moq  
-nuget MagicOnion == 2.6.3
-nuget MessagePack == 1.7.3.7
-nuget Humanizer.Core  
-nuget Newtonsoft.Json  
-nuget NUnit  
-nuget NUnit3TestAdapter  
-nuget Ryder  
-nuget Shouldly  
-nuget System.CodeDom
-nuget System.Data.Common  
-nuget System.Interactive
-nuget System.Interactive.Async
-nuget System.Drawing.Common  
-nuget System.Reactive  
-nuget Unofficial.Microsoft.mshtml  
-nuget Xpand.Patcher
-nuget Xpand.Collections
+nuget Enums.NET 3.0
+nuget FasterFlect.Xpand 2.0.7
+nuget Mono.Cecil 0.11.1
+nuget Moq 4.13.1
+nuget MagicOnion 2.6.3
+nuget MessagePack 1.7.3.7
+nuget Humanizer.Core 2.7.9
+nuget Newtonsoft.Json 12.0.3
+nuget NUnit 3.12
+nuget NUnit3TestAdapter 3.15.1
+nuget Ryder 0.8
+nuget Shouldly 3.0.2 
+nuget System.CodeDom 4.6
+nuget System.Data.Common 4.3  
+nuget System.Interactive 4.0
+nuget System.Interactive.Async 4.0
+nuget System.Drawing.Common 4.6
+nuget System.Reactive 4.2
+nuget Unofficial.Microsoft.mshtml 7.0.3300
+nuget Xpand.Patcher 1.0.1
+nuget Xpand.Collections 1.0.1

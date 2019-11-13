@@ -57,6 +57,37 @@ jobs:
           AzureToken ='$(AzureToken)'
           PastBuild =$false 
           CustomVersion ='$(Build.DefinitionName)'
+          Convert=$true
+        }
+        "goArgs:"
+        $goArgs|out-string
+        & .\tools\build\pipeline.ps1 @goArgs
+      pwsh: true
+  - task: CacheBeta@0
+    inputs:
+      key: paket | paket.lock
+      path: .\packages
+    displayName: Cache NuGet packages
+  - task: PowerShell@2
+    displayName: Build
+    continueOnError: true
+    inputs:
+      ignoreLASTEXITCODE: true
+      failOnStderr: false
+      errorActionPreference: continue
+      targetType: 'inline'
+      script: |
+        $goArgs=@{
+          Branch ='$(Build.SourceBranchName)'
+          SourcePath ='$(System.DefaultworkingDirectory)'
+          GitHubUserName ='$(GitHubUserName)' 
+          Token ='$(GitHubToken)' 
+          DXApiFeed ='$(DXApiFeed) '
+          ArtifactStagingDirectory ='$(build.artifactstagingdirectory)' 
+          BinDirectory ='$(System.DefaultworkingDirectory)\bin '
+          AzureToken ='$(AzureToken)'
+          PastBuild =$false 
+          CustomVersion ='$(Build.DefinitionName)'
         }
         "goArgs:"
         $goArgs|out-string
@@ -72,9 +103,44 @@ jobs:
   #   inputs:
   #     PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage'
   #     ArtifactName: 'Build'
-- job: TestPhaseEasyTest
+# - job: TestPhaseEasyTest
+#   strategy:
+#     parallel: 2
+#   dependsOn: TestsRunBuild
+#   pool:
+#     vmImage: windows-2019
+#   variables:
+#     - group: keys
+#   steps:
+#     - checkout: none
+#     - task: DownloadBuildArtifacts@0
+#       inputs:
+#         buildType: 'current'
+#         downloadType: 'specific'
+#         downloadPath: '$(System.DefaultworkingDirectory)'
+#     - task: VSTest@2
+#       displayName: 'VsTest - testAssemblies'
+#       continueOnError: true
+#       inputs:
+#         searchFolder: '$(System.DefaultWorkingDirectory)'
+#         testSelector: 'testAssemblies'
+#         testAssemblyVer2: |
+#           **\**All*Tests.dll
+#           !**\*ModelMapper*.dll
+#           !**\*Hub*.dll
+#           !**\*TestAdapter.dll
+#           !**\obj\**    
+#         diagnosticsEnabled: true
+#         codeCoverageEnabled: true
+#         distributionBatchType: basedOnAssembly
+#         runInParallel: false
+#         runSettingsFile: .\bin\Tests.runsettings
+#         runTestsInIsolation: true
+#         collectDumpOn: never
+- job: TestPhase1
   strategy:
-    parallel: 2
+    parallel: 10
+  # dependsOn: TestPhaseEasyTest
   dependsOn: TestsRunBuild
   pool:
     vmImage: windows-2019
@@ -94,41 +160,14 @@ jobs:
         searchFolder: '$(System.DefaultWorkingDirectory)'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
-          **\**All*Tests.dll
-          !**\*ModelMapper*.dll
-          !**\*Hub*.dll
-          !**\*TestAdapter.dll
-          !**\obj\**    
-        diagnosticsEnabled: true
-        codeCoverageEnabled: true
-        distributionBatchType: basedOnAssembly
-        runInParallel: false
-        runSettingsFile: .\bin\Tests.runsettings
-        runTestsInIsolation: true
-        collectDumpOn: never
-- job: TestPhase1
-  strategy:
-    parallel: 14
-  dependsOn: TestPhaseEasyTest
-  pool:
-    vmImage: windows-2019
-  variables:
-    - group: keys
-  steps:
-    - checkout: none
-    - task: DownloadBuildArtifacts@0
-      inputs:
-        buildType: 'current'
-        downloadType: 'specific'
-        downloadPath: '$(System.DefaultworkingDirectory)'
-    - task: VSTest@2
-      displayName: 'VsTest - testAssemblies'
-      continueOnError: true
-      inputs:
-        searchFolder: '$(System.DefaultWorkingDirectory)'
-        testSelector: 'testAssemblies'
-        testAssemblyVer2: |
-          **\**Tests.dll
+          **\*AutoCommit*.dll
+          **\*CloneMember*.dll
+          **\*CloneModel*.dll
+          **\*ModelViewIn*.dll
+          **\*Grid*.dll
+          **\*Hide*.dll
+          **\*Logger*.dll
+          **\*MasterDetail*.dll
           !**\*ModelMapper*.dll
           !**\*Hub*.dll
           !**\*TestAdapter.dll

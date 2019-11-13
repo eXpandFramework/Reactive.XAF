@@ -91,4 +91,7 @@
     <!-- <PackageReference Include="Xpand.XAF.Modules.Reactive" Version="1.2.67.3" /> -->
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="XCopy $(ProjectDir)\..\..\packages\grpc.core\runtimes\win\native\*.* $(ProjectDir)$(OutDir)\*.*  /S /Q /H /R /Y" />
+  </Target>
 </Project>

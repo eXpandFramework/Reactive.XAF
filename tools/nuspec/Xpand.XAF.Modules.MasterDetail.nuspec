@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.MasterDetail</id>
-    <version>1.0.17.0</version>
+    <version>1.0.19.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -15,21 +15,12 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  MasterDetail</tags>
     <dependencies>
       <dependency id="Fasterflect.Xpand" version="2.0.7" />
-      <dependency id="Microsoft.NETCore.Platforms" version="3.0" />
-      <dependency id="Microsoft.NETCore.Targets" version="3.0" />
       <dependency id="System.Reactive" version="4.2" />
-      <dependency id="System.Reflection.Emit.ILGeneration" version="4.6" />
-      <dependency id="System.Reflection.Emit.Lightweight" version="4.6" />
-      <dependency id="System.Runtime" version="4.3.1" />
-      <dependency id="System.Runtime.CompilerServices.Unsafe" version="4.6" />
-      <dependency id="System.Runtime.InteropServices.WindowsRuntime" version="4.3" />
-      <dependency id="System.Threading.Tasks.Extensions" version="4.5.3" />
-      <dependency id="System.ValueTuple" version="4.5" />
-      <dependency id="Xpand.Extensions.Reactive" version="0.0.2.0" />
-      <dependency id="Xpand.Extensions.XAF" version="0.0.8.0" />
+      <dependency id="Xpand.Extensions.Reactive" version="0.0.4.0" />
+      <dependency id="Xpand.Extensions.XAF" version="0.0.10.0" />
       <dependency id="Xpand.Patcher" version="1.0.1" />
-      <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.69.0" />
-      <dependency id="Xpand.VersionConverter" version="1.1.0.0" />
+      <dependency id="Xpand.XAF.Modules.Reactive" version="1.2.71.0" />
+      <dependency id="Xpand.VersionConverter" version="1.1.1.0" />
     </dependencies>
   </metadata>
   <files>
