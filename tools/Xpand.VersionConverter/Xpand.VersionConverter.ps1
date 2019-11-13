@@ -8,8 +8,6 @@ using namespace System.Text.RegularExpressions
 using namespace Mono.Cecil
 using namespace Mono.Cecil.pdb
 param(
-    [string]$projectFile ,
-    [string]$targetPath ,
     $DevExpressVersion,
     [string]$VerboseOutput="Continue",
     [string]$referenceFilter = "DevExpress*"
@@ -46,14 +44,16 @@ $moduleDirectories=[Directory]::GetDirectories($nugetPackageFolders)|Where-Objec
     $baseName=(Get-Item $_).BaseName
     $baseName -like "Xpand.XAF*" -or $baseName -like "Xpand.Extensions*"
 }
-Write-Verbose "moduleDirectories:"
-$moduleDirectories|Write-Verbose
+
 $unpatchedPackages=Get-UnPatchedPackages $moduleDirectories $dxversion
 if (!$unpatchedPackages){
     Write-Verbose "All packages already patched for $dxversion"
     return
 }
-
+"--- moduleDirectories:"
+$moduleDirectories
+"--- unpatchedPackages:"
+$unpatchedPackages
 try {
     $mtx = [Mutex]::OpenExisting("VersionConverterMutex")
 }
@@ -68,12 +68,12 @@ try {
     
     Install-MonoCecil $targetPath
     $moduleDirectories|ForEach-Object{
-        write-verbose "`r`nmoduleDir=$_"
+        "nmoduleDir=$_"
         $unpatchedPackages|Get-Item|#Where-Object{$_.basename -eq "Xpand.XAF.Modules.Reactive" -or $_.basename -eq "Xpand.XAF.Modules.AutoCommit"}|
         # Where-Object{$installedPackages.Contains($_.BaseName)}|
         ForEach-Object{
             $packageFile = $_.FullName
-            Write-verbose "packageFile=$packageFile"
+            "packageFile=$packageFile"
             $packageDir = $_.DirectoryName
             $versionConverterFlag = "$packageDir\VersionConverter.v.$dxVersion.DoNotDelete"
             if (!(Test-Path $versionConverterFlag)) {
@@ -81,19 +81,21 @@ try {
                 @($packageFile) | ForEach-Object {
                     if (Test-Path $_) {
                         $modulePath = (Get-Item $_).FullName
-                        Write-Verbose "Checking references: $modulePath ..`r`n"
+                        "Checking references: $modulePath ..`r`n"
                         Update-Version $modulePath $dxVersion
                     }
                 }
-                Write-Verbose "Flag $versionConverterFlag"
+                "Flag $versionConverterFlag"
                 New-Item $versionConverterFlag -ItemType Directory | Out-Null
             }
         }
     }
 }
 catch {
-    Write-Warning ($_.Exception | Format-List -Force | Out-String) -ErrorAction Continue
-    Write-Warning ($_.InvocationInfo | Format-List -Force | Out-String) -ErrorAction Continue
+    "Exception:"
+    $_
+    "InvocationInfo:"
+    $_.InvocationInfo
     Write-Warning "`r`n$howToVerbose`r`n"
     throw "Check output warning message"
 

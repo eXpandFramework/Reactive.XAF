@@ -182,9 +182,6 @@ function Get-MonoAssembly($path, [switch]$ReadSymbols) {
     $assemblyResolver = New-Object MyDefaultAssemblyResolver
     $readerParams.AssemblyResolver = $assemblyResolver
     try {
-        if ($path -like "*Xpand.XAF.Modules.Reactive*") {
-            # $_
-        }
         $m = [ModuleDefinition]::ReadModule($path, $readerParams)
         [PSCustomObject]@{
             Assembly = $m.assembly
@@ -192,7 +189,7 @@ function Get-MonoAssembly($path, [switch]$ReadSymbols) {
         }
     }
     catch {
-        if ($_.FullyQualifiedErrorId -like "*Symbols*") {
+        if ($_.FullyQualifiedErrorId -like "*Symbols*" -or ($_.FullyQualifiedErrorId -like "pdbex*")) {
             Get-MonoAssembly $path
         }
         else {
@@ -205,7 +202,7 @@ function Get-MonoAssembly($path, [switch]$ReadSymbols) {
 function Get-PaketReferences {
     [CmdletBinding()]
     param (
-        [string]$Path = "."
+        [System.IO.FileInfo]$projectFile = "."
     )
     
     begin {
@@ -213,18 +210,18 @@ function Get-PaketReferences {
     }
     
     process {
-        $paketDirectoryInfo = Get-Item $Path
+        $paketDirectoryInfo = $projectFile.Directory
         $paketReferencesFile = "$($paketDirectoryInfo.FullName)\paket.references"
         if (Test-Path $paketReferencesFile) {
-            $paketDependeciesFile = Get-PaketDependenciesPath
-            $dependencies = Get-Content $paketDependeciesFile | ForEach-Object {
-                $regex = [regex] 'nuget ([^ ]*) ([^ ]*)'
-                $result = $regex.Match($_);
+            Push-Location $projectFile.DirectoryName
+            $dependencies=dotnet paket show-installed-packages --project $projectFile.FullName --all |ForEach-Object {
+                $parts = $_.split(" ")
                 [PSCustomObject]@{
-                    Include    = $result.Groups[1].Value
-                    Version = $result.Groups[2].Value
+                    Include      = $parts[1]
+                    Version = $parts[3]
                 }
             }
+            Pop-Location
             $c=Get-Content $paketReferencesFile|ForEach-Object{
                 $ref=$_
                 $d=$dependencies|Where-Object{
@@ -280,7 +277,7 @@ function Get-DevExpressVersion($targetPath, $referenceFilter, $projectFile) {
         [xml]$csproj = Get-Content $projectFileInfo.FullName
         $packageReference = $csproj.Project.ItemGroup.PackageReference |Where-Object{$_}
         if (!$packageReference){
-            $packageReference=Get-PaketReferences (Get-Item $projectFile).DirectoryName
+            $packageReference=Get-PaketReferences (Get-Item $projectFile)
         }
         $packageReference=$packageReference| Where-Object { $_.Include -like "$referenceFilter" }
         if ($packageReference) {
@@ -329,7 +326,11 @@ function Get-DevExpressVersion($targetPath, $referenceFilter, $projectFile) {
         $version
     }
     catch {
-        Write-Warning "$_`r`n$howToVerbose`r`n"
+        "Exception:"
+        $_.Exception
+        "InvocationInfo:"
+        $_.InvocationInfo 
+        Write-Warning "$howToVerbose`r`n"
         throw "Check output warning message"
     }
 }
@@ -383,12 +384,12 @@ function Update-Version($modulePath, $dxVersion) {
     $moduleAssemblyData = Get-MonoAssembly $modulePath -ReadSymbols
     $moduleAssembly = $moduleAssemblyData.assembly
     $moduleReferences = $moduleAssembly.MainModule.AssemblyReferences
-    Write-Verbose "References:`r`n"
+    "References:`r`n"
     $moduleReferences | Write-Verbose
     $needsPatching = $false
     $moduleReferences.ToArray() | Where-Object { $_.FullName -like $referenceFilter } | ForEach-Object {
         $dxReference = $_
-        Write-Verbose "`r`nChecking reference $_...`r`n"
+        "nChecking reference $_..."
         if ($dxReference.Version -ne $dxVersion) {
             $moduleReferences.Remove($dxReference) | Out-Null
             $newMinor = "$($dxVersion.Major).$($dxVersion.Minor)"
@@ -404,15 +405,15 @@ function Update-Version($modulePath, $dxVersion) {
                     $_.Scope = $newReference 
                 }
             }
-            Write-Verbose "$($_.Name) version will changed from $($_.Version.Major) to $($dxVersion)`r`n" 
+            "$($_.Name) version will changed from $($_.Version.Major) to $($dxVersion)`r`n" 
             $needsPatching = $true
         }
         else {
-            Write-Verbose "$($_.Name) Version ($($dxReference.Version)) matched nothing to do.`r`n"
+            "$($_.Name) Version ($($dxReference.Version)) matched nothing to do.`r`n"
         }
     }
     if ($needsPatching) {
-        Write-Verbose "Patching $modulePath"
+        "Patching $modulePath"
         $writeParams = New-Object WriterParameters
         $writeParams.WriteSymbols = $moduleAssembly.MainModule.hassymbols
         $key = [File]::ReadAllBytes("$PSScriptRoot\Xpand.snk")
@@ -423,14 +424,14 @@ function Update-Version($modulePath, $dxVersion) {
             $symbolSources = Get-SymbolSources $pdbPath
         }
         $moduleAssembly.Write($writeParams)
-        Write-Verbose "Patched $modulePath"
+        "Patched $modulePath"
         if ($writeParams.WriteSymbols) {
-            Write-Verbose "Symbols $modulePath"
+            "Symbols $modulePath"
             if ($symbolSources -notmatch "is not source indexed") {
                 Update-Symbols -pdb $pdbPath -SymbolSources $symbolSources
             }
             else {
-                $symbolSources | Write-Verbose
+                $symbolSources 
             }
         }
     }
