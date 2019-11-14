@@ -18,12 +18,12 @@ using Xpand.TestsLib;
 using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.Reactive.Logger.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive.Services;
-[assembly:XpandTimeout]
+
 namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
     [NonParallelizable]
     [Serializable]
     public class ReactiveLoggerTests : BaseTest{
-        
+        [XpandTimeout]
         [TestCase("NoLastEvent")]
         [TestCase("DifferentLastEvent")]
         [TestCase("SameLastEvent")]

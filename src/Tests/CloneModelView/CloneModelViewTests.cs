@@ -13,11 +13,12 @@ using Xpand.XAF.Modules.CloneModelView.Tests.BOModel;
 using Xpand.XAF.Modules.ModelViewInheritance;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
-[assembly:XpandTimeout]
+
 namespace Xpand.XAF.Modules.CloneModelView.Tests{
     [NonParallelizable]
     
     public class CloneModelViewTests : BaseTest{
+        [XpandTimeout]
         [TestCase(CloneViewType.LookupListView)]
         [TestCase(CloneViewType.ListView)]
         [TestCase(CloneViewType.DetailView)]
@@ -38,7 +39,7 @@ namespace Xpand.XAF.Modules.CloneModelView.Tests{
             modelView.Id.ShouldBe(cloneViewId);
             application.Dispose();
         }
-
+        [XpandTimeout]
         [TestCase(CloneViewType.DetailView)]
         public void Keep_ModelGenerators(CloneViewType cloneViewType){
             var cloneViewId = $"{nameof(Keep_ModelGenerators)}_{cloneViewType}";
@@ -81,6 +82,7 @@ namespace Xpand.XAF.Modules.CloneModelView.Tests{
         [TestCase(CloneViewType.LookupListView)]
         [TestCase(CloneViewType.ListView)]
         [TestCase(CloneViewType.DetailView)]
+        [XpandTimeout]
         public void Clone_Model_View_and_make_it_default(CloneViewType cloneViewType){
             var cloneViewId = $"{nameof(Clone_Model_View_and_make_it_default)}_{cloneViewType}";
 
@@ -96,7 +98,7 @@ namespace Xpand.XAF.Modules.CloneModelView.Tests{
 
         
 
-
+        [XpandTimeout]
         [TestCase(CloneViewType.LookupListView)]
         [TestCase(CloneViewType.ListView)]
         public void Clone_Model_ListView_and_change_its_detailview(CloneViewType cloneViewType){

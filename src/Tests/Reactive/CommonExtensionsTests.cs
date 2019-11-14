@@ -7,7 +7,7 @@ using Xpand.Extensions.Reactive.Utility;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Attributes;
 
-[assembly:XpandTimeout]
+
 namespace Xpand.XAF.Modules.Reactive.Tests{
     [NonParallelizable]
     public class CommonExtensionsTests:BaseTest{

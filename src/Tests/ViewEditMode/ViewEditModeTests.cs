@@ -10,12 +10,12 @@ using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.ViewEditMode.Tests.BOModel;
 
-[assembly:XpandTimeout]
+
 namespace Xpand.XAF.Modules.ViewEditMode.Tests{
     [NonParallelizable]
     public class ViewEditModeTests : BaseTest{
 
-        
+        [XpandTimeout]
         [TestCase(true,DevExpress.ExpressApp.Editors.ViewEditMode.Edit,nameof(Platform.Win))]
         [TestCase(false,DevExpress.ExpressApp.Editors.ViewEditMode.View,nameof(Platform.Win))]
         [TestCase(true,DevExpress.ExpressApp.Editors.ViewEditMode.Edit,nameof(Platform.Web))]

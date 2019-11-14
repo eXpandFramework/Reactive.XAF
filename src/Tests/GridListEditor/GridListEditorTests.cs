@@ -13,7 +13,7 @@ using Xpand.XAF.Modules.GridListEditor.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 
-[assembly:XpandTimeout]
+
 namespace Xpand.XAF.Modules.GridListEditor.Tests{
     [NonParallelizable]
     public class GridListEditorTests : BaseTest{

@@ -10,12 +10,12 @@ using Xpand.TestsLib;
 using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.MasterDetail;
 using Xpand.XAF.Modules.SuppressConfirmation.Tests.BOModel;
-[assembly:XpandTimeout]
+
 namespace Xpand.XAF.Modules.SuppressConfirmation.Tests{
     [NonParallelizable]
     public class SuppressConfirmationTests : BaseTest{
 
-        
+        [XpandTimeout]
         [TestCase(typeof(ListView),nameof(Platform.Win))]
         [TestCase(typeof(DetailView),nameof(Platform.Win))]
         [TestCase(typeof(ListView),nameof(Platform.Web))]
@@ -35,7 +35,7 @@ namespace Xpand.XAF.Modules.SuppressConfirmation.Tests{
             
         }
 
-        
+        [XpandTimeout]
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
         public async Task Signal_When_DashboardView_with_SupressConfirmation_Enabled_ObjectView_changed(string platformName){
@@ -56,7 +56,7 @@ namespace Xpand.XAF.Modules.SuppressConfirmation.Tests{
             
         }
 
-        
+        [XpandTimeout]
         [TestCase(typeof(ListView),nameof(Platform.Win))]
         [TestCase(typeof(DetailView),nameof(Platform.Win))]
         [TestCase(typeof(ListView),nameof(Platform.Web))]

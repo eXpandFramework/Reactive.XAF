@@ -42,6 +42,7 @@ using Xpand.Extensions.XAF.Model;
 using Xpand.Extensions.XAF.TypesInfo;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;
+using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.ModelMapper.Services.Predefined;
@@ -53,7 +54,7 @@ using Task = System.Threading.Tasks.Task;
 namespace Xpand.XAF.Modules.ModelMapper.Tests{
     [NonParallelizable]
     public class ModelMapperBinderServiceTests:ModelMapperBaseTest{
-        
+        [XpandTimeout]
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
         public void Bind_Only_NullAble_Properties_That_are_not_Null(string platformName){
@@ -76,7 +77,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             }
         }
 
-        
+        [XpandTimeout]
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
         public void Do_not_bind_Disable_mode_nodes(string platformName){
@@ -99,7 +100,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             }
         }
 
-        
+        [XpandTimeout]
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
         public void Do_not_throw_if_target_object_properties_do_not_exist(string platformName){
@@ -118,7 +119,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             }
         }
 
-        
+        [XpandTimeout]
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
         public void Bind_all_public_nullable_type_properties(string platformName){
@@ -141,7 +142,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             }
         }
 
-        
+        [XpandTimeout]
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
         public void Bind_all_public_rw_string_properties(string platformName){
@@ -162,7 +163,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             }
         }
 
-        
+        [XpandTimeout]
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
         public void Bind_all_public_rw_nested_properties(string platformName){
@@ -182,7 +183,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             }
         }
 
-
+        [XpandTimeout]
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
         [Ignore(NotImplemented)]
@@ -190,7 +191,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             
         }
 
-
+        [XpandTimeout]
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
         [Ignore(NotImplemented)]
@@ -198,7 +199,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             
         }
 
-
+        [XpandTimeout]
         [TestCase(nameof(Platform.Web),new[]{PredefinedMap.ASPxPopupControl },new[]{typeof(ASPxPopupControl)},new Type[0],0)]
         [TestCase(nameof(Platform.Win),new[]{PredefinedMap.XafLayoutControl },new[]{typeof(XafLayoutControl)},new Type[0],1)]
         [TestCase(nameof(Platform.Win),new[]{PredefinedMap.LayoutControlGroup },new[]{typeof(LayoutControlGroup)},new Type[0],1)]
@@ -306,7 +307,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                 }
             }
         }
-        
+        [XpandTimeout]
         [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public async Task Bind_PropertyEditor_Control(string platformName){
@@ -358,7 +359,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             
 
         }
-        
+        [XpandTimeout]
         [TestCase(typeof(ListView))]
         [TestCase(typeof(DetailView))]
         public async Task Bind_RepositoryItems(Type viewType){

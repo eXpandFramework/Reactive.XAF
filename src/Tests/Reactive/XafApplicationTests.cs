@@ -12,6 +12,7 @@ using Shouldly;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;
+using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.Reactive.Logger;
 using Xpand.XAF.Modules.Reactive.Logger.Hub;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -21,7 +22,7 @@ using Xpand.XAF.Modules.Reactive.Tests.BOModel;
 namespace Xpand.XAF.Modules.Reactive.Tests{
     [NonParallelizable]
     public class XafApplicationTests : BaseTest{
-        
+        [XpandTimeout]
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
         public async Task WhenFrameCreated(string platformName){
@@ -44,7 +45,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             
         }
 
-        
+        [XpandTimeout]
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
         public async Task WhenWindowCreated(string platformName){
@@ -62,7 +63,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             
         }
 
-        
+        [XpandTimeout]
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
         public async Task WhenPopupWindowCreated(string platformName){
@@ -78,7 +79,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             
         }
 
-        
+        [XpandTimeout]
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
         public async Task WHen_NestedFrameCreated(string platformName){

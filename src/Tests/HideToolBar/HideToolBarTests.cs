@@ -18,12 +18,12 @@ using Xpand.TestsLib;
 using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.HideToolBar.Tests.BOModel;
 
-[assembly:XpandTimeout]
+
 namespace Xpand.XAF.Modules.HideToolBar.Tests{
     [NonParallelizable]
     public class HideToolBarTests : BaseTest{
 
-        
+        [XpandTimeout]
         [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public async Task Signal_When_frame_with_HideToolBar_Enabled_ListView_controls_created(string platformName){
@@ -50,7 +50,7 @@ namespace Xpand.XAF.Modules.HideToolBar.Tests{
             templateMock.Setup(template => template.GetContainers()).Returns(new ActionContainerCollection());
             return templateMock;
         }
-
+        [XpandTimeout]
         [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public async Task Hide_Nested_ToolBar(string platformName){

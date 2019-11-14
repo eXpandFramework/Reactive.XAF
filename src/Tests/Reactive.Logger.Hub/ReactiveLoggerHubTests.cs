@@ -21,7 +21,7 @@ using Xpand.XAF.Modules.Reactive.Logger.Hub.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive.Services;
 
 using Task = System.Threading.Tasks.Task;
-[assembly:XpandTimeout]
+
 namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
     [NonParallelizable]
     public class ReactiveLoggerHubTests : BaseTest{

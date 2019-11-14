@@ -32,6 +32,7 @@ using Xpand.Extensions.String;
 using Xpand.Extensions.XAF.Model;
 using Xpand.Extensions.XAF.TypesInfo;
 using Xpand.Extensions.XAF.XafApplication;
+using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.ModelMapper.Services.Predefined;
@@ -41,7 +42,7 @@ using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.Ty
 namespace Xpand.XAF.Modules.ModelMapper.Tests{
     [NonParallelizable]
     public class ModelMapperExtenderServiceTests : ModelMapperBaseTest{
-
+        [XpandTimeout]
         [TestCase(typeof(TestModelMapper),nameof(Platform.Win))]
         [TestCase(typeof(TestModelMapper),nameof(Platform.Web))]
         [TestCase(typeof(RootType),nameof(Platform.Win))]
@@ -108,7 +109,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             
         }
 
-        
+        [XpandTimeout]
         [TestCase(PredefinedMap.LayoutControlGroup, typeof(LayoutControlGroup),nameof(Platform.Win),MMDetailViewNodePath+"/Layout/Main")]
         [TestCase(PredefinedMap.GridColumn, typeof(GridColumn),nameof(Platform.Win),MMListViewNodePath+"/Columns/Test")]
         [TestCase(PredefinedMap.GridView, typeof(GridView),nameof(Platform.Win),MMListViewNodePath)]
@@ -164,7 +165,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             Extend_Predifiened_ViewItems(predefinedMaps,Platform.Win, ViewItemService.RepositoryItemsMapName,true);
         }
 
-        
+        [XpandTimeout]
         [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public void Extend_Predefined_PropertyEditorControls(string platformName){
@@ -217,7 +218,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             }
         }
 
-        
+        [XpandTimeout]
         [TestCase(PredefinedMap.ChartControlRadarDiagram, typeof(RadarDiagram),nameof(Platform.Win))]
         [TestCase(PredefinedMap.ChartControlPolarDiagram, typeof(PolarDiagram),nameof(Platform.Win))]
         [TestCase(PredefinedMap.ChartControlXYDiagram2D, typeof(XYDiagram2D),nameof(Platform.Win))]
@@ -261,7 +262,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             }
         }
 
-        
+        [XpandTimeout]
         [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public void ExtendModel_All_Predefined_Maps(string platformName){
@@ -297,7 +298,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             }
         }
 
-        
+        [XpandTimeout]
         [TestCase(nameof(Platform.Web),PredefinedMap.ASPxHyperLink)]
         [TestCase(nameof(Platform.Win),PredefinedMap.RichEditControl)]
         [TestCase(nameof(Platform.Win),PredefinedMap.RepositoryItem)]
@@ -344,7 +345,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             }
         }
 
-        
+        [XpandTimeout]
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
         public void ModelMapperContexts(string platformName){
@@ -361,7 +362,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             }
         }
 
-        
+        [XpandTimeout]
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
         public void Container_ModelMapperContexts(string platformName){
@@ -388,7 +389,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             }
         }
 
-        
+        [XpandTimeout]
         [TestCase("Parent.AllowEdit=?", true,false,null)]
         [TestCase("Parent.AllowEdit=?", false,true,null)]
         [TestCase(VisibilityCriteriaLeftOperand.IsAssignableFromModelListVideEditorType, true,typeof(WinColumnsListEditor),"Parent.")]

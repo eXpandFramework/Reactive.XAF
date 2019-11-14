@@ -17,7 +17,7 @@ using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.RefreshView.Tests.BOModel;
 
-[assembly:XpandTimeout]
+
 namespace Xpand.XAF.Modules.RefreshView.Tests{
     [NonParallelizable]
     public class RefreshViewTests : BaseTest{

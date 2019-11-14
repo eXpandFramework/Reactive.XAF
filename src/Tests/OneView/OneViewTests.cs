@@ -19,7 +19,7 @@ using Xpand.XAF.Modules.Reactive.Logger;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Win.Services;
 
-[assembly:XpandTimeout]
+
 namespace Xpand.XAF.Modules.OneView.Tests{
     [NonParallelizable]
     public class OneViewTests : BaseTest{

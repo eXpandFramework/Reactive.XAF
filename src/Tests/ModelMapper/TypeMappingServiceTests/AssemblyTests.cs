@@ -8,6 +8,7 @@ using Fasterflect;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.XAF.XafApplication;
+using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.TypeMappingService;
@@ -15,7 +16,7 @@ using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.Ty
 namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
     [NonParallelizable]
     public class AssemblyTests:ModelMapperBaseTest{
-        
+        [XpandTimeout]
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
         public async Task Create_Model_Assembly_in_path_if_not_Exist(string platformName){
@@ -27,7 +28,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
             File.Exists(mapToModel.Assembly.Location).ShouldBeTrue();
         }
-
+        [XpandTimeout]
         [TestCase(typeof(TestModelMapper),nameof(Platform.Win))]
         [TestCase(typeof(TestModelMapper),nameof(Platform.Web))]
         public void Platform_Detection(Type typeToMap,string platformName){

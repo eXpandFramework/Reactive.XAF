@@ -39,6 +39,7 @@ using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.XAF.Model;
 using Xpand.Extensions.XAF.XafApplication;
+using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.ModelMapper.Services.Predefined;
@@ -81,7 +82,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             modelTypeProperties.Length.ShouldBe(propertiesToMap.Length);
         }
 
-        
+        [XpandTimeout]
         [TestCase(typeof(CollectionsType), new[] {
             nameof(CollectionsType.TestModelMappersList), nameof(CollectionsType.TestModelMappersArray),
             nameof(CollectionsType.ValueTypeArray)
@@ -187,7 +188,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         
-
+        [XpandTimeout]
         [TestCase(PredefinedMap.LayoutControlGroup,new[]{typeof(LayoutControlGroup)},nameof(Platform.Win),new string[0])]
         [TestCase(PredefinedMap.GridColumn,new[]{typeof(GridColumn),typeof(GridListEditor)},nameof(Platform.Win),new[]{nameof(GridColumn.Summary)})]
         [TestCase(PredefinedMap.GridView,new[]{typeof(GridView),typeof(GridListEditor)},nameof(Platform.Win),new[]{nameof(GridView.FormatRules)})]
@@ -245,7 +246,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             }
         }
 
-        
+        [XpandTimeout]
         [TestCase(nameof(Platform.Win))]
         public async Task Map_PredefinedMap_RepositoryItems(string platformName){
             var platform = GetPlatform(platformName);
@@ -301,7 +302,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             }
         }
 
-        
+        [XpandTimeout]
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
         public async Task Map_PredefinedMap_PropertyEditor_Controls(string platformName){
@@ -312,7 +313,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             await Map_PredefinedMap_ViewItems(platform, predefinedMaps, typeof(PropertyEditorControlMap).ModelTypeName(), ViewItemService.PropertyEditorControlMapName);
         }
 
-        
+        [XpandTimeout]
         [TestCase(PredefinedMap.ChartControl,new[]{typeof(ChartControl),typeof(ChartListEditor)},nameof(Platform.Win),new[]{nameof(ChartControl.Series),"Diagrams"})]
         [TestCase(PredefinedMap.ChartControlDiagram3D,new[]{typeof(Diagram3D),typeof(ChartListEditor)},nameof(Platform.Win),new string[0])]
         [TestCase(PredefinedMap.ChartControlSimpleDiagram3D,new[]{typeof(SimpleDiagram3D),typeof(ChartListEditor)},nameof(Platform.Win),new string[0])]
@@ -368,7 +369,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
 
-        
+        [XpandTimeout]
         [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public void Map_All_PredefinedConfigurations(string platformName){
