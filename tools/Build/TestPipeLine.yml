@@ -1,0 +1,50 @@
+variables:
+  PastBuild: false
+  Latest: false
+
+trigger: none
+jobs:
+- job: TestPhase1
+  strategy:
+    parallel: 10
+  pool:
+    vmImage: windows-latest
+  variables:
+    - group: keys
+  steps:
+    - checkout: none
+    - task: DownloadBuildArtifacts@0
+      inputs:
+        buildType: 'specific'
+        project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
+        pipeline: '23'
+        buildVersionToDownload: 'latest'
+        downloadType: 'single'
+        artifactName: 'bin'
+        downloadPath: '$(System.DefaultworkingDirectory)'
+    - task: VSTest@2
+      displayName: 'VsTest - testAssemblies'
+      continueOnError: true
+      inputs:
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: |
+          **\*AutoCommit*.dll
+          **\*CloneMember*.dll
+          **\*CloneModel*.dll
+          **\*ModelViewIn*.dll
+          **\*Grid*.dll
+          **\*Hide*.dll
+          **\*Logger*.dll
+          **\*MasterDetail*.dll
+          !**\*ModelMapper*.dll
+          !**\*Hub*.dll
+          !**\*TestAdapter.dll
+          !**\obj\**    
+        diagnosticsEnabled: true
+        codeCoverageEnabled: true
+        distributionBatchType: basedOnAssembly
+        runInParallel: false
+        runSettingsFile: .\bin\Tests.runsettings
+        runTestsInIsolation: false
+        collectDumpOn: never

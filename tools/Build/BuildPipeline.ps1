@@ -3,34 +3,34 @@ param(
     $SourcePath = "$PSScriptRoot\..\..",
     $GitHubUserName = "apobekiaris",
     $Token = $env:GitHubToken,
-    $DXApiFeed  =$env:DxFeed,
+    $DXApiFeed = $env:DxFeed,
     $artifactstagingdirectory,
     $bindirectory,
     $AzureToken = $env:AzureToken,
     $PastBuild,
     $CustomVersion,
     $latest,
-    $Convert 
-    
+    [switch]$Run
 )
-if ($CustomVersion){
-    $goArgs=@{
-        Branch ='$(Build.SourceBranchName)'
-        SourcePath ='$(System.DefaultworkingDirectory)'
-        GitHubUserName ='$(GitHubUserName)' 
-        Token ='$(GitHubToken)' 
-        DXApiFeed ='$(DXApiFeed) '
-        ArtifactStagingDirectory ='$(build.artifactstagingdirectory)' 
-        BinDirectory ='$(System.DefaultworkingDirectory)\bin '
-        AzureToken ='$(AzureToken)'
-        PastBuild =$false 
-        CustomVersion ='$(Build.DefinitionName)'
-        Convert=$true
-      }
-      "goArgs:"
-      $goArgs|out-string
-      & "$PSScriptRoot\pipeline.ps1" @goArgs
-      return
+if ($CustomVersion -and !$Run) {
+    $goArgs = @{
+        Branch                   = $env:Build_SourceBranchName
+        SourcePath               = $env:System_DefaultworkingDirectory
+        GitHubUserName           = $env:GitHubUserName
+        Token                    = $Token
+        DXApiFeed                = $DXApiFeed
+        ArtifactStagingDirectory = $env:build_artifactstagingdirectory
+        BinDirectory             = "$env:System_DefaultworkingDirectory\bin"
+        AzureToken               = $AzureToken
+        PastBuild                = $env:PastBuild
+        CustomVersion            = $env:Build_DefinitionName
+        Convert                  = $Convert
+        Run                      = $true
+    }
+    "goArgs:"
+    $goArgs | Out-String
+    & "$PSScriptRoot\BuildPipeline.ps1" @goArgs
+    return
 }
 
 "PastBuild=$PastBuild"
@@ -43,7 +43,8 @@ $ErrorActionPreference = "Stop"
 $regex = [regex] '(\d{2}\.\d*)'
 $result = $regex.Match($CustomVersion).Groups[1].Value;
 & "$SourcePath\go.ps1" -InstallModules
-$stage="$SourcePath\buildstage"
+$stage = "$SourcePath\buildstage"
+Copy-Item "$SourcePath\paket.lock" "$SourcePath\paket.lock1"
 Remove-Item $stage -force -recurse -ErrorAction SilentlyContinue
 dotnet tool restore
 
@@ -129,7 +130,7 @@ $yArgs = @{
     Organization  = "eXpandFramework"
     Repository    = "DevExpress.XAF"
     Branch        = $Branch
-    Token          = $Token
+    Token         = $Token
     Packages      = $publishedPackages 
     SourcePath    = $SourcePath
     CommitsSince  = $labBuild.finishTime
@@ -141,15 +142,15 @@ if ($newPackages) {
 }
 Write-Host "End-Packages:" -f blue
 $yArgs.Packages | Out-String 
-if ($Branch -eq "lab"){
-    Get-ChildItem $sourcePath *.csproj -Recurse|ForEach-Object{
-        $pName=$_.BaseName
-        $pDir=$_.DirectoryName
-        $yArgs.Packages|Where-Object{$_.id -eq $pName}|ForEach-Object{
-            $nextVersion=$_.NextVersion
-            if ($nextVersion.Revision -gt -1){
-                $revision=[int]$nextVersion.Revision-1
-                $nowVersion=New-Object version ($nextVersion.Major,$nextVersion.Minor,$nextVersion.Build,$revision)
+if ($Branch -eq "lab") {
+    Get-ChildItem $sourcePath *.csproj -Recurse | ForEach-Object {
+        $pName = $_.BaseName
+        $pDir = $_.DirectoryName
+        $yArgs.Packages | Where-Object { $_.id -eq $pName } | ForEach-Object {
+            $nextVersion = $_.NextVersion
+            if ($nextVersion.Revision -gt -1) {
+                $revision = [int]$nextVersion.Revision - 1
+                $nowVersion = New-Object version ($nextVersion.Major, $nextVersion.Minor, $nextVersion.Build, $revision)
                 Write-Host "Update $pName version to latest $nowVersion"
                 Update-AssemblyInfoVersion $nowVersion $pDir
             }
@@ -179,7 +180,7 @@ if ($reactiveVersionChanged) {
 }
 
 $taskList = "Release"
-$newVersion=$defaulVersion
+$newVersion = $defaulVersion
 if ($customVersion -eq "latest") {
     $newVersion = $DXVersion
 }
@@ -192,31 +193,31 @@ elseif ($CustomVersion -and !$latest) {
 $bArgs = @{
     packageSources = "$(Get-PackageFeed -Xpand);$DxApiFeed"
     tasklist       = $tasklist
-    dxVersion        = $newVersion
+    dxVersion      = $newVersion
     CustomVersion  = $newVersion -ne $defaulVersion
 }
 "bArgs:"
 $bArgs | Out-String
-$SourcePath,"$SourcePath\src\tests","$SourcePath\src\tests\all"|ForEach-Object{
+$SourcePath, "$SourcePath\src\tests", "$SourcePath\src\tests\all" | ForEach-Object {
     Set-Location $_
     Move-PaketSource 0 $DXApiFeed
 }
 Start-XpandProjectConverter -version $newVersion -path $SourcePath -SkipInstall
 
-if ($newVersion -ne $defaulVersion){
+if ($newVersion -ne $defaulVersion ) {
     Set-Location $SourcePath
     "PaketInstall $SourcePath (due to different Version)"
-    Invoke-PaketInstall -Strict
+    Invoke-PaketInstall -Strict 
+    
 } 
-if ($Convert){
-    return
-}
+
 & $SourcePath\go.ps1 @bArgs
 
 
 New-Item $stage -ItemType Directory -Force
 Set-Location $SourcePath
-Get-ChildItem -Exclude ".git","bin","buildstage"|Copy-Item -Destination $stage -Recurse -Force -ErrorAction Continue
-set-location $stage
+Get-ChildItem -Exclude ".git", "bin", "buildstage" | Copy-Item -Destination $stage -Recurse -Force -ErrorAction Continue
+Set-Location $stage
 Clear-ProjectDirectories
 Copy-Item "$Sourcepath\Bin" "$stage\Bin" -Recurse -Force
+Copy-Item "$SourcePath\paket.lock1" "$SourcePath\paket.lock" -Force
