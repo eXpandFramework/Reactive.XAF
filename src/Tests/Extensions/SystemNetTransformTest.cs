@@ -10,7 +10,9 @@ using Shouldly;
 using Xpand.Extensions.Reactive.Transform.System.Net;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.TestsLib;
+using Xpand.TestsLib.Attributes;
 
+[assembly:XpandTimeout]
 namespace Xpand.Extensions.Tests{
     public class SystemNetTransformTest:BaseTest{
         [Test]

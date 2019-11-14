@@ -12,13 +12,14 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;
+using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.OneView.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Logger;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Win.Services;
 
-
+[assembly:XpandTimeout]
 namespace Xpand.XAF.Modules.OneView.Tests{
     [NonParallelizable]
     public class OneViewTests : BaseTest{

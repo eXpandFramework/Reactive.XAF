@@ -9,6 +9,7 @@ using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.AppDomain;
 using Xpand.TestsLib;
+using Xpand.TestsLib.Attributes;
 using Xpand.TestsLib.EasyTest;
 using Xpand.XAF.Modules.Reactive;
 
@@ -18,6 +19,7 @@ namespace ALL.Web.Tests{
         [Test()]
         [TestCaseSource(nameof(AgnosticModules))]
         [TestCaseSource(nameof(WebModules))]
+        [XpandTimeout]
         public void UnloadWebModules(Type moduleType){
             ReactiveModuleBase.Unload(moduleType);
             using (var application = new TestWebApplication(moduleType, false)){

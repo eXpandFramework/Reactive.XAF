@@ -11,10 +11,11 @@ using Shouldly;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;
+using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.CloneMemberValue.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive.Services;
 
-
+[assembly:XpandTimeout]
 namespace Xpand.XAF.Modules.CloneMemberValue.Tests{
     [NonParallelizable]
     public class CloneMemberValueTests : BaseTest{

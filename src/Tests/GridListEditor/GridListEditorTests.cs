@@ -8,11 +8,12 @@ using Shouldly;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;
+using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.GridListEditor.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 
-
+[assembly:XpandTimeout]
 namespace Xpand.XAF.Modules.GridListEditor.Tests{
     [NonParallelizable]
     public class GridListEditorTests : BaseTest{

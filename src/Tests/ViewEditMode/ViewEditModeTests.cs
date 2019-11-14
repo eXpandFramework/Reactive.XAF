@@ -6,10 +6,11 @@ using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;
+using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.ViewEditMode.Tests.BOModel;
 
-
+[assembly:XpandTimeout]
 namespace Xpand.XAF.Modules.ViewEditMode.Tests{
     [NonParallelizable]
     public class ViewEditModeTests : BaseTest{

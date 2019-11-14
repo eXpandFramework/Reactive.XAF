@@ -8,12 +8,13 @@ using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;
+using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.CloneModelView;
 using Xpand.XAF.Modules.ModelViewInheritance.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 
-
+[assembly:XpandTimeout]
 namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{
     [NonParallelizable]
     public class ModelViewInheritanceTests:BaseTest {

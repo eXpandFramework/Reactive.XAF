@@ -12,11 +12,12 @@ using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;
+using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.RefreshView.Tests.BOModel;
 
-
+[assembly:XpandTimeout]
 namespace Xpand.XAF.Modules.RefreshView.Tests{
     [NonParallelizable]
     public class RefreshViewTests : BaseTest{

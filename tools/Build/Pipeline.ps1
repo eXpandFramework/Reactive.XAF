@@ -13,7 +13,25 @@ param(
     $Convert 
     
 )
-
+if ($CustomVersion){
+    $goArgs=@{
+        Branch ='$(Build.SourceBranchName)'
+        SourcePath ='$(System.DefaultworkingDirectory)'
+        GitHubUserName ='$(GitHubUserName)' 
+        Token ='$(GitHubToken)' 
+        DXApiFeed ='$(DXApiFeed) '
+        ArtifactStagingDirectory ='$(build.artifactstagingdirectory)' 
+        BinDirectory ='$(System.DefaultworkingDirectory)\bin '
+        AzureToken ='$(AzureToken)'
+        PastBuild =$false 
+        CustomVersion ='$(Build.DefinitionName)'
+        Convert=$true
+      }
+      "goArgs:"
+      $goArgs|out-string
+      & "$PSScriptRoot\pipeline.ps1" @goArgs
+      return
+}
 
 "PastBuild=$PastBuild"
 "latest=$latest"

@@ -15,10 +15,11 @@ using Xpand.Extensions.XAF.Action;
 using Xpand.Extensions.XAF.Frame;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;
+using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.MasterDetial.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Controllers;
-
+[assembly:XpandTimeout]
 namespace Xpand.XAF.Modules.MasterDetail.Tests{
     [NonParallelizable]
     public class MasterDetailTests:BaseTest {

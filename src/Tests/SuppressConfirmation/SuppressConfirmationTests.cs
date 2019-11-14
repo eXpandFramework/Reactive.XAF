@@ -7,9 +7,10 @@ using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;
+using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.MasterDetail;
 using Xpand.XAF.Modules.SuppressConfirmation.Tests.BOModel;
-
+[assembly:XpandTimeout]
 namespace Xpand.XAF.Modules.SuppressConfirmation.Tests{
     [NonParallelizable]
     public class SuppressConfirmationTests : BaseTest{

@@ -6,9 +6,10 @@ using Shouldly;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;
+using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.AutoCommit.Tests.BOModel;
 
-
+[assembly:XpandTimeout]
 namespace Xpand.XAF.Modules.AutoCommit.Tests{
     [NonParallelizable]
     public class AutoCommitTests : BaseTest{

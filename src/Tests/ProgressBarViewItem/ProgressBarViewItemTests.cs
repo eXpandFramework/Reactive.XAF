@@ -13,9 +13,10 @@ using Shouldly;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;
+using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.ProgressBarViewItem.Tests.BOModel;
 
-
+[assembly:XpandTimeout]
 namespace Xpand.XAF.Modules.ProgressBarViewItem.Tests{
     [NonParallelizable]
     public class ProgressBarViewItemTests : BaseTest{

@@ -16,11 +16,12 @@ using Xpand.Extensions.XAF.CollectionSource;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.Source.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;
+using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.Reactive.Logger.Hub.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive.Services;
 
 using Task = System.Threading.Tasks.Task;
-
+[assembly:XpandTimeout]
 namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
     [NonParallelizable]
     public class ReactiveLoggerHubTests : BaseTest{

@@ -8,18 +8,20 @@ using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;
+using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.CloneModelView.Tests.BOModel;
 using Xpand.XAF.Modules.ModelViewInheritance;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
-
-
+[assembly:XpandTimeout]
 namespace Xpand.XAF.Modules.CloneModelView.Tests{
     [NonParallelizable]
+    
     public class CloneModelViewTests : BaseTest{
         [TestCase(CloneViewType.LookupListView)]
         [TestCase(CloneViewType.ListView)]
         [TestCase(CloneViewType.DetailView)]
+        
         public void Clone_Model_View(CloneViewType cloneViewType){
 
             var cloneViewId = $"{nameof(Clone_Model_View)}_{cloneViewType}";

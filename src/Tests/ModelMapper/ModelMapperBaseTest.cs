@@ -9,11 +9,12 @@ using Microsoft.CSharp;
 using Xpand.Extensions.AppDomain;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;
+using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.ModelMapper.Tests.BOModel;
 using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.TypeMappingService;
-
+[assembly:XpandTimeout]
 namespace Xpand.XAF.Modules.ModelMapper.Tests{
     public abstract class ModelMapperBaseTest:BaseTest{
         

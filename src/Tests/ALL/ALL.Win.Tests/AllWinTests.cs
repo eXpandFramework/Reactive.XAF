@@ -9,6 +9,7 @@ using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.AppDomain;
 using Xpand.TestsLib;
+using Xpand.TestsLib.Attributes;
 using Xpand.TestsLib.EasyTest;
 using Xpand.XAF.Modules.Reactive;
 
@@ -18,6 +19,7 @@ namespace ALL.Win.Tests{
         [Test()]
         [TestCaseSource(nameof(AgnosticModules))]
         [TestCaseSource(nameof(WinModules))]
+        [XpandTimeout]
         public void UnloadWinModules(Type moduleType){
             ReactiveModuleBase.Unload(moduleType);
             using (var application = new TestWinApplication(moduleType, false)){

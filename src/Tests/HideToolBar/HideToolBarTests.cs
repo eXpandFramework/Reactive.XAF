@@ -15,9 +15,10 @@ using Shouldly;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;
+using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.HideToolBar.Tests.BOModel;
 
-
+[assembly:XpandTimeout]
 namespace Xpand.XAF.Modules.HideToolBar.Tests{
     [NonParallelizable]
     public class HideToolBarTests : BaseTest{
