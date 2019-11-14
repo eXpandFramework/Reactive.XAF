@@ -216,9 +216,18 @@ if ($newVersion -ne $defaulVersion ) {
 
 
 New-Item $stage -ItemType Directory -Force
+New-Item $stage\source -ItemType Directory -Force
 Set-Location $SourcePath
-Get-ChildItem -Exclude ".git", "bin", "buildstage" | Copy-Item -Destination $stage -Recurse -Force -ErrorAction Continue
+Get-ChildItem -Exclude ".git", "bin", "buildstage" | Copy-Item -Destination $stage\source -Recurse -Force -ErrorAction Continue
 Set-Location $stage
-Clear-ProjectDirectories
+
+$stage="$Sourcepath\buildstage"
+Get-ChildItem $stage -Recurse|Remove-Item -Recurse -Force
+New-Item "$stage\TestApplication" -ItemType Directory
 Copy-Item "$Sourcepath\Bin" "$stage\Bin" -Recurse -Force
+Move-Item "$stage\Bin\TestWinApplication" "$stage\TestApplication\TestWinApplication" -Force
+Move-Item "$stage\Bin\TestWebApplication" "$stage\TestApplication\TestWebApplication" -Force
+Move-Item "$stage\Bin\AllTestWeb" "$stage\TestApplication" -Force
+Move-Item "$stage\Bin\AllTestWeb" "$stage\TestApplication" -Force
+Remove-Item "$stage\bin\ReactiveLoggerClient" -Recurse -Force
 Copy-Item "$SourcePath\paket.lock1" "$SourcePath\paket.lock" -Force

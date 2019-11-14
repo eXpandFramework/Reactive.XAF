@@ -85,14 +85,8 @@ $depsRaw=Get-Content $depsFile -Raw
 
 Set-Location "$root\src\Tests\All"
 Invoke-Script {
-    if ($global:versionChanged ){
-        Write-Host "Paket Update" -f Green
-        Invoke-PaketUpdate
-    }
-    else{
-        Write-Host "Paket Restore" -f Green
-        Invoke-PaketRestore
-    }
+    Write-Host "Paket Update" -f Green
+    Invoke-PaketUpdate
 }
 
 Write-Host "Building TestApplication" -f Green

@@ -6,7 +6,7 @@ trigger: none
 jobs:
 - job: TestPhase1
   strategy:
-    parallel: 10
+    parallel: 5
   pool:
     vmImage: windows-latest
   variables:
@@ -29,14 +29,15 @@ jobs:
         searchFolder: '$(System.DefaultWorkingDirectory)'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
-          **\*AutoCommit*.dll
-          **\*CloneMember*.dll
-          **\*CloneModel*.dll
-          **\*ModelViewIn*.dll
-          **\*Grid*.dll
-          **\*Hide*.dll
-          **\*Logger*.dll
-          **\*MasterDetail*.dll
+          **\*AutoCommit*Tests.dll
+          **\*CloneMemberValue*Tests.dll
+          **\*CloneModelView*Tests.dll
+          **\*HideTool*Tests.dll
+          **\*Grid*Tests.dll
+          !**\*MasterDet*Tests.dll
+          !**\*Hide*.dll
+          !**\*Logger*.dll
+          !**\*MasterDetail*.dll
           !**\*ModelMapper*.dll
           !**\*Hub*.dll
           !**\*TestAdapter.dll

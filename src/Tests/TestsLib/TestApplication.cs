@@ -19,8 +19,8 @@ namespace Xpand.TestsLib{
         public TestWinApplication(Type sutModule,bool transmitMessage=true){
             _transmitMessage = transmitMessage;
             SUTModule = sutModule;
-            TraceClientConnected = this.ClientConnect();
-            TraceClientBroadcast = this.ClientBroadcast();
+//            TraceClientConnected = this.ClientConnect();
+//            TraceClientBroadcast = this.ClientBroadcast();
         }
 
         public bool TransmitMessage => _transmitMessage;
@@ -88,8 +88,8 @@ namespace Xpand.TestsLib{
         public TestWebApplication(Type sutModule,bool transmitMessage=true){
             _transmitMessage = transmitMessage;
             SUTModule = sutModule;
-            TraceClientConnected = this.ClientConnect();
-            TraceClientBroadcast = this.ClientBroadcast();
+//            TraceClientConnected = this.ClientConnect();
+//            TraceClientBroadcast = this.ClientBroadcast();
             TransmitMessage = transmitMessage;
         }
 

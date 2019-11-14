@@ -37,11 +37,11 @@ jobs:
     - group: keys
   steps:
   - checkout: self
-  # - task: CacheBeta@0
-  #   inputs:
-  #     key: paket | paket.lock
-  #     path: .\packages
-  #   displayName: Cache NuGet packages
+  - task: CacheBeta@0
+    inputs:
+      key: paket | paket.lock
+      path: .\packages
+    displayName: Cache NuGet packages
   - task: PowerShell@2
     displayName: Build
     inputs:
@@ -52,8 +52,13 @@ jobs:
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Bin'
     inputs:
-      PathtoPublish: '$(System.DefaultworkingDirectory)\bin'
+      PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\bin'
       ArtifactName: 'Bin'
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: TestXafApplication'
+    inputs:
+      PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\TestApplication'
+      ArtifactName: 'TestApplication'
   # - task: PublishBuildArtifacts@1
   #   displayName: 'Publish Artifact: Build'
   #   inputs:
