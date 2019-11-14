@@ -46,6 +46,7 @@ $result = $regex.Match($CustomVersion).Groups[1].Value;
 $stage = "$SourcePath\buildstage"
 Copy-Item "$SourcePath\paket.lock" "$SourcePath\paket.lock1"
 Remove-Item $stage -force -recurse -ErrorAction SilentlyContinue
+Set-Location $SourcePath
 dotnet tool restore
 
 if (!$result) {

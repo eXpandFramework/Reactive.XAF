@@ -45,7 +45,7 @@ $packages | Out-String
 
 $testApplication = "$root\src\Tests\ALL\TestApplication\TestApplication.sln"
 $global:versionChanged=$false
-function UpdateVersion( $dxVersion, $testApplication ) {
+function UpdateDXVersion( $dxVersion, $testApplication ) {
     $testAppDir = (Get-Item $testApplication).DirectoryName
     $shortDxVersion = Get-DevExpressVersion $dxVersion
     if (($dxVersion.ToCharArray() | Where-Object { $_ -eq "." }).Count -eq 2) {
@@ -55,12 +55,15 @@ function UpdateVersion( $dxVersion, $testApplication ) {
         $xml = Get-Content $_.FullName -Raw
         $regex = [regex] '(?<name>DevExpress.*)v\d{2}\.\d{1,2}(.*)Version=([.\d]*)'
         $result = $regex.Replace($xml, "`${name}v$shortDxVersion`$1Version=$dxversion")
+        if ($result.Trim() -ne $xml.Trim()){
+            $global:versionChanged=$true;
+        }
         Set-Content $_.FullName $result.Trim()
     }
     
 }
 Get-ChildItem "$root\src\Tests\All\" *.csproj -Recurse | ForEach-Object {
-    UpdateVersion $dxVersion $testApplication
+    UpdateDXVersion $dxVersion $testApplication
 }
 Set-Location $root\src\Tests\All\
 $depsFile=Get-PaketDependenciesPath
@@ -75,14 +78,16 @@ $depsRaw=Get-Content $depsFile -Raw
     }
     $depsRaw=$result
     Set-Content $depsFile $result.Trim()
+    Write-Host ----$depsFile
+    Write-Host $result
 }
 
 
 Set-Location "$root\src\Tests\All"
 Invoke-Script {
-    if ($global:versionChanged){
-        Write-Host "Paket Install" -f Green
-        Invoke-PaketInstall
+    if ($global:versionChanged ){
+        Write-Host "Paket Update" -f Green
+        Invoke-PaketUpdate
     }
     else{
         Write-Host "Paket Restore" -f Green
