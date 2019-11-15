@@ -42,7 +42,7 @@ Task Init {
         New-Item "$Root\bin" -ItemType Directory -Force 
         New-Item "$Root\bin\ReactiveLoggerClient" -ItemType Directory -Force | Out-Null
         
-        Copy-Item -Path "$root\tools\build\Tests.runsettings" -Destination "$Root\bin\Tests.runsettings" -Force -Verbose
+        Copy-Item -Path "$root\tools\build\Tests.runsettings" -Destination "$Root\bin\Tests.runsettings" -Force
         # $versionMismatch=Get-ChildItem $Root *.csproj -Recurse -Exclude "*TestApplication*"|ForEach-Object{
         #     $projectPath=$_.FullName
         #     Get-PackageReference $projectPath|foreach-Object{

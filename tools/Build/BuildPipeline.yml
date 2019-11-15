@@ -59,6 +59,11 @@ jobs:
     inputs:
       PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\TestApplication'
       ArtifactName: 'TestApplication'
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Source'
+    inputs:
+      PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\Source'
+      ArtifactName: 'TestApplication'
   # - task: PublishBuildArtifacts@1
   #   displayName: 'Publish Artifact: Build'
   #   inputs:

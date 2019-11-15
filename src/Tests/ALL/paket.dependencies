@@ -1,6 +1,7 @@
 strategy:max
 framework: auto-detect
 source "C:\Program Files (x86)\DevExpress 18.2\Components\System\Components\Packages"
+cache ../../../nupkgs versions: current
 source "..\..\..\bin\Nupkg"
 source https://api.nuget.org/v3/index.json
 source https://xpandnugetserver.azurewebsites.net/nuget

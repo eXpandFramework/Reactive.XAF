@@ -65,6 +65,9 @@ if ($latest) {
     $customVersion = $defaulVersion
     "CustomVersion=$CustomVersion"
 }
+
+
+
 if ($Branch -eq "master") {
     $bArgs = @{
         packageSources = "$(Get-PackageFeed -Xpand);$DxApiFeed"
@@ -215,19 +218,22 @@ if ($newVersion -ne $defaulVersion ) {
 & $SourcePath\go.ps1 @bArgs
 
 
+Set-Location $SourcePath
+$stage="$Sourcepath\buildstage"
 New-Item $stage -ItemType Directory -Force
+Get-ChildItem $stage -Recurse|Remove-Item -Recurse -Force
 New-Item $stage\source -ItemType Directory -Force
 Set-Location $SourcePath
-Get-ChildItem -Exclude ".git", "bin", "buildstage" | Copy-Item -Destination $stage\source -Recurse -Force -ErrorAction Continue
+Get-ChildItem $SourcePath -Exclude ".git", "bin", "buildstage" | Copy-Item -Destination $stage\source -Recurse -Force -ErrorAction Continue
 Set-Location $stage
 
-$stage="$Sourcepath\buildstage"
-Get-ChildItem $stage -Recurse|Remove-Item -Recurse -Force
+
+
 New-Item "$stage\TestApplication" -ItemType Directory
 Copy-Item "$Sourcepath\Bin" "$stage\Bin" -Recurse -Force
-Move-Item "$stage\Bin\TestWinApplication" "$stage\TestApplication\TestWinApplication" -Force
-Move-Item "$stage\Bin\TestWebApplication" "$stage\TestApplication\TestWebApplication" -Force
+Move-Item "$stage\Bin\TestWinApplication" "$stage\TestApplication" -Force
+Move-Item "$stage\Bin\TestWebApplication" "$stage\TestApplication" -Force
 Move-Item "$stage\Bin\AllTestWeb" "$stage\TestApplication" -Force
-Move-Item "$stage\Bin\AllTestWeb" "$stage\TestApplication" -Force
+Move-Item "$stage\Bin\AllTestWin" "$stage\TestApplication" -Force
 Remove-Item "$stage\bin\ReactiveLoggerClient" -Recurse -Force
 Copy-Item "$SourcePath\paket.lock1" "$SourcePath\paket.lock" -Force

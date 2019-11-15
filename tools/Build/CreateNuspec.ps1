@@ -6,17 +6,15 @@ param(
 
 $ErrorActionPreference = "Stop"
 # Import-XpandPwsh
-Set-Location $root
+
 New-Item -Path "$root\bin\Nupkg" -ItemType Directory  -ErrorAction SilentlyContinue -Force | Out-Null
 
-$versionConverter = [PSCustomObject]@{
-    id              = "Xpand.VersionConverter"
-    version         = ([xml](Get-Content "$PsScriptRoot\..\Xpand.VersionConverter\Xpand.VersionConverter.nuspec")).package.metadata.version
-    targetFramework = "net452"
-}
+
 
 $allProjects=Get-ChildItem $root *.csproj -Recurse | Select-Object -ExpandProperty BaseName
-Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notlike "*Test*" } | ForEach-Object {
+# Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notlike "*Test*" } | ForEach-Object {
+Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notlike "*Test*" } | Invoke-Parallel -VariablesToImport @("allProjects","root","Release") -LimitConcurrency ([System.Environment]::ProcessorCount) -Script {
+    Set-Location $root
     $projectPath = $_.FullName
     Write-Host "Creating Nuspec for $($_.baseName)" -f "Blue"
     $uArgs = @{
@@ -70,6 +68,13 @@ Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -not
     $ns.AddNamespace("ns", $nuspec.DocumentElement.NamespaceURI)
     
     if ($nuspec.package.metaData.id -like "Xpand.XAF*" -or $nuspec.package.metaData.id -like "Xpand.Extensions.XAF*") {
+        "versionConverter"
+        $versionConverter = [PSCustomObject]@{
+            id              = "Xpand.VersionConverter"
+            version         = ([xml](Get-Content "$root\Tools\Xpand.VersionConverter\Xpand.VersionConverter.nuspec")).package.metadata.version
+            targetFramework = "net452"
+        }
+        $versionConverter |Out-String
         Add-NuspecDependency $versionConverter.Id $versionConverter.Version $nuspec
     }
     $nuspec.Save($nuspecFileName)
