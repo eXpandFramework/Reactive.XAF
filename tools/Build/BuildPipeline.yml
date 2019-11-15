@@ -55,4 +55,9 @@ jobs:
     inputs:
       PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\bin'
       ArtifactName: 'Bin'
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Source'
+    inputs:
+      PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\source'
+      ArtifactName: 'Source'
   

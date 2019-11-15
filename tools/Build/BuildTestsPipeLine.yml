@@ -12,12 +12,8 @@ jobs:
     - group: keys
   steps:
   - checkout: self
-  - task: CacheBeta@0
-    inputs:
-      key: paket | paket.lock
-      path: .\packages
-    displayName: Cache NuGet packages
   - task: DownloadBuildArtifacts@0
+    displayName: "Download Bin"
     inputs:
         buildType: 'specific'
         project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
@@ -27,6 +23,7 @@ jobs:
         artifactName: 'bin'
         downloadPath: '$(System.DefaultworkingDirectory)'
   - task: DownloadBuildArtifacts@0
+    displayName: "Download Source"
     inputs:
         buildType: 'specific'
         project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
@@ -36,14 +33,37 @@ jobs:
         artifactName: 'source'
         downloadPath: '$(System.DefaultworkingDirectory)'
   - task: PowerShell@2
+    displayName: Restore State
+    inputs:
+      targetType: inline
+      script: |
+        dotnet tool restore
+        Remove-Item $(System.DefaultworkingDirectory)\src -Recurse -Force -verbose
+        Move-Item $(System.DefaultworkingDirectory)\Source\src $(System.DefaultworkingDirectory) 
+        # Remove-Item $(System.DefaultworkingDirectory)\paket.dependencies
+        Remove-Item $(System.DefaultworkingDirectory)\Source -Recurse -Force
+        # Get-Content $(System.DefaultworkingDirectory)\paket.dependencies -Raw
+        Get-Content $(System.DefaultworkingDirectory)\src\tests\all\paket.dependencies -Raw
+      pwsh: true
+  - task: CacheBeta@0
+    inputs:
+      key: paket | paket.lock
+      path: .\packages
+    displayName: Cache NuGet packages
+  - task: PowerShell@2
     displayName: Build
     inputs:
       targetType: inline
       script: |
-        $SourcePath='$(System.DefaultworkingDirectory)'
-        $dxAssembly=Get-ChildItem $SourcePath\bin DevExp*.dll|Select-Object -First 1
-        $version=[System.Diagnostics.FileVersionInfo]::GetVersionInfo($dxAssembly).FileVersion
-        Get-ChildItem $SourcePath\Source|Move-Item -Destination $SourcePath
-        & $SourcePath\go.ps1 -tasklist BuildTests -version "$($version.Major).$($version.Minor).$($version.Build)"
+        & $(System.DefaultworkingDirectory)\tools\build\BuildTestsPipeline.ps1 '$(System.DefaultworkingDirectory)' $(DXApiFeed)
       pwsh: true
-  
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: UnitTests'
+    inputs:
+      PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\bin'
+      ArtifactName: 'Bin'
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: XafApplication'
+    inputs:
+      PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\Tests'
+      ArtifactName: 'Tests'
