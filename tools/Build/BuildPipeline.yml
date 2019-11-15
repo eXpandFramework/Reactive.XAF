@@ -1,7 +1,8 @@
 variables:
   PastBuild: false
   Latest: false
-  
+  NUGET_PACKAGES: $(Pipeline.Workspace)/.nuget/packages
+
 trigger: 
     paths:
       exclude:
@@ -28,7 +29,7 @@ trigger:
       include:
         - master
 jobs:
-- job: TestsRunBuild
+- job: BuildModules
   strategy: 
     parallel: 1
   pool:
@@ -54,105 +55,4 @@ jobs:
     inputs:
       PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\bin'
       ArtifactName: 'Bin'
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: TestXafApplication'
-    inputs:
-      PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\TestApplication'
-      ArtifactName: 'TestApplication'
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: Source'
-    inputs:
-      PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\Source'
-      ArtifactName: 'TestApplication'
-  # - task: PublishBuildArtifacts@1
-  #   displayName: 'Publish Artifact: Build'
-  #   inputs:
-  #     PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage'
-  #     ArtifactName: 'Build'
-# - job: TestPhaseEasyTest
-#   strategy:
-#     parallel: 2
-#   dependsOn: TestsRunBuild
-#   pool:
-#     vmImage: windows-2019
-#   variables:
-#     - group: keys
-#   steps:
-#     - checkout: none
-#     - task: DownloadBuildArtifacts@0
-#       inputs:
-#         buildType: 'current'
-#         downloadType: 'specific'
-#         downloadPath: '$(System.DefaultworkingDirectory)'
-#     - task: VSTest@2
-#       displayName: 'VsTest - testAssemblies'
-#       continueOnError: true
-#       inputs:
-#         searchFolder: '$(System.DefaultWorkingDirectory)'
-#         testSelector: 'testAssemblies'
-#         testAssemblyVer2: |
-#           **\**All*Tests.dll
-#           !**\*ModelMapper*.dll
-#           !**\*Hub*.dll
-#           !**\*TestAdapter.dll
-#           !**\obj\**    
-#         diagnosticsEnabled: true
-#         codeCoverageEnabled: true
-#         distributionBatchType: basedOnAssembly
-#         runInParallel: false
-#         runSettingsFile: .\bin\Tests.runsettings
-#         runTestsInIsolation: true
-#         collectDumpOn: never
-
-# - job: Release
-#   dependsOn: CheckTests
-#   strategy: 
-#     parallel: 1
-#   pool:
-#     vmImage: windows-2019
-#   variables:
-#     - group: keys
-#   steps:
-#   - checkout: self
-#   - task: PowerShell@2
-#     displayName: Build
-#     inputs:
-#       targetType: 'inline'
-#       script: |
-#         $goArgs=@{
-#           Branch ='$(Build.SourceBranchName)'
-#           SourcePath ='$(System.DefaultworkingDirectory)'
-#           GitHubUserName ='$(GitHubUserName)' 
-#           Token ='$(GitHubToken)' 
-#           DXApiFeed ='$(DXApiFeed)'
-#           ArtifactStagingDirectory ='$(build.artifactstagingdirectory)' 
-#           BinDirectory ='$(System.DefaultworkingDirectory)\bin '
-#           AzureToken ='$(AzureToken)'
-#           PastBuild ='$(PastBuild)' 
-#           CustomVersion ='$(Build.DefinitionName)'
-#         }
-#         "goArgs:"
-#         $goArgs|out-string
-#         & .\tools\build\pipeline.ps1 @goArgs
-#       pwsh: true
-#   - task: PowerShell@2
-#     displayName: PublishNugets
-#     inputs:
-#       targetType: 'inline'
-#       script: |
-#         $goArgs=@{
-#           Branch ='$(Build.SourceBranchName)'
-#           SourcesRoot ='$(System.DefaultworkingDirectory)'
-#           ApiKey ='$(NugetApiKey)'
-#           LocalPackageSource ='$(System.DefaultWorkingDirectory)\bin\Nupkg' 
-#           PastBuild ='$(PastBuild)' 
-#         }
-#         "goArgs:"
-#         $goArgs|out-string
-#         & .\tools\build\publishNugets.ps1 @goArgs
-#       pwsh: true
-#   - task: PublishBuildArtifacts@1
-#     displayName: 'Publish Artifact: Packages'
-#     inputs:
-#       PathtoPublish: '$(System.DefaultworkingDirectory)\bin'
-#       ArtifactName: 'Release.Bin'
+  

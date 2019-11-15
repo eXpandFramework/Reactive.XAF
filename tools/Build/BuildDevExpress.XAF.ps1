@@ -17,8 +17,9 @@ Properties {
 }
 
 
-Task Release  -depends   Clean, PaketRestore, Init, UpdateProjects, Compile, IndexSources, CreateNuspec, PackNuspec, CompileTests, UpdateAllTests
-Task TestsRun  -depends Release
+Task ReleaseModules  -depends   Clean, PaketRestore, Init, UpdateProjects, Compile, IndexSources, CreateNuspec, PackNuspec
+Task BuildTests  -depends  CompileTests, UpdateAllTests
+
 
 Task PaketRestore {
     Invoke-Script {
@@ -78,21 +79,21 @@ Task CompileTests -precondition { return $compile } {
         $source = "https://api.nuget.org/v3/index.json;$packageSources"
         $source = "$source;$Root\Bin\Nupkg"
         dotnet restore "$Root\src\Tests\Tests.sln" --source $packageSources --source (Get-PackageFeed -Nuget) /WarnAsError
-        dotnet msbuild "$Root\src\Tests\Tests.sln" "/bl:$Root\Bin\CompileTests.binlog" -t:rebuild "/p:configuration=Debug" /WarnAsError /m /v:m
+        dotnet msbuild "$Root\src\Tests\Tests.sln" "/bl:$Root\Bin\CompileTests.binlog" -t:rebuild "/p:configuration=Debug" /WarnAsError /m /v:m 
     } -Maximum 2
 }
 
 Task Compile -precondition { return $compile } {
     Invoke-Script {
         Write-Host "Building Extensions" -f "Blue"
-        dotnet restore "$Root\src\Extensions\Extensions.sln" --source (Get-PackageFeed -nuget) --source $packageSources /WarnAsError
-        & dotnet msbuild "$Root\src\Extensions\Extensions.sln" -t:rebuild "/bl:$Root\Bin\Extensions.binlog" "/p:configuration=Release" /m /v:m /WarnAsError
+        # dotnet restore "$Root\src\Extensions\Extensions.sln" --source (Get-PackageFeed -nuget) --source $packageSources /WarnAsError
+        & dotnet msbuild "$Root\src\Extensions\Extensions.sln" -t:rebuild "/bl:$Root\Bin\Extensions.binlog" "/p:configuration=Release" /m /v:m /WarnAsError -r
     } -Maximum 2
     Invoke-Script {
         Write-Host "Building Modules" -f "Blue"
-        dotnet restore "$Root\src\Modules\Modules.sln" --source (Get-PackageFeed -nuget) --source $packageSources /WarnAsError
+        # dotnet restore "$Root\src\Modules\Modules.sln" --source (Get-PackageFeed -nuget) --source $packageSources /WarnAsError
         Set-Location "$Root\src\Modules"
-        dotnet msbuild "$Root\src\Modules\Modules.sln" -t:rebuild "/bl:$Root\Bin\Modules.binlog" "/p:configuration=Release" /WarnAsError /m /v:m
+        dotnet msbuild "$Root\src\Modules\Modules.sln" -t:rebuild "/bl:$Root\Bin\Modules.binlog" "/p:configuration=Release" /WarnAsError /m /v:m -r
     } -Maximum 2
 }
 

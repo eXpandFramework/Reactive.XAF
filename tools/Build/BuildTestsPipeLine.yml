@@ -1,0 +1,49 @@
+variables:
+  PastBuild: false
+  Latest: false
+  NUGET_PACKAGES: $(Pipeline.Workspace)/.nuget/packages
+jobs:
+- job: BuildTests
+  strategy: 
+    parallel: 1
+  pool:
+    vmImage: windows-2019
+  variables:
+    - group: keys
+  steps:
+  - checkout: self
+  - task: CacheBeta@0
+    inputs:
+      key: paket | paket.lock
+      path: .\packages
+    displayName: Cache NuGet packages
+  - task: DownloadBuildArtifacts@0
+    inputs:
+        buildType: 'specific'
+        project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
+        pipeline: '23'
+        buildVersionToDownload: 'latest'
+        downloadType: 'single'
+        artifactName: 'bin'
+        downloadPath: '$(System.DefaultworkingDirectory)'
+  - task: DownloadBuildArtifacts@0
+    inputs:
+        buildType: 'specific'
+        project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
+        pipeline: '23'
+        buildVersionToDownload: 'latest'
+        downloadType: 'single'
+        artifactName: 'source'
+        downloadPath: '$(System.DefaultworkingDirectory)'
+  - task: PowerShell@2
+    displayName: Build
+    inputs:
+      targetType: inline
+      script: |
+        $SourcePath='$(System.DefaultworkingDirectory)'
+        $dxAssembly=Get-ChildItem $SourcePath\bin DevExp*.dll|Select-Object -First 1
+        $version=[System.Diagnostics.FileVersionInfo]::GetVersionInfo($dxAssembly).FileVersion
+        Get-ChildItem $SourcePath\Source|Move-Item -Destination $SourcePath
+        & $SourcePath\go.ps1 -tasklist BuildTests -version "$($version.Major).$($version.Minor).$($version.Build)"
+      pwsh: true
+  

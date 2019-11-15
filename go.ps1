@@ -8,7 +8,7 @@ param(
     [bool]$cleanBin = $true,
     [string]$branch="lab",
     [switch]$InstallModules,
-    [string[]]$taskList=@("Release"),
+    [string[]]$taskList=@("ReleaseModules"),
     [string]$XpandPwshVersion = "0.30.1",
     [switch]$Release,
     [switch]$CustomVersion
@@ -29,7 +29,7 @@ if ($InstallModules){
     return
 }
 
-Invoke-XPsake  "$PSScriptRoot\tools\build\Build.ps1" -properties @{
+Invoke-XPsake  "$PSScriptRoot\tools\build\BuildDevExpress.XAF.ps1" -properties @{
     "cleanBin"       = $cleanBin;
     "msbuild"        = $msbuild;
     "nugetApiKey"    = $nugetApiKey;

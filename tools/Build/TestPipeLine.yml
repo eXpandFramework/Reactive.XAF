@@ -6,7 +6,7 @@ trigger: none
 jobs:
 - job: TestPhase1
   strategy:
-    parallel: 5
+    parallel: 13
   pool:
     vmImage: windows-latest
   variables:
@@ -34,11 +34,13 @@ jobs:
           **\*CloneModelView*Tests.dll
           **\*HideTool*Tests.dll
           **\*Grid*Tests.dll
-          !**\*MasterDet*Tests.dll
-          !**\*Hide*.dll
-          !**\*Logger*.dll
-          !**\*MasterDetail*.dll
-          !**\*ModelMapper*.dll
+          **\*MasterDet*Tests.dll
+          **\*OneView*Tests.dll
+          **\*Progre*Tests.dll
+          **\*Reactive*Tests.dll
+          **\*Refresh*Tests.dll
+          **\*Supp*Tests.dll
+          **\*View*Tests.dll
           !**\*Hub*.dll
           !**\*TestAdapter.dll
           !**\obj\**    

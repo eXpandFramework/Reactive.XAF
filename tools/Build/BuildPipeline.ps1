@@ -67,11 +67,11 @@ if ($latest) {
 }
 
 
-
+$taskList = "ReleaseModules"
 if ($Branch -eq "master") {
     $bArgs = @{
         packageSources = "$(Get-PackageFeed -Xpand);$DxApiFeed"
-        tasklist       = "release"
+        tasklist       = $taskList 
         Release        = $true
     }
     & $SourcePath\go.ps1 @bArgs
@@ -183,7 +183,7 @@ if ($reactiveVersionChanged) {
     }
 }
 
-$taskList = "Release"
+
 $newVersion = $defaulVersion
 if ($customVersion -eq "latest") {
     $newVersion = $DXVersion
@@ -231,9 +231,9 @@ Set-Location $stage
 
 New-Item "$stage\TestApplication" -ItemType Directory
 Copy-Item "$Sourcepath\Bin" "$stage\Bin" -Recurse -Force
-Move-Item "$stage\Bin\TestWinApplication" "$stage\TestApplication" -Force
-Move-Item "$stage\Bin\TestWebApplication" "$stage\TestApplication" -Force
-Move-Item "$stage\Bin\AllTestWeb" "$stage\TestApplication" -Force
-Move-Item "$stage\Bin\AllTestWin" "$stage\TestApplication" -Force
+# Move-Item "$stage\Bin\TestWinApplication" "$stage\TestApplication" -Force
+# Move-Item "$stage\Bin\TestWebApplication" "$stage\TestApplication" -Force
+# Move-Item "$stage\Bin\AllTestWeb" "$stage\TestApplication" -Force
+# Move-Item "$stage\Bin\AllTestWin" "$stage\TestApplication" -Force
 Remove-Item "$stage\bin\ReactiveLoggerClient" -Recurse -Force
 Copy-Item "$SourcePath\paket.lock1" "$SourcePath\paket.lock" -Force

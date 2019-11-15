@@ -122,8 +122,8 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             
         }
 
-        [Test]
-        [Apartment(ApartmentState.STA)]
+//        [Test]
+//        [Apartment(ApartmentState.STA)]
         public void UnloadReactiveModule(){
             using (var application = Platform.Win.NewApplication<TestModule>()){
                 var testModule = application.AddModule<TestModule>();
