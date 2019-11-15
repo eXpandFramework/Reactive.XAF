@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace Xpand.TestsLib.Attributes{
     public class XpandTimeoutAttribute:TimeoutAttribute{
-        public XpandTimeoutAttribute() : base(30000){
+        public XpandTimeoutAttribute() : base(120000){
         }
     }
 }

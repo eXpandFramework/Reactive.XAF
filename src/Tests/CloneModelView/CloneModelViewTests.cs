@@ -56,6 +56,7 @@ namespace Xpand.XAF.Modules.CloneModelView.Tests{
 
         
         [Test()]
+        [XpandTimeout]
         public void Clone_multiple_Model_Views(){
             
             var cloneViewId = $"{nameof(Clone_multiple_Model_Views)}_";

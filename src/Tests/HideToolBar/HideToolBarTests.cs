@@ -77,6 +77,7 @@ namespace Xpand.XAF.Modules.HideToolBar.Tests{
         }
 
         [Test]
+        [XpandTimeout]
         public async Task Hide_ToolbarVisibilityController(){
             using (var application = Platform.Win.NewApplication<HideToolBarModule>()){
                 application.Title = nameof(Hide_ToolbarVisibilityController);

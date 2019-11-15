@@ -235,7 +235,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             }
         }
 
-        [Test]
+//        [Test]
+//        [XpandTimeout]
         public async Task Bind_Subsequent_Views(){
             Assembly.LoadFile(typeof(XafGridView).Assembly.Location);
             InitializeMapperService($"{nameof(Bind_Subsequent_Views)}{PredefinedMap.GridView}",Platform.Win);

@@ -26,6 +26,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
     [NonParallelizable]
     public class ReactiveLoggerHubTests : BaseTest{
         [Test]
+        [XpandTimeout]
         [Apartment(ApartmentState.STA)]
         public async Task Start_Server_After_Logon(){
             
@@ -46,6 +47,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
         }
 
         [Test()]
+        [XpandTimeout]
         [Apartment(ApartmentState.STA)]
         public async Task Connect_Client(){
             
@@ -78,6 +80,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
         }
 
         [Test]
+        [XpandTimeout]
         [Apartment(ApartmentState.STA)]
         public async Task Display_TraceEvent_On_New_Client(){
             XpoTypesInfoHelper.GetXpoTypeInfoSource().XPDictionary.CollectClassInfos(GetType().Assembly);
@@ -126,6 +129,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
         }
 
         [Test]
+        [XpandTimeout]
         [Apartment(ApartmentState.STA)]
         public async Task Display_TraceEvent_On_Running_Client(){
             XpoTypesInfoHelper.GetXpoTypeInfoSource().XPDictionary.CollectClassInfos(GetType().Assembly);

@@ -45,6 +45,7 @@ namespace Xpand.XAF.Modules.ViewEditMode.Tests{
         }
 
         [Test]
+        [XpandTimeout]
         public async Task UnLock_ViewEditoMode_When_SwitchToEditMode_Action_Executed(){
             using (var application = DefaultViewEditModeModule(Platform.Web,nameof(UnLock_ViewEditoMode_When_SwitchToEditMode_Action_Executed)).Application){
                 var viewViewEditMode = ((IModelDetailViewViewEditMode) application.Model.BOModel.GetClass(typeof(VEM)).DefaultDetailView);

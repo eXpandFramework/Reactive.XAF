@@ -58,6 +58,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         [Test]
+        [XpandTimeout]
         public void Get_PredefinedModelNode(){
             InitializeMapperService($"{nameof(Customize_PredifienedMaps_TargetInterface)}",Platform.Win);
 
@@ -69,6 +70,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         [Test]
+        [XpandTimeout]
         public void Get_PredefinedViewItemMergedModelNode(){
             InitializeMapperService($"{nameof(Customize_PredifienedMaps_TargetInterface)}",Platform.Win);
 
@@ -94,6 +96,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         [Test]
+        [XpandTimeout]
         public void Customize_PredifienedMaps_TargetInterface(){
             InitializeMapperService($"{nameof(Customize_PredifienedMaps_TargetInterface)}",Platform.Win);
 
@@ -159,6 +162,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         [Test]
+        [XpandTimeout]
         public void Extend_PredefinedRepositoryItems(){
             var predefinedMaps = Enums.GetValues<PredefinedMap>()
                 .Where(map => map.IsRepositoryItem());
@@ -247,6 +251,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         [Test]
+        [XpandTimeout]
         public void ExtendModel_All_PredefinedChartDiagram(){
             Assembly.LoadFile(typeof(ChartControl).Assembly.Location);
             Assembly.LoadFile(typeof(Diagram).Assembly.Location);
@@ -280,6 +285,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         [Test]
+        [XpandTimeout]
         public void Extend_Existing_PredefinedMap(){
             InitializeMapperService(nameof(Extend_Existing_PredefinedMap),Platform.Win);
             using (var module = new[]{PredefinedMap.PivotGridControl, PredefinedMap.GridView}.Extend()){
@@ -328,6 +334,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         [Test]
+        [XpandTimeout]
         public void Extend_Multiple_Objects_with_common_types(){
             var typeToMap1 = typeof(TestModelMapperCommonType1);
             var typeToMap2 = typeof(TestModelMapperCommonType2);

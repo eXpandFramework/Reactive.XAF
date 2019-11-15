@@ -102,6 +102,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
         }
 
         [Test]
+        [XpandTimeout]
         public void BufferUntilCompatibilityChecked(){
             var source = new Subject<int>();
             using (var application = DefaultReactiveModule().Application){

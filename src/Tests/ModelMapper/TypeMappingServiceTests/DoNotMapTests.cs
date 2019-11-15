@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Fasterflect;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 
 using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.TypeMappingService;
@@ -14,6 +15,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
     [NonParallelizable]
     public class DoNotMapTests:ModelMapperBaseTest{
         [Test]
+        [XpandTimeout]
         public async Task Do_Not_Map_If_recursion_detected(){
             
             InitializeMapperService(nameof(Do_Not_Map_If_recursion_detected));
@@ -45,12 +47,14 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test()][Ignore(NotImplemented)]
+        [XpandTimeout]
         public  Task Do_not_map_Objects_with_no_mapable_properties(){
 //            InitializeMapperService(nameof(Do_not_map_Objects_with_no_mapable_properties));
             throw new NotImplementedException();
         }
 
         [Test]
+        [XpandTimeout]
         public async Task Do_Not_Map_TypeConverterAttributes_with_DevExpress_DesignTime_Types(){
             InitializeMapperService(nameof(Do_Not_Map_TypeConverterAttributes_with_DevExpress_DesignTime_Types));
             var typeToMap = typeof(DXDesignTimeAttributeClass);
@@ -64,6 +68,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
 
         [Test]
+        [XpandTimeout]
         public async Task Do_Not_Map_Reserved_properties(){
             InitializeMapperService(nameof(Do_Not_Map_Reserved_properties));
             var typeToMap = typeof(ResevredProperties);
@@ -77,6 +82,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
+        [XpandTimeout]
         public async Task Do_Not_Map_Non_Browsable_properties(){
             InitializeMapperService(nameof(Do_Not_Map_Non_Browsable_properties));
             var typeToMap = typeof(NonBrowsableProperties);
@@ -91,6 +97,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
+        [XpandTimeout]
         public async Task Do_Not_Map_Obsolete_properties(){
             InitializeMapperService(nameof(Do_Not_Map_Obsolete_properties));
             var typeToMap = typeof(ObsoleteProperties);
@@ -105,6 +112,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
+        [XpandTimeout]
         public async Task Do_Not_Map_Already_Mapped_Types(){
             var typeToMap1 = typeof(TestModelMapper);
             var typeToMap2 = typeof(TestModelMapper);
@@ -118,6 +126,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
+        [XpandTimeout]
         public async Task Do_not_Map_DefaultValueAttribute(){
 
             InitializeMapperService(nameof(Do_not_Map_DefaultValueAttribute));
@@ -131,6 +140,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
+        [XpandTimeout]
         public async Task Do_not_Map_Attributes_With_Flag_Parameters(){
 
             InitializeMapperService(nameof(Do_not_Map_Attributes_With_Flag_Parameters));
@@ -145,6 +155,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
+        [XpandTimeout]
         public async Task Do_Not_Map_Attributes_With_Non_Public_Types_As_Parameters(){
             var typeToMap1 = typeof(NonPublicAttributeClass);
             InitializeMapperService(nameof(Do_Not_Map_Attributes_With_Non_Public_Types_As_Parameters));
@@ -156,6 +167,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
+        [XpandTimeout]
         public async Task Do_Not_Map_Properties_Marked_With_DesignerSerialization_Hidden(){
             var typeToMap1 = typeof(DesignerSerializationHiddenClass);
             InitializeMapperService(nameof(Do_Not_Map_Properties_Marked_With_DesignerSerialization_Hidden));

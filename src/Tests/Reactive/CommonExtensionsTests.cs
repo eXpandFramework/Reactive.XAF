@@ -12,6 +12,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
     [NonParallelizable]
     public class CommonExtensionsTests:BaseTest{
         [Test]
+        [XpandTimeout]
         public void CountSubSequent(){
             var subject = new ReplaySubject<int>();
             subject.OnNext(0);

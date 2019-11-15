@@ -5,6 +5,7 @@ using DevExpress.Persistent.Base;
 using Fasterflect;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 
@@ -14,6 +15,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
     [NonParallelizable]
     public class ContainerTests:ModelMapperBaseTest{
         [Test]
+        [XpandTimeout]
         public async Task Custom_Container_Image(){
             InitializeMapperService(nameof(Custom_Container_Image));
             var typeToMap = typeof(TestModelMapper);
@@ -29,6 +31,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
 
         [Test]
+        [XpandTimeout]
         public async Task Container_Interface(){
             InitializeMapperService(nameof(Container_Interface));
             var typeToMap = typeof(TestModelMapper);
@@ -44,6 +47,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
+        [XpandTimeout]
         public async Task Custom_Container_Name(){
             InitializeMapperService(nameof(Custom_Container_Name));
             var typeToMap = typeof(TestModelMapper);
@@ -61,6 +65,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
+        [XpandTimeout]
         public async Task ModelMappers_Interface(){
             InitializeMapperService(nameof(ModelMappers_Interface));
             var typeToMap = typeof(TestModelMapper);

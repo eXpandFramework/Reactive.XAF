@@ -42,6 +42,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
+        [XpandTimeout]
         public async Task Assembly_Version_Should_Match_Model_Mapper_Version(){
             InitializeMapperService(nameof(Assembly_Version_Should_Match_Model_Mapper_Version));
             var typeToMap = typeof(TestModelMapper);
@@ -53,6 +54,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
+        [XpandTimeout]
         public async Task Do_Not_Map_If_Type_Assembly_Version_Not_Changed(){
             InitializeMapperService(nameof(Do_Not_Map_If_Type_Assembly_Version_Not_Changed));
             var mappedType = typeof(TestModelMapper);
@@ -75,6 +77,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
+        [XpandTimeout]
         public async Task Always_Map_If_Any_Type_Assembly_HashCode_Changed(){
 
             var name = nameof(Always_Map_If_Any_Type_Assembly_HashCode_Changed);
@@ -97,6 +100,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
+        [XpandTimeout]
         public async Task Always_Map_If_ModelMapperModule_HashCode_Changed(){
             InitializeMapperService(nameof(Always_Map_If_ModelMapperModule_HashCode_Changed));
             var mappedType = typeof(TestModelMapper);
@@ -110,6 +114,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
+        [XpandTimeout]
         public async Task Always_Map_If_ModelMapperConfiguration_Changed(){
             
             InitializeMapperService(nameof(Always_Map_If_ModelMapperConfiguration_Changed));

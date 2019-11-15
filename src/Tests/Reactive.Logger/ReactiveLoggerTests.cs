@@ -73,6 +73,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
         }
 
         [Test]
+        [XpandTimeout]
         public  void Populate_TracedSource_Modules_to_Model(){
             
             using (var application = LoggerModule(nameof(Populate_TracedSource_Modules_to_Model)).Application){
@@ -91,6 +92,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
 
 
         [Test]
+        [XpandTimeout]
         [Apartment(ApartmentState.STA)]
         public async Task SaveTrace_When_AuthendiationStandard(){
             await SaveTraceEvent(application => {
@@ -99,6 +101,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
         }
 
         [Test]
+        [XpandTimeout]
         [Apartment(ApartmentState.STA)]
         public void Do_Not_Trace_If_TraceSources_Level_Off(){
 
@@ -115,6 +118,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
         }
 
         [Test]
+        [XpandTimeout]
         [Apartment(ApartmentState.STA)]
         public async Task Save_TraceEvent(){
             await SaveTraceEvent(afterSaveTrace: async () => {
@@ -148,6 +152,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
 
 
         [Test]
+        [XpandTimeout]
         [Apartment(ApartmentState.STA)]
         public async Task Refresh_TraceEvent_ListView_when_trace(){
             using (var application = Platform.Win.NewApplication<ReactiveLoggerModule>()){
@@ -169,6 +174,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
         }
 
         [Test]
+        [XpandTimeout]
         [Apartment(ApartmentState.STA)]
         public async Task Trace_Events_Before_CompatibityCheck(){
             using (var application = Platform.Win.NewApplication<ReactiveLoggerModule>()){

@@ -4,50 +4,50 @@ variables:
 
 trigger: none
 jobs:
-# - job: EasyTests
-#   strategy:
-#     parallel: 2
-#   pool:
-#     vmImage: windows-latest
-#   variables:
-#     - group: keys
-#   steps:
-#     - checkout: self
-#     - task: DownloadBuildArtifacts@0
-#       inputs:
-#         buildType: 'specific'
-#         project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
-#         pipeline: '71'
-#         buildVersionToDownload: 'latest'
-#         downloadType: 'single'
-#         artifactName: 'Tests'
-#         downloadPath: '$(System.DefaultworkingDirectory)\bin'
-#     - task: PowerShell@2
-#       displayName: Copy runsetting
-#       inputs:
-#         pwsh: true
-#         targetType: inline
-#         script: |
-#           get-childitem|select-object -expandproperty BaseName
-#           Copy-Item -Path "$(System.DefaultWorkingDirectory)\tools\build\Tests.runsettings" -Destination "$(System.DefaultWorkingDirectory)\bin\Tests.runsettings" -Force -verbose
-#     - task: VSTest@2
-#       displayName: 'EasyTests'
-#       continueOnError: true
-#       inputs:
-#         searchFolder: '$(System.DefaultWorkingDirectory)'
-#         testSelector: 'testAssemblies'
-#         testAssemblyVer2: |
-#           **\*All*Tests.dll
-#           !**\obj\**    
-#         diagnosticsEnabled: true
-#         codeCoverageEnabled: true
-#         distributionBatchType: basedOnAssembly
-#         runInParallel: false
-#         runSettingsFile: .\bin\Tests.runsettings
-#         runTestsInIsolation: false
-#         collectDumpOn: never
+- job: EasyTests
+  strategy:
+    parallel: 2
+  pool:
+    vmImage: windows-latest
+  variables:
+    - group: keys
+  steps:
+    - checkout: self
+    - task: DownloadBuildArtifacts@0
+      inputs:
+        buildType: 'specific'
+        project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
+        pipeline: '71'
+        buildVersionToDownload: 'latest'
+        downloadType: 'single'
+        artifactName: 'Tests'
+        downloadPath: '$(System.DefaultworkingDirectory)\bin'
+    - task: PowerShell@2
+      displayName: Copy runsetting
+      inputs:
+        pwsh: true
+        targetType: inline
+        script: |
+          get-childitem|select-object -expandproperty BaseName
+          Copy-Item -Path "$(System.DefaultWorkingDirectory)\tools\build\Tests.runsettings" -Destination "$(System.DefaultWorkingDirectory)\bin\Tests.runsettings" -Force -verbose
+    - task: VSTest@2
+      displayName: 'EasyTests'
+      continueOnError: true
+      inputs:
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: |
+          **\*All*Tests.dll
+          !**\obj\**    
+        diagnosticsEnabled: true
+        codeCoverageEnabled: true
+        distributionBatchType: basedOnAssembly
+        runInParallel: false
+        runSettingsFile: .\bin\Tests.runsettings
+        runTestsInIsolation: false
+        collectDumpOn: never
 - job: TestModules
-  # dependsOn: 'EasyTests'
+  dependsOn: 'EasyTests'
   strategy:
     parallel: 14
   pool:
@@ -97,7 +97,7 @@ jobs:
         runTestsInIsolation: false
         collectDumpOn: never
 - job: TestModelMapper
-  # dependsOn: 'TestModules'
+  dependsOn: 'TestModules'
   strategy:
     parallel: 10
   pool:
@@ -131,3 +131,17 @@ jobs:
         runSettingsFile: .\bin\Tests.runsettings
         runTestsInIsolation: false
         collectDumpOn: never
+- job: CheckTests
+  dependsOn: TestModelMapper
+  pool:
+    vmImage: windows-latest
+  variables:
+    - group: keys
+  steps:
+    - checkout: self
+    - task: PowerShell@2
+      displayName: CheckTests
+      inputs:
+        targetType: filePath
+        filePath: .\tools\build\check-tests.ps1
+        arguments: $(AzureToken) $(Build.DefinitionName) $(Build.BuildNumber)

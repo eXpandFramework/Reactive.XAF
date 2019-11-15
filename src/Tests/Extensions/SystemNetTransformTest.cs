@@ -16,6 +16,7 @@ using Xpand.TestsLib.Attributes;
 namespace Xpand.Extensions.Tests{
     public class SystemNetTransformTest:BaseTest{
         [Test]
+        [XpandTimeout]
         public async Task Signal_When_In_Listening(){
             
             var portInUse = Enumerable.Range(10000,2).Select(port => new IPEndPoint(IPAddress.Loopback, port)).ToArray().Listening().SubscribeReplay();
@@ -28,6 +29,7 @@ namespace Xpand.Extensions.Tests{
         }
 
         [Test]
+        [XpandTimeout]
         public async Task Signal_When_Listening_Subsequent(){
             var portInUse = Enumerable.Range(10000,2).Select(port => new IPEndPoint(IPAddress.Loopback, port)).ToArray().Listening().SubscribeReplay();
             var tcpListener = new TcpListener(IPAddress.Loopback,10000);
