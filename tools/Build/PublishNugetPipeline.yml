@@ -25,8 +25,12 @@ steps:
             SourcesRoot ='$(System.DefaultworkingDirectory)'
             ApiKey ='$(NugetApiKey)'
             LocalPackageSource ='$(System.DefaultWorkingDirectory)\bin\Nupkg' 
-            PastBuild ='$(PastBuild)' 
           }
           "goArgs:"
           $goArgs|out-string
           & .\tools\build\publishNugets.ps1 @goArgs
+  - task: PublishBuildArtifacts@1
+    displayName: 'Published Packages'
+    inputs:
+      PathtoPublish: '$(System.DefaultworkingDirectory)\Build\Nuget'
+      ArtifactName: 'Nugets'

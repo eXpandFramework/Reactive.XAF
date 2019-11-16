@@ -7,12 +7,17 @@ param(
     $criteria = "Xpand.*"
 
 )
+if (!$Branch){
+    $Branch="lab"
+}
+
 $VerbosePreference="continue"
 "PastBuild=$pastbuild"
 "localPackageSource=$localPackageSource"
 if ($PastBuild -and $PastBuild -ne "false"){
     return
 }
+New-Item $sourcesRoot\build\Nuget -ItemType Directory
 $localPackages=Get-ChildItem "$localPackageSource" 
 Write-Host "local-packages:`r`n$localPackages"
 
@@ -49,5 +54,8 @@ $localPackages| ForEach-Object {
     if (!$package -or (([version]$package.Version) -lt ([version]$localPackageVersion))) {
         "Pushing $($_.FullName)"
         & (Get-Nugetpath) push $_.FullName -source $remotePackageSource -ApiKey $apikey
+    }
+    else{
+        Remove-Item $_ -Verbose
     }
 }
