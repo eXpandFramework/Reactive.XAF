@@ -210,9 +210,14 @@ Start-XpandProjectConverter -version $newVersion -path $SourcePath -SkipInstall
 
 if ($newVersion -ne $defaulVersion ) {
     Set-Location $SourcePath
-    "PaketInstall $SourcePath (due to different Version)"
-    Invoke-PaketInstall -Strict 
-    
+    "PaketRestore $SourcePath"
+    try {
+        dotnet paket restore --fail-on-checks
+    }
+    catch {
+        "PaketInstall $SourcePath (due to different Version)"
+        Invoke-PaketInstall -Strict     
+    }
 } 
 
 & $SourcePath\go.ps1 @bArgs
@@ -237,4 +242,4 @@ Copy-Item "$Sourcepath\Bin" "$stage\Bin" -Recurse -Force
 # Move-Item "$stage\Bin\AllTestWeb" "$stage\TestApplication" -Force
 # Move-Item "$stage\Bin\AllTestWin" "$stage\TestApplication" -Force
 Remove-Item "$stage\bin\ReactiveLoggerClient" -Recurse -Force
-Copy-Item "$SourcePath\paket.lock1" "$SourcePath\paket.lock" -Force
+# Copy-Item "$SourcePath\paket.lock1" "$SourcePath\paket.lock" -Force

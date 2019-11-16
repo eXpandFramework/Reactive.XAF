@@ -40,15 +40,21 @@ jobs:
   - checkout: self
   - task: CacheBeta@0
     inputs:
-      key: paket | paket.lock
-      path: .\packages
+      key: paket2 | paket.lock
+      path: $(Pipeline.Workspace)/.nuget/packages
     displayName: Cache NuGet packages
   - task: PowerShell@2
     displayName: Build
     inputs:
       targetType: inline
       script: |
+        'paket.lock','paket.dependencies'|ForEach-Object{
+            Copy-Item "$(Pipeline.Workspace)/.nuget/packages/$_" $SourcePath\$_ -Force -ErrorAction Continue -verbose
+        }
         & $(System.DefaultWorkingDirectory)\tools\Build\BuildPipeline.ps1 -Token '$(GitHubToken)' -AzureToken '$(AzureToken)' -GitHubUserName '$(GitHubUserName)' -DXApiFeed '$(DXApiFeed)'
+        'paket.lock','paket.dependencies'|ForEach-Object{
+            Copy-Item $SourcePath\$_ "$(Pipeline.Workspace)/.nuget/packages/$_" -Force -ErrorAction Continue -verbose
+        }
       pwsh: true
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: Bin'
