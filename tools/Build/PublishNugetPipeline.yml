@@ -1,0 +1,32 @@
+variables:
+  - group: keys
+pool:
+    vmImage: windows-latest
+    
+steps:
+  - checkout: self
+  - task: DownloadBuildArtifacts@0
+    displayName: "Download Bin"
+    inputs:
+        buildType: 'specific'
+        project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
+        pipeline: '23'
+        buildVersionToDownload: 'latest'
+        downloadType: 'single'
+        artifactName: 'bin'
+        downloadPath: '$(System.DefaultworkingDirectory)'
+  - task: PowerShell@2
+    displayName: Publish Nuget Packages
+    inputs:
+      targetType: inline
+      script: |
+         $goArgs=@{
+            Branch ='$(Build.SourceBranchName)'
+            SourcesRoot ='$(System.DefaultworkingDirectory)'
+            ApiKey ='$(NugetApiKey)'
+            LocalPackageSource ='$(System.DefaultWorkingDirectory)\bin\Nupkg' 
+            PastBuild ='$(PastBuild)' 
+          }
+          "goArgs:"
+          $goArgs|out-string
+          & .\tools\build\publishNugets.ps1 @goArgs
