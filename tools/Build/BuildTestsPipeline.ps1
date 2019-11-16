@@ -9,8 +9,13 @@ $dxAssembly = Get-ChildItem $SourcePath\bin DevExp*.dll | Select-Object -First 1
 $dxVersion="$($version.Major).$($version.Minor).$($version.Build)"
 "dxVersion=$dxVersion"
 & "$SourcePath\go.ps1" -InstallModules
-Move-PaketSource 0 $DXApiFeed
+$SourcePath, "$SourcePath\src\tests\all" | ForEach-Object {
+    Set-Location $_
+    Move-PaketSource 0 $DXApiFeed
+}
+Set-Location $SourcePath
 Start-XpandProjectConverter -version $dxVersion -path $SourcePath -SkipInstall
+
 Set-Location $SourcePath
 "PaketInstall $SourcePath (due to different Version)"
 Invoke-PaketInstall -Strict 

@@ -202,7 +202,7 @@ $bArgs = @{
 }
 "bArgs:"
 $bArgs | Out-String
-$SourcePath, "$SourcePath\src\tests", "$SourcePath\src\tests\all" | ForEach-Object {
+$SourcePath, "$SourcePath\src\tests\all" | ForEach-Object {
     Set-Location $_
     Move-PaketSource 0 $DXApiFeed
 }

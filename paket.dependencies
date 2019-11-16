@@ -1,5 +1,4 @@
 strategy:max
-framework: auto-detect
 cache ./nupkgs versions: current
 source "C:\Program Files (x86)\DevExpress 18.2\Components\System\Components\Packages"
 source https://api.nuget.org/v3/index.json

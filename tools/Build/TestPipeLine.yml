@@ -126,7 +126,7 @@ jobs:
           !**\obj\**    
         diagnosticsEnabled: true
         codeCoverageEnabled: true
-        distributionBatchType: basedOnExecutionTime
+        distributionBatchType: basedOnTestCases
         runInParallel: false
         runSettingsFile: .\bin\Tests.runsettings
         runTestsInIsolation: false

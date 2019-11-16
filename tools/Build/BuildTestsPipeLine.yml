@@ -38,18 +38,26 @@ jobs:
       targetType: inline
       script: |
         dotnet tool restore
-        Remove-Item $(System.DefaultworkingDirectory)\src -Recurse -Force -verbose
-        Move-Item $(System.DefaultworkingDirectory)\Source\src $(System.DefaultworkingDirectory) 
+        Get-ChildItem $(System.DefaultworkingDirectory)\src -Exclude Tests|Remove-Item -Recurse -Force -Verbose
+        Get-ChildItem $(System.DefaultworkingDirectory)\Source\src -Exclude Tests|foreach{
+          Move-Item $_ $(System.DefaultworkingDirectory)\src -Verbose -Force
+        }
         # Remove-Item $(System.DefaultworkingDirectory)\paket.dependencies
         Remove-Item $(System.DefaultworkingDirectory)\Source -Recurse -Force
         # Get-Content $(System.DefaultworkingDirectory)\paket.dependencies -Raw
         Get-Content $(System.DefaultworkingDirectory)\src\tests\all\paket.dependencies -Raw
-      pwsh: true
   - task: CacheBeta@0
     inputs:
       key: paket | paket.lock
       path: .\packages
     displayName: Cache NuGet packages
+  - task: PowerShell@2
+    displayName: Copy Packages
+    inputs:
+      targetType: inline
+      script: |
+        "Workspace=$(Pipeline.Workspace)"
+        Copy-Item $(System.DefaultworkingDirectory)\packages $(Pipeline.Workspace)/.nuget/packages -Recurse -Force -Verbose
   - task: PowerShell@2
     displayName: Build
     inputs:
