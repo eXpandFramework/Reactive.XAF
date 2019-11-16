@@ -25,9 +25,7 @@ Task PaketRestore {
     Invoke-Script {
         dotnet tool restore
         Set-Location $root
-        Invoke-PaketRestore
-        Set-Location "$root\src\Tests"
-        Invoke-PaketRestore
+        Invoke-PaketRestore -strict
     }
 }
 Task IndexSources {

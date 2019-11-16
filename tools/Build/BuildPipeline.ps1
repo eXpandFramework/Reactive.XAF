@@ -44,7 +44,7 @@ $regex = [regex] '(\d{2}\.\d*)'
 $result = $regex.Match($CustomVersion).Groups[1].Value;
 & "$SourcePath\go.ps1" -InstallModules
 $stage = "$SourcePath\buildstage"
-Copy-Item "$SourcePath\paket.lock" "$SourcePath\paket.lock1"
+
 Remove-Item $stage -force -recurse -ErrorAction SilentlyContinue
 Set-Location $SourcePath
 dotnet tool restore
@@ -213,10 +213,14 @@ if ($newVersion -ne $defaulVersion ) {
     "PaketRestore $SourcePath"
     try {
         dotnet paket restore --fail-on-checks
+        if ($LASTEXITCODE) {
+            throw     
+        }
     }
     catch {
+        "PaketRestore Failed"
         "PaketInstall $SourcePath (due to different Version)"
-        Invoke-PaketInstall -Strict     
+        Invoke-PaketInstall -Strict
     }
 } 
 
@@ -224,13 +228,13 @@ if ($newVersion -ne $defaulVersion ) {
 
 
 Set-Location $SourcePath
-$stage="$Sourcepath\buildstage"
+$stage = "$Sourcepath\buildstage"
 New-Item $stage -ItemType Directory -Force
-Get-ChildItem $stage -Recurse|Remove-Item -Recurse -Force
+Get-ChildItem $stage -Recurse | Remove-Item -Recurse -Force
 New-Item $stage\source -ItemType Directory -Force
 Set-Location $SourcePath
 Get-ChildItem $SourcePath -Exclude ".git", "bin", "buildstage" | Copy-Item -Destination $stage\source -Recurse -Force 
-Get-ChildItem $stage\source -include "packages","obj","nupkg" -Recurse|Remove-Item -Recurse -Force
+Get-ChildItem $stage\source -include "packages", "obj", "nupkg" -Recurse | Remove-Item -Recurse -Force
 Set-Location $stage
 
 
@@ -242,4 +246,4 @@ Copy-Item "$Sourcepath\Bin" "$stage\Bin" -Recurse -Force
 # Move-Item "$stage\Bin\AllTestWeb" "$stage\TestApplication" -Force
 # Move-Item "$stage\Bin\AllTestWin" "$stage\TestApplication" -Force
 Remove-Item "$stage\bin\ReactiveLoggerClient" -Recurse -Force
-# Copy-Item "$SourcePath\paket.lock1" "$SourcePath\paket.lock" -Force
+
