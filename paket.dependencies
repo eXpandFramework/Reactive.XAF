@@ -33,3 +33,5 @@ nuget System.Reactive 4.2
 nuget Unofficial.Microsoft.mshtml 7.0.3300
 nuget Xpand.Patcher 1.0.1
 nuget Xpand.Collections 1.0.1
+nuget Jetbrains.Annotations
+nuget Polly

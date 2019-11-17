@@ -19,7 +19,7 @@ namespace ALL.Web.Tests{
         [Test()]
         [TestCaseSource(nameof(AgnosticModules))]
         [TestCaseSource(nameof(WebModules))]
-        [XpandTimeout]
+        [XpandTest]
         public void UnloadWebModules(Type moduleType){
             ReactiveModuleBase.Unload(moduleType);
             using (var application = new TestWebApplication(moduleType, false)){

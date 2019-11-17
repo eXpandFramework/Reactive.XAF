@@ -25,7 +25,7 @@ namespace Xpand.XAF.Modules.ProgressBarViewItem.Tests{
             typeof(ProgressBarViewItemBase).SetFieldValue("_platform", null);
         }
 
-        [XpandTimeout]
+        [XpandTest]
         [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public void Editor_registration(string platformName){
@@ -36,7 +36,7 @@ namespace Xpand.XAF.Modules.ProgressBarViewItem.Tests{
                 .FirstOrDefault(s => s == nameof(IModelProgressBarViewItem)).ShouldNotBeNull();
 
         }
-        [XpandTimeout]
+        [XpandTest]
         [TestCase(nameof(Platform.Web),typeof(ASPxProgressBar))]
         [TestCase(nameof(Platform.Win),typeof(ProgressBarControl))]
         public void ProgressBarControl_Type(string platformName,Type progressBarType){
@@ -62,7 +62,7 @@ namespace Xpand.XAF.Modules.ProgressBarViewItem.Tests{
         private static ProgressBarViewItemModule DefaultProgressBarViewItemModule(Platform platform){
             return platform.NewApplication<ProgressBarViewItemModule>().AddModule<ProgressBarViewItemModule>(typeof(PBVI));
         }
-        [XpandTimeout]
+        [XpandTest]
         [TestCase(nameof(Platform.Win))]
         [Apartment(ApartmentState.STA)]
         public async Task Can_Observe_an_asynchronous_sequencial_percentance_sequence(string platformName){

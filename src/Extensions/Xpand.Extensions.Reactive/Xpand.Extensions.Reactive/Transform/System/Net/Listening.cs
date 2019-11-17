@@ -9,18 +9,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net{
     public static class SystemNetTransform{
         
         public static IObservable<IPEndPoint> Listening(this IEnumerable<IPEndPoint> source,bool repeatWhenOffine=true,TimeSpan? timeSpan=null){
-//            return source.ToArray().AsObservable()
-//                .SelectMany(points => {
-//                    return Observable.Start(() => {
-//                        
-//                        var notInUsed = points.ToObservable(Scheduler.Default).Where(point => point.Listening());
-//                        var inUsed = points.ToObservable(Scheduler.Default).Where(point => point.Listening())
-//                            .Select(point => notInUsed.Where(nu => point));
-//                        return inUsed
-//                            .RepeatWhen(obs => obs.Where())
-//                    });
-//                });
-            timeSpan = timeSpan ?? TimeSpan.FromMilliseconds(500);
+            timeSpan ??= TimeSpan.FromMilliseconds(500);
             return source.ToObservable()
                 .SelectMany(endPoint => {
                     var inUsed = Observable.While(() => !endPoint.Listening(), Observable.Empty<IPEndPoint>().Delay(timeSpan.Value))

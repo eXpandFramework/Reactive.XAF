@@ -18,7 +18,7 @@ namespace Xpand.XAF.Modules.GridListEditor.Tests{
     [NonParallelizable]
     public class GridListEditorTests : BaseTest{
         [Test]
-        [XpandTimeout]
+        [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task Remember_WHen_Refresh_View_DataSource(){
             

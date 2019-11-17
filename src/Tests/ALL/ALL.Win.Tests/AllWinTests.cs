@@ -19,7 +19,7 @@ namespace ALL.Win.Tests{
         [Test()]
         [TestCaseSource(nameof(AgnosticModules))]
         [TestCaseSource(nameof(WinModules))]
-        [XpandTimeout]
+        [XpandTest]
         public void UnloadWinModules(Type moduleType){
             ReactiveModuleBase.Unload(moduleType);
             using (var application = new TestWinApplication(moduleType, false)){

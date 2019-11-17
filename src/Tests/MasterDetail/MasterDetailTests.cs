@@ -24,7 +24,7 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
     [NonParallelizable]
     public class MasterDetailTests:BaseTest {
 
-        [XpandTimeout]
+        [XpandTest]
         [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public void When_model_dashboardView_has_listview_detailview_for_the_same_type_is_masterdetail_enabled(string platformName){
@@ -34,7 +34,7 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
                 ((IModelDashboardViewMasterDetail) modelDashboardView).MasterDetail.ShouldBe(true);
             }
         }
-        [XpandTimeout]
+        [XpandTest]
         [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public async Task Monitor_ListView_DetailView_dashboardViewItem_pair(string platformName){
@@ -56,7 +56,7 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
                 (pair.detailViewItem.Model.View as IModelDetailView).ShouldNotBeNull();        
             }
         }
-        [XpandTimeout]
+        [XpandTest]
         [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public async Task Handle_listView_process_selected_object_action(string platformName){
@@ -85,7 +85,7 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
 
             
         }
-        [XpandTimeout]
+        [XpandTest]
         [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public async Task When_list_view_selection_changed_synchronize_detailview_current_object(string platformName){
@@ -108,7 +108,7 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
             return tuple;
         }
 
-        [XpandTimeout]
+        [XpandTest]
         [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public async Task Master_Detail_Save_Action_is_active_when_detailview(string platformName){
@@ -123,7 +123,7 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
 
             
         }
-        [XpandTimeout]
+        [XpandTest]
         [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public async Task Refresh_listview_object_when_detailview_objectspace_commited(string platformName){
@@ -139,7 +139,7 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
                 .ShouldBe("updated");
             info.DetailViewItem.Frame.Application.Dispose();
         }
-        [XpandTimeout]
+        [XpandTest]
         [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public async Task Configure_conditional_detailviews(string platformName){

@@ -22,7 +22,7 @@ using Xpand.XAF.Modules.Reactive.Tests.BOModel;
 namespace Xpand.XAF.Modules.Reactive.Tests{
     [NonParallelizable]
     public class XafApplicationTests : BaseTest{
-        [XpandTimeout]
+        [XpandTest]
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
         public async Task WhenFrameCreated(string platformName){
@@ -45,7 +45,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             
         }
 
-        [XpandTimeout]
+        [XpandTest]
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
         public async Task WhenWindowCreated(string platformName){
@@ -63,7 +63,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             
         }
 
-        [XpandTimeout]
+        [XpandTest]
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
         public async Task WhenPopupWindowCreated(string platformName){
@@ -79,7 +79,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             
         }
 
-        [XpandTimeout]
+        [XpandTest]
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
         public async Task WHen_NestedFrameCreated(string platformName){
@@ -102,7 +102,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
         }
 
         [Test]
-        [XpandTimeout]
+        [XpandTest]
         public void BufferUntilCompatibilityChecked(){
             var source = new Subject<int>();
             using (var application = DefaultReactiveModule().Application){

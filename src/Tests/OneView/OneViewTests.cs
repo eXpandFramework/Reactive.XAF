@@ -24,7 +24,7 @@ namespace Xpand.XAF.Modules.OneView.Tests{
     [NonParallelizable]
     public class OneViewTests : BaseTest{
         [Test]
-        [XpandTimeout]
+        [XpandTest]
         [Apartment(ApartmentState.STA)]
         public  void Hide_MainWindow_Template_OnStart(){
             using (var application = OneViewModule(nameof(Hide_MainWindow_Template_OnStart)).Application){
@@ -47,7 +47,7 @@ namespace Xpand.XAF.Modules.OneView.Tests{
         }
 
         [Test]
-        [XpandTimeout]
+        [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task Show_OneView_OnStart(){
             using (var application = (TestWinApplication) OneViewModule(nameof(Show_OneView_OnStart)).Application){
@@ -68,7 +68,7 @@ namespace Xpand.XAF.Modules.OneView.Tests{
         }
 
         [Test]
-        [XpandTimeout]
+        [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task Exit_Application_On_View_Close(){
             using (var application = OneViewModule(nameof(Exit_Application_On_View_Close)).Application){
@@ -89,7 +89,7 @@ namespace Xpand.XAF.Modules.OneView.Tests{
 
 
         [Test]
-        [XpandTimeout]
+        [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task Edit_Model(){
             using (var application = OneViewModule(nameof(Edit_Model)).Application){

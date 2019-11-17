@@ -10,10 +10,11 @@ using DevExpress.XtraGrid.Views.BandedGrid;
 using DevExpress.XtraGrid.Views.Base;
 using DevExpress.XtraGrid.Views.Layout;
 using Fasterflect;
+using JetBrains.Annotations;
 using Xpand.XAF.Modules.ModelMapper.Tests.BOModel;
 
 namespace Xpand.XAF.Modules.ModelMapper.Tests{
-    public class XafLayoutView:LayoutView,IModelSynchronizersHolder{
+    public  class XafLayoutView:LayoutView,IModelSynchronizersHolder{
         public IModelSynchronizer GetSynchronizer(Component component){
             throw new NotImplementedException();
         }
@@ -45,7 +46,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             remove => this.CustomModelSynchronizer -= value;
         }
 
-        protected virtual void OnCustomModelSynchronizer(CustomModelSynchronizerEventArgs e){
+        protected void OnCustomModelSynchronizer(CustomModelSynchronizerEventArgs e){
             CustomModelSynchronizer?.Invoke(this, e);
         }
     }
@@ -78,7 +79,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             add => this.CustomModelSynchronizer += value;
             remove => this.CustomModelSynchronizer -= value;
         }
-
+        [PublicAPI]
         protected virtual void OnCustomModelSynchronizer(CustomModelSynchronizerEventArgs e){
             CustomModelSynchronizer?.Invoke(this, e);
         }

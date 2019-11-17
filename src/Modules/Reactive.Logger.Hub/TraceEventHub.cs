@@ -5,10 +5,12 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using MagicOnion.Server.Hubs;
 using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
+    [UsedImplicitly]
     public class TraceEventHub : StreamingHubBase<ITraceEventHub, ITraceEventHubReceiver>,ITraceEventHub{
         static readonly ISubject<TraceEventMessage> BroadcastedSubject=new Subject<TraceEventMessage>();
 
@@ -21,7 +23,6 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 
 
         public static IObservable<Unit> Connecting => ConnectingSubject;
-        public static IObservable<ITraceEvent> StartEvents{ get; set; }
 
         public  Task ConnectAsync(){
             ConnectingSubject.OnNext(Unit.Default);
@@ -37,13 +38,10 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
                 })
                 .DoNotComplete()
                 .ToTask();
-
         }
-
+        
         protected override async ValueTask OnConnecting(){
             _group = await Group.AddAsync("global");
-            
-            
         }
 
         protected override async ValueTask OnDisconnected(){

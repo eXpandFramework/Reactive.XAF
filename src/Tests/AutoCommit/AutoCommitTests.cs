@@ -14,7 +14,7 @@ namespace Xpand.XAF.Modules.AutoCommit.Tests{
     [NonParallelizable]
     public class AutoCommitTests : BaseTest{
 
-        [XpandTimeout]
+        [XpandTest]
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
         public async Task Signal_When_AutoCommit_Enabled_ObjectView_Created(string platformName){
@@ -30,7 +30,7 @@ namespace Xpand.XAF.Modules.AutoCommit.Tests{
                 
             }
         }
-        [XpandTimeout]
+        [XpandTest]
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
         public void AutoCommit_When_object_view_closing(string platformName){

@@ -234,7 +234,7 @@ Get-ChildItem $stage -Recurse | Remove-Item -Recurse -Force
 New-Item $stage\source -ItemType Directory -Force
 Set-Location $SourcePath
 Get-ChildItem $SourcePath -Exclude ".git", "bin", "buildstage" | Copy-Item -Destination $stage\source -Recurse -Force 
-Get-ChildItem $stage\source -include "packages", "obj", "nupkg" -Recurse | Remove-Item -Recurse -Force
+Get-ChildItem $stage\source -include "packages", "obj", "nupkg","nupkgs" -Recurse | Remove-Item -Recurse -Force -Verbose
 Set-Location $stage
 
 

@@ -38,13 +38,11 @@ jobs:
       targetType: inline
       script: |
         dotnet tool restore
-        Get-ChildItem $(System.DefaultworkingDirectory)\src -Exclude Tests|Remove-Item -Recurse -Force -Verbose
+        Get-ChildItem $(System.DefaultworkingDirectory)\src -Exclude Tests|Remove-Item -Recurse -Force 
         Get-ChildItem $(System.DefaultworkingDirectory)\Source\src -Exclude Tests|foreach{
-          Move-Item $_ $(System.DefaultworkingDirectory)\src -Verbose -Force
+          Move-Item $_ $(System.DefaultworkingDirectory)\src -Force
         }
-        # Remove-Item $(System.DefaultworkingDirectory)\paket.dependencies
         Remove-Item $(System.DefaultworkingDirectory)\Source -Recurse -Force
-        # Get-Content $(System.DefaultworkingDirectory)\paket.dependencies -Raw
         Get-Content $(System.DefaultworkingDirectory)\src\tests\all\paket.dependencies -Raw
   - task: CacheBeta@0
     inputs:

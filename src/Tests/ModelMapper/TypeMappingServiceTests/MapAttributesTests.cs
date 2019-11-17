@@ -16,7 +16,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
     [NonParallelizable]
     public class MapAttributesTests:ModelMapperBaseTest{
         [Test]
-        [XpandTimeout]
+        [XpandTest]
         public async Task Map_Private_DescriptionAttributes(){
             InitializeMapperService(nameof(Map_Private_DescriptionAttributes));
             
@@ -31,7 +31,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
-        [XpandTimeout]
+        [XpandTest]
         public async Task Map_Attributes(){
             
             InitializeMapperService(nameof(Map_Attributes));
@@ -53,7 +53,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
 
         [Test]
-        [XpandTimeout]
+        [XpandTest]
         public async Task Escape_strings(){
 
             InitializeMapperService(nameof(Escape_strings));
@@ -66,7 +66,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
 
         [Test]
-        [XpandTimeout]
+        [XpandTest]
         public async Task Customize_Attributes_Mapping(){
             InitializeMapperService(nameof(Customize_Attributes_Mapping));
             TypeMappingService.PropertyMappingRules.Add(("Custom", tuple => {
@@ -81,7 +81,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
-        [XpandTimeout]
+        [XpandTest]
         public async Task Attribute_Mapping_Can_Be_Disabled(){
             InitializeMapperService(nameof(Attribute_Mapping_Can_Be_Disabled));
             TypeMappingService.PropertyMappingRules.Add(("Disable", tuple => {

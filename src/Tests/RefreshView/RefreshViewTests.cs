@@ -22,7 +22,7 @@ namespace Xpand.XAF.Modules.RefreshView.Tests{
     [NonParallelizable]
     public class RefreshViewTests : BaseTest{
         [Test]
-        [XpandTimeout]
+        [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task Refresh_ListView_When_Root(){
             using (var application = RefreshViewModule(nameof(Refresh_ListView_When_Root)).Application){

@@ -30,7 +30,7 @@ namespace Xpand.XAF.Modules.CloneMemberValue.Tests{
             return cloneMemberValueModule;
         }
 
-        [XpandTimeout]
+        [XpandTest]
         [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public async Task Collect_Previous_Current_DetailViews_with_cloneable_members(string platformName){
@@ -56,7 +56,7 @@ namespace Xpand.XAF.Modules.CloneMemberValue.Tests{
             }
         }
 
-        [XpandTimeout]
+        [XpandTest]
         [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public async Task Collect_editable_ListViews_with_clonable_members(string platformName){
@@ -84,7 +84,7 @@ namespace Xpand.XAF.Modules.CloneMemberValue.Tests{
             application.Dispose();
             
         }
-        [XpandTimeout]
+        [XpandTest]
         [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public async Task Collect_ListView_Previous_Current_New_Objects(string platformName){
@@ -111,7 +111,7 @@ namespace Xpand.XAF.Modules.CloneMemberValue.Tests{
                 application.Dispose();
             }
         }
-        [XpandTimeout]
+        [XpandTest]
         [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public async Task CloneMemberValues(string platformName){

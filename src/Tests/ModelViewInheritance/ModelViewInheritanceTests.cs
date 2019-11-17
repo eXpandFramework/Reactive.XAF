@@ -18,7 +18,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{
     [NonParallelizable]
     public class ModelViewInheritanceTests:BaseTest {
-        [XpandTimeout]
+        [XpandTest]
         [TestCase(ViewType.DetailView,false,nameof(Platform.Win))]
         [TestCase(ViewType.DetailView,true,nameof(Platform.Win))]
         [TestCase(ViewType.DetailView,false,nameof(Platform.Web))]
@@ -89,7 +89,7 @@ namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{
             application.AddModule(modelViewInheritanceModule,null,setup,baseBoTypes.Concat(boTypes).ToArray());
             return modelViewInheritanceModule;
         }
-        [XpandTimeout]
+        [XpandTest]
         [TestCase(true)]
         [TestCase(false)]
         public void Chained_Cloned_listview_merging(bool deepMerge){

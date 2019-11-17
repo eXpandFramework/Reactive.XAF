@@ -15,7 +15,6 @@ using MagicOnion.Client;
 using MagicOnion.Server;
 using MessagePack;
 using MessagePack.Resolvers;
-using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.System.Net;
@@ -29,27 +28,29 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
         
 
         internal static IObservable<Unit> Connect(this XafApplication application){
+            
             MessagePackSerializer.SetDefaultResolver(ContractlessStandardResolver.Instance);
             if (!(application is ILoggerHubClientApplication)){
-                TraceEventHub.Init();
+//                TraceEventHub.Init();
             }
             var startServer = Observable.Start(application.StartServer).Merge().Publish().RefCount();
-            var client = Observable.Start(application.ConnectClient).Merge().Publish().RefCount();
+//            var client = Observable.Start(application.ConnectClient).Merge().Publish().RefCount();
 
-            CleanUpHubResources(application, client, startServer);
+            CleanUpHubResources(application, startServer);
             
             
-            var saveServerTraceMessages = application.SaveServerTraceMessages().Publish().RefCount();
+//            var saveServerTraceMessages = application.SaveServerTraceMessages().Publish().RefCount();
             return startServer.ToUnit()
-                .Merge(client.ToUnit())
-                .Merge(saveServerTraceMessages.ToUnit())
-                .Merge(application.WhenViewOnFrame(typeof(TraceEvent))
-                    .SelectMany(frame => saveServerTraceMessages.LoadTracesToListView(frame)))
+//                .Merge(client.ToUnit())
+//                .Merge(saveServerTraceMessages.ToUnit())
                 ;
-            
+//                .Merge(application.WhenViewOnFrame(typeof(TraceEvent))
+//                    .SelectMany(frame => saveServerTraceMessages.LoadTracesToListView(frame)))
+//                ;
+
         }
 
-        public static void CleanUpHubResources(XafApplication application, IObservable<ITraceEventHub> client, IObservable<Server> startServer){
+        public static void CleanUpHubResources(XafApplication application, IObservable<Server> startServer){
             application.WhenDisposed().Zip(startServer, (tuple, server) => server.ShutdownAsync().ToObservable().Select(unit => unit))
                 .Concat()
                 .FirstOrDefaultAsync()
@@ -98,13 +99,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
         }
 
         private static IObservable<ITraceEventHub> ConnectClient(this XafApplication application){
-            return application.WhenCompatibilityChecked()
-                .SelectMany(window => {
-                    var loggerHub = application is ILoggerHubClientApplication
-                        ? application.DetectServer().ConnectClient().TakeUntilDisposed(application)
-                        : Observable.Empty<ITraceEventHub>();
-                    return loggerHub;
-                });
+            return application is ILoggerHubClientApplication? Observable.Empty<ITraceEventHub>()
+                : application.WhenCompatibilityChecked().FirstAsync().SelectMany(_ => application.DetectServer().ConnectClient());
         }
 
         public static IObservable<IPEndPoint> DetectServer(this XafApplication application){

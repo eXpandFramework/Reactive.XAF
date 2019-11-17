@@ -1,77 +1,60 @@
 ﻿using System;
-using System.Linq;
+using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 using NUnit.Framework.Internal.Commands;
+using Polly.Timeout;
 
 namespace Xpand.TestsLib.Attributes{
-    public class XpandTestAttribute:Attribute,IApplyToContext,IWrapSetUpTearDown{
+    [AttributeUsage(AttributeTargets.Method, Inherited = false)]
+    public class XpandTestAttribute : NUnitAttribute, IRepeatTest{
+        private readonly int _tryCount;
         private readonly int _timeout;
 
-        public XpandTestAttribute(int timeout=120000,int times=2){
-            Times = times;
+        public XpandTestAttribute(int timeout = 120000, int tryCount = 2){
             _timeout = timeout;
+            _tryCount = tryCount;
         }
 
-        void IApplyToContext.ApplyToContext(TestExecutionContext context){
-            context.TestCaseTimeout=_timeout;
-        }
-        
         public TestCommand Wrap(TestCommand command){
-            return new RetryingCommand(command, Times);
+            return new RetryCommand(command, _tryCount,_timeout);
         }
 
-        public int Times{ get; }
 
-        private class RetryingCommand : DelegatingTestCommand{
-            private readonly int _times;
+        public class RetryCommand : DelegatingTestCommand{
+            private readonly int _tryCount;
+            private readonly int _timeout;
 
-            public RetryingCommand(TestCommand innerCommand, int times)
+
+            public RetryCommand(TestCommand innerCommand, int tryCount, int timeout)
                 : base(innerCommand){
-                _times = times;
+                _tryCount = tryCount;
+                _timeout = timeout;
             }
 
             public override TestResult Execute(TestExecutionContext context){
-                var retriesLeft = _times;
+                var count = _tryCount;
 
-                RunTest(context);
+                while (count-- > 0){
+                    try{
+                        Polly.Policy.Timeout(TimeSpan.FromMilliseconds(_timeout),TimeoutStrategy.Pessimistic)
+                            .Execute(() => context.CurrentResult = innerCommand.Execute(context));
+                    }
+                    catch (Exception ex){
+                        if (context.CurrentResult == null) context.CurrentResult = context.CurrentTest.MakeTestResult();
+                        context.CurrentResult.RecordException(ex);
+                    }
 
-                while (TestFailed(context) && retriesLeft > 0){
-                    ClearTestResult(context);
-                    RunTest(context);
-
-                    retriesLeft--;
-                }
-
-                var performedRetries = _times - retriesLeft;
-
-                if (performedRetries > 0){
-                    context.OutWriter.WriteLine();
-                    context.OutWriter.WriteLine($"Test retried {performedRetries} time/s.");
+                    if (count > 0){
+                        context.CurrentResult = context.CurrentTest.MakeTestResult();
+                        context.CurrentRepeatCount++; 
+                    }
                 }
 
                 return context.CurrentResult;
             }
-
-            private void RunTest(TestExecutionContext context){
-                context.CurrentResult = innerCommand.Execute(context);
-            }
-
-            private static void ClearTestResult(TestExecutionContext context){
-                context.CurrentResult = context.CurrentTest.MakeTestResult();
-            }
-
-            private static bool TestFailed(TestExecutionContext context){
-                var currentResultResultState = context.CurrentResult.ResultState;
-                var resultStates = UnsuccessfulResultStates;
-                return resultStates.ToList().Contains(currentResultResultState);
-            }
-
-            private static ResultState[] UnsuccessfulResultStates => new[] {
-                ResultState.Failure,
-                ResultState.Error
-            };
         }
+
+        
     }
-    
 }
