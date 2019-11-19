@@ -14,14 +14,13 @@ if ($branch -eq "master") {
 $ErrorActionPreference = "Stop"
 # Import-XpandPwsh
 $excludeFilter = "*client*;*extension*"
-$localPackages = Get-ChildItem "$root\tools\nuspec" *ALL.nuspec | ForEach-Object {
-    [xml]$nuspec = Get-Content $_.FullName
-    $version = [version]$nuspec.package.metadata.Version
+$localPackages = & (Get-NugetPath) list -source "$root\bin\nupkg"|ConvertTo-PackageObject|Where-Object{$_.id -like "*.ALL"} | ForEach-Object {
+    $version = [version]$_.Version
     if ($version.revision -eq 0) {
         $version = New-Object System.Version ($version.Major, $version.Minor, $version.build)
     }
     [PSCustomObject]@{
-        Id      = $nuspec.package.metadata.id
+        Id      = $_.Id
         Version = $version
     }
 }
@@ -86,7 +85,7 @@ $depsRaw=Get-Content $depsFile -Raw
 Set-Location "$root\src\Tests\All"
 Invoke-Script {
     Write-Host "Paket Update" -f Green
-    Invoke-PaketUpdate
+    Invoke-PaketInstall
 }
 
 Write-Host "Building TestApplication" -f Green

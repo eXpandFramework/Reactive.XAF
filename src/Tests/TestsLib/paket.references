@@ -22,3 +22,4 @@ NUnit3TestAdapter
 Fasterflect.Xpand
 Xpand.Patcher
 Polly
+JetBrains.Annotations

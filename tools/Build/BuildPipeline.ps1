@@ -166,24 +166,6 @@ $updateVersion = Update-NugetProjectVersion @yArgs
 "updateVersion:"
 $updateVersion
 
-$reactiveVersionChanged = $updateVersion | Select-String "Xpand.XAF.Modules.Reactive"
-"reactiveVersionChanged=$reactiveVersionChanged"
-if ($reactiveVersionChanged) {
-    $reactiveModules = Get-ChildItem "$sourcePath\src\Modules" *.csproj -Recurse | ForEach-Object {
-        [xml]$csproj = Get-Content $_.FullName
-        $packageName = $_.BaseName
-        $csproj.project.itemgroup.reference.include | Where-Object { $_ -eq "Xpand.XAF.Modules.Reactive" } | ForEach-Object { $packageName }
-    }
-    "reactiveModules:"
-    $reactiveModules | Write-Host
-    Get-ChildItem "$sourcePath\src\Modules" *.csproj -Recurse | ForEach-Object {
-        $name = $_.baseName
-        $version = $localPackages | Where-Object { $_.id -eq $name } | Select-Object -ExpandProperty NextVersion
-        Update-AssemblyInfoVersion -path "$($_.DirectoryName)" -version $version
-    }
-}
-
-
 $newVersion = $defaulVersion
 if ($customVersion -eq "latest") {
     $newVersion = $DXVersion
@@ -206,10 +188,11 @@ $SourcePath, "$SourcePath\src\tests\all" | ForEach-Object {
     Set-Location $_
     Move-PaketSource 0 $DXApiFeed
 }
+"Start-ProjectConverter $newversion" 
 Start-XpandProjectConverter -version $newVersion -path $SourcePath -SkipInstall
 
 if ($newVersion -ne $defaulVersion ) {
-    Set-Location $SourcePath
+    Set-Location "$SourcePath"
     "PaketRestore $SourcePath"
     try {
         dotnet paket restore --fail-on-checks
@@ -234,7 +217,7 @@ Get-ChildItem $stage -Recurse | Remove-Item -Recurse -Force
 New-Item $stage\source -ItemType Directory -Force
 Set-Location $SourcePath
 Get-ChildItem $SourcePath -Exclude ".git", "bin", "buildstage" | Copy-Item -Destination $stage\source -Recurse -Force 
-Get-ChildItem $stage\source -include "packages", "obj", "nupkg","nupkgs" -Recurse | Remove-Item -Recurse -Force -Verbose
+Get-ChildItem $stage\source -include "packages", "obj", "nupkg","nupkgs" -Recurse | Remove-Item -Recurse -Force
 Set-Location $stage
 
 

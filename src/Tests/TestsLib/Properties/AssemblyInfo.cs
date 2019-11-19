@@ -3,7 +3,6 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 
-
 //[assembly:InternalsVisibleTo(XpandInfo.Reactive+ ",PublicKey="+XpandInfo.Key)]
 //[assembly:InternalsVisibleTo(XpandInfo.CloneMemberValue+ ",PublicKey="+XpandInfo.Key)]
 //[assembly:InternalsVisibleTo(XpandInfo.RefreshView+ ",PublicKey="+XpandInfo.Key)]

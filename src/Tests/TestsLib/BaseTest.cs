@@ -16,9 +16,10 @@ using IDisposable = System.IDisposable;
 namespace Xpand.TestsLib{
     public abstract class BaseTest : IDisposable{
         protected Platform GetPlatform(string platformName){
-            return (Platform)Enum.Parse(typeof(Platform),platformName);
+            return (Platform) Enum.Parse(typeof(Platform), platformName);
         }
-        protected TimeSpan Timeout = TimeSpan.FromSeconds(Debugger.IsAttached?120:5);
+
+        protected TimeSpan Timeout = TimeSpan.FromSeconds(Debugger.IsAttached ? 120 : 5);
 
         static BaseTest(){
             TextListener = new TextWriterTraceListener($@"{AppDomain.CurrentDomain.ApplicationPath()}\reactive.log");
@@ -30,9 +31,10 @@ namespace Xpand.TestsLib{
         protected static object[] AgnosticModules(){
             return GetModules("Xpand.XAF.Modules*.dll").Where(o => {
                 var name = ((Type) o).Assembly.GetName().Name;
-                return !name.EndsWith(".Win")&&!name.EndsWith(".Web")&&!name.EndsWith(".Tests");
+                return !name.EndsWith(".Win") && !name.EndsWith(".Web") && !name.EndsWith(".Tests");
             }).ToArray();
         }
+
         protected static object[] Modules(){
             return GetModules("Xpand.XAF.Modules*.dll").ToArray();
         }
@@ -46,22 +48,24 @@ namespace Xpand.TestsLib{
         }
 
         private static object[] GetModules(string pattern){
-            return Directory.GetFiles(AppDomain.CurrentDomain.ApplicationPath(),pattern)
-                .Select(s => Assembly.LoadFile(s).GetTypes().FirstOrDefault(type => !type.IsAbstract&&typeof(ModuleBase).IsAssignableFrom(type)))
+            return Directory.GetFiles(AppDomain.CurrentDomain.ApplicationPath(), pattern)
+                .Select(s =>
+                    Assembly.LoadFile(s).GetTypes().FirstOrDefault(type =>
+                        !type.IsAbstract && typeof(ModuleBase).IsAssignableFrom(type)))
                 .WhereNotDefault()
                 .Cast<object>().ToArray();
         }
 
         protected static object[] ReactiveModules(){
-
             return Modules().OfType<ReactiveModuleBase>().Cast<object>().ToArray();
+        }
 
-        }
         protected void WriteLine(bool value){
-            TestContext.WriteLine(value);    
+            TestContext.WriteLine(value);
         }
+
         protected void WriteLine(char value){
-            TestContext.WriteLine(value);    
+            TestContext.WriteLine(value);
         }
 
         protected void WriteLine(string value){
@@ -69,10 +73,11 @@ namespace Xpand.TestsLib{
         }
 
         protected void WriteLine(char[] value){
-            TestContext.WriteLine(value);    
+            TestContext.WriteLine(value);
         }
+
         protected void WriteLine(decimal value){
-            TestContext.WriteLine(value);    
+            TestContext.WriteLine(value);
         }
 
         public static TextWriterTraceListener TextListener{ get; }
@@ -80,7 +85,7 @@ namespace Xpand.TestsLib{
         public static TraceSource TraceSource{ get; }
 
         public const string NotImplemented = "NotImplemented";
-        
+
         [TearDown]
         public void Dispose(){
             XpoTypesInfoHelper.Reset();

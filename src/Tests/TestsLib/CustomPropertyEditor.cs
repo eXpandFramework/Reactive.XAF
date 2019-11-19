@@ -6,7 +6,8 @@ namespace Xpand.TestsLib{
     public class CustomPropertyEditor : PropertyEditor{
         private readonly object _control;
 
-        public CustomPropertyEditor(Type objectType, IModelMemberViewItem model, object control) : base(objectType, model){
+        public CustomPropertyEditor(Type objectType, IModelMemberViewItem model, object control) : base(objectType,
+            model){
             _control = control;
         }
 
@@ -15,7 +16,6 @@ namespace Xpand.TestsLib{
         }
 
         protected override void ReadValueCore(){
-            
         }
 
         protected override object GetControlValueCore(){

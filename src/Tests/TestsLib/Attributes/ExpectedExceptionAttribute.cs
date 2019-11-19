@@ -40,9 +40,11 @@ namespace Xpand.TestsLib.Attributes{
                 if (caughtType == _expectedType)
                     context.CurrentResult.SetResult(ResultState.Success);
                 else if (caughtType != null)
-                    context.CurrentResult.SetResult(ResultState.Failure,$"Expected {_expectedType.Name} but got {caughtType.Name}");
+                    context.CurrentResult.SetResult(ResultState.Failure,
+                        $"Expected {_expectedType.Name} but got {caughtType.Name}");
                 else
-                    context.CurrentResult.SetResult(ResultState.Failure,$"Expected {_expectedType.Name} but no exception was thrown");
+                    context.CurrentResult.SetResult(ResultState.Failure,
+                        $"Expected {_expectedType.Name} but no exception was thrown");
 
                 return context.CurrentResult;
             }

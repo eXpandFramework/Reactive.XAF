@@ -1,17 +1,16 @@
 strategy:max
-cache ./nupkgs versions: current
 source "C:\Program Files (x86)\DevExpress 18.2\Components\System\Components\Packages"
 source https://api.nuget.org/v3/index.json
 source https://xpandnugetserver.azurewebsites.net/nuget
 
 nuget akarnokd.reactive_extensions 0.0.27-alpha
-nuget DevExpress.ExpressApp.Core.All 18.2.10
-nuget DevExpress.ExpressApp.Win.All 18.2.10
-nuget DevExpress.ExpressApp.Web.All 18.2.10
-nuget DevExpress.EasyTest 18.2.10  
-nuget DevExpress.ExpressApp.EasyTest.WebAdapter 18.2.10  
-nuget DevExpress.ExpressApp.EasyTest.WinAdapter 18.2.10  
-nuget DevExpress.ExpressApp.Security.Xpo 18.2.10  
+nuget DevExpress.ExpressApp.Core.All == 18.2.10
+nuget DevExpress.ExpressApp.Win.All == 18.2.10
+nuget DevExpress.ExpressApp.Web.All == 18.2.10
+nuget DevExpress.EasyTest == 18.2.10  
+nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 18.2.10  
+nuget DevExpress.ExpressApp.EasyTest.WinAdapter == 18.2.10  
+nuget DevExpress.ExpressApp.Security.Xpo == 18.2.10  
 nuget Enums.NET 3.0
 nuget FasterFlect.Xpand 2.0.7
 nuget Mono.Cecil 0.11.1

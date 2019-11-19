@@ -1,6 +1,5 @@
 strategy:max
 source "C:\Program Files (x86)\DevExpress 18.2\Components\System\Components\Packages"
-cache ../../../nupkgs versions: current
 source "..\..\..\bin\Nupkg"
 source https://api.nuget.org/v3/index.json
 source https://xpandnugetserver.azurewebsites.net/nuget
@@ -27,3 +26,4 @@ nuget System.Drawing.Common 4.6
 nuget Unofficial.Microsoft.mshtml 7.0.3300
 nuget Xpand.XAF.Web.All 0.0.7.2
 nuget Xpand.XAF.Win.All 0.0.7.2
+nuget JetBrains.Annotations

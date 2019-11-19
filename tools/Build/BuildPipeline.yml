@@ -51,7 +51,7 @@ jobs:
         Copy-Item "$(System.DefaultWorkingDirectory)\paket.lock" "$(System.DefaultWorkingDirectory)\paket.lock1" -verbose
         'paket.lock','paket.dependencies'|ForEach-Object{
             $cache="$(Pipeline.Workspace)/.nuget/packages/$_"
-            Get-Content $cache -Raw -ErrorAction Continue 
+            # Get-Content $cache -Raw -ErrorAction Continue 
             Copy-Item $cache $(System.DefaultWorkingDirectory)\$_ -Force -ErrorAction Continue -verbose
         }
         & $(System.DefaultWorkingDirectory)\tools\Build\BuildPipeline.ps1 -Token '$(GitHubToken)' -AzureToken '$(AzureToken)' -GitHubUserName '$(GitHubUserName)' -DXApiFeed '$(DXApiFeed)'

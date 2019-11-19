@@ -159,7 +159,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
                 Ports = {serverPort}
             };
 
-            server.Start();
+//            server.Start();
             return server;
         }
 

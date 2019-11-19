@@ -30,7 +30,7 @@ Set-Location $sourceDir
 $assemblyVersions = & "$sourceDir\tools\build\AssemblyVersions.ps1" $sourceDir
 
 # Get-ChildItem "$sourceDir\tools\nuspec" "Xpand*$filter*.nuspec" -Recurse | ForEach-Object {
-$nuspecs=Get-ChildItem "$sourceDir\tools\nuspec" "Xpand*$filter*.nuspec" -Recurse
+$nuspecs=Get-ChildItem "$sourceDir\tools\nuspec" "Xpand.*$filter*.nuspec" -Exclude "*Tests*" -Recurse
 
 $nugetPath=(Get-XNugetPath)
 
@@ -50,21 +50,16 @@ $packScript={
         $version=$coreNuspec.package.metadata.Version
     }
  
-    try {
+    Invoke-Script{
         Write-Output "$nugetPath pack $name -OutputDirectory $($nugetBin) -Basepath $basePath -Version $version " #-f Blue
         & $nugetPath pack $name -OutputDirectory $nugetBin -Basepath $basePath -Version $version
-    }
-    catch {
-        Write-Host "Name: $name"
-        Write-Host "$(Get-Content $name -Raw)"
-        throw
     }
     
 }
 $varsToImport=@("assemblyVersions","SkipReadMe","nugetPath","sourceDir","nugetBin","SkipReadMe")
 $conLimit=[System.Environment]::ProcessorCount
-$nuspecs | Invoke-Parallel -LimitConcurrency $conLimit -VariablesToImport $varsToImport -Script $packScript
-# $nuspecs | ForEach-Object{Invoke-Command $packScript -ArgumentList $_}
+# $nuspecs | Invoke-Parallel -LimitConcurrency $conLimit -VariablesToImport $varsToImport -Script $packScript
+$nuspecs | ForEach-Object{Invoke-Command $packScript -ArgumentList $_}
 function AddReadMe{
     param(
         $BaseName,
@@ -98,14 +93,14 @@ function AddReadMe{
         Remove-Item "$Directory\ReadMe.txt" -Force -ErrorAction SilentlyContinue
     }
 }
-# Get-ChildItem "$nugetBin" *.nupkg|ForEach-Object{
-#     $zip="$($_.DirectoryName)\$($_.BaseName).zip" 
-#     Move-Item $_ $zip
-#     $unzipDir="$($_.DirectoryName)\$($_.BaseName)"
-#     Expand-archive $zip $unzipDir
-#     Remove-Item $zip
-#     AddReadme $_.BaseName $unzipDir
-#     Compress-Files "$unzipDir" $zip 
-#     Move-Item $zip $_
-#     Remove-Item $unzipDir -Force -Recurse
-# }
+Get-ChildItem "$nugetBin" *.nupkg|ForEach-Object{
+    $zip="$($_.DirectoryName)\$($_.BaseName).zip" 
+    Move-Item $_ $zip
+    $unzipDir="$($_.DirectoryName)\$($_.BaseName)"
+    Expand-archive $zip $unzipDir
+    Remove-Item $zip
+    AddReadme $_.BaseName $unzipDir
+    Compress-Files "$unzipDir" $zip 
+    Move-Item $zip $_
+    Remove-Item $unzipDir -Force -Recurse
+}

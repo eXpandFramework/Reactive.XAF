@@ -27,10 +27,8 @@ Set-Location $SourcePath
 $stage = "$Sourcepath\buildstage"
 New-Item $stage -ItemType Directory -Force
 Get-ChildItem $stage -Recurse | Remove-Item -Recurse -Force
-# New-Item $stage\source -ItemType Directory -Force
-Set-Location $SourcePath
-# Get-ChildItem $SourcePath -Exclude ".git", "bin", "buildstage" | Copy-Item -Destination $stage\source -Recurse -Force 
-# Get-ChildItem $stage\source -include "packages","obj","nupkg" -Recurse|Remove-Item -Recurse -Force
+
+
 Set-Location $stage
 
 New-Item "$stage\Tests" -ItemType Directory

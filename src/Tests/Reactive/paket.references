@@ -5,3 +5,4 @@ Moq
 Shouldly
 NUnit
 NUnit3TestAdapter
+JetBrains.Annotations

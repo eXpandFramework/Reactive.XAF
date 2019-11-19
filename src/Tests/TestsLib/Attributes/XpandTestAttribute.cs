@@ -7,7 +7,7 @@ using Polly.Timeout;
 
 namespace Xpand.TestsLib.Attributes{
     [AttributeUsage(AttributeTargets.Method, Inherited = false)]
-    public class XpandTestAttribute : NUnitAttribute, IRepeatTest{
+    public class XpandTestAttribute : Attribute{
         private readonly int _tryCount;
         private readonly int _timeout;
 
@@ -16,9 +16,9 @@ namespace Xpand.TestsLib.Attributes{
             _tryCount = tryCount;
         }
 
-        public TestCommand Wrap(TestCommand command){
-            return new RetryCommand(command, _tryCount,_timeout);
-        }
+//        public TestCommand Wrap(TestCommand command){
+//            return new RetryCommand(command, _tryCount, _timeout);
+//        }
 
 
         public class RetryCommand : DelegatingTestCommand{
@@ -37,7 +37,7 @@ namespace Xpand.TestsLib.Attributes{
 
                 while (count-- > 0){
                     try{
-                        Polly.Policy.Timeout(TimeSpan.FromMilliseconds(_timeout),TimeoutStrategy.Pessimistic)
+                        Polly.Policy.Timeout(TimeSpan.FromMilliseconds(_timeout), TimeoutStrategy.Pessimistic)
                             .Execute(() => context.CurrentResult = innerCommand.Execute(context));
                     }
                     catch (Exception ex){
@@ -47,14 +47,12 @@ namespace Xpand.TestsLib.Attributes{
 
                     if (count > 0){
                         context.CurrentResult = context.CurrentTest.MakeTestResult();
-                        context.CurrentRepeatCount++; 
+                        context.CurrentRepeatCount++;
                     }
                 }
 
                 return context.CurrentResult;
             }
         }
-
-        
     }
 }

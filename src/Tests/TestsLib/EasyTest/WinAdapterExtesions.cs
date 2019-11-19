@@ -10,14 +10,15 @@ namespace Xpand.TestsLib.EasyTest{
             return winAdapter.CreateCommandAdapter();
         }
 
-        public static void AddAttribute(this TestApplication testApplication,string name,string value){
+        public static void AddAttribute(this TestApplication testApplication, string name, string value){
             var document = new XmlDocument();
             var attribute = document.CreateAttribute(name);
             attribute.Value = value;
-            testApplication.AdditionalAttributes=testApplication.AdditionalAttributes.Add(attribute).ToArray();
+            testApplication.AdditionalAttributes = testApplication.AdditionalAttributes.Add(attribute).ToArray();
         }
 
-        public static TestApplication RunWebApplication(this IApplicationAdapter winAdapter,string physicalPath,string port){
+        public static TestApplication RunWebApplication(this IApplicationAdapter winAdapter, string physicalPath,
+            string port){
             var testApplication = new TestApplication();
             testApplication.AddAttribute("SingleWebDev", "true");
             testApplication.AddAttribute("DontRestartIIS", "true");
@@ -28,7 +29,8 @@ namespace Xpand.TestsLib.EasyTest{
             return testApplication;
         }
 
-        public static TestApplication RunWinApplication(this IApplicationAdapter winAdapter, string fileName,int port =4100){
+        public static TestApplication RunWinApplication(this IApplicationAdapter winAdapter, string fileName,
+            int port = 4100){
             var testApplication = new TestApplication();
             testApplication.AddAttribute("FileName", fileName);
             testApplication.AddAttribute("CommunicationPort", port.ToString());
@@ -37,7 +39,8 @@ namespace Xpand.TestsLib.EasyTest{
         }
 
         private static void RunApplication(this IApplicationAdapter winAdapter, TestApplication testApplication){
-            winAdapter.RunApplication(testApplication, $"ConnectionString={InMemoryDataStoreProvider.ConnectionString}");
+            winAdapter.RunApplication(testApplication,
+                $"ConnectionString={InMemoryDataStoreProvider.ConnectionString}");
         }
     }
 }

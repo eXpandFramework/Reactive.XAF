@@ -49,7 +49,7 @@ jobs:
 - job: TestModules
   # dependsOn: 'EasyTests'
   strategy:
-    parallel: 3
+    parallel: 16
   pool:
     vmImage: windows-latest
   variables:
@@ -65,6 +65,15 @@ jobs:
         downloadType: 'single'
         artifactName: 'bin'
         downloadPath: '$(System.DefaultworkingDirectory)'
+    - task: DownloadBuildArtifacts@0
+      inputs:
+        buildType: 'specific'
+        project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
+        pipeline: '71'
+        buildVersionToDownload: 'latest'
+        downloadType: 'single'
+        artifactName: 'Tests'
+        downloadPath: '$(System.DefaultworkingDirectory)'
     - task: VSTest@2
       displayName: 'Test Modules'
       continueOnError: true
@@ -72,6 +81,7 @@ jobs:
         searchFolder: '$(System.DefaultWorkingDirectory)'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
+          # **\*All*Tests.dll
           **\*AutoCommit*Tests.dll
           **\*CloneMemberValue*Tests.dll
           **\*CloneModelView*Tests.dll
