@@ -3,9 +3,11 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using JetBrains.Annotations;
 using Microsoft.CSharp;
 
 namespace Xpand.Extensions.Assembly{
+    
     public static class AssemblyExtensions{
         public static Lazy<CSharpCodeProvider> CodeProvider { get; } = new Lazy<CSharpCodeProvider>(() => {
             var csc = new CSharpCodeProvider();
@@ -21,8 +23,8 @@ namespace Xpand.Extensions.Assembly{
 
             return csc;
         });
-
-        public static System.Reflection.Assembly New(this AssemblyMetadata assemblyMetadata,params TypeMetada[] typeParameters){
+        [PublicAPI]
+        public static System.Reflection.Assembly NewAssembly(this AssemblyMetadata assemblyMetadata,params TypeMetada[] typeParameters){
             
             var compilerParameters = new CompilerParameters{
                 CompilerOptions = "/t:library",
@@ -85,7 +87,7 @@ public class {metada.Name}{{
             return $"{metadata.Attributes.AttributesCode()}{Environment.NewLine}public {metadata.Type.FullName} {metadata.Name} {{get;{(metadata.CanWrite ? "set;" : null)}}}";
         }
     }
-
+    [PublicAPI]
     public class AssemblyMetadata{
         public AssemblyMetadata(){
             Attributes=new List<Attribute>();
@@ -95,7 +97,7 @@ public class {metada.Name}{{
         public Version Version{ get; set; }
         public List<Attribute> Attributes{ get;  }
     }
-
+    [PublicAPI]
     public class TypeMetada{
         public TypeMetada(string name,params PropertyMetadata[] propertyParameters){
             Name = name;
@@ -106,7 +108,7 @@ public class {metada.Name}{{
         public string Name{ get; set; }
         public List<PropertyMetadata> Properties{ get; }
     }
-
+    [PublicAPI]
     public class PropertyMetadata{
         public PropertyMetadata(string name, Type type, bool canWrite, params Attribute[] attributes){
             Name = name;

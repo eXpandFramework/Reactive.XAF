@@ -10,6 +10,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
+using DevExpress.Persistent.Base;
 using Fasterflect;
 using Xpand.Extensions.Linq;
 using Xpand.Extensions.Reactive.Filter;
@@ -158,7 +159,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             if (!modelNodeDisabled.NodeDisabled){
                 var modelNode = ((ModelNode) modelNodeDisabled);
                 var modelNodeInfo = modelNode.NodeInfo;
-                var propertyInfos = instance.GetType().Properties(Flags.Public|Flags.Static|Flags.AllMembers).DistinctBy(info => info.Name).ToDictionary(info => info.Name,info => info);
+                var propertyInfos = instance.BindablePropertyInfos(modelNodeDisabled);
                 
                 var modelPropertyNames = modelNodeInfo.ValuesInfo.Where(info => IsValidInfo(info, propertyInfos))
                     .Where(info => !TypeMappingService.ReservedPropertyNames.Contains(info.Name)).Select(info => info.Name).ToArray();
@@ -179,6 +180,17 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                     }
                     
                 }
+            }
+        }
+
+        private static Dictionary<string, PropertyInfo> BindablePropertyInfos(this object instance,IModelNodeDisabled modelNodeDisabled){
+            try{
+                return instance.GetType().Properties(Flags.Public|Flags.Static|Flags.AllMembers).DistinctBy(info => info.Name).ToDictionary(info => info.Name,info => info);
+            }
+            catch (Exception e){
+                var exception = new Exception($"ModelNode:{((ModelNode) modelNodeDisabled).Path}, object:{instance}",e);
+                Tracing.Tracer.LogError(exception);
+                return new Dictionary<string, PropertyInfo>();
             }
         }
 

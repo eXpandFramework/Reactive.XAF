@@ -36,6 +36,7 @@ using DevExpress.XtraTreeList.Columns;
 using Fasterflect;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Assembly;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.Model;
@@ -56,7 +57,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
     public class ModelMapperBinderServiceTests:ModelMapperBaseTest{
         [XpandTest]
         [TestCase(nameof(Platform.Win))]
-        [TestCase(nameof(Platform.Web))]
         public void Bind_Only_NullAble_Properties_That_are_not_Null(string platformName){
             var platform = GetPlatform(platformName);
             var typeToMap=typeof(StringValueTypeProperties);
@@ -79,7 +79,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
         [XpandTest]
         [TestCase(nameof(Platform.Win))]
-        [TestCase(nameof(Platform.Web))]
         public void Do_not_bind_Disable_mode_nodes(string platformName){
             var platform = GetPlatform(platformName);
             var typeToMap=typeof(StringValueTypeProperties);
@@ -102,7 +101,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
         [XpandTest]
         [TestCase(nameof(Platform.Win))]
-        [TestCase(nameof(Platform.Web))]
         public void Do_not_throw_if_target_object_properties_do_not_exist(string platformName){
             var platform = GetPlatform(platformName);
             Type typeToMap=typeof(StringValueTypeProperties);
@@ -121,7 +119,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
         [XpandTest]
         [TestCase(nameof(Platform.Win))]
-        [TestCase(nameof(Platform.Web))]
         public void Bind_all_public_nullable_type_properties(string platformName){
             var platform = GetPlatform(platformName);
             Type typeToMap=typeof(StringValueTypeProperties);
@@ -144,7 +141,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
         [XpandTest]
         [TestCase(nameof(Platform.Win))]
-        [TestCase(nameof(Platform.Web))]
         public void Bind_all_public_rw_string_properties(string platformName){
             var platform = GetPlatform(platformName);
             Type typeToMap=typeof(StringValueTypeProperties);
@@ -165,7 +161,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
         [XpandTest]
         [TestCase(nameof(Platform.Win))]
-        [TestCase(nameof(Platform.Web))]
         public void Bind_all_public_rw_nested_properties(string platformName){
             var platform = GetPlatform(platformName);
             var typeToMap=typeof(ReferenceTypeProperties);
@@ -185,7 +180,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
         [XpandTest]
         [TestCase(nameof(Platform.Win))]
-        [TestCase(nameof(Platform.Web))]
         [Ignore(NotImplemented)]
         public void Apply_AllMapper_Contexts(string platformName){
             
@@ -193,7 +187,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
         [XpandTest]
         [TestCase(nameof(Platform.Win))]
-        [TestCase(nameof(Platform.Web))]
         [Ignore(NotImplemented)]
         public void Apply_Root_Map_After_mapper_contexts(string platformName){
             
@@ -309,7 +302,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             }
         }
         [XpandTest()]
-        [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public async Task Bind_PropertyEditor_Control(string platformName){
             var platform = GetPlatform(platformName);
