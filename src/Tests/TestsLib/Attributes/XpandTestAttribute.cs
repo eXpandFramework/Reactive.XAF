@@ -1,5 +1,4 @@
 ﻿using System;
-using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 using NUnit.Framework.Internal.Commands;
@@ -7,7 +6,7 @@ using Polly.Timeout;
 
 namespace Xpand.TestsLib.Attributes{
     [AttributeUsage(AttributeTargets.Method, Inherited = false)]
-    public class XpandTestAttribute : Attribute{
+    public class XpandTestAttribute : Attribute,IRepeatTest{
         private readonly int _tryCount;
         private readonly int _timeout;
 
@@ -16,9 +15,9 @@ namespace Xpand.TestsLib.Attributes{
             _tryCount = tryCount;
         }
 
-//        public TestCommand Wrap(TestCommand command){
-//            return new RetryCommand(command, _tryCount, _timeout);
-//        }
+        public TestCommand Wrap(TestCommand command){
+            return new RetryCommand(command, _tryCount, _timeout);
+        }
 
 
         public class RetryCommand : DelegatingTestCommand{
