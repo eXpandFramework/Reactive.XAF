@@ -8,8 +8,8 @@ param(
     [bool]$cleanBin = $true,
     [string]$branch="lab",
     [switch]$InstallModules,
-    [string[]]$taskList=@("ReleaseModules"),
-    [string]$XpandPwshVersion = "0.31.4",
+    [string[]]$taskList=@("Build"),
+    [string]$XpandPwshVersion = "0.32.6",
     [switch]$Debug,
     [switch]$CustomVersion
 )

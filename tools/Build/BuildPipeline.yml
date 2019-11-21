@@ -40,7 +40,7 @@ jobs:
   - checkout: self
   - task: CacheBeta@0
     inputs:
-      key: paket4 | paket.lock
+      key: paket5 | paket.lock
       path: $(Pipeline.Workspace)/.nuget/packages
     displayName: Cache NuGet packages
   - task: PowerShell@2
@@ -48,26 +48,36 @@ jobs:
     inputs:
       targetType: inline
       script: |
-        Copy-Item "$(System.DefaultWorkingDirectory)\paket.lock" "$(System.DefaultWorkingDirectory)\paket.lock1" -verbose
+        Copy-Item '$(System.DefaultWorkingDirectory)\paket.lock' '$(System.DefaultWorkingDirectory)\paket.lock1' -verbose
         'paket.lock','paket.dependencies'|ForEach-Object{
-            $cache="$(Pipeline.Workspace)/.nuget/packages/$_"
+            $cache='$(Pipeline.Workspace)/.nuget/packages/$_'
             # Get-Content $cache -Raw -ErrorAction Continue 
             Copy-Item $cache $(System.DefaultWorkingDirectory)\$_ -Force -ErrorAction Continue -verbose
         }
         & $(System.DefaultWorkingDirectory)\tools\Build\BuildPipeline.ps1 -Token '$(GitHubToken)' -AzureToken '$(AzureToken)' -GitHubUserName '$(GitHubUserName)' -DXApiFeed '$(DXApiFeed)'
         'paket.lock','paket.dependencies'|ForEach-Object{
-            Copy-Item $(System.DefaultWorkingDirectory)\$_ "$(Pipeline.Workspace)/.nuget/packages/$_" -Force -ErrorAction Continue -verbose
+            Copy-Item '$(System.DefaultWorkingDirectory)\$_' '$(Pipeline.Workspace)/.nuget/packages/$_' -Force -ErrorAction Continue -verbose
         }
-        Copy-Item "$(System.DefaultWorkingDirectory)\paket.lock1" "$(System.DefaultWorkingDirectory)\paket.lock" -Force -verbose
+        Copy-Item '$(System.DefaultWorkingDirectory)\paket.lock1' '$(System.DefaultWorkingDirectory)\paket.lock' -Force -verbose
       pwsh: true
   - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: Bin'
+    displayName: 'Publish Artifact: UnitTests'
     inputs:
       PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\bin'
       ArtifactName: 'Bin'
   - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: Source'
+    displayName: 'Publish Artifact: XafApplication'
     inputs:
-      PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\source'
-      ArtifactName: 'Source'
+      PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\TestApplication'
+      ArtifactName: 'Tests'
+  # - task: PublishBuildArtifacts@1
+  #   displayName: 'Publish Artifact: Bin'
+  #   inputs:
+  #     PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\bin'
+  #     ArtifactName: 'Bin'
+  # - task: PublishBuildArtifacts@1
+  #   displayName: 'Publish Artifact: Source'
+  #   inputs:
+  #     PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\source'
+  #     ArtifactName: 'Source'
   

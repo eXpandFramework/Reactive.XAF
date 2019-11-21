@@ -50,7 +50,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             traceEvent.Line = Convert.ToInt32(regexObj.Match(traceEvent.Message).Groups["Ln"].Value);
             traceEvent.LogicalOperationStack = string.Join(Environment.NewLine, eventCache.LogicalOperationStack.ToArray());
             
-//            _eventTraceSubject.OnNext(traceEvent);
+            _eventTraceSubject.OnNext(traceEvent);
         }
 
     }

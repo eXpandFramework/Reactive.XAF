@@ -380,16 +380,40 @@ else {
     }
 }
 }
-function Update-Version($modulePath, $dxVersion) {
+function Write-Intent {
+    [CmdletBinding()]
+    param (
+        [parameter(ValueFromPipeline)]
+        [string]$Text,
+        [int]$Level
+    )
+    
+    begin {
+        
+    }
+    
+    process {
+        for ($i = 0; $i -lt $Level.Count; $i++) {
+            $prefix+="  "    
+        }
+        $prefix+=$text
+        Write-Output $prefix       
+    }
+    
+    end {
+        
+    }
+}
+function Update-Version($modulePath, $dxVersion,$referenceFilter,$snkFile) {
     $moduleAssemblyData = Get-MonoAssembly $modulePath -ReadSymbols
     $moduleAssembly = $moduleAssemblyData.assembly
     $moduleReferences = $moduleAssembly.MainModule.AssemblyReferences
     "References:`r`n"
-    $moduleReferences | Write-Verbose
+    $moduleReferences.Fullname |Sort-Object
     $needsPatching = $false
-    $moduleReferences.ToArray() | Where-Object { $_.FullName -like $referenceFilter } | ForEach-Object {
+    $moduleReferences.ToArray() | Where-Object { $_.Name -like $referenceFilter } | ForEach-Object {
         $dxReference = $_
-        "nChecking reference $_..."
+        "Checking reference $_..."
         if ($dxReference.Version -ne $dxVersion) {
             $moduleReferences.Remove($dxReference) | Out-Null
             $newMinor = "$($dxVersion.Major).$($dxVersion.Minor)"
@@ -405,7 +429,7 @@ function Update-Version($modulePath, $dxVersion) {
                     $_.Scope = $newReference 
                 }
             }
-            "$($_.Name) version will changed from $($_.Version.Major) to $($dxVersion)`r`n" 
+            "$($_.Name) version will changed from $($_.Version) to $($dxVersion)`r`n" 
             $needsPatching = $true
         }
         else {
@@ -416,7 +440,7 @@ function Update-Version($modulePath, $dxVersion) {
         "Patching $modulePath"
         $writeParams = New-Object WriterParameters
         $writeParams.WriteSymbols = $moduleAssembly.MainModule.hassymbols
-        $key = [File]::ReadAllBytes("$PSScriptRoot\Xpand.snk")
+        $key = [File]::ReadAllBytes($snkFile)
         $writeParams.StrongNameKeyPair = [System.Reflection.StrongNameKeyPair]($key)
         if ($writeParams.WriteSymbols) {
             $pdbPath = Get-Item $modulePath

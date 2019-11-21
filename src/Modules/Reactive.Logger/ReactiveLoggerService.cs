@@ -41,7 +41,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
 
         public static IObservable<ITraceEvent> SavedTraceEvent{ get; }=SavedTraceEventSubject;
         internal static IObservable<Unit> Connect(this ReactiveLoggerModule reactiveLoggerModule){
-
+            
             var application = reactiveLoggerModule.Application;
             if (application == null){
                 return Observable.Empty<Unit>();
@@ -65,19 +65,19 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             }
             return application.WhenViewOnFrame(typeof(TraceEvent),ViewType.ListView)
                 .SelectMany(frame => {
-                    var synchronizationContext = SynchronizationContext.Current;
-                    return events.Throttle(TimeSpan.FromSeconds(1))
-                        .TakeUntil(frame.WhenDisposingFrame())
-                        .DistinctUntilChanged(_ => _.TraceKey())
-                        .ObserveOn(synchronizationContext) 
-                        .SelectMany(e => {
-                            if (e.Method != nameof(RefreshViewDataSource)){
-                                frame?.View?.RefreshDataSource();
-                                return e.AsObservable().ToUnit();
-                            }
+                    return SynchronizationContext.Current.AsObservable().WhenNotDefault()
+                        .SelectMany(context => events.Throttle(TimeSpan.FromSeconds(1))
+                            .TakeUntil(frame.WhenDisposingFrame())
+                            .DistinctUntilChanged(_ => _.TraceKey())
+                            .ObserveOn(context)
+                            .SelectMany(e => {
+                                if (e.Method != nameof(RefreshViewDataSource)){
+                                    frame?.View?.RefreshDataSource();
+                                    return e.AsObservable().ToUnit();
+                                }
 
-                            return Observable.Never<Unit>();
-                        });
+                                return Observable.Never<Unit>();
+                            }));
                 }).ToUnit()
                 .TraceLogger();
         }

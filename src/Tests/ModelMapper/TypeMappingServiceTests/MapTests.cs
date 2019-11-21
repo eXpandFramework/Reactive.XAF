@@ -5,6 +5,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reflection;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using DevExpress.DashboardWeb;
 using DevExpress.DashboardWin;
@@ -160,7 +162,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             var mappedTypes = new List<Type>(new[]{typeToMap1, typeToMap2}.MapToModel().ModelInterfaces().ToEnumerable().ToArray());
 
             var mappedType1 = mappedTypes[0];
-            var typesToMap = new[]{typeToMap1,typeToMap2}.Select(type => type.ModelTypeName());
+            var typesToMap = new[]{typeToMap1,typeToMap2}.Select(type => type.ModelTypeName()).ToArray();
             typesToMap.ShouldContain(mappedType1.Name);
             var appearenceCell = mappedType1.Properties().First(_ => _.Name==nameof(TestModelMapperCommonType1.AppearanceCell));
             appearenceCell.ShouldNotBeNull();
@@ -257,7 +259,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         public async Task Map_PredefinedMap_RepositoryItems(string platformName){
             var platform = GetPlatform(platformName);
             var predefinedMaps = Enums.GetValues<PredefinedMap>().Where(map => map.IsRepositoryItem())
-                .Where(map => map.Attribute<MapPlatformAttribute>().Platform == platform.ToString());
+                .Where(map => map.Attribute<MapPlatformAttribute>().Platform == platform);
 
             await Map_PredefinedMap_ViewItems(platform, predefinedMaps, typeof(RepositoryItemBaseMap).ModelTypeName(), ViewItemService.RepositoryItemsMapName,true);
         }
@@ -314,7 +316,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         public async Task Map_PredefinedMap_PropertyEditor_Controls(string platformName){
             var platform = GetPlatform(platformName);
             var predefinedMaps = Enums.GetValues<PredefinedMap>().Where(map => map.IsPropertyEditor())
-                .Where(map => map.Attribute<MapPlatformAttribute>().Platform==platform.ToString());
+                .Where(map => map.Attribute<MapPlatformAttribute>().Platform==platform);
             
             await Map_PredefinedMap_ViewItems(platform, predefinedMaps, typeof(PropertyEditorControlMap).ModelTypeName(), ViewItemService.PropertyEditorControlMapName);
         }
@@ -383,7 +385,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             Assembly.LoadFile(typeof(ChartControl).Assembly.Location);
             InitializeMapperService($"{nameof(Map_All_PredefinedConfigurations)}",platform);
             var values = Enums.GetValues<PredefinedMap>()
-                .Where(map =>map.GetAttributes().OfType<MapPlatformAttribute>().Any(_ => _.Platform == platform.ToString()))
+                .Where(map =>map.GetAttributes().OfType<MapPlatformAttribute>().Any(_ => _.Platform == platform))
                 .ToArray();
             var modelInterfaces = values.MapToModel().ModelInterfaces().Replay();
             modelInterfaces.Connect();
@@ -396,7 +398,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
                 types.FirstOrDefault(_ => _.Name == modelTypeName).ShouldNotBeNull();
             }
         }
-
         [Test]
         [XpandTest]
         public void Map_PredefinedConfigurations_Combination(){

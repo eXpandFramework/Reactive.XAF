@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Win.All</id>
-    <version>0.0.8.0</version>
+    <version>0.0.8.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -14,10 +14,10 @@
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Xpand.XAF.Win.All</tags>
     <dependencies>
-      <dependency id="Xpand.XAF.Modules.GridListEditor" version="0.0.22.0" />
-      <dependency id="Xpand.XAF.Modules.OneView" version="0.0.22.0" />
-      <dependency id="Xpand.XAF.Modules.Reactive.Win" version="0.0.22.0" />
-      <dependency id="Xpand.XAF.Core.All" version="0.0.7.1" />
+      <dependency id="Xpand.XAF.Modules.GridListEditor" version="0.0.23.0" />
+      <dependency id="Xpand.XAF.Modules.OneView" version="0.0.23.0" />
+      <dependency id="Xpand.XAF.Modules.Reactive.Win" version="0.0.23.0" />
+      <dependency id="Xpand.XAF.Core.All" version="0.0.8.1" />
     </dependencies>
   </metadata>
   <files>

@@ -135,7 +135,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
         private static async Task SaveTraceEvent(Action<XafApplication> created=null, Action afterSaveTrace=null){
             using (var application = Platform.Win.NewApplication<ReactiveLoggerModule>(false)){
                 created?.Invoke(application);
-                application.AddModule<TestReactiveLoggerModule>();
+                application.AddModule<ReactiveLoggerModule>();
                 application.Title = nameof(Save_TraceEvent);
                 application.CreateObjectSpace();
                 var test = application.WhenTraceEvent().FirstAsync(_ => _.Value == "test").SubscribeReplay(Scheduler.Default);
@@ -197,7 +197,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             var xafApplication = Platform.Win.NewApplication<ReactiveLoggerModule>();
             xafApplication.Title = title;
             xafApplication.Modules.AddRange(modules);
-            var module = xafApplication.AddModule<TestReactiveLoggerModule>(typeof(RL));
+            var module = xafApplication.AddModule<ReactiveLoggerModule>(typeof(RL));
             xafApplication.Logon();
             xafApplication.CreateObjectSpace();
             return module.Application.Modules.OfType<ReactiveLoggerModule>().First();

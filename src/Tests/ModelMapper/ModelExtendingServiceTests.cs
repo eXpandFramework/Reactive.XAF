@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reflection;
-using DevExpress.DashboardWeb;
 using DevExpress.DashboardWin;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
@@ -25,7 +23,6 @@ using DevExpress.XtraScheduler;
 using DevExpress.XtraTreeList;
 using DevExpress.XtraTreeList.Columns;
 using EnumsNET;
-using Fasterflect;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.String;
@@ -112,7 +109,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             
         }
 
-        [XpandTest]
+        [XpandTest(LongTimeout)]
         [TestCase(PredefinedMap.LayoutControlGroup, typeof(LayoutControlGroup),nameof(Platform.Win),MMDetailViewNodePath+"/Layout/Main")]
         [TestCase(PredefinedMap.GridColumn, typeof(GridColumn),nameof(Platform.Win),MMListViewNodePath+"/Columns/Test")]
         [TestCase(PredefinedMap.GridView, typeof(GridView),nameof(Platform.Win),MMListViewNodePath)]
@@ -161,66 +158,68 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             modelMapper.ShouldNotBeNull();
         }
 
-        [Test]
-        [XpandTest]
-        public void Extend_PredefinedRepositoryItems(){
-            var predefinedMaps = Enums.GetValues<PredefinedMap>()
-                .Where(map => map.IsRepositoryItem());
-            Extend_Predifiened_ViewItems(predefinedMaps,Platform.Win, ViewItemService.RepositoryItemsMapName,true);
+        [TestCaseSource(nameof(RepositoryItems))]
+        [XpandTest()]
+        public void Extend_PredefinedRepositoryItems(PredefinedMap predefinedMap){
+            InitializeMapperService($"{nameof(Extend_PredefinedRepositoryItems)}{predefinedMap}", predefinedMap.Platform());
+            Extend_Predefined_ViewItem(predefinedMap, ViewItemService.RepositoryItemsMapName,true);
         }
 
-        [XpandTest(500000)]
-        [TestCase(nameof(Platform.Web))]
-        [TestCase(nameof(Platform.Win))]
-        public void Extend_Predefined_PropertyEditorControls(string platformName){
-            var platform = GetPlatform(platformName);
-            var predefinedMaps = Enums.GetValues<PredefinedMap>()
-                .Where(map => map.IsPropertyEditor()&&map.Attribute<MapPlatformAttribute>().Platform==platform.ToString());
-            new[]{typeof(ASPxDashboard)}.ToObservable().Subscribe();
-            Extend_Predifiened_ViewItems(predefinedMaps,platform, ViewItemService.PropertyEditorControlMapName);
+        protected static object[] RepositoryItems(){
+            return Enums.GetValues<PredefinedMap>()
+                .Where(map => map.IsRepositoryItem()).Cast<object>().ToArray();
         }
 
-        private void Extend_Predifiened_ViewItems(IEnumerable<PredefinedMap> predefinedMaps, Platform platform,string mapPropertyName,bool checkListViewColumns=false){
-            foreach (var predefinedMap in predefinedMaps){
-                try{
-                    InitializeMapperService($"{nameof(Extend_Predifiened_ViewItems)}{predefinedMap}", platform);
-                    using (var module = predefinedMap.Extend()){
-                        var connectableObservable = TypeMappingService.MappedTypes.Replay();
-                        connectableObservable.Connect();
-                        using (var application = DefaultModelMapperModule($"{nameof(Extend_Predifiened_ViewItems)}-{predefinedMap}", platform, module).Application){
-                            var typeToMap = predefinedMap.TypeToMap();
-                    
-                            var modelNode = application.Model.GetNodeByPath(MMDetailViewTestItemNodePath);
-                    
-                            modelNode.GetNode(mapPropertyName).ShouldNotBeNull();
-                            if (checkListViewColumns){
-                                modelNode = application.Model.GetNodeByPath(MMListViewTestItemNodePath);
-                                modelNode.GetNode(mapPropertyName).ShouldNotBeNull();
-                            }
-                            var typeInfo = XafTypesInfo.Instance.FindTypeInfo(typeof(IModelModelMap)).Descendants
-                                .FirstOrDefault(info => info.Name.EndsWith(typeToMap.Name));
-                            typeInfo.ShouldNotBeNull();
-                            typeInfo.Name.ShouldBe(typeToMap.ModelTypeName());
+        protected static object[] WinPropertyEditorControls(){
+            return Enums.GetValues<PredefinedMap>()
+                .Where(map => map.IsPropertyEditor()&&map.Platform()==Platform.Win).Cast<object>().ToArray();
+        }
 
-                            var defaultContext =
-                                ((IModelApplicationModelMapper) application.Model).ModelMapper.MapperContexts.GetNode(
-                                    ModelMapperContextNodeGenerator.Default);
-                            defaultContext.ShouldNotBeNull();
-                            var modelMapper = defaultContext.GetNode(predefinedMap.DisplayName());
-                            modelMapper.ShouldNotBeNull();
-                            application.Dispose();
-                        }
+        protected static object[] WebPropertyEditorControls(){
+            return Enums.GetValues<PredefinedMap>()
+                .Where(map => map.IsPropertyEditor()&&map.Platform()==Platform.Web).Cast<object>().ToArray();
+        }
 
-                        Dispose();
+        [XpandTest()]
+        [TestCaseSource(nameof(WebPropertyEditorControls))]
+        [TestCaseSource(nameof(WinPropertyEditorControls))]
+        public void Extend_Predefined_PropertyEditorControls(PredefinedMap predefinedMap){
+            InitializeMapperService($"{nameof(Extend_Predefined_PropertyEditorControls)}{predefinedMap}", predefinedMap.Platform());
+            Extend_Predefined_ViewItem(predefinedMap, ViewItemService.PropertyEditorControlMapName);
+        }
+
+        private void Extend_Predefined_ViewItem(PredefinedMap predefinedMap, string mapPropertyName,
+            bool checkListViewColumns = false){
+            using (var module = predefinedMap.Extend()){
+                var connectableObservable = TypeMappingService.MappedTypes.Replay();
+                connectableObservable.Connect();
+                using (var application =
+                    DefaultModelMapperModule($"{nameof(Extend_Predefined_PropertyEditorControls)}-{predefinedMap}",
+                        predefinedMap.Platform(), module).Application){
+                    var typeToMap = predefinedMap.TypeToMap();
+
+                    var modelNode = application.Model.GetNodeByPath(MMDetailViewTestItemNodePath);
+                    modelNode.GetNode(mapPropertyName).ShouldNotBeNull();
+                    if (checkListViewColumns){
+                        modelNode = application.Model.GetNodeByPath(MMListViewTestItemNodePath);
+                        modelNode.GetNode(mapPropertyName).ShouldNotBeNull();
                     }
 
-                    
-                }
-                catch (Exception e){
-                    throw new Exception(predefinedMap.ToString(), e);
+                    var typeInfo = XafTypesInfo.Instance.FindTypeInfo(typeof(IModelModelMap)).Descendants
+                        .FirstOrDefault(info => info.Name.EndsWith(typeToMap.Name));
+                    typeInfo.ShouldNotBeNull();
+                    typeInfo.Name.ShouldBe(typeToMap.ModelTypeName());
+
+                    var defaultContext =
+                        ((IModelApplicationModelMapper) application.Model).ModelMapper.MapperContexts.GetNode(
+                            ModelMapperContextNodeGenerator.Default);
+                    defaultContext.ShouldNotBeNull();
+                    var modelMapper = defaultContext.GetNode(predefinedMap.DisplayName());
+                    modelMapper.ShouldNotBeNull();
                 }
             }
         }
+
 
         [XpandTest]
         [TestCase(PredefinedMap.ChartControlRadarDiagram, typeof(RadarDiagram),nameof(Platform.Win))]
@@ -267,14 +266,14 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             }
         }
 
-        [XpandTest]
+        [XpandTest(LongTimeout)]
         [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public void ExtendModel_All_Predefined_Maps(string platformName){
             var platform = GetPlatform(platformName);
             InitializeMapperService($"{nameof(ExtendModel_All_Predefined_Maps)}",platform);
             var values = Enums.GetValues<PredefinedMap>()
-                .Where(map =>map.GetAttributes().OfType<MapPlatformAttribute>().Any(_ => _.Platform == platform.ToString()))
+                .Where(map =>map.GetAttributes().OfType<MapPlatformAttribute>().Any(_ => _.Platform == platform))
                 .ToArray();
 
             using (var module = values.ToArray().Extend()){

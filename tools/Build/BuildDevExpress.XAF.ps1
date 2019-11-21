@@ -17,8 +17,8 @@ Properties {
 }
 
 
-Task ReleaseModules  -depends   Clean, Init, UpdateProjects, Compile, IndexSources, CreateNuspec, PackNuspec
-Task BuildTests  -depends  CompileTests, UpdateAllTests
+
+Task Build  -depends   Clean, Init, UpdateProjects, Compile, IndexSources, CreateNuspec, PackNuspec, CompileTests, UpdateAllTests
 
 
 Task IndexSources {
@@ -40,7 +40,7 @@ Task Init {
         Set-Location $root
         Invoke-PaketRestore -strict
         
-        Get-ChildItem "$root\packages\grpc.core\runtimes\win\"|Copy-Item -Destination $root\bin -Verbose -Recurse -Force
+        Get-ChildItem "$root\packages\grpc.core\runtimes\"|Copy-Item -Destination "$root\bin\runtimes" -Verbose -Recurse -Force
         # $versionMismatch=Get-ChildItem $Root *.csproj -Recurse -Exclude "*TestApplication*"|ForEach-Object{
         #     $projectPath=$_.FullName
         #     Get-PackageReference $projectPath|foreach-Object{
@@ -96,6 +96,13 @@ Task Compile -precondition { return $compile } {
         Set-Location "$Root\src\Modules"
         dotnet msbuild "$Root\src\Modules\Modules.sln" -t:rebuild "/bl:$Root\Bin\Modules.binlog" "/p:configuration=$Configuration" /WarnAsError /m /v:m -r
     } -Maximum 2
+    "Build Versions:"
+    Get-ChildItem "$Root\Bin" "*Xpand.*.dll"|ForEach-Object{
+        [PSCustomObject]@{
+            Name = $_.BaseName
+            Version=[System.Diagnostics.FileVersionInfo]::GetVersionInfo($_.FullName)
+        }
+    }
 }
 
 Task  CreateNuspec {

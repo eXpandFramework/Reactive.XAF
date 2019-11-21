@@ -37,13 +37,11 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
             var client = Observable.Start(application.ConnectClient).Merge().Publish().RefCount();
 
             CleanUpHubResources(application, startServer);
-            
-            
+
             var saveServerTraceMessages = application.SaveServerTraceMessages().Publish().RefCount();
             return startServer.ToUnit()
                 .Merge(client.ToUnit())
                 .Merge(saveServerTraceMessages.ToUnit())
-//                ;
                 .Merge(application.WhenViewOnFrame(typeof(TraceEvent))
                     .SelectMany(frame => saveServerTraceMessages.LoadTracesToListView(frame)))
                 ;
@@ -51,10 +49,14 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
         }
 
         public static void CleanUpHubResources(XafApplication application, IObservable<Server> startServer){
-            application.WhenDisposed().Zip(startServer, (tuple, server) => server.KillAsync().ToObservable().Select(unit => unit))
+            application.WhenDisposed().Zip(startServer, (tuple, server) => server.ShutDownServer())
                 .Concat()
                 .FirstOrDefaultAsync()
                 .Subscribe();
+        }
+
+        private static IObservable<Unit> ShutDownServer(this Server server){
+            return server.ShutdownAsync().ToObservable().TakeUntil(Observable.Timer(TimeSpan.FromSeconds(5)));
         }
 
         private static IObservable<Unit> LoadTracesToListView(this IObservable<TraceEvent[]> source,Frame frame){

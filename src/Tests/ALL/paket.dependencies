@@ -14,6 +14,7 @@ nuget DevExpress.ExpressApp.EasyTest.WebAdapter 18.2.10
 nuget DevExpress.ExpressApp.EasyTest.WinAdapter 18.2.10  
 nuget Humanizer.Core 2.7.9
 nuget MagicOnion  2.6.3
+nuget Grpc 2.23.0
 nuget MessagePack 1.7.3.7
 nuget Moq 4.13.1
 nuget Newtonsoft.Json 12.0.3
@@ -24,6 +25,6 @@ nuget Shouldly 3.0.2
 nuget System.Data.Common 4.3
 nuget System.Drawing.Common 4.6 
 nuget Unofficial.Microsoft.mshtml 7.0.3300
-nuget Xpand.XAF.Web.All 0.0.7.2
-nuget Xpand.XAF.Win.All 0.0.7.2
+nuget Xpand.XAF.Web.All 0.0.8.1
+nuget Xpand.XAF.Win.All 0.0.8.1
 nuget JetBrains.Annotations

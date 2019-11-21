@@ -4,75 +4,63 @@ variables:
 
 trigger: none
 jobs:
-# - job: EasyTests
-#   strategy:
-#     parallel: 2
-#   pool:
-#     vmImage: windows-latest
-#   variables:
-#     - group: keys
-#   steps:
-#     - checkout: self
-#     - task: DownloadBuildArtifacts@0
-#       inputs:
-#         buildType: 'specific'
-#         project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
-#         pipeline: '71'
-#         buildVersionToDownload: 'latest'
-#         downloadType: 'single'
-#         artifactName: 'Tests'
-#         downloadPath: '$(System.DefaultworkingDirectory)\bin'
-#     - task: PowerShell@2
-#       displayName: Copy runsetting
-#       inputs:
-#         pwsh: true
-#         targetType: inline
-#         script: |
-#           get-childitem|select-object -expandproperty BaseName
-#           Copy-Item -Path "$(System.DefaultWorkingDirectory)\tools\build\Tests.runsettings" -Destination "$(System.DefaultWorkingDirectory)\bin\Tests.runsettings" -Force -verbose
-#     - task: VSTest@2
-#       displayName: 'EasyTests'
-#       continueOnError: true
-#       inputs:
-#         searchFolder: '$(System.DefaultWorkingDirectory)'
-#         testSelector: 'testAssemblies'
-#         testAssemblyVer2: |
-#           **\*All*Tests.dll
-#           !**\obj\**    
-#         diagnosticsEnabled: true
-#         codeCoverageEnabled: true
-#         distributionBatchType: basedOnAssembly
-#         runInParallel: false
-#         runSettingsFile: .\bin\Tests.runsettings
-#         runTestsInIsolation: false
-#         collectDumpOn: never
-- job: TestModules
-  # dependsOn: 'EasyTests'
+- job: BuildArtifacts
   strategy:
-    parallel: 16
+    parallel: 1
   pool:
     vmImage: windows-latest
   variables:
     - group: keys
   steps:
-    - checkout: none
+    - checkout: self
     - task: DownloadBuildArtifacts@0
+      displayName: Download Bin
       inputs:
         buildType: 'specific'
         project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
-        pipeline: '71'
+        pipeline: '23'
         buildVersionToDownload: 'latest'
         downloadType: 'single'
         artifactName: 'bin'
         downloadPath: '$(System.DefaultworkingDirectory)'
     - task: DownloadBuildArtifacts@0
+      displayName: Download EasyTests
       inputs:
         buildType: 'specific'
         project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
-        pipeline: '71'
+        pipeline: '23'
         buildVersionToDownload: 'latest'
         downloadType: 'single'
         artifactName: 'Tests'
+        downloadPath: '$(System.DefaultworkingDirectory)\bin'
+    - task: AzurePowerShell@4
+      displayName: BuildArtifacts
+      inputs:
+        azureSubscription: 'Visual Studio Enterprise (b48a609a-17f6-4e48-a317-54ab77fbf822)'
+        ScriptType: 'FilePath'
+        azurePowerShellVersion: 'LatestVersion'
+        ScriptPath: $(System.DefaultworkingDirectory)/tools/build/TestPipeline.ps1
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: Bin'
+      inputs:
+        PathtoPublish: '$(System.DefaultworkingDirectory)\bin'
+        ArtifactName: 'Bin'
+- job: TestPerAssembly
+  dependsOn: 'BuildArtifacts'
+  strategy:
+    parallel: 15
+  pool:
+    vmImage: windows-latest
+  variables:
+    - group: keys
+  steps:
+    - checkout: self
+    - task: DownloadBuildArtifacts@0
+      displayName: Download Bin
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'bin'
         downloadPath: '$(System.DefaultworkingDirectory)'
     - task: VSTest@2
       displayName: 'Test Modules'
@@ -94,7 +82,7 @@ jobs:
           **\*ModelViewIn*Tests.dll
           **\*OneView*Tests.dll
           **\*Progre*Tests.dll
-          **\*Reactive*Tests.dll
+          **\*Reactive.Tests.dll
           **\*Refresh*Tests.dll
           **\*Supp*Tests.dll
           **\*View*Tests.dll
@@ -108,8 +96,14 @@ jobs:
         runSettingsFile: .\bin\Tests.runsettings
         runTestsInIsolation: false
         collectDumpOn: never
-- job: TestModelMapper
-  dependsOn: 'TestModules'
+    # - task: PublishBuildArtifacts@1
+    #   displayName: 'Publish Artifact: Bin'
+    #   inputs:
+    #     PathtoPublish: '$(System.DefaultworkingDirectory)\bin'
+    #     ArtifactName: 'Bin'
+- job: TestPerExecutionTime
+  # dependsOn: 'BuildArtifacts'
+  dependsOn: 'TestPerAssembly'
   strategy:
     parallel: 10
   pool:
@@ -119,32 +113,31 @@ jobs:
   steps:
     - checkout: none
     - task: DownloadBuildArtifacts@0
+      displayName: Download Bin
       inputs:
-        buildType: 'specific'
-        project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
-        pipeline: '71'
-        buildVersionToDownload: 'latest'
+        buildType: 'current'
         downloadType: 'single'
         artifactName: 'bin'
         downloadPath: '$(System.DefaultworkingDirectory)'
     - task: VSTest@2
-      displayName: 'Test Modules'
+      displayName: 'Tests'
       continueOnError: true
       inputs:
         searchFolder: '$(System.DefaultWorkingDirectory)'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
+          **\*All*Tests.dll
           **\*ModelMapper*Tests.dll
           !**\obj\**    
         diagnosticsEnabled: true
         codeCoverageEnabled: true
-        distributionBatchType: basedOnTestCases
+        distributionBatchType: basedOnExecutionTime
         runInParallel: false
         runSettingsFile: .\bin\Tests.runsettings
         runTestsInIsolation: false
         collectDumpOn: never
 - job: CheckTests
-  dependsOn: TestModelMapper
+  dependsOn: TestPerExecutionTime
   pool:
     vmImage: windows-latest
   variables:

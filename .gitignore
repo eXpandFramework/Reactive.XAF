@@ -331,3 +331,4 @@ ASALocalRun/
 *.bak
 **/licenses.licx
 /buildstage/**
+/tools/Build/Write-HostFormatted.ps1

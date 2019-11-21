@@ -84,7 +84,10 @@ namespace Xpand.TestsLib{
                 application is WinApplication ? (ModuleBase) new SystemWindowsFormsModule() : new SystemAspNetModule()
             }.Concat(modules);
             if (((ITestApplication) application).TransmitMessage){
-                moduleBases = moduleBases.Add(new ReactiveLoggerModule());
+//                throw new NotImplementedException();
+                if (Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()){
+                    moduleBases = moduleBases.Add(new ReactiveLoggerHubModule());   
+                }
             }
 
             foreach (var moduleBase in moduleBases){

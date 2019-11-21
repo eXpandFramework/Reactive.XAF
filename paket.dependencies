@@ -16,6 +16,7 @@ nuget FasterFlect.Xpand 2.0.7
 nuget Mono.Cecil 0.11.1
 nuget Moq 4.13.1
 nuget MagicOnion 2.6.3
+nuget Grpc 2.23.0
 nuget MessagePack 1.7.3.7
 nuget Humanizer.Core 2.7.9
 nuget Newtonsoft.Json 12.0.3

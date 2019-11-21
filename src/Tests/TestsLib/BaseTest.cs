@@ -15,6 +15,7 @@ using IDisposable = System.IDisposable;
 
 namespace Xpand.TestsLib{
     public abstract class BaseTest : IDisposable{
+        public const int LongTimeout = 500000;
         protected Platform GetPlatform(string platformName){
             return (Platform) Enum.Parse(typeof(Platform), platformName);
         }

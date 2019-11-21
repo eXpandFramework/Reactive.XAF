@@ -307,7 +307,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         [TestCase(nameof(Platform.Win))]
         public async Task Bind_PropertyEditor_Control(string platformName){
             var platform = GetPlatform(platformName);
-            var maps = EnumsNET.Enums.GetValues<PredefinedMap>().Where(map => map.IsPropertyEditor()&&map.Attribute<MapPlatformAttribute>().Platform==platform.ToString());
+            var maps = EnumsNET.Enums.GetValues<PredefinedMap>().Where(map => map.IsPropertyEditor()&&map.Attribute<MapPlatformAttribute>().Platform==platform);
             foreach (var predefinedMap in maps){
                 try{
                     InitializeMapperService($"{nameof(Bind_PropertyEditor_Control)}{predefinedMap}",platform);

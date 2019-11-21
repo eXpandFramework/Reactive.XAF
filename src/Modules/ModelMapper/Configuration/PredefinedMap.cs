@@ -6,10 +6,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Configuration{
     [AttributeUsage(AttributeTargets.Field)]
     public class MapPlatformAttribute:Attribute{
         internal MapPlatformAttribute(Platform platform){
-            Platform = platform.ToString();
+            Platform = platform;
         }
 
-        public string Platform{ get; }
+        public Platform Platform{ get; }
     }
 
     public enum PredefinedMap{

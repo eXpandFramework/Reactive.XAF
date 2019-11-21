@@ -84,7 +84,7 @@ try {
                     if (Test-Path $_) {
                         $modulePath = (Get-Item $_).FullName
                         "Checking references: $modulePath ..`r`n"
-                        Update-Version $modulePath $dxVersion
+                        Update-Version $modulePath $dxVersion $referenceFilter "$PSScriptRoot\Xpand.snk"
                     }
                 }
                 "Flag $versionConverterFlag"

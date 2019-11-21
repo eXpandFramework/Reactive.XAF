@@ -66,7 +66,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             var versionSuffix = $".v{version.Major}.{version.Minor}";
             _dxAssemblyNamePostfix = dxAssemblyName.FullName.Substring(dxAssemblyName.FullName.IndexOf(",", StringComparison.Ordinal));
             _dxUtilsAssembly = assemblies.GetAssembly($"DevExpress.Utils{versionSuffix}");
-            if (ModelExtendingService.Platform == Platform.Win){
+            if (ModelExtendingService.Platform == Extensions.XAF.XafApplication.Platform.Win){
                 
                 _xafWinAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.Win{versionSuffix}");
                 _xafPivotGridWinAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.PivotGrid.Win{versionSuffix}");
@@ -88,7 +88,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 _xpandWinAssembly = assemblies.GetAssembly("Xpand.ExpressApp.Win",true);
             }
 
-            if (ModelExtendingService.Platform == Platform.Web){
+            if (ModelExtendingService.Platform == Extensions.XAF.XafApplication.Platform.Web){
                 _dashboardWebWebFormsAssembly = assemblies.GetAssembly($"DevExpress.Dashboard{versionSuffix}.Web.WebForms");
                 _xafWebAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.Web{versionSuffix}");
                 _dxWebAssembly = assemblies.GetAssembly($"DevExpress.Web{versionSuffix}");
@@ -767,6 +767,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         private static string ListViewVisibilityCriteria(Type rightOperand){
             var visibilityCriteria =VisibilityCriteriaLeftOperand.IsAssignableFromModelListVideEditorType.GetVisibilityCriteria(rightOperand,"Parent.");
             return visibilityCriteria;
+        }
+
+        public static Platform Platform(this PredefinedMap predefinedMap){
+            return predefinedMap.Attribute<MapPlatformAttribute>().Platform;
         }
 
         private static string ColumnVisibilityCriteria(Type rightOperand){
