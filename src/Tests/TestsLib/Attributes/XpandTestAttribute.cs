@@ -1,8 +1,14 @@
 ﻿using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Fasterflect;
+using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 using NUnit.Framework.Internal.Commands;
 using Polly.Timeout;
+using Xpand.Extensions.Task;
 
 namespace Xpand.TestsLib.Attributes{
     [AttributeUsage(AttributeTargets.Method, Inherited = false)]
@@ -16,6 +22,7 @@ namespace Xpand.TestsLib.Attributes{
         }
 
         public TestCommand Wrap(TestCommand command){
+            
             return new RetryCommand(command, _tryCount, _timeout);
         }
 
@@ -36,8 +43,9 @@ namespace Xpand.TestsLib.Attributes{
 
                 while (count-- > 0){
                     try{
+                        TestResult Execute() => context.CurrentResult = innerCommand.Execute(context);
                         Polly.Policy.Timeout(TimeSpan.FromMilliseconds(_timeout), TimeoutStrategy.Pessimistic)
-                            .Execute(() => context.CurrentResult = innerCommand.Execute(context));
+                            .Execute(() => Task.Factory.StartTask(Execute,GetApartmentState(context)).Result);
                     }
                     catch (Exception ex){
                         if (context.CurrentResult == null) context.CurrentResult = context.CurrentTest.MakeTestResult();
@@ -51,6 +59,15 @@ namespace Xpand.TestsLib.Attributes{
                 }
 
                 return context.CurrentResult;
+            }
+
+            private static ApartmentState GetApartmentState(TestExecutionContext context){
+                var apartmentAttribute = context.CurrentTest.Method.MethodInfo.Attribute<ApartmentAttribute>();
+                if (apartmentAttribute != null){
+                    return (ApartmentState) apartmentAttribute.Properties[PropertyNames.ApartmentState].OfType<object>()
+                        .First();
+                }
+                return Thread.CurrentThread.GetApartmentState();
             }
         }
     }

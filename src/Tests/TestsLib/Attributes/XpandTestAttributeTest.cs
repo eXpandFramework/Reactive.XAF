@@ -20,13 +20,22 @@ namespace Xpand.TestsLib.Attributes{
         }
 
 
+        [XpandTest]
+        [Test]
+        [Apartment(ApartmentState.STA)]
+        public void Donot_Change_AppartmentState(){
+            var currentThreadApartmentState = Thread.CurrentThread.GetApartmentState();
+            currentThreadApartmentState.ShouldBe(ApartmentState.STA);
+        }
+
         [XpandTest(1000)]
         [Test]
+        
         public void Fail_and_retry_When_Timeout_Passed(){
             _failAndRetryWhenTimeoutPassed++;
 
             if (_failAndRetryWhenTimeoutPassed == 1){
-                Thread.Sleep(1500);
+                Thread.Sleep(5000);
                 _failAndRetryWhenTimeoutPassedTimeout = false;
             }
             _failAndRetryWhenTimeoutPassedTimeout.ShouldBe(true);

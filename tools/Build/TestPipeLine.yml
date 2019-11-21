@@ -85,6 +85,8 @@ jobs:
           **\*AutoCommit*Tests.dll
           **\*CloneMemberValue*Tests.dll
           **\*CloneModelView*Tests.dll
+          **\*Extensions*Tests.dll
+          **\*Testslib.dll
           **\*Grid*Tests.dll
           **\*HideTool*Tests.dll
           **\*Logger.Tests.dll

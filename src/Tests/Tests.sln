@@ -195,6 +195,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ALL.Web.Tests", "ALL\ALL.Web.Tests\ALL.Web.Tests.csproj", "{293B4570-29B5-4DD0-AA00-2BD3504B0C27}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.Tests", "Extensions\Xpand.Extensions.Tests.csproj", "{DD67D36C-83A3-4487-BC1B-6E247C76B289}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC} = {6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{24608F82-5824-4B5F-BB14-8FDA7191159A}"
 	ProjectSection(SolutionItems) = preProject

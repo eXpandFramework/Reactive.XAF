@@ -10,7 +10,7 @@ param(
     [switch]$InstallModules,
     [string[]]$taskList=@("ReleaseModules"),
     [string]$XpandPwshVersion = "0.31.4",
-    [switch]$Release,
+    [switch]$Debug,
     [switch]$CustomVersion
 )
 $ErrorActionPreference = "Stop"
@@ -37,7 +37,7 @@ Invoke-XPsake  "$PSScriptRoot\tools\build\BuildDevExpress.XAF.ps1" -properties @
     "build"          = $build;
     "dxVersion"          = $dxVersion;
     "branch"=$branch;
-    "Release"=$Release;
+    "Release"=!$Debug;
     "CustomVersion"=$CustomVersion;
     "Root"=$PSScriptRoot;
 } -taskList $taskList

@@ -81,16 +81,20 @@ Task CompileTests -precondition { return $compile } {
 }
 
 Task Compile -precondition { return $compile } {
+    $Configuration="Debug"
+    if ($release){
+        $Configuration="Release"
+    }
     Invoke-Script {
         Write-Host "Building Extensions" -f "Blue"
         # dotnet restore "$Root\src\Extensions\Extensions.sln" --source (Get-PackageFeed -nuget) --source $packageSources /WarnAsError
-        & dotnet msbuild "$Root\src\Extensions\Extensions.sln" -t:rebuild "/bl:$Root\Bin\Extensions.binlog" "/p:configuration=Release" /m /v:m /WarnAsError -r
+        & dotnet msbuild "$Root\src\Extensions\Extensions.sln" -t:rebuild "/bl:$Root\Bin\Extensions.binlog" "/p:configuration=$Configuration" /m /v:m /WarnAsError -r
     } -Maximum 2
     Invoke-Script {
         Write-Host "Building Modules" -f "Blue"
         # dotnet restore "$Root\src\Modules\Modules.sln" --source (Get-PackageFeed -nuget) --source $packageSources /WarnAsError
         Set-Location "$Root\src\Modules"
-        dotnet msbuild "$Root\src\Modules\Modules.sln" -t:rebuild "/bl:$Root\Bin\Modules.binlog" "/p:configuration=Release" /WarnAsError /m /v:m -r
+        dotnet msbuild "$Root\src\Modules\Modules.sln" -t:rebuild "/bl:$Root\Bin\Modules.binlog" "/p:configuration=$Configuration" /WarnAsError /m /v:m -r
     } -Maximum 2
 }
 

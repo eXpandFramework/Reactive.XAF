@@ -184,11 +184,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                     key = instanceData.key;
                     propertiesCode = instanceData.code;
                 }
-                propertiesCode ??= $"{modelBrowseableCode}{mapName} {configuration.MapName??type.Name}{{get;}}";
+                propertiesCode = propertiesCode??$"{modelBrowseableCode}{mapName} {configuration.MapName??type.Name}{{get;}}";
                 var containerCode = (type,Type.EmptyTypes.FirstOrDefault()).ModelCode(null, $"{modelName}".Substring(6),
                     propertiesCode,baseType:typeof(IModelModelMapContainer));
             
-                key ??= containerCode.key;
+                key =key?? containerCode.key;
                 return (key,$"{linkAttributeCode}{containerCode.code}",false);
             }
 
@@ -204,7 +204,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         private static (string key, string code,bool map) ModelCode(this (Type typeToCode, Type rootType) data, string imageName = null,
             string customName = null, string propertiesCode = null,string additionalPropertiesCode = null, Type baseType = null, HashSet<Type> mappedTypes = null){
 
-            baseType ??= typeof(IModelNodeDisabled);
+            baseType =baseType?? typeof(IModelNodeDisabled);
             var typeToCode =data.typeToCode==data.rootType?data.typeToCode: data.typeToCode.GetRealType();
             if (typeToCode == typeof(object)){
                 typeToCode = data.typeToCode;
