@@ -84,7 +84,7 @@ namespace Xpand.TestsLib{
                 application is WinApplication ? (ModuleBase) new SystemWindowsFormsModule() : new SystemAspNetModule()
             }.Concat(modules);
             if (((ITestApplication) application).TransmitMessage){
-//                moduleBases = moduleBases.Add(new ReactiveLoggerHubModule());
+                moduleBases = moduleBases.Add(new ReactiveLoggerModule());
             }
 
             foreach (var moduleBase in moduleBases){

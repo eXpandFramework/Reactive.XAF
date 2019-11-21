@@ -169,7 +169,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             Extend_Predifiened_ViewItems(predefinedMaps,Platform.Win, ViewItemService.RepositoryItemsMapName,true);
         }
 
-        [XpandTest]
+        [XpandTest(500000)]
         [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public void Extend_Predefined_PropertyEditorControls(string platformName){

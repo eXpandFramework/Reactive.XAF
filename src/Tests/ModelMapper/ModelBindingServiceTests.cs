@@ -36,7 +36,6 @@ using DevExpress.XtraTreeList.Columns;
 using Fasterflect;
 using NUnit.Framework;
 using Shouldly;
-using Xpand.Extensions.Assembly;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.Model;
@@ -211,19 +210,20 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                     .Concat(new[]{module})
                     .ToArray();
                 using (var application = DefaultModelMapperModule(nameof(Bind_DetailView_Maps), platform, moduleBases).Application){
-                    var controlBound = ModelBindingService.ControlBind.SubscribeReplay();
-                    for (int i = 0; i < 2; i++){
-                        var detailView = application.CreateObjectView<DetailView>(typeof(MM));
-                        detailView.CreateControls();
+                    var controlBound = ModelBindingService.ControlBind.Replay();
+                    using (controlBound.Connect()){
+                        for (int i = 0; i < 2; i++){
+                            var detailView = application.CreateObjectView<DetailView>(typeof(MM));
+                            detailView.CreateControls();
                     
-                        if (boundTypes>0){
-                            await controlBound.Take((i+1)*boundTypes).Timeout(Timeout).ToTaskWithoutConfigureAwait();
-                        }
+                            if (boundTypes>0){
+                                await controlBound.Take((i+1)*boundTypes).Timeout(Timeout).ToTaskWithoutConfigureAwait();
+                            }
 
-                        detailView.Close();
+                            detailView.Close();
+                        }
                     }
                     
-
                 }
             }
         }
@@ -244,7 +244,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
                     
                     await bound.ToTaskWithoutConfigureAwait();
-
+                    
                 }
             }
         }
@@ -284,20 +284,22 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                     application.CreateObjectSpace();
                     MockListEditor(platform, controlTypes, application, predefinedMap,null);
                     var controlBound = ModelBindingService.ControlBind.Replay();
-                    controlBound.Connect();
-                    for (int i = 0; i < 2; i++){
+                    using (controlBound.Connect()){
+                        for (int i = 0; i < 2; i++){
                         
                     
-                        var listView = application.CreateObjectView<ListView>(typeof(MM));
-                        listView.Model.EditorType = controlTypes.Last();
-                        listView.Model.BandsLayout.Enable = predefinedMaps.Contains(PredefinedMap.AdvBandedGridView);
+                            var listView = application.CreateObjectView<ListView>(typeof(MM));
+                            listView.Model.EditorType = controlTypes.Last();
+                            listView.Model.BandsLayout.Enable = predefinedMaps.Contains(PredefinedMap.AdvBandedGridView);
 
-                        listView.CreateControls();
+                            listView.CreateControls();
                     
-                        if (boundTypes>0){
-                            await controlBound.Take((boundTypes*(i+1))).WithTimeOut(Timeout);
+                            if (boundTypes>0){
+                                await controlBound.Take((boundTypes*(i+1))).WithTimeOut(Timeout);
+                            }
                         }
                     }
+                    
                 }
             }
         }
@@ -325,21 +327,23 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                                 .ToArray())
                             .Application){
                             var controlBound = ModelBindingService.ControlBind.Replay();
-                            controlBound.Connect();
-                            var modelPropertyEditor = ((IModelPropertyEditor) application.Model.GetNodeByPath(MMDetailViewTestItemNodePath));
-                            var mapNode = modelPropertyEditor.GetNode(ViewItemService.PropertyEditorControlMapName);
-                            var propertyEditorControlType = mapNode.ModelListItemType().ToTypeInfo();
-                            var typeInfo = propertyEditorControlType.Descendants.First(info => info.Type.Name==predefinedMap.ModelTypeName());
-                            mapNode.AddNode(typeInfo.Type);
-                            application.MockDetailViewEditor( modelPropertyEditor, controlType.CreateInstance());
+                            using (controlBound.Connect()){
+                                var modelPropertyEditor = ((IModelPropertyEditor) application.Model.GetNodeByPath(MMDetailViewTestItemNodePath));
+                                var mapNode = modelPropertyEditor.GetNode(ViewItemService.PropertyEditorControlMapName);
+                                var propertyEditorControlType = mapNode.ModelListItemType().ToTypeInfo();
+                                var typeInfo = propertyEditorControlType.Descendants.First(info => info.Type.Name==predefinedMap.ModelTypeName());
+                                mapNode.AddNode(typeInfo.Type);
+                                application.MockDetailViewEditor( modelPropertyEditor, controlType.CreateInstance());
 
-                            var detailView = application.CreateObjectView<DetailView>(typeof(MM));
+                                var detailView = application.CreateObjectView<DetailView>(typeof(MM));
             
-                            detailView.DelayedItemsInitialization = false;
-                            detailView.CreateControls();
+                                detailView.DelayedItemsInitialization = false;
+                                detailView.CreateControls();
 
-                            await controlBound.Take(1).WithTimeOut(TimeSpan.FromSeconds(10)); 
-                            application.Dispose();
+                                await controlBound.Take(1).WithTimeOut(TimeSpan.FromSeconds(10)); 
+                                application.Dispose();
+                            }
+                            
                         }
                     }
 
@@ -364,28 +368,29 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             using (var module = predefinedMaps.Extend()){
                 using (var application = DefaultModelMapperModule(nameof(Bind_RepositoryItems), Platform.Win, module).Application){
                     var controlBound = ModelBindingService.ControlBind.Take(boundTypes).Replay();
-                    controlBound.Connect();
-            
-                    var modelPropertyEditor = ((IModelPropertyEditor) application.Model.GetNodeByPath(MMDetailViewTestItemNodePath));
-                    var controlInstance = new StringEdit();
-                    var repositoryItemTextEdit = controlInstance.Properties;
-                    if (viewType == typeof(ListView)){
-                        MockListEditor(Platform.Win, controlTypes, application, PredefinedMap.GridView,repositoryItemTextEdit);
+                    using (controlBound.Connect()){
+                        var modelPropertyEditor = ((IModelPropertyEditor) application.Model.GetNodeByPath(MMDetailViewTestItemNodePath));
+                        var controlInstance = new StringEdit();
+                        var repositoryItemTextEdit = controlInstance.Properties;
+                        if (viewType == typeof(ListView)){
+                            MockListEditor(Platform.Win, controlTypes, application, PredefinedMap.GridView,repositoryItemTextEdit);
+                        }
+                        else{
+                            application.MockDetailViewEditor( modelPropertyEditor, controlInstance);
+                        }
+
+                        var objectView = application.CreateObjectView(viewType, typeof(MM));
+                        var values = ConfigureModelRepositories(objectView);
+                        objectView.DelayedItemsInitialization = false;
+                        objectView.CreateControls();
+
+                        await controlBound.WithTimeOut(Timeout);
+
+                        Debug.Assert(repositoryItemTextEdit != null, nameof(repositoryItemTextEdit) + " != null");
+                        repositoryItemTextEdit.CharacterCasing.ShouldBe(values.concreteTypePropertyValue);
+                        repositoryItemTextEdit.AccessibleDescription.ShouldBe(values.basePropertyValue);
                     }
-                    else{
-                        application.MockDetailViewEditor( modelPropertyEditor, controlInstance);
-                    }
-
-                    var objectView = application.CreateObjectView(viewType, typeof(MM));
-                    var values = ConfigureModelRepositories(objectView);
-                    objectView.DelayedItemsInitialization = false;
-                    objectView.CreateControls();
-
-                    await controlBound.WithTimeOut(Timeout);
-
-                    Debug.Assert(repositoryItemTextEdit != null, nameof(repositoryItemTextEdit) + " != null");
-                    repositoryItemTextEdit.CharacterCasing.ShouldBe(values.concreteTypePropertyValue);
-                    repositoryItemTextEdit.AccessibleDescription.ShouldBe(values.basePropertyValue);
+                    
                 }
             }
         }

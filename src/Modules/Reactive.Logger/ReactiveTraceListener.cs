@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Text.RegularExpressions;
 using Xpand.Extensions.AppDomain;
@@ -18,7 +20,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             _applicationTitle = applicationTitle;
         }
 
-        public IObservable<ITraceEvent> EventTrace => _eventTraceSubject;
+        public IObservable<ITraceEvent> EventTrace => _eventTraceSubject.ObserveOn(TaskPoolScheduler.Default);
 
         public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string message){
             base.TraceEvent(eventCache, source, eventType, id, message);
@@ -48,7 +50,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             traceEvent.Line = Convert.ToInt32(regexObj.Match(traceEvent.Message).Groups["Ln"].Value);
             traceEvent.LogicalOperationStack = string.Join(Environment.NewLine, eventCache.LogicalOperationStack.ToArray());
             
-            _eventTraceSubject.OnNext(traceEvent);
+//            _eventTraceSubject.OnNext(traceEvent);
         }
 
     }

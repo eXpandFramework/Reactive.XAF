@@ -28,7 +28,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             xafApplication.Modules.AddRange(modules);
             var modelMapperModule = xafApplication.AddModule<ModelMapperModule>(title,typeof(MM));
             xafApplication.Logon();
-            xafApplication.CreateObjectSpace();
+            using (xafApplication.CreateObjectSpace()){
+            }
+
             return modelMapperModule;
         }
 

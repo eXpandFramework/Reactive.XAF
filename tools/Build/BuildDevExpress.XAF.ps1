@@ -17,17 +17,10 @@ Properties {
 }
 
 
-Task ReleaseModules  -depends   Clean, PaketRestore, Init, UpdateProjects, Compile, IndexSources, CreateNuspec, PackNuspec
+Task ReleaseModules  -depends   Clean, Init, UpdateProjects, Compile, IndexSources, CreateNuspec, PackNuspec
 Task BuildTests  -depends  CompileTests, UpdateAllTests
 
 
-Task PaketRestore {
-    Invoke-Script {
-        dotnet tool restore
-        Set-Location $root
-        Invoke-PaketRestore -strict
-    }
-}
 Task IndexSources {
     Invoke-Script {
         $sha = Get-GitLastSha "https://github.com/eXpandFramework/DevExpress.XAF" $branch
@@ -42,6 +35,12 @@ Task Init {
         New-Item "$Root\bin\ReactiveLoggerClient" -ItemType Directory -Force | Out-Null
         
         Copy-Item -Path "$root\tools\build\Tests.runsettings" -Destination "$Root\bin\Tests.runsettings" -Force
+
+        dotnet tool restore
+        Set-Location $root
+        Invoke-PaketRestore -strict
+        
+        Get-ChildItem "$root\packages\grpc.core\runtimes\win\"|Copy-Item -Destination $root\bin -Verbose -Recurse -Force
         # $versionMismatch=Get-ChildItem $Root *.csproj -Recurse -Exclude "*TestApplication*"|ForEach-Object{
         #     $projectPath=$_.FullName
         #     Get-PackageReference $projectPath|foreach-Object{

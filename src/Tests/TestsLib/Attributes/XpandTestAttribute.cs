@@ -41,7 +41,7 @@ namespace Xpand.TestsLib.Attributes{
                     }
                     catch (Exception ex){
                         if (context.CurrentResult == null) context.CurrentResult = context.CurrentTest.MakeTestResult();
-                        context.CurrentResult.RecordException(ex);
+                        context.CurrentResult.RecordException(new Exception($"Retry {context.CurrentRepeatCount+1} of {_tryCount}",ex));
                     }
 
                     if (count > 0){

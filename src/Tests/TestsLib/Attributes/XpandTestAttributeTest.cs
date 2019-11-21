@@ -7,7 +7,8 @@ namespace Xpand.TestsLib.Attributes{
     public class XpandTestAttributeTest{
         private static int _retryWhenTestcaseFailCount;
         private static int _retryWhenTestFailCount;
-        private static int _timeoutTest;
+        private static int _failAndRetryWhenTimeoutPassed;
+        private static bool _failAndRetryWhenTimeoutPassedTimeout=true;
 
         [XpandTest()]
         [Test]
@@ -19,15 +20,17 @@ namespace Xpand.TestsLib.Attributes{
         }
 
 
-        [XpandTest()]
+        [XpandTest(1000)]
         [Test]
-        public void Fail_When_Timeout_Passed(){
-            _timeoutTest++;
-            if (_timeoutTest == 1){
-                Thread.Sleep(1500);
-            }
+        public void Fail_and_retry_When_Timeout_Passed(){
+            _failAndRetryWhenTimeoutPassed++;
 
-            _timeoutTest.ShouldBe(2);
+            if (_failAndRetryWhenTimeoutPassed == 1){
+                Thread.Sleep(1500);
+                _failAndRetryWhenTimeoutPassedTimeout = false;
+            }
+            _failAndRetryWhenTimeoutPassedTimeout.ShouldBe(true);
+            _failAndRetryWhenTimeoutPassed.ShouldBe(2);
         }
 
 

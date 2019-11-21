@@ -31,27 +31,27 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
             
             MessagePackSerializer.SetDefaultResolver(ContractlessStandardResolver.Instance);
             if (!(application is ILoggerHubClientApplication)){
-//                TraceEventHub.Init();
+                TraceEventHub.Init();
             }
-            var startServer = Observable.Start(application.StartServer).Merge().Publish().RefCount();
-//            var client = Observable.Start(application.ConnectClient).Merge().Publish().RefCount();
+            var startServer = application.StartServer().Publish().RefCount();
+            var client = Observable.Start(application.ConnectClient).Merge().Publish().RefCount();
 
             CleanUpHubResources(application, startServer);
             
             
-//            var saveServerTraceMessages = application.SaveServerTraceMessages().Publish().RefCount();
+            var saveServerTraceMessages = application.SaveServerTraceMessages().Publish().RefCount();
             return startServer.ToUnit()
-//                .Merge(client.ToUnit())
-//                .Merge(saveServerTraceMessages.ToUnit())
-                ;
-//                .Merge(application.WhenViewOnFrame(typeof(TraceEvent))
-//                    .SelectMany(frame => saveServerTraceMessages.LoadTracesToListView(frame)))
+                .Merge(client.ToUnit())
+                .Merge(saveServerTraceMessages.ToUnit())
 //                ;
+                .Merge(application.WhenViewOnFrame(typeof(TraceEvent))
+                    .SelectMany(frame => saveServerTraceMessages.LoadTracesToListView(frame)))
+                ;
 
         }
 
         public static void CleanUpHubResources(XafApplication application, IObservable<Server> startServer){
-            application.WhenDisposed().Zip(startServer, (tuple, server) => server.ShutdownAsync().ToObservable().Select(unit => unit))
+            application.WhenDisposed().Zip(startServer, (tuple, server) => server.KillAsync().ToObservable().Select(unit => unit))
                 .Concat()
                 .FirstOrDefaultAsync()
                 .Subscribe();
