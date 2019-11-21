@@ -85,17 +85,17 @@ jobs:
           **\*AutoCommit*Tests.dll
           **\*CloneMemberValue*Tests.dll
           **\*CloneModelView*Tests.dll
-          # **\*Grid*Tests.dll
-          # **\*HideTool*Tests.dll
-          # **\*Logger.Tests.dll
-          # **\*MasterDet*Tests.dll
-          # **\*ModelViewIn*Tests.dll
-          # **\*OneView*Tests.dll
-          # **\*Progre*Tests.dll
-          # **\*Reactive*Tests.dll
-          # **\*Refresh*Tests.dll
-          # **\*Supp*Tests.dll
-          # **\*View*Tests.dll
+          **\*Grid*Tests.dll
+          **\*HideTool*Tests.dll
+          **\*Logger.Tests.dll
+          **\*MasterDet*Tests.dll
+          **\*ModelViewIn*Tests.dll
+          **\*OneView*Tests.dll
+          **\*Progre*Tests.dll
+          **\*Reactive*Tests.dll
+          **\*Refresh*Tests.dll
+          **\*Supp*Tests.dll
+          **\*View*Tests.dll
           !**\*Hub*.dll
           !**\*TestAdapter.dll
           !**\obj\**    
