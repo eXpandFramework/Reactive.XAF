@@ -228,8 +228,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             }
         }
 
-//        [Test]
-//        [XpandTest]
+        [Test]
+        [XpandTest]
         public async Task Bind_Subsequent_Views(){
             Assembly.LoadFile(typeof(XafGridView).Assembly.Location);
             InitializeMapperService($"{nameof(Bind_Subsequent_Views)}{PredefinedMap.GridView}",Platform.Win);
@@ -238,13 +238,15 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                     var bound = ModelBindingService.ControlBind.FirstAsync().SubscribeReplay();
                     application.Logon();
                     application.CreateObjectSpace();
-                    application.MockListEditor();
+                    application.EditorFactory=new DevExpress.ExpressApp.Editors.EditorsFactory();
                     var listView = application.CreateObjectView<ListView>(typeof(MM));
                     listView.CreateControls();
-
+                    await bound;
                     
-                    await bound.ToTaskWithoutConfigureAwait();
-                    
+                    bound = ModelBindingService.ControlBind.FirstAsync().SubscribeReplay();
+                    listView = application.CreateObjectView<ListView>(typeof(MM));
+                    listView.CreateControls();
+                    await bound;
                 }
             }
         }
