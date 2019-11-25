@@ -5,8 +5,11 @@ param(
     $SourcePath = [Path]::GetFullPath("$PSScriptRoot\..\..")
 )
 $ErrorActionPreference="Stop"
+
+$buildNumber=$env:build_BuildNumber
+$buildNumber+=$env:Build_TriggeredBy_DefinitionName
 . "$Sourcepath\Tools\Build\WriteHostFormatted.ps1"
-Write-Verbose -Verbose "##vso[build.updatebuildnumber]$version"
+Write-Verbose -Verbose "##vso[build.updatebuildnumber]$buildNumber"
 $ErrorActionPreference = "Stop"
 function Install-MonoCecilCustom($monopath) {
     Write-Verbose "Loading Mono.Cecil"

@@ -40,7 +40,7 @@ Task Init {
         Set-Location $root
         Invoke-PaketRestore -strict
         
-        Get-ChildItem "$root\packages\grpc.core\runtimes\"|Copy-Item -Destination "$root\bin\runtimes" -Verbose -Recurse -Force
+        Get-ChildItem "$root\packages\grpc.core\runtimes\"|Copy-Item -Destination "$root\bin\runtimes" -Recurse -Force
         # $versionMismatch=Get-ChildItem $Root *.csproj -Recurse -Exclude "*TestApplication*"|ForEach-Object{
         #     $projectPath=$_.FullName
         #     Get-PackageReference $projectPath|foreach-Object{

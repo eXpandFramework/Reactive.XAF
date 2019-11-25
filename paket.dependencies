@@ -4,15 +4,15 @@ source https://api.nuget.org/v3/index.json
 source https://xpandnugetserver.azurewebsites.net/nuget
 
 nuget akarnokd.reactive_extensions 0.0.27-alpha
-nuget DevExpress.ExpressApp.Core.All == 18.2.10
-nuget DevExpress.ExpressApp.Win.All == 18.2.10
-nuget DevExpress.ExpressApp.Web.All == 18.2.10
-nuget DevExpress.EasyTest == 18.2.10  
-nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 18.2.10  
-nuget DevExpress.ExpressApp.EasyTest.WinAdapter == 18.2.10  
-nuget DevExpress.ExpressApp.Security.Xpo == 18.2.10  
+nuget DevExpress.ExpressApp.Core.All == 18.2.11
+nuget DevExpress.ExpressApp.Win.All == 18.2.11
+nuget DevExpress.ExpressApp.Web.All == 18.2.11
+nuget DevExpress.EasyTest == 18.2.11  
+nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 18.2.11  
+nuget DevExpress.ExpressApp.EasyTest.WinAdapter == 18.2.11  
+nuget DevExpress.ExpressApp.Security.Xpo == 18.2.11  
 nuget Enums.NET 3.0
-nuget FasterFlect.Xpand 2.0.7
+nuget FasterFlect.Xpand
 nuget Mono.Cecil 0.11.1
 nuget Moq 4.13.1
 nuget MagicOnion 2.6.3
@@ -31,7 +31,8 @@ nuget System.Interactive.Async 4.0
 nuget System.Drawing.Common 4.6
 nuget System.Reactive 4.2
 nuget Unofficial.Microsoft.mshtml 7.0.3300
-nuget Xpand.Patcher 1.0.1
-nuget Xpand.Collections 1.0.1
+nuget Xpand.Patcher 
+nuget Xpand.Collections 
 nuget Jetbrains.Annotations
-nuget Polly
+nuget Polly 7.1.1
+

@@ -5,13 +5,13 @@ source https://api.nuget.org/v3/index.json
 source https://xpandnugetserver.azurewebsites.net/nuget
 
 nuget akarnokd.reactive_extensions 0.0.27-alpha
-nuget DevExpress.ExpressApp.Core.All 18.2.10  
-nuget DevExpress.ExpressApp.Win.All 18.2.10  
-nuget DevExpress.ExpressApp.Web.All 18.2.10  
-nuget DevExpress.ExpressApp.Security.Xpo 18.2.10  
-nuget DevExpress.EasyTest 18.2.10  
-nuget DevExpress.ExpressApp.EasyTest.WebAdapter 18.2.10  
-nuget DevExpress.ExpressApp.EasyTest.WinAdapter 18.2.10  
+nuget DevExpress.ExpressApp.Core.All 18.2.11  
+nuget DevExpress.ExpressApp.Win.All 18.2.11  
+nuget DevExpress.ExpressApp.Web.All 18.2.11  
+nuget DevExpress.ExpressApp.Security.Xpo 18.2.11  
+nuget DevExpress.EasyTest 18.2.11  
+nuget DevExpress.ExpressApp.EasyTest.WebAdapter 18.2.11  
+nuget DevExpress.ExpressApp.EasyTest.WinAdapter 18.2.11  
 nuget Humanizer.Core 2.7.9
 nuget MagicOnion  2.6.3
 nuget Grpc 2.23.0
@@ -25,6 +25,6 @@ nuget Shouldly 3.0.2
 nuget System.Data.Common 4.3
 nuget System.Drawing.Common 4.6 
 nuget Unofficial.Microsoft.mshtml 7.0.3300
-nuget Xpand.XAF.Web.All 0.0.8.1
-nuget Xpand.XAF.Win.All 0.0.8.1
+nuget Xpand.XAF.Web.All 0.0.8.2
+nuget Xpand.XAF.Win.All 0.0.8.2
 nuget JetBrains.Annotations

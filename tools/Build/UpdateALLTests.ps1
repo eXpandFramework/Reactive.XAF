@@ -26,7 +26,7 @@ $localPackages = & (Get-NugetPath) list -source "$root\bin\nupkg"|ConvertTo-Pack
 }
 Write-Host "LocalPackages:" -f blue
 $localPackages | Out-String
-$remotePackages = Get-XpandPackages -PackageType XAF -Source $branch | Where-Object { $_.Name -like "*All" }
+$remotePackages = Find-XpandPackage "Xpand*All*" -PackageSource Lab
 Write-Host "remotePackages:" -f Blue
 $remotePackages | Out-String
 $latestPackages = (($localPackages + $remotePackages) | Group-Object Id | ForEach-Object {
