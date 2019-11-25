@@ -1,5 +1,4 @@
 variables:
-  PastBuild: false
   Latest: false
   NUGET_PACKAGES: $(Pipeline.Workspace)/.nuget/packages
 
@@ -54,7 +53,21 @@ jobs:
             # Get-Content $cache -Raw -ErrorAction Continue 
             Copy-Item $cache $(System.DefaultWorkingDirectory)\$_ -Force -ErrorAction Continue -verbose
         }
-        & $(System.DefaultWorkingDirectory)\tools\Build\BuildPipeline.ps1 -Token '$(GitHubToken)' -AzureToken '$(AzureToken)' -GitHubUserName '$(GitHubUserName)' -DXApiFeed '$(DXApiFeed)'
+        $goArgs = @{
+            Token ='$(GitHubToken)'
+            AzureToken ='$(AzureToken)' 
+            GitHubUserName ='$(GitHubUserName)' 
+            DXApiFeed ='$(DXApiFeed)'
+            Branch                   = '$(Build.SourceBranchName)'
+            SourcePath               = '$(System.DefaultworkingDirectory)'
+            ArtifactStagingDirectory = '$(Build.Artifactstagingdirectory)'
+            BinDirectory             = '$(System_DefaultworkingDirectory)\bin'
+            CustomVersion            = '$(Build.DefinitionName)'
+        }
+        "goArgs:"
+        $goArgs | Out-String
+        
+        & '$(System.DefaultWorkingDirectory)\tools\Build\BuildPipeline.ps1' @goArgs
         'paket.lock','paket.dependencies'|ForEach-Object{
             Copy-Item '$(System.DefaultWorkingDirectory)\$_' '$(Pipeline.Workspace)/.nuget/packages/$_' -Force -ErrorAction Continue -verbose
         }

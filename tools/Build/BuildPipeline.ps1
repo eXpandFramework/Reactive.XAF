@@ -7,37 +7,11 @@ param(
     $artifactstagingdirectory,
     $bindirectory,
     $AzureToken = $env:AzureToken,
-    $PastBuild,
-    $CustomVersion,
-    $latest,
-    [switch]$Run
+    $CustomVersion=$env:Build_DefinitionName,
+    $latest
 )
-if ($CustomVersion -and !$Run) {
-    $goArgs = @{
-        Branch                   = $env:Build_SourceBranchName
-        SourcePath               = $env:System_DefaultworkingDirectory
-        GitHubUserName           = $env:GitHubUserName
-        Token                    = $Token
-        DXApiFeed                = $DXApiFeed
-        ArtifactStagingDirectory = $env:build_artifactstagingdirectory
-        BinDirectory             = "$env:System_DefaultworkingDirectory\bin"
-        AzureToken               = $AzureToken
-        PastBuild                = $env:PastBuild
-        CustomVersion            = $env:Build_DefinitionName
-        Convert                  = $Convert
-        Run                      = $true
-    }
-    "goArgs:"
-    $goArgs | Out-String
-    & "$PSScriptRoot\BuildPipeline.ps1" @goArgs
-    return
-}
 
-"PastBuild=$PastBuild"
 "latest=$latest"
-if ($PastBuild -and $PastBuild -ne "false") {
-    return
-}
 "CustomVersion=$CustomVersion"
 $ErrorActionPreference = "Stop"
 $regex = [regex] '(\d{2}\.\d*)'
@@ -87,6 +61,7 @@ $officialPackages = Get-XpandPackages -PackageType XAF -Source Release
 $labPackages = Get-XpandPackages -PackageType XAFAll -Source Lab
 Write-Host "labPackages" -f Blue
 $labPackages | Out-String
+
 $DXVersion = Get-DevExpressVersion 
 "DXVersion=$DXVersion"
 $localPackages = (Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse) + (Get-ChildItem "$sourcePath\src\Extensions" "*.csproj" -Recurse) | ForEach-Object {
@@ -171,7 +146,6 @@ if ($customVersion -eq "latest") {
     $newVersion = $DXVersion
 }
 elseif ($CustomVersion -and !$latest) {
-    $taskList = "TestsRun"
     $newVersion = $CustomVersion
 }
 

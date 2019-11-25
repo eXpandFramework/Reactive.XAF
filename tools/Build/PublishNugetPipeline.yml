@@ -32,5 +32,5 @@ steps:
   - task: PublishBuildArtifacts@1
     displayName: 'Published Packages'
     inputs:
-      PathtoPublish: '$(System.DefaultworkingDirectory)\Build\Nuget'
+      PathtoPublish: '$(System.DefaultWorkingDirectory)\bin\Nupkg' 
       ArtifactName: 'Nugets'

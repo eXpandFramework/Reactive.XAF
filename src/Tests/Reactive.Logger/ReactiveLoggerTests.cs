@@ -11,6 +11,7 @@ using AppDomainToolkit;
 using DevExpress.ExpressApp;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.Source.Extensions.XAF.XafApplication;
@@ -124,9 +125,9 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             await SaveTraceEvent(afterSaveTrace: async () => {
                 using (var appDomainContext2 = AppDomainContext.Create(AppDomain.CurrentDomain.SetupInformation)){
                     await RemoteFuncAsync.InvokeAsync(appDomainContext2.Domain, async () => {
-                        await SaveTraceEvent();
+                        await SaveTraceEvent().ConfigureAwait(false);
                         return Unit.Default;
-                    });
+                    }).ConfigureAwait(false);
                     appDomainContext2.Dispose();
                 }
             });
@@ -142,7 +143,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
                 ReactiveLoggerModule.TraceSource.TraceMessage("test");
                 application.Logon();
 
-                await test.Timeout(TimeSpan.FromSeconds(1));
+                await test.Timeout(TimeSpan.FromSeconds(1)).ToTaskWithoutConfigureAwait();
                 var objectSpace = application.CreateObjectSpace();
                 objectSpace.GetObjectsQuery<TraceEvent>().FirstOrDefault(_ => _.Value.Contains("test")).ShouldNotBeNull();
 

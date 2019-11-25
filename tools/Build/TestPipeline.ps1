@@ -6,6 +6,7 @@ param(
 )
 $ErrorActionPreference="Stop"
 . "$Sourcepath\Tools\Build\WriteHostFormatted.ps1"
+Write-Verbose -Verbose "##vso[build.updatebuildnumber]$version"
 $ErrorActionPreference = "Stop"
 function Install-MonoCecilCustom($monopath) {
     Write-Verbose "Loading Mono.Cecil"
