@@ -3,13 +3,13 @@ param(
     [string]$packageSources = $env:DxFeed, #"C:\Program Files (x86)\DevExpress 18.2\Components\System\Components\packages",
     [string]$msbuild = $null,
     [string]$nugetApiKey = $null,
-    [string]$dxVersion = "18.2.10",
+    [string]$dxVersion = "18.2.11",
     [bool]$build = $true,
     [bool]$cleanBin = $true,
     [string]$branch="lab",
     [switch]$InstallModules,
     [string[]]$taskList=@("Build"),
-    [string]$XpandPwshVersion = "0.32.6",
+    [string]$XpandPwshVersion = "0.34.0",
     [switch]$Debug,
     [switch]$CustomVersion
 )

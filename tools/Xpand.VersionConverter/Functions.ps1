@@ -1,4 +1,4 @@
-. .\Write-HostFormatted.ps1
+. "$PSScriptRoot\Write-HostFormatted.ps1"
 function Get-UnPatchedPackages {
     param(
         $moduleDirectories,

@@ -96,13 +96,13 @@ function AddReadMe {
 }
 Get-ChildItem "$nugetBin" *.nupkg | ForEach-Object {
     $zip = "$($_.DirectoryName)\$($_.BaseName).zip" 
-    Move-Item $_ $zip
+    Move-Item $_.FullName $zip
     $unzipDir = "$($_.DirectoryName)\$($_.BaseName)"
     Expand-Archive $zip $unzipDir
     Remove-Item $zip
     AddReadme $_.BaseName $unzipDir
     Compress-Files "$unzipDir" $zip 
-    Move-Item $zip $_
+    Move-Item $zip $_.FullName
     Remove-Item $unzipDir -Force -Recurse
 }
 if ($ChangedModules) {

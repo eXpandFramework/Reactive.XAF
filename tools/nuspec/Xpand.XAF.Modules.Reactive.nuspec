@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Reactive</id>
-    <version>1.2.72.0</version>
+    <version>1.2.73</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -18,11 +18,11 @@
       <dependency id="JetBrains.Annotations" version="2019.1.3" />
       <dependency id="System.Interactive" version="4.0" />
       <dependency id="System.Reactive" version="4.2" />
-      <dependency id="Xpand.Extensions" version="0.0.12.0" />
-      <dependency id="Xpand.Extensions.Reactive" version="0.0.5.0" />
-      <dependency id="Xpand.Extensions.XAF" version="0.0.11.0" />
+      <dependency id="Xpand.Extensions" version="0.0.13.0" />
+      <dependency id="Xpand.Extensions.Reactive" version="0.0.6.0" />
+      <dependency id="Xpand.Extensions.XAF" version="0.0.12.0" />
       <dependency id="Xpand.Patcher" version="1.0.1" />
-      <dependency id="Xpand.VersionConverter" version="1.1.1.0" />
+      <dependency id="Xpand.VersionConverter" version="1.1.3.0" />
     </dependencies>
   </metadata>
   <files>

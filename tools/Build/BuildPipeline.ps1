@@ -157,13 +157,13 @@ $bArgs = @{
     CustomVersion  = $newVersion -ne $defaulVersion
     ChangedModules = $updateVersion
 }
-"bArgs:"
+Write-HostFormatted "bArgs:" -Section
 $bArgs | Out-String
-$SourcePath, "$SourcePath\src\tests\all" | ForEach-Object {
+$SourcePath| ForEach-Object {
     Set-Location $_
     Move-PaketSource 0 $DXApiFeed
 }
-"Start-ProjectConverter $newversion" 
+Write-HostFormatted "Start-ProjectConverter $newversion"  -Section
 Start-XpandProjectConverter -version $newVersion -path $SourcePath -SkipInstall
 
 if ($newVersion -ne $defaulVersion ) {

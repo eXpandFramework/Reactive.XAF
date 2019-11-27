@@ -39,7 +39,12 @@ Task Init {
 
         dotnet tool restore
         Set-Location $root
-        Invoke-PaketRestore -strict
+        try{
+            Invoke-Script{Invoke-PaketRestore -strict}
+        }
+        catch{
+            Invoke-PaketRestore -strict -Force
+        }
         
         Get-ChildItem "$root\packages\grpc.core\runtimes\"|Copy-Item -Destination "$root\bin\runtimes" -Recurse -Force
         # $versionMismatch=Get-ChildItem $Root *.csproj -Recurse -Exclude "*TestApplication*"|ForEach-Object{

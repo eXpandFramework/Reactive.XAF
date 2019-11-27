@@ -8,8 +8,8 @@ using namespace System.Text.RegularExpressions
 using namespace Mono.Cecil
 using namespace Mono.Cecil.pdb
 param(
-    [string]$projectFile ="C:\Work\eXpandFramework\DevExpress.XAF\src\Tests\ALL\ALL.Win.Tests\ALL.Win.Tests.csproj",
-    [string]$targetPath ="C:\Work\eXpandFramework\DevExpress.XAF\bin\Nupkg\",
+    [string]$projectFile ,
+    [string]$targetPath ,
     $DevExpressVersion,
     [string]$VerboseOutput="Continue",
     [string]$referenceFilter = "DevExpress*"

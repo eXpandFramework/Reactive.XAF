@@ -1,5 +1,7 @@
 strategy:max
 source "C:\Program Files (x86)\DevExpress 18.2\Components\System\Components\Packages"
+cache: /.paket/nupkg
+cache: /.paket/nupkg versions:all
 source https://api.nuget.org/v3/index.json
 source https://xpandnugetserver.azurewebsites.net/nuget
 

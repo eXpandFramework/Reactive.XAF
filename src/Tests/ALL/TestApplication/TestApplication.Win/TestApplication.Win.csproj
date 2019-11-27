@@ -1,4 +1,3 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
@@ -88,10 +87,16 @@
     <Content Include="ExpressApp.ico" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="DevExpress.ExpressApp" Version="18.2.11" />
+    <PackageReference Include="DevExpress.ExpressApp.Images" Version="18.2.11" />
+    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="18.2.11" />
+    <PackageReference Include="DevExpress.ExpressApp.Validation.Win" Version="18.2.11" />
+    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="18.2.11" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="18.2.11" />
+    <PackageReference Include="DevExpress.Images" Version="18.2.11" />
+    <PackageReference Include="DevExpress.Win.BonusSkins" Version="18.2.11" />
+    <PackageReference Include="Grpc.Core" Version="2.24.0" />
     <!-- <PackageReference Include="Xpand.XAF.Modules.Reactive" Version="1.2.67.3" /> -->
+    <PackageReference Include="Xpand.XAF.Win.All" Version="0.0.9.1" />
   </ItemGroup>
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="XCopy $(ProjectDir)\..\..\packages\grpc.core\runtimes\win\native\*.* $(ProjectDir)$(OutDir)\*.*  /S /Q /H /R /Y" />
-  </Target>
-  <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>
