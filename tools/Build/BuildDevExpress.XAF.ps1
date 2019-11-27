@@ -14,6 +14,7 @@ Properties {
     $CustomVersion = $false
     $AzureToken = $null,
     $Root = "$nugetbin\..\..\"
+    $ChangedModules=@()
 }
 
 
@@ -117,7 +118,8 @@ Task  CreateNuspec {
 
 Task PackNuspec {
     Invoke-Script {
-        & "$PSScriptRoot\PackNuspec.ps1" -branch $branch
+        & "$PSScriptRoot\PackNuspec.ps1" -branch $branch -ChangedModules $ChangedModules
+        
     }
 }
 

@@ -155,6 +155,7 @@ $bArgs = @{
     tasklist       = $tasklist
     dxVersion      = $newVersion
     CustomVersion  = $newVersion -ne $defaulVersion
+    ChangedModules = $updateVersion
 }
 "bArgs:"
 $bArgs | Out-String

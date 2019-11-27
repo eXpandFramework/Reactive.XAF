@@ -1,4 +1,4 @@
-
+. .\Write-HostFormatted.ps1
 function Get-UnPatchedPackages {
     param(
         $moduleDirectories,
@@ -214,7 +214,7 @@ function Get-PaketReferences {
         $paketReferencesFile = "$($paketDirectoryInfo.FullName)\paket.references"
         if (Test-Path $paketReferencesFile) {
             Push-Location $projectFile.DirectoryName
-            $dependencies=dotnet paket show-installed-packages --project $projectFile.FullName --all |ForEach-Object {
+            $dependencies=dotnet paket show-installed-packages --project $projectFile.FullName --all --silent |ForEach-Object {
                 $parts = $_.split(" ")
                 [PSCustomObject]@{
                     Include      = $parts[1]
@@ -429,11 +429,11 @@ function Update-Version($modulePath, $dxVersion,$referenceFilter,$snkFile) {
                     $_.Scope = $newReference 
                 }
             }
-            "$($_.Name) version will changed from $($_.Version) to $($dxVersion)`r`n" 
+            Write-HostFormatted "$($_.Name) version will changed from $($_.Version) to $($dxVersion)`r`n" -ForegroundColor Blue
             $needsPatching = $true
         }
         else {
-            "$($_.Name) Version ($($dxReference.Version)) matched nothing to do.`r`n"
+            Write-HostFormatted "$($_.Name) Version ($($dxReference.Version)) matched nothing to do.`r`n" -ForegroundColor Blue
         }
     }
     if ($needsPatching) {

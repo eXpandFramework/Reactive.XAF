@@ -3,13 +3,14 @@ param(
     $nugetBin = "$PSScriptRoot\..\..\bin\Nupkg",
     $sourceDir = "$PSScriptRoot\..\..",
     $Filter ,
-    [switch]$SkipReadMe
+    [switch]$SkipReadMe,
+    [string[]]$ChangedModules = @()
 )
 Import-Module XpandPwsh -Force -Prefix X
 $ErrorActionPreference = "Stop"
 
 New-Item $nugetBin -ItemType Directory -Force | Out-Null
-Get-ChildItem $nugetBin|Remove-Item -Force -Recurse
+Get-ChildItem $nugetBin | Remove-Item -Force -Recurse
 $versionConverterSpecPath = "$sourceDir\Tools\Xpand.VersionConverter\Xpand.VersionConverter.nuspec"
 if ($Branch -match "lab") {
     [xml]$versionConverterSpec = Get-XmlContent $versionConverterSpecPath
@@ -30,37 +31,37 @@ Set-Location $sourceDir
 $assemblyVersions = & "$sourceDir\tools\build\AssemblyVersions.ps1" $sourceDir
 
 # Get-ChildItem "$sourceDir\tools\nuspec" "Xpand*$filter*.nuspec" -Recurse | ForEach-Object {
-$nuspecs=Get-ChildItem "$sourceDir\tools\nuspec" "Xpand.*$filter*.nuspec" -Exclude "*Tests*" -Recurse
+$nuspecs = Get-ChildItem "$sourceDir\tools\nuspec" "Xpand.*$filter*.nuspec" -Exclude "*Tests*" -Recurse
 
-$nugetPath=(Get-XNugetPath)
+$nugetPath = (Get-XNugetPath)
 
-$packScript={
+$packScript = {
     $name = $_.FullName
-    $basePath="$sourceDir\bin"
-    if ($name -like "*Client*"){
-        $basePath+="\ReactiveLoggerClient"
+    $basePath = "$sourceDir\bin"
+    if ($name -like "*Client*") {
+        $basePath += "\ReactiveLoggerClient"
     }
     
     $packageName = [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
     $assemblyItem = $assemblyVersions | Where-Object { $_.name -eq $packageName }
     
-    $version=$assemblyItem.Version
-    if ($packageName -like "*All"){
-        [xml]$coreNuspec=Get-Content "$sourceDir\tools\nuspec\$packagename.nuspec"
-        $version=$coreNuspec.package.metadata.Version
+    $version = $assemblyItem.Version
+    if ($packageName -like "*All") {
+        [xml]$coreNuspec = Get-Content "$sourceDir\tools\nuspec\$packagename.nuspec"
+        $version = $coreNuspec.package.metadata.Version
     }
  
-    Invoke-Script{
+    Invoke-Script {
         Write-Output "$nugetPath pack $name -OutputDirectory $($nugetBin) -Basepath $basePath -Version $version " #-f Blue
         & $nugetPath pack $name -OutputDirectory $nugetBin -Basepath $basePath -Version $version
     }
     
 }
-$varsToImport=@("assemblyVersions","SkipReadMe","nugetPath","sourceDir","nugetBin","SkipReadMe")
-$conLimit=[System.Environment]::ProcessorCount
-# $nuspecs | Invoke-Parallel -LimitConcurrency $conLimit -VariablesToImport $varsToImport -Script $packScript
-$nuspecs | ForEach-Object{Invoke-Command $packScript -ArgumentList $_}
-function AddReadMe{
+$varsToImport = @("assemblyVersions", "SkipReadMe", "nugetPath", "sourceDir", "nugetBin", "SkipReadMe")
+$conLimit = [System.Environment]::ProcessorCount
+$nuspecs | Invoke-Parallel -LimitConcurrency $conLimit -VariablesToImport $varsToImport -Script $packScript
+# $nuspecs | ForEach-Object { Invoke-Command $packScript -ArgumentList $_ }
+function AddReadMe {
     param(
         $BaseName,
         $Directory
@@ -89,18 +90,29 @@ function AddReadMe{
 "@
         Set-Content "$Directory\ReadMe.txt" $message
     }
-    else{
+    else {
         Remove-Item "$Directory\ReadMe.txt" -Force -ErrorAction SilentlyContinue
     }
 }
-Get-ChildItem "$nugetBin" *.nupkg|ForEach-Object{
-    $zip="$($_.DirectoryName)\$($_.BaseName).zip" 
+Get-ChildItem "$nugetBin" *.nupkg | ForEach-Object {
+    $zip = "$($_.DirectoryName)\$($_.BaseName).zip" 
     Move-Item $_ $zip
-    $unzipDir="$($_.DirectoryName)\$($_.BaseName)"
-    Expand-archive $zip $unzipDir
+    $unzipDir = "$($_.DirectoryName)\$($_.BaseName)"
+    Expand-Archive $zip $unzipDir
     Remove-Item $zip
     AddReadme $_.BaseName $unzipDir
     Compress-Files "$unzipDir" $zip 
     Move-Item $zip $_
     Remove-Item $unzipDir -Force -Recurse
+}
+if ($ChangedModules) {
+    Write-HostFormatted "ChangedModules" -Section
+    $ChangedModules
+    $nupks = Get-ChildItem $nugetBin
+    & (Get-NugetPath) list -source $nugetBin | ConvertTo-PackageObject|Where-Object{$_.Id -notlike "*.all.*"} | ForEach-Object {
+        $p = $_
+        if ($p.Id -notin $ChangedModules) {
+            $nupks | Where-Object { $_.BaseName -eq "$($p.Id).$($p.Version)" }
+        }
+    } | Remove-Item
 }

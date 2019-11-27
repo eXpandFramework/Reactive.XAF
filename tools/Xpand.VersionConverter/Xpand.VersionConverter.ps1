@@ -8,8 +8,8 @@ using namespace System.Text.RegularExpressions
 using namespace Mono.Cecil
 using namespace Mono.Cecil.pdb
 param(
-    [string]$projectFile ,
-    [string]$targetPath ,
+    [string]$projectFile ="C:\Work\eXpandFramework\DevExpress.XAF\src\Tests\ALL\ALL.Win.Tests\ALL.Win.Tests.csproj",
+    [string]$targetPath ="C:\Work\eXpandFramework\DevExpress.XAF\bin\Nupkg\",
     $DevExpressVersion,
     [string]$VerboseOutput="Continue",
     [string]$referenceFilter = "DevExpress*"
@@ -17,7 +17,7 @@ param(
 
 $howToVerbose="Edit $projectFile and enable verbose messaging by adding <PropertyGroup><VersionConverterVerbose>Continue</VersionConverterVerbose>. Rebuild the project and send the output to support."
 if ($VerboseOutput){
-    $VerbosePreference = $VerboseOutput
+    # $VerbosePreference = $VerboseOutput
 }
 if ($DevExpressVersion){
     [version]$DevExpressVersion=$DevExpressVersion
@@ -52,12 +52,10 @@ if (!$unpatchedPackages){
     Write-Verbose "All packages already patched for $dxversion"
     return
 }
-"--- moduleDirectories:"
+Write-HostFormatted "ModuleDirectories:" -Section
 $moduleDirectories
-if ($unpatchedPackages){
-    Write-Host "--- unpatchedPackages:" -f Yellow
-    $unpatchedPackages
-}
+Write-HostFormatted "--- unpatchedPackages:" -Section
+$unpatchedPackages
 
 try {
     $mtx = [Mutex]::OpenExisting("VersionConverterMutex")
@@ -70,10 +68,8 @@ try {
     
     Install-MonoCecil $targetPath
     $moduleDirectories|ForEach-Object{
-        "nmoduleDir=$_"
-        $unpatchedPackages|Get-Item|#Where-Object{$_.basename -eq "Xpand.XAF.Modules.Reactive" -or $_.basename -eq "Xpand.XAF.Modules.AutoCommit"}|
-        # Where-Object{$installedPackages.Contains($_.BaseName)}|
-        ForEach-Object{
+        Write-HostFormatted "nmoduleDir=$_" -ForegroundColor Purple
+        $unpatchedPackages|Get-Item|ForEach-Object{
             $packageFile = $_.FullName
             "packageFile=$packageFile"
             $packageDir = $_.DirectoryName
@@ -94,7 +90,7 @@ try {
     }
 }
 catch {
-    "Exception:"
+    Write-HostFormatted "Exception:" -ForegroundColor Red
     $_
     "InvocationInfo:"
     $_.InvocationInfo

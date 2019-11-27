@@ -24,21 +24,21 @@ $localPackages = & (Get-NugetPath) list -source "$root\bin\nupkg"|ConvertTo-Pack
         Version = $version
     }
 }
-Write-Host "LocalPackages:" -f blue
+Write-HostFormatted "LocalPackages:" -Section
 $localPackages | Out-String
 $remotePackages = Find-XpandPackage "Xpand*All*" -PackageSource Lab
-Write-Host "remotePackages:" -f Blue
+Write-HostFormatted "remotePackages:" -Section
 $remotePackages | Out-String
 $latestPackages = (($localPackages + $remotePackages) | Group-Object Id | ForEach-Object {
         $_.group | Sort-Object Version -Descending | Select-Object -first 1
     })
-Write-Host "latestPackages:" -f Blue
+Write-HostFormatted "latestPackages:" -Section
 $latestPackages | Out-String
 $packages = $latestPackages | Where-Object {
     $p = $_
     !($excludeFilter.Split(";") | Where-Object { $p.Id -like $_ })
 }
-Write-Host "finalPackages:" -f Blue
+Write-HostFormatted "finalPackages:" -Section
 $packages | Out-String
 
 
@@ -77,30 +77,33 @@ $depsRaw=Get-Content $depsFile -Raw
     }
     $depsRaw=$result
     Set-Content $depsFile $result.Trim()
-    Write-Host ----$depsFile
-    Write-Host $result
 }
+Write-HostFormatted $depsFile -Section
+Write-Host $result
 
 
 Set-Location "$root\src\Tests\All"
 Invoke-Script {
-    Write-Host "Paket Update" -f Green
-    Invoke-PaketInstall
+    try {
+        Write-HostFormatted "Paket Restore" -Section
+        Invoke-Script {Invoke-PaketRestore}
+    }
+    catch {
+        Write-HostFormatted "Paket Update" -Section
+        Invoke-PaketUpdate
+    }
+
 }
 
-Write-Host "Building TestApplication" -f Green
+Write-HostFormatted "Building TestApplication" -Section
 
 $localSource = "$root\bin\Nupkg"
 $source = "$localSource;$(Get-PackageFeed -Nuget);$(Get-PackageFeed -Xpand);$source"
 "Source=$source"
 $testAppPAth = (Get-Item $testApplication).DirectoryName
-# Invoke-Script {
-#     & (Get-NugetPath) restore "$testAppPAth\TestApplication.Win\TestApplication.Win.csproj" -source $source
-#     & (Get-MsBuildPath) "$testAppPAth\TestApplication.Win\TestApplication.Win.csproj" /bl:$root\bin\TestWebApplication.binlog /WarnAsError /v:m -t:rebuild
-# }
 Invoke-Script {
     & (Get-NugetPath) restore "$testAppPAth\TestApplication.sln" -source $source
     & (Get-MsBuildPath) "$testAppPAth\TestApplication.sln" /bl:$root\bin\TestWebApplication.binlog /WarnAsError /v:m -t:rebuild -m
-}
+} -Maximum 2
 
 
