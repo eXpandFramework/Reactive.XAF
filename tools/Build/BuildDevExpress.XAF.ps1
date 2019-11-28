@@ -34,6 +34,7 @@ Task Init {
         "Create bin directory in $Root"
         New-Item "$Root\bin" -ItemType Directory -Force 
         New-Item "$Root\bin\ReactiveLoggerClient" -ItemType Directory -Force | Out-Null
+        New-Item "$Root\bin\TestWebApplication" -ItemType Directory -Force | Out-Null
         
         Copy-Item -Path "$root\tools\build\Tests.runsettings" -Destination "$Root\bin\Tests.runsettings" -Force
 
@@ -138,7 +139,7 @@ Task UpdateAllTests {
 Task Clean -precondition { return $cleanBin } {
     $bin = "$Root\bin\"
     if (Test-Path $bin) {
-        Remove-Item $bin -Recurse -Force
+        Get-ChildItem $bin -Exclude "*Nupkg*" -Recurse|Remove-Item -Force -Recurse
     }
         
     Clear-XProjectDirectories

@@ -37,73 +37,69 @@ jobs:
       displayName: BuildArtifacts
       inputs:
         azureSubscription: 'Visual Studio Enterprise (b48a609a-17f6-4e48-a317-54ab77fbf822)'
-        ScriptType: 'FilePath'
+        ScriptType: InlineScript
         azurePowerShellVersion: 'LatestVersion'
-        ScriptPath: $(System.DefaultworkingDirectory)/tools/build/TestPipeline.ps1
+        Inline: |
+          & '$(System.DefaultworkingDirectory)/tools/build/TestPipeline.ps1' '$(System.DefaultWorkingDirectory)'
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact: Bin'
       inputs:
         PathtoPublish: '$(System.DefaultworkingDirectory)\bin'
         ArtifactName: 'Bin'
-- job: TestPerAssembly
-  dependsOn: 'BuildArtifacts'
-  strategy:
-    parallel: 15
-  pool:
-    vmImage: windows-latest
-  variables:
-    - group: keys
-  steps:
-    - checkout: self
-    - task: DownloadBuildArtifacts@0
-      displayName: Download Bin
-      inputs:
-        buildType: 'current'
-        downloadType: 'single'
-        artifactName: 'bin'
-        downloadPath: '$(System.DefaultworkingDirectory)'
-    - task: VSTest@2
-      displayName: 'Test Modules'
-      continueOnError: true
-      inputs:
-        searchFolder: '$(System.DefaultWorkingDirectory)'
-        testSelector: 'testAssemblies'
-        testAssemblyVer2: |
-          # **\*All*Tests.dll
-          **\*AutoCommit*Tests.dll
-          **\*CloneMemberValue*Tests.dll
-          **\*CloneModelView*Tests.dll
-          **\*Extensions*Tests.dll
-          **\*Testslib.dll
-          **\*Grid*Tests.dll
-          **\*HideTool*Tests.dll
-          **\*Logger.Tests.dll
-          **\*MasterDet*Tests.dll
-          **\*ModelViewIn*Tests.dll
-          **\*OneView*Tests.dll
-          **\*Progre*Tests.dll
-          **\*Reactive.Tests.dll
-          **\*Refresh*Tests.dll
-          **\*Supp*Tests.dll
-          **\*View*Tests.dll
-          !**\*Hub*.dll
-          !**\*TestAdapter.dll
-          !**\obj\**    
-        diagnosticsEnabled: true
-        codeCoverageEnabled: true
-        distributionBatchType: basedOnAssembly
-        runInParallel: false
-        runSettingsFile: .\bin\Tests.runsettings
-        runTestsInIsolation: false
-        collectDumpOn: never
-    # - task: PublishBuildArtifacts@1
-    #   displayName: 'Publish Artifact: Bin'
-    #   inputs:
-    #     PathtoPublish: '$(System.DefaultworkingDirectory)\bin'
-    #     ArtifactName: 'Bin'
+# - job: TestPerAssembly
+#   dependsOn: 'BuildArtifacts'
+#   strategy:
+#     parallel: 15
+#   pool:
+#     vmImage: windows-latest
+#   variables:
+#     - group: keys
+#   steps:
+#     - checkout: self
+#     - task: DownloadBuildArtifacts@0
+#       displayName: Download Bin
+#       inputs:
+#         buildType: 'current'
+#         downloadType: 'single'
+#         artifactName: 'bin'
+#         downloadPath: '$(System.DefaultworkingDirectory)'
+#     - task: VSTest@2
+#       displayName: 'Test Modules'
+#       continueOnError: true
+#       inputs:
+#         searchFolder: '$(System.DefaultWorkingDirectory)'
+#         testSelector: 'testAssemblies'
+#         testAssemblyVer2: |
+#           # **\*All*Tests.dll
+#           **\*AutoCommit*Tests.dll
+#           **\*CloneMemberValue*Tests.dll
+#           **\*CloneModelView*Tests.dll
+#           **\*Extensions*Tests.dll
+#           **\*Testslib.dll
+#           **\*Grid*Tests.dll
+#           **\*HideTool*Tests.dll
+#           **\*Logger.Tests.dll
+#           **\*MasterDet*Tests.dll
+#           **\*ModelViewIn*Tests.dll
+#           **\*OneView*Tests.dll
+#           **\*Progre*Tests.dll
+#           **\*Reactive.Tests.dll
+#           **\*Refresh*Tests.dll
+#           **\*Supp*Tests.dll
+#           **\*View*Tests.dll
+#           !**\*Hub*.dll
+#           !**\*TestAdapter.dll
+#           !**\obj\**    
+#         diagnosticsEnabled: true
+#         codeCoverageEnabled: true
+#         distributionBatchType: basedOnAssembly
+#         runInParallel: false
+#         runSettingsFile: .\bin\Tests.runsettings
+#         runTestsInIsolation: false
+#         collectDumpOn: never
 - job: TestPerExecutionTime
-  # dependsOn: 'BuildArtifacts'
-  dependsOn: 'TestPerAssembly'
+  dependsOn: 'BuildArtifacts'
+  # dependsOn: 'TestPerAssembly'
   strategy:
     parallel: 10
   pool:
@@ -144,9 +140,13 @@ jobs:
     - group: keys
   steps:
     - checkout: self
-    - task: PowerShell@2
-      displayName: CheckTests
+    - task: AzurePowerShell@4
+      displayName: BuildArtifacts
       inputs:
-        targetType: filePath
-        filePath: .\tools\build\check-tests.ps1
-        arguments: $(AzureToken) $(Build.DefinitionName) $(Build.BuildNumber)
+        azureSubscription: 'Visual Studio Enterprise (b48a609a-17f6-4e48-a317-54ab77fbf822)'
+        ScriptType: InlineScript
+        azurePowerShellVersion: 'LatestVersion'
+        Inline: |
+          # $azurePassword = ConvertTo-SecureString $xpandBlobOwnerSecret -AsPlainText -Force
+          # $psCred = New-Object System.Management.Automation.PSCredential($azureAplicationId , $azurePassword)
+          # Connect-AzAccount -Credential $psCred -TenantId $subscriptionTenantId  -ServicePrincipal 

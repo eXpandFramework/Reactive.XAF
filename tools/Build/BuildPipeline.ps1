@@ -2,14 +2,20 @@ param(
     $Branch = "lab",
     $SourcePath = "$PSScriptRoot\..\..",
     $GitHubUserName = "apobekiaris",
-    $Token = $env:GitHubToken,
+    $GitHubToken = $env:GitHubToken,
     $DXApiFeed = $env:DxFeed,
     $artifactstagingdirectory,
     $bindirectory,
-    $AzureToken = $env:AzureToken,
+    [string]$AzureToken=$env:AzDevopsToken,
     $CustomVersion=$env:Build_DefinitionName,
     $latest
 )
+
+if (!(Get-Module eXpandFramework -ListAvailable)){
+    # $env:AzureToken=$AzureToken
+    # $env:AzOrganization="eXpandDevOps"
+    # $env:AzProject ="eXpandFramework"
+}
 
 "latest=$latest"
 "CustomVersion=$CustomVersion"
@@ -52,18 +58,14 @@ if ($Branch -eq "master") {
     return    
 }
 
-if (!(Get-Module VSTeam -ListAvailable)) {
-    Install-Module VSTeam -Force
-}
 
-Set-VSTeamAccount -Account eXpandDevOps -PersonalAccessToken $AzureToken
-$officialPackages = Get-XpandPackages -PackageType XAF -Source Release
+$officialPackages = Get-XpandPackages -PackageType XAFAll -Source Release
 $labPackages = Get-XpandPackages -PackageType XAFAll -Source Lab
-Write-Host "labPackages" -f Blue
+Write-HostFormatted "labPackages" -Section
 $labPackages | Out-String
 
 $DXVersion = Get-DevExpressVersion 
-"DXVersion=$DXVersion"
+Write-HostFormatted "DXVersion=$DXVersion" -ForegroundColor Magenta
 $localPackages = (Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse) + (Get-ChildItem "$sourcePath\src\Extensions" "*.csproj" -Recurse) | ForEach-Object {
     $name = [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
     $localVersion = Get-XpandVersion -XpandPath $_.DirectoryName -module $name
@@ -83,13 +85,13 @@ $localPackages = (Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse) +
         LocalVersion = $localVersion
     }
 }
-Write-Host "localPackages:" -f blue
+Write-HostFormatted "localPackages:" -Section
 $localPackages | Out-String
 $publishedPackages = $labPackages | ForEach-Object {
     $publishedName = $_.Id
     $localPackages | Where-Object { $_.Id -eq $publishedName }
 }
-Write-Host "publishedPackages:" -f blue
+Write-HostFormatted "publishedPackages:" -Section
 $publishedPackages | Out-String
 $newPackages = $localPackages | Where-Object { !(($publishedPackages | Select-Object -ExpandProperty Id) -contains $_.Id) } | ForEach-Object {
     $localVersion = New-Object System.Version($_.LocalVersion)
@@ -100,21 +102,33 @@ $newPackages = $localPackages | Where-Object { !(($publishedPackages | Select-Ob
         LocalVersion = $localVersion
     }
 }
-Write-Host "newPackages:" -f blue
+Write-HostFormatted "newPackages:" -Section
 $newPackages | Out-String
 
-$labBuild = Get-VSTeamBuild -ResultFilter succeeded -ProjectName expandframework -top 1 -StatusFilter completed -Definitions 23
-
+$cred=@{
+    Project="expandFramework"
+    Organization="eXpandDevOps"
+    Token=$AzureToken
+}
+$labBuild = Get-AzBuilds -Result succeeded -Status completed -Definition DevExpress.XAF-Lab @cred|
+where-object{$_.status -eq "completed"}|Select-Object -First 1
+Write-HostFormatted "labBuild" -Section
+$labBuild
+if (!$labBuild ){
+    throw "lab build not found"
+}
+if ($labBuild.result -ne 'succeeded'){
+    throw "labebuild result is $($labBuild.result)"
+}
 $yArgs = @{
     Organization  = "eXpandFramework"
     Repository    = "DevExpress.XAF"
     Branch        = $Branch
-    Token         = $Token
+    Token         = $GitHubToken
     Packages      = $publishedPackages 
     SourcePath    = $SourcePath
     CommitsSince  = $labBuild.finishTime
     ExcludeFilter = "Test"
-    Verbose       = $true
 }
 if ($newPackages) {
     $yArgs.Packages += $newPackages
@@ -136,10 +150,9 @@ if ($Branch -eq "lab") {
         }
     }
 }
+Write-HostFormatted "updateVersion:" -Section
+Update-NugetProjectVersion @yArgs 
 
-$updateVersion = Update-NugetProjectVersion @yArgs 
-"updateVersion:"
-$updateVersion
 
 $newVersion = $defaulVersion
 if ($customVersion -eq "latest") {

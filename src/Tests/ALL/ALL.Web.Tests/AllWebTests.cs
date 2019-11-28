@@ -37,7 +37,6 @@ namespace ALL.Web.Tests{
             
             var autoTestCommand = new AutoTestCommand();
             autoTestCommand.Execute(commandAdapter);
-
             webAdapter.KillApplication(testApplication, KillApplicationContext.TestNormalEnded);
 
         }

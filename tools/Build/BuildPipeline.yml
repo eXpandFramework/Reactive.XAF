@@ -39,7 +39,7 @@ jobs:
   - checkout: self
   - task: CacheBeta@0
     inputs:
-      key: paket5 | paket.lock
+      key: paket6 | paket.lock
       path: $(Pipeline.Workspace)/.nuget/packages
     displayName: Cache NuGet packages
   - task: PowerShell@2
@@ -54,7 +54,7 @@ jobs:
             Copy-Item $cache $(System.DefaultWorkingDirectory)\$_ -Force -ErrorAction Continue -verbose
         }
         $goArgs = @{
-            Token ='$(GitHubToken)'
+            GithubToken ='$(GitHubToken)'
             AzureToken ='$(AzureToken)' 
             GitHubUserName ='$(GitHubUserName)' 
             DXApiFeed ='$(DXApiFeed)'

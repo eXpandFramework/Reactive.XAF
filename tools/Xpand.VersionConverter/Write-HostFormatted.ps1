@@ -1,23 +1,28 @@
-function Write-HostFormatted {
+
+function wh {
     [CmdletBinding()]
     param(
         [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
         [System.Object] $Object,
-        [validateSet("Green","Blue","Purple","Yellow","Red")]
-        [Alias('fg')] [string] $ForegroundColor,
-        [validateSet("Green","Blue","Purple","Yellow","Red")]
-        [Alias('bg')] [string] $BackgroundColor,
+        [Alias('fg')] [System.ConsoleColor] $ForegroundColor,
+        [Alias('bg')] [System.ConsoleColor] $BackgroundColor,
         [validateSet("Bold", "Inverted","Underline","Frame")]
         [string[]]$Style,
         [Alias('nnl')] [switch] $NoNewline,
-        [switch]$Section
+        [switch]$Section,
+        [switch]$AnsiColors,
+        [int]$Indent
+
     )    
     begin {
     }
     process {
         if ($Section){
-            Write-HostFormatted -Object $Object -ForegroundColor Green -Style Frame
-            return
+            if (!$ForegroundColor){
+                $ForegroundColor="Green"
+            }
+            $Style="Frame"
+            
         }
         if ($env:Build_DefinitionName ){  
             if ($ForegroundColor -eq "Blue"){
@@ -37,31 +42,54 @@ function Write-HostFormatted {
             }
             $directive+=$Object
             if ($Style -eq "Frame"){
-                $directive|ConvertTo-FramedText
+                $directive|cf
             }
             else {
                 $directive
             }
             return
         }
+        
         $fc=$ForegroundColor
-        if ($ForegroundColor -eq "Purple"){
-            $fc="BrightMagenta"
-        }
         $code = GetAnsiCode $fc
         $code += GetAnsiCode $BackgroundColor 10
         if ($Style -ne "Frame"){
             $code += ($Style | ForEach-Object { GetAnsiCode $_ }) -join ""
         }else{
-            $Object=$Object|ConvertTo-FramedText
+            $Object=$Object|cf
         }
-        $Object|ForEach-Object{
-            $newcode = "$($code)$_"
-            $newcode += GetAnsiCode "Default"
-            $newcode
+        if ($AnsiColors){
+            $Object|ForEach-Object{
+                $newcode = "$($code)$_"
+                $newcode += GetAnsiCode "Default"
+                $newcode
+            }
         }
-        
-        
+        else{
+
+            $Object|ForEach-Object{
+                $prefix=$null
+                for ($i = 0; $i -lt $Indent; $i++) {
+                    $prefix+="  "
+                }
+                $prefix+=$_
+                if ($Style -eq "Underline"){
+                    $prefix=ConvertTo-FramedText $prefix -NoRoof -char "_"
+                }
+                $prefix|ForEach-Object{
+                    $a=@{
+                        Object=$_
+                    }
+                    if ($ForegroundColor){
+                        $a.Add("ForegroundColor",$ForegroundColor)
+                    }
+                    if ($BackGroundColor){
+                        $a.Add("BackGroundColor",$BackGroundColor)
+                    }
+                    Write-Host @a 
+                }
+            }
+        }
     }
     end {
  

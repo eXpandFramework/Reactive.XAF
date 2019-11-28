@@ -1,4 +1,6 @@
 . "$PSScriptRoot\Write-HostFormatted.ps1"
+. "$PSScriptRoot\ConvertTo-FramedText.ps1"
+
 function Get-UnPatchedPackages {
     param(
         $moduleDirectories,
@@ -97,52 +99,6 @@ function Install-MonoCecil($resolvePath) {
     $monoPath = "$PSScriptRoot\mono.cecil"
     [System.Reflection.Assembly]::Load([File]::ReadAllBytes("$monoPath\Mono.Cecil.dll")) | Out-Null
     [System.Reflection.Assembly]::Load([File]::ReadAllBytes("$monoPath\Mono.Cecil.pdb.dll")) | Out-Null
-    $packagesFolder = Get-PackagesFolder 
-    Add-Type @"
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.IO;
-    using Mono.Cecil;
-
-    public class MyDefaultAssemblyResolver : DefaultAssemblyResolver{
-        List<AssemblyDefinition> _resolvedDefinitions=new List<AssemblyDefinition>();
-        public override AssemblyDefinition Resolve(AssemblyNameReference name, ReaderParameters parameters){
-            var definition = ResolveAssemblyDefinition(name, parameters);
-            _resolvedDefinitions.Add(definition);
-            return definition;
-        }
-
-        private AssemblyDefinition ResolveAssemblyDefinition(AssemblyNameReference name, ReaderParameters parameters){
-            try{
-                return base.Resolve(name, parameters);
-            }
-            catch (AssemblyResolutionException){
-                return AssemblyDefinition(name);
-            }
-        }
-
-        protected override void Dispose(bool disposing){
-            base.Dispose(disposing);
-            foreach (var resolvedDefinition in _resolvedDefinitions){
-                resolvedDefinition.Dispose();
-            }
-        }
-
-        private static AssemblyDefinition AssemblyDefinition(AssemblyNameReference name){
-            var assemblies = Directory.GetFiles(@"$packagesFolder", string.Format("{0}.dll", name.Name),
-                SearchOption.AllDirectories);
-            foreach (var assembly in assemblies){
-                var fileVersion = new Version(FileVersionInfo.GetVersionInfo(assembly).FileVersion);
-                if (fileVersion == name.Version){
-                    return Mono.Cecil.AssemblyDefinition.ReadAssembly(assembly);
-                }
-            }
-
-            return Mono.Cecil.AssemblyDefinition.ReadAssembly(string.Format(@"$resolvePath\{0}.dll", name.Name));
-        }
-    }
-"@ -ReferencedAssemblies @("$monoPath\Mono.Cecil.dll")
 }
 function Remove-PatchFlags {
     param(
@@ -170,16 +126,17 @@ function Use-Object {
         if ($null -ne $InputObject -and $InputObject -is [System.IDisposable]) {
             $InputObject.Dispose()
             if ($killDomain) {
-                # Stop-Process -id $pid
+                Stop-Process -id $pid
             }
         }
     }
 }
-function Get-MonoAssembly($path, [switch]$ReadSymbols) {
+function Get-MonoAssembly($path, $AssemblyList,[switch]$ReadSymbols) {
     $readerParams = New-Object ReaderParameters
     $readerParams.ReadWrite = $true
     $readerParams.ReadSymbols = $ReadSymbols
-    $assemblyResolver = New-Object MyDefaultAssemblyResolver
+    . "$PSScriptRoot\AssemblyResolver.ps1"
+    $assemblyResolver = [AssemblyResolver]::new($assemblyList)
     $readerParams.AssemblyResolver = $assemblyResolver
     try {
         $m = [ModuleDefinition]::ReadModule($path, $readerParams)
@@ -190,7 +147,7 @@ function Get-MonoAssembly($path, [switch]$ReadSymbols) {
     }
     catch {
         if ($_.FullyQualifiedErrorId -like "*Symbols*" -or ($_.FullyQualifiedErrorId -like "pdbex*")) {
-            Get-MonoAssembly $path
+            Get-MonoAssembly $path $assemblyList
         }
         else {
             Write-Warning "$($_.FullyQualifiedErrorId) exception when loading $path"
@@ -284,6 +241,10 @@ function Get-DevExpressVersion($targetPath, $referenceFilter, $projectFile) {
             $v = ($packageReference ).Version | Select-Object -First 1
             if ($packageReference) {
                 $version = [version]$v
+                if ($version.Revision -eq -1){
+                    $v+=".0"
+                    $version = [version]$v
+                }
             }
         }
         
@@ -404,64 +365,7 @@ function Write-Intent {
         
     }
 }
-function Update-Version($modulePath, $dxVersion,$referenceFilter,$snkFile) {
-    $moduleAssemblyData = Get-MonoAssembly $modulePath -ReadSymbols
-    $moduleAssembly = $moduleAssemblyData.assembly
-    $moduleReferences = $moduleAssembly.MainModule.AssemblyReferences
-    "References:`r`n"
-    $moduleReferences.Fullname |Sort-Object
-    $needsPatching = $false
-    $moduleReferences.ToArray() | Where-Object { $_.Name -like $referenceFilter } | ForEach-Object {
-        $dxReference = $_
-        "Checking reference $_..."
-        if ($dxReference.Version -ne $dxVersion) {
-            $moduleReferences.Remove($dxReference) | Out-Null
-            $newMinor = "$($dxVersion.Major).$($dxVersion.Minor)"
-            $newName = [Regex]::Replace($dxReference.Name, ".(v[\d]{2}\.\d)", ".v$newMinor")
-            $regex = New-Object Regex("PublicKeyToken=([\w]*)") 
-            $token = $regex.Match($dxReference).Groups[1].Value
-            $regex = New-Object Regex("Culture=([\w]*)")
-            $culture = $regex.Match($dxReference).Groups[1].Value
-            $newReference = [AssemblyNameReference]::Parse("$newName, Version=$($dxVersion), Culture=$culture, PublicKeyToken=$token")
-            $moduleReferences.Add($newreference)
-            $moduleAssembly.MainModule.Types | ForEach-Object {
-                $moduleAssembly.MainModule.GetTypeReferences() | Where-Object { $_.Scope -eq $dxReference } | ForEach-Object { 
-                    $_.Scope = $newReference 
-                }
-            }
-            Write-HostFormatted "$($_.Name) version will changed from $($_.Version) to $($dxVersion)`r`n" -ForegroundColor Blue
-            $needsPatching = $true
-        }
-        else {
-            Write-HostFormatted "$($_.Name) Version ($($dxReference.Version)) matched nothing to do.`r`n" -ForegroundColor Blue
-        }
-    }
-    if ($needsPatching) {
-        "Patching $modulePath"
-        $writeParams = New-Object WriterParameters
-        $writeParams.WriteSymbols = $moduleAssembly.MainModule.hassymbols
-        $key = [File]::ReadAllBytes($snkFile)
-        $writeParams.StrongNameKeyPair = [System.Reflection.StrongNameKeyPair]($key)
-        if ($writeParams.WriteSymbols) {
-            $pdbPath = Get-Item $modulePath
-            $pdbPath = "$($pdbPath.DirectoryName)\$($pdbPath.BaseName).pdb"
-            $symbolSources = Get-SymbolSources $pdbPath
-        }
-        $moduleAssembly.Write($writeParams)
-        "Patched $modulePath"
-        if ($writeParams.WriteSymbols) {
-            "Symbols $modulePath"
-            if ($symbolSources -notmatch "is not source indexed") {
-                Update-Symbols -pdb $pdbPath -SymbolSources $symbolSources
-            }
-            else {
-                $symbolSources 
-            }
-        }
-    }
-    $moduleAssemblyData.Resolver.Dispose()
-    $moduleAssembly.Dispose()
-}
+
 function Get-SymbolSources {
     [CmdletBinding()]
     param (
@@ -583,4 +487,74 @@ function Update-Symbols {
             Remove-Item $streamPath
         }
     }
+}
+function Switch-ReferencesVersion() {
+    param(
+        [string]$modulePath, 
+        [version]$Version,
+        [string]$referenceFilter,
+        [string]$snkFile,
+        [System.IO.FileInfo[]]$assemblyList
+    )
+    if (!$assemblyList){
+        $packagesFolder=Get-PackagesFolder
+        $assemblyList=Get-ChildItem $packagesFolder -Include "*.dll","*.exe" -Recurse
+    }
+    $moduleAssemblyData = Get-MonoAssembly $modulePath $assemblyList -ReadSymbols
+    $moduleAssembly = $moduleAssemblyData.assembly
+    $moduleReferences = $moduleAssembly.MainModule.AssemblyReferences
+    # wh "References:" -Style Underline
+    # $moduleReferences.Fullname |Sort-Object
+    $needsPatching = $false
+    $moduleReferences.ToArray() | Where-Object { $_.Name -like $referenceFilter } | ForEach-Object {
+        $dxReference = $_
+        # "Checking reference $_..."
+        if ($dxReference.Version -ne $Version) {
+            $moduleReferences.Remove($dxReference) | Out-Null
+            $newMinor = "$($Version.Major).$($Version.Minor)"
+            $newName = [Regex]::Replace($dxReference.Name, "\.v\d{2}\.\d", ".v$newMinor")
+            $regex = New-Object Regex("PublicKeyToken=([\w]*)") 
+            $token = $regex.Match($dxReference).Groups[1].Value
+            $regex = New-Object Regex("Culture=([\w]*)")
+            $culture = $regex.Match($dxReference).Groups[1].Value
+            $newReference = [AssemblyNameReference]::Parse("$newName, Version=$($Version), Culture=$culture, PublicKeyToken=$token")
+            $moduleReferences.Add($newreference)
+            $moduleAssembly.MainModule.Types | ForEach-Object {
+                $moduleAssembly.MainModule.GetTypeReferences() | Where-Object { $_.Scope -eq $dxReference } | ForEach-Object { 
+                    $_.Scope = $newReference 
+                }
+            }
+            wh "$($_.Name) version will changed from $($_.Version) to $($Version)`r`n" -ForegroundColor Blue
+            $needsPatching = $true
+        }
+        else {
+            wh "$($_.Name) Version ($($dxReference.Version)) matched nothing to do.`r`n" -ForegroundColor Blue
+        }
+    }
+    if ($needsPatching) {
+        wh "Patching $modulePath" -ForegroundColor Yellow
+        $writeParams = New-Object WriterParameters
+        $writeParams.WriteSymbols = $moduleAssembly.MainModule.hassymbols
+        $key = [File]::ReadAllBytes($snkFile)
+        $writeParams.StrongNameKeyPair = [System.Reflection.StrongNameKeyPair]($key)
+        if ($writeParams.WriteSymbols) {
+            $pdbPath = Get-Item $modulePath
+            $pdbPath = "$($pdbPath.DirectoryName)\$($pdbPath.BaseName).pdb"
+            $symbolSources = Get-SymbolSources $pdbPath
+        }
+        $moduleAssembly.Write($writeParams)
+        wh "Patched $modulePath" -ForegroundColor Green
+        if ($writeParams.WriteSymbols) {
+            "Symbols $modulePath"
+            if ($symbolSources -notmatch "is not source indexed") {
+                Update-Symbols -pdb $pdbPath -SymbolSources $symbolSources
+            }
+            else {
+                $global:lastexitcode=0
+                $symbolSources 
+            }
+        }
+    }
+    $moduleAssemblyData.Resolver.Dispose()
+    $moduleAssembly.Dispose()
 }

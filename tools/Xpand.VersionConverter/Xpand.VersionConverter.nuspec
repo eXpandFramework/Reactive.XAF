@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>Xpand.VersionConverter</id>
-    <version>1.1.3.0</version>
+    <version>1.1.5.0</version>
     <title>This package modifies the DevExpress references in all Xpand.XAF.* assemblies to match the target prroject DevExpress version</title>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
@@ -17,6 +17,8 @@
     <file src="Xpand.VersionConverter.ps1" target="build\Xpand.VersionConverter.ps1" />
     <file src="Functions.ps1" target="build\Functions.ps1" />
     <file src="Write-HostFormatted.ps1" target="build\Write-HostFormatted.ps1" />
+    <file src="ConvertTo-FramedText.ps1" target="build\ConvertTo-FramedText.ps1" />
+    <file src="AssemblyResolver.ps1" target="build\AssemblyResolver.ps1" />
     <file src="..\..\src\Xpand.key\Xpand.snk" target="build\Xpand.snk" />
     <file src="Xpand.VersionConverter.targets" target="build\Xpand.VersionConverter.targets" />
     <file src="Mono.Cecil\Mono.Cecil.dll" target="build\Mono.Cecil\Mono.Cecil.dll" />

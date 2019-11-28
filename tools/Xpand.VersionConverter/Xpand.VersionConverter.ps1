@@ -8,53 +8,53 @@ using namespace System.Text.RegularExpressions
 using namespace Mono.Cecil
 using namespace Mono.Cecil.pdb
 param(
-    [string]$projectFile ,
-    [string]$targetPath ,
+    [string]$projectFile = "C:\Work\eXpandFramework\DevExpress.XAF\src\Tests\ALL\ALL.Win.Tests\ALL.Win.Tests.csproj",
+    [string]$targetPath = "C:\Work\eXpandFramework\DevExpress.XAF\bin\AllTestWin\",
     $DevExpressVersion,
-    [string]$VerboseOutput="Continue",
+    [string]$VerboseOutput = "Continue",
     [string]$referenceFilter = "DevExpress*"
 )
 
-$howToVerbose="Edit $projectFile and enable verbose messaging by adding <PropertyGroup><VersionConverterVerbose>Continue</VersionConverterVerbose>. Rebuild the project and send the output to support."
-if ($VerboseOutput){
-    # $VerbosePreference = $VerboseOutput
+$howToVerbose = "Edit $projectFile and enable verbose messaging by adding <PropertyGroup><VersionConverterVerbose>Continue</VersionConverterVerbose>. Rebuild the project and send the output to support."
+if ($VerboseOutput) {
+    $VerbosePreference = $VerboseOutput
 }
-if ($DevExpressVersion){
-    [version]$DevExpressVersion=$DevExpressVersion
+if ($DevExpressVersion) {
+    [version]$DevExpressVersion = $DevExpressVersion
 }
 $ErrorActionPreference = "Stop"
 . "$PSScriptRoot\Functions.ps1"
 
 Write-Verbose "Running VersionConverter on project $projectFile with target $targetPath"
-if (!$DevExpressVersion){
+if (!$DevExpressVersion) {
     $dxVersion = Get-DevExpressVersion $targetPath $referenceFilter $projectFile 
 }
-else{
-    $dxVersion=$DevExpressVersion
+else {
+    $dxVersion = $DevExpressVersion
 }
 
-if (!$dxVersion){
+if (!$dxVersion) {
     Write-Warning "Cannot find DevExpress Version. You have the following options:`r`n1. $howToVerbose`r`n2. If your project has indirect references to DevExpress through another assembly then you can always force the DevExpressVersion by modifying your project to include <PropertyGroup><DevExpressVersion>19.1.3</DevExpressVersion>.`r`n This declaration can be solution wide if done in your directory.build.props file.`r`n"
     throw "Check output warning message"
 }
 Write-Verbose "DxVersion=$dxVersion"
 
-$packagesFolder=Get-PackagesFolder
+$packagesFolder = Get-PackagesFolder
 Write-Verbose "nugetPackageFoldersPath=$packagesFolder"
-$nugetPackageFolders=[Path]::GetFullPath($packagesFolder)
-$moduleDirectories=[Directory]::GetDirectories($nugetPackageFolders)|Where-Object{
-    $baseName=(Get-Item $_).BaseName
+$nugetPackageFolders = [Path]::GetFullPath($packagesFolder)
+$moduleDirectories = [Directory]::GetDirectories($nugetPackageFolders) | Where-Object {
+    $baseName = (Get-Item $_).BaseName
     $baseName -like "Xpand.XAF*" -or $baseName -like "Xpand.Extensions*"
 }
 
-$unpatchedPackages=Get-UnPatchedPackages $moduleDirectories $dxversion
-if (!$unpatchedPackages){
+$unpatchedPackages = Get-UnPatchedPackages $moduleDirectories $dxversion
+if (!$unpatchedPackages) {
     Write-Verbose "All packages already patched for $dxversion"
     return
 }
-Write-HostFormatted "ModuleDirectories:" -Section
+wh "ModuleDirectories:" -Section
 $moduleDirectories
-Write-HostFormatted "--- unpatchedPackages:" -Section
+wh "UnpatchedPackages:" -Section
 $unpatchedPackages
 
 try {
@@ -67,32 +67,38 @@ $mtx.WaitOne() | Out-Null
 try {    
     
     Install-MonoCecil $targetPath
-    $moduleDirectories|ForEach-Object{
-        Write-HostFormatted "nmoduleDir=$_" -ForegroundColor Purple
-        $unpatchedPackages|Get-Item|ForEach-Object{
-            $packageFile = $_.FullName
-            "packageFile=$packageFile"
-            $packageDir = $_.DirectoryName
-            $versionConverterFlag = "$packageDir\VersionConverter.v.$dxVersion.DoNotDelete"
-            if (!(Test-Path $versionConverterFlag)) {
-                Remove-PatchFlags $packageDir 
-                @($packageFile) | ForEach-Object {
-                    if (Test-Path $_) {
-                        $modulePath = (Get-Item $_).FullName
-                        "Checking references: $modulePath ..`r`n"
-                        Update-Version $modulePath $dxVersion $referenceFilter "$PSScriptRoot\Xpand.snk"
+    $assemblyList=Get-ChildItem $packagesFolder -Include "*.dll","*.exe" -Recurse|Where-Object{$_.GetType() -ne [DirectoryInfo]}
+    $unpatchedPackages | Get-Item | ForEach-Object {
+        $packageFile = $_.FullName
+        $packageDir = $_.DirectoryName
+        $versionConverterFlag = "$packageDir\VersionConverter.v.$dxVersion.DoNotDelete"
+        if (!(Test-Path $versionConverterFlag)) {
+            wh "Analyzing.. $packageFile" -section
+            Remove-PatchFlags $packageDir 
+            @($packageFile) | ForEach-Object {
+                if (Test-Path $_) {
+                    $modulePath = (Get-Item $_).FullName
+                    wh "Switch:" -Style Underline
+                    $a = @{
+                        Modulepath      = $modulePath
+                        Version         = $dxversion
+                        referenceFilter = $referenceFilter
+                        snkFile        = "$PSScriptRoot\Xpand.snk"
+                        AssemblyList=$assemblyList
                     }
+                    $a
+                    Switch-ReferencesVersion @a
                 }
-                "Flag $versionConverterFlag"
-                New-Item $versionConverterFlag -ItemType Directory | Out-Null
             }
+            "Flag $versionConverterFlag"
+            New-Item $versionConverterFlag -ItemType Directory | Out-Null
         }
     }
 }
 catch {
-    Write-HostFormatted "Exception:" -ForegroundColor Red
+    wh "Exception:" -ForegroundColor Red -Section
     $_
-    "InvocationInfo:"
+    wh "InvokcationInfo:" -ForegroundColor Yellow -Section
     $_.InvocationInfo
     Write-Warning "`r`n$howToVerbose`r`n"
     throw "Check output warning message"
