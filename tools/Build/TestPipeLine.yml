@@ -38,7 +38,7 @@ jobs:
         ScriptType: InlineScript
         azurePowerShellVersion: 'LatestVersion'
         Inline: |
-          & '$(System.DefaultWorkingDirectory)/tools/build/TestPipeline.ps1' '$(System.DefaultWorkingDirectory)'
+          & '$(System.DefaultWorkingDirectory)/tools/build/TestPipeline.ps1' '$(System.DefaultWorkingDirectory)' '($AzureToken)'
     - task: PublishPipelineArtifact@1
       # condition: $(NewArtifact)
       displayName: 'Publish Artifact: Bin'

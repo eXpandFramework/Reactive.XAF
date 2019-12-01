@@ -2,10 +2,15 @@ using namespace Mono.Cecil
 using namespace System.Reflection
 using namespace System.IO
 param(
-    $SourcePath = [Path]::GetFullPath("$PSScriptRoot\..\..")
+    $SourcePath = [Path]::GetFullPath("$PSScriptRoot\..\.."),
+    $AzureToken=$env:AzDevOpsToken
 )
 $ErrorActionPreference = "Stop"
-
+if (!(Get-Module eXpandFramework -ListAvailable)){
+    $env:AzureToken=$AzureToken
+    $env:AzOrganization="eXpandDevOps"
+    $env:AzProject ="eXpandFramework"
+}
 $buildNumber = $env:build_BuildNumber
 $buildNumber += $env:Build_TriggeredBy_DefinitionName
 & "$SourcePath\go.ps1" -InstallModules
