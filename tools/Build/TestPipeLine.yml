@@ -21,7 +21,7 @@ jobs:
         definition:  '23'
         buildVersionToDownload: 'latest'
         artifactName: 'bin'
-        targetPath: '$(Default.WorkingDirectory)'
+        targetPath: '$(System.DefaultWorkingDirectory)'
     - task: DownloadPipelineArtifact@2
       displayName: Download EasyTests
       inputs:
@@ -30,7 +30,7 @@ jobs:
         definition: '23'
         buildVersionToDownload: 'latest'
         artifactName: 'Tests'
-        targetPath: '$(Default.WorkingDirectory)\bin'
+        targetPath: '$(System.DefaultWorkingDirectory)\bin'
     - task: AzurePowerShell@4
       displayName: BuildArtifacts
       inputs:
@@ -38,12 +38,12 @@ jobs:
         ScriptType: InlineScript
         azurePowerShellVersion: 'LatestVersion'
         Inline: |
-          & '$(Default.WorkingDirectory)/tools/build/TestPipeline.ps1' '$(Default.WorkingDirectory)'
+          & '$(System.DefaultWorkingDirectory)/tools/build/TestPipeline.ps1' '$(System.DefaultWorkingDirectory)'
     - task: PublishPipelineArtifact@1
       # condition: $(NewArtifact)
       displayName: 'Publish Artifact: Bin'
       inputs:
-        targetPath: '$(Default.WorkingDirectory)\bin'
+        targetPath: '$(System.DefaultWorkingDirectory)\bin'
         ArtifactName: 'Bin'
 # - job: TestPerAssembly
 #   dependsOn: 'BuildArtifacts'
@@ -61,12 +61,12 @@ jobs:
 #         buildType: 'current'
 #         downloadType: 'single'
 #         artifactName: 'bin'
-#         downloadPath: '$(Default.WorkingDirectory)'
+#         downloadPath: '$(System.DefaultWorkingDirectory)'
 #     - task: VSTest@2
 #       displayName: 'Test Modules'
 #       continueOnError: true
 #       inputs:
-#         searchFolder: '$(Default.WorkingDirectory)'
+#         searchFolder: '$(System.DefaultWorkingDirectory)'
 #         testSelector: 'testAssemblies'
 #         testAssemblyVer2: |
 #           # **\*All*Tests.dll
@@ -112,12 +112,12 @@ jobs:
       inputs:
         buildType: 'current'
         artifactName: 'bin'
-        targetPath: '$(Default.WorkingDirectory)'
+        targetPath: '$(System.DefaultWorkingDirectory)'
     - task: VSTest@2
       displayName: 'Tests'
       continueOnError: true
       inputs:
-        searchFolder: '$(Default.WorkingDirectory)'
+        searchFolder: '$(System.DefaultWorkingDirectory)'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
           **\*All*Tests.dll
