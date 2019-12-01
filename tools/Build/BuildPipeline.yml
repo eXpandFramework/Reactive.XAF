@@ -73,14 +73,16 @@ jobs:
         }
         Copy-Item '$(System.DefaultWorkingDirectory)\paket.lock1' '$(System.DefaultWorkingDirectory)\paket.lock' -Force -verbose
       pwsh: true
-  - task: PublishPipelineArtifact@1
+  - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: UnitTests'
     inputs:
+      Parallel: true
       targetPath: '$(System.DefaultworkingDirectory)\buildstage\bin'
       ArtifactName: 'Bin'
-  - task: PublishPipelineArtifact@1
+  - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: XafApplication'
     inputs:
+      Parallel: true
       targetPath: '$(System.DefaultworkingDirectory)\buildstage\TestApplication'
       ArtifactName: 'Tests'
   # - task: PublishBuildArtifacts@1
