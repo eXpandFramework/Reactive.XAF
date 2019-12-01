@@ -69,7 +69,7 @@ jobs:
         
         & '$(System.DefaultWorkingDirectory)\tools\Build\BuildPipeline.ps1' @goArgs
         'paket.lock','paket.dependencies'|ForEach-Object{
-            Copy-Item '$(System.DefaultWorkingDirectory)\$_' '$(Pipeline.Workspace)/.nuget/packages/$_' -Force -ErrorAction Continue -verbose
+            Copy-Item "$(System.DefaultWorkingDirectory)\$_" "$(Pipeline.Workspace)/.nuget/packages/$_" -Force -ErrorAction Continue -verbose
         }
         Copy-Item '$(System.DefaultWorkingDirectory)\paket.lock1' '$(System.DefaultWorkingDirectory)\paket.lock' -Force -verbose
       pwsh: true
@@ -85,14 +85,5 @@ jobs:
       Parallel: true
       targetPath: '$(System.DefaultworkingDirectory)\buildstage\TestApplication'
       ArtifactName: 'Tests'
-  # - task: PublishBuildArtifacts@1
-  #   displayName: 'Publish Artifact: Bin'
-  #   inputs:
-  #     PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\bin'
-  #     ArtifactName: 'Bin'
-  # - task: PublishBuildArtifacts@1
-  #   displayName: 'Publish Artifact: Source'
-  #   inputs:
-  #     PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\source'
-  #     ArtifactName: 'Source'
+  
   

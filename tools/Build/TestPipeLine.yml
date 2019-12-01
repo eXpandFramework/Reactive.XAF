@@ -21,17 +21,18 @@ jobs:
         definition:  '23'
         buildVersionToDownload: 'latest'
         artifactName: 'bin'
-        downloadPath:  '$(System.DefaultWorkingDirectory)'
-        downloadType: single 
-    # - task: DownloadPipelineArtifact@2
-    #   displayName: Download EasyTests
-    #   inputs:
-    #     buildType: 'specific'
-    #     project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
-    #     definition: '23'
-    #     buildVersionToDownload: 'latest'
-    #     artifactName: 'Tests'
-    #     targetPath: '$(System.DefaultWorkingDirectory)\bin'
+        downloadType: single
+        downloadPath: '$(System.DefaultWorkingDirectory)'
+    - task: DownloadBuildArtifacts@0
+      displayName: Download EasyTests
+      inputs:
+        buildType: 'specific'
+        project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
+        definition:  '23'
+        buildVersionToDownload: 'latest'
+        artifactName: 'Tests'
+        downloadType: single
+        downloadPath: '$(System.DefaultWorkingDirectory)\bin'
     - task: AzurePowerShell@4
       displayName: BuildArtifacts
       inputs:
