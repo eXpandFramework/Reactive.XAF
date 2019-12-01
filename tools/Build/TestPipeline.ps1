@@ -15,6 +15,7 @@ $buildNumber = $env:build_BuildNumber
 $buildNumber += $env:Build_TriggeredBy_DefinitionName
 & "$SourcePath\go.ps1" -InstallModules
 if (!$buildNumber){
+    New-Item "$SourcePath\bin" -ItemType Directory -Force
     @{ArtifactName="Bin";OutPath=$SourcePath},@{ArtifactName="Tests";OutPath="$SourcePath\bin"}|invoke-parallel -script{
         $name=$_.ArtifactName
         $path=$_.Outpath
