@@ -1,4 +1,4 @@
-﻿param(
+param(
     
     [string]$packageSources = $env:DxFeed, #"C:\Program Files (x86)\DevExpress 18.2\Components\System\Components\packages",
     [string]$msbuild = $null,
@@ -9,7 +9,7 @@
     [string]$branch="lab",
     [switch]$InstallModules,
     [string[]]$taskList=@("Build"),
-    [string]$XpandPwshVersion = "0.36.0",
+    [string]$XpandPwshVersion = "0.36.1",
     [switch]$Debug,
     [switch]$CustomVersion
 )
