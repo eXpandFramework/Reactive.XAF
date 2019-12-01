@@ -42,7 +42,7 @@ jobs:
         Inline: |
           & '$(System.DefaultworkingDirectory)/tools/build/TestPipeline.ps1' '$(System.DefaultWorkingDirectory)'
     - task: PublishPipelineArtifact@1
-      condition: $(NewArtifact)
+      # condition: $(NewArtifact)
       displayName: 'Publish Artifact: Bin'
       inputs:
         targetPath: '$(System.DefaultworkingDirectory)\bin'
