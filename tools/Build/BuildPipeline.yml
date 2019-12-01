@@ -81,7 +81,7 @@ jobs:
   - task: PublishPipelineArtifact@1
     displayName: 'Publish Artifact: XafApplication'
     inputs:
-      targetPath: : '$(System.DefaultworkingDirectory)\buildstage\TestApplication'
+      targetPath: '$(System.DefaultworkingDirectory)\buildstage\TestApplication'
       ArtifactName: 'Tests'
   # - task: PublishBuildArtifacts@1
   #   displayName: 'Publish Artifact: Bin'
