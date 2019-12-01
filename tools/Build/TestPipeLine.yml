@@ -41,12 +41,13 @@ jobs:
         azurePowerShellVersion: 'LatestVersion'
         Inline: |
           & '$(System.DefaultWorkingDirectory)/tools/build/TestPipeline.ps1' '$(System.DefaultWorkingDirectory)' '($AzureToken)'
-    - task: PublishPipelineArtifact@1
+    - task: PublishBuildArtifacts@1
       # condition: $(NewArtifact)
       displayName: 'Publish Artifact: Bin'
       inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)\bin'
+        Parallel: true
         ArtifactName: 'Bin'
+        PathtoPublish: '$(System.DefaultWorkingDirectory)\bin'
 # - job: TestPerAssembly
 #   dependsOn: 'BuildArtifacts'
 #   strategy:
@@ -109,12 +110,13 @@ jobs:
     - group: keys
   steps:
     - checkout: none
-    - task: DownloadPipelineArtifact@2
+    - task: DownloadBuildArtifacts@0
       displayName: Download Bin
       inputs:
         buildType: 'current'
         artifactName: 'bin'
-        targetPath: '$(System.DefaultWorkingDirectory)'
+        downloadType: single
+        downloadPath: '$(System.DefaultWorkingDirectory)'
     - task: VSTest@2
       displayName: 'Tests'
       continueOnError: true
@@ -123,7 +125,7 @@ jobs:
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
           **\*All*Tests.dll
-          **\*ModelMapper*Tests.dll
+          # **\*ModelMapper*Tests.dll
           !**\obj\**    
         diagnosticsEnabled: true
         codeCoverageEnabled: true
