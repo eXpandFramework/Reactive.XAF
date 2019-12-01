@@ -14,11 +14,14 @@ if (!(Get-Module eXpandFramework -ListAvailable)){
 $buildNumber = $env:build_BuildNumber
 $buildNumber += $env:Build_TriggeredBy_DefinitionName
 & "$SourcePath\go.ps1" -InstallModules
-if ($buildNumber){
-    Write-HostFormatted "Download Bin" -Section
-    Get-AzArtifact -Definition DevExpress.XAF-Lab -ArtifactName bin -Outpath "$SourcePath"
-    Write-HostFormatted "Download Tests" -Section
-    Get-AzArtifact -Definition DevExpress.XAF-Lab -ArtifactName Tests -Outpath "$SourcePath\Tests"
+if (!$buildNumber){
+    @{ArtifactName="Bin";OutPath=$SourcePath},@{ArtifactName="Tests";OutPath="$SourcePath\bin"}|invoke-parallel -script{
+        $name=$_.ArtifactName
+        $path=$_.Outpath
+        Write-Output "Downloading $name in $path"
+        Get-AzArtifact -Definition DevExpress.XAF-Lab -ArtifactName $name -Outpath $path
+        
+    }
 }
 
 function UpdateVersion {
