@@ -21,7 +21,7 @@ jobs:
         definition:  '23'
         buildVersionToDownload: 'latest'
         artifactName: 'bin'
-        targetPath: '$(Pipeline.Workspace)'
+        targetPath: '$(Default.WorkingDirectory)'
     - task: DownloadPipelineArtifact@2
       displayName: Download EasyTests
       inputs:
@@ -30,7 +30,7 @@ jobs:
         definition: '23'
         buildVersionToDownload: 'latest'
         artifactName: 'Tests'
-        targetPath: '$(Pipeline.Workspace)\bin'
+        targetPath: '$(Default.WorkingDirectory)\bin'
     - task: AzurePowerShell@4
       displayName: BuildArtifacts
       inputs:
@@ -38,12 +38,12 @@ jobs:
         ScriptType: InlineScript
         azurePowerShellVersion: 'LatestVersion'
         Inline: |
-          & '$(Pipeline.Workspace)/tools/build/TestPipeline.ps1' '$(Pipeline.Workspace)'
+          & '$(Default.WorkingDirectory)/tools/build/TestPipeline.ps1' '$(Default.WorkingDirectory)'
     - task: PublishPipelineArtifact@1
       # condition: $(NewArtifact)
       displayName: 'Publish Artifact: Bin'
       inputs:
-        targetPath: '$(Pipeline.Workspace)\bin'
+        targetPath: '$(Default.WorkingDirectory)\bin'
         ArtifactName: 'Bin'
 # - job: TestPerAssembly
 #   dependsOn: 'BuildArtifacts'
@@ -61,12 +61,12 @@ jobs:
 #         buildType: 'current'
 #         downloadType: 'single'
 #         artifactName: 'bin'
-#         downloadPath: '$(Pipeline.Workspace)'
+#         downloadPath: '$(Default.WorkingDirectory)'
 #     - task: VSTest@2
 #       displayName: 'Test Modules'
 #       continueOnError: true
 #       inputs:
-#         searchFolder: '$(Pipeline.Workspace)'
+#         searchFolder: '$(Default.WorkingDirectory)'
 #         testSelector: 'testAssemblies'
 #         testAssemblyVer2: |
 #           # **\*All*Tests.dll
@@ -112,12 +112,12 @@ jobs:
       inputs:
         buildType: 'current'
         artifactName: 'bin'
-        targetPath: '$(Pipeline.Workspace)'
+        targetPath: '$(Default.WorkingDirectory)'
     - task: VSTest@2
       displayName: 'Tests'
       continueOnError: true
       inputs:
-        searchFolder: '$(Pipeline.Workspace)'
+        searchFolder: '$(Default.WorkingDirectory)'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
           **\*All*Tests.dll
