@@ -112,7 +112,7 @@ jobs:
       inputs:
         buildType: 'current'
         artifactName: 'bin'
-        downloadPath: '$(Pipeline.Workspace)'
+        targetPath: '$(Pipeline.Workspace)'
     - task: VSTest@2
       displayName: 'Tests'
       continueOnError: true
