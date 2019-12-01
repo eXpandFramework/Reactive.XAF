@@ -9,7 +9,7 @@ $ErrorActionPreference = "Stop"
 $buildNumber = $env:build_BuildNumber
 $buildNumber += $env:Build_TriggeredBy_DefinitionName
 & "$SourcePath\go.ps1" -InstallModules
-Write-HostFormatted "Contexts"
+
 
 function UpdateVersion {
     param (
@@ -43,8 +43,10 @@ function UpdateVersion {
 
 Invoke-Script {
     Write-Verbose -Verbose "##vso[build.updatebuildnumber]$buildNumber"
-    Approve-LastExitCode
+    
     $monoPath = "$SourcePath\bin\"
+    Write-HostFormatted "monoPath=$monoPath" -Section
+    Get-ChildItem $monoPath
     . $SourcePath\tools\Xpand.VersionConverter\functions.ps1
     Install-MonoCecil $monopath
     . $SourcePath\tools\Xpand.VersionConverter\AssemblyResolver.ps1
