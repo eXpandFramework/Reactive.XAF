@@ -18,19 +18,19 @@ jobs:
       inputs:
         buildType: 'specific'
         project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
-        pipeline: '23'
+        pipelineId: '23'
         buildVersionToDownload: 'latest'
         artifactName: 'bin'
-        targetPath: '$(System.DefaultworkingDirectory)'
+        targetPath: '$(Pipeline.Workspace)'
     - task: DownloadPipelineArtifact@2
       displayName: Download EasyTests
       inputs:
         buildType: 'specific'
         project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
-        pipeline: '23'
+        pipelineId: '23'
         buildVersionToDownload: 'latest'
         artifactName: 'Tests'
-        targetPath: '$(System.DefaultworkingDirectory)\bin'
+        targetPath: '$(Pipeline.Workspace)\bin'
     - task: AzurePowerShell@4
       displayName: BuildArtifacts
       inputs:
@@ -38,12 +38,12 @@ jobs:
         ScriptType: InlineScript
         azurePowerShellVersion: 'LatestVersion'
         Inline: |
-          & '$(System.DefaultworkingDirectory)/tools/build/TestPipeline.ps1' '$(System.DefaultWorkingDirectory)'
+          & '$(Pipeline.Workspace)/tools/build/TestPipeline.ps1' '$(Pipeline.Workspace)'
     - task: PublishPipelineArtifact@1
       # condition: $(NewArtifact)
       displayName: 'Publish Artifact: Bin'
       inputs:
-        targetPath: '$(System.DefaultworkingDirectory)\bin'
+        targetPath: '$(Pipeline.Workspace)\bin'
         ArtifactName: 'Bin'
 # - job: TestPerAssembly
 #   dependsOn: 'BuildArtifacts'
@@ -61,12 +61,12 @@ jobs:
 #         buildType: 'current'
 #         downloadType: 'single'
 #         artifactName: 'bin'
-#         downloadPath: '$(System.DefaultworkingDirectory)'
+#         downloadPath: '$(Pipeline.Workspace)'
 #     - task: VSTest@2
 #       displayName: 'Test Modules'
 #       continueOnError: true
 #       inputs:
-#         searchFolder: '$(System.DefaultWorkingDirectory)'
+#         searchFolder: '$(Pipeline.Workspace)'
 #         testSelector: 'testAssemblies'
 #         testAssemblyVer2: |
 #           # **\*All*Tests.dll
@@ -112,12 +112,12 @@ jobs:
       inputs:
         buildType: 'current'
         artifactName: 'bin'
-        downloadPath: '$(System.DefaultworkingDirectory)'
+        downloadPath: '$(Pipeline.Workspace)'
     - task: VSTest@2
       displayName: 'Tests'
       continueOnError: true
       inputs:
-        searchFolder: '$(System.DefaultWorkingDirectory)'
+        searchFolder: '$(Pipeline.Workspace)'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
           **\*All*Tests.dll
