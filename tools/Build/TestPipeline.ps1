@@ -8,7 +8,7 @@ param(
 $ErrorActionPreference = "Stop"
 & "$SourcePath\go.ps1" -InstallModules
 $buildNumber = $env:build_BuildNumber
-$buildNumber += $env:Build_TriggeredBy_DefinitionName
+
 if ($buildNumber){
     $env:AzDevOpsToken=$AzureToken
     $env:AzOrganization="eXpandDevOps"
@@ -22,7 +22,7 @@ if ($buildNumber){
     #     Get-AzArtifact -Definition DevExpress.XAF-Lab -ArtifactName $name -Outpath $path
         
     # }
-    Get-ChildItem "$sourcepath\bin"
+    # Get-ChildItem "$sourcepath\bin"
 }
 
 function UpdateVersion {
@@ -56,7 +56,7 @@ function UpdateVersion {
 }
 
 Invoke-Script {
-    Write-Verbose -Verbose "##vso[build.updatebuildnumber]$buildNumber"
+    
     
     $monoPath = "$SourcePath\bin\"
     Write-HostFormatted "monoPath=$monoPath" -Section
@@ -69,13 +69,20 @@ Invoke-Script {
     Remove-Item $updates -Recurse -Force -ErrorAction SilentlyContinue
     New-Item $updates -ItemType Directory -Force
 
-    Write-HostFormatted  "Downloading into $updates" -Section
+    [version]$dxVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo(((Get-ChildItem $monoPath *DevExpress*.dll).FullName | Select-Object -First 1)).FileVersion
+    Write-HostFormatted "dxVersion=$dxVersion" -ForegroundColor Green
+    if ($env:build_BuildNumber){
+        "Add Tag $dxversion to $env:Build_BuildId"
+        Add-AzBuildTag -tag "$dxVersion" -id $env:Build_BuildId
+    }
+    Set-VsoVariable build.updatebuildnumber "$env:build_BuildNumber-$dxVersion"
 
+    Write-HostFormatted  "Downloading into $updates" -Section
     Get-AzStorageBlob -Container xpandbuild -Context (Get-AzStorageAccount|Where-Object{$_.StorageAccountName -eq "xpandbuildblob"}).Context | Get-AzStorageBlobContent -Destination $updates -Force | Out-Null
     Write-HostFormatted "Download Finished" -ForegroundColor Green
 
-    [version]$dxVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo(((Get-ChildItem $monoPath *DevExpress*.dll).FullName | Select-Object -First 1)).FileVersion
-    Write-HostFormatted "dxVersion=$dxVersion" -ForegroundColor Green
+    
+
     $snk = "$Sourcepath\src\Xpand.key\Xpand.snk"
     $allAssemblies = Get-ChildItem $monopath *.dll
     Get-ChildItem $updates *.dll | ForEach-Object {

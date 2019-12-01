@@ -20,6 +20,7 @@ Properties {
 
 
 Task Build  -depends   Clean, Init, UpdateProjects, Compile, IndexSources, CreateNuspec, PackNuspec, CompileTests, UpdateAllTests
+Task TestsRun  -depends   Clean, Init, UpdateProjects, Compile, IndexSources, CreateNuspec, PackNuspec, CompileTests, UpdateAllTests
 
 
 Task IndexSources {
@@ -40,12 +41,7 @@ Task Init {
 
         dotnet tool restore
         Set-Location $root
-        try{
-            Invoke-Script{Invoke-PaketRestore -strict}
-        }
-        catch{
-            Invoke-PaketRestore -strict -Force
-        }
+        Invoke-Script{Invoke-PaketRestore -strict}
         
         Get-ChildItem "$root\packages\grpc.core\runtimes\"|Copy-Item -Destination "$root\bin\runtimes" -Recurse -Force
         # $versionMismatch=Get-ChildItem $Root *.csproj -Recurse -Exclude "*TestApplication*"|ForEach-Object{
@@ -85,6 +81,7 @@ Task CompileTests -precondition { return $compile } {
         dotnet restore "$Root\src\Tests\Tests.sln" --source $packageSources --source (Get-PackageFeed -Nuget) /WarnAsError
         dotnet msbuild "$Root\src\Tests\Tests.sln" "/bl:$Root\Bin\CompileTests.binlog" -t:rebuild "/p:configuration=Debug" /WarnAsError /m /v:m 
     } -Maximum 2
+    CheckDXReference
 }
 
 Task Compile -precondition { return $compile } {
@@ -110,8 +107,22 @@ Task Compile -precondition { return $compile } {
             Version=[System.Diagnostics.FileVersionInfo]::GetVersionInfo($_.FullName)
         }
     }
+    CheckDXReference
 }
 
+function CheckDXReference{
+    $missMatch=Get-ChildItem $bindirectory *xpand*.dll|ForEach-Object{
+        $refs=Get-AssemblyReference $_ -NameFilter DevEx*|Where-Object{$_.version -ne $dxVersion}
+        if ($refs){
+            Write-HostFormatted $_.BaseName -Section
+            $refs
+        }
+    }
+    $missMatch
+    if ($missMatch){
+        throw "Multiple DevExpress version dependecies"
+    }
+}
 Task  CreateNuspec {
     Invoke-Script {
         $a = @{
@@ -133,6 +144,7 @@ Task UpdateAllTests {
     Invoke-Script {
         & "$Root\Tools\Build\UpdateAllTests.ps1" "$Root" $branch $packageSources $dxVersion
     }
+    CheckDXReference
 }
 
 

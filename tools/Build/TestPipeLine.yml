@@ -19,7 +19,8 @@ jobs:
         buildType: 'specific'
         project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
         definition:  '23'
-        buildVersionToDownload: 'latest'
+        buildVersionToDownload: 'specific'
+        buildId: '$(DxPipelineBuildId)'
         artifactName: 'bin'
         downloadType: single
         downloadPath: '$(System.DefaultWorkingDirectory)'
@@ -29,7 +30,8 @@ jobs:
         buildType: 'specific'
         project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
         definition:  '23'
-        buildVersionToDownload: 'latest'
+        buildVersionToDownload: specific
+        buildId: '$(DxPipelineBuildId)'
         artifactName: 'Tests'
         downloadType: single
         downloadPath: '$(System.DefaultWorkingDirectory)\bin'
@@ -48,62 +50,61 @@ jobs:
         Parallel: true
         ArtifactName: 'Bin'
         PathtoPublish: '$(System.DefaultWorkingDirectory)\bin'
-# - job: TestPerAssembly
-#   dependsOn: 'BuildArtifacts'
-#   strategy:
-#     parallel: 15
-#   pool:
-#     vmImage: windows-latest
-#   variables:
-#     - group: keys
-#   steps:
-#     - checkout: self
-#     - task: DownloadBuildArtifacts@0
-#       displayName: Download Bin
-#       inputs:
-#         buildType: 'current'
-#         downloadType: 'single'
-#         artifactName: 'bin'
-#         downloadPath: '$(System.DefaultWorkingDirectory)'
-#     - task: VSTest@2
-#       displayName: 'Test Modules'
-#       continueOnError: true
-#       inputs:
-#         searchFolder: '$(System.DefaultWorkingDirectory)'
-#         testSelector: 'testAssemblies'
-#         testAssemblyVer2: |
-#           # **\*All*Tests.dll
-#           **\*AutoCommit*Tests.dll
-#           **\*CloneMemberValue*Tests.dll
-#           **\*CloneModelView*Tests.dll
-#           **\*Extensions*Tests.dll
-#           **\*Testslib.dll
-#           **\*Grid*Tests.dll
-#           **\*HideTool*Tests.dll
-#           **\*Logger.Tests.dll
-#           **\*MasterDet*Tests.dll
-#           **\*ModelViewIn*Tests.dll
-#           **\*OneView*Tests.dll
-#           **\*Progre*Tests.dll
-#           **\*Reactive.Tests.dll
-#           **\*Refresh*Tests.dll
-#           **\*Supp*Tests.dll
-#           **\*View*Tests.dll
-#           !**\*Hub*.dll
-#           !**\*TestAdapter.dll
-#           !**\obj\**    
-#         diagnosticsEnabled: true
-#         codeCoverageEnabled: true
-#         distributionBatchType: basedOnAssembly
-#         runInParallel: false
-#         runSettingsFile: .\bin\Tests.runsettings
-#         runTestsInIsolation: false
-#         collectDumpOn: never
-- job: TestPerExecutionTime
+- job: TestPerAssembly
   dependsOn: 'BuildArtifacts'
-  # dependsOn: 'TestPerAssembly'
   strategy:
-    parallel: 2
+    parallel: 15
+  pool:
+    vmImage: windows-latest
+  variables:
+    - group: keys
+  steps:
+    - checkout: self
+    - task: DownloadBuildArtifacts@0
+      displayName: Download Bin
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'bin'
+        downloadPath: '$(System.DefaultWorkingDirectory)'
+    - task: VSTest@2
+      displayName: 'Test Modules'
+      continueOnError: true
+      inputs:
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: |
+          **\*AutoCommit*Tests.dll
+          **\*CloneMemberValue*Tests.dll
+          **\*CloneModelView*Tests.dll
+          **\*Extensions*Tests.dll
+          **\*Testslib.dll
+          **\*Grid*Tests.dll
+          **\*HideTool*Tests.dll
+          **\*Logger.Tests.dll
+          **\*MasterDet*Tests.dll
+          **\*ModelViewIn*Tests.dll
+          **\*OneView*Tests.dll
+          **\*Progre*Tests.dll
+          **\*Reactive.Tests.dll
+          **\*Refresh*Tests.dll
+          **\*Supp*Tests.dll
+          **\*View*Tests.dll
+          !**\*Hub*.dll
+          !**\*TestAdapter.dll
+          !**\obj\**    
+        diagnosticsEnabled: true
+        codeCoverageEnabled: true
+        distributionBatchType: basedOnAssembly
+        runInParallel: false
+        runSettingsFile: .\bin\Tests.runsettings
+        runTestsInIsolation: false
+        collectDumpOn: never
+- job: TestPerExecutionTime
+  # dependsOn: 'BuildArtifacts'
+  dependsOn: 'TestPerAssembly'
+  strategy:
+    parallel: 10
   pool:
     vmImage: windows-latest
   variables:
@@ -125,7 +126,7 @@ jobs:
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
           **\*All*Tests.dll
-          # **\*ModelMapper*Tests.dll
+          **\*ModelMapper*Tests.dll
           !**\obj\**    
         diagnosticsEnabled: true
         codeCoverageEnabled: true
@@ -135,6 +136,7 @@ jobs:
         runTestsInIsolation: false
         collectDumpOn: never
 - job: CheckTests
+  # dependsOn: BuildArtifacts
   dependsOn: TestPerExecutionTime
   pool:
     vmImage: windows-latest
@@ -143,12 +145,35 @@ jobs:
   steps:
     - checkout: self
     - task: AzurePowerShell@4
-      displayName: BuildArtifacts
+      displayName: 'CheckTest'
       inputs:
         azureSubscription: 'Visual Studio Enterprise (b48a609a-17f6-4e48-a317-54ab77fbf822)'
         ScriptType: InlineScript
         azurePowerShellVersion: 'LatestVersion'
         Inline: |
-          # $azurePassword = ConvertTo-SecureString $xpandBlobOwnerSecret -AsPlainText -Force
-          # $psCred = New-Object System.Management.Automation.PSCredential($azureAplicationId , $azurePassword)
-          # Connect-AzAccount -Credential $psCred -TenantId $subscriptionTenantId  -ServicePrincipal 
+          & '$(System.DefaultWorkingDirectory)\go.ps1' -InstallModules
+          $env:AzDevopsToken='$(AzureToken)'
+          $env:AzOrganization="eXpandDevOps"
+          $env:AzProject ="eXpandFramework"
+          $env:DXFeed='$(DXApiFeed)'
+          Write-Host "Checking for failed test"
+          if (Get-AzTestRuns -buildIds $env:Build_BuildId -FailedOnly){
+              throw "There are fail tests"
+          }
+          Write-Host "Query latest minors"
+          $latestMinors=Get-XAFLatestMinors
+          $dxversion=$latestMinors|select-object -first 1
+          if ($env:build_buildnumber -like "*$dxversion*"){
+              Write-Host "adding PublishNugets-DevExpress.XAF build"
+              Add-AzBuild PublishNugets-DevExpress.XAF
+              $latestMinors|Where-object{$_ -ne "$dxVersion"}|foreach{
+                  "MinorVersion:$_"
+                  $b=Get-AzBuilds -Tag "$_" -Status completed -Result succeeded -Top 1
+                  $b
+                  $parameters = @{
+                      DxPipelineBuildId = $b.id
+                  }
+                  Add-AzBuild -Definition DevExpress.XAF-Lab-Tests -Parameters $parameters
+              }
+          }
+

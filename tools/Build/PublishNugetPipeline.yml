@@ -26,6 +26,10 @@ steps:
             ApiKey ='$(NugetApiKey)'
             LocalPackageSource ='$(System.DefaultWorkingDirectory)\bin\Nupkg' 
           }
+          $env:AzDevopsToken='$(AzureToken)'
+          $env:AzOrganization="eXpandDevOps"
+          $env:AzProject ="eXpandFramework"
+          $env:DXFeed='$(DXApiFeed)'
           "goArgs:"
           $goArgs|out-string
           & .\tools\build\publishNugets.ps1 @goArgs
