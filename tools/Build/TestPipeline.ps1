@@ -18,7 +18,7 @@ if ($buildNumber){
     Write-HostFormatted "Download Bin" -Section
     Get-AzArtifact -Definition DevExpress.XAF-Lab -ArtifactName bin -Outpath "$SourcePath"
     Write-HostFormatted "Download Tests" -Section
-    Get-AzArtifact -Definition DevExpress.XAF-Lab -ArtifactName Tests -Outpath "$SourcePath"
+    Get-AzArtifact -Definition DevExpress.XAF-Lab -ArtifactName Tests -Outpath "$SourcePath\Tests"
 }
 
 function UpdateVersion {
