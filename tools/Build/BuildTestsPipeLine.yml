@@ -63,13 +63,13 @@ jobs:
       script: |
         & $(System.DefaultworkingDirectory)\tools\build\BuildTestsPipeline.ps1 '$(System.DefaultworkingDirectory)' $(DXApiFeed)
       pwsh: true
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@1
     displayName: 'Publish Artifact: UnitTests'
     inputs:
-      PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\bin'
+      targetPath: '$(System.DefaultworkingDirectory)\buildstage\bin'
       ArtifactName: 'Bin'
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@1
     displayName: 'Publish Artifact: XafApplication'
     inputs:
-      PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\Tests'
+      targetPath:  '$(System.DefaultworkingDirectory)\buildstage\Tests'
       ArtifactName: 'Tests'

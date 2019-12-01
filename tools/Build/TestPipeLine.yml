@@ -41,10 +41,11 @@ jobs:
         azurePowerShellVersion: 'LatestVersion'
         Inline: |
           & '$(System.DefaultworkingDirectory)/tools/build/TestPipeline.ps1' '$(System.DefaultWorkingDirectory)'
-    - task: PublishBuildArtifacts@1
+    - task: PublishPipelineArtifact@1
+      condition: $(NewArtifact)
       displayName: 'Publish Artifact: Bin'
       inputs:
-        PathtoPublish: '$(System.DefaultworkingDirectory)\bin'
+        targetPath: '$(System.DefaultworkingDirectory)\bin'
         ArtifactName: 'Bin'
 # - job: TestPerAssembly
 #   dependsOn: 'BuildArtifacts'

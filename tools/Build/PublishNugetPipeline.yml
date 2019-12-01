@@ -29,8 +29,8 @@ steps:
           "goArgs:"
           $goArgs|out-string
           & .\tools\build\publishNugets.ps1 @goArgs
-  - task: PublishBuildArtifacts@1
+  - task: PublishPipelineArtifact@1
     displayName: 'Published Packages'
     inputs:
-      PathtoPublish: '$(System.DefaultWorkingDirectory)\bin\Nupkg' 
+      targetPath: '$(System.DefaultWorkingDirectory)\bin\Nupkg' 
       ArtifactName: 'Nugets'

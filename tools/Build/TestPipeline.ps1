@@ -93,5 +93,7 @@ Invoke-Script{
 
     
 }
-
+$patchingSkipped=((Get-ChildItem $updates).count -eq 0)
+Write-HostFormatted "Patching skipped $patchingSkipped"
+Set-VsoVariable $NewArtifacts !$patchingSkipped
 # Compress-Archive "$sourcePath\bin" -CompressionLevel Fastest -DestinationPath "$sourcepath\artifacts\bin.zip"
