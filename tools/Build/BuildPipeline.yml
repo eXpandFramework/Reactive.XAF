@@ -77,13 +77,13 @@ jobs:
     displayName: 'Publish Artifact: UnitTests'
     inputs:
       Parallel: true
-      targetPath: '$(System.DefaultworkingDirectory)\buildstage\bin'
+      PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\bin'
       ArtifactName: 'Bin'
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: XafApplication'
     inputs:
       Parallel: true
-      targetPath: '$(System.DefaultworkingDirectory)\buildstage\TestApplication'
+      PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\TestApplication'
       ArtifactName: 'Tests'
   
   
