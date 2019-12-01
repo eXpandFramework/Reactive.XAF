@@ -206,21 +206,21 @@ New-Item $stage\source -ItemType Directory -Force
 Set-Location $stage
 New-Item "$stage\TestApplication" -ItemType Directory
 Write-HostFormatted "Copyingg Bin" -Section
-Copy-Item "$Sourcepath\Bin" "$stage\Bin" -Recurse -Force -Verbose
+Copy-Item "$Sourcepath\Bin" "$stage\Bin" -Recurse -Force 
 Write-HostFormatted "Copyingg TestWinApplication" -Section
-Move-Item "$stage\Bin\TestWinApplication" "$stage\TestApplication" -Force -Verbose
+Move-Item "$stage\Bin\TestWinApplication" "$stage\TestApplication" -Force 
 Write-HostFormatted "Copyingg TestWebApplication" -Section
-Move-Item "$stage\Bin\TestWebApplication" "$stage\TestApplication" -Force -Verbose
+Move-Item "$stage\Bin\TestWebApplication" "$stage\TestApplication" -Force 
 Write-HostFormatted "Copyingg AllTestsWin" -Section
-Move-Item "$stage\Bin\AllTestWeb" "$stage\TestApplication" -Force -Verbose
+Move-Item "$stage\Bin\AllTestWeb" "$stage\TestApplication" -Force 
 Write-HostFormatted "Copyingg AllTestsWeb" -Section
-Move-Item "$stage\Bin\AllTestWin" "$stage\TestApplication" -Force -Verbose
+Move-Item "$stage\Bin\AllTestWin" "$stage\TestApplication" -Force 
 Remove-Item "$stage\bin\ReactiveLoggerClient" -Recurse -Force
 Write-HostFormatted "Compressing TestApplication" -Section
 Compress-Files "$stage\TestApplication" -zipfileName $sourcePath\Tests.zip -compressionLevel NoCompression
 Write-HostFormatted "Compressing Bin" -Section
 Compress-Files "$stage\Bin\" -zipfileName $sourcePath\bin.zip -compressionLevel NoCompression
 Get-ChildItem $stage\bin|Remove-Item -Force -Recurse
-Move-Item "$stage\bin.zip" "$stage\bin\bin.zip"
+Move-Item "$sourcePath\bin.zip" "$stage\bin\bin.zip"
 Get-ChildItem $stage\bin\TestApplication|Remove-Item -Force -Recurse
-Move-Item "$stage\Tests.zip" "$stage\TestApplication\Tests.zip"
+Move-Item "$sourcePath\Tests.zip" "$stage\TestApplication\Tests.zip"

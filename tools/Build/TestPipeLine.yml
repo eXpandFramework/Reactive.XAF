@@ -103,7 +103,7 @@ jobs:
   dependsOn: 'BuildArtifacts'
   # dependsOn: 'TestPerAssembly'
   strategy:
-    parallel: 10
+    parallel: 2
   pool:
     vmImage: windows-latest
   variables:
