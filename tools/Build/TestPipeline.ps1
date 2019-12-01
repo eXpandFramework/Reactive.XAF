@@ -22,7 +22,7 @@ if ($buildNumber){
     #     Get-AzArtifact -Definition DevExpress.XAF-Lab -ArtifactName $name -Outpath $path
         
     # }
-    Get-ChildItem "$ourcepath\bin"
+    Get-ChildItem "$sourcepath\bin"
 }
 
 function UpdateVersion {
