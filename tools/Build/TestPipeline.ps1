@@ -6,23 +6,23 @@ param(
     $AzureToken=$env:AzDevOpsToken
 )
 $ErrorActionPreference = "Stop"
-if (!(Get-Module eXpandFramework -ListAvailable)){
+& "$SourcePath\go.ps1" -InstallModules
+$buildNumber = $env:build_BuildNumber
+$buildNumber += $env:Build_TriggeredBy_DefinitionName
+if ($buildNumber){
     $env:AzDevOpsToken=$AzureToken
     $env:AzOrganization="eXpandDevOps"
     $env:AzProject ="eXpandFramework"
-}
-$buildNumber = $env:build_BuildNumber
-$buildNumber += $env:Build_TriggeredBy_DefinitionName
-& "$SourcePath\go.ps1" -InstallModules
-if ($buildNumber){
-    New-Item "$SourcePath\bin" -ItemType Directory -Force
-    @{ArtifactName="Bin";OutPath=$SourcePath},@{ArtifactName="Tests";OutPath="$SourcePath\bin"}|invoke-parallel -script{
-        $name=$_.ArtifactName
-        $path=$_.Outpath
-        Write-Output "Downloading $name in $path"
-        Get-AzArtifact -Definition DevExpress.XAF-Lab -ArtifactName $name -Outpath $path
+
+    # New-Item "$SourcePath\bin" -ItemType Directory -Force
+    # @{ArtifactName="Bin";OutPath=$SourcePath},@{ArtifactName="Tests";OutPath="$SourcePath\bin"}|invoke-parallel -script{
+    #     $name=$_.ArtifactName
+    #     $path=$_.Outpath
+    #     Write-Output "Downloading $name in $path"
+    #     Get-AzArtifact -Definition DevExpress.XAF-Lab -ArtifactName $name -Outpath $path
         
-    }
+    # }
+    Get-ChildItem "$ourcepath\bin"
 }
 
 function UpdateVersion {
