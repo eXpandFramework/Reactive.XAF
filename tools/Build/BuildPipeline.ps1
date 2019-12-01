@@ -12,9 +12,9 @@ param(
 )
 
 if (!(Get-Module eXpandFramework -ListAvailable)){
-    # $env:AzureToken=$AzureToken
-    # $env:AzOrganization="eXpandDevOps"
-    # $env:AzProject ="eXpandFramework"
+    $env:AzDevopsToken=$AzureToken
+    $env:AzOrganization="eXpandDevOps"
+    $env:AzProject ="eXpandFramework"
 }
 
 "latest=$latest"
