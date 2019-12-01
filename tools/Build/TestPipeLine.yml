@@ -13,24 +13,24 @@ jobs:
     - group: keys
   steps:
     - checkout: self
-    - task: DownloadPipelineArtifact@2
-      displayName: Download Bin
-      inputs:
-        buildType: 'specific'
-        project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
-        definition:  '23'
-        buildVersionToDownload: 'latest'
-        artifactName: 'bin'
-        targetPath: '$(System.DefaultWorkingDirectory)'
-    - task: DownloadPipelineArtifact@2
-      displayName: Download EasyTests
-      inputs:
-        buildType: 'specific'
-        project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
-        definition: '23'
-        buildVersionToDownload: 'latest'
-        artifactName: 'Tests'
-        targetPath: '$(System.DefaultWorkingDirectory)\bin'
+    # - task: DownloadPipelineArtifact@2
+    #   displayName: Download Bin
+    #   inputs:
+    #     buildType: 'specific'
+    #     project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
+    #     definition:  '23'
+    #     buildVersionToDownload: 'latest'
+    #     artifactName: 'bin'
+    #     targetPath: '$(System.DefaultWorkingDirectory)'
+    # - task: DownloadPipelineArtifact@2
+    #   displayName: Download EasyTests
+    #   inputs:
+    #     buildType: 'specific'
+    #     project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
+    #     definition: '23'
+    #     buildVersionToDownload: 'latest'
+    #     artifactName: 'Tests'
+    #     targetPath: '$(System.DefaultWorkingDirectory)\bin'
     - task: AzurePowerShell@4
       displayName: BuildArtifacts
       inputs:

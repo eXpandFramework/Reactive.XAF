@@ -9,7 +9,10 @@ $ErrorActionPreference = "Stop"
 $buildNumber = $env:build_BuildNumber
 $buildNumber += $env:Build_TriggeredBy_DefinitionName
 & "$SourcePath\go.ps1" -InstallModules
-
+if ($buildNumber){
+    Get-AzArtifact -Definition DevExpress.XAF-Lab -ArtifactName bin -Outpath "$SourcePath"
+    Get-AzArtifact -Definition DevExpress.XAF-Lab -ArtifactName Tests -Outpath "$SourcePath"
+}
 
 function UpdateVersion {
     param (
