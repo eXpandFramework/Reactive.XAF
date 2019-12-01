@@ -13,7 +13,7 @@ jobs:
     - group: keys
   steps:
     - checkout: self
-    - task: DownloadPipelineArtifact@2
+    - task: DownloadBuildArtifacts@0
       displayName: Download Bin
       inputs:
         buildType: 'specific'
@@ -21,7 +21,8 @@ jobs:
         definition:  '23'
         buildVersionToDownload: 'latest'
         artifactName: 'bin'
-        targetPath: '$(System.DefaultWorkingDirectory)'
+        downloadPath:  '$(System.DefaultWorkingDirectory)'
+        downloadType: single 
     # - task: DownloadPipelineArtifact@2
     #   displayName: Download EasyTests
     #   inputs:
