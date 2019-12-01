@@ -216,4 +216,5 @@ Move-Item "$stage\Bin\AllTestWeb" "$stage\TestApplication" -Force -Verbose
 Write-HostFormatted "Copyingg AllTestsWeb" -Section
 Move-Item "$stage\Bin\AllTestWin" "$stage\TestApplication" -Force -Verbose
 Remove-Item "$stage\bin\ReactiveLoggerClient" -Recurse -Force
-
+Compress-Files "$stage\TestApplication" -zipfileName $sourcePath\Tests.zip -compressionLevel NoCompression
+Compress-Files "$stage\Bin\" -zipfileName $sourcePath\bin.zip -compressionLevel NoCompression
