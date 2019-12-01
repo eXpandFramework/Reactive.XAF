@@ -109,10 +109,11 @@ jobs:
     - group: keys
   steps:
     - checkout: none
-    - task: DownloadBuildArtifacts@0
+    - task: DownloadPipelineArtifact@2
       displayName: Download Bin
       inputs:
         buildType: 'current'
+        
         downloadType: 'single'
         artifactName: 'bin'
         downloadPath: '$(System.DefaultworkingDirectory)'
