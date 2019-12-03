@@ -27,7 +27,7 @@ $ErrorActionPreference = "Stop"
 
 Write-Verbose "Running VersionConverter on project $projectFile with target $targetPath"
 if (!$DevExpressVersion) {
-    $dxVersion = Get-DevExpressVersion $targetPath $referenceFilter $projectFile 
+    $dxVersion = GetDevExpressVersion $targetPath $referenceFilter $projectFile 
 }
 else {
     $dxVersion = $DevExpressVersion
@@ -75,21 +75,16 @@ try {
         if (!(Test-Path $versionConverterFlag)) {
             wh "Analyzing.. $packageFile" -section
             Remove-PatchFlags $packageDir 
-            @($packageFile) | ForEach-Object {
-                if (Test-Path $_) {
-                    $modulePath = (Get-Item $_).FullName
-                    wh "Switch:" -Style Underline
-                    $a = @{
-                        Modulepath      = $modulePath
-                        Version         = $dxversion
-                        referenceFilter = $referenceFilter
-                        snkFile        = "$PSScriptRoot\Xpand.snk"
-                        AssemblyList=$assemblyList
-                    }
-                    $a
-                    Switch-ReferencesVersion @a
-                }
+            wh "Switch:" -Style Underline
+            $a = @{
+                Modulepath      = $packageFile
+                Version         = $dxversion
+                referenceFilter = $referenceFilter
+                snkFile        = "$PSScriptRoot\Xpand.snk"
+                AssemblyList=$assemblyList
             }
+            $a
+            Switch-AssemblyDependencyVersion @a
             "Flag $versionConverterFlag"
             New-Item $versionConverterFlag -ItemType Directory | Out-Null
         }

@@ -131,7 +131,7 @@ function Use-Object {
         }
     }
 }
-function Get-MonoAssembly($path, $AssemblyList,[switch]$ReadSymbols) {
+function Get-MonoAssembly($path, $AssemblyList, [switch]$ReadSymbols) {
     $readerParams = New-Object ReaderParameters
     $readerParams.ReadWrite = $true
     $readerParams.ReadSymbols = $ReadSymbols
@@ -171,18 +171,18 @@ function Get-PaketReferences {
         $paketReferencesFile = "$($paketDirectoryInfo.FullName)\paket.references"
         if (Test-Path $paketReferencesFile) {
             Push-Location $projectFile.DirectoryName
-            $dependencies=dotnet paket show-installed-packages --project $projectFile.FullName --all --silent |ForEach-Object {
+            $dependencies = dotnet paket show-installed-packages --project $projectFile.FullName --all --silent | ForEach-Object {
                 $parts = $_.split(" ")
                 [PSCustomObject]@{
-                    Include      = $parts[1]
+                    Include = $parts[1]
                     Version = $parts[3]
                 }
             }
             Pop-Location
-            $c=Get-Content $paketReferencesFile|ForEach-Object{
-                $ref=$_
-                $d=$dependencies|Where-Object{
-                    $ref-eq $_.Include
+            $c = Get-Content $paketReferencesFile | ForEach-Object {
+                $ref = $_
+                $d = $dependencies | Where-Object {
+                    $ref -eq $_.Include
                 }
                 $d
             }
@@ -198,7 +198,7 @@ function Get-PaketReferences {
 function Get-PaketDependenciesPath {
     [CmdletBinding()]
     param (
-        [string]$Path="."
+        [string]$Path = "."
     )
     
     begin {
@@ -207,18 +207,18 @@ function Get-PaketDependenciesPath {
     
     process {
         $paketDirectoryInfo = (Get-Item $Path).Directory
-        if (!$paketDirectoryInfo){
+        if (!$paketDirectoryInfo) {
             $paketDirectoryInfo = Get-Item $Path
         }
         $paketDependeciesFile = "$($paketDirectoryInfo.FullName)\paket.dependencies"
         while (!(Test-Path $paketDependeciesFile)) {
             $paketDirectoryInfo = $paketDirectoryInfo.Parent
-            if (!$paketDirectoryInfo){
+            if (!$paketDirectoryInfo) {
                 return
             }
             $paketDependeciesFile = "$($paketDirectoryInfo.FullName)\paket.dependencies"
         }
-        $item=Get-Item $paketDependeciesFile
+        $item = Get-Item $paketDependeciesFile
         Set-Location $item.Directory.Parent.FullName
         $item
     }
@@ -227,28 +227,28 @@ function Get-PaketDependenciesPath {
         
     }
 }
-function Get-DevExpressVersion($targetPath, $referenceFilter, $projectFile) {
+function GetDevExpressVersion($targetPath, $referenceFilter, $projectFile) {
     try {
         Write-Verbose "Locating DevExpress version..."
         $projectFileInfo = Get-Item $projectFile
         [xml]$csproj = Get-Content $projectFileInfo.FullName
-        $packageReference = $csproj.Project.ItemGroup.PackageReference |Where-Object{$_}
-        if (!$packageReference){
-            $packageReference=Get-PaketReferences (Get-Item $projectFile)
+        $packageReference = $csproj.Project.ItemGroup.PackageReference | Where-Object { $_ }
+        if (!$packageReference) {
+            $packageReference = Get-PaketReferences (Get-Item $projectFile)
         }
-        $packageReference=$packageReference| Where-Object { $_.Include -like "$referenceFilter" }
+        $packageReference = $packageReference | Where-Object { $_.Include -like "$referenceFilter" }
         if ($packageReference) {
             $v = ($packageReference ).Version | Select-Object -First 1
             if ($packageReference) {
                 $version = [version]$v
-                if ($version.Revision -eq -1){
-                    $v+=".0"
+                if ($version.Revision -eq -1) {
+                    $v += ".0"
                     $version = [version]$v
                 }
             }
         }
         
-        if (!$packageReference -and !$paket){
+        if (!$packageReference -and !$paket) {
             $references = $csproj.Project.ItemGroup.Reference
             $dxReferences = $references.Include | Where-Object { $_ -like "$referenceFilter" }    
             $hintPath = $dxReferences.HintPath | ForEach-Object { 
@@ -316,30 +316,30 @@ function Get-DevExpressVersionFromReference {
             }
         }
     } | Where-Object { $_ } | Select-Object -First 1
-if ($hintPath ) {
-    Write-Verbose "$($dxAssembly.Name.Name) found from $hintpath"
-    [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($hintPath).FileVersion
-}
-else {
-    $dxAssemblyPath = Get-ChildItem $targetPath "$referenceFilter*.dll" | Select-Object -First 1
-    if ($dxAssemblyPath) {
-        Write-Verbose "$($dxAssembly.Name.Name) found from $($dxAssemblyPath.FullName)"
-        [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($dxAssemblyPath.FullName).FileVersion
+    if ($hintPath ) {
+        Write-Verbose "$($dxAssembly.Name.Name) found from $hintpath"
+        [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($hintPath).FileVersion
     }
     else {
-        $include = ($dxReferences | Select-Object -First 1).Include
-        $dxReference = [Regex]::Match($include, "DevExpress[^,]*", [RegexOptions]::IgnoreCase).Value
-        Write-Verbose "Include=$Include"
-        Write-Verbose "DxReference=$dxReference"
-        $dxAssembly = Get-ChildItem "$env:windir\Microsoft.NET\assembly\GAC_MSIL"  *.dll -Recurse | Where-Object { $_ -like "*$dxReference.dll" } | Select-Object -First 1
-        if ($dxAssembly) {
-            [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($dxAssembly.FullName).FileVersion
+        $dxAssemblyPath = Get-ChildItem $targetPath "$referenceFilter*.dll" | Select-Object -First 1
+        if ($dxAssemblyPath) {
+            Write-Verbose "$($dxAssembly.Name.Name) found from $($dxAssemblyPath.FullName)"
+            [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($dxAssemblyPath.FullName).FileVersion
         }
         else {
-            throw "Cannot find DevExpress Version"
+            $include = ($dxReferences | Select-Object -First 1).Include
+            $dxReference = [Regex]::Match($include, "DevExpress[^,]*", [RegexOptions]::IgnoreCase).Value
+            Write-Verbose "Include=$Include"
+            Write-Verbose "DxReference=$dxReference"
+            $dxAssembly = Get-ChildItem "$env:windir\Microsoft.NET\assembly\GAC_MSIL"  *.dll -Recurse | Where-Object { $_ -like "*$dxReference.dll" } | Select-Object -First 1
+            if ($dxAssembly) {
+                [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($dxAssembly.FullName).FileVersion
+            }
+            else {
+                throw "Cannot find DevExpress Version"
+            }
         }
     }
-}
 }
 function Write-Intent {
     [CmdletBinding()]
@@ -355,9 +355,9 @@ function Write-Intent {
     
     process {
         for ($i = 0; $i -lt $Level.Count; $i++) {
-            $prefix+="  "    
+            $prefix += "  "    
         }
-        $prefix+=$text
+        $prefix += $text
         Write-Output $prefix       
     }
     
@@ -488,7 +488,7 @@ function Update-Symbols {
         }
     }
 }
-function Switch-ReferencesVersion() {
+function Switch-AssemblyDependencyVersion() {
     param(
         [string]$modulePath, 
         [version]$Version,
@@ -496,65 +496,159 @@ function Switch-ReferencesVersion() {
         [string]$snkFile,
         [System.IO.FileInfo[]]$assemblyList
     )
-    if (!$assemblyList){
-        $packagesFolder=Get-PackagesFolder
-        $assemblyList=Get-ChildItem $packagesFolder -Include "*.dll","*.exe" -Recurse
+    if (!$assemblyList) {
+        $packagesFolder = Get-PackagesFolder
+        $assemblyList = Get-ChildItem $packagesFolder -Include "*.dll", "*.exe" -Recurse
     }
     $moduleAssemblyData = Get-MonoAssembly $modulePath $assemblyList -ReadSymbols
     $moduleAssembly = $moduleAssemblyData.assembly
-    $moduleReferences = $moduleAssembly.MainModule.AssemblyReferences
-    # wh "References:" -Style Underline
-    # $moduleReferences.Fullname |Sort-Object
-    $needsPatching = $false
-    $moduleReferences.ToArray() | Where-Object { $_.Name -like $referenceFilter } | ForEach-Object {
-        $dxReference = $_
-        # "Checking reference $_..."
-        if ($dxReference.Version -ne $Version) {
-            $moduleReferences.Remove($dxReference) | Out-Null
-            $newMinor = "$($Version.Major).$($Version.Minor)"
-            $newName = [Regex]::Replace($dxReference.Name, "\.v\d{2}\.\d", ".v$newMinor")
-            $regex = New-Object Regex("PublicKeyToken=([\w]*)") 
-            $token = $regex.Match($dxReference).Groups[1].Value
-            $regex = New-Object Regex("Culture=([\w]*)")
-            $culture = $regex.Match($dxReference).Groups[1].Value
-            $newReference = [AssemblyNameReference]::Parse("$newName, Version=$($Version), Culture=$culture, PublicKeyToken=$token")
-            $moduleReferences.Add($newreference)
-            $moduleAssembly.MainModule.Types | ForEach-Object {
-                $moduleAssembly.MainModule.GetTypeReferences() | Where-Object { $_.Scope -eq $dxReference } | ForEach-Object { 
-                    $_.Scope = $newReference 
-                }
-            }
-            wh "$($_.Name) version will changed from $($_.Version) to $($Version)`r`n" -ForegroundColor Blue
-            $needsPatching = $true
-        }
-        else {
-            wh "$($_.Name) Version ($($dxReference.Version)) matched nothing to do.`r`n" -ForegroundColor Blue
-        }
-    }
-    if ($needsPatching) {
-        wh "Patching $modulePath" -ForegroundColor Yellow
-        $writeParams = New-Object WriterParameters
-        $writeParams.WriteSymbols = $moduleAssembly.MainModule.hassymbols
-        $key = [File]::ReadAllBytes($snkFile)
-        $writeParams.StrongNameKeyPair = [System.Reflection.StrongNameKeyPair]($key)
-        if ($writeParams.WriteSymbols) {
-            $pdbPath = Get-Item $modulePath
-            $pdbPath = "$($pdbPath.DirectoryName)\$($pdbPath.BaseName).pdb"
-            $symbolSources = Get-SymbolSources $pdbPath
-        }
-        $moduleAssembly.Write($writeParams)
-        wh "Patched $modulePath" -ForegroundColor Green
-        if ($writeParams.WriteSymbols) {
-            "Symbols $modulePath"
-            if ($symbolSources -notmatch "is not source indexed") {
-                Update-Symbols -pdb $pdbPath -SymbolSources $symbolSources
-            }
-            else {
-                $global:lastexitcode=0
-                $symbolSources 
-            }
-        }
+    $switchedRefs=Switch-AssemblyNameReferences $moduleAssembly $referenceFilter $version
+    if ($switchedRefs) {
+        Switch-TypeReferences $moduleAssembly $referenceFilter $switchedRefs
+        Switch-Attributeparameters $moduleAssembly $referenceFilter $switchedRefs
+        Write-Assembly $modulePath $moduleAssembly $snkFile $Version
     }
     $moduleAssemblyData.Resolver.Dispose()
     $moduleAssembly.Dispose()
+}
+
+function New-AssemblyReference{
+    param(
+        [Mono.Cecil.AssemblyNameReference]$AsemblyNameReference,
+        $Version
+    )
+    $newMinor = "$($Version.Major).$($Version.Minor)"
+    $newName = [Regex]::Replace($AsemblyNameReference.Name, "\.v\d{2}\.\d", ".v$newMinor")
+    $regex = New-Object Regex("PublicKeyToken=([\w]*)") 
+    $token = $regex.Match($AsemblyNameReference).Groups[1].Value
+    $regex = New-Object Regex("Culture=([\w]*)")
+    $culture = $regex.Match($AsemblyNameReference).Groups[1].Value
+    [AssemblyNameReference]::Parse("$newName, Version=$($Version), Culture=$culture, PublicKeyToken=$token")
+}
+
+function Write-Assembly{
+    param(
+        $modulePath,
+        $moduleAssembly,
+        $snkFile,
+        $version
+    )
+    
+    wh "Switching $($moduleAssembly.Name.Name) to $version" -ForegroundColor Yellow
+    $writeParams = New-Object WriterParameters
+    $writeParams.WriteSymbols = $moduleAssembly.MainModule.hassymbols
+    $key = [File]::ReadAllBytes($snkFile)
+    $writeParams.StrongNameKeyPair = [System.Reflection.StrongNameKeyPair]($key)
+    if ($writeParams.WriteSymbols) {
+        $pdbPath = Get-Item $modulePath
+        $pdbPath = "$($pdbPath.DirectoryName)\$($pdbPath.BaseName).pdb"
+        $symbolSources = Get-SymbolSources $pdbPath
+    }
+    $moduleAssembly.Write($writeParams)
+    wh "Patched $modulePath" -ForegroundColor Green
+    if ($writeParams.WriteSymbols) {
+        "Symbols $modulePath"
+        if ($symbolSources -notmatch "is not source indexed") {
+            Update-Symbols -pdb $pdbPath -SymbolSources $symbolSources
+        }
+        else {
+            $global:lastexitcode = 0
+            $symbolSources 
+        }
+    }
+}
+
+function Switch-TypeReferences{
+    param(
+        $moduleAssembly,
+        $referenceFilter,
+        [hashtable]$AssemblyReferences
+    )
+    $typeReferences = $moduleAssembly.MainModule.GetTypeReferences()
+    $moduleAssembly.MainModule.Types | ForEach-Object {
+        $typeReferences | Where-Object { $_.Scope -like $referenceFilter } | ForEach-Object { 
+            $scope=$AssemblyReferences[$_.Scope.FullName]
+            if ($scope){
+                $_.Scope=$scope
+            }
+        }
+    }
+}
+
+function Switch-AttributeParameters {
+    param (
+        $moduleAssembly,
+        $referenceFilter,
+        [hashtable]$AssemblyReferences
+    )
+    @(($moduleAssembly.MainModule.Types.CustomAttributes.ConstructorArguments |Where-Object{
+        $_.Type.FullName -eq "System.Type" -and $_.Value.Scope -like $referenceFilter
+    }).Value)|Where-Object{$_}|ForEach-Object{
+        $scope=$AssemblyReferences[$_.Scope.FullName]
+        if ($scope){
+            $_.Scope=$scope
+        }
+    }
+}
+function Switch-AssemblyNameReferences {
+    param (
+        $moduleAssembly,
+        $referenceFilter,
+        $Version
+    )
+    $moduleReferences=$moduleAssembly.MainModule.AssemblyReferences
+    $refs=$moduleReferences.ToArray() | Where-Object { $_.Name -like $referenceFilter } | ForEach-Object {
+        if ($_.Version -ne $Version) {
+            $moduleReferences.Remove($_) | Out-Null
+            $assembNameReference=(New-AssemblyReference $_ $version)
+            $moduleReferences.Add($assembNameReference)
+            @{
+                Old = $_.FullName
+                New=$assembNameReference
+            }
+        }
+    }
+    $refs|ConvertToDictionary -KeyPropertyName Old -ValuePropertyName New
+}
+
+function ConvertToDictionary {
+    [CmdletBinding()]
+    param (
+        [Parameter(Position = 0,Mandatory,ValueFromPipeline)] 
+        [object] $Object ,
+        [parameter(Mandatory,Position=1)]
+        [string]$KeyPropertyName,
+        [string]$ValuePropertyName,
+        # [parameter(Mandatory)]
+        [scriptblock]$ValueSelector,
+        [switch]$Force
+    )
+    
+    begin {
+        $output = @{}
+    }
+    
+    process {
+        $key=$Object.($KeyPropertyName)
+        if (!$Force){
+            if (!$output.ContainsKey($key)){
+                if ($ValueSelector){
+                    $output.add($key,(& $ValueSelector $Object))
+                }
+                else{
+                    $value=$Object.($ValuePropertyName)
+                    $output.add($key,$value)
+                }
+                
+            }
+        }
+        else{
+            $output.add($key,(& $ValueSelector $Object))
+        }
+        
+    }
+    
+    end {
+        $output
+    }
 }

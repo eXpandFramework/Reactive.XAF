@@ -1,32 +1,7 @@
 variables:
-  Latest: false
-  NUGET_PACKAGES: $(Pipeline.Workspace)/.nuget/packages
+  NUGET_PACKAGES: $(Pipeline.Workspace)\.nuget\packages
 
-trigger: 
-    paths:
-      exclude:
-        - .github/FUNDING.yml
-        - src/Modules/Readme.md
-        - src/Modules/AutoCommit/Readme.md
-        - src/Modules/CloneMemberValue/Readme.md
-        - src/Modules/HideToolBar/Readme.md
-        - src/Modules/MasterDetail/Readme.md
-        - src/Modules/ModelMapper/Readme.md
-        - src/Modules/ModelViewInheritance/Readme.md
-        - src/Modules/ProgressBarViewItem/Readme.md
-        - src/Modules/Reactive/Readme.md
-        - src/Modules/SuppressConfirmation/Readme.md
-        - src/Modules/ViewEditMode/Readme.md
-        - src/Modules/RefreshView/Readme.md
-        - src/Modules/GridListEditor/Readme.md
-        - src/Modules/OneView/Readme.md
-        - src/Modules/Reactive.Logger/Readme.md
-        - src/Modules/Reactive.Logger.Hub/Readme.md
-        - src/Modules/Reactive.Logger.Client.Win/Readme.md
-        - README.md
-    branches:
-      include:
-        - master
+trigger: none 
 jobs:
 - job: BuildModules
   strategy: 
@@ -39,7 +14,7 @@ jobs:
   - checkout: self
   - task: CacheBeta@0
     inputs:
-      key: paket6 | paket.lock
+      key: paket7 | paket.lock
       path: $(Pipeline.Workspace)/.nuget/packages
     displayName: Cache NuGet packages
   - task: PowerShell@2
@@ -47,6 +22,7 @@ jobs:
     inputs:
       targetType: inline
       script: |
+        "Nugetpackage=$env:Nuget_PACKAGES"
         Copy-Item '$(System.DefaultWorkingDirectory)\paket.lock' '$(System.DefaultWorkingDirectory)\paket.lock1' -verbose
         'paket.lock','paket.dependencies'|ForEach-Object{
             $cache='$(Pipeline.Workspace)/.nuget/packages/$_'

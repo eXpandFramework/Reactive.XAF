@@ -7,7 +7,7 @@ param(
     $artifactstagingdirectory,
     $bindirectory,
     [string]$AzureToken=$env:AzDevopsToken,
-    [string]$CustomVersion="19.1"
+    [string]$CustomVersion="19.2.4"
 )
 
 if (!(Get-Module eXpandFramework -ListAvailable)){
@@ -17,7 +17,7 @@ if (!(Get-Module eXpandFramework -ListAvailable)){
     $env:DxFeed=$DxApiFeed
 }
 "CustomVersion=$CustomVersion"
-Start-XpandProjectConverter -version 19.1.8 -path $SourcePath -SkipInstall
+
 $ErrorActionPreference = "Stop"
 $regex = [regex] '(\d{2}\.\d*)'
 $result = $regex.Match($CustomVersion).Groups[1].Value;
@@ -72,39 +72,34 @@ $SourcePath| ForEach-Object {
     Set-Location $_
     Move-PaketSource 0 $DXApiFeed
 }
-Write-HostFormatted "Start-ProjectConverter $newversion"  -Section
-Start-XpandProjectConverter -version $newVersion -path $SourcePath -SkipInstall
 
 Set-Location "$SourcePath"
 "PaketRestore $SourcePath"
-$paketConfigsPath="$SourcePath\.paket\.config\$newversion"
-New-Item $paketConfigsPath -ItemType Directory -Force
-Get-ChildItem "$paketConfigsPath\.."|where-Object{
-    $name=$_.Name 
-    !($latestMinors|Where-Object{$_ -eq $name})
-}|Remove-Item -Force -Recurse
-Get-ChildItem $paketConfigsPath|ForEach-Object{
-    Copy-Item $_.FullName $SourcePath -Force
-}
-
+# $paketConfigsPath="$SourcePath\.paket\.config\$newversion"
+# New-Item $paketConfigsPath -ItemType Directory -Force
+# Get-ChildItem "$paketConfigsPath\.."|where-Object{
+#     $name=$_.Name 
+#     !($latestMinors|Where-Object{$_ -eq $name})
+# }|Remove-Item -Force -Recurse
+# Get-ChildItem $paketConfigsPath|ForEach-Object{
+#     Copy-Item $_.FullName $SourcePath -Force
+# }
+Write-HostFormatted "Start-ProjectConverter $newversion"  -Section
+Start-XpandProjectConverter -version $newVersion -path $SourcePath -SkipInstall
 
 try {
-    dotnet paket restore --fail-on-checks
-    if (!(Get-ChildItem $paketConfigsPath)){
-        Copy-Item $SourcePath\paket.lock $paketConfigsPath
-        Copy-Item $SourcePath\paket.dependencies $paketConfigsPath
-    }
-    if ($LASTEXITCODE) {
-        throw     
-    }
+    Invoke-PaketRestore -Strict 
+    Copy-Item $SourcePath\paket.lock $paketConfigsPath
+    Copy-Item $SourcePath\paket.dependencies $paketConfigsPath
 }
 catch {
     "PaketRestore Failed"
-    "PaketInstall $SourcePath (due to different Version)"
-    Invoke-PaketInstall -Strict
-    Get-ChildItem $paketConfigsPath|Remove-Item 
-    Copy-Item $SourcePath\paket.lock $paketConfigsPath
-    Copy-Item $SourcePath\paket.dependencies $paketConfigsPath
+    Write-HostFormatted "PaketInstall $SourcePath (due to different Version)" -section
+    dotnet paket install -v
+    # Invoke-PaketInstall -Strict
+    # Get-ChildItem $paketConfigsPath|Remove-Item 
+    # Copy-Item $SourcePath\paket.lock $paketConfigsPath
+    # Copy-Item $SourcePath\paket.dependencies $paketConfigsPath
 }
 
 & $SourcePath\go.ps1 @bArgs

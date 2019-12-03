@@ -1,7 +1,3 @@
-variables:
-  PastBuild: false
-  Latest: false
-
 trigger: none
 jobs:
 - job: BuildArtifacts
@@ -20,7 +16,7 @@ jobs:
         project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
         definition:  '23'
         buildVersionToDownload: 'specific'
-        buildId: '$(DxPipelineBuildId)'
+        buildId: $(DxPipelineBuildId)
         artifactName: 'bin'
         downloadType: single
         downloadPath: '$(System.DefaultWorkingDirectory)'
@@ -31,7 +27,7 @@ jobs:
         project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
         definition:  '23'
         buildVersionToDownload: specific
-        buildId: '$(DxPipelineBuildId)'
+        buildId: $(DxPipelineBuildId)
         artifactName: 'Tests'
         downloadType: single
         downloadPath: '$(System.DefaultWorkingDirectory)\bin'
@@ -151,29 +147,6 @@ jobs:
         ScriptType: InlineScript
         azurePowerShellVersion: 'LatestVersion'
         Inline: |
-          & '$(System.DefaultWorkingDirectory)\go.ps1' -InstallModules
-          $env:AzDevopsToken='$(AzureToken)'
-          $env:AzOrganization="eXpandDevOps"
-          $env:AzProject ="eXpandFramework"
-          $env:DXFeed='$(DXApiFeed)'
-          Write-Host "Checking for failed test"
-          if (Get-AzTestRuns -buildIds $env:Build_BuildId -FailedOnly){
-              throw "There are fail tests"
-          }
-          Write-Host "Query latest minors"
-          $latestMinors=Get-XAFLatestMinors
-          $dxversion=$latestMinors|select-object -first 1
-          if ($env:build_buildnumber -like "*$dxversion*"){
-              Write-Host "adding PublishNugets-DevExpress.XAF build"
-              Add-AzBuild PublishNugets-DevExpress.XAF
-              $latestMinors|Where-object{$_ -ne "$dxVersion"}|foreach{
-                  "MinorVersion:$_"
-                  $b=Get-AzBuilds -Tag "$_" -Status completed -Result succeeded -Top 1
-                  $b
-                  $parameters = @{
-                      DxPipelineBuildId = $b.id
-                  }
-                  Add-AzBuild -Definition DevExpress.XAF-Lab-Tests -Parameters $parameters
-              }
-          }
+          & '$(System.DefaultWorkingDirectory)\tools\build\check-tests.ps1' '$(System.DefaultWorkingDirectory)' '$(AzureToken)' '$(DxApiFeed)' '$(Build.BuildNumber)' '$(DxPipelineBuildId)'
+          
 

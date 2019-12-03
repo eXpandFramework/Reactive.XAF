@@ -1,18 +1,18 @@
 strategy:max
-source "C:\Program Files (x86)\DevExpress 18.2\Components\System\Components\Packages"
-cache: /.paket/nupkg
-cache: /.paket/nupkg versions:all
+source https://nuget.devexpress.com/88luCgoeuPFTrDrTDcc6zKg22U2cVcTm3vdKCv88I7PHF9St6i/api
 source https://api.nuget.org/v3/index.json
 source https://xpandnugetserver.azurewebsites.net/nuget
+storage:none
 
 nuget akarnokd.reactive_extensions 0.0.27-alpha
-nuget DevExpress.ExpressApp.Core.All == 18.2.11
-nuget DevExpress.ExpressApp.Win.All == 18.2.11
-nuget DevExpress.ExpressApp.Web.All == 18.2.11
-nuget DevExpress.EasyTest == 18.2.11  
-nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 18.2.11  
-nuget DevExpress.ExpressApp.EasyTest.WinAdapter == 18.2.11  
-nuget DevExpress.ExpressApp.Security.Xpo == 18.2.11  
+nuget DevExpress.ExpressApp.Core.All == 19.2.4
+nuget DevExpress.ExpressApp.Win.All == 19.2.4
+nuget DevExpress.ExpressApp.Web.All == 19.2.4
+nuget DevExpress.EasyTest == 19.2.4  
+nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 19.2.4  
+nuget DevExpress.ExpressApp.EasyTest.WinAdapter == 19.2.4  
+nuget DevExpress.ExpressApp.Security.Xpo == 19.2.4  
+nuget Microsoft.Extensions.Dependencyinjection == 3.1.0  
 nuget Enums.NET 3.0
 nuget FasterFlect.Xpand
 nuget Mono.Cecil 0.11.1
@@ -30,7 +30,7 @@ nuget System.CodeDom 4.6
 nuget System.Data.Common 4.3  
 nuget System.Interactive 4.0
 nuget System.Interactive.Async 4.0
-nuget System.Drawing.Common 4.6
+nuget System.Drawing.Common 4.7
 nuget System.Reactive 4.2
 nuget Unofficial.Microsoft.mshtml 7.0.3300
 nuget Xpand.Patcher 

@@ -424,11 +424,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
                 }
             }));
             
-            var modelInterfaces = new[]{PredefinedMap.GridView,PredefinedMap.TreeList}.MapToModel().ModelInterfaces().Replay();
+            var modelInterfaces = new[]{PredefinedMap.TreeList}.MapToModel().ModelInterfaces().Replay();
             modelInterfaces.Connect();
 
             var types = modelInterfaces.ToEnumerable().ToArray();
-            types.Length.ShouldBe(2);
+            types.Length.ShouldBe(1);
             types.Last().GetProperties()
                 .FirstOrDefault(info => !TypeMappingService.ReservedPropertyNames.Contains(info.Name)&&info.Name!=TypeMappingService.ModelMappersNodeName)
                 .ShouldBeNull();

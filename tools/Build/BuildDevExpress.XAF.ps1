@@ -41,9 +41,9 @@ Task Init {
 
         dotnet tool restore
         Set-Location $root
-        Invoke-Script{Invoke-PaketRestore -strict}
+        Invoke-Script{Invoke-PaketRestore -strict }
         
-        Get-ChildItem "$root\packages\grpc.core\runtimes\"|Copy-Item -Destination "$root\bin\runtimes" -Recurse -Force
+        Get-ChildItem "$env:NUGET_PACKAGES\grpc.core" "runtimes" -Recurse|Select-Object -Last 1|Copy-Item -Destination "$root\bin\runtimes" -Recurse -Force
         # $versionMismatch=Get-ChildItem $Root *.csproj -Recurse -Exclude "*TestApplication*"|ForEach-Object{
         #     $projectPath=$_.FullName
         #     Get-PackageReference $projectPath|foreach-Object{
@@ -81,7 +81,7 @@ Task CompileTests -precondition { return $compile } {
         dotnet restore "$Root\src\Tests\Tests.sln" --source $packageSources --source (Get-PackageFeed -Nuget) /WarnAsError
         dotnet msbuild "$Root\src\Tests\Tests.sln" "/bl:$Root\Bin\CompileTests.binlog" -t:rebuild "/p:configuration=Debug" /WarnAsError /m /v:m 
     } -Maximum 2
-    CheckDXReference
+    Get-ChildItem $root\bin "*xpand*.dll"| Test-AssemblyReference -VersionFilter $DXVersion
 }
 
 Task Compile -precondition { return $compile } {
@@ -104,25 +104,12 @@ Task Compile -precondition { return $compile } {
     Get-ChildItem "$Root\Bin" "*Xpand.*.dll"|ForEach-Object{
         [PSCustomObject]@{
             Name = $_.BaseName
-            Version=[System.Diagnostics.FileVersionInfo]::GetVersionInfo($_.FullName)
+            Version=[System.Diagnostics.FileVersionInfo]::GetVersionInfo($_.FullName).FileVersion
         }
     }
-    CheckDXReference
+    Get-ChildItem $root\bin "*xpand*.dll"| Test-AssemblyReference -VersionFilter $DXVersion
 }
 
-function CheckDXReference{
-    $missMatch=Get-ChildItem $bindirectory *xpand*.dll|ForEach-Object{
-        $refs=Get-AssemblyReference $_ -NameFilter DevEx*|Where-Object{$_.version -ne $dxVersion}
-        if ($refs){
-            Write-HostFormatted $_.BaseName -Section
-            $refs
-        }
-    }
-    $missMatch
-    if ($missMatch){
-        throw "Multiple DevExpress version dependecies"
-    }
-}
 Task  CreateNuspec {
     Invoke-Script {
         $a = @{
@@ -144,7 +131,7 @@ Task UpdateAllTests {
     Invoke-Script {
         & "$Root\Tools\Build\UpdateAllTests.ps1" "$Root" $branch $packageSources $dxVersion
     }
-    CheckDXReference
+    Get-ChildItem $root\bin "*xpand*.dll"| Test-AssemblyReference -VersionFilter $DXVersion
 }
 
 

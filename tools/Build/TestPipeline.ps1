@@ -11,18 +11,8 @@ $buildNumber = $env:build_BuildNumber
 
 if ($buildNumber){
     $env:AzDevOpsToken=$AzureToken
-    $env:AzOrganization="eXpandDevOps"
+    $env:AzOrganization="eXpandDevops"
     $env:AzProject ="eXpandFramework"
-
-    # New-Item "$SourcePath\bin" -ItemType Directory -Force
-    # @{ArtifactName="Bin";OutPath=$SourcePath},@{ArtifactName="Tests";OutPath="$SourcePath\bin"}|invoke-parallel -script{
-    #     $name=$_.ArtifactName
-    #     $path=$_.Outpath
-    #     Write-Output "Downloading $name in $path"
-    #     Get-AzArtifact -Definition DevExpress.XAF-Lab -ArtifactName $name -Outpath $path
-        
-    # }
-    # Get-ChildItem "$sourcepath\bin"
 }
 
 function UpdateVersion {
@@ -71,10 +61,7 @@ Invoke-Script {
 
     [version]$dxVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo(((Get-ChildItem $monoPath *DevExpress*.dll).FullName | Select-Object -First 1)).FileVersion
     Write-HostFormatted "dxVersion=$dxVersion" -ForegroundColor Green
-    if ($env:build_BuildNumber){
-        "Add Tag $dxversion to $env:Build_BuildId"
-        Add-AzBuildTag -tag "$dxVersion" -id $env:Build_BuildId
-    }
+    
     Set-VsoVariable build.updatebuildnumber "$env:build_BuildNumber-$dxVersion"
 
     Write-HostFormatted  "Downloading into $updates" -Section

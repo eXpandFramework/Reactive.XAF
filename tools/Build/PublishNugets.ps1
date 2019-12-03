@@ -7,25 +7,16 @@ param(
     $criteria = "Xpand.*"
 
 )
-if (!$Branch){
-    $Branch="lab"
-}
 
-$VerbosePreference="continue"
-"PastBuild=$pastbuild"
 "localPackageSource=$localPackageSource"
-if ($PastBuild -and $PastBuild -ne "false"){
-    return
-}
-New-Item $sourcesRoot\build\Nuget -ItemType Directory
-$localPackages=Get-ChildItem "$localPackageSource" 
-Write-Host "local-packages:`r`n$localPackages"
-
 if (!(Get-Module XpandPwsh -ListAvailable)){
     Install-Module XpandPwsh -Force
 }
 
-
+New-Item $sourcesRoot\build\Nuget -ItemType Directory
+$localPackages=Get-ChildItem "$localPackageSource" 
+Write-HostFormatted "local-packages:" -Section
+$localPackages
 
 $pArgs = @{
     PackageSource = "Release"
@@ -36,10 +27,11 @@ if ($Branch -eq "lab") {
     $pArgs.PackageSource="Lab"
     $remotePackageSource=Get-PackageFeed -Xpand
 }
-$args|Write-Output
+$args
 $packages =Find-XpandPackage  @pArgs
 
-Write-Host "remote-packages:`r`n$packages"
+Write-HostFormatted "remote-packages:" -Section
+$packages|Format-Table -AutoSize
 
 
 $localPackages| ForEach-Object {
@@ -54,8 +46,12 @@ $localPackages| ForEach-Object {
     if (!$package -or (([version]$package.Version) -lt ([version]$localPackageVersion))) {
         "Pushing $($_.FullName)"
         & (Get-Nugetpath) push $_.FullName -source $remotePackageSource -ApiKey $apikey
+        $clearCache=$true
     }
     else{
         Remove-Item $_ -Verbose
     }
+}
+if ($clearCache){
+    Invoke-RestMethod "https://xpandnugetstats.azurewebsites.net/api/totals/clearcache"
 }
