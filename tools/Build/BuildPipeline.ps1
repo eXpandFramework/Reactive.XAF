@@ -7,8 +7,7 @@ param(
     $artifactstagingdirectory,
     $bindirectory,
     [string]$AzureToken = $env:AzDevopsToken,
-    [string]$CustomVersion = "19.2.4",
-    [Switch]$Release
+    [string]$CustomVersion = "19.2.4"
 )
 
 if (!(Get-Module eXpandFramework -ListAvailable)) {
@@ -23,7 +22,17 @@ $ErrorActionPreference = "Stop"
 $regex = [regex] '(\d{2}\.\d*)'
 $result = $regex.Match($CustomVersion).Groups[1].Value;
 & "$SourcePath\go.ps1" -InstallModules
+
 Set-VsoVariable build.updatebuildnumber "$env:build_BuildNumber-$CustomVersion"
+$DXVersion = Get-DevExpressVersion 
+Write-HostFormatted "DXVersion=$DXVersion" -ForegroundColor Magenta
+Set-VsoVariable build.updatebuildnumber "$env:build_BuildNumber-$DXVersion"
+if ($env:build_BuildId) {
+    Add-AzBuildTag $DXVersion
+    if ($Branch -eq "master") {
+        Add-AzBuildTag "Release"
+    }
+}
 
 $stage = "$SourcePath\buildstage"
 Remove-Item $stage -force -recurse -ErrorAction SilentlyContinue
@@ -39,24 +48,9 @@ $CustomVersion = $latestMinors | Where-Object { "$($_.Major).$($_.Minor)" -eq $r
 
 
 $taskList = "Build"
-if (!$Release) {
+if ($Branch -eq "lab") {
     . "$SourcePath\tools\build\UpdateLatestProjectVersion.ps1"
 }
-
-
-$newVersion = $CustomVersion
-if ($CustomVersion -eq "latest") {
-    $newVersion = "$DXVersion.0"
-}
-
-Set-VsoVariable build.updatebuildnumber "$env:build_BuildNumber-$newVersion"
-if ($env:build_BuildId) {
-    Add-AzBuildTag $newVersion
-    if ($Release) {
-        Add-AzBuildTag "Release"
-    }
-}
-
 
 $bArgs = @{
     packageSources = "$(Get-PackageFeed -Xpand);$DxApiFeed"
@@ -124,3 +118,8 @@ Write-HostFormatted "Copyingg AllTestsWeb" -Section
 Move-Item "$stage\Bin\AllTestWin" "$stage\TestApplication" -Force 
 Remove-Item "$stage\bin\ReactiveLoggerClient" -Recurse -Force
 
+$DXVersion=Get-DevExpressVersion $DXVersion
+$SourcePath | ForEach-Object {
+    Set-Location $_
+    Move-PaketSource 0 "C:\Program Files (x86)\DevExpress $DXVersion\Components\System\Components\Packages"
+}

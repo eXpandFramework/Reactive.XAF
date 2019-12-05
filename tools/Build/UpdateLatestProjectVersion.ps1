@@ -1,5 +1,4 @@
-$DXVersion = Get-DevExpressVersion 
-Write-HostFormatted "DXVersion=$DXVersion" -ForegroundColor Magenta
+
 $officialPackages = Get-XpandPackages -PackageType XAFAll -Source Release
 $labPackages = Get-XpandPackages -PackageType XAFAll -Source Lab
 Write-HostFormatted "labPackages" -Section

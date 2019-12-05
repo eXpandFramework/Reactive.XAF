@@ -78,7 +78,7 @@ jobs:
             $parameters = @{
                 DxPipelineBuildId = $env:Build_BuildId
             }
-            Add-AzBuild -Definition DevExpress.XAF-Lab-Tests -Parameters $parameters
+            Add-AzBuild -Definition DevExpress.XAF-Lab-Tests -Parameters $parameters -Branch '$(Build.SourceBranchName)'
         }
         
   

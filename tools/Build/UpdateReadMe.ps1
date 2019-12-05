@@ -1,9 +1,14 @@
 using namespace system.text.RegularExpressions
 param(
-    $AzureToken = $env:AzureToken
+    $AzureToken =$env:AzDevOpsToken
 )
 
 $ErrorActionPreference = "Stop"
+if ($buildNumber){
+    $env:AzDevOpsToken=$AzureToken
+    $env:AzOrganization="eXpandDevops"
+    $env:AzProject ="eXpandFramework"
+}
 
 $rootLocation = "$PSScriptRoot\..\.."
 Set-Location $rootLocation
@@ -11,6 +16,17 @@ Set-Location $rootLocation
 $nuget = Get-NugetPath
 $packagesPath = "$rootLocation\bin\Nupkg\"
 $packages = & $nuget List -Source $packagesPath | ConvertTo-PackageObject | Select-Object -ExpandProperty Id
+function GetModuleName($_){
+    $moduleName = $_.BaseName.Substring($_.BaseName.LastIndexOf(".") + 1)
+    $moduleName = "$($_.BaseName).$($moduleName)Module"
+    if ($moduleName -like "*.hub.*") {
+        $moduleName = "Xpand.XAF.Modules.Reactive.Logger.Hub.ReactiveLoggerHubModule"
+    }
+    elseif ($moduleName -like "*Logger*") {
+        $moduleName = "Xpand.XAF.Modules.Reactive.Logger.ReactiveLoggerModule"
+    }
+    $moduleName
+}
 function UpdateModulesList($rootLocation, $packages) {
     $moduleList = "|PackageName|Version|[![Custom badge](https://img.shields.io/endpoint.svg?label=Nuget.org&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAF)](https://www.nuget.org/packages?q=Xpand.XAF)`r`n|---|---|---|`r`n"
     $packages | Where-Object { $_ -ne "Xpand.VersionConverter" -and $_ -notlike "Xpand.Extensions*" } | ForEach-Object {
@@ -116,89 +132,91 @@ function UpdateModules($rootLocation, $packages) {
     }
 }
 
-UpdateModulesList $rootLocation $packages
-UpdateModules $rootLocation $packages
+# UpdateModulesList $rootLocation $packages
+# UpdateModules $rootLocation $packages
 
 #compatibility matrix
-if (!$AzureToken){
-    return
-}
-$latestMinors = Get-LatestMinorVersion "DevExpress.ExpressApp" (Get-Feed -DX)
-"latestMinors:"
-$latestMinors
-Set-VSTeamAccount -Account eXpandDevOps -PersonalAccessToken $AzureToken
-function GetMatrixRows($Branch,$vsTeamBuilds) {
+# if (!$AzureToken){
+#     return
+# }
+# $latestMinors = Get-LatestMinorVersion "DevExpress.ExpressApp" (Get-Feed -DX)
+# "latestMinors:"
+# $latestMinors
+
+# function GetMatrixRows($Branch,$vsTeamBuilds) {
     
-    ($vsTeamBuilds | Select-Object -ExpandProperty Definition | Sort-Object Name -Unique | Where-Object { $_.name -like "DevExpress.XAF-$Branch*" } | ForEach-Object {
-            $definitionName=$_.name
-            $regex = [regex] '(\d{2}\.\d*)'
-            $result = $regex.Match($definitionName).Groups[1].Value;
-            [version]$latestVersion = $latestMinors | Where-Object { "$($_.Major).$($_.minor)" -eq $result }
-            $id = $_.Id
-            if (!$latestVersion) {
-                $latestVersion = Get-DevExpressVersion -LatestVersionFeed (Get-Feed -DX)
-                $id = 23
-                if ($Branch -eq "release") {
-                    $id = 25
-                }
-            }
+#     ($vsTeamBuilds | Select-Object -ExpandProperty Definition | Sort-Object Name -Unique | Where-Object { $_.name -like "DevExpress.XAF-$Branch*" } | ForEach-Object {
+#             $definitionName=$_.name
+#             $regex = [regex] '(\d{2}\.\d*)'
+#             $result = $regex.Match($definitionName).Groups[1].Value;
+#             [version]$latestVersion = $latestMinors | Where-Object { "$($_.Major).$($_.minor)" -eq $result }
+#             $id = $_.Id
+#             if (!$latestVersion) {
+#                 $latestVersion = Get-DevExpressVersion -LatestVersionFeed (Get-Feed -DX)
+#                 $id = 23
+#                 if ($Branch -eq "release") {
+#                     $id = 25
+#                 }
+#             }
             
-            $result=$vsTeamBuilds|Where-Object{$_.Definition.name -eq $definitionName}|Sort-Object FinishTime -Descending |Select-Object -ExpandProperty Result -First  1
-            $brnachName=$Branch
-            if ($Branch -eq "Release"){
-                $brnachName="master"
-            }
-            [PSCustomObject]@{
-                Version = $latestVersion
-                Id      = $id
-                Badge = "[![Build Status](https://dev.azure.com/eXpandDevOps/eXpandFramework/_apis/build/status/$Branch-Builds/$($_.name)?branchName=$brnachName)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=$Id&branchName=$brnachName)"
-                Succeeded =($result -eq "Succeeded")
-            }
-        } | Sort-Object Version -Descending)
-}
-$vsTeamBuilds=Get-VSTeamBuild -ProjectName expandFramework
-$releaseRows = GetMatrixRows Release $vsTeamBuilds
-$labRows = GetMatrixRows lab $vsTeamBuilds
-$rowMatrix = $labRows | ForEach-Object {
-    $version = $_.Version
-    $release=$releaseRows | Where-Object { $_.Version -eq $version }
-    [PSCustomObject]@{
-        Labid     = $_.id
-        ReleaseId = ($release | Select-Object -ExpandProperty Id)
-        Version   = "$($version.Major).$($version.Minor).$($version.Build)"
-        ReleaseBadge=$release.badge
-        LabBadge=$_.badge
-        ReleaseSucceeded=$release.Succeeded
-        LabSucceeded=$_.Succeeded
-    }
-}
-$matrix = ($rowMatrix | ForEach-Object {
-        $releaseId = $_.Releaseid
-        $releasebadge = $null
-        if ($releaseId) {
-            $releasebadge = "![Azure DevOps tests (compact)](https://img.shields.io/azure-devops/tests/expanddevops/expandframework/$($releaseId)?label=%20)"
-            $releasebadge="$($_.ReleaseBadge)<br>$releasebadge"
-        }
-        $labBadge="![Azure DevOps tests (compact)](https://img.shields.io/azure-devops/tests/expanddevops/expandframework/$($_.LabId)?label=%20)"
-        $labBadge="$($_.LabBadge)<br>$labBadge"
-        "|$($_.Version)|$releasebadge|$labBadge"
-    }) -join [System.Environment]::NewLine
+#             $result=$vsTeamBuilds|Where-Object{$_.Definition.name -eq $definitionName}|Sort-Object FinishTime -Descending |Select-Object -ExpandProperty Result -First  1
+#             $brnachName=$Branch
+#             if ($Branch -eq "Release"){
+#                 $brnachName="master"
+#             }
+#             [PSCustomObject]@{
+#                 Version = $latestVersion
+#                 Id      = $id
+#                 Badge = "[![Build Status](https://dev.azure.com/eXpandDevOps/eXpandFramework/_apis/build/status/$Branch-Builds/$($_.name)?branchName=$brnachName)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=$Id&branchName=$brnachName)"
+#                 Succeeded =($result -eq "Succeeded")
+#             }
+#         } | Sort-Object Version -Descending)
+# }
+# # $vsTeamBuilds=Get-VSTeamBuild -ProjectName expandFramework
 
-$matrix = @"
-[![Azure DevOps Coverage](https://img.shields.io/azure-devops/coverage/eXpandDevOps/expandframework/25.svg?logo=azuredevops)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=25)
-`r`n`r`n
-|XAF Version   | Release  | Lab|
-|---|---|---|
-$matrix
-    "
-"@
-$rootReadMe=Get-Content "$rootLocation\Readme.md" -Raw
-$regex = [regex] '(?s)### Compatibility Matrix(.*)### Issues'
-$result = $regex.Replace($rootReadMe, @"
-### Compatibility Matrix
-$matrix
-### Issues
-"@)
+# Get-AzBuilds DevExpress.XAF-Lab -Tag
+# $releaseRows = GetMatrixRows Release $vsTeamBuilds
+# $labRows = GetMatrixRows lab $vsTeamBuilds
+# $rowMatrix = $labRows | ForEach-Object {
+#     $version = $_.Version
+#     $release=$releaseRows | Where-Object { $_.Version -eq $version }
+#     [PSCustomObject]@{
+#         Labid     = $_.id
+#         ReleaseId = ($release | Select-Object -ExpandProperty Id)
+#         Version   = "$($version.Major).$($version.Minor).$($version.Build)"
+#         ReleaseBadge=$release.badge
+#         LabBadge=$_.badge
+#         ReleaseSucceeded=$release.Succeeded
+#         LabSucceeded=$_.Succeeded
+#     }
+# }
+# $matrix = ($rowMatrix | ForEach-Object {
+#         $releaseId = $_.Releaseid
+#         $releasebadge = $null
+#         if ($releaseId) {
+#             $releasebadge = "![Azure DevOps tests (compact)](https://img.shields.io/azure-devops/tests/expanddevops/expandframework/$($releaseId)?label=%20)"
+#             $releasebadge="$($_.ReleaseBadge)<br>$releasebadge"
+#         }
+#         $labBadge="![Azure DevOps tests (compact)](https://img.shields.io/azure-devops/tests/expanddevops/expandframework/$($_.LabId)?label=%20)"
+#         $labBadge="$($_.LabBadge)<br>$labBadge"
+#         "|$($_.Version)|$releasebadge|$labBadge"
+#     }) -join [System.Environment]::NewLine
 
-Set-Content "$rootLocation\Readme.md" $result.Trim("")
+# $matrix = @"
+# [![Azure DevOps Coverage](https://img.shields.io/azure-devops/coverage/eXpandDevOps/expandframework/25.svg?logo=azuredevops)](https://dev.azure.com/eXpandDevOps/eXpandFramework/_build/latest?definitionId=25)
+# `r`n`r`n
+# |XAF Version   | Release  | Lab|
+# |---|---|---|
+# $matrix
+#     "
+# "@
+# $rootReadMe=Get-Content "$rootLocation\Readme.md" -Raw
+# $regex = [regex] '(?s)### Compatibility Matrix(.*)### Issues'
+# $result = $regex.Replace($rootReadMe, @"
+# ### Compatibility Matrix
+# $matrix
+# ### Issues
+# "@)
+
+# Set-Content "$rootLocation\Readme.md" $result.Trim("")
     

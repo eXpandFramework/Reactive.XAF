@@ -14,6 +14,7 @@ The modules follow the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 ## Platform agnostic modules list
 |PackageName|Version|[![Custom badge](https://img.shields.io/endpoint.svg?label=Nuget.org&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAF)](https://www.nuget.org/packages?q=Xpand.XAF)
 |---|---|---|
+[Xpand.XAF.Core.All](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Core.All)|![](https://img.shields.io/nuget/v/Xpand.XAF.Core.All.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Core.All.svg?label=&style=flat)
 [AutoCommit](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/AutoCommit)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.AutoCommit.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.AutoCommit.svg?label=&style=flat)
 [CloneMemberValue](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/CloneMemberValue)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.CloneMemberValue.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.CloneMemberValue.svg?label=&style=flat)
 [CloneModelView](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/CloneModelView)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.CloneModelView.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.CloneModelView.svg?label=&style=flat)
@@ -32,6 +33,8 @@ The modules follow the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 [RefreshView](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/RefreshView)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.RefreshView.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.RefreshView.svg?label=&style=flat)
 [SuppressConfirmation](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/SuppressConfirmation)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.SuppressConfirmation.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.SuppressConfirmation.svg?label=&style=flat)
 [ViewEditMode](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/ViewEditMode)|![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.ViewEditMode.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.ViewEditMode.svg?label=&style=flat)
+[Xpand.XAF.Web.All](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Web.All)|![](https://img.shields.io/nuget/v/Xpand.XAF.Web.All.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Web.All.svg?label=&style=flat)
+[Xpand.XAF.Win.All](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Win.All)|![](https://img.shields.io/nuget/v/Xpand.XAF.Win.All.svg?label=&style=flat)|![](https://img.shields.io/nuget/dt/Xpand.XAF.Win.All.svg?label=&style=flat)
 
 ## Issues
 Use main project [issues](https://github.com/eXpandFramework/eXpand/issues/new/choose)
