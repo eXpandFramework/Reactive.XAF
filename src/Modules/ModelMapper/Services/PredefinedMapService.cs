@@ -344,7 +344,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             }
 
             if (new[]{PredefinedMap.XafLayoutControl,PredefinedMap.SplitContainerControl}.Any(map => map==predefinedMap)){
-                return view.GetPropertyValue(nameof(CompositeView.LayoutManager)).GetPropertyValue(nameof(LayoutManager.Container));
+                var value = view.GetPropertyValue(nameof(CompositeView.LayoutManager));
+                return value.GetType().Properties(nameof(LayoutManager.Container)).First().GetValue(value);
             }
 
             if (predefinedMap.IsRepositoryItem()){

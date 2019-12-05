@@ -27,17 +27,16 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 
 |<!-- -->|<!-- -->
 |----|----
-|**DevExpress.ExpressApp**|**Any**
- |**DevExpress.Persistent.Base**|**Any**
- |**DevExpress.ExpressApp.ConditionalAppearance**|**Any**
- |**DevExpress.Xpo**|**Any**
-|Fasterflect.Xpand|2.0.6
+|**DevExpress.ExpressApp.ConditionalAppearance**|**Any**
+|Fasterflect.Xpand|2.0.7
+ |JetBrains.Annotations|2019.1.3
  |System.Reactive|4.2.0
- |Xpand.Extensions|0.0.3
- |Xpand.Extensions.XAF|0.0.3
+ |Xpand.Extensions|0.0.19
+ |Xpand.Extensions.Reactive|0.0.12
+ |Xpand.Extensions.XAF|0.0.18
  |Xpand.Patcher|1.0.1
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|1.2.64
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.0.35
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|1.2.79
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.1.7
 
 ## Issues-Debugging-Troubleshooting
 

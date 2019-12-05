@@ -186,12 +186,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
             await new[]{typeToMap1}.MapToModel();
             await new[]{typeToMap2}.MapToModel();
-
+            var modelTypeNames = new[]{typeToMap1.ModelTypeName(),typeToMap2.ModelTypeName()};
             typeof(TypeMappingService).Method("Start",Flags.StaticInstanceAnyVisibility).Call(null);
             var mappedType1 = await TypeMappingService.MappedTypes.Take(1);
-            mappedType1.Name.ShouldBe(typeToMap1.ModelTypeName());
+            modelTypeNames.ShouldContain(mappedType1.Name);
             var mappedType2 = await TypeMappingService.MappedTypes.Take(2);
-            mappedType2.Name.ShouldBe(typeToMap2.ModelTypeName());
+            modelTypeNames.ShouldContain(mappedType2.Name);
             mappedType1.Assembly.ShouldBe(mappedType2.Assembly);
         }
 

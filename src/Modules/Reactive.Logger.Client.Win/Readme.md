@@ -29,21 +29,18 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 
 |<!-- -->|<!-- -->
 |----|----
-|**DevExpress.ExpressApp**|**Any**
- |**DevExpress.ExpressApp.ConditionalAppearance**|**Any**
+|**DevExpress.ExpressApp.ConditionalAppearance**|**Any**
  |**DevExpress.ExpressApp.Win**|**Any**
  |**DevExpress.ExpressApp.Xpo**|**Any**
- |**DevExpress.Xpo**|**Any**
-|Fasterflect.Xpand|2.0.6
- |MagicOnion|2.6.2
- |System.Buffers|4.5.0
- |System.Collections.Immutable|1.6.0
+|Fasterflect.Xpand|2.0.7
+ |JetBrains.Annotations|2019.1.3
+ |MagicOnion|2.6.3
  |System.Reactive|4.2.0
- |[Xpand.XAF.Modules.GridListEditor](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.GridListEditor)|0.0.15
- |[Xpand.XAF.Modules.OneView](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.OneView)|0.0.15
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|1.2.64
- |[Xpand.XAF.Modules.Reactive.Logger.Hub](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Logger.Hub)|0.0.16
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.0.35
+ |[Xpand.XAF.Modules.GridListEditor](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.GridListEditor)|0.0.30
+ |[Xpand.XAF.Modules.OneView](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.OneView)|0.0.30
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|1.2.79
+ |[Xpand.XAF.Modules.Reactive.Logger.Hub](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Logger.Hub)|0.0.31
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.1.7
 
 ## Issues-Debugging-Troubleshooting
 
