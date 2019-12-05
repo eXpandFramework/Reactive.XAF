@@ -1,5 +1,6 @@
 param(
-    $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\..\")
+    $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\..\"),
+    $Release
 )
 Use-MonoCecil | Out-Null
 function UpdateALLNuspec($platform,$allNuspec,$nuspecs) {
@@ -35,7 +36,11 @@ function UpdateALLNuspec($platform,$allNuspec,$nuspecs) {
     }
     if ($changed){
         [version]$version=$allNuspec.package.metadata.version
-        $allNuspec.package.metadata.version=(New-Object System.version($version.Major,$version.Minor,$version.Build,($version.Revision+1))).ToString()
+        $v=New-Object System.version($version.Major,$version.Minor,$version.Build,($version.Revision+1))
+        if ($Release){
+            $v=New-Object System.version($version.Major,$version.Minor,($version.Build+1),0)
+        }
+        $allNuspec.package.metadata.version=($v).ToString()
     }
     if ($allNuspec.package.metadata.dependencies){
         $allNuspec.package.metadata.dependencies.RemoveAll()

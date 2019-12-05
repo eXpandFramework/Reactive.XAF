@@ -79,4 +79,4 @@ Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -not
     }
     $nuspec.Save($nuspecFileName)
 } 
-& "$root\tools\build\UpdateAllNuspec.ps1" $root $dxVersion
+& "$root\tools\build\UpdateAllNuspec.ps1" $root $dxVersion $Release

@@ -123,15 +123,15 @@
       <Private>False</Private>
     </Reference>
     <PackageReference Include="DevExpress.ExpressApp.Web.All">
-      <Version>18.2.11</Version>
+      <Version>19.2.4</Version>
     </PackageReference>
-    <PackageReference Include="DevExpress.ExpressApp.Web" Version="18.2.11" />
-    <PackageReference Include="DevExpress.ExpressApp" Version="18.2.11" />
-    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WebAdapter" Version="18.2.11" />
-    <PackageReference Include="DevExpress.EasyTest" Version="18.2.11" />
-    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="18.2.11" />
+    <PackageReference Include="DevExpress.ExpressApp.Web" Version="19.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="19.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WebAdapter" Version="19.2.4" />
+    <PackageReference Include="DevExpress.EasyTest" Version="19.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="19.2.4" />
     <PackageReference Include="Xpand.XAF.Web.All">
-      <Version>0.0.11.4</Version>
+      <Version>0.0.15</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>

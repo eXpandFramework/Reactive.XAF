@@ -6,15 +6,16 @@ param(
     $DXApiFeed = $env:DxFeed,
     $artifactstagingdirectory,
     $bindirectory,
-    [string]$AzureToken=$env:AzDevopsToken,
-    [string]$CustomVersion="19.2.4"
+    [string]$AzureToken = $env:AzDevopsToken,
+    [string]$CustomVersion = "19.2.4",
+    [Switch]$Release
 )
 
-if (!(Get-Module eXpandFramework -ListAvailable)){
-    $env:AzDevopsToken=$AzureToken
-    $env:AzOrganization="eXpandDevOps"
-    $env:AzProject ="eXpandFramework"
-    $env:DxFeed=$DxApiFeed
+if (!(Get-Module eXpandFramework -ListAvailable)) {
+    $env:AzDevopsToken = $AzureToken
+    $env:AzOrganization = "eXpandDevOps"
+    $env:AzProject = "eXpandFramework"
+    $env:DxFeed = $DxApiFeed
 }
 "CustomVersion=$CustomVersion"
 
@@ -38,26 +39,24 @@ $CustomVersion = $latestMinors | Where-Object { "$($_.Major).$($_.Minor)" -eq $r
 
 
 $taskList = "Build"
-if ($Branch -eq "master") {
-    $bArgs = @{
-        packageSources = "$(Get-PackageFeed -Xpand);$DxApiFeed"
-        tasklist       = $taskList 
-        Release        = $true
-    }
-    & $SourcePath\go.ps1 @bArgs
-    return    
+if (!$Release) {
+    . "$SourcePath\tools\build\UpdateLatestProjectVersion.ps1"
 }
-. "$SourcePath\tools\build\UpdateLatestProjectVersion.ps1"
+
 
 $newVersion = $CustomVersion
-if ($CustomVersion -eq "latest"){
+if ($CustomVersion -eq "latest") {
     $newVersion = "$DXVersion.0"
 }
 
 Set-VsoVariable build.updatebuildnumber "$env:build_BuildNumber-$newVersion"
-if ($env:build_BuildId){
+if ($env:build_BuildId) {
     Add-AzBuildTag $newVersion
+    if ($Release) {
+        Add-AzBuildTag "Release"
+    }
 }
+
 
 $bArgs = @{
     packageSources = "$(Get-PackageFeed -Xpand);$DxApiFeed"
@@ -65,10 +64,11 @@ $bArgs = @{
     dxVersion      = $newVersion
     CustomVersion  = $newVersion -ne $defaulVersion
     ChangedModules = $updateVersion
+    Debug          = !$Release
 }
 Write-HostFormatted "bArgs:" -Section
 $bArgs | Out-String
-$SourcePath| ForEach-Object {
+$SourcePath | ForEach-Object {
     Set-Location $_
     Move-PaketSource 0 $DXApiFeed
 }
@@ -89,8 +89,8 @@ Start-XpandProjectConverter -version $newVersion -path $SourcePath -SkipInstall
 
 try {
     Invoke-PaketRestore -Strict 
-    Copy-Item $SourcePath\paket.lock $paketConfigsPath
-    Copy-Item $SourcePath\paket.dependencies $paketConfigsPath
+    # Copy-Item $SourcePath\paket.lock $paketConfigsPath
+    # Copy-Item $SourcePath\paket.dependencies $paketConfigsPath
 }
 catch {
     "PaketRestore Failed"
