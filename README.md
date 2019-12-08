@@ -1,19 +1,16 @@
-
-![Open Collective backers and sponsors](https://img.shields.io/opencollective/all/expand?label=PLEASE%20SPONSOR%20our%20activities%20if%20we%20helped%20your%20business&style=for-the-badge)
-
-![GitHub stars](https://img.shields.io/github/stars/expandframework/devexpress.xaf?label=Star%20the%20project%20if%20you%20think%20it%20deserves%20it&style=social)
-
-![GitHub forks](https://img.shields.io/github/forks/expandframework/Devexpress.Xaf?label=Fork%20the%20project%20to%20extend%20and%20contribute&style=social)
-
 ![image](https://user-images.githubusercontent.com/159464/66713086-c8c5a800-edae-11e9-9bc1-73ffc0c215fb.png)
+
+[![image](https://img.shields.io/badge/Exclusive%20services%3F-Head%20to%20the%20dashboard-Blue)](https://github.com/sponsors/apobekiaris) ![GitHub stars](https://img.shields.io/github/stars/expandframework/devexpress.xaf?label=Star%20the%20project%20if%20you%20think%20it%20deserves%20it&style=social) ![GitHub forks](https://img.shields.io/github/forks/expandframework/Devexpress.Xaf?label=Fork%20the%20project%20to%20extend%20and%20contribute&style=social)
+
+
 # About 
 In the `DevExpress.XAF` repository you can find **low dependency** DevExpress XAF **modules** distributed from Nuget.org only. 
 
 We aim for low dependency XAF modules so expect to see only a small set of classes per project. To learn more about each module navigate to its root `Readme` file or search the [Wiki](http://xaf.wiki.expandframework.com).
 
 There are two namespaces in the source, follow the links to read more. 
-1. The [DevExpress.XAF.Extensions](https://github.com/eXpandFramework/XAF/blob/master/src/Extensions/)
-2. The [DevExpress.XAF.Modules](https://github.com/eXpandFramework/XAF/tree/master/src/Modules)
+1. [DevExpress.XAF.Extensions](https://github.com/eXpandFramework/XAF/blob/master/src/Extensions/)
+2. [DevExpress.XAF.Modules](https://github.com/eXpandFramework/XAF/tree/master/src/Modules)
 
 ## Versioning
 The modules are **not bound** to **DevExpress versioning**, which means you can use the latest version with your old DevExpress projects [Read more](https://github.com/eXpandFramework/XAF/tree/master/tools/Xpand.VersionConverter).
@@ -30,7 +27,7 @@ The modules follow the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 
 ### Compatibility Matrix 
 
-The source is tested against the **latest Minor of each Major version** for the last **three years**.
+The modules found in this repository are unit tested and EasyTested consuming the released packages, against the **latest Minor of each Major version** for the last **three years**.
 
 
 
