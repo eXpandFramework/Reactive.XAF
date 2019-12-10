@@ -70,23 +70,20 @@ function AddReadMe {
         $name = $_.BaseName.Replace("Xpand.XAF.Modules.", "")
         $id = "Xpand.XAF.Modules.$name.$name" + "Module"
         $message = @"
-    
-    ➤ ​̲𝗣​̲𝗟​̲𝗘​̲𝗔​̲𝗦​̲𝗘​̲ ​̲𝗦​̲𝗨​̲𝗦​̲𝗧​̲𝗔​̲𝗜​̲𝗡​̲ ​̲𝗢​̲𝗨​̲𝗥​̲ ​̲𝗔​̲𝗖​̲𝗧​̲𝗜​̲𝗩​̲𝗜​̲𝗧​̲𝗜​̲𝗘​̲𝗦
-
-        ☞  Iғ ᴏᴜʀ ᴘᴀᴄᴋᴀɢᴇs ᴀʀᴇ ʜᴇʟᴘɪɴɢ ʏᴏᴜʀ ʙᴜsɪɴᴇss ᴀɴᴅ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ɢɪᴠᴇ ʙᴀᴄᴋ ᴄᴏɴsɪᴅᴇʀ ʙᴇᴄᴏᴍɪɴɢ ᴀ SPONSOR ᴏʀ ᴀ BACKER.
-            https://opencollective.com/expand
-
-        ☞  ɪғ ʏᴏᴜ ʟɪᴋᴇ ᴏᴜʀ ᴡᴏʀᴋ ᴘʟᴇᴀsᴇ ᴄᴏɴsɪᴅᴇʀ ᴛᴏ ɢɪᴠᴇ ᴜs ᴀ STAR.
-            https://github.com/eXpandFramework/DevExpress.XAF/stargazers 
-
-    ➤ ​​̲𝗣​̲𝗮​̲𝗰​̲𝗸​̲𝗮​̲𝗴​̲𝗲​̲ ​̲𝗻​̲𝗼​̲𝘁​̲𝗲​̲𝘀
-
-        ☞ Build the project before opening the model editor.
-
-        ☞ To read $id documentation visit the wiki page @ https://github.com/eXpandFramework/DevExpress.XAF/wiki/$name".
+++++++++++++++++++++++++  ++++++++      ❇️ 🅴🆇🅲🅻🆄🆂🅸🆅🅴 🆂🅴🆁🆅🅸🅲🅴🆂?❇️
+++++++++++++++++++++++##  ++++++++          https://github.com/sponsors/apobekiaris
+++++++++++++++++++++++  ++++++++++      
+++++++++++    ++++++  ++++++++++++      ➤  ɪғ ʏᴏᴜ ʟɪᴋᴇ ᴏᴜʀ ᴡᴏʀᴋ ᴘʟᴇᴀsᴇ ᴄᴏɴsɪᴅᴇʀ ᴛᴏ ɢɪᴠᴇ ᴜs ᴀ STAR. 
+++++++++++++  ++++++  ++++++++++++          https://github.com/eXpandFramework/DevExpress.XAF/stargazers
+++++++++++++++  ++  ++++++++++++++
+++++++++++++++    ++++++++++++++++      ➤ ​​̲𝗣​̲𝗮​̲𝗰​̲𝗸​̲𝗮​̲𝗴​̲𝗲​̲ ​̲𝗻​̲𝗼​̲𝘁​̲𝗲​̲𝘀
+++++++++++++++  ++  ++++++++++++++  
+++++++++++++  ++++    ++++++++++++          ☞ Build the project before opening the model editor.
+++++++++++  ++++++++  ++++++++++++          ☞ Documentation can be found @ https://github.com/eXpandFramework/DevExpress.XAF/wiki/$name".
+++++++++++  ++++++++++  ++++++++++          ☞ The package only adds the required references. To install $id add the next line in the constructor of your XAF module.
+++++++++  ++++++++++++++++++++++++              RequiredModuleTypes.Add(typeof($id));
+++++++  ++++++++++++++++++++++++++
         
-        ☞ The package only adds the required references. To install $id add the next line in the constructor of your XAF module.
-            RequiredModuleTypes.Add(typeof($id));
 "@
         Set-Content "$Directory\ReadMe.txt" $message
     }
