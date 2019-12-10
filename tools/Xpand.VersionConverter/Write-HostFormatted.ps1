@@ -74,7 +74,7 @@ function wh {
                 }
                 $prefix+=$_
                 if ($Style -eq "Underline"){
-                    $prefix=ConvertTo-FramedText $prefix -NoRoof -char "_"
+                    $prefix=cf $prefix -NoRoof -char "_"
                 }
                 $prefix|ForEach-Object{
                     $a=@{

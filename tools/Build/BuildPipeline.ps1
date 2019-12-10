@@ -3,7 +3,7 @@ param(
     $SourcePath = "$PSScriptRoot\..\..",
     $GitHubUserName = "apobekiaris",
     $GitHubToken = $env:GitHubToken,
-    $DXApiFeed = $env:DxFeed,
+    $DXApiFeed = $env:LocalDXFeed,
     $artifactstagingdirectory,
     $bindirectory,
     [string]$AzureToken = $env:AzDevopsToken,
@@ -24,11 +24,9 @@ $result = $regex.Match($CustomVersion).Groups[1].Value;
 & "$SourcePath\go.ps1" -InstallModules
 
 Set-VsoVariable build.updatebuildnumber "$env:build_BuildNumber-$CustomVersion"
-$DXVersion = Get-DevExpressVersion 
-Write-HostFormatted "DXVersion=$DXVersion" -ForegroundColor Magenta
-Set-VsoVariable build.updatebuildnumber "$env:build_BuildNumber-$DXVersion"
+
 if ($env:build_BuildId) {
-    Add-AzBuildTag $DXVersion
+    Add-AzBuildTag $CustomVersion
     if ($Branch -eq "master") {
         Add-AzBuildTag "Release"
     }
@@ -46,6 +44,7 @@ $latestMinors
 $CustomVersion = $latestMinors | Where-Object { "$($_.Major).$($_.Minor)" -eq $result }
 "CustomVersion=$CustomVersion"
 
+$DXVersion = Get-DevExpressVersion 
 
 $taskList = "Build"
 if ($Branch -eq "lab") {
@@ -55,8 +54,7 @@ if ($Branch -eq "lab") {
 $bArgs = @{
     packageSources = "$(Get-PackageFeed -Xpand);$DxApiFeed"
     tasklist       = $tasklist
-    dxVersion      = $newVersion
-    CustomVersion  = $newVersion -ne $defaulVersion
+    dxVersion      = $CustomVersion
     ChangedModules = $updateVersion
     Debug          = !$Release
 }
@@ -78,8 +76,8 @@ Set-Location "$SourcePath"
 # Get-ChildItem $paketConfigsPath|ForEach-Object{
 #     Copy-Item $_.FullName $SourcePath -Force
 # }
-Write-HostFormatted "Start-ProjectConverter $newversion"  -Section
-Start-XpandProjectConverter -version $newVersion -path $SourcePath -SkipInstall
+Write-HostFormatted "Start-ProjectConverter $CustomVersion"  -Section
+Start-XpandProjectConverter -version $CustomVersion -path $SourcePath -SkipInstall
 
 try {
     Invoke-PaketRestore -Strict 
@@ -118,7 +116,7 @@ Write-HostFormatted "Copyingg AllTestsWeb" -Section
 Move-Item "$stage\Bin\AllTestWin" "$stage\TestApplication" -Force 
 Remove-Item "$stage\bin\ReactiveLoggerClient" -Recurse -Force
 
-$DXVersion=Get-DevExpressVersion $DXVersion
+$DXVersion=Get-DevExpressVersion 
 $SourcePath | ForEach-Object {
     Set-Location $_
     Move-PaketSource 0 "C:\Program Files (x86)\DevExpress $DXVersion\Components\System\Components\Packages"

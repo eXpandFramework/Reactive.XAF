@@ -90,24 +90,24 @@ Task Compile -precondition { return $compile } {
         $Configuration="Release"
     }
     Invoke-Script {
-        Write-Host "Building Extensions" -f "Blue"
+        Write-HostFormatted "Building Extensions" -Section
         # dotnet restore "$Root\src\Extensions\Extensions.sln" --source (Get-PackageFeed -nuget) --source $packageSources /WarnAsError
         & dotnet msbuild "$Root\src\Extensions\Extensions.sln" -t:rebuild "/bl:$Root\Bin\Extensions.binlog" "/p:configuration=$Configuration" /m /v:m /WarnAsError -r
     } -Maximum 2
     Invoke-Script {
-        Write-Host "Building Modules" -f "Blue"
+        Write-HostFormatted "Building Modules" -Section
         # dotnet restore "$Root\src\Modules\Modules.sln" --source (Get-PackageFeed -nuget) --source $packageSources /WarnAsError
         Set-Location "$Root\src\Modules"
         dotnet msbuild "$Root\src\Modules\Modules.sln" -t:rebuild "/bl:$Root\Bin\Modules.binlog" "/p:configuration=$Configuration" /WarnAsError /m /v:m -r
     } -Maximum 2
-    "Build Versions:"
+    Write-HostFormatted "Build Versions:" -Section
     Get-ChildItem "$Root\Bin" "*Xpand.*.dll"|ForEach-Object{
         [PSCustomObject]@{
             Name = $_.BaseName
             Version=[System.Diagnostics.FileVersionInfo]::GetVersionInfo($_.FullName).FileVersion
         }
     }
-    Get-ChildItem $root\bin "*xpand*.dll"| Test-AssemblyReference -VersionFilter $DXVersion
+    Get-ChildItem $root\bin "*xpand*.dll"| Test-AssemblyReference -VersionFilter $DXVersion|Format-Table -AutoSize
 }
 
 Task  CreateNuspec {
