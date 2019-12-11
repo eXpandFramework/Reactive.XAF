@@ -27,7 +27,7 @@ The modules follow the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 
 ### Compatibility Matrix 
 
-The modules found in this repository are unit tested and EasyTested consuming the released packages, against the **latest Minor of each Major version** for the last **three years**.
+The modules found in this repository are unit tested and EasyTested, consuming the released packages, against the latest Minor of **each Major version** for the last **three years**.
 
 
 
@@ -38,7 +38,7 @@ The modules found in this repository are unit tested and EasyTested consuming th
 |![Custom badge](https://img.shields.io/endpoint?style=for-the-badge&label=%20&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FLatestXAFMinors%3Findex%3D1)|![Custom badge](https://img.shields.io/endpoint?style=plastic&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAFBuild%3Findex%3D1%26branch%3Dmaster%26shield%3Dtests)|![Custom badge](https://img.shields.io/endpoint?&style=plastic&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAFBuild%3Findex%3D1%26branch%3Dlab%26shield%3Dtests)
 |![Custom badge](https://img.shields.io/endpoint?label=%20&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FLatestXAFMinors%3Findex%3D2)|![Custom badge](https://img.shields.io/endpoint?style=plastic&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAFBuild%3Findex%3D2%26branch%3Dmaster%26shield%3Dtests)|![Custom badge](https://img.shields.io/endpoint?style=plastic&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAFBuild%3Findex%3D2%26branch%3Dlab%26shield%3Dtests)
 |![Custom badge](https://img.shields.io/endpoint?label=%20&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FLatestXAFMinors%3Findex%3D3)|![Custom badge](https://img.shields.io/endpoint?style=plastic&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAFBuild%3Findex%3D3%26branch%3Dmaster%26shield%3Dtests)|![Custom badge](https://img.shields.io/endpoint?style=plastic&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAFBuild%3Findex%3D3%26branch%3Dlab%26shield%3Dtests)
-|
+
 ### Issues
 Use main project [issues](https://github.com/eXpandFramework/eXpand/issues/new?assignees=apobekiaris&labels=Question%2C+XAF&template=xaf--question.md&title=)
 

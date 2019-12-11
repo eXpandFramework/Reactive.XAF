@@ -45,6 +45,7 @@ $packages | Out-String
 
 $testApplication = "$root\src\Tests\ALL\TestApplication\TestApplication.sln"
 Set-Location $root\src\Tests\All\
+
 Get-ChildItem *.csproj -Recurse|ForEach-Object{
     $prefs=Get-PackageReference $_ 
     $prefs|Where-Object{$_.include -like "Xpand.XAF.*"}|ForEach-Object{
@@ -59,12 +60,14 @@ Get-ChildItem *.csproj -Recurse|ForEach-Object{
 Write-HostFormatted "Building TestApplication" -Section
 
 $localSource = "$root\bin\Nupkg"
-$source = "$localSource;$(Get-PackageFeed -Nuget);$(Get-PackageFeed -Xpand);$source"
+$source = "$(Get-PackageFeed -Nuget);$(Get-PackageFeed -Xpand);$source"
 "Source=$source"
 $testAppPAth = (Get-Item $testApplication).DirectoryName
 Set-Location $testAppPAth
 Clear-ProjectDirectories
+
 Invoke-Script {
+    & (Get-NugetPath) restore "$testAppPAth\TestApplication.sln" -source $localsource
     & (Get-NugetPath) restore "$testAppPAth\TestApplication.sln" -source $source
     & (Get-MsBuildPath) "$testAppPAth\TestApplication.sln" /bl:$root\bin\TestWebApplication.binlog /WarnAsError /v:m -t:rebuild -m
 } -Maximum 2

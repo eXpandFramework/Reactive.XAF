@@ -63,26 +63,35 @@ $nuspecs | Invoke-Parallel -LimitConcurrency $conLimit -VariablesToImport $varsT
 # $nuspecs | ForEach-Object { Invoke-Command $packScript -ArgumentList $_ }
 function AddReadMe {
     param(
-        $BaseName,
-        $Directory
+        $Package,
+        $Directory,
+        [System.IO.FileInfo[]]$assemblyList,
+        $modules
     )
-    if ($BaseName -like "Xpand.XAF*") {
-        $name = $_.BaseName.Replace("Xpand.XAF.Modules.", "")
-        $id = "Xpand.XAF.Modules.$name.$name" + "Module"
+    if ($Package.Id -like "Xpand.XAF*") {
+        $moduleName = (Get-XAFModule $Directory $assemblyList).Name
+        $wikiName=$moduleName
+        if (!$wikiName){
+            $wikiName="Modules"
+        }
+        $registration="RequiredModuleTypes.Add(typeof($moduleName));"
+        if ($package.Id -like "*all*"){
+            $registration=($modules|Where-Object{$_.platform -eq "Core" -or $package.id -like "*$($_.platform)*"}|ForEach-Object{"RequiredModuleTypes.Add(typeof($($_.FullName)));"}) -join "`r`n                                                "
+        }
         $message = @"
-++++++++++++++++++++++++  ++++++++      ❇️ 🅴🆇🅲🅻🆄🆂🅸🆅🅴 🆂🅴🆁🆅🅸🅲🅴🆂?❇️
-++++++++++++++++++++++##  ++++++++          https://github.com/sponsors/apobekiaris
-++++++++++++++++++++++  ++++++++++      
-++++++++++    ++++++  ++++++++++++      ➤  ɪғ ʏᴏᴜ ʟɪᴋᴇ ᴏᴜʀ ᴡᴏʀᴋ ᴘʟᴇᴀsᴇ ᴄᴏɴsɪᴅᴇʀ ᴛᴏ ɢɪᴠᴇ ᴜs ᴀ STAR. 
-++++++++++++  ++++++  ++++++++++++          https://github.com/eXpandFramework/DevExpress.XAF/stargazers
-++++++++++++++  ++  ++++++++++++++
-++++++++++++++    ++++++++++++++++      ➤ ​​̲𝗣​̲𝗮​̲𝗰​̲𝗸​̲𝗮​̲𝗴​̲𝗲​̲ ​̲𝗻​̲𝗼​̲𝘁​̲𝗲​̲𝘀
-++++++++++++++  ++  ++++++++++++++  
-++++++++++++  ++++    ++++++++++++          ☞ Build the project before opening the model editor.
-++++++++++  ++++++++  ++++++++++++          ☞ Documentation can be found @ https://github.com/eXpandFramework/DevExpress.XAF/wiki/$name".
-++++++++++  ++++++++++  ++++++++++          ☞ The package only adds the required references. To install $id add the next line in the constructor of your XAF module.
-++++++++  ++++++++++++++++++++++++              RequiredModuleTypes.Add(typeof($id));
-++++++  ++++++++++++++++++++++++++
+++++++++++++++++++++++++  ++++++++
+++++++++++++++++++++++##  ++++++++      ➤ 🅴🆇🅲🅻🆄🆂🅸🆅🅴 🆂🅴🆁🆅🅸🅲🅴🆂 
+++++++++++++++++++++++  ++++++++++          ☞ http://𝗮𝗽𝗼𝗯𝗲𝗸𝗶𝗮𝗿𝗶𝘀.𝗲𝘅𝗽𝗮𝗻𝗱𝗳𝗿𝗮𝗺𝗲𝘄𝗼𝗿𝗸.𝗰𝗼𝗺
+++++++++++    ++++++  ++++++++++++      
+++++++++++++  ++++++  ++++++++++++      ➤  ɪғ ʏᴏᴜ ʟɪᴋᴇ ᴏᴜʀ ᴡᴏʀᴋ ᴘʟᴇᴀsᴇ ᴄᴏɴsɪᴅᴇʀ ᴛᴏ ɢɪᴠᴇ ᴜs ᴀ STAR. 
+++++++++++++++  ++  ++++++++++++++          ☞ https://github.com/eXpandFramework/DevExpress.XAF/stargazers
+++++++++++++++    ++++++++++++++++      
+++++++++++++++  ++  ++++++++++++++      ➤ ​​̲𝗣​̲𝗮​̲𝗰​̲𝗸​̲𝗮​̲𝗴​̲𝗲​̲ ​̲𝗻​̲𝗼​̲𝘁​̲𝗲​̲𝘀
+++++++++++++  ++++    ++++++++++++         ☞ Build the project before opening the model editor.
+++++++++++  ++++++++  ++++++++++++         ☞ Documentation can be found @ https://github.com/eXpandFramework/DevExpress.XAF/wiki/$moduleName".
+++++++++++  ++++++++++  ++++++++++         ☞ $($package.id) only adds the required references. To register the included packages add the next line/s in the constructor of your XAF module.
+++++++++  ++++++++++++++++++++++++              $registration
+++++++  ++++++++++++++++++++++++++      
         
 "@
         Set-Content "$Directory\ReadMe.txt" $message
@@ -91,17 +100,34 @@ function AddReadMe {
         Remove-Item "$Directory\ReadMe.txt" -Force -ErrorAction SilentlyContinue
     }
 }
-Get-ChildItem "$nugetBin" *.nupkg | ForEach-Object {
-    $zip = "$($_.DirectoryName)\$($_.BaseName).zip" 
-    Move-Item $_.FullName $zip
-    $unzipDir = "$($_.DirectoryName)\$($_.BaseName)"
+
+Write-HostFormatted "Discover XAFModules"
+$packages=& (Get-NugetPath) list -source $nugetBin|ConvertTo-PackageObject
+$assemblyList=(Get-ChildItem "$nugetbin\.." *.dll)
+$modules=Get-XAFModule "$nugetBin\.." -Include "Xpand.XAF.Modules.*" -AssemblyList $assemblyList|ForEach-Object{
+    [PSCustomObject]@{
+        FullName = $_.FullName
+        platform=(Get-AssemblyMetadata $_.Assembly -key platform).value
+    }
+}
+
+Write-HostFormatted "Update Nupkg files (ReadMe)"
+$packages|Invoke-Parallel -VariablesToImport "nugetbin","modules","assemblylist" -LimitConcurrency ([System.Environment]::ProcessorCount) -Script{
+# $packages | ForEach-Object {
+    $baseName="$($_.Id).$($_.Version)"
+    $zip = "$nugetbin\$baseName.zip" 
+    $nupkgPath="$nugetBin\$baseName.nupkg"
+    Move-Item $nupkgPath $zip
+    $unzipDir = "$nugetBin\$baseName"
     Expand-Archive $zip $unzipDir
     Remove-Item $zip
-    AddReadme $_.BaseName $unzipDir
+    AddReadme $_ $unzipDir $assemblyList $modules
     Compress-Files "$unzipDir" $zip 
-    Move-Item $zip $_.FullName
+    Move-Item $zip $nupkgPath
     Remove-Item $unzipDir -Force -Recurse
 }
+
+
 if ($ChangedModules) {
     Write-HostFormatted "ChangedModules" -Section
     $ChangedModules

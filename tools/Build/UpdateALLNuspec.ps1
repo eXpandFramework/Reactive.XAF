@@ -3,56 +3,72 @@ param(
     $Release
 )
 Use-MonoCecil | Out-Null
-function UpdateALLNuspec($platform,$allNuspec,$nuspecs) {
-    $allNuspec.package.metadata.dependencies|Where-Object{
+function UpdateALLNuspec($platform, $allNuspec, $nuspecs) {
+    $allNuspec.package.metadata.dependencies | Where-Object {
         $assembly
     }
 
     
     $allModuleNuspecs = $nuspecs | Where-Object { $_ -notlike "*ALL*" -and $_ -like "*.Modules.*" -and $_ -notlike "*.Client.*" }
-    $platformNuspecs=$allModuleNuspecs | Where-Object {
-        $platformMetada=Get-AssemblyMetadata "$root\bin\$($_.BaseName).dll"|Where-Object{$_.key -eq "Platform"}
-        if (!$platformMetada){
-            throw "Platform missing in $($_.baseName)"
-        }
+    $platformNuspecs = $allModuleNuspecs | Where-Object {
+        $platformMetada = Get-AssemblyMetadata "$root\bin\$($_.BaseName).dll" -key "Platform"
         $platformMetada.Value -eq $platform
-    }| ForEach-Object {
+    } | ForEach-Object {
         [xml]$nuspec = Get-Content $_.FullName
         [PSCustomObject]@{
             Nuspec = $nuspec
-            File= $_
+            File   = $_
         }
     }
-    $changed=$allNuspec.package.metadata.dependencies.dependency|Where-Object{
+    $changed = $allNuspec.package.metadata.dependencies.dependency | Where-Object {
 
-        $id=$_.Id
-        $version=$_.Version
-        if ($id -like "*.all"){
-            [xml]$allCore=@(Get-Content "$root\tools\nuspec\Xpand.XAF.Core.All.nuspec")
+        $id = $_.Id
+        $version = $_.Version
+        if ($id -like "*.all") {
+            [xml]$allCore = @(Get-Content "$root\tools\nuspec\Xpand.XAF.Core.All.nuspec")
         }
-        !((($platformNuspecs|Select-Object -ExpandProperty Nuspec) + @($allCore))|Where-Object{
-            $_.package.metaData.Id -eq $id -and $_.package.metaData.version -eq $version
-        })
+        !((($platformNuspecs | Select-Object -ExpandProperty Nuspec) + @($allCore)) | Where-Object {
+                $_.package.metaData.Id -eq $id -and $_.package.metaData.version -eq $version
+            })
     }
-    if ($changed){
-        [version]$version=$allNuspec.package.metadata.version
-        $v=New-Object System.version($version.Major,$version.Minor,$version.Build,($version.Revision+1))
+    [version]$modulesVersion=[System.Diagnostics.FileVersionInfo]::GetVersionInfo("$root\bin\Xpand.XAF.Modules.Reactive.dll" ).FileVersion
+    [version]$v = $allNuspec.package.metadata.version
+    if ($changed -or $Release) {
+        $build=$v.Build
+        $revision=($v.Revision + 1)
         if ($Release){
-            $v=New-Object System.version($version.Major,$version.Minor,($version.Build+1),0)
+            $build+=1
+            $revision=0
         }
-        $allNuspec.package.metadata.version=($v).ToString()
+        if ($nowVersion.Minor -ne $modulesVersion.Minor){
+            $revision=0
+        }
+        $v = New-Object System.version($modulesVersion.Major, $modulesVersion.Minor, $build, $revision)
+        $allNuspec.package.metadata.version = ($v).ToString()
     }
-    if ($allNuspec.package.metadata.dependencies){
+    else{
+        [version]$nowVersion=$allNuspec.package.metadata.version
+        $build=$nowVersion.Build
+        $revision=$nowVersion.Revision
+        if ($nowVersion.Minor -ne $modulesVersion.Minor){
+            $build=0
+            $revision=0
+        }
+        $newVersion=New-Object System.Version($nowVersion.Major,$modulesVersion.Minor,$build,$revision)
+        $allNuspec.package.metadata.version = ($newVersion).ToString()
+    }
+    if ($allNuspec.package.metadata.dependencies) {
         $allNuspec.package.metadata.dependencies.RemoveAll()
     }
     
-    $platformNuspecs| ForEach-Object {
+    $platformNuspecs | ForEach-Object {
         [xml]$nuspec = $_.Nuspec
         $dependency = [PSCustomObject]@{
             id      = $_.File.BaseName
             version = $nuspec.package.metadata.version
         }
-        Add-NuspecDependency $dependency.Id $dependency.Version $allNuspec
+        
+        Add-NuspecDependency $dependency.Id $dependency.version $allNuspec
     }
 }
 $nuspecs = Get-ChildItem "$root\tools\nuspec" *.nuspec

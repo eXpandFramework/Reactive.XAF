@@ -8,8 +8,12 @@ $ErrorActionPreference = "Stop"
 # Import-XpandPwsh
 
 New-Item -Path "$root\bin\Nupkg" -ItemType Directory  -ErrorAction SilentlyContinue -Force | Out-Null
-
-
+[version]$modulesVersion=[System.Diagnostics.FileVersionInfo]::GetVersionInfo("$root\bin\Xpand.XAF.Modules.Reactive.dll" ).FileVersion
+$versionConverterPath="$root\tools\Xpand.VersionConverter\Xpand.VersionConverter.nuspec"
+[xml]$nuspec=Get-Content $versionConverterPath
+[version]$vv=$nuspec.package.metadata.version
+$nuspec.package.metadata.version="$($vv.major).$($modulesVersion.Minor).$($vv.build)"
+$nuspec.Save($versionConverterPath)
 
 $allProjects=Get-ChildItem $root *.csproj -Recurse | Select-Object -ExpandProperty BaseName
 # Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notlike "*Test*" } | ForEach-Object {
@@ -77,6 +81,8 @@ Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -not
         $versionConverter |Out-String
         Add-NuspecDependency $versionConverter.Id $versionConverter.Version $nuspec
     }
+    
+    
     $nuspec.Save($nuspecFileName)
 } 
 & "$root\tools\build\UpdateAllNuspec.ps1" $root $dxVersion $Release

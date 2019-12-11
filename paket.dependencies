@@ -19,6 +19,7 @@ nuget Mono.Cecil 0.11.1
 nuget Moq 4.13.1
 nuget MagicOnion 2.6.3
 nuget Grpc 2.23.0
+nuget Grpc.Core 2.25.0
 nuget MessagePack 1.7.3.7
 nuget Humanizer.Core 2.7.9
 nuget Newtonsoft.Json 12.0.3
@@ -32,6 +33,7 @@ nuget System.Interactive 4.0
 nuget System.Interactive.Async 4.0
 nuget System.Drawing.Common 4.7
 nuget System.Reactive 4.2
+nuget System.Collections.Immutable 1.7.0
 nuget Unofficial.Microsoft.mshtml 7.0.3300
 nuget Xpand.Patcher 
 nuget Xpand.Collections 

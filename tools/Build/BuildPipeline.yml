@@ -61,13 +61,12 @@ jobs:
       Parallel: true
       PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\TestApplication'
       ArtifactName: 'Tests'
-  - task: AzurePowerShell@4
-    displayName: 'Testing start'
+  - task: PowerShell@2
+    displayName: 'Start Tesing' 
     inputs:
-      azureSubscription: 'Visual Studio Enterprise (b48a609a-17f6-4e48-a317-54ab77fbf822)'
-      ScriptType: InlineScript
-      azurePowerShellVersion: 'LatestVersion'
-      Inline: |
+      pwsh: true
+      targetType: inline
+      script: |
         & '$(System.DefaultWorkingDirectory)\go.ps1' -InstallModules
         $env:AzDevopsToken='$(AzureToken)'
         $env:AzOrganization="eXpandDevOps"
@@ -78,7 +77,7 @@ jobs:
             $parameters = @{
                 DxPipelineBuildId = $env:Build_BuildId
             }
-            Add-AzBuild -Definition DevExpress.XAF-Lab-Tests -Parameters $parameters -Branch '$(Build.SourceBranchName)'
+            Add-AzBuild -Definition DevExpress.XAF-Lab-Tests -Parameters $parameters -Branch '$(Build.SourceBranchName)' -Tag $dxVersion
         }
         
   

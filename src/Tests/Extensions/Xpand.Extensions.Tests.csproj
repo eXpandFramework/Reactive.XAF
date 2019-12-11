@@ -28,7 +28,7 @@
     <Reference Include="Xpand.Extensions.XAF.Xpo">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.Xpo.dll</HintPath>
     </Reference>
-    <Reference Include="Xpand.TestsLib, Version=1.0.17.0, Culture=neutral, PublicKeyToken=c52ffed5d5ff0958">
+    <Reference Include="Xpand.TestsLib">
       <HintPath>..\..\..\bin\Xpand.TestsLib.dll</HintPath>
     </Reference>
   </ItemGroup>

@@ -16,16 +16,6 @@
     <OutputPathSuffix>AllTestWeb</OutputPathSuffix>
     <OutputPath>..\..\..\..\bin\AllTestWeb</OutputPath>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
-    <LangVersion>latest</LangVersion>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <OutputPath>..\..\..\..\bin\AllTestWeb</OutputPath>
-  </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Program.cs" />
   </ItemGroup>
@@ -47,7 +37,7 @@
     <PackageReference Include="DevExpress.ExpressApp" Version="19.2.4" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
     <PackageReference Include="Unofficial.Microsoft.mshtml" Version="7.0.3300" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="0.0.15" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="2.192.8" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.TestsLib">

@@ -1,7 +1,7 @@
 param(
     $Branch = "lab",
     $sourcesRoot = "$PSScriptRoot\..\..",
-    $apiKey,
+    $apiKey=$env:NugetApiKey,
     $localPackageSource = "$PSScriptRoot\..\..\bin\Nupkg",
     $PastBuild,
     $criteria = "Xpand.*"
@@ -12,9 +12,19 @@ param(
 if (!(Get-Module XpandPwsh -ListAvailable)){
     Install-Module XpandPwsh -Force
 }
-
+"Build_DefinitionName=$env:Build_DefinitionName"
 New-Item $sourcesRoot\build\Nuget -ItemType Directory
-$localPackages=Get-ChildItem "$localPackageSource" 
+$nupkg=Get-ChildItem "$localPackageSource" 
+$localPackages=((& (Get-NugetPath) list -source $localPackageSource)|ConvertTo-PackageObject)
+$localPackages=$localPackages|ForEach-Object{
+    $id=$_.Id
+    $version=$_.version
+    [PSCustomObject]@{
+        Id = $id
+        Version=$version
+        FullName=($nupkg|Where-Object{$_.BaseName -eq "$id.$version"}).FullName
+    }
+}
 Write-HostFormatted "local-packages:" -Section
 $localPackages
 
@@ -35,12 +45,9 @@ $packages|Format-Table -AutoSize
 
 
 $localPackages| ForEach-Object {
-    $localPackageName = [System.IO.Path]::GetFileNameWithoutExtension($_)
-    $r = New-Object System.Text.RegularExpressions.Regex("[\d]{1,2}\.[\d]{1}\.[\d]*(\.[\d]*)?")
-    $localPackageVersion = $r.Match($localPackageName).Value
-    $localPackageName = $localPackageName.Replace($localPackageVersion, "").Trim(".")
+    $localPackageName = $_.id
+    $localPackageVersion = $_.Version
     "localPackage=$localPackageName, $localPackageVersion"
-    
     $package = $packages | Where-Object { $_.Id -eq $localPackageName }
     "publishedPackage=$package"
     if (!$package -or (([version]$package.Version) -lt ([version]$localPackageVersion))) {
@@ -49,7 +56,7 @@ $localPackages| ForEach-Object {
         $clearCache=$true
     }
     else{
-        Remove-Item $_ -Verbose
+        Remove-Item $_.FullName -Verbose
     }
 }
 if ($clearCache){

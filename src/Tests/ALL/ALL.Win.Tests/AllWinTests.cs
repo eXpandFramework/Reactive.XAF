@@ -12,6 +12,7 @@ using Xpand.TestsLib;
 using Xpand.TestsLib.Attributes;
 using Xpand.TestsLib.EasyTest;
 using Xpand.XAF.Modules.Reactive;
+using Xpand.XAF.Modules.Reactive.Logger;
 
 namespace ALL.Win.Tests{
     [NonParallelizable]
@@ -21,6 +22,8 @@ namespace ALL.Win.Tests{
         [TestCaseSource(nameof(WinModules))]
         [XpandTest]
         public void UnloadWinModules(Type moduleType){
+            moduleType = typeof(ReactiveModule);
+            moduleType = typeof(ReactiveLoggerModule);
             ReactiveModuleBase.Unload(moduleType);
             using (var application = new TestWinApplication(moduleType, false)){
                 application.AddModule((ModuleBase) moduleType.CreateInstance(), nameof(UnloadWinModules));

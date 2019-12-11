@@ -7,7 +7,7 @@ param(
     $artifactstagingdirectory,
     $bindirectory,
     [string]$AzureToken = $env:AzDevopsToken,
-    [string]$CustomVersion = "19.2.4"
+    [string]$CustomVersion = "19.2.4.0"
 )
 
 if (!(Get-Module eXpandFramework -ListAvailable)) {
@@ -26,9 +26,9 @@ $result = $regex.Match($CustomVersion).Groups[1].Value;
 Set-VsoVariable build.updatebuildnumber "$env:build_BuildNumber-$CustomVersion"
 
 if ($env:build_BuildId) {
-    Add-AzBuildTag $CustomVersion
+    # Add-AzBuildTag $CustomVersion
     if ($Branch -eq "master") {
-        Add-AzBuildTag "Release"
+        # Add-AzBuildTag "Release"
     }
 }
 
@@ -56,7 +56,6 @@ $bArgs = @{
     tasklist       = $tasklist
     dxVersion      = $CustomVersion
     ChangedModules = $updateVersion
-    Debug          = !$Release
 }
 Write-HostFormatted "bArgs:" -Section
 $bArgs | Out-String
@@ -116,7 +115,7 @@ Write-HostFormatted "Copyingg AllTestsWeb" -Section
 Move-Item "$stage\Bin\AllTestWin" "$stage\TestApplication" -Force 
 Remove-Item "$stage\bin\ReactiveLoggerClient" -Recurse -Force
 
-$DXVersion=Get-DevExpressVersion 
+$DXVersion=Get-DevExpressVersion (Get-DevExpressVersion)
 $SourcePath | ForEach-Object {
     Set-Location $_
     Move-PaketSource 0 "C:\Program Files (x86)\DevExpress $DXVersion\Components\System\Components\Packages"
