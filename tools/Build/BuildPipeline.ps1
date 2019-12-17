@@ -66,31 +66,18 @@ $SourcePath | ForEach-Object {
 
 Set-Location "$SourcePath"
 "PaketRestore $SourcePath"
-# $paketConfigsPath="$SourcePath\.paket\.config\$newversion"
-# New-Item $paketConfigsPath -ItemType Directory -Force
-# Get-ChildItem "$paketConfigsPath\.."|where-Object{
-#     $name=$_.Name 
-#     !($latestMinors|Where-Object{$_ -eq $name})
-# }|Remove-Item -Force -Recurse
-# Get-ChildItem $paketConfigsPath|ForEach-Object{
-#     Copy-Item $_.FullName $SourcePath -Force
-# }
+
 Write-HostFormatted "Start-ProjectConverter $CustomVersion"  -Section
 Start-XpandProjectConverter -version $CustomVersion -path $SourcePath -SkipInstall
 
 try {
     Invoke-PaketRestore -Strict 
-    # Copy-Item $SourcePath\paket.lock $paketConfigsPath
-    # Copy-Item $SourcePath\paket.dependencies $paketConfigsPath
+
 }
 catch {
     "PaketRestore Failed"
     Write-HostFormatted "PaketInstall $SourcePath (due to different Version)" -section
     dotnet paket install -v
-    # Invoke-PaketInstall -Strict
-    # Get-ChildItem $paketConfigsPath|Remove-Item 
-    # Copy-Item $SourcePath\paket.lock $paketConfigsPath
-    # Copy-Item $SourcePath\paket.dependencies $paketConfigsPath
 }
 
 & $SourcePath\go.ps1 @bArgs

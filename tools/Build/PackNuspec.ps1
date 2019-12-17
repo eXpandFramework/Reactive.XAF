@@ -79,9 +79,12 @@ function AddReadMe {
             $registration=($modules|Where-Object{$_.platform -eq "Core" -or $package.id -like "*$($_.platform)*"}|ForEach-Object{"RequiredModuleTypes.Add(typeof($($_.FullName)));"}) -join "`r`n                                                "
         }
         $message = @"
+
+
+        
 ++++++++++++++++++++++++  ++++++++
 ++++++++++++++++++++++##  ++++++++      ➤ 🅴🆇🅲🅻🆄🆂🅸🆅🅴 🆂🅴🆁🆅🅸🅲🅴🆂 
-++++++++++++++++++++++  ++++++++++          ☞ http://𝗮𝗽𝗼𝗯𝗲𝗸𝗶𝗮𝗿𝗶𝘀.𝗲𝘅𝗽𝗮𝗻𝗱𝗳𝗿𝗮𝗺𝗲𝘄𝗼𝗿𝗸.𝗰𝗼𝗺
+++++++++++++++++++++++  ++++++++++          ☞ http://apobekiaris.expandframework.com
 ++++++++++    ++++++  ++++++++++++      
 ++++++++++++  ++++++  ++++++++++++      ➤  ɪғ ʏᴏᴜ ʟɪᴋᴇ ᴏᴜʀ ᴡᴏʀᴋ ᴘʟᴇᴀsᴇ ᴄᴏɴsɪᴅᴇʀ ᴛᴏ ɢɪᴠᴇ ᴜs ᴀ STAR. 
 ++++++++++++++  ++  ++++++++++++++          ☞ https://github.com/eXpandFramework/DevExpress.XAF/stargazers
@@ -112,8 +115,8 @@ $modules=Get-XAFModule "$nugetBin\.." -Include "Xpand.XAF.Modules.*" -AssemblyLi
 }
 
 Write-HostFormatted "Update Nupkg files (ReadMe)"
-$packages|Invoke-Parallel -VariablesToImport "nugetbin","modules","assemblylist" -LimitConcurrency ([System.Environment]::ProcessorCount) -Script{
-# $packages | ForEach-Object {
+# $packages|Invoke-Parallel -VariablesToImport "nugetbin","modules","assemblylist" -LimitConcurrency ([System.Environment]::ProcessorCount) -Script{
+$packages | ForEach-Object {
     $baseName="$($_.Id).$($_.Version)"
     $zip = "$nugetbin\$baseName.zip" 
     $nupkgPath="$nugetBin\$baseName.nupkg"
