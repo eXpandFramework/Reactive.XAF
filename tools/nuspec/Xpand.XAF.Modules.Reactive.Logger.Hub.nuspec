@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Reactive.Logger.Hub</id>
-    <version>2.192.3.0</version>
+    <version>2.192.4.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -19,9 +19,9 @@
       <dependency version="2.6.3" id="MagicOnion" />
       <dependency version="4.0" id="System.Interactive.Async" />
       <dependency version="4.2" id="System.Reactive" />
-      <dependency version="2.192.13.0" id="Xpand.Extensions.Reactive" />
-      <dependency version="2.192.3.0" id="Xpand.XAF.Modules.Reactive" />
-      <dependency version="2.192.3.0" id="Xpand.XAF.Modules.Reactive.Logger" />
+      <dependency version="2.192.14.0" id="Xpand.Extensions.Reactive" />
+      <dependency version="2.192.4.0" id="Xpand.XAF.Modules.Reactive" />
+      <dependency version="2.192.4.0" id="Xpand.XAF.Modules.Reactive.Logger" />
       <dependency version="2.192.0" id="Xpand.VersionConverter" />
     </dependencies>
   </metadata>

@@ -16,6 +16,8 @@ if (!(Get-Module eXpandFramework -ListAvailable)) {
     $env:AzProject = "eXpandFramework"
     $env:DxFeed = $DxApiFeed
 }
+"XpandPwsh"
+Get-Module XpandPwsh -ListAvailable
 "CustomVersion=$CustomVersion"
 
 $ErrorActionPreference = "Stop"
@@ -25,12 +27,6 @@ $result = $regex.Match($CustomVersion).Groups[1].Value;
 
 Set-VsoVariable build.updatebuildnumber "$env:build_BuildNumber-$CustomVersion"
 
-if ($env:build_BuildId) {
-    # Add-AzBuildTag $CustomVersion
-    if ($Branch -eq "master") {
-        # Add-AzBuildTag "Release"
-    }
-}
 
 $stage = "$SourcePath\buildstage"
 Remove-Item $stage -force -recurse -ErrorAction SilentlyContinue
