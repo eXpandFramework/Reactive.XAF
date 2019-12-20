@@ -91,16 +91,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             }
         }
 
-
-        [Test]
-        [XpandTest]
-        [Apartment(ApartmentState.STA)]
-        public async Task SaveTrace_When_AuthendiationStandard(){
-            await SaveTraceEvent(application => {
-                    application.SetupSecurity();
-                });
-        }
-
+        
         [Test]
         [XpandTest]
         [Apartment(ApartmentState.STA)]

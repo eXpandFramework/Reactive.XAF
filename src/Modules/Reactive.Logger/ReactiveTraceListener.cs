@@ -7,7 +7,6 @@ using System.Reactive.Subjects;
 using System.Text.RegularExpressions;
 using Xpand.Extensions.AppDomain;
 
-
 namespace Xpand.XAF.Modules.Reactive.Logger{
     public class ReactiveTraceListener : TextWriterTraceListener{
         private readonly string _applicationTitle;

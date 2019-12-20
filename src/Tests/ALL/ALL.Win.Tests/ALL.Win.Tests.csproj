@@ -19,11 +19,11 @@
     <Compile Remove="Program.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.EasyTest" Version="19.2.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="19.2.4" />
-    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="19.2.4" />
-    <PackageReference Include="DevExpress.ExpressApp.ScriptRecorder" Version="19.2.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="19.2.4" />
+    <PackageReference Include="DevExpress.EasyTest" Version="19.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="19.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="19.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp.ScriptRecorder" Version="19.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="19.2.5" />
     <PackageReference Include="Grpc.Core" Version="2.24.0" />
     <PackageReference Include="MagicOnion" Version="2.6.3" />
     <PackageReference Include="Moq" Version="4.13.0" />
@@ -36,7 +36,7 @@
     <!-- <PackageReference Include="Xpand.XAF.Modules.Reactive" Version="1.2.79.2" /> -->
     <!-- <PackageReference Include="Xpand.XAF.Modules.Reactive.Logger" Version="0.0.32.2" /> -->
     <!-- <PackageReference Include="Xpand.XAF.Modules.Reactive.Logger.Hub" Version="0.0.31.2" /> -->
-    <PackageReference Include="Xpand.XAF.Win.All" Version="2.192.16" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="2.192.20.0" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.TestsLib">

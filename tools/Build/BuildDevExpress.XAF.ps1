@@ -19,8 +19,8 @@ Properties {
 
 
 
-Task Build  -depends   Clean, Init, UpdateProjects, Compile, IndexSources, CreateNuspec, PackNuspec, CompileTests, UpdateAllTests
-Task TestsRun  -depends   Clean, Init, UpdateProjects, Compile, IndexSources, CreateNuspec, PackNuspec, CompileTests, UpdateAllTests
+Task Build  -depends   Clean, Init, UpdateProjects, Compile, IndexSources, CreateNuspec, PackNuspec, CompileTests, UpdateAllTests,UpdateReadMe
+Task TestsRun  -depends   Clean, Init, UpdateProjects, Compile, IndexSources, CreateNuspec, PackNuspec, CompileTests, UpdateAllTests,UpdateReadMe
 
 
 Task IndexSources {

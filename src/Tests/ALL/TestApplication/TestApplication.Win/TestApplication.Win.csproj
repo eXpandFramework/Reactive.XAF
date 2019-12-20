@@ -87,10 +87,10 @@
     <Content Include="ExpressApp.ico" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="19.2.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="19.2.4" />
-    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="19.2.4" />
-    <PackageReference Include="DevExpress.EasyTest" Version="19.2.4" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="2.192.16" />
+    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="19.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="19.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="19.2.5" />
+    <PackageReference Include="DevExpress.EasyTest" Version="19.2.5" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="2.192.20.0" />
   </ItemGroup>
 </Project>

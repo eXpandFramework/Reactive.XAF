@@ -19,6 +19,7 @@
       <dependency version="4.2" id="System.Reactive" />
       <dependency version="2.192.14.0" id="Xpand.Extensions.Reactive" />
       <dependency version="2.192.20.0" id="Xpand.Extensions.XAF" />
+      <dependency version="2.192.4.0" id="Xpand.XAF.Modules.Reactive" />
       <dependency version="2.192.4.0" id="Xpand.XAF.Modules.Reactive.Win" />
       <dependency version="2.192.0" id="Xpand.VersionConverter" />
     </dependencies>

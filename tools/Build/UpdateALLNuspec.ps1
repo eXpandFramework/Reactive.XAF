@@ -1,6 +1,6 @@
 param(
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\..\"),
-    $Release
+    $Release=$true
 )
 Use-MonoCecil | Out-Null
 function UpdateALLNuspec($platform, $allNuspec, $nuspecs) {
@@ -80,23 +80,29 @@ $nuspecs | ForEach-Object {
     $nuspec.Save($_.FullName)
 }
 $allFileName = "$root\tools\nuspec\Xpand.XAF.Core.All.nuspec"
+Write-HostFormatted "Updating $allFileName"
 [xml]$allNuspec = Get-Content $allFileName
 UpdateALLNuspec "Core" $allNuspec $nuspecs
 $allNuspec.Save($allFileName)
+$allNuspec
 $coreDependency = [PSCustomObject]@{
     id      = $allNuspec.package.metadata.id
     version = $allNuspec.package.metadata.version
 }
 
 $allFileName = "$root\tools\nuspec\Xpand.XAF.Win.All.nuspec"
+Write-HostFormatted "Updating $allFileName"
 [xml]$allNuspec = Get-Content $allFileName
 UpdateALLNuspec "Win" $allNuspec  $nuspecs
 Add-NuspecDependency $coreDependency.Id $coreDependency.Version $allNuspec
 $allNuspec.Save($allFileName)
+$allNuspec
 
 $allFileName = "$root\tools\nuspec\Xpand.XAF.Web.All.nuspec"
+Write-HostFormatted "Updating $allFileName"
 [xml]$allNuspec = Get-Content $allFileName
 UpdateALLNuspec "Web" $allNuspec  $nuspecs
 
 Add-NuspecDependency $coreDependency.Id $coreDependency.Version $allNuspec
 $allNuspec.Save($allFileName)
+$allNuspec
