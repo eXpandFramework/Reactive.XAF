@@ -9,8 +9,8 @@ param(
     [string]$branch="lab",
     [switch]$InstallModules,
     [string[]]$taskList=@("Build"),
-    [string]$XpandPwshVersion = "1.192.35",
-    [switch]$Debug,
+    [string]$XpandPwshVersion = "1.201.1",
+    [string[]]$ChangedModules=@(),
     [switch]$CustomVersion
 )
 $ErrorActionPreference = "Stop"
@@ -37,7 +37,7 @@ Invoke-XPsake  "$PSScriptRoot\tools\build\BuildDevExpress.XAF.ps1" -properties @
     "build"          = $build;
     "dxVersion"          = $dxVersion;
     "branch"=$branch;
-    "Release"=!$Debug;
+    "ChangedModules"=$ChangedModules;
     "CustomVersion"=$CustomVersion;
     "Root"=$PSScriptRoot;
 } -taskList $taskList

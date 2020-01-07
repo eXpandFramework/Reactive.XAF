@@ -10,9 +10,7 @@ Properties {
     $compile = $true
     $dxVersion = $null
     $branch = $null
-    $Release = $null
     $CustomVersion = $false
-    $AzureToken = $null,
     $Root = "$nugetbin\..\..\"
     $ChangedModules=@()
 }
@@ -86,7 +84,7 @@ Task CompileTests -precondition { return $compile } {
 
 Task Compile -precondition { return $compile } {
     $Configuration="Debug"
-    if ($release){
+    if ($branch -eq "master"){
         $Configuration="Release"
     }
     Invoke-Script {
@@ -113,8 +111,9 @@ Task Compile -precondition { return $compile } {
 Task  CreateNuspec {
     Invoke-Script {
         $a = @{
-            Release   = $Release
+            ChangedModules   = $ChangedModules
             DxVersion = $dxVersion
+            Branch=$branch
         }
         & "$PSScriptRoot\CreateNuspec.ps1" @a
     }

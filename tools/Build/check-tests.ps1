@@ -5,6 +5,7 @@ param(
     $BuildNumber = "19.2",
     $DxPipelineBuildId
 )
+$ErrorActionPreference="stop"
 "DxPipelineBuildId=$DxPipelineBuildId"
 "BuildNumber=$BuildNumber"
 & $Root\go.ps1 -InstallModules

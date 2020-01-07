@@ -1,7 +1,8 @@
 param(
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\..\"),
     [switch]$Release,
-    $dxVersion=$env:FirstDxVersion
+    $dxVersion=$env:FirstDxVersion,
+    $branch
 )
 
 $ErrorActionPreference = "Stop"
@@ -85,4 +86,4 @@ Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -not
     
     $nuspec.Save($nuspecFileName)
 } 
-& "$root\tools\build\UpdateAllNuspec.ps1" $root $dxVersion $Release
+& "$root\tools\build\UpdateAllNuspec.ps1" $root $Release $branch

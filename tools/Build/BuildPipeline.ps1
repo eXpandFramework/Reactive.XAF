@@ -63,7 +63,7 @@ $SourcePath | ForEach-Object {
 Set-Location "$SourcePath"
 "PaketRestore $SourcePath"
 
-Write-HostFormatted "Start-ProjectConverter $CustomVersion"  -Section
+Write-HostFormatted "Start-ProjectConverter version $CustomVersion"  -Section
 Start-XpandProjectConverter -version $CustomVersion -path $SourcePath -SkipInstall
 
 try {

@@ -308,17 +308,17 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
 
         public static object GetViewControl(this PredefinedMap predefinedMap, CompositeView view, string model){
             if (new[]{PredefinedMap.GridView,PredefinedMap.AdvBandedGridView,PredefinedMap.LayoutView}.Any(_ => _==predefinedMap)){
-                return ((ListView) view).Editor.Control.GetPropertyValue("MainView");
+                return ((ListView) view).Editor.Control.GetPropertyValueSafe("MainView");
             }
             if (new[]{PredefinedMap.TreeList}.Any(_ => _==predefinedMap)){
-                return ((ListView) view).Editor.GetPropertyValue("TreeList");
+                return ((ListView) view).Editor.GetPropertyValueSafe("TreeList");
             }
 
             if (new[]{PredefinedMap.PivotGridControl,PredefinedMap.ChartControl,PredefinedMap.SchedulerControl}.Any(_ =>_ == predefinedMap)){
-                return ((ListView) view).Editor.GetPropertyValue(predefinedMap.ToString(),Flags.InstancePublic);
+                return ((ListView) view).Editor.GetPropertyValueSafe(predefinedMap.ToString(),Flags.InstancePublic);
             }
             if (predefinedMap.IsChartControlDiagram()){
-                return PredefinedMap.ChartControl.GetViewControl(view, model).GetPropertyValue("Diagram");
+                return PredefinedMap.ChartControl.GetViewControl(view, model).GetPropertyValueSafe("Diagram");
             }
             if (new[]{PredefinedMap.PivotGridField}.Any(_ =>_ == predefinedMap)){
                 return GetColumns(PredefinedMap.PivotGridControl, view, model,"Fields");
@@ -330,13 +330,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 return GetColumns(PredefinedMap.TreeList, view, model,"Columns");
             }
             if (predefinedMap == PredefinedMap.ASPxGridView){
-                return ((ListView) view).Editor.GetPropertyValue("Grid");
+                return ((ListView) view).Editor.GetPropertyValueSafe("Grid");
             }
             if (predefinedMap == PredefinedMap.GridViewDataColumn){
-                return PredefinedMap.ASPxGridView.GetViewControl(view,null).GetPropertyValue("Columns",Flags.InstancePublicDeclaredOnly).GetIndexer(model);
+                return PredefinedMap.ASPxGridView.GetViewControl(view,null).GetPropertyValueSafe("Columns",Flags.InstancePublicDeclaredOnly).GetIndexer(model);
             }
             if (predefinedMap == PredefinedMap.ASPxScheduler){
-                return ((ListView) view).Editor.GetPropertyValue("SchedulerControl");
+                return ((ListView) view).Editor.GetPropertyValueSafe("SchedulerControl");
             }
 
             if (predefinedMap == PredefinedMap.DashboardDesigner){
@@ -344,18 +344,18 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             }
 
             if (new[]{PredefinedMap.XafLayoutControl,PredefinedMap.SplitContainerControl}.Any(map => map==predefinedMap)){
-                var value = view.GetPropertyValue(nameof(CompositeView.LayoutManager));
-                return value.GetType().Properties(nameof(LayoutManager.Container)).First().GetValue(value);
+                var value = view.GetPropertyValueSafe(nameof(CompositeView.LayoutManager));
+                return value.GetPropertyValueSafe(nameof(LayoutManager.Container));
             }
 
             if (predefinedMap.IsRepositoryItem()){
                 object repositoryItem;
                 if (view is DetailView){
-                    repositoryItem = view.GetItems<PropertyEditor>().First(propertyEditor => propertyEditor.Model.Id==model).Control.GetPropertyValue("Properties");
+                    repositoryItem = view.GetItems<PropertyEditor>().First(propertyEditor => propertyEditor.Model.Id==model).Control.GetPropertyValueSafe("Properties");
                 }
                 else{
                     var column = GetViewControl(PredefinedMap.GridColumn, view, model);
-                    repositoryItem = column.GetPropertyValue("ColumnEdit");
+                    repositoryItem = column.GetPropertyValueSafe("ColumnEdit");
                 }
                 return repositoryItem != null && predefinedMap.TypeToMap().IsInstanceOfType(repositoryItem)? repositoryItem: null;
             }
@@ -368,6 +368,16 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 return null;
             }
             throw new NotImplementedException(predefinedMap.ToString());
+        }
+
+        private static object GetPropertyValueSafe(this object o,string name,Flags? flags=null){
+            try{
+                flags = flags ?? Flags.Default;
+                return o.GetPropertyValue(name,flags.Value);
+            }
+            catch (AmbiguousMatchException){
+                return o.GetType().Properties(name).First().GetValue(o);
+            }
         }
 
         private static object GetColumns(PredefinedMap container, CompositeView view, string model,string columnsName){

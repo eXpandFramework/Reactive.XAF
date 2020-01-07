@@ -25,7 +25,8 @@ jobs:
         "Nugetpackage=$env:Nuget_PACKAGES"
         Copy-Item '$(System.DefaultWorkingDirectory)\paket.lock' '$(System.DefaultWorkingDirectory)\paket.lock1' -verbose
         'paket.lock','paket.dependencies'|ForEach-Object{
-            $cache='$(Pipeline.Workspace)/.nuget/packages/$_'
+            $cache='$(Pipeline.Workspace)/.nuget/packages/'
+            $cache+="$_"
             # Get-Content $cache -Raw -ErrorAction Continue 
             Copy-Item $cache $(System.DefaultWorkingDirectory)\$_ -Force -ErrorAction Continue -verbose
         }
@@ -45,7 +46,9 @@ jobs:
         
         & '$(System.DefaultWorkingDirectory)\tools\Build\BuildPipeline.ps1' @goArgs
         'paket.lock','paket.dependencies'|ForEach-Object{
-            Copy-Item "$(System.DefaultWorkingDirectory)\$_" "$(Pipeline.Workspace)/.nuget/packages/$_" -Force -ErrorAction Continue -verbose
+            $workingDirectory='$(System.DefaultWorkingDirectory)'
+            $workspace='$(Pipeline.Workspace)'
+            Copy-Item "$workingDirectory\$_" "$workspace/.nuget/packages/$_" -Force -ErrorAction Continue -verbose
         }
         Copy-Item '$(System.DefaultWorkingDirectory)\paket.lock1' '$(System.DefaultWorkingDirectory)\paket.lock' -Force -verbose
       pwsh: true

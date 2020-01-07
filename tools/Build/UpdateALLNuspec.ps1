@@ -1,14 +1,10 @@
 param(
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\..\"),
-    $Release=$true
+    $Release=$true,
+    $Branch="lab"
 )
 Use-MonoCecil | Out-Null
 function UpdateALLNuspec($platform, $allNuspec, $nuspecs) {
-    $allNuspec.package.metadata.dependencies | Where-Object {
-        $assembly
-    }
-
-    
     $allModuleNuspecs = $nuspecs | Where-Object { $_ -notlike "*ALL*" -and $_ -like "*.Modules.*" -and $_ -notlike "*.Client.*" }
     $platformNuspecs = $allModuleNuspecs | Where-Object {
         $platformMetada = Get-AssemblyMetadata "$root\bin\$($_.BaseName).dll" -key "Platform"
@@ -32,11 +28,17 @@ function UpdateALLNuspec($platform, $allNuspec, $nuspecs) {
             })
     }
     [version]$modulesVersion=[System.Diagnostics.FileVersionInfo]::GetVersionInfo("$root\bin\Xpand.XAF.Modules.Reactive.dll" ).FileVersion
-    [version]$v = $allNuspec.package.metadata.version
-    if ($changed -or $Release) {
+    $source="lab"
+    if ($branch -eq "master"){
+        $source="Release"
+    }
+    [version]$v = (Find-XpandPackage $allNuspec.package.metadata.Id -packagesource $source).Version
+
+    [version]$nowVersion=$allNuspec.package.metadata.version
+    if ($changed -or ($Branch -eq "master")) {
         $build=$v.Build
         $revision=($v.Revision + 1)
-        if ($Release){
+        if ($Branch -eq "master"){
             $build+=1
             $revision=0
         }
@@ -47,7 +49,7 @@ function UpdateALLNuspec($platform, $allNuspec, $nuspecs) {
         $allNuspec.package.metadata.version = ($v).ToString()
     }
     else{
-        [version]$nowVersion=$allNuspec.package.metadata.version
+        
         $build=$nowVersion.Build
         $revision=$nowVersion.Revision
         if ($nowVersion.Minor -ne $modulesVersion.Minor){
