@@ -113,7 +113,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             var type = Type.GetType(mapInterface.Attribute<ModelMapLinkAttribute>().LinkedTypeName);
             var model = data.model.Id();
             control =control?? EnumsNET.Enums.GetMember<PredefinedMap>(type?.Name).Value.GetViewControl(data.view, model);
-            var modelMap = (IModelModelMap) data.info.GetValue(data.model);
+            var modelMap =  data.info.GetValue(data.model) as IModelModelMap;
             if (control!=null){
                 return (modelMap, control,data.view);
             }

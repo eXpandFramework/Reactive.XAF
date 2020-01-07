@@ -58,8 +58,7 @@ $packScript = {
     
 }
 $varsToImport = @("assemblyVersions", "SkipReadMe", "nugetPath", "sourceDir", "nugetBin", "SkipReadMe")
-$conLimit = [System.Environment]::ProcessorCount
-$nuspecs | Invoke-Parallel -LimitConcurrency $conLimit -VariablesToImport $varsToImport -Script $packScript
+$nuspecs | Invoke-Parallel -VariablesToImport $varsToImport -Script $packScript
 # $nuspecs | ForEach-Object { Invoke-Command $packScript -ArgumentList $_ }
 function AddReadMe {
     param(
