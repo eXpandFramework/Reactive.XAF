@@ -69,14 +69,15 @@ function AddReadMe {
     )
     if ($Package.Id -like "Xpand.XAF*") {
         $moduleName = (Get-XAFModule $Directory $assemblyList).Name
-        $wikiName=$moduleName
-        if (!$wikiName){
-            $wikiName="Modules"
+        $wikiName="Modules"
+        if ($moduleName){
+            $wikiName="$moduleName".Replace("Module","")
         }
         $registration="RequiredModuleTypes.Add(typeof($moduleName));"
         if ($package.Id -like "*all*"){
             $registration=($modules|Where-Object{$_.platform -eq "Core" -or $package.id -like "*$($_.platform)*"}|ForEach-Object{"RequiredModuleTypes.Add(typeof($($_.FullName)));"}) -join "`r`n                                                "
         }
+        
         $message = @"
 
 
@@ -90,7 +91,7 @@ function AddReadMe {
 ++++++++++++++    ++++++++++++++++      
 ++++++++++++++  ++  ++++++++++++++      ➤ ​​̲𝗣​̲𝗮​̲𝗰​̲𝗸​̲𝗮​̲𝗴​̲𝗲​̲ ​̲𝗻​̲𝗼​̲𝘁​̲𝗲​̲𝘀
 ++++++++++++  ++++    ++++++++++++         ☞ Build the project before opening the model editor.
-++++++++++  ++++++++  ++++++++++++         ☞ Documentation can be found @ https://github.com/eXpandFramework/DevExpress.XAF/wiki/$moduleName".
+++++++++++  ++++++++  ++++++++++++         ☞ Documentation can be found @ https://github.com/eXpandFramework/DevExpress.XAF/wiki/$wikiName".
 ++++++++++  ++++++++++  ++++++++++         ☞ $($package.id) only adds the required references. To register the included packages add the next line/s in the constructor of your XAF module.
 ++++++++  ++++++++++++++++++++++++              $registration
 ++++++  ++++++++++++++++++++++++++      
