@@ -90,7 +90,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 .SelectMany(_ => {
                     var control = _.EventArgs.Item.GetPropertyValue("Item");
                     return ((IModelNode) control.GetPropertyValue("Model")).ToBindableData(_.view)
-                        .Select(tuple => BindData(tuple,control));
+                        .Select(tuple => BindData(tuple,control)).Where(tuple => tuple.modelMap!=null);
                 })
                 .TraceModelMapper()
                 .Do(tuple => tuple.BindTo());
@@ -113,7 +113,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             var mapInterface = interfaces.First(type1 => type1.Property(infoName) != null);
             var type = Type.GetType(mapInterface.Attribute<ModelMapLinkAttribute>().LinkedTypeName);
             var model = data.model.Id();
-            control =control?? EnumsNET.Enums.GetMember<PredefinedMap>(type?.Name).Value.GetViewControl(data.view, model);
+            control ??= EnumsNET.Enums.GetMember<PredefinedMap>(type?.Name).Value.GetViewControl(data.view, model);
             var modelMap =  data.info.GetValue(data.model) as IModelModelMap;
             if (control!=null){
                 return (modelMap, control,data.view);
