@@ -17,8 +17,8 @@ Properties {
 
 
 
-Task Build  -depends   Clean, Init, UpdateProjects, Compile, IndexSources, CreateNuspec, PackNuspec, CompileTests, UpdateAllTests,UpdateReadMe
-Task TestsRun  -depends   Clean, Init, UpdateProjects, Compile, IndexSources, CreateNuspec, PackNuspec, CompileTests, UpdateAllTests,UpdateReadMe
+Task Build  -depends   Clean, Init, UpdateProjects, Compile,CheckVersions, IndexSources, CreateNuspec, PackNuspec, CompileTests, UpdateAllTests,UpdateReadMe
+Task TestsRun  -depends   Clean, Init, UpdateProjects, Compile,CheckVersions, IndexSources, CreateNuspec, PackNuspec, CompileTests, UpdateAllTests,UpdateReadMe
 
 
 Task IndexSources {
@@ -141,6 +141,16 @@ Task Clean -precondition { return $cleanBin } {
     }
         
     Clear-XProjectDirectories
+}
+
+Task CheckVersions -precondition { return $branch -eq "master" } {
+    Push-Location "$Root\bin\"
+    $labPackages=Get-ChildItem Xpand*.dll|Where-Object{([version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($_).FileVersion).Revision -gt 0}
+    if ($labPackages){
+        $labPackages
+        throw "Lab packages found in a release build"
+    }    
+    Pop-Location   
 }
 
 Task ? -Description "Helper to display task info" {
