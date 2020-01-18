@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
@@ -10,7 +11,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
     public static class DetailViewExtensions{
         public static IObservable<(DetailView detailView, CancelEventArgs e)> WhenViewEditModeChanging(this DetailView detailView){
             return Observable.FromEventPattern<EventHandler<CancelEventArgs>, CancelEventArgs>(
-                    h => detailView.ViewEditModeChanging += h, h => detailView.ViewEditModeChanging -= h)
+                    h => detailView.ViewEditModeChanging += h, h => detailView.ViewEditModeChanging -= h,ImmediateScheduler.Instance)
                 .TransformPattern<CancelEventArgs, DetailView>();
         }
 

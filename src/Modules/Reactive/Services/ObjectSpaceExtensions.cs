@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using Xpand.Extensions.Reactive.Transform;
@@ -76,14 +77,14 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source.SelectMany(item => item.WhenObjectsGetting());
         }
         public static IObservable<(NonPersistentObjectSpace objectSpace,ObjectsGettingEventArgs e)> WhenObjectsGetting(this NonPersistentObjectSpace item) {
-            return Observable.FromEventPattern<EventHandler<ObjectsGettingEventArgs>, ObjectsGettingEventArgs>(h => item.ObjectsGetting += h, h => item.ObjectsGetting -= h)
+            return Observable.FromEventPattern<EventHandler<ObjectsGettingEventArgs>, ObjectsGettingEventArgs>(h => item.ObjectsGetting += h, h => item.ObjectsGetting -= h,ImmediateScheduler.Instance)
                 .TransformPattern<ObjectsGettingEventArgs, NonPersistentObjectSpace>();
         }
         
         public static IObservable<(IObjectSpace objectSpace,EventArgs e)> Commited(this IObservable<IObjectSpace> source) {
             return source.SelectMany(item => {
                 return Observable
-                    .FromEventPattern<EventHandler, EventArgs>(h => item.Committed += h, h => item.Committed -= h)
+                    .FromEventPattern<EventHandler, EventArgs>(h => item.Committed += h, h => item.Committed -= h,ImmediateScheduler.Instance)
                     .TransformPattern<EventArgs, IObjectSpace>();
             });
         }
@@ -91,7 +92,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(IObjectSpace objectSpace,CancelEventArgs e)> Commiting(this IObservable<IObjectSpace> source) {
             return source.SelectMany(item => {
                 return Observable
-                    .FromEventPattern<EventHandler<CancelEventArgs>, CancelEventArgs>(h => item.Committing += h, h => item.Committing -= h)
+                    .FromEventPattern<EventHandler<CancelEventArgs>, CancelEventArgs>(h => item.Committing += h, h => item.Committing -= h,ImmediateScheduler.Instance)
                     .TransformPattern<CancelEventArgs, IObjectSpace>()
                     .TraceRX();
             });
@@ -110,7 +111,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
 
         public static IObservable<(IObjectSpace objectSpace,ObjectsManipulatingEventArgs e)> WhenObjectDeleted(this IObjectSpace item) {
-            return Observable.FromEventPattern<EventHandler<ObjectsManipulatingEventArgs>, ObjectsManipulatingEventArgs>(h => item.ObjectDeleted += h, h => item.ObjectDeleted -= h)
+            return Observable.FromEventPattern<EventHandler<ObjectsManipulatingEventArgs>, ObjectsManipulatingEventArgs>(h => item.ObjectDeleted += h, h => item.ObjectDeleted -= h,ImmediateScheduler.Instance)
                 .TransformPattern<ObjectsManipulatingEventArgs, IObjectSpace>();
         }
         
@@ -119,13 +120,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
 
         public static IObservable<(IObjectSpace objectSpace,ObjectChangedEventArgs e)> WhenObjectChanged(this IObjectSpace item) {
-            return Observable.FromEventPattern<EventHandler<ObjectChangedEventArgs>, ObjectChangedEventArgs>(h => item.ObjectChanged += h, h => item.ObjectChanged -= h)
+            return Observable.FromEventPattern<EventHandler<ObjectChangedEventArgs>, ObjectChangedEventArgs>(h => item.ObjectChanged += h, h => item.ObjectChanged -= h,ImmediateScheduler.Instance)
                 .TransformPattern<ObjectChangedEventArgs, IObjectSpace>();
         }
         
         public static IObservable<Unit> Disposed(this IObservable<IObjectSpace> source){
             return source
-                .SelectMany(item => Observable.FromEventPattern<EventHandler,EventArgs>(h => item.Disposed += h, h => item.Disposed -= h))
+                .SelectMany(item => Observable.FromEventPattern<EventHandler,EventArgs>(h => item.Disposed += h, h => item.Disposed -= h,ImmediateScheduler.Instance))
                 .ToUnit();
         }
 
@@ -139,7 +140,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<IObjectSpace> ModifyChanged(this IObservable<IObjectSpace> source) {
             return source
-                .SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(h => item.ModifiedChanged += h, h => item.ModifiedChanged -= h)
+                .SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(h => item.ModifiedChanged += h, h => item.ModifiedChanged -= h,ImmediateScheduler.Instance)
                     .Select(pattern => (IObjectSpace) pattern.Sender)
                 );
         }

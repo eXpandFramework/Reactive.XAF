@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp.SystemModule;
 using Xpand.XAF.Modules.Reactive.Extensions;
@@ -14,7 +15,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
             return controllers.SelectMany(controller => {
                 return Observable.FromEventPattern<EventHandler<CustomizeWindowStatusMessagesEventArgs>,
                         CustomizeWindowStatusMessagesEventArgs>(h => controller.CustomizeWindowStatusMessages += h,
-                        h => controller.CustomizeWindowStatusMessages -= h).TraceRX();
+                        h => controller.CustomizeWindowStatusMessages -= h,ImmediateScheduler.Instance).TraceRX();
             });
         }
     }

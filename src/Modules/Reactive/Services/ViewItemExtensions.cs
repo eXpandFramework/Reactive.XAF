@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
@@ -12,7 +13,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .SelectMany(item => {
                     return Observable
                         .FromEventPattern<EventHandler<EventArgs>, EventArgs>(h => item.FrameChanged += h,
-                            h => item.FrameChanged -= h)
+                            h => item.FrameChanged -= h,ImmediateScheduler.Instance)
                         .Select(pattern => item);
                 });
         }
@@ -39,7 +40,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .SelectMany(item => {
                     return Observable
                         .FromEventPattern<EventHandler<EventArgs>, EventArgs>(h => item.ControlCreated += h,
-                            h => item.ControlCreated -= h)
+                            h => item.ControlCreated -= h,ImmediateScheduler.Instance)
                         .Select(pattern => item);
                 });
         }

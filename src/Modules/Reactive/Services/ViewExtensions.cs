@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
@@ -21,7 +22,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source.Cast<View>().SelectMany(view => {
                 return Observable.FromEventPattern<EventHandler, EventArgs>(
                     handler => view.Closing += handler,
-                    handler => view.Closing -= handler);
+                    handler => view.Closing -= handler,ImmediateScheduler.Instance);
             })
             .Select(pattern => (T)pattern.Sender);
         }
@@ -33,7 +34,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source.Cast<View>().SelectMany(view => {
                 return Observable.FromEventPattern<EventHandler, EventArgs>(
                     handler => view.Activated += handler,
-                    handler => view.Activated -= handler);
+                    handler => view.Activated -= handler,ImmediateScheduler.Instance);
             })
             .Select(pattern => (T)pattern.Sender);
         }
@@ -47,7 +48,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source.SelectMany(view => {
                 return Observable.FromEventPattern<EventHandler, EventArgs>(
                     handler => view.Closed += handler,
-                    handler => view.Closed -= handler);
+                    handler => view.Closed -= handler,ImmediateScheduler.Instance);
             })
             .Select(pattern => (T)pattern.Sender);
         }
@@ -60,7 +61,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source.Cast<View>().SelectMany(view => {
                 return Observable.FromEventPattern<EventHandler<CancelEventArgs>, CancelEventArgs>(
                     handler => view.QueryCanClose += handler,
-                    handler => view.QueryCanClose -= handler);
+                    handler => view.QueryCanClose -= handler,ImmediateScheduler.Instance);
             }).TransformPattern<CancelEventArgs,T>();
         }
         public static IObservable<(T view, CancelEventArgs e)> WhenQueryCanChangeCurrentObject<T>(this T view) where T : View{
@@ -71,14 +72,14 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source.Cast<View>().SelectMany(view => {
                 return Observable.FromEventPattern<EventHandler<CancelEventArgs>, CancelEventArgs>(
                     handler => view.QueryCanChangeCurrentObject += handler,
-                    handler => view.QueryCanChangeCurrentObject -= handler);
+                    handler => view.QueryCanChangeCurrentObject -= handler,ImmediateScheduler.Instance);
             }).TransformPattern<CancelEventArgs,T>();
         }
 
         public static IObservable<(T view, EventArgs e)> WhenControlsCreated<T>(this T view) where T : View{
             return Observable.FromEventPattern<EventHandler, EventArgs>(
                 handler => view.ControlsCreated += handler,
-                handler => view.ControlsCreated -= handler)
+                handler => view.ControlsCreated -= handler,ImmediateScheduler.Instance)
                 .TransformPattern<EventArgs, T>();
 //            return Observable.Return(view).ControlsCreated();
         }
@@ -89,7 +90,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     ? Observable.Return(new EventPattern<EventArgs>(view, EventArgs.Empty))
                     : Observable.FromEventPattern<EventHandler, EventArgs>(
                             handler => view.ControlsCreated += handler,
-                            handler => view.ControlsCreated -= handler);
+                            handler => view.ControlsCreated -= handler,ImmediateScheduler.Instance);
             }).TransformPattern<EventArgs,T>();
         }
 
@@ -101,7 +102,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source
                 .SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(
                         handler => item.SelectionChanged += handler,
-                        handler => item.SelectionChanged -= handler))
+                        handler => item.SelectionChanged -= handler,ImmediateScheduler.Instance))
                 .TransformPattern<EventArgs,T>();
         }
 
@@ -113,7 +114,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source.SelectMany(item => {
                 return Observable.FromEventPattern<EventHandler, EventArgs>(
                     handler => item.CurrentObjectChanged += handler,
-                    handler => item.CurrentObjectChanged -= handler);
+                    handler => item.CurrentObjectChanged -= handler,ImmediateScheduler.Instance);
             }).TransformPattern<EventArgs,T>();
         }
         
@@ -123,7 +124,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<Unit> Disposing<TView>(this IObservable<TView> source) where TView:View{
             return source
-                .SelectMany(item => Observable.StartAsync(async () => await Observable.FromEventPattern<CancelEventHandler, EventArgs>(handler => item.Disposing += handler,handler => item.Disposing -= handler)))
+                .SelectMany(item => Observable.StartAsync(async () => await Observable.FromEventPattern<CancelEventHandler, EventArgs>(handler => item.Disposing += handler,handler => item.Disposing -= handler,ImmediateScheduler.Instance)))
                 .ToUnit();
         }
 

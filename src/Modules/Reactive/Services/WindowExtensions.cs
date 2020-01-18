@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
@@ -10,7 +11,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source.SelectMany(item => {
                 return Observable.FromEventPattern<EventHandler, EventArgs>(
                     handler => item.ViewControllersActivated += handler,
-                    handler => item.ViewControllersActivated -= handler).Select(pattern => item);
+                    handler => item.ViewControllersActivated -= handler,ImmediateScheduler.Instance).Select(pattern => item);
             });
         }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
@@ -45,7 +46,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
             return controllers.SelectMany(controller => {
                 return Observable.FromEventPattern<EventHandler, EventArgs>(
                     handler => controller.ViewControlsCreated += handler,
-                    handler => controller.ViewControlsCreated -= handler).Select(pattern => controller);
+                    handler => controller.ViewControlsCreated -= handler,ImmediateScheduler.Instance)
+                    .Select(pattern => controller);
             });
         }
 
@@ -57,14 +59,14 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
             return controllers.Select(controller => {
                 return Observable.FromEventPattern<EventHandler, EventArgs>(
                     handler => controller.Activated += handler,
-                    handler => controller.Activated -= handler).Select(pattern => controller);
+                    handler => controller.Activated -= handler,ImmediateScheduler.Instance).Select(pattern => controller);
             }).Concat();
         }
 
         public static IObservable<T> WhenDeactivated<T>(this T controller) where T : Controller{
             return Observable.FromEventPattern<EventHandler, EventArgs>(
                     handler => controller.Deactivated += handler,
-                    handler => controller.Deactivated -= handler)
+                    handler => controller.Deactivated -= handler,ImmediateScheduler.Instance)
                 .Select(pattern => (T) pattern.Sender);
         }
 
@@ -72,7 +74,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
             return controllers.SelectMany(controller => {
                 return Observable.FromEventPattern<EventHandler, EventArgs>(
                     handler => controller.Deactivated += handler,
-                    handler => controller.Deactivated -= handler).Select(pattern => controller);
+                    handler => controller.Deactivated -= handler,ImmediateScheduler.Instance)
+                    .Select(pattern => controller);
             });
         }
 
@@ -80,7 +83,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
             return controllers.Select(controller => {
                     var frameAssigned = Observable.FromEventPattern<EventHandler, EventArgs>(
                             handler => controller.FrameAssigned += handler,
-                            handler => controller.FrameAssigned -= handler)
+                            handler => controller.FrameAssigned -= handler,ImmediateScheduler.Instance)
                         .Select(pattern => controller);
                     return controller.Frame!=null ? frameAssigned.StartWith(controller) : frameAssigned;
                 })

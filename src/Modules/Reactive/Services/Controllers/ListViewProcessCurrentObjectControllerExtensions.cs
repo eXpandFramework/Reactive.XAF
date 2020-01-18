@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp.SystemModule;
 using Xpand.Extensions.Reactive.Transform;
@@ -13,7 +14,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
             return controllers.SelectMany(controller => {
                         return Observable.FromEventPattern<EventHandler<CustomProcessListViewSelectedItemEventArgs>,
                             CustomProcessListViewSelectedItemEventArgs>(h => controller.CustomProcessSelectedItem += h,
-                            h => controller.CustomProcessSelectedItem -= h);
+                            h => controller.CustomProcessSelectedItem -= h,ImmediateScheduler.Instance);
                     })
                     .TransformPattern<CustomProcessListViewSelectedItemEventArgs,ListViewProcessCurrentObjectController>()
                 ;

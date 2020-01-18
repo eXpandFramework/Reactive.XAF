@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
@@ -76,7 +77,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                     var eventPattern =
                         Observable.FromEventPattern<EventHandler<CustomizeAppearanceEventArgs>, CustomizeAppearanceEventArgs>(
                             h => layoutManager.CustomizeAppearance += h,
-                            h => layoutManager.CustomizeAppearance -= h);
+                            h => layoutManager.CustomizeAppearance -= h,ImmediateScheduler.Instance);
                     return eventPattern.Select(pattern => (view: _, pattern.EventArgs));
                 })
                 .Where(_ => {
