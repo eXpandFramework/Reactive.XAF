@@ -261,7 +261,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         }
 
         private static IModelNode AddViewItemNode(IModelNode modelNode, PredefinedMap predefinedMap, string id,string mapName){
-            id = id ?? predefinedMap.ToString();
+            id ??= predefinedMap.ToString();
             var node = modelNode.GetNode(mapName);
             return node.AddNode(predefinedMap.TypeToMap().ModelType(), id);
         }
@@ -372,8 +372,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
 
         private static object GetPropertyValueSafe(this object o,string name,Flags? flags=null){
             try{
-                flags = flags ?? Flags.Default;
-                return o.GetPropertyValue(name,flags.Value);
+                flags ??= Flags.Default;
+                return o.GetPropertyValue(name, flags.Value);
+            }
+            catch (MissingMemberException e){
+                Tracing.Tracer.LogVerboseError(e);
+                return null;
             }
             catch (AmbiguousMatchException){
                 return o.GetType().Properties(name).First().GetValue(o);
@@ -382,10 +386,14 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
 
         private static object GetColumns(PredefinedMap container, CompositeView view, string model,string columnsName){
             var viewControl = container.GetViewControl(view, null);
-            var columnInfos = viewControl.GetType().GetProperties().Where(info => info.Name == columnsName);
-            var propertyInfo = columnInfos.First();
-            var propertyName = ((ListView) view).Model.Columns[model].PropertyName;
-            return propertyInfo.GetValue(viewControl).GetIndexer(propertyName);
+            if (viewControl!=null){
+                var columnInfos = viewControl.GetType().GetProperties().Where(info => info.Name == columnsName);
+                var propertyInfo = columnInfos.First();
+                var propertyName = ((ListView) view).Model.Columns[model].PropertyName;
+                return propertyInfo.GetValue(viewControl).GetIndexer(propertyName);
+            }
+
+            return null;
         }
 
         public static bool IsChartControlDiagram(this PredefinedMap predefinedMap){
