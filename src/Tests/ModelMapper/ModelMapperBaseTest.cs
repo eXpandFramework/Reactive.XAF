@@ -68,13 +68,6 @@ public class {DynamicTypeName}{{
         }
 
         internal string InitializeMapperService(string modelMapperAssemblyName,Platform platform=Platform.Agnostic,bool newAssemblyName=true ){
-            
-            TypeMappingService.ContainerMappingRules.Clear();
-            TypeMappingService.AdditionalTypesList.Clear();
-            TypeMappingService.AdditionalReferences.Clear();
-            TypeMappingService.TypeMappingRules.Clear();
-            TypeMappingService.PropertyMappingRules.Clear();
-            typeof(ModelExtendingService).SetPropertyValue("Platform", platform);
             var mapperAssemblyName = $"{GetType().Name}{modelMapperAssemblyName}{platform}".GetHashCode();
             
             if (newAssemblyName){
@@ -90,12 +83,20 @@ public class {DynamicTypeName}{{
                     // ignored
                 }
             }
-            typeof(TypeMappingService).CallMethod(null, "Init");
-            typeof(PredefinedMapService).CallMethod(null, "Init");
-            var outPutAssembly = (string)typeof(TypeMappingService).GetFieldValue("_outputAssembly",Flags.StaticInstanceAnyVisibility);
-            typeof(TypeMappingService).SetFieldValue("_outputAssembly",
-                $@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\{Path.GetFileNameWithoutExtension(outPutAssembly)}.dll");
-            typeof(TypeMappingService).SetFieldValue("_modelMapperModuleVersion", typeof(ModelMapperModule).Assembly.GetName().Version);
+
+            TypeMappingService.Reset(platform:platform);
+            // TypeMappingService.AdditionalTypesList.Clear();
+            // TypeMappingService.AdditionalReferences.Clear();
+            // TypeMappingService.TypeMappingRules.Clear();
+            // TypeMappingService.PropertyMappingRules.Clear();
+            // typeof(ModelExtendingService).SetPropertyValue("Platform", platform);
+            //
+            // typeof(TypeMappingService).CallMethod(null, "Init");
+            // typeof(PredefinedMapService).CallMethod(null, "Init");
+            // var outPutAssembly = (string)typeof(TypeMappingService).GetFieldValue("_outputAssembly",Flags.StaticInstanceAnyVisibility);
+            // typeof(TypeMappingService).SetFieldValue("_outputAssembly",
+            //     $@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\{Path.GetFileNameWithoutExtension(outPutAssembly)}.dll");
+            // typeof(TypeMappingService).SetFieldValue("_modelMapperModuleVersion", typeof(ModelMapperModule).Assembly.GetName().Version);
             ConfigureLayoutViewPredefinedMapService();
             return mapperAssemblyName.ToString();
         }

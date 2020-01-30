@@ -19,6 +19,7 @@ using Xpand.Extensions.AppDomain;
 using Xpand.Extensions.Linq;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reflection;
+using Xpand.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.Predefined;
 
@@ -90,7 +91,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             MappedTypes = Observable.Defer(() => {
                 var distinnctTypesToMap = _typesToMap.Distinct(_ => _.TypeToMap).Do(_mappingTypes);
                 return distinnctTypesToMap
-                    .All(_ => _.TypeFromPath())
+                    .All(_ =>_skipeAssemblyValidation|| _.TypeFromPath())
                     .Select(_ => {
                         var assembly =!_? distinnctTypesToMap.ModelCode().SelectMany(tuple => tuple.references.Compile(tuple.code))
                                 : Assembly.LoadFile(GetLastAssemblyPath()).AsObservable();
@@ -102,7 +103,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                             return types;
                         });
                     }).Switch();
-            }).Publish().AutoConnect().Replay().AutoConnect().Distinct();
+            }).Publish().AutoConnect().Replay().AutoConnect().Distinct()
+                .Finally(() => _skipeAssemblyValidation=false);
             _modelMapperModuleVersion = typeof(TypeMappingService).Assembly.GetName().Version;
             
             ReservedPropertyNames.Clear();
@@ -217,6 +219,21 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             }
 
             return (type, rootType).ModelName(configuration?.MapName);
+        }
+
+        public static void Reset(bool skipeAssemblyValidation=false,Platform? platform=null){
+            _skipeAssemblyValidation = skipeAssemblyValidation;
+            ContainerMappingRules.Clear();
+            AdditionalTypesList.Clear();
+            AdditionalReferences.Clear();
+            TypeMappingRules.Clear();
+            PropertyMappingRules.Clear();
+            if (platform != null) ModelExtendingService.Platform = platform.Value;
+            Init();
+            PredefinedMapService.Init();
+            _outputAssembly = $@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\{Path.GetFileNameWithoutExtension(_outputAssembly)}.dll";
+            _modelMapperModuleVersion = typeof(ModelMapperModule).Assembly.GetName().Version;
+            
         }
     }
 }

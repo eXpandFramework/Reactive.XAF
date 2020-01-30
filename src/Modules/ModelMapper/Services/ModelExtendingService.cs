@@ -19,7 +19,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
     
     public static class ModelExtendingService{
         private static readonly ISubject<Unit> ConnectedSubject=Subject.Synchronize(new Subject<Unit>());
-        internal static Platform Platform{ get; private set; }
+        internal static Platform Platform{ get; set; }
 
         public static IObservable<Unit> Connected => Observable.Defer(() => ConnectedSubject);
 

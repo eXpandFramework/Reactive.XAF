@@ -12,7 +12,7 @@ using Xpand.XAF.Modules.ModelMapper.Configuration;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     public static partial class TypeMappingService{
-        
+        private static bool _skipeAssemblyValidation;
 
 
         private static IObservable<Assembly> Compile(this IEnumerable<string> references, string code){
@@ -88,10 +88,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         private static bool TypeFromPath(this IModelMapperConfiguration configuration){
             var assemblyPath = GetLastAssemblyPath();
             if (assemblyPath!=null){
-                using (var assembly = AssemblyDefinition.ReadAssembly(assemblyPath)){
-                    if (assembly.IsMapped(configuration) && !assembly.VersionChanged() && !assembly.ConfigurationChanged()){
-                        return true;
-                    }
+                using var assembly = AssemblyDefinition.ReadAssembly(assemblyPath);
+                if (assembly.IsMapped(configuration) && !assembly.VersionChanged() && !assembly.ConfigurationChanged()){
+                    return true;
                 }
             }
             return false;
@@ -133,7 +132,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             return Version.Parse(versionAttribute.ConstructorArguments.First().Value.ToString()) !=_modelMapperModuleVersion;
         }
 
-        private static bool IsMapped(this AssemblyDefinition assembly,IModelMapperConfiguration configuration){
+        private static bool IsMapped(this AssemblyDefinition assembly, IModelMapperConfiguration configuration){
             var typeAssemblyHash = configuration.TypeToMap.Assembly.ManifestModule.ModuleVersionId.GetHashCode();
             var modelMapperServiceAttributes = assembly.CustomAttributes.Where(attribute => attribute.AttributeType.FullName == typeof(ModelMapperTypeAttribute).FullName).ToArray();
             return modelMapperServiceAttributes.Any(attribute => {

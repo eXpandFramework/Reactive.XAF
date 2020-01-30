@@ -58,7 +58,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             Init();
         }
 
-        private static void Init(){
+        internal static void Init(){
             _layoutViewListEditorTypeName = "Xpand.ExpressApp.Win.ListEditors.GridListEditors.LayoutView.LayoutViewListEditor";
             var dxAssemblyName = typeof(ModelMapperModule).Assembly.GetReferencedAssemblies().First(_ => _.Name.Contains("DevExpress"));
             var version = dxAssemblyName.Version;
@@ -88,15 +88,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 _xpandWinAssembly = assemblies.GetAssembly("Xpand.ExpressApp.Win",true);
             }
 
-            if (ModelExtendingService.Platform == Extensions.XAF.XafApplication.Platform.Web){
-                _dashboardWebWebFormsAssembly = assemblies.GetAssembly($"DevExpress.Dashboard{versionSuffix}.Web.WebForms");
-                _xafWebAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.Web{versionSuffix}");
-                _dxWebAssembly = assemblies.GetAssembly($"DevExpress.Web{versionSuffix}");
-                _dxHtmlEditorWebAssembly = assemblies.GetAssembly($"DevExpress.Web.ASPxHtmlEditor{versionSuffix}");
-                _dxScedulerWebAssembly = assemblies.GetAssembly($"DevExpress.Web.ASPxScheduler{versionSuffix}");
-                _xafHtmlEditorWebAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.HtmlPropertyEditor.Web{versionSuffix}");
-                _xafSchedulerWebAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.Scheduler.Web{versionSuffix}");
-            }
+            _dashboardWebWebFormsAssembly = assemblies.GetAssembly($"DevExpress.Dashboard{versionSuffix}.Web.WebForms");
+            _xafWebAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.Web{versionSuffix}");
+            _dxWebAssembly = assemblies.GetAssembly($"DevExpress.Web{versionSuffix}");
+            _dxHtmlEditorWebAssembly = assemblies.GetAssembly($"DevExpress.Web.ASPxHtmlEditor{versionSuffix}");
+            _dxScedulerWebAssembly = assemblies.GetAssembly($"DevExpress.Web.ASPxScheduler{versionSuffix}");
+            _xafHtmlEditorWebAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.HtmlPropertyEditor.Web{versionSuffix}");
+            _xafSchedulerWebAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.Scheduler.Web{versionSuffix}");
 
         }
 
