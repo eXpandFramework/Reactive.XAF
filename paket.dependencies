@@ -5,13 +5,13 @@ source https://xpandnugetserver.azurewebsites.net/nuget
 storage:none
 
 nuget akarnokd.reactive_extensions 0.0.27-alpha
-nuget DevExpress.ExpressApp.Core.All == 19.2.5
-nuget DevExpress.ExpressApp.Win.All == 19.2.5
-nuget DevExpress.ExpressApp.Web.All == 19.2.5
-nuget DevExpress.EasyTest == 19.2.5  
-nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 19.2.5  
-nuget DevExpress.ExpressApp.EasyTest.WinAdapter == 19.2.5  
-nuget DevExpress.ExpressApp.Security.Xpo == 19.2.5  
+nuget DevExpress.ExpressApp.Core.All == 19.2.6
+nuget DevExpress.ExpressApp.Win.All == 19.2.6
+nuget DevExpress.ExpressApp.Web.All == 19.2.6
+nuget DevExpress.EasyTest == 19.2.6  
+nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 19.2.6  
+nuget DevExpress.ExpressApp.EasyTest.WinAdapter == 19.2.6  
+nuget DevExpress.ExpressApp.Security.Xpo == 19.2.6  
 nuget Microsoft.Extensions.Dependencyinjection == 3.1.0  
 nuget Enums.NET 3.0
 nuget FasterFlect.Xpand

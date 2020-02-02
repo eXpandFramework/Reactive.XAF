@@ -74,7 +74,8 @@ Invoke-Script {
     Get-XpandPackages $psource All|Where-Object{$_.id -like "Xpand*"}|Where-Object{$_.id -notin $tempPackages}|Invoke-Parallel -VariablesToImport @("psource","tempNupkg") -script{
         Get-NugetPackage -name $_.id -Source (Get-PackageFeed $psource) -ResultType NupkgFile|Copy-Item -Destination $tempNupkg
     }
-    & (Get-NugetPath) restore "$testAppPAth\TestApplication.sln" -source $tempNupkg
+
+    & (Get-NugetPath) restore "$testAppPAth\TestApplication.sln" -source "$tempNupkg;$(Get-PackageFeed -Nuget);$(Get-PackageFeed -Xpand)"
     & (Get-MsBuildPath) "$testAppPAth\TestApplication.sln" /bl:$root\bin\TestWebApplication.binlog /WarnAsError /v:m -t:rebuild -m
     Remove-Item $tempNupkg -Force -Recurse
 } -Maximum 2

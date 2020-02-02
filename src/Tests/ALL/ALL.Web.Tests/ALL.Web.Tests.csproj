@@ -20,10 +20,10 @@
     <Compile Remove="Program.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.EasyTest" Version="19.2.5" />
-    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="19.2.5" />
-    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WebAdapter" Version="19.2.5" />
-    <PackageReference Include="DevExpress.ExpressApp.Web.All" Version="19.2.5" />
+    <PackageReference Include="DevExpress.EasyTest" Version="19.2.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="19.2.6" />
+    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WebAdapter" Version="19.2.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Web.All" Version="19.2.6" />
     <PackageReference Include="Fasterflect.Xpand" Version="2.0.7" />
     <PackageReference Include="Grpc.Core" Version="2.24.0" />
     <PackageReference Include="MagicOnion" Version="2.6.3" />
@@ -34,10 +34,10 @@
     <PackageReference Include="System.Reactive" Version="4.2.0" />
     <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.15.1" />
-    <PackageReference Include="DevExpress.ExpressApp" Version="19.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="19.2.6" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
     <PackageReference Include="Unofficial.Microsoft.mshtml" Version="7.0.3300" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="2.192.20.0" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="2.201.22.5" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.TestsLib">
