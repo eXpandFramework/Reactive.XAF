@@ -21,7 +21,12 @@ function UpdateALLNuspec($platform, $allNuspec, $nuspecs) {
         $id = $_.Id
         $version = $_.Version
         if ($id -like "*.all") {
-            [xml]$allCore = @(Get-Content "$root\tools\nuspec\Xpand.XAF.Core.All.nuspec")
+            $source=Get-PackageFeed -Nuget
+            if ($branch -eq "lab"){
+                $source=Get-PackageFeed -Xpand
+            }
+            
+            [xml]$allCore = @(Get-Content ((Get-NugetPackage -name Xpand.Xaf.Web.All -Source $source -ResultType DownloadResults).packageReader).GetNuspecFile())
         }
         !((($platformNuspecs | Select-Object -ExpandProperty Nuspec) + @($allCore)) | Where-Object {
                 $_.package.metaData.Id -eq $id -and $_.package.metaData.version -eq $version
@@ -82,7 +87,7 @@ $nuspecs | ForEach-Object {
     $nuspec.Save($_.FullName)
 }
 $allFileName = "$root\tools\nuspec\Xpand.XAF.Core.All.nuspec"
-Write-HostFormatted "Updating $allFileName"
+Write-HostFormatted "Updating Xpand.XAF.Core.All.nuspec" -Section
 [xml]$allNuspec = Get-Content $allFileName
 UpdateALLNuspec "Core" $allNuspec $nuspecs
 $allNuspec.Save($allFileName)
@@ -93,7 +98,7 @@ $coreDependency = [PSCustomObject]@{
 }
 
 $allFileName = "$root\tools\nuspec\Xpand.XAF.Win.All.nuspec"
-Write-HostFormatted "Updating $allFileName"
+Write-HostFormatted "Updating Xpand.XAF.Win.All.nuspec" -Section
 [xml]$allNuspec = Get-Content $allFileName
 UpdateALLNuspec "Win" $allNuspec  $nuspecs
 Add-NuspecDependency $coreDependency.Id $coreDependency.Version $allNuspec
@@ -101,7 +106,7 @@ $allNuspec.Save($allFileName)
 $allNuspec
 
 $allFileName = "$root\tools\nuspec\Xpand.XAF.Web.All.nuspec"
-Write-HostFormatted "Updating $allFileName"
+Write-HostFormatted "Updating Xpand.XAF.Web.All.nuspec"
 [xml]$allNuspec = Get-Content $allFileName
 UpdateALLNuspec "Web" $allNuspec  $nuspecs
 

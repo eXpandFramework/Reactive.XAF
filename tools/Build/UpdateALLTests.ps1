@@ -2,7 +2,7 @@ param(
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\..\"),
     $branch = "lab",
     $source,
-    $dxVersion = (& "$PSScriptRoot\DefaultVersion.ps1")
+    $dxVersion = "19.2.6"
 )
 if ($branch -eq "lab" -and !$source) {
     $source = "$(Get-PackageFeed -Xpand);$(Get-PackageFeed -DX)"
@@ -58,18 +58,25 @@ Get-ChildItem *.csproj -Recurse|ForEach-Object{
 }
 
 Write-HostFormatted "Building TestApplication" -Section
-
-$localSource = "$root\bin\Nupkg"
-$source = "$(Get-PackageFeed -Nuget);$(Get-PackageFeed -Xpand);$source"
-"Source=$source"
 $testAppPAth = (Get-Item $testApplication).DirectoryName
 Set-Location $testAppPAth
 Clear-ProjectDirectories
 
 Invoke-Script {
-    & (Get-NugetPath) restore "$testAppPAth\TestApplication.sln" -source $localsource
-    & (Get-NugetPath) restore "$testAppPAth\TestApplication.sln" -source $source
+    New-Item "$root\bin\NupkgTemp" -ItemType Directory -Force
+    $tempNupkg="$root\bin\NupkgTemp\"
+    Get-ChildItem "$root\bin\Nupkg"|Copy-Item -Destination $tempNupkg -Force
+    $psource="Release"
+    if ($branch -eq "lab"){
+        $psource="Lab"
+    }
+    $tempPackages=(& (Get-NugetPath) list -source $tempNupkg|ConvertTo-PackageObject).id
+    Get-XpandPackages $psource All|Where-Object{$_.id -like "Xpand*"}|Where-Object{$_.id -notin $tempPackages}|Invoke-Parallel -VariablesToImport @("psource","tempNupkg") -script{
+        Get-NugetPackage -name $_.id -Source (Get-PackageFeed $psource) -ResultType NupkgFile|Copy-Item -Destination $tempNupkg
+    }
+    & (Get-NugetPath) restore "$testAppPAth\TestApplication.sln" -source $tempNupkg
     & (Get-MsBuildPath) "$testAppPAth\TestApplication.sln" /bl:$root\bin\TestWebApplication.binlog /WarnAsError /v:m -t:rebuild -m
+    Remove-Item $tempNupkg -Force -Recurse
 } -Maximum 2
 
 

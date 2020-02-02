@@ -1,45 +1,42 @@
 trigger: none
-jobs:
-- job: BuildArtifacts
-  strategy:
-    parallel: 1
-  pool:
-    vmImage: windows-latest
-  variables:
-    - group: keys    
-  steps:
-    - checkout: self
-    - task: DownloadBuildArtifacts@0
-      displayName: "Download Bin"
-      inputs:
-          buildType: 'specific'
-          project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
-          pipeline: '23'
-          buildVersionToDownload: specific
-          buildId: '$(DxPipelineBuildId)'
-          downloadType: specific
-          artifactName: 'bin'
-          downloadPath: '$(System.DefaultworkingDirectory)'
-    - task: PowerShell@2
-      displayName: Publish Nuget Packages
-      inputs:
-        targetType: inline
-        script: |
-          $goArgs=@{
-              Branch ='$(Build.SourceBranchName)'
-              SourcesRoot ='$(System.DefaultworkingDirectory)'
-              ApiKey ='$(NugetApiKey)'
-              LocalPackageSource ='$(System.DefaultWorkingDirectory)\bin\Nupkg' 
-            }
-            $env:AzDevopsToken='$(AzureToken)'
-            $env:AzOrganization="eXpandDevOps"
-            $env:AzProject ="eXpandFramework"
-            $env:DXFeed='$(DXApiFeed)'
-            "goArgs:"
-            $goArgs|out-string
-            & .\tools\build\publishNugets.ps1 @goArgs
-    - task: PublishPipelineArtifact@1
-      displayName: 'Published Packages'
-      inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)\bin\Nupkg' 
-        ArtifactName: 'Nugets'
+pool:
+  vmImage: windows-2019
+variables:
+  - group: keys    
+steps:
+  - checkout: self
+    clean: true
+  - task: DownloadBuildArtifacts@0
+    displayName: "Download Bin"
+    inputs:
+        buildType: 'specific'
+        project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
+        pipeline: '23'
+        buildVersionToDownload: specific
+        buildId: '$(DxPipelineBuildId)'
+        downloadType: specific
+        artifactName: 'bin'
+        downloadPath: '$(System.DefaultworkingDirectory)'
+  - task: PowerShell@2
+    displayName: Publish Nuget Packages
+    inputs:
+      targetType: inline
+      script: |
+        $goArgs=@{
+            Branch ='$(Build.SourceBranchName)'
+            SourcesRoot ='$(System.DefaultworkingDirectory)'
+            ApiKey ='$(NugetApiKey)'
+            LocalPackageSource ='$(System.DefaultWorkingDirectory)\bin\Nupkg' 
+          }
+          $env:AzDevopsToken='$(AzureToken)'
+          $env:AzOrganization="eXpandDevOps"
+          $env:AzProject ="eXpandFramework"
+          $env:DXFeed='$(DXApiFeed)'
+          "goArgs:"
+          $goArgs|out-string
+          & .\tools\build\publishNugets.ps1 @goArgs
+  - task: PublishPipelineArtifact@1
+    displayName: 'Published Packages'
+    inputs:
+      targetPath: '$(System.DefaultWorkingDirectory)\bin\Nupkg' 
+      ArtifactName: 'Nugets'

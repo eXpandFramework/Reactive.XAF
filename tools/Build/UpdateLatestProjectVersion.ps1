@@ -71,7 +71,7 @@ $yArgs = @{
 if ($newPackages) {
     $yArgs.Packages += $newPackages
 }
-Write-Host "End-Packages:" -f blue
+Write-HostFormatted "Changed-Packages:" -Section
 $yArgs.Packages | Out-String 
 if ($Branch -eq "lab") {
     Get-ChildItem $sourcePath *.csproj -Recurse | ForEach-Object {
@@ -82,11 +82,12 @@ if ($Branch -eq "lab") {
             if ($nextVersion.Revision -gt -1) {
                 $revision = [int]$nextVersion.Revision - 1
                 $nowVersion = New-Object version ($nextVersion.Major, $nextVersion.Minor, $nextVersion.Build, $revision)
-                Write-Host "Update $pName version to latest $nowVersion"
+                Write-HostFormatted "Update $pName version to current published $nowVersion" -ForegroundColor Magenta
                 Update-AssemblyInfoVersion $nowVersion $pDir
             }
         }
     }
 }
-Write-HostFormatted "updateVersion:" -Section
-Update-NugetProjectVersion @yArgs 
+Write-HostFormatted "updateVersion comparing local/remote differences:" -Section
+$updateVersion=Update-NugetProjectVersion @yArgs -Verbose
+$updateVersion

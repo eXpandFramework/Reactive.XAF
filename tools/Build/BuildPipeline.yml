@@ -12,24 +12,24 @@ jobs:
     - group: keys
   steps:
   - checkout: self
-  - task: CacheBeta@0
-    inputs:
-      key: paket7 | paket.lock
-      path: $(Pipeline.Workspace)/.nuget/packages
-    displayName: Cache NuGet packages
+  # - task: CacheBeta@0
+  #   inputs:
+  #     key: paket8 | paket.lock
+  #     path: $(Pipeline.Workspace)/.nuget/packages
+  #   displayName: Cache NuGet packages
   - task: PowerShell@2
     displayName: Build
     inputs:
       targetType: inline
       script: |
         "Nugetpackage=$env:Nuget_PACKAGES"
-        Copy-Item '$(System.DefaultWorkingDirectory)\paket.lock' '$(System.DefaultWorkingDirectory)\paket.lock1' -verbose
-        'paket.lock','paket.dependencies'|ForEach-Object{
-            $cache='$(Pipeline.Workspace)/.nuget/packages/'
-            $cache+="$_"
-            # Get-Content $cache -Raw -ErrorAction Continue 
-            Copy-Item $cache $(System.DefaultWorkingDirectory)\$_ -Force -ErrorAction Continue -verbose
-        }
+        # Copy-Item '$(System.DefaultWorkingDirectory)\paket.lock' '$(System.DefaultWorkingDirectory)\paket.lock1' -verbose
+        # 'paket.lock','paket.dependencies'|ForEach-Object{
+        #     $cache='$(Pipeline.Workspace)/.nuget/packages/'
+        #     $cache+="$_"
+        #     # Get-Content $cache -Raw -ErrorAction Continue 
+        #     Copy-Item $cache $(System.DefaultWorkingDirectory)\$_ -Force -ErrorAction Continue -verbose
+        # }
         $goArgs = @{
             GithubToken ='$(GitHubToken)'
             AzureToken ='$(AzureToken)' 
@@ -45,12 +45,12 @@ jobs:
         $goArgs | Out-String
         
         & '$(System.DefaultWorkingDirectory)\tools\Build\BuildPipeline.ps1' @goArgs
-        'paket.lock','paket.dependencies'|ForEach-Object{
-            $workingDirectory='$(System.DefaultWorkingDirectory)'
-            $workspace='$(Pipeline.Workspace)'
-            Copy-Item "$workingDirectory\$_" "$workspace/.nuget/packages/$_" -Force -ErrorAction Continue -verbose
-        }
-        Copy-Item '$(System.DefaultWorkingDirectory)\paket.lock1' '$(System.DefaultWorkingDirectory)\paket.lock' -Force -verbose
+        # 'paket.lock','paket.dependencies'|ForEach-Object{
+        #     $workingDirectory='$(System.DefaultWorkingDirectory)'
+        #     $workspace='$(Pipeline.Workspace)'
+        #     Copy-Item "$workingDirectory\$_" "$workspace/.nuget/packages/$_" -Force -ErrorAction Continue -verbose
+        # }
+        # Copy-Item '$(System.DefaultWorkingDirectory)\paket.lock1' '$(System.DefaultWorkingDirectory)\paket.lock' -Force -verbose
       pwsh: true
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: UnitTests'

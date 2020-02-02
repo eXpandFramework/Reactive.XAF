@@ -51,7 +51,7 @@ $bArgs = @{
     packageSources = "$(Get-PackageFeed -Xpand);$DxApiFeed"
     tasklist       = $tasklist
     dxVersion      = $CustomVersion
-    ChangedModules = $updateVersion
+    ChangedModules = @($updateVersion)
 }
 Write-HostFormatted "bArgs:" -Section
 $bArgs | Out-String
@@ -68,14 +68,42 @@ Start-XpandProjectConverter -version $CustomVersion -path $SourcePath -SkipInsta
 
 try {
     Invoke-PaketRestore -Strict 
-
 }
 catch {
     "PaketRestore Failed"
     Write-HostFormatted "PaketInstall $SourcePath (due to different Version)" -section
     dotnet paket install -v
 }
-
+if ($Branch -eq "lab") {
+    Write-HostFormatted "New DevExpress Version ($CustomVersion) detected" -Section
+    $filter = "DevExpress*"
+    [version]$currentVersion = (Invoke-PaketShowInstalled -OnlyDirect | Where-Object { $_.id -like $filter } | Select-Object -First 1).Version
+    $outputFolder = "$([System.IO.Path]::GetTempPath())\GetNugetpackage"
+    Get-NugetPackage -Name Xpand.XAF.Modules.Reactive -Source (Get-PackageFeed -Xpand) -OutputFolder $outputFolder | Out-Null
+    [version]$publishdeVersion = Get-VersionPart (((Get-AssemblyReference (Get-ChildItem $outputFolder "Xpand.XAF.Modules.Reactive.dll" -Recurse).FullName) | Where-Object { $_.Name -like $filter }).version) Build
+    if ($publishdeVersion -lt $currentVersion) {
+        $trDeps = Get-NugetPackageDependencies DevExpress.ExpressApp.Core.all -Source $env:DxFeed -filter $filter -Recurse
+        Push-Location 
+        $projectPackages = (Get-ChildItem "$SourcePath\src\modules" *.csproj -Recurse)+(Get-ChildItem "$SourcePath\src\extensions" *.csproj -Recurse) | Invoke-Parallel -VariablesToImport "filter" -Script {
+            Push-Location $_.DirectoryName
+            [PSCustomObject]@{
+                Project           = $_
+                InstalledPackages = (Invoke-PaketShowInstalled -Project $_.FullName) | Where-Object { $_.id -like $filter }
+            }
+            Pop-Location
+        }
+        ($projectPackages | Where-Object { $_.InstalledPackages.id | Where-Object { $_ -in $trDeps.id } }).Project | Get-Item|ForEach-Object{
+            Write-HostFormatted "Increase $($_.basename) revision" -ForegroundColor Magenta
+            Update-AssemblyInfo $_.DirectoryName -Revision
+            $bArgs.ChangedModules+=$_.basename
+        }
+    }
+}
+if ($bArgs.ChangedModules){
+    $bArgs.ChangedModules=$bArgs.ChangedModules|Get-Unique
+}
+Write-HostFormatted "ChangedModules" -Section
+$bArgs.ChangedModules
 & $SourcePath\go.ps1 @bArgs
 
 
@@ -98,7 +126,7 @@ Write-HostFormatted "Copyingg AllTestsWeb" -Section
 Move-Item "$stage\Bin\AllTestWin" "$stage\TestApplication" -Force 
 Remove-Item "$stage\bin\ReactiveLoggerClient" -Recurse -Force
 
-$DXVersion=Get-DevExpressVersion (Get-DevExpressVersion)
+$DXVersion = Get-VersionPart (Get-DevExpressVersion) Minor
 $SourcePath | ForEach-Object {
     Set-Location $_
     Move-PaketSource 0 "C:\Program Files (x86)\DevExpress $DXVersion\Components\System\Components\Packages"

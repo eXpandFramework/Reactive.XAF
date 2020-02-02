@@ -3,6 +3,8 @@ param(
     [switch]$Release,
     $dxVersion=$env:FirstDxVersion,
     $branch
+    # $changedModules=@("Xpand.XAF.Modules.AutoCommit","Xpand.Extensions.XAF.Xpo","Xpand.Extensions.XAF","Xpand.XAF.Modules.ModelViewInheritance","Xpand.XAF.Modules.RefreshView","Xpand.XAF.Modules.ViewEditMode","Xpand.XAF.Modules.MasterDetail","Xpand.XAF.Modules.CloneMemberValue","Xpand.XAF.Modules.AutoCommit","Xpand.XAF.Modules.ProgressBarViewItem","Xpand.XAF.Modules.Reactive","Xpand.XAF.Modules.CloneModelView","Xpand.XAF.Modules.SuppressConfirmation","Xpand.XAF.Modules.ModelMapper","Xpand.XAF.Modules.HideToolBar","Xpand.XAF.Modules.Reactive.Win","Xpand.XAF.Modules.Reactive.Logger.Hub","Xpand.XAF.Modules.GridListEditor","Xpand.XAF.Modules.OneView","Xpand.XAF.Modules.Reactive.Logger","Xpand.XAF.Modules.Reactive.Logger.Client.Win")
+    # $changedModules=@("Xpand.XAF.Modules.AutoCommit","Xpand.Extensions.XAF.Xpo","Xpand.Extensions.XAF","Xpand.XAF.Modules.ModelViewInheritance","Xpand.XAF.Modules.RefreshView","Xpand.XAF.Modules.ViewEditMode","Xpand.XAF.Modules.MasterDetail","Xpand.XAF.Modules.CloneMemberValue","Xpand.XAF.Modules.AutoCommit","Xpand.XAF.Modules.ProgressBarViewItem","Xpand.XAF.Modules.Reactive","Xpand.XAF.Modules.CloneModelView","Xpand.XAF.Modules.SuppressConfirmation","Xpand.XAF.Modules.ModelMapper","Xpand.XAF.Modules.HideToolBar","Xpand.XAF.Modules.Reactive.Win","Xpand.XAF.Modules.Reactive.Logger.Hub","Xpand.XAF.Modules.GridListEditor","Xpand.XAF.Modules.OneView","Xpand.XAF.Modules.Reactive.Logger","Xpand.XAF.Modules.Reactive.Logger.Client.Win")
 )
 
 $ErrorActionPreference = "Stop"
@@ -17,11 +19,12 @@ $nuspec.package.metadata.version="$($vv.major).$($modulesVersion.Minor).$($vv.bu
 $nuspec.Save($versionConverterPath)
 
 $allProjects=Get-ChildItem $root *.csproj -Recurse | Select-Object -ExpandProperty BaseName
-# Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notlike "*Test*" } | ForEach-Object {
+# Get-ChildItem "$root\src\" *.csproj -Recurse | Where-Object { $_.BaseName -in $changedModules } | ForEach-Object {
+# Get-ChildItem "$root\src\" -Include "*Xpand.Extensions.Reactive.csproj" -Recurse |ForEach-Object {
 Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notlike "*Test*" } | Invoke-Parallel -VariablesToImport @("allProjects","root","Release") -Script {
     Set-Location $root
     $projectPath = $_.FullName
-    Write-Host "Creating Nuspec for $($_.baseName)" -f "Blue"
+    Write-Output "Creating Nuspec for $($_.baseName)" 
     $uArgs = @{
         NuspecFilename           = "$root\tools\nuspec\$($_.baseName).nuspec"
         ProjectFileName          = $projectPath
@@ -73,7 +76,7 @@ Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -not
     $ns.AddNamespace("ns", $nuspec.DocumentElement.NamespaceURI)
     
     if ($nuspec.package.metaData.id -like "Xpand.XAF*" -or $nuspec.package.metaData.id -like "Xpand.Extensions.XAF*") {
-        "versionConverter"
+        Write-Output "Adding versionConverter dependency"
         $versionConverter = [PSCustomObject]@{
             id              = "Xpand.VersionConverter"
             version         = ([xml](Get-Content "$root\Tools\Xpand.VersionConverter\Xpand.VersionConverter.nuspec")).package.metadata.version

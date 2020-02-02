@@ -137,7 +137,7 @@ Task UpdateAllTests {
 Task Clean -precondition { return $cleanBin } {
     $bin = "$Root\bin\"
     if (Test-Path $bin) {
-        Get-ChildItem $bin -Exclude "*Nupkg*" -Recurse|Remove-Item -Force -Recurse
+        Get-ChildItem $bin -Recurse|Remove-Item -Force -Recurse
     }
         
     Clear-XProjectDirectories

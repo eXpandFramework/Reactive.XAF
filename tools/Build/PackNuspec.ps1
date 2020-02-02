@@ -8,7 +8,10 @@ param(
 )
 Import-Module XpandPwsh -Force -Prefix X
 $ErrorActionPreference = "Stop"
-
+if (!$ChangedModules){
+    Write-HostFormatted "Skipping package creation as no package changed" -ForegroundColor Yellow
+    return
+}
 New-Item $nugetBin -ItemType Directory -Force | Out-Null
 Get-ChildItem $nugetBin | Remove-Item -Force -Recurse
 $versionConverterSpecPath = "$sourceDir\Tools\Xpand.VersionConverter\Xpand.VersionConverter.nuspec"
@@ -104,7 +107,7 @@ function AddReadMe {
     }
 }
 
-Write-HostFormatted "Discover XAFModules"
+Write-HostFormatted "Discover XAFModules" -Section
 $packages=& (Get-NugetPath) list -source $nugetBin|ConvertTo-PackageObject
 $assemblyList=(Get-ChildItem "$nugetbin\.." *.dll)
 $modules=Get-XAFModule "$nugetBin\.." -Include "Xpand.XAF.Modules.*" -AssemblyList $assemblyList|ForEach-Object{
@@ -114,7 +117,7 @@ $modules=Get-XAFModule "$nugetBin\.." -Include "Xpand.XAF.Modules.*" -AssemblyLi
     }
 }
 
-Write-HostFormatted "Update Nupkg files (ReadMe)"
+Write-HostFormatted "Update Nupkg files (ReadMe)" -Section
 # $packages|Invoke-Parallel -VariablesToImport "nugetbin","modules","assemblylist" -LimitConcurrency ([System.Environment]::ProcessorCount) -Script{
 $packages | ForEach-Object {
     $baseName="$($_.Id).$($_.Version)"
@@ -130,15 +133,32 @@ $packages | ForEach-Object {
     Remove-Item $unzipDir -Force -Recurse
 }
 
-
+Write-HostFormatted "Remove not changed packages" -Section
 if ($ChangedModules) {
-    Write-HostFormatted "ChangedModules" -Section
+    
+    $core=@(Get-ChildItem "$sourceDir\bin" Xpand*.dll|Where-Object{$_.BaseName -in $ChangedModules }|ForEach-Object{(Get-AssemblyMetadata $_.FullName -Key platform).value}|Get-Unique|ForEach-Object{
+        "Xpand.XAF.$_.All"
+    })
+    if ($core|Select-String "core"){
+        $core+="Xpand.XAF.Win.All","Xpand.XAF.Web.All"
+    }
+    $core=$core|Sort-Object -Unique
+    $ChangedModules+=$core
+    $s="lab"
+    if ($Branch -ne $s){
+        $s="Release"
+    }
+    if ((Find-XpandPackage Xpand.VersionConverter $s).Version -ne (Get-NugetPackageSearchMetadata Xpand.VersionConverter -Source $nugetBin).identity.version.version){
+        $ChangedModules+="Xpand.VersionConverter"
+    }
+    "ChangedModules:"
     $ChangedModules
     $nupks = Get-ChildItem $nugetBin
-    & (Get-NugetPath) list -source $nugetBin | ConvertTo-PackageObject|Where-Object{$_.Id -notlike "*.all.*"} | ForEach-Object {
+    & (Get-NugetPath) list -source $nugetBin | ConvertTo-PackageObject| ForEach-Object {
         $p = $_
         if ($p.Id -notin $ChangedModules) {
             $nupks | Where-Object { $_.BaseName -eq "$($p.Id).$($p.Version)" }
         }
-    } | Remove-Item
+    } | Remove-Item -Verbose
+    
 }
