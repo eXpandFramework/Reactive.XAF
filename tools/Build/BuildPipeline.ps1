@@ -52,6 +52,7 @@ $bArgs = @{
     tasklist       = $tasklist
     dxVersion      = $CustomVersion
     ChangedModules = @($updateVersion)
+    Branch         = $Branch
 }
 Write-HostFormatted "bArgs:" -Section
 $bArgs | Out-String
@@ -75,7 +76,7 @@ catch {
     dotnet paket install -v
 }
 if ($Branch -eq "lab") {
-    Write-HostFormatted "New DevExpress Version ($CustomVersion) detected" -Section
+    Write-HostFormatted "checking for New DevExpress Version ($CustomVersion) detected" -Section
     $filter = "DevExpress*"
     # [version]$currentVersion = (Invoke-PaketShowInstalled -OnlyDirect | Where-Object { $_.id -like $filter } | Select-Object -First 1).Version
     [version]$currentVersion = Get-VersionPart (Get-DevExpressVersion) Build
@@ -85,7 +86,7 @@ if ($Branch -eq "lab") {
     if ($publishdeVersion -lt $currentVersion) {
         $trDeps = Get-NugetPackageDependencies DevExpress.ExpressApp.Core.all -Source $env:DxFeed -filter $filter -Recurse
         Push-Location 
-        $projectPackages = (Get-ChildItem "$SourcePath\src\modules" *.csproj -Recurse)+(Get-ChildItem "$SourcePath\src\extensions" *.csproj -Recurse) | Invoke-Parallel -VariablesToImport "filter" -Script {
+        $projectPackages = (Get-ChildItem "$SourcePath\src\modules" *.csproj -Recurse) + (Get-ChildItem "$SourcePath\src\extensions" *.csproj -Recurse) | Invoke-Parallel -VariablesToImport "filter" -Script {
             Push-Location $_.DirectoryName
             [PSCustomObject]@{
                 Project           = $_
@@ -93,15 +94,33 @@ if ($Branch -eq "lab") {
             }
             Pop-Location
         }
-        ($projectPackages | Where-Object { $_.InstalledPackages.id | Where-Object { $_ -in $trDeps.id } }).Project | Get-Item|ForEach-Object{
+        ($projectPackages | Where-Object { $_.InstalledPackages.id | Where-Object { $_ -in $trDeps.id } }).Project | Get-Item | ForEach-Object {
             Write-HostFormatted "Increase $($_.basename) revision" -ForegroundColor Magenta
             Update-AssemblyInfo $_.DirectoryName -Revision
-            $bArgs.ChangedModules+=$_.basename
+            $bArgs.ChangedModules += $_.basename
         }
     }
 }
-if ($bArgs.ChangedModules){
-    $bArgs.ChangedModules=$bArgs.ChangedModules|Get-Unique
+else{
+    $LocalPackages=((get-childitem $SourcePath\src\Modules *.csproj -Recurse)+(get-childitem $SourcePath\src\Extensions *.csproj -Recurse)).DirectoryName|ForEach-Object{
+        [PSCustomObject]@{
+            Id = (Get-ChildItem $_ *.csproj).BaseName
+            Version =[version]((Get-ChildItem $_ AssemblyInfo.cs -Recurse).FullName|Get-AssemblyInfoVersion)
+        }
+    }
+    Write-HostFormatted "LocalPackage" -ForegroundColor Magenta
+    $localPackages|Format-Table
+    $remotePackages=Get-XpandPackages Release XAFAll
+    Write-HostFormatted "RemotePackages" -ForegroundColor Magenta
+    $RemotePackages|Format-Table
+
+    $bArgs.ChangedModules=($LocalPackages|Where-Object{
+        $localPackage=$_
+        $remotePackages|Where-Object{$_.Id -eq $localPackage.Id -and $_.version -ne $localPackage.Version}
+    }).Id
+}
+if ($bArgs.ChangedModules) {
+    $bArgs.ChangedModules = $bArgs.ChangedModules | Sort-Object -Unique
 }
 Write-HostFormatted "ChangedModules" -Section
 $bArgs.ChangedModules

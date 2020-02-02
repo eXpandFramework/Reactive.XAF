@@ -101,9 +101,9 @@ Task Compile -precondition { return $compile } {
     Write-HostFormatted "Build Versions:" -Section
     Get-ChildItem "$Root\Bin" "*Xpand.*.dll"|ForEach-Object{
         [PSCustomObject]@{
-            Name = $_.BaseName
+            Id = $_.BaseName
             Version=[System.Diagnostics.FileVersionInfo]::GetVersionInfo($_.FullName).FileVersion
-        }
+        }|Write-Output
     }
     Get-ChildItem $root\bin "*xpand*.dll"| Test-AssemblyReference -VersionFilter $DXVersion|Format-Table -AutoSize
 }
