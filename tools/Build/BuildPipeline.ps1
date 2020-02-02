@@ -77,7 +77,8 @@ catch {
 if ($Branch -eq "lab") {
     Write-HostFormatted "New DevExpress Version ($CustomVersion) detected" -Section
     $filter = "DevExpress*"
-    [version]$currentVersion = (Invoke-PaketShowInstalled -OnlyDirect | Where-Object { $_.id -like $filter } | Select-Object -First 1).Version
+    # [version]$currentVersion = (Invoke-PaketShowInstalled -OnlyDirect | Where-Object { $_.id -like $filter } | Select-Object -First 1).Version
+    [version]$currentVersion = Get-VersionPart (Get-DevExpressVersion) Build
     $outputFolder = "$([System.IO.Path]::GetTempPath())\GetNugetpackage"
     Get-NugetPackage -Name Xpand.XAF.Modules.Reactive -Source (Get-PackageFeed -Xpand) -OutputFolder $outputFolder | Out-Null
     [version]$publishdeVersion = Get-VersionPart (((Get-AssemblyReference (Get-ChildItem $outputFolder "Xpand.XAF.Modules.Reactive.dll" -Recurse).FullName) | Where-Object { $_.Name -like $filter }).version) Build

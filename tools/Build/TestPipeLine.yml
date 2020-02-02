@@ -4,7 +4,7 @@ jobs:
   strategy:
     parallel: 1
   pool:
-    vmImage: windows-latest
+    vmImage: windows-2019
   variables:
     - group: keys
   steps:
@@ -31,14 +31,21 @@ jobs:
         artifactName: 'Tests'
         downloadType: single
         downloadPath: '$(System.DefaultWorkingDirectory)\bin'
-    - task: AzurePowerShell@4
-      displayName: BuildArtifacts
+    - task: PowerShell@2
+      displayName: 'BuildArtifacts'
       inputs:
-        azureSubscription: 'Visual Studio Enterprise (b48a609a-17f6-4e48-a317-54ab77fbf822)'
-        ScriptType: InlineScript
-        azurePowerShellVersion: 'LatestVersion'
-        Inline: |
-          & '$(System.DefaultWorkingDirectory)/tools/build/TestPipeline.ps1' '$(System.DefaultWorkingDirectory)' '($AzureToken)'
+        pwsh: true
+        targetType: inline
+        script: |
+          $a = @{
+            Sourcepath = '$(System.DefaultWorkingDirectory)'
+            AzureToken ='$(AzureToken)'
+            AzureApplicationId='$(AzureApplicationId)'
+            AzureTenantId='$(AzureTenantId)'
+            XpandBlobOwnerSecret='$(XpandBlobOwnerSecret)'
+          }
+          $a|write-output
+          & '$(System.DefaultWorkingDirectory)/tools/build/TestPipeline.ps1' @a
     - task: PublishBuildArtifacts@1
       # condition: $(NewArtifact)
       displayName: 'Publish Artifact: Bin'
@@ -51,7 +58,7 @@ jobs:
   strategy:
     parallel: 15
   pool:
-    vmImage: windows-latest
+    vmImage: windows-2019
   variables:
     - group: keys
   steps:
@@ -102,7 +109,7 @@ jobs:
   strategy:
     parallel: 10
   pool:
-    vmImage: windows-latest
+    vmImage: windows-2019
   variables:
     - group: keys
   steps:
@@ -135,7 +142,7 @@ jobs:
   # dependsOn: BuildArtifacts
   dependsOn: TestPerExecutionTime
   pool:
-    vmImage: windows-latest
+    vmImage: windows-2019
   variables:
     - group: keys
   steps:

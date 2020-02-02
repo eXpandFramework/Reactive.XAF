@@ -3,8 +3,12 @@ using namespace System.Reflection
 using namespace System.IO
 param(
     $SourcePath = [Path]::GetFullPath("$PSScriptRoot\..\.."),
-    $AzureToken=$env:AzDevOpsToken
+    $AzureToken=$env:AzDevOpsToken,
+    $AzureApplicationId=$env:AzApplicationId,
+    $AzureTenantId=$env:AzTenantId,
+    $XpandBlobOwnerSecret=$env:AzXpandBlobOwnerSecret
 )
+
 $ErrorActionPreference = "Stop"
 & "$SourcePath\go.ps1" -InstallModules
 $buildNumber = $env:build_BuildNumber
@@ -14,7 +18,15 @@ if ($buildNumber){
     $env:AzOrganization="eXpandDevops"
     $env:AzProject ="eXpandFramework"
 }
-
+if (!(Get-Module Az -ListAvailable)){
+    Write-HostFormatted "Install Az powershell" -Section
+    Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+    Install-Module -Name Az -AllowClobber -Scope CurrentUser    
+}
+Write-HostFormatted "Connecting to Azure" -Section
+$azurePassword = ConvertTo-SecureString $XpandBlobOwnerSecret -AsPlainText -Force
+$psCred = New-Object System.Management.Automation.PSCredential($AzureApplicationId , $azurePassword)
+Connect-AzAccount -Credential $psCred -TenantId $azureTenantId  -ServicePrincipal 
 function UpdateVersion {
     param (
         $_,
