@@ -29,9 +29,9 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |Fasterflect.Xpand|2.0.7
  |JetBrains.Annotations|2019.1.3
  |System.ValueTuple|4.5.0
- |Xpand.Extensions|0.0.19
- |Xpand.Extensions.XAF|0.0.18
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.1.7
+ |Xpand.Extensions|2.201.2
+ |Xpand.Extensions.XAF|2.201.2
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.1
 
 ## Issues-Debugging-Troubleshooting
 
