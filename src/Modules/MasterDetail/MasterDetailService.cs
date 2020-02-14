@@ -108,17 +108,35 @@ namespace Xpand.XAF.Modules.MasterDetail{
                         .Select(tuple => listView.SelectedObjects.Cast<object>().FirstOrDefault())
                         .WhenNotDefault()
                         .DistinctUntilChanged(o => listView.ObjectSpace.GetKeyValue(o))
-                        .Select(o => CreateDetailView(detailView, o, listView, dashboardViewItem, frame).CurrentObject)
+                        .Select(o => detailView.SynchronizeCurrentObject(o, listView, dashboardViewItem, frame))
                         .ToUnit();
                 })
                 .Merge().ToUnit()
                 .TraceMasterDetailModule();
         }
 
-        private static DetailView CreateDetailView(DetailView detailView, object o, ListView listView,
-            DashboardViewItem dashboardViewItem, Frame frame){
-            var objectTypeLink = ((IModelApplicationMasterDetail) detailView.Model.Application).DashboardMasterDetail
-                .ObjectTypeLinks
+        private static Unit SynchronizeCurrentObject(this DetailView detailView,object o, ListView listView, DashboardViewItem dashboardViewItem, NestedFrame frame){
+            var objectTypeLink = detailView.GetObjectTypeLink(o, listView);
+            if (objectTypeLink != null){
+                detailView = objectTypeLink.CreateDetailView(detailView, dashboardViewItem, frame);
+            }
+
+            detailView.CurrentObject = detailView.ObjectSpace.GetObject(o);
+            return Unit.Default;
+        }
+
+        private static DetailView CreateDetailView(this IModelMasterDetailViewObjectTypeLink objectTypeLink, DetailView detailView, DashboardViewItem dashboardViewItem, Frame frame){
+            detailView.Close();
+            dashboardViewItem.Frame.SetView(null);
+            var application = dashboardViewItem.Frame.Application;
+            var objectSpace = application.CreateObjectSpace();
+            detailView = application.CreateDetailView(objectSpace, objectTypeLink.DetailView.Id, true, dashboardViewItem.InnerView);
+            dashboardViewItem.Frame.SetView(detailView, true, frame);
+            return detailView;
+        }
+
+        private static IModelMasterDetailViewObjectTypeLink GetObjectTypeLink(this DetailView detailView, object o, ListView listView){
+            return ((IModelApplicationMasterDetail) detailView.Model.Application).DashboardMasterDetail.ObjectTypeLinks
                 .FirstOrDefault(link => {
                     if (link.ModelClass.TypeInfo.Type == o.GetType()){
                         var fitForCriteria = listView.ObjectSpace.IsObjectFitForCriteria(o, CriteriaOperator.Parse(link.Criteria));
@@ -126,24 +144,11 @@ namespace Xpand.XAF.Modules.MasterDetail{
                     }
                     return false;
                 });
-            if (objectTypeLink != null){
-                detailView.Close();
-                dashboardViewItem.Frame.SetView(null);
-                var application = dashboardViewItem.Frame.Application;
-                var objectSpace = application.CreateObjectSpace();
-                detailView = application.CreateDetailView(objectSpace, objectTypeLink.DetailView.Id,
-                    true, dashboardViewItem.InnerView);
-                dashboardViewItem.Frame.SetView(detailView, true, frame);
-            }
-
-            detailView.CurrentObject = detailView.ObjectSpace.GetObject(o);
-            return detailView;
         }
 
-        public static
-            IObservable<((DashboardViewItem detailViewItem, DashboardViewItem listViewItem) masterDetailItem,
-                CustomProcessListViewSelectedItemEventArgs e)> WhenMasterDetailListViewProcessSelectedItem(
-                this XafApplication application){
+        public static IObservable<((DashboardViewItem detailViewItem, DashboardViewItem listViewItem) masterDetailItem, CustomProcessListViewSelectedItemEventArgs e)> 
+            WhenMasterDetailListViewProcessSelectedItem(this XafApplication application){
+            
             return application.WhenMasterDetailDashboardViewItems()
                 .SelectMany(tuple => tuple.listViewItem.Frame
                     .GetController<ListViewProcessCurrentObjectController>()

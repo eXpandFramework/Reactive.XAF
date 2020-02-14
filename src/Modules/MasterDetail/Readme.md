@@ -51,7 +51,7 @@ The module satisfies the following conditions:
    ![image](https://user-images.githubusercontent.com/159464/55990839-67af0180-5cb1-11e9-84cd-6ef0bb5d0137.png)
 
 3. Each time a ListView selection change, it will synchronize the DetailView CurrentObject with the selected from the ListView.
-2. `ALL CRUD` operations are `supported`. A valuable module for forcing the DetailView to open in edit mode is the [ViewEditModeModule](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/ViewEditMode). Additionaly you can use the [AutoCommitModule](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/AutoCommit, for auto commiting the DetailView.
+2. `ALL CRUD` operations are `supported`. A valuable module for forcing the DetailView to open in edit mode is the [ViewEditModeModule](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/ViewEditMode). Additionaly you can use the [AutoCommitModule](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/AutoCommit), for auto commiting the DetailView.
 3. Conditional detailviews can be configured from the model by creating `IModelMasterDetailViewObjectTypeLinks`
 
    ![image](https://user-images.githubusercontent.com/159464/55991766-b1005080-5cb3-11e9-9dc2-bee3dfb627ac.png)

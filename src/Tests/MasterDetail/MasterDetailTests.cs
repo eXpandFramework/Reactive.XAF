@@ -142,9 +142,9 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
         [XpandTest]
         [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
-        public async Task Configure_conditional_detailviews(string platformName){
+        public async Task Conditional_detailviews(string platformName){
             var platform = GetPlatform(platformName);
-            var info = await When_list_view_selection_changed_synchronize_detailview_current_object_Core(platform,nameof(Configure_conditional_detailviews)).WithTimeOut();
+            var info = await When_list_view_selection_changed_synchronize_detailview_current_object_Core(platform,nameof(Conditional_detailviews)).WithTimeOut();
             var application = info.DetailViewItem.Frame.Application;
             var detailViewObjectTypeLinks = ((IModelApplicationMasterDetail) application.Model).DashboardMasterDetail.ObjectTypeLinks;
             var objectTypeLink = detailViewObjectTypeLinks.AddNode<IModelMasterDetailViewObjectTypeLink>();
