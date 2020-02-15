@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using Mono.Cecil;
 
-namespace Xpand.Extensions.Cecil{
+namespace Xpand.Extensions.Mono.Cecil{
     public static partial class MonoCecilExtensions{
         public static bool DoesSpecificTypeImplementInterface(this TypeDefinition childTypeDef,TypeDefinition parentInterfaceDef){
             return childTypeDef

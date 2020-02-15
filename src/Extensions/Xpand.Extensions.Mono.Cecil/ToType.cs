@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Mono.Cecil;
 
-namespace Xpand.Extensions.Cecil{
+namespace Xpand.Extensions.Mono.Cecil{
     public static partial class MonoCecilExtensions{
 
         

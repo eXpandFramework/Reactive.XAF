@@ -83,3 +83,4 @@ Next we see how it looks on Desktop:
 and the same view on the web:
 
 ![web2](https://user-images.githubusercontent.com/159464/58791676-53291e80-85fb-11e9-81de-6ed7db651219.gif)
+
