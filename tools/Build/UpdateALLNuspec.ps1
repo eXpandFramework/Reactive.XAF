@@ -4,8 +4,8 @@ param(
     $Branch="lab"
 )
 Use-MonoCecil | Out-Null
-function UpdateALLNuspec($platform, $allNuspec, $nuspecs) {
-    $allModuleNuspecs = $nuspecs | Where-Object { $_ -notlike "*ALL*" -and $_ -like "*.Modules.*" -and $_ -notlike "*.Client.*" }
+function UpdateALLNuspec($platform, $allNuspec, $nuspecs,$allModuleNuspecs) {
+    
     $platformNuspecs = $allModuleNuspecs | Where-Object {
         $platformMetada = Get-AssemblyMetadata "$root\bin\$($_.BaseName).dll" -key "Platform"
         $platformMetada.Value -eq $platform
@@ -89,7 +89,8 @@ $nuspecs | ForEach-Object {
 $allFileName = "$root\tools\nuspec\Xpand.XAF.Core.All.nuspec"
 Write-HostFormatted "Updating Xpand.XAF.Core.All.nuspec" -Section
 [xml]$allNuspec = Get-Content $allFileName
-UpdateALLNuspec "Core" $allNuspec $nuspecs
+$allModuleNuspecs = $nuspecs | Where-Object { $_ -notlike "*ALL*" -and ($_ -like "*.Modules.*" -or $_ -like "*.Extensions.*") -and $_ -notlike "*.Client.*" }
+UpdateALLNuspec "Core" $allNuspec $nuspecs $allModuleNuspecs 
 $allNuspec.Save($allFileName)
 $allNuspec
 $coreDependency = [PSCustomObject]@{
@@ -100,7 +101,8 @@ $coreDependency = [PSCustomObject]@{
 $allFileName = "$root\tools\nuspec\Xpand.XAF.Win.All.nuspec"
 Write-HostFormatted "Updating Xpand.XAF.Win.All.nuspec" -Section
 [xml]$allNuspec = Get-Content $allFileName
-UpdateALLNuspec "Win" $allNuspec  $nuspecs
+$allModuleNuspecs = $nuspecs | Where-Object { $_ -notlike "*ALL*" -and $_ -like "*.Modules.*" -and $_ -notlike "*.Client.*" }
+UpdateALLNuspec "Win" $allNuspec  $nuspecs $allModuleNuspecs
 Add-NuspecDependency $coreDependency.Id $coreDependency.Version $allNuspec
 $allNuspec.Save($allFileName)
 $allNuspec
@@ -108,7 +110,8 @@ $allNuspec
 $allFileName = "$root\tools\nuspec\Xpand.XAF.Web.All.nuspec"
 Write-HostFormatted "Updating Xpand.XAF.Web.All.nuspec"
 [xml]$allNuspec = Get-Content $allFileName
-UpdateALLNuspec "Web" $allNuspec  $nuspecs
+$allModuleNuspecs = $nuspecs | Where-Object { $_ -notlike "*ALL*" -and $_ -like "*.Modules.*" -and $_ -notlike "*.Client.*" }
+UpdateALLNuspec "Web" $allNuspec  $nuspecs $allModuleNuspecs 
 
 Add-NuspecDependency $coreDependency.Id $coreDependency.Version $allNuspec
 $allNuspec.Save($allFileName)

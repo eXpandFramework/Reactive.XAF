@@ -146,9 +146,10 @@ Move-Item "$stage\Bin\AllTestWeb" "$stage\TestApplication" -Force
 Write-HostFormatted "Copyingg AllTestsWeb" -Section
 Move-Item "$stage\Bin\AllTestWin" "$stage\TestApplication" -Force 
 Remove-Item "$stage\bin\ReactiveLoggerClient" -Recurse -Force
-
+Write-HostFormatted "Restore paket source" -ForegroundColor Magenta
 $DXVersion = Get-VersionPart (Get-DevExpressVersion) Minor
 $SourcePath | ForEach-Object {
     Set-Location $_
     Move-PaketSource 0 "C:\Program Files (x86)\DevExpress $DXVersion\Components\System\Components\Packages"
 }
+Write-HostFormatted "FINISH" -Section
