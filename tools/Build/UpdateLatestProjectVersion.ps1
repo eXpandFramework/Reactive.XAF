@@ -51,7 +51,7 @@ $cred=@{
 $labBuild = Get-AzBuilds -Result succeeded -Status completed -Definition DevExpress.XAF-Lab @cred|
 where-object{$_.status -eq "completed"}|Select-Object -First 1
 Write-HostFormatted "labBuild" -Section
-$labBuild
+$labBuild.buildNumber
 if (!$labBuild ){
     throw "lab build not found"
 }
@@ -89,5 +89,27 @@ if ($Branch -eq "lab") {
     }
 }
 Write-HostFormatted "updateVersion comparing local/remote differences:" -Section
-$updateVersion=Update-NugetProjectVersion @yArgs -Verbose
-$updateVersion
+$updateVersion=@(Update-NugetProjectVersion @yArgs -Verbose)
+
+# $releasepackages=Get-XpandPackages Release XAFAll
+$publishedPackages=Get-XpandPackages Lab XAFAll
+$localPackages=(Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse) + (Get-ChildItem "$sourcePath\src\Extensions" "*.csproj" -Recurse)|ForEach-Object{
+    [PSCustomObject]@{
+        Id = $_.BaseName
+        Version=[version](Get-AssemblyInfoVersion "$($_.DirectoryName)\Properties\assemblyinfo.cs")
+        File=$_
+    }
+}
+Write-HostFormatted "Matching remote build versions" -Section
+$localPackages|ForEach-Object{
+    $localpackage=$_
+    $publishedPackage=$publishedPackages|Where-Object{$_.id -eq $localpackage.id}
+    $publishedVersion=([version](Get-VersionPart $publishedPackage.Version Build))
+    $local=([version](Get-VersionPart $localpackage.Version Build))
+    if ($local -ne $publishedVersion){
+        $remoteversion="$(Get-VersionPart $publishedVersion Build).$(($publishedVersion.Revision+1))"
+        write-warning "$($localPackage.Id) release build version ($remoteVersion) is different than local ($local)"
+        $updateVersion+=$localPackage.File.BaseName
+    }
+}
+$updateVersion|Sort-Object -Unique

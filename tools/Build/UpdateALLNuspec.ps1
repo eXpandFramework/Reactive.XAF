@@ -92,7 +92,7 @@ Write-HostFormatted "Updating Xpand.XAF.Core.All.nuspec" -Section
 $allModuleNuspecs = $nuspecs | Where-Object { $_ -notlike "*ALL*" -and ($_ -like "*.Modules.*" -or $_ -like "*.Extensions.*") -and $_ -notlike "*.Client.*" }
 UpdateALLNuspec "Core" $allNuspec $nuspecs $allModuleNuspecs 
 $allNuspec.Save($allFileName)
-$allNuspec
+Get-Content $allFileName -Raw
 $coreDependency = [PSCustomObject]@{
     id      = $allNuspec.package.metadata.id
     version = $allNuspec.package.metadata.version
@@ -105,7 +105,7 @@ $allModuleNuspecs = $nuspecs | Where-Object { $_ -notlike "*ALL*" -and $_ -like 
 UpdateALLNuspec "Win" $allNuspec  $nuspecs $allModuleNuspecs
 Add-NuspecDependency $coreDependency.Id $coreDependency.Version $allNuspec
 $allNuspec.Save($allFileName)
-$allNuspec
+Get-Content $allFileName -Raw
 
 $allFileName = "$root\tools\nuspec\Xpand.XAF.Web.All.nuspec"
 Write-HostFormatted "Updating Xpand.XAF.Web.All.nuspec"
@@ -115,4 +115,4 @@ UpdateALLNuspec "Web" $allNuspec  $nuspecs $allModuleNuspecs
 
 Add-NuspecDependency $coreDependency.Id $coreDependency.Version $allNuspec
 $allNuspec.Save($allFileName)
-$allNuspec
+Get-Content $allFileName -Raw

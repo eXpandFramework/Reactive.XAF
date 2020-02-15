@@ -9,6 +9,7 @@ param(
 Import-Module XpandPwsh -Force -Prefix X
 $ErrorActionPreference = "Stop"
 if (!$ChangedModules){
+    $ChangedModules
     Write-HostFormatted "Skipping package creation as no package changed" -ForegroundColor Yellow
     return
 }
@@ -152,7 +153,7 @@ if ($ChangedModules) {
         $ChangedModules+="Xpand.VersionConverter"
     }
     "ChangedModules:"
-    $ChangedModules
+    $ChangedModules|Write-Output
     $nupks = Get-ChildItem $nugetBin
     & (Get-NugetPath) list -source $nugetBin | ConvertTo-PackageObject| ForEach-Object {
         $p = $_
