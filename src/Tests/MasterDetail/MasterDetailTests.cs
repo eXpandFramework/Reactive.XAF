@@ -105,7 +105,7 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
             listView.Editor.CallMethod("OnSelectionChanged");
 
             var detailView = ((DetailView) tuple.DetailViewItem.InnerView);
-            // detailView.ObjectSpace.GetKeyValue(detailView.CurrentObject).ShouldBe(md.Oid);
+            detailView.ObjectSpace.GetKeyValue(detailView.CurrentObject).ShouldBe(md.Oid);
             return tuple;
         }
 
