@@ -16,6 +16,7 @@ using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ApplicationModulesManager;
 using Xpand.Extensions.XAF.Frame;
 using Xpand.Extensions.XAF.XafApplication;
+using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
@@ -58,7 +59,8 @@ namespace Xpand.XAF.Modules.MasterDetail{
                         return Unit.Default;
                     })
                 )
-                .ToUnit();
+                .ToUnit()
+                .Retry(application);
         }
 
         private static IObservable<Unit> WhenSaveAction(this XafApplication application){
@@ -69,7 +71,8 @@ namespace Xpand.XAF.Modules.MasterDetail{
                     .Select(action => action.WhenExecuted()).Merge()
                     .Do(tuple => { tuple.action.Controller.Frame.View.ObjectSpace.CommitChanges(); }))
                 .Merge().ToUnit()
-                .TraceMasterDetailModule();
+                .TraceMasterDetailModule()
+                .Retry(application);
         }
 
         public static IObservable<DashboardView> WhenMasterDetailDashboardViewCreated(this XafApplication application){
@@ -107,7 +110,8 @@ namespace Xpand.XAF.Modules.MasterDetail{
                         .ToUnit();
                 })
                 .Merge().ToUnit()
-                .TraceMasterDetailModule();
+                .TraceMasterDetailModule()
+                .Retry(application);
         }
 
         private static Unit SynchronizeCurrentObject(this DetailView detailView,object o, ListView listView, DashboardViewItem dashboardViewItem, NestedFrame frame){
@@ -116,11 +120,11 @@ namespace Xpand.XAF.Modules.MasterDetail{
                 detailView = objectTypeLink.CreateDetailView(detailView, dashboardViewItem, frame);
             }
 
-            if (detailView.ObjectSpace == null){
-                dashboardViewItem.Frame.SetView(null);
-                detailView = (DetailView) frame.Application.CreateView(detailView.Model);
-                dashboardViewItem.Frame.SetView(detailView);
-            }
+            // if (detailView.ObjectSpace == null){
+            //     dashboardViewItem.Frame.SetView(null);
+            //     detailView = (DetailView) frame.Application.CreateView(detailView.Model);
+            //     dashboardViewItem.Frame.SetView(detailView);
+            // }
             detailView.CurrentObject = detailView.ObjectSpace.GetObject(o);
             return Unit.Default;
         }

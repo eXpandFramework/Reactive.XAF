@@ -8,6 +8,7 @@ using DevExpress.ExpressApp;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.XAF.Modules.Reactive;
+using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.RefreshView{
@@ -42,7 +43,8 @@ namespace Xpand.XAF.Modules.RefreshView{
                                 );
                     }).Merge()
                 .TraceRefreshView()
-                .ToUnit();
+                .ToUnit()
+                .Retry(application);
         }
     }
 }

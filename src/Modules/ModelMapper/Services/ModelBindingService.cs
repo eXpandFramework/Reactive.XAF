@@ -13,6 +13,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
 using Fasterflect;
+using JetBrains.Annotations;
 using Xpand.Extensions.Linq;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
@@ -20,6 +21,7 @@ using Xpand.Extensions.XAF.Model;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.Predefined;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
+using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services{
@@ -37,6 +39,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
     public static class ModelBindingService{
         static readonly Subject<Parameter> ControlBindSubject=new Subject<Parameter>();
 
+        [PublicAPI]
         public static IObservable<Parameter> ControlBind => ControlBindSubject;
 
         internal static IObservable<Unit> BindConnect(this XafApplication application){
@@ -44,14 +47,17 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             if (application==null)
                 return Observable.Empty<Unit>();
             var controlsCreated = application.WhenObjectViewCreated()
-                .ControlsCreated().Select(tuple => tuple).Publish().RefCount();
+                .ControlsCreated().Select(tuple => tuple)
+                .Retry(application)
+                .Publish().RefCount();
             
             return controlsCreated.ViewModelProperties()
                 .Merge(controlsCreated.ViewItemBindData())
                 .Do(tuple => BindTo(tuple))
                 .ToUnit()
                 .Merge(application.BindLayoutGroupControl())
-                .TraceModelMapper();
+                .TraceModelMapper()
+                .Retry(application);
                 
         }
 

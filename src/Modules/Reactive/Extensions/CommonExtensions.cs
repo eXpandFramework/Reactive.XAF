@@ -8,16 +8,27 @@ using System.Reactive.Threading.Tasks;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Utils;
 using DevExpress.Persistent.Base;
+using Fasterflect;
 using JetBrains.Annotations;
 using Xpand.Extensions.Configuration;
 using Xpand.Extensions.Exception;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.XAF.XafApplication;
 
 namespace Xpand.XAF.Modules.Reactive.Extensions{
     public static class CommonExtensions{
         [PublicAPI]
         public static IDisposable SubscribeSafe<T>(this IObservable<T> source){
             return source.HandleException().Subscribe();
+        }
+
+        public static IObservable<T> Retry<T>(this IObservable<T> source,
+            XafApplication application){
+            return source.RetryWhen(_ => _.Do(e => {
+                if (application.GetPlatform() == Platform.Win){
+                    application.CallMethod("HandleException", e);
+                }
+            }).SelectMany(e => application.GetPlatform()==Platform.Win?e.ReturnObservable():Observable.Empty<Exception>()));
         }
 
         public static IObservable<T> HandleException<T>(this IObservable<T> source,Func<Exception,IObservable<T>> exceptionSelector=null){

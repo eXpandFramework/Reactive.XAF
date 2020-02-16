@@ -8,15 +8,17 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
+using JetBrains.Annotations;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.CloneMemberValue{
     public static class CloneMemberValueService{
-
-        public static IObservable<Unit> Connect(this ApplicationModulesManager modulesManager ,XafApplication application){
+        [UsedImplicitly]
+        internal static IObservable<Unit> Connect(this ApplicationModulesManager modulesManager ,XafApplication application){
             if (application != null){
                 return application.WhenCloneMemberValues()
                     .ToUnit();
@@ -68,8 +70,7 @@ namespace Xpand.XAF.Modules.CloneMemberValue{
                 .Select(_ => _.e.ListView).Where(view => view.Model.AllowEdit);
         }
 
-        public static IObservable<(ObjectView objectView, IMemberInfo MemberInfo, object previousObject, object currentObject)>
-            WhenCloneMemberValues(this XafApplication application){
+        public static IObservable<(ObjectView objectView, IMemberInfo MemberInfo, object previousObject, object currentObject)> WhenCloneMemberValues(this XafApplication application){
             return application.WhenCloneMemberValueDetailViewPairs()
                 .Select(_ => (((ObjectView) _.current),_.previous.CurrentObject,_.current.CurrentObject))
                 .Merge(application.WhenCloneMemberValueListViewCreated()
@@ -78,7 +79,9 @@ namespace Xpand.XAF.Modules.CloneMemberValue{
                         .NewObjectPairs()
                         .Select(tuple => (((ObjectView) _.view),tuple.previous,tuple.current)))))
                 .CloneMembers()
-                .Publish().RefCount();
+                .Publish().RefCount()
+                .TraceCloneMemberValueModule()
+                .Retry(application);
         }
 
         private static (ObjectView objectView,IMemberInfo MemberInfo, object previousObject, object currentObject)

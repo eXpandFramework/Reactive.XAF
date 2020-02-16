@@ -8,6 +8,7 @@ using DevExpress.ExpressApp.Templates;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplication;
+using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.HideToolBar{
@@ -44,6 +45,7 @@ namespace Xpand.XAF.Modules.HideToolBar{
             if (application != null){
                 return application.HideToolBarNestedFrames()
                     .HideToolBar()
+                    .Retry(application)
                     .ToUnit();
             }
             return Observable.Empty<Unit>();

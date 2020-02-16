@@ -7,6 +7,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.SystemModule;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.SuppressConfirmation{
@@ -38,7 +39,7 @@ namespace Xpand.XAF.Modules.SuppressConfirmation{
                     }).Publish().RefCount();
 
 
-                var suppressConfirmationWindows = application.WhenSuppressConfirmationWindows().Publish().RefCount();
+                var suppressConfirmationWindows = application.WhenSuppressConfirmationWindows().TraceSuppressConfirmationModule().Retry(application).Publish().RefCount();
                 return viewSignal.CombineLatest(suppressConfirmationWindows, (unit, frame) => ChangeModificationHandlingMode(frame)).Merge().ToUnit()
                     .Merge(suppressConfirmationWindows.Select(DisableWebControllers).ToUnit())
                     .ToUnit();

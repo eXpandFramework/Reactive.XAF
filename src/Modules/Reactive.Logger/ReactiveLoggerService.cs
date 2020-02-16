@@ -12,6 +12,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using DevExpress.ExpressApp;
 using DevExpress.Utils;
+using JetBrains.Annotations;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -79,14 +80,10 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                                 return Observable.Never<Unit>();
                             }));
                 }).ToUnit()
-                .TraceLogger();
+                .TraceLogger()
+                .Retry(application);
         }
-
-
-        public static IObservable<TraceEvent> WhenMethod(this IObservable<TraceEvent> source, params string[] methods ){
-            return source.Where(_ => methods.Contains(_.Method));
-        }
-
+        [PublicAPI]
         public static IObservable<TraceEvent> WhenTraceEvent<TLocation>(this XafApplication application, Expression<Func<TLocation, object>> expression,
             RXAction rxAction = RXAction.All){
             var name = expression.GetMemberInfo().Name;
@@ -115,6 +112,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                 .Where(_ => rxAction == RXAction.All || _.RXAction.HasAnyFlag(rxAction));
         }
 
+        [PublicAPI]
         public static IObservable<TraceEvent> WhenTraceOnSubscribeEvent(this XafApplication application,
             params string[] methods){
             return application.WhenTraceEvent(null, RXAction.Subscribe, methods);
@@ -128,6 +126,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             return application.WhenTraceEvent(location, RXAction.OnNext, methods);
         }
 
+        [PublicAPI]
         public static IObservable<TraceEvent> WhenTraceEvent(this XafApplication application,Type location=null,RXAction rxAction=RXAction.All,params string[] methods){
             return SavedTraceEvent.When(location, rxAction,methods).Cast<TraceEvent>();
 
@@ -174,10 +173,9 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                     }
                 })
                 .ToUnit();
-            return register.Merge(applyModel);
+            return register.Merge(applyModel)
+                .Retry(application);
         }
-
-        internal  static  string ApplicationTitle{ get; set; }
 
         public static void TraceMessage(this TraceSource traceSource, string value,TraceEventType traceEventType=TraceEventType.Information){
             var traceEventMessage = new TraceEventMessage {
@@ -197,7 +195,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             
             return events.Select(_ => _)
                 .Buffer(TimeSpan.FromSeconds(1)).WhenNotEmpty()
-                .SelectMany(list => application.ObjectSpaceProvider.ToObjectSpace().SelectMany(space => space.SaveTraceEvent(list)));
+                .SelectMany(list => application.ObjectSpaceProvider.ToObjectSpace().SelectMany(space => space.SaveTraceEvent(list)))
+                .Retry(application);
         }
 
         public static IObservable<TraceEvent> SaveTraceEvent(this IObjectSpace objectSpace, IList<ITraceEvent> traceEventMessages){

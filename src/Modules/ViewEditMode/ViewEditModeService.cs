@@ -9,6 +9,7 @@ using DevExpress.ExpressApp.Actions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
@@ -37,10 +38,12 @@ namespace Xpand.XAF.Modules.ViewEditMode{
                     var model = ((IModelDetailViewViewEditMode) _.Frame.View.Model);
                     return model.ViewEditMode == DevExpress.ExpressApp.Editors.ViewEditMode.View && model.LockViewEditMode;
                 })
+                .Retry(application)
                 .Publish().RefCount();
 
             var editAction = webModificationsController
                 .Select(_ => _.Actions.First(action => action.Id == "SwitchToEditMode")).Cast<SimpleAction>()
+                .Retry(application)
                 .Publish().RefCount();
             editAction.SelectMany(action => action.Enabled.WhenResultValueChanged()).Subscribe(tuple => { });
             var unLockEdit = editAction.SelectMany(_ => _.WhenExecuting()).FirstAsync()
@@ -53,7 +56,7 @@ namespace Xpand.XAF.Modules.ViewEditMode{
                     ((IModelDetailViewViewEditMode) _.Controller.Frame.View.Model).LockViewEditMode = true;
                     return Unit.Default;
                 });
-            return unLockEdit.Merge(lockEdit).ToUnit().TraceViewEditModeModule();
+            return unLockEdit.Merge(lockEdit).ToUnit().TraceViewEditModeModule().Retry(application);
         }
 
         public static IObservable<DetailView> WhenViewEditModeAssigned(this XafApplication application){

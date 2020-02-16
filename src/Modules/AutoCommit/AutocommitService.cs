@@ -6,6 +6,7 @@ using Fasterflect;
 using Xpand.Extensions.AppDomain;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.Model;
+using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.AutoCommit{
@@ -34,7 +35,7 @@ namespace Xpand.XAF.Modules.AutoCommit{
         }
 
         internal static IObservable<View> Connect(this XafApplication application){
-            return application != null ? application.WhenAutoCommitObjectViewCreated().Publish().RefCount().AutoCommit() : Observable.Empty<View>();
+            return application != null ? application.WhenAutoCommitObjectViewCreated().AutoCommit().Retry(application) : Observable.Empty<View>();
         }
 
         public static IObservable<View> AutoCommit(this  IObservable<ObjectView> objectViewCreated){
