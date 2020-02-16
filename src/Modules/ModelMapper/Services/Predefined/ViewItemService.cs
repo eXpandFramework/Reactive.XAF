@@ -44,7 +44,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.Predefined{
             TypeMappingService.ContainerMappingRules.Add((info.typeToMap.Name,tuple => ViewItem(info.typeToMap,tuple,info.mapName)));
             TypeMappingService.AdditionalTypesList.Add(genericList);    
             
-            return Unit.Default.AsObservable();
+            return Unit.Default.ReturnObservable();
         }
 
 

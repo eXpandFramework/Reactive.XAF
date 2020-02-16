@@ -126,13 +126,13 @@ namespace Xpand.TestsLib{
             return Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()
                 ? TraceEventHub.Broadcasted.FirstAsync(_ => _.Source == application.SUTModule.Name).ToUnit()
                     .SubscribeReplay()
-                : Unit.Default.AsObservable();
+                : Unit.Default.ReturnObservable();
         }
 
         public static IObservable<Unit> ClientConnect(this ITestApplication application){
             return Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()
                 ? TraceEventHub.Connecting.FirstAsync().SubscribeReplay()
-                : Unit.Default.AsObservable();
+                : Unit.Default.ReturnObservable();
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Xpand.Extensions.Reactive.Transform{
                 .SelectMany(ob => {
                     var r = ob.Replay();
                     r.Connect();
-                    return r.IgnoreElements().Concat(default(T).AsObservable())
+                    return r.IgnoreElements().Concat(default(T).ReturnObservable())
                         .Select(_ => r.ToEnumerable().ToArray());
                 })
                 .Select(_ => {

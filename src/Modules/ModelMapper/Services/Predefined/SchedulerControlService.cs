@@ -28,7 +28,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.Predefined{
                 .Subscribe();
             
             TypeMappingService.PropertyMappingRules.Insert(0,(PredefinedMap.SchedulerControl.ToString(),data => SchedulerStorage(data,typeToMap, types)));
-            return Unit.Default.AsObservable();
+            return Unit.Default.ReturnObservable();
         }
 
 

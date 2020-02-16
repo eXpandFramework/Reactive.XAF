@@ -26,7 +26,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<XafApplication> WhenCompatibilityChecked(this XafApplication application){
             if ((bool) application.GetPropertyValue("IsCompatibilityChecked")){
-                return application.AsObservable();
+                return application.ReturnObservable();
             }
             return application.WhenObjectSpaceCreated().FirstAsync()
                 .Select(_ => _.application)
@@ -160,7 +160,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<Frame> WhenViewOnFrame(
             this XafApplication application,Type objectType=null,ViewType viewType=ViewType.Any,Nesting nesting=Nesting.Any){
             return application.WhenWindowCreated().TemplateViewChanged()
-                .SelectMany(window => (window.View.AsObservable().When(objectType, viewType, nesting)).To(window))
+                .SelectMany(window => (window.View.ReturnObservable().When(objectType, viewType, nesting)).To(window))
                 .TraceRX();
         }
 
@@ -190,7 +190,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .TransformPattern<ListViewCreatedEventArgs, XafApplication>().TraceRX();
         }
         public static IObservable<ObjectView> WhenObjectViewCreated(this XafApplication application){
-            return application.AsObservable().ObjectViewCreated();
+            return application.ReturnObservable().ObjectViewCreated();
         }
 
         public static IObservable<DashboardView> DashboardViewCreated(this IObservable<XafApplication> source){

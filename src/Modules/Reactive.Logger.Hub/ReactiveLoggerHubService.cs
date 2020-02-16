@@ -113,7 +113,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
             return source.SelectMany(point => {
                 var newClient = point.ToServerPort().NewClient(Receiver);
                 return newClient.ConnectAsync().ToObservable()
-                    .Merge(Unit.Default.AsObservable()).To(newClient);
+                    .Merge(Unit.Default.ReturnObservable()).To(newClient);
             })
             .TraceRXLoggerHub()
             .Retry();
@@ -134,7 +134,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
         private static IObservable<IPEndPoint> IPEndPoint(string host, int port){
             var isIP = Regex.IsMatch(host, @"\A\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b\z");
             if (isIP){
-                return new IPEndPoint(IPAddress.Parse(host), port).AsObservable();
+                return new IPEndPoint(IPAddress.Parse(host), port).ReturnObservable();
             }
 
             return Dns.GetHostAddressesAsync(host).ToObservable()

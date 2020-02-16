@@ -47,7 +47,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         internal static IObservable<TFrame> WhenFits<TFrame>(this IObservable<TFrame> source, ViewType viewType,
             Type objectType = null, Nesting nesting = Nesting.Any, bool? isPopupLookup = null) where TFrame : Frame{
-            return source.SelectMany(_ => _.View != null ? _.AsObservable() : _.WhenViewChanged().Select(tuple => _))
+            return source.SelectMany(_ => _.View != null ? _.ReturnObservable() : _.WhenViewChanged().Select(tuple => _))
                 .Where(frame => frame.View.Fits(viewType, nesting, objectType))
                 .Where(_ => {
                     if (isPopupLookup.HasValue){
@@ -86,7 +86,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T> TemplateChanged<T>(this IObservable<T> source,
             bool skipWindowsCtorAssigment = false) where T : Frame{
             return source.SelectMany(item => {
-                if (item.Template != null) return item.AsObservable();
+                if (item.Template != null) return item.ReturnObservable();
                 return Observable.FromEventPattern<EventHandler, EventArgs>(
                         handler => item.TemplateChanged += handler,
                         handler => item.TemplateChanged -= handler,ImmediateScheduler.Instance)

@@ -94,7 +94,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                     .All(_ =>_skipeAssemblyValidation|| _.TypeFromPath())
                     .Select(_ => {
                         var assembly =!_? distinnctTypesToMap.ModelCode().SelectMany(tuple => tuple.references.Compile(tuple.code))
-                                : Assembly.LoadFile(GetLastAssemblyPath()).AsObservable();
+                                : Assembly.LoadFile(GetLastAssemblyPath()).ReturnObservable();
                         return assembly.SelectMany(assembly1 => {
                             var types = assembly1.GetTypes()
                                 .Where(type => typeof(IModelModelMap).IsAssignableFrom(type))

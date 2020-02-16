@@ -11,7 +11,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.Predefined{
         public static IObservable<Unit> Connect(){
             
             TypeMappingService.TypeMappingRules.Add((PredefinedMap.LayoutControlGroup.ToString(), TypeMappingRule));
-            return Unit.Default.AsObservable();
+            return Unit.Default.ReturnObservable();
         }
 
         private static void TypeMappingRule(ModelMapperType _){

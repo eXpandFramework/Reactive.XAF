@@ -63,7 +63,7 @@ namespace Xpand.XAF.Modules.HideToolBar.Tests{
                     nestedFrame.Template.GetMock().As<ISupportActionsToolbarVisibility>()
                         .Setup(visibility => visibility.SetVisible(false));
                 }
-                await nestedFrame.AsObservable().HideToolBar();
+                await nestedFrame.ReturnObservable().HideToolBar();
 
                 if (platform==Platform.Win){
                     ((IBarManagerHolder) nestedFrame.Template).BarManager.Bars.Any(bar => bar.Visible).ShouldBe(false);
@@ -87,7 +87,7 @@ namespace Xpand.XAF.Modules.HideToolBar.Tests{
                 var controller = new ToolbarVisibilityController();
                 frame.RegisterController(controller);
 
-                await frame.AsObservable().HideToolBar();
+                await frame.ReturnObservable().HideToolBar();
 
                 controller.Active[HideToolBarModule.CategoryName].ShouldBe(false);
             }

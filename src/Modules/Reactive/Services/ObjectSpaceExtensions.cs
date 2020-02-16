@@ -31,11 +31,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
 
         public static IObservable<IObjectSpace> ToObjectSpace(this IObjectSpaceProvider provider){
-            return provider == null ? Observable.Empty<IObjectSpace>() : Observable.Using(provider.CreateObjectSpace, space => space.AsObservable());
+            return provider == null ? Observable.Empty<IObjectSpace>() : Observable.Using(provider.CreateObjectSpace, space => space.ReturnObservable());
         }
 
         public static IObservable<IObjectSpace> ToObjectSpace(this XafApplication application){
-            return Observable.Using(application.CreateObjectSpace, space => space.AsObservable());
+            return Observable.Using(application.CreateObjectSpace, space => space.ReturnObservable());
         }
 
         public static T GetObject<T>(this XafApplication application,T value){
@@ -135,7 +135,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
 
         public static IObservable<IObjectSpace> WhenModifyChanged(this IObjectSpace source){
-            return source.AsObservable().ModifyChanged();
+            return source.ReturnObservable().ModifyChanged();
         }
 
         public static IObservable<IObjectSpace> ModifyChanged(this IObservable<IObjectSpace> source) {

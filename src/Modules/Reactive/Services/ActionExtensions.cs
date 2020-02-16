@@ -12,7 +12,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ActionExtensions{
         public static IObservable<TFrame> WhenView<TFrame>(this IObservable<TFrame> source, Type objectType)
             where TFrame : Frame{
-            return source.SelectMany(frame => frame.View.AsObservable().When(objectType).Select(view => frame));
+            return source.SelectMany(frame => frame.View.ReturnObservable().When(objectType).Select(view => frame));
         }
 
         public static IObservable<TAction> When<TAction>(this IObservable<TAction> source, Type objectType)

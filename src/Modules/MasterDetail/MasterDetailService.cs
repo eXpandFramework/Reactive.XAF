@@ -175,7 +175,7 @@ namespace Xpand.XAF.Modules.MasterDetail{
                     };
                 simpleAction.Active[MasterDetailModule.CategoryName] = false;
                 return simpleAction;
-            }).AsObservable().FirstAsync()
+            }).ReturnObservable().FirstAsync()
                 .TraceMasterDetailModule();
         }
 

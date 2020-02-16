@@ -13,9 +13,9 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net{
             return source.ToObservable()
                 .SelectMany(endPoint => {
                     var inUsed = Observable.While(() => !endPoint.Listening(), Observable.Empty<IPEndPoint>().Delay(timeSpan.Value))
-                        .Concat(endPoint.AsObservable());
+                        .Concat(endPoint.ReturnObservable());
                     var notInUse = Observable.While(endPoint.Listening, Observable.Empty<IPEndPoint>().Delay(timeSpan.Value))
-                        .Concat(endPoint.AsObservable());
+                        .Concat(endPoint.ReturnObservable());
                     return repeatWhenOffine ? inUsed.RepeatWhen(_ => _.SelectMany(o => notInUse)) : inUsed;
                 });
         }

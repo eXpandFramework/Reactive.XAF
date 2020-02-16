@@ -65,7 +65,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             }
             return application.WhenViewOnFrame(typeof(TraceEvent),ViewType.ListView)
                 .SelectMany(frame => {
-                    return SynchronizationContext.Current.AsObservable().WhenNotDefault()
+                    return SynchronizationContext.Current.ReturnObservable().WhenNotDefault()
                         .SelectMany(context => events.Throttle(TimeSpan.FromSeconds(1))
                             .TakeUntil(frame.WhenDisposingFrame())
                             .DistinctUntilChanged(_ => _.TraceKey())
@@ -73,7 +73,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                             .SelectMany(e => {
                                 if (e.Method != nameof(RefreshViewDataSource)){
                                     frame?.View?.RefreshDataSource();
-                                    return e.AsObservable().ToUnit();
+                                    return e.ReturnObservable().ToUnit();
                                 }
 
                                 return Observable.Never<Unit>();
