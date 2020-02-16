@@ -101,15 +101,17 @@ $coreDependency = [PSCustomObject]@{
 $allFileName = "$root\tools\nuspec\Xpand.XAF.Win.All.nuspec"
 Write-HostFormatted "Updating Xpand.XAF.Win.All.nuspec" -Section
 [xml]$allNuspec = Get-Content $allFileName
-UpdateALLNuspec @("Core","Win") $allNuspec  $nuspecs $allModuleNuspecs
+UpdateALLNuspec @("Win") $allNuspec  $nuspecs $allModuleNuspecs
 Add-NuspecDependency $coreDependency.Id $coreDependency.Version $allNuspec
+# $coredependency=$allNuspec.package.metadata.dependencies.dependency|Where-Object{$_.id -eq "Xpand.XAF.Core.all"}|Select-Object -First 1
+# $coreDependency.ParentNode.RemoveChild($coreDependency)
 $allNuspec.Save($allFileName)
 Get-Content $allFileName -Raw
 
 $allFileName = "$root\tools\nuspec\Xpand.XAF.Web.All.nuspec"
 Write-HostFormatted "Updating Xpand.XAF.Web.All.nuspec"
 [xml]$allNuspec = Get-Content $allFileName
-UpdateALLNuspec @("Core","Web") $allNuspec  $nuspecs $allModuleNuspecs 
+UpdateALLNuspec @("Web") $allNuspec  $nuspecs $allModuleNuspecs 
 
 Add-NuspecDependency $coreDependency.Id $coreDependency.Version $allNuspec
 $allNuspec.Save($allFileName)

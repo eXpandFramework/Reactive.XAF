@@ -75,9 +75,22 @@ Invoke-Script {
         Get-NugetPackage -name $_.id -Source (Get-PackageFeed $psource) -ResultType NupkgFile|Copy-Item -Destination $tempNupkg
     }
 
+    $localpackages=& (Get-NugetPath) list -Source "$root\bin\Nupkg\"|ConvertTo-PackageObject
+    Get-XpandPackages $branch XAFAll|ForEach-Object{
+        $package=$_
+        $localPackage=$localpackages|Where-Object{$_.id -eq $package.id}
+        if ($localPackage){
+            $localPackage
+        }
+        else{
+            $package
+        }
+    }|Where-Object{$_.id -notlike "*versionconverter*"}|ForEach-Object{
+        Add-AssemblyBindingRedirect -id $_.id -version $_.version -path "$testAppPAth\TestApplication.web" -PublicToken (Get-XpandPublicKeyToken)
+    }
     & (Get-NugetPath) restore "$testAppPAth\TestApplication.sln" -source "$tempNupkg;$(Get-PackageFeed -Nuget);$(Get-PackageFeed -Xpand)"
     & (Get-MsBuildPath) "$testAppPAth\TestApplication.sln" /bl:$root\bin\TestWebApplication.binlog /WarnAsError /v:m -t:rebuild -m
     Remove-Item $tempNupkg -Force -Recurse
-} -Maximum 2
+} -Maximum 1
 
 
