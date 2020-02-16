@@ -16,9 +16,14 @@ namespace Xpand.TestsLib{
     public class TestWinApplication : WinApplication, ITestApplication{
         private readonly bool _transmitMessage;
 
-        public TestWinApplication(Type sutModule, bool transmitMessage = true){
+        public TestWinApplication(Type sutModule, bool transmitMessage = true, bool handleExceptions=true){
             _transmitMessage = transmitMessage;
             SUTModule = sutModule;
+            CustomHandleException += (sender, e) => {
+                if (handleExceptions){
+                    throw e.Exception;
+                }
+            };
 //            TraceClientConnected = this.ClientConnect();
 //            TraceClientBroadcast = this.ClientBroadcast();
         }

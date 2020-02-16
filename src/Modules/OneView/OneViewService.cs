@@ -12,7 +12,6 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.Reactive;
-using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Win.Services;
 
@@ -45,7 +44,7 @@ namespace Xpand.XAF.Modules.OneView{
                 .Where(view => !(bool) application.GetFieldValue("exiting"))
                 .Do(view => application.Exit())
                 .Select(view => view);
-            return closingView.ToUnit().Retry(application);
+            return closingView.ToUnit();
 
         }
 
@@ -55,8 +54,7 @@ namespace Xpand.XAF.Modules.OneView{
                     .Select(tuple => application.MainWindow.GetController<EditModelController>().EditModelAction));
             return editModelAction
                 .Do(action => action.DoExecute()).ToUnit()
-                .TraceOneView()
-                .Retry(application);
+                .TraceOneView();
         }
 
         private static IObservable<Unit> HideMainWindow(this XafApplication application){
@@ -66,8 +64,7 @@ namespace Xpand.XAF.Modules.OneView{
                 })
                 .ToUnit()
                 .TakeUntil(application.ToReactiveModule<IModelReactiveModuleOneView>().Where(view => view.OneView.View==null))
-                .TraceOneView()
-                .Retry(application);
+                .TraceOneView();
         }
 
 

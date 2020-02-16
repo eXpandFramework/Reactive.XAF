@@ -1,4 +1,5 @@
-﻿using System.Reactive.Linq;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -21,7 +22,7 @@ using Xpand.XAF.Modules.Reactive.Win.Services;
 
 
 namespace Xpand.XAF.Modules.OneView.Tests{
-    [NonParallelizable]
+    [NonParallelizable][SuppressMessage("ReSharper", "AccessToDisposedClosure")]
     public class OneViewTests : BaseTest{
         [Test]
         [XpandTest]
@@ -121,7 +122,7 @@ namespace Xpand.XAF.Modules.OneView.Tests{
         }
 
         private static OneViewModule OneViewModule(string title,Platform platform=Platform.Win){
-            var application = platform.NewApplication<OneViewModule>();
+            var application = platform.NewApplication<OneViewModule>(handleExceptions:false);
             application.EditorFactory=new EditorsFactory();
             var oneViewModule = application.AddModule<OneViewModule>(title,typeof(OV), typeof(A));
             ConfigureModel(application);

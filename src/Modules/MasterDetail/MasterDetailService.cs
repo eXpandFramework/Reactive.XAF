@@ -120,11 +120,11 @@ namespace Xpand.XAF.Modules.MasterDetail{
                 detailView = objectTypeLink.CreateDetailView(detailView, dashboardViewItem, frame);
             }
 
-            // if (detailView.ObjectSpace == null){
-            //     dashboardViewItem.Frame.SetView(null);
-            //     detailView = (DetailView) frame.Application.CreateView(detailView.Model);
-            //     dashboardViewItem.Frame.SetView(detailView);
-            // }
+            if (detailView.ObjectSpace == null){
+                dashboardViewItem.Frame.SetView(null);
+                detailView = (DetailView) frame.Application.CreateView(detailView.Model);
+                dashboardViewItem.Frame.SetView(detailView);
+            }
             detailView.CurrentObject = detailView.ObjectSpace.GetObject(o);
             return Unit.Default;
         }

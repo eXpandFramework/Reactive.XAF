@@ -141,7 +141,7 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
             info.DetailViewItem.Frame.Application.Dispose();
         }
         [XpandTest]
-        // [TestCase(nameof(Platform.Web))]
+        [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public async Task Conditional_detailviews(string platformName){
             var platform = GetPlatform(platformName);

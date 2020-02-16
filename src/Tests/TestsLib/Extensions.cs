@@ -180,7 +180,7 @@ namespace Xpand.TestsLib{
             return platform.NewApplication<TModule>().AddModule<TModule>(title, additionalExportedTypes);
         }
 
-        public static XafApplication NewApplication<TModule>(this Platform platform, bool transmitMessage = true)
+        public static XafApplication NewApplication<TModule>(this Platform platform, bool transmitMessage = true,bool handleExceptions=true)
             where TModule : ModuleBase{
             XafApplication application;
 
@@ -188,7 +188,7 @@ namespace Xpand.TestsLib{
                 application = new TestWebApplication(typeof(TModule), transmitMessage);
             }
             else if (platform == Platform.Win){
-                application = new TestWinApplication(typeof(TModule), transmitMessage);
+                application = new TestWinApplication(typeof(TModule), transmitMessage,handleExceptions);
             }
             else{
                 throw new NotSupportedException(
