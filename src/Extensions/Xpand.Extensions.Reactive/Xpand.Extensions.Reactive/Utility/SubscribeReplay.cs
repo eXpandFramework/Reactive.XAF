@@ -5,7 +5,7 @@ using System.Reactive.Linq;
 namespace Xpand.Extensions.Reactive.Utility{
     public static partial class Utility{
         public static IObservable<T> SubscribeReplay<T>(this IObservable<T> source, IScheduler scheduler,int bufferSize = 0){
-            scheduler = scheduler ?? Scheduler.Default;
+            scheduler ??= Scheduler.Default;
             var subscribeOn = source.SubscribeOn(scheduler);
             return subscribeOn.SubscribeReplay(bufferSize);
         }

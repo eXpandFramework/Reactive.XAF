@@ -11,5 +11,8 @@ namespace Xpand.Extensions.Reactive.Transform{
         public static IObservable<T> To<T>(this IObservable<object> source){
             return source.Select(o => default(T)).WhenNotDefault();
         }
+        public static IObservable<TResult> To<TResult,T>(this IObservable<T> source){
+            return source.Select(o => default(TResult)).WhenNotDefault();
+        }
     }
 }
