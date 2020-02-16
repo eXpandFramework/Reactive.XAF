@@ -19,11 +19,11 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |JetBrains.Annotations|2019.1.3
  |System.Interactive|4.0.0
  |System.Reactive|4.2.0
- |Xpand.Extensions|0.0.19
- |Xpand.Extensions.Reactive|0.0.12
- |Xpand.Extensions.XAF|0.0.18
+ |Xpand.Extensions|2.201.2.1
+ |Xpand.Extensions.Reactive|2.201.2.1
+ |Xpand.Extensions.XAF|2.201.2
  |Xpand.Patcher|1.0.1
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.1.7
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.1
 
 ## Issues-Debugging-Troubleshooting
 
