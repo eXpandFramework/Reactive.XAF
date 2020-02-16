@@ -3,11 +3,13 @@ using System.Reactive.Subjects;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
+using JetBrains.Annotations;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive {
     public sealed class ReactiveModule : ReactiveModuleBase {
+        [PublicAPI]
         public static ReactiveTraceSource TraceSource{ get; set; }
         readonly Subject<ITypesInfo> _typesInfoSubject=new Subject<ITypesInfo>();
         
@@ -18,10 +20,9 @@ namespace Xpand.XAF.Modules.Reactive {
         public IObservable<ModelInterfaceExtenders> ExtendModel=>_extendModelSubject;
 
         static ReactiveModule(){
-            
             TraceSource=new ReactiveTraceSource(nameof(ReactiveModule));
-
         }
+        
         public ReactiveModule() {
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));
         }

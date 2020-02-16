@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Linq;
+using System.Net.Mail;
 using System.Reflection;
 using Xpand.Extensions.Linq;
 
 namespace Xpand.Extensions.Exception{
-    public static class ExceptionExtensions{
+    public static partial class ExceptionExtensions{
         public static string GetAllInfo(this global::System.Exception exception){
             if (exception is AggregateException aex){
                 var flatten = aex.Flatten();

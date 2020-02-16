@@ -21,17 +21,12 @@ using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
 namespace Xpand.XAF.Modules.MasterDetail{
     public static class MasterDetailService{
-
         public const string MasterDetailSaveAction = "MasterDetailSaveAction";
         internal static IObservable<TSource> TraceMasterDetailModule<TSource>(this IObservable<TSource> source, string name = null,
-            Action<string> traceAction = null,
-            ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
-            [CallerMemberName] string memberName = "",
-            [CallerFilePath] string sourceFilePath = "",
-            [CallerLineNumber] int sourceLineNumber = 0){
+            Action<string> traceAction = null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
+            [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0){
             return source.Trace(name, MasterDetailModule.TraceSource, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
         }
-
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager applicationModulesManager,XafApplication application){
             if (application==null)
