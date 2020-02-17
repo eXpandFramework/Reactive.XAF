@@ -73,11 +73,12 @@ Task UpdateReadMe {
 
 Task CompileTests -precondition { return $compile } {
     Invoke-Script {
-        Write-Host "Building Tests" -f "Blue"
+        Write-HostFormatted "Building Tests" -Section
         $source = "https://api.nuget.org/v3/index.json;$packageSources"
         $source = "$source;$Root\Bin\Nupkg"
+        dotnet msbuild "$Root\src\Tests\Tests.sln" /t:Clean
         dotnet restore "$Root\src\Tests\Tests.sln" --source $packageSources --source (Get-PackageFeed -Nuget) /WarnAsError
-        dotnet msbuild "$Root\src\Tests\Tests.sln" "/bl:$Root\Bin\CompileTests.binlog" -t:rebuild "/p:configuration=Debug" /WarnAsError /m /v:m 
+        dotnet msbuild "$Root\src\Tests\Tests.sln" "/bl:$Root\Bin\CompileTests.binlog" "/p:configuration=Debug" /WarnAsError /m /v:m 
     } -Maximum 2
     Get-ChildItem $root\bin "*xpand*.dll"| Test-AssemblyReference -VersionFilter $DXVersion
 }
@@ -89,14 +90,16 @@ Task Compile -precondition { return $compile } {
     }
     Invoke-Script {
         Write-HostFormatted "Building Extensions" -Section
-        # dotnet restore "$Root\src\Extensions\Extensions.sln" --source (Get-PackageFeed -nuget) --source $packageSources /WarnAsError
-        & dotnet msbuild "$Root\src\Extensions\Extensions.sln" -t:rebuild "/bl:$Root\Bin\Extensions.binlog" "/p:configuration=$Configuration" /m /v:m /WarnAsError -r
+        & dotnet msbuild "$Root\src\Extensions\Extensions.sln" /t:Clean
+        dotnet restore "$Root\src\Extensions\Extensions.sln" --source $packageSources --source (Get-PackageFeed -Nuget) /WarnAsError
+        & dotnet msbuild "$Root\src\Extensions\Extensions.sln" "/bl:$Root\Bin\Extensions.binlog" "/p:configuration=$Configuration" /m /v:m /WarnAsError 
     } -Maximum 2
     Invoke-Script {
         Write-HostFormatted "Building Modules" -Section
-        # dotnet restore "$Root\src\Modules\Modules.sln" --source (Get-PackageFeed -nuget) --source $packageSources /WarnAsError
+        dotnet msbuild "$Root\src\Modules\Modules.sln" /t:Clean
         Set-Location "$Root\src\Modules"
-        dotnet msbuild "$Root\src\Modules\Modules.sln" -t:rebuild "/bl:$Root\Bin\Modules.binlog" "/p:configuration=$Configuration" /WarnAsError /m /v:m -r
+        dotnet restore "$Root\src\Modules\Modules.sln" --source $packageSources --source (Get-PackageFeed -Nuget) /WarnAsError
+        dotnet msbuild "$Root\src\Modules\Modules.sln" "/bl:$Root\Bin\Modules.binlog" "/p:configuration=$Configuration" /WarnAsError /m /v:m
     } -Maximum 2
     Write-HostFormatted "Build Versions:" -Section
     Get-ChildItem "$Root\Bin" "*Xpand.*.dll"|ForEach-Object{

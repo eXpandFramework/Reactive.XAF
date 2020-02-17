@@ -24,7 +24,6 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
 
         public static IObservable<T> Retry<T>(this IObservable<T> source,
             XafApplication application){
-            return source;
             return source.RetryWhen(_ => _.Do(e => {
                 if (application.GetPlatform() == Platform.Win){
                     application.CallMethod("HandleException", e);

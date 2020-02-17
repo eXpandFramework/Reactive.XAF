@@ -36,11 +36,11 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |JetBrains.Annotations|2019.1.3
  |MagicOnion|2.6.3
  |System.Reactive|4.2.0
- |[Xpand.XAF.Modules.GridListEditor](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.GridListEditor)|0.0.30
- |[Xpand.XAF.Modules.OneView](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.OneView)|0.0.30
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|1.2.79
- |[Xpand.XAF.Modules.Reactive.Logger.Hub](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Logger.Hub)|0.0.31
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|1.1.7
+ |[Xpand.XAF.Modules.GridListEditor](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.GridListEditor)|2.201.5
+ |[Xpand.XAF.Modules.OneView](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.OneView)|2.201.5
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.201.5
+ |[Xpand.XAF.Modules.Reactive.Logger.Hub](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Logger.Hub)|2.201.5
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.1
 
 ## Issues-Debugging-Troubleshooting
 

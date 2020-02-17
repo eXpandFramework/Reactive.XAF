@@ -16,54 +16,36 @@ function UpdateALLNuspec($platform, $allNuspec, $nuspecs,$allModuleNuspecs) {
             File   = $_
         }
     }
-    $changed = $allNuspec.package.metadata.dependencies.dependency | Where-Object {
-
-        $id = $_.Id
-        $version = $_.Version
-        if ($id -like "*.all") {
-            $source=Get-PackageFeed -Nuget
-            if ($branch -eq "lab"){
-                $source=Get-PackageFeed -Xpand
-            }
-            
-            [xml]$allCore = @(Get-Content ((Get-NugetPackage -name Xpand.Xaf.Web.All -Source $source -ResultType DownloadResults).packageReader).GetNuspecFile())
-        }
-        !((($platformNuspecs | Select-Object -ExpandProperty Nuspec) + @($allCore)) | Where-Object {
-                $_.package.metaData.Id -eq $id -and $_.package.metaData.version -eq $version
-            })
-    }
-    [version]$modulesVersion=[System.Diagnostics.FileVersionInfo]::GetVersionInfo("$root\bin\Xpand.XAF.Modules.Reactive.dll" ).FileVersion
+    
+    [version]$modulesVersion=Get-VersionPart ([System.Diagnostics.FileVersionInfo]::GetVersionInfo("$root\bin\Xpand.XAF.Modules.Reactive.dll" ).FileVersion) build
+    "Year Version build=$modulesVersion"
     $source="lab"
     if ($branch -eq "master"){
         $source="Release"
     }
     [version]$v = (Find-XpandPackage $allNuspec.package.metadata.Id -packagesource $source).Version
-
+    $releasedVersion=[version](Get-VersionPart (Find-XpandPackage $allNuspec.package.metadata.Id -packagesource Release).Version Build)
+    "release build=$releasedVersion"
+    $nuspecBuild=([version](Get-VersionPart $allnuspec.package.metaData.version Build))
+    "nuspecBuild=$nuspecBuild"
     [version]$nowVersion=$allNuspec.package.metadata.version
-    if ($changed -or ($Branch -eq "master")) {
-        $build=$v.Build
-        $revision=($v.Revision + 1)
-        if ($Branch -eq "master"){
-            $build+=1
-            $revision=0
-        }
-        if ($nowVersion.Minor -ne $modulesVersion.Minor){
-            $revision=0
-        }
-        $v = New-Object System.version($modulesVersion.Major, $modulesVersion.Minor, $build, $revision)
-        $allNuspec.package.metadata.version = ($v).ToString()
+    if ($releasedVersion -gt $nuspecBuild){
+        $nowVersion=[version]"$releasedVersion.0"
     }
-    else{
-        
-        $build=$nowVersion.Build
-        $revision=$nowVersion.Revision
-        if ($nowVersion.Minor -ne $modulesVersion.Minor){
-            $build=0
-            $revision=0
-        }
-        $newVersion=New-Object System.Version($nowVersion.Major,$modulesVersion.Minor,$build,$revision)
-        $allNuspec.package.metadata.version = ($newVersion).ToString()
+    "nowVersion=$nowVersion"
+
+    $build=$nowVersion.Build
+    $revision=($nowVersion.Revision + 1)
+    if ($Branch -eq "master"){
+        $build+=1
+        $revision=0
     }
+    if ($nowVersion.Minor -ne $modulesVersion.Minor){
+        $revision=0
+    }
+    $v = New-Object System.version($modulesVersion.Major, $modulesVersion.Minor, $build, $revision)
+    "newVersion=$v"
+    $allNuspec.package.metadata.version = ($v).ToString()
     if ($allNuspec.package.metadata.dependencies) {
         $allNuspec.package.metadata.dependencies.RemoveAll()
     }
@@ -101,9 +83,9 @@ $coreDependency = [PSCustomObject]@{
 $allFileName = "$root\tools\nuspec\Xpand.XAF.Win.All.nuspec"
 Write-HostFormatted "Updating Xpand.XAF.Win.All.nuspec" -Section
 [xml]$allNuspec = Get-Content $allFileName
-UpdateALLNuspec @("Win") $allNuspec  $nuspecs $allModuleNuspecs
+UpdateALLNuspec @("Core","Win") $allNuspec  $nuspecs $allModuleNuspecs
 Add-NuspecDependency $coreDependency.Id $coreDependency.Version $allNuspec
-# $coredependency=$allNuspec.package.metadata.dependencies.dependency|Where-Object{$_.id -eq "Xpand.XAF.Core.all"}|Select-Object -First 1
+$coredependency=$allNuspec.package.metadata.dependencies.dependency|Where-Object{$_.id -eq "Xpand.XAF.Core.all"}|Select-Object -First 1
 # $coreDependency.ParentNode.RemoveChild($coreDependency)
 $allNuspec.Save($allFileName)
 Get-Content $allFileName -Raw
@@ -111,7 +93,7 @@ Get-Content $allFileName -Raw
 $allFileName = "$root\tools\nuspec\Xpand.XAF.Web.All.nuspec"
 Write-HostFormatted "Updating Xpand.XAF.Web.All.nuspec"
 [xml]$allNuspec = Get-Content $allFileName
-UpdateALLNuspec @("Web") $allNuspec  $nuspecs $allModuleNuspecs 
+UpdateALLNuspec @("Core","Web") $allNuspec  $nuspecs $allModuleNuspecs 
 
 Add-NuspecDependency $coreDependency.Id $coreDependency.Version $allNuspec
 $allNuspec.Save($allFileName)

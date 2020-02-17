@@ -1,7 +1,7 @@
 
 $officialPackages = Get-XpandPackages -PackageType XAFAll -Source Release
 $labPackages = Get-XpandPackages -PackageType XAFAll -Source Lab
-Write-HostFormatted "labPackages" -Section
+Write-HostFormatted "labPackages"  -Section
 $labPackages | Out-String
 
 $localPackages = (Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse) + (Get-ChildItem "$sourcePath\src\Extensions" "*.csproj" -Recurse) | ForEach-Object {
@@ -23,13 +23,13 @@ $localPackages = (Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse) +
         LocalVersion = $localVersion
     }
 }
-Write-HostFormatted "localPackages:" -Section
+Write-HostFormatted "localPackages:"  -Section
 $localPackages | Out-String
 $publishedPackages = $labPackages | ForEach-Object {
     $publishedName = $_.Id
     $localPackages | Where-Object { $_.Id -eq $publishedName }
 }
-Write-HostFormatted "publishedPackages:" -Section
+Write-HostFormatted "publishedPackages:"  -Section
 $publishedPackages | Out-String
 $newPackages = $localPackages | Where-Object { !(($publishedPackages | Select-Object -ExpandProperty Id) -contains $_.Id) } | ForEach-Object {
     $localVersion = New-Object System.Version($_.LocalVersion)
@@ -40,7 +40,7 @@ $newPackages = $localPackages | Where-Object { !(($publishedPackages | Select-Ob
         LocalVersion = $localVersion
     }
 }
-Write-HostFormatted "newPackages:" -Section
+Write-HostFormatted "newPackages:"  -Section
 $newPackages | Out-String
 
 $cred=@{
@@ -48,7 +48,7 @@ $cred=@{
     Organization="eXpandDevOps"
     Token=$AzureToken
 }
-$labBuild = Get-AzBuilds -Result succeeded -Status completed -Definition DevExpress.XAF-Lab @cred|
+$labBuild = Get-AzBuilds -Result succeeded -Status completed -Definition PublishNugets-DevExpress.XAF @cred|
 where-object{$_.status -eq "completed"}|Select-Object -First 1
 Write-HostFormatted "labBuild" -Section
 $labBuild.buildNumber

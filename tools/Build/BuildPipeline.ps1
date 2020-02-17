@@ -76,7 +76,7 @@ catch {
     dotnet paket install -v
 }
 if ($Branch -eq "lab") {
-    Write-HostFormatted "checking for New DevExpress Version ($CustomVersion) detected" -Section
+    Write-HostFormatted "checking for New DevExpress Version ($CustomVersion) " -Section
     $filter = "DevExpress*"
     # [version]$currentVersion = (Invoke-PaketShowInstalled -OnlyDirect | Where-Object { $_.id -like $filter } | Select-Object -First 1).Version
     [version]$currentVersion = Get-VersionPart (Get-DevExpressVersion) Build
@@ -85,6 +85,7 @@ if ($Branch -eq "lab") {
     $assemblyReference=Get-AssemblyReference $rxdllpath.FullName
     [version]$publishdeVersion = Get-VersionPart (($assemblyReference | Where-Object { $_.Name -like $filter }).version) Build
     if ($publishdeVersion -lt $currentVersion) {
+        Write-HostFormatted "new DX version detected $currentVersion"
         $trDeps = Get-NugetPackageDependencies DevExpress.ExpressApp.Core.all -Source $env:DxFeed -filter $filter -Recurse
         Push-Location 
         $projectPackages = (Get-ChildItem "$SourcePath\src\modules" *.csproj -Recurse) + (Get-ChildItem "$SourcePath\src\extensions" *.csproj -Recurse) | Invoke-Parallel -VariablesToImport "filter" -Script {
