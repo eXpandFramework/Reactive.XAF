@@ -71,9 +71,10 @@ $yArgs = @{
 if ($newPackages) {
     $yArgs.Packages += $newPackages
 }
-Write-HostFormatted "Changed-Packages:" -Section
-$yArgs.Packages | Out-String 
+
 if ($Branch -eq "lab") {
+    Write-HostFormatted "updateVersion comparing local/remote differences:" -Section
+    $yArgs.Packages | Out-String 
     Get-ChildItem $sourcePath *.csproj -Recurse | ForEach-Object {
         $pName = $_.BaseName
         $pDir = $_.DirectoryName
@@ -88,7 +89,7 @@ if ($Branch -eq "lab") {
         }
     }
 }
-Write-HostFormatted "updateVersion comparing local/remote differences:" -Section
+Write-HostFormatted "CHECK IF REMOTE INDEX IS DELAYED" -ForegroundColor Red
 $updateVersion=@(Update-NugetProjectVersion @yArgs -Verbose)
 
 # $releasepackages=Get-XpandPackages Release XAFAll

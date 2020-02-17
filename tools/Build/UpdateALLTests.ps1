@@ -95,7 +95,7 @@ $config.configuration.runtime.assemblyBinding.dependentassembly|ForEach-Object{
         Name = $_.assemblyIdentity.Name
         Version=$_.bindingRedirect.NewVersion
     }
-}|ft
+}|Format-Table
 Invoke-Script {
     
     Write-HostFormatted "Complie TestApplication.sln" -ForegroundColor Magenta

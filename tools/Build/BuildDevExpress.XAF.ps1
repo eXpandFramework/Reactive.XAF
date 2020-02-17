@@ -17,8 +17,8 @@ Properties {
 
 
 
-Task Build  -depends   Clean, Init, UpdateProjects, Compile,CheckVersions, IndexSources, CreateNuspec, PackNuspec, CompileTests, UpdateAllTests,UpdateReadMe
-Task TestsRun  -depends   Clean, Init, UpdateProjects, Compile,CheckVersions, IndexSources, CreateNuspec, PackNuspec, CompileTests, UpdateAllTests,UpdateReadMe
+Task Build  -depends   Clean, Init, UpdateProjects, Compile,CheckVersions, IndexSources, CreateNuspec, PackNuspec, CompileTests, UpdateAllTests
+Task TestsRun  -depends   Clean, Init, UpdateProjects, Compile,CheckVersions, IndexSources, CreateNuspec, PackNuspec, CompileTests, UpdateAllTests
 
 
 Task IndexSources {
@@ -65,11 +65,6 @@ Task UpdateProjects {
     }
 }
 
-Task UpdateReadMe {
-    Invoke-Script {
-        & "$PSScriptRoot\UpdateReadMe.ps1" 
-    }
-}
 
 Task CompileTests -precondition { return $compile } {
     Invoke-Script {

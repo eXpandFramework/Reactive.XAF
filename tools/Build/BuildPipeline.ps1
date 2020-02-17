@@ -36,7 +36,7 @@ dotnet tool restore
 
 $latestMinors = Get-XAFLatestMinors
 "latestMinors:"
-$latestMinors
+$latestMinors|Format-Table
 $CustomVersion = $latestMinors | Where-Object { "$($_.Major).$($_.Minor)" -eq $result }
 "CustomVersion=$CustomVersion"
 

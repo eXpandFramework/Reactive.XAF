@@ -133,7 +133,10 @@ $packages | ForEach-Object {
     Move-Item $zip $nupkgPath
     Remove-Item $unzipDir -Force -Recurse
 }
-
+if ($Branch -ne "lab"){
+    Write-HostFormatted "Update ReadMe" -Section
+    & "$PSScriptRoot\UpdateReadMe.ps1" 
+}
 Write-HostFormatted "Remove not changed packages" -Section
 if ($ChangedModules) {
     
