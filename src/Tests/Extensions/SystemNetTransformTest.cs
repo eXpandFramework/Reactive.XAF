@@ -4,10 +4,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Reactive.Linq;
 using akarnokd.reactive_extensions;
-using Fasterflect;
 using NUnit.Framework;
 using Shouldly;
-using Xpand.Extensions.AppDomain;
 using Xpand.Extensions.Reactive.Transform.System.Net;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.TestsLib;
@@ -19,11 +17,6 @@ namespace Xpand.Extensions.Tests{
         [Test]
         [XpandTest]
         public async System.Threading.Tasks.Task Signal_When_In_Listening(){
-            if (System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework")){
-                var setupInformation = System.AppDomain.CurrentDomain.SetupInformation;
-                var propertyValue = (string) (setupInformation.GetPropertyValue("PrivateBinPath")??setupInformation.GetPropertyValue("ApplicationBase"));
-            }
-            System.Environment.Version.ShouldBeNull();
             var portInUse = Enumerable.Range(10000,2).Select(port => new IPEndPoint(IPAddress.Loopback, port)).ToArray().Listening().SubscribeReplay();
             var tcpListener = new TcpListener(IPAddress.Loopback,10001);
             tcpListener.Start();

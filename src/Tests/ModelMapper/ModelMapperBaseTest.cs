@@ -85,18 +85,8 @@ public class {DynamicTypeName}{{
             }
 
             TypeMappingService.Reset(platform:platform);
-            // TypeMappingService.AdditionalTypesList.Clear();
-            // TypeMappingService.AdditionalReferences.Clear();
-            // TypeMappingService.TypeMappingRules.Clear();
-            // TypeMappingService.PropertyMappingRules.Clear();
-            // typeof(ModelExtendingService).SetPropertyValue("Platform", platform);
-            //
-            // typeof(TypeMappingService).CallMethod(null, "Init");
-            // typeof(PredefinedMapService).CallMethod(null, "Init");
-            // var outPutAssembly = (string)typeof(TypeMappingService).GetFieldValue("_outputAssembly",Flags.StaticInstanceAnyVisibility);
-            // typeof(TypeMappingService).SetFieldValue("_outputAssembly",
-            //     $@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\{Path.GetFileNameWithoutExtension(outPutAssembly)}.dll");
-            // typeof(TypeMappingService).SetFieldValue("_modelMapperModuleVersion", typeof(ModelMapperModule).Assembly.GetName().Version);
+            TypeMappingService.OutputAssembly =
+                $@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\{Path.GetFileNameWithoutExtension(TypeMappingService.OutputAssembly)}.dll";
             ConfigureLayoutViewPredefinedMapService();
             return mapperAssemblyName.ToString();
         }

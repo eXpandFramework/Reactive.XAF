@@ -31,8 +31,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         public static string ModelMapperAssemblyName;
         public static string MapperAssemblyName="ModelMapperAssembly";
         public static string ModelMappersNodeName="ModelMappers";
-        
-        static string _outputAssembly;
+
+        internal static string OutputAssembly;
 
         public static ConcurrentHashSet<string> ReservedPropertyNames{ get; }=new ConcurrentHashSet<string>();
         public static ConcurrentHashSet<Type> ReservedPropertyTypes{ get; }=new ConcurrentHashSet<Type>();
@@ -68,7 +68,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
 
             var path = DesignerOnlyCalculator.IsRunFromDesigner?tempPath:AppDomain.CurrentDomain.ApplicationPath();
             
-            _outputAssembly = $@"{path}\{MapperAssemblyName}{ModelMapperAssemblyName}{{0}}.dll";
+            OutputAssembly = $@"{path}\{MapperAssemblyName}{ModelMapperAssemblyName}{{0}}.dll";
             _customizeContainerCode=new Subject<(Type type, Result<(string key, string code)> data)>();
             _customizeProperties =new Subject<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)>();
             _customizeTypes =new Subject<ModelMapperType>();
@@ -235,7 +235,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             if (platform != null) ModelExtendingService.Platform = platform.Value;
             Init();
             PredefinedMapService.Init();
-            _outputAssembly = $@"{AppDomain.CurrentDomain.ApplicationPath()}\{Path.GetFileNameWithoutExtension(_outputAssembly)}.dll";
+            OutputAssembly = $@"{AppDomain.CurrentDomain.ApplicationPath()}\{Path.GetFileNameWithoutExtension(OutputAssembly)}.dll";
             _modelMapperModuleVersion = typeof(ModelMapperModule).Assembly.GetName().Version;
             
         }
