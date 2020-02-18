@@ -21,6 +21,7 @@ $localPackages = (Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse) +
         Id           = $name
         NextVersion  = $nextversion
         LocalVersion = $localVersion
+        File=$_
     }
 }
 Write-HostFormatted "localPackages:"  -Section
@@ -43,19 +44,19 @@ $newPackages = $localPackages | Where-Object { !(($publishedPackages | Select-Ob
 Write-HostFormatted "newPackages:"  -Section
 $newPackages | Out-String
 
-$cred=@{
-    Project="expandFramework"
-    Organization="eXpandDevOps"
-    Token=$AzureToken
+$cred = @{
+    Project      = "expandFramework"
+    Organization = "eXpandDevOps"
+    Token        = $AzureToken
 }
-$labBuild = Get-AzBuilds -Result succeeded -Status completed -Definition PublishNugets-DevExpress.XAF @cred|
-where-object{$_.status -eq "completed"}|Select-Object -First 1
+$labBuild = Get-AzBuilds -Result succeeded -Status completed -Definition PublishNugets-DevExpress.XAF @cred |
+Where-Object { $_.status -eq "completed" } | Select-Object -First 1
 Write-HostFormatted "labBuild" -Section
 $labBuild.buildNumber
-if (!$labBuild ){
+if (!$labBuild ) {
     throw "lab build not found"
 }
-if ($labBuild.result -ne 'succeeded'){
+if ($labBuild.result -ne 'succeeded') {
     throw "labebuild result is $($labBuild.result)"
 }
 $yArgs = @{
@@ -90,27 +91,50 @@ if ($Branch -eq "lab") {
     }
 }
 Write-HostFormatted "CHECK IF REMOTE INDEX IS DELAYED" -ForegroundColor Red
-$updateVersion=@(Update-NugetProjectVersion @yArgs -Verbose)
+$updateVersion = @(Update-NugetProjectVersion @yArgs -Verbose)
+Write-HostFormatted "Updated packages" -Section
+$updateVersion
 
-# $releasepackages=Get-XpandPackages Release XAFAll
-$publishedPackages=Get-XpandPackages Lab XAFAll
-$localPackages=(Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse) + (Get-ChildItem "$sourcePath\src\Extensions" "*.csproj" -Recurse)|ForEach-Object{
+$publishedPackages = Get-XpandPackages Lab XAFAll
+$localPackages = (Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse) + (Get-ChildItem "$sourcePath\src\Extensions" "*.csproj" -Recurse) | ForEach-Object {
     [PSCustomObject]@{
-        Id = $_.BaseName
-        Version=[version](Get-AssemblyInfoVersion "$($_.DirectoryName)\Properties\assemblyinfo.cs")
-        File=$_
+        Id      = $_.BaseName
+        Version = [version](Get-AssemblyInfoVersion "$($_.DirectoryName)\Properties\assemblyinfo.cs")
+        File    = $_
     }
 }
 Write-HostFormatted "Matching remote build versions" -Section
-$localPackages|ForEach-Object{
-    $localpackage=$_
-    $publishedPackage=$publishedPackages|Where-Object{$_.id -eq $localpackage.id}
-    $publishedVersion=([version](Get-VersionPart $publishedPackage.Version Build))
-    $local=([version](Get-VersionPart $localpackage.Version Build))
-    if ($local -ne $publishedVersion){
-        $remoteversion="$(Get-VersionPart $publishedVersion Build).$(($publishedVersion.Revision+1))"
-        write-warning "$($localPackage.Id) release build version ($remoteVersion) is different than local ($local)"
-        $updateVersion+=$localPackage.File.BaseName
+$localPackages | ForEach-Object {
+    $localpackage = $_
+    $publishedPackage = $publishedPackages | Where-Object { $_.id -eq $localpackage.id }
+    $publishedVersion = ([version](Get-VersionPart $publishedPackage.Version Build))
+    $local = ([version](Get-VersionPart $localpackage.Version Build))
+    if ($local -ne $publishedVersion) {
+        $remoteversion = "$(Get-VersionPart $publishedVersion Build).$(($publishedVersion.Revision+1))"
+        Write-Warning "$($localPackage.Id) release build version ($remoteVersion) is different than local ($local)"
+        Update-AssemblyInfoVersion -path "$($localpackage.File.DirectoryName)\properties\assemblyinfo.cs" -version "$(Update-Version $publishedPackage.version -Revision)"
+        $updateVersion += $localPackage.File.BaseName
     }
 }
-$updateVersion|Sort-Object -Unique
+if ($updateVersion) {
+    Write-HostFormatted "Collect related assemblies for:" -Section
+    $packageDeps=Get-XpandPackages Lab XAFAll|Where-Object{$_.id -notlike "*all*"}|Invoke-Parallel -Script{
+        [PSCustomObject]@{
+            Id = $_.id
+            Deps=(Get-NugetPackageDependencies $_.Id -Source (Get-PackageFeed -Xpand) -Filter "Xpand.*" -Recurse)
+        }
+    }
+    $relatedPackages=$updateVersion | ForEach-Object {
+        $updatedPackage=$_
+        $packageDeps|Where-Object{$updatedPackage -in $_.Deps.Id }|ForEach-Object{
+            $dependency=$_
+            $localpackage=($localPackages|Where-Object{$_.Id -eq $dependency.Id})
+            $newVersion="$(Update-Version $localpackage.Version -Revision)"
+            Update-AssemblyInfoVersion -version $newVersion -path "$($localpackage.File.DirectoryName)\properties\assemblyinfo.cs"
+            $dependency
+        }
+    }
+    $relatedPackages.Id
+    $updateVersion +=$relatedPackages.Id|Sort-Object -Unique
+}
+
