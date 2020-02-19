@@ -23,13 +23,12 @@ function UpdateALLNuspec($platform, $allNuspec, $nuspecs,$allModuleNuspecs) {
     if ($branch -eq "master"){
         $source="Release"
     }
-    [version]$v = (Find-XpandPackage $allNuspec.package.metadata.Id -packagesource $source).Version
+    [version]$nowVersion = (Find-XpandPackage $allNuspec.package.metadata.Id -packagesource $source).Version
     $releasedVersion=[version](Get-VersionPart (Find-XpandPackage $allNuspec.package.metadata.Id -packagesource Release).Version Build)
     "release build=$releasedVersion"
-    $nuspecBuild=([version](Get-VersionPart $allnuspec.package.metaData.version Build))
-    "nuspecBuild=$nuspecBuild"
-    [version]$nowVersion=$allNuspec.package.metadata.version
-    if ($releasedVersion -gt $nuspecBuild){
+    $nowBuild=([version](Get-VersionPart $nowVersion Build))
+    "nowBuild=$nowBuild"
+    if ($releasedVersion -gt $nowBuild){
         $nowVersion=[version]"$releasedVersion.0"
     }
     "nowVersion=$nowVersion"
