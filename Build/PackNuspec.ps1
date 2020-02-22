@@ -95,7 +95,7 @@ function AddReadMe {
 ++++++++++++++    ++++++++++++++++      
 ++++++++++++++  ++  ++++++++++++++      ➤ ​​̲𝗣​̲𝗮​̲𝗰​̲𝗸​̲𝗮​̲𝗴​̲𝗲​̲ ​̲𝗻​̲𝗼​̲𝘁​̲𝗲​̲𝘀
 ++++++++++++  ++++    ++++++++++++         ☞ Build the project before opening the model editor.
-++++++++++  ++++++++  ++++++++++++         ☞ Documentation can be found @ https://github.com/eXpandFramework/DevExpress.XAF/wiki/$wikiName".
+++++++++++  ++++++++  ++++++++++++         ☞ Documentation can be found @ https://github.com/eXpandFramework/DevExpress.XAF/wiki/$wikiName.
 ++++++++++  ++++++++++  ++++++++++         ☞ $($package.id) only adds the required references. To register the included packages add the next line/s in the constructor of your XAF module.
 ++++++++  ++++++++++++++++++++++++              $registration
 ++++++  ++++++++++++++++++++++++++      
