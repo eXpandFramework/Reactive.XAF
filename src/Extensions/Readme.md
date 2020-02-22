@@ -1,5 +1,5 @@
 # About
-The  `Extensions` namespace is used for projects that contain **static** **internal** **extension** classes. 
+The  `Extensions` namespace is used for projects that contain **static** **extension** classes. 
 
 There is no package or assembly though as the modules only link the methods they want to use. 
 
