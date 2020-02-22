@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>Xpand.Extensions.Reactive</id>
+    <version>2.201.5.3</version>
+    <authors>eXpandFramework</authors>
+    <owners>eXpandFramework</owners>
+    <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive</projectUrl>
+    <iconUrl>http://sign.expandframework.com</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Xpand.Extensions.Reactive</description>
+    <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
+    <copyright>eXpandFramework.com</copyright>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Xpand.Extensions.Reactive</tags>
+    <dependencies>
+      <dependency version="2.0.7" id="Fasterflect.Xpand" />
+      <dependency version="2019.1.3" id="JetBrains.Annotations" />
+      <dependency version="4.6" id="System.CodeDom" />
+      <dependency version="4.2" id="System.Reactive" />
+      <dependency version="4.7" id="System.Reflection.Emit" />
+      <dependency version="2.201.5.3" id="Xpand.Extensions" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="Xpand.Extensions.Reactive.dll" target="lib\netstandard2.0\Xpand.Extensions.Reactive.dll" />
+    <file src="Xpand.Extensions.Reactive.pdb" target="lib\netstandard2.0\Xpand.Extensions.Reactive.pdb" />
+  </files>
+</package>

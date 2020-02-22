@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>Xpand.Extensions.XAF</id>
+    <version>2.201.5.3</version>
+    <authors>eXpandFramework</authors>
+    <owners>eXpandFramework</owners>
+    <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Extensions/Xpand.Extensions.XAF</projectUrl>
+    <iconUrl>http://sign.expandframework.com</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Xpand.Extensions.XAF</description>
+    <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
+    <copyright>eXpandFramework.com</copyright>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Xpand.Extensions.XAF</tags>
+    <dependencies>
+      <dependency version="2.0.7" id="Fasterflect.Xpand" />
+      <dependency version="2019.1.3" id="JetBrains.Annotations" />
+      <dependency version="4.7" id="System.Reflection.Emit" />
+      <dependency version="2.201.5.3" id="Xpand.Extensions" />
+      <dependency version="1.0.1" id="Xpand.Patcher" />
+      <dependency version="2.201.1" id="Xpand.VersionConverter" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="Xpand.Extensions.XAF.dll" target="lib\net461\Xpand.Extensions.XAF.dll" />
+    <file src="Xpand.Extensions.XAF.pdb" target="lib\net461\Xpand.Extensions.XAF.pdb" />
+  </files>
+</package>

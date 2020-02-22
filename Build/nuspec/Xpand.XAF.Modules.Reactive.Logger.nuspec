@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>Xpand.XAF.Modules.Reactive.Logger</id>
+    <version>2.201.5.3</version>
+    <authors>eXpandFramework</authors>
+    <owners>eXpandFramework</owners>
+    <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/Reactive.Logger</projectUrl>
+    <iconUrl>http://sign.expandframework.com</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>The `Reactive.Logger` module monitors calls to the Reactive delegates (OnNext, OnSubscribe, OnDispose, OnCompleted, OnError) and persists the calls info in the application datastore. For more head to the details section.</description>
+    <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
+    <copyright>eXpandFramework.com</copyright>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Reactive.Logger</tags>
+    <dependencies>
+      <dependency version="2.0.7" id="Fasterflect.Xpand" />
+      <dependency version="2019.1.3" id="JetBrains.Annotations" />
+      <dependency version="4.2" id="System.Reactive" />
+      <dependency version="2.201.5.3" id="Xpand.Extensions" />
+      <dependency version="2.201.5.3" id="Xpand.Extensions.Reactive" />
+      <dependency version="2.201.5.3" id="Xpand.Extensions.XAF" />
+      <dependency version="1.0.1" id="Xpand.Patcher" />
+      <dependency version="2.201.5.3" id="Xpand.XAF.Modules.Reactive" />
+      <dependency version="2.201.1" id="Xpand.VersionConverter" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="Xpand.XAF.Modules.Reactive.Logger.dll" target="lib\net461\Xpand.XAF.Modules.Reactive.Logger.dll" />
+    <file src="Xpand.XAF.Modules.Reactive.Logger.pdb" target="lib\net461\Xpand.XAF.Modules.Reactive.Logger.pdb" />
+  </files>
+</package>

@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>Xpand.XAF.Modules.ModelMapper</id>
+    <version>2.201.5.4</version>
+    <authors>eXpandFramework</authors>
+    <owners>eXpandFramework</owners>
+    <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/ModelMapper</projectUrl>
+    <iconUrl>http://sign.expandframework.com</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>The `ModelMapper` module **can map any type** to the XAF application model and in runtime bind it to the respective object instance. 
+The module **ships with 82 predefined maps** for all the common types such as GirdView, ASPxGridView, TreeList, Scheduler, Chart, Dashboards etc. More info in the Details section.</description>
+    <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
+    <copyright>eXpandFramework.com</copyright>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  ModelMapper</tags>
+    <dependencies>
+      <dependency version="3.0" id="Enums.NET" />
+      <dependency version="2.0.7" id="Fasterflect.Xpand" />
+      <dependency version="2019.1.3" id="JetBrains.Annotations" />
+      <dependency version="0.11.1" id="Mono.Cecil" />
+      <dependency version="4.6" id="System.CodeDom" />
+      <dependency version="4.0" id="System.Interactive" />
+      <dependency version="4.2" id="System.Reactive" />
+      <dependency version="1.0.1" id="Xpand.Collections" />
+      <dependency version="2.201.5.3" id="Xpand.Extensions" />
+      <dependency version="2.201.5.3" id="Xpand.Extensions.Reactive" />
+      <dependency version="2.201.5.3" id="Xpand.Extensions.XAF" />
+      <dependency version="2.201.5.3" id="Xpand.XAF.Modules.Reactive" />
+      <dependency version="2.201.1" id="Xpand.VersionConverter" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="Xpand.XAF.Modules.ModelMapper.dll" target="lib\net461\Xpand.XAF.Modules.ModelMapper.dll" />
+    <file src="Xpand.XAF.Modules.ModelMapper.pdb" target="lib\net461\Xpand.XAF.Modules.ModelMapper.pdb" />
+  </files>
+</package>

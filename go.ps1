@@ -22,14 +22,14 @@ $ErrorActionPreference = "Stop"
     Name = "XpandPwsh"
     Version =$XpandPwshVersion
 })|ForEach-Object{
-    & "$PSScriptRoot\tools\build\Install-Module.ps1" $_
+    & "$PSScriptRoot\build\Install-Module.ps1" $_
 }
 
 if ($InstallModules){
     return
 }
 
-Invoke-XPsake  "$PSScriptRoot\tools\build\BuildDevExpress.XAF.ps1" -properties @{
+Invoke-XPsake  "$PSScriptRoot\build\BuildDevExpress.XAF.ps1" -properties @{
     "cleanBin"       = $cleanBin;
     "msbuild"        = $msbuild;
     "nugetApiKey"    = $nugetApiKey;

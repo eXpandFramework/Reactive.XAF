@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>Xpand.XAF.Core.All</id>
+    <version>2.201.23.10</version>
+    <authors>eXpandFramework</authors>
+    <owners>eXpandFramework</owners>
+    <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/modules</projectUrl>
+    <iconUrl>http://sign.expandframework.com</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>All platform agnostic packages</description>
+    <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
+    <copyright>eXpandFramework.com</copyright>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Xpand.XAF.Core.All</tags>
+    <dependencies>
+    <dependency version="2.201.5.1" id="Xpand.Extensions.Mono.Cecil" />
+    <dependency version="2.201.5.3" id="Xpand.Extensions" />
+    <dependency version="2.201.5.3" id="Xpand.Extensions.Reactive" />
+    <dependency version="2.201.5.3" id="Xpand.Extensions.XAF" />
+    <dependency version="2.201.5.1" id="Xpand.Extensions.XAF.Xpo" />
+    <dependency version="2.201.5.3" id="Xpand.XAF.Modules.AutoCommit" />
+    <dependency version="2.201.5.3" id="Xpand.XAF.Modules.CloneMemberValue" />
+    <dependency version="2.201.5.3" id="Xpand.XAF.Modules.CloneModelView" />
+    <dependency version="2.201.5.3" id="Xpand.XAF.Modules.HideToolBar" />
+    <dependency version="2.201.5.3" id="Xpand.XAF.Modules.MasterDetail" />
+    <dependency version="2.201.5.4" id="Xpand.XAF.Modules.ModelMapper" />
+    <dependency version="2.201.5.3" id="Xpand.XAF.Modules.ModelViewInheritance" />
+    <dependency version="2.201.5.3" id="Xpand.XAF.Modules.ProgressBarViewItem" />
+    <dependency version="2.201.5.3" id="Xpand.XAF.Modules.Reactive.Logger.Hub" />
+    <dependency version="2.201.5.3" id="Xpand.XAF.Modules.Reactive.Logger" />
+    <dependency version="2.201.5.3" id="Xpand.XAF.Modules.Reactive" />
+    <dependency version="2.201.5.3" id="Xpand.XAF.Modules.RefreshView" />
+    <dependency version="2.201.5.3" id="Xpand.XAF.Modules.SuppressConfirmation" />
+    <dependency version="2.201.5.3" id="Xpand.XAF.Modules.ViewEditMode" /></dependencies>
+  </metadata>
+  <files>
+  </files>
+</package>

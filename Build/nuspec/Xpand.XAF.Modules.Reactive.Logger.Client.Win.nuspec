@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>Xpand.XAF.Modules.Reactive.Logger.Client.Win</id>
+    <version>2.201.5.3</version>
+    <authors>eXpandFramework</authors>
+    <owners>eXpandFramework</owners>
+    <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/Reactive.Logger.Client.Win</projectUrl>
+    <iconUrl>http://sign.expandframework.com</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>The `Reactive.Logger.Client.Win` is a XAF Windows Forms application (**executable**) capable to connect to any XAF application that has the [Reactive.Logger.Hub](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Hub) module installed. More in the details section.</description>
+    <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
+    <copyright>eXpandFramework.com</copyright>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Reactive.Logger.Client.Win</tags>
+    <dependencies>
+      <dependency version="2.0.7" id="Fasterflect.Xpand" />
+      <dependency version="2019.1.3" id="JetBrains.Annotations" />
+      <dependency version="2.6.3" id="MagicOnion" />
+      <dependency version="4.2" id="System.Reactive" />
+      <dependency version="2.201.5.3" id="Xpand.XAF.Modules.GridListEditor" />
+      <dependency version="2.201.5.3" id="Xpand.XAF.Modules.OneView" />
+      <dependency version="2.201.5.3" id="Xpand.XAF.Modules.Reactive" />
+      <dependency version="2.201.5.3" id="Xpand.XAF.Modules.Reactive.Logger.Hub" />
+      <dependency version="2.201.1" id="Xpand.VersionConverter" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="Xpand.XAF.Modules.Reactive.Logger.Client.Win.exe" target="lib\net461\Xpand.XAF.Modules.Reactive.Logger.Client.Win.exe" />
+    <file src="Xpand.XAF.Modules.Reactive.Logger.Client.Win.pdb" target="lib\net461\Xpand.XAF.Modules.Reactive.Logger.Client.Win.pdb" />
+  </files>
+</package>
