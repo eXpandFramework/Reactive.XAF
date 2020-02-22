@@ -1,5 +1,5 @@
 # About
-The  `Extensions` namespace is used for projects that contain **static extension methods**. 
+All projects in this namespace contain only **static classes with extension methods**. 
 
 Use the [XpandPwsh](https://github.com/eXpandFramework/XpandPwsh) To list all the published extension packages:
 
