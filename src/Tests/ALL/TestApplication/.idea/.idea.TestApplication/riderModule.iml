@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<module type="RIDER_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$USER_HOME$/.nuget/packages/grpc.core/2.25.0/runtimes/linux/native/libgrpc_csharp_ext.x64.so" />
+    <content url="file://$USER_HOME$/.nuget/packages/grpc.core/2.25.0/runtimes/linux/native/libgrpc_csharp_ext.x86.so" />
+    <content url="file://$USER_HOME$/.nuget/packages/grpc.core/2.25.0/runtimes/osx/native/libgrpc_csharp_ext.x64.dylib" />
+    <content url="file://$USER_HOME$/.nuget/packages/grpc.core/2.25.0/runtimes/osx/native/libgrpc_csharp_ext.x86.dylib" />
+    <content url="file://$USER_HOME$/.nuget/packages/grpc.core/2.25.0/runtimes/win/native/grpc_csharp_ext.x64.dll" />
+    <content url="file://$USER_HOME$/.nuget/packages/grpc.core/2.25.0/runtimes/win/native/grpc_csharp_ext.x86.dll" />
+    <content url="file://$USER_HOME$/.nuget/packages/nunit3testadapter/3.15.1/build/net35/NUnit3.TestAdapter.dll" />
+    <content url="file://$USER_HOME$/.nuget/packages/nunit3testadapter/3.15.1/build/net35/NUnit3.TestAdapter.pdb" />
+    <content url="file://$USER_HOME$/.nuget/packages/nunit3testadapter/3.15.1/build/net35/nunit.engine.api.dll" />
+    <content url="file://$USER_HOME$/.nuget/packages/nunit3testadapter/3.15.1/build/net35/nunit.engine.dll" />
+    <content url="file://$MODULE_DIR$/../../../../../../paket.dependencies" />
+    <content url="file://$MODULE_DIR$/../../../../../Extensions/Xpand.Extensions" />
+    <content url="file://$MODULE_DIR$/../../../ALL.Web.Tests" />
+    <content url="file://$MODULE_DIR$/../../../ALL.Win.Tests" />
+    <content url="file://$MODULE_DIR$/../.." />
+    <content url="file://$MODULE_DIR$/../../../packages/Grpc.Core/runtimes/linux/native/libgrpc_csharp_ext.x64.so" />
+    <content url="file://$MODULE_DIR$/../../../packages/Grpc.Core/runtimes/linux/native/libgrpc_csharp_ext.x86.so" />
+    <content url="file://$MODULE_DIR$/../../../packages/Grpc.Core/runtimes/osx/native/libgrpc_csharp_ext.x64.dylib" />
+    <content url="file://$MODULE_DIR$/../../../packages/Grpc.Core/runtimes/osx/native/libgrpc_csharp_ext.x86.dylib" />
+    <content url="file://$MODULE_DIR$/../../../packages/Grpc.Core/runtimes/win/native/grpc_csharp_ext.x64.dll" />
+    <content url="file://$MODULE_DIR$/../../../packages/Grpc.Core/runtimes/win/native/grpc_csharp_ext.x86.dll" />
+    <content url="file://$MODULE_DIR$/../../../../TestsLib" />
+    <content url="file://$MODULE_DIR$/../../../../paket.dependencies" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>

@@ -1,0 +1,829 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="6d118cbd-0e48-43f0-8308-7ad34e028ea1" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/../Extensions/Xpand.Extensions.Mono.Cecil/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Extensions/Xpand.Extensions.Mono.Cecil/Properties/AssemblyInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive/Properties/AssemblyInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Extensions/Xpand.Extensions.XAF.Xpo/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Extensions/Xpand.Extensions.XAF.Xpo/Properties/AssemblyInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Extensions/Xpand.Extensions.XAF/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Extensions/Xpand.Extensions.XAF/Properties/AssemblyInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Extensions/Xpand.Extensions/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Extensions/Xpand.Extensions/Properties/AssemblyInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Modules/AutoCommit/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/AutoCommit/Properties/AssemblyInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Modules/CloneMemberValue/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/CloneMemberValue/Properties/AssemblyInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Modules/CloneModelView/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/CloneModelView/Properties/AssemblyInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Modules/GridListEditor/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/GridListEditor/Properties/AssemblyInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Modules/HideToolBar/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/HideToolBar/Properties/AssemblyInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Modules/MasterDetail/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/MasterDetail/Properties/AssemblyInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Modules/ModelMapper/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/ModelMapper/Properties/AssemblyInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Modules/ModelMapper/Services/TypeMapping/Compile.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/ModelMapper/Services/TypeMapping/Compile.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Modules/ModelMapper/Services/TypeMapping/PublicMembers.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/ModelMapper/Services/TypeMapping/PublicMembers.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Modules/ModelViewInheritance/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/ModelViewInheritance/Properties/AssemblyInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Modules/OneView/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/OneView/Properties/AssemblyInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Modules/ProgressBarViewItem/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/ProgressBarViewItem/Properties/AssemblyInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Modules/Reactive.Logger.Client.Win/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/Reactive.Logger.Client.Win/Properties/AssemblyInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Modules/Reactive.Logger.Hub/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/Reactive.Logger.Hub/Properties/AssemblyInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Modules/Reactive.Logger/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/Reactive.Logger/Properties/AssemblyInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Modules/Reactive.Win/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/Reactive.Win/Properties/AssemblyInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Modules/Reactive/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/Reactive/Properties/AssemblyInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Modules/RefreshView/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/RefreshView/Properties/AssemblyInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Modules/SuppressConfirmation/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/SuppressConfirmation/Properties/AssemblyInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Modules/ViewEditMode/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/ViewEditMode/Properties/AssemblyInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ALL/ALL.Web.Tests/ALL.Web.Tests.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/ALL/ALL.Web.Tests/ALL.Web.Tests.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ALL/ALL.Win.Tests/ALL.Win.Tests.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/ALL/ALL.Win.Tests/ALL.Win.Tests.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ALL/TestApplication/TestApplication.Web/TestApplication.Web.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/ALL/TestApplication/TestApplication.Web/TestApplication.Web.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ALL/TestApplication/TestApplication.Web/Web.config" beforeDir="false" afterPath="$PROJECT_DIR$/ALL/TestApplication/TestApplication.Web/Web.config" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ALL/TestApplication/TestApplication.Win/TestApplication.Win.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/ALL/TestApplication/TestApplication.Win/TestApplication.Win.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ModelMapper/ModelBindingServiceTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ModelMapper/ModelBindingServiceTests.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.Extensions.Mono.Cecil.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.Extensions.Mono.Cecil.nuspec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.Extensions.Reactive.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.Extensions.Reactive.nuspec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.Extensions.XAF.Xpo.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.Extensions.XAF.Xpo.nuspec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.Extensions.XAF.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.Extensions.XAF.nuspec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.Extensions.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.Extensions.nuspec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Core.All.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Core.All.nuspec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.AutoCommit.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.AutoCommit.nuspec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.CloneMemberValue.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.CloneMemberValue.nuspec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.CloneModelView.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.CloneModelView.nuspec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.GridListEditor.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.GridListEditor.nuspec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.HideToolBar.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.HideToolBar.nuspec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.MasterDetail.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.MasterDetail.nuspec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.ModelMapper.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.ModelMapper.nuspec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.ModelViewInheritance.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.ModelViewInheritance.nuspec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.OneView.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.OneView.nuspec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.ProgressBarViewItem.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.ProgressBarViewItem.nuspec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.Reactive.Logger.Client.Win.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.Reactive.Logger.Client.Win.nuspec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.Reactive.Logger.Hub.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.Reactive.Logger.Hub.nuspec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.Reactive.Logger.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.Reactive.Logger.nuspec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.Reactive.Win.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.Reactive.Win.nuspec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.Reactive.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.Reactive.nuspec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.RefreshView.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.RefreshView.nuspec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.SuppressConfirmation.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.SuppressConfirmation.nuspec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.ViewEditMode.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.ViewEditMode.nuspec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Web.All.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Web.All.nuspec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Win.All.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Win.All.nuspec" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DatabaseView">
+    <option name="SHOW_INTERMEDIATE" value="true" />
+    <option name="GROUP_DATA_SOURCES" value="true" />
+    <option name="GROUP_SCHEMA" value="true" />
+    <option name="GROUP_CONTENTS" value="false" />
+    <option name="SORT_POSITIONED" value="false" />
+    <option name="SHOW_EMPTY_GROUPS" value="false" />
+    <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
+    <option name="HIDDEN_KINDS">
+      <set />
+    </option>
+    <expand />
+    <select />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/6343304B-FD0A-4901-B96E-954C69CB0314/45/22899419/ModuleBase.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/ProgressBarViewItem/ProgressBarViewItemService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/TestsLib/Extensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/6343304B-FD0A-4901-B96E-954C69CB0314/55/06eec4e2/ModelApplicationCreator.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/Symbols/src/nunit/nunit/c933a883ea25263ec575a654dae69fa38000edd9/src/NUnitFramework/framework/Internal/Commands/BeforeTestCommand.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive.Logger/Module.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive.Logger/ReactiveLoggerService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions.XAF/ApplicationModulesManager/RegisterAction.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive.Logger/TraceEvent.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/6343304B-FD0A-4901-B96E-954C69CB0314/cb/7708c0f5/ModelNode.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/Symbols/src/nunit/nunit/c933a883ea25263ec575a654dae69fa38000edd9/src/NUnitFramework/framework/Attributes/TimeoutAttribute.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive.Logger/ReactiveTraceListener.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/6343304B-FD0A-4901-B96E-954C69CB0314/36/c82ac782/IModelNode.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/CloneModelView/CloneModelViewTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/Symbols/src/nunit/nunit/c933a883ea25263ec575a654dae69fa38000edd9/src/NUnitFramework/framework/Attributes/MaxTimeAttribute.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/Symbols/src/eXpandFramework/Fasterflect/06d8e16a324a93f87a52350f59bdf1820be86f5b/Fasterflect/Extensions/Core/PropertyExtensions.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive.Logger.Client.Win/Program.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/HideToolBar/HideToolBarTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/Symbols/src/nunit/nunit/c933a883ea25263ec575a654dae69fa38000edd9/src/NUnitFramework/framework/Internal/Commands/MaxTimeCommand.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/OneView/OneViewService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions.XAF/Module/ModulebaseExtensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/GridListEditor/GridListEditorTests.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/RefreshView/RefreshViewService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/Symbols/src/nunit/nunit/c933a883ea25263ec575a654dae69fa38000edd9/src/NUnitFramework/framework/Attributes/RetryAttribute.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/E21E62F8-5E04-4546-911F-744C98893B8D/48/b6c1f877/TypeMappingService.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions.XAF/XafApplication/GetPlatform.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions/AppDomain/ApplicationPath.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/GridListEditor/GridListEditorService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions/AppDomain/AssemblyDevExpressExpressAppWeb.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/Symbols/src/nunit/nunit/c933a883ea25263ec575a654dae69fa38000edd9/src/NUnitFramework/framework/Attributes/NUnitAttribute.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions/Exception/GetAllMessages.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/TestsLib/Attributes/ExpectedExceptionAttribute.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions/Assembly/NewAssembly.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/TestsLib/Attributes/XpandTestAttribute.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/Symbols/src/nunit/nunit/c933a883ea25263ec575a654dae69fa38000edd9/src/NUnitFramework/framework/Internal/Results/TestResult.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions/Linq/FromHierarchy.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/Symbols/src/eXpandFramework/Fasterflect/06d8e16a324a93f87a52350f59bdf1820be86f5b/Fasterflect/Emitter/LookupUtils.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ModelMapper/TestTypes.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/Symbols/src/nunit/nunit/c933a883ea25263ec575a654dae69fa38000edd9/src/NUnitFramework/framework/Attributes/PropertyAttribute.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions/Properties/AssemblyInfo.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ALL/TestApplication/TestApplication.Web/Default.aspx" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/TestsLib/Attributes/XpandTestAttributeTest.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ALL/TestApplication/TestApplication.Web/Error.aspx" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ModelMapper/Class1.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ALL/TestApplication/TestApplication.Web/Web.config" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Reactive.Logger/ReactiveLoggerTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions.Mono.Cecil/Properties/AssemblyInfo.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive/Combine/CombineWithPrevious.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive/Combine/SwitchIfEmpty.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive/ErrorHandling/RetryWithBackoff.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive/Conditional/TakeUntilDisposed.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive/Filter/WhenNotDefault.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive/Filter/WhenDefault.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions.Mono.Cecil/IsSubclassOf.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions.Mono.Cecil/BaseClasses.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive/Transform/ReturnObservable.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions.Mono.Cecil/IsAssignableFrom.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive/Transform/DoNotComplete.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive/Transform/To.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive/Transform/StepInterval.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/EF28F193-EAB6-4E49-B44B-3FB27EAB4F75/cf/091addb6/WaitHandle.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ModelMapper/BOModel/MM.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ModelMapper/TypeMappingServiceTests/AssemblyTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive/Transform/System/Net/Listening.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive/Transform/TransformPattern.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ModelMapper/TypeMappingServiceTests/ContainerTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive/Utility/DelaySubscription.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive/Transform/WhenDisposed.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/B4FF2D16-FEA1-4902-A910-EAA7775B074B/07/748a67da/ReportsAspNetModuleV2.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive/Utility/Trace.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ModelMapper/TypeMappingServiceTests/DoNotMapTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive/Utility/SubscribeReplay.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive/Utility/ObserveLatestOn.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ModelMapper/TypeMappingServiceTests/MapAttributesTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ALL/TestApplication/TestApplication.Win/Program.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ModelMapper/TypeMappingServiceTests/MapTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/B4FF2D16-FEA1-4902-A910-EAA7775B074B/fa/21888b4c/IModelReportDesignerViewItem.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ALL/TestApplication/TestApplication.Win/TestWinApplication.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/RefreshView/RefreshViewTests.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ViewEditMode/ViewEditModeTests.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ModelMapper/CustomGridListEditor.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ModelMapper/ModelExtendingServiceTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/730509C0-7CA1-42CB-B1B4-384F8BB45FDC/22/StringShouldBeTestExtensions.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ModelMapper/ModelMapperBaseTest.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ALL/ALL.Win.Tests/AllWinTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive.Logger.Client.Win/WinApplication.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ProgressBarViewItem/ProgressBarViewItemTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ALL/ALL.Web.Tests/AllWebTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive.Logger.Hub/ReactiveLoggerHubService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive.Logger.Hub/Module.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/F65E0AD2-CF32-4AA8-A654-AA7D4A3DDF50/c3/8186b52e/ValidationResultsShowingController.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/AutoCommit/AutoCommitTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/7E85EA5A-4FCC-42B7-AB1C-BF96E34A332F/b5/b5a70127/WinApplication.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/OneView/OneViewTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Reactive.Logger.Hub/ReactiveLoggerHubTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Reactive.Logger.Hub/ClientWinApp.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/7C074160-DD1A-4D91-9B45-B6E4C27A3BAC/9c/23ac46ff/WaitHandle.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Reactive/CommonExtensionsTests.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive.Logger.Hub/TraceEventHub.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/Symbols/src/eXpandFramework/Fasterflect/06d8e16a324a93f87a52350f59bdf1820be86f5b/Fasterflect/Extensions/Core/MethodExtensions.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/CloneMemberValue/CloneMemberValueTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/EF28F193-EAB6-4E49-B44B-3FB27EAB4F75/50/b71aaed3/RuntimeMethodInfo.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Reactive/TestModule.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Reactive/XafApplicationTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/AutoCommit/Properties/AssemblyInfo.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/ModelMapper/Services/TypeMapping/ModelCode.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/6343304B-FD0A-4901-B96E-954C69CB0314/e3/2689d8e4/Frame.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/MasterDetail/MasterDetailTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/AutoCommit/AutocommitService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive/Extensions/CommonExtensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive/HarmonyPatches/RxAppPatch.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive/HarmonyPatches/ReactiveModuleBasePatch.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ModelViewInheritance/ModelViewInheritanceTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/CloneMemberValue/CloneMemberValueService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive/Services/Controllers/ControllerExtensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive/Services/Controllers/ShowNavigationItemControllerExtensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/5A404691-D536-4FDE-B38A-7E0C99DE0B25/bf/3e5834c6/Frame.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/CloneModelView/CloneModelViewAttribute.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive/Services/Controllers/ListViewProcessCurrentObjectControllerExtensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/F61F002D-E081-4344-9369-2B3B4DBBCC6F/A/Enums.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive/Services/Controllers/WindowTemplateControllerExtensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive/Services/ActionExtensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/EF28F193-EAB6-4E49-B44B-3FB27EAB4F75/25/77d965d1/RuntimeType.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/TestsLib/Properties/AssemblyInfo.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive/Services/CollectionSourceService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/MasterDetail/ModelLogic.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/CloneModelView/ModelViewClonerUpdater.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Reactive/BOModel/R.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive/Services/BoolListExtensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/TestsLib/BaseTest.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive/Services/FrameExtensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/MasterDetail/Module.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/F61F002D-E081-4344-9369-2B3B4DBBCC6F/8/EnumMember.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive/Services/DetailViewExtensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive/Services/ObjectSpaceExtensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive/Services/ListEditorExtensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/MasterDetail/MasterDetailService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive/Services/ViewItemExtensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/DC567DFD-CF36-4FFE-B03A-E85A9DD64A01/17/43474478/XafApplication.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions.Mono.Cecil/ToType.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive/Services/ViewExtensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive/Services/WindowTemplateService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/MasterDetail/BOModel/MdParent.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/TestsLib/TestApplication.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive/Services/WindowExtensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/9E79EFD9-6E32-455B-9193-C8134EC74AE7/76/da9ad454/ShowViewStrategyBase.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Extensions/SystemNetTransformTest.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive/Module.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/BE0E2B70-CA25-4BB6-8441-7CCCEA7D5290/c5/c8735697/IApplyToContext.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive.Win/Services/WinApplicationExtensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/EF28F193-EAB6-4E49-B44B-3FB27EAB4F75/92/26ab3b76/AmbiguousMatchException.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/ModelMapper/Services/ModelBindingService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive/Services/XafApplicationRXExtensions.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/SuppressConfirmation/SuppressConfirmationTests.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive/RXApp.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/Reactive/ReactiveModuleBase.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions/Task/StartTask.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/ModelMapper/ModelBindingServiceTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions/Exception/ToMaiilMessage.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/ModelMapper/Properties/AssemblyInfo.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions/Configuration/NewSmtpClient.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/SuppressConfirmation/SuppressConfirmationService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/Symbols/src/nunit/nunit/c933a883ea25263ec575a654dae69fa38000edd9/src/NUnitFramework/framework/Attributes/TestCaseAttribute.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/ModelMapper/Services/Predefined/ViewItemService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/ModelMapper/Services/TypeMapping/MappingRules.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/ModelMapper/Services/TypeMapping/Compile.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/ViewEditMode/ViewEditModeService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/ModelMapper/Services/TypeMapping/PublicMembers.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/ModelMapper/Services/TypeMapping/Metadata.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/HideToolBar/HideToolBarService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/ModelMapper/Services/PredefinedMapService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/ModelMapper/Services/ModelMapperService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/ProgressBarViewItem/ProgressBarViewItemBase.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/6343304B-FD0A-4901-B96E-954C69CB0314/d7/dd86d19a/ApplicationModelManager.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Modules/ProgressBarViewItem/Module.cs" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/../Modules/Reactive/Services/CollectionSourceService.cs" />
+        <option value="$PROJECT_DIR$/../Modules/Reactive/Services/DetailViewExtensions.cs" />
+        <option value="$PROJECT_DIR$/../Modules/Reactive/Services/ListEditorExtensions.cs" />
+        <option value="$PROJECT_DIR$/../Modules/Reactive/Services/ObjectSpaceExtensions.cs" />
+        <option value="$PROJECT_DIR$/../Modules/Reactive/Services/ViewExtensions.cs" />
+        <option value="$PROJECT_DIR$/../Modules/Reactive/Services/ViewItemExtensions.cs" />
+        <option value="$PROJECT_DIR$/../Modules/Reactive/Services/WindowExtensions.cs" />
+        <option value="$PROJECT_DIR$/../Modules/Reactive/Services/FrameExtensions.cs" />
+        <option value="$PROJECT_DIR$/ModelMapper/ModelExtendingServiceTests.cs" />
+        <option value="$PROJECT_DIR$/../Modules/ProgressBarViewItem/ProgressBarViewItemBase.cs" />
+        <option value="$PROJECT_DIR$/MasterDetail/BOModel/MdParent.cs" />
+        <option value="$PROJECT_DIR$/../Extensions/Xpand.Extensions.Mono.Cecil/BaseClasses.cs" />
+        <option value="$PROJECT_DIR$/../Extensions/Xpand.Extensions.Mono.Cecil/IsAssignableFrom.cs" />
+        <option value="$PROJECT_DIR$/../Extensions/Xpand.Extensions.Mono.Cecil/IsSubclassOf.cs" />
+        <option value="$PROJECT_DIR$/../Extensions/Xpand.Extensions.Mono.Cecil/ToType.cs" />
+        <option value="$PROJECT_DIR$/../Modules/Reactive/Services/XafApplicationRXExtensions.cs" />
+        <option value="$PROJECT_DIR$/../Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive/Utility/SubscribeReplay.cs" />
+        <option value="$PROJECT_DIR$/../Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive/Utility/DelaySubscription.cs" />
+        <option value="$PROJECT_DIR$/../Extensions/Xpand.Extensions/Exception/GetAllMessages.cs" />
+        <option value="$PROJECT_DIR$/../Extensions/Xpand.Extensions/Exception/ToMaiilMessage.cs" />
+        <option value="$PROJECT_DIR$/../Extensions/Xpand.Extensions/Configuration/ConfigurationExtensions.cs" />
+        <option value="$PROJECT_DIR$/../Extensions/Xpand.Extensions/Configuration/NewSmtpClient.cs" />
+        <option value="$PROJECT_DIR$/../Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive/Transform/AsObservable.cs" />
+        <option value="$PROJECT_DIR$/../Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive/Transform/ReturnObservable.cs" />
+        <option value="$PROJECT_DIR$/../Modules/Reactive/Module.cs" />
+        <option value="$PROJECT_DIR$/../Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive/Transform/To.cs" />
+        <option value="$PROJECT_DIR$/../Modules/MasterDetail/Module.cs" />
+        <option value="$PROJECT_DIR$/../Modules/AutoCommit/AutocommitService.cs" />
+        <option value="$PROJECT_DIR$/../Modules/CloneMemberValue/CloneMemberValueService.cs" />
+        <option value="$PROJECT_DIR$/../Modules/GridListEditor/GridListEditorService.cs" />
+        <option value="$PROJECT_DIR$/../Modules/HideToolBar/HideToolBarService.cs" />
+        <option value="$PROJECT_DIR$/../Modules/Reactive.Logger/ReactiveLoggerService.cs" />
+        <option value="$PROJECT_DIR$/../Modules/Reactive.Logger.Hub/ReactiveLoggerHubService.cs" />
+        <option value="$PROJECT_DIR$/../Modules/ModelMapper/Services/ModelBindingService.cs" />
+        <option value="$PROJECT_DIR$/../Modules/Reactive/RXApp.cs" />
+        <option value="$PROJECT_DIR$/../Modules/RefreshView/RefreshViewService.cs" />
+        <option value="$PROJECT_DIR$/../Modules/SuppressConfirmation/SuppressConfirmationService.cs" />
+        <option value="$PROJECT_DIR$/../Modules/ViewEditMode/ViewEditModeService.cs" />
+        <option value="$PROJECT_DIR$/../Modules/MasterDetail/MasterDetailService.cs" />
+        <option value="$PROJECT_DIR$/MasterDetail/MasterDetailTests.cs" />
+        <option value="$PROJECT_DIR$/../Modules/OneView/OneViewService.cs" />
+        <option value="$PROJECT_DIR$/TestsLib/Extensions.cs" />
+        <option value="$PROJECT_DIR$/OneView/OneViewTests.cs" />
+        <option value="$PROJECT_DIR$/TestsLib/TestApplication.cs" />
+        <option value="$PROJECT_DIR$/../Modules/Reactive/Extensions/CommonExtensions.cs" />
+        <option value="$PROJECT_DIR$/Extensions/SystemNetTransformTest.cs" />
+        <option value="$PROJECT_DIR$/ModelMapper/ModelMapperBaseTest.cs" />
+        <option value="$PROJECT_DIR$/../Modules/ModelMapper/Services/TypeMapping/Compile.cs" />
+        <option value="$PROJECT_DIR$/../Extensions/Xpand.Extensions/AppDomain/ApplicationPath.cs" />
+        <option value="$PROJECT_DIR$/../Modules/ModelMapper/Services/TypeMapping/PublicMembers.cs" />
+        <option value="$PROJECT_DIR$/ModelMapper/ModelBindingServiceTests.cs" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectId" id="1TTwIA7R0H7ug3AIjRmofSywV0g" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
+    <property name="Rider.DefaultBreakpoints.AreToggled" value="true" />
+    <property name="Rider.ProjectViewActivator.IsNotFirstRun" value="true" />
+    <property name="TWShift.4" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="settings.editor.selected.configurable" value="project.propDebugger" />
+  </component>
+  <component name="RunManager" selected=".NET Project.ALLTests\TestApplication\TestApplication.Win">
+    <configuration name="ALLTests\TestApplication\TestApplication.Win" type="DotNetProject" factoryName=".NET Project" temporary="true">
+      <option name="EXE_PATH" value="$PROJECT_DIR$/../../bin/TestWinApplication/TestApplication.Win.exe" />
+      <option name="PROGRAM_PARAMETERS" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../bin/TestWinApplication" />
+      <option name="PASS_PARENT_ENVS" value="1" />
+      <option name="USE_EXTERNAL_CONSOLE" value="0" />
+      <option name="USE_MONO" value="0" />
+      <option name="RUNTIME_ARGUMENTS" value="" />
+      <option name="PROJECT_PATH" value="$PROJECT_DIR$/ALL/TestApplication/TestApplication.Win/TestApplication.Win.csproj" />
+      <option name="PROJECT_EXE_PATH_TRACKING" value="1" />
+      <option name="PROJECT_ARGUMENTS_TRACKING" value="1" />
+      <option name="PROJECT_WORKING_DIRECTORY_TRACKING" value="1" />
+      <option name="PROJECT_KIND" value="DotNetCore" />
+      <option name="PROJECT_TFM" value=".NETFramework,Version=v4.6.2" />
+      <method v="2">
+        <option name="Build" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Xpand.TestsLib: Tests" type="LaunchSettings" factoryName=".NET Launch Settings Profile">
+      <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/TestsLib/Xpand.TestsLib.csproj" />
+      <option name="LAUNCH_PROFILE_TFM" value=".NETFramework,Version=v4.6.1" />
+      <option name="LAUNCH_PROFILE_NAME" value="Tests" />
+      <option name="USE_EXTERNAL_CONSOLE" value="0" />
+      <option name="USE_MONO" value="0" />
+      <option name="RUNTIME_ARGUMENTS" value="" />
+      <option name="GENERATE_APPLICATIONHOST_CONFIG" value="1" />
+      <option name="SHOW_IIS_EXPRESS_OUTPUT" value="0" />
+      <option name="SEND_DEBUG_REQUEST" value="1" />
+      <option name="ADDITIONAL_IIS_EXPRESS_ARGUMENTS" value="" />
+      <method v="2">
+        <option name="Build" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Xpand.XAF.Modules.ModelMapper.Tests" type="LaunchSettings" factoryName=".NET Launch Settings Profile">
+      <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/ModelMapper/Xpand.XAF.Modules.ModelMapper.Tests.csproj" />
+      <option name="LAUNCH_PROFILE_TFM" value=".NETFramework,Version=v4.6.1" />
+      <option name="LAUNCH_PROFILE_NAME" value="Xpand.XAF.Modules.ModelMapper.Tests" />
+      <option name="USE_EXTERNAL_CONSOLE" value="0" />
+      <option name="USE_MONO" value="0" />
+      <option name="RUNTIME_ARGUMENTS" value="" />
+      <option name="GENERATE_APPLICATIONHOST_CONFIG" value="1" />
+      <option name="SHOW_IIS_EXPRESS_OUTPUT" value="0" />
+      <option name="SEND_DEBUG_REQUEST" value="1" />
+      <option name="ADDITIONAL_IIS_EXPRESS_ARGUMENTS" value="" />
+      <method v="2">
+        <option name="Build" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue=".NET Project.ALLTests\TestApplication\TestApplication.Win" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="ServiceViewManager">
+    <option name="viewStates">
+      <list>
+        <serviceView>
+          <treeState>
+            <expand />
+            <select />
+          </treeState>
+        </serviceView>
+      </list>
+    </option>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="6d118cbd-0e48-43f0-8308-7ad34e028ea1" name="Default Changelist" comment="" />
+      <created>1573497312225</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1573497312225</updated>
+      <workItem from="1573497316340" duration="297000" />
+      <workItem from="1573539092049" duration="240000" />
+      <workItem from="1573539375450" duration="8778000" />
+      <workItem from="1573621383817" duration="1104000" />
+      <workItem from="1573650579804" duration="11198000" />
+      <workItem from="1573790237117" duration="7237000" />
+      <workItem from="1573879436130" duration="2372000" />
+      <workItem from="1574000963451" duration="104000" />
+      <workItem from="1574002838415" duration="10852000" />
+      <workItem from="1574068213733" duration="890000" />
+      <workItem from="1574069280225" duration="17900000" />
+      <workItem from="1574134241040" duration="10094000" />
+      <workItem from="1574151625958" duration="724000" />
+      <workItem from="1574176512723" duration="1662000" />
+      <workItem from="1574254009520" duration="927000" />
+      <workItem from="1574255660303" duration="7573000" />
+      <workItem from="1574265331668" duration="1616000" />
+      <workItem from="1574267711247" duration="634000" />
+      <workItem from="1574271251178" duration="239000" />
+      <workItem from="1574434794460" duration="5596000" />
+      <workItem from="1574530823538" duration="15736000" />
+      <workItem from="1574586525971" duration="10511000" />
+      <workItem from="1574654224845" duration="4205000" />
+      <workItem from="1575039365389" duration="55000" />
+      <workItem from="1575044148595" duration="1619000" />
+      <workItem from="1575371997113" duration="2722000" />
+      <workItem from="1575545251873" duration="320000" />
+      <workItem from="1575545602538" duration="707000" />
+      <workItem from="1575605718766" duration="5026000" />
+      <workItem from="1575745704729" duration="128000" />
+      <workItem from="1575937659776" duration="2294000" />
+      <workItem from="1576058107108" duration="628000" />
+      <workItem from="1576569772576" duration="1443000" />
+      <workItem from="1576643403766" duration="1411000" />
+      <workItem from="1576658329967" duration="4141000" />
+      <workItem from="1576811738405" duration="6626000" />
+      <workItem from="1577412982196" duration="2260000" />
+      <workItem from="1577615001829" duration="3011000" />
+      <workItem from="1577949193615" duration="1261000" />
+      <workItem from="1578393537615" duration="899000" />
+      <workItem from="1578410546935" duration="1334000" />
+      <workItem from="1578576786963" duration="875000" />
+      <workItem from="1578663689994" duration="7809000" />
+      <workItem from="1578762161347" duration="211000" />
+      <workItem from="1578762405545" duration="1831000" />
+      <workItem from="1578767297019" duration="1427000" />
+      <workItem from="1579099725773" duration="2511000" />
+      <workItem from="1579145885650" duration="1406000" />
+      <workItem from="1579259190860" duration="2040000" />
+      <workItem from="1579352719693" duration="2860000" />
+      <workItem from="1579358793685" duration="1218000" />
+      <workItem from="1579420964508" duration="1223000" />
+      <workItem from="1579437283985" duration="3253000" />
+      <workItem from="1579477289516" duration="1202000" />
+      <workItem from="1579504066857" duration="1221000" />
+      <workItem from="1579567555095" duration="8256000" />
+      <workItem from="1580181401468" duration="1488000" />
+      <workItem from="1580361129493" duration="3565000" />
+      <workItem from="1580619211936" duration="689000" />
+      <workItem from="1581177195464" duration="707000" />
+      <workItem from="1581306856938" duration="1073000" />
+      <workItem from="1581415140808" duration="665000" />
+      <workItem from="1581566827385" duration="312000" />
+      <workItem from="1581615674024" duration="1822000" />
+      <workItem from="1581673132322" duration="6855000" />
+      <workItem from="1581699444016" duration="22543000" />
+      <workItem from="1581787590413" duration="890000" />
+      <workItem from="1581827798350" duration="10812000" />
+      <workItem from="1581873592387" duration="4960000" />
+      <workItem from="1581920619481" duration="3071000" />
+      <workItem from="1581927681830" duration="1345000" />
+      <workItem from="1581949126424" duration="3181000" />
+      <workItem from="1582027897221" duration="725000" />
+      <workItem from="1582128378284" duration="310000" />
+      <workItem from="1582199182707" duration="2227000" />
+      <workItem from="1582203404368" duration="1860000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
+  <component name="UnityUnitTestConfiguration" currentTestLauncher="NUnit" />
+  <component name="Vcs.Log.History.Properties">
+    <option name="COLUMN_ORDER">
+      <list>
+        <option value="0" />
+        <option value="2" />
+        <option value="3" />
+        <option value="1" />
+      </list>
+    </option>
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="641" y="316" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog" timestamp="1577412992619" />
+    <state x="641" y="316" key="#com.intellij.openapi.updateSettings.impl.PluginUpdateInfoDialog/2880.1800/1920.1080/1920.1080" timestamp="1577412992619" />
+    <state x="0" y="0" width="1920" height="1160" key="#xdebugger.evaluate" timestamp="1582201347689">
+      <screen x="0" y="0" width="1920" height="1160" />
+    </state>
+    <state x="0" y="0" width="1920" height="1160" key="#xdebugger.evaluate/0.0.1920.1160/-1920.235.1920.1040/2880.160.1920.1040@0.0.1920.1160" timestamp="1582201347689" />
+    <state x="343" y="99" width="1289" height="861" key="#xdebugger.evaluate/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@0.0.1920.1160" timestamp="1581922551143" />
+    <state x="343" y="99" width="1151" height="921" key="#xdebugger.evaluate/2880.1800/1920.1080/1920.1080" timestamp="1577412992619" />
+    <state width="1877" height="396" key="GridCell.Tab.0.bottom" timestamp="1582201411023">
+      <screen x="0" y="0" width="1920" height="1160" />
+    </state>
+    <state width="1877" height="396" key="GridCell.Tab.0.bottom/0.0.1920.1160/-1920.235.1920.1040/2880.160.1920.1040@0.0.1920.1160" timestamp="1582201411023" />
+    <state width="1877" height="396" key="GridCell.Tab.0.bottom/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@0.0.1920.1160" timestamp="1581997886656" />
+    <state width="1877" height="396" key="GridCell.Tab.0.bottom/2880.1800/1920.1080/1920.1080" timestamp="1577412992619" />
+    <state width="1877" height="396" key="GridCell.Tab.0.center" timestamp="1582201411023">
+      <screen x="0" y="0" width="1920" height="1160" />
+    </state>
+    <state width="1877" height="396" key="GridCell.Tab.0.center/0.0.1920.1160/-1920.235.1920.1040/2880.160.1920.1040@0.0.1920.1160" timestamp="1582201411023" />
+    <state width="1877" height="396" key="GridCell.Tab.0.center/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@0.0.1920.1160" timestamp="1581997886656" />
+    <state width="1877" height="396" key="GridCell.Tab.0.center/2880.1800/1920.1080/1920.1080" timestamp="1577412992619" />
+    <state width="1877" height="396" key="GridCell.Tab.0.left" timestamp="1582201411023">
+      <screen x="0" y="0" width="1920" height="1160" />
+    </state>
+    <state width="1877" height="396" key="GridCell.Tab.0.left/0.0.1920.1160/-1920.235.1920.1040/2880.160.1920.1040@0.0.1920.1160" timestamp="1582201411023" />
+    <state width="1877" height="396" key="GridCell.Tab.0.left/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@0.0.1920.1160" timestamp="1581997886655" />
+    <state width="1877" height="396" key="GridCell.Tab.0.left/2880.1800/1920.1080/1920.1080" timestamp="1577412992619" />
+    <state width="1877" height="396" key="GridCell.Tab.0.right" timestamp="1582201411023">
+      <screen x="0" y="0" width="1920" height="1160" />
+    </state>
+    <state width="1877" height="396" key="GridCell.Tab.0.right/0.0.1920.1160/-1920.235.1920.1040/2880.160.1920.1040@0.0.1920.1160" timestamp="1582201411023" />
+    <state width="1877" height="396" key="GridCell.Tab.0.right/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@0.0.1920.1160" timestamp="1581997886656" />
+    <state width="1877" height="396" key="GridCell.Tab.0.right/2880.1800/1920.1080/1920.1080" timestamp="1577412992619" />
+    <state width="1877" height="396" key="GridCell.Tab.1.bottom" timestamp="1582201411024">
+      <screen x="0" y="0" width="1920" height="1160" />
+    </state>
+    <state width="1877" height="396" key="GridCell.Tab.1.bottom/0.0.1920.1160/-1920.235.1920.1040/2880.160.1920.1040@0.0.1920.1160" timestamp="1582201411024" />
+    <state width="1877" height="396" key="GridCell.Tab.1.bottom/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@0.0.1920.1160" timestamp="1581997886657" />
+    <state width="1877" height="396" key="GridCell.Tab.1.bottom/2880.1800/1920.1080/1920.1080" timestamp="1577412992619" />
+    <state width="1877" height="396" key="GridCell.Tab.1.center" timestamp="1582201411024">
+      <screen x="0" y="0" width="1920" height="1160" />
+    </state>
+    <state width="1877" height="396" key="GridCell.Tab.1.center/0.0.1920.1160/-1920.235.1920.1040/2880.160.1920.1040@0.0.1920.1160" timestamp="1582201411024" />
+    <state width="1877" height="396" key="GridCell.Tab.1.center/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@0.0.1920.1160" timestamp="1581997886656" />
+    <state width="1877" height="396" key="GridCell.Tab.1.center/2880.1800/1920.1080/1920.1080" timestamp="1577412992619" />
+    <state width="1877" height="396" key="GridCell.Tab.1.left" timestamp="1582201411024">
+      <screen x="0" y="0" width="1920" height="1160" />
+    </state>
+    <state width="1877" height="396" key="GridCell.Tab.1.left/0.0.1920.1160/-1920.235.1920.1040/2880.160.1920.1040@0.0.1920.1160" timestamp="1582201411024" />
+    <state width="1877" height="396" key="GridCell.Tab.1.left/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@0.0.1920.1160" timestamp="1581997886656" />
+    <state width="1877" height="396" key="GridCell.Tab.1.left/2880.1800/1920.1080/1920.1080" timestamp="1577412992619" />
+    <state width="1877" height="396" key="GridCell.Tab.1.right" timestamp="1582201411024">
+      <screen x="0" y="0" width="1920" height="1160" />
+    </state>
+    <state width="1877" height="396" key="GridCell.Tab.1.right/0.0.1920.1160/-1920.235.1920.1040/2880.160.1920.1040@0.0.1920.1160" timestamp="1582201411024" />
+    <state width="1877" height="396" key="GridCell.Tab.1.right/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@0.0.1920.1160" timestamp="1581997886656" />
+    <state width="1877" height="396" key="GridCell.Tab.1.right/2880.1800/1920.1080/1920.1080" timestamp="1577412992619" />
+    <state width="1877" height="396" key="GridCell.Tab.2.bottom" timestamp="1582201411024">
+      <screen x="0" y="0" width="1920" height="1160" />
+    </state>
+    <state width="1877" height="396" key="GridCell.Tab.2.bottom/0.0.1920.1160/-1920.235.1920.1040/2880.160.1920.1040@0.0.1920.1160" timestamp="1582201411024" />
+    <state width="1877" height="396" key="GridCell.Tab.2.bottom/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@0.0.1920.1160" timestamp="1581997886657" />
+    <state width="1877" height="396" key="GridCell.Tab.2.bottom/2880.1800/1920.1080/1920.1080" timestamp="1577412992619" />
+    <state width="1877" height="396" key="GridCell.Tab.2.center" timestamp="1582201411024">
+      <screen x="0" y="0" width="1920" height="1160" />
+    </state>
+    <state width="1877" height="396" key="GridCell.Tab.2.center/0.0.1920.1160/-1920.235.1920.1040/2880.160.1920.1040@0.0.1920.1160" timestamp="1582201411024" />
+    <state width="1877" height="396" key="GridCell.Tab.2.center/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@0.0.1920.1160" timestamp="1581997886657" />
+    <state width="1877" height="396" key="GridCell.Tab.2.center/2880.1800/1920.1080/1920.1080" timestamp="1577412992619" />
+    <state width="1877" height="396" key="GridCell.Tab.2.left" timestamp="1582201411024">
+      <screen x="0" y="0" width="1920" height="1160" />
+    </state>
+    <state width="1877" height="396" key="GridCell.Tab.2.left/0.0.1920.1160/-1920.235.1920.1040/2880.160.1920.1040@0.0.1920.1160" timestamp="1582201411024" />
+    <state width="1877" height="396" key="GridCell.Tab.2.left/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@0.0.1920.1160" timestamp="1581997886657" />
+    <state width="1877" height="396" key="GridCell.Tab.2.left/2880.1800/1920.1080/1920.1080" timestamp="1577412992619" />
+    <state width="1877" height="396" key="GridCell.Tab.2.right" timestamp="1582201411024">
+      <screen x="0" y="0" width="1920" height="1160" />
+    </state>
+    <state width="1877" height="396" key="GridCell.Tab.2.right/0.0.1920.1160/-1920.235.1920.1040/2880.160.1920.1040@0.0.1920.1160" timestamp="1582201411024" />
+    <state width="1877" height="396" key="GridCell.Tab.2.right/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@0.0.1920.1160" timestamp="1581997886657" />
+    <state width="1877" height="396" key="GridCell.Tab.2.right/2880.1800/1920.1080/1920.1080" timestamp="1577412992619" />
+    <state width="1877" height="396" key="GridCell.Tab.3.bottom" timestamp="1582201411025">
+      <screen x="0" y="0" width="1920" height="1160" />
+    </state>
+    <state width="1877" height="396" key="GridCell.Tab.3.bottom/0.0.1920.1160/-1920.235.1920.1040/2880.160.1920.1040@0.0.1920.1160" timestamp="1582201411025" />
+    <state width="1877" height="396" key="GridCell.Tab.3.bottom/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@0.0.1920.1160" timestamp="1581997886657" />
+    <state width="1877" height="396" key="GridCell.Tab.3.bottom/2880.1800/1920.1080/1920.1080" timestamp="1577412992619" />
+    <state width="1877" height="396" key="GridCell.Tab.3.center" timestamp="1582201411025">
+      <screen x="0" y="0" width="1920" height="1160" />
+    </state>
+    <state width="1877" height="396" key="GridCell.Tab.3.center/0.0.1920.1160/-1920.235.1920.1040/2880.160.1920.1040@0.0.1920.1160" timestamp="1582201411025" />
+    <state width="1877" height="396" key="GridCell.Tab.3.center/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@0.0.1920.1160" timestamp="1581997886657" />
+    <state width="1877" height="396" key="GridCell.Tab.3.center/2880.1800/1920.1080/1920.1080" timestamp="1577412992619" />
+    <state width="1877" height="396" key="GridCell.Tab.3.left" timestamp="1582201411025">
+      <screen x="0" y="0" width="1920" height="1160" />
+    </state>
+    <state width="1877" height="396" key="GridCell.Tab.3.left/0.0.1920.1160/-1920.235.1920.1040/2880.160.1920.1040@0.0.1920.1160" timestamp="1582201411025" />
+    <state width="1877" height="396" key="GridCell.Tab.3.left/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@0.0.1920.1160" timestamp="1581997886657" />
+    <state width="1877" height="396" key="GridCell.Tab.3.left/2880.1800/1920.1080/1920.1080" timestamp="1577412992619" />
+    <state width="1877" height="396" key="GridCell.Tab.3.right" timestamp="1582201411025">
+      <screen x="0" y="0" width="1920" height="1160" />
+    </state>
+    <state width="1877" height="396" key="GridCell.Tab.3.right/0.0.1920.1160/-1920.235.1920.1040/2880.160.1920.1040@0.0.1920.1160" timestamp="1582201411025" />
+    <state width="1877" height="396" key="GridCell.Tab.3.right/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@0.0.1920.1160" timestamp="1581997886657" />
+    <state width="1877" height="396" key="GridCell.Tab.3.right/2880.1800/1920.1080/1920.1080" timestamp="1577412992619" />
+    <state width="1877" height="396" key="GridCell.Tab.4.bottom" timestamp="1582201411025">
+      <screen x="0" y="0" width="1920" height="1160" />
+    </state>
+    <state width="1877" height="396" key="GridCell.Tab.4.bottom/0.0.1920.1160/-1920.235.1920.1040/2880.160.1920.1040@0.0.1920.1160" timestamp="1582201411025" />
+    <state width="1877" height="396" key="GridCell.Tab.4.bottom/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@0.0.1920.1160" timestamp="1581997886658" />
+    <state width="1877" height="396" key="GridCell.Tab.4.bottom/2880.1800/1920.1080/1920.1080" timestamp="1577412992619" />
+    <state width="1877" height="396" key="GridCell.Tab.4.center" timestamp="1582201411025">
+      <screen x="0" y="0" width="1920" height="1160" />
+    </state>
+    <state width="1877" height="396" key="GridCell.Tab.4.center/0.0.1920.1160/-1920.235.1920.1040/2880.160.1920.1040@0.0.1920.1160" timestamp="1582201411025" />
+    <state width="1877" height="396" key="GridCell.Tab.4.center/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@0.0.1920.1160" timestamp="1581997886657" />
+    <state width="1877" height="396" key="GridCell.Tab.4.center/2880.1800/1920.1080/1920.1080" timestamp="1577412992619" />
+    <state width="1877" height="396" key="GridCell.Tab.4.left" timestamp="1582201411025">
+      <screen x="0" y="0" width="1920" height="1160" />
+    </state>
+    <state width="1877" height="396" key="GridCell.Tab.4.left/0.0.1920.1160/-1920.235.1920.1040/2880.160.1920.1040@0.0.1920.1160" timestamp="1582201411025" />
+    <state width="1877" height="396" key="GridCell.Tab.4.left/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@0.0.1920.1160" timestamp="1581997886657" />
+    <state width="1877" height="396" key="GridCell.Tab.4.left/2880.1800/1920.1080/1920.1080" timestamp="1577412992619" />
+    <state width="1877" height="396" key="GridCell.Tab.4.right" timestamp="1582201411025">
+      <screen x="0" y="0" width="1920" height="1160" />
+    </state>
+    <state width="1877" height="396" key="GridCell.Tab.4.right/0.0.1920.1160/-1920.235.1920.1040/2880.160.1920.1040@0.0.1920.1160" timestamp="1582201411025" />
+    <state width="1877" height="396" key="GridCell.Tab.4.right/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@0.0.1920.1160" timestamp="1581997886658" />
+    <state width="1877" height="396" key="GridCell.Tab.4.right/2880.1800/1920.1080/1920.1080" timestamp="1577412992619" />
+    <state x="553" y="312" key="Rider.ProjectTemplateDialog.Size" timestamp="1581921779778">
+      <screen x="0" y="0" width="1920" height="1160" />
+    </state>
+    <state x="553" y="312" key="Rider.ProjectTemplateDialog.Size/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@0.0.1920.1160" timestamp="1581921779778" />
+    <state x="553" y="312" key="Rider.ProjectTemplateDialog.Size/2880.1800/1920.1080/1920.1080" timestamp="1577412992619" />
+    <state x="446" y="223" key="SettingsEditor" timestamp="1582200902361">
+      <screen x="0" y="0" width="1920" height="1160" />
+    </state>
+    <state x="446" y="223" key="SettingsEditor/0.0.1920.1160/-1920.235.1920.1040/2880.160.1920.1040@0.0.1920.1160" timestamp="1582200902361" />
+    <state x="446" y="223" key="SettingsEditor/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@0.0.1920.1160" timestamp="1581699766654" />
+    <state x="446" y="223" key="SettingsEditor/2880.1800/1920.1080/1920.1080" timestamp="1577412992619" />
+    <state width="498" height="477" key="SwitcherDM" timestamp="1582205166676">
+      <screen x="0" y="0" width="1920" height="1160" />
+    </state>
+    <state width="498" height="477" key="SwitcherDM/0.0.1920.1160/-1920.235.1920.1040/2880.160.1920.1040@0.0.1920.1160" timestamp="1582205166676" />
+    <state width="498" height="477" key="SwitcherDM/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@0.0.1920.1160" timestamp="1581950711864" />
+    <state x="93" y="93" width="1735" height="975" maximized="true" key="dock-window-1" timestamp="1579437316424">
+      <screen x="0" y="0" width="1920" height="1160" />
+    </state>
+    <state x="93" y="93" width="1735" height="975" maximized="true" key="dock-window-1/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@0.0.1920.1160" timestamp="1579437316424" />
+    <state x="566" y="312" width="824" height="606" key="find.popup" timestamp="1579260729702">
+      <screen x="0" y="0" width="1920" height="1160" />
+    </state>
+    <state x="566" y="312" width="789" height="536" key="find.popup/-1920.317.1920.1020/0.0.1920.1160/2880.334.1920.1040@0.0.1920.1160" timestamp="1578393663324" />
+    <state x="566" y="312" width="824" height="606" key="find.popup/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@0.0.1920.1160" timestamp="1579260729702" />
+    <state x="617" y="271" width="672" height="677" key="run.anything.popup" timestamp="1581921540755">
+      <screen x="0" y="0" width="1920" height="1160" />
+    </state>
+    <state x="617" y="271" width="672" height="677" key="run.anything.popup/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@0.0.1920.1160" timestamp="1581921540755" />
+    <state x="623" y="255" width="672" height="679" key="search.everywhere.popup" timestamp="1582203498292">
+      <screen x="0" y="0" width="1920" height="1160" />
+    </state>
+    <state x="623" y="255" width="672" height="679" key="search.everywhere.popup/-1920.317.1920.1020/0.0.1920.1160/2880.334.1920.1040@0.0.1920.1160" timestamp="1578393565483" />
+    <state x="3503" y="563" width="672" height="608" key="search.everywhere.popup/-1920.317.1920.1020/0.0.1920.1160/2880.334.1920.1040@2880.334.1920.1040" timestamp="1577976545158" />
+    <state x="623" y="255" width="672" height="679" key="search.everywhere.popup/0.0.1920.1160/-1920.235.1920.1040/2880.160.1920.1040@0.0.1920.1160" timestamp="1582203498292" />
+    <state x="623" y="255" width="672" height="679" key="search.everywhere.popup/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@0.0.1920.1160" timestamp="1581949803966" />
+    <state x="623" y="255" width="672" height="678" key="search.everywhere.popup/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@2880.334.1920.1040" timestamp="1577615046577" />
+    <state x="623" y="255" width="672" height="679" key="search.everywhere.popup/0.0.1920.1160/2880.320.1920.1040@0.0.1920.1160" timestamp="1578677211655" />
+    <state x="623" y="255" width="672" height="678" key="search.everywhere.popup/2880.1800/1920.1080/1920.1080" timestamp="1577412992619" />
+    <state x="683" y="492" key="vcs.readOnlyHandler.ReadOnlyStatusDialog" timestamp="1577412992619" />
+    <state x="683" y="492" key="vcs.readOnlyHandler.ReadOnlyStatusDialog/2880.1800/1920.1080/1920.1080" timestamp="1577412992619" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <breakpoint enabled="true" type="DotNet Exception Breakpoints">
+          <properties exception="System.Threading.ThreadAbortException" displayValue="System.Threading.ThreadAbortException" />
+          <option name="timeStamp" value="1" />
+        </breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/ModelMapper/TypeMappingServiceTests/DoNotMapTests.cs</url>
+          <line>43</line>
+          <properties documentPath="$PROJECT_DIR$/ModelMapper/TypeMappingServiceTests/DoNotMapTests.cs" initialLine="42">
+            <startOffsets>
+              <option value="-1" />
+            </startOffsets>
+            <endOffsets>
+              <option value="-1" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="11" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/ModelMapper/TypeMappingServiceTests/DoNotMapTests.cs</url>
+          <line>39</line>
+          <properties documentPath="$PROJECT_DIR$/ModelMapper/TypeMappingServiceTests/DoNotMapTests.cs" initialLine="39">
+            <startOffsets>
+              <option value="1487" />
+            </startOffsets>
+            <endOffsets>
+              <option value="1488" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="12" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/ModelMapper/TypeMappingServiceTests/DoNotMapTests.cs</url>
+          <line>44</line>
+          <properties documentPath="$PROJECT_DIR$/ModelMapper/TypeMappingServiceTests/DoNotMapTests.cs" initialLine="44">
+            <startOffsets>
+              <option value="1724" />
+            </startOffsets>
+            <endOffsets>
+              <option value="1731" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="13" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/ModelMapper/TypeMappingServiceTests/DoNotMapTests.cs</url>
+          <line>18</line>
+          <properties documentPath="$PROJECT_DIR$/ModelMapper/TypeMappingServiceTests/DoNotMapTests.cs" initialLine="18">
+            <startOffsets>
+              <option value="650" />
+            </startOffsets>
+            <endOffsets>
+              <option value="651" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="14" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/ModelMapper/TypeMappingServiceTests/DoNotMapTests.cs</url>
+          <line>40</line>
+          <properties documentPath="$PROJECT_DIR$/ModelMapper/TypeMappingServiceTests/DoNotMapTests.cs" initialLine="40">
+            <startOffsets>
+              <option value="1503" />
+            </startOffsets>
+            <endOffsets>
+              <option value="1567" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="15" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/MasterDetail/MasterDetailTests.cs</url>
+          <line>159</line>
+          <properties documentPath="$PROJECT_DIR$/MasterDetail/MasterDetailTests.cs" initialLine="159">
+            <startOffsets>
+              <option value="9307" />
+            </startOffsets>
+            <endOffsets>
+              <option value="9356" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="16" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/../Extensions/Xpand.Extensions/AppDomain/ApplicationPath.cs</url>
+          <line>11</line>
+          <properties documentPath="$PROJECT_DIR$/../Extensions/Xpand.Extensions/AppDomain/ApplicationPath.cs" initialLine="4">
+            <startOffsets>
+              <option value="636" />
+            </startOffsets>
+            <endOffsets>
+              <option value="667" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="18" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/../Modules/ModelMapper/Services/TypeMapping/PublicMembers.cs</url>
+          <line>238</line>
+          <properties documentPath="$PROJECT_DIR$/../Modules/ModelMapper/Services/TypeMapping/PublicMembers.cs" initialLine="238">
+            <startOffsets>
+              <option value="12648" />
+            </startOffsets>
+            <endOffsets>
+              <option value="12729" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="23" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/../Modules/ModelMapper/Services/TypeMapping/PublicMembers.cs</url>
+          <line>71</line>
+          <properties documentPath="$PROJECT_DIR$/../Modules/ModelMapper/Services/TypeMapping/PublicMembers.cs" initialLine="71">
+            <startOffsets>
+              <option value="3255" />
+            </startOffsets>
+            <endOffsets>
+              <option value="3346" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="24" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+    <watches-manager>
+      <configuration name="RiderUnitTests">
+        <watch expression="listViewObjectSpace.GetKeyValue(o1)==listViewObjectSpace.GetKeyValue(o)" language="C#" custom="RiderImportsList:" />
+        <watch expression="listViewObjectSpace.GetKeyValue(o1)" language="C#" custom="RiderImportsList:" />
+        <watch expression="listViewObjectSpace.GetKeyValue(o)" language="C#" custom="RiderImportsList:" />
+        <watch expression="objects.Key" language="C#" custom="RiderImportsList:" />
+        <watch expression="objects.Key.Id" language="C#" custom="RiderImportsList:" />
+        <watch expression="listViewObjectSpace.GetKeyValue(o2).ToString()" language="C#" custom="RiderImportsList:" />
+        <watch expression="listViewObjectSpace.GetKeyValue(o2).ToString()" language="C#" custom="RiderImportsList:" />
+      </configuration>
+    </watches-manager>
+  </component>
+</project>
