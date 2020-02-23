@@ -34,7 +34,7 @@ steps:
           $env:DXFeed='$(DXApiFeed)'
           "goArgs:"
           $goArgs|out-string
-          & .\tools\build\publishNugets.ps1 @goArgs
+          & .\build\publishNugets.ps1 @goArgs
   - task: PublishPipelineArtifact@1
     displayName: 'Published Packages'
     inputs:

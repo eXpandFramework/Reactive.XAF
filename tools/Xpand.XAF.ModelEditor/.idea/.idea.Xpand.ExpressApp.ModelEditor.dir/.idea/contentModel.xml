@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="A:\.idea\extResources" t="IncludeRecursive" />
+    <e p="A:\Resharper\ReSharperHost193._.19.RD.00" t="ExcludeRecursive" />
+    <e p="C:\Work\eXpandFramework\expand\Xpand.DLL" t="ExcludeRecursive">
+      <e p="Xpand.ExpressApp.ModelEditor.exe.config" t="Include" />
+    </e>
+    <e p="C:\Work\eXpandFramework\expand\Xpand.Plugins\Xpand.ExpressApp.ModelEditor" t="IncludeRecursive">
+      <e p="App.config" t="Include" />
+      <e p="App.ico" t="Include" />
+      <e p="build" t="Include">
+        <e p="Xpand.ExpressApp.ModelEditor.targets" t="Include" />
+      </e>
+      <e p="ExpressApp.ico" t="Include" />
+      <e p="Main.cs" t="Include" />
+      <e p="ModelControllerBuilder.cs" t="Include" />
+      <e p="ModelDifference" t="Include">
+        <e p="AspectInfo.cs" t="Include" />
+        <e p="ResourceInfo.cs" t="Include" />
+        <e p="ResourceModelCollector.cs" t="Include" />
+        <e p="ResourcesModelStore.cs" t="Include" />
+      </e>
+      <e p="nuget_pack.bat" t="Include" />
+      <e p="nuget_publish.bat" t="Include" />
+      <e p="obj" t="ExcludeRecursive" />
+      <e p="packages" t="ExcludeRecursive" />
+      <e p="paket.references" t="Include" />
+      <e p="PathInfo.cs" t="Include" />
+      <e p="Properties" t="Include">
+        <e p="AssemblyInfo.cs" t="Include" />
+      </e>
+      <e p="tasks" t="Include">
+        <e p="net461" t="Include">
+          <e p="Connect.cs" t="Include" />
+          <e p="ModellerLibDownloader.csproj" t="Include" />
+        </e>
+        <e p="PackageReferencies.targets" t="Include" />
+      </e>
+      <e p="Xpand.ExpressApp.ModelEditor.19.2.601.nupkg" t="Include" />
+      <e p="Xpand.ExpressApp.ModelEditor.csproj" t="IncludeRecursive" />
+    </e>
+  </component>
+</project>

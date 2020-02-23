@@ -63,9 +63,9 @@ Invoke-Script {
     $monoPath = "$SourcePath\bin\"
     Write-HostFormatted "monoPath=$monoPath" -Section
     Get-ChildItem $monoPath
-    . $SourcePath\tools\Xpand.VersionConverter\functions.ps1
+    . $SourcePath\tools\commonLibs\common.ps1
     Install-MonoCecil $monopath
-    . $SourcePath\tools\Xpand.VersionConverter\AssemblyResolver.ps1
+    . $SourcePath\tools\commonLibs\AssemblyResolver.ps1
 
     $updates = [System.IO.Path]::GetFullPath("$SourcePath\bin\updates")
     Remove-Item $updates -Recurse -Force -ErrorAction SilentlyContinue

@@ -1,20 +1,47 @@
 param(
     $Branch = "master",
-    $nugetBin = "$PSScriptRoot\..\..\bin\Nupkg",
-    $sourceDir = "$PSScriptRoot\..\..",
+    $nugetBin = "$PSScriptRoot\..\bin\Nupkg",
+    $sourceDir = "$PSScriptRoot\..",
     $Filter ,
     [switch]$SkipReadMe,
-    [string[]]$ChangedModules = @()
+    [string[]]$ChangedModules = @("Xpand.Extensions",
+    "Xpand.Extensions.Mono.Cecil",
+    "Xpand.Extensions.Reactive",
+    "Xpand.Extensions.XAF",
+    "Xpand.Extensions.XAF.Xpo",
+    "Xpand.XAF.Modules.AutoCommit",
+    "Xpand.XAF.Modules.CloneMemberValue",
+    "Xpand.XAF.Modules.CloneModelView",
+    "Xpand.XAF.Modules.GridListEditor",
+    "Xpand.XAF.Modules.HideToolBar",
+    "Xpand.XAF.Modules.MasterDetail",
+    "Xpand.XAF.Modules.ModelMapper",
+    "Xpand.XAF.Modules.ModelViewInheritance",
+    "Xpand.XAF.Modules.OneView",
+    "Xpand.XAF.Modules.ProgressBarViewItem",
+    "Xpand.XAF.Modules.Reactive",
+    "Xpand.XAF.Modules.Reactive.Logger",
+    "Xpand.XAF.Modules.Reactive.Logger.Client.Win",
+    "Xpand.XAF.Modules.Reactive.Logger.Hub",
+    "Xpand.XAF.Modules.Reactive.Win",
+    "Xpand.XAF.Modules.RefreshView",
+    "Xpand.XAF.Modules.SuppressConfirmation",
+    "Xpand.XAF.Modules.ViewEditMode",
+    "Xpand.XAF.Core.All",
+    "Xpand.XAF.Web.All",
+    "Xpand.XAF.Win.All")
 )
 Import-Module XpandPwsh -Force -Prefix X
 $ErrorActionPreference = "Stop"
+New-Item $nugetBin -ItemType Directory -Force | Out-Null
+Get-ChildItem $nugetBin | Remove-Item -Force -Recurse
+& "$PSScriptRoot\PackModelEditor.ps1"
 if (!$ChangedModules){
     $ChangedModules
     Write-HostFormatted "Skipping package creation as no package changed" -ForegroundColor Yellow
     return
 }
-New-Item $nugetBin -ItemType Directory -Force | Out-Null
-Get-ChildItem $nugetBin | Remove-Item -Force -Recurse
+
 $versionConverterSpecPath = "$sourceDir\Tools\Xpand.VersionConverter\Xpand.VersionConverter.nuspec"
 if ($Branch -match "lab") {
     [xml]$versionConverterSpec = Get-XmlContent $versionConverterSpecPath
@@ -32,10 +59,10 @@ if ($lastexitcode) {
 
 
 Set-Location $sourceDir
-$assemblyVersions = & "$sourceDir\tools\build\AssemblyVersions.ps1" $sourceDir
+$assemblyVersions = & "$sourceDir\build\AssemblyVersions.ps1" $sourceDir
 
 # Get-ChildItem "$sourceDir\tools\nuspec" "Xpand*$filter*.nuspec" -Recurse | ForEach-Object {
-$nuspecs = Get-ChildItem "$sourceDir\tools\nuspec" "Xpand.*$filter*.nuspec" -Exclude "*Tests*" -Recurse
+$nuspecs = Get-ChildItem "$sourceDir\build\nuspec" "Xpand.*$filter*.nuspec" -Exclude "*Tests*" -Recurse
 
 $nugetPath = (Get-XNugetPath)
 
@@ -51,7 +78,7 @@ $packScript = {
     
     $version = $assemblyItem.Version
     if ($packageName -like "*All") {
-        [xml]$coreNuspec = Get-Content "$sourceDir\tools\nuspec\$packagename.nuspec"
+        [xml]$coreNuspec = Get-Content "$sourceDir\build\nuspec\$packagename.nuspec"
         $version = $coreNuspec.package.metadata.Version
     }
  
@@ -87,13 +114,13 @@ function AddReadMe {
 
         
 ++++++++++++++++++++++++  ++++++++
-++++++++++++++++++++++##  ++++++++      ➤ 🅴🆇🅲🅻🆄🆂🅸🆅🅴 🆂🅴🆁🆅🅸🅲🅴🆂 
+++++++++++++++++++++++##  ++++++++      ➤ 𝗘𝗫𝗖𝗟𝗨𝗦𝗜𝗩𝗘 𝗦𝗘𝗥𝗩𝗜𝗖𝗘𝗦 @ 
 ++++++++++++++++++++++  ++++++++++          ☞ http://apobekiaris.expandframework.com
 ++++++++++    ++++++  ++++++++++++      
 ++++++++++++  ++++++  ++++++++++++      ➤  ɪғ ʏᴏᴜ ʟɪᴋᴇ ᴏᴜʀ ᴡᴏʀᴋ ᴘʟᴇᴀsᴇ ᴄᴏɴsɪᴅᴇʀ ᴛᴏ ɢɪᴠᴇ ᴜs ᴀ STAR. 
 ++++++++++++++  ++  ++++++++++++++          ☞ https://github.com/eXpandFramework/DevExpress.XAF/stargazers
 ++++++++++++++    ++++++++++++++++      
-++++++++++++++  ++  ++++++++++++++      ➤ ​​̲𝗣​̲𝗮​̲𝗰​̲𝗸​̲𝗮​̲𝗴​̲𝗲​̲ ​̲𝗻​̲𝗼​̲𝘁​̲𝗲​̲𝘀
+++++++++++++++  ++  ++++++++++++++      ➤ Package Notes
 ++++++++++++  ++++    ++++++++++++         ☞ Build the project before opening the model editor.
 ++++++++++  ++++++++  ++++++++++++         ☞ Documentation can be found @ https://github.com/eXpandFramework/DevExpress.XAF/wiki/$wikiName.
 ++++++++++  ++++++++++  ++++++++++         ☞ $($package.id) only adds the required references. To register the included packages add the next line/s in the constructor of your XAF module.

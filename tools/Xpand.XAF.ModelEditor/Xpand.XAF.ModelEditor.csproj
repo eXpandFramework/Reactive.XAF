@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ApplicationIcon>ExpressApp.ico</ApplicationIcon>
+    <OutputType>WinExe</OutputType>
+    <AssemblyOriginatorKeyFile>..\..\src\Xpand.key\Xpand.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <TargetFramework>net461</TargetFramework>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <OutputPath>..\..\bin\</OutputPath>
+    <LangVersion>latest</LangVersion>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <LangVersion>latest</LangVersion>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Windows.Forms">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="build\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Remove="build\**" />
+    <None Remove="ExpressApp.ico" />
+    <EmbeddedResource Include="ExpressApp.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="build\**" />
+  </ItemGroup>
+  <Import Project="..\..\.paket\Paket.Restore.targets" />
+</Project>

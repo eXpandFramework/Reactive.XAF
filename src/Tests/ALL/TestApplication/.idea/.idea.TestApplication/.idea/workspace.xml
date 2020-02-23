@@ -2,85 +2,45 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="42c36c70-e981-4bf4-b982-1421dac9d992" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions.Mono.Cecil/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions.Mono.Cecil/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions.XAF.Xpo/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions.XAF.Xpo/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions.XAF/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions.XAF/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/AppDomain/ApplicationPath.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/AppDomain/ApplicationPath.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/AppDomain/AssemblyDevExpressExpressAppWeb.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/AppDomain/AssemblyDevExpressExpressAppWeb.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/AppDomain/AssemblySystemWeb.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/AppDomain/AssemblySystemWeb.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Assembly/NewAssembly.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Assembly/NewAssembly.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Configuration/NewSmtpClient.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Configuration/NewSmtpClient.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Exception/GetAllMessages.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Exception/GetAllMessages.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Linq/Add.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Linq/Add.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Linq/DistinctBy.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Linq/DistinctBy.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Linq/FindIndex.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Linq/FindIndex.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Linq/FromHierarchy.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Linq/FromHierarchy.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Linq/GetItems.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Linq/GetItems.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Linq/ToRuns.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Linq/ToRuns.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Linq/WhereNotDefault.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Linq/WhereNotDefault.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Reflection/GetMemberInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Reflection/GetMemberInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Reflection/PropertyInfoAccessModifier.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Reflection/PropertyInfoAccessModifier.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/String/CleanCodeName.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/String/CleanCodeName.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Task/StartTask.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Task/StartTask.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Xpand.Extensions.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Xpand.Extensions.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Modules/AutoCommit/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Modules/AutoCommit/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Modules/CloneMemberValue/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Modules/CloneMemberValue/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Modules/CloneModelView/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Modules/CloneModelView/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Modules/GridListEditor/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Modules/GridListEditor/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Modules/HideToolBar/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Modules/HideToolBar/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Modules/MasterDetail/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Modules/MasterDetail/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Modules/ModelMapper/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Modules/ModelMapper/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Modules/ModelMapper/Services/TypeMapping/Compile.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Modules/ModelMapper/Services/TypeMapping/Compile.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Modules/ModelMapper/Services/TypeMapping/PublicMembers.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Modules/ModelMapper/Services/TypeMapping/PublicMembers.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Modules/ModelViewInheritance/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Modules/ModelViewInheritance/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Modules/OneView/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Modules/OneView/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Modules/ProgressBarViewItem/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Modules/ProgressBarViewItem/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Modules/Reactive.Logger.Client.Win/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Modules/Reactive.Logger.Client.Win/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Modules/Reactive.Logger.Hub/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Modules/Reactive.Logger.Hub/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Modules/Reactive.Logger/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Modules/Reactive.Logger/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Modules/Reactive.Win/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Modules/Reactive.Win/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Modules/Reactive/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Modules/Reactive/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Modules/RefreshView/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Modules/RefreshView/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Modules/SuppressConfirmation/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Modules/SuppressConfirmation/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../Modules/ViewEditMode/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../../Modules/ViewEditMode/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../ALL.Web.Tests/ALL.Web.Tests.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/../ALL.Web.Tests/ALL.Web.Tests.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../ALL.Web.Tests/AllWebTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../ALL.Web.Tests/AllWebTests.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../ALL.Web.Tests/app.config" beforeDir="false" afterPath="$PROJECT_DIR$/../ALL.Web.Tests/app.config" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../ALL.Win.Tests/ALL.Win.Tests.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/../ALL.Win.Tests/ALL.Win.Tests.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../ALL.Win.Tests/AllWinTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../ALL.Win.Tests/AllWinTests.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestApplication.Web/Customer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/TestApplication.Web/Customer.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestApplication.Web/Default.aspx" beforeDir="false" afterPath="$PROJECT_DIR$/TestApplication.Web/Default.aspx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestApplication.Web/Default.aspx.cs" beforeDir="false" afterPath="$PROJECT_DIR$/TestApplication.Web/Default.aspx.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestApplication.Web/Default.aspx.designer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/TestApplication.Web/Default.aspx.designer.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestApplication.Web/Error.aspx" beforeDir="false" afterPath="$PROJECT_DIR$/TestApplication.Web/Error.aspx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestApplication.Web/Error.aspx.cs" beforeDir="false" afterPath="$PROJECT_DIR$/TestApplication.Web/Error.aspx.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestApplication.Web/Global.asax" beforeDir="false" afterPath="$PROJECT_DIR$/TestApplication.Web/Global.asax" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestApplication.Web/Global.asax.cs" beforeDir="false" afterPath="$PROJECT_DIR$/TestApplication.Web/Global.asax.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestApplication.Web/Login.aspx" beforeDir="false" afterPath="$PROJECT_DIR$/TestApplication.Web/Login.aspx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestApplication.Web/Login.aspx.cs" beforeDir="false" afterPath="$PROJECT_DIR$/TestApplication.Web/Login.aspx.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestApplication.Web/Login.aspx.designer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/TestApplication.Web/Login.aspx.designer.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestApplication.Web/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/TestApplication.Web/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestApplication.Web/TestApplication.Web.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/TestApplication.Web/TestApplication.Web.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestApplication.Web/Web.config" beforeDir="false" afterPath="$PROJECT_DIR$/TestApplication.Web/Web.config" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestApplication.Web/WebApplication.cs" beforeDir="false" afterPath="$PROJECT_DIR$/TestApplication.Web/WebApplication.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestApplication.Web/WebModule.cs" beforeDir="false" afterPath="$PROJECT_DIR$/TestApplication.Web/WebModule.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestApplication.Win/App.config" beforeDir="false" afterPath="$PROJECT_DIR$/TestApplication.Win/App.config" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestApplication.Win/Customer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/TestApplication.Win/Customer.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestApplication.Win/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/TestApplication.Win/Program.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestApplication.Win/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/TestApplication.Win/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestApplication.Win/TestApplication.Win.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/TestApplication.Win/TestApplication.Win.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestApplication.Win/TestWinApplication.cs" beforeDir="false" afterPath="$PROJECT_DIR$/TestApplication.Win/TestWinApplication.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestApplication.Win/WinModule.cs" beforeDir="false" afterPath="$PROJECT_DIR$/TestApplication.Win/WinModule.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../ModelMapper/ModelBindingServiceTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../ModelMapper/ModelBindingServiceTests.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../TestsLib/Attributes/XpandTestAttribute.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../TestsLib/Attributes/XpandTestAttribute.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../TestsLib/Attributes/XpandTestAttributeTest.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../TestsLib/Attributes/XpandTestAttributeTest.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../TestsLib/BaseTest.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../TestsLib/BaseTest.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../TestsLib/Extensions.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../TestsLib/Extensions.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../TestsLib/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../TestsLib/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../TestsLib/TestApplication.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../../TestsLib/TestApplication.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../TestsLib/Xpand.TestsLib.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/../../TestsLib/Xpand.TestsLib.csproj" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../Build/PackModelEditor.ps1" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/.idea/.idea.Xpand.ExpressApp.ModelEditor.dir/.idea/contentModel.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/.idea/.idea.Xpand.ExpressApp.ModelEditor.dir/.idea/encodings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/.idea/.idea.Xpand.ExpressApp.ModelEditor.dir/.idea/indexLayout.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/.idea/.idea.Xpand.ExpressApp.ModelEditor.dir/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/.idea/.idea.Xpand.ExpressApp.ModelEditor.dir/.idea/projectSettingsUpdater.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/.idea/.idea.Xpand.ExpressApp.ModelEditor.dir/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/.idea/.idea.Xpand.ExpressApp.ModelEditor.dir/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/.idea/.idea.Xpand.ExpressApp.ModelEditor.dir/riderModule.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/.idea/.idea.Xpand.XAF.ModelEditor.dir/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/.idea/.idea.Xpand.XAF.ModelEditor.dir/.idea/contentModel.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/.idea/.idea.Xpand.XAF.ModelEditor.dir/.idea/encodings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/.idea/.idea.Xpand.XAF.ModelEditor.dir/.idea/indexLayout.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/.idea/.idea.Xpand.XAF.ModelEditor.dir/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/.idea/.idea.Xpand.XAF.ModelEditor.dir/.idea/projectSettingsUpdater.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/.idea/.idea.Xpand.XAF.ModelEditor.dir/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/.idea/.idea.Xpand.XAF.ModelEditor.dir/riderModule.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/App.config" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/App.ico" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/ExpressApp.ico" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/Main.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/ModelControllerBuilder.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/ModelDifference/AspectInfo.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/ModelDifference/ResourceInfo.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/ModelDifference/ResourceModelCollector.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/PathInfo.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/Properties/AssemblyInfo.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/Xpand.XAF.ModelEditor.csproj" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/build/ModelerLibDownloader/Connect.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/build/ModelerLibDownloader/ModellerLibDownloader.csproj" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/build/Xpand.XAF.ModelEditor.nuspec" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/build/Xpand.XAF.ModelEditor.ps1" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/build/Xpand.XAF.ModelEditor.targets" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../../tools/Xpand.XAF.ModelEditor/paket.references" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../Build/BuildDevExpress.XAF.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/../../../../Build/BuildDevExpress.XAF.ps1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../Build/PackNuspec.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/../../../../Build/PackNuspec.ps1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.TestApplication/.idea/contentModel.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.TestApplication/.idea/contentModel.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.TestApplication/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.TestApplication/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/config/applicationhost.config" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/config/applicationhost.config" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -103,6 +63,7 @@
     <setting file="file://$PROJECT_DIR$/../../TestsLib/TestApplication.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../Extensions/Xpand.Extensions/Linq/Add.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/TestApplication.Web/WebApplication.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/.idea/config/applicationhost.config" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/TestApplication.Web/WebModule.cs" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="IdeDocumentHistory">
@@ -197,7 +158,7 @@
       <workItem from="1582269785533" duration="3019000" />
       <workItem from="1582279934785" duration="190000" />
       <workItem from="1582280170361" duration="1332000" />
-      <workItem from="1582373476391" duration="5794000" />
+      <workItem from="1582373476391" duration="6637000" />
     </task>
     <servers />
   </component>

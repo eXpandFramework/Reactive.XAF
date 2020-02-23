@@ -34,8 +34,7 @@ else {
 }
 
 if (!$dxVersion) {
-    Write-Warning "Cannot find DevExpress Version. You have the following options:`r`n1. $howToVerbose`r`n2. If your project has indirect references to DevExpress through another assembly then you can always force the DevExpressVersion by modifying your project to include <PropertyGroup><DevExpressVersion>19.1.3</DevExpressVersion>.`r`n This declaration can be solution wide if done in your directory.build.props file.`r`n"
-    throw "Check output warning message"
+    throw "Cannot find DevExpress Version. You have the following options:`r`n1. $howToVerbose`r`n2. If your project has indirect references to DevExpress through another assembly then you can always force the DevExpressVersion by modifying your project to include <PropertyGroup><DevExpressVersion>19.1.3</DevExpressVersion>.`r`n This declaration can be solution wide if done in your directory.build.props file.`r`n"
 }
 Write-Verbose "DxVersion=$dxVersion"
 
@@ -91,13 +90,7 @@ try {
     }
 }
 catch {
-    wh "Exception:" -ForegroundColor Red -Section
-    $_
-    wh "InvokcationInfo:" -ForegroundColor Yellow -Section
-    $_.InvocationInfo
-    Write-Warning "`r`n$howToVerbose`r`n"
-    throw "Check output warning message"
-
+    throw "$_`r`n$($_.InvocationInfo)"
 }
 finally {
     try {

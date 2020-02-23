@@ -44,7 +44,7 @@ jobs:
         "goArgs:"
         $goArgs | Out-String
         
-        & '$(System.DefaultWorkingDirectory)\tools\Build\BuildPipeline.ps1' @goArgs
+        & '$(System.DefaultWorkingDirectory)\Build\BuildPipeline.ps1' @goArgs
         # 'paket.lock','paket.dependencies'|ForEach-Object{
         #     $workingDirectory='$(System.DefaultWorkingDirectory)'
         #     $workspace='$(Pipeline.Workspace)'

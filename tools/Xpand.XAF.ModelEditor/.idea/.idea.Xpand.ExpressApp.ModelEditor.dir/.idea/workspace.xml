@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="e3cf0a46-c28c-4401-b46d-2e67008b2e32" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/.idea.Xpand.ExpressApp.ModelEditor.dir/.idea/contentModel.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/.idea.Xpand.ExpressApp.ModelEditor.dir/.idea/encodings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/.idea.Xpand.ExpressApp.ModelEditor.dir/.idea/indexLayout.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/.idea.Xpand.ExpressApp.ModelEditor.dir/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/.idea.Xpand.ExpressApp.ModelEditor.dir/.idea/projectSettingsUpdater.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/.idea.Xpand.ExpressApp.ModelEditor.dir/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/.idea.Xpand.ExpressApp.ModelEditor.dir/riderModule.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Xpand/Xpand.ExpressApp.Modules/.idea/.idea.AllModules/.idea/contentModel.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App.config" beforeDir="false" afterPath="$PROJECT_DIR$/App.config" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/AssemblyInfo.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Main.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Main.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PathInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/PathInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Xpand.ExpressApp.ModelEditor.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/Xpand.ExpressApp.ModelEditor.csproj" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/Properties/AssemblyInfo.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/App.config" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/PathInfo.cs" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/Xpand.ExpressApp.ModelEditor.csproj" />
+        <option value="$PROJECT_DIR$/Properties/AssemblyInfo.cs" />
+        <option value="$PROJECT_DIR$/tasks/PackageReferencies.targets" />
+        <option value="$PROJECT_DIR$/PathInfo.cs" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectId" id="1Y4uK15tQEu1ulvz0GQXbCUp6X1" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+  </component>
+  <component name="RunManager">
+    <configuration name="Xpand.ExpressApp.ModelEditor" type="DotNetProject" factoryName=".NET Project">
+      <option name="EXE_PATH" value="" />
+      <option name="PROGRAM_PARAMETERS" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="PASS_PARENT_ENVS" value="1" />
+      <option name="USE_EXTERNAL_CONSOLE" value="0" />
+      <option name="USE_MONO" value="0" />
+      <option name="RUNTIME_ARGUMENTS" value="" />
+      <option name="PROJECT_PATH" value="$PROJECT_DIR$/Xpand.ExpressApp.ModelEditor.csproj" />
+      <option name="PROJECT_EXE_PATH_TRACKING" value="1" />
+      <option name="PROJECT_ARGUMENTS_TRACKING" value="1" />
+      <option name="PROJECT_WORKING_DIRECTORY_TRACKING" value="1" />
+      <option name="PROJECT_KIND" value="DotNetCore" />
+      <option name="PROJECT_TFM" value="" />
+      <method v="2">
+        <option name="Build" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="e3cf0a46-c28c-4401-b46d-2e67008b2e32" name="Default Changelist" comment="" />
+      <created>1582214120098</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1582214120098</updated>
+      <workItem from="1582214121476" duration="407000" />
+      <workItem from="1582216611941" duration="1584000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
+  <component name="UnityUnitTestConfiguration" currentTestLauncher="NUnit" />
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="WindowStateProjectService">
+    <state width="498" height="446" key="SwitcherDM" timestamp="1582216743805">
+      <screen x="0" y="0" width="1920" height="1160" />
+    </state>
+    <state width="498" height="446" key="SwitcherDM/0.0.1920.1160/-1920.235.1920.1040/2880.160.1920.1040@0.0.1920.1160" timestamp="1582216743805" />
+  </component>
+</project>

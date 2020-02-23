@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>Xpand.XAF.ModelEditor</id>
+    <version>1.201.0.11</version>
+    <title>DevExpress eXpandFramework Standalone Model Editor VS/Rider/Explorer integration.</title>
+    <authors>eXpandFramework</authors>
+    <owners>eXpandFramework</owners>
+    <iconUrl>http://sign.expandframework.com</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>DevExpress eXpandFramework Standalone Model Editor VS/Rider/Explorer integration.</description>
+    <summary>DevExpress eXpandFramework Standalone Model Editor VS/Rider/Explorer integration.</summary>
+    <copyright>eXpandFramework.com</copyright>
+    <tags>DevExpress, eXpand, XAF, eXpressApp, Model Editor</tags>
+    <projectUrl>http://www.expandframework.com/</projectUrl>
+    <dependencies>
+      <group targetFramework=".NETFramework4.6.1" />
+    </dependencies>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="System.Configuration" targetFramework=".NETFramework4.6.1" />
+      <frameworkAssembly assemblyName="System.Windows.Forms" targetFramework=".NETFramework4.6.1" />
+    </frameworkAssemblies>
+  </metadata>
+  <files>
+    <file src="..\..\..\bin\Xpand.XAF.ModelEditor.exe" target="build\Xpand.XAF.ModelEditor.exe" />
+    <file src="..\..\..\bin\Xpand.XAF.ModelEditor.pdb" target="build\Xpand.XAF.ModelEditor.pdb" />
+    <file src="..\..\..\src\Xpand.Key\Xpand.snk" target="build\Xpand.snk" />
+    <file src=".\Xpand.XAF.ModelEditor.ps1" target="build\Xpand.XAF.ModelEditor.ps1" />
+    <file src=".\Functions.ps1" target="build\Functions.ps1" />
+    <file src=".\Xpand.XAF.ModelEditor.targets" target="build\Xpand.XAF.ModelEditor.targets" />
+    <file src=".\ModelerLibDownloader\*" target="build\ModelerLibDownloader\" />
+    <file src="..\..\CommonLibs\**" target="build\" />
+    <file src="ReadMe.txt" target="" />
+  </files>
+</package>

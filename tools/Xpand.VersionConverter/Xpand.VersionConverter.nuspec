@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>Xpand.VersionConverter</id>
-    <version>2.201.1</version>
+    <version>2.201.1.0</version>
     <title>This package modifies the DevExpress references in all Xpand.XAF.* assemblies to match the target prroject DevExpress version</title>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
@@ -17,20 +17,9 @@
   <files>
     <file src="Xpand.VersionConverter.ps1" target="build\Xpand.VersionConverter.ps1" />
     <file src="Functions.ps1" target="build\Functions.ps1" />
-    <file src="Write-HostFormatted.ps1" target="build\Write-HostFormatted.ps1" />
-    <file src="ConvertTo-FramedText.ps1" target="build\ConvertTo-FramedText.ps1" />
-    <file src="AssemblyResolver.ps1" target="build\AssemblyResolver.ps1" />
     <file src="..\..\src\Xpand.key\Xpand.snk" target="build\Xpand.snk" />
     <file src="Xpand.VersionConverter.targets" target="build\Xpand.VersionConverter.targets" />
-    <file src="Mono.Cecil\Mono.Cecil.dll" target="build\Mono.Cecil\Mono.Cecil.dll" />
-    <file src="Mono.Cecil\Mono.Cecil.Pdb.dll" target="build\Mono.Cecil\Mono.Cecil.Pdb.dll" />
-    <file src="Mono.Cecil\Mono.Cecil.Rocks.dll" target="build\Mono.Cecil\Mono.Cecil.Rocks.dll" />
-    <file src="Mono.Cecil\Mono.Cecil.Mdb.dll" target="build\Mono.Cecil\Mono.Cecil.Mdb.dll" />
-    <file src="srcsrv\dbghelp.dll" target="build\srcsrv\dbghelp.dll" />
-    <file src="srcsrv\pdbstr.exe" target="build\srcsrv\pdbstr.exe" />
-    <file src="srcsrv\srcsrv.dll" target="build\srcsrv\srcsrv.dll" />
-    <file src="srcsrv\srcsrv.ini" target="build\srcsrv\srcsrv.ini" />
-    <file src="srcsrv\srctool.exe" target="build\srcsrv\srctool.exe" />
-    <file src="ReadMe.md" target="content\Properties\Xpand.VersionConverter.ReadMe.md" />
+    <file src="..\CommonLibs\**" target="build\" />
+    <file src="ReadMe.txt" target="" />
   </files>
 </package>

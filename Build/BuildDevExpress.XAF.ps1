@@ -96,6 +96,13 @@ Task Compile -precondition { return $compile } {
         dotnet restore "$Root\src\Modules\Modules.sln" --source $packageSources --source (Get-PackageFeed -Nuget) /WarnAsError
         dotnet msbuild "$Root\src\Modules\Modules.sln" "/bl:$Root\Bin\Modules.binlog" "/p:configuration=$Configuration" /WarnAsError /m /v:m
     } -Maximum 2
+    Invoke-Script {
+        Write-HostFormatted "Building Xpand.XAF.ModelEditor" -Section
+        dotnet msbuild "$Root\tools\Xpand.XAF.ModelEditor\Xpand.XAF.ModelEditor.csproj" /t:Clean
+        dotnet restore "$Root\tools\Xpand.XAF.ModelEditor\Xpand.XAF.ModelEditor.csproj" --source $packageSources --source (Get-PackageFeed -Nuget) /WarnAsError
+        dotnet msbuild "$Root\tools\Xpand.XAF.ModelEditor\Xpand.XAF.ModelEditor.csproj" "/bl:$Root\Bin\ModelEditor.binlog" "/p:configuration=$Configuration" /WarnAsError /m /v:m
+    } -Maximum 2
+    
     Write-HostFormatted "Build Versions:" -Section
     Get-ChildItem "$Root\Bin" "*Xpand.*.dll"|ForEach-Object{
         [PSCustomObject]@{

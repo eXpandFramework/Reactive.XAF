@@ -15,7 +15,7 @@ Set-Location $rootLocation
 
 $nuget = Get-NugetPath
 $packagesPath = "$rootLocation\bin\Nupkg\"
-$packages = & $nuget List -Source $packagesPath | ConvertTo-PackageObject | Select-Object -ExpandProperty Id
+$packages = & $nuget List -Source $packagesPath | ConvertTo-PackageObject | Select-Object -ExpandProperty Id| Where-Object { $_ -notin @("Xpand.VersionConverter","Xpand.XAF.ModelEditor") -and $_ -notlike "Xpand.Extensions*" } 
 function GetModuleName($_){
     $moduleName = $_.BaseName.Substring($_.BaseName.LastIndexOf(".") + 1)
     $moduleName = "$($_.BaseName).$($moduleName)Module"
@@ -29,7 +29,7 @@ function GetModuleName($_){
 }
 function UpdateModulesList($rootLocation, $packages) {
     $moduleList = "|PackageName|Version|[![Custom badge](https://img.shields.io/endpoint.svg?label=Nuget.org&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAF)](https://www.nuget.org/packages?q=Xpand.XAF)`r`n|---|---|---|`r`n"
-    $packages | Where-Object { $_ -ne "Xpand.VersionConverter" -and $_ -notlike "Xpand.Extensions*" } | ForEach-Object {
+    $packages | ForEach-Object {
         $name = $_.Replace("Xpand.XAF.Modules.", "")
         $packageUri = "[$name](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/$name)"
         $version = "![](https://img.shields.io/nuget/v/$_.svg?label=&style=flat)"
@@ -132,8 +132,10 @@ function UpdateModules($rootLocation, $packages) {
         }   
     }
 }
+if ($packages){
+    UpdateModulesList $rootLocation $packages
+    UpdateModules $rootLocation $packages
+}
 
-UpdateModulesList $rootLocation $packages
-UpdateModules $rootLocation $packages
 
     

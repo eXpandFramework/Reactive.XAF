@@ -45,7 +45,7 @@ jobs:
             XpandBlobOwnerSecret='$(XpandBlobOwnerSecret)'
           }
           $a|write-output
-          & '$(System.DefaultWorkingDirectory)/tools/build/TestPipeline.ps1' @a
+          & '$(System.DefaultWorkingDirectory)/build/TestPipeline.ps1' @a
     - task: PublishBuildArtifacts@1
       # condition: $(NewArtifact)
       displayName: 'Publish Artifact: Bin'
@@ -153,6 +153,6 @@ jobs:
         pwsh: true
         targetType: inline
         script: |
-          & '$(System.DefaultWorkingDirectory)\tools\build\check-tests.ps1' '$(System.DefaultWorkingDirectory)' '$(AzureToken)' '$(DxApiFeed)' '$(Build.BuildNumber)' '$(DxPipelineBuildId)'
+          & '$(System.DefaultWorkingDirectory)\build\check-tests.ps1' '$(System.DefaultWorkingDirectory)' '$(AzureToken)' '$(DxApiFeed)' '$(Build.BuildNumber)' '$(DxPipelineBuildId)'
           
 

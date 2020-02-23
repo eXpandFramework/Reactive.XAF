@@ -149,7 +149,6 @@
         <e p="TestApplication.Win.csproj" t="IncludeRecursive" />
         <e p="TestWinApplication.cs" t="Include" />
         <e p="WinModule.cs" t="Include" />
-        <e p="XafModellerRun.bat" t="Include" />
       </e>
       <e p="Tests" t="Include" />
     </e>
