@@ -3,18 +3,18 @@
 . "$PSScriptRoot\Write-HostFormatted.ps1"
 . "$PSScriptRoot\ConvertTo-FramedText.ps1"
 . "$PSScriptRoot\Get-DevExpressVersion.ps1"
+$global:howToVerbose
+
 function ConfigureVerbose {
     param (
-        $VerboseOutput
+        $VerboseOutput,
+        $AttributeName
     )
-    $howToVerbose = "Edit $projectFile and enable verbose messaging by adding <PropertyGroup><VersionConverterVerbose>Continue</VersionConverterVerbose>, alternatively create an Enviroment variable named VerboseVersionConverter and set its value to 1. Rebuild the project and send the $PSScriptRoot\execution.log to support."
-    if ( $env:VerboseVersionConverter -eq 1) {
+    $global:howToVerbose = "Edit $projectFile and enable verbose messaging by adding <PropertyGroup><$AttributeName>Continue</$AttributeName>, alternatively create an Enviroment variable named $AttributeName and set its value to 1. Rebuild the project and send the $PSScriptRoot\execution.log to support."
+    if ( [System.Environment]::GetEnvironmentVariable($AttributeName) -eq 1) {
         $VerboseOutput = "continue"
     }
-    if ($VerboseOutput) {
-        $VerbosePreference = $VerboseOutput
-    }
-    $howToVerbose
+    $VerboseOutput
 }
 
 function Write-VerboseLog {

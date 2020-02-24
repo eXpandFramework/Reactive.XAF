@@ -18,7 +18,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 . "$PSScriptRoot\Functions.ps1"
-$howToVerbose=ConfigureVerbose $VerboseOutput
+$VerbosePreference=ConfigureVerbose $VerboseOutput ModelEditorVerbose
 Write-VerboseLog "Executing VersionConverter..." 
 Write-VerboseLog "ProjectFile=$projectFile"
 Write-VerboseLog "targetPath=$targetPath"

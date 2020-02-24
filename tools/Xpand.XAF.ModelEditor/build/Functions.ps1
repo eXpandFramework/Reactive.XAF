@@ -1,6 +1,6 @@
 . "$PSScriptRoot\Common.ps1"
 function DownloadDependencies($dxVersion) {
-    Write-Host "Downloading Model Editor dependencies..."
+    Write-VerboseLog "Downloading Model Editor dependencies..."
     Push-Location $PSScriptRoot
     $projFile = "$PSScriptRoot\ModelerLibDownloader\ModellerLibDownloader.csproj"
     [xml]$proj = Get-Content $projFile
@@ -28,6 +28,7 @@ function CreateModelEditorBootStrapper {
         [string]$OutputPath
     )
     $solutionDir = (Get-Item $SolutionPath).DirectoryName
+    Write-Verbose "Create BootStrapper for all projects in $SolutionPath"
     GetSolutionProjects $SolutionPath | ForEach-Object {
         $projectPath = "$solutionDir\$_"
         [xml]$proj = Get-Content $projectPath
@@ -42,6 +43,7 @@ function CreateModelEditorBootStrapper {
         $modelPath = "$projectDirectory\$modelFileName"
         $content = "start /d `"$PSScriptRoot\ModelerLibDownloader\bin\$dxVersion`" Xpand.XAF.ModelEditor.exe $isFronEndProject `"$assemblyPath`" `"$modelPath`" `"$projectDirectory`"" 
         Set-Content -path "$projectDirectory\Xpand.XAF.ModelEditor.bat" -value $content
+        Write-Verbose "Updating $projectDirectory\Xpand.XAF.ModelEditor.bat"
     }
 }
 
@@ -79,7 +81,7 @@ function CreateExternalIDETool ($SolutionPath, $OutputType, $OutputPath, $Assemb
         $solutionSettings = "$($solutionItem.DirectoryName)\$($SolutionItem.Name).DotSettings"
         $execureModelerCommand = '<s:String x:Key="/Default/CustomTools/CustomToolsData/@EntryValue">ExternalToolData|Xpand.XAF.ModelEditor||xafml|C:\Windows\System32\cmd.exe|/Q /D /E:OFF /C "$PROJECT_FOLDER$\Xpand.XAF.ModelEditor.bat"#ExternalToolData|Cmd||bat|C:\Windows\System32\cmd.exe|"$FILE$"</s:String>'
         if (!(Test-Path $solutionSettings)) {
-            Write-Host "Creating New $($SolutionItem.Name).DotSettings"
+            Write-VerboseLog "Creating New $($SolutionItem.Name).DotSettings"
             $xml = @"
         <wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
             $execureModelerCommand
@@ -88,7 +90,7 @@ function CreateExternalIDETool ($SolutionPath, $OutputType, $OutputPath, $Assemb
             Set-Content $solutionSettings $xml
         }
         else {
-            Write-Host "Modyfing $($SolutionItem.Name).DotSettings"
+            Write-VerboseLog "Modyfing $($SolutionItem.Name).DotSettings"
             $ns = ([xml](Get-Content $solutionSettings)).DocumentElement.NamespaceURI
             [xml]$settingsXml = ( Select-Xml -Path $solutionSettings -XPath / -Namespace @{mse = $ns }).Node
             if ($settingsXml.ResourceDictionary.innerXml -notlike "*Xpand.XAF.ModelEditor*") {
