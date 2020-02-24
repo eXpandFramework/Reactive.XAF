@@ -21,7 +21,7 @@ Install-Package Xpand.XAF.ModelEditor
 
 ## How it works
 
-`Xpand.XAF.ModelEditor` package is distributed from nuget.org as a Nuget package. After each build it will detect the used DevExpress version and will download the required DevExpress dependencies from your system feeds. So if you already have DevExpress installed there is no need for extra configuration just make sure you add a feed to Nuget.config that points to valid DevExpress packages (local or remote). Subsequent builds won't download or check those dependencies but they will modify the solution bootstrappers if needed e.g. a new project added to the solution.
+`Xpand.XAF.ModelEditor` package is distributed from nuget.org as a Nuget package. After each build it will detect the used DevExpress version and will download the required DevExpress dependencies from your system feeds. So if you already have DevExpress installed there is no need for extra configuration. If not just make sure you add a feed to Nuget.config that points to valid DevExpress packages (local or remote). Subsequent builds won't download or check those dependencies but they will modify the solution bootstrappers if needed e.g. a new project added to the solution.
 
 All downloaded dependecies for each XAF version remain inside the package installation folder under the ModelerLibDownloader\bin directory.
 
@@ -30,7 +30,7 @@ If it fails to detect the DevExpress version used due to either indirect referen
 
 1. The work is done on each build so start from a clean build.
 2. If previous step did not work delete the Nuget package from your nuget cache and try again.
-3. You still have problems then enable logging by either setting the Enviromental `ModelEditorVerbose` to 1 or the same msbuild property to true. This will generate an execution.log inside the package directory, provide it to support with as much details as possible over the usage context..
+3. You still have problems then enable logging by either setting the Enviromental variable `ModelEditorVerbose` to 1 or the same msbuild property to true. This will generate an execution.log inside the package directory, provide it to support with as much details as possible over the usage context..
 
 ## Rider installation
 Rider installation is ready to go without any additional steps. The Xpand.XAF.ModelEditor creates an external tool in your Settings/Custom tools.
@@ -40,6 +40,10 @@ Rider installation is ready to go without any additional steps. The Xpand.XAF.Mo
 and a menu entry in the solution explorer context menu which is shown only for xafml files.
 
 ![image](https://user-images.githubusercontent.com/159464/75140145-06d8be00-56f7-11ea-9e0e-9b03b6e2381f.png)
+
+If you prefer to work with Rider without having installed DevExpress consider the following cmdlets from the [XpandPwsh](https://github.com/eXpandFramework/XpandPwsh) module:
+1. [Start-XpandProjectConverter](https://github.com/eXpandFramework/XpandPwsh/wiki/Start-XpandProjectConverter)
+2. [New-XafProject](https://github.com/eXpandFramework/XpandPwsh/wiki/New-XAFProject)
 
 ## Visual Studio installation
 
