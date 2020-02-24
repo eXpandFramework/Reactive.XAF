@@ -35,24 +35,14 @@ Import-Module XpandPwsh -Force -Prefix X
 $ErrorActionPreference = "Stop"
 New-Item $nugetBin -ItemType Directory -Force | Out-Null
 Get-ChildItem $nugetBin | Remove-Item -Force -Recurse
-& "$PSScriptRoot\PackModelEditor.ps1"
+$toolPackages=@("Xpand.VersionConverter","Xpand.XAF.ModelEditor")
+& "$PSScriptRoot\PackTools.ps1" $toolPackages
 if (!$ChangedModules){
     $ChangedModules
     Write-HostFormatted "Skipping package creation as no package changed" -ForegroundColor Yellow
     return
 }
 
-$versionConverterSpecPath = "$sourceDir\Tools\Xpand.VersionConverter\Xpand.VersionConverter.nuspec"
-if ($Branch -match "lab") {
-    [xml]$versionConverterSpec = Get-XmlContent $versionConverterSpecPath
-    $v = New-Object System.Version($versionConverterSpec.Package.metadata.version)
-    if ($v.Revision -eq -1) {
-        $versionConverterSpec.Package.metadata.version = "$($versionConverterSpec.Package.metadata.version).0"
-    }
-    $versionConverterSpec.Save($versionConverterSpecPath)
-    
-}
-& (Get-XNugetPath) pack $versionConverterSpecPath -OutputDirectory $nugetBin -NoPackageAnalysis
 if ($lastexitcode) {
     throw 
 }
@@ -84,7 +74,7 @@ $packScript = {
  
     Invoke-Script {
         Write-Output "$nugetPath pack $name -OutputDirectory $($nugetBin) -Basepath $basePath -Version $version " #-f Blue
-        & $nugetPath pack $name -OutputDirectory $nugetBin -Basepath $basePath -Version $version
+        & $nugetPath pack $name -OutputDirectory $nugetBin -Basepath $basePath -Version $version -NoPackageAnalysis
     }
     
 }
@@ -136,7 +126,7 @@ function AddReadMe {
 }
 
 Write-HostFormatted "Discover XAFModules" -Section
-$packages=& (Get-NugetPath) list -source $nugetBin|ConvertTo-PackageObject
+$packages=& (Get-NugetPath) list -source $nugetBin|ConvertTo-PackageObject|Where-Object{$_.id -notin $toolPackages}
 $assemblyList=(Get-ChildItem "$nugetbin\.." *.dll)
 $modules=Get-XAFModule "$nugetBin\.." -Include "Xpand.XAF.Modules.*" -AssemblyList $assemblyList|ForEach-Object{
     [PSCustomObject]@{
@@ -179,9 +169,12 @@ if ($ChangedModules) {
     if ($Branch -ne $s){
         $s="Release"
     }
-    if ((Find-XpandPackage Xpand.VersionConverter $s).Version -ne (Get-NugetPackageSearchMetadata Xpand.VersionConverter -Source $nugetBin).identity.version.version){
-        $ChangedModules+="Xpand.VersionConverter"
+    $toolPackages|ForEach-Object{
+        if ((Find-XpandPackage $_ $s).Version -ne (Get-NugetPackageSearchMetadata $_ -Source $nugetBin).identity.version.version){
+            $ChangedModules+=$_
+        }
     }
+    
     "ChangedModules:"
     $ChangedModules|Write-Output
     $nupks = Get-ChildItem $nugetBin

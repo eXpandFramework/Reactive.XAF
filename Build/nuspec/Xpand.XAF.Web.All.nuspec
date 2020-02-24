@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Web.All</id>
-    <version>2.201.23.10</version>
+    <version>2.201.25.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -14,26 +14,27 @@
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Xpand.XAF.Web.All</tags>
     <dependencies>
-    <dependency version="2.201.5.1" id="Xpand.Extensions.Mono.Cecil" />
-    <dependency version="2.201.5.3" id="Xpand.Extensions" />
-    <dependency version="2.201.5.3" id="Xpand.Extensions.Reactive" />
-    <dependency version="2.201.5.3" id="Xpand.Extensions.XAF" />
-    <dependency version="2.201.5.1" id="Xpand.Extensions.XAF.Xpo" />
-    <dependency version="2.201.5.3" id="Xpand.XAF.Modules.AutoCommit" />
-    <dependency version="2.201.5.3" id="Xpand.XAF.Modules.CloneMemberValue" />
-    <dependency version="2.201.5.3" id="Xpand.XAF.Modules.CloneModelView" />
-    <dependency version="2.201.5.3" id="Xpand.XAF.Modules.HideToolBar" />
-    <dependency version="2.201.5.3" id="Xpand.XAF.Modules.MasterDetail" />
-    <dependency version="2.201.5.4" id="Xpand.XAF.Modules.ModelMapper" />
-    <dependency version="2.201.5.3" id="Xpand.XAF.Modules.ModelViewInheritance" />
-    <dependency version="2.201.5.3" id="Xpand.XAF.Modules.ProgressBarViewItem" />
-    <dependency version="2.201.5.3" id="Xpand.XAF.Modules.Reactive.Logger.Hub" />
-    <dependency version="2.201.5.3" id="Xpand.XAF.Modules.Reactive.Logger" />
-    <dependency version="2.201.5.3" id="Xpand.XAF.Modules.Reactive" />
-    <dependency version="2.201.5.3" id="Xpand.XAF.Modules.RefreshView" />
-    <dependency version="2.201.5.3" id="Xpand.XAF.Modules.SuppressConfirmation" />
-    <dependency version="2.201.5.3" id="Xpand.XAF.Modules.ViewEditMode" />
-    <dependency version="2.201.23.10" id="Xpand.XAF.Core.All" /></dependencies>
+      <dependency id="Xpand.Extensions.Mono.Cecil" version="2.201.6.0" />
+      <dependency id="Xpand.Extensions" version="2.201.6.0" />
+      <dependency id="Xpand.Extensions.Reactive" version="2.201.6.1" />
+      <dependency id="Xpand.Extensions.XAF" version="2.201.6.1" />
+      <dependency id="Xpand.Extensions.XAF.Xpo" version="2.201.6.0" />
+      <dependency id="Xpand.XAF.Modules.AutoCommit" version="2.201.6.1" />
+      <dependency id="Xpand.XAF.Modules.CloneMemberValue" version="2.201.6.1" />
+      <dependency id="Xpand.XAF.Modules.CloneModelView" version="2.201.6.1" />
+      <dependency id="Xpand.XAF.Modules.HideToolBar" version="2.201.6.1" />
+      <dependency id="Xpand.XAF.Modules.MasterDetail" version="2.201.6.1" />
+      <dependency id="Xpand.XAF.Modules.ModelMapper" version="2.201.6.1" />
+      <dependency id="Xpand.XAF.Modules.ModelViewInheritance" version="2.201.6.1" />
+      <dependency id="Xpand.XAF.Modules.ProgressBarViewItem" version="2.201.6.1" />
+      <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="2.201.6.1" />
+      <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="2.201.6.1" />
+      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.6.1" />
+      <dependency id="Xpand.XAF.Modules.RefreshView" version="2.201.6.1" />
+      <dependency id="Xpand.XAF.Modules.SuppressConfirmation" version="2.201.6.1" />
+      <dependency id="Xpand.XAF.Modules.ViewEditMode" version="2.201.6.1" />
+      <dependency id="Xpand.XAF.Core.All" version="2.201.23.10" />
+    </dependencies>
   </metadata>
   <files>
   </files>

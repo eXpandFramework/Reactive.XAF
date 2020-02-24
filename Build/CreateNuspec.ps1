@@ -18,6 +18,7 @@ $nuspec.Save($versionConverterPath)
 
 $allProjects=Get-ChildItem $root *.csproj -Recurse | Select-Object -ExpandProperty BaseName
 Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notlike "*Test*" } | Invoke-Parallel -VariablesToImport @("allProjects","root","Release") -Script {
+# Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notlike "*Test*" } | foreach {
     Set-Location $root
     $projectPath = $_.FullName
     Write-Output "Creating Nuspec for $($_.baseName)" 
@@ -42,7 +43,22 @@ Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -not
 
     $nuspecFileName = "$root\build\nuspec\$($_.BaseName).nuspec"
     [xml]$nuspec = Get-Content $nuspecFileName
-
+    $a = [ordered]@{
+        src = "..\build\CopySymbols.targets"
+        target="build\$($nuspec.package.metadata.id).targets" 
+    }
+    if ($nuspecFileName -like "*Client*") {
+        $a.src = "..\$($a.src)"
+    }
+    Add-XmlElement $nuspec "file" "files" $a
+    $a = [ordered]@{
+        src = "..\build\CopySymbols.ps1"
+        target="build\CopySymbols.ps1" 
+    }
+    if ($nuspecFileName -like "*Client*") {
+        $a.src = "..\$($a.src)"
+    }
+    Add-XmlElement $nuspec "file" "files" $a
     $readMePath = "$($_.DirectoryName)\ReadMe.md"
     if (Test-Path $readMePath) {
         $readMe = Get-Content $readMePath -Raw

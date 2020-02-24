@@ -103,7 +103,7 @@ $localPackages = (Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse) +
         File    = $_
     }
 }
-Write-HostFormatted "Matching remote build versions" -Section
+Write-HostFormatted "Checking if local build version increase" -Section
 $localPackages | ForEach-Object {
     $localpackage = $_
     $publishedPackage = $publishedPackages | Where-Object { $_.id -eq $localpackage.id }
@@ -112,7 +112,6 @@ $localPackages | ForEach-Object {
     if ($local -ne $publishedVersion) {
         $remoteversion = "$(Get-VersionPart $publishedVersion Build).$(($publishedVersion.Revision+1))"
         Write-Warning "$($localPackage.Id) release build version ($remoteVersion) is different than local ($local)"
-        Update-AssemblyInfoVersion -path "$($localpackage.File.DirectoryName)\properties\assemblyinfo.cs" -version "$(Update-Version $publishedPackage.version -Revision)"
         $updateVersion += $localPackage.File.BaseName
     }
 }

@@ -11,8 +11,8 @@ function Get-UnPatchedPackages {
             }
         }
     }
-    Write-Verbose "unpatchedPackages:"
-    $unpatchedPackages | Write-Verbose
+    Write-VerboseLog "unpatchedPackages:"
+    $unpatchedPackages | Write-VerboseLog
     $unpatchedPackages
 }
 function Get-InstalledPackages {
@@ -264,25 +264,25 @@ function Update-Symbols {
     }
     
     end {
-        Write-Verbose "Indexing $($list.count) pdb files"
+        Write-VerboseLog "Indexing $($list.count) pdb files"
         # $list | Invoke-Parallel -ActivityName Indexing -VariablesToImport @("dbgToolsPath", "TargetRoot", "SourcesRoot", "remoteTarget") -Script {
         $list | foreach {
             Write-Host "Indexing $($_.FullName) ..."
             $streamPath = [System.IO.Path]::GetTempFileName()
-            Write-Verbose "Preparing stream header section..."
+            Write-VerboseLog "Preparing stream header section..."
             Add-Content -value "SRCSRV: ini ------------------------------------------------" -path $streamPath
             Add-Content -value "VERSION=1" -path $streamPath
             Add-Content -value "INDEXVERSION=2" -path $streamPath
             Add-Content -value "VERCTL=Archive" -path $streamPath
             Add-Content -value ("DATETIME=" + ([System.DateTime]::Now)) -path $streamPath
-            Write-Verbose "Preparing stream variables section..."
+            Write-VerboseLog "Preparing stream variables section..."
             Add-Content -value "SRCSRV: variables ------------------------------------------" -path $streamPath
             if ($remoteTarget) {
                 Add-Content -value "SRCSRVVERCTRL=http" -path $streamPath
             }
             Add-Content -value "SRCSRVTRG=%var2%" -path $streamPath
             Add-Content -value "SRCSRVCMD=" -path $streamPath
-            Write-Verbose "Preparing stream source files section..."
+            Write-VerboseLog "Preparing stream source files section..."
             Add-Content -value "SRCSRV: source files ---------------------------------------" -path $streamPath
             if ($symbolSources) {
                 $symbolSources | ForEach-Object {
@@ -293,7 +293,7 @@ function Update-Symbols {
                     if ($src -and $trg) {
                         $result = "$src*$trg";
                         Add-Content -value $result -path $streamPath
-                        Write-Verbose "Indexing to $result"
+                        Write-VerboseLog "Indexing to $result"
                     }
                 }
             }
@@ -307,7 +307,7 @@ function Update-Symbols {
                             $target = "$src*$TargetRoot/$file"
                         }
                         Add-Content -value $target -path $streamPath
-                        Write-Verbose "Indexing $src to $target"
+                        Write-VerboseLog "Indexing $src to $target"
                     }
                 }
                 else {
@@ -315,7 +315,7 @@ function Update-Symbols {
                 }       
             }
             Add-Content -value "SRCSRV: end ------------------------------------------------" -path $streamPath
-            Write-Verbose "Saving the generated stream into the $_ file..."
+            Write-VerboseLog "Saving the generated stream into the $_ file..."
             & $pdbstrPath -w -s:srcsrv "-p:$($_.Fullname)" "-i:$streamPath"
             Remove-Item $streamPath
         }

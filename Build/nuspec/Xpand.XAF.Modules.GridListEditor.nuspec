@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.GridListEditor</id>
-    <version>2.201.5.3</version>
+    <version>2.201.8.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -14,16 +14,18 @@
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  GridListEditor</tags>
     <dependencies>
-      <dependency version="2.0.7" id="Fasterflect.Xpand" />
-      <dependency version="2019.1.3" id="JetBrains.Annotations" />
-      <dependency version="4.2" id="System.Reactive" />
-      <dependency version="2.201.5.3" id="Xpand.Extensions.Reactive" />
-      <dependency version="2.201.5.3" id="Xpand.XAF.Modules.Reactive" />
-      <dependency version="2.201.1" id="Xpand.VersionConverter" />
+      <dependency id="Fasterflect.Xpand" version="2.0.7" />
+      <dependency id="JetBrains.Annotations" version="2019.1.3" />
+      <dependency id="System.Reactive" version="4.2" />
+      <dependency id="Xpand.Extensions.Reactive" version="2.201.6.1" />
+      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.6.1" />
+      <dependency id="Xpand.VersionConverter" version="2.201.1" />
     </dependencies>
   </metadata>
   <files>
     <file src="Xpand.XAF.Modules.GridListEditor.dll" target="lib\net461\Xpand.XAF.Modules.GridListEditor.dll" />
     <file src="Xpand.XAF.Modules.GridListEditor.pdb" target="lib\net461\Xpand.XAF.Modules.GridListEditor.pdb" />
+    <file src="..\build\CopySymbols.targets" target="build\CopySymbols.targets" />
+    <file src="..\build\CopySymbols.ps1" target="build\CopySymbols.ps1" />
   </files>
 </package>

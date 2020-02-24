@@ -11,35 +11,34 @@ param(
     [string]$projectFile = "C:\Work\eXpandFramework\DevExpress.XAF\src\Tests\ALL\ALL.Win.Tests\ALL.Win.Tests.csproj",
     [string]$targetPath = "C:\Work\eXpandFramework\DevExpress.XAF\bin\AllTestWin\",
     $DevExpressVersion,
-    [string]$VerboseOutput = "Continue",
+    [string]$VerboseOutput = "Continue" ,
     [string]$referenceFilter = "DevExpress*"
 )
 
-$howToVerbose = "Edit $projectFile and enable verbose messaging by adding <PropertyGroup><VersionConverterVerbose>Continue</VersionConverterVerbose>. Rebuild the project and send the output to support."
-if ($VerboseOutput) {
-    $VerbosePreference = $VerboseOutput
-}
-if ($DevExpressVersion) {
-    [version]$DevExpressVersion = $DevExpressVersion
-}
+
 $ErrorActionPreference = "Stop"
 . "$PSScriptRoot\Functions.ps1"
+$howToVerbose=ConfigureVerbose $VerboseOutput
+Write-VerboseLog "Executing VersionConverter..." 
+Write-VerboseLog "ProjectFile=$projectFile"
+Write-VerboseLog "targetPath=$targetPath"
+Write-VerboseLog "DevExpressVersion=$DevExpressVersion"
+Write-VerboseLog "referenceFilter=$referenceFilter"
 
-Write-Verbose "Running VersionConverter on project $projectFile with target $targetPath"
 if (!$DevExpressVersion) {
     $dxVersion = GetDevExpressVersion $targetPath $referenceFilter $projectFile 
 }
 else {
-    $dxVersion = $DevExpressVersion
+    $dxVersion = [version]$DevExpressVersion
 }
 
 if (!$dxVersion) {
     throw "Cannot find DevExpress Version. You have the following options:`r`n1. $howToVerbose`r`n2. If your project has indirect references to DevExpress through another assembly then you can always force the DevExpressVersion by modifying your project to include <PropertyGroup><DevExpressVersion>19.1.3</DevExpressVersion>.`r`n This declaration can be solution wide if done in your directory.build.props file.`r`n"
 }
-Write-Verbose "DxVersion=$dxVersion"
+Write-VerboseLog "DxVersion=$dxVersion"
 
 $packagesFolder = Get-PackagesFolder
-Write-Verbose "nugetPackageFoldersPath=$packagesFolder"
+Write-VerboseLog "nugetPackageFoldersPath=$packagesFolder"
 $nugetPackageFolders = [Path]::GetFullPath($packagesFolder)
 $moduleDirectories = [Directory]::GetDirectories($nugetPackageFolders) | Where-Object {
     $baseName = (Get-Item $_).BaseName
@@ -48,7 +47,7 @@ $moduleDirectories = [Directory]::GetDirectories($nugetPackageFolders) | Where-O
 
 $unpatchedPackages = Get-UnPatchedPackages $moduleDirectories $dxversion
 if (!$unpatchedPackages) {
-    Write-Verbose "All packages already patched for $dxversion"
+    Write-VerboseLog "All packages already patched for $dxversion"
     return
 }
 wh "ModuleDirectories:" -Section
