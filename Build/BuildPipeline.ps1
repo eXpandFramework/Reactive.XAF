@@ -1,5 +1,5 @@
 param(
-    $Branch = "lab",
+    $Branch = "master",
     $SourcePath = "$PSScriptRoot\..",
     $GitHubUserName = "apobekiaris",
     $GitHubToken = $env:GitHubToken,
@@ -43,9 +43,7 @@ $CustomVersion = $latestMinors | Where-Object { "$($_.Major).$($_.Minor)" -eq $r
 $DXVersion = Get-DevExpressVersion 
 
 $taskList = "Build"
-if ($Branch -eq "lab") {
-    . "$SourcePath\build\UpdateLatestProjectVersion.ps1"
-}
+. "$SourcePath\build\UpdateLatestProjectVersion.ps1"
 
 $bArgs = @{
     packageSources = "$(Get-PackageFeed -Xpand);$DxApiFeed"
@@ -103,24 +101,7 @@ if ($Branch -eq "lab") {
         }
     }
 }
-else{
-    $LocalPackages=((get-childitem $SourcePath\src\Modules *.csproj -Recurse)+(get-childitem $SourcePath\src\Extensions *.csproj -Recurse)).DirectoryName|ForEach-Object{
-        [PSCustomObject]@{
-            Id = (Get-ChildItem $_ *.csproj).BaseName
-            Version =[version]((Get-ChildItem $_ AssemblyInfo.cs -Recurse).FullName|Get-AssemblyInfoVersion)
-        }
-    }
-    Write-HostFormatted "LocalPackage" -ForegroundColor Magenta
-    $localPackages|Format-Table
-    $remotePackages=Get-XpandPackages Release XAFAll
-    Write-HostFormatted "RemotePackages" -ForegroundColor Magenta
-    $RemotePackages|Format-Table
 
-    $bArgs.ChangedModules=($LocalPackages|Where-Object{
-        $localPackage=$_
-        $remotePackages|Where-Object{$_.Id -eq $localPackage.Id -and $_.version -ne $localPackage.Version}
-    }).Id
-}
 if ($bArgs.ChangedModules) {
     $bArgs.ChangedModules = $bArgs.ChangedModules | Sort-Object -Unique
 }

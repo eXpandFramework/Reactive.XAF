@@ -23,17 +23,17 @@ The module **ships with 82 predefined maps** for all the common types such as Gi
       <dependency id="System.Interactive" version="4.0" />
       <dependency id="System.Reactive" version="4.2" />
       <dependency id="Xpand.Collections" version="1.0.1" />
-      <dependency id="Xpand.Extensions" version="2.201.6.0" />
-      <dependency id="Xpand.Extensions.Reactive" version="2.201.6.1" />
-      <dependency id="Xpand.Extensions.XAF" version="2.201.6.1" />
-      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.6.1" />
-      <dependency id="Xpand.VersionConverter" version="2.201.1" />
+      <dependency id="Xpand.Extensions" version="2.201.8.0" />
+      <dependency id="Xpand.Extensions.Reactive" version="2.201.8.0" />
+      <dependency id="Xpand.Extensions.XAF" version="2.201.8.0" />
+      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.8.0" />
+      <dependency id="Xpand.VersionConverter" version="2.201.2" />
     </dependencies>
   </metadata>
   <files>
     <file src="Xpand.XAF.Modules.ModelMapper.dll" target="lib\net461\Xpand.XAF.Modules.ModelMapper.dll" />
     <file src="Xpand.XAF.Modules.ModelMapper.pdb" target="lib\net461\Xpand.XAF.Modules.ModelMapper.pdb" />
-    <file src="..\build\CopySymbols.targets" target="build\CopySymbols.targets" />
+    <file src="..\build\CopySymbols.targets" target="build\Xpand.XAF.Modules.ModelMapper.targets" />
     <file src="..\build\CopySymbols.ps1" target="build\CopySymbols.ps1" />
   </files>
 </package>

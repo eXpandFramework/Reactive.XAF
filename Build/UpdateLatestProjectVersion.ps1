@@ -1,6 +1,22 @@
-
-$officialPackages = Get-XpandPackages -PackageType XAFAll -Source Release
 $labPackages = Get-XpandPackages -PackageType XAFAll -Source Lab
+if ($Branch -eq "master"){
+    $updateVersion=($labPackages|Where-Object{$_.Version.Revision -gt 0}).id
+    Get-ChildItem $sourcePath *.csproj -Recurse |ForEach-Object{
+        $project=$_
+        $assemblyInfoPath="$($project.DirectoryName)\Properties\AssemblyInfo.cs"
+        if (Test-Path $assemblyInfoPath){
+            $labPackage=$labPackages|Where-Object{$_.Id -eq $project.BaseName}
+            if ($labPackage){
+                $projectVersion=Get-AssemblyInfoVersion $assemblyInfoPath
+                if ((Get-VersionPart $projectVersion Build) -lt (Get-VersionPart $labPackage.version Build)){
+                    Update-AssemblyInfo $assemblyInfoPath -Build
+                }   
+            }
+        }
+    }
+    return
+}
+$officialPackages = Get-XpandPackages -PackageType XAFAll -Source Release
 Write-HostFormatted "labPackages"  -Section
 $labPackages | Out-String
 
@@ -26,6 +42,8 @@ $localPackages = (Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse) +
 }
 Write-HostFormatted "localPackages:"  -Section
 $localPackages | Out-String
+
+
 $publishedPackages = $labPackages | ForEach-Object {
     $publishedName = $_.Id
     $localPackages | Where-Object { $_.Id -eq $publishedName }
@@ -116,7 +134,7 @@ $localPackages | ForEach-Object {
     }
 }
 if ($updateVersion) {
-    Write-HostFormatted "Collect related assemblies for:" -Section
+    Write-HostFormatted "Collect related assemblies:" -Section
     $packageDeps=Get-XpandPackages Lab XAFAll|Where-Object{$_.id -notlike "*all*"}|Invoke-Parallel -Script{
         [PSCustomObject]@{
             Id = $_.id

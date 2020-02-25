@@ -41,7 +41,7 @@ using System.Reflection;
 [assembly: AssemblyDescription("Xpand.XAF.ModelEditor")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyProduct("Xpand.XAF.ModelEditor")]
-[assembly: AssemblyVersion("1.201.0.0")]
-[assembly: AssemblyFileVersion("1.201.0.0")]
-[assembly: AssemblyInformationalVersion("1.201.0.0")]
+[assembly: AssemblyVersion("1.201.1.0")]
+[assembly: AssemblyFileVersion("1.201.1.0")]
+[assembly: AssemblyInformationalVersion("1.201.1.0")]
 

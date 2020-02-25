@@ -18,17 +18,17 @@
       <dependency id="JetBrains.Annotations" version="2019.1.3" />
       <dependency id="MagicOnion" version="2.6.3" />
       <dependency id="System.Reactive" version="4.2" />
-      <dependency id="Xpand.XAF.Modules.GridListEditor" version="2.201.6.1" />
-      <dependency id="Xpand.XAF.Modules.OneView" version="2.201.6.1" />
-      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.6.1" />
-      <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="2.201.6.1" />
-      <dependency id="Xpand.VersionConverter" version="2.201.1" />
+      <dependency id="Xpand.XAF.Modules.GridListEditor" version="2.201.8.0" />
+      <dependency id="Xpand.XAF.Modules.OneView" version="2.201.8.0" />
+      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.8.0" />
+      <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="2.201.8.0" />
+      <dependency id="Xpand.VersionConverter" version="2.201.2" />
     </dependencies>
   </metadata>
   <files>
     <file src="Xpand.XAF.Modules.Reactive.Logger.Client.Win.exe" target="lib\net461\Xpand.XAF.Modules.Reactive.Logger.Client.Win.exe" />
     <file src="Xpand.XAF.Modules.Reactive.Logger.Client.Win.pdb" target="lib\net461\Xpand.XAF.Modules.Reactive.Logger.Client.Win.pdb" />
-    <file src="..\..\build\CopySymbols.targets" target="build\CopySymbols.targets" />
+    <file src="..\..\build\CopySymbols.targets" target="build\Xpand.XAF.Modules.Reactive.Logger.Client.Win.targets" />
     <file src="..\..\build\CopySymbols.ps1" target="build\CopySymbols.ps1" />
   </files>
 </package>

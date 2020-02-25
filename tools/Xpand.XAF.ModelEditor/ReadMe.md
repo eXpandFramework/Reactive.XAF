@@ -31,6 +31,9 @@ If it fails to detect the DevExpress version used due to either indirect referen
 1. The work is done on each build so start from a clean build.
 2. If previous step did not work delete the Nuget package from your nuget cache and try again.
 3. You still have problems then enable logging by either setting the Enviromental variable `ModelEditorVerbose` to 1 or the same msbuild property to true. This will generate an execution.log inside the package directory, provide it to support with as much details as possible over the usage context..
+4. For support, feedback etc. use the main project [issues](https://github.com/eXpandFramework/eXpand/issues/new/choose).
+
+[![GitHub issues](https://img.shields.io/github/issues/eXpandFramework/expand/XpandModelEditor.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AXpandModelEditor) [![GitHub close issues](https://img.shields.io/github/issues-closed/eXpandFramework/eXpand/XpandModelEditor.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AXpandModelEditor)
 
 ## Rider installation
 Rider installation is ready to go without any additional steps. The Xpand.XAF.ModelEditor creates an external tool in your Settings/Custom tools.

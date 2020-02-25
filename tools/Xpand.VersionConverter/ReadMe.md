@@ -8,14 +8,12 @@ The alternative is to have a full Continuous Integration pipeline and support it
 
 You might say that do not even know whats a CI (Continuous Integration) or perhaps I do not use a CI, but think again, storing the project, taking backups, git repository, open visual studio, Ctrl+F5 is actually a CI.
 ## Technicals
-This package will insert logic that runs on each build and it will. 
 
-1. **Detects** the current **DevExpress version** by parsing the current project declaration and if not found does a lookup inside project $(TargetDir)
-2. **Collects** all DevExpress assembly **references** references in all **Xpand.XAF** assemblies inside project $(TargetDir).
-3. **After** each **build** **changes** the **version** in assembly references found.
-4. **Changes** the reference **name** if DevExpress references are from **different major**.
-
-Note: For designer support VS uses the original files and not the ones in $(TargetDir), therefore the **original files** inside project's nuget packages folder will be **patched** as well.
+1. `Xpand.VersionConverter` before the consumer project is build will change the version of all assemblies in the host package to match the DevExpress version of the consumer project. 
+2. If the package fails to detect the DevExpress version used from the consumer project due for e.g to indirect references you can help it with the DevExpressVersion msbuild property. 
+2. The patching requires locking so the the patched packages are flagged to avoid locks in subsequent builds. To remove the flags you can use the [Remove-VersionConverterFlags](https://github.com/eXpandFramework/XpandPwsh/wiki/Remove-VersionConverterFlags) cmdlet.
+3. To troubleshoot you can enable verbose logging you can set the Environmental VersionConverterVerbose to 1 and an extensions.log will be created in the package directory.
+4. Xpand.Versionconverter is already a dependency to packages that use DevExpress assemblies in this repository.
 
 ### Installation
 
@@ -25,3 +23,5 @@ Install-Package Xpand.VersionConverter
 
 ## Issues
 Use main project [issues](https://github.com/eXpandFramework/eXpand/issues/new/choose)
+
+[![GitHub issues](https://img.shields.io/github/issues/eXpandFramework/expand/VersionConverter.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AVersionConverter) [![GitHub close issues](https://img.shields.io/github/issues-closed/eXpandFramework/eXpand/VersionConverter.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AVersionConverter)
