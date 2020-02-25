@@ -10,7 +10,7 @@ if ($buildNumber){
     $env:AzProject ="eXpandFramework"
 }
 
-$rootLocation = "$PSScriptRoot\..\.."
+$rootLocation = "$PSScriptRoot\.."
 Set-Location $rootLocation
 
 $nuget = Get-NugetPath

@@ -1,29 +1,23 @@
 # About
-The  `Extensions` namespace is used for projects that contain **static** **internal** **extension** classes. 
+All projects in this namespace contain only **static classes with extension methods**. 
 
-There is no package or assembly though as the modules only link the methods they want to use. 
+Use the [XpandPwsh](https://github.com/eXpandFramework/XpandPwsh) To list all the published extension packages:
 
-For example in the `Xpand.Source.Extensions.XAF.Model` namespace there is a `GetParent` method.
+```ps1
+Get-XpandPackages Release XAFExtensions
 
-```cs
-using DevExpress.ExpressApp.Model;
-
-namespace Xpand.Source.Extensions.XAF.Model{
-    internal static partial class Extensions{
-        public static TNode GetParent<TNode>(this IModelNode modelNode) where TNode : class, IModelNode{
-            if (modelNode is TNode node)
-                return node;
-            var parent = modelNode.Parent;
-            while (!(parent is TNode)) {
-                parent = parent.Parent;
-                if (parent == null)
-                    break;
-            }
-            return (TNode) parent;
-        }
-
-    }
-}
+Id                          Version   Source
+--                          -------   ------
+Xpand.Extensions.XAF.Xpo    2.201.2.0 Release
+Xpand.Extensions            2.201.2.0 Release
+Xpand.Extensions.Mono.Cecil 2.201.2.0 Release
+Xpand.Extensions.XAF        2.201.2.0 Release
+Xpand.Extensions.Reactive   2.201.2.0 Release
 ```
 
-The consumer modules link/compile this file only, minimizing the dependencies.
+Similarly if you wish to install them you can do:
+```ps1
+Get-XpandPackages Release XAFExtensions|Install-Package
+```
+
+These packages are consumed from the modules of this repository therefore they are unit tested together with their consumers. 
