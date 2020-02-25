@@ -4,13 +4,14 @@
 
 
 # About 
-In the `DevExpress.XAF` repository you can find **low dependency** DevExpress XAF **modules** distributed from Nuget.org only. 
+In the `DevExpress.XAF` repository you can find **low dependency** DevExpress XAF **modules** and **tools** distributed from Nuget.org only. 
 
 We aim for low dependency XAF modules so expect to see only a small set of classes per project. To learn more about each module navigate to its root `Readme` file or search the [Wiki](http://xaf.wiki.expandframework.com).
 
-There are two namespaces in the source, follow the links to read more. 
+There are three project categories, follow the links to read more. 
 1. [DevExpress.XAF.Extensions](https://github.com/eXpandFramework/XAF/blob/master/src/Extensions/)
 2. [DevExpress.XAF.Modules](https://github.com/eXpandFramework/XAF/tree/master/src/Modules)
+3. [Tools](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools)
 
 ## Versioning
 The modules are **not bound** to **DevExpress versioning**, which means you can use the latest version with your old DevExpress projects [Read more](https://github.com/eXpandFramework/XAF/tree/master/tools/Xpand.VersionConverter).
