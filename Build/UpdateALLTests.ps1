@@ -1,10 +1,10 @@
 param(
-    $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\..\"),
-    $branch = "lab",
+    $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\"),
+    $branch = "master",
     $source,
     $dxVersion = "19.2.6"
 )
-if ($branch -eq "lab" -and !$source) {
+if (!$source) {
     $source = "$(Get-PackageFeed -Xpand);$(Get-PackageFeed -DX)"
 }
 if ($branch -eq "master") {
@@ -27,7 +27,11 @@ $localPackages = & (Get-NugetPath) list -source "$root\bin\nupkg"|ConvertTo-Pack
 }
 Write-HostFormatted "LocalPackages:" -Section
 $localPackages | Out-String
-$remotePackages = Find-XpandPackage "Xpand*All*" -PackageSource Lab
+$psource="Release"
+if ($branch -eq "lab"){
+    $psource="Lab"
+}
+$remotePackages = Find-XpandPackage "Xpand*All*" -PackageSource $psource
 Write-HostFormatted "remotePackages:" -Section
 $remotePackages | Out-String
 $latestPackages = (($localPackages + $remotePackages) | Group-Object Id | ForEach-Object {
@@ -65,10 +69,7 @@ New-Item "$root\bin\NupkgTemp" -ItemType Directory -Force
 Write-HostFormatted "Create local package source" -ForegroundColor Magenta
 $tempNupkg="$root\bin\NupkgTemp\"
 Get-ChildItem "$root\bin\Nupkg"|Copy-Item -Destination $tempNupkg -Force
-$psource="Release"
-if ($branch -eq "lab"){
-    $psource="Lab"
-}
+
 $tempPackages=(& (Get-NugetPath) list -source $tempNupkg|ConvertTo-PackageObject).id
 Get-XpandPackages $psource All|Where-Object{$_.id -like "Xpand*"}|Where-Object{$_.id -notin $tempPackages}|Invoke-Parallel -VariablesToImport @("psource","tempNupkg") -script{
     Get-NugetPackage -name $_.id -Source (Get-PackageFeed $psource) -ResultType NupkgFile|Copy-Item -Destination $tempNupkg -Verbose

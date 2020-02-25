@@ -1,7 +1,7 @@
 param(
-    $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\..\"),
+    $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\"),
     $Release=$true,
-    $Branch="lab"
+    $Branch="master"
 )
 Use-MonoCecil | Out-Null
 function UpdateALLNuspec($platform, $allNuspec, $nuspecs,$allModuleNuspecs) {

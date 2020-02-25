@@ -36,17 +36,13 @@ $ErrorActionPreference = "Stop"
 New-Item $nugetBin -ItemType Directory -Force | Out-Null
 Get-ChildItem $nugetBin | Remove-Item -Force -Recurse
 $toolPackages=@("Xpand.VersionConverter","Xpand.XAF.ModelEditor")
-& "$PSScriptRoot\PackTools.ps1" $toolPackages
+& "$PSScriptRoot\PackTools.ps1" $toolPackages $Branch
+
 if (!$ChangedModules){
     $ChangedModules
     Write-HostFormatted "Skipping package creation as no package changed" -ForegroundColor Yellow
     return
 }
-
-if ($lastexitcode) {
-    throw 
-}
-
 
 Set-Location $sourceDir
 $assemblyVersions = & "$sourceDir\build\AssemblyVersions.ps1" $sourceDir

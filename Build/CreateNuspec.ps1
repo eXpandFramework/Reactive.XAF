@@ -2,7 +2,7 @@ param(
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\"),
     [switch]$Release,
     $dxVersion=$env:FirstDxVersion,
-    $branch
+    $branch="master"
 )
 
 $ErrorActionPreference = "Stop"
@@ -18,7 +18,7 @@ $nuspec.Save($versionConverterPath)
 
 $allProjects=Get-ChildItem $root *.csproj -Recurse | Select-Object -ExpandProperty BaseName
 Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notlike "*Test*" } | Invoke-Parallel -VariablesToImport @("allProjects","root","Release") -Script {
-# Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notlike "*Test*" } | foreach {
+# Get-ChildItem "$root\src\" -Include "*oneview*.csproj" -Recurse | Where-Object { $_ -notlike "*Test*" } | foreach {
     Set-Location $root
     $projectPath = $_.FullName
     Write-Output "Creating Nuspec for $($_.baseName)" 
@@ -101,4 +101,19 @@ Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -not
     
     $nuspec.Save($nuspecFileName)
 } 
+
 & "$root\build\UpdateAllNuspec.ps1" $root $Release $branch
+if ($branch -eq "master"){
+    Write-HostFormatted "Checking nuspec versions" -Section
+    $labnuspecs=Get-ChildItem "$root\build\nuspec" *.nuspec -Recurse|ForEach-Object{
+        [xml]$n=Get-xmlContent $_.FullName
+        $v=[version]$n.package.metadata.version
+        if ($v.Revision -gt 0){
+            $n.package.metadata.id
+        }
+    }
+    $labnuspecs
+    if ($labnuspecs){
+        throw "labNuspec found in a release build"
+    }
+}

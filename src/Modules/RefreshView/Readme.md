@@ -33,9 +33,9 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |Fasterflect.Xpand|2.0.7
  |JetBrains.Annotations|2019.1.3
  |System.Reactive|4.2.0
- |Xpand.Extensions.Reactive|2.201.5
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.201.5
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.1
+ |Xpand.Extensions.Reactive|2.201.9
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.201.9
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.2
 
 ## Issues-Debugging-Troubleshooting
 
