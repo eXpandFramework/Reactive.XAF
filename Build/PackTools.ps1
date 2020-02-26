@@ -5,9 +5,19 @@ param(
 )
 $releasepackages=Get-XpandPackages Release XAFAll 
 $labPackages=Get-XpandPackages Lab XAFAll
+$latestPackages=Get-XpandPackages Release XAFAll|ForEach-Object{
+    $package=$_
+    $labPackage=$labPackages|Where-Object{$_.Id -eq $package.id}
+    if ($labPackage.version -gt $package.version){
+        $labPackage
+    }
+    else{
+        $package
+    }
+}
 $toolNuspecs=Get-ChildItem "$sourceDir\Tools\$_" *.nuspec -Recurse | Where-Object { $_.FullName -notlike "*\obj\*" }
 if ($Branch -eq "master"){
-    $labPackages|Where-Object{$_.id -in $Toolpackages}|ForEach-Object{
+    $latestPackages|Where-Object{$_.id -in $Toolpackages}|ForEach-Object{
         if ($_.Version.Revision -gt 0){
             $packageId=$_.Id
             $toolNuspec=$toolNuspecs|Where-Object{$_.BaseName -eq $packageId}

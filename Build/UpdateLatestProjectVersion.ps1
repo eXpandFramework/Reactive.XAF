@@ -1,11 +1,25 @@
 $labPackages = Get-XpandPackages -PackageType XAFAll -Source Lab
+Write-HostFormatted "labPackages"  -Section
+$labPackages | Out-String
 if ($Branch -eq "master"){
-    $updateVersion=($labPackages|Where-Object{$_.Version.Revision -gt 0}).id
+    $latestPackages = Get-XpandPackages -PackageType XAFAll -Source Release|ForEach-Object{
+        $package=$_
+        $labPackage=$labPackages|Where-Object{$_.id -eq $package.id}
+        if ($labPackage.Version -gt $package.version){
+            $labPackage
+        }
+        else{
+            $package
+        }
+    }
+    Write-HostFormatted "latestPackages"  -Section
+    $latestPackages | Out-String
+    $updateVersion=@(($latestPackages|Where-Object{$_.Version.Revision -gt 0}).id)
     Get-ChildItem $sourcePath *.csproj -Recurse |ForEach-Object{
         $project=$_
         $assemblyInfoPath="$($project.DirectoryName)\Properties\AssemblyInfo.cs"
         if (Test-Path $assemblyInfoPath){
-            $labPackage=$labPackages|Where-Object{$_.Id -eq $project.BaseName}
+            $labPackage=$latestPackages|Where-Object{$_.Id -eq $project.BaseName}
             if ($labPackage){
                 $projectVersion=Get-AssemblyInfoVersion $assemblyInfoPath
                 if ((Get-VersionPart $projectVersion Build) -lt (Get-VersionPart $labPackage.version Build)){
@@ -16,9 +30,6 @@ if ($Branch -eq "master"){
     }
     return
 }
-$officialPackages = Get-XpandPackages -PackageType XAFAll -Source Release
-Write-HostFormatted "labPackages"  -Section
-$labPackages | Out-String
 
 $localPackages = (Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse) + (Get-ChildItem "$sourcePath\src\Extensions" "*.csproj" -Recurse) | ForEach-Object {
     $name = [System.IO.Path]::GetFileNameWithoutExtension($_.FullName)
