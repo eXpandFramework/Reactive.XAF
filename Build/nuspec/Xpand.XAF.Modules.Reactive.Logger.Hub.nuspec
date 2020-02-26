@@ -22,7 +22,7 @@
       <dependency id="Xpand.Extensions.Reactive" version="2.201.9.0" />
       <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.9.0" />
       <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="2.201.9.0" />
-      <dependency id="Xpand.VersionConverter" version="2.201.2" />
+      <dependency id="Xpand.VersionConverter" version="2.201.3" />
     </dependencies>
   </metadata>
   <files>

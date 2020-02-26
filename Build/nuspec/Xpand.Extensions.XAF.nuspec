@@ -19,7 +19,7 @@
       <dependency id="System.Reflection.Emit" version="4.7" />
       <dependency id="Xpand.Extensions" version="2.201.9.0" />
       <dependency id="Xpand.Patcher" version="1.0.1" />
-      <dependency id="Xpand.VersionConverter" version="2.201.2" />
+      <dependency id="Xpand.VersionConverter" version="2.201.3" />
     </dependencies>
   </metadata>
   <files>

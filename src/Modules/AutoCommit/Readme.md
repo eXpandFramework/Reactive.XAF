@@ -33,7 +33,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |Xpand.Extensions.Reactive|2.201.9
  |Xpand.Extensions.XAF|2.201.9
  |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.201.9
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.2
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.3
 
 ## Issues-Debugging-Troubleshooting
 
