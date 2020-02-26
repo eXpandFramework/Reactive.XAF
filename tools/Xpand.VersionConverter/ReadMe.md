@@ -1,3 +1,7 @@
+![image](https://user-images.githubusercontent.com/159464/66713086-c8c5a800-edae-11e9-9bc1-73ffc0c215fb.png)
+
+[![image](https://img.shields.io/badge/Exclusive%20services%3F-Head%20to%20the%20dashboard-Blue)](https://github.com/sponsors/apobekiaris) ![GitHub stars](https://img.shields.io/github/stars/expandframework/devexpress.xaf?label=Star%20the%20project%20if%20you%20think%20it%20deserves%20it&style=social) ![GitHub forks](https://img.shields.io/github/forks/expandframework/Devexpress.Xaf?label=Fork%20the%20project%20to%20extend%20and%20contribute&style=social)
+
 ![](https://img.shields.io/nuget/v/Xpand.VersionConverter.svg?label=nuget.org&style=flat) ![](https://img.shields.io/nuget/dt/Xpand.VersionConverter.svg?style=flat)
 
 # About
