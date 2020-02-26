@@ -29,7 +29,7 @@ function Write-VerboseLog {
     process {
         if ($VerbosePreference -eq "continue") {
             Write-Verbose $Message
-            Add-Content "$PSScriptRoot\execution.log" $Message
+            $Message | Out-File "$PSScriptRoot\execution.log" -Append
         }
     }
     
