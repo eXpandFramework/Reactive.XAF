@@ -87,13 +87,19 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         private static IObservable<Type> GetMappedTypes(){
+            Assembly LoadFile(){
+                var lastAssemblyPath = GetLastAssemblyPath();
+                var loaded=AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(asm => asm.Location.Equals(lastAssemblyPath,StringComparison.OrdinalIgnoreCase));
+                return loaded??Assembly.LoadFile(lastAssemblyPath);
+            }
+
             return Observable.Defer(() => {
                     var distinnctTypesToMap = _typesToMap.Distinct(_ => _.TypeToMap).Do(MappingTypes);
                     return distinnctTypesToMap
                         .All(_ =>_skipeAssemblyValidation|| _.TypeFromPath())
                         .Select(_ => {
                             var assembly =!_? distinnctTypesToMap.ModelCode().SelectMany(tuple => tuple.references.Compile(tuple.code))
-                                : Assembly.LoadFile(GetLastAssemblyPath()).ReturnObservable();
+                                : LoadFile().ReturnObservable();
                             return assembly.SelectMany(assembly1 => {
                                 var types = assembly1.GetTypes()
                                     .Where(type => typeof(IModelModelMap).IsAssignableFrom(type))
