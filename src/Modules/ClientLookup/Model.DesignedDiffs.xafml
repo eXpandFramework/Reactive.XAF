@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Application>
+  <BOModel>
+    <Class Name="Xpand.XAF.Modules.Reactive.Logger.TraceEvent">
+      <AppearanceRules>
+        <AppearanceRule Id="Dispose" Context="ListView" Criteria="[RXAction] = ##Enum#Xpand.XAF.Modules.Reactive.Logger.RXAction,Dispose#" FontColor="192, 0, 192" TargetItems="RXAction" Index="10001" IsNewNode="True" />
+        <AppearanceRule Id="OnCompeted" Context="ListView" Criteria="[RXAction] = ##Enum#Xpand.XAF.Modules.Reactive.Logger.RXAction,OnCompleted#" FontColor="128, 64, 0" TargetItems="RXAction" Index="10001" IsNewNode="True" />
+        <AppearanceRule Id="OnError" Context="ListView" Criteria="[RXAction] = ##Enum#Xpand.XAF.Modules.Reactive.Logger.RXAction,OnError#" FontColor="Red" TargetItems="RXAction,Method,Location" Index="10001" FontStyle="Bold" IsNewNode="True" />
+        <AppearanceRule Id="OnNext" Context="ListView" Criteria="[RXAction] = ##Enum#Xpand.XAF.Modules.Reactive.Logger.RXAction,OnNext#" FontColor="Green" TargetItems="RXAction" Index="10001" IsNewNode="True" />
+        <AppearanceRule Id="Subscribe" Context="ListView" Criteria="[RXAction] = ##Enum#Xpand.XAF.Modules.Reactive.Logger.RXAction,Subscribe#" FontColor="0, 0, 192" TargetItems="RXAction" Index="10001" IsNewNode="True" />
+      </AppearanceRules>
+    </Class>
+  </BOModel>
+  <Views>
+    <DetailView Id="TraceEvent_DetailView" AllowEdit="False" />
+    <ListView Id="TraceEvent_ListView" IsFooterVisible="True" DataAccessMode="Server" ShowAutoFilterRow="True" TopReturnedObjects="5000">
+      <Columns>
+        <ColumnInfo Id="Action" Index="-1" Width="58" />
+        <ColumnInfo Id="DateTime" Width="248" Index="-1" />
+        <ColumnInfo Id="Line" Index="-1" />
+        <ColumnInfo Id="Message" Width="840" Index="-1" />
+        <ColumnInfo Id="ProcessId" Index="-1" />
+        <ColumnInfo Id="TraceEventType" Width="158" Index="-1" />
+        <ColumnInfo Id="Timestamp" Index="0" SortOrder="Descending" SortIndex="0" />
+        <ColumnInfo Id="ApplicationTitle" Index="1" />
+        <ColumnInfo Id="Source" Width="124" Index="2" />
+        <ColumnInfo Id="Location" Index="3">
+          <Summary>
+            <ColumnSummaryItem Id="@6222179a-461a-4508-9c01-c8879c503df6" SummaryType="Count" IsNewNode="True" />
+          </Summary>
+        </ColumnInfo>
+        <ColumnInfo Id="Method" Index="4" />
+        <ColumnInfo Id="RXAction" Index="5" />
+        <ColumnInfo Id="Called" Index="6" Width="37" />
+        <ColumnInfo Id="ThreadId" Index="7" />
+        <ColumnInfo Id="Value" Index="8" Width="46" />
+      </Columns>
+    </ListView>
+  </Views>
+</Application>
