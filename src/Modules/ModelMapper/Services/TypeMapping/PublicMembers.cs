@@ -40,7 +40,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         public static ConcurrentHashSet<Type> AdditionalTypesList{ get; }=new ConcurrentHashSet<Type>();
         public static ConcurrentHashSet<string> AdditionalReferences{ get; }=new ConcurrentHashSet<string>();
         static ISubject<IModelMapperConfiguration> _typesToMap;
-        private static ReplaySubject<IModelMapperConfiguration> _mappingTypes;
+        
         public static ObservableCollection<(string key, Action<(Type declaringType,List<ModelMapperPropertyInfo> propertyInfos)> action)> PropertyMappingRules{ get; private set; }
         public static ObservableCollection<(string key, Action<(Type typeToMap,Result<(string key, string code)> data)> action)> ContainerMappingRules{ get; private set; }
         public static ObservableCollection<(string key, Action<ModelMapperType> action)> TypeMappingRules{ get; private set; }
@@ -65,20 +65,92 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             if (!Directory.Exists(tempPath)){
                 Directory.CreateDirectory(tempPath);
             }
-
             var path = DesignerOnlyCalculator.IsRunFromDesigner?tempPath:AppDomain.CurrentDomain.ApplicationPath();
-            
             OutputAssembly = $@"{path}\{MapperAssemblyName}{ModelMapperAssemblyName}{{0}}.dll";
             _customizeContainerCode=new Subject<(Type type, Result<(string key, string code)> data)>();
             _customizeProperties =new Subject<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)>();
             _customizeTypes =new Subject<ModelMapperType>();
             
-            TypeMappingRules = new ObservableCollection<(string key, Action<ModelMapperType> action)>(){
-                (nameof(WithNonPublicAttributeParameters), NonPublicAttributeParameters),
-                (nameof(GenericTypeArguments), GenericTypeArguments),
-            };
+            TypeMappingRules = GetTypeMappingRules();
             ContainerMappingRules=new ObservableCollection<(string key, Action<(Type typeToMap, Result<(string key, string code)> data)> action)>();
-            PropertyMappingRules = new ObservableCollection<(string key, Action<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)> action)>{
+            PropertyMappingRules = GetPropertyMappingRules();
+            _typesToMap = new ReplaySubject<IModelMapperConfiguration>();
+            
+            MappingTypes=new ReplaySubject<IModelMapperConfiguration>();
+            MappedTypes = GetMappedTypes();
+            _modelMapperModuleVersion = typeof(TypeMappingService).Assembly.GetName().Version;
+            
+            ConfigureReservedProeprties();
+            ConfigureReservedPropertyTypes();
+            ConfigureReservedPropertyInstances();
+            ConfigureAdditionalReferences();
+        }
+
+        private static IObservable<Type> GetMappedTypes(){
+            return Observable.Defer(() => {
+                    var distinnctTypesToMap = _typesToMap.Distinct(_ => _.TypeToMap).Do(MappingTypes);
+                    return distinnctTypesToMap
+                        .All(_ =>_skipeAssemblyValidation|| _.TypeFromPath())
+                        .Select(_ => {
+                            var assembly =!_? distinnctTypesToMap.ModelCode().SelectMany(tuple => tuple.references.Compile(tuple.code))
+                                : Assembly.LoadFile(GetLastAssemblyPath()).ReturnObservable();
+                            return assembly.SelectMany(assembly1 => {
+                                var types = assembly1.GetTypes()
+                                    .Where(type => typeof(IModelModelMap).IsAssignableFrom(type))
+                                    .Where(type => !type.Attributes<ModelAbstractClassAttribute>().Any())
+                                    .ToArray();
+                                return types;
+                            });
+                        }).Switch();
+                }).Publish().AutoConnect().Replay().AutoConnect().Distinct()
+                .Finally(() => _skipeAssemblyValidation=false);
+        }
+
+        private static void ConfigureAdditionalReferences(){
+            new[]{
+                    typeof(IModelNode), typeof(DescriptionAttribute), typeof(AssemblyFileVersionAttribute),
+                    typeof(ImageNameAttribute), typeof(TypeMappingService)
+                }
+                .ToObservable(Scheduler.Immediate)
+                .Do(type => AdditionalReferences.Add(type.Assembly.Location))
+                .Subscribe();
+        }
+
+        private static void ConfigureReservedPropertyInstances(){
+            new[]{typeof(IDictionary)}.ToObservable(Scheduler.Immediate)
+                .Do(type => ReservedPropertyInstances.Add(type))
+                .Subscribe();
+        }
+
+        private static void ConfigureReservedPropertyTypes(){
+            new[]{typeof(Type), typeof(IList), typeof(object), typeof(Array), typeof(IComponent), typeof(ISite)}
+                .ToObservable(Scheduler.Immediate)
+                .Do(type => ReservedPropertyTypes.Add(type))
+                .Subscribe();
+            var systemWebAssembly = AppDomain.CurrentDomain.GetAssemblies()
+                .FirstOrDefault(assembly => assembly.GetName().Name == "System.Web");
+            if (systemWebAssembly != null){
+                var type = systemWebAssembly.GetType("System.Web.HttpCookie");
+                ReservedPropertyTypes.Add(type);
+            }
+        }
+
+        private static void ConfigureReservedProeprties(){
+            ReservedPropertyNames.Clear();
+            new[]{typeof(ModelNode), typeof(IModelNode), typeof(ModelApplicationBase)}
+                .SelectMany(_ => _.Members(MemberTypes.Property | MemberTypes.Method)
+                    .Where(info => info is MethodBase method
+                        ? !method.IsPrivate
+                        : AccessModifier.Public.YieldItem().Add(AccessModifier.Protected)
+                            .Contains(((PropertyInfo) info).AccessModifier()))).Select(_ => _.Name)
+                .Concat(new[]{"Item", "IsReadOnly", "Remove", "Id", "Nodes", "IsValid"}).Distinct()
+                .ToObservable(Scheduler.Immediate)
+                .Do(name => ReservedPropertyNames.Add(name))
+                .Subscribe();
+        }
+
+        private static ObservableCollection<(string key, Action<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)> action)> GetPropertyMappingRules(){
+            return new ObservableCollection<(string key, Action<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)> action)>{
                 (nameof(DesignerSerializationVisibilityAttribute), DesignerSerializationVisibilityAttribute),
                 (nameof(GenericTypeArguments), GenericTypeArguments),
                 (nameof(BrowsableRule), BrowsableRule),
@@ -87,61 +159,15 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 (nameof(WithNonPublicAttributeParameters), NonPublicAttributeParameters),
                 (nameof(TypeConverterWithDXDesignTimeType), TypeConverterWithDXDesignTimeType)
             };
-            _typesToMap = new ReplaySubject<IModelMapperConfiguration>();
-            _mappingTypes = new ReplaySubject<IModelMapperConfiguration>();
-            MappingTypes=_mappingTypes;
-            MappedTypes = Observable.Defer(() => {
-                var distinnctTypesToMap = _typesToMap.Distinct(_ => _.TypeToMap).Do(_mappingTypes);
-                return distinnctTypesToMap
-                    .All(_ =>_skipeAssemblyValidation|| _.TypeFromPath())
-                    .Select(_ => {
-                        var assembly =!_? distinnctTypesToMap.ModelCode().SelectMany(tuple => tuple.references.Compile(tuple.code))
-                                : Assembly.LoadFile(GetLastAssemblyPath()).ReturnObservable();
-                        return assembly.SelectMany(assembly1 => {
-                            var types = assembly1.GetTypes()
-                                .Where(type => typeof(IModelModelMap).IsAssignableFrom(type))
-                                .Where(type => !type.Attributes<ModelAbstractClassAttribute>().Any())
-                                .ToArray();
-                            return types;
-                        });
-                    }).Switch();
-            }).Publish().AutoConnect().Replay().AutoConnect().Distinct()
-                .Finally(() => _skipeAssemblyValidation=false);
-            _modelMapperModuleVersion = typeof(TypeMappingService).Assembly.GetName().Version;
-            
-            ReservedPropertyNames.Clear();
-            new []{typeof(ModelNode),typeof(IModelNode),typeof(ModelApplicationBase)}
-                .SelectMany(_ => _.Members(MemberTypes.Property|MemberTypes.Method)
-                    .Where(info => info is MethodBase method? !method.IsPrivate
-                    : AccessModifier.Public.YieldItem().Add(AccessModifier.Protected)
-                        .Contains(((PropertyInfo) info).AccessModifier()))).Select(_ => _.Name)
-                .Concat(new []{"Item","IsReadOnly","Remove","Id","Nodes","IsValid"}).Distinct()
-                .ToObservable(Scheduler.Immediate)
-                .Do(name => ReservedPropertyNames.Add(name))
-                .Subscribe();
-            new[]{typeof(Type), typeof(IList), typeof(object), typeof(Array), typeof(IComponent), typeof(ISite)}
-                .ToObservable(Scheduler.Immediate)
-                .Do(type => ReservedPropertyTypes.Add(type))
-                .Subscribe();
-            new[]{typeof(IDictionary)}.ToObservable(Scheduler.Immediate)
-                .Do(type => ReservedPropertyInstances.Add(type))
-                .Subscribe();
-            new []{typeof(IModelNode),typeof(DescriptionAttribute),typeof(AssemblyFileVersionAttribute),typeof(ImageNameAttribute),typeof(TypeMappingService)}
-                .ToObservable(Scheduler.Immediate)
-                .Do(type => AdditionalReferences.Add(type.Assembly.Location))
-                .Subscribe();
-            
-            var systemWebAssembly = AppDomain.CurrentDomain.GetAssemblies()
-                .FirstOrDefault(assembly => assembly.GetName().Name == "System.Web");
-            if (systemWebAssembly != null){
-                var type = systemWebAssembly.GetType("System.Web.HttpCookie");
-                ReservedPropertyTypes.Add(type);
-            }
-            
-            
         }
 
-        
+        private static ObservableCollection<(string key, Action<ModelMapperType> action)> GetTypeMappingRules(){
+            return new ObservableCollection<(string key, Action<ModelMapperType> action)>(){
+                (nameof(WithNonPublicAttributeParameters), NonPublicAttributeParameters),
+                (nameof(GenericTypeArguments), GenericTypeArguments),
+            };
+        }
+
 
         public static IEnumerable<Type> ModelMapperContainerTypes(this Type type){
             return type.Assembly.GetTypes()

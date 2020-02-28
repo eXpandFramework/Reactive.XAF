@@ -2,63 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="6d118cbd-0e48-43f0-8308-7ad34e028ea1" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../Extensions/Xpand.Extensions.Mono.Cecil/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Extensions/Xpand.Extensions.Mono.Cecil/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Extensions/Xpand.Extensions.XAF.Xpo/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Extensions/Xpand.Extensions.XAF.Xpo/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Extensions/Xpand.Extensions.XAF/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Extensions/Xpand.Extensions.XAF/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Extensions/Xpand.Extensions/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Extensions/Xpand.Extensions/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Modules/AutoCommit/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/AutoCommit/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Modules/CloneMemberValue/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/CloneMemberValue/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Modules/CloneModelView/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/CloneModelView/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Modules/GridListEditor/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/GridListEditor/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Modules/HideToolBar/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/HideToolBar/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Modules/MasterDetail/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/MasterDetail/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Modules/ModelMapper/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/ModelMapper/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Modules/ModelMapper/Services/TypeMapping/Compile.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/ModelMapper/Services/TypeMapping/Compile.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../go.ps1" beforeDir="false" afterPath="$PROJECT_DIR$/../../go.ps1" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Modules/ModelMapper/Services/TypeMapping/PublicMembers.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/ModelMapper/Services/TypeMapping/PublicMembers.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Modules/ModelViewInheritance/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/ModelViewInheritance/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Modules/OneView/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/OneView/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Modules/ProgressBarViewItem/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/ProgressBarViewItem/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Modules/Reactive.Logger.Client.Win/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/Reactive.Logger.Client.Win/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Modules/Reactive.Logger.Hub/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/Reactive.Logger.Hub/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Modules/Reactive.Logger/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/Reactive.Logger/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Modules/Reactive.Win/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/Reactive.Win/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Modules/Reactive/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/Reactive/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Modules/RefreshView/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/RefreshView/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Modules/SuppressConfirmation/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/SuppressConfirmation/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Modules/ViewEditMode/Properties/AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../Modules/ViewEditMode/Properties/AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ALL/ALL.Web.Tests/ALL.Web.Tests.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/ALL/ALL.Web.Tests/ALL.Web.Tests.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ALL/ALL.Win.Tests/ALL.Win.Tests.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/ALL/ALL.Win.Tests/ALL.Win.Tests.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ALL/TestApplication/TestApplication.Web/TestApplication.Web.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/ALL/TestApplication/TestApplication.Web/TestApplication.Web.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ALL/TestApplication/TestApplication.Web/Web.config" beforeDir="false" afterPath="$PROJECT_DIR$/ALL/TestApplication/TestApplication.Web/Web.config" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ALL/TestApplication/TestApplication.Win/TestApplication.Win.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/ALL/TestApplication/TestApplication.Win/TestApplication.Win.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ModelMapper/ModelBindingServiceTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ModelMapper/ModelBindingServiceTests.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.Extensions.Mono.Cecil.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.Extensions.Mono.Cecil.nuspec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.Extensions.Reactive.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.Extensions.Reactive.nuspec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.Extensions.XAF.Xpo.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.Extensions.XAF.Xpo.nuspec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.Extensions.XAF.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.Extensions.XAF.nuspec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.Extensions.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.Extensions.nuspec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Core.All.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Core.All.nuspec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.AutoCommit.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.AutoCommit.nuspec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.CloneMemberValue.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.CloneMemberValue.nuspec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.CloneModelView.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.CloneModelView.nuspec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.GridListEditor.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.GridListEditor.nuspec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.HideToolBar.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.HideToolBar.nuspec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.MasterDetail.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.MasterDetail.nuspec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.ModelMapper.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.ModelMapper.nuspec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.ModelViewInheritance.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.ModelViewInheritance.nuspec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.OneView.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.OneView.nuspec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.ProgressBarViewItem.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.ProgressBarViewItem.nuspec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.Reactive.Logger.Client.Win.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.Reactive.Logger.Client.Win.nuspec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.Reactive.Logger.Hub.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.Reactive.Logger.Hub.nuspec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.Reactive.Logger.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.Reactive.Logger.nuspec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.Reactive.Win.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.Reactive.Win.nuspec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.Reactive.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.Reactive.nuspec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.RefreshView.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.RefreshView.nuspec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.SuppressConfirmation.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.SuppressConfirmation.nuspec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.ViewEditMode.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Modules.ViewEditMode.nuspec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Web.All.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Web.All.nuspec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Win.All.nuspec" beforeDir="false" afterPath="$PROJECT_DIR$/../../tools/nuspec/Xpand.XAF.Win.All.nuspec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Tests/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Tests/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/config/applicationhost.config" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/config/applicationhost.config" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -121,6 +68,7 @@
     <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions/Linq/FromHierarchy.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$USER_HOME$/AppData/Local/Symbols/src/eXpandFramework/Fasterflect/06d8e16a324a93f87a52350f59bdf1820be86f5b/Fasterflect/Emitter/LookupUtils.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/ModelMapper/TestTypes.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions/Linq/WhereNotDefault.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$USER_HOME$/AppData/Local/Symbols/src/nunit/nunit/c933a883ea25263ec575a654dae69fa38000edd9/src/NUnitFramework/framework/Attributes/PropertyAttribute.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../Extensions/Xpand.Extensions/Properties/AssemblyInfo.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/ALL/TestApplication/TestApplication.Web/Default.aspx" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
@@ -311,8 +259,8 @@
         <option value="$PROJECT_DIR$/ModelMapper/ModelMapperBaseTest.cs" />
         <option value="$PROJECT_DIR$/../Modules/ModelMapper/Services/TypeMapping/Compile.cs" />
         <option value="$PROJECT_DIR$/../Extensions/Xpand.Extensions/AppDomain/ApplicationPath.cs" />
-        <option value="$PROJECT_DIR$/../Modules/ModelMapper/Services/TypeMapping/PublicMembers.cs" />
         <option value="$PROJECT_DIR$/ModelMapper/ModelBindingServiceTests.cs" />
+        <option value="$PROJECT_DIR$/../Modules/ModelMapper/Services/TypeMapping/PublicMembers.cs" />
       </list>
     </option>
   </component>
@@ -329,6 +277,8 @@
     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="Rider.DefaultBreakpoints.AreToggled" value="true" />
     <property name="Rider.ProjectViewActivator.IsNotFirstRun" value="true" />
+    <property name="Rider.SolutionExplorerActivator" value="true" />
+    <property name="TWShift.3" value="true" />
     <property name="TWShift.4" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="settings.editor.selected.configurable" value="project.propDebugger" />
@@ -486,6 +436,7 @@
       <workItem from="1582128378284" duration="310000" />
       <workItem from="1582199182707" duration="2227000" />
       <workItem from="1582203404368" duration="1860000" />
+      <workItem from="1582893986887" duration="1781000" />
     </task>
     <servers />
   </component>
@@ -675,12 +626,12 @@
       <screen x="0" y="0" width="1920" height="1160" />
     </state>
     <state x="617" y="271" width="672" height="677" key="run.anything.popup/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@0.0.1920.1160" timestamp="1581921540755" />
-    <state x="623" y="255" width="672" height="679" key="search.everywhere.popup" timestamp="1582203498292">
+    <state x="623" y="255" width="672" height="679" key="search.everywhere.popup" timestamp="1582894144099">
       <screen x="0" y="0" width="1920" height="1160" />
     </state>
     <state x="623" y="255" width="672" height="679" key="search.everywhere.popup/-1920.317.1920.1020/0.0.1920.1160/2880.334.1920.1040@0.0.1920.1160" timestamp="1578393565483" />
     <state x="3503" y="563" width="672" height="608" key="search.everywhere.popup/-1920.317.1920.1020/0.0.1920.1160/2880.334.1920.1040@2880.334.1920.1040" timestamp="1577976545158" />
-    <state x="623" y="255" width="672" height="679" key="search.everywhere.popup/0.0.1920.1160/-1920.235.1920.1040/2880.160.1920.1040@0.0.1920.1160" timestamp="1582203498292" />
+    <state x="623" y="255" width="672" height="679" key="search.everywhere.popup/0.0.1920.1160/-1920.235.1920.1040/2880.160.1920.1040@0.0.1920.1160" timestamp="1582894144099" />
     <state x="623" y="255" width="672" height="679" key="search.everywhere.popup/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@0.0.1920.1160" timestamp="1581949803966" />
     <state x="623" y="255" width="672" height="678" key="search.everywhere.popup/0.0.1920.1160/-1920.317.1920.1040/2880.334.1920.1040@2880.334.1920.1040" timestamp="1577615046577" />
     <state x="623" y="255" width="672" height="679" key="search.everywhere.popup/0.0.1920.1160/2880.320.1920.1040@0.0.1920.1160" timestamp="1578677211655" />
@@ -788,26 +739,26 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/../Modules/ModelMapper/Services/TypeMapping/PublicMembers.cs</url>
-          <line>238</line>
+          <line>270</line>
           <properties documentPath="$PROJECT_DIR$/../Modules/ModelMapper/Services/TypeMapping/PublicMembers.cs" initialLine="238">
             <startOffsets>
-              <option value="12648" />
+              <option value="13927" />
             </startOffsets>
             <endOffsets>
-              <option value="12729" />
+              <option value="14008" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="23" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/../Modules/ModelMapper/Services/TypeMapping/PublicMembers.cs</url>
-          <line>71</line>
+          <line>69</line>
           <properties documentPath="$PROJECT_DIR$/../Modules/ModelMapper/Services/TypeMapping/PublicMembers.cs" initialLine="71">
             <startOffsets>
-              <option value="3255" />
+              <option value="3171" />
             </startOffsets>
             <endOffsets>
-              <option value="3346" />
+              <option value="3262" />
             </endOffsets>
           </properties>
           <option name="timeStamp" value="24" />
