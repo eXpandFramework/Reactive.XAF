@@ -36,6 +36,7 @@ using Xpand.XAF.Modules.ModelMapper.Services.Predefined;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.TypeMappingService;
 
+
 namespace Xpand.XAF.Modules.ModelMapper.Tests{
     [NonParallelizable]
     public class ModelMapperExtenderServiceTests : ModelMapperBaseTest{

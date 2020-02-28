@@ -1,3 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{00D2F9A9-F3B7-4A5D-8556-DCF05493D5A6}</ProjectGuid>
@@ -25,4 +26,5 @@
     <PackageReference Include="DevExpress.ExpressApp" Version="19.2.6" />
     <PackageReference Include="DevExpress.Persistent.Base" Version="19.2.6" />
   </ItemGroup>
+  <Import Project="..\..\..\..\.paket\Paket.Restore.targets" />
 </Project>

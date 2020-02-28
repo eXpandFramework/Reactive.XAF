@@ -20,7 +20,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             var codeProvider = new CSharpCodeProvider();
             var compilerParameters = new CompilerParameters{
                 CompilerOptions = "/t:library /optimize",
-                OutputAssembly = FomatOutputAssembly()
+                OutputAssembly = FormatOutputAssembly()
             };
             
             var strings = references.ToArray();
@@ -33,12 +33,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 throw new Exception(message);
             }
 
-            var assembly = RemoveRecursiveProperties(FomatOutputAssembly());
+            var assembly = RemoveRecursiveProperties(FormatOutputAssembly());
             return assembly.ReturnObservable().TraceModelMapper();
 
         }
 
-        private static string FomatOutputAssembly() => string.Format(OutputAssembly, ModelExtendingService.Platform);
+        private static string FormatOutputAssembly() => string.Format(OutputAssembly, ModelExtendingService.Platform);
 
         private static Assembly RemoveRecursiveProperties(string assembly){
             
@@ -87,7 +87,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
 
         private static bool TypeFromPath(this IModelMapperConfiguration configuration){
             var assemblyPath = GetLastAssemblyPath();
-            if (assemblyPath!=null){
+            if (!string.IsNullOrEmpty(assemblyPath)){
                 using var assembly = AssemblyDefinition.ReadAssembly(assemblyPath);
                 if (assembly.IsMapped(configuration) && !assembly.VersionChanged() && !assembly.ConfigurationChanged()){
                     return true;
@@ -97,10 +97,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         private static string GetLastAssemblyPath(){
+            var outputAssembly = FormatOutputAssembly();
             var assemblyPath = Directory
-                .GetFiles($"{Path.GetDirectoryName(FomatOutputAssembly())}", $"{Path.GetFileNameWithoutExtension(FomatOutputAssembly())}*.dll")
+                .GetFiles($"{Path.GetDirectoryName(outputAssembly)}", $"{Path.GetFileNameWithoutExtension(outputAssembly)}*.dll")
                 .OrderByDescending(s => s).FirstOrDefault();
-            return assemblyPath;
+            return $"{assemblyPath}".Replace(@"\\",@"\");
         }
 
         private static bool ConfigurationChanged(this AssemblyDefinition assembly){

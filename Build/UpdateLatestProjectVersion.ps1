@@ -1,6 +1,9 @@
 $labPackages = Get-XpandPackages -PackageType XAFAll -Source Lab
 Write-HostFormatted "labPackages"  -Section
 $labPackages | Out-String
+$officialPackages = Get-XpandPackages -PackageType XAFAll -Source Release
+Write-HostFormatted "officialPackages"  -Section
+$officialPackages | Out-String
 if ($Branch -eq "master"){
     $latestPackages = Get-XpandPackages -PackageType XAFAll -Source Release|ForEach-Object{
         $package=$_
@@ -133,17 +136,17 @@ $localPackages = (Get-ChildItem "$sourcePath\src\Modules" "*.csproj" -Recurse) +
     }
 }
 Write-HostFormatted "Checking if local build version increase" -Section
-$localPackages | ForEach-Object {
-    $localpackage = $_
-    $publishedPackage = $publishedPackages | Where-Object { $_.id -eq $localpackage.id }
-    $publishedVersion = ([version](Get-VersionPart $publishedPackage.Version Build))
-    $local = ([version](Get-VersionPart $localpackage.Version Build))
-    if ($local -ne $publishedVersion) {
-        $remoteversion = "$(Get-VersionPart $publishedVersion Build).$(($publishedVersion.Revision+1))"
-        Write-Warning "$($localPackage.Id) release build version ($remoteVersion) is different than local ($local)"
-        $updateVersion += $localPackage.File.BaseName
-    }
-}
+# $localPackages | ForEach-Object {
+#     $localpackage = $_
+#     $publishedPackage = $publishedPackages | Where-Object { $_.id -eq $localpackage.id }
+#     $publishedVersion = ([version](Get-VersionPart $publishedPackage.Version Build))
+#     $local = ([version](Get-VersionPart $localpackage.Version Build))
+#     if ($local -ne $publishedVersion) {
+#         $remoteversion = "$(Get-VersionPart $publishedVersion Build).$(($publishedVersion.Revision+1))"
+#         Write-Warning "$($localPackage.Id) release build version ($remoteVersion) is different than local ($local)"
+#         $updateVersion += $localPackage.File.BaseName
+#     }
+# }
 if ($updateVersion) {
     Write-HostFormatted "Collect related assemblies:" -Section
     $packageDeps=Get-XpandPackages Lab XAFAll|Where-Object{$_.id -notlike "*all*"}|Invoke-Parallel -Script{

@@ -626,3 +626,4 @@ $RECYCLE.BIN/
 /buildstage/
 /src/Tests/ModelMapper/Properties/launchSettings.json
 /src/Tests/TestsLib/Properties/launchSettings.json
+**/.idea/**

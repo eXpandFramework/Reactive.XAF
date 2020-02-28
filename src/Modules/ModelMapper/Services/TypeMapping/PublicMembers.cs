@@ -89,7 +89,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         private static IObservable<Type> GetMappedTypes(){
             Assembly LoadFile(){
                 var lastAssemblyPath = GetLastAssemblyPath();
-                var loaded=AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(asm => asm.Location.Equals(lastAssemblyPath,StringComparison.OrdinalIgnoreCase));
+                var loaded=AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(asm =>!asm.IsDynamic&& $"{asm.Location.Replace(@"\\",@"\")}".Equals(lastAssemblyPath,StringComparison.OrdinalIgnoreCase));
                 return loaded??Assembly.LoadFile(lastAssemblyPath);
             }
 

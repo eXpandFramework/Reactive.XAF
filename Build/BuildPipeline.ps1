@@ -1,5 +1,5 @@
 param(
-    $Branch = "master",
+    $Branch = "lab",
     $SourcePath = "$PSScriptRoot\..",
     $GitHubUserName = "apobekiaris",
     $GitHubToken = $env:GitHubToken,
