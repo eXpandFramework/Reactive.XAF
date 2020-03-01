@@ -1,4 +1,5 @@
-﻿using Fasterflect;
+﻿using System.IO;
+using Fasterflect;
 using JetBrains.Annotations;
 
 namespace Xpand.Extensions.AppDomain{

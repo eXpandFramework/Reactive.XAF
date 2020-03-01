@@ -87,19 +87,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         private static IObservable<Type> GetMappedTypes(){
-            Assembly LoadFile(){
-                var lastAssemblyPath = GetLastAssemblyPath();
-                var loaded=AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(asm =>!asm.IsDynamic&& $"{asm.Location.Replace(@"\\",@"\")}".Equals(lastAssemblyPath,StringComparison.OrdinalIgnoreCase));
-                return loaded??Assembly.LoadFile(lastAssemblyPath);
-            }
-
             return Observable.Defer(() => {
                     var distinnctTypesToMap = _typesToMap.Distinct(_ => _.TypeToMap).Do(MappingTypes);
                     return distinnctTypesToMap
-                        .All(_ =>_skipeAssemblyValidation|| _.TypeFromPath())
+                        .All(_ =>_skipAssemblyValidation|| _.TypeFromPath())
                         .Select(_ => {
                             var assembly =!_? distinnctTypesToMap.ModelCode().SelectMany(tuple => tuple.references.Compile(tuple.code))
-                                : LoadFile().ReturnObservable();
+                                : AppDomain.CurrentDomain.LoadAssembly(GetLastAssemblyPath()).ReturnObservable();
                             return assembly.SelectMany(assembly1 => {
                                 var types = assembly1.GetTypes()
                                     .Where(type => typeof(IModelModelMap).IsAssignableFrom(type))
@@ -109,7 +103,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                             });
                         }).Switch();
                 }).Publish().AutoConnect().Replay().AutoConnect().Distinct()
-                .Finally(() => _skipeAssemblyValidation=false);
+                .Finally(() => _skipAssemblyValidation=false);
         }
 
         private static void ConfigureAdditionalReferences(){
@@ -258,7 +252,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
 
         [PublicAPI]
         public static void Reset(bool skipeAssemblyValidation=false,Platform? platform=null){
-            _skipeAssemblyValidation = skipeAssemblyValidation;
+            _skipAssemblyValidation = skipeAssemblyValidation;
             ContainerMappingRules.Clear();
             AdditionalTypesList.Clear();
             AdditionalReferences.Clear();

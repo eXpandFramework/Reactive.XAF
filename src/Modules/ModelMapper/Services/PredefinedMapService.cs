@@ -13,6 +13,7 @@ using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.Persistent.Base;
 using Fasterflect;
+using JetBrains.Annotations;
 using Xpand.Extensions.AppDomain;
 using Xpand.Extensions.XAF.Model;
 using Xpand.Extensions.XAF.XafApplication;
@@ -105,7 +106,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 var wildCard=partialMatch?"*":"";
                 var path = Directory.GetFiles(AppDomain.CurrentDomain.ApplicationPath(), $"{name}{wildCard}.dll").FirstOrDefault();
                 if (path!=null){
-                    return Assembly.LoadFile(path);
+                    return AppDomain.CurrentDomain.LoadAssembly(path);
                 }
 
                 try{
@@ -119,6 +120,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             return assembly;
         }
 
+        [PublicAPI]
         public static void Extend(this ApplicationModulesManager modulesManager,IEnumerable<PredefinedMap> maps, Action<ModelMapperConfiguration> configure = null){
             foreach (var map in maps){
                 modulesManager.Extend(map,configure);
@@ -155,12 +157,14 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 .FirstAsync();
         }
 
+        [PublicAPI]
         public static void Extend(this ApplicationModulesManager modulesManager,params PredefinedMap[] maps){
             foreach (var map in maps){
                 modulesManager.Extend(map);
             }
         }
 
+        [PublicAPI]
         public static void Extend(this ApplicationModulesManager modulesManager,Action<PredefinedMap,ModelMapperConfiguration> configure = null, params PredefinedMap[] maps){
             foreach (var map in maps){
                 modulesManager.Extend(map,configuration => configure?.Invoke(map, configuration));
@@ -250,6 +254,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             return mapperConfiguration;
         }
 
+        [PublicAPI]
         public static IModelNode AddControlsNode(this IModelNode modelNode, PredefinedMap predefinedMap,string id = null){
             return AddViewItemNode(modelNode, predefinedMap, id, ViewItemService.PropertyEditorControlMapName);
         }
@@ -272,6 +277,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             return ViewItemNode(modelNode, predefinedMap, ViewItemService.RepositoryItemsMapName);
         }
 
+        [PublicAPI]
         public static IModelNode GetControlsItemNode(this IModelNode modelNode, PredefinedMap predefinedMap){
             return ViewItemNode(modelNode, predefinedMap, ViewItemService.PropertyEditorControlMapName);
         }

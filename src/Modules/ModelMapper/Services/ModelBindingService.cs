@@ -107,7 +107,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             this IObservable<(ObjectView view, EventArgs e)> controlsCreated, string propertyMapName,Func<ObjectView, bool> viewMatch = null){
 
             return controlsCreated.Where(_ => viewMatch?.Invoke(_.view)??true).SelectMany(_ => {
-                return _.view.Model.AsObjectView.Items().Cast<IModelNode>()
+                return _.view.Model.AsObjectView.CommonMemberViewItems().Cast<IModelNode>()
                     .SelectMany(item => item.GetNode(propertyMapName)?.Nodes().Cast<IModelModelMap>() ?? Enumerable.Empty<IModelModelMap>())
                     .Select(node => (_.view,node));
             });

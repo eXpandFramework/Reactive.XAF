@@ -6,13 +6,14 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.CSharp;
 using Mono.Cecil;
+using Xpand.Extensions.AppDomain;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     public static partial class TypeMappingService{
-        private static bool _skipeAssemblyValidation;
+        private static bool _skipAssemblyValidation;
 
 
         private static IObservable<Assembly> Compile(this IEnumerable<string> references, string code){
@@ -50,7 +51,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 assemblyDefinition.Write();
             }
 
-            return Assembly.LoadFile(assembly);
+            return AppDomain.CurrentDomain.LoadAssembly(assembly);
         }
 
         private static void RemoveRecursiveProperties(this AssemblyDefinition assemblyDefinition,TypeReference type,string chainTypes){
@@ -101,7 +102,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             var assemblyPath = Directory
                 .GetFiles($"{Path.GetDirectoryName(outputAssembly)}", $"{Path.GetFileNameWithoutExtension(outputAssembly)}*.dll")
                 .OrderByDescending(s => s).FirstOrDefault();
-            return $"{assemblyPath}".Replace(@"\\",@"\");
+            return $"{assemblyPath}";
         }
 
         private static bool ConfigurationChanged(this AssemblyDefinition assembly){

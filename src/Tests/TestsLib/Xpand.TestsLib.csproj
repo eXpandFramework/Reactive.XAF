@@ -32,21 +32,27 @@
     <Reference Include="System.Web" />
     <Reference Include="Xpand.Extensions">
       <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
+      <SpecificVersion>false</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.Extensions.Reactive">
       <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.dll</HintPath>
+      <SpecificVersion>false</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.Extensions.XAF">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
+      <SpecificVersion>false</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
+      <SpecificVersion>false</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive.Logger">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.dll</HintPath>
+      <SpecificVersion>false</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive.Logger.Hub">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.Hub.dll</HintPath>
+      <SpecificVersion>false</SpecificVersion>
     </Reference>
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
