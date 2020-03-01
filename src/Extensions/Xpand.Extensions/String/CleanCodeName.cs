@@ -1,5 +1,6 @@
 ﻿using System;
 using System.CodeDom.Compiler;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Xpand.Extensions.String{

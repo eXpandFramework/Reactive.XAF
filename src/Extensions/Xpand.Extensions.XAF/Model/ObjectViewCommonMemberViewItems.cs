@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp.Model;
 
 namespace Xpand.Extensions.XAF.Model{
     public partial class ModelExtensions{
-        public static IEnumerable<IModelCommonMemberViewItem> Items(this IModelObjectView modelObjectView,string id=null){
+        public static IEnumerable<IModelCommonMemberViewItem> CommonMemberViewItems(this IModelObjectView modelObjectView,string id=null){
             var viewItems = modelObjectView is IModelDetailView modelDetailView
                 ? modelDetailView.Items.OfType<IModelCommonMemberViewItem>()
                 : ((IModelListView) modelObjectView).Columns;
