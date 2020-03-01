@@ -400,7 +400,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         private static (CharacterCasing concreteTypePropertyValue, string basePropertyValue) ConfigureModelRepositories(ObjectView objectView){
             var concreteTypePropertyValue = CharacterCasing.Upper;
             var basePropertyValue = "AccessibleDescription";
-            var repositoryItemsNode = objectView.Model.Items(nameof(MM.Test)).Cast<IModelNode>().First().GetNode(ViewItemService.RepositoryItemsMapName);
+            var repositoryItemsNode = objectView.Model.CommonMemberViewItems(nameof(MM.Test)).Cast<IModelNode>().First().GetNode(ViewItemService.RepositoryItemsMapName);
 
             var modelListItemType = repositoryItemsNode.ModelListItemType();
             
