@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{FCC60F32-B678-40B7-9226-9FBEB82B0FDA}</ProjectGuid>
+    <ProjectGuid>{EAC4F34F-31F9-47D6-B2FF-659B567D7E5F}</ProjectGuid>
     <TargetFramework>net461</TargetFramework>
     <LangVersion>latest</LangVersion>
     <SignAssembly>true</SignAssembly>
@@ -10,8 +10,8 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <OutputPath>..\..\..\bin</OutputPath>
-    <AssemblyTitle>Xpand.XAF.Modules.ViewEditMode</AssemblyTitle>
-    <Product>Xpand.XAF.Modules.ViewEditMode</Product>
+    <AssemblyTitle>Xpand.XAF.Modules.ClientLookupCascade</AssemblyTitle>
+    <Product>Xpand.XAF.Modules.ClientLookupCascade</Product>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <DebugType>full</DebugType>
@@ -23,13 +23,11 @@
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Xpand.Extensions">
+    <Reference Include="System.Web" />
+    <Reference Include="Xpand.Extensions, Version=2.201.9.0, Culture=neutral, PublicKeyToken=c52ffed5d5ff0958">
       <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
     </Reference>
-    <Reference Include="Xpand.Extensions.Reactive">
-      <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.dll</HintPath>
-    </Reference>
-    <Reference Include="Xpand.Extensions.XAF">
+    <Reference Include="Xpand.Extensions.XAF, Version=2.201.9.1, Culture=neutral, PublicKeyToken=c52ffed5d5ff0958">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
