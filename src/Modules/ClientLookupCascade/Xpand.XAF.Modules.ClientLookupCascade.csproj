@@ -24,10 +24,10 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Web" />
-    <Reference Include="Xpand.Extensions, Version=2.201.9.0, Culture=neutral, PublicKeyToken=c52ffed5d5ff0958">
+    <Reference Include="Xpand.Extensions">
       <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
     </Reference>
-    <Reference Include="Xpand.Extensions.XAF, Version=2.201.9.1, Culture=neutral, PublicKeyToken=c52ffed5d5ff0958">
+    <Reference Include="Xpand.Extensions.XAF">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">

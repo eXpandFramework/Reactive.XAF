@@ -24,7 +24,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 namespace Xpand.XAF.Modules.ClientLookupCascade.Tests{
     [NonParallelizable]
     [Serializable]
-    public class ReactiveLoggerTests : BaseTest{
+    public class ModelLogicTests : BaseTest{
         [XpandTest]
         [TestCase("Project_ListView")]
         [TestCase("Project_DetailView")]

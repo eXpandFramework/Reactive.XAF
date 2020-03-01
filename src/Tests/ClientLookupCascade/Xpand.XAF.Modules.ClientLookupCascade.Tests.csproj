@@ -28,7 +28,7 @@
     <Reference Include="Xpand.Extensions.XAF">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
     </Reference>
-    <Reference Include="Xpand.XAF.Modules.ClientLookupCascade, Version=2.201.0.0, Culture=neutral, PublicKeyToken=c52ffed5d5ff0958">
+    <Reference Include="Xpand.XAF.Modules.ClientLookupCascade">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.ClientLookupCascade.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
