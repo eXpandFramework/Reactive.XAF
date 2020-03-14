@@ -89,7 +89,7 @@ try {
     }
 }
 catch {
-    throw "$_`r`n$($_.InvocationInfo)"
+    throw "$_`r`n$($_.ScriptStackTrace)"
 }
 finally {
     try {

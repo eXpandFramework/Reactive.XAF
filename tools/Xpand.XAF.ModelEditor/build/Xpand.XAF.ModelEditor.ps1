@@ -63,7 +63,7 @@ try {
     CreateModelEditorBootStrapper $SolutionPath $dxversion $OutputPath
 }
 catch {
-    throw "$_`r`n$($_.InvocationInfo)"
+    throw "$_`r`n$($_.ScriptStackTrace)"
 }
 finally {
     try {

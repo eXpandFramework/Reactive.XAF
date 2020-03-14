@@ -26,7 +26,7 @@ $result = $regex.Match($CustomVersion).Groups[1].Value;
 & "$SourcePath\go.ps1" -InstallModules
 
 Set-VsoVariable build.updatebuildnumber "$env:build_BuildNumber-$CustomVersion"
-
+Pop-XafPackage
 
 $stage = "$SourcePath\buildstage"
 Remove-Item $stage -force -recurse -ErrorAction SilentlyContinue
