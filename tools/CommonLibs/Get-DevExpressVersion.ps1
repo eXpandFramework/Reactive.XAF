@@ -56,3 +56,42 @@ function GetDevExpressVersion($targetPath, $referenceFilter, $projectFile) {
     }
     $version
 }
+
+function Get-PaketReferences {
+    [CmdletBinding()]
+    param (
+        [System.IO.FileInfo]$projectFile = "."
+    )
+    
+    begin {
+        
+    }
+    
+    process {
+        $paketDirectoryInfo = $projectFile.Directory
+        $paketReferencesFile = "$($paketDirectoryInfo.FullName)\paket.references"
+        if (Test-Path $paketReferencesFile) {
+            Push-Location $projectFile.DirectoryName
+            $dependencies = dotnet paket show-installed-packages --project $projectFile.FullName --all --silent | ForEach-Object {
+                $parts = $_.split(" ")
+                [PSCustomObject]@{
+                    Include = $parts[1]
+                    Version = $parts[3]
+                }
+            }
+            Pop-Location
+            $c = Get-Content $paketReferencesFile | ForEach-Object {
+                $ref = $_
+                $d = $dependencies | Where-Object {
+                    $ref -eq $_.Include
+                }
+                $d
+            }
+            Write-Output $c
+        }
+    }
+    
+    end {
+        
+    }
+}

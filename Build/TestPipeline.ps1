@@ -2,7 +2,7 @@ using namespace Mono.Cecil
 using namespace System.Reflection
 using namespace System.IO
 param(
-    $SourcePath = [Path]::GetFullPath("$PSScriptRoot\..\.."),
+    $SourcePath = ([Path]::GetFullPath("$PSScriptRoot\..")),
     $AzureToken=$env:AzDevOpsToken,
     $AzureApplicationId=$env:AzApplicationId,
     $AzureTenantId=$env:AzTenantId,
@@ -17,12 +17,12 @@ if ($buildNumber){
     $env:AzDevOpsToken=$AzureToken
     $env:AzOrganization="eXpandDevops"
     $env:AzProject ="eXpandFramework"
-}
-if (!(Get-Module Az -ListAvailable)){
     Write-HostFormatted "Install Az powershell" -Section
     Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
     Install-Module -Name Az -AllowClobber -Scope CurrentUser    
 }
+
+
 Write-HostFormatted "Connecting to Azure" -Section
 $azurePassword = ConvertTo-SecureString $XpandBlobOwnerSecret -AsPlainText -Force
 $psCred = New-Object System.Management.Automation.PSCredential($AzureApplicationId , $azurePassword)
@@ -62,7 +62,7 @@ Invoke-Script {
     
     $monoPath = "$SourcePath\bin\"
     Write-HostFormatted "monoPath=$monoPath" -Section
-    Get-ChildItem $monoPath
+    Get-ChildItem $monoPath|Format-Table
     . $SourcePath\tools\commonLibs\common.ps1
     Install-MonoCecil $monopath
     . $SourcePath\tools\commonLibs\AssemblyResolver.ps1

@@ -34,7 +34,7 @@ jobs:
     - task: PowerShell@2
       displayName: 'BuildArtifacts'
       inputs:
-        pwsh: true
+        # pwsh: true
         targetType: inline
         script: |
           $a = @{

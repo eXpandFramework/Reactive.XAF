@@ -1,6 +1,6 @@
 param(
     $Branch = "lab",
-    $sourcesRoot = "$PSScriptRoot\..\..",
+    $sourcesRoot = "$PSScriptRoot\..",
     $apiKey=$env:NugetApiKey,
     $localPackageSource = "$PSScriptRoot\..\..\bin\Nupkg",
     $PastBuild,
@@ -8,10 +8,11 @@ param(
 
 )
 
+& "$sourcesRoot\go.ps1" -InstallModules
+$ErrorActionPreference="stop"
+$VerbosePreference="Continue"
 "localPackageSource=$localPackageSource"
-if (!(Get-Module XpandPwsh -ListAvailable)){
-    Install-Module XpandPwsh -Force
-}
+
 "Build_DefinitionName=$env:Build_DefinitionName"
 New-Item $sourcesRoot\build\Nuget -ItemType Directory
 $nupkg=Get-ChildItem "$localPackageSource" 

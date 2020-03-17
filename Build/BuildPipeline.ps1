@@ -21,10 +21,11 @@ Get-Module XpandPwsh -ListAvailable
 "CustomVersion=$CustomVersion"
 
 $ErrorActionPreference = "Stop"
+$regex = [regex] '(\d{2}\.\d*)'
+$result = $regex.Match($CustomVersion).Groups[1].Value;
+& "$SourcePath\go.ps1" -InstallModules
 Invoke-Script{
-    $regex = [regex] '(\d{2}\.\d*)'
-    $result = $regex.Match($CustomVersion).Groups[1].Value;
-    & "$SourcePath\go.ps1" -InstallModules
+    
 
     Set-VsoVariable build.updatebuildnumber "$env:build_BuildNumber-$CustomVersion"
 

@@ -2,7 +2,7 @@ param(
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\"),
     [switch]$Release,
     $dxVersion=$env:FirstDxVersion,
-    $branch="master"
+    $branch="lab"
 )
 
 $ErrorActionPreference = "Stop"
