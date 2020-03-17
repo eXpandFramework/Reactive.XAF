@@ -51,7 +51,10 @@ jobs:
         #     Copy-Item "$workingDirectory\$_" "$workspace/.nuget/packages/$_" -Force -ErrorAction Continue -verbose
         # }
         # Copy-Item '$(System.DefaultWorkingDirectory)\paket.lock1' '$(System.DefaultWorkingDirectory)\paket.lock' -Force -verbose
-      pwsh: true
+      # pwsh: true
+      errorActionPreference: continue
+      failOnStderr: false
+      ignoreLASTEXITCODE: true
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: UnitTests'
     inputs:

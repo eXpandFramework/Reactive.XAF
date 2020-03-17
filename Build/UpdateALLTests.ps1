@@ -1,11 +1,11 @@
 param(
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\"),
-    $branch = "master",
+    $branch = "lab",
     $source,
     $dxVersion = "19.2.6"
 )
 if (!$source) {
-    $source = "$(Get-PackageFeed -Xpand);$(Get-PackageFeed -DX)"
+    $source = "$(Get-PackageFeed -Xpand);$env:DxFeed"
 }
 if ($branch -eq "master") {
     $branch = "Release"

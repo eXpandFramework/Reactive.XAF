@@ -131,7 +131,7 @@
     <PackageReference Include="DevExpress.EasyTest" Version="19.2.6" />
     <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="19.2.6" />
     <PackageReference Include="Xpand.XAF.Web.All">
-      <Version>2.201.25.1</Version>
+      <Version>2.201.25.3</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
