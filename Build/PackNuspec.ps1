@@ -133,8 +133,7 @@ $modules=Get-XAFModule "$nugetBin\.." -Include "Xpand.XAF.Modules.*" -AssemblyLi
 }
 
 Write-HostFormatted "Update Nupkg files (ReadMe)" -Section
-# $packages|Invoke-Parallel -VariablesToImport "nugetbin","modules","assemblylist" -LimitConcurrency ([System.Environment]::ProcessorCount) -Script{
-$packages | ForEach-Object {
+$packages | ForEach-Object  {
     $baseName="$($_.Id).$($_.Version)"
     $zip = "$nugetbin\$baseName.zip" 
     $nupkgPath="$nugetBin\$baseName.nupkg"

@@ -24,6 +24,7 @@ $ErrorActionPreference = "Stop"
 $regex = [regex] '(\d{2}\.\d*)'
 $result = $regex.Match($CustomVersion).Groups[1].Value;
 & "$SourcePath\go.ps1" -InstallModules
+Clear-NugetCache -Filter XpandPackages
 Invoke-Script{
     
 

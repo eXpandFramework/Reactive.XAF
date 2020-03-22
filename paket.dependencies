@@ -1,5 +1,5 @@
 strategy:max
-source F:\devexpress\Packages\
+source C:\Program Files (x86)\DevExpress 19.2\Components\System\Components\Packages
 source https://api.nuget.org/v3/index.json
 source https://xpandnugetserver.azurewebsites.net/nuget
 storage:none
@@ -12,10 +12,10 @@ nuget DevExpress.EasyTest == 19.2.6
 nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 19.2.6  
 nuget DevExpress.ExpressApp.EasyTest.WinAdapter == 19.2.6  
 nuget DevExpress.ExpressApp.Security.Xpo == 19.2.6  
-nuget Microsoft.Extensions.Dependencyinjection == 3.1.0  
-nuget Enums.NET 3.0
+nuget Microsoft.Extensions.Dependencyinjection == 3.1.2  
+nuget Enums.NET 3.0.3
 nuget FasterFlect.Xpand
-nuget Mono.Cecil 0.11.1
+nuget Mono.Cecil 0.11.2
 nuget Moq 4.13.1
 nuget MagicOnion 2.6.3
 nuget Grpc 2.23.0
@@ -27,16 +27,15 @@ nuget NUnit 3.12
 nuget NUnit3TestAdapter 3.16.1
 nuget Ryder 0.8
 nuget Shouldly 3.0.2 
-nuget System.CodeDom 4.6
+nuget System.CodeDom 4.7
 nuget System.Data.Common 4.3  
 nuget System.Interactive 4.0
 nuget System.Interactive.Async 4.0
 nuget System.Drawing.Common 4.7
-nuget System.Reactive 4.2
+nuget System.Reactive 4.3.2
 nuget System.Collections.Immutable 1.7.0
 nuget Unofficial.Microsoft.mshtml 7.0.3300
 nuget Xpand.Patcher 
 nuget Xpand.Collections 
 nuget Jetbrains.Annotations
-nuget Polly 7.1.1
-
+nuget Polly 7.2.0
