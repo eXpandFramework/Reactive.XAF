@@ -5,7 +5,6 @@ using Fasterflect;
 
 namespace Xpand.Extensions.XAF.XafApplication{
     public static partial class XafApplicationExtensions{
-
         public static ObjectView CreateObjectView(this DevExpress.ExpressApp.XafApplication application,
             Type viewType,Type objectType) {
             if (viewType == typeof(ListView)){

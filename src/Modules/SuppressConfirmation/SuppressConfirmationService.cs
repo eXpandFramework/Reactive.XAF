@@ -7,7 +7,6 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.SystemModule;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
-using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.SuppressConfirmation{
@@ -25,24 +24,21 @@ namespace Xpand.XAF.Modules.SuppressConfirmation{
 
         internal static IObservable<Unit> Connect(this XafApplication application){
             if (application != null){
-                var viewSignal = application
-                    .WhenObjectViewCreated()
-                    .Where(view => ((IModelObjectViewSupressConfirmation) view.Model).SupressConfirmation)
-                    .SelectMany(view => {
+                var suppressConfirmationWindows = application.WhenSuppressConfirmationWindows().Publish().RefCount();
+                return suppressConfirmationWindows
+                    .SelectMany(frame => frame.ChangeModificationHandlingMode().To(frame))
+                    .SelectMany(frame => {
                         var whenNewDetailViewObjectChangedOnce = Observable.Empty<Unit>();
-                        if (view is DetailView detailView && detailView.ObjectSpace.IsNewObject(detailView.CurrentObject)){
+                        if (frame.View is DetailView detailView && detailView.ObjectSpace.IsNewObject(detailView.CurrentObject)){
                             whenNewDetailViewObjectChangedOnce = detailView.ObjectSpace.WhenObjectChanged()
                                 .Select(tuple => tuple).FirstAsync().ToUnit();
                         }
+
                         return whenNewDetailViewObjectChangedOnce
-                            .Merge(view.ObjectSpace.WhenCommited().Select(tuple => tuple).ToUnit()).ToUnit();
-                    }).Publish().RefCount();
-
-
-                var suppressConfirmationWindows = application.WhenSuppressConfirmationWindows().TraceSuppressConfirmationModule().Retry(application).Publish().RefCount();
-                return viewSignal.CombineLatest(suppressConfirmationWindows, (unit, frame) => ChangeModificationHandlingMode(frame)).Merge().ToUnit()
-                    .Merge(suppressConfirmationWindows.Select(DisableWebControllers).ToUnit())
-                    .ToUnit();
+                            .Merge(frame.View.ObjectSpace.WhenCommited().Select(tuple => tuple).ToUnit()).ToUnit()
+                            .SelectMany(_ => frame.ChangeModificationHandlingMode());
+                    }).ToUnit()
+                    .Merge(suppressConfirmationWindows.Select(DisableWebControllers).ToUnit());
             }
             return Observable.Empty<Unit>();
         }
@@ -57,7 +53,7 @@ namespace Xpand.XAF.Modules.SuppressConfirmation{
                 }).ToArray().ToObservable();
         }
 
-        private static IObservable<Unit> ChangeModificationHandlingMode(Frame window){
+        private static IObservable<Unit> ChangeModificationHandlingMode(this Frame window){
             window.GetController<ModificationsController>().ModificationsHandlingMode = ModificationsHandlingMode;
             return Observable.Empty<Unit>();
         }
@@ -68,7 +64,7 @@ namespace Xpand.XAF.Modules.SuppressConfirmation{
                 .WhenModule(typeof(SuppressConfirmationModule))
                 .ViewChanged().Where(_ => _.frame.View is ObjectView)
                 .Where(_ => ((IModelObjectViewSupressConfirmation) _.frame.View.Model).SupressConfirmation)
-                .Select(_ => _.frame).Publish().RefCount();
+                .Select(_ => _.frame);
         }
     }
 }

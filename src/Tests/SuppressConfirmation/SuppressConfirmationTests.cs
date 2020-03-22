@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.SystemModule;
 using NUnit.Framework;
@@ -73,6 +74,7 @@ namespace Xpand.XAF.Modules.SuppressConfirmation.Tests{
                 objectView.ObjectSpace.CommitChanges();
 
                 window.GetController<ModificationsController>().ModificationsHandlingMode.ShouldBe((ModificationsHandlingMode) (-1));
+                window.Close();
             }
         }
 

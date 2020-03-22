@@ -250,7 +250,7 @@ namespace Xpand.TestsLib{
 
         public static void MockListEditor(this XafApplication application,
             Func<IModelListView, XafApplication, CollectionSourceBase, ListEditor> listEditor = null){
-            listEditor = listEditor ?? ((view, xafApplication, arg3) => {
+            listEditor ??= ((view, xafApplication, arg3) => {
                 var listEditorMock = ListEditorMock(application);
                 return listEditorMock.Object;
             });
