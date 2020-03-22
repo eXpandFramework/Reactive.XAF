@@ -50,7 +50,7 @@ Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -not
     if ($nuspecFileName -like "*Client*") {
         $a.src = "..\$($a.src)"
     }
-    Add-XmlElement $nuspec "file" "files" $a
+    Add-XmlElement -Owner $nuspec -elementname "file" -parent "files"-Attributes $a
     $a = [ordered]@{
         src = "..\build\CopySymbols.ps1"
         target="build\CopySymbols.ps1" 
@@ -58,7 +58,7 @@ Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -not
     if ($nuspecFileName -like "*Client*") {
         $a.src = "..\$($a.src)"
     }
-    Add-XmlElement $nuspec "file" "files" $a
+    Add-XmlElement -Owner $nuspec -elementname "file" -parent "files"-Attributes $a
     $readMePath = "$($_.DirectoryName)\ReadMe.md"
     if (Test-Path $readMePath) {
         $readMe = Get-Content $readMePath -Raw

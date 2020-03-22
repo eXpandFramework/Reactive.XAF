@@ -33,6 +33,7 @@ param(
 )
 Import-Module XpandPwsh -Force -Prefix X
 $ErrorActionPreference = "Stop"
+get-variable ChangedModules|Out-variable
 New-Item $nugetBin -ItemType Directory -Force | Out-Null
 Get-ChildItem $nugetBin | Remove-Item -Force -Recurse
 $toolPackages=@("Xpand.VersionConverter","Xpand.XAF.ModelEditor")
