@@ -5,6 +5,7 @@ using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Templates;
+using Fasterflect;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplication;
@@ -59,8 +60,9 @@ namespace Xpand.XAF.Modules.HideToolBar{
                     if (toolbarVisibilityController != null){
                         toolbarVisibilityController.Active[HideToolBarModule.CategoryName] = false;
                     }
+                    var barManager = frame.Template.GetType().Properties().FirstOrDefault(p => p.Name.Contains("DevExpress.ExpressApp.Win.Controls.IBarManagerHolder.BarManager"));
+                    barManager?.GetValue(frame.Template).GetPropertyValue("Bars").CallMethod("Clear");
                 }
-
                 var visibility = frame.Template as ISupportActionsToolbarVisibility;
                 visibility?.SetVisible(false);
                 return frame;
