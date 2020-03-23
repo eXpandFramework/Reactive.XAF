@@ -54,7 +54,7 @@ function GetDevExpressVersion($targetPath, $referenceFilter, $projectFile) {
             }
         }
     }
-    $version
+    "$($version.Major).$($version.Minor).$($version.Build)"
 }
 
 function Get-PaketReferences {

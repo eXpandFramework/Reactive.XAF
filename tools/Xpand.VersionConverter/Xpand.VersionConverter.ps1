@@ -66,6 +66,8 @@ try {
     
     Install-MonoCecil $targetPath
     $assemblyList=Get-ChildItem $packagesFolder -Include "*.dll","*.exe" -Recurse|Where-Object{$_.GetType() -ne [DirectoryInfo]}
+    $assemblyList+=Get-ChildItem $targetPath -Include "*.dll","*.exe" 
+    $assemblyList+=Get-ChildItem "$env:windir\Microsoft.NET\assembly\GAC_MSIL"  *.dll -Recurse
     $unpatchedPackages | Get-Item | ForEach-Object {
         $packageFile = $_.FullName
         $packageDir = $_.DirectoryName
