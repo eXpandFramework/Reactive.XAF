@@ -17,8 +17,7 @@ using View = DevExpress.ExpressApp.View;
 namespace Xpand.XAF.Modules.Reactive.Services{
     
     public static class XafApplicationRXExtensions{
-        public static IObservable<TSource> BufferUntilCompatibilityChecked<TSource>(
-            this XafApplication application,IObservable<TSource> source){
+        public static IObservable<TSource> BufferUntilCompatibilityChecked<TSource>(this XafApplication application,IObservable<TSource> source){
             var compatibilityCheckefd = application.WhenCompatibilityChecked().Select(xafApplication => xafApplication).FirstAsync();
             return source.Buffer(compatibilityCheckefd).FirstAsync().SelectMany(list => list)
                 .Concat(Observable.Defer(() => source)).Select(source1 => source1);
@@ -33,8 +32,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .TraceRX();
         }
 
-        public static IObservable<XafApplication> WhenModule(
-            this IObservable<XafApplication> source, Type moduleType){
+        public static IObservable<XafApplication> WhenModule(this IObservable<XafApplication> source, Type moduleType){
             return source.Where(_ => _.Modules.FindModule(moduleType)!=null);
         }
 
@@ -48,7 +46,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<T> ToController<T>(this IObservable<Frame> source) where T : Controller{
             return source.SelectMany(window => window.Controllers.Cast<Controller>())
-                .Select(controller => controller).OfType<T>().Select(controller => controller);
+                .Select(controller => controller).OfType<T>()
+                .Select(controller => controller);
         }
 
         public static IObservable<Controller> ToController(this IObservable<Window> source,params string[] names){
@@ -130,10 +129,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source.SelectMany(application => application.WhenObjectSpaceCreated());
         }
 
-        public static IObservable<(XafApplication application, ObjectSpaceCreatedEventArgs e)> WhenObjectSpaceCreated(this XafApplication application){
+        public static IObservable<(XafApplication application, ObjectSpaceCreatedEventArgs e)> WhenObjectSpaceCreated(this XafApplication application,bool includeNonPersistent=false){
             return Observable
                 .FromEventPattern<EventHandler<ObjectSpaceCreatedEventArgs>,ObjectSpaceCreatedEventArgs>(h => application.ObjectSpaceCreated += h,h => application.ObjectSpaceCreated -= h,ImmediateScheduler.Instance)
                 .TransformPattern<ObjectSpaceCreatedEventArgs,XafApplication>()
+                .Where(_ => includeNonPersistent || !(_.e.ObjectSpace is NonPersistentObjectSpace))
                 .TraceRX();
         }
         public static IObservable<(XafApplication application, EventArgs e)> SetupComplete(this IObservable<XafApplication> source){
@@ -157,11 +157,21 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source.Select(_ => _.e.View);
         }
 
-        public static IObservable<Frame> WhenViewOnFrame(
-            this XafApplication application,Type objectType=null,ViewType viewType=ViewType.Any,Nesting nesting=Nesting.Any){
+        public static IObservable<Frame> WhenViewOnFrame(this XafApplication application,Type objectType=null,ViewType viewType=ViewType.Any,Nesting nesting=Nesting.Any){
             return application.WhenWindowCreated().TemplateViewChanged()
                 .SelectMany(window => (window.View.ReturnObservable().When(objectType, viewType, nesting)).To(window))
                 .TraceRX();
+        }
+
+        public static IObservable<DetailViewCreatingEventArgs> WhenDetailViewCreating(this XafApplication application){
+            return Observable.FromEventPattern<EventHandler<DetailViewCreatingEventArgs>, DetailViewCreatingEventArgs>(
+                    h => application.DetailViewCreating += h, h => application.DetailViewCreating -= h, ImmediateScheduler.Instance)
+                .Select(tuple => tuple.EventArgs)
+                .TraceRX();
+        }
+
+        public static IObservable<DetailViewCreatedEventArgs> WhenDetailViewCreated(this XafApplication application,Type objectType){
+            return application.WhenDetailViewCreated().Where(_ => objectType.IsAssignableFrom(_.e.View.ObjectTypeInfo.Type)).Select(_ => _.e);
         }
 
         public static IObservable<(XafApplication application, DetailViewCreatedEventArgs e)> WhenDetailViewCreated(this XafApplication application){
@@ -174,10 +184,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
 
         public static IObservable<DashboardView> WhenDashboardViewCreated(this XafApplication application){
-            return Observable
-                .FromEventPattern<EventHandler<DashboardViewCreatedEventArgs>, DashboardViewCreatedEventArgs>(
+            return Observable.FromEventPattern<EventHandler<DashboardViewCreatedEventArgs>, DashboardViewCreatedEventArgs>(
                     h => application.DashboardViewCreated += h, h => application.DashboardViewCreated -= h,ImmediateScheduler.Instance)
-                .Select(pattern => pattern.EventArgs.View).TraceRX();
+                .Select(pattern => pattern.EventArgs.View)
+                .TraceRX();
         }
 
         public static IObservable<(XafApplication application, ListViewCreatedEventArgs e)> ListViewCreated(this IObservable<XafApplication> source){
@@ -187,7 +197,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return Observable
                 .FromEventPattern<EventHandler<ListViewCreatedEventArgs>, ListViewCreatedEventArgs>(
                     h => application.ListViewCreated += h, h => application.ListViewCreated -= h,ImmediateScheduler.Instance)
-                .TransformPattern<ListViewCreatedEventArgs, XafApplication>().TraceRX();
+                .TransformPattern<ListViewCreatedEventArgs, XafApplication>()
+                .TraceRX();
         }
         public static IObservable<ObjectView> WhenObjectViewCreated(this XafApplication application){
             return application.ReturnObservable().ObjectViewCreated();
@@ -207,7 +218,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<View> WhenViewCreated(this XafApplication application){
             return Observable
-                .FromEventPattern<EventHandler<ViewCreatedEventArgs>,ViewCreatedEventArgs>(h => application.ViewCreated += h,h => application.ViewCreated -= h,ImmediateScheduler.Instance)
+                .FromEventPattern<EventHandler<ViewCreatedEventArgs>, ViewCreatedEventArgs>(
+                    h => application.ViewCreated += h, h => application.ViewCreated -= h, ImmediateScheduler.Instance)
                 .Select(pattern => pattern.EventArgs.View);
         }
 

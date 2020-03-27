@@ -5,24 +5,11 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Editors;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
-    public static class NestedFrameExtensions{
-        public static IObservable<TFrame> WhenIsNotOnLookupPopupTemplate<TFrame>(this IObservable<TFrame> source)
-            where TFrame : Frame{
-            return source.Where(frame => !(frame.Template is ILookupPopupFrameTemplate))
-                .Cast<TFrame>();
-        }
-
-        public static IObservable<TFrame> WhenIsOnLookupPopupTemplate<TFrame>(this IObservable<TFrame> source)
-            where TFrame : Frame{
-            return source.Where(frame => frame.Template is ILookupPopupFrameTemplate)
-                .Cast<TFrame>();
-        }
-    }
-
     public static class FrameExtensions{
         public static IObservable<TFrame> WhenModule<TFrame>(
             this IObservable<TFrame> source, Type moduleType) where TFrame : Frame{
@@ -115,7 +102,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
 
         public static IObservable<Unit> DisposingFrame<TFrame>(this IObservable<TFrame> source) where TFrame : Frame{
-            return source.SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(
+            return source.WhenNotDefault().SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(
                 handler => item.Disposing += handler,
                 handler => item.Disposing -= handler,ImmediateScheduler.Instance)).ToUnit();
         }

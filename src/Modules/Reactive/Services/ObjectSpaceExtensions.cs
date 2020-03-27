@@ -1,24 +1,72 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
+using JetBrains.Annotations;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ObjectSpaceExtensions{
+        public static IObservable<T> WhenModifiedObjects<T>(this IObjectSpace objectSpace,bool emitAfterCommit=false,ObjectModification objectModification=ObjectModification.All ){
+            return objectSpace.WhenCommiting().SelectMany(_ => {
+                var modifiedObjects = objectSpace.ModifiedObjects<T>(objectModification).ToArray();
+                return emitAfterCommit ? objectSpace.WhenCommited().FirstAsync().SelectMany(pattern => modifiedObjects) : modifiedObjects.ToObservable();
+            });
+        }
+        static bool IsUpdated<T>(this IObjectSpace objectSpace, T t){
+            return !objectSpace.IsNewObject(t)&&!objectSpace.IsDeletedObject(t);
+        }
+
+        [PublicAPI]
+        public static IObservable<T> WhenDeletedObjects<T>(this IObjectSpace objectSpace,bool emitAfterCommit=false){
+            return emitAfterCommit ? objectSpace.WhenModifiedObjects<T>(true, ObjectModification.Deleted)
+                : objectSpace.WhenObjectDeleted()
+                    .SelectMany(pattern => pattern.e.Objects.Cast<object>()).OfType<T>()
+                    .TakeUntil(objectSpace.WhenDisposed());
+        }
+        
+        
+        [PublicAPI]
+        public static IEnumerable<T> ModifiedObjects<T>(this IObjectSpace objectSpace, ObjectModification objectModification){
+            
+            return objectSpace.ModifiedObjects.Cast<object>().Select(o => o).OfType<T>().Where(_ => {
+                if (objectModification == ObjectModification.Deleted){
+                    return objectSpace.IsDeletedObject(_);
+                }
+                if (objectModification == ObjectModification.New){
+                    return objectSpace.IsNewObject(_);
+                }
+                if (objectModification == ObjectModification.Updated){
+                    return objectSpace.IsUpdated(_);
+                }
+                if (objectModification == ObjectModification.NewOrDeleted){
+                    return objectSpace.IsNewObject(_) || objectSpace.IsDeletedObject(_);
+                }
+                if (objectModification == ObjectModification.NewOrUpdated){
+                    return objectSpace.IsNewObject(_) || objectSpace.IsUpdated(_);
+                }
+                if (objectModification == ObjectModification.DeletedOrUpdated){
+                    return objectSpace.IsUpdated(_) || objectSpace.IsDeletedObject(_);
+                }
+
+                return true;
+
+            });
+        }
         public static IObservable<T> ModifiedExistingObject<T>(this XafApplication application,
             Func<(IObjectSpace objectSpace,ObjectChangedEventArgs e),bool> filter = null){
-            filter = filter ?? (_ => true);
+            filter ??= (_ => true);
             return application.AllModifiedObjects<T>(_ => filter(_) && !_.objectSpace.IsNewObject(_.e.Object));
         }
 
         public static IObservable<T> ModifiedNewObject<T>(this XafApplication application,
             Func<(IObjectSpace objectSpace,ObjectChangedEventArgs e),bool> filter = null){
-            filter = filter ?? (_ => true);
+            filter ??= (_ => true);
             return application.AllModifiedObjects<T>(_ => filter(_) && _.objectSpace.IsNewObject(_.e.Object));
         }
 
@@ -146,4 +194,14 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
 
     }
+    public enum ObjectModification{
+        All,
+        New,
+        Deleted,
+        Updated,
+        NewOrDeleted,
+        NewOrUpdated,
+        DeletedOrUpdated
+    }
+
 }
