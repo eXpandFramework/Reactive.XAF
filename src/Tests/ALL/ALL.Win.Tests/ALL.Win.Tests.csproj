@@ -19,11 +19,11 @@
     <Compile Remove="Program.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.EasyTest" Version="19.2.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="19.2.6" />
-    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="19.2.6" />
-    <PackageReference Include="DevExpress.ExpressApp.ScriptRecorder" Version="19.2.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="19.2.6" />
+    <PackageReference Include="DevExpress.EasyTest" Version="19.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="19.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="19.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp.ScriptRecorder" Version="19.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="19.2.7" />
     <PackageReference Include="Grpc.Core" Version="2.24.0" />
     <PackageReference Include="MagicOnion" Version="2.6.3" />
     <PackageReference Include="Moq" Version="4.13.0" />

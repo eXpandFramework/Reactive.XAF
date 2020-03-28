@@ -5,13 +5,13 @@ source https://xpandnugetserver.azurewebsites.net/nuget
 storage:none
 
 nuget akarnokd.reactive_extensions 0.0.27-alpha
-nuget DevExpress.ExpressApp.Core.All == 19.2.6
-nuget DevExpress.ExpressApp.Win.All == 19.2.6
-nuget DevExpress.ExpressApp.Web.All == 19.2.6
-nuget DevExpress.EasyTest == 19.2.6  
-nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 19.2.6  
-nuget DevExpress.ExpressApp.EasyTest.WinAdapter == 19.2.6  
-nuget DevExpress.ExpressApp.Security.Xpo == 19.2.6  
+nuget DevExpress.ExpressApp.Core.All == 19.2.7
+nuget DevExpress.ExpressApp.Win.All == 19.2.7
+nuget DevExpress.ExpressApp.Web.All == 19.2.7
+nuget DevExpress.EasyTest == 19.2.7  
+nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 19.2.7  
+nuget DevExpress.ExpressApp.EasyTest.WinAdapter == 19.2.7  
+nuget DevExpress.ExpressApp.Security.Xpo == 19.2.7  
 nuget Microsoft.Extensions.Dependencyinjection == 3.1.2  
 nuget Enums.NET 3.0.3
 nuget FasterFlect.Xpand
@@ -22,6 +22,7 @@ nuget Grpc 2.23.0
 nuget Grpc.Core 2.25.0
 nuget MessagePack 1.7.3.7
 nuget Humanizer.Core 2.7.9
+nuget Microsoft.CSharp 4.7.0
 nuget Newtonsoft.Json 12.0.3
 nuget NUnit 3.12
 nuget NUnit3TestAdapter 3.16.1
