@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -113,7 +114,7 @@ namespace Xpand.XAF.Modules.OneView.Tests{
                     .SelectMany(frame => frame.Template.ToForm().WhenShown().To(frame))
                     .Do(frame => frame.View.Close())
                     .FirstAsync().SubscribeReplay();
-
+                testWinApplication.WhenCustomHandleException().Subscribe(args => { args.Handled = true; });
                 testWinApplication.Start();
                 await editModel;
                 await showViewAfterModelEdit;
