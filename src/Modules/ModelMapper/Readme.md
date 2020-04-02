@@ -27,19 +27,19 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp**|**Any**
-|Enums.NET|3.0.0
+|Enums.NET|3.0.3
  |Fasterflect.Xpand|2.0.7
  |JetBrains.Annotations|2019.1.3
- |Mono.Cecil|0.11.1
- |System.CodeDom|4.6.0
+ |Mono.Cecil|0.11.2
+ |System.CodeDom|4.7.0
  |System.Interactive|4.0.0
- |System.Reactive|4.2.0
+ |System.Reactive|4.3.2
  |Xpand.Collections|1.0.1
- |Xpand.Extensions|2.201.9
- |Xpand.Extensions.Reactive|2.201.9
- |Xpand.Extensions.XAF|2.201.9
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.201.9
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.3
+ |Xpand.Extensions|2.201.13
+ |Xpand.Extensions.Reactive|2.201.13
+ |Xpand.Extensions.XAF|2.201.13
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.201.13
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.5
 
 ## Issues-Debugging-Troubleshooting
 

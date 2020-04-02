@@ -108,7 +108,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             });
         }
 
-        [Test]
+        [Test][Ignore(NotImplemented)]
         [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task Save_TraceEvent(){

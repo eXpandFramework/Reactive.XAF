@@ -91,7 +91,7 @@ namespace Xpand.XAF.Modules.OneView.Tests{
 
 
         [Test]
-        [XpandTest]
+        [XpandTest][Ignore(NotImplemented)]
         [Apartment(ApartmentState.STA)]
         public async Task Edit_Model(){
             using (var application = OneViewModule(nameof(Edit_Model)).Application){
