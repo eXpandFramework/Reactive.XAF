@@ -16,7 +16,7 @@ Get-ChildItem -Filter *.csproj -Recurse |  ForEach-Object {
     Update-ProjectAutoGenerateBindingRedirects $projXml $true
     if ($fileName -notlike "*.Tests.csproj"  -or $fileName -like "*All*.csproj" ){
         if ($fileName -notlike "*TestApplication.Web*.csproj"){
-            Update-OutputPath $projXml $fileName "$rootLocation\bin\"
+            Update-OutputPath $fileName "$rootLocation\bin\"
         }
         
     }

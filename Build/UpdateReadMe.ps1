@@ -28,12 +28,12 @@ function GetModuleName($_){
     $moduleName
 }
 function UpdateModulesList($rootLocation, $packages) {
-    $moduleList = "|PackageName|Version|[![Custom badge](https://img.shields.io/endpoint.svg?label=Nuget.org&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAF)](https://www.nuget.org/packages?q=Xpand.XAF)`r`n|---|---|---|`r`n"
+    $moduleList = "|PackageName|Version|[![Custom badge](https://xpandshields.azurewebsites.net/endpoint.svg?label=Nuget.org&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAF)](https://www.nuget.org/packages?q=Xpand.XAF)`r`n|---|---|---|`r`n"
     $packages | ForEach-Object {
         $name = $_.Replace("Xpand.XAF.Modules.", "")
         $packageUri = "[$name](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/$name)"
-        $version = "![](https://img.shields.io/nuget/v/$_.svg?label=&style=flat)"
-        $downloads = "![](https://img.shields.io/nuget/dt/$_.svg?label=&style=flat)"
+        $version = "![](https://xpandshields.azurewebsites.net/nuget/v/$_.svg?label=&style=flat)"
+        $downloads = "![](https://xpandshields.azurewebsites.net/nuget/dt/$_.svg?label=&style=flat)"
         $moduleList += "$packageUri|$version|$downloads`r`n"
     }
 
@@ -75,9 +75,9 @@ function UpdateBadges($_, $packagespath, $readMePath) {
     $readMe = Get-Content $readMePath -Raw
     $package = $_.BaseName.Replace("Xpand.XAF.Modules.", "")
     $badges = @"
-![](https://img.shields.io/nuget/v/Xpand.XAF.Modules.$package.svg?&style=flat) ![](https://img.shields.io/nuget/dt/Xpand.XAF.Modules.$package.svg?&style=flat)
+![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.$package.svg?&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.$package.svg?&style=flat)
 
-[![GitHub issues](https://img.shields.io/github/issues/eXpandFramework/expand/$package.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+$package) [![GitHub close issues](https://img.shields.io/github/issues-closed/eXpandFramework/eXpand/$package.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+$package)
+[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/$package.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+$package) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/$package.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+$package)
 "@
     $readMe = [Regex]::replace($readMe, '(.*)# About', "$badges`r`n# About", [RegexOptions]::Singleline)
     Set-Content $readMePath $readMe.Trim()
