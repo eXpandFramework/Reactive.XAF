@@ -1,4 +1,4 @@
-![](https://img.shields.io/nuget/v/Xpand.VersionConverter.svg?label=nuget.org&style=flat) ![](https://img.shields.io/nuget/dt/Xpand.VersionConverter.svg?style=flat)
+![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.VersionConverter.svg?label=nuget.org&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.VersionConverter.svg?style=flat)
 # Example
 3 years ago I develop a my cool 5 xaf modules about X domain. I used the `Xpand.VersionConverter` nuget package, I compiled them and publish on Nuget.
  
