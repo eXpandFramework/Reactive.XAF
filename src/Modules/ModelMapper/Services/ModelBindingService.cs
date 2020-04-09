@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
 using DevExpress.ExpressApp;
-using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
@@ -107,13 +105,16 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         }
 
         private static (IModelModelMap modelMap, object control,ObjectView view) BindData((PropertyInfo info, IModelNode model, ObjectView view) data,object control=null){
-            var interfaces = data.model.GetType().GetInterfaces();
-            var infoName = data.info.Name;
-            var mapInterface = interfaces.First(type1 => type1.Property(infoName) != null);
-            var type = Type.GetType(mapInterface.Attribute<ModelMapLinkAttribute>().LinkedTypeName);
-            var model = data.model.Id();
-            control ??= EnumsNET.Enums.GetMember<PredefinedMap>(type?.Name).Value.GetViewControl(data.view, model);
-            var modelMap =  data.info.GetValue(data.model) as IModelModelMap;
+            var modelMap=data.model as IModelModelMap;
+            if (control == null){
+                var interfaces = data.model.GetType().GetInterfaces();
+                var infoName = data.info.Name;
+                var mapInterface = interfaces.First(type1 => type1.Property(infoName) != null);
+                var type = Type.GetType(mapInterface.Attribute<ModelMapLinkAttribute>().LinkedTypeName);
+                var model = data.model.Id();
+                control = EnumsNET.Enums.GetMember<PredefinedMap>(type?.Name).Value.GetViewControl(data.view, model);
+                modelMap = data.info.GetValue(data.model) as IModelModelMap;
+            }
             if (control!=null){
                 return (modelMap, control,data.view);
             }
@@ -145,6 +146,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         }
 
         private static IEnumerable<(PropertyInfo info, IModelNode model, ObjectView view)> ToBindableData(this IModelNode node,ObjectView objectView){
+            if (node is IModelModelMappersContextDependency contextDependency){
+                var modelMappers = contextDependency.ModelMapperContext;
+                return modelMappers.Select(_ => ((PropertyInfo) null, (IModelNode) _, objectView));
+            }
             return node.GetType().Properties()
                 .Where(info => typeof(IModelModelMap).IsAssignableFrom(info.PropertyType))
                 .Where(info => node.IsPropertyVisible(info.Name))

@@ -17,7 +17,6 @@ using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.BandedGrid;
 using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraGrid.Views.Layout;
-using DevExpress.XtraLayout;
 using DevExpress.XtraPivotGrid;
 using DevExpress.XtraScheduler;
 using DevExpress.XtraTreeList;
@@ -34,6 +33,7 @@ using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.ModelMapper.Services.Predefined;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
+using Xpand.XAF.Modules.ModelMapper.Tests.BOModel;
 using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.TypeMappingService;
 
 
@@ -111,7 +111,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         [XpandTest(LongTimeout)]
-        [TestCase(PredefinedMap.LayoutControlGroup, typeof(LayoutControlGroup),nameof(Platform.Win),MMDetailViewNodePath+"/Layout/Main")]
         [TestCase(PredefinedMap.GridColumn, typeof(GridColumn),nameof(Platform.Win),MMListViewNodePath+"/Columns/Test")]
         [TestCase(PredefinedMap.GridView, typeof(GridView),nameof(Platform.Win),MMListViewNodePath)]
         [TestCase(PredefinedMap.SchedulerControl, typeof(SchedulerControl),nameof(Platform.Win),MMListViewNodePath)]
@@ -164,6 +163,21 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         public void Extend_PredefinedRepositoryItems(PredefinedMap predefinedMap){
             InitializeMapperService($"{nameof(Extend_PredefinedRepositoryItems)}{predefinedMap}", predefinedMap.Platform());
             Extend_Predefined_ViewItem(predefinedMap, ViewItemService.RepositoryItemsMapName,true);
+        }
+
+        [XpandTest()]
+        [Test]
+        public void Extend_LayoutControlGroup(){
+            
+            var layoutControlGroup = PredefinedMap.LayoutControlGroup;
+            var platform = layoutControlGroup.Platform();
+            InitializeMapperService($"{nameof(Extend_LayoutControlGroup)}{layoutControlGroup}", platform);
+            using (var module = layoutControlGroup.Extend()){
+                using (var application = DefaultModelMapperModule(nameof(Extend_LayoutControlGroup), platform, module).Application){
+                    var modelViewLayout = application.Model.BOModel.GetClass(typeof(MM)).DefaultDetailView.Layout;
+                    modelViewLayout.Nodes().First().ShouldBeAssignableTo<IModelModelMappersContextDependency>();
+                }
+            }
         }
 
         protected static object[] RepositoryItems(){
