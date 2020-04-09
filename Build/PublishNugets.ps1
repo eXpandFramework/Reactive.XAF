@@ -3,6 +3,9 @@ param(
     $sourcesRoot = "$PSScriptRoot\..",
     $apiKey=$env:NugetApiKey,
     $localPackageSource = "$PSScriptRoot\..\..\bin\Nupkg",
+    $AzApoPowerSHellScriptsSecret=$env:AzApoSecret,
+    $AzPowerShellScriptsApplicationId=$env:AzPowerShellScriptsApplicationId,
+    $AzApoTenantId=$env:AzApoTenantId,
     $PastBuild,
     $criteria = "Xpand.*"
 
@@ -44,7 +47,7 @@ $packages =Find-XpandPackage  @pArgs
 Write-HostFormatted "remote-packages:" -Section
 $packages|Format-Table -AutoSize
 
-
+$clearCache=$false
 $localPackages| ForEach-Object {
     $localPackageName = $_.id
     $localPackageVersion = $_.Version
@@ -61,5 +64,6 @@ $localPackages| ForEach-Object {
     }
 }
 if ($clearCache){
-    Invoke-RestMethod "https://xpandnugetstats.azurewebsites.net/api/totals/clearcache"
+    Connect-Az $AzApoPowerSHellScriptsSecret $AzPowerShellScriptsApplicationId $AzApoTenantId
+    Get-AzWebApp -Name XpandNugetStats|Restart-AzWebApp
 }
