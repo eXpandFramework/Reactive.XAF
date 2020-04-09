@@ -10,8 +10,8 @@ using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.Predefined{
-    class ChartControlService{
-        public static IObservable<Unit> Connect(Type typeToMap, Assembly chartCoreAssembly){
+    static class ChartControlService{
+        public static IObservable<Unit> Connect(Type typeToMap){
             var propertyInfo = typeToMap.Property("Diagram");
             var genericType = typeof(IList<>).MakeGenericType(propertyInfo.PropertyType);
             TypeMappingService.AdditionalTypesList.Add(genericType);

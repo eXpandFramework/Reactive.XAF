@@ -9,6 +9,7 @@ using System.Reflection;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
+using JetBrains.Annotations;
 using Xpand.Extensions.String;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 
@@ -57,7 +58,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         
         static ((string key, string code,bool map)[] code, IEnumerable<string> references) ModelCode(this Type type,IModelMapperConfiguration configuration=null){
             var propertyInfos = type.PropertyInfos().Concat(AdditionalTypesList.Select(_ => _.GetRealType()).SelectMany(_ => _.PropertyInfos())).ToArray();
-//            var propertyInfos = type.PropertyInfos();
             var additionalTypes = propertyInfos.AdditionalTypes(type)
                 .Concat(AdditionalTypesList).Distinct().ToArray();
             var additionalTypesCode = type.AdditionalTypesCode( additionalTypes);
@@ -184,11 +184,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                     key = instanceData.key;
                     propertiesCode = instanceData.code;
                 }
-                propertiesCode = propertiesCode??$"{modelBrowseableCode}{mapName} {configuration.MapName??type.Name}{{get;}}";
+                propertiesCode ??= $"{modelBrowseableCode}{mapName} {configuration.MapName??type.Name}{{get;}}";
                 var containerCode = (type,Type.EmptyTypes.FirstOrDefault()).ModelCode(null, $"{modelName}".Substring(6),
                     propertiesCode,baseType:typeof(IModelModelMapContainer));
             
-                key =key?? containerCode.key;
+                key ??= containerCode.key;
                 return (key,$"{linkAttributeCode}{containerCode.code}",false);
             }
 
@@ -204,7 +204,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         private static (string key, string code,bool map) ModelCode(this (Type typeToCode, Type rootType) data, string imageName = null,
             string customName = null, string propertiesCode = null,string additionalPropertiesCode = null, Type baseType = null, HashSet<Type> mappedTypes = null){
 
-            baseType =baseType?? typeof(IModelNodeDisabled);
+            baseType ??= typeof(IModelNodeDisabled);
             var typeToCode =data.typeToCode==data.rootType?data.typeToCode: data.typeToCode.GetRealType();
             if (typeToCode == typeof(object)){
                 typeToCode = data.typeToCode;
@@ -276,6 +276,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 }).TraceModelMapper();
         }
 
+        [PublicAPI]
         public static IScheduler ModelCodeScheduler{ get; set; }=Scheduler.Default;
     }
 }

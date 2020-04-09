@@ -20,7 +20,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.Predefined{
     public abstract class PropertyEditorControlMap{
     }
 
-    public class ViewItemService{
+    public static class ViewItemService{
         public static string RepositoryItemsMapName = "RepositoryItems";
         public static string PropertyEditorControlMapName = "Controls";
 
@@ -46,14 +46,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.Predefined{
             
             return Unit.Default.ReturnObservable();
         }
-
-
+        
         private static void ViewItem(ModelMapperType modelMapperType, Type typeToMap, Type[] viewItemTypes){
             if (modelMapperType.Type == typeof(RepositoryItemBaseMap)||modelMapperType.Type == typeof(PropertyEditorControlMap)){
                 if (modelMapperType.CustomAttributeDatas.All(data => data.AttributeType != typeof(ModelAbstractClassAttribute))){
                     modelMapperType.CustomAttributeDatas.Add(new ModelMapperCustomAttributeData(typeof(ModelAbstractClassAttribute)));
                 }
-                
             }
 
             if (viewItemTypes.Contains(modelMapperType.Type)) {
@@ -76,7 +74,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.Predefined{
                 if (modelMapperType.AdditionalPropertiesCode != null){
                     modelMapperType.AdditionalPropertiesCode = null;        
                 }
-                
             }
             if (modelMapperType.TypeToMap==null&&viewItemTypes.Contains(modelMapperType.Type)){
                 if (modelMapperType.BaseTypeFullNames.Contains(typeof(IModelModelMapContainer).FullName)){
@@ -94,8 +91,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.Predefined{
                 result.Data=(mapName,code);
             }
         }
-
-
+        
         private static IObservable<Unit> ConnectViewItemService(Type[] viewItemTypes, Type typeToMap,string mapName){
             return TypeMappingService.MappingTypes.Where(_ => viewItemTypes.Contains(_.TypeToMap)).FirstOrDefaultAsync().WhenNotDefault()
                 .Select(unit => Connect((typeToMap, mapName,viewItemTypes)))

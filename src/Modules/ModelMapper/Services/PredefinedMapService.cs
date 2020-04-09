@@ -230,11 +230,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
 
         public static IObservable<Type> MapToModel(this IEnumerable<PredefinedMap> predefinedMaps,Action<PredefinedMap,ModelMapperConfiguration> configure = null){
             var maps = predefinedMaps.Where(_ => _!=PredefinedMap.None).ToArray();
-            var results = maps
-                .Select(_ => {
-                    var modelMapperConfiguration = _.ModelMapperConfiguration(configuration => configure?.Invoke(_, configuration));
-                    return modelMapperConfiguration;
-                });
+            var results = maps.Select(_ => _.ModelMapperConfiguration(configuration => configure?.Invoke(_, configuration)));
             var repositoryItemResults = maps.Where(map => map.IsRepositoryItem())
                 .Select(map => new ModelMapperConfiguration(typeof(RepositoryItemBaseMap), typeof(IModelPropertyEditor), typeof(IModelColumn)))
                 .Take(1);
@@ -654,7 +650,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             if (new[]{PredefinedMap.LayoutControlGroup, }.Any(map => map==predefinedMap)){
                 CheckRequiredParameters(nameof(_xtraLayoutAssembly), nameof(_xtraLayoutAssembly));
                 LayoutGroupControlService.Connect().Subscribe();
-                return new ModelMapperConfiguration(predefinedMap.TypeToMap(), typeof(IModelLayoutGroup)){ImageName = predefinedMap.Attribute<ImageNameAttribute>().ImageName};
+                return new ModelMapperConfiguration(predefinedMap.TypeToMap(), typeof(IModelLayoutGroup)){ImageName = predefinedMap.Attribute<ImageNameAttribute>().ImageName,IsDependency = true};
             }
             if (new[]{PredefinedMap.SplitContainerControl, }.Any(map => map==predefinedMap)){
                 CheckRequiredParameters(nameof(_dxWinEditorsAssembly), nameof(_dxWinEditorsAssembly));
@@ -754,7 +750,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                     visibilityCriteria=CriteriaOperator.Parse($"{visibilityCriteria} AND Parent.BandsLayout.Enable=?", bandsLayout).ToString();
                     var typeToMap=controlAssembly.GetType(gridViewTypeName);
                     if (predefinedMap == PredefinedMap.ChartControl){
-                        ChartControlService.Connect(typeToMap,_chartCoreAssembly).Subscribe();
+                        ChartControlService.Connect(typeToMap).Subscribe();
                     }
                     if (predefinedMap == PredefinedMap.SchedulerControl){
                         SchedulerControlService.Connect(typeToMap,_schedulerCoreAssembly).Subscribe();

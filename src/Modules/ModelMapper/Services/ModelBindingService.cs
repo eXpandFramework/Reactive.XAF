@@ -78,14 +78,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
 
         private static IObservable<Unit> BindLayoutGroupControl(this XafApplication application){
             var bindLayoutGroupControl = application.WhenDetailViewCreated().ToDetailView()
-                .SelectMany(_ => {
-                    var layoutManager = (ISupportAppearanceCustomization) _.LayoutManager;
-                    var eventPattern =
-                        Observable.FromEventPattern<EventHandler<CustomizeAppearanceEventArgs>, CustomizeAppearanceEventArgs>(
-                            h => layoutManager.CustomizeAppearance += h,
-                            h => layoutManager.CustomizeAppearance -= h,ImmediateScheduler.Instance);
-                    return eventPattern.Select(pattern => (view: _, pattern.EventArgs));
-                })
+                .SelectMany(_ => _.LayoutManager.WhenCustomizeAppearence().Select(pattern => (view: _, pattern.EventArgs)))
                 .Where(_ => {
                     var item = _.EventArgs.Item.GetPropertyValue("Item");
                     if (item.GetType().Name != "XafLayoutControlGroup") return false;

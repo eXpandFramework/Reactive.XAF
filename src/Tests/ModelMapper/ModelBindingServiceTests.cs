@@ -215,15 +215,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                         for (int i = 0; i < 2; i++){
                             var detailView = application.CreateObjectView<DetailView>(typeof(MM));
                             detailView.CreateControls();
-                    
                             if (boundTypes>0){
                                 await controlBound.Take((i+1)*boundTypes).Timeout(Timeout).ToTaskWithoutConfigureAwait();
                             }
-
                             detailView.Close();
                         }
                     }
-                    
                 }
             }
         }

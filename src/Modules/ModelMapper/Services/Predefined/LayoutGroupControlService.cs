@@ -6,7 +6,7 @@ using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.Predefined{
-    public class LayoutGroupControlService{
+    public static class LayoutGroupControlService{
         
         public static IObservable<Unit> Connect(){
             

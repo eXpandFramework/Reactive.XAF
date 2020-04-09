@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -7,6 +8,7 @@ using ConcurrentCollections;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using Fasterflect;
+using JetBrains.Annotations;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplication;
@@ -52,9 +54,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 .Distinct().Replay().RefCount();
 
             return modelExtenders
-                .SelectMany(_ => mappedContainers.FirstAsync(type =>type.Attribute<ModelMapLinkAttribute>().LinkedTypeName == _.TypeToMap.AssemblyQualifiedName)
-                    .SelectMany(extenderInterface => _.TargetInterfaceTypes.Select(targetInterfaceType => (targetInterfaceType, extenderInterface))))
+                .SelectMany(_ => mappedContainers.FirstAsync(type =>type.Attribute<ModelMapLinkAttribute>().LinkedTypeName == _.TypeToMap.AssemblyQualifiedName).SelectMany(_.CollectExtenders))
                 .Do(_ => extenders.Add(_.targetInterfaceType,_.extenderInterface));
+        }
+
+        private static IEnumerable<(Type targetInterfaceType, Type extenderInterface)> CollectExtenders(this IModelMapperConfiguration configuration, Type extenderInterface){
+            XafTypesInfo.Instance.FindTypeInfo(extenderInterface);
+            return configuration.TargetInterfaceTypes.Select(targetInterfaceType => (targetInterfaceType, configuration.IsDependency?typeof(IModelModelMappersContextDependency):extenderInterface));
         }
 
         private static IObservable<IModelMapperConfiguration> ModelExtenders(){
@@ -72,17 +78,15 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             else{
                 ModelMapperConfigurations.Add(configuration);
             }
-            
-
         }
+        
+        [PublicAPI]
         public static void Extend<TTargetInterface>(this ApplicationModulesManager modulesManager,Type extenderType) 
             where TTargetInterface : IModelNode {
-
-            
             modulesManager.Extend(new ModelMapperConfiguration(extenderType,typeof(TTargetInterface)));
         }
 
-
+        [PublicAPI]
         public static void Extend<TTargetInterface, TExtenderType>(this ApplicationModulesManager modulesManager) where TTargetInterface : IModelNode where TExtenderType:class{
             modulesManager.Extend(new ModelMapperConfiguration(typeof(TExtenderType),typeof(TTargetInterface)));
         }

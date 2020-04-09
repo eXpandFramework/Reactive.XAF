@@ -15,7 +15,8 @@ using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.ModelMapper{
-    public sealed class ModelMapperModule : ReactiveModuleBase {
+    public sealed class ModelMapperModule : ReactiveModuleBase{
+        public const string ModelCategory = "Xpand.ModelMapper";
         private readonly IConnectableObservable<Unit> _modelExtended;
 
         static ModelMapperModule(){

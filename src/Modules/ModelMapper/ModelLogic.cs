@@ -9,12 +9,14 @@ using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
+using JetBrains.Annotations;
 using Xpand.Extensions.XAF.FunctionOperators;
 using Xpand.Extensions.XAF.Model;
 
 namespace Xpand.XAF.Modules.ModelMapper{
-    [DomainLogic(typeof(IModelNodeDisabled))]
+    [DomainLogic(typeof(IModelNodeDisabled))][UsedImplicitly]
     public class ModelNodeEnabledDomainLogic{
+        [UsedImplicitly]
         public static IModelObjectView Get_ParentObjectView(IModelNodeDisabled modelNodeDisabled){
             return modelNodeDisabled.GetParent<IModelObjectView>();
         }
@@ -23,7 +25,7 @@ namespace Xpand.XAF.Modules.ModelMapper{
     public interface IModelNodeDisabled : IModelNode {
         [Category("Activation")]
         bool NodeDisabled { get; set; }
-        [Browsable(false)]
+        [Browsable(false)][UsedImplicitly]
         IModelObjectView ParentObjectView { get; }
     }
 
@@ -31,7 +33,7 @@ namespace Xpand.XAF.Modules.ModelMapper{
         IModelModelMapper ModelMapper{ get; }         
     }
 
-    class ModelImageSource{
+    static class ModelImageSource{
         public const string ModelMappers = "ModelEditor_Group";
         public const string ModelModelMapper = "ModelEditor_ModelMerge";
         public const string ModelModelMapperContexts = "Context_Menu_Show_In_Popup";
@@ -50,8 +52,9 @@ namespace Xpand.XAF.Modules.ModelMapper{
 
     }
 
-    [DomainLogic(typeof (IModelModelMapperContexts))]
+    [DomainLogic(typeof (IModelModelMapperContexts))][UsedImplicitly]
     public static class ModelModelMapperContextsDomainLogic {
+        [UsedImplicitly]
         public static IEnumerable<T> GetMappers<T>(this IModelModelMapperContexts contexts) where T:IModelModelMap{
             var modelMappers = contexts.SelectMany(mappers => mappers);
             return modelMappers.Where(modelMapper => !modelMapper.NodeDisabled).OfType<T>();
@@ -91,12 +94,13 @@ namespace Xpand.XAF.Modules.ModelMapper{
     [ImageName(ModelImageSource.ModelModelMapper)]
     public interface IModelMapperContextContainer:IModelNode{
         [DataSourceProperty("Application."+nameof(IModelApplicationModelMapper.ModelMapper)+"."+nameof(IModelModelMapper.MapperContexts))]
-        [Required]
+        [Required][UsedImplicitly]
         IModelModelMappers Context{ get; set; }
     }
 
-    [DomainLogic(typeof(IModelMapperContextContainer))]
+    [DomainLogic(typeof(IModelMapperContextContainer))][UsedImplicitly]
     public class ModelMapperContextContainerDomainLogic{
+        [UsedImplicitly]
         public static IModelModelMappers Get_Context(IModelMapperContextContainer modelModelMappers){
             var id = modelModelMappers.Id();
 
@@ -128,6 +132,22 @@ namespace Xpand.XAF.Modules.ModelMapper{
          
     }
 
+    public interface IModelModelMappersContextDependency:IModelNode{
+        [UsedImplicitly]
+        [DataSourceProperty("Application."+nameof(IModelApplicationModelMapper.ModelMapper)+"."+nameof(IModelModelMapper.MapperContexts))]
+        [Category(ModelMapperModule.ModelCategory)]
+        IModelModelMappers ModelMapperContext{ get; set; }
+    }
+
+    [DomainLogic(typeof(IModelModelMappersContextDependency))]
+    public static class ModelModelMappersContextDependencyLogic{
+        
+        [UsedImplicitly]
+        public static IModelModelMappers Get_ModelMapperContext(IModelModelMappersContextDependency modelMappersContextDependency){
+            return ((IModelApplicationModelMapper) modelMappersContextDependency.Application).ModelMapper.MapperContexts[ModelMapperContextNodeGenerator.Default];
+        }
+    }
+    
     public interface IModelModelMap:IModelNodeDisabled{
     }
 
@@ -137,7 +157,7 @@ namespace Xpand.XAF.Modules.ModelMapper{
 
     public class ModelMappersNodeGenerator:ModelNodesGeneratorBase{
         protected override void GenerateNodesCore(ModelNode node){
-            var modelMapperTypeInfos = XafTypesInfo.Instance.FindTypeInfo(typeof(IModelModelMap)).Descendants.Where(info
+            var modelMapperTypeInfos = XafTypesInfo.Instance.FindTypeInfo(typeof(IModelModelMap)).Descendants .Where(info
                 => info.FindAttribute<ModelAbstractClassAttribute>(false) == null && info.IsInterface);
 
             if (node.Id == ModelMapperContextNodeGenerator.Default){
@@ -160,6 +180,7 @@ namespace Xpand.XAF.Modules.ModelMapper{
     }
 
     public static class ModelLayoutGroupLogic{
+        [UsedImplicitly]
         public static string Get_Caption(IModelLayoutGroup layoutGroup){
             var count = layoutGroup.Count(_ => !(_ is IModelModelMap));
             if (count == 1 && layoutGroup[0] is IModelLayoutViewItem){

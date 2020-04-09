@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Configuration;
+using System.Linq;
 using System.Net;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
@@ -17,6 +18,12 @@ using Xpand.Extensions.XAF.XafApplication;
 
 namespace Xpand.XAF.Modules.Reactive.Extensions{
     public static class CommonExtensions{
+        private static readonly object ErrorHandling;
+        static CommonExtensions(){
+            var dxWebAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(assembly => assembly.GetName().Name.StartsWith("DevExpress.ExpressApp.Web.v"));
+            var errorHandlingType = dxWebAssembly?.GetTypes().First(type => type.FullName=="DevExpress.ExpressApp.Web.ErrorHandling");
+            ErrorHandling = errorHandlingType?.GetProperty("Instance")?.GetValue(null);
+        }
         [PublicAPI]
         public static IDisposable SubscribeSafe<T>(this IObservable<T> source){
             return source.HandleException().Subscribe();
@@ -30,6 +37,39 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
                 }
             }).SelectMany(e => application.GetPlatform()==Platform.Win?e.ReturnObservable():Observable.Empty<Exception>()));
         }
+        
+        [PublicAPI]
+        public static IObservable<T> DistinctUntilChanged<T>(this IObservable<T> source, TimeSpan duration,
+            IScheduler scheduler = null, Func<T,object> keySelector=null, Func<T, object, bool> matchFunc = null) {
+            if (scheduler == null) scheduler = Scheduler.Default;
+            if (matchFunc == null){
+                matchFunc = (arg1, arg2) => ReferenceEquals(null, arg1) ? ReferenceEquals(null, arg2) : arg1.Equals(arg2);
+            }
+			
+            if (keySelector == null)
+                keySelector = arg => arg;
+            var sourcePub = source.Publish().RefCount();
+            return sourcePub.GroupByUntil(k => keySelector(k), x => Observable.Timer(duration, scheduler).TakeUntil(sourcePub.Where(item => !matchFunc(item, x.Key))))
+                .SelectMany(y => y.FirstAsync());
+        }
+
+        public static IObservable<T> HandleErrors<T>(this IObservable<T> source, XafApplication application, CancelEventArgs args,Func<Exception, IObservable<T>> exceptionSelector=null){
+            exceptionSelector ??= (exception => Observable.Empty<T>());
+            return source.Catch<T, Exception>(exception => {
+                args.Cancel = true;
+                if (application.GetPlatform() == Platform.Win){
+                    application.CallMethod("HandleException", exception);
+                }
+                else{
+                    ErrorHandling.CallMethod("SetPageError",exception);
+                }
+                Tracing.Tracer.LogError(exception);
+                return exception.Handle(exceptionSelector);
+            });
+        }
+        
+        public static IObservable<T> Handle<T>(this Exception exception, Func<Exception, IObservable<T>> exceptionSelector = null) => exception is WarningException ? default(T).ReturnObservable() :
+            exceptionSelector != null ? exceptionSelector(exception) : Observable.Throw<T>(exception);
 
         public static IObservable<T> HandleException<T>(this IObservable<T> source,Func<Exception,IObservable<T>> exceptionSelector=null){
             

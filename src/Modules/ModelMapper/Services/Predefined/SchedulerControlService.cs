@@ -11,7 +11,7 @@ using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.Predefined{
-    public class SchedulerControlService{
+    public static class SchedulerControlService{
         public const string PopupMenusMoelPropertyName = "PopupMenus";
 
         internal static IObservable<Unit> Connect(Type typeToMap, Assembly schedulerCoreAssembly){

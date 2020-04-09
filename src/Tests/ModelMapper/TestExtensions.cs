@@ -28,14 +28,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
 
-        public static ModelMapperTestModule Extend(this PredefinedMap map, ModelMapperTestModule testModule = null,
-            Action<ModelMapperConfiguration> configure = null){
+        public static ModelMapperTestModule Extend(this PredefinedMap map, ModelMapperTestModule testModule = null, Action<ModelMapperConfiguration> configure = null){
             testModule ??= new ModelMapperTestModule();
             return new[]{map}.Extend(testModule, configure);
         }
 
-        public static ModelMapperTestModule Extend(this PredefinedMap[] maps, ModelMapperTestModule testModule = null,
-            Action<ModelMapperConfiguration> configure = null){
+        public static ModelMapperTestModule Extend(this PredefinedMap[] maps, ModelMapperTestModule testModule = null, Action<ModelMapperConfiguration> configure = null){
             testModule ??= new ModelMapperTestModule();
             testModule.ApplicationModulesManager.FirstAsync(_ => _.module==testModule)
                 .SelectMany(_ => maps.Select(map => {
@@ -46,8 +44,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             return testModule;
         }
 
-        public static ModelMapperTestModule Extend(this Type extenderType,
-            Action<ModelMapperConfiguration> configure, ModelMapperTestModule testModule = null){
+        public static ModelMapperTestModule Extend(this Type extenderType, Action<ModelMapperConfiguration> configure, ModelMapperTestModule testModule = null){
             testModule ??= new ModelMapperTestModule();
             testModule.ApplicationModulesManager.FirstAsync()
                 .Do(_ => {

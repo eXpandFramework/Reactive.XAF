@@ -9,7 +9,7 @@ using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.Predefined{
-    class BandedGridColumnService{
+    static class BandedGridColumnService{
         private static void BandedGridColumnPropertyRules((Type declaringType, List<ModelMapperPropertyInfo> propertyInfos) data){
             var typeName = PredefinedMap.BandedGridColumn.GetTypeName();
             if (data.declaringType.FullName == typeName){
