@@ -148,7 +148,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         private static IEnumerable<(PropertyInfo info, IModelNode model, ObjectView view)> ToBindableData(this IModelNode node,ObjectView objectView){
             if (node is IModelModelMappersContextDependency contextDependency){
                 var modelMappers = contextDependency.ModelMapperContext;
-                return modelMappers.Select(_ => ((PropertyInfo) null, (IModelNode) _, objectView));
+                return modelMappers != null ? modelMappers.Select(_ => ((PropertyInfo) null, (IModelNode) _, objectView))
+                    : Enumerable.Empty<(PropertyInfo info, IModelNode model, ObjectView view)>();
             }
             return node.GetType().Properties()
                 .Where(info => typeof(IModelModelMap).IsAssignableFrom(info.PropertyType))
