@@ -11,14 +11,13 @@
     <DebugType>full</DebugType>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+    <AssemblyName>Xpand.XAF.Modules.LookupCascade.Tests</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AppDomainToolkit">
       <HintPath>..\..\Libs\AppDomainToolkit.dll</HintPath>
     </Reference>
-    <Reference Include="Tests">
-      <HintPath>..\..\..\bin\Xpand.TestsLib.dll</HintPath>
-    </Reference>
+    <Reference Include="System.Web" />
     <Reference Include="Xpand.Extensions">
       <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
     </Reference>
@@ -28,8 +27,11 @@
     <Reference Include="Xpand.Extensions.XAF">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
     </Reference>
-    <Reference Include="Xpand.XAF.Modules.ClientLookupCascade">
-      <HintPath>..\..\..\bin\Xpand.XAF.Modules.ClientLookupCascade.dll</HintPath>
+    <Reference Include="Xpand.TestsLib, Version=2.201.0.0, Culture=neutral, PublicKeyToken=c52ffed5d5ff0958">
+      <HintPath>..\..\..\bin\Xpand.TestsLib.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.LookupCascade, Version=2.201.0.0, Culture=neutral, PublicKeyToken=c52ffed5d5ff0958">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.LookupCascade.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
@@ -43,6 +45,9 @@
     <Reference Include="Xpand.Extensions.XAF.Xpo">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.Xpo.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>
