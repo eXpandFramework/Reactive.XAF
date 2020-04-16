@@ -42,7 +42,7 @@ namespace Xpand.XAF.Modules.ProgressBarViewItem.Tests{
         public void ProgressBarControl_Type(string platformName, Type progressBarType){
             var platform = GetPlatform(platformName);
             var application = DefaultProgressBarViewItemModule(platform).Application;
-            var objectView = application.CreateObjectView<DetailView>(typeof(PBVI));
+            var objectView = application.NewObjectView<DetailView>(typeof(PBVI));
 
             if (platform == Platform.Win){
                 var unused = new ProgressBarControl();

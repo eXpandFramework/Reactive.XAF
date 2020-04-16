@@ -4,10 +4,15 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Editors;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
     public static partial class ControllerExtensions{
+        public static IObservable<T> TakeUntilDeactivated<T>(this IObservable<T> source,Controller controller){
+            return source.TakeUntil(controller.WhenDeactivated());
+        }
+
         public static IObservable<TController> WhenIsOnLookupPopupFrame<TController>(this IObservable<TController> source) where TController : Controller{
             return source.Where(controller => controller.Frame.Template is ILookupPopupFrameTemplate)
                 .Cast<TController>();
@@ -23,19 +28,17 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
         }
 
         public static IObservable<TController> When<TController>(this IObservable<TController> source,ViewType viewType=ViewType.Any,Type objectType=null,Nesting nesting=Nesting.Any) where TController:Controller{
-            objectType = objectType ?? typeof(object);            
+            objectType ??= typeof(object);            
             return source
                 .SelectMany(controller => {
                     if (controller.Frame?.View != null )
-                        return Observable.Return(controller).Where(_ => _.Frame.View.Fits(viewType, nesting) &&
-                                                                        objectType.IsAssignableFrom(_.Frame.View
-                                                                            .ObjectTypeInfo.Type));
+                        return Observable.Return(controller)
+                            .Where(_ => _.Frame.View.Fits(viewType, nesting) && objectType.IsAssignableFrom(_.Frame.View.ObjectTypeInfo.Type));
                     return Observable.Return(controller)
                         .FrameAssigned()
                         .SelectMany(_ => _.Frame.WhenViewChanged().Select(tuple => _))
                         ;
-                }).Where(_ => _.Frame.View.Fits(viewType, nesting) &&
-                              objectType.IsAssignableFrom(_.Frame.View.ObjectTypeInfo.Type));
+                }).Where(_ => _.Frame.View.Fits(viewType, nesting) && objectType.IsAssignableFrom(_.Frame.View.ObjectTypeInfo.Type));
         }
 
         public static IObservable<T> WhenViewControlsCreated<T>(this T controller) where T : Controller{
@@ -67,7 +70,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
             return Observable.FromEventPattern<EventHandler, EventArgs>(
                     handler => controller.Deactivated += handler,
                     handler => controller.Deactivated -= handler,ImmediateScheduler.Instance)
-                .Select(pattern => (T) pattern.Sender);
+                .Select(pattern => (T) pattern.Sender).TakeUntilDisposed(controller);
         }
 
         public static IObservable<T> Deactivated<T>(this IObservable<T> controllers) where T:Controller{

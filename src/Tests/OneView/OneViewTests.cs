@@ -19,6 +19,7 @@ using Xpand.XAF.Modules.OneView.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Logger;
 using Xpand.XAF.Modules.Reactive.Services;
+using Xpand.XAF.Modules.Reactive.Services.Actions;
 using Xpand.XAF.Modules.Reactive.Win.Services;
 
 

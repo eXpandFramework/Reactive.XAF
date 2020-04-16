@@ -150,7 +150,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
                 application.AddModule<TestReactiveLoggerModule>();
                 application.Title = nameof(Refresh_TraceEvent_ListView_when_trace);
                 application.Logon();
-                var listView = application.CreateObjectView<ListView>(typeof(TraceEvent));
+                var listView = application.NewObjectView<ListView>(typeof(TraceEvent));
                 application.CreateViewWindow().SetView(listView);
                 var refresh = application.WhenTraceEvent(typeof(ReactiveLoggerService), RXAction.OnNext,
                     nameof(ReactiveLoggerService.RefreshViewDataSource)).FirstAsync().SubscribeReplay();

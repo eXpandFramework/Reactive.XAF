@@ -11,7 +11,9 @@ using Fasterflect;
 using JetBrains.Annotations;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.Reactive.Extensions;
+using Xpand.XAF.Modules.Reactive.Services.Actions;
 using ListView = DevExpress.ExpressApp.ListView;
 using View = DevExpress.ExpressApp.View;
 
@@ -273,7 +275,19 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         [PublicAPI]
         public static IObservable<(XafApplication application, CreateCustomModelDifferenceStoreEventArgs e)> WhenCreateCustomModelDifferenceStore(this XafApplication application){
             return Observable
-                .FromEventPattern<EventHandler<CreateCustomModelDifferenceStoreEventArgs>,CreateCustomModelDifferenceStoreEventArgs>(h => application.CreateCustomModelDifferenceStore += h,h => application.CreateCustomModelDifferenceStore -= h,ImmediateScheduler.Instance)
+                .FromEventPattern<EventHandler<CreateCustomModelDifferenceStoreEventArgs>,
+                    CreateCustomModelDifferenceStoreEventArgs>(h => application.CreateCustomModelDifferenceStore += h,
+                    h => application.CreateCustomModelDifferenceStore -= h, ImmediateScheduler.Instance)
+                .TransformPattern<CreateCustomModelDifferenceStoreEventArgs,XafApplication>()
+                .TraceRX();
+        }
+
+        [PublicAPI]
+        public static IObservable<(XafApplication application, CreateCustomModelDifferenceStoreEventArgs e)> WhenCreateCustomUserModelDifferenceStore(this XafApplication application){
+            return Observable
+                .FromEventPattern<EventHandler<CreateCustomModelDifferenceStoreEventArgs>,
+                    CreateCustomModelDifferenceStoreEventArgs>(h => application.CreateCustomUserModelDifferenceStore += h,
+                    h => application.CreateCustomUserModelDifferenceStore -= h, ImmediateScheduler.Instance)
                 .TransformPattern<CreateCustomModelDifferenceStoreEventArgs,XafApplication>()
                 .TraceRX();
         }
@@ -285,5 +299,32 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .TransformPattern<SetupEventArgs,XafApplication>()
                 .TraceRX();
         }
+
+        public static IObservable<(string parameter, object result)> WhenCallBack(this IObservable<IWebAPI> source,string parameter=null){
+            return source.SelectMany(api => api.Application.WhenWindowCreated().When(TemplateContext.ApplicationWindow)
+                .TemplateChanged()
+                .SelectMany(_ => Observable.FromEventPattern<EventArgs>(CommonExtensions.CurrentRequestPage,"InitComplete",ImmediateScheduler.Instance).To(_))
+                .Select(_ => _.Template.GetPropertyValue("CallbackManager").GetPropertyValue("CallbackControl"))
+                .SelectMany(_ => Observable.FromEventPattern<EventArgs>(_,"Callback",ImmediateScheduler.Instance)))
+                .Select(_ => (parameter:$"{_.EventArgs.GetPropertyValue("Parameter")}",result:_.EventArgs.GetPropertyValue("Result")))
+                .Where(_ => parameter==null||_.parameter.StartsWith($"{parameter}:"));
+        }
+
+        public static IObservable<IWebAPI> WhenWeb(this XafApplication application){
+            return application.GetPlatform() == Platform.Web ? new WebApi(application).ReturnObservable() : Observable.Empty<IWebAPI>();
+        }
+
+    }
+
+    class WebApi:IWebAPI{
+        public XafApplication Application{ get; }
+
+        public WebApi(XafApplication application){
+            Application = application;
+        }
+
+    }
+    public interface IWebAPI{
+        XafApplication Application{ get; }
     }
 }

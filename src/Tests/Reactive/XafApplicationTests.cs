@@ -1,20 +1,15 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Threading;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
-using DevExpress.ExpressApp.Model;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Attributes;
-using Xpand.XAF.Modules.Reactive.Logger;
-using Xpand.XAF.Modules.Reactive.Logger.Hub;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Tests.BOModel;
 
@@ -41,8 +36,6 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
                 (await frames.Take(3)).ShouldBe(nestedFrame);
                 (await frames.Take(4)).ShouldBe(popupWindow);
             }
-
-            
         }
 
         [XpandTest]
@@ -59,8 +52,6 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
                 (await windows.Take(1)).ShouldBe(window);
                 (await windows.Take(2)).ShouldBe(popupWindow);
             }
-
-            
         }
 
         [XpandTest]
@@ -75,8 +66,6 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
                 var popupWindow = application.CreatePopupWindow(TemplateContext.ApplicationWindow, null);
                 (await windows.Take(1)).ShouldBe(popupWindow);
             }
-
-            
         }
 
         [XpandTest]
@@ -91,11 +80,8 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
                 var nestedFrame = application.CreateNestedFrame(null, TemplateContext.ApplicationWindow);
                 (await nestedFrames.FirstAsync()).ShouldBe(nestedFrame);
             }
-
-            
         }
-
-
+        
         private static ReactiveModule DefaultReactiveModule(Platform platform=Platform.Win){
             var application = platform.NewApplication<ReactiveModule>();
             return application.AddModule<ReactiveModule>(typeof(R));
@@ -114,32 +100,10 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
                 application.CreateObjectSpace();
 
                 source.OnNext(3);
-
-            
+                
                 buffer.Test().Items.Count.ShouldBe(3);
-
-            }
-
-            
-        }
-
-//        [Test]
-//        [Apartment(ApartmentState.STA)]
-        public void UnloadReactiveModule(){
-            using (var application = Platform.Win.NewApplication<TestModule>()){
-                var testModule = application.AddModule<TestModule>();
-                application.Modules.OfType<ReactiveModule>().FirstOrDefault().ShouldBeNull();
-                application.Modules.OfType<ReactiveLoggerModule>().FirstOrDefault().ShouldBeNull();
-                application.Modules.OfType<ReactiveLoggerHubModule>().FirstOrDefault().ShouldBeNull();
-                testModule.RequiredModuleTypes.Contains(typeof(ReactiveModule)).ShouldBeFalse();
-                testModule.ModuleManager.Modules.Select(_ => _.GetType()).Contains(typeof(ReactiveModule)).ShouldBeFalse();
-                testModule.ModuleManager.Modules.Select(_ => _.GetType()).Contains(typeof(ReactiveLoggerModule)).ShouldBeFalse();
-                testModule.ModuleManager.Modules.Select(_ => _.GetType()).Contains(typeof(ReactiveLoggerHubModule)).ShouldBeFalse();
-                ((IModelSources)application.Model).Modules.FirstOrDefault(_ => _ is ReactiveModule).ShouldBeNull();
-                ((IModelSources)application.Model).Modules.FirstOrDefault(_ => _ is ReactiveLoggerModule).ShouldBeNull();
-                ((IModelSources)application.Model).Modules.FirstOrDefault(_ => _ is ReactiveLoggerHubModule).ShouldBeNull();
             }
         }
-
+        
     }
 }

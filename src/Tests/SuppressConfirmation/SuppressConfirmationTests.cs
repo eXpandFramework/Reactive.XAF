@@ -27,7 +27,7 @@ namespace Xpand.XAF.Modules.SuppressConfirmation.Tests{
                 var windows = application.WhenSuppressConfirmationWindows().Replay();
                 windows.Connect();
                 var window = application.CreateWindow(TemplateContext.View, null, true);
-                var objectView = application.CreateObjectView(viewType, typeof(SC));
+                var objectView = application.NewObjectView(viewType, typeof(SC));
                 window.SetView(objectView);
 
                 await windows.FirstAsync();
@@ -68,7 +68,7 @@ namespace Xpand.XAF.Modules.SuppressConfirmation.Tests{
                 var windows = application.WhenSuppressConfirmationWindows().Replay();
                 windows.Connect();
                 var window = application.CreateWindow(TemplateContext.View, null, true);
-                var objectView = application.CreateObjectView(viewType, typeof(SC));
+                var objectView = application.NewObjectView(viewType, typeof(SC));
                 objectView.CurrentObject = objectView.ObjectSpace.CreateObject(typeof(SC));
                 window.SetView(objectView);
                 objectView.ObjectSpace.CommitChanges();

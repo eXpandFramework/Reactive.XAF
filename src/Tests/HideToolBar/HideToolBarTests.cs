@@ -33,7 +33,7 @@ namespace Xpand.XAF.Modules.HideToolBar.Tests{
                 nestedFrames.Connect();
                 var nestedFrame = application.CreateNestedFrame(null, TemplateContext.NestedFrame);
                 nestedFrame.CreateTemplate();
-                var detailView = application.CreateObjectView<ListView>(typeof(HTBParent));
+                var detailView = application.NewObjectView<ListView>(typeof(HTBParent));
                 nestedFrame.SetView(detailView);
 
 

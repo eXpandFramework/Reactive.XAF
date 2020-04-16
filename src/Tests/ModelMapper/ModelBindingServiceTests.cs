@@ -213,7 +213,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                     var controlBound = ModelBindingService.ControlBind.Replay();
                     using (controlBound.Connect()){
                         for (int i = 0; i < 2; i++){
-                            var detailView = application.CreateObjectView<DetailView>(typeof(MM));
+                            var detailView = application.NewObjectView<DetailView>(typeof(MM));
                             detailView.CreateControls();
                             if (boundTypes>0){
                                 await controlBound.Take((i+1)*boundTypes).Timeout(Timeout).ToTaskWithoutConfigureAwait();
@@ -236,12 +236,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                     application.Logon();
                     application.CreateObjectSpace();
                     application.EditorFactory=new DevExpress.ExpressApp.Editors.EditorsFactory();
-                    var listView = application.CreateObjectView<ListView>(typeof(MM));
+                    var listView = application.NewObjectView<ListView>(typeof(MM));
                     listView.CreateControls();
                     await bound;
                     
                     bound = ModelBindingService.ControlBind.FirstAsync().SubscribeReplay();
-                    listView = application.CreateObjectView<ListView>(typeof(MM));
+                    listView = application.NewObjectView<ListView>(typeof(MM));
                     listView.CreateControls();
                     await bound;
                 }
@@ -287,7 +287,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                         for (int i = 0; i < 2; i++){
                         
                     
-                            var listView = application.CreateObjectView<ListView>(typeof(MM));
+                            var listView = application.NewObjectView<ListView>(typeof(MM));
                             listView.Model.EditorType = controlTypes.Last();
                             listView.Model.BandsLayout.Enable = predefinedMaps.Contains(PredefinedMap.AdvBandedGridView);
 
@@ -334,7 +334,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                                 mapNode.AddNode(typeInfo.Type);
                                 application.MockDetailViewEditor( modelPropertyEditor, controlType.CreateInstance());
 
-                                var detailView = application.CreateObjectView<DetailView>(typeof(MM));
+                                var detailView = application.NewObjectView<DetailView>(typeof(MM));
             
                                 detailView.DelayedItemsInitialization = false;
                                 detailView.CreateControls();
@@ -378,7 +378,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                             application.MockDetailViewEditor( modelPropertyEditor, controlInstance);
                         }
 
-                        var objectView = application.CreateObjectView(viewType, typeof(MM));
+                        var objectView = application.NewObjectView(viewType, typeof(MM));
                         var values = ConfigureModelRepositories(objectView);
                         objectView.DelayedItemsInitialization = false;
                         objectView.CreateControls();

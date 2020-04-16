@@ -8,8 +8,9 @@ using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Utils;
 using Xpand.Extensions.Reactive.Transform;
 
-namespace Xpand.XAF.Modules.Reactive.Services{
-    public static class ActionExtensions{
+namespace Xpand.XAF.Modules.Reactive.Services.Actions{
+    
+    public static partial class ActionsService{
         public static IObservable<TFrame> WhenView<TFrame>(this IObservable<TFrame> source, Type objectType)
             where TFrame : Frame{
             return source.SelectMany(frame => frame.View.ReturnObservable().When(objectType).Select(view => frame));
@@ -49,6 +50,14 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source.Select(_ => _.action);
         }
 
+        public static IObservable<(PopupWindowShowAction action, CustomizePopupWindowParamsEventArgs e)> WhenCustomizePopupWindowParams(this PopupWindowShowAction action){
+            return Observable.FromEventPattern<CustomizePopupWindowParamsEventHandler, CustomizePopupWindowParamsEventArgs>(
+                    h => action.CustomizePopupWindowParams += h, h => action.CustomizePopupWindowParams -= h,
+                    ImmediateScheduler.Instance)
+                .TransformPattern<CustomizePopupWindowParamsEventArgs, PopupWindowShowAction>();
+
+
+        }
         public static IObservable<(TAction action, ActionBaseEventArgs e)> WhenExecuted<TAction>(this TAction action)
             where TAction : ActionBase{
             return Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(

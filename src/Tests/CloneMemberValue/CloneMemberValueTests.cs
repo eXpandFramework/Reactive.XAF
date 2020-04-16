@@ -122,7 +122,7 @@ namespace Xpand.XAF.Modules.CloneMemberValue.Tests{
                 aCmv1.PrimitiveProperty = "test";
                 var objectSpace2 = application.CreateObjectSpace();
                 var aCmv2 = objectSpace2.CreateObject<ACmv>();
-                var objectView = application.CreateObjectView<DetailView>(typeof(ACmv));
+                var objectView = application.NewObjectView<DetailView>(typeof(ACmv));
                 ((IModelMemberCloneValue) objectView.Model.ModelClass.FindMember(nameof(ACmv.PrimitiveProperty))).CloneValue=true;
 
                 var clonedMembers = await ((ObjectView)objectView,(object)aCmv1,(object)aCmv2).ReturnObservable().CloneMembers().WithTimeOut();

@@ -32,7 +32,7 @@ namespace Xpand.XAF.Modules.RefreshView.Tests{
                 item.Interval = TimeSpan.FromMilliseconds(500);
             
                 application.Logon();
-                var listView = application.CreateObjectView<ListView>(typeof(RV));
+                var listView = application.NewObjectView<ListView>(typeof(RV));
                 var reloaded = listView.CollectionSource.WhenCollectionReloaded().Select(tuple => tuple).FirstAsync().SubscribeReplay();
                 application.CreateViewWindow().SetView(listView);
             

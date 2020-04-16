@@ -100,7 +100,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
                     clientWinApp.Logon();
 
                     
-                    var listView = clientWinApp.CreateObjectView<ListView>(typeof(TraceEvent));
+                    var listView = clientWinApp.NewObjectView<ListView>(typeof(TraceEvent));
                     var collectionReloaded = listView.CollectionSource.WhenCollectionReloaded().FirstAsync().SubscribeReplay();
                     clientWinApp.CreateViewWindow().SetView(listView);
                     
@@ -113,7 +113,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
                     
                     
                     
-                    application.CreateObjectView<DetailView>(typeof(RLH));
+                    application.NewObjectView<DetailView>(typeof(RLH));
 
 
                     await broadcast.Timeout(Timeout);
@@ -136,7 +136,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
                 clientWinApp.EditorFactory=new EditorsFactory();
                 clientWinApp.AddModule<ReactiveLoggerHubModule>();
                 clientWinApp.Logon();
-                var listView = clientWinApp.CreateObjectView<ListView>(typeof(TraceEvent));
+                var listView = clientWinApp.NewObjectView<ListView>(typeof(TraceEvent));
                 var viewWindow = clientWinApp.CreateWindow(TemplateContext.ApplicationWindow, new List<Controller>(),true );
                 viewWindow.SetView(listView);
                 
@@ -155,7 +155,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
                     var viewCreated = clientWinApp.WhenTraceOnNextEvent(nameof(XafApplicationRXExtensions.WhenDetailViewCreated))
                         .FirstAsync().SubscribeReplay();
                     var whenDetailViewCreated = application.WhenDetailViewCreated().FirstAsync().SubscribeReplay();
-                    application.CreateObjectView<DetailView>(typeof(RLH));
+                    application.NewObjectView<DetailView>(typeof(RLH));
                     await viewCreated.Timeout(Timeout).ToTaskWithoutConfigureAwait();
                     await listView.CollectionSource.WhenCollectionReloaded().FirstAsync();
                     await whenDetailViewCreated;

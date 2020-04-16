@@ -22,8 +22,8 @@ namespace Xpand.XAF.Modules.AutoCommit.Tests{
 
                 var objectViews = application.WhenAutoCommitObjectViewCreated().SubscribeReplay();
                 
-                var listView = application.CreateObjectView<ListView>(typeof(AC));
-                var detailView = application.CreateObjectView<DetailView>(typeof(AC));
+                var listView = application.NewObjectView<ListView>(typeof(AC));
+                var detailView = application.NewObjectView<DetailView>(typeof(AC));
 
                 (await objectViews.Take(1).WithTimeOut()).ShouldBe(listView);
                 (await objectViews.Take(2).WithTimeOut()).ShouldBe(detailView);
@@ -36,7 +36,7 @@ namespace Xpand.XAF.Modules.AutoCommit.Tests{
         public void AutoCommit_When_object_view_closing(string platformName){
             
             using (var application = DefaultAutoCommitModule(platformName, nameof(AutoCommit_When_object_view_closing)).Application){
-                var detailView = application.CreateObjectView<DetailView>(typeof(AC));
+                var detailView = application.NewObjectView<DetailView>(typeof(AC));
                 detailView.ObjectSpace.CreateObject<AC>();
 
                 detailView.Close();
