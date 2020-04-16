@@ -10,22 +10,32 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <OutputPath>..\..\..\bin</OutputPath>
-    <AssemblyTitle>Xpand.XAF.Modules.ClientLookupCascade</AssemblyTitle>
-    <Product>Xpand.XAF.Modules.ClientLookupCascade</Product>
+    <AssemblyTitle>Xpand.XAF.Modules.LookupCascadePropertyEditor</AssemblyTitle>
+    <Product>Xpand.XAF.Modules.LookupCascadePropertyEditor</Product>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <DebugType>full</DebugType>
+    <AssemblyName>Xpand.XAF.Modules.LookupCascade</AssemblyName>
+    <RootNamespace>Xpand.XAF.Modules.LookupCascade</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="Model.DesignedDiffs.xafml" />
+    <Compile Remove="ClientDatasourceStorageController.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
+    <None Remove="ASPxLookupCascadePropertyEditor.js" />
+    <None Remove="pako.min.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ASPxLookupCascadePropertyEditor.js" />
+    <EmbeddedResource Include="pako.min.js" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Web" />
     <Reference Include="Xpand.Extensions">
       <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions.Reactive">
+      <HintPath>..\..\..\..\Issues\ClientLooupCascadeTest\ClientLooupCascadeTest.Web\Bin\Xpand.Extensions.Reactive.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.Extensions.XAF">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>

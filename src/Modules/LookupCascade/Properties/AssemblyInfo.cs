@@ -4,12 +4,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Xpand.XAF.Modules.ClientLookupCascade")]
+[assembly: AssemblyTitle("Xpand.XAF.Modules.LookupCascade")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyMetadata("Platform","Web")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Xpand.XAF.Modules.ClientLookupCascade")]
+[assembly: AssemblyProduct("Xpand.XAF.Modules.LookupCascade")]
 [assembly: AssemblyCopyright("Copyright eXpandFramework � 2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

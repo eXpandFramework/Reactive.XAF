@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
@@ -9,7 +8,7 @@ using DevExpress.Persistent.Validation;
 using JetBrains.Annotations;
 using Xpand.Extensions.XAF.Model;
 
-namespace Xpand.XAF.Modules.ClientLookupCascade{
+namespace Xpand.XAF.Modules.LookupCascade{
     public interface IModelOptionsClientDatasource:IModelNode{
         IModelClientDatasource ClientDatasource{ get;  }
     }
@@ -27,14 +26,10 @@ namespace Xpand.XAF.Modules.ClientLookupCascade{
         [UsedImplicitly]
         public static IModelList<IModelListView> Get_LookupListViews(IModelClientDatasourceLookupView lookupView){
             var modelListViews = lookupView.Application.Views.OfType<IModelObjectView>()
-                .SelectMany(view => view.MemberViewItems(typeof(ASPxClientLookupCascadePropertyEditor)))
-                .Select(item => item.GetLookupListView()).OfType<IModelListView>()
+                .SelectMany(view => view.MemberViewItems(typeof(ASPxLookupCascadePropertyEditor)))
+                .Select(item => item.GetLookupListView())
                 .Distinct();
             return new CalculatedModelNodeList<IModelListView>(modelListViews);
-        }
-
-        public static string GetUniqueID(this IModelListView lookupListViewModel,string parentViewId){
-            return $"{lookupListViewModel.Id}__guid__{parentViewId}";
         }
 
     }
@@ -54,14 +49,14 @@ namespace Xpand.XAF.Modules.ClientLookupCascade{
     }
 
     [ModelAbstractClass]
-    public interface IModelMemberViewItemASPxClientLookupPropertyEditor:IModelMemberViewItem{
-        [ModelBrowsable(typeof(ModelMemberViewItemASPxClientLooupPropertyEditorVisibilityCalculator))]
-        IModelASPxClientLookupPropertyEditor ASPxClientLookupPropertyEditor{ get; }
+    public interface IModelMemberViewItemLookupCascadePropertyEditor:IModelMemberViewItem{
+        [ModelBrowsable(typeof(ModelMemberViewItemLooupCascadePropertyEditorVisibilityCalculator))]
+        IModelLookupCascadePropertyEditor LookupCascade{ get; }
     }
 
-    public class ModelMemberViewItemASPxClientLooupPropertyEditorVisibilityCalculator:IModelIsVisible{
+    public class ModelMemberViewItemLooupCascadePropertyEditorVisibilityCalculator:IModelIsVisible{
         public bool IsVisible(IModelNode node, string propertyName){
-            return typeof(ASPxClientLookupCascadePropertyEditor).IsAssignableFrom(((IModelMemberViewItem) node).PropertyEditorType);
+            return typeof(ASPxLookupCascadePropertyEditor).IsAssignableFrom(((IModelMemberViewItem) node).PropertyEditorType);
         }
     }
 
@@ -71,7 +66,7 @@ namespace Xpand.XAF.Modules.ClientLookupCascade{
     }
 
     
-    public interface IModelASPxClientLookupPropertyEditor:IModelNode{
+    public interface IModelLookupCascadePropertyEditor:IModelNode{
         [DefaultValue("{0}")]
         string TextFormatString{ get; [UsedImplicitly] set; }
         
@@ -82,9 +77,10 @@ namespace Xpand.XAF.Modules.ClientLookupCascade{
         [RuleRequiredField(TargetCriteria = nameof(CascadeMemberViewItem )+" Is Not Null")]
         [DataSourceProperty(nameof(CascadeColumnFilters))]
         [Category("Cascade")]
-        [Description("Column of the " +nameof(CascadeMemberViewItem)+ " View uppon which the cascaded lookup will be filtered. Only visible columns are listed, to hide the column on the client false the "+nameof(IModelColumnClientVisible.ClientVisible)+" on the lookup view")]
+        [Description("Lists memberViewItme of the " +nameof(CascadeMemberViewItem)+ " LookupView Members of the same type to current memberViewItem key type. Only visible columns are listed, to hide the column on the client false the "+nameof(IModelColumnClientVisible.ClientVisible)+" on the lookup view")]
         IModelColumn CascadeColumnFilter{ get; [UsedImplicitly] set; }
-
+        [Category("Synchronize")]
+        bool Synchronize{ get; set; }
         [DataSourceProperty(nameof(LookupPropertyEditorMemberViewItems))]
         [Category("Synchronize")]
         IModelMemberViewItem SynchronizeMemberViewItem{ get; set; }
@@ -104,35 +100,31 @@ namespace Xpand.XAF.Modules.ClientLookupCascade{
     }
 
 
-    [DomainLogic(typeof(IModelASPxClientLookupPropertyEditor))]
+    [DomainLogic(typeof(IModelLookupCascadePropertyEditor))]
     [UsedImplicitly]
-    public class ModelASPxClientLookupPropertyEditorLogic{
+    public class ModelLookupCasadePropertyEditorLogic{
         [UsedImplicitly]
-        public static IModelList<IModelColumn> Get_SynchronizeMemberLookupColumns(IModelASPxClientLookupPropertyEditor modelLookupPropertyEditor){
+        public static IModelList<IModelColumn> Get_SynchronizeMemberLookupColumns(IModelLookupCascadePropertyEditor modelLookupPropertyEditor){
             var viewItem = modelLookupPropertyEditor.SynchronizeMemberViewItem;
             return new CalculatedModelNodeList<IModelColumn>(viewItem!=null?viewItem.GetLookupListView().VisibleMemberViewItems().Cast<IModelColumn>():Enumerable.Empty<IModelColumn>());
         }
 
         [UsedImplicitly]
-        public static IModelList<IModelColumn> Get_CascadeColumnFilters(IModelASPxClientLookupPropertyEditor modelLookupPropertyEditor){
+        public static IModelList<IModelColumn> Get_CascadeColumnFilters(IModelLookupCascadePropertyEditor modelLookupPropertyEditor){
             var cascadeMemberViewItem = modelLookupPropertyEditor.CascadeMemberViewItem;
-            return new CalculatedModelNodeList<IModelColumn>(cascadeMemberViewItem!=null?cascadeMemberViewItem.GetLookupListView().VisibleMemberViewItems().Cast<IModelColumn>():Enumerable.Empty<IModelColumn>());
+            return new CalculatedModelNodeList<IModelColumn>(cascadeMemberViewItem != null
+                ? cascadeMemberViewItem.GetLookupListView().VisibleMemberViewItems().Cast<IModelColumn>()
+                    .Where(_ => _.ModelMember.Type==modelLookupPropertyEditor.GetParent<IModelMemberViewItem>().ModelMember.MemberInfo.Owner.KeyMember.MemberType)
+                : Enumerable.Empty<IModelColumn>());
         }
 
         [UsedImplicitly]
-        public static IModelList<IModelMemberViewItem> Get_LookupPropertyEditorMemberViewItems(IModelASPxClientLookupPropertyEditor modelLookupPropertyEditor){
+        public static IModelList<IModelMemberViewItem> Get_LookupPropertyEditorMemberViewItems(IModelLookupCascadePropertyEditor modelLookupPropertyEditor){
             var modelMemberViewItems = modelLookupPropertyEditor.GetParent<IModelObjectView>().MemberViewItems()
-                .Where(item => item != modelLookupPropertyEditor.Parent && typeof(ASPxClientLookupCascadePropertyEditor).IsAssignableFrom(item.PropertyEditorType));
+                .Where(item => item != modelLookupPropertyEditor.Parent && typeof(ASPxLookupCascadePropertyEditor).IsAssignableFrom(item.PropertyEditorType));
             return new CalculatedModelNodeList<IModelMemberViewItem>(modelMemberViewItems);
         }
     }
 
-    public class ClientLookupModelExtender:Controller,IModelExtender{
-        public void ExtendModelInterfaces(ModelInterfaceExtenders extenders){
-            extenders.Add<IModelOptions,IModelOptionsClientDatasource>();
-            extenders.Add<IModelMemberViewItem,IModelMemberViewItemASPxClientLookupPropertyEditor>();
-            extenders.Add<IModelColumn,IModelColumnClientVisible>();
-        }
-    }
 
 }

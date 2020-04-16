@@ -1,43 +1,38 @@
 ﻿using System;
-using System.Collections.Generic;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
-using DevExpress.ExpressApp.Model.Core;
 using JetBrains.Annotations;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
-
-namespace Xpand.XAF.Modules.ClientLookupCascade {
+namespace Xpand.XAF.Modules.LookupCascade {
     [UsedImplicitly]
-    public sealed class ClientLookupCascadeModule : ReactiveModuleBase{
-        static ClientLookupCascadeModule(){
-            TraceSource=new ReactiveTraceSource(nameof(ClientLookupCascadeModule));
+    public sealed class LookupCascadeModule : ReactiveModuleBase{
+        static LookupCascadeModule(){
+            TraceSource=new ReactiveTraceSource(nameof(LookupCascade));
         }
-        public ClientLookupCascadeModule() {
+        public LookupCascadeModule() {
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.Web.SystemModule.SystemAspNetModule));
             RequiredModuleTypes.Add(typeof(ReactiveModule));
         }
 
         public static ReactiveTraceSource TraceSource{ get; set; }
-        protected override IEnumerable<Type> GetDeclaredControllerTypes(){
-            yield return typeof(ClientDatasourceStorageController);
-            yield return typeof(ClientLookupModelExtender);
-            yield return typeof(ParentViewLookupItemsController);
-        }
 
         public override void Setup(XafApplication application){
             base.Setup(application);
             
-            // this.Connect()
-            //     .TakeUntilDisposed(this)
-            //     .Subscribe();
+            this.Connect()
+                .TakeUntilDisposed(this)
+                .Subscribe();
         }
 
         public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders){
             base.ExtendModelInterfaces(extenders);
-            
+            extenders.Add<IModelOptions,IModelOptionsClientDatasource>();
+            extenders.Add<IModelMemberViewItem,IModelMemberViewItemLookupCascadePropertyEditor>();
+            extenders.Add<IModelColumn,IModelColumnClientVisible>();
             // extenders.Add<IModelReactiveModules,IModelReactiveModuleLogger>();
             
         }
