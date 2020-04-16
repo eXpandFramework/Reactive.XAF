@@ -1,4 +1,7 @@
-﻿using DevExpress.ExpressApp;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.AuditTrail;
 using DevExpress.ExpressApp.Chart;
 using DevExpress.ExpressApp.Chart.Web;
@@ -29,17 +32,25 @@ using DevExpress.ExpressApp.StateMachine;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.ExpressApp.TreeListEditors;
 using DevExpress.ExpressApp.TreeListEditors.Web;
+using DevExpress.ExpressApp.Updating;
 using DevExpress.ExpressApp.Validation;
 using DevExpress.ExpressApp.Validation.Web;
 using DevExpress.ExpressApp.ViewVariantsModule;
 using DevExpress.ExpressApp.Web.SystemModule;
 using DevExpress.ExpressApp.Workflow;
+using TestApplication.Web.LookupCascade;
+using Xpand.Extensions.Reactive.Conditional;
+using Xpand.Extensions.XAF.XafApplication;
+using Xpand.TestsLib.BO;
 using Xpand.XAF.Modules.AutoCommit;
 using Xpand.XAF.Modules.CloneMemberValue;
 using Xpand.XAF.Modules.CloneModelView;
 using Xpand.XAF.Modules.HideToolBar;
+using Xpand.XAF.Modules.LookupCascade;
 using Xpand.XAF.Modules.MasterDetail;
 using Xpand.XAF.Modules.ModelMapper;
+using Xpand.XAF.Modules.ModelMapper.Configuration;
+using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.ModelViewInheritance;
 using Xpand.XAF.Modules.ProgressBarViewItem;
 using Xpand.XAF.Modules.Reactive;
@@ -53,6 +64,8 @@ namespace TestApplication.Web{
         public WebModule(){
             #region XAF Modules
 
+            RequiredModuleTypes.Add(typeof(ScriptRecorderModuleBase));
+            RequiredModuleTypes.Add(typeof(ScriptRecorderAspNetModule));
             RequiredModuleTypes.Add(typeof(AuditTrailModule));
             RequiredModuleTypes.Add(typeof(ChartModule));
             RequiredModuleTypes.Add(typeof(ChartAspNetModule));
@@ -93,9 +106,9 @@ namespace TestApplication.Web{
             RequiredModuleTypes.Add(typeof(ServerUpdateDatabaseModule));
 
             #endregion
-            
+            AdditionalExportedTypes.Add(typeof(Order));
             AdditionalExportedTypes.Add(typeof(Customer));
-
+//
             RequiredModuleTypes.Add(typeof(AutoCommitModule));
             RequiredModuleTypes.Add(typeof(CloneMemberValueModule));
             RequiredModuleTypes.Add(typeof(CloneModelViewModule));
@@ -110,7 +123,36 @@ namespace TestApplication.Web{
             RequiredModuleTypes.Add(typeof(RefreshViewModule));
             RequiredModuleTypes.Add(typeof(SuppressConfirmationModule));
             RequiredModuleTypes.Add(typeof(ViewEditModeModule));
+            RequiredModuleTypes.Add(typeof(LookupCascadeModule));
             
+        }
+
+        // protected override IEnumerable<Type> GetDeclaredControllerTypes(){
+        //     yield return typeof(CustomerController);
+        // }
+        public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB){
+            yield return new OrderModuleUpdater(objectSpace, versionFromDB);
+        }
+
+        public override void Setup(XafApplication application){
+            base.Setup(application);
+        }
+
+        public override void Setup(ApplicationModulesManager moduleManager){
+            base.Setup(moduleManager);
+            
+            moduleManager.Extend(Enum.GetValues(typeof(PredefinedMap)).OfType<PredefinedMap>().Where(map =>map!=PredefinedMap.None&& map.Platform()==Platform.Web));
+            moduleManager.LookupCascade()
+                .TakeUntilDisposed(this)
+                .Subscribe();
+        }
+
+    }
+
+    public class CustomerController : ObjectViewController<ListView,Customer>{
+        protected override void OnViewControlsCreated(){
+            base.OnViewControlsCreated();
+            // throw new NotImplementedException();
         }
     }
 }

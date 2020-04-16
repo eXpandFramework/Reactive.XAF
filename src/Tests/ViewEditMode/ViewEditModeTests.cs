@@ -51,7 +51,7 @@ namespace Xpand.XAF.Modules.ViewEditMode.Tests{
                 var viewViewEditMode = ((IModelDetailViewViewEditMode) application.Model.BOModel.GetClass(typeof(VEM)).DefaultDetailView);
                 viewViewEditMode.ViewEditMode=DevExpress.ExpressApp.Editors.ViewEditMode.View;
 
-                var objectView = application.CreateObjectView<DetailView>(typeof(VEM));
+                var objectView = application.NewObjectView<DetailView>(typeof(VEM));
                 objectView.CurrentObject = objectView.ObjectSpace.CreateObject<VEM>();
                 var window = application.CreateWindow(TemplateContext.View, null, true);
                 

@@ -30,35 +30,34 @@ namespace Xpand.TestsLib{
         }
 
         protected static object[] AgnosticModules(){
-            return GetModules("Xpand.XAF.Modules*.dll").Where(o => {
+            return GetModules("Xpand.XAF.Modules*.dll","Core").Where(o => {
                 var name = ((Type) o).Assembly.GetName().Name;
                 return !name.EndsWith(".Win") && !name.EndsWith(".Web") && !name.EndsWith(".Tests");
             }).ToArray();
         }
 
-        protected static object[] Modules(){
-            return GetModules("Xpand.XAF.Modules*.dll").ToArray();
-        }
-
         protected static object[] WinModules(){
-            return GetModules("Xpand.XAF.Modules*.Win.dll");
+            return GetModules("Xpand.XAF.Modules*.dll","Win");
         }
 
         protected static object[] WebModules(){
-            return GetModules("Xpand.XAF.Modules*.Web.dll");
+            return GetModules("Xpand.XAF.Modules*.dll","Web");
         }
 
-        private static object[] GetModules(string pattern){
+        private static object[] GetModules(string pattern,string platform){
             return Directory.GetFiles(AppDomain.CurrentDomain.ApplicationPath(), pattern)
-                .Select(s =>
-                    Assembly.LoadFile(s).GetTypes().FirstOrDefault(type =>
-                        !type.IsAbstract && typeof(ModuleBase).IsAssignableFrom(type)))
+                .Select(s => {
+                    var assembly = Assembly.LoadFile(s);
+                    return assembly.GetCustomAttributes<AssemblyMetadataAttribute>().First(_ => _.Key == "Platform")
+                        .Value == platform ? assembly.GetTypes().First(type =>
+                            !type.IsAbstract && typeof(ModuleBase).IsAssignableFrom(type)) : null;
+                })
                 .WhereNotDefault()
                 .Cast<object>().ToArray();
         }
 
         protected static object[] ReactiveModules(){
-            return Modules().OfType<ReactiveModuleBase>().Cast<object>().ToArray();
+            return AgnosticModules().Concat(WinModules()).Concat(WebModules()).OfType<ReactiveModuleBase>().Cast<object>().ToArray();
         }
 
         protected void WriteLine(bool value){
