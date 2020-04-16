@@ -17,13 +17,13 @@ namespace Xpand.Extensions.XAF.XafApplication{
 
     public static partial class XafApplicationExtensions{
         private static Harmony _harmony;
-        private static ConcurrentBag<Type> _securedTypes;
+        private static ConcurrentBag<System.Type> _securedTypes;
         static XafApplicationExtensions(){
             Init();
         }
 
         private static void Init(){
-            _securedTypes=new ConcurrentBag<Type>();
+            _securedTypes=new ConcurrentBag<System.Type>();
             var assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
             var systemWebAssembly = assemblies.FirstOrDefault(assembly => assembly.GetName().Name == "System.Web");
             var httpContextType = systemWebAssembly?.Types().First(_ => _.Name == "HttpContext");

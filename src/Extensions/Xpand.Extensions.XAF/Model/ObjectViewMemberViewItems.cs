@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using DevExpress.ExpressApp.Model;
 using JetBrains.Annotations;
 
@@ -11,9 +10,10 @@ namespace Xpand.Extensions.XAF.Model{
                 : ((IModelDetailView) modelObjectView).Items.OfType<IModelMemberViewItem>()).ToArray();
         }
 
-        public static IModelMemberViewItem[] MemberViewItems(this IModelObjectView modelObjectView, Type propertyEditorType){
+        public static IModelMemberViewItem[] MemberViewItems(this IModelObjectView modelObjectView, System.Type propertyEditorType){
             return modelObjectView.MemberViewItems()
                 .Where(item => propertyEditorType.IsAssignableFrom(item.PropertyEditorType)).ToArray();
+            
         }
     }
 }

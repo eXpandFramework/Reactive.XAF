@@ -8,7 +8,7 @@ using Microsoft.CSharp;
 
 namespace Xpand.Extensions.Assembly{
     
-    public static class AssemblyExtensions{
+    public static partial class AssemblyExtensions{
         public static Lazy<CSharpCodeProvider> CodeProvider { get; } = new Lazy<CSharpCodeProvider>(() => {
             var csc = new CSharpCodeProvider();
             var settings = csc
@@ -23,7 +23,7 @@ namespace Xpand.Extensions.Assembly{
 
             return csc;
         });
-        [PublicAPI]
+
         public static System.Reflection.Assembly NewAssembly(this AssemblyMetadata assemblyMetadata,params TypeMetada[] typeParameters){
             
             var compilerParameters = new CompilerParameters{
@@ -110,7 +110,7 @@ public class {metada.Name}{{
     }
     [PublicAPI]
     public class PropertyMetadata{
-        public PropertyMetadata(string name, Type type, bool canWrite, params Attribute[] attributes){
+        public PropertyMetadata(string name, System.Type type, bool canWrite, params Attribute[] attributes){
             Name = name;
             Type = type;
             CanWrite = canWrite;
@@ -118,7 +118,7 @@ public class {metada.Name}{{
         }
 
         public string Name{ get; set; }
-        public Type Type{ get; set; }
+        public System.Type Type{ get; set; }
         public bool CanWrite{ get; set; }
         public List<Attribute> Attributes{ get;  }
     }

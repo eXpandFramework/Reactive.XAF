@@ -14,7 +14,7 @@ namespace Xpand.Extensions.Reflection{
             MModule = assembly.DefineDynamicModule("DelegateTypeFactory");
         }
 
-        public static Type CreateDelegateType(this MethodInfo method){
+        public static System.Type CreateDelegateType(this MethodInfo method){
             var nameBase = $"{method.DeclaringType?.Name}{method.Name}";
             var name = GetUniqueName(nameBase);
 

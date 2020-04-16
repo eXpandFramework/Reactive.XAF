@@ -1,5 +1,4 @@
-﻿using System;
-using DevExpress.Data.Filtering;
+﻿using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp.SystemModule;
 
 namespace Xpand.Extensions.XAF.FunctionOperators{
@@ -11,7 +10,7 @@ namespace Xpand.Extensions.XAF.FunctionOperators{
             CustomFunctionOperatorHelper.Register(Instance);
         }
 
-        public Type ResultType(params Type[] operands){
+        public System.Type ResultType(params System.Type[] operands){
             return typeof(bool);
         }
 

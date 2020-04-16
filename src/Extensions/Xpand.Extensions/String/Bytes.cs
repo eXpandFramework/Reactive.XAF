@@ -1,7 +1,4 @@
-﻿using System.IO;
-using System.Linq;
-using System.Text;
-using Xpand.Extensions.Stream;
+﻿using System.Text;
 
 namespace Xpand.Extensions.String{
     public static partial class StringExtensions{

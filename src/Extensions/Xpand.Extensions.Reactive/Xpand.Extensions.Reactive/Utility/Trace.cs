@@ -16,10 +16,10 @@ namespace Xpand.Extensions.Reactive.Utility{
     }
 
     public static partial class Utility{
-        private static ConcurrentDictionary<Type, Func<object, string>> Serialization{ get; }
+        private static ConcurrentDictionary<System.Type, Func<object, string>> Serialization{ get; }
 
         static Utility(){
-            Serialization=new ConcurrentDictionary<Type, Func<object,string>>();
+            Serialization=new ConcurrentDictionary<System.Type, Func<object,string>>();
         }
 
         public static bool AddTraceSerialization<T>(Func<T,string> function){

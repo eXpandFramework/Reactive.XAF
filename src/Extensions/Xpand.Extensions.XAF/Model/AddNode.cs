@@ -10,7 +10,7 @@ namespace Xpand.Extensions.XAF.Model{
             return node.AddNode(node.ModelListType(), id);
         }
 
-        public static ModelNode AddNode(this IModelNode node, Type type,string id=null){
+        public static ModelNode AddNode(this IModelNode node, System.Type type,string id=null){
             return node.AddNode(XafTypesInfo.Instance.FindTypeInfo(type),id);
         }
 
