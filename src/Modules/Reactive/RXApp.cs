@@ -10,6 +10,7 @@ using HarmonyLib;
 using JetBrains.Annotations;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ApplicationModulesManager;
+using Xpand.Extensions.XAF.Module;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Security;
@@ -66,10 +67,26 @@ namespace Xpand.XAF.Modules.Reactive{
                 .ToUnit();
         }
 
-        internal static IObservable<Unit> Connect(this ApplicationModulesManager applicationModulesManager){
-            return applicationModulesManager.AddNonSecuredTypes();
+        internal static IObservable<Unit> Connect(this ApplicationModulesManager manager){
+            return manager.AddNonSecuredTypes()
+                .Merge(manager.SetupPropertyEditorParentView())
+                .Merge(manager.MergedExtraEmbededModels());
         }
-        
+
+        private static IObservable<Unit> MergedExtraEmbededModels(this ApplicationModulesManager manager) =>
+            manager.WhereApplication().ToObservable()
+                .SelectMany(application => application.WhenCreateCustomUserModelDifferenceStore()
+                    .Do(_ => {
+                        var models = _.application.Modules.SelectMany(m =>
+                            m.EmbeddedModels().Select(tuple => (id: $"{m.Name},{tuple.id}", tuple.model)));
+                        foreach (var model in models){
+                            _.e.AddExtraDiffStore(model.id, new StringModelStore(model.model));
+                        }
+                    })).ToUnit();
+
+        private static IObservable<Unit> SetupPropertyEditorParentView(this ApplicationModulesManager applicationModulesManager) =>
+            applicationModulesManager.WhereApplication().ToObservable().SelectMany(_ => _.SetupPropertyEditorParentView());
+
         [PublicAPI]
         public static IObservable<Unit> UpdateMainWindowStatus<T>(IObservable<T> messages,TimeSpan period=default){
             if (period==default)

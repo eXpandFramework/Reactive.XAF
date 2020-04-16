@@ -6,6 +6,7 @@ using System.Net;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using System.Reflection;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Utils;
 using DevExpress.Persistent.Base;
@@ -19,11 +20,21 @@ using Xpand.Extensions.XAF.XafApplication;
 namespace Xpand.XAF.Modules.Reactive.Extensions{
     public static class CommonExtensions{
         private static readonly object ErrorHandling;
+        private static readonly Type WebWindowType;
+
         static CommonExtensions(){
-            var dxWebAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(assembly => assembly.GetName().Name.StartsWith("DevExpress.ExpressApp.Web.v"));
-            var errorHandlingType = dxWebAssembly?.GetTypes().First(type => type.FullName=="DevExpress.ExpressApp.Web.ErrorHandling");
+            DXWebAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(assembly => assembly.GetName().Name.StartsWith("DevExpress.ExpressApp.Web.v"));
+            var errorHandlingType = DXWebAssembly?.GetTypes().First(type => type.FullName=="DevExpress.ExpressApp.Web.ErrorHandling");
             ErrorHandling = errorHandlingType?.GetProperty("Instance")?.GetValue(null);
+            
+            WebWindowType = DXWebAssembly?.GetTypes().First(type => type.FullName=="DevExpress.ExpressApp.Web.WebWindow");
+            
         }
+
+        public static object CurrentRequestPage => WebWindowType?.GetProperty("CurrentRequestPage")?.GetValue(null);
+
+        public static Assembly DXWebAssembly{ get; }
+
         [PublicAPI]
         public static IDisposable SubscribeSafe<T>(this IObservable<T> source){
             return source.HandleException().Subscribe();

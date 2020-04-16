@@ -13,6 +13,7 @@ using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
+using Xpand.XAF.Modules.Reactive.Services.Actions;
 using Xpand.XAF.Modules.Reactive.Win.Services;
 
 namespace Xpand.XAF.Modules.OneView{
@@ -89,7 +90,7 @@ namespace Xpand.XAF.Modules.OneView{
                         showViewParameters.Context = TemplateContext.PopupWindow;
 
                         showViewParameters.TargetWindow = TargetWindow.NewWindow;
-                        showViewParameters.CreatedView = application.CreateView(modelView.View);
+                        showViewParameters.CreatedView = application.NewView(modelView.View);
                         application.ShowViewStrategy.ShowView(showViewParameters, new ShowViewSource(null, null));
                         return showViewParameters.ReturnObservable();
                     }

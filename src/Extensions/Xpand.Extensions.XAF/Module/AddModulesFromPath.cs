@@ -4,7 +4,7 @@ using DevExpress.ExpressApp;
 using Xpand.Extensions.AppDomain;
 
 namespace Xpand.Extensions.XAF.Module{
-    public static class ModulebaseExtensions{
+    public static partial class ModulebaseExtensions{
         public static void AddModulesFromPath(this ModuleBase module,string pattern){
             var moduleTypes = Directory.GetFiles(System.AppDomain.CurrentDomain.ApplicationPath(), pattern)
                 .Select(System.Reflection.Assembly.LoadFile)
@@ -13,4 +13,5 @@ namespace Xpand.Extensions.XAF.Module{
         }
 
     }
+
 }
