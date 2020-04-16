@@ -87,75 +87,75 @@
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.AutoCommit">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.AutoCommit.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.AutoCommit.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.CloneMemberValue">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.CloneMemberValue.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.CloneMemberValue.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.CloneModelView">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.CloneModelView.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.CloneModelView.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.GridListEditor">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.GridListEditor.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.GridListEditor.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.HideToolBar">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.HideToolBar.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.HideToolBar.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.LookupCascade">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.LookupCascade.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.LookupCascade.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.MasterDetail">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.MasterDetail.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.MasterDetail.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.ModelMapper">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.ModelMapper.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.ModelMapper.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.ModelViewInheritance">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.ModelViewInheritance.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.ModelViewInheritance.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.OneView">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.OneView.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.OneView.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.ProgressBarViewItem">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.ProgressBarViewItem.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.ProgressBarViewItem.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive.Logger">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.Reactive.Logger.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive.Logger.Hub">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.Reactive.Logger.Hub.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.Hub.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive.Win">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.Reactive.Win.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.Reactive.Win.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.RefreshView">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.RefreshView.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.RefreshView.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.SuppressConfirmation">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.SuppressConfirmation.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.SuppressConfirmation.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.ViewEditMode">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.ViewEditMode.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.ViewEditMode.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.EasyTest">
@@ -475,75 +475,75 @@
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.AutoCommit">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.AutoCommit.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.AutoCommit.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.CloneMemberValue">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.CloneMemberValue.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.CloneMemberValue.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.CloneModelView">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.CloneModelView.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.CloneModelView.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.GridListEditor">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.GridListEditor.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.GridListEditor.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.HideToolBar">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.HideToolBar.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.HideToolBar.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.LookupCascade">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.LookupCascade.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.LookupCascade.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.MasterDetail">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.MasterDetail.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.MasterDetail.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.ModelMapper">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.ModelMapper.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.ModelMapper.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.ModelViewInheritance">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.ModelViewInheritance.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.ModelViewInheritance.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.OneView">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.OneView.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.OneView.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.ProgressBarViewItem">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.ProgressBarViewItem.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.ProgressBarViewItem.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive.Logger">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.Reactive.Logger.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive.Logger.Hub">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.Reactive.Logger.Hub.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.Hub.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive.Win">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.Reactive.Win.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.Reactive.Win.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.RefreshView">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.RefreshView.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.RefreshView.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.SuppressConfirmation">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.SuppressConfirmation.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.SuppressConfirmation.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.ViewEditMode">
-      <HintPath>C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.ViewEditMode.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\Xpand.XAF.Modules.ViewEditMode.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.EasyTest">

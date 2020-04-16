@@ -3,7 +3,6 @@ using System.Linq;
 using DevExpress.EasyTest.Framework;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.EasyTest.WebAdapter;
-using DevExpress.ExpressApp.EasyTest.WebAdapter.Commands;
 using Fasterflect;
 using NUnit.Framework;
 using Shouldly;
@@ -28,18 +27,22 @@ namespace ALL.Web.Tests{
                 application.Modules.FirstOrDefault(m => m.GetType()==moduleType).ShouldBeNull();
             }
         }
-        [Test][Ignore("Azure fails")]
+        [XpandTest(LongTimeout,3)]
+        [Test]
         public void Web_EasyTest(){
-            var webAdapter = new WebAdapter();
-            var testApplication = webAdapter.RunWebApplication($@"{AppDomain.CurrentDomain.ApplicationPath()}\..\TestWebApplication\","65377");
+            using (var webAdapter = new WebAdapter()){
+                var testApplication = webAdapter.RunWebApplication($@"{AppDomain.CurrentDomain.ApplicationPath()}\..\TestWebApplication\",65377);
+                var commandAdapter = webAdapter.CreateCommandAdapter();
 
-            var commandAdapter = webAdapter.CreateCommandAdapter();
-            
-            var autoTestCommand = new AutoTestCommand();
-            autoTestCommand.Execute(commandAdapter);
-            webAdapter.KillApplication(testApplication, KillApplicationContext.TestNormalEnded);
-
+                try{
+                    commandAdapter.TestLookupCascade();
+                }
+                finally{
+                    webAdapter.KillApplication(testApplication, KillApplicationContext.TestNormalEnded);
+                }
+            }
         }
 
     }
+
 }

@@ -95,6 +95,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Reactive.
 		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.LookupCascade", "LookupCascade\Xpand.XAF.Modules.LookupCascade.csproj", "{EAC4F34F-31F9-47D6-B2FF-659B567D7E5F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -210,6 +215,12 @@ Global
 		{8E006135-6815-49E6-A282-9D0F964937D3}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{8E006135-6815-49E6-A282-9D0F964937D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E006135-6815-49E6-A282-9D0F964937D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EAC4F34F-31F9-47D6-B2FF-659B567D7E5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EAC4F34F-31F9-47D6-B2FF-659B567D7E5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EAC4F34F-31F9-47D6-B2FF-659B567D7E5F}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{EAC4F34F-31F9-47D6-B2FF-659B567D7E5F}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
+		{EAC4F34F-31F9-47D6-B2FF-659B567D7E5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EAC4F34F-31F9-47D6-B2FF-659B567D7E5F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

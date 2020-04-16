@@ -18,14 +18,6 @@
     <DebugType>full</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="Modules\**" />
-    <Compile Remove="Modules\MasterDetail\**" />
-    <EmbeddedResource Remove="Modules\**" />
-    <EmbeddedResource Remove="Modules\MasterDetail\**" />
-    <None Remove="Modules\**" />
-    <None Remove="Modules\MasterDetail\**" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Remove="AppDomainExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

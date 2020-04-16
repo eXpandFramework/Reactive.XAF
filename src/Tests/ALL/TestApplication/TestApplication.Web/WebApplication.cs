@@ -11,6 +11,7 @@ namespace TestApplication.Web{
 
         public TestWebApplication(){
             ((ISupportInitialize) this).BeginInit();
+            Modules.Add(new WebModule());
             ((ISupportInitialize) this).EndInit();
             DatabaseVersionMismatch += Solution1AspNetApplication_DatabaseVersionMismatch;
             ApplicationName = "TestWebApplication";

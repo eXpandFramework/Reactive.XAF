@@ -16,6 +16,8 @@ if ($Branch -eq "master"){
     }
     return
 }
+Write-HostFormatted "Reset modified assemblyInfo" -Section
+"AssemblyInfo.cs",".nuspec"|Get-GitDiff |Restore-GitFile
 $officialPackages = Get-XpandPackages -PackageType XAFAll -Source Release
 Write-HostFormatted "labPackages"  -Section
 $labPackages | Out-String
@@ -90,25 +92,28 @@ $yArgs = @{
 if ($newPackages) {
     $yArgs.Packages += $newPackages
 }
+Write-HostFormatted "yArgs" -Section
+$yArgs | Out-String 
 
-if ($Branch -eq "lab") {
-    Write-HostFormatted "updateVersion comparing local/remote differences:" -Section
-    $yArgs.Packages | Out-String 
-    Get-ChildItem $sourcePath *.csproj -Recurse | ForEach-Object {
-        $pName = $_.BaseName
-        $pDir = $_.DirectoryName
-        $yArgs.Packages | Where-Object { $_.id -eq $pName } | ForEach-Object {
-            $nextVersion = $_.NextVersion
-            if ($nextVersion.Revision -gt -1) {
-                $revision = [int]$nextVersion.Revision - 1
-                $nowVersion = New-Object version ($nextVersion.Major, $nextVersion.Minor, $nextVersion.Build, $revision)
-                Write-HostFormatted "Update $pName version to current published $nowVersion" -ForegroundColor Magenta
-                Update-AssemblyInfoVersion $nowVersion $pDir
-            }
+Write-HostFormatted "updateVersion comparing local/remote differences:" -Section
+
+Get-ChildItem $sourcePath *.csproj -Recurse | ForEach-Object {
+    $pName = $_.BaseName
+    $pDir = $_.DirectoryName
+    $yArgs.Packages | Where-Object { $_.id -eq $pName } | ForEach-Object {
+        $nextVersion = $_.NextVersion
+        if ($nextVersion.Revision -gt -1) {
+            $revision = [int]$nextVersion.Revision - 1
+            $nowVersion = New-Object version ($nextVersion.Major, $nextVersion.Minor, $nextVersion.Build, $revision)
+            Write-HostFormatted "Update $pName version to current published $nowVersion" -ForegroundColor Magenta
+            Update-AssemblyInfoVersion $nowVersion $pDir
         }
     }
 }
-Write-HostFormatted "CHECK IF REMOTE INDEX IS DELAYED" -ForegroundColor Red
+Write-HostFormatted "CHECK IF REMOTE INDEX IS DELAYED" -Section
+if ((Get-GitLastSha -repoGitUrl .) -ne (Get-GitLastSha -repoGitUrl (Get-XpandRepository -Name DevExpress.XAF -Uri) -Branch lab)){
+    throw "REMOTE INDEX IS DELAYED. PLEASE PUSH"
+}
 $updateVersion = @(Update-NugetProjectVersion @yArgs -Verbose)
 Write-HostFormatted "Updated packages" -Section
 $updateVersion

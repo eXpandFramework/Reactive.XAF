@@ -107,8 +107,7 @@ namespace TestApplication.Web{
 
             #endregion
             AdditionalExportedTypes.Add(typeof(Order));
-            AdditionalExportedTypes.Add(typeof(Customer));
-//
+
             RequiredModuleTypes.Add(typeof(AutoCommitModule));
             RequiredModuleTypes.Add(typeof(CloneMemberValueModule));
             RequiredModuleTypes.Add(typeof(CloneModelViewModule));
@@ -127,16 +126,10 @@ namespace TestApplication.Web{
             
         }
 
-        // protected override IEnumerable<Type> GetDeclaredControllerTypes(){
-        //     yield return typeof(CustomerController);
-        // }
         public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB){
             yield return new OrderModuleUpdater(objectSpace, versionFromDB);
         }
 
-        public override void Setup(XafApplication application){
-            base.Setup(application);
-        }
 
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
@@ -149,10 +142,4 @@ namespace TestApplication.Web{
 
     }
 
-    public class CustomerController : ObjectViewController<ListView,Customer>{
-        protected override void OnViewControlsCreated(){
-            base.OnViewControlsCreated();
-            // throw new NotImplementedException();
-        }
-    }
 }

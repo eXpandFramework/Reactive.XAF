@@ -105,9 +105,12 @@ Invoke-Script {
             Remove-Item "$root\bin\$_" -Force -Recurse
         }
     }
-    & (Get-MsBuildPath) "$testAppPAth\TestApplication.sln" /t:Clean /v:m
-    & (Get-NugetPath) restore "$testAppPAth\TestApplication.sln" -source "$tempNupkg;$(Get-PackageFeed -Nuget);$(Get-PackageFeed -Xpand)"
-    & (Get-MsBuildPath) "$testAppPAth\TestApplication.sln" /bl:$root\bin\TestWebApplication.binlog /WarnAsError /v:m -t:rebuild -m
+    Clear-NugetCache XpandPackages
+    Push-Location "$testAppPAth\.."
+    Use-NugetConfig -Sources $tempNupkg,(Get-PackageFeed -Nuget),(Get-PackageFeed -Xpand) -ScriptBlock{
+        Start-Build "$testAppPAth\TestApplication.sln" -BinaryLogPath $root\bin\TestWebApplication.binlog -WarnAsError
+    }
+    Pop-Location
 } -Maximum 2
 
 Remove-Item $tempNupkg -Force -Recurse

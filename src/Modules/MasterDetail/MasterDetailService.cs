@@ -13,11 +13,11 @@ using DevExpress.Persistent.Base;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
-using Xpand.Extensions.XAF.ApplicationModulesManager;
 using Xpand.Extensions.XAF.Frame;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
+using Xpand.XAF.Modules.Reactive.Services.Actions;
 using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
 namespace Xpand.XAF.Modules.MasterDetail{
@@ -122,7 +122,7 @@ namespace Xpand.XAF.Modules.MasterDetail{
 
             if (detailView.ObjectSpace == null){
                 dashboardViewItem.Frame.SetView(null);
-                detailView = (DetailView) frame.Application.CreateView(detailView.Model);
+                detailView = (DetailView) frame.Application.NewView(detailView.Model);
                 dashboardViewItem.Frame.SetView(detailView);
             }
             detailView.CurrentObject = detailView.ObjectSpace.GetObject(o);
@@ -174,8 +174,7 @@ namespace Xpand.XAF.Modules.MasterDetail{
                     };
                 simpleAction.Active[MasterDetailModule.CategoryName] = false;
                 return simpleAction;
-            }).ReturnObservable().FirstAsync()
-                .TraceMasterDetailModule();
+            }).TraceMasterDetailModule();
         }
 
         public static IModelDashboardView NewModelDashboardView(this IModelApplication modelApplication, Type objectType){

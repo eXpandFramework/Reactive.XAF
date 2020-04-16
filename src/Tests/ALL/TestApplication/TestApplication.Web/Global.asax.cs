@@ -19,7 +19,7 @@ namespace TestApplication.Web {
             Tracing.Initialize();
 
             var application = new TestWebApplication();
-            application.Modules.Add(new WebModule());
+            
             WebApplication.SetInstance(Session, application);
 //            SecurityStrategy security = (SecurityStrategy)WebApplication.Instance.Security;
 //            security.RegisterXPOAdapterProviders();

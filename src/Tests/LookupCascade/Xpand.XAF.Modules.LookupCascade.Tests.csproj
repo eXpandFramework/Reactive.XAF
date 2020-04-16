@@ -30,7 +30,7 @@
     <Reference Include="Xpand.TestsLib, Version=2.201.0.0, Culture=neutral, PublicKeyToken=c52ffed5d5ff0958">
       <HintPath>..\..\..\bin\Xpand.TestsLib.dll</HintPath>
     </Reference>
-    <Reference Include="Xpand.XAF.Modules.LookupCascade, Version=2.201.0.0, Culture=neutral, PublicKeyToken=c52ffed5d5ff0958">
+    <Reference Include="Xpand.XAF.Modules.LookupCascade">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.LookupCascade.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">

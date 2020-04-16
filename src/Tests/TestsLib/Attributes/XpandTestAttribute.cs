@@ -53,8 +53,12 @@ namespace Xpand.TestsLib.Attributes{
                     }
 
                     if (count > 0){
-                        context.CurrentResult = context.CurrentTest.MakeTestResult();
-                        context.CurrentRepeatCount++;
+                        if (context.CurrentResult.ResultState!=ResultState.Success){
+                            context.CurrentRepeatCount++;
+                        }
+                        else{
+                            break;
+                        }
                     }
                 }
 

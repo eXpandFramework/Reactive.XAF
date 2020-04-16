@@ -131,8 +131,11 @@
     <PackageReference Include="DevExpress.EasyTest" Version="19.2.7" />
     <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="19.2.7" />
     <PackageReference Include="Xpand.XAF.Web.All">
-      <Version>2.201.26</Version>
+      <Version>2.201.26.3</Version>
     </PackageReference>
+    <Reference Include="Xpand.TestsLib">
+      <HintPath>..\..\..\..\..\bin\Xpand.TestsLib.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Default.aspx" />
@@ -142,7 +145,6 @@
     <Content Include="Login.aspx" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Customer.cs" />
     <Compile Include="Default.aspx.designer.cs">
       <DependentUpon>Default.aspx</DependentUpon>
     </Compile>
@@ -155,6 +157,7 @@
     <Compile Include="Login.aspx.designer.cs">
       <DependentUpon>Login.aspx</DependentUpon>
     </Compile>
+    <Compile Include="LookupCascade\LookupCascadeService.cs" />
     <Compile Include="WebApplication.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -184,6 +187,9 @@
     <Content Include="Model.Desktop.xafml" />
     <Content Include="Model.Tablet.xafml" />
     <Content Include="Web.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="LookupCascade\LookupCascade.xafml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

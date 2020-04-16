@@ -35,7 +35,7 @@
       <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.Extensions.Reactive">
-      <HintPath>..\..\..\..\Issues\ClientLooupCascadeTest\ClientLooupCascadeTest.Web\Bin\Xpand.Extensions.Reactive.dll</HintPath>
+      <HintPath>..\..\..\Bin\Xpand.Extensions.Reactive.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.Extensions.XAF">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
