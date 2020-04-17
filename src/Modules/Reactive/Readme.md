@@ -19,9 +19,9 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |JetBrains.Annotations|2019.1.3
  |System.Interactive|4.0.0
  |System.Reactive|4.3.2
- |Xpand.Extensions|2.201.13
- |Xpand.Extensions.Reactive|2.201.13
- |Xpand.Extensions.XAF|2.201.13
+ |Xpand.Extensions|2.201.13.2
+ |Xpand.Extensions.Reactive|2.201.13.3
+ |Xpand.Extensions.XAF|2.201.13.4
  |Xpand.Patcher|1.0.1
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.5
 
