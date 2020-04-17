@@ -36,10 +36,10 @@ function UpdateModulesList($rootLocation, $packages) {
         $downloads = "![](https://xpandshields.azurewebsites.net/nuget/dt/$_.svg?label=&style=flat)"
         $moduleList += "$packageUri|$version|$downloads`r`n"
     }
-
+    $header="`r`n`r`nTo minimize version conflicts we recommend that you use the [Xpand.XAF.Core.All](https://www.nuget.org/packages/Xpand.XAF.Core.All), [Xpand.XAF.Win.All](https://www.nuget.org/packages/Xpand.XAF.Win.All), [Xpand.XAF.Web.All](https://www.nuget.org/packages/Xpand.XAF.Web.All) packages. Doing so, all packages will be at your disposal and .NET will add a dependecy only to those packages that you actually use and not to all.`r`n`r`n"
     $path = "$rootLocation\src\modules\ReadMe.md"
     $allModulesReadMe = Get-Content $path -Raw
-    $allModulesReadMe = [Regex]::replace($allModulesReadMe, "(## Platform agnostic modules list)(.*)(## Issues)", "`$1`r`n$moduleList`r`n`$3", [RegexOptions]::Singleline)
+    $allModulesReadMe = [Regex]::replace($allModulesReadMe, "(## Platform agnostic modules list)$header(.*)(## Issues)", "`$1`r`n$moduleList`r`n`$3", [RegexOptions]::Singleline)
     Set-Content $path $allModulesReadMe.trim()
 }
 
