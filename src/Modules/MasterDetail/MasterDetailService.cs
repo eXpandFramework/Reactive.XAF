@@ -33,15 +33,14 @@ namespace Xpand.XAF.Modules.MasterDetail{
             if (application==null)
                 return Observable.Empty<Unit>();
             var listViewProcessSelectedItem = application.WhenMasterDetailListViewProcessSelectedItem().Publish().AutoConnect();
-            var connect = application.WhenSynchronizeDetailView()
+            return application.WhenSynchronizeDetailView()
                 .Merge(listViewProcessSelectedItem.ToUnit())
                 .Merge(application.DisableListViewController("ListViewFastCallbackHandlerController"))
                 .Merge(application.DisableDetailViewViewController("ActionsFastCallbackHandlerController"))
                 .Merge(application.WhenSaveAction())
                 .Merge(application.WhenRefreshListView())
+                .Merge(applicationModulesManager.RegisterActions().ToUnit())
                 .ToUnit();
-            return applicationModulesManager.RegisterActions().ToUnit()
-                .Concat(connect);
         }
 
         private static IObservable<Unit> WhenRefreshListView(this XafApplication application){

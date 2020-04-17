@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Web.UI.WebControls;
 using DevExpress.Data.Extensions;
 using DevExpress.ExpressApp;
@@ -15,11 +16,12 @@ using DevExpress.Persistent.Base;
 using DevExpress.Web;
 using Xpand.Extensions.String;
 using Xpand.Extensions.XAF.Model;
+using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.LookupCascade{
     [PropertyEditor(typeof(object), false)]
-    public class ASPxLookupCascadePropertyEditor :ASPxPropertyEditor, IDependentPropertyEditor,IParentViewPropertyEditor,IComplexViewItem{
+    public class ASPxLookupCascadePropertyEditor :ASPxObjectPropertyEditorBase, IDependentPropertyEditor,IParentViewPropertyEditor{
         
         
         private IModelMemberViewItem[] _lookupViewModelMemberViewItems;
@@ -35,7 +37,7 @@ namespace Xpand.XAF.Modules.LookupCascade{
             _comboBox.ValueChanged+=ComboBoxOnValueChanged;
             _comboBox.TextFormatString = EditorModel.TextFormatString;
             _comboBox.AllowNull = true;
-            _comboBox.NullText = DatasourceService.NA;
+            _comboBox.NullText = LookupCascadeService.NA;
             ConfigureColumns(_comboBox);
             ConfigureSynchronize(_comboBox);
             ConfigureCascade(_comboBox);
@@ -66,11 +68,10 @@ namespace Xpand.XAF.Modules.LookupCascade{
             _parentView = value;
             if (value is ListView listView){
                 var gridListEditor = ((ASPxGridListEditor) listView.Editor);
-                var clientStorage = ((IModelOptionsClientDatasource) Model.Application.Options)
-                    .ClientDatasource.ClientStorage.ToString().FirstCharacterToLower();
+                
                 ClientSideEventsHelper.AssignClientHandlerSafe(gridListEditor.Grid,
                     nameof(gridListEditor.Grid.ClientSideEvents.BeginCallback),
-                    $"function(s,e){{ClearEditorItems('{clientStorage}','{View}')}}",
+                    $"function(s,e){{ClearEditorItems('{_clientStorage}','{View}')}}",
                     $"{GetType().FullName}{nameof(gridListEditor.Grid.ClientSideEvents.BeginCallback)}");
             }
         }
@@ -79,22 +80,22 @@ namespace Xpand.XAF.Modules.LookupCascade{
             return _helper.GetEscapedDisplayText(PropertyValue,NullText,DisplayFormat);
         }
 
-        public void Setup(IObjectSpace space, XafApplication xafApplication){
-            
+        public override void Setup(IObjectSpace space, XafApplication xafApplication){
+            base.Setup(space, xafApplication);
+            var modelClientDatasource = xafApplication.ReactiveModulesModel().LookupCascadeModel().Select(_ => _.ClientDatasource).Wait();
             _helper = new WebLookupEditorHelper(xafApplication, space, MemberInfo.MemberTypeInfo, Model){
                 EditorMode = LookupEditorMode.AllItems
             };
             ImmediatePostData = false;
             var lookupListViewModel = _helper.LookupListViewModel;
             _lookupViewModelMemberViewItems = lookupListViewModel.VisibleMemberViewItems().OrderForView();
-            _clientStorage = ((IModelOptionsClientDatasource) Model.Application.Options).ClientDatasource.ClientStorage.ToString().FirstCharacterToLower();
+            _clientStorage = modelClientDatasource.ClientStorage.ToString().FirstCharacterToLower();
         }
 
         private void ConfigureClientSideEvents(ASPxComboBox comboBox){
-            var clientStorage = ((IModelOptionsClientDatasource) Model.Application.Options).ClientDatasource.ClientStorage.ToString().FirstCharacterToLower();
             var displayText = _helper.GetDisplayText(PropertyValue,NullText,DisplayFormat);
             var objectKey = _helper.GetObjectKey(PropertyValue);
-            comboBox.ClientSideEvents.Init = $"function(s,e){{EditorInit(s,'{_helper.LookupListViewModel.Id}','{_parentView.Id}','{clientStorage}','{displayText}','{objectKey}');}}";
+            comboBox.ClientSideEvents.Init = $"function(s,e){{EditorInit(s,'{_helper.LookupListViewModel.Id}','{_parentView.Id}','{_clientStorage}','{displayText}','{objectKey}');}}";
         }
 
         private void ConfigureColumns(ASPxComboBox comboBox){
@@ -141,6 +142,7 @@ namespace Xpand.XAF.Modules.LookupCascade{
 
         private ASPxComboBox _comboBox;
         private ObjectView _parentView;
+        
 
         IList<string> IDependentPropertyEditor.MasterProperties => _helper.MasterProperties;
 

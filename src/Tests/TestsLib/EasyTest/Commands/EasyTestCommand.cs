@@ -1,11 +1,21 @@
 ﻿using System;
+using System.Linq;
 using DevExpress.EasyTest.Framework;
+using Fasterflect;
 
 namespace Xpand.TestsLib.EasyTest.Commands{
     public abstract class EasyTestCommand:Command{
         public new bool ExpectException{ get; set; }
+        public new bool SuppressException{
+            get{
+                return Version.Parse(AssemblyInfo.Version) >= new Version(19, 2, 7) && (bool) GetType()
+                    .Properties("SuppressException").First(info => info.DeclaringType == typeof(Command)).GetValue(this);
+            }
+            set => throw new NotImplementedException();
+        }
 
         protected sealed override void InternalExecute(ICommandAdapter adapter){
+            var suppressException = SuppressException;
             try {
                 ExecuteCore(adapter);
                 if(ExpectException) {
@@ -13,7 +23,7 @@ namespace Xpand.TestsLib.EasyTest.Commands{
                 }
             }
             catch(AdapterOperationException e) {
-                if(SuppressException) {
+                if(suppressException) {
                     Logger.Instance.Exception(e);
                 }
                 else {
@@ -23,7 +33,7 @@ namespace Xpand.TestsLib.EasyTest.Commands{
                 }
             }
             catch(CommandException e) {
-                if(SuppressException) {
+                if(suppressException) {
                     Logger.Instance.Exception(e);
                 } 
                 else {

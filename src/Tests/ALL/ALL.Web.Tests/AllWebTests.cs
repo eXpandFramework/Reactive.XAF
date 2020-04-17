@@ -32,9 +32,8 @@ namespace ALL.Web.Tests{
         public void Web_EasyTest(){
             using (var webAdapter = new WebAdapter()){
                 var testApplication = webAdapter.RunWebApplication($@"{AppDomain.CurrentDomain.ApplicationPath()}\..\TestWebApplication\",65377);
-                var commandAdapter = webAdapter.CreateCommandAdapter();
-
                 try{
+                    var commandAdapter = webAdapter.CreateCommandAdapter();
                     commandAdapter.TestLookupCascade();
                 }
                 finally{

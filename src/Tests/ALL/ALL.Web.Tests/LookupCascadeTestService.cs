@@ -84,8 +84,8 @@ namespace ALL.Web.Tests{
         }
 
         private static void TestEditors(this ICommandAdapter commandAdapter, bool inlineEditor=false){
-            commandAdapter.Execute(new FillEditorCommand(nameof(Order.Product), DatasourceService.NA,inlineEditor));
-            commandAdapter.Execute(new FillEditorCommand(nameof(Order.Accessory), DatasourceService.NA,inlineEditor));
+            commandAdapter.Execute(new FillEditorCommand(nameof(Order.Product), LookupCascadeService.NA,inlineEditor));
+            commandAdapter.Execute(new FillEditorCommand(nameof(Order.Accessory), LookupCascadeService.NA,inlineEditor));
             commandAdapter.Execute(new FillEditorCommand(nameof(Order.Accessory), $"{nameof(Accessory.AccessoryName)}0",inlineEditor));
             commandAdapter.Execute(new FillEditorCommand(nameof(Order.Product), $"{nameof(Product.ProductName)}0",inlineEditor));
             commandAdapter.Execute(new FillEditorCommand(nameof(Order.Accessory), $"{nameof(Accessory.AccessoryName)}0",inlineEditor));

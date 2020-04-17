@@ -9,6 +9,7 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 namespace Xpand.XAF.Modules.LookupCascade {
     [UsedImplicitly]
     public sealed class LookupCascadeModule : ReactiveModuleBase{
+        public const string ModuleName = "Xpand.LookupCascade";
         static LookupCascadeModule(){
             TraceSource=new ReactiveTraceSource(nameof(LookupCascade));
         }
@@ -17,7 +18,8 @@ namespace Xpand.XAF.Modules.LookupCascade {
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.Web.SystemModule.SystemAspNetModule));
             RequiredModuleTypes.Add(typeof(ReactiveModule));
         }
-
+        
+        [PublicAPI]
         public static ReactiveTraceSource TraceSource{ get; set; }
 
         public override void Setup(XafApplication application){
@@ -30,11 +32,9 @@ namespace Xpand.XAF.Modules.LookupCascade {
 
         public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders){
             base.ExtendModelInterfaces(extenders);
-            extenders.Add<IModelOptions,IModelOptionsClientDatasource>();
             extenders.Add<IModelMemberViewItem,IModelMemberViewItemLookupCascadePropertyEditor>();
             extenders.Add<IModelColumn,IModelColumnClientVisible>();
-            // extenders.Add<IModelReactiveModules,IModelReactiveModuleLogger>();
-            
+            extenders.Add<IModelReactiveModules,IModelReactiveModuleLookupCascade>();
         }
     }
 

@@ -9,18 +9,21 @@
       </Item>
     </Items>
   </NavigationItems>
-  <Options CollectionsEditMode="Edit">
-    <ClientDatasource>
-      <LookupViews>
-        <ClientDatasourceLookupView Id="Accesories" LookupListView="LookupCascade_Accessory_LookupListView" IsNewNode="True" />
-        <ClientDatasourceLookupView Id="Products" LookupListView="Product_LookupListView" IsNewNode="True" />
-      </LookupViews>
-    </ClientDatasource>
-  </Options>
+  <Options CollectionsEditMode="Edit" />
+  <ReactiveModules>
+    <LookupCascade>
+      <ClientDatasource>
+        <LookupViews>
+          <ClientDatasourceLookupView Id="Accesories" LookupListView="LookupCascade_Accessory_LookupListView" IsNewNode="True" />
+          <ClientDatasourceLookupView Id="Products" LookupListView="Product_LookupListView" IsNewNode="True" />
+        </LookupViews>
+      </ClientDatasource>
+    </LookupCascade>
+  </ReactiveModules>
   <Views>
     <ListView Id="LookupCascade_Accessory_LookupListView">
       <Columns>
-        <ColumnInfo Id="Product" PropertyName="Product.Oid" Index="2" Caption="Product" IsNewNode="True" Removed="True" />
+        <ColumnInfo Id="Product" PropertyName="Product.Oid" Index="2" Caption="Product" ClientVisible="False" IsNewNode="True" Removed="True" />
       </Columns>
     </ListView>
     <DetailView Id="LookupCascade_Order_DetailView">
@@ -35,7 +38,7 @@
     <ListView Id="LookupCascade_Order_ListView" AllowEdit="True" NewItemRowPosition="Top" DetailViewID="LookupCascade_Order_DetailView">
       <Columns>
         <ColumnInfo Id="Product" PropertyEditorType="Xpand.XAF.Modules.LookupCascade.ASPxLookupCascadePropertyEditor" SortIndex="0" SortOrder="Ascending">
-          <LookupCascade CascadeMemberViewItem="Accessory" CascadeColumnFilter="Product" Synchronize="True" />
+          <LookupCascade Synchronize="True" CascadeMemberViewItem="Accessory" CascadeColumnFilter="Product" />
         </ColumnInfo>
         <ColumnInfo Id="Accessory" PropertyEditorType="Xpand.XAF.Modules.LookupCascade.ASPxLookupCascadePropertyEditor" View="LookupCascade_Accessory_LookupListView">
           <LookupCascade SynchronizeMemberViewItem="Product" SynchronizeMemberLookupColumn="ProductName" />

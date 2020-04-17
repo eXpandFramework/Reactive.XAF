@@ -12,7 +12,6 @@ using Xpand.TestsLib;
 using Xpand.TestsLib.Attributes;
 using Xpand.TestsLib.EasyTest;
 using Xpand.XAF.Modules.Reactive;
-using Xpand.XAF.Modules.Reactive.Logger;
 
 namespace ALL.Win.Tests{
     [NonParallelizable]
@@ -32,17 +31,21 @@ namespace ALL.Win.Tests{
         [Test]
         [Apartment(ApartmentState.STA)]
         public void Win_EasyTest(){
-            var winAdapter = new WinAdapter();
-            var path = $@"C:\Work\eXpandFramework\DevExpress.XAF\bin\TestWinApplication\TestApplication.Win.exe";
-            var testApplication = winAdapter.RunWinApplication(path);
-
-            var commandAdapter = winAdapter.CreateCommandAdapter();
-            
-            var autoTestCommand = new AutoTestCommand();
-            autoTestCommand.Execute(commandAdapter);
-
-            winAdapter.KillApplication(testApplication, KillApplicationContext.TestNormalEnded);
-
+            using (var winAdapter = new WinAdapter()){
+                var testApplication = winAdapter.RunWinApplication($@"{AppDomain.CurrentDomain.ApplicationPath()}\..\TestWinApplication\TestApplication.Win.exe");
+                try{
+                    var commandAdapter = winAdapter.CreateCommandAdapter();
+                    var autoTestCommand = new AutoTestCommand();
+                    autoTestCommand.Execute(commandAdapter);
+                }
+                catch (Exception e){
+                    Console.WriteLine(e);
+                    throw;
+                }
+                finally{
+                    winAdapter.KillApplication(testApplication, KillApplicationContext.TestNormalEnded);    
+                }
+            }
         }
 
     }

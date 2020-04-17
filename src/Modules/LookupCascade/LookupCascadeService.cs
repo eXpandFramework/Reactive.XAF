@@ -3,22 +3,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 using System.Web;
 using System.Web.UI;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Web;
 using Newtonsoft.Json;
+using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.String;
 using Xpand.Extensions.XAF.Model;
 using Xpand.XAF.Modules.LookupCascade;
+using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 
-[assembly: WebResource(DatasourceService.PakoScriptResourceName, "application/x-javascript")]
-[assembly: WebResource(DatasourceService.ASPxClientLookupPropertyEditorScriptResourceName, "application/x-javascript")]
+[assembly: WebResource(LookupCascadeService.PakoScriptResourceName, "application/x-javascript")]
+[assembly: WebResource(LookupCascadeService.ASPxClientLookupPropertyEditorScriptResourceName, "application/x-javascript")]
 namespace Xpand.XAF.Modules.LookupCascade{
-    public static class DatasourceService{
+    public static class LookupCascadeService{
         public const string FieldNames = "FieldNames";
         public static string NA = "N/A";
         internal const string PakoScriptResourceName = "Xpand.XAF.Modules.LookupCascade.pako.min.js";
@@ -26,36 +30,35 @@ namespace Xpand.XAF.Modules.LookupCascade{
 
         internal static IObservable<Unit> Connect(this LookupCascadeModule module){
             var application = module.Application;
-            return application.RegisterClientScripts()
-                .Merge(application.StoreDataSource());
-
+            return application.RegisterClientScripts().Merge(application.StoreDataSource());
         }
 
         private static IObservable<Unit> StoreDataSource(this XafApplication application){
-            var createClientDataSource = application.WhenWeb().WhenCallBack(typeof(DatasourceService).FullName)
+            return application.WhenWeb().WhenCallBack(typeof(LookupCascadeService).FullName)
                 .SelectMany(pattern => application.CreateClientDataSource())
                 .Do(_ => {
                     WebWindow.CurrentRequestWindow.RegisterStartupScript($"StoreDatasource_{_.viewId}",
                         $"StoreDatasource('{_.viewId}','{_.objects}','{_.storage}')");
                 })
-                .ToUnit();
-            return createClientDataSource;
+                .ToUnit()
+                .TraceLookupCascdeModule();
         }
 
         private static IObservable<Unit> RegisterClientScripts(this XafApplication application){
-            return application.WhenWindowCreated()
-                .Cast<WebWindow>()
-                .Do(window => {
-                    var modelClientDatasource = ((IModelOptionsClientDatasource) application.Model.Options).ClientDatasource;
+            return application.WhenWindowCreated().Cast<WebWindow>().CombineLatest(application.ReactiveModulesModel().LookupCascadeModel())
+                .Do(_ => {
+                    var window = _.first;
+                    var modelClientDatasource = _.second.ClientDatasource;
                     var clientStorage = modelClientDatasource.ClientStorage.ToString().FirstCharacterToLower();
-                    var type = typeof(DatasourceService);
+                    var type = typeof(LookupCascadeService);
                     window.RegisterStartupScript($"RequestDatasources_{type.FullName}",
                         $"RequestDatasources('{type.FullName}','{clientStorage}');globalCallbackControl.BeginCallback.AddHandler(function(){{ClearEditorItems('{clientStorage}');}});");
                     window.RegisterClientScriptResource(type,PakoScriptResourceName);
                     window.RegisterClientScriptResource(type,ASPxClientLookupPropertyEditorScriptResourceName);
                     RegisterPollyFills(window);
                 })
-                .ToUnit();
+                .ToUnit()
+                .TraceLookupCascdeModule();
         }
 
         private static void RegisterPollyFills(WebWindow window){
@@ -63,12 +66,12 @@ namespace Xpand.XAF.Modules.LookupCascade{
                 "String.prototype.startsWith","String.prototype.endsWith", "Array.prototype.filter", "Object.entries", "Array.prototype.includes",
                 "Array.prototype.keys", "Array.prototype.findIndex", "Array.prototype.find"
             };
-            window.RegisterClientScriptInclude($"{typeof(DatasourceService).FullName}_polyfill",
+            window.RegisterClientScriptInclude($"{typeof(LookupCascadeService).FullName}_polyfill",
                 $"https://polyfill.io/v3/polyfill.min.js?version=3.52.1&features={string.Join("%2C",pollyFills)}");
         }
 
         public static IEnumerable<(string viewId, string objects, string storage)> CreateClientDataSource(this XafApplication application){
-            var modelClientDatasource = ((IModelOptionsClientDatasource) application.Model.Options).ClientDatasource;
+            var modelClientDatasource = application.ReactiveModulesModel().LookupCascadeModel().Wait().ClientDatasource;
             var storage = modelClientDatasource.ClientStorage.ToString().FirstCharacterToLower();
             var viewsIds = modelClientDatasource.LookupViews.Select(view => view.LookupListView.Id);
             return viewsIds.ToObservable()
@@ -115,6 +118,12 @@ namespace Xpand.XAF.Modules.LookupCascade{
 
             });
         }
-
+        
+        internal static IObservable<TSource> TraceLookupCascdeModule<TSource>(this IObservable<TSource> source, string name = null,
+            Action<string> traceAction = null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
+            [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0){
+            return source.Trace(name, LookupCascadeModule.TraceSource, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
+        }
     }
+    
 }

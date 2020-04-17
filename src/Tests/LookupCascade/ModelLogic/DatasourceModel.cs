@@ -1,9 +1,11 @@
 ﻿using System.Linq;
+using System.Reactive.Linq;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.XAF.Model;
 using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.LookupCascade.Tests.BOModel;
+using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.XAF.Modules.LookupCascade.Tests.ModelLogic{
     public class DatasourceModel:LookupCascadeBaseTest{
@@ -19,7 +21,7 @@ namespace Xpand.XAF.Modules.LookupCascade.Tests.ModelLogic{
             modelMemberViewItems.First(item => item.ModelMember.MemberInfo.MemberType==typeof(Product)).PropertyEditorType=typeof(ASPxLookupCascadePropertyEditor);
             modelMemberViewItems.First(item => item.ModelMember.MemberInfo.MemberType==typeof(Accessory)).PropertyEditorType=typeof(ASPxLookupCascadePropertyEditor);
         
-            var clientDatasourceLookupView = ((IModelOptionsClientDatasource) applicationModel.Options).ClientDatasource.LookupViews.AddNode<IModelClientDatasourceLookupView>();
+            var clientDatasourceLookupView = application.ReactiveModulesModel().LookupCascadeModel().Wait().ClientDatasource.LookupViews.AddNode<IModelClientDatasourceLookupView>();
             clientDatasourceLookupView.LookupListViews.ShouldContain(applicationModel.FindLookupListView(typeof(Product)));
             clientDatasourceLookupView.LookupListViews.ShouldContain(applicationModel.FindLookupListView(typeof(Accessory)));
             

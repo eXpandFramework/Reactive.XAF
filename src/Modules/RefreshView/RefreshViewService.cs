@@ -27,7 +27,7 @@ namespace Xpand.XAF.Modules.RefreshView{
         }
 
         private static IObservable<Unit> RefreshView(XafApplication application){
-            return application.WhenViewOnFrame().Select(frame => frame).CombineLatest(application.ReactiveModulesModel().Select(modules => modules).RefreshViewModel(),
+            return application.WhenViewOnFrame().CombineLatest(application.ReactiveModulesModel().RefreshViewModel(),
                     (frame, model) => {
                         var synchronizationContext = SynchronizationContext.Current;
                         return model.Items

@@ -1,18 +1,38 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reactive.Linq;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 using JetBrains.Annotations;
 using Xpand.Extensions.XAF.Model;
+using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.XAF.Modules.LookupCascade{
-    public interface IModelOptionsClientDatasource:IModelNode{
+    [PublicAPI]
+    public interface IModelReactiveModuleLookupCascade:IModelReactiveModule{
+        IModelLookupCascade LookupCascade{ get; }
+    }
+    
+    public static class ModelLookupCascade{
+        public static IObservable<IModelLookupCascade> LookupCascadeModel(this IObservable<IModelReactiveModules> source){
+            return source.Select(modules => modules.LookupCascade());
+        }
+
+        public static IModelLookupCascade LookupCascade(this IModelReactiveModules reactiveModules){
+            return ((IModelReactiveModuleLookupCascade) reactiveModules).LookupCascade;
+        }
+    }
+
+    [PublicAPI]
+    public interface IModelLookupCascade:IModelNode{
         IModelClientDatasource ClientDatasource{ get;  }
     }
 
+    [PublicAPI]
     public interface IModelClientDatasourceLookupView:IModelNode{
         [DataSourceProperty(nameof(LookupListViews))]
         [Required]
@@ -37,6 +57,7 @@ namespace Xpand.XAF.Modules.LookupCascade{
     public interface IModelClientDatasourceLookupViews:IModelList<IModelClientDatasourceLookupView>,IModelNode{
     }
 
+    [PublicAPI]
     public interface IModelClientDatasource:IModelNode{
         ClientStorage ClientStorage{ get; [UsedImplicitly] set; }
         IModelClientDatasourceLookupViews LookupViews{ get; }
@@ -62,10 +83,11 @@ namespace Xpand.XAF.Modules.LookupCascade{
 
     [ModelAbstractClass]
     public interface IModelColumnClientVisible:IModelColumn{
+        [Category(LookupCascadeModule.ModuleName)]
         bool? ClientVisible{ get; set; }    
     }
 
-    
+    [PublicAPI]
     public interface IModelLookupCascadePropertyEditor:IModelNode{
         [DefaultValue("{0}")]
         string TextFormatString{ get; [UsedImplicitly] set; }
@@ -81,20 +103,9 @@ namespace Xpand.XAF.Modules.LookupCascade{
         IModelColumn CascadeColumnFilter{ get; [UsedImplicitly] set; }
         [Category("Synchronize")]
         bool Synchronize{ get; set; }
-        [DataSourceProperty(nameof(LookupPropertyEditorMemberViewItems))]
-        [Category("Synchronize")]
-        IModelMemberViewItem SynchronizeMemberViewItem{ get; set; }
-
-        [Category("Synchronize")]
-        [DataSourceProperty(nameof(SynchronizeMemberLookupColumns))]
-        [RuleRequiredField(TargetCriteria = nameof(SynchronizeMemberViewItem)+" Is Not Null")]
-        [Description("This column value will be used on the client to set the value of the " +nameof(SynchronizeMemberViewItem)+ ". Only visible columns are listed, to hide the column on the client false the "+nameof(IModelColumnClientVisible.ClientVisible)+" on the lookup view")]
-        IModelColumn SynchronizeMemberLookupColumn{ get; [UsedImplicitly] set; }
 
         [Browsable(false)]
         IEnumerable<IModelColumn> CascadeColumnFilters{ [UsedImplicitly] get; }
-        [Browsable(false)]
-        IEnumerable<IModelColumn> SynchronizeMemberLookupColumns{ [UsedImplicitly] get; }
         [Browsable(false)]
         IEnumerable<IModelMemberViewItem> LookupPropertyEditorMemberViewItems{ [UsedImplicitly] get; }
     }
@@ -103,11 +114,6 @@ namespace Xpand.XAF.Modules.LookupCascade{
     [DomainLogic(typeof(IModelLookupCascadePropertyEditor))]
     [UsedImplicitly]
     public class ModelLookupCasadePropertyEditorLogic{
-        [UsedImplicitly]
-        public static IModelList<IModelColumn> Get_SynchronizeMemberLookupColumns(IModelLookupCascadePropertyEditor modelLookupPropertyEditor){
-            var viewItem = modelLookupPropertyEditor.SynchronizeMemberViewItem;
-            return new CalculatedModelNodeList<IModelColumn>(viewItem!=null?viewItem.GetLookupListView().VisibleMemberViewItems().Cast<IModelColumn>():Enumerable.Empty<IModelColumn>());
-        }
 
         [UsedImplicitly]
         public static IModelList<IModelColumn> Get_CascadeColumnFilters(IModelLookupCascadePropertyEditor modelLookupPropertyEditor){

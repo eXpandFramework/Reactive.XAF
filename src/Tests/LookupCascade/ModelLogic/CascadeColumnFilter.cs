@@ -30,9 +30,6 @@ namespace Xpand.XAF.Modules.LookupCascade.Tests.ModelLogic{
             productPropertyEditor.CascadeMemberViewItem.View = accesoryLIstView;
             productPropertyEditor.CascadeColumnFilters.Count().ShouldBe(1);
             productPropertyEditor.CascadeColumnFilters.ShouldContain(modelColumn);
-            productPropertyEditor.SynchronizeMemberViewItem=modelMemberViewItems.First(item => item.Id==nameof(Order.Product));
-            productPropertyEditor.SynchronizeMemberLookupColumns.ShouldContain(applicationModel.FindLookupListView(typeof(Product)).Columns[nameof(Product.ProductName)]);
-            productPropertyEditor.SynchronizeMemberLookupColumns.Count().ShouldBe(1);
         }
                 
     }
