@@ -22,6 +22,8 @@ steps:
     inputs:
       targetType: inline
       script: |
+        $ErrorView="NormalView"
+        $VerbosePreference="Continue"
         $goArgs=@{
             Branch ='$(Build.SourceBranchName)'
             SourcesRoot ='$(System.DefaultworkingDirectory)'
