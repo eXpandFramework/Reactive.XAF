@@ -119,10 +119,13 @@ Limitations: The module stores the datasources to the [sessionStorage](https://d
 Possible future improvements:
 
 1. Live datasource synchronization instead of restarting the browser.
+2. Earlier datasource transmission e.g. on XafApplication.SetupCompleted event.
+3. Support for creating new objects.
 
+We estimate the above improvements to 15-20 hours. Let us know if you want us to implement them for you, or if you have other ideas and needs.
 ### Tests
 
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.LookupCascade.LookupCascade).
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.Modules.LookupCascade).
 All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
 
 ### Examples

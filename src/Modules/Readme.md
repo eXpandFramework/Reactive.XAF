@@ -41,6 +41,8 @@ To minimize version conflicts we recommend that you use the `Xpand.XAF.Core.All,
 ## Issues
 Use main project [issues](https://github.com/eXpandFramework/eXpand/issues/new/choose)
 
+![GitHub issues by-label](https://xpandshields.azurewebsites.net/github/issues/expandframework/expand/Standalone_XAF_Modules.svg) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/Standalone_XAF_Modules.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AXAF+)
+
 ### Efficient Package Management
 
 Working with many nuget packages may be counter productive. So if you want to boost your productity make sure you go through the [Efficient Package Management](https://github.com/eXpandFramework/DevExpress.XAF/wiki/Efficient-package-management) wiki page.

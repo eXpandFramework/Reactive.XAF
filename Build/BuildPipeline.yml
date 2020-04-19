@@ -12,11 +12,6 @@ jobs:
     - group: keys
   steps:
   - checkout: self
-  # - task: CacheBeta@0
-  #   inputs:
-  #     key: paket8 | paket.lock
-  #     path: $(Pipeline.Workspace)/.nuget/packages
-  #   displayName: Cache NuGet packages
   - task: PowerShell@2
     displayName: Build
     inputs:
