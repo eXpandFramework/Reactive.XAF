@@ -15,7 +15,7 @@ if ($branch -eq "master") {
 $ErrorActionPreference = "Stop"
 # Import-XpandPwsh
 $excludeFilter = "*client*;*extension*"
-$localPackages = & (Get-NugetPath) list -source "$root\bin\nupkg"|ConvertTo-PackageObject|Where-Object{$_.id -like "*.ALL"} | ForEach-Object {
+$localPackages = @(& (Get-NugetPath) list -source "$root\bin\nupkg"|ConvertTo-PackageObject|Where-Object{$_.id -like "*.ALL"} | ForEach-Object {
     $version = [version]$_.Version
     if ($version.revision -eq 0) {
         $version = New-Object System.Version ($version.Major, $version.Minor, $version.build)
@@ -24,14 +24,14 @@ $localPackages = & (Get-NugetPath) list -source "$root\bin\nupkg"|ConvertTo-Pack
         Id      = $_.Id
         Version = $version
     }
-}
+})
 Write-HostFormatted "LocalPackages:" -Section
 $localPackages | Out-String
 $psource="Release"
 if ($branch -eq "lab"){
     $psource="Lab"
 }
-$remotePackages = Find-XpandPackage "Xpand*All*" -PackageSource $psource
+$remotePackages = @(Find-XpandPackage "Xpand*All*" -PackageSource $psource)
 Write-HostFormatted "remotePackages:" -Section
 $remotePackages | Out-String
 $latestPackages = (($localPackages + $remotePackages) | Group-Object Id | ForEach-Object {

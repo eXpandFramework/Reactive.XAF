@@ -9,7 +9,7 @@
     <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/modules</projectUrl>
     <iconUrl>http://sign.expandframework.com</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>All platform agnostic packages</description>
+    <description>All Win packages and all platform agnostic packages.Use this package to minimize dependency efforts.</description>
     <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Xpand.XAF.Win.All</tags>
