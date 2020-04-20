@@ -1,7 +1,6 @@
 ![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.LookupCascade.svg?&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.LookupCascade.svg?&style=flat)
 
 [![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/LookupCascade.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+LookupCascade) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/LookupCascade.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+LookupCascade)
-
 # About
 
 The `LookupCascade` module is designed to cascade/synchronize declaratively a PropertyEditor pair directly on the client without callbacks thus optimizing performance.
@@ -28,7 +27,6 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 
 ## Dependencies
-
 `.NetFramework: net461`
 
 |<!-- -->|<!-- -->
@@ -39,19 +37,18 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |JetBrains.Annotations|2019.1.3
  |Newtonsoft.Json|12.0.3
  |System.Reactive|4.3.2
- |Xpand.Extensions|2.201.13.2
- |Xpand.Extensions.Reactive|2.201.13.3
- |Xpand.Extensions.XAF|2.201.13.4
+ |Xpand.Extensions|2.201.14
+ |Xpand.Extensions.Reactive|2.201.14
+ |Xpand.Extensions.XAF|2.201.14
  |Xpand.Patcher|1.0.1
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.201.13.4
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.201.14
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.5
 
 ## Issues-Debugging-Troubleshooting
 
 To `Step in the source code` you need to `enable Source Server support` in your Visual Studio/Tools/Options/Debugging/Enable Source Server Support. See also [How to boost your DevExpress Debugging Experience](https://github.com/eXpandFramework/DevExpress.XAF/wiki/How-to-boost-your-DevExpress-Debugging-Experience#1-index-the-symbols-to-your-custom-devexpresss-installation-location).
 
-If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call at the constructor of your module.
-
+If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call at the contructor of your module.
 ```cs
 Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.LookupCascade.LookupCascadeModule))
 ```
@@ -124,8 +121,7 @@ Possible future improvements:
 
 We estimate the above improvements to 15-20 hours. Let us know if you want us to implement them for you, or if you have other ideas and needs.
 ### Tests
-
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.Modules.LookupCascade).
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.LookupCascade.LookupCascade). 
 All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
-
 ### Examples
+
