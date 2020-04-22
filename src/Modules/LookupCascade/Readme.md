@@ -125,3 +125,6 @@ The module is tested on Azure for each build with these [tests](https://github.c
 All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
 ### Examples
 
+Next is a screencast of a ListView cascade where as you see there are `no callbacks` and all editors cascade/synchronization is done on the client.
+
+![8h2FsWIk3E](https://user-images.githubusercontent.com/159464/79941231-7acfe200-846c-11ea-83c6-9b16bc80b4c0.gif)
