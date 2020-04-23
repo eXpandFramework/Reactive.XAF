@@ -113,6 +113,8 @@ Below is the model describing the above configuration used from the related EayT
 
 Limitations: The module stores the datasources to the [sessionStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage) which has a limit of 5mb. However they are compressed so you can store a really large number of objects. The sessionStorage is not persistent and dies when the browser is closed.
 
+``` txt
+
 Possible future improvements:
 
 1. Live datasource synchronization instead of restarting the browser.
@@ -120,11 +122,14 @@ Possible future improvements:
 3. Support for creating new objects.
 
 We estimate the above improvements to 15-20 hours. Let us know if you want us to implement them for you, or if you have other ideas and needs.
+```
+
+
 ### Tests
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.LookupCascade.LookupCascade). 
 All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
 ### Examples
 
-Next is a screencast of a ListView cascade where as you see there are `no callbacks` and all editors cascade/synchronization is done on the client.
+Next is a screencast of a ListView cascade where as you see there are `no callbacks` and the cascade/synchronization is done on the client.
 
 ![8h2FsWIk3E](https://user-images.githubusercontent.com/159464/79941231-7acfe200-846c-11ea-83c6-9b16bc80b4c0.gif)
