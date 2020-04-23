@@ -58,7 +58,9 @@ The client is an executable XAF Windows Forms application and not a XAF module, 
 If a XAF application that has the [Reactive.Logger.Hub](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Hub) found transmitting in this range it will connect and persist all message that describe the remote application pipeline flow. 
 
 Bellow is a screencast when running the client and execute one of our tests. The `Bind_Only_NullAble_Properties_That_are_not_Null` test makes sure that the `ModelMapper` module will only bind those model properties that have value.
+<twitter>
 ![2019-09-21_23-53-04](https://user-images.githubusercontent.com/159464/65379147-1da06200-dccc-11e9-93c4-98c3a21ea3ed.gif)
+</twitter>
 
 The information can be overwhelming however simple filters, like the one applied in the previous screencast, let us extra very useful data as to what the ModelMapper did. 
 

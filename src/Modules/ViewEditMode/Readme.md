@@ -51,9 +51,9 @@ Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.Vi
 
 ## Details
 The module extends the `IModelDetailView` interface with the `IModelDetailViewViewEditMode`. 
-
+<twitter>
 ![image](https://user-images.githubusercontent.com/159464/55380067-b7f6c880-5527-11e9-96a1-053fd44095e7.png)
-
+</twitter>
 ### Tests
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.ViewEditMode.ViewEditMode). 
 All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)

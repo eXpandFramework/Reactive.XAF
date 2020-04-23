@@ -50,9 +50,9 @@ Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.On
 
 ## Details
 To configure the `OneView` follow a similar pattern as shown next:
-
+<twitter>
 ![image](https://user-images.githubusercontent.com/159464/64824645-57ce7d00-d5c3-11e9-9645-1f3e0a7b17af.png)
-
+</twitter>
 
 
 ### Tests

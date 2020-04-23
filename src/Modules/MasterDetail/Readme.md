@@ -64,6 +64,6 @@ The module is integrated with the `ExcelImporter`, `XtraDashboard` modules.
 
 
 Next screenshot is an example from ExcelImporter from the view tha maps the Excel columns with the BO members. 
-
+<twitter>
 ![image](https://user-images.githubusercontent.com/159464/55381194-238e6500-552b-11e9-8314-f1b1132d09f3.png)
-
+</twitter>

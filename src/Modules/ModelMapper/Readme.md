@@ -132,7 +132,7 @@ The predefined maps are categorized as:
 
     Editor|ListView | Column 
     ------|---------|----------
-    GridListEditor|![image](https://user-images.githubusercontent.com/159464/61733035-a0b64200-ad87-11e9-96cd-9b6d0eacd86b.png) | ![image](https://user-images.githubusercontent.com/159464/61733099-bb88b680-ad87-11e9-8279-11dbcd0f4d1d.png) 
+    GridListEditor|<twitter>![image](https://user-images.githubusercontent.com/159464/61733035-a0b64200-ad87-11e9-96cd-9b6d0eacd86b.png)</twitter> | ![image](https://user-images.githubusercontent.com/159464/61733099-bb88b680-ad87-11e9-8279-11dbcd0f4d1d.png) 
     AdvBandedGridListEditor | ![image](https://user-images.githubusercontent.com/159464/61732015-58962000-ad85-11e9-9a28-b9ea0bb744c5.png) | ![image](https://user-images.githubusercontent.com/159464/61731872-0fde6700-ad85-11e9-845c-54f41692334a.png)
     LayoutViewListEditor | ![image](https://user-images.githubusercontent.com/159464/61733269-191d0300-ad88-11e9-86fb-3c6484613554.png) | ![image](https://user-images.githubusercontent.com/159464/61733304-2afea600-ad88-11e9-920c-e5699a961946.png)
     TreeListEditor|![image](https://user-images.githubusercontent.com/159464/61733920-84b3a000-ad89-11e9-8d60-456589982d3d.png)|![image](https://user-images.githubusercontent.com/159464/61733872-651c7780-ad89-11e9-9b8c-db720fcc33cd.png)</br></br>Navigation</br>![image](https://user-images.githubusercontent.com/159464/61733960-9ac16080-ad89-11e9-88a5-a69fccb07aaa.png)

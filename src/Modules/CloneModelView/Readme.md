@@ -57,9 +57,12 @@ Using the `CloneModelViewAttribute` in your Bussiness Objects you can:
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.CloneModelView.CloneModelView). 
 All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
 ### Examples
-The module is integrated with the following eXpandFramework modules: `Dashboard, ExcelImporter, ModelDifference, System`,
+The module is integrated with the following eXpandFramework modules: `Dashboard, ExcelImporter, ModelDifference, System`
 
+
+<twitter>
 Next snippet is taken from the ModelDifference module.
+
 ```cs
  [RuleCombinationOfPropertiesIsUnique("MDO_Unique_Name_Application", DefaultContexts.Save, nameof(Name)+"," +nameof(PersistentApplication)+","+nameof(DeviceCategory))]
     [CreatableItem(false), NavigationItem("Default"), HideFromNewMenu]
@@ -78,3 +81,4 @@ Next snippet is taken from the ModelDifference module.
 
 ```
 
+</twitter>

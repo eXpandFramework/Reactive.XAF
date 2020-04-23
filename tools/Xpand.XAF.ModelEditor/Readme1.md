@@ -46,9 +46,9 @@ Rider installation is ready to go without any additional steps. The Xpand.XAF.Mo
 ![image](https://user-images.githubusercontent.com/159464/75139968-9f227300-56f6-11ea-98f7-47c7aab37b8d.png)
 
 and a menu entry in the solution explorer context menu which is shown only for xafml files.
-
+<twitter>
 ![image](https://user-images.githubusercontent.com/159464/75140145-06d8be00-56f7-11ea-9e0e-9b03b6e2381f.png)
-
+</twitter>
 If you prefer to work with Rider without having installed DevExpress consider the following cmdlets from the [XpandPwsh](https://github.com/eXpandFramework/XpandPwsh) module:
 1. [Start-XpandProjectConverter](https://github.com/eXpandFramework/XpandPwsh/wiki/Start-XpandProjectConverter)
 2. [New-XafProject](https://github.com/eXpandFramework/XpandPwsh/wiki/New-XAFProject)

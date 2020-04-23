@@ -12,6 +12,8 @@ The modules are **not bound** to **DevExpress versioning**, which means you can 
 The modules follow the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 
 ## Platform agnostic modules list
+<twitter>
+
 To minimize version conflicts we recommend that you use the `Xpand.XAF.Core.All, Xpand.XAF.Win.All, Xpand.XAF.Web.All` packages. Doing so, all packages will be at your disposal and .NET will add a dependecy only to those packages that you actually use and not to all.
 |PackageName|Version|[![Custom badge](https://xpandshields.azurewebsites.net/endpoint.svg?label=Nuget.org&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAF)](https://www.nuget.org/packages?q=Xpand.XAF)
 |---|---|---|
@@ -37,6 +39,8 @@ To minimize version conflicts we recommend that you use the `Xpand.XAF.Core.All,
 [ViewEditMode](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/ViewEditMode)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.ViewEditMode.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.ViewEditMode.svg?label=&style=flat)
 [Xpand.XAF.Web.All](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Web.All)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Web.All.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Web.All.svg?label=&style=flat)
 [Xpand.XAF.Win.All](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Win.All)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Win.All.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Win.All.svg?label=&style=flat)
+
+</twitter>
 
 ## Issues
 Use main project [issues](https://github.com/eXpandFramework/eXpand/issues/new/choose)

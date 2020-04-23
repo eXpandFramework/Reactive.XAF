@@ -79,7 +79,9 @@ All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramewo
 ### Examples
 
 The module  can be used with all packages that use the API from Xpand.XAF.Modules.Reactive. It will persist the calls to the datastore using the `TraceEvent` object. Below we analyze what the logger logs when used from the [Xpand.XAF.Modules.Reactive.Logger.Client.Win](https://github.com/eXpandFramework/DevExpress.XAF/tree/lab/src/Modules/Reactive.Logger.Client.Win). 
+<twitter>
 ![image](https://user-images.githubusercontent.com/159464/65377524-f2ab1380-dcb5-11e9-9861-c8c1d8381023.png)
+</twitter>
 Clarification: The client application is designed to received the remote logs in real-time of other XAF applications, it does it using the RX API because the [ReactiveLogger](https://github.com/eXpandFramework/DevExpress.XAF/tree/lab/src/Modules/Reactive.Logger), [ReactiveLoggerHub](https://github.com/eXpandFramework/DevExpress.XAF/tree/lab/src/Modules/Reactive.Logger.Hub), [OneView](https://github.com/eXpandFramework/DevExpress.XAF/tree/lab/src/Modules/OneView), [GridListEditor](https://github.com/eXpandFramework/DevExpress.XAF/tree/lab/src/Modules/GridListEditor) and [Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/lab/src/Modules/Reactive    ) modules are installed, so this means it is like just any other XAF application and can log itself the same way. Let us analyze what we see when it starts reading it from bottom to top (Please give a brief to the previous links to understand better the analysis):
 
 1. We have `7` subscriptions/rows (`7th column`) in the `RXLoggerClientApp (2nd column)` from the `OneView, Reactive, GridListEditor `modules (`3rd column`).  On `4th column` we have the `location` of each subscription. 

@@ -64,7 +64,7 @@ public static IObservable<ListView> ToListView(this IObservable<(XafApplication 
 As you can see I used as input the output of the WhenListViewCreated and with the `Select` I can project it to any type I like. System.ValueTuple is a great help here as you most probably want to avoid polluting your code base with classes that do noting more than storing state in a property.
 
 The `Xpand.XAF.Modules.Reactive` modules already provides a great number of operators found at [Xpand.XAF.Modules.Reactive.Services](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive/Services) namespace.
-
+<twitter>
 Now let's use the previous two operators to await the first Customer ListView created since our application start.
 
 ```cs
@@ -83,7 +83,7 @@ await newCustomer.CombineLatest(listView, (customer, view) => {
     return customer;
 })
 ```
-
+<twitter>
 And so on, the sky is the limit here as you can write custom operators just like a common c# extension method that extends and returns an `IObservable<T>`. All modules of this repository that have a dependency to the Reactive package are developed similar to the above example. Explore their docs, tests, source to find endless examples.
 
 

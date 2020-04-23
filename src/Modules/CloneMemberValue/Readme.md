@@ -51,9 +51,9 @@ Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.Cl
 
 ## Details
 The module extends the `IModelMember` nodes with the `IModelMemberCloneValue`. 
-
+<twitter>
 ![image](https://user-images.githubusercontent.com/159464/54979695-7bb5ec00-4fac-11e9-8373-b128982b8bc2.png)
-
+</twitter>
 
 if logging is set to verbose all operations will be logged. 
 To observe the cloning operations in code use the next pattern in one of your modules.

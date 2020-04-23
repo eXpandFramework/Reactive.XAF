@@ -81,6 +81,7 @@ Next we see how it looks on Desktop:
 ![win](https://user-images.githubusercontent.com/159464/58791920-ce8ad000-85fb-11e9-8a00-bd72e891c8b7.gif)
 
 and the same view on the web:
-
+<twitter>
 ![web2](https://user-images.githubusercontent.com/159464/58791676-53291e80-85fb-11e9-81de-6ed7db651219.gif)
 
+</twitter>

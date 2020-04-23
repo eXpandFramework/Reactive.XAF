@@ -46,9 +46,9 @@ Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.Su
 The module satisfies the following conditions:
 1. When any Window `ObjectView` `changed` with `SuppressConfirmation` enabled, a signal will be created out of the [Frame.ViewChanged](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.Frame.ViewChanged) event. For each signal emit the [ModificationsHandlingMode](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.SystemModule.ModificationsController.ModificationsHandlingMode) is set to not used.
 2. When web for each signal emit both the `DevExpress.ExpressApp.Web.SystemModule.ASPxGridListEditorConfirmUnsavedChangesController`, `DevExpress.ExpressApp.Web.SystemModule.WebConfirmUnsavedChangesDetailViewController` will be deactivated.
-
+<twitter>
 ![image](https://user-images.githubusercontent.com/159464/56219085-d2c05580-606e-11e9-9a8e-80e0a37b8285.png)
-
+</twitter>
 ### Tests
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.SuppressConfirmation.SuppressConfirmation). 
 All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
