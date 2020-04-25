@@ -62,6 +62,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             {Color.DarkGreen, "ProgressBarViewItemModule"},
             {Color.DarkKhaki, "RefreshViewModule"},
             {Color.DarkMagenta, "SuppressConfirmationModule"},
+            {Color.Chocolate, "LookupCascadeModule"},
+            {Color.Firebrick, "SequenceGeneratorModule"},
             {Color.DarkRed, "ViewEditModule"}
         };
 

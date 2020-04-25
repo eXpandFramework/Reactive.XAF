@@ -100,6 +100,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.LookupCas
 		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.SequenceGenerator", "SequenceGenerator\Xpand.XAF.Modules.SequenceGenerator.csproj", "{AA212429-F21D-4497-9090-64A3D396288E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -221,6 +226,12 @@ Global
 		{EAC4F34F-31F9-47D6-B2FF-659B567D7E5F}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{EAC4F34F-31F9-47D6-B2FF-659B567D7E5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EAC4F34F-31F9-47D6-B2FF-659B567D7E5F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA212429-F21D-4497-9090-64A3D396288E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA212429-F21D-4497-9090-64A3D396288E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA212429-F21D-4497-9090-64A3D396288E}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA212429-F21D-4497-9090-64A3D396288E}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
+		{AA212429-F21D-4497-9090-64A3D396288E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA212429-F21D-4497-9090-64A3D396288E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
