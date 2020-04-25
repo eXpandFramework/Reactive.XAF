@@ -46,6 +46,7 @@ namespace Xpand.TestsLib{
 
         private static object[] GetModules(string pattern,string platform){
             return Directory.GetFiles(AppDomain.CurrentDomain.ApplicationPath(), pattern)
+                .Where(s => !s.Contains(".Tests."))
                 .Select(s => {
                     var assembly = Assembly.LoadFile(s);
                     return assembly.GetCustomAttributes<AssemblyMetadataAttribute>().First(_ => _.Key == "Platform")

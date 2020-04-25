@@ -89,7 +89,7 @@ namespace Xpand.TestsLib{
     public class TestWebApplication : WebApplication, ITestApplication{
         private readonly bool _transmitMessage;
 
-        public TestWebApplication(Type sutModule, bool transmitMessage = true){
+        public  TestWebApplication(Type sutModule, bool transmitMessage = true){
             _transmitMessage = transmitMessage;
             SUTModule = sutModule;
 //            TraceClientConnected = this.ClientConnect();

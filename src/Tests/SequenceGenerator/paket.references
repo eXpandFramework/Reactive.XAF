@@ -1,0 +1,15 @@
+DevExpress.ExpressApp
+DevExpress.ExpressApp.Security
+DevExpress.ExpressApp.Security.Xpo
+DevExpress.ExpressApp.Web
+System.Interactive
+akarnokd.reactive_extensions
+DevExpress.Xpo
+DevExpress.Persistent.BaseImpl
+MagicOnion
+Moq
+Shouldly
+System.Reactive
+NUnit
+NUnit3TestAdapter
+JetBrains.Annotations

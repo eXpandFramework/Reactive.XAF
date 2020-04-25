@@ -11,6 +11,13 @@ namespace Xpand.TestsLib.BO{
         public Order(Session session) : base(session){
         }
 
+        long _orderID;
+
+        public long OrderID{
+            get => _orderID;
+            set => SetPropertyValue(nameof(OrderID), ref _orderID, value);
+        }
+
         public Product Product{
             get => _product;
             set => SetPropertyValue(nameof(Product), ref _product, value);

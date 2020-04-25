@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
@@ -26,12 +27,14 @@ using DevExpress.Persistent.BaseImpl;
 using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 using DevExpress.Web;
 using DevExpress.XtraGrid;
+using JetBrains.Annotations;
 using Moq;
 using Moq.Protected;
 using Xpand.Extensions.Linq;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplication;
+using Xpand.Extensions.XAF.Xpo;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Logger;
 using Xpand.XAF.Modules.Reactive.Logger.Hub;
@@ -39,7 +42,17 @@ using Xpand.XAF.Modules.Reactive.Services;
 using EditorsFactory = DevExpress.ExpressApp.Editors.EditorsFactory;
 
 namespace Xpand.TestsLib{
+    [PublicAPI]
     public static class Extensions{
+        public static IObservable<Exception> WhenException(this TestTracing tracing){
+            return Observable.FromEventPattern<EventHandler<CreateCustomTracerEventArgs>, CreateCustomTracerEventArgs>(
+                    h => Tracing.CreateCustomTracer += h, h => Tracing.CreateCustomTracer -= h, ImmediateScheduler.Instance).FirstAsync()
+                .SelectMany(_ => {
+                    _.EventArgs.Tracer=tracing;
+                    return tracing.Exceptions;
+                });
+        }
+
         public static void SetupSecurity(this XafApplication application){
             application.Modules.Add(new SecurityModule());
             application.Security = new SecurityStrategyComplex(typeof(PermissionPolicyUser),
@@ -52,7 +65,7 @@ namespace Xpand.TestsLib{
         }
 
         public static async Task<T> WithTimeOut<T>(this IObservable<T> source, TimeSpan? timeout = null){
-            timeout = timeout ?? TimeSpan.FromSeconds(5);
+            timeout ??= TimeSpan.FromSeconds(5);
             return await source.Timeout(timeout.Value);
         }
 
@@ -71,6 +84,9 @@ namespace Xpand.TestsLib{
         public static void SetupDefaults(this XafApplication application, params ModuleBase[] modules){
             application.RegisterDefaults(modules);
             application.Setup();
+            if (!string.IsNullOrEmpty(application.ConnectionString)&&!application.ConnectionString.Contains(InMemoryDataStoreProvider.ConnectionString)){
+                application.ObjectSpaceProvider.DeleteAllData();
+            }
         }
 
         public static void RegisterDefaults(this XafApplication application, params ModuleBase[] modules){
@@ -84,7 +100,6 @@ namespace Xpand.TestsLib{
                 application is WinApplication ? (ModuleBase) new SystemWindowsFormsModule() : new SystemAspNetModule()
             }.Concat(modules);
             if (((ITestApplication) application).TransmitMessage){
-//                throw new NotImplementedException();
                 if (Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()){
                     moduleBases = moduleBases.Add(new ReactiveLoggerHubModule());   
                 }
@@ -96,7 +111,7 @@ namespace Xpand.TestsLib{
                 }
             }
 
-            application.RegisterInMemoryObjectSpaceProvider();
+            application.AddObjectSpaceProvider();
         }
 
         public static readonly Dictionary<string, int> ModulePorts = new Dictionary<string, int>(){
@@ -117,6 +132,8 @@ namespace Xpand.TestsLib{
             {"RefreshViewModule", 61471},
             {"SuppressConfirmationModule", 61472},
             {"ViewEditModeModule", 61473},
+            {"LookupCascadeModule", 61474},
+            {"SequenceGeneratorModule", 61475},
         };
 
         public static IObservable<IModelReactiveLogger> ConfigureModel<TModule>(this XafApplication application,
@@ -174,13 +191,13 @@ namespace Xpand.TestsLib{
             where T : ModuleBase, new(){
             return (T) application.AddModule(new T(), null, true, additionalExportedTypes);
         }
-
+    
         public static TModule NewModule<TModule>(Platform platform, string title = null,
             params Type[] additionalExportedTypes) where TModule : ModuleBase, new(){
             return platform.NewApplication<TModule>().AddModule<TModule>(title, additionalExportedTypes);
         }
 
-        public static XafApplication NewApplication<TModule>(this Platform platform, bool transmitMessage = true,bool handleExceptions=true)
+        public static XafApplication NewApplication<TModule>(this Platform platform, bool transmitMessage = true,bool handleExceptions=true,bool usePersistentStorage=false)
             where TModule : ModuleBase{
             XafApplication application;
 
@@ -195,6 +212,10 @@ namespace Xpand.TestsLib{
                     "if implemented make sure all tests pass with TestExplorer and live testing");
             }
 
+            application.ConnectionString =usePersistentStorage?
+                @$"Integrated Security=SSPI;Pooling=false;Data Source=(localdb)\mssqllocaldb;Initial Catalog={typeof(TModule).Name}":InMemoryDataStoreProvider.ConnectionString;
+            application.DatabaseUpdateMode=DatabaseUpdateMode.UpdateDatabaseAlways;
+            application.CheckCompatibilityType=CheckCompatibilityType.DatabaseSchema;
             application.ConfigureModel<TModule>(transmitMessage).SubscribeReplay();
             application.MockEditorsFactory();
 
@@ -224,24 +245,17 @@ namespace Xpand.TestsLib{
             application.EditorFactory = editorsFactoryMock.Object;
             application.MockListEditor();
 
-            editorsFactoryMock.Setup(_ => _.CreateDetailViewEditor(It.IsAny<bool>(), It.IsAny<IModelViewItem>(),
-                    It.IsAny<Type>(), It.IsAny<XafApplication>(), It.IsAny<IObjectSpace>()))
-                .Returns((bool needProtectedContent, IModelViewItem modelViewItem, Type objectType, XafApplication app,
-                    IObjectSpace objectSpace) => {
-                    if (modelViewItem is IModelDashboardViewItem modelDashboardViewItem){
-                        var detailViewEditor = new EditorsFactory().CreateDetailViewEditor(needProtectedContent,
-                            modelDashboardViewItem, objectType, application, objectSpace);
-                        return detailViewEditor;
-                    }
-
-                    return new Mock<ViewItem>(typeof(object), Guid.NewGuid().ToString()){CallBase = true}.Object;
-                });
+            editorsFactoryMock.Setup(_ => _.CreateDetailViewEditor(It.IsAny<bool>(), It.IsAny<IModelViewItem>(), It.IsAny<Type>(), It.IsAny<XafApplication>(), It.IsAny<IObjectSpace>()))
+                .Returns((bool needProtectedContent, IModelViewItem modelViewItem, Type objectType, XafApplication app, IObjectSpace objectSpace) 
+                    => new EditorsFactory().CreateDetailViewEditor(needProtectedContent, modelViewItem, objectType, application, objectSpace));
+            editorsFactoryMock.Setup(_ => _.CreatePropertyEditorByType(It.IsAny<Type>(),It.IsAny<IModelMemberViewItem>(),It.IsAny<Type>(),It.IsAny<XafApplication>(),It.IsAny<IObjectSpace>()))
+                .Returns((Type editorType, IModelMemberViewItem modelViewItem, Type objectType, XafApplication xafApplication, IObjectSpace objectSpace)
+                    =>new EditorsFactory().CreatePropertyEditorByType(editorType, modelViewItem, objectType, xafApplication, objectSpace));
         }
 
         public static Mock<ListEditor> ListEditorMock(this XafApplication application){
             var listEditorMock = new Mock<ListEditor>{CallBase = true};
-            listEditorMock.Setup(editor => editor.SupportsDataAccessMode(CollectionSourceDataAccessMode.Client))
-                .Returns(true);
+            listEditorMock.Setup(editor => editor.SupportsDataAccessMode(CollectionSourceDataAccessMode.Client)).Returns(true);
             listEditorMock.Setup(editor => editor.GetSelectedObjects()).Returns(new object[0]);
             listEditorMock.Protected().Setup<object>("CreateControlsCore")
                 .Returns(application is WinApplication ? (object) new GridControl() : new ASPxGridView());
@@ -297,9 +311,6 @@ namespace Xpand.TestsLib{
                 .Subscribe();
         }
 
-        public static void RegisterInMemoryObjectSpaceProvider(this XafApplication application){
-            application.AddObjectSpaceProvider(new XPObjectSpaceProvider(new MemoryDataStoreProvider(), true));
-        }
     }
 
     public class ModuleUpdaterModule : ModuleBase{

@@ -56,6 +56,7 @@ using Xpand.XAF.Modules.ProgressBarViewItem;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Logger;
 using Xpand.XAF.Modules.RefreshView;
+using Xpand.XAF.Modules.SequenceGenerator;
 using Xpand.XAF.Modules.SuppressConfirmation;
 using Xpand.XAF.Modules.ViewEditMode;
 
@@ -123,6 +124,7 @@ namespace TestApplication.Web{
             RequiredModuleTypes.Add(typeof(SuppressConfirmationModule));
             RequiredModuleTypes.Add(typeof(ViewEditModeModule));
             RequiredModuleTypes.Add(typeof(LookupCascadeModule));
+            RequiredModuleTypes.Add(typeof(SequenceGeneratorModule));
             
         }
 

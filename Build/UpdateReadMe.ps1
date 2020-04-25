@@ -92,7 +92,7 @@ function UpdateIssues($_, $packagespath, $readMePath) {
 $1
 To ``Step in the source code`` you need to ``enable Source Server support`` in your Visual Studio/Tools/Options/Debugging/Enable Source Server Support. See also [How to boost your DevExpress Debugging Experience](https://github.com/eXpandFramework/DevExpress.XAF/wiki/How-to-boost-your-DevExpress-Debugging-Experience#1-index-the-symbols-to-your-custom-devexpresss-installation-location).
 
-If the package is installed in a way that you do not have access to uninstall it, then you can ``unload`` it with the next call at the contructor of your module.
+If the package is installed in a way that you do not have access to uninstall it, then you can ``unload`` it with the next call at the constructor of your module.
 ``````cs
 Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof($moduleName))
 ``````

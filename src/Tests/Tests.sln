@@ -202,6 +202,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.LookupCas
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.LookupCascade", "..\Modules\LookupCascade\Xpand.XAF.Modules.LookupCascade.csproj", "{EAC4F34F-31F9-47D6-B2FF-659B567D7E5F}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SequenceGenerator", "SequenceGenerator", "{76EBFDF6-D7D5-4B23-B27D-7FC0A2858067}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.SequenceGenerator", "..\Modules\SequenceGenerator\Xpand.XAF.Modules.SequenceGenerator.csproj", "{AA212429-F21D-4497-9090-64A3D396288E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.SequenceGenerator.Tests", "SequenceGenerator\Xpand.XAF.Modules.SequenceGenerator.Tests.csproj", "{8740DD80-C463-40CB-962A-FC3274A236E2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC} = {6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -695,6 +704,28 @@ Global
 		{EAC4F34F-31F9-47D6-B2FF-659B567D7E5F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EAC4F34F-31F9-47D6-B2FF-659B567D7E5F}.Release|x86.ActiveCfg = Release|Any CPU
 		{EAC4F34F-31F9-47D6-B2FF-659B567D7E5F}.Release|x86.Build.0 = Release|Any CPU
+		{AA212429-F21D-4497-9090-64A3D396288E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA212429-F21D-4497-9090-64A3D396288E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AA212429-F21D-4497-9090-64A3D396288E}.Debug|x86.Build.0 = Debug|Any CPU
+		{AA212429-F21D-4497-9090-64A3D396288E}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA212429-F21D-4497-9090-64A3D396288E}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
+		{AA212429-F21D-4497-9090-64A3D396288E}.EasyTest|x86.ActiveCfg = Debug|Any CPU
+		{AA212429-F21D-4497-9090-64A3D396288E}.EasyTest|x86.Build.0 = Debug|Any CPU
+		{AA212429-F21D-4497-9090-64A3D396288E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA212429-F21D-4497-9090-64A3D396288E}.Release|x86.ActiveCfg = Release|Any CPU
+		{AA212429-F21D-4497-9090-64A3D396288E}.Release|x86.Build.0 = Release|Any CPU
+		{8740DD80-C463-40CB-962A-FC3274A236E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8740DD80-C463-40CB-962A-FC3274A236E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8740DD80-C463-40CB-962A-FC3274A236E2}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8740DD80-C463-40CB-962A-FC3274A236E2}.Debug|x86.Build.0 = Debug|Any CPU
+		{8740DD80-C463-40CB-962A-FC3274A236E2}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{8740DD80-C463-40CB-962A-FC3274A236E2}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
+		{8740DD80-C463-40CB-962A-FC3274A236E2}.EasyTest|x86.ActiveCfg = Debug|Any CPU
+		{8740DD80-C463-40CB-962A-FC3274A236E2}.EasyTest|x86.Build.0 = Debug|Any CPU
+		{8740DD80-C463-40CB-962A-FC3274A236E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8740DD80-C463-40CB-962A-FC3274A236E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8740DD80-C463-40CB-962A-FC3274A236E2}.Release|x86.ActiveCfg = Release|Any CPU
+		{8740DD80-C463-40CB-962A-FC3274A236E2}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -743,6 +774,8 @@ Global
 		{1B9C3106-17DA-4EE4-8E65-1562F551373F} = {9E8D268A-937D-4295-8C5B-82E9A19A65AE}
 		{54729669-5FA9-41E3-A567-C935BB754203} = {90D9078A-4C0B-42C9-B681-9F4CC3ECACF9}
 		{EAC4F34F-31F9-47D6-B2FF-659B567D7E5F} = {90D9078A-4C0B-42C9-B681-9F4CC3ECACF9}
+		{AA212429-F21D-4497-9090-64A3D396288E} = {76EBFDF6-D7D5-4B23-B27D-7FC0A2858067}
+		{8740DD80-C463-40CB-962A-FC3274A236E2} = {76EBFDF6-D7D5-4B23-B27D-7FC0A2858067}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C0A41578-813B-4E26-B5DF-D979F1C0A7D7}

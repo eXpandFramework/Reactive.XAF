@@ -96,10 +96,22 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return RxApp.PopupWindows.Where(_ => _.Application==application);
         }
 
-        public static void AddObjectSpaceProvider(this XafApplication application, IObjectSpaceProvider objectSpaceprovider) {
+        public static void AddObjectSpaceProvider(this XafApplication application, params IObjectSpaceProvider[] objectSpaceProviders) {
             application.WhenCreateCustomObjectSpaceProvider()
                 .Select(_ => {
-                    _.e.ObjectSpaceProviders.Add(objectSpaceprovider);
+                    if (!objectSpaceProviders.Any()){
+                        var xpoASsembly = AppDomain.CurrentDomain.GetAssemblies().First(asm => asm.GetName().Name.StartsWith("DevExpress.ExpressApp.Xpo.v"));
+                        var dataStoreProvider = $"{application.ConnectionString}".Contains("XpoProvider=InMemoryDataStoreProvider")||$"{application.ConnectionString}"==""
+                            ? xpoASsembly.GetType("DevExpress.ExpressApp.Xpo.MemoryDataStoreProvider").CreateInstance()
+                            : xpoASsembly.GetType("DevExpress.ExpressApp.Xpo.ConnectionStringDataStoreProvider").CreateInstance(application.ConnectionString);
+                        var objectSpaceProvider = (IObjectSpaceProvider) xpoASsembly.GetType("DevExpress.ExpressApp.Xpo.XPObjectSpaceProvider")
+                            .Constructor(xpoASsembly.GetType("DevExpress.ExpressApp.Xpo.IXpoDataStoreProvider"), typeof(bool), typeof(bool))
+                            .Invoke(new[]{dataStoreProvider,true,false});
+                        _.e.ObjectSpaceProviders.Add(objectSpaceProvider);
+                    }
+                    else{
+                        _.e.ObjectSpaceProviders.AddRange(objectSpaceProviders);
+                    }
                     return _;
                 })
                 .Subscribe();

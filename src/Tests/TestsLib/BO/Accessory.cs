@@ -6,7 +6,7 @@ namespace Xpand.TestsLib.BO{
     [FriendlyKeyProperty(nameof(AccessoryName))]
     public class Accessory : BaseObject{
         private string _accessoryName;
-        private bool _isGlobal;
+        private long _accesoryID;
         private Product _product;
 
         public Accessory(Session session) : base(session){
@@ -17,9 +17,9 @@ namespace Xpand.TestsLib.BO{
             set => SetPropertyValue(nameof(AccessoryName), ref _accessoryName, value);
         }
 
-        public bool IsGlobal{
-            get => _isGlobal;
-            set => SetPropertyValue(nameof(IsGlobal), ref _isGlobal, value);
+        public long AccesoryID{
+            get => _accesoryID;
+            set => SetPropertyValue(nameof(AccesoryID), ref _accesoryID, value);
         }
 
         [Association("P-To-C")]

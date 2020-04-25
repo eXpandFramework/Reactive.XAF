@@ -13,7 +13,6 @@ using DevExpress.ExpressApp.MiddleTier;
 using DevExpress.ExpressApp.Notifications;
 using DevExpress.ExpressApp.Notifications.Win;
 using DevExpress.ExpressApp.Objects;
-using DevExpress.ExpressApp.Office;
 using DevExpress.ExpressApp.Office.Win;
 using DevExpress.ExpressApp.PivotChart;
 using DevExpress.ExpressApp.PivotChart.Win;
@@ -49,9 +48,9 @@ using Xpand.XAF.Modules.OneView;
 using Xpand.XAF.Modules.ProgressBarViewItem;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Logger;
-using Xpand.XAF.Modules.Reactive.Logger.Hub;
 using Xpand.XAF.Modules.Reactive.Win;
 using Xpand.XAF.Modules.RefreshView;
+using Xpand.XAF.Modules.SequenceGenerator;
 using Xpand.XAF.Modules.SuppressConfirmation;
 using Xpand.XAF.Modules.ViewEditMode;
 
@@ -121,6 +120,7 @@ namespace TestApplication.Win{
             RequiredModuleTypes.Add(typeof(RefreshViewModule));
             RequiredModuleTypes.Add(typeof(SuppressConfirmationModule));
             RequiredModuleTypes.Add(typeof(ViewEditModeModule));
+            RequiredModuleTypes.Add(typeof(SequenceGeneratorModule));
             
             
         }
