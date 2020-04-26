@@ -49,15 +49,43 @@ Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.Se
 ```
 
 ## Details
-The `SequenceGenerator` module is a well tested implementation variation of the E3459. 
+**Credits:** to the Company that [sponsor](https://github.com/sponsors/apobekiaris) the initial implementation of this module.
 
-In details: when any XAF database transaction starts an Exclicit UnitOfWork is used to acquire a lock to the SequenceStorage table. If the table is already locked the it retries forever, if not it queries the SequenceStorage table for all the object types that match the objects inside the transaction and assigns their binding members (e.g. a long SequenceNumber member). After the XAF transaction completes with success or with a failure the database lock is released.
+The `SequenceGenerator` module is a well tested implementation variation of the E3459. The module can be configure to generate unique sequence of number and assign them to BO members. 
+
+In details: when any XAF database transaction starts an [Explicit UnitOfWork](https://docs.devexpress.com/XPO/8921/concepts/explicit-units-of-work) is used to acquire a lock to the `SequenceStorage` table. If the table is already locked the it retries until success, if not it queries the table for all the object types that match the objects inside the transaction and assigns their binding members (e.g. a long SequenceNumber member). After the XAF transaction completes with success or with a failure the database lock is released. A long sequential number is generated only one time for new objects.
 
 ##### <u>Configuration</u>
-You can configure the Sequence binding at runtime by creating instances of the SequenceStorage BO as shown in the next screencast.
+You can configure the Sequence binding at runtime by creating instances of the `SequenceStorage` BO as shown in the next screencast.
 
-Because the SequenceStorage table is a normal XAF BO, it is possible to create sequence bindings in code by creating instances of that object. However we do not recommend creating instances directly but use the provided API (possibly in a ModuleUpdater) which respects additional constrains and validations.
+<twitter>![hfvTo7UsCI](https://user-images.githubusercontent.com/159464/80309035-f918e500-87da-11ea-8f52-7799457213cf.gif)</twitter>
 
+The SequenceStorage table is a normal XAF BO, therefore it is possible to create sequence bindings in code by creating instances of that object. However we do not recommend creating instances directly but use the provided API (possibly in a [ModuleUpdater](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.Updating.ModuleUpdater)). The API respects additional constrains and validations.
+
+To generate the configuration of the screencast you can use the next snippet.
+
+```cs
+objectSpace.SetSequence<Order>(order => order.OrderID,2000);
+objectSpace.SetSequence<Accessory>(accessory => accessory.AccesoryID,1000);
+```
+
+To share the same sequence between types use the `SequenceStorage.CustomType` member.
+
+To observe the generation results you may use a call like the next one:
+
+```cs
+SequenceGeneratorService.Sequence.OfType<Order>().Subscribe(order => DoSomething(order));
+SequenceGeneratorService.Sequence.OfType<Accessory>().Subscribe(order => DoSomething(order));
+```
+
+``` txt
+
+Possible future improvements:
+
+1. Support for sequential number reusing.
+
+We estimate the above improvements to 10 hours. Let us know if you want us to implement them for you, or if you have other ideas and needs.
+```
 ### Tests
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/SequenceGenerator)
 
