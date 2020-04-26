@@ -147,11 +147,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
 
         public static IObservable<(IObjectSpace objectSpace,EventArgs e)> WhenCommited(this IObjectSpace item) {
-            return Observable.Return(item).Commited();
+            return item.ReturnObservable().Commited();
         }
 
         public static IObservable<(IObjectSpace objectSpace, CancelEventArgs e)> WhenCommiting(this IObjectSpace item){
-            return Observable.Return(item).Commiting();
+            return item.ReturnObservable().Commiting();
         }
         
         public static IObservable<(IObjectSpace objectSpace,ObjectsManipulatingEventArgs e)> ObjectDeleted(this IObservable<IObjectSpace> source) {
@@ -179,7 +179,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
 
         public static IObservable<Unit> WhenDisposed(this IObjectSpace source) {
-            return Observable.Return(source).Disposed();
+            return source.ReturnObservable().Disposed();
         }
 
         public static IObservable<IObjectSpace> WhenModifyChanged(this IObjectSpace source){

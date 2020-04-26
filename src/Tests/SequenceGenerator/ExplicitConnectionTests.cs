@@ -24,7 +24,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
                     // ReSharper disable once ObjectCreationAsStatement
                     new TestObject2(explicitUnitOfWork1);
 
-                    Should.Throw<InvalidOperationException>(() => explicitUnitOfWork1.FlushChanges(), SequenceGenerator.ParallelTransactionExceptionMessage);
+                    Should.Throw<InvalidOperationException>(() => explicitUnitOfWork1.FlushChanges(), SequenceGeneratorService.ParallelTransactionExceptionMessage);
 
                     explicitUnitOfWork.Close();
                     explicitUnitOfWork1.Close();

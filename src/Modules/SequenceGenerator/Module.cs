@@ -27,7 +27,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         public static ReactiveTraceSource TraceSource{ get; set; }
         public override void Setup(XafApplication application){
             base.Setup(application);
-            application.GenerateSequences(SequenceStorageType)
+            application.Connect(SequenceStorageType)
                 .TakeUntilDisposed(this)
                 .Subscribe();
         }

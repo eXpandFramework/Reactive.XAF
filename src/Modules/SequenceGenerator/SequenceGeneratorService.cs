@@ -8,6 +8,7 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.DC.Xpo;
@@ -27,13 +28,18 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.SequenceGenerator{
-    public static class SequenceGenerator{
+    public static class SequenceGeneratorService{
         public const int ParallelTransactionExceptionHResult = -2146233079;
         public const string ParallelTransactionExceptionMessage = "SqlConnection does not support parallel transactions.";
         
         static readonly Subject<Exception> ExceptionsSubject=new Subject<Exception>();
+        internal static IObservable<TSource> TraceSequenceGeneratorModule<TSource>(this IObservable<TSource> source, string name = null,
+            Action<string> traceAction = null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
+            [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0){
+            return source.Trace(name, SequenceGeneratorModule.TraceSource, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
+        }
 
-        static SequenceGenerator(){
+        static SequenceGeneratorService(){
             ExceptionsSubject.Do(exception => Tracing.Tracer.LogError(exception)).Subscribe();
         }
         [PublicAPI]
@@ -151,7 +157,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
             return attribute != null ? attribute.Type.FullName : objectType.FullName;
         }
 
-        internal static IObservable<object> GenerateSequences(this XafApplication application,Type sequenceStorageType=null){
+        internal static IObservable<object> Connect(this XafApplication application,Type sequenceStorageType=null){
             sequenceStorageType ??= typeof(SequenceStorage);
             Guard.TypeArgumentIs(typeof(ISequenceStorage),sequenceStorageType,nameof(sequenceStorageType));
             var objectSpaceProvider = application.ObjectSpaceProvider == null ? application.WhenSetupComplete()
@@ -175,7 +181,8 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         }
         
         private static IObservable<object> Configure(XafApplication application, ObjectView view, (IObjectSpace objectSpace, CancelEventArgs e) _){
-            return view.ObjectSpace.ModifiedObjects.Cast<SequenceStorage>().ToObservable()
+            return view.ObjectSpace.ModifiedObjects.Cast<SequenceStorage>().Where(storage => !storage.ObjectSpace.IsObjectToDelete(storage))
+                .ToObservable()
                 .SelectMany(storage => storage.Configure().HandleErrors(application, _.e)).ToUnit()
                 .To(new object());
         }
@@ -209,7 +216,8 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
                 })
                 .RetryWhen(exceptions => exceptions
                     .RetryException()
-                    .Do(ExceptionsSubject.OnNext));
+                    .Do(ExceptionsSubject.OnNext))
+                .TraceSequenceGeneratorModule();
         }
 
         private static IObservable<EventPattern<EventArgs>> WhenTransacationFailed(this Session session,
@@ -222,7 +230,8 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         }
 
         private static IObservable<Exception> RetryException(this IObservable<Exception> source){
-            return source.OfType<Exception>().Where(exception => exception.HResult == ParallelTransactionExceptionHResult);
+            return source.OfType<Exception>().Where(exception => exception.HResult == ParallelTransactionExceptionHResult)
+                .TraceSequenceGeneratorModule();
         }
 
         private static IObservable<object> GenerateSequences(this Session session,  ExplicitUnitOfWork explicitUnitOfWork,Type sequenceStorageType){

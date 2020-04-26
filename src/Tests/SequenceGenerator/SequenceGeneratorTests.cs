@@ -60,7 +60,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         public async Task Do_Not_Increase_Sequence_When_Updating_Objects(){
             using (var application = SequenceGeneratorModule(nameof(Do_Not_Increase_Sequence_When_Updating_Objects)).Application){
                 SetSequences(application);
-                var nextSequenceTest = SequenceGenerator.Sequence.OfType<TestObject>().Test();
+                var nextSequenceTest = SequenceGeneratorService.Sequence.OfType<TestObject>().Test();
             
                 await TestObjects(application, false, 1);
 
@@ -80,7 +80,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         public async Task Increase_Sequence_When_Saving_New_Objects([Values(2, 102, 1002)] int itemsCount, [Values(true, false)] bool parallel, [Values(1, 2)] int objectSpaceCount){
             using (var application = SequenceGeneratorModule(nameof(Increase_Sequence_When_Saving_New_Objects)).Application){
                 SetSequences(application);
-                var nextSequenceTest = SequenceGenerator.Sequence.OfType<TestObject>().Test();
+                var nextSequenceTest = SequenceGeneratorService.Sequence.OfType<TestObject>().Test();
 
                 await TestObjects(application, parallel, itemsCount,objectSpaceCount);
             
@@ -92,7 +92,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         public void Increase_Sequence_When_saving_Nested_New_Objects(){
             using (var application = SequenceGeneratorModule(nameof(Increase_Sequence_When_saving_Nested_New_Objects)).Application){
                 SetSequences(application);
-                var nextSequenceTest = SequenceGenerator.Sequence.OfType<Child>().Test();
+                var nextSequenceTest = SequenceGeneratorService.Sequence.OfType<Child>().Test();
 
                 using (var objectSpace = application.CreateObjectSpace()){
                     var parent = objectSpace.CreateObject<Parent>();
@@ -117,8 +117,8 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         public void Increase_Sequence_When_saving_Parent_Child_New_Objects(){
             using (var application = SequenceGeneratorModule(nameof(Increase_Sequence_When_saving_Parent_Child_New_Objects)).Application){
                 SetSequences(application);
-                var nextParentSequenceTest = SequenceGenerator.Sequence.OfType<ParentSequencial>().Test();
-                var nextChildSequenceTest = SequenceGenerator.Sequence.OfType<Child>().Test();
+                var nextParentSequenceTest = SequenceGeneratorService.Sequence.OfType<ParentSequencial>().Test();
+                var nextChildSequenceTest = SequenceGeneratorService.Sequence.OfType<Child>().Test();
 
                 using (var objectSpace = application.CreateObjectSpace()){
                     for (int j = 0; j < 5; j++){
@@ -151,7 +151,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         public async Task Increase_Sequence_When_Saving_Different_Type_Objects(){
             using (var application = SequenceGeneratorModule(nameof(Increase_Sequence_When_Saving_Different_Type_Objects)).Application){
                 SetSequences(application);
-                var nextSequenceTest = SequenceGenerator.Sequence.OfType<ISequentialNumber>().SubscribeReplay();
+                var nextSequenceTest = SequenceGeneratorService.Sequence.OfType<ISequentialNumber>().SubscribeReplay();
                 
                 await TestObjects<TestType2Object>(application, false, 1).Merge(TestObjects(application, false,1)).Merge(TestObjects<TestObjectNotRegistered>(application, false, 1));
                 
@@ -165,7 +165,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         public async Task Increase_Sequence_When_SequenceStorageKeyAttribute(){
             using (var application = SequenceGeneratorModule(nameof(Increase_Sequence_When_SequenceStorageKeyAttribute)).Application){
                 SetSequences(application);
-                var nextSequenceTest = SequenceGenerator.Sequence.OfType<CustomSquenceNameTestObject>().Test();
+                var nextSequenceTest = SequenceGeneratorService.Sequence.OfType<CustomSquenceNameTestObject>().Test();
 
                 await TestObjects<CustomSquenceNameTestObject>(application, false, 1);
             
@@ -181,7 +181,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         public async Task Custom_Sequence_Type(){
             using (var application = SequenceGeneratorModule(nameof(Custom_Sequence_Type)).Application){
                 SetSequences(application);
-                var nextSequenceTest = SequenceGenerator.Sequence.OfType<ISequentialNumber>().Test();
+                var nextSequenceTest = SequenceGeneratorService.Sequence.OfType<ISequentialNumber>().Test();
 
                 await TestObjects<TestObject2>(application, false, 1).Merge(TestObjects<TestObject3>(application, false,1));
 
@@ -257,7 +257,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
                 using (var objectSpace = application.CreateObjectSpace()){
                     objectSpace.SetSequence<TestObject>(o => o.SequentialNumber,10);
                 }
-                var testObjectObserver = SequenceGenerator.Sequence.OfType<TestObject>().SubscribeReplay();
+                var testObjectObserver = SequenceGeneratorService.Sequence.OfType<TestObject>().SubscribeReplay();
                 var explicitUnitOfWork = new ExplicitUnitOfWork(simpleDataLayer);
                 
                 new TestObject(explicitUnitOfWork);
@@ -279,7 +279,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
                     objectSpace.SetSequence<TestObject>(o => o.SequentialNumber,10);
                 }
 
-                var testObserver = SequenceGenerator.Sequence.OfType<TestObject>().Test();
+                var testObserver = SequenceGeneratorService.Sequence.OfType<TestObject>().Test();
             
                 await TestObjects(application, false, 1);
             
@@ -312,7 +312,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
                 SequenceGeneratorModule(nameof(SecuredObjectSpaceProvider_Installed), application);
                 SetSequences(application);
 
-                var testObserver = SequenceGenerator.Sequence.OfType<TestObject>().Test();
+                var testObserver = SequenceGeneratorService.Sequence.OfType<TestObject>().Test();
                 
                 await TestObjects(application, false, 1);
                 
