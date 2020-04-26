@@ -43,7 +43,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
                     var traceEvent = objectSpace.CreateObject<TraceEvent>();
                     traceEvent.Source = "source";
                     traceEvent.Location = "Location";
-                    traceEvent.Method = "Method";r
+                    traceEvent.Method = "Method";
                     traceEvent.Action = "Action";
                     objectSpace.CommitChanges();
                 }

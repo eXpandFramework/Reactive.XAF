@@ -29,7 +29,11 @@ function Write-VerboseLog {
     process {
         if ($VerbosePreference -eq "continue") {
             Write-Verbose $Message
-            $Message | Out-File "$PSScriptRoot\execution.log" -Append
+            $fs=[System.IO.File]::Open("$PSScriptRoot\execution.log",[System.IO.FileMode]::OpenOrCreate,[System.IO.FileAccess]::ReadWrite,[System.IO.FileShare]::ReadWrite)
+            $sw=[System.IO.StreamWriter]::new($fs)
+            $sw.WriteLine($Message)
+            $sw.Dispose()
+            $fs.Dispose()
         }
     }
     
