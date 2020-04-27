@@ -97,8 +97,6 @@ function Get-MonoAssembly($path, $AssemblyList, [switch]$ReadSymbols) {
     }
 }
 function Test-Version {
-    [CmdletBinding()]
-    [CmdLetTag("#dotnet")]
     param (
         [parameter(Mandatory,ValueFromPipeline)]
         [string]$Version
