@@ -9,8 +9,10 @@ using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.DC;
 using Fasterflect;
 using JetBrains.Annotations;
+using Xpand.Extensions.Linq;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.XAF.TypesInfo;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
@@ -104,9 +106,16 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                         var dataStoreProvider = $"{application.ConnectionString}".Contains("XpoProvider=InMemoryDataStoreProvider")||$"{application.ConnectionString}"==""
                             ? xpoASsembly.GetType("DevExpress.ExpressApp.Xpo.MemoryDataStoreProvider").CreateInstance()
                             : xpoASsembly.GetType("DevExpress.ExpressApp.Xpo.ConnectionStringDataStoreProvider").CreateInstance(application.ConnectionString);
+
+                        Type[] parameterTypes = {xpoASsembly.GetType("DevExpress.ExpressApp.Xpo.IXpoDataStoreProvider"), typeof(bool)};
+                        object[] parameterValues = {dataStoreProvider, true};
+                        if (application.TypesInfo.XAFVersion() > Version.Parse("19.2.0.0")){
+                            parameterTypes=parameterTypes.Add(typeof(bool)).ToArray();
+                            parameterValues=parameterValues.Add(false).ToArray();
+                        }
                         var objectSpaceProvider = (IObjectSpaceProvider) xpoASsembly.GetType("DevExpress.ExpressApp.Xpo.XPObjectSpaceProvider")
-                            .Constructor(xpoASsembly.GetType("DevExpress.ExpressApp.Xpo.IXpoDataStoreProvider"), typeof(bool), typeof(bool))
-                            .Invoke(new[]{dataStoreProvider,true,false});
+                            .Constructor(parameterTypes)
+                            .Invoke(parameterValues);
                         _.e.ObjectSpaceProviders.Add(objectSpaceProvider);
                     }
                     else{

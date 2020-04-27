@@ -6,6 +6,9 @@ using DevExpress.ExpressApp.DC;
 
 namespace Xpand.Extensions.XAF.TypesInfo{
     public static partial class TypesInfoExtensions{
+        public static Version XAFVersion(this ITypesInfo typesInfo){
+            return typeof(TypesInfoExtensions).Assembly.GetReferencedAssemblies().First(_ => _.Name.Contains("DevExpress")).Version;
+        }
         public static bool RuntimeMode(this ITypesInfo typeInfo){
             var devProcceses = new[]{".ExpressApp.ModelEditor", "devenv"};
             var processName = Process.GetCurrentProcess().ProcessName;
