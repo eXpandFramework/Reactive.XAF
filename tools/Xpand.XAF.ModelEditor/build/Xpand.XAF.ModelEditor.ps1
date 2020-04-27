@@ -25,8 +25,8 @@ else {
     $dxVersion = $DevExpressVersion
 }
 
-if (!$dxVersion) {
-    throw "Cannot find DevExpress Version. You have the following options:`r`n1. $howToVerbose`r`n2. If your project has indirect references to DevExpress through another assembly then you can always force the DevExpressVersion by modifying your project to include <PropertyGroup><DevExpressVersion>19.1.3</DevExpressVersion>.`r`n This declaration can be solution wide if done in your directory.build.props file.`r`n"
+if (!(Test-Version $dxVersion)) {
+    throw "Cannot find DevExpress Version for $ProjectPath. You have the following options:`r`n1. $howToVerbose`r`n2. If your project has indirect references to DevExpress through another assembly then you can always force the DevExpressVersion by modifying your project to include <PropertyGroup><DevExpressVersion>19.1.3</DevExpressVersion>.`r`n This declaration can be solution wide if done in your directory.build.props file.`r`n"
 }
 Write-VerboseLog "DxVersion=$dxVersion"
 if (Test-Path "$PSScriptRoot\ModelerLibDownloader\bin\$dxVersion"){

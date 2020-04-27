@@ -1,10 +1,10 @@
 function GetDevExpressVersion($targetPath, $referenceFilter, $projectFile) {
-    Write-VerboseLog "Locating DevExpress version..."
+    Write-VerboseLog "Locating $referenceFilter version..."
     $projectFileInfo = Get-Item $projectFile
     [xml]$csproj = Get-Content $projectFileInfo.FullName
     $packageReference = $csproj.Project.ItemGroup.PackageReference | Where-Object { $_ }
     if (!$packageReference) {
-        Write-VerboseLog "Locating DevExpress version from PackageRefences..."
+        Write-VerboseLog "Locating $referenceFilter version from PackageRefences..."
         $packageReference = Get-PaketReferences (Get-Item $projectFile)
     }
     $packageReference = $packageReference | Where-Object { $_.Include -like "$referenceFilter" }
@@ -20,7 +20,7 @@ function GetDevExpressVersion($targetPath, $referenceFilter, $projectFile) {
     }
     
     if (!$packageReference -and !$paket) {
-        Write-VerboseLog "Locating DevExpress version...from references"
+        Write-VerboseLog "Locating $referenceFilter version...from references"
         $references = $csproj.Project.ItemGroup.Reference
         $dxReferences = $references | Where-Object { $_.Include -like "$referenceFilter" }
         $hintPath = $dxReferences.HintPath | ForEach-Object { 
@@ -49,7 +49,7 @@ function GetDevExpressVersion($targetPath, $referenceFilter, $projectFile) {
                 Write-VerboseLog "Include=$Include"
                 $dxReference = [Regex]::Match($include, "DevExpress[^,]*", [RegexOptions]::IgnoreCase).Value
                 Write-VerboseLog "DxReference=$dxReference"
-                $dxAssembly = Get-ChildItem "$env:windir\Microsoft.NET\assembly\GAC_MSIL"  *.dll -Recurse | Where-Object { $_ -like "*$dxReference.dll" } | Select-Object -First 1
+                $dxAssembly = Get-ChildItem "$env:windir\Microsoft.NET\assembly\GAC_MSIL"  *.dll -Recurse | Where-Object { $_ -like $referenceFilter } | Select-Object -First 1
                 if ($dxAssembly) {
                     $version = [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($dxAssembly.FullName).FileVersion
                 }

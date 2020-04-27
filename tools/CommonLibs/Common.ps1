@@ -96,7 +96,26 @@ function Get-MonoAssembly($path, $AssemblyList, [switch]$ReadSymbols) {
         }
     }
 }
-
+function Test-Version {
+    [CmdletBinding()]
+    [CmdLetTag("#dotnet")]
+    param (
+        [parameter(Mandatory,ValueFromPipeline)]
+        [string]$Version
+    )
+    
+    begin {
+    
+    }
+    
+    process {
+        [version]$v=$null
+        [version]::TryParse($Version,[ref]$v)
+    }
+    end {
+        
+    }
+}
 function Switch-AssemblyDependencyVersion() {
     param(
         [string]$modulePath, 
