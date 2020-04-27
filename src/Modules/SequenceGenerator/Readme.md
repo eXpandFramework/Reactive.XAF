@@ -49,9 +49,9 @@ Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.Se
 ```
 
 ## Details
-**Credits:** to the Company that [sponsor](https://github.com/sponsors/apobekiaris) the initial implementation of this module.
+**Credits:** to [Brokero](https://www.brokero.ch/de/startseite/) that [sponsor](https://github.com/sponsors/apobekiaris) the initial implementation of this module.
 
-The `SequenceGenerator` module is a well tested implementation variation of the E3459. The module can be configure to generate unique sequence of number and assign them to BO members. 
+The `SequenceGenerator` module is a well tested implementation variation of the [E2829](https://supportcenter.devexpress.com/ticket/details/e2829/how-to-generate-a-sequential-number-for-a-persistent-object-within-a-database). The module can be configure to generate unique numerical sequences per ObjectType/memberName combination. 
 
 In details: when any XAF database transaction starts an [Explicit UnitOfWork](https://docs.devexpress.com/XPO/8921/concepts/explicit-units-of-work) is used to acquire a lock to the `SequenceStorage` table. If the table is already locked the it retries until success, if not it queries the table for all the object types that match the objects inside the transaction and assigns their binding members (e.g. a long SequenceNumber member). After the XAF transaction completes with success or with a failure the database lock is released. A long sequential number is generated only one time for new objects.
 
@@ -74,8 +74,13 @@ To share the same sequence between types use the `SequenceStorage.CustomType` me
 To observe the generation results you may use a call like the next one:
 
 ```cs
-SequenceGeneratorService.Sequence.OfType<Order>().Subscribe(order => DoSomething(order));
-SequenceGeneratorService.Sequence.OfType<Accessory>().Subscribe(order => DoSomething(order));
+SequenceGeneratorService.Sequence.OfType<Order>()
+.Do(DoWithOrder)
+.Subscribe();
+
+SequenceGeneratorService.Sequence.OfType<Accessory>()
+.Do(DoWithAccessory)
+.Subscribe();
 ```
 
 ``` txt
