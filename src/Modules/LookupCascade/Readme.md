@@ -37,18 +37,18 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |JetBrains.Annotations|2019.1.3
  |Newtonsoft.Json|12.0.3
  |System.Reactive|4.3.2
- |Xpand.Extensions|2.201.14
- |Xpand.Extensions.Reactive|2.201.14
- |Xpand.Extensions.XAF|2.201.14
+ |Xpand.Extensions|2.201.28
+ |Xpand.Extensions.Reactive|2.201.28
+ |Xpand.Extensions.XAF|2.201.28
  |Xpand.Patcher|1.0.1
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.201.14
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.5
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.201.28
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.7
 
 ## Issues-Debugging-Troubleshooting
 
 To `Step in the source code` you need to `enable Source Server support` in your Visual Studio/Tools/Options/Debugging/Enable Source Server Support. See also [How to boost your DevExpress Debugging Experience](https://github.com/eXpandFramework/DevExpress.XAF/wiki/How-to-boost-your-DevExpress-Debugging-Experience#1-index-the-symbols-to-your-custom-devexpresss-installation-location).
 
-If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call at the contructor of your module.
+If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call at the constructor of your module.
 ```cs
 Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.LookupCascade.LookupCascadeModule))
 ```
@@ -136,3 +136,4 @@ Next is a screencast of a ListView cascade where as you see there are `no callba
 ![8h2FsWIk3E](https://user-images.githubusercontent.com/159464/79941231-7acfe200-846c-11ea-83c6-9b16bc80b4c0.gif)
 
 </twitter>
+

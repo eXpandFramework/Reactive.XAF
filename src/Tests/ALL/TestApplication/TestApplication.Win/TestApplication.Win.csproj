@@ -91,6 +91,6 @@
     <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="19.2.7" />
     <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="19.2.7" />
     <PackageReference Include="DevExpress.EasyTest" Version="19.2.7" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="2.201.27" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="2.201.28" />
   </ItemGroup>
 </Project>
