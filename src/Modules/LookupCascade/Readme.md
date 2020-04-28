@@ -55,7 +55,11 @@ Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.Lo
 
 ## Details
 
+---
+
 **Credits:** to the Company that [sponsor](https://github.com/sponsors/apobekiaris) the initial implementation of this module.
+
+---
 
 Assuming you have a domain like:
 ![image](https://user-images.githubusercontent.com/159464/79579820-c3844580-80d0-11ea-9ca5-2b7d1fe16b59.png)
@@ -113,16 +117,17 @@ Below is the model describing the above configuration used from the related EayT
 
 Limitations: The module stores the datasources to the [sessionStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage) which has a limit of 5mb. However they are compressed so you can store a really large number of objects. The sessionStorage is not persistent and dies when the browser is closed.
 
-``` txt
+---
 
-Possible future improvements:
+**Possible future improvements:**
 
 1. Live datasource synchronization instead of restarting the browser.
 2. Earlier datasource transmission e.g. on XafApplication.SetupCompleted event.
 3. Support for creating new objects.
 
-We estimate the above improvements to 15-20 hours. Let us know if you want us to implement them for you, or if you have other ideas and needs.
-```
+Let us know if you want us to implement them for you, or if you have other ideas and needs.
+
+---
 
 
 ### Tests

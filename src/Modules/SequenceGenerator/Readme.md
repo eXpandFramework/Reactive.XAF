@@ -49,7 +49,12 @@ Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.Se
 ```
 
 ## Details
+
+---
+
 **Credits:** to [Brokero](https://www.brokero.ch/de/startseite/) that [sponsor](https://github.com/sponsors/apobekiaris) the initial implementation of this module.
+
+---
 
 The `SequenceGenerator` module is a well tested implementation variation of the [E2829](https://supportcenter.devexpress.com/ticket/details/e2829/how-to-generate-a-sequential-number-for-a-persistent-object-within-a-database). The module can be configure to generate unique numerical sequences per ObjectType/memberName combination. 
 
@@ -83,14 +88,21 @@ SequenceGeneratorService.Sequence.OfType<Accessory>()
 .Subscribe();
 ```
 
-``` txt
+---
 
-Possible future improvements:
+**Limitations:**
 
-1. Support for sequential number reusing.
+The module works only for MSSQL, MySql, and Oracle databases.
 
-We estimate the above improvements to 10 hours. Let us know if you want us to implement them for you, or if you have other ideas and needs.
-```
+**Possible future improvements:**
+
+1. Provide logic to allow re-generation of a sequence for e.g. when an object is deleted or per demand.
+
+2. Support all database providers.
+
+Let us know if you want us to implement them for you, or if you have other ideas and needs.
+
+---
 ### Tests
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/SequenceGenerator)
 
