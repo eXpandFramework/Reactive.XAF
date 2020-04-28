@@ -1,6 +1,7 @@
 using namespace system.text.RegularExpressions
 param(
-    $AzureToken =$env:AzDevOpsToken
+    $AzureToken =$env:AzDevOpsToken,
+    [version]$ExistingVersion
 )
 
 $ErrorActionPreference = "Stop"
@@ -15,7 +16,13 @@ Set-Location $rootLocation
 
 $nuget = Get-NugetPath
 $packagesPath = "$rootLocation\bin\Nupkg\"
-$packages = & $nuget List -Source $packagesPath | ConvertTo-PackageObject | Select-Object -ExpandProperty Id| Where-Object { $_ -notin @("Xpand.VersionConverter","Xpand.XAF.ModelEditor") -and $_ -notlike "Xpand.Extensions*" } 
+
+if ($ExistingVersion){
+    Clear-NugetCache XpandPackages
+    Pop-XpandPackage Release -Version $ExistingVersion -PackageType XAFAll
+    Get-ChildItem (Get-NugetInstallationFolder GlobalPackagesFolder) Xpand.XAF.Modules.*.Nupkg -Recurse|Copy-Item -Destination $packagesPath -Force
+}
+$packages=& $nuget List -Source $packagesPath | ConvertTo-PackageObject | Select-Object -ExpandProperty Id| Where-Object { $_ -notin @("Xpand.VersionConverter","Xpand.XAF.ModelEditor") -and $_ -notlike "Xpand.Extensions*" } 
 function GetModuleName($_){
     $moduleName = $_.BaseName.Substring($_.BaseName.LastIndexOf(".") + 1)
     $moduleName = "$($_.BaseName).$($moduleName)Module"
@@ -36,10 +43,19 @@ function UpdateModulesList($rootLocation, $packages) {
         $downloads = "![](https://xpandshields.azurewebsites.net/nuget/dt/$_.svg?label=&style=flat)"
         $moduleList += "$packageUri|$version|$downloads`r`n"
     }
-    $header="`r`n`r`nTo minimize version conflicts we recommend that you use the [Xpand.XAF.Core.All](https://www.nuget.org/packages/Xpand.XAF.Core.All), [Xpand.XAF.Win.All](https://www.nuget.org/packages/Xpand.XAF.Win.All), [Xpand.XAF.Web.All](https://www.nuget.org/packages/Xpand.XAF.Web.All) packages. Doing so, all packages will be at your disposal and .NET will add a dependecy only to those packages that you actually use and not to all.`r`n`r`n"
+    
     $path = "$rootLocation\src\modules\ReadMe.md"
     $allModulesReadMe = Get-Content $path -Raw
-    $allModulesReadMe = [Regex]::replace($allModulesReadMe, "(## Platform agnostic modules list)$header(.*)(## Issues)", "`$1`r`n$moduleList`r`n`$3", [RegexOptions]::Singleline)
+    
+    $regex = [regex] '(?is)<twitter>(?<list>.*)</twitter>'
+    $allModulesReadMe = $regex.Replace($allModulesReadMe, @"
+<twitter>
+
+$moduleList
+
+</twitter>
+"@
+)
     Set-Content $path $allModulesReadMe.trim()
 }
 

@@ -12,12 +12,14 @@ The modules are **not bound** to **DevExpress versioning**, which means you can 
 The modules follow the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 
 ## Platform agnostic modules list
-<twitter>
+
 
 To minimize version conflicts we recommend that you use the `Xpand.XAF.Core.All, Xpand.XAF.Win.All, Xpand.XAF.Web.All` packages. Doing so, all packages will be at your disposal and .NET will add a dependecy only to those packages that you actually use and not to all.
+
+<twitter>
+
 |PackageName|Version|[![Custom badge](https://xpandshields.azurewebsites.net/endpoint.svg?label=Nuget.org&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAF)](https://www.nuget.org/packages?q=Xpand.XAF)
 |---|---|---|
-[Xpand.XAF.Core.All](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Core.All)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Core.All.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Core.All.svg?label=&style=flat)
 [AutoCommit](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/AutoCommit)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.AutoCommit.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.AutoCommit.svg?label=&style=flat)
 [CloneMemberValue](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/CloneMemberValue)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.CloneMemberValue.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.CloneMemberValue.svg?label=&style=flat)
 [CloneModelView](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/CloneModelView)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.CloneModelView.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.CloneModelView.svg?label=&style=flat)
@@ -31,14 +33,13 @@ To minimize version conflicts we recommend that you use the `Xpand.XAF.Core.All,
 [ProgressBarViewItem](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/ProgressBarViewItem)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.ProgressBarViewItem.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.ProgressBarViewItem.svg?label=&style=flat)
 [Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.Reactive.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.Reactive.svg?label=&style=flat)
 [Reactive.Logger](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.Reactive.Logger.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.Reactive.Logger.svg?label=&style=flat)
-[Reactive.Logger.Client.Win](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.Reactive.Logger.Client.Win.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.Reactive.Logger.Client.Win.svg?label=&style=flat)
 [Reactive.Logger.Hub](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Hub)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.Reactive.Logger.Hub.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.Reactive.Logger.Hub.svg?label=&style=flat)
 [Reactive.Win](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Win)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.Reactive.Win.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.Reactive.Win.svg?label=&style=flat)
 [RefreshView](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/RefreshView)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.RefreshView.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.RefreshView.svg?label=&style=flat)
+[SequenceGenerator](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/SequenceGenerator)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.SequenceGenerator.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.SequenceGenerator.svg?label=&style=flat)
 [SuppressConfirmation](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/SuppressConfirmation)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.SuppressConfirmation.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.SuppressConfirmation.svg?label=&style=flat)
 [ViewEditMode](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/ViewEditMode)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.ViewEditMode.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.ViewEditMode.svg?label=&style=flat)
-[Xpand.XAF.Web.All](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Web.All)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Web.All.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Web.All.svg?label=&style=flat)
-[Xpand.XAF.Win.All](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Win.All)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Win.All.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Win.All.svg?label=&style=flat)
+
 
 </twitter>
 
