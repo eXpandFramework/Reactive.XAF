@@ -97,12 +97,13 @@ The module works only for MSSQL, MySql, and Oracle databases.
 **Possible future improvements:**
 
 1. Provide logic to allow re-generation of a sequence for e.g. when an object is deleted or per demand.
-
 2. Support all database providers.
+3. Additional constrains e.g. based on view, on model, on object state etc.
 
 Let us know if you want us to implement them for you, or if you have other ideas and needs.
 
 ---
-### Tests
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/SequenceGenerator)
 
+### Tests
+
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/SequenceGenerator)

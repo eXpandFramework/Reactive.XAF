@@ -19,6 +19,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
 
         public SequenceGeneratorModule(){
             RequiredModuleTypes.Add(typeof(ValidationModule));
+            RequiredModuleTypes.Add(typeof(ReactiveModule));
         }
 
         [Browsable(false)][PublicAPI]
