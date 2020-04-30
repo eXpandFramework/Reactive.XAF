@@ -52,21 +52,17 @@ namespace Xpand.XAF.Modules.OneView.Tests{
         [Test]
         [XpandTest]
         [Apartment(ApartmentState.STA)]
-        public async Task Show_OneView_OnStart(){
+        public void Show_OneView_OnStart(){
             using (var application = (TestWinApplication) OneViewModule(nameof(Show_OneView_OnStart)).Application){
-
-                var replay = application.WhenViewShown()
-                    .Select(_ => _.TargetFrame).WhenView(typeof(OV))
-                    .SelectMany(frame => ((Form) frame.Template)
-                        .WhenActivated().FirstAsync().To(frame.View))
-                    .Do(frame => application.Exit())
-                    .FirstAsync()
-                    .SubscribeReplay();
+                
+                var test = application.WhenViewOnFrame(typeof(OV))
+                    .Select(frame => frame)
+                    .Do(frame => frame.Application.Exit())
+                    .Test();
 
                 application.Start();
 
-                var frame1 = await replay;
-                frame1.ShouldNotBeNull();
+                test.ItemCount.ShouldBe(1);
             }
         }
 
@@ -92,7 +88,7 @@ namespace Xpand.XAF.Modules.OneView.Tests{
 
 
         [Test]
-        [XpandTest][Ignore(NotImplemented)]
+        [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task Edit_Model(){
             using (var application = OneViewModule(nameof(Edit_Model)).Application){
