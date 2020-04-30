@@ -4,6 +4,27 @@
 # About 
 
 The `MasterDetail` module can help you create platform agnostic master detail `XAF` views using only the Model Editor. 
+
+## Details
+The module satisfies the following conditions:
+1. If a `DashboardView` contains a `one ListView and one DetailView` of the `same type`, then it will be Master-Detail `enabled by default`. It can be disabled by setting the `IModelDashboardViewMasterDetail.MasterDetail` to false.
+
+   ![image](https://user-images.githubusercontent.com/159464/55990839-67af0180-5cb1-11e9-84cd-6ef0bb5d0137.png)
+
+3. Each time a ListView selection change, it will synchronize the DetailView CurrentObject with the selected from the ListView.
+2. `ALL CRUD` operations are `supported`. A valuable module for forcing the DetailView to open in edit mode is the [ViewEditModeModule](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/ViewEditMode). Additionaly you can use the [AutoCommitModule](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/AutoCommit), for auto commiting the DetailView.
+3. Conditional detailviews can be configured from the model by creating `IModelMasterDetailViewObjectTypeLinks`
+
+   ![image](https://user-images.githubusercontent.com/159464/55991766-b1005080-5cb3-11e9-9dc2-bee3dfb627ac.png)
+### Examples
+The module is integrated with the `ExcelImporter`, `XtraDashboard` modules.
+
+
+Next screenshot is an example from ExcelImporter from the view tha maps the Excel columns with the BO members. 
+<twitter>
+![image](https://user-images.githubusercontent.com/159464/55381194-238e6500-552b-11e9-8314-f1b1132d09f3.png)
+</twitter>
+
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 
 
@@ -44,27 +65,8 @@ If the package is installed in a way that you do not have access to uninstall it
 Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.MasterDetail.MasterDetailModule))
 ```
 
-## Details
-The module satisfies the following conditions:
-1. If a `DashboardView` contains a `one ListView and one DetailView` of the `same type`, then it will be Master-Detail `enabled by default`. It can be disabled by setting the `IModelDashboardViewMasterDetail.MasterDetail` to false.
-
-   ![image](https://user-images.githubusercontent.com/159464/55990839-67af0180-5cb1-11e9-84cd-6ef0bb5d0137.png)
-
-3. Each time a ListView selection change, it will synchronize the DetailView CurrentObject with the selected from the ListView.
-2. `ALL CRUD` operations are `supported`. A valuable module for forcing the DetailView to open in edit mode is the [ViewEditModeModule](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/ViewEditMode). Additionaly you can use the [AutoCommitModule](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/AutoCommit), for auto commiting the DetailView.
-3. Conditional detailviews can be configured from the model by creating `IModelMasterDetailViewObjectTypeLinks`
-
-   ![image](https://user-images.githubusercontent.com/159464/55991766-b1005080-5cb3-11e9-9dc2-bee3dfb627ac.png)
 
 ### Tests
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.MasterDetail.MasterDetail). 
 All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
-### Examples
-The module is integrated with the `ExcelImporter`, `XtraDashboard` modules.
-
-
-Next screenshot is an example from ExcelImporter from the view tha maps the Excel columns with the BO members. 
-<twitter>
-![image](https://user-images.githubusercontent.com/159464/55381194-238e6500-552b-11e9-8314-f1b1132d09f3.png)
-</twitter>
 

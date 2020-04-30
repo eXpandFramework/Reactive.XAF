@@ -3,8 +3,14 @@
 [![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/RefreshView.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+RefreshView) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/RefreshView.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+RefreshView)
 # About 
 
-The `RefreshView` module will refresh the View datasource periotically from a model configuration. Model in the details section
-.
+The `RefreshView` module will refresh the View datasource periodically from a model configuration. 
+
+## Details
+Use the next model configuration to periodically refresh a ListView.
+<twitter>
+![image](https://user-images.githubusercontent.com/159464/64825964-d5948780-d5c7-11e9-9249-27a7847e6bb9.png)
+</twitter>
+
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 
 
@@ -46,13 +52,7 @@ If the package is installed in a way that you do not have access to uninstall it
 Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.RefreshView.RefreshViewModule))
 ```
 
-## Details
-Use the next model configuration to periodically refresh a ListView.
-<twitter>
-![image](https://user-images.githubusercontent.com/159464/64825964-d5948780-d5c7-11e9-9249-27a7847e6bb9.png)
-</twitter>
 ### Tests
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.RefreshView.RefreshView). 
 All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
-### Examples
 

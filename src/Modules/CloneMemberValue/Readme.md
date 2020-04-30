@@ -5,9 +5,34 @@
 
 The `CloneMemberValue` module will help you to selectively `clone` Bussiness object `members`. The application model can be used to `define` the cloning `context` (Views/Members). 
 
-The module uses the next two strategies:
+## Details
+
+The module extends the `IModelMember` nodes with the `IModelMemberCloneValue` uses the next two strategies:
+
 1. It monitors the `DetailView` construction sequence and projects the result to a `Previous/Current` pair which is then used to clone if the context is valid.
 2. It monitors the sequence of new object created from the XAF `ListEditor`, it then projects it similarly to a `Previous/Current` pair.
+<twitter>
+![image](https://user-images.githubusercontent.com/159464/54979695-7bb5ec00-4fac-11e9-8373-b128982b8bc2.png)
+</twitter>
+
+if logging is set to verbose all operations will be logged. 
+To observe the cloning operations in code use the next pattern in one of your modules.
+
+```cs
+public override void Setup(XafApplication application){
+	base.Setup(application);
+	CloneMemberValueService.CloneMemberValues
+		.Do(DoSomethingForEachMemberValue)
+		.TakeUntilDisposingMainWindow()
+		.Subscribe();
+}
+
+private void DoSomethingForEachMemberValue((IModelObjectView modelObjectView, IMemberInfo MemberInfo, IObjectSpaceLink previousObject, IObjectSpaceLink currentObject) valueTuple){
+	throw new NotImplementedException();
+}
+```
+
+
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 
 
@@ -48,30 +73,6 @@ If the package is installed in a way that you do not have access to uninstall it
 ```cs
 Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.CloneMemberValue.CloneMemberValueModule))
 ```
-
-## Details
-The module extends the `IModelMember` nodes with the `IModelMemberCloneValue`. 
-<twitter>
-![image](https://user-images.githubusercontent.com/159464/54979695-7bb5ec00-4fac-11e9-8373-b128982b8bc2.png)
-</twitter>
-
-if logging is set to verbose all operations will be logged. 
-To observe the cloning operations in code use the next pattern in one of your modules.
-
-```cs
-public override void Setup(XafApplication application){
-	base.Setup(application);
-	CloneMemberValueService.CloneMemberValues
-		.Do(DoSomethingForEachMemberValue)
-		.TakeUntilDisposingMainWindow()
-		.Subscribe();
-}
-
-private void DoSomethingForEachMemberValue((IModelObjectView modelObjectView, IMemberInfo MemberInfo, IObjectSpaceLink previousObject, IObjectSpaceLink currentObject) valueTuple){
-	throw new NotImplementedException();
-}
-```
-
 
 ### Tests
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/CloneMemberValue)

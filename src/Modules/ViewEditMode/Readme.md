@@ -5,9 +5,32 @@
 
 The `ViewEditMode` module controls the state of DetailView.ViewEditMode. Choose `Edit` mode to open a `DetailView` in edit mode. 
 
+
+## Details
+The module extends the `IModelDetailView` interface with the `IModelDetailViewViewEditMode`. 
+
+<twitter>
+![image](https://user-images.githubusercontent.com/159464/55380067-b7f6c880-5527-11e9-96a1-053fd44095e7.png)
+</twitter>
+
 The module uses the next two strategies:
+
 1. It monitors the `DetailView` creation and modifies its ViewEditMode property according to model configuration. However later ViewEditMode property modifications are allowed.
-2. It monitors the `ViewEditMode` modifiation and cancels it if the `LockViewEditMode` attribute is used.
+2. It monitors the `ViewEditMode` modification and cancels it if the `LockViewEditMode` attribute is used.
+
+### Examples
+
+The module is valuable in scenarios similar to:
+
+1. When you want to `navigate` from a `ListView` to a `DetailView` without the intermediate view which is set to View ViewEditMode.
+2. When you develop a `master-detail` layout and you want to control the ViewEditMode state of your
+
+`XtraDashboardModule` ,`ExcelImporterModule` are modules that use the `ViewEditModeModule`.  
+
+Next screenshot is an example from ExcelImporter from the view tha maps the Excel columns with the BO members. 
+
+![image](https://user-images.githubusercontent.com/159464/55381194-238e6500-552b-11e9-8314-f1b1132d09f3.png)
+
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 
 
@@ -49,23 +72,8 @@ If the package is installed in a way that you do not have access to uninstall it
 Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.ViewEditMode.ViewEditModeModule))
 ```
 
-## Details
-The module extends the `IModelDetailView` interface with the `IModelDetailViewViewEditMode`. 
-<twitter>
-![image](https://user-images.githubusercontent.com/159464/55380067-b7f6c880-5527-11e9-96a1-053fd44095e7.png)
-</twitter>
+
 ### Tests
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.ViewEditMode.ViewEditMode). 
 All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
-### Examples
-
-The module is valuable in scenarios similar to:
-1. When you want to `navigate` from a `ListView` to a `DetailView` without the intermediate view which is set to View ViewEditMode.
-2. When you develop a `master-detail` layout and you want to control the ViewEditMode state of your
-
-`XtraDashboardModule` ,`ExcelImporterModule` are modules that use the `ViewEditModeModule`.  
-
-Next screenshot is an example from ExcelImporter from the view tha maps the Excel columns with the BO members. 
-
-![image](https://user-images.githubusercontent.com/159464/55381194-238e6500-552b-11e9-8314-f1b1132d09f3.png)
 

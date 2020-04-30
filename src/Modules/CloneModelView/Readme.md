@@ -3,10 +3,38 @@
 [![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/CloneModelView.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+CloneModelView) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/CloneModelView.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+CloneModelView)
 # About
 
-
- 
-
 The `CloneModelView` package can be used to generate XAF model views in the generator layer, resulting in a clean model which is really important for monitoring and supporting purposes.
+
+## Details
+Using the `CloneModelViewAttribute` in your Bussiness Objects you can:
+
+1. Create one or many `DetailViews` or `ListViews` or `LookupListViews`.
+2. Additionally for the cloned view you can configure if it will be the default view for the Business Object.
+3. If you cloned a `ListView` it is possible the configure related `DetailView`
+
+<twitter>
+Next snippet is taken from the ModelDifference module.
+
+```cs
+ [RuleCombinationOfPropertiesIsUnique("MDO_Unique_Name_Application", DefaultContexts.Save, nameof(Name)+"," +nameof(PersistentApplication)+","+nameof(DeviceCategory))]
+    [CreatableItem(false), NavigationItem("Default"), HideFromNewMenu]
+    [ModelDefault("Caption", Caption), ModelDefault("IsClonable", "True"), VisibleInReports(false)]
+    [CloneView(CloneViewType.DetailView, "MDO_DetailView",true)]
+    [CloneView(CloneViewType.ListView, "MDO_ListView_Tablet",true)]
+    [CloneView(CloneViewType.ListView, "MDO_ListView_Desktop",true)]
+    [CloneView(CloneViewType.ListView, "MDO_ListView_Mobile",true)]
+    [CloneView(CloneViewType.ListView, "MDO_ListView_All",true)]
+    [CloneView(CloneViewType.ListView, "MDO_ListView", true)]
+    [Appearance("Disable DeviceCategory for win models", AppearanceItemType.ViewItem,
+        "EndsWith([" + nameof(PersistentApplication) + "." + nameof(BaseObjects.PersistentApplication.ExecutableName) +"], '.exe')", 
+        Enabled = false, TargetItems = nameof(DeviceCategory))]
+    [RuleCombinationOfPropertiesIsUnique(nameof(PersistentApplication)+","+nameof(DifferenceType)+","+nameof(CombineOrder))]
+    public class ModelDifferenceObject : XpandCustomObject, IXpoModelDifference {
+
+```
+
+</twitter>
+
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 
 
@@ -45,41 +73,9 @@ If the package is installed in a way that you do not have access to uninstall it
 Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.CloneModelView.CloneModelViewModule))
 ```
 
-## Details
-Using the `CloneModelViewAttribute` in your Bussiness Objects you can:
-1. Create one or many `DetailViews` or `ListViews` or `LookupListViews`.
-2. Additionaly for the cloned view you can configure if it will be the default view for the Bussiness Object.
-3. If you cloned a `ListView` it is possible the configure related `DetailView`
-
-
 
 ### Tests
+
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.CloneModelView.CloneModelView). 
 All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
-### Examples
-The module is integrated with the following eXpandFramework modules: `Dashboard, ExcelImporter, ModelDifference, System`
-
-
-<twitter>
-Next snippet is taken from the ModelDifference module.
-
-```cs
- [RuleCombinationOfPropertiesIsUnique("MDO_Unique_Name_Application", DefaultContexts.Save, nameof(Name)+"," +nameof(PersistentApplication)+","+nameof(DeviceCategory))]
-    [CreatableItem(false), NavigationItem("Default"), HideFromNewMenu]
-    [ModelDefault("Caption", Caption), ModelDefault("IsClonable", "True"), VisibleInReports(false)]
-    [CloneView(CloneViewType.DetailView, "MDO_DetailView",true)]
-    [CloneView(CloneViewType.ListView, "MDO_ListView_Tablet",true)]
-    [CloneView(CloneViewType.ListView, "MDO_ListView_Desktop",true)]
-    [CloneView(CloneViewType.ListView, "MDO_ListView_Mobile",true)]
-    [CloneView(CloneViewType.ListView, "MDO_ListView_All",true)]
-    [CloneView(CloneViewType.ListView, "MDO_ListView", true)]
-    [Appearance("Disable DeviceCategory for win models", AppearanceItemType.ViewItem,
-        "EndsWith([" + nameof(PersistentApplication) + "." + nameof(BaseObjects.PersistentApplication.ExecutableName) +"], '.exe')", 
-        Enabled = false, TargetItems = nameof(DeviceCategory))]
-    [RuleCombinationOfPropertiesIsUnique(nameof(PersistentApplication)+","+nameof(DifferenceType)+","+nameof(CombineOrder))]
-    public class ModelDifferenceObject : XpandCustomObject, IXpoModelDifference {
-
-```
-
-</twitter>
 

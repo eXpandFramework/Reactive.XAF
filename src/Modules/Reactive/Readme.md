@@ -3,36 +3,7 @@
 [![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/Reactive.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+Reactive) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/Reactive.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+Reactive)
 # About 
 
-The `Reactive` module can be used to create XAF DSL implementations in a Reactive/Functional style. 
-
-## Versioning
-The module is **not bound** to **DevExpress versioning**, which means you can use the latest version with your old DevExpress projects [Read more](https://github.com/eXpandFramework/XAF/tree/master/tools/Xpand.VersionConverter).
-
-The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
-## Dependencies
-`.NetFramework: net461`
-
-|<!-- -->|<!-- -->
-|----|----
-|**DevExpress.ExpressApp**|**Any**
-|Fasterflect.Xpand|2.0.7
- |JetBrains.Annotations|2019.1.3
- |System.Interactive|4.0.0
- |System.Reactive|4.3.2
- |Xpand.Extensions|2.201.28
- |Xpand.Extensions.Reactive|2.201.28
- |Xpand.Extensions.XAF|2.201.28
- |Xpand.Patcher|1.0.1
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.7
-
-## Issues-Debugging-Troubleshooting
-
-To `Step in the source code` you need to `enable Source Server support` in your Visual Studio/Tools/Options/Debugging/Enable Source Server Support. See also [How to boost your DevExpress Debugging Experience](https://github.com/eXpandFramework/DevExpress.XAF/wiki/How-to-boost-your-DevExpress-Debugging-Experience#1-index-the-symbols-to-your-custom-devexpresss-installation-location).
-
-If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call at the constructor of your module.
-```cs
-Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.Reactive.ReactiveModule))
-```
+The `Reactive` module can be used to create XAF DSL implementations in a Reactive/Functional style resulting in maintainable easy to read code base. 
 
 ## Details
 This module and all modules that use it as a dependency **do not use controllers**. Instead they use existing or new XAF events where they are modeled as operators with the prefix `When`. 
@@ -86,14 +57,39 @@ await newCustomer.CombineLatest(listView, (customer, view) => {
 <twitter>
 And so on, the sky is the limit here as you can write custom operators just like a common c# extension method that extends and returns an `IObservable<T>`. All modules of this repository that have a dependency to the Reactive package are developed similar to the above example. Explore their docs, tests, source to find endless examples.
 
+### Examples
+All Xpand.XAF.Modules that reference this package are developed the RX way.
 
+## Versioning
+The module is **not bound** to **DevExpress versioning**, which means you can use the latest version with your old DevExpress projects [Read more](https://github.com/eXpandFramework/XAF/tree/master/tools/Xpand.VersionConverter).
 
+The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
+## Dependencies
+`.NetFramework: net461`
 
+|<!-- -->|<!-- -->
+|----|----
+|**DevExpress.ExpressApp**|**Any**
+|Fasterflect.Xpand|2.0.7
+ |JetBrains.Annotations|2019.1.3
+ |System.Interactive|4.0.0
+ |System.Reactive|4.3.2
+ |Xpand.Extensions|2.201.28
+ |Xpand.Extensions.Reactive|2.201.28
+ |Xpand.Extensions.XAF|2.201.28
+ |Xpand.Patcher|1.0.1
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.7
 
+## Issues-Debugging-Troubleshooting
+
+To `Step in the source code` you need to `enable Source Server support` in your Visual Studio/Tools/Options/Debugging/Enable Source Server Support. See also [How to boost your DevExpress Debugging Experience](https://github.com/eXpandFramework/DevExpress.XAF/wiki/How-to-boost-your-DevExpress-Debugging-Experience#1-index-the-symbols-to-your-custom-devexpresss-installation-location).
+
+If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call at the constructor of your module.
+```cs
+Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.Reactive.ReactiveModule))
+```
 
 ### Tests
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.Reactive.Reactive). 
 All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
-### Examples
-All Xpand.XAF.Modules that reference this package are developed the RX way.
 

@@ -4,6 +4,26 @@
 # About 
 
 The `HIdeToolBar` package can be used to hide the Nested ListView toolbar. The module extends the model with the `IModelListView.HideToolBar` attribute. The implemented scenarios are described in the details section.
+
+## Details
+The module satisfies the following conditions:
+1. For all `Nested Frames` with `HIdeToolBar` attribute enabled a signal will be created out of the [Frame.TemplatedChanged](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.Frame.TemplateChanged) and the [Frame.TemplateViewChanged](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.Frame.TemplateViewChanged) events. For each signal emit the the ToolBar will be hidden.
+2. For Windows platform in addition to the ToolBar the `DevExpress.ExpressApp.Win.SystemModule.ToolbarVisibilityController` will be disabled which controls the Show Toolbar context menu.
+
+<twitter>
+![image](https://user-images.githubusercontent.com/159464/58032948-418c4500-7b2c-11e9-96bc-f853bd4b9287.png)
+</twitter>
+### Tests
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.HideToolBar.HideToolBar). 
+All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
+### Examples
+The module is integrated with the `ExcelImporter`.
+
+Next screenshot is an example from ExcelImporter from the view that maps the Excel columns with the BO members. On the right side the nested ListView has the HideToolBar set to true.
+
+![image](https://user-images.githubusercontent.com/159464/55381194-238e6500-552b-11e9-8314-f1b1132d09f3.png)
+
+
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 
 
@@ -42,22 +62,4 @@ If the package is installed in a way that you do not have access to uninstall it
 ```cs
 Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.HideToolBar.HideToolBarModule))
 ```
-
-## Details
-The module satisfies the following conditions:
-1. For all `Nested Frames` with `HIdeToolBar` attribute enabled a signal will be created out of the [Frame.TemplatedChanged](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.Frame.TemplateChanged) and the [Frame.TemplateViewChanged](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.Frame.TemplateViewChanged) events. For each signal emit the the ToolBar will be hidden.
-2. For Windows platform in addition to the ToolBar the `DevExpress.ExpressApp.Win.SystemModule.ToolbarVisibilityController` will be disabled which controls the Show Toolbar context menu.
-
-<twitter>
-![image](https://user-images.githubusercontent.com/159464/58032948-418c4500-7b2c-11e9-96bc-f853bd4b9287.png)
-</twitter>
-### Tests
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.HideToolBar.HideToolBar). 
-All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
-### Examples
-The module is integrated with the `ExcelImporter`.
-
-Next screenshot is an example from ExcelImporter from the view that maps the Excel columns with the BO members. On the right side the nested ListView has the HideToolBar set to true.
-
-![image](https://user-images.githubusercontent.com/159464/55381194-238e6500-552b-11e9-8314-f1b1132d09f3.png)
 
