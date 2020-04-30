@@ -2,14 +2,14 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Reactive.Win</id>
-    <version>2.201.28.0</version>
+    <version>2.201.28.3</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/Reactive.Win</projectUrl>
     <iconUrl>http://sign.expandframework.com</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>The `Reactive.Win` module is the platform specific version of the [Reactive module](https://github.com/eXpandFramework/DevExpress.XAF/tree/lab/src/Modules/Reactive). Refer to it for further information.</description>
+    <description>The `Reactive.Win` module is the platform specific version of the `Reactive module`.</description>
     <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Reactive.Win</tags>
@@ -24,7 +24,7 @@
       </dependency>
       <dependency id="Xpand.Patcher" version="1.0.1">
       </dependency>
-      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.28.0">
+      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.28.2">
       </dependency>
       <dependency id="Xpand.VersionConverter" version="2.201.7">
       </dependency>

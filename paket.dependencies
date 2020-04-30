@@ -1,17 +1,17 @@
 strategy:max
-source C:\Program Files (x86)\DevExpress 19.2\Components\System\Components\Packages
+source C:\Program Files (x86)\DevExpress 20.1\Components\System\Components\Packages
 source https://api.nuget.org/v3/index.json
 source https://xpandnugetserver.azurewebsites.net/nuget
 storage:none
 
 nuget akarnokd.reactive_extensions 0.0.27-alpha
-nuget DevExpress.ExpressApp.Core.All == 19.2.7
-nuget DevExpress.ExpressApp.Win.All == 19.2.7
-nuget DevExpress.ExpressApp.Web.All == 19.2.7
-nuget DevExpress.EasyTest == 19.2.7  
-nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 19.2.7  
-nuget DevExpress.ExpressApp.EasyTest.WinAdapter == 19.2.7  
-nuget DevExpress.ExpressApp.Security.Xpo == 19.2.7  
+nuget DevExpress.ExpressApp.Core.All == 20.1.3
+nuget DevExpress.ExpressApp.Win.All == 20.1.3
+nuget DevExpress.ExpressApp.Web.All == 20.1.3
+nuget DevExpress.EasyTest == 20.1.3  
+nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 20.1.3  
+nuget DevExpress.ExpressApp.EasyTest.WinAdapter == 20.1.3  
+nuget DevExpress.ExpressApp.Security.Xpo == 20.1.3  
 nuget Microsoft.Extensions.Dependencyinjection == 3.1.2  
 nuget Enums.NET 3.0.3
 nuget FasterFlect.Xpand

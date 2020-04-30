@@ -2,14 +2,14 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.LookupCascade</id>
-    <version>2.201.29.0</version>
+    <version>2.201.30.3</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/LookupCascade</projectUrl>
     <iconUrl>http://sign.expandframework.com</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>The `LookupCascade` module is designed to cascade/synchronize declaratively a PropertyEditor pair directly on the client without callbacks thus optimizing performance.</description>
+    <description>The `LookupCascade` module implements client side Cascading Filtering for Lookup List Views (No ImmediatePostData).</description>
     <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  LookupCascade</tags>
@@ -26,11 +26,11 @@
       </dependency>
       <dependency id="Xpand.Extensions.Reactive" version="2.201.28.0">
       </dependency>
-      <dependency id="Xpand.Extensions.XAF" version="2.201.28.0">
+      <dependency id="Xpand.Extensions.XAF" version="2.201.28.1">
       </dependency>
       <dependency id="Xpand.Patcher" version="1.0.1">
       </dependency>
-      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.28.0">
+      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.28.2">
       </dependency>
       <dependency id="Xpand.VersionConverter" version="2.201.7">
       </dependency>

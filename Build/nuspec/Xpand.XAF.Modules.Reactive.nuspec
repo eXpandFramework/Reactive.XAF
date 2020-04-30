@@ -2,14 +2,14 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Reactive</id>
-    <version>2.201.28.0</version>
+    <version>2.201.28.2</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/Reactive</projectUrl>
     <iconUrl>http://sign.expandframework.com</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>The `Reactive` module can be used to create XAF DSL implementations in a Reactive/Functional style.</description>
+    <description>The `Reactive` module can be used to create XAF DSL implementations in a Reactive/Functional style resulting in maintainable easy to read code base.</description>
     <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Reactive</tags>
@@ -26,7 +26,7 @@
       </dependency>
       <dependency id="Xpand.Extensions.Reactive" version="2.201.28.0">
       </dependency>
-      <dependency id="Xpand.Extensions.XAF" version="2.201.28.0">
+      <dependency id="Xpand.Extensions.XAF" version="2.201.28.1">
       </dependency>
       <dependency id="Xpand.Patcher" version="1.0.1">
       </dependency>

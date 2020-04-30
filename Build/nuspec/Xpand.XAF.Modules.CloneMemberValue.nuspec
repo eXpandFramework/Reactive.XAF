@@ -2,18 +2,14 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.CloneMemberValue</id>
-    <version>2.201.28.0</version>
+    <version>2.201.28.3</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/CloneMemberValue</projectUrl>
     <iconUrl>http://sign.expandframework.com</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>The `CloneMemberValue` module will help you to selectively `clone` Bussiness object `members`. The application model can be used to `define` the cloning `context` (Views/Members). 
-
-The module uses the next two strategies:
-1. It monitors the `DetailView` construction sequence and projects the result to a `Previous/Current` pair which is then used to clone if the context is valid.
-2. It monitors the sequence of new object created from the XAF `ListEditor`, it then projects it similarly to a `Previous/Current` pair.</description>
+    <description>The `CloneMemberValue` module will help you to selectively `clone` Bussiness object `members`. The application model can be used to `define` the cloning `context` (Views/Members).</description>
     <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  CloneMemberValue</tags>
@@ -26,7 +22,7 @@ The module uses the next two strategies:
       </dependency>
       <dependency id="Xpand.Extensions.Reactive" version="2.201.28.0">
       </dependency>
-      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.28.0">
+      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.28.2">
       </dependency>
       <dependency id="Xpand.VersionConverter" version="2.201.7">
       </dependency>

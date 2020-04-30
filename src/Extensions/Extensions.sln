@@ -24,12 +24,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.Reactive",
 		{2856A16A-A776-4A9B-B2C1-518644B9B2F3} = {2856A16A-A776-4A9B-B2C1-518644B9B2F3}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.Office.Cloud", "Xpand.Extensions.Office.Cloud\Xpand.Extensions.Office.Cloud.csproj", "{42191D35-4A5D-45AA-A317-C4F1E282B05D}"
-	ProjectSection(ProjectDependencies) = postProject
-		{2856A16A-A776-4A9B-B2C1-518644B9B2F3} = {2856A16A-A776-4A9B-B2C1-518644B9B2F3}
-		{FFD98CC7-7E8D-4E40-A062-65239BEFEBE6} = {FFD98CC7-7E8D-4E40-A062-65239BEFEBE6}
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -56,10 +50,6 @@ Global
 		{FFD98CC7-7E8D-4E40-A062-65239BEFEBE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FFD98CC7-7E8D-4E40-A062-65239BEFEBE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FFD98CC7-7E8D-4E40-A062-65239BEFEBE6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{42191D35-4A5D-45AA-A317-C4F1E282B05D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{42191D35-4A5D-45AA-A317-C4F1E282B05D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{42191D35-4A5D-45AA-A317-C4F1E282B05D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{42191D35-4A5D-45AA-A317-C4F1E282B05D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

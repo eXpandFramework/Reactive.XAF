@@ -2,15 +2,14 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.RefreshView</id>
-    <version>2.201.28.0</version>
+    <version>2.201.28.3</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/RefreshView</projectUrl>
     <iconUrl>http://sign.expandframework.com</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>The `RefreshView` module will refresh the View datasource periotically from a model configuration. Model in the details section
-.</description>
+    <description>The `RefreshView` module will refresh the View datasource periodically from a model configuration.</description>
     <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  RefreshView</tags>
@@ -23,7 +22,7 @@
       </dependency>
       <dependency id="Xpand.Extensions.Reactive" version="2.201.28.0">
       </dependency>
-      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.28.0">
+      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.28.2">
       </dependency>
       <dependency id="Xpand.VersionConverter" version="2.201.7">
       </dependency>
