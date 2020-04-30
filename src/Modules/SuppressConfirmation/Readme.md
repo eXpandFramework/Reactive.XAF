@@ -4,6 +4,24 @@
 # About 
 
 The `SuppressConfirmation` package can be used to enable specific SuppressConfirmation scenarios by setting the `IModelObjectView.SuppressConfirmation` attribute to true. The implemented SuppressConfirmation scenarios are described in the details section.
+
+
+## Details
+The module satisfies the following conditions:
+1. When any Window `ObjectView` `changed` with `SuppressConfirmation` enabled, a signal will be created out of the [Frame.ViewChanged](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.Frame.ViewChanged) event. For each signal emit the [ModificationsHandlingMode](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.SystemModule.ModificationsController.ModificationsHandlingMode) is set to not used.
+2. When web for each signal emit both the `DevExpress.ExpressApp.Web.SystemModule.ASPxGridListEditorConfirmUnsavedChangesController`, `DevExpress.ExpressApp.Web.SystemModule.WebConfirmUnsavedChangesDetailViewController` will be deactivated.
+<twitter>
+![image](https://user-images.githubusercontent.com/159464/56219085-d2c05580-606e-11e9-9a8e-80e0a37b8285.png)
+</twitter>
+
+### Examples
+The module is integrated with the `ExcelImporter`.
+
+Next screenshot is an example from ExcelImporter from the view tha maps the Excel columns with the BO members. The editable DetailView on the right needs the SuppressConfirmation set to true, to get a natural flow UI without notifications.
+
+![image](https://user-images.githubusercontent.com/159464/55381194-238e6500-552b-11e9-8314-f1b1132d09f3.png)
+
+
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 
 
@@ -42,20 +60,7 @@ If the package is installed in a way that you do not have access to uninstall it
 Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.SuppressConfirmation.SuppressConfirmationModule))
 ```
 
-## Details
-The module satisfies the following conditions:
-1. When any Window `ObjectView` `changed` with `SuppressConfirmation` enabled, a signal will be created out of the [Frame.ViewChanged](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.Frame.ViewChanged) event. For each signal emit the [ModificationsHandlingMode](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.SystemModule.ModificationsController.ModificationsHandlingMode) is set to not used.
-2. When web for each signal emit both the `DevExpress.ExpressApp.Web.SystemModule.ASPxGridListEditorConfirmUnsavedChangesController`, `DevExpress.ExpressApp.Web.SystemModule.WebConfirmUnsavedChangesDetailViewController` will be deactivated.
-<twitter>
-![image](https://user-images.githubusercontent.com/159464/56219085-d2c05580-606e-11e9-9a8e-80e0a37b8285.png)
-</twitter>
 ### Tests
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.SuppressConfirmation.SuppressConfirmation). 
 All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
-### Examples
-The module is integrated with the `ExcelImporter`.
-
-Next screenshot is an example from ExcelImporter from the view tha maps the Excel columns with the BO members. The editable DetailView on the right needs the SuppressConfirmation set to true, to get a natural flow UI without notifications.
-
-![image](https://user-images.githubusercontent.com/159464/55381194-238e6500-552b-11e9-8314-f1b1132d09f3.png)
 

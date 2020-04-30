@@ -5,50 +5,6 @@
 
 The `ModelMapper` module **can map any type** to the XAF application model and in runtime bind it to the respective object instance. 
 The module **ships with 82 predefined maps** for all the common types such as GirdView, ASPxGridView, TreeList, Scheduler, Chart, Dashboards etc. More info in the Details section.
-## Installation 
-1. First you need the nuget package so issue this command to the `VS Nuget package console` 
-
-   `Install-Package Xpand.XAF.Modules.ModelMapper`.
-
-    The above only references the dependencies and nexts steps are mandatory.
-
-2. [Ways to Register a Module](https://documentation.devexpress.com/eXpressAppFramework/118047/Concepts/Application-Solution-Components/Ways-to-Register-a-Module)
-or simply add the next call to your module constructor
-    ```cs
-    RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.ModelMapperModule));
-    ```
-## Versioning
-The module is **not bound** to **DevExpress versioning**, which means you can use the latest version with your old DevExpress projects [Read more](https://github.com/eXpandFramework/XAF/tree/master/tools/Xpand.VersionConverter).
-
-The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
-## Dependencies
-`.NetFramework: net461`
-
-|<!-- -->|<!-- -->
-|----|----
-|**DevExpress.ExpressApp**|**Any**
-|Enums.NET|3.0.3
- |Fasterflect.Xpand|2.0.7
- |JetBrains.Annotations|2019.1.3
- |Mono.Cecil|0.11.2
- |System.CodeDom|4.7.0
- |System.Interactive|4.0.0
- |System.Reactive|4.3.2
- |Xpand.Collections|1.0.1
- |Xpand.Extensions|2.201.28
- |Xpand.Extensions.Reactive|2.201.28
- |Xpand.Extensions.XAF|2.201.28
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.201.28
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.7
-
-## Issues-Debugging-Troubleshooting
-
-To `Step in the source code` you need to `enable Source Server support` in your Visual Studio/Tools/Options/Debugging/Enable Source Server Support. See also [How to boost your DevExpress Debugging Experience](https://github.com/eXpandFramework/DevExpress.XAF/wiki/How-to-boost-your-DevExpress-Debugging-Experience#1-index-the-symbols-to-your-custom-devexpresss-installation-location).
-
-If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call at the constructor of your module.
-```cs
-Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.ModelMapper.ModelMapperModule))
-```
 
 ## Details
 The `ModelMapper` module will transform any type to XAF model format and will extend the model with a simple call like:
@@ -208,6 +164,53 @@ If you create a custom map you can manually map as:
 modelNode.BindTo(objectInstance)
 ```
 The `BindTo` method will follow the hierarchy tree respecting the disabled nodes and will update all properties that are not null.
+
+## Installation 
+1. First you need the nuget package so issue this command to the `VS Nuget package console` 
+
+   `Install-Package Xpand.XAF.Modules.ModelMapper`.
+
+    The above only references the dependencies and nexts steps are mandatory.
+
+2. [Ways to Register a Module](https://documentation.devexpress.com/eXpressAppFramework/118047/Concepts/Application-Solution-Components/Ways-to-Register-a-Module)
+or simply add the next call to your module constructor
+    ```cs
+    RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.ModelMapperModule));
+    ```
+## Versioning
+The module is **not bound** to **DevExpress versioning**, which means you can use the latest version with your old DevExpress projects [Read more](https://github.com/eXpandFramework/XAF/tree/master/tools/Xpand.VersionConverter).
+
+The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
+## Dependencies
+`.NetFramework: net461`
+
+|<!-- -->|<!-- -->
+|----|----
+|**DevExpress.ExpressApp**|**Any**
+|Enums.NET|3.0.3
+ |Fasterflect.Xpand|2.0.7
+ |JetBrains.Annotations|2019.1.3
+ |Mono.Cecil|0.11.2
+ |System.CodeDom|4.7.0
+ |System.Interactive|4.0.0
+ |System.Reactive|4.3.2
+ |Xpand.Collections|1.0.1
+ |Xpand.Extensions|2.201.28
+ |Xpand.Extensions.Reactive|2.201.28
+ |Xpand.Extensions.XAF|2.201.28
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.201.28
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.7
+
+## Issues-Debugging-Troubleshooting
+
+To `Step in the source code` you need to `enable Source Server support` in your Visual Studio/Tools/Options/Debugging/Enable Source Server Support. See also [How to boost your DevExpress Debugging Experience](https://github.com/eXpandFramework/DevExpress.XAF/wiki/How-to-boost-your-DevExpress-Debugging-Experience#1-index-the-symbols-to-your-custom-devexpresss-installation-location).
+
+If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call at the constructor of your module.
+```cs
+Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.ModelMapper.ModelMapperModule))
+```
+
+
 ### Tests
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/ModelMapper)
 

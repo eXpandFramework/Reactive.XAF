@@ -4,6 +4,46 @@
 # About 
 
 The `ProgressBarViewItem` package contains a ViewItem that can help you display a progress for your long running tasks. Examples in the details section of this page.
+
+## Details
+The module registers a `ProgressViewItem` into the [ViewItems](https://docs.devexpress.com/eXpressAppFramework/112612/concepts/ui-construction/view-items) of your application.
+![image](https://user-images.githubusercontent.com/159464/58765488-56c99080-857c-11e9-8522-4c716df019fd.png).
+
+This is a ViewItem and is not bound to a property. To add it in a DetailView Layout you have first to add it in the IModelViewItems collection.
+
+
+Let's assume you have a long running task such as an import which is done in a different thread and an asynchronous sequence emits its progress. To bind the sequence to a DetailView ProgressViewItem we have to: 
+
+```cs
+var progressBarViewItem = View.GetItems<ProgressBarViewItemBase>().First();
+progressBarViewItem.Start();
+```
+The `ProgressViewItem` implements the `IObserver<decimal>` so after start the binding becomes as simple as:
+
+```cs
+await signal.Cast<Decimal>.Do(progressBarViewItem);
+```
+
+The `ProgressBarViewItem` features completion notification which can be configured like:
+```cs
+progressBarViewItem.SetFinishOptions(new MessageOptions(){});
+```
+![image](https://user-images.githubusercontent.com/159464/58765606-5da4d300-857d-11e9-83ba-79c8f1bf6463.png)
+
+### Examples
+The module is integrated with the `ExcelImporter`.
+
+Next we see how it looks on Desktop:
+
+![win](https://user-images.githubusercontent.com/159464/58791920-ce8ad000-85fb-11e9-8a00-bd72e891c8b7.gif)
+
+and the same view on the web:
+<twitter>
+![web2](https://user-images.githubusercontent.com/159464/58791676-53291e80-85fb-11e9-81de-6ed7db651219.gif)
+
+</twitter>
+
+
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 
 
@@ -44,45 +84,7 @@ If the package is installed in a way that you do not have access to uninstall it
 Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.ProgressBarViewItem.ProgressBarViewItemModule))
 ```
 
-## Details
-The module registers a `ProgressViewItem` into the [ViewItems](https://docs.devexpress.com/eXpressAppFramework/112612/concepts/ui-construction/view-items) of your application.
-![image](https://user-images.githubusercontent.com/159464/58765488-56c99080-857c-11e9-8522-4c716df019fd.png).
-
-This is a ViewItem and is not bound to a property. To add it in a DetailView Layout you have first to add it in the IModelViewItems collection.
-
-
-Let's assume you have a long running task such as an import which is done in a different thread and an asynchronous sequence emits its progress. To bind the sequence to a DetailView ProgressViewItem we have to: 
-
-```cs
-var progressBarViewItem = View.GetItems<ProgressBarViewItemBase>().First();
-progressBarViewItem.Start();
-```
-The `ProgressViewItem` implements the `IObserver<decimal>` so after start the binding becomes as simple as:
-
-```cs
-await signal.Cast<Decimal>.Do(progressBarViewItem);
-```
-
-The `ProgressBarViewItem` features completion notification which can be configured like:
-```cs
-progressBarViewItem.SetFinishOptions(new MessageOptions(){});
-```
-![image](https://user-images.githubusercontent.com/159464/58765606-5da4d300-857d-11e9-83ba-79c8f1bf6463.png)
-
-
 ### Tests
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.ProgressBarViewItem.ProgressBarViewItem). 
 All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
-### Examples
-The module is integrated with the `ExcelImporter`.
-
-Next we see how it looks on Desktop:
-
-![win](https://user-images.githubusercontent.com/159464/58791920-ce8ad000-85fb-11e9-8a00-bd72e891c8b7.gif)
-
-and the same view on the web:
-<twitter>
-![web2](https://user-images.githubusercontent.com/159464/58791676-53291e80-85fb-11e9-81de-6ed7db651219.gif)
-
-</twitter>
 

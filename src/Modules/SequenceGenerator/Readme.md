@@ -4,49 +4,6 @@
 # About 
 
 The `SequenceGenerator` updates Bushiness Objects members with unique sequential values.
-## Installation 
-1. First you need the nuget package so issue this command to the `VS Nuget package console` 
-
-   `Install-Package Xpand.XAF.Modules.SequenceGenerator`.
-
-    The above only references the dependencies and nexts steps are mandatory.
-
-2. [Ways to Register a Module](https://documentation.devexpress.com/eXpressAppFramework/118047/Concepts/Application-Solution-Components/Ways-to-Register-a-Module)
-or simply add the next call to your module constructor
-    ```cs
-    RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.SequenceGeneratorModule));
-    ```
-## Versioning
-The module is **not bound** to **DevExpress versioning**, which means you can use the latest version with your old DevExpress projects [Read more](https://github.com/eXpandFramework/XAF/tree/master/tools/Xpand.VersionConverter).
-
-The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
-## Dependencies
-`.NetFramework: net461`
-
-|<!-- -->|<!-- -->
-|----|----
-|**DevExpress.Persistent.Base**|**Any**
- |**DevExpress.ExpressApp**|**Any**
- |**DevExpress.ExpressApp.Validation**|**Any**
- |**DevExpress.ExpressApp.Xpo**|**Any**
-|Fasterflect.Xpand|2.0.7
- |JetBrains.Annotations|2019.1.3
- |System.Reactive|4.3.2
- |Xpand.Extensions|2.201.28
- |Xpand.Extensions.Reactive|2.201.28
- |Xpand.Extensions.XAF|2.201.28
- |Xpand.Extensions.XAF.Xpo|2.201.28
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.201.28
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.7
-
-## Issues-Debugging-Troubleshooting
-
-To `Step in the source code` you need to `enable Source Server support` in your Visual Studio/Tools/Options/Debugging/Enable Source Server Support. See also [How to boost your DevExpress Debugging Experience](https://github.com/eXpandFramework/DevExpress.XAF/wiki/How-to-boost-your-DevExpress-Debugging-Experience#1-index-the-symbols-to-your-custom-devexpresss-installation-location).
-
-If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call at the constructor of your module.
-```cs
-Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.SequenceGenerator.SequenceGeneratorModule))
-```
 
 ## Details
 
@@ -104,6 +61,53 @@ Let us know if you want us to implement them for you, or if you have other ideas
 
 ---
 
+## Installation 
+1. First you need the nuget package so issue this command to the `VS Nuget package console` 
+
+   `Install-Package Xpand.XAF.Modules.SequenceGenerator`.
+
+    The above only references the dependencies and nexts steps are mandatory.
+
+2. [Ways to Register a Module](https://documentation.devexpress.com/eXpressAppFramework/118047/Concepts/Application-Solution-Components/Ways-to-Register-a-Module)
+or simply add the next call to your module constructor
+    ```cs
+    RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.SequenceGeneratorModule));
+    ```
+## Versioning
+The module is **not bound** to **DevExpress versioning**, which means you can use the latest version with your old DevExpress projects [Read more](https://github.com/eXpandFramework/XAF/tree/master/tools/Xpand.VersionConverter).
+
+The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
+## Dependencies
+`.NetFramework: net461`
+
+|<!-- -->|<!-- -->
+|----|----
+|**DevExpress.Persistent.Base**|**Any**
+ |**DevExpress.ExpressApp**|**Any**
+ |**DevExpress.ExpressApp.Validation**|**Any**
+ |**DevExpress.ExpressApp.Xpo**|**Any**
+|Fasterflect.Xpand|2.0.7
+ |JetBrains.Annotations|2019.1.3
+ |System.Reactive|4.3.2
+ |Xpand.Extensions|2.201.28
+ |Xpand.Extensions.Reactive|2.201.28
+ |Xpand.Extensions.XAF|2.201.28
+ |Xpand.Extensions.XAF.Xpo|2.201.28
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.201.28
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.7
+
+## Issues-Debugging-Troubleshooting
+
+To `Step in the source code` you need to `enable Source Server support` in your Visual Studio/Tools/Options/Debugging/Enable Source Server Support. See also [How to boost your DevExpress Debugging Experience](https://github.com/eXpandFramework/DevExpress.XAF/wiki/How-to-boost-your-DevExpress-Debugging-Experience#1-index-the-symbols-to-your-custom-devexpresss-installation-location).
+
+If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call at the constructor of your module.
+```cs
+Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.SequenceGenerator.SequenceGeneratorModule))
+```
+
+
+
 ### Tests
 
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/SequenceGenerator)
+

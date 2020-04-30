@@ -5,6 +5,17 @@
 
 The `GridListEditor` module hosts features related to XAF GridListEditor. This version hosts only the `RememberTopRowIndex` rule that will free the GridView TopRow when the ListView Collection source gets reloaded. More in the details section..
 
+## Details
+
+To freeze the TopRowIndex of a ListView when its CollectionSource get reloaded add a new rule to your model as in next image.
+
+<twitter>
+
+![image](https://user-images.githubusercontent.com/159464/64824092-c9a5c700-d5c1-11e9-96b8-5267876fa7c4.png)
+</twitter>
+
+The module is valuable in scenarios where an external signal notifies about new data and you refresh your View. Such an example is the [Reactive.Logger.Client](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win)
+
 
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 
@@ -47,15 +58,8 @@ If the package is installed in a way that you do not have access to uninstall it
 Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.GridListEditor.GridListEditorModule))
 ```
 
-## Details
-To freeze the TopRowIndex of a ListView when its collectionsource get reloaded add a new rule to your model as in next image.
-<twitter>
-![image](https://user-images.githubusercontent.com/159464/64824092-c9a5c700-d5c1-11e9-96b8-5267876fa7c4.png)
-</twitter>
 ### Tests
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.GridListEditor.GridListEditor). 
 All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
 ### Examples
-
-The module is valuable in scenarios where an external signal notifies about new data and you refresh your View. Such an example is the [Reactive.Logger.Client](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win)
 
