@@ -128,11 +128,11 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |JetBrains.Annotations|2019.1.3
  |Newtonsoft.Json|12.0.3
  |System.Reactive|4.3.2
- |Xpand.Extensions|2.201.28
- |Xpand.Extensions.Reactive|2.201.28
- |Xpand.Extensions.XAF|2.201.28
- |Xpand.Patcher|1.0.1
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.201.28
+ |Xpand.Extensions|2.201.29
+ |Xpand.Extensions.Reactive|2.201.29
+ |Xpand.Extensions.XAF|2.201.29
+ |Xpand.Patcher|1.0.10
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.201.29
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.7
 
 ## Issues-Debugging-Troubleshooting
