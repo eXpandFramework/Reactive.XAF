@@ -77,10 +77,18 @@ namespace Xpand.XAF.Modules.Reactive{
             manager.WhereApplication().ToObservable()
                 .SelectMany(application => application.WhenCreateCustomUserModelDifferenceStore()
                     .Do(_ => {
-                        var models = _.application.Modules.SelectMany(m =>
-                            m.EmbeddedModels().Select(tuple => (id: $"{m.Name},{tuple.id}", tuple.model)));
+                        var models = _.application.Modules.SelectMany(m => m.EmbeddedModels().Select(tuple => (id: $"{m.Name},{tuple.id}", tuple.model)))
+                            .Where(_ => {
+                                var pattern = ConfigurationManager.AppSettings["EmbeddedModels"]??@"(\.MDO)|(\.RDO)";
+                                return !Regex.IsMatch(_.id, pattern, RegexOptions.Singleline);
+                            })
+                            .ToArray();
                         foreach (var model in models){
                             _.e.AddExtraDiffStore(model.id, new StringModelStore(model.model));
+                        }
+
+                        if (models.Any()){
+                            _.e.AddExtraDiffStore("After Setup", new ModelStoreBase.EmptyModelStore());
                         }
                     })).ToUnit();
 
