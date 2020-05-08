@@ -14,18 +14,19 @@
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Xpand.Extensions.XAF.Xpo</tags>
     <dependencies>
+      <dependency id="DevExpress.ExpressApp" version="20.1.3">
+      </dependency>
+      <dependency id="DevExpress.ExpressApp.Xpo" version="20.1.3">
+      </dependency>
+      <dependency id="DevExpress.Xpo" version="20.1.3">
+      </dependency>
       <dependency id="JetBrains.Annotations" version="2019.1.3">
       </dependency>
-      <dependency id="Xpand.VersionConverter" version="2.201.7">
-      </dependency>
-    </dependencies>
+    <dependency id="Xpand.VersionConverter" version="2.201.7"></dependency></dependencies>
   </metadata>
   <files>
     <file src="Xpand.Extensions.XAF.Xpo.dll" target="lib\net461\Xpand.Extensions.XAF.Xpo.dll" />
     <file src="Xpand.Extensions.XAF.Xpo.pdb" target="lib\net461\Xpand.Extensions.XAF.Xpo.pdb" />
-    <file src="..\build\CopySymbols.targets" target="build\Xpand.Extensions.XAF.Xpo.targets">
-    </file>
-    <file src="..\build\CopySymbols.ps1" target="build\CopySymbols.ps1">
-    </file>
-  </files>
+    <file src="..\build\CopySymbols.targets" target="build\Xpand.Extensions.XAF.Xpo.targets"></file>
+    <file src="..\build\CopySymbols.ps1" target="build\CopySymbols.ps1"></file></files>
 </package>

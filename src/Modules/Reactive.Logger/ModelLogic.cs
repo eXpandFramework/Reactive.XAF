@@ -48,26 +48,44 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
     }
 
     public class TraceEventAppearenceRulesGenerator:ModelNodesGeneratorUpdater<AppearanceRulesModelNodesGenerator>{
-        public static readonly Dictionary<string, Color> Modules=new Dictionary<string,Color>{
-            {nameof(ReactiveModule),Color.Black},
-            {nameof(ReactiveLoggerModule),Color.DimGray},
-            {"ReactiveLoggerHubModule",Color.DarkOrange},
-            {"AutoCommitModule",Color.Blue},
-            {"CloneMemberValueModule",Color.BlueViolet},
-            {"CloneModelViewModule",Color.Brown},
-            {"GridListEditorModule",Color.BurlyWood},
-            {"HideToolBarModule",Color.CadetBlue},
-            {"MasterDetailModule",Color.Chartreuse},
-            {"ModelMapperModule",Color.Chocolate},
-            {"ModelViewInheritanceModule",Color.DarkGoldenrod},
-            {"OneViewModule",Color.DarkGray},
-            {"ProgressBarViewItemModule",Color.DarkGreen},
-            {"RefreshViewModule",Color.DarkKhaki},
-            {"SuppressConfirmationModule",Color.DarkMagenta},
-            {"LookupCascadeModule",Color.Chocolate},
-            {"SequenceGeneratorModule",Color.Firebrick},
-            {"ViewEditModule",Color.DarkRed}
+        private const string Reactive = "Reactive";
+        private const string Data = "Data";
+        private const string Editors = "Editors";
+        private const string Model = "Model";
+        private const string Office = "Office";
+        private const string View = "View";
+        public static readonly Dictionary<string, Color> Colors=new Dictionary<string,Color>{
+            {Reactive,Color.Black},
+            {Data,Color.DimGray},
+            {Editors,Color.DarkOrange},
+            {Model,Color.Blue},
+            {Office,Color.BlueViolet},
+            {View,Color.Brown}
         };
+
+        public static readonly Dictionary<string, Color> Modules=new Dictionary<string,Color>{
+            {nameof(ReactiveModule),Colors[Reactive]},
+            {nameof(ReactiveLoggerModule),Colors[Reactive]},
+            {"ReactiveLoggerHubModule",Colors[Reactive]},
+            {"AutoCommitModule",Colors[Data]},
+            {"CloneMemberValueModule",Colors[Data]},
+            {"CloneModelViewModule",Colors[Model]},
+            {"GridListEditorModule",Colors[Editors]},
+            {"HideToolBarModule",Colors[View]},
+            {"MasterDetailModule",Colors[View]},
+            {"ModelMapperModule",Colors[Model]},
+            {"ModelViewInheritanceModule",Colors[Model]},
+            {"OneViewModule",Colors[View]},
+            {"ProgressBarViewItemModule",Colors[Editors]},
+            {"RefreshViewModule",Colors[View]},
+            {"SuppressConfirmationModule",Colors[View]},
+            {"LookupCascadeModule",Colors[Editors]},
+            {"SequenceGeneratorModule",Colors[Data]},
+            {"MicrosoftTodoModule",Colors[Office]},
+            {"ViewEditModule",Colors[View]}
+        };
+
+        
 
         public override void UpdateNode(ModelNode node){
             if (node.GetParent<IModelClass>().TypeInfo.Type==typeof(TraceEvent)){

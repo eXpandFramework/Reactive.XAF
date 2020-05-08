@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Configuration;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using DevExpress.ExpressApp;
 using Fasterflect;
 using HarmonyLib;
@@ -78,9 +80,9 @@ namespace Xpand.XAF.Modules.Reactive{
                 .SelectMany(application => application.WhenCreateCustomUserModelDifferenceStore()
                     .Do(_ => {
                         var models = _.application.Modules.SelectMany(m => m.EmbeddedModels().Select(tuple => (id: $"{m.Name},{tuple.id}", tuple.model)))
-                            .Where(_ => {
+                            .Where(tuple => {
                                 var pattern = ConfigurationManager.AppSettings["EmbeddedModels"]??@"(\.MDO)|(\.RDO)";
-                                return !Regex.IsMatch(_.id, pattern, RegexOptions.Singleline);
+                                return !Regex.IsMatch(tuple.id, pattern, RegexOptions.Singleline);
                             })
                             .ToArray();
                         foreach (var model in models){

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reactive.Linq;
+using Fasterflect;
 using Xpand.Extensions.Reactive.Filter;
 
 namespace Xpand.Extensions.Reactive.Transform{
@@ -8,9 +9,10 @@ namespace Xpand.Extensions.Reactive.Transform{
             return source.Select(o => value);
         }
 
-        public static IObservable<T> To<T>(this IObservable<object> source){
-            return source.Select(o => default(T)).WhenNotDefault();
+        public static IObservable<T> To<T>(this IObservable<object> source,bool newInstance=false){
+            return source.Select(o =>!newInstance? default:(T)typeof(T).CreateInstance()).WhenNotDefault();
         }
+
         public static IObservable<TResult> To<TResult,T>(this IObservable<T> source){
             return source.Select(o => default(TResult)).WhenNotDefault();
         }

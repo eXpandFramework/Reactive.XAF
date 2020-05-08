@@ -42,20 +42,6 @@ Task Init {
         Invoke-Script{Invoke-PaketRestore -strict }
         
         Get-ChildItem "$env:NUGET_PACKAGES\grpc.core" "runtimes" -Recurse|Select-Object -Last 1|Copy-Item -Destination "$root\bin\runtimes" -Recurse -Force
-        # $versionMismatch=Get-ChildItem $Root *.csproj -Recurse -Exclude "*TestApplication*"|ForEach-Object{
-        #     $projectPath=$_.FullName
-        #     Get-PackageReference $projectPath|foreach-Object{
-        #         if ($_.Include -like "DevExpress*" -and $_.Version -ne $dxVersion){
-        #             [PSCustomObject]@{
-        #                 Path = $projectPath
-        #                 Version=$_.Version
-        #             }
-        #         }
-        #     }
-        # }|Select-Object -First 1
-        # if ($versionMismatch -and !$CustomVersion){
-        #     throw "$($versionMismatch.Path) use DX $($versionMismatch.Version) instaed of $dxversion"
-        # }
     }
 }
 

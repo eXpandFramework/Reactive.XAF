@@ -627,3 +627,6 @@ $RECYCLE.BIN/
 /src/Tests/ModelMapper/Properties/launchSettings.json
 /src/Tests/TestsLib/Properties/launchSettings.json
 **/.idea/**
+
+/src/Tests/Office.Cloud.Microsoft.Todo/AuthenticationData.json
+/src/Tests/Office.Cloud.Microsoft.Todo/AzureAppCredentials.json

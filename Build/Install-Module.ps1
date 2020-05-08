@@ -5,7 +5,8 @@ $module=Get-module $psObj.Name -ListAvailable|Where-Object{$_.Version -eq $psObj
 if (!$module){
     $name=$psObj.Name
     $version=$psObj.Version
-    Install-Module $name -RequiredVersion $version -Scope CurrentUser -AllowClobber -Force
+    Write-Host "Installing $name $version"
+    Install-Module $name -RequiredVersion $version -Scope CurrentUser -AllowClobber -Force 
 }
 Import-Module $psObj.Name -Global -Prefix X -RequiredVersion $psObj.Version -Force 
 

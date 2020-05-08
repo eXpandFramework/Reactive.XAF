@@ -1,0 +1,10 @@
+DevExpress.Persistent.Base
+DevExpress.ExpressApp
+DevExpress.ExpressApp.Xpo
+Fasterflect.Xpand
+System.Reactive
+JetBrains.Annotations
+Microsoft.Graph.Beta
+Microsoft.Graph.Core
+Microsoft.Identity.Client
+Newtonsoft.Json

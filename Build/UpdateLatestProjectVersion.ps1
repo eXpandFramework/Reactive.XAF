@@ -161,4 +161,5 @@ if ($updateVersion) {
     $relatedPackages.Id
     $updateVersion +=$relatedPackages.Id|Sort-Object -Unique
 }
+$updateVersion+=$newPackages.Id|Sort-Object -Unique
 

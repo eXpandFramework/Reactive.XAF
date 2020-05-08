@@ -24,19 +24,22 @@ $ErrorActionPreference = "Stop"
 $regex = [regex] '(\d{2}\.\d*)'
 $result = $regex.Match($CustomVersion).Groups[1].Value;
 & "$SourcePath\go.ps1" -InstallModules
+$todoTestsPath="$SourcePath\src\Tests\Office.Cloud.Microsoft.Todo\"
+if (!(Test-Path $todoTestsPath\AzureAppCredentials.json) -or !(Get-Content $todoTestsPath\AzureAppCredentials.json -Raw)){
+    Write-HostFormatted "Download office credential" -Section
+    Remove-Item $env:TEMP\storage -Force -Recurse -ErrorAction SilentlyContinue
+    Set-Location $env:TEMP
+    git clone "https://apobekiaris:$GithubToken@github.com/eXpandFramework/storage.git"
+    Set-Location $env:TEMP\storage\Azure
+    "AzureAppCredentials.json","AuthenticationData.json"|Copy-Item -Destination $todoTestsPath -Force
+}
 Clear-NugetCache -Filter XpandPackages
 Invoke-Script{
-    
-
     Set-VsoVariable build.updatebuildnumber "$env:build_BuildNumber-$CustomVersion"
-
-
     $stage = "$SourcePath\buildstage"
     Remove-Item $stage -force -recurse -ErrorAction SilentlyContinue
-
     Set-Location $SourcePath
     dotnet tool restore
-
     $latestMinors = Get-XAFLatestMinors 
     "latestMinors:"
     $latestMinors|Format-Table
@@ -110,6 +113,8 @@ Invoke-Script{
     }
     Write-HostFormatted "ChangedModules" -Section
     $bArgs.ChangedModules
+    
+    
     & $SourcePath\go.ps1 @bArgs
 
 

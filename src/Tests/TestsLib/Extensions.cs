@@ -134,6 +134,7 @@ namespace Xpand.TestsLib{
             {"ViewEditModeModule", 61473},
             {"LookupCascadeModule", 61474},
             {"SequenceGeneratorModule", 61475},
+            {"MicrosoftTodoModule", 61476},
         };
 
         public static IObservable<IModelReactiveLogger> ConfigureModel<TModule>(this XafApplication application,

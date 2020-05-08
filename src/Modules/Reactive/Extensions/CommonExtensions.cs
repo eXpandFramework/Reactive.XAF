@@ -40,30 +40,30 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
             return source.HandleException().Subscribe();
         }
 
-        public static IObservable<T> Retry<T>(this IObservable<T> source,
-            XafApplication application){
-            return source.RetryWhen(_ => _.Do(e => {
-                if (application.GetPlatform() == Platform.Win){
-                    application.CallMethod("HandleException", e);
-                }
-            }).SelectMany(e => application.GetPlatform()==Platform.Win?e.ReturnObservable():Observable.Empty<Exception>()));
+        public static IObservable<T> Retry<T>(this IObservable<T> source, XafApplication application){
+            return source.RetryWhen(_ => _.Do(application.HandleException)
+                .SelectMany(e => application.GetPlatform()==Platform.Win?e.ReturnObservable():Observable.Empty<Exception>()));
         }
         
         public static IObservable<T> HandleErrors<T>(this IObservable<T> source, XafApplication application, CancelEventArgs args,Func<Exception, IObservable<T>> exceptionSelector=null){
             exceptionSelector ??= (exception => Observable.Empty<T>());
             return source.Catch<T, Exception>(exception => {
                 args.Cancel = true;
-                if (application.GetPlatform() == Platform.Win){
-                    application.CallMethod("HandleException", exception);
-                }
-                else{
-                    ErrorHandling.CallMethod("SetPageError",exception);
-                }
-                Tracing.Tracer.LogError(exception);
+                application.HandleException( exception);
                 return exception.Handle(exceptionSelector);
             });
         }
-        
+
+        private static void HandleException(this XafApplication application, Exception exception){
+            if (application.GetPlatform() == Platform.Win){
+                application.CallMethod("HandleException", exception);
+            }
+            else{
+                ErrorHandling.CallMethod("SetPageError", exception);
+            }
+            Tracing.Tracer.LogError(exception);
+        }
+
         public static IObservable<T> Handle<T>(this Exception exception, Func<Exception, IObservable<T>> exceptionSelector = null) => exception is WarningException ? default(T).ReturnObservable() :
             exceptionSelector != null ? exceptionSelector(exception) : Observable.Throw<T>(exception);
 
