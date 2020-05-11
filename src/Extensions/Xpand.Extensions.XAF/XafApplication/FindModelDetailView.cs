@@ -1,4 +1,5 @@
-﻿using DevExpress.ExpressApp.Model;
+﻿using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Model;
 
 namespace Xpand.Extensions.XAF.XafApplication{
     public static partial class XafApplicationExtensions{

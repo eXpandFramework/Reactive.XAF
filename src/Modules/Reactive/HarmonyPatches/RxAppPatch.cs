@@ -2,6 +2,10 @@
 
 namespace Xpand.XAF.Modules.Reactive{
     internal static partial class RxApp{
+        static void CreateModuleManager(ApplicationModulesManager __result){
+            ApplicationModulesManagerSubject.OnNext(__result);
+        }
+
         static void CreateFrame(Frame __result){
             FramesSubject.OnNext(__result);
         }

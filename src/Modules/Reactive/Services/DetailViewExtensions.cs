@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
@@ -18,10 +19,17 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(DetailView detailView, CancelEventArgs e)> ViewEditModeChanging<T>(this IObservable<T> source) where T : DetailView{
             return source.SelectMany(_ => _.WhenViewEditModeChanging());
         }
-        public static IObservable<Frame> FrameAssigned(this IObservable<DetailView> source){
-            throw new NotImplementedException();   
-//            var rootFrames = RxApp.FrameAssignedToController.ViewChanged().Where(tuple => tuple.frame.View.IsRoot).Select(tuple => tuple.frame);
-//            return source.OfType<DetailView>().WhenChildrenCurrentObjectChanged<object>().Select(tuple => tuple.nestedFrame).Cast<Frame>().Concat(rootFrames );
+        
+        public static TEditor GetPropertyEditor<TEditor, TObject>(this DetailView detailView, Expression<Func<TObject, object>> memberName) where TEditor : class{
+            return detailView.GetPropertyEditor(((MemberExpression) memberName.Body).Member.Name) as TEditor;
+        }
+        
+        public static PropertyEditor GetPropertyEditor(this DetailView detailView, string memberName){
+            return detailView.GetItems<PropertyEditor>().First(editor => editor.MemberInfo.Name ==memberName);
+        }
+        
+        public static ListPropertyEditor GetListPropertyEditor< TObject>(this DetailView detailView, Expression<Func<TObject, object>> memberName){
+            return detailView.GetPropertyEditor<ListPropertyEditor,TObject>(memberName);
         }
 
         public static IObservable<(DetailView detailView, NestedFrame nestedFrame)>

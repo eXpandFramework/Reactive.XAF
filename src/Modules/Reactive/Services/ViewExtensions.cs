@@ -13,7 +13,19 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ViewExtensions{
-        
+        public static DetailView AsDetailView(this View view){
+            return view as DetailView;
+        }
+        public static ListView AsListView(this View view){
+            return view as ListView;
+        }
+        public static ObjectView AsObjectView(this View view){
+            return view as ObjectView;
+        }
+        public static DashboardView AsDashboardView(this View view){
+            return view as DashboardView;
+        }
+
         public static IObservable<T> WhenClosing<T>(this T view) where T : View{
             return Observable.Return(view).WhenNotDefault().Closing();
         }

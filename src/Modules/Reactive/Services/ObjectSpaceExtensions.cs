@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
@@ -12,6 +13,12 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ObjectSpaceExtensions{
+        public static IObservable<T> WhenModifiedObjects<T>(this IObjectSpace objectSpace,Expression<Func<T,object>> memberSelector){
+            var memberName = ((MemberExpression) memberSelector.Body).Member.Name;
+            return objectSpace.WhenObjectChanged().Where(_ => _.e.Object is T && _.e.MemberInfo.Name == memberName)
+                .Select(_ => _.e.Object).Cast<T>();
+        }
+
         public static IObservable<T> WhenModifiedObjects<T>(this IObjectSpace objectSpace,bool emitAfterCommit=false,ObjectModification objectModification=ObjectModification.All ){
             return objectSpace.WhenCommiting().SelectMany(_ => {
                 var modifiedObjects = objectSpace.ModifiedObjects<T>(objectModification).ToArray();

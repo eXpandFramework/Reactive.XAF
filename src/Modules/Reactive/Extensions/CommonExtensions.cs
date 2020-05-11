@@ -11,11 +11,11 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Utils;
 using DevExpress.Persistent.Base;
 using Fasterflect;
-using JetBrains.Annotations;
 using Xpand.Extensions.Configuration;
 using Xpand.Extensions.Exception;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.XafApplication;
+using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
 namespace Xpand.XAF.Modules.Reactive.Extensions{
     public static class CommonExtensions{
@@ -35,9 +35,18 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
 
         public static Assembly DXWebAssembly{ get; }
 
-        [PublicAPI]
-        public static IDisposable SubscribeSafe<T>(this IObservable<T> source){
-            return source.HandleException().Subscribe();
+        public static IDisposable Subscribe<T>(this IObservable<T> source, ModuleBase moduleBase){
+            var takeUntil = source.TakeUntil(moduleBase.WhenDisposed());
+            return moduleBase.Application!=null ? takeUntil.Subscribe(moduleBase.Application) : takeUntil.Subscribe();
+        }
+
+        public static IDisposable Subscribe<T>(this IObservable<T> source, Controller controller){
+            return source.TakeUntil(controller.WhenDeactivated()).Subscribe(controller.Application);
+        }
+
+        public static IDisposable Subscribe<T>(this IObservable<T> source,XafApplication application){
+            return source.HandleErrors(application)
+                .Subscribe();
         }
 
         public static IObservable<T> Retry<T>(this IObservable<T> source, XafApplication application){
@@ -45,10 +54,10 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
                 .SelectMany(e => application.GetPlatform()==Platform.Win?e.ReturnObservable():Observable.Empty<Exception>()));
         }
         
-        public static IObservable<T> HandleErrors<T>(this IObservable<T> source, XafApplication application, CancelEventArgs args,Func<Exception, IObservable<T>> exceptionSelector=null){
+        public static IObservable<T> HandleErrors<T>(this IObservable<T> source, XafApplication application, CancelEventArgs args=null,Func<Exception, IObservable<T>> exceptionSelector=null){
             exceptionSelector ??= (exception => Observable.Empty<T>());
             return source.Catch<T, Exception>(exception => {
-                args.Cancel = true;
+                if (args != null) args.Cancel = true;
                 application.HandleException( exception);
                 return exception.Handle(exceptionSelector);
             });

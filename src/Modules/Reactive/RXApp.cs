@@ -20,6 +20,7 @@ using Xpand.XAF.Modules.Reactive.Services.Security;
 namespace Xpand.XAF.Modules.Reactive{
     internal static partial class RxApp{
         
+        static readonly Subject<ApplicationModulesManager> ApplicationModulesManagerSubject=new Subject<ApplicationModulesManager>();
         static readonly Subject<Frame> FramesSubject=new Subject<Frame>();
         static readonly Subject<Window> PopupWindowsSubject=new Subject<Window>();
         static RxApp(){
@@ -51,6 +52,9 @@ namespace Xpand.XAF.Modules.Reactive{
 
             var createPopupWindow = xafApplicationMethods.First(info => info.Name == nameof(CreatePopupWindow)&&info.Parameters().Count==5);
             harmony.Patch(createPopupWindow, finalizer: new HarmonyMethod(GetMethodInfo(nameof(CreatePopupWindow))));
+            
+            var createModuleManager = xafApplicationMethods.First(info => info.Name == nameof(CreateModuleManager));
+            harmony.Patch(createModuleManager, finalizer: new HarmonyMethod(GetMethodInfo(nameof(CreateModuleManager))));
         }
 
         private static MethodInfo GetMethodInfo(string methodName){
@@ -71,6 +75,7 @@ namespace Xpand.XAF.Modules.Reactive{
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager){
             return manager.AddNonSecuredTypes()
+                .Merge(manager.WhenApplication().SelectMany(application => application.WhenNonPersistentPropertyCollectionSource()).ToUnit())
                 .Merge(manager.SetupPropertyEditorParentView())
                 .Merge(manager.MergedExtraEmbededModels());
         }
@@ -103,6 +108,8 @@ namespace Xpand.XAF.Modules.Reactive{
                 period=TimeSpan.FromSeconds(5);
             return WindowTemplateService.UpdateStatus(period, messages);
         }
+
+        internal static IObservable<ApplicationModulesManager> ApplicationModulesManager => ApplicationModulesManagerSubject.AsObservable();
 
         internal static IObservable<Window> PopupWindows => PopupWindowsSubject;
         
