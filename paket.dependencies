@@ -39,7 +39,7 @@ nuget System.Drawing.Common 4.7
 nuget System.Reactive 4.3.2
 nuget System.Collections.Immutable 1.7.0
 nuget Unofficial.Microsoft.mshtml 7.0.3300
-nuget Xpand.Patcher 2.0.1
+nuget Xpand.Patcher 2.0.11
 nuget Xpand.Collections 
 nuget Jetbrains.Annotations
 nuget Polly 7.2.0
