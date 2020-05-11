@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
@@ -19,7 +18,6 @@ using Xpand.XAF.Modules.OneView.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Logger;
 using Xpand.XAF.Modules.Reactive.Services;
-using Xpand.XAF.Modules.Reactive.Services.Actions;
 using Xpand.XAF.Modules.Reactive.Win.Services;
 
 
@@ -111,7 +109,7 @@ namespace Xpand.XAF.Modules.OneView.Tests{
                     .SelectMany(frame => frame.Template.ToForm().WhenShown().To(frame))
                     .Do(frame => frame.View.Close())
                     .FirstAsync().SubscribeReplay();
-                testWinApplication.WhenCustomHandleException().Subscribe(args => { args.Handled = true; });
+                testWinApplication.WhenWin().WhenCustomHandleException().Subscribe(args => { args.handledEventArgs.Handled = true; });
                 testWinApplication.Start();
                 await editModel;
                 await showViewAfterModelEdit;
