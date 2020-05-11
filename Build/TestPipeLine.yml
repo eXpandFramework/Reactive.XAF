@@ -43,33 +43,50 @@ jobs:
             AzureApplicationId='$(AzureApplicationId)'
             AzureTenantId='$(AzureTenantId)'
             XpandBlobOwnerSecret='$(XpandBlobOwnerSecret)'
+            AzStorageLookup='$(AzStorageLookup)'
           }
           $a|write-output
           & '$(System.DefaultWorkingDirectory)/build/TestPipeline.ps1' @a
-    - task: PublishBuildArtifacts@1
-      # condition: $(NewArtifact)
-      displayName: 'Publish Artifact: Bin'
+  
+    - task: PublishPipelineArtifact@1
       inputs:
-        Parallel: true
-        ArtifactName: 'Bin'
-        PathtoPublish: '$(System.DefaultWorkingDirectory)\bin'
+        targetPath: '$(Pipeline.Workspace)'
+        artifact: 'bin'
+        publishLocation: 'pipeline'
+    # - task: PublishBuildArtifacts@1
+    #   # condition: $(NewArtifact)
+    #   displayName: 'Publish Artifact: Bin'
+    #   inputs:
+    #     Parallel: true
+    #     ArtifactName: 'Bin'
+    #     PathtoPublish: '$(System.DefaultWorkingDirectory)\bin'
 - job: TestPerAssembly
   dependsOn: 'BuildArtifacts'
   strategy:
-    parallel: 15
+    parallel: 1
   pool:
     vmImage: windows-2019
   variables:
     - group: keys
   steps:
     - checkout: self
-    - task: DownloadBuildArtifacts@0
-      displayName: Download Bin
+    - task: DownloadPipelineArtifact@2
       inputs:
         buildType: 'current'
-        downloadType: 'single'
         artifactName: 'bin'
-        downloadPath: '$(System.DefaultWorkingDirectory)'
+        targetPath: '$(Pipeline.Workspace)'
+    # - task: DownloadBuildArtifacts@0
+    #   displayName: Download Bin
+    #   inputs:
+    #     buildType: 'current'
+    #     downloadType: 'single'
+    #     artifactName: 'bin'
+    #     downloadPath: '$(System.DefaultWorkingDirectory)'
+    - task: PowerShell@2
+      inputs:
+        targetType: inline
+        script: |
+          $env:DOTNET_CLI_TELEMETRY_OPTOUT=1
     - task: VSTest@2
       displayName: 'Test Modules'
       continueOnError: true
@@ -77,22 +94,24 @@ jobs:
         searchFolder: '$(System.DefaultWorkingDirectory)'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
-          **\*AutoCommit*Tests.dll
-          **\*CloneMemberValue*Tests.dll
-          **\*CloneModelView*Tests.dll
-          **\*Extensions*Tests.dll
-          **\*Testslib.dll
-          **\*Grid*Tests.dll
-          **\*HideTool*Tests.dll
-          **\*Logger.Tests.dll
-          **\*MasterDet*Tests.dll
-          **\*ModelViewIn*Tests.dll
-          **\*OneView*Tests.dll
-          **\*Progre*Tests.dll
-          **\*Reactive.Tests.dll
-          **\*Refresh*Tests.dll
-          **\*Supp*Tests.dll
-          **\*View*Tests.dll
+          # **\*AutoCommit*Tests.dll
+          # **\*CloneMemberValue*Tests.dll
+          # **\*CloneModelView*Tests.dll
+          # **\*Extensions*Tests.dll
+          # **\*Grid*Tests.dll
+          # **\*HideTool*Tests.dll
+          # **\*Logger.Tests.dll
+          # **\*MasterDet*Tests.dll
+          # **\*ModelViewIn*Tests.dll
+          # **\*OneView*Tests.dll
+          # **\*Progre*Tests.dll
+          # **\*Reactive.Tests.dll
+          # **\*Refresh*Tests.dll
+          # **\*Supp*Tests.dll
+          # **\*View*Tests.dll
+          # **\*Lookup*Tests.dll
+          **\*Todo*Tests.dll
+          # **\*Sequence*Tests.dll
           !**\*Hub*.dll
           !**\*TestAdapter.dll
           !**\obj\**    

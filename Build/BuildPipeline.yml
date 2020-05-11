@@ -51,6 +51,12 @@ jobs:
       Parallel: true
       PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\TestApplication'
       ArtifactName: 'Tests'
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: DX'
+    inputs:
+      Parallel: true
+      PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\DX'
+      ArtifactName: 'Tests'
   - task: PowerShell@2
     displayName: 'Start Tesing' 
     inputs:

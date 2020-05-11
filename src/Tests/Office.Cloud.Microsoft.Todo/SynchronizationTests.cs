@@ -21,7 +21,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
     [NonParallelizable]
     public class SynchronizationTests : BaseTaskTests{
         [TestCase(TaskStatus.NotStarted,nameof(TaskStatus.NotStarted))]
-        [TestCase(TaskStatus.Completed,nameof(TaskStatus.Completed))][XpandTest()]
+        // [TestCase(TaskStatus.Completed,nameof(TaskStatus.Completed))]
+        // [XpandTest()]
         public override async Task Map_Two_New_Tasks(TaskStatus projectTaskStatus, string taskStatus){
             await MapTwoNewTasks(projectTaskStatus, taskStatus,TodoTestExtensions.TasksFolderName);
         }
@@ -41,7 +42,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
             }
         }
 
-        [Test][XpandTest()]
+        // [Test][XpandTest()]
         public override async Task Customize_Two_New_Tasks(){
             using (var application = Platform.Win.TodoModule(nameof(Customize_Two_New_Tasks)).Application){
                 var builder = await application.InitializeService();
@@ -57,9 +58,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
             }
         }
 
-        [TestCase(TaskStatus.NotStarted,nameof(TaskStatus.NotStarted))]
-        [TestCase(TaskStatus.Completed,nameof(TaskStatus.Completed))]
-        [XpandTest()]
+        // [TestCase(TaskStatus.NotStarted,nameof(TaskStatus.NotStarted))]
+        // [TestCase(TaskStatus.Completed,nameof(TaskStatus.Completed))]
+        // [XpandTest()]
         public override async Task Map_Existing_Two_Times(TaskStatus projectTaskStatus, string taskStatus){
             using (var application = Platform.Win.TodoModule(nameof(Map_Existing_Two_Times)).Application){
                 var builderData = await application.InitializeService();
@@ -76,7 +77,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
             }
         }
         
-        [Test][XpandTest()]
+        // [Test][XpandTest()]
         public override async Task Customize_Existing_Two_Times(){
             using (var application = Platform.Win.TodoModule(nameof(Customize_Existing_Two_Times)).Application){
                 var builder = await application.InitializeService();
@@ -93,7 +94,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
             }
         }
 
-        [Test][XpandTest()]
+        // [Test][XpandTest()]
         public override async Task Delete_Two_Tasks(){
             using (var application = Platform.Win.TodoModule(nameof(Delete_Two_Tasks)).Application){
                 var builder = await application.InitializeService();
@@ -107,9 +108,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
             }
         }
         
-        [TestCase(true)]
-        [TestCase(false)]
-        [XpandTest()]
+        // [TestCase(true)]
+        // [TestCase(false)]
+        // [XpandTest()]
         public override async Task Customize_Delete_Two_Tasks(bool handleDeletion){
             using (var application = Platform.Win.TodoModule(nameof(Customize_Delete_Two_Tasks)).Application){
                 var builder = await application.InitializeService();
@@ -149,13 +150,13 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
             throw new NotImplementedException();
         }
 
-        [XpandTest()]
+        // [XpandTest()]
         public override async Task Create_Entity_Container_When_Not_Exist(){
             var tasksFolderName = Guid.NewGuid().ToString();
             await MapTwoNewTasks(TaskStatus.InProgress,TaskStatus.InProgress.ToString() ,tasksFolderName);
         }
 
-        [XpandTest()]
+        // [XpandTest()]
         public override Task User_Container(){
             throw new NotImplementedException();
         }

@@ -37,7 +37,7 @@ Clear-NugetCache -Filter XpandPackages
 Invoke-Script{
     Set-VsoVariable build.updatebuildnumber "$env:build_BuildNumber-$CustomVersion"
     $stage = "$SourcePath\buildstage"
-    Remove-Item $stage -force -recurse -ErrorAction SilentlyContinue
+    Remove-Item $stage -force -Recurse -ErrorAction SilentlyContinue
     Set-Location $SourcePath
     dotnet tool restore
     $latestMinors = Get-XAFLatestMinors 
@@ -125,22 +125,34 @@ Invoke-Script{
     New-Item $stage\source -ItemType Directory -Force
     Set-Location $stage
     New-Item "$stage\TestApplication" -ItemType Directory
-    Write-HostFormatted "Copyingg Bin" -Section
-    Copy-Item "$Sourcepath\Bin" "$stage\Bin" -Recurse -Force 
-    Write-HostFormatted "Copyingg TestWinApplication" -Section
+    Write-HostFormatted "Copying Bin" -Section
+    if (Test-AzDevops){
+        Move-Item "$Sourcepath\Bin" "$stage\Bin" -Force 
+    }
+    else{
+        Copy-Item "$Sourcepath\Bin" "$stage\Bin" -Recurse -Force 
+    }
+    
+    Write-HostFormatted "Moving TestWinApplication" -Section
     Move-Item "$stage\Bin\TestWinApplication" "$stage\TestApplication" -Force 
-    Write-HostFormatted "Copyingg TestWebApplication" -Section
+    Write-HostFormatted "Moving TestWebApplication" -Section
     Move-Item "$stage\Bin\TestWebApplication" "$stage\TestApplication" -Force 
-    Write-HostFormatted "Copyingg AllTestsWin" -Section
+    Write-HostFormatted "Moving AllTestsWin" -Section
     Move-Item "$stage\Bin\AllTestWeb" "$stage\TestApplication" -Force 
-    Write-HostFormatted "Copyingg AllTestsWeb" -Section
+    Write-HostFormatted "Moving AllTestsWeb" -Section
     Move-Item "$stage\Bin\AllTestWin" "$stage\TestApplication" -Force 
     Remove-Item "$stage\bin\ReactiveLoggerClient" -Recurse -Force
-    Write-HostFormatted "Restore paket source" -ForegroundColor Magenta
-    $DXVersion = Get-VersionPart (Get-DevExpressVersion) Minor
-    $SourcePath | ForEach-Object {
-        Set-Location $_
-        Move-PaketSource 0 "C:\Program Files (x86)\DevExpress $DXVersion\Components\System\Components\Packages"
+    
+    "Web","Win"|ForEach-Object{
+        Write-HostFormatted "Zipping DX $_" -ForegroundColor Magenta
+        $webassemblies=((Get-ChildItem "$stage\TestApplication\AllTest$_" DevExpress*.dll -Recurse)+(Get-ChildItem ("$stage\TestApplication\Test$_","Application" -join "") DevExpress*.dll -Recurse))
+        New-Item $stage\DX$_ -ItemType Directory -Force
+        $webassemblies|Move-Item -Destination $stage\DX$_ -Force
+        Compress-Files $stage\DX$_ $stage\DX$_.Zip -compressionLevel NoCompression 
+        Remove-Item $stage\DX$_ -Force -Recurse
+        Get-ChildItem "$stage\bin" DevExpress*.dll|Remove-Item
+        New-Item $stage\DX -ItemType Directory -Force
+        Move-Item $stage\DX$_.Zip $stage\DX
     }
     Write-HostFormatted "FINISH" -Section
 }

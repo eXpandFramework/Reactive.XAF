@@ -97,6 +97,10 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             return Disposing(Observable.Return(simpleAction));
         }
 
+        public static IObservable<TAction> WhenActionActivated<TAction>(this IObservable<TAction> source)where TAction : ActionBase{
+            return source.SelectMany(a => a.WhenActionActivated());
+        }
+
         public static IObservable<TAction> WhenActionActivated<TAction>(this TAction simpleAction)
             where TAction : ActionBase{
             return simpleAction.ResultValueChanged(action => action.Active)

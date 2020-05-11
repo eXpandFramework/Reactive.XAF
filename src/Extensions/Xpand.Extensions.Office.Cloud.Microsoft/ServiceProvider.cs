@@ -30,8 +30,7 @@ namespace Xpand.Extensions.Office.Cloud.Microsoft{
         public static PublicClientApplicationBuilder ClientAppBuilder { get; }
 
         public static IObservable<GraphServiceClient> AuthorizeMS(this XafApplication application){
-            return ClientAppBuilder.Authorize(cache =>
-                    cache.SynchStorage(application.CreateObjectSpace, (Guid) SecuritySystem.CurrentUserId));
+            return ClientAppBuilder.Authorize(cache => cache.SynchStorage(application.CreateObjectSpace, (Guid) SecuritySystem.CurrentUserId));
         }
         public static IObservable<GraphServiceClient> Authorize(this PublicClientApplicationBuilder builder,
             Func<ITokenCache, IObservable<TokenCacheNotificationArgs>> storeResults){

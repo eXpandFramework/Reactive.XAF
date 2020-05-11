@@ -20,7 +20,7 @@ namespace Xpand.TestsLib{
             return (Platform) Enum.Parse(typeof(Platform), platformName);
         }
 
-        protected TimeSpan Timeout = TimeSpan.FromSeconds(Debugger.IsAttached ? 120 : 5);
+        protected TimeSpan Timeout = TimeSpan.FromSeconds(Debugger.IsAttached ? 120 : 25);
 
         static BaseTest(){
             TextListener = new TextWriterTraceListener($@"{AppDomain.CurrentDomain.ApplicationPath()}\reactive.log");

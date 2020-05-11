@@ -107,7 +107,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                         var xpoASsembly = AppDomain.CurrentDomain.GetAssemblies().First(asm => asm.GetName().Name.StartsWith("DevExpress.ExpressApp.Xpo.v"));
                         var dataStoreProvider = $"{application.ConnectionString}".Contains("XpoProvider=InMemoryDataStoreProvider")||$"{application.ConnectionString}"==""
                             ? xpoASsembly.GetType("DevExpress.ExpressApp.Xpo.MemoryDataStoreProvider").CreateInstance()
-                            : xpoASsembly.GetType("DevExpress.ExpressApp.Xpo.ConnectionStringDataStoreProvider").CreateInstance(application.ConnectionString);
+                            : Activator.CreateInstance(xpoASsembly.GetType("DevExpress.ExpressApp.Xpo.ConnectionStringDataStoreProvider"),application.ConnectionString);
 
                         Type[] parameterTypes = {xpoASsembly.GetType("DevExpress.ExpressApp.Xpo.IXpoDataStoreProvider"), typeof(bool)};
                         object[] parameterValues = {dataStoreProvider, true};

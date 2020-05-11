@@ -37,9 +37,8 @@ namespace Xpand.Extensions.Office.Cloud.Microsoft{
         private static IObservable<TokenCacheNotificationArgs> ReadStorage(this ITokenCache tokenCache, Func<IObjectSpace> objectspaceFactory, Guid userId) 
             => tokenCache.BeforeAccess().Select(args => {
                 using (var objectSpace = objectspaceFactory()){
-                    var authentication = objectSpace.GetObjectByKey<MSAuthentication>(userId) ?? objectSpace.CreateObject<MSAuthentication>();
-                    authentication.Oid = userId;
-                    args.TokenCache.DeserializeMsalV3(authentication.Token);
+                    var authentication = objectSpace.GetObjectByKey<MSAuthentication>(userId) ;
+                    args.TokenCache.DeserializeMsalV3(authentication?.Token);
                     objectSpace.CommitChanges();
                 }
                 return args;

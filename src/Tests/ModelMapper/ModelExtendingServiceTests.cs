@@ -288,7 +288,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             var platform = GetPlatform(platformName);
             InitializeMapperService($"{nameof(ExtendModel_All_Predefined_Maps)}",platform);
             var values = Enums.GetValues<PredefinedMap>()
-                .Where(map =>map.GetAttributes().OfType<MapPlatformAttribute>().Any(_ => _.Platform == platform))
+                .Where(map =>map.GetAttributes()!.OfType<MapPlatformAttribute>().Any(_ => _.Platform == platform))
                 .ToArray();
 
             using (var module = values.ToArray().Extend()){
@@ -311,7 +311,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                     });
                 using (var application = DefaultModelMapperModule(nameof(Extend_Existing_PredefinedMap), Platform.Win, module).Application){
                     var modelListView = application.Model.Views.OfType<IModelListView>().First();
-                    var modelNode = modelListView.GetNode(typeof(GridView).Name);
+                    var modelNode = modelListView.GetNode(nameof(GridView));
 
                     (modelNode is IModelPredefinedMapExtension).ShouldBeTrue();
                 }
