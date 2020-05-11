@@ -131,9 +131,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
         }
 
         static IObservable<(Frame frame, GraphServiceClient client)> Authorize(this  IObservable<Frame> whenViewOnFrame){
-            return whenViewOnFrame.SelectMany(frame => ServiceProvider.ClientAppBuilder
-                .Authorize(cache => cache.SynchStorage(frame.Application.CreateObjectSpace, (Guid)SecuritySystem.CurrentUserId))
-                .Select(client => (frame,client)))
+            return whenViewOnFrame.SelectMany(frame => frame.Application.AuthorizeMS().Select(client => (frame, client)))
                 .TraceMicrosoftTodoModule();
         }
     }

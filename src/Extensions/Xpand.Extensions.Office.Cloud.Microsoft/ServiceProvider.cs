@@ -7,6 +7,7 @@ using Prompt = Microsoft.Identity.Client.Prompt;
 using JetBrains.Annotations;
 using System;
 using System.Reactive.Linq;
+using DevExpress.ExpressApp;
 using File = System.IO.File;
 
 namespace Xpand.Extensions.Office.Cloud.Microsoft{
@@ -28,6 +29,10 @@ namespace Xpand.Extensions.Office.Cloud.Microsoft{
 
         public static PublicClientApplicationBuilder ClientAppBuilder { get; }
 
+        public static IObservable<GraphServiceClient> AuthorizeMS(this XafApplication application){
+            return ClientAppBuilder.Authorize(cache =>
+                    cache.SynchStorage(application.CreateObjectSpace, (Guid) SecuritySystem.CurrentUserId));
+        }
         public static IObservable<GraphServiceClient> Authorize(this PublicClientApplicationBuilder builder,
             Func<ITokenCache, IObservable<TokenCacheNotificationArgs>> storeResults){
 
