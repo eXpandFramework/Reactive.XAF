@@ -15,11 +15,13 @@ namespace Xpand.Extensions.XAF.CollectionSource{
             if (collectionSourceBase.Collection is IEnumerable collection){
                 return collection.Cast<T>();
             }
-
             if (collectionSourceBase.Collection is IListSource listSource){
                 return listSource.GetList().Cast<T>();
             }
 
+            if (collectionSourceBase is PropertyCollectionSource propertyCollectionSource){
+                return ((IEnumerable) propertyCollectionSource.MemberInfo.GetValue(propertyCollectionSource.MasterObject)).Cast<T>();
+            }
             throw new NotImplementedException($"{collectionSourceBase}");
         }
     }

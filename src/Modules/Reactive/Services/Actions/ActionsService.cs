@@ -11,6 +11,18 @@ using Xpand.Extensions.Reactive.Transform;
 namespace Xpand.XAF.Modules.Reactive.Services.Actions{
     
     public static partial class ActionsService{
+        public static IObservable<(SimpleAction action, SimpleActionExecuteEventArgs e)> WhenExecute(this SimpleAction simpleAction){
+            return Observable.FromEventPattern<SimpleActionExecuteEventHandler, SimpleActionExecuteEventArgs>(
+                    h => simpleAction.Execute += h, h => simpleAction.Execute -= h, ImmediateScheduler.Instance)
+                .TransformPattern<SimpleActionExecuteEventArgs, SimpleAction>();
+        }
+        public static IObservable<(SingleChoiceAction action, SingleChoiceActionExecuteEventArgs e)> WhenExecute(this SingleChoiceAction simpleAction){
+            return Observable.FromEventPattern<SingleChoiceActionExecuteEventHandler, SingleChoiceActionExecuteEventArgs>(
+                    h => simpleAction.Execute += h, h => simpleAction.Execute -= h, ImmediateScheduler.Instance)
+                .TransformPattern<SingleChoiceActionExecuteEventArgs, SingleChoiceAction>();
+        }
+
+
         public static IObservable<TFrame> WhenView<TFrame>(this IObservable<TFrame> source, Type objectType)
             where TFrame : Frame{
             return source.SelectMany(frame => frame.View.ReturnObservable().When(objectType).Select(view => frame));
@@ -74,8 +86,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
                 .TransformPattern<ActionBaseEventArgs, TAction>();
         }
 
-        public static IObservable<(TAction action, BoolList boolList, BoolValueChangedEventArgs e)>
-            ResultValueChanged<TAction>(
+        public static IObservable<(TAction action, BoolList boolList, BoolValueChangedEventArgs e)> ResultValueChanged<TAction>(
                 this TAction source, Func<TAction, BoolList> boolListSelector) where TAction : ActionBase{
             return Observable.Return(boolListSelector(source))
                     .ResultValueChanged().Select(tuple => (source, tuple.boolList, tuple.e))

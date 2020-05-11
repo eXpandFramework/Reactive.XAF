@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -12,12 +14,15 @@ using DevExpress.Persistent.Base;
 using Fasterflect;
 using HarmonyLib;
 using JetBrains.Annotations;
+using Xpand.Extensions.Reactive.Transform;
+using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
 namespace Xpand.XAF.Modules.Reactive.Services.Actions{
     [PublicAPI]
     public static partial class ActionsService{
         public static object Locker=new object();
         private static readonly Harmony Harmony;
+        
         static readonly ConcurrentDictionary<Type,(string id,Func<(Controller controller, string id), ActionBase> actionBase)> ControllerCtorState=new ConcurrentDictionary<Type, (string id, Func<(Controller controller, string id), ActionBase> actionBase)>();
         static ActionsService(){
             Harmony = new Harmony(typeof(ActionsService).FullName);
@@ -29,51 +34,119 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 
         public static IObservable<TAction> RegisterMainWindowAction<TAction>(this ApplicationModulesManager applicationModulesManager, string id,
             Func<(WindowController controller, string id), TAction> actionBase) where  TAction:ActionBase{
-            return applicationModulesManager.RegisterWindowAction(id, actionBase).Do(_ => ((WindowController) _.Controller).TargetWindowType = WindowType.Child);
+            return applicationModulesManager.RegisterWindowAction(id, tuple => {
+                var action = actionBase(tuple);
+                tuple.controller.TargetWindowType=WindowType.Child;
+                return action;
+            });
         }
 
         public static IObservable<TAction> RegisterChildWindowAction<TAction>(this ApplicationModulesManager applicationModulesManager, string id,
-            Func<(WindowController controller, string id), TAction> actionBase) where  TAction:ActionBase{
-
-            return applicationModulesManager.RegisterWindowAction(id, actionBase)
-                .Do(_ => ((WindowController) _.Controller).TargetWindowType=WindowType.Child);
-        }
+            Func<(WindowController controller, string id), TAction> actionBase) where  TAction:ActionBase =>
+            applicationModulesManager.RegisterWindowAction(id, tuple => {
+                    var action = actionBase(tuple);
+                    tuple.controller.TargetWindowType=WindowType.Child;
+                    return action;
+                });
 
         public static IObservable<TAction> RegisterWindowAction<TAction>(this ApplicationModulesManager applicationModulesManager, string id,
-            Func<(WindowController controller, string id), TAction> actionBase) where TAction:ActionBase{
+            Func<(WindowController controller, string id), TAction> actionBase) where TAction:ActionBase =>
+            applicationModulesManager.RegisterAction(id, actionBase);
 
-            return applicationModulesManager.RegisterAction(id, actionBase);
+        public static IObservable<PopupWindowShowAction> RegisterViewPopupWindowShowAction(this ApplicationModulesManager manager, string id,
+            Type targetObjectType=null,ViewType viewType=ViewType.Any,PredefinedCategory category=PredefinedCategory.View) =>
+            manager.RegisterViewAction(id, category.NewAction<PopupWindowShowAction,ViewController>(targetObjectType.Configure(viewType)));
+
+        public static IObservable<PopupWindowShowAction> RegisterViewPopupWindowShowAction(this ApplicationModulesManager manager, string id,
+            Action<PopupWindowShowAction> configure,PredefinedCategory category=PredefinedCategory.View) =>
+            manager.RegisterViewAction(id, category.NewAction<PopupWindowShowAction,ViewController>(configure));
+
+        public static IObservable<PopupWindowShowAction> RegisterWindowPopupWindowShowAction(this ApplicationModulesManager manager, string id,
+            PredefinedCategory category=PredefinedCategory.View,Action<PopupWindowShowAction> configure=null) =>
+            manager.RegisterWindowAction(id, category.NewAction<PopupWindowShowAction,WindowController>(configure));
+
+        public static IObservable<SimpleAction> RegisterViewSimpleAction(this ApplicationModulesManager manager, string id, 
+            Type targetObjectType=null,ViewType viewType=ViewType.Any,PredefinedCategory category = PredefinedCategory.View) 
+                => manager.RegisterViewAction(id, category.NewAction<SimpleAction,ViewController>( targetObjectType.Configure(viewType)));
+
+        public static IObservable<SimpleAction> RegisterViewSimpleAction(this ApplicationModulesManager manager, string id, 
+            Action<SimpleAction> configure,PredefinedCategory category = PredefinedCategory.View) 
+                => manager.RegisterViewAction(id, category.NewAction<SimpleAction,ViewController>( configure));
+
+        public static IObservable<SingleChoiceAction> RegisterViewSingleChoiceAction(this ApplicationModulesManager manager, string id, 
+            Type targetObjectType=null,ViewType viewType=ViewType.Any ,PredefinedCategory category = PredefinedCategory.View) 
+                => manager.RegisterViewAction(id, category.NewAction<SingleChoiceAction,ViewController>( targetObjectType.Configure(viewType)));
+        public static IObservable<SingleChoiceAction> RegisterViewSingleChoiceAction(this ApplicationModulesManager manager, string id, 
+             Action<SingleChoiceAction> configure ,PredefinedCategory category = PredefinedCategory.View) 
+                => manager.RegisterViewAction(id, category.NewAction<SingleChoiceAction,ViewController>( configure));
+
+        private static Func<(TController controller, string id), TAction> NewAction<TAction, TController>(
+            this PredefinedCategory category, Action<TAction> configure) where TAction:ActionBase, new() where TController:Controller{
+            return _ => category.NewAction( configure, _);
         }
 
-        public static IObservable<PopupWindowShowAction> RegisterViewPopupWindowShowAction(this ApplicationModulesManager manager, string id,PredefinedCategory category=PredefinedCategory.View){
-            return manager.RegisterViewAction(id, _ => new PopupWindowShowAction(_.controller,id, category));
-        }
-        public static IObservable<PopupWindowShowAction> RegisterWindowPopupWindowShowAction(this ApplicationModulesManager manager, string id,PredefinedCategory category=PredefinedCategory.View){
-            return manager.RegisterWindowAction(id, _ => new PopupWindowShowAction(_.controller,id, category));
-        }
-
-        public static IObservable<SimpleAction> RegisterViewSimpleAction(this ApplicationModulesManager manager, string id,PredefinedCategory category=PredefinedCategory.View){
-            return manager.RegisterViewAction(id, _ => new SimpleAction(_.controller, _.id, category));
-        }
-        
-        public static IObservable<SingleChoiceAction> RegisterViewSingleChoiceAction(this ApplicationModulesManager manager, string id,PredefinedCategory category=PredefinedCategory.View){
-            return manager.RegisterViewAction(id, _ => new SingleChoiceAction(_.controller, _.id, category));
-        }
-
-        public static IObservable<ParametrizedAction> RegisterViewParametrizedAction(this ApplicationModulesManager manager, string id,Type valueType,PredefinedCategory category=PredefinedCategory.View){
-            return manager.RegisterViewAction(id, _ => new ParametrizedAction(_.controller, _.id, category, valueType));
-        }
-
-        public static IObservable<SimpleAction> RegisterWindowSimpleAction(this ApplicationModulesManager manager, string id,PredefinedCategory category=PredefinedCategory.Tools){
-            return manager.RegisterWindowAction(id, _ => new SimpleAction(_.controller, _.id, category));
-        }
-        
-        public static IObservable<SingleChoiceAction> RegisterWindowSingleChoiceAction(this ApplicationModulesManager manager, string id,PredefinedCategory category=PredefinedCategory.Tools){
-            return manager.RegisterWindowAction(id, _ => new SingleChoiceAction(_.controller, _.id, category));
+        private static TAction NewAction<TAction, TController>(this PredefinedCategory category, Action<TAction> configure,
+            (TController controller, string id) _) where TAction : ActionBase, new() where TController : Controller{
+            var args = new object[]{_.controller,_.id,category};
+            if (typeof(TAction) == typeof(ParametrizedAction)){
+                args=args.AddItem(typeof(Type)).ToArray();
+            }
+            var action =  (TAction)Activator.CreateInstance(typeof(TAction),args);
+            configure?.Invoke(action);
+            if (action.Controller is ViewController viewController){
+                viewController.TargetObjectType=action.TargetObjectType;
+                viewController.TargetViewType=action.TargetViewType;
+                viewController.TargetViewId=action.TargetViewId;
+                viewController.TargetViewNesting=action.TargetViewNesting;
+                viewController.TypeOfView = action.TypeOfView;
+            }
+            return action;
         }
 
-        public static IObservable<ParametrizedAction> RegisterWindowParametrizedAction(this ApplicationModulesManager manager, string id,Type valueType,PredefinedCategory category=PredefinedCategory.Tools){
-            return manager.RegisterWindowAction(id, _ => new ParametrizedAction(_.controller, _.id, category, valueType));
+        public static IObservable<ParametrizedAction> RegisterViewParametrizedAction(this ApplicationModulesManager manager, string id,Type valueType,
+            Type targetObjectType=null,ViewType viewType=ViewType.Any,PredefinedCategory category=PredefinedCategory.View){
+            return manager.RegisterViewAction(id, tuple => {
+                var parametrizedAction = category.NewAction(targetObjectType.Configure<ParametrizedAction>(viewType),tuple);
+                parametrizedAction.ValueType=valueType;
+                return parametrizedAction;
+            });
+        }
+
+        public static IObservable<ParametrizedAction> RegisterViewParametrizedAction(this ApplicationModulesManager manager, string id,Type valueType,
+            Action<ParametrizedAction> configure,PredefinedCategory category=PredefinedCategory.View) =>
+            manager.RegisterViewAction(id, tuple => {
+                var parametrizedAction = category.NewAction(configure,tuple);
+                parametrizedAction.ValueType=valueType;
+                return parametrizedAction;
+            });
+
+
+        public static IObservable<SimpleAction> RegisterWindowSimpleAction(this ApplicationModulesManager manager, string id,
+            PredefinedCategory category=PredefinedCategory.Tools,Action<SimpleAction> configure=null) =>
+            manager.RegisterWindowAction(id, category.NewAction<SimpleAction,WindowController>(configure));
+
+
+        public static IObservable<SingleChoiceAction> RegisterWindowSingleChoiceAction(this ApplicationModulesManager manager, string id,
+            PredefinedCategory category=PredefinedCategory.Tools,Action<SingleChoiceAction> configure=null) =>
+            manager.RegisterWindowAction(id, category.NewAction<SingleChoiceAction,WindowController>(configure));
+
+
+        private static Action<T> Configure<T>(this Type targetObjectType, ViewType viewType) where T:ActionBase =>
+            action => {
+                action.TargetObjectType = targetObjectType;
+                action.TargetViewType = viewType;
+            };
+
+        private static Action<ActionBase> Configure(this Type targetObjectType, ViewType viewType) =>
+            targetObjectType.Configure<ActionBase>(viewType);
+
+        public static IObservable<ParametrizedAction> RegisterWindowParametrizedAction(this ApplicationModulesManager manager, string id,Type valueType,
+            PredefinedCategory category=PredefinedCategory.Tools,Action<ParametrizedAction> configure=null){
+            return manager.RegisterWindowAction(id, _ => {
+                var parametrizedAction = category.NewAction(configure,_);
+                parametrizedAction.ValueType=valueType;
+                return parametrizedAction;
+            });
         }
 
         public static IObservable<TAction> RegisterViewAction<TAction>(this ApplicationModulesManager applicationModulesManager, string id,
@@ -84,41 +157,35 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static IObservable<TAction> RegisterAction<TController,TAction>(this ApplicationModulesManager applicationModulesManager, string id,
             Func<(TController controller, string id), TAction> actionBase) where TController : Controller where TAction:ActionBase{
             lock (ActionsModule){
-                return Observable.Create<TAction>(observer => {
-                    var type = ActionsModule.Assembly.GetType($"{id}{typeof(TController).Name}");
-                    var controllerType = type ?? NewControllerType<TController>(id);
-                    var controller = (TController) controllerType.CreateInstance();
-                    var action = actionBase((controller, id));
-                    controller.Actions.Add(action);
-                    observer.OnNext(action);
-                    if (type == null){
-                        ControllerCtorState.TryAdd(controllerType,
-                            (id, _ => actionBase(((TController) _.controller, _.id))));
-                        var controllerCtorPatch =
-                            typeof(ActionsService).Method(nameof(ControllerCtorPatch), Flags.StaticAnyVisibility);
-                        Harmony.Patch(controllerType.Constructor(), finalizer: new HarmonyMethod(controllerCtorPatch));
-                    }
-
-                    applicationModulesManager.ControllersManager.RegisterController(controller);
-                    return action;
-                }).Merge(_actionsSubject.OfType<TAction>().Where(_ => _.Id==id));
+                var type = ActionsModule.Assembly.GetType($"{id}{typeof(TController).Name}");
+                var controllerType = type ?? NewControllerType<TController>(id);
+                if (type == null){
+                    ControllerCtorState.TryAdd(controllerType, (id, _ => {
+                        var action = actionBase(((TController) _.controller, _.id));
+                        return action;
+                    }));
+                    var controllerCtorPatch = typeof(ActionsService).Method(nameof(ControllerCtorPatch), Flags.StaticAnyVisibility);
+                    Harmony.Patch(controllerType.Constructor(), finalizer: new HarmonyMethod(controllerCtorPatch));
+                }
+                var controller = (TController) Controller.Create(controllerType);
+                applicationModulesManager.ControllersManager.RegisterController(controller);
+                // return Observable.Create<TAction>(observer => {
+                //     TAction action = controller.Actions[id] as TAction;
+                //     observer.OnNext(action);
+                //     return Disposable.Empty;
+                // });
+                return _actionsSubject.Select(a => a).OfType<TAction>().Where(_ => _.Id == id);
             }
         }
 
         static Subject<ActionBase> _actionsSubject=new Subject<ActionBase>();
-        
-        
+
+
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         private static void ControllerCtorPatch(Controller __instance){
-            void AfterConstruction(object sender, EventArgs args){
-                var _ = (Controller) sender;
-                _.AfterConstruction -= AfterConstruction;
-                var tuple = ControllerCtorState[_.GetType()];
-                var controllerAction = tuple.actionBase((_, tuple.id));
-                _.Actions.Add(controllerAction);
-                _actionsSubject.OnNext(controllerAction);
-            }
-            __instance.AfterConstruction+= AfterConstruction;
+            var tuple = ControllerCtorState[__instance.GetType()];
+            var actionBase = tuple.actionBase((__instance, tuple.id));
+            _actionsSubject.OnNext(actionBase);
         }
 
         private static Type NewControllerType<T>(string id) where T:Controller{

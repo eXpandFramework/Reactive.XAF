@@ -3,7 +3,7 @@ using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Utils;
 
 namespace Xpand.Extensions.XAF.Action{
-    public static class ActionExtensions{
+    public static partial class ActionExtensions{
 
         public static BoolList Clone(this BoolList boolList){
             var list = new BoolList();

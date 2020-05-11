@@ -10,8 +10,10 @@ using DevExpress.ExpressApp.DC;
 using Fasterflect;
 using JetBrains.Annotations;
 using Xpand.Extensions.Linq;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.XAF.ApplicationModulesManager;
 using Xpand.Extensions.XAF.TypesInfo;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.Reactive.Extensions;
@@ -117,6 +119,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                             .Constructor(parameterTypes)
                             .Invoke(parameterValues);
                         _.e.ObjectSpaceProviders.Add(objectSpaceProvider);
+                        _.e.ObjectSpaceProviders.Add(new NonPersistentObjectSpaceProvider());
                     }
                     else{
                         _.e.ObjectSpaceProviders.AddRange(objectSpaceProviders);
@@ -186,6 +189,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<DetailView> ToDetailView(this IObservable<(XafApplication application, DetailViewCreatedEventArgs e)> source) {
             return source.Select(_ => _.e.View);
+        }
+
+        public static IObservable<(HandledEventArgs handledEventArgs, Exception exception, Exception originalException)> WhenCustomHandleException(this IObservable<IWinAPI> source){
+            return source.SelectMany(api => Observable.FromEventPattern(api.Application, "CustomHandleException")
+                .Select(pattern => (((HandledEventArgs) pattern.EventArgs), exception:((Exception) pattern.EventArgs.GetPropertyValue("Exception")
+                    ),originalException:((Exception) pattern.EventArgs.GetPropertyValue("Exception")))));
+
         }
 
         public static IObservable<Frame> WhenViewOnFrame(this XafApplication application,Type objectType=null,ViewType viewType=ViewType.Any,Nesting nesting=Nesting.Any){
@@ -335,6 +345,31 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return application.GetPlatform() == Platform.Web ? new WebApi(application).ReturnObservable() : Observable.Empty<IWebAPI>();
         }
 
+        public static IObservable<ApplicationModulesManager> WhenApplicationModulesManager(this XafApplication application){
+            return RxApp.ApplicationModulesManager.Where(manager => manager.Application() == application);
+        }
+
+        public static IObservable<IWinAPI> WhenWin(this XafApplication application){
+            return application.GetPlatform() == Platform.Win ? new WinApi(application).ReturnObservable() : Observable.Empty<IWinAPI>();
+        }
+        
+        public static IObservable<CreateCustomPropertyCollectionSourceEventArgs> WhenCreateCustomPropertyCollectionSource(this XafApplication application){
+            return Observable.FromEventPattern<EventHandler<CreateCustomPropertyCollectionSourceEventArgs>,
+                    CreateCustomPropertyCollectionSourceEventArgs>(h => application.CreateCustomPropertyCollectionSource += h,
+                    h => application.CreateCustomPropertyCollectionSource += h, Scheduler.Immediate).Select(_ => _.EventArgs);
+        }
+
+        public static IObservable<NonPersistePropertyCollectionSource> WhenNonPersistentPropertyCollectionSource(this XafApplication application){
+            return application.WhenCreateCustomPropertyCollectionSource()
+                .Where(e => e.ObjectSpace is NonPersistentObjectSpace)
+                .Select(e => {
+                    e.PropertyCollectionSource = new NonPersistePropertyCollectionSource(e.ObjectSpace, e.MasterObjectType, e.MasterObject, e.MemberInfo,e.DataAccessMode, e.Mode);
+                    return e.PropertyCollectionSource;
+                })
+                .Cast<NonPersistePropertyCollectionSource>()
+                .TakeUntilDisposed(application);
+        }
+
     }
 
     class WebApi:IWebAPI{
@@ -345,7 +380,18 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
 
     }
+    class WinApi:IWinAPI{
+        public XafApplication Application{ get; }
+
+        public WinApi(XafApplication application){
+            Application = application;
+        }
+
+    }
     public interface IWebAPI{
+        XafApplication Application{ get; }
+    }
+    public interface IWinAPI{
         XafApplication Application{ get; }
     }
 }
