@@ -11,12 +11,11 @@ using Xpand.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.Reactive.Services;
-using Xpand.XAF.Modules.Reactive.Tests.BOModel;
 
 
 namespace Xpand.XAF.Modules.Reactive.Tests{
     [NonParallelizable]
-    public class XafApplicationTests : BaseTest{
+    public class XafApplicationTests : ReactiveBaseTest{
         [XpandTest]
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
@@ -82,10 +81,6 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             }
         }
         
-        private static ReactiveModule DefaultReactiveModule(Platform platform=Platform.Win){
-            var application = platform.NewApplication<ReactiveModule>();
-            return application.AddModule<ReactiveModule>(typeof(R));
-        }
 
         [Test]
         [XpandTest]

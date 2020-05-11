@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.DC;
+using Xpand.Extensions.EventArg;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
@@ -21,4 +25,27 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
 
     }
+    public class NonPersistePropertyCollectionSource : PropertyCollectionSource{
+        readonly Subject<GenericEventArgs<IEnumerable<object>>> _datasourceSubject=new Subject<GenericEventArgs<IEnumerable<object>>>();
+        public NonPersistePropertyCollectionSource(IObjectSpace objectSpace, Type masterObjectType, object masterObject, IMemberInfo memberInfo, CollectionSourceDataAccessMode dataAccessMode, CollectionSourceMode mode) : base(objectSpace, masterObjectType, masterObject, memberInfo, dataAccessMode, mode){
+        }
+
+        public NonPersistePropertyCollectionSource(IObjectSpace objectSpace, Type masterObjectType, object masterObject, IMemberInfo memberInfo, bool isServerMode, CollectionSourceMode mode) : base(objectSpace, masterObjectType, masterObject, memberInfo, isServerMode, mode){
+        }
+
+        public NonPersistePropertyCollectionSource(IObjectSpace objectSpace, Type masterObjectType, object masterObject, IMemberInfo memberInfo, CollectionSourceMode mode) : base(objectSpace, masterObjectType, masterObject, memberInfo, mode){
+        }
+
+        public NonPersistePropertyCollectionSource(IObjectSpace objectSpace, Type masterObjectType, object masterObject, IMemberInfo memberInfo) : base(objectSpace, masterObjectType, masterObject, memberInfo){
+        }
+
+        public IObservable<GenericEventArgs<IEnumerable<object>>> Datasource => _datasourceSubject.AsObservable();
+
+        protected override object CreateCollection(){
+            var handledEventArgs = new GenericEventArgs<IEnumerable<object>>();
+            _datasourceSubject.OnNext(handledEventArgs);
+            return handledEventArgs.Handled ? handledEventArgs.Instance : base.CreateCollection();
+        }
+    }
+
 }
