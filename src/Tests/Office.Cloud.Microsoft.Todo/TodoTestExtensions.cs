@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -47,6 +48,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
             var requestBuilder = foldersRequestBuilder[taskFolder?.Id];
             if (taskFolderName != TasksPagingFolderName&&!keepTasks){
                 await requestBuilder.DeleteAllTasks();
+                (await requestBuilder.Tasks.ListAllItems()).Count().ShouldBe(0);
             }
             
             return (requestBuilder,client.frame);
@@ -97,6 +99,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
 
             using (var space = objectSpaceProvider.CreateObjectSpace()){
                 var cloudObjects = space.QueryCloudOfficeObject(cloudEntityType,task).ToArray();
+                if (cloudObjects.Length != 1){
+                    Debug.WriteLine("");
+                }
                 cloudObjects.Length.ShouldBe(1);
                 var cloudObject = cloudObjects.First();
                 cloudObject.LocalId.ShouldBe(task.Oid.ToString());
@@ -148,7 +153,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
                 var task = new OutlookTask(){
                     Subject = $"{i}{title}",
                     CompletedDateTime = new DateTimeTimeZone {DateTime = dateTime.AddHours(i).ToString(CultureInfo.InvariantCulture),
-                        TimeZone = TimeZone.CurrentTimeZone.StandardName
+                        TimeZone = TimeZoneInfo.Local.Id
                     }
                 };
                 
@@ -156,7 +161,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
             }).Buffer(count);
         }
         public static Guid NewMicrosoftAuthentication(this IObjectSpaceProvider objectSpaceProvider){
-            var type = typeof(SynchronizationTests);
+            var type = typeof(TodoSynchronizationTests);
             using (var manifestResourceStream = type.Assembly.GetManifestResourceStream(type, "AuthenticationData.json")){
                 var token = Encoding.UTF8.GetBytes(new StreamReader(manifestResourceStream ?? throw new InvalidOperationException()).ReadToEnd());
                 using (var objectSpace = objectSpaceProvider.CreateObjectSpace()){

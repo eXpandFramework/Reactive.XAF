@@ -33,7 +33,7 @@
     <PackageReference Include="System.Reactive" Version="4.3.2" />
     <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.16.1" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="2.201.29.1" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="2.201.29.4" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.TestsLib">

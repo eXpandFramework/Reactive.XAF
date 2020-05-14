@@ -10,6 +10,7 @@ using Shouldly;
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Tests{
     public static class TestExtensions{
@@ -124,7 +125,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
                 var localEntity = i == 0 ? localEntity1 : localEntity2;
                 assert( localEntity, cloudEntity);
                 return Unit.Default;
-            }).Timeout(timeout);
+            })
+            .TakeUntil(objectSpace.WhenDisposed())
+            .Timeout(timeout);
             
         }
 

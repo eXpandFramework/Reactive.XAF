@@ -13,6 +13,8 @@ using System.Threading;
 using DevExpress.ExpressApp;
 using DevExpress.Utils;
 using JetBrains.Annotations;
+using Xpand.Extensions.AppDomain;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -34,12 +36,9 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         All=Subscribe|OnNext|OnCompleted|Dispose|OnError
     }
     public static class ReactiveLoggerService{
-        
-        
+        public static string RXLoggerLogPath{ get; set; }=@$"{AppDomain.CurrentDomain.ApplicationPath()}\{AppDomain.CurrentDomain.SetupInformation.ApplicationName}_RXLogger.log";
         private static readonly Subject<ITraceEvent> SavedTraceEventSubject=new Subject<ITraceEvent>();
-
         public static IObservable<ITraceEvent> ListenerEvents{ get; private set; }
-
         public static IObservable<ITraceEvent> SavedTraceEvent{ get; }=SavedTraceEventSubject;
         internal static IObservable<Unit> Connect(this ReactiveLoggerModule reactiveLoggerModule){
             
@@ -152,7 +151,10 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                     if (!_.traceSource.Listeners.Contains(traceListener)){
                         _.traceSource.Listeners.Add(traceListener);
                     }
-                }).ToUnit();
+                })
+                .TakeUntilDisposed(application)
+                .Finally(() => traceListener?.Dispose())
+                .ToUnit();
             var applyModel = application.WhenModelChanged()
                 .Select(_ =>application.Model.ToReactiveModule<IModelReactiveModuleLogger>()?.ReactiveLogger).WhenNotDefault()
                 .Select(model => model.GetActiveSources())
@@ -192,11 +194,11 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         }
 
         private static IObservable<TraceEvent> SaveEvent(this IObservable<ITraceEvent> events, XafApplication application){
-            
             return events.Select(_ => _)
-                .Buffer(TimeSpan.FromSeconds(1)).WhenNotEmpty()
+                .Buffer(TimeSpan.FromSeconds(3)).WhenNotEmpty()
                 .SelectMany(list => application.ObjectSpaceProvider.ToObjectSpace().SelectMany(space => space.SaveTraceEvent(list)))
-                .Retry(application);
+                .Retry(application)
+                ;
         }
 
         public static IObservable<TraceEvent> SaveTraceEvent(this IObjectSpace objectSpace, IList<ITraceEvent> traceEventMessages){

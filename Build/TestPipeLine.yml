@@ -31,39 +31,32 @@ jobs:
         artifactName: 'Tests'
         downloadType: single
         downloadPath: '$(System.DefaultWorkingDirectory)\bin'
-    - task: PowerShell@2
-      displayName: 'BuildArtifacts'
+    - task: AzurePowerShell@5
       inputs:
-        # pwsh: true
-        targetType: inline
-        script: |
+        azureSubscription: 'Visual Studio Enterprise(b48a609a-17f6-4e48-a317-54ab77fbf822)'
+        ScriptType: 'InlineScript'
+        Inline: |
           $a = @{
             Sourcepath = '$(System.DefaultWorkingDirectory)'
             AzureToken ='$(AzureToken)'
             AzureApplicationId='$(AzureApplicationId)'
             AzureTenantId='$(AzureTenantId)'
             XpandBlobOwnerSecret='$(XpandBlobOwnerSecret)'
-            AzStorageLookup='$(AzStorageLookup)'
+            AzStorageLookup=('$(AzStorageLookup)' -eq "1")
           }
           $a|write-output
           & '$(System.DefaultWorkingDirectory)/build/TestPipeline.ps1' @a
+        azurePowerShellVersion: 'LatestVersion'
   
     - task: PublishPipelineArtifact@1
       inputs:
         targetPath: '$(Pipeline.Workspace)'
         artifact: 'bin'
         publishLocation: 'pipeline'
-    # - task: PublishBuildArtifacts@1
-    #   # condition: $(NewArtifact)
-    #   displayName: 'Publish Artifact: Bin'
-    #   inputs:
-    #     Parallel: true
-    #     ArtifactName: 'Bin'
-    #     PathtoPublish: '$(System.DefaultWorkingDirectory)\bin'
 - job: TestPerAssembly
   dependsOn: 'BuildArtifacts'
   strategy:
-    parallel: 1
+    parallel: 10
   pool:
     vmImage: windows-2019
   variables:
@@ -94,22 +87,22 @@ jobs:
         searchFolder: '$(System.DefaultWorkingDirectory)'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
-          # **\*AutoCommit*Tests.dll
-          # **\*CloneMemberValue*Tests.dll
-          # **\*CloneModelView*Tests.dll
-          # **\*Extensions*Tests.dll
-          # **\*Grid*Tests.dll
-          # **\*HideTool*Tests.dll
-          # **\*Logger.Tests.dll
-          # **\*MasterDet*Tests.dll
-          # **\*ModelViewIn*Tests.dll
-          # **\*OneView*Tests.dll
-          # **\*Progre*Tests.dll
-          # **\*Reactive.Tests.dll
-          # **\*Refresh*Tests.dll
-          # **\*Supp*Tests.dll
-          # **\*View*Tests.dll
-          # **\*Lookup*Tests.dll
+          **\*AutoCommit*Tests.dll
+          **\*CloneMemberValue*Tests.dll
+          **\*CloneModelView*Tests.dll
+          **\*Extensions*Tests.dll
+          **\*Grid*Tests.dll
+          **\*HideTool*Tests.dll
+          **\*Logger.Tests.dll
+          **\*MasterDet*Tests.dll
+          **\*ModelViewIn*Tests.dll
+          **\*OneView*Tests.dll
+          **\*Progre*Tests.dll
+          **\*Reactive.Tests.dll
+          **\*Refresh*Tests.dll
+          **\*Supp*Tests.dll
+          **\*View*Tests.dll
+          **\*Lookup*Tests.dll
           **\*Todo*Tests.dll
           # **\*Sequence*Tests.dll
           !**\*Hub*.dll
@@ -123,7 +116,6 @@ jobs:
         runTestsInIsolation: false
         collectDumpOn: never
 - job: TestPerExecutionTime
-  # dependsOn: 'BuildArtifacts'
   dependsOn: 'TestPerAssembly'
   strategy:
     parallel: 10
@@ -172,6 +164,9 @@ jobs:
         pwsh: true
         targetType: inline
         script: |
+          if (('$(AzStorageLookup)' -eq "1")){
+              throw "Start full build with AzStorageLookup"
+          }
           & '$(System.DefaultWorkingDirectory)\build\check-tests.ps1' '$(System.DefaultWorkingDirectory)' '$(AzureToken)' '$(DxApiFeed)' '$(Build.BuildNumber)' '$(DxPipelineBuildId)'
           
 

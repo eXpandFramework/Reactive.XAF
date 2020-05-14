@@ -5,18 +5,25 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Text.RegularExpressions;
-using Xpand.Extensions.AppDomain;
 
 namespace Xpand.XAF.Modules.Reactive.Logger{
     public class ReactiveTraceListener : TextWriterTraceListener{
         private readonly string _applicationTitle;
+        
         readonly ISubject<ITraceEvent> _eventTraceSubject=Subject.Synchronize(new Subject<ITraceEvent>());
-        private static readonly FileStream Stream = new Lazy<FileStream>(() => {
-            var path = $@"{AppDomain.CurrentDomain.ApplicationPath()}\{AppDomain.CurrentDomain.SetupInformation.ApplicationName}_RXLogger.log";
-            return  File.Open(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
-        }).Value;
-        public ReactiveTraceListener(string applicationTitle) : base(Stream){
+        private static Lazy<FileStream> _stream = NewStream();
+
+        private static Lazy<FileStream> NewStream(){
+            return new Lazy<FileStream>(() => File.Open(ReactiveLoggerService.RXLoggerLogPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite));
+        }
+
+        public ReactiveTraceListener(string applicationTitle) : base(_stream.Value){
             _applicationTitle = applicationTitle;
+        }
+
+        protected override void Dispose(bool disposing){
+            _stream=NewStream();
+            base.Dispose(disposing);
         }
 
         public IObservable<ITraceEvent> EventTrace => _eventTraceSubject.ObserveOn(TaskPoolScheduler.Default);

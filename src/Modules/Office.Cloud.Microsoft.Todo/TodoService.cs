@@ -63,21 +63,21 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
             if (source.DateCompleted != DateTime.MinValue){
                 target.CompletedDateTime = new DateTimeTimeZone(){
                     DateTime = source.DateCompleted.ToString(CultureInfo.InvariantCulture),
-                    TimeZone = TimeZone.CurrentTimeZone.StandardName
+                    TimeZone = TimeZoneInfo.Local.Id
                 };
             }
 
             if (source.StartDate != DateTime.MinValue){
                 target.StartDateTime = new DateTimeTimeZone(){
                     DateTime = source.StartDate.ToString(CultureInfo.InvariantCulture),
-                    TimeZone = TimeZone.CurrentTimeZone.StandardName
+                    TimeZone = TimeZoneInfo.Local.Id
                 };
             }
 
             if (source.DueDate != DateTime.MinValue){
                 target.DueDateTime = new DateTimeTimeZone(){
                     DateTime = source.DueDate.ToString(CultureInfo.InvariantCulture),
-                    TimeZone = TimeZone.CurrentTimeZone.StandardName
+                    TimeZone = TimeZoneInfo.Local.Id
                 };
             }
             subject.OnNext((target, source));
@@ -94,9 +94,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
 
         internal static IObservable<TSource> TraceMicrosoftTodoModule<TSource>(this IObservable<TSource> source, string name = null,
             Action<string> traceAction = null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
-            [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0){
-            return source.Trace(name, MicrosoftTodoModule.TraceSource, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
-        }
+            [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0) => source
+            .Trace(name, MicrosoftTodoModule.TraceSource, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
 
         internal static IObservable<Unit> Connect(this XafApplication application){
             Client = application.AuthorizationRequired()
@@ -109,30 +108,25 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
                 .ToUnit();
         }
         
-
-        private static IObservable<OutlookTask> SynchronizeCloud(this IObservable<(Frame frame,GraphServiceClient client)> source){
-            return source.SelectMany(client => {
+        private static IObservable<OutlookTask> SynchronizeCloud(this IObservable<(Frame frame,GraphServiceClient client)> source) =>
+            source.SelectMany(client => {
                 var modelTodo = client.frame.Application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Microsoft().Todo();
                 return client.client.Me.Outlook.TaskFolders.GetFolder(modelTodo.DefaultTodoListName)
-                    .Select(folder => client.client.Me.Outlook.TaskFolders[folder.Id])
-                    .SynchronizeCloud(client.frame.View.ObjectSpace, client.frame.Application.CreateObjectSpace,
+                    .Select(folder => client.client.Me.Outlook.TaskFolders[folder.Id]).SynchronizeCloud(
+                        client.frame.View.ObjectSpace, client.frame.Application.CreateObjectSpace,
                         CustomizeDeleteSubject.OnNext, CustomizeInsertSubject.OnNext, CustomizeUpdateSubject.OnNext);
-            });
-        }
+            }).TraceMicrosoftTodoModule();
 
-        private static IObservable<Frame> AuthorizationRequired(this XafApplication application){
-            return application.WhenViewOnFrame()
-                .Where(frame => {
-                    var moduleOffice = application.Model.ToReactiveModule<IModelReactiveModuleOffice>();
-                    return moduleOffice.Microsoft().Todo().ObjectViews().Select(dependency => dependency.Id())
-                        .Contains(frame.View.Model.Id);
-                })
-                .TraceMicrosoftTodoModule();
-        }
+        private static IObservable<Frame> AuthorizationRequired(this XafApplication application) => application
+            .WhenViewOnFrame()
+            .Where(frame => {
+                var moduleOffice = application.Model.ToReactiveModule<IModelReactiveModuleOffice>();
+                return moduleOffice.Microsoft().Todo().ObjectViews().Select(dependency => dependency.Id())
+                    .Contains(frame.View.Model.Id);
+            })
+            .TraceMicrosoftTodoModule();
 
-        static IObservable<(Frame frame, GraphServiceClient client)> Authorize(this  IObservable<Frame> whenViewOnFrame){
-            return whenViewOnFrame.SelectMany(frame => frame.Application.AuthorizeMS().Select(client => (frame, client)))
-                .TraceMicrosoftTodoModule();
-        }
+        static IObservable<(Frame frame, GraphServiceClient client)> Authorize(this  IObservable<Frame> whenViewOnFrame) => whenViewOnFrame
+            .SelectMany(frame => frame.Application.AuthorizeMS().Select(client => (frame, client))).TraceMicrosoftTodoModule();
     }
 }

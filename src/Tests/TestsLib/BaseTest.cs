@@ -5,12 +5,14 @@ using System.Linq;
 using System.Reflection;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Xpo;
+using JetBrains.Annotations;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using Xpand.Extensions.AppDomain;
 using Xpand.Extensions.Linq;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.XAF.Modules.Reactive;
+using Xpand.XAF.Modules.Reactive.Logger;
 using IDisposable = System.IDisposable;
 
 namespace Xpand.TestsLib{
@@ -57,18 +59,22 @@ namespace Xpand.TestsLib{
                 .Cast<object>().ToArray();
         }
 
+        [PublicAPI]
         protected static object[] ReactiveModules(){
             return AgnosticModules().Concat(WinModules()).Concat(WebModules()).OfType<ReactiveModuleBase>().Cast<object>().ToArray();
         }
-
+        
+        [PublicAPI]
         protected void WriteLine(bool value){
             TestContext.WriteLine(value);
         }
 
+        [PublicAPI]
         protected void WriteLine(char value){
             TestContext.WriteLine(value);
         }
 
+        [PublicAPI]
         protected void WriteLine(string value){
             WriteLine(value.ToCharArray());
         }
@@ -77,6 +83,7 @@ namespace Xpand.TestsLib{
             TestContext.WriteLine(value);
         }
 
+        [PublicAPI]
         protected void WriteLine(decimal value){
             TestContext.WriteLine(value);
         }
@@ -84,31 +91,22 @@ namespace Xpand.TestsLib{
         public static TextWriterTraceListener TextListener{ get; }
 
         public static TraceSource TraceSource{ get; }
+        
 
         public const string NotImplemented = "NotImplemented";
+
+        [SetUp]
+        public void Setup(){
+            ReactiveLoggerService.RXLoggerLogPath = Path.Combine(TestContext.CurrentContext.TestDirectory,
+                $"{TestContext.CurrentContext.Test.MethodName}_{TestContext.CurrentContext.Test.ID}_RXLogger{TestContext.CurrentContext.CurrentRepeatCount}.log");
+        }
 
         [TearDown]
         public void Dispose(){
             XpoTypesInfoHelper.Reset();
             XafTypesInfo.HardReset();
-//            GC.Collect();
             if (TestContext.CurrentContext.Result.Outcome.Status == TestStatus.Failed){
-//                var settingsPath = $"{AppDomain.CurrentDomain.ApplicationPath()}\\TestRun.Settings";
-//                while (!File.Exists(settingsPath)){
-//                    var parent = new DirectoryInfo($"{Path.GetDirectoryName(settingsPath)}").Parent;
-//                    if (parent == null){
-//                        settingsPath = null;
-//                        break;
-//                    }
-//                    settingsPath = $"{parent.FullName}\\TestRun.Settings";
-//                }
-//
-//                if (settingsPath != null){
-//                    var settings=Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(settingsPath);
-//                    var fileName = $"{settings.TestArtifactsDirectory}\\TestsRun.zip";
-//                    ZipFile.CreateFromDirectory(settings.TestArtifactsDirectory,fileName,CompressionLevel.NoCompression, false);
-//                    TestContext.AddTestAttachment(fileName);
-//                }    
+                TestContext.AddTestAttachment(ReactiveLoggerService.RXLoggerLogPath);
             }
         }
     }

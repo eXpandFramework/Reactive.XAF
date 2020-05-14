@@ -98,7 +98,8 @@ namespace Xpand.TestsLib{
             var moduleBases = new[]{
                 new SystemModule(),
                 application is WinApplication ? (ModuleBase) new SystemWindowsFormsModule() : new SystemAspNetModule()
-            }.Concat(modules);
+            }.Concat(modules.Concat(new []{new ReactiveLoggerModule()}));
+
             if (((ITestApplication) application).TransmitMessage){
                 if (Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()){
                     moduleBases = moduleBases.Add(new ReactiveLoggerHubModule());   

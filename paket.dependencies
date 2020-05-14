@@ -43,4 +43,3 @@ nuget Xpand.Patcher 2.0.12
 nuget Xpand.Collections 
 nuget Jetbrains.Annotations
 nuget Polly 7.2.0
-
