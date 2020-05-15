@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -11,11 +10,9 @@ using System.Text;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Security;
-using DevExpress.Persistent.Base.General;
 using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 using Microsoft.Graph;
 using Shouldly;
-using Xpand.Extensions.EventArg;
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Office.Cloud.Microsoft;
 using Xpand.Extensions.Reactive.Transform;
@@ -48,7 +45,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
             var requestBuilder = foldersRequestBuilder[taskFolder?.Id];
             if (taskFolderName != TasksPagingFolderName&&!keepTasks){
                 await requestBuilder.DeleteAllTasks();
-                (await requestBuilder.Tasks.ListAllItems()).Count().ShouldBe(0);
+                (await requestBuilder.Tasks.ListAllItems()).Length.ShouldBe(0);
             }
             
             return (requestBuilder,client.frame);
@@ -84,12 +81,6 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
             return xafApplication;
         }
 
-        public static IObservable<OutlookTask> SynchronizeCloud(this IOutlookTaskFolderRequestBuilder builder, IObjectSpace objectSpace, IObjectSpaceProvider objectSpaceProvider,
-            Action<GenericEventArgs<CloudOfficeObject>> delete=null,Action<(OutlookTask target, ITask source)> insert=null,Action<(OutlookTask target, ITask source)> update=null){
-            return builder.ReturnObservable().SynchronizeCloud(objectSpace, objectSpaceProvider.CreateObjectSpace,delete,insert,update);
-        }
-
-
         public static void AssertTask(this IObjectSpaceProvider objectSpaceProvider, Type cloudEntityType, Task task,
             string title, string notes, DateTime? due, string expectedStatus, string actualStatus, string taskId){
             title.ShouldBe(task.Subject);
@@ -99,9 +90,6 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
 
             using (var space = objectSpaceProvider.CreateObjectSpace()){
                 var cloudObjects = space.QueryCloudOfficeObject(cloudEntityType,task).ToArray();
-                if (cloudObjects.Length != 1){
-                    Debug.WriteLine("");
-                }
                 cloudObjects.Length.ShouldBe(1);
                 var cloudObject = cloudObjects.First();
                 cloudObject.LocalId.ShouldBe(task.Oid.ToString());

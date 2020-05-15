@@ -87,22 +87,22 @@ jobs:
         searchFolder: '$(System.DefaultWorkingDirectory)'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
-          **\*AutoCommit*Tests.dll
-          **\*CloneMemberValue*Tests.dll
-          **\*CloneModelView*Tests.dll
-          **\*Extensions*Tests.dll
-          **\*Grid*Tests.dll
-          **\*HideTool*Tests.dll
-          **\*Logger.Tests.dll
-          **\*MasterDet*Tests.dll
-          **\*ModelViewIn*Tests.dll
-          **\*OneView*Tests.dll
-          **\*Progre*Tests.dll
-          **\*Reactive.Tests.dll
-          **\*Refresh*Tests.dll
-          **\*Supp*Tests.dll
-          **\*View*Tests.dll
-          **\*Lookup*Tests.dll
+          # **\*AutoCommit*Tests.dll
+          # **\*CloneMemberValue*Tests.dll
+          # **\*CloneModelView*Tests.dll
+          # **\*Extensions*Tests.dll
+          # **\*Grid*Tests.dll
+          # **\*HideTool*Tests.dll
+          # **\*Logger.Tests.dll
+          # **\*MasterDet*Tests.dll
+          # **\*ModelViewIn*Tests.dll
+          # **\*OneView*Tests.dll
+          # **\*Progre*Tests.dll
+          # **\*Reactive.Tests.dll
+          # **\*Refresh*Tests.dll
+          # **\*Supp*Tests.dll
+          # **\*View*Tests.dll
+          # **\*Lookup*Tests.dll
           **\*Todo*Tests.dll
           # **\*Sequence*Tests.dll
           !**\*Hub*.dll

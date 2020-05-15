@@ -33,6 +33,7 @@ using Moq.Protected;
 using Xpand.Extensions.Linq;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.XAF.Model;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.Extensions.XAF.Xpo;
 using Xpand.XAF.Modules.Reactive;
@@ -146,9 +147,7 @@ namespace Xpand.TestsLib{
                     var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>()?.ReactiveLogger;
                     if (logger != null){
                         logger.TraceSources.Enabled = true;
-                        foreach (var traceSource in logger.TraceSources){
-                            traceSource.Level = SourceLevels.Verbose;
-                        }
+                        logger.TraceSources.First(module => module.Id()==typeof(TModule).Name).Level=SourceLevels.Verbose;
 
                         var port = ModulePorts.Where(pair => pair.Key == typeof(TModule).Name)
                             .Select(pair => pair.Value).FirstOrDefault();
