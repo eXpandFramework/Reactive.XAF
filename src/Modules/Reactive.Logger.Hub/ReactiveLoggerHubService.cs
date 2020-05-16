@@ -34,8 +34,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
             if (!(application is ILoggerHubClientApplication)){
                 TraceEventHub.Init();
             }
-            var startServer = application.StartServer().Retry(application).Publish().RefCount();
-            var client = Observable.Start(application.ConnectClient).Merge().Retry(application).Publish().RefCount();
+            var startServer = application.StartServer().Publish().RefCount();
+            var client = Observable.Start(application.ConnectClient).Merge().Publish().RefCount();
 
             application.CleanUpHubResources( startServer);
 
@@ -102,7 +102,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
         }
 
         private static IObservable<ITraceEventHub> ConnectClient(this XafApplication application){
-            return application is ILoggerHubClientApplication? Observable.Empty<ITraceEventHub>()
+            return !(application is ILoggerHubClientApplication)? Observable.Empty<ITraceEventHub>()
                 : application.WhenCompatibilityChecked().FirstAsync().SelectMany(_ => application.DetectServer().ConnectClient());
         }
 
@@ -162,7 +162,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
                 Ports = {serverPort}
             };
 
-//            server.Start();
+            server.Start();
             return server;
         }
 

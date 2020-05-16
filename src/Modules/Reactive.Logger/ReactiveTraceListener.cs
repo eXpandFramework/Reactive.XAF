@@ -26,7 +26,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             base.Dispose(disposing);
         }
 
-        public IObservable<ITraceEvent> EventTrace => _eventTraceSubject.ObserveOn(TaskPoolScheduler.Default);
+        public IObservable<ITraceEvent> EventTrace => _eventTraceSubject.ObserveOn(DefaultScheduler.Instance);
 
         public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string message){
             base.TraceEvent(eventCache, source, eventType, id, message);

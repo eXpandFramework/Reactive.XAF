@@ -7,6 +7,7 @@ using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Xpo;
+using DevExpress.ExpressApp.Xpo.Updating;
 using DevExpress.Persistent.BaseImpl;
 using NUnit.Framework;
 using Shouldly;
@@ -53,26 +54,27 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
             using (var clientWinApp = new ClientWinApp()){
                 
                 clientWinApp.AddModule<ReactiveLoggerHubModule>(typeof(RLH),typeof(BaseObject));
-                clientWinApp.Logon();
-                clientWinApp.CreateObjectSpace();
-
                 var connectClient = clientWinApp.WhenTraceOnNextEvent(nameof(ReactiveLoggerHubService.ConnectClient)).FirstAsync()
                     .SubscribeOn(Scheduler.Default)
                     .SubscribeReplay();
+                clientWinApp.Logon();
+                clientWinApp.CreateObjectSpace();
+
+                
                 using (var application = Platform.Win.NewApplication<ReactiveLoggerHubModule>()){
-                    application.AddModule<RXLoggerHubTestsModule>(nameof(Connect_Client), typeof(RLH),typeof(BaseObject));
+                    application.AddModule<ReactiveLoggerHubModule>(nameof(Connect_Client), typeof(RLH),typeof(BaseObject));
                     application.Logon();
                     application.CreateObjectSpace();
-                    await connectClient.FirstAsync();
+                    await connectClient.FirstAsync().Timeout(Timeout);
                 }
                 connectClient = clientWinApp.WhenTraceOnNextEvent(nameof(ReactiveLoggerHubService.ConnectClient)).FirstAsync()
                     .SubscribeReplay();
                 using (var application = Platform.Win.NewApplication<ReactiveLoggerHubModule>()){
-                    application.AddModule<RXLoggerHubTestsModule>($"{nameof(Connect_Client)}_2",typeof(RLH),typeof(BaseObject));
+                    application.AddModule<ReactiveLoggerHubModule>($"{nameof(Connect_Client)}_2",typeof(RLH),typeof(BaseObject));
                     application.Logon();
                     application.CreateObjectSpace();
 
-                    await connectClient.FirstAsync();
+                    await connectClient.FirstAsync().Timeout(Timeout);
                     connectClient.Test().ItemCount.ShouldBe(1);
                 }
             }
@@ -82,13 +84,15 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
         [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task Display_TraceEvent_On_New_Client(){
-            XpoTypesInfoHelper.GetXpoTypeInfoSource().XPDictionary.CollectClassInfos(GetType().Assembly);
+            var dictionary = XpoTypesInfoHelper.GetXpoTypeInfoSource().XPDictionary;
+            dictionary.CollectClassInfos(GetType().Assembly);
+            dictionary.CollectClassInfos(typeof(ModuleInfo).Assembly);
             using (var application = Platform.Win.NewApplication<ReactiveLoggerHubModule>()){
                 
                 var startServer = application.WhenTraceOnNextEvent(nameof(ReactiveLoggerHubService.StartServer))
                     .FirstAsync().SubscribeReplay().SubscribeOn(Scheduler.Default);
                 var connecting = TraceEventHub.Connecting.FirstAsync().SubscribeReplay();
-                application.AddModule<RXLoggerHubTestsModule>(nameof(Display_TraceEvent_On_New_Client),typeof(RLH));
+                application.AddModule<ReactiveLoggerHubModule>(nameof(Display_TraceEvent_On_New_Client),typeof(RLH));
                 application.Logon();
                 application.CreateObjectSpace();
                 
@@ -97,6 +101,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
                 using (var clientWinApp = new ClientWinApp()){
                     clientWinApp.EditorFactory=new EditorsFactory();
                     clientWinApp.AddModule<ReactiveLoggerHubModule>();
+                    clientWinApp.Model.BOModel.GetClass(typeof(TraceEvent)).DefaultListView.UseServerMode = false;
                     clientWinApp.Logon();
 
                     
@@ -135,6 +140,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
             using (var clientWinApp = new ClientWinApp()){
                 clientWinApp.EditorFactory=new EditorsFactory();
                 clientWinApp.AddModule<ReactiveLoggerHubModule>();
+                clientWinApp.Model.BOModel.GetClass(typeof(TraceEvent)).DefaultListView.UseServerMode = false;
                 clientWinApp.Logon();
                 var listView = clientWinApp.NewObjectView<ListView>(typeof(TraceEvent));
                 var viewWindow = clientWinApp.CreateWindow(TemplateContext.ApplicationWindow, new List<Controller>(),true );
@@ -145,7 +151,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
                         .FirstAsync().SubscribeReplay().SubscribeOn(Scheduler.Default);
                     var connecting = TraceEventHub.Connecting.FirstAsync().SubscribeReplay();
                     
-                    application.AddModule<RXLoggerHubTestsModule>(nameof(Display_TraceEvent_On_Running_Client),typeof(RLH));
+                    application.AddModule<ReactiveLoggerHubModule>(nameof(Display_TraceEvent_On_Running_Client),typeof(RLH));
                     application.Logon();
                     application.CreateObjectSpace();
 

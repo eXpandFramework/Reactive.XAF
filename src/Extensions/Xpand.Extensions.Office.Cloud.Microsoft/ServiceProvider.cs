@@ -24,6 +24,7 @@ namespace Xpand.Extensions.Office.Cloud.Microsoft{
                 .WithRedirectUri($"{settings.RedirectUrl}");
         }
         public static IUserRequestBuilder Me(this IBaseRequestBuilder builder) => builder.Client.Me();
+        [PublicAPI]
         public static IUserRequestBuilder Me(this IBaseRequest builder) => builder.Client.Me();
         public static IUserRequestBuilder Me(this IBaseClient client) => ((GraphServiceClient)client).Me;
 

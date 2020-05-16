@@ -43,9 +43,11 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
             }
         }
 
-        [Test][XpandTest()]
+        [Test]
+        // [XpandTest()]
         public override async Task Customize_Two_New_Tasks(){
             using (var application = Platform.Win.TodoModule(nameof(Customize_Two_New_Tasks)).Application){
+                application.CreateObjectSpace();
                 var builder = await application.InitializeService();
                 await builder.frame.View.ObjectSpace.Map_Two_New_Entity(space =>space.NewTask(TaskStatus.Completed), Timeout,
                     space => TodoService.Updated.Merge(TodoService.CustomizeInsert.Take(2)

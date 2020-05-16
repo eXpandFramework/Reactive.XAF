@@ -124,10 +124,13 @@ namespace Xpand.Extensions.Office.Cloud{
                     .To<TServiceObject>());
         }
 
-        public static IObservable<T> NewCloudObject<T>(this IObservable<T> source, Func<IObjectSpace> objectSpaceFactory, string localId) => source.SelectMany(@event => Observable.Using(objectSpaceFactory,
-      space => space.NewCloudObject(localId, (string)@event.GetPropertyValue("Id"), @event.GetType().ToCloudObjectType()).Select(unit => @event)));
+        public static IObservable<T> NewCloudObject<T>(this IObservable<T> source, Func<IObjectSpace> objectSpaceFactory, string localId) => source
+            .SelectMany(@event => Observable.Using(objectSpaceFactory, 
+                space => space.NewCloudObject(localId, (string)@event.GetPropertyValue("Id"), @event.GetType().ToCloudObjectType())
+                    .Select(unit => @event)));
         [PublicAPI]
-        public static IObservable<CloudOfficeObject> NewCloudObject(this IObjectSpace space, string localId, string cloudId, System.Type cloudObjectType) => space.NewCloudObject(localId, cloudId, cloudObjectType.ToCloudObjectType());
+        public static IObservable<CloudOfficeObject> NewCloudObject(this IObjectSpace space, string localId, string cloudId, System.Type cloudObjectType) => space
+            .NewCloudObject(localId, cloudId, cloudObjectType.ToCloudObjectType());
 
         public static IObservable<CloudOfficeObject> NewCloudObject(this IObjectSpace space, object localEntity, object cloudEntity){
             var localId = space.GetKeyValue(localEntity).ToString();

@@ -51,7 +51,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             ListenerEvents = listener.EventTrace.Publish().RefCount();
 
 
-            return application.BufferUntilCompatibilityChecked(ListenerEvents.Select(_ => _))
+            return application.BufferUntilCompatibilityChecked(ListenerEvents).Select(_ => _)
                 .SaveEvent(application)
                 .ToUnit()
                 .Merge(ListenerEvents.RefreshViewDataSource(application))

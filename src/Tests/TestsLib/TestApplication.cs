@@ -7,6 +7,7 @@ using System.Reactive.Subjects;
 using System.Windows.Forms;
 using DevExpress.ExpressApp.Web;
 using DevExpress.ExpressApp.Win;
+using JetBrains.Annotations;
 using Xpand.Extensions.AppDomain;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -24,8 +25,8 @@ namespace Xpand.TestsLib{
                     throw e.Exception;
                 }
             };
-//            TraceClientConnected = this.ClientConnect();
-//            TraceClientBroadcast = this.ClientBroadcast();
+            TraceClientConnected = this.ClientConnect();
+            TraceClientBroadcast = this.ClientBroadcast();
         }
 
         public bool TransmitMessage => _transmitMessage;
@@ -34,12 +35,13 @@ namespace Xpand.TestsLib{
 
 
         public IObservable<Unit> TraceClientConnected{ get; set; }
-        public Type SUTModule{ get; set; }
+        
+        public Type SUTModule{ get; }
 
         protected override void Dispose(bool disposing){
             if (_transmitMessage){
-//                TraceClientConnected.ToTaskWithoutConfigureAwait().GetAwaiter().GetResult();
-//                TraceClientBroadcast.ToTaskWithoutConfigureAwait().GetAwaiter().GetResult();
+                // TraceClientConnected.ToTaskWithoutConfigureAwait().GetAwaiter().GetResult();
+                // TraceClientBroadcast.ToTaskWithoutConfigureAwait().GetAwaiter().GetResult();
             }
 
             base.Dispose(disposing);
@@ -50,7 +52,7 @@ namespace Xpand.TestsLib{
         public TestWinApplication(){
         }
 
-        public IObservable<Form> ModelEditorForm => Observable.AsObservable(_modelEditorForm);
+        public IObservable<Form> ModelEditorForm => _modelEditorForm.AsObservable();
 
         protected override Form CreateModelEditorForm(){
             var modelEditorForm = base.CreateModelEditorForm();
@@ -92,8 +94,8 @@ namespace Xpand.TestsLib{
         public  TestWebApplication(Type sutModule, bool transmitMessage = true){
             _transmitMessage = transmitMessage;
             SUTModule = sutModule;
-//            TraceClientConnected = this.ClientConnect();
-//            TraceClientBroadcast = this.ClientBroadcast();
+            TraceClientConnected = this.ClientConnect();
+            TraceClientBroadcast = this.ClientBroadcast();
             TransmitMessage = transmitMessage;
         }
 
@@ -116,8 +118,10 @@ namespace Xpand.TestsLib{
 
         protected override bool IsSharedModel => false;
         public IObservable<Unit> TraceClientConnected{ get; set; }
+        [PublicAPI]
         public Type SUTModule{ get; set; }
     }
+    [PublicAPI]
 
     public interface ITestApplication{
         bool TransmitMessage{ get; }
@@ -133,7 +137,7 @@ namespace Xpand.TestsLib{
                     .SubscribeReplay()
                 : Unit.Default.ReturnObservable();
         }
-
+        [PublicAPI]
         public static IObservable<Unit> ClientConnect(this ITestApplication application){
             return Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()
                 ? TraceEventHub.Connecting.FirstAsync().SubscribeReplay()

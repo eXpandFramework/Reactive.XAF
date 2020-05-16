@@ -3,7 +3,7 @@
 [![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/HideToolBar.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+HideToolBar) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/HideToolBar.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+HideToolBar)
 # About 
 
-The `HIdeToolBar` package can be used to hide the Nested ListView toolbar. The module extends the model with the `IModelListView.HideToolBar` attribute. The implemented scenarios are described in the details section.
+The `HideToolBar` package uses the the `IModelListView.HideToolBar` attribute to hide the toolbar.
 
 ## Details
 The module satisfies the following conditions:

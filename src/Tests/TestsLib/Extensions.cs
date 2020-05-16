@@ -141,13 +141,19 @@ namespace Xpand.TestsLib{
 
         public static IObservable<IModelReactiveLogger> ConfigureModel<TModule>(this XafApplication application,
             bool transmitMessage = true) where TModule : ModuleBase{
-            return application.WhenModelChanged().FirstAsync()
+            return application.WhenModelChanged()
                 .Where(_ => application.Modules.Any(m => m is ReactiveLoggerModule))
                 .Select(_ => {
                     var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>()?.ReactiveLogger;
                     if (logger != null){
                         logger.TraceSources.Enabled = true;
-                        logger.TraceSources.First(module => module.Id()==typeof(TModule).Name).Level=SourceLevels.Verbose;
+                        var modelTraceSourcedModules = logger.TraceSources.Where(module => module.Id()!=typeof(TModule).Name);
+                        var traceSourcedModule = logger.TraceSources.First(module => module.Id()==typeof(TModule).Name);
+                        traceSourcedModule.Level=SourceLevels.Verbose;
+                        
+                        foreach (var modelTraceSourcedModule in modelTraceSourcedModules){
+                            modelTraceSourcedModule.Level=SourceLevels.Off;    
+                        }
 
                         var port = ModulePorts.Where(pair => pair.Key == typeof(TModule).Name)
                             .Select(pair => pair.Value).FirstOrDefault();

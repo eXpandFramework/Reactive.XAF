@@ -108,7 +108,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         public Guid Oid{ get; set; } 
 
         string _source;
-
+        [Size(255)]
         public string Source{
             get => _source;
             set => SetPropertyValue(nameof(Source), ref _source, value);
@@ -122,14 +122,14 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         }
 
         string _location;
-
+        [Size(255)]
         public string Location{
             get => _location;
             set => SetPropertyValue(nameof(Location), ref _location, value);
         }
 
         string _method;
-
+        [Size(255)]
         public string Method{
             get => _method;
             set => SetPropertyValue(nameof(Method), ref _method, value);
@@ -231,7 +231,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         }
 
         string _applicationTitle;
-
+        [Size(255)] 
         public string ApplicationTitle{
             get => _applicationTitle;
             set => SetPropertyValue(nameof(ApplicationTitle), ref _applicationTitle, value);

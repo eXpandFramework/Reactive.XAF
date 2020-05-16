@@ -118,16 +118,26 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
             var map = synchronize(objectSpace).SubscribeReplay();
             var localEntity1 = localEntityFactory(objectSpace);
             objectSpace.CommitChanges();
-            var localEntity2 = localEntityFactory(objectSpace);
+            var entity1 = localEntity1;
+            await map.FirstAsync().Select((cloudEntity, i) => {
+                    assert( entity1, cloudEntity);
+                    return Unit.Default;
+                })
+                .TakeUntil(objectSpace.WhenDisposed())
+                .Timeout(timeout);
+            
+            map = synchronize(objectSpace).SubscribeReplay();
+            localEntity1 = localEntityFactory(objectSpace);
             objectSpace.CommitChanges();
+            await map.FirstAsync().Select((cloudEntity, i) => {
+                    assert( localEntity1, cloudEntity);
+                    return Unit.Default;
+                })
+                .TakeUntil(objectSpace.WhenDisposed())
+                .Timeout(timeout);
+            
 
-            await map.Take(2).Select((cloudEntity, i) => {
-                var localEntity = i == 0 ? localEntity1 : localEntity2;
-                assert( localEntity, cloudEntity);
-                return Unit.Default;
-            })
-            .TakeUntil(objectSpace.WhenDisposed())
-            .Timeout(timeout);
+            
             
         }
 

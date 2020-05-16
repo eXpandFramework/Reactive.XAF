@@ -79,30 +79,12 @@ namespace Xpand.Extensions.Reactive.Utility{
             if (serilialization != null){
                 return serilialization;
             }
-//            if (serialization==null){
-//                if (v is IModelNode){
-//                    v = $"{objectType.Name} - {((ModelNode) v).Id}";
-//                }
-//            }
-//
-//            var attributes = objectType.Attributes();
-//            var defaultPropertyAttribute = attributes.OfType<XafDefaultPropertyAttribute>().FirstOrDefault();
-//            if (defaultPropertyAttribute != null){
-//                v = $"{objectType.Name} - {v.GetPropertyValue(defaultPropertyAttribute.Name)}";
-//            }
-//
-//            var xafDefaultPropertyAttribute = objectType.GetInterfaces().SelectMany(type => type.Attributes())
-//                .OfType<XafDefaultPropertyAttribute>().FirstOrDefault();
-//            if (xafDefaultPropertyAttribute != null){
-//                v = $"{objectType.Name} - {v.GetPropertyValue(xafDefaultPropertyAttribute.Name)}";
-//            }
-
             return v;
         }
 
         private static Action<string> TraceError(this Action<string> traceAction, TraceSource traceSource){
             var action = traceAction;
-            action = action ?? (s => {
+            action ??= (s => {
                 if (traceSource != null){
                     traceSource.TraceEvent(TraceEventType.Error, 0,s);
                 }
@@ -116,7 +98,7 @@ namespace Xpand.Extensions.Reactive.Utility{
         
         private static Action<string> TraceInformation(this Action<string> traceAction, TraceSource traceSource){
             var action = traceAction;
-            action = action ?? (s => {
+            action ??= (s => {
                 if (traceSource != null){
                     traceSource.TraceEvent(TraceEventType.Information, 0,s);
                 }
