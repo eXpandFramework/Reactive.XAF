@@ -112,25 +112,26 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
             }).Timeout(timeout);
             objectSpace.Dispose();
         }
-        public static async Task Map_Two_New_Entity<TCloudEntity,TLocalEntity>(this IObjectSpace objectSpace,Func<IObjectSpace,TLocalEntity> localEntityFactory,TimeSpan timeout,
-            Func<IObjectSpace, IObservable<TCloudEntity>> synchronize, Action<TLocalEntity,TCloudEntity> assert){
+        public static async Task Map_Two_New_Entity<TCloudEntity,TLocalEntity>(this IObjectSpace objectSpace,Func<IObjectSpace,int,TLocalEntity> localEntityFactory,TimeSpan timeout,
+            Func<IObjectSpace, IObservable<TCloudEntity>> synchronize, Action<TLocalEntity,TCloudEntity,int> assert){
             
-            var map = synchronize(objectSpace).SubscribeReplay();
-            var localEntity1 = localEntityFactory(objectSpace);
+            var map = synchronize(objectSpace).Take(2).SubscribeReplay();
+            var localEntity1 = localEntityFactory(objectSpace,0);
             objectSpace.CommitChanges();
-            var entity1 = localEntity1;
+            
             await map.FirstAsync().Select((cloudEntity, i) => {
-                    assert( entity1, cloudEntity);
+                    assert( localEntity1, cloudEntity,0);
                     return Unit.Default;
                 })
                 .TakeUntil(objectSpace.WhenDisposed())
                 .Timeout(timeout);
-            
-            map = synchronize(objectSpace).SubscribeReplay();
-            localEntity1 = localEntityFactory(objectSpace);
+
+            // map = synchronize(objectSpace).FirstAsync().SubscribeReplay();
+            var localEntity2 = localEntityFactory(objectSpace,1);
             objectSpace.CommitChanges();
-            await map.FirstAsync().Select((cloudEntity, i) => {
-                    assert( localEntity1, cloudEntity);
+
+            await map.LastAsync().Select((cloudEntity, i) => {
+                    assert( localEntity2, cloudEntity,1);
                     return Unit.Default;
                 })
                 .TakeUntil(objectSpace.WhenDisposed())

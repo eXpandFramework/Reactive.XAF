@@ -38,8 +38,5 @@
   <ItemGroup>
     <Compile Update="Module.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <!--    <PackageReference Include="JetBrains.Annotations" Version="2019.1.3" />-->
-  </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

@@ -60,8 +60,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
             return client;
         }
 
-        public static MicrosoftTodoModule TodoModule(this Platform platform,string title,params ModuleBase[] modules){
-            var application = NewApplication(platform, title, modules);
+        public static MicrosoftTodoModule TodoModule(this Platform platform,params ModuleBase[] modules){
+            var application = NewApplication(platform,  modules);
             var securityStrategyComplex = new SecurityStrategyComplex(typeof(PermissionPolicyUser),
                 typeof(PermissionPolicyRole), new AuthenticationStandard());
             application.Security = securityStrategyComplex;
@@ -74,16 +74,16 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
             return module.Application.Modules.OfType<MicrosoftTodoModule>().First();
         }
 
-        static XafApplication NewApplication(this Platform platform, string title, ModuleBase[] modules){
+        static XafApplication NewApplication(this Platform platform,  ModuleBase[] modules){
             var xafApplication = platform.NewApplication<MicrosoftTodoModule>();
-            xafApplication.Title = title;
             xafApplication.Modules.AddRange(modules);
             return xafApplication;
         }
 
         public static void AssertTask(this IObjectSpaceProvider objectSpaceProvider, Type cloudEntityType, Task task,
-            string title, string notes, DateTime? due, string expectedStatus, string actualStatus, string taskId){
-            title.ShouldBe(task.Subject);
+            string title, string notes, DateTime? due, string expectedStatus, string actualStatus, string taskId,
+            string localTaskSubject){
+            title.ShouldBe(localTaskSubject);
             notes.ShouldBe(task.Description);
             due.ShouldNotBeNull();
             actualStatus.ShouldBe(expectedStatus);
@@ -115,9 +115,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
                 return task;
             }
         }
-        public static Task NewTask(this IObjectSpace objectSpace, TaskStatus taskStatus) {
+        public static Task NewTask(this IObjectSpace objectSpace, TaskStatus taskStatus,int index=0) {
             var task = objectSpace.CreateObject<Task>();
-            task.Subject = "Subject";
+            task.Subject = $"Subject{index}";
             task.Description = "Description";
             task.StartDate=DateTime.Now.AddMinutes(1);
             task.DueDate=DateTime.Now.AddMinutes(2);
@@ -149,7 +149,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
             }).Buffer(count);
         }
         public static Guid NewMicrosoftAuthentication(this IObjectSpaceProvider objectSpaceProvider){
-            var type = typeof(TodoSynchronizationTests);
+            var type = typeof(TodoServiceTests);
             using (var manifestResourceStream = type.Assembly.GetManifestResourceStream(type, "AuthenticationData.json")){
                 var token = Encoding.UTF8.GetBytes(new StreamReader(manifestResourceStream ?? throw new InvalidOperationException()).ReadToEnd());
                 using (var objectSpace = objectSpaceProvider.CreateObjectSpace()){
