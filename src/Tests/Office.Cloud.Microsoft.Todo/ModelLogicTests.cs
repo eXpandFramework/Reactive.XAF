@@ -17,7 +17,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
     public class ModelLogicTests : BaseTest{
         // [Test][XpandTest()]
         public void User_lookup_lists_usertypes(){
-            using (var application = Platform.Web.TodoModule(nameof(User_lookup_lists_usertypes)).Application){
+            using (var application = Platform.Web.TodoModule().Application){
                 var officeModel = application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office;
 
                 var modelClasses = officeModel.Get_Users();
@@ -28,7 +28,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
         }
         // [Test][XpandTest()]
         public void TodoListNameMember_Lookup_lists_user_string_members(){
-            using (var application = Platform.Web.TodoModule(nameof(TodoListNameMember_Lookup_lists_user_string_members)).Application){
+            using (var application = Platform.Web.TodoModule().Application){
                 var modelOffice = application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office;
                 modelOffice.User = modelOffice.Application.BOModel.GetClass(typeof(PermissionPolicyUser));
                 var modelMicrosoft = modelOffice.Microsoft();
@@ -36,7 +36,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
                 var userMembers = modelOffice.User.AllMembers
                     .Where(info => info.MemberInfo.MemberType==typeof(string)).ToArray();
                 var modelMembers = modelMicrosoft.Todo().Get_TodoListNameMembers();
-                modelMembers.Count.ShouldBe(userMembers.Count());
+                modelMembers.Count.ShouldBe(userMembers.Length);
                 foreach (var userMember in userMembers){
                     modelMembers.Select(member => member.MemberInfo).ShouldContain(userMember.MemberInfo);    
                 }

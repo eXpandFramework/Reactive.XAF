@@ -17,9 +17,15 @@ namespace Xpand.Extensions.Reactive.Utility{
 
     public static partial class Utility{
         private static ConcurrentDictionary<System.Type, Func<object, string>> Serialization{ get; }
+        
 
+        public static Func<object, string> Serializer = o => o.ToString();
         static Utility(){
             Serialization=new ConcurrentDictionary<System.Type, Func<object,string>>();
+        }
+
+        public static bool AddTraceSerialization(System.Type type){
+            return Serialization.TryAdd(type, Serializer);
         }
 
         public static bool AddTraceSerialization<T>(Func<T,string> function){
@@ -33,8 +39,8 @@ namespace Xpand.Extensions.Reactive.Utility{
             [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "",
             [CallerLineNumber] int sourceLineNumber = 0){
-            
 
+            
             return Observable.Create<TSource>(observer => {
                 void Action(string m, object v, Action<string> ta){
                     if (traceSource?.Switch.Level == SourceLevels.Off){
@@ -43,15 +49,21 @@ namespace Xpand.Extensions.Reactive.Utility{
                     if (v!=null){
                         v = CalculateValue(v);
                     }
-                    ta($"{name}.{Path.GetFileNameWithoutExtension(sourceFilePath)}.{memberName}({sourceLineNumber}): {m}({v})".TrimStart('.'));
+
+                    var mName = memberName;
+                    if (m == "OnNext"){
+                        mName = $"{memberName} =>{GetSourceName<TSource>()}";
+                    }
+                    ta($"{name}.{Path.GetFileNameWithoutExtension(sourceFilePath)}.{mName}({sourceLineNumber}): {m}({v})".TrimStart('.'));
                 }
 
                 if (traceStrategy == ObservableTraceStrategy.All)
                     Action("Subscribe", "", traceAction.TraceInformation(traceSource));
                 var disposable = source.Subscribe(
                     v => {
-                        if (traceStrategy != ObservableTraceStrategy.None)
+                        if (traceStrategy != ObservableTraceStrategy.None){
                             Action("OnNext", v, traceAction.TraceInformation(traceSource));
+                        }
                         observer.OnNext(v);
                     },
                     e => {
@@ -69,6 +81,13 @@ namespace Xpand.Extensions.Reactive.Utility{
                     disposable.Dispose();
                 };
             });
+        }
+
+        private static string GetSourceName<TSource>(){
+            if (typeof(TSource).IsGenericType){
+                return string.Join(",", typeof(TSource).GetGenericArguments().Select(type => type.Name));
+            }
+            return typeof(TSource).Name;
         }
 
         private static object CalculateValue(object v){

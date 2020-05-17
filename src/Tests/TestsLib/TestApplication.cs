@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using DevExpress.ExpressApp.Web;
 using DevExpress.ExpressApp.Win;
 using JetBrains.Annotations;
+using NUnit.Framework;
 using Xpand.Extensions.AppDomain;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;

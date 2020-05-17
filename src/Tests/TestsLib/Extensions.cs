@@ -30,6 +30,7 @@ using DevExpress.XtraGrid;
 using JetBrains.Annotations;
 using Moq;
 using Moq.Protected;
+using NUnit.Framework;
 using Xpand.Extensions.Linq;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Utility;
@@ -219,6 +220,7 @@ namespace Xpand.TestsLib{
                     "if implemented make sure all tests pass with TestExplorer and live testing");
             }
 
+            application.Title = TestContext.CurrentContext.Test.FullName;
             application.ConnectionString =usePersistentStorage?
                 @$"Integrated Security=SSPI;Pooling=false;Data Source=(localdb)\mssqllocaldb;Initial Catalog={typeof(TModule).Name}":InMemoryDataStoreProvider.ConnectionString;
             application.DatabaseUpdateMode=DatabaseUpdateMode.UpdateDatabaseAlways;

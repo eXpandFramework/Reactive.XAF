@@ -13,8 +13,6 @@ using DevExpress.ExpressApp;
 using Grpc.Core;
 using MagicOnion.Client;
 using MagicOnion.Server;
-using MessagePack;
-using MessagePack.Resolvers;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.System.Net;
@@ -30,7 +28,6 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 
         internal static IObservable<Unit> Connect(this XafApplication application){
             
-            MessagePackSerializer.SetDefaultResolver(ContractlessStandardResolver.Instance);
             if (!(application is ILoggerHubClientApplication)){
                 TraceEventHub.Init();
             }

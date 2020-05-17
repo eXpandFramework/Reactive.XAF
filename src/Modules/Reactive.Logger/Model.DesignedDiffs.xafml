@@ -12,15 +12,49 @@
     </Class>
   </BOModel>
   <Views>
-    <DetailView Id="TraceEvent_DetailView" AllowEdit="False" />
-    <ListView Id="TraceEvent_ListView" IsFooterVisible="True" DataAccessMode="Server" ShowAutoFilterRow="True" TopReturnedObjects="5000">
+    <DetailView Id="TraceEvent_DetailView" AllowEdit="False">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="3.6503362151777137">
+            <LayoutGroup Id="TraceEvent" RelativeSize="100" ShowCaption="False">
+              <LayoutGroup Id="TraceEvent_col1" RelativeSize="49.886277482941622" Caption="TraceEvent_col1">
+                <LayoutItem Id="Action" Index="0" RelativeSize="100" ViewItem="Action" Removed="True" />
+                <LayoutItem Id="DateTime" ViewItem="DateTime" Index="0" RelativeSize="100" IsNewNode="True" />
+                <LayoutItem Id="Line" Index="0" RelativeSize="36.363636363636367" ViewItem="Line" Removed="True" />
+                <LayoutItem Id="Location" Index="0" RelativeSize="20" ViewItem="Location" Removed="True" />
+                <LayoutItem Id="Method" Index="0" RelativeSize="20" ViewItem="Method" Removed="True" />
+                <LayoutItem Id="TraceEventType" Index="0" RelativeSize="20" ViewItem="TraceEventType" Removed="True" />
+                <LayoutItem Id="Source" ViewItem="Source" Removed="True" />
+              </LayoutGroup>
+              <LayoutGroup Id="TraceEvent_col2" RelativeSize="50.113722517058378" Direction="Horizontal">
+                <LayoutItem Id="ProcessId" RelativeSize="49.924357034795761" Index="0" ViewItem="ProcessId" />
+                <LayoutItem Id="ThreadId" RelativeSize="50.075642965204239" Index="1" ViewItem="ThreadId" />
+                <LayoutItem Id="ApplicationTitle" RelativeSize="20" ViewItem="ApplicationTitle" Removed="True" />
+                <LayoutItem Id="Called" RelativeSize="23.529411764705884" ViewItem="Called" Removed="True" />
+                <LayoutItem Id="DateTime" RelativeSize="36.363636363636367" ViewItem="DateTime" Removed="True" />
+                <LayoutItem Id="Timestamp" RelativeSize="28.571428571428573" ViewItem="Timestamp" Removed="True" />
+              </LayoutGroup>
+            </LayoutGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="SizeableEditors" RelativeSize="96.349663784822283" Caption="SizeableEditors" TextAlignMode="AlignWithChildren">
+            <LayoutItem Id="Value" RelativeSize="100" ShowCaption="False" ViewItem="Value" />
+            <LayoutItem Id="CallStack" RelativeSize="49.398907103825138" Index="1" ViewItem="CallStack" Removed="True" />
+            <LayoutItem Id="LogicalOperationStack" RelativeSize="75.300546448087431" Index="1" ViewItem="LogicalOperationStack" Removed="True" />
+            <LayoutItem Id="Message" RelativeSize="24.808743169398905" ViewItem="Message" Removed="True" />
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <ListView Id="TraceEvent_ListView" IsFooterVisible="True" DataAccessMode="Server" ShowAutoFilterRow="True" TopReturnedObjects="5000" MasterDetailMode="ListViewAndDetailView">
       <Columns>
         <ColumnInfo Id="Action" Index="-1" Width="58" />
         <ColumnInfo Id="DateTime" Width="248" Index="-1" />
         <ColumnInfo Id="Line" Index="-1" />
         <ColumnInfo Id="Message" Width="840" Index="-1" />
         <ColumnInfo Id="ProcessId" Index="-1" />
+        <ColumnInfo Id="ThreadId" Index="-1" />
         <ColumnInfo Id="TraceEventType" Width="158" Index="-1" />
+        <ColumnInfo Id="Value" Index="-1" Width="46" />
         <ColumnInfo Id="Timestamp" Index="0" SortOrder="Descending" SortIndex="0" />
         <ColumnInfo Id="ApplicationTitle" Index="1" />
         <ColumnInfo Id="Source" Width="124" Index="2" />
@@ -32,9 +66,8 @@
         <ColumnInfo Id="Method" Index="4" />
         <ColumnInfo Id="RXAction" Index="5" />
         <ColumnInfo Id="Called" Index="6" Width="37" />
-        <ColumnInfo Id="ThreadId" Index="7" />
-        <ColumnInfo Id="Value" Index="8" Width="46" />
       </Columns>
+      <SplitLayout SplitterPosition="500" />
     </ListView>
   </Views>
 </Application>
