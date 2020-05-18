@@ -82,7 +82,7 @@ Invoke-Script{
     if ($Branch -eq "lab") {
         Write-HostFormatted "checking for New DevExpress Version ($CustomVersion) " -Section
         $filter = "DevExpress*"
-        # [version]$currentVersion = (Invoke-PaketShowInstalled -OnlyDirect | Where-Object { $_.id -like $filter } | Select-Object -First 1).Version
+        
         [version]$currentVersion = Get-VersionPart (Get-DevExpressVersion) Build
         $outputFolder = "$([System.IO.Path]::GetTempPath())\GetNugetpackage"
         $rxdllpath=Get-ChildItem ((get-item (Get-NugetPackage -Name Xpand.XAF.Modules.Reactive -Source (Get-PackageFeed -Xpand) -OutputFolder $outputFolder -ResultType NupkgFile )).DirectoryName) "Xpand.XAF.Modules.Reactive.dll" -Recurse|Select-Object -First 1
@@ -143,6 +143,8 @@ Invoke-Script{
     Move-Item "$stage\Bin\AllTestWin" "$stage\TestApplication" -Force 
     Remove-Item "$stage\bin\ReactiveLoggerClient" -Recurse -Force
     
+    Move-PaketSource 0 "C:\Program Files (x86)\DevExpress $(Get-VersionPart $DXVersion Minor)\Components\System\Components\Packages"
+
     "Web","Win"|ForEach-Object{
         Write-HostFormatted "Zipping DX $_" -ForegroundColor Magenta
         $webassemblies=((Get-ChildItem "$stage\TestApplication\AllTest$_" DevExpress*.dll -Recurse)+(Get-ChildItem ("$stage\TestApplication\Test$_","Application" -join "") DevExpress*.dll -Recurse))

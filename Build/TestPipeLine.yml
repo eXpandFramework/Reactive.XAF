@@ -68,18 +68,6 @@ jobs:
         buildType: 'current'
         artifactName: 'bin'
         targetPath: '$(Pipeline.Workspace)'
-    # - task: DownloadBuildArtifacts@0
-    #   displayName: Download Bin
-    #   inputs:
-    #     buildType: 'current'
-    #     downloadType: 'single'
-    #     artifactName: 'bin'
-    #     downloadPath: '$(System.DefaultWorkingDirectory)'
-    - task: PowerShell@2
-      inputs:
-        targetType: inline
-        script: |
-          $env:DOTNET_CLI_TELEMETRY_OPTOUT=1
     - task: VSTest@2
       displayName: 'Test Modules'
       continueOnError: true
@@ -104,7 +92,7 @@ jobs:
           **\*View*Tests.dll
           **\*Lookup*Tests.dll
           **\*Todo*Tests.dll
-          # **\*Sequence*Tests.dll
+          **\*Sequence*Tests.dll
 
           !**\*Hub*.dll
           !**\*TestAdapter.dll
@@ -126,13 +114,11 @@ jobs:
     - group: keys
   steps:
     - checkout: none
-    - task: DownloadBuildArtifacts@0
-      displayName: Download Bin
+    - task: DownloadPipelineArtifact@2
       inputs:
         buildType: 'current'
         artifactName: 'bin'
-        downloadType: single
-        downloadPath: '$(System.DefaultWorkingDirectory)'
+        targetPath: '$(Pipeline.Workspace)'
     - task: VSTest@2
       displayName: 'Tests'
       continueOnError: true

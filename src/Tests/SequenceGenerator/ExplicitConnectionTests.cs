@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using DevExpress.Xpo;
@@ -11,8 +12,9 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
     public class ExplicitConnectionTests:SequenceGeneratorTestsBaseTests{
         [XpandTest()]
         [Test()]
+        [SuppressMessage("ReSharper", "ObjectCreationAsStatement")]
         public void Throws_if_another_connection_exists_with_same_datalayer(){
-            using (var application = SequenceGeneratorModule(nameof(Throws_if_another_connection_exists_with_same_datalayer)).Application){
+            using (var application = SequenceGeneratorModule().Application){
                 using (var defaultDataLayer = NewSimpleDataLayer(application)){
                     var explicitUnitOfWork = new ExplicitUnitOfWork(defaultDataLayer);
                     var testObject = new TestObject(explicitUnitOfWork);
@@ -21,7 +23,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 
                     var explicitUnitOfWork1 = new ExplicitUnitOfWork(defaultDataLayer);
 
-                    // ReSharper disable once ObjectCreationAsStatement
+                    
                     new TestObject2(explicitUnitOfWork1);
 
                     Should.Throw<InvalidOperationException>(() => explicitUnitOfWork1.FlushChanges(), SequenceGeneratorService.ParallelTransactionExceptionMessage);
@@ -35,7 +37,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 
         [Test][Ignore("Passed in the past, maybe some side effect of xpo")]
         public void Locks_Only_Modified_Tables_When_Different_datalyer(){
-            using (var application = SequenceGeneratorModule(nameof(Locks_Only_Modified_Tables_When_Different_datalyer)).Application){
+            using (var application = SequenceGeneratorModule().Application){
                 var defaultDataLayer1 = NewSimpleDataLayer(application);
                 var explicitUnitOfWork = new ExplicitUnitOfWork(defaultDataLayer1);
                 var testObject = new TestObject(explicitUnitOfWork);
@@ -61,8 +63,9 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 
         [Test]
         [XpandTest()]
+        [SuppressMessage("ReSharper", "MethodHasAsyncOverload")]
         public async Task UnLocks_current_Record_When_Commit_Changes(){
-            using (var application = SequenceGeneratorModule(nameof(UnLocks_current_Record_When_Commit_Changes)).Application){
+            using (var application = SequenceGeneratorModule().Application){
                 var defaultDataLayer1 = await application.ObjectSpaceProvider.SequenceGeneratorDatalayer();
                 
                 var explicitUnitOfWork = new ExplicitUnitOfWork(defaultDataLayer1);

@@ -26,7 +26,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         [Test]
         [XpandTest()]
         public async Task Cache_datalayer(){
-            using (var application = SequenceGeneratorModule(nameof(Cache_datalayer)).Application){
+            using (var application = SequenceGeneratorModule().Application){
                 var datalayer = application.ObjectSpaceProvider.SequenceGeneratorDatalayer();
 
                 (await datalayer).ShouldBe(await datalayer);
@@ -35,7 +35,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 
         [Test][XpandTest()]
         public async Task Observe_ObjectSpace_Commiting_On_Sequence_Generator_Thread(){
-            using (var application = SequenceGeneratorModule(nameof(Observe_ObjectSpace_Commiting_On_Sequence_Generator_Thread)).Application){
+            using (var application = SequenceGeneratorModule().Application){
                 var eventLoopScheduler = new EventLoopScheduler(start => new Thread(start){IsBackground = true});
                 var commiting = application.WhenObjectSpaceCreated()
                     .SelectMany(space => space.WhenCommiting())
@@ -58,7 +58,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 
         [Test][XpandTest]
         public async Task Do_Not_Increase_Sequence_When_Updating_Objects(){
-            using (var application = SequenceGeneratorModule(nameof(Do_Not_Increase_Sequence_When_Updating_Objects)).Application){
+            using (var application = SequenceGeneratorModule().Application){
                 SetSequences(application);
                 var nextSequenceTest = SequenceGeneratorService.Sequence.OfType<TestObject>().Test();
             
@@ -76,13 +76,15 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
             }
         }
 
-        [Combinatorial][XpandTest]
-        public async Task Increase_Sequence_When_Saving_New_Objects([Values(2, 102, 1002)] int itemsCount, [Values(true, false)] bool parallel, [Values(1, 2)] int objectSpaceCount){
-            using (var application = SequenceGeneratorModule(nameof(Increase_Sequence_When_Saving_New_Objects)).Application){
+        [Combinatorial]
+        [XpandTest]
+        public async Task Increase_Sequence_When_Saving_New_Objects([Values(2, 102, 500)] int itemsCount, [Values(true, false)] bool parallel, [Values(1, 2)] int objectSpaceCount){
+            using (var application = SequenceGeneratorModule().Application){
                 SetSequences(application);
                 var nextSequenceTest = SequenceGeneratorService.Sequence.OfType<TestObject>().Test();
 
-                await TestObjects(application, parallel, itemsCount,objectSpaceCount);
+                await TestObjects(application, parallel, itemsCount, objectSpaceCount)
+                    .Timeout(TimeSpan.FromSeconds(60));
             
                 AssertNextSequences(application,itemsCount*objectSpaceCount, nextSequenceTest);
             }
@@ -90,7 +92,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 
         [Test][XpandTest]
         public void Increase_Sequence_When_saving_Nested_New_Objects(){
-            using (var application = SequenceGeneratorModule(nameof(Increase_Sequence_When_saving_Nested_New_Objects)).Application){
+            using (var application = SequenceGeneratorModule().Application){
                 SetSequences(application);
                 var nextSequenceTest = SequenceGeneratorService.Sequence.OfType<Child>().Test();
 
@@ -115,7 +117,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 
         [Test][XpandTest]
         public void Increase_Sequence_When_saving_Parent_Child_New_Objects(){
-            using (var application = SequenceGeneratorModule(nameof(Increase_Sequence_When_saving_Parent_Child_New_Objects)).Application){
+            using (var application = SequenceGeneratorModule().Application){
                 SetSequences(application);
                 var nextParentSequenceTest = SequenceGeneratorService.Sequence.OfType<ParentSequencial>().Test();
                 var nextChildSequenceTest = SequenceGeneratorService.Sequence.OfType<Child>().Test();
@@ -149,7 +151,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 
         [Test][XpandTest]
         public async Task Increase_Sequence_When_Saving_Different_Type_Objects(){
-            using (var application = SequenceGeneratorModule(nameof(Increase_Sequence_When_Saving_Different_Type_Objects)).Application){
+            using (var application = SequenceGeneratorModule().Application){
                 SetSequences(application);
                 var nextSequenceTest = SequenceGeneratorService.Sequence.OfType<ISequentialNumber>().SubscribeReplay();
                 
@@ -163,7 +165,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         
         [Test][XpandTest]
         public async Task Increase_Sequence_When_SequenceStorageKeyAttribute(){
-            using (var application = SequenceGeneratorModule(nameof(Increase_Sequence_When_SequenceStorageKeyAttribute)).Application){
+            using (var application = SequenceGeneratorModule().Application){
                 SetSequences(application);
                 var nextSequenceTest = SequenceGeneratorService.Sequence.OfType<CustomSquenceNameTestObject>().Test();
 
@@ -179,7 +181,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 
         [Test][XpandTest]
         public async Task Custom_Sequence_Type(){
-            using (var application = SequenceGeneratorModule(nameof(Custom_Sequence_Type)).Application){
+            using (var application = SequenceGeneratorModule().Application){
                 SetSequences(application);
                 var nextSequenceTest = SequenceGeneratorService.Sequence.OfType<ISequentialNumber>().Test();
 
@@ -196,7 +198,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         
         [Test][XpandTest]
         public void Invalid_Lenght_Sequence_Registration(){
-            using (var application = SequenceGeneratorModule(nameof(Invalid_Lenght_Sequence_Registration)).Application){
+            using (var application = SequenceGeneratorModule().Application){
                 SetSequences(application);
                 Should.Throw<NotSupportedException>(() => {
                     using (var objectSpace = application.CreateObjectSpace()){
@@ -208,7 +210,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 
         [Test][XpandTest]
         public void Not_Registered_Custom_Sequence_Type_Registration(){
-            using (var application = SequenceGeneratorModule(nameof(Not_Registered_Custom_Sequence_Type_Registration)).Application){
+            using (var application = SequenceGeneratorModule().Application){
                 SetSequences(application);
                 using (var objectSpace = application.CreateObjectSpace()){
                     objectSpace.Delete(objectSpace.GetObjectsQuery<SequenceStorage>().ToArray());
@@ -222,7 +224,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         
         [Test][XpandTest]
         public void Invalid_Custom_Sequence_Type_Member_Registration(){
-            using (var application = SequenceGeneratorModule(nameof(Invalid_Custom_Sequence_Type_Member_Registration)).Application){
+            using (var application = SequenceGeneratorModule().Application){
                 SetSequences(application);
                 using (var objectSpace = application.CreateObjectSpace()){
                     Should.Throw<MemberNotFoundException>(() =>
@@ -236,7 +238,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         
         [Test][XpandTest()]
         public void Update_Sequence_Type_Registration(){
-            using (var application = SequenceGeneratorModule(nameof(Update_Sequence_Type_Registration)).Application){
+            using (var application = SequenceGeneratorModule().Application){
                 SetSequences(application);
                 using (var objectSpace = application.CreateObjectSpace()){
                     objectSpace.SetSequence<TestObject3>(_ => _.SequentialNumber, typeof(TestObject));
@@ -249,11 +251,12 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         [Test]
         [XpandTest()]
         [SuppressMessage("ReSharper", "ObjectCreationAsStatement")]
+        [SuppressMessage("ReSharper", "MethodHasAsyncOverload")]
         public async Task Generate_Sequences_When_Locks_From_ExplicitUow(){
             
             using (var application = NewApplication()){
                 var simpleDataLayer = NewSimpleDataLayer(application);
-                SequenceGeneratorModule(nameof(Generate_Sequences_When_Locks_From_ExplicitUow),application);
+                SequenceGeneratorModule(application);
                 using (var objectSpace = application.CreateObjectSpace()){
                     objectSpace.SetSequence<TestObject>(o => o.SequentialNumber,10);
                 }
@@ -274,7 +277,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 
         [XpandTest()][Test]
         public async Task Custom_First_Sequence(){
-            using (var application = SequenceGeneratorModule(nameof(Custom_First_Sequence)).Application){
+            using (var application = SequenceGeneratorModule().Application){
                 using (var objectSpace = application.CreateObjectSpace()){
                     objectSpace.SetSequence<TestObject>(o => o.SequentialNumber,10);
                 }
@@ -309,7 +312,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
                 var securityStrategyComplex = new SecurityStrategyComplex(typeof(PermissionPolicyUser), typeof(PermissionPolicyRole), new AuthenticationStandard());
                 securityStrategyComplex.AnonymousAllowedTypes.Add(typeof(TestObject));
                 application.Security= securityStrategyComplex;
-                SequenceGeneratorModule(nameof(SecuredObjectSpaceProvider_Installed), application);
+                SequenceGeneratorModule( application);
                 SetSequences(application);
 
                 var testObserver = SequenceGeneratorService.Sequence.OfType<TestObject>().Test();

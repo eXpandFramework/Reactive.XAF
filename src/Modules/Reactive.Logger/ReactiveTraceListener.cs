@@ -9,9 +9,13 @@ using System.Text.RegularExpressions;
 namespace Xpand.XAF.Modules.Reactive.Logger{
     public class ReactiveTraceListener : TextWriterTraceListener{
         private readonly string _applicationTitle;
-        
+
+        static ReactiveTraceListener(){
+            Regex = new Regex(@"(?<Location>[^.]*)\.(?<Method>[^(]*)\((?<Ln>[\d]*)\): (?<Action>[^(]*)\((?<Value>.*)\)",RegexOptions.Singleline|RegexOptions.Compiled);
+        }
         readonly ISubject<ITraceEvent> _eventTraceSubject=Subject.Synchronize(new Subject<ITraceEvent>());
         private static Lazy<FileStream> _stream = NewStream();
+        private static readonly Regex Regex;
 
         private static Lazy<FileStream> NewStream(){
             return new Lazy<FileStream>(() => File.Open(ReactiveLoggerService.RXLoggerLogPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite));
@@ -42,11 +46,12 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                 TraceEventType = eventType,
                 ApplicationTitle = _applicationTitle,
             };
-            var regexObj = new Regex(@"(?<Location>[^.]*)\.(?<Method>[^(]*)\((?<Ln>[\d]*)\): (?<Action>[^(]*)\((?<Value>.*)\)",RegexOptions.Singleline);
-            traceEvent.Location = regexObj.Match(traceEvent.Message).Groups["Location"].Value;
-            traceEvent.Method = regexObj.Match(traceEvent.Message).Groups["Method"].Value;
-            traceEvent.Value = regexObj.Match(traceEvent.Message).Groups["Value"].Value;
-            traceEvent.Action = regexObj.Match(traceEvent.Message).Groups["Action"].Value;
+
+            var match = Regex.Match(traceEvent.Message);
+            traceEvent.Location = match.Groups["Location"].Value;
+            traceEvent.Method = match.Groups["Method"].Value;
+            traceEvent.Value = match.Groups["Value"].Value;
+            traceEvent.Action = match.Groups["Action"].Value;
             if (!string.IsNullOrEmpty(traceEvent.Action)){
                 if (Enum.TryParse(traceEvent.Action, out RXAction rxAction)){
                     traceEvent.RXAction = rxAction;
@@ -57,7 +62,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                 traceEvent.ResultType = traceEvent.Method.Substring(traceEvent.Method.IndexOf(">", StringComparison.Ordinal) + 1);
                 traceEvent.Method = traceEvent.Method.Substring(0, traceEvent.Method.IndexOf(" ", StringComparison.Ordinal));
             }
-            traceEvent.Line = Convert.ToInt32(regexObj.Match(traceEvent.Message).Groups["Ln"].Value);
+            traceEvent.Line = Convert.ToInt32(match.Groups["Ln"].Value);
             traceEvent.LogicalOperationStack = string.Join(Environment.NewLine, eventCache.LogicalOperationStack.ToArray());
             
             _eventTraceSubject.OnNext(traceEvent);

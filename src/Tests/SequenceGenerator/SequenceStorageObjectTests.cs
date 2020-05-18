@@ -17,7 +17,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
     public class SequenceStorageObjectTests:SequenceGeneratorTestsBaseTests{
         [Test][XpandTest()]
         public void SequenceStorageObjectType_Lookup_should_list_all_persistent_types(){
-            using (var application = SequenceGeneratorModule(nameof(SequenceStorageObjectType_Lookup_should_list_all_persistent_types)).Application){
+            using (var application = SequenceGeneratorModule().Application){
                 using (var objectSpace = application.CreateObjectSpace()){
                     var sequenceStorage = objectSpace.CreateObject<SequenceStorage>();
                     sequenceStorage.Types.Count.ShouldBeGreaterThan(0);
@@ -28,7 +28,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         
         [Test]
         public void SequenceStorage_Member_Lookup_should_list_all__long_ObjectType_types(){
-            using (var application = SequenceGeneratorModule(nameof(SequenceStorage_Member_Lookup_should_list_all__long_ObjectType_types)).Application){
+            using (var application = SequenceGeneratorModule().Application){
                 using (var objectSpace = application.CreateObjectSpace()){
                     var sequenceStorage = objectSpace.CreateObject<SequenceStorage>();
                     sequenceStorage.Type=new ObjectType(){Type = typeof(TestObject)};
@@ -42,7 +42,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         
         [Test]
         public void SequenceStorageCustomSequence_Lookup_should_list_all_sequence_base_types(){
-            using (var application = SequenceGeneratorModule(nameof(SequenceStorageCustomSequence_Lookup_should_list_all_sequence_base_types)).Application){
+            using (var application = SequenceGeneratorModule().Application){
                 SetSequences(application);
                 using (var objectSpace = application.CreateObjectSpace()){
                     var storage =(SequenceStorage) objectSpace.GetSequenceStorage(typeof(TestObject3));
@@ -56,7 +56,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         
         [Test]
         public void Create_New_SequenceStorage_From_DetailView(){
-            using (var application = SequenceGeneratorModule(nameof(Create_New_SequenceStorage_From_DetailView)).Application){
+            using (var application = SequenceGeneratorModule().Application){
                 SetSequences(application);
                 using (var window = application.CreateViewWindow()){
                     using (var objectSpace = application.CreateObjectSpace()){
@@ -70,7 +70,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         [TestCase(typeof(ExplicitUnitOfWork))]
         [TestCase(typeof(UnitOfWork))]
         public void SequenceStorage_UI_Properties_are_configured_on_load(Type uowType){
-            using (var application = SequenceGeneratorModule(nameof(SequenceStorage_UI_Properties_are_configured_on_load)).Application){
+            using (var application = SequenceGeneratorModule().Application){
                 SetSequences(application);
                 using (application.CreateObjectSpace()){
                     IDataLayer dataLayer = ((XPObjectSpaceProvider) application.ObjectSpaceProvider).DataLayer;
@@ -98,7 +98,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
             var testObserver = new TestTracing().WhenException().Test();
             Tracing.Initialize();
             using (var application=NewApplication(Platform.Web)){
-                SequenceGeneratorModule(nameof(Configure_SequencStorage_When_ObjectSpace_Commits), application);
+                SequenceGeneratorModule( application);
                 SetSequences(application);
                 var modelClass = application.Model.BOModel.GetClass(typeof(SequenceStorage));
                 var viewId = objectViewType == typeof(DetailView) ? modelClass.DefaultDetailView.Id : modelClass.DefaultListView.Id;

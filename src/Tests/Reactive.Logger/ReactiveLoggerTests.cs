@@ -76,15 +76,12 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             
             using (var application = LoggerModule().Application){
                 var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger;
-                logger.TraceSources.Count.ShouldBeGreaterThan(5);
+                logger.TraceSources.Count.ShouldBeGreaterThanOrEqualTo(TestsLib.Extensions.ModulePorts.Count-1);
                 var module = logger.TraceSources[nameof(ReactiveLoggerModule)];
                 module.ShouldNotBeNull();
                 
                 module.Level.ShouldBe(SourceLevels.Verbose);
 
-                module = logger.TraceSources.Last();
-                
-                module.Level.ShouldBe(SourceLevels.Verbose);
             }
         }
 
@@ -165,18 +162,14 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
         [Apartment(ApartmentState.STA)]
         public async Task Trace_Events_Before_CompatibityCheck(){
             using (var application = Platform.Win.NewApplication<ReactiveLoggerModule>()){
-                application.Title = nameof(Trace_Events_Before_CompatibityCheck);
-                var reactiveLoggerModule = new ReactiveLoggerModule();
-                var traceSetup = application.WhenTraceEvent(typeof(ReactiveModuleBase),RXAction.OnNext,nameof(ReactiveLoggerModule.SetupCompleted))
-                    .FirstAsync(_ => _.Value==nameof(ReactiveLoggerModule)).SubscribeReplay();
-                var setup = reactiveLoggerModule.SetupCompleted.FirstAsync().SubscribeReplay();
-                application.Modules.Add(reactiveLoggerModule);
-                application.AddModule<TestReactiveLoggerModule>();
+                
+                application.AddModule<ReactiveLoggerModule>();
+                var test = application.WhenTraceEvent().FirstAsync(_ => _.Value == "test").SubscribeReplay();
+                ReactiveLoggerModule.TraceSource.TraceMessage("test");
                 application.Logon();
                 application.CreateObjectSpace();
 
-                await setup;
-                await traceSetup.Timeout(Timeout);
+                await test.Timeout(Timeout);
             }
         }
 

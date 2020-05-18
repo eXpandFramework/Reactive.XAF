@@ -47,7 +47,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
 
         [DebuggerStepThrough][PublicAPI]
         public static void SetSequence(this IObjectSpace objectSpace, Type sequenceType, string sequenceMember, Type customSequence = null, long firstSequence = 0, Type sequenceStorageType = null){
-            objectSpace.SetSequence(sequenceType, sequenceMember,customSequence.FullName,firstSequence,sequenceStorageType);
+            objectSpace.SetSequence(sequenceType, sequenceMember,customSequence?.FullName,firstSequence,sequenceStorageType);
         }
 
         [DebuggerStepThrough]
@@ -195,7 +195,8 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
             return source.SelectMany(space => Observable.Defer(() => space.UnitOfWork().WhenObjectSaving().Select(session => session).Distinct()
                             .TakeUntil(space.UnitOfWork().WhenAfterCommitTransaction())).RepeatWhen(observable => observable.Where(o => space.UnitOfWork() != null)))
                 .SelectMany(session => session.GenerateSequences(dataLayer, sequenceStorageType))
-                .Do(SequenceSubject);
+                .Do(SequenceSubject)
+                .TraceSequenceGeneratorModule();
         }
 
         private static IObservable<object> GenerateSequences(this Session session,IDataLayer dataLayer, Type sequenceStorageType){
@@ -214,10 +215,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
                     return afterCommited.Merge(generateSequences, currentThreadScheduler)
                         .Merge(whenTransacationFailed,currentThreadScheduler);
                 })
-                .RetryWhen(exceptions => exceptions
-                    .RetryException()
-                    .Do(ExceptionsSubject.OnNext))
-                .TraceSequenceGeneratorModule();
+                .RetryWhen(exceptions => exceptions.RetryException().Do(ExceptionsSubject.OnNext));
         }
 
         private static IObservable<EventPattern<EventArgs>> WhenTransacationFailed(this Session session,
@@ -226,7 +224,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
                 .Merge(session.WhenFailedCommitTransaction(),scheduler)
                 .IgnoreElements()
                 .DisposeOnException(explicitUnitOfWork)
-                .Do(pattern => explicitUnitOfWork.Close()).FirstAsync();
+                .Do(_ => explicitUnitOfWork.Close()).FirstAsync();
         }
 
         private static IObservable<Exception> RetryException(this IObservable<Exception> source){

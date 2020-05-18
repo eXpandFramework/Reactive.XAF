@@ -16,9 +16,9 @@ using Xpand.XAF.Modules.SequenceGenerator.Tests.BO;
 
 namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
     public abstract class SequenceGeneratorTestsBaseTests:BaseTest{
-        protected  SequenceGeneratorModule SequenceGeneratorModule(string title, XafApplication application=null,Platform platform=Platform.Win){
+        protected  SequenceGeneratorModule SequenceGeneratorModule( XafApplication application=null,Platform platform=Platform.Win){
             application ??= NewApplication(platform);
-            return application.AddModule<SequenceGeneratorModule>(title,typeof(TestObject).Assembly.GetTypes().Where(type => typeof(IXPSimpleObject).IsAssignableFrom(type)).Concat(new []{typeof(CustomSequenceTypeName)}).ToArray());
+            return application.AddModule<SequenceGeneratorModule>(typeof(TestObject).Assembly.GetTypes().Where(type => typeof(IXPSimpleObject).IsAssignableFrom(type)).Concat(new []{typeof(CustomSequenceTypeName)}).ToArray());
         }
 
         protected XafApplication NewApplication(Platform platform=Platform.Win){

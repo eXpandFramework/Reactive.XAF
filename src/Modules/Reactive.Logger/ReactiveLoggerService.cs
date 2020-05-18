@@ -217,7 +217,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                 .ToArray();
             objectSpace.CommitChanges();
             
-            return traceEvents.ToObservable().Do(_ => SavedTraceEventSubject.OnNext(_));
+            return traceEvents.ToObservable(ImmediateScheduler.Instance).Do(_ => SavedTraceEventSubject.OnNext(_));
         }
 
     }

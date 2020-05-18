@@ -11,15 +11,22 @@ using Xpand.Extensions.Reactive.Transform;
 namespace Xpand.XAF.Modules.Reactive.Services.Actions{
     
     public static partial class ActionsService{
-        public static IObservable<(SimpleAction action, SimpleActionExecuteEventArgs e)> WhenExecute(this SimpleAction simpleAction){
+        public static IObservable<SimpleActionExecuteEventArgs> WhenExecute(this IObservable<SimpleAction> source){
+            return source.SelectMany(action => action.WhenExecute());
+        }
+
+        public static IObservable<SimpleActionExecuteEventArgs> WhenExecute(this SimpleAction simpleAction){
             return Observable.FromEventPattern<SimpleActionExecuteEventHandler, SimpleActionExecuteEventArgs>(
                     h => simpleAction.Execute += h, h => simpleAction.Execute -= h, ImmediateScheduler.Instance)
-                .TransformPattern<SimpleActionExecuteEventArgs, SimpleAction>();
+                .Select(pattern => pattern.EventArgs);
         }
-        public static IObservable<(SingleChoiceAction action, SingleChoiceActionExecuteEventArgs e)> WhenExecute(this SingleChoiceAction simpleAction){
+        public static IObservable<SingleChoiceActionExecuteEventArgs> WhenExecute(this SingleChoiceAction simpleAction){
             return Observable.FromEventPattern<SingleChoiceActionExecuteEventHandler, SingleChoiceActionExecuteEventArgs>(
                     h => simpleAction.Execute += h, h => simpleAction.Execute -= h, ImmediateScheduler.Instance)
-                .TransformPattern<SingleChoiceActionExecuteEventArgs, SingleChoiceAction>();
+                .Select(pattern => pattern.EventArgs);
+        }
+        public static IObservable<SingleChoiceActionExecuteEventArgs> WhenExecute(this IObservable<SingleChoiceAction> source){
+            return source.SelectMany(action => action.WhenExecute());
         }
 
 

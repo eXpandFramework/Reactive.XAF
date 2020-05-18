@@ -221,7 +221,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         }
 
         long _timestamp;
-
+        [Indexed]
         public long Timestamp{
             get => _timestamp;
             set => SetPropertyValue(nameof(Timestamp), ref _timestamp, value);
