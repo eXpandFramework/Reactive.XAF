@@ -40,7 +40,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                 ThreadId = eventCache.ThreadId,
                 Timestamp = eventCache.Timestamp,
                 TraceEventType = eventType,
-                ApplicationTitle = _applicationTitle
+                ApplicationTitle = _applicationTitle,
             };
             var regexObj = new Regex(@"(?<Location>[^.]*)\.(?<Method>[^(]*)\((?<Ln>[\d]*)\): (?<Action>[^(]*)\((?<Value>.*)\)",RegexOptions.Singleline);
             traceEvent.Location = regexObj.Match(traceEvent.Message).Groups["Location"].Value;
@@ -52,7 +52,11 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                     traceEvent.RXAction = rxAction;
                 }
             }
-            
+
+            if (traceEvent.RXAction == RXAction.OnNext){
+                traceEvent.ResultType = traceEvent.Method.Substring(traceEvent.Method.IndexOf(">", StringComparison.Ordinal) + 1);
+                traceEvent.Method = traceEvent.Method.Substring(0, traceEvent.Method.IndexOf(" ", StringComparison.Ordinal));
+            }
             traceEvent.Line = Convert.ToInt32(regexObj.Match(traceEvent.Message).Groups["Ln"].Value);
             traceEvent.LogicalOperationStack = string.Join(Environment.NewLine, eventCache.LogicalOperationStack.ToArray());
             

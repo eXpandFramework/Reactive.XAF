@@ -32,8 +32,6 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             using (var application = Platform.Win.NewApplication<ReactiveLoggerModule>()){
                 application.AddModule<TestReactiveLoggerModule>();
 
-                application.Title = nameof(Update_traceEvent_calls);
-                
                 var objectSpace = application.CreateObjectSpace();
                 if (when=="DifferentLastEvent"){
                     objectSpace.CreateObject<TraceEvent>();
@@ -76,7 +74,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
         [XpandTest]
         public  void Populate_TracedSource_Modules_to_Model(){
             
-            using (var application = LoggerModule(nameof(Populate_TracedSource_Modules_to_Model)).Application){
+            using (var application = LoggerModule().Application){
                 var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger;
                 logger.TraceSources.Count.ShouldBeGreaterThan(5);
                 var module = logger.TraceSources[nameof(ReactiveLoggerModule)];
@@ -127,7 +125,6 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             using (var application = Platform.Win.NewApplication<ReactiveLoggerModule>(false)){
                 created?.Invoke(application);
                 application.AddModule<ReactiveLoggerModule>();
-                application.Title = nameof(Save_TraceEvent);
                 application.CreateObjectSpace();
                 var test = application.WhenTraceEvent().FirstAsync(_ => _.Value == "test").SubscribeReplay(Scheduler.Default);
                 ReactiveLoggerModule.TraceSource.TraceMessage("test");
@@ -147,8 +144,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
         [Apartment(ApartmentState.STA)]
         public async Task Refresh_TraceEvent_ListView_when_trace(){
             using (var application = Platform.Win.NewApplication<ReactiveLoggerModule>()){
-                application.AddModule<TestReactiveLoggerModule>();
-                application.Title = nameof(Refresh_TraceEvent_ListView_when_trace);
+                application.AddModule<ReactiveLoggerModule>();
                 application.Logon();
                 var listView = application.NewObjectView<ListView>(typeof(TraceEvent));
                 application.CreateViewWindow().SetView(listView);
@@ -157,7 +153,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
                 var test = application.WhenTraceEvent().FirstAsync(_ => _.Value == "test").SubscribeReplay();
                 ReactiveLoggerModule.TraceSource.TraceMessage("test");
 
-                await refresh;
+                await refresh.ToTaskWithoutConfigureAwait();
                 await test;
                 
                 
@@ -184,9 +180,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             }
         }
 
-        internal ReactiveLoggerModule LoggerModule(string title,params ModuleBase[] modules){
+        internal ReactiveLoggerModule LoggerModule(params ModuleBase[] modules){
             var xafApplication = Platform.Win.NewApplication<ReactiveLoggerModule>();
-            xafApplication.Title = title;
             xafApplication.Modules.AddRange(modules);
             var module = xafApplication.AddModule<ReactiveLoggerModule>(typeof(RL));
             xafApplication.Logon();

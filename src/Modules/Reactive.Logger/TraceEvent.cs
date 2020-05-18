@@ -27,7 +27,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         int ProcessId{ get; set; }
         string ThreadId{ get; set; }
         long Timestamp{ get; set; }
-        
+        string ResultType{ get; set; }    
         string ApplicationTitle{ get; set; }
         
     }
@@ -87,8 +87,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         public int ProcessId{ get; set; }
         public string ThreadId{ get; set; }
         public long Timestamp{ get; set; }
-        
-        
+        public string ResultType{ get; set; }
     }
 
     [NavigationItem("Settings")]
@@ -105,7 +104,14 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         }
 
         [VisibleInListView(false), VisibleInDetailView(false), VisibleInLookupListView(false), Key(true)][NonCloneable]
-        public Guid Oid{ get; set; } 
+        public Guid Oid{ get; set; }
+
+        string _resultType;
+        [Size(255)]
+        public string ResultType{
+            get => _resultType;
+            set => SetPropertyValue(nameof(ResultType), ref _resultType, value);
+        }
 
         string _source;
         [Size(255)]
