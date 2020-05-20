@@ -58,8 +58,117 @@ await newCustomer.CombineLatest(listView, (customer, view) => {
 And so on, the sky is the limit here as you can write custom operators just like a common c# extension method that extends and returns an `IObservable<T>`. All modules of this repository that have a dependency to the Reactive package are developed similar to the above example. Explore their docs, tests, source to find endless examples.
 
 ### Examples
-All Xpand.XAF.Modules that reference this package are developed the RX way.
+All Xpand.XAF.Modules that reference this package are developed the RX way. Following the functional RX paradigm all modules do not use controllers rather describe the problem by composing events. 
 
+Below we will add interesting examples. All methods can live in a static class.
+##### Working with actions
+1. First we register the action inside our module Setup method as registration needs an `ApplicationModulesManager`. The `RegisterViewSimpleAction` is an `Observable` which we need to `Subscribe` to it else it does nothing, same as IEnumerable does nothing if we do not enumerate. We pass the `this` argument to dispose subscription resources along with the module.
+    ```cs
+    public override void Setup(ApplicationModulesManager manager){
+        base.Setup(manager);
+        manager.RegisterViewSimpleAction(nameof(MyCustomAction)).Subscribe(this);
+    }
+    ```
+1. Previously we used the `nameof(MyCustomAction)` to provide an action id, so now we will implement it like below:
+    ```cs
+    public static SimpleAction MyCustomAction(this (MyCustomModule, Frame frame) tuple) => tuple
+        .frame.Action(nameof(MyCustomAction)).As<SimpleAction>();
+    ```
+    now our code consumers can use the next snippet at any place they have an Application dependency (Controller, Module, XafApplication, Program.cs, Global.asax.cs etc.):
+    ```cs
+    Application.WhenViewOnFrame(typeof(MyBO), ViewType.ListView, Nesting.Nested)
+        .SelectMany(frame => frame.Action<MyCustomModule>().MyCustomAction().WhenExecute())
+        .ExecuteTheAction()
+        .Subscribe(this);
+    ```
+
+    For more examples consider the existing [tests](https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Tests/Reactive/RegisterActionTests.cs).
+3. Modify view artifacts (ViewItem, ListEditor, Bussiness object, Nested Views) by implementing the `ExecuteTheAction` from previous step.
+    ```cs
+    private static IObservable<Unit> ExecuteTheAction(this IObservable<SimpleActionExecuteEventArgs> source) 
+        => source.Do(e => {
+                //get hold of the action
+                var simpleAction = e.Action; 
+                //get the frame for the frame.GetController()
+                var frame = simpleAction.Controller.Frame;  
+                var detailView = simpleAction.View<DetailView>();
+                //get a propertyeditor
+                var boNamePropertyEditor = detailView.GetPropertyEditor<MyCustomBO>(bo =>bo.Name ); 
+                //get the listpropertyeditor
+                var listPropertyEditor = detailView.GetListPropertyEditor<MyCustomBO>(bo => bo.Childs);
+                //get the nestedlistView
+                var nestedListView = listPropertyEditor.Frame.View; 
+                
+                //implement any master-child view scenario as all dependencies are known
+            });
+
+    ```
+##### Working with Views
+1. Modifying View artifacts similar to what was demoed with working with Actions:
+    ```cs
+    public override void Setup(ApplicationModulesManager moduleManager){
+        base.Setup(moduleManager);
+        moduleManager.WhenApplication().WhenListViewCreated()
+            .When(typeof(MyCustomBo))
+            .ControlsCreated()
+            .Do(listview => {
+                //filter the listview
+                listview.CollectionSource.Criteria[""] = ...
+            })
+            .Subscribe(this);
+
+    }
+    ```
+2. Utilizing the `Frame` useful to get for example traditional XAF Controllers.
+    ```cs
+    public override void Setup(ApplicationModulesManager moduleManager){
+        base.Setup(moduleManager);
+        moduleManager.WhenApplication().WhenViewOnFrame(typeof(MyCustomBo),ViewType.ListView)
+            .Do(frame => {
+                //get a xaf build in controller
+                var listViewProcessCurrentObjectController = frame.GetController<ListViewProcessCurrentObjectController>();
+            })
+            .Subscribe(this);
+
+    }
+
+    ```
+3. Working on Master-detail scenario: In previous step we saw how to wait for a view on a frame. In a master-detail scenario we need to wait for two views on a frame and then using the ReactiveX [Zip operator](http://reactivex.io/documentation/operators/zip.html) to pair them together.
+    ```cs
+    public override void Setup(ApplicationModulesManager moduleManager){
+        base.Setup(moduleManager);
+        //every time a MyCustom DetailView created together wuth a MyCustomBoChildListView
+        moduleManager.WhenApplication().WhenViewOnFrame(typeof(MyCustomBo),ViewType.DetailView)
+            .Zip(moduleManager.WhenApplication().WhenViewOnFrame(typeof(MyCustomBoChild),ViewType.ListView),
+            //emit the created pair of frames
+                (masterFrame, nestedFrame) => {
+                    //set the parent object OrderCount to the count of child objects
+                    ((MyCustomBo) masterFrame.View.CurrentObject).OrderCount = nestedFrame.View.AsListView()
+                        .CollectionSource.Objects<MyCustomChildBo>().Count();
+                    //return void
+                    return Unit.Default;
+                })
+        
+            .Subscribe(this);
+
+    }
+
+    ```
+
+##### Working with NonPersistentObjects
+1. Populate a ListView at any context (Popup, Navigation, Root, Nested)
+    ```cs
+    public override void Setup(ApplicationModulesManager moduleManager){
+    base.Setup(moduleManager);
+    moduleManager.WhenApplication().WhenListViewCreating(typeof(NonPersistentObject))
+        .SelectMany(tuple => ((NonPersistentObjectSpace) tuple.args.ObjectSpace)
+            .WhenObjectsGetting().Do(_ => {
+                _.e.Objects = new BindingList<NonPersistentObject>();
+            })
+        )
+        .Subscribe(this);
+    }
+    ```
 ## Versioning
 The module is **not bound** to **DevExpress versioning**, which means you can use the latest version with your old DevExpress projects [Read more](https://github.com/eXpandFramework/XAF/tree/master/tools/Xpand.VersionConverter).
 
