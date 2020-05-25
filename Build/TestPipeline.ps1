@@ -21,6 +21,11 @@ if ($env:Build_DefinitionName){
     Expand-Archive -DestinationPath $sourcePath\bin\Tests\AllTestWin -Path $sourcePath\bin\Tests\DXWin.Zip -Force
     Expand-Archive -DestinationPath $sourcePath\bin\Tests\TestWinApplication -Path $sourcePath\bin\Tests\DXWin.Zip -Force
     Remove-Item $sourcePath\bin\Tests\DXWin.Zip
+    
+    
+    [version]$dxVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo(((Get-ChildItem $sourcePath\bin *DevExpress*.dll).FullName | Select-Object -First 1)).FileVersion
+    Write-Host "dxVersion=$dxVersion" 
+    Write-Verbose -Verbose "##vso[build.updatebuildnumber]$env:build_BuildNumber-$dxVersion"
     if (!$AzStorageLookup){
         return
     }

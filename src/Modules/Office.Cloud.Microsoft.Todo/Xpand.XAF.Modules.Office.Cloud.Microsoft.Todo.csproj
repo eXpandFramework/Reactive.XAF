@@ -19,12 +19,6 @@
     <DebugType>full</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="Model.xafml" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Model.xafml" />
-  </ItemGroup>
-  <ItemGroup>
     <Reference Include="Xpand.Extensions">
       <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
     </Reference>

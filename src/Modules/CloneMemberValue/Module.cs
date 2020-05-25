@@ -21,7 +21,7 @@ namespace Xpand.XAF.Modules.CloneMemberValue{
 
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
-            moduleManager.Connect(Application)
+            moduleManager.Connect()
                 .TakeUntilDisposed(this)
                 .Subscribe();
         }

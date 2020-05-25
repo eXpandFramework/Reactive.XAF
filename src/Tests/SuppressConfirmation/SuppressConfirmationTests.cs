@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.SystemModule;
 using NUnit.Framework;
@@ -44,7 +43,7 @@ namespace Xpand.XAF.Modules.SuppressConfirmation.Tests{
             using (var application = DefaultSuppressConfirmationModule(platform).Application){
                 var windows = application.WhenSuppressConfirmationWindows().Replay();
                 windows.Connect();
-                var modelDashboardView = application.Model.NewModelDashboardView(typeof(SC));
+                var modelDashboardView = application.Model.NewMasterDetailModelDashboardView(typeof(SC));
                 var dashboardView = application.CreateDashboardView(application.CreateObjectSpace(), modelDashboardView.Id, true);
                 dashboardView.MockCreateControls();
 

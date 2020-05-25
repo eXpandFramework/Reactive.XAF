@@ -1,16 +1,13 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Configuration;
-using System.Linq;
 using System.Net;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
-using System.Reflection;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Utils;
 using DevExpress.Persistent.Base;
-using Fasterflect;
 using Xpand.Extensions.Configuration;
 using Xpand.Extensions.Exception;
 using Xpand.Extensions.Reactive.Transform;
@@ -19,22 +16,6 @@ using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
 namespace Xpand.XAF.Modules.Reactive.Extensions{
     public static class CommonExtensions{
-        private static readonly object ErrorHandling;
-        private static readonly Type WebWindowType;
-
-        static CommonExtensions(){
-            DXWebAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(assembly => assembly.GetName().Name.StartsWith("DevExpress.ExpressApp.Web.v"));
-            var errorHandlingType = DXWebAssembly?.GetTypes().First(type => type.FullName=="DevExpress.ExpressApp.Web.ErrorHandling");
-            ErrorHandling = errorHandlingType?.GetProperty("Instance")?.GetValue(null);
-            
-            WebWindowType = DXWebAssembly?.GetTypes().First(type => type.FullName=="DevExpress.ExpressApp.Web.WebWindow");
-            
-        }
-
-        public static object CurrentRequestPage => WebWindowType?.GetProperty("CurrentRequestPage")?.GetValue(null);
-
-        public static Assembly DXWebAssembly{ get; }
-
         public static IDisposable Subscribe<T>(this IObservable<T> source, ModuleBase moduleBase){
             var takeUntil = source.TakeUntil(moduleBase.WhenDisposed());
             return moduleBase.Application!=null ? takeUntil.Subscribe(moduleBase.Application) : takeUntil.Subscribe();
@@ -50,11 +31,13 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
         }
 
         public static IObservable<T> Retry<T>(this IObservable<T> source, XafApplication application){
+            Guard.ArgumentNotNull(application,nameof(application));
             return source.RetryWhen(_ => _.Do(application.HandleException)
                 .SelectMany(e => application.GetPlatform()==Platform.Win?e.ReturnObservable():Observable.Empty<Exception>()));
         }
         
         public static IObservable<T> HandleErrors<T>(this IObservable<T> source, XafApplication application, CancelEventArgs args=null,Func<Exception, IObservable<T>> exceptionSelector=null){
+            Guard.ArgumentNotNull(application,nameof(application));
             exceptionSelector ??= (exception => Observable.Empty<T>());
             return source.Catch<T, Exception>(exception => {
                 if (args != null) args.Cancel = true;
@@ -63,15 +46,6 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
             });
         }
 
-        private static void HandleException(this XafApplication application, Exception exception){
-            if (application.GetPlatform() == Platform.Win){
-                application.CallMethod("HandleException", exception);
-            }
-            else{
-                ErrorHandling.CallMethod("SetPageError", exception);
-            }
-            Tracing.Tracer.LogError(exception);
-        }
 
         public static IObservable<T> Handle<T>(this Exception exception, Func<Exception, IObservable<T>> exceptionSelector = null) => exception is WarningException ? default(T).ReturnObservable() :
             exceptionSelector != null ? exceptionSelector(exception) : Observable.Throw<T>(exception);

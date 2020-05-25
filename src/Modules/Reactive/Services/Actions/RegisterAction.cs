@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -10,12 +9,11 @@ using System.Reflection;
 using System.Reflection.Emit;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
+using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
 using Fasterflect;
 using HarmonyLib;
 using JetBrains.Annotations;
-using Xpand.Extensions.Reactive.Transform;
-using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
 namespace Xpand.XAF.Modules.Reactive.Services.Actions{
     [PublicAPI]
@@ -23,13 +21,14 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static object Locker=new object();
         private static readonly Harmony Harmony;
         
-        static readonly ConcurrentDictionary<Type,(string id,Func<(Controller controller, string id), ActionBase> actionBase)> ControllerCtorState=new ConcurrentDictionary<Type, (string id, Func<(Controller controller, string id), ActionBase> actionBase)>();
+        static readonly ConcurrentDictionary<Type,(string id,Func<(Controller controller, string id), ActionBase> actionBase)> ControllerCtorState;
         static ActionsService(){
+	        ControllerCtorState = new ConcurrentDictionary<Type, (string id, Func<(Controller controller, string id), ActionBase> actionBase)>();
             Harmony = new Harmony(typeof(ActionsService).FullName);
             var dynamicAssembly = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("ActionsAssembly"),AssemblyBuilderAccess.Run);
             ActionsModule = dynamicAssembly.DefineDynamicModule("ActionsModule");
         }
-
+        
         private static ModuleBuilder ActionsModule{ get; }
 
         public static IObservable<TAction> RegisterMainWindowAction<TAction>(this ApplicationModulesManager applicationModulesManager, string id,
@@ -159,6 +158,14 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             lock (ActionsModule){
                 var type = ActionsModule.Assembly.GetType($"{id}{typeof(TController).Name}");
                 var controllerType = type ?? NewControllerType<TController>(id);
+                if (DesignerOnlyCalculator.IsRunFromDesigner){
+                    return Observable.Create<TAction>(observer => {
+                        var actionController = Controller.Create(controllerType);
+                        applicationModulesManager.ControllersManager.RegisterController(actionController);
+                        observer.OnNext(actionBase(((TController) actionController, id)));
+                        return actionController;
+                    });
+                }
                 if (type == null){
                     ControllerCtorState.TryAdd(controllerType, (id, _ => {
                         var action = actionBase(((TController) _.controller, _.id));
@@ -169,11 +176,6 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
                 }
                 var controller = (TController) Controller.Create(controllerType);
                 applicationModulesManager.ControllersManager.RegisterController(controller);
-                // return Observable.Create<TAction>(observer => {
-                //     TAction action = controller.Actions[id] as TAction;
-                //     observer.OnNext(action);
-                //     return Disposable.Empty;
-                // });
                 return _actionsSubject.Select(a => a).OfType<TAction>().Where(_ => _.Id == id);
             }
         }
@@ -190,8 +192,18 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 
         private static Type NewControllerType<T>(string id) where T:Controller{
             var parent = typeof(T);
+            if (parent == typeof(ViewController)){
+
+            }
             return ActionsModule.DefineType($"{id}{parent.Name}", TypeAttributes.Public, parent).CreateType();
         }
+        class RegisterActionViewController:ViewController{
+	        public RegisterActionViewController(Func<Controller,ActionBase> actionFactory){
+		        _actionsSubject.OnNext(actionFactory(this));
+	        }
+        }
+
     }
+
 
 }

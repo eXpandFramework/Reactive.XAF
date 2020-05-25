@@ -100,15 +100,15 @@ namespace Xpand.Extensions.Office.Cloud{
         public static IObservable<TServiceObject> MapEntities<TBO, TServiceObject>(this IObjectSpace objectSpace,
             Func<CloudOfficeObject, IObservable<TServiceObject>> delete, Func<TBO, IObservable<TServiceObject>> map){
             var deleteObjects = objectSpace.WhenDeletedObjects<TBO>(true)
-                .SelectMany(_ => {
-                    var deletedId = objectSpace.GetKeyValue(_).ToString();
-                    return objectSpace.QueryCloudOfficeObject(typeof(TServiceObject), _).Where(o => o.LocalId == deletedId).ToObservable();
-                })
+                .SelectMany(_ => _.objects.SelectMany(o => {
+	                var deletedId = _.objectSpace.GetKeyValue(o).ToString();
+	                return _.objectSpace.QueryCloudOfficeObject(typeof(TServiceObject), o).Where(officeObject => officeObject.LocalId == deletedId);
+                }))
                 .DeleteObjectSpaceLink()
                 .SelectMany(cloudOfficeObject => delete(cloudOfficeObject).Select(s => cloudOfficeObject))
                 .To((TServiceObject)typeof(TServiceObject).CreateInstance());
             var mapObjects = objectSpace.WhenModifiedObjects<TBO>(true, ObjectModification.NewOrUpdated)
-                .SelectMany(map);
+                .SelectMany(_ => _.objects).Cast<TBO>().SelectMany(map);
             return mapObjects.Merge(deleteObjects);
         }
         public static IObservable<TServiceObject> MapEntities<TBO, TServiceObject>(this IObjectSpace objectSpace,IObservable<TBO> deletedObjects,

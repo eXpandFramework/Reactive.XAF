@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -8,6 +9,7 @@ using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Security;
@@ -27,6 +29,7 @@ using DevExpress.Persistent.BaseImpl;
 using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 using DevExpress.Web;
 using DevExpress.XtraGrid;
+using Fasterflect;
 using JetBrains.Annotations;
 using Moq;
 using Moq.Protected;
@@ -34,6 +37,7 @@ using NUnit.Framework;
 using Xpand.Extensions.Linq;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.XAF.Action;
 using Xpand.Extensions.XAF.Model;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.Extensions.XAF.Xpo;
@@ -71,8 +75,34 @@ namespace Xpand.TestsLib{
             return await source.Timeout(timeout.Value);
         }
 
-        public static Mock<T> GetMock<T>(this T t) where T : class{
-            return Mock.Get(t);
+        public static Mock<T> GetMock<T>(this T t) where T : class => Mock.Get(t);
+
+        public static void OnSelectionChanged(this ListEditor editor){
+	        editor.CallMethod(nameof(OnSelectionChanged));
+        }
+
+        public static void OnSelectionChanged(this ObjectView objectView){
+	        objectView.CallMethod(nameof(OnSelectionChanged));
+        }
+
+        public static CompositeView NewView(this XafApplication application, IModelView modelView,Func<IObjectSpace,IList> selectedObjectsFactory){
+
+	        application.WhenListViewCreating().Where(_ => _.e.ViewID == modelView.Id).Do(_ => {
+		        var viewMock = new Mock<ListView>(() => new ListView((IModelListView) modelView, _.e.CollectionSource,_.application,_.e.IsRoot)){CallBase = true};
+		        viewMock.As<ISelectionContext>().SetupGet(context => context.SelectedObjects)
+			        .Returns(() => selectedObjectsFactory(viewMock.Object.ObjectSpace));
+		        _.e.View = viewMock.Object;
+	        }).FirstAsync().Subscribe();
+	        return application.NewView(modelView);
+        }
+
+        public static void DoExecute(this ActionBase action,Func<IObjectSpace,IList> selectedObjectsFactory){
+            var selectionContextMock = new Mock<ISelectionContext>();
+            selectionContextMock.SetupGet(context => context.SelectedObjects).Returns(() => selectedObjectsFactory(action.View().ObjectSpace));
+            action.SelectionContext = selectionContextMock.Object;
+            action.Active[ ActionBase.RequireSingleObjectContext] = true;
+            action.Active[ ActionBase.RequireMultipleObjectsContext] = true;
+            action.DoTheExecute();
         }
 
         public static void MockCreateControls(this DashboardView view){
@@ -138,6 +168,7 @@ namespace Xpand.TestsLib{
             {"LookupCascadeModule", 61474},
             {"SequenceGeneratorModule", 61475},
             {"MicrosoftTodoModule", 61476},
+            {"PositionInlistViewModule", 61478},
         };
 
         public static IObservable<IModelReactiveLogger> ConfigureModel<TModule>(this XafApplication application,
@@ -262,8 +293,13 @@ namespace Xpand.TestsLib{
                     =>new EditorsFactory().CreatePropertyEditorByType(editorType, modelViewItem, objectType, xafApplication, objectSpace));
         }
 
-        public static Mock<ListEditor> ListEditorMock(this XafApplication application){
-            var listEditorMock = new Mock<ListEditor>{CallBase = true};
+
+        public static Mock<ListEditor> ListEditorMock(this XafApplication application, IModelListView listView){
+	        return application.ListEditorMock<ListEditor>(listView);
+        }
+
+        public static Mock<TEditor> ListEditorMock<TEditor>(this XafApplication application ,IModelListView listView) where TEditor :  ListEditor{
+	        var listEditorMock = new Mock<TEditor>(listView){CallBase = true};
             listEditorMock.Setup(editor => editor.SupportsDataAccessMode(CollectionSourceDataAccessMode.Client)).Returns(true);
             listEditorMock.Setup(editor => editor.GetSelectedObjects()).Returns(new object[0]);
             listEditorMock.Protected().Setup<object>("CreateControlsCore")
@@ -271,24 +307,21 @@ namespace Xpand.TestsLib{
             return listEditorMock;
         }
 
-        public static void MockListEditor(this XafApplication application,
-            Func<IModelListView, XafApplication, CollectionSourceBase, ListEditor> listEditor = null){
-            listEditor ??= ((view, xafApplication, arg3) => {
-                var listEditorMock = ListEditorMock(application);
-                return listEditorMock.Object;
-            });
-            var editorsFactoryMock = application.EditorFactory.GetMock();
-            editorsFactoryMock.Setup(_ => _.CreateListEditor(It.IsAny<IModelListView>(), It.IsAny<XafApplication>(),
-                    It.IsAny<CollectionSourceBase>()))
-                .Returns(
-                    (IModelListView modelListView, XafApplication app, CollectionSourceBase collectionSourceBase) =>
+        public static void MockPlatformListEditor(this XafApplication application){
+           application.MockListEditor((view, xafApplication, collectionSource) => application is WinApplication
+	           ? (ListEditor) new GridListEditor(view) : new ASPxGridListEditor(view));
+        }
+
+        public static void MockListEditor(this XafApplication application, Func<IModelListView, XafApplication, CollectionSourceBase, ListEditor> listEditor = null){
+	        listEditor ??= ((view, xafApplication, arg3) => application.ListEditorMock(view).Object);
+           var editorsFactoryMock = application.EditorFactory.GetMock();
+           editorsFactoryMock.Setup(_ => _.CreateListEditor(It.IsAny<IModelListView>(), It.IsAny<XafApplication>(), It.IsAny<CollectionSourceBase>()))
+                .Returns((IModelListView modelListView, XafApplication app, CollectionSourceBase collectionSourceBase) =>
                         listEditor(modelListView, application, collectionSourceBase));
         }
 
-        public static ListEditor CreateListEditor(this XafApplication application, IModelListView modelListView,
-            CollectionSourceBase collectionSourceBase){
-            var listEditor = application is WinApplication
-                ? (ListEditor) new Mock<GridListEditor>(modelListView){CallBase = true}.Object
+        public static ListEditor CreateListEditor(this XafApplication application, IModelListView modelListView, CollectionSourceBase collectionSourceBase){
+            var listEditor = application is WinApplication ? (ListEditor) new Mock<GridListEditor>(modelListView){CallBase = true}.Object
                 : new Mock<ASPxGridListEditor>(modelListView){CallBase = true}.Object;
             ((IComplexListEditor) listEditor).Setup(collectionSourceBase, application);
             return listEditor;

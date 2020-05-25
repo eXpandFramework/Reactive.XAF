@@ -24,9 +24,8 @@ namespace Xpand.XAF.Modules.Reactive{
         static readonly Subject<Frame> FramesSubject=new Subject<Frame>();
         static readonly Subject<Window> PopupWindowsSubject=new Subject<Window>();
         static RxApp(){
-            Frames = FramesSubject.DistinctUntilChanged()
-                .Merge(PopupWindows).Publish();
-            ((IConnectableObservable<Frame>) Frames).Connect();
+            
+            
             var harmony = new Harmony(typeof(RxApp).Namespace);
             PatchXafApplication(harmony);
 
@@ -49,7 +48,7 @@ namespace Xpand.XAF.Modules.Reactive{
                 harmony.Patch(createWindow, finalizer: new HarmonyMethod(GetMethodInfo(nameof(CreateWindow))));    
             }
             
-
+            
             var createPopupWindow = xafApplicationMethods.First(info => info.Name == nameof(CreatePopupWindow)&&info.Parameters().Count==5);
             harmony.Patch(createPopupWindow, finalizer: new HarmonyMethod(GetMethodInfo(nameof(CreatePopupWindow))));
             
@@ -112,9 +111,10 @@ namespace Xpand.XAF.Modules.Reactive{
         internal static IObservable<ApplicationModulesManager> ApplicationModulesManager => ApplicationModulesManagerSubject.AsObservable();
 
         internal static IObservable<Window> PopupWindows => PopupWindowsSubject;
-        
-        internal static IObservable<Frame> Frames{ get; }
-        
+
+        internal static IObservable<Frame> Frames{ get; } = FramesSubject.DistinctUntilChanged()
+	        .Merge(PopupWindows);
+
     }
 
 }

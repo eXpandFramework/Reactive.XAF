@@ -16,19 +16,15 @@ using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
 namespace Xpand.XAF.Modules.ViewEditMode{
     public static class ViewEditModeService{
-        internal static IObservable<TSource> TraceViewEditModeModule<TSource>(this IObservable<TSource> source, string name = null,
-            Action<string> traceAction = null,
-            ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
-            [CallerMemberName] string memberName = "",
-            [CallerFilePath] string sourceFilePath = "",
-            [CallerLineNumber] int sourceLineNumber = 0){
-            return source.Trace(name, ViewEditModeModule.TraceSource, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
-        }
+        internal static IObservable<TSource> TraceViewEditModeModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
+            Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
+            [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) =>
+            source.Trace(name, ViewEditModeModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
 
-        internal static IObservable<Unit> Connect(this XafApplication application){
-            return application != null? application.WhenViewEditModeChanged().ToUnit()
-                    .Merge(application.HandleWebEditAction(), Scheduler.Immediate): Observable.Empty<Unit>();
-        }
+
+        internal static IObservable<Unit> Connect(this XafApplication application) =>
+            application != null? application.WhenViewEditModeChanged().ToUnit()
+                .Merge(application.HandleWebEditAction(), Scheduler.Immediate): Observable.Empty<Unit>();
 
         private static IObservable<Unit> HandleWebEditAction(this XafApplication application){
             var webModificationsController = application.WhenWindowCreated()
@@ -57,11 +53,12 @@ namespace Xpand.XAF.Modules.ViewEditMode{
                     ((IModelDetailViewViewEditMode) _.Controller.Frame.View.Model).LockViewEditMode = true;
                     return Unit.Default;
                 });
-            return unLockEdit.Merge(lockEdit).ToUnit().TraceViewEditModeModule().Retry(application);
+            return unLockEdit.Merge(lockEdit)
+                .TraceViewEditModeModule().ToUnit().Retry(application);
         }
 
-        public static IObservable<DetailView> WhenViewEditModeAssigned(this XafApplication application){
-            return application.WhenDetailViewCreated()
+        public static IObservable<DetailView> WhenViewEditModeAssigned(this XafApplication application) =>
+            application.WhenDetailViewCreated()
                 .Select(_ => {
                     var detailView = _.e.View;
                     var viewEditMode = ((IModelDetailViewViewEditMode) detailView.Model).ViewEditMode;
@@ -72,17 +69,15 @@ namespace Xpand.XAF.Modules.ViewEditMode{
 
                     return null;
                 }).WhenNotDefault()
-                .TraceViewEditModeModule();
-        }
+                .TraceViewEditModeModule(view => view.Id);
 
-        public static IObservable<DetailView> WhenViewEditModeChanged(this XafApplication application){
-            return application.WhenViewEditModeAssigned()
+        public static IObservable<DetailView> WhenViewEditModeChanged(this XafApplication application) =>
+            application.WhenViewEditModeAssigned()
                 .ViewEditModeChanging()
                 .Select(_ => {
                     _.e.Cancel = ((IModelDetailViewViewEditMode) _.detailView.Model).LockViewEditMode;
                     return _.detailView;
                 })
-                .TraceViewEditModeModule();
-        }
+                .TraceViewEditModeModule(view => view.Id);
     }
 }

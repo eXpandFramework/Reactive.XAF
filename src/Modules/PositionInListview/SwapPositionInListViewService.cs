@@ -64,7 +64,7 @@ namespace Xpand.XAF.Modules.PositionInListview{
             }
         }
 
-        private static IObservable<SimpleAction> Activate(this IObservable<SimpleAction> source) => source.WhenActionActivated()
+        private static IObservable<SimpleAction> Activate(this IObservable<SimpleAction> source) => source.WhenActivated()
             .Do(action => action.Active[nameof(PositionInListViewService)] = action.Application.Model.IsPositionInListView(action.View().Id))
             .WhenActive()
             .Select(action => action)

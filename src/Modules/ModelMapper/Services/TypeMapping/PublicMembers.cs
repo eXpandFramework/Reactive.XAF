@@ -200,7 +200,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             return configurations
                 .Do(_ => _typesToMap.OnNext(_))
                 .Select(_ => _.TypeToMap)
-                .TraceModelMapper();
+                .TraceModelMapper(type => type.FullName);
         }
 
         public static IObservable<Type> MapToModel(this IObservable<Type> types,Func<Type,IModelMapperConfiguration> configSelector=null){
@@ -226,7 +226,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         internal static IObservable<Type> ModelInterfaces(this IObservable<Type> source){
-            return source.Finally(Start).Select(_ => MappedTypes).Switch().Distinct().TraceModelMapper();
+            return source.Finally(Start).Select(_ => MappedTypes).Switch().Distinct().TraceModelMapper(type => type.FullName );
         }
 
         public static string ModelMapContainerName(this Type type, IModelMapperConfiguration configuration=null){

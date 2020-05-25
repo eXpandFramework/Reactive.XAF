@@ -64,6 +64,7 @@ $localPackages| ForEach-Object {
     }
 }
 if ($clearCache){
+    Install-Module -Name Az -AllowClobber -Scope CurrentUser  
     Connect-Az $AzApoPowerSHellScriptsSecret $AzPowerShellScriptsApplicationId $AzApoTenantId
     Get-AzWebApp -Name XpandNugetStats|Restart-AzWebApp
 }

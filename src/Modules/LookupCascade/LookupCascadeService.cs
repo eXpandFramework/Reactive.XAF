@@ -28,24 +28,20 @@ namespace Xpand.XAF.Modules.LookupCascade{
         internal const string PakoScriptResourceName = "Xpand.XAF.Modules.LookupCascade.pako.min.js";
         internal const string ASPxClientLookupPropertyEditorScriptResourceName = "Xpand.XAF.Modules.LookupCascade.ASPxLookupCascadePropertyEditor.js";
 
-        internal static IObservable<Unit> Connect(this LookupCascadeModule module){
-            var application = module.Application;
-            return application.RegisterClientScripts().Merge(application.StoreDataSource());
-        }
+        internal static IObservable<Unit> Connect(this LookupCascadeModule module) => module.Application.RegisterClientScripts().Merge(module.Application.StoreDataSource());
 
-        private static IObservable<Unit> StoreDataSource(this XafApplication application){
-            return application.WhenWeb().WhenCallBack(typeof(LookupCascadeService).FullName)
+        private static IObservable<Unit> StoreDataSource(this XafApplication application) =>
+            application.WhenWeb().WhenCallBack(typeof(LookupCascadeService).FullName)
                 .SelectMany(pattern => application.CreateClientDataSource())
                 .Do(_ => {
                     WebWindow.CurrentRequestWindow.RegisterStartupScript($"StoreDatasource_{_.viewId}",
                         $"StoreDatasource('{_.viewId}','{_.objects}','{_.storage}')");
                 })
-                .ToUnit()
-                .TraceLookupCascdeModule();
-        }
+                .TraceLookupCascdeModule()
+                .ToUnit();
 
-        private static IObservable<Unit> RegisterClientScripts(this XafApplication application){
-            return application.WhenWindowCreated().Cast<WebWindow>().CombineLatest(application.ReactiveModulesModel().LookupCascadeModel())
+        private static IObservable<Unit> RegisterClientScripts(this XafApplication application) =>
+            application.WhenWindowCreated().Cast<WebWindow>().CombineLatest(application.ReactiveModulesModel().LookupCascadeModel())
                 .Do(_ => {
                     var window = _.first;
                     var modelClientDatasource = _.second.ClientDatasource;
@@ -57,9 +53,8 @@ namespace Xpand.XAF.Modules.LookupCascade{
                     window.RegisterClientScriptResource(type,ASPxClientLookupPropertyEditorScriptResourceName);
                     RegisterPollyFills(window);
                 })
-                .ToUnit()
-                .TraceLookupCascdeModule();
-        }
+                .TraceLookupCascdeModule(_ =>$"{_.first.Context}, {_.second.Id()}" )
+                .ToUnit();
 
         private static void RegisterPollyFills(WebWindow window){
             var pollyFills = new[]{
@@ -119,11 +114,11 @@ namespace Xpand.XAF.Modules.LookupCascade{
             });
         }
         
-        internal static IObservable<TSource> TraceLookupCascdeModule<TSource>(this IObservable<TSource> source, string name = null,
-            Action<string> traceAction = null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
-            [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0){
-            return source.Trace(name, LookupCascadeModule.TraceSource, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
-        }
+        internal static IObservable<TSource> TraceLookupCascdeModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
+            Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
+            [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) =>
+            source.Trace(name, LookupCascadeModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
+
     }
     
 }

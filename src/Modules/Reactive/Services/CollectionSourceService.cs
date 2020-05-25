@@ -14,7 +14,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return Observable.FromEventPattern<EventHandler, EventArgs>(
                     h => collectionSourceBase.CollectionReloaded += h, h => collectionSourceBase.CollectionReloaded -= h,ImmediateScheduler.Instance)
                 .Select(_ => _.Sender).Cast<T>()
-                .TraceRX();
+                .TraceRX(c => c.ObjectTypeInfo.Type.FullName);
         }
 
         public static IObservable<T> WhenCollectionChanged<T>(this T collectionSourceBase) where T:CollectionSourceBase{

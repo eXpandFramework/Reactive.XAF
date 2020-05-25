@@ -68,23 +68,28 @@ namespace Xpand.XAF.Modules.PositionInListview{
                 .SelectMany(_ => _.e.ObjectSpace.WhenModifiedObjects(ObjectModification.New)
                 .Do(tuple => {
                     var modelPositionInListView = _.application.Model.ModelPositionInListView();
-                    foreach (var objects in tuple.objects.GroupBy(o => o.GetType())){
-                        var listViewItem = modelPositionInListView.ListViewItems.First(item => item.ListView.ModelClass.TypeInfo.Type==objects.Key);
-                        var modelClassItem = modelPositionInListView.ModelClassItems.FirstOrDefault(item => item.ModelClass.TypeInfo.Type==objects.Key&&item.ModelMember==listViewItem.PositionMember);
-                        var aggregate = Aggregate.Max;
-                        if (modelClassItem != null&&modelClassItem.NewObjectsStrategy==PositionInListViewNewObjectsStrategy.First){
-                            aggregate=Aggregate.Min;
-                        }
-                        var aggregateOperand = new AggregateOperand("", listViewItem.PositionMember.MemberInfo.Name, aggregate);
-                        var value = (int)(tuple.objectSpace.Evaluate(objects.Key, aggregateOperand, null) ?? 0) ;
-                        foreach (var o in objects){
-                            if (aggregate == Aggregate.Max){
-                                value++;    
+                    var listViewItems = modelPositionInListView.ListViewItems;
+                    if (listViewItems.Any()){
+                        foreach (var objects in tuple.objects.GroupBy(o => o.GetType())){
+                            var listViewItem = listViewItems.FirstOrDefault(item => item.ListView.ModelClass.TypeInfo.Type==objects.Key);
+                            if (listViewItem != null){
+	                            var modelClassItem = modelPositionInListView.ModelClassItems.FirstOrDefault(item => item.ModelClass.TypeInfo.Type==objects.Key&&item.ModelMember==listViewItem.PositionMember);
+	                            var aggregate = Aggregate.Max;
+	                            if (modelClassItem != null&&modelClassItem.NewObjectsStrategy==PositionInListViewNewObjectsStrategy.First){
+		                            aggregate=Aggregate.Min;
+	                            }
+	                            var aggregateOperand = new AggregateOperand("", listViewItem.PositionMember.MemberInfo.Name, aggregate);
+	                            var value = (int)(tuple.objectSpace.Evaluate(objects.Key, aggregateOperand, null) ?? 0) ;
+	                            foreach (var o in objects){
+		                            if (aggregate == Aggregate.Max){
+			                            value++;    
+		                            }
+		                            else{
+			                            value--;
+		                            }
+		                            listViewItem.PositionMember.MemberInfo.SetValue(o,value);
+	                            }
                             }
-                            else{
-                                value--;
-                            }
-                            listViewItem.PositionMember.MemberInfo.SetValue(o,value);
                         }
                     }
                 }))

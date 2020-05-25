@@ -9,6 +9,7 @@ namespace Xpand.XAF.Modules.PositionInListView.Tests{
         protected static PositionInListViewModule PositionInListViewModuleModule(params ModuleBase[] modules){
             var positionInListViewModule = Platform.Win.NewApplication<PositionInListViewModule>().AddModule<PositionInListViewModule>(typeof(PIL));
             var xafApplication = positionInListViewModule.Application;
+            xafApplication.MockPlatformListEditor();
             xafApplication.Modules.AddRange(modules);
             xafApplication.Logon();
             xafApplication.CreateObjectSpace();

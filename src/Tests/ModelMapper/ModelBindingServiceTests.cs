@@ -422,7 +422,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                         (ListEditor) Activator.CreateInstance(controlTypes.Last(), view);
                 }
                 else if (new[]{PredefinedMap.DashboardDesigner,PredefinedMap.SplitContainerControl}.Any(map => map == predefinedMap)){
-                    return application.ListEditorMock().Object;
+                    return application.ListEditorMock(view).Object;
                 }
                 else
                     listEditor = platform == Platform.Win

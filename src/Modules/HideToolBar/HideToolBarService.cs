@@ -14,17 +14,14 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.HideToolBar{
     public static class HideToolBarService{
-        internal static IObservable<TSource> TraceHideToolBarModule<TSource>(this IObservable<TSource> source, string name = null,
-            Action<string> traceAction = null,
-            ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
-            [CallerMemberName] string memberName = "",
-            [CallerFilePath] string sourceFilePath = "",
-            [CallerLineNumber] int sourceLineNumber = 0){
-            return source.Trace(name, HideToolBarModule.TraceSource, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
-        }
+        internal static IObservable<TSource> TraceHideToolBarModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
+            Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
+            [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) =>
+            source.Trace(name, HideToolBarModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
 
-        public static IObservable<Frame> HideToolBarNestedFrames(this XafApplication application){
-            return application
+
+        public static IObservable<Frame> HideToolBarNestedFrames(this XafApplication application) =>
+            application
                 .WhenNestedFrameCreated()
                 .Select(frame => frame)
                 .TemplateChanged()
@@ -38,22 +35,18 @@ namespace Xpand.XAF.Modules.HideToolBar{
 
                     return false;
                 })
-                .TraceHideToolBarModule()
+                .TraceHideToolBarModule(frame => $"{frame.ViewItem.View.Id}, {frame.View.Id}")
                 .Publish().RefCount();
-        }
 
-        internal static IObservable<Unit> Connect(this XafApplication application){
-            if (application != null){
-                return application.HideToolBarNestedFrames()
+        internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) =>
+            manager.WhenApplication()
+                .SelectMany(application =>  application.HideToolBarNestedFrames()
                     .HideToolBar()
-                    .Retry(application)
-                    .ToUnit();
-            }
-            return Observable.Empty<Unit>();
-        }
+                    .Retry(application))
+                .ToUnit();
 
-        public static IObservable<Frame> HideToolBar(this IObservable<Frame> source){
-            return source.Select(frame => {
+        public static IObservable<Frame> HideToolBar(this IObservable<Frame> source) =>
+            source.Select(frame => {
                 if (frame.Application.GetPlatform() == Platform.Win){
                     var toolbarVisibilityController = frame.Controllers.Cast<Controller>().FirstOrDefault(controller =>
                         controller.Name == "DevExpress.ExpressApp.Win.SystemModule.ToolbarVisibilityController");
@@ -66,8 +59,6 @@ namespace Xpand.XAF.Modules.HideToolBar{
                 var visibility = frame.Template as ISupportActionsToolbarVisibility;
                 visibility?.SetVisible(false);
                 return frame;
-            }).TraceHideToolBarModule();
-
-        }
+            }).TraceHideToolBarModule(frame => frame.View.Id);
     }
 }

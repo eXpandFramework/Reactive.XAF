@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using Fasterflect;
 using HarmonyLib;
 using Xpand.Extensions.Linq;
@@ -18,7 +19,8 @@ namespace Xpand.Extensions.XAF.XafApplication{
             }
         }
 
-        // ReSharper disable once InconsistentNaming
+        
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
         private static bool IsSecuredType(ref bool __result, System.Type type){
             if (_securedTypes.Contains(type)){
                 __result = false;

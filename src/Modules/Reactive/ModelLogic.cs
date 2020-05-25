@@ -18,6 +18,10 @@ namespace Xpand.XAF.Modules.Reactive{
     }
 
     public static class ReactiveModulesExtension{
+        public static IObservable<IModelReactiveModules> ReactiveModulesModel(this IObservable<XafApplication> source){
+            return source.SelectMany(application => application.ReactiveModulesModel());
+        }
+
         public static IObservable<IModelReactiveModules> ReactiveModulesModel(this XafApplication application){
             return application.ReactiveModule(() => {
                 var model =  application.Model as IModelApplicationReactiveModules;

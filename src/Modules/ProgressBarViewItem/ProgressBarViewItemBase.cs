@@ -9,6 +9,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using Fasterflect;
+using JetBrains.Annotations;
 using Xpand.Extensions.AppDomain;
 using Xpand.Extensions.String;
 using Xpand.Extensions.XAF.XafApplication;
@@ -57,6 +58,7 @@ namespace Xpand.XAF.Modules.ProgressBarViewItem{
             PollingInterval = 1000;
         }
 
+        [PublicAPI]
         public void ProcessAction(string parameter){
             var script = $"{parameter}.SetPosition('{Position}');";
             if (FinishOptions!=null) {
@@ -75,8 +77,9 @@ namespace Xpand.XAF.Modules.ProgressBarViewItem{
             }
         }
 
+        [PublicAPI]
         public virtual void Start(SynchronizationContext synchronizationContext=null){
-            synchronizationContext = synchronizationContext ?? SynchronizationContext.Current;
+            synchronizationContext ??= SynchronizationContext.Current;
             if (synchronizationContext == null){
                 throw new ArgumentNullException(nameof(synchronizationContext));
             }
@@ -125,6 +128,7 @@ console.log('p='+previous);
             }
         }
 
+        [PublicAPI]
         public int PollingInterval{ get; set; }
         string _handlerId; 
         private static MethodInvoker _asssignClientHanderSafe;
@@ -146,7 +150,7 @@ console.log('p='+previous);
                         _callBackManager = _application.MainWindow.Template.GetPropertyValue("CallbackManager");
                         _callBackManager.CallMethod("RegisterHandler", _handlerId, this);
                     })
-                    .TraceProgressBarViewItemModule()
+                    .TraceProgressBarViewItemModule(compositeView => compositeView.Id)
                     .Subscribe();
             }
             return instance;

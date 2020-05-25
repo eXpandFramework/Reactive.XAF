@@ -16,8 +16,9 @@ namespace Xpand.XAF.Modules.LookupCascade.Tests{
     public class DataSourceTests:LookupCascadeBaseTest{
         [XpandTest]
         [Test]
+        [Order(1)]
         public void First_record_is_the_listview_columns_captions(){
-            using (var application = ClientLookupCascadeModule(nameof(First_record_is_the_listview_columns_captions)).Application){
+            using (var application = ClientLookupCascadeModule().Application){
                 var lookupView = application.ReactiveModulesModel().LookupCascadeModel().Wait().ClientDatasource.LookupViews.AddNode<IModelClientDatasourceLookupView>();
                 var producLookupListView = application.FindModelClass(typeof(Product)).DefaultListView;
                 lookupView.LookupListView = producLookupListView;
@@ -33,9 +34,9 @@ namespace Xpand.XAF.Modules.LookupCascade.Tests{
             }
         }
         [XpandTest]
-        [Test]
+        [Test][Order(2)]
         public void Second_record_is_the_NA_record(){
-            using (var application = ClientLookupCascadeModule(nameof(First_record_is_the_listview_columns_captions)).Application){
+            using (var application = ClientLookupCascadeModule().Application){
                 var lookupView = application.ReactiveModulesModel().LookupCascadeModel().Wait().ClientDatasource.LookupViews.AddNode<IModelClientDatasourceLookupView>();
                 var producLookupListView = application.FindModelClass(typeof(Product)).DefaultListView;
                 lookupView.LookupListView = producLookupListView;
@@ -53,7 +54,7 @@ namespace Xpand.XAF.Modules.LookupCascade.Tests{
         [XpandTest]
         [Test]
         public void Third_record_is_the_values_of_all_visible_columns(){
-            using (var application = ClientLookupCascadeModule(nameof(First_record_is_the_listview_columns_captions)).Application){
+            using (var application = ClientLookupCascadeModule().Application){
                 var lookupView = application.ReactiveModulesModel().LookupCascadeModel().Wait().ClientDatasource.LookupViews.AddNode<IModelClientDatasourceLookupView>();
                 var accesporyLookupListView = application.FindModelClass(typeof(Accessory)).DefaultListView;
                 accesporyLookupListView.Columns[nameof(Accessory.Product)].Remove();
@@ -81,7 +82,7 @@ namespace Xpand.XAF.Modules.LookupCascade.Tests{
         [XpandTest]
         [Test]
         public void Each_Lookupview_has_a_different_datasource(){
-            using (var application = ClientLookupCascadeModule(nameof(First_record_is_the_listview_columns_captions)).Application){
+            using (var application = ClientLookupCascadeModule().Application){
                 var lookupView = application.ReactiveModulesModel().LookupCascadeModel().Wait().ClientDatasource.LookupViews.AddNode<IModelClientDatasourceLookupView>();
                 var productLookupListView = application.FindModelClass(typeof(Product)).DefaultListView;
                 lookupView.LookupListView = productLookupListView;

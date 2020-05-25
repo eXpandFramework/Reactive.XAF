@@ -1,4 +1,5 @@
-﻿using DevExpress.ExpressApp;
+﻿using System.Linq;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Utils;
 
@@ -32,7 +33,7 @@ namespace Xpand.Extensions.XAF.Action{
             var simpleAction = actionBase as SimpleAction;
             simpleAction?.DoExecute();
             var singleChoiceAction = actionBase as SingleChoiceAction;
-            singleChoiceAction?.DoExecute(singleChoiceAction.SelectedItem);
+            singleChoiceAction?.DoExecute(singleChoiceAction.SelectedItem??singleChoiceAction.Items.FirstOrDefault());
 
             var popupWindowShowAction = actionBase as PopupWindowShowAction;
             popupWindowShowAction?.DoExecute((Window)popupWindowShowAction.Controller.Frame);

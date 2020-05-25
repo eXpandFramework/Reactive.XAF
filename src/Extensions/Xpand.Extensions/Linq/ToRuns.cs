@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace Xpand.Extensions.Linq{
     public static partial class LinqExtensions{
-        public static IEnumerable<List<T>> ToRuns<T, TKey>(
-            this IEnumerable<T> source,
-            Func<T, TKey> keySelector){
+        public static IEnumerable<List<T>> ToRuns<T, TKey>(this IEnumerable<T> source, Func<T, TKey> keySelector){
             using (var enumerator = source.GetEnumerator()){
                 if (!enumerator.MoveNext())
                     yield break;

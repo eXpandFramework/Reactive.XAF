@@ -45,12 +45,11 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <ListView Id="TraceEvent_ListView" IsFooterVisible="True" DataAccessMode="Server" ShowAutoFilterRow="True" TopReturnedObjects="5000" MasterDetailMode="ListViewAndDetailView">
+    <ListView Id="TraceEvent_ListView" IsFooterVisible="True" DataAccessMode="Server" ShowAutoFilterRow="True" TopReturnedObjects="5000">
       <Columns>
         <ColumnInfo Id="Action" Index="-1" Width="58" />
         <ColumnInfo Id="DateTime" Width="248" Index="-1" />
         <ColumnInfo Id="Line" Index="-1" />
-        <ColumnInfo Id="Message" Width="840" Index="-1" />
         <ColumnInfo Id="ProcessId" Index="-1" />
         <ColumnInfo Id="ThreadId" Index="-1" />
         <ColumnInfo Id="TraceEventType" Width="158" Index="-1" />
@@ -65,9 +64,10 @@
         </ColumnInfo>
         <ColumnInfo Id="Method" Index="4" />
         <ColumnInfo Id="RXAction" Index="5" />
-        <ColumnInfo Id="Called" Index="6" Width="37" />
+        <ColumnInfo Id="ResultType" Index="6" />
+        <ColumnInfo Id="Message" Width="840" Index="7" />
+        <ColumnInfo Id="Called" Index="8" Width="37" />
       </Columns>
-      <SplitLayout SplitterPosition="500" />
     </ListView>
   </Views>
 </Application>

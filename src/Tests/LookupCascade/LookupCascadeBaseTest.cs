@@ -7,9 +7,8 @@ using Xpand.XAF.Modules.LookupCascade.Tests.BOModel;
 
 namespace Xpand.XAF.Modules.LookupCascade.Tests{
     public abstract class LookupCascadeBaseTest:BaseTest{
-        protected static LookupCascadeModule ClientLookupCascadeModule(string title,params ModuleBase[] modules){
+        protected static LookupCascadeModule ClientLookupCascadeModule(params ModuleBase[] modules){
             var xafApplication = Platform.Web.NewApplication<LookupCascadeModule>();
-            xafApplication.Title = title;
             xafApplication.Modules.AddRange(modules);
             var module = xafApplication.AddModule<LookupCascadeModule>(typeof(Product),typeof(Order),typeof(Accessory));
             xafApplication.Logon();

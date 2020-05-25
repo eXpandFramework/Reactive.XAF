@@ -17,6 +17,8 @@ using Shouldly;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.TestsLib.Attributes;
+using Xpand.XAF.Modules.Reactive;
+using Xpand.XAF.Modules.Reactive.Logger;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.SequenceGenerator.Tests.BO;
 
@@ -80,11 +82,12 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         [XpandTest]
         public async Task Increase_Sequence_When_Saving_New_Objects([Values(2, 102, 500)] int itemsCount, [Values(true, false)] bool parallel, [Values(1, 2)] int objectSpaceCount){
             using (var application = SequenceGeneratorModule().Application){
+                application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger.TraceSources.Enabled = false;
                 SetSequences(application);
                 var nextSequenceTest = SequenceGeneratorService.Sequence.OfType<TestObject>().Test();
 
                 await TestObjects(application, parallel, itemsCount, objectSpaceCount)
-                    .Timeout(TimeSpan.FromSeconds(60));
+                    .Timeout(TimeSpan.FromSeconds(100));
             
                 AssertNextSequences(application,itemsCount*objectSpaceCount, nextSequenceTest);
             }

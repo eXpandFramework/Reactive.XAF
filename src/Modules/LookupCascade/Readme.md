@@ -9,7 +9,7 @@ The `LookupCascade` module implements client side Cascading Filtering for Lookup
 
 ---
 
-**Credits:** to the Company that [sponsor](https://github.com/sponsors/apobekiaris) the initial implementation of this module.
+**Credits:** to the Company (wants anonymity) that [sponsor](https://github.com/sponsors/apobekiaris) the initial implementation of this module. 
 
 ---
 There are many solutions for implementing [Cascading Filtering for Lookup List Views](https://docs.devexpress.com/eXpressAppFramework/112681/task-based-help/filtering/how-to-implement-cascading-filtering-for-lookup-list-views#1). 
@@ -82,8 +82,9 @@ Limitations: The module stores the datasources to the [sessionStorage](https://d
 1. Live datasource synchronization instead of restarting the browser.
 2. Earlier datasource transmission e.g. on XafApplication.SetupCompleted event.
 3. Support for creating new objects.
+4. Any other need you may have.
 
-Let us know if you want us to implement them for you, or if you have other ideas and needs.
+Let us know if you want us to implement them for you.
 
 ---
 

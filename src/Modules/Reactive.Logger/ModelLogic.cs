@@ -73,6 +73,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             {"GridListEditorModule",Colors[Editors]},
             {"HideToolBarModule",Colors[View]},
             {"MasterDetailModule",Colors[View]},
+            {"PositionInListViewModule",Colors[View]},
             {"ModelMapperModule",Colors[Model]},
             {"ModelViewInheritanceModule",Colors[Model]},
             {"OneViewModule",Colors[View]},

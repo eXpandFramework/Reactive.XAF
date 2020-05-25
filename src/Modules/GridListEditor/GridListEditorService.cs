@@ -15,33 +15,30 @@ namespace Xpand.XAF.Modules.GridListEditor{
         internal static IObservable<Unit> Connect(this  XafApplication application){
             return application.RememberTopRow().Retry(application).ToUnit();
         }
+        internal static IObservable<TSource> TraceGridListEditor<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
+	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
+	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) =>
+	        source.Trace(name, GridListEditorModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
 
-        internal static IObservable<TSource> TraceGridListEditor<TSource>(this IObservable<TSource> source, string name = null, Action<string> traceAction = null,
-            ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,[CallerMemberName] string memberName = "",
-            [CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0){
-            return source.Trace(name,GridListEditorModule.TraceSource,traceAction,traceStrategy,memberName,sourceFilePath,sourceLineNumber);
-        }
 
-        public static IObservable<string> RememberTopRow(this XafApplication application){
-            var listViewFrame = application.WhenViewOnFrame(viewType:ViewType.ListView)
-                .SelectMany(frame => ModelRules(application, frame).To(frame));
-            return listViewFrame.Select(frame => frame.View).Cast<ListView>()
-                .SelectMany(view => {
-                    var gridListEditor = ((DevExpress.ExpressApp.Win.Editors.GridListEditor) view.Editor);
-                    var topRowIndex = gridListEditor.GridView.TopRowIndex;
-                    return view.CollectionSource.WhenCollectionReloaded()
-                        .Do(_ => {
-                            gridListEditor.GridView.TopRowIndex = topRowIndex;
-                        })
-                        .To($"TopRowIndex: {topRowIndex}, View: {view}");
-                })
-                .TraceGridListEditor();
-        }
+        public static IObservable<string> RememberTopRow(this XafApplication application) =>
+	        application.WhenViewOnFrame(viewType:ViewType.ListView)
+		        .SelectMany(frame => ModelRules(application, frame).To(frame))
+		        .Select(frame => frame.View).Cast<ListView>()
+		        .SelectMany(view => {
+			        var gridListEditor = ((DevExpress.ExpressApp.Win.Editors.GridListEditor) view.Editor);
+			        var topRowIndex = gridListEditor.GridView.TopRowIndex;
+			        return view.CollectionSource.WhenCollectionReloaded()
+				        .Do(_ => {
+					        gridListEditor.GridView.TopRowIndex = topRowIndex;
+				        })
+				        .To($"TopRowIndex: {topRowIndex}, View: {view}");
+		        })
+		        .TraceGridListEditor();
 
-        private static IObservable<IModelGridListEditorTopRow> ModelRules(XafApplication application, Frame frame){
-            return application.ReactiveModulesModel().GridListEditor().Rules().OfType<IModelGridListEditorTopRow>()
-                .Where(row =>row.ListView == frame.View.Model &&((ListView) frame.View).Editor is DevExpress.ExpressApp.Win.Editors.GridListEditor)
-                .TraceGridListEditor();
-        }
+        private static IObservable<IModelGridListEditorTopRow> ModelRules(XafApplication application, Frame frame) =>
+	        application.ReactiveModulesModel().GridListEditor().Rules().OfType<IModelGridListEditorTopRow>()
+		        .Where(row =>row.ListView == frame.View.Model &&((ListView) frame.View).Editor is DevExpress.ExpressApp.Win.Editors.GridListEditor)
+		        .TraceGridListEditor(row => row.ListView.Id);
     }
 }

@@ -13,21 +13,15 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.RefreshView{
     public static class RefreshViewService{
-        internal static IObservable<TSource> TraceRefreshView<TSource>(this IObservable<TSource> source, string name = null,
-            Action<string> traceAction = null,ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
-            [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0){
+        internal static IObservable<TSource> TraceRefreshView<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
+            Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
+            [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) =>
+            source.Trace(name, RefreshViewModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
 
-            return source.Trace(name, RefreshViewModule.TraceSource, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
-        }
+        internal static IObservable<Unit> Connect(this  XafApplication application) => application.RefreshView().ToUnit();
 
-
-        internal static IObservable<Unit> Connect(this  XafApplication application){
-            return RefreshView(application)
-                .ToUnit();
-        }
-
-        private static IObservable<Unit> RefreshView(XafApplication application){
-            return application.WhenViewOnFrame().CombineLatest(application.ReactiveModulesModel().RefreshViewModel(),
+        private static IObservable<Unit> RefreshView(this XafApplication application) =>
+            application.WhenViewOnFrame().CombineLatest(application.ReactiveModulesModel().RefreshViewModel(),
                     (frame, model) => {
                         var synchronizationContext = SynchronizationContext.Current;
                         return model.Items
@@ -40,11 +34,10 @@ namespace Xpand.XAF.Modules.RefreshView{
                                     frame.View.RefreshDataSource();
                                     return frame.View;
                                 })
-                                );
+                            );
                     }).Merge()
-                .TraceRefreshView()
+                .TraceRefreshView(view => view.Id)
                 .ToUnit()
                 .Retry(application);
-        }
     }
 }

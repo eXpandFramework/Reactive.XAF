@@ -134,6 +134,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.Office.Clo
 		{EF33033B-F47B-43FF-B53C-FEA63EEA9021} = {EF33033B-F47B-43FF-B53C-FEA63EEA9021}
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.PositionInListview", "PositionInListview\Xpand.XAF.Modules.PositionInListview.csproj", "{255E47FF-6E55-4368-A90D-BD717AB51B7F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -279,6 +284,12 @@ Global
 		{4E350570-607E-4841-98D0-63FD3B19251B}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{4E350570-607E-4841-98D0-63FD3B19251B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4E350570-607E-4841-98D0-63FD3B19251B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{255E47FF-6E55-4368-A90D-BD717AB51B7F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{255E47FF-6E55-4368-A90D-BD717AB51B7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{255E47FF-6E55-4368-A90D-BD717AB51B7F}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{255E47FF-6E55-4368-A90D-BD717AB51B7F}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
+		{255E47FF-6E55-4368-A90D-BD717AB51B7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{255E47FF-6E55-4368-A90D-BD717AB51B7F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -308,6 +319,7 @@ Global
 		{DCF66753-EB48-4AD9-BCBA-82B2BBF581C1} = {C49DF3D6-B513-4C06-ACD6-4BA2E2FF02C8}
 		{EF33033B-F47B-43FF-B53C-FEA63EEA9021} = {C49DF3D6-B513-4C06-ACD6-4BA2E2FF02C8}
 		{4E350570-607E-4841-98D0-63FD3B19251B} = {C49DF3D6-B513-4C06-ACD6-4BA2E2FF02C8}
+		{255E47FF-6E55-4368-A90D-BD717AB51B7F} = {74E52C63-A831-49FB-B1C6-5BDDA7A5AEFE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ADFDF91F-E839-4378-9136-C917729594E2}

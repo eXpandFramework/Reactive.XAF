@@ -20,41 +20,38 @@ namespace Xpand.Extensions.Reactive.Utility{
         
 
         public static Func<object, string> Serializer = o => o.ToString();
-        static Utility(){
-            Serialization=new ConcurrentDictionary<System.Type, Func<object,string>>();
-        }
+        static Utility() => Serialization=new ConcurrentDictionary<System.Type, Func<object,string>>();
 
-        public static bool AddTraceSerialization(System.Type type){
-            return Serialization.TryAdd(type, Serializer);
-        }
+        public static bool AddTraceSerialization(System.Type type) => Serialization.TryAdd(type, Serializer);
 
-        public static bool AddTraceSerialization<T>(Func<T,string> function){
-            return Serialization.TryAdd(typeof(T), o => function((T) o));
-        }
+        public static bool AddTraceSerialization<T>(Func<T,string> function) => Serialization.TryAdd(typeof(T), o => function((T) o));
 
 
         public static IObservable<TSource> Trace<TSource>(this IObservable<TSource> source, string name = null,TraceSource traceSource=null,
-            Action<string> traceAction = null, 
+            Func<TSource,string> messageFactory=null,Func<System.Exception,string> errorMessageFactory=null, Action<string> traceAction = null, 
             ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
             [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "",
             [CallerLineNumber] int sourceLineNumber = 0){
 
-            
             return Observable.Create<TSource>(observer => {
                 void Action(string m, object v, Action<string> ta){
                     if (traceSource?.Switch.Level == SourceLevels.Off){
                         return;
                     }
+
+                    string value = null;
                     if (v!=null){
-                        v = CalculateValue(v);
+	                    value = $@"{CalculateValue(v, o => messageFactory.GetMessageValue( errorMessageFactory, o))}";
                     }
 
                     var mName = memberName;
                     if (m == "OnNext"){
                         mName = $"{memberName} =>{GetSourceName<TSource>()}";
                     }
-                    ta($"{name}.{Path.GetFileNameWithoutExtension(sourceFilePath)}.{mName}({sourceLineNumber}): {m}({v})".TrimStart('.'));
+
+                    var message = $"{name}.{Path.GetFileNameWithoutExtension(sourceFilePath)}.{mName}({sourceLineNumber}): {m}({value})".TrimStart('.');
+                    ta(message);
                 }
 
                 if (traceStrategy == ObservableTraceStrategy.All)
@@ -83,51 +80,48 @@ namespace Xpand.Extensions.Reactive.Utility{
             });
         }
 
-        private static string GetSourceName<TSource>(){
-            if (typeof(TSource).IsGenericType){
-                return string.Join(",", typeof(TSource).GetGenericArguments().Select(type => type.Name));
+        private static string GetMessageValue<TSource>(this Func<TSource, string> messageFactory, Func<System.Exception, string> errorMessageFactory, object o){
+            try{
+                return o switch{
+                    TSource t => (messageFactory?.Invoke(t) ?? o).ToString(),
+                    System.Exception e => (errorMessageFactory?.Invoke(e) ?? o).ToString(),
+                    _ => o.ToString()
+                };
             }
-            return typeof(TSource).Name;
-        }
-
-        private static object CalculateValue(object v){
-            var objectType = v.GetType();
-            var serilialization = objectType.FromHierarchy(_ => _.BaseType)
-                .Select(_ => Serialization.TryGetValue(_, out var func) ? func(v) : null)
-                .WhereNotDefault().FirstOrDefault();
-            if (serilialization != null){
-                return serilialization;
+            catch (System.Exception e){
+                return e.Message;
             }
-            return v;
         }
 
-        private static Action<string> TraceError(this Action<string> traceAction, TraceSource traceSource){
-            var action = traceAction;
-            action ??= (s => {
-                if (traceSource != null){
-                    traceSource.TraceEvent(TraceEventType.Error, 0,s);
-                }
-                else{
-                    System.Diagnostics.Trace.TraceError(s);
-                }
-            });
-            return action;
-        }
+        private static string GetSourceName<TSource>() => 
+	        typeof(TSource).IsGenericType ? string.Join(",", typeof(TSource).GetGenericArguments().Select(type => type.Name)) : typeof(TSource).Name;
 
-        
-        private static Action<string> TraceInformation(this Action<string> traceAction, TraceSource traceSource){
-            var action = traceAction;
-            action ??= (s => {
-                if (traceSource != null){
-                    traceSource.TraceEvent(TraceEventType.Information, 0,s);
-                }
-                else{
-                    System.Diagnostics.Trace.TraceInformation(s);
-                }
+        private static object CalculateValue(object v, Func<object, string> messageFactory) =>
+	        v.GetType().FromHierarchy(_ => _.BaseType)
+		        .Select(_ => Serialization.TryGetValue(_, out var func) ? func(v) : null)
+		        .WhereNotDefault().FirstOrDefault()?? (messageFactory != null ? messageFactory(v) : v);
 
-            });
-            return action;
-        }
+        private static Action<string> TraceError(this Action<string> traceAction, TraceSource traceSource) =>
+	        traceAction ?? (s => {
+		        if (traceSource != null){
+			        traceSource.TraceEvent(TraceEventType.Error, 0,s);
+		        }
+		        else{
+			        System.Diagnostics.Trace.TraceError(s);
+		        }
+	        });
+
+
+        private static Action<string> TraceInformation(this Action<string> traceAction, TraceSource traceSource) =>
+	        traceAction ?? (s => {
+		        if (traceSource != null){
+			        traceSource.TraceEvent(TraceEventType.Information, 0,s);
+		        }
+		        else{
+			        System.Diagnostics.Trace.TraceInformation(s);
+		        }
+
+	        });
     }
 
 }

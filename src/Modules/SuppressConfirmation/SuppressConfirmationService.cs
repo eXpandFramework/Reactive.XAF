@@ -11,14 +11,11 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.SuppressConfirmation{
     public static class SuppressConfirmationService{
-        internal static IObservable<TSource> TraceSuppressConfirmationModule<TSource>(this IObservable<TSource> source, string name = null,
-            Action<string> traceAction = null,
-            ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
-            [CallerMemberName] string memberName = "",
-            [CallerFilePath] string sourceFilePath = "",
-            [CallerLineNumber] int sourceLineNumber = 0){
-            return source.Trace(name, SuppressConfirmationModule.TraceSource, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
-        }
+        internal static IObservable<TSource> TraceSuppressConfirmationModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
+            Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
+            [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) =>
+            source.Trace(name, SuppressConfirmationModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
+
 
         public const ModificationsHandlingMode ModificationsHandlingMode = (ModificationsHandlingMode) (-1);
 
@@ -43,28 +40,29 @@ namespace Xpand.XAF.Modules.SuppressConfirmation{
             return Observable.Empty<Unit>();
         }
 
-        private static IObservable<Frame> DisableWebControllers(Frame window){
-            var strings = new[]{"ASPxGridListEditorConfirmUnsavedChangesController","WebConfirmUnsavedChangesDetailViewController"};
-            return window.Controllers.Cast<Controller>()
-                .Where(controller => strings.Any(name => controller.GetType().Name == name))
+        private static IObservable<Controller> DisableWebControllers(Frame window) =>
+            window.Controllers.Cast<Controller>()
+                .Where(controller => new[]{"ASPxGridListEditorConfirmUnsavedChangesController","WebConfirmUnsavedChangesDetailViewController"}
+                    .Any(name => controller.GetType().Name == name))
                 .Select(controller => {
                     controller.Active[SuppressConfirmationModule.CategoryName] = false;
-                    return window;
-                }).ToArray().ToObservable();
-        }
+                    return controller;
+                })
+                .ToArray().ToObservable()
+                .TraceSuppressConfirmationModule(controller => controller.Name);
 
         private static IObservable<Unit> ChangeModificationHandlingMode(this Frame window){
             window.GetController<ModificationsController>().ModificationsHandlingMode = ModificationsHandlingMode;
             return Observable.Empty<Unit>();
         }
 
-        public static IObservable<Frame> WhenSuppressConfirmationWindows(this XafApplication application){
-            return application.WhenWindowCreated().Cast<Frame>()
+        public static IObservable<Frame> WhenSuppressConfirmationWindows(this XafApplication application) =>
+            application.WhenWindowCreated().Cast<Frame>()
                 .Merge(application.WhenNestedFrameCreated().Cast<Frame>())
                 .WhenModule(typeof(SuppressConfirmationModule))
                 .ViewChanged().Where(_ => _.frame.View is ObjectView)
                 .Where(_ => ((IModelObjectViewSupressConfirmation) _.frame.View.Model).SupressConfirmation)
-                .Select(_ => _.frame);
-        }
+                .Select(_ => _.frame)
+                .TraceSuppressConfirmationModule(frame => frame.View.Id);
     }
 }

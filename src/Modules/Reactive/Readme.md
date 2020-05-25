@@ -83,7 +83,7 @@ Below we will add interesting examples. All methods can live in a static class.
     ```
 
     For more examples consider the existing [tests](https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Tests/Reactive/RegisterActionTests.cs).
-3. Modify view artifacts (ViewItem, ListEditor, Bussiness object, Nested Views) by implementing the `ExecuteTheAction` from previous step.
+3. Modify view artifacts (ViewItem, ListEditor, Business object, Nested Views) by implementing the `ExecuteTheAction` from previous step.
     ```cs
     private static IObservable<Unit> ExecuteTheAction(this IObservable<SimpleActionExecuteEventArgs> source) 
         => source.Do(e => {

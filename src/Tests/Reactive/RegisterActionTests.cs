@@ -27,7 +27,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
                     .SelectMany(manager => {
                         var registerViewSimpleAction = manager.RegisterViewSimpleAction($"{nameof(SimpleAction)}{viewType}",
                             Configure<SimpleAction>(viewType,nameof(Register_SimpleAction_For_All_Views))).Publish().RefCount();
-                        var selectMany = registerViewSimpleAction.SelectMany(action => action.WhenActionActivated().Select(simpleAction => simpleAction));
+                        var selectMany = registerViewSimpleAction.SelectMany(action => action.WhenActivated().Select(simpleAction => simpleAction));
                         return registerViewSimpleAction.Merge(selectMany);
                     })
                     .Test();

@@ -22,7 +22,7 @@ namespace Xpand.XAF.Modules.HideToolBar{
 
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
-            Application.Connect()
+            moduleManager.Connect()
                 .TakeUntilDisposed(this)
                 .Subscribe();
         }

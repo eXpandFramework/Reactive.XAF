@@ -12,21 +12,20 @@ namespace Xpand.XAF.Modules.Reactive{
         internal readonly ReplaySubject<ReactiveModuleBase> SetupCompletedSubject=new ReplaySubject<ReactiveModuleBase>(1);
         static readonly Subject<ApplicationModulesManager> SettingUpSubject=new Subject<ApplicationModulesManager>();
 
-        public static void Unload(params Type[] modules){
-            SettingUpSubject.Do(_ => {
-                    foreach (var module in _.Modules.Where(m => m.RequiredModuleTypes.Any(modules.Contains))){
-                        foreach (var type in modules){
-                            module.RequiredModuleTypes.Remove(type);
-                        }
-                    }
-                    foreach (var m in modules){
-                        var module = _.Modules.FindModule(m);
-                        _.Modules.Remove(module);
-                        module.Dispose();
-                    }
-                })
-                .FirstAsync().Subscribe();
-        }
+        public static void Unload(params Type[] modules) =>
+	        SettingUpSubject.Do(_ => {
+			        foreach (var module in _.Modules.Where(m => m.RequiredModuleTypes.Any(modules.Contains))){
+				        foreach (var type in modules){
+					        module.RequiredModuleTypes.Remove(type);
+				        }
+			        }
+			        foreach (var m in modules){
+				        var module = _.Modules.FindModule(m);
+				        _.Modules.Remove(module);
+				        module.Dispose();
+			        }
+		        })
+		        .FirstAsync().Subscribe();
 
         public IObservable<ReactiveModuleBase> SetupCompleted => Observable.Defer(() => SetupCompletedSubject.Select(module => module)).TraceRX();
 

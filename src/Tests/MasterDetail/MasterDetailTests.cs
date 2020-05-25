@@ -32,7 +32,7 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
         public void When_model_dashboardView_has_listview_detailview_for_the_same_type_is_masterdetail_enabled(string platformName){
             var platform = GetPlatform(platformName);
             using (var xafApplication = DefaultMasterDetailModule(platform).Application){
-                var modelDashboardView = xafApplication.Model.NewModelDashboardView(typeof(Md));
+                var modelDashboardView = xafApplication.Model.NewMasterDetailModelDashboardView(typeof(Md));
                 ((IModelDashboardViewMasterDetail) modelDashboardView).MasterDetail.ShouldBe(true);
             }
         }
@@ -44,7 +44,7 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
             using (var xafApplication = DefaultMasterDetailModule(platform).Application){
                 var masterDetailDashoardViewItems = xafApplication.WhenMasterDetailDashboardViewItems().Replay();
                 masterDetailDashoardViewItems.Connect();
-                var modelDashboardView = xafApplication.Model.NewModelDashboardView(typeof(Md));
+                var modelDashboardView = xafApplication.Model.NewMasterDetailModelDashboardView(typeof(Md));
 
                 var window = xafApplication.CreateWindow(TemplateContext.View, new List<Controller>(), true);
                 var dashboardView = xafApplication.CreateDashboardView(xafApplication.CreateObjectSpace(), modelDashboardView.Id, true);
@@ -63,7 +63,7 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
         public async Task Handle_listView_process_selected_object_action(string platformName){
             var platform = GetPlatform(platformName);
             using (var xafApplication = DefaultMasterDetailModule(platform).Application){
-                var modelDashboardView = xafApplication.Model.NewModelDashboardView(typeof(Md));
+                var modelDashboardView = xafApplication.Model.NewMasterDetailModelDashboardView(typeof(Md));
                 var masterDetailDashoardViewItems = xafApplication.WhenMasterDetailDashboardViewItems().Replay();
                 masterDetailDashoardViewItems.Connect();
                 var dashboardView = xafApplication.CreateDashboardView(xafApplication.CreateObjectSpace(), modelDashboardView.Id, true);
@@ -101,8 +101,9 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
             var listView = ((ListView) tuple.ListViewItem.InnerView);
             var md = listView.ObjectSpace.CreateObject<Md>();
             listView.ObjectSpace.CommitChanges();
+            
             listView.Editor.GetMock().Setup(editor => editor.GetSelectedObjects()).Returns(() => new[]{md});
-            listView.Editor.CallMethod("OnSelectionChanged");
+            listView.Editor.OnSelectionChanged();
 
             var detailView = ((DetailView) tuple.DetailViewItem.InnerView);
             detailView.ObjectSpace.GetKeyValue(detailView.CurrentObject).ShouldBe(md.Oid);
@@ -155,24 +156,25 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
             var listView = ((ListView) info.ListViewItem.InnerView);
             var mdParent = listView.ObjectSpace.CreateObject<MdParent>();
             listView.ObjectSpace.CommitChanges();
+            
             listView.Editor.GetMock().Setup(editor => editor.GetSelectedObjects()).Returns(() => new[]{mdParent});
-            var detailView = application.WhenDetailViewCreated().Replay();
+            var detailView = application.WhenDetailViewCreated().ToDetailView().Replay();
             detailView.Connect();
             listView.Editor.CallMethod("OnSelectionChanged");
 
-            await detailView.FirstAsync(t => t.e.View.ObjectTypeInfo.Type==typeof(MdParent)).WithTimeOut();
+            await detailView.FirstAsync(view => view.ObjectTypeInfo.Type==typeof(MdParent)).WithTimeOut();
 
             var firstObject = listView.CollectionSource.Objects<Md>().First();
             listView.Editor.GetMock().Setup(editor => editor.GetSelectedObjects()).Returns(() => new[]{firstObject});
             listView.Editor.CallMethod("OnSelectionChanged");
             
-            await detailView.FirstAsync(t => t.e.View.ObjectTypeInfo?.Type==typeof(Md)).WithTimeOut();
+            await detailView.FirstAsync(view => view.ObjectTypeInfo?.Type==typeof(Md)).WithTimeOut();
             
             application.Dispose();
         }
 
         static async Task<DashboardViewItemInfo> ViewItems(XafApplication xafApplication){
-            var modelDashboardView = xafApplication.Model.NewModelDashboardView(typeof(Md));
+            var modelDashboardView = xafApplication.Model.NewMasterDetailModelDashboardView(typeof(Md));
             var masterDetailDashoardViewItems = xafApplication.WhenMasterDetailDashboardViewItems().Replay();
             masterDetailDashoardViewItems.Connect();
             var dashboardView = xafApplication.CreateDashboardView(xafApplication.CreateObjectSpace(), modelDashboardView.Id, true);

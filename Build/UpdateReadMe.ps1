@@ -112,7 +112,8 @@ If the package is installed in a way that you do not have access to uninstall it
 ``````cs
 Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof($moduleName))
 ``````
-$additionalTroubleShooting
+$additionalTroubleShootingThe 
+The [Reactive.Logger.Client.Win](https://github.com/eXpandFramework/DevExpress.XAF/wiki/Reactive.Logger.Client.Win) is a must-have tool to help you troubleshoot and monitor in details a module, even from a remote location.
 ## Details
 "@
     )

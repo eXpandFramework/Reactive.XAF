@@ -5,6 +5,7 @@ System.Reactive
 NUnit
 NUnit3TestAdapter
 DevExpress.ExpressApp
+DevExpress.ExpressApp.Win
 DevExpress.Xpo
 Fasterflect.Xpand
 JetBrains.Annotations

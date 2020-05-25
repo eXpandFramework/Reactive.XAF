@@ -13,16 +13,16 @@ using Xpand.Extensions.XAF.Model;
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class PropertyEditorService{
         internal static IObservable<Unit> SetupPropertyEditorParentView(this XafApplication application){
-            var detailViewEditors = application.WhenDetailViewCreated()
-                .SelectMany(_ => _.e.View.GetItems<IParentViewPropertyEditor>().Select(editor => (view: (ObjectView) _.e.View, editor)));
+            var detailViewEditors = application.WhenDetailViewCreated().ToDetailView()
+                .SelectMany(detailView => detailView.GetItems<IParentViewPropertyEditor>().Select(editor => (view: (ObjectView) detailView, editor)));
             var listViewEditors = application.WhenListViewCreated()
-                .SelectMany(_ => _.e.ListView.WhenControlsCreated())
-                .SelectMany(_ => {
-                    if (_.view.Editor.GetType().InheritsFrom("DevExpress.ExpressApp.Web.Editors.ComplexWebListEditor")){
-                        return _.view.Model.MemberViewItems(typeof(IParentViewPropertyEditor))
-                            .Select(item => _.view.Editor.CallMethod("FindPropertyEditor",item,ViewEditMode.Edit) as IParentViewPropertyEditor)
+                .SelectMany(listView => listView.WhenControlsCreated())
+                .SelectMany(listView => {
+                    if (listView.Editor.GetType().InheritsFrom("DevExpress.ExpressApp.Web.Editors.ComplexWebListEditor")){
+                        return listView.Model.MemberViewItems(typeof(IParentViewPropertyEditor))
+                            .Select(item => listView.Editor.CallMethod("FindPropertyEditor",item,ViewEditMode.Edit) as IParentViewPropertyEditor)
                             .ToObservable().WhenNotDefault()
-                            .Select(editor => (view: (ObjectView) _.view, editor));
+                            .Select(editor => (view: (ObjectView) listView, editor));
                     }
 
                     return Observable.Empty<(ObjectView view, IParentViewPropertyEditor editor)>();

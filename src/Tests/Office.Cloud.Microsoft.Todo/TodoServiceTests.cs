@@ -110,7 +110,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
             }
         }
 
-        [Test][XpandTest()]
+        [Test]
+        [XpandTest()]
         public override async Task Delete_Two_Tasks(){
             using (var application = Platform.Win.TodoModule().Application){
                 var builder = await application.InitializeService();

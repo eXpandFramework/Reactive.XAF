@@ -45,8 +45,7 @@ namespace Xpand.XAF.Modules.RefreshView.Tests{
                 objectSpace = application.CreateObjectSpace();
                 var guid = objectSpace.CreateObject<RV>().Oid;
                 objectSpace.CommitChanges();
-//                await Task.Delay(13000).ConfigureAwait(false);
-            
+
                 var o = ((IEnumerable) listView.CollectionSource.Collection).Cast<RV>().FirstOrDefault(rv => rv.Oid==guid);
                 o.ShouldNotBeNull();
             }
