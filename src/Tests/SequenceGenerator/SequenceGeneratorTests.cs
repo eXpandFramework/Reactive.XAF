@@ -25,6 +25,7 @@ using Xpand.XAF.Modules.SequenceGenerator.Tests.BO;
 namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
     [NonParallelizable]
     public class SequenceGeneratorTests:SequenceGeneratorTestsBaseTests{
+        
         [Test]
         [XpandTest()]
         public async Task Cache_datalayer(){
@@ -82,7 +83,6 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         [XpandTest]
         public async Task Increase_Sequence_When_Saving_New_Objects([Values(2, 102, 500)] int itemsCount, [Values(true, false)] bool parallel, [Values(1, 2)] int objectSpaceCount){
             using (var application = SequenceGeneratorModule().Application){
-                application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger.TraceSources.Enabled = false;
                 SetSequences(application);
                 var nextSequenceTest = SequenceGeneratorService.Sequence.OfType<TestObject>().Test();
 

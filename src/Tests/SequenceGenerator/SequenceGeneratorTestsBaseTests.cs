@@ -12,13 +12,17 @@ using JetBrains.Annotations;
 using Shouldly;
 using Xpand.Extensions.XAF.XafApplication;
 using Xpand.TestsLib;
+using Xpand.XAF.Modules.Reactive;
+using Xpand.XAF.Modules.Reactive.Logger;
 using Xpand.XAF.Modules.SequenceGenerator.Tests.BO;
 
 namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
     public abstract class SequenceGeneratorTestsBaseTests:BaseTest{
         protected  SequenceGeneratorModule SequenceGeneratorModule( XafApplication application=null,Platform platform=Platform.Win){
             application ??= NewApplication(platform);
-            return application.AddModule<SequenceGeneratorModule>(typeof(TestObject).Assembly.GetTypes().Where(type => typeof(IXPSimpleObject).IsAssignableFrom(type)).Concat(new []{typeof(CustomSequenceTypeName)}).ToArray());
+            var sequenceGeneratorModule = application.AddModule<SequenceGeneratorModule>(typeof(TestObject).Assembly.GetTypes().Where(type => typeof(IXPSimpleObject).IsAssignableFrom(type)).Concat(new []{typeof(CustomSequenceTypeName)}).ToArray());
+            application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger.TraceSources.Enabled = false;
+            return sequenceGeneratorModule;
         }
 
         protected XafApplication NewApplication(Platform platform=Platform.Win){

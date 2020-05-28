@@ -17,11 +17,11 @@ steps:
         downloadType: specific
         artifactName: 'bin'
         downloadPath: '$(System.DefaultworkingDirectory)'
-  - task: PowerShell@2
-    displayName: Publish Nuget Packages
+  - task: AzurePowerShell@5
     inputs:
-      targetType: inline
-      script: |
+      azureSubscription: 'Visual Studio Enterprise(b48a609a-17f6-4e48-a317-54ab77fbf822)'
+      ScriptType: 'InlineScript'
+      Inline: |
         $ErrorView="NormalView"
         $VerbosePreference="Continue"
         $goArgs=@{
@@ -40,6 +40,7 @@ steps:
           "goArgs:"
           $goArgs|out-string
           & .\build\publishNugets.ps1 @goArgs
+      azurePowerShellVersion: 'LatestVersion'
   - task: PublishPipelineArtifact@1
     displayName: 'Published Packages'
     inputs:
