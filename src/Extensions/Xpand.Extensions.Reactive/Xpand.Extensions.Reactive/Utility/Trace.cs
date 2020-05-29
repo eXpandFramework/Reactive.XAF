@@ -5,8 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
-using Xpand.Extensions.Exception;
-using Xpand.Extensions.Linq;
+using Xpand.Extensions.ExceptionExtensions;
+using Xpand.Extensions.LinqExtensions;
 
 namespace Xpand.Extensions.Reactive.Utility{
     public enum ObservableTraceStrategy{
@@ -16,25 +16,23 @@ namespace Xpand.Extensions.Reactive.Utility{
     }
 
     public static partial class Utility{
-        private static ConcurrentDictionary<System.Type, Func<object, string>> Serialization{ get; }
+        private static ConcurrentDictionary<Type, Func<object, string>> Serialization{ get; }
         
 
         public static Func<object, string> Serializer = o => o.ToString();
-        static Utility() => Serialization=new ConcurrentDictionary<System.Type, Func<object,string>>();
+        static Utility() => Serialization=new ConcurrentDictionary<Type, Func<object,string>>();
 
-        public static bool AddTraceSerialization(System.Type type) => Serialization.TryAdd(type, Serializer);
+        public static bool AddTraceSerialization(Type type) => Serialization.TryAdd(type, Serializer);
 
         public static bool AddTraceSerialization<T>(Func<T,string> function) => Serialization.TryAdd(typeof(T), o => function((T) o));
 
 
         public static IObservable<TSource> Trace<TSource>(this IObservable<TSource> source, string name = null,TraceSource traceSource=null,
-            Func<TSource,string> messageFactory=null,Func<System.Exception,string> errorMessageFactory=null, Action<string> traceAction = null, 
+            Func<TSource,string> messageFactory=null,Func<Exception,string> errorMessageFactory=null, Action<string> traceAction = null, 
             ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
             [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "",
-            [CallerLineNumber] int sourceLineNumber = 0){
-
-            return Observable.Create<TSource>(observer => {
+            [CallerLineNumber] int sourceLineNumber = 0) => Observable.Create<TSource>(observer => {
                 void Action(string m, object v, Action<string> ta){
                     if (traceSource?.Switch.Level == SourceLevels.Off){
                         return;
@@ -42,7 +40,7 @@ namespace Xpand.Extensions.Reactive.Utility{
 
                     string value = null;
                     if (v!=null){
-	                    value = $@"{CalculateValue(v, o => messageFactory.GetMessageValue( errorMessageFactory, o))}";
+                        value = $@"{CalculateValue(v, o => messageFactory.GetMessageValue( errorMessageFactory, o))}";
                     }
 
                     var mName = memberName;
@@ -78,17 +76,16 @@ namespace Xpand.Extensions.Reactive.Utility{
                     disposable.Dispose();
                 };
             });
-        }
 
-        private static string GetMessageValue<TSource>(this Func<TSource, string> messageFactory, Func<System.Exception, string> errorMessageFactory, object o){
+        private static string GetMessageValue<TSource>(this Func<TSource, string> messageFactory, Func<Exception, string> errorMessageFactory, object o){
             try{
                 return o switch{
                     TSource t => (messageFactory?.Invoke(t) ?? o).ToString(),
-                    System.Exception e => (errorMessageFactory?.Invoke(e) ?? o).ToString(),
+                    Exception e => (errorMessageFactory?.Invoke(e) ?? o).ToString(),
                     _ => o.ToString()
                 };
             }
-            catch (System.Exception e){
+            catch (Exception e){
                 return e.Message;
             }
         }

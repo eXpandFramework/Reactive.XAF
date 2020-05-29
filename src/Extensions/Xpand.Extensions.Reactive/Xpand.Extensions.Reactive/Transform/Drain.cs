@@ -6,8 +6,8 @@ using System.Reactive.Subjects;
 namespace Xpand.Extensions.Reactive.Transform{
     public static partial class Transform{
         public static IObservable<TOut> Drain<TSource, TOut>(this IObservable<TSource> source,
-            Func<TSource, IObservable<TOut>> selector){
-            return Observable.Defer(() => {
+            Func<TSource, IObservable<TOut>> selector) =>
+            Observable.Defer(() => {
                 var queue = new BehaviorSubject<Unit>(new Unit());
 
                 return source
@@ -16,6 +16,5 @@ namespace Xpand.Extensions.Reactive.Transform{
                         .Do(_ => { }, () => queue.OnNext(new Unit()))
                     );
             });
-        }
     }
 }

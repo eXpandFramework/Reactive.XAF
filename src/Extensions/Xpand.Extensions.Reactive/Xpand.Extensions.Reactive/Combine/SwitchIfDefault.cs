@@ -8,7 +8,7 @@ namespace Xpand.Extensions.Reactive.Combine{
             where T : class{
             if (@this == null) throw new ArgumentNullException(nameof(@this));
             if (switchTo == null) throw new ArgumentNullException(nameof(switchTo));
-            return @this.SelectMany(entry => entry != default(T) ? entry.ReturnObservable<T>() : switchTo);
+            return @this.SelectMany(entry => entry != default(T) ? entry.ReturnObservable() : switchTo);
         }
     }
 }

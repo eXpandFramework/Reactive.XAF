@@ -16,11 +16,11 @@ using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
 using Fasterflect;
 using JetBrains.Annotations;
-using Xpand.Extensions.AppDomain;
-using Xpand.Extensions.Linq;
+using Xpand.Extensions.AppDomainExtensions;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.Extensions.Reflection;
-using Xpand.Extensions.XAF.XafApplication;
+using Xpand.Extensions.ReflectionExtensions;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.Predefined;
 

@@ -14,9 +14,9 @@ using DevExpress.ExpressApp.SystemModule;
 using DevExpress.Persistent.Base;
 using Fasterflect;
 using JetBrains.Annotations;
-using Xpand.Extensions.AppDomain;
-using Xpand.Extensions.XAF.Model;
-using Xpand.Extensions.XAF.XafApplication;
+using Xpand.Extensions.AppDomainExtensions;
+using Xpand.Extensions.XAF.ModelExtensions;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.Predefined;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
@@ -67,7 +67,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             var versionSuffix = $".v{version.Major}.{version.Minor}";
             _dxAssemblyNamePostfix = dxAssemblyName.FullName.Substring(dxAssemblyName.FullName.IndexOf(",", StringComparison.Ordinal));
             _dxUtilsAssembly = assemblies.GetAssembly($"DevExpress.Utils{versionSuffix}");
-            if (ModelExtendingService.Platform == Extensions.XAF.XafApplication.Platform.Win){
+            if (ModelExtendingService.Platform == Extensions.XAF.XafApplicationExtensions.Platform.Win){
                 
                 _xafWinAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.Win{versionSuffix}");
                 _xafPivotGridWinAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.PivotGrid.Win{versionSuffix}");

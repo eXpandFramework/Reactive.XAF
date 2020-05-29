@@ -7,9 +7,9 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.Persistent.Base;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.Extensions.XAF.Action;
-using Xpand.Extensions.XAF.CollectionSource;
-using Xpand.Extensions.XAF.Frame;
+using Xpand.Extensions.XAF.ActionExtensions;
+using Xpand.Extensions.XAF.CollectionSourceExtensions;
+using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 

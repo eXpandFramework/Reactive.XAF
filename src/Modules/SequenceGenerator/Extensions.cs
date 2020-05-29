@@ -13,7 +13,6 @@ using DevExpress.Xpo;
 using Fasterflect;
 using JetBrains.Annotations;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.Extensions.XAF.XafApplication;
 
 namespace Xpand.XAF.Modules.SequenceGenerator{
     public static class Extensions{

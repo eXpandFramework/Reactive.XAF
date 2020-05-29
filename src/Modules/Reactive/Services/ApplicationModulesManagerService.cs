@@ -3,7 +3,7 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.Extensions.XAF.ApplicationModulesManager;
+using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ApplicationModulesManagerService{

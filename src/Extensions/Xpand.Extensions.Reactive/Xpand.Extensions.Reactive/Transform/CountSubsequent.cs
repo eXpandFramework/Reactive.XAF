@@ -16,11 +16,7 @@ namespace Xpand.Extensions.Reactive.Transform{
                     return r.IgnoreElements().Concat(default(T).ReturnObservable())
                         .Select(_ => r.ToEnumerable().ToArray());
                 })
-                .Select(_ => {
-                    var item = _.First();
-
-                    return (item, _.Length);
-                });
+                .Select(_ => (_.First(), _.Length));
         }
     }
 }

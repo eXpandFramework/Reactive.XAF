@@ -11,7 +11,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.Xpo;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
-using Xpand.Extensions.XAF.Model;
+using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 

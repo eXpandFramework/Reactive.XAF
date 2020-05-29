@@ -9,7 +9,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net{
     public static class SystemNetTransform{
         
         public static IObservable<IPEndPoint> Listening(this IEnumerable<IPEndPoint> source,bool repeatWhenOffine=true,TimeSpan? timeSpan=null){
-            timeSpan =timeSpan?? TimeSpan.FromMilliseconds(500);
+            timeSpan ??= TimeSpan.FromMilliseconds(500);
             return source.ToObservable()
                 .SelectMany(endPoint => {
                     var inUsed = Observable.While(() => !endPoint.Listening(), Observable.Empty<IPEndPoint>().Delay(timeSpan.Value))
@@ -20,8 +20,6 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net{
                 });
         }
 
-        public static bool Listening(this IPEndPoint endPoint){
-            return IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners().Contains(endPoint);
-        }
+        public static bool Listening(this IPEndPoint endPoint) => IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners().Contains(endPoint);
     }
 }

@@ -3,8 +3,6 @@ using System.Reactive.Linq;
 
 namespace Xpand.Extensions.Reactive.Transform{
     public static partial class Transform{
-        public static T Wait<T>(this IObservable<T> source, TimeSpan timeSpan){
-            return source.Timeout(timeSpan).Wait();
-        }
+        public static T Wait<T>(this IObservable<T> source, TimeSpan timeSpan) => source.Timeout(timeSpan).Wait();
     }
 }

@@ -11,9 +11,9 @@ using Fasterflect;
 using HarmonyLib;
 using JetBrains.Annotations;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.Extensions.XAF.ApplicationModulesManager;
-using Xpand.Extensions.XAF.Module;
-using Xpand.Extensions.XAF.XafApplication;
+using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
+using Xpand.Extensions.XAF.ModuleExtensions;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Security;
 

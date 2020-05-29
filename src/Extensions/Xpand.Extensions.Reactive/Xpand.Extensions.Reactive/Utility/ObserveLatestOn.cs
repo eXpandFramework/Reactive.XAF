@@ -6,8 +6,7 @@ using System.Reactive.Linq;
 
 namespace Xpand.Extensions.Reactive.Utility{
     public static partial class Utility{
-        public static IObservable<T> ObserveLatestOn<T>(this IObservable<T> source, IScheduler scheduler){
-            return Observable.Create<T>(observer => {
+        public static IObservable<T> ObserveLatestOn<T>(this IObservable<T> source, IScheduler scheduler) => Observable.Create<T>(observer => {
                 Notification<T> outsideNotification;
                 var gate = new object();
                 var active = false;
@@ -39,6 +38,5 @@ namespace Xpand.Extensions.Reactive.Utility{
                 });
                 return new CompositeDisposable(disposable, cancelable);
             });
-        }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 using DevExpress.Persistent.Base;
-using Xpand.Extensions.XAF.XafApplication;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 
 namespace Xpand.XAF.Modules.ModelMapper.Configuration{
     [AttributeUsage(AttributeTargets.Field)]

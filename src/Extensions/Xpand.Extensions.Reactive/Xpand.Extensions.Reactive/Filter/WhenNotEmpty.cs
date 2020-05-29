@@ -5,8 +5,6 @@ using System.Reactive.Linq;
 
 namespace Xpand.Extensions.Reactive.Filter{
     public static partial class Filter{
-        public static IObservable<IList<TOut>> WhenNotEmpty<TOut>(this IObservable<IList<TOut>> source){
-            return source.Where(outs => outs.Any());
-        }
+        public static IObservable<IList<TOut>> WhenNotEmpty<TOut>(this IObservable<IList<TOut>> source) => source.Where(outs => outs.Any());
     }
 }

@@ -11,7 +11,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using JetBrains.Annotations;
 using Xpand.Extensions.Reactive.Filter;
-using Xpand.Extensions.XAF.Model;
+using Xpand.Extensions.XAF.ModelExtensions;
 
 
 namespace Xpand.XAF.Modules.Reactive.Logger{

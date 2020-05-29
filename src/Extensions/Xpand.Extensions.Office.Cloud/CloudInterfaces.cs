@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.Base.General;
-using Xpand.Extensions.Type;
+using Xpand.Extensions.TypeExtensions;
 
 namespace Xpand.Extensions.Office.Cloud{
     public enum CloudObjectType{

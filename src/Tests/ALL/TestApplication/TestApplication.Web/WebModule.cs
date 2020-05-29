@@ -40,7 +40,7 @@ using DevExpress.ExpressApp.Web.SystemModule;
 using DevExpress.ExpressApp.Workflow;
 using TestApplication.Web.LookupCascade;
 using Xpand.Extensions.Reactive.Conditional;
-using Xpand.Extensions.XAF.XafApplication;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.BO;
 using Xpand.XAF.Modules.AutoCommit;
 using Xpand.XAF.Modules.CloneMemberValue;

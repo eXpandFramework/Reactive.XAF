@@ -10,9 +10,9 @@ using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using Fasterflect;
 using JetBrains.Annotations;
-using Xpand.Extensions.AppDomain;
-using Xpand.Extensions.String;
-using Xpand.Extensions.XAF.XafApplication;
+using Xpand.Extensions.AppDomainExtensions;
+using Xpand.Extensions.StringExtensions;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.ProgressBarViewItem{

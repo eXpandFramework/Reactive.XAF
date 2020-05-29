@@ -5,7 +5,7 @@ using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
-using Xpand.Extensions.XAF.Model;
+using Xpand.Extensions.XAF.ModelExtensions;
 
 
 namespace Xpand.XAF.Modules.ModelViewInheritance {

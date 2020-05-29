@@ -5,8 +5,8 @@ using System.Linq;
 using System.Reflection;
 using EnumsNET;
 using Fasterflect;
-using Xpand.Extensions.Linq;
-using Xpand.Extensions.Reflection;
+using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.ReflectionExtensions;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     public static partial class TypeMappingService{

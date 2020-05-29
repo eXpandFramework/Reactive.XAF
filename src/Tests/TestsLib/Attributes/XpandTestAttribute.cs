@@ -8,7 +8,7 @@ using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 using NUnit.Framework.Internal.Commands;
 using Polly.Timeout;
-using Xpand.Extensions.Task;
+using Xpand.Extensions.TaskExtensions;
 
 namespace Xpand.TestsLib.Attributes{
     [AttributeUsage(AttributeTargets.Method, Inherited = false)]

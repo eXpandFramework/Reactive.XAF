@@ -6,7 +6,7 @@ using JetBrains.Annotations;
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Office.Cloud.Microsoft;
 using Xpand.Extensions.Reactive.Conditional;
-using Xpand.Extensions.XAF.Model;
+using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 

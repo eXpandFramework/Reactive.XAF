@@ -16,7 +16,7 @@ using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.Office.Cloud.Tests;
-using Platform = Xpand.Extensions.XAF.XafApplication.Platform;
+using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
 using TaskStatus = DevExpress.Persistent.Base.General.TaskStatus;
 
 

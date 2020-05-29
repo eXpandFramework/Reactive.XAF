@@ -1,5 +1,5 @@
 ﻿using DevExpress.ExpressApp;
-using Xpand.Extensions.XAF.XafApplication;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib;
 using Xpand.XAF.Modules.PositionInListview;
 using Xpand.XAF.Modules.PositionInListView.Tests.BOModel;

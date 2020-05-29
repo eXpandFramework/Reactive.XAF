@@ -21,9 +21,10 @@ using Fasterflect;
 using JetBrains.Annotations;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
-using Xpand.Extensions.XAF.Security;
-using Xpand.Extensions.XAF.TypesInfo;
+using Xpand.Extensions.XAF.SecurityExtensions;
+using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.Extensions.XAF.Xpo;
+using Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 

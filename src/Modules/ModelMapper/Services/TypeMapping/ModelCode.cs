@@ -10,7 +10,7 @@ using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using JetBrains.Annotations;
-using Xpand.Extensions.String;
+using Xpand.Extensions.StringExtensions;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{

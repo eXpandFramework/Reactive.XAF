@@ -10,7 +10,7 @@ using DevExpress.Xpo;
 using DevExpress.Xpo.DB;
 using JetBrains.Annotations;
 using Shouldly;
-using Xpand.Extensions.XAF.XafApplication;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Logger;

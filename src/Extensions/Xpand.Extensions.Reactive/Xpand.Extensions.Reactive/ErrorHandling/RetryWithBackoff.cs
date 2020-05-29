@@ -6,7 +6,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling{
     public static class ErrorHandling{
         public static IObservable<T> RetryWithBackoff<TException, T>(this IObservable<T> source,
             Func<TException, bool> retryOnError = null, int retryCount = 3,
-            Func<int, TimeSpan> strategy = null, IScheduler scheduler = null) where TException : System.Exception{
+            Func<int, TimeSpan> strategy = null, IScheduler scheduler = null) where TException : Exception{
             strategy ??= (n => TimeSpan.FromSeconds(Math.Pow(n, 2)));
             var attempt = 0;
             retryOnError ??= (_ => true);
@@ -23,9 +23,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling{
                     : Observable.Throw<T>(t.Item3));
         }
         public static IObservable<T> RetryWithBackoff<T>(this IObservable<T> source,int retryCount = 3,
-            Func<int, TimeSpan> strategy = null,Func<System.Exception, bool> retryOnError = null,IScheduler scheduler = null){
-            return source.RetryWithBackoff(retryOnError, retryCount, strategy, scheduler);
-        }
-
+            Func<int, TimeSpan> strategy = null,Func<Exception, bool> retryOnError = null,IScheduler scheduler = null) =>
+            source.RetryWithBackoff(retryOnError, retryCount, strategy, scheduler);
     }
 }

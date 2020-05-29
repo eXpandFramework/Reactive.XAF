@@ -8,7 +8,7 @@ using Fasterflect;
 using Microsoft.Graph;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.Extensions.Reflection;
+using Xpand.Extensions.ReflectionExtensions;
 
 namespace Xpand.Extensions.Office.Cloud.Microsoft{
     public static class Pagination{

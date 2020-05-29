@@ -3,9 +3,9 @@ using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using Fasterflect;
-using Xpand.Extensions.AppDomain;
+using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Reactive.Utility;
-using Xpand.Extensions.XAF.Model;
+using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 

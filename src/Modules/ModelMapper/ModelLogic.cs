@@ -11,7 +11,7 @@ using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
 using JetBrains.Annotations;
 using Xpand.Extensions.XAF.FunctionOperators;
-using Xpand.Extensions.XAF.Model;
+using Xpand.Extensions.XAF.ModelExtensions;
 
 namespace Xpand.XAF.Modules.ModelMapper{
     [DomainLogic(typeof(IModelNodeDisabled))][UsedImplicitly]

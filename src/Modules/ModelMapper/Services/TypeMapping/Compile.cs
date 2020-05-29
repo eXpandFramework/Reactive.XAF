@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.CSharp;
 using Mono.Cecil;
-using Xpand.Extensions.AppDomain;
+using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 

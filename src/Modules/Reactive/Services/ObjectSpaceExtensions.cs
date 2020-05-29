@@ -8,7 +8,7 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using JetBrains.Annotations;
-using Xpand.Extensions.Linq;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.Reactive.Extensions;
 

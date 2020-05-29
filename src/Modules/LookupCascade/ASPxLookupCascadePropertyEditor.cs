@@ -14,8 +14,8 @@ using DevExpress.ExpressApp.Web.TestScripts;
 using DevExpress.ExpressApp.Web.Utils;
 using DevExpress.Persistent.Base;
 using DevExpress.Web;
-using Xpand.Extensions.String;
-using Xpand.Extensions.XAF.Model;
+using Xpand.Extensions.StringExtensions;
+using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 

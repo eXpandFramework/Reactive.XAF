@@ -7,7 +7,7 @@ using DevExpress.ExpressApp.EasyTest.WinAdapter;
 using Fasterflect;
 using NUnit.Framework;
 using Shouldly;
-using Xpand.Extensions.AppDomain;
+using Xpand.Extensions.AppDomainExtensions;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Attributes;
 using Xpand.TestsLib.EasyTest;

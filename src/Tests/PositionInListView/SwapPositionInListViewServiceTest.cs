@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using Shouldly;
-using Xpand.Extensions.XAF.Frame;
-using Xpand.Extensions.XAF.XafApplication;
+using Xpand.Extensions.XAF.FrameExtensions;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.PositionInListview;

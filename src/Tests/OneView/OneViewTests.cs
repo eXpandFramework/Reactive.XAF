@@ -11,7 +11,7 @@ using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
-using Xpand.Extensions.XAF.XafApplication;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.OneView.Tests.BOModel;

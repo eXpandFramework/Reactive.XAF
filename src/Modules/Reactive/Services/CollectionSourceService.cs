@@ -5,7 +5,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
-using Xpand.Extensions.EventArg;
+using Xpand.Extensions.EventArgExtensions;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{

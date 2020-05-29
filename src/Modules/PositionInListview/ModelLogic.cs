@@ -9,7 +9,7 @@ using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
 using DevExpress.Xpo.DB;
 using JetBrains.Annotations;
-using Xpand.Extensions.XAF.Model;
+using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.XAF.Modules.PositionInListview{

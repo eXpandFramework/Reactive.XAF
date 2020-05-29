@@ -3,7 +3,7 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp.Model;
 using NUnit.Framework;
 using Shouldly;
-using Xpand.Extensions.XAF.Model;
+using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.LookupCascade.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive;

@@ -4,7 +4,7 @@ using DevExpress.EasyTest.Framework;
 using DevExpress.ExpressApp.EasyTest.WebAdapter;
 using DevExpress.ExpressApp.Xpo;
 using Fasterflect;
-using Xpand.Extensions.Linq;
+using Xpand.Extensions.LinqExtensions;
 
 namespace Xpand.TestsLib.EasyTest{
     public static class EasytestExtesions{

@@ -8,10 +8,10 @@ using System.Reactive.Threading.Tasks;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Utils;
 using DevExpress.Persistent.Base;
-using Xpand.Extensions.Configuration;
-using Xpand.Extensions.Exception;
+using Xpand.Extensions.ConfigurationExtensions;
+using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.Extensions.XAF.XafApplication;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
 namespace Xpand.XAF.Modules.Reactive.Extensions{

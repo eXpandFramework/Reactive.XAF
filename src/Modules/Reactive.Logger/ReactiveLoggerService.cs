@@ -13,14 +13,14 @@ using System.Threading;
 using DevExpress.ExpressApp;
 using DevExpress.Utils;
 using JetBrains.Annotations;
-using Xpand.Extensions.AppDomain;
+using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
-using Xpand.Extensions.Reflection;
-using Xpand.Extensions.XAF.Model;
-using Xpand.Extensions.XAF.XafApplication;
+using Xpand.Extensions.ReflectionExtensions;
+using Xpand.Extensions.XAF.ModelExtensions;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 

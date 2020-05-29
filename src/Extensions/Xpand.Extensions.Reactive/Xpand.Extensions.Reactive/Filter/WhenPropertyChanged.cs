@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Linq.Expressions;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using Xpand.Extensions.ExpressionExtensions;
 using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.Extensions.Reactive.Filter{
@@ -11,12 +12,11 @@ namespace Xpand.Extensions.Reactive.Filter{
             Expression<Func<TObject, object>> memberSelector, IScheduler scheduler = null)
             where TObject : INotifyPropertyChanged{
             scheduler ??= ImmediateScheduler.Instance;
-            var memberName = ((MemberExpression) memberSelector.Body).Member.Name;
             return Observable.FromEventPattern<PropertyChangedEventHandler, PropertyChangedEventArgs>(
                     h => o.PropertyChanged += h,
                     h => o.PropertyChanged -= h, scheduler)
                 .TransformPattern<PropertyChangedEventArgs, TObject>()
-                .Where(_ => _.e.PropertyName == memberName).Select(_ => _.sender);
+                .Where(_ => _.e.PropertyName == memberSelector.MemberExpressionName()).Select(_ => _.sender);
         }
     }
 }

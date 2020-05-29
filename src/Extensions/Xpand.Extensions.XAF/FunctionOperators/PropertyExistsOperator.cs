@@ -6,17 +6,11 @@ namespace Xpand.Extensions.XAF.FunctionOperators{
         public const string OperatorName = "PropertyExists";
         private static readonly PropertyExistsOperator Instance = new PropertyExistsOperator();
 
-        static PropertyExistsOperator(){
-            CustomFunctionOperatorHelper.Register(Instance);
-        }
+        static PropertyExistsOperator() => CustomFunctionOperatorHelper.Register(Instance);
 
-        public System.Type ResultType(params System.Type[] operands){
-            return typeof(bool);
-        }
+        public System.Type ResultType(params System.Type[] operands) => typeof(bool);
 
-        public object Evaluate(params object[] operands){
-            return operands[0].GetType().GetProperty((string) operands[1])!=null;
-        }
+        public object Evaluate(params object[] operands) => operands[0].GetType().GetProperty((string) operands[1])!=null;
 
         public string Name{ get; } = OperatorName;
     }

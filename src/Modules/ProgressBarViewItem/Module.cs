@@ -5,7 +5,7 @@ using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.SystemModule;
 using Fasterflect;
 using Microsoft.CSharp;
-using Xpand.Extensions.XAF.XafApplication;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 

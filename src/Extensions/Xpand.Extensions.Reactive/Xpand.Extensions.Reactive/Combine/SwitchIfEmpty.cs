@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.Extensions.Reactive.Combine{
     public static partial class Combine{
@@ -11,7 +10,7 @@ namespace Xpand.Extensions.Reactive.Combine{
             return Observable.Create<T>(obs => {
                 var source = @this.Replay(1);
                 var switched = source.Any().SelectMany(any => any ? Observable.Empty<T>() : switchTo);
-                return new CompositeDisposable(source.Concat(switched).Subscribe((IObserver<T>) obs), source.Connect());
+                return new CompositeDisposable(source.Concat(switched).Subscribe(obs), source.Connect());
             });
         }
     }

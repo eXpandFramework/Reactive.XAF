@@ -6,13 +6,9 @@ namespace Xpand.Extensions.XAF.FunctionOperators{
         public const string OperatorName = "IsAssignableFrom";
         private static readonly IsAssignableFromOperator Instance = new IsAssignableFromOperator();
 
-        static IsAssignableFromOperator(){
-            CustomFunctionOperatorHelper.Register(Instance);
-        }
+        static IsAssignableFromOperator() => CustomFunctionOperatorHelper.Register(Instance);
 
-        public System.Type ResultType(params System.Type[] operands){
-            return typeof(bool);
-        }
+        public System.Type ResultType(params System.Type[] operands) => typeof(bool);
 
         public object Evaluate(params object[] operands){
             var type = System.Type.GetType(operands[1].ToString());

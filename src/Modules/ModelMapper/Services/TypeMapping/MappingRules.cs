@@ -7,7 +7,7 @@ using System.Reactive.Linq;
 using System.Reflection;
 using EnumsNET;
 using Fasterflect;
-using Xpand.Extensions.String;
+using Xpand.Extensions.StringExtensions;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     public static partial class TypeMappingService{

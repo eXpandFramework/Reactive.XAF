@@ -4,8 +4,6 @@ using Mono.Cecil;
 
 namespace Xpand.Extensions.Mono.Cecil{
     public static partial class MonoCecilExtensions{
-
-        
         public static Type ToType(this TypeReference typeReference,Dictionary<string,Type> typesCache=null){
 
             string fullName = null;

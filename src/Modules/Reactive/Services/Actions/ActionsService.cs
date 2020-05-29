@@ -7,7 +7,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Utils;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.Extensions.XAF.Frame;
+using Xpand.Extensions.XAF.FrameExtensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services.Actions{
     

@@ -7,8 +7,8 @@ using DevExpress.ExpressApp.Editors;
 using Fasterflect;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.Extensions.Type;
-using Xpand.Extensions.XAF.Model;
+using Xpand.Extensions.TypeExtensions;
+using Xpand.Extensions.XAF.ModelExtensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class PropertyEditorService{

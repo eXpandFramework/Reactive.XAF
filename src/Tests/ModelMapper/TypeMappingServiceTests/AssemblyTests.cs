@@ -7,7 +7,7 @@ using DevExpress.ExpressApp.Model;
 using Fasterflect;
 using NUnit.Framework;
 using Shouldly;
-using Xpand.Extensions.XAF.XafApplication;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;

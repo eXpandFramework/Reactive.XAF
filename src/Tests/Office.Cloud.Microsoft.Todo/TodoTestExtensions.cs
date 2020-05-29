@@ -16,11 +16,11 @@ using Shouldly;
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Office.Cloud.Microsoft;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.Extensions.XAF.Model;
-using Xpand.Extensions.XAF.XafApplication;
+using Xpand.Extensions.XAF.ModelExtensions;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib;
 using Xpand.XAF.Modules.Reactive;
-using Platform = Xpand.Extensions.XAF.XafApplication.Platform;
+using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
 using Task = DevExpress.Persistent.BaseImpl.Task;
 using TaskStatus = DevExpress.Persistent.Base.General.TaskStatus;
 

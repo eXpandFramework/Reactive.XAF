@@ -7,9 +7,9 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.Model.NodeGenerators;
-using Xpand.Extensions.Linq;
-using Xpand.Extensions.XAF.Model;
-using Xpand.Extensions.XAF.TypesInfo;
+using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.XAF.ModelExtensions;
+using Xpand.Extensions.XAF.TypesInfoExtensions;
 
 namespace Xpand.XAF.Modules.ModelViewInheritance{
     internal static class ModelViewInheritanceExtensions{
