@@ -86,15 +86,14 @@ namespace Xpand.TestsLib{
 	        objectView.CallMethod(nameof(OnSelectionChanged));
         }
 
-        public static CompositeView NewView(this XafApplication application, IModelView modelView,Func<IObjectSpace,IList> selectedObjectsFactory){
-
+        public static CompositeView NewView(this XafApplication application, IModelView modelView,Func<IObjectSpace,IList> selectedObjectsFactory,IObjectSpace objectSpace=null){
 	        application.WhenListViewCreating().Where(_ => _.e.ViewID == modelView.Id).Do(_ => {
 		        var viewMock = new Mock<ListView>(() => new ListView((IModelListView) modelView, _.e.CollectionSource,_.application,_.e.IsRoot)){CallBase = true};
 		        viewMock.As<ISelectionContext>().SetupGet(context => context.SelectedObjects)
 			        .Returns(() => selectedObjectsFactory(viewMock.Object.ObjectSpace));
 		        _.e.View = viewMock.Object;
 	        }).FirstAsync().Subscribe();
-	        return application.NewView(modelView);
+	        return application.NewView(modelView,objectSpace);
         }
 
         public static void DoExecute(this ActionBase action,Func<IObjectSpace,IList> selectedObjectsFactory){

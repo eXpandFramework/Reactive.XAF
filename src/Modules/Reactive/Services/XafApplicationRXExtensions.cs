@@ -170,7 +170,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             source.SelectMany(application => application.WhenViewOnFrame(objectType, viewType, nesting));
 
         public static IObservable<Frame> WhenViewOnFrame(this XafApplication application,Type objectType=null,ViewType viewType=ViewType.Any,Nesting nesting=Nesting.Any) =>
-            application.WhenWindowCreated().TemplateViewChanged()
+            application.WhenFrameCreated().TemplateViewChanged()
+	            .Where(frame => nesting==Nesting.Any|| frame is NestedFrame&&nesting==Nesting.Nested||!(frame is NestedFrame)&&nesting==Nesting.Root)
                 .SelectMany(window => (window.View.ReturnObservable().When(objectType, viewType, nesting)).To(window))
                 .TraceRX(window => window.View.Id);
 
@@ -209,13 +210,14 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .TraceRX(view => view.Id);
 
         [PublicAPI]
-        public static IObservable<(ListView listView, XafApplication application)> WhenListViewCreated(this IObservable<XafApplication> source) => source
-            .SelectMany(application => application.WhenListViewCreated().Pair(application));
+        public static IObservable<(ListView listView, XafApplication application)> WhenListViewCreated(this IObservable<XafApplication> source,Type objectType=null) => source
+            .SelectMany(application => application.WhenListViewCreated(objectType).Pair(application));
 
-        public static IObservable<ListView> WhenListViewCreated(this XafApplication application) => Observable
+        public static IObservable<ListView> WhenListViewCreated(this XafApplication application,Type objectType=null) => Observable
                 .FromEventPattern<EventHandler<ListViewCreatedEventArgs>, ListViewCreatedEventArgs>(
                     h => application.ListViewCreated += h, h => application.ListViewCreated -= h,ImmediateScheduler.Instance)
                 .Select(pattern => pattern.EventArgs.ListView)
+                .Where(view => objectType==null||objectType.IsAssignableFrom(view.ObjectTypeInfo.Type))
                 .TraceRX(view => view.Id);
 
         public static IObservable<ObjectView> WhenObjectViewCreated(this XafApplication application) => application.ReturnObservable().ObjectViewCreated();

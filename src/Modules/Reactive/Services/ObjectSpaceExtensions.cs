@@ -136,13 +136,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return application.CreateObjectSpace().GetObject(value);
         }
 
-        public static IObservable<T> ExistingObject<T>(this XafApplication application,Func<IQueryable<T>,IQueryable<T>> query=null){
+        public static IObservable<(T theObject, IObjectSpace objectSpace)> ExistingObject<T>(this XafApplication application,Func<IQueryable<T>,IQueryable<T>> query=null){
             return Observable.Using(application.CreateObjectSpace, space => space.ExistingObject(query));
         }
 
         [PublicAPI]
-        public static IObservable<T> AnyObject<T>(this XafApplication application){
-            return application.NewObject<T>().Merge(application.ExistingObject<T>()).DistinctUntilChanged()
+        public static IObservable<(T theObject, IObjectSpace objectSpace)> AnyObject<T>(this XafApplication application){
+            return application.NewObject<T>().Merge(application.ExistingObject<T>()).DistinctUntilChanged(_ => _.theObject)
                 .TraceRX();
         }
 
@@ -157,16 +157,18 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .TraceRX();
         }
 
-        public static IObservable<T> NewObject<T>(this XafApplication application){
-            return application.WhenObjectSpaceCreated().SelectMany(_ => _.e.ObjectSpace.NewObject<T>());
-        }
+        public static IObservable<(T theObject, IObjectSpace objectSpace)> NewObject<T>(this XafApplication application,bool emitOnCreation=false) =>
+            application.WhenObjectSpaceCreated().SelectMany(_ =>
+                !emitOnCreation ? _.e.ObjectSpace.NewObject<T>().Pair(_.e.ObjectSpace)
+                    : RxApp.NewObjects.Where(tuple => tuple.objectSpace==_.e.ObjectSpace&&tuple.theObject is T)
+                        .Select(tuple => ((T)tuple.theObject,tuple.objectSpace)));
 
-        public static IObservable<T> ExistingObject<T>(this IObjectSpace objectSpace,Func<IQueryable<T>,IQueryable<T>> query=null){
+        public static IObservable<(T theObject, IObjectSpace objectSpace)> ExistingObject<T>(this IObjectSpace objectSpace,Func<IQueryable<T>,IQueryable<T>> query=null){
             var objectsQuery = objectSpace.GetObjectsQuery<T>();
             if (query != null){
                 objectsQuery = objectsQuery.Concat(query(objectsQuery));
             }
-            return objectsQuery.ToObservable().TraceRX();
+            return objectsQuery.ToObservable().Pair(objectSpace).TraceRX();
         }
 
         [PublicAPI]

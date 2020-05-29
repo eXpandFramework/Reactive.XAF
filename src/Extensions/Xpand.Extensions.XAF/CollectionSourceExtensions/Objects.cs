@@ -6,7 +6,7 @@ using System.Linq;
 using DevExpress.ExpressApp;
 
 namespace Xpand.Extensions.XAF.CollectionSourceExtensions{
-    public static class CollectionSourceExtensions{
+    public static partial class CollectionSourceExtensions{
         public static IEnumerable<object> Objects(this CollectionSourceBase collectionSourceBase) => collectionSourceBase.Objects<object>();
 
         public static IEnumerable<T> Objects<T>(this CollectionSourceBase collectionSourceBase){

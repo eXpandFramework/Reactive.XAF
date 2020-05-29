@@ -27,7 +27,27 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions{
 
         public static CompositeView NewView(this XafApplication application,string viewId) => application.NewView(application.Model.Views[viewId]);
 
-        public static CompositeView NewView(this XafApplication application,IModelView modelView) => (CompositeView) application.CallMethod("CreateView", modelView);
+        public static CompositeView NewView(this XafApplication application,IModelView modelView,IObjectSpace objectSpace=null) => 
+	        (CompositeView) (objectSpace==null?(CompositeView) application.CallMethod("CreateView", modelView):application.CreateView(modelView, objectSpace));
+
+        static View CreateView(this XafApplication application,IModelView viewModel,IObjectSpace objectSpace) {
+	        View view = null;
+	        switch (viewModel){
+		        case IModelListView listViewModel:{
+			        var collectionSource = application.CreateCollectionSource(objectSpace, listViewModel.ModelClass.TypeInfo.Type, listViewModel.Id);
+			        view = application.CreateListView(listViewModel, collectionSource, true);
+			        break;
+		        }
+		        case IModelDetailView detailViewModel:
+			        view = application.CreateDetailView(objectSpace, detailViewModel, true);
+			        break;
+		        case IModelDashboardView _:
+			        view = application.CreateDashboardView(objectSpace, viewModel.Id, true);
+			        break;
+	        }
+	        return view;
+        }
+
 
 
         public static TObjectView NewObjectView<TObjectView>(this XafApplication application,System.Type objectType) where TObjectView:ObjectView =>

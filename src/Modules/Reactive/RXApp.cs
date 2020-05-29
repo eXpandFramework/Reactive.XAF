@@ -22,14 +22,17 @@ namespace Xpand.XAF.Modules.Reactive{
         
         static readonly Subject<ApplicationModulesManager> ApplicationModulesManagerSubject=new Subject<ApplicationModulesManager>();
         static readonly Subject<Frame> FramesSubject=new Subject<Frame>();
+        static readonly Subject<(object theObject,IObjectSpace objectSpace)> NewObjectsSubject=new Subject<(object theObject, IObjectSpace objectSpace)>();
         static readonly Subject<Window> PopupWindowsSubject=new Subject<Window>();
         static RxApp(){
-            
-            
             var harmony = new Harmony(typeof(RxApp).Namespace);
             PatchXafApplication(harmony);
-
+            var methodInfo = typeof(BaseObjectSpace).Methods(Flags.AnyVisibility|Flags.Instance,nameof(BaseObjectSpace.CreateObject)).First(info => !info.IsGenericMethod);
+            var method = GetMethodInfo(nameof(CreateObject));
+            harmony.Patch(methodInfo,postfix: new HarmonyMethod(method));
         }
+
+        public static IObservable<(object theObject,IObjectSpace objectSpace)> NewObjects => NewObjectsSubject.AsObservable();
 
         private static void PatchXafApplication(Harmony harmony){
             var xafApplicationMethods = typeof(XafApplication).Methods();
