@@ -1,5 +1,8 @@
-﻿using NUnit.Framework;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.XAF.CollectionSourceExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib;
@@ -32,6 +35,7 @@ namespace Xpand.XAF.Modules.PositionInListView.Tests{
 		[TestCase(nameof(SwapPositionInListViewService.MoveObjectUp))]
 		[TestCase(nameof(SwapPositionInListViewService.MoveObjectDown))]
 		[XpandTest]
+		[SuppressMessage("ReSharper", "AccessToModifiedClosure")]
 		public void Move_object_action_is_disabled_when_on_edge(string actionId){
 			using (var applicatin = PositionInListViewModuleModule().Application){
 				var modelPositionInListView = applicatin.Model.ToReactiveModule<IModelReactiveModulesPositionInListView>()
@@ -40,16 +44,15 @@ namespace Xpand.XAF.Modules.PositionInListView.Tests{
 				listViewItem.ListView = applicatin.Model.BOModel.GetClass(typeof(PIL)).DefaultListView;
 				var viewWindow = applicatin.CreateViewWindow();
 				var objectSpace = applicatin.CreateObjectSpace();
-				var pil1 = objectSpace.CreateObject<PIL>();
-				pil1.Name = "a";
-				var pil2 = objectSpace.CreateObject<PIL>();
-				pil2.Name = "b";
-				objectSpace.CommitChanges();
+				PIL pil1 = null;
+				PIL pil2 = null;
 				var view = applicatin.NewView(listViewItem.ListView,
-					space => new[]
-						{space.GetObject(actionId == nameof(SwapPositionInListViewService.MoveObjectUp) ? pil1 : pil2)});
+					space => new[]{space.GetObject(actionId == nameof(SwapPositionInListViewService.MoveObjectUp) ? pil1 : pil2)},objectSpace);
 				viewWindow.SetView(view);
-
+				pil1 = objectSpace.CreateObject<PIL>();
+				pil1.Name = "a";
+				pil2 = objectSpace.CreateObject<PIL>();
+				pil2.Name = "b";
 
 				view.AsObjectView().OnSelectionChanged();
 
@@ -68,23 +71,27 @@ namespace Xpand.XAF.Modules.PositionInListView.Tests{
 				var listViewItem = modelPositionInListView.ListViewItems.AddNode<IModelPositionInListViewListViewItem>();
 				listViewItem.ListView = applicatin.Model.BOModel.GetClass(typeof(PIL)).DefaultListView;
 				var objectSpace = applicatin.CreateObjectSpace();
+				
+				var viewWindow = applicatin.CreateViewWindow();
+				var compositeView = applicatin.NewView(listViewItem.ListView,objectSpace).AsListView();
+				viewWindow.SetView(compositeView);
 				var pil1 = objectSpace.CreateObject<PIL>();
 				pil1.Name = "a";
 				var pil2 = objectSpace.CreateObject<PIL>();
 				pil2.Name = "b";
 				var pil3 = objectSpace.CreateObject<PIL>();
 				pil3.Name = "c";
-				objectSpace.CommitChanges();
-				var viewWindow = applicatin.CreateViewWindow();
-				viewWindow.SetView(applicatin.NewView(listViewItem.ListView));
+				compositeView.CollectionSource.Add(pil2);
+				compositeView.CollectionSource.Add(pil1);
+				compositeView.CollectionSource.Add(pil3);
+				compositeView.CollectionSource.Objects().Count().ShouldBe(3);
 				var action = viewWindow.Action(direction);
 				var edgeObject = direction == nameof(SwapPositionInListViewService.MoveObjectUp) ? pil3 : pil1;
 
 				action.DoExecute(space1 => new[]{space1.GetObject(edgeObject)});
 
-				var space = applicatin.CreateObjectSpace();
-				space.GetObject(edgeObject).Order.ShouldBe(2);
-				space.GetObject(pil2).Order.ShouldBe(otherObjectPosition);
+				edgeObject.Order.ShouldBe(2);
+				pil2.Order.ShouldBe(otherObjectPosition);
 			}
 		}
 

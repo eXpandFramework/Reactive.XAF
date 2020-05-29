@@ -13,12 +13,14 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.PositionInListView.Tests{
 	public class PositionInListServiceTests : PositionInListViewBaseTest{
+
 		[TestCase(null, 1, 2, 3, 4)]
 		[TestCase(PositionInListViewNewObjectsStrategy.Last, 1, 2, 3, 4)]
 		[TestCase(PositionInListViewNewObjectsStrategy.First, -1, -2, -3, -4)]
 		[XpandTest]
 		public void When_new_objects_position_them_by_model_strategy(PositionInListViewNewObjectsStrategy? strategy,
 			int first, int second, int third, int fourth){
+
 			using (var applicatin = PositionInListViewModuleModule().Application){
 				var modelPositionInListView = applicatin.Model.ToReactiveModule<IModelReactiveModulesPositionInListView>()
 					.PositionInListView;
@@ -36,11 +38,12 @@ namespace Xpand.XAF.Modules.PositionInListView.Tests{
 				var pil1 = objectSpace.CreateObject<PIL>();
 				var pil2 = objectSpace.CreateObject<PIL>();
 				var pil3 = objectSpace.CreateObject<PIL>();
-				objectSpace.CommitChanges();
+				
 
 				pil1.Order.ShouldBe(first);
 				pil2.Order.ShouldBe(second);
 				pil3.Order.ShouldBe(third);
+				objectSpace.CommitChanges();
 				objectSpace = applicatin.CreateObjectSpace();
 				var pil4 = objectSpace.CreateObject<PIL>();
 				objectSpace.CommitChanges();

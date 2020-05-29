@@ -6,6 +6,7 @@ using DevExpress.Data.Extensions;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.Persistent.Base;
+using DevExpress.Xpo.DB;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
@@ -49,10 +50,8 @@ namespace Xpand.XAF.Modules.PositionInListview{
             var listView = action.View<ListView>();
             var positionMember = action.Application.Model.ModelPositionInListView().ListViewItems
                 .First(item => item.ListView.Id == listView.Id).PositionMember.MemberInfo;
-            var objects = listView.CollectionSource.Objects().ToArray();
-            var objectSpace = listView.ObjectSpace;
-            var selectObjectKeyValue = objectSpace.GetKeyValue(selectedObject).ToString();
-            var selectedIndex = objects.FindIndex(o => selectObjectKeyValue == objectSpace.GetKeyValue(o).ToString());
+            var objects = listView.Objects();
+            var selectedIndex = objects.FindIndex(o => selectedObject == o);
             var swapIndex = action.Id == nameof(MoveObjectUp) ? selectedIndex - 1 : selectedIndex + 1;
             if (swapIndex > -1 && swapIndex <= objects.Length - 1){
                 var selectedPosition = positionMember.GetValue(selectedObject);
@@ -60,7 +59,6 @@ namespace Xpand.XAF.Modules.PositionInListview{
                 var swapPosition = positionMember.GetValue(swapObject);
                 positionMember.SetValue(swapObject, selectedPosition);
                 positionMember.SetValue(selectedObject, swapPosition);
-                objectSpace.CommitChanges();
             }
         }
 
@@ -83,7 +81,7 @@ namespace Xpand.XAF.Modules.PositionInListview{
 		        var action = _.Item2;
 		        var currentObject = listView.SelectedObjects.Cast<object>().FirstOrDefault();
 		        if (currentObject != null){
-			        var objects = listView.CollectionSource.Objects().ToArray();
+			        var objects = listView.Objects();
 			        var keyValue = listView.ObjectSpace.GetKeyValue(currentObject).ToString();
 			        var selectedIndex = objects.FindIndex(o => listView.ObjectSpace.GetKeyValue(o).ToString() == keyValue);
 			        action.Enabled[EdgeContext] = action.Id == nameof(MoveObjectUp)?selectedIndex > 0:selectedIndex<objects.Length-1;
@@ -92,5 +90,18 @@ namespace Xpand.XAF.Modules.PositionInListview{
 	        })
 	        .TracePositionInListView(_ => _.Item2.Id)
 	        .ToUnit();
+
+        private static object[] Objects(this ListView listView){
+	        var objects = listView.CollectionSource.Objects();
+	        // return objects.ToArray();
+	        if (listView.CollectionSource.CanApplySorting){
+		        return objects.ToArray();
+	        }
+	        var item = listView.Model.Application.ModelPositionInListView().ListViewItems
+		        .First(rule => rule.ListView == listView.Model);
+	        return item.SortingDirection == SortingDirection.Ascending
+		        ? objects.OrderBy(o => item.PositionMember.MemberInfo.GetValue(o)).ToArray()
+		        : objects.OrderByDescending(o => item.PositionMember.MemberInfo.GetValue(o)).ToArray();
+        }
     }
 }
