@@ -17,7 +17,7 @@ The module is designed to sort a ListView CollectionSource on a existing Busines
 
 For the configured ListViews the `MoveObjectUp` and `MoveObjectDown` actions will be active and they can be used to change the order. The module on the background swaps the values of the model configured `PositionMember` on each action execute resulting in a persistent ListView order.
 
-The ListView sorting happens when a ListView is created on the CollectionSource object. In addition ListView sorting and grouping from the UI Editor are disabled.
+The ListView sorting happens when a ListView is created on the CollectionSource object. For cases that the CollectionSource is not sortable e.g. (non-persistent) sorting is done explicitly. In addition ListView sorting and grouping from the UI Editor are disabled and the `PositionMember` modification are not committed explicitly.
 
 For new Business objects the module will automatically update the configured members as per model configuration as shown:
 
@@ -36,6 +36,9 @@ Below is a screencast of the module in action. At the bottom you can see what th
 
 1. Moving multiple positions at once.
 2. Moving multiple objects.
+4. Conditional NewObjectsStrategy.
+5. Conditional persistance PositionMember modifications.
+6. Enable temporarily UI sorting and grouping on the ListView.
 3. Any other need you may have.
 
 Let us know if you want us to implement them for you.

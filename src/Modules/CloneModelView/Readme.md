@@ -58,10 +58,10 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |----|----
 |**DevExpress.ExpressApp**|**Any**
 |Fasterflect.Xpand|2.0.7
- |JetBrains.Annotations|2019.1.3
+ |JetBrains.Annotations|2020.1.0
  |System.ValueTuple|4.5.0
- |Xpand.Extensions.XAF|2.201.29
- |Xpand.Patcher|1.0.10
+ |Xpand.Extensions.XAF|2.201.30
+ |Xpand.Patcher|2.0.15
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.7
 
 ## Issues-Debugging-Troubleshooting

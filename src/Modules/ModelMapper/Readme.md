@@ -189,16 +189,16 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |**DevExpress.ExpressApp**|**Any**
 |Enums.NET|3.0.3
  |Fasterflect.Xpand|2.0.7
- |JetBrains.Annotations|2019.1.3
+ |JetBrains.Annotations|2020.1.0
  |Mono.Cecil|0.11.2
  |System.CodeDom|4.7.0
  |System.Interactive|4.0.0
  |System.Reactive|4.3.2
  |Xpand.Collections|1.0.1
- |Xpand.Extensions|2.201.29
- |Xpand.Extensions.Reactive|2.201.29
- |Xpand.Extensions.XAF|2.201.29
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.201.29
+ |Xpand.Extensions|2.201.30
+ |Xpand.Extensions.Reactive|2.201.30
+ |Xpand.Extensions.XAF|2.201.30
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.201.30
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.7
 
 ## Issues-Debugging-Troubleshooting
