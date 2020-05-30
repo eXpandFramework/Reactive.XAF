@@ -12,9 +12,9 @@ using Xpand.XAF.Modules.Reactive.Services;
 namespace Xpand.XAF.Modules.GridListEditor{
     public static class GridListEditorService{
 
-        internal static IObservable<Unit> Connect(this  XafApplication application){
-            return application.RememberTopRow().Retry(application).ToUnit();
-        }
+        internal static IObservable<Unit> Connect(this  ApplicationModulesManager manager) => 
+	        manager.WhenApplication().SelectMany(application => application.RememberTopRow().Retry(application).ToUnit());
+
         internal static IObservable<TSource> TraceGridListEditor<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
 	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
 	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) =>

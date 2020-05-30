@@ -21,7 +21,7 @@ namespace Xpand.XAF.Modules.GridListEditor {
 
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
-            Application.Connect()
+            moduleManager.Connect()
                 .TakeUntilDisposed(this)
                 .Subscribe();
         }

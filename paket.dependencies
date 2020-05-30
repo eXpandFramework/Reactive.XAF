@@ -43,5 +43,5 @@ nuget Unofficial.Microsoft.mshtml 7.0.3300
 nuget Xpand.Patcher 2.0.15
 nuget YamlDotNet 8.1.1
 nuget Xpand.Collections 
-nuget Jetbrains.Annotations
+nuget JetBrains.Annotations 2020.1.0
 nuget Polly 7.2.1
