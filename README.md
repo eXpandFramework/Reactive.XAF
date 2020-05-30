@@ -9,8 +9,9 @@ In the `DevExpress.XAF` repository you can find **low dependency** DevExpress XA
 We aim for low dependency XAF modules so expect to see only a small set of classes per project. To learn more about each module navigate to its root `Readme` file or search the [Wiki](http://xaf.wiki.expandframework.com).
 
 There are three project categories, follow the links to read more. 
-1. [DevExpress.XAF.Extensions](https://github.com/eXpandFramework/XAF/blob/master/src/Extensions/)
+
 2. [DevExpress.XAF.Modules](https://github.com/eXpandFramework/XAF/tree/master/src/Modules)
+1. [DevExpress.XAF.Extensions](https://github.com/eXpandFramework/XAF/blob/master/src/Extensions/)
 3. [Tools](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools)
 
 ## Versioning

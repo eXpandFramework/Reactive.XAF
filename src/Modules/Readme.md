@@ -2,14 +2,6 @@
 
 This namespace `Xpand.XAF.Modules` is used for projects that contain XAF modules. 
 
-## Installation 
-You have to install the packages from nuget `Install-Package ModuleName` and then register the module as per XAF docs see [Ways to Register a Module](https://documentation.devexpress.com/eXpressAppFramework/118047/Concepts/Application-Solution-Components/Ways-to-Register-a-Module). 
-
-
-## Versioning
-The modules are **not bound** to **DevExpress versioning**, which means you can use the latest version with your old DevExpress projects [Read more](https://github.com/eXpandFramework/XAF/tree/master/tools/Xpand.VersionConverter).
-
-The modules follow the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 
 ## Platform agnostic modules list
 
@@ -53,6 +45,15 @@ To minimize version conflicts we recommend that you use the `Xpand.XAF.Core.All,
 Use main project [issues](https://github.com/eXpandFramework/eXpand/issues/new/choose)
 
 ![GitHub issues by-label](https://xpandshields.azurewebsites.net/github/issues/expandframework/expand/Standalone_XAF_Modules.svg) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/Standalone_XAF_Modules.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AXAF+)
+
+## Installation 
+You have to install the packages from nuget `Install-Package ModuleName` and then register the module as per XAF docs see [Ways to Register a Module](https://documentation.devexpress.com/eXpressAppFramework/118047/Concepts/Application-Solution-Components/Ways-to-Register-a-Module). 
+
+
+## Versioning
+The modules are **not bound** to **DevExpress versioning**, which means you can use the latest version with your old DevExpress projects [Read more](https://github.com/eXpandFramework/XAF/tree/master/tools/Xpand.VersionConverter).
+
+The modules follow the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 
 ### Efficient Package Management
 
