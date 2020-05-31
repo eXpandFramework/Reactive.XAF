@@ -184,8 +184,8 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |System.Interactive|4.0.0
  |System.Reactive|4.3.2
  |Xpand.Extensions|2.201.31
- |Xpand.Extensions.Reactive|2.201.31
- |Xpand.Extensions.XAF|2.201.31
+ |Xpand.Extensions.Reactive|2.201.32
+ |Xpand.Extensions.XAF|2.201.32
  |Xpand.Patcher|2.0.15
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.7
 
