@@ -13,7 +13,7 @@ To configure the `OneView` follow a similar pattern as shown next:
 
 ### Examples
 
-The module is used from the [Reactive.Logger.Client](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win) to display only one View the `TraceEvent_ListView`
+This WinForms module is used from the [Reactive.Logger.Client](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win) to display only one View the `TraceEvent_ListView`
 
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 

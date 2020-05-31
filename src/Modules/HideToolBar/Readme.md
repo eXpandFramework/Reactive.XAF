@@ -6,7 +6,7 @@
 The `HideToolBar` package uses the the `IModelListView.HideToolBar` attribute to hide the toolbar.
 
 ## Details
-The module satisfies the following conditions:
+This is a platform agnostic module that satisfies the following conditions:
 1. For all `Nested Frames` with `HIdeToolBar` attribute enabled a signal will be created out of the [Frame.TemplatedChanged](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.Frame.TemplateChanged) and the [Frame.TemplateViewChanged](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.Frame.TemplateViewChanged) events. For each signal emit the the ToolBar will be hidden.
 2. For Windows platform in addition to the ToolBar the `DevExpress.ExpressApp.Win.SystemModule.ToolbarVisibilityController` will be disabled which controls the Show Toolbar context menu.
 

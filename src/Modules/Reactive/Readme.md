@@ -6,7 +6,7 @@
 The `Reactive` module can be used to create XAF DSL implementations in a Reactive/Functional style resulting in maintainable easy to read code base. 
 
 ## Details
-This module and all modules that use it as a dependency **do not use controllers**. Instead they use existing or new XAF events where they are modeled as operators with the prefix `When`. 
+This is a platform agnostic module. All modules that use it as a dependency **do not use controllers**. Instead they use existing or new XAF events where they are modeled as operators with the prefix `When`. 
 
 Observables are nothing more than a Type which provides operators/methods to [CombineLatest](http://reactivex.io/documentation/operators/combinelatest.html), [Merge](http://reactivex.io/documentation/operators/Merge.html), [Zip](http://reactivex.io/documentation/operators/zip.html), [ObserveOn](http://reactivex.io/documentation/operators/combinelatest.html)(Scheduler) using LINQ style syntax see ([ReactiveX.IO](http://reactivex.io/documentation/operators.html)).
 

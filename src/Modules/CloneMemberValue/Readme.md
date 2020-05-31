@@ -7,7 +7,7 @@ The `CloneMemberValue` module will help you to selectively `clone` Bussiness obj
 
 ## Details
 
-The module extends the `IModelMember` nodes with the `IModelMemberCloneValue` uses the next two strategies:
+This is a platform agnostic module extends the `IModelMember` nodes with the `IModelMemberCloneValue` uses the next two strategies:
 
 1. It monitors the `DetailView` construction sequence and projects the result to a `Previous/Current` pair which is then used to clone if the context is valid.
 2. It monitors the sequence of new object created from the XAF `ListEditor`, it then projects it similarly to a `Previous/Current` pair.

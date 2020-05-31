@@ -6,7 +6,7 @@
 The `RefreshView` module will refresh the View datasource periodically from a model configuration. 
 
 ## Details
-Use the next model configuration to periodically refresh a ListView.
+This is a platform agnostic modules thats uses the next model configuration to periodically refresh a ListView.
 <twitter>
 ![image](https://user-images.githubusercontent.com/159464/64825964-d5948780-d5c7-11e9-9249-27a7847e6bb9.png)
 </twitter>

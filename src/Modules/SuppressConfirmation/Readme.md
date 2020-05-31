@@ -7,7 +7,7 @@ The `SuppressConfirmation` package can be used to enable specific SuppressConfir
 
 
 ## Details
-The module satisfies the following conditions:
+This is a platform agnostic module satisfies the following conditions:
 1. When any Window `ObjectView` `changed` with `SuppressConfirmation` enabled, a signal will be created out of the [Frame.ViewChanged](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.Frame.ViewChanged) event. For each signal emit the [ModificationsHandlingMode](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.SystemModule.ModificationsController.ModificationsHandlingMode) is set to not used.
 2. When web for each signal emit both the `DevExpress.ExpressApp.Web.SystemModule.ASPxGridListEditorConfirmUnsavedChangesController`, `DevExpress.ExpressApp.Web.SystemModule.WebConfirmUnsavedChangesDetailViewController` will be deactivated.
 <twitter>

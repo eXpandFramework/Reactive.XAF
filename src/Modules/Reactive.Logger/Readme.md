@@ -6,7 +6,7 @@
 The `Reactive.Logger` module monitors calls to the Reactive delegates (OnNext, OnSubscribe, OnDispose, OnCompleted, OnError) and persists the calls info in the application datastore. For more head to the details section.
 
 ## Details
-The module extends the `IModelReactiveModules` to provide a list TraceSources allowing to configure them further. All reactive modules will be in this list. 
+This is a platform agnostic module extends the `IModelReactiveModules` to provide a list TraceSources allowing to configure them further. All reactive modules will be in this list. 
 ![image](https://user-images.githubusercontent.com/159464/64830050-63c43a00-d5d7-11e9-919d-ac5df92646af.png)
 
 All messages are stored in the local database using the `TraceEvent` BO and you can visualize them in ListView as shown in the next shot.

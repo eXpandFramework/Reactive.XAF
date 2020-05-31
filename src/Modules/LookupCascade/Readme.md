@@ -12,7 +12,7 @@ The `LookupCascade` module implements client side Cascading Filtering for Lookup
 **Credits:** to the Company (wants anonymity) that [sponsor](https://github.com/sponsors/apobekiaris) the initial implementation of this module. 
 
 ---
-There are many solutions for implementing [Cascading Filtering for Lookup List Views](https://docs.devexpress.com/eXpressAppFramework/112681/task-based-help/filtering/how-to-implement-cascading-filtering-for-lookup-list-views#1). 
+This is a ASP.NET module. There are many solutions for implementing [Cascading Filtering for Lookup List Views](https://docs.devexpress.com/eXpressAppFramework/112681/task-based-help/filtering/how-to-implement-cascading-filtering-for-lookup-list-views#1). 
 
 However they require a round trip to the server as the [ImmediatePostData](https://docs.devexpress.com/eXpressAppFramework/DevExpress.Persistent.Base.ImmediatePostDataAttribute) attribute must be applied and if your users are on a low speed network (regular 2G) then you will notice a few seconds delay for each round trip.
 

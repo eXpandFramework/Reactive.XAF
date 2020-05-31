@@ -7,7 +7,7 @@ The `ViewEditMode` module controls the state of DetailView.ViewEditMode. Choose 
 
 
 ## Details
-The module extends the `IModelDetailView` interface with the `IModelDetailViewViewEditMode`. 
+This is a platform agnostic module extends the `IModelDetailView` interface with the `IModelDetailViewViewEditMode`. 
 
 <twitter>
 ![image](https://user-images.githubusercontent.com/159464/55380067-b7f6c880-5527-11e9-96a1-053fd44095e7.png)

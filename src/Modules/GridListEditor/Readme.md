@@ -7,7 +7,7 @@ The `GridListEditor` module hosts features related to XAF GridListEditor. This v
 
 ## Details
 
-To freeze the TopRowIndex of a ListView when its CollectionSource get reloaded add a new rule to your model as in next image.
+This is a WinForma module. To freeze the TopRowIndex of a ListView when its CollectionSource get reloaded add a new rule to your model as in next image.
 
 <twitter>
 

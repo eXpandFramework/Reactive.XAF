@@ -6,7 +6,7 @@
 The `MasterDetail` module can help you create platform agnostic master detail `XAF` views using only the Model Editor. 
 
 ## Details
-The module satisfies the following conditions:
+This is a platform agnostic module that satisfies the following conditions:
 1. If a `DashboardView` contains a `one ListView and one DetailView` of the `same type`, then it will be Master-Detail `enabled by default`. It can be disabled by setting the `IModelDashboardViewMasterDetail.MasterDetail` to false.
 
    ![image](https://user-images.githubusercontent.com/159464/55990839-67af0180-5cb1-11e9-84cd-6ef0bb5d0137.png)

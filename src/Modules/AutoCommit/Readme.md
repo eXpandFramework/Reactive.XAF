@@ -3,10 +3,10 @@
 [![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/AutoCommit.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+AutoCommit) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/AutoCommit.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+AutoCommit)
 # About 
 
-The `AutoCommit` package can be used to enable specific autocommit scenarios by setting the `IModelObjectView.AutoCommit` attribute to true.
+The `AutoCommit` package can be used to enable specific autocommit scenarios by setting the `IModelObjectView.AutoCommit`.
 
 ## Details
-The module satisfies the following conditions:
+This is a platform agnostic module that satisfies the following conditions:
 1. When any `ObjectView` with `AutoCommit` enabled a signal will be created out of the [View.Closing](https://documentation.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.View.Closing.event) and the [QueryCanChangeCurrentObject](https://documentation.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.View.QueryCanChangeCurrentObject.event) events. For each signal emit the `View.ObjectSpace.CommitChanges()` is called.
 2. When the `ASPxListEditor` of any `ListView` with `AllowEdit` in `BatchEdit` mode and `Autocommit` loses focus (`Client side`) then `View.ObjectSpace.CommitChanges()` is called.
 <twitter>

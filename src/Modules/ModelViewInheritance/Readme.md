@@ -6,7 +6,7 @@
 The `ModuleViewInheritance` module replaces the generator layer of a view by composing multiple unrelated view model differences.
 
 ## Details
-The module extends the model views nodes with the `IModelObjectViewMergedDifferences` interface to allow model view differences composition. 
+This is a platform agnostic module that extends the model views nodes with the `IModelObjectViewMergedDifferences` interface to allow model view differences composition. 
 
 ![image](https://user-images.githubusercontent.com/159464/50849204-f80e3b00-137e-11e9-8c6c-0a93edffb954.png)
 

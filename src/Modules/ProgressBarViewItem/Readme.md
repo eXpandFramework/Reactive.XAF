@@ -6,7 +6,7 @@
 The `ProgressBarViewItem` package contains a ViewItem that can help you display a progress for your long running tasks. Examples in the details section of this page.
 
 ## Details
-The module registers a `ProgressViewItem` into the [ViewItems](https://docs.devexpress.com/eXpressAppFramework/112612/concepts/ui-construction/view-items) of your application.
+This is a platform agnostic module that registers a `ProgressViewItem` into the [ViewItems](https://docs.devexpress.com/eXpressAppFramework/112612/concepts/ui-construction/view-items) of your application.
 ![image](https://user-images.githubusercontent.com/159464/58765488-56c99080-857c-11e9-8522-4c716df019fd.png).
 
 This is a ViewItem and is not bound to a property. To add it in a DetailView Layout you have first to add it in the IModelViewItems collection.
