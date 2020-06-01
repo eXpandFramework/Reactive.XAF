@@ -85,14 +85,15 @@ jobs:
           **\*MasterDet*Tests.dll
           **\*ModelViewIn*Tests.dll
           **\*OneView*Tests.dll
+          **\*Position*Tests.dll
           **\*Progre*Tests.dll
           **\*Reactive.Tests.dll
           **\*Refresh*Tests.dll
+          **\*Sequence*Tests.dll
           **\*Supp*Tests.dll
           **\*View*Tests.dll
           **\*Lookup*Tests.dll
           **\*Todo*Tests.dll
-          **\*Sequence*Tests.dll
 
           !**\*Hub*.dll
           !**\*TestAdapter.dll
