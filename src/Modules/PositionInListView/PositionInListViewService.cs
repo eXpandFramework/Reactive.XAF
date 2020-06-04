@@ -13,7 +13,6 @@ using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ModelExtensions;
-using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.PositionInListview{
@@ -40,8 +39,8 @@ namespace Xpand.XAF.Modules.PositionInListview{
                 .SelectMany(_ => _.listView.WhenControlsCreated())
                 .SelectMany(view => ((ColumnsListEditor) view.Editor).Columns)
                 .Do(wrapper => {
-                    // wrapper.AllowGroupingChange = false;
-                    // wrapper.AllowSortingChange = false;
+                    wrapper.AllowGroupingChange = false;
+                    wrapper.AllowSortingChange = false;
                 })
                 .TracePositionInListView(wrapper => wrapper.Caption)
                 .ToUnit();
@@ -110,7 +109,6 @@ namespace Xpand.XAF.Modules.PositionInListview{
                 .TracePositionInListView(_ => _.source.theObject.ToString())
                 .ToUnit();
 
-        internal static IModelPositionInListView ModelPositionInListView(this IModelApplication modelApplication) => modelApplication
-            .ToReactiveModule<IModelReactiveModulesPositionInListView>().PositionInListView;
+        
     }
 }

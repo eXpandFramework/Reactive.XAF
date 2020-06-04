@@ -11,7 +11,7 @@ The PositionInListView XAF module, allows to control how objects are positioned 
 **Credits:** to the Company (wants anonymity) that [sponsor](https://github.com/sponsors/apobekiaris) the initial implementation of this module. 
 
 ---
-This is a platform agnostic module that is designed to sort a ListView based on a existing Business Object member. It is possible to define one configuration for each ListView and choose the sorting member from the model as shown:
+This is a `platform agnostic` module that is designed to sort a ListView based on a existing Business Object member. It is possible to define one configuration for each ListView and choose the sorting member from the model as shown:
 
 ![image](https://user-images.githubusercontent.com/159464/82748810-7ec58b80-9dad-11ea-8e00-6f98cc426f19.png)
 

@@ -6,14 +6,14 @@
 The `OneView` will display **one view only** with the option to edit the model. To learn how this is designed to work head to the details section.
 
 ## Details
-To configure the `OneView` follow a similar pattern as shown next:
+This is a `WinForms module`. To configure the `OneView` follow a similar pattern as shown next:
 <twitter>
 ![image](https://user-images.githubusercontent.com/159464/64824645-57ce7d00-d5c3-11e9-9645-1f3e0a7b17af.png)
 </twitter>
 
 ### Examples
 
-This WinForms module is used from the [Reactive.Logger.Client](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win) to display only one View the `TraceEvent_ListView`
+This module is used from the [Reactive.Logger.Client](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win) to display only one View the `TraceEvent_ListView`
 
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 

@@ -8,6 +8,7 @@ using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Utils;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.FrameExtensions;
+using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
 namespace Xpand.XAF.Modules.Reactive.Services.Actions{
     
@@ -109,6 +110,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 
         public static IObservable<Unit> WhenDisposing<TAction>(this TAction simpleAction) where TAction : ActionBase => Disposing(Observable.Return(simpleAction));
 
+        public static IObservable<TAction> WhenControllerActivated<TAction>(this IObservable<TAction> source) where TAction : ActionBase => source
+	        .SelectMany(a =>a.Controller.WhenActivated().To(a) );
         public static IObservable<TAction> WhenActive<TAction>(this IObservable<TAction> source) where TAction : ActionBase => source.Where(a => a.Active);
 
         public static IObservable<TAction> WhenActive<TAction>(this TAction simpleAction) where TAction : ActionBase =>

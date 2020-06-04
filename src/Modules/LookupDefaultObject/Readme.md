@@ -1,0 +1,82 @@
+![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.LookupDefaultObject.svg?&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.LookupDefaultObject.svg?&style=flat)
+
+[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/LookupDefaultObject.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+LookupDefaultObject) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/LookupDefaultObject.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+LookupDefaultObject)
+# About 
+
+The LookupDefaultObject XAF module, helps end-user to configure the default object for a LookUp editor.
+
+## Details
+---
+
+**Credits:** to the Company (wants anonymity) that [sponsor](https://github.com/sponsors/apobekiaris) the initial implementation of this module. 
+
+---
+This is a `platform agnostic` module. The end-user can execute the `LookupDefaultObject` action and select which value a lookup property editor will get when a new object is created. To configure the participating DetailView and lookup members you can use the Model Editor as in the next image:
+
+![image](https://user-images.githubusercontent.com/159464/83668842-49a11080-a5d9-11ea-840c-ba8ffec00cca.png)
+
+
+When the above `Order_DetailView` created the `LookupDefaultObject` will be active and will contain two items the `Product` and the `Accessory`. Executing the action will result in saving the related lookup editor object key value along with the view and member name in the database. When the same Order_DetailView is created later for a new object then the info from the database will be used to assign the appropriate object.
+
+
+Below is a screencast of the module in action. At the bottom you can see what the [Reactive.Logger.Client.Win](https://github.com/eXpandFramework/DevExpress.XAF/wiki/Reactive.Logger.Client.Win) reports in our dev environment as the module is used in a remote IIS.
+<twitter>
+![kMok40PDFn](https://user-images.githubusercontent.com/159464/83734915-4e58d980-a658-11ea-90db-c05fa9f614ac.gif)
+</twitter>
+
+---
+
+**Possible future improvements:**
+
+1. Multiple default object info persistent with one go.
+1. ListView support.
+2. Remember value strategies e.g Last.
+4. Conditional strategies.
+3. Any other need you may have.
+
+Let me know if you want me to implement them for you.
+
+---
+
+## Installation 
+1. First you need the nuget package so issue this command to the `VS Nuget package console` 
+
+   `Install-Package Xpand.XAF.Modules.LookupDefaultObject`.
+
+    The above only references the dependencies and next steps are mandatory.
+
+2. [Ways to Register a Module](https://documentation.devexpress.com/eXpressAppFramework/118047/Concepts/Application-Solution-Components/Ways-to-Register-a-Module)
+or simply add the next call to your module constructor
+    ```cs
+    RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.LookupDefaultObjectModule));
+    ```
+## Versioning
+The module is **not bound** to **DevExpress versioning**, which means you can use the latest version with your old DevExpress projects [Read more](https://github.com/eXpandFramework/XAF/tree/master/tools/Xpand.VersionConverter).
+
+The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
+## Dependencies
+`.NetFramework: net461`
+
+|<!-- -->|<!-- -->
+|----|----
+|**DevExpress.ExpressApp**|**Any**
+|Fasterflect.Xpand|2.0.7
+ |JetBrains.Annotations|2019.1.3
+ |System.ValueTuple|4.5.0
+ |Xpand.Extensions|2.201.29
+ |Xpand.Extensions.XAF|2.201.29
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.7
+
+## Issues-Debugging-Troubleshooting
+
+To `Step in the source code` you need to `enable Source Server support` in your Visual Studio/Tools/Options/Debugging/Enable Source Server Support. See also [How to boost your DevExpress Debugging Experience](https://github.com/eXpandFramework/DevExpress.XAF/wiki/How-to-boost-your-DevExpress-Debugging-Experience#1-index-the-symbols-to-your-custom-devexpresss-installation-location).
+
+If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call at the constructor of your module.
+```cs
+Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.LookupDefaultObject.LookupDefaultObjectModule))
+```
+
+### Tests
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.LookupDefaultObject.LookupDefaultObject). 
+All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
+

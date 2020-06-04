@@ -6,7 +6,7 @@
 The `Reactive.Logger.Client.Win` is a XAF Windows Forms application (**executable**) capable to connect to any XAF application that has the `Reactive.Logger.Hub` module installed.
 
 ## Details
-This WinForms client is an executable XAF Windows Forms application and not a XAF module, which at the moment is distributed from Nuget.org but in future will use Chocolatey.org as it makes more sense. So you download the package and run the exe which will monitor the ports configured in your model. By default it monitors the range 
+The client is an executable XAF Windows Forms application and not a XAF module, which at the moment is distributed from Nuget.org but in future will use Chocolatey.org as it makes more sense. So you download the package and run the exe which will monitor the ports configured in your model. By default it monitors the range 
 ![image](https://user-images.githubusercontent.com/159464/66378578-62124a00-e9bc-11e9-9a8c-479c4c6e4037.png)
 
 If a XAF application that has the [Reactive.Logger.Hub](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Hub) found transmitting in this range it will connect and persist all message that describe the remote application pipeline flow. 

@@ -40,7 +40,6 @@ using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
-using Xpand.Extensions.XAF.Xpo;
 using Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Logger;
@@ -169,6 +168,7 @@ namespace Xpand.TestsLib{
             {"SequenceGeneratorModule", 61475},
             {"MicrosoftTodoModule", 61476},
             {"PositionInlistViewModule", 61478},
+            {"LookupDefaultObjectModule", 61479},
         };
 
         public static IObservable<IModelReactiveLogger> ConfigureModel<TModule>(this XafApplication application,

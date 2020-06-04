@@ -1,10 +1,12 @@
-﻿using DevExpress.Persistent.Base;
+﻿using System.ComponentModel;
+using DevExpress.ExpressApp;
+using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl;
 using DevExpress.Xpo;
 
 namespace Xpand.TestsLib.BO{
     [FriendlyKeyProperty(nameof(ProductName))]
-    public class Product : BaseObject{
+    public class Product : BaseObject,IObjectSpaceLink{
         public Product(Session session) : base(session){
         }
 
@@ -17,5 +19,8 @@ namespace Xpand.TestsLib.BO{
 
         [Association("P-To-C")]
         public XPCollection<Accessory> Accessories => GetCollection<Accessory>(nameof(Accessories));
+        [Browsable(false)][NonPersistent]
+
+        public IObjectSpace ObjectSpace{ get; set; }
     }
 }

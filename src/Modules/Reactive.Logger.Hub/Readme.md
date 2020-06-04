@@ -7,7 +7,7 @@ The `Reactive.Logger.Hub` module can be used as a Server which you can install i
 
 ## Details
 
-This is a platform agnostic module.
+This is a `platform agnostic` module.
 
 1. Client Mode
 To install it as a client the XafApplication descendant should implement the `ILoggerHubClientApplication`. Having so the application consult the model as to which ports should listen.
@@ -16,7 +16,7 @@ To install it as a client the XafApplication descendant should implement the `IL
 ![image](https://user-images.githubusercontent.com/159464/65379322-d23b8300-dcce-11e9-9c43-194b8f6c92c9.png)
 </twitter>
 
-Once a TCP Listerner found in any of these ports the application will try to receive and persist all transmitted messages. There is already a [Reactive.Logger.Client.exe](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win) you can use to monitor all reactive packages of this repository.
+Once a TCP Listener found in any of these ports the application will try to receive and persist all transmitted messages. There is already a [Reactive.Logger.Client.exe](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win) you can use to monitor all reactive packages of this repository.
 2. Server Mode
 In this mode the application starts transmitting all messages. It transmits to a preconfigured port to all connected clients. You do not need to implement the `ILoggerHubClientApplication` as before just install the package as a regular XAF module.
 ![image](https://user-images.githubusercontent.com/159464/65379394-e2079700-dccf-11e9-840d-44ec34849229.png)

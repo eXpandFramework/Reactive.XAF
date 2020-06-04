@@ -6,7 +6,7 @@
 The `CloneModelView` package can be used to generate XAF model views in the generator layer, resulting in a clean model which is really important for monitoring and supporting purposes.
 
 ## Details
-This is This is a platform agnostic module. Using the `CloneModelViewAttribute` in your Bussiness Objects you can:
+This is a `platform agnostic` module. Using the `CloneModelViewAttribute` in your Bussiness Objects you can:
 
 1. Create one or many `DetailViews` or `ListViews` or `LookupListViews`.
 2. Additionally for the cloned view you can configure if it will be the default view for the Business Object.

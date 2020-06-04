@@ -81,21 +81,21 @@ jobs:
           **\*Extensions*Tests.dll
           **\*Grid*Tests.dll
           **\*HideTool*Tests.dll
-          **\*Logger.Tests.dll
+          **\*LookupCascade*.Tests.dll
+          **\*LookupDefaultObject*.Tests.dll
           **\*MasterDet*Tests.dll
           **\*ModelViewIn*Tests.dll
+          **\*Office*Todo*Tests.dll
           **\*OneView*Tests.dll
           **\*Position*Tests.dll
           **\*Progre*Tests.dll
           **\*Reactive.Tests.dll
+          **\*Reactive*Logger.Tests.dll
+          **\*Reactive*Logger.Hub.Tests.dll
           **\*Refresh*Tests.dll
           **\*Sequence*Tests.dll
           **\*Supp*Tests.dll
           **\*View*Tests.dll
-          **\*Lookup*Tests.dll
-          **\*Todo*Tests.dll
-
-          !**\*Hub*.dll
           !**\*TestAdapter.dll
           !**\obj\**    
         diagnosticsEnabled: true

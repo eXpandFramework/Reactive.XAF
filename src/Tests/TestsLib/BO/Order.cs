@@ -1,10 +1,12 @@
-﻿using DevExpress.Persistent.Base;
+﻿using System.ComponentModel;
+using DevExpress.ExpressApp;
+using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl;
 using DevExpress.Xpo;
 
 namespace Xpand.TestsLib.BO{
     [DefaultClassOptions]
-    public class Order : BaseObject{
+    public class Order : BaseObject,IObjectSpaceLink{
         private Accessory _accessory;
         private Product _product;
 
@@ -38,5 +40,7 @@ namespace Xpand.TestsLib.BO{
             get => _aggregatedOrder;
             set => SetPropertyValue(nameof(AggregatedOrder), ref _aggregatedOrder, value);
         }
+        [Browsable(false)][NonPersistent]
+        public IObjectSpace ObjectSpace{ get; set; }
     }
 }

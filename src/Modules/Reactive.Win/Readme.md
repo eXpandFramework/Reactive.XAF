@@ -6,7 +6,7 @@
 The `Reactive.Win` module is the platform specific version of the `Reactive module`. 
 
 ## Details
-This is a WinForms module. Refer to the `Reactive module`](https://github.com/eXpandFramework/DevExpress.XAF/tree/lab/src/Modules/Reactive).
+This is a `WinForms module`. Refer to the `Reactive module`](https://github.com/eXpandFramework/DevExpress.XAF/tree/lab/src/Modules/Reactive).
 
 ## Versioning
 The module is **not bound** to **DevExpress versioning**, which means you can use the latest version with your old DevExpress projects [Read more](https://github.com/eXpandFramework/XAF/tree/master/tools/Xpand.VersionConverter).

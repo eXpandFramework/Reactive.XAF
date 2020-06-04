@@ -227,7 +227,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             .SelectMany(application => application.WhenDashboardViewCreated());
 
         [PublicAPI]
-        public static IObservable<(XafApplication application, DetailViewCreatedEventArgs e)> DetailViewCreated(this IObservable<XafApplication> source) => source
+        public static IObservable<(XafApplication application, DetailViewCreatedEventArgs e)> WhenDetailViewCreated(this IObservable<XafApplication> source) => source
             .SelectMany(application => application.WhenDetailViewCreated());
 
         public static IObservable<ObjectView> ObjectViewCreated(this IObservable<XafApplication> source) => source.ViewCreated().OfType<ObjectView>();

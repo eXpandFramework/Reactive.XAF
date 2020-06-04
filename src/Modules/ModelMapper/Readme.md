@@ -7,7 +7,7 @@ The `ModelMapper` module **can map any type** to the XAF application model and i
 The module **ships with 82 predefined maps** for all the common types such as GirdView, ASPxGridView, TreeList, Scheduler, Chart, Dashboards etc. More info in the Details section.
 
 ## Details
-This is a platform agnostic module that transforms any type to XAF model format and will extend the model with a simple call like:
+This is a `platform agnostic` module that transforms any type to XAF model format and will extend the model with a simple call like:
 ```cs
 public override void Setup(ApplicationModulesManager moduleManager) {
 	base.Setup(moduleManager);

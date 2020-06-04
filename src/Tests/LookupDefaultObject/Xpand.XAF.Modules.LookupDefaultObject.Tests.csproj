@@ -11,14 +11,7 @@
     <DebugType>full</DebugType>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
-    <AssemblyName>Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests</AssemblyName>
   </PropertyGroup>
-  <ItemGroup>
-    <None Remove="AuthenticationData.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="AuthenticationData.json" />
-  </ItemGroup>
   <ItemGroup>
     <Reference Include="Tests">
       <HintPath>..\..\..\bin\Xpand.TestsLib.dll</HintPath>
@@ -26,41 +19,18 @@
     <Reference Include="Xpand.Extensions">
       <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
     </Reference>
-    <Reference Include="Xpand.Extensions.Reactive">
-      <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.dll</HintPath>
-    </Reference>
-    <Reference Include="Xpand.Extensions.Office.Cloud">
-      <HintPath>..\..\..\bin\Xpand.Extensions.Office.Cloud.dll</HintPath>
-    </Reference>
-    <Reference Include="Xpand.Extensions.Office.Cloud.Microsoft">
-      <HintPath>..\..\..\bin\Xpand.Extensions.Office.Cloud.Microsoft.dll</HintPath>
-    </Reference>
     <Reference Include="Xpand.Extensions.XAF">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
     </Reference>
-    <Reference Include="Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo">
-      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.dll</HintPath>
-    </Reference>
-    <Reference Include="Xpand.XAF.Modules.Office.Cloud.Tests">
-      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Office.Cloud.Tests.dll</HintPath>
+    <Reference Include="Xpand.XAF.Modules.LookupDefaultObject">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.LookupDefaultObject.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
     </Reference>
-    <Reference Include="Xpand.XAF.Modules.Reactive.Logger">
-      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.dll</HintPath>
-    </Reference>
     <Reference Include="Xpand.Extensions.XAF.Xpo">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.Xpo.dll</HintPath>
     </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="BusinessObjects\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Update="AzureAppCredentials.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

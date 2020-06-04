@@ -17,6 +17,16 @@ namespace Xpand.XAF.Modules.PositionInListview{
 		IModelPositionInListView PositionInListView{ get; }
 	}
 
+	public static class ModelPositionInListViewLogic{
+		[PublicAPI]
+		public static IObservable<IModelPositionInListView> PositionInListView(this IObservable<IModelReactiveModules> source) => source
+			.Select(modules => modules.PositionInListView());
+
+		public static IModelPositionInListView PositionInListView(this IModelReactiveModules reactiveModules) => 
+			((IModelReactiveModulesPositionInListView) reactiveModules).PositionInListView;
+		internal static IModelPositionInListView ModelPositionInListView(this IModelApplication modelApplication) => modelApplication
+			.ToReactiveModule<IModelReactiveModulesPositionInListView>().PositionInListView;
+	}
 	public interface IModelPositionInListView : IModelNode{
 		IModelPositionInListViewModelClassItems ModelClassItems{ get; }
 		IModelPositionInListViewListViewItems ListViewItems{ get; }
@@ -107,8 +117,10 @@ namespace Xpand.XAF.Modules.PositionInListview{
 
 	[DomainLogic(typeof(IModelPositionInListViewListViewItem))]
 	public static class ModelPositionInListViewListViewItemLogic{
+		[UsedImplicitly]
 		public static IModelListView Get_ListView(IModelPositionInListViewListViewItem item) => (IModelListView) item.Application.Views[item.ListViewId];
 
+		[UsedImplicitly]
 		public static void Set_ListView(IModelPositionInListViewListViewItem item, IModelListView listView) => item.ListViewId = listView.Id;
 
 		[UsedImplicitly]
@@ -127,11 +139,6 @@ namespace Xpand.XAF.Modules.PositionInListview{
 		public static IModelMember Get_PositionMember(this IModelPositionInListViewListViewItem positionInListView) => positionInListView
 			.PositionMembers.FirstOrDefault();
 
-		[PublicAPI]
-		public static IObservable<IModelPositionInListView> PositionInListView(this IObservable<IModelReactiveModules> source) => source
-			.Select(modules => modules.PositionInListView());
-
-		public static IModelPositionInListView PositionInListView(this IModelReactiveModules reactiveModules) => 
-			((IModelReactiveModulesPositionInListView) reactiveModules).PositionInListView;
+		
 	}
 }

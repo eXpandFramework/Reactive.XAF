@@ -65,7 +65,6 @@ namespace Xpand.XAF.Modules.PositionInListview{
         private static IObservable<SimpleAction> Activate(this IObservable<SimpleAction> source) => source.WhenActivated()
             .Do(action => action.Active[nameof(PositionInListViewService)] = action.Application.Model.IsPositionInListView(action.View().Id))
             .WhenActive()
-            .Select(action => action)
             .TracePositionInListView(action => action.Id);
 
         private static IObservable<Unit> Enable(this IObservable<SimpleAction> source) => source
@@ -93,7 +92,6 @@ namespace Xpand.XAF.Modules.PositionInListview{
 
         private static object[] Objects(this ListView listView){
 	        var objects = listView.CollectionSource.Objects();
-	        // return objects.ToArray();
 	        if (listView.CollectionSource.CanApplySorting){
 		        return objects.ToArray();
 	        }
