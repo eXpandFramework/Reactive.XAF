@@ -13,6 +13,16 @@ This is a `platform agnostic` module that extends the model views nodes with the
 **v1.1.39**
 [#471](https://github.com/eXpandFramework/eXpand/issues/471). Adds the `DeepMerge` attribute which if enable the module will recourse and merge the source view differences. 
 
+--- 
+
+**Possible future improvements:**
+
+1. Any other need you may have.
+
+[Let me know](https://github.com/sponsors/apobekiaris) if you want me to implement them for you.
+
+---
+
 ### Examples
 Bellow are a few examples of how we use the module in `eXpandFramework`. 
 

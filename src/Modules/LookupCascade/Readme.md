@@ -84,7 +84,7 @@ Limitations: The module stores the datasources to the [sessionStorage](https://d
 3. Support for creating new objects.
 4. Any other need you may have.
 
-Let us know if you want us to implement them for you.
+[Let me know](https://github.com/sponsors/apobekiaris) if you want me to implement them for you.
 
 ---
 

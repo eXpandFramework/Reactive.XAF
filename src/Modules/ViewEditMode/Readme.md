@@ -18,6 +18,16 @@ The module uses the next two strategies:
 1. It monitors the `DetailView` creation and modifies its ViewEditMode property according to model configuration. However later ViewEditMode property modifications are allowed.
 2. It monitors the `ViewEditMode` modification and cancels it if the `LockViewEditMode` attribute is used.
 
+--- 
+
+**Possible future improvements:**
+
+1. Any other need you may have.
+
+[Let me know](https://github.com/sponsors/apobekiaris) if you want me to implement them for you.
+
+---
+
 ### Examples
 
 The module is valuable in scenarios similar to:

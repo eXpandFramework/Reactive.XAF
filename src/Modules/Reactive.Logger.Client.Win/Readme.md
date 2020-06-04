@@ -20,6 +20,16 @@ The information can be overwhelming however simple filters, like the one applied
 
 The client is Hybrid logger and and uses both the Logger and the Hub so everything discussed there applies also here.
 
+--- 
+
+**Possible future improvements:**
+
+1. Any other need you may have.
+
+[Let me know](https://github.com/sponsors/apobekiaris) if you want me to implement them for you.
+
+---
+
 ### Examples
 Head to [Reactive.Logger](https://github.com/eXpandFramework/DevExpress.XAF/tree/lab/src/Modules/Reactive.Logger)
 

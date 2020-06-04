@@ -22,6 +22,16 @@ In this mode the application starts transmitting all messages. It transmits to a
 ![image](https://user-images.githubusercontent.com/159464/65379394-e2079700-dccf-11e9-840d-44ec34849229.png)
 The default port is the 61456 for all modules.
 
+--- 
+
+**Possible future improvements:**
+
+1. Any other need you may have.
+
+[Let me know](https://github.com/sponsors/apobekiaris) if you want me to implement them for you.
+
+---
+
 ### Examples
 
 Head to [Reactive.Logger.Client.Win](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win), [Reactive.Logger](https://github.com/eXpandFramework/DevExpress.XAF/tree/lab/src/Modules/Reactive.Logger)

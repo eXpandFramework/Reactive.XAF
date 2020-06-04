@@ -23,6 +23,14 @@ Next screenshot is an example from ExcelImporter from the view that maps the Exc
 
 ![image](https://user-images.githubusercontent.com/159464/55381194-238e6500-552b-11e9-8314-f1b1132d09f3.png)
 
+--- 
+
+**Possible future improvements:**
+
+1. Any other need you may have.
+
+[Let me know](https://github.com/sponsors/apobekiaris) if you want me to implement them for you.
+
 
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 

@@ -41,9 +41,10 @@ Below is a screencast of the module in action. At the bottom you can see what th
 6. Enable temporarily UI sorting and grouping on the ListView.
 3. Any other need you may have.
 
-Let us know if you want us to implement them for you.
+[Let me know](https://github.com/sponsors/apobekiaris) if you want me to implement them for you.
 
 ---
+
 
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 

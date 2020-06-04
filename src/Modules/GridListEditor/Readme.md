@@ -16,6 +16,14 @@ This is a `WinForma module`. To freeze the TopRowIndex of a ListView when its Co
 
 The module is valuable in scenarios where an external signal notifies about new data and you refresh your View. Such an example is the [Reactive.Logger.Client](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win)
 
+--- 
+
+**Possible future improvements:**
+
+1. Any other need you may have.
+
+[Let me know](https://github.com/sponsors/apobekiaris) if you want me to implement them for you.
+
 
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 

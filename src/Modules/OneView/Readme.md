@@ -11,6 +11,16 @@ This is a `WinForms module`. To configure the `OneView` follow a similar pattern
 ![image](https://user-images.githubusercontent.com/159464/64824645-57ce7d00-d5c3-11e9-9645-1f3e0a7b17af.png)
 </twitter>
 
+--- 
+
+**Possible future improvements:**
+
+1. Any other need you may have.
+
+[Let me know](https://github.com/sponsors/apobekiaris) if you want me to implement them for you.
+
+---
+
 ### Examples
 
 This module is used from the [Reactive.Logger.Client](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win) to display only one View the `TraceEvent_ListView`

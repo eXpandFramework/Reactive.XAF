@@ -16,6 +16,14 @@ This is a `platform agnostic` module that satisfies the following conditions:
 
 </twitter>
 
+---
+
+**Possible future improvements:**
+
+1. Any other need you may have.
+
+[Let me know](https://github.com/sponsors/apobekiaris) if you want me to implement them for you.
+
 ### Examples
 The module is integrated with the `ExcelImporter`.
 

@@ -11,6 +11,16 @@ This is a `platform agnostic` modules thats uses the next model configuration to
 ![image](https://user-images.githubusercontent.com/159464/64825964-d5948780-d5c7-11e9-9249-27a7847e6bb9.png)
 </twitter>
 
+--- 
+
+**Possible future improvements:**
+
+1. Any other need you may have.
+
+[Let me know](https://github.com/sponsors/apobekiaris) if you want me to implement them for you.
+
+---
+
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 
 

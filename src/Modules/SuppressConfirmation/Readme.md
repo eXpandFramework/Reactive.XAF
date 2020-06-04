@@ -14,6 +14,16 @@ This is a `platform agnostic` module satisfies the following conditions:
 ![image](https://user-images.githubusercontent.com/159464/56219085-d2c05580-606e-11e9-9a8e-80e0a37b8285.png)
 </twitter>
 
+--- 
+
+**Possible future improvements:**
+
+1. Any other need you may have.
+
+[Let me know](https://github.com/sponsors/apobekiaris) if you want me to implement them for you.
+
+---
+
 ### Examples
 The module is integrated with the `ExcelImporter`.
 

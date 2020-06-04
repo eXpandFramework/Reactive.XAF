@@ -30,6 +30,16 @@ progressBarViewItem.SetFinishOptions(new MessageOptions(){});
 ```
 ![image](https://user-images.githubusercontent.com/159464/58765606-5da4d300-857d-11e9-83ba-79c8f1bf6463.png)
 
+--- 
+
+**Possible future improvements:**
+
+1. Any other need you may have.
+
+[Let me know](https://github.com/sponsors/apobekiaris) if you want me to implement them for you.
+
+---
+
 ### Examples
 The module is integrated with the `ExcelImporter`.
 

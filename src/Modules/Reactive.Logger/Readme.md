@@ -31,6 +31,16 @@ To initialize the TraceSources that operate before model e.g. ModelMapper add th
 </configuration>
 ```
 
+--- 
+
+**Possible future improvements:**
+
+1. Any other need you may have.
+
+[Let me know](https://github.com/sponsors/apobekiaris) if you want me to implement them for you.
+
+---
+
 ### Examples
 
 The module  can be used with all packages that use the API from Xpand.XAF.Modules.Reactive. It will persist the calls to the datastore using the `TraceEvent` object. Below we analyze what the logger logs when used from the [Xpand.XAF.Modules.Reactive.Logger.Client.Win](https://github.com/eXpandFramework/DevExpress.XAF/tree/lab/src/Modules/Reactive.Logger.Client.Win). 

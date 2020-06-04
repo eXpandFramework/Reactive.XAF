@@ -57,6 +57,16 @@ await newCustomer.CombineLatest(listView, (customer, view) => {
 <twitter>
 And so on, the sky is the limit here as you can write custom operators just like a common c# extension method that extends and returns an `IObservable<T>`. All modules of this repository that have a dependency to the Reactive package are developed similar to the above example. Explore their docs, tests, source to find endless examples.
 
+--- 
+
+**Possible future improvements:**
+
+1. Any other need you may have.
+
+[Let me know](https://github.com/sponsors/apobekiaris) if you want me to implement them for you.
+
+---
+
 ### Examples
 All Xpand.XAF.Modules that reference this package are developed the RX way. Following the functional RX paradigm all modules do not use controllers rather describe the problem by composing events. 
 

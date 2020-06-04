@@ -56,10 +56,12 @@ The module works only for MSSQL, MySql, and Oracle databases.
 1. Provide logic to allow re-generation of a sequence for e.g. when an object is deleted or per demand.
 2. Support all database providers.
 3. Additional constrains e.g. based on view, on model, on object state etc.
+4. Any other need you may have.
 
-Let us know if you want us to implement them for you, or if you have other ideas and needs.
+[Let me know](https://github.com/sponsors/apobekiaris) if you want me to implement them for you.
 
 ---
+
 
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 
