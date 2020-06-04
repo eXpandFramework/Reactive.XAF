@@ -173,7 +173,7 @@ namespace Xpand.TestsLib{
 
         public static IObservable<IModelReactiveLogger> ConfigureModel<TModule>(this XafApplication application,
             bool transmitMessage = true) where TModule : ModuleBase{
-            return application.WhenModelChanged()
+            return application.WhenModelChanged().FirstAsync()
                 .Where(_ => application.Modules.Any(m => m is ReactiveLoggerModule))
                 .Select(_ => {
                     var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>()?.ReactiveLogger;

@@ -17,8 +17,6 @@ using Shouldly;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.TestsLib.Attributes;
-using Xpand.XAF.Modules.Reactive;
-using Xpand.XAF.Modules.Reactive.Logger;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.SequenceGenerator.Tests.BO;
 
