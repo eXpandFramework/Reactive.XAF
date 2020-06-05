@@ -12,9 +12,6 @@ namespace Xpand.Extensions.LinqExtensions{
             }
         }
 
-        [PublicAPI]
-        public static TSource[] AddRange<TSource>(this IEnumerable<TSource> source, IEnumerable<TSource> items) => source.Concat(items).ToArray();
-
         public static TSource[] Add<TSource>(this IEnumerable<TSource> source,TSource item){
             source ??= Enumerable.Empty<TSource>();
             return source.Concat(new[]{item}).ToArray();

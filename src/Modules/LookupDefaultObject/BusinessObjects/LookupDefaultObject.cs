@@ -1,9 +1,11 @@
 ﻿using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
+using JetBrains.Annotations;
 using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.LookupDefaultObject.BusinessObjects{
     [RuleCombinationOfPropertiesIsUnique(nameof(MemberName)+";"+nameof(ObjectView))]
+    [UsedImplicitly]
     public class LookupDefaultObject:CustomBaseObject{
         public LookupDefaultObject(Session session) : base(session){
         }

@@ -5,6 +5,9 @@ if ($Branch -eq "master"){
         [xml]$nuspec=Get-XmlContent $_.FullName
         $nuspec.package.metadata.id
     }|Where-Object{ $_ -notin $officialPackages.id})
+    if ($newPackages){
+        throw "increase version #715"
+    }
     $updateVersion=($labPackages|Where-Object{$_.Version.Revision -gt 0}).id+$newPackages
     Get-ChildItem $sourcePath *.csproj -Recurse |ForEach-Object{
         $project=$_
