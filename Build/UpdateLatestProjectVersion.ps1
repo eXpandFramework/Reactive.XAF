@@ -1,6 +1,11 @@
 $labPackages = Get-XpandPackages -PackageType XAFAll -Source Lab
+$officialPackages = Get-XpandPackages -PackageType XAFAll -Source Release
 if ($Branch -eq "master"){
-    $updateVersion=($labPackages|Where-Object{$_.Version.Revision -gt 0}).id
+    $newPackages=@(Get-ChildItem "$sourcePath\build\Nuspec" -Exclude "Xpand.TestsLib.nuspec"|ForEach-Object{
+        [xml]$nuspec=Get-XmlContent $_.FullName
+        $nuspec.package.metadata.id
+    }|Where-Object{ $_ -notin $officialPackages.id})
+    $updateVersion=($labPackages|Where-Object{$_.Version.Revision -gt 0}).id+$newPackages
     Get-ChildItem $sourcePath *.csproj -Recurse |ForEach-Object{
         $project=$_
         $assemblyInfoPath="$($project.DirectoryName)\Properties\AssemblyInfo.cs"
@@ -18,7 +23,7 @@ if ($Branch -eq "master"){
 }
 Write-HostFormatted "Reset modified assemblyInfo" -Section
 "AssemblyInfo.cs",".nuspec"|Get-GitDiff |Restore-GitFile
-$officialPackages = Get-XpandPackages -PackageType XAFAll -Source Release
+
 Write-HostFormatted "labPackages"  -Section
 $labPackages | Out-String
 

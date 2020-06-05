@@ -88,7 +88,11 @@ Get-XpandPackages $branch XAFAll|ForEach-Object{
         $package
     }
 }|Where-Object{$_.id -notlike "*versionconverter*"}|ForEach-Object{
-    Add-AssemblyBindingRedirect -id $_.id -version $_.version -ConfigFile "$testAppPAth\TestApplication.web\Web.config" -PublicToken (Get-XpandPublicKeyToken)
+    $version=[version]$_.version
+    if ($version.revision -eq -1){
+        $version=Update-Version -Revision -version $version
+    }
+    Add-AssemblyBindingRedirect -id $_.id -version $version -ConfigFile "$testAppPAth\TestApplication.web\Web.config" -PublicToken (Get-XpandPublicKeyToken)
 }
 [xml]$config=Get-xmlContent "$testAppPAth\TestApplication.web\web.config"
 $config.configuration.runtime.assemblyBinding.dependentassembly|ForEach-Object{

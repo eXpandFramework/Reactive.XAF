@@ -1,5 +1,5 @@
 param(
-    $Branch = "lab",
+    $Branch = "master",
     $SourcePath = "$PSScriptRoot\..",
     $GitHubUserName = "apobekiaris",
     $GitHubToken = $env:GitHubToken,
@@ -7,7 +7,7 @@ param(
     $artifactstagingdirectory,
     $bindirectory,
     [string]$AzureToken = $env:AzDevopsToken,
-    [string]$CustomVersion = "19.2.4.0"
+    [string]$CustomVersion = "20.1.4.0"
 )
 
 if (!(Get-Module eXpandFramework -ListAvailable)) {
@@ -58,8 +58,8 @@ Invoke-Script{
         ChangedModules = @($updateVersion)
         Branch         = $Branch
     }
-    Write-HostFormatted "bArgs:" -Section
-    $bArgs | Out-String
+    Write-HostFormatted "ChangedModules:" -Section
+    $bArgs.ChangedModules|Sort-Object | Out-String
     $SourcePath | ForEach-Object {
         Set-Location $_
         Move-PaketSource 0 $DXApiFeed

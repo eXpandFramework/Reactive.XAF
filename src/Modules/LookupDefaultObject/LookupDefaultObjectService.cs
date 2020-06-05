@@ -23,7 +23,7 @@ namespace Xpand.XAF.Modules.LookupDefaultObject{
             .frame.Action(nameof(LookupDefaultObject)).As<SingleChoiceAction>();
         
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager){
-            var registerAction = manager.RegisterAction().Publish().RefCount();
+            var registerAction = manager.RegisterAction();
             
             return registerAction.Activate().ToUnit()
                 .Merge(registerAction.SaveDefaultLookupObject())
@@ -86,7 +86,7 @@ namespace Xpand.XAF.Modules.LookupDefaultObject{
                 action.Caption = "Default";
                 action.ImageName = "Editor_Add";
                 action.PaintStyle=ActionItemPaintStyle.CaptionAndImage;
-            });
+            }).Publish().RefCount();
 
         private static IObservable<SingleChoiceAction> AddItems(this IObservable<SingleChoiceAction> activate) => activate
                 .Do(action => {
