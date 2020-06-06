@@ -24,7 +24,7 @@
       </dependency>
       <dependency id="Xpand.Patcher" version="2.0.15">
       </dependency>
-      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.33.0">
+      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.34.0">
       </dependency>
       <dependency id="Xpand.VersionConverter" version="2.201.7">
       </dependency>

@@ -31,13 +31,13 @@ The module **ships with 82 predefined maps** for all the common types such as Gi
       </dependency>
       <dependency id="Xpand.Collections" version="1.0.1">
       </dependency>
-      <dependency id="Xpand.Extensions" version="2.201.32.0">
+      <dependency id="Xpand.Extensions" version="2.201.33.0">
       </dependency>
-      <dependency id="Xpand.Extensions.Reactive" version="2.201.33.0">
+      <dependency id="Xpand.Extensions.Reactive" version="2.201.34.0">
       </dependency>
-      <dependency id="Xpand.Extensions.XAF" version="2.201.33.0">
+      <dependency id="Xpand.Extensions.XAF" version="2.201.34.0">
       </dependency>
-      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.33.0">
+      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.34.0">
       </dependency>
       <dependency id="Xpand.VersionConverter" version="2.201.7">
       </dependency>

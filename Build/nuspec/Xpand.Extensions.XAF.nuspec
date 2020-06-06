@@ -20,7 +20,7 @@
       </dependency>
       <dependency id="System.Reflection.Emit" version="4.7">
       </dependency>
-      <dependency id="Xpand.Extensions" version="2.201.32.0">
+      <dependency id="Xpand.Extensions" version="2.201.33.0">
       </dependency>
       <dependency id="Xpand.Patcher" version="2.0.15">
       </dependency>

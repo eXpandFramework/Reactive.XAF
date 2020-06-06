@@ -20,15 +20,15 @@
       </dependency>
       <dependency id="System.Reactive" version="4.3.2">
       </dependency>
-      <dependency id="Xpand.Extensions" version="2.201.32.0">
+      <dependency id="Xpand.Extensions" version="2.201.33.0">
       </dependency>
-      <dependency id="Xpand.Extensions.Reactive" version="2.201.33.0">
+      <dependency id="Xpand.Extensions.Reactive" version="2.201.34.0">
       </dependency>
-      <dependency id="Xpand.Extensions.XAF" version="2.201.33.0">
+      <dependency id="Xpand.Extensions.XAF" version="2.201.34.0">
       </dependency>
-      <dependency id="Xpand.Extensions.XAF.Xpo" version="2.201.31.0">
+      <dependency id="Xpand.Extensions.XAF.Xpo" version="2.201.32.0">
       </dependency>
-      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.33.0">
+      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.34.0">
       </dependency>
       <dependency id="Xpand.VersionConverter" version="2.201.7">
       </dependency>

@@ -24,11 +24,11 @@
       </dependency>
       <dependency id="System.Reactive" version="4.3.2">
       </dependency>
-      <dependency id="Xpand.Extensions.Reactive" version="2.201.33.0">
+      <dependency id="Xpand.Extensions.Reactive" version="2.201.34.0">
       </dependency>
-      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.33.0">
+      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.34.0">
       </dependency>
-      <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="2.201.33.0">
+      <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="2.201.34.0">
       </dependency>
       <dependency id="YamlDotNet" version="8.1.1">
       </dependency>
