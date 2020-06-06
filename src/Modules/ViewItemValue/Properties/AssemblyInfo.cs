@@ -1,17 +1,15 @@
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Security;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Xpand.Extensions")]
+[assembly: AssemblyTitle("Xpand.XAF.Modules.ViewItemValue")]
 [assembly: AssemblyMetadata("Platform","Core")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Xpand.Extensions")]
+[assembly: AssemblyProduct("Xpand.XAF.Modules.ViewItemValue")]
 [assembly: AssemblyCopyright("Copyright eXpandFramework � 2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -30,7 +28,8 @@ using System.Security;
 //
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("2.201.33.4")]
-[assembly: AssemblyFileVersion("2.201.33.4")]
+
+[assembly: AssemblyVersion("2.201.0.0")]
+[assembly: AssemblyFileVersion("2.201.0.0")]
 //[assembly:AllowPartiallyTrustedCallers]
 //[assembly: SecurityTransparent()]

@@ -1,18 +1,18 @@
 <?xml version="1.0"?>
 <package>
   <metadata>
-    <id>Xpand.XAF.Modules.LookupDefaultObject</id>
-    <version>2.201.1.0</version>
+    <id>Xpand.XAF.Modules.ViewItemValue</id>
+    <version>2.201.0.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
-    <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/LookupDefaultObject</projectUrl>
+    <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/ViewItemValue</projectUrl>
     <iconUrl>http://sign.expandframework.com</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>The LookupDefaultObject XAF module, helps end-user to configure the default object for a LookUp editor.</description>
+    <description>With the help of the ViewItemValue XAF modules end-users can configure the default values for lookup view items.</description>
     <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  LookupDefaultObject</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  ViewItemValue</tags>
     <dependencies>
       <dependency id="Fasterflect.Xpand" version="2.0.7">
       </dependency>
@@ -24,24 +24,24 @@
       </dependency>
       <dependency id="System.ValueTuple" version="4.5">
       </dependency>
-      <dependency id="Xpand.Extensions" version="2.201.33.0">
+      <dependency id="Xpand.Extensions" version="2.201.33.2">
       </dependency>
-      <dependency id="Xpand.Extensions.Reactive" version="2.201.34.0">
+      <dependency id="Xpand.Extensions.Reactive" version="2.201.34.4">
       </dependency>
-      <dependency id="Xpand.Extensions.XAF" version="2.201.34.0">
+      <dependency id="Xpand.Extensions.XAF" version="2.201.34.4">
       </dependency>
-      <dependency id="Xpand.Extensions.XAF.Xpo" version="2.201.32.0">
+      <dependency id="Xpand.Extensions.XAF.Xpo" version="2.201.32.1">
       </dependency>
-      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.34.0">
+      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.34.4">
       </dependency>
       <dependency id="Xpand.VersionConverter" version="2.201.7">
       </dependency>
     </dependencies>
   </metadata>
   <files>
-    <file src="Xpand.XAF.Modules.LookupDefaultObject.dll" target="lib\net461\Xpand.XAF.Modules.LookupDefaultObject.dll" />
-    <file src="Xpand.XAF.Modules.LookupDefaultObject.pdb" target="lib\net461\Xpand.XAF.Modules.LookupDefaultObject.pdb" />
-    <file src="..\build\CopySymbols.targets" target="build\Xpand.XAF.Modules.LookupDefaultObject.targets">
+    <file src="Xpand.XAF.Modules.ViewItemValue.dll" target="lib\net461\Xpand.XAF.Modules.ViewItemValue.dll" />
+    <file src="Xpand.XAF.Modules.ViewItemValue.pdb" target="lib\net461\Xpand.XAF.Modules.ViewItemValue.pdb" />
+    <file src="..\build\CopySymbols.targets" target="build\Xpand.XAF.Modules.ViewItemValue.targets">
     </file>
     <file src="..\build\CopySymbols.ps1" target="build\CopySymbols.ps1">
     </file>

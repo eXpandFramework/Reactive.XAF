@@ -142,16 +142,16 @@ $packages | ForEach-Object  {
     Expand-Archive $zip $unzipDir
     Remove-Item $zip
     AddReadme $_ $unzipDir $assemblyList $modules
-    if ("Xpand.XAF.Core.ALL" -notin $ChangedModules -and ($_.Id -notlike "*core*") -and ($_.id -like "*.all*")){
-        [xml]$n=Get-XmlContent "$unzipDir\$($_.id).nuspec"
-        $s="lab"
-        if ($Branch -ne $s){
-            $s="Release"
-        }
-        $coreVersion=(Find-XpandPackage "Xpand.XAF.Core.All" $s).version
-        ($n.package.metadata.dependencies.dependency|Where-Object{$_.id -eq "Xpand.XAF.Core.All"}).version=$coreVersion
-        $n|Save-Xml "$unzipDir\$($_.id).nuspec"|Out-Null
-    }
+    # if ("Xpand.XAF.Core.ALL" -notin $ChangedModules -and ($_.Id -notlike "*core*") -and ($_.id -like "*.all*")){
+    #     [xml]$n=Get-XmlContent "$unzipDir\$($_.id).nuspec"
+    #     $s="lab"
+    #     if ($Branch -ne $s){
+    #         $s="Release"
+    #     }
+    #     $coreVersion=(Find-XpandPackage "Xpand.XAF.Core.All" $s).version
+    #     ($n.package.metadata.dependencies.dependency|Where-Object{$_.id -eq "Xpand.XAF.Core.All"}).version=$coreVersion
+    #     $n|Save-Xml "$unzipDir\$($_.id).nuspec"|Out-Null
+    # }
     Compress-Files "$unzipDir" $zip 
     Move-Item $zip $nupkgPath
     Remove-Item $unzipDir -Force -Recurse

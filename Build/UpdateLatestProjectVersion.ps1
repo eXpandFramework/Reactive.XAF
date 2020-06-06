@@ -159,11 +159,17 @@ if ($updateVersion) {
     $relatedPackages=$updateVersion | ForEach-Object {
         $updatedPackage=$_
         $packageDeps|Where-Object{$updatedPackage -in $_.Deps.Id }|ForEach-Object{
-            $dependency=$_
-            $localpackage=($localPackages|Where-Object{$_.Id -eq $dependency.Id})
-            $newVersion="$(Update-Version $localpackage.Version -Revision)"
-            Update-AssemblyInfoVersion -version $newVersion -path "$($localpackage.File.DirectoryName)\properties\assemblyinfo.cs"
-            $dependency
+            try {
+                $dependency=$_
+                $localpackage=($localPackages|Where-Object{$_.Id -eq $dependency.Id})
+                $newVersion="$(Update-Version $localpackage.Version -Revision)"
+                Update-AssemblyInfoVersion -version $newVersion -path "$($localpackage.File.DirectoryName)\properties\assemblyinfo.cs"
+                $dependency
+    
+            }
+            catch {
+                $dependency
+            }
         }
     }
     $relatedPackages.Id

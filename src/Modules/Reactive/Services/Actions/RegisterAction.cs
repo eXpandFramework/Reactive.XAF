@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
@@ -153,7 +152,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             return applicationModulesManager.RegisterAction(id, actionBase);
         }
         
-        public static IObservable<TAction> RegisterAction<TController,TAction>(this ApplicationModulesManager applicationModulesManager, string id,
+        static IObservable<TAction> RegisterAction<TController,TAction>(this ApplicationModulesManager applicationModulesManager, string id,
             Func<(TController controller, string id), TAction> actionBase) where TController : Controller where TAction:ActionBase{
             lock (ActionsModule){
                 var type = ActionsModule.Assembly.GetType($"{id}{typeof(TController).Name}");

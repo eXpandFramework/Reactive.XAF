@@ -168,7 +168,7 @@ namespace Xpand.TestsLib{
             {"SequenceGeneratorModule", 61475},
             {"MicrosoftTodoModule", 61476},
             {"PositionInlistViewModule", 61478},
-            {"LookupDefaultObjectModule", 61479},
+            {"ViewItemValueModule", 61479},
         };
 
         public static IObservable<IModelReactiveLogger> ConfigureModel<TModule>(this XafApplication application,

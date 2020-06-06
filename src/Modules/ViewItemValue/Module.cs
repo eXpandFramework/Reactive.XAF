@@ -5,14 +5,14 @@ using JetBrains.Annotations;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
-namespace Xpand.XAF.Modules.LookupDefaultObject {
-    public sealed class LookupDefaultObjectModule : ReactiveModuleBase {
-        static LookupDefaultObjectModule(){
-            TraceSource=new ReactiveTraceSource(nameof(LookupDefaultObjectModule));
+namespace Xpand.XAF.Modules.ViewItemValue {
+    public sealed class ViewItemValueModule : ReactiveModuleBase {
+        static ViewItemValueModule(){
+            TraceSource=new ReactiveTraceSource(nameof(ViewItemValueModule));
         }
         [PublicAPI]
         public static ReactiveTraceSource TraceSource{ get; set; }
-        public LookupDefaultObjectModule() {
+        public ViewItemValueModule() {
             RequiredModuleTypes.Add(typeof(ReactiveModule));
             RequiredModuleTypes.Add(typeof(ValidationModule));
         }
@@ -25,7 +25,7 @@ namespace Xpand.XAF.Modules.LookupDefaultObject {
 
         public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders){
             base.ExtendModelInterfaces(extenders);
-            extenders.Add<IModelReactiveModules,IModelReactiveModulesLookupDefaultObject>();
+            extenders.Add<IModelReactiveModules,IModelReactiveModulesViewItemValue>();
         }
 
     }

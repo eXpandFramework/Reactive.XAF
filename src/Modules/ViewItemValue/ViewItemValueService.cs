@@ -17,33 +17,33 @@ using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 
-namespace Xpand.XAF.Modules.LookupDefaultObject{
-    public static class LookupDefaultObjectService{
-        public static SingleChoiceAction LookupDefaultObject(this (LookupDefaultObjectModule, Frame frame) tuple) => tuple
-            .frame.Action(nameof(LookupDefaultObject)).As<SingleChoiceAction>();
+namespace Xpand.XAF.Modules.ViewItemValue{
+    public static class ViewItemValueService{
+        public static SingleChoiceAction ViewItemValue(this (ViewItemValueModule, Frame frame) tuple) => tuple
+            .frame.Action(nameof(ViewItemValue)).As<SingleChoiceAction>();
         
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager){
             var registerAction = manager.RegisterAction();
             
             return registerAction.Activate().ToUnit()
-                .Merge(registerAction.SaveDefaultLookupObject())
-                .Merge(manager.AssignDefaultLokupObject())
+                .Merge(registerAction.SaveViewItemValue())
+                .Merge(manager.AssignViewItemValue())
                 .ToUnit();
         }
 
-        private static IObservable<Unit> AssignDefaultLokupObject(this ApplicationModulesManager manager) => manager
+        private static IObservable<Unit> AssignViewItemValue(this ApplicationModulesManager manager) => manager
 	        .WhenApplication().WhenDetailViewCreated().ToDetailView()
-	        .Where(view => view.Model.Application.IsDefaultObjectView(view.Id))
-	        .SelectMany(view => view.Model.Application.ModelLookupDefaultObject().Items
+	        .Where(view => view.Model.Application.IsViewItemValueObjectView(view.Id))
+	        .SelectMany(view => view.Model.Application.ModelViewItemValue().Items
 		        .Where(item => item.ObjectView == view.Model)
 		        .SelectMany(item => item.Members)
 		        .Select(item => {
 			        var memberInfo = item.MemberViewItem.ModelMember.MemberInfo;
-			        var defaultObject = view.ObjectSpace.GetObjectsQuery<BusinessObjects.LookupDefaultObject>()
-				        .FirstOrDefault(o => o.MemberName == memberInfo.Name && o.ObjectView == view.Id);
+			        var defaultObject = view.ObjectSpace.GetObjectsQuery<BusinessObjects.ViewItemValueObject>()
+				        .FirstOrDefault(o => o.ViewItemId == memberInfo.Name && o.ObjectView == view.Id);
 			        if (defaultObject != null){
 				        var typeConverter = TypeDescriptor.GetConverter(memberInfo.MemberTypeInfo.KeyMember.MemberType);
-				        var objectKeyValue = defaultObject.KeyValue;
+				        var objectKeyValue = defaultObject.ViewItemValue;
 				        var value = objectKeyValue!=null?view.ObjectSpace.GetObjectByKey(memberInfo.MemberType,
 					        typeConverter.ConvertFromString(objectKeyValue)):null;
 				        memberInfo.SetValue(view.CurrentObject, value);
@@ -52,35 +52,35 @@ namespace Xpand.XAF.Modules.LookupDefaultObject{
 			        return null;
 		        }))
 	        .WhenNotDefault()
-	        .TraceLookupDefaultObject(item => item.Id())
+	        .TraceDefaultObjectValue(item => item.Id())
 	        .ToUnit();
 
-        private static IObservable<Unit> SaveDefaultLookupObject(this IObservable<SingleChoiceAction> registerAction) => registerAction
+        private static IObservable<Unit> SaveViewItemValue(this IObservable<SingleChoiceAction> registerAction) => registerAction
             .WhenExecute()
             .Select(e => {
-                var item = ((IModelLookupDefaultObjectObjectViewItem) e.SelectedChoiceActionItem.Data);
+                var item = ((IModelViewItemValueObjectViewItem) e.SelectedChoiceActionItem.Data);
                 using (var objectSpace = e.Action.Application.CreateObjectSpace()){
-                    var defaultObjectItem = item.GetParent<IModelLookupDefaultObjectItem>();
+                    var defaultObjectItem = item.GetParent<IModelViewItemValueItem>();
                     var memberInfo = item.MemberViewItem.ModelMember.MemberInfo;
                     var memberName = memberInfo.Name;
                     var objectViewId = defaultObjectItem.ObjectView.Id;
-                    var defaultObject = objectSpace.GetObjectsQuery<BusinessObjects.LookupDefaultObject>(true)
-                                            .FirstOrDefault(o => o.MemberName == memberName && o.ObjectView == objectViewId) ??
-                                        objectSpace.CreateObject<BusinessObjects.LookupDefaultObject>();
+                    var defaultObject = objectSpace.GetObjectsQuery<BusinessObjects.ViewItemValueObject>(true)
+                                            .FirstOrDefault(o => o.ViewItemId == memberName && o.ObjectView == objectViewId) ??
+                                        objectSpace.CreateObject<BusinessObjects.ViewItemValueObject>();
                     defaultObject.ObjectView = objectViewId;
-                    defaultObject.MemberName = memberName;
+                    defaultObject.ViewItemId = memberName;
                     var value = memberInfo.GetValue(e.SelectedObjects.Cast<object>().First());
-                    defaultObject.KeyValue=value!=null?$"{objectSpace.GetKeyValue(value)}":null;
+                    defaultObject.ViewItemValue=value!=null?$"{objectSpace.GetKeyValue(value)}":null;
                     objectSpace.CommitChanges();
                 }
 
                 return item;
             })
-            .TraceLookupDefaultObject(item => item.Id())
+            .TraceDefaultObjectValue(item => item.Id())
             .ToUnit();
 
         private static IObservable<SingleChoiceAction> RegisterAction(this ApplicationModulesManager manager) => manager
-            .RegisterViewSingleChoiceAction(nameof(LookupDefaultObject), action => {
+            .RegisterViewSingleChoiceAction(nameof(ViewItemValue), action => {
 	            action.SelectionDependencyType = SelectionDependencyType.RequireSingleObject;
                 action.ItemType=SingleChoiceActionItemType.ItemIsOperation;
                 action.Caption = "Default";
@@ -91,25 +91,28 @@ namespace Xpand.XAF.Modules.LookupDefaultObject{
         private static IObservable<SingleChoiceAction> AddItems(this IObservable<SingleChoiceAction> activate) => activate
                 .Do(action => {
                     action.Items.Clear();
-                    foreach (var item in action.View().Model.Application.ModelLookupDefaultObject().Items.SelectMany(item => item.Members)){
+                    var modelView = action.View().Model;
+                    var items = modelView.Application.ModelViewItemValue().Items
+	                    .Where(item => item.ObjectView==modelView);
+                    foreach (var item in items.SelectMany(item => item.Members)){
                         action.Items.Add(new ChoiceActionItem(item.MemberViewItem.Caption, item));
                     }
                 });
 
         private static IObservable<SingleChoiceAction> Activate(this IObservable<SingleChoiceAction> registerViewSingleChoiceAction) => registerViewSingleChoiceAction
             .WhenControllerActivated()
-            .Do(action => action.Active[nameof(LookupDefaultObjectService)] = action.Application.Model.IsDefaultObjectView(action.View().Id))
+            .Do(action => action.Active[nameof(ViewItemValueService)] = action.Application.Model.IsViewItemValueObjectView(action.View().Id))
             .AddItems()
             .WhenActive()
-            .TraceLookupDefaultObject(action => action.Id);
+            .TraceDefaultObjectValue(action => action.Id);
 
-        internal static bool IsDefaultObjectView(this IModelApplication applicationModel, string viewID) => applicationModel
-            .ModelLookupDefaultObject().Items.Any(item => item.ObjectView.Id==viewID);
+        internal static bool IsViewItemValueObjectView(this IModelApplication applicationModel, string viewID) => applicationModel
+            .ModelViewItemValue().Items.Any(item => item.ObjectView.Id==viewID);
 
-        internal static IObservable<TSource> TraceLookupDefaultObject<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
+        internal static IObservable<TSource> TraceDefaultObjectValue<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) =>
-            source.Trace(name, LookupDefaultObjectModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
+            source.Trace(name, ViewItemValueModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
 
     }
 }
