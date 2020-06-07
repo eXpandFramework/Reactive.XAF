@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.ModelMapper</id>
-    <version>2.201.34.4</version>
+    <version>2.201.35.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -31,13 +31,13 @@ The module **ships with 82 predefined maps** for all the common types such as Gi
       </dependency>
       <dependency id="Xpand.Collections" version="1.0.1">
       </dependency>
-      <dependency id="Xpand.Extensions" version="2.201.33.2">
+      <dependency id="Xpand.Extensions" version="2.201.34.0">
       </dependency>
-      <dependency id="Xpand.Extensions.Reactive" version="2.201.34.4">
+      <dependency id="Xpand.Extensions.Reactive" version="2.201.35.0">
       </dependency>
-      <dependency id="Xpand.Extensions.XAF" version="2.201.34.4">
+      <dependency id="Xpand.Extensions.XAF" version="2.201.35.0">
       </dependency>
-      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.34.4">
+      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.35.0">
       </dependency>
       <dependency id="Xpand.VersionConverter" version="2.201.7">
       </dependency>

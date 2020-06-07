@@ -131,7 +131,7 @@
     <PackageReference Include="DevExpress.EasyTest" Version="20.1.4" />
     <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="20.1.4" />
     <PackageReference Include="Xpand.XAF.Web.All">
-      <Version>2.201.33.1</Version>
+      <Version>2.201.34</Version>
     </PackageReference>
     <Reference Include="Xpand.TestsLib">
       <HintPath>..\..\..\..\..\bin\Xpand.TestsLib.dll</HintPath>

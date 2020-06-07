@@ -1,31 +1,41 @@
+Write-HostFormatted "Reset modified assemblyInfo" -Section
+"AssemblyInfo.cs",".nuspec"|Get-GitDiff |Restore-GitFile
 $labPackages = Get-XpandPackages -PackageType XAFAll -Source Lab
 $officialPackages = Get-XpandPackages -PackageType XAFAll -Source Release
 if ($Branch -eq "master"){
+    $updateVersion=@()
     $newPackages=@(Get-ChildItem "$sourcePath\build\Nuspec" -Exclude "Xpand.TestsLib.nuspec"|ForEach-Object{
         [xml]$nuspec=Get-XmlContent $_.FullName
         $nuspec.package.metadata.id
     }|Where-Object{ $_ -notin $officialPackages.id})
     if ($newPackages){
-        throw "increase version #715"
+        Get-MSBuildProjects $sourcePath|ForEach-Object{
+            if ($_.BaseName -in $newPackages){
+                # Update-AssemblyInfo "$($_.DirectoryName)\Properties" -Build
+                $updateVersion+=$_.BaseName
+            }
+        }
     }
-    $updateVersion=($labPackages|Where-Object{$_.Version.Revision -gt 0}).id+$newPackages
+    
     Get-ChildItem $sourcePath *.csproj -Recurse |ForEach-Object{
         $project=$_
         $assemblyInfoPath="$($project.DirectoryName)\Properties\AssemblyInfo.cs"
         if (Test-Path $assemblyInfoPath){
             $labPackage=$labPackages|Where-Object{$_.Id -eq $project.BaseName}
             if ($labPackage){
-                $projectVersion=Get-AssemblyInfoVersion $assemblyInfoPath
-                if ((Get-VersionPart $projectVersion Build) -lt (Get-VersionPart $labPackage.version Build)){
-                    Update-AssemblyInfo $assemblyInfoPath -Build
+                $projectVersion=[version](Get-AssemblyInfoVersion $assemblyInfoPath)
+                if ((Get-VersionPart $projectVersion Build) -ne (Get-VersionPart $labPackage.version Build) -or 
+                    $projectVersion -lt $labPackage.Version ){
+                    $updateVersion+=$_.BaseName
+                    # Update-AssemblyInfo $assemblyInfoPath -Build
                 }   
             }
         }
     }
+    $updateVersion
     return
 }
-Write-HostFormatted "Reset modified assemblyInfo" -Section
-"AssemblyInfo.cs",".nuspec"|Get-GitDiff |Restore-GitFile
+
 
 Write-HostFormatted "labPackages"  -Section
 $labPackages | Out-String
@@ -159,17 +169,11 @@ if ($updateVersion) {
     $relatedPackages=$updateVersion | ForEach-Object {
         $updatedPackage=$_
         $packageDeps|Where-Object{$updatedPackage -in $_.Deps.Id }|ForEach-Object{
-            try {
-                $dependency=$_
-                $localpackage=($localPackages|Where-Object{$_.Id -eq $dependency.Id})
-                $newVersion="$(Update-Version $localpackage.Version -Revision)"
-                Update-AssemblyInfoVersion -version $newVersion -path "$($localpackage.File.DirectoryName)\properties\assemblyinfo.cs"
-                $dependency
-    
-            }
-            catch {
-                $dependency
-            }
+            $dependency=$_
+            $localpackage=($localPackages|Where-Object{$_.Id -eq $dependency.Id})
+            $newVersion="$(Update-Version $localpackage.Version -Revision)"
+            Update-AssemblyInfoVersion -version $newVersion -path "$($localpackage.File.DirectoryName)\properties\assemblyinfo.cs"
+            $dependency
         }
     }
     $relatedPackages.Id
