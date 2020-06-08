@@ -35,6 +35,7 @@ using Moq;
 using Moq.Protected;
 using NUnit.Framework;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ActionExtensions;
@@ -304,6 +305,14 @@ namespace Xpand.TestsLib{
             listEditorMock.Setup(editor => editor.GetSelectedObjects()).Returns(new object[0]);
             listEditorMock.Protected().Setup<object>("CreateControlsCore")
                 .Returns(application is WinApplication ? (object) new GridControl() : new ASPxGridView());
+            if (typeof(TEditor) == typeof(ListEditor)){
+                application.WhenViewOnFrame(typeof(object), ViewType.ListView)
+                    .Where(frame => frame.View.AsListView().Editor==listEditorMock.Object)
+                    .Do(frame => listEditorMock.SetupSet(editor => editor.FocusedObject = It.IsAny<object>())
+                        .Callback(() => frame.View.AsListView().OnSelectionChanged()))
+                    .TakeUntilDisposed(application)
+                    .Subscribe();
+            }
             return listEditorMock;
         }
 
