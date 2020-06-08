@@ -24,7 +24,6 @@ namespace Xpand.XAF.Modules.ViewItemValue{
         
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager){
             var registerAction = manager.RegisterAction();
-            
             return registerAction.Activate().ToUnit()
                 .Merge(registerAction.SaveViewItemValue())
                 .Merge(manager.AssignViewItemValue())
@@ -84,7 +83,7 @@ namespace Xpand.XAF.Modules.ViewItemValue{
 	            action.SelectionDependencyType = SelectionDependencyType.RequireSingleObject;
                 action.ItemType=SingleChoiceActionItemType.ItemIsOperation;
                 action.Caption = "Default";
-                action.ImageName = "Editor_Add";
+                action.ImageName = "DifferentFirstPage";
                 action.PaintStyle=ActionItemPaintStyle.CaptionAndImage;
             }).Publish().RefCount();
 
