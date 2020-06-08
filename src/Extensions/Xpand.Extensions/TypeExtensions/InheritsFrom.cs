@@ -3,8 +3,8 @@ using System.Linq;
 
 namespace Xpand.Extensions.TypeExtensions{
     public static partial class TypeExtensions{
-        public static bool InheritsFrom(this Type type, string typeName) => type
-            .FullName==typeName|| type.ParentTypes().Select(_ => _.FullName).Any(s => typeName.Equals(s,StringComparison.Ordinal));
+	    public static bool InheritsFrom(this Type type, string typeName) => type
+		                                                                        .FullName==typeName|| type.ParentTypes().Select(_ => _.FullName).Any(s => typeName.Equals(s,StringComparison.Ordinal));
 
         public static bool InheritsFrom(this Type type, Type baseType){
             if (type == null){
