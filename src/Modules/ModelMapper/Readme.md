@@ -167,11 +167,10 @@ The `BindTo` method will follow the hierarchy tree respecting the disabled nodes
 
 --- 
 
-**Possible future improvements:**
+##### Possible future improvements:
 
+1. Chart Calculated fields [#717](https://github.com/eXpandFramework/eXpand/issues/717).
 1. Any other need you may have.
-
-[Let me know](https://github.com/sponsors/apobekiaris) if you want me to implement them for you.
 
 ---
 
