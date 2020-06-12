@@ -18,5 +18,9 @@ namespace Xpand.Extensions.Reactive.Filter{
                 .TransformPattern<PropertyChangedEventArgs, TObject>()
                 .Where(_ => _.e.PropertyName == memberSelector.MemberExpressionName()).Select(_ => _.sender);
         }
+        public static IObservable<TObject> WhenPropertyChanged<TObject>(this IObservable<TObject> source,
+            Expression<Func<TObject, object>> memberSelector, IScheduler scheduler = null)
+            where TObject : INotifyPropertyChanged =>
+            source.SelectMany(o => o.WhenPropertyChanged(memberSelector, scheduler));
     }
 }

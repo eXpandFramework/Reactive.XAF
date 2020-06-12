@@ -4,12 +4,12 @@ using DevExpress.Xpo.DB;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
+using Xpand.Extensions.XAF.ViewExtenions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.PositionInListview;
 using Xpand.XAF.Modules.PositionInListView.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive;
-using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.PositionInListView.Tests{
 	public class PositionInListServiceTests : PositionInListViewBaseTest{

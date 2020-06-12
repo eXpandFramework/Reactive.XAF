@@ -61,7 +61,7 @@ namespace Xpand.XAF.Modules.CloneMemberValue{
             application.WhenCloneMemberValueDetailViewPairs()
                 .Select(_ => (((ObjectView) _.current),_.previous.CurrentObject,_.current.CurrentObject))
                 .Merge(application.WhenCloneMemberValueListViewCreated()
-                    .ControlsCreated()
+                    .WhenControlsCreated()
                     .SelectMany(_ => (_.Editor
                         .NewObjectPairs()
                         .Select(tuple => (((ObjectView) _),tuple.previous,tuple.current)))))

@@ -12,10 +12,7 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ViewExtensions{
-        public static DetailView AsDetailView(this View view) => view as DetailView;
-        public static ListView AsListView(this View view) => view as ListView;
-        public static ObjectView AsObjectView(this View view) => view as ObjectView;
-        public static DashboardView AsDashboardView(this View view) => view as DashboardView;
+        
 
         public static IObservable<T> WhenClosing<T>(this T view) where T : View => Observable.Return(view).WhenNotDefault().Closing();
 
@@ -59,7 +56,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     handler => view.ControlsCreated += handler, handler => view.ControlsCreated -= handler,ImmediateScheduler.Instance)
                 .Select(pattern => pattern.Sender).Cast<T>();
 
-        public static IObservable<T> ControlsCreated<T>(this IObservable<T> source) where T:View =>
+        
+        public static IObservable<T> WhenControlsCreated<T>(this IObservable<T> source) where T:View =>
             source.SelectMany(view => Observable.FromEventPattern<EventHandler, EventArgs>(
                     handler => view.ControlsCreated += handler, handler => view.ControlsCreated -= handler, ImmediateScheduler.Instance)
                 .Select(pattern => pattern.Sender).Cast<T>());
@@ -85,7 +83,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             source.SelectMany(item => Observable.FromEventPattern<CancelEventHandler, EventArgs>(handler => item.Disposing += handler,
                         handler => item.Disposing -= handler, ImmediateScheduler.Instance)).ToUnit();
 
-        public static IObservable<ListPropertyEditor> NestedListViews<TView>(this IObservable<TView> views, params Type[] objectTypes) where TView : DetailView => views.ControlsCreated().SelectMany(detailView => detailView.NestedListViews(objectTypes));
+        public static IObservable<ListPropertyEditor> NestedListViews<TView>(this IObservable<TView> views, params Type[] objectTypes) where TView : DetailView => views
+            .WhenControlsCreated().SelectMany(detailView => detailView.NestedListViews(objectTypes));
 
         public static IObservable<ListPropertyEditor> NestedListViews<TView>(this TView view, params Type[] objectTypes ) where TView : DetailView{
             var listPropertyEditors = view.GetItems<ListPropertyEditor>().Where(editor =>editor.Frame?.View != null).ToObservable();

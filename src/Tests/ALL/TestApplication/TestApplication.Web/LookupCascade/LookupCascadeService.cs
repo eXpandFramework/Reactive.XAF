@@ -27,11 +27,11 @@ namespace TestApplication.Web.LookupCascade{
                 .SelectMany(action => {
                     action.TargetViewId = LookupcascadeOrderListview;
                     return action.WhenCustomizePopupWindowParams().Do(_ => {
-                        var application = _.action.Application;
-                        var detailView = application.NewDetailView(((ListView) _.action.Controller.Frame.View).CollectionSource.Objects<Order>().First(order =>order.Product.ProductName.EndsWith("0") ),
+                        var application = _.Action.Application;
+                        var detailView = application.NewDetailView(((ListView) _.Action.Controller.Frame.View).CollectionSource.Objects<Order>().First(order =>order.Product.ProductName.EndsWith("0") ),
                             (IModelDetailView) application.Model.Views[LookupCascadeOrderDetailView]);
                         detailView.ViewEditMode=ViewEditMode.Edit;
-                        _.e.View = detailView;
+                        _.View = detailView;
                     });
                 })
                 .ToUnit();

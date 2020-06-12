@@ -52,18 +52,18 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 names.Contains(controller.Name))).Select(controller => controller);
 
         [PublicAPI]
-        public static IObservable<(ActionBase action, ActionBaseEventArgs e)> WhenActionExecuted<TController>(
-            this XafApplication application, Func<TController, ActionBase> action) where TController : Controller =>
+        public static IObservable<ActionBaseEventArgs> WhenActionExecuted<TController,TAction>(
+            this XafApplication application, Func<TController, TAction> action) where TController : Controller where TAction:ActionBase=>
             application.WhenWindowCreated().ToController<TController>().SelectMany(_ => action(_).WhenExecuted());
 
         [PublicAPI]
-        public static IObservable<(ActionBase action, CancelEventArgs e)> WhenActionExecuting<TController>(
-            this XafApplication application, Func<TController, ActionBase> action) where TController : Controller =>
+        public static IObservable<(TAction action, CancelEventArgs e)> WhenActionExecuting<TController,TAction>(
+            this XafApplication application, Func<TController, TAction> action) where TController : Controller where TAction:ActionBase =>
             application.WhenWindowCreated().ToController<TController>().SelectMany(_ => action(_).WhenExecuting());
 
         [PublicAPI]
-        public static IObservable<(ActionBase action, ActionBaseEventArgs e)> WhenActionExecuteCompleted<TController>(
-            this XafApplication application, Func<TController, ActionBase> action) where TController : Controller =>
+        public static IObservable<ActionBaseEventArgs> WhenActionExecuteCompleted<TController,TAction>(
+            this XafApplication application, Func<TController, TAction> action) where TController : Controller where TAction:ActionBase=>
             application.WhenWindowCreated().ToController<TController>().SelectMany(_ => action(_).WhenExecuteCompleted());
 
         public static IObservable<Window> WhenWindowCreated(this XafApplication application,bool isMain=false){

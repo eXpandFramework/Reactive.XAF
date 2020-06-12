@@ -5,7 +5,6 @@ using DevExpress.ExpressApp.Utils;
 
 namespace Xpand.Extensions.XAF.ActionExtensions{
     public static partial class ActionExtensions{
-
         public static BoolList Clone(this BoolList boolList){
             var list = new BoolList();
             foreach (var key in boolList.GetKeys()){

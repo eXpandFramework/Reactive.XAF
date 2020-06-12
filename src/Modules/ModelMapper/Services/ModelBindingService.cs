@@ -45,7 +45,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             if (application==null)
                 return Observable.Empty<Unit>();
             var controlsCreated = application.WhenObjectViewCreated()
-                .ControlsCreated().Select(tuple => tuple)
+                .WhenControlsCreated().Select(tuple => tuple)
                 .Retry(application)
                 .Publish().RefCount();
             

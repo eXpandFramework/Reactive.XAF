@@ -50,10 +50,10 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 
         public static IObservable<TAction> ToAction<TAction>(this IObservable<(TAction action, ActionBaseEventArgs e)> source) where TAction : ActionBase => source.Select(_ => _.action);
 
-        public static IObservable<(PopupWindowShowAction action, CustomizePopupWindowParamsEventArgs e)> WhenCustomizePopupWindowParams(this PopupWindowShowAction action) =>
+        public static IObservable<CustomizePopupWindowParamsEventArgs> WhenCustomizePopupWindowParams(this PopupWindowShowAction action) =>
 	        Observable.FromEventPattern<CustomizePopupWindowParamsEventHandler, CustomizePopupWindowParamsEventArgs>(
 			        h => action.CustomizePopupWindowParams += h, h => action.CustomizePopupWindowParams -= h, ImmediateScheduler.Instance)
-		        .TransformPattern<CustomizePopupWindowParamsEventArgs, PopupWindowShowAction>();
+		        .Select(pattern => pattern.EventArgs);
 
         public static IObservable<SimpleActionExecuteEventArgs> WhenExecuted(this SimpleAction action) =>
 	        Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(
@@ -71,35 +71,39 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 	        Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(
 		        h => action.Executed += h, h => action.Executed -= h, ImmediateScheduler.Instance).Select(_ => (PopupWindowShowActionExecuteEventArgs)_.EventArgs);
 
-        public static IObservable<(TAction action, ActionBaseEventArgs e)> WhenExecuted<TAction>(this TAction action) where TAction : ActionBase =>
+        public static IObservable<ActionBaseEventArgs> WhenExecuted<TAction>(this TAction action) where TAction : ActionBase =>
 	        Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(
 			        h => action.Executed += h, h => action.Executed -= h, ImmediateScheduler.Instance)
-		        .TransformPattern<ActionBaseEventArgs, TAction>();
+		        .Select(pattern => pattern.EventArgs);
 
-        public static IObservable<(TAction action, ActionBaseEventArgs e)> WhenExecuteCompleted<TAction>(this TAction action) where TAction : ActionBase =>
+        public static IObservable<ActionBaseEventArgs> WhenExecuteCompleted<TAction>(this TAction action) where TAction : ActionBase =>
 	        Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(
 			        h => action.ExecuteCompleted += h, h => action.ExecuteCompleted -= h, ImmediateScheduler.Instance)
-		        .TransformPattern<ActionBaseEventArgs, TAction>();
+		        .Select(pattern => pattern.EventArgs);
+        public static IObservable<ActionBaseEventArgs> WhenExecuteCompleted<TAction>(this IObservable<TAction> source) where TAction : ActionBase =>
+	        source.SelectMany(a=>a.WhenExecuteCompleted());
+        public static IObservable<ActionBaseEventArgs> WhenExecuted<TAction>(this IObservable<TAction> source) where TAction : ActionBase =>
+	        source.SelectMany(a=>a.WhenExecuted());
 
-        public static IObservable<(SimpleAction action, SimpleActionExecuteEventArgs e)> WhenExecuteCompleted(this SimpleAction action) =>
+        public static IObservable<SimpleActionExecuteEventArgs> WhenExecuteCompleted(this SimpleAction action) =>
 	        Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(
 			        h => action.ExecuteCompleted += h, h => action.ExecuteCompleted -= h, ImmediateScheduler.Instance)
-		        .Select(pattern => ((SimpleAction)pattern.Sender,(SimpleActionExecuteEventArgs)pattern.EventArgs));
+		        .Select(pattern => (SimpleActionExecuteEventArgs)pattern.EventArgs);
 
-        public static IObservable<(SingleChoiceAction action, SingleChoiceActionExecuteEventArgs e)> WhenExecuteCompleted(this SingleChoiceAction action) =>
+        public static IObservable<SingleChoiceActionExecuteEventArgs> WhenExecuteCompleted(this SingleChoiceAction action) =>
 	        Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(
 			        h => action.ExecuteCompleted += h, h => action.ExecuteCompleted -= h, ImmediateScheduler.Instance)
-		        .Select(pattern => ((SingleChoiceAction)pattern.Sender,(SingleChoiceActionExecuteEventArgs)pattern.EventArgs));
+		        .Select(pattern => (SingleChoiceActionExecuteEventArgs)pattern.EventArgs);
 
-        public static IObservable<(ParametrizedAction action, ParametrizedActionExecuteEventArgs e)> WhenExecuteCompleted(this ParametrizedAction action) =>
+        public static IObservable<ParametrizedActionExecuteEventArgs> WhenExecuteCompleted(this ParametrizedAction action) =>
 	        Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(
 			        h => action.ExecuteCompleted += h, h => action.ExecuteCompleted -= h, ImmediateScheduler.Instance)
-		        .Select(pattern => ((ParametrizedAction)pattern.Sender,(ParametrizedActionExecuteEventArgs)pattern.EventArgs));
+		        .Select(pattern => (ParametrizedActionExecuteEventArgs)pattern.EventArgs);
 
-        public static IObservable<(PopupWindowShowAction action, PopupWindowShowActionExecuteEventArgs e)> WhenExecuteCompleted(this PopupWindowShowAction action) =>
+        public static IObservable<PopupWindowShowActionExecuteEventArgs> WhenExecuteCompleted(this PopupWindowShowAction action) =>
 	        Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(
 			        h => action.ExecuteCompleted += h, h => action.ExecuteCompleted -= h, ImmediateScheduler.Instance)
-		        .Select(pattern => ((PopupWindowShowAction)pattern.Sender,(PopupWindowShowActionExecuteEventArgs)pattern.EventArgs));
+		        .Select(pattern => (PopupWindowShowActionExecuteEventArgs)pattern.EventArgs);
 
         public static IObservable<(TAction action, BoolList boolList, BoolValueChangedEventArgs e)> ResultValueChanged<TAction>(
                 this TAction source, Func<TAction, BoolList> boolListSelector) where TAction : ActionBase =>

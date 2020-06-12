@@ -10,6 +10,7 @@ using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.DetailViewExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
+using Xpand.Extensions.XAF.ViewExtenions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Attributes;

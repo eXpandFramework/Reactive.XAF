@@ -37,7 +37,7 @@ namespace Xpand.XAF.Modules.AutoCommit{
                     _.view.ObjectSpace.CommitChanges();
                     return _.view;
                 })
-                .Merge(objectViewCreated.OfType<ListView>().ControlsCreated().Select(BatchEditCommit))
+                .Merge(objectViewCreated.OfType<ListView>().WhenControlsCreated().Select(BatchEditCommit))
                 .TraceAutoCommit(view => view.Id);
 
         private static View BatchEditCommit(ListView listView){

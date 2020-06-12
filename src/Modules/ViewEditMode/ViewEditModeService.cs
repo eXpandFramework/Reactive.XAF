@@ -48,7 +48,7 @@ namespace Xpand.XAF.Modules.ViewEditMode{
                     ((IModelDetailViewViewEditMode) _.action.Controller.Frame.View.Model).LockViewEditMode = false;
                     return Unit.Default;
                 });
-            var lockEdit = editAction.SelectMany(_ => _.WhenExecuteCompleted()).Select(_ => _.action).FirstAsync()
+            var lockEdit = editAction.SelectMany(_ => _.WhenExecuteCompleted()).Select(_ => _.Action).FirstAsync()
                 .Select(_ => {
                     ((IModelDetailViewViewEditMode) _.Controller.Frame.View.Model).LockViewEditMode = true;
                     return Unit.Default;
