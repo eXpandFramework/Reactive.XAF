@@ -36,22 +36,20 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         All=Subscribe|OnNext|OnCompleted|Dispose|OnError
     }
     public static class ReactiveLoggerService{
-        public static string RXLoggerLogPath{ get; set; }=@$"{AppDomain.CurrentDomain.ApplicationPath()}\{AppDomain.CurrentDomain.SetupInformation.ApplicationName}_RXLogger.log";
+        public static string RXLoggerLogPath{ get; [PublicAPI]set; }=@$"{AppDomain.CurrentDomain.ApplicationPath()}\{AppDomain.CurrentDomain.SetupInformation.ApplicationName}_RXLogger.log";
         private static readonly Subject<ITraceEvent> SavedTraceEventSubject=new Subject<ITraceEvent>();
         public static IObservable<ITraceEvent> ListenerEvents{ get; private set; }
         public static IObservable<ITraceEvent> SavedTraceEvent{ get; }=SavedTraceEventSubject;
-        internal static IObservable<Unit> Connect(this ReactiveLoggerModule reactiveLoggerModule){
-	        var application = reactiveLoggerModule.Application;
-            if (application == null){
-                return Observable.Empty<Unit>();
-            }
-            var listener = new ReactiveTraceListener(application.Title);
-            ListenerEvents = listener.EventTrace.Publish().RefCount();
-            return application.BufferUntilCompatibilityChecked(ListenerEvents).Select(_ => _)
-	            .SaveEvent(application)
-                .ToUnit()
-                .Merge(ListenerEvents.RefreshViewDataSource(application))
-                .Merge(application.RegisterListener(listener),Scheduler.Immediate);
+        internal static IObservable<Unit> Connect(this ApplicationModulesManager manager){
+	        return manager.WhenApplication(application => {
+		        var listener = new ReactiveTraceListener(application.Title);
+		        ListenerEvents = listener.EventTrace.Publish().RefCount();
+		        return application.BufferUntilCompatibilityChecked(ListenerEvents).Select(_ => _)
+			        .SaveEvent(application)
+			        .ToUnit()
+			        .Merge(ListenerEvents.RefreshViewDataSource(application))
+			        .Merge(application.RegisterListener(listener), Scheduler.Immediate);
+	        });
         }
 
         public static IObservable<Unit> RefreshViewDataSource(this IObservable<ITraceEvent> events, XafApplication application) =>
@@ -71,8 +69,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
 					        return Observable.Never<ITraceEvent>();
 				        }))
 			        .TraceLogger(_ => _.Message)
-			        .ToUnit()
-			        .Retry(application);
+			        .ToUnit();
 
         [PublicAPI]
         public static IObservable<TraceEvent> WhenTraceEvent<TLocation>(this XafApplication application, Expression<Func<TLocation, object>> expression, RXAction rxAction = RXAction.All){
@@ -80,6 +77,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             return application.WhenTraceEvent(typeof(TLocation), rxAction).Where(_ => _.Method == name);
         }
 
+        [PublicAPI]
         public static IObservable<ITraceEvent> WhenTraceOnNext(this XafApplication application, params string[] methods) => application
 	        .WhenTraceOnNext(null, methods);
 
@@ -98,7 +96,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         [PublicAPI]
         public static IObservable<TraceEvent> WhenTraceOnSubscribeEvent(this XafApplication application, params string[] methods) =>
 	        application.WhenTraceEvent(null, RXAction.Subscribe, methods);
-
+        
+        [PublicAPI]
         public static IObservable<TraceEvent> WhenTraceOnNextEvent(this XafApplication application,params string[] methods) => application
 	        .WhenTraceOnNextEvent(null, methods);
 
@@ -160,10 +159,10 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                     }
                 })
                 .ToUnit();
-            return register.Merge(applyModel)
-                .Retry(application);
+            return register.Merge(applyModel);
         }
-
+        
+        [PublicAPI]
         public static void TraceMessage(this TraceSource traceSource, string value,TraceEventType traceEventType=TraceEventType.Information){
             if (traceSource.Switch.Level != SourceLevels.Off){
 	            var traceEventMessage = new TraceEventMessage {

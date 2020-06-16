@@ -59,8 +59,7 @@ namespace Xpand.XAF.Modules.MasterDetail{
                         return Unit.Default;
                     })
                 )
-                .ToUnit()
-                .Retry(application);
+                .ToUnit();
 
         private static IObservable<Unit> WhenSaveAction(this XafApplication application) =>
             application.WhenMasterDetailDashboardViewItems()
@@ -70,7 +69,6 @@ namespace Xpand.XAF.Modules.MasterDetail{
                     .Select(action => action.WhenExecuted()).Merge()
                     .Do(tuple => { tuple.Action.Controller.Frame.View.ObjectSpace.CommitChanges(); }))
                 .TraceMasterDetailModule(_ => _.Action.Id)
-                .Retry(application)
                 .ToUnit();
 
         public static IObservable<DashboardView> WhenMasterDetailDashboardViewCreated(this XafApplication application) =>
@@ -105,8 +103,7 @@ namespace Xpand.XAF.Modules.MasterDetail{
                         .TraceMasterDetailModule(view => view.Id)
                         .ToUnit();
                 })
-                .Merge().ToUnit()
-                .Retry(application);
+                .Merge().ToUnit();
 
         private static DetailView SynchronizeCurrentObject(this DetailView detailView,object o, ListView listView, DashboardViewItem dashboardViewItem, NestedFrame frame){
             var objectTypeLink = detailView.GetObjectTypeLink(o, listView);

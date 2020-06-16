@@ -40,24 +40,19 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         [PublicAPI]
         public static IObservable<Parameter> ControlBind => ControlBindSubject;
 
-        internal static IObservable<Unit> BindConnect(this XafApplication application){
-            
-            if (application==null)
-                return Observable.Empty<Unit>();
-            var controlsCreated = application.WhenObjectViewCreated()
-                .WhenControlsCreated().Select(tuple => tuple)
-                .Retry(application)
-                .Publish().RefCount();
-            
-            return controlsCreated.ViewModelProperties()
-                .Merge(controlsCreated.ViewItemBindData())
-                .Do(tuple => BindTo(tuple))
-                .TraceModelMapper()
-                .ToUnit()
-                .Merge(application.BindLayoutGroupControl().TraceModelMapper().ToUnit())
-                .Retry(application);
-                
-        }
+        internal static IObservable<Unit> BindConnect(this ApplicationModulesManager manager) =>
+            manager.WhenApplication(application => {
+                var controlsCreated = application.WhenObjectViewCreated()
+                    .WhenControlsCreated().Select(tuple => tuple)
+                    .Publish().RefCount();
+
+                return controlsCreated.ViewModelProperties()
+                    .Merge(controlsCreated.ViewItemBindData())
+                    .Do(tuple => BindTo(tuple))
+                    .TraceModelMapper()
+                    .ToUnit()
+                    .Merge(application.BindLayoutGroupControl().TraceModelMapper().ToUnit());
+            });
 
         private static IObservable<(IModelModelMap modelMap, object control, ObjectView objectView)> ViewItemBindData(this IObservable<ObjectView> controlsCreated){
             var viewItemBindData = controlsCreated.ViewItemData(ViewItemService.RepositoryItemsMapName)

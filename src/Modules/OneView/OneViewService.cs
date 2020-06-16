@@ -19,15 +19,15 @@ using Xpand.XAF.Modules.Reactive.Win.Services;
 namespace Xpand.XAF.Modules.OneView{
     public static class OneViewService{
         
-        internal static IObservable<Unit> Connect(this  XafApplication application){
-            var cleanStartupNavigationItem = CleanStartupNavigationItem(application);
-            var showView = application.ShowView().Publish().RefCount();
-            return showView.EditModel(application)
-                .Merge(showView.ExitApplication(application))
-                .Merge(application.HideMainWindow())
-                .Merge(cleanStartupNavigationItem)
-                ;
-        }
+        internal static IObservable<Unit> Connect(this  ApplicationModulesManager manager) =>
+	        manager.WhenApplication(application => {
+		        var cleanStartupNavigationItem = CleanStartupNavigationItem(application);
+		        var showView = application.ShowView().Publish().RefCount();
+		        return showView.EditModel(application)
+			        .Merge(showView.ExitApplication(application))
+			        .Merge(application.HideMainWindow())
+			        .Merge(cleanStartupNavigationItem);
+	        });
 
         static IObservable<Unit> CleanStartupNavigationItem(this XafApplication application) => application.WhenModelChanged()
 		        .Do(modelApplication => ((IModelApplicationNavigationItems) modelApplication).NavigationItems.StartupNavigationItem = null)

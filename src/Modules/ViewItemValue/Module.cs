@@ -6,6 +6,7 @@ using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.ViewItemValue {
+    [UsedImplicitly]
     public sealed class ViewItemValueModule : ReactiveModuleBase {
         static ViewItemValueModule(){
             TraceSource=new ReactiveTraceSource(nameof(ViewItemValueModule));

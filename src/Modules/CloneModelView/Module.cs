@@ -1,6 +1,7 @@
 ﻿using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using HarmonyLib;
+using JetBrains.Annotations;
 
 namespace Xpand.XAF.Modules.CloneModelView{
     
@@ -10,7 +11,7 @@ namespace Xpand.XAF.Modules.CloneModelView{
             harmony.PatchAll(typeof(CloneModelViewModule).Assembly);
         }
 
-
+        [PublicAPI]
         public const string CategoryName = "Xpand.XAF.Modules.CloneModelView";
 
 

@@ -19,8 +19,7 @@ namespace Xpand.XAF.Modules.CloneMemberValue{
     public static class CloneMemberValueService{
         [UsedImplicitly]
         internal static IObservable<Unit> Connect(this ApplicationModulesManager modulesManager ) =>
-            modulesManager.WhenApplication().SelectMany(xafApplication => xafApplication.WhenCloneMemberValues())
-                .ToUnit();
+            modulesManager.WhenApplication(application => application.WhenCloneMemberValues().ToUnit());
 
         internal static IObservable<TSource> TraceCloneMemberValueModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,

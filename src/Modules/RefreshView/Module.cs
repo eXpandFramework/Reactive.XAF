@@ -18,12 +18,11 @@ namespace Xpand.XAF.Modules.RefreshView {
         public RefreshViewModule() {
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));
             RequiredModuleTypes.Add(typeof(ReactiveModule));
-            
         }
 
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
-            Application?.Connect()
+            moduleManager.Connect()
                 .TakeUntilDisposed(this)
                 .Subscribe();
         }

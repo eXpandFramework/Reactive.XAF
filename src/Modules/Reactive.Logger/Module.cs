@@ -7,6 +7,7 @@ using Xpand.Extensions.Reactive.Conditional;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Logger {
+    [UsedImplicitly]
     public sealed class ReactiveLoggerModule : ReactiveModuleBase{
         [PublicAPI]
         public const string CategoryName = "Xpand.XAF.Modules.Reactive.Logger";
@@ -28,10 +29,9 @@ namespace Xpand.XAF.Modules.Reactive.Logger {
             updaters.Add(new TraceEventAppearenceRulesGenerator());
         }
 
-        public override void Setup(XafApplication application){
-            base.Setup(application);
-            
-            this.Connect()
+        public override void Setup(ApplicationModulesManager manager){
+            base.Setup(manager);
+            manager.Connect()
                 .TakeUntilDisposed(this)
                 .Subscribe();
         }

@@ -19,8 +19,8 @@ namespace Xpand.XAF.Modules.SuppressConfirmation{
 
         public const ModificationsHandlingMode ModificationsHandlingMode = (ModificationsHandlingMode) (-1);
 
-        internal static IObservable<Unit> Connect(this XafApplication application){
-            if (application != null){
+        internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) =>
+            manager.WhenApplication(application => {
                 var suppressConfirmationWindows = application.WhenSuppressConfirmationWindows().Publish().RefCount();
                 return suppressConfirmationWindows
                     .SelectMany(frame => frame.ChangeModificationHandlingMode().To(frame))
@@ -30,15 +30,12 @@ namespace Xpand.XAF.Modules.SuppressConfirmation{
                             whenNewDetailViewObjectChangedOnce = detailView.ObjectSpace.WhenObjectChanged()
                                 .Select(tuple => tuple).FirstAsync().ToUnit();
                         }
-
                         return whenNewDetailViewObjectChangedOnce
                             .Merge(frame.View.ObjectSpace.WhenCommited().Select(tuple => tuple).ToUnit()).ToUnit()
                             .SelectMany(_ => frame.ChangeModificationHandlingMode());
                     }).ToUnit()
                     .Merge(suppressConfirmationWindows.Select(DisableWebControllers).ToUnit());
-            }
-            return Observable.Empty<Unit>();
-        }
+            });
 
         private static IObservable<Controller> DisableWebControllers(Frame window) =>
             window.Controllers.Cast<Controller>()

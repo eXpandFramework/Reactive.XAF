@@ -5,11 +5,12 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.Model.NodeGenerators;
 using HarmonyLib;
+using JetBrains.Annotations;
 
 namespace Xpand.XAF.Modules.CloneModelView{
     [HarmonyPatch(typeof(ModelViewsNodesGenerator))]
-    [HarmonyPatch(nameof(GenerateNodesCore))]
-    public class ModelViewsNodesGeneratorPatch{
+    [HarmonyPatch(nameof(GenerateNodesCore))][UsedImplicitly]
+    public static class ModelViewsNodesGeneratorPatch{
         [HarmonyPostfix]
         public static void GenerateNodesCore(ModelNode node){
             foreach (var modelClass in node.Application.BOModel){
@@ -18,12 +19,12 @@ namespace Xpand.XAF.Modules.CloneModelView{
                 
                     var modelView = NewModelView(modelClass.Application.Views, cloneViewAttribute, modelClass);
                     AssignAsDefaultView(cloneViewAttribute, modelView);
-                    if (modelView is IModelListView && !(string.IsNullOrEmpty(cloneViewAttribute.DetailView))){
-                        var modelDetailView = modelView.Application.Views.OfType<IModelDetailView>().FirstOrDefault(view
+                    if (modelView is IModelListView listView && !(string.IsNullOrEmpty(cloneViewAttribute.DetailView))){
+                        var modelDetailView = listView.Application.Views.OfType<IModelDetailView>().FirstOrDefault(view
                             => view.Id == cloneViewAttribute.DetailView);
                         if (modelDetailView == null)
                             throw new NullReferenceException(cloneViewAttribute.DetailView);
-                        ((IModelListView) modelView).DetailView = modelDetailView;
+                        listView.DetailView = modelDetailView;
                     }
                 }
             }
@@ -59,7 +60,8 @@ namespace Xpand.XAF.Modules.CloneModelView{
             throw new NotImplementedException();
         }
 
-        public static Type ModelViewType( CloneViewType viewType){
+        [PublicAPI]
+        public static Type ModelViewType(this CloneViewType viewType){
             if (viewType == CloneViewType.ListView||viewType == CloneViewType.LookupListView) return typeof(IModelListView);
             return typeof(IModelDetailView);
         }

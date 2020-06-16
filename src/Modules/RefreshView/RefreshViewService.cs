@@ -8,7 +8,6 @@ using DevExpress.ExpressApp;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.XAF.Modules.Reactive;
-using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.RefreshView{
@@ -18,7 +17,7 @@ namespace Xpand.XAF.Modules.RefreshView{
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) =>
             source.Trace(name, RefreshViewModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
 
-        internal static IObservable<Unit> Connect(this  XafApplication application) => application.RefreshView().ToUnit();
+        internal static IObservable<Unit> Connect(this  ApplicationModulesManager manager) => manager.WhenApplication(application => application.RefreshView());
 
         private static IObservable<Unit> RefreshView(this XafApplication application) =>
             application.WhenViewOnFrame().CombineLatest(application.ReactiveModulesModel().RefreshViewModel(),
@@ -37,7 +36,6 @@ namespace Xpand.XAF.Modules.RefreshView{
                             );
                     }).Merge()
                 .TraceRefreshView(view => view.Id)
-                .ToUnit()
-                .Retry(application);
+                .ToUnit();
     }
 }

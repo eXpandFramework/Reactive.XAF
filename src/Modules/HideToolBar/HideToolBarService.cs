@@ -9,7 +9,6 @@ using Fasterflect;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
-using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.HideToolBar{
@@ -39,11 +38,7 @@ namespace Xpand.XAF.Modules.HideToolBar{
                 .Publish().RefCount();
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) =>
-            manager.WhenApplication()
-                .SelectMany(application =>  application.HideToolBarNestedFrames()
-                    .HideToolBar()
-                    .Retry(application))
-                .ToUnit();
+            manager.WhenApplication(application => application.HideToolBarNestedFrames().HideToolBar().ToUnit());
 
         public static IObservable<Frame> HideToolBar(this IObservable<Frame> source) =>
             source.Select(frame => {

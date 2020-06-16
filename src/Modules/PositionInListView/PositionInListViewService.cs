@@ -17,22 +17,25 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.PositionInListview{
     public static class PositionInListViewService{
-        internal static IObservable<Unit> Connect(this ApplicationModulesManager manager){
-            var whenApplication = manager.WhenApplication();
-            var whenPositionInListCreated = WhenPositionInListCreated(whenApplication);
-            return whenApplication.PositionNewObjects()
-                .Merge(whenPositionInListCreated.SortCollectionSource())
-                .Merge(whenPositionInListCreated.DisableSorting());
-        }
+        internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) =>
+            manager.WhenApplication(application => {
+                var positionInListCreated = application.WhenPositionInListCreated();
+                return positionInListCreated.SortCollectionSource()
+                    .Merge(positionInListCreated.DisableSorting())
+                    .Merge(application.ReturnObservable().PositionNewObjects());
+            });
+
         internal static IObservable<TSource> TracePositionInListView<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
 	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
 	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) =>
 	        source.Trace(name, PositionInListViewModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
 
 
-        private static IObservable<(ListView listView, XafApplication application)> WhenPositionInListCreated(this IObservable<XafApplication> whenApplication) =>
-            whenApplication.WhenListViewCreated()
-                .Where(_ => _.application.Model.IsPositionInListView(_.listView.Model.Id)).Publish().RefCount();
+        private static IObservable<(ListView listView, XafApplication application)> WhenPositionInListCreated(this XafApplication application) =>
+            application.WhenListViewCreated()
+                .Where(_ => application.Model.IsPositionInListView(_.Model.Id))
+                .Pair(application)
+                .Publish().RefCount();
 
         private static IObservable<Unit> DisableSorting(this IObservable<(ListView listView, XafApplication application)> whenPositionInListCreated) =>
             whenPositionInListCreated

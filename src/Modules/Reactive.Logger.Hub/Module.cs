@@ -2,6 +2,7 @@
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
+using JetBrains.Annotations;
 using MessagePack;
 using MessagePack.Resolvers;
 using Xpand.Extensions.Reactive.Transform;
@@ -10,7 +11,9 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 using YamlDotNet.Serialization;
 
 namespace Xpand.XAF.Modules.Reactive.Logger.Hub {
+    [UsedImplicitly]
     public sealed class ReactiveLoggerHubModule : ReactiveModuleBase{
+        [PublicAPI]
         public const string CategoryName = "Xpand.XAF.Modules.Reactive.Logger.Hub";
 
         static ReactiveLoggerHubModule(){
@@ -25,11 +28,11 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub {
             RequiredModuleTypes.Add(typeof(ReactiveLoggerModule));
         }
 
-        public static ReactiveTraceSource TraceSource{ get; set; }
+        public static ReactiveTraceSource TraceSource{ get; [PublicAPI]set; }
 
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
-            Application?.Connect()
+            moduleManager.Connect()
                 .TakeUntil(Application.WhenDisposed())
                 .Subscribe();
         }

@@ -30,6 +30,14 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
                 .Subscribe();
         }
 
+        public static IObservable<T> Retry<T>(this IObservable<T> source, Func<XafApplication> applicationSelector){
+	        return source.RetryWhen(_ => {
+		        var application = applicationSelector();
+		        return _.Do(application.HandleException)
+			        .SelectMany(e => application.GetPlatform()==Platform.Win?e.ReturnObservable():Observable.Empty<Exception>());
+	        });
+        }
+
         public static IObservable<T> Retry<T>(this IObservable<T> source, XafApplication application){
             Guard.ArgumentNotNull(application,nameof(application));
             return source.RetryWhen(_ => _.Do(application.HandleException)

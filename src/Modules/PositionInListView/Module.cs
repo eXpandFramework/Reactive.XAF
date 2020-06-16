@@ -6,6 +6,7 @@ using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.PositionInListview {
+    [UsedImplicitly]
     public sealed class PositionInListViewModule : ReactiveModuleBase {
         static PositionInListViewModule(){
             TraceSource=new ReactiveTraceSource(nameof(PositionInListViewModule));

@@ -1,12 +1,13 @@
 ﻿using System;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using Fasterflect;
 using Xpand.Extensions.AppDomainExtensions;
+using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ModelExtensions;
-using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.AutoCommit{
@@ -27,7 +28,8 @@ namespace Xpand.XAF.Modules.AutoCommit{
             source.Trace(name, AutoCommitModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
 
 
-        internal static IObservable<View> Connect(this XafApplication application) => application != null ? application.WhenAutoCommitObjectViewCreated().AutoCommit().Retry(application) : Observable.Empty<View>();
+        internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) =>
+            manager.WhenApplication(application => application.WhenAutoCommitObjectViewCreated().AutoCommit().ToUnit());
 
         public static IObservable<View> AutoCommit(this  IObservable<ObjectView> objectViewCreated) =>
             objectViewCreated

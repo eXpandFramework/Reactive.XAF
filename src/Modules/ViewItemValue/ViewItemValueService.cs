@@ -31,28 +31,28 @@ namespace Xpand.XAF.Modules.ViewItemValue{
         }
 
         private static IObservable<Unit> AssignViewItemValue(this ApplicationModulesManager manager) => manager
-	        .WhenApplication().WhenDetailViewCreated().ToDetailView()
-	        .Where(view => view.Model.Application.IsViewItemValueObjectView(view.Id))
-	        .SelectMany(view => view.Model.Application.ModelViewItemValue().Items
-		        .Where(item => item.ObjectView == view.Model)
-		        .SelectMany(item => item.Members)
-		        .Select(item => {
-			        var memberInfo = item.MemberViewItem.ModelMember.MemberInfo;
-			        var defaultObject = view.ObjectSpace.GetObjectsQuery<BusinessObjects.ViewItemValueObject>()
-				        .FirstOrDefault(o => o.ViewItemId == memberInfo.Name && o.ObjectView == view.Id);
-			        if (defaultObject != null){
-				        var typeConverter = TypeDescriptor.GetConverter(memberInfo.MemberTypeInfo.KeyMember.MemberType);
-				        var objectKeyValue = defaultObject.ViewItemValue;
-				        var value = objectKeyValue!=null?view.ObjectSpace.GetObjectByKey(memberInfo.MemberType,
-					        typeConverter.ConvertFromString(objectKeyValue)):null;
-				        memberInfo.SetValue(view.CurrentObject, value);
-				        return item;
-			        }
-			        return null;
-		        }))
-	        .WhenNotDefault()
-	        .TraceDefaultObjectValue(item => item.Id())
-	        .ToUnit();
+	        .WhenApplication(application => application.WhenDetailViewCreated().ToDetailView()
+                .Where(view => view.Model.Application.IsViewItemValueObjectView(view.Id))
+                .SelectMany(view => view.Model.Application.ModelViewItemValue().Items
+                    .Where(item => item.ObjectView == view.Model)
+                    .SelectMany(item => item.Members)
+                    .Select(item => {
+                        var memberInfo = item.MemberViewItem.ModelMember.MemberInfo;
+                        var defaultObject = view.ObjectSpace.GetObjectsQuery<BusinessObjects.ViewItemValueObject>()
+                            .FirstOrDefault(o => o.ViewItemId == memberInfo.Name && o.ObjectView == view.Id);
+                        if (defaultObject != null){
+                            var typeConverter = TypeDescriptor.GetConverter(memberInfo.MemberTypeInfo.KeyMember.MemberType);
+                            var objectKeyValue = defaultObject.ViewItemValue;
+                            var value = objectKeyValue!=null?view.ObjectSpace.GetObjectByKey(memberInfo.MemberType,
+                                typeConverter.ConvertFromString(objectKeyValue)):null;
+                            memberInfo.SetValue(view.CurrentObject, value);
+                            return item;
+                        }
+                        return null;
+                    }))
+                .WhenNotDefault()
+                .TraceDefaultObjectValue(item => item.Id())
+                .ToUnit());
 
         private static IObservable<Unit> SaveViewItemValue(this IObservable<SingleChoiceAction> registerAction) => registerAction
             .WhenExecute()

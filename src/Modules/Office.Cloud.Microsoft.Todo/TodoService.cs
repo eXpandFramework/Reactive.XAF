@@ -19,7 +19,6 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.XAF.Modules.Reactive;
-using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using TaskStatus = DevExpress.Persistent.Base.General.TaskStatus;
 
@@ -99,17 +98,17 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) =>
             source.Trace(name, MicrosoftTodoModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
         
-        internal static IObservable<Unit> Connect(this XafApplication application){
-            Client = application.AuthorizationRequired()
-                .Authorize()
-                .Retry(application)
-                .Publish().RefCount();
-            Updated = Client.SynchronizeCloud().Publish().RefCount();
-            return Updated
-                .TraceMicrosoftTodoModule(task => $"{task.Subject}, {task.Status}, {task.Id}") 
-                .ToUnit();
-        }
-        
+        internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) =>
+            manager.WhenApplication(application => {
+                Client = application.AuthorizationRequired()
+                    .Authorize()
+                    .Publish().RefCount();
+                Updated = Client.SynchronizeCloud().Publish().RefCount();
+                return Updated
+                    .TraceMicrosoftTodoModule(task => $"{task.Subject}, {task.Status}, {task.Id}")
+                    .ToUnit();
+            });
+
         private static IObservable<OutlookTask> SynchronizeCloud(this IObservable<(Frame frame,GraphServiceClient client)> source) =>
             source.SelectMany(client => {
                 var modelTodo = client.frame.Application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Microsoft().Todo();

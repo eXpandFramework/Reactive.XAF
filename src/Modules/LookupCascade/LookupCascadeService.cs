@@ -28,7 +28,8 @@ namespace Xpand.XAF.Modules.LookupCascade{
         internal const string PakoScriptResourceName = "Xpand.XAF.Modules.LookupCascade.pako.min.js";
         internal const string ASPxClientLookupPropertyEditorScriptResourceName = "Xpand.XAF.Modules.LookupCascade.ASPxLookupCascadePropertyEditor.js";
 
-        internal static IObservable<Unit> Connect(this LookupCascadeModule module) => module.Application.RegisterClientScripts().Merge(module.Application.StoreDataSource());
+        internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) => manager
+            .WhenApplication(application => application.RegisterClientScripts().Merge(application.StoreDataSource()));
 
         private static IObservable<Unit> StoreDataSource(this XafApplication application) =>
             application.WhenWeb().WhenCallBack(typeof(LookupCascadeService).FullName)

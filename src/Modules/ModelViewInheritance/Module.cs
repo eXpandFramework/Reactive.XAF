@@ -1,7 +1,10 @@
 ﻿using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
+using JetBrains.Annotations;
+
 namespace Xpand.XAF.Modules.ModelViewInheritance {
+    [UsedImplicitly]
     public sealed class ModelViewInheritanceModule : ModuleBase {
         public ModelViewInheritanceModule() {
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));

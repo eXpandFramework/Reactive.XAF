@@ -17,7 +17,6 @@ using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.System.Net;
 using Xpand.Extensions.Reactive.Utility;
-using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using ListView = DevExpress.ExpressApp.ListView;
 
@@ -26,25 +25,23 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
         static readonly TraceEventReceiver Receiver = new TraceEventReceiver();
         
 
-        internal static IObservable<Unit> Connect(this XafApplication application){
-            
-            if (!(application is ILoggerHubClientApplication)){
-                TraceEventHub.Init();
-            }
-            var startServer = application.StartServer().Publish().RefCount();
-            var client = Observable.Start(application.ConnectClient).Merge().Publish().RefCount();
+        internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) =>
+	        manager.WhenApplication(application => {
+		        if (!(application is ILoggerHubClientApplication)){
+			        TraceEventHub.Init();
+		        }
+		        var startServer = application.StartServer().Publish().RefCount();
+		        var client = Observable.Start(application.ConnectClient).Merge().Publish().RefCount();
 
-            application.CleanUpHubResources( startServer);
+		        application.CleanUpHubResources( startServer);
 
-            var saveServerTraceMessages = application.SaveServerTraceMessages().Retry(application).Publish().RefCount();
-            return startServer.ToUnit()
-                .Merge(client.ToUnit())
-                .Merge(saveServerTraceMessages.ToUnit())
-                .Merge(application.WhenViewOnFrame(typeof(TraceEvent))
-                    .SelectMany(frame => saveServerTraceMessages.LoadTracesToListView(frame)))
-                .Retry(application);
-
-        }
+		        var saveServerTraceMessages = application.SaveServerTraceMessages().Publish().RefCount();
+		        return startServer.ToUnit()
+			        .Merge(client.ToUnit())
+			        .Merge(saveServerTraceMessages.ToUnit())
+			        .Merge(application.WhenViewOnFrame(typeof(TraceEvent))
+				        .SelectMany(frame => saveServerTraceMessages.LoadTracesToListView(frame)));
+	        });
 
         public static void CleanUpHubResources(this XafApplication application, IObservable<Server> startServer){
             application.WhenDisposed().Zip(startServer, (tuple, server) => server.ShutDownServer())
@@ -106,16 +103,16 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 	        application.ModelLoggerPorts().SelectMany(ports => ports.LoggerPorts).OfType<IModelLoggerClientRange>()
 		        .TraceRXLoggerHub(range => $"{range.Host}, {range.StartPort}, {range.EndPort}")
 		        .SelectMany(range => Enumerable.Range(range.StartPort, range.EndPort-range.StartPort)
-			        .Select(port => IPEndPoint(range.Host, port))).Merge()
+			        .Select(port => IpEndPoint(range.Host, port))).Merge()
 		        .ToEnumerable();
 
-        private static IObservable<IPEndPoint> IPEndPoint(string host, int port) =>
+        private static IObservable<IPEndPoint> IpEndPoint(string host, int port) =>
 	        Regex.IsMatch(host, @"\A\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b\z") ? new IPEndPoint(IPAddress.Parse(host), port).ReturnObservable()
 		        : Dns.GetHostAddressesAsync(host).ToObservable()
 			        .Select(addresses => new IPEndPoint(addresses.Last(), port));
 
         public static IObservable<IPEndPoint> ServerPortsList(this XafApplication application) => application.ModelLoggerPorts()
-		        .SelectMany(ports => ports.LoggerPorts.OfType<IModelLoggerServerPort>().ToObservable().SelectMany(_ => IPEndPoint(_.Host,_.Port)));
+		        .SelectMany(ports => ports.LoggerPorts.OfType<IModelLoggerServerPort>().ToObservable().SelectMany(_ => IpEndPoint(_.Host,_.Port)));
 
         private static IObservable<IModelServerPorts> ModelLoggerPorts(this XafApplication application) =>
 	        application.ToReactiveModule<IModelReactiveModuleLogger>().Select(logger => logger.ReactiveLogger).Cast<IModelServerPorts>()

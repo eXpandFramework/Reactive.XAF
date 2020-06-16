@@ -9,6 +9,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
+using JetBrains.Annotations;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.Reactive;
@@ -23,7 +24,7 @@ namespace Xpand.XAF.Modules.ModelMapper{
             TraceSource=new ReactiveTraceSource(nameof(ModelMapperModule));
         }
 
-        public static ReactiveTraceSource TraceSource{ get; set; }
+        public static ReactiveTraceSource TraceSource{ get; [PublicAPI]set; }
 
         public ModelMapperModule(){
             RequiredModuleTypes.Add(typeof(ReactiveModule));
@@ -47,7 +48,7 @@ namespace Xpand.XAF.Modules.ModelMapper{
             
             CheckXpandVSIXInstalled();
             moduleManager.ConnectExtendingService()
-                .Merge(Application.BindConnect())
+                .Merge(moduleManager.BindConnect())
                 .TakeUntilDisposed(this)
                 .Subscribe();
         }

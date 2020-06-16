@@ -88,7 +88,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static IObservable<SimpleActionExecuteEventArgs> WhenExecuteCompleted(this SimpleAction action) =>
 	        Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(
 			        h => action.ExecuteCompleted += h, h => action.ExecuteCompleted -= h, ImmediateScheduler.Instance)
-		        .Select(pattern => (SimpleActionExecuteEventArgs)pattern.EventArgs);
+		        .Select(pattern => (SimpleActionExecuteEventArgs) pattern.EventArgs);
 
         public static IObservable<SingleChoiceActionExecuteEventArgs> WhenExecuteCompleted(this SingleChoiceAction action) =>
 	        Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(

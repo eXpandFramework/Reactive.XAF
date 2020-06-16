@@ -8,6 +8,7 @@ using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.SequenceGenerator{
+    [UsedImplicitly]
     public sealed class SequenceGeneratorModule : ReactiveModuleBase{
         [PublicAPI]
         public const string ModelCategory = "Xpand.SequenceGenerator";
@@ -26,11 +27,13 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         public static Type SequenceStorageType{ get; set; } = typeof(SequenceStorage);
         [PublicAPI]
         public static ReactiveTraceSource TraceSource{ get; set; }
-        public override void Setup(XafApplication application){
-            base.Setup(application);
-            application.Connect(SequenceStorageType)
+
+        public override void Setup(ApplicationModulesManager moduleManager){
+            base.Setup(moduleManager);
+            moduleManager.Connect(SequenceStorageType)
                 .TakeUntilDisposed(this)
                 .Subscribe();
         }
+
     }
 }

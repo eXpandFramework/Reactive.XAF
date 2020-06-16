@@ -23,7 +23,6 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.SecurityExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
-using Xpand.Extensions.XAF.Xpo;
 using Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -160,16 +159,17 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
             return attribute != null ? attribute.Type.FullName : objectType.FullName;
         }
 
-        internal static IObservable<object> Connect(this XafApplication application,Type sequenceStorageType=null){
+        internal static IObservable<Unit> Connect(this ApplicationModulesManager manager,Type sequenceStorageType=null){
             sequenceStorageType ??= typeof(SequenceStorage);
             Guard.TypeArgumentIs(typeof(ISequenceStorage),sequenceStorageType,nameof(sequenceStorageType));
-            var objectSpaceProvider = application.ObjectSpaceProvider == null ? application.WhenSetupComplete()
-                .Select(_ => application.ObjectSpaceProvider) : application.ObjectSpaceProvider.ReturnObservable();
-
-            return objectSpaceProvider.SelectMany(provider => provider.SequenceGeneratorDatalayer()
-                    .SelectMany(dataLayer => application.WhenObjectSpaceCreated().GenerateSequences(dataLayer,sequenceStorageType)
-                        .Merge(application.Security.AddAnonymousType(sequenceStorageType).ToObservable())))
-                    .Merge(application.ConfigureDetailViewSequenceStorage());
+            return manager.WhenApplication(application => {
+                var objectSpaceProvider = application.ObjectSpaceProvider == null ? application.WhenSetupComplete()
+                    .Select(_ => application.ObjectSpaceProvider) : application.ObjectSpaceProvider.ReturnObservable();
+                return objectSpaceProvider.SelectMany(provider => provider.SequenceGeneratorDatalayer()
+                        .SelectMany(dataLayer => application.WhenObjectSpaceCreated().GenerateSequences(dataLayer,sequenceStorageType)
+                            .Merge(application.Security.AddAnonymousType(sequenceStorageType).ToObservable())))
+                    .Merge(application.ConfigureDetailViewSequenceStorage()).ToUnit();
+            });
         }
 
         private static IObservable<object> ConfigureDetailViewSequenceStorage(this XafApplication application) =>

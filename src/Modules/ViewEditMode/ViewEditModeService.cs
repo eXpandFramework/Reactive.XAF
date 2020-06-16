@@ -9,7 +9,6 @@ using DevExpress.ExpressApp.Actions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
-using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 using Xpand.XAF.Modules.Reactive.Services.Controllers;
@@ -22,9 +21,10 @@ namespace Xpand.XAF.Modules.ViewEditMode{
             source.Trace(name, ViewEditModeModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
 
 
-        internal static IObservable<Unit> Connect(this XafApplication application) =>
-            application != null? application.WhenViewEditModeChanged().ToUnit()
-                .Merge(application.HandleWebEditAction(), Scheduler.Immediate): Observable.Empty<Unit>();
+        internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) =>
+            manager.WhenApplication(application => application.WhenViewEditModeChanged().ToUnit()
+                .Merge(application.HandleWebEditAction(), Scheduler.Immediate));
+            
 
         private static IObservable<Unit> HandleWebEditAction(this XafApplication application){
             var webModificationsController = application.WhenWindowCreated()
@@ -35,12 +35,10 @@ namespace Xpand.XAF.Modules.ViewEditMode{
                     var model = ((IModelDetailViewViewEditMode) _.Frame.View.Model);
                     return model.ViewEditMode == DevExpress.ExpressApp.Editors.ViewEditMode.View && model.LockViewEditMode;
                 })
-                .Retry(application)
                 .Publish().RefCount();
 
             var editAction = webModificationsController
                 .Select(_ => _.Actions.First(action => action.Id == "SwitchToEditMode")).Cast<SimpleAction>()
-                .Retry(application)
                 .Publish().RefCount();
             editAction.SelectMany(action => action.Enabled.WhenResultValueChanged()).Subscribe(tuple => { });
             var unLockEdit = editAction.SelectMany(_ => _.WhenExecuting()).FirstAsync()
@@ -54,7 +52,7 @@ namespace Xpand.XAF.Modules.ViewEditMode{
                     return Unit.Default;
                 });
             return unLockEdit.Merge(lockEdit)
-                .TraceViewEditModeModule().ToUnit().Retry(application);
+                .TraceViewEditModeModule().ToUnit();
         }
 
         public static IObservable<DetailView> WhenViewEditModeAssigned(this XafApplication application) =>

@@ -2,11 +2,13 @@
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
+using JetBrains.Annotations;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.HideToolBar{
+    [UsedImplicitly]
     public sealed class HideToolBarModule : ReactiveModuleBase{
         public const string CategoryName = "Xpand.XAF.Modules.HideToolBar";
 
@@ -15,7 +17,7 @@ namespace Xpand.XAF.Modules.HideToolBar{
             RequiredModuleTypes.Add(typeof(ReactiveModule));   
         }
 
-        public static ReactiveTraceSource TraceSource{ get; set; }
+        public static ReactiveTraceSource TraceSource{ get; [PublicAPI]set; }
         static HideToolBarModule(){
             TraceSource=new ReactiveTraceSource(nameof(HideToolBarModule));
         }

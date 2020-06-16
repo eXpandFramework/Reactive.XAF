@@ -22,10 +22,9 @@ namespace Xpand.XAF.Modules.LookupCascade {
         [PublicAPI]
         public static ReactiveTraceSource TraceSource{ get; set; }
 
-        public override void Setup(XafApplication application){
-            base.Setup(application);
-            
-            this.Connect()
+        public override void Setup(ApplicationModulesManager moduleManager){
+            base.Setup(moduleManager);
+            moduleManager.Connect()
                 .TakeUntilDisposed(this)
                 .Subscribe();
         }

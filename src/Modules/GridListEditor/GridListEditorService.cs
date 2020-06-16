@@ -6,14 +6,13 @@ using DevExpress.ExpressApp;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.XAF.Modules.Reactive;
-using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.GridListEditor{
     public static class GridListEditorService{
 
         internal static IObservable<Unit> Connect(this  ApplicationModulesManager manager) => 
-	        manager.WhenApplication().SelectMany(application => application.RememberTopRow().Retry(application).ToUnit());
+	        manager.WhenApplication(application => application.RememberTopRow().ToUnit());
 
         internal static IObservable<TSource> TraceGridListEditor<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
 	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,

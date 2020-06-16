@@ -11,6 +11,7 @@ using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
+    [UsedImplicitly]
     public sealed class MicrosoftTodoModule : ReactiveModuleBase{
         [PublicAPI]
         public const string ModelCategory = "Xpand.MicrosoftTodo";
@@ -39,9 +40,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
         
         [PublicAPI]
         public static ReactiveTraceSource TraceSource{ get; set; }
-        public override void Setup(XafApplication application){
-            base.Setup(application);
-            application.Connect()
+        public override void Setup(ApplicationModulesManager manager){
+            base.Setup(manager);
+            manager.Connect()
                 .TakeUntilDisposed(this)
                 .Subscribe();
         }
