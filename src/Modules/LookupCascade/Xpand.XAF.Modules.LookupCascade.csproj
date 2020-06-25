@@ -17,7 +17,15 @@
     <DebugType>full</DebugType>
     <AssemblyName>Xpand.XAF.Modules.LookupCascade</AssemblyName>
     <RootNamespace>Xpand.XAF.Modules.LookupCascade</RootNamespace>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+  </ItemGroup>
+
   <ItemGroup>
     <Compile Remove="ClientDatasourceStorageController.cs" />
   </ItemGroup>
