@@ -5,7 +5,7 @@ using System.Reflection.Emit;
 
 namespace Xpand.Extensions.ReflectionExtensions{
     public partial class ReflectionExtensions{
-        private static readonly ModuleBuilder MModule;
+	    private static readonly ModuleBuilder MModule;
 
         static ReflectionExtensions(){
             var assembly = AssemblyBuilder.DefineDynamicAssembly(

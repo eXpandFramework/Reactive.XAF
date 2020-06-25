@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
-using System.Text;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
-using DevExpress.ExpressApp.Security;
-using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 using Microsoft.Graph;
 using Shouldly;
 using Xpand.Extensions.Office.Cloud;
@@ -19,6 +15,7 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib;
+using Xpand.XAF.Modules.Office.Cloud.Tests;
 using Xpand.XAF.Modules.Reactive;
 using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
 using Task = DevExpress.Persistent.BaseImpl.Task;
@@ -26,8 +23,8 @@ using TaskStatus = DevExpress.Persistent.Base.General.TaskStatus;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
     static class TodoTestExtensions{
-        public const string TasksFolderName = "Brokero Tasks";
-        public const string TasksPagingFolderName = "Brokero Paging Tasks";
+        public const string TasksFolderName = "Xpnad Tasks";
+        public const string TasksPagingFolderName = "Xpand Paging Tasks";
 
         public const int TasksFolderPagingItemsCount = 11;
 
@@ -62,9 +59,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
 
         public static MicrosoftTodoModule TodoModule(this Platform platform,params ModuleBase[] modules){
             var application = NewApplication(platform,  modules);
-            var securityStrategyComplex = new SecurityStrategyComplex(typeof(PermissionPolicyUser),
-                typeof(PermissionPolicyRole), new AuthenticationStandard());
-            application.Security = securityStrategyComplex;
+            application.SetupSecurity();
             var module = application.AddModule<MicrosoftTodoModule>(typeof(Task));
             var todoModel = application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Todo();
             var dependency = ((IModelObjectViews) todoModel).ObjectViews.AddNode<IModelObjectViewDependency>();
@@ -99,7 +94,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
 
         public static async Task<IList<(Task task, OutlookTask outlookTask)>> CreateExistingObjects(
             this XafApplication application, string title, TaskStatus taskStatus = TaskStatus.InProgress,int count=1){
-            var builder =await application.ObjectSpaceProvider.NewGraphServiceClient();
+            var builder =await application.AuthorizeTestMS();
             var folder = await builder.Me.Outlook.TaskFolders.GetFolder(TasksFolderName, true);
             await builder.Me.Outlook.TaskFolders[folder.Id].DeleteAllTasks();
             return await Observable.Range(0, count).SelectMany(i => {
@@ -148,30 +143,6 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
                 return builder.Tasks.Request().AddAsync(task);
             }).Buffer(count);
         }
-        public static Guid NewMicrosoftAuthentication(this IObjectSpaceProvider objectSpaceProvider){
-            var type = typeof(TodoServiceTests);
-            using (var manifestResourceStream = type.Assembly.GetManifestResourceStream(type, "AuthenticationData.json")){
-                var token = Encoding.UTF8.GetBytes(new StreamReader(manifestResourceStream ?? throw new InvalidOperationException()).ReadToEnd());
-                using (var objectSpace = objectSpaceProvider.CreateObjectSpace()){
-                    var authenticationOid = (Guid)objectSpace.GetKeyValue(SecuritySystem.CurrentUser);
-                    if (objectSpace.GetObjectByKey<MSAuthentication>(authenticationOid)==null){
-                        var authentication = objectSpace.CreateObject<MSAuthentication>();
-                    
-                        authentication.Oid=authenticationOid;
-                        authentication.Token=token;
-                        objectSpace.CommitChanges();
-                    }
-                    
-                    return authenticationOid;
-                }
-            }
-        }
-
-        public static IObservable<GraphServiceClient> NewGraphServiceClient(this IObjectSpaceProvider objectSpaceProvider){
-            return ServiceProvider.ClientAppBuilder.Authorize(cache => {
-                var newMicrosoftAuthentication = objectSpaceProvider.NewMicrosoftAuthentication();
-                return cache.SynchStorage(objectSpaceProvider.CreateObjectSpace, newMicrosoftAuthentication);
-            });
-        }
+        
     }
 }

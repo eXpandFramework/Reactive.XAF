@@ -2,7 +2,15 @@ Fasterflect.Xpand
 JetBrains.Annotations
 System.Reactive
 DevExpress.Persistent.Base
+DevExpress.ExpressApp.Security
 Microsoft.Graph.Beta
 Microsoft.Graph.Core
+Microsoft.IdentityModel.Tokens
 Microsoft.Identity.Client
+Microsoft.Owin
+Microsoft.Owin.Host.SystemWeb
+Microsoft.Owin.Security
+Microsoft.Owin.Security.Cookies
+Microsoft.Owin.Security.OpenIdConnect
+Owin
 Newtonsoft.Json

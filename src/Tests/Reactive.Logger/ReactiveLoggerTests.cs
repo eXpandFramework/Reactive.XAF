@@ -76,7 +76,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             
             using (var application = LoggerModule().Application){
                 var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger;
-                logger.TraceSources.Count.ShouldBeGreaterThanOrEqualTo(TestsLib.Extensions.ModulePorts.Count-1);
+                logger.TraceSources.Count.ShouldBeGreaterThanOrEqualTo(TestsLib.Extensions.ModulePorts.Count-2);
                 var module = logger.TraceSources[nameof(ReactiveLoggerModule)];
                 module.ShouldNotBeNull();
                 

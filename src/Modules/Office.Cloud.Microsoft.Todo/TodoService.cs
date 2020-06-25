@@ -111,23 +111,23 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
 
         private static IObservable<OutlookTask> SynchronizeCloud(this IObservable<(Frame frame,GraphServiceClient client)> source) =>
             source.SelectMany(client => {
-                var modelTodo = client.frame.Application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Microsoft().Todo();
+                var modelTodo = client.frame.Application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Todo();
                 return client.client.Me.Outlook.TaskFolders.GetFolder(modelTodo.DefaultTodoListName)
                     .Select(folder => client.client.Me.Outlook.TaskFolders[folder.Id]).SynchronizeCloud(
                         client.frame.View.ObjectSpace, client.frame.Application.CreateObjectSpace,
                         CustomizeDeleteSubject.OnNext, CustomizeInsertSubject.OnNext, CustomizeUpdateSubject.OnNext);
-            }).TraceMicrosoftTodoModule(task => $"{task.Subject}, {task.Status}, {task.Id}");
+            })
+            .TraceMicrosoftTodoModule(task => $"{task.Subject}, {task.Status}, {task.Id}");
 
         private static IObservable<Frame> AuthorizationRequired(this XafApplication application) => application
             .WhenViewOnFrame()
-            .Where(frame => {
-                var moduleOffice = application.Model.ToReactiveModule<IModelReactiveModuleOffice>();
-                return moduleOffice.Microsoft().Todo().ObjectViews().Select(dependency => dependency.Id())
-                    .Contains(frame.View.Model.Id);
-            })
+            .Where(frame => application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office
+                .Microsoft().Todo().ObjectViews().Select(dependency => dependency.Id())
+                .Contains(frame.View.Model.Id))
             .TraceMicrosoftTodoModule(frame => frame.View.Id);
 
         static IObservable<(Frame frame, GraphServiceClient client)> Authorize(this  IObservable<Frame> whenViewOnFrame) => whenViewOnFrame
-            .SelectMany(frame => frame.Application.AuthorizeMS().Select(client => (frame, client))).TraceMicrosoftTodoModule();
+            .SelectMany(frame => frame.Application.AuthorizeMS().Select(client => (frame, client)))
+            .TraceMicrosoftTodoModule(_ => _.frame.View.Id);
     }
 }

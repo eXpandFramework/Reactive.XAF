@@ -2,8 +2,7 @@
 using JetBrains.Annotations;
 
 namespace Xpand.Extensions.Office.Cloud.Microsoft{
-    [DeferredDeletion(false)]
-    [UsedImplicitly]
+	[UsedImplicitly]
     public class MSAuthentication : CloudOfficeBaseObject{
         public MSAuthentication(Session session) : base(session){
         }

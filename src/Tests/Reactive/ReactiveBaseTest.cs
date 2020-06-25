@@ -11,9 +11,10 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
         }
 
         protected ReactiveModule DefaultReactiveModule(Platform platform=Platform.Win){
-            var application = platform.NewApplication<ReactiveModule>();
+            var application = NewXafApplication(platform);
             return DefaultReactiveModule(application);
         }
 
+        protected XafApplication NewXafApplication(Platform platform=Platform.Win) => platform.NewApplication<ReactiveModule>();
     }
 }

@@ -33,7 +33,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
     [DomainLogic(typeof(IModelTodo))]
     public static class ModelTodoLogic{
         
-        public static IObservable<IModelTodo> TodoModel(this IObservable<IModelOfficeMicrosoft> source){
+        public static IObservable<IModelTodo> TodoModel(this IObservable<IModelMicrosoft> source){
             return source.Select(modules => modules.Todo());
         }
 

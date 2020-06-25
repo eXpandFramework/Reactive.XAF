@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Windows.Forms;
@@ -25,6 +26,13 @@ using View = DevExpress.ExpressApp.View;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class XafApplicationRXExtensions{
+        
+        
+        public static IObservable<Unit> Logon(this XafApplication application,object userKey) =>
+            RxApp.AuthenticateSubject.Where(_ => _.authentication== application.Security.GetPropertyValue("Authentication"))
+                .Do(_ => _.args.Instance=userKey).SelectMany(_ => application.WhenLoggedOn().FirstAsync()).ToUnit()
+                .Merge(Unit.Default.ReturnObservable().Do(_ => application.Logon()).IgnoreElements());
+
         public static IObservable<TSource> BufferUntilCompatibilityChecked<TSource>(this XafApplication application,IObservable<TSource> source) =>
             source.Buffer(application.WhenCompatibilityChecked().FirstAsync()).FirstAsync().SelectMany(list => list)
                 .Concat(Observable.Defer(() => source)).Select(source1 => source1);
@@ -266,6 +274,14 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .FromEventPattern<EventHandler<LogonEventArgs>,LogonEventArgs>(h => application.LoggedOn += h,h => application.LoggedOn -= h,ImmediateScheduler.Instance)
                 .TransformPattern<LogonEventArgs,XafApplication>()
                 .TraceRX(_ => $"{_.e.LogonParameters}");
+        
+        public static IObservable<(XafApplication application, LogonEventArgs e)> WhenLoggingOn(this IObservable<XafApplication> soure) => soure
+	        .SelectMany(application => application.WhenLoggingOn());
+
+        public static IObservable<(XafApplication application, LogonEventArgs e)> WhenLoggingOn(this XafApplication application) => Observable
+            .FromEventPattern<EventHandler<LogonEventArgs>,LogonEventArgs>(h => application.LoggingOn += h,h => application.LoggingOn -= h,ImmediateScheduler.Instance)
+            .TransformPattern<LogonEventArgs,XafApplication>()
+            .TraceRX(_ => $"{_.e.LogonParameters}");
 
         public static IObservable<XafApplication> WhenSetupComplete(this XafApplication application) =>
             Observable.FromEventPattern<EventHandler<EventArgs>,EventArgs>(h => application.SetupComplete += h,h => application.SetupComplete -= h,ImmediateScheduler.Instance)

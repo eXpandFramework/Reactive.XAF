@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
+using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.Utility;
@@ -99,6 +101,24 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
                 buffer.Test().Items.Count.ShouldBe(3);
             }
         }
+
         
+        [Test]
+        [XpandTest()]
+        public async Task Logon_with_user_key(){
+            using (var application = NewXafApplication()){
+                application.SetupSecurity();
+                DefaultReactiveModule(application);
+                var objectSpace = application.CreateObjectSpace();
+                var policyUser = objectSpace.GetObjectsQuery<PermissionPolicyUser>().First();
+                policyUser.SetPassword("test");
+                objectSpace.CommitChanges();
+                
+                await application.Logon(policyUser.Oid).FirstAsync();
+                
+                SecuritySystem.CurrentUserId.ShouldBe(policyUser.Oid);
+            }
+
+        }
     }
 }

@@ -14,9 +14,9 @@ nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 20.1.4
 nuget DevExpress.ExpressApp.EasyTest.WinAdapter == 20.1.4  
 nuget DevExpress.ExpressApp.Security.Xpo == 20.1.4  
 nuget Microsoft.Extensions.Dependencyinjection == 3.1.2  
-nuget Microsoft.Identity.Client 4.13.0
-nuget Microsoft.Graph.Beta == 0.17.0-preview
+nuget Microsoft.Graph.Beta == 0.18.0-preview
 nuget Microsoft.Graph.Core == 1.19.0
+nuget Microsoft.IdentityModel.Tokens == 6.6.0
 nuget Enums.NET 3.0.3
 nuget FasterFlect.Xpand
 nuget Mono.Cecil 0.11.2
@@ -27,6 +27,13 @@ nuget Grpc.Core 2.25.0
 nuget MessagePack 1.7.3.7
 nuget Humanizer.Core 2.7.9
 nuget Microsoft.CSharp 4.7.0
+nuget Microsoft.Identity.Client 4.13.0
+nuget Microsoft.Owin 4.1.0
+nuget Microsoft.Owin.Host.SystemWeb 4.1.0
+nuget Microsoft.Owin.Security 4.1.0
+nuget Microsoft.Owin.Security.Cookies 4.1.0
+nuget Microsoft.Owin.Security.OpenIdConnect 4.1.0
+nuget Owin 1.0.0
 nuget Newtonsoft.Json == 12.0.3
 nuget NUnit 3.12
 nuget NUnit3TestAdapter 3.16.1
@@ -40,7 +47,7 @@ nuget System.Drawing.Common 4.7
 nuget System.Reactive 4.3.2
 nuget System.Collections.Immutable 1.7.0
 nuget Unofficial.Microsoft.mshtml 7.0.3300
-nuget Xpand.Patcher 2.0.15
+nuget Xpand.Patcher 2.0.23
 nuget YamlDotNet 8.1.1
 nuget Xpand.Collections 
 nuget JetBrains.Annotations 2020.1.0

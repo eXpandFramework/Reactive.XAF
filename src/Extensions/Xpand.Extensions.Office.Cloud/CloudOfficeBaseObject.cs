@@ -4,7 +4,7 @@ using DevExpress.ExpressApp;
 using DevExpress.Xpo;
 
 namespace Xpand.Extensions.Office.Cloud{
-    [NonPersistent]
+    [NonPersistent][OptimisticLocking(false)][DeferredDeletion(false)]
     public abstract class CloudOfficeBaseObject : XPCustomObject, IObjectSpaceLink{
         protected CloudOfficeBaseObject(Session session) : base(session){
         }

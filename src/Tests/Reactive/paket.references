@@ -1,4 +1,6 @@
 DevExpress.ExpressApp.Win
+DevExpress.ExpressApp.Security
+DevExpress.Persistent.BaseImpl
 akarnokd.reactive_extensions
 MagicOnion
 Moq
@@ -6,3 +8,5 @@ Shouldly
 NUnit
 NUnit3TestAdapter
 JetBrains.Annotations
+Xpand.Patcher
+FasterFlect.Xpand

@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net461</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <LangVersion>latest</LangVersion>
     <SignAssembly>true</SignAssembly>
@@ -37,7 +37,7 @@
     <PackageReference Include="DevExpress.ExpressApp" Version="20.1.4" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
     <PackageReference Include="Unofficial.Microsoft.mshtml" Version="7.0.3300" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="2.201.34" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="2.201.34.5" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.TestsLib">

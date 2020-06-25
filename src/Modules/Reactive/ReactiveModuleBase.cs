@@ -1,17 +1,33 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using DevExpress.ExpressApp;
+using DevExpress.Persistent.Base;
 using Fasterflect;
+using HarmonyLib;
+using JetBrains.Annotations;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive{
-    public abstract partial class ReactiveModuleBase:ModuleBase{
+    public abstract class ReactiveModuleBase:ModuleBase{
         internal readonly ReplaySubject<ReactiveModuleBase> SetupCompletedSubject=new ReplaySubject<ReactiveModuleBase>(1);
         static readonly Subject<ApplicationModulesManager> SettingUpSubject=new Subject<ApplicationModulesManager>();
+        static ReactiveModuleBase(){
+            var harmony = new Harmony(typeof(ReactiveModuleBase).FullName);
+            var original = typeof(ApplicationModulesManager).Method("SetupModules");
+            var prefix = typeof(ReactiveModule).Method(nameof(SetupModulesPatch),Flags.StaticAnyVisibility);
+            harmony.Patch(original,  new HarmonyMethod(prefix));
+        }
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        static bool SetupModulesPatch(ApplicationModulesManager __instance){
+            Tracing.Tracer.LogText("SetupModules");
+            return SetupModules(__instance);
 
+        }
+        [PublicAPI]
         public static void Unload(params Type[] modules) =>
 	        SettingUpSubject.Do(_ => {
 			        foreach (var module in _.Modules.Where(m => m.RequiredModuleTypes.Any(modules.Contains))){

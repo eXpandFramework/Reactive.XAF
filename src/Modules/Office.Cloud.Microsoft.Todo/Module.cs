@@ -12,7 +12,7 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
     [UsedImplicitly]
-    public sealed class MicrosoftTodoModule : ReactiveModuleBase{
+    public sealed class MicrosoftTodoModule : MicrosoftModule{
         [PublicAPI]
         public const string ModelCategory = "Xpand.MicrosoftTodo";
         
@@ -29,10 +29,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
             AdditionalExportedTypes.Add(typeof(CloudOfficeTokenStorage));
         }
 
+        
         public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders){
             base.ExtendModelInterfaces(extenders);
-            extenders.Add<IModelReactiveModules,IModelReactiveModuleOffice>();
-            extenders.Add<IModelOffice,IModelOfficeMicrosoft>();
             extenders.Add<IModelMicrosoft,IModelMicrosoftTodo>();
             extenders.Add<IModelTodo,IModelObjectViews>();
         }

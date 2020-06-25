@@ -124,7 +124,7 @@ namespace Xpand.TestsLib{
 
         public static void RegisterDefaults(this XafApplication application, params ModuleBase[] modules){
             if (modules.Any() && application.Security is SecurityStrategyComplex){
-                modules = modules.Add(new ModuleUpdaterModule()).ToArray();
+                modules = modules.Add(new TestApplicationModule()).ToArray();
             }
 
             application.AlwaysUpdateOnDatabaseVersionMismatch().Subscribe();
@@ -171,6 +171,7 @@ namespace Xpand.TestsLib{
             {"MicrosoftTodoModule", 61476},
             {"PositionInlistViewModule", 61478},
             {"ViewItemValueModule", 61479},
+            {"MicrosoftTestModule", 61480},
         };
 
         public static IObservable<IModelReactiveLogger> ConfigureModel<TModule>(this XafApplication application,
@@ -365,7 +366,7 @@ namespace Xpand.TestsLib{
 
     }
 
-    public class ModuleUpdaterModule : ModuleBase{
+    public class TestApplicationModule : ModuleBase{
         public override void Setup(XafApplication application){
             base.Setup(application);
             application.LoggingOn += ApplicationOnLoggingOn;
@@ -381,6 +382,8 @@ namespace Xpand.TestsLib{
                 .Add(new DefaultUserModuleUpdater(objectSpace, versionFromDB));
         }
     }
+
+
 
     public class DefaultUserModuleUpdater : ModuleUpdater{
         public DefaultUserModuleUpdater(IObjectSpace objectSpace, Version currentDBVersion) : base(objectSpace,

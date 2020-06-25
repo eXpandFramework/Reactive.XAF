@@ -35,6 +35,20 @@
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
     </Reference>
+    <Reference Include="Xpand.XAF.Modules.Reactive.Logger">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions.Office.Cloud.Microsoft">
+      <HintPath>..\..\..\bin\Xpand.Extensions.Office.Cloud.Microsoft.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="AuthenticationData.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="AzureAppCredentials.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

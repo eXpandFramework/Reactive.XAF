@@ -630,3 +630,5 @@ $RECYCLE.BIN/
 
 /src/Tests/Office.Cloud.Microsoft.Todo/AuthenticationData.json
 /src/Tests/Office.Cloud.Microsoft.Todo/AzureAppCredentials.json
+/src/Tests/Office.Cloud/AuthenticationData.json
+/src/Tests/Office.Cloud/AzureAppCredentials.json

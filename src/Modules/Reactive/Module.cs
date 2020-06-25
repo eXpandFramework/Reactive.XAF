@@ -39,7 +39,7 @@ namespace Xpand.XAF.Modules.Reactive {
                 .TakeUntilDisposed(this)
                 .Subscribe();
         }
-
+        
         public override void CustomizeTypesInfo(ITypesInfo typesInfo) {
             base.CustomizeTypesInfo(typesInfo);
             _typesInfoSubject.OnNext(typesInfo);

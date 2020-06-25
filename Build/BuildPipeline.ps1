@@ -24,7 +24,7 @@ $ErrorActionPreference = "Stop"
 $regex = [regex] '(\d{2}\.\d*)'
 $result = $regex.Match($CustomVersion).Groups[1].Value;
 & "$SourcePath\go.ps1" -InstallModules
-$todoTestsPath="$SourcePath\src\Tests\Office.Cloud.Microsoft.Todo\"
+$todoTestsPath="$SourcePath\src\Tests\Office.Cloud\"
 if (!(Test-Path $todoTestsPath\AzureAppCredentials.json) -or !(Get-Content $todoTestsPath\AzureAppCredentials.json -Raw)){
     Write-HostFormatted "Download office credential" -Section
     Remove-Item $env:TEMP\storage -Force -Recurse -ErrorAction SilentlyContinue

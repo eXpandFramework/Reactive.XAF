@@ -7,7 +7,9 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Utils;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
+using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
 namespace Xpand.XAF.Modules.Reactive.Services.Actions{
@@ -41,8 +43,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 	        Observable.FromEventPattern<CancelEventHandler, CancelEventArgs>(h => action.Executing += h,
 		        h => action.Executing -= h, ImmediateScheduler.Instance).TransformPattern<CancelEventArgs, TAction>();
 
-        public static  IObservable<(TAction action, Type objectType, View view, Frame frame, IObjectSpace objectSpace,
-                ShowViewParameters showViewParameters)> ToParameter<TAction>(
+        public static  IObservable<(TAction action, Type objectType, View view, Frame frame, IObjectSpace objectSpace, ShowViewParameters showViewParameters)> ToParameter<TAction>(
                 this IObservable<(TAction action, ActionBaseEventArgs e)> source) where TAction : ActionBase => source.Select(_ => {
 		        var frame = _.action.Controller.Frame;
 		        return (_.action, frame.View.ObjectTypeInfo.Type, frame.View, frame, frame.View.ObjectSpace, _.e.ShowViewParameters);
@@ -110,6 +111,13 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 	        Observable.Return(boolListSelector(source))
 		        .ResultValueChanged().Select(tuple => (source, tuple.boolList, tuple.e));
 
+        public static IObservable<SingleChoiceAction> WhenSelectedItemChanged(this IObservable<SingleChoiceAction> source) =>source
+	        .SelectMany(action => action.WhenSelectedItemChanged());
+
+        public static IObservable<SingleChoiceAction> WhenSelectedItemChanged(this SingleChoiceAction action) =>
+	        Observable.FromEventPattern<EventHandler,EventArgs>(h => action.SelectedItemChanged+=h,h => action.SelectedItemChanged-=h,ImmediateScheduler.Instance)
+		        .Select(_ => _.Sender).Cast<SingleChoiceAction>();
+
         public static TAction As<TAction>(this ActionBase action) where TAction:ActionBase => ((TAction) action);
 
         public static IObservable<Unit> WhenDisposing<TAction>(this TAction simpleAction) where TAction : ActionBase => Disposing(Observable.Return(simpleAction));
@@ -117,14 +125,24 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static IObservable<TAction> WhenControllerActivated<TAction>(this IObservable<TAction> source) where TAction : ActionBase => source
 	        .SelectMany(a =>a.Controller.WhenActivated().To(a) );
         public static IObservable<TAction> WhenActive<TAction>(this IObservable<TAction> source) where TAction : ActionBase => source.Where(a => a.Active);
+        public static IObservable<TAction> WhenInActive<TAction>(this IObservable<TAction> source) where TAction : ActionBase => source.Where(a => !a.Active);
 
         public static IObservable<TAction> WhenActive<TAction>(this TAction simpleAction) where TAction : ActionBase =>
 	        simpleAction.ReturnObservable().WhenActive();
 		public static IObservable<TAction> WhenActivated<TAction>(this IObservable<TAction> source) where TAction : ActionBase => source.SelectMany(a => a.WhenActivated());
+		
+		public static IObservable<TAction> WhenInActive<TAction>(this TAction simpleAction) where TAction : ActionBase =>
+	        simpleAction.ReturnObservable().WhenInActive();
+		public static IObservable<TAction> WhenDeactivated<TAction>(this IObservable<TAction> source) where TAction : ActionBase => source.SelectMany(a => a.WhenDeactivated());
 
         public static IObservable<TAction> WhenActivated<TAction>(this TAction simpleAction) where TAction : ActionBase =>
 	        simpleAction.ResultValueChanged(action => action.Active)
 		        .Where(tuple => tuple.action.Active.ResultValue)
+		        .Select(_ => _.action);
+        
+        public static IObservable<TAction> WhenDeactivated<TAction>(this TAction simpleAction) where TAction : ActionBase =>
+	        simpleAction.ResultValueChanged(action => action.Active)
+		        .Where(tuple => !tuple.action.Active.ResultValue)
 		        .Select(_ => _.action);
 
         public static IObservable<TAction> WhenChanged<TAction>(this IObservable<TAction> source,ActionChangedType? actionChangedType = null)where TAction : ActionBase => source
@@ -150,5 +168,14 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 	        source .SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(h => item.Disposing += h,
 			        h => item.Disposing -= h, ImmediateScheduler.Instance)
 		        .Select(pattern => pattern).ToUnit());
+
+        public static IObservable<SimpleAction> ActivateInUserDetails(this IObservable<SimpleAction> registerAction) =>
+	        registerAction.WhenControllerActivated()
+		        .Do(action => {
+			        var view = action.View();
+			        action.Active[nameof(ActivateInUserDetails)] = view.CurrentObject!=null&&view.ObjectSpace.GetKeyValue(view.CurrentObject).ToString() == SecuritySystem.CurrentUserId.ToString()&&view is DetailView;
+		        })
+		        .WhenActive()
+		        .TraceRX(action => $"{action.Id}, {SecuritySystem.CurrentUserName}");
     }
 }

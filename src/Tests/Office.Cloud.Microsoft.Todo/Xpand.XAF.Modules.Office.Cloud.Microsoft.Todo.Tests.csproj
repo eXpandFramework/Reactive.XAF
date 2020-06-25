@@ -14,12 +14,6 @@
     <AssemblyName>Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="AuthenticationData.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="AuthenticationData.json" />
-  </ItemGroup>
-  <ItemGroup>
     <Reference Include="Tests">
       <HintPath>..\..\..\bin\Xpand.TestsLib.dll</HintPath>
     </Reference>
@@ -56,11 +50,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="BusinessObjects\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Update="AzureAppCredentials.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

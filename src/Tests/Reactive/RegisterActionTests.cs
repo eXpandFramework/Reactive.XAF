@@ -7,6 +7,7 @@ using DevExpress.ExpressApp.Actions;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.Conditional;
+using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.DetailViewExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;

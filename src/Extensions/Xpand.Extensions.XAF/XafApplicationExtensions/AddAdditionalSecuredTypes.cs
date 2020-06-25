@@ -1,12 +1,14 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using DevExpress.ExpressApp;
 using Fasterflect;
 using HarmonyLib;
 using Xpand.Extensions.LinqExtensions;
 
 namespace Xpand.Extensions.XAF.XafApplicationExtensions{
     public static partial class XafApplicationExtensions{
-        public static void AddNonSecuredType(this DevExpress.ExpressApp.XafApplication application,params System.Type[] objectTypes){
+	    public static void AddNonSecuredType(this XafApplication application,params Type[] objectTypes){
             if (application.Security != null && application.Security.GetType().FromHierarchy(type => type.BaseType)
                     .Any(type => type.Name == "SecurityStrategy")){
                 
@@ -22,7 +24,7 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions{
 
         
         [SuppressMessage("ReSharper", "InconsistentNaming")]
-        private static bool IsSecuredType(ref bool __result, System.Type type){
+        private static bool IsSecuredType(ref bool __result, Type type){
             if (_securedTypes.Contains(type)){
                 __result = false;
                 return false;

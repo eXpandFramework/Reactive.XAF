@@ -29,12 +29,12 @@ namespace Xpand.Extensions.Office.Cloud{
                 typeof(ISecurityUser).IsAssignableFrom(c.TypeInfo.Type) && !c.TypeInfo.IsAbstract));
         }
 
-        public static IObservable<IModelReactiveModuleOffice> OfficeModel(this IObservable<IModelReactiveModules> source){
+        public static IObservable<IModelOffice> OfficeModel(this IObservable<IModelReactiveModules> source){
             return source.Select(modules => modules.Office());
         }
 
-        public static IModelReactiveModuleOffice Office(this IModelReactiveModules reactiveModules){
-            return ((IModelReactiveModuleOffice) reactiveModules);
+        public static IModelOffice Office(this IModelReactiveModules reactiveModules){
+            return ((IModelReactiveModuleOffice) reactiveModules).Office;
         }
     }
 

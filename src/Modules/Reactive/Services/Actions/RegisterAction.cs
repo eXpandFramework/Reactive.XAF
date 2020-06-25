@@ -20,7 +20,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static object Locker=new object();
         private static readonly Harmony Harmony;
         
-        static readonly ConcurrentDictionary<Type,(string id,Func<(Controller controller, string id), ActionBase> actionBase)> ControllerCtorState;
+        static readonly ConcurrentDictionary<Type, (string id, Func<(Controller controller, string id), ActionBase> actionBase)> ControllerCtorState;
         static ActionsService(){
 	        ControllerCtorState = new ConcurrentDictionary<Type, (string id, Func<(Controller controller, string id), ActionBase> actionBase)>();
             Harmony = new Harmony(typeof(ActionsService).FullName);
@@ -197,11 +197,10 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             return ActionsModule.DefineType($"{id}{parent.Name}", TypeAttributes.Public, parent).CreateType();
         }
         class RegisterActionViewController:ViewController{
-	        public RegisterActionViewController(Func<Controller,ActionBase> actionFactory){
+	        public RegisterActionViewController(Func<Controller, ActionBase> actionFactory){
 		        _actionsSubject.OnNext(actionFactory(this));
 	        }
         }
-
     }
 
 

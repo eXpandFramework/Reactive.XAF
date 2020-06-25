@@ -16,7 +16,7 @@ namespace Xpand.Extensions.Office.Cloud{
     }
 
     public static class CloudObjectExtensions{
-        public static CloudObjectType ToCloudObjectType(this System.Type type){
+        public static CloudObjectType ToCloudObjectType(this Type type){
             if (type.InheritsFrom("Microsoft.Graph.Event")||type.InheritsFrom("Google.Apis.Calendar.v3.Data.Event") || typeof(IEvent).IsAssignableFrom(type)){
                 return CloudObjectType.Event;
             }
@@ -29,12 +29,12 @@ namespace Xpand.Extensions.Office.Cloud{
         public static IQueryable<CloudOfficeObject> QueryCloudOfficeObject(this IObjectSpace objectSpace,
             string cloudId, CloudObjectType cloudObjectType) => objectSpace.GetObjectsQuery<CloudOfficeObject>().Where(o => o.CloudObjectType == cloudObjectType && o.CloudId == cloudId);
 
-        public static IQueryable<CloudOfficeObject> QueryCloudOfficeObject(this IObjectSpace objectSpace, string localId, System.Type cloudEntityType){
+        public static IQueryable<CloudOfficeObject> QueryCloudOfficeObject(this IObjectSpace objectSpace, string localId, Type cloudEntityType){
             var cloudObjectType = cloudEntityType.ToCloudObjectType();
             return objectSpace.GetObjectsQuery<CloudOfficeObject>().Where(o => o.CloudObjectType == cloudObjectType && o.LocalId == localId);
         }
 
-        public static IQueryable<CloudOfficeObject> QueryCloudOfficeObject(this IObjectSpace objectSpace, System.Type cloudEntityType, object localEntity){
+        public static IQueryable<CloudOfficeObject> QueryCloudOfficeObject(this IObjectSpace objectSpace, Type cloudEntityType, object localEntity){
             var localId = objectSpace.GetKeyValue(localEntity);
             return objectSpace.QueryCloudOfficeObject(localId.ToString(), cloudEntityType);
         }
@@ -49,12 +49,7 @@ namespace Xpand.Extensions.Office.Cloud{
         string UserEmail { get; }
         EventResourceResponse EventResourceStatus { get; set; }
     }
-
-    public interface ICloudUser : IObjectSpaceLink{
-        string UserName { get; }
-        CloudProvider? CloudProvider { get; }
-    }
-
+    
     public enum EventResourceResponse{
         NeedsAction = 0,
         Tentative = 1,
