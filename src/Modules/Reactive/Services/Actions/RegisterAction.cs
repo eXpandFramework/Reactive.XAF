@@ -191,9 +191,6 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 
         private static Type NewControllerType<T>(string id) where T:Controller{
             var parent = typeof(T);
-            if (parent == typeof(ViewController)){
-
-            }
             return ActionsModule.DefineType($"{id}{parent.Name}", TypeAttributes.Public, parent).CreateType();
         }
         class RegisterActionViewController:ViewController{

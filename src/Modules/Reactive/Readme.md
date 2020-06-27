@@ -179,6 +179,47 @@ Below we will add interesting examples. All methods can live in a static class.
         .Subscribe(this);
     }
     ```
+
+##### Extending the XAF TypesInfo
+
+1. Add a new member to an existing BO as:
+
+    ```cs
+    public override void Setup(ApplicationModulesManager moduleManager){
+        base.Setup(moduleManager);
+        moduleManager.WhenCustomizeTypesInfo()
+            .Do(_ => (_.e.TypesInfo.FindTypeInfo(typeof(MyCustomBO))).CreateMember("MemberName",
+                typeof(string)))
+            .Subscribe(this);
+    }
+
+    ```
+
+##### Extending the XAF Model
+
+1. Extend the ListView model with the IModelListViewTest interface.
+
+    ```cs
+    public override void Setup(ApplicationModulesManager moduleManager){
+        base.Setup(moduleManager);
+        moduleManager.WhenExtendingModel()
+            .Do(_ => _.Add<IModelListView,IModelListViewTest>())
+            .Subscribe(this);
+    }
+    ```
+
+2. Generate model nodes, for example add a new IModelFileImageSource.
+    
+    ```cs
+    public override void Setup(ApplicationModulesManager moduleManager){
+        base.Setup(moduleManager);
+        moduleManager.WhenGeneratingModelNodes(modelApplication => modelApplication.ImageSources)
+            .Do(_ => _.AddNode<IModelFileImageSource>())
+            .Subscribe(this);
+    }
+
+    ```
+
 ## Versioning
 The module is **not bound** to **DevExpress versioning**, which means you can use the latest version with your old DevExpress projects [Read more](https://github.com/eXpandFramework/XAF/tree/master/tools/Xpand.VersionConverter).
 
@@ -193,10 +234,10 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |JetBrains.Annotations|2020.1.0
  |System.Interactive|4.0.0
  |System.Reactive|4.3.2
- |Xpand.Extensions|2.201.34
- |Xpand.Extensions.Reactive|2.201.35
- |Xpand.Extensions.XAF|2.201.35
- |Xpand.Patcher|2.0.15
+ |Xpand.Extensions|2.201.34.5
+ |Xpand.Extensions.Reactive|2.201.35.9
+ |Xpand.Extensions.XAF|2.201.35.8
+ |Xpand.Patcher|2.0.23
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.7
 
 ## Issues-Debugging-Troubleshooting

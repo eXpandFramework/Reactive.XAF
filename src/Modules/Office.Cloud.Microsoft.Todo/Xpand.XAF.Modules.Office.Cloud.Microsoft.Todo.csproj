@@ -31,14 +31,14 @@
     <Reference Include="Xpand.Extensions.XAF">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
     </Reference>
-    <Reference Include="Xpand.Extensions.Office.Cloud.Microsoft">
-      <HintPath>..\..\..\bin\Xpand.Extensions.Office.Cloud.Microsoft.dll</HintPath>
-    </Reference>
     <Reference Include="Xpand.Extensions.XAF.Xpo">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.Xpo.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Office.Cloud.Microsoft">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Office.Cloud.Microsoft.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

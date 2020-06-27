@@ -1,4 +1,5 @@
 ﻿using DevExpress.Xpo;
+using Xpand.Extensions.Office.Cloud.BusinessObjects;
 
 namespace Xpand.Extensions.Office.Cloud{
     [DeferredDeletion(false)]

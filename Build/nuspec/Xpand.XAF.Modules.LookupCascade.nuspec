@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.LookupCascade</id>
-    <version>2.201.37.0</version>
+    <version>2.201.37.7</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -22,15 +22,15 @@
       </dependency>
       <dependency id="System.Reactive" version="4.3.2">
       </dependency>
-      <dependency id="Xpand.Extensions" version="2.201.34.0">
+      <dependency id="Xpand.Extensions" version="2.201.34.5">
       </dependency>
-      <dependency id="Xpand.Extensions.Reactive" version="2.201.35.0">
+      <dependency id="Xpand.Extensions.Reactive" version="2.201.35.9">
       </dependency>
-      <dependency id="Xpand.Extensions.XAF" version="2.201.35.0">
+      <dependency id="Xpand.Extensions.XAF" version="2.201.35.8">
       </dependency>
-      <dependency id="Xpand.Patcher" version="2.0.15">
+      <dependency id="Xpand.Patcher" version="2.0.23">
       </dependency>
-      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.35.0">
+      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.35.10">
       </dependency>
       <dependency id="Xpand.VersionConverter" version="2.201.7">
       </dependency>

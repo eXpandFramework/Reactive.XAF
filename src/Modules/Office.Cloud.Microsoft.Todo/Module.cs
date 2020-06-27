@@ -4,15 +4,16 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base.General;
 using JetBrains.Annotations;
 using Xpand.Extensions.Office.Cloud;
-using Xpand.Extensions.Office.Cloud.Microsoft;
+using Xpand.Extensions.Office.Cloud.BusinessObjects;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.XAF.ModelExtensions;
+using Xpand.XAF.Modules.Office.Cloud.Microsoft.BusinessObjects;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
     [UsedImplicitly]
-    public sealed class MicrosoftTodoModule : MicrosoftModule{
+    public sealed class MicrosoftTodoModule : ReactiveModuleBase{
         [PublicAPI]
         public const string ModelCategory = "Xpand.MicrosoftTodo";
         
@@ -23,7 +24,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
         }
 
         public MicrosoftTodoModule(){
-            RequiredModuleTypes.Add(typeof(ReactiveModule));
+            RequiredModuleTypes.Add(typeof(MicrosoftModule));
             AdditionalExportedTypes.Add(typeof(MSAuthentication));
             AdditionalExportedTypes.Add(typeof(CloudOfficeObject));
             AdditionalExportedTypes.Add(typeof(CloudOfficeTokenStorage));

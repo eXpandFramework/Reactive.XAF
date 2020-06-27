@@ -122,8 +122,8 @@ namespace Xpand.XAF.Modules.CloneModelView.Tests{
         private static CloneModelViewModule DefaultCloneModelViewModule(CloneModelViewModule cloneModelViewModule,Action<ITypesInfo> customizeTypesInfo,Platform platform){
             var application = platform.NewApplication<CloneModelViewModule>();
             application.Modules.Add(new ReactiveModule());
-            application.WhenCustomizingTypesInfo().FirstAsync(info => {
-                    customizeTypesInfo(info);
+            application.WhenApplicationModulesManager().WhenCustomizeTypesInfo().FirstAsync(info => {
+                    customizeTypesInfo(info.e.TypesInfo);
                     return true;
                 })
                 .Subscribe();

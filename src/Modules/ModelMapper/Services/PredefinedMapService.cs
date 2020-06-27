@@ -20,7 +20,7 @@ using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.Predefined;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
-using Xpand.XAF.Modules.Reactive;
+using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services{
     public static class PredefinedMapService{
@@ -128,8 +128,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         }
 
         public static IObservable<(ModelInterfaceExtenders extenders, Type targetInterface)> ExtendMap(this ApplicationModulesManager modulesManager, PredefinedMap map){
-            var extendModel = modulesManager.Modules.OfType<ReactiveModule>().ToObservable()
-                .SelectMany(_ => _.ExtendModel).FirstAsync().Publish().RefCount();
+            var extendModel = modulesManager.WhenExtendingModel();
             var typeToMap = map.TypeToMap();
             if (map.IsPropertyEditor() || map.IsRepositoryItem()){
                 return extendModel.SelectMany(extenders => TypeMappingService.MappedTypes
@@ -145,17 +144,14 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             return modulesManager.ExtendMap(typeToMap);
         }
 
-        public static IObservable<(ModelInterfaceExtenders extenders, Type targetInterface)> ExtendMap(this ApplicationModulesManager modulesManager, Type typeToMap){
-            var extendModel = modulesManager.Modules.OfType<ReactiveModule>().ToObservable()
-                .SelectMany(_ => _.ExtendModel).FirstAsync().Publish().RefCount();
-            return extendModel
-                .SelectMany(extenders => TypeMappingService.MappedTypes
-                    .SelectMany(type => type.ModelMapperContainerTypes()
-                        .Where(_ => _.Properties().Any(info => type.IsAssignableFrom(info.PropertyType)))
-                        .Where(_ => Type.GetType(_.Attribute<ModelMapLinkAttribute>().LinkedTypeName) == typeToMap)
-                        .Select(_ => (extenders, type))))
-                .FirstAsync();
-        }
+        public static IObservable<(ModelInterfaceExtenders extenders, Type targetInterface)> ExtendMap(this ApplicationModulesManager modulesManager, Type typeToMap) =>
+	        modulesManager.WhenExtendingModel()
+		        .SelectMany(extenders => TypeMappingService.MappedTypes
+			        .SelectMany(type => type.ModelMapperContainerTypes()
+				        .Where(_ => _.Properties().Any(info => type.IsAssignableFrom(info.PropertyType)))
+				        .Where(_ => Type.GetType(_.Attribute<ModelMapLinkAttribute>().LinkedTypeName) == typeToMap)
+				        .Select(_ => (extenders, type))))
+		        .FirstAsync();
 
         [PublicAPI]
         public static void Extend(this ApplicationModulesManager modulesManager,params PredefinedMap[] maps){

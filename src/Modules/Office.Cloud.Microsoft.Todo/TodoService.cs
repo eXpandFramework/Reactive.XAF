@@ -12,7 +12,6 @@ using JetBrains.Annotations;
 using Microsoft.Graph;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.Office.Cloud;
-using Xpand.Extensions.Office.Cloud.Microsoft;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;

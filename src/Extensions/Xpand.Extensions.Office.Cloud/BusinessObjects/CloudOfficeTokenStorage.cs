@@ -1,7 +1,7 @@
 ﻿using DevExpress.Xpo;
 using JetBrains.Annotations;
 
-namespace Xpand.Extensions.Office.Cloud{
+namespace Xpand.Extensions.Office.Cloud.BusinessObjects{
     [DeferredDeletion(false)]
     [UsedImplicitly]
     public class CloudOfficeTokenStorage : CloudOfficeBaseObject, ITokenStore{

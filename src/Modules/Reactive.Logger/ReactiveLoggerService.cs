@@ -181,7 +181,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
 	        events.Select(_ => _)
 		        .Buffer(TimeSpan.FromSeconds(3)).WhenNotEmpty()
 		        .Where(list => application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger.GetActiveSources().Any())
-		        .SelectMany(list => application.ObjectSpaceProvider.ToObjectSpace().SelectMany(space => space.SaveTraceEvent(list)));
+		        .SelectMany(list => application.ObjectSpaceProvider.NewObjectSpace(space => space.SaveTraceEvent(list)));
 
         public static IObservable<TraceEvent> SaveTraceEvent(this IObjectSpace objectSpace, IList<ITraceEvent> traceEventMessages){
             var lastEvent = objectSpace.GetObjectsQuery<TraceEvent>().OrderByDescending(_ => _.Timestamp).FirstOrDefault();

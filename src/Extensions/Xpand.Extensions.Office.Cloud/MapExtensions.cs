@@ -8,6 +8,7 @@ using DevExpress.ExpressApp;
 using DevExpress.Persistent.Base.General;
 using Fasterflect;
 using Xpand.Extensions.EventArgExtensions;
+using Xpand.Extensions.Office.Cloud.BusinessObjects;
 
 namespace Xpand.Extensions.Office.Cloud{
     public static class MapExtensions{

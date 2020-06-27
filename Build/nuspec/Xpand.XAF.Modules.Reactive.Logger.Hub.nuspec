@@ -2,14 +2,14 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Reactive.Logger.Hub</id>
-    <version>2.201.35.0</version>
+    <version>2.201.35.7</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/Reactive.Logger.Hub</projectUrl>
     <iconUrl>http://sign.expandframework.com</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>The `Reactive.Logger.Hub` module can be used as a Server which you can install in your app to transmit the pipeLine flow or as a client that can connect and receive messages from the server. For more head to the details section.</description>
+    <description>The `Reactive.Logger.Hub` transmits the pipeLine execution flow if used as server or receives it if used as client.</description>
     <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Reactive.Logger.Hub</tags>
@@ -24,11 +24,11 @@
       </dependency>
       <dependency id="System.Reactive" version="4.3.2">
       </dependency>
-      <dependency id="Xpand.Extensions.Reactive" version="2.201.35.0">
+      <dependency id="Xpand.Extensions.Reactive" version="2.201.35.9">
       </dependency>
-      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.35.0">
+      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.35.10">
       </dependency>
-      <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="2.201.35.0">
+      <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="2.201.35.7">
       </dependency>
       <dependency id="YamlDotNet" version="8.1.1">
       </dependency>

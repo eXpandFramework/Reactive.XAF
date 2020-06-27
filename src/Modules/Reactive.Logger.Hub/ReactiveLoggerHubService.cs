@@ -68,8 +68,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 	        application.BufferUntilCompatibilityChecked(TraceEventReceiver.TraceEvent)
 		        .Buffer(TimeSpan.FromSeconds(2)).WhenNotEmpty()
 		        .TakeUntil(application.WhenDisposed())
-		        .Select(list => application.ObjectSpaceProvider.ToObjectSpace()
-			        .SelectMany(space => space.SaveTraceEvent(list)).ToEnumerable().ToArray());
+		        .Select(list => application.ObjectSpaceProvider.NewObjectSpace(space => space.SaveTraceEvent(list)).ToEnumerable().ToArray());
 
         internal static IObservable<TSource> TraceRXLoggerHub<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
 	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,

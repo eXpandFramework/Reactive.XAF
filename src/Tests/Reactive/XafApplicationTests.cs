@@ -16,7 +16,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 
 namespace Xpand.XAF.Modules.Reactive.Tests{
-    [NonParallelizable]
+	[NonParallelizable]
     public class XafApplicationTests : ReactiveBaseTest{
         [XpandTest]
         [TestCase(nameof(Platform.Win))]
@@ -120,5 +120,6 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             }
 
         }
+
     }
 }

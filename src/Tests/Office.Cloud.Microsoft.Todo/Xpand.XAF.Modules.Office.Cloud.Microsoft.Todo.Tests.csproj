@@ -26,14 +26,17 @@
     <Reference Include="Xpand.Extensions.Office.Cloud">
       <HintPath>..\..\..\bin\Xpand.Extensions.Office.Cloud.dll</HintPath>
     </Reference>
-    <Reference Include="Xpand.Extensions.Office.Cloud.Microsoft">
-      <HintPath>..\..\..\bin\Xpand.Extensions.Office.Cloud.Microsoft.dll</HintPath>
-    </Reference>
     <Reference Include="Xpand.Extensions.XAF">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Office.Cloud.Microsoft">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Office.Cloud.Microsoft.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Office.Cloud.Tests">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Office.Cloud.Tests.dll</HintPath>

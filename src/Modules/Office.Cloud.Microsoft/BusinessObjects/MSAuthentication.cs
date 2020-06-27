@@ -1,7 +1,8 @@
 ﻿using DevExpress.Xpo;
 using JetBrains.Annotations;
+using Xpand.Extensions.Office.Cloud.BusinessObjects;
 
-namespace Xpand.Extensions.Office.Cloud.Microsoft{
+namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.BusinessObjects{
 	[UsedImplicitly]
     public class MSAuthentication : CloudOfficeBaseObject{
         public MSAuthentication(Session session) : base(session){

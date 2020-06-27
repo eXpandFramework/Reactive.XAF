@@ -5,10 +5,8 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
-using DevExpress.Persistent.Base.General;
 using JetBrains.Annotations;
 using Xpand.Extensions.Office.Cloud;
-using Xpand.Extensions.Office.Cloud.Microsoft;
 using Xpand.Extensions.XAF.ModelExtensions;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{

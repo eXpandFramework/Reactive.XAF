@@ -14,7 +14,7 @@ using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
-using Xpand.XAF.Modules.Reactive;
+using Xpand.XAF.Modules.Reactive.Services;
 using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.TypeMappingService;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services{
@@ -28,13 +28,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         private static ConcurrentHashSet<IModelMapperConfiguration> ModelMapperConfigurations{ get; } =new ConcurrentHashSet<IModelMapperConfiguration>();
 
         internal static IObservable<Unit> ConnectExtendingService(this ApplicationModulesManager applicationModulesManager){
-            
-            Platform = applicationModulesManager.Modules.GetPlatform();
-            
-            var extendModel = applicationModulesManager.Modules.OfType<ReactiveModule>().ToObservable().FirstAsync()
-                .Select(module => module.ExtendModel).Switch().FirstAsync();
-            
-            return extendModel.Select(extenders => extenders)
+	        Platform = applicationModulesManager.Modules.GetPlatform();
+	        return applicationModulesManager.WhenExtendingModel().FirstAsync()
                 .Select(AddExtenders).Switch()
                 .Finally(() => {
                     ConnectedSubject.OnNext(Unit.Default);

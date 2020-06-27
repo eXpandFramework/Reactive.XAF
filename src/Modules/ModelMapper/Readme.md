@@ -206,10 +206,10 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |System.Interactive|4.0.0
  |System.Reactive|4.3.2
  |Xpand.Collections|1.0.1
- |Xpand.Extensions|2.201.34
- |Xpand.Extensions.Reactive|2.201.35
- |Xpand.Extensions.XAF|2.201.35
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.201.35
+ |Xpand.Extensions|2.201.34.5
+ |Xpand.Extensions.Reactive|2.201.35.9
+ |Xpand.Extensions.XAF|2.201.35.8
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.201.35.10
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.7
 
 ## Issues-Debugging-Troubleshooting

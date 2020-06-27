@@ -93,9 +93,8 @@ namespace Xpand.XAF.Modules.Reactive{
         private static MethodInfo GetMethodInfo(string methodName) => typeof(RxApp).GetMethods(BindingFlags.Static|BindingFlags.NonPublic).First(info => info.Name == methodName);
 
         private static IObservable<Unit> AddNonSecuredTypes(this ApplicationModulesManager applicationModulesManager) =>
-            applicationModulesManager.Modules.OfType<ReactiveModule>().ToObservable()
-                .SelectMany(_ => _.ModifyTypesInfo)
-                .Select(_ =>_.PersistentTypes.Where(info => info.Attributes.OfType<NonSecuredTypeAttrbute>().Any())
+            applicationModulesManager.WhenCustomizeTypesInfo()
+                .Select(_ =>_.e.TypesInfo.PersistentTypes.Where(info => info.Attributes.OfType<NonSecuredTypeAttrbute>().Any())
                     .Select(info => info.Type))
                 .Do(infos => {
                     var xafApplication = applicationModulesManager.Application();

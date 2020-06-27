@@ -6,11 +6,12 @@ using System.Reactive.Linq;
 using System.Web;
 using Fasterflect;
 using Microsoft.Graph;
+using Xpand.Extensions.Office.Cloud.BusinessObjects;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.ReflectionExtensions;
 
-namespace Xpand.Extensions.Office.Cloud.Microsoft{
+namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
     public static class Pagination{
         public static IObservable<Entity[]> ListAllItems(this IBaseRequestBuilder builder, Action<ITokenStore> saveToken = null, ITokenStore tokenStore = null) => builder.ListAllItems<Entity>(tokenStore, saveToken);
 

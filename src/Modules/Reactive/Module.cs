@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Reactive.Subjects;
 using DevExpress.ExpressApp;
-using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.Model.Core;
 using JetBrains.Annotations;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.XAF.Modules.Reactive.Extensions;
@@ -11,13 +11,10 @@ namespace Xpand.XAF.Modules.Reactive {
     public sealed class ReactiveModule : ReactiveModuleBase {
         [PublicAPI]
         public static ReactiveTraceSource TraceSource{ get; set; }
-        readonly Subject<ITypesInfo> _typesInfoSubject=new Subject<ITypesInfo>();
-        
-        readonly Subject<ModelInterfaceExtenders> _extendModelSubject=new Subject<ModelInterfaceExtenders>();
-
-        public IObservable<ITypesInfo> ModifyTypesInfo => _typesInfoSubject;
-
-        public IObservable<ModelInterfaceExtenders> ExtendModel=>_extendModelSubject;
+        readonly Subject<ModelInterfaceExtenders> _extendingModelSubject=new Subject<ModelInterfaceExtenders>();
+        readonly Subject<ModelNodesGeneratorUpdaters> _generatingModelNodesSubject=new Subject<ModelNodesGeneratorUpdaters>();
+        internal IObservable<ModelInterfaceExtenders> ExtendingModel=>_extendingModelSubject;
+        internal Subject<ModelNodesGeneratorUpdaters> GeneratingModelNodes=>_generatingModelNodesSubject;
 
         static ReactiveModule(){
             TraceSource=new ReactiveTraceSource(nameof(ReactiveModule));
@@ -29,8 +26,13 @@ namespace Xpand.XAF.Modules.Reactive {
 
         public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders){
             base.ExtendModelInterfaces(extenders);
-            _extendModelSubject.OnNext(extenders);
+            _extendingModelSubject.OnNext(extenders);
             extenders.Add<IModelApplication,IModelApplicationReactiveModules>();
+        }
+
+        public override void AddGeneratorUpdaters(ModelNodesGeneratorUpdaters updaters){
+	        base.AddGeneratorUpdaters(updaters);
+            _generatingModelNodesSubject.OnNext(updaters);
         }
 
         public override void Setup(ApplicationModulesManager moduleManager){
@@ -39,12 +41,5 @@ namespace Xpand.XAF.Modules.Reactive {
                 .TakeUntilDisposed(this)
                 .Subscribe();
         }
-        
-        public override void CustomizeTypesInfo(ITypesInfo typesInfo) {
-            base.CustomizeTypesInfo(typesInfo);
-            _typesInfoSubject.OnNext(typesInfo);
-        }
-
-
     }
 }

@@ -1,11 +1,21 @@
-﻿using DevExpress.ExpressApp;
+﻿using System.Diagnostics;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
+using Xpand.Extensions.Office.Cloud;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
-namespace Xpand.Extensions.Office.Cloud.Microsoft{
-    public abstract class MicrosoftModule:ReactiveModuleBase{
-        public override void Setup(ApplicationModulesManager moduleManager){
+namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
+    public class MicrosoftModule:ReactiveModuleBase{
+	    static MicrosoftModule(){
+		    TraceSource=new ReactiveTraceSource(nameof(MicrosoftModule));
+
+	    }
+	    public MicrosoftModule(){
+		    RequiredModuleTypes.Add(typeof(ReactiveModule));
+	    }
+
+	    public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
             moduleManager.Connect()
                 .Subscribe(this);
@@ -16,5 +26,7 @@ namespace Xpand.Extensions.Office.Cloud.Microsoft{
             extenders.Add<IModelReactiveModules, IModelReactiveModuleOffice>();
             extenders.Add<IModelOffice, IModelOfficeMicrosoft>();
         }
+
+        public static TraceSource TraceSource{ get; set; }
     }
 }

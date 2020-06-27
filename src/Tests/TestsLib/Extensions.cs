@@ -171,7 +171,7 @@ namespace Xpand.TestsLib{
             {"MicrosoftTodoModule", 61476},
             {"PositionInlistViewModule", 61478},
             {"ViewItemValueModule", 61479},
-            {"MicrosoftTestModule", 61480},
+            {"MicrosoftModule", 61480}
         };
 
         public static IObservable<IModelReactiveLogger> ConfigureModel<TModule>(this XafApplication application,

@@ -86,6 +86,8 @@ jobs:
           **\*MasterDet*Tests.dll
           **\*ModelViewIn*Tests.dll
           **\*Office*Todo*Tests.dll
+          **\*Office*Microsoft*Tests.dll
+          **\*Office.Cloud.Tests.dll
           **\*OneView*Tests.dll
           **\*Position*Tests.dll
           **\*Progre*Tests.dll

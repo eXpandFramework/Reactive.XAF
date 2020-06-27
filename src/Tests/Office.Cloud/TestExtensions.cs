@@ -1,49 +1,21 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
-using System.Text;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.Base.General;
-using Microsoft.Graph;
-using Microsoft.Identity.Client;
 using Shouldly;
 using Xpand.Extensions.Office.Cloud;
-using Xpand.Extensions.Office.Cloud.Microsoft;
+using Xpand.Extensions.Office.Cloud.BusinessObjects;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Tests{
 	public static class TestExtensions{
-        public static void NewMicrosoftAuthentication(this IObjectSpaceProvider objectSpaceProvider){
-            var type = typeof(TestExtensions);
-            using (var manifestResourceStream = type.Assembly.GetManifestResourceStream(type, "AuthenticationData.json")){
-                var token = Encoding.UTF8.GetBytes(new StreamReader(manifestResourceStream ?? throw new InvalidOperationException()).ReadToEnd());
-                using (var objectSpace = objectSpaceProvider.CreateObjectSpace()){
-                    var authenticationOid = (Guid)objectSpace.GetKeyValue(SecuritySystem.CurrentUser);
-                    if (objectSpace.GetObjectByKey<MSAuthentication>(authenticationOid)==null){
-                        var authentication = objectSpace.CreateObject<MSAuthentication>();
-                    
-                        authentication.Oid=authenticationOid;
-                        authentication.Token=token;
-                        objectSpace.CommitChanges();
-                    }
-                }
-            }
-        }
-
-        public static IObservable<GraphServiceClient> AuthorizeTestMS(this XafApplication application,bool aquireToken=true){
-            if (aquireToken){
-                application.ObjectSpaceProvider.NewMicrosoftAuthentication();
-            }
-            
-            return aquireToken ? application.AuthorizeMS()
-                : application.AuthorizeMS((exception, strings) => Observable.Throw<AuthenticationResult>(exception));
-        }
+        
         public static async Task Populate_All<TEntity>(this IObjectSpace objectSpace, string syncToken,
             Func<CloudOfficeTokenStorage,IObservable<TEntity>> listEvents,TimeSpan timeout,Action<IObservable<TEntity>> assert,IObjectSpaceProvider assertTokenStorageProvider=null){
             

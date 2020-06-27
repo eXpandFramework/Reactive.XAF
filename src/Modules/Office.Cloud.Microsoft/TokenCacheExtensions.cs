@@ -6,8 +6,9 @@ using System.Security.Cryptography;
 using DevExpress.ExpressApp;
 using JetBrains.Annotations;
 using Microsoft.Identity.Client;
+using Xpand.XAF.Modules.Office.Cloud.Microsoft.BusinessObjects;
 
-namespace Xpand.Extensions.Office.Cloud.Microsoft{
+namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
     public static class TokenCacheExtensions{
 
         private static IObservable<TokenCacheNotificationArgs> WriteStorage(this ITokenCache tokenCache, string cacheFilePath) => tokenCache.AfterAccess()

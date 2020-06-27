@@ -11,7 +11,6 @@ using Microsoft.Graph;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Office.Cloud;
-using Xpand.Extensions.Office.Cloud.Microsoft;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.TestsLib.Attributes;

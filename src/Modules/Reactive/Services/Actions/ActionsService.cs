@@ -177,5 +177,13 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 		        })
 		        .WhenActive()
 		        .TraceRX(action => $"{action.Id}, {SecuritySystem.CurrentUserName}");
+
+        public static IObservable<(TAction sender, CustomizeControlEventArgs e)> WhenCustomizeControl<TAction>(this IObservable<TAction> source) where TAction : ActionBase =>
+	        source.SelectMany(a => a.WhenCustomizeControl());
+        public static IObservable<(TAction sender, CustomizeControlEventArgs e)> WhenCustomizeControl<TAction>(this TAction action) where TAction:ActionBase =>
+	        Observable.FromEventPattern<EventHandler<CustomizeControlEventArgs>, CustomizeControlEventArgs>(
+			        h => action.CustomizeControl += h, h => action.CustomizeControl -= h, ImmediateScheduler.Instance)
+		        .TransformPattern<CustomizeControlEventArgs, TAction>()
+		        .TraceRX();
     }
 }

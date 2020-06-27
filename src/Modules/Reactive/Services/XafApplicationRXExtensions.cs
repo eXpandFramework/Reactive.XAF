@@ -7,7 +7,6 @@ using System.Reactive.Linq;
 using System.Windows.Forms;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
-using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using Fasterflect;
 using JetBrains.Annotations;
@@ -124,20 +123,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Select(pattern => (XafApplication)pattern.Sender).Select(xafApplication =>xafApplication.Model )
                 .TraceRX();
 
-        public static IObservable<ITypesInfo> WhenCustomizingTypesInfo(this XafApplication application) =>
-            application.Modules.OfType<ReactiveModule>().ToObservable()
-                .SelectMany(_ => _.SetupCompleted).Cast<ReactiveModule>().SelectMany(_ => _.ModifyTypesInfo)
-                .TraceRX();
-
         public static IObservable<(XafApplication application, CreateCustomObjectSpaceProviderEventArgs e)> WhenCreateCustomObjectSpaceProvider(this XafApplication application) =>
-            Observable
-                .FromEventPattern<EventHandler<CreateCustomObjectSpaceProviderEventArgs>,CreateCustomObjectSpaceProviderEventArgs>(h => application.CreateCustomObjectSpaceProvider += h,h => application.CreateCustomObjectSpaceProvider -= h,ImmediateScheduler.Instance)
+            Observable.FromEventPattern<EventHandler<CreateCustomObjectSpaceProviderEventArgs>,CreateCustomObjectSpaceProviderEventArgs>(h => application.CreateCustomObjectSpaceProvider += h,h => application.CreateCustomObjectSpaceProvider -= h,ImmediateScheduler.Instance)
                 .TransformPattern<CreateCustomObjectSpaceProviderEventArgs,XafApplication>()
                 .TraceRX(_ => _.e.ConnectionString);
 
         public static IObservable<(XafApplication application, CreateCustomTemplateEventArgs e)> WhenCreateCustomTemplate(this XafApplication application) =>
-            Observable
-                .FromEventPattern<EventHandler<CreateCustomTemplateEventArgs>,CreateCustomTemplateEventArgs>(h => application.CreateCustomTemplate += h,h => application.CreateCustomTemplate -= h,ImmediateScheduler.Instance)
+            Observable.FromEventPattern<EventHandler<CreateCustomTemplateEventArgs>,CreateCustomTemplateEventArgs>(h => application.CreateCustomTemplate += h,h => application.CreateCustomTemplate -= h,ImmediateScheduler.Instance)
                 .TransformPattern<CreateCustomTemplateEventArgs,XafApplication>()
                 .TraceRX(_ => _.e.Context);
 
@@ -146,8 +138,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             .SelectMany(application => application.WhenObjectSpaceCreated());
 
         public static IObservable<(XafApplication application, ObjectSpaceCreatedEventArgs e)> WhenObjectSpaceCreated(this XafApplication application,bool includeNonPersistent=false) =>
-            Observable
-                .FromEventPattern<EventHandler<ObjectSpaceCreatedEventArgs>,ObjectSpaceCreatedEventArgs>(h => application.ObjectSpaceCreated += h,h => application.ObjectSpaceCreated -= h,ImmediateScheduler.Instance)
+            Observable.FromEventPattern<EventHandler<ObjectSpaceCreatedEventArgs>,ObjectSpaceCreatedEventArgs>(h => application.ObjectSpaceCreated += h,h => application.ObjectSpaceCreated -= h,ImmediateScheduler.Instance)
                 .TransformPattern<ObjectSpaceCreatedEventArgs,XafApplication>()
                 .Where(_ => includeNonPersistent || !(_.e.ObjectSpace is NonPersistentObjectSpace))
                 .TraceRX(_ => _.e.ObjectSpace.ToString());

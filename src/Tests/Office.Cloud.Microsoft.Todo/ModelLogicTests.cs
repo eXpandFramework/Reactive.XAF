@@ -5,7 +5,6 @@ using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Office.Cloud;
-using Xpand.Extensions.Office.Cloud.Microsoft;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib;
@@ -15,7 +14,7 @@ using Xpand.XAF.Modules.Reactive;
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
     [NonParallelizable]
     public class ModelLogicTests : BaseTest{
-        // [Test][XpandTest()]
+        [Test][XpandTest()]
         public void User_lookup_lists_usertypes(){
             using (var application = Platform.Web.TodoModule().Application){
                 var officeModel = application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office;
@@ -26,7 +25,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
             }
 
         }
-        // [Test][XpandTest()]
+        [Test][XpandTest()]
         public void TodoListNameMember_Lookup_lists_user_string_members(){
             using (var application = Platform.Web.TodoModule().Application){
                 var modelOffice = application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office;
@@ -42,8 +41,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
                 }
             }
         }
-        // [Test][XpandTest()]
-        // [SuppressMessage("ReSharper", "ObjectCreationAsStatement")]
+        [Test][XpandTest()]
+        [SuppressMessage("ReSharper", "ObjectCreationAsStatement")]
         public void ObjectView_Lookup_lists_user_string_members(){
             new MicrosoftTodoModule();
             ModelObjectViewDependencyLogic.ObjectViewsMap[typeof(IModelTodo)].ShouldBe(typeof(ITask));

@@ -120,18 +120,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Office", "Office", "{C49DF3D6-B513-4C06-ACD6-4BA2E2FF02C8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo", "Office.Cloud.Microsoft.Todo\Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.csproj", "{DCF66753-EB48-4AD9-BCBA-82B2BBF581C1}"
-	ProjectSection(ProjectDependencies) = postProject
-		{4E350570-607E-4841-98D0-63FD3B19251B} = {4E350570-607E-4841-98D0-63FD3B19251B}
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.Office.Cloud", "..\Extensions\Xpand.Extensions.Office.Cloud\Xpand.Extensions.Office.Cloud.csproj", "{EF33033B-F47B-43FF-B53C-FEA63EEA9021}"
 	ProjectSection(ProjectDependencies) = postProject
 		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
-	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.Office.Cloud.Microsoft", "..\Extensions\Xpand.Extensions.Office.Cloud.Microsoft\Xpand.Extensions.Office.Cloud.Microsoft.csproj", "{4E350570-607E-4841-98D0-63FD3B19251B}"
-	ProjectSection(ProjectDependencies) = postProject
-		{EF33033B-F47B-43FF-B53C-FEA63EEA9021} = {EF33033B-F47B-43FF-B53C-FEA63EEA9021}
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.PositionInListview", "PositionInListview\Xpand.XAF.Modules.PositionInListview.csproj", "{255E47FF-6E55-4368-A90D-BD717AB51B7F}"
@@ -141,6 +133,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.PositionI
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.ViewItemValue", "ViewItemValue\Xpand.XAF.Modules.ViewItemValue.csproj", "{125454E1-8A59-4765-8383-A24AC2F5BE0A}"
 	ProjectSection(ProjectDependencies) = postProject
+		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Office.Cloud.Microsoft", "Office.Cloud.Microsoft\Xpand.XAF.Modules.Office.Cloud.Microsoft.csproj", "{8B9C565C-6057-40DC-AB32-41444278E492}"
+	ProjectSection(ProjectDependencies) = postProject
+		{EF33033B-F47B-43FF-B53C-FEA63EEA9021} = {EF33033B-F47B-43FF-B53C-FEA63EEA9021}
 		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
 	EndProjectSection
 EndProject
@@ -283,12 +281,6 @@ Global
 		{EF33033B-F47B-43FF-B53C-FEA63EEA9021}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{EF33033B-F47B-43FF-B53C-FEA63EEA9021}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EF33033B-F47B-43FF-B53C-FEA63EEA9021}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4E350570-607E-4841-98D0-63FD3B19251B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4E350570-607E-4841-98D0-63FD3B19251B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4E350570-607E-4841-98D0-63FD3B19251B}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
-		{4E350570-607E-4841-98D0-63FD3B19251B}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
-		{4E350570-607E-4841-98D0-63FD3B19251B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4E350570-607E-4841-98D0-63FD3B19251B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{255E47FF-6E55-4368-A90D-BD717AB51B7F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{255E47FF-6E55-4368-A90D-BD717AB51B7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{255E47FF-6E55-4368-A90D-BD717AB51B7F}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
@@ -301,6 +293,12 @@ Global
 		{125454E1-8A59-4765-8383-A24AC2F5BE0A}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{125454E1-8A59-4765-8383-A24AC2F5BE0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{125454E1-8A59-4765-8383-A24AC2F5BE0A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B9C565C-6057-40DC-AB32-41444278E492}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B9C565C-6057-40DC-AB32-41444278E492}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B9C565C-6057-40DC-AB32-41444278E492}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B9C565C-6057-40DC-AB32-41444278E492}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
+		{8B9C565C-6057-40DC-AB32-41444278E492}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B9C565C-6057-40DC-AB32-41444278E492}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -329,9 +327,9 @@ Global
 		{09B2B381-4A9C-49D4-9B70-9DA9CD320E00} = {6A5A6D7B-EC29-44B7-BA2C-81413614FC5E}
 		{DCF66753-EB48-4AD9-BCBA-82B2BBF581C1} = {C49DF3D6-B513-4C06-ACD6-4BA2E2FF02C8}
 		{EF33033B-F47B-43FF-B53C-FEA63EEA9021} = {C49DF3D6-B513-4C06-ACD6-4BA2E2FF02C8}
-		{4E350570-607E-4841-98D0-63FD3B19251B} = {C49DF3D6-B513-4C06-ACD6-4BA2E2FF02C8}
 		{255E47FF-6E55-4368-A90D-BD717AB51B7F} = {74E52C63-A831-49FB-B1C6-5BDDA7A5AEFE}
 		{125454E1-8A59-4765-8383-A24AC2F5BE0A} = {74E52C63-A831-49FB-B1C6-5BDDA7A5AEFE}
+		{8B9C565C-6057-40DC-AB32-41444278E492} = {C49DF3D6-B513-4C06-ACD6-4BA2E2FF02C8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ADFDF91F-E839-4378-9136-C917729594E2}

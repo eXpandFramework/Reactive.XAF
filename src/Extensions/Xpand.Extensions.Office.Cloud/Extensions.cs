@@ -7,6 +7,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using Fasterflect;
 using JetBrains.Annotations;
+using Xpand.Extensions.Office.Cloud.BusinessObjects;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -102,30 +103,22 @@ namespace Xpand.Extensions.Office.Cloud{
 
         public static IObservable<Unit> ConfigureCloudAction<TAuthentication>(this IObservable<SimpleAction> source, string disconnectImageName, string connectImageName,
             Func<SimpleAction, IObservable<Unit>> aquireAuthorization, Func<SimpleAction, IObservable<Unit>> validateAuthorization=null) where TAuthentication : CloudOfficeBaseObject =>
-            source.Do(action => action.ImageName=connectImageName)
-                .ValidateAuthorization(disconnectImageName, connectImageName, (validateAuthorization ??= aquireAuthorization))
+            
+            source.SelectMany(action => (validateAuthorization ??= aquireAuthorization)(action).To(action))
                 .SelectMany(action => action.WhenExecute()
                     .SelectMany(_=> (_.Action.ImageName == connectImageName ? aquireAuthorization(_.Action.AsSimpleAction())
                         : _.Action.RemoveAuthorization<TAuthentication>()).To(_.Action.AsSimpleAction()))
-                    .ValidateAuthorization(disconnectImageName, connectImageName, validateAuthorization))
+                    .SelectMany(simpleAction => (validateAuthorization ??= aquireAuthorization)?.Invoke(simpleAction).To(simpleAction)))
                 .ToUnit();
-
-        private static IObservable<SimpleAction> ValidateAuthorization(this IObservable<SimpleAction> srouce,string disconnectImageName, string connectImageName, Func<SimpleAction, IObservable<Unit>> validateAuthorization) =>
-	        srouce.SelectMany(action => validateAuthorization(action)
-		        .Catch<Unit, Exception>(e => {
-			        action.ImageName = connectImageName;
-			        return Observable.Empty<Unit>();
-		        })
-		        .Do(client => action.ImageName = disconnectImageName).To(action));
-
+        
         private static IObservable<Unit> RemoveAuthorization<TAuthentication>(this ActionBase action) where TAuthentication : CloudOfficeBaseObject =>
-	        action.Application.ToObjectSpace()
-		        .Do(space => {
-			        var authentication = space.GetObjectByKey<TAuthentication>(SecuritySystem.CurrentUserId);
-			        space.Delete(authentication);
-			        space.CommitChanges();
-		        })
-		        .ToUnit();
+	        action.Application.NewObjectSpace(space => {
+                    var authentication = space.GetObjectByKey<TAuthentication>(SecuritySystem.CurrentUserId);
+                    space.Delete(authentication);
+                    space.CommitChanges();
+                    return Unit.Default.ReturnObservable();
+                })
+                .ToUnit();
     }
 
 
