@@ -1,4 +1,6 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp.Model;
 using Xpand.Extensions.Office.Cloud;
@@ -9,6 +11,22 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
     }
 
     public interface IModelMicrosoft:IModelNode{
+        IModelOAuth OAuth{ get; }
+    }
+
+    public interface IModelOAuth:IModelNode{
+        [Required][DefaultValue(OAuthPrompt.Consent)]
+	    OAuthPrompt Prompt{ get; set; }
+        [Description("Space seperated list of scopes")]
+        string Scopes{ get; set; }
+    }
+
+    public enum OAuthPrompt{
+		None,    
+        [SuppressMessage("ReSharper", "InconsistentNaming")] 
+        Select_Account,
+        Login,
+        Consent
     }
 
     public static class ModelMicrosoft{

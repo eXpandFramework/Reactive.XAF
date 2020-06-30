@@ -14,11 +14,10 @@ using DevExpress.ExpressApp;
 using DevExpress.Utils;
 using JetBrains.Annotations;
 using Xpand.Extensions.AppDomainExtensions;
-using Xpand.Extensions.Reactive.Conditional;
+using Xpand.Extensions.ExpressionExtensions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
-using Xpand.Extensions.ReflectionExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Extensions;
@@ -40,8 +39,9 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         private static readonly Subject<ITraceEvent> SavedTraceEventSubject=new Subject<ITraceEvent>();
         public static IObservable<ITraceEvent> ListenerEvents{ get; private set; }
         public static IObservable<ITraceEvent> SavedTraceEvent{ get; }=SavedTraceEventSubject;
-        internal static IObservable<Unit> Connect(this ApplicationModulesManager manager){
-	        return manager.WhenApplication(application => {
+        internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) =>
+	        manager.WhenApplication(application => {
+                application.AddNonSecuredType(typeof(TraceEvent));
 		        var listener = new ReactiveTraceListener(application.Title);
 		        ListenerEvents = listener.EventTrace.Publish().RefCount();
 		        return application.BufferUntilCompatibilityChecked(ListenerEvents).Select(_ => _)
@@ -50,11 +50,9 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
 			        .Merge(ListenerEvents.RefreshViewDataSource(application))
 			        .Merge(application.RegisterListener(listener), Scheduler.Immediate);
 	        });
-        }
 
         public static IObservable<Unit> RefreshViewDataSource(this IObservable<ITraceEvent> events, XafApplication application) =>
-	        application.GetPlatform() == Platform.Web
-		        ? Observable.Empty<Unit>()
+	        application.GetPlatform() == Platform.Web ? Observable.Empty<Unit>()
 		        : application.WhenViewOnFrame(typeof(TraceEvent), ViewType.ListView)
 			        .SelectMany(frame => events.Throttle(TimeSpan.FromSeconds(1))
 				        .TakeUntil(frame.WhenDisposingFrame())
@@ -73,7 +71,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
 
         [PublicAPI]
         public static IObservable<TraceEvent> WhenTraceEvent<TLocation>(this XafApplication application, Expression<Func<TLocation, object>> expression, RXAction rxAction = RXAction.All){
-            var name = expression.GetMemberInfo().Name;
+            var name = expression.MemberExpressionName();
             return application.WhenTraceEvent(typeof(TLocation), rxAction).Where(_ => _.Method == name);
         }
 
@@ -127,8 +125,6 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                         _.traceSource.Listeners.Add(traceListener);
                     }
                 })
-                .TakeUntilDisposed(application)
-                .Finally(() => traceListener?.Dispose())
                 .ToUnit();
             var applyModel = application.WhenModelChanged()
                 .Select(_ =>application.Model.ToReactiveModule<IModelReactiveModuleLogger>()?.ReactiveLogger).WhenNotDefault()

@@ -27,6 +27,7 @@ This is a `platform agnostic` module that extends the model views nodes with the
 Bellow are a few examples of how we use the module in `eXpandFramework`. 
 
 <twitter>
+
 ![image](https://user-images.githubusercontent.com/159464/50846982-1709ce80-1379-11e9-877a-6a2e277867a7.png)
 
 to derive a version with `Remember Me` support as below:

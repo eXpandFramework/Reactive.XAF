@@ -70,20 +70,6 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             }
         }
 
-        [Test]
-        [XpandTest]
-        public  void Populate_TracedSource_Modules_to_Model(){
-            
-            using (var application = LoggerModule().Application){
-                var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger;
-                logger.TraceSources.Count.ShouldBeGreaterThanOrEqualTo(TestsLib.Extensions.ModulePorts.Count-2);
-                var module = logger.TraceSources[nameof(ReactiveLoggerModule)];
-                module.ShouldNotBeNull();
-                
-                module.Level.ShouldBe(SourceLevels.Verbose);
-
-            }
-        }
 
         
         [Test]
@@ -103,7 +89,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             });
         }
 
-        [Test][Ignore(NotImplemented)]
+        // [Test][Ignore(NotImplemented)]
         [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task Save_TraceEvent(){
@@ -135,15 +121,28 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             }
         }
 
+        [Test]
+        [XpandTest]
+        public  void Populate_TracedSource_Modules_to_Model(){
+            
+	        using (var application = LoggerModule().Application){
+		        var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger;
+		        logger.TraceSources.Count.ShouldBeGreaterThanOrEqualTo(TestsLib.Extensions.ModulePorts.Count-2);
+		        var module = logger.TraceSources[nameof(ReactiveLoggerModule)];
+		        module.ShouldNotBeNull();
+                
+		        module.Level.ShouldBe(SourceLevels.Verbose);
+
+	        }
+        }
+
 
         [Test]
         [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task Refresh_TraceEvent_ListView_when_trace(){
-            using (var application = Platform.Win.NewApplication<ReactiveLoggerModule>()){
-                application.AddModule<ReactiveLoggerModule>();
-                application.Logon();
-                var listView = application.NewObjectView<ListView>(typeof(TraceEvent));
+            using (var application = LoggerModule().Application){
+	            var listView = application.NewObjectView<ListView>(typeof(TraceEvent));
                 application.CreateViewWindow().SetView(listView);
                 var refresh = application.WhenTraceEvent(typeof(ReactiveLoggerService), RXAction.OnNext,
                     nameof(ReactiveLoggerService.RefreshViewDataSource)).FirstAsync().SubscribeReplay();

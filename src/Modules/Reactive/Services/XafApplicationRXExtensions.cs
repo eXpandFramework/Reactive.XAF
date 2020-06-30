@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Windows.Forms;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
@@ -25,9 +26,7 @@ using View = DevExpress.ExpressApp.View;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class XafApplicationRXExtensions{
-        
-        
-        public static IObservable<Unit> Logon(this XafApplication application,object userKey) =>
+	    public static IObservable<Unit> Logon(this XafApplication application,object userKey) =>
             RxApp.AuthenticateSubject.Where(_ => _.authentication== application.Security.GetPropertyValue("Authentication"))
                 .Do(_ => _.args.Instance=userKey).SelectMany(_ => application.WhenLoggedOn().FirstAsync()).ToUnit()
                 .Merge(Unit.Default.ReturnObservable().Do(_ => application.Logon()).IgnoreElements());
@@ -273,6 +272,20 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             .FromEventPattern<EventHandler<LogonEventArgs>,LogonEventArgs>(h => application.LoggingOn += h,h => application.LoggingOn -= h,ImmediateScheduler.Instance)
             .TransformPattern<LogonEventArgs,XafApplication>()
             .TraceRX(_ => $"{_.e.LogonParameters}");
+        
+        public static IObservable<(XafApplication application, LoggingOffEventArgs e)> WhenLoggingOff(this IObservable<XafApplication> soure) => soure
+	        .SelectMany(application => application.WhenLoggingOff());
+
+        public static IObservable<(XafApplication application, LoggingOffEventArgs e)> WhenLoggingOff(this XafApplication application) => Observable
+            .FromEventPattern<EventHandler<LoggingOffEventArgs>,LoggingOffEventArgs>(h => application.LoggingOff += h,h => application.LoggingOff -= h,ImmediateScheduler.Instance)
+            .TransformPattern<LoggingOffEventArgs,XafApplication>();
+        
+        public static IObservable<XafApplication> WhenLoggedOff(this IObservable<XafApplication> soure) => soure
+	        .SelectMany(application => application.WhenLoggedOff());
+
+        public static IObservable<XafApplication> WhenLoggedOff(this XafApplication application) => Observable
+            .FromEventPattern<EventHandler<EventArgs>,EventArgs>(h => application.LoggedOff += h,h => application.LoggedOff -= h,ImmediateScheduler.Instance)
+            .TransformPattern<XafApplication>();
 
         public static IObservable<XafApplication> WhenSetupComplete(this XafApplication application) =>
             Observable.FromEventPattern<EventHandler<EventArgs>,EventArgs>(h => application.SetupComplete += h,h => application.SetupComplete -= h,ImmediateScheduler.Instance)
@@ -312,9 +325,19 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Select(_ => (parameter:$"{_.EventArgs.GetPropertyValue("Parameter")}",result:_.EventArgs.GetPropertyValue("Result")))
                 .Where(_ => parameter==null||_.parameter.StartsWith($"{parameter}:"));
 
-        public static IObservable<IXAFAppWebAPI> WhenWeb(this XafApplication application){
-            return application.GetPlatform() == Platform.Web ? new XAFAppWebAPI(application).ReturnObservable() : Observable.Empty<IXAFAppWebAPI>();
+        public static IObservable<Unit> CheckAsync(this IObservable<IXAFAppWebAPI> source,string module){
+	        var whenTemplate = source.SelectMany(api => api.Application.WhenWindowCreated().When(TemplateContext.ApplicationWindow).FirstAsync().TemplateChanged())
+		        .WhenNotDefault(window => window.Template).Publish().RefCount();
+	        return whenTemplate
+	            .WhenDefault(window => (bool)window.Template.GetPropertyValue("IsAsync"))
+	            .SelectMany(window => Observable.Throw<Unit>(new Exception($"Asynchronous operations not supported, please mark the Page as async, for details refer to {module} wiki page.")))
+	            .Merge(whenTemplate.SelectMany(_ => SynchronizationContext.Current.ReturnObservable().Where(context => context.GetType().Name!="AspNetSynchronizationContext")
+		            .SelectMany(context => Observable.Throw<Unit>(new Exception($"{context.GetType().FullName} is used instead of System.Web.AspNetSynchronizationContext, please modify your httpRuntime configuration. For details refer to {module} wiki page."))).ToUnit()));
         }
+
+        public static IObservable<IXAFAppWebAPI> WhenWeb(this XafApplication application) => 
+	        application.GetPlatform() == Platform.Web ? new XAFAppWebAPI(application).ReturnObservable() : Observable.Empty<IXAFAppWebAPI>();
+
         [PublicAPI]
         public static void SetPageError(IXAFAppWebAPI api, Exception exception) => api.Application.HandleException(exception);
 

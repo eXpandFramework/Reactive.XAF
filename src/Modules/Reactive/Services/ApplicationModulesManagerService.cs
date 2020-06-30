@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -16,9 +15,10 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ApplicationModulesManagerService{
-	    public static IObservable<Unit> WhenApplication(this ApplicationModulesManager manager,Func<XafApplication,IObservable<Unit>> selector) => manager
+	    public static IObservable<T> WhenApplication<T>(this ApplicationModulesManager manager,Func<XafApplication,IObservable<T>> retriedExecution) => manager
 		    .WhereApplication().ToObservable(ImmediateScheduler.Instance)
-		    .SelectMany(application => selector(application).Retry(application));
+		    .SelectMany(application => retriedExecution(application).Retry(application));
+		
 
 	    public static IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> WhenCustomizeTypesInfo(this IObservable<ApplicationModulesManager> source) =>
 		    source.SelectMany(manager => manager.WhenCustomizeTypesInfo());

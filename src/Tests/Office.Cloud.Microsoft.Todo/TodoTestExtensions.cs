@@ -21,7 +21,7 @@ using Task = DevExpress.Persistent.BaseImpl.Task;
 using TaskStatus = DevExpress.Persistent.Base.General.TaskStatus;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
-    static class TodoTestExtensions{
+	static class TodoTestExtensions{
         public const string TasksFolderName = "Xpnad Tasks";
         public const string TasksPagingFolderName = "Xpand Paging Tasks";
 

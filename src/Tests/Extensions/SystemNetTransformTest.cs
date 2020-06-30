@@ -13,7 +13,7 @@ using Xpand.TestsLib.Attributes;
 
 
 namespace Xpand.Extensions.Tests{
-    public class SystemNetTransformTest:BaseTest{
+	public class SystemNetTransformTest:BaseTest{
         [Test]
         [XpandTest]
         public async System.Threading.Tasks.Task Signal_When_In_Listening(){

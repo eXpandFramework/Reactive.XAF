@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using JetBrains.Annotations;
 using MessagePack;
 using MessagePack.Resolvers;
-using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using YamlDotNet.Serialization;
+
 
 namespace Xpand.XAF.Modules.Reactive.Logger.Hub {
     [UsedImplicitly]
@@ -33,8 +32,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub {
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
             moduleManager.Connect()
-                .TakeUntil(Application.WhenDisposed())
-                .Subscribe();
+	            .Subscribe(this);
         }
 
         public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders){

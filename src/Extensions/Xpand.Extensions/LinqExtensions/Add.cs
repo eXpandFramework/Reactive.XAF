@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
@@ -7,7 +6,7 @@ using JetBrains.Annotations;
 namespace Xpand.Extensions.LinqExtensions{
     public static partial class LinqExtensions{
 	    [PublicAPI]
-        public static void AddRange(this  IList list,IEnumerable enumerable){
+	    public static void AddRange(this  IList list,IEnumerable enumerable){
             foreach (var o in enumerable){
                 list.Add(o);
             }

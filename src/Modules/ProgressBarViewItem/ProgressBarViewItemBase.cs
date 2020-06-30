@@ -12,6 +12,7 @@ using Fasterflect;
 using JetBrains.Annotations;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.StringExtensions;
+using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
@@ -43,7 +44,7 @@ namespace Xpand.XAF.Modules.ProgressBarViewItem{
                     _progressBarControlType = assemmbly?.GetType("DevExpress.Web.ASPxProgressBar");
 
                     _percentage = AppDomain.CurrentDomain.AssemblySystemWeb().TypeUnit().Percentage();
-                    var assemblyDevExpressExpressAppWeb = AppDomain.CurrentDomain.AssemblyDevExpressExpressAppWeb();
+                    var assemblyDevExpressExpressAppWeb = AppDomain.CurrentDomain.XAF().AssemblyDevExpressExpressAppWeb();
                     _asssignClientHanderSafe = assemblyDevExpressExpressAppWeb.TypeClientSideEventsHelper().AsssignClientHanderSafe();
 
                 

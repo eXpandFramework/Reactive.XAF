@@ -10,6 +10,8 @@
     }
     public static partial class AppDomainExtensions{
         public static IXAFAppDomain XAF(this System.AppDomain appDomain) => new XAFAppDomain(appDomain);
+
     }
+
 
 }

@@ -1,11 +1,9 @@
-﻿using System;
-using DevExpress.ExpressApp;
+﻿using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base.General;
 using JetBrains.Annotations;
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Office.Cloud.BusinessObjects;
-using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft.BusinessObjects;
 using Xpand.XAF.Modules.Reactive;
@@ -43,8 +41,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
         public override void Setup(ApplicationModulesManager manager){
             base.Setup(manager);
             manager.Connect()
-                .TakeUntilDisposed(this)
-                .Subscribe();
+	            .Subscribe(this);
         }
     }
 }

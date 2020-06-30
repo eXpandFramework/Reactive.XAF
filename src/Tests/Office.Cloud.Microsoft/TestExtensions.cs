@@ -31,8 +31,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests{
 				application.ObjectSpaceProvider.NewMicrosoftAuthentication();
 			}
             
-			return aquireToken ? application.AuthorizeMS()
-				: application.AuthorizeMS((exception, strings) => Observable.Throw<AuthenticationResult>(exception));
+			return aquireToken ? application.AuthorizeMS() : application.AuthorizeMS(Observable.Throw<AuthenticationResult>);
 		}
 	}
 }

@@ -31,11 +31,9 @@ namespace Xpand.XAF.Modules.Reactive.Logger {
 
         public override void Setup(ApplicationModulesManager manager){
             base.Setup(manager);
-            manager.Connect()
-                .TakeUntilDisposed(this)
-                .Subscribe();
+            manager.Connect().Subscribe(this);
         }
-
+ 
         public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders){
             base.ExtendModelInterfaces(extenders);
             

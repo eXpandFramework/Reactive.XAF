@@ -1,9 +1,9 @@
 ﻿using System.Linq;
 using Fasterflect;
 
-namespace Xpand.Extensions.AppDomainExtensions{
+namespace Xpand.Extensions.XAF.AppDomainExtensions{
     public static partial class AppDomainExtensions{
-        public static System.Reflection.Assembly AssemblyDevExpressExpressAppWeb(this System.AppDomain appDomain) => appDomain
+        public static System.Reflection.Assembly AssemblyDevExpressExpressAppWeb(this IXAFAppDomain appDomain) => appDomain.AppDomain
             .GetAssemblies().FirstOrDefault(_ => _.GetName().Name.StartsWith("DevExpress.ExpressApp.Web.v"));
 
         public static System.Type TypeClientSideEventsHelper(this System.Reflection.Assembly assembly) => assembly

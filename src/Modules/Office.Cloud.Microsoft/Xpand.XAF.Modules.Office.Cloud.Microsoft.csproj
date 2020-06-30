@@ -15,6 +15,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Security" />
     <Reference Include="System.Web" />
     <Reference Include="Xpand.Extensions">

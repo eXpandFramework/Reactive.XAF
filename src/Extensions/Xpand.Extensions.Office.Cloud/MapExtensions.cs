@@ -51,12 +51,13 @@ namespace Xpand.Extensions.Office.Cloud{
                 ));
 
         private static IObservable<TCloudEntity> Update<TCloudEntity, TLocalEntity>(this TLocalEntity source, string cloudId, Func<string, IObservable<TCloudEntity>> getRequest,
-            Func<(TCloudEntity cloudEntity, TLocalEntity localEntity, string cloudId), IObservable<TCloudEntity>> updateRequest, Func<TCloudEntity, TLocalEntity, TCloudEntity> map, Action<(TCloudEntity target, TLocalEntity source)> update = null) => getRequest(cloudId)
-                .SelectMany(target => {
-                    target = map(target, source);
-                    update?.Invoke((target, source));
-                    return updateRequest((target, source, cloudId));
-                });
+	        Func<(TCloudEntity cloudEntity, TLocalEntity localEntity, string cloudId), IObservable<TCloudEntity>> updateRequest, Func<TCloudEntity, TLocalEntity, TCloudEntity> map,
+	        Action<(TCloudEntity target, TLocalEntity source)> update = null) => getRequest(cloudId)
+		        .SelectMany(target => {
+			        target = map(target, source);
+			        update?.Invoke((target, source));
+			        return updateRequest((target, source, cloudId));
+		        });
 
         private static IObservable<TCloudEntity> Insert<TCloudEntity, TLocalEntity>(this TLocalEntity sourceEvent, IObjectSpace objectSpace, Func<IObjectSpace> objectSpaceFactory,
             Action<(TCloudEntity, TLocalEntity)> insert, Func<TCloudEntity, IObservable<TCloudEntity>> insertReqest, Func<TCloudEntity, TLocalEntity, TCloudEntity> map){

@@ -16,7 +16,7 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions{
                 var postfix = new HarmonyMethod(typeof(XafApplicationExtensions).Method(nameof(IsSecuredType),Flags.Static|Flags.NonPublic));
                 _harmony.Patch(isSecuredTypeMethod,postfix);
 
-                foreach (var securedType in _securedTypes){
+                foreach (var securedType in objectTypes){
                     _securedTypes.Add(securedType);   
                 }
             }

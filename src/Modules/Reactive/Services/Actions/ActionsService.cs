@@ -15,20 +15,69 @@ using Xpand.XAF.Modules.Reactive.Services.Controllers;
 namespace Xpand.XAF.Modules.Reactive.Services.Actions{
     
     public static partial class ActionsService{
+	    public static void Active(this ActionBase action,string key,bool value){
+			action.BeginUpdate();
+			action.Active.BeginUpdate();
+			action.Active[key] = value;
+			action.Active.EndUpdate();
+			action.EndUpdate();
+
+	    }
 	    public static IObservable<(TModule module, Frame frame)> Action<TModule>(
 		    this IObservable<Frame> source) where TModule : ModuleBase =>
 		    source.Select(frame => frame.Action<TModule>());
 
-        public static IObservable<SimpleActionExecuteEventArgs> WhenExecute(this IObservable<SimpleAction> source) => source.SelectMany(action => action.WhenExecute());
+        public static IObservable<T> WhenExecute<T>(this IObservable<SimpleAction> source,Func<SimpleActionExecuteEventArgs, IObservable<T>> retriedExecution) => 
+	        source.SelectMany(action => action.WhenExecute(retriedExecution));
+
+        public static IObservable<T> WhenExecute<T>(this SimpleAction simpleAction,Func<SimpleActionExecuteEventArgs, IObservable<T>> retriedExecution) =>
+	        simpleAction.WhenExecute().SelectMany(retriedExecution).Retry(simpleAction.Application);
+        
+        public static IObservable<T> WhenExecute<T>(this IObservable<SingleChoiceAction> source,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> retriedExecution) => 
+	        source.SelectMany(action => action.WhenExecute(retriedExecution));
+
+        public static IObservable<T> WhenExecute<T>(this SingleChoiceAction singleChoiceAction,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> retriedExecution) =>
+	        singleChoiceAction.WhenExecute().SelectMany(retriedExecution).Retry(singleChoiceAction.Application);
+        
+        public static IObservable<T> WhenExecute<T>(this IObservable<ParametrizedAction> source,Func<ParametrizedActionExecuteEventArgs, IObservable<T>> retriedExecution) => 
+	        source.SelectMany(action => action.WhenExecute(retriedExecution));
+
+        public static IObservable<T> WhenExecute<T>(this ParametrizedAction action,Func<ParametrizedActionExecuteEventArgs, IObservable<T>> retriedExecution) =>
+	        action.WhenExecute().SelectMany(retriedExecution).Retry(action.Application);
+        
+        public static IObservable<T> WhenExecute<T>(this IObservable<PopupWindowShowAction> source,Func<PopupWindowShowActionExecuteEventArgs, IObservable<T>> retriedExecution) => 
+	        source.SelectMany(action => action.WhenExecute(retriedExecution));
+
+        public static IObservable<T> WhenExecute<T>(this PopupWindowShowAction action,Func<PopupWindowShowActionExecuteEventArgs, IObservable<T>> retriedExecution) =>
+	        action.WhenExecute().SelectMany(retriedExecution).Retry(action.Application);
+
+        public static IObservable<SimpleActionExecuteEventArgs> WhenExecute(this IObservable<SimpleAction> source) =>
+	        source.SelectMany(action => action.WhenExecute());
+        
+        public static IObservable<ParametrizedActionExecuteEventArgs> WhenExecute(this IObservable<ParametrizedAction> source) =>
+	        source.SelectMany(action => action.WhenExecute());
+        
+        public static IObservable<PopupWindowShowActionExecuteEventArgs> WhenExecute(this IObservable<PopupWindowShowAction> source) =>
+	        source.SelectMany(action => action.WhenExecute());
 
         public static IObservable<SimpleActionExecuteEventArgs> WhenExecute(this SimpleAction simpleAction) =>
 	        Observable.FromEventPattern<SimpleActionExecuteEventHandler, SimpleActionExecuteEventArgs>(
 			        h => simpleAction.Execute += h, h => simpleAction.Execute -= h, ImmediateScheduler.Instance)
 		        .Select(pattern => pattern.EventArgs);
+        
+        public static IObservable<PopupWindowShowActionExecuteEventArgs> WhenExecute(this PopupWindowShowAction action) =>
+	        Observable.FromEventPattern<PopupWindowShowActionExecuteEventHandler, PopupWindowShowActionExecuteEventArgs>(
+			        h => action.Execute += h, h => action.Execute -= h, ImmediateScheduler.Instance)
+		        .Select(pattern => pattern.EventArgs);
+        
+        public static IObservable<ParametrizedActionExecuteEventArgs> WhenExecute(this ParametrizedAction action) =>
+	        Observable.FromEventPattern<ParametrizedActionExecuteEventHandler, ParametrizedActionExecuteEventArgs>(
+			        h => action.Execute += h, h => action.Execute -= h, ImmediateScheduler.Instance)
+		        .Select(pattern => pattern.EventArgs);
 
-        public static IObservable<SingleChoiceActionExecuteEventArgs> WhenExecute(this SingleChoiceAction simpleAction) =>
+        public static IObservable<SingleChoiceActionExecuteEventArgs> WhenExecute(this SingleChoiceAction singleChoiceAction) =>
 	        Observable.FromEventPattern<SingleChoiceActionExecuteEventHandler, SingleChoiceActionExecuteEventArgs>(
-			        h => simpleAction.Execute += h, h => simpleAction.Execute -= h, ImmediateScheduler.Instance)
+			        h => singleChoiceAction.Execute += h, h => singleChoiceAction.Execute -= h, ImmediateScheduler.Instance)
 		        .Select(pattern => pattern.EventArgs);
 
         public static IObservable<SingleChoiceActionExecuteEventArgs> WhenExecute(this IObservable<SingleChoiceAction> source) => source.SelectMany(action => action.WhenExecute());
@@ -169,11 +218,15 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 			        h => item.Disposing -= h, ImmediateScheduler.Instance)
 		        .Select(pattern => pattern).ToUnit());
 
-        public static IObservable<SimpleAction> ActivateInUserDetails(this IObservable<SimpleAction> registerAction) =>
+        public static IObservable<SimpleAction> ActivateInUserDetails(this IObservable<SimpleAction> registerAction,bool skipWhenNoSecurity=false) =>
 	        registerAction.WhenControllerActivated()
 		        .Do(action => {
-			        var view = action.View();
-			        action.Active[nameof(ActivateInUserDetails)] = view.CurrentObject!=null&&view.ObjectSpace.GetKeyValue(view.CurrentObject).ToString() == SecuritySystem.CurrentUserId.ToString()&&view is DetailView;
+					if (!skipWhenNoSecurity||!string.IsNullOrEmpty(SecuritySystem.CurrentUserName)){
+						var view = action.View();
+						var active = view is DetailView && view.CurrentObject != null &&
+						        view.ObjectSpace.GetKeyValue(view.CurrentObject)?.ToString() == SecuritySystem.CurrentUserId.ToString();
+						action.Active[nameof(ActivateInUserDetails)] = active;
+					}
 		        })
 		        .WhenActive()
 		        .TraceRX(action => $"{action.Id}, {SecuritySystem.CurrentUserName}");

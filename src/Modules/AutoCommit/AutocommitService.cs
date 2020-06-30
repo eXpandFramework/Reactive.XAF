@@ -4,9 +4,9 @@ using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using Fasterflect;
-using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
@@ -14,7 +14,7 @@ namespace Xpand.XAF.Modules.AutoCommit{
     public static class AutoCommitService{
         private static readonly MethodInvoker AsssignClientHanderSafe;
 
-        static AutoCommitService() => AsssignClientHanderSafe = AppDomain.CurrentDomain.AssemblyDevExpressExpressAppWeb()?.TypeClientSideEventsHelper()?.AsssignClientHanderSafe();
+        static AutoCommitService() => AsssignClientHanderSafe = AppDomain.CurrentDomain.XAF().AssemblyDevExpressExpressAppWeb()?.TypeClientSideEventsHelper()?.AsssignClientHanderSafe();
 
         public static IObservable<ObjectView> WhenAutoCommitObjectViewCreated(this XafApplication application) =>
             application

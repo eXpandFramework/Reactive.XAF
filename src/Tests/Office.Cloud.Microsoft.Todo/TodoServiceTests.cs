@@ -167,11 +167,14 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
             throw new NotImplementedException();
         }
 
-        // [XpandTest()]
+        // [XpandTest()][Test]
         public override async Task Create_Entity_Container_When_Not_Exist(){
             var tasksFolderName = Guid.NewGuid().ToString();
             await MapTwoNewTasks(TaskStatus.InProgress, TaskStatus.InProgress.ToString(), tasksFolderName,
-                builder => builder.Tasks[tasksFolderName].Request().DeleteAsync().ToObservable());
+                builder => {
+	                return builder.Me().Outlook.TaskFolders.GetFolder(tasksFolderName)
+		                .SelectMany(f=>builder.Me().Outlook.TaskFolders[f.Id].Request().DeleteAsync().ToObservable());
+                });
         }
 
         // [XpandTest()]
