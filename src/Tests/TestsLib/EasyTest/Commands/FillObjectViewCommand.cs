@@ -3,7 +3,7 @@ using System.Linq;
 using DevExpress.EasyTest.Framework;
 
 namespace Xpand.TestsLib.EasyTest.Commands{
-    public class FillObjectViewCommand:EasyTestCommand{
+	public class FillObjectViewCommand:EasyTestCommand{
         private readonly IEnumerable<(string editor, string value)> _tuples;
         public const string Name = "FillObjectView";
 

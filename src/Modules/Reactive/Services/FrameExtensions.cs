@@ -55,20 +55,27 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source.WhenViewChanged().Where(_ => _.frame.View == null);
         }
 
-        public static IObservable<(TFrame frame, ViewChangedEventArgs args)> WhenViewChanged<TFrame>(this TFrame source)
-            where TFrame : Frame{
-            return Observable.Return(source).ViewChanged();
-        }
+        public static IObservable<(TFrame frame, ViewChangedEventArgs args)> WhenViewChanged<TFrame>(this TFrame source) where TFrame : Frame => 
+	        Observable.Return(source).ViewChanged();
 
         public static IObservable<(TFrame frame, ViewChangedEventArgs args)> ViewChanged<TFrame>(
-            this IObservable<TFrame> source) where TFrame : Frame{
-            return source
-                .SelectMany(item =>
-                    Observable.FromEventPattern<EventHandler<ViewChangedEventArgs>, ViewChangedEventArgs>(
-                        h => item.ViewChanged += h, h => item.ViewChanged -= h, ImmediateScheduler.Instance))
-                .Select(pattern => pattern)
-                .TransformPattern<ViewChangedEventArgs, TFrame>();
-        }
+            this IObservable<TFrame> source) where TFrame : Frame =>
+	        source
+		        .SelectMany(item =>
+			        Observable.FromEventPattern<EventHandler<ViewChangedEventArgs>, ViewChangedEventArgs>(
+				        h => item.ViewChanged += h, h => item.ViewChanged -= h, ImmediateScheduler.Instance))
+		        .Select(pattern => pattern)
+		        .TransformPattern<ViewChangedEventArgs, TFrame>();
+        
+        public static IObservable<(TFrame frame, ViewChangingEventArgs args)> WhenViewChanging<TFrame>(this TFrame source) where TFrame : Frame => 
+	        Observable.Return(source).WhenViewChanging();
+
+        public static IObservable<(TFrame frame, ViewChangingEventArgs args)> WhenViewChanging<TFrame>(
+            this IObservable<TFrame> source) where TFrame : Frame =>
+	        source.SelectMany(item => Observable.FromEventPattern<EventHandler<ViewChangingEventArgs>, ViewChangingEventArgs>(
+				        h => item.ViewChanging += h, h => item.ViewChanging -= h, ImmediateScheduler.Instance))
+		        .Select(pattern => pattern)
+		        .TransformPattern<ViewChangingEventArgs, TFrame>();
 
         public static IObservable<T> TemplateChanged<T>(this IObservable<T> source,
             bool skipWindowsCtorAssigment = false) where T : Frame{

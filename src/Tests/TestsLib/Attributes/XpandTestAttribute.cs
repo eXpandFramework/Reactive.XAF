@@ -43,12 +43,27 @@ namespace Xpand.TestsLib.Attributes{
 
                 while (count-- > 0){
                     try{
+                        // ManualResetEvent resetEvent = new ManualResetEvent(false);
                         TestResult Execute() => context.CurrentResult = innerCommand.Execute(context);
                         Polly.Policy.Timeout(TimeSpan.FromMilliseconds(_timeout), TimeoutStrategy.Pessimistic)
-                            .Execute(() => Task.Factory.StartTask(Execute,GetApartmentState(context)).Result);
+                            .Execute(() => {
+                                Task.Factory.StartTask(Execute, thread => thread.SetApartmentState(GetApartmentState(context))).Wait();
+                                // return;
+                                // if (context.CurrentTest.Arguments.Any(o => o == (object) Platform.Web)){
+                                //     ThreadPool.QueueUserWorkItem(state => {
+                                //         var tuple = ((TestExecutionContext executionContext, TestCommand command)) state;
+                                //         tuple.executionContext.CurrentResult = tuple.command.Execute(tuple.executionContext);
+                                //         resetEvent.Set();
+                                //     }, (context, innerCommand));
+                                //     resetEvent.WaitOne();    
+                                // }
+                                // else{
+                                //     Task.Factory.StartTask(Execute, thread => thread.SetApartmentState(GetApartmentState(context))).Wait();   
+                                // }
+                            });
                     }
                     catch (Exception ex){
-                        if (context.CurrentResult == null) context.CurrentResult = context.CurrentTest.MakeTestResult();
+                        context.CurrentResult ??= context.CurrentTest.MakeTestResult();
                         context.CurrentResult.RecordException(new Exception($"Retry {context.CurrentRepeatCount+1} of {_tryCount}",ex));
                     }
 
@@ -64,14 +79,10 @@ namespace Xpand.TestsLib.Attributes{
 
                 return context.CurrentResult;
             }
-
+            
             private static ApartmentState GetApartmentState(TestExecutionContext context){
                 var apartmentAttribute = context.CurrentTest.Method.MethodInfo.Attribute<ApartmentAttribute>();
-                if (apartmentAttribute != null){
-                    return (ApartmentState) apartmentAttribute.Properties[PropertyNames.ApartmentState].OfType<object>()
-                        .First();
-                }
-                return Thread.CurrentThread.GetApartmentState();
+                return (ApartmentState?) apartmentAttribute?.Properties[PropertyNames.ApartmentState].OfType<object>().First() ?? Thread.CurrentThread.GetApartmentState();
             }
         }
     }

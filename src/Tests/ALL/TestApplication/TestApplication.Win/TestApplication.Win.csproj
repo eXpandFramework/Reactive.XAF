@@ -55,6 +55,18 @@
     <Compile Remove="_Program.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\..\TestsLib\BO\Accessory.cs" Link="Common\Accessory.cs" />
+    <Compile Include="..\..\..\TestsLib\BO\Order.cs" Link="Common\Order.cs" />
+    <Compile Include="..\..\..\TestsLib\BO\OrderModuleUpdater.cs" Link="Common\OrderModuleUpdater.cs" />
+    <Compile Include="..\..\..\TestsLib\BO\Product.cs" Link="Common\Product.cs" />
+    <Compile Include="..\..\..\TestsLib\DefaultUserModuleUpdater.cs" Link="Common\DefaultUserModuleUpdater.cs" />
+    <Compile Include="..\CommonFiles\AgnosticModule.cs" Link="Common\AgnosticModule.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="..\CommonFiles\MicrosoftService\MicrosoftService.cs" Link="MicrosoftService\MicrosoftService.cs" />
+    <Compile Include="..\CommonFiles\MicrosoftService\ShowMSAccountInfoService.cs" Link="MicrosoftService\ShowMSAccountInfoService.cs" />
+  
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Windows.Forms" />

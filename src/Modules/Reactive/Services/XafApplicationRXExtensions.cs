@@ -4,13 +4,16 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Model;
 using Fasterflect;
 using JetBrains.Annotations;
+using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
@@ -26,6 +29,12 @@ using View = DevExpress.ExpressApp.View;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class XafApplicationRXExtensions{
+	    public static IObservable<T> SelectMany<T>(this XafApplication application, IObservable<T> execute) =>
+		    application.SelectMany(execute.ToTask);
+
+	    public static IObservable<T> SelectMany<T>(this XafApplication application, Func<Task<T>> execute) =>
+		    application.GetPlatform()==Platform.Web?Task.Run(execute).Result.ReturnObservable():Observable.FromAsync(execute);
+
 	    public static IObservable<Unit> Logon(this XafApplication application,object userKey) =>
             RxApp.AuthenticateSubject.Where(_ => _.authentication== application.Security.GetPropertyValue("Authentication"))
                 .Do(_ => _.args.Instance=userKey).SelectMany(_ => application.WhenLoggedOn().FirstAsync()).ToUnit()
@@ -329,10 +338,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 	        var whenTemplate = source.SelectMany(api => api.Application.WhenWindowCreated().When(TemplateContext.ApplicationWindow).FirstAsync().TemplateChanged())
 		        .WhenNotDefault(window => window.Template).Publish().RefCount();
 	        return whenTemplate
-	            .WhenDefault(window => (bool)window.Template.GetPropertyValue("IsAsync"))
-	            .SelectMany(window => Observable.Throw<Unit>(new Exception($"Asynchronous operations not supported, please mark the Page as async, for details refer to {module} wiki page.")))
+	            .WhenDefault(window => (bool)window.Template.GetPropertyValue("IsAsync")).ToUnit()
+	            .Do(window => AppDomain.CurrentDomain.Web().WriteHttpResponse($"<span style='color:red'>Asynchronous operations not supported, please mark the Page as async, for details refer to {module} wiki page. </span>",true))
 	            .Merge(whenTemplate.SelectMany(_ => SynchronizationContext.Current.ReturnObservable().Where(context => context.GetType().Name!="AspNetSynchronizationContext")
-		            .SelectMany(context => Observable.Throw<Unit>(new Exception($"{context.GetType().FullName} is used instead of System.Web.AspNetSynchronizationContext, please modify your httpRuntime configuration. For details refer to {module} wiki page."))).ToUnit()));
+		            .Do(context => AppDomain.CurrentDomain.Web().WriteHttpResponse($"<span style='color:red'>{context.GetType().FullName} is used instead of System.Web.AspNetSynchronizationContext, please modify your httpRuntime configuration. For details refer to {module} wiki page.</span>",true)).ToUnit()));
         }
 
         public static IObservable<IXAFAppWebAPI> WhenWeb(this XafApplication application) => 

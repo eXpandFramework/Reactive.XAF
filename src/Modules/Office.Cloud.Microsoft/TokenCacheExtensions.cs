@@ -6,6 +6,8 @@ using System.Security.Cryptography;
 using DevExpress.ExpressApp;
 using JetBrains.Annotations;
 using Microsoft.Identity.Client;
+using Xpand.Extensions.BytesExtensions;
+using Xpand.Extensions.StringExtensions;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft.BusinessObjects;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
@@ -23,7 +25,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
                 using (var objectSpace = objectspaceFactory()){
                     var authentication = objectSpace.GetObjectByKey<MSAuthentication>(userId) ?? objectSpace.CreateObject<MSAuthentication>();
                     authentication.Oid = userId;
-                    authentication.Token = args.TokenCache.SerializeMsalV3();
+                    authentication.Token = args.TokenCache.SerializeMsalV3().GetString();
                     objectSpace.CommitChanges();
                 }
                 return args;
@@ -39,7 +41,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
             => tokenCache.BeforeAccess().Select(args => {
                 using (var objectSpace = objectspaceFactory()){
                     var authentication = objectSpace.GetObjectByKey<MSAuthentication>(userId) ;
-                    args.TokenCache.DeserializeMsalV3(authentication?.Token);
+                    args.TokenCache.DeserializeMsalV3(authentication?.Token.Bytes());
                     objectSpace.CommitChanges();
                 }
                 return args;

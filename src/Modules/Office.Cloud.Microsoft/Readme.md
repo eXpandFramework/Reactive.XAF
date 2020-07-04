@@ -23,13 +23,13 @@ First off you have to create an Azure application following the next steps:
 1. Go to [App registrations](https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationsListBlade) in the Azure portal.
 2. Select New registration, then enter an application name.
 3. Select the Supported account types, depending on your case.
-5. Select Register and copy the `Application (Client) ID` into the application configuration AppSettings `MSClientID` entry.
+5. Select Register and copy the `Application (Client) ID` to the related XAF model entry.
 7. From the left pane, select `Authentication`. 
-   * If you target the XAF web click on `Add Platform`, select `Web` enter a uri like `http://localhost:2064/login.aspx` and and copy this value to your Web.Config `RedirectUri` AppSettings entry. Enable the implicit grant flow by selecting both `Access Token` and `ID Tokens`.
-   * If you target the XAF win click on `Add Platform` and select `Mobile and desktop applications`. Check on one of the predefined Url e.g the https://login.live.com/oauth20_desktop.srf and copy this value to your App.Config `RedirectUri` AppSettings entry.
-6. From the left pane, select `Certificates & secrets` > New client secret. Enter a description, select the validity duration, and select Add. Copy the value into the application configuration AppSettings `MSClientSecret` entry. This step is only required for Web applications.
-8. From the left pane, select API permissions > Add a permission to configure additional endpoint access. In the [Query the MSGraph endpoints](https://github.com/eXpandFramework/DevExpress.XAF/tree/lab/src/Modules/Office.Cloud.Microsoft#query-the-msgraph-endpoints) you can see an example of how to use the API to query the User endpoint.
-1. Configure additional permissions and OAuth2 settings using the XAF Model editor.
+   * If you target the XAF web click on `Add Platform`, select `Web` enter a uri like `http://localhost:2064/login.aspx` and and copy this value to the related XAF model entry. Enable the implicit grant flow by selecting both `Access Token` and `ID Tokens`.
+   * If you target the XAF win click on `Add Platform` and select `Mobile and desktop applications`. Check on one of the predefined Url e.g the https://login.live.com/oauth20_desktop.srf and copy this value to the related XAF model entry.
+6. From the left pane, select `Certificates & secrets` > New client secret. Enter a description, select the validity duration, and select Add. Copy the value into the related XAF model entry. This step is only required for Web applications.
+8. From the left pane, select API permissions > Add a permission to configure additional endpoint access. In the [Query the MSGraph endpoints](https://github.com/eXpandFramework/DevExpress.XAF/tree/lab/src/Modules/Office.Cloud.Microsoft#query-the-msgraph-endpoints) you can see an example of how to use the API to query the User endpoint. Copy these permissions to into the related XAF model.
+1. The into the related XAF model is available
 
 
 #### Authentication
@@ -38,67 +38,43 @@ The module `does not replace nor requires` the XAF authentication. The module wi
 
 For both platforms once the user authenticated the `RefreshToken` and `AccessToken` will be saved with the help of the `MSAuthentication` business object. When the AccessToken expires the module will use the RefreshToken to `silently` request a new AccessToken until the lifetime limit reached `(6 months)`. If the MSAuthentication contains data for the current user and a new AccessToken cannot be acquired, a message will notify the end user to navigate to his/her profile for authentication.
 
-In the next screencast you can see the module in action for both Win and Web. At the bottom the [Reactive.Logger.Client.Win](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win) is reporting as the module is used.
-<twitter>
-
-![Xpand XAF Modules Office Cloud Microsoft](https://user-images.githubusercontent.com/159464/86131887-e24e8180-baee-11ea-8c02-b64b2c639b6d.gif)
-</twitter>
-
 #### Query the MSGraph endpoints
 
-In the above screencast at the end we executed the `Show MS Account Info` action to display a popup view with all the details of the connected MS account. Below is all the module code used for it:
+In the screencast on the examples section, we executed the `Show MS Account Info` action to display a popup view with all the details of the connected MS account. Below is all the module code used for it:
 
 ```cs
 
-//contains all logic for the current context which is to Show the connect MSAccount info
 internal static class ShowMSAccountInfoService{
 	// The ShowMSAccountInfo action declaration. Refer to the Reactive module wiki for details
-	public static SimpleAction ShowMSAccountInfo(this (SolutionTestModule, Frame frame) tuple) => 
+	public static SimpleAction ShowMSAccountInfo(this (AgnosticModule, Frame frame) tuple) => 
 		tuple.frame.Action(nameof(ShowMSAccountInfo)).As<SimpleAction>();
 
-	public static IObservable<Unit> Connect(this ApplicationModulesManager manager, SolutionTestModule module){
+	public static IObservable<Unit> ShowMSAccountInfo(this ApplicationModulesManager manager){
 		//export the Microsoft.Graph.User as we want to display as XAF view for it
-		module.AdditionalExportedTypes.Add(typeof(Microsoft.Graph.User));
+		manager.Modules.OfType<AgnosticModule>().First().AdditionalExportedTypes.Add(typeof(Microsoft.Graph.User));
 		//The ShowMSAccountInfo registration. Refer to the Reactive module wiki for details.
 		//also we publish the registration as we want to reuse it without running it twice
-		var registerViewSimpleAction = manager.RegisterViewSimpleAction(nameof(ShowMSAccountInfo)).Publish().RefCount(); 
-		return manager.WhenApplication(application => application.ShowUserInfoView(registerViewSimpleAction)).ToUnit()
+		var registerViewSimpleAction = manager.RegisterViewSimpleAction(nameof(ShowMSAccountInfo)).ActivateInUserDetails().Publish().RefCount(); 
+		//when the application is available at runtime we chain the ShowMSAccountInfo action execute event to the ShowAccountInfoView method
+		return manager.WhenApplication(application => registerViewSimpleAction.WhenExecute().ShowAccountInfoView().ToUnit())
+			//subscribe early before an application is created to expose the action to the design time enviroment.
 			.Merge(registerViewSimpleAction.ToUnit());
 	}
 
-	private static IObservable<Unit> ShowUserInfoView(this XafApplication application, IObservable<SimpleAction> registerViewSimpleAction) =>
-		application.OutlookUser().CombineLatest(
-			registerViewSimpleAction.WhenExecute(), //when the ShowMSAccountInfo execute is raized we combine it with the latest value of the connected user
-			(user, e) => {
-				//we show the view of the logged Microsoft.Graph.User
-				e.ShowViewParameters.CreatedView =
-					e.Action.Application.NewView(ViewType.DetailView, typeof(Microsoft.Graph.User));
-				e.ShowViewParameters.CreatedView.CurrentObject = user;
+	private static IObservable<User> ShowAccountInfoView(this IObservable<SimpleActionExecuteEventArgs> source) =>
+		source.SelectMany(e => {
+				e.ShowViewParameters.CreatedView = e.Action.Application.NewView(ViewType.DetailView, typeof(User));
 				e.ShowViewParameters.TargetWindow = TargetWindow.NewWindow;
-				return Unit.Default;
+				//we get the OutlookUser and display it on a view
+				return e.Action.Application.OutlookUser().ObserveOn(SynchronizationContext.Current)
+					.Do(user => e.ShowViewParameters.CreatedView.CurrentObject = user);
 			});
 
-	private static IObservable<Microsoft.Graph.User> OutlookUser(this XafApplication application) =>
-		//when the mainwindow created 
-		application.WhenWindowCreated().When(TemplateContext.ApplicationWindow) 
-			//skip if authentication needed
-			.SelectMany(window => application.MicrosoftNeedsAuthentication().WhenDefault()) 
-			//get the MSGraphClient
-			.SelectMany(window => application.AuthorizeMS()) 
-			//get the account info
-			.SelectMany(client => client.Me.Request().GetAsync()); 
+	//authorize to get the MSClient and use it to query the Me endpoint
+	private static IObservable<User> OutlookUser(this XafApplication application) =>
+		application.AuthorizeMS().SelectMany(client => client.Me.Request().GetAsync());
 }
 
-public sealed class SolutionTestModule : ModuleBase{
-	//install the MicrosoftModule
-	public SolutionTestModule() => RequiredModuleTypes.Add(typeof(MicrosoftModule)); 
-
-	public override void Setup(ApplicationModulesManager moduleManager){
-		base.Setup(moduleManager);
-		//subscribe to the main observable of the ShowMSAccountInfoService
-		moduleManager.Connect(this).Subscribe(this); 
-	}
-}
 
 ```
 
@@ -131,7 +107,17 @@ In order to execute the asynchronous operations:
 
 ### Examples
 
-Refer to the [Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Office.Cloud.Microsoft.Todo)
+In the next screencast you can see the module in action for both Win and Web. At the bottom the [Reactive.Logger.Client.Win](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win) is reporting as the module is used.
+
+<twitter>
+
+[![Xpand XAF Modules Office Cloud Microsoft](https://user-images.githubusercontent.com/159464/86131887-e24e8180-baee-11ea-8c02-b64b2c639b6d.gif)]()
+
+</twitter>
+
+Click the screencast to watch it on YouTube. 
+
+Also, refer to the [Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Office.Cloud.Microsoft.Todo)
 
 
 ## Installation 

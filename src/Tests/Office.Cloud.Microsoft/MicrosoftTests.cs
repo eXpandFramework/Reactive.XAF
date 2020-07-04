@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
@@ -15,26 +15,25 @@ using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft.BusinessObjects;
-using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests{
 	public class MicrosoftTests:BaseTest{
-        [Test][XpandTest()][Apartment(ApartmentState.STA)]
-        public async Task NeedsAuthentication_when_MSAuthentication_does_not_contain_current_user(){
-            using (var application=MicrosoftModule().Application){
+        [Test][XpandTest()]
+        public async Task NeedsAuthentication_when_MSAuthentication_does_not_contain_current_user([ValueSource(nameof(PlatformDatasource))]Platform platform){
+            using (var application=MicrosoftModule(platform).Application){
                 
                 var needsAuthentication = await application.MicrosoftNeedsAuthentication();
 
                 needsAuthentication.ShouldBeTrue();
             }
-
         }
-        [Test][XpandTest()][Apartment(ApartmentState.STA)]
-        public async Task NeedsAuthentication_when_MSAuthentication_current_user_cannot_authenticate(){
-            using (var application=MicrosoftModule().Application){
+
+        [Test][XpandTest()]
+        public async Task NeedsAuthentication_when_MSAuthentication_current_user_cannot_authenticate([ValueSource(nameof(PlatformDatasource))]Platform platform){
+            using (var application=MicrosoftModule(platform).Application){
                 await application.NewObjectSpace(space => {
                     var msAuthentication = space.CreateObject<MSAuthentication>();
                     msAuthentication.Oid = (Guid) SecuritySystem.CurrentUserId;
@@ -48,10 +47,11 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests{
             }
 
         }
-        [Test][XpandTest()][Apartment(ApartmentState.STA)]
-        public async Task Not_NeedsAuthentication_when_MSAuthentication_current_user_can_authenticate(){
-            using (var application=MicrosoftModule().Application){
-                application.ObjectSpaceProvider.NewMicrosoftAuthentication();
+
+        [Test][XpandTest()]
+        public async Task Not_NeedsAuthentication_when_MSAuthentication_current_user_can_authenticate([ValueSource(nameof(PlatformDatasource))]Platform platform){
+            using (var application=MicrosoftModule(platform).Application){
+                application.ObjectSpaceProvider.NewMicrosoftAuthentication(platform);
 
                 var needsAuthentication = await application.MicrosoftNeedsAuthentication();
 
@@ -60,9 +60,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests{
 
         }
 
-        [Test][XpandTest()][Apartment(ApartmentState.STA)]
-        public void Cloud_Connection_Actions_are_Activated_For_CurrentUser_Details(){
-            using (var application=MicrosoftModule().Application){
+        [Test][XpandTest()]
+        public void Actions_are_Activated_For_CurrentUser_Details([ValueSource(nameof(PlatformDatasource))]Platform platform){
+            using (var application=MicrosoftModule(platform).Application){
 
                 var compositeView = application.NewView(ViewType.DetailView, application.Security.UserType);
                 compositeView.CurrentObject = compositeView.ObjectSpace.GetObjectByKey(application.Security.UserType, SecuritySystem.CurrentUserId);
@@ -75,10 +75,10 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests{
                 msActions.DisconnectMicrosoft().Active[nameof(ActionsService.ActivateInUserDetails)].ShouldBeTrue();
             }
         }
-        
-        [Test][XpandTest()][Apartment(ApartmentState.STA)]
-        public async Task CloudConnection_Actions_Active_State_when_authentication_needed(){
-            using (var application=MicrosoftModule().Application){
+
+        [Test][XpandTest()]
+        public  void Actions_Active_State_when_authentication_needed([ValueSource(nameof(PlatformDatasource))]Platform platform){
+            using (var application=MicrosoftModule(platform).Application){
                 
                 var compositeView = application.NewView(ViewType.DetailView, application.Security.UserType);
                 compositeView.CurrentObject = compositeView.ObjectSpace.GetObjectByKey(application.Security.UserType, SecuritySystem.CurrentUserId);
@@ -88,7 +88,6 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests{
 
                 var actions = viewWindow.Action<MicrosoftModule>();
                 
-                await actions.ConnectMicrosoft().WhenActivated().FirstAsync();
                 actions.ConnectMicrosoft().Active[nameof(MicrosoftService.MicrosoftNeedsAuthentication)].ShouldBeTrue();
                 actions.DisconnectMicrosoft().Active[nameof(MicrosoftService.MicrosoftNeedsAuthentication)].ShouldBeFalse();
             }
@@ -105,11 +104,11 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests{
                 .FirstAsync()
                 .ToTaskWithoutConfigureAwait();
         }
-
-        [Test][XpandTest()][Apartment(ApartmentState.STA)]
-        public async Task CloudConnection_Actions_Active_State_when_authentication_not_needed(){
-            using (var application=MicrosoftModule().Application){
-                application.ObjectSpaceProvider.NewMicrosoftAuthentication();
+        
+        [Test][XpandTest()]
+        public async Task Actions_Active_State_when_authentication_not_needed([ValueSource(nameof(PlatformDatasource))]Platform platform){
+            using (var application=MicrosoftModule(platform).Application){
+                application.ObjectSpaceProvider.NewMicrosoftAuthentication(platform);
                 var compositeView = application.NewView(ViewType.DetailView, application.Security.UserType);
                 compositeView.CurrentObject = compositeView.ObjectSpace.GetObjectByKey(application.Security.UserType, SecuritySystem.CurrentUserId);
                 var viewWindow = application.CreateViewWindow();
@@ -122,58 +121,63 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests{
 
 
         [Test]
-        [XpandTest()][Apartment(ApartmentState.STA)]
-        public async Task DisconnectMicrosoft_Action_Destroys_Connection(){
-            using (var application=MicrosoftModule().Application){
-                application.ObjectSpaceProvider.NewMicrosoftAuthentication();
+        [XpandTest()]
+        public async Task DisconnectMicrosoft_Action_Destroys_Connection([ValueSource(nameof(PlatformDatasource))]Platform platform){
+            using (var application=MicrosoftModule(platform).Application){
+                application.ObjectSpaceProvider.NewMicrosoftAuthentication(platform);
                 var compositeView = application.NewView(ViewType.DetailView, application.Security.UserType);
                 compositeView.CurrentObject = compositeView.ObjectSpace.GetObjectByKey(application.Security.UserType, SecuritySystem.CurrentUserId);
                 var viewWindow = application.CreateViewWindow();
                 viewWindow.SetView(compositeView);
 
                 var disconnectMicrosoft = viewWindow.Action<MicrosoftModule>().DisconnectMicrosoft();
-                await disconnectMicrosoft.WhenActivated().FirstAsync();
+                await disconnectMicrosoft.WhenActivated().FirstAsync().ToTaskWithoutConfigureAwait();
                 disconnectMicrosoft.DoExecute();
-
-                await disconnectMicrosoft.WhenDeactivated().FirstAsync();
+                
                 disconnectMicrosoft.Active[nameof(MicrosoftService.MicrosoftNeedsAuthentication)].ShouldBeFalse();
                 viewWindow.Action<MicrosoftModule>().ConnectMicrosoft().Active[nameof(MicrosoftService.MicrosoftNeedsAuthentication)].ShouldBeTrue();
             }
         }
+
+        public static IEnumerable<Platform> PlatformDatasource(){
+            yield return Platform.Web;
+            yield return Platform.Win;
+        }
+
         [Test]
         [XpandTest()]
-        [Apartment(ApartmentState.STA)]
-        public async Task ConnectMicrosoft_Action_Creates_Connection(){
-            using (var application=MicrosoftModule().Application){
+        public async Task ConnectMicrosoft_Action_Creates_Connection([ValueSource(nameof(PlatformDatasource))]Platform platform){
+            using (var application=MicrosoftModule(platform).Application){
 	            
                 var compositeView = application.NewView(ViewType.DetailView, application.Security.UserType);
                 compositeView.CurrentObject = compositeView.ObjectSpace.GetObjectByKey(application.Security.UserType, SecuritySystem.CurrentUserId);
                 var viewWindow = application.CreateViewWindow();
                 viewWindow.SetView(compositeView);
                 MicrosoftService.CustomAquireTokenInteractively
-	                .Do(args => application.ObjectSpaceProvider.NewMicrosoftAuthentication())
+	                .Do(args => application.ObjectSpaceProvider.NewMicrosoftAuthentication(platform))
                     .Do(e => e.Instance=Observable.Empty<AuthenticationResult>().FirstOrDefaultAsync()).Test();
                 var connectMicrosoft = viewWindow.Action<MicrosoftModule>().ConnectMicrosoft();
-                await connectMicrosoft.WhenActivated().FirstAsync();
+                var disconnectMicrosoft = viewWindow.Action<MicrosoftModule>().DisconnectMicrosoft();
+                
                 connectMicrosoft.DoExecute();
 
-                await connectMicrosoft.WhenDeactivated().FirstAsync();
+                await connectMicrosoft.WhenDeactivated().FirstAsync().Merge(disconnectMicrosoft.WhenActivated().FirstAsync()).Take(2).ToTaskWithoutConfigureAwait();
                 connectMicrosoft.Active[nameof(MicrosoftService.MicrosoftNeedsAuthentication)].ShouldBeFalse();
-                viewWindow.Action<MicrosoftModule>().DisconnectMicrosoft().Active[nameof(MicrosoftService.MicrosoftNeedsAuthentication)].ShouldBeTrue();
+                disconnectMicrosoft.Active[nameof(MicrosoftService.MicrosoftNeedsAuthentication)].ShouldBeTrue();
             }
         }
 
         protected MicrosoftModule MicrosoftModule( Platform platform=Platform.Win,params ModuleBase[] modules){
             var application = NewApplication(platform,  modules);
             application.SetupSecurity();
-            var module = application.AddModule<MicrosoftModule>(typeof(MSAuthentication));
-            
+            var module = application.AddModule<MicrosoftModule>();
+            application.Model.ConfigureMicrosoft();
             application.Logon();
             application.CreateObjectSpace();
             return module.Application.Modules.OfType<MicrosoftModule>().First();
         }
         XafApplication NewApplication(Platform platform,  ModuleBase[] modules){
-            var xafApplication = platform.NewApplication<ReactiveModule>();
+            var xafApplication = platform.NewApplication<MicrosoftModule>();
             xafApplication.Modules.AddRange(modules);
             return xafApplication;
         }

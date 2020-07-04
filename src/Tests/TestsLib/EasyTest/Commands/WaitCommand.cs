@@ -3,7 +3,7 @@ using System.Threading;
 using DevExpress.EasyTest.Framework;
 
 namespace Xpand.TestsLib.EasyTest.Commands{
-    public class WaitCommand:EasyTestCommand{
+	public class WaitCommand:EasyTestCommand{
         public const string Name = "Wait";
 
         public WaitCommand(int millisecs=500){

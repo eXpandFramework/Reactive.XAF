@@ -34,7 +34,7 @@ progressBarViewItem.SetFinishOptions(new MessageOptions(){});
 
 **Possible future improvements:**
 
-1. Any other need you may have.
+Any other need you may have.
 
 [Let me know](https://github.com/sponsors/apobekiaris) if you want me to implement them for you.
 
@@ -48,11 +48,14 @@ Next we see how it looks on Desktop:
 ![win](https://user-images.githubusercontent.com/159464/58791920-ce8ad000-85fb-11e9-8a00-bd72e891c8b7.gif)
 
 and the same view on the web:
+
 <twitter>
-![web2](https://user-images.githubusercontent.com/159464/58791676-53291e80-85fb-11e9-81de-6ed7db651219.gif)
+
+[![web2](https://user-images.githubusercontent.com/159464/58791676-53291e80-85fb-11e9-81de-6ed7db651219.gif)](https://www.youtube.com/watch?v=rJgK4UD2PgA)
 
 </twitter>
 
+Click the screencast to watch it on YouTube. 
 
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 

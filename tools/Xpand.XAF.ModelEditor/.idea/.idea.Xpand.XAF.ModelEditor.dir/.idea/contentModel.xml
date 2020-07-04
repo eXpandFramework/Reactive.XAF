@@ -2,25 +2,9 @@
 <project version="4">
   <component name="ContentModelStore">
     <e p="A:\.idea\extResources" t="IncludeRecursive" />
-    <e p="A:\Resharper\ReSharperHost193._.19.RD.00" t="ExcludeRecursive" />
+    <e p="A:\Resharper\ReSharperHost201._.19.RD.00" t="ExcludeRecursive" />
     <e p="C:\Work\eXpandFramework\DevExpress.XAF\bin" t="ExcludeRecursive" />
     <e p="C:\Work\eXpandFramework\DevExpress.XAF\tools\Xpand.XAF.ModelEditor" t="IncludeRecursive">
-      <e p=".vs" t="Include">
-        <e p="Xpand.XAF.ModelEditor" t="Include">
-          <e p="DesignTimeBuild" t="Include">
-            <e p=".dtbcache" t="Include" />
-          </e>
-          <e p="v16" t="Include">
-            <e p=".suo" t="Include" />
-            <e p="Server" t="Include">
-              <e p="sqlite3" t="Include">
-                <e p="db.lock" t="Include" />
-                <e p="storage.ide" t="Include" />
-              </e>
-            </e>
-          </e>
-        </e>
-      </e>
       <e p="App.config" t="Include" />
       <e p="ExpressApp.ico" t="Include" />
       <e p="Main.cs" t="Include" />
@@ -37,6 +21,7 @@
       <e p="Properties" t="Include">
         <e p="AssemblyInfo.cs" t="Include" />
       </e>
+      <e p="Readme.md" t="Include" />
       <e p="Xpand.XAF.ModelEditor.csproj" t="IncludeRecursive" />
     </e>
   </component>

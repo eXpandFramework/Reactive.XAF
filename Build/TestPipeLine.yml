@@ -68,6 +68,15 @@ jobs:
         buildType: 'current'
         artifactName: 'bin'
         targetPath: '$(Pipeline.Workspace)'
+    - task: PowerShell@2
+      displayName: Download Cloud creds
+      inputs: 
+        pwsh: true
+        targetType: inline
+        script: |
+          $VerbosePreference="Continue"
+          $ErrorView="NormalView"
+          & '$(System.DefaultWorkingDirectory)/build/DownloadCloudCreds.ps1' '$(GitHubToken)'
     - task: VSTest@2
       displayName: 'Test Modules'
       continueOnError: true
@@ -122,6 +131,15 @@ jobs:
         buildType: 'current'
         artifactName: 'bin'
         targetPath: '$(Pipeline.Workspace)'
+    - task: PowerShell@2
+      displayName: Download Cloud creds
+      inputs: 
+        pwsh: true
+        targetType: inline
+        script: |
+          $VerbosePreference="Continue"
+          $ErrorView="NormalView"
+          & '$(System.DefaultWorkingDirectory)/build/DownloadCloudCreds.ps1' '$(GitHubToken)'
     - task: VSTest@2
       displayName: 'Tests'
       continueOnError: true

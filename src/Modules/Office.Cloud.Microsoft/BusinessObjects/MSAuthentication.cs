@@ -8,9 +8,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.BusinessObjects{
         public MSAuthentication(Session session) : base(session){
         }
 
-        byte[] _token;
-
-        public byte[] Token{
+        string _token;
+        [Size(SizeAttribute.Unlimited)]
+        public string Token{
             get => _token;
             set => SetPropertyValue(nameof(Token), ref _token, value);
         }

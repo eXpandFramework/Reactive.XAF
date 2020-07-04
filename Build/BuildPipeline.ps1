@@ -24,15 +24,7 @@ $ErrorActionPreference = "Stop"
 $regex = [regex] '(\d{2}\.\d*)'
 $result = $regex.Match($CustomVersion).Groups[1].Value;
 & "$SourcePath\go.ps1" -InstallModules
-$todoTestsPath="$SourcePath\src\Tests\Office.Cloud.Microsoft\"
-if (!(Test-Path $todoTestsPath\AzureAppCredentials.json) -or !(Get-Content $todoTestsPath\AzureAppCredentials.json -Raw)){
-    Write-HostFormatted "Download office credential" -Section
-    Remove-Item $env:TEMP\storage -Force -Recurse -ErrorAction SilentlyContinue
-    Set-Location $env:TEMP
-    git clone "https://apobekiaris:$GithubToken@github.com/eXpandFramework/storage.git"
-    Set-Location $env:TEMP\storage\Azure
-    "AzureAppCredentials.json","AuthenticationData.json"|Copy-Item -Destination $todoTestsPath -Force
-}
+
 Clear-NugetCache -Filter XpandPackages
 Invoke-Script{
     Set-VsoVariable build.updatebuildnumber "$env:build_BuildNumber-$CustomVersion"
@@ -156,5 +148,6 @@ Invoke-Script{
         New-Item $stage\DX -ItemType Directory -Force
         Move-Item $stage\DX$_.Zip $stage\DX
     }
+    & "$sourcePath\build\DownloadCloudCreds.ps1" 
     Write-HostFormatted "FINISH" -Section
 }

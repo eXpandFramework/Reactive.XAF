@@ -20,7 +20,14 @@ In details: when any XAF database transaction starts an [Explicit UnitOfWork](ht
 ##### <u>Configuration</u>
 You can configure the Sequence binding at runtime by creating instances of the `SequenceStorage` BO as shown in the next screencast.
 
-<twitter>![hfvTo7UsCI](https://user-images.githubusercontent.com/159464/80309035-f918e500-87da-11ea-8f52-7799457213cf.gif)</twitter>
+<twitter>
+
+[![hfvTo7UsCI](https://user-images.githubusercontent.com/159464/80309035-f918e500-87da-11ea-8f52-7799457213cf.gif)](https://www.youtube.com/watch?v=t1BDPFU01z8)
+
+</twitter>
+
+Click the screencast to watch it on YouTube. 
+
 
 The SequenceStorage table is a normal XAF BO, therefore it is possible to create sequence bindings in code by creating instances of that object. However we do not recommend creating instances directly but use the provided API (possibly in a [ModuleUpdater](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.Updating.ModuleUpdater)). The API respects additional constrains and validations.
 

@@ -43,7 +43,7 @@ namespace Xpand.XAF.Modules.ProgressBarViewItem{
                         .FirstOrDefault(assembly => assembly.FullName.StartsWith("DevExpress.Web.v"));
                     _progressBarControlType = assemmbly?.GetType("DevExpress.Web.ASPxProgressBar");
 
-                    _percentage = AppDomain.CurrentDomain.AssemblySystemWeb().TypeUnit().Percentage();
+                    _percentage = AppDomain.CurrentDomain.Web().TypeUnitPercentage();
                     var assemblyDevExpressExpressAppWeb = AppDomain.CurrentDomain.XAF().AssemblyDevExpressExpressAppWeb();
                     _asssignClientHanderSafe = assemblyDevExpressExpressAppWeb.TypeClientSideEventsHelper().AsssignClientHanderSafe();
 

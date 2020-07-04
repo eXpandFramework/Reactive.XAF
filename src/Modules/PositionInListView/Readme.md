@@ -26,9 +26,14 @@ For new Business objects the module will automatically update the configured mem
 If a `NewObjectsStrategy` for the ModelClass is not configured it defaults to `Last`. The strategy is not applied to objects created from a ModuleUpdater.
 
 Below is a screencast of the module in action. At the bottom you can see what the [Reactive.Logger.Client.Win](https://github.com/eXpandFramework/DevExpress.XAF/wiki/Reactive.Logger.Client.Win) reports as the module is used.
+
 <twitter>
-![sqFoseHS2q](https://user-images.githubusercontent.com/159464/82759129-e4d50180-9df3-11ea-8bb9-eb6b36452c51.gif)
+
+[![sqFoseHS2q](https://user-images.githubusercontent.com/159464/82759129-e4d50180-9df3-11ea-8bb9-eb6b36452c51.gif)](https://www.youtube.com/watch?v=JBoVNXo19ek)
+
 </twitter>
+
+Click the screencast to watch it on YouTube. 
 
 ---
 

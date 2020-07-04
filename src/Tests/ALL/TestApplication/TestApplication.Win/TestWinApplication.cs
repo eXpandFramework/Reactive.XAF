@@ -7,8 +7,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 namespace TestApplication.Win{
     public class TestWinApplication:WinApplication{
         public TestWinApplication(){
-            DatabaseUpdateMode=DatabaseUpdateMode.Never;
-            CheckCompatibilityType=CheckCompatibilityType.DatabaseSchema;
+	        CheckCompatibilityType=CheckCompatibilityType.DatabaseSchema;
             this.AlwaysUpdateOnDatabaseVersionMismatch().Subscribe();
         }
 
@@ -18,6 +17,7 @@ namespace TestApplication.Win{
 
         protected override void CreateDefaultObjectSpaceProvider(CreateCustomObjectSpaceProviderEventArgs args){
             args.ObjectSpaceProvider=new XPObjectSpaceProvider(new MemoryDataStoreProvider(),true);
+            // args.ObjectSpaceProvider=new XPObjectSpaceProvider(new ConnectionStringDataStoreProvider("Integrated Security=SSPI;Pooling=false;Data Source=APO-BEK;Initial Catalog=TestApplicationEasyTest"),true);
         }
     }
 }

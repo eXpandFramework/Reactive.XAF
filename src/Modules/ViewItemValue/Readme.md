@@ -20,9 +20,14 @@ When the above `Order_DetailView` created the `ViewItemValue` will be active and
 
 
 Below is a screencast of the module in action. At the bottom you can see what the [Reactive.Logger.Client.Win](https://github.com/eXpandFramework/DevExpress.XAF/wiki/Reactive.Logger.Client.Win) reports in our dev environment as the module is used in a remote IIS.
+
 <twitter>
-![kMok40PDFn](https://user-images.githubusercontent.com/159464/83734915-4e58d980-a658-11ea-90db-c05fa9f614ac.gif)
+
+[![kMok40PDFn](https://user-images.githubusercontent.com/159464/83734915-4e58d980-a658-11ea-90db-c05fa9f614ac.gif)](https://www.youtube.com/watch?v=90MzTKyVlsg&t=21s)
+
 </twitter>
+
+Click the screencast to watch it on YouTube. 
 
 ---
 

@@ -1,5 +1,5 @@
 Write-HostFormatted "Reset modified assemblyInfo" -Section
-"AssemblyInfo.cs",".nuspec"|Get-GitDiff |Restore-GitFile
+"AssemblyInfo.cs","/.nuspec"|Get-GitDiff |Restore-GitFile
 $labPackages = Get-XpandPackages -PackageType XAFAll -Source Lab
 $officialPackages = Get-XpandPackages -PackageType XAFAll -Source Release
 if ($Branch -eq "master"){

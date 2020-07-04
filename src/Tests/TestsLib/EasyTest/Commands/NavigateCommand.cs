@@ -1,5 +1,4 @@
 ﻿using DevExpress.EasyTest.Framework;
-using DevExpress.EasyTest.Framework.Commands;
 
 namespace Xpand.TestsLib.EasyTest.Commands{
     public class NavigateCommand:EasyTestCommand{

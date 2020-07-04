@@ -1,10 +1,12 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Web;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Web;
 using DevExpress.ExpressApp.Web.Editors.ASPx;
 using DevExpress.ExpressApp.Xpo;
 using DevExpress.Persistent.Base;
+using Xpand.XAF.Modules.Reactive.Services;
 
 namespace TestApplication.Web{
     public class TestWebApplication : WebApplication{
@@ -13,7 +15,7 @@ namespace TestApplication.Web{
             ((ISupportInitialize) this).BeginInit();
             Modules.Add(new WebModule());
             ((ISupportInitialize) this).EndInit();
-            DatabaseVersionMismatch += Solution1AspNetApplication_DatabaseVersionMismatch;
+            this.AlwaysUpdateOnDatabaseVersionMismatch().Subscribe();
             ApplicationName = "TestWebApplication";
             CheckCompatibilityType = CheckCompatibilityType.DatabaseSchema;
             InitializeDefaults();
@@ -21,11 +23,11 @@ namespace TestApplication.Web{
         }
 
         protected override void CreateDefaultObjectSpaceProvider(CreateCustomObjectSpaceProviderEventArgs args){
-            var xpoDataStoreProvider = GetDataStoreProvider();
+            var xpoDataStoreProvider = GetDataStoreProvider(args);
             args.ObjectSpaceProvider = new XPObjectSpaceProvider(xpoDataStoreProvider, true);
         }
 
-        private IXpoDataStoreProvider GetDataStoreProvider(){
+        private IXpoDataStoreProvider GetDataStoreProvider(CreateCustomObjectSpaceProviderEventArgs args){
             var application = HttpContext.Current != null ? HttpContext.Current.Application : null;
             IXpoDataStoreProvider dataStoreProvider;
             if (application?["DataStoreProvider"] != null){
@@ -33,16 +35,11 @@ namespace TestApplication.Web{
             }
             else{
                 dataStoreProvider = new MemoryDataStoreProvider();
+                // dataStoreProvider = new ConnectionStringDataStoreProvider("Integrated Security=SSPI;Pooling=false;Data Source=APO-BEK;Initial Catalog=TestApplication");
                 if (application != null) application["DataStoreProvider"] = dataStoreProvider;
             }
 
             return dataStoreProvider;
-        }
-
-        private void Solution1AspNetApplication_DatabaseVersionMismatch(object sender,
-            DatabaseVersionMismatchEventArgs e){
-            e.Updater.Update();
-            e.Handled = true;
         }
 
         static TestWebApplication(){

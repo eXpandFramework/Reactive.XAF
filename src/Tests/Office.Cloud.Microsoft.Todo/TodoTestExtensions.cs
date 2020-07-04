@@ -60,6 +60,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
             var application = NewApplication(platform,  modules);
             application.SetupSecurity();
             var module = application.AddModule<MicrosoftTodoModule>(typeof(Task));
+            application.Model.ConfigureMicrosoft();
             var todoModel = application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Todo();
             var dependency = ((IModelObjectViews) todoModel).ObjectViews.AddNode<IModelObjectViewDependency>();
             dependency.ObjectView = application.Model.BOModel.GetClass(typeof(Task)).DefaultDetailView;

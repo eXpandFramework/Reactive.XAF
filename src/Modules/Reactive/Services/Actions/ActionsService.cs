@@ -219,7 +219,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 		        .Select(pattern => pattern).ToUnit());
 
         public static IObservable<SimpleAction> ActivateInUserDetails(this IObservable<SimpleAction> registerAction,bool skipWhenNoSecurity=false) =>
-	        registerAction.WhenControllerActivated()
+	        registerAction.Select(action => action).WhenControllerActivated()
 		        .Do(action => {
 					if (!skipWhenNoSecurity||!string.IsNullOrEmpty(SecuritySystem.CurrentUserName)){
 						var view = action.View();

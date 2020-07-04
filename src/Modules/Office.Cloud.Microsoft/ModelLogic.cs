@@ -1,9 +1,14 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Reactive.Linq;
+using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.Model.Core;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Office.Cloud;
+using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
     public interface IModelOfficeMicrosoft : IModelNode{
@@ -19,11 +24,25 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 	    OAuthPrompt Prompt{ get; set; }
         [Description("Space seperated list of scopes")]
         string Scopes{ get; set; }
+        [Required][ModelBrowsable(typeof(DesignerOnlyCalculator))]
+        string ClientId{ get; set; }
+        [Required]
+        string RedirectUri{ get; set; }
+        [Required][ModelBrowsable(typeof(DesignerOnlyCalculator))]
+        string ClientSecret{ get; set; }
     }
 
+
+    [DomainLogic(typeof(IModelOAuth))]
+    public static class ModelOathLogic{
+	    internal static IModelOAuth OAuth(this IModelApplication application) =>
+		    application.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().OAuth;
+
+	    internal static string[] Scopes(this IModelOAuth modelOAuth) =>
+		    $"{modelOAuth.Scopes}".Split(' ').Add("User.Read").Where(s => !string.IsNullOrEmpty(s)).Distinct().ToArray();
+    }
     public enum OAuthPrompt{
-		None,    
-        [SuppressMessage("ReSharper", "InconsistentNaming")] 
+	    [SuppressMessage("ReSharper", "InconsistentNaming")] 
         Select_Account,
         Login,
         Consent

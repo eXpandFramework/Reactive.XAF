@@ -7,9 +7,14 @@ param(
     $AzureApplicationId=$env:AzApplicationId,
     $AzureTenantId=$env:AzTenantId,
     $XpandBlobOwnerSecret=$env:AzXpandBlobOwnerSecret,
-    $AzStorageLookup
+    $AzStorageLookup,
+    $GithubToken
 )
 $ErrorActionPreference = "Stop"
+& "$SourcePath\go.ps1" -InstallModules
+
+
+
 if ($env:Build_DefinitionName){
     Write-host --------Expanding DxWeb-------------------
     Expand-Archive -DestinationPath $sourcePath\bin -Path $sourcePath\bin\Tests\DXWeb.Zip -Force
@@ -26,13 +31,14 @@ if ($env:Build_DefinitionName){
     [version]$dxVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo(((Get-ChildItem $sourcePath\bin *DevExpress*.dll).FullName | Select-Object -First 1)).FileVersion
     Write-Host "dxVersion=$dxVersion" 
     Write-Verbose -Verbose "##vso[build.updatebuildnumber]$env:build_BuildNumber-$dxVersion"
+
     if (!$AzStorageLookup){
         return
     }
 }
 
 
-& "$SourcePath\go.ps1" -InstallModules
+
 $buildNumber = $env:build_BuildNumber
 
 if ($buildNumber){

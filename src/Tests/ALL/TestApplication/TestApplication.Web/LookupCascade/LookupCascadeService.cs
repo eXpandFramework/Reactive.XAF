@@ -17,36 +17,31 @@ namespace TestApplication.Web.LookupCascade{
     public static class LookupCascadeService{
         const  string LookupcascadeOrderListview = "LookupCascade_Order_ListView";
         const  string LookupCascadeOrderDetailView = "LookupCascade_Order_DetailView";
-        public static IObservable<Unit> LookupCascade(this ApplicationModulesManager manager){
-            
-            return CustomizeTypesInfo(manager).Merge(manager.RegisterActions());
-        }
+        public static IObservable<Unit> LookupCascade(this ApplicationModulesManager manager) => CustomizeTypesInfo(manager).Merge(manager.RegisterActions());
 
-        private static IObservable<Unit> RegisterActions(this ApplicationModulesManager manager){
-            return manager.RegisterViewPopupWindowShowAction("ShowInPopup")
-                .SelectMany(action => {
-                    action.TargetViewId = LookupcascadeOrderListview;
-                    return action.WhenCustomizePopupWindowParams().Do(_ => {
-                        var application = _.Action.Application;
-                        var detailView = application.NewDetailView(((ListView) _.Action.Controller.Frame.View).CollectionSource.Objects<Order>().First(order =>order.Product.ProductName.EndsWith("0") ),
-                            (IModelDetailView) application.Model.Views[LookupCascadeOrderDetailView]);
-                        detailView.ViewEditMode=ViewEditMode.Edit;
-                        _.View = detailView;
-                    });
-                })
-                .ToUnit();
-        }
+        private static IObservable<Unit> RegisterActions(this ApplicationModulesManager manager) =>
+	        manager.RegisterViewPopupWindowShowAction("ShowInPopup")
+		        .SelectMany(action => {
+			        action.TargetViewId = LookupcascadeOrderListview;
+			        return action.WhenCustomizePopupWindowParams().Do(_ => {
+				        var application = _.Action.Application;
+				        var detailView = application.NewDetailView(((ListView) _.Action.Controller.Frame.View).CollectionSource.Objects<Order>().First(order =>order.Product.ProductName.EndsWith("0") ),
+					        (IModelDetailView) application.Model.Views[LookupCascadeOrderDetailView]);
+				        detailView.ViewEditMode=ViewEditMode.Edit;
+				        _.View = detailView;
+			        });
+		        })
+		        .ToUnit();
 
-        private static IObservable<Unit> CustomizeTypesInfo(this ApplicationModulesManager manager){
-            return manager.WhenCustomizeTypesInfo()
-                .Do(_ => {
-                    var typeInfo = _.e.TypesInfo.FindTypeInfo(typeof(Order));
+        private static IObservable<Unit> CustomizeTypesInfo(this ApplicationModulesManager manager) =>
+	        manager.WhenCustomizeTypesInfo()
+		        .Do(_ => {
+			        var typeInfo = _.e.TypesInfo.FindTypeInfo(typeof(Order));
                     
-                    typeInfo.AddAttribute(new CloneModelViewAttribute(CloneViewType.ListView, LookupcascadeOrderListview));
-                    typeInfo.AddAttribute(new CloneModelViewAttribute(CloneViewType.DetailView, LookupCascadeOrderDetailView));
-                    typeInfo = _.e.TypesInfo.FindTypeInfo(typeof(Accessory));
-                    typeInfo.AddAttribute(new CloneModelViewAttribute(CloneViewType.ListView, "LookupCascade_Accessory_LookupListView"));
-                }).ToUnit();
-        }
+			        typeInfo.AddAttribute(new CloneModelViewAttribute(CloneViewType.ListView, LookupcascadeOrderListview));
+			        typeInfo.AddAttribute(new CloneModelViewAttribute(CloneViewType.DetailView, LookupCascadeOrderDetailView));
+			        typeInfo = _.e.TypesInfo.FindTypeInfo(typeof(Accessory));
+			        typeInfo.AddAttribute(new CloneModelViewAttribute(CloneViewType.ListView, "LookupCascade_Accessory_LookupListView"));
+		        }).ToUnit();
     }
 }

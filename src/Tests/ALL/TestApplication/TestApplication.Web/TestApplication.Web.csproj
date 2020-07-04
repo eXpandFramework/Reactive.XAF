@@ -131,11 +131,8 @@
     <PackageReference Include="DevExpress.EasyTest" Version="20.1.4" />
     <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="20.1.4" />
     <PackageReference Include="Xpand.XAF.Web.All">
-      <Version>2.201.34.7</Version>
+      <Version>2.201.34.8</Version>
     </PackageReference>
-    <Reference Include="Xpand.TestsLib">
-      <HintPath>..\..\..\..\..\bin\Xpand.TestsLib.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Default.aspx" />
@@ -145,6 +142,31 @@
     <Content Include="Login.aspx" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\..\TestsLib\BO\Accessory.cs">
+      <Link>Common\Accessory.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\TestsLib\BO\Order.cs">
+      <Link>Common\Order.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\TestsLib\BO\OrderModuleUpdater.cs">
+      <Link>Common\OrderModuleUpdater.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\TestsLib\BO\Product.cs">
+      <Link>Common\Product.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\TestsLib\DefaultUserModuleUpdater.cs">
+      <Link>Common\DefaultUserModuleUpdater.cs</Link>
+    </Compile>
+    <Compile Include="..\CommonFiles\AgnosticModule.cs">
+      <Link>Common\AgnosticModule.cs</Link>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="..\CommonFiles\MicrosoftService\MicrosoftService.cs">
+      <Link>MicrosoftService\MicrosoftService.cs</Link>
+    </Compile>
+    <Compile Include="..\CommonFiles\MicrosoftService\ShowMSAccountInfoService.cs">
+      <Link>MicrosoftService\ShowMSAccountInfoService.cs</Link>
+    </Compile>
     <Compile Include="Default.aspx.designer.cs">
       <DependentUpon>Default.aspx</DependentUpon>
     </Compile>

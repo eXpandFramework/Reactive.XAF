@@ -5,76 +5,59 @@ using Xpand.TestsLib.EasyTest;
 using Xpand.TestsLib.EasyTest.Commands;
 using Xpand.TestsLib.EasyTest.Commands.ActionCommands;
 using Xpand.TestsLib.EasyTest.Commands.DialogCommands;
-using Xpand.XAF.Modules.LookupCascade;
 using ActionCommand = Xpand.TestsLib.EasyTest.Commands.ActionCommands.ActionCommand;
 using NavigateCommand = Xpand.TestsLib.EasyTest.Commands.NavigateCommand;
 
 namespace ALL.Web.Tests{
-    public interface ICascadeTest{
-        ICommandAdapter CommandAdapter{ get; }    
-    }
 
-    public class CascadeTest:ICascadeTest{
-        public ICommandAdapter CommandAdapter{ get; }
-
-        public CascadeTest(ICommandAdapter commandAdapter){
-            CommandAdapter = commandAdapter;
-        }
-    }
-    public static class LookupCascadeTestService{
+    public static class LookupCascadeService{
         private static readonly NavigateCommand NavigateToOrderListView=new NavigateCommand("LookupCascade.Order");
 
-        public static ICascadeTest TestLookupCascade(this ICommandAdapter commandAdapter){
+        public static ICommandAdapter TestLookupCascade(this ICommandAdapter commandAdapter){
             commandAdapter.Execute(NavigateToOrderListView);
-            return new CascadeTest(commandAdapter)
+            return commandAdapter
                 .ListView()
                 .DetailView()
                 .DetailViewPopup()
                 .SaveDetailView()
-                .SaveListViewWithSynchronizationOn()
-                ;
+                .SaveListViewWithSynchronizationOn();
         }
 
-        public static ICascadeTest SaveListViewWithSynchronizationOn(this ICascadeTest cascadeTest){
-            var commandAdapter = cascadeTest.CommandAdapter;
-            commandAdapter.Execute(new SelectObjectsCommand(),new ActionDeleteObjectsCommand(),
+        public static ICommandAdapter SaveListViewWithSynchronizationOn(this ICommandAdapter commandAdapter){
+	        commandAdapter.Execute(new SelectObjectsCommand(),new ActionDeleteObjectsCommand(),
                 new ActionGridListEditorCommand(GridListEditorInlineCommand.New),
                 new FillEditorCommand(nameof(Order.Accessory), $"{nameof(Accessory.AccessoryName)}0",true),
                 new ActionGridListEditorCommand(GridListEditorInlineCommand.Update)
                 ,CheckListViewCommand(1));
-            return cascadeTest;
+            return commandAdapter;
         }
 
-        public static ICascadeTest SaveDetailView(this ICascadeTest cascadeTest){
-            var commandAdapter = cascadeTest.CommandAdapter;
-            commandAdapter.Execute(new SelectObjectsCommand(),new ActionDeleteObjectsCommand(),new ActionNewCommand(),
+        public static ICommandAdapter SaveDetailView(this ICommandAdapter commandAdapter){
+	        commandAdapter.Execute(new SelectObjectsCommand(),new ActionDeleteObjectsCommand(),new ActionNewCommand(),
                 new FillEditorCommand(nameof(Order.Product), $"{nameof(Product.ProductName)}0"),
                 new FillEditorCommand(nameof(Order.Accessory), $"{nameof(Accessory.AccessoryName)}0"),
                 new ActionSaveCommand(SaveCommandType.Close),CheckListViewCommand(1));
-            return cascadeTest;
+            return commandAdapter;
         }
 
-        public static ICascadeTest DetailViewPopup(this ICascadeTest cascadeTest){
-            var commandAdapter = cascadeTest.CommandAdapter;
-            commandAdapter.Execute(new  ActionCommand("Show In Popup"));
+        public static ICommandAdapter DetailViewPopup(this ICommandAdapter commandAdapter){
+	        commandAdapter.Execute(new  ActionCommand("Show In Popup"));
             commandAdapter.TestDetailView();
             commandAdapter.Execute(new ActionCancelCommand());
             commandAdapter.Execute(new RespondDialogCommand("OK"));
             commandAdapter.Execute(NavigateToOrderListView);
-            return cascadeTest;
+            return commandAdapter;
         }
 
-        public static ICascadeTest DetailView(this ICascadeTest cascadeTest){
-            var commandAdapter = cascadeTest.CommandAdapter;
-            
-            commandAdapter.Execute(
+        public static ICommandAdapter DetailView(this ICommandAdapter commandAdapter){
+	        commandAdapter.Execute(
                 new ActionEditObjectCommand(nameof(Order.Product),$"{nameof(Product.ProductName)}0"),
                 new CheckDetailViewCommand((nameof(Order.Product),$"{nameof(Product.ProductName)}0")),
                 NavigateToOrderListView,new RespondDialogCommand("OK"),new ActionEditObjectCommand(nameof(Order.Product), $"{nameof(Product.ProductName)}0"));
             commandAdapter.TestDetailView();
             commandAdapter.Execute(NavigateToOrderListView);
             commandAdapter.Execute(new RespondDialogCommand("OK"));
-            return cascadeTest;
+            return commandAdapter;
         }
 
         private static void TestDetailView(this ICommandAdapter commandAdapter){
@@ -84,8 +67,8 @@ namespace ALL.Web.Tests{
         }
 
         private static void TestEditors(this ICommandAdapter commandAdapter, bool inlineEditor=false){
-            commandAdapter.Execute(new FillEditorCommand(nameof(Order.Product), LookupCascadeService.NA,inlineEditor));
-            commandAdapter.Execute(new FillEditorCommand(nameof(Order.Accessory), LookupCascadeService.NA,inlineEditor));
+            commandAdapter.Execute(new FillEditorCommand(nameof(Order.Product), Xpand.XAF.Modules.LookupCascade.LookupCascadeService.NA,inlineEditor));
+            commandAdapter.Execute(new FillEditorCommand(nameof(Order.Accessory), Xpand.XAF.Modules.LookupCascade.LookupCascadeService.NA,inlineEditor));
             commandAdapter.Execute(new FillEditorCommand(nameof(Order.Accessory), $"{nameof(Accessory.AccessoryName)}0",inlineEditor));
             commandAdapter.Execute(new FillEditorCommand(nameof(Order.Product), $"{nameof(Product.ProductName)}0",inlineEditor));
             commandAdapter.Execute(new FillEditorCommand(nameof(Order.Accessory), $"{nameof(Accessory.AccessoryName)}0",inlineEditor));
@@ -97,12 +80,11 @@ namespace ALL.Web.Tests{
             commandAdapter.Execute(new FillEditorCommand(nameof(Order.Accessory), $"{nameof(Accessory.AccessoryName)}2",inlineEditor){ExpectException = true});
         }
 
-        public static ICascadeTest ListView(this ICascadeTest cascadeTest){
-            var commandAdapter = cascadeTest.CommandAdapter;
-            commandAdapter.TestListView(2);
+        public static ICommandAdapter ListView(this ICommandAdapter commandAdapter){
+	        commandAdapter.TestListView(2);
             commandAdapter.Execute(NavigateToOrderListView);
             commandAdapter.Execute(new RespondDialogCommand("OK"));
-            return cascadeTest;
+            return commandAdapter;
         }
 
         private static void TestListView(this ICommandAdapter commandAdapter,int rowCount){
@@ -123,9 +105,8 @@ namespace ALL.Web.Tests{
             return checkListViewCommand;
         }
 
-        public static void CreateOrderDependecies(this ICascadeTest cascadeTest){
-            var commandAdapter = cascadeTest.CommandAdapter;
-            Command[] commands = {
+        public static void CreateOrderDependecies(this ICommandAdapter commandAdapter){
+	        Command[] commands = {
                 new NavigateCommand(nameof(Order)),
                 new ActionNewCommand(),
                 new EditorActionNewCommand(nameof(Order.Product)),

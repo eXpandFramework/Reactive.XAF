@@ -1,14 +1,10 @@
 ﻿using System;
 using DevExpress.EasyTest.Framework;
-using Fasterflect;
 
 namespace Xpand.TestsLib.EasyTest.Commands{
     public abstract class EasyTestCommand:Command{
-        public new bool ExpectException{ get; set; }
-        public bool SuppressExceptions{
-            get => Version.Parse(AssemblyInfo.Version) >= new Version(19, 2, 7) && (bool) this.GetPropertyValue("SuppressException");
-            set => throw new NotImplementedException();
-        }
+	    public new bool ExpectException{ get; set; }
+        public bool SuppressExceptions{ get; set; }
 
         protected sealed override void InternalExecute(ICommandAdapter adapter){
             var suppressException = SuppressExceptions;

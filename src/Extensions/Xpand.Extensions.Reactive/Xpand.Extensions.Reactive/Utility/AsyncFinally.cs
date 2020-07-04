@@ -4,7 +4,7 @@ using System.Reactive.Linq;
 
 namespace Xpand.Extensions.Reactive.Utility{
     public static partial class Utility{
-        public static IObservable<T> AsyncFinally<T>(this IObservable<T> source, Func<System.Threading.Tasks.Task> action) => source
+	    public static IObservable<T> AsyncFinally<T>(this IObservable<T> source, Func<System.Threading.Tasks.Task> action) => source
                 .Materialize()
                 .SelectMany(async n => {
                     switch (n.Kind){

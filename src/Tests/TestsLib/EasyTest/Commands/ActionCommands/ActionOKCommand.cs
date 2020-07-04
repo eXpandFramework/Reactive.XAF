@@ -2,11 +2,16 @@
 
 namespace Xpand.TestsLib.EasyTest.Commands.ActionCommands{
     public class ActionOKCommand:EasyTestCommand{
-        public const string Name = "ActionOK";
+	    private readonly bool _optional;
+	    public const string Name = "ActionOK";
+
+        public ActionOKCommand(bool optional=true){
+	        _optional = optional;
+        }
 
         protected override void ExecuteCore(ICommandAdapter adapter){
-            var command = new ActionCommand("OK");
-            command.Execute(adapter);
+	        var command = new ActionCommand("OK"){SuppressExceptions = _optional};
+	        command.Execute(adapter);
         }
     }
 }

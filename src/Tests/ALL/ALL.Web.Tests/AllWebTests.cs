@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using ALL.Tests;
 using DevExpress.EasyTest.Framework;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.EasyTest.WebAdapter;
@@ -10,6 +13,7 @@ using Xpand.Extensions.AppDomainExtensions;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Attributes;
 using Xpand.TestsLib.EasyTest;
+using Xpand.TestsLib.EasyTest.Commands;
 using Xpand.XAF.Modules.Reactive;
 
 namespace ALL.Web.Tests{
@@ -28,13 +32,15 @@ namespace ALL.Web.Tests{
             }
         }
         [XpandTest(LongTimeout,3)]
-        [Test]
-        public void Web_EasyTest(){
+        [Test][Apartment(ApartmentState.STA)]
+        public async Task Web_EasyTest(){
             using (var webAdapter = new WebAdapter()){
-                var testApplication = webAdapter.RunWebApplication($@"{AppDomain.CurrentDomain.ApplicationPath()}\..\TestWebApplication\",65377);
+                var testApplication = webAdapter.RunWebApplication($@"{AppDomain.CurrentDomain.ApplicationPath()}\..\TestWebApplication\",65477);
                 try{
-                    var commandAdapter = webAdapter.CreateCommandAdapter();
-                    commandAdapter.TestLookupCascade();
+	                var commandAdapter = webAdapter.CreateCommandAdapter();
+                    commandAdapter.Execute(new LoginCommand());
+                    // commandAdapter.TestLookupCascade();
+                    await commandAdapter.TestMicrosoftService();
                 }
                 finally{
                     webAdapter.KillApplication(testApplication, KillApplicationContext.TestNormalEnded);
