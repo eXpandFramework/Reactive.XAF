@@ -29,6 +29,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
         [Required]
         string RedirectUri{ get; set; }
         [Required][ModelBrowsable(typeof(DesignerOnlyCalculator))]
+        [DefaultValue("Applicable only for web")]
         string ClientSecret{ get; set; }
     }
 

@@ -11,7 +11,7 @@ if ($Branch -eq "master"){
     if ($newPackages){
         Get-MSBuildProjects $sourcePath|ForEach-Object{
             if ($_.BaseName -in $newPackages){
-                # Update-AssemblyInfo "$($_.DirectoryName)\Properties" -Build
+                Update-AssemblyInfo "$($_.DirectoryName)\Properties" -Build
                 $updateVersion+=$_.BaseName
             }
         }
@@ -27,7 +27,7 @@ if ($Branch -eq "master"){
                 if ((Get-VersionPart $projectVersion Build) -ne (Get-VersionPart $labPackage.version Build) -or 
                     $projectVersion -lt $labPackage.Version ){
                     $updateVersion+=$_.BaseName
-                    # Update-AssemblyInfo $assemblyInfoPath -Build
+                    Update-AssemblyInfo $assemblyInfoPath -Build
                 }   
             }
         }

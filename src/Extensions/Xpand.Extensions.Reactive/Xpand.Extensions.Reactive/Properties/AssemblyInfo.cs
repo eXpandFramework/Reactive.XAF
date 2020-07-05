@@ -30,7 +30,7 @@ using System.Security;
 //
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("2.201.35.9")]
-[assembly: AssemblyFileVersion("2.201.35.9")]
+[assembly: AssemblyVersion("2.201.36.0")]
+[assembly: AssemblyFileVersion("2.201.36.0")]
 //[assembly:AllowPartiallyTrustedCallers]
 //[assembly: SecurityTransparent()]

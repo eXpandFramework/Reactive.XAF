@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
+using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.Utils;
 using DevExpress.ExpressApp.Win.Core;
 using DevExpress.ExpressApp.Win.Core.ModelEditor;
@@ -43,6 +44,8 @@ namespace Xpand.XAF.ModelEditor {
                         $"Attach to {Path.GetFileName(AppDomain.CurrentDomain.SetupInformation.ApplicationBase)}");
                     strings = args.Skip(1).ToArray();
                 }
+
+                DesignerOnlyCalculator.IsRunFromDesigner = true;
                 splashScreen = new SplashScreen();
                 splashScreen.Start();
                 var pathInfo = new PathInfo(strings);

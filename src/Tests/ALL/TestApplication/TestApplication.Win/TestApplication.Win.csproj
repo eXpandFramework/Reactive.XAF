@@ -65,7 +65,6 @@
     </Compile>
     <Compile Include="..\CommonFiles\MicrosoftService\MicrosoftService.cs" Link="MicrosoftService\MicrosoftService.cs" />
     <Compile Include="..\CommonFiles\MicrosoftService\ShowMSAccountInfoService.cs" Link="MicrosoftService\ShowMSAccountInfoService.cs" />
-  
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -103,6 +102,6 @@
     <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="20.1.4" />
     <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="20.1.4" />
     <PackageReference Include="DevExpress.EasyTest" Version="20.1.4" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="2.201.34.7" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="2.201.35" />
   </ItemGroup>
 </Project>

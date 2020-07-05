@@ -2,14 +2,14 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Office.Cloud.Microsoft</id>
-    <version>2.201.34.6</version>
+    <version>2.201.36.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/Office.Cloud.Microsoft</projectUrl>
     <iconUrl>http://sign.expandframework.com</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Xpand.XAF.Modules.Office.Cloud.Microsoft</description>
+    <description>This package authenticates against Azure Active Directory and provides API for querying the MSGraph endpoints.</description>
     <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Office.Cloud.Microsoft</tags>
@@ -23,6 +23,8 @@
       <dependency id="Microsoft.Graph.Core" version="1.19">
       </dependency>
       <dependency id="Microsoft.Identity.Client" version="4.13">
+      </dependency>
+      <dependency id="Microsoft.IdentityModel.Protocols.OpenIdConnect" version="6.6">
       </dependency>
       <dependency id="Microsoft.IdentityModel.Tokens" version="6.6">
       </dependency>
@@ -42,15 +44,15 @@
       </dependency>
       <dependency id="System.Reactive" version="4.3.2">
       </dependency>
-      <dependency id="Xpand.Extensions" version="2.201.34.5">
+      <dependency id="Xpand.Extensions" version="2.201.35.0">
       </dependency>
-      <dependency id="Xpand.Extensions.Office.Cloud" version="2.201.34.6">
+      <dependency id="Xpand.Extensions.Office.Cloud" version="2.201.35.0">
       </dependency>
-      <dependency id="Xpand.Extensions.Reactive" version="2.201.35.9">
+      <dependency id="Xpand.Extensions.Reactive" version="2.201.36.0">
       </dependency>
-      <dependency id="Xpand.Extensions.XAF" version="2.201.35.8">
+      <dependency id="Xpand.Extensions.XAF" version="2.201.36.0">
       </dependency>
-      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.35.10">
+      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.36.0">
       </dependency>
       <dependency id="Xpand.VersionConverter" version="2.201.7">
       </dependency>

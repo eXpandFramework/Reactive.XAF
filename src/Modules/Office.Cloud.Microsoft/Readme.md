@@ -1,7 +1,6 @@
 ![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.Office.Cloud.Microsoft.svg?&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.Office.Cloud.Microsoft.svg?&style=flat)
 
 [![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/Office.Cloud.Microsoft.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+Office.Cloud.Microsoft) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/Office.Cloud.Microsoft.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+Office.Cloud.Microsoft)
-
 # About 
 
 This package authenticates against Azure Active Directory and provides API for querying the MSGraph endpoints.
@@ -29,7 +28,8 @@ First off you have to create an Azure application following the next steps:
    * If you target the XAF win click on `Add Platform` and select `Mobile and desktop applications`. Check on one of the predefined Url e.g the https://login.live.com/oauth20_desktop.srf and copy this value to the related XAF model entry.
 6. From the left pane, select `Certificates & secrets` > New client secret. Enter a description, select the validity duration, and select Add. Copy the value into the related XAF model entry. This step is only required for Web applications.
 8. From the left pane, select API permissions > Add a permission to configure additional endpoint access. In the [Query the MSGraph endpoints](https://github.com/eXpandFramework/DevExpress.XAF/tree/lab/src/Modules/Office.Cloud.Microsoft#query-the-msgraph-endpoints) you can see an example of how to use the API to query the User endpoint. Copy these permissions to into the related XAF model.
-1. The into the related XAF model is available
+1. The related XAF model is available at:
+   ![image](https://user-images.githubusercontent.com/159464/86536412-f1b73b80-beef-11ea-8cca-490aeb16bb7d.png)
 
 
 #### Authentication
@@ -141,12 +141,27 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 
 |<!-- -->|<!-- -->
 |----|----
-|**DevExpress.ExpressApp**|**Any**
+|**DevExpress.Persistent.Base**|**Any**
 |Fasterflect.Xpand|2.0.7
  |JetBrains.Annotations|2020.1.0
- |System.ValueTuple|4.5.0
- |Xpand.Extensions|2.201.34.5
- |Xpand.Extensions.XAF|2.201.35.8
+ |Microsoft.Graph.Beta|0.18.0-preview
+ |Microsoft.Graph.Core|1.19.0
+ |Microsoft.Identity.Client|4.13.0
+ |Microsoft.IdentityModel.Protocols.OpenIdConnect|6.6.0
+ |Microsoft.IdentityModel.Tokens|6.6.0
+ |Microsoft.Owin|4.1.0
+ |Microsoft.Owin.Host.SystemWeb|4.1.0
+ |Microsoft.Owin.Security|4.1.0
+ |Microsoft.Owin.Security.Cookies|4.1.0
+ |Microsoft.Owin.Security.OpenIdConnect|4.1.0
+ |Newtonsoft.Json|12.0.3
+ |Owin|1.0.0
+ |System.Reactive|4.3.2
+ |Xpand.Extensions|2.201.35
+ |Xpand.Extensions.Office.Cloud|2.201.35
+ |Xpand.Extensions.Reactive|2.201.36
+ |Xpand.Extensions.XAF|2.201.36
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.201.36
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.7
 
 ## Issues-Debugging-Troubleshooting
