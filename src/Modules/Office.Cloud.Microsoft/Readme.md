@@ -111,7 +111,7 @@ In the next screencast you can see the module in action for both Win and Web. At
 
 <twitter>
 
-[![Xpand XAF Modules Office Cloud Microsoft](https://user-images.githubusercontent.com/159464/86131887-e24e8180-baee-11ea-8c02-b64b2c639b6d.gif)]()
+[![Xpand XAF Modules Office Cloud Microsoft](https://user-images.githubusercontent.com/159464/86131887-e24e8180-baee-11ea-8c02-b64b2c639b6d.gif)](https://www.youtube.com/watch?v=XIczKjE2sFw)
 
 </twitter>
 
