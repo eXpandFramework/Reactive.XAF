@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <Target Name="ConvertVersion" BeforeTargets="PreBuildEvent">
-        <Exec Command="powershell.exe –NonInteractive –ExecutionPolicy Unrestricted –command &quot;&amp; { &amp;&apos;$(MSBuildThisFileDirectory)\Xpand.VersionConverter.ps1&apos; &apos;$(ProjectPath)&apos; &apos;$(TargetDir)&apos; &apos;$(DevExpressVersion)&apos; &apos;$(VersionConverterVerbose)&apos;} &quot; " LogStandardErrorAsError="True" ContinueOnError="False" />
+        <Exec Command="powershell.exe –NonInteractive –ExecutionPolicy Unrestricted –command &quot;&amp; { &amp;&apos;$(MSBuildThisFileDirectory)\Xpand.VersionConverter.ps1&apos; &apos;$(ProjectPath)&apos; &apos;$(TargetDir)&apos; &apos;$(DevExpressVersion)&apos; &apos;$(VersionConverterVerbose)&apos; &apos;$(ReferenceFilter)&apos; &apos;$(TargetFilter)&apos;} &quot; " LogStandardErrorAsError="True" ContinueOnError="False" />
     </Target>
 </Project>

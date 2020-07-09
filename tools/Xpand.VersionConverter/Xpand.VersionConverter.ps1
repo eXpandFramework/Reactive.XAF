@@ -12,7 +12,8 @@ param(
     [string]$targetPath = "C:\Work\eXpandFramework\DevExpress.XAF\bin\AllTestWin\",
     $DevExpressVersion,
     [string]$VerboseOutput = "Continue" ,
-    [string]$referenceFilter = "DevExpress*"
+    [string]$referenceFilter = "DevExpress*",
+    [string]$targetFilter = "(?s)Xpand\.XAF|Xpand\.Extensions"
 )
 
 
@@ -42,7 +43,8 @@ Write-VerboseLog "nugetPackageFoldersPath=$packagesFolder"
 $nugetPackageFolders = [Path]::GetFullPath($packagesFolder)
 $moduleDirectories = [Directory]::GetDirectories($nugetPackageFolders) | Where-Object {
     $baseName = (Get-Item $_).BaseName
-    $baseName -like "Xpand.XAF*" -or $baseName -like "Xpand.Extensions*"
+    $regex = [regex] $targetFilter
+    $regex.IsMatch($baseName);
 }
 
 $unpatchedPackages = Get-UnPatchedPackages $moduleDirectories $dxversion
