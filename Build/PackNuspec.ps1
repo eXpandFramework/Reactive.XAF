@@ -102,7 +102,7 @@ function AddReadMe {
         
 ++++++++++++++++++++++++  ++++++++
 ++++++++++++++++++++++##  ++++++++      ➤ 𝗘𝗫𝗖𝗟𝗨𝗦𝗜𝗩𝗘 𝗦𝗘𝗥𝗩𝗜𝗖𝗘𝗦 @ 
-++++++++++++++++++++++  ++++++++++          ☞ http://apobekiaris.expandframework.com
+++++++++++++++++++++++  ++++++++++          ☞ http://hire.expandframework.com
 ++++++++++    ++++++  ++++++++++++      
 ++++++++++++  ++++++  ++++++++++++      ➤  ɪғ ʏᴏᴜ ʟɪᴋᴇ ᴏᴜʀ ᴡᴏʀᴋ ᴘʟᴇᴀsᴇ ᴄᴏɴsɪᴅᴇʀ ᴛᴏ ɢɪᴠᴇ ᴜs ᴀ STAR. 
 ++++++++++++++  ++  ++++++++++++++          ☞ https://github.com/eXpandFramework/DevExpress.XAF/stargazers
@@ -111,8 +111,8 @@ function AddReadMe {
 ++++++++++++  ++++    ++++++++++++         ☞ Build the project before opening the model editor.
 ++++++++++  ++++++++  ++++++++++++         ☞ Documentation can be found @ https://github.com/eXpandFramework/DevExpress.XAF/wiki/$wikiName.
 ++++++++++  ++++++++++  ++++++++++         ☞ $($package.id) only adds the required references. To register the included packages add the next line/s in the constructor of your XAF module.
-++++++++  ++++++++++++++++++++++++              $registration
-++++++  ++++++++++++++++++++++++++      
+++++++++  ++++++++++++++++++++++++              
+++++++  ++++++++++++++++++++++++++            $registration
         
 "@
         Set-Content "$Directory\ReadMe.txt" $message

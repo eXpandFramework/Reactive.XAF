@@ -2,7 +2,7 @@
 
 namespace Xpand.Extensions.LinqExtensions{
     public static partial class LinqExtensions{
-        public static IEnumerable<T> TakeAllButLast<T>(this IEnumerable<T> source){
+	    public static IEnumerable<T> TakeAllButLast<T>(this IEnumerable<T> source){
             using (var it = source.GetEnumerator()){
                 bool hasRemainingItems;
                 var isFirst = true;

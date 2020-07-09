@@ -7,9 +7,7 @@ namespace Xpand.XAF.Modules.ModelViewInheritance{
     public class ModelViewInheritanceUpdater : ModelNodesGeneratorUpdater<ModelViewsNodesGenerator> {
         public static bool Disabled;
 
-        public override void UpdateCachedNode(ModelNode node){
-            UpdateNodeCore(node);
-        }
+        public override void UpdateCachedNode(ModelNode node) => UpdateNodeCore(node);
 
         private void UpdateNodeCore(ModelNode node){
             if (Disabled )
@@ -22,9 +20,6 @@ namespace Xpand.XAF.Modules.ModelViewInheritance{
             }
         }
 
-        public override void UpdateNode(ModelNode node){
-            UpdateNodeCore(node);
-        }
-
+        public override void UpdateNode(ModelNode node) => UpdateNodeCore(node);
     }
 }
