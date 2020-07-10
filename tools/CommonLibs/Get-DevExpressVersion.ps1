@@ -49,7 +49,7 @@ function GetDevExpressVersion($targetPath, $referenceFilter, $projectFile) {
                 Write-VerboseLog "Include=$Include"
                 $dxReference = [Regex]::Match($include, "DevExpress[^,]*", [RegexOptions]::IgnoreCase).Value
                 Write-VerboseLog "DxReference=$dxReference"
-                $dxAssembly = Get-ChildItem "$env:windir\Microsoft.NET\assembly\GAC_MSIL"  *.dll -Recurse | Where-Object { $_ -like $referenceFilter } | Select-Object -First 1
+                $dxAssembly = Get-ChildItem "$env:windir\Microsoft.NET\assembly\GAC_MSIL"  *.dll -Recurse | Where-Object { $_.BaseName -like $dxReference } | Select-Object -First 1
                 if ($dxAssembly) {
                     $version = [version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($dxAssembly.FullName).FileVersion
                 }
