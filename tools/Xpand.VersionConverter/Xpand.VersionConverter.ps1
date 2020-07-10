@@ -8,23 +8,30 @@ using namespace System.Text.RegularExpressions
 using namespace Mono.Cecil
 using namespace Mono.Cecil.pdb
 param(
-    [string]$projectFile = "C:\Work\eXpandFramework\DevExpress.XAF\src\Tests\ALL\ALL.Win.Tests\ALL.Win.Tests.csproj",
-    [string]$targetPath = "C:\Work\eXpandFramework\DevExpress.XAF\bin\AllTestWin\",
+    [string]$projectFile ="C:\Work\eXpandFramework\Issues\Solution42\Solution42.Module\Solution42.Module.csproj",
+    [string]$targetPath ="C:\Work\eXpandFramework\Issues\Solution42\Solution42.Module\bin\Debug\",
     $DevExpressVersion,
     [string]$VerboseOutput = "Continue" ,
-    [string]$referenceFilter = "DevExpress*",
-    [string]$targetFilter = "(?s)Xpand\.XAF|Xpand\.Extensions"
+    [string]$referenceFilter ,
+    [string]$targetFilter ="(?is)MyCompany"
 )
 
+if (!$referenceFilter){
+    $referenceFilter="DevExpress*"
+}
+if (!$targetFilter){
+    $targetFilter="(?s)Xpand\.XAF|Xpand\.Extensions"
+}
 
 $ErrorActionPreference = "Stop"
 . "$PSScriptRoot\Functions.ps1"
-$VerbosePreference=ConfigureVerbose $VerboseOutput VerboseVersionConverter
+$VerbosePreference="Continue"
 Write-VerboseLog "Executing VersionConverter..." 
 Write-VerboseLog "ProjectFile=$projectFile"
 Write-VerboseLog "targetPath=$targetPath"
 Write-VerboseLog "DevExpressVersion=$DevExpressVersion"
 Write-VerboseLog "referenceFilter=$referenceFilter"
+Write-VerboseLog "targetFilter=$targetFilter"
 
 if (!$DevExpressVersion) {
     $dxVersion = GetDevExpressVersion $targetPath $referenceFilter $projectFile 
