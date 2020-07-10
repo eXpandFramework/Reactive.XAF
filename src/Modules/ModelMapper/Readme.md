@@ -3,8 +3,8 @@
 [![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/ModelMapper.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+ModelMapper) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/ModelMapper.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+ModelMapper)
 # About 
 
-The `ModelMapper` module **can map any type** to the XAF application model and in runtime bind it to the respective object instance. 
-The module **ships with 82 predefined maps** for all the common types such as GirdView, ASPxGridView, TreeList, Scheduler, Chart, Dashboards etc. More info in the Details section.
+The `ModelMapper` module is a XAF application model mapper and runtime binder. Ships 
+with predefined maps for all the common XAF components.
 
 ## Details
 This is a `platform agnostic` module that transforms any type to XAF model format and will extend the model with a simple call like:

@@ -35,6 +35,8 @@ if ($Branch -eq "master"){
     $updateVersion
     return
 }
+Write-HostFormatted "Semester version check"  -Section
+
 
 
 Write-HostFormatted "labPackages"  -Section
