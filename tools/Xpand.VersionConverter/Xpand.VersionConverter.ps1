@@ -25,7 +25,7 @@ if (!$targetFilter){
 
 $ErrorActionPreference = "Stop"
 . "$PSScriptRoot\Functions.ps1"
-$VerbosePreference="Continue"
+$VerbosePreference=ConfigureVerbose $VerboseOutput VerboseVersionConverter
 Write-VerboseLog "Executing VersionConverter..." 
 Write-VerboseLog "ProjectFile=$projectFile"
 Write-VerboseLog "targetPath=$targetPath"
