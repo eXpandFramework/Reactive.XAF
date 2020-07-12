@@ -27,12 +27,12 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
 
         public const int TasksFolderPagingItemsCount = 11;
 
-        public static async Task<(IOutlookTaskFolderRequestBuilder requestBuilder, Frame frame)> InitializeService(this XafApplication application,string taskFolderName=TasksFolderName,bool keepTasks=false){
+        public static async Task<(IOutlookTaskFolderRequestBuilder requestBuilder, Frame frame)> InitializeService(this XafApplication application,string taskFolderName=TasksFolderName,bool keepTasks=false,bool keepTaskFolder=false){
             var modelTodo = application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Todo();
             modelTodo.DefaultTodoListName = taskFolderName;
             var client = await application.InitGraphServiceClient();
             var foldersRequestBuilder = client.client.Me.Outlook.TaskFolders;
-            var taskFolder = await foldersRequestBuilder.GetFolder(taskFolderName, taskFolderName!=TasksPagingFolderName);
+            var taskFolder = await foldersRequestBuilder.GetFolder(taskFolderName, !keepTaskFolder && taskFolderName!=TasksPagingFolderName);
             if (taskFolder == null&&taskFolderName==TasksPagingFolderName){
                 taskFolder = await foldersRequestBuilder.Request()
                     .AddAsync(new OutlookTaskFolder(){Name = TasksPagingFolderName});
@@ -66,7 +66,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
             dependency.ObjectView = application.Model.BOModel.GetClass(typeof(Task)).DefaultDetailView;
             application.Logon();
             application.CreateObjectSpace();
-            return module.Application.Modules.OfType<MicrosoftTodoModule>().First();
+            return module.Application.Modules.OfType<MicrosoftTodoModule>().First();  
         }
 
         static XafApplication NewApplication(this Platform platform,  ModuleBase[] modules){

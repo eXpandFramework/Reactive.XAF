@@ -25,12 +25,8 @@ namespace Xpand.Extensions.Office.Cloud{
         }
 
         static Extensions() => AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainOnAssemblyResolve;
-        private static System.Reflection.Assembly CurrentDomainOnAssemblyResolve(object sender, ResolveEventArgs args){
-            if (args.Name.Contains("Newton")){
-                return System.Reflection.Assembly.LoadFile($@"{AppDomain.CurrentDomain.BaseDirectory}bin\Newtonsoft.Json.dll");
-            }
-            return null;
-        }
+        private static System.Reflection.Assembly CurrentDomainOnAssemblyResolve(object sender, ResolveEventArgs args) => 
+            args.Name.Contains("Newton") ? System.Reflection.Assembly.LoadFile($@"{AppDomain.CurrentDomain.BaseDirectory}bin\Newtonsoft.Json.dll") : null;
 
         public static IObservable<TCloudEntity> MapEntity<TCloudEntity, TLocalEntity>(this Func<IObjectSpace> objectSpaceFactory, TLocalEntity localEntity,
             Func<TLocalEntity, IObservable<TCloudEntity>> insert, Func<(string cloudId, TLocalEntity task), IObservable<TCloudEntity>> update){

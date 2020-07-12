@@ -89,7 +89,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
             var addNew = createNew.ReturnObservable().WhenNotDefault().SelectMany(b =>
                 request.AddAsync(new OutlookTaskFolder() { Name = name }).ToObservable());
             return request.Filter($"{nameof(OutlookTaskFolder.Name)} eq '{name}'").GetAsync().ToObservable()
-                .SelectMany(page => page).SwitchIfEmpty(addNew).FirstOrDefaultAsync().Select(folder => folder);
+                .SelectMany(page => page).SwitchIfEmpty(addNew).FirstOrDefaultAsync().Publish().RefCount();
         }
 
         internal static IObservable<TSource> TraceMicrosoftTodoModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
@@ -101,6 +101,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
             manager.WhenApplication(application => {
                 Client = application.AuthorizationRequired()
                     .Authorize()
+                    .EnsureTaskFolder()
                     .Publish().RefCount();
                 Updated = Client.SynchronizeCloud().Publish().RefCount();
                 return Updated
@@ -108,10 +109,14 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
                     .ToUnit();
             });
 
+        private static IObservable<(Frame frame, GraphServiceClient client)> EnsureTaskFolder(this IObservable<(Frame frame, GraphServiceClient client)> source) =>
+            source.SelectMany(_ => _.client.Me.Outlook.TaskFolders
+                .GetFolder(_.frame.Application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Todo().DefaultTodoListName, true).To(_));
+        
         private static IObservable<OutlookTask> SynchronizeCloud(this IObservable<(Frame frame,GraphServiceClient client)> source) =>
             source.SelectMany(client => {
                 var modelTodo = client.frame.Application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Todo();
-                return client.client.Me.Outlook.TaskFolders.GetFolder(modelTodo.DefaultTodoListName)
+                return client.client.Me.Outlook.TaskFolders.GetFolder(modelTodo.DefaultTodoListName,true)
                     .Select(folder => client.client.Me.Outlook.TaskFolders[folder.Id]).SynchronizeCloud(
                         client.frame.View.ObjectSpace, client.frame.Application.CreateObjectSpace,
                         CustomizeDeleteSubject.OnNext, CustomizeInsertSubject.OnNext, CustomizeUpdateSubject.OnNext);

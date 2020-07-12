@@ -29,26 +29,25 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
             await MapTwoNewTasks(projectTaskStatus, taskStatus,TodoTestExtensions.TasksFolderName);
         }
 
-        private async Task MapTwoNewTasks(TaskStatus projectTaskStatus, string taskStatus, string tasksFolderName,Func<IOutlookTaskFolderRequestBuilder,IObservable<Unit>> afterAssert=null){
+        private async Task MapTwoNewTasks(TaskStatus projectTaskStatus, string taskStatus, string tasksFolderName,Func<IOutlookTaskFolderRequestBuilder,IObservable<Unit>> afterAssert=null,bool keepTaskFolder=false){
+        AppDomain.CurrentDomain.AssemblyResolve
             using (var application = Platform.Win.TodoModule().Application){
-                (IOutlookTaskFolderRequestBuilder requestBuilder, Frame frame) builder = await application.InitializeService(tasksFolderName);
-                try{
-                    await builder.frame.View.ObjectSpace.Map_Two_New_Entity(
-                        (space, i) => space.NewTask(projectTaskStatus, i), Timeout,
-                        space => TodoService.Updated.TakeUntilDisposed(application),
-                        (task, outlookTask, i) => {
+                (IOutlookTaskFolderRequestBuilder requestBuilder, Frame frame) builder = await application.InitializeService(tasksFolderName,keepTaskFolder:keepTaskFolder);
+                await builder.frame.View.ObjectSpace.Map_Two_New_Entity(
+                    (space, i) => space.NewTask(projectTaskStatus, i), Timeout,
+                    space => TodoService.Updated.TakeUntilDisposed(application), async (task, outlookTask, i) => {
+                        if (afterAssert != null){
+                            await afterAssert(builder.requestBuilder);
+                        }
+                        else{
                             application.ObjectSpaceProvider.AssertTask(typeof(OutlookTask), task, outlookTask.Subject,
                                 outlookTask.Body.Content,
                                 DateTime.Parse(outlookTask.DueDateTime.DateTime, CultureInfo.InvariantCulture),
                                 taskStatus,
-                                $"{outlookTask.Status}", outlookTask.Id, task.Subject);
-                        });
-                }
-                finally{
-                    if (afterAssert != null){
-                        await afterAssert(builder.requestBuilder);
-                    }
-                }
+                                $"{outlookTask.Status}", outlookTask.Id, task.Subject);    
+                        }
+                            
+                    });
             }
         }
 
@@ -167,14 +166,12 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
             throw new NotImplementedException();
         }
 
-        // [XpandTest()][Test]
+        [XpandTest()][Test]
         public override async Task Create_Entity_Container_When_Not_Exist(){
             var tasksFolderName = Guid.NewGuid().ToString();
             await MapTwoNewTasks(TaskStatus.InProgress, TaskStatus.InProgress.ToString(), tasksFolderName,
-                builder => {
-	                return builder.Me().Outlook.TaskFolders.GetFolder(tasksFolderName)
-		                .SelectMany(f=>builder.Me().Outlook.TaskFolders[f.Id].Request().DeleteAsync().ToObservable());
-                });
+                builder => builder.Me().Outlook.TaskFolders.GetFolder(tasksFolderName)
+                    .SelectMany(f=>builder.Me().Outlook.TaskFolders[f.Id].Request().DeleteAsync().ToObservable()),true);
         }
 
         // [XpandTest()]
