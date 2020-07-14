@@ -48,7 +48,7 @@ namespace TestApplication.Web{
             RequiredModuleTypes.Add(typeof(ValidationAspNetModule));
             RequiredModuleTypes.Add(typeof(SystemAspNetModule));
             #endregion
-            AdditionalExportedTypes.Add(typeof(Order));
+            
 
             RequiredModuleTypes.Add(typeof(LookupCascadeModule));
         }

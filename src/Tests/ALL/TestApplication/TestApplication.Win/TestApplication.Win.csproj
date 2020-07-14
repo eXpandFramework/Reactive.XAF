@@ -65,6 +65,7 @@
     </Compile>
     <Compile Include="..\CommonFiles\MicrosoftService\MicrosoftService.cs" Link="MicrosoftService\MicrosoftService.cs" />
     <Compile Include="..\CommonFiles\MicrosoftService\ShowMSAccountInfoService.cs" Link="MicrosoftService\ShowMSAccountInfoService.cs" />
+    <Compile Include="..\CommonFiles\MicrosoftTodoService\MicrosoftTodoService.cs" Link="MicrosoftTodoService\MicrosoftTodoService.cs" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -103,5 +104,8 @@
     <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="20.1.4" />
     <PackageReference Include="DevExpress.EasyTest" Version="20.1.4" />
     <PackageReference Include="Xpand.XAF.Win.All" Version="2.201.35" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="MicrosoftTodoService\" />
   </ItemGroup>
 </Project>

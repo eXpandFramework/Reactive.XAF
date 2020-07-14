@@ -13,7 +13,7 @@ using ActionCommand = Xpand.TestsLib.EasyTest.Commands.ActionCommands.ActionComm
 
 namespace ALL.Tests{
 	public static class MicrosoftService{
-		public static async Task TestMicrosoftService(this ICommandAdapter commandAdapter){
+		public static async Task TestMicrosoftService(this ICommandAdapter commandAdapter,Func<IObservable<Unit>> whenConnected){
 			
 			var commands=new Command[]{
 				new NavigateCommand("Default.My Details"),new ActionCommand(Xpand.XAF.Modules.Office.Cloud.Microsoft.MicrosoftService.SignOutCaption){ExpectException = true}
@@ -23,6 +23,7 @@ namespace ALL.Tests{
 			commandAdapter.CheckConnection();
 			commandAdapter.Execute(new LogOffCommand(),new LoginCommand());
 			commandAdapter.CheckConnection();
+            await whenConnected();
 			commandAdapter.Disconnect();
 		}
 

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ALL.Tests;
@@ -40,7 +42,7 @@ namespace ALL.Web.Tests{
 	                var commandAdapter = webAdapter.CreateCommandAdapter();
                     commandAdapter.Execute(new LoginCommand());
                     // commandAdapter.TestLookupCascade();
-                    await commandAdapter.TestMicrosoftService();
+                    await commandAdapter.TestMicrosoftService(() => Observable.Empty<Unit>());
                 }
                 finally{
                     webAdapter.KillApplication(testApplication, KillApplicationContext.TestNormalEnded);

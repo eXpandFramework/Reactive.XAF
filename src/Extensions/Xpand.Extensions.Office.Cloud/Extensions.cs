@@ -24,10 +24,6 @@ namespace Xpand.Extensions.Office.Cloud{
             }
         }
 
-        static Extensions() => AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainOnAssemblyResolve;
-        private static System.Reflection.Assembly CurrentDomainOnAssemblyResolve(object sender, ResolveEventArgs args) => 
-            args.Name.Contains("Newton") ? System.Reflection.Assembly.LoadFile($@"{AppDomain.CurrentDomain.BaseDirectory}bin\Newtonsoft.Json.dll") : null;
-
         public static IObservable<TCloudEntity> MapEntity<TCloudEntity, TLocalEntity>(this Func<IObjectSpace> objectSpaceFactory, TLocalEntity localEntity,
             Func<TLocalEntity, IObservable<TCloudEntity>> insert, Func<(string cloudId, TLocalEntity task), IObservable<TCloudEntity>> update){
             var objectSpace = objectSpaceFactory();
@@ -44,8 +40,8 @@ namespace Xpand.Extensions.Office.Cloud{
             return link;
         });
 
-        public static IObservable<TServiceObject> MapEntities<TBO, TServiceObject>(this IObjectSpace objectSpace,
-            Func<CloudOfficeObject, IObservable<TServiceObject>> delete, Func<TBO, IObservable<TServiceObject>> map){
+        public static IObservable<(TServiceObject serviceObject, MapAction mapAction)> MapEntities<TBO, TServiceObject>(this IObjectSpace objectSpace,
+            Func<CloudOfficeObject, IObservable<(TServiceObject serviceObject,MapAction mapAction)>> delete, Func<TBO, IObservable<(TServiceObject serviceObject,MapAction mapAction)>> map){
             var deleteObjects = objectSpace.WhenDeletedObjects<TBO>(true)
                 .SelectMany(_ => _.objects.SelectMany(o => {
 	                var deletedId = _.objectSpace.GetKeyValue(o).ToString();
@@ -53,7 +49,9 @@ namespace Xpand.Extensions.Office.Cloud{
                 }))
                 .DeleteObjectSpaceLink()
                 .SelectMany(cloudOfficeObject => delete(cloudOfficeObject).Select(s => cloudOfficeObject))
-                .To((TServiceObject)typeof(TServiceObject).CreateInstance());
+                .To((TServiceObject)typeof(TServiceObject).CreateInstance())
+                .Select(o => (o,MapAction.Delete));
+
             var mapObjects = objectSpace.WhenModifiedObjects<TBO>(true, ObjectModification.NewOrUpdated)
                 .SelectMany(_ => _.objects).Cast<TBO>().SelectMany(map);
             return mapObjects.Merge(deleteObjects);

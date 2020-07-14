@@ -348,10 +348,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 	        application.GetPlatform() == Platform.Web ? new XAFAppWebAPI(application).ReturnObservable() : Observable.Empty<IXAFAppWebAPI>();
 
         [PublicAPI]
-        public static void SetPageError(IXAFAppWebAPI api, Exception exception) => api.Application.HandleException(exception);
+        public static void SetPageError(this IXAFAppWebAPI api, Exception exception) => api.Application.HandleException(exception);
 
         [PublicAPI]
-        public static void Redirect(IXAFAppWebAPI api, string url) => AppDomain
+        public static void Redirect(this IXAFAppWebAPI api, string url) => AppDomain
             .CurrentDomain.XAF().WebApplicationType().GetMethod("Redirect",new[]{typeof(string)})?.Invoke(null,new object[]{url});
 
         public static IObservable<ApplicationModulesManager> WhenApplicationModulesManager(this XafApplication application) => RxApp

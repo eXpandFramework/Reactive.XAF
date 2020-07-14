@@ -7,15 +7,11 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
     public class MicrosoftModule:ReactiveModuleBase{
-	    static MicrosoftModule(){
-		    TraceSource=new ReactiveTraceSource(nameof(MicrosoftModule));
+	    static MicrosoftModule() => TraceSource=new ReactiveTraceSource(nameof(MicrosoftModule));
 
-	    }
-	    public MicrosoftModule(){
-		    RequiredModuleTypes.Add(typeof(ReactiveModule));
-	    }
+        public MicrosoftModule() => RequiredModuleTypes.Add(typeof(ReactiveModule));
 
-	    public override void Setup(ApplicationModulesManager moduleManager){
+        public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
             moduleManager.Connect()
                 .Subscribe(this);

@@ -7,6 +7,7 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.Base.General;
 using Fasterflect;
+using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.Office.Cloud.BusinessObjects;
 
@@ -37,17 +38,17 @@ namespace Xpand.Extensions.Office.Cloud{
                 }));
         }
 
-        public static IObservable<TCloudEntity> Synchronize<TCloudEntity, TSourceEntity>(this Func<IObjectSpace> objectSpaceFactory, IObjectSpace objectSpace,
+        public static IObservable<(TCloudEntity serviceObject, MapAction mapAction)> Synchronize<TCloudEntity, TSourceEntity>(this Func<IObjectSpace> objectSpaceFactory, IObjectSpace objectSpace,
             Func<string, IObservable<Unit>> deleteReqest, Func<TCloudEntity, IObservable<TCloudEntity>> insertReqest, Func<string, IObservable<TCloudEntity>> getRequest,
             Func<(TCloudEntity cloudEntity, TSourceEntity localEntity, string cloudId), IObservable<TCloudEntity>> updateRequest, Func<TCloudEntity, TSourceEntity, TCloudEntity> map,
             Action<GenericEventArgs<CloudOfficeObject>> onDelete = null, Action<(TCloudEntity target, TSourceEntity source)> onInsert = null,
             Action<(TCloudEntity target, TSourceEntity source)> update = null) where TCloudEntity : class 
             
             => objectSpace.MapEntities<TSourceEntity, TCloudEntity>(
-                cloudOfficeObject => cloudOfficeObject.Delete<TCloudEntity>(onDelete, deleteReqest),
+                cloudOfficeObject => cloudOfficeObject.Delete<TCloudEntity>(onDelete, deleteReqest).FirstOrDefaultAsync().Select(entity => (entity,MapAction.Delete)),
                 localEntity => objectSpaceFactory.MapEntity(localEntity,
-                    sourceEntity => sourceEntity.Insert(objectSpace, objectSpaceFactory, onInsert, insertReqest, map),
-                    _ => _.task.Update(_.cloudId, getRequest, updateRequest, map, update)
+                    sourceEntity => sourceEntity.Insert(objectSpace, objectSpaceFactory, onInsert, insertReqest, map).Select(entity => (entity, MapAction.Insert)),
+                    _ => _.task.Update(_.cloudId, getRequest, updateRequest, map, update).Select(entity => (entity, MapAction.Update))
                 ));
 
         private static IObservable<TCloudEntity> Update<TCloudEntity, TLocalEntity>(this TLocalEntity source, string cloudId, Func<string, IObservable<TCloudEntity>> getRequest,
@@ -56,25 +57,39 @@ namespace Xpand.Extensions.Office.Cloud{
 		        .SelectMany(target => {
 			        target = map(target, source);
 			        update?.Invoke((target, source));
-			        return updateRequest((target, source, cloudId));
+			        return updateRequest.Start(source, cloudId,  target);
 		        });
+
+        private static IObservable<TCloudEntity> Start<TCloudEntity, TLocalEntity>(this Func<(TCloudEntity cloudEntity, TLocalEntity localEntity, string cloudId), 
+            IObservable<TCloudEntity>> updateRequest,TLocalEntity source, string cloudId,  TCloudEntity target) => 
+            AppDomain.CurrentDomain.IsHosted() ? Observable.Start(() => updateRequest((target, source, cloudId)).Wait()) : updateRequest((target, source, cloudId));
 
         private static IObservable<TCloudEntity> Insert<TCloudEntity, TLocalEntity>(this TLocalEntity sourceEvent, IObjectSpace objectSpace, Func<IObjectSpace> objectSpaceFactory,
             Action<(TCloudEntity, TLocalEntity)> insert, Func<TCloudEntity, IObservable<TCloudEntity>> insertReqest, Func<TCloudEntity, TLocalEntity, TCloudEntity> map){
             var cloudEntity = (TCloudEntity)typeof(TCloudEntity).CreateInstance();
             var updatedEvent = map(cloudEntity, sourceEvent);
             insert?.Invoke((updatedEvent, sourceEvent));
-            return insertReqest(updatedEvent).NewCloudObject(objectSpaceFactory, objectSpace.GetKeyValue(sourceEvent).ToString());
+            return insertReqest.Start( updatedEvent).NewCloudObject(objectSpaceFactory, objectSpace.GetKeyValue(sourceEvent).ToString());
         }
+
+        private static IObservable<TCloudEntity> Start<TCloudEntity>(this Func<TCloudEntity, IObservable<TCloudEntity>> insertReqest, TCloudEntity updatedEvent) => 
+            AppDomain.CurrentDomain.IsHosted()? Observable.Start(() => insertReqest(updatedEvent).Wait()):insertReqest(updatedEvent);
 
         private static IObservable<TCloudEntity> Delete<TCloudEntity>(this CloudOfficeObject cloudOfficeObject, Action<GenericEventArgs<CloudOfficeObject>> delete,
             Func<string, IObservable<Unit>> deleteReqest) where TCloudEntity : class{
             var args = new GenericEventArgs<CloudOfficeObject>(cloudOfficeObject);
             delete?.Invoke(args);
-            return !args.Handled ? deleteReqest(cloudOfficeObject.CloudId).Select(entity => (TCloudEntity)null) : Observable.Empty<TCloudEntity>();
+            return !args.Handled ? deleteReqest.Start<TCloudEntity>(cloudOfficeObject) : Observable.Empty<TCloudEntity>();
         }
 
+        private static IObservable<TCloudEntity> Start<TCloudEntity>(this Func<string, IObservable<Unit>> deleteReqest,CloudOfficeObject cloudOfficeObject) where TCloudEntity : class => 
+            AppDomain.CurrentDomain.IsHosted()? Observable.Start(() => deleteReqest(cloudOfficeObject.CloudId).Select(entity => (TCloudEntity)null).Wait())
+                :deleteReqest(cloudOfficeObject.CloudId).Select(entity => (TCloudEntity)null);
     }
 
-
+    public enum MapAction{
+        Delete,
+        Insert,
+        Update
+    }
 }

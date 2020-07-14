@@ -1,12 +1,9 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Linq;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
-using DevExpress.Persistent.Base;
 using JetBrains.Annotations;
-using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.XAF.ModelExtensions;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
@@ -20,12 +17,6 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
         [DefaultValue(TodoService.DefaultTodoListId)]
         [Required]
         string DefaultTodoListName{ get; set; }
-        
-        [Category("User")][DataSourceProperty(nameof(TodoListNameMembers))]
-        IModelMember TodoListNameMember{ get; set; }
-        [Browsable(false)]
-        IModelList<IModelMember> TodoListNameMembers{ get; }
-
     }
 
     [DomainLogic(typeof(IModelTodo))]
@@ -48,12 +39,6 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
             return reactiveModules.Microsoft.Todo();
         }
 
-        public static IModelList<IModelMember> Get_TodoListNameMembers(this IModelTodo modelTodo){
-            var modelClass = modelTodo.GetParent<IModelOffice>().User;
-            var modelMembers =modelClass!=null? modelClass.AllMembers.Where(member => member.Type==typeof(string)):Enumerable.Empty<IModelMember>();
-            
-            return new CalculatedModelNodeList<IModelMember>(modelMembers);
-        }
     }
 
 }

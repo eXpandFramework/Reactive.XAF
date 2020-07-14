@@ -15,5 +15,6 @@ if ($GithubToken){
     "AzureAppCredentials.json","AuthenticationDataWin.json","AuthenticationDataWeb.json","dxmailpass.json"|ForEach-Object{
         Copy-Item -Destination "$PSScriptRoot\..\bin" -Force -Path ".\$_"
         Copy-Item -Destination "$PSScriptRoot\..\bin\Tests" -Force -Path ".\$_"
+        Copy-Item -Destination "$PSScriptRoot\..\src\Tests\ALL\TestApplication" -Force -Path ".\$_"
     }
 }

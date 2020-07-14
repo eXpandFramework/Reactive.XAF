@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.AuditTrail;
 using DevExpress.ExpressApp.Chart;
@@ -24,9 +25,12 @@ using DevExpress.ExpressApp.Updating;
 using DevExpress.ExpressApp.Validation;
 using DevExpress.ExpressApp.ViewVariantsModule;
 using DevExpress.ExpressApp.Workflow;
+using DevExpress.Persistent.BaseImpl;
 using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 using TestApplication.MicrosoftService;
+using TestApplication.MicrosoftTodoService;
 using Xpand.TestsLib;
+using Xpand.TestsLib.BO;
 using Xpand.XAF.Modules.AutoCommit;
 using Xpand.XAF.Modules.CloneMemberValue;
 using Xpand.XAF.Modules.CloneModelView;
@@ -39,6 +43,7 @@ using Xpand.XAF.Modules.ProgressBarViewItem;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Logger;
+using Xpand.XAF.Modules.Reactive.Logger.Hub;
 using Xpand.XAF.Modules.RefreshView;
 using Xpand.XAF.Modules.SequenceGenerator;
 using Xpand.XAF.Modules.SuppressConfirmation;
@@ -76,6 +81,7 @@ namespace TestApplication{
 
 			#endregion
 
+            AdditionalExportedTypes.Add(typeof(Order));
 
 			RequiredModuleTypes.Add(typeof(AutoCommitModule));
 			RequiredModuleTypes.Add(typeof(CloneMemberValueModule));
@@ -93,7 +99,8 @@ namespace TestApplication{
 			RequiredModuleTypes.Add(typeof(SuppressConfirmationModule));
 			RequiredModuleTypes.Add(typeof(ViewEditModeModule));
 			RequiredModuleTypes.Add(typeof(ViewItemValueModule));
-			// RequiredModuleTypes.Add(typeof(ReactiveLoggerHubModule));
+			RequiredModuleTypes.Add(typeof(ReactiveLoggerHubModule));
+			AdditionalExportedTypes.Add(typeof(Task));
 		}
 
 		public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB){
@@ -109,7 +116,7 @@ namespace TestApplication{
 
 		public override void Setup(ApplicationModulesManager moduleManager){
 			base.Setup(moduleManager);
-			moduleManager.ConnectMicrosoftService().Subscribe(this);
-		}
+			moduleManager.ConnectMicrosoftService().Merge(moduleManager.ConnectMicrosoftTodoService())
+                .Subscribe(this); }
 	}
 }

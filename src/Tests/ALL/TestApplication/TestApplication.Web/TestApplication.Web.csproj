@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="Current">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="Current">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -167,6 +167,9 @@
     <Compile Include="..\CommonFiles\MicrosoftService\ShowMSAccountInfoService.cs">
       <Link>MicrosoftService\ShowMSAccountInfoService.cs</Link>
     </Compile>
+    <Compile Include="..\CommonFiles\MicrosoftTodoService\MicrosoftTodoService.cs">
+      <Link>MicrosoftTodoService\MicrosoftTodoService.cs</Link>
+    </Compile>
     <Compile Include="Default.aspx.designer.cs">
       <DependentUpon>Default.aspx</DependentUpon>
     </Compile>
@@ -213,6 +216,7 @@
   <ItemGroup>
     <EmbeddedResource Include="LookupCascade\LookupCascade.xafml" />
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

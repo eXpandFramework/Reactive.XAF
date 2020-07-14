@@ -37,6 +37,7 @@ using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
+using Xpand.Extensions.XAF.ViewExtenions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft.BusinessObjects;
@@ -56,7 +57,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
         
         private static readonly string AuthenticationType=OpenIdConnectAuthenticationDefaults.AuthenticationType;
 
-        public static IObservable<bool> MicrosoftNeedsAuthentication(this XafApplication application) => 
+        public static IObservable<bool> MicrosoftNeedsAuthentication(this XafApplication application) =>
+	        
 	        application.NewObjectSpace(space => (space.GetObjectByKey<MSAuthentication>( application.CurrentUserId()) == null).ReturnObservable())
 		        .SelectMany(b => !b ? application.AuthorizeMS(Observable.Throw<AuthenticationResult>)
 				    .To(false).Catch(true.ReturnObservable()) : true.ReturnObservable())
@@ -103,7 +105,6 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 
         private static IObservable<SimpleAction> Activate(this SimpleAction action){
 	        return action.Application.MicrosoftNeedsAuthentication()
-		        .Select(b => b)
 		        .Do(b => {
 			        action.Active(nameof(MicrosoftNeedsAuthentication), action.Id == nameof(ConnectMicrosoft) ? b : !b);
 			        if (!b && action.Id == nameof(DisconnectMicrosoft)){
@@ -284,6 +285,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 				.FirstAsync()
 				.TraceMicrosoftModule();
 		}
+
+        public static IObservable<(Frame frame, GraphServiceClient client)> AuthorizeMS(this  IObservable<Frame> source) => source
+            .SelectMany(frame => frame.View.AsObjectView().Application().AuthorizeMS().Select(client => (frame, client)));
 
 		public static IObservable<GraphServiceClient> AuthorizeMS(this XafApplication application, 
 			Func<MsalUiRequiredException,  IObservable<AuthenticationResult>> aquireToken = null) => application.CreateClientApp()

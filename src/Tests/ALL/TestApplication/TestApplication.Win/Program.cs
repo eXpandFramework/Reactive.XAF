@@ -25,7 +25,7 @@ namespace TestApplication.Win {
             Tracing.Initialize();
             var winApplication = new TestWinApplication();
 
-            winApplication.Modules.Add(new WinModule());
+            
             try {
                 winApplication.Setup();
                 winApplication.Start();

@@ -46,9 +46,9 @@ namespace TestApplication.Win{
             
             AdditionalExportedTypes.Add(typeof(Customer));
 
-            RequiredModuleTypes.Add(typeof(GridListEditorModule));
-            RequiredModuleTypes.Add(typeof(OneViewModule));
-            RequiredModuleTypes.Add(typeof(ReactiveModuleWin));
+            // RequiredModuleTypes.Add(typeof(GridListEditorModule));
+            // RequiredModuleTypes.Add(typeof(OneViewModule));
+            // RequiredModuleTypes.Add(typeof(ReactiveModuleWin));
 
 
         }
