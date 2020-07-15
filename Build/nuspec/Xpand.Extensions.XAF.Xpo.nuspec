@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.Extensions.XAF.Xpo</id>
-    <version>2.201.33.0</version>
+    <version>2.202.34.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -16,7 +16,7 @@
     <dependencies>
       <dependency id="JetBrains.Annotations" version="2020.1">
       </dependency>
-      <dependency id="Xpand.VersionConverter" version="2.201.7">
+      <dependency id="Xpand.VersionConverter" version="2.202.9">
       </dependency>
     </dependencies>
   </metadata>

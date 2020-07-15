@@ -39,7 +39,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
                 await foldersRequestBuilder[taskFolder.Id].NewFolderTasks(TasksFolderPagingItemsCount, nameof(MicrosoftTodoModule));
             }
             var requestBuilder = foldersRequestBuilder[taskFolder?.Id];
-            if (taskFolderName != TasksPagingFolderName&&!keepTasks){
+            if (taskFolderName != TasksPagingFolderName&&!keepTasks&&!keepTaskFolder){
                 await requestBuilder.DeleteAllTasks();
                 (await requestBuilder.Tasks.ListAllItems()).Length.ShouldBe(0);
             }

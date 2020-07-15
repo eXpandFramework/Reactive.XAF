@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Reactive;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,12 +12,10 @@ using Fasterflect;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.AppDomainExtensions;
-using Xpand.Extensions.Reactive.Transform;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Attributes;
 using Xpand.TestsLib.EasyTest;
 using Xpand.TestsLib.EasyTest.Commands;
-using Xpand.TestsLib.EasyTest.Commands.ActionCommands;
 using Xpand.XAF.Modules.Reactive;
 
 namespace ALL.Win.Tests{
@@ -38,7 +34,7 @@ namespace ALL.Win.Tests{
             }
         } 
         [Test]
-        // [XpandTest(LongTimeout,3)]
+        [XpandTest(LongTimeout,3)]
         [Apartment(ApartmentState.STA)]
         public async Task Win_EasyTest(){
             
@@ -47,27 +43,16 @@ namespace ALL.Win.Tests{
                 try{
                     var commandAdapter = winAdapter.CreateCommandAdapter();
                     commandAdapter.Execute(new LoginCommand());
-                    // var autoTestCommand = new AutoTestCommand();
-                    // autoTestCommand.Execute(commandAdapter);
-                    // await commandAdapter.TestMicrosoftService(() => commandAdapter.TestMicrosoftTodoService());
-                    await commandAdapter.TestMicrosoftTodoService();
+                    await commandAdapter.TestMicrosoftService(() => Observable.Start(() => {
+                        var autoTestCommand = new AutoTestCommand();
+                        autoTestCommand.Execute(commandAdapter);
+                        commandAdapter.TestMicrosoftTodoService();
+                    }));
                 }
                 finally{
                     winAdapter.KillApplication(testApplication, KillApplicationContext.TestNormalEnded);    
                 }
             }
-        }
-
-    }
-
-    public static class MicrosoftTodoService{
-        public static IObservable<Unit> TestMicrosoftTodoService(this ICommandAdapter commandAdapter){
-            return Unit.Default.ReturnObservable()
-                .Do(_ => {
-                    commandAdapter.Execute(new NavigateCommand("Default.Task"), new ActionNewCommand(),
-                        new FillObjectViewCommand((nameof(DevExpress.Persistent.BaseImpl.Task.Subject), "New")),
-                        new ActionSaveCommand(),new WaitCommand(10000));
-                });
         }
 
     }

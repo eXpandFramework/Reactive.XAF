@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Reflection;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.Base;
 using Fasterflect;
@@ -24,14 +25,20 @@ namespace Xpand.XAF.Modules.Reactive{
             harmony.Patch(original,  new HarmonyMethod(prefix));
         }
 
-        private static System.Reflection.Assembly CurrentDomainOnAssemblyResolve(object sender, ResolveEventArgs args){
+        private static Assembly CurrentDomainOnAssemblyResolve(object sender, ResolveEventArgs args){
             var name = args.Name;
             var comma = name.IndexOf(",", StringComparison.Ordinal);
             if (comma > -1){
                 name = args.Name.Substring(0, comma);
             }
-            return System.Reflection.Assembly.LoadFile(
-                $@"{AppDomain.CurrentDomain.ApplicationPath()}{name}.dll");
+
+            try{
+                return Assembly.LoadFile(
+                    $@"{AppDomain.CurrentDomain.ApplicationPath()}{name}.dll");
+            }
+            catch (Exception){
+                return null;
+            }
         }
 
         [SuppressMessage("ReSharper", "InconsistentNaming")]

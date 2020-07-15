@@ -106,7 +106,9 @@ namespace Xpand.TestsLib{
             XpoTypesInfoHelper.Reset();
             XafTypesInfo.HardReset();
             if (TestContext.CurrentContext.Result.Outcome.Status == TestStatus.Failed){
-                TestContext.AddTestAttachment(ReactiveLoggerService.RXLoggerLogPath);
+                if (File.Exists(ReactiveLoggerService.RXLoggerLogPath)){
+                    TestContext.AddTestAttachment(ReactiveLoggerService.RXLoggerLogPath);
+                }
             }
         }
     }

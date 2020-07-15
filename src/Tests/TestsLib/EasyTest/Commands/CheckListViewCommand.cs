@@ -7,12 +7,16 @@ namespace Xpand.TestsLib.EasyTest.Commands{
         private string[][] _rows;
         public const string Name = "CheckListView";
 
-        public CheckListViewCommand(int rowCount, params string[] columns):this(columns){
+        public CheckListViewCommand(string tableName, int rowCount, params string[] columns):this(columns){
             Parameters.Add(new Parameter("RowCount",rowCount.ToString()));
+            Parameters.MainParameter=new MainParameter(tableName);
+            
         }
 
         public CheckListViewCommand(params string[] columns){
-            Parameters.Add(new Parameter($" Columns = {string.Join(",", columns)}"));
+            if (columns.Any()){
+                Parameters.Add(new Parameter($" Columns = {string.Join(",", columns)}"));
+            }
         }
 
         public void AddRows(params string[][] rows){
@@ -21,10 +25,14 @@ namespace Xpand.TestsLib.EasyTest.Commands{
 
 
         protected override void ExecuteCore(ICommandAdapter adapter){
-            Parameters.AddRange(_rows.Select((value,i) => new Parameter( $"Row[{i}] = {string.Join(", ",value)}")));
-            if (_rows.Length > 0&&Parameters["RowCount"]==null){
-                Parameters.Add(new Parameter("RowCount",_rows.Length.ToString()));
+            if (_rows != null){
+                Parameters.AddRange(_rows.Select((value, i) =>
+                    new Parameter($"Row[{i}] = {string.Join(", ", value)}")));
+                if (_rows.Length > 0 && Parameters["RowCount"] == null){
+                    Parameters.Add(new Parameter("RowCount", _rows.Length.ToString()));
+                }
             }
+
             adapter.Execute(this.ConnvertTo<CheckTableCommand>());
         }
 

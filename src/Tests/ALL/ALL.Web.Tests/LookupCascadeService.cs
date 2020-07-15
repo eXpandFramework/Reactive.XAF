@@ -23,7 +23,7 @@ namespace ALL.Web.Tests{
                 .SaveListViewWithSynchronizationOn();
         }
 
-        public static ICommandAdapter SaveListViewWithSynchronizationOn(this ICommandAdapter commandAdapter){
+        static ICommandAdapter SaveListViewWithSynchronizationOn(this ICommandAdapter commandAdapter){
 	        commandAdapter.Execute(new SelectObjectsCommand(),new ActionDeleteObjectsCommand(),
                 new ActionGridListEditorCommand(GridListEditorInlineCommand.New),
                 new FillEditorCommand(nameof(Order.Accessory), $"{nameof(Accessory.AccessoryName)}0",true),
@@ -32,24 +32,24 @@ namespace ALL.Web.Tests{
             return commandAdapter;
         }
 
-        public static ICommandAdapter SaveDetailView(this ICommandAdapter commandAdapter){
-	        commandAdapter.Execute(new SelectObjectsCommand(),new ActionDeleteObjectsCommand(),new ActionNewCommand(),
+        static ICommandAdapter SaveDetailView(this ICommandAdapter commandAdapter){
+	        commandAdapter.Execute(new SelectObjectsCommand(),new ActionDeleteObjectsCommand(),new ActionCommand(Actions.New),
                 new FillEditorCommand(nameof(Order.Product), $"{nameof(Product.ProductName)}0"),
                 new FillEditorCommand(nameof(Order.Accessory), $"{nameof(Accessory.AccessoryName)}0"),
-                new ActionSaveCommand(SaveCommandType.Close),CheckListViewCommand(1));
+                new ActionCommand(Actions.SaveAndClose),CheckListViewCommand(1));
             return commandAdapter;
         }
 
-        public static ICommandAdapter DetailViewPopup(this ICommandAdapter commandAdapter){
+        static ICommandAdapter DetailViewPopup(this ICommandAdapter commandAdapter){
 	        commandAdapter.Execute(new  ActionCommand("Show In Popup"));
             commandAdapter.TestDetailView();
-            commandAdapter.Execute(new ActionCancelCommand());
+            commandAdapter.Execute(new ActionCommand(Actions.Cancel));
             commandAdapter.Execute(new RespondDialogCommand("OK"));
             commandAdapter.Execute(NavigateToOrderListView);
             return commandAdapter;
         }
 
-        public static ICommandAdapter DetailView(this ICommandAdapter commandAdapter){
+        static ICommandAdapter DetailView(this ICommandAdapter commandAdapter){
 	        commandAdapter.Execute(
                 new ActionEditObjectCommand(nameof(Order.Product),$"{nameof(Product.ProductName)}0"),
                 new CheckDetailViewCommand((nameof(Order.Product),$"{nameof(Product.ProductName)}0")),
@@ -60,13 +60,13 @@ namespace ALL.Web.Tests{
             return commandAdapter;
         }
 
-        private static void TestDetailView(this ICommandAdapter commandAdapter){
+        static void TestDetailView(this ICommandAdapter commandAdapter){
             commandAdapter.Execute(new CheckDetailViewCommand((nameof(Order.Product), $"{nameof(Product.ProductName)}0")));
             commandAdapter.TestEditors();
             commandAdapter.TestListView(1);
         }
 
-        private static void TestEditors(this ICommandAdapter commandAdapter, bool inlineEditor=false){
+        static void TestEditors(this ICommandAdapter commandAdapter, bool inlineEditor=false){
             commandAdapter.Execute(new FillEditorCommand(nameof(Order.Product), Xpand.XAF.Modules.LookupCascade.LookupCascadeService.NA,inlineEditor));
             commandAdapter.Execute(new FillEditorCommand(nameof(Order.Accessory), Xpand.XAF.Modules.LookupCascade.LookupCascadeService.NA,inlineEditor));
             commandAdapter.Execute(new FillEditorCommand(nameof(Order.Accessory), $"{nameof(Accessory.AccessoryName)}0",inlineEditor));
@@ -80,7 +80,7 @@ namespace ALL.Web.Tests{
             commandAdapter.Execute(new FillEditorCommand(nameof(Order.Accessory), $"{nameof(Accessory.AccessoryName)}2",inlineEditor){ExpectException = true});
         }
 
-        public static ICommandAdapter ListView(this ICommandAdapter commandAdapter){
+        static ICommandAdapter ListView(this ICommandAdapter commandAdapter){
 	        commandAdapter.TestListView(2);
             commandAdapter.Execute(NavigateToOrderListView);
             commandAdapter.Execute(new RespondDialogCommand("OK"));
@@ -105,25 +105,5 @@ namespace ALL.Web.Tests{
             return checkListViewCommand;
         }
 
-        public static void CreateOrderDependecies(this ICommandAdapter commandAdapter){
-	        Command[] commands = {
-                new NavigateCommand(nameof(Order)),
-                new ActionNewCommand(),
-                new EditorActionNewCommand(nameof(Order.Product)),
-                new FillEditorCommand("Product Name", "product0"),
-                new ActionOKCommand(),
-                new EditorActionNewCommand(nameof(Order.Product)),
-                new FillEditorCommand("Product Name", "product1"),
-                new ActionOKCommand(),
-                new EditorActionNewCommand(nameof(Order.Accessory)),
-                new FillObjectViewCommand(("Accessory Name", "accessory0"), ("Product", "product0")),
-                new ActionOKCommand(),
-                new EditorActionNewCommand(nameof(Order.Accessory)),
-                new FillObjectViewCommand(("Accessory Name", "accessory1"), ("Product", "product1")),
-                new ActionOKCommand(),
-                new NavigateCommand(nameof(Order))
-            };
-            commandAdapter.Execute(commands);
-        }
     }
 }

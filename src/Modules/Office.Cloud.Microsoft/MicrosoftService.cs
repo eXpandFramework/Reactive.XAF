@@ -60,7 +60,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
         public static IObservable<bool> MicrosoftNeedsAuthentication(this XafApplication application) =>
 	        
 	        application.NewObjectSpace(space => (space.GetObjectByKey<MSAuthentication>( application.CurrentUserId()) == null).ReturnObservable())
-		        .SelectMany(b => !b ? application.AuthorizeMS(Observable.Throw<AuthenticationResult>)
+		        .SelectMany(b => !b ? application.AuthorizeMS((exception, client) => Observable.Throw<AuthenticationResult>(exception))
 				    .To(false).Catch(true.ReturnObservable()) : true.ReturnObservable())
 		        .TraceMicrosoftModule();
 
@@ -97,7 +97,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 						e.Action.Data.Clear();
 				        return e.Action.AsSimpleAction().ReturnObservable();
 			        })
-			        : e.Action.Application.AuthorizeMS().To(e.Action.AsSimpleAction());
+			        : e.Action.Application.AuthorizeMS((exception, app) => app.AquireTokenInteractively(action.Application)).To(e.Action.AsSimpleAction());
 		        return execute.ActivateWhenAuthenticationNeeded();
 	        })
 	        .TraceMicrosoftModule();
@@ -286,28 +286,27 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 				.TraceMicrosoftModule();
 		}
 
-        public static IObservable<(Frame frame, GraphServiceClient client)> AuthorizeMS(this  IObservable<Frame> source) => source
-            .SelectMany(frame => frame.View.AsObjectView().Application().AuthorizeMS().Select(client => (frame, client)));
+        public static IObservable<(Frame frame, GraphServiceClient client)> AuthorizeMS(this  IObservable<Frame> source,
+	        Func<MsalUiRequiredException,IClientApplicationBase,  IObservable<AuthenticationResult>> aquireToken = null) => source
+            .SelectMany(frame => frame.View.AsObjectView().Application().AuthorizeMS(aquireToken).Select(client => (frame, client)));
 
 		public static IObservable<GraphServiceClient> AuthorizeMS(this XafApplication application, 
-			Func<MsalUiRequiredException,  IObservable<AuthenticationResult>> aquireToken = null) => application.CreateClientApp()
-			.Authorize(cache => cache.SynchStorage(application.CreateObjectSpace, application.CurrentUserId()),
-				aquireToken, application)
+			Func<MsalUiRequiredException,IClientApplicationBase,  IObservable<AuthenticationResult>> aquireToken = null) => application.CreateClientApp()
+			.Authorize(cache => cache.SynchStorage(application.CreateObjectSpace, application.CurrentUserId()), aquireToken, application)
 		;
 
 		private static Guid CurrentUserId(this XafApplication application) =>
 			application.Security.IsSecurityStrategyComplex() ? (Guid) application.Security.UserId
 				: $"{application.Title}{Environment.MachineName}{Environment.UserName}".ToGuid();
 
-		static IObservable<GraphServiceClient> Authorize(this IClientApplicationBase clientApp,
-			Func<ITokenCache, IObservable<TokenCacheNotificationArgs>> storeResults,
-			Func<MsalUiRequiredException, IObservable<AuthenticationResult>> aquireToken, XafApplication application){
+		static IObservable<GraphServiceClient> Authorize(this IClientApplicationBase clientApp, Func<ITokenCache, IObservable<TokenCacheNotificationArgs>> storeResults,
+			Func<MsalUiRequiredException,IClientApplicationBase, IObservable<AuthenticationResult>> aquireToken, XafApplication application){
 
-			aquireToken ??= ((exception) =>clientApp.AquireTokenInteractively(application));
+			aquireToken ??= ((exception,app) =>Observable.Throw<AuthenticationResult>(new UserFriendlyException("Azure authentication failed. Use the profile view to authenticate again")));
 			var authResults = Observable.FromAsync(clientApp.GetAccountsAsync)
 				.Select(accounts => accounts.FirstOrDefault())
 				.SelectMany(account => Observable.FromAsync(() => clientApp.AcquireTokenSilent(application.Model.OAuth().Scopes(), account).ExecuteAsync()))
-				.Catch<AuthenticationResult, MsalUiRequiredException>(e => aquireToken(e));
+				.Catch<AuthenticationResult, MsalUiRequiredException>(e => aquireToken(e,clientApp));
 			var authenticationResult = storeResults(clientApp.UserTokenCache)
 				.Select(args => (AuthenticationResult)null).IgnoreElements()
 				.Merge(authResults).FirstAsync();
@@ -318,7 +317,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 			})));
 		}
 
-		private static IObservable<AuthenticationResult> AquireTokenInteractively(this XafApplication application){
+		private static IObservable<AuthenticationResult> Challenge(this XafApplication application){
 			var modelOAuth = application.Model.OAuth();
 			var authenticationProperties = new AuthenticationProperties(new Dictionary<string, string>
 					{{"userid", application.CurrentUserId().ToString()},{"RedirectUri", modelOAuth.RedirectUri},
@@ -335,15 +334,15 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 
 		private static IObservable<AuthenticationResult> AquireTokenInteractively(this IClientApplicationBase clientApp, XafApplication application){
 			var aquireTokenInteractively = HttpContext.Current == null
-				? Observable.Defer(() => ((IPublicClientApplication) clientApp).AquireTokenInteractively( application))
-				: application.AquireTokenInteractively();
+				? Observable.Defer(() => ((IPublicClientApplication) clientApp).AquireTokenInteractively(application))
+				: application.Challenge();
 			var args = new GenericEventArgs<IObservable<AuthenticationResult>>(aquireTokenInteractively);
 			CustomAquireTokenInteractivelySubject.OnNext(args);
 			return args.Instance
 				.Do(result => application.UpdateUserName(application.CurrentUserId(),result?.Account.Username))
 				.TraceMicrosoftModule(result => result.Account?.Username);
 		}
-
+		
 		private static IObservable<AuthenticationResult> AquireTokenInteractively(this IPublicClientApplication clientApp, XafApplication application) =>
 			clientApp.AcquireTokenInteractive(application.Model.OAuth().Scopes()).WithUseEmbeddedWebView(true)
 				.WithPrompt(application.Model.OAuth().Prompt.ToPrompt()).ExecuteAsync().ToObservable(new SynchronizationContextScheduler(SynchronizationContext.Current));

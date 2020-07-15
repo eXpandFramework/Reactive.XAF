@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Linq;
-using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ALL.Tests;
+using ALL.Win.Tests;
 using DevExpress.EasyTest.Framework;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.EasyTest.WebAdapter;
@@ -39,10 +39,11 @@ namespace ALL.Web.Tests{
             using (var webAdapter = new WebAdapter()){
                 var testApplication = webAdapter.RunWebApplication($@"{AppDomain.CurrentDomain.ApplicationPath()}\..\TestWebApplication\",65477);
                 try{
+                    
 	                var commandAdapter = webAdapter.CreateCommandAdapter();
                     commandAdapter.Execute(new LoginCommand());
-                    // commandAdapter.TestLookupCascade();
-                    await commandAdapter.TestMicrosoftService(() => Observable.Empty<Unit>());
+                    commandAdapter.TestLookupCascade();
+                    await commandAdapter.TestMicrosoftService(() => Observable.Start(() => commandAdapter.TestMicrosoftTodoService()));
                 }
                 finally{
                     webAdapter.KillApplication(testApplication, KillApplicationContext.TestNormalEnded);

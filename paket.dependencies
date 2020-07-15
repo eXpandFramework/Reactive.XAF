@@ -41,10 +41,10 @@ nuget Ryder 0.8
 nuget Shouldly 3.0.2 
 nuget System.CodeDom 4.7
 nuget System.Data.Common 4.3  
-nuget System.Interactive 4.0
-nuget System.Interactive.Async 4.0
+nuget System.Interactive 4.1.1
+nuget System.Interactive.Async 4.1.1
 nuget System.Drawing.Common 4.7
-nuget System.Reactive 4.3.2
+nuget System.Reactive 4.4.1
 nuget System.Collections.Immutable 1.7.0
 nuget Unofficial.Microsoft.mshtml 7.0.3300
 nuget Xpand.Patcher 2.0.23

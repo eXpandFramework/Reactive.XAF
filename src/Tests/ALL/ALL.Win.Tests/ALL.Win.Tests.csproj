@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\CommonFiles\MicrosoftService.cs" Link="MicrosoftService.cs" />
+    <Compile Include="..\CommonFiles\MicrosoftTodoService.cs" Link="MicrosoftTodoService.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DevExpress.EasyTest" Version="20.1.4" />
@@ -29,13 +30,12 @@
     <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="20.1.4" />
     <PackageReference Include="MagicOnion" Version="2.6.3" />
     <PackageReference Include="Moq" Version="4.13.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="Shouldly" Version="3.0.2" />
-    <PackageReference Include="System.Buffers" Version="4.5.0" />
-    <PackageReference Include="System.Reactive" Version="4.3.2" />
+    <PackageReference Include="System.Buffers" Version="4.5.1" />
+    <PackageReference Include="System.Reactive" Version="4.4.1" />
     <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.16.1" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="2.202.35.1" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="2.202.35.2" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.TestsLib">

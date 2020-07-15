@@ -3,7 +3,6 @@ using System.Globalization;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
@@ -12,9 +11,11 @@ using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Reactive.Conditional;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.Office.Cloud.Tests;
+using Xpand.XAF.Modules.Reactive;
 using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
 using TaskStatus = DevExpress.Persistent.Base.General.TaskStatus;
 
@@ -131,19 +132,14 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
                 var builder = await application.InitializeService();
                 var existingObjects = await application.CreateExistingObjects(nameof(Customize_Delete_Two_Tasks),count:2);
                 var deleteTwoEntities = builder.frame.View.ObjectSpace.Delete_Two_Entities(existingObjects.Select(_ => _.task).ToArray(),
-                    objectSpace => TodoService.Updated.Select(_ => _.serviceObject).Merge(TodoService.CustomizeDelete.Take(2)
-                        .Do(_ => _.Handled=handleDeletion).To(default(OutlookTask)).IgnoreElements())
+                    objectSpace => TodoService.CustomizeDelete.Take(2)
+                        .Do(_ => _.Handled=handleDeletion).To(default(OutlookTask))
                         .TakeUntilDisposed(application),
                     async () => {
                         var allTasks = await builder.requestBuilder.Tasks.ListAllItems();
-                        allTasks.Length.ShouldBe(0);
+                        allTasks.Length.ShouldBe(handleDeletion?2:0);
                     }, Timeout,existingObjects.Select(_ => _.outlookTask).ToArray());
-                if (handleDeletion){
-                    await deleteTwoEntities.ShouldThrowAsync<TimeoutException>();
-                }
-                else{
-                    await deleteTwoEntities;
-                }
+                await deleteTwoEntities;
             }
         }
 
@@ -166,12 +162,22 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
             throw new NotImplementedException();
         }
 
-        [XpandTest()][Test]
+        [XpandTest()]
+        [Test]
         public override async Task Create_Entity_Container_When_Not_Exist(){
-            var tasksFolderName = Guid.NewGuid().ToString();
-            await MapTwoNewTasks(TaskStatus.InProgress, TaskStatus.InProgress.ToString(), tasksFolderName,
-                builder => builder.Me().Outlook.TaskFolders.GetFolder(tasksFolderName)
-                    .SelectMany(f=>builder.Me().Outlook.TaskFolders[f.Id].Request().DeleteAsync().ToObservable()),true);
+            using (var application = Platform.Win.TodoModule().Application){
+                var modelTodo = application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Todo();
+                modelTodo.DefaultTodoListName = $"{nameof(Create_Entity_Container_When_Not_Exist)}{Guid.NewGuid()}";
+
+                var serviceClient = await application.InitGraphServiceClient();
+
+                var outlookTaskFolders = serviceClient.client.Me().Outlook.TaskFolders;
+                var folder = await outlookTaskFolders.GetFolder(modelTodo.DefaultTodoListName).WhenNotDefault().FirstAsync();
+                await outlookTaskFolders[folder.Id].Request().DeleteAsync();
+            }
+
+            
+            
         }
 
         // [XpandTest()]

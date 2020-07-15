@@ -31,9 +31,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ALL.Web.Tests", "..\ALL.Web
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo", "..\..\..\Modules\Office.Cloud.Microsoft.Todo\Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.csproj", "{DCF66753-EB48-4AD9-BCBA-82B2BBF581C1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.Office.Cloud", "..\..\..\Extensions\Xpand.Extensions.Office.Cloud\Xpand.Extensions.Office.Cloud.csproj", "{75FF05D6-E906-4010-AC99-924B0FD42813}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Office.Cloud.Microsoft", "..\..\..\Modules\Office.Cloud.Microsoft\Xpand.XAF.Modules.Office.Cloud.Microsoft.csproj", "{42732B4E-E371-492A-8B9A-03BC88B249AB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Office.Cloud.Microsoft", "..\..\..\Modules\Office.Cloud.Microsoft\Xpand.XAF.Modules.Office.Cloud.Microsoft.csproj", "{889BA0B9-E098-4FEF-8EDA-6BB62FBB65D3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.Reactive", "..\..\..\Extensions\Xpand.Extensions.Reactive\Xpand.Extensions.Reactive\Xpand.Extensions.Reactive.csproj", "{DE86F607-0FAF-4484-9E77-48AE4ADC01F7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Reactive", "..\..\..\Modules\Reactive\Xpand.XAF.Modules.Reactive.csproj", "{58399364-9ACA-429F-A276-7F01E9E61D7D}"
 EndProject
@@ -74,12 +74,12 @@ Global
 		{DCF66753-EB48-4AD9-BCBA-82B2BBF581C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DCF66753-EB48-4AD9-BCBA-82B2BBF581C1}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
 		{DCF66753-EB48-4AD9-BCBA-82B2BBF581C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{75FF05D6-E906-4010-AC99-924B0FD42813}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{75FF05D6-E906-4010-AC99-924B0FD42813}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
-		{75FF05D6-E906-4010-AC99-924B0FD42813}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{889BA0B9-E098-4FEF-8EDA-6BB62FBB65D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{889BA0B9-E098-4FEF-8EDA-6BB62FBB65D3}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
-		{889BA0B9-E098-4FEF-8EDA-6BB62FBB65D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42732B4E-E371-492A-8B9A-03BC88B249AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42732B4E-E371-492A-8B9A-03BC88B249AB}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{42732B4E-E371-492A-8B9A-03BC88B249AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE86F607-0FAF-4484-9E77-48AE4ADC01F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE86F607-0FAF-4484-9E77-48AE4ADC01F7}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE86F607-0FAF-4484-9E77-48AE4ADC01F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{58399364-9ACA-429F-A276-7F01E9E61D7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{58399364-9ACA-429F-A276-7F01E9E61D7D}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
 		{58399364-9ACA-429F-A276-7F01E9E61D7D}.Release|Any CPU.ActiveCfg = Release|Any CPU

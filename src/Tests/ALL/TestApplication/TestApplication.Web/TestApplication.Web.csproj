@@ -25,6 +25,10 @@
     <DebugType>full</DebugType>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <OutputPath>bin</OutputPath>
+    <RestorePackagesWithLockFile>False</RestorePackagesWithLockFile>
+    <RestoreLockedMode>False</RestoreLockedMode>
+    <NoWarn>NU1603</NoWarn>
+    <DisableImplicitNuGetFallbackFolder>False</DisableImplicitNuGetFallbackFolder>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -122,17 +126,17 @@
     <Reference Include="System.Xml.Linq">
       <Private>False</Private>
     </Reference>
-    <PackageReference Include="DevExpress.ExpressApp.Web.All">
-      <Version>20.1.4</Version>
-    </PackageReference>
+    <PackageReference Include="DevExpress.ExpressApp.Web.All" Version="20.1.4" />
     <PackageReference Include="DevExpress.ExpressApp.Web" Version="20.1.4" />
     <PackageReference Include="DevExpress.ExpressApp" Version="20.1.4" />
     <PackageReference Include="DevExpress.ExpressApp.EasyTest.WebAdapter" Version="20.1.4" />
     <PackageReference Include="DevExpress.EasyTest" Version="20.1.4" />
     <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="20.1.4" />
-    <PackageReference Include="Xpand.XAF.Web.All">
-      <Version>2.201.35</Version>
-    </PackageReference>
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="20.1.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Web.All" Version="20.1.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.1.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.1.4" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="2.202.35.2" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Default.aspx" />

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Chart.Web;
 using DevExpress.ExpressApp.Dashboards.Web;
@@ -17,7 +16,6 @@ using DevExpress.ExpressApp.TreeListEditors.Web;
 using DevExpress.ExpressApp.Updating;
 using DevExpress.ExpressApp.Validation.Web;
 using DevExpress.ExpressApp.Web.SystemModule;
-using TestApplication.MicrosoftService;
 using TestApplication.Web.LookupCascade;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
@@ -60,7 +58,7 @@ namespace TestApplication.Web{
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
             
-            moduleManager.Extend(Enum.GetValues(typeof(PredefinedMap)).OfType<PredefinedMap>().Where(map =>map!=PredefinedMap.None&& map.Platform()==Platform.Web));
+            // moduleManager.Extend(Enum.GetValues(typeof(PredefinedMap)).OfType<PredefinedMap>().Where(map =>map!=PredefinedMap.None&& map.Platform()==Platform.Web));
             moduleManager.LookupCascade().ToUnit()
 	            .Subscribe(this);
         }

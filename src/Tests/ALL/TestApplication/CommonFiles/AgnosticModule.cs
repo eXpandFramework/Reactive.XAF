@@ -116,7 +116,9 @@ namespace TestApplication{
 
 		public override void Setup(ApplicationModulesManager moduleManager){
 			base.Setup(moduleManager);
-			moduleManager.ConnectMicrosoftService().Merge(moduleManager.ConnectMicrosoftTodoService())
-                .Subscribe(this); }
+			moduleManager.ConnectMicrosoftService()
+                .Merge(moduleManager.ConnectMicrosoftTodoService())
+                .Subscribe(this);
+        }
 	}
 }

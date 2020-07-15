@@ -53,11 +53,11 @@ namespace TestApplication.Win{
 
         }
 
-        public override void Setup(ApplicationModulesManager moduleManager){
-	        base.Setup(moduleManager);
-	        var excludeMaps = new []{PredefinedMap.None,PredefinedMap.LayoutView,PredefinedMap.LayoutViewColumn,PredefinedMap.LabelControl};
-	        moduleManager.Extend(Enum.GetValues(typeof(PredefinedMap)).OfType<PredefinedMap>().Where(map =>!excludeMaps.Contains(map)&& map.Platform()==Platform.Win));
-        }
+        // public override void Setup(ApplicationModulesManager moduleManager){
+	       //  base.Setup(moduleManager);
+	       //  var excludeMaps = new []{PredefinedMap.None,PredefinedMap.LayoutView,PredefinedMap.LayoutViewColumn,PredefinedMap.LabelControl};
+	       //  moduleManager.Extend(Enum.GetValues(typeof(PredefinedMap)).OfType<PredefinedMap>().Where(map =>!excludeMaps.Contains(map)&& map.Platform()==Platform.Win));
+        // }
 
     }
 }

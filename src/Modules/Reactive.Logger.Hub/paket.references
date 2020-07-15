@@ -6,3 +6,5 @@ System.Reactive
 Fasterflect.Xpand
 Jetbrains.Annotations
 YamlDotNet
+Grpc
+Grpc.Core

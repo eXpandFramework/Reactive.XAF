@@ -60,9 +60,7 @@
     <Compile Include="..\..\..\TestsLib\BO\OrderModuleUpdater.cs" Link="Common\OrderModuleUpdater.cs" />
     <Compile Include="..\..\..\TestsLib\BO\Product.cs" Link="Common\Product.cs" />
     <Compile Include="..\..\..\TestsLib\DefaultUserModuleUpdater.cs" Link="Common\DefaultUserModuleUpdater.cs" />
-    <Compile Include="..\CommonFiles\AgnosticModule.cs" Link="Common\AgnosticModule.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="..\CommonFiles\AgnosticModule.cs" Link="Common\AgnosticModule.cs" />
     <Compile Include="..\CommonFiles\MicrosoftService\MicrosoftService.cs" Link="MicrosoftService\MicrosoftService.cs" />
     <Compile Include="..\CommonFiles\MicrosoftService\ShowMSAccountInfoService.cs" Link="MicrosoftService\ShowMSAccountInfoService.cs" />
     <Compile Include="..\CommonFiles\MicrosoftTodoService\MicrosoftTodoService.cs" Link="MicrosoftTodoService\MicrosoftTodoService.cs" />
@@ -103,7 +101,7 @@
     <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="20.1.4" />
     <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="20.1.4" />
     <PackageReference Include="DevExpress.EasyTest" Version="20.1.4" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="2.201.35" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="2.202.35.2" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="MicrosoftTodoService\" />

@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Reactive.Logger.Hub</id>
-    <version>2.201.36.0</version>
+    <version>2.202.38.3</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -16,23 +16,27 @@
     <dependencies>
       <dependency id="Fasterflect.Xpand" version="2.0.7">
       </dependency>
+      <dependency id="Grpc" version="2.23">
+      </dependency>
+      <dependency id="Grpc.Core" version="2.25">
+      </dependency>
       <dependency id="Jetbrains.Annotations" version="2020.1">
       </dependency>
       <dependency id="MagicOnion" version="2.6.3">
       </dependency>
-      <dependency id="System.Interactive.Async" version="4.0">
+      <dependency id="System.Interactive.Async" version="4.1.1">
       </dependency>
-      <dependency id="System.Reactive" version="4.3.2">
+      <dependency id="System.Reactive" version="4.4.1">
       </dependency>
-      <dependency id="Xpand.Extensions.Reactive" version="2.201.36.0">
+      <dependency id="Xpand.Extensions.Reactive" version="2.202.38.4">
       </dependency>
-      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.36.0">
+      <dependency id="Xpand.XAF.Modules.Reactive" version="2.202.38.4">
       </dependency>
-      <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="2.201.36.0">
+      <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="2.202.38.3">
       </dependency>
       <dependency id="YamlDotNet" version="8.1.1">
       </dependency>
-      <dependency id="Xpand.VersionConverter" version="2.201.7">
+      <dependency id="Xpand.VersionConverter" version="2.202.9">
       </dependency>
     </dependencies>
   </metadata>

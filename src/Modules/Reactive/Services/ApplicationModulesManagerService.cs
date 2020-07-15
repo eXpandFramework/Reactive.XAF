@@ -16,7 +16,7 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ApplicationModulesManagerService{
 	    public static IObservable<T> WhenApplication<T>(this ApplicationModulesManager manager,Func<XafApplication,IObservable<T>> retriedExecution) => manager
-		    .WhereApplication().ToObservable(ImmediateScheduler.Instance)
+		    .WhereApplication().ToObservable()
 		    .SelectMany(application => retriedExecution(application).Retry(application));
 		
 

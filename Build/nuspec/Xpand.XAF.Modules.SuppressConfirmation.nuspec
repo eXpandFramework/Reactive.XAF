@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.SuppressConfirmation</id>
-    <version>2.201.36.0</version>
+    <version>2.202.38.3</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -18,13 +18,13 @@
       </dependency>
       <dependency id="JetBrains.Annotations" version="2020.1">
       </dependency>
-      <dependency id="System.Reactive" version="4.3.2">
+      <dependency id="System.Reactive" version="4.4.1">
       </dependency>
-      <dependency id="Xpand.Extensions.Reactive" version="2.201.36.0">
+      <dependency id="Xpand.Extensions.Reactive" version="2.202.38.4">
       </dependency>
-      <dependency id="Xpand.XAF.Modules.Reactive" version="2.201.36.0">
+      <dependency id="Xpand.XAF.Modules.Reactive" version="2.202.38.4">
       </dependency>
-      <dependency id="Xpand.VersionConverter" version="2.201.7">
+      <dependency id="Xpand.VersionConverter" version="2.202.9">
       </dependency>
     </dependencies>
   </metadata>

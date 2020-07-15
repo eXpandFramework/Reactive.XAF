@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Configuration;
 using System.Web;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Web;
@@ -35,8 +34,8 @@ namespace TestApplication.Web{
                 dataStoreProvider = application["DataStoreProvider"] as IXpoDataStoreProvider;
             }
             else{
-                // dataStoreProvider = new MemoryDataStoreProvider();
-                dataStoreProvider = new ConnectionStringDataStoreProvider(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString);
+                dataStoreProvider = new MemoryDataStoreProvider();
+                // dataStoreProvider = new ConnectionStringDataStoreProvider(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString);
                 if (application != null) application["DataStoreProvider"] = dataStoreProvider;
             }
 

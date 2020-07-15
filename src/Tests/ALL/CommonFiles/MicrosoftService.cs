@@ -28,7 +28,7 @@ namespace ALL.Tests{
 		}
 
 		private static void Disconnect(this ICommandAdapter commandAdapter){
-			commandAdapter.Execute(new ActionCommand(Xpand.XAF.Modules.Office.Cloud.Microsoft.MicrosoftService.SignOutCaption),
+			commandAdapter.Execute(new NavigateCommand("Default.My Details"),new ActionCommand(Xpand.XAF.Modules.Office.Cloud.Microsoft.MicrosoftService.SignOutCaption),
 				new ActionAvailableCommand(Xpand.XAF.Modules.Office.Cloud.Microsoft.MicrosoftService.SignOutCaption)
 					{ExpectException = true},
 				new ActionAvailableCommand(Xpand.XAF.Modules.Office.Cloud.Microsoft.MicrosoftService.SignInCaption));

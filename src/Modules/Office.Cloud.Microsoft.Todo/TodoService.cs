@@ -25,6 +25,10 @@ using TaskStatus = DevExpress.Persistent.Base.General.TaskStatus;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
     public static class TodoService{
+        private static readonly ISubject<(Frame frame, GraphServiceClient client)> ClientSubject=new Subject<(Frame frame, GraphServiceClient client)>();
+
+        public static IObservable<(Frame frame, GraphServiceClient client)> Client => ClientSubject.AsObservable();
+
         private static readonly ISubject<(OutlookTask, ITask)> CustomizeCloudSynchronizationSubject;
         static TodoService() => CustomizeCloudSynchronizationSubject = Subject.Synchronize(new Subject<(OutlookTask, ITask)>());
         internal const string DefaultTodoListId = "Tasks";
@@ -104,7 +108,6 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
             manager.WhenApplication(application => application
                 .AuthorizationRequired()
                 .Authorize()
-                .EnsureTaskFolder()
                 .Synchronize()
                 .ToUnit());
 
@@ -133,7 +136,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
             .Select(frame => frame)
             .TraceMicrosoftTodoModule(frame => frame.View.Id);
 
-        static IObservable<(Frame frame, GraphServiceClient client)> Authorize(this  IObservable<Frame> whenViewOnFrame) => whenViewOnFrame
-            .AuthorizeMS().TraceMicrosoftTodoModule(_ => _.frame.View.Id);
+        static IObservable<(Frame frame, GraphServiceClient client, OutlookTaskFolder folder)> Authorize(this  IObservable<Frame> whenViewOnFrame) => whenViewOnFrame
+            .AuthorizeMS().EnsureTaskFolder()
+            .Do(tuple => ClientSubject.OnNext((tuple.frame,tuple.client)))
+            .TraceMicrosoftTodoModule(_ => _.frame.View.Id);
     }
 }
