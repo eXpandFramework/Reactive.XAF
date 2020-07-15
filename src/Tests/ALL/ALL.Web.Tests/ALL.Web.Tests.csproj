@@ -41,7 +41,7 @@
     <PackageReference Include="DevExpress.ExpressApp" Version="20.1.4" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
     <PackageReference Include="Unofficial.Microsoft.mshtml" Version="7.0.3300" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="2.202.35.2" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="2.202.36" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.TestsLib">

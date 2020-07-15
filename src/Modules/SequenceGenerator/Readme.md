@@ -17,8 +17,13 @@ This `platform agnostic` module is a well tested implementation variation of the
 
 In details: when any XAF database transaction starts an [Explicit UnitOfWork](https://docs.devexpress.com/XPO/8921/concepts/explicit-units-of-work) is used to acquire a lock to the `SequenceStorage` table. If the table is already locked the it retries until success, if not it queries the table for all the object types that match the objects inside the transaction and assigns their binding members (e.g. a long SequenceNumber member). After the XAF transaction completes with success or with a failure the database lock is released. A long sequential number is generated only one time for new objects.
 
-##### <u>Configuration</u>
-You can configure the Sequence binding at runtime by creating instances of the `SequenceStorage` BO as shown in the next screencast.
+**Our Invoices and Orders must use unique sequential values in a multi user environment. How can we do it? without sparing my resources?**
+</br><u>Traditionally:</u>
+This is a non-trivial to implement case without space for mistakes. Therefore a substantial amount of resources is required to research and analyze taking help from existing public work. Do not forget that the requirement is to be super easy to install and use in any project and to be really trustable, so unit and EasyTest is the only way to go in a CI/CD pipeline. 
+</br><u>Solution:</u>
+The cross platform [Xpand.XAF.Modules.SequenceGenerator](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/SequenceGenerator) generates unique sequential values and provides a XAF UI so the end user can link those values to Business objects members. Its unit and EasyTest run for the latest 3 Major XAF versions with the help of `Xpand.VersionConverter`</br>
+
+</br>In the next screencast we use the XAF UI to create a `subscription` to the `sequence` generator and `assign` the generated sequence to our  `Order.OrderId` configuring the initial sequence to `1000`. Similarly for `Accessory.AccessoryId` where we set the initial value to `2000`. Finally we test by creating an Order and an Accessory where we can `observe` the assigned `values` of OrderId, AccessoryId.
 
 <twitter>
 
@@ -26,7 +31,9 @@ You can configure the Sequence binding at runtime by creating instances of the `
 
 </twitter>
 
-Click the screencast to watch it on YouTube. 
+[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://www.youtube.com/watch?v=t1BDPFU01z8)
+
+---
 
 
 The SequenceStorage table is a normal XAF BO, therefore it is possible to create sequence bindings in code by creating instances of that object. However we do not recommend creating instances directly but use the provided API (possibly in a [ModuleUpdater](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.Updating.ModuleUpdater)). The API respects additional constrains and validations.
@@ -97,13 +104,13 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |**DevExpress.ExpressApp.Xpo**|**Any**
 |Fasterflect.Xpand|2.0.7
  |JetBrains.Annotations|2020.1.0
- |System.Reactive|4.3.2
- |Xpand.Extensions|2.201.35
- |Xpand.Extensions.Reactive|2.201.36
- |Xpand.Extensions.XAF|2.201.36
- |Xpand.Extensions.XAF.Xpo|2.201.33
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.201.36
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.7
+ |System.Reactive|4.4.1
+ |Xpand.Extensions|2.202.38
+ |Xpand.Extensions.Reactive|2.202.39
+ |Xpand.Extensions.XAF|2.202.39
+ |Xpand.Extensions.XAF.Xpo|2.202.35
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.39
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.9
 
 ## Issues-Debugging-Troubleshooting
 

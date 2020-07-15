@@ -5,8 +5,23 @@ This namespace `Xpand.XAF.Modules` is used for projects that contain XAF modules
 
 ## Platform agnostic modules list
 
+**Due to the large package number a substantial effort is needed even for simple tasks, like installation, package API discovery and version choosing. How to get the best out of them?**
+</br><u>Traditionally:</u>
+      You can `discover and install` the packages `one by one` looking for `incompatibilities` between them, by yourself, in each project you plan to consume them.
+</br><u>Xpand.XAF.Modules Solution:</u>
+    Use `only` the `three` container nuget packages [Xpand.XAF.Core.All](https://www.nuget.org/packages/Xpand.XAF.Core.All), [Xpand.XAF.Win.All](https://www.nuget.org/packages/Xpand.XAF.Win.All), [Xpand.XAF.Web.All](https://www.nuget.org/packages/Xpand.XAF.Web.All). They come with the next benefits:
+    * Install only one package per platform with agnostic optional.
+    * You will get a `copy-paste` module `registration` snippet. 
+    * `All API` from all packages is available in the VS intellisense as soon as you start typing. 
+    * You do `not` have to deal with versions `incompatibilities`.
+    * No extra dependencies if package API is not used.
+    * Only one entry in the Nuget Package Manager Console lists.
+    * Only one entry in the Project/References list.
 
-To minimize version conflicts we recommend that you use the `Xpand.XAF.Core.All, Xpand.XAF.Win.All, Xpand.XAF.Web.All` packages. Doing so, all packages will be at your disposal and .NET will add a dependecy only to those packages that you actually use and not to all.
+</br>In the next screencast we see how easy is to install all packages that target the Windows platform. It is recommended to use the Nuget `PackageReference` format. First we install all packages and make a note that a dependency is added for all, then we remove a few installation lines and we make a note how the assembly dependencies reflects only that used API. The assembly reference discovery was done with the help of the XpandPwsh [Get-AssemblyReference](https://github.com/eXpandFramework/XpandPwsh/wiki/Get-AssemblyReference) cmdlet.</br>
+    ![Xpand XAF All](https://user-images.githubusercontent.com/159464/86915211-447c3780-c12a-11ea-973d-3096044dc22b.gif)
+
+    ---
 
 <twitter>
 

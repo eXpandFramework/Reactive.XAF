@@ -54,7 +54,7 @@ In the next screencast you can see all `CRUD` operations on the Task BO and how 
 
 </twitter>
 
-Click the screencast to watch it on YouTube. 
+[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)]((https://www.youtube.com/watch?v=8m6Yjrw2Rk0))
 
 
 ## Installation 
@@ -79,27 +79,23 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.Persistent.Base**|**Any**
+ |**DevExpress.ExpressApp**|**Any**
+ |**DevExpress.ExpressApp.Xpo**|**Any**
 |Fasterflect.Xpand|2.0.7
  |JetBrains.Annotations|2020.1.0
  |Microsoft.Graph.Beta|0.18.0-preview
  |Microsoft.Graph.Core|1.19.0
  |Microsoft.Identity.Client|4.13.0
- |Microsoft.IdentityModel.Protocols.OpenIdConnect|6.6.0
- |Microsoft.IdentityModel.Tokens|6.6.0
- |Microsoft.Owin|4.1.0
- |Microsoft.Owin.Host.SystemWeb|4.1.0
- |Microsoft.Owin.Security|4.1.0
- |Microsoft.Owin.Security.Cookies|4.1.0
- |Microsoft.Owin.Security.OpenIdConnect|4.1.0
  |Newtonsoft.Json|12.0.3
- |Owin|1.0.0
- |System.Reactive|4.3.2
- |Xpand.Extensions|2.201.35
- |Xpand.Extensions.Office.Cloud|2.201.35
- |Xpand.Extensions.Reactive|2.201.36
- |Xpand.Extensions.XAF|2.201.36
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.201.36
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.7
+ |System.Reactive|4.4.1
+ |Xpand.Extensions|2.202.38
+ |Xpand.Extensions.Office.Cloud|2.202.38
+ |Xpand.Extensions.Reactive|2.202.39
+ |Xpand.Extensions.XAF|2.202.39
+ |Xpand.Extensions.XAF.Xpo|2.202.35
+ |[Xpand.XAF.Modules.Office.Cloud.Microsoft](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Office.Cloud.Microsoft)|2.202.40
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.39
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.9
 
 ## Issues-Debugging-Troubleshooting
 

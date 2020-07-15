@@ -19,7 +19,13 @@ This is a `platform agnostic` module. The end-user can execute the `ViewItemValu
 When the above `Order_DetailView` created the `ViewItemValue` will be active and will contain two items the `Product` and the `Accessory`. Executing the action will result in saving the related lookup editor object key value along with the view and member name in the database. When the same Order_DetailView is created later for a new object then the info from the database will be used to assign the appropriate object.
 
 
-Below is a screencast of the module in action. At the bottom you can see what the [Reactive.Logger.Client.Win](https://github.com/eXpandFramework/DevExpress.XAF/wiki/Reactive.Logger.Client.Win) reports in our dev environment as the module is used in a remote IIS.
+ **We want the end user to configure the default lookup values for certain views**
+</br><u>Traditionally:</u>
+You have to declare tables that hold which value was for which lookup. To configure it you need to extend the model. As always you have to test support and distribute.
+</br><u>eXpandFramework solution:</u>
+Use the cross platform [Xpand.XAF.Modules.ViewItemValue](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/ViewItemValue)
+
+</br> In the screencast we configure the model to allow end user to choose the default values for `Product` and `Order` when he is on the `Order_DetailView`
 
 <twitter>
 
@@ -27,7 +33,7 @@ Below is a screencast of the module in action. At the bottom you can see what th
 
 </twitter>
 
-Click the screencast to watch it on YouTube. 
+[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://www.youtube.com/watch?v=90MzTKyVlsg&t=21s)
 
 ---
 
@@ -71,15 +77,15 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |**DevExpress.Xpo**|**Any**
 |Fasterflect.Xpand|2.0.7
  |JetBrains.Annotations|2020.1.0
- |System.Interactive|4.0.0
- |System.Reactive|4.3.2
+ |System.Interactive|4.1.1
+ |System.Reactive|4.4.1
  |System.ValueTuple|4.5.0
- |Xpand.Extensions|2.201.35
- |Xpand.Extensions.Reactive|2.201.36
- |Xpand.Extensions.XAF|2.201.36
- |Xpand.Extensions.XAF.Xpo|2.201.33
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.201.36
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.7
+ |Xpand.Extensions|2.202.38
+ |Xpand.Extensions.Reactive|2.202.39
+ |Xpand.Extensions.XAF|2.202.39
+ |Xpand.Extensions.XAF.Xpo|2.202.35
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.39
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.9
 
 ## Issues-Debugging-Troubleshooting
 

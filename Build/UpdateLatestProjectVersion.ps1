@@ -25,7 +25,7 @@ if ($Branch -eq "master"){
             if ($labPackage){
                 $projectVersion=[version](Get-AssemblyInfoVersion $assemblyInfoPath)
                 if ((Get-VersionPart $projectVersion Build) -ne (Get-VersionPart $labPackage.version Build) -or 
-                    $projectVersion -lt $labPackage.Version ){
+                    ($projectVersion -lt $labPackage.Version) -or ($projectVersion.Revision -gt 0)){
                     $updateVersion+=$_.BaseName
                     Update-AssemblyInfo $assemblyInfoPath -Build
                 }   

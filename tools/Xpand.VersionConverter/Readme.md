@@ -8,15 +8,24 @@
 This package modifies the DevExpress references in all Xpand.XAF.* assemblies to match the target project DevExpress version.
 
 ## Example
-3 years ago I develop a my cool 5 xaf modules about X domain. I used the `Xpand.VersionConverter` nuget package, I compiled them and publish on Nuget.
- 
-3 years passed and I want to use them in a new project. I just need to install the nuget packages and they will work even if DevExpress assemblies names change every year (Major builds). This is the result of Xpand.VersionConverter that patches the version on each build. The **support cost** for my XAF modules closes to **zero**.
- 
-The alternative is to have a full Continuous Integration pipeline and support it (VERY COSTLY), a version strategy bound to DevExpress versioning just for being able to republish the packages. 
+**We have a lot of XAF packages compiled against previous XAF versions.  How to reuse them in the latest version without a complex Continuous Integration pipeline**
+</br><u>Traditionally:</u>
+You have to `support multiple versions` of your projects, so you can `recompile` and `redistribute` each time you want to support a different DX version. You need a complex CI/CD and resources to support it.
+</br><u>eXpandFramework Solution:</u>
+Use the [Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter) to `patch` your packages on the `fly` in relation to the consuming project `skipping` the need for additional `efforts`.
 
-You might say that do not even know whats a CI (Continuous Integration) or perhaps I do not use a CI, but think again, storing the project, taking backups, git repository, open visual studio, Ctrl+F5 is actually a CI.
+</br>In the screencast you can see how to make `our company` packages `version agnostic` and be able to produce really valuable compatibility matrixes like: 
+
+[![image](https://user-images.githubusercontent.com/159464/87158168-fbfa8080-c2c7-11ea-9b33-93b67bad7c78.png)](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
+
+We demo how to make `MyCompany.MyPackage` DX version agnostic. The process is simple, we add a dependency to `MyPackage.Xpand.VersionConverter` package which was generated with the help of the [New-XpandVersionConvreter](https://github.com/eXpandFramework/XpandPwsh/wiki/New-XpandVersionConverter) XpandPwsh cmdlet.</br>
+
+![LgCT4R1ejP](https://user-images.githubusercontent.com/159464/87150508-db77f980-c2ba-11ea-97c0-59c50a52ac0f.gif)
+
+---
+
 ## Technicals
-<twitter>
+
 
 1. `Xpand.VersionConverter` patch all Xpand assemblies found in your Nuget cache to match the DevExpress version of the current project. This patching occurs before the actual build.
 2. If the package fails to detect the DevExpress version due to for e.g to indirect references you can help it with the `DevExpressVersion` MSBuild property. 
@@ -24,7 +33,7 @@ You might say that do not even know whats a CI (Continuous Integration) or perha
 3. To troubleshoot you can enable verbose logging you can set the Environmental `VersionConverterVerbose` to 1 and an extensions.log will be created in the package directory.
 4. `Xpand.Versionconverter` is already a dependency to all Xpand packages that use DevExpress assemblies in this repository.
 
-</twitter>
+
 
 ### Installation
 

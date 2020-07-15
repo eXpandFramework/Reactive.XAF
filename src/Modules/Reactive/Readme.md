@@ -236,13 +236,13 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |**DevExpress.ExpressApp**|**Any**
 |Fasterflect.Xpand|2.0.7
  |JetBrains.Annotations|2020.1.0
- |System.Interactive|4.0.0
- |System.Reactive|4.3.2
- |Xpand.Extensions|2.201.35
- |Xpand.Extensions.Reactive|2.201.36
- |Xpand.Extensions.XAF|2.201.36
+ |System.Interactive|4.1.1
+ |System.Reactive|4.4.1
+ |Xpand.Extensions|2.202.38
+ |Xpand.Extensions.Reactive|2.202.39
+ |Xpand.Extensions.XAF|2.202.39
  |Xpand.Patcher|2.0.23
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.7
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.9
 
 ## Issues-Debugging-Troubleshooting
 

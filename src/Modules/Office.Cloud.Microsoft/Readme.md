@@ -107,7 +107,8 @@ In order to execute the asynchronous operations:
 
 ### Examples
 
-In the next screencast you can see the module in action for both Win and Web. At the bottom the [Reactive.Logger.Client.Win](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win) is reporting as the module is used.
+
+Below is a demonstration of the package authenticating against `AAD` for both `Win/Web`. Also the API is used to call the `MSGraph` [Me](https://docs.microsoft.com/en-us/graph/api/user-get?view=graph-rest-1.0&tabs=http) endpoint for displaying the authenticated user info in a XAF view. At the bottom the [Reactive.Logger.Client.Win](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win) is reporting as the module is used. This demo it is Easytested [with this script](https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Tests/ALL/CommonFiles/MicrosoftService.cs) for the last three XAF major versions, compliments of the `Xpand.VersionConverter`
 
 <twitter>
 
@@ -115,7 +116,7 @@ In the next screencast you can see the module in action for both Win and Web. At
 
 </twitter>
 
-Click the screencast to watch it on YouTube. 
+[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)]((https://www.youtube.com/watch?v=XIczKjE2sFw))
 
 Also, refer to the [Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Office.Cloud.Microsoft.Todo)
 
@@ -156,13 +157,13 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |Microsoft.Owin.Security.OpenIdConnect|4.1.0
  |Newtonsoft.Json|12.0.3
  |Owin|1.0.0
- |System.Reactive|4.3.2
- |Xpand.Extensions|2.201.35
- |Xpand.Extensions.Office.Cloud|2.201.35
- |Xpand.Extensions.Reactive|2.201.36
- |Xpand.Extensions.XAF|2.201.36
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.201.36
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.7
+ |System.Reactive|4.4.1
+ |Xpand.Extensions|2.202.38
+ |Xpand.Extensions.Office.Cloud|2.202.38
+ |Xpand.Extensions.Reactive|2.202.39
+ |Xpand.Extensions.XAF|2.202.39
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.39
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.9
 
 ## Issues-Debugging-Troubleshooting
 

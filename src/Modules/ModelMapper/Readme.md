@@ -41,6 +41,22 @@ public override void Setup(ApplicationModulesManager moduleManager) {
 }
 
 ```
+
+**Model Editor control on all major components used from XAF**
+</br><u>Traditionally:</u>
+You need to create model interfaces and extend the model for all component structures. You need to link them with the actual runtime objects and editors and update their values. As this is not a non-trivial case a large number of Unit and EasyTest must run on evert build.
+</br><u>Xpand.XAF.Modules Solution:</u>
+The cross platform [Xpand.XAF.Modules.ModelMapper](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/ModelMapper) ships with `predefined maps` for `all` the common XAF `components` such as Grids, Charts, Tree, Pivot etc.
+</br>In the next screencast we see how to `extend` the XAF model with the `GridView` and the `GridColumn` components. Then we used the model editor to modify the model and run the application to test our changes at runtime.</br></br>
+
+<twitter>
+
+[![aYbdUf4HwV](https://user-images.githubusercontent.com/159464/86943203-d1d18300-c14e-11ea-9d68-ee68ff57455f.gif)](https://youtu.be/CkJKEfPhS0M)
+
+<twitter>
+
+[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](youtu.be/CkJKEfPhS0M)
+
 ##### Map Generation
 Generating maps for many types is costly however it happens in parallel and only once. Afterwards the model interfaces are loaded from the `ModelMapperAsssmbly.dll` found in path. All mapped types are included in this one assembly even if the map was executed from different modules.
 
@@ -88,7 +104,7 @@ The predefined maps are categorized as:
 
     Editor|ListView | Column 
     ------|---------|----------
-    GridListEditor|<twitter>![image](https://user-images.githubusercontent.com/159464/61733035-a0b64200-ad87-11e9-96cd-9b6d0eacd86b.png)</twitter> | ![image](https://user-images.githubusercontent.com/159464/61733099-bb88b680-ad87-11e9-8279-11dbcd0f4d1d.png) 
+    GridListEditor|![image](https://user-images.githubusercontent.com/159464/61733035-a0b64200-ad87-11e9-96cd-9b6d0eacd86b.png) | ![image](https://user-images.githubusercontent.com/159464/61733099-bb88b680-ad87-11e9-8279-11dbcd0f4d1d.png) 
     AdvBandedGridListEditor | ![image](https://user-images.githubusercontent.com/159464/61732015-58962000-ad85-11e9-9a28-b9ea0bb744c5.png) | ![image](https://user-images.githubusercontent.com/159464/61731872-0fde6700-ad85-11e9-845c-54f41692334a.png)
     LayoutViewListEditor | ![image](https://user-images.githubusercontent.com/159464/61733269-191d0300-ad88-11e9-86fb-3c6484613554.png) | ![image](https://user-images.githubusercontent.com/159464/61733304-2afea600-ad88-11e9-920c-e5699a961946.png)
     TreeListEditor|![image](https://user-images.githubusercontent.com/159464/61733920-84b3a000-ad89-11e9-8d60-456589982d3d.png)|![image](https://user-images.githubusercontent.com/159464/61733872-651c7780-ad89-11e9-9b8c-db720fcc33cd.png)</br></br>Navigation</br>![image](https://user-images.githubusercontent.com/159464/61733960-9ac16080-ad89-11e9-88a5-a69fccb07aaa.png)
@@ -201,14 +217,14 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |JetBrains.Annotations|2020.1.0
  |Mono.Cecil|0.11.2
  |System.CodeDom|4.7.0
- |System.Interactive|4.0.0
- |System.Reactive|4.3.2
+ |System.Interactive|4.1.1
+ |System.Reactive|4.4.1
  |Xpand.Collections|1.0.1
- |Xpand.Extensions|2.201.35
- |Xpand.Extensions.Reactive|2.201.36
- |Xpand.Extensions.XAF|2.201.36
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.201.36
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.7
+ |Xpand.Extensions|2.202.38
+ |Xpand.Extensions.Reactive|2.202.39
+ |Xpand.Extensions.XAF|2.202.39
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.39
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.9
 
 ## Issues-Debugging-Troubleshooting
 
