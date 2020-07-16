@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Globalization;
-using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
@@ -17,7 +16,6 @@ using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
-using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.ViewExtenions;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -105,8 +103,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
             source.Trace(name, MicrosoftTodoModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
         
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) =>
-            manager.WhenApplication(application => application
-                .AuthorizationRequired()
+            manager.WhenApplication(application => application.WhenViewOnFrame()
+                .When(frame => application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Todo().ObjectViews())
                 .Authorize()
                 .Synchronize()
                 .ToUnit());
@@ -128,14 +126,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
                 ).Switch()
                 .Do(UpdatedSubject)
                 .TraceMicrosoftTodoModule(_ => $"{_.mapAction} {_.serviceObject.Subject}, {_.serviceObject.Status}, {_.serviceObject.Id}");
-
-        private static IObservable<Frame> AuthorizationRequired(this XafApplication application) => application
-            .WhenViewOnFrame()
-            .Where(frame => frame.View.Model.Application.ToReactiveModule<IModelReactiveModuleOffice>().Office
-                .Microsoft().Todo().ObjectViews().Select(dependency => dependency.Id()).Contains(frame.View.Model.Id))
-            .Select(frame => frame)
-            .TraceMicrosoftTodoModule(frame => frame.View.Id);
-
+        
         static IObservable<(Frame frame, GraphServiceClient client, OutlookTaskFolder folder)> Authorize(this  IObservable<Frame> whenViewOnFrame) => whenViewOnFrame
             .AuthorizeMS().EnsureTaskFolder()
             .Do(tuple => ClientSubject.OnNext((tuple.frame,tuple.client)))

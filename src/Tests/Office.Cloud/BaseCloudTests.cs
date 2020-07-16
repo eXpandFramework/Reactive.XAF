@@ -10,8 +10,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
         public abstract Task Populate_Modified();
         [Order(1)]
         public abstract Task Create_Entity_Container_When_Not_Exist();
-        [Order(100)]
-        public abstract Task User_Container();
+        
         
         
     }

@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using DevExpress.ExpressApp;
+﻿using DevExpress.ExpressApp;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.XAF.FrameExtensions;

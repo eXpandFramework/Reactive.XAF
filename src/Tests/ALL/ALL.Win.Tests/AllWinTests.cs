@@ -34,7 +34,7 @@ namespace ALL.Win.Tests{
             }
         } 
         [Test]
-        [XpandTest(LongTimeout,3)]
+        // [XpandTest(LongTimeout,3)]
         [Apartment(ApartmentState.STA)]
         public async Task Win_EasyTest(){
             

@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputPath>..\..\..\bin</OutputPath>
+    <TargetFramework>net461</TargetFramework>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <LangVersion>latest</LangVersion>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+    <AssemblyName>Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Tests">
+      <HintPath>..\..\..\bin\Xpand.TestsLib.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions">
+      <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions.Reactive">
+      <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions.Office.Cloud">
+      <HintPath>..\..\..\bin\Xpand.Extensions.Office.Cloud.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions.XAF">
+      <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Office.Cloud.Microsoft">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Office.Cloud.Microsoft.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Office.Cloud.Tests">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Office.Cloud.Tests.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Reactive">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Reactive.Logger">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions.XAF.Xpo">
+      <HintPath>..\..\..\bin\Xpand.Extensions.XAF.Xpo.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="BusinessObjects\" />
+  </ItemGroup>
+  <Import Project="..\..\..\.paket\Paket.Restore.targets" />
+</Project>

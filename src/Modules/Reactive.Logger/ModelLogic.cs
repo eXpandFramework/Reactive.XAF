@@ -85,6 +85,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             {"LookupCascadeModule",Colors[Editors]},
             {"SequenceGeneratorModule",Colors[Data]},
             {"MicrosoftTodoModule",Colors[Office]},
+            {"MicrosoftCalendarModule",Colors[Office]},
             {"MicrosoftModule",Colors[Office]},
             {"ViewEditModule",Colors[View]}
         };

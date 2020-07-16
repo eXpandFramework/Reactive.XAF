@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar</id>
+    <version>2.202.10.0</version>
+    <authors>eXpandFramework</authors>
+    <owners>eXpandFramework</owners>
+    <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/Office.Cloud.Microsoft.Calendar</projectUrl>
+    <iconUrl>http://sign.expandframework.com</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>This package integrates with the Office365 Calendar cloud service.</description>
+    <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
+    <copyright>eXpandFramework.com</copyright>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Office.Cloud.Microsoft.Calendar</tags>
+    <dependencies>
+      <dependency id="Fasterflect.Xpand" version="2.0.7">
+      </dependency>
+      <dependency id="JetBrains.Annotations" version="2020.1">
+      </dependency>
+      <dependency id="Microsoft.Graph.Beta" version="0.18.0-preview">
+      </dependency>
+      <dependency id="Microsoft.Graph.Core" version="1.19">
+      </dependency>
+      <dependency id="Microsoft.Identity.Client" version="4.13">
+      </dependency>
+      <dependency id="Newtonsoft.Json" version="12.0.3">
+      </dependency>
+      <dependency id="System.Reactive" version="4.4.1">
+      </dependency>
+      <dependency id="Xpand.Extensions" version="2.202.38.0">
+      </dependency>
+      <dependency id="Xpand.Extensions.Office.Cloud" version="2.202.38.0">
+      </dependency>
+      <dependency id="Xpand.Extensions.Reactive" version="2.202.39.0">
+      </dependency>
+      <dependency id="Xpand.Extensions.XAF" version="2.202.39.0">
+      </dependency>
+      <dependency id="Xpand.Extensions.XAF.Xpo" version="2.202.35.0">
+      </dependency>
+      <dependency id="Xpand.XAF.Modules.Office.Cloud.Microsoft" version="2.202.40.0">
+      </dependency>
+      <dependency id="Xpand.XAF.Modules.Reactive" version="2.202.39.0">
+      </dependency>
+      <dependency id="Xpand.VersionConverter" version="2.202.9">
+      </dependency>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.dll" target="lib\net461\Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.dll" />
+    <file src="Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.pdb" target="lib\net461\Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.pdb" />
+    <file src="..\build\CopySymbols.targets" target="build\Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.targets">
+    </file>
+    <file src="..\build\CopySymbols.ps1" target="build\CopySymbols.ps1">
+    </file>
+  </files>
+</package>

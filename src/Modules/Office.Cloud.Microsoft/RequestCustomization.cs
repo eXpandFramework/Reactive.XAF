@@ -4,7 +4,7 @@ using System.Reactive.Subjects;
 using JetBrains.Annotations;
 using Microsoft.Graph;
 
-namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
+namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
     public static class RequestCustomization{
         static readonly Subject<IBaseRequest> CustomizeSubject = new Subject<IBaseRequest>();
 

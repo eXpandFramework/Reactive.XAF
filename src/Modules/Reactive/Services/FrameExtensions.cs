@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
@@ -7,6 +8,7 @@ using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Editors;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
@@ -22,6 +24,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return source.Where(window => window.Context == templateContext);
         }
 
+        public static IObservable<Frame> When(this IObservable<Frame> source, Func<Frame,IModelObjectViewsDependencyList> objectViewsDependencyList) => source
+            .Where(frame => objectViewsDependencyList(frame).Select(dependency => dependency.ObjectView.Id).Contains(frame.View.Model.Id));
+        
         public static IObservable<T> When<T>(this IObservable<T> source, Frame parentFrame, NestedFrame nestedFrame){
             return source
                 .Where(_ => nestedFrame?.View != null && parentFrame?.View != null);

@@ -29,13 +29,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ALL.Web.Tests", "..\ALL.Web
 		{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC} = {6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo", "..\..\..\Modules\Office.Cloud.Microsoft.Todo\Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.csproj", "{DCF66753-EB48-4AD9-BCBA-82B2BBF581C1}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Office.Cloud.Microsoft", "..\..\..\Modules\Office.Cloud.Microsoft\Xpand.XAF.Modules.Office.Cloud.Microsoft.csproj", "{42732B4E-E371-492A-8B9A-03BC88B249AB}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.Reactive", "..\..\..\Extensions\Xpand.Extensions.Reactive\Xpand.Extensions.Reactive\Xpand.Extensions.Reactive.csproj", "{DE86F607-0FAF-4484-9E77-48AE4ADC01F7}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Reactive", "..\..\..\Modules\Reactive\Xpand.XAF.Modules.Reactive.csproj", "{58399364-9ACA-429F-A276-7F01E9E61D7D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -71,18 +65,9 @@ Global
 		{3B0C7B34-9818-4CB3-A1B2-2F2F25459D35}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{3B0C7B34-9818-4CB3-A1B2-2F2F25459D35}.Release|Any CPU.ActiveCfg = Debug|Any CPU
 		{3B0C7B34-9818-4CB3-A1B2-2F2F25459D35}.Release|Any CPU.Build.0 = Debug|Any CPU
-		{DCF66753-EB48-4AD9-BCBA-82B2BBF581C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DCF66753-EB48-4AD9-BCBA-82B2BBF581C1}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
-		{DCF66753-EB48-4AD9-BCBA-82B2BBF581C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{42732B4E-E371-492A-8B9A-03BC88B249AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{42732B4E-E371-492A-8B9A-03BC88B249AB}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
-		{42732B4E-E371-492A-8B9A-03BC88B249AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DE86F607-0FAF-4484-9E77-48AE4ADC01F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DE86F607-0FAF-4484-9E77-48AE4ADC01F7}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
 		{DE86F607-0FAF-4484-9E77-48AE4ADC01F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{58399364-9ACA-429F-A276-7F01E9E61D7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{58399364-9ACA-429F-A276-7F01E9E61D7D}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
-		{58399364-9ACA-429F-A276-7F01E9E61D7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -90,10 +90,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
                 .Timeout(timeout);
         }
 
-        public static void Modify_Task<TTask>(this TTask task, DevExpress.Persistent.Base.General.TaskStatus projectTaskStatus, int i) where TTask:ITask{
-            task.Subject = $"{nameof(Modify_Task)}{i}";
-            task.Status=projectTaskStatus;
-        }
+        
 
         public static async Task Map_Two_New_Entity<TCloudEntity,TLocalEntity>(this IObjectSpaceProvider objectSpaceProvider,Func<IObjectSpace,TLocalEntity> localEntityFactory,TimeSpan timeout,
             Func<IObjectSpace, IObservable<TCloudEntity>> synchronize, Action<TLocalEntity,TCloudEntity> assert){

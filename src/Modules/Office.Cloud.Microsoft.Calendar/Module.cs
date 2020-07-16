@@ -6,23 +6,23 @@ using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
-namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
+namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
     [UsedImplicitly]
-    public sealed class MicrosoftTodoModule : ReactiveModuleBase{
+    public sealed class MicrosoftCalendarModule : ReactiveModuleBase{
         [PublicAPI]
-        public const string ModelCategory = "Xpand.MicrosoftTodo";
+        public const string ModelCategory = "Xpand.MicrosoftCalendar";
         
-        static MicrosoftTodoModule(){
-            TraceSource=new ReactiveTraceSource(nameof(MicrosoftTodoModule));
-            ModelObjectViewDependencyLogic.ObjectViewsMap.Add(typeof(IModelTodo),typeof(ITask));
+        static MicrosoftCalendarModule(){
+            TraceSource=new ReactiveTraceSource(nameof(MicrosoftCalendarModule));
+            ModelObjectViewDependencyLogic.ObjectViewsMap.Add(typeof(IModelCalendar),typeof(IEvent));
         }
 
-        public MicrosoftTodoModule() => MicrosoftModule.AddRequirements(this);
-
+        public MicrosoftCalendarModule() => MicrosoftModule.AddRequirements(this);
+        
         public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders){
             base.ExtendModelInterfaces(extenders);
-            extenders.Add<IModelMicrosoft,IModelMicrosoftTodo>();
-            extenders.Add<IModelTodo,IModelObjectViews>();
+            extenders.Add<IModelMicrosoft,IModelMicrosoftCalendar>();
+            extenders.Add<IModelCalendar,IModelObjectViews>();
         }
         
         [PublicAPI]

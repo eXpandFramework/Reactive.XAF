@@ -7,6 +7,7 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
+using DevExpress.Persistent.Base.General;
 using Microsoft.Graph;
 using Shouldly;
 using Xpand.Extensions.Office.Cloud;
@@ -46,7 +47,11 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
             
             return (requestBuilder,client.frame);
         }
-
+        public static void Modify_Task<TTask>(this TTask task, TaskStatus projectTaskStatus, int i) where TTask:ITask{
+            task.Subject = $"{nameof(Modify_Task)}{i}";
+            task.Status=projectTaskStatus;
+        }
+        
         public static async Task<(Frame frame, GraphServiceClient client)> InitGraphServiceClient(this XafApplication application){
             application.ObjectSpaceProvider.NewMicrosoftAuthentication();
             var todoModel = await application.ReactiveModulesModel().OfficeModel().MicrosoftModel().TodoModel();

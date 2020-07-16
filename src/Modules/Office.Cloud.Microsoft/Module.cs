@@ -2,6 +2,8 @@
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using Xpand.Extensions.Office.Cloud;
+using Xpand.Extensions.Office.Cloud.BusinessObjects;
+using Xpand.XAF.Modules.Office.Cloud.Microsoft.BusinessObjects;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
@@ -24,5 +26,12 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
         }
 
         public static TraceSource TraceSource{ get; set; }
+
+        public static void AddRequirements(ModuleBase module){
+            module.RequiredModuleTypes.Add(typeof(MicrosoftModule));
+            module.AdditionalExportedTypes.Add(typeof(MSAuthentication));
+            module.AdditionalExportedTypes.Add(typeof(CloudOfficeObject));
+            module.AdditionalExportedTypes.Add(typeof(CloudOfficeTokenStorage));
+        }
     }
 }

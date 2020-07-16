@@ -170,7 +170,8 @@ namespace Xpand.TestsLib{
             {"PositionInlistViewModule", 61478},
             {"ViewWizardModule", 61479},
             {"ViewItemValueModule", 61479},
-            {"MicrosoftModule", 61480}
+            {"MicrosoftModule", 61480},
+            {"MicrosoftCalendarModule", 61481}
         };
 
         public static IObservable<IModelReactiveLogger> ConfigureModel<TModule>(this XafApplication application,
