@@ -168,6 +168,7 @@ namespace Xpand.TestsLib{
             {"SequenceGeneratorModule", 61475},
             {"MicrosoftTodoModule", 61476},
             {"PositionInlistViewModule", 61478},
+            {"ViewWizardModule", 61479},
             {"ViewItemValueModule", 61479},
             {"MicrosoftModule", 61480}
         };

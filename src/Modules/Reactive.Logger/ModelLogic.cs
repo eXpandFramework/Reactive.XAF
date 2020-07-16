@@ -71,6 +71,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             {"CloneMemberValueModule",Colors[Data]},
             {"CloneModelViewModule",Colors[Model]},
             {"GridListEditorModule",Colors[Editors]},
+            {"ViewWizardModule",Colors[View]},
             {"ViewItemValueModule",Colors[View]},
             {"HideToolBarModule",Colors[View]},
             {"MasterDetailModule",Colors[View]},
