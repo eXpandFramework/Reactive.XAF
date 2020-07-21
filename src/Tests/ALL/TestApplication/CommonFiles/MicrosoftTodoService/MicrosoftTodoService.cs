@@ -9,6 +9,7 @@ using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft;
+using Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -17,12 +18,8 @@ using Task = DevExpress.Persistent.BaseImpl.Task;
 // ReSharper disable once CheckNamespace
 namespace TestApplication.MicrosoftTodoService{
     public static class MicrosoftTodoService{
-        public static IObservable<Unit> ConnectMicrosoftTodoService(this ApplicationModulesManager manager){
-            
-            return manager.InitializeModule()
-                .Merge(manager.WhenApplication(application => application.UpdateTaskDescription()).ToUnit())
-                ;
-        }
+        public static IObservable<Unit> ConnectMicrosoftTodoService(this ApplicationModulesManager manager) =>
+            manager.InitializeModule().Merge(manager.WhenApplication(application => application.UpdateTaskDescription()).ToUnit());
 
         private static IObservable<(OutlookTask serviceObject, MapAction mapAction)> UpdateTaskDescription(this XafApplication application) =>
             TodoService.Updated
@@ -37,6 +34,11 @@ namespace TestApplication.MicrosoftTodoService{
                 });
 
         private static IObservable<Unit> InitializeModule(this ApplicationModulesManager manager){
+            CalendarService.CustomizeUpdate.Merge(CalendarService.CustomizeInsert)
+                .Do(tuple => {
+                    tuple.cloudEvent.Subject = $"{tuple.localEvent.Subject} - {DateTime.Now}";
+                })
+                .Subscribe();
             manager.Modules.OfType<AgnosticModule>().First().AdditionalExportedTypes.Add(typeof(Task));
             return manager.WhenCustomizeTypesInfo().Do(_ => _.e.TypesInfo.FindTypeInfo(typeof(Task)).AddAttribute(new DefaultClassOptionsAttribute())).ToUnit()
                 .FirstAsync()

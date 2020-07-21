@@ -268,6 +268,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.ViewWizard.Tests", "ViewWizard\Xpand.XAF.Modules.ViewWizard.Tests.csproj", "{42A903E6-C1BB-4A61-8AF3-F5A090558A04}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests", "Office.Cloud.Microsoft.Calendar\Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests.csproj", "{DACB24B2-35B6-47A2-9C82-931D0514233C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{ACC7754C-DC61-46E0-B8D9-637AC9D98FD3} = {ACC7754C-DC61-46E0-B8D9-637AC9D98FD3}
+		{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC} = {6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Microsoft", "Microsoft", "{F1DE0A72-7259-4290-853D-30BB1996DA02}"
 EndProject
@@ -276,6 +280,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Calendar", "Calendar", "{F208998D-7FA6-49B4-8D44-B64F6ED205F7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar", "..\Modules\Office.Cloud.Microsoft.Calendar\Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.csproj", "{9AC9273B-47F0-4935-BCAC-DCE468C726A4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.Office.Cloud", "..\Extensions\Xpand.Extensions.Office.Cloud\Xpand.Extensions.Office.Cloud.csproj", "{9EA8BB13-A3AC-40A4-8A00-18F086273A62}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -936,6 +942,16 @@ Global
 		{9AC9273B-47F0-4935-BCAC-DCE468C726A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9AC9273B-47F0-4935-BCAC-DCE468C726A4}.Release|x86.ActiveCfg = Release|Any CPU
 		{9AC9273B-47F0-4935-BCAC-DCE468C726A4}.Release|x86.Build.0 = Release|Any CPU
+		{9EA8BB13-A3AC-40A4-8A00-18F086273A62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9EA8BB13-A3AC-40A4-8A00-18F086273A62}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9EA8BB13-A3AC-40A4-8A00-18F086273A62}.Debug|x86.Build.0 = Debug|Any CPU
+		{9EA8BB13-A3AC-40A4-8A00-18F086273A62}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{9EA8BB13-A3AC-40A4-8A00-18F086273A62}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
+		{9EA8BB13-A3AC-40A4-8A00-18F086273A62}.EasyTest|x86.ActiveCfg = Debug|Any CPU
+		{9EA8BB13-A3AC-40A4-8A00-18F086273A62}.EasyTest|x86.Build.0 = Debug|Any CPU
+		{9EA8BB13-A3AC-40A4-8A00-18F086273A62}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9EA8BB13-A3AC-40A4-8A00-18F086273A62}.Release|x86.ActiveCfg = Release|Any CPU
+		{9EA8BB13-A3AC-40A4-8A00-18F086273A62}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1021,6 +1037,7 @@ Global
 		{CD63B808-3982-48EC-A3C9-68F367E0A4F0} = {F1DE0A72-7259-4290-853D-30BB1996DA02}
 		{F208998D-7FA6-49B4-8D44-B64F6ED205F7} = {F1DE0A72-7259-4290-853D-30BB1996DA02}
 		{9AC9273B-47F0-4935-BCAC-DCE468C726A4} = {F208998D-7FA6-49B4-8D44-B64F6ED205F7}
+		{9EA8BB13-A3AC-40A4-8A00-18F086273A62} = {220968C6-52AC-473D-B8CB-D33DD9093A98}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C0A41578-813B-4E26-B5DF-D979F1C0A7D7}

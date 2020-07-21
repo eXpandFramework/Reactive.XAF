@@ -27,6 +27,7 @@ using DevExpress.ExpressApp.ViewVariantsModule;
 using DevExpress.ExpressApp.Workflow;
 using DevExpress.Persistent.BaseImpl;
 using DevExpress.Persistent.BaseImpl.PermissionPolicy;
+using TestApplication.MicrosoftCalendarService;
 using TestApplication.MicrosoftService;
 using TestApplication.MicrosoftTodoService;
 using Xpand.TestsLib;
@@ -38,6 +39,7 @@ using Xpand.XAF.Modules.HideToolBar;
 using Xpand.XAF.Modules.MasterDetail;
 using Xpand.XAF.Modules.ModelMapper;
 using Xpand.XAF.Modules.ModelViewInheritance;
+using Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo;
 using Xpand.XAF.Modules.ProgressBarViewItem;
 using Xpand.XAF.Modules.Reactive;
@@ -90,6 +92,7 @@ namespace TestApplication{
 			RequiredModuleTypes.Add(typeof(MasterDetailModule));
 			RequiredModuleTypes.Add(typeof(ModelMapperModule));
 			RequiredModuleTypes.Add(typeof(ModelViewInheritanceModule));
+			RequiredModuleTypes.Add(typeof(MicrosoftCalendarModule));
 			RequiredModuleTypes.Add(typeof(MicrosoftTodoModule));
 			RequiredModuleTypes.Add(typeof(ProgressBarViewItemModule));
 			RequiredModuleTypes.Add(typeof(ReactiveModule));
@@ -100,7 +103,7 @@ namespace TestApplication{
 			RequiredModuleTypes.Add(typeof(ViewEditModeModule));
 			RequiredModuleTypes.Add(typeof(ViewItemValueModule));
 			RequiredModuleTypes.Add(typeof(ReactiveLoggerHubModule));
-			AdditionalExportedTypes.Add(typeof(Task));
+			AdditionalExportedTypes.Add(typeof(Event));
 		}
 
 		public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB){
@@ -118,6 +121,7 @@ namespace TestApplication{
 			base.Setup(moduleManager);
 			moduleManager.ConnectMicrosoftService()
                 .Merge(moduleManager.ConnectMicrosoftTodoService())
+                .Merge(moduleManager.ConnectMicrosoftCalendarService())
                 .Subscribe(this);
         }
 	}

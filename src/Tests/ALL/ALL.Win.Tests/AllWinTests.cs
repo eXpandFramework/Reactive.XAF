@@ -34,7 +34,7 @@ namespace ALL.Win.Tests{
             }
         } 
         [Test]
-        // [XpandTest(LongTimeout,3)]
+        [XpandTest(LongTimeout,3)]
         [Apartment(ApartmentState.STA)]
         public async Task Win_EasyTest(){
             
@@ -47,6 +47,7 @@ namespace ALL.Win.Tests{
                         var autoTestCommand = new AutoTestCommand();
                         autoTestCommand.Execute(commandAdapter);
                         commandAdapter.TestMicrosoftTodoService();
+                        commandAdapter.TestMicrosoftCalendarService();
                     }));
                 }
                 finally{

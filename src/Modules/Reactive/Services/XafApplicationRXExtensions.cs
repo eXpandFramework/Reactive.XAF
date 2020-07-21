@@ -32,10 +32,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 	    public static IObservable<T> SelectMany<T>(this XafApplication application, IObservable<T> execute) =>
 		    application.SelectMany(execute.ToTask);
 
+        public static IObservable<T> SelectMany<T>(this XafApplication application, Func<IObservable<T>> execute) =>
+            Observable.Defer(() => Observable.Start(execute).Merge().Wait().ReturnObservable()).Catch<T,InvalidOperationException>(exception => Observable.Empty<T>());
+        
 	    public static IObservable<T> SelectMany<T>(this XafApplication application, Func<Task<T>> execute) =>
 		    application.GetPlatform()==Platform.Web?Task.Run(execute).Result.ReturnObservable():Observable.FromAsync(execute);
-
-	    public static IObservable<Unit> Logon(this XafApplication application,object userKey) =>
+        
+        public static IObservable<Unit> Logon(this XafApplication application,object userKey) =>
             RxApp.AuthenticateSubject.Where(_ => _.authentication== application.Security.GetPropertyValue("Authentication"))
                 .Do(_ => _.args.Instance=userKey).SelectMany(_ => application.WhenLoggedOn().FirstAsync()).ToUnit()
                 .Merge(Unit.Default.ReturnObservable().Do(_ => application.Logon()).IgnoreElements());

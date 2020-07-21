@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.Base.General;
@@ -9,10 +8,6 @@ namespace Xpand.Extensions.Office.Cloud{
     public enum CloudObjectType{
         Event,
         Task
-    }
-    public enum CloudProvider{
-        Google,
-        Microsoft
     }
 
     public static class CloudObjectExtensions{
@@ -25,9 +20,9 @@ namespace Xpand.Extensions.Office.Cloud{
             }
             throw new NotSupportedException(type.FullName);
         }
-
-        public static IQueryable<CloudOfficeObject> QueryCloudOfficeObject(this IObjectSpace objectSpace,
-            string cloudId, CloudObjectType cloudObjectType) => objectSpace.GetObjectsQuery<CloudOfficeObject>().Where(o => o.CloudObjectType == cloudObjectType && o.CloudId == cloudId);
+        
+        public static IQueryable<CloudOfficeObject> QueryCloudOfficeObject(this IObjectSpace objectSpace, string cloudId, CloudObjectType cloudObjectType) 
+            => objectSpace.GetObjectsQuery<CloudOfficeObject>().Where(o => o.CloudObjectType == cloudObjectType && o.CloudId == cloudId);
 
         public static IQueryable<CloudOfficeObject> QueryCloudOfficeObject(this IObjectSpace objectSpace, string localId, Type cloudEntityType){
             var cloudObjectType = cloudEntityType.ToCloudObjectType();
@@ -40,22 +35,4 @@ namespace Xpand.Extensions.Office.Cloud{
         }
 
     }
-    public interface IEventAttendees{
-        IEnumerable<IEventAttendee> Attendees { get; }
-    }
-
-    public interface IEventAttendee{
-        string UserName { get; }
-        string UserEmail { get; }
-        EventResourceResponse EventResourceStatus { get; set; }
-    }
-    
-    public enum EventResourceResponse{
-        NeedsAction = 0,
-        Tentative = 1,
-        Accepted = 2,
-        Declined = 3,
-
-    }
-
 }

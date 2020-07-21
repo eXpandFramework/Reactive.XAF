@@ -20,8 +20,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
             filter ??= (_ => true);
             var methodInfo = request.GetType().Methods(Flags.InstancePublic, "GetAsync").First();
             return Observable.FromAsync(() => methodInfo.InvokeAsync(request)).Cast<IEnumerable<TEntity>>()
-                .SelectMany(entities => entities.ListAllItems(tokenStore, saveToken, filter))
-                .Select(entities => entities);
+                .SelectMany(entities => entities.ListAllItems(tokenStore, saveToken, filter).ToEnumerable().ToArray().ToObservable());
         }
 
         public static IObservable<TEntity[]> ListAllItems<TEntity>(this IEnumerable<TEntity> page,
@@ -32,7 +31,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
                 throw new NotSupportedException($"Pagination not supported for {page.GetType().FullName}");
             }
             var nextPageRequestDelegate = page.GetType().DelegateForGetPropertyValue("NextPageRequest");
-
+            
+            
             var invokeNextPage = Observable.FromAsync(() => methodInfo.InvokeAsync(nextPageRequestDelegate(page)))
                 .Select(entities => {
                     page = (IEnumerable<TEntity>)entities;
@@ -46,8 +46,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
                             tokenStore.Token = HttpUtility.ParseQueryString(new Uri(additionalData["@odata.nextLink"].ToString()).Query).Get("$skiptoken");
                             tokenStore.TokenType = "skiptoken";
                         }
+                        saveToken?.Invoke(tokenStore);
                     }
-
                     return entities;
                 }).Finally(() => saveToken?.Invoke(tokenStore))
                 .Select(o => ((IEnumerable)o).Cast<TEntity>().ToArray());

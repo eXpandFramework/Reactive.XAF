@@ -27,8 +27,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
 
         public static IObservable<(Frame frame, GraphServiceClient client)> Client => ClientSubject.AsObservable();
 
-        private static readonly ISubject<(OutlookTask, ITask)> CustomizeCloudSynchronizationSubject;
-        static TodoService() => CustomizeCloudSynchronizationSubject = Subject.Synchronize(new Subject<(OutlookTask, ITask)>());
+        private static readonly ISubject<(MapAction mapAction,OutlookTask outlookTask, ITask task)> CustomizeCloudSynchronizationSubject;
+        static TodoService() => CustomizeCloudSynchronizationSubject = Subject.Synchronize(new Subject<(MapAction mapAction,OutlookTask, ITask)>());
         internal const string DefaultTodoListId = "Tasks";
         private static IUserRequestBuilder Me(this IBaseRequestBuilder builder) => builder.Client.Me();
         private static IUserRequestBuilder Me(this IBaseClient client) => ((GraphServiceClient)client).Me;
@@ -55,12 +55,12 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
                 task => ((IOutlookTaskFolderTasksCollectionRequest)RequestCustomization.Default(builder.Tasks.Request())).AddAsync(task).ToObservable(),
                 id => new OutlookTask().ReturnObservable(),
                 _ => ((IOutlookTaskRequest)RequestCustomization.Default(builder.Me().Outlook.Tasks[_.cloudId].Request())).UpdateAsync(_.cloudEntity).ToObservable(),
-                (target, sourceEntity) => CustomizeCloudSynchronizationSubject.Synchronize(target, sourceEntity), delete, insert, update));
+                (mapAction,cloud, local) =>CustomizeCloudSynchronizationSubject.Synchronize(cloud, local,mapAction) , delete, insert, update));
 
         [PublicAPI]
-        public static IObservable<(OutlookTask target, ITask source)> CustomizeCloudSynchronization { get; } = CustomizeCloudSynchronizationSubject;
+        public static ISubject<(MapAction mapAction, OutlookTask outlookTask, ITask task)> CustomizeCloudSynchronization { get; } = CustomizeCloudSynchronizationSubject;
 
-        private static OutlookTask Synchronize(this ISubject<(OutlookTask, ITask)> subject, OutlookTask target, ITask source){
+        private static OutlookTask Synchronize(this ISubject<(MapAction,OutlookTask, ITask)> subject, OutlookTask target, ITask source,MapAction mapAction){
             target.Subject = source.Subject;
             target.Body = new ItemBody { Content = source.Description };
             target.Status = source.Status == TaskStatus.Completed
@@ -86,7 +86,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
                     TimeZone = TimeZoneInfo.Local.Id
                 };
             }
-            subject.OnNext((target, source));
+            subject.OnNext((mapAction,target, source));
             return target;
         }
 

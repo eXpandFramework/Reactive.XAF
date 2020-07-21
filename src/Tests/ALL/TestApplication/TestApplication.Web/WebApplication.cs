@@ -1,11 +1,13 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Configuration;
 using System.Web;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Web;
 using DevExpress.ExpressApp.Web.Editors.ASPx;
 using DevExpress.ExpressApp.Xpo;
 using DevExpress.Persistent.Base;
+using Fasterflect;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace TestApplication.Web{
@@ -15,6 +17,8 @@ namespace TestApplication.Web{
             ((ISupportInitialize) this).BeginInit();
             Modules.Add(new WebModule());
             ((ISupportInitialize) this).EndInit();
+            var module = Modules.FindModule(typeof(ModuleBase));
+            module.SetFieldValue("name", "Base");
             this.AlwaysUpdateOnDatabaseVersionMismatch().Subscribe();
             ApplicationName = "TestWebApplication";
             CheckCompatibilityType = CheckCompatibilityType.DatabaseSchema;
@@ -35,8 +39,8 @@ namespace TestApplication.Web{
             }
             else{
                 dataStoreProvider = new MemoryDataStoreProvider();
-                // dataStoreProvider = new ConnectionStringDataStoreProvider(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString);
-                if (application != null) application["DataStoreProvider"] = dataStoreProvider;
+                dataStoreProvider = new ConnectionStringDataStoreProvider(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString);
+                // if (application != null) application["DataStoreProvider"] = dataStoreProvider;
             }
 
             return dataStoreProvider;

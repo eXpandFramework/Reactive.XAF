@@ -9,6 +9,7 @@ using DevExpress.ExpressApp;
 using DevExpress.Persistent.Base.General;
 using DevExpress.Persistent.BaseImpl;
 using Microsoft.Graph;
+using Microsoft.Identity.Client;
 using Shouldly;
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Office.Cloud.BusinessObjects;
@@ -29,7 +30,14 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
         public const string PagingCalendarName = "Xpand Paging Events";
 
         public const int PagingCalendarItemsCount = 11;
-        
+
+        public static async Task<GraphServiceClient> DeleteAllEvents(this XafApplication application){
+            application.ObjectSpaceProvider.NewMicrosoftAuthentication();
+            var authorizeMS = await application.AuthorizeMS((exception, client) => Observable.Empty<AuthenticationResult>());
+            await authorizeMS.Me.Calendar.DeleteAllEvents();
+            return authorizeMS;
+        }
+
         public static async Task Populate_Modified<TEntity>(this IObjectSpaceProvider objectSpaceProvider,
             Func<CloudOfficeTokenStorage,IObservable<TEntity>> listEntities,IObservable<Unit> modified,TimeSpan timeout,Action<IObservable<TEntity>> assert){
             
@@ -73,10 +81,11 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
 
         public static async Task<(Frame frame, GraphServiceClient client)> InitGraphServiceClient(this XafApplication application){
             application.ObjectSpaceProvider.NewMicrosoftAuthentication();
-            var todoModel = await application.ReactiveModulesModel().OfficeModel().MicrosoftModel().CalendarModel();
+            var todoModel = application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Calendar();
             var window = application.CreateViewWindow();
+            var service = CalendarService.Client.FirstAsync().SubscribeReplay();
             window.SetView(application.NewView(todoModel.ObjectViews().First().ObjectView));
-            var client = await CalendarService.Client.FirstAsync().ToTaskWithoutConfigureAwait();
+            var client = await service.ToTaskWithoutConfigureAwait();
             return client;
         }
 
@@ -99,18 +108,18 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
             return xafApplication;
         }
 
-        public static void AssertEvent(this IObjectSpaceProvider objectSpaceProvider, Type cloudEntityType, DevExpress.Persistent.BaseImpl.Event task,
-            string title, DateTime? due, string taskId, string localTaskSubject){
-            title.ShouldBe(localTaskSubject);
+        public static void AssertEvent(this IObjectSpaceProvider objectSpaceProvider, Type cloudEntityType, DevExpress.Persistent.BaseImpl.Event @event,
+            string title, DateTime? due, string taskId, string localEventSubject){
+            title.ShouldBe(localEventSubject);
             
             due.ShouldNotBeNull();
             
 
             using (var space = objectSpaceProvider.CreateObjectSpace()){
-                var cloudObjects = space.QueryCloudOfficeObject(cloudEntityType,task).ToArray();
+                var cloudObjects = space.QueryCloudOfficeObject(cloudEntityType,@event).ToArray();
                 cloudObjects.Length.ShouldBe(1);
                 var cloudObject = cloudObjects.First();
-                cloudObject.LocalId.ShouldBe(task.Oid.ToString());
+                cloudObject.LocalId.ShouldBe(@event.Oid.ToString());
                 cloudObject.CloudId.ShouldBe(taskId);
             }
         }
@@ -168,14 +177,12 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
             return @event;
         }
 
-        public static IObservable<Unit> DeleteAllEvents(this ICalendarRequestBuilder builder){
-            return builder.Events.ListAllItems().DeleteAll(task => builder.Me().Outlook.Tasks[task.Id].Request().DeleteAsync().ToObservable());
-        }
+        public static IObservable<Unit> DeleteAllEvents(this ICalendarRequestBuilder builder) 
+            => builder.Events.ListAllItems().DeleteAll(evt => builder.Me().Events[evt.Id].Request().DeleteAsync().ToObservable());
 
-        public static IObservable<Unit> DeleteAll(this IObservable<IEnumerable<Entity>> source, Func<Entity, IObservable<Unit>> delete){
-            return source.Aggregate((acc, curr) => acc.Concat(curr)).SelectMany(tasks => tasks)
+        public static IObservable<Unit> DeleteAll(this IObservable<IEnumerable<Entity>> source, Func<Entity, IObservable<Unit>> delete) 
+            => source.Aggregate((acc, curr) => acc.Concat(curr)).SelectMany(entities => entities)
                 .SelectMany(delete).LastOrDefaultAsync();
-        }
 
 
         public static IObservable<IList<Event>> NewCalendarEvents(this ICalendarRequestBuilder builder,int count,string title){

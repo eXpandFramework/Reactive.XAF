@@ -196,10 +196,16 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<Unit> WhenDisposed(this IObjectSpace source) => source.ReturnObservable().Disposed();
 
         [PublicAPI]
-        public static IObservable<IObjectSpace> WhenModifyChanged(this IObjectSpace source) => source.ReturnObservable().ModifyChanged();
+        public static IObservable<IObjectSpace> WhenModifyChanged(this IObjectSpace source) => source.ReturnObservable().WhenModifyChanged();
 
-        public static IObservable<IObjectSpace> ModifyChanged(this IObservable<IObjectSpace> source) => source
+        public static IObservable<IObjectSpace> WhenModifyChanged(this IObservable<IObjectSpace> source) => source
             .SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(h => item.ModifiedChanged += h, h => item.ModifiedChanged -= h,ImmediateScheduler.Instance)
+                .Select(pattern => (IObjectSpace) pattern.Sender)
+            );
+        
+        public static IObservable<IObjectSpace> WhenReloaded(this IObjectSpace source) => source.ReturnObservable().WhenReloaded();
+        public static IObservable<IObjectSpace> WhenReloaded(this IObservable<IObjectSpace> source) => source
+            .SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(h => item.Reloaded += h, h => item.Reloaded -= h,ImmediateScheduler.Instance)
                 .Select(pattern => (IObjectSpace) pattern.Sender)
             );
     }

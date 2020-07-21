@@ -33,7 +33,7 @@ namespace ALL.Web.Tests{
                 application.Modules.FirstOrDefault(m => m.GetType()==moduleType).ShouldBeNull();
             }
         }
-        // [XpandTest(LongTimeout,3)]
+        [XpandTest(LongTimeout,3)]
         [Test][Apartment(ApartmentState.STA)]
         public async Task Web_EasyTest(){
             using (var webAdapter = new WebAdapter()){
@@ -43,7 +43,10 @@ namespace ALL.Web.Tests{
 	                var commandAdapter = webAdapter.CreateCommandAdapter();
                     commandAdapter.Execute(new LoginCommand());
                     commandAdapter.TestLookupCascade();
-                    await commandAdapter.TestMicrosoftService(() => Observable.Start(() => commandAdapter.TestMicrosoftTodoService()));
+                    await commandAdapter.TestMicrosoftService(() => Observable.Start(() => {
+                        commandAdapter.TestMicrosoftTodoService();
+                        commandAdapter.TestMicrosoftCalendarService();
+                    }));
                 }
                 finally{
                     webAdapter.KillApplication(testApplication, KillApplicationContext.TestNormalEnded);

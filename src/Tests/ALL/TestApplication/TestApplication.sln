@@ -31,6 +31,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ALL.Web.Tests", "..\ALL.Web
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.Reactive", "..\..\..\Extensions\Xpand.Extensions.Reactive\Xpand.Extensions.Reactive\Xpand.Extensions.Reactive.csproj", "{DE86F607-0FAF-4484-9E77-48AE4ADC01F7}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Office.Cloud.Microsoft", "..\..\..\Modules\Office.Cloud.Microsoft\Xpand.XAF.Modules.Office.Cloud.Microsoft.csproj", "{60E6B658-E3B9-4EFE-A4FF-E2D0E5743E5F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo", "..\..\..\Modules\Office.Cloud.Microsoft.Todo\Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.csproj", "{DCF66753-EB48-4AD9-BCBA-82B2BBF581C1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar", "..\..\..\Modules\Office.Cloud.Microsoft.Calendar\Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.csproj", "{9AC9273B-47F0-4935-BCAC-DCE468C726A4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.Office.Cloud", "..\..\..\Extensions\Xpand.Extensions.Office.Cloud\Xpand.Extensions.Office.Cloud.csproj", "{FADE9990-2E30-4667-8EA5-8FA2D1E0DAD9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -68,6 +76,18 @@ Global
 		{DE86F607-0FAF-4484-9E77-48AE4ADC01F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DE86F607-0FAF-4484-9E77-48AE4ADC01F7}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
 		{DE86F607-0FAF-4484-9E77-48AE4ADC01F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60E6B658-E3B9-4EFE-A4FF-E2D0E5743E5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60E6B658-E3B9-4EFE-A4FF-E2D0E5743E5F}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{60E6B658-E3B9-4EFE-A4FF-E2D0E5743E5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCF66753-EB48-4AD9-BCBA-82B2BBF581C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCF66753-EB48-4AD9-BCBA-82B2BBF581C1}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCF66753-EB48-4AD9-BCBA-82B2BBF581C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9AC9273B-47F0-4935-BCAC-DCE468C726A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9AC9273B-47F0-4935-BCAC-DCE468C726A4}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{9AC9273B-47F0-4935-BCAC-DCE468C726A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FADE9990-2E30-4667-8EA5-8FA2D1E0DAD9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FADE9990-2E30-4667-8EA5-8FA2D1E0DAD9}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{FADE9990-2E30-4667-8EA5-8FA2D1E0DAD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,17 +1,13 @@
 ﻿using System;
 
 using System.Linq;
-using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
-using DevExpress.ExpressApp.Actions;
 using Fasterflect;
 using JetBrains.Annotations;
 using Xpand.Extensions.Office.Cloud.BusinessObjects;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
-using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 namespace Xpand.Extensions.Office.Cloud{
     public static class Extensions{
@@ -19,6 +15,7 @@ namespace Xpand.Extensions.Office.Cloud{
             using (var space = objectSpaceFactory()){
                 var storage = (ITokenStore)(space.GetObject(store) ?? space.CreateObject(store.GetType()));
                 storage.Token = store.Token;
+                storage.TokenType = store.TokenType;
                 storage.EntityName = store.EntityName;
                 space.CommitChanges();
             }
@@ -78,7 +75,7 @@ namespace Xpand.Extensions.Office.Cloud{
             .NewCloudObject(localId, cloudId, cloudObjectType.ToCloudObjectType());
 
         public static IObservable<CloudOfficeObject> NewCloudObject(this IObjectSpace space, object localEntity, object cloudEntity){
-            var localId = space.GetKeyValue(localEntity).ToString();
+            var localId = space .GetKeyValue(localEntity).ToString();
             var cloudId = cloudEntity.GetPropertyValue("Id").ToString();
             return space.NewCloudObject(localId, cloudId, cloudEntity.GetType().ToCloudObjectType());
         }
@@ -94,25 +91,7 @@ namespace Xpand.Extensions.Office.Cloud{
         [PublicAPI]
         public static string GetCloudId(this IObjectSpace objectSpace, string localId, Type cloudEntityType) =>
             objectSpace.QueryCloudOfficeObject(localId, cloudEntityType).FirstOrDefault()?.CloudId;
-
-        public static IObservable<Unit> ConfigureCloudAction<TAuthentication>(this IObservable<SimpleAction> source, string disconnectImageName, string connectImageName,
-            Func<SimpleAction, IObservable<Unit>> aquireAuthorization, Func<SimpleAction, IObservable<Unit>> validateAuthorization=null) where TAuthentication : CloudOfficeBaseObject =>
-            
-            source.SelectMany(action => (validateAuthorization ??= aquireAuthorization)(action).To(action))
-                .SelectMany(action => action.WhenExecute()
-                    .SelectMany(_=> (_.Action.ImageName == connectImageName ? aquireAuthorization(_.Action.AsSimpleAction())
-                        : _.Action.RemoveAuthorization<TAuthentication>()).To(_.Action.AsSimpleAction()))
-                    .SelectMany(simpleAction => (validateAuthorization ??= aquireAuthorization)?.Invoke(simpleAction).To(simpleAction)))
-                .ToUnit();
         
-        private static IObservable<Unit> RemoveAuthorization<TAuthentication>(this ActionBase action) where TAuthentication : CloudOfficeBaseObject =>
-	        action.Application.NewObjectSpace(space => {
-                    var authentication = space.GetObjectByKey<TAuthentication>(SecuritySystem.CurrentUserId);
-                    space.Delete(authentication);
-                    space.CommitChanges();
-                    return Unit.Default.ReturnObservable();
-                })
-                .ToUnit();
     }
 
 
