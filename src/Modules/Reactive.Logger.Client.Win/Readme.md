@@ -3,7 +3,7 @@
 [![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/Reactive.Logger.Client.Win.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+Reactive.Logger.Client.Win) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/Reactive.Logger.Client.Win.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+Reactive.Logger.Client.Win)
 # About 
 
-The `Reactive.Logger.Client.Win` is a XAF Windows Forms application (**executable**) capable to connect to any XAF application that has the `Reactive.Logger.Hub` module installed.
+The `Reactive.Logger.Client.Win` is an executable able connect to any XAF app that uses the `Reactive.Logger.Hub`.
 
 ## Details
 The client is an executable XAF Windows Forms application and not a XAF module, which at the moment is distributed from Nuget.org but in future will use Chocolatey.org as it makes more sense. So you download the package and run the exe which will monitor the ports configured in your model. By default it monitors the range 

@@ -1,9 +1,9 @@
-![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.svg?&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.svg?&style=flat)
+![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.svg?&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.svg?&style=flat)
 
-[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/Office.Cloud.Microsoft.Todo.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+Office.Cloud.Microsoft.Todo) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/Office.Cloud.Microsoft.Todo.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+Office.Cloud.Microsoft.Todo)
+[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/Office.Cloud.Microsoft.Calendar.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+Office.Cloud.Microsoft.Calendar) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/Office.Cloud.Microsoft.Calendar.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+Office.Cloud.Microsoft.Calendar)
 # About 
 
-This package integrates with the Office365 Todo cloud service.
+The `Microsoft.Calendar` package integrates with the Office365 Calendar cloud service.
 
 ## Details
 
@@ -15,29 +15,45 @@ This package integrates with the Office365 Todo cloud service.
 
 This is a `platform agnostic` module that authenticates against Azure using the [Xpand.XAF.Modules.Microsoft](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Office.Cloud.Microsoft) package, for details head to it's wiki page.
 
-The `Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo` provides a configurable one way synchronization between the `ITask` Domain Components and the `Microsoft.Graph.OutlookTask` entity.
-All `CRUD` operations will execute the cloud api after a successful XAF transaction. To `configure` the subject `Views` and the target container `Task list` you can use the model.
+The `Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar` provides a configurable `two way` synchronization between the `IEvent` Domain Components and the `Microsoft.Graph.Event` entity.
+All `CRUD` operations will execute the cloud api after a successful XAF transaction. 
 
-![image](https://user-images.githubusercontent.com/159464/87255178-264b6a00-c491-11ea-84ec-575750a3c38e.png)
+You can use the model to `configure`:
 
-The package can operate without any configuration by executing a `predefined map` between the `ITask` and `OutlookTask` objects on Update and on Insert.
+* The subject `Views`, the target container `Calendar` and which Domain Component should be created when a `NewCloudEvent`.</br>
+![image](https://user-images.githubusercontent.com/159464/88489382-9cc18f00-cf9c-11ea-9f59-ceb22fbcd16a.png)
+* The CRUD `SynchronizationType` and the `CallDirection`.</br>
+![image](https://user-images.githubusercontent.com/159464/88489628-01c9b480-cf9e-11ea-95b3-e59e59bcd93b.png)
 
-To customize the predefined map you can use a query like the next one which suffix the OutlookTask subject with the current date:
+
+
+The package can operate without any configuration by executing a `predefined map` between the `IEvent` and `OutlookEvent` objects on Update and on Insert for both incoming and outgoing calls.
+
+To customize the predefined map you can use a query like the next one which suffix the OutlookEvent subject with the current date:
 
 ```cs
 
-TodoService.CustomizeUpdate.Merge(TodoService.CustomizeInsert)
-	.Do(tuple => {
-		tuple.outlookTask.Subject = $"{tuple.task.Subject} - {DateTime.Now}";
-	})
-	.Subscribe();
+CalendarService.CustomizeSynchronization
+    .Do(e => {
+        var tuple = e.Instance;
+        if (tuple.mapAction != MapAction.Delete){
+            if (tuple.callDirection == CallDirection.In){
+                tuple.local.Subject = $"{tuple.cloud.Subject} - {DateTime.Now}";
+            }
+            else if (tuple.callDirection == CallDirection.Out){
+                tuple.cloud.Subject = $"{tuple.local.Subject} - {DateTime.Now}";
+            }
+            e.Handled = true;
+        }
+    })
+    .Subscribe();
 ```
-
+**Cloud to local synchronization:**
+The package uses [delta queries](https://docs.microsoft.com/en-us/graph/delta-query-overview) to track changes in Microsoft Graph data.
 
 **Possible future improvements:**
 
-1. Bi-Directional synchronization.
-1. Any other need you may have.
+Any other need you may have.
 
 [Let me know](https://github.com/sponsors/apobekiaris) if you want me to implement them for you.
 
@@ -45,29 +61,29 @@ TodoService.CustomizeUpdate.Merge(TodoService.CustomizeInsert)
 
 ### Examples
 
-In the next screencast you can see all `CRUD` operations on the Task BO and how they synchronize with the `Office365` cloud, for both `Win` and `Web`. At the bottom the [Reactive.Logger.Client.Win](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win) is reporting as the module is used.
+In the next screencast you can see all `CRUD` operations on the Event BO and how they synchronize with the `Office365` Calendar, for both platforms `Win`, `Web` and both directions `Incoming`, `Outgoing`. At the bottom the [Reactive.Logger.Client.Win](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win) is reporting as the module is used.
 
 <twitter>
 
-[![Xpand XAF Modules Office Cloud Microsoft Todo](https://user-images.githubusercontent.com/159464/87413649-3e2b0700-c5d3-11ea-95d1-b44ee2f7891c.gif)
-](https://www.youtube.com/watch?v=8m6Yjrw2Rk0)
+[![Xpand XAF Modules Office Cloud Microsoft Calendar](https://user-images.githubusercontent.com/159464/87413649-3e2b0700-c5d3-11ea-95d1-b44ee2f7891c.gif)
+](https://youtu.be/E90hOGf-W2I)
 
 </twitter>
 
-[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)]((https://www.youtube.com/watch?v=8m6Yjrw2Rk0))
+[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/E90hOGf-W2I)
 
 
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 
 
-   `Install-Package Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo`.
+   `Install-Package Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar`.
 
-    The above only references the dependencies and nexts steps are mandatory.
+    The above only references the dependencies and next steps are mandatory.
 
 2. [Ways to Register a Module](https://documentation.devexpress.com/eXpressAppFramework/118047/Concepts/Application-Solution-Components/Ways-to-Register-a-Module)
 or simply add the next call to your module constructor
     ```cs
-    RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.Office.Cloud.Microsoft.TodoModule));
+    RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.Office.Cloud.Microsoft.CalendarModule));
     ```
 ## Versioning
 The module is **not bound** to **DevExpress versioning**, which means you can use the latest version with your old DevExpress projects [Read more](https://github.com/eXpandFramework/XAF/tree/master/tools/Xpand.VersionConverter).
@@ -103,10 +119,10 @@ To `Step in the source code` you need to `enable Source Server support` in your 
 
 If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call at the constructor of your module.
 ```cs
-Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Office.Office.Cloud.Microsoft.TodoModule))
+Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Office.Office.Cloud.Microsoft.CalendarModule))
 ```
 
 ### Tests
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.Office.Office.Cloud.Microsoft.Todo.Office.Office.Cloud.Microsoft.Todo). 
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.Office.Office.Cloud.Microsoft.Calendar.Office.Office.Cloud.Microsoft.Calendar). 
 All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
 

@@ -17,6 +17,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
         [DefaultValue(TodoService.DefaultTodoListId)]
         [Required]
         string DefaultTodoListName{ get; set; }
+        IModelTodoItems Items{ get; }
     }
 
     [DomainLogic(typeof(IModelTodo))]
@@ -24,11 +25,6 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
         
         public static IObservable<IModelTodo> TodoModel(this IObservable<IModelMicrosoft> source){
             return source.Select(modules => modules.Todo());
-        }
-
-
-        public static IModelObjectViewsDependencyList ObjectViews(this IModelTodo modelTodo){
-            return ((IModelObjectViews) modelTodo).ObjectViews;
         }
 
         public static IModelTodo Todo(this IModelMicrosoft modelMicrosoft){
@@ -41,4 +37,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
 
     }
 
+    public interface IModelTodoItems : IModelList<IModelTodoItem>,IModelNode{
+    }
+
+    public interface IModelTodoItem:IModelSynchronizationType,IModelObjectViewDependency{
+    }
 }

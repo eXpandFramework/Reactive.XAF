@@ -8,20 +8,7 @@ using DevExpress.Persistent.Base;
 using JetBrains.Annotations;
 
 namespace Xpand.Extensions.XAF.ModelExtensions{
-    public interface IModelObjectViews:IModelNode{
-        IModelObjectViewsDependencyList ObjectViews{ get; }
-    }
-
-    [ModelNodesGenerator(typeof(ModelObjectViewsNodesGenerator))]
-    public interface IModelObjectViewsDependencyList:IModelList<IModelObjectViewDependency>,IModelNode{
-        
-    }
-    public class ModelObjectViewsNodesGenerator:ModelNodesGeneratorBase{
-        protected override void GenerateNodesCore(ModelNode node){
-            
-        }
-    }
-
+    
     [KeyProperty(nameof(ObjectViewId))][PublicAPI]
     public interface IModelObjectViewDependency:IModelNode{
         [Browsable(false)]

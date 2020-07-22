@@ -61,6 +61,7 @@
     <Compile Include="..\..\..\TestsLib\BO\Product.cs" Link="Common\Product.cs" />
     <Compile Include="..\..\..\TestsLib\DefaultUserModuleUpdater.cs" Link="Common\DefaultUserModuleUpdater.cs" />
     <Compile Include="..\CommonFiles\AgnosticModule.cs" Link="Common\AgnosticModule.cs" />
+    <Compile Include="..\CommonFiles\MicrosoftCalendarService\MicrosoftCalendarService.cs" Link="MicrosoftCalendarService\MicrosoftCalendarService.cs" />
     <Compile Include="..\CommonFiles\MicrosoftService\MicrosoftService.cs" Link="MicrosoftService\MicrosoftService.cs" />
     <Compile Include="..\CommonFiles\MicrosoftService\ShowMSAccountInfoService.cs" Link="MicrosoftService\ShowMSAccountInfoService.cs" />
     <Compile Include="..\CommonFiles\MicrosoftTodoService\MicrosoftTodoService.cs" Link="MicrosoftTodoService\MicrosoftTodoService.cs" />
@@ -97,13 +98,13 @@
     <Content Include="ExpressApp.ico" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="20.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="20.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="20.1.4" />
-    <PackageReference Include="DevExpress.EasyTest" Version="20.1.4" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="2.202.36" />
+    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="20.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="20.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="20.1.6" />
+    <PackageReference Include="DevExpress.EasyTest" Version="20.1.6" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="2.202.36.1" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="MicrosoftTodoService\" />
+    <Folder Include="MicrosoftCalendarService\" />
   </ItemGroup>
 </Project>

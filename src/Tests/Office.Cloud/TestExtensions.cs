@@ -5,7 +5,6 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
-using DevExpress.Persistent.Base.General;
 using Shouldly;
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Office.Cloud.BusinessObjects;

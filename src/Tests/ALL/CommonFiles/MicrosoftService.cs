@@ -20,11 +20,12 @@ namespace ALL.Tests{
 			};
 			commandAdapter.Execute(commands);
 			await commandAdapter.Authenticate();
-			commandAdapter.CheckConnection();
-			commandAdapter.Execute(new LogOffCommand(),new LoginCommand());
-			commandAdapter.CheckConnection();
             await whenConnected();
-			commandAdapter.Disconnect();
+			commandAdapter.CheckConnection();
+            commandAdapter.Execute(new LogOffCommand(),new LoginCommand());
+			commandAdapter.CheckConnection();
+            commandAdapter.Execute(new ActionCloseCommand(),new ActionCloseCommand());
+            commandAdapter.Disconnect();
 		}
 
 		private static void Disconnect(this ICommandAdapter commandAdapter){
@@ -39,7 +40,7 @@ namespace ALL.Tests{
 				new ActionAvailableCommand(Xpand.XAF.Modules.Office.Cloud.Microsoft.MicrosoftService.SignInCaption){ExpectException = true},
 				new ActionAvailableCommand(Xpand.XAF.Modules.Office.Cloud.Microsoft.MicrosoftService.SignOutCaption),
 				new CheckActionToolTip((Xpand.XAF.Modules.Office.Cloud.Microsoft.MicrosoftService.SignOutCaption,"Sign out apostolisb@devexpress.com")),
-				new ActionCommand("Show MSAccount Info"),new WaitCommand(5000),new CheckDetailViewCommand(("Mail","apostolisb@devexpress.com")),new ActionOKCommand());
+				new ActionCommand("Show MSAccount Info"),new WaitCommand(5000),new CheckDetailViewCommand(("Mail","apostolisb@devexpress.com")),new ActionCloseCommand());
 		}
 
 		private static async Task Authenticate(this ICommandAdapter commandAdapter){

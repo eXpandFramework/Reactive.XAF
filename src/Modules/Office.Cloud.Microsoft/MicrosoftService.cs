@@ -286,17 +286,25 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 				.TraceMicrosoftModule();
 		}
 
+        static readonly Subject<GraphServiceClient> ClientSubject=new Subject<GraphServiceClient>();
+
+        public static IObservable<GraphServiceClient> Client => ClientSubject.AsObservable();
+
         public static IObservable<(Frame frame, GraphServiceClient client)> AuthorizeMS(this  IObservable<Frame> source,
-	        Func<MsalUiRequiredException,IClientApplicationBase,  IObservable<AuthenticationResult>> aquireToken = null) => source
-            .SelectMany(frame => frame.View.AsObjectView().Application().AuthorizeMS(aquireToken).Select(client => (frame, client)));
+	        Func<MsalUiRequiredException,IClientApplicationBase,  IObservable<AuthenticationResult>> aquireToken = null) 
+            => source.SelectMany(frame => frame.View.AsObjectView().Application().AuthorizeMS(aquireToken)
+                    .Select(client => (frame, client)));
 
 		public static IObservable<GraphServiceClient> AuthorizeMS(this XafApplication application, 
-			Func<MsalUiRequiredException,IClientApplicationBase,  IObservable<AuthenticationResult>> aquireToken = null) => application.CreateClientApp()
-			.Authorize(cache => cache.SynchStorage(application.CreateObjectSpace, application.CurrentUserId()), aquireToken, application)
-		;
+			Func<MsalUiRequiredException,IClientApplicationBase,  IObservable<AuthenticationResult>> aquireToken = null) 
+            => application.CreateClientApp()
+                .Authorize(cache => cache.SynchStorage(application.CreateObjectSpace, application.CurrentUserId()), aquireToken, application)
+                .Do(client => {})
+                .Do(ClientSubject.OnNext)
+        ;
 
-		private static Guid CurrentUserId(this XafApplication application) =>
-			application.Security.IsSecurityStrategyComplex() ? (Guid) application.Security.UserId
+		private static Guid CurrentUserId(this XafApplication application) 
+            => application.Security.IsSecurityStrategyComplex() ? (Guid) application.Security.UserId
 				: $"{application.Title}{Environment.MachineName}{Environment.UserName}".ToGuid();
 
 		static IObservable<GraphServiceClient> Authorize(this IClientApplicationBase clientApp, Func<ITokenCache, IObservable<TokenCacheNotificationArgs>> storeResults,

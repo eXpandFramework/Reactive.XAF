@@ -3,7 +3,7 @@
 [![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/Office.Cloud.Microsoft.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+Office.Cloud.Microsoft) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/Office.Cloud.Microsoft.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+Office.Cloud.Microsoft)
 # About 
 
-This package authenticates against Azure Active Directory and provides API for querying the MSGraph endpoints.
+The `Microsoft` authenticates against Azure Active Directory and queries the MSGraph endpoints.
 
 ## Details
 
@@ -116,7 +116,7 @@ Below is a demonstration of the package authenticating against `AAD` for both `W
 
 </twitter>
 
-[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)]((https://www.youtube.com/watch?v=XIczKjE2sFw))
+[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://www.youtube.com/watch?v=XIczKjE2sFw)
 
 Also, refer to the [Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Office.Cloud.Microsoft.Todo)
 

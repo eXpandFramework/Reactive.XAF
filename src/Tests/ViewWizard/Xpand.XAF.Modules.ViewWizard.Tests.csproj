@@ -22,7 +22,9 @@
     <Reference Include="Xpand.Extensions.XAF">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
     </Reference>
-    
+    <Reference Include="Xpand.XAF.Modules.CloneModelView">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.CloneModelView.dll</HintPath>
+    </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
     </Reference>

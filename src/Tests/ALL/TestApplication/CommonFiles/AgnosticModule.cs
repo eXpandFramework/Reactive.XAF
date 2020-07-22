@@ -102,7 +102,7 @@ namespace TestApplication{
 			RequiredModuleTypes.Add(typeof(SuppressConfirmationModule));
 			RequiredModuleTypes.Add(typeof(ViewEditModeModule));
 			RequiredModuleTypes.Add(typeof(ViewItemValueModule));
-			RequiredModuleTypes.Add(typeof(ReactiveLoggerHubModule));
+			// RequiredModuleTypes.Add(typeof(ReactiveLoggerHubModule));
 			AdditionalExportedTypes.Add(typeof(Event));
 		}
 

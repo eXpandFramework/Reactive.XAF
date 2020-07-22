@@ -6,13 +6,14 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
+using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.Base.General;
 using Microsoft.Graph;
 using Shouldly;
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.Extensions.XAF.ModelExtensions;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests;
@@ -34,10 +35,17 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
             var client = await application.InitGraphServiceClient();
             var foldersRequestBuilder = client.client.Me.Outlook.TaskFolders;
             var taskFolder = await foldersRequestBuilder.GetFolder(taskFolderName, !keepTaskFolder && taskFolderName!=TasksPagingFolderName);
-            if (taskFolder == null&&taskFolderName==TasksPagingFolderName){
-                taskFolder = await foldersRequestBuilder.Request()
-                    .AddAsync(new OutlookTaskFolder(){Name = TasksPagingFolderName});
-                await foldersRequestBuilder[taskFolder.Id].NewFolderTasks(TasksFolderPagingItemsCount, nameof(MicrosoftTodoModule));
+            if (taskFolderName==TasksPagingFolderName){
+                if (taskFolder==null){
+                    taskFolder = await foldersRequestBuilder.Request()
+                        .AddAsync(new OutlookTaskFolder(){Name = TasksPagingFolderName});
+                }
+
+                var count = (await foldersRequestBuilder[taskFolder?.Id].Tasks.ListAllItems().Sum(entities => entities.Length));
+                var itemsCount = TasksFolderPagingItemsCount-count;
+                if (itemsCount>0){
+                    await foldersRequestBuilder[taskFolder?.Id].NewFolderTasks(itemsCount, nameof(MicrosoftTodoModule));
+                }
             }
             var requestBuilder = foldersRequestBuilder[taskFolder?.Id];
             if (taskFolderName != TasksPagingFolderName&&!keepTasks&&!keepTaskFolder){
@@ -56,9 +64,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
             application.ObjectSpaceProvider.NewMicrosoftAuthentication();
             var todoModel = await application.ReactiveModulesModel().OfficeModel().MicrosoftModel().TodoModel();
             var window = application.CreateViewWindow();
-            window.SetView(application.NewView(todoModel.ObjectViews().First().ObjectView));
-            var client = await TodoService.Client.FirstAsync().ToTaskWithoutConfigureAwait();
-            return client;
+            var service = TodoService.Client.FirstAsync().SubscribeReplay();
+            window.SetView(application.NewView(todoModel.Items.Select(item => item.ObjectView).First()));
+            return (await service.ToTaskWithoutConfigureAwait());
         }
 
         public static MicrosoftTodoModule TodoModule(this Platform platform,params ModuleBase[] modules){
@@ -67,7 +75,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
             var module = application.AddModule<MicrosoftTodoModule>(typeof(Task));
             application.Model.ConfigureMicrosoft();
             var todoModel = application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Todo();
-            var dependency = ((IModelObjectViews) todoModel).ObjectViews.AddNode<IModelObjectViewDependency>();
+            var dependency = todoModel.Items.AddNode<IModelTodoItem>();
             dependency.ObjectView = application.Model.BOModel.GetClass(typeof(Task)).DefaultDetailView;
             application.Logon();
             application.CreateObjectSpace();

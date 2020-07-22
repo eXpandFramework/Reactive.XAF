@@ -44,9 +44,11 @@ namespace ALL.Web.Tests{
                     commandAdapter.Execute(new LoginCommand());
                     commandAdapter.TestLookupCascade();
                     await commandAdapter.TestMicrosoftService(() => Observable.Start(() => {
-                        commandAdapter.TestMicrosoftTodoService();
                         commandAdapter.TestMicrosoftCalendarService();
+                        commandAdapter.TestMicrosoftTodoService();
+                        
                     }));
+                    
                 }
                 finally{
                     webAdapter.KillApplication(testApplication, KillApplicationContext.TestNormalEnded);

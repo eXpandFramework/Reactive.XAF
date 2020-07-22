@@ -3,7 +3,7 @@
 [![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/SuppressConfirmation.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+SuppressConfirmation) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/SuppressConfirmation.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+SuppressConfirmation)
 # About 
 
-Suppress ObjectView modification confirmations.
+The `SuppressConfirmation` suppresses ObjectViews modification confirmations.
 
 ## Details
 This is a `platform agnostic` module satisfies the following conditions:

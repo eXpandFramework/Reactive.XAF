@@ -21,7 +21,7 @@ namespace Xpand.Extensions.Office.Cloud{
             }
         }
 
-        public static IObservable<TCloudEntity> MapEntity<TCloudEntity, TLocalEntity>(this Func<IObjectSpace> objectSpaceFactory, TLocalEntity localEntity,
+        internal static IObservable<TCloudEntity> MapEntity<TCloudEntity, TLocalEntity>(this Func<IObjectSpace> objectSpaceFactory, TLocalEntity localEntity,
             Func<TLocalEntity, IObservable<TCloudEntity>> insert, Func<(string cloudId, TLocalEntity task), IObservable<TCloudEntity>> update){
             var objectSpace = objectSpaceFactory();
             var localId = objectSpace.GetKeyValue(localEntity).ToString();
@@ -31,27 +31,44 @@ namespace Xpand.Extensions.Office.Cloud{
 
         
         [PublicAPI]
-        public static IObservable<T> DeleteObjectSpaceLink<T>(this IObservable<T> source) where T : IObjectSpaceLink => source.Select(link => {
-            link.ObjectSpace.Delete(link);
-            link.ObjectSpace.CommitChanges();
-            return link;
-        });
+        public static IObservable<T> DeleteObjectSpaceLink<T>(this IObservable<T> source) where T : IObjectSpaceLink 
+            => source.Select(link => {
+                link.ObjectSpace.Delete(link);
+                link.ObjectSpace.CommitChanges();
+                return link;
+            });
 
-        public static IObservable<(TServiceObject serviceObject, MapAction mapAction)> MapEntities<TBO, TServiceObject>(this IObjectSpace objectSpace,
-            Func<CloudOfficeObject, IObservable<(TServiceObject serviceObject,MapAction mapAction)>> delete, Func<TBO, IObservable<(TServiceObject serviceObject,MapAction mapAction)>> map){
-            var deleteObjects = objectSpace.WhenDeletedObjects<TBO>(true)
+        public static bool IsDelete(this SynchronizationType synchronizationType) 
+            => new[]{SynchronizationType.CreatedOrDeleted,SynchronizationType.Deleted,SynchronizationType.All }.Contains(synchronizationType);
+
+        public static bool IsCreate(this SynchronizationType synchronizationType) 
+            => new[]{SynchronizationType.Created, SynchronizationType.CreatedOrDeleted, SynchronizationType.CreatedOrUpdated,SynchronizationType.All}.Contains(synchronizationType);
+        
+        public static bool IsUpdate(this SynchronizationType synchronizationType) 
+            => new[]{SynchronizationType.Updated, SynchronizationType.CreatedOrUpdated, SynchronizationType.UpdatedOrDeleted,SynchronizationType.All}.Contains(synchronizationType);
+
+        public static IObservable<(TCloudEntity serviceObject, MapAction mapAction)>
+            ModifiedObjects<TLocalEntity, TCloudEntity>(this IObjectSpace objectSpace, SynchronizationType synchronizationType, 
+                Func<(CloudOfficeObject cloudOfficeObject, TLocalEntity localEntity), IObservable<(TCloudEntity , MapAction mapAction)>> delete,
+                Func<TLocalEntity, IObservable<(TCloudEntity serviceObject, MapAction mapAction)>> map){
+            
+            var deleteObjects =synchronizationType.IsDelete()? objectSpace.WhenDeletedObjects<TLocalEntity>(true)
                 .SelectMany(_ => _.objects.SelectMany(o => {
 	                var deletedId = _.objectSpace.GetKeyValue(o).ToString();
-	                return _.objectSpace.QueryCloudOfficeObject(typeof(TServiceObject), o).Where(officeObject => officeObject.LocalId == deletedId);
+	                return _.objectSpace.QueryCloudOfficeObject(typeof(TCloudEntity), o).Where(officeObject => officeObject.LocalId == deletedId).ToArray()
+                        .Select(officeObject => (officeObject,bo:(TLocalEntity)o));
                 }))
-                .DeleteObjectSpaceLink()
-                .SelectMany(cloudOfficeObject => delete(cloudOfficeObject).Select(s => cloudOfficeObject))
-                .To((TServiceObject)typeof(TServiceObject).CreateInstance())
-                .Select(o => (o,MapAction.Delete));
+                .SelectMany(t => delete(t).Select(s => t.officeObject))
+                // .DeleteObjectSpaceLink()
+                .To((TCloudEntity)typeof(TCloudEntity).CreateInstance())
+                .Select(o => (o,MapAction.Delete)):Observable.Empty<(TCloudEntity serviceObject, MapAction mapAction)>();
 
-            var mapObjects = objectSpace.WhenModifiedObjects<TBO>(true, ObjectModification.NewOrUpdated)
-                .SelectMany(_ => _.objects).Cast<TBO>().SelectMany(map);
-            return mapObjects.Merge(deleteObjects);
+            var newObjects = synchronizationType.IsCreate() ? objectSpace.WhenModifiedObjects<TLocalEntity>(true, ObjectModification.New)
+                .SelectMany(_ => _.objects).Cast<TLocalEntity>().SelectMany(map):Observable.Empty<(TCloudEntity serviceObject, MapAction mapAction)>();
+            
+            var updateObjects = synchronizationType.IsUpdate() ? objectSpace.WhenModifiedObjects<TLocalEntity>(true, ObjectModification.Updated)
+                .SelectMany(_ => _.objects).Cast<TLocalEntity>().SelectMany(map):Observable.Empty<(TCloudEntity serviceObject, MapAction mapAction)>();
+            return updateObjects.Merge(newObjects).Merge(deleteObjects);
         }
         public static IObservable<TServiceObject> MapEntities<TBO, TServiceObject>(this IObjectSpace objectSpace,IObservable<TBO> deletedObjects,
             IObservable<TBO> newOrUpdatedObjects, Func<CloudOfficeObject, IObservable<TServiceObject>> delete, Func<TBO, IObservable<TServiceObject>> map){
@@ -61,7 +78,7 @@ namespace Xpand.Extensions.Office.Cloud{
                         var deletedId = objectSpace.GetKeyValue(_).ToString();
                         return objectSpace.QueryCloudOfficeObject(typeof(TServiceObject), _).Where(o => o.LocalId == deletedId).ToObservable();
                     })
-                    .DeleteObjectSpaceLink()
+                    // .DeleteObjectSpaceLink()
                     .SelectMany(cloudOfficeObject => delete(cloudOfficeObject).Select(s => cloudOfficeObject))
                     .To<TServiceObject>());
         }

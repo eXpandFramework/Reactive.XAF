@@ -12,3 +12,4 @@ JetBrains.Annotations
 Moq
 Fasterflect.Xpand
 Xpand.Patcher
+akarnokd.reactive_extensions

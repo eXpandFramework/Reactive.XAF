@@ -19,11 +19,16 @@ This namespace `Xpand.XAF.Modules` is used for projects that contain XAF modules
     * Only one entry in the Project/References list.
 
 </br>In the next screencast we see how easy is to install all packages that target the Windows platform. It is recommended to use the Nuget `PackageReference` format. First we install all packages and make a note that a dependency is added for all, then we remove a few installation lines and we make a note how the assembly dependencies reflects only that used API. The assembly reference discovery was done with the help of the XpandPwsh [Get-AssemblyReference](https://github.com/eXpandFramework/XpandPwsh/wiki/Get-AssemblyReference) cmdlet.</br>
-    ![Xpand XAF All](https://user-images.githubusercontent.com/159464/86915211-447c3780-c12a-11ea-973d-3096044dc22b.gif)
-
-    ---
 
 <twitter>
+
+![Xpand XAF All](https://user-images.githubusercontent.com/159464/86915211-447c3780-c12a-11ea-973d-3096044dc22b.gif)
+
+</twitter>
+
+[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/LvxQ-U_0Sbg)
+
+
 
 |PackageName|Version|[![Custom badge](https://xpandshields.azurewebsites.net/endpoint.svg?label=&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAF)](https://www.nuget.org/packages?q=Xpand.XAF)|Target|Platform
 |---|---|---|---|---|
@@ -56,7 +61,7 @@ This namespace `Xpand.XAF.Modules` is used for projects that contain XAF modules
 [Xpand.XAF.Win.All](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Win.All)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Win.All.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Win.All.svg?label=&style=flat)||Win
 
 
-</twitter>
+
 
 ## Issues
 Use main project [issues](https://github.com/eXpandFramework/eXpand/issues/new/choose)

@@ -3,7 +3,7 @@
 [![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/Reactive.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+Reactive) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/Reactive.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+Reactive)
 # About 
 
-The `Reactive` module can be used to create XAF DSL implementations in a Reactive/Functional style resulting in maintainable easy to read code base. 
+The `Reactive` module provides a XAF DSL API for functional/stateless implementations. 
 
 ## Details
 This is a `platform agnostic` module. All modules that use it as a dependency **do not use controllers**. Instead they use existing or new XAF events where they are modeled as operators with the prefix `When`. 

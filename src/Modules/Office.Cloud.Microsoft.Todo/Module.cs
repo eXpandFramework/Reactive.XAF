@@ -22,7 +22,6 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
         public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders){
             base.ExtendModelInterfaces(extenders);
             extenders.Add<IModelMicrosoft,IModelMicrosoftTodo>();
-            extenders.Add<IModelTodo,IModelObjectViews>();
         }
         
         [PublicAPI]

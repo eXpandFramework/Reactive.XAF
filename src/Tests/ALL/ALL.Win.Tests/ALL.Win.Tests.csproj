@@ -19,15 +19,17 @@
     <Compile Remove="Program.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\CommonFiles\MicrosoftCalendarService.cs" Link="MicrosoftCalendarService.cs" />
     <Compile Include="..\CommonFiles\MicrosoftService.cs" Link="MicrosoftService.cs" />
     <Compile Include="..\CommonFiles\MicrosoftTodoService.cs" Link="MicrosoftTodoService.cs" />
+    <Compile Include="..\CommonFiles\OfficeCloudService.cs" Link="OfficeCloudService.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.EasyTest" Version="20.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="20.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.ScriptRecorder" Version="20.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="20.1.4" />
+    <PackageReference Include="DevExpress.EasyTest" Version="20.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="20.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.ScriptRecorder" Version="20.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="20.1.6" />
     <PackageReference Include="MagicOnion" Version="2.6.3" />
     <PackageReference Include="Moq" Version="4.13.0" />
     <PackageReference Include="Shouldly" Version="3.0.2" />
@@ -35,7 +37,7 @@
     <PackageReference Include="System.Reactive" Version="4.4.1" />
     <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.16.1" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="2.202.36" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="2.202.36.1" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.TestsLib">

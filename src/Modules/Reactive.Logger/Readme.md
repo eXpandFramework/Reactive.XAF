@@ -3,7 +3,7 @@
 [![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/Reactive.Logger.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+Reactive.Logger) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/Reactive.Logger.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+Reactive.Logger)
 # About 
 
-The `Reactive.Logger` module monitors calls to the Reactive delegates OnNext, OnSubscribe, OnDispose, OnCompleted, OnError
+The `Reactive.Logger` module monitors calls to the RX delegates OnNext, OnSubscribe, OnDispose, OnCompleted, OnError
 
 ## Details
 This is a `platform agnostic` module extends the `IModelReactiveModules` to provide a list TraceSources allowing to configure them further. All reactive modules will be in this list. 

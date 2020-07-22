@@ -3,7 +3,7 @@
 [![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/ProgressBarViewItem.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+ProgressBarViewItem) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/ProgressBarViewItem.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+ProgressBarViewItem)
 # About 
 
-The `ProgressBarViewItem` package contains a ViewItem that can help you display a progress for your long running tasks. 
+The `ProgressBarViewItem` package integrates a UI progress for long running tasks. 
 
 ## Details
 This is a `platform agnostic` module that registers a `ProgressViewItem` into the [ViewItems](https://docs.devexpress.com/eXpressAppFramework/112612/concepts/ui-construction/view-items) of your application.
@@ -55,7 +55,7 @@ and the same view on the web:
 
 </twitter>
 
-[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)]((https://www.youtube.com/watch?v=rJgK4UD2PgA))
+[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://www.youtube.com/watch?v=rJgK4UD2PgA)
 
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 

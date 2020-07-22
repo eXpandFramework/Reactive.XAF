@@ -8,6 +8,8 @@ using Xpand.Extensions.LinqExtensions;
 
 namespace Xpand.TestsLib.EasyTest{
     public static class EasytestExtesions{
+        
+
         public static bool IsWeb(this TestApplication application) {
             return application.AdditionalAttributes.Any(_ => _.Name == "URL");
         }
@@ -15,7 +17,7 @@ namespace Xpand.TestsLib.EasyTest{
         public static T ConnvertTo<T>(this Command command) where T:Command{
             var t = (T)typeof(T).CreateInstance();
             t.Parameters.MainParameter = command.Parameters.MainParameter??new MainParameter();
-            t.Parameters.ExtraParameter = command.Parameters.ExtraParameter;
+            t.Parameters.ExtraParameter = command.Parameters.ExtraParameter??new MainParameter();
             t.SetPropertyValue("ExpectException",command.ExpectException);
             foreach (var parameter in command.Parameters){
                 t.Parameters.Add(parameter);
@@ -33,7 +35,15 @@ namespace Xpand.TestsLib.EasyTest{
                 if (command is IRequireApplicationOptions requireApplicationOptions){
                     requireApplicationOptions.SetApplicationOptions(adapter.GetTestApplication());
                 }
-                command.Execute(adapter);
+                try{
+                    command.Execute(adapter);
+                }
+                catch (CommandException){
+                    if(!command.ExpectException) {
+                        throw;
+                    }
+
+                }
             }
         }
 

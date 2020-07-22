@@ -22,7 +22,6 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
         public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders){
             base.ExtendModelInterfaces(extenders);
             extenders.Add<IModelMicrosoft,IModelMicrosoftCalendar>();
-            extenders.Add<IModelCalendar,IModelObjectViews>();
         }
         
         [PublicAPI]

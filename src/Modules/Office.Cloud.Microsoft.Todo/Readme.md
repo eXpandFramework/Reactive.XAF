@@ -16,9 +16,13 @@ This package integrates with the Office365 Todo cloud service.
 This is a `platform agnostic` module that authenticates against Azure using the [Xpand.XAF.Modules.Microsoft](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Office.Cloud.Microsoft) package, for details head to it's wiki page.
 
 The `Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo` provides a configurable one way synchronization between the `ITask` Domain Components and the `Microsoft.Graph.OutlookTask` entity.
-All `CRUD` operations will execute the cloud api after a successful XAF transaction. To `configure` the subject `Views` and the target container `Task list` you can use the model.
+All `CRUD` operations will execute the cloud api after a successful XAF transaction. 
 
-![image](https://user-images.githubusercontent.com/159464/87255178-264b6a00-c491-11ea-84ec-575750a3c38e.png)
+* To `configure` the subject `Views` and the target container `Task list` you can use the model.</br>  
+  ![image](https://user-images.githubusercontent.com/159464/87255178-264b6a00-c491-11ea-84ec-575750a3c38e.png)
+
+* To `configure` which CRUD operation will be propagated use the `SynchronizationType` attribute.</br>  
+![image](https://user-images.githubusercontent.com/159464/88489123-0b9de880-cf9b-11ea-8bc3-e8a8ac1c3d46.png)
 
 The package can operate without any configuration by executing a `predefined map` between the `ITask` and `OutlookTask` objects on Update and on Insert.
 
@@ -26,11 +30,15 @@ To customize the predefined map you can use a query like the next one which suff
 
 ```cs
 
-TodoService.CustomizeUpdate.Merge(TodoService.CustomizeInsert)
-	.Do(tuple => {
-		tuple.outlookTask.Subject = $"{tuple.task.Subject} - {DateTime.Now}";
-	})
-	.Subscribe();
+TodoService.CustomizeSynchronization
+    .Do(e => {
+        if (e.Instance.mapAction != MapAction.Delete){
+            e.Instance.cloud.Subject = $"{e.Instance.local.Subject} - {DateTime.Now}";
+            e.Handled = true;
+        }
+    })
+    .Subscribe();
+
 ```
 
 
@@ -54,8 +62,7 @@ In the next screencast you can see all `CRUD` operations on the Task BO and how 
 
 </twitter>
 
-[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)]((https://www.youtube.com/watch?v=8m6Yjrw2Rk0))
-
+[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://www.youtube.com/watch?v=8m6Yjrw2Rk0)
 
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 

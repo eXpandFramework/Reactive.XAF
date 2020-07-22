@@ -1,4 +1,4 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="Current">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="Current">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -126,17 +126,32 @@
     <Reference Include="System.Xml.Linq">
       <Private>False</Private>
     </Reference>
-    <PackageReference Include="DevExpress.ExpressApp.Web.All" Version="20.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Web" Version="20.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp" Version="20.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WebAdapter" Version="20.1.4" />
-    <PackageReference Include="DevExpress.EasyTest" Version="20.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="20.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="20.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Web.All" Version="20.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.1.4" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="2.202.35.2" />
+    <PackageReference Include="DevExpress.ExpressApp.Web.All" Version="20.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Web" Version="20.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="20.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WebAdapter" Version="20.1.6" />
+    <PackageReference Include="DevExpress.EasyTest" Version="20.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="20.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="20.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Web.All" Version="20.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.1.6" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3 ">
+    </PackageReference>
+    <PackageReference Include="FasterFlect.Xpand" Version="2.0.7">
+    </PackageReference>
+    <PackageReference Include="System.Reactive" Version="4.4.1">
+    </PackageReference>
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.13.0">
+    </PackageReference>
+    <PackageReference Include="Microsoft.Owin" Version="4.1.0">
+    </PackageReference>
+    <PackageReference Include="Microsoft.Owin.Host.SystemWeb" Version="4.1.0">
+    </PackageReference>
+    <PackageReference Include="Microsoft.Graph.Beta" Version="0.18.0-preview">
+    </PackageReference>
+    <PackageReference Include="Xpand.XAF.Web.All" Version="2.202.36.1">
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Default.aspx" />
@@ -164,6 +179,9 @@
     <Compile Include="..\CommonFiles\AgnosticModule.cs">
       <Link>Common\AgnosticModule.cs</Link>
       <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="..\commonfiles\microsoftcalendarservice\MicrosoftCalendarService.cs">
+      <Link>MicrosoftCalendarService\MicrosoftCalendarService.cs</Link>
     </Compile>
     <Compile Include="..\CommonFiles\MicrosoftService\MicrosoftService.cs">
       <Link>MicrosoftService\MicrosoftService.cs</Link>

@@ -20,7 +20,7 @@ namespace TestApplication.MicrosoftService{
 			tuple.frame.Action(nameof(ShowMSAccountInfo)).As<SimpleAction>();
 
 		public static IObservable<Unit> ShowMSAccountInfo(this ApplicationModulesManager manager){
-			manager.Modules.OfType<AgnosticModule>().First().AdditionalExportedTypes.Add(typeof(Microsoft.Graph.User));
+			manager.Modules.OfType<AgnosticModule>().First().AdditionalExportedTypes.Add(typeof(User));
 			var registerViewSimpleAction = manager.RegisterViewSimpleAction(nameof(ShowMSAccountInfo)).ActivateInUserDetails().Publish().RefCount(); 
 			return manager.WhenApplication(application => registerViewSimpleAction.WhenExecute().ShowAccountInfoView().ToUnit())
 				.Merge(registerViewSimpleAction.ToUnit());

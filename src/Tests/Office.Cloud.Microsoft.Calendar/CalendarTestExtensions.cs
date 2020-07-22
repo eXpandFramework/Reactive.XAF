@@ -15,7 +15,6 @@ using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Office.Cloud.BusinessObjects;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
-using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests;
@@ -31,10 +30,12 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
 
         public const int PagingCalendarItemsCount = 11;
 
-        public static async Task<GraphServiceClient> DeleteAllEvents(this XafApplication application){
+        public static async Task<GraphServiceClient> MSGraphClient(this XafApplication application,bool deleteAll=false){
             application.ObjectSpaceProvider.NewMicrosoftAuthentication();
             var authorizeMS = await application.AuthorizeMS((exception, client) => Observable.Empty<AuthenticationResult>());
-            await authorizeMS.Me.Calendar.DeleteAllEvents();
+            if (deleteAll){
+                await authorizeMS.Me.Calendar.DeleteAllEvents();
+            }
             return authorizeMS;
         }
 
@@ -59,24 +60,25 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
             }
         }
 
-        public static async Task<(ICalendarRequestBuilder requestBuilder, Frame frame)> InitializeService(this XafApplication application,string taskFolderName=CalendarName,bool keepTasks=false,bool keepTaskFolder=false){
+        public static async Task<(ICalendarRequestBuilder requestBuilder, Frame frame, GraphServiceClient client)>
+            InitializeService(this XafApplication application, string calendarName = CalendarName, bool keepTasks = false, bool keepEvents = false){
             var modelTodo = application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Calendar();
-            modelTodo.DefaultCaledarName = taskFolderName;
-            var client = await application.InitGraphServiceClient();
-            var foldersRequestBuilder = client.client.Me.Calendars;
-            var taskFolder = await foldersRequestBuilder.GetCalendar(taskFolderName, !keepTaskFolder && taskFolderName!=PagingCalendarName);
-            if (taskFolder == null&&taskFolderName==PagingCalendarName){
-                taskFolder = await foldersRequestBuilder.Request()
+            modelTodo.DefaultCaledarName = calendarName;
+            var client =  await application.InitGraphServiceClient();
+            var calendarsCollectionRequestBuilder = client.client.Me.Calendars;
+            var calendar = await calendarsCollectionRequestBuilder.GetCalendar(calendarName, !keepEvents && calendarName!=PagingCalendarName).ToTaskWithoutConfigureAwait();
+            if (calendar == null&&calendarName==PagingCalendarName){
+                calendar = await calendarsCollectionRequestBuilder.Request()
                     .AddAsync(new global::Microsoft.Graph.Calendar(){Name = PagingCalendarName});
-                await foldersRequestBuilder[taskFolder.Id].NewCalendarEvents(PagingCalendarItemsCount, nameof(MicrosoftCalendarModule));
+                await calendarsCollectionRequestBuilder[calendar.Id].NewCalendarEvents(PagingCalendarItemsCount, nameof(MicrosoftCalendarModule));
             }
-            var requestBuilder = foldersRequestBuilder[taskFolder?.Id];
-            if (taskFolderName != PagingCalendarName&&!keepTasks&&!keepTaskFolder){
+            var requestBuilder = calendarsCollectionRequestBuilder[calendar?.Id];
+            if (calendarName != PagingCalendarName&&!keepTasks&&!keepEvents){
                 await requestBuilder.DeleteAllEvents();
                 (await requestBuilder.Events.ListAllItems()).Length.ShouldBe(0);
             }
             
-            return (requestBuilder,client.frame);
+            return (requestBuilder,client.frame,client.client);
         }
 
         public static async Task<(Frame frame, GraphServiceClient client)> InitGraphServiceClient(this XafApplication application){
@@ -84,9 +86,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
             var todoModel = application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Calendar();
             var window = application.CreateViewWindow();
             var service = CalendarService.Client.FirstAsync().SubscribeReplay();
-            window.SetView(application.NewView(todoModel.ObjectViews().First().ObjectView));
-            var client = await service.ToTaskWithoutConfigureAwait();
-            return client;
+            window.SetView(application.NewView(todoModel.Items.Select(item => item.ObjectView).First()));
+            return (await service.ToTaskWithoutConfigureAwait());
         }
 
         public static MicrosoftCalendarModule CalendarModule(this Platform platform,params ModuleBase[] modules){
@@ -95,7 +96,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
             var module = application.AddModule<MicrosoftCalendarModule>(typeof(DevExpress.Persistent.BaseImpl.Event));
             application.Model.ConfigureMicrosoft();
             var todoModel = application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Calendar();
-            var dependency = ((IModelObjectViews) todoModel).ObjectViews.AddNode<IModelObjectViewDependency>();
+            var dependency = ( todoModel).Items.AddNode<IModelCalendarItem>();
             dependency.ObjectView = application.Model.BOModel.GetClass(typeof(DevExpress.Persistent.BaseImpl.Event)).DefaultDetailView;
             application.Logon();
             application.CreateObjectSpace();
@@ -176,14 +177,6 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
             @event.Resources.Add(resource);
             return @event;
         }
-
-        public static IObservable<Unit> DeleteAllEvents(this ICalendarRequestBuilder builder) 
-            => builder.Events.ListAllItems().DeleteAll(evt => builder.Me().Events[evt.Id].Request().DeleteAsync().ToObservable());
-
-        public static IObservable<Unit> DeleteAll(this IObservable<IEnumerable<Entity>> source, Func<Entity, IObservable<Unit>> delete) 
-            => source.Aggregate((acc, curr) => acc.Concat(curr)).SelectMany(entities => entities)
-                .SelectMany(delete).LastOrDefaultAsync();
-
 
         public static IObservable<IList<Event>> NewCalendarEvents(this ICalendarRequestBuilder builder,int count,string title){
             var dateTime = DateTime.Now;

@@ -17,6 +17,7 @@ using Xpand.TestsLib.Attributes;
 using Xpand.TestsLib.EasyTest;
 using Xpand.TestsLib.EasyTest.Commands;
 using Xpand.XAF.Modules.Reactive;
+using AutoTestCommand = Xpand.TestsLib.EasyTest.Commands.ActionCommands.AutoTestCommand;
 
 namespace ALL.Win.Tests{
 	[NonParallelizable]
@@ -43,11 +44,11 @@ namespace ALL.Win.Tests{
                 try{
                     var commandAdapter = winAdapter.CreateCommandAdapter();
                     commandAdapter.Execute(new LoginCommand());
+                    var autoTestCommand = new AutoTestCommand("Event|Task");
+                    commandAdapter.Execute(autoTestCommand);
                     await commandAdapter.TestMicrosoftService(() => Observable.Start(() => {
-                        var autoTestCommand = new AutoTestCommand();
-                        autoTestCommand.Execute(commandAdapter);
-                        commandAdapter.TestMicrosoftTodoService();
                         commandAdapter.TestMicrosoftCalendarService();
+                        commandAdapter.TestMicrosoftTodoService();
                     }));
                 }
                 finally{

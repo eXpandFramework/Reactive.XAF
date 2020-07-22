@@ -5,7 +5,7 @@
 ![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.VersionConverter.svg?label=nuget.org&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.VersionConverter.svg?style=flat)
 
 # About
-This package modifies the DevExpress references in all Xpand.XAF.* assemblies to match the target project DevExpress version.
+The `Xpand.VersionConverter` can your nuget packages to version agnostic.
 
 ## Example
 **We have a lot of XAF packages compiled against previous XAF versions.  How to reuse them in the latest version without a complex Continuous Integration pipeline**
@@ -18,13 +18,19 @@ Use the [Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.X
 
 [![image](https://user-images.githubusercontent.com/159464/87158168-fbfa8080-c2c7-11ea-9b33-93b67bad7c78.png)](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
 
-We demo how to make `MyCompany.MyPackage` DX version agnostic. The process is simple, we add a dependency to `MyPackage.Xpand.VersionConverter` package which was generated with the help of the [New-XpandVersionConvreter](https://github.com/eXpandFramework/XpandPwsh/wiki/New-XpandVersionConverter) XpandPwsh cmdlet.</br>
+The demo is about how to make `MyCompany.MyPackage` DevExpress version agnostic. The process is simple, we add a dependency to `MyPackage.Xpand.VersionConverter` package which was generated with the help of the [New-XpandVersionConverter](https://github.com/eXpandFramework/XpandPwsh/wiki/New-XpandVersionConverter) XpandPwsh cmdlet.</br>
+
+<twitter>
 
 ![LgCT4R1ejP](https://user-images.githubusercontent.com/159464/87150508-db77f980-c2ba-11ea-97c0-59c50a52ac0f.gif)
 
+<twitter>
+
+[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/LvxQ-U_0Sbg)
+
 ---
 
-## Technicals
+## WorkStream
 
 
 1. `Xpand.VersionConverter` patch all Xpand assemblies found in your Nuget cache to match the DevExpress version of the current project. This patching occurs before the actual build.

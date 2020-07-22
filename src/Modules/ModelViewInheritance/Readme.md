@@ -3,7 +3,7 @@
 [![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/ModelViewInheritance.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+ModelViewInheritance) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/ModelViewInheritance.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+ModelViewInheritance)
 # About 
 
-The `ModuleViewInheritance` module replaces the generator layer of a view by composing multiple unrelated view model differences.
+The `ModuleViewInheritance` changes the default Model View generation without coding.
 
 ## Details
 This is a `platform agnostic` module that extends the model views nodes with the `IModelObjectViewMergedDifferences` interface to allow model view differences composition. 
@@ -27,7 +27,7 @@ The cross platform [Xpand.XAF.Modules.ModuleViewInheritance](https://github.com/
 
    </Twitter>
 
-   [![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](youtu.be/uh4SMPwJ5pU)
+   [![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/uh4SMPwJ5pU)
 
 **v1.1.39**
 [#471](https://github.com/eXpandFramework/eXpand/issues/471). Adds the `DeepMerge` attribute which if enable the module will recourse and merge the source view differences. 

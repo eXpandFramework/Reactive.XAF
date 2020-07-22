@@ -13,7 +13,8 @@ using Xpand.Extensions.ReflectionExtensions;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
     public static class Pagination{
-        public static IObservable<Entity[]> ListAllItems(this IBaseRequestBuilder builder, Action<ITokenStore> saveToken = null, ITokenStore tokenStore = null) => builder.ListAllItems<Entity>(tokenStore, saveToken);
+        public static IObservable<Entity[]> ListAllItems(this IBaseRequestBuilder builder, Action<ITokenStore> saveToken = null, ITokenStore tokenStore = null) 
+            => builder.ListAllItems<Entity>(tokenStore, saveToken);
 
         public static IObservable<TEntity[]> ListAllItems<TEntity>(this IBaseRequest request,
             ITokenStore tokenStore = null, Action<ITokenStore> saveToken = null, Func<TEntity, bool> filter = null) where TEntity : Entity{
@@ -31,29 +32,38 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
                 throw new NotSupportedException($"Pagination not supported for {page.GetType().FullName}");
             }
             var nextPageRequestDelegate = page.GetType().DelegateForGetPropertyValue("NextPageRequest");
-            
-            
+            page.AdditionalData().SaveToken( tokenStore, saveToken);
             var invokeNextPage = Observable.FromAsync(() => methodInfo.InvokeAsync(nextPageRequestDelegate(page)))
                 .Select(entities => {
                     page = (IEnumerable<TEntity>)entities;
-                    if (tokenStore != null){
-                        var additionalData = ((IDictionary<string, Object>)page.GetPropertyValue("AdditionalData"));
-                        if (additionalData.ContainsKey("@odata.deltaLink")){
-                            tokenStore.Token = HttpUtility.ParseQueryString(new Uri(additionalData["@odata.deltaLink"].ToString()).Query).Get("$deltatoken");
-                            tokenStore.TokenType = "deltatoken";
-                        }
-                        else if (additionalData.ContainsKey("@odata.nextLink")){
-                            tokenStore.Token = HttpUtility.ParseQueryString(new Uri(additionalData["@odata.nextLink"].ToString()).Query).Get("$skiptoken");
-                            tokenStore.TokenType = "skiptoken";
-                        }
-                        saveToken?.Invoke(tokenStore);
-                    }
+                    entities.AdditionalData().SaveToken( tokenStore, saveToken);
                     return entities;
-                }).Finally(() => saveToken?.Invoke(tokenStore))
+                })
                 .Select(o => ((IEnumerable)o).Cast<TEntity>().ToArray());
             return Observable.While(() => nextPageRequestDelegate(page) != null, invokeNextPage).StartWith(page.ToArray())
-                    .Select(entities => entities.Where(filter).ToArray())
-                    .SwitchIfEmpty(Enumerable.Empty<TEntity>().ToArray().ReturnObservable());
+                .Finally(() => {})
+                .Select(entities => entities.Where(filter).ToArray())
+                .SwitchIfEmpty(Enumerable.Empty<TEntity>().ToArray().ReturnObservable());
+        }
+
+        private static IDictionary<string, object> AdditionalData(this object page) 
+            => (IDictionary<string, object>) page.GetPropertyValue("AdditionalData");
+
+        private static void SaveToken(this IDictionary<string, object> additionalData, ITokenStore tokenStore, Action<ITokenStore> saveToken){
+            if (tokenStore != null){
+                if (additionalData.ContainsKey("@odata.deltaLink")){
+                    tokenStore.Token = HttpUtility
+                        .ParseQueryString(new Uri(additionalData["@odata.deltaLink"].ToString()).Query).Get("$deltatoken");
+                    tokenStore.TokenType = "deltatoken";
+                }
+                else if (additionalData.ContainsKey("@odata.nextLink")){
+                    tokenStore.Token = HttpUtility.ParseQueryString(new Uri(additionalData["@odata.nextLink"].ToString()).Query)
+                        .Get("$skiptoken");
+                    tokenStore.TokenType = "skiptoken";
+                }
+
+                saveToken?.Invoke(tokenStore);
+            }
         }
 
         public static IObservable<TEntity[]> ListAllItems<TEntity>(this IBaseRequestBuilder builder,

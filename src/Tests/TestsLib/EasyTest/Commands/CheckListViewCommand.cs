@@ -10,13 +10,13 @@ namespace Xpand.TestsLib.EasyTest.Commands{
         public CheckListViewCommand(string tableName, int rowCount, params string[] columns):this(columns){
             Parameters.Add(new Parameter("RowCount",rowCount.ToString()));
             Parameters.MainParameter=new MainParameter(tableName);
-            
         }
 
         public CheckListViewCommand(params string[] columns){
             if (columns.Any()){
                 Parameters.Add(new Parameter($" Columns = {string.Join(",", columns)}"));
             }
+            Parameters.MainParameter=new MainParameter("");
         }
 
         public void AddRows(params string[][] rows){

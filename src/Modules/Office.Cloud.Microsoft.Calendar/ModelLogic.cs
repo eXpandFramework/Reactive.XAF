@@ -27,6 +27,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
         IModelClass NewCloudEvent{ get; set; }
         [Browsable(false)]
         IModelList<IModelClass> NewCloudEvents{ get; }
+
+        IModelCalendarItems Items{ get; }
     }
 
     
@@ -44,8 +46,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
         public static CalculatedModelNodeList<IModelClass> Get_NewCloudEvents(this IModelCalendar modelCalendar) 
             => modelCalendar.Application.BOModel.Where(c =>c.TypeInfo.IsPersistent&&!c.TypeInfo.IsAbstract&&typeof(IEvent).IsAssignableFrom(c.TypeInfo.Type) ).ToCalculatedModelNodeList();
 
-        public static IModelObjectViewsDependencyList ObjectViews(this IModelCalendar modelCalendar) 
-            => ((IModelObjectViews) modelCalendar).ObjectViews;
+        
 
         public static IModelCalendar Calendar(this IModelMicrosoft modelMicrosoft) 
             => ((IModelMicrosoftCalendar) modelMicrosoft).Calendar;
@@ -53,6 +54,18 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
         [PublicAPI]
         public static IModelCalendar Calendar(this IModelOfficeMicrosoft reactiveModules) 
             => reactiveModules.Microsoft.Calendar();
+    }
+
+    public interface IModelCalendarItems : IModelList<IModelCalendarItem>,IModelNode{
+    }
+
+    public interface IModelCalendarItem:IModelSynchronizationType,IModelCallDirection,IModelObjectViewDependency{
+    }
+
+    public enum CallDirection{
+        Both,
+        In,
+        Out
     }
 
 }

@@ -3,8 +3,7 @@
 [![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/ModelMapper.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+ModelMapper) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/ModelMapper.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+ModelMapper)
 # About 
 
-The `ModelMapper` module is a XAF application model mapper and runtime binder. Ships 
-with predefined maps for all the common XAF components.
+The `ModelMapper` allows to control all XAF components from the application model.
 
 ## Details
 This is a `platform agnostic` module that transforms any type to XAF model format and will extend the model with a simple call like:
@@ -55,10 +54,10 @@ The cross platform [Xpand.XAF.Modules.ModelMapper](https://github.com/eXpandFram
 
 <twitter>
 
-[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](youtu.be/CkJKEfPhS0M)
+[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/CkJKEfPhS0M)
 
 ##### Map Generation
-Generating maps for many types is costly however it happens in parallel and only once. Afterwards the model interfaces are loaded from the `ModelMapperAsssmbly.dll` found in path. All mapped types are included in this one assembly even if the map was executed from different modules.
+Generating maps for many types is costly however it happens in parallel and only once. Afterwards the model interfaces are loaded from the `ModelMapperAssembly.dll` found in path. All mapped types are included in this one assembly even if the map was executed from different modules.
 
 The module will generate automatically the `ModelMapperAssembly.dll` under the following conditions.
 1. If the assembly does not exist in path.
