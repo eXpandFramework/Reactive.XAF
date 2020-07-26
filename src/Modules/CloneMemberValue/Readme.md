@@ -11,11 +11,13 @@ This is a `platform agnostic` module extends the `IModelMember` nodes with the `
 
 1. It monitors the `DetailView` construction sequence and projects the result to a `Previous/Current` pair which is then used to clone if the context is valid.
 2. It monitors the sequence of new object created from the XAF `ListEditor`, it then projects it similarly to a `Previous/Current` pair.
-<twitter>
-![image](https://user-images.githubusercontent.com/159464/54979695-7bb5ec00-4fac-11e9-8373-b128982b8bc2.png)
-</twitter>
 
-if logging is set to verbose all operations will be logged. 
+
+![image](https://user-images.githubusercontent.com/159464/54979695-7bb5ec00-4fac-11e9-8373-b128982b8bc2.png)
+
+
+
+If logging is set to verbose all operations will be logged. 
 To observe the cloning operations in code use the next pattern in one of your modules.
 
 ```cs
