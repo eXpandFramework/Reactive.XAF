@@ -19,12 +19,12 @@ Next snippet is taken from the ModelDifference module.
  [RuleCombinationOfPropertiesIsUnique("MDO_Unique_Name_Application", DefaultContexts.Save, nameof(Name)+"," +nameof(PersistentApplication)+","+nameof(DeviceCategory))]
     [CreatableItem(false), NavigationItem("Default"), HideFromNewMenu]
     [ModelDefault("Caption", Caption), ModelDefault("IsClonable", "True"), VisibleInReports(false)]
-    [CloneView(CloneViewType.DetailView, "MDO_DetailView",true)]
-    [CloneView(CloneViewType.ListView, "MDO_ListView_Tablet",true)]
-    [CloneView(CloneViewType.ListView, "MDO_ListView_Desktop",true)]
-    [CloneView(CloneViewType.ListView, "MDO_ListView_Mobile",true)]
-    [CloneView(CloneViewType.ListView, "MDO_ListView_All",true)]
-    [CloneView(CloneViewType.ListView, "MDO_ListView", true)]
+    [CloneModelView(CloneViewType.DetailView, "MDO_DetailView",true)]
+    [CloneModelView(CloneViewType.ListView, "MDO_ListView_Tablet",true)]
+    [CloneModelView(CloneViewType.ListView, "MDO_ListView_Desktop",true)]
+    [CloneModelView(CloneViewType.ListView, "MDO_ListView_Mobile",true)]
+    [CloneModelView(CloneViewType.ListView, "MDO_ListView_All",true)]
+    [CloneModelView(CloneViewType.ListView, "MDO_ListView", true)]
     [Appearance("Disable DeviceCategory for win models", AppearanceItemType.ViewItem,
         "EndsWith([" + nameof(PersistentApplication) + "." + nameof(BaseObjects.PersistentApplication.ExecutableName) +"], '.exe')", 
         Enabled = false, TargetItems = nameof(DeviceCategory))]
@@ -84,6 +84,6 @@ Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.Cl
 
 ### Tests
 
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.CloneModelView.CloneModelView). 
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Tests/CloneModelView). 
 All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
 
