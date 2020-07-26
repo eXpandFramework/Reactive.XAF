@@ -70,6 +70,6 @@ If the package is installed in a way that you do not have access to uninstall it
 Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.AutoCommit.AutoCommitModule))
 ```
 ### Tests
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.AutoCommit.AutoCommit). 
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Tests/AutoCommit). 
 All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
 
