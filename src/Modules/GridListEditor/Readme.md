@@ -67,7 +67,7 @@ Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.Gr
 ```
 
 ### Tests
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.GridListEditor.GridListEditor). 
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Tests/GridListEditor). 
 All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
 ### Examples
 
