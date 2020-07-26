@@ -10,11 +10,11 @@ This is a `platform agnostic` module that satisfies the following conditions:
 1. For all `Nested Frames` with `HIdeToolBar` attribute enabled a signal will be created out of the [Frame.TemplatedChanged](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.Frame.TemplateChanged) and the [Frame.TemplateViewChanged](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.Frame.TemplateViewChanged) events. For each signal emit the the ToolBar will be hidden.
 2. For Windows platform in addition to the ToolBar the `DevExpress.ExpressApp.Win.SystemModule.ToolbarVisibilityController` will be disabled which controls the Show Toolbar context menu.
 
-<twitter>
+
 ![image](https://user-images.githubusercontent.com/159464/58032948-418c4500-7b2c-11e9-96bc-f853bd4b9287.png)
-</twitter>
+
 ### Tests
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.HideToolBar.HideToolBar). 
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Tests/HideToolBar). 
 All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
 ### Examples
 The module is integrated with the `ExcelImporter`.
