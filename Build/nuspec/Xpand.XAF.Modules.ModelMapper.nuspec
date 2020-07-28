@@ -2,15 +2,14 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.ModelMapper</id>
-    <version>2.202.39.0</version>
+    <version>2.202.41.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/ModelMapper</projectUrl>
     <iconUrl>http://sign.expandframework.com</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>The `ModelMapper` module is a XAF application model mapper and runtime binder. Ships 
-with predefined maps for all the common XAF components.</description>
+    <description>The `ModelMapper` allows to control all XAF components from the application model.</description>
     <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  ModelMapper</tags>
@@ -31,13 +30,13 @@ with predefined maps for all the common XAF components.</description>
       </dependency>
       <dependency id="Xpand.Collections" version="1.0.1">
       </dependency>
-      <dependency id="Xpand.Extensions" version="2.202.38.0">
+      <dependency id="Xpand.Extensions" version="2.202.40.0">
       </dependency>
-      <dependency id="Xpand.Extensions.Reactive" version="2.202.39.0">
+      <dependency id="Xpand.Extensions.Reactive" version="2.202.41.0">
       </dependency>
-      <dependency id="Xpand.Extensions.XAF" version="2.202.39.0">
+      <dependency id="Xpand.Extensions.XAF" version="2.202.41.0">
       </dependency>
-      <dependency id="Xpand.XAF.Modules.Reactive" version="2.202.39.0">
+      <dependency id="Xpand.XAF.Modules.Reactive" version="2.202.41.0">
       </dependency>
       <dependency id="Xpand.VersionConverter" version="2.202.9">
       </dependency>

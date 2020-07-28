@@ -102,7 +102,7 @@
     <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="20.1.6" />
     <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="20.1.6" />
     <PackageReference Include="DevExpress.EasyTest" Version="20.1.6" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="2.202.36.1" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="2.202.37" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="MicrosoftCalendarService\" />

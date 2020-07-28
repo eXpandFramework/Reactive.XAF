@@ -1,6 +1,6 @@
-![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.ViewItemValue.svg?&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.ViewItemValue.svg?&style=flat)
+![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.ViewWizard.svg?&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.ViewWizard.svg?&style=flat)
 
-[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/ViewItemValue.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+ViewItemValue) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/ViewItemValue.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+ViewItemValue)
+[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/ViewWizard.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+ViewWizard) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/ViewWizard.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+ViewWizard)
 # About 
 
 With the help of the ViewItemValue XAF modules end-users can configure the default values for lookup view items.
@@ -73,18 +73,17 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp**|**Any**
- |**DevExpress.ExpressApp.Validation**|**Any**
  |**DevExpress.Xpo**|**Any**
 |Fasterflect.Xpand|2.0.7
  |JetBrains.Annotations|2020.1.0
  |System.Interactive|4.1.1
  |System.Reactive|4.4.1
  |System.ValueTuple|4.5.0
- |Xpand.Extensions|2.202.38
- |Xpand.Extensions.Reactive|2.202.39
- |Xpand.Extensions.XAF|2.202.39
- |Xpand.Extensions.XAF.Xpo|2.202.35
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.39
+ |Xpand.Extensions|2.202.40
+ |Xpand.Extensions.Reactive|2.202.41
+ |Xpand.Extensions.XAF|2.202.41
+ |Xpand.Extensions.XAF.Xpo|2.202.37
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.41
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.9
 
 ## Issues-Debugging-Troubleshooting

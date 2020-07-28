@@ -2,14 +2,14 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.CloneModelView</id>
-    <version>2.202.39.0</version>
+    <version>2.202.41.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/CloneModelView</projectUrl>
     <iconUrl>http://sign.expandframework.com</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>The `CloneModelView` package can be used to generate XAF model views in the generator layer, resulting in a clean model which is really important for monitoring and supporting purposes.</description>
+    <description>The `CloneModelView` package generated additional default design time model views.</description>
     <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  CloneModelView</tags>
@@ -20,7 +20,7 @@
       </dependency>
       <dependency id="System.ValueTuple" version="4.5">
       </dependency>
-      <dependency id="Xpand.Extensions.XAF" version="2.202.39.0">
+      <dependency id="Xpand.Extensions.XAF" version="2.202.41.0">
       </dependency>
       <dependency id="Xpand.Patcher" version="2.0.23">
       </dependency>
