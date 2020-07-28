@@ -212,8 +212,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
                     Timeout,
                     events => {
                         var testObserver = events.Test();
-                        testObserver.ItemCount.ShouldBe(1);
-                        testObserver.Items.Any(_ => _.@event.Subject=="updated").ShouldBeTrue();
+                        testObserver.Items.Count(_ => _.@event.Subject=="updated").ShouldBe(1);
                     });
             }
         }

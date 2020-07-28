@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.Base.General;
@@ -65,20 +64,26 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
             var modelTodo = application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Calendar();
             modelTodo.DefaultCaledarName = calendarName;
             var client =  await application.InitGraphServiceClient();
-            var calendarsCollectionRequestBuilder = client.client.Me.Calendars;
-            var calendar = await calendarsCollectionRequestBuilder.GetCalendar(calendarName, !keepEvents && calendarName!=PagingCalendarName).ToTaskWithoutConfigureAwait();
-            if (calendar == null&&calendarName==PagingCalendarName){
-                calendar = await calendarsCollectionRequestBuilder.Request()
-                    .AddAsync(new global::Microsoft.Graph.Calendar(){Name = PagingCalendarName});
-                await calendarsCollectionRequestBuilder[calendar.Id].NewCalendarEvents(PagingCalendarItemsCount, nameof(MicrosoftCalendarModule));
-            }
-            var requestBuilder = calendarsCollectionRequestBuilder[calendar?.Id];
-            if (calendarName != PagingCalendarName&&!keepTasks&&!keepEvents){
-                await requestBuilder.DeleteAllEvents();
-                (await requestBuilder.Events.ListAllItems()).Length.ShouldBe(0);
+            var requestBuilder = client.client.Me.Calendars;
+            var calendar = await requestBuilder.GetCalendar(calendarName, !keepEvents && calendarName!=PagingCalendarName).ToTaskWithoutConfigureAwait();
+            if (calendarName==PagingCalendarName){
+                if (calendar == null){
+                    calendar = await requestBuilder.Request()
+                        .AddAsync(new global::Microsoft.Graph.Calendar(){Name = PagingCalendarName});
+                }
+                var count = (await requestBuilder[calendar?.Id].Events.ListAllItems().Sum(entities => entities.Length));
+                var itemsCount = PagingCalendarItemsCount-count;
+                if (itemsCount>0){
+                    await requestBuilder[calendar?.Id].NewCalendarEvents(itemsCount, nameof(MicrosoftCalendarModule));
+                }
             }
             
-            return (requestBuilder,client.frame,client.client);
+            if (calendarName != PagingCalendarName&&!keepTasks&&!keepEvents){
+                await requestBuilder[calendar?.Id].DeleteAllEvents();
+                (await requestBuilder[calendar?.Id].Events.ListAllItems()).Length.ShouldBe(0);
+            }
+            
+            return (requestBuilder[calendar?.Id],client.frame,client.client);
         }
 
         public static async Task<(Frame frame, GraphServiceClient client)> InitGraphServiceClient(this XafApplication application){
