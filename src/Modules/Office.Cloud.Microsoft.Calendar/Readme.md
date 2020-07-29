@@ -48,6 +48,7 @@ CalendarService.CustomizeSynchronization
     })
     .Subscribe();
 ```
+
 **Cloud to local synchronization:**
 The package uses [delta queries](https://docs.microsoft.com/en-us/graph/delta-query-overview) to track changes in Microsoft Graph data.
 
@@ -65,7 +66,7 @@ In the next screencast you can see all `CRUD` operations on the Event BO and how
 
 <twitter>
 
-[![Xpand XAF Modules Office Cloud Microsoft Calendar](https://user-images.githubusercontent.com/159464/87413649-3e2b0700-c5d3-11ea-95d1-b44ee2f7891c.gif)
+[![Xpand XAF Modules Office Cloud Microsoft Calendar](https://user-images.githubusercontent.com/159464/88318256-1d755680-cd23-11ea-9d59-e9011f969904.gif)
 ](https://youtu.be/E90hOGf-W2I)
 
 </twitter>
