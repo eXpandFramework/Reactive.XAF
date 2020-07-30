@@ -36,7 +36,7 @@ namespace Xpand.XAF.Modules.ViewWizard{
                 .Merge(manager.RegisterViewSimpleAction(nameof(PreviousWizardView), action => action.Configure(),PredefinedCategory.PopupActions))
                 .Publish().RefCount();
             return manager.WhenApplication(application => {
-                    var showWizardView = registerActions.OfType<SingleChoiceAction>().ShowWizardView().Publish().AutoConnect();
+                    var showWizardView = registerActions.OfType<SingleChoiceAction>().ShowWizardView().Publish().RefCount();
                     return showWizardView.NextWizardView().Merge(showWizardView.PreviousWizardView())
                         .ToUnit()
                         .Merge(application.ActiveAction().PopulateShowWizardActionItems());

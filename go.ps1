@@ -9,7 +9,7 @@ param(
     [string]$branch="lab",
     [switch]$InstallModules,
     [string[]]$taskList=@("Build"),
-    [string]$XpandPwshVersion = "1.201.39.1",
+    [string]$XpandPwshVersion = "1.202.40.6",
     [string[]]$ChangedModules=@(),
     [switch]$CustomVersion
 )
