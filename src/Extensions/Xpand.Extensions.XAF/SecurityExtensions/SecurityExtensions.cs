@@ -10,7 +10,11 @@ namespace Xpand.Extensions.XAF.SecurityExtensions{
             securityStrategy?.GetType().InheritsFrom("DevExpress.ExpressApp.Security.SecurityStrategy") == true ? new[]{securityStrategy}
                 : Enumerable.Empty<ISecurityStrategyBase>();
 
-        public static IEnumerable<ISecurityStrategyBase> AddAnonymousType(this ISecurityStrategyBase securityStrategy,params System.Type[] types){
+        public static ISecurityStrategyBase[] AddAnonymousType(this ISecurityStrategyBase securityStrategy,params System.Type[] types){
+            return securityStrategy.AddAnonymousTypeCore(types).ToArray();
+        }
+
+        public static IEnumerable<ISecurityStrategyBase> AddAnonymousTypeCore(this ISecurityStrategyBase securityStrategy,params System.Type[] types){
             foreach (var strategyBase in securityStrategy.WhenSecurityStrategy()){
                 var anonymousAllowedTypes = strategyBase.GetPropertyValue("AnonymousAllowedTypes");
                 foreach (var type in types){

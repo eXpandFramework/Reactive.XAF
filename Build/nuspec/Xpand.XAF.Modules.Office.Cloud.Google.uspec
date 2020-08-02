@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>Xpand.XAF.Modules.Office.Cloud.Google</id>
+    <version>2.202.42.0</version>
+    <authors>eXpandFramework</authors>
+    <owners>eXpandFramework</owners>
+    <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/Office.Cloud.Google</projectUrl>
+    <iconUrl>http://sign.expandframework.com</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>The `Google` authenticates against Azure Active Directory and queries the MSGraph endpoints.</description>
+    <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
+    <copyright>eXpandFramework.com</copyright>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Office.Cloud.Google</tags>
+    <dependencies>
+      <dependency id="Fasterflect.Xpand" version="2.0.7">
+      </dependency>
+      <dependency id="JetBrains.Annotations" version="2020.1">
+      </dependency>
+      <dependency id="Google.Graph.Beta" version="0.18.0-preview">
+      </dependency>
+      <dependency id="Google.Graph.Core" version="1.19">
+      </dependency>
+      <dependency id="Google.Identity.Client" version="4.13">
+      </dependency>
+      <dependency id="Google.IdentityModel.Protocols.OpenIdConnect" version="6.6">
+      </dependency>
+      <dependency id="Google.IdentityModel.Tokens" version="6.6">
+      </dependency>
+      <dependency id="Google.Owin" version="4.1">
+      </dependency>
+      <dependency id="Google.Owin.Host.SystemWeb" version="4.1">
+      </dependency>
+      <dependency id="Google.Owin.Security" version="4.1">
+      </dependency>
+      <dependency id="Google.Owin.Security.Cookies" version="4.1">
+      </dependency>
+      <dependency id="Google.Owin.Security.OpenIdConnect" version="4.1">
+      </dependency>
+      <dependency id="Newtonsoft.Json" version="12.0.3">
+      </dependency>
+      <dependency id="Owin" version="1.0">
+      </dependency>
+      <dependency id="System.Reactive" version="4.4.1">
+      </dependency>
+      <dependency id="Xpand.Extensions" version="2.202.40.0">
+      </dependency>
+      <dependency id="Xpand.Extensions.Office.Cloud" version="2.202.40.0">
+      </dependency>
+      <dependency id="Xpand.Extensions.Reactive" version="2.202.41.0">
+      </dependency>
+      <dependency id="Xpand.Extensions.XAF" version="2.202.41.0">
+      </dependency>
+      <dependency id="Xpand.XAF.Modules.Reactive" version="2.202.41.0">
+      </dependency>
+      <dependency id="Xpand.VersionConverter" version="2.202.9">
+      </dependency>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="Xpand.XAF.Modules.Office.Cloud.Google.dll" target="lib\net461\Xpand.XAF.Modules.Office.Cloud.Google.dll" />
+    <file src="Xpand.XAF.Modules.Office.Cloud.Google.pdb" target="lib\net461\Xpand.XAF.Modules.Office.Cloud.Google.pdb" />
+    <file src="..\build\CopySymbols.targets" target="build\Xpand.XAF.Modules.Office.Cloud.Google.targets">
+    </file>
+    <file src="..\build\CopySymbols.ps1" target="build\CopySymbols.ps1">
+    </file>
+  </files>
+</package>

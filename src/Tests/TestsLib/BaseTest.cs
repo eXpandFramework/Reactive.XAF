@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -29,6 +30,10 @@ namespace Xpand.TestsLib{
             var traceSourceSwitch = new SourceSwitch("SourceSwitch", "Verbose");
             TraceSource = new TraceSource(nameof(BaseTest)){Switch = traceSourceSwitch};
             TraceSource.Listeners.Add(TextListener);
+        }
+        public static IEnumerable<Platform> PlatformDatasource(){
+            yield return Platform.Web;
+            yield return Platform.Win;
         }
 
         protected static object[] AgnosticModules(){

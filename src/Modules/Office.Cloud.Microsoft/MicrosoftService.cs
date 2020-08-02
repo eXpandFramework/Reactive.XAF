@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http.Headers;
@@ -16,8 +15,6 @@ using System.Threading.Tasks;
 using System.Web;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
-using DevExpress.ExpressApp.Templates;
-using Fasterflect;
 using JetBrains.Annotations;
 using Microsoft.Graph;
 using Microsoft.Identity.Client;
@@ -31,10 +28,10 @@ using Microsoft.Owin.Security.OpenIdConnect;
 using Owin;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
-using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ViewExtenions;
@@ -50,152 +47,127 @@ using Prompt = Microsoft.Identity.Client.Prompt;
 [assembly: OwinStartup(typeof(MicrosoftService))]
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 	public static class MicrosoftService{
-		public const string SignInCaption = "Sign in with Microsoft";
-		public const string SignOutCaption = "Sign out Microsoft";
+		// public const string SignInCaption = "Sign in with Microsoft";
+		// public const string SignOutCaption = "Sign out Microsoft";
 		static readonly Subject<GenericEventArgs<IObservable<AuthenticationResult>>> CustomAquireTokenInteractivelySubject=new Subject<GenericEventArgs<IObservable<AuthenticationResult>>>();
 		private static readonly Uri AuthorityUri=new Uri(string.Format(CultureInfo.InvariantCulture, "https://login.microsoftonline.com/{0}{1}", "common", "/v2.0"));
         
         private static readonly string AuthenticationType=OpenIdConnectAuthenticationDefaults.AuthenticationType;
 
-        public static IObservable<bool> MicrosoftNeedsAuthentication(this XafApplication application) =>
-	        
-	        application.NewObjectSpace(space => (space.GetObjectByKey<MSAuthentication>( application.CurrentUserId()) == null).ReturnObservable())
-		        .SelectMany(b => !b ? application.AuthorizeMS((exception, client) => Observable.Throw<AuthenticationResult>(exception))
-				    .To(false).Catch(true.ReturnObservable()) : true.ReturnObservable())
-		        .TraceMicrosoftModule();
+        public static IObservable<bool> MicrosoftNeedsAuthentication(this XafApplication application) 
+            => application.NeedsAuthentication<MSAuthentication>(() 
+                => application.AuthorizeMS((exception, client) => Observable.Throw<AuthenticationResult>(exception)).ToUnit());
 
-        public static SimpleAction ConnectMicrosoft(this (MicrosoftModule, Frame frame) tuple) => tuple
-	        .frame.Action(nameof(ConnectMicrosoft)).As<SimpleAction>();
+        public static SimpleAction ConnectMicrosoft(this (MicrosoftModule, Frame frame) tuple) 
+            => tuple.frame.Action(nameof(ConnectMicrosoft)).As<SimpleAction>();
 
-        public static SimpleAction DisconnectMicrosoft(this (MicrosoftModule, Frame frame) tuple) => tuple
-	        .frame.Action(nameof(DisconnectMicrosoft)).As<SimpleAction>();
+        public static SimpleAction DisconnectMicrosoft(this (MicrosoftModule, Frame frame) tuple) 
+            => tuple.frame.Action(nameof(DisconnectMicrosoft)).As<SimpleAction>();
 
-        internal static IObservable<Unit> Connect(this ApplicationModulesManager manager){
-	        var registerActions = manager.RegisterActions().Publish().RefCount();
-	        var whenApplication = manager.WhenApplication(application => registerActions.ExecuteActions()
-		        .Merge(registerActions.ConfigureStyle())
-		        .Merge(application.WhenWeb().CheckAsync(nameof(MicrosoftModule))));
+        internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
+            => manager.Connect("Microsoft", typeof(MSAuthentication), application 
+                => application.MicrosoftNeedsAuthentication(), application 
+                => application.AuthorizeMS((exception, app) => app.AquireTokenInteractively(application)).ToUnit());
 
-	        return registerActions.ToUnit()
-		        .Merge(whenApplication)
-		        .ToUnit();
-        }
+        // private static IObservable<Unit> ExecuteActions(this IObservable<SimpleAction> registerActions) =>
+	       //  registerActions.ActivateWhenUserDetails()
+		      //   .SelectMany(action => action.Activate()
+		      //   .Merge(action.Execution())
+	       //  ).ToUnit();
 
-        private static IObservable<Unit> ExecuteActions(this IObservable<SimpleAction> registerActions) =>
-	        registerActions.ActivateWhenUserDetails()
-		        .SelectMany(action => action.Activate()
-		        .Merge(action.Execution())
-	        ).ToUnit();
-
-        private static IObservable<SimpleAction> Execution(this SimpleAction action) => action
-	        .WhenExecute(e => {
-		        var execute = e.Action.Id == nameof(DisconnectMicrosoft)
-			        ? e.Action.Application.NewObjectSpace(space => {
-				        var objectSpace = e.Action.View().ObjectSpace;
-				        objectSpace.Delete(objectSpace.GetObjectByKey<MSAuthentication>(e.Action.Application.CurrentUserId()));
-				        objectSpace.CommitChanges();
-						e.Action.Data.Clear();
-				        return e.Action.AsSimpleAction().ReturnObservable();
-			        })
-			        : e.Action.Application.AuthorizeMS((exception, app) => app.AquireTokenInteractively(action.Application)).To(e.Action.AsSimpleAction());
-		        return execute.ActivateWhenAuthenticationNeeded();
-	        })
-	        .TraceMicrosoftModule();
+      //   private static IObservable<SimpleAction> Execution(this SimpleAction action) => action
+	     //    .WhenExecute(e => {
+		    //     var execute = e.Action.Id == nameof(DisconnectMicrosoft)
+			   //      ? e.Action.Application.NewObjectSpace(space => {
+				  //       var objectSpace = e.Action.View().ObjectSpace;
+				  //       objectSpace.Delete(objectSpace.GetObjectByKey<MSAuthentication>(e.Action.Application.CurrentUserId()));
+				  //       objectSpace.CommitChanges();
+						// e.Action.Data.Clear();
+				  //       return e.Action.AsSimpleAction().ReturnObservable();
+			   //      })
+			   //      : e.Action.Application.AuthorizeMS((exception, app) => app.AquireTokenInteractively(action.Application)).To(e.Action.AsSimpleAction());
+		    //     return execute.ActivateWhenAuthenticationNeeded();
+	     //    })
+	     //    .TraceMicrosoftModule();
 
 
-        private static IObservable<SimpleAction> Activate(this SimpleAction action){
-	        return action.Application.MicrosoftNeedsAuthentication()
-		        .Do(b => {
-			        action.Active(nameof(MicrosoftNeedsAuthentication), action.Id == nameof(ConnectMicrosoft) ? b : !b);
-			        if (!b && action.Id == nameof(DisconnectMicrosoft)){
-				        action.UpdateDisconnectActionToolTip();
-			        }
-		        })
-		        .To(action)
-		        .TraceMicrosoftModule(a => $"{a.Id}, Active:{a.Active}");
-        }
+        // private static IObservable<SimpleAction> Activate(this SimpleAction action){
+	       //  return action.Application.MicrosoftNeedsAuthentication()
+		      //   .Do(b => {
+			     //    action.Active(nameof(MicrosoftNeedsAuthentication), action.Id == nameof(ConnectMicrosoft) ? b : !b);
+			     //    if (!b && action.Id == nameof(DisconnectMicrosoft)){
+				    //     action.UpdateDisconnectActionToolTip();
+			     //    }
+		      //   })
+		      //   .To(action)
+		      //   .TraceMicrosoftModule(a => $"{a.Id}, Active:{a.Active}");
+        // }
 
-        private static IObservable<Unit> ConfigureStyle(this IObservable<SimpleAction> source) => source
-	        .WhenCustomizeControl()
-	        .Select(_ => {
-		        var application = _.sender.Application;
-		        if (application.GetPlatform()==Platform.Web){
-			        if (_.sender.Id == nameof(ConnectMicrosoft)){
-						_.sender.Model.SetValue("IsPostBackRequired",true);
-			        }
-			        var menuItem = _.e.Control.GetPropertyValue("MenuItem");
-			        var itemStyle = menuItem.GetPropertyValue("ItemStyle");
-			        itemStyle.GetPropertyValue("Paddings").SetPropertyValue("Padding", new System.Web.UI.WebControls.Unit(2));
-			        itemStyle.SetPropertyValue("ImageSpacing", new System.Web.UI.WebControls.Unit(7));
-			        itemStyle.GetPropertyValue("Font").SetPropertyValue("Name", "Roboto Medium");
-			        itemStyle.GetPropertyValue("SelectedStyle").SetPropertyValue("BackColor", Color.White);
-			        itemStyle.SetPropertyValue("ForeColor", ColorTranslator.FromHtml("#757575"));
-			        itemStyle.GetPropertyValue("HoverStyle").SetPropertyValue("BackColor", Color.White);
-			        menuItem.CallMethod("ForceMenuRendering");
-		        }
-		        return _.sender;
-	        })
-	        .ToUnit();
+      //   private static IObservable<Unit> ConfigureStyle(this IObservable<SimpleAction> source) => source
+	     //    .WhenCustomizeControl()
+	     //    .Select(_ => {
+		    //     var application = _.sender.Application;
+		    //     if (application.GetPlatform()==Platform.Web){
+			   //      if (_.sender.Id == nameof(ConnectMicrosoft)){
+						// _.sender.Model.SetValue("IsPostBackRequired",true);
+			   //      }
+			   //      var menuItem = _.e.Control.GetPropertyValue("MenuItem");
+			   //      var itemStyle = menuItem.GetPropertyValue("ItemStyle");
+			   //      itemStyle.GetPropertyValue("Paddings").SetPropertyValue("Padding", new System.Web.UI.WebControls.Unit(2));
+			   //      itemStyle.SetPropertyValue("ImageSpacing", new System.Web.UI.WebControls.Unit(7));
+			   //      itemStyle.GetPropertyValue("Font").SetPropertyValue("Name", "Roboto Medium");
+			   //      itemStyle.GetPropertyValue("SelectedStyle").SetPropertyValue("BackColor", Color.White);
+			   //      itemStyle.SetPropertyValue("ForeColor", ColorTranslator.FromHtml("#757575"));
+			   //      itemStyle.GetPropertyValue("HoverStyle").SetPropertyValue("BackColor", Color.White);
+			   //      menuItem.CallMethod("ForceMenuRendering");
+		    //     }
+		    //     return _.sender;
+	     //    })
+	     //    .ToUnit();
         
-        private static IObservable<SimpleAction> ActivateWhenUserDetails(this IObservable<SimpleAction> registerActions) =>
-	        registerActions.ActivateInUserDetails(true)
-		        .Do(action => action.Active(nameof(MicrosoftNeedsAuthentication),false) )
-		        .Publish().RefCount();
+        // private static IObservable<SimpleAction> ActivateWhenUserDetails(this IObservable<SimpleAction> registerActions) =>
+	       //  registerActions.ActivateInUserDetails(true)
+		      //   .Do(action => action.Active(nameof(MicrosoftNeedsAuthentication),false) )
+		      //   .Publish().RefCount();
 
 
-        private static IObservable<SimpleAction> ActivateWhenAuthenticationNeeded(this IObservable<SimpleAction> source) =>
-	        source.SelectMany(action => action.Application.MicrosoftNeedsAuthentication()
-			        .Do(b => {
-				        var actions = action.Controller.Frame.Action<MicrosoftModule>();
-				        if (action.Id == nameof(ConnectMicrosoft)){
-					        action.Active(nameof(MicrosoftNeedsAuthentication), b);
-							actions.DisconnectMicrosoft().Active(nameof(MicrosoftNeedsAuthentication),!b);
-				        }
-				        else{
-					        action.Active(nameof(MicrosoftNeedsAuthentication), !b);
-					        actions.ConnectMicrosoft().Active(nameof(MicrosoftNeedsAuthentication),b);
-				        }
-				        action.UpdateDisconnectActionToolTip();
-			        }).To(action))
-		        .WhenActive()
-		        .TraceMicrosoftModule();
+       //  private static IObservable<SimpleAction> ActivateWhenAuthenticationNeeded(this IObservable<SimpleAction> source) =>
+	      //   source.SelectMany(action => action.Application.MicrosoftNeedsAuthentication()
+			    //     .Do(b => {
+				   //      var actions = action.Controller.Frame.Action<MicrosoftModule>();
+				   //      if (action.Id == nameof(ConnectMicrosoft)){
+					  //       action.Active(nameof(MicrosoftNeedsAuthentication), b);
+							// actions.DisconnectMicrosoft().Active(nameof(MicrosoftNeedsAuthentication),!b);
+				   //      }
+				   //      else{
+					  //       action.Active(nameof(MicrosoftNeedsAuthentication), !b);
+					  //       actions.ConnectMicrosoft().Active(nameof(MicrosoftNeedsAuthentication),b);
+				   //      }
+				   //      action.UpdateDisconnectActionToolTip();
+			    //     }).To(action))
+		     //    .WhenActive()
+		     //    .TraceMicrosoftModule();
 
-        private static void UpdateDisconnectActionToolTip(this SimpleAction action){
-	        using (var objectSpace = action.Application.CreateObjectSpace(typeof(MSAuthentication))){
-		        var disconnectMicrosoft = action.Controller.Frame.Action<MicrosoftModule>().DisconnectMicrosoft();
-		        var currentUserId = action.Application.CurrentUserId();
-		        var objectByKey = objectSpace.GetObjectByKey<MSAuthentication>(currentUserId);
-		        var userName = objectByKey?.UserName;
-		        if (!disconnectMicrosoft.Data.ContainsKey("ToolTip")){
-			        disconnectMicrosoft.Data["ToolTip"] = disconnectMicrosoft.ToolTip;
-		        }
-		        disconnectMicrosoft.ToolTip = $"{disconnectMicrosoft.Data["ToolTip"]} {userName}";
-	        }
-        }
+        // private static void UpdateDisconnectActionToolTip(this SimpleAction action){
+	       //  using (var objectSpace = action.Application.CreateObjectSpace(typeof(MSAuthentication))){
+		      //   var disconnectMicrosoft = action.Controller.Frame.Action<MicrosoftModule>().DisconnectMicrosoft();
+		      //   var currentUserId = action.Application.CurrentUserId();
+		      //   var objectByKey = objectSpace.GetObjectByKey<MSAuthentication>(currentUserId);
+		      //   var userName = objectByKey?.UserName;
+		      //   if (!disconnectMicrosoft.Data.ContainsKey("ToolTip")){
+			     //    disconnectMicrosoft.Data["ToolTip"] = disconnectMicrosoft.ToolTip;
+		      //   }
+		      //   disconnectMicrosoft.ToolTip = $"{disconnectMicrosoft.Data["ToolTip"]} {userName}";
+	       //  }
+        // }
 
         internal static IObservable<TSource> TraceMicrosoftModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
 	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
-	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) =>
-	        source.Trace(name, MicrosoftModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
+	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
+            => source.Trace(name, MicrosoftModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
 
         
-        private static IObservable<SimpleAction> RegisterActions(this ApplicationModulesManager manager) =>
-	        manager.RegisterViewSimpleAction(nameof(ConnectMicrosoft), Initialize)
-		        .Merge(manager.RegisterViewSimpleAction(nameof(DisconnectMicrosoft), Initialize));
 
-        private static void Initialize(this SimpleAction action){
-	        action.Caption = SignInCaption;
-	        action.ImageName = "Microsoft";
-	        if (action.Id == nameof(ConnectMicrosoft)){
-		        action.ToolTip = "Connect";
-	        }
-	        else{
-		        action.Caption = SignOutCaption;
-		        action.ToolTip="Sign out";
-	        }
-	        action.PaintStyle=ActionItemPaintStyle.CaptionAndImage;
-
-        }
         
         [PublicAPI]
         public static IUserRequestBuilder Me(this IBaseRequestBuilder builder) => builder.Client.Me();
@@ -203,8 +175,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
         public static IUserRequestBuilder Me(this IBaseRequest builder) => builder.Client.Me();
         public static IUserRequestBuilder Me(this IBaseClient client) => ((GraphServiceClient)client).Me;
         
-        static Prompt ToPrompt(this OAuthPrompt prompt) =>
-	        prompt switch{
+        static Prompt ToPrompt(this OAuthPrompt prompt) 
+            => prompt switch{
 		        OAuthPrompt.Consent => Prompt.Consent,
 		        OAuthPrompt.Login => Prompt.ForceLogin,
 		        _ => Prompt.SelectAccount
@@ -212,7 +184,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 
 
         static IClientApplicationBase CreateClientApp(this XafApplication application){
-	        var modelOAuth = application.Model.OAuth();
+	        var modelOAuth = application.Model.OAuthMS();
 	        return application.GetPlatform() == Platform.Web
 		        ? (IClientApplicationBase) ConfidentialClientApplicationBuilder.Create(modelOAuth.ClientId)
 			        .WithRedirectUri(modelOAuth.RedirectUri).WithClientSecret(modelOAuth.ClientSecret).WithAuthority(AuthorityUri).Build()
@@ -227,13 +199,13 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 	        app.UseOpenIdConnectAuthentication(OpenIdConnectOptions());
         }
 
-		private static CookieAuthenticationOptions CookieAuthenticationOptions() =>
-			new CookieAuthenticationOptions{AuthenticationType = AuthenticationType, AuthenticationMode = AuthenticationMode.Passive,
+		private static CookieAuthenticationOptions CookieAuthenticationOptions() 
+            => new CookieAuthenticationOptions{AuthenticationType = AuthenticationType, AuthenticationMode = AuthenticationMode.Passive,
 				CookieName = $".AspNet.{AuthenticationType}", ExpireTimeSpan = TimeSpan.FromMinutes(5)
 			};
 
-		private static OpenIdConnectAuthenticationOptions OpenIdConnectOptions() =>
-			new OpenIdConnectAuthenticationOptions{ Authority = AuthorityUri.ToString(),
+		private static OpenIdConnectAuthenticationOptions OpenIdConnectOptions() 
+            => new OpenIdConnectAuthenticationOptions{ Authority = AuthorityUri.ToString(),
 				TokenValidationParameters = new TokenValidationParameters{ValidateIssuer = false,ValidateAudience = false},
 				Notifications = new OpenIdConnectAuthenticationNotifications{
 					RedirectToIdentityProvider = RedirectToIdentityProvider,
@@ -278,7 +250,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 		private static IObservable<AuthenticationResult> AquireTokenByAuthorizationCode(this XafApplication application, string code, object currentUserId){
 			var clientApp = application.CreateClientApp();
 			return Observable.FromAsync(() => ((ConfidentialClientApplication) clientApp)
-					.AcquireTokenByAuthorizationCode(application.Model.OAuth().Scopes(), code)
+					.AcquireTokenByAuthorizationCode(application.Model.OAuthMS().Scopes(), code)
 					.ExecuteAsync())
 				.Merge(clientApp.UserTokenCache.SynchStorage(application.CreateObjectSpace, (Guid) currentUserId)
 					.IgnoreElements().To<AuthenticationResult>())
@@ -313,7 +285,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 			aquireToken ??= ((exception,app) =>Observable.Throw<AuthenticationResult>(new UserFriendlyException("Azure authentication failed. Use the profile view to authenticate again")));
 			var authResults = Observable.FromAsync(clientApp.GetAccountsAsync)
 				.Select(accounts => accounts.FirstOrDefault())
-				.SelectMany(account => Observable.FromAsync(() => clientApp.AcquireTokenSilent(application.Model.OAuth().Scopes(), account).ExecuteAsync()))
+				.SelectMany(account => Observable.FromAsync(() => clientApp.AcquireTokenSilent(application.Model.OAuthMS().Scopes(), account).ExecuteAsync()))
 				.Catch<AuthenticationResult, MsalUiRequiredException>(e => aquireToken(e,clientApp));
 			var authenticationResult = storeResults(clientApp.UserTokenCache)
 				.Select(args => (AuthenticationResult)null).IgnoreElements()
@@ -326,7 +298,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 		}
 
 		private static IObservable<AuthenticationResult> Challenge(this XafApplication application){
-			var modelOAuth = application.Model.OAuth();
+			var modelOAuth = application.Model.OAuthMS();
 			var authenticationProperties = new AuthenticationProperties(new Dictionary<string, string>
 					{{"userid", application.CurrentUserId().ToString()},{"RedirectUri", modelOAuth.RedirectUri},
 						{"prompt", modelOAuth.Prompt.ToString().ToLower()},{"scopes", modelOAuth.Scopes().Join(" ")},
@@ -337,8 +309,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 			return Observable.Empty<AuthenticationResult>();
 		}
 
-		public static IObservable<GenericEventArgs<IObservable<AuthenticationResult>>> CustomAquireTokenInteractively => 
-			CustomAquireTokenInteractivelySubject.AsObservable();
+		public static IObservable<GenericEventArgs<IObservable<AuthenticationResult>>> CustomAquireTokenInteractively 
+            => CustomAquireTokenInteractivelySubject.AsObservable();
 
 		private static IObservable<AuthenticationResult> AquireTokenInteractively(this IClientApplicationBase clientApp, XafApplication application){
 			var aquireTokenInteractively = HttpContext.Current == null
@@ -351,8 +323,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 				.TraceMicrosoftModule(result => result.Account?.Username);
 		}
 		
-		private static IObservable<AuthenticationResult> AquireTokenInteractively(this IPublicClientApplication clientApp, XafApplication application) =>
-			clientApp.AcquireTokenInteractive(application.Model.OAuth().Scopes()).WithUseEmbeddedWebView(true)
-				.WithPrompt(application.Model.OAuth().Prompt.ToPrompt()).ExecuteAsync().ToObservable(new SynchronizationContextScheduler(SynchronizationContext.Current));
+		private static IObservable<AuthenticationResult> AquireTokenInteractively(this IPublicClientApplication clientApp, XafApplication application) 
+            => clientApp.AcquireTokenInteractive(application.Model.OAuthMS().Scopes()).WithUseEmbeddedWebView(true)
+				.WithPrompt(application.Model.OAuthMS().Prompt.ToPrompt()).ExecuteAsync()
+                .ToObservable(new SynchronizationContextScheduler(SynchronizationContext.Current));
 	}
 }

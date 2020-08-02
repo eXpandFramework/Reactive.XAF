@@ -9,9 +9,6 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
     [UsedImplicitly]
     public sealed class MicrosoftCalendarModule : ReactiveModuleBase{
-        [PublicAPI]
-        public const string ModelCategory = "Xpand.MicrosoftCalendar";
-        
         static MicrosoftCalendarModule(){
             TraceSource=new ReactiveTraceSource(nameof(MicrosoftCalendarModule));
             ModelObjectViewDependencyLogic.ObjectViewsMap.Add(typeof(IModelCalendar),typeof(IEvent));

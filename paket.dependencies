@@ -1,5 +1,5 @@
 strategy:max
-source C:\Program Files (x86)\DevExpress 20.1\Components\System\Components\Packages
+source F:\devexpress\Packages\
 source https://api.nuget.org/v3/index.json
 source https://xpandnugetserver.azurewebsites.net/nuget
 storage:none
@@ -52,3 +52,6 @@ nuget YamlDotNet 8.1.1
 nuget Xpand.Collections 
 nuget JetBrains.Annotations 2020.1.0
 nuget Polly 7.2.1
+nuget Google.Apis.Calendar.v3 1.43.0.1809
+nuget Google.Apis.Tasks.v1 1.43.0.1804
+

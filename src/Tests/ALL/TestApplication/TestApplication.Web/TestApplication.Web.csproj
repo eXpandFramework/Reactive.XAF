@@ -150,7 +150,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Graph.Beta" Version="0.18.0-preview">
     </PackageReference>
-    <PackageReference Include="Xpand.XAF.Web.All" Version="2.202.37">
+    <PackageReference Include="Xpand.XAF.Web.All" Version="2.202.37.1">
     </PackageReference>
   </ItemGroup>
   <ItemGroup>

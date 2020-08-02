@@ -9,9 +9,7 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
     [UsedImplicitly]
     public sealed class MicrosoftTodoModule : ReactiveModuleBase{
-        [PublicAPI]
-        public const string ModelCategory = "Xpand.MicrosoftTodo";
-        
+
         static MicrosoftTodoModule(){
             TraceSource=new ReactiveTraceSource(nameof(MicrosoftTodoModule));
             ModelObjectViewDependencyLogic.ObjectViewsMap.Add(typeof(IModelTodo),typeof(ITask));

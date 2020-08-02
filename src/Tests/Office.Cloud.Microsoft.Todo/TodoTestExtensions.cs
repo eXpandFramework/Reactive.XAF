@@ -61,7 +61,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
         }
         
         public static async Task<(Frame frame, GraphServiceClient client)> InitGraphServiceClient(this XafApplication application){
-            application.ObjectSpaceProvider.NewMicrosoftAuthentication();
+            application.ObjectSpaceProvider.NewAuthentication();
             var todoModel = await application.ReactiveModulesModel().OfficeModel().MicrosoftModel().TodoModel();
             var window = application.CreateViewWindow();
             var service = TodoService.Client.FirstAsync().SubscribeReplay();

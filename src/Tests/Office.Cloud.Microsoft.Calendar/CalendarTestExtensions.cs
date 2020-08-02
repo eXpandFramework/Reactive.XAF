@@ -30,7 +30,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
         public const int PagingCalendarItemsCount = 11;
 
         public static async Task<GraphServiceClient> MSGraphClient(this XafApplication application,bool deleteAll=false){
-            application.ObjectSpaceProvider.NewMicrosoftAuthentication();
+            application.ObjectSpaceProvider.NewAuthentication();
             var authorizeMS = await application.AuthorizeMS((exception, client) => Observable.Empty<AuthenticationResult>());
             if (deleteAll){
                 await authorizeMS.Me.Calendar.DeleteAllEvents();
@@ -87,7 +87,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
         }
 
         public static async Task<(Frame frame, GraphServiceClient client)> InitGraphServiceClient(this XafApplication application){
-            application.ObjectSpaceProvider.NewMicrosoftAuthentication();
+            application.ObjectSpaceProvider.NewAuthentication();
             var todoModel = application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Calendar();
             var window = application.CreateViewWindow();
             var service = CalendarService.Client.FirstAsync().SubscribeReplay();

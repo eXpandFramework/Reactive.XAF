@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30320.27
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.ModelEditor", "Xpand.XAF.ModelEditor.csproj", "{7B0B11B9-22FC-4ADB-B21E-61F7DD5338D9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7B0B11B9-22FC-4ADB-B21E-61F7DD5338D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B0B11B9-22FC-4ADB-B21E-61F7DD5338D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B0B11B9-22FC-4ADB-B21E-61F7DD5338D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B0B11B9-22FC-4ADB-B21E-61F7DD5338D9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {19B72417-5713-4A08-9E22-D581EB1CE7EB}
+	EndGlobalSection
+EndGlobal
