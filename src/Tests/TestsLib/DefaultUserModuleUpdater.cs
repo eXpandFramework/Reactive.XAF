@@ -6,11 +6,15 @@ using DevExpress.ExpressApp.Updating;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl;
 using DevExpress.Persistent.BaseImpl.PermissionPolicy;
+using Fasterflect;
 
 namespace Xpand.TestsLib{
     public class DefaultUserModuleUpdater : ModuleUpdater{
-        public DefaultUserModuleUpdater(IObjectSpace objectSpace, Version currentDBVersion) : base(objectSpace,
+        private readonly bool _fixedUserId;
+
+        public DefaultUserModuleUpdater(IObjectSpace objectSpace, Version currentDBVersion, bool fixedUserId) : base(objectSpace,
             currentDBVersion){
+            _fixedUserId = fixedUserId;
         }
 
         private PermissionPolicyRole CreateDefaultRole(){
@@ -49,6 +53,9 @@ namespace Xpand.TestsLib{
                 sampleUser = ObjectSpace.CreateObject<PermissionPolicyUser>();
                 sampleUser.UserName = "User";
                 sampleUser.SetPassword("");
+                if (_fixedUserId){
+                    sampleUser.SetMemberValue("oid", Guid.Parse("5c50f5c6-e697-4e9e-ac1b-969eac1237f3"));
+                }
             }
 
             var defaultRole = CreateDefaultRole();

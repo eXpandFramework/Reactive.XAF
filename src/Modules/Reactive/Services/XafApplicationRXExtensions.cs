@@ -18,12 +18,14 @@ using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
+using Xpand.XAF.Modules.Reactive.Services.Security;
 using ListView = DevExpress.ExpressApp.ListView;
 using View = DevExpress.ExpressApp.View;
 
@@ -377,6 +379,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 })
                 .Cast<NonPersistePropertyCollectionSource>()
                 .TakeUntilDisposed(application);
+
+        public static Guid CurrentUserId(this XafApplication application) 
+            => application.Security.IsSecurityStrategyComplex() ? (Guid) application.Security.UserId
+                : $"{application.Title}{Environment.MachineName}{Environment.UserName}".ToGuid();
     }
 
 

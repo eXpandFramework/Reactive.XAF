@@ -3,7 +3,7 @@
 This namespace `Xpand.XAF.Modules` is used for projects that contain XAF modules. 
 
 
-## Platform agnostic modules list
+## Modules list
 
 **Due to the large package number a substantial effort is needed even for simple tasks, like installation, package API discovery and version choosing. How to get the best out of them?**
 </br><u>Traditionally:</u>
@@ -21,6 +21,18 @@ This namespace `Xpand.XAF.Modules` is used for projects that contain XAF modules
 </br>In the next screencast we see how easy is to install all packages that target the Windows platform. It is recommended to use the Nuget `PackageReference` format. First we install all packages and make a note that a dependency is added for all, then we remove a few installation lines and we make a note how the assembly dependencies reflects only that used API. The assembly reference discovery was done with the help of the XpandPwsh [Get-AssemblyReference](https://github.com/eXpandFramework/XpandPwsh/wiki/Get-AssemblyReference) cmdlet.</br>
 
 <twitter>
+
+![Xpand XAF All](https://user-images.githubusercontent.com/159464/86915211-447c3780-c12a-11ea-973d-3096044dc22b.gif)
+
+</twitter>
+
+
+[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/LvxQ-U_0Sbg)
+
+For web also install the packages on the web front and build so VS will help you fix your conflicts with just an Enter after a build.
+![image](https://user-images.githubusercontent.com/159464/89271022-d5b8ce00-d644-11ea-8a55-40d0a27a0075.png)
+
+<moduleslist>
 
 |PackageName|Version|[![Custom badge](https://xpandshields.azurewebsites.net/endpoint.svg?label=&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAF)](https://www.nuget.org/packages?q=Xpand.XAF)|Target|Platform
 |---|---|---|---|---|
@@ -54,45 +66,7 @@ This namespace `Xpand.XAF.Modules` is used for projects that contain XAF modules
 [Xpand.XAF.Web.All](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Web.All)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Web.All.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Web.All.svg?label=&style=flat)||Web
 [Xpand.XAF.Win.All](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Win.All)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Win.All.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Win.All.svg?label=&style=flat)||Win
 
-
-</twitter>
-
-[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/LvxQ-U_0Sbg)
-
-
-
-|PackageName|Version|[![Custom badge](https://xpandshields.azurewebsites.net/endpoint.svg?label=&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAF)](https://www.nuget.org/packages?q=Xpand.XAF)|Target|Platform
-|---|---|---|---|---|
-[Xpand.XAF.Core.All](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Core.All)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Core.All.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Core.All.svg?label=&style=flat)||Agnostic
-[AutoCommit](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/AutoCommit)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.AutoCommit.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.AutoCommit.svg?label=&style=flat)|net461|Agnostic
-[CloneMemberValue](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/CloneMemberValue)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.CloneMemberValue.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.CloneMemberValue.svg?label=&style=flat)|net461|Agnostic
-[CloneModelView](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/CloneModelView)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.CloneModelView.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.CloneModelView.svg?label=&style=flat)|net461|Agnostic
-[GridListEditor](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/GridListEditor)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.GridListEditor.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.GridListEditor.svg?label=&style=flat)|net461|Win
-[HideToolBar](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/HideToolBar)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.HideToolBar.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.HideToolBar.svg?label=&style=flat)|net461|Agnostic
-[LookupCascade](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/LookupCascade)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.LookupCascade.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.LookupCascade.svg?label=&style=flat)|net461|Web
-[MasterDetail](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/MasterDetail)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.MasterDetail.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.MasterDetail.svg?label=&style=flat)|net461|Agnostic
-[ModelMapper](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/ModelMapper)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.ModelMapper.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.ModelMapper.svg?label=&style=flat)|net461|Agnostic
-[ModelViewInheritance](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/ModelViewInheritance)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.ModelViewInheritance.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.ModelViewInheritance.svg?label=&style=flat)|net461|Agnostic
-[Office.Cloud.Microsoft](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Office.Cloud.Microsoft)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.Office.Cloud.Microsoft.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.Office.Cloud.Microsoft.svg?label=&style=flat)|net461|Agnostic
-[Office.Cloud.Microsoft.Todo](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Office.Cloud.Microsoft.Todo)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.svg?label=&style=flat)|net461|Agnostic
-[OneView](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/OneView)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.OneView.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.OneView.svg?label=&style=flat)|net461|Win
-[PositionInListView](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/PositionInListView)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.PositionInListView.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.PositionInListView.svg?label=&style=flat)|net461|Agnostic
-[ProgressBarViewItem](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/ProgressBarViewItem)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.ProgressBarViewItem.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.ProgressBarViewItem.svg?label=&style=flat)|net461|Agnostic
-[Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.Reactive.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.Reactive.svg?label=&style=flat)|net461|Agnostic
-[Reactive.Logger](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.Reactive.Logger.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.Reactive.Logger.svg?label=&style=flat)|net461|Agnostic
-[Reactive.Logger.Client.Win](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.Reactive.Logger.Client.Win.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.Reactive.Logger.Client.Win.svg?label=&style=flat)|net461|
-[Reactive.Logger.Hub](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Hub)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.Reactive.Logger.Hub.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.Reactive.Logger.Hub.svg?label=&style=flat)|net461|Agnostic
-[Reactive.Win](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Win)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.Reactive.Win.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.Reactive.Win.svg?label=&style=flat)|net461|Win
-[RefreshView](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/RefreshView)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.RefreshView.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.RefreshView.svg?label=&style=flat)|net461|Agnostic
-[SequenceGenerator](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/SequenceGenerator)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.SequenceGenerator.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.SequenceGenerator.svg?label=&style=flat)|net461|Agnostic
-[SuppressConfirmation](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/SuppressConfirmation)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.SuppressConfirmation.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.SuppressConfirmation.svg?label=&style=flat)|net461|Agnostic
-[ViewEditMode](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/ViewEditMode)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.ViewEditMode.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.ViewEditMode.svg?label=&style=flat)|net461|Agnostic
-[ViewItemValue](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/ViewItemValue)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.ViewItemValue.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.ViewItemValue.svg?label=&style=flat)|net461|Agnostic
-[Xpand.XAF.Web.All](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Web.All)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Web.All.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Web.All.svg?label=&style=flat)||Web
-[Xpand.XAF.Win.All](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Win.All)|![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Win.All.svg?label=&style=flat)|![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Win.All.svg?label=&style=flat)||Win
-
-
-
+</moduleslist>
 
 ## Issues
 Use main project [issues](https://github.com/eXpandFramework/eXpand/issues/new/choose)

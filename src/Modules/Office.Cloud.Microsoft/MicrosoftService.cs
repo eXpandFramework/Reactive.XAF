@@ -10,6 +10,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Runtime.CompilerServices;
+using System.Security.Authentication;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -29,6 +30,7 @@ using Owin;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Office.Cloud;
+using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
@@ -47,8 +49,6 @@ using Prompt = Microsoft.Identity.Client.Prompt;
 [assembly: OwinStartup(typeof(MicrosoftService))]
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 	public static class MicrosoftService{
-		// public const string SignInCaption = "Sign in with Microsoft";
-		// public const string SignOutCaption = "Sign out Microsoft";
 		static readonly Subject<GenericEventArgs<IObservable<AuthenticationResult>>> CustomAquireTokenInteractivelySubject=new Subject<GenericEventArgs<IObservable<AuthenticationResult>>>();
 		private static readonly Uri AuthorityUri=new Uri(string.Format(CultureInfo.InvariantCulture, "https://login.microsoftonline.com/{0}{1}", "common", "/v2.0"));
         
@@ -56,7 +56,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 
         public static IObservable<bool> MicrosoftNeedsAuthentication(this XafApplication application) 
             => application.NeedsAuthentication<MSAuthentication>(() 
-                => application.AuthorizeMS((exception, client) => Observable.Throw<AuthenticationResult>(exception)).ToUnit());
+                => application.AuthorizeMS((exception, client) => Observable.Throw<AuthenticationResult>(new AuthenticationException(nameof(MicrosoftService))))
+	                .Catch<GraphServiceClient,AuthenticationException>(e => Observable.Empty<GraphServiceClient>())
+	                .To(false).SwitchIfEmpty(true.ReturnObservable()));
 
         public static SimpleAction ConnectMicrosoft(this (MicrosoftModule, Frame frame) tuple) 
             => tuple.frame.Action(nameof(ConnectMicrosoft)).As<SimpleAction>();
@@ -69,105 +71,10 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
                 => application.MicrosoftNeedsAuthentication(), application 
                 => application.AuthorizeMS((exception, app) => app.AquireTokenInteractively(application)).ToUnit());
 
-        // private static IObservable<Unit> ExecuteActions(this IObservable<SimpleAction> registerActions) =>
-	       //  registerActions.ActivateWhenUserDetails()
-		      //   .SelectMany(action => action.Activate()
-		      //   .Merge(action.Execution())
-	       //  ).ToUnit();
-
-      //   private static IObservable<SimpleAction> Execution(this SimpleAction action) => action
-	     //    .WhenExecute(e => {
-		    //     var execute = e.Action.Id == nameof(DisconnectMicrosoft)
-			   //      ? e.Action.Application.NewObjectSpace(space => {
-				  //       var objectSpace = e.Action.View().ObjectSpace;
-				  //       objectSpace.Delete(objectSpace.GetObjectByKey<MSAuthentication>(e.Action.Application.CurrentUserId()));
-				  //       objectSpace.CommitChanges();
-						// e.Action.Data.Clear();
-				  //       return e.Action.AsSimpleAction().ReturnObservable();
-			   //      })
-			   //      : e.Action.Application.AuthorizeMS((exception, app) => app.AquireTokenInteractively(action.Application)).To(e.Action.AsSimpleAction());
-		    //     return execute.ActivateWhenAuthenticationNeeded();
-	     //    })
-	     //    .TraceMicrosoftModule();
-
-
-        // private static IObservable<SimpleAction> Activate(this SimpleAction action){
-	       //  return action.Application.MicrosoftNeedsAuthentication()
-		      //   .Do(b => {
-			     //    action.Active(nameof(MicrosoftNeedsAuthentication), action.Id == nameof(ConnectMicrosoft) ? b : !b);
-			     //    if (!b && action.Id == nameof(DisconnectMicrosoft)){
-				    //     action.UpdateDisconnectActionToolTip();
-			     //    }
-		      //   })
-		      //   .To(action)
-		      //   .TraceMicrosoftModule(a => $"{a.Id}, Active:{a.Active}");
-        // }
-
-      //   private static IObservable<Unit> ConfigureStyle(this IObservable<SimpleAction> source) => source
-	     //    .WhenCustomizeControl()
-	     //    .Select(_ => {
-		    //     var application = _.sender.Application;
-		    //     if (application.GetPlatform()==Platform.Web){
-			   //      if (_.sender.Id == nameof(ConnectMicrosoft)){
-						// _.sender.Model.SetValue("IsPostBackRequired",true);
-			   //      }
-			   //      var menuItem = _.e.Control.GetPropertyValue("MenuItem");
-			   //      var itemStyle = menuItem.GetPropertyValue("ItemStyle");
-			   //      itemStyle.GetPropertyValue("Paddings").SetPropertyValue("Padding", new System.Web.UI.WebControls.Unit(2));
-			   //      itemStyle.SetPropertyValue("ImageSpacing", new System.Web.UI.WebControls.Unit(7));
-			   //      itemStyle.GetPropertyValue("Font").SetPropertyValue("Name", "Roboto Medium");
-			   //      itemStyle.GetPropertyValue("SelectedStyle").SetPropertyValue("BackColor", Color.White);
-			   //      itemStyle.SetPropertyValue("ForeColor", ColorTranslator.FromHtml("#757575"));
-			   //      itemStyle.GetPropertyValue("HoverStyle").SetPropertyValue("BackColor", Color.White);
-			   //      menuItem.CallMethod("ForceMenuRendering");
-		    //     }
-		    //     return _.sender;
-	     //    })
-	     //    .ToUnit();
-        
-        // private static IObservable<SimpleAction> ActivateWhenUserDetails(this IObservable<SimpleAction> registerActions) =>
-	       //  registerActions.ActivateInUserDetails(true)
-		      //   .Do(action => action.Active(nameof(MicrosoftNeedsAuthentication),false) )
-		      //   .Publish().RefCount();
-
-
-       //  private static IObservable<SimpleAction> ActivateWhenAuthenticationNeeded(this IObservable<SimpleAction> source) =>
-	      //   source.SelectMany(action => action.Application.MicrosoftNeedsAuthentication()
-			    //     .Do(b => {
-				   //      var actions = action.Controller.Frame.Action<MicrosoftModule>();
-				   //      if (action.Id == nameof(ConnectMicrosoft)){
-					  //       action.Active(nameof(MicrosoftNeedsAuthentication), b);
-							// actions.DisconnectMicrosoft().Active(nameof(MicrosoftNeedsAuthentication),!b);
-				   //      }
-				   //      else{
-					  //       action.Active(nameof(MicrosoftNeedsAuthentication), !b);
-					  //       actions.ConnectMicrosoft().Active(nameof(MicrosoftNeedsAuthentication),b);
-				   //      }
-				   //      action.UpdateDisconnectActionToolTip();
-			    //     }).To(action))
-		     //    .WhenActive()
-		     //    .TraceMicrosoftModule();
-
-        // private static void UpdateDisconnectActionToolTip(this SimpleAction action){
-	       //  using (var objectSpace = action.Application.CreateObjectSpace(typeof(MSAuthentication))){
-		      //   var disconnectMicrosoft = action.Controller.Frame.Action<MicrosoftModule>().DisconnectMicrosoft();
-		      //   var currentUserId = action.Application.CurrentUserId();
-		      //   var objectByKey = objectSpace.GetObjectByKey<MSAuthentication>(currentUserId);
-		      //   var userName = objectByKey?.UserName;
-		      //   if (!disconnectMicrosoft.Data.ContainsKey("ToolTip")){
-			     //    disconnectMicrosoft.Data["ToolTip"] = disconnectMicrosoft.ToolTip;
-		      //   }
-		      //   disconnectMicrosoft.ToolTip = $"{disconnectMicrosoft.Data["ToolTip"]} {userName}";
-	       //  }
-        // }
-
         internal static IObservable<TSource> TraceMicrosoftModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
 	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
 	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
             => source.Trace(name, MicrosoftModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
-
-        
-
         
         [PublicAPI]
         public static IUserRequestBuilder Me(this IBaseRequestBuilder builder) => builder.Client.Me();
@@ -181,8 +88,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 		        OAuthPrompt.Login => Prompt.ForceLogin,
 		        _ => Prompt.SelectAccount
 	        };
-
-
+        
         static IClientApplicationBase CreateClientApp(this XafApplication application){
 	        var modelOAuth = application.Model.OAuthMS();
 	        return application.GetPlatform() == Platform.Web
@@ -250,7 +156,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 		private static IObservable<AuthenticationResult> AquireTokenByAuthorizationCode(this XafApplication application, string code, object currentUserId){
 			var clientApp = application.CreateClientApp();
 			return Observable.FromAsync(() => ((ConfidentialClientApplication) clientApp)
-					.AcquireTokenByAuthorizationCode(application.Model.OAuthMS().Scopes(), code)
+					.AcquireTokenByAuthorizationCode(application.Scopes(), code)
 					.ExecuteAsync())
 				.Merge(clientApp.UserTokenCache.SynchStorage(application.CreateObjectSpace, (Guid) currentUserId)
 					.IgnoreElements().To<AuthenticationResult>())
@@ -258,9 +164,10 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 				.TraceMicrosoftModule();
 		}
 
-        static readonly Subject<GraphServiceClient> ClientSubject=new Subject<GraphServiceClient>();
+		private static string[] Scopes(this XafApplication application) => application.Model.OAuthMS().Scopes().Add("User.Read");
 
-        public static IObservable<GraphServiceClient> Client => ClientSubject.AsObservable();
+		static readonly Subject<GraphServiceClient> ClientSubject=new Subject<GraphServiceClient>();
+		public static IObservable<GraphServiceClient> Client => ClientSubject.AsObservable();
 
         public static IObservable<(Frame frame, GraphServiceClient client)> AuthorizeMS(this  IObservable<Frame> source,
 	        Func<MsalUiRequiredException,IClientApplicationBase,  IObservable<AuthenticationResult>> aquireToken = null) 
@@ -285,7 +192,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 			aquireToken ??= ((exception,app) =>Observable.Throw<AuthenticationResult>(new UserFriendlyException("Azure authentication failed. Use the profile view to authenticate again")));
 			var authResults = Observable.FromAsync(clientApp.GetAccountsAsync)
 				.Select(accounts => accounts.FirstOrDefault())
-				.SelectMany(account => Observable.FromAsync(() => clientApp.AcquireTokenSilent(application.Model.OAuthMS().Scopes(), account).ExecuteAsync()))
+				.SelectMany(account => Observable.FromAsync(() => clientApp.AcquireTokenSilent(application.Scopes(), account).ExecuteAsync()))
 				.Catch<AuthenticationResult, MsalUiRequiredException>(e => aquireToken(e,clientApp));
 			var authenticationResult = storeResults(clientApp.UserTokenCache)
 				.Select(args => (AuthenticationResult)null).IgnoreElements()
@@ -301,7 +208,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 			var modelOAuth = application.Model.OAuthMS();
 			var authenticationProperties = new AuthenticationProperties(new Dictionary<string, string>
 					{{"userid", application.CurrentUserId().ToString()},{"RedirectUri", modelOAuth.RedirectUri},
-						{"prompt", modelOAuth.Prompt.ToString().ToLower()},{"scopes", modelOAuth.Scopes().Join(" ")},
+						{"prompt", modelOAuth.Prompt.ToString().ToLower()},{"scopes", application.Scopes().Join(" ")},
 						{"clientId", modelOAuth.ClientId}})
 				{RedirectUri = modelOAuth.RedirectUri};
 			HttpContext.Current.Response.SuppressFormsAuthenticationRedirect = true;
@@ -324,7 +231,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 		}
 		
 		private static IObservable<AuthenticationResult> AquireTokenInteractively(this IPublicClientApplication clientApp, XafApplication application) 
-            => clientApp.AcquireTokenInteractive(application.Model.OAuthMS().Scopes()).WithUseEmbeddedWebView(true)
+            => clientApp.AcquireTokenInteractive(application.Scopes()).WithUseEmbeddedWebView(true)
 				.WithPrompt(application.Model.OAuthMS().Prompt.ToPrompt()).ExecuteAsync()
                 .ToObservable(new SynchronizationContextScheduler(SynchronizationContext.Current));
 	}

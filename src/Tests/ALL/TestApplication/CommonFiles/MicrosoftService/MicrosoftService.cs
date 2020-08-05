@@ -25,14 +25,14 @@ namespace TestApplication.MicrosoftService{
 					var modelOAuth = views.Application.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().OAuth;
 					using (var manifestResourceStream = File.OpenRead($"{AppDomain.CurrentDomain.ApplicationPath()}\\..\\{parentFolder}AzureAppCredentials.json")){
 						var json = JsonConvert.DeserializeObject<dynamic>(new StreamReader(manifestResourceStream!).ReadToEnd());
-						modelOAuth.ClientId = "984844117367-e4j0tjtagncoi74b4eujupc99fc10svu.apps.googleusercontent.com";
-						modelOAuth.RedirectUri = "";
+						modelOAuth.ClientId = json.MSClient;
+						modelOAuth.RedirectUri = json.RedirectUri;
 						
 						if (isWeb){
 							modelOAuth.RedirectUri = "http://localhost:65477/login.aspx";
 						}
 						
-						modelOAuth.ClientSecret = "-vyhiFsLx8qXiX1lscumx7g5";
+						modelOAuth.ClientSecret = json.MSClientSecret;
 						modelOAuth.Prompt=OAuthPrompt.Login;
 					}
 				})

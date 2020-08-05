@@ -122,8 +122,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
                 .Timeout(timeout);
         }
         
-        public static void NewAuthentication<TAuth>(this IObjectSpaceProvider objectSpaceProvider,Action<TAuth,byte[]> saveToken,Platform platform=Platform.Win) where TAuth:CloudOfficeBaseObject{
-            using (var manifestResourceStream = File.OpenRead($"{AppDomain.CurrentDomain.ApplicationPath()}\\AuthenticationData{platform}.json")){
+        public static void NewAuthentication<TAuth>(this IObjectSpaceProvider objectSpaceProvider,Action<TAuth,byte[]> saveToken,string serviceName,Platform platform=Platform.Win) where TAuth:CloudOfficeBaseObject{
+            using (var manifestResourceStream = File.OpenRead($"{AppDomain.CurrentDomain.ApplicationPath()}\\{serviceName}AuthenticationData{platform}.json")){
                 var token = Encoding.UTF8.GetBytes(new StreamReader(manifestResourceStream).ReadToEnd());
                 using (var objectSpace = objectSpaceProvider.CreateObjectSpace()){
                     var authenticationOid = (Guid)objectSpace.GetKeyValue(SecuritySystem.CurrentUser);
@@ -137,19 +137,19 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
             }
         }
         
-        public static async Task DisconnectMicrosoft_Action_Destroys_Connection(this XafApplication application, string serviceName){
+        public static async Task Disconnect_Action_Destroys_Connection(this XafApplication application, string serviceName){
             
             var compositeView = application.NewView(ViewType.DetailView, application.Security.UserType);
             compositeView.CurrentObject = compositeView.ObjectSpace.GetObjectByKey(application.Security.UserType, SecuritySystem.CurrentUserId);
             var viewWindow = application.CreateViewWindow();
             viewWindow.SetView(compositeView);
-
             var disconnectMicrosoft = viewWindow.DisconnectAction(serviceName);
+
             await disconnectMicrosoft.WhenActivated().FirstAsync().ToTaskWithoutConfigureAwait();
             disconnectMicrosoft.DoExecute();
                 
-            disconnectMicrosoft.Active[$"{serviceName}NeedsAuthentication"].ShouldBeFalse();
-            viewWindow.DisconnectAction(serviceName).Active[$"{serviceName}NeedsAuthentication"].ShouldBeTrue();
+            disconnectMicrosoft.Active[nameof(Extensions.Office.Cloud.Extensions.NeedsAuthentication)].ShouldBeFalse();
+            viewWindow.ConnectAction(serviceName).Active[nameof(Extensions.Office.Cloud.Extensions.NeedsAuthentication)].ShouldBeTrue();
         }
 
         public static async Task Actions_Active_State_when_authentication_not_needed(this XafApplication application, string serviceName){
@@ -165,11 +165,11 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
         private static async Task ActiveState(Window viewWindow, bool authenticationNeeded, string serviceName){
             
             await Observable.Interval(TimeSpan.FromMilliseconds(200))
-                .Where(l => viewWindow.ConnectAction(serviceName).Active[$"{serviceName}NeedsAuthentication"]==authenticationNeeded)
+                .Where(l => viewWindow.ConnectAction(serviceName).Active[nameof(Extensions.Office.Cloud.Extensions.NeedsAuthentication)]==authenticationNeeded)
                 .FirstAsync()
                 .ToTaskWithoutConfigureAwait();
             await Observable.Interval(TimeSpan.FromMilliseconds(200))
-                .Where(l => viewWindow.DisconnectAction(serviceName).Active[$"{serviceName}NeedsAuthentication"]=!authenticationNeeded)
+                .Where(l => viewWindow.DisconnectAction(serviceName).Active[nameof(Extensions.Office.Cloud.Extensions.NeedsAuthentication)]=!authenticationNeeded)
                 .FirstAsync()
                 .ToTaskWithoutConfigureAwait();
         }
@@ -182,8 +182,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
                 
             viewWindow.SetView(compositeView);
 
-            viewWindow.ConnectAction(serviceName).Active[$"{serviceName}NeedsAuthentication"].ShouldBeTrue();
-            viewWindow.DisconnectAction(serviceName).Active[$"{serviceName}NeedsAuthentication"].ShouldBeFalse();
+            viewWindow.ConnectAction(serviceName).Active[nameof(Extensions.Office.Cloud.Extensions.NeedsAuthentication)].ShouldBeTrue();
+            viewWindow.DisconnectAction(serviceName).Active[nameof(Extensions.Office.Cloud.Extensions.NeedsAuthentication)].ShouldBeFalse();
         }
 
         private static SimpleAction ConnectAction(this Window viewWindow,string serviceName) => (SimpleAction) viewWindow.Actions($"Connect{serviceName}").First();

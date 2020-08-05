@@ -19,7 +19,7 @@ using Xpand.XAF.Modules.Reactive.Services.Actions;
 using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests{
-	public class MicrosoftTests:BaseTest{
+	public class MicrosoftServiceTests:BaseTest{
         private const string ServiceName = "Microsoft";
         [Test][XpandTest()]
         public async Task NeedsAuthentication_when_AuthenticationStorage_does_not_contain_current_user([ValueSource(nameof(PlatformDatasource))]Platform platform){
@@ -40,7 +40,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests{
         [Test][XpandTest()]
         public async Task Not_NeedsAuthentication_when_AuthenticationStorage_current_user_can_authenticate([ValueSource(nameof(PlatformDatasource))]Platform platform){
             using (var application=MicrosoftModule(platform).Application){
-                application.ObjectSpaceProvider.NewAuthentication(platform);
+                application.ObjectSpaceProvider.NewAuthentication(ServiceName,platform);
 
                 await application.MicrosoftNeedsAuthentication().Not_NeedsAuthentication_when_AuthenticationStorage_current_user_can_authenticate();
             }
@@ -65,7 +65,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests{
         [Test][XpandTest()]
         public async Task Actions_Active_State_when_authentication_not_needed([ValueSource(nameof(PlatformDatasource))]Platform platform){
             using (var application=MicrosoftModule(platform).Application){
-                application.ObjectSpaceProvider.NewAuthentication(platform);
+                application.ObjectSpaceProvider.NewAuthentication(ServiceName,platform);
                 
                 await application.Actions_Active_State_when_authentication_not_needed(ServiceName);
             }
@@ -76,8 +76,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests{
         [XpandTest()]
         public async Task DisconnectMicrosoft_Action_Destroys_Connection([ValueSource(nameof(PlatformDatasource))]Platform platform){
             using (var application=MicrosoftModule(platform).Application){
-                application.ObjectSpaceProvider.NewAuthentication(platform);
-                await application.DisconnectMicrosoft_Action_Destroys_Connection(ServiceName);
+                application.ObjectSpaceProvider.NewAuthentication(ServiceName,platform);
+                await application.Disconnect_Action_Destroys_Connection(ServiceName);
             }
         }
 
@@ -92,7 +92,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests{
                 var viewWindow = application.CreateViewWindow();
                 viewWindow.SetView(compositeView);
                 MicrosoftService.CustomAquireTokenInteractively
-	                .Do(args => application.ObjectSpaceProvider.NewAuthentication(platform))
+	                .Do(args => application.ObjectSpaceProvider.NewAuthentication(ServiceName,platform))
                     .Do(e => e.Instance=Observable.Empty<AuthenticationResult>().FirstOrDefaultAsync()).Test();
                 var connectMicrosoft = viewWindow.Action<MicrosoftModule>().ConnectMicrosoft();
                 var disconnectMicrosoft = viewWindow.Action<MicrosoftModule>().DisconnectMicrosoft();
@@ -100,7 +100,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests{
                 connectMicrosoft.DoExecute();
 
                 await connectMicrosoft.WhenDeactivated().FirstAsync().Merge(disconnectMicrosoft.WhenActivated().FirstAsync()).Take(2).ToTaskWithoutConfigureAwait();
-                connectMicrosoft.Active[nameof(MicrosoftService.MicrosoftNeedsAuthentication)].ShouldBeFalse();
+                connectMicrosoft.Active[nameof(Extensions.Office.Cloud.Extensions.NeedsAuthentication)].ShouldBeFalse();
                 disconnectMicrosoft.Active[nameof(MicrosoftService.MicrosoftNeedsAuthentication)].ShouldBeTrue();
             }
         }

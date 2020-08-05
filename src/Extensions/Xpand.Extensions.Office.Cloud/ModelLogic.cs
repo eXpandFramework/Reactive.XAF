@@ -7,7 +7,6 @@ using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using JetBrains.Annotations;
-using Xpand.Extensions.LinqExtensions;
 using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.Extensions.Office.Cloud{
@@ -40,7 +39,7 @@ namespace Xpand.Extensions.Office.Cloud{
 
     public interface IModelOAuth:IModelNode{
         [Required][DefaultValue(OAuthPrompt.Consent)]
-        OAuthPrompt Prompt{ get; set; }
+        OAuthPrompt Prompt{ get; [UsedImplicitly] set; }
         [Description("Space seperated list of scopes")]
         string Scopes{ get; [UsedImplicitly] set; }
         [Required][ModelBrowsable(typeof(DesignerOnlyCalculator))]
@@ -48,14 +47,14 @@ namespace Xpand.Extensions.Office.Cloud{
         [Required]
         string RedirectUri{ get; set; }
         [Required][ModelBrowsable(typeof(DesignerOnlyCalculator))]
-        [DefaultValue("Applicable only for web")]
+        // [DefaultValue("Applicable only for web")]
         string ClientSecret{ get; set; }
     }
     
     [DomainLogic(typeof(IModelOAuth))]
     public static class ModelOathLogic{
         internal static string[] Scopes(this IModelOAuth modelOAuth) =>
-            $"{modelOAuth.Scopes}".Split(' ').Add("User.Read").Where(s => !string.IsNullOrEmpty(s)).Distinct().ToArray();
+            $"{modelOAuth.Scopes}".Split(' ').Where(s => !string.IsNullOrEmpty(s)).Distinct().ToArray();
     }
 
 }

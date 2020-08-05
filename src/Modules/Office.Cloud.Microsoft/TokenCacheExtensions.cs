@@ -41,7 +41,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
             => tokenCache.BeforeAccess().Select(args => {
                 using (var objectSpace = objectspaceFactory()){
                     var authentication = objectSpace.GetObjectByKey<MSAuthentication>(userId) ;
-                    args.TokenCache.DeserializeMsalV3(authentication?.Token.Bytes());
+                    args.TokenCache.DeserializeMsalV3(authentication?.Token?.Bytes());
                     objectSpace.CommitChanges();
                 }
                 return args;

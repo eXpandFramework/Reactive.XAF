@@ -7,26 +7,26 @@ using System.Reactive.Threading.Tasks;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Web;
-using DevExpress.Data.Filtering.Helpers;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using Google.Apis.Auth.OAuth2;
+using Google.Apis.Auth.OAuth2.Flows;
 using Google.Apis.Auth.OAuth2.Requests;
 using Google.Apis.Auth.OAuth2.Responses;
 using Google.Apis.Auth.OAuth2.Web;
+using JetBrains.Annotations;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.Office.Cloud;
+using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
-using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.SecurityExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Office.Cloud.Google.BusinessObjects;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
-using Xpand.XAF.Modules.Reactive.Services.Security;
 using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
 
 
@@ -35,13 +35,16 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
 	public static class GoogleService{
         public static IObservable<bool> GoogleNeedsAuthentication(this XafApplication application) 
             => application.NeedsAuthentication<GoogleAuthentication>(() => Observable.Using(application.GoogleAuthorizationCodeFlow,
-                flow => Observable.FromAsync(() => flow.LoadTokenAsync(SecuritySystem.CurrentUserId.ToString(), CancellationToken.None))
-                    .RemoveInvalidAuthentication(application).WhenNotDefault().NeedsAuthorization(flow)).ToUnit());
+                flow => flow.LoadTokenAsync(application.CurrentUserId().ToString(), CancellationToken.None).ToObservable()
+                    .RemoveInvalidAuthentication(application).WhenNotDefault().NeedsAuthorization(flow, application.CurrentUserId().ToString()))
+                .SwitchIfEmpty(true.ReturnObservable()));
 
-        public static SimpleAction ConnectGoogle(this (GoogleModule, Frame frame) tuple) 
+        [PublicAPI]
+        public static SimpleAction ConnectGoogle(this (GoogleModule googleModule, Frame frame) tuple) 
             => tuple.frame.Action(nameof(ConnectGoogle)).As<SimpleAction>();
 
-        public static SimpleAction DisconnectGoogle(this (GoogleModule, Frame frame) tuple) 
+        [PublicAPI]
+        public static SimpleAction DisconnectGoogle(this (GoogleModule googleModule, Frame frame) tuple) 
             => tuple.frame.Action(nameof(DisconnectGoogle)).As<SimpleAction>();
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
@@ -53,28 +56,23 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
 	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
 	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
             => source.Trace(name, GoogleModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
-
         
-		private static Guid CurrentUserId(this XafApplication application) 
-            => application.Security.IsSecurityStrategyComplex() ? (Guid) application.Security.UserId
-				: $"{application.Title}{Environment.MachineName}{Environment.UserName}".ToGuid();
-
-        private static IObservable<bool> NeedsAuthorization(this IObservable<TokenResponse> source,global::Google.Apis.Auth.OAuth2.Flows.GoogleAuthorizationCodeFlow flow) 
-            => source.SelectMany(response => response.IsExpired(flow.Clock) ? flow.RefreshTokenAsync(SecuritySystem.CurrentUserId.ToString(),
-			        response.RefreshToken, CancellationToken.None).ToObservable()
-		        .Select(tokenResponse => tokenResponse.IsExpired(flow.Clock)) : false.ReturnObservable());
+        private static IObservable<bool> NeedsAuthorization(this IObservable<TokenResponse> source, GoogleAuthorizationCodeFlow flow, string userId) 
+            => source.SelectMany(response 
+                => response.IsExpired(flow.Clock) ? flow.RefreshTokenAsync(userId, response.RefreshToken, CancellationToken.None).ToObservable().Select(tokenResponse 
+                    => tokenResponse.IsExpired(flow.Clock)) : false.ReturnObservable());
 
         private static IObservable<TokenResponse> RemoveInvalidAuthentication(this IObservable<TokenResponse> source, XafApplication application) 
             => source.Do(response => {
 		        if (response == null){
 			        using (var objectSpace = application.CreateObjectSpace()){
-				        objectSpace.Delete(objectSpace.GetObjectByKey<GoogleAuthentication>(SecuritySystem.CurrentUserId));
+				        objectSpace.Delete(objectSpace.GetObjectByKey<GoogleAuthentication>(application.CurrentUserId()));
 				        objectSpace.CommitChanges();
 			        }
 		        }
 	        });
 
-        private class AuthorizationCodeFlow : global::Google.Apis.Auth.OAuth2.Flows.GoogleAuthorizationCodeFlow{
+        private class AuthorizationCodeFlow : GoogleAuthorizationCodeFlow{
 	        public AuthorizationCodeFlow(Initializer initializer) : base(initializer){
 	        }
 
@@ -87,8 +85,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
 		        };
         };
         
-        private static AuthorizationCodeFlow GoogleAuthorizationCodeFlow(this XafApplication application) 
-            => new AuthorizationCodeFlow(new global::Google.Apis.Auth.OAuth2.Flows.GoogleAuthorizationCodeFlow.Initializer{
+        private static AuthorizationCodeFlow GoogleAuthorizationCodeFlow(this XafApplication application)
+            => new AuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer{
                 ClientSecrets = application.NewClientSecrets(), Scopes = application.Model.OAuthGoogle().Scopes(),
                 DataStore = application.NewXafOAuthDataStore()
             });
@@ -126,15 +124,15 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
             application.Security.AddAnonymousType(cloudTypes.ToArray());
             var args = new GenericEventArgs<Func<XafApplication, XafOAuthDataStore>>();
             CustomizeOathDataStoreSubject.OnNext(args);
-            return args.Handled ? args.Instance(application) : new XafOAuthDataStore(application.CreateObjectSpace, (Guid) SecuritySystem.CurrentUserId,application.GetPlatform());
+            return args.Handled ? args.Instance(application) : new XafOAuthDataStore(application.CreateObjectSpace, application.CurrentUserId(),application.GetPlatform());
         }
         
-        static IObservable<UserCredential> AuthorizeGoogle(this  global::Google.Apis.Auth.OAuth2.Flows.GoogleAuthorizationCodeFlow flow,XafApplication application) 
+        static IObservable<UserCredential> AuthorizeGoogle(this GoogleAuthorizationCodeFlow flow, XafApplication application) 
             => ((XafOAuthDataStore) flow.DataStore).Platform==Platform.Win?Observable.FromAsync(() => GoogleWebAuthorizationBroker.AuthorizeAsync(
-                    application.NewClientSecrets(), EmptyEnumerable<string>.Instance, application.CurrentUserId().ToString(), CancellationToken.None, flow.DataStore))
+                    application.NewClientSecrets(), application.Model.OAuthGoogle().Scopes(), application.CurrentUserId().ToString(), CancellationToken.None, flow.DataStore))
                 : flow.AuthorizeWebApp(application);
 
-        private static IObservable<UserCredential> AuthorizeWebApp(this  global::Google.Apis.Auth.OAuth2.Flows.GoogleAuthorizationCodeFlow flow,XafApplication application){
+        private static IObservable<UserCredential> AuthorizeWebApp(this  IAuthorizationCodeFlow flow,XafApplication application){
 	        var redirectUri = HttpContext.Current.Request.Url.ToString();
 	        return new AuthorizationCodeWebApp(flow, redirectUri, redirectUri)
                 .AuthorizeAsync(application.CurrentUserId().ToString(), CancellationToken.None)

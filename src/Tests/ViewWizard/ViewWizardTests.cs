@@ -142,5 +142,38 @@ namespace Xpand.XAF.Modules.ViewWizard.Tests{
             }
         }
 
+        [Test]
+        [XpandTest()]
+        public void FinishWizard_Action_Closes_DetailView(){
+            using (var application = ViewWizardModule().Application){
+                var wizardWizardViews = application.Model.ToReactiveModule<IModelReactiveModulesViewWizard>().ViewWizard.WizardViews;
+                var modelWizardView = wizardWizardViews.AddNode<IModelWizardView>();
+                modelWizardView.DetailView = application.Model.BOModel.GetClass(typeof(VW)).DefaultDetailView;
+                var childItem = modelWizardView.Childs.AddNode<IModelViewWizardChildItem>();
+                childItem.ChildDetailView = (IModelDetailView) application.Model.Views["VW_Child_DetailView1"];
+                childItem = modelWizardView.Childs.AddNode<IModelViewWizardChildItem>();
+                childItem.ChildDetailView = (IModelDetailView) application.Model.Views["VW_Finish_DetailView"];
+                var window = application.CreateViewWindow();
+                window.SetView(application.NewView<DetailView>(typeof(VW)));
+                var showWizard = window.Action<ViewWizardModule>().ShowWizard();
+                showWizard.WhenExecuted().Do(e => e.ShowViewParameters.TargetWindow = TargetWindow.NewWindow).Test();
+                window.Action<ViewWizardModule>().FinishWizardView().Active["Always"].ShouldBeFalse();
+
+                var testObserver = application.WhenViewOnFrame().Test();
+                showWizard.DoExecute(showWizard.Items.First());
+                var frame = testObserver.Items.First();
+                frame.Action<ViewWizardModule>().NextWizardView().DoExecute();
+
+                var finishWizardView = frame.Action<ViewWizardModule>().FinishWizardView();
+                finishWizardView.Active["Always"].ShouldBeTrue();
+
+                var whenClosed = frame.View.WhenClosed().Test();
+                finishWizardView.DoExecute();
+
+                whenClosed.Items.Count.ShouldBe(1);
+
+            }
+        }
+
     }
 }

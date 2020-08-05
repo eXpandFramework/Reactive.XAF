@@ -10,13 +10,11 @@ using Fasterflect;
 using JetBrains.Annotations;
 using Xpand.Extensions.Office.Cloud.BusinessObjects;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
-using Xpand.XAF.Modules.Reactive.Services.Security;
 
 namespace Xpand.Extensions.Office.Cloud{
     public static class Extensions{
@@ -120,7 +118,7 @@ namespace Xpand.Extensions.Office.Cloud{
 
         private static IObservable<SimpleAction> RegisterAuthActions(this ApplicationModulesManager manager,string serviceName) 
             => manager.RegisterViewSimpleAction($"Connect{serviceName}", action => action.Initialize(serviceName))
-                .Merge(manager.RegisterViewSimpleAction($"Disconned{serviceName}", action => action.Initialize(serviceName)))
+                .Merge(manager.RegisterViewSimpleAction($"Disconnect{serviceName}", action => action.Initialize(serviceName)))
                 .Publish().RefCount();
 
         private static void Initialize(this SimpleAction action,string connectActionId){
@@ -150,11 +148,9 @@ namespace Xpand.Extensions.Office.Cloud{
                 .ToUnit();
         }
 
-        public static IObservable<bool> NeedsAuthentication<TAuthentication>(this XafApplication application,Func<IObservable<Unit>> authrorize) where TAuthentication:CloudOfficeBaseObject 
+        public static IObservable<bool> NeedsAuthentication<TAuthentication>(this XafApplication application,Func<IObservable<bool>> authrorize) where TAuthentication:CloudOfficeBaseObject 
             => application.NewObjectSpace(space => (space.GetObjectByKey<TAuthentication>( application.CurrentUserId()) == null).ReturnObservable())
-                .SelectMany(b => !b ? authrorize().To(false).Catch(true.ReturnObservable()) : true.ReturnObservable());
-
-        
+                .SelectMany(b => !b ? authrorize() : true.ReturnObservable());
 
         private static IObservable<Unit> ConfigureStyle(this IObservable<SimpleAction> source) 
             => source.WhenCustomizeControl()
@@ -178,21 +174,17 @@ namespace Xpand.Extensions.Office.Cloud{
 
         private static IObservable<SimpleAction> Activate(this IObservable<(bool needsAuth, SimpleAction action)> source, string serviceName, Type serviceStorageType) 
             => source.Select(t => {
-                    t.action.Active("NeedsAuthentication", t.action.Id.StartsWith("Connect") ? t.needsAuth : !t.needsAuth);
+                    t.action.Active(nameof(NeedsAuthentication), t.action.Id.StartsWith("Connect") ? t.needsAuth : !t.needsAuth);
                     if (!t.needsAuth && t.action.Id.StartsWith("Disconnect")){
                         t.action.UpdateDisconnectActionToolTip(serviceName,serviceStorageType);
                     }
 
                     return t.action;
                 });
-        private static Guid CurrentUserId(this XafApplication application) 
-            => application.Security.IsSecurityStrategyComplex() ? (Guid) application.Security.UserId
-                : $"{application.Title}{Environment.MachineName}{Environment.UserName}".ToGuid();
 
-        private static void UpdateDisconnectActionToolTip(this SimpleAction action, string serviceName,
-            Type serviceStorageType){
+        private static void UpdateDisconnectActionToolTip(this SimpleAction action, string serviceName, Type serviceStorageType){
             using (var objectSpace = action.Application.CreateObjectSpace(serviceStorageType)){
-                var disconnectMicrosoft = action.Controller.Frame.Actions().First(a => a.Id==serviceName);
+                var disconnectMicrosoft = action.Controller.Frame.Actions().First(a => a.Id==$"Disconnect{serviceName}");
                 var currentUserId = action.Application.CurrentUserId();
                 var objectByKey = objectSpace.GetObjectByKey(serviceStorageType,currentUserId);
                 var userName = objectByKey?.GetPropertyValue("UserName");
@@ -230,19 +222,20 @@ namespace Xpand.Extensions.Office.Cloud{
 
         private static IObservable<SimpleAction> ActivateWhenUserDetails(this IObservable<SimpleAction> registerActions) 
             => registerActions.ActivateInUserDetails(true)
-                .Do(action => action.Active(nameof(ActivateWhenUserDetails),false) )
+                .Do(action => action.Active(nameof(NeedsAuthentication),false) )
                 .Publish().RefCount();
 
+        
         private static IObservable<SimpleAction> ActivateWhenAuthenticationNeeded(
             this IObservable<(bool needsAuth, SimpleAction action)> source, string serviceName, Type serviceStorageType) 
             => source.Select(t => {
                     if (t.action.Id == $"Connect{serviceName}"){
-                        t.action.Active("NeedsAuthentication", t.needsAuth);
-                        t.action.Controller.Frame.Action($"Disconnect{serviceName}").Active("NeedsAuthentication", !t.needsAuth);
+                        t.action.Active(nameof(NeedsAuthentication), t.needsAuth);
+                        t.action.Controller.Frame.Action($"Disconnect{serviceName}").Active(nameof(NeedsAuthentication), !t.needsAuth);
                     }
                     else{
-                        t.action.Active("NeedsAuthentication", !t.needsAuth);
-                        t.action.Controller.Frame.Action($"Connect{serviceName}").Active("NeedsAuthentication", t.needsAuth);
+                        t.action.Active(nameof(NeedsAuthentication), !t.needsAuth);
+                        t.action.Controller.Frame.Action($"Connect{serviceName}").Active(nameof(NeedsAuthentication), t.needsAuth);
                     }
                     t.action.UpdateDisconnectActionToolTip(serviceName, serviceStorageType);
                     return t.action;

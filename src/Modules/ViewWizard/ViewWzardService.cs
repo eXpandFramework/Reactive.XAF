@@ -11,6 +11,7 @@ using DevExpress.ExpressApp.SystemModule;
 using DevExpress.Persistent.Base;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -31,30 +32,47 @@ namespace Xpand.XAF.Modules.ViewWizard{
             .frame.Action(nameof(FinishWizardView)).As<SimpleAction>();
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager){
-            var registerActions = manager.RegisterViewSingleChoiceAction(nameof(ShowWizard), action => action.Configure()).Cast<ActionBase>()
-                .Merge(manager.RegisterViewSimpleAction(nameof(NextWizardView), action => action.Configure(),PredefinedCategory.PopupActions))
-                .Merge(manager.RegisterViewSimpleAction(nameof(PreviousWizardView), action => action.Configure(),PredefinedCategory.PopupActions))
-                .Publish().RefCount();
+            var registerActions = manager.RegisterActions();
             return manager.WhenApplication(application => {
                     var showWizardView = registerActions.OfType<SingleChoiceAction>().ShowWizardView().Publish().RefCount();
-                    return showWizardView.NextWizardView().Merge(showWizardView.PreviousWizardView())
+                    return showWizardView.NextWizardView()
+                        .Merge(showWizardView.PreviousWizardView())
+                        .Merge(showWizardView.FinishWizardView())
                         .ToUnit()
                         .Merge(application.ActiveAction().PopulateShowWizardActionItems());
                 })
             .Merge(registerActions.ToUnit());
         }
 
+        private static IObservable<ActionBase> RegisterActions(this ApplicationModulesManager manager) 
+            => manager.RegisterViewSingleChoiceAction(nameof(ShowWizard), action => action.Configure())
+                .Cast<ActionBase>()
+                .Merge(manager.RegisterViewSimpleAction(nameof(NextWizardView), action => action.Configure(),
+                    PredefinedCategory.PopupActions))
+                .Merge(manager.RegisterViewSimpleAction(nameof(PreviousWizardView), action => action.Configure(),
+                    PredefinedCategory.PopupActions))
+                .Merge(manager.RegisterViewSimpleAction(nameof(FinishWizardView), action => action.Configure(),
+                    PredefinedCategory.PopupActions))
+                .Publish().RefCount();
+
         private static IObservable<SimpleActionExecuteEventArgs> NextWizardView(this IObservable<(Frame Frame, IModelWizardView modelWizardView)> source) 
-            => source.SelectMany(tuple => {
-                var nextWizardView = tuple.Frame.Action<ViewWizardModule>().NextWizardView();
+            => source.SelectMany(t => {
+                var nextWizardView = t.Frame.Action<ViewWizardModule>().NextWizardView();
                 nextWizardView.Active["Always"] = true;
                 return nextWizardView.WhenExecute()
                     .Do(args => {
-                        tuple.Frame.Action<ViewWizardModule>().PreviousWizardView().Enabled["FirstView"] = true;
-                        var wizardView = tuple.modelWizardView;
-                        args.ShowViewParameters.CreatedView = args.Action.Application.NewView(tuple.Frame.NextChildDetailView(wizardView));
+                        t.Frame.Action<ViewWizardModule>().PreviousWizardView().Enabled["FirstView"] = true;
+                        var wizardView = t.modelWizardView;
+                        t.Frame.Action<ViewWizardModule>().FinishWizardView().Active["Always"] = t.Frame.CurrentWizardIndex(wizardView) == wizardView.Parent.NodeCount - 1;
+                        args.ShowViewParameters.CreatedView = args.Action.Application.NewView(t.Frame.NextChildDetailView(wizardView));
                     });
             });
+
+        private static IObservable<SimpleActionExecuteEventArgs> FinishWizardView(
+            this IObservable<(Frame Frame, IModelWizardView modelWizardView)> source){
+            return source.SelectMany(t => t.Frame.Action<ViewWizardModule>().FinishWizardView().WhenExecute())
+                .Do(e => e.Action.View().Close());
+        }
 
         private static IObservable<SimpleActionExecuteEventArgs> PreviousWizardView(this IObservable<(Frame Frame, IModelWizardView modelWizardView)> source){
             return source.SelectMany(tuple => {
@@ -69,20 +87,14 @@ namespace Xpand.XAF.Modules.ViewWizard{
             });
         }
 
-        private static IModelDetailView NextChildDetailView(this Frame frame, IModelWizardView wizardView){
-            if (frame.View.Model == wizardView.DetailView){
-                return wizardView.Childs.First().ChildDetailView;
-            }
-            var currentWizardIndex = wizardView.GetParent<IModelWizardViews>().FindIndex(view => view.DetailView==frame.View.Model);
-            return  ((IModelWizardViews) wizardView.Parent)[currentWizardIndex + 1].DetailView;
-        }
-        private static IModelDetailView PreviousChildDetailView(this Frame frame, IModelWizardView wizardView){
-            if (frame.View.Model == wizardView.DetailView){
-                return wizardView.Childs.First().ChildDetailView;
-            }
-            var currentWizardIndex = wizardView.GetParent<IModelWizardViews>().FindIndex(view => view.DetailView==frame.View.Model);
-            return  ((IModelWizardViews) wizardView.Parent)[currentWizardIndex + 1].DetailView;
-        }
+        private static IModelDetailView NextChildDetailView(this Frame frame, IModelWizardView wizardView) 
+            => frame.View.Model == wizardView.DetailView ? wizardView.Childs.First().ChildDetailView : ((IModelWizardViews) wizardView.Parent)[frame.CurrentWizardIndex(wizardView) + 1].DetailView;
+
+        private static IModelDetailView PreviousChildDetailView(this Frame frame, IModelWizardView wizardView) 
+            => frame.View.Model == wizardView.DetailView ? wizardView.Childs.First().ChildDetailView : ((IModelWizardViews) wizardView.Parent)[frame.CurrentWizardIndex(wizardView) + 1].DetailView;
+
+        private static int CurrentWizardIndex(this Frame frame, IModelWizardView wizardView) 
+            => wizardView.GetParent<IModelWizardViews>().FindIndex(view => view.DetailView == frame.View.Model);
 
         private static IObservable<(Frame Frame, IModelWizardView modelWizardView)> ShowWizardView(this IObservable<SingleChoiceAction> registerActions) =>
             registerActions.WhenExecute()

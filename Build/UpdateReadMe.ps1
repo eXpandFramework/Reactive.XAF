@@ -67,13 +67,13 @@ function UpdateModulesList($rootLocation, $packages) {
     $path = "$rootLocation\src\modules\ReadMe.md"
     $allModulesReadMe = Get-Content $path -Raw
     
-    $regex = [regex] '(?is)<twitter>(?<list>.*)</twitter>'
+    $regex = [regex] '(?is)<moduleslist>(?<list>.*)</moduleslist>'
     $allModulesReadMe = $regex.Replace($allModulesReadMe, @"
-<twitter>
+<moduleslist>
 
 $moduleList
 
-</twitter>
+</moduleslist>
 "@
 )
     Set-Content $path $allModulesReadMe.trim()

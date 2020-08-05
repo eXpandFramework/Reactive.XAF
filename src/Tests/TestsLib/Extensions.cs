@@ -59,8 +59,14 @@ namespace Xpand.TestsLib{
                 });
         }
 
-        public static void SetupSecurity(this XafApplication application){
+        public static void SetupSecurity(this XafApplication application,bool fixedUserId=false){
             application.Modules.Add(new SecurityModule());
+            var testApplicationModule = application.Modules.FindModule<TestApplicationModule>();
+            if (testApplicationModule == null){
+                testApplicationModule=new TestApplicationModule();
+                application.Modules.Add(testApplicationModule);
+            }
+            testApplicationModule.FixedUserId = fixedUserId;
             application.Security = new SecurityStrategyComplex(typeof(PermissionPolicyUser),
                 typeof(PermissionPolicyRole), new AuthenticationStandard(typeof(PermissionPolicyUser),
                     typeof(AuthenticationStandardLogonParameters)));
@@ -168,10 +174,11 @@ namespace Xpand.TestsLib{
             {"SequenceGeneratorModule", 61475},
             {"MicrosoftTodoModule", 61476},
             {"PositionInlistViewModule", 61478},
-            {"ViewWizardModule", 61479},
+            {"ViewWizardModule", 61482},
             {"ViewItemValueModule", 61479},
             {"MicrosoftModule", 61480},
-            {"MicrosoftCalendarModule", 61481}
+            {"MicrosoftCalendarModule", 61481},
+            {"GoogleModule", 61483}
         };
 
         public static IObservable<IModelReactiveLogger> ConfigureModel<TModule>(this XafApplication application,
@@ -379,7 +386,9 @@ namespace Xpand.TestsLib{
 
         public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB){
             return base.GetModuleUpdaters(objectSpace, versionFromDB)
-                .Add(new DefaultUserModuleUpdater(objectSpace, versionFromDB));
+                .Add(new DefaultUserModuleUpdater(objectSpace, versionFromDB,FixedUserId));
         }
+
+        public bool FixedUserId{ get; set; }
     }
 }
