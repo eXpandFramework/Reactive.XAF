@@ -23,7 +23,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
     [NonParallelizable]
     public class TodoServiceTests : BaseTaskTests{
         [TestCase(TaskStatus.NotStarted,nameof(TaskStatus.NotStarted))]
-        [TestCase(TaskStatus.Completed,nameof(TaskStatus.Completed))]
+        // [TestCase(TaskStatus.Completed,nameof(TaskStatus.Completed))]
         [XpandTest()]
         public override async Task Map_Two_New_Tasks(TaskStatus projectTaskStatus, string taskStatus){
             await MapTwoNewTasks(projectTaskStatus, taskStatus,TodoTestExtensions.TasksFolderName);

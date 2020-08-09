@@ -7,9 +7,9 @@ using Xpand.TestsLib.EasyTest.Commands.ActionCommands;
 namespace ALL.Win.Tests{
     public static class MicrosoftCalendarService{
         public static void TestMicrosoftCalendarService(this ICommandAdapter commandAdapter){
-            commandAdapter.TestOfficeCloudService("Default.Scheduler Event", nameof(Event.Subject),
+            commandAdapter.TestOfficeCloudService("Cloud.Microsoft Event", nameof(Event.Subject),
                 nameof(Event.Description));
-            commandAdapter.Execute(new NavigateCommand("Default.Scheduler Event"));
+            commandAdapter.Execute(new NavigateCommand("Cloud.Microsoft Event"));
         
             commandAdapter.Execute(new ActionCommand("Cloud Operation","New"));
 

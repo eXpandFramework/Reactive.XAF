@@ -1,9 +1,11 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
 using System.Xml;
 using DevExpress.EasyTest.Framework;
 using DevExpress.ExpressApp.EasyTest.WebAdapter;
-using DevExpress.ExpressApp.Xpo;
+using DevExpress.ExpressApp.EasyTest.WinAdapter;
 using Fasterflect;
+using Newtonsoft.Json;
 using Xpand.Extensions.LinqExtensions;
 
 namespace Xpand.TestsLib.EasyTest{
@@ -58,20 +60,25 @@ namespace Xpand.TestsLib.EasyTest{
             testApplication.AdditionalAttributes = testApplication.AdditionalAttributes.Add(attribute).ToArray();
         }
 
-        public static TestApplication RunWebApplication(this IApplicationAdapter adapter, string physicalPath, int port){
+        public static TestApplication RunWebApplication(this WebAdapter adapter, string physicalPath, int port){
             var testApplication = EasyTestWebApplication.New(physicalPath,port);
-            adapter.RunApplication(testApplication);
+            adapter.RunApplication(testApplication, null);
             return testApplication;
         }
 
-        public static TestApplication RunWinApplication(this IApplicationAdapter adapter, string fileName, int port = 4100){
+        public static TestApplication RunWinApplication(this WinAdapter adapter, string fileName,string connectionString){
+            var testApplication = EasyTestWinApplication.New(fileName);
+
+            File.WriteAllText($"{Path.GetDirectoryName(fileName)}\\{Path.GetFileNameWithoutExtension(fileName)}_EasyTestSettings.json",
+                JsonConvert.SerializeObject(new{ConnectionString = connectionString}));
+            adapter.RunApplication(testApplication, null);
+            return testApplication;
+        }
+ 
+        public static TestApplication RunWinApplication(this WinAdapter adapter, string fileName, int port = 4100){
             var testApplication = EasyTestWinApplication.New(fileName,port);
-            adapter.RunApplication(testApplication);
+            adapter.RunApplication(testApplication, null);
             return testApplication;
-        }
-
-        private static void RunApplication(this IApplicationAdapter adapter, TestApplication testApplication){
-            adapter.RunApplication(testApplication, $"ConnectionString={InMemoryDataStoreProvider.ConnectionString}");
         }
     }
 }

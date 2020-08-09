@@ -1,23 +1,20 @@
 ﻿using System;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ALL.Tests;
 using DevExpress.EasyTest.Framework;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.EasyTest.WinAdapter;
 using Fasterflect;
-
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Attributes;
 using Xpand.TestsLib.EasyTest;
-using Xpand.TestsLib.EasyTest.Commands;
 using Xpand.XAF.Modules.Reactive;
 using AutoTestCommand = Xpand.TestsLib.EasyTest.Commands.ActionCommands.AutoTestCommand;
+using BaseTest = ALL.Tests.BaseTest;
 
 namespace ALL.Win.Tests{
 	[NonParallelizable]
@@ -35,26 +32,28 @@ namespace ALL.Win.Tests{
             }
         } 
         [Test]
-        [XpandTest(LongTimeout,3)]
+        // [XpandTest(LongTimeout,3)]
         [Apartment(ApartmentState.STA)]
-        public async Task Win_EasyTest(){
-            
-            using (var winAdapter = new WinAdapter()){
-                var testApplication = winAdapter.RunWinApplication($@"{AppDomain.CurrentDomain.ApplicationPath()}\..\TestWinApplication\TestApplication.Win.exe");
-                try{
-                    var commandAdapter = winAdapter.CreateCommandAdapter();
-                    commandAdapter.Execute(new LoginCommand());
+        public async Task Win_EasyTest_InMemory(){
+            await EasyTest(() => new WinAdapter(), RunWinApplication, async adapter => {
                     var autoTestCommand = new AutoTestCommand("Event|Task");
-                    commandAdapter.Execute(autoTestCommand);
-                    await commandAdapter.TestMicrosoftService(() => Observable.Start(() => {
-                        commandAdapter.TestMicrosoftCalendarService();
-                        commandAdapter.TestMicrosoftTodoService();
-                    }));
-                }
-                finally{
-                    winAdapter.KillApplication(testApplication, KillApplicationContext.TestNormalEnded);    
-                }
-            }
+                    adapter.Execute(autoTestCommand);
+                    await adapter.TestCloudServices();
+                });
+        }
+
+        private static TestApplication RunWinApplication(WinAdapter adapter, string connectionString) 
+            => adapter.RunWinApplication(
+                $@"{AppDomain.CurrentDomain.ApplicationPath()}\..\TestWinApplication\TestApplication.Win.exe",connectionString);
+
+
+        [Test]
+        // [XpandTest(LongTimeout,3)]
+        [Apartment(ApartmentState.STA)]
+        public async Task Win_EasyTest_InLocalDb(){
+            var connectionString = "Integrated Security=SSPI;Pooling=false;Data Source=(localdb)\\mssqllocaldb;Initial Catalog=TestApplicationWin";
+            // await EasyTest(() => new WinAdapter(), RunWinApplication, adapter => {};
+            
         }
 
     }

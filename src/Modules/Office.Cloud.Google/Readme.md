@@ -1,9 +1,9 @@
-![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.Office.Cloud.Microsoft.svg?&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.Office.Cloud.Microsoft.svg?&style=flat)
+![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.Office.Cloud.Google.svg?&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.Office.Cloud.Google.svg?&style=flat)
 
-[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/Office.Cloud.Microsoft.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+Office.Cloud.Microsoft) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/Office.Cloud.Microsoft.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+Office.Cloud.Microsoft)
+[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/Office.Cloud.Google.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+Office.Cloud.Google) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/Office.Cloud.Google.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+Office.Cloud.Google)
 # About 
 
-The `Microsoft` authenticates against Azure Active Directory and queries the MSGraph endpoints.
+The `Google` package authenticates against the Google Cloud services.
 
 ## Details
 
@@ -19,61 +19,61 @@ This is a `platform agnostic` module.
 
 First off you have to create an Azure application following the next steps:
 
-1. Go to [App registrations](https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationsListBlade) in the Azure portal.
-2. Select New registration, then enter an application name.
-3. Select the Supported account types, depending on your case.
-5. Select Register and copy the `Application (Client) ID` to the related XAF model entry.
-7. From the left pane, select `Authentication`. 
-   * If you target the XAF web click on `Add Platform`, select `Web` enter a uri like `http://localhost:2064/login.aspx` and and copy this value to the related XAF model entry. Enable the implicit grant flow by selecting both `Access Token` and `ID Tokens`.
-   * If you target the XAF win click on `Add Platform` and select `Mobile and desktop applications`. Check on one of the predefined Url e.g the https://login.live.com/oauth20_desktop.srf and copy this value to the related XAF model entry.
-6. From the left pane, select `Certificates & secrets` > New client secret. Enter a description, select the validity duration, and select Add. Copy the value into the related XAF model entry. This step is only required for Web applications.
-8. From the left pane, select API permissions > Add a permission to configure additional endpoint access. In the [Query the MSGraph endpoints](https://github.com/eXpandFramework/DevExpress.XAF/tree/lab/src/Modules/Office.Cloud.Microsoft#query-the-msgraph-endpoints) you can see an example of how to use the API to query the User endpoint. Copy these permissions to into the related XAF model.
+1. Go to [console.developers.google.com/](https://console.developers.google.com/).
+2. Select Credentials/Create Credentials/OAth client ID
+3. Select `Desktop app` or `Web application`.
+   * If web then add the Authorized redirect URI e.g. http://localhost/default.aspx.
+5. Select Create and copy the `Your Client ID`, `Your Client Secret` to the related XAF model entry.
+7. From the left pane, select `Library` and enable for the API you want to consume.
+6. Choose the [appropriate scopes](https://developers.google.com/identity/protocols/oauth2/scopes) and copy them into the related model attribute.
 1. The related XAF model is available at:
-   ![image](https://user-images.githubusercontent.com/159464/86536412-f1b73b80-beef-11ea-8cca-490aeb16bb7d.png)
+   ![image](https://user-images.githubusercontent.com/159464/89741475-5723bc80-da9a-11ea-81d4-e8c115a3d8f6.png)
 
 
 #### Authentication
 
-The module `does not replace nor requires` the XAF authentication. The module will use the credentials from the application configuration file authenticate/link it self with the Azure application. To authenticate, the end user must execute the `Sign in with Microsoft` action. If XAF has security installed the action is only active in current user profile, else it is always active. Once there is a valid authentication the Sign in with Microsoft action will be deactivated and the `Sing out Microsoft` will be activated.
+The module `does not replace nor requires` the XAF authentication. The module will use the credentials from the application configuration file authenticate/link it self with the Azure application. To authenticate, the end user must execute the `Sign in with Google` action. If XAF has security installed the action is only active in current user profile, else it is always active. Once there is a valid authentication the Sign in with Google action will be deactivated and the `Sing out Google` will be activated.
 
-For both platforms once the user authenticated the `RefreshToken` and `AccessToken` will be saved with the help of the `MSAuthentication` business object. When the AccessToken expires the module will use the RefreshToken to `silently` request a new AccessToken until the lifetime limit reached `(6 months)`. If the MSAuthentication contains data for the current user and a new AccessToken cannot be acquired, a message will notify the end user to navigate to his/her profile for authentication.
+For both platforms once the user authenticated the `RefreshToken` and `AccessToken` will be saved with the help of the `GoogleAuthentication` business object. When the AccessToken expires the module will use the RefreshToken to `silently` request a new AccessToken. The RefreshToken never expires. If the GoogleAuthentication contains data for the current user and a new AccessToken cannot be acquired, a message will notify the end user to navigate to his/her profile for authentication.
 
-#### Query the MSGraph endpoints
+#### Query the Google People api
 
-In the screencast on the examples section, we executed the `Show MS Account Info` action to display a popup view with all the details of the connected MS account. Below is all the module code used for it:
+In the screencast on the examples section, we executed the `Show Google Account Info` action to display a popup view with all the details of the connected Google account. Below is all the module code used for it:
 
 ```cs
 
-internal static class ShowMSAccountInfoService{
-	// The ShowMSAccountInfo action declaration. Refer to the Reactive module wiki for details
-	public static SimpleAction ShowMSAccountInfo(this (AgnosticModule, Frame frame) tuple) => 
-		tuple.frame.Action(nameof(ShowMSAccountInfo)).As<SimpleAction>();
+internal static class ShowGoogleAccountInfoService{
+	//action declaration refer to the Reactive module wiki
+	public static SimpleAction ShowGoogleAccountInfo(this (AgnosticModule, Frame frame) tuple) 
+		=> tuple.frame.Action(nameof(ShowGoogleAccountInfo)).As<SimpleAction>();
 
-	public static IObservable<Unit> ShowMSAccountInfo(this ApplicationModulesManager manager){
-		//export the Microsoft.Graph.User as we want to display as XAF view for it
-		manager.Modules.OfType<AgnosticModule>().First().AdditionalExportedTypes.Add(typeof(Microsoft.Graph.User));
-		//The ShowMSAccountInfo registration. Refer to the Reactive module wiki for details.
-		//also we publish the registration as we want to reuse it without running it twice
-		var registerViewSimpleAction = manager.RegisterViewSimpleAction(nameof(ShowMSAccountInfo)).ActivateInUserDetails().Publish().RefCount(); 
-		//when the application is available at runtime we chain the ShowMSAccountInfo action execute event to the ShowAccountInfoView method
-		return manager.WhenApplication(application => registerViewSimpleAction.WhenExecute().ShowAccountInfoView().ToUnit())
-			//subscribe early before an application is created to expose the action to the design time enviroment.
+	public static IObservable<Unit> ShowGoogleAccountInfo(this ApplicationModulesManager manager){
+		//export the google EmailAddress so we can display a XAF view for it
+		manager.Modules.OfType<AgnosticModule>().First().AdditionalExportedTypes.Add(typeof(EmailAddress));
+		var registerViewSimpleAction = manager.RegisterViewSimpleAction(nameof(ShowGoogleAccountInfo)).ActivateInUserDetails().Publish().RefCount(); 
+		return manager.WhenApplication(application 
+				//when the action executed show the Info View
+				=> registerViewSimpleAction.WhenExecute().ShowAccountInfoView().ToUnit())
+			//register the action for the design time Model Editor
 			.Merge(registerViewSimpleAction.ToUnit());
 	}
 
-	private static IObservable<User> ShowAccountInfoView(this IObservable<SimpleActionExecuteEventArgs> source) =>
-		source.SelectMany(e => {
-				e.ShowViewParameters.CreatedView = e.Action.Application.NewView(ViewType.DetailView, typeof(User));
+	private static IObservable<Person> ShowAccountInfoView(this IObservable<SimpleActionExecuteEventArgs> source) 
+		=> source.SelectMany(e => {
+				e.ShowViewParameters.CreatedView = e.Action.Application.NewView(ViewType.DetailView, typeof(EmailAddress));
 				e.ShowViewParameters.TargetWindow = TargetWindow.NewWindow;
-				//we get the OutlookUser and display it on a view
-				return e.Action.Application.OutlookUser().ObserveOn(SynchronizationContext.Current)
-					.Do(user => e.ShowViewParameters.CreatedView.CurrentObject = user);
+				return e.Action.Application.GoogleUser().ObserveOn(SynchronizationContext.Current)
+					.Do(user => e.ShowViewParameters.CreatedView.CurrentObject = user.EmailAddresses.First());
 			});
 
-	//authorize to get the MSClient and use it to query the Me endpoint
-	private static IObservable<User> OutlookUser(this XafApplication application) =>
-		application.AuthorizeMS().SelectMany(client => client.Me.Request().GetAsync());
-}
+	private static IObservable<Person> GoogleUser(this XafApplication application) 
+	//authorize and then create the PeopleService to retrieve the auth google Person
+		=> application.AuthorizeGoogle().NewService<PeopleService>()
+			.SelectMany(service => {
+				var request = service.People.Get("people/me");
+				request.RequestMaskIncludeField = "person.emailAddresses";
+				return request.ExecuteAsync(); //
+			});
 
 
 ```
@@ -108,35 +108,35 @@ In order to execute the asynchronous operations:
 ### Examples
 
 
-Below is a demonstration of the package authenticating against `AAD` for both `Win/Web`. Also the API is used to call the `MSGraph` [Me](https://docs.microsoft.com/en-us/graph/api/user-get?view=graph-rest-1.0&tabs=http) endpoint for displaying the authenticated user info in a XAF view. At the bottom the [Reactive.Logger.Client.Win](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win) is reporting as the module is used. This demo is Easytested [with this script](https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Tests/ALL/CommonFiles/MicrosoftService.cs) for the last three XAF major versions, compliments of the `Xpand.VersionConverter`
+In the screencast below we see authentication against `Google/People/Me` service. To demo auth token database persistence we logOff and the clean the browser cookies. At the bottom the [Reactive.Logger.Client.Win](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win) is reporting as the module is used. This demo is Easytested [with this script](https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Tests/ALL/CommonFiles/GoogleService.cs) for the last three XAF major versions, compliments of the `Xpand.VersionConverter`
 
 <twitter>
 
-[![Xpand XAF Modules Office Cloud Microsoft](https://user-images.githubusercontent.com/159464/86131887-e24e8180-baee-11ea-8c02-b64b2c639b6d.gif)](https://www.youtube.com/watch?v=XIczKjE2sFw)
+[![Xpand XAF Modules Office Cloud Google](https://user-images.githubusercontent.com/159464/89726928-e8f2e180-da28-11ea-96fc-135719a18f46.gif)](https://www.youtube.com/watch?v=-pZjbGUChp0)
 
 </twitter>
 
-[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://www.youtube.com/watch?v=XIczKjE2sFw)
+[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://www.youtube.com/watch?v=-pZjbGUChp0)
 
-Also, refer to the [Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Office.Cloud.Microsoft.Todo)
+
 
 
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 
 
-   `Install-Package Xpand.XAF.Modules.Office.Cloud.Microsoft`.
+   `Install-Package Xpand.XAF.Modules.Office.Cloud.Google`.
 
     The above only references the dependencies and nexts steps are mandatory.
 
 2. [Ways to Register a Module](https://documentation.devexpress.com/eXpressAppFramework/118047/Concepts/Application-Solution-Components/Ways-to-Register-a-Module)
 or simply add the next call to your module constructor
     ```cs
-    RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.Office.Cloud.MicrosoftModule));
+    RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.Office.Cloud.GoogleModule));
     ```
 ## Versioning
 The module is **not bound** to **DevExpress versioning**, which means you can use the latest version with your old DevExpress projects [Read more](https://github.com/eXpandFramework/XAF/tree/master/tools/Xpand.VersionConverter).
 
-The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
+The module follows the Nuget [Version Basics](https://docs.Google.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
 `.NetFramework: net461`
 
@@ -145,16 +145,16 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |**DevExpress.Persistent.Base**|**Any**
 |Fasterflect.Xpand|2.0.7
  |JetBrains.Annotations|2020.1.0
- |Microsoft.Graph.Beta|0.18.0-preview
- |Microsoft.Graph.Core|1.19.0
- |Microsoft.Identity.Client|4.13.0
- |Microsoft.IdentityModel.Protocols.OpenIdConnect|6.6.0
- |Microsoft.IdentityModel.Tokens|6.6.0
- |Microsoft.Owin|4.1.0
- |Microsoft.Owin.Host.SystemWeb|4.1.0
- |Microsoft.Owin.Security|4.1.0
- |Microsoft.Owin.Security.Cookies|4.1.0
- |Microsoft.Owin.Security.OpenIdConnect|4.1.0
+ |Google.Graph.Beta|0.18.0-preview
+ |Google.Graph.Core|1.19.0
+ |Google.Identity.Client|4.13.0
+ |Google.IdentityModel.Protocols.OpenIdConnect|6.6.0
+ |Google.IdentityModel.Tokens|6.6.0
+ |Google.Owin|4.1.0
+ |Google.Owin.Host.SystemWeb|4.1.0
+ |Google.Owin.Security|4.1.0
+ |Google.Owin.Security.Cookies|4.1.0
+ |Google.Owin.Security.OpenIdConnect|4.1.0
  |Newtonsoft.Json|12.0.3
  |Owin|1.0.0
  |System.Reactive|4.4.1
@@ -171,10 +171,10 @@ To `Step in the source code` you need to `enable Source Server support` in your 
 
 If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call at the constructor of your module.
 ```cs
-Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.Office.Cloud.Microsoft.Office.Office.Cloud.MicrosoftModule))
+Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.Office.Cloud.Google.Office.Office.Cloud.GoogleModule))
 ```
 
 ### Tests
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.Office.Office.Cloud.Microsoft.Office.Office.Cloud.Microsoft). 
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.Office.Office.Cloud.Google.Office.Office.Cloud.Google). 
 All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
 

@@ -356,8 +356,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static void SetPageError(this IXAFAppWebAPI api, Exception exception) => api.Application.HandleException(exception);
 
         [PublicAPI]
-        public static void Redirect(this IXAFAppWebAPI api, string url) => AppDomain
-            .CurrentDomain.XAF().WebApplicationType().GetMethod("Redirect",new[]{typeof(string)})?.Invoke(null,new object[]{url});
+        public static void Redirect(this IXAFAppWebAPI api, string url,bool endResponse=true) => AppDomain
+            .CurrentDomain.XAF().WebApplicationType().GetMethod("Redirect",new[]{typeof(string),typeof(bool)})?.Invoke(null,new object[]{url,endResponse});
 
         public static IObservable<ApplicationModulesManager> WhenApplicationModulesManager(this XafApplication application) => RxApp
             .ApplicationModulesManager.Where(manager => manager.Application() == application);

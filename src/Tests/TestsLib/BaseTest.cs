@@ -32,7 +32,7 @@ namespace Xpand.TestsLib{
             TraceSource.Listeners.Add(TextListener);
         }
         public static IEnumerable<Platform> PlatformDatasource(){
-            // yield return Platform.Web;
+            yield return Platform.Web;
             yield return Platform.Win;
         }
 

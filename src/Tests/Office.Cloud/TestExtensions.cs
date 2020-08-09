@@ -144,8 +144,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
             var viewWindow = application.CreateViewWindow();
             viewWindow.SetView(compositeView);
             var disconnectMicrosoft = viewWindow.DisconnectAction(serviceName);
-
-            await disconnectMicrosoft.WhenActivated().FirstAsync().ToTaskWithoutConfigureAwait();
+            if (!disconnectMicrosoft.Active){
+                await disconnectMicrosoft.WhenActivated().FirstAsync().ToTaskWithoutConfigureAwait();
+            }
             disconnectMicrosoft.DoExecute();
                 
             disconnectMicrosoft.Active[nameof(Extensions.Office.Cloud.Extensions.NeedsAuthentication)].ShouldBeFalse();
@@ -186,8 +187,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
             viewWindow.DisconnectAction(serviceName).Active[nameof(Extensions.Office.Cloud.Extensions.NeedsAuthentication)].ShouldBeFalse();
         }
 
-        private static SimpleAction ConnectAction(this Window viewWindow,string serviceName) => (SimpleAction) viewWindow.Actions($"Connect{serviceName}").First();
-        private static SimpleAction DisconnectAction(this Window viewWindow,string serviceName) => (SimpleAction) viewWindow.Actions($"Disconnect{serviceName}").First();
+        public static SimpleAction ConnectAction(this Window viewWindow,string serviceName) => (SimpleAction) viewWindow.Actions($"Connect{serviceName}").First();
+        public static SimpleAction DisconnectAction(this Window viewWindow,string serviceName) => (SimpleAction) viewWindow.Actions($"Disconnect{serviceName}").First();
 
         public static void Actions_are_Activated_For_CurrentUser_Details(this XafApplication application, string serviceName){
             var compositeView = application.NewView(ViewType.DetailView, application.Security.UserType);

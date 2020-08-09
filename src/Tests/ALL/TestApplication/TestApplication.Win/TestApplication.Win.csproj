@@ -61,10 +61,13 @@
     <Compile Include="..\..\..\TestsLib\BO\Product.cs" Link="Common\Product.cs" />
     <Compile Include="..\..\..\TestsLib\DefaultUserModuleUpdater.cs" Link="Common\DefaultUserModuleUpdater.cs" />
     <Compile Include="..\CommonFiles\AgnosticModule.cs" Link="Common\AgnosticModule.cs" />
-    <Compile Include="..\CommonFiles\MicrosoftCalendarService\MicrosoftCalendarService.cs" Link="MicrosoftCalendarService\MicrosoftCalendarService.cs" />
-    <Compile Include="..\CommonFiles\MicrosoftService\MicrosoftService.cs" Link="MicrosoftService\MicrosoftService.cs" />
-    <Compile Include="..\CommonFiles\MicrosoftService\ShowMSAccountInfoService.cs" Link="MicrosoftService\ShowMSAccountInfoService.cs" />
-    <Compile Include="..\CommonFiles\MicrosoftTodoService\MicrosoftTodoService.cs" Link="MicrosoftTodoService\MicrosoftTodoService.cs" />
+    <Compile Include="..\CommonFiles\GoogleService\ShowGoogleAccountInfoService.cs" Link="Cloud.Office\Google\ShowGoogleAccountInfoService.cs" />
+    <Compile Include="..\CommonFiles\MicrosoftCalendarService\MicrosoftCalendarService.cs" Link="Cloud.Office\Microsoft\MicrosoftCalendarService.cs" />
+    <Compile Include="..\CommonFiles\MicrosoftService\MicrosoftService.cs" Link="Cloud.Office\Microsoft\MicrosoftService.cs" />
+    <Compile Include="..\CommonFiles\CloudService.cs" Link="Cloud.Office\CloudService.cs" />
+    <Compile Include="..\CommonFiles\GoogleService\GoogleService.cs" Link="Cloud.Office\Google\GoogleService.cs" />
+    <Compile Include="..\CommonFiles\MicrosoftService\ShowMSAccountInfoService.cs" Link="Cloud.Office\Microsoft\ShowMSAccountInfoService.cs" />
+    <Compile Include="..\CommonFiles\MicrosoftTodoService\MicrosoftTodoService.cs" Link="Cloud.Office\Microsoft\MicrosoftTodoService.cs" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -81,9 +84,11 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="..\CommonFiles\SeqeuenceGenerator\SequenceGenerator.xafml" Link="SequenceGenerator\SequenceGenerator.xafml" />
     <Content Include="Model.xafml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <EmbeddedResource Include="..\CommonFiles\Cloud.Office.xafml" Link="Cloud.Office\Cloud.Office.xafml" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -102,9 +107,11 @@
     <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="20.1.6" />
     <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="20.1.6" />
     <PackageReference Include="DevExpress.EasyTest" Version="20.1.6" />
+    <PackageReference Include="Google.Apis.People.v1" Version="1.25.0.830" />
     <PackageReference Include="Xpand.XAF.Win.All" Version="2.202.37.1" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="MicrosoftCalendarService\" />
+    <Folder Include="Cloud.Office\Google\" />
+    <Folder Include="SequenceGenerator\" />
   </ItemGroup>
 </Project>

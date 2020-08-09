@@ -16,28 +16,26 @@ using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Google.Tests{
 	public static class TestExtensions{
-		public static void NewAuthentication(this IObjectSpaceProvider objectSpaceProvider,string serviceName,Platform platform=Platform.Win){
+		public static void NewAuthentication(this IObjectSpaceProvider objectSpaceProvider,Platform platform=Platform.Win){
 			objectSpaceProvider.NewAuthentication<GoogleAuthentication>((authentication, bytes) => {
 				authentication.OAuthToken=(Dictionary<string, string>) new DictionaryValueConverter().ConvertFromStorageType(bytes.GetString());
-			},serviceName,platform);
+			},"Google",platform);
 		}
 
-		public static void ConfigureGoogle(this IModelApplication application){
+		public static void ConfigureGoogle(this IModelApplication application,Platform platform){
 			var json = JsonConvert.DeserializeObject<dynamic>(
-				File.ReadAllText($"{AppDomain.CurrentDomain.ApplicationPath()}\\GoogleAppCredentials.json"));
+				File.ReadAllText($"{AppDomain.CurrentDomain.ApplicationPath()}\\Google{platform}AppCredentials.json"));
 			var modelOAuth = application.ToReactiveModule<IModelReactiveModuleOffice>().Office.Google().OAuth;
-			modelOAuth.ClientId = json.installed.client_id;
-			modelOAuth.RedirectUri = json.installed.redirect_uris.ToString();
-            modelOAuth.Scopes = PeopleService.Scope.UserinfoProfile;
-            modelOAuth.ClientSecret = json.installed.client_secret;
+			modelOAuth.Scopes = PeopleService.Scope.UserinfoProfile;
+			if (platform == Platform.Win){
+				modelOAuth.ClientId = json.installed.client_id;
+				modelOAuth.ClientSecret = json.installed.client_secret;	
+			}
+			else{
+				modelOAuth.ClientId = json.web.client_id;
+				modelOAuth.ClientSecret = json.web.client_secret;
+			}
+			
         }
-
-		// public static IObservable<GraphServiceClient> AuthorizeTestMS(this XafApplication application,bool aquireToken=true){
-		// 	if (aquireToken){
-		// 		application.ObjectSpaceProvider.NewMicrosoftAuthentication();
-		// 	}
-  //           
-		// 	return aquireToken ? application.AuthorizeMS() : application.AuthorizeMS((e, clientApp) => Observable.Throw<AuthenticationResult>(e));
-		// }
-	}
+    }
 }

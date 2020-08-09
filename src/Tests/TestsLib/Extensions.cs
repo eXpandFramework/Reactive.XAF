@@ -59,17 +59,21 @@ namespace Xpand.TestsLib{
                 });
         }
 
-        public static void SetupSecurity(this XafApplication application,bool fixedUserId=false){
+        public static void SetupSecurity(this XafApplication application, Guid userId){
             application.Modules.Add(new SecurityModule());
             var testApplicationModule = application.Modules.FindModule<TestApplicationModule>();
             if (testApplicationModule == null){
                 testApplicationModule=new TestApplicationModule();
                 application.Modules.Add(testApplicationModule);
             }
-            testApplicationModule.FixedUserId = fixedUserId;
+            testApplicationModule.UserId = userId;
             application.Security = new SecurityStrategyComplex(typeof(PermissionPolicyUser),
                 typeof(PermissionPolicyRole), new AuthenticationStandard(typeof(PermissionPolicyUser),
                     typeof(AuthenticationStandardLogonParameters)));
+        }
+
+        public static void SetupSecurity(this XafApplication application,bool fixedUserId=false){
+            application.SetupSecurity(fixedUserId?Guid.Parse("5c50f5c6-e697-4e9e-ac1b-969eac1237f3") :Guid.Empty );
         }
 
         public static async Task<T> WithTimeOut<T>(this Task<T> source, TimeSpan? timeout = null){
@@ -128,7 +132,9 @@ namespace Xpand.TestsLib{
 
         public static void RegisterDefaults(this XafApplication application, params ModuleBase[] modules){
             if (modules.Any() && application.Security is SecurityStrategyComplex){
-                modules = modules.Add(new TestApplicationModule()).ToArray();
+                if (!modules.OfType<TestApplicationModule>().Any()){
+                    modules = modules.Add(new TestApplicationModule()).ToArray();
+                }
             }
 
             application.AlwaysUpdateOnDatabaseVersionMismatch().Subscribe();
@@ -385,10 +391,10 @@ namespace Xpand.TestsLib{
 
 
         public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB){
-            return base.GetModuleUpdaters(objectSpace, versionFromDB)
-                .Add(new DefaultUserModuleUpdater(objectSpace, versionFromDB,FixedUserId));
+            var defaultUserModuleUpdater = new DefaultUserModuleUpdater(objectSpace, versionFromDB,UserId);
+            return new[]{defaultUserModuleUpdater};
         }
 
-        public bool FixedUserId{ get; set; }
+        public Guid UserId{ get; set; }
     }
 }

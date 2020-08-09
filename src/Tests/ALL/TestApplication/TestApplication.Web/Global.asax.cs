@@ -19,7 +19,7 @@ namespace TestApplication.Web {
             Tracing.Initialize();
 
             var application = new TestWebApplication();
-            
+            application.ConfigureConnectionString();
             WebApplication.SetInstance(Session, application);
 //            SecurityStrategy security = (SecurityStrategy)WebApplication.Instance.Security;
 //            security.RegisterXPOAdapterProviders();
@@ -28,7 +28,7 @@ namespace TestApplication.Web {
             
 
 
-            WebApplication.Instance.ConnectionString = "XpoProvider=InMemoryDataSet";
+            // WebApplication.Instance.ConnectionString = "XpoProvider=InMemoryDataSet";
 
             WebApplication.Instance.Setup();
             WebApplication.Instance.Start();

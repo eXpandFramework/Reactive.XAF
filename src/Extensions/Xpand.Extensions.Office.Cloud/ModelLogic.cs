@@ -42,12 +42,9 @@ namespace Xpand.Extensions.Office.Cloud{
         OAuthPrompt Prompt{ get; [UsedImplicitly] set; }
         [Description("Space seperated list of scopes")]
         string Scopes{ get; [UsedImplicitly] set; }
-        [Required][ModelBrowsable(typeof(DesignerOnlyCalculator))]
+        [Required]
         string ClientId{ get; set; }
         [Required]
-        string RedirectUri{ get; set; }
-        [Required][ModelBrowsable(typeof(DesignerOnlyCalculator))]
-        // [DefaultValue("Applicable only for web")]
         string ClientSecret{ get; set; }
     }
     

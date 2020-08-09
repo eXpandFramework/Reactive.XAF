@@ -1,5 +1,14 @@
-﻿using DevExpress.EasyTest.Framework;
+﻿using System;
+using System.Diagnostics;
+using System.IO;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using ALL.Tests;
+using DevExpress.EasyTest.Framework;
+using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Office.Cloud;
+using Xpand.Extensions.Reactive.Transform;
 using Xpand.TestsLib.EasyTest;
 using Xpand.TestsLib.EasyTest.Commands;
 using Xpand.TestsLib.EasyTest.Commands.ActionCommands;
@@ -27,6 +36,64 @@ namespace ALL.Win.Tests{
             
             commandAdapter.Execute(new NavigateCommand(navigationItemCaption));
             commandAdapter.Execute(new ActionCommand(Actions.Refresh), new CheckListViewCommand("",0));
+        }
+
+        public static async Task TestCloudServices(this ICommandAdapter commandAdapter){
+            await commandAdapter.TestGoogleService(Observable.Empty<Unit>);
+            await commandAdapter.TestMicrosoftService(() => Observable.Start(() => {
+                commandAdapter.TestMicrosoftCalendarService();
+                commandAdapter.TestMicrosoftTodoService();
+            }).ToUnit());
+        }
+
+        public static async Task TestCloudService(this ICommandAdapter commandAdapter,
+            Func<string, IObservable<Unit>> whenConnected, string serviceName,
+            CheckDetailViewCommand checkAccountInfoCOmmand){
+            var signOutCaption = $"Sign out {serviceName}";
+            var signInCaption = $"Sign In {serviceName}";
+            commandAdapter.Execute(new NavigateCommand("Default.My Details"),new ActionCommand(signOutCaption){ExpectException = true});
+            
+            await whenConnected(signInCaption);
+            commandAdapter.CheckConnection(signOutCaption, signInCaption, checkAccountInfoCOmmand,serviceName);
+            commandAdapter.Execute(new LogOffCommand(),new LoginCommand());
+            commandAdapter.CheckConnection(signOutCaption, signInCaption, checkAccountInfoCOmmand,serviceName);
+            commandAdapter.Execute(new ActionCloseCommand(),new ActionCloseCommand());
+            commandAdapter.Disconnect(signOutCaption,signInCaption);
+        }
+
+        private static void CheckConnection(this ICommandAdapter commandAdapter, string signOutCaption,
+            string signInCaption, Command checkAccountInfoCOmmand,string serviceName){
+            commandAdapter.Execute(new NavigateCommand("Default.My Details"),
+                new ActionAvailableCommand(signInCaption){ExpectException = true},
+                new ActionAvailableCommand(signOutCaption),
+                new CheckActionToolTip((signOutCaption,"Sign out")),
+                new ActionCommand($"Show {serviceName} Account Info"),new WaitCommand(WaitInterval),checkAccountInfoCOmmand,new ActionCloseCommand());
+        }
+
+        public static int WaitInterval => Debugger.IsAttached?2500:5000;
+
+        private static void Disconnect(this ICommandAdapter commandAdapter, string signOutCaption, string signInCaption){
+            commandAdapter.Execute(new NavigateCommand("Default.My Details"),new ActionCommand(signOutCaption),
+                new ActionAvailableCommand(signOutCaption)
+                    {ExpectException = true},
+                new ActionAvailableCommand(signInCaption));
+        }
+
+        public static IObservable<Unit> Authenticate(this ICommandAdapter commandAdapter, string signInCaption,string passFileName,string email){
+            if (commandAdapter.GetTestApplication().IsWeb()){
+                Observable.Start(() => commandAdapter.Execute(new ActionCommand(signInCaption)))
+                    .Timeout(TimeSpan.FromSeconds(Debugger.IsAttached?10:30)).OnErrorResumeNext(Observable.Empty<Unit>().FirstOrDefaultAsync()).Wait();
+            }
+            else{
+                commandAdapter.Execute(new ActionCommand(signInCaption),new WaitCommand(WaitInterval*2));
+            }
+            commandAdapter.Execute(new PasteClipBoardCommand(email), new SendKeysCommand("{Enter}"), new WaitCommand((int) (WaitInterval*1.5)));
+
+            var dxMailPass = File.ReadAllText($"{AppDomain.CurrentDomain.ApplicationPath()}\\..\\{passFileName}.json").Trim();
+            commandAdapter.Execute(new PasteClipBoardCommand(dxMailPass),new WaitCommand(1000),
+                new SendKeysCommand("{Enter}"), new WaitCommand(WaitInterval));
+            commandAdapter.Execute(new SendKeysCommand("{Enter}"),new WaitCommand(WaitInterval));
+            return Unit.Default.ReturnObservable();
         }
 
     }

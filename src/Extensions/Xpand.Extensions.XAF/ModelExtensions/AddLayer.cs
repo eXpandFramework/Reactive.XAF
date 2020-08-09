@@ -1,7 +1,13 @@
 ﻿using System;
+using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 
 namespace Xpand.Extensions.XAF.ModelExtensions{
+    public class DesignerCalculator:IModelIsVisible{
+        public bool IsVisible(IModelNode node, string propertyName){
+            return DesignerOnlyCalculator.IsRunFromDesigner;
+        }
+    }
     public static partial class ModelExtensions{
 	    public static void AddLayer(this ModelApplicationBase application, ModelNode layer) => ModelApplicationHelper.AddLayer(application, (ModelApplicationBase) layer);
 

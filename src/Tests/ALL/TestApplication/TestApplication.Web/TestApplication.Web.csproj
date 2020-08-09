@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="Current">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="Current">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -136,6 +136,12 @@
     <PackageReference Include="DevExpress.ExpressApp.Web.All" Version="20.1.6" />
     <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.1.6" />
     <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.1.6" />
+    <PackageReference Include="Google.Apis">
+      <Version>1.48.0</Version>
+    </PackageReference>
+    <PackageReference Include="Google.Apis.People.v1">
+      <Version>1.25.0.830</Version>
+    </PackageReference>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3 ">
     </PackageReference>
     <PackageReference Include="FasterFlect.Xpand" Version="2.0.7">
@@ -180,17 +186,26 @@
       <Link>Common\AgnosticModule.cs</Link>
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="..\CommonFiles\CloudService.cs">
+      <Link>Cloud.Office\CloudService.cs</Link>
+    </Compile>
+    <Compile Include="..\CommonFiles\GoogleService\GoogleService.cs">
+      <Link>Cloud.Office\Google\GoogleService.cs</Link>
+    </Compile>
+    <Compile Include="..\CommonFiles\GoogleService\ShowGoogleAccountInfoService.cs">
+      <Link>Cloud.Office\Google\ShowGoogleAccountInfoService.cs</Link>
+    </Compile>
     <Compile Include="..\commonfiles\microsoftcalendarservice\MicrosoftCalendarService.cs">
-      <Link>MicrosoftCalendarService\MicrosoftCalendarService.cs</Link>
+      <Link>Cloud.Office\Microsoft\MicrosoftCalendarService.cs</Link>
     </Compile>
     <Compile Include="..\CommonFiles\MicrosoftService\MicrosoftService.cs">
-      <Link>MicrosoftService\MicrosoftService.cs</Link>
+      <Link>Cloud.Office\Microsoft\MicrosoftService.cs</Link>
     </Compile>
     <Compile Include="..\CommonFiles\MicrosoftService\ShowMSAccountInfoService.cs">
-      <Link>MicrosoftService\ShowMSAccountInfoService.cs</Link>
+      <Link>Cloud.Office\Microsoft\ShowMSAccountInfoService.cs</Link>
     </Compile>
     <Compile Include="..\CommonFiles\MicrosoftTodoService\MicrosoftTodoService.cs">
-      <Link>MicrosoftTodoService\MicrosoftTodoService.cs</Link>
+      <Link>Cloud.Office\Microsoft\MicrosoftTodoService.cs</Link>
     </Compile>
     <Compile Include="Default.aspx.designer.cs">
       <DependentUpon>Default.aspx</DependentUpon>
@@ -238,7 +253,17 @@
   <ItemGroup>
     <EmbeddedResource Include="LookupCascade\LookupCascade.xafml" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\CommonFiles\Cloud.Office.xafml">
+      <Link>Cloud.Office\Cloud.Office.xafml</Link>
+    </EmbeddedResource>
+  </ItemGroup>
   <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="..\CommonFiles\SeqeuenceGenerator\SequenceGenerator.xafml">
+      <Link>SequenceGenerator\SequenceGenerator.xafml</Link>
+    </EmbeddedResource>
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

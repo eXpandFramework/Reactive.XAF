@@ -11,13 +11,13 @@ if ($GithubToken){
         New-Item "$PSScriptRoot\..\bin\Tests" -ItemType Directory
     }
     Set-Location $env:TEMP\storage\Azure
-    "AzureAppCredentials.json","MicrosoftAuthenticationDataWin.json","MicrosoftAuthenticationDataWeb.json","dxmailpass.json"|ForEach-Object{
+    "MicrosoftAppCredentials.json","MicrosoftAuthenticationDataWin.json","MicrosoftAuthenticationDataWeb.json","dxmailpass.json"|ForEach-Object{
         Copy-Item -Destination "$PSScriptRoot\..\bin" -Force -Path ".\$_"
         Copy-Item -Destination "$PSScriptRoot\..\bin\Tests" -Force -Path ".\$_"
         Copy-Item -Destination "$PSScriptRoot\..\src\Tests\ALL\TestApplication" -Force -Path ".\$_"
     }
     Set-Location $env:TEMP\storage\Google
-    @("GoogleAppCredentials.json","GoogleAuthenticationDataWin.json")|ForEach-Object{
+    @("GoogleWinAppCredentials.json","GoogleWebAppCredentials.json","GoogleAuthenticationDataWin.json","GoogleAuthenticationDataWeb.json","TestAppPass.json")|ForEach-Object{
         Copy-Item -Destination "$PSScriptRoot\..\bin" -Force -Path ".\$_"
         Copy-Item -Destination "$PSScriptRoot\..\bin\Tests" -Force -Path ".\$_"
         Copy-Item -Destination "$PSScriptRoot\..\src\Tests\ALL\TestApplication" -Force -Path ".\$_"

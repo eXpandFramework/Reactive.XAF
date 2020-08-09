@@ -2,13 +2,12 @@
 <Application>
   <NavigationItems>
     <Items>
-      <Item Id="Reports">
+      <Item Id="Default">
         <Items>
-          <Item Id="Dashboards" Visible="False" />
-          <Item Id="ReportsV2" Visible="False" />
+          <Item Id="@5cb08f0b-1dc2-4f04-b1da-9c5cc5e71efd" ViewId="SequenceStorage_ListView" IsNewNode="True" />
         </Items>
       </Item>
     </Items>
   </NavigationItems>
-  <Options FormStyle="Ribbon" UIType="TabbedMDI" />
+  <Options CollectionsEditMode="Edit" />
 </Application>

@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Application>
+  <NavigationItems>
+    <Items>
+      <Item Id="Cloud" IsNewNode="True">
+        <Items IsNewNode="True">
+          <Item Id="@2f30b9bb-9534-437c-9d64-ddc9bf3e0021" ViewId="EventMicrosoft_ListView" Caption="Microsoft Event" IsNewNode="True" />
+          <!-- <Item Id="@712452d2-f73e-493d-b94a-c92814f5bd4d" ViewId="EventGoogle_ListView" Caption="Google Event" IsNewNode="True" /> -->
+          <Item Id="@97b2ca38-382f-4a7b-8be0-9d62c403ee0e" ViewId="TaskMicrosoft_ListView" Caption="Microsoft Task" IsNewNode="True" />
+          <!-- <Item Id="@b30eac1c-6e1a-4432-a7b7-ec7ffddfe952" ViewId="TaskGoogle_ListView" Caption="Google Task" IsNewNode="True" /> -->
+        </Items>
+      </Item>
+    </Items>
+  </NavigationItems>
+  <Options FormStyle="Ribbon" UIType="TabbedMDI" />
+</Application>

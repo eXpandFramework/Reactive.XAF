@@ -13,3 +13,4 @@ DevExpress.ExpressApp.Xpo
 Fasterflect.Xpand
 akarnokd.reactive_extensions
 Google.Apis.Auth
+Google.Apis.People.v1

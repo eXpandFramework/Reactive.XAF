@@ -46,37 +46,39 @@ namespace Xpand.TestsLib.EasyTest.Commands.ActionCommands{
             var namigationItems = Enumerable.Range(0,itemsCount).Select(i => grid.GetCellValue(i, grid.Columns.First())).ToArray();
             for(int i = 0; i < itemsCount; i++) {
                 var namigationItem = namigationItems[i];
-                if (_excludeMatch==null||!Regex.IsMatch(namigationItem,_excludeMatch)){
-                    var testControl = GetNavigationTestControl(adapter);
-                    var gridBase = testControl.GetInterface<IGridBase>();
-                    var navigationItemName = gridBase.GetCellValue(i, gridBase.Columns.First());
-                    var controlAct = testControl.GetInterface<IControlAct>();
-                    controlAct.Act(navigationItemName);
-                    if(adapter.IsControlExist(TestControlType.Action, "New")) {
-                        try {
-                            adapter.CreateTestControl(TestControlType.Action, "New").FindInterface<IControlAct>().Act("");
-                        }
-                        catch(Exception e) {
-                            throw new CommandException(
-                                $"The 'New' action execution failed. Navigation item: {navigationItemName}\r\nInner Exception: {e.Message}", this.StartPosition);
-                        }
-                        if(adapter.IsControlExist(TestControlType.Action, "Cancel")) {
+                if (namigationItem!=null){
+                    if (_excludeMatch==null||!Regex.IsMatch(namigationItem,_excludeMatch)){
+                        var testControl = GetNavigationTestControl(adapter);
+                        var gridBase = testControl.GetInterface<IGridBase>();
+                        var navigationItemName = gridBase.GetCellValue(i, gridBase.Columns.First());
+                        var controlAct = testControl.GetInterface<IControlAct>();
+                        controlAct.Act(navigationItemName);
+                        if(adapter.IsControlExist(TestControlType.Action, "New")) {
                             try {
-                                ITestControl cancelActionTestControl = adapter.CreateTestControl(TestControlType.Action, "Cancel");
-                                if(cancelActionTestControl.GetInterface<IControlEnabled>().Enabled) {
-                                    cancelActionTestControl.FindInterface<IControlAct>().Act(null);
-                                }
+                                adapter.CreateTestControl(TestControlType.Action, "New").FindInterface<IControlAct>().Act("");
                             }
                             catch(Exception e) {
                                 throw new CommandException(
-                                    $"The 'Cancel' action execution failed. Navigation item: {navigationItemName}\r\nInner Exception: {e.Message}", this.StartPosition);
+                                    $"The 'New' action execution failed. Navigation item: {navigationItemName}\r\nInner Exception: {e.Message}", this.StartPosition);
                             }
-                        }
+                            if(adapter.IsControlExist(TestControlType.Action, "Cancel")) {
+                                try {
+                                    ITestControl cancelActionTestControl = adapter.CreateTestControl(TestControlType.Action, "Cancel");
+                                    if(cancelActionTestControl.GetInterface<IControlEnabled>().Enabled) {
+                                        cancelActionTestControl.FindInterface<IControlAct>().Act(null);
+                                    }
+                                }
+                                catch(Exception e) {
+                                    throw new CommandException(
+                                        $"The 'Cancel' action execution failed. Navigation item: {navigationItemName}\r\nInner Exception: {e.Message}", this.StartPosition);
+                                }
+                            }
 
-                        var command = new OptionalActionCommand{
-                            Parameters = {MainParameter = new MainParameter("Yes"), ExtraParameter = new MainParameter()}
-                        };
-                        command.Execute(adapter);
+                            var command = new OptionalActionCommand{
+                                Parameters = {MainParameter = new MainParameter("Yes"), ExtraParameter = new MainParameter()}
+                            };
+                            command.Execute(adapter);
+                        }
                     }
                 }
             }

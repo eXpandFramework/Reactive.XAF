@@ -1,5 +1,6 @@
 ﻿using System.Windows.Forms;
 using DevExpress.EasyTest.Framework;
+using Xpand.TestsLib.Win32;
 
 namespace Xpand.TestsLib.EasyTest.Commands{
 	public class PasteClipBoardCommand:EasyTestCommand{
@@ -10,8 +11,8 @@ namespace Xpand.TestsLib.EasyTest.Commands{
 		}
 
 		protected override void ExecuteCore(ICommandAdapter adapter){
-			var sendKeysCommand = new SendKeysCommand("^{v}");
-			sendKeysCommand.Execute(adapter);
+			var inputSimulator = new InputSimulator.InputSimulator();
+			inputSimulator.Keyboard.TextEntry(Clipboard.GetText());
 		}
 	}
 }

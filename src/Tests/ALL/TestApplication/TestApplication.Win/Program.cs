@@ -24,8 +24,8 @@ namespace TestApplication.Win {
             }
             Tracing.Initialize();
             var winApplication = new TestWinApplication();
+            winApplication.ConfigureConnectionString();
 
-            
             try {
                 winApplication.Setup();
                 winApplication.Start();

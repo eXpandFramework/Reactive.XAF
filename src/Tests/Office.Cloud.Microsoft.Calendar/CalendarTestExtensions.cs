@@ -67,10 +67,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
             var requestBuilder = client.client.Me.Calendars;
             var calendar = await requestBuilder.GetCalendar(calendarName, !keepEvents && calendarName!=PagingCalendarName).ToTaskWithoutConfigureAwait();
             if (calendarName==PagingCalendarName){
-                if (calendar == null){
-                    calendar = await requestBuilder.Request()
-                        .AddAsync(new global::Microsoft.Graph.Calendar(){Name = PagingCalendarName});
-                }
+                calendar ??= await requestBuilder.Request().AddAsync(new global::Microsoft.Graph.Calendar(){Name = PagingCalendarName});
                 var count = (await requestBuilder[calendar?.Id].Events.ListAllItems().Sum(entities => entities.Length));
                 var itemsCount = PagingCalendarItemsCount-count;
                 if (itemsCount>0){

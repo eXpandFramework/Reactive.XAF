@@ -8,7 +8,6 @@ using Google.Apis.Json;
 using Google.Apis.Util.Store;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
-using Xpand.Extensions.XAF.Xpo.ValueConverters;
 using Xpand.XAF.Modules.Office.Cloud.Google.BusinessObjects;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Google{
@@ -35,7 +34,6 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
                     cloudAuthentication.OAuthToken.Add(key, serialize);
                 else
                     cloudAuthentication.OAuthToken[key] = serialize;
-                var convertFromStorageType = new DictionaryValueConverter().ConvertToStorageType(cloudAuthentication.OAuthToken);
                 cloudAuthentication.Save();
                 objectSpace.CommitChanges();
                 return Observable.Return(default(T));

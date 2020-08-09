@@ -49,7 +49,7 @@ using Prompt = Microsoft.Identity.Client.Prompt;
 [assembly: OwinStartup(typeof(MicrosoftService))]
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 	public static class MicrosoftService{
-		static readonly Subject<GenericEventArgs<IObservable<AuthenticationResult>>> CustomAquireTokenInteractivelySubject=new Subject<GenericEventArgs<IObservable<AuthenticationResult>>>();
+		
 		private static readonly Uri AuthorityUri=new Uri(string.Format(CultureInfo.InvariantCulture, "https://login.microsoftonline.com/{0}{1}", "common", "/v2.0"));
         
         private static readonly string AuthenticationType=OpenIdConnectAuthenticationDefaults.AuthenticationType;
@@ -58,7 +58,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
             => application.NeedsAuthentication<MSAuthentication>(() 
                 => application.AuthorizeMS((exception, client) => Observable.Throw<AuthenticationResult>(new AuthenticationException(nameof(MicrosoftService))))
 	                .Catch<GraphServiceClient,AuthenticationException>(e => Observable.Empty<GraphServiceClient>())
-	                .To(false).SwitchIfEmpty(true.ReturnObservable()));
+	                .To(false).SwitchIfEmpty(true.ReturnObservable()))
+                .TraceMicrosoftModule();
 
         public static SimpleAction ConnectMicrosoft(this (MicrosoftModule, Frame frame) tuple) 
             => tuple.frame.Action(nameof(ConnectMicrosoft)).As<SimpleAction>();
@@ -161,7 +162,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 				.Merge(clientApp.UserTokenCache.SynchStorage(application.CreateObjectSpace, (Guid) currentUserId)
 					.IgnoreElements().To<AuthenticationResult>())
 				.FirstAsync()
-				.TraceMicrosoftModule();
+				.TraceMicrosoftModule(result => result.Account?.Username);
 		}
 
 		private static string[] Scopes(this XafApplication application) => application.Model.OAuthMS().Scopes().Add("User.Read");
@@ -178,7 +179,6 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 			Func<MsalUiRequiredException,IClientApplicationBase,  IObservable<AuthenticationResult>> aquireToken = null) 
             => application.CreateClientApp()
                 .Authorize(cache => cache.SynchStorage(application.CreateObjectSpace, application.CurrentUserId()), aquireToken, application)
-                .Do(client => {})
                 .Do(ClientSubject.OnNext)
         ;
 
@@ -200,7 +200,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 			return authenticationResult.Select(result => new GraphServiceClient(new DelegateAuthenticationProvider(request => {
 				request.Headers.Authorization = new AuthenticationHeaderValue("bearer", result.AccessToken);
 				request.Headers.Add("Prefer", "IdType=\"ImmutableId\"");
-				return request.ReturnObservable().TraceMicrosoftModule().ToTask();
+				return request.ReturnObservable()
+                    .TraceMicrosoftModule()
+                    .ToTask();
 			})));
 		}
 
@@ -218,6 +220,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 
 		public static IObservable<GenericEventArgs<IObservable<AuthenticationResult>>> CustomAquireTokenInteractively 
             => CustomAquireTokenInteractivelySubject.AsObservable();
+        static readonly Subject<GenericEventArgs<IObservable<AuthenticationResult>>> CustomAquireTokenInteractivelySubject=new Subject<GenericEventArgs<IObservable<AuthenticationResult>>>();
 
 		private static IObservable<AuthenticationResult> AquireTokenInteractively(this IClientApplicationBase clientApp, XafApplication application){
 			var aquireTokenInteractively = HttpContext.Current == null

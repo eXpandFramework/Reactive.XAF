@@ -19,10 +19,12 @@
     <Compile Remove="Program.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\CommonFiles\GoogleService.cs" Link="GoogleService.cs" />
     <Compile Include="..\CommonFiles\MicrosoftCalendarService.cs" Link="MicrosoftCalendarService.cs" />
     <Compile Include="..\CommonFiles\MicrosoftService.cs" Link="MicrosoftService.cs" />
     <Compile Include="..\CommonFiles\MicrosoftTodoService.cs" Link="MicrosoftTodoService.cs" />
     <Compile Include="..\CommonFiles\OfficeCloudService.cs" Link="OfficeCloudService.cs" />
+    <Compile Include="..\CommonFiles\BaseTest.cs" Link="BaseTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DevExpress.EasyTest" Version="20.1.6" />

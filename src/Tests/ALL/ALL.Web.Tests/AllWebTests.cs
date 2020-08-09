@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ALL.Tests;
 using ALL.Win.Tests;
 using DevExpress.EasyTest.Framework;
 using DevExpress.ExpressApp;
@@ -15,8 +13,9 @@ using Xpand.Extensions.AppDomainExtensions;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Attributes;
 using Xpand.TestsLib.EasyTest;
-using Xpand.TestsLib.EasyTest.Commands;
+using Xpand.TestsLib.EasyTest.Commands.ActionCommands;
 using Xpand.XAF.Modules.Reactive;
+using BaseTest = ALL.Tests.BaseTest;
 
 namespace ALL.Web.Tests{
     [NonParallelizable]
@@ -33,27 +32,17 @@ namespace ALL.Web.Tests{
                 application.Modules.FirstOrDefault(m => m.GetType()==moduleType).ShouldBeNull();
             }
         }
+        private static TestApplication RunWinApplication(WebAdapter adapter, string connectionString) 
+            => adapter.RunWebApplication($@"{AppDomain.CurrentDomain.ApplicationPath()}\..\TestWebApplication\",65477);
+
         [XpandTest(LongTimeout,3)]
         [Test][Apartment(ApartmentState.STA)]
         public async Task Web_EasyTest(){
-            using (var webAdapter = new WebAdapter()){
-                var testApplication = webAdapter.RunWebApplication($@"{AppDomain.CurrentDomain.ApplicationPath()}\..\TestWebApplication\",65477);
-                try{
-                    
-	                var commandAdapter = webAdapter.CreateCommandAdapter();
-                    commandAdapter.Execute(new LoginCommand());
-                    commandAdapter.TestLookupCascade();
-                    await commandAdapter.TestMicrosoftService(() => Observable.Start(() => {
-                        commandAdapter.TestMicrosoftCalendarService();
-                        commandAdapter.TestMicrosoftTodoService();
-                        
-                    }));
-                    
-                }
-                finally{
-                    webAdapter.KillApplication(testApplication, KillApplicationContext.TestNormalEnded);
-                }
-            }
+            await EasyTest(() => new WebAdapter(), RunWinApplication, async adapter => {
+                var autoTestCommand = new AutoTestCommand("Event|Task");
+                adapter.Execute(autoTestCommand);
+                await adapter.TestCloudServices();
+            });
         }
 
     }

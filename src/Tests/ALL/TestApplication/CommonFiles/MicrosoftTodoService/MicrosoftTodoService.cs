@@ -4,7 +4,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using DevExpress.ExpressApp;
-using DevExpress.Persistent.Base;
+using DevExpress.ExpressApp.Model;
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft;
@@ -20,8 +20,8 @@ namespace TestApplication.MicrosoftTodoService{
         public static IObservable<Unit> ConnectMicrosoftTodoService(this ApplicationModulesManager manager) =>
             manager.InitializeModule().Merge(manager.WhenApplication(application => application.UpdateTaskDescription().Merge(application.DeleteAllTasks())).ToUnit());
 
-        private static IObservable<Unit> UpdateTaskDescription(this XafApplication application) =>
-            TodoService.Updated
+        private static IObservable<Unit> UpdateTaskDescription(this XafApplication application) 
+            => TodoService.Updated
                 .Do(tuple => {
                     using (var objectSpace = application.CreateObjectSpace()){
                         var cloudOfficeObject = objectSpace.QueryCloudOfficeObject(tuple.cloud.Id, CloudObjectType.Task).First();
@@ -44,14 +44,12 @@ namespace TestApplication.MicrosoftTodoService{
 
         private static IObservable<Unit> InitializeModule(this ApplicationModulesManager manager){
             manager.Modules.OfType<AgnosticModule>().First().AdditionalExportedTypes.Add(typeof(Task));
-            return manager.WhenCustomizeTypesInfo().Do(_ => _.e.TypesInfo.FindTypeInfo(typeof(Task)).AddAttribute(new DefaultClassOptionsAttribute())).ToUnit()
-                .FirstAsync()
-                .Concat(manager.WhenGeneratingModelNodes(application => application.Views)
-                    .Do(views => {
-                        var modelTodo = views.Application.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Todo();
-                        var modelTodoItem = modelTodo.Items.AddNode<IModelTodoItem>();
-                        modelTodoItem.ObjectView=views.Application.BOModel.GetClass(typeof(Task)).DefaultDetailView;
-                    }).ToUnit());
+            return manager.WhenGeneratingModelNodes(application => application.Views)
+                .Do(views => {
+                    var modelTodo = views.Application.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Todo();
+                    var modelTodoItem = modelTodo.Items.AddNode<IModelTodoItem>();
+                    modelTodoItem.ObjectView=(IModelObjectView) views.Application.Views["TaskMicrosoft_DetailView"];
+                }).ToUnit();
         }
     }
 }

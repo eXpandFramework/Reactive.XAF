@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.AuditTrail;
@@ -25,11 +26,15 @@ using DevExpress.ExpressApp.Updating;
 using DevExpress.ExpressApp.Validation;
 using DevExpress.ExpressApp.ViewVariantsModule;
 using DevExpress.ExpressApp.Workflow;
+using DevExpress.ExpressApp.Xpo;
 using DevExpress.Persistent.BaseImpl;
 using DevExpress.Persistent.BaseImpl.PermissionPolicy;
+using Newtonsoft.Json;
+using TestApplication.GoogleService;
 using TestApplication.MicrosoftCalendarService;
 using TestApplication.MicrosoftService;
 using TestApplication.MicrosoftTodoService;
+using Xpand.Extensions.AppDomainExtensions;
 using Xpand.TestsLib;
 using Xpand.TestsLib.BO;
 using Xpand.XAF.Modules.AutoCommit;
@@ -39,13 +44,13 @@ using Xpand.XAF.Modules.HideToolBar;
 using Xpand.XAF.Modules.MasterDetail;
 using Xpand.XAF.Modules.ModelMapper;
 using Xpand.XAF.Modules.ModelViewInheritance;
+using Xpand.XAF.Modules.Office.Cloud.Google;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo;
 using Xpand.XAF.Modules.ProgressBarViewItem;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Logger;
-using Xpand.XAF.Modules.Reactive.Logger.Hub;
 using Xpand.XAF.Modules.RefreshView;
 using Xpand.XAF.Modules.SequenceGenerator;
 using Xpand.XAF.Modules.SuppressConfirmation;
@@ -53,6 +58,18 @@ using Xpand.XAF.Modules.ViewEditMode;
 using Xpand.XAF.Modules.ViewItemValue;
 
 namespace TestApplication{
+    public static class AgnosticExtensions{
+        public static void ConfigureConnectionString(this XafApplication application){
+            application.ConnectionString = InMemoryDataStoreProvider.ConnectionString;
+            var easyTestSettingsFile =
+                $"{AppDomain.CurrentDomain.ApplicationPath()}{Path.GetFileNameWithoutExtension(AppDomain.CurrentDomain.SetupInformation.ApplicationName)}_EasyTestSettings.json";
+            if (File.Exists(easyTestSettingsFile)){
+                var settings = JsonConvert.DeserializeObject<dynamic>(File.ReadAllText(easyTestSettingsFile));
+                application.ConnectionString = settings.ConnectionString;
+            }
+        }
+
+    }
 	public abstract class AgnosticModule:ModuleBase{
 		protected AgnosticModule(){
 			#region XAF Modules
@@ -102,8 +119,10 @@ namespace TestApplication{
 			RequiredModuleTypes.Add(typeof(SuppressConfirmationModule));
 			RequiredModuleTypes.Add(typeof(ViewEditModeModule));
 			RequiredModuleTypes.Add(typeof(ViewItemValueModule));
+			RequiredModuleTypes.Add(typeof(GoogleModule));
 			// RequiredModuleTypes.Add(typeof(ReactiveLoggerHubModule));
 			AdditionalExportedTypes.Add(typeof(Event));
+			AdditionalExportedTypes.Add(typeof(Task));
 		}
 
 		public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB){
@@ -119,9 +138,10 @@ namespace TestApplication{
 
 		public override void Setup(ApplicationModulesManager moduleManager){
 			base.Setup(moduleManager);
-			moduleManager.ConnectMicrosoftService()
+            moduleManager.ConnectMicrosoftService()
                 .Merge(moduleManager.ConnectMicrosoftTodoService())
                 .Merge(moduleManager.ConnectMicrosoftCalendarService())
+                .Merge(moduleManager.ConnectGoogleService())
                 .Subscribe(this);
         }
 	}

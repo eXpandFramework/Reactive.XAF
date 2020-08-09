@@ -118,7 +118,9 @@ Below is a demonstration of the package authenticating against `AAD` for both `W
 
 [![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://www.youtube.com/watch?v=XIczKjE2sFw)
 
-Also, refer to the [Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Office.Cloud.Microsoft.Todo)
+Also, refer to: 
+* [Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Office.Cloud.Microsoft.Todo)
+* [Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Office.Cloud.Microsoft.Calendar)
 
 
 ## Installation 

@@ -121,14 +121,14 @@ namespace Xpand.Extensions.Office.Cloud{
                 .Merge(manager.RegisterViewSimpleAction($"Disconnect{serviceName}", action => action.Initialize(serviceName)))
                 .Publish().RefCount();
 
-        private static void Initialize(this SimpleAction action,string connectActionId){
-            action.Caption = $"Sing In {connectActionId}";
-            action.ImageName = connectActionId;
-            if (action.Id == connectActionId){
+        private static void Initialize(this SimpleAction action,string serviceName){
+            action.Caption = $"Sign In {serviceName}";
+            action.ImageName = serviceName;
+            if (action.Id == $"Connect{serviceName}"){
                 action.ToolTip = "Connect";
             }
             else{
-                action.Caption = $"Sign out {connectActionId}";
+                action.Caption = $"Sign out {serviceName}";
                 action.ToolTip="Sign out";
             }
             action.PaintStyle=ActionItemPaintStyle.CaptionAndImage;

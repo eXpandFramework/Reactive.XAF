@@ -6,7 +6,7 @@ using System.Reactive.Threading.Tasks;
 using System.Threading;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
-using DevExpress.Persistent.Base;
+using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base.General;
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Reactive.Transform;
@@ -75,17 +75,14 @@ namespace TestApplication.MicrosoftCalendarService{
 
         private static IObservable<Unit> InitializeModule(this ApplicationModulesManager manager){
             manager.Modules.OfType<AgnosticModule>().First().AdditionalExportedTypes.Add(typeof(Event));
-            return manager.WhenCustomizeTypesInfo()
-                .Do(_ => _.e.TypesInfo.FindTypeInfo(typeof(Event)).AddAttribute(new DefaultClassOptionsAttribute())).ToUnit()
-                .FirstAsync()
-                .Concat(manager.WhenGeneratingModelNodes(application => application.Views)
-                    .Do(views => {
-                        var modelCalendar = views.Application.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Calendar();
-                        var calendarItem = modelCalendar.Items.AddNode<IModelCalendarItem>();
-                        calendarItem.ObjectView=views.Application.BOModel.GetClass(typeof(Event)).DefaultDetailView;
-                        calendarItem = modelCalendar.Items.AddNode<IModelCalendarItem>();
-                        calendarItem.ObjectView=views.Application.BOModel.GetClass(typeof(Event)).DefaultListView;
-                    }).ToUnit())
+            return manager.WhenGeneratingModelNodes(application => application.Views)
+                .Do(views => {
+                    var modelCalendar = views.Application.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Calendar();
+                    var calendarItem = modelCalendar.Items.AddNode<IModelCalendarItem>();
+                    calendarItem.ObjectView=(IModelObjectView) views.Application.Views["EventMicrosoft_DetailView"];
+                    calendarItem = modelCalendar.Items.AddNode<IModelCalendarItem>();
+                    calendarItem.ObjectView=(IModelObjectView) views.Application.Views["EventMicrosoft_ListView"];
+                }).ToUnit()
                 .Merge(manager.RegisterViewSingleChoiceAction(nameof(CloudOperation), action => {
                     action.TargetObjectType = typeof(Event);
                     action.ItemType=SingleChoiceActionItemType.ItemIsOperation;

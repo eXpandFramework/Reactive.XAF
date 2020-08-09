@@ -97,6 +97,7 @@ jobs:
           **\*Office*Calendar*Tests.dll
           **\*Office*Todo*Tests.dll
           **\*Office*Microsoft*Tests.dll
+          **\*Office*Google*Tests.dll
           **\*Office.Cloud.Tests.dll
           **\*OneView*Tests.dll
           **\*Position*Tests.dll

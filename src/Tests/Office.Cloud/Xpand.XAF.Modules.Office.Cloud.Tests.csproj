@@ -14,6 +14,9 @@
     <AssemblyName>Xpand.XAF.Modules.Office.Cloud.Tests</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="CloudServiceTests.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="Xpand.Extensions">
       <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
     </Reference>

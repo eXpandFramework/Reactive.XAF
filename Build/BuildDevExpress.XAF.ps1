@@ -107,14 +107,13 @@ Task  CreateNuspec {
             Branch=$branch
         }
         & "$PSScriptRoot\CreateNuspec.ps1" @a
-    }
+    } -Maximum 3
 }
 
 Task PackNuspec {
     Invoke-Script {
         & "$PSScriptRoot\PackNuspec.ps1" -branch $branch -ChangedModules $ChangedModules
-        
-    }
+    } -Maximum 3
 }
 
 Task UpdateAllTests {

@@ -38,7 +38,7 @@ namespace TestApplication.Web{
                 dataStoreProvider = application["DataStoreProvider"] as IXpoDataStoreProvider;
             }
             else{
-                dataStoreProvider = new MemoryDataStoreProvider();
+                dataStoreProvider = new ConnectionStringDataStoreProvider(args.ConnectionString);
                 // dataStoreProvider = new ConnectionStringDataStoreProvider(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString);
                 if (application != null) application["DataStoreProvider"] = dataStoreProvider;
             }

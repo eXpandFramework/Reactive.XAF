@@ -12,11 +12,15 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
     }
 
     public interface IModelMicrosoft:IModelNode{
-        IModelOAuth OAuth{ get; }
+        IModelOAuthRedirectUri OAuth{ get; }
     }
 
+    public interface IModelOAuthRedirectUri:IModelOAuth{
+        [Required]
+        string RedirectUri{ get; set; }
+    }
     public static class ModelMicrosoft{
-        internal static IModelOAuth OAuthMS(this IModelApplication application) 
+        internal static IModelOAuthRedirectUri OAuthMS(this IModelApplication application) 
             => application.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().OAuth;
         [PublicAPI]
         public static IObservable<IModelMicrosoft> MicrosoftModel(this IObservable<IModelOffice> source) 

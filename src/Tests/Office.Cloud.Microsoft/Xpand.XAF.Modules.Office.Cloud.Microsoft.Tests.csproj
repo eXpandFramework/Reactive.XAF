@@ -13,6 +13,9 @@
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\Office.Cloud\CloudServiceTests.cs" Link="CloudServiceTests.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="Tests">
       <HintPath>..\..\..\bin\Xpand.TestsLib.dll</HintPath>
     </Reference>

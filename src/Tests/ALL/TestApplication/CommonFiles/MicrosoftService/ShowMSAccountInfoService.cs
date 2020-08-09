@@ -16,12 +16,12 @@ using Xpand.XAF.Modules.Reactive.Services.Actions;
 // ReSharper disable once CheckNamespace
 namespace TestApplication.MicrosoftService{
 	internal static class ShowMSAccountInfoService{
-		public static SimpleAction ShowMSAccountInfo(this (AgnosticModule, Frame frame) tuple) => 
-			tuple.frame.Action(nameof(ShowMSAccountInfo)).As<SimpleAction>();
+		public static SimpleAction ShowMicrosoftAccountInfo(this (AgnosticModule, Frame frame) tuple) => 
+			tuple.frame.Action(nameof(ShowMicrosoftAccountInfo)).As<SimpleAction>();
 
 		public static IObservable<Unit> ShowMSAccountInfo(this ApplicationModulesManager manager){
 			manager.Modules.OfType<AgnosticModule>().First().AdditionalExportedTypes.Add(typeof(User));
-			var registerViewSimpleAction = manager.RegisterViewSimpleAction(nameof(ShowMSAccountInfo)).ActivateInUserDetails().Publish().RefCount(); 
+			var registerViewSimpleAction = manager.RegisterViewSimpleAction(nameof(ShowMicrosoftAccountInfo)).ActivateInUserDetails().Publish().RefCount(); 
 			return manager.WhenApplication(application => registerViewSimpleAction.WhenExecute().ShowAccountInfoView().ToUnit())
 				.Merge(registerViewSimpleAction.ToUnit());
 		}
