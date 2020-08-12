@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using DevExpress.ExpressApp;
@@ -11,6 +12,7 @@ using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Logger;
@@ -19,11 +21,12 @@ using IDisposable = System.IDisposable;
 namespace Xpand.TestsLib{
     public abstract class BaseTest : IDisposable{
         public const int LongTimeout = 500000;
+        [UsedImplicitly]
         protected Platform GetPlatform(string platformName){
             return (Platform) Enum.Parse(typeof(Platform), platformName);
         }
 
-        protected TimeSpan Timeout = TimeSpan.FromSeconds(Debugger.IsAttached ? 120 : 5);
+        [UsedImplicitly] protected TimeSpan Timeout = TimeSpan.FromSeconds(Debugger.IsAttached ? 120 : 5);
 
         static BaseTest(){
             TextListener = new TextWriterTraceListener($@"{AppDomain.CurrentDomain.ApplicationPath()}\reactive.log");
@@ -31,6 +34,7 @@ namespace Xpand.TestsLib{
             TraceSource = new TraceSource(nameof(BaseTest)){Switch = traceSourceSwitch};
             TraceSource.Listeners.Add(TextListener);
         }
+        [UsedImplicitly]
         public static IEnumerable<Platform> PlatformDatasource(){
             yield return Platform.Web;
             yield return Platform.Win;
@@ -98,7 +102,7 @@ namespace Xpand.TestsLib{
         public static TraceSource TraceSource{ get; }
         
 
-        public const string NotImplemented = "NotImplemented";
+        [UsedImplicitly] public const string NotImplemented = "NotImplemented";
 
         [SetUp]
         public void Setup(){
@@ -110,9 +114,14 @@ namespace Xpand.TestsLib{
         public void Dispose(){
             XpoTypesInfoHelper.Reset();
             XafTypesInfo.HardReset();
-            if (TestContext.CurrentContext.Result.Outcome.Status == TestStatus.Failed){
+            if (TestContext.CurrentContext.Result.Outcome.Status != TestStatus.Passed){
                 if (File.Exists(ReactiveLoggerService.RXLoggerLogPath)){
-                    TestContext.AddTestAttachment(ReactiveLoggerService.RXLoggerLogPath);
+                    var zipPPath = $"{Path.GetDirectoryName(ReactiveLoggerService.RXLoggerLogPath)}\\{Path.GetFileNameWithoutExtension(Path.GetDirectoryName(ReactiveLoggerService.RXLoggerLogPath))}.zip";
+                    using (var gZipStream = new GZipStream(File.OpenRead(zipPPath), CompressionMode.Compress)){
+                        var bytes = File.ReadAllText(ReactiveLoggerService.RXLoggerLogPath).Bytes();
+                        gZipStream.Write(bytes,0,bytes.Length);
+                    }
+                    TestContext.AddTestAttachment(zipPPath);
                 }
             }
         }

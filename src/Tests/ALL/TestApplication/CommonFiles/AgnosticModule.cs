@@ -61,14 +61,15 @@ namespace TestApplication{
     public static class AgnosticExtensions{
         public static void ConfigureConnectionString(this XafApplication application){
             application.ConnectionString = InMemoryDataStoreProvider.ConnectionString;
-            var easyTestSettingsFile =
-                $"{AppDomain.CurrentDomain.ApplicationPath()}{Path.GetFileNameWithoutExtension(AppDomain.CurrentDomain.SetupInformation.ApplicationName)}_EasyTestSettings.json";
+            var easyTestSettingsFile = AppDomain.CurrentDomain.EasyTestSettingsFile();
             if (File.Exists(easyTestSettingsFile)){
                 var settings = JsonConvert.DeserializeObject<dynamic>(File.ReadAllText(easyTestSettingsFile));
                 application.ConnectionString = settings.ConnectionString;
             }
         }
 
+        public static string EasyTestSettingsFile(this AppDomain appDomain) 
+			=>appDomain.IsHosted()? $"{appDomain.ApplicationPath()}\\..\\EasyTestSettings.json":$"{appDomain.ApplicationPath()}\\EasyTestSettings.json";
     }
 	public abstract class AgnosticModule:ModuleBase{
 		protected AgnosticModule(){

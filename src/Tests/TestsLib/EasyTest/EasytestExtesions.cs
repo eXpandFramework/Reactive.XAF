@@ -49,9 +49,13 @@ namespace Xpand.TestsLib.EasyTest{
             }
         }
 
-        public static ICommandAdapter CreateCommandAdapter(this IApplicationAdapter adapter){
-            return adapter.CreateCommandAdapter();
+        public static string EasyTestSettingsFile(this TestApplication application){
+            var path = application.AdditionalAttributes.FirstOrDefault(attribute => attribute.LocalName == "FileName")?.Value;
+            path = path != null ? Path.GetDirectoryName(path) : application.AdditionalAttributes.First(attribute => attribute.LocalName=="PhysicalPath").Value;
+            return $"{path}\\EasyTestSettings.json";
         }
+
+        public static ICommandAdapter CreateCommandAdapter(this IApplicationAdapter adapter) => adapter.CreateCommandAdapter();
 
         public static void AddAttribute(this TestApplication testApplication, string name, string value){
             var document = new XmlDocument();
@@ -60,21 +64,25 @@ namespace Xpand.TestsLib.EasyTest{
             testApplication.AdditionalAttributes = testApplication.AdditionalAttributes.Add(attribute).ToArray();
         }
 
-        public static TestApplication RunWebApplication(this WebAdapter adapter, string physicalPath, int port){
+        public static TestApplication RunWebApplication(this WebAdapter adapter, string physicalPath, int port,string connectionString){
             var testApplication = EasyTestWebApplication.New(physicalPath,port);
+            testApplication.ConfigSettings(connectionString);
             adapter.RunApplication(testApplication, null);
             return testApplication;
         }
 
         public static TestApplication RunWinApplication(this WinAdapter adapter, string fileName,string connectionString){
             var testApplication = EasyTestWinApplication.New(fileName);
-
-            File.WriteAllText($"{Path.GetDirectoryName(fileName)}\\{Path.GetFileNameWithoutExtension(fileName)}_EasyTestSettings.json",
-                JsonConvert.SerializeObject(new{ConnectionString = connectionString}));
+            testApplication.ConfigSettings(connectionString);
             adapter.RunApplication(testApplication, null);
             return testApplication;
         }
- 
+
+        private static void ConfigSettings(this TestApplication application,string connectionString){
+            File.WriteAllText(application.EasyTestSettingsFile(),
+                JsonConvert.SerializeObject(new{ConnectionString = connectionString}));
+        }
+
         public static TestApplication RunWinApplication(this WinAdapter adapter, string fileName, int port = 4100){
             var testApplication = EasyTestWinApplication.New(fileName,port);
             adapter.RunApplication(testApplication, null);

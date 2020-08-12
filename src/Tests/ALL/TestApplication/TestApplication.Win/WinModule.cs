@@ -44,7 +44,7 @@ namespace TestApplication.Win{
             RequiredModuleTypes.Add(typeof(WorkflowWindowsFormsModule));
             #endregion
             
-            AdditionalExportedTypes.Add(typeof(Customer));
+            
 
             // RequiredModuleTypes.Add(typeof(GridListEditorModule));
             // RequiredModuleTypes.Add(typeof(OneViewModule));

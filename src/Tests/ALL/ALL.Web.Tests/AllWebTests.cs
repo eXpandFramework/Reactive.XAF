@@ -13,6 +13,7 @@ using Xpand.Extensions.AppDomainExtensions;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Attributes;
 using Xpand.TestsLib.EasyTest;
+using Xpand.TestsLib.EasyTest.Commands;
 using Xpand.TestsLib.EasyTest.Commands.ActionCommands;
 using Xpand.XAF.Modules.Reactive;
 using BaseTest = ALL.Tests.BaseTest;
@@ -32,18 +33,32 @@ namespace ALL.Web.Tests{
                 application.Modules.FirstOrDefault(m => m.GetType()==moduleType).ShouldBeNull();
             }
         }
-        private static TestApplication RunWinApplication(WebAdapter adapter, string connectionString) 
-            => adapter.RunWebApplication($@"{AppDomain.CurrentDomain.ApplicationPath()}\..\TestWebApplication\",65477);
+        private static TestApplication RunWebApplication(WebAdapter adapter, string connectionString) 
+            => adapter.RunWebApplication($@"{AppDomain.CurrentDomain.ApplicationPath()}\..\TestWebApplication\",65477,connectionString);
 
         [XpandTest(LongTimeout,3)]
         [Test][Apartment(ApartmentState.STA)]
-        public async Task Web_EasyTest(){
-            await EasyTest(() => new WebAdapter(), RunWinApplication, async adapter => {
-                var autoTestCommand = new AutoTestCommand("Event|Task");
+        public async Task Web_EasyTest_InMemory(){
+            await EasyTest(() => new WebAdapter(), RunWebApplication, async adapter => {
+                var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
                 adapter.Execute(autoTestCommand);
                 await adapter.TestCloudServices();
             });
         }
+
+        [Test]
+        [XpandTest(LongTimeout,3)]
+        [Apartment(ApartmentState.STA)]
+        public async Task Web_EasyTest_InLocalDb(){
+            var connectionString = "Integrated Security=SSPI;Pooling=false;Data Source=(localdb)\\mssqllocaldb;Initial Catalog=TestApplicationWeb";
+            await EasyTest(() => new WebAdapter(), RunWebApplication,  adapter => {
+                adapter.TestSequenceGeneratorService();
+                return Task.CompletedTask;
+            
+            },connectionString);
+            
+        }
+
 
     }
 

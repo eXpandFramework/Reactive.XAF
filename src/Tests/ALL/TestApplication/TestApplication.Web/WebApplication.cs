@@ -39,6 +39,9 @@ namespace TestApplication.Web{
             }
             else{
                 dataStoreProvider = new ConnectionStringDataStoreProvider(args.ConnectionString);
+                if (args.ConnectionString.Contains("Memory")){
+                    dataStoreProvider=new MemoryDataStoreProvider();
+                }
                 // dataStoreProvider = new ConnectionStringDataStoreProvider(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString);
                 if (application != null) application["DataStoreProvider"] = dataStoreProvider;
             }

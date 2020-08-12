@@ -25,6 +25,7 @@
     <Compile Include="..\CommonFiles\GoogleService.cs" Link="GoogleService.cs" />
     <Compile Include="..\CommonFiles\MicrosoftTodoService.cs" Link="MicrosoftTodoService.cs" />
     <Compile Include="..\CommonFiles\OfficeCloudService.cs" Link="OfficeCloudService.cs" />
+    <Compile Include="..\CommonFiles\SequenceGeneratorService.cs" Link="SequenceGeneratorService.cs" />
     <Compile Include="..\CommonFiles\BaseTest.cs" Link="BaseTest.cs" />
   </ItemGroup>
   <ItemGroup>

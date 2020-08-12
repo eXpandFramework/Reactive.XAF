@@ -7,9 +7,10 @@ namespace Xpand.TestsLib.EasyTest.Commands{
         private readonly Command _command;
         public const string Name = "SelectObjects";
 
-        public SelectObjectsCommand(){
+        public SelectObjectsCommand(MainParameter mainParameter=null){
             Parameters.Add(new Parameter("SelectAll = True"));
             _command = this.ConnvertTo<ExecuteTableActionCommand>();
+            if (mainParameter != null) _command.Parameters.MainParameter = mainParameter;
         }
 
         public SelectObjectsCommand(string column,params string[] rows){

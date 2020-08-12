@@ -163,9 +163,8 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
             sequenceStorageType ??= typeof(SequenceStorage);
             Guard.TypeArgumentIs(typeof(ISequenceStorage),sequenceStorageType,nameof(sequenceStorageType));
             return manager.WhenApplication(application => {
-                var objectSpaceProvider = application.ObjectSpaceProvider == null ? application.WhenSetupComplete()
-                    .Select(_ => application.ObjectSpaceProvider) : application.ObjectSpaceProvider.ReturnObservable();
-                return objectSpaceProvider.SelectMany(provider => provider.SequenceGeneratorDatalayer()
+                return application.WhenCompatibilityChecked().FirstAsync().Select(xafApplication => xafApplication.ObjectSpaceProvider)
+                    .SelectMany(provider => provider.SequenceGeneratorDatalayer()
                         .SelectMany(dataLayer => application.WhenObjectSpaceCreated().GenerateSequences(dataLayer,sequenceStorageType)
                             .Merge(application.Security.AddAnonymousType(sequenceStorageType).ToObservable())))
                     .Merge(application.ConfigureDetailViewSequenceStorage()).ToUnit();

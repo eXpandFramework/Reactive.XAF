@@ -32,11 +32,11 @@ namespace ALL.Win.Tests{
             }
         } 
         [Test]
-        // [XpandTest(LongTimeout,3)]
+        [XpandTest(LongTimeout,3)]
         [Apartment(ApartmentState.STA)]
         public async Task Win_EasyTest_InMemory(){
             await EasyTest(() => new WinAdapter(), RunWinApplication, async adapter => {
-                    var autoTestCommand = new AutoTestCommand("Event|Task");
+                    var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
                     adapter.Execute(autoTestCommand);
                     await adapter.TestCloudServices();
                 });
@@ -48,11 +48,15 @@ namespace ALL.Win.Tests{
 
 
         [Test]
-        // [XpandTest(LongTimeout,3)]
+        [XpandTest(LongTimeout,3)]
         [Apartment(ApartmentState.STA)]
         public async Task Win_EasyTest_InLocalDb(){
             var connectionString = "Integrated Security=SSPI;Pooling=false;Data Source=(localdb)\\mssqllocaldb;Initial Catalog=TestApplicationWin";
-            // await EasyTest(() => new WinAdapter(), RunWinApplication, adapter => {};
+            await EasyTest(() => new WinAdapter(), RunWinApplication, adapter => {
+                adapter.TestSequenceGeneratorService();
+                return Task.CompletedTask;
+            
+            },connectionString);
             
         }
 
