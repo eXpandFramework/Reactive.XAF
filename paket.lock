@@ -803,7 +803,7 @@ NUGET
     Unofficial.Microsoft.mshtml (7.0.3300)
     Xpand.Collections (1.0.1)
     YamlDotNet (8.1.1)
-  remote: F:\devexpress\Packages\
+  remote: C:\Program Files (x86)\DevExpress 20.1\Components\System\Components\Packages
     DevExpress.Charts (20.1.6)
       DevExpress.Charts.Core (20.1.6)
       DevExpress.Data (20.1.6)

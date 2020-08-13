@@ -43,21 +43,16 @@ namespace TestApplication.Win{
             RequiredModuleTypes.Add(typeof(SystemWindowsFormsModule));
             RequiredModuleTypes.Add(typeof(WorkflowWindowsFormsModule));
             #endregion
-            
-            
-
-            // RequiredModuleTypes.Add(typeof(GridListEditorModule));
-            // RequiredModuleTypes.Add(typeof(OneViewModule));
-            // RequiredModuleTypes.Add(typeof(ReactiveModuleWin));
-
-
+            RequiredModuleTypes.Add(typeof(GridListEditorModule));
+            RequiredModuleTypes.Add(typeof(OneViewModule));
+            RequiredModuleTypes.Add(typeof(ReactiveModuleWin));
         }
 
-        // public override void Setup(ApplicationModulesManager moduleManager){
-	       //  base.Setup(moduleManager);
-	       //  var excludeMaps = new []{PredefinedMap.None,PredefinedMap.LayoutView,PredefinedMap.LayoutViewColumn,PredefinedMap.LabelControl};
-	       //  moduleManager.Extend(Enum.GetValues(typeof(PredefinedMap)).OfType<PredefinedMap>().Where(map =>!excludeMaps.Contains(map)&& map.Platform()==Platform.Win));
-        // }
+        public override void Setup(ApplicationModulesManager moduleManager){
+	        base.Setup(moduleManager);
+	        var excludeMaps = new []{PredefinedMap.None,PredefinedMap.LayoutView,PredefinedMap.LayoutViewColumn,PredefinedMap.LabelControl};
+	        moduleManager.Extend(Enum.GetValues(typeof(PredefinedMap)).OfType<PredefinedMap>().Where(map =>!excludeMaps.Contains(map)&& map.Platform()==Platform.Win));
+        }
 
     }
 }

@@ -144,25 +144,16 @@ The module follows the Nuget [Version Basics](https://docs.Google.com/en-us/nuge
 |----|----
 |**DevExpress.Persistent.Base**|**Any**
 |Fasterflect.Xpand|2.0.7
+ |Google.Apis.Auth|1.48.0
  |JetBrains.Annotations|2020.1.0
- |Google.Graph.Beta|0.18.0-preview
- |Google.Graph.Core|1.19.0
- |Google.Identity.Client|4.13.0
- |Google.IdentityModel.Protocols.OpenIdConnect|6.6.0
- |Google.IdentityModel.Tokens|6.6.0
- |Google.Owin|4.1.0
- |Google.Owin.Host.SystemWeb|4.1.0
- |Google.Owin.Security|4.1.0
- |Google.Owin.Security.Cookies|4.1.0
- |Google.Owin.Security.OpenIdConnect|4.1.0
  |Newtonsoft.Json|12.0.3
- |Owin|1.0.0
  |System.Reactive|4.4.1
- |Xpand.Extensions|2.202.40
- |Xpand.Extensions.Office.Cloud|2.202.40
- |Xpand.Extensions.Reactive|2.202.41
- |Xpand.Extensions.XAF|2.202.41
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.41
+ |Xpand.Extensions|2.202.41
+ |Xpand.Extensions.Office.Cloud|2.202.42
+ |Xpand.Extensions.Reactive|2.202.42
+ |Xpand.Extensions.XAF|2.202.42
+ |Xpand.Extensions.XAF.Xpo|2.202.38
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.42
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.9
 
 ## Issues-Debugging-Troubleshooting
