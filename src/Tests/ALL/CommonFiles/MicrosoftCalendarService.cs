@@ -1,4 +1,5 @@
-﻿using DevExpress.EasyTest.Framework;
+﻿using ALL.Tests;
+using DevExpress.EasyTest.Framework;
 using DevExpress.Persistent.BaseImpl;
 using Xpand.TestsLib.EasyTest;
 using Xpand.TestsLib.EasyTest.Commands;

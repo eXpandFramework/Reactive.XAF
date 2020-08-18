@@ -36,9 +36,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="TestModule.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Update="TestModule.cs" />
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

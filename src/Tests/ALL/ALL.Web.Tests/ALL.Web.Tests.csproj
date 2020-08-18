@@ -20,6 +20,7 @@
     <Compile Remove="Program.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\CommonFiles\GoogleTasksService.cs" Link="GoogleTasksService.cs" />
     <Compile Include="..\CommonFiles\MicrosoftCalendarService.cs" Link="MicrosoftCalendarService.cs" />
     <Compile Include="..\CommonFiles\MicrosoftService.cs" Link="MicrosoftService.cs" />
     <Compile Include="..\CommonFiles\GoogleService.cs" Link="GoogleService.cs" />
@@ -33,7 +34,6 @@
     <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.1.6" />
     <PackageReference Include="DevExpress.ExpressApp.EasyTest.WebAdapter" Version="20.1.6" />
     <PackageReference Include="DevExpress.ExpressApp.Web.All" Version="20.1.6" />
-    <PackageReference Include="Fasterflect.Xpand" Version="2.0.7" />
     <PackageReference Include="Grpc.Core" Version="2.25.0" />
     <PackageReference Include="MagicOnion" Version="2.6.3" />
     <PackageReference Include="Moq" Version="4.13.1" />
@@ -46,7 +46,7 @@
     <PackageReference Include="DevExpress.ExpressApp" Version="20.1.6" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
     <PackageReference Include="Unofficial.Microsoft.mshtml" Version="7.0.3300" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="2.202.38" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="2.202.38.1" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.TestsLib">

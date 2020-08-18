@@ -1,9 +1,8 @@
 using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
-using Xpand.TestsLib.Win32;
 
-namespace Xpand.EasyTest.Win32 {
+namespace Xpand.TestsLib.Win32 {
     public class Win32Types {
         #region INPUTTYPE enum
         public enum INPUTTYPE {
@@ -301,7 +300,7 @@ namespace Xpand.EasyTest.Win32 {
             public int cbSize;
 
             /// <summary>
-            /// Members to retrieve or set. This member can be one or more of these values. MIIM_BITMAP Microsoft® Windows® 98/Windows Millennium Edition (Windows Me), Windows 2000/Windows XP: Retrieves or sets the hbmpItem member.MIIM_CHECKMARKS Retrieves or sets the hbmpChecked and hbmpUnchecked members.MIIM_DATA Retrieves or sets the dwItemData member.MIIM_FTYPE Windows 98/Windows Me, Windows 2000/Windows XP: Retrieves or sets the fType member.MIIM_ID Retrieves or sets the wID member.MIIM_STATE Retrieves or sets the fState member. MIIM_STRING Windows 98/Windows Me, Windows 2000/Windows XP: Retrieves or sets the dwTypeData member.MIIM_SUBMENU Retrieves or sets the hSubMenu member.MIIM_TYPE Retrieves or sets the fType and dwTypeData members. Windows 98/Me, Windows 2000/XP: MIIM_TYPE is replaced by MIIM_BITMAP, MIIM_FTYPE, and MIIM_STRING.
+            /// Members to retrieve or set. This member can be one or more of these values. MIIM_BITMAP Microsoftï¿½ Windowsï¿½ 98/Windows Millennium Edition (Windows Me), Windows 2000/Windows XP: Retrieves or sets the hbmpItem member.MIIM_CHECKMARKS Retrieves or sets the hbmpChecked and hbmpUnchecked members.MIIM_DATA Retrieves or sets the dwItemData member.MIIM_FTYPE Windows 98/Windows Me, Windows 2000/Windows XP: Retrieves or sets the fType member.MIIM_ID Retrieves or sets the wID member.MIIM_STATE Retrieves or sets the fState member. MIIM_STRING Windows 98/Windows Me, Windows 2000/Windows XP: Retrieves or sets the dwTypeData member.MIIM_SUBMENU Retrieves or sets the hSubMenu member.MIIM_TYPE Retrieves or sets the fType and dwTypeData members. Windows 98/Me, Windows 2000/XP: MIIM_TYPE is replaced by MIIM_BITMAP, MIIM_FTYPE, and MIIM_STRING.
             /// </summary>
             public int fMask;
 

@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Xpand.EasyTest.Win32{
+namespace Xpand.TestsLib.Win32{
     public class WindowFinder {
         // Win32 constants.
         const int WmGettext = 0x000D;

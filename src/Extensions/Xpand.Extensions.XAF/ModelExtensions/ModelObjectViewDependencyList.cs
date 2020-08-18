@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.Linq;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
-using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
 using JetBrains.Annotations;
 

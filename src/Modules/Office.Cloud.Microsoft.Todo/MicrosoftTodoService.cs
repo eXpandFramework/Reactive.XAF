@@ -9,6 +9,7 @@ using System.Reactive.Threading.Tasks;
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.Base.General;
+using JetBrains.Annotations;
 using Microsoft.Graph;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.Office.Cloud;
@@ -22,7 +23,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 using TaskStatus = DevExpress.Persistent.Base.General.TaskStatus;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
-    public static class TodoService{
+    public static class MicrosoftTodoService{
         private static readonly ISubject<(Frame frame, GraphServiceClient client)> ClientSubject=new Subject<(Frame frame, GraphServiceClient client)>();
 
         public static IObservable<(Frame frame, GraphServiceClient client)> Client => ClientSubject.AsObservable();
@@ -44,7 +45,11 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
         public static IObservable<GenericEventArgs<(IObjectSpace objectSpace, ITask local, OutlookTask cloud, MapAction mapAction)>> When(
             this IObservable<GenericEventArgs<(IObjectSpace objectSpace, ITask local, OutlookTask cloud, MapAction mapAction)>> source, MapAction mapAction)
             => source.Where(_ => _.Instance.mapAction == mapAction);
-        
+        static readonly Subject<IBaseRequest> CustomizeSubject = new Subject<IBaseRequest>();
+
+        [PublicAPI]
+        public static IObservable<IBaseRequest> Customize => CustomizeSubject.AsObservable();
+
         private static IObservable<(OutlookTask serviceObject, MapAction mapAction)> SynchronizeCloud(this IObservable<IOutlookTaskFolderRequestBuilder> source,IModelTodoItem modelTodoItem, 
             IObjectSpace objectSpace, Func<IObjectSpace> objectSpaceFactory) 
             => source.SelectMany(builder => objectSpaceFactory.SynchronizeCloud<OutlookTask, ITask>(modelTodoItem.SynchronizationType,objectSpace,

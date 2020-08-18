@@ -45,9 +45,7 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <Compile Update="Module.cs" />
-    <Compile Update="ReactiveModuleBase.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Update="ReactiveModuleBase.cs" />
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

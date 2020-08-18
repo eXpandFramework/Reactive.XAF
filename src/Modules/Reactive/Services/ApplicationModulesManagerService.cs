@@ -15,27 +15,27 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ApplicationModulesManagerService{
-	    public static IObservable<T> WhenApplication<T>(this ApplicationModulesManager manager,Func<XafApplication,IObservable<T>> retriedExecution) => manager
-		    .WhereApplication().ToObservable()
+	    public static IObservable<T> WhenApplication<T>(this ApplicationModulesManager manager,Func<XafApplication,IObservable<T>> retriedExecution) 
+            => manager.WhereApplication().ToObservable()
 		    .SelectMany(application => retriedExecution(application).Retry(application));
 		
 
-	    public static IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> WhenCustomizeTypesInfo(this IObservable<ApplicationModulesManager> source) =>
-		    source.SelectMany(manager => manager.WhenCustomizeTypesInfo());
+	    public static IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> WhenCustomizeTypesInfo(this IObservable<ApplicationModulesManager> source) 
+            => source.SelectMany(manager => manager.WhenCustomizeTypesInfo());
 
-	    public static IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> WhenCustomizeTypesInfo(this ApplicationModulesManager manager) =>
-	        Observable.FromEventPattern<EventHandler<CustomizeTypesInfoEventArgs>, CustomizeTypesInfoEventArgs>(
+	    public static IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> WhenCustomizeTypesInfo(this ApplicationModulesManager manager) 
+            => Observable.FromEventPattern<EventHandler<CustomizeTypesInfoEventArgs>, CustomizeTypesInfoEventArgs>(
 			        h => manager.CustomizeTypesInfo += h, h => manager.CustomizeTypesInfo += h, ImmediateScheduler.Instance)
 		        .TransformPattern<CustomizeTypesInfoEventArgs,ApplicationModulesManager>();
 	    
-	    public static IObservable<ModelInterfaceExtenders> WhenExtendingModel(this IObservable<ApplicationModulesManager> source) =>
-		    source.SelectMany(manager => manager.WhenExtendingModel());
+	    public static IObservable<ModelInterfaceExtenders> WhenExtendingModel(this IObservable<ApplicationModulesManager> source) 
+            => source.SelectMany(manager => manager.WhenExtendingModel());
 
 	    public static IObservable<ModelInterfaceExtenders> WhenExtendingModel(this ApplicationModulesManager manager) =>
 	        manager.Modules.OfType<ReactiveModule>().First().ExtendingModel;
 
-	    public static IObservable<T> WhenGeneratingModelNodes<T>(this IObservable<ApplicationModulesManager> source,Expression<Func<IModelApplication,T>> selector=null) where T : IEnumerable<IModelNode> =>
-		    source.SelectMany(manager => manager.WhenGeneratingModelNodes(selector));
+        public static IObservable<T> WhenGeneratingModelNodes<T>(this IObservable<ApplicationModulesManager> source,Expression<Func<IModelApplication,T>> selector=null) where T : IEnumerable<IModelNode> 
+            => source.SelectMany(manager => manager.WhenGeneratingModelNodes(selector));
 
 	    public static IObservable<T> WhenGeneratingModelNodes<T>(this ApplicationModulesManager manager,Expression<Func<IModelApplication,T>> selector=null) where T : IEnumerable<IModelNode> =>
 		    manager.Modules.OfType<ReactiveModule>().First().GeneratingModelNodes

@@ -23,7 +23,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests{
 		public static void ConfigureMicrosoft(this IModelApplication application){
 			var json = JsonConvert.DeserializeObject<dynamic>(
 				File.ReadAllText($"{AppDomain.CurrentDomain.ApplicationPath()}\\MicrosoftAppCredentials.json"));
-			var modelOAuth = application.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().OAuth;
+			IModelOAuthRedirectUri modelOAuth = application.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().OAuth;
 			modelOAuth.ClientId = json.MSClientId;
 			modelOAuth.RedirectUri = json.RedirectUri;
 			modelOAuth.ClientSecret = json.MSClientSecret;

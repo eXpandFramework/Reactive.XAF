@@ -41,7 +41,7 @@ Task Init {
         Set-Location $root
         Invoke-Script{Invoke-PaketRestore -strict }
         
-        Get-ChildItem "$env:NUGET_PACKAGES\grpc.core" "runtimes" -Recurse|Select-Object -Last 1|Copy-Item -Destination "$root\bin\runtimes" -Recurse -Force
+        Get-ChildItem "$(Get-NugetInstallationFolder)\grpc.core" "runtimes" -Recurse|Select-Object -Last 1|Copy-Item -Destination "$root\bin\runtimes" -Recurse -Force
     }
 }
 

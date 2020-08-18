@@ -3,8 +3,10 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using ALL.Tests;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
+using Microsoft.Graph;
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft;
@@ -17,30 +19,15 @@ using Task = DevExpress.Persistent.BaseImpl.Task;
 // ReSharper disable once CheckNamespace
 namespace TestApplication.MicrosoftTodoService{
     public static class MicrosoftTodoService{
-        public static IObservable<Unit> ConnectMicrosoftTodoService(this ApplicationModulesManager manager) =>
-            manager.InitializeModule().Merge(manager.WhenApplication(application => application.UpdateTaskDescription().Merge(application.DeleteAllTasks())).ToUnit());
+        public static IObservable<Unit> ConnectMicrosoftTodoService(this ApplicationModulesManager manager) 
+            => manager.ConnectCloudTasksService(() => (
+                Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.MicrosoftTodoService.Updated,
+                Xpand.XAF.Modules.Office.Cloud.Microsoft.MicrosoftService.Client.DeleteAllTasks(),manager.InitializeModule()));
 
-        private static IObservable<Unit> UpdateTaskDescription(this XafApplication application) 
-            => TodoService.Updated
-                .Do(tuple => {
-                    using (var objectSpace = application.CreateObjectSpace()){
-                        var cloudOfficeObject = objectSpace.QueryCloudOfficeObject(tuple.cloud.Id, CloudObjectType.Task).First();
-
-                        var task = objectSpace.GetObjectByKey<Task>(Guid.Parse(cloudOfficeObject.LocalId));
-                        task.Description = tuple.mapAction.ToString();
-                        objectSpace.CommitChanges();
-                    }
-                })
-                .ToUnit();
-        private static IObservable<Unit> DeleteAllTasks(this XafApplication application)
-            => Xpand.XAF.Modules.Office.Cloud.Microsoft.MicrosoftService.Client.FirstAsync()
-                .Select(client => client.Me.Outlook.Tasks.ListAllItems().DeleteAll(task => client.Me().Outlook.Tasks[task.Id].Request().DeleteAsync().ToObservable())).Switch().ToUnit()
-                .Merge(application.WhenWindowCreated().When(TemplateContext.ApplicationWindow).FirstAsync()
-                    .Do(window => {
-                        var objectSpace = window.Application.CreateObjectSpace();
-                        objectSpace.Delete(objectSpace.GetObjects<Task>());
-                        objectSpace.CommitChanges();
-                    }).ToUnit());
+        private static IObservable<IObservable<Unit>> DeleteAllTasks(this IObservable<GraphServiceClient> source)
+            => source.FirstAsync().Select(client 
+                => client.Me.Outlook.Tasks.ListAllItems().DeleteAll(task 
+                    => client.Me().Outlook.Tasks[task.Id].Request().DeleteAsync().ToObservable()));
 
         private static IObservable<Unit> InitializeModule(this ApplicationModulesManager manager){
             manager.Modules.OfType<AgnosticModule>().First().AdditionalExportedTypes.Add(typeof(Task));

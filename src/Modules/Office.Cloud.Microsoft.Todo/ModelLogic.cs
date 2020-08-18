@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using JetBrains.Annotations;
+using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.XAF.ModelExtensions;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
@@ -14,7 +15,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
 
     [PublicAPI]
     public interface IModelTodo:IModelNode{
-        [DefaultValue(TodoService.DefaultTodoListId)]
+        [DefaultValue(MicrosoftTodoService.DefaultTodoListId)]
         [Required]
         string DefaultTodoListName{ get; set; }
         IModelTodoItems Items{ get; }
@@ -23,18 +24,11 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
     [DomainLogic(typeof(IModelTodo))]
     public static class ModelTodoLogic{
         
-        public static IObservable<IModelTodo> TodoModel(this IObservable<IModelMicrosoft> source){
-            return source.Select(modules => modules.Todo());
-        }
+        public static IObservable<IModelTodo> Todo(this IObservable<IModelMicrosoft> source) => source.Select(modules => modules.Todo());
 
-        public static IModelTodo Todo(this IModelMicrosoft modelMicrosoft){
-            return ((IModelMicrosoftTodo) modelMicrosoft).Todo;
-        }
+        public static IModelTodo Todo(this IModelMicrosoft modelMicrosoft) => ((IModelMicrosoftTodo) modelMicrosoft).Todo;
 
-        public static IModelTodo Todo(this IModelOfficeMicrosoft reactiveModules){
-            return reactiveModules.Microsoft.Todo();
-        }
-
+        public static IModelTodo Todo(this IModelOfficeMicrosoft reactiveModules) => reactiveModules.Microsoft.Todo();
     }
 
     public interface IModelTodoItems : IModelList<IModelTodoItem>,IModelNode{

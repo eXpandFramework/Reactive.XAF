@@ -2,7 +2,7 @@ param(
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\"),
     $branch = "lab",
     $source,
-    $dxVersion = "20.1.4"
+    $dxVersion = "20.1.6"
 )
 if (!$source) {
     $source = "$(Get-PackageFeed -Xpand);$env:DxFeed"

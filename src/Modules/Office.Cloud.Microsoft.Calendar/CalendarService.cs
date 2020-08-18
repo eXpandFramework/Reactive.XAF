@@ -90,7 +90,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
 
         private static IObservable<(IEvent target, Event source)> SynchronizeLocal(
             this (Frame frame, GraphServiceClient client, global::Microsoft.Graph.Calendar calendar,IModelCalendarItem calerdarItem) _, SynchronizationType synchronizationType){
-            var newCloudEventType = _.frame.View.Model.Application.CalendarModel().NewCloudEvent.TypeInfo.Type;
+            var newCloudEventType = _.frame.View.Model.Application.Calendar().NewCloudEvent.TypeInfo.Type;
             Func<IObjectSpace> objectSpaceFactory = _.frame.Application.CreateObjectSpace;
             return _.client.Me.CalendarView.ReturnObservable().SynchronizeLocalEvent(objectSpaceFactory,synchronizationType,
                 Guid.Parse($"{_.frame.Application.Security.UserId}"), _.frame.View.ObjectTypeInfo.Type, newCloudEventType);

@@ -4,7 +4,7 @@ using System.IO;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using ALL.Tests;
+using ALL.Win.Tests;
 using DevExpress.EasyTest.Framework;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Office.Cloud;
@@ -12,8 +12,9 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.TestsLib.EasyTest;
 using Xpand.TestsLib.EasyTest.Commands;
 using Xpand.TestsLib.EasyTest.Commands.ActionCommands;
+using Xpand.TestsLib.Win32;
 
-namespace ALL.Win.Tests{
+namespace ALL.Tests{
     public static class OfficeCloudService{
         private static void CheckOperatrion(this ICommandAdapter commandAdapter, MapAction mapAction, string verifyEditor){
             commandAdapter.Execute(new WaitCommand(2000), new ActionCommand(Actions.Refresh));
@@ -39,7 +40,7 @@ namespace ALL.Win.Tests{
         }
 
         public static async Task TestCloudServices(this ICommandAdapter commandAdapter){
-            await commandAdapter.TestGoogleService(Observable.Empty<Unit>);
+            await commandAdapter.TestGoogleService(() => Observable.Start(commandAdapter.TestGoogleTasksService).ToUnit());
             await commandAdapter.TestMicrosoftService(() => Observable.Start(() => {
                 commandAdapter.TestMicrosoftCalendarService();
                 commandAdapter.TestMicrosoftTodoService();
@@ -87,12 +88,12 @@ namespace ALL.Win.Tests{
             else{
                 commandAdapter.Execute(new ActionCommand(signInCaption),new WaitCommand(WaitInterval*2));
             }
-            commandAdapter.Execute(new PasteClipBoardCommand(email), new SendKeysCommand("{Enter}"), new WaitCommand((int) (WaitInterval*1.5)));
+            commandAdapter.Execute(new SendTextCommand(email), new SendKeysCommand(Win32Constants.VirtualKeys.Return), new WaitCommand((int) (WaitInterval*1.5)));
 
             var dxMailPass = File.ReadAllText($"{AppDomain.CurrentDomain.ApplicationPath()}\\..\\{passFileName}.json").Trim();
-            commandAdapter.Execute(new PasteClipBoardCommand(dxMailPass),new WaitCommand(1000),
-                new SendKeysCommand("{Enter}"), new WaitCommand(WaitInterval));
-            commandAdapter.Execute(new SendKeysCommand("{Enter}"),new WaitCommand(WaitInterval));
+            commandAdapter.Execute(new SendTextCommand(dxMailPass),new WaitCommand(1000),
+                new SendKeysCommand(Win32Constants.VirtualKeys.Return), new WaitCommand(WaitInterval));
+            
             return Unit.Default.ReturnObservable();
         }
 

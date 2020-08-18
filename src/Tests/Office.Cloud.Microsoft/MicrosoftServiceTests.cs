@@ -1,26 +1,16 @@
 ﻿using System;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using Microsoft.Identity.Client;
-using NUnit.Framework;
 using Xpand.TestsLib;
-using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft.BusinessObjects;
 using Xpand.XAF.Modules.Office.Cloud.Tests;
 using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests{
 	public class MicrosoftServiceTests:CloudServiceTests<MSAuthentication>{
-        [Test][XpandTest()]
-        public async Task Actions_Active_State_when_authentication_not_needed([ValueSource(nameof(PlatformDatasource))]Platform platform){
-            using (var application=Application(platform)){
-                NewAuthentication(platform, application);
-                await application.Actions_Active_State_when_authentication_not_needed(ServiceName);
-            }
-        }
 
         protected MicrosoftModule MicrosoftModule( Platform platform=Platform.Win,params ModuleBase[] modules){
             var application = NewApplication(platform,  modules);

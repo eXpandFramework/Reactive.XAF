@@ -15,9 +15,7 @@
     <DebugType>full</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Update="Module.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Update="Module.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Readme.md" />

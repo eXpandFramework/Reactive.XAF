@@ -7,10 +7,12 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using Google.Apis.People.v1;
 using Google.Apis.People.v1.Data;
+using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Office.Cloud.Google;
+using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 using Person = Google.Apis.People.v1.Data.Person;
@@ -19,20 +21,19 @@ using Person = Google.Apis.People.v1.Data.Person;
 namespace TestApplication.GoogleService{
 
 	internal static class ShowGoogleAccountInfoService{
-		//action declaration refer to the Reactive module wiki
 		public static SimpleAction ShowGoogleAccountInfo(this (AgnosticModule, Frame frame) tuple) 
             => tuple.frame.Action(nameof(ShowGoogleAccountInfo)).As<SimpleAction>();
 
 		public static IObservable<Unit> ShowGoogleAccountInfo(this ApplicationModulesManager manager){
-			//export the google EmailAddress so we can display a XAF view for it
-            manager.Modules.OfType<AgnosticModule>().First().AdditionalExportedTypes.Add(typeof(EmailAddress));
+			manager.Modules.OfType<AgnosticModule>().First().AdditionalExportedTypes.Add(typeof(EmailAddress));
             var registerViewSimpleAction = manager.RegisterViewSimpleAction(nameof(ShowGoogleAccountInfo)).ActivateInUserDetails().Publish().RefCount(); 
-			return manager.WhenApplication(application 
-                    => registerViewSimpleAction.WhenExecute().ShowAccountInfoView().ToUnit())
-				//register the action for the design time Model Editor
-				.Merge(registerViewSimpleAction.ToUnit());
+			return manager.WhenApplication(application => registerViewSimpleAction.WhenExecute().ShowAccountInfoView().ToUnit())
+				.Merge(registerViewSimpleAction.ToUnit())
+				.Merge(manager.ConfigureModel());
 		}
-
+		private static IObservable<Unit> ConfigureModel(this ApplicationModulesManager manager) 
+			=> manager.WhenGeneratingModelNodes(modelApplication => modelApplication.BOModel)
+				.Do(model => model.Application.ToReactiveModule<IModelReactiveModuleOffice>().Office.Google().OAuth.AddScopes(PeopleService.Scope.UserinfoEmail,PeopleService.Scope.UserinfoProfile)).ToUnit();
 		private static IObservable<Person> ShowAccountInfoView(this IObservable<SimpleActionExecuteEventArgs> source) 
             => source.SelectMany(e => {
 					e.ShowViewParameters.CreatedView = e.Action.Application.NewView(ViewType.DetailView, typeof(EmailAddress));

@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using ALL.Tests;
 using ALL.Win.Tests;
 using DevExpress.EasyTest.Framework;
 using DevExpress.ExpressApp;
@@ -13,7 +14,6 @@ using Xpand.Extensions.AppDomainExtensions;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Attributes;
 using Xpand.TestsLib.EasyTest;
-using Xpand.TestsLib.EasyTest.Commands;
 using Xpand.TestsLib.EasyTest.Commands.ActionCommands;
 using Xpand.XAF.Modules.Reactive;
 using BaseTest = ALL.Tests.BaseTest;

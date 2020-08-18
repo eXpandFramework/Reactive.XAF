@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
-using Google.Apis.People.v1;
+using Google.Apis.Auth.OAuth2;
 using Newtonsoft.Json;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.BytesExtensions;
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.XAF.Xpo.ValueConverters;
+using Xpand.TestsLib;
 using Xpand.XAF.Modules.Office.Cloud.Google.BusinessObjects;
 using Xpand.XAF.Modules.Office.Cloud.Tests;
 using Xpand.XAF.Modules.Reactive;
@@ -22,12 +24,15 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tests{
 			},"Google",platform);
 		}
 
+		public static void SetupGoogleSecurity(this XafApplication application, Platform platform) 
+			=> application.SetupSecurity(platform==Platform.Win? Guid.Parse("97a41f78-e44a-429b-a743-e4eadd34b60d"):Guid.Parse("b43f6e81-0134-4dfb-8bd8-8178bc8534e6"));
+
 		public static void ConfigureGoogle(this IModelApplication application,Platform platform){
 			var json = JsonConvert.DeserializeObject<dynamic>(
 				File.ReadAllText($"{AppDomain.CurrentDomain.ApplicationPath()}\\Google{platform}AppCredentials.json"));
 			var modelOAuth = application.ToReactiveModule<IModelReactiveModuleOffice>().Office.Google().OAuth;
-			modelOAuth.Scopes = PeopleService.Scope.UserinfoProfile;
-			if (platform == Platform.Win){
+			modelOAuth.Scopes = "https://www.googleapis.com/auth/tasks https://www.googleapis.com/auth/calendar.events";
+            if (platform == Platform.Win){
 				modelOAuth.ClientId = json.installed.client_id;
 				modelOAuth.ClientSecret = json.installed.client_secret;	
 			}
@@ -37,5 +42,15 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tests{
 			}
 			
         }
+
+        public static IObservable<UserCredential> AuthorizeTestGoogle(this XafApplication application,bool aquireToken=true){
+            if (aquireToken){
+                application.ObjectSpaceProvider.NewAuthentication();
+            }
+            return aquireToken ? application.AuthorizeGoogle() : application.GoogleNeedsAuthentication()
+                    .Select(b => b ? Observable.Throw<UserCredential>(new Exception(nameof(AuthorizeTestGoogle)))
+                            : application.AuthorizeGoogle()).Merge();
+        }
+
     }
 }

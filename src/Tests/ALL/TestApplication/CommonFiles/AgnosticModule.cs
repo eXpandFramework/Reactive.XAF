@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reactive.Linq;
+using ALL.Tests;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.AuditTrail;
 using DevExpress.ExpressApp.Chart;
@@ -45,12 +47,14 @@ using Xpand.XAF.Modules.MasterDetail;
 using Xpand.XAF.Modules.ModelMapper;
 using Xpand.XAF.Modules.ModelViewInheritance;
 using Xpand.XAF.Modules.Office.Cloud.Google;
+using Xpand.XAF.Modules.Office.Cloud.Google.Tasks;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo;
 using Xpand.XAF.Modules.ProgressBarViewItem;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Logger;
+using Xpand.XAF.Modules.Reactive.Logger.Hub;
 using Xpand.XAF.Modules.RefreshView;
 using Xpand.XAF.Modules.SequenceGenerator;
 using Xpand.XAF.Modules.SuppressConfirmation;
@@ -108,7 +112,9 @@ namespace TestApplication{
 			RequiredModuleTypes.Add(typeof(CloneModelViewModule));
 			RequiredModuleTypes.Add(typeof(HideToolBarModule));
 			RequiredModuleTypes.Add(typeof(MasterDetailModule));
-			RequiredModuleTypes.Add(typeof(ModelMapperModule));
+			if (!Debugger.IsAttached){
+				RequiredModuleTypes.Add(typeof(ModelMapperModule));	
+			}
 			RequiredModuleTypes.Add(typeof(ModelViewInheritanceModule));
 			RequiredModuleTypes.Add(typeof(MicrosoftCalendarModule));
 			RequiredModuleTypes.Add(typeof(MicrosoftTodoModule));
@@ -121,7 +127,8 @@ namespace TestApplication{
 			RequiredModuleTypes.Add(typeof(ViewEditModeModule));
 			RequiredModuleTypes.Add(typeof(ViewItemValueModule));
 			RequiredModuleTypes.Add(typeof(GoogleModule));
-			// RequiredModuleTypes.Add(typeof(ReactiveLoggerHubModule));
+			RequiredModuleTypes.Add(typeof(GoogleTasksModule));
+			RequiredModuleTypes.Add(typeof(ReactiveLoggerHubModule));
 			AdditionalExportedTypes.Add(typeof(Event));
 			AdditionalExportedTypes.Add(typeof(Task));
 		}
@@ -141,6 +148,7 @@ namespace TestApplication{
 			base.Setup(moduleManager);
             moduleManager.ConnectMicrosoftService()
                 .Merge(moduleManager.ConnectMicrosoftTodoService())
+                .Merge(moduleManager.ConnectGoogleTasksService())
                 .Merge(moduleManager.ConnectMicrosoftCalendarService())
                 .Merge(moduleManager.ConnectGoogleService())
                 .Subscribe(this);

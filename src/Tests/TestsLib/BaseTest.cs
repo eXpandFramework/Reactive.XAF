@@ -52,6 +52,7 @@ namespace Xpand.TestsLib{
         }
 
         protected static object[] WebModules(){
+         
             return GetModules("Xpand.XAF.Modules*.dll","Web");
         }
 
@@ -116,10 +117,15 @@ namespace Xpand.TestsLib{
             XafTypesInfo.HardReset();
             if (TestContext.CurrentContext.Result.Outcome.Status != TestStatus.Passed){
                 if (File.Exists(ReactiveLoggerService.RXLoggerLogPath)){
-                    var zipPPath = $"{Path.GetDirectoryName(ReactiveLoggerService.RXLoggerLogPath)}\\{Path.GetFileNameWithoutExtension(Path.GetDirectoryName(ReactiveLoggerService.RXLoggerLogPath))}.zip";
-                    using (var gZipStream = new GZipStream(File.OpenRead(zipPPath), CompressionMode.Compress)){
-                        var bytes = File.ReadAllText(ReactiveLoggerService.RXLoggerLogPath).Bytes();
-                        gZipStream.Write(bytes,0,bytes.Length);
+                    var zipPPath = $"{Path.GetDirectoryName(ReactiveLoggerService.RXLoggerLogPath)}\\{Path.GetFileNameWithoutExtension(ReactiveLoggerService.RXLoggerLogPath)}.zip";
+                    using (var gZipStream = new GZipStream(File.Create(zipPPath), CompressionMode.Compress)){
+                        try{
+                            var bytes = File.ReadAllText(ReactiveLoggerService.RXLoggerLogPath!).Bytes();
+                            gZipStream.Write(bytes,0,bytes.Length);
+                        }
+                        catch (Exception e){
+                            TestContext.Out.Write(e.ToString());
+                        }
                     }
                     TestContext.AddTestAttachment(zipPPath);
                 }

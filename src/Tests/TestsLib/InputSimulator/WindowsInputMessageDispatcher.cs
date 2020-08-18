@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using Xpand.EasyTest.Win32;
+using Xpand.TestsLib.Win32;
 
-namespace Xpand.EasyTest.Automation.InputSimulator{
+namespace Xpand.TestsLib.InputSimulator{
     internal class WindowsInputMessageDispatcher : IInputMessageDispatcher{
         public void DispatchInput(Win32Types.INPUT[] inputs){
-            if (inputs == null) throw new ArgumentNullException("inputs");
-            if (inputs.Length == 0) throw new ArgumentException("The input array was empty", "inputs");
+            if (inputs == null) throw new ArgumentNullException(nameof(inputs));
+            if (inputs.Length == 0) throw new ArgumentException("The input array was empty", nameof(inputs));
             uint successful = Win32Declares.KeyBoard.SendInput((UInt32) inputs.Length, inputs,
                 Marshal.SizeOf(new Win32Types.INPUT()));
             if (successful != inputs.Length)

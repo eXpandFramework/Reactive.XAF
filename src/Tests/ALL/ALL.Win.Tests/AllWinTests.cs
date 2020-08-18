@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using ALL.Tests;
 using DevExpress.EasyTest.Framework;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.EasyTest.WinAdapter;
@@ -18,7 +19,8 @@ using BaseTest = ALL.Tests.BaseTest;
 
 namespace ALL.Win.Tests{
 	[NonParallelizable]
-    public class AllWinTests : BaseTest{
+    public class 
+        AllWinTests : BaseTest{
         [Test()]
         [TestCaseSource(nameof(AgnosticModules))]
         [TestCaseSource(nameof(WinModules))]
@@ -31,6 +33,7 @@ namespace ALL.Win.Tests{
                 application.Modules.FirstOrDefault(m => m.GetType()==moduleType).ShouldBeNull();
             }
         } 
+        
         [Test]
         [XpandTest(LongTimeout,3)]
         [Apartment(ApartmentState.STA)]

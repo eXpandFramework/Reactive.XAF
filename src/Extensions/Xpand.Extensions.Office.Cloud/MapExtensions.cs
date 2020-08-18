@@ -37,7 +37,7 @@ namespace Xpand.Extensions.Office.Cloud{
                 .Select(cloudObject => ((IEvent) objectSpace.GetObjectByKey(localEventType,new Guid(cloudObject.LocalId)))).Pair(_)
                 .Select(tuple => (objectSpace,tuple.source,tuple.other.@event,tuple.other.mapAction))
                 .AddLocalEvent(_.@event,objectSpace)
-                .Finally(() => objectSpace.CommitChanges())));
+                .Finally(objectSpace.CommitChanges)));
 
         public static IObservable<(TCloudEntity serviceObject, MapAction mapAction)>
             SynchronizeCloud<TCloudEntity, TLocalEntity>(this Func<IObjectSpace> objectSpaceFactory, SynchronizationType synchronizationType, IObjectSpace objectSpace,
@@ -69,7 +69,8 @@ namespace Xpand.Extensions.Office.Cloud{
             Action<(TCloudEntity, TLocalEntity)> insert, Func<TCloudEntity, IObservable<TCloudEntity>> insertReqest){
             var cloudEntity = (TCloudEntity)typeof(TCloudEntity).CreateInstance();
             insert?.Invoke((cloudEntity, sourceEvent));
-            return insertReqest.Start(cloudEntity).NewCloudObject(objectSpaceFactory, objectSpace.GetKeyValue(sourceEvent).ToString());
+            return insertReqest.Start(cloudEntity)
+                .NewCloudObject(objectSpaceFactory, objectSpace.GetKeyValue(sourceEvent).ToString());
         }
 
         private static IObservable<TCloudEntity> Start<TCloudEntity>(this Func<TCloudEntity, IObservable<TCloudEntity>> insertReqest, TCloudEntity updatedEvent) 

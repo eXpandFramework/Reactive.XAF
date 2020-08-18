@@ -44,9 +44,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="CustomGridListEditor.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Update="CustomGridListEditor.cs" />
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

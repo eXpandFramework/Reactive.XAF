@@ -41,7 +41,6 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
                 })
                 .Select(o => ((IEnumerable)o).Cast<TEntity>().ToArray());
             return Observable.While(() => nextPageRequestDelegate(page) != null, invokeNextPage).StartWith(page.ToArray())
-                .Finally(() => {})
                 .Select(entities => entities.Where(filter).ToArray())
                 .SwitchIfEmpty(Enumerable.Empty<TEntity>().ToArray().ReturnObservable());
         }

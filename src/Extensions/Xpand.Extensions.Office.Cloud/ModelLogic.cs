@@ -5,8 +5,8 @@ using System.Linq;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
-using DevExpress.ExpressApp.Model.Core;
 using JetBrains.Annotations;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.Extensions.Office.Cloud{
@@ -20,14 +20,12 @@ namespace Xpand.Extensions.Office.Cloud{
 
     [DomainLogic(typeof(IModelOffice))]
     public static class ModelOfficeLogic{
-        
-        public static IObservable<IModelOffice> OfficeModel(this IObservable<IModelReactiveModules> source){
-            return source.Select(modules => modules.Office());
-        }
+        [PublicAPI]
+        public static IObservable<IModelOffice> Office(this IObservable<IModelReactiveModules> source) 
+            => source.Select(modules => modules.Office());
 
-        public static IModelOffice Office(this IModelReactiveModules reactiveModules){
-            return ((IModelReactiveModuleOffice) reactiveModules).Office;
-        }
+        public static IModelOffice Office(this IModelReactiveModules reactiveModules) 
+            => ((IModelReactiveModuleOffice) reactiveModules).Office;
     }
 
     public enum OAuthPrompt{
@@ -35,6 +33,11 @@ namespace Xpand.Extensions.Office.Cloud{
         Select_Account,
         Login,
         Consent
+    }
+
+    public interface IModelOAuthRedirectUri:IModelOAuth{
+        [Required]
+        string RedirectUri{ get; set; }
     }
 
     public interface IModelOAuth:IModelNode{
@@ -50,8 +53,15 @@ namespace Xpand.Extensions.Office.Cloud{
     
     [DomainLogic(typeof(IModelOAuth))]
     public static class ModelOathLogic{
+        public static void AddScopes(this IModelOAuth modelOAuth, params string[] scopes) =>
+            modelOAuth.Scopes = scopes.Select(scope => $"{modelOAuth.Scopes}".Split(' ').Add(scope).Join(" ")).Join(" ");
+
         internal static string[] Scopes(this IModelOAuth modelOAuth) =>
             $"{modelOAuth.Scopes}".Split(' ').Where(s => !string.IsNullOrEmpty(s)).Distinct().ToArray();
     }
 
+    public interface IModelSynchronizationType{
+        [Required][DefaultValue(SynchronizationType.All)]
+        SynchronizationType SynchronizationType{ get; [UsedImplicitly] set; }
+    }
 }

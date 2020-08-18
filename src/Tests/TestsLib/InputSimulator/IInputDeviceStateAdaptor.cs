@@ -1,5 +1,4 @@
-﻿using Xpand.EasyTest.Win32;
-using Xpand.TestsLib.Win32;
+﻿using Xpand.TestsLib.Win32;
 
 namespace Xpand.EasyTest.Automation.InputSimulator{
     public interface IInputDeviceStateAdaptor{

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Xpand.EasyTest.Automation.InputSimulator;
-using Xpand.EasyTest.Win32;
 using Xpand.TestsLib.Win32;
 
 namespace Xpand.TestsLib.InputSimulator{

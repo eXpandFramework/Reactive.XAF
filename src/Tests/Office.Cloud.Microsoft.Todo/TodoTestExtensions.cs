@@ -6,7 +6,6 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
-using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.Base.General;
 using Microsoft.Graph;
@@ -62,9 +61,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
         
         public static async Task<(Frame frame, GraphServiceClient client)> InitGraphServiceClient(this XafApplication application){
             application.ObjectSpaceProvider.NewAuthentication();
-            var todoModel = await application.ReactiveModulesModel().OfficeModel().MicrosoftModel().TodoModel();
+            var todoModel = await application.ReactiveModulesModel().Office().Microsoft().Todo();
             var window = application.CreateViewWindow();
-            var service = TodoService.Client.FirstAsync().SubscribeReplay();
+            var service = MicrosoftTodoService.Client.FirstAsync().SubscribeReplay();
             window.SetView(application.NewView(todoModel.Items.Select(item => item.ObjectView).First()));
             return (await service.ToTaskWithoutConfigureAwait());
         }

@@ -35,9 +35,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
     [DomainLogic(typeof(IModelCalendar))]
     public static class ModelCalendarLogic{
         [PublicAPI]
-        internal static IModelCalendar CalendarModel(this IModelApplication application)
+        internal static IModelCalendar Calendar(this IModelApplication application)
             => application.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Calendar();
-        public static IObservable<IModelCalendar> CalendarModel(this IObservable<IModelMicrosoft> source) 
+        public static IObservable<IModelCalendar> Calendar(this IObservable<IModelMicrosoft> source) 
             => source.Select(modules => modules.Calendar());
 
         [UsedImplicitly]

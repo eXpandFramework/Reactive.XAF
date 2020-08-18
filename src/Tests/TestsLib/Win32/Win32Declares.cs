@@ -1,9 +1,8 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
-using Xpand.TestsLib.Win32;
 
-namespace Xpand.EasyTest.Win32 {
+namespace Xpand.TestsLib.Win32 {
     /// <summary>
     /// Summary description for Win32Declares.
     /// </summary>
@@ -591,7 +590,7 @@ namespace Xpand.EasyTest.Win32 {
             /// <summary>
             /// The FindWindowEx function retrieves a handle to a window whose class name and window name match the specified strings. The function searches child windows, beginning with the one following the specified child window. This function does not perform a case-sensitive search. 
             /// </summary>
-            /// <param name="hwndParent">[in] Handle to the parent window whose child windows are to be searched. If hwndParent is NULL, the function uses the desktop window as the parent window. The function searches among windows that are child windows of the desktop. Microsoft® Windows® 2000 and Windows XP: If hwndParent is HWND_MESSAGE, the function searches all message-only windows. </param>
+            /// <param name="hwndParent">[in] Handle to the parent window whose child windows are to be searched. If hwndParent is NULL, the function uses the desktop window as the parent window. The function searches among windows that are child windows of the desktop. MicrosoftÂ® WindowsÂ® 2000 and Windows XP: If hwndParent is HWND_MESSAGE, the function searches all message-only windows. </param>
             /// <param name="hwndChildAfter">[in] Handle to a child window. The search begins with the next child window in the Z order. The child window must be a direct child window of hwndParent, not just a descendant window. If hwndChildAfter is NULL, the search begins with the first child window of hwndParent. Note that if both hwndParent and hwndChildAfter are NULL, the function searches all top-level and message-only windows. </param>
             /// <param name="lpszClass">Pointer to a null-terminated string that specifies the class name or a class atom created by a previous call to the RegisterClass or RegisterClassEx function. The atom must be placed in the low-order word of lpszClass; the high-order word must be zero.If lpszClass is a string, it specifies the window class name. The class name can be any name registered with RegisterClass or RegisterClassEx, or any of the predefined control-class names, or it can be MAKEINTATOM(0x800). In this latter case, 0x8000 is the atom for a menu class. For more information, see the Remarks section of this topic.</param>
             /// <param name="lpszWindow">[in] Pointer to a null-terminated string that specifies the window name (the window's title). If this parameter is NULL, all window names match. </param>

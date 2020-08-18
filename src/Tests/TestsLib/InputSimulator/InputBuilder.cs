@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using Xpand.EasyTest.Win32;
 using Xpand.TestsLib.Win32;
 
 namespace Xpand.EasyTest.Automation.InputSimulator{

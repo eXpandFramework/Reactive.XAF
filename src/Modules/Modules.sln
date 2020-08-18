@@ -165,6 +165,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Office.Cl
 		{EF33033B-F47B-43FF-B53C-FEA63EEA9021} = {EF33033B-F47B-43FF-B53C-FEA63EEA9021}
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Office.Cloud.Google.Tasks", "Office.Cloud.Google.Tasks\Xpand.XAF.Modules.Office.Cloud.Google.Tasks.csproj", "{B2170D1F-3D0B-4693-890D-8A9D3BE01FD0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0EB2E3E0-D407-44C8-87A8-28C5DDA51021} = {0EB2E3E0-D407-44C8-87A8-28C5DDA51021}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -340,6 +345,12 @@ Global
 		{0EB2E3E0-D407-44C8-87A8-28C5DDA51021}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{0EB2E3E0-D407-44C8-87A8-28C5DDA51021}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0EB2E3E0-D407-44C8-87A8-28C5DDA51021}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2170D1F-3D0B-4693-890D-8A9D3BE01FD0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2170D1F-3D0B-4693-890D-8A9D3BE01FD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2170D1F-3D0B-4693-890D-8A9D3BE01FD0}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2170D1F-3D0B-4693-890D-8A9D3BE01FD0}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
+		{B2170D1F-3D0B-4693-890D-8A9D3BE01FD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2170D1F-3D0B-4693-890D-8A9D3BE01FD0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -376,6 +387,7 @@ Global
 		{9AC9273B-47F0-4935-BCAC-DCE468C726A4} = {EB52329B-8167-4BB5-B133-210BF480C329}
 		{E16CA157-6DDC-4B3C-A78C-DA354B452353} = {C49DF3D6-B513-4C06-ACD6-4BA2E2FF02C8}
 		{0EB2E3E0-D407-44C8-87A8-28C5DDA51021} = {E16CA157-6DDC-4B3C-A78C-DA354B452353}
+		{B2170D1F-3D0B-4693-890D-8A9D3BE01FD0} = {E16CA157-6DDC-4B3C-A78C-DA354B452353}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ADFDF91F-E839-4378-9136-C917729594E2}

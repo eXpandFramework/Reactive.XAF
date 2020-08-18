@@ -21,7 +21,7 @@ using TaskStatus = DevExpress.Persistent.Base.General.TaskStatus;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
     [NonParallelizable]
-    public class TodoServiceTests : BaseTaskTests{
+    public class MicrosoftTodoServiceTests : BaseTaskTests{
         [TestCase(TaskStatus.NotStarted,nameof(TaskStatus.NotStarted))]
         // [TestCase(TaskStatus.Completed,nameof(TaskStatus.Completed))]
         [XpandTest()]
@@ -35,7 +35,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
                 var builder = await application.InitializeService(tasksFolderName,keepTaskFolder:keepTaskFolder);
                 await builder.frame.View.ObjectSpace.Map_Two_New_Entity(
                     (space, i) => space.NewTask(projectTaskStatus, i), Timeout,
-                    space => TodoService.Updated.TakeUntilDisposed(application), async (task, _, i) => {
+                    space => MicrosoftTodoService.Updated.TakeUntilDisposed(application), async (task, _, i) => {
                         if (afterAssert != null){
                             await afterAssert(builder.requestBuilder);
                         }
@@ -55,7 +55,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
             using (var application = Platform.Win.TodoModule().Application){
                 var builder = await application.InitializeService();
                 await builder.frame.View.ObjectSpace.Map_Two_New_Entity((space,i)=>space.NewTask(TaskStatus.NotStarted,i), Timeout,
-                    space => TodoService.Updated.Select(_ => _.cloud).Merge(TodoService.CustomizeSynchronization.When(MapAction.Insert)
+                    space => MicrosoftTodoService.Updated.Select(_ => _.cloud).Merge(MicrosoftTodoService.CustomizeSynchronization.When(MapAction.Insert)
                         .Select((tuple, i) => {
                             tuple.Instance.cloud.Subject = $"{nameof(Customize_Two_New_Tasks)}{i}";
                             tuple.Handled=true;
@@ -78,7 +78,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
 
                 await builderData.frame.View.ObjectSpace.Map_Existing_Entity_Two_Times(existingObjects.task,
                     (pmeTask,i) => pmeTask.Modify_Task( projectTaskStatus,i), existingObjects.outlookTask
-                    , space => TodoService.Updated.When(MapAction.Update).Select(_ => _.cloud).TakeUntilDisposed(application),
+                    , space => MicrosoftTodoService.Updated.When(MapAction.Update).Select(_ => _.cloud).TakeUntilDisposed(application),
                     (task, outlookTask) => {
                         outlookTask.Subject.ShouldBe(task.Subject);
                         outlookTask.Status.ToString().ShouldBe(taskStatus);
@@ -94,8 +94,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
                 var existingObjects = (await application.CreateExistingObjects(nameof(Customize_Existing_Two_Times))).First();
                 await builder.frame.View.ObjectSpace.Map_Existing_Entity_Two_Times(existingObjects.task,
                     (pmeTask,i) => pmeTask.Modify_Task( TaskStatus.Completed, i),existingObjects.outlookTask, space
-                        => TodoService.Updated.When(MapAction.Update).Select(_ => _.cloud)
-                            .Merge(TodoService.CustomizeSynchronization.When(MapAction.Update).Take(2)
+                        => MicrosoftTodoService.Updated.When(MapAction.Update).Select(_ => _.cloud)
+                            .Merge(MicrosoftTodoService.CustomizeSynchronization.When(MapAction.Update).Take(2)
                             .Do(_ => {
                                 _.Instance.cloud.Subject = nameof(Customize_Existing_Two_Times);
                                 _.Handled = true;
@@ -116,7 +116,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
                 var existingObjects = await application.CreateExistingObjects(nameof(Delete_Two_Tasks),count:2);
 
                 await builder.frame.View.ObjectSpace.Delete_Two_Entities(existingObjects.Select(tuple => tuple.task).ToArray(),
-                    space => TodoService.Updated.When(MapAction.Delete).Select(_ => _.cloud).TakeUntilDisposed(application), async () => {
+                    space => MicrosoftTodoService.Updated.When(MapAction.Delete).Select(_ => _.cloud).TakeUntilDisposed(application), async () => {
                         var allTasks = await builder.requestBuilder.Tasks.ListAllItems();
                         allTasks.Length.ShouldBe(0);
                     }, Timeout,existingObjects.Select(_ => _.outlookTask).ToArray());
@@ -131,7 +131,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
                 var builder = await application.InitializeService();
                 var existingObjects = await application.CreateExistingObjects(nameof(Customize_Delete_Two_Tasks),count:2);
                 var deleteTwoEntities = builder.frame.View.ObjectSpace.Delete_Two_Entities(existingObjects.Select(_ => _.task).ToArray(),
-                    objectSpace => TodoService.CustomizeSynchronization.When(MapAction.Delete).Take(2)
+                    objectSpace => MicrosoftTodoService.CustomizeSynchronization.When(MapAction.Delete).Take(2)
                         .Do(_ => _.Handled=handleDeletion).To(default(OutlookTask))
                         .TakeUntilDisposed(application),
                     async () => {
