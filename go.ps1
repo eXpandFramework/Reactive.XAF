@@ -17,7 +17,7 @@ $ErrorActionPreference = "Stop"
 
 @([PSCustomObject]@{
     Name = "psake"
-    Version ="4.7.4"
+    Version ="4.9.0"
 },[PSCustomObject]@{
     Name = "XpandPwsh"
     Version =$XpandPwshVersion

@@ -25,13 +25,14 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tests{
 		}
 
 		public static void SetupGoogleSecurity(this XafApplication application, Platform platform) 
-			=> application.SetupSecurity(platform==Platform.Win? Guid.Parse("97a41f78-e44a-429b-a743-e4eadd34b60d"):Guid.Parse("b43f6e81-0134-4dfb-8bd8-8178bc8534e6"));
+			=> application.SetupSecurity(platform==Platform.Win? Guid.Parse("4acb47a5-1d32-4720-be2d-f9ffd4a65c3e"):Guid.Parse("b43f6e81-0134-4dfb-8bd8-8178bc8534e6"));
 
 		public static void ConfigureGoogle(this IModelApplication application,Platform platform){
 			var json = JsonConvert.DeserializeObject<dynamic>(
 				File.ReadAllText($"{AppDomain.CurrentDomain.ApplicationPath()}\\Google{platform}AppCredentials.json"));
 			var modelOAuth = application.ToReactiveModule<IModelReactiveModuleOffice>().Office.Google().OAuth;
-			modelOAuth.Scopes = "https://www.googleapis.com/auth/tasks https://www.googleapis.com/auth/calendar.events";
+			modelOAuth.AddScopes("https://www.googleapis.com/auth/tasks","https://www.googleapis.com/auth/calendar.events");
+            
             if (platform == Platform.Win){
 				modelOAuth.ClientId = json.installed.client_id;
 				modelOAuth.ClientSecret = json.installed.client_secret;	
@@ -39,6 +40,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tests{
 			else{
 				modelOAuth.ClientId = json.web.client_id;
 				modelOAuth.ClientSecret = json.web.client_secret;
+                modelOAuth.RedirectUri = json.web.redirect_uris[0];
 			}
 			
         }

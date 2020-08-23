@@ -24,11 +24,13 @@ namespace TestApplication.GoogleService{
                     if (AppDomain.CurrentDomain.IsHosted()){
                         t.modelOAuth.ClientId = json.web.client_id;
                         t.modelOAuth.ClientSecret = json.web.client_secret;
+                        t.modelOAuth.RedirectUri = json.web.redirect_uris[0];
                     }
                     else{
                         t.modelOAuth.ClientId = json.installed.client_id;
                         t.modelOAuth.ClientSecret = json.installed.client_secret;
                     }
+					
 				})
 				.ToUnit()
                 .Merge(manager.ShowGoogleAccountInfo())

@@ -11,7 +11,6 @@ using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests{
 	public class MicrosoftServiceTests:CloudServiceTests<MSAuthentication>{
-
         protected MicrosoftModule MicrosoftModule( Platform platform=Platform.Win,params ModuleBase[] modules){
             var application = NewApplication(platform,  modules);
             application.SetupSecurity();
@@ -35,7 +34,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests{
 
         protected override string ServiceName => "Microsoft";
 
-        protected override void OnConnectMicrosoft_Action_Creates_Connection(Platform platform, XafApplication application) 
+        protected override void OnConnect_Action_Creates_Connection(Platform platform, XafApplication application) 
             => MicrosoftService.CustomAquireTokenInteractively
                 .Do(args => application.ObjectSpaceProvider.NewAuthentication(platform))
                 .Do(e => e.Instance=Observable.Empty<AuthenticationResult>().FirstOrDefaultAsync()).Test();

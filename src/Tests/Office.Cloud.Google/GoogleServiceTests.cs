@@ -13,6 +13,7 @@ using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
 namespace Xpand.XAF.Modules.Office.Cloud.Google.Tests{
     [UsedImplicitly]
     public class GoogleServiceTests:CloudServiceTests<GoogleAuthentication>{
+        
 
         protected override IObservable<bool> NeedsAuthentication(XafApplication application) => application.GoogleNeedsAuthentication();
 
@@ -36,7 +37,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tests{
         protected override void NewAuthentication(Platform platform, XafApplication application) => application.ObjectSpaceProvider.NewAuthentication(platform);
 
         protected override string ServiceName => "Google";
-        protected override void OnConnectMicrosoft_Action_Creates_Connection(Platform platform, XafApplication application) 
+        protected override void OnConnect_Action_Creates_Connection(Platform platform, XafApplication application) 
             => GoogleService.CustomAquireTokenInteractively
                 .Do(args => NewAuthentication(platform, application))
                 .Do(e => e.Instance=Observable.Empty<UserCredential>().FirstOrDefaultAsync()).Test();

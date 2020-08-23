@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace Xpand.Extensions.DateTimeExtensions{
-    public static class DateTimeExtensions{
+    public static partial class DateTimeExtensions{
         public static DateTime UnixTimestampToDateTimeMilliSecond(this double unixTime) => UnixTimestampToDateTime(unixTime, TimeSpan.TicksPerMillisecond);
 
         private static DateTime UnixTimestampToDateTime(double unixTime, long ticks){

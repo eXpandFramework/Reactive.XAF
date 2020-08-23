@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -8,6 +7,7 @@ using DevExpress.ExpressApp;
 using DevExpress.Persistent.Base.General;
 using Google.Apis.Tasks.v1.Data;
 using Shouldly;
+using Xpand.Extensions.DateTimeExtensions;
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -101,19 +101,19 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks.Tests{
             }
         }
 
-        public static async Task<IList<(Task task, global::Google.Apis.Tasks.v1.Data.Task outlookTask)>> CreateExistingObjects(
+        public static async Task<IList<(Task task, global::Google.Apis.Tasks.v1.Data.Task cloudTask)>> CreateExistingObjects(
             this XafApplication application, string title, TaskStatus taskStatus = TaskStatus.InProgress,int count=1){
             var credential =await application.AuthorizeTestGoogle();
             var tasksService = credential.NewService<global::Google.Apis.Tasks.v1.TasksService>();
             var folder = await tasksService.GetTaskList(TasksFolderName,true);
             await tasksService.DeleteAllTasks(folder.Id);
             return await Observable.Range(0, count).SelectMany(i => tasksService.NewTaskListTasks(1,folder.Id,title)
-                .Select(outlookTask1 => (application.NewTask(taskStatus), outlookTask1))).Buffer(count);
+                .Select((cloudTask,i1) => (application.NewTask(taskStatus,i1), cloudTask))).Buffer(count);
         }
 
-        public static Task NewTask(this XafApplication application, TaskStatus taskStatus) {
+        public static Task NewTask(this XafApplication application, TaskStatus taskStatus,int index=0) {
             using (var objectSpace = application.CreateObjectSpace()){
-                var task = objectSpace.NewTask(taskStatus);
+                var task = objectSpace.NewTask(taskStatus,index);
                 objectSpace.CommitChanges();
                 return task;
             }
@@ -123,7 +123,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks.Tests{
             task.Subject = $"Subject{index}";
             task.Description = "Description";
             task.StartDate=DateTime.Now.AddMinutes(1);
-            task.DueDate=DateTime.Now.AddMinutes(2);
+            // task.DueDate=DateTime.Now.AddDays(2);
             task.Status=taskStatus;
             return task;
         }
@@ -133,7 +133,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks.Tests{
             return Observable.Range(0, count).SelectMany(i => Observable.FromAsync(() => {
                 var task = new global::Google.Apis.Tasks.v1.Data.Task(){
                     Title =i>0?$"{title}{i}": title??i.ToString(),
-                    Completed = dateTime.AddHours(i).ToString(CultureInfo.InvariantCulture)
+                    Completed = dateTime.AddHours(i).ToRfc3339String()
                 };
                 return tasksService.Tasks.Insert(task, tasksListId).ExecuteAsync();
             }));

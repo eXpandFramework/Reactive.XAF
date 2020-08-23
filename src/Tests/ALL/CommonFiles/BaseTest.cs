@@ -1,7 +1,9 @@
 ﻿using System;
-using System.Drawing;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using DevExpress.EasyTest.Framework;
 using DevExpress.ExpressApp.Xpo;
@@ -13,9 +15,13 @@ using Xpand.TestsLib.EasyTest.Commands;
 
 namespace ALL.Tests{
     public abstract class BaseTest:Xpand.TestsLib.BaseTest{
+        
+
         protected async Task EasyTest<TAppAdapter>(Func<TAppAdapter> appAdapter,Func<TAppAdapter,string,TestApplication> applicationFactory,Func<ICommandAdapter,Task> executeCommands,string connectionString=null) where TAppAdapter:IApplicationAdapter{
+            DeleteBrowserFiles.Execute();
             connectionString ??= InMemoryDataStoreProvider.ConnectionString;
-            using (var winAdapter = appAdapter()){
+            using (TAppAdapter winAdapter = appAdapter()){
+                
                 var testApplication = applicationFactory(winAdapter, connectionString);
                 try{
                     var commandAdapter = winAdapter.CreateCommandAdapter();

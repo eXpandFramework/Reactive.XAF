@@ -148,6 +148,6 @@ Invoke-Script{
         New-Item $stage\DX -ItemType Directory -Force
         Move-Item $stage\DX$_.Zip $stage\DX
     }
-    & "$sourcePath\build\DownloadCloudCreds.ps1" 
+    
     Write-HostFormatted "FINISH" -Section
 }

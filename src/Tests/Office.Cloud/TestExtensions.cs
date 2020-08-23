@@ -66,7 +66,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
             objectSpace.CommitChanges();
 
             
-            await map.Take(2).SelectMany((cloudEntity, i) => Observable.FromAsync(assert)).Timeout(timeout);
+            await map.Take(2).LastAsync().Delay(TimeSpan.FromSeconds(3)).SelectMany((cloudEntity, i) => Observable.FromAsync(assert)).Timeout(timeout);
 
         }
 

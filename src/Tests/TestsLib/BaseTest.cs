@@ -20,7 +20,7 @@ using IDisposable = System.IDisposable;
 
 namespace Xpand.TestsLib{
     public abstract class BaseTest : IDisposable{
-        public const int LongTimeout = 500000;
+        public const int LongTimeout = 900000;
         [UsedImplicitly]
         protected Platform GetPlatform(string platformName){
             return (Platform) Enum.Parse(typeof(Platform), platformName);
@@ -118,14 +118,11 @@ namespace Xpand.TestsLib{
             if (TestContext.CurrentContext.Result.Outcome.Status != TestStatus.Passed){
                 if (File.Exists(ReactiveLoggerService.RXLoggerLogPath)){
                     var zipPPath = $"{Path.GetDirectoryName(ReactiveLoggerService.RXLoggerLogPath)}\\{Path.GetFileNameWithoutExtension(ReactiveLoggerService.RXLoggerLogPath)}.zip";
+                    var tempFileName = Path.GetTempFileName();
+                    File.Copy(ReactiveLoggerService.RXLoggerLogPath!,tempFileName,true);
+                    var bytes = File.ReadAllText(tempFileName).Bytes();
                     using (var gZipStream = new GZipStream(File.Create(zipPPath), CompressionMode.Compress)){
-                        try{
-                            var bytes = File.ReadAllText(ReactiveLoggerService.RXLoggerLogPath!).Bytes();
-                            gZipStream.Write(bytes,0,bytes.Length);
-                        }
-                        catch (Exception e){
-                            TestContext.Out.Write(e.ToString());
-                        }
+                        gZipStream.Write(bytes,0,bytes.Length);
                     }
                     TestContext.AddTestAttachment(zipPPath);
                 }

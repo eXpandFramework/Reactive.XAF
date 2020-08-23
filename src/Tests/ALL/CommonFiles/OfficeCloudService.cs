@@ -88,12 +88,16 @@ namespace ALL.Tests{
             else{
                 commandAdapter.Execute(new ActionCommand(signInCaption),new WaitCommand(WaitInterval*2));
             }
-            commandAdapter.Execute(new SendTextCommand(email), new SendKeysCommand(Win32Constants.VirtualKeys.Return), new WaitCommand((int) (WaitInterval*1.5)));
 
+            var foregroundWindow = Win32Declares.WindowFocus.GetForegroundWindow();
+            commandAdapter.Execute(new SendTextCommand(email),new WaitCommand(1000));
+            Win32Declares.WindowFocus.SetForegroundWindow(foregroundWindow);
+            commandAdapter.Execute(new SendKeysCommand(Win32Constants.VirtualKeys.Return), new WaitCommand((int) (WaitInterval*1.5)));
+            Win32Declares.WindowFocus.SetForegroundWindow(foregroundWindow);
             var dxMailPass = File.ReadAllText($"{AppDomain.CurrentDomain.ApplicationPath()}\\..\\{passFileName}.json").Trim();
             commandAdapter.Execute(new SendTextCommand(dxMailPass),new WaitCommand(1000),
                 new SendKeysCommand(Win32Constants.VirtualKeys.Return), new WaitCommand(WaitInterval));
-            
+            Win32Declares.WindowFocus.SetForegroundWindow(foregroundWindow);
             return Unit.Default.ReturnObservable();
         }
 

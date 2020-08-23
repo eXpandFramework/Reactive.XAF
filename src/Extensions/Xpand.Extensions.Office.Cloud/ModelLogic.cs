@@ -53,11 +53,11 @@ namespace Xpand.Extensions.Office.Cloud{
     
     [DomainLogic(typeof(IModelOAuth))]
     public static class ModelOathLogic{
-        public static void AddScopes(this IModelOAuth modelOAuth, params string[] scopes) =>
-            modelOAuth.Scopes = scopes.Select(scope => $"{modelOAuth.Scopes}".Split(' ').Add(scope).Join(" ")).Join(" ");
+        public static void AddScopes(this IModelOAuth modelOAuth, params string[] scopes) 
+            => modelOAuth.Scopes = modelOAuth.Scopes().Concat(scopes).Distinct().Join(" ");
 
-        internal static string[] Scopes(this IModelOAuth modelOAuth) =>
-            $"{modelOAuth.Scopes}".Split(' ').Where(s => !string.IsNullOrEmpty(s)).Distinct().ToArray();
+        internal static string[] Scopes(this IModelOAuth modelOAuth) 
+            => $"{modelOAuth.Scopes}".Split(' ').Where(s => !string.IsNullOrEmpty(s)).Distinct().ToArray();
     }
 
     public interface IModelSynchronizationType{

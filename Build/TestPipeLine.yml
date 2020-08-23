@@ -84,32 +84,32 @@ jobs:
         searchFolder: '$(System.DefaultWorkingDirectory)'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
-          **\*AutoCommit*Tests.dll
-          **\*CloneMemberValue*Tests.dll
-          **\*CloneModelView*Tests.dll
-          **\*Extensions*Tests.dll
-          **\*Grid*Tests.dll
-          **\*HideTool*Tests.dll
-          **\*LookupCascade*.Tests.dll
-          **\*LookupDefaultObject*.Tests.dll
-          **\*MasterDet*Tests.dll
-          **\*ModelViewIn*Tests.dll
-          **\*Office*Calendar*Tests.dll
-          **\*Office*Todo*Tests.dll
-          **\*Office*Microsoft*Tests.dll
-          **\*Office*Google*Tests.dll
-          **\*Office.Cloud.Tests.dll
-          **\*OneView*Tests.dll
-          **\*Position*Tests.dll
-          **\*Progre*Tests.dll
-          **\*Reactive.Tests.dll
-          **\*Reactive*Logger.Tests.dll
-          **\*Reactive*Logger.Hub.Tests.dll
-          **\*Refresh*Tests.dll
-          **\*Sequence*Tests.dll
-          **\*Supp*Tests.dll
-          **\*ViewEditMode.Tests.dll
-          **\*ViewItemValue.Tests.dll
+          **\Xpand.XAF.Modules.AutoCommit.Tests.dll
+          **\Xpand.XAF.Modules.CloneMemberValue.Tests.dll
+          **\Xpand.XAF.Modules.SequenceGenerator.Tests.dll
+          **\Xpand.XAF.Modules.GridListEditor.Tests.dll
+          **\Xpand.XAF.Modules.LookupCascade.Tests.dll
+          **\Xpand.XAF.Modules.ProgressBarViewItem.Tests.dll
+          **\Xpand.Extensions.Tests.dll
+          **\Xpand.XAF.Modules.CloneModelView.Tests.dll
+          **\Xpand.XAF.Modules.ModelViewInheritance.Tests.dll
+          **\Xpand.XAF.Modules.Office.Cloud.Google.Tasks.Tests.dll
+          **\Xpand.XAF.Modules.Office.Cloud.Google.Tests.dll
+          **\Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests.dll
+          **\Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests.dll
+          **\Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests.dll
+          **\Xpand.XAF.Modules.Office.Cloud.Tests.dll
+          **\Xpand.XAF.Modules.Reactive.Logger.Hub.Tests.dll
+          **\Xpand.XAF.Modules.Reactive.Logger.Tests.dll
+          **\Xpand.XAF.Modules.Reactive.Tests.dll
+          **\Xpand.XAF.Modules.HideToolBar.Tests.dll
+          **\Xpand.XAF.Modules.MasterDetail.Tests.dll
+          **\Xpand.XAF.Modules.OneView.Tests.dll
+          **\Xpand.XAF.Modules.PositionInListView.Tests.dll
+          **\Xpand.XAF.Modules.RefreshView.Tests.dll
+          **\Xpand.XAF.Modules.SuppressConfirmation.Tests.dll
+          **\Xpand.XAF.Modules.ViewEditMode.Tests.dll
+          **\Xpand.XAF.Modules.ViewItemValue.Tests.dll
           !**\*TestAdapter.dll
           !**\obj\**    
         diagnosticsEnabled: true
@@ -144,13 +144,93 @@ jobs:
           $ErrorView="NormalView"
           & '$(System.DefaultWorkingDirectory)/build/DownloadCloudCreds.ps1' '$(GitHubToken)'
     - task: VSTest@2
+      displayName: 'ALL.Win.Tests'
+      continueOnError: true
+      inputs:
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: |
+          **\ALL.Win.Tests.dll
+          !**\obj\**    
+        diagnosticsEnabled: true
+        codeCoverageEnabled: true
+        distributionBatchType: basedOnExecutionTime
+        runInParallel: false
+        runSettingsFile: .\bin\Tests.runsettings
+        runTestsInIsolation: false
+        collectDumpOn: never
+- job: ALLWinTests
+  dependsOn: 'TestPerAssembly'
+  strategy:
+    parallel: 1
+  pool:
+    vmImage: windows-2019
+  variables:
+    - group: keys
+  steps:
+    - checkout: none
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        buildType: 'current'
+        artifactName: 'bin'
+        targetPath: '$(Pipeline.Workspace)'
+    - task: PowerShell@2
+      displayName: Download Cloud creds
+      inputs: 
+        pwsh: true
+        targetType: inline
+        script: |
+          $VerbosePreference="Continue"
+          $ErrorView="NormalView"
+          & '$(System.DefaultWorkingDirectory)/build/DownloadCloudCreds.ps1' '$(GitHubToken)'
+    - task: VSTest@2
+      displayName: 'ALL.Win.Tests'
+      continueOnError: true
+      inputs:
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: |
+          **\ALL.Win.Tests.dll
+          !**\obj\**    
+        diagnosticsEnabled: true
+        codeCoverageEnabled: true
+        distributionBatchType: basedOnExecutionTime
+        runInParallel: false
+        runSettingsFile: .\bin\Tests.runsettings
+        runTestsInIsolation: false
+        collectDumpOn: never
+- job: TestsPerExecutionTime
+  dependsOn: 'ALLWinTests'
+  strategy:
+    parallel: 10
+  pool:
+    vmImage: windows-2019
+  variables:
+    - group: keys
+  steps:
+    - checkout: none
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        buildType: 'current'
+        artifactName: 'bin'
+        targetPath: '$(Pipeline.Workspace)'
+    - task: PowerShell@2
+      displayName: Download Cloud creds
+      inputs: 
+        pwsh: true
+        targetType: inline
+        script: |
+          $VerbosePreference="Continue"
+          $ErrorView="NormalView"
+          & '$(System.DefaultWorkingDirectory)/build/DownloadCloudCreds.ps1' '$(GitHubToken)'
+    - task: VSTest@2
       displayName: 'Tests'
       continueOnError: true
       inputs:
         searchFolder: '$(System.DefaultWorkingDirectory)'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
-          **\*All*Tests.dll
+          **\ALL.Web.Tests.dll
           **\*ModelMapper*Tests.dll
           !**\obj\**    
         diagnosticsEnabled: true

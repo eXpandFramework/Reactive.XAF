@@ -7,6 +7,7 @@ using DevExpress.EasyTest.Framework;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.TestsLib.EasyTest;
 using Xpand.TestsLib.EasyTest.Commands;
+using Xpand.TestsLib.Win32;
 
 namespace ALL.Tests{
 	public static class GoogleService{
@@ -18,7 +19,8 @@ namespace ALL.Tests{
                         commandAdapter.Execute(new FindItemCommand("advance",true));
                         commandAdapter.Execute(new FindItemCommand("Go to TestApplication (unsafe)",true),new WaitCommand(3000));
                         commandAdapter.Execute(new MouseCommand(new Point(619, 497)),new WaitCommand(2000));
-                        commandAdapter.Execute(new MouseCommand(new Point(635,615)),new WaitCommand(2000));
+                        commandAdapter.Execute(new SendKeysCommand(Win32Constants.VirtualKeys.PageDown),new WaitCommand(2000));
+                        commandAdapter.Execute(new MouseCommand(new Point(652,606)),new WaitCommand(2000));
                         return whenConnected();
                     })), "Google",new CheckDetailViewCommand(("Value","xpand.testaplication@gmail.com")));
     }

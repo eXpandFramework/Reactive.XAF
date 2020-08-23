@@ -1,20 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
-using System.Xml;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.Base.General;
 using Google;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Tasks.v1;
 using Google.Apis.Tasks.v1.Data;
+using Xpand.Extensions.DateTimeExtensions;
 using Xpand.Extensions.EventArgExtensions;
-using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Office.Cloud.BusinessObjects;
 using Xpand.Extensions.Reactive.Combine;
@@ -64,11 +62,11 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks{
                     cloud.Notes = local.Description;
                     cloud.Status = local.Status == TaskStatus.Completed ? "completed" : "needsAction";
                     if (local.DateCompleted != DateTime.MinValue){
-                        cloud.Completed=XmlConvert.ToString(local.DateCompleted,XmlDateTimeSerializationMode.RoundtripKind);
+                        cloud.Completed=local.DateCompleted.ToRfc3339String();
 
                     }
                     if (local.DueDate != DateTime.MinValue){
-                        cloud.Due = local.DueDate.ToString(CultureInfo.InvariantCulture);
+                        cloud.Due = local.DueDate.ToRfc3339String();
                     }
                 }
             }

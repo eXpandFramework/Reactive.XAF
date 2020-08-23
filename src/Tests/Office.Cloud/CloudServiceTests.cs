@@ -22,15 +22,47 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
         protected  abstract IObservable<bool> NeedsAuthentication(XafApplication application);
 
         protected abstract XafApplication Application(Platform platform);
-        protected abstract void OnConnectMicrosoft_Action_Creates_Connection(Platform platform, XafApplication application);
+        protected abstract void OnConnect_Action_Creates_Connection(Platform platform, XafApplication application);
+        [Test][XpandTest()]
+        public async Task Not_NeedsAuthentication_when_Authentication_current_user_can_authenticate([ValueSource(nameof(PlatformDatasource))]Platform platform){
+            using (var application=Application(platform)){
+                NewAuthentication(platform, application);
         
+                await NeedsAuthentication(application).Select(b => b).Not_NeedsAuthentication_when_AuthenticationStorage_current_user_can_authenticate();
+            }
+        
+        }
+
+        [Test]
+        [XpandTest()]
+        public async Task Connect_Action_Creates_Connection([ValueSource(nameof(PlatformDatasource))]Platform platform){
+            using (var application=Application(platform)){
+	            
+                var compositeView = application.NewView(ViewType.DetailView, application.Security.UserType);
+                compositeView.CurrentObject = compositeView.ObjectSpace.GetObjectByKey(application.Security.UserType, SecuritySystem.CurrentUserId);
+                var viewWindow = application.CreateViewWindow();
+                viewWindow.SetView(compositeView);
+                OnConnect_Action_Creates_Connection(platform, application);
+                var connectMicrosoft = viewWindow.ConnectAction(ServiceName);
+                var disconnectMicrosoft = viewWindow.DisconnectAction(ServiceName);
+                
+                var actionStateChanged = connectMicrosoft.WhenDeactivated().FirstAsync().Merge(disconnectMicrosoft.WhenActivated().FirstAsync()).Take(2).SubscribeReplay();
+                connectMicrosoft.DoExecute();
+
+                
+                await actionStateChanged.ToTaskWithoutConfigureAwait();
+                connectMicrosoft.Active[nameof(Extensions.Office.Cloud.Extensions.NeedsAuthentication)].ShouldBeFalse();
+                disconnectMicrosoft.Active[nameof(Extensions.Office.Cloud.Extensions.NeedsAuthentication)].ShouldBeTrue();
+            }
+        }
+
         [Test][XpandTest()]
         public async Task NeedsAuthentication_when_AuthenticationStorage_does_not_contain_current_user([ValueSource(nameof(PlatformDatasource))]Platform platform){
             using (var application=Application(platform)){
                 await application.NeedsAuthentication_when_AuthenticationStorage_does_not_contain_current_user(() => NeedsAuthentication(application));
             }
         }
-        
+
         [Test][XpandTest()]
         public async Task NeedsAuthentication_when_AuthenticationStorage_current_user_cannot_authenticate([ValueSource(nameof(PlatformDatasource))]Platform platform){
             using (var application=Application(platform)){
@@ -40,25 +72,11 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
         }
         
         [Test][XpandTest()]
-        public async Task Not_NeedsAuthentication_when_Authentication_current_user_can_authenticate([ValueSource(nameof(PlatformDatasource))]Platform platform){
-            using (var application=Application(platform)){
-                NewAuthentication(platform, application);
-        
-                await NeedsAuthentication(application).Not_NeedsAuthentication_when_AuthenticationStorage_current_user_can_authenticate();
-            }
-        
-        }
-        
-        
-        [Test][XpandTest()]
         public void Actions_are_Activated_For_CurrentUser_Details([ValueSource(nameof(PlatformDatasource))]Platform platform){
             using (var application=Application(platform)){
-        
                 application.Actions_are_Activated_For_CurrentUser_Details(ServiceName);
             }
         }
-        
-        
         
         [Test][XpandTest()]
         public  void Actions_Active_State_when_authentication_needed([ValueSource(nameof(PlatformDatasource))]Platform platform){
@@ -84,28 +102,6 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
             }
         }
         
-        [Test]
-        [XpandTest()]
-        public async Task ConnectMicrosoft_Action_Creates_Connection([ValueSource(nameof(PlatformDatasource))]Platform platform){
-            using (var application=Application(platform)){
-	            
-                var compositeView = application.NewView(ViewType.DetailView, application.Security.UserType);
-                compositeView.CurrentObject = compositeView.ObjectSpace.GetObjectByKey(application.Security.UserType, SecuritySystem.CurrentUserId);
-                var viewWindow = application.CreateViewWindow();
-                viewWindow.SetView(compositeView);
-                OnConnectMicrosoft_Action_Creates_Connection(platform, application);
-                var connectMicrosoft = viewWindow.ConnectAction(ServiceName);
-                var disconnectMicrosoft = viewWindow.DisconnectAction(ServiceName);
-                
-                var actionStateChanged = connectMicrosoft.WhenDeactivated().FirstAsync().Merge(disconnectMicrosoft.WhenActivated().FirstAsync()).Take(2).SubscribeReplay();
-                connectMicrosoft.DoExecute();
-
-                
-                await actionStateChanged.ToTaskWithoutConfigureAwait();
-                connectMicrosoft.Active[nameof(Extensions.Office.Cloud.Extensions.NeedsAuthentication)].ShouldBeFalse();
-                disconnectMicrosoft.Active[nameof(Extensions.Office.Cloud.Extensions.NeedsAuthentication)].ShouldBeTrue();
-            }
-        }
         
         
     }

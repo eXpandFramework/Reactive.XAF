@@ -561,7 +561,8 @@ namespace Xpand.TestsLib.Win32 {
             Insert = 0x2D,
             Delete = 0x2E,
             Help = 0x2F,
-
+            PageDown=0x22,
+            PageUp=0x21,
             D0 = 0x30,
             D1 = 0x31,
             D2 = 0x32,

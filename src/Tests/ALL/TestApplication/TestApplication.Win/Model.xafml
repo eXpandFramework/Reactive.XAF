@@ -11,4 +11,11 @@
     </Items>
   </NavigationItems>
   <Options FormStyle="Ribbon" UIType="TabbedMDI" />
+  <ReactiveModules>
+    <Office>
+      <Google>
+        <OAuth Prompt="Consent" RedirectUri="jj" />
+      </Google>
+    </Office>
+  </ReactiveModules>
 </Application>

@@ -32,6 +32,7 @@ namespace ALL.Win.Tests{
 
                 application.Modules.FirstOrDefault(m => m.GetType()==moduleType).ShouldBeNull();
             }
+
         } 
         
         [Test]
@@ -43,7 +44,7 @@ namespace ALL.Win.Tests{
                     adapter.Execute(autoTestCommand);
                     await adapter.TestCloudServices();
                 });
-        }
+        }     
 
         private static TestApplication RunWinApplication(WinAdapter adapter, string connectionString) 
             => adapter.RunWinApplication(

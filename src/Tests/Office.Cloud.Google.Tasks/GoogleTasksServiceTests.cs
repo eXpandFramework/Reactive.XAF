@@ -74,11 +74,11 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks.Tests{
                 var existingObjects = (await application.CreateExistingObjects(nameof(Map_Existing_Two_Times), projectTaskStatus)).First();
 
                 await builderData.frame.View.ObjectSpace.Map_Existing_Entity_Two_Times(existingObjects.task,
-                    (pmeTask,i) => pmeTask.Modify_Task( projectTaskStatus,i), existingObjects.outlookTask
+                    (pmeTask,i) => pmeTask.Modify_Task( projectTaskStatus,i), existingObjects.cloudTask
                     , space => GoogleTasksService.Updated.When(MapAction.Update).Select(_ => _.cloud).TakeUntilDisposed(application),
-                    (task, outlookTask) => {
-                        outlookTask.Title.ShouldBe(task.Subject);
-                        outlookTask.Status.ToString().ShouldBe(taskStatus);
+                    (localTask, cloudTask) => {
+                        cloudTask.Title.ShouldBe(localTask.Subject);
+                        cloudTask.Status.ToString().ShouldBe(taskStatus);
                         return Task.CompletedTask;
                     },Timeout);
             }
@@ -90,7 +90,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks.Tests{
                 var builder = await application.InitializeService();
                 var existingObjects = (await application.CreateExistingObjects(nameof(Customize_Existing_Two_Times))).First();
                 await builder.frame.View.ObjectSpace.Map_Existing_Entity_Two_Times(existingObjects.task,
-                    (pmeTask,i) => pmeTask.Modify_Task( TaskStatus.Completed, i),existingObjects.outlookTask, space
+                    (pmeTask,i) => pmeTask.Modify_Task( TaskStatus.Completed, i),existingObjects.cloudTask, space
                         => GoogleTasksService.Updated.When(MapAction.Update).Select(_ => _.cloud)
                             .Merge(GoogleTasksService.CustomizeSynchronization.When(MapAction.Update).Take(2)
                             .Do(_ => {
@@ -116,7 +116,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks.Tests{
                     space => GoogleTasksService.Updated.When(MapAction.Delete).Select(_ => _.cloud).TakeUntilDisposed(application), async () => {
                         var allTasks =await builder.service.GetTaskList(TasksTestExtensions.TasksFolderName).SelectMany(list => builder.service.Tasks.List(list.Id).ToObservable());
                         allTasks.Items.ShouldBeNull();
-                    }, Timeout,existingObjects.Select(_ => _.outlookTask).ToArray());
+                    }, Timeout,existingObjects.Select(_ => _.cloudTask).ToArray());
             }
         }
         
@@ -125,6 +125,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks.Tests{
         [XpandTest()]
         public override async Task Customize_Delete_Two_Tasks(bool handleDeletion){
             using (var application = Platform.Win.TasksModule().Application){
+                
                 var builder = await application.InitializeService();
                 var existingObjects = await application.CreateExistingObjects(nameof(Customize_Delete_Two_Tasks),count:2);
                 var deleteTwoEntities = builder.frame.View.ObjectSpace.Delete_Two_Entities(existingObjects.Select(_ => _.task).ToArray(),
@@ -134,18 +135,19 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks.Tests{
                     async () => {
                         var allTasks =await builder.service.GetTaskList(TasksTestExtensions.TasksFolderName).SelectMany(list => builder.service.Tasks.List(list.Id).ToObservable());
                         if (handleDeletion){
-                            allTasks.Items.Count().ShouldBe(2);
+                            allTasks.Items.Count.ShouldBe(2);
                         }
                         else{
                             allTasks.Items.ShouldBeNull();
                         }
-                    }, Timeout,existingObjects.Select(_ => _.outlookTask).ToArray());
+                    }, Timeout,existingObjects.Select(_ => _.cloudTask).ToArray());
                 await deleteTwoEntities;
             }
         }
 
 
-        [TestCase(null)][XpandTest()]
+        [TestCase(null)]
+        [XpandTest()]
         public override async Task Populate_All(string syncToken){
             using (var application = Platform.Win.TasksModule().Application){
                 var builder = await application.InitializeService(TasksTestExtensions.TasksPagingFolderName);

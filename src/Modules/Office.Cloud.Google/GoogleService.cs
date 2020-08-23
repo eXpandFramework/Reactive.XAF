@@ -149,13 +149,14 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
 
         static IObservable<UserCredential> AuthorizeGoogle(this GoogleAuthorizationCodeFlow flow, XafApplication application){
             var args = new GenericEventArgs<IObservable<UserCredential>>(Observable.Defer(() => ((XafOAuthDataStore) flow.DataStore).Platform == Platform.Win
-                ? Observable.FromAsync(() => GoogleWebAuthorizationBroker.AuthorizeAsync(
-                    application.NewClientSecrets(), application.Model.OAuthGoogle().Scopes(),
-                    application.CurrentUserId().ToString(), CancellationToken.None, flow.DataStore))
+                ? flow.AuthorizeInstalledApp(application)
                 : flow.AuthorizeWebApp(application)));
             CustomAquireTokenInteractivelySubject.OnNext(args);
             return args.Instance;
         }
+
+        private static IObservable<UserCredential> AuthorizeInstalledApp(this IAuthorizationCodeFlow flow, XafApplication application) 
+            => Observable.FromAsync(() => new AuthorizationCodeInstalledApp(flow, new LocalServerCodeReceiver()).AuthorizeAsync(application.CurrentUserId().ToString(), CancellationToken.None));
 
         private static IObservable<UserCredential> AuthorizeWebApp(this  IAuthorizationCodeFlow flow,XafApplication application){
 	        var redirectUri = HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Path);
