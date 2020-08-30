@@ -1768,4 +1768,5 @@ NUGET
       DevExpress.Win.Navigation (20.1.7) - restriction: || (== net461) (&& (== netstandard2.0) (>= net452))
       DevExpress.Win.Printing (20.1.7) - restriction: || (== net461) (&& (== netstandard2.0) (>= net452))
   remote: https://xpandnugetserver.azurewebsites.net/nuget
-    Xpand.Patcher (2.0.23)
+    Xpand.Patcher (2.0.24)
+      Mono.Cecil (>= 0.11.2) - restriction: || (== net461) (&& (== netstandard2.0) (>= net45))

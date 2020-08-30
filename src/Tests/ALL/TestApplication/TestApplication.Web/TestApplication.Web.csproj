@@ -139,7 +139,7 @@
     <PackageReference Include="Google.Apis.People.v1">
       <Version>1.25.0.830</Version>
     </PackageReference>
-    <PackageReference Include="Xpand.XAF.Web.All" Version="2.202.38.2">
+    <PackageReference Include="Xpand.XAF.Web.All" Version="2.202.38.3">
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
@@ -205,9 +205,12 @@
       <DependentUpon>Login.aspx</DependentUpon>
     </Compile>
     <Compile Include="LookupCascade\LookupCascadeService.cs" />
-    <Compile Include="WebApplication.cs" />
+    <Compile Include="WebApplication.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Error.aspx.cs">
       <DependentUpon>Error.aspx</DependentUpon>
@@ -215,9 +218,12 @@
     </Compile>
     <Compile Include="Login.aspx.cs">
       <DependentUpon>Login.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WebModule.cs" />
+    <Compile Include="WebModule.cs">
+      <SubType>Component</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Model.xafml">

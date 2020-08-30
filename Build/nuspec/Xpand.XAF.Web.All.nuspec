@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Web.All</id>
-    <version>2.202.38.0</version>
+    <version>2.202.39.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -14,36 +14,69 @@
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Xpand.XAF.Web.All</tags>
     <dependencies>
-    <dependency id="Xpand.Extensions.Mono.Cecil" version="2.202.37.0"></dependency>
-    <dependency id="Xpand.Extensions" version="2.202.41.0"></dependency>
-    <dependency id="Xpand.Extensions.Office.Cloud" version="2.202.42.0"></dependency>
-    <dependency id="Xpand.Extensions.Reactive" version="2.202.42.0"></dependency>
-    <dependency id="Xpand.Extensions.XAF" version="2.202.42.0"></dependency>
-    <dependency id="Xpand.Extensions.XAF.Xpo" version="2.202.38.0"></dependency>
-    <dependency id="Xpand.XAF.Modules.AutoCommit" version="2.202.42.0"></dependency>
-    <dependency id="Xpand.XAF.Modules.CloneMemberValue" version="2.202.42.0"></dependency>
-    <dependency id="Xpand.XAF.Modules.CloneModelView" version="2.202.42.0"></dependency>
-    <dependency id="Xpand.XAF.Modules.HideToolBar" version="2.202.42.0"></dependency>
-    <dependency id="Xpand.XAF.Modules.LookupCascade" version="2.202.44.0"></dependency>
-    <dependency id="Xpand.XAF.Modules.MasterDetail" version="2.202.42.0"></dependency>
-    <dependency id="Xpand.XAF.Modules.ModelMapper" version="2.202.42.0"></dependency>
-    <dependency id="Xpand.XAF.Modules.ModelViewInheritance" version="2.202.42.0"></dependency>
-    <dependency id="Xpand.XAF.Modules.Office.Cloud.Google" version="2.202.2.0"></dependency>
-    <dependency id="Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar" version="2.202.14.0"></dependency>
-    <dependency id="Xpand.XAF.Modules.Office.Cloud.Microsoft" version="2.202.43.0"></dependency>
-    <dependency id="Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo" version="2.202.13.0"></dependency>
-    <dependency id="Xpand.XAF.Modules.PositionInListView" version="2.202.13.0"></dependency>
-    <dependency id="Xpand.XAF.Modules.ProgressBarViewItem" version="2.202.42.0"></dependency>
-    <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="2.202.42.0"></dependency>
-    <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="2.202.42.0"></dependency>
-    <dependency id="Xpand.XAF.Modules.Reactive" version="2.202.42.0"></dependency>
-    <dependency id="Xpand.XAF.Modules.RefreshView" version="2.202.42.0"></dependency>
-    <dependency id="Xpand.XAF.Modules.SequenceGenerator" version="2.202.42.0"></dependency>
-    <dependency id="Xpand.XAF.Modules.SuppressConfirmation" version="2.202.42.0"></dependency>
-    <dependency id="Xpand.XAF.Modules.ViewEditMode" version="2.202.42.0"></dependency>
-    <dependency id="Xpand.XAF.Modules.ViewItemValue" version="2.202.8.0"></dependency>
-    <dependency id="Xpand.XAF.Modules.ViewWizard" version="2.202.4.0"></dependency>
-    <dependency id="Xpand.XAF.Core.All" version="2.202.38.0"></dependency></dependencies>
+      <dependency id="Xpand.Extensions.Mono.Cecil" version="2.202.37.0">
+      </dependency>
+      <dependency id="Xpand.Extensions" version="2.202.42.3">
+      </dependency>
+      <dependency id="Xpand.Extensions.Office.Cloud" version="2.202.43.7">
+      </dependency>
+      <dependency id="Xpand.Extensions.Reactive" version="2.202.43.4">
+      </dependency>
+      <dependency id="Xpand.Extensions.XAF" version="2.202.43.5">
+      </dependency>
+      <dependency id="Xpand.Extensions.XAF.Xpo" version="2.202.39.1">
+      </dependency>
+      <dependency id="Xpand.XAF.Modules.AutoCommit" version="2.202.43.4">
+      </dependency>
+      <dependency id="Xpand.XAF.Modules.CloneMemberValue" version="2.202.43.4">
+      </dependency>
+      <dependency id="Xpand.XAF.Modules.CloneModelView" version="2.202.43.5">
+      </dependency>
+      <dependency id="Xpand.XAF.Modules.HideToolBar" version="2.202.43.4">
+      </dependency>
+      <dependency id="Xpand.XAF.Modules.LookupCascade" version="2.202.45.4">
+      </dependency>
+      <dependency id="Xpand.XAF.Modules.MasterDetail" version="2.202.43.4">
+      </dependency>
+      <dependency id="Xpand.XAF.Modules.ModelMapper" version="2.202.43.5">
+      </dependency>
+      <dependency id="Xpand.XAF.Modules.ModelViewInheritance" version="2.202.43.5">
+      </dependency>
+      <dependency id="Xpand.XAF.Modules.Office.Cloud.Google" version="2.202.4.7">
+      </dependency>
+      <dependency id="Xpand.XAF.Modules.Office.Cloud.Google.Tasks" version="2.202.0.5">
+      </dependency>
+      <dependency id="Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar" version="2.202.15.7">
+      </dependency>
+      <dependency id="Xpand.XAF.Modules.Office.Cloud.Microsoft" version="2.202.44.7">
+      </dependency>
+      <dependency id="Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo" version="2.202.14.5">
+      </dependency>
+      <dependency id="Xpand.XAF.Modules.PositionInListView" version="2.202.14.4">
+      </dependency>
+      <dependency id="Xpand.XAF.Modules.ProgressBarViewItem" version="2.202.43.4">
+      </dependency>
+      <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="2.202.43.4">
+      </dependency>
+      <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="2.202.43.5">
+      </dependency>
+      <dependency id="Xpand.XAF.Modules.Reactive" version="2.202.43.7">
+      </dependency>
+      <dependency id="Xpand.XAF.Modules.RefreshView" version="2.202.43.4">
+      </dependency>
+      <dependency id="Xpand.XAF.Modules.SequenceGenerator" version="2.202.43.4">
+      </dependency>
+      <dependency id="Xpand.XAF.Modules.SuppressConfirmation" version="2.202.43.4">
+      </dependency>
+      <dependency id="Xpand.XAF.Modules.ViewEditMode" version="2.202.43.4">
+      </dependency>
+      <dependency id="Xpand.XAF.Modules.ViewItemValue" version="2.202.9.4">
+      </dependency>
+      <dependency id="Xpand.XAF.Modules.ViewWizard" version="2.202.5.6">
+      </dependency>
+      <dependency id="Xpand.XAF.Core.All" version="2.202.38.3">
+      </dependency>
+    </dependencies>
   </metadata>
   <files>
   </files>
