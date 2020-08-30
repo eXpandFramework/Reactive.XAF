@@ -144,16 +144,16 @@ The module follows the Nuget [Version Basics](https://docs.Google.com/en-us/nuge
 |----|----
 |**DevExpress.Persistent.Base**|**Any**
 |Fasterflect.Xpand|2.0.7
- |Google.Apis.Auth|1.48.0
+ |Google.Apis.Auth|1.49.0
  |JetBrains.Annotations|2020.1.0
  |Newtonsoft.Json|12.0.3
  |System.Reactive|4.4.1
- |Xpand.Extensions|2.202.41
- |Xpand.Extensions.Office.Cloud|2.202.42
- |Xpand.Extensions.Reactive|2.202.42
- |Xpand.Extensions.XAF|2.202.42
- |Xpand.Extensions.XAF.Xpo|2.202.38
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.42
+ |Xpand.Extensions|2.202.44
+ |Xpand.Extensions.Office.Cloud|2.202.45
+ |Xpand.Extensions.Reactive|2.202.45
+ |Xpand.Extensions.XAF|2.202.45
+ |Xpand.Extensions.XAF.Xpo|2.202.41
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.45
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.9
 
 ## Issues-Debugging-Troubleshooting

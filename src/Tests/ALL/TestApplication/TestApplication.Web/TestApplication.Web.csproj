@@ -139,7 +139,7 @@
     <PackageReference Include="Google.Apis.People.v1">
       <Version>1.25.0.830</Version>
     </PackageReference>
-    <PackageReference Include="Xpand.XAF.Web.All" Version="2.202.38.3">
+    <PackageReference Include="Xpand.XAF.Web.All" Version="2.202.39">
     </PackageReference>
   </ItemGroup>
   <ItemGroup>

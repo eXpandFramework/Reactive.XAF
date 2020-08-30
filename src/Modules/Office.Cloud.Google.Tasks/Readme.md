@@ -89,19 +89,18 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |**DevExpress.ExpressApp**|**Any**
  |**DevExpress.ExpressApp.Xpo**|**Any**
 |Fasterflect.Xpand|2.0.7
+ |Google.Apis.Auth|1.49.0
+ |Google.Apis.Tasks.v1|1.49.0.2049
  |JetBrains.Annotations|2020.1.0
- |Microsoft.Graph.Beta|0.18.0-preview
- |Microsoft.Graph.Core|1.19.0
- |Microsoft.Identity.Client|4.13.0
  |Newtonsoft.Json|12.0.3
  |System.Reactive|4.4.1
- |Xpand.Extensions|2.202.41
- |Xpand.Extensions.Office.Cloud|2.202.42
- |Xpand.Extensions.Reactive|2.202.42
- |Xpand.Extensions.XAF|2.202.42
- |Xpand.Extensions.XAF.Xpo|2.202.38
- |[Xpand.XAF.Modules.Office.Cloud.Microsoft](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Office.Cloud.Microsoft)|2.202.43
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.42
+ |Xpand.Extensions|2.202.44
+ |Xpand.Extensions.Office.Cloud|2.202.45
+ |Xpand.Extensions.Reactive|2.202.45
+ |Xpand.Extensions.XAF|2.202.45
+ |Xpand.Extensions.XAF.Xpo|2.202.41
+ |[Xpand.XAF.Modules.Office.Cloud.Google](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Office.Cloud.Google)|2.202.6
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.45
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.9
 
 ## Issues-Debugging-Troubleshooting

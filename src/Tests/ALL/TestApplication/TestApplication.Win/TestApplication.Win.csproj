@@ -110,7 +110,7 @@
     <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="20.1.7" />
     <PackageReference Include="DevExpress.EasyTest" Version="20.1.7" />
     <PackageReference Include="Google.Apis.People.v1" Version="1.25.0.830" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="2.202.38.3" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="2.202.39" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Cloud.Office\Google\" />

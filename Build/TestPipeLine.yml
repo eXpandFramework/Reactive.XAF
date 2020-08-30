@@ -119,46 +119,6 @@ jobs:
         runSettingsFile: .\bin\Tests.runsettings
         runTestsInIsolation: false
         collectDumpOn: never
-- job: TestPerExecutionTime
-  dependsOn: 'TestPerAssembly'
-  strategy:
-    parallel: 10
-  pool:
-    vmImage: windows-2019
-  variables:
-    - group: keys
-  steps:
-    - checkout: none
-    - task: DownloadPipelineArtifact@2
-      inputs:
-        buildType: 'current'
-        artifactName: 'bin'
-        targetPath: '$(Pipeline.Workspace)'
-    - task: PowerShell@2
-      displayName: Download Cloud creds
-      inputs: 
-        pwsh: true
-        targetType: inline
-        script: |
-          $VerbosePreference="Continue"
-          $ErrorView="NormalView"
-          & '$(System.DefaultWorkingDirectory)/build/DownloadCloudCreds.ps1' '$(GitHubToken)'
-    - task: VSTest@2
-      displayName: 'ALL.Win.Tests'
-      continueOnError: true
-      inputs:
-        searchFolder: '$(System.DefaultWorkingDirectory)'
-        testSelector: 'testAssemblies'
-        testAssemblyVer2: |
-          **\ALL.Win.Tests.dll
-          !**\obj\**    
-        diagnosticsEnabled: true
-        codeCoverageEnabled: true
-        distributionBatchType: basedOnExecutionTime
-        runInParallel: false
-        runSettingsFile: .\bin\Tests.runsettings
-        runTestsInIsolation: false
-        collectDumpOn: never
 - job: ALLWinTests
   dependsOn: 'TestPerAssembly'
   strategy:
@@ -199,7 +159,7 @@ jobs:
         runSettingsFile: .\bin\Tests.runsettings
         runTestsInIsolation: false
         collectDumpOn: never
-- job: TestsPerExecutionTime
+- job: TestPerExecutionTime
   dependsOn: 'ALLWinTests'
   strategy:
     parallel: 10
@@ -241,7 +201,6 @@ jobs:
         runTestsInIsolation: false
         collectDumpOn: never
 - job: CheckTests
-  # dependsOn: BuildArtifacts
   dependsOn: TestPerExecutionTime
   pool:
     vmImage: windows-2019
