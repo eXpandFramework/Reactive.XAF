@@ -112,7 +112,7 @@ namespace Xpand.XAF.Modules.Reactive{
         static IObservable<XafApplication> PatchAuthentication(this XafApplication application) =>
             application.WhenSetupComplete()
                 .Do(_ => {
-                    var harmony = new Harmony("aaa");
+                    var harmony = new Harmony("SecurityAuthentication");
                     if (application.Security.IsInstanceOf("DevExpress.ExpressApp.Security.SecurityStrategyBase")){
                         var methodInfo = ( application.Security)?.GetPropertyValue("Authentication")?.GetType().GetMethod("Authenticate");
                         if (methodInfo != null){
