@@ -91,7 +91,8 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
             }
         }
 
-        [Test][XpandTest]
+        [Test]
+        [XpandTest]
         public void Increase_Sequence_When_saving_Nested_New_Objects(){
             using (var application = SequenceGeneratorModule().Application){
                 SetSequences(application);
@@ -99,12 +100,12 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 
                 using (var objectSpace = application.CreateObjectSpace()){
                     var parent = objectSpace.CreateObject<Parent>();
-                    for (int i = 0; i < 10; i++){
+                    var objectCount = 10;
+                    for (int i = 0; i < objectCount; i++){
                         parent.Childs.Add(objectSpace.CreateObject<Child>());    
                     }
                     objectSpace.CommitChanges();
-                    AssertNextSequences(application, 10,nextSequenceTest);
-                
+                    AssertNextSequences(application, objectCount,nextSequenceTest);
                     parent = objectSpace.CreateObject<Parent>();
                     for (int i = 0; i < 10; i++){
                         parent.Childs.Add(objectSpace.CreateObject<Child>());    
@@ -112,6 +113,19 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
                     objectSpace.CommitChanges();
                 
                     AssertNextSequences(application, 20,nextSequenceTest);
+                }
+            }
+        }
+        [Test][XpandTest]
+        public void Increase_Sequence_When_creating_Nested_New_Objects_on_parent_saving(){
+            using (var application = SequenceGeneratorModule().Application){
+                SetSequences(application);
+                var nextSequenceTest = SequenceGeneratorService.Sequence.OfType<Child>().Test();
+
+                using (var objectSpace = application.CreateObjectSpace()){
+                    objectSpace.CreateObject<ParentWithChildOnSaving>();
+                    objectSpace.CommitChanges();
+                    AssertNextSequences(application, 1,nextSequenceTest);
                 }
             }
         }
@@ -180,7 +194,8 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         }
 
 
-        [Test][XpandTest]
+        [Test]
+        [XpandTest]
         public async Task Custom_Sequence_Type(){
             using (var application = SequenceGeneratorModule().Application){
                 SetSequences(application);

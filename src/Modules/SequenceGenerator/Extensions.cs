@@ -38,6 +38,12 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
                 .TakeUntil(session.WhenDisposed());
 
         [PublicAPI]
+        public static IObservable<Session> WhenObjectsSaved(this Session session) 
+            => Observable.FromEventPattern<ObjectsManipulationEventHandler, EventArgs>(h => session.ObjectsSaved += h, h => session.ObjectsSaved -= h, EventsScheduler)
+                .Select(pattern => pattern.Sender).Cast<Session>()
+                .TakeUntil(session.WhenDisposed());
+
+        [PublicAPI]
         public static IObservable<T> DistinctUntilChanged<T>(this IObservable<T> source, TimeSpan duration,
             IScheduler scheduler = null, Func<T,object> keySelector=null, Func<T, object, bool> matchFunc = null) {
             scheduler ??= Scheduler.Default;

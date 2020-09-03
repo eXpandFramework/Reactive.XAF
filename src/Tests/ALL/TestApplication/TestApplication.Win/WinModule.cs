@@ -42,7 +42,7 @@ namespace TestApplication.Win{
             RequiredModuleTypes.Add(typeof(TreeListEditorsWindowsFormsModule));
             RequiredModuleTypes.Add(typeof(ValidationWindowsFormsModule));
             RequiredModuleTypes.Add(typeof(SystemWindowsFormsModule));
-            RequiredModuleTypes.Add(typeof(WorkflowWindowsFormsModule));
+            // RequiredModuleTypes.Add(typeof(WorkflowWindowsFormsModule));
             #endregion
             RequiredModuleTypes.Add(typeof(GridListEditorModule));
             RequiredModuleTypes.Add(typeof(OneViewModule));

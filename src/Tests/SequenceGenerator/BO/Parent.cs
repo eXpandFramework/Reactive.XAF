@@ -1,5 +1,4 @@
-﻿using BrokeroTests.SequenceGenerator.BO;
-using DevExpress.Persistent.BaseImpl;
+﻿using DevExpress.Persistent.BaseImpl;
 using DevExpress.Xpo;
 using JetBrains.Annotations;
 
@@ -13,7 +12,17 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests.BO{
         public XPCollection<Child> Childs => GetCollection<Child>(nameof(Childs));
 
     }
-    
+
+    public class ParentWithChildOnSaving:Parent{
+        public ParentWithChildOnSaving(Session session) : base(session){
+        }
+
+        protected override void OnSaving(){
+            base.OnSaving();
+            Childs.Add(new Child(Session));
+        }
+    }
+
     [PublicAPI]
     public class ParentSequencial:Parent,ISequentialNumber{
         public ParentSequencial(Session session) : base(session){

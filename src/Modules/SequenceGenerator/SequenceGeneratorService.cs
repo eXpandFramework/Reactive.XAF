@@ -19,6 +19,7 @@ using DevExpress.Xpo.DB;
 using DevExpress.Xpo.Helpers;
 using Fasterflect;
 using JetBrains.Annotations;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.SecurityExtensions;
@@ -190,39 +191,45 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         public static IObservable<object> Sequence => SequenceSubject.AsObservable();
 
         private static IObservable<object> GenerateSequences(this IObservable<IObjectSpace> source, IDataLayer dataLayer,Type sequenceStorageType=null) 
-            => source.SelectMany(space => Observable.Defer(() => space.UnitOfWork().WhenObjectSaving().Select(session => session).Distinct()
-                    .TakeUntil(space.UnitOfWork().WhenAfterCommitTransaction())).RepeatWhen(observable => observable.Where(o => space.UnitOfWork() != null)))
-                .SelectMany(session => session.GenerateSequences(dataLayer, sequenceStorageType))
+            => source.SelectMany(space => Observable.Defer(space.GetObjectsForSave)
+                    .RepeatWhen(observable => observable.Where(o => space.UnitOfWork() != null).Do(o => space.CommitChanges())))
+                .Synchronize()
+                .SelectMany(t => t.GenerateSequences(dataLayer, sequenceStorageType))
+                .Select(o => o)
                 .Do(SequenceSubject)
                 .TraceSequenceGeneratorModule();
 
-        private static IObservable<object> GenerateSequences(this Session session,IDataLayer dataLayer, Type sequenceStorageType) 
+        static IObservable<(UnitOfWork unitOfWork, object[])> GetObjectsForSave(this IObjectSpace objectSpace){
+            var unitOfWork = objectSpace.UnitOfWork();
+            return unitOfWork.WhenObjectSaving().SelectMany(session => session.GetObjectsToSave().Cast<object>().Where(objectSpace.IsNewObject).ToArray())
+                .Buffer(unitOfWork.WhenObjectsSaved).FirstAsync().WhenNotEmpty().Select(list => (unitOfWork, list.Distinct().ToArray()));
+        }
+
+        private static IObservable<object> GenerateSequences(this (UnitOfWork unitOfWork,IList<object> objects) t,IDataLayer dataLayer, Type sequenceStorageType) 
             => Observable.Defer(() => {
                     var explicitUnitOfWork = new ExplicitUnitOfWork(dataLayer);
-                    var generateSequences = session.GenerateSequences(explicitUnitOfWork,sequenceStorageType).Publish().RefCount();
-                    var afterCommited = session.WhenAfterCommitTransaction().FirstAsync().SelectMany(pattern => {
+                    var afterCommited = t.unitOfWork.WhenAfterCommitTransaction().FirstAsync().Select(pattern => {
                             explicitUnitOfWork.CommitChanges();
                             explicitUnitOfWork.Close();
-                            return generateSequences;
+                            return default(object);
                         })
                         .DisposeOnException(explicitUnitOfWork)
                         .IgnoreElements();
                     var currentThreadScheduler = Scheduler.CurrentThread;
-                    var whenTransacationFailed = session.WhenTransacationFailed( currentThreadScheduler, explicitUnitOfWork);
-                    return afterCommited.Merge(generateSequences, currentThreadScheduler)
+                    var whenTransacationFailed = t.unitOfWork.WhenTransacationFailed( currentThreadScheduler, explicitUnitOfWork);
+                    return afterCommited.Merge(t.objects.GenerateSequences(explicitUnitOfWork,sequenceStorageType), currentThreadScheduler)
                         .Merge(whenTransacationFailed,currentThreadScheduler);
                 })
                 .RetryWhen(exceptions => exceptions.RetryException().Do(ExceptionsSubject.OnNext));
 
-        private static IObservable<object> GenerateSequences(this Session session,  ExplicitUnitOfWork explicitUnitOfWork,Type sequenceStorageType) 
-            => session.GetObjectsToSave().Cast<object>()
+        private static IObservable<object> GenerateSequences(this IList<object> objects,  ExplicitUnitOfWork explicitUnitOfWork,Type sequenceStorageType) 
+            => objects.ToObservable(Scheduler.Immediate)
                 .GroupBy(o => o.GetType())
-                .SelectMany(objects => {
-                    var sequenceStorage = explicitUnitOfWork.GetSequenceStorage(objects.Key,sequenceStorageType:sequenceStorageType);
-                    return sequenceStorage != null ? objects.Where(o => ((ISessionProvider) o).Session.IsNewObject(o))
-                        .Cast<IXPClassInfoProvider>().GenerateNextSequences(explicitUnitOfWork, sequenceStorage) : Enumerable.Empty<object>();
+                .SelectMany(groupedObjects => {
+                    var sequenceStorage = explicitUnitOfWork.GetSequenceStorage(groupedObjects.Key,sequenceStorageType:sequenceStorageType);
+                    return sequenceStorage != null ? groupedObjects
+                        .OfType<IXPClassInfoProvider>().GenerateNextSequences(explicitUnitOfWork, sequenceStorage) : Observable.Empty<object>();
                 })
-                .ToObservable()
                 .DisposeOnException(explicitUnitOfWork);
 
         private static IObservable<EventPattern<EventArgs>> WhenTransacationFailed(this Session session,
@@ -247,7 +254,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
                 return Observable.Throw<T>(exception);
             });
 
-        private static IEnumerable<IXPClassInfoProvider> GenerateNextSequences(this IEnumerable<IXPClassInfoProvider> source,ExplicitUnitOfWork explicitUnitOfWork, ISequenceStorage sequenceStorage) 
+        private static IObservable<IXPClassInfoProvider> GenerateNextSequences(this IObservable<IXPClassInfoProvider> source,ExplicitUnitOfWork explicitUnitOfWork, ISequenceStorage sequenceStorage) 
             => source.Select(o => {
                 var memberInfo = o.ClassInfo.GetMember(sequenceStorage.SequenceMember);
                 memberInfo.SetValue(o, sequenceStorage.NextSequence);

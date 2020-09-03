@@ -8,6 +8,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Xpo;
 using DevExpress.Xpo;
 using DevExpress.Xpo.DB;
+using Fasterflect;
 using JetBrains.Annotations;
 using Shouldly;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -78,7 +79,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         }
 
         protected IObservable<Unit> TestObjects<T>(XafApplication application,bool parallel, int count = 100, int objectSpaceCount = 1, Action beforeSave = null){
-            if (!parallel){
+            if (parallel){
                 return Observable.Range(1, count).SelectMany(i => Observable.Defer(() => Observable.Start(() => {
                     for (int j = 0; j < objectSpaceCount; j++){
                         using (var objectSpace = application.CreateObjectSpace()){

@@ -100,8 +100,8 @@ namespace TestApplication{
 			RequiredModuleTypes.Add(typeof(SystemModule));
 			RequiredModuleTypes.Add(typeof(ValidationModule));
 			RequiredModuleTypes.Add(typeof(ViewVariantsModule));
-			RequiredModuleTypes.Add(typeof(WorkflowModule));
-			RequiredModuleTypes.Add(typeof(ServerUpdateDatabaseModule));
+			// RequiredModuleTypes.Add(typeof(WorkflowModule));
+			// RequiredModuleTypes.Add(typeof(ServerUpdateDatabaseModule));
 
 			#endregion
 
