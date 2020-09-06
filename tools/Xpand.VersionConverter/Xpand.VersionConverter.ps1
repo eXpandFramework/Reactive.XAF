@@ -8,19 +8,18 @@ using namespace System.Text.RegularExpressions
 using namespace Mono.Cecil
 using namespace Mono.Cecil.pdb
 param(
-    [string]$projectFile ="C:\Work\eXpandFramework\Issues\Solution42\Solution42.Module\Solution42.Module.csproj",
-    [string]$targetPath ="C:\Work\eXpandFramework\Issues\Solution42\Solution42.Module\bin\Debug\",
+    [string]$projectFile ="C:\Work\eXpandFramework\Issues\Solution1\Solution1.Module.Win\Solution1.Module.Win.csproj",
+    [string]$targetPath ="C:\Work\eXpandFramework\Issues\Solution1\Solution1.Module.Win\bin\Debug\net472\",
     $DevExpressVersion,
     [string]$VerboseOutput = "Continue" ,
     [string]$referenceFilter ,
-    [string]$targetFilter ="(?is)MyCompany"
+    [string]$targetFilter ="(?is)Xpand\.XAF|Xpand\.Extensions"
 )
-
 if (!$referenceFilter){
     $referenceFilter="DevExpress*"
 }
 if (!$targetFilter){
-    $targetFilter="(?s)Xpand\.XAF|Xpand\.Extensions"
+    $targetFilter="(?is)Xpand\.XAF|Xpand\.Extensions"
 }
 
 $ErrorActionPreference = "Stop"
