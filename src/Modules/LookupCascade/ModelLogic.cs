@@ -18,13 +18,11 @@ namespace Xpand.XAF.Modules.LookupCascade{
     }
     
     public static class ModelLookupCascade{
-        public static IObservable<IModelLookupCascade> LookupCascadeModel(this IObservable<IModelReactiveModules> source){
-            return source.Select(modules => modules.LookupCascade());
-        }
+        public static IObservable<IModelLookupCascade> LookupCascadeModel(this IObservable<IModelReactiveModules> source) 
+            => source.Select(modules => modules.LookupCascade());
 
-        public static IModelLookupCascade LookupCascade(this IModelReactiveModules reactiveModules){
-            return ((IModelReactiveModuleLookupCascade) reactiveModules).LookupCascade;
-        }
+        public static IModelLookupCascade LookupCascade(this IModelReactiveModules reactiveModules) 
+            => ((IModelReactiveModuleLookupCascade) reactiveModules).LookupCascade;
     }
 
     [PublicAPI]
@@ -35,7 +33,7 @@ namespace Xpand.XAF.Modules.LookupCascade{
     [PublicAPI]
     public interface IModelClientDatasourceLookupView:IModelNode{
         [DataSourceProperty(nameof(LookupListViews))]
-        [Required]
+        [Required][Description("Lists ListViews that use the "+nameof(ASPxLookupCascadePropertyEditor))]
         IModelListView LookupListView{ get; [UsedImplicitly] set; }
         [Browsable(false)]
         IEnumerable<IModelListView> LookupListViews{ [UsedImplicitly] get; }
@@ -44,14 +42,11 @@ namespace Xpand.XAF.Modules.LookupCascade{
     [DomainLogic(typeof(IModelClientDatasourceLookupView))]
     public static class ModelClientDatasourceLookupViewLogic{
         [UsedImplicitly]
-        public static IModelList<IModelListView> Get_LookupListViews(IModelClientDatasourceLookupView lookupView){
-            var modelListViews = lookupView.Application.Views.OfType<IModelObjectView>()
+        public static IModelList<IModelListView> Get_LookupListViews(IModelClientDatasourceLookupView lookupView) 
+            => lookupView.Application.Views.OfType<IModelObjectView>()
                 .SelectMany(view => view.MemberViewItems(typeof(ASPxLookupCascadePropertyEditor)))
                 .Select(item => item.GetLookupListView())
-                .Distinct();
-            return new CalculatedModelNodeList<IModelListView>(modelListViews);
-        }
-
+                .Distinct().ToCalculatedModelNodeList();
     }
 
     public interface IModelClientDatasourceLookupViews:IModelList<IModelClientDatasourceLookupView>,IModelNode{
@@ -76,9 +71,8 @@ namespace Xpand.XAF.Modules.LookupCascade{
     }
 
     public class ModelMemberViewItemLooupCascadePropertyEditorVisibilityCalculator:IModelIsVisible{
-        public bool IsVisible(IModelNode node, string propertyName){
-            return typeof(ASPxLookupCascadePropertyEditor).IsAssignableFrom(((IModelMemberViewItem) node).PropertyEditorType);
-        }
+        public bool IsVisible(IModelNode node, string propertyName) 
+            => typeof(ASPxLookupCascadePropertyEditor).IsAssignableFrom(((IModelMemberViewItem) node).PropertyEditorType);
     }
 
     [ModelAbstractClass]
@@ -125,11 +119,9 @@ namespace Xpand.XAF.Modules.LookupCascade{
         }
 
         [UsedImplicitly]
-        public static IModelList<IModelMemberViewItem> Get_LookupPropertyEditorMemberViewItems(IModelLookupCascadePropertyEditor modelLookupPropertyEditor){
-            var modelMemberViewItems = modelLookupPropertyEditor.GetParent<IModelObjectView>().MemberViewItems()
-                .Where(item => item != modelLookupPropertyEditor.Parent && typeof(ASPxLookupCascadePropertyEditor).IsAssignableFrom(item.PropertyEditorType));
-            return new CalculatedModelNodeList<IModelMemberViewItem>(modelMemberViewItems);
-        }
+        public static IModelList<IModelMemberViewItem> Get_LookupPropertyEditorMemberViewItems(IModelLookupCascadePropertyEditor modelLookupPropertyEditor) 
+            => modelLookupPropertyEditor.GetParent<IModelObjectView>().MemberViewItems()
+                .Where(item => item != modelLookupPropertyEditor.Parent && typeof(ASPxLookupCascadePropertyEditor).IsAssignableFrom(item.PropertyEditorType)).ToCalculatedModelNodeList();
     }
 
 
