@@ -6,6 +6,7 @@ using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
+using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Templates;
 using Xpand.Extensions.Reactive.Filter;
@@ -14,8 +15,10 @@ using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
+using Xpand.Extensions.XAF.ViewExtenions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
+using Xpand.XAF.Modules.ViewItemValue.BusinessObjects;
 
 namespace Xpand.XAF.Modules.ViewItemValue{
     public static class ViewItemValueService{
@@ -38,8 +41,7 @@ namespace Xpand.XAF.Modules.ViewItemValue{
                     .SelectMany(item => item.Members)
                     .Select(item => {
                         var memberInfo = item.MemberViewItem.ModelMember.MemberInfo;
-                        var defaultObject = view.ObjectSpace.GetObjectsQuery<BusinessObjects.ViewItemValueObject>()
-                            .FirstOrDefault(o => o.ViewItemId == memberInfo.Name && o.ObjectView == view.Id);
+                        var defaultObject = view.ViewItemValueObject(memberInfo);
                         if (defaultObject != null){
                             var typeConverter = TypeDescriptor.GetConverter(memberInfo.MemberTypeInfo.KeyMember.MemberType);
                             var objectKeyValue = defaultObject.ViewItemValue;
@@ -54,6 +56,18 @@ namespace Xpand.XAF.Modules.ViewItemValue{
                 .TraceDefaultObjectValue(item => item.Id())
                 .ToUnit());
 
+        private static ViewItemValueObject ViewItemValueObject(this DetailView view, IMemberInfo memberInfo){
+            ViewItemValueObject Query(IObjectSpace space) 
+                => space.GetObjectsQuery<ViewItemValueObject>()
+                    .FirstOrDefault(o => o.ViewItemId == memberInfo.Name && o.ObjectView == view.Id);
+            if (!view.ObjectTypeInfo.IsPersistent){
+                using (var space = view.Application().CreateObjectSpace()){
+                    return Query(space);
+                }
+            }
+            return Query(view.ObjectSpace);
+        }
+
         private static IObservable<Unit> SaveViewItemValue(this IObservable<SingleChoiceAction> registerAction) => registerAction
             .WhenExecute()
             .Select(e => {
@@ -63,9 +77,9 @@ namespace Xpand.XAF.Modules.ViewItemValue{
                     var memberInfo = item.MemberViewItem.ModelMember.MemberInfo;
                     var memberName = memberInfo.Name;
                     var objectViewId = defaultObjectItem.ObjectView.Id;
-                    var defaultObject = objectSpace.GetObjectsQuery<BusinessObjects.ViewItemValueObject>(true)
+                    var defaultObject = objectSpace.GetObjectsQuery<ViewItemValueObject>(true)
                                             .FirstOrDefault(o => o.ViewItemId == memberName && o.ObjectView == objectViewId) ??
-                                        objectSpace.CreateObject<BusinessObjects.ViewItemValueObject>();
+                                        objectSpace.CreateObject<ViewItemValueObject>();
                     defaultObject.ObjectView = objectViewId;
                     defaultObject.ViewItemId = memberName;
                     var value = memberInfo.GetValue(e.SelectedObjects.Cast<object>().First());

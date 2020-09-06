@@ -35,9 +35,10 @@ namespace ALL.Tests{
             => deleteAll.Switch().ToUnit()
                 .Merge(application.WhenWindowCreated().When(TemplateContext.ApplicationWindow).FirstAsync()
                     .Do(window => {
-                        var objectSpace = window.Application.CreateObjectSpace();
-                        objectSpace.Delete(objectSpace.GetObjects<Task>());
-                        objectSpace.CommitChanges();
+                        using (var objectSpace = window.Application.CreateObjectSpace()){
+                            objectSpace.Delete(objectSpace.GetObjects<Task>());
+                            objectSpace.CommitChanges();
+                        }
                     }).ToUnit());
 
         

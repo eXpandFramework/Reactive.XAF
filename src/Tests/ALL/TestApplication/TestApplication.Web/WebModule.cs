@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Chart.Web;
@@ -46,8 +47,6 @@ namespace TestApplication.Web{
             RequiredModuleTypes.Add(typeof(ValidationAspNetModule));
             RequiredModuleTypes.Add(typeof(SystemAspNetModule));
             #endregion
-            
-
             RequiredModuleTypes.Add(typeof(LookupCascadeModule));
         }
 
@@ -57,8 +56,10 @@ namespace TestApplication.Web{
 
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
+            if (!Debugger.IsAttached){
+                moduleManager.Extend(Enum.GetValues(typeof(PredefinedMap)).OfType<PredefinedMap>().Where(map =>map!=PredefinedMap.None&& map.Platform()==Platform.Web));
+            }
             
-            // moduleManager.Extend(Enum.GetValues(typeof(PredefinedMap)).OfType<PredefinedMap>().Where(map =>map!=PredefinedMap.None&& map.Platform()==Platform.Web));
             moduleManager.LookupCascade().ToUnit()
 	            .Subscribe(this);
         }
