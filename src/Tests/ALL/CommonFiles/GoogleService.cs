@@ -20,6 +20,7 @@ namespace ALL.Tests{
                         commandAdapter.Execute(new FindItemCommand("Go to TestApplication (unsafe)",true),new WaitCommand(3000));
                         commandAdapter.Execute(new MouseCommand(new Point(619, 497)),new WaitCommand(2000));
                         commandAdapter.Execute(new SendKeysCommand(Win32Constants.VirtualKeys.PageDown),new WaitCommand(2000));
+                        commandAdapter.Execute(new SendKeysCommand(Win32Constants.VirtualKeys.PageDown),new WaitCommand(2000));
                         commandAdapter.Execute(new MouseCommand(new Point(652,606)),new WaitCommand(2000));
                         return whenConnected();
                     })), "Google",new CheckDetailViewCommand(("Value","xpand.testaplication@gmail.com")));
