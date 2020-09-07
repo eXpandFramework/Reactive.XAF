@@ -112,9 +112,9 @@ namespace Xpand.XAF.Modules.LookupCascade{
         [UsedImplicitly]
         public static IModelList<IModelColumn> Get_CascadeColumnFilters(IModelLookupCascadePropertyEditor modelLookupPropertyEditor){
             var cascadeMemberViewItem = modelLookupPropertyEditor.CascadeMemberViewItem;
+            var keyMemberMemberType = modelLookupPropertyEditor.GetParent<IModelMemberViewItem>().ModelMember.MemberInfo.MemberTypeInfo.KeyMember.MemberType;
             return new CalculatedModelNodeList<IModelColumn>(cascadeMemberViewItem != null
-                ? cascadeMemberViewItem.GetLookupListView().VisibleMemberViewItems().Cast<IModelColumn>()
-                    .Where(_ => _.ModelMember.Type==modelLookupPropertyEditor.GetParent<IModelMemberViewItem>().ModelMember.MemberInfo.Owner.KeyMember.MemberType)
+                ? cascadeMemberViewItem.GetLookupListView().VisibleMemberViewItems().Cast<IModelColumn>().Where(_ => _.ModelMember.Type==keyMemberMemberType)
                 : Enumerable.Empty<IModelColumn>());
         }
 

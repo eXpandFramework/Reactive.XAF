@@ -17,7 +17,7 @@ namespace Xpand.XAF.Modules.LookupCascade.Tests{
             var application = ClientLookupCascadeModule().Application;
             var applicationModel = application.Model;
             var modelObjectView = applicationModel.Views[viewId].AsObjectView;
-            var modelMemberViewItems = modelObjectView.MemberViewItems();
+            var modelMemberViewItems = modelObjectView.MemberViewItems().ToArray();
             var productModelMemberViewItem = modelMemberViewItems.First(item => item.ModelMember.MemberInfo.MemberType==typeof(Product));
             productModelMemberViewItem.PropertyEditorType=typeof(ASPxLookupCascadePropertyEditor);
             var accesoryModelMemberViewItem = modelMemberViewItems.First(item => item.ModelMember.MemberInfo.MemberType==typeof(Accessory));
@@ -39,7 +39,7 @@ namespace Xpand.XAF.Modules.LookupCascade.Tests{
             var application = ClientLookupCascadeModule().Application;
             var applicationModel = application.Model;
             var modelObjectView = applicationModel.Views[viewId].AsObjectView;
-            var modelMemberViewItems = modelObjectView.MemberViewItems();
+            var modelMemberViewItems = modelObjectView.MemberViewItems().ToArray();
             var productModelMemberViewItem = modelMemberViewItems.First(item => item.ModelMember.MemberInfo.MemberType==typeof(Product));
             productModelMemberViewItem.PropertyEditorType=typeof(ASPxLookupCascadePropertyEditor);
             var accesoryModelMemberViewItem = modelMemberViewItems.First(item => item.ModelMember.MemberInfo.MemberType==typeof(Accessory));
