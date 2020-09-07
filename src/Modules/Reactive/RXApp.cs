@@ -114,7 +114,7 @@ namespace Xpand.XAF.Modules.Reactive{
                 .Do(_ => {
                     var harmony = new Harmony("SecurityAuthentication");
                     if (application.Security.IsInstanceOf("DevExpress.ExpressApp.Security.SecurityStrategyBase")){
-                        var methodInfo = ( application.Security)?.GetPropertyValue("Authentication")?.GetType().GetMethod("Authenticate");
+                        var methodInfo = ( application.Security)?.GetPropertyValue("Authentication")?.GetType().Methods("Authenticate").Last();
                         if (methodInfo != null){
                             harmony.Patch(methodInfo, new HarmonyMethod(GetMethodInfo(nameof(Authenticate))));	
                         }	
