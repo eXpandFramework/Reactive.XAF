@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -91,6 +92,16 @@ namespace ALL.Tests{
             }
             commandAdapter.Execute(new WaitCommand(5000));
             var foregroundWindow = Win32Declares.WindowFocus.GetForegroundWindow();
+            commandAdapter.Execute(new MoveWindowCommand(0,0,1024,768));
+            commandAdapter.Execute(new MouseCommand(new Point(341,663)),new WaitCommand(1000));
+            for (int i = 0; i < 70; i++){
+                commandAdapter.Execute(new SendKeysCommand(Win32Constants.VirtualKeys.Up),new WaitCommand(150));    
+            }
+            for (int i = 0; i < 7; i++){
+                commandAdapter.Execute(new SendKeysCommand(Win32Constants.VirtualKeys.Down),new WaitCommand(150));    
+            }
+            commandAdapter.Execute(new SendKeysCommand(Win32Constants.VirtualKeys.Return),new WaitCommand(150));    
+            commandAdapter.Execute(new WaitCommand(5000));
             commandAdapter.Execute(new SendTextCommand(email),new WaitCommand(1000));
             Win32Declares.WindowFocus.SetForegroundWindow(foregroundWindow);
             commandAdapter.Execute(new SendKeysCommand(Win32Constants.VirtualKeys.Return), new WaitCommand((int) (WaitInterval*1.5)));

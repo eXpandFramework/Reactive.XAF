@@ -21,7 +21,7 @@ namespace Xpand.TestsLib.EasyTest.Commands.Automation{
 			else{
 				inputSimulator.Keyboard.KeyPress(_keyCodes);	
 			}
-
+			adapter.Execute(new WaitCommand(100));
 		}
 	}
 }

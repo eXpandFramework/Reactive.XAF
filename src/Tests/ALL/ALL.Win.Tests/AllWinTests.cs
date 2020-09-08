@@ -36,12 +36,12 @@ namespace ALL.Win.Tests{
         } 
         
         [Test]
-        [XpandTest(LongTimeout,3)]
+        // [XpandTest(LongTimeout,3)]
         [Apartment(ApartmentState.STA)]
         public async Task Win_EasyTest_InMemory(){
             await EasyTest(() => new WinAdapter(), RunWinApplication, async adapter => {
-                    var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
-                    adapter.Execute(autoTestCommand);
+                    // var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
+                    // adapter.Execute(autoTestCommand);
                     await adapter.TestCloudServices();
                 });
         }     

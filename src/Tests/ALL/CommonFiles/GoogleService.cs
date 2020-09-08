@@ -3,7 +3,9 @@ using System.Drawing;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using DevExpress.EasyTest.Framework;
+using NUnit.Framework;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.TestsLib.EasyTest;
@@ -18,12 +20,25 @@ namespace ALL.Tests{
                 => commandAdapter.Authenticate(singInCaption,"TestAppPass","xpand.testaplication@gmail.com")
                     .Concat(Unit.Default.ReturnObservable().SelectMany(_ => {
                         commandAdapter.Execute(new WaitCommand(3000));
-                        commandAdapter.Execute(new MoveWindowCommand(0,0,1024,768));
+                        TestContext.Out.WriteLine($"aaaaaaaaaaaaaaaaaaa{AppDomain.CurrentDomain.ApplicationPath()}\\..\\WinAuth.exe");
                         commandAdapter.Execute(new TwoFactorCommand($"{AppDomain.CurrentDomain.ApplicationPath()}\\..\\WinAuth.exe",$"{AppDomain.CurrentDomain.ApplicationPath()}\\..\\Xpand.testapplication.xml"));
                         commandAdapter.Execute(new SendKeysCommand(Win32Constants.VirtualKeys.Tab));
                         commandAdapter.Execute(new SendKeysCommand(Win32Constants.VirtualKeys.Tab));
                         commandAdapter.Execute(new SendKeysCommand(Win32Constants.VirtualKeys.Return));
                         commandAdapter.Execute(new WaitCommand(6000));
+                        commandAdapter.Execute(new MouseCommand(new Point(100,100)));
+                        try{
+                            commandAdapter.Execute(new FindItemCommand("Verify",false),new WaitCommand(1500));
+                            var text = Clipboard.GetText();
+                            commandAdapter.Execute(new SendKeysCommand(Win32Constants.VirtualKeys.Tab));
+                            commandAdapter.Execute(new SendKeysCommand(Win32Constants.VirtualKeys.Return));
+                            commandAdapter.Execute(new WaitCommand(3000));
+                        }
+                        catch{
+                            // ignored
+                        }
+
+
                         commandAdapter.Execute(new MouseCommand(new Point(242,428)));
                         commandAdapter.Execute(new WaitCommand(3000));
                         commandAdapter.Execute(new MouseCommand(new Point(298,570)));
