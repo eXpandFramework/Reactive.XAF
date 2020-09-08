@@ -79,7 +79,7 @@ jobs:
           & '$(System.DefaultWorkingDirectory)/build/DownloadCloudCreds.ps1' '$(GitHubToken)'
     - task: VSTest@2
       displayName: 'Test Modules'
-      enabled: false
+      enabled: true
       continueOnError: true
       inputs:
         searchFolder: '$(System.DefaultWorkingDirectory)'
