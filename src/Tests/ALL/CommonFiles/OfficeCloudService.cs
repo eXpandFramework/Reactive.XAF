@@ -39,14 +39,6 @@ namespace ALL.Tests{
             commandAdapter.Execute(new ActionCommand(Actions.Refresh), new CheckListViewCommand("",0));
         }
 
-        public static async Task TestCloudServices(this ICommandAdapter commandAdapter){
-            await commandAdapter.TestGoogleService(() => Observable.Start(commandAdapter.TestGoogleTasksService).ToUnit());
-            await commandAdapter.TestMicrosoftService(() => Observable.Start(() => {
-                commandAdapter.TestMicrosoftCalendarService();
-                commandAdapter.TestMicrosoftTodoService();
-            }).ToUnit());
-        }
-
         public static async Task TestCloudService(this ICommandAdapter commandAdapter,
             Func<string, IObservable<Unit>> whenConnected, string serviceName,
             CheckDetailViewCommand checkAccountInfoCOmmand){

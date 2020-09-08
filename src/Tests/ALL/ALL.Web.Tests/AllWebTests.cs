@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ALL.Tests;
@@ -11,6 +12,7 @@ using Fasterflect;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.AppDomainExtensions;
+using Xpand.Extensions.Reactive.Transform;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Attributes;
 using Xpand.TestsLib.EasyTest;
@@ -39,12 +41,34 @@ namespace ALL.Web.Tests{
         [XpandTest(LongTimeout,3)]
         [Test][Apartment(ApartmentState.STA)]
         public async Task Web_EasyTest_InMemory(){
-            await EasyTest(() => new WebAdapter(), RunWebApplication, async adapter => {
+            await EasyTest(() => new WebAdapter(), RunWebApplication, adapter => {
                 var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
                 adapter.Execute(autoTestCommand);
-                await adapter.TestCloudServices();
+                adapter.TestLookupCascade();
+                return Task.CompletedTask;
             });
         }
+
+        [Test]
+        [XpandTest(LongTimeout,3)]
+        [Apartment(ApartmentState.STA)]
+        public async Task Web_EasyTest_Google(){
+            await EasyTest(() => new WebAdapter(), RunWebApplication, async adapter => {
+                await adapter.TestGoogleService(() => Observable.Start(adapter.TestGoogleTasksService).ToUnit());
+            });
+        }     
+
+        [Test]
+        [XpandTest(LongTimeout,3)]
+        [Apartment(ApartmentState.STA)]
+        public async Task Web_EasyTest_Microsoft(){
+            await EasyTest(() => new WebAdapter(), RunWebApplication, async adapter => {
+                await adapter.TestMicrosoftService(() => Observable.Start(() => {
+                    adapter.TestMicrosoftCalendarService();
+                    adapter.TestMicrosoftTodoService();
+                }).ToUnit());
+            });
+        }     
 
         [Test]
         [XpandTest(LongTimeout,3)]
