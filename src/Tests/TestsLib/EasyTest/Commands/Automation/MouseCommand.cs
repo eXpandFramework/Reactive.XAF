@@ -3,14 +3,18 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Threading;
 using DevExpress.EasyTest.Framework;
+using Xpand.TestsLib.InputSimulator;
 
 namespace Xpand.TestsLib.EasyTest.Commands.Automation{
+    
     public class MouseCommand:EasyTestCommand{
         private readonly Point _moveTo;
+        private readonly Action<IMouseSimulator> _execute;
         private static readonly InputSimulator.InputSimulator Simulator=new InputSimulator.InputSimulator();
 
-        public MouseCommand(Point moveTo){
+        public MouseCommand(Point moveTo,Action<IMouseSimulator> execute=null){
             _moveTo = moveTo;
+            _execute = execute ?? (simulator => simulator.LeftButtonClick());
         }
         [DllImport("User32.dll")]
         public static extern IntPtr GetDC(IntPtr hwnd);
@@ -48,7 +52,7 @@ namespace Xpand.TestsLib.EasyTest.Commands.Automation{
                 Simulator.Mouse.MoveMouseTo(_moveTo.X, _moveTo.Y);
             }
             Blink(_moveTo);
-            Simulator.Mouse.LeftButtonClick();
+            _execute(Simulator.Mouse);
             Thread.Sleep(500);
         }
     }

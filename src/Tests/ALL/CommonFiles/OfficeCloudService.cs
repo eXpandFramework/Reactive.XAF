@@ -89,7 +89,7 @@ namespace ALL.Tests{
             else{
                 commandAdapter.Execute(new ActionCommand(signInCaption),new WaitCommand(WaitInterval*2));
             }
-
+            commandAdapter.Execute(new WaitCommand(5000));
             var foregroundWindow = Win32Declares.WindowFocus.GetForegroundWindow();
             commandAdapter.Execute(new SendTextCommand(email),new WaitCommand(1000));
             Win32Declares.WindowFocus.SetForegroundWindow(foregroundWindow);

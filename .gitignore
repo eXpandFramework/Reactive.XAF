@@ -636,3 +636,5 @@ $RECYCLE.BIN/
 **Authentication**.json
 **Credentials**.json
 **pass.json
+**/WinAuth.exe
+**/Xpand.testapplication.xml

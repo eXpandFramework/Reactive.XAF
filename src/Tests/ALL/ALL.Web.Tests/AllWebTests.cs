@@ -40,8 +40,8 @@ namespace ALL.Web.Tests{
         [Test][Apartment(ApartmentState.STA)]
         public async Task Web_EasyTest_InMemory(){
             await EasyTest(() => new WebAdapter(), RunWebApplication, async adapter => {
-                var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
-                adapter.Execute(autoTestCommand);
+                // var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
+                // adapter.Execute(autoTestCommand);
                 await adapter.TestCloudServices();
             });
         }
