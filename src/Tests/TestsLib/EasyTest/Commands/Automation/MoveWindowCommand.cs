@@ -1,8 +1,9 @@
-﻿using DevExpress.EasyTest.Framework;
+﻿using System.Threading;
+using DevExpress.EasyTest.Framework;
 using JetBrains.Annotations;
 using Xpand.TestsLib.Win32;
 
-namespace Xpand.TestsLib.EasyTest.Commands{
+namespace Xpand.TestsLib.EasyTest.Commands.Automation{
     public class MoveWindowCommand:EasyTestCommand{
         private readonly int _x;
         private readonly int _y;
@@ -25,6 +26,7 @@ namespace Xpand.TestsLib.EasyTest.Commands{
 
         protected override void ExecuteCore(ICommandAdapter adapter){
             Win32Declares.Window.MoveWindow(Win32Declares.WindowFocus.GetForegroundWindow(), _x, _y, _width, _height, _repaint);
+            Thread.Sleep(500);
         }
     }
 }

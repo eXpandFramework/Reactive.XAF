@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
-
 using System.Threading;
 using DevExpress.EasyTest.Framework;
 
-namespace Xpand.TestsLib.EasyTest.Commands{
+namespace Xpand.TestsLib.EasyTest.Commands.Automation{
     public class MouseCommand:EasyTestCommand{
         private readonly Point _moveTo;
         private static readonly InputSimulator.InputSimulator Simulator=new InputSimulator.InputSimulator();
@@ -50,6 +49,7 @@ namespace Xpand.TestsLib.EasyTest.Commands{
             }
             Blink(_moveTo);
             Simulator.Mouse.LeftButtonClick();
+            Thread.Sleep(500);
         }
     }
     

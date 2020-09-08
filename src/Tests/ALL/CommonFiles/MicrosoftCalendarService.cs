@@ -4,6 +4,7 @@ using DevExpress.Persistent.BaseImpl;
 using Xpand.TestsLib.EasyTest;
 using Xpand.TestsLib.EasyTest.Commands;
 using Xpand.TestsLib.EasyTest.Commands.ActionCommands;
+using Xpand.TestsLib.EasyTest.Commands.Automation;
 
 namespace ALL.Win.Tests{
     public static class MicrosoftCalendarService{

@@ -1,6 +1,6 @@
 ﻿using DevExpress.EasyTest.Framework;
 
-namespace Xpand.TestsLib.EasyTest.Commands{
+namespace Xpand.TestsLib.EasyTest.Commands.Automation{
 	public class SendTextCommand:EasyTestCommand{
 		private readonly string _text;
 		

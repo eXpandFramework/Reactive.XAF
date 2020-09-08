@@ -12,6 +12,7 @@ using NUnit.Framework.Interfaces;
 using Xpand.Extensions.StringExtensions;
 using Xpand.TestsLib.EasyTest;
 using Xpand.TestsLib.EasyTest.Commands;
+using Xpand.TestsLib.EasyTest.Commands.Automation;
 
 namespace ALL.Tests{
     public abstract class BaseTest:Xpand.TestsLib.BaseTest{

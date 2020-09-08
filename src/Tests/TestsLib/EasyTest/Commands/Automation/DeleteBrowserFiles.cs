@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading;
 using Xpand.TestsLib.Win32;
 
-namespace Xpand.TestsLib.EasyTest.Commands{
+namespace Xpand.TestsLib.EasyTest.Commands.Automation{
     public class DeleteBrowserFiles{
         public static void Execute(){
             KillBrowser();

@@ -3,7 +3,7 @@ using System.Linq;
 using DevExpress.EasyTest.Framework;
 using Xpand.TestsLib.Win32;
 
-namespace Xpand.TestsLib.EasyTest.Commands{
+namespace Xpand.TestsLib.EasyTest.Commands.Automation{
 	public class SendKeysCommand : EasyTestCommand{
 		private readonly Win32Constants.VirtualKeys _keyCodes;
 		private readonly IEnumerable<Win32Constants.VirtualKeys> _modifierKeyCodes;

@@ -1,7 +1,7 @@
 ﻿using DevExpress.EasyTest.Framework;
 using DevExpress.ExpressApp.EasyTest.WebAdapter;
 
-namespace Xpand.TestsLib.EasyTest.Commands{
+namespace Xpand.TestsLib.EasyTest.Commands.Automation{
     public class SetHtmlElementValueCommand:EasyTestCommand{
         public SetHtmlElementValueCommand(string identifier,bool byName=false){
         }

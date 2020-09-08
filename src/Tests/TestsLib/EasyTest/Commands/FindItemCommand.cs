@@ -1,4 +1,5 @@
 ﻿using DevExpress.EasyTest.Framework;
+using Xpand.TestsLib.EasyTest.Commands.Automation;
 using Xpand.TestsLib.Win32;
 
 namespace Xpand.TestsLib.EasyTest.Commands{

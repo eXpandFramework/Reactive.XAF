@@ -12,6 +12,7 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.TestsLib.EasyTest;
 using Xpand.TestsLib.EasyTest.Commands;
 using Xpand.TestsLib.EasyTest.Commands.ActionCommands;
+using Xpand.TestsLib.EasyTest.Commands.Automation;
 using Xpand.TestsLib.Win32;
 
 namespace ALL.Tests{
@@ -37,6 +38,14 @@ namespace ALL.Tests{
             
             commandAdapter.Execute(new NavigateCommand(navigationItemCaption));
             commandAdapter.Execute(new ActionCommand(Actions.Refresh), new CheckListViewCommand("",0));
+        }
+
+        public static async Task TestCloudServices(this ICommandAdapter commandAdapter){
+            await commandAdapter.TestGoogleService(() => Observable.Start(commandAdapter.TestGoogleTasksService).ToUnit());
+            await commandAdapter.TestMicrosoftService(() => Observable.Start(() => {
+                commandAdapter.TestMicrosoftCalendarService();
+                commandAdapter.TestMicrosoftTodoService();
+            }).ToUnit());
         }
 
         public static async Task TestCloudService(this ICommandAdapter commandAdapter,

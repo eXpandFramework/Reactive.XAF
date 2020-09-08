@@ -473,7 +473,7 @@ namespace Xpand.TestsLib.Win32 {
             /// </summary>
             /// <param name="hwnd">[in] Handle to the window or control containing the text. </param>
             /// <param name="stringBuilder">[out] Pointer to the buffer that will receive the text. If the string is as long or longer than the buffer, the string is truncated and terminated with a NULL character. </param>
-            /// <param name="cch">[in] Specifies the maximum number of characters to copy to the buffer, including the NULL character. If the text exceeds this limit, it is truncated</param>
+            /// <param name="cch">[in] Specifies the maximum number of characters to copy to the buffer, including the NULL character. If the text exceeds this limit, it is truncated. Use 256</param>
             /// <returns>If the function succeeds, the return value is the length, in characters, of the copied string, not including the terminating NULL character. If the window has no title bar or text, if the title bar is empty, or if the window or control handle is invalid, the return value is zero. To get extended error information, call GetLastError. This function cannot retrieve the text of an edit control in another application.</returns>
             [DllImport("user32.dll")]
             public static extern int GetWindowText(IntPtr hwnd, StringBuilder stringBuilder, int cch);
