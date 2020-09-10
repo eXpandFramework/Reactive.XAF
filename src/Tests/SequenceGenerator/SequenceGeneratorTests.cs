@@ -16,6 +16,7 @@ using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions;
 using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.SequenceGenerator.Tests.BO;
@@ -34,7 +35,8 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
             }
         }
 
-        [Test][XpandTest()]
+        [Test]
+        [XpandTest()]
         public async Task Observe_ObjectSpace_Commiting_On_Sequence_Generator_Thread(){
             using (var application = SequenceGeneratorModule().Application){
                 var eventLoopScheduler = new EventLoopScheduler(start => new Thread(start){IsBackground = true});
@@ -57,7 +59,8 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         }
 
 
-        [Test][XpandTest]
+        [Test]
+        [XpandTest]
         public async Task Do_Not_Increase_Sequence_When_Updating_Objects(){
             using (var application = SequenceGeneratorModule().Application){
                 SetSequences(application);
@@ -78,7 +81,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         }
 
         [Combinatorial]
-        [XpandTest]
+        [XpandTest(LongTimeout)]
         public async Task Increase_Sequence_When_Saving_New_Objects([Values(2, 102, 500)] int itemsCount, [Values(true, false)] bool parallel, [Values(1, 2)] int objectSpaceCount){
             using (var application = SequenceGeneratorModule().Application){
                 SetSequences(application);
@@ -93,7 +96,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 
         [Test]
         [XpandTest]
-        public void Increase_Sequence_When_saving_Nested_New_Objects(){
+        public void Increase_Sequence_When_saving_Nested_New_Objects_from_subsequent_commits(){
             using (var application = SequenceGeneratorModule().Application){
                 SetSequences(application);
                 var nextSequenceTest = SequenceGeneratorService.Sequence.OfType<Child>().Test();
@@ -106,26 +109,38 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
                     }
                     objectSpace.CommitChanges();
                     AssertNextSequences(application, objectCount,nextSequenceTest);
+
                     parent = objectSpace.CreateObject<Parent>();
-                    for (int i = 0; i < 10; i++){
+                    for (int i = 0; i < objectCount; i++){
                         parent.Childs.Add(objectSpace.CreateObject<Child>());    
                     }
                     objectSpace.CommitChanges();
                 
-                    AssertNextSequences(application, 20,nextSequenceTest);
+                    AssertNextSequences(application, objectCount*2,nextSequenceTest);
                 }
             }
         }
         [Test][XpandTest]
-        public void Increase_Sequence_When_creating_Nested_New_Objects_on_parent_saving(){
+        public void Increase_Sequence_When_creating_Nested_New_Objects_on_non_sequencial_parent_saving(){
+            Increase_Sequence_When_creating_Nested_New_Objects_on_parent_saving<ParentNonSequencialWithChildOnSaving>();
+        }
+
+        [Test][XpandTest]
+        public void Increase_Sequence_When_creating_Nested_New_Objects_on_sequencial_parent_saving(){
+            Increase_Sequence_When_creating_Nested_New_Objects_on_parent_saving<ParentSequencialWithChildOnSaving>();
+        }
+
+        private void Increase_Sequence_When_creating_Nested_New_Objects_on_parent_saving<TParent>() where TParent:Parent{
             using (var application = SequenceGeneratorModule().Application){
                 SetSequences(application);
                 var nextSequenceTest = SequenceGeneratorService.Sequence.OfType<Child>().Test();
 
                 using (var objectSpace = application.CreateObjectSpace()){
-                    objectSpace.CreateObject<ParentWithChildOnSaving>();
+                    objectSpace.CreateObject<TParent>();
+                    objectSpace.UnitOfWork().BeforeCommitTransaction += (sender, args) => { };
+                    objectSpace.UnitOfWork().ObjectSaving += (sender, args) => { };
                     objectSpace.CommitChanges();
-                    AssertNextSequences(application, 1,nextSequenceTest);
+                    AssertNextSequences(application, 1, nextSequenceTest);
                 }
             }
         }
@@ -164,13 +179,17 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
             }
         }
 
-        [Test][XpandTest]
+        [Test]
+        [XpandTest]
         public async Task Increase_Sequence_When_Saving_Different_Type_Objects(){
             using (var application = SequenceGeneratorModule().Application){
                 SetSequences(application);
                 var nextSequenceTest = SequenceGeneratorService.Sequence.OfType<ISequentialNumber>().SubscribeReplay();
-                
-                await TestObjects<TestType2Object>(application, false, 1).Merge(TestObjects(application, false,1)).Merge(TestObjects<TestObjectNotRegistered>(application, false, 1));
+
+                await TestObjects<TestType2Object>(application, false, 1)
+                    .Concat(TestObjects(application, false,1))
+                    .Concat(TestObjects<TestObjectNotRegistered>(application, false, 1))
+                    ;
                 
                 AssertNextSequences(application, 1,nextSequenceTest.OfType<TestObject>().Test());
                 AssertNextSequences(application, 1,nextSequenceTest.OfType<TestType2Object>().Test());
@@ -338,6 +357,6 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
                 AssertNextSequences(application, 1,testObserver);
             }
         }
-
     }
+
 }

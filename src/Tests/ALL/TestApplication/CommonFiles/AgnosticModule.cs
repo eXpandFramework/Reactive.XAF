@@ -122,7 +122,7 @@ namespace TestApplication{
 			RequiredModuleTypes.Add(typeof(ReactiveModule));
 			RequiredModuleTypes.Add(typeof(ReactiveLoggerModule));
 			RequiredModuleTypes.Add(typeof(RefreshViewModule));
-			RequiredModuleTypes.Add(typeof(SequenceGeneratorModule));
+			// RequiredModuleTypes.Add(typeof(SequenceGeneratorModule));
 			RequiredModuleTypes.Add(typeof(SuppressConfirmationModule));
 			RequiredModuleTypes.Add(typeof(ViewEditModeModule));
 			RequiredModuleTypes.Add(typeof(ViewItemValueModule));

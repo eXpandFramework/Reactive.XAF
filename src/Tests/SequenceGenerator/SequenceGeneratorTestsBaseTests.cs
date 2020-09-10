@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -8,8 +7,6 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Xpo;
 using DevExpress.Xpo;
 using DevExpress.Xpo.DB;
-using Fasterflect;
-using JetBrains.Annotations;
 using Shouldly;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib;
@@ -41,6 +38,8 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
                 objectSpace.SetSequence<CustomSquenceNameTestObject>(o => o.SequentialNumber,emptyType,sequenceStorageType: sequenceStorageType);
                 objectSpace.SetSequence<Child>(o => o.SequentialNumber,emptyType,sequenceStorageType: sequenceStorageType);
                 objectSpace.SetSequence<ParentSequencial>(o => o.SequentialNumber,emptyType,sequenceStorageType: sequenceStorageType);
+                objectSpace.SetSequence<ParentSequencialWithChildOnSaving>(o => o.SequentialNumber,emptyType,sequenceStorageType: sequenceStorageType);
+                
             }
         }
         
@@ -63,21 +62,6 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
             );
 
 
-        [UsedImplicitly]
-        protected IObservable<Unit> DeleteAndCreate(XafApplication application){
-            var deleteOneCreateOne = Observable.Defer(() => Observable.Start(() => {
-                using (var objectSpace = application.CreateObjectSpace()){
-                    var sequenceGeneratorTestObject =
-                        objectSpace.GetObjectsQuery<TestObject>().First();
-                    sequenceGeneratorTestObject.Title = "delete";
-                    objectSpace.Delete(sequenceGeneratorTestObject);
-                    objectSpace.CreateObject<TestObject>();
-                    objectSpace.CommitChanges();
-                }
-            }));
-            return deleteOneCreateOne;
-        }
-
         protected IObservable<Unit> TestObjects<T>(XafApplication application,bool parallel, int count = 100, int objectSpaceCount = 1, Action beforeSave = null){
             if (parallel){
                 return Observable.Range(1, count).SelectMany(i => Observable.Defer(() => Observable.Start(() => {
@@ -86,7 +70,6 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
                             objectSpace.CreateObject<T>();
                             beforeSave?.Invoke();
                             objectSpace.CommitChanges();
-                            Debug.WriteLine("");
                         }
                     }
                 })));

@@ -32,9 +32,9 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
                 .TakeUntil(session.WhenDisposed());
 
         [PublicAPI]
-        public static IObservable<Session> WhenObjectSaving(this Session session) 
+        public static IObservable<ObjectManipulationEventArgs> WhenObjectSaving(this Session session) 
             => Observable.FromEventPattern<ObjectManipulationEventHandler, EventArgs>(h => session.ObjectSaving += h, h => session.ObjectSaving -= h, EventsScheduler)
-                .Select(pattern => pattern.Sender).Cast<Session>()
+                .Select(pattern => pattern.EventArgs).Cast<ObjectManipulationEventArgs>()
                 .TakeUntil(session.WhenDisposed());
 
         [PublicAPI]

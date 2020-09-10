@@ -23,8 +23,8 @@ namespace TestApplication.Win{
 
         protected override void CreateDefaultObjectSpaceProvider(CreateCustomObjectSpaceProviderEventArgs args){
             args.ObjectSpaceProvider=new XPObjectSpaceProvider(new ConnectionStringDataStoreProvider(args.ConnectionString),true);
-            // args.ObjectSpaceProvider = new XPObjectSpaceProvider(
-                // new ConnectionStringDataStoreProvider(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString), true);
+            args.ObjectSpaceProvider = new XPObjectSpaceProvider(
+                new ConnectionStringDataStoreProvider(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString), true);
         }
     }
 }

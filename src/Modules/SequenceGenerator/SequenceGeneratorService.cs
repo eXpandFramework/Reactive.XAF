@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
@@ -19,7 +18,6 @@ using DevExpress.Xpo.DB;
 using DevExpress.Xpo.Helpers;
 using Fasterflect;
 using JetBrains.Annotations;
-using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.SecurityExtensions;
@@ -191,24 +189,30 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         public static IObservable<object> Sequence => SequenceSubject.AsObservable();
 
         private static IObservable<object> GenerateSequences(this IObservable<IObjectSpace> source, IDataLayer dataLayer,Type sequenceStorageType=null) 
-            => source.SelectMany(space => Observable.Defer(space.GetObjectsForSave)
-                    .RepeatWhen(observable => observable.Where(o => space.UnitOfWork() != null).Do(o => space.CommitChanges())))
-                .Synchronize()
-                .SelectMany(t => t.GenerateSequences(dataLayer, sequenceStorageType))
+            => source.SelectMany(space => Observable.Defer(() => space.GetObjectForSave(dataLayer).SelectMany(e => e.GenerateSequences(sequenceStorageType))
+                        .TakeUntil(space.WhenCommited().Select(objectSpace => objectSpace)))
+                    .RepeatWhen(observable => observable.Where(o => !space.IsDisposed).Do(o => {}))
+                )
                 .Select(o => o)
                 .Do(SequenceSubject)
                 .TraceSequenceGeneratorModule();
 
-        static IObservable<(UnitOfWork unitOfWork, object[])> GetObjectsForSave(this IObjectSpace objectSpace){
+        static IObservable<(ObjectManipulationEventArgs e, ExplicitUnitOfWork explicitUnitOfWork)> GetObjectForSave(this IObjectSpace objectSpace, IDataLayer dataLayer ){
             var unitOfWork = objectSpace.UnitOfWork();
-            return unitOfWork.WhenObjectSaving().SelectMany(session => session.GetObjectsToSave().Cast<object>().Where(objectSpace.IsNewObject).ToArray())
-                .Buffer(unitOfWork.WhenObjectsSaved).FirstAsync().WhenNotEmpty().Select(list => (unitOfWork, list.Distinct().ToArray()));
+            return objectSpace.WhenCommiting().SelectMany(_ => {
+                var explicitUnitOfWork = new ExplicitUnitOfWork(dataLayer);
+                return unitOfWork.WhenObjectSaving()
+                    .Where(e => e.Session.IsNewObject(e.Object))
+                    .Select(e => (e,explicitUnitOfWork))
+                    .TakeUntil(objectSpace.WhenCommited().ToUnit().Merge(objectSpace.WhenRollingBack().ToUnit()))
+                    .Finally(() => explicitUnitOfWork.Close());
+            });
         }
 
-        private static IObservable<object> GenerateSequences(this (UnitOfWork unitOfWork,IList<object> objects) t,IDataLayer dataLayer, Type sequenceStorageType) 
+        private static IObservable<object> GenerateSequences(this (ObjectManipulationEventArgs e,ExplicitUnitOfWork explicitUnitOfWork) t, Type sequenceStorageType) 
             => Observable.Defer(() => {
-                    var explicitUnitOfWork = new ExplicitUnitOfWork(dataLayer);
-                    var afterCommited = t.unitOfWork.WhenAfterCommitTransaction().FirstAsync().Select(pattern => {
+                    var explicitUnitOfWork = t.explicitUnitOfWork;
+                    var afterCommited = t.e.Session.WhenAfterCommitTransaction().FirstAsync().Select(pattern => {
                             explicitUnitOfWork.CommitChanges();
                             explicitUnitOfWork.Close();
                             return default(object);
@@ -216,21 +220,34 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
                         .DisposeOnException(explicitUnitOfWork)
                         .IgnoreElements();
                     var currentThreadScheduler = Scheduler.CurrentThread;
-                    var whenTransacationFailed = t.unitOfWork.WhenTransacationFailed( currentThreadScheduler, explicitUnitOfWork);
-                    return afterCommited.Merge(t.objects.GenerateSequences(explicitUnitOfWork,sequenceStorageType), currentThreadScheduler)
+                    var whenTransacationFailed = t.e.Session.WhenTransacationFailed( currentThreadScheduler, explicitUnitOfWork);
+                    return afterCommited.Merge(explicitUnitOfWork.GenerateSequences(t.e.Object,sequenceStorageType), currentThreadScheduler)
                         .Merge(whenTransacationFailed,currentThreadScheduler);
                 })
-                .RetryWhen(exceptions => exceptions.RetryException().Do(ExceptionsSubject.OnNext));
+                .RetryWhen(exceptions => exceptions.Select(exception => exception).RetryException().Do(ExceptionsSubject.OnNext));
 
-        private static IObservable<object> GenerateSequences(this IList<object> objects,  ExplicitUnitOfWork explicitUnitOfWork,Type sequenceStorageType) 
-            => objects.ToObservable(Scheduler.Immediate)
-                .GroupBy(o => o.GetType())
-                .SelectMany(groupedObjects => {
-                    var sequenceStorage = explicitUnitOfWork.GetSequenceStorage(groupedObjects.Key,sequenceStorageType:sequenceStorageType);
-                    return sequenceStorage != null ? groupedObjects
-                        .OfType<IXPClassInfoProvider>().GenerateNextSequences(explicitUnitOfWork, sequenceStorage) : Observable.Empty<object>();
-                })
-                .DisposeOnException(explicitUnitOfWork);
+        
+        static readonly object Locker=new object();
+        private static IObservable<object> GenerateSequences(this ExplicitUnitOfWork explicitUnitOfWork,object theObject,Type sequenceStorageType){
+            var classInfoProvider = ((IXPClassInfoProvider) theObject);
+            lock (Locker){
+                var sequenceStorage = explicitUnitOfWork.GetSequenceStorage(theObject.GetType(),sequenceStorageType:sequenceStorageType);
+                if (sequenceStorage!=null){
+                    var memberInfo = classInfoProvider.ClassInfo.GetMember(sequenceStorage.SequenceMember);
+                    memberInfo.SetValue(theObject, sequenceStorage.NextSequence);
+                    sequenceStorage.NextSequence++;
+                    try{
+                        explicitUnitOfWork.FlushChanges();
+                    }
+                    catch (Exception){
+                        sequenceStorage.NextSequence--;
+                        throw;
+                    }
+                    return theObject.ReturnObservable();
+                }
+                return Observable.Empty<object>();
+            }
+        }
 
         private static IObservable<EventPattern<EventArgs>> WhenTransacationFailed(this Session session,
             IScheduler scheduler, ExplicitUnitOfWork explicitUnitOfWork) 
@@ -248,24 +265,18 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
             explicitUnitOfWork.Disconnect();
             explicitUnitOfWork.Dispose();
         }
+
         private static IObservable<T> DisposeOnException<T>(this IObservable<T> source,ExplicitUnitOfWork explicitUnitOfWork) 
             => source.Catch<T, Exception>(exception => {
                 explicitUnitOfWork.Close();
                 return Observable.Throw<T>(exception);
             });
 
-        private static IObservable<IXPClassInfoProvider> GenerateNextSequences(this IObservable<IXPClassInfoProvider> source,ExplicitUnitOfWork explicitUnitOfWork, ISequenceStorage sequenceStorage) 
-            => source.Select(o => {
-                var memberInfo = o.ClassInfo.GetMember(sequenceStorage.SequenceMember);
-                memberInfo.SetValue(o, sequenceStorage.NextSequence);
-                sequenceStorage.NextSequence++;
-                explicitUnitOfWork.FlushChanges();
-                return o;
-            });
 
         public static IObservable<IDataLayer> SequenceGeneratorDatalayer(this  IObjectSpaceProvider objectSpaceProvider) 
             => Observable.Defer(() => XpoDefault.GetDataLayer(objectSpaceProvider.GetConnectionString(),
                 ((TypesInfo) objectSpaceProvider.TypesInfo).EntityStores.OfType<XpoTypeInfoSource>().First().XPDictionary, AutoCreateOption.None
-            ).ReturnObservable()).SubscribeReplay();
+            ).ReturnObservable()).SubscribeReplay()
+                .TraceSequenceGeneratorModule();
     }
 }

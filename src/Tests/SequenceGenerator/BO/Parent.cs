@@ -13,8 +13,8 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests.BO{
 
     }
 
-    public class ParentWithChildOnSaving:Parent{
-        public ParentWithChildOnSaving(Session session) : base(session){
+    public class ParentNonSequencialWithChildOnSaving:Parent{
+        public ParentNonSequencialWithChildOnSaving(Session session) : base(session){
         }
 
         protected override void OnSaving(){
@@ -34,6 +34,17 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests.BO{
             get => _sequentialNumber;
             set => SetPropertyValue(nameof(SequentialNumber), ref _sequentialNumber, value);
         }
+    }
+    [PublicAPI]
+    public class ParentSequencialWithChildOnSaving:ParentSequencial{
+        public ParentSequencialWithChildOnSaving(Session session) : base(session){
+        }
+
+        protected override void OnSaving(){
+            base.OnSaving();
+            Childs.Add(new Child(Session));
+        }
+
     }
     
     [PublicAPI]
