@@ -53,7 +53,7 @@ jobs:
         targetPath: '$(Pipeline.Workspace)'
         artifact: 'bin'
         publishLocation: 'pipeline'
-- job: TestPerAssembly
+- job: ALLWinTests
   dependsOn: 'BuildArtifacts'
   strategy:
     parallel: 10
@@ -78,30 +78,13 @@ jobs:
           $ErrorView="NormalView"
           & '$(System.DefaultWorkingDirectory)/build/DownloadCloudCreds.ps1' '$(GitHubToken)'
     - task: VSTest@2
-      displayName: 'Test Modules'
+      displayName: 'ALL.Win.Tests'
       enabled: true
       continueOnError: true
       inputs:
         searchFolder: '$(System.DefaultWorkingDirectory)'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
-          **\Xpand.XAF.Modules.AutoCommit.Tests.dll
-          **\Xpand.XAF.Modules.CloneMemberValue.Tests.dll
-          **\Xpand.XAF.Modules.SequenceGenerator.Tests.dll
-          **\Xpand.XAF.Modules.GridListEditor.Tests.dll
-          **\Xpand.XAF.Modules.LookupCascade.Tests.dll
-          **\Xpand.XAF.Modules.ProgressBarViewItem.Tests.dll
-          **\Xpand.Extensions.Tests.dll
-          **\Xpand.XAF.Modules.CloneModelView.Tests.dll
-          **\Xpand.XAF.Modules.ModelViewInheritance.Tests.dll
-          **\Xpand.XAF.Modules.Office.Cloud.Google.Tasks.Tests.dll
-          **\Xpand.XAF.Modules.Office.Cloud.Google.Tests.dll
-          **\Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests.dll
-          **\Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests.dll
-          **\Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests.dll
-          **\Xpand.XAF.Modules.Office.Cloud.Tests.dll
-          **\Xpand.XAF.Modules.Reactive.Logger.Hub.Tests.dll
-          **\Xpand.XAF.Modules.Reactive.Logger.Tests.dll
           **\Xpand.XAF.Modules.Reactive.Tests.dll
           **\Xpand.XAF.Modules.HideToolBar.Tests.dll
           **\Xpand.XAF.Modules.MasterDetail.Tests.dll
@@ -111,7 +94,7 @@ jobs:
           **\Xpand.XAF.Modules.SuppressConfirmation.Tests.dll
           **\Xpand.XAF.Modules.ViewEditMode.Tests.dll
           **\Xpand.XAF.Modules.ViewItemValue.Tests.dll
-          !**\*TestAdapter.dll
+          **\ALL.Win.Tests.dll
           !**\obj\**    
         diagnosticsEnabled: true
         codeCoverageEnabled: true
@@ -120,10 +103,10 @@ jobs:
         runSettingsFile: .\bin\Tests.runsettings
         runTestsInIsolation: false
         collectDumpOn: never
-- job: ALLWinTests
-  dependsOn: 'TestPerAssembly'
+- job: TestPerAssembly
+  dependsOn: 'ALLWinTests'
   strategy:
-    parallel: 1
+    parallel: 10
   pool:
     vmImage: windows-2019
   variables:
@@ -145,14 +128,11 @@ jobs:
           $ErrorView="NormalView"
           & '$(System.DefaultWorkingDirectory)/build/DownloadCloudCreds.ps1' '$(GitHubToken)'
     - task: VSTest@2
-      displayName: 'ALL.Win.Tests'
+      displayName: 'Test Modules'
       continueOnError: true
       inputs:
         searchFolder: '$(System.DefaultWorkingDirectory)'
         testSelector: 'testAssemblies'
-        testAssemblyVer2: |
-          **\ALL.Win.Tests.dll
-          !**\obj\**    
         diagnosticsEnabled: true
         codeCoverageEnabled: true
         distributionBatchType: basedOnExecutionTime
@@ -160,8 +140,28 @@ jobs:
         runSettingsFile: .\bin\Tests.runsettings
         runTestsInIsolation: false
         collectDumpOn: never
+        testAssemblyVer2: |
+          **\Xpand.XAF.Modules.AutoCommit.Tests.dll
+          **\Xpand.XAF.Modules.CloneMemberValue.Tests.dll
+          **\Xpand.XAF.Modules.SequenceGenerator.Tests.dll
+          **\Xpand.XAF.Modules.GridListEditor.Tests.dll
+          **\Xpand.XAF.Modules.LookupCascade.Tests.dll
+          **\Xpand.XAF.Modules.ProgressBarViewItem.Tests.dll
+          **\Xpand.Extensions.Tests.dll
+          **\Xpand.XAF.Modules.CloneModelView.Tests.dll
+          **\Xpand.XAF.Modules.ModelViewInheritance.Tests.dll
+          **\Xpand.XAF.Modules.Office.Cloud.Google.Tasks.Tests.dll
+          **\Xpand.XAF.Modules.Office.Cloud.Google.Tests.dll
+          **\Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests.dll
+          **\Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests.dll
+          **\Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests.dll
+          **\Xpand.XAF.Modules.Office.Cloud.Tests.dll
+          **\Xpand.XAF.Modules.Reactive.Logger.Hub.Tests.dll
+          **\Xpand.XAF.Modules.Reactive.Logger.Tests.dll
+          !**\*TestAdapter.dll
+          !**\obj\**    
 - job: TestPerExecutionTime
-  dependsOn: 'ALLWinTests'
+  dependsOn: 'TestPerAssembly'
   strategy:
     parallel: 10
   pool:
