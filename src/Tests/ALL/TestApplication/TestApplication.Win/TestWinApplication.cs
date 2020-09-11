@@ -9,7 +9,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 namespace TestApplication.Win{
     public class TestWinApplication:WinApplication{
         public TestWinApplication(){
-            
+            UseOldTemplates = false;
             Modules.Add(new WinModule());
             var module = Modules.FindModule(typeof(ModuleBase));
             module.SetFieldValue("name", "Base");
@@ -23,8 +23,8 @@ namespace TestApplication.Win{
 
         protected override void CreateDefaultObjectSpaceProvider(CreateCustomObjectSpaceProviderEventArgs args){
             args.ObjectSpaceProvider=new XPObjectSpaceProvider(new ConnectionStringDataStoreProvider(args.ConnectionString),true);
-            args.ObjectSpaceProvider = new XPObjectSpaceProvider(
-                new ConnectionStringDataStoreProvider(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString), true);
+            // args.ObjectSpaceProvider = new XPObjectSpaceProvider(
+                // new ConnectionStringDataStoreProvider(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString), true);
         }
     }
 }

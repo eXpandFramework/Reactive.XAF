@@ -25,27 +25,21 @@ namespace ALL.Tests{
         public static void TestOfficeCloudService(this ICommandAdapter commandAdapter, string navigationItemCaption,
             string editorName, string verifyEditor){
             commandAdapter.Execute(new NavigateCommand(navigationItemCaption),new ActionCommand(Actions.New));
-            commandAdapter.Execute(new FillObjectViewCommand((editorName, "New")),
-                new ActionCommand(Actions.Save));
-            
+            commandAdapter.Execute(new FillObjectViewCommand((editorName, "New")),new WaitCommand(2000),new ActionCommand(Actions.Save));
             commandAdapter.CheckOperatrion(MapAction.Insert, verifyEditor);
                     
-            commandAdapter.Execute(new FillObjectViewCommand((editorName, "Update")),new ActionCommand(Actions.Save));
+            commandAdapter.Execute(new FillObjectViewCommand((editorName, "Update")),new WaitCommand(2000),new ActionCommand(Actions.Save));
             commandAdapter.CheckOperatrion(MapAction.Update, verifyEditor);
 
             commandAdapter.Execute(new ActionDeleteCommand());
-            
-            
             commandAdapter.Execute(new NavigateCommand(navigationItemCaption));
             commandAdapter.Execute(new ActionCommand(Actions.Refresh), new CheckListViewCommand("",0));
         }
 
         public static async Task TestCloudServices(this ICommandAdapter commandAdapter){
-            await commandAdapter.TestGoogleService(() => Observable.Start(commandAdapter.TestGoogleTasksService).ToUnit());
-            await commandAdapter.TestMicrosoftService(() => Observable.Start(() => {
-                commandAdapter.TestMicrosoftCalendarService();
-                commandAdapter.TestMicrosoftTodoService();
-            }).ToUnit());
+            // await commandAdapter.TestGoogleService(() => Observable.Start(commandAdapter.TestGoogleTasksService).ToUnit());
+            await commandAdapter.TestMicrosoftService(() => Observable.Start(() => commandAdapter.TestMicrosoftCalendarService()
+                .Do(_ => commandAdapter.TestMicrosoftTodoService())).Concat().ToUnit());
         }
 
         public static async Task TestCloudService(this ICommandAdapter commandAdapter,

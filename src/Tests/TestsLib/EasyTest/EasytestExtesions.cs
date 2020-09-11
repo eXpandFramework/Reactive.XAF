@@ -1,5 +1,8 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
 using System.Xml;
 using DevExpress.EasyTest.Framework;
 using DevExpress.ExpressApp.EasyTest.WebAdapter;
@@ -7,6 +10,7 @@ using DevExpress.ExpressApp.EasyTest.WinAdapter;
 using Fasterflect;
 using Newtonsoft.Json;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.Reactive.ErrorHandling;
 
 namespace Xpand.TestsLib.EasyTest{
     public static class EasytestExtesions{
@@ -31,6 +35,9 @@ namespace Xpand.TestsLib.EasyTest{
         public static TestApplication GetTestApplication(this ICommandAdapter adapter){
             return adapter is WebCommandAdapter ? (TestApplication) EasyTestWebApplication.Instance : EasyTestWinApplication.Instance;
         }
+
+        public static IObservable<Unit> Execute(this ICommandAdapter adapter, Action retriedAction) 
+            => Observable.Defer(() => Observable.Start(retriedAction)).RetryWithBackoff();
 
         public static void Execute(this ICommandAdapter adapter,params Command[] commands){
             foreach (var command in commands){
