@@ -85,6 +85,7 @@ jobs:
         searchFolder: '$(System.DefaultWorkingDirectory)'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
+          **\Xpand.XAF.Modules.ViewWizard.Tests.dll
           **\Xpand.XAF.Modules.Reactive.Tests.dll
           **\Xpand.XAF.Modules.HideToolBar.Tests.dll
           **\Xpand.XAF.Modules.MasterDetail.Tests.dll
