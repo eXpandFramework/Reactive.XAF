@@ -86,6 +86,9 @@ function UpdateDependencies($_, $packagespath, $readMePath) {
             if ($id -like "Xpand.XAF*") {
                 $id = "[$id](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/$id)"
             }
+            elseif ($id -eq "Fasterflect.Xpand") {
+                $id = "[$id](https://github.com/eXpandFramework/Fasterflect)"
+            }
             elseif ($id -eq "Xpand.VersionConverter") {
                 $id = "[$id](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)"
             }

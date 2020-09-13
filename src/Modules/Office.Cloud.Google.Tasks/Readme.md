@@ -88,7 +88,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |**DevExpress.Persistent.Base**|**Any**
  |**DevExpress.ExpressApp**|**Any**
  |**DevExpress.ExpressApp.Xpo**|**Any**
-|Fasterflect.Xpand|2.0.7
+|[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |Google.Apis.Auth|1.49.0
  |Google.Apis.Tasks.v1|1.49.0.2049
  |JetBrains.Annotations|2020.1.0

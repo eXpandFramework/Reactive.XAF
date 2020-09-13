@@ -79,7 +79,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp.ConditionalAppearance**|**Any**
-|Fasterflect.Xpand|2.0.7
+|[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |JetBrains.Annotations|2020.1.0
  |System.Reactive|4.4.1
  |Xpand.Extensions|2.202.49

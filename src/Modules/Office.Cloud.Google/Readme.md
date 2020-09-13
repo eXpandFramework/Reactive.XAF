@@ -143,7 +143,7 @@ The module follows the Nuget [Version Basics](https://docs.Google.com/en-us/nuge
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.Persistent.Base**|**Any**
-|Fasterflect.Xpand|2.0.7
+|[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |Google.Apis.Auth|1.49.0
  |JetBrains.Annotations|2020.1.0
  |Newtonsoft.Json|12.0.3

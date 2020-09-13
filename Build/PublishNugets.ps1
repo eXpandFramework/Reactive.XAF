@@ -68,4 +68,6 @@ $localPackages| ForEach-Object {
 if ($clearCache){
     Connect-Az $AzApoPowerSHellScriptsSecret $AzPowerShellScriptsApplicationId $AzApoTenantId
     Get-AzWebApp -Name XpandNugetStats|Restart-AzWebApp
+    $c=[System.Net.WebClient]::new()
+    $c.DownloadString("http://xaf.expandframework.com/")|Out-Null
 }

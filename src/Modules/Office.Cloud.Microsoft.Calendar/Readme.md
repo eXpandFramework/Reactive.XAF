@@ -98,7 +98,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |**DevExpress.Persistent.Base**|**Any**
  |**DevExpress.ExpressApp**|**Any**
  |**DevExpress.ExpressApp.Xpo**|**Any**
-|Fasterflect.Xpand|2.0.7
+|[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |JetBrains.Annotations|2020.1.0
  |Microsoft.Graph.Beta|0.18.0-preview
  |Microsoft.Graph.Core|1.19.0

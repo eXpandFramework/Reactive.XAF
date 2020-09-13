@@ -64,7 +64,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |----|----
 |**DevExpress.ExpressApp**|**Any**
  |**DevExpress.Xpo**|**Any**
-|Fasterflect.Xpand|2.0.7
+|[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |Grpc|2.23.0
  |Grpc.Core|2.25.0
  |Jetbrains.Annotations|2020.1.0

@@ -212,7 +212,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |----|----
 |**DevExpress.ExpressApp**|**Any**
 |Enums.NET|3.0.3
- |Fasterflect.Xpand|2.0.7
+ |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |JetBrains.Annotations|2020.1.0
  |Mono.Cecil|0.11.2
  |System.CodeDom|4.7.0
