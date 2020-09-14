@@ -52,7 +52,7 @@ The cross platform [Xpand.XAF.Modules.ModelMapper](https://github.com/eXpandFram
 
 [![aYbdUf4HwV](https://user-images.githubusercontent.com/159464/86943203-d1d18300-c14e-11ea-9d68-ee68ff57455f.gif)](https://youtu.be/CkJKEfPhS0M)
 
-<twitter>
+</twitter>
 
 [![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/CkJKEfPhS0M)
 
