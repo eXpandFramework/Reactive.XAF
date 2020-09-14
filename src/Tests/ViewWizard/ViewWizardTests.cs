@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Reactive.Linq;
 using akarnokd.reactive_extensions;
+using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using NUnit.Framework;
@@ -63,8 +64,13 @@ namespace Xpand.XAF.Modules.ViewWizard.Tests{
         [XpandTest()]
         public void ShowWizard_Action_Shows_Wizard_DetailView(){
             using (var application = ViewWizardModule().Application){
+                var objectSpace = application.CreateObjectSpace();
+                var vw = objectSpace.CreateObject<VW>();
+                vw.Name = nameof(ShowWizard_Action_Items);
+                objectSpace.CommitChanges();
                 var wizardWizardViews = application.Model.ToReactiveModule<IModelReactiveModulesViewWizard>().ViewWizard.WizardViews;
                 var modelWizardView = wizardWizardViews.AddNode<IModelWizardView>();
+                modelWizardView.Criteria = CriteriaOperator.Parse("Name=?", nameof(ShowWizard_Action_Items)).ToString();
                 modelWizardView.DetailView = application.Model.BOModel.GetClass(typeof(VW)).DefaultDetailView;
                 var window = application.CreateViewWindow();
                 window.SetView(application.NewView<DetailView>(typeof(VW)));
@@ -76,7 +82,9 @@ namespace Xpand.XAF.Modules.ViewWizard.Tests{
                 showWizard.DoExecute(showWizard.Items.First());
 
                 whendetailViewCreated.Items.Count.ShouldBe(1);
-                whendetailViewCreated.Items.First().Model.ShouldBe(modelWizardView.DetailView);
+                var detailView = whendetailViewCreated.Items.First();
+                detailView.Model.ShouldBe(modelWizardView.DetailView);
+                detailView.ObjectSpace.GetKeyValue(detailView.CurrentObject).ShouldBe(vw.Oid);
 
                 
             }
@@ -85,6 +93,10 @@ namespace Xpand.XAF.Modules.ViewWizard.Tests{
         [XpandTest()]
         public void NextWizard_Action_Shows_NextWizard_DetailView(){
             using (var application = ViewWizardModule().Application){
+                var objectSpace = application.CreateObjectSpace();
+                var vw = objectSpace.CreateObject<VW>();
+                vw.Name = nameof(NextWizard_Action_Shows_NextWizard_DetailView);
+                objectSpace.CommitChanges();
                 var wizardWizardViews = application.Model.ToReactiveModule<IModelReactiveModulesViewWizard>().ViewWizard.WizardViews;
                 var modelWizardView = wizardWizardViews.AddNode<IModelWizardView>();
                 modelWizardView.DetailView = application.Model.BOModel.GetClass(typeof(VW)).DefaultDetailView;
@@ -109,6 +121,8 @@ namespace Xpand.XAF.Modules.ViewWizard.Tests{
                 nextWizardView.DoExecute();
 
                 nextDetailView.Items.Count.ShouldBe(1);
+                var detailView = nextDetailView.Items.First().e.View;
+                detailView.ObjectSpace.GetKeyValue(detailView.CurrentObject).ShouldBe(vw.Oid);
             }
         }
         [Test]

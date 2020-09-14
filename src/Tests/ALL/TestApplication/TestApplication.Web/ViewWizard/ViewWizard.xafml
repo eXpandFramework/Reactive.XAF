@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Application>
+  <ReactiveModules>
+    <ViewWizard>
+      <WizardViews>
+        <WizardView Id="Order" DetailView="Order_DetailView" IsNewNode="True" />
+      </WizardViews>
+    </ViewWizard>
+  </ReactiveModules>
+</Application>

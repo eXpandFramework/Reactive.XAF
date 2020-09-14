@@ -70,6 +70,7 @@
     <Compile Include="..\CommonFiles\GoogleService\GoogleService.cs" Link="Cloud.Office\Google\GoogleService.cs" />
     <Compile Include="..\CommonFiles\MicrosoftService\ShowMSAccountInfoService.cs" Link="Cloud.Office\Microsoft\ShowMSAccountInfoService.cs" />
     <Compile Include="..\CommonFiles\MicrosoftTodoService\MicrosoftTodoService.cs" Link="Cloud.Office\Microsoft\MicrosoftTodoService.cs" />
+    <Compile Include="..\CommonFiles\ViewWizard\ViewWizard.cs" Link="ViewWizard\ViewWizard.cs" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Data.DataSetExtensions" />

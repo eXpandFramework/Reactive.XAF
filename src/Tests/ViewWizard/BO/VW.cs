@@ -9,5 +9,12 @@ namespace Xpand.XAF.Modules.ViewWizard.Tests.BO{
     public class VW:CustomBaseObject{
         public VW(Session session) : base(session){
         }
+
+        string _name;
+
+        public string Name{
+            get => _name;
+            set => SetPropertyValue(nameof(Name), ref _name, value);
+        }
     }
 }

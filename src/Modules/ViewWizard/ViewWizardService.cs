@@ -4,6 +4,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using DevExpress.Data.Extensions;
+using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Model;
@@ -21,11 +22,12 @@ using Xpand.XAF.Modules.Reactive.Services.Actions;
 using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
 namespace Xpand.XAF.Modules.ViewWizard{
-    public static class ViewWzardService{
+    public static class ViewWizardService{
         public static SingleChoiceAction ShowWizard(this (ViewWizardModule, Frame frame) tuple) => tuple
             .frame.Action(nameof(ShowWizard)).As<SingleChoiceAction>();
         public static SimpleAction NextWizardView(this (ViewWizardModule, Frame frame) tuple) => tuple
             .frame.Action(nameof(NextWizardView)).As<SimpleAction>();
+        
         public static SimpleAction PreviousWizardView(this (ViewWizardModule, Frame frame) tuple) => tuple
             .frame.Action(nameof(PreviousWizardView)).As<SimpleAction>();
         public static SimpleAction FinishWizardView(this (ViewWizardModule, Frame frame) tuple) => tuple
@@ -45,7 +47,10 @@ namespace Xpand.XAF.Modules.ViewWizard{
         }
 
         private static IObservable<ActionBase> RegisterActions(this ApplicationModulesManager manager) 
-            => manager.RegisterViewSingleChoiceAction(nameof(ShowWizard), action => action.Configure())
+            => manager.RegisterViewSingleChoiceAction(nameof(ShowWizard), action => {
+                    action.Configure();
+                    action.ItemType=SingleChoiceActionItemType.ItemIsOperation;
+                })
                 .Cast<ActionBase>()
                 .Merge(manager.RegisterViewSimpleAction(nameof(NextWizardView), action => action.Configure(),
                     PredefinedCategory.PopupActions))
@@ -64,7 +69,8 @@ namespace Xpand.XAF.Modules.ViewWizard{
                         t.Frame.Action<ViewWizardModule>().PreviousWizardView().Enabled["FirstView"] = true;
                         var wizardView = t.modelWizardView;
                         t.Frame.Action<ViewWizardModule>().FinishWizardView().Active["Always"] = t.Frame.CurrentWizardIndex(wizardView) == wizardView.Parent.NodeCount - 1;
-                        args.ShowViewParameters.CreatedView = args.Action.Application.NewView(t.Frame.NextChildDetailView(wizardView));
+                        t.Frame.Application.NewWizardView( wizardView, args.ShowViewParameters, t.Frame.NextChildDetailView(wizardView));
+                        args.ShowViewParameters.TargetWindow=TargetWindow.Current;
                     });
             });
 
@@ -83,6 +89,7 @@ namespace Xpand.XAF.Modules.ViewWizard{
                     .Do(args => {
                         var wizardView = tuple.modelWizardView;
                         args.ShowViewParameters.CreatedView = args.Action.Application.NewView(tuple.Frame.PreviousChildDetailView(wizardView));
+                        args.ShowViewParameters.TargetWindow = TargetWindow.Current;
                     });
             });
         }
@@ -101,7 +108,7 @@ namespace Xpand.XAF.Modules.ViewWizard{
                 .SelectMany(e => {
                     var modelWizardView = ((IModelWizardView) e.SelectedChoiceActionItem.Data);
                     var parameters = e.ShowViewParameters;
-                    parameters.CreatedView = e.Action.Application.NewView(modelWizardView.DetailView);
+                    e.Action.Application.NewWizardView( modelWizardView, parameters, modelWizardView.DetailView);
                     parameters.CreateAllControllers = true;
                     var dialogController = new DialogController();
                     
@@ -109,6 +116,12 @@ namespace Xpand.XAF.Modules.ViewWizard{
                     parameters.TargetWindow=TargetWindow.NewModalWindow;
                     return dialogController.WhenActivated().Select(controller => (controller.Frame,modelWizardView));
                 });
+
+        private static void NewWizardView(this XafApplication application, IModelWizardView modelWizardView, ShowViewParameters parameters, IModelDetailView modelDetailView){
+            var objectSpace = application.CreateObjectSpace();
+            var obj = objectSpace.FindObject(modelDetailView.ModelClass.TypeInfo.Type, CriteriaOperator.Parse(modelWizardView.Criteria));
+            parameters.CreatedView = application.CreateDetailView(objectSpace, modelDetailView, true, obj);
+        }
 
         internal static IObservable<TSource> TraceViewWizardModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,

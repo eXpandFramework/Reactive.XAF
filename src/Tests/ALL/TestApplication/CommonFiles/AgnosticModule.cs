@@ -58,6 +58,7 @@ using Xpand.XAF.Modules.SequenceGenerator;
 using Xpand.XAF.Modules.SuppressConfirmation;
 using Xpand.XAF.Modules.ViewEditMode;
 using Xpand.XAF.Modules.ViewItemValue;
+using Xpand.XAF.Modules.ViewWizard;
 
 namespace TestApplication{
     public static class AgnosticExtensions{
@@ -127,6 +128,7 @@ namespace TestApplication{
 			RequiredModuleTypes.Add(typeof(GoogleModule));
 			RequiredModuleTypes.Add(typeof(GoogleTasksModule));
 			RequiredModuleTypes.Add(typeof(ReactiveLoggerHubModule));
+			RequiredModuleTypes.Add(typeof(ViewWizardModule));
 			AdditionalExportedTypes.Add(typeof(Event));
 			AdditionalExportedTypes.Add(typeof(Task));
 		}
@@ -149,6 +151,7 @@ namespace TestApplication{
                 .Merge(moduleManager.ConnectGoogleTasksService())
                 .Merge(moduleManager.ConnectMicrosoftCalendarService())
                 .Merge(moduleManager.ConnectGoogleService())
+                .Merge(moduleManager.ConnectViewWizardService())
                 .Subscribe(this);
         }
 	}

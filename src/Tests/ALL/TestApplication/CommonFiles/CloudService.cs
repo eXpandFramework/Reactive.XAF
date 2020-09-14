@@ -8,6 +8,8 @@ using DevExpress.Persistent.BaseImpl;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.XAF.FrameExtensions;
+using Xpand.TestsLib.BO;
 using Xpand.XAF.Modules.CloneModelView;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -33,6 +35,11 @@ namespace TestApplication{
                             modelOAuth.Prompt=OAuthPrompt.Login;
                         });
                 })
+                .Merge(manager.WhenApplication(xafApplication => xafApplication.WhenViewOnFrame(typeof(Order))
+                    .Do(frame => {
+                        var controller = frame.Action("ShowWizard").Controller;
+                        controller = null;
+                    })).To(default((string creds, TModelOauth modelOAuth))))
                 .Merge(manager.WhenCustomizeTypesInfo()
                     .Do(t => {
                         foreach (var type in new[]{typeof(Event),typeof(Task)}){

@@ -43,7 +43,8 @@ namespace ALL.Win.Tests{
                     var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
                     adapter.Execute(autoTestCommand);
                     await adapter.TestCloudServices();
-                });
+                    // adapter.TestViewWizardService();
+            });
         }     
 
         private static TestApplication RunWinApplication(WinAdapter adapter, string connectionString) 

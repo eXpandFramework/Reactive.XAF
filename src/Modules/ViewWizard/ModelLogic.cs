@@ -1,6 +1,9 @@
 ﻿using System.ComponentModel;
+using System.Drawing.Design;
 using System.Linq;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
+using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using Xpand.Extensions.XAF.ModelExtensions;
@@ -18,19 +21,13 @@ namespace Xpand.XAF.Modules.ViewWizard{
     public interface IModelWizardViews:IModelList<IModelWizardView>,IModelNode{
         
     }
-    // public interface IModelViewWizardItems:IModelList<IModelViewWizardItem>,IModelNode{
-    //     
-    // }
-    // public interface IModelViewWizardItem{
-    //     [DataSourceProperty("Application.Views")][Required]
-    //     IModelView HostView{ get; set; }
-    //     [DataSourceProperty("Parent."+nameof(IModelViewWizard.WizardViews))]
-    //     [Required]
-    //     IModelWizardView WizardView{ get; set; }
-    //     
-    // }
 
     public interface IModelWizardView:IModelNode{
+        [CriteriaOptions("DetailView.ModelClass.TypeInfo")]
+        [Editor("DevExpress.ExpressApp.Win.Core.ModelEditor.CriteriaModelEditorControl, DevExpress.ExpressApp.Win" + XafAssemblyInfo.VersionSuffix + XafAssemblyInfo.AssemblyNamePostfix, typeof(UITypeEditor))]
+        [Required]
+        string Criteria{ get; set; }
+        
         [Required]
         [DataSourceProperty(nameof(DetailViews))]
         IModelDetailView DetailView{ get; set; }

@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Application>
+  <NavigationItems>
+    <Items>
+      <Item Id="ViewWizard" IsNewNode="True">
+        <Items IsNewNode="True">
+          <Item Id="@cabfe0ac-056b-4e6b-97b3-c470c903e957" ViewId="Order_ListView" IsNewNode="True" />
+        </Items>
+      </Item>
+    </Items>
+  </NavigationItems>
+  <ReactiveModules>
+    <ViewWizard>
+      <WizardViews>
+        <WizardView Id="Order" DetailView="Order_DetailView" Criteria="[OrderID] = 10L" IsNewNode="True">
+          <Childs IsNewNode="True">
+            <ViewWizardChildItem Id="@6f4f09c7-1026-4f40-acf1-2044b66decf0" ChildDetailView="OrderPage1_DetailVIew" IsNewNode="True" />
+          </Childs>
+        </WizardView>
+      </WizardViews>
+    </ViewWizard>
+  </ReactiveModules>
+  <Views>
+    <DetailView Id="OrderPage1_DetailVIew">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="100">
+            <LayoutGroup Id="Order" RelativeSize="100">
+              <LayoutItem Id="Product" RelativeSize="3.0739673390970221" ViewItem="Product" Index="0" />
+              <LayoutItem Id="Accessory" RelativeSize="96.926032660902976" ViewItem="Accessory" Index="1" />
+              <LayoutItem Id="OrderID" RelativeSize="3.0739673390970221" ViewItem="OrderID" Removed="True" />
+            </LayoutGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="AggregatedOrders_Group" Caption="Aggregated Orders" RelativeSize="91.738712776176754" Removed="True">
+            <LayoutItem Id="AggregatedOrders" ViewItem="AggregatedOrders" Removed="True" />
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+  </Views>
+</Application>
