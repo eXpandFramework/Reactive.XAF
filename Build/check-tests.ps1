@@ -26,13 +26,7 @@ Invoke-Script {
     "latestPastVersion:$latestPastVersion"
     $firstPastVersion = $latestMinors | Select-Object -first 1 -skip 2
     "firstPastVersion=$firstPastVersion"
-    if ($buildNumber -like "*$latestDxVersion*") {
-        Write-Host "adding PublishNugets-DevExpress.XAF for build $DxPipelineBuildId"
-        $parameters = @{
-            DxPipelineBuildId = $DxPipelineBuildId
-        }
-        Add-AzBuild PublishNugets-DevExpress.XAF -Parameters $parameters -Tag $latestDxVersion
-              
+    if ($buildNumber -like "*$latestDxVersion*") {      
         $b = Get-AzBuilds -Tag "$latestPastVersion" -Status completed -Result succeeded -Top 1 -Definition DevExpress.XAF-Lab
         $b
         $parameters = @{
@@ -47,5 +41,11 @@ Invoke-Script {
             DxPipelineBuildId = $b.id
         }
         Add-AzBuild -Definition DevExpress.XAF-Lab-Tests -Parameters $parameters -Tag "$firstPastVersion"
+
+        Write-Host "adding PublishNugets-DevExpress.XAF for build $DxPipelineBuildId"
+        $parameters = @{
+            DxPipelineBuildId = $DxPipelineBuildId
+        }
+        Add-AzBuild PublishNugets-DevExpress.XAF -Parameters $parameters -Tag $latestDxVersion
     }
 }
