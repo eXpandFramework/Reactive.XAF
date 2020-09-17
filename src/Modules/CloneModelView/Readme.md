@@ -1,6 +1,6 @@
 ![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.CloneModelView.svg?&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.CloneModelView.svg?&style=flat)
 
-[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/CloneModelView.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+CloneModelView) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/CloneModelView.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+CloneModelView)
+[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/CloneModelView.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+label%3ACloneModelView) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/CloneModelView.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+label%3ACloneModelView)
 # About
 
 The `CloneModelView` package generated additional default design time model views.
@@ -68,7 +68,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |JetBrains.Annotations|2020.1.0
  |System.ValueTuple|4.5.0
- |Xpand.Extensions.XAF|2.202.50
+ |Xpand.Extensions.XAF|2.202.51.1
  |Xpand.Patcher|2.0.24
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.10
 

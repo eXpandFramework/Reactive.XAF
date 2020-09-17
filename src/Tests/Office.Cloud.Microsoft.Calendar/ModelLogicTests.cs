@@ -2,6 +2,7 @@
 using DevExpress.Persistent.Base.General;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Attributes;

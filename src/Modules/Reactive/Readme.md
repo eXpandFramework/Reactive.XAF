@@ -1,6 +1,6 @@
 ![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.Reactive.svg?&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.Reactive.svg?&style=flat)
 
-[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/Reactive.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+Reactive) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/Reactive.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+Reactive)
+[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/Reactive.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+label%3AReactive) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/Reactive.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+label%3AReactive)
 # About 
 
 The `Reactive` module provides a XAF DSL API for functional/stateless implementations. 
@@ -238,9 +238,9 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |JetBrains.Annotations|2020.1.0
  |System.Interactive|4.1.1
  |System.Reactive|4.4.1
- |Xpand.Extensions|2.202.49
- |Xpand.Extensions.Reactive|2.202.50
- |Xpand.Extensions.XAF|2.202.50
+ |Xpand.Extensions|2.202.50
+ |Xpand.Extensions.Reactive|2.202.51.1
+ |Xpand.Extensions.XAF|2.202.51.1
  |Xpand.Patcher|2.0.24
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.10
 

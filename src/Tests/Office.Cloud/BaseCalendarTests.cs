@@ -11,7 +11,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
         [UsedImplicitly]
         public abstract Task Delete_Two_Events();
         [UsedImplicitly]
-        public abstract Task Delete_Local_Event();
+        public abstract Task Delete_Local_Event_Resource();
         public abstract Task Delete_Cloud_Event();
         public abstract Task Insert_Cloud_Event();
         public abstract Task Update_Cloud_Event();

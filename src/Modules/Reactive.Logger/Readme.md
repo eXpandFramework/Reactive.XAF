@@ -1,6 +1,6 @@
 ![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.Reactive.Logger.svg?&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.Reactive.Logger.svg?&style=flat)
 
-[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/Reactive.Logger.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+Reactive.Logger) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/Reactive.Logger.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+Reactive.Logger)
+[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/Reactive.Logger.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+label%3AReactive.Logger) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/Reactive.Logger.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+label%3AReactive.Logger)
 # About 
 
 The `Reactive.Logger` module monitors calls to the RX delegates OnNext, OnSubscribe, OnDispose, OnCompleted, OnError
@@ -82,11 +82,11 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |JetBrains.Annotations|2020.1.0
  |System.Reactive|4.4.1
- |Xpand.Extensions|2.202.49
- |Xpand.Extensions.Reactive|2.202.50
- |Xpand.Extensions.XAF|2.202.50
+ |Xpand.Extensions|2.202.50
+ |Xpand.Extensions.Reactive|2.202.51.1
+ |Xpand.Extensions.XAF|2.202.51.1
  |Xpand.Patcher|2.0.24
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.50
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.51.2
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.10
 
 ## Issues-Debugging-Troubleshooting

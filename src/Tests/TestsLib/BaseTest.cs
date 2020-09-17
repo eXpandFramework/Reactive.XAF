@@ -9,7 +9,6 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Xpo;
 using JetBrains.Annotations;
 using NUnit.Framework;
-using NUnit.Framework.Interfaces;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.StringExtensions;
@@ -115,17 +114,15 @@ namespace Xpand.TestsLib{
         public void Dispose(){
             XpoTypesInfoHelper.Reset();
             XafTypesInfo.HardReset();
-            if (TestContext.CurrentContext.Result.Outcome.Status != TestStatus.Passed){
-                if (File.Exists(ReactiveLoggerService.RXLoggerLogPath)){
-                    var zipPPath = $"{Path.GetDirectoryName(ReactiveLoggerService.RXLoggerLogPath)}\\{Path.GetFileNameWithoutExtension(ReactiveLoggerService.RXLoggerLogPath)}.zip";
-                    var tempFileName = Path.GetTempFileName();
-                    File.Copy(ReactiveLoggerService.RXLoggerLogPath!,tempFileName,true);
-                    var bytes = File.ReadAllText(tempFileName).Bytes();
-                    using (var gZipStream = new GZipStream(File.Create(zipPPath), CompressionMode.Compress)){
-                        gZipStream.Write(bytes,0,bytes.Length);
-                    }
-                    TestContext.AddTestAttachment(zipPPath);
+            if (File.Exists(ReactiveLoggerService.RXLoggerLogPath)){
+                var zipPPath = $"{Path.GetDirectoryName(ReactiveLoggerService.RXLoggerLogPath)}\\{Path.GetFileNameWithoutExtension(ReactiveLoggerService.RXLoggerLogPath)}.zip";
+                var tempFileName = Path.GetTempFileName();
+                File.Copy(ReactiveLoggerService.RXLoggerLogPath!,tempFileName,true);
+                var bytes = File.ReadAllText(tempFileName).Bytes();
+                using (var gZipStream = new GZipStream(File.Create(zipPPath), CompressionMode.Compress)){
+                    gZipStream.Write(bytes,0,bytes.Length);
                 }
+                TestContext.AddTestAttachment(zipPPath);
             }
         }
     }

@@ -32,15 +32,4 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
         SynchronizationType SynchronizationType{ get; [UsedImplicitly] set; }
     }
 
-    public interface IModelCallDirection{
-        [Required][DefaultValue(CallDirection.Both)]
-        CallDirection CallDirection{ get; set; }
-    }
-    
-
-    public enum CallDirection{
-        Both,
-        In,
-        Out
-    }
 }

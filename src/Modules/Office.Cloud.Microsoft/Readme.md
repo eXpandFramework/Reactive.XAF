@@ -1,6 +1,6 @@
 ![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.Office.Cloud.Microsoft.svg?&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.Office.Cloud.Microsoft.svg?&style=flat)
 
-[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/Office.Cloud.Microsoft.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+Office.Cloud.Microsoft) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/Office.Cloud.Microsoft.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+Office.Cloud.Microsoft)
+[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/Office.Cloud.Microsoft.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+label%3AOffice.Cloud.Microsoft) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/Office.Cloud.Microsoft.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+label%3AOffice.Cloud.Microsoft)
 # About 
 
 The `Microsoft` authenticates against Azure Active Directory and queries the MSGraph endpoints.
@@ -160,11 +160,11 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |Newtonsoft.Json|12.0.3
  |Owin|1.0.0
  |System.Reactive|4.4.1
- |Xpand.Extensions|2.202.49
- |Xpand.Extensions.Office.Cloud|2.202.50
- |Xpand.Extensions.Reactive|2.202.50
- |Xpand.Extensions.XAF|2.202.50
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.50
+ |Xpand.Extensions|2.202.50
+ |Xpand.Extensions.Office.Cloud|2.202.51.1
+ |Xpand.Extensions.Reactive|2.202.51.1
+ |Xpand.Extensions.XAF|2.202.51.1
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.51.2
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.10
 
 ## Issues-Debugging-Troubleshooting

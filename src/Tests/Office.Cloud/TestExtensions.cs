@@ -97,6 +97,27 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
                 .Timeout(timeout);
         }
 
+        public static async Task Populate_Modified<TEntity>(this IObjectSpaceProvider objectSpaceProvider,
+            Func<CloudOfficeTokenStorage,IObservable<TEntity>> listEntities,IObservable<Unit> modified,TimeSpan timeout,Action<IObservable<TEntity>> assert){
+            
+            
+            using (var objectSpace = objectSpaceProvider.CreateObjectSpace()){
+                var tokenStorage = objectSpace.CreateObject<CloudOfficeTokenStorage>();
+                var storageToken = tokenStorage.Token;
+                await listEntities(tokenStorage);
+
+                await modified.Timeout(timeout);
+
+                var entities = listEntities(tokenStorage).SubscribeReplay().Do(entity => { });
+                await entities.Timeout(timeout);
+
+                tokenStorage.Token.ShouldNotBeNull();
+                tokenStorage.Token.ShouldNotBe(storageToken);
+                
+                assert(entities);
+            }
+        }
+
         public static async Task Map_Two_New_Entity<TCloudEntity,TLocalEntity>(this IObjectSpace objectSpace,Func<IObjectSpace,int,TLocalEntity> localEntityFactory,TimeSpan timeout,
             Func<IObjectSpace, IObservable<TCloudEntity>> synchronize, Action<TLocalEntity,TCloudEntity,int> assert){
             
@@ -229,6 +250,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
 
             needsAuthentication.ShouldBeTrue();
         }
+
 
     }
 }

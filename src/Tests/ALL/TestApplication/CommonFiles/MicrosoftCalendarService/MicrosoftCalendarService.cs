@@ -16,7 +16,6 @@ using Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
-using CallDirection = Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.CallDirection;
 using Event = DevExpress.Persistent.BaseImpl.Event;
 
 namespace TestApplication.MicrosoftCalendarService{

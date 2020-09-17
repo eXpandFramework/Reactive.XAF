@@ -31,7 +31,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tests{
 			var json = JsonConvert.DeserializeObject<dynamic>(
 				File.ReadAllText($"{AppDomain.CurrentDomain.ApplicationPath()}\\Google{platform}AppCredentials.json"));
 			var modelOAuth = application.ToReactiveModule<IModelReactiveModuleOffice>().Office.Google().OAuth;
-			modelOAuth.AddScopes("https://www.googleapis.com/auth/tasks");
+			modelOAuth.AddScopes("https://www.googleapis.com/auth/tasks","https://www.googleapis.com/auth/calendar.events","https://www.googleapis.com/auth/calendar");
             
             if (platform == Platform.Win){
 				modelOAuth.ClientId = json.installed.client_id;

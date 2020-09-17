@@ -1,6 +1,7 @@
 trigger: none
 jobs:
 - job: BuildArtifacts
+  timeoutInMinutes: 70
   strategy:
     parallel: 1
   pool:
@@ -54,6 +55,7 @@ jobs:
         artifact: 'bin'
         publishLocation: 'pipeline'
 - job: ALLWinTests
+  timeoutInMinutes: 70
   dependsOn: 'BuildArtifacts'
   strategy:
     parallel: 10
@@ -105,6 +107,7 @@ jobs:
         runTestsInIsolation: false
         collectDumpOn: never
 - job: TestPerAssembly
+  timeoutInMinutes: 70
   dependsOn: 'ALLWinTests'
   strategy:
     parallel: 10
@@ -151,6 +154,7 @@ jobs:
           **\Xpand.Extensions.Tests.dll
           **\Xpand.XAF.Modules.CloneModelView.Tests.dll
           **\Xpand.XAF.Modules.ModelViewInheritance.Tests.dll
+          **\Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests.dll
           **\Xpand.XAF.Modules.Office.Cloud.Google.Tasks.Tests.dll
           **\Xpand.XAF.Modules.Office.Cloud.Google.Tests.dll
           **\Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests.dll
@@ -162,6 +166,7 @@ jobs:
           !**\*TestAdapter.dll
           !**\obj\**    
 - job: TestPerExecutionTime
+  timeoutInMinutes: 70
   dependsOn: 'TestPerAssembly'
   strategy:
     parallel: 10

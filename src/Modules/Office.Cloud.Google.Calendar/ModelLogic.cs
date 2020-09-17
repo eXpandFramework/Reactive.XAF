@@ -1,39 +1,29 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Reactive.Linq;
-using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using JetBrains.Annotations;
 using Xpand.Extensions.Office.Cloud;
-using Xpand.Extensions.XAF.ModelExtensions;
+using Xpand.XAF.Modules.Reactive;
 
-namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks{
+namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
     
-    public interface IModelGoogleTasks:IModelNode{
-        IModelTasks Tasks{ get; }
+    public interface IModelGoogleCalendar:IModelNode{
+        IModelCalendar Calendar{ get; }
     }
 
-    [PublicAPI]
-    public interface IModelTasks:IModelNode{
-        [DefaultValue(GoogleTasksService.DefaultTasksListId)]
-        [Required]
-        string DefaultTaskListName{ get; set; }
-        IModelTasksItems Items{ get; }
+    public static class ModelCalendarLogic{
+        internal static IModelCalendar Calendar(this IModelApplication application)
+            => application.ToReactiveModule<IModelReactiveModuleOffice>().Office.Google().Calendar();
+
+        public static IObservable<IModelCalendar> Calendar(this IObservable<IModelGoogle> source) 
+            => source.Select(modules => modules.Calendar());
+
+        public static IModelCalendar Calendar(this IModelGoogle modelGoogle) 
+            => ((IModelGoogleCalendar) modelGoogle).Calendar;
+
+        [PublicAPI]
+        public static IModelCalendar Calendar(this IModelOfficeGoogle reactiveModules) 
+            => reactiveModules.Google.Calendar();
     }
-
-    [DomainLogic(typeof(IModelTasks))]
-    public static class ModelTasksLogic{
-        
-        public static IObservable<IModelTasks> Tasks(this IObservable<IModelGoogle> source) => source.Select(modules => modules.Tasks());
-
-        public static IModelTasks Tasks(this IModelGoogle modelGoogle) => ((IModelGoogleTasks) modelGoogle).Tasks;
-
-        public static IModelTasks Tasks(this IModelOfficeGoogle reactiveModules) => reactiveModules.Google.Tasks();
-    }
-
-    public interface IModelTasksItems : IModelList<IModelTasksItem>,IModelNode{
-    }
-
-    public interface IModelTasksItem:IModelSynchronizationType,IModelObjectViewDependency{
-    }
+    
 }

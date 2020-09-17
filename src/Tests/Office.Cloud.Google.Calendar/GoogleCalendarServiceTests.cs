@@ -1,17 +1,16 @@
 ﻿using System;
-using System.Globalization;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using DevExpress.Xpo;
-using Microsoft.Graph;
+using Google.Apis.Calendar.v3.Data;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Office.Cloud;
+using Xpand.Extensions.Office.Cloud.BusinessObjects;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
@@ -24,9 +23,9 @@ using Xpand.XAF.Modules.Reactive;
 using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
 
 
-namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
+namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
     [NonParallelizable]
-    public class CalendarServiceTests : BaseCalendarTests{
+    public class GoogleCalendarServiceTests : BaseCalendarTests{
         
         [Test]
         [XpandTest()]
@@ -34,21 +33,19 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
             await MapTwoNewEvents(CalendarTestExtensions.CalendarName);
         }
         
-        private async Task MapTwoNewEvents(string tasksFolderName,Func<ICalendarRequestBuilder, IObservable<Unit>> afterAssert=null,bool keepTaskFolder=false){
+        private async Task MapTwoNewEvents(string tasksFolderName,Func<global::Google.Apis.Calendar.v3.CalendarService, IObservable<Unit>> afterAssert=null,bool keepTaskFolder=false){
             using (var application = Platform.Win.CalendarModule().Application){
-                var builder = await application.InitializeService(tasksFolderName,keepEvents:keepTaskFolder);
-                await builder.frame.View.ObjectSpace.Map_Two_New_Entity(
+                var t = await application.InitializeService(tasksFolderName,keepEvents:keepTaskFolder);
+                await t.frame.View.ObjectSpace.Map_Two_New_Entity(
                     (space, i) => space.NewEvent(i), Timeout,
-                    space => CalendarService.Updated.When(MapAction.Insert).TakeUntilDisposed(application), async (task, _, i) => {
+                    space => CalendarService.Updated.When(MapAction.Insert).TakeUntilDisposed(application), async (@event, _, i) => {
                         if (afterAssert != null){
-                            await afterAssert(builder.requestBuilder);
+                            await afterAssert(t.service);
                         }
                         else{
-                            application.ObjectSpaceProvider.AssertEvent(typeof(OutlookTask), task, _.cloud.Subject,
-                                DateTime.Parse(_.cloud.End.DateTime, CultureInfo.InvariantCulture),
-                                 _.cloud.Id, task.Subject);    
+                            application.ObjectSpaceProvider.AssertEvent(typeof(Event), @event, _.cloud.Description,
+                                _.cloud.End.DateTime, _.cloud.Id, @event.Subject);    
                         }
-                            
                     });
             }
         }
@@ -62,68 +59,75 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
                     space => CalendarService.Updated.When(MapAction.Insert).Select(_ => _.cloud)
                         .Merge(CalendarService.CustomizeSynchronization.Where(e => e.Instance.mapAction==MapAction.Insert)
                             .Select((tuple, i) => {
-                                tuple.Instance.cloud.Subject = $"{nameof(Customize_Two_New_Event)}{i}";
+                                tuple.Instance.local.MapCloudEvent(tuple.Instance.cloud);
+                                tuple.Instance.cloud.Summary = $"{nameof(Customize_Two_New_Event)}{i}";
                                 tuple.Handled = true;
                                 return tuple.Instance.cloud;
                             }).IgnoreElements())
                         .TakeUntilDisposed(application), 
-                    (cloudEvent, taskListEntry,i) => {
-                        application.ObjectSpaceProvider.AssertEvent(typeof(Event),cloudEvent, taskListEntry.Subject, DateTime.Parse(taskListEntry.End.DateTime),  taskListEntry.Id,$"{nameof(Customize_Two_New_Event)}{i}");
+                    (cloudEvent, listEntry,i) => {
+                        application.ObjectSpaceProvider
+                            .AssertEvent(typeof(Event),cloudEvent, listEntry.Summary, listEntry.End.DateTime,  listEntry.Id,$"{nameof(Customize_Two_New_Event)}{i}");
                     });
             
             }
         }
 
-        [Test][XpandTest()]
+        [Test]
+        [XpandTest()]
         public override async Task Map_Existing_Event_Two_Times(){
             using (var application = Platform.Win.CalendarModule().Application){
                 var builderData = await application.InitializeService();
                 var existingObjects = (await application.CreateExistingObjects(nameof(Map_Existing_Event_Two_Times))).First();
-
+                
                 await builderData.frame.View.ObjectSpace.Map_Existing_Entity_Two_Times(existingObjects.local,
-                    (pmeTask,i) => pmeTask.Modify_Event( i), existingObjects.cloud
+                    (pmeTask,i) => pmeTask.Modify_Event( i), existingObjects.cloudEvent
                     , space => CalendarService.Updated.When(MapAction.Update).Select(_ => _.cloud).TakeUntilDisposed(application),
                     (local, cloud) => {
-                        cloud.Subject.ShouldBe(local.Subject);
+                        cloud.Summary.ShouldBe(local.Subject);
                         return Task.CompletedTask;
                     },Timeout);
             }
 
         }
 
-        [Test][XpandTest()]
+        [Test]
+        [XpandTest()]
         public override async Task Customize_Map_Existing_Event_Two_Times(){
+
             using (var application = Platform.Win.CalendarModule().Application){
                 var builder = await application.InitializeService();
                 var existingObjects = (await application.CreateExistingObjects(nameof(Customize_Map_Existing_Event_Two_Times))).First();
                 await builder.frame.View.ObjectSpace.Map_Existing_Entity_Two_Times(existingObjects.local,
-                    (pmeTask,i) => pmeTask.Modify_Event( i),existingObjects.cloud, space
+                    (pmeTask,i) => pmeTask.Modify_Event( i),existingObjects.cloudEvent, space
                         => CalendarService.Updated.When(MapAction.Update).Select(_ => _.cloud)
                             .Merge(CalendarService.CustomizeSynchronization.Where(e => e.Instance.mapAction==MapAction.Update).Take(2)
                                 .Do(_ => {
-                                    _.Instance.cloud.Subject = nameof(Customize_Map_Existing_Event_Two_Times);
+                                    _.Instance.local.MapCloudEvent(_.Instance.cloud);
+                                    _.Instance.cloud.Summary = nameof(Customize_Map_Existing_Event_Two_Times);
                                     _.Handled = true;
                                 }).To(default(Event)).IgnoreElements())
                             .TakeUntilDisposed(application),
                     (pmeTask, cloudTask) => {
-                        cloudTask.Subject.ShouldBe(nameof(Customize_Map_Existing_Event_Two_Times));
+                        cloudTask.Summary.ShouldBe(nameof(Customize_Map_Existing_Event_Two_Times));
                         return Task.CompletedTask;
                     },Timeout);
             }
 
         }
 
-        [Test][XpandTest()]
+        [Test]
+        [XpandTest()]
         public override async Task Delete_Two_Events(){
             using (var application = Platform.Win.CalendarModule().Application){
-                var builder = await application.InitializeService();
+                var t = await application.InitializeService();
                 var existingObjects = await application.CreateExistingObjects(nameof(Delete_Two_Events),count:2);
-
-                await builder.frame.View.ObjectSpace.Delete_Two_Entities(existingObjects.Select(tuple => tuple.local).ToArray(),
+            
+                await t.frame.View.ObjectSpace.Delete_Two_Entities(existingObjects.Select(tuple => tuple.local).ToArray(),
                     space => CalendarService.Updated.When(MapAction.Delete).Select(_ => _.cloud).TakeUntilDisposed(application), async () => {
-                        var allTasks = await builder.requestBuilder.Events.ListAllItems();
-                        allTasks.Length.ShouldBe(0);
-                    }, Timeout,existingObjects.Select(_ => _.cloud).ToArray());
+                        var allEvents = await t.service.GetCalendar(CalendarTestExtensions.CalendarName).SelectMany(list => t.service.Events.List(list.Id).ToObservable());
+                        allEvents.Items.Count.ShouldBe(0);
+                    }, Timeout,existingObjects.Select(_ => _.cloudEvent).ToArray());
             }
 
         }
@@ -143,24 +147,26 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
                         .Merge(CalendarService.Updated.When(MapAction.Delete).To(default(Event)).Take(2).TakeUntilDisposed(application))
                         ,
                     async () => {
-                        var allTasks = await builder.requestBuilder.Events.ListAllItems();
-                        allTasks.Length.ShouldBe(handleDeletion?2:0);
-                    }, Timeout,existingObjects.Select(_ => _.cloud).ToArray());
+                        var allTasks =await builder.service.GetCalendar(CalendarTestExtensions.CalendarName)
+                            .SelectMany(list => builder.service.Events.List(list.Id).ToObservable());
+                        allTasks.Items.Count.ShouldBe(handleDeletion ? 2 : 0);
+                    }, Timeout,existingObjects.Select(_ => _.cloudEvent).ToArray());
                 await deleteTwoEntities;
             }
 
         }
 
-        [Test][XpandTest()]
+        [Test]
+        [XpandTest()]
         public override async Task Delete_Local_Event_Resource(){
             using (var application = Platform.Win.CalendarModule().Application){
-                var builder = await application.InitializeService();
-
-                await builder.frame.View.ObjectSpace.Delete_Event_Resource(pmeEvent =>
+                var t = await application.InitializeService();
+                var calendar = await t.service.GetCalendar(CalendarTestExtensions.CalendarName);
+                await t.frame.View.ObjectSpace.Delete_Event_Resource(pmeEvent =>
                     CalendarService.Updated.Select(_ => _.local).TakeUntilDisposed(application), async () => {
-                    var events = await builder.requestBuilder.Events.Request().GetAsync();
-                    events.Count.ShouldBe(1);
-                    events.First().Attendees.Count().ShouldBe(0);
+                    var events = await t.service.ListEvents(calendar.Id);
+                    events.First().Items.Count.ShouldBe(1);
+                    events.First().Items.First().Attendees.ShouldBeNull();
                 }, Timeout);
             }
         }
@@ -169,49 +175,50 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
         [Test]
         public override async Task Create_Entity_Container_When_Not_Exist(){
             using (var application = Platform.Win.CalendarModule().Application){
-                var modelTodo = application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Calendar();
+                var modelTodo = application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Google().Calendar();
                 modelTodo.DefaultCalendarName = $"{nameof(Create_Entity_Container_When_Not_Exist)}{Guid.NewGuid()}";
-
-                var serviceClient =  await application.InitGraphServiceClient();
-
-                var outlookTaskFolders = serviceClient.client.Me().Calendars;
-                var folder = await outlookTaskFolders.GetCalendar(modelTodo.DefaultCalendarName).WhenNotDefault().FirstAsync();
-                await outlookTaskFolders[folder.Id].Request().DeleteAsync();
+            
+                var t =  await application.InitService();
+            
+                var service = t.service;
+                var calendarListEntry = await service.GetCalendar(modelTodo.DefaultCalendarName).WhenNotDefault().FirstAsync();
+                await service.CalendarList.Delete(calendarListEntry.Id).ExecuteAsync();
             }
-
-            
-            
         }
 
         [TestCase(null)]
+        [TestCase("invalidToken")]
         [XpandTest()]
         public override async Task Populate_All(string syncToken){
             using (var application = Platform.Win.CalendarModule().Application){
-                var builder = await application.InitializeService(CalendarTestExtensions.PagingCalendarName);
-                await builder.frame.View.ObjectSpace.Populate_All(syncToken,
-                    storage => builder.requestBuilder.Events.ListAllItems(
-                        store => store.SaveToken(application.ObjectSpaceProvider.CreateObjectSpace), storage), Timeout,
-                    tasks => {
-                        tasks.Test().ItemCount.ShouldBe(2);
-                        tasks.SelectMany(events1 => events1).Test().ItemCount.ShouldBe(CalendarTestExtensions.PagingCalendarItemsCount);
+                var t = await application.InitializeService(CalendarTestExtensions.CalendarPagingName);
+                var calendarId = (await t.service.GetCalendar(CalendarTestExtensions.CalendarPagingName)).Id;
+                await t.frame.View.ObjectSpace.Populate_All(syncToken,
+                    storage => t.service.ListEvents(calendarId,null,
+                        store => store.SaveToken(application.ObjectSpaceProvider.CreateObjectSpace),250), Timeout,
+                    events => {
+                        var testObserver = events.Test();
+                        testObserver.Items.First().Length.ShouldBe(2);
+                        testObserver.Items.First().SelectMany(events1 => events1.Items).Count().ShouldBe(CalendarTestExtensions.PagingItemsCount);
                     });
             }
         }
 
-        [Test][XpandTest()]
+        [Test]
+        [XpandTest()]
         public override async Task Populate_Modified(){
             using (var application = Platform.Win.CalendarModule().Application){
-                var builder = await application.InitializeService();
-                await builder.requestBuilder.Me().Calendar.DeleteAllEvents();
-                var calendarEvents = (await builder.requestBuilder.Me().Calendar.NewCalendarEvents(12, nameof(Populate_Modified)).FirstAsync()).First();
-                await builder.frame.Application.ObjectSpaceProvider
-                    .Populate_Modified(storage => builder.requestBuilder.Me().CalendarView
-                            .ListDelta(storage,application.CreateObjectSpace), Unit.Default.ReturnObservable()
-                            .SelectMany(unit => builder.requestBuilder.Me().Events[calendarEvents.Id].Request()
-                            .UpdateAsync(new Event(){Subject = "updated"}).ToObservable().Select(_ => _).ToUnit()),
+                var t = await application.InitializeService();
+                var calendarId = (await t.service.GetCalendar(CalendarTestExtensions.CalendarName)).Id;
+                await t.service.DeleteAllEvents(calendarId);
+                var calendarEvent = (await t.service.NewCalendarEvents(2,calendarId, nameof(Populate_Modified)).FirstAsync()).First();
+                await t.frame.Application.ObjectSpaceProvider
+                    .Populate_Modified(storage => t.service.ListEvents(calendarId,storage), calendarEvent.ReturnObservable()
+                            .Do(cloudEvent => cloudEvent.Description="updated")
+                            .SelectMany(unit => t.service.Events.Update(calendarEvent, calendarId,calendarEvent.Id ).ExecuteAsync()).ToUnit() ,
                     Timeout, events => {
                         var testObserver = events.Test();
-                        testObserver.Items.Count(_ => _.@event.Subject=="updated").ShouldBe(1);
+                        testObserver.Items.First().SelectMany(_ => _.Items).First().Description.ShouldBe("updated");
                     });
             }
         }
@@ -221,28 +228,29 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
         [XpandTest()]
         public override async Task Update_Cloud_Event(){
             using (var application = Platform.Win.CalendarModule().Application){
-                await application.MSGraphClient(true);
+                await application.CalendarService(true);
                 var updatedEvent = CalendarService.Updated.When(MapAction.Insert).FirstAsync().SubscribeReplay();
-                var builder = await application.InitializeService("Calendar");
+                var t = await application.InitializeService();
                 application.CreateObjectSpace().GetObjects<DevExpress.Persistent.BaseImpl.Event>().Count.ShouldBe(0);
-                var @event = builder.frame.View.ObjectSpace.CreateObject<DevExpress.Persistent.BaseImpl.Event>();
+                var @event = t.frame.View.ObjectSpace.NewEvent(subject: nameof(Update_Cloud_Event));
                 @event.Subject = nameof(Update_Cloud_Event);
-                builder.frame.View.ObjectSpace.CommitChanges();
-                
+                t.frame.View.ObjectSpace.CommitChanges();
                 var serviceObject = (await updatedEvent).cloud;
+                serviceObject.Summary = nameof(Update_Cloud_Event);
                 application.CreateObjectSpace().GetObjects<DevExpress.Persistent.BaseImpl.Event>().Count.ShouldBe(1);
-                await builder.requestBuilder.Me().Events[serviceObject.Id].Request().UpdateAsync(new Event(){Subject = "updated"});
+                var calendar = await t.service.GetCalendar(CalendarTestExtensions.CalendarName);
+                await t.service.Events.Update(serviceObject,calendar.Id,serviceObject.Id).ToObservable();
                 
                 var synchronization = CalendarService.CustomizeSynchronization.FirstAsync(args => args.Instance.mapAction==MapAction.Update).SubscribeReplay();
-
+            
                 
-                builder.frame.SetView(application.NewView(ViewType.DetailView, typeof(DevExpress.Persistent.BaseImpl.Event)));
-
-                var tuple = await synchronization;
-
+                t.frame.SetView(application.NewView(ViewType.DetailView, typeof(DevExpress.Persistent.BaseImpl.Event)));
+            
+                var tuple = await synchronization.Timeout(Timeout);
+            
                 tuple.Instance.mapAction.ShouldBe(MapAction.Update);
                 var objectSpace = application.CreateObjectSpace();
-                objectSpace.GetObject(@event).Subject.ShouldBe("updated");
+                objectSpace.GetObject(@event).Subject.ShouldBe(nameof(Update_Cloud_Event));
                 objectSpace.GetObjects<DevExpress.Persistent.BaseImpl.Event>().Count.ShouldBe(1);
             }
         }
@@ -251,26 +259,29 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
         [XpandTest()]
         public override async Task Delete_Cloud_Event(){
             using (var application = Platform.Win.CalendarModule().Application){
-                var client = await application.MSGraphClient(true);
-                await client.Me().Calendar.Events.Request().AddAsync(new Event(){Subject = "test"});
+                var calendarService = await application.CalendarService(true);
+                var calendar = await calendarService.GetCalendar(CalendarTestExtensions.CalendarName);
+                await calendarService.NewCalendarEvents(1, calendar.Id, "test");
+                
                 var officeTokenStorage = application.CreateObjectSpace().CloudOfficeTokenStorage((Guid) SecuritySystem.CurrentUserId);
                 officeTokenStorage.Token.ShouldBeNull();
-                var observeInsert = client.Me().CalendarView.ListDelta(officeTokenStorage,application.CreateObjectSpace ).FirstAsync().Test();
+                var observeInsert = calendarService.ListEvents(officeTokenStorage, application.CreateObjectSpace,calendar.Id).FirstAsync().Test();
                 observeInsert.AwaitDone(Timeout);
                 observeInsert.Items.Count.ShouldBe(1);
                 observeInsert.Items.Select(_ => _.mapAction).First().ShouldBe(MapAction.Insert);
+                application.CreateObjectSpace().GetObjectsQuery<CloudOfficeTokenStorage>();
                 officeTokenStorage = application.CreateObjectSpace().CloudOfficeTokenStorage((Guid) SecuritySystem.CurrentUserId);
                 officeTokenStorage.Token.ShouldNotBeNull();
                 var objectSpace1 = application.CreateObjectSpace();
                 var o = objectSpace1.CreateObject<DevExpress.Persistent.BaseImpl.Event>();
                 objectSpace1.CommitChanges();
-                await objectSpace1.NewCloudObject(o, observeInsert.Items.First().@event);
+                await objectSpace1.NewCloudObject(o, observeInsert.Items.First().e);
                 objectSpace1.CommitChanges();
                 var synchronization = CalendarService.CustomizeSynchronization.FirstAsync(args => args.Instance.mapAction==MapAction.Delete).SubscribeReplay();
-                var builder = await application.InitializeService("Calendar",true);
-                await builder.client.Me.Events[observeInsert.Items.First().@event.Id].Request().DeleteAsync();
+                var t = await application.InitializeService(keepEvents:true);
+                await t.service.Events.Delete(calendar.Id, observeInsert.Items.First().e.Id).ExecuteAsync();
 
-                builder.frame.SetView(application.NewView(ViewType.DetailView, typeof(DevExpress.Persistent.BaseImpl.Event)));
+                t.frame.SetView(application.NewView(ViewType.DetailView, typeof(DevExpress.Persistent.BaseImpl.Event)));
                 
                 var tuple = await synchronization.ToTaskWithoutConfigureAwait();
                 tuple.Instance.mapAction.ShouldBe(MapAction.Delete);
@@ -283,15 +294,17 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
         [XpandTest()]
         public override async Task Insert_Cloud_Event(){
             using (var application = Platform.Win.CalendarModule().Application){
-                await application.MSGraphClient(true);
-                var builder = await application.InitializeService("Calendar");
-                await builder.client.Me.Events.Request().AddAsync(new Event(){Subject = "New"});
+                await application.CalendarService(true);
+                var t = await application.InitializeService();
+                var calendar = await t.service.GetCalendar(CalendarTestExtensions.CalendarName);
+                await t.service.NewCalendarEvents(1, calendar.Id, "New");
+
                 var synchronization = CalendarService.CustomizeSynchronization
                     .FirstAsync(args => args.Instance.mapAction == MapAction.Insert).SubscribeReplay();
-                builder.frame.SetView(application.NewView(ViewType.DetailView, typeof(DevExpress.Persistent.BaseImpl.Event)));
-
+                t.frame.SetView(application.NewView(ViewType.DetailView, typeof(DevExpress.Persistent.BaseImpl.Event)));
+            
                 var tuple = await synchronization;
-
+            
                 tuple.Instance.mapAction.ShouldBe(MapAction.Insert);
                 var objectSpace = application.CreateObjectSpace();
                 var objectsQuery = objectSpace.GetObjectsQuery<DevExpress.Persistent.BaseImpl.Event>().ToArray();
@@ -299,6 +312,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
                 objectsQuery.FirstOrDefault(e => e.Subject == "New").ShouldNotBeNull();
                 await objectSpace.QueryCloudOfficeObject(tuple.Instance.cloud.Id, CloudObjectType.Event).FirstAsync()
                     .WithTimeOut();
+
             }
         }
 

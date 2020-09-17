@@ -114,7 +114,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks.Tests{
 
                 await builder.frame.View.ObjectSpace.Delete_Two_Entities(existingObjects.Select(tuple => tuple.task).ToArray(),
                     space => GoogleTasksService.Updated.When(MapAction.Delete).Select(_ => _.cloud).TakeUntilDisposed(application), async () => {
-                        var allTasks =await builder.service.GetTaskList(TasksTestExtensions.TasksFolderName).SelectMany(list => builder.service.Tasks.List(list.Id).ToObservable());
+                        global::Google.Apis.Tasks.v1.Data.Tasks allTasks =await builder.service.GetTaskList(TasksTestExtensions.TasksFolderName).SelectMany(list => builder.service.Tasks.List(list.Id).ToObservable());
                         allTasks.Items.ShouldBeNull();
                     }, Timeout,existingObjects.Select(_ => _.cloudTask).ToArray());
             }
@@ -133,7 +133,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks.Tests{
                         .Do(_ => _.Handled=handleDeletion).To(default(global::Google.Apis.Tasks.v1.Data.Task))
                         .TakeUntilDisposed(application),
                     async () => {
-                        var allTasks =await builder.service.GetTaskList(TasksTestExtensions.TasksFolderName).SelectMany(list => builder.service.Tasks.List(list.Id).ToObservable());
+                        var allTasks =await builder.service.GetTaskList(TasksTestExtensions.TasksFolderName)
+                            .SelectMany(list => builder.service.Tasks.List(list.Id).ToObservable());
                         if (handleDeletion){
                             allTasks.Items.Count.ShouldBe(2);
                         }

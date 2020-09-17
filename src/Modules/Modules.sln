@@ -171,6 +171,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Office.Cl
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Office.Cloud.Google.Calendar", "Office.Cloud.Google.Calendar\Xpand.XAF.Modules.Office.Cloud.Google.Calendar.csproj", "{E6C713D8-13D3-405E-BF10-BB373116F98C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0EB2E3E0-D407-44C8-87A8-28C5DDA51021} = {0EB2E3E0-D407-44C8-87A8-28C5DDA51021}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

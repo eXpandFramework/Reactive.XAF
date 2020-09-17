@@ -14,7 +14,6 @@ if ($buildNumber){
 $rootLocation = "$PSScriptRoot\.."
 Set-Location $rootLocation
 
-$nuget = Get-NugetPath
 $packagesPath = "$rootLocation\bin\Nupkg\"
 
 if ($ExistingVersion){
@@ -22,7 +21,10 @@ if ($ExistingVersion){
     Pop-XpandPackage Release -Version $ExistingVersion -PackageType XAFAll
     Get-ChildItem (Get-NugetInstallationFolder GlobalPackagesFolder) Xpand.XAF.Modules.*.Nupkg -Recurse|Copy-Item -Destination $packagesPath -Force
 }
-$packages=& $nuget List -Source $packagesPath | ConvertTo-PackageObject | Select-Object -ExpandProperty Id| Where-Object { $_ -notin @("Xpand.VersionConverter","Xpand.XAF.ModelEditor") -and $_ -notlike "Xpand.Extensions*" } 
+function GetPackages($packagesPath){
+    & (Get-NugetPath) List -Source $packagesPath | ConvertTo-PackageObject | Select-Object -ExpandProperty Id| Where-Object { $_ -notin @("Xpand.VersionConverter","Xpand.XAF.ModelEditor") -and $_ -notlike "Xpand.Extensions*" -and $_ -notin "Xpand.Collections","xpand.patcher" } 
+}
+$packages=GetPackages $packagesPath
 function GetModuleName($_){
     $moduleName = $_.BaseName.Substring($_.BaseName.LastIndexOf(".") + 1)
     $moduleName = "$($_.BaseName).$($moduleName)Module"
@@ -34,7 +36,7 @@ function GetModuleName($_){
     }
     $moduleName
 }
-function UpdateModulesList($rootLocation, $packages) {
+function UpdateModulesList($rootLocation, $packages,$path) {
     $moduleList = "|PackageName|Version|[![Custom badge](https://xpandshields.azurewebsites.net/endpoint.svg?label=&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAF)](https://www.nuget.org/packages?q=Xpand.XAF)|Target|Platform`r`n|---|---|---|---|---|`r`n"
     $projects=Get-MSBuildProjects $rootLocation\src\Modules
     $assemblies=Get-ChildItem $rootLocation\bin xpand.*.dll
@@ -64,7 +66,7 @@ function UpdateModulesList($rootLocation, $packages) {
         $moduleList += "$packageUri|$version|$downloads|$targetFramework|$platform`r`n"
     }
     
-    $path = "$rootLocation\src\modules\ReadMe.md"
+    
     $allModulesReadMe = Get-Content $path -Raw
     
     $regex = [regex] '(?is)<moduleslist>(?<list>.*)</moduleslist>'
@@ -116,7 +118,7 @@ function UpdateBadges($_, $packagespath, $readMePath) {
     $badges = @"
 ![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.$package.svg?&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.$package.svg?&style=flat)
 
-[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/$package.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+$package) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/$package.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+$package)
+[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/$package.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+label%3A$package) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/$package.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+label%3A$package)
 "@
     $readMe = [Regex]::replace($readMe, '(.*)# About', "$badges`r`n# About", [RegexOptions]::Singleline)
     Set-Content $readMePath $readMe.Trim()
@@ -173,7 +175,7 @@ function UpdateModules($rootLocation, $packages) {
     }
 }
 if ($packages){
-    UpdateModulesList $rootLocation $packages
+    UpdateModulesList $rootLocation $packages "$rootLocation\src\modules\ReadMe.md"
     UpdateModules $rootLocation $packages
 }
 

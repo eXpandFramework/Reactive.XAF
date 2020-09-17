@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
@@ -11,7 +10,6 @@ using Microsoft.Graph;
 using Microsoft.Identity.Client;
 using Shouldly;
 using Xpand.Extensions.Office.Cloud;
-using Xpand.Extensions.Office.Cloud.BusinessObjects;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -38,31 +36,11 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
             return authorizeMS;
         }
 
-        public static async Task Populate_Modified<TEntity>(this IObjectSpaceProvider objectSpaceProvider,
-            Func<CloudOfficeTokenStorage,IObservable<TEntity>> listEntities,IObservable<Unit> modified,TimeSpan timeout,Action<IObservable<TEntity>> assert){
-            
-            
-            using (var objectSpace = objectSpaceProvider.CreateObjectSpace()){
-                var tokenStorage = objectSpace.CreateObject<CloudOfficeTokenStorage>();
-                var storageToken = tokenStorage.Token;
-                await listEntities(tokenStorage);
-
-                await modified.Timeout(timeout);
-
-                var entities = listEntities(tokenStorage).SubscribeReplay().Do(entity => { });
-                await entities.Timeout(timeout);
-
-                tokenStorage.Token.ShouldNotBeNull();
-                tokenStorage.Token.ShouldNotBe(storageToken);
-                
-                assert(entities);
-            }
-        }
 
         public static async Task<(ICalendarRequestBuilder requestBuilder, Frame frame, GraphServiceClient client)>
             InitializeService(this XafApplication application, string calendarName = CalendarName, bool keepTasks = false, bool keepEvents = false){
             var modelTodo = application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Calendar();
-            modelTodo.DefaultCaledarName = calendarName;
+            modelTodo.DefaultCalendarName = calendarName;
             var client =  await application.InitGraphServiceClient();
             var requestBuilder = client.client.Me.Calendars;
             var calendar = await requestBuilder.GetCalendar(calendarName, !keepEvents && calendarName!=PagingCalendarName).ToTaskWithoutConfigureAwait();
@@ -151,10 +129,10 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
             var builder =await application.AuthorizeTestMS();
             var calendar = await builder.Me.Calendars.GetCalendar(CalendarName, true);
             await builder.Me.Calendars[calendar.Id].DeleteAllEvents();
-            return await Observable.Range(0, count).SelectMany(i => {
-                return builder.Me.Calendars[calendar.Id].NewCalendarEvents(1, title)
-                    .SelectMany(lst => lst).Select(outlookTask1 => (application.NewEvent(), outlookTask1));
-            }).Buffer(count);
+            return await Observable.Range(0, count)
+                .SelectMany(i => builder.Me.Calendars[calendar.Id].NewCalendarEvents(1, title)
+                    .SelectMany(lst => lst).Select(outlookTask1 => (application.NewEvent(), outlookTask1)))
+                .Buffer(count);
         }
 
         public static void Modify_Event<TTask>(this TTask task,  int i) where TTask:IEvent{

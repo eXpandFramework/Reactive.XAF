@@ -31,10 +31,10 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
             if (tokenStore != null){
                 allEvents= allEvents.Where(_ => _.GetPropertyValue("NextSyncToken") != null).LastOrDefaultAsync().Do(_ => {
                     if (_ != null) tokenStore.Token = $"{_.GetPropertyValue("NextSyncToken")}";
-                }).IgnoreElements().Merge(allEvents).Publish().RefCount();
+                }).IgnoreElements().Merge(allEvents);
             }
 
-            return allEvents.BufferUntilCompleted();
+            return allEvents.BufferUntilCompleted().Select(responses => responses);
         }
 
 

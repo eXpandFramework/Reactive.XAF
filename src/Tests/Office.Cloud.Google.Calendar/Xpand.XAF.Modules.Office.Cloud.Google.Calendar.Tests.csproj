@@ -11,7 +11,7 @@
     <DebugType>full</DebugType>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
-    <AssemblyName>Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests</AssemblyName>
+    <AssemblyName>Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Tests">
@@ -29,8 +29,8 @@
     <Reference Include="Xpand.Extensions.XAF">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
     </Reference>
-    <Reference Include="Xpand.XAF.Modules.Office.Cloud.Google.Tasks">
-      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Office.Cloud.Google.Tasks.dll</HintPath>
+    <Reference Include="Xpand.XAF.Modules.Office.Cloud.Google.Calendar">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Office.Cloud.Google.Calendar.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Office.Cloud.Google">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Office.Cloud.Google.dll</HintPath>
@@ -50,9 +50,6 @@
     <Reference Include="Xpand.Extensions.XAF.Xpo">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.Xpo.dll</HintPath>
     </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="BusinessObjects\" />
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>
