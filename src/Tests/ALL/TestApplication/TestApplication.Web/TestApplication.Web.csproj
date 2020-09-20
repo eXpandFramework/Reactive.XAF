@@ -169,6 +169,9 @@
       <Link>Common\AgnosticModule.cs</Link>
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="..\CommonFiles\CloudCalendarService.cs">
+      <Link>Cloud.Office\CloudCalendarService.cs</Link>
+    </Compile>
     <Compile Include="..\CommonFiles\CloudService.cs">
       <Link>Cloud.Office\CloudService.cs</Link>
     </Compile>
@@ -177,6 +180,9 @@
     </Compile>
     <Compile Include="..\CommonFiles\GoogleService\ShowGoogleAccountInfoService.cs">
       <Link>Cloud.Office\Google\ShowGoogleAccountInfoService.cs</Link>
+    </Compile>
+    <Compile Include="..\CommonFiles\GoogleTasksService\GoogleCalendarService.cs">
+      <Link>Cloud.Office\Google\GoogleCalendarService.cs</Link>
     </Compile>
     <Compile Include="..\commonfiles\microsoftcalendarservice\MicrosoftCalendarService.cs">
       <Link>Cloud.Office\Microsoft\MicrosoftCalendarService.cs</Link>

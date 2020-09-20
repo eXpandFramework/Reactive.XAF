@@ -12,7 +12,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
 
         static MicrosoftTodoModule(){
             TraceSource=new ReactiveTraceSource(nameof(MicrosoftTodoModule));
-            ModelObjectViewDependencyLogic.ObjectViewsMap.Add(typeof(IModelTodo),typeof(ITask));
+            ModelObjectViewDependencyLogic.AddObjectViewMap(typeof(IModelTodo),typeof(ITask));
         }
 
         public MicrosoftTodoModule() => MicrosoftModule.AddRequirements(this);

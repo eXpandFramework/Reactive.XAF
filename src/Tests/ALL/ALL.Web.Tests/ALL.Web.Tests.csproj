@@ -20,6 +20,7 @@
     <Compile Remove="Program.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\CommonFiles\GoogleCalendarService.cs" Link="GoogleCalendarService.cs" />
     <Compile Include="..\CommonFiles\GoogleTasksService.cs" Link="GoogleTasksService.cs" />
     <Compile Include="..\CommonFiles\MicrosoftCalendarService.cs" Link="MicrosoftCalendarService.cs" />
     <Compile Include="..\CommonFiles\MicrosoftService.cs" Link="MicrosoftService.cs" />

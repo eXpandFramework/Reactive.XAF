@@ -4,7 +4,7 @@ using DevExpress.Persistent.BaseImpl;
 
 namespace ALL.Win.Tests{
     public static class MicrosoftTodoService{
-        public static void TestMicrosoftTodoService(this ICommandAdapter commandAdapter) => 
-            commandAdapter.TestOfficeCloudService("Cloud.Microsoft Task",nameof(Task.Subject), nameof(Task.Description));
+        public static async System.Threading.Tasks.Task TestMicrosoftTodoService(this ICommandAdapter commandAdapter) 
+            => await commandAdapter.TestOfficeCloudService("Cloud.Microsoft Task",nameof(Task.Subject));
     }
 }

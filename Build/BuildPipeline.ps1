@@ -119,7 +119,7 @@ Invoke-Script{
     New-Item "$stage\TestApplication" -ItemType Directory
     Write-HostFormatted "Copying Bin" -Section
     if (Test-AzDevops){
-        Move-Item "$Sourcepath\Bin" "$stage\Bin" -Force 
+        Invoke-Script {Move-Item "$Sourcepath\Bin" "$stage\Bin" -Force } -Maximum 3 -RetryInterval 3
     }
     else{
         Copy-Item "$Sourcepath\Bin" "$stage\Bin" -Recurse -Force 

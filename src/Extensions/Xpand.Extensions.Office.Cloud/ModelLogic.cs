@@ -84,7 +84,7 @@ namespace Xpand.Extensions.Office.Cloud{
     [DomainLogic(typeof(IModelCalendar))]
     public static class ModelCalendarLogic{
         [PublicAPI]
-        internal static string Get_DefaultCalendarName(this IModelCalendar modelCalendar){
+        public static string Get_DefaultCalendarName(this IModelCalendar modelCalendar){
             var interfaces = modelCalendar.Parent.GetType().GetInterfaces();
             if (interfaces.Any(type => type.Name.Contains("Microsoft"))){
                 return "Calendar";

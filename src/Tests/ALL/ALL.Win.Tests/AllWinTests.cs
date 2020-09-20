@@ -13,14 +13,14 @@ using Xpand.Extensions.AppDomainExtensions;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Attributes;
 using Xpand.TestsLib.EasyTest;
+using Xpand.TestsLib.EasyTest.Commands.Automation;
 using Xpand.XAF.Modules.Reactive;
 using AutoTestCommand = Xpand.TestsLib.EasyTest.Commands.ActionCommands.AutoTestCommand;
 using BaseTest = ALL.Tests.BaseTest;
 
 namespace ALL.Win.Tests{
 	[NonParallelizable]
-    public class 
-        AllWinTests : BaseTest{
+    public class AllWinTests : BaseTest{
         [Test()]
         [TestCaseSource(nameof(AgnosticModules))]
         [TestCaseSource(nameof(WinModules))]
@@ -39,13 +39,36 @@ namespace ALL.Win.Tests{
         [XpandTest(LongTimeout,3)]
         [Apartment(ApartmentState.STA)]
         public async Task Win_EasyTest_InMemory(){
-            await EasyTest(() => new WinAdapter(), RunWinApplication, async adapter => {
-                    var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
-                    adapter.Execute(autoTestCommand);
-                    await adapter.TestCloudServices();
-                    // adapter.TestViewWizardService();
+            await EasyTest(() => new WinAdapter(), RunWinApplication, adapter => {
+                var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
+                adapter.Execute(autoTestCommand);
+                return Task.CompletedTask;
             });
         }     
+
+        [XpandTest(LongTimeout,3)]
+        [Test][Apartment(ApartmentState.STA)]
+        public async Task Win_MicrosoftCloud_EasyTest(){
+            DeleteBrowserFiles.Execute();
+            await EasyTest(() => new WinAdapter(), RunWinApplication, async adapter => {
+                await adapter.TestMicrosoftService(async () => {
+                    await adapter.TestMicrosoftCalendarService();
+                    await adapter.TestMicrosoftTodoService();
+                });
+            });
+        }
+
+        [XpandTest(LongTimeout,3)]
+        [Test][Apartment(ApartmentState.STA)]
+        public async Task Win_GoogleCloud_EasyTest(){
+            DeleteBrowserFiles.Execute();
+            await EasyTest(() => new WinAdapter(), RunWinApplication, async adapter => {
+                await adapter.TestGoogleService(async () => {
+                    await adapter.TestGoogleCalendarService();
+                    await adapter.TestGoogleTasksService();
+                });
+            });
+        }
 
         private static TestApplication RunWinApplication(WinAdapter adapter, string connectionString) 
             => adapter.RunWinApplication(

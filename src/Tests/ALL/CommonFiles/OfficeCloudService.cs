@@ -4,7 +4,6 @@ using System.IO;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using ALL.Win.Tests;
 using DevExpress.EasyTest.Framework;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Office.Cloud;
@@ -17,29 +16,48 @@ using Xpand.TestsLib.Win32;
 
 namespace ALL.Tests{
     public static class OfficeCloudService{
-        private static void CheckOperatrion(this ICommandAdapter commandAdapter, MapAction mapAction, string verifyEditor){
-            commandAdapter.Execute(new WaitCommand(2000), new ActionCommand(Actions.Refresh));
-            commandAdapter.Execute(new CheckDetailViewCommand((verifyEditor, mapAction.ToString())));
+        private static async Task CheckOperation(this ICommandAdapter commandAdapter, MapAction mapAction){
+            await commandAdapter.Execute(() => {
+                commandAdapter.Execute(new ActionCommand(Actions.Refresh));
+                commandAdapter.Execute(new CheckActionToolTip(("Save",mapAction.ToString())));
+            });
         }
 
-        public static void TestOfficeCloudService(this ICommandAdapter commandAdapter, string navigationItemCaption,
-            string editorName, string verifyEditor){
+        public static async Task TestOfficeCloudService(this ICommandAdapter commandAdapter, string serviceName){
+            commandAdapter.Execute(new NavigateCommand($"Cloud.{serviceName} Event"));
+            var cloudCalendarOperation = "Cloud Calendar Operation";
+            commandAdapter.Execute(new ActionCommand(cloudCalendarOperation, "New"),new WaitCommand(2500));
+            await commandAdapter.Execute(() => {
+                commandAdapter.Execute(new ActionCommand(Actions.Refresh));
+                var checkListViewCommand = new CheckListViewCommand("Subject");
+                checkListViewCommand.AddRows(new[]{$"{serviceName}-Cloud"});
+                commandAdapter.Execute(checkListViewCommand);
+            });
+            commandAdapter.Execute(new ActionCommand(cloudCalendarOperation, "Update"),new WaitCommand(2500));
+            await commandAdapter.Execute(() => {
+                commandAdapter.Execute(new ActionCommand(Actions.Refresh));
+                var checkListViewCommand = new CheckListViewCommand("Subject");
+                checkListViewCommand.AddRows(new[]{$"{serviceName}-Cloud-Updated"});
+                commandAdapter.Execute(checkListViewCommand);
+            });
+            commandAdapter.Execute(new ActionCommand(cloudCalendarOperation, "Delete"),new WaitCommand(2500));
+            await commandAdapter.Execute(() => {
+                commandAdapter.Execute(new ActionCommand(Actions.Refresh));
+                commandAdapter.Execute(new CheckListViewCommand("", 0));
+            });
+        }
+
+        public static async Task TestOfficeCloudService(this ICommandAdapter commandAdapter, string navigationItemCaption, string editorName){
             commandAdapter.Execute(new NavigateCommand(navigationItemCaption),new ActionCommand(Actions.New));
             commandAdapter.Execute(new FillObjectViewCommand((editorName, "New")),new WaitCommand(2000),new ActionCommand(Actions.Save));
-            commandAdapter.CheckOperatrion(MapAction.Insert, verifyEditor);
-                    
-            commandAdapter.Execute(new FillObjectViewCommand((editorName, "Update")),new WaitCommand(2000),new ActionCommand(Actions.Save));
-            commandAdapter.CheckOperatrion(MapAction.Update, verifyEditor);
-
+            await commandAdapter.CheckOperation(MapAction.Insert);
+            commandAdapter.Execute(new FillObjectViewCommand((editorName, "Update")));
+            commandAdapter.Execute(new WaitCommand(2000));
+            commandAdapter.Execute(new ActionCommand(Actions.Save));
+            await commandAdapter.CheckOperation(MapAction.Update);
             commandAdapter.Execute(new ActionDeleteCommand());
             commandAdapter.Execute(new NavigateCommand(navigationItemCaption));
-            commandAdapter.Execute(new ActionCommand(Actions.Refresh), new CheckListViewCommand("",0));
-        }
-
-        public static async Task TestCloudServices(this ICommandAdapter commandAdapter){
-            // await commandAdapter.TestGoogleService(() => Observable.Start(commandAdapter.TestGoogleTasksService).ToUnit());
-            await commandAdapter.TestMicrosoftService(() => Observable.Start(() => commandAdapter.TestMicrosoftCalendarService()
-                .Do(_ => commandAdapter.TestMicrosoftTodoService())).Concat().ToUnit());
+            await commandAdapter.Execute(() => commandAdapter.Execute(new ActionCommand(Actions.Refresh), new CheckListViewCommand("", 0)));
         }
 
         public static async Task TestCloudService(this ICommandAdapter commandAdapter,
@@ -59,11 +77,14 @@ namespace ALL.Tests{
 
         private static void CheckConnection(this ICommandAdapter commandAdapter, string signOutCaption,
             string signInCaption, Command checkAccountInfoCOmmand,string serviceName){
-            commandAdapter.Execute(new NavigateCommand("Default.My Details"),
-                new ActionAvailableCommand(signInCaption){ExpectException = true},
-                new ActionAvailableCommand(signOutCaption),
-                new CheckActionToolTip((signOutCaption,"Sign out")),
-                new ActionCommand($"Show {serviceName} Account Info"),new WaitCommand(WaitInterval),checkAccountInfoCOmmand,new ActionCloseCommand());
+            commandAdapter.Execute(new NavigateCommand("Default.My Details"));
+            commandAdapter.Execute(new ActionAvailableCommand(signInCaption){ExpectException = true});
+            commandAdapter.Execute(new ActionAvailableCommand(signOutCaption));
+            commandAdapter.Execute(new CheckActionToolTip((signOutCaption,"Sign out")));
+            commandAdapter.Execute(new ActionCommand($"Show {serviceName} Account Info"));
+            commandAdapter.Execute(new WaitCommand(WaitInterval));
+            commandAdapter.Execute(checkAccountInfoCOmmand);
+            commandAdapter.Execute(new ActionCloseCommand());
         }
 
         public static int WaitInterval => Debugger.IsAttached?2500:5000;

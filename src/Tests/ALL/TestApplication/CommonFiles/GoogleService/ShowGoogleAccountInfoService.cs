@@ -34,7 +34,7 @@ namespace TestApplication.GoogleService{
 		private static IObservable<Unit> ConfigureModel(this ApplicationModulesManager manager) 
 			=> manager.WhenGeneratingModelNodes(modelApplication => modelApplication.BOModel)
 				.Do(model => model.Application.ToReactiveModule<IModelReactiveModuleOffice>().Office.Google().OAuth
-					.AddScopes(PeopleService.Scope.UserinfoEmail,PeopleService.Scope.UserinfoProfile,"https://www.googleapis.com/auth/calendar.events")).ToUnit();
+					.AddScopes(PeopleService.Scope.UserinfoEmail,PeopleService.Scope.UserinfoProfile)).ToUnit();
 		private static IObservable<Person> ShowAccountInfoView(this IObservable<SimpleActionExecuteEventArgs> source) 
             => source.SelectMany(e => {
 					e.ShowViewParameters.CreatedView = e.Action.Application.NewView(ViewType.DetailView, typeof(EmailAddress));

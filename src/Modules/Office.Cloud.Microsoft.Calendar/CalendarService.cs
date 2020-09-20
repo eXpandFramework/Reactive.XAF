@@ -86,7 +86,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
 
         private static IObservable<(Frame frame, GraphServiceClient client, (IEvent target, Event source) calendar)> SynchronizeLocal(
                 this IObservable<(Frame frame, GraphServiceClient client, global::Microsoft.Graph.Calendar calendar, IModelCalendarItem calerdarItem)> source)  
-            => source.SelectMany(_ => _.frame.Application
+            => source
+                .Where(t => t.calerdarItem.CallDirection!=CallDirection.Out)
+                .SelectMany(_ => _.frame.Application
                     .SelectMany(() => _.SynchronizeLocal(_.calerdarItem.SynchronizationType))
                     .Select(calendar => (_.frame,_.client,calendar))
                     .TraceMicrosoftCalendarModule(folder => $"Event: {folder.calendar.source?.Id}"));
@@ -102,6 +104,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
             => source.AuthorizeMS()
                 .EnsureCalendar()
                 .Publish().RefCount()
+                .WhenNotDefault(t => t.frame.Application)
                 .Do(tuple => ClientSubject.OnNext((tuple.frame,tuple.client)))
                 .Select(t => (t.frame,t.client,t.calendar,t.frame.Application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Calendar().Items[t.frame.View.Id]))
                 .TraceMicrosoftCalendarModule(_ => _.frame.View.Id);
@@ -202,9 +205,10 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
 
         private static void Update(this IEvent localEvent, GenericEventArgs<(Func<IObjectSpace> objectSpace, IEvent local, Event cloud, MapAction mapAction, CallDirection callDirection)> args){
             localEvent.Location = args.Instance.cloud.Location?.DisplayName;
-            localEvent.StartOn = Convert.ToDateTime(args.Instance.cloud.Start?.DateTime);
-            localEvent.EndOn = Convert.ToDateTime(args.Instance.cloud.End?.DateTime);
+            localEvent.StartOn = Convert.ToDateTime(args.Instance.cloud.Start?.DateTime).ToLocalTime();
+            localEvent.EndOn = Convert.ToDateTime(args.Instance.cloud.End?.DateTime).ToLocalTime();
             localEvent.Subject = args.Instance.cloud.Subject;
+            args.Instance.cloud.Body.ContentType=BodyType.Text;
             localEvent.Description = args.Instance.cloud.Body?.Content;
         }
         

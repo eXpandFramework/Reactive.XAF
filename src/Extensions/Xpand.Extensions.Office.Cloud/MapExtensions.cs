@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.Base.General;
@@ -25,18 +26,14 @@ namespace Xpand.Extensions.Office.Cloud{
             return tokenStorage;
         }
 
-        static IObservable<(IObjectSpace objectSpace, IEvent source, TCloudEvent @event, MapAction mapAction)> AddLocalEvent<TCloudEvent>
-            (this IObservable<(IObjectSpace objectSpace, IEvent source, TCloudEvent @event, MapAction mapAction)> source, TCloudEvent cloudEvent, IObjectSpace objectSpace)
-            => source.SwitchIfEmpty((objectSpace,(IEvent)null,cloudEvent,MapAction.Insert).ReturnObservable().Select(tuple => tuple));
-
         static IObservable<(IObjectSpace objectSpace, IEvent source, TCloudEvent @event, MapAction mapAction)>
             SynchronizeLocalEvent<TCloudEvent>(this IObservable<(TCloudEvent @event, MapAction mapAction)> source,
                 Func<IObjectSpace> objectSpaceFactory, Type localEventType) 
-            => source.SelectMany(_ => Observable.Using(objectSpaceFactory, objectSpace => objectSpace
-                .QueryCloudOfficeObject((string)_.@event.GetPropertyValue("Id"), _.@event.GetType().ToCloudObjectType()).ToObservable()
-                .Select(cloudObject => ((IEvent) objectSpace.GetObjectByKey(localEventType,new Guid(cloudObject.LocalId)))).Pair(_)
+            => source.SelectMany(t => Observable.Using(objectSpaceFactory, objectSpace => objectSpace
+                .QueryCloudOfficeObject((string)t.@event.GetPropertyValue("Id"), t.@event.GetType().ToCloudObjectType()).ToObservable(Scheduler.Immediate)
+                .Select(cloudObject => ((IEvent) objectSpace.GetObjectByKey(localEventType,new Guid(cloudObject.LocalId)))).Pair(t)
                 .Select(tuple => (objectSpace,tuple.source,tuple.other.@event,tuple.other.mapAction))
-                .AddLocalEvent(_.@event,objectSpace)
+                .SwitchIfEmpty((objectSpace,(IEvent)null,t.@event,t.mapAction).ReturnObservable().Select(tuple => tuple))
                 .Finally(objectSpace.CommitChanges)));
 
         public static IObservable<(TCloudEntity serviceObject, MapAction mapAction)>
@@ -46,7 +43,11 @@ namespace Xpand.Extensions.Office.Cloud{
             Action<GenericEventArgs<(CloudOfficeObject cloudOfficeObject, TLocalEntity localEntinty)>> onDelete = null, Action<(TCloudEntity target, TLocalEntity source)> onInsert = null,
             Action<(TCloudEntity target, TLocalEntity source)> update = null) where TCloudEntity : class
             => objectSpace.ModifiedObjects<TLocalEntity, TCloudEntity>(synchronizationType, cloudOfficeObject 
-                    => cloudOfficeObject.Delete<TCloudEntity,TLocalEntity>(onDelete, deleteReqest).FirstOrDefaultAsync().Select(entity => (entity,MapAction.Delete)),
+                    => {
+                    var cloudEntity = getRequest(cloudOfficeObject.cloudOfficeObject.CloudId).FirstOrDefaultAsync().Wait();
+                    return cloudEntity != null ? cloudOfficeObject.Delete<TCloudEntity, TLocalEntity>(onDelete, deleteReqest)
+                            .FirstOrDefaultAsync().Select(entity => (entity, MapAction.Delete)) : Observable.Empty<(TCloudEntity, MapAction mapAction)>();
+                },
                 localEntity => objectSpaceFactory.MapEntity(localEntity, sourceEntity 
                         => sourceEntity.Insert(objectSpace, objectSpaceFactory, onInsert, insertReqest).Select(entity => (entity, MapAction.Insert)), _ 
                         => _.task.Update(_.cloudId, getRequest, updateRequest, update).Select(entity => (entity, MapAction.Update))

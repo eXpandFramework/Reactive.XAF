@@ -13,7 +13,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
     public sealed class MicrosoftCalendarModule : ReactiveModuleBase{
         static MicrosoftCalendarModule(){
             TraceSource=new ReactiveTraceSource(nameof(MicrosoftCalendarModule));
-            ModelObjectViewDependencyLogic.ObjectViewsMap.Add(typeof(IModelCalendar),typeof(IEvent));
+            ModelObjectViewDependencyLogic.AddObjectViewMap(typeof(IModelCalendar),typeof(IEvent));
         }
 
         public MicrosoftCalendarModule() => MicrosoftModule.AddRequirements(this);

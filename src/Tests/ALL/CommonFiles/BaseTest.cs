@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using DevExpress.EasyTest.Framework;
 using DevExpress.ExpressApp.Xpo;
@@ -12,14 +9,12 @@ using NUnit.Framework.Interfaces;
 using Xpand.Extensions.StringExtensions;
 using Xpand.TestsLib.EasyTest;
 using Xpand.TestsLib.EasyTest.Commands;
-using Xpand.TestsLib.EasyTest.Commands.Automation;
 
 namespace ALL.Tests{
     public abstract class BaseTest:Xpand.TestsLib.BaseTest{
-        
-
-        protected async Task EasyTest<TAppAdapter>(Func<TAppAdapter> appAdapter,Func<TAppAdapter,string,TestApplication> applicationFactory,Func<ICommandAdapter,Task> executeCommands,string connectionString=null) where TAppAdapter:IApplicationAdapter{
-            DeleteBrowserFiles.Execute();
+        protected async Task EasyTest<TAppAdapter>(Func<TAppAdapter> appAdapter,
+            Func<TAppAdapter, string, TestApplication> applicationFactory, Func<ICommandAdapter, Task> executeCommands,
+            string connectionString = null) where TAppAdapter : IApplicationAdapter{
             connectionString ??= InMemoryDataStoreProvider.ConnectionString;
             using (TAppAdapter winAdapter = appAdapter()){
                 

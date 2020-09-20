@@ -23,11 +23,12 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks{
 
     [DomainLogic(typeof(IModelTasks))]
     public static class ModelTasksLogic{
-        
+        [PublicAPI]
         public static IObservable<IModelTasks> Tasks(this IObservable<IModelGoogle> source) => source.Select(modules => modules.Tasks());
 
         public static IModelTasks Tasks(this IModelGoogle modelGoogle) => ((IModelGoogleTasks) modelGoogle).Tasks;
 
+        [PublicAPI]
         public static IModelTasks Tasks(this IModelOfficeGoogle reactiveModules) => reactiveModules.Google.Tasks();
     }
 

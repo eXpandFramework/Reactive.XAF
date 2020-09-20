@@ -14,7 +14,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
 
         static GoogleCalendarModule(){
             TraceSource=new ReactiveTraceSource(nameof(GoogleCalendarModule));
-            ModelObjectViewDependencyLogic.ObjectViewsMap.Add(typeof(IModelCalendar),typeof(IEvent));
+            ModelObjectViewDependencyLogic.AddObjectViewMap(typeof(IModelCalendar),typeof(IEvent));
         }
 
         public GoogleCalendarModule() => GoogleModule.AddRequirements(this);

@@ -11,6 +11,7 @@ using Google;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Tasks.v1;
 using Google.Apis.Tasks.v1.Data;
+using JetBrains.Annotations;
 using Xpand.Extensions.DateTimeExtensions;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.Office.Cloud;
@@ -27,16 +28,21 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks{
     public static class GoogleTasksService{
         private static readonly ISubject<(Frame frame, UserCredential userCredential)> CredentialsSubject=new Subject<(Frame frame, UserCredential client)>();
         public static IObservable<(Frame frame, UserCredential credential)> Credentials => CredentialsSubject.AsObservable();
-        public const string DefaultTasksListId = "My Tasks";
+        public const string DefaultTasksListId = "@default";
         static readonly Subject<(Task serviceObject, MapAction mapAction)> UpdatedSubject=new Subject<(Task serviceObject, MapAction mapAction)>();
         public static IObservable<(Task cloud, MapAction mapAction)> Updated{ get; }=UpdatedSubject.AsObservable();
         static readonly Subject<GenericEventArgs<(IObjectSpace objectSpace, ITask local, Task cloud, MapAction mapAction)>> CustomizeSynchronizationSubject =
             new Subject<GenericEventArgs<(IObjectSpace objectSpace, ITask local, Task cloud, MapAction mapAction)>>();
+        
+        [PublicAPI]
         public static IObservable<GenericEventArgs<(IObjectSpace objectSpace, ITask local, Task cloud, MapAction mapAction)>> CustomizeSynchronization 
             => CustomizeSynchronizationSubject.AsObservable();
 
+        [PublicAPI]
         public static IObservable<(Task cloud, MapAction mapAction)> When(this IObservable<(Task outlookTask, MapAction mapAction)> source, MapAction mapAction)
             => source.Where(_ => _.mapAction == mapAction);
+        
+        [PublicAPI]
         public static IObservable<GenericEventArgs<(IObjectSpace objectSpace, ITask local, Task cloud, MapAction mapAction)>> When(
             this IObservable<GenericEventArgs<(IObjectSpace objectSpace, ITask local, Task cloud, MapAction mapAction)>> source, MapAction mapAction)
             => source.Where(_ => _.Instance.mapAction == mapAction);
@@ -74,7 +80,10 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks{
             return e;
         }
 
-        public static IObservable<TaskList> GetTaskList(this TasksService tasksService, string title, bool createNew = false){
+        public static IObservable<TaskList> GetTaskList(this TasksService tasksService, string title=null, bool createNew = false,bool returnDefault=false){
+            if (returnDefault){
+                return tasksService.Tasklists.Get(DefaultTasksListId).ToObservable();
+            }
             var addNew = createNew.ReturnObservable().WhenNotDefault()
                 .SelectMany(b => tasksService.Tasklists.Insert(new TaskList() { Title = title }).ToObservable())
                 .SelectMany(calendar => tasksService.GetTaskList(title));
@@ -104,7 +113,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks{
             => source.Select(_ => {
                     var defaultTaskListName = _.frame.View.AsObjectView().Application().Model
                         .ToReactiveModule<IModelReactiveModuleOffice>().Office.Google().Tasks().DefaultTaskListName;
-                    return Observable.Start(() => _.credential.NewService<TasksService>().GetTaskList(defaultTaskListName, true)).Merge().Wait().ReturnObservable()
+                    return Observable.Start(() => _.credential.NewService<TasksService>().GetTaskList(defaultTaskListName, true,defaultTaskListName==DefaultTasksListId)).Merge().Wait().ReturnObservable()
                         .Select(folder => (_.frame, _.credential, folder));
                 }).Merge()
                 .TraceGoogleTasksModule(folder => folder.folder.Title);

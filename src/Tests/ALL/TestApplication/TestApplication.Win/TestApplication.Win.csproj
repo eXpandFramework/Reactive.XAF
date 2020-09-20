@@ -60,6 +60,8 @@
     <Compile Include="..\..\..\TestsLib\BO\OrderModuleUpdater.cs" Link="Common\OrderModuleUpdater.cs" />
     <Compile Include="..\..\..\TestsLib\BO\Product.cs" Link="Common\Product.cs" />
     <Compile Include="..\..\..\TestsLib\DefaultUserModuleUpdater.cs" Link="Common\DefaultUserModuleUpdater.cs" />
+    <Compile Include="..\CommonFiles\CloudCalendarService.cs" Link="Cloud.Office\CloudCalendarService.cs" />
+    <Compile Include="..\CommonFiles\GoogleTasksService\GoogleCalendarService.cs" Link="Cloud.Office\Google\GoogleCalendarService.cs" />
     <Compile Include="..\CommonFiles\GoogleTasksService\GoogleTasksService.cs" Link="Cloud.Office\Google\GoogleTasksService.cs" />
     <Compile Include="..\CommonFiles\CloudTasksService.cs" Link="Cloud.Office\CloudTasksService.cs" />
     <Compile Include="..\CommonFiles\AgnosticModule.cs" Link="Common\AgnosticModule.cs" />

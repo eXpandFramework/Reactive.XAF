@@ -3,8 +3,8 @@ using DevExpress.Persistent.BaseImpl;
 
 namespace ALL.Tests{
     public static class GoogleTasksService{
-        public static void TestGoogleTasksService(this ICommandAdapter commandAdapter) =>
-            commandAdapter.TestOfficeCloudService("Cloud.Google Task", nameof(Task.Subject), nameof(Task.Description));
+        public static async System.Threading.Tasks.Task TestGoogleTasksService(this ICommandAdapter commandAdapter) 
+            => await commandAdapter.TestOfficeCloudService("Cloud.Google Task", nameof(Task.Subject));
 
     }
 }

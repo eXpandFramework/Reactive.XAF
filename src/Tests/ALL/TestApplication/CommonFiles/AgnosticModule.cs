@@ -45,6 +45,7 @@ using Xpand.XAF.Modules.MasterDetail;
 using Xpand.XAF.Modules.ModelMapper;
 using Xpand.XAF.Modules.ModelViewInheritance;
 using Xpand.XAF.Modules.Office.Cloud.Google;
+using Xpand.XAF.Modules.Office.Cloud.Google.Calendar;
 using Xpand.XAF.Modules.Office.Cloud.Google.Tasks;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo;
@@ -127,6 +128,7 @@ namespace TestApplication{
 			RequiredModuleTypes.Add(typeof(ViewItemValueModule));
 			RequiredModuleTypes.Add(typeof(GoogleModule));
 			RequiredModuleTypes.Add(typeof(GoogleTasksModule));
+			RequiredModuleTypes.Add(typeof(GoogleCalendarModule));
 			RequiredModuleTypes.Add(typeof(ReactiveLoggerHubModule));
 			RequiredModuleTypes.Add(typeof(ViewWizardModule));
 			AdditionalExportedTypes.Add(typeof(Event));
@@ -150,6 +152,7 @@ namespace TestApplication{
                 .Merge(moduleManager.ConnectMicrosoftTodoService())
                 .Merge(moduleManager.ConnectGoogleTasksService())
                 .Merge(moduleManager.ConnectMicrosoftCalendarService())
+                .Merge(moduleManager.ConnectGoogleCalendarService())
                 .Merge(moduleManager.ConnectGoogleService())
                 .Merge(moduleManager.ConnectViewWizardService())
                 .Subscribe(this);

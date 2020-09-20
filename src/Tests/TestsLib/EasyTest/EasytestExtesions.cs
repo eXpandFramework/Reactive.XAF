@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reactive;
@@ -45,7 +46,7 @@ namespace Xpand.TestsLib.EasyTest{
                     requireApplicationOptions.SetApplicationOptions(adapter.GetTestApplication());
                 }
                 try{
-                    command.Execute(adapter);
+                    ExecuteSilent(adapter, command);
                 }
                 catch (CommandException){
                     if(!command.ExpectException) {
@@ -54,6 +55,11 @@ namespace Xpand.TestsLib.EasyTest{
 
                 }
             }
+        }
+
+        [DebuggerNonUserCode][DebuggerStepThrough][DebuggerHidden]
+        private static void ExecuteSilent(ICommandAdapter adapter, Command command){
+            command.Execute(adapter);
         }
 
         public static string EasyTestSettingsFile(this TestApplication application){
@@ -79,6 +85,9 @@ namespace Xpand.TestsLib.EasyTest{
         }
 
         public static TestApplication RunWinApplication(this WinAdapter adapter, string fileName,string connectionString){
+            foreach (var file in Directory.GetFiles($"{Path.GetDirectoryName(fileName)}", "Model.User.xafml")){
+                File.Delete(file);
+            }
             var testApplication = EasyTestWinApplication.New(fileName);
             testApplication.ConfigSettings(connectionString);
             adapter.RunApplication(testApplication, null);

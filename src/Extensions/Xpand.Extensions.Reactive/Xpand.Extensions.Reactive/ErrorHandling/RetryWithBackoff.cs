@@ -14,16 +14,13 @@ namespace Xpand.Extensions.Reactive.ErrorHandling{
             return Observable.Defer(() =>
                     (++attempt == 1 ? source : source.DelaySubscription(strategy(attempt - 1), scheduler))
                     .Select(item => (true, item, (TException) null))
-                    .Catch<(bool, T, TException), TException>(e => retryOnError(e)
-                        ? Observable.Throw<(bool, T, TException)>(e)
-                        : Observable.Return<(bool, T, TException)>((false, default, e))))
+                    .Catch<(bool, T, TException), TException>(
+                        e => retryOnError(e) ? Observable.Throw<(bool, T, TException)>(e) : Observable.Return<(bool, T, TException)>((false, default, e))))
                 .Retry(retryCount)
-                .SelectMany(t => t.Item1
-                    ? Observable.Return(t.Item2)
-                    : Observable.Throw<T>(t.Item3));
+                .SelectMany(t => t.Item1 ? Observable.Return(t.Item2) : Observable.Throw<T>(t.Item3));
         }
         public static IObservable<T> RetryWithBackoff<T>(this IObservable<T> source,int retryCount = 3,
-            Func<int, TimeSpan> strategy = null,Func<Exception, bool> retryOnError = null,IScheduler scheduler = null) =>
-            source.RetryWithBackoff(retryOnError, retryCount, strategy, scheduler);
+            Func<int, TimeSpan> strategy = null,Func<Exception, bool> retryOnError = null,IScheduler scheduler = null) 
+            => source.RetryWithBackoff(retryOnError, retryCount, strategy, scheduler);
     }
 }

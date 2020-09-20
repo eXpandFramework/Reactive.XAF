@@ -12,6 +12,7 @@ using DevExpress.Persistent.Base.General;
 using Google;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Calendar.v3.Data;
+using JetBrains.Annotations;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Office.Cloud.BusinessObjects;
@@ -33,14 +34,18 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
         public static IObservable<(Event cloud, IEvent local, MapAction mapAction, CallDirection callDirection)> Updated{ get; }=UpdatedSubject.AsObservable();
         static readonly Subject<GenericEventArgs<(Func<IObjectSpace> objectSpace, IEvent local, Event cloud, MapAction mapAction, CallDirection callDirection)>> CustomizeSynchronizationSubject =
             new Subject<GenericEventArgs<(Func<IObjectSpace> objectSpace, IEvent target, Event source, MapAction mapAction, CallDirection callDirection)>>();
+        
+        [PublicAPI]
         public static IObservable<GenericEventArgs<(Func<IObjectSpace> objectSpace, IEvent local, Event cloud, MapAction mapAction, CallDirection callDirection)>> CustomizeSynchronization 
             => CustomizeSynchronizationSubject.AsObservable();
 
+        [PublicAPI]
         public static IObservable<(Event cloud, IEvent local, MapAction mapAction, CallDirection callDirection)> When(
             this IObservable<(Event cloud,IEvent local, MapAction mapAction,CallDirection callDirection)> source,
             MapAction mapAction, CallDirection calldirection = CallDirection.Both)
             => source.Where(_ => _.mapAction == mapAction&& (calldirection == CallDirection.Both || _.callDirection == calldirection));
 
+        [PublicAPI]
         public static IObservable<GenericEventArgs<(Func<IObjectSpace> objectSpaceFactory, IEvent local, Event cloud, MapAction mapAction, CallDirection callDirection)>> When(
             this IObservable<GenericEventArgs<(Func<IObjectSpace> objectSpaceFactory, IEvent local, Event cloud, MapAction mapAction, CallDirection callDirection)>> source,
             MapAction mapAction, CallDirection calldirection = CallDirection.Both)
@@ -76,15 +81,18 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
             => source.Select(_ => {
                     var defaultCalendarName = _.frame.View.AsObjectView().Application().Model
                         .ToReactiveModule<IModelReactiveModuleOffice>().Office.Google().Calendar().DefaultCalendarName;
-                    return Observable.Start(() => _.credential.NewService<global::Google.Apis.Calendar.v3.CalendarService>().GetCalendar(defaultCalendarName, true)).Merge().Wait().ReturnObservable()
-                        .Select(folder => (_.frame, _.credential, folder));
+                    return Observable.Start(() => _.credential.NewService<global::Google.Apis.Calendar.v3.CalendarService>()
+                            .GetCalendar(defaultCalendarName, true,defaultCalendarName==DefaultCalendarId)).Merge().Wait().ReturnObservable()
+                        .Select(calendarListEntry => (_.frame, _.credential, calendarListEntry));
                 })
                 .Merge()
-                .TraceGoogleCalendarModule(folder => folder.folder.Summary);
+                .TraceGoogleCalendarModule(t => t.calendarListEntry.Summary);
 
         private static IObservable<(Frame frame, UserCredential userCredential, (IEvent target, Event source) calendar)> SynchronizeLocal(
             this IObservable<(Frame frame, UserCredential userCredential, CalendarListEntry calendar, IModelCalendarItem calerdarItem)> source)  
-            => source.SelectMany(_ => _.frame.Application
+            => source
+                .Where(t => t.calerdarItem.CallDirection!=CallDirection.Out)
+                .SelectMany(_ => _.frame.Application
                 .SelectMany(() => _.SynchronizeLocal(_.calerdarItem.SynchronizationType))
                 .Select(calendar => (_.frame,_.userCredential,calendar))
                 .TraceGoogleCalendarModule(folder => $"Event: {folder.calendar.source?.Id}"));
@@ -100,8 +108,10 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
         }
 
         static IObservable<(Frame frame, UserCredential credential, CalendarListEntry calendarListEntry, IModelCalendarItem modelCalendarItem)> Authorize(this  IObservable<Frame> source) 
-            => source.AuthorizeGoogle().Select(t => t).EnsureCalendar()
+            => source.AuthorizeGoogle()
+                .EnsureCalendar()
                 .Publish().RefCount()
+                .WhenNotDefault(t => t.frame.Application)
                 .Do(tuple => CredentialsSubject.OnNext((tuple.frame,tuple.credential)))
                 .Select(t => (t.frame,t.credential,t.calendarListEntry,t.frame.Application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Google().Calendar().Items[t.frame.View.Id]))
                 .TraceGoogleCalendarModule(_ => _.frame.View.Id);
@@ -126,7 +136,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
             => source.SelectMany(service => objectSpaceFactory.SynchronizeCloud<Event, IEvent>(synchronizationType,objectSpace,
                 cloudId => RequestCustomization.Default(service.Events.Delete(calendar.Id, cloudId)).ToObservable<string>().ToUnit(),
                 cloudEvent => RequestCustomization.Default(service.Events.Insert(cloudEvent, calendar.Id)).ToObservable<Event>(),
-                cloudId => RequestCustomization.Default(service.Events.Get(calendar.Id, cloudId)).ToObservable<Event>(),
+                cloudId => RequestCustomization.Default(service.Events.Get(calendar.Id, cloudId)).ToObservable<Event>().Where(e => e.Status!="cancelled"),
                 t => RequestCustomization.Default(service.Events.Update(t.cloudEntity, calendar.Id, t.cloudId)).ToObservable<Event>(),
                 e => e.Handled=MapAction.Delete.CustomSynchronization(objectSpaceFactory, e.Instance.localEntinty, null, CallDirection.Out,synchronizationType,e.Instance.cloudOfficeObject).Handled,
                 t => MapAction.Insert.CustomSynchronization(objectSpaceFactory, t.source, t.target, CallDirection.Out,synchronizationType),
@@ -209,8 +219,6 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
                         mapAction=MapAction.Delete;
                     }
                     return (e, mapAction);
-                    // return events.Select(e => e.AdditionalData.TryGetValue("@removed", out _)
-                    //     ? (e, MapAction.Delete) : (e, objectSpace.QueryCloudOfficeObject(e.Id, e.GetType().ToCloudObjectType()).Any() ? MapAction.Update : MapAction.Insert)).ToArray();
                 }
             });
 
@@ -222,18 +230,22 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
             localEvent.Description = args.Instance.cloud.Description;
         }
 
-        public static IObservable<CalendarListEntry> GetCalendar(this global::Google.Apis.Calendar.v3.CalendarService calendarService, string summary, bool createNew = false){
+        public static IObservable<CalendarListEntry> GetCalendar(this global::Google.Apis.Calendar.v3.CalendarService calendarService, string summary=null, bool createNew = false,bool returnDefault=false){
+            if (returnDefault){
+                return calendarService.CalendarList.Get("primary").ToObservable();
+            }
             var addNew = createNew.ReturnObservable().WhenNotDefault()
                 .SelectMany(b => calendarService.Calendars.Insert(new global::Google.Apis.Calendar.v3.Data.Calendar() { Summary = summary}).ToObservable())
                 .SelectMany(calendar => calendarService.GetCalendar(summary));
-            return calendarService.CalendarList.List().ToObservable().SelectMany(list => list.Items).FirstOrDefaultAsync(entry => entry.Summary == summary)
-                .SwitchIfDefault(addNew);
+            return calendarService.CalendarList.List().ToObservable().SelectMany(list => list.Items)
+                .FirstOrDefaultAsync(entry => entry.Summary == summary).SwitchIfDefault(addNew);
         }
 
 
         private static IObservable<Unit> ConfigureModel(this ApplicationModulesManager manager) 
             => manager.WhenGeneratingModelNodes(modelApplication => modelApplication.BOModel)
-                .Do(model => model.Application.OAuthGoogle().AddScopes(global::Google.Apis.Calendar.v3.CalendarService.Scope.CalendarEvents)).ToUnit();
+                .Do(model => model.Application.OAuthGoogle()
+                    .AddScopes(global::Google.Apis.Calendar.v3.CalendarService.Scope.CalendarEvents,global::Google.Apis.Calendar.v3.CalendarService.Scope.Calendar)).ToUnit();
 
         public static IObservable<(Event e, MapAction mapAction)> ListEvents(this global::Google.Apis.Calendar.v3.CalendarService service, ITokenStore store,
             Func<IObjectSpace> objectSpaceFactory,string calendarId) 

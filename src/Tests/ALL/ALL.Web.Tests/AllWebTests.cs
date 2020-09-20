@@ -15,6 +15,7 @@ using Xpand.TestsLib;
 using Xpand.TestsLib.Attributes;
 using Xpand.TestsLib.EasyTest;
 using Xpand.TestsLib.EasyTest.Commands.ActionCommands;
+using Xpand.TestsLib.EasyTest.Commands.Automation;
 using Xpand.XAF.Modules.Reactive;
 using BaseTest = ALL.Tests.BaseTest;
 
@@ -33,16 +34,41 @@ namespace ALL.Web.Tests{
                 application.Modules.FirstOrDefault(m => m.GetType()==moduleType).ShouldBeNull();
             }
         }
+
         private static TestApplication RunWebApplication(WebAdapter adapter, string connectionString) 
             => adapter.RunWebApplication($@"{AppDomain.CurrentDomain.ApplicationPath()}\..\TestWebApplication\",65477,connectionString);
 
         [XpandTest(LongTimeout,3)]
         [Test][Apartment(ApartmentState.STA)]
         public async Task Web_EasyTest_InMemory(){
-            await EasyTest(() => new WebAdapter(), RunWebApplication, async adapter => {
+            await EasyTest(() => new WebAdapter(), RunWebApplication,  adapter => {
                 var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
                 adapter.Execute(autoTestCommand);
-                await adapter.TestCloudServices();
+                return Task.CompletedTask;
+            });
+        }
+
+        [XpandTest(LongTimeout,3)]
+        [Test][Apartment(ApartmentState.STA)]
+        public async Task Web_MicrosoftCloud_EasyTest(){
+            DeleteBrowserFiles.Execute();
+            await EasyTest(() => new WebAdapter(), RunWebApplication, async adapter => {
+                await adapter.TestMicrosoftService(async () => {
+                    await adapter.TestMicrosoftCalendarService();
+                    await adapter.TestMicrosoftTodoService();
+                });
+            });
+        }
+
+        [XpandTest(LongTimeout,3)]
+        [Test][Apartment(ApartmentState.STA)]
+        public async Task Web_GoogleCloud_EasyTest(){
+            DeleteBrowserFiles.Execute();
+            await EasyTest(() => new WebAdapter(), RunWebApplication, async adapter => {
+                await adapter.TestGoogleService(async () => {
+                    await adapter.TestGoogleCalendarService();
+                    await adapter.TestGoogleTasksService();
+                });
             });
         }
 

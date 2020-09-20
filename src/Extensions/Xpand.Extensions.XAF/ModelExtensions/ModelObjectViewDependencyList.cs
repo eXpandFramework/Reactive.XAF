@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Linq;
 using DevExpress.ExpressApp.DC;
@@ -19,7 +20,11 @@ namespace Xpand.Extensions.XAF.ModelExtensions{
     }
     [DomainLogic(typeof(IModelObjectViewDependency))]
     public static class ModelObjectViewDependencyLogic {
-        public static readonly Dictionary<System.Type,System.Type> ObjectViewsMap=new Dictionary<System.Type, System.Type>();
+        public static readonly ConcurrentDictionary<Type,Type> ObjectViewsMap=new ConcurrentDictionary<Type, Type>();
+
+        public static void AddObjectViewMap(Type modelType,Type entityType ) 
+            => ObjectViewsMap.TryAdd(modelType, entityType);
+
         public static IModelList<IModelObjectView> Get_ObjectViews(this IModelObjectViewDependency dependency){
             var key = ObjectViewsMap.Keys.First(type => type.IsInstanceOfType(dependency.Parent.Parent));
             return new CalculatedModelNodeList<IModelObjectView>(dependency.Application.Views.OfType<IModelObjectView>()
@@ -27,10 +32,11 @@ namespace Xpand.Extensions.XAF.ModelExtensions{
         }
 
         [UsedImplicitly]
-        public static IModelObjectView Get_ObjectView(IModelObjectViewDependency todoObjectView) => 
-            !string.IsNullOrEmpty(todoObjectView.ObjectViewId) ? todoObjectView.Application.Views[todoObjectView.ObjectViewId].AsObjectView : null;
+        public static IModelObjectView Get_ObjectView(IModelObjectViewDependency todoObjectView) 
+            => !string.IsNullOrEmpty(todoObjectView.ObjectViewId) ? todoObjectView.Application.Views[todoObjectView.ObjectViewId].AsObjectView : null;
 
         [UsedImplicitly]
-        public static void Set_ObjectView(IModelObjectViewDependency todoObjectView, IModelObjectView value) => todoObjectView.ObjectViewId = value.Id;
+        public static void Set_ObjectView(IModelObjectViewDependency todoObjectView, IModelObjectView value) 
+            => todoObjectView.ObjectViewId = value.Id;
     }
 }

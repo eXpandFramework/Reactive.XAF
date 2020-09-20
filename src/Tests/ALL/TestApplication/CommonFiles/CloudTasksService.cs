@@ -3,9 +3,12 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.SystemModule;
 using Fasterflect;
+using TestApplication;
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 using Task = DevExpress.Persistent.BaseImpl.Task;
 
@@ -15,33 +18,30 @@ namespace ALL.Tests{
             Func<(IObservable<(TCloud cloud, MapAction mapAction)> updated, IObservable<IObservable<Unit>> deleteAll,IObservable<Unit> initializeModule)> config){
             var action = config();
             return action.initializeModule.Merge(manager.WhenApplication(application
-                => application.UpdateTaskDescription(action.updated)
-                    .Merge(application.DeleteAllTasks(action.deleteAll))).ToUnit());
+                => application.WhenViewOnFrame(typeof(Task),ViewType.DetailView)
+                    .SelectMany(frame => frame.NotifyTaskOperation(action.updated))
+                    .ToUnit()
+                    .Merge(application.DeleteAllEntities<Task>(action.deleteAll))).ToUnit());
         }
 
-        private static IObservable<Unit> UpdateTaskDescription<TCloud>(this XafApplication application,IObservable<(TCloud cloud,MapAction mapAction)> updated) 
-            => updated
-                .Do(tuple => {
-                    using (var objectSpace = application.CreateObjectSpace()){
+        private static IObservable<Unit> NotifyTaskOperation<TCloud>(this Frame frame,IObservable<(TCloud cloud,MapAction mapAction)> updated) 
+            => updated.Do(tuple => {
+                    using (var objectSpace = frame.Application.CreateObjectSpace()){
                         var cloudOfficeObject = objectSpace.QueryCloudOfficeObject(tuple.cloud.GetPropertyValue("Id").ToString(), CloudObjectType.Task).First();
-                    
-                        var task = objectSpace.GetObjectByKey<Task>(Guid.Parse(cloudOfficeObject.LocalId));
-                        task.Description = tuple.mapAction.ToString();
-                        objectSpace.CommitChanges();
+                        if (cloudOfficeObject != null){
+                            frame.GetController<ModificationsController>().SaveAction.ToolTip = tuple.mapAction.ToString();
+                        }
                     }
                 })
                 .ToUnit();
-        private static IObservable<Unit> DeleteAllTasks(this XafApplication application, IObservable<IObservable<Unit>> deleteAll)
-            => deleteAll.Switch().ToUnit()
-                .Merge(application.WhenWindowCreated().When(TemplateContext.ApplicationWindow).FirstAsync()
-                    .Do(window => {
-                        using (var objectSpace = window.Application.CreateObjectSpace()){
-                            objectSpace.Delete(objectSpace.GetObjects<Task>());
-                            objectSpace.CommitChanges();
-                        }
-                    }).ToUnit());
 
-        
+        public static IObservable<Unit> InitializeCloudTasksModule(this ApplicationModulesManager manager,Action<IModelOffice> action){
+            manager.Modules.OfType<AgnosticModule>().First().AdditionalExportedTypes.Add(typeof(Task));
+            return manager.WhenGeneratingModelNodes(application => application.Views)
+                .Do(views => action(views.Application.ToReactiveModule<IModelReactiveModuleOffice>().Office))
+                .ToUnit();
 
+        }
     }
+
 }
