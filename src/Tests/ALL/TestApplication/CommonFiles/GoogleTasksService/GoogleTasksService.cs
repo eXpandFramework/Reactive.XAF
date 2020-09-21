@@ -3,6 +3,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.Model.Core;
 using Google.Apis.Tasks.v1;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.Office.Cloud.Google;
@@ -20,6 +21,7 @@ namespace ALL.Tests{
                 var modelTasks = office.Google().Tasks();
                 var tasksItem = modelTasks.Items.AddNode<IModelTasksItem>();
                 tasksItem.ObjectView=(IModelObjectView) office.Application.Views["TaskGoogle_DetailView"];
+                ((ModelNode) tasksItem).Id = $"{tasksItem.ObjectView.Id}-{tasksItem.SynchronizationType}";
             });
 
         private static IObservable<IObservable<Unit>> DeleteAllEntities() 

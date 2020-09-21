@@ -108,7 +108,7 @@ namespace Xpand.XAF.Modules.LookupCascade{
                                 Columns = string.Join("&", modelColumns.Select(column => HttpUtility.UrlEncode(column.Caption)))
                             }
                         }.Concat(objects).ToArray();
-                        return ( uniqueId: modelListView.Id, objects: Convert.ToBase64String(JsonConvert.SerializeObject(objects).Zip()) );
+                        return ( uniqueId: modelListView.Id, objects: Convert.ToBase64String(JsonConvert.SerializeObject(objects).GZip()) );
                     }
                 }
 

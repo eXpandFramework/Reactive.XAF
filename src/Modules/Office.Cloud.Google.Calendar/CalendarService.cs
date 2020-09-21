@@ -113,7 +113,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
                 .Publish().RefCount()
                 .WhenNotDefault(t => t.frame.Application)
                 .Do(tuple => CredentialsSubject.OnNext((tuple.frame,tuple.credential)))
-                .Select(t => (t.frame,t.credential,t.calendarListEntry,t.frame.Application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Google().Calendar().Items[t.frame.View.Id]))
+                .Select(t => (t.frame, t.credential, t.calendarListEntry,
+                    t.frame.Application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Google().Calendar()
+                        .Items.First(item => item.ObjectView == t.frame.View.Model)))
                 .TraceGoogleCalendarModule(_ => _.frame.View.Id);
 
         private static IObservable<(Event serviceObject, MapAction mapAction)> SynchronizeBoth(
@@ -136,7 +138,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
             => source.SelectMany(service => objectSpaceFactory.SynchronizeCloud<Event, IEvent>(synchronizationType,objectSpace,
                 cloudId => RequestCustomization.Default(service.Events.Delete(calendar.Id, cloudId)).ToObservable<string>().ToUnit(),
                 cloudEvent => RequestCustomization.Default(service.Events.Insert(cloudEvent, calendar.Id)).ToObservable<Event>(),
-                cloudId => RequestCustomization.Default(service.Events.Get(calendar.Id, cloudId)).ToObservable<Event>().Where(e => e.Status!="cancelled"),
+                t => RequestCustomization.Default(service.Events.Get(calendar.Id, t.cloudId)).ToObservable<Event>().Where(e => e.Status!="cancelled"),
                 t => RequestCustomization.Default(service.Events.Update(t.cloudEntity, calendar.Id, t.cloudId)).ToObservable<Event>(),
                 e => e.Handled=MapAction.Delete.CustomSynchronization(objectSpaceFactory, e.Instance.localEntinty, null, CallDirection.Out,synchronizationType,e.Instance.cloudOfficeObject).Handled,
                 t => MapAction.Insert.CustomSynchronization(objectSpaceFactory, t.source, t.target, CallDirection.Out,synchronizationType),
@@ -156,10 +158,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
                     local.MapCloudEvent(cloud);
                 }
                 else{
-                    using (var objectSpace = objectSpaceFactory()){
-                        objectSpace.Delete(objectSpace.GetObject(cloudOfficeObject));
-                        objectSpace.CommitChanges();
-                    }
+                    using var objectSpace = objectSpaceFactory();
+                    objectSpace.Delete(objectSpace.GetObject(cloudOfficeObject));
+                    objectSpace.CommitChanges();
                 }
             }
             return e;
@@ -213,13 +214,12 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
 
         public static IObservable<(Event e, MapAction mapAction)> PairMapAction(this IObservable<Event> source, Func<IObjectSpace> objectSpaceFactory) 
             => source.Select(e => {
-                using (var objectSpace = objectSpaceFactory()){
-                    var mapAction = objectSpace.QueryCloudOfficeObject(e.Id, e.GetType().ToCloudObjectType()).Any()?MapAction.Update:MapAction.Insert;
-                    if (e.Status == "cancelled"){
-                        mapAction=MapAction.Delete;
-                    }
-                    return (e, mapAction);
+                using var objectSpace = objectSpaceFactory();
+                var mapAction = objectSpace.QueryCloudOfficeObject(e.Id, e.GetType().ToCloudObjectType()).Any()?MapAction.Update:MapAction.Insert;
+                if (e.Status == "cancelled"){
+                    mapAction=MapAction.Delete;
                 }
+                return (e, mapAction);
             });
 
         private static void Update(this IEvent localEvent, GenericEventArgs<(Func<IObjectSpace> objectSpace, IEvent local, Event cloud, MapAction mapAction, CallDirection callDirection)> args){

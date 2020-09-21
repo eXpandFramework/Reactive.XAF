@@ -66,11 +66,13 @@ jobs:
   steps:
     - checkout: self
     - task: DownloadPipelineArtifact@2
+      enabled: true
       inputs:
         buildType: 'current'
         artifactName: 'bin'
         targetPath: '$(Pipeline.Workspace)'
     - task: PowerShell@2
+      enabled: true
       displayName: Download Cloud creds
       inputs: 
         pwsh: true
@@ -221,6 +223,7 @@ jobs:
         pwsh: true
         targetType: inline
         script: |
+          throw "Start full build with AzStorageLookup"
           if (('$(AzStorageLookup)' -eq "1")){
               throw "Start full build with AzStorageLookup"
           }

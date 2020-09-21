@@ -16,7 +16,7 @@ namespace Xpand.TestsLib.Attributes{
         private readonly int _tryCount;
         private readonly int _timeout;
 
-        public XpandTestAttribute(int timeout = 120000, int tryCount = 2){
+        public XpandTestAttribute(int timeout = 60000, int tryCount = 2){
             _timeout = timeout;
             _tryCount = tryCount;
         }
@@ -44,10 +44,10 @@ namespace Xpand.TestsLib.Attributes{
                 while (count-- > 0){
                     try{
                         // ManualResetEvent resetEvent = new ManualResetEvent(false);
-                        TestResult Execute() => context.CurrentResult = innerCommand.Execute(context);
+                        TestResult ExecuteTest() => context.CurrentResult = innerCommand.Execute(context);
                         Polly.Policy.Timeout(TimeSpan.FromMilliseconds(_timeout), TimeoutStrategy.Pessimistic)
                             .Execute(() => {
-                                Task.Factory.StartTask(Execute, thread => thread.SetApartmentState(GetApartmentState(context))).Wait();
+                                Task.Factory.StartTask(ExecuteTest, thread => thread.SetApartmentState(GetApartmentState(context))).Wait();
                                 // return;
                                 // if (context.CurrentTest.Arguments.Any(o => o == (object) Platform.Web)){
                                 //     ThreadPool.QueueUserWorkItem(state => {
@@ -64,7 +64,9 @@ namespace Xpand.TestsLib.Attributes{
                     }
                     catch (Exception ex){
                         context.CurrentResult ??= context.CurrentTest.MakeTestResult();
-                        context.CurrentResult.RecordException(new Exception($"Retry {context.CurrentRepeatCount+1} of {_tryCount}",ex));
+                        var message = $"Retry {context.CurrentRepeatCount+1} of {_tryCount}";
+                        TestContext.Out.WriteLine(message);
+                        context.CurrentResult.RecordException(new Exception(message,ex));
                     }
 
                     if (count > 0){

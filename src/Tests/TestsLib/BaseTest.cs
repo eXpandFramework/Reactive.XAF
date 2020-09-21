@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using DevExpress.ExpressApp;
@@ -97,6 +96,7 @@ namespace Xpand.TestsLib{
             TestContext.WriteLine(value);
         }
 
+        protected readonly List<string> LogPaths=new List<string>(){ReactiveLoggerService.RXLoggerLogPath,Path.Combine(TestContext.CurrentContext.TestDirectory,"expressappframework.log")};
         public static TextWriterTraceListener TextListener{ get; }
 
         public static TraceSource TraceSource{ get; }
@@ -114,16 +114,26 @@ namespace Xpand.TestsLib{
         public void Dispose(){
             XpoTypesInfoHelper.Reset();
             XafTypesInfo.HardReset();
-            if (File.Exists(ReactiveLoggerService.RXLoggerLogPath)){
-                var zipPPath = $"{Path.GetDirectoryName(ReactiveLoggerService.RXLoggerLogPath)}\\{Path.GetFileNameWithoutExtension(ReactiveLoggerService.RXLoggerLogPath)}.zip";
-                var tempFileName = Path.GetTempFileName();
-                File.Copy(ReactiveLoggerService.RXLoggerLogPath!,tempFileName,true);
-                var bytes = File.ReadAllText(tempFileName).Bytes();
-                using (var gZipStream = new GZipStream(File.Create(zipPPath), CompressionMode.Compress)){
-                    gZipStream.Write(bytes,0,bytes.Length);
-                }
-                TestContext.AddTestAttachment(zipPPath);
+            var text = GetLogText();
+            if (!string.IsNullOrEmpty(text)){
+                var zipPPath = Path.Combine(TestContext.CurrentContext.TestDirectory,$"{GetTestName()}.gz");
+                File.WriteAllBytes(zipPPath,text.GZip());
+                TestContext.AddTestAttachment(zipPPath);    
             }
+            
         }
+
+        private static string GetTestName() 
+            => $"{TestContext.CurrentContext.Test.MethodName}{TestContext.CurrentContext.Test.Arguments.Select(o => $"{o}").Join("_")}";
+
+        private string GetLogText() 
+            => LogPaths.Select(logPath => {
+                if (File.Exists(logPath)){
+                    var tempFileName = Path.GetTempFileName();
+                    File.Copy(logPath!, tempFileName, true);
+                    return $"{File.ReadAllText(tempFileName)}{Environment.NewLine}";
+                }
+                return null;
+            }).Join(Environment.NewLine).Trim();
     }
 }

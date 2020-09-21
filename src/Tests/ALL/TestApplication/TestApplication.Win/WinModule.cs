@@ -53,7 +53,7 @@ namespace TestApplication.Win{
 	        base.Setup(moduleManager);
 	        var excludeMaps = new []{PredefinedMap.None,PredefinedMap.LayoutView,PredefinedMap.LayoutViewColumn,PredefinedMap.LabelControl};
 	        if (!Debugger.IsAttached){
-		        moduleManager.Extend(Enum.GetValues(typeof(PredefinedMap)).OfType<PredefinedMap>().Where(map =>!excludeMaps.Contains(map)&& map.Platform()==Platform.Win));
+		        // moduleManager.Extend(Enum.GetValues(typeof(PredefinedMap)).OfType<PredefinedMap>().Where(map =>!excludeMaps.Contains(map)&& map.Platform()==Platform.Win));
 	        }
         }
 

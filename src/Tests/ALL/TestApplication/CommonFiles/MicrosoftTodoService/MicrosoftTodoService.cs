@@ -5,6 +5,7 @@ using System.Reactive.Threading.Tasks;
 using ALL.Tests;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.Model.Core;
 using Microsoft.Graph;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar;
@@ -23,6 +24,7 @@ namespace TestApplication.MicrosoftTodoService{
                     var modelTodo = office.Microsoft().Todo();
                     var modelTodoItem = modelTodo.Items.AddNode<IModelTodoItem>();
                     modelTodoItem.ObjectView=(IModelObjectView) office.Application.Views["TaskMicrosoft_DetailView"];
+                    ((ModelNode) modelTodoItem).Id = $"{modelTodoItem.ObjectView.Id}-{modelTodoItem.SynchronizationType}";
                 });
 
         private static IObservable<IObservable<Unit>> DeleteAllTasks(this IObservable<GraphServiceClient> source)

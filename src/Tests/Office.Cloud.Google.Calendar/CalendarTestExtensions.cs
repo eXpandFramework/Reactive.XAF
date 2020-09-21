@@ -20,7 +20,7 @@ using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
 	static class CalendarTestExtensions{
-        public const string CalendarName = "Xpand Events";
+        public const string CalendarName = "Xpand DevOps Events";
         public const string CalendarPagingName = "Xpand Paging Events";
         public const int PagingItemsCount = 251;
         public static async Task<global::Google.Apis.Calendar.v3.CalendarService> CalendarService(this XafApplication application,bool deleteAll=false){
@@ -97,15 +97,14 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
             title.ShouldBe(localEventSubject);
             
             due.ShouldNotBeNull();
-            
 
-            using (var space = objectSpaceProvider.CreateObjectSpace()){
-                var cloudObjects = space.QueryCloudOfficeObject(cloudEntityType,@event).ToArray();
-                cloudObjects.Length.ShouldBe(1);
-                var cloudObject = cloudObjects.First();
-                cloudObject.LocalId.ShouldBe(@event.Oid.ToString());
-                cloudObject.CloudId.ShouldBe(taskId);
-            }
+
+            using var space = objectSpaceProvider.CreateObjectSpace();
+            var cloudObjects = space.QueryCloudOfficeObject(cloudEntityType,@event).ToArray();
+            cloudObjects.Length.ShouldBe(1);
+            var cloudObject = cloudObjects.First();
+            cloudObject.LocalId.ShouldBe(@event.Oid.ToString());
+            cloudObject.CloudId.ShouldBe(taskId);
         }
 
         public static async Task<IList<(Event local, global::Google.Apis.Calendar.v3.Data.Event cloudEvent)>> CreateExistingObjects(
@@ -133,12 +132,11 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
             return @event;
         }
 
-        public static Event NewEvent(this XafApplication application) {
-            using (var objectSpace = application.CreateObjectSpace()){
-                var newEvent = objectSpace.NewEvent();
-                objectSpace.CommitChanges();
-                return newEvent;
-            }
+        public static Event NewEvent(this XafApplication application){
+            using var objectSpace = application.CreateObjectSpace();
+            var newEvent = objectSpace.NewEvent();
+            objectSpace.CommitChanges();
+            return newEvent;
         }
 
         public static IObservable<IList<global::Google.Apis.Calendar.v3.Data.Event>> NewCalendarEvents(

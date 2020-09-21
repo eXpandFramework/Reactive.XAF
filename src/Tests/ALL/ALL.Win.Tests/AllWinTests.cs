@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,6 +17,7 @@ using Xpand.TestsLib.Attributes;
 using Xpand.TestsLib.EasyTest;
 using Xpand.TestsLib.EasyTest.Commands.Automation;
 using Xpand.XAF.Modules.Reactive;
+using Xpand.XAF.Modules.Reactive.Logger;
 using AutoTestCommand = Xpand.TestsLib.EasyTest.Commands.ActionCommands.AutoTestCommand;
 using BaseTest = ALL.Tests.BaseTest;
 
@@ -27,12 +30,10 @@ namespace ALL.Win.Tests{
         [XpandTest]
         public void UnloadWinModules(Type moduleType){
             ReactiveModuleBase.Unload(moduleType);
-            using (var application = new TestWinApplication(moduleType, false)){
-                application.AddModule((ModuleBase) moduleType.CreateInstance(), nameof(UnloadWinModules));
+            using var application = new TestWinApplication(moduleType, false);
+            application.AddModule((ModuleBase) moduleType.CreateInstance(), nameof(UnloadWinModules));
 
-                application.Modules.FirstOrDefault(m => m.GetType()==moduleType).ShouldBeNull();
-            }
-
+            application.Modules.FirstOrDefault(m => m.GetType()==moduleType).ShouldBeNull();
         } 
         
         [Test]
@@ -70,9 +71,16 @@ namespace ALL.Win.Tests{
             });
         }
 
-        private static TestApplication RunWinApplication(WinAdapter adapter, string connectionString) 
-            => adapter.RunWinApplication(
-                $@"{AppDomain.CurrentDomain.ApplicationPath()}\..\TestWinApplication\TestApplication.Win.exe",connectionString);
+        private TestApplication RunWinApplication(WinAdapter adapter, string connectionString){
+            var fileName = $@"{AppDomain.CurrentDomain.ApplicationPath()}\..\TestWinApplication\TestApplication.Win.exe";
+            foreach (var process in Process.GetProcessesByName("TestApplication.Win")){
+                process.Kill();
+            }
+            LogPaths.Clear();
+            LogPaths.Add(Path.Combine(Path.GetDirectoryName(fileName)!,"eXpressAppFramework.log"));
+            LogPaths.Add(Path.Combine(Path.GetDirectoryName(fileName)!,Path.GetFileName(ReactiveLoggerService.RXLoggerLogPath)));
+            return adapter.RunWinApplication(fileName, connectionString);
+        }
 
 
         [Test]

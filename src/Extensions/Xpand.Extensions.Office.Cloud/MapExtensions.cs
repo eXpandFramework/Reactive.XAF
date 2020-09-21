@@ -38,13 +38,13 @@ namespace Xpand.Extensions.Office.Cloud{
 
         public static IObservable<(TCloudEntity serviceObject, MapAction mapAction)>
             SynchronizeCloud<TCloudEntity, TLocalEntity>(this Func<IObjectSpace> objectSpaceFactory, SynchronizationType synchronizationType, IObjectSpace objectSpace,
-            Func<string, IObservable<Unit>> deleteReqest, Func<TCloudEntity, IObservable<TCloudEntity>> insertReqest, Func<string, IObservable<TCloudEntity>> getRequest,
+            Func<string, IObservable<Unit>> deleteReqest, Func<TCloudEntity, IObservable<TCloudEntity>> insertReqest, Func<(string cloudId,MapAction mapAction), IObservable<TCloudEntity>> getRequest,
             Func<(TCloudEntity cloudEntity, TLocalEntity localEntity, string cloudId), IObservable<TCloudEntity>> updateRequest, 
             Action<GenericEventArgs<(CloudOfficeObject cloudOfficeObject, TLocalEntity localEntinty)>> onDelete = null, Action<(TCloudEntity target, TLocalEntity source)> onInsert = null,
             Action<(TCloudEntity target, TLocalEntity source)> update = null) where TCloudEntity : class
             => objectSpace.ModifiedObjects<TLocalEntity, TCloudEntity>(synchronizationType, cloudOfficeObject 
                     => {
-                    var cloudEntity = getRequest(cloudOfficeObject.cloudOfficeObject.CloudId).FirstOrDefaultAsync().Wait();
+                    var cloudEntity = getRequest((cloudOfficeObject.cloudOfficeObject.CloudId,MapAction.Delete)).FirstOrDefaultAsync().Wait();
                     return cloudEntity != null ? cloudOfficeObject.Delete<TCloudEntity, TLocalEntity>(onDelete, deleteReqest)
                             .FirstOrDefaultAsync().Select(entity => (entity, MapAction.Delete)) : Observable.Empty<(TCloudEntity, MapAction mapAction)>();
                 },
@@ -53,10 +53,10 @@ namespace Xpand.Extensions.Office.Cloud{
                         => _.task.Update(_.cloudId, getRequest, updateRequest, update).Select(entity => (entity, MapAction.Update))
                 ));
 
-        private static IObservable<TCloudEntity> Update<TCloudEntity, TLocalEntity>(this TLocalEntity source, string cloudId, Func<string, IObservable<TCloudEntity>> getRequest,
+        private static IObservable<TCloudEntity> Update<TCloudEntity, TLocalEntity>(this TLocalEntity source, string cloudId, Func<(string cloudId,MapAction mapAction), IObservable<TCloudEntity>> getRequest,
 	        Func<(TCloudEntity cloudEntity, TLocalEntity localEntity, string cloudId), IObservable<TCloudEntity>> updateRequest, 
 	        Action<(TCloudEntity target, TLocalEntity source)> update = null) 
-            => getRequest(cloudId).SelectMany(target => {
+            => getRequest((cloudId,MapAction.Update)).SelectMany(target => {
                     update?.Invoke((target, source));
 			        return updateRequest.Start(source, cloudId,  target);
 		        });

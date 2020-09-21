@@ -6,6 +6,7 @@ using System.Threading;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.Persistent.Base.General;
 using DevExpress.Persistent.BaseImpl;
@@ -64,8 +65,10 @@ namespace ALL.Tests{
                     var calendarItem = modelCalendar.Items.AddNode<IModelCalendarItem>();
                     calendarItem.ObjectView=(IModelObjectView) views.Application.Views[$"Event{serviceName}_DetailView"];
                     calendarItem.CallDirection=CallDirection.Out;
+                    ((ModelNode) calendarItem).Id=$"{calendarItem.ObjectView.Id}-{calendarItem.SynchronizationType}-{calendarItem.CallDirection}";
                     calendarItem = modelCalendar.Items.AddNode<IModelCalendarItem>();
                     calendarItem.ObjectView=(IModelObjectView) views.Application.Views[$"Event{serviceName}_ListView"];
+                    ((ModelNode) calendarItem).Id=$"{calendarItem.ObjectView.Id}-{calendarItem.SynchronizationType}-{calendarItem.CallDirection}";
                 }).ToUnit();
         }
 

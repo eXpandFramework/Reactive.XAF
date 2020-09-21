@@ -9,10 +9,8 @@ using JetBrains.Annotations;
 
 namespace Xpand.Extensions.XAF.ModelExtensions{
     
-    [KeyProperty(nameof(ObjectViewId))][PublicAPI]
+    [PublicAPI]
     public interface IModelObjectViewDependency:IModelNode{
-        [Browsable(false)]
-        string ObjectViewId { get; set; }
         [Required][DataSourceProperty(nameof(ObjectViews))]
         IModelObjectView ObjectView{ get; set; }
         [Browsable(false)]
@@ -31,12 +29,6 @@ namespace Xpand.Extensions.XAF.ModelExtensions{
                 .Where(view =>!view.ModelClass.TypeInfo.IsAbstract&& ObjectViewsMap[key].IsAssignableFrom(view.ModelClass.TypeInfo.Type)));
         }
 
-        [UsedImplicitly]
-        public static IModelObjectView Get_ObjectView(IModelObjectViewDependency todoObjectView) 
-            => !string.IsNullOrEmpty(todoObjectView.ObjectViewId) ? todoObjectView.Application.Views[todoObjectView.ObjectViewId].AsObjectView : null;
 
-        [UsedImplicitly]
-        public static void Set_ObjectView(IModelObjectViewDependency todoObjectView, IModelObjectView value) 
-            => todoObjectView.ObjectViewId = value.Id;
     }
 }

@@ -21,9 +21,9 @@ All `CRUD` operations will execute the cloud api after a successful XAF transact
 You can use the model to `configure`:
 
 * The subject `Views`, the target container `Calendar` and which Domain Component should be created when a `NewCloudEvent`.</br>
-![image](https://user-images.githubusercontent.com/159464/88489382-9cc18f00-cf9c-11ea-9f59-ceb22fbcd16a.png)
+![image](https://user-images.githubusercontent.com/159464/93871666-ac78fd80-fcd7-11ea-9db6-1279678557ae.png)
 * The CRUD `SynchronizationType` and the `CallDirection`.</br>
-![image](https://user-images.githubusercontent.com/159464/88489628-01c9b480-cf9e-11ea-95b3-e59e59bcd93b.png)
+![image](https://user-images.githubusercontent.com/159464/93871813-e8ac5e00-fcd7-11ea-81bb-6eff35b84273.png)
 
 
 

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.IO.Compression;
+using System.Linq;
 using System.Reactive.Linq;
 using akarnokd.reactive_extensions;
 using NUnit.Framework;

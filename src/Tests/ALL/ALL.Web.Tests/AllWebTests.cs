@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,6 +18,7 @@ using Xpand.TestsLib.EasyTest;
 using Xpand.TestsLib.EasyTest.Commands.ActionCommands;
 using Xpand.TestsLib.EasyTest.Commands.Automation;
 using Xpand.XAF.Modules.Reactive;
+using Xpand.XAF.Modules.Reactive.Logger;
 using BaseTest = ALL.Tests.BaseTest;
 
 namespace ALL.Web.Tests{
@@ -28,15 +30,20 @@ namespace ALL.Web.Tests{
         [XpandTest]
         public void UnloadWebModules(Type moduleType){
             ReactiveModuleBase.Unload(moduleType);
-            using (var application = new TestWebApplication(moduleType, false)){
-                application.AddModule((ModuleBase) moduleType.CreateInstance(), nameof(UnloadWebModules));
+            using var application = new TestWebApplication(moduleType, false);
+            application.AddModule((ModuleBase) moduleType.CreateInstance(), nameof(UnloadWebModules));
 
-                application.Modules.FirstOrDefault(m => m.GetType()==moduleType).ShouldBeNull();
-            }
+            application.Modules.FirstOrDefault(m => m.GetType()==moduleType).ShouldBeNull();
         }
 
-        private static TestApplication RunWebApplication(WebAdapter adapter, string connectionString) 
-            => adapter.RunWebApplication($@"{AppDomain.CurrentDomain.ApplicationPath()}\..\TestWebApplication\",65477,connectionString);
+        private TestApplication RunWebApplication(WebAdapter adapter, string connectionString){
+            var physicalPath = $@"{AppDomain.CurrentDomain.ApplicationPath()}\..\TestWebApplication\";
+            LogPaths.Clear();
+            LogPaths.Add(Path.Combine(Path.GetDirectoryName(physicalPath)!,"eXpressAppFramework.log"));
+            LogPaths.Add(Path.Combine($"{Path.GetDirectoryName(physicalPath)}\bin",Path.GetFileName(ReactiveLoggerService.RXLoggerLogPath)));
+            return adapter.RunWebApplication(physicalPath,
+                65477, connectionString);
+        }
 
         [XpandTest(LongTimeout,3)]
         [Test][Apartment(ApartmentState.STA)]

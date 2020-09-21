@@ -35,6 +35,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
         static readonly Subject<(Event cloud,IEvent local, MapAction mapAction,CallDirection callDirection)> UpdatedSubject=new Subject<(Event cloud, IEvent local, MapAction mapAction, CallDirection callDirection)>();
         static readonly Subject<GenericEventArgs<(Func<IObjectSpace> objectSpace, IEvent local, Event cloud, MapAction mapAction, CallDirection callDirection)>> CustomizeSynchronizationSubject =
             new Subject<GenericEventArgs<(Func<IObjectSpace> objectSpace, IEvent target, Event source, MapAction mapAction, CallDirection callDirection)>>();
+        
+        [PublicAPI]
         public static IObservable<GenericEventArgs<(Func<IObjectSpace> objectSpaceFactory, IEvent local, Event cloud, MapAction mapAction, CallDirection callDirection)>> CustomizeSynchronization 
             => CustomizeSynchronizationSubject.AsObservable();
         public static IObservable<(Event cloud,IEvent local, MapAction mapAction,CallDirection callDirection)> Updated{ get; }=UpdatedSubject.AsObservable();
@@ -42,11 +44,14 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
         public static DateTime DeltaSnapShotStartDateTime { get; set; } = DateTime.Now.AddMonths(-12);
         [PublicAPI]
         public static DateTime DeltaSnapShotEndDateTime { get; set; } = DateTime.Now.AddMonths(12 * 5);
+        
+        [PublicAPI]
         public static IObservable<(Event cloud, IEvent local, MapAction mapAction, CallDirection callDirection)> When(
             this IObservable<(Event cloud,IEvent local, MapAction mapAction,CallDirection callDirection)> source,
             MapAction mapAction, CallDirection calldirection = CallDirection.Both)
             => source.Where(_ => _.mapAction == mapAction&& (calldirection == CallDirection.Both || _.callDirection == calldirection));
 
+        [PublicAPI]
         public static IObservable<GenericEventArgs<(Func<IObjectSpace> objectSpaceFactory, IEvent local, Event cloud, MapAction mapAction, CallDirection callDirection)>> When(
             this IObservable<GenericEventArgs<(Func<IObjectSpace> objectSpaceFactory, IEvent local, Event cloud, MapAction mapAction, CallDirection callDirection)>> source,
             MapAction mapAction, CallDirection calldirection = CallDirection.Both)
@@ -88,9 +93,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
                 this IObservable<(Frame frame, GraphServiceClient client, global::Microsoft.Graph.Calendar calendar, IModelCalendarItem calerdarItem)> source)  
             => source
                 .Where(t => t.calerdarItem.CallDirection!=CallDirection.Out)
-                .SelectMany(_ => _.frame.Application
-                    .SelectMany(() => _.SynchronizeLocal(_.calerdarItem.SynchronizationType))
-                    .Select(calendar => (_.frame,_.client,calendar))
+                .SelectMany(t => t.frame.Application
+                    .SelectMany(() => t.SynchronizeLocal(t.calerdarItem.SynchronizationType))
+                    .Select(calendar => (t.frame,t.client,calendar))
                     .TraceMicrosoftCalendarModule(folder => $"Event: {folder.calendar.source?.Id}"));
 
         private static IObservable<(IEvent target, Event source)> SynchronizeLocal(
@@ -106,7 +111,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
                 .Publish().RefCount()
                 .WhenNotDefault(t => t.frame.Application)
                 .Do(tuple => ClientSubject.OnNext((tuple.frame,tuple.client)))
-                .Select(t => (t.frame,t.client,t.calendar,t.frame.Application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Calendar().Items[t.frame.View.Id]))
+                .Select(t => (t.frame, t.client, t.calendar,
+                    t.frame.Application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft()
+                        .Calendar().Items.First(item => item.ObjectView==t.frame.View.Model)))
                 .TraceMicrosoftCalendarModule(_ => _.frame.View.Id);
 
         private static IObservable<(Event serviceObject, MapAction mapAction)> SynchronizeBoth(
@@ -126,16 +133,19 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
                 .Do(tuple => UpdatedSubject.OnNext((tuple.serviceObject,null,tuple.mapAction,CallDirection.Out)))
                 .TraceMicrosoftCalendarModule(_ => $"{_.mapAction} {_.serviceObject.Subject},  {_.serviceObject.Id}");
 
-        private static IObservable<(Event serviceObject, MapAction mapAction)> SynchronizeCloud(this IObservable<ICalendarRequestBuilder> source, SynchronizationType synchronizationType,
-            IObjectSpace objectSpace, Func<IObjectSpace> objectSpaceFactory) 
+        private static IObservable<(Event serviceObject, MapAction mapAction)> SynchronizeCloud(this IObservable<ICalendarRequestBuilder> source, 
+            SynchronizationType synchronizationType, IObjectSpace objectSpace, Func<IObjectSpace> objectSpaceFactory) 
             => source.SelectMany(builder => objectSpaceFactory.SynchronizeCloud<Event, IEvent>(synchronizationType, objectSpace,
-                cloudId => ((IEventRequest) RequestCustomization.Default(builder.Me().Events[cloudId].Request())).DeleteAsync().ToObservable(),
+                cloudId => ((IEventRequest) RequestCustomization.Default(builder.EventRequest(cloudId))).DeleteAsync().ToObservable(),
                 @event => ((ICalendarEventsCollectionRequest) RequestCustomization.Default(builder.Events.Request())).AddAsync(@event).ToObservable(), 
-                cloudId => new Event().ReturnObservable(),
-                t => ((IEventRequest) RequestCustomization.Default(builder.Me().Events[t.cloudId].Request())).UpdateAsync(t.cloudEntity).ToObservable(), 
+                t => t.mapAction==MapAction.Delete?((IEventRequest) RequestCustomization.Default(builder.EventRequest(t.cloudId))).GetAsync().ToObservable():new Event().ReturnObservable(),
+                t => ((IEventRequest) RequestCustomization.Default(builder.EventRequest(t.cloudId))).UpdateAsync(t.cloudEntity).ToObservable(), 
                 e =>e.Handled=MapAction.Delete.CustomSynchronization(objectSpaceFactory, e.Instance.localEntinty, null, CallDirection.Out,synchronizationType,e.Instance.cloudOfficeObject).Handled , 
                 t => MapAction.Insert.CustomSynchronization(objectSpaceFactory, t.source, t.target, CallDirection.Out,synchronizationType), 
                 t => MapAction.Update.CustomSynchronization(objectSpaceFactory, t.source, t.target, CallDirection.Out,synchronizationType)));
+
+        private static IEventRequest EventRequest(this ICalendarRequestBuilder builder, string cloudId) 
+            => builder.Me().Events[cloudId].Request();
 
         private static GenericEventArgs<(Func<IObjectSpace> objectSpace, IEvent local, Event cloud, MapAction mapAction,
                 CallDirection callDirection)> CustomSynchronization(this MapAction mapAction, Func<IObjectSpace> objectSpaceFactory,
@@ -160,10 +170,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
                     cloud.Subject = local.Subject;
                 }
                 else{
-                    using (var objectSpace = objectSpaceFactory()){
-                        objectSpace.Delete(objectSpace.GetObject(cloudOfficeObject));
-                        objectSpace.CommitChanges();
-                    }
+                    using var objectSpace = objectSpaceFactory();
+                    objectSpace.Delete(objectSpace.GetObject(cloudOfficeObject));
+                    objectSpace.CommitChanges();
                 }
             }
 
@@ -239,10 +248,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
 
         public static IObservable<(Event e, MapAction mapAction)> PairMapAction(this IObservable<Event[]> source, Func<IObjectSpace> objectSpaceFactory) 
             => source.SelectMany(events => {
-                using (var objectSpace = objectSpaceFactory()){
-                    return events.Select(e => e.AdditionalData.TryGetValue("@removed", out _)
-                        ? (e, MapAction.Delete) : (e, objectSpace.QueryCloudOfficeObject(e.Id, e.GetType().ToCloudObjectType()).Any() ? MapAction.Update : MapAction.Insert)).ToArray();
-                }
+                using var objectSpace = objectSpaceFactory();
+                return events.Select(e => e.AdditionalData.TryGetValue("@removed", out _)
+                    ? (e, MapAction.Delete) : (e, objectSpace.QueryCloudOfficeObject(e.Id, e.GetType().ToCloudObjectType()).Any() ? MapAction.Update : MapAction.Insert)).ToArray();
             });
 
         public static IObservable<global::Microsoft.Graph.Calendar> GetCalendar(this IUserCalendarsCollectionRequestBuilder builder, string name, bool createNew = false){

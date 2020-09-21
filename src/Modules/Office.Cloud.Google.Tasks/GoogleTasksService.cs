@@ -52,7 +52,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks{
             => source.SelectMany(service => objectSpaceFactory.SynchronizeCloud<Task, ITask>(modelTasksItem.SynchronizationType,objectSpace,
                 cloudId => RequestCustomization.Default(service.Tasks.Delete(taskList.Id, cloudId)).ToObservable<string>().ToUnit(),
                 task => RequestCustomization.Default(service.Tasks.Insert(task, taskList.Id)).ToObservable<Task>(),
-                cloudId => RequestCustomization.Default(service.Tasks.Get(taskList.Id, cloudId)).ToObservable<Task>(),
+                t => RequestCustomization.Default(service.Tasks.Get(taskList.Id, t.cloudId)).ToObservable<Task>(),
                 t => RequestCustomization.Default(service.Tasks.Update(t.cloudEntity, taskList.Id, t.cloudId)).ToObservable<Task>(),
                 e => e.Handled=MapAction.Delete.CustomSynchronization(e.Instance.cloudOfficeObject.ObjectSpace, e.Instance.localEntinty, null).Handled,
                 t => MapAction.Insert.CustomSynchronization(null, t.source, t.target),
@@ -152,7 +152,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks{
             => source.AuthorizeGoogle().Select(t => t).EnsureTasksList()
             .Publish().RefCount()
             .Do(tuple => CredentialsSubject.OnNext((tuple.frame,tuple.credential)))
-            .Select(t => (t.frame,t.credential,t.taskList,t.frame.Application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Google().Tasks().Items[t.frame.View.Id]))
+            .Select(t => (t.frame, t.credential, t.taskList,
+                t.frame.Application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Google().Tasks().Items
+                    .First(item => item.ObjectView == t.frame.View.Model)))
             .TraceGoogleTasksModule(_ => _.frame.View.Id);
     }
 }
