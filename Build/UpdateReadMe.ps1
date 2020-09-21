@@ -37,14 +37,16 @@ function GetModuleName($_){
     $moduleName
 }
 function UpdateModulesList($rootLocation, $packages,$path) {
-    $moduleList = "|PackageName|Version|[![Custom badge](https://xpandshields.azurewebsites.net/endpoint.svg?label=&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAF)](https://www.nuget.org/packages?q=Xpand.XAF)|Target|Platform`r`n|---|---|---|---|---|`r`n"
+    $moduleList = "|PackageName|Version|[![Custom badge](https://xpandshields.azurewebsites.net/endpoint.svg?label=&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAF)](https://www.nuget.org/packages?q=Xpand.XAF)|Target|Platform|About`r`n|---|---|---|---|---|---|`r`n"
     $projects=Get-MSBuildProjects $rootLocation\src\Modules
     $assemblies=Get-ChildItem $rootLocation\bin xpand.*.dll
+    
     $packages | ForEach-Object {
         $name = $_.Replace("Xpand.XAF.Modules.", "")
         $packageUri = "[$name](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/$name)"
         $version = "![](https://xpandshields.azurewebsites.net/nuget/v/$_.svg?label=&style=flat)"
         $downloads = "![](https://xpandshields.azurewebsites.net/nuget/dt/$_.svg?label=&style=flat)"
+         
         $targetFramework =$null
         if ($_ -like "*.All"){
             $regex = [regex] '(?is)Xpand\.XAF\.(?<platform>[^\.]*)\.All'
@@ -55,7 +57,19 @@ function UpdateModulesList($rootLocation, $packages,$path) {
             }
         }else{
             $packageName=$_
-            $project=$projects|Where-Object{$_.BaseName -eq $packageName}|Get-XmlContent
+            $projectFile=$projects|Where-Object{$_.BaseName -eq $packageName}
+            $project=$projectFile|Get-XmlContent
+            $readMe="$($projectFile.DirectoryName)\Readme.md"
+            $about=$null
+            if (Test-Path $readMe){
+                $readMeContent=Get-Content $readMe
+                $regex = [regex] '(?is)# About(.*)## Details'
+                $about = ($regex.Match($readMeContent).Groups[1].Value).trim();
+                if (!$about){
+                    throw "About for $packageName not found"
+                }
+            }
+            
             $targetFramework =Get-ProjectTargetFramework $project -FullName
             $platform=($assemblies|Where-Object{$_.BaseName -eq $packageName}|Get-AssemblyMetadata -key Platform).Value
             if ($platform -eq "Core"){
@@ -63,7 +77,7 @@ function UpdateModulesList($rootLocation, $packages,$path) {
             }
         }
         
-        $moduleList += "$packageUri|$version|$downloads|$targetFramework|$platform`r`n"
+        $moduleList += "$packageUri|$version|$downloads|$targetFramework|$platform|$about`r`n"
     }
     
     

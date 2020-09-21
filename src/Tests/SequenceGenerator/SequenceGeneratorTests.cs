@@ -16,7 +16,6 @@ using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
-using Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions;
 using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.SequenceGenerator.Tests.BO;
@@ -54,7 +53,8 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
                 await TestObjects(application, true, 2);
                 var tuple = await subscribeReplay.FirstAsync();
                 tuple.sequenceGenerator.ShouldBe(tuple.CurrentManagedThreadId);
-                tuple.commits.ShouldNotBe(tuple.CurrentManagedThreadId);    
+                tuple.commits.ShouldNotBe(tuple.CurrentManagedThreadId);
+                eventLoopScheduler.Dispose();
             }
         }
 
@@ -118,6 +118,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
                 
                     AssertNextSequences(application, objectCount*2,nextSequenceTest);
                 }
+                nextSequenceTest.Dispose();
             }
         }
         [Test][XpandTest]
@@ -134,14 +135,13 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
             using (var application = SequenceGeneratorModule().Application){
                 SetSequences(application);
                 var nextSequenceTest = SequenceGeneratorService.Sequence.OfType<Child>().Test();
-
+                
                 using (var objectSpace = application.CreateObjectSpace()){
                     objectSpace.CreateObject<TParent>();
-                    objectSpace.UnitOfWork().BeforeCommitTransaction += (sender, args) => { };
-                    objectSpace.UnitOfWork().ObjectSaving += (sender, args) => { };
                     objectSpace.CommitChanges();
                     AssertNextSequences(application, 1, nextSequenceTest);
                 }
+                nextSequenceTest.Dispose();
             }
         }
 
