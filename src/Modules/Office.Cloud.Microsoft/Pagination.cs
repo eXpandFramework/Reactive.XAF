@@ -13,30 +13,30 @@ using Xpand.Extensions.ReflectionExtensions;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
     public static class Pagination{
-        public static IObservable<Entity[]> ListAllItems(this IBaseRequestBuilder builder, Action<ITokenStore> saveToken = null, ITokenStore tokenStore = null) 
-            => builder.ListAllItems<Entity>(tokenStore, saveToken);
+        public static IObservable<Entity[]> ListAllItems(this IBaseRequestBuilder builder, Action<ICloudOfficeToken> saveToken = null, ICloudOfficeToken cloudOfficeToken = null) 
+            => builder.ListAllItems<Entity>(cloudOfficeToken, saveToken);
 
         public static IObservable<TEntity[]> ListAllItems<TEntity>(this IBaseRequest request,
-            ITokenStore tokenStore = null, Action<ITokenStore> saveToken = null, Func<TEntity, bool> filter = null) where TEntity : Entity{
+            ICloudOfficeToken cloudOfficeToken = null, Action<ICloudOfficeToken> saveToken = null, Func<TEntity, bool> filter = null) where TEntity : Entity{
             filter ??= (_ => true);
             var methodInfo = request.GetType().Methods(Flags.InstancePublic, "GetAsync").First();
             return Observable.FromAsync(() => methodInfo.InvokeAsync(request)).Cast<IEnumerable<TEntity>>()
-                .SelectMany(entities => entities.ListAllItems(tokenStore, saveToken, filter).ToEnumerable().ToArray().ToObservable());
+                .SelectMany(entities => entities.ListAllItems(cloudOfficeToken, saveToken, filter).ToEnumerable().ToArray().ToObservable());
         }
 
         public static IObservable<TEntity[]> ListAllItems<TEntity>(this IEnumerable<TEntity> page,
-            ITokenStore tokenStore = null, Action<ITokenStore> saveToken = null, Func<TEntity, bool> filter = null) where TEntity : Entity{
+            ICloudOfficeToken cloudOfficeToken = null, Action<ICloudOfficeToken> saveToken = null, Func<TEntity, bool> filter = null) where TEntity : Entity{
             filter ??= (_ => true);
             var methodInfo = page.GetType().GetProperty("NextPageRequest")?.PropertyType.Methods(Flags.InstancePublic, "GetAsync").First();
             if (methodInfo == null){
                 throw new NotSupportedException($"Pagination not supported for {page.GetType().FullName}");
             }
             var nextPageRequestDelegate = page.GetType().DelegateForGetPropertyValue("NextPageRequest");
-            page.AdditionalData().SaveToken( tokenStore, saveToken);
+            page.AdditionalData().SaveToken( cloudOfficeToken, saveToken);
             var invokeNextPage = Observable.FromAsync(() => methodInfo.InvokeAsync(nextPageRequestDelegate(page)))
                 .Select(entities => {
                     page = (IEnumerable<TEntity>)entities;
-                    entities.AdditionalData().SaveToken( tokenStore, saveToken);
+                    entities.AdditionalData().SaveToken( cloudOfficeToken, saveToken);
                     return entities;
                 })
                 .Select(o => ((IEnumerable)o).Cast<TEntity>().ToArray());
@@ -48,27 +48,27 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
         private static IDictionary<string, object> AdditionalData(this object page) 
             => (IDictionary<string, object>) page.GetPropertyValue("AdditionalData");
 
-        private static void SaveToken(this IDictionary<string, object> additionalData, ITokenStore tokenStore, Action<ITokenStore> saveToken){
-            if (tokenStore != null){
+        private static void SaveToken(this IDictionary<string, object> additionalData, ICloudOfficeToken cloudOfficeToken, Action<ICloudOfficeToken> saveToken){
+            if (cloudOfficeToken != null){
                 if (additionalData.ContainsKey("@odata.deltaLink")){
-                    tokenStore.Token = HttpUtility
+                    cloudOfficeToken.Token = HttpUtility
                         .ParseQueryString(new Uri(additionalData["@odata.deltaLink"].ToString()).Query).Get("$deltatoken");
-                    tokenStore.TokenType = "deltatoken";
+                    cloudOfficeToken.TokenType = "deltatoken";
                 }
                 else if (additionalData.ContainsKey("@odata.nextLink")){
-                    tokenStore.Token = HttpUtility.ParseQueryString(new Uri(additionalData["@odata.nextLink"].ToString()).Query)
+                    cloudOfficeToken.Token = HttpUtility.ParseQueryString(new Uri(additionalData["@odata.nextLink"].ToString()).Query)
                         .Get("$skiptoken");
-                    tokenStore.TokenType = "skiptoken";
+                    cloudOfficeToken.TokenType = "skiptoken";
                 }
 
-                saveToken?.Invoke(tokenStore);
+                saveToken?.Invoke(cloudOfficeToken);
             }
         }
 
         public static IObservable<TEntity[]> ListAllItems<TEntity>(this IBaseRequestBuilder builder,
-            ITokenStore tokenStore = null, Action<ITokenStore> saveToken = null, Func<TEntity, bool> filter = null) where TEntity : Entity{
+            ICloudOfficeToken cloudOfficeToken = null, Action<ICloudOfficeToken> saveToken = null, Func<TEntity, bool> filter = null) where TEntity : Entity{
             var request = (IBaseRequest)builder.CallMethod("Request");
-            return request.ListAllItems(tokenStore, saveToken, filter);
+            return request.ListAllItems(cloudOfficeToken, saveToken, filter);
         }
 
 

@@ -40,7 +40,7 @@ namespace ALL.Web.Tests{
             var physicalPath = $@"{AppDomain.CurrentDomain.ApplicationPath()}\..\TestWebApplication\";
             LogPaths.Clear();
             LogPaths.Add(Path.Combine(Path.GetDirectoryName(physicalPath)!,"eXpressAppFramework.log"));
-            LogPaths.Add(Path.Combine($"{Path.GetDirectoryName(physicalPath)}\bin",Path.GetFileName(ReactiveLoggerService.RXLoggerLogPath)));
+            LogPaths.Add(Path.Combine(@$"{Path.GetDirectoryName(physicalPath)}\bin",Path.GetFileName(ReactiveLoggerService.RXLoggerLogPath)));
             return adapter.RunWebApplication(physicalPath,
                 65477, connectionString);
         }

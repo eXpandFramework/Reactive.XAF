@@ -18,9 +18,9 @@ using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 namespace Xpand.Extensions.Office.Cloud{
     public static class Extensions{
-        public static void SaveToken(this ITokenStore store, Func<IObjectSpace> objectSpaceFactory){
+        public static void SaveToken(this ICloudOfficeToken store, Func<IObjectSpace> objectSpaceFactory){
             using (var space = objectSpaceFactory()){
-                var storage = (ITokenStore)(space.GetObject(store) ?? space.CreateObject(store.GetType()));
+                var storage = (ICloudOfficeToken)(space.GetObject(store) ?? space.CreateObject(store.GetType()));
                 storage.Token = store.Token;
                 storage.TokenType = store.TokenType;
                 storage.EntityName = store.EntityName;

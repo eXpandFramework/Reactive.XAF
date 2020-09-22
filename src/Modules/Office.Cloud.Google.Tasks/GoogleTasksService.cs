@@ -126,13 +126,13 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks{
                 .Do(UpdatedSubject.OnNext)
                 .TraceGoogleTasksModule(_ => $"{_.mapAction} {_.serviceObject.Title}, {_.serviceObject.Status}, {_.serviceObject.Id}");
         
-        public static IObservable<global::Google.Apis.Tasks.v1.Data.Tasks[]> ListTasks(this TasksService tasksService,string tasksListId, ITokenStore tokenStore = null,
-            Action<ITokenStore> @finally = null,  int? maxResults = 100, Func<GoogleApiException, bool> repeat = null){
+        public static IObservable<global::Google.Apis.Tasks.v1.Data.Tasks[]> ListTasks(this TasksService tasksService,string tasksListId, ICloudOfficeToken cloudOfficeToken = null,
+            Action<ICloudOfficeToken> @finally = null,  int? maxResults = 100, Func<GoogleApiException, bool> repeat = null){
             if (maxResults < 20){
                 throw new ArgumentOutOfRangeException($"{nameof(maxResults)} is less than 20");
             }
 
-            return tasksService.Tasks.List(tasksListId).List(maxResults, tokenStore, @finally, repeat)
+            return tasksService.Tasks.List(tasksListId).List(maxResults, cloudOfficeToken, @finally, repeat)
                 .Select(tasks => tasks.Select(t => {
                     t.Items ??= new List<Task>();
                     return t;

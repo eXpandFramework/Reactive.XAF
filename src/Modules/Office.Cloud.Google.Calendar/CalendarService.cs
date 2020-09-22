@@ -182,7 +182,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
             Func<IObjectSpace> objectSpaceFactory, SynchronizationType synchronizationType, Guid currentUserId,
             Type eventType, Type newCloudEventType, CalendarListEntry calendarListEntry) 
             => source.SynchronizeLocalEvent(objectSpaceFactory, currentUserId, (service, store) 
-                    => service.ListEvents( store,objectSpaceFactory,calendarListEntry.Id), eventType )
+                    => service.ListEvents( store,objectSpaceFactory,calendarListEntry.Id), eventType,"synctoken" )
                 .Select(tuple => {
                     var args = new GenericEventArgs<(Func<IObjectSpace> objectSpace, IEvent local, Event cloud, MapAction
                             mapAction, CallDirection callDirection)>((objectSpaceFactory, tuple.local, tuple.cloud, tuple.mapAction, CallDirection.In));
@@ -247,21 +247,20 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
                 .Do(model => model.Application.OAuthGoogle()
                     .AddScopes(global::Google.Apis.Calendar.v3.CalendarService.Scope.CalendarEvents,global::Google.Apis.Calendar.v3.CalendarService.Scope.Calendar)).ToUnit();
 
-        public static IObservable<(Event e, MapAction mapAction)> ListEvents(this global::Google.Apis.Calendar.v3.CalendarService service, ITokenStore store,
+        public static IObservable<(Event e, MapAction mapAction)> ListEvents(this global::Google.Apis.Calendar.v3.CalendarService service, ICloudOfficeToken store,
             Func<IObjectSpace> objectSpaceFactory,string calendarId) 
-            => service.ListEvents(calendarId, store,tokenStore => tokenStore.SaveToken(objectSpaceFactory)).SelectMany(eventses => eventses).SelectMany(events => events.Items)
+            => service.ListEvents(calendarId, store,tokenStore => tokenStore?.SaveToken(objectSpaceFactory)).SelectMany(eventses => eventses).SelectMany(events => events.Items)
                 .PairMapAction(objectSpaceFactory);
 
-        public static IObservable<Events[]> ListEvents(this global::Google.Apis.Calendar.v3.CalendarService calendarService,string calendarId, ITokenStore tokenStore = null,
-            Action<ITokenStore> @finally = null,  int? maxResults = 2500, Func<GoogleApiException, bool> repeat = null){
-            return maxResults < 250
+        public static IObservable<Events[]> ListEvents(this global::Google.Apis.Calendar.v3.CalendarService calendarService,string calendarId, ICloudOfficeToken cloudOfficeToken = null,
+            Action<ICloudOfficeToken> @finally = null,  int? maxResults = 2500, Func<GoogleApiException, bool> repeat = null) 
+            => maxResults < 250
                 ? throw new ArgumentOutOfRangeException($"{nameof(maxResults)} is less than 250")
-                : calendarService.Events.List(calendarId).List(maxResults, tokenStore, @finally, repeat)
+                : calendarService.Events.List(calendarId).List(maxResults, cloudOfficeToken, @finally, repeat)
                     .Select(events => events.Select(t => {
                         t.Items ??= new List<Event>();
                         return t;
                     }).ToArray());
-        }
 
         public static IObservable<string> DeleteAllEvents(this global::Google.Apis.Calendar.v3.CalendarService calendarService, string calendarId) 
             => calendarService.ListEvents(calendarId)

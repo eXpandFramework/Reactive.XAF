@@ -24,9 +24,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
 	public static class TestExtensions{
         
         public static async Task Populate_All<TEntity>(this IObjectSpace objectSpace, string syncToken,
-            Func<CloudOfficeTokenStorage,IObservable<TEntity>> listEvents,TimeSpan timeout,Action<IObservable<TEntity>> assert,IObjectSpaceProvider assertTokenStorageProvider=null){
+            Func<ICloudOfficeToken,IObservable<TEntity>> listEvents,TimeSpan timeout,Action<IObservable<TEntity>> assert,IObjectSpaceProvider assertTokenStorageProvider=null){
             
-            var tokenStorage = objectSpace.CreateObject<CloudOfficeTokenStorage>();
+            var tokenStorage = objectSpace.CreateObject<CloudOfficeToken>();
             tokenStorage.Token = syncToken;
             tokenStorage.EntityName = typeof(TEntity).FullName;
             objectSpace.CommitChanges();
@@ -36,12 +36,11 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
             await events.Timeout(timeout);
 
             if (assertTokenStorageProvider!=null){
-                using (var space = assertTokenStorageProvider.CreateObjectSpace()){
-                    tokenStorage = space.GetObjectsQuery<CloudOfficeTokenStorage>()
-                        .First(storage => storage.Oid == storageOid);
-                    tokenStorage.Token.ShouldNotBeNull();
-                    tokenStorage.Token.ShouldNotBe(syncToken);
-                }
+                using var space = assertTokenStorageProvider.CreateObjectSpace();
+                tokenStorage = space.GetObjectsQuery<CloudOfficeToken>()
+                    .First(storage => storage.Oid == storageOid);
+                tokenStorage.Token.ShouldNotBeNull();
+                tokenStorage.Token.ShouldNotBe(syncToken);
             }
 
             assert(events);
@@ -98,24 +97,21 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
         }
 
         public static async Task Populate_Modified<TEntity>(this IObjectSpaceProvider objectSpaceProvider,
-            Func<CloudOfficeTokenStorage,IObservable<TEntity>> listEntities,IObservable<Unit> modified,TimeSpan timeout,Action<IObservable<TEntity>> assert){
-            
-            
-            using (var objectSpace = objectSpaceProvider.CreateObjectSpace()){
-                var tokenStorage = objectSpace.CreateObject<CloudOfficeTokenStorage>();
-                var storageToken = tokenStorage.Token;
-                await listEntities(tokenStorage);
+            Func<ICloudOfficeToken,IObservable<TEntity>> listEntities,IObservable<Unit> modified,TimeSpan timeout,Action<IObservable<TEntity>> assert){
+            using var objectSpace = objectSpaceProvider.CreateObjectSpace();
+            var tokenStorage = objectSpace.CreateObject<CloudOfficeToken>();
+            var storageToken = tokenStorage.Token;
+            await listEntities(tokenStorage);
 
-                await modified.Timeout(timeout);
+            await modified.Timeout(timeout);
 
-                var entities = listEntities(tokenStorage).SubscribeReplay().Do(entity => { });
-                await entities.Timeout(timeout);
+            var entities = listEntities(tokenStorage).SubscribeReplay().Do(entity => { });
+            await entities.Timeout(timeout);
 
-                tokenStorage.Token.ShouldNotBeNull();
-                tokenStorage.Token.ShouldNotBe(storageToken);
+            tokenStorage.Token.ShouldNotBeNull();
+            tokenStorage.Token.ShouldNotBe(storageToken);
                 
-                assert(entities);
-            }
+            assert(entities);
         }
 
         public static async Task Map_Two_New_Entity<TCloudEntity,TLocalEntity>(this IObjectSpace objectSpace,Func<IObjectSpace,int,TLocalEntity> localEntityFactory,TimeSpan timeout,
@@ -144,17 +140,15 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
         }
         
         public static void NewAuthentication<TAuth>(this IObjectSpaceProvider objectSpaceProvider,Action<TAuth,byte[]> saveToken,string serviceName,Platform platform=Platform.Win) where TAuth:CloudOfficeBaseObject{
-            using (var manifestResourceStream = File.OpenRead($"{AppDomain.CurrentDomain.ApplicationPath()}\\{serviceName}AuthenticationData{platform}.json")){
-                var token = Encoding.UTF8.GetBytes(new StreamReader(manifestResourceStream).ReadToEnd());
-                using (var objectSpace = objectSpaceProvider.CreateObjectSpace()){
-                    var authenticationOid = (Guid)objectSpace.GetKeyValue(SecuritySystem.CurrentUser);
-                    if (objectSpace.GetObjectByKey<TAuth>(authenticationOid)==null){
-                        var authentication = objectSpace.CreateObject<TAuth>();
-                        authentication.Oid=authenticationOid;
-                        saveToken(authentication, token);
-                        objectSpace.CommitChanges();
-                    }
-                }
+            using var manifestResourceStream = File.OpenRead($"{AppDomain.CurrentDomain.ApplicationPath()}\\{serviceName}AuthenticationData{platform}.json");
+            var token = Encoding.UTF8.GetBytes(new StreamReader(manifestResourceStream).ReadToEnd());
+            using var objectSpace = objectSpaceProvider.CreateObjectSpace();
+            var authenticationOid = (Guid)objectSpace.GetKeyValue(SecuritySystem.CurrentUser);
+            if (objectSpace.GetObjectByKey<TAuth>(authenticationOid)==null){
+                var authentication = objectSpace.CreateObject<TAuth>();
+                authentication.Oid=authenticationOid;
+                saveToken(authentication, token);
+                objectSpace.CommitChanges();
             }
         }
         

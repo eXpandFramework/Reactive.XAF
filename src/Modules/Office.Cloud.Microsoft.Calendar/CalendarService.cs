@@ -181,8 +181,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
 
         private static IObservable<(IEvent target, Event source)> SynchronizeLocalEvent(this IObservable<IUserCalendarViewCollectionRequestBuilder> source,
             Func<IObjectSpace> objectSpaceFactory, SynchronizationType synchronizationType, Guid currentUserId, Type eventType, Type newCloudEventType) 
-            => source.SynchronizeLocalEvent(objectSpaceFactory, currentUserId, (service, tokenStorage) 
-                    => service.ListDelta(tokenStorage, objectSpaceFactory),eventType )
+            => source.SynchronizeLocalEvent(objectSpaceFactory, currentUserId, (service, deltaToken) 
+                    => service.ListDelta(deltaToken, objectSpaceFactory),eventType ,"deltatoken")
                 .Select(tuple => {
                     var args = new GenericEventArgs<(Func<IObjectSpace> objectSpace, IEvent local, Event cloud, MapAction
                             mapAction, CallDirection callDirection)>((objectSpaceFactory, tuple.local, tuple.cloud, tuple.mapAction, CallDirection.In));
@@ -210,7 +210,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
                     }
                     return (localEvent, cloudEvent: tuple.cloud);
                 })
-                .TraceMicrosoftCalendarModule(tuple => $"source: {tuple.cloudEvent.Id}, target:{tuple.localEvent.Subject}");
+                .TraceMicrosoftCalendarModule(tuple => $"cloudId: {tuple.cloudEvent.Id}, cloudSubject: {tuple.cloudEvent.Subject}, local:{tuple.localEvent}");
 
         private static void Update(this IEvent localEvent, GenericEventArgs<(Func<IObjectSpace> objectSpace, IEvent local, Event cloud, MapAction mapAction, CallDirection callDirection)> args){
             localEvent.Location = args.Instance.cloud.Location?.DisplayName;
@@ -221,20 +221,20 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
             localEvent.Description = args.Instance.cloud.Body?.Content;
         }
         
-        public static IObservable<(Event @event, MapAction mapAction)> ListDelta(this IUserCalendarViewCollectionRequestBuilder calendarViewCollectionRequestBuilder, ITokenStore storage,
+        public static IObservable<(Event @event, MapAction mapAction)> ListDelta(this IUserCalendarViewCollectionRequestBuilder calendarViewCollectionRequestBuilder, ICloudOfficeToken cloudOfficeToken,
             Func<IObjectSpace> objectSpaceFactory){
             var queryOptions = new[]{
                 new QueryOption("StartDateTime", DeltaSnapShotStartDateTime.ToString(CultureInfo.InvariantCulture)), 
                 new QueryOption("EndDateTime", DeltaSnapShotEndDateTime.ToString(CultureInfo.InvariantCulture)),
             };
             
-            if (storage.Token != null){
-                queryOptions =new[] { new QueryOption($"${storage.TokenType}", storage.Token) } ;
+            if (cloudOfficeToken?.Token != null){
+                queryOptions =new[] { new QueryOption($"${cloudOfficeToken.TokenType}", cloudOfficeToken.Token) } ;
             }
             return calendarViewCollectionRequestBuilder
                 .Delta().Request(queryOptions)
                 .Header("Prefer", "odata.track-changes")
-                .ListAllItems<Event>(storage, store => store.SaveToken(objectSpaceFactory)).ToEnumerable().ToObservable()
+                .ListAllItems<Event>(cloudOfficeToken, store => store?.SaveToken(objectSpaceFactory)).ToEnumerable().ToObservable()
                 .PairMapAction(objectSpaceFactory)
                 .TraceMicrosoftCalendarModule(tuple => $"{tuple.e.Subject}, {tuple.mapAction}");
         }

@@ -114,11 +114,16 @@ namespace Xpand.TestsLib{
         public void Dispose(){
             XpoTypesInfoHelper.Reset();
             XafTypesInfo.HardReset();
-            var text = GetLogText();
-            if (!string.IsNullOrEmpty(text)){
-                var zipPPath = Path.Combine(TestContext.CurrentContext.TestDirectory,$"{GetTestName()}.gz");
-                File.WriteAllBytes(zipPPath,text.GZip());
-                TestContext.AddTestAttachment(zipPPath);    
+            try{
+                var text = GetLogText();
+                if (!string.IsNullOrEmpty(text)){
+                    var zipPPath = Path.Combine(TestContext.CurrentContext.TestDirectory,$"{GetTestName()}.gz");
+                    File.WriteAllBytes(zipPPath,text.GZip());
+                    TestContext.AddTestAttachment(zipPPath);    
+                }
+            }
+            catch (Exception e){
+                TestContext.Out.Write(e);
             }
             
         }

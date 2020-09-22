@@ -4,8 +4,20 @@ using JetBrains.Annotations;
 namespace Xpand.Extensions.Office.Cloud.BusinessObjects{
     [DeferredDeletion(false)]
     [UsedImplicitly]
-    public class CloudOfficeTokenStorage : CloudOfficeBaseObject, ITokenStore{
+    public class CloudOfficeTokenStorage : CloudOfficeBaseObject{
         public CloudOfficeTokenStorage(Session session) : base(session){
+        }
+
+        
+
+        [Association("CloudOfficeTokenStorage-CloudOfficeTokens")]
+        public XPCollection<CloudOfficeToken> CloudOfficeTokens => GetCollection<CloudOfficeToken>(nameof(CloudOfficeTokens));
+    }
+
+    [DeferredDeletion(false)]
+    [UsedImplicitly]
+    public class CloudOfficeToken:CloudOfficeBaseObject,ICloudOfficeToken{
+        public CloudOfficeToken(Session session) : base(session){
         }
 
         string _entityName;
@@ -27,9 +39,16 @@ namespace Xpand.Extensions.Office.Cloud.BusinessObjects{
             get => _token;
             set => SetPropertyValue(nameof(Token), ref _token, value);
         }
-    }
 
-    public interface ITokenStore{
+        CloudOfficeTokenStorage _cloudOfficeTokenStorage;
+
+        [Association("CloudOfficeTokenStorage-CloudOfficeTokens")]
+        public CloudOfficeTokenStorage CloudOfficeTokenStorage{
+            get => _cloudOfficeTokenStorage;
+            set => SetPropertyValue(nameof(CloudOfficeTokenStorage), ref _cloudOfficeTokenStorage, value);
+        }
+    }
+    public interface ICloudOfficeToken{
         string TokenType { get; set; }
         string Token { get; set; }
         string EntityName { get; set; }

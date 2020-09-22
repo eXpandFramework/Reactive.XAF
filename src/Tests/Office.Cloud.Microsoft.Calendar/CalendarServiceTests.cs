@@ -141,7 +141,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
         }
 
         [Test]
-        // [XpandTest()]
+        [XpandTest()]
         public override async Task Delete_Local_Event_Resource(){
             using var application = Platform.Win.CalendarModule().Application;
             var builder = await application.InitializeService();
@@ -168,7 +168,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
             await outlookTaskFolders[folder.Id].Request().DeleteAsync();
         }
 
-        [TestCase(null)]
+        [TestCase("CPDx077Z9-sCEPDx077Z9-sCGAU=")]
         [XpandTest()]
         public override async Task Populate_All(string syncToken){
             using var application = Platform.Win.CalendarModule().Application;
@@ -235,13 +235,13 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
             using var application = Platform.Win.CalendarModule().Application;
             var client = await application.MSGraphClient(true);
             await client.Me().Calendar.Events.Request().AddAsync(new Event(){Subject = "test"});
-            var officeTokenStorage = application.CreateObjectSpace().CloudOfficeTokenStorage((Guid) SecuritySystem.CurrentUserId);
+            var officeTokenStorage = application.CreateObjectSpace().CloudOfficeToken((Guid) SecuritySystem.CurrentUserId,typeof(Event).FullName,"deltatoken");
             officeTokenStorage.Token.ShouldBeNull();
             var observeInsert = client.Me().CalendarView.ListDelta(officeTokenStorage,application.CreateObjectSpace ).FirstAsync().Test();
             observeInsert.AwaitDone(Timeout);
             observeInsert.Items.Count.ShouldBe(1);
             observeInsert.Items.Select(_ => _.mapAction).First().ShouldBe(MapAction.Insert);
-            officeTokenStorage = application.CreateObjectSpace().CloudOfficeTokenStorage((Guid) SecuritySystem.CurrentUserId);
+            officeTokenStorage = application.CreateObjectSpace().CloudOfficeToken((Guid) SecuritySystem.CurrentUserId,typeof(Event).FullName,"deltatoken");
             officeTokenStorage.Token.ShouldNotBeNull();
             var objectSpace1 = application.CreateObjectSpace();
             var o = objectSpace1.CreateObject<DevExpress.Persistent.BaseImpl.Event>();

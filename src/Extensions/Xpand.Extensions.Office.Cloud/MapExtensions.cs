@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
@@ -14,16 +15,26 @@ using Xpand.Extensions.Reactive.Transform;
 namespace Xpand.Extensions.Office.Cloud{
     public static class MapExtensions{
         public static IObservable<(IObjectSpace objectSpace, IEvent local, TCloudEvent cloud, MapAction mapAction)> SynchronizeLocalEvent<TCloudEvent, TService>(
-            this IObservable<TService> source, Func<IObjectSpace> objectSpaceFactory, Guid currentUserId, Func<TService, ITokenStore, IObservable<
-                (TCloudEvent @event,MapAction mapAction)>> modifiedEventsList, Type localEventType)  
-            => Observable.Using(objectSpaceFactory, objectSpace => source.SelectMany(service => modifiedEventsList(service, objectSpace.CloudOfficeTokenStorage(currentUserId)))
+            this IObservable<TService> source, Func<IObjectSpace> objectSpaceFactory, Guid currentUserId, Func<TService, ICloudOfficeToken, IObservable<
+                (TCloudEvent @event,MapAction mapAction)>> modifiedEventsList, Type localEventType,string tokenType)
+            => Observable.Using(objectSpaceFactory, objectSpace => source.SelectMany(service => modifiedEventsList(service,
+                    objectSpace.CloudOfficeToken(currentUserId, typeof(TCloudEvent).FullName,tokenType)))
                 .SynchronizeLocalEvent(objectSpaceFactory, localEventType));
 
-        public static CloudOfficeTokenStorage CloudOfficeTokenStorage(this IObjectSpace objectSpace,Guid currentUserId){
-            var tokenStorage = (objectSpace.GetObjectByKey<CloudOfficeTokenStorage>(currentUserId) ?? objectSpace.CreateObject<CloudOfficeTokenStorage>());
-            tokenStorage.Oid = currentUserId;
+        public static CloudOfficeToken CloudOfficeToken(this IObjectSpace objectSpace,Guid currentUserId,string entityName,string tokenType){
+            var cloudOfficeToken = objectSpace.GetObjectsQuery<CloudOfficeToken>().FirstOrDefault(token =>
+                token.CloudOfficeTokenStorage.Oid == currentUserId && token.EntityName == entityName&&token.TokenType==tokenType);
+            
+            if (cloudOfficeToken == null){
+                cloudOfficeToken = objectSpace.CreateObject<CloudOfficeToken>();
+                cloudOfficeToken.CloudOfficeTokenStorage =objectSpace.GetObjectByKey<CloudOfficeTokenStorage>(currentUserId)?? objectSpace.CreateObject<CloudOfficeTokenStorage>();
+                cloudOfficeToken.CloudOfficeTokenStorage.Oid = currentUserId;
+                cloudOfficeToken.TokenType = tokenType;
+                cloudOfficeToken.EntityName=entityName;
+            }
+            
             objectSpace.CommitChanges();
-            return tokenStorage;
+            return cloudOfficeToken;
         }
 
         static IObservable<(IObjectSpace objectSpace, IEvent source, TCloudEvent @event, MapAction mapAction)>
@@ -43,11 +54,7 @@ namespace Xpand.Extensions.Office.Cloud{
             Action<GenericEventArgs<(CloudOfficeObject cloudOfficeObject, TLocalEntity localEntinty)>> onDelete = null, Action<(TCloudEntity target, TLocalEntity source)> onInsert = null,
             Action<(TCloudEntity target, TLocalEntity source)> update = null) where TCloudEntity : class
             => objectSpace.ModifiedObjects<TLocalEntity, TCloudEntity>(synchronizationType, cloudOfficeObject 
-                    => {
-                    var cloudEntity = getRequest((cloudOfficeObject.cloudOfficeObject.CloudId,MapAction.Delete)).FirstOrDefaultAsync().Wait();
-                    return cloudEntity != null ? cloudOfficeObject.Delete<TCloudEntity, TLocalEntity>(onDelete, deleteReqest)
-                            .FirstOrDefaultAsync().Select(entity => (entity, MapAction.Delete)) : Observable.Empty<(TCloudEntity, MapAction mapAction)>();
-                },
+                    => cloudOfficeObject.Delete<TCloudEntity,TLocalEntity>(onDelete, deleteReqest).FirstOrDefaultAsync().Select(entity => (entity,MapAction.Delete)),
                 localEntity => objectSpaceFactory.MapEntity(localEntity, sourceEntity 
                         => sourceEntity.Insert(objectSpace, objectSpaceFactory, onInsert, insertReqest).Select(entity => (entity, MapAction.Insert)), _ 
                         => _.task.Update(_.cloudId, getRequest, updateRequest, update).Select(entity => (entity, MapAction.Update))

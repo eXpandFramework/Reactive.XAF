@@ -156,20 +156,104 @@ jobs:
           **\Xpand.Extensions.Tests.dll
           **\Xpand.XAF.Modules.CloneModelView.Tests.dll
           **\Xpand.XAF.Modules.ModelViewInheritance.Tests.dll
-          **\Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests.dll
-          **\Xpand.XAF.Modules.Office.Cloud.Google.Tasks.Tests.dll
-          **\Xpand.XAF.Modules.Office.Cloud.Google.Tests.dll
-          **\Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests.dll
-          **\Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests.dll
-          **\Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests.dll
           **\Xpand.XAF.Modules.Office.Cloud.Tests.dll
           **\Xpand.XAF.Modules.Reactive.Logger.Hub.Tests.dll
           **\Xpand.XAF.Modules.Reactive.Logger.Tests.dll
           !**\*TestAdapter.dll
           !**\obj\**    
-- job: TestPerExecutionTime
+- job: GoogleCloudOffice
   timeoutInMinutes: 70
   dependsOn: 'TestPerAssembly'
+  strategy:
+    parallel: 1
+  pool:
+    vmImage: windows-2019
+  variables:
+    - group: keys
+  steps:
+    - checkout: none
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        buildType: 'current'
+        artifactName: 'bin'
+        targetPath: '$(Pipeline.Workspace)'
+    - task: PowerShell@2
+      displayName: Download Cloud creds
+      inputs: 
+        pwsh: true
+        targetType: inline
+        script: |
+          $VerbosePreference="Continue"
+          $ErrorView="NormalView"
+          & '$(System.DefaultWorkingDirectory)/build/DownloadCloudCreds.ps1' '$(GitHubToken)'
+    - task: VSTest@2
+      displayName: 'Test Modules'
+      continueOnError: true
+      inputs:
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        testSelector: 'testAssemblies'
+        diagnosticsEnabled: true
+        codeCoverageEnabled: true
+        distributionBatchType: basedOnExecutionTime
+        runInParallel: false
+        runSettingsFile: .\bin\Tests.runsettings
+        runTestsInIsolation: false
+        collectDumpOn: never
+        testAssemblyVer2: |
+          **\Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests.dll
+          **\Xpand.XAF.Modules.Office.Cloud.Google.Tasks.Tests.dll
+          **\Xpand.XAF.Modules.Office.Cloud.Google.Tests.dll
+          !**\*TestAdapter.dll
+          !**\obj\**    
+- job: MicrosoftCloudOffice
+  timeoutInMinutes: 70
+  dependsOn: 'TestPerAssembly'
+  strategy:
+    parallel: 1
+  pool:
+    vmImage: windows-2019
+  variables:
+    - group: keys
+  steps:
+    - checkout: none
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        buildType: 'current'
+        artifactName: 'bin'
+        targetPath: '$(Pipeline.Workspace)'
+    - task: PowerShell@2
+      displayName: Download Cloud creds
+      inputs: 
+        pwsh: true
+        targetType: inline
+        script: |
+          $VerbosePreference="Continue"
+          $ErrorView="NormalView"
+          & '$(System.DefaultWorkingDirectory)/build/DownloadCloudCreds.ps1' '$(GitHubToken)'
+    - task: VSTest@2
+      displayName: 'Test Modules'
+      continueOnError: true
+      inputs:
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        testSelector: 'testAssemblies'
+        diagnosticsEnabled: true
+        codeCoverageEnabled: true
+        distributionBatchType: basedOnExecutionTime
+        runInParallel: false
+        runSettingsFile: .\bin\Tests.runsettings
+        runTestsInIsolation: false
+        collectDumpOn: never
+        testAssemblyVer2: |
+          **\Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests.dll
+          **\Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests.dll
+          **\Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests.dll
+          !**\*TestAdapter.dll
+          !**\obj\**    
+- job: TestPerExecutionTime
+  timeoutInMinutes: 70
+  dependsOn: 
+    - GoogleCloudOffice
+    - MicrosoftCloudOffice
   strategy:
     parallel: 10
   pool:
@@ -223,7 +307,6 @@ jobs:
         pwsh: true
         targetType: inline
         script: |
-          throw "Start full build with AzStorageLookup"
           if (('$(AzStorageLookup)' -eq "1")){
               throw "Start full build with AzStorageLookup"
           }

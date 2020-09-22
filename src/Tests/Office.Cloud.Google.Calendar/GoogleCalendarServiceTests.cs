@@ -247,14 +247,14 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
             var calendar = await calendarService.GetCalendar(CalendarTestExtensions.CalendarName);
             await calendarService.NewCalendarEvents(1, calendar.Id, "test");
                 
-            var officeTokenStorage = application.CreateObjectSpace().CloudOfficeTokenStorage((Guid) SecuritySystem.CurrentUserId);
+            var officeTokenStorage = application.CreateObjectSpace().CloudOfficeToken((Guid) SecuritySystem.CurrentUserId,typeof(Event).FullName,"synctoken");
             officeTokenStorage.Token.ShouldBeNull();
             var observeInsert = calendarService.ListEvents(officeTokenStorage, application.CreateObjectSpace,calendar.Id).FirstAsync().Test();
             observeInsert.AwaitDone(Timeout);
             observeInsert.Items.Count.ShouldBe(1);
             observeInsert.Items.Select(_ => _.mapAction).First().ShouldBe(MapAction.Insert);
             application.CreateObjectSpace().GetObjectsQuery<CloudOfficeTokenStorage>();
-            officeTokenStorage = application.CreateObjectSpace().CloudOfficeTokenStorage((Guid) SecuritySystem.CurrentUserId);
+            officeTokenStorage = application.CreateObjectSpace().CloudOfficeToken((Guid) SecuritySystem.CurrentUserId,typeof(Event).FullName,"synctoken");
             officeTokenStorage.Token.ShouldNotBeNull();
             var objectSpace1 = application.CreateObjectSpace();
             var o = objectSpace1.CreateObject<DevExpress.Persistent.BaseImpl.Event>();

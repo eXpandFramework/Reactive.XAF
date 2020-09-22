@@ -54,7 +54,7 @@ namespace ALL.Tests{
                                 frame.GetController<ModificationsController>().SaveAction.ToolTip = tuple.mapAction.ToString();
                             }
                         }
-                    }));
+                    }).TakeUntil(frame.View.WhenClosed()));
 
         public static IObservable<Unit> InitializeCloudCalendarModule(this ApplicationModulesManager manager,
             Func<IModelOffice, IModelCalendar> modelCalendarSelector, string serviceName){
