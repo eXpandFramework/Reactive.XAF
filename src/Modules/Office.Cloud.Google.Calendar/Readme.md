@@ -3,7 +3,7 @@
 [![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/Office.Cloud.Google.Calendar.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+label%3AOffice.Cloud.Google.Calendar) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/Office.Cloud.Google.Calendar.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+label%3AOffice.Cloud.Google.Calendar)
 # About 
 
-The `Microsoft.Calendar` package integrates with the Office365 Calendar cloud service.
+The `Google.Calendar` package integrates with the Google Calendar cloud service.
 
 ## Details
 
@@ -13,23 +13,23 @@ The `Microsoft.Calendar` package integrates with the Office365 Calendar cloud se
 
 ---
 
-This is a `platform agnostic` module that authenticates against Azure using the [Xpand.XAF.Modules.Microsoft](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Office.Cloud.Microsoft) package, for details head to it's wiki page.
+This is a `platform agnostic` module that authenticates against Google using the [Xpand.XAF.Modules.Google](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Office.Cloud.Google) package, for details head to it's wiki page.
 
-The `Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar` provides a configurable `two way` synchronization between the `IEvent` Domain Components and the `Microsoft.Graph.Event` entity.
+The `Xpand.XAF.Modules.Office.Cloud.Google.Calendar` provides a configurable `two way` synchronization between the `IEvent` Domain Components and the `Google.Apis.Calendar.v3.Event` entity.
 All `CRUD` operations will execute the cloud api after a successful XAF transaction. 
 
 You can use the model to `configure`:
 
 * The subject `Views`, the target container `Calendar` and which Domain Component should be created when a `NewCloudEvent`.</br>
-![image](https://user-images.githubusercontent.com/159464/88489382-9cc18f00-cf9c-11ea-9f59-ceb22fbcd16a.png)
+![image](https://user-images.githubusercontent.com/159464/93872067-48a30480-fcd8-11ea-92c7-3512999e53e9.png)
 * The CRUD `SynchronizationType` and the `CallDirection`.</br>
-![image](https://user-images.githubusercontent.com/159464/88489628-01c9b480-cf9e-11ea-95b3-e59e59bcd93b.png)
+![image](https://user-images.githubusercontent.com/159464/93872150-6a03f080-fcd8-11ea-92b0-2289b38032d4.png)
 
 
 
-The package can operate without any configuration by executing a `predefined map` between the `IEvent` and `OutlookEvent` objects on Update and on Insert for both incoming and outgoing calls.
+The package can operate without any configuration by executing a `predefined map` between the `IEvent` and `Google.Apis.Calendar.v3.Event` objects on Update and on Insert for both incoming and outgoing calls.
 
-To customize the predefined map you can use a query like the next one which suffix the OutlookEvent subject with the current date:
+To customize the predefined map you can use a query like the next one which suffix the Google.Apis.Calendar.v3.Event subject with the current date:
 
 ```cs
 
@@ -50,7 +50,11 @@ CalendarService.CustomizeSynchronization
 ```
 
 **Cloud to local synchronization:**
-The package uses [delta queries](https://docs.microsoft.com/en-us/graph/delta-query-overview) to track changes in Microsoft Graph data.
+The package track changes using [synchronization tokens](https://developers.google.com/calendar/v3/sync).
+
+
+> The first time the run method is called it will perform a full sync and store the sync token. On each subsequent execution it will load the saved sync token and perform an incremental sync.
+
 
 **Possible future improvements:**
 
@@ -66,7 +70,7 @@ In the next screencast you can see all `CRUD` operations on the Event BO and how
 
 <twitter>
 
-[![Xpand XAF Modules Office Cloud Microsoft Calendar](https://user-images.githubusercontent.com/159464/88318256-1d755680-cd23-11ea-9d59-e9011f969904.gif)
+[![Xpand XAF Modules Office Cloud Google Calendar](https://user-images.githubusercontent.com/159464/88318256-1d755680-cd23-11ea-9d59-e9011f969904.gif)
 ](https://youtu.be/E90hOGf-W2I)
 
 </twitter>
@@ -77,19 +81,19 @@ In the next screencast you can see all `CRUD` operations on the Event BO and how
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 
 
-   `Install-Package Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar`.
+   `Install-Package Xpand.XAF.Modules.Office.Cloud.Google.Calendar`.
 
     The above only references the dependencies and next steps are mandatory.
 
 2. [Ways to Register a Module](https://documentation.devexpress.com/eXpressAppFramework/118047/Concepts/Application-Solution-Components/Ways-to-Register-a-Module)
 or simply add the next call to your module constructor
     ```cs
-    RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.Office.Cloud.Microsoft.CalendarModule));
+    RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.Office.Cloud.Google.CalendarModule));
     ```
 ## Versioning
 The module is **not bound** to **DevExpress versioning**, which means you can use the latest version with your old DevExpress projects [Read more](https://github.com/eXpandFramework/XAF/tree/master/tools/Xpand.VersionConverter).
 
-The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
+The module follows the Nuget [Version Basics](https://docs.Google.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
 `.NetFramework: net461`
 
@@ -119,10 +123,10 @@ To `Step in the source code` you need to `enable Source Server support` in your 
 
 If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call at the constructor of your module.
 ```cs
-Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Office.Office.Cloud.Microsoft.CalendarModule))
+Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Office.Office.Cloud.Google.CalendarModule))
 ```
 
 ### Tests
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.Office.Office.Cloud.Microsoft.Calendar.Office.Office.Cloud.Microsoft.Calendar). 
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.Office.Office.Cloud.Google.Calendar.Office.Office.Cloud.Google.Calendar). 
 All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
 
