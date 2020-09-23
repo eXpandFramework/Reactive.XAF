@@ -82,6 +82,19 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
         [Test]
         [XpandTest]
+        public async Task Remove_LocalizableAttribute_from_Non_String_Properties(){
+            InitializeMapperService(nameof(Customize_Attributes_Mapping));
+            var typeToMap = typeof(LocalizableAttributeClass);
+            
+            var modelType = await typeToMap.MapToModel().ModelInterfaces();
+
+            var propertyInfos = modelType.Properties();
+            propertyInfos.First(info => info.Name==nameof(LocalizableAttributeClass.BackColor)).GetCustomAttributes(typeof(LocalizableAttribute),false).Any().ShouldBeFalse();
+            propertyInfos.First(info => info.Name==nameof(LocalizableAttributeClass.Color)).GetCustomAttributes(typeof(LocalizableAttribute),false).Any().ShouldBeTrue();
+        }
+
+        [Test]
+        [XpandTest]
         public async Task Attribute_Mapping_Can_Be_Disabled(){
             InitializeMapperService(nameof(Attribute_Mapping_Can_Be_Disabled));
             TypeMappingService.PropertyMappingRules.Add(("Disable", tuple => {

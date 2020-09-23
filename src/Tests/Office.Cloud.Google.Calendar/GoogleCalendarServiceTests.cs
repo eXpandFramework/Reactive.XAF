@@ -122,8 +122,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
                 }, Timeout,existingObjects.Select(_ => _.cloudEvent).ToArray());
         }
 
-        [TestCase(false)]
-        [TestCase(true)]
+        // [TestCase(false)]
+        // [TestCase(true)]
         [XpandTest()]
         public override async Task Customize_Delete_Two_Events(bool handleDeletion){
             using var application = Platform.Win.CalendarModule().Application;

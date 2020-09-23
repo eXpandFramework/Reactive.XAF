@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -58,8 +59,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
 
         public ModelMapperPropertyInfo(string name, Type propertyType,Type declaringType,IEnumerable<ModelMapperCustomAttributeData> customAttributeDatas = null) : this(name,
             propertyType, declaringType, true, true){
-            customAttributeDatas = customAttributeDatas ?? Enumerable.Empty<ModelMapperCustomAttributeData>();
+            customAttributeDatas ??= Enumerable.Empty<ModelMapperCustomAttributeData>();
             _customAttributeDatas.AddRange(customAttributeDatas);
+            if (propertyType != typeof(string)){
+                _customAttributeDatas.RemoveAll(data => typeof(LocalizableAttribute).IsAssignableFrom(data.AttributeType));
+            }
         }
 
         public override string Name{ get; }

@@ -109,6 +109,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         public string S2{ get; }
     }
 
+    class LocalizableAttributeClass{
+        [Localizable(true)]
+        public Color BackColor{ get; set; }
+        [Localizable(true)]
+        public string Color{ get; set; }
+    }
     class ReplaceAttributesClass{
         [Private]
         public string PrivateAttribute{ get; set; }
