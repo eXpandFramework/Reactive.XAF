@@ -1,4 +1,4 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="Current">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="Current">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -139,7 +139,7 @@
     <PackageReference Include="Google.Apis.People.v1">
       <Version>1.25.0.830</Version>
     </PackageReference>
-    <PackageReference Include="Xpand.XAF.Web.All" Version="2.202.40">
+    <PackageReference Include="Xpand.XAF.Web.All" Version="2.202.41">
     </PackageReference>
   </ItemGroup>
   <ItemGroup>

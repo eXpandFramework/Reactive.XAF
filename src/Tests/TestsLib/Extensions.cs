@@ -185,7 +185,8 @@ namespace Xpand.TestsLib{
             {"MicrosoftModule", 61480},
             {"MicrosoftCalendarModule", 61481},
             {"GoogleModule", 61483},
-            {"GoogleTasksModule", 61484}
+            {"GoogleTasksModule", 61484},
+            {"GoogleCalendarModule", 61485}
         };
 
         public static IObservable<IModelReactiveLogger> ConfigureModel<TModule>(this XafApplication application,

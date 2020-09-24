@@ -22,7 +22,7 @@ if ($ExistingVersion){
     Get-ChildItem (Get-NugetInstallationFolder GlobalPackagesFolder) Xpand.XAF.Modules.*.Nupkg -Recurse|Copy-Item -Destination $packagesPath -Force
 }
 function GetPackages($packagesPath){
-    & (Get-NugetPath) List -Source $packagesPath | ConvertTo-PackageObject | Select-Object -ExpandProperty Id| Where-Object { $_ -notin @("Xpand.VersionConverter","Xpand.XAF.ModelEditor") -and $_ -notlike "Xpand.Extensions*" -and $_ -notin "Xpand.Collections","xpand.patcher" } 
+    (Get-XpandPackages -Source Lab -PackageType XAFModules).Id
 }
 $packages=GetPackages $packagesPath
 function GetModuleName($_){

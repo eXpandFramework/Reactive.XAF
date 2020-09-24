@@ -13,10 +13,10 @@ namespace ALL.Tests{
             commandAdapter.Execute(new ActionCommand(Actions.New));
             commandAdapter.Execute(new FillEditorCommand(nameof(Order.OrderID).CompoundName(),"10"));
             commandAdapter.Execute(new ActionCommand(Actions.Save));
-            commandAdapter.Execute(new ActionCommand(nameof(Xpand.XAF.Modules.ViewWizard.ViewWizardService.ShowWizard).CompoundName()));
-            commandAdapter.Execute(new CheckDetailViewCommand((nameof(Order.OrderID).CompoundName(), "10")));
-            commandAdapter.Execute(new ActionCommand(nameof(Xpand.XAF.Modules.ViewWizard.ViewWizardService.NextWizardView).CompoundName()));
-            commandAdapter.Execute(new ActionCommand(new FillEditorCommand(nameof(Order.OrderID).CompoundName(),"10"){ExpectException = true}.CompoundName()));
+            // commandAdapter.Execute(new ActionCommand(nameof(Xpand.XAF.Modules.ViewWizard.ViewWizardService.ShowWizard).CompoundName()));
+            // commandAdapter.Execute(new CheckDetailViewCommand((nameof(Order.OrderID).CompoundName(), "10")));
+            // commandAdapter.Execute(new ActionCommand(nameof(Xpand.XAF.Modules.ViewWizard.ViewWizardService.NextWizardView).CompoundName()));
+            // commandAdapter.Execute(new ActionCommand(new FillEditorCommand(nameof(Order.OrderID).CompoundName(),"10"){ExpectException = true}.CompoundName()));
 
         }
     }

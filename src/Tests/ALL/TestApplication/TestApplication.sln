@@ -29,28 +29,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ALL.Web.Tests", "..\ALL.Web
 		{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC} = {6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.ViewWizard", "..\..\..\Modules\ViewWizard\Xpand.XAF.Modules.ViewWizard.csproj", "{6D92353B-7E54-4BBB-AFB3-4E67439AF618}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Office.Cloud.Google", "..\..\..\Modules\Office.Cloud.Google\Xpand.XAF.Modules.Office.Cloud.Google.csproj", "{64B06257-28BD-4CA2-96C3-07F3B2B53220}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Office.Cloud.Google.Tasks", "..\..\..\Modules\Office.Cloud.Google.Tasks\Xpand.XAF.Modules.Office.Cloud.Google.Tasks.csproj", "{B2170D1F-3D0B-4693-890D-8A9D3BE01FD0}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Office.Cloud.Microsoft", "..\..\..\Modules\Office.Cloud.Microsoft\Xpand.XAF.Modules.Office.Cloud.Microsoft.csproj", "{DF1CC19C-E063-4653-8C0B-F800B1B5F9BC}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar", "..\..\..\Modules\Office.Cloud.Microsoft.Calendar\Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.csproj", "{9AC9273B-47F0-4935-BCAC-DCE468C726A4}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo", "..\..\..\Modules\Office.Cloud.Microsoft.Todo\Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.csproj", "{DCF66753-EB48-4AD9-BCBA-82B2BBF581C1}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Office.Cloud.Google.Calendar", "..\..\..\Modules\Office.Cloud.Google.Calendar\Xpand.XAF.Modules.Office.Cloud.Google.Calendar.csproj", "{E6C713D8-13D3-405E-BF10-BB373116F98C}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.XAF", "..\..\..\Extensions\Xpand.Extensions.XAF\Xpand.Extensions.XAF.csproj", "{CE7D51D8-A053-473A-9F92-5BB6FA90AA55}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.Office.Cloud", "..\..\..\Extensions\Xpand.Extensions.Office.Cloud\Xpand.Extensions.Office.Cloud.csproj", "{36364A46-D146-431F-A0A8-1533613088F1}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Reactive", "..\..\..\Modules\Reactive\Xpand.XAF.Modules.Reactive.csproj", "{58399364-9ACA-429F-A276-7F01E9E61D7D}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.Reactive", "..\..\..\Extensions\Xpand.Extensions.Reactive\Xpand.Extensions.Reactive\Xpand.Extensions.Reactive.csproj", "{D19A58A5-EA8D-4A0E-A778-98135F706744}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -85,51 +63,6 @@ Global
 		{3B0C7B34-9818-4CB3-A1B2-2F2F25459D35}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{3B0C7B34-9818-4CB3-A1B2-2F2F25459D35}.Release|Any CPU.ActiveCfg = Debug|Any CPU
 		{3B0C7B34-9818-4CB3-A1B2-2F2F25459D35}.Release|Any CPU.Build.0 = Debug|Any CPU
-		{6D92353B-7E54-4BBB-AFB3-4E67439AF618}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6D92353B-7E54-4BBB-AFB3-4E67439AF618}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6D92353B-7E54-4BBB-AFB3-4E67439AF618}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
-		{6D92353B-7E54-4BBB-AFB3-4E67439AF618}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
-		{6D92353B-7E54-4BBB-AFB3-4E67439AF618}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6D92353B-7E54-4BBB-AFB3-4E67439AF618}.Release|Any CPU.Build.0 = Release|Any CPU
-		{64B06257-28BD-4CA2-96C3-07F3B2B53220}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{64B06257-28BD-4CA2-96C3-07F3B2B53220}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
-		{64B06257-28BD-4CA2-96C3-07F3B2B53220}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B2170D1F-3D0B-4693-890D-8A9D3BE01FD0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B2170D1F-3D0B-4693-890D-8A9D3BE01FD0}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
-		{B2170D1F-3D0B-4693-890D-8A9D3BE01FD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DF1CC19C-E063-4653-8C0B-F800B1B5F9BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DF1CC19C-E063-4653-8C0B-F800B1B5F9BC}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
-		{DF1CC19C-E063-4653-8C0B-F800B1B5F9BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9AC9273B-47F0-4935-BCAC-DCE468C726A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9AC9273B-47F0-4935-BCAC-DCE468C726A4}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
-		{9AC9273B-47F0-4935-BCAC-DCE468C726A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DCF66753-EB48-4AD9-BCBA-82B2BBF581C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DCF66753-EB48-4AD9-BCBA-82B2BBF581C1}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
-		{DCF66753-EB48-4AD9-BCBA-82B2BBF581C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E6C713D8-13D3-405E-BF10-BB373116F98C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E6C713D8-13D3-405E-BF10-BB373116F98C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E6C713D8-13D3-405E-BF10-BB373116F98C}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
-		{E6C713D8-13D3-405E-BF10-BB373116F98C}.EasyTest|Any CPU.Build.0 = Release|Any CPU
-		{E6C713D8-13D3-405E-BF10-BB373116F98C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E6C713D8-13D3-405E-BF10-BB373116F98C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CE7D51D8-A053-473A-9F92-5BB6FA90AA55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CE7D51D8-A053-473A-9F92-5BB6FA90AA55}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
-		{CE7D51D8-A053-473A-9F92-5BB6FA90AA55}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{36364A46-D146-431F-A0A8-1533613088F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{36364A46-D146-431F-A0A8-1533613088F1}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
-		{36364A46-D146-431F-A0A8-1533613088F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{58399364-9ACA-429F-A276-7F01E9E61D7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{58399364-9ACA-429F-A276-7F01E9E61D7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{58399364-9ACA-429F-A276-7F01E9E61D7D}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
-		{58399364-9ACA-429F-A276-7F01E9E61D7D}.EasyTest|Any CPU.Build.0 = Release|Any CPU
-		{58399364-9ACA-429F-A276-7F01E9E61D7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{58399364-9ACA-429F-A276-7F01E9E61D7D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D19A58A5-EA8D-4A0E-A778-98135F706744}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D19A58A5-EA8D-4A0E-A778-98135F706744}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D19A58A5-EA8D-4A0E-A778-98135F706744}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
-		{D19A58A5-EA8D-4A0E-A778-98135F706744}.EasyTest|Any CPU.Build.0 = Release|Any CPU
-		{D19A58A5-EA8D-4A0E-A778-98135F706744}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D19A58A5-EA8D-4A0E-A778-98135F706744}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

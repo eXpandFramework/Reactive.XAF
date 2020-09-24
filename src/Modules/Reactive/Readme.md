@@ -238,9 +238,9 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |JetBrains.Annotations|2020.1.0
  |System.Interactive|4.1.1
  |System.Reactive|4.4.1
- |Xpand.Extensions|2.202.50
- |Xpand.Extensions.Reactive|2.202.51.1
- |Xpand.Extensions.XAF|2.202.51.1
+ |Xpand.Extensions|2.202.53
+ |Xpand.Extensions.Reactive|2.202.54
+ |Xpand.Extensions.XAF|2.202.54
  |Xpand.Patcher|2.0.24
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.10
 

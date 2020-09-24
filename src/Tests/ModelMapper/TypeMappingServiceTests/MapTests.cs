@@ -194,7 +194,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         
-        [XpandTest]
+        [XpandTest(LongTimeout)]
         [TestCase(PredefinedMap.LayoutControlGroup,new[]{typeof(LayoutControlGroup)},nameof(Platform.Win),new string[0])]
         [TestCase(PredefinedMap.GridColumn,new[]{typeof(GridColumn),typeof(GridListEditor)},nameof(Platform.Win),new[]{nameof(GridColumn.Summary)})]
         [TestCase(PredefinedMap.GridView,new[]{typeof(GridView),typeof(GridListEditor)},nameof(Platform.Win),new[]{nameof(GridView.FormatRules)})]
@@ -252,7 +252,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             }
         }
 
-        [XpandTest]
+        [XpandTest(LongTimeout)]
         [TestCase(nameof(Platform.Win))]
         public async Task Map_PredefinedMap_RepositoryItems(string platformName){
             var platform = GetPlatform(platformName);

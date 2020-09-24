@@ -95,13 +95,13 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |Microsoft.Identity.Client|4.13.0
  |Newtonsoft.Json|12.0.3
  |System.Reactive|4.4.1
- |Xpand.Extensions|2.202.50
- |Xpand.Extensions.Office.Cloud|2.202.51.1
- |Xpand.Extensions.Reactive|2.202.51.1
- |Xpand.Extensions.XAF|2.202.51.1
- |Xpand.Extensions.XAF.Xpo|2.202.47
- |[Xpand.XAF.Modules.Office.Cloud.Microsoft](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Office.Cloud.Microsoft)|2.202.52.2
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.51.2
+ |Xpand.Extensions|2.202.53
+ |Xpand.Extensions.Office.Cloud|2.202.54
+ |Xpand.Extensions.Reactive|2.202.54
+ |Xpand.Extensions.XAF|2.202.54
+ |Xpand.Extensions.XAF.Xpo|2.202.50
+ |[Xpand.XAF.Modules.Office.Cloud.Microsoft](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Office.Cloud.Microsoft)|2.202.55
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.54
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.10
 
 ## Issues-Debugging-Troubleshooting
