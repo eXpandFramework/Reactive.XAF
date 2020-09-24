@@ -66,16 +66,16 @@ Any other need you may have.
 
 ### Examples
 
-In the next screencast you can see all `CRUD` operations on the Event BO and how they synchronize with the `Office365` Calendar, for both platforms `Win`, `Web` and both directions `Incoming`, `Outgoing`. At the bottom the [Reactive.Logger.Client.Win](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win) is reporting as the module is used.
+In the next screencast you can see all `CRUD` operations on the Event BO and how they synchronize with the `Google` Calendar, for both platforms `Win`, `Web` and both directions `Incoming`, `Outgoing`. At the bottom the [Reactive.Logger.Client.Win](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win) is reporting as the module is used.
 
 <twitter>
 
-[![Xpand XAF Modules Office Cloud Google Calendar](https://user-images.githubusercontent.com/159464/88318256-1d755680-cd23-11ea-9d59-e9011f969904.gif)
-](https://youtu.be/E90hOGf-W2I)
+[![Xpand XAF Module Office Cloud Google Calendar](https://user-images.githubusercontent.com/159464/94122039-ba0ac080-fe5a-11ea-8723-a973fd1e2852.gif))
+](https://youtu.be/kch5gduu0FQ)
 
 </twitter>
 
-[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/E90hOGf-W2I)
+[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/kch5gduu0FQ)
 
 
 ## Installation 
