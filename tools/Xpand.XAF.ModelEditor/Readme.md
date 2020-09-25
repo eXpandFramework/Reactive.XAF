@@ -5,7 +5,20 @@
 ![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.ModelEditor.svg?label=nuget.org&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.ModelEditor.svg?style=flat)
 # About
 
-The `Xpand.XAF.ModelEditor` package contains a standalone version of XAF Model Editor, designed to integrate with Visual Studio, Rider, Explorer. 
+The `Xpand.XAF.ModelEditor` package contains a standalone version of XAF Model Editor, designed to integrate with Visual Studio, Rider, Explorer as standalone without any dependency to eXpandFramework packages. ALternatively you can use the VSIX package where the XpandModelEditor is embedded as described in [VSIX integration section](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.XAF.ModelEditor#vsix-integration). 
+
+## VSIX integration 
+
+Having installed the VSIX package (available in the [releases page](https://github.com/eXpandFramework/eXpand/releases)) you will also get the XpandModelEditor as it is embedded and there is no need to install anything else.
+
+In the VSIX ModelEditor integration there is an extra tool, the `XAF Solution Model List` which
+is very useful when you work in VS with large projects as it uses a grid to allow fast navigation. In addition can open extra models and not only the XAF default ones. Bellow you see the AllModules.sln which contains all the modules of the main framework with some custom filter applied `.w`.
+
+![image](https://user-images.githubusercontent.com/159464/75141828-769c7800-56fa-11ea-9498-49374bb96fae.png)
+
+> The XAF Solution Model List in some systems may have transparency issues. To fix it uncheck the VS Menu/Options/Environment/General/Optimize Rendering...
+
+Next you will get instructions on how to use the XpandModelEditor with Rider or Visual Studio or Explorer without the VSIX.
 
 ## Installation
 
@@ -28,14 +41,14 @@ Install-Package Xpand.XAF.ModelEditor
 
 `Xpand.XAF.ModelEditor` package is distributed from nuget.org as a Nuget package. After each build it will detect the used DevExpress version and will download the required DevExpress dependencies from your system feeds. So if you already have DevExpress installed there is no need for extra configuration. If not just make sure you add a feed to Nuget.config that points to valid DevExpress packages (local or remote). Subsequent builds won't download or check those dependencies but they will modify the solution bootstrappers if needed e.g. a new project added to the solution.
 
-All downloaded dependecies for each XAF version remain inside the package installation folder under the ModelerLibDownloader\bin directory.
+All downloaded dependencies for each XAF version remain inside the package installation folder under the ModelerLibDownloader\bin directory.
 
 If it fails to detect the DevExpress version used due to either indirect references or another way of package reference configuration, then you can force by using the `DevExpressVersion` msbuild property.
 ### TroubleShooting
 
 1. The work is done on each build so start from a clean build.
 2. If previous step did not work delete the Nuget package from your nuget cache and try again.
-3. You still have problems then enable logging by either setting the Enviromental variable `ModelEditorVerbose` to 1 or the same msbuild property to true. This will generate an execution.log inside the package directory, provide it to support with as much details as possible over the usage context..
+3. You still have problems then enable logging by either setting the Environmental variable `ModelEditorVerbose` to 1 or the same MSBuild property to true. This will generate an execution.log inside the package directory, provide it to support with as much details as possible over the usage context..
 4. For support, feedback etc. use the main project [issues](https://github.com/eXpandFramework/eXpand/issues/new/choose).
 
 [![GitHub issues by-label](https://xpandshields.azurewebsites.net/github/issues/expandframework/expand/XpandModelEditor)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AXpandModelEditor) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/XpandModelEditor.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AXpandModelEditor)
@@ -74,10 +87,6 @@ If you prefer to work with Rider without having installed DevExpress consider th
 
   ![image](https://user-images.githubusercontent.com/159464/75141245-3b4d7980-56f9-11ea-9d41-81642c134946.png)
 
-## VSIX integration 
 
-The same package is bundled with Xpand.VSIX (get it from the releases page) and is very useful when you work in VS with large project as it uses a grid to allow fast navigation and can open additional models and not only the XAF default ones. Bellow you see the AllModules.sln which contains all the modules of the main framework with some custom filter applied `.w`.
-
-![image](https://user-images.githubusercontent.com/159464/75141828-769c7800-56fa-11ea-9498-49374bb96fae.png)
 
 
