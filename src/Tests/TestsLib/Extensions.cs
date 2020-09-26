@@ -186,7 +186,8 @@ namespace Xpand.TestsLib{
             {"MicrosoftCalendarModule", 61481},
             {"GoogleModule", 61483},
             {"GoogleTasksModule", 61484},
-            {"GoogleCalendarModule", 61485}
+            {"GoogleCalendarModule", 61485},
+            {"DocumentStyleManagerModule", 61486}
         };
 
         public static IObservable<IModelReactiveLogger> ConfigureModel<TModule>(this XafApplication application,
@@ -351,6 +352,11 @@ namespace Xpand.TestsLib{
                 : new Mock<ASPxGridListEditor>(modelListView){CallBase = true}.Object;
             ((IComplexListEditor) listEditor).Setup(collectionSourceBase, application);
             return listEditor;
+        }
+
+
+        public static void OnCurrentObjectChanged(this ObjectView objectView){
+            objectView.CallMethod("OnCurrentObjectChanged");
         }
 
         public static void MockDetailViewEditor(this XafApplication application,

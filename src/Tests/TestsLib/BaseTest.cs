@@ -105,13 +105,13 @@ namespace Xpand.TestsLib{
         [UsedImplicitly] public const string NotImplemented = "NotImplemented";
 
         [SetUp]
-        public void Setup(){
+        public virtual void Setup(){
             ReactiveLoggerService.RXLoggerLogPath = Path.Combine(TestContext.CurrentContext.TestDirectory,
                 $"{TestContext.CurrentContext.Test.MethodName}_{TestContext.CurrentContext.Test.ID}_RXLogger{TestContext.CurrentContext.CurrentRepeatCount}.log");
         }
 
         [TearDown]
-        public void Dispose(){
+        public virtual void Dispose(){
             XpoTypesInfoHelper.Reset();
             XafTypesInfo.HardReset();
             try{

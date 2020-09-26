@@ -1,0 +1,225 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Application>
+  <ActionDesign>
+    <Actions>
+      <Action Id="ApplyStyle" ImageName="ChangeFontStyle" />
+      <Action Id="DeleteStyles" ImageName="Delete" />
+      <Action Id="ReplaceStyles" ImageName="Replace" />
+      <Action Id="ShowStyleManager" ImageName="ManageRelations" />
+    </Actions>
+    <ActionToContainerMapping>
+      <ActionContainer Id="ApplyTemplateStyle">
+        <ActionLink ActionId="ViewItemValue" Index="0" IsNewNode="True" />
+        <ActionLink ActionId="ApplyTemplate" Index="1" />
+      </ActionContainer>
+      <ActionContainer Id="PopupActions">
+        <ActionLink ActionId="FilterImportStyles" Index="999" />
+      </ActionContainer>
+      <ActionContainer Id="StyleManager" IsNewNode="True">
+        <ActionLink ActionId="ApplyStyle" Index="2" IsNewNode="True" />
+        <ActionLink ActionId="DeleteStyles" Index="3" IsNewNode="True" />
+        <ActionLink ActionId="ReplaceStyles" Index="4" IsNewNode="True" />
+        <ActionLink ActionId="ImportStyles" Index="5" IsNewNode="True" />
+        <ActionLink ActionId="TemplateStyleSelection" Index="6" Removed="True" />
+        <ActionLink ActionId="AcceptChanges" Index="98" IsNewNode="True" />
+        <ActionLink ActionId="CancelStyleManagerChanges" Index="99" IsNewNode="True" />
+        <ActionLink ActionId="AcceptStyleManagerChanges" Index="100" IsNewNode="True" />
+      </ActionContainer>
+      <ActionContainer Id="StyleManager_Template" IsNewNode="True">
+        <ActionLink ActionId="ViewItemValue" Index="0" IsNewNode="True" />
+        <ActionLink ActionId="TemplateStyleSelection" Index="1" IsNewNode="True" />
+      </ActionContainer>
+    </ActionToContainerMapping>
+  </ActionDesign>
+  <ReactiveModules>
+    <ViewItemValue>
+      <Items>
+        <ViewItemValueItem ObjectViewId="ApplyTemplateStyle_DetailView" IsNewNode="True">
+          <Members IsNewNode="True">
+            <ViewItemValueObjectViewItem MemberViewItemId="Template" IsNewNode="True" />
+          </Members>
+        </ViewItemValueItem>
+        <ViewItemValueItem ObjectViewId="DocumentStyleManager_DetailView" IsNewNode="True">
+          <Members IsNewNode="True">
+            <ViewItemValueObjectViewItem MemberViewItemId="DocumentStyleLinkTemplate" IsNewNode="True" />
+          </Members>
+        </ViewItemValueItem>
+      </Items>
+    </ViewItemValue>
+  </ReactiveModules>
+  <SchemaModules>
+    <SchemaModule Name="SystemModule" Version="20.1.4.0" IsNewNode="True" />
+  </SchemaModules>
+  <Views>
+    <ListView Id="ApplyTemplateStyle_ChangedStyles_ListView" HideToolBar="True">
+      <Columns>
+        <ColumnInfo Id="DocumentStyleLinkTemplate" Index="-1" Removed="True" />
+        <ColumnInfo Id="Operation" Index="0" />
+        <ColumnInfo Id="Count" Index="1" />
+        <ColumnInfo Id="OriginalStyle" Index="2" />
+        <ColumnInfo Id="OriginalStyle.Parent" PropertyName="OriginalStyle.Parent" Index="3" IsNewNode="True" />
+        <ColumnInfo Id="OriginalStyle.FontName" PropertyName="OriginalStyle.FontName" Index="4" IsNewNode="True" />
+        <ColumnInfo Id="OriginalStyle.FontSize" PropertyName="OriginalStyle.FontSize" Index="5" IsNewNode="True" />
+        <ColumnInfo Id="ReplacementStyle" Index="6" />
+        <ColumnInfo Id="ReplacementStyle.Parent" PropertyName="ReplacementStyle.Parent" Index="7" IsNewNode="True" />
+        <ColumnInfo Id="ReplacementStyle.FontName" PropertyName="ReplacementStyle.FontName" Index="8" IsNewNode="True" />
+        <ColumnInfo Id="ReplacementStyle.FontSize" PropertyName="ReplacementStyle.FontSize" Index="9" IsNewNode="True" />
+      </Columns>
+      <HiddenActions>
+        <ActionLink ActionId="ListViewShowObject" IsNewNode="True" />
+      </HiddenActions>
+    </ListView>
+    <DetailView Id="ApplyTemplateStyle_DetailView" SupressConfirmation="True">
+      <HiddenActions>
+        <ActionLink ActionId="Cancel" IsNewNode="True" />
+        <ActionLink ActionId="Delete" IsNewNode="True" />
+        <ActionLink ActionId="New" IsNewNode="True" />
+        <ActionLink ActionId="Save" IsNewNode="True" />
+        <ActionLink ActionId="SaveAndClose" IsNewNode="True" />
+        <ActionLink ActionId="SaveAndNew" IsNewNode="True" />
+      </HiddenActions>
+      <Items>
+        <ActionContainerViewItem Id="ApplyTemplate" PaintStyle="CaptionAndImage" ActionContainer="ApplyTemplateStyle" Caption="ApplyTemplate(10)" IsNewNode="True" />
+      </Items>
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="5.333333333333333" Caption="Main" Direction="Horizontal">
+          <LayoutItem Id="Template" ViewItem="Template" Index="0" RelativeSize="86.8" SizeConstraintsType="Custom" MinSize="169, 35" IsNewNode="True" />
+          <LayoutItem Id="ApplyTemplate" ViewItem="ApplyTemplate" Index="1" RelativeSize="13.2" ShowCaption="False" CaptionLocation="Bottom" IsNewNode="True" />
+          <LayoutGroup Id="SimpleEditors" Removed="True" />
+          <TabbedGroup Id="Tabs" Removed="True" />
+        </LayoutGroup>
+        <LayoutGroup Id="Auto23c863e4-1491-4a88-a768-d0ebf8dde00c" ShowCaption="False" Caption="Auto23c863e4-1491-4a88-a768-d0ebf8dde00c(3)" Direction="Horizontal" Index="1" RelativeSize="63.6" IsNewNode="True">
+          <LayoutGroup Id="Item2" ShowCaption="True" CaptionLocation="Right" Index="0" RelativeSize="31.866666666666667" Caption="Documents" IsCollapsibleGroup="True" IsNewNode="True">
+            <LayoutItem Id="Documents" ViewItem="Documents" CaptionLocation="Top" SizeConstraintsType="Custom" MinSize="200, 79" MaxSize="200, 0" Index="0" RelativeSize="100" IsNewNode="True" />
+          </LayoutGroup>
+          <LayoutItem Id="Original" ShowCaption="True" ViewItem="Original" SizeConstraintsType="Custom" MinSize="70, 40" Index="1" RelativeSize="28.666666666666668" CaptionLocation="Top" IsNewNode="True" />
+          <LayoutItem Id="Changed" ViewItem="Changed" CaptionLocation="Top" SizeConstraintsType="Custom" MinSize="120, 24" Index="2" RelativeSize="39.466666666666669" IsNewNode="True" />
+        </LayoutGroup>
+        <LayoutGroup Id="Item1" ShowCaption="True" CaptionLocation="Top" Index="2" RelativeSize="31.066666666666666" Caption="Changes Styles" IsCollapsibleGroup="True" IsNewNode="True">
+          <LayoutItem Id="ChangedStyles" ShowCaption="False" ViewItem="ChangedStyles" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True" />
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <ListView Id="ApplyTemplateStyle_Documents_ListView" HideToolBar="True">
+      <HiddenActions>
+        <ActionLink ActionId="ListViewShowObject" IsNewNode="True" />
+      </HiddenActions>
+    </ListView>
+    <ListView Id="DocumentStyleLink_ListView" HideToolBar="True">
+      <Columns>
+        <ColumnInfo Id="DocumentStyleLinkTemplate" Index="-1" />
+        <ColumnInfo Id="Operation" Index="0" />
+        <ColumnInfo Id="OriginalStyle.Parent" PropertyName="OriginalStyle.Parent" Index="2" Caption="Original.Parent" IsNewNode="True" />
+        <ColumnInfo Id="ReplacementStyle" Index="3" />
+        <ColumnInfo Id="ReplacementStyle.Parent" PropertyName="ReplacementStyle.Parent" Index="3" Caption="Replacement.Parent" IsNewNode="True" />
+      </Columns>
+      <HiddenActions>
+        <ActionLink ActionId="ListViewShowObject" IsNewNode="True" />
+        <ActionLink ActionId="New" IsNewNode="True" />
+      </HiddenActions>
+    </ListView>
+    <ListView Id="DocumentStyleLinkTemplate_LookupListView">
+      <Columns>
+        <ColumnInfo Id="KeepUnused" PropertyName="KeepUnused" Index="1" IsNewNode="True" />
+      </Columns>
+    </ListView>
+    <ListView Id="DocumentStyleManager_AllStyles_ListView" HideToolBar="True" AutoExpandAllGroups="True" AllowDelete="False" AllowNew="False">
+      <Columns>
+        <ColumnInfo Id="IsDeleted" Index="-1" />
+        <ColumnInfo Id="Used" Index="-1" SortOrder="None" GroupIndex="-1" />
+        <ColumnInfo Id="StyleName" Index="0" />
+        <ColumnInfo Id="Parent" Index="1" />
+        <ColumnInfo Id="Next" Index="2" />
+        <ColumnInfo Id="FontName" Index="3" />
+        <ColumnInfo Id="Underline" Index="4" />
+        <ColumnInfo Id="FontSize" Index="5" />
+        <ColumnInfo Id="Bold" Index="6" />
+        <ColumnInfo Id="DocumentStyleType" Index="7" />
+        <ColumnInfo Id="Italic" Index="8" />
+      </Columns>
+    </ListView>
+    <DetailView Id="DocumentStyleManager_DetailView" AllowEdit="True" AllowDelete="False" AllowNew="False" SupressConfirmation="True">
+      <HiddenActions>
+        <ActionLink ActionId="Cancel" IsNewNode="True" />
+        <ActionLink ActionId="Delete" IsNewNode="True" />
+        <ActionLink ActionId="New" IsNewNode="True" />
+        <ActionLink ActionId="Save" IsNewNode="True" />
+        <ActionLink ActionId="SaveAndClose" IsNewNode="True" />
+        <ActionLink ActionId="SaveAndNew" IsNewNode="True" />
+      </HiddenActions>
+      <Items>
+        <PropertyEditor Id="DocumentStyleLinks" PropertyName="DocumentStyleLinkTemplate.DocumentStyleLinks" IsNewNode="True" />
+        <PropertyEditor Id="Original" AllowEdit="False" />
+        <ActionContainerViewItem Id="StyleManager" ActionContainer="StyleManager" Caption="StyleManager(11)" IsNewNode="True" />
+        <ActionContainerViewItem Id="TemplateActionContainer" ActionContainer="StyleManager_Template" Caption="TemplateActionContainer(23)" PaintStyle="CaptionAndImage" IsNewNode="True" />
+      </Items>
+      <Layout>
+        <LayoutGroup Id="Auto32665584-0835-4681-8a72-1700fce4fe26" ShowCaption="False" Caption="Auto32665584-0835-4681-8a72-1700fce4fe26(2)" Index="0" RelativeSize="100" Direction="Vertical" IsNewNode="True">
+          <LayoutGroup Id="Autoa2b21a1f-26a3-4646-8f9f-600ab55f5ab4" ShowCaption="False" Caption="Autoa2b21a1f-26a3-4646-8f9f-600ab55f5ab4(2)" Direction="Vertical" Index="0" RelativeSize="100" IsNewNode="True">
+            <LayoutGroup Id="Auto44eb47c0-0e5f-42f0-bdff-3744cbb01606" ShowCaption="False" Caption="Auto44eb47c0-0e5f-42f0-bdff-3744cbb01606(3)" Index="0" RelativeSize="100" IsNewNode="True">
+              <LayoutGroup Id="Auto09672d0a-aa39-4f4e-929c-ca19511c7f7a" ShowCaption="False" Caption="Auto09672d0a-aa39-4f4e-929c-ca19511c7f7a(4)" Direction="Vertical" Index="0" RelativeSize="100" IsNewNode="True">
+                <LayoutGroup Id="Item5" ShowCaption="False" CaptionLocation="Top" Direction="Vertical" Index="0" RelativeSize="100" Caption="Item5" IsNewNode="True">
+                  <LayoutGroup Id="Auto31d6bbdf-0106-461e-a61c-56bb5f488135" ShowCaption="False" Caption="Auto31d6bbdf-0106-461e-a61c-56bb5f488135(7)" Index="0" RelativeSize="100" Direction="Horizontal" IsNewNode="True">
+                    <LayoutGroup Id="Auto30f922f2-2f20-4196-98ce-3bad6edca1c3" ShowCaption="False" Caption="Auto30f922f2-2f20-4196-98ce-3bad6edca1c3(7)" Index="0" RelativeSize="47.204968944099377" Direction="Vertical" IsNewNode="True">
+                      <LayoutItem Id="Content" ShowCaption="False" ViewItem="Content" Index="0" RelativeSize="50.240153698366953" SizeConstraintsType="Custom" MinSize="65, 32" IsNewNode="True" />
+                      <TabbedGroup Id="Item4" CaptionLocation="Top" Index="1" RelativeSize="49.759846301633047" IsNewNode="True">
+                        <LayoutGroup Id="Item3" ShowCaption="True" CaptionLocation="Top" Index="0" RelativeSize="100" Caption="Original Content" IsNewNode="True">
+                          <LayoutItem Id="Original" ShowCaption="False" ViewItem="Original" SizeConstraintsType="Custom" MinSize="65, 32" Index="0" RelativeSize="100" IsNewNode="True" />
+                        </LayoutGroup>
+                        <LayoutGroup Id="Item6" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="1" Caption="Linked styles template" RelativeSize="100" IsNewNode="True">
+                          <LayoutGroup Id="Auto92a39345-74d1-4248-b647-2f9e62f7e3c2" ShowCaption="False" Caption="" Direction="Horizontal" Index="0" RelativeSize="7.0686070686070686" IsNewNode="True">
+                            <LayoutItem Id="DocumentStyleLinkTemplate" ViewItem="DocumentStyleLinkTemplate" Index="0" RelativeSize="71.067961165048544" IsNewNode="True" />
+                            <LayoutItem Id="TemplateActionContainer" ViewItem="TemplateActionContainer" Index="1" RelativeSize="28.932038834951456" IsNewNode="True" />
+                          </LayoutGroup>
+                          <LayoutItem Id="DocumentStyleLinks" ViewItem="DocumentStyleLinks" Index="1" RelativeSize="92.931392931392935" SizeConstraintsType="Custom" MinSize="54, 24" IsNewNode="True" />
+                        </LayoutGroup>
+                      </TabbedGroup>
+                    </LayoutGroup>
+                    <LayoutGroup Id="Item1" ShowCaption="False" CaptionLocation="Top" Index="1" RelativeSize="52.795031055900623" Caption="Item1" Direction="Vertical" IsNewNode="True">
+                      <LayoutItem Id="AllStyles" ViewItem="AllStyles" CaptionLocation="Top" Index="0" RelativeSize="77.041306436119115" ShowCaption="True" IsNewNode="True" />
+                      <LayoutItem Id="ReplacementStyles" ViewItem="ReplacementStyles" CaptionLocation="Top" Index="1" RelativeSize="19.116234390009605" ShowCaption="True" IsNewNode="True" />
+                      <LayoutGroup Id="Auto55948eef-fe8b-4d0e-ab86-cbe1b13550e6" ShowCaption="False" Caption="Auto55948eef-fe8b-4d0e-ab86-cbe1b13550e6(11)" Direction="Horizontal" Index="2" RelativeSize="3.8424591738712777" IsNewNode="True">
+                        <LayoutItem Id="Item2" Index="0" RelativeSize="83.8655462184874" IsNewNode="True" />
+                        <LayoutItem Id="StyleManager" ViewItem="StyleManager" Index="1" RelativeSize="16.134453781512605" IsNewNode="True" />
+                      </LayoutGroup>
+                    </LayoutGroup>
+                  </LayoutGroup>
+                </LayoutGroup>
+              </LayoutGroup>
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+        <LayoutGroup Id="Main" RelativeSize="93.3677863910422" Caption="Main" Direction="Horizontal" Index="1" Removed="True">
+          <TabbedGroup Id="Tabs" Index="3" RelativeSize="7.8175895765472312" Removed="True">
+            <LayoutGroup Id="AllStyles" Caption="All Styles" Direction="Horizontal">
+              <LayoutItem Id="AllStyles" ViewItem="AllStyles" Removed="True" />
+            </LayoutGroup>
+            <LayoutGroup Id="Content" RelativeSize="0" Direction="Horizontal">
+              <LayoutItem Id="Content" RelativeSize="100" ViewItem="Content" Removed="True" />
+            </LayoutGroup>
+            <LayoutGroup Id="ReplacementStyles" RelativeSize="0" Caption="Replacement Styles" Direction="Horizontal">
+              <LayoutItem Id="ReplacementStyles" RelativeSize="100" ViewItem="ReplacementStyles" Removed="True" />
+            </LayoutGroup>
+          </TabbedGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <ListView Id="DocumentStyleManager_ReplacementStyles_ListView" HideToolBar="True" AllowNew="False" AllowDelete="False">
+      <Columns>
+        <ColumnInfo Id="IsDeleted" Index="-1" />
+        <ColumnInfo Id="Used" Index="-1" SortOrder="None" GroupIndex="-1" />
+        <ColumnInfo Id="Parent" Index="1" />
+        <ColumnInfo Id="Next" Index="2" />
+        <ColumnInfo Id="DocumentStyleType" Index="3" />
+        <ColumnInfo Id="Underline" Index="4" />
+        <ColumnInfo Id="FontName" Index="5" />
+        <ColumnInfo Id="FontSize" Index="6" />
+        <ColumnInfo Id="Bold" Index="7" />
+        <ColumnInfo Id="Italic" Index="8" />
+      </Columns>
+      <HiddenActions>
+        <ActionLink ActionId="ListViewShowObject" IsNewNode="True" />
+      </HiddenActions>
+    </ListView>
+  </Views>
+</Application>

@@ -90,6 +90,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             {"GoogleModule",Colors[Office]},
             {"GoogleTasksModule",Colors[Office]},
             {"GoogleCalendarModule",Colors[Office]},
+            {"DocumentStyleManagerModule",Colors[Office]},
             {"ViewEditModule",Colors[View]}
         };
 

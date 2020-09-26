@@ -109,45 +109,8 @@ Invoke-Script{
     
     & $SourcePath\go.ps1 @bArgs
 
-
-    Set-Location $SourcePath
-    $stage = "$Sourcepath\buildstage"
-    New-Item $stage -ItemType Directory -Force
-    Get-ChildItem $stage -Recurse | Remove-Item -Recurse -Force
-    New-Item $stage\source -ItemType Directory -Force
-    Set-Location $stage
-    New-Item "$stage\TestApplication" -ItemType Directory
-    Write-HostFormatted "Copying Bin" -Section
-    if (Test-AzDevops){
-        Invoke-Script {Move-Item "$Sourcepath\Bin" "$stage\Bin" -Force } -Maximum 3 -RetryInterval 3
-    }
-    else{
-        Copy-Item "$Sourcepath\Bin" "$stage\Bin" -Recurse -Force 
-    }
-    
-    Write-HostFormatted "Moving TestWinApplication" -Section
-    Move-Item "$stage\Bin\TestWinApplication" "$stage\TestApplication" -Force 
-    Write-HostFormatted "Moving TestWebApplication" -Section
-    Move-Item "$stage\Bin\TestWebApplication" "$stage\TestApplication" -Force 
-    Write-HostFormatted "Moving AllTestsWin" -Section
-    Move-Item "$stage\Bin\AllTestWeb" "$stage\TestApplication" -Force 
-    Write-HostFormatted "Moving AllTestsWeb" -Section
-    Move-Item "$stage\Bin\AllTestWin" "$stage\TestApplication" -Force 
-    Remove-Item "$stage\bin\ReactiveLoggerClient" -Recurse -Force
-    
     Move-PaketSource 0 "C:\Program Files (x86)\DevExpress $(Get-VersionPart $DXVersion Minor)\Components\System\Components\Packages"
-
-    "Web","Win"|ForEach-Object{
-        Write-HostFormatted "Zipping DX $_" -ForegroundColor Magenta
-        $webassemblies=((Get-ChildItem "$stage\TestApplication\AllTest$_" DevExpress*.dll -Recurse)+(Get-ChildItem ("$stage\TestApplication\Test$_","Application" -join "") DevExpress*.dll -Recurse))
-        New-Item $stage\DX$_ -ItemType Directory -Force
-        $webassemblies|Move-Item -Destination $stage\DX$_ -Force
-        Compress-Files $stage\DX$_ $stage\DX$_.Zip -compressionLevel NoCompression 
-        Remove-Item $stage\DX$_ -Force -Recurse
-        Get-ChildItem "$stage\bin" DevExpress*.dll|Remove-Item
-        New-Item $stage\DX -ItemType Directory -Force
-        Move-Item $stage\DX$_.Zip $stage\DX
-    }
     
-    Write-HostFormatted "FINISH" -Section
+    Copy-Item "$Sourcepath\Bin" "$stage\Bin" -Recurse -Force -ErrorAction SilentlyContinue
+    
 }

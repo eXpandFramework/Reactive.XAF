@@ -113,6 +113,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                     return Assembly.Load($"{name}{_dxAssemblyNamePostfix}");
                 }
                 catch (FileNotFoundException){
+
+                }
+                catch (FileLoadException){
                     
                 }
             }
