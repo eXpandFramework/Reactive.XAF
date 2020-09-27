@@ -72,10 +72,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
         private string _fontNameHighAnsi;
         private string _fontNameComplexScript;
         private string _fontNameEastAsia;
-        private ThemeFont? _themeFontAscii;
-        private ThemeFont? _themeFontHighAnsi;
-        private ThemeFont? _themeFontComplexScript;
-        private ThemeFont? _themeFontEastAsia;
+        
         private float? _fontSize;
         private bool? _bold;
         private bool? _italic;
@@ -415,6 +412,11 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
             }
         }
 
+#if !XAF191
+        private ThemeFont? _themeFontAscii;
+        private ThemeFont? _themeFontHighAnsi;
+        private ThemeFont? _themeFontComplexScript;
+        private ThemeFont? _themeFontEastAsia;
         [VisibleInListView(false)]
         [VisibleInLookupListView(false)]
         public ThemeFont? ThemeFontAscii{
@@ -456,6 +458,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
                 OnPropertyChanged();
             }
         }
+#endif
 
         [XafDisplayName("Size")]
         public float? FontSize{

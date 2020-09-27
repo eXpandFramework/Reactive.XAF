@@ -47,7 +47,7 @@ Task Init {
 
 Task UpdateProjects {
     Invoke-Script {
-        & "$PSScriptRoot\UpdateProjects.ps1"
+        & "$PSScriptRoot\UpdateProjects.ps1" $DXVersion
     }
 }
 

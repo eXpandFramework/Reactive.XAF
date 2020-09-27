@@ -222,30 +222,32 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
 			get => _fontNameEastAsia;
 			set => SetPropertyValue(nameof(FontNameEastAsia), ref _fontNameEastAsia, value);
 		}
-		ThemeFont? _themeFontAscii;
+#if !XAF191
+        ThemeFont? _themeFontAscii;
 
-		public ThemeFont? ThemeFontAscii{
-			get => _themeFontAscii;
-			set => SetPropertyValue(nameof(ThemeFontAscii), ref _themeFontAscii, value);
-		}
-		ThemeFont? _themeFontHighAnsi;
+        public ThemeFont? ThemeFontAscii{
+            get => _themeFontAscii;
+            set => SetPropertyValue(nameof(ThemeFontAscii), ref _themeFontAscii, value);
+        }
+        ThemeFont? _themeFontHighAnsi;
 
-		public ThemeFont? ThemeFontHighAnsi{
-			get => _themeFontHighAnsi;
-			set => SetPropertyValue(nameof(ThemeFontHighAnsi), ref _themeFontHighAnsi, value);
-		}
-		ThemeFont? _themeFontComplexScript;
+        public ThemeFont? ThemeFontHighAnsi{
+            get => _themeFontHighAnsi;
+            set => SetPropertyValue(nameof(ThemeFontHighAnsi), ref _themeFontHighAnsi, value);
+        }
+        ThemeFont? _themeFontComplexScript;
 
-		public ThemeFont? ThemeFontComplexScript{
-			get => _themeFontComplexScript;
-			set => SetPropertyValue(nameof(ThemeFontComplexScript), ref _themeFontComplexScript, value);
-		}
-		ThemeFont? _themeFontEastAsia;
+        public ThemeFont? ThemeFontComplexScript{
+            get => _themeFontComplexScript;
+            set => SetPropertyValue(nameof(ThemeFontComplexScript), ref _themeFontComplexScript, value);
+        }
+        ThemeFont? _themeFontEastAsia;
 
-		public ThemeFont? ThemeFontEastAsia{
-			get => _themeFontEastAsia;
-			set => SetPropertyValue(nameof(ThemeFontEastAsia), ref _themeFontEastAsia, value);
-		}
+        public ThemeFont? ThemeFontEastAsia{
+            get => _themeFontEastAsia;
+            set => SetPropertyValue(nameof(ThemeFontEastAsia), ref _themeFontEastAsia, value);
+        }
+#endif
 
 		float? _fontSize;
 

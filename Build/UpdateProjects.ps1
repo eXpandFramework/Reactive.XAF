@@ -1,3 +1,6 @@
+param(
+    [version]$DXVersion="20.1.7"
+)
 $ErrorActionPreference = "Stop"
 $rootLocation="$PSScriptRoot\..\"
 Set-Location "$rootLocation\src"
@@ -5,9 +8,22 @@ Set-Location "$rootLocation\src"
 "Xpand.XAF.*" | ForEach-Object{
     Update-HintPath "$rootLocation" "$rootLocation\bin\" $_
 }
+$directive="XAF$($DXVersion.Major)$($DXVersion.Minor)"
 Get-ChildItem -Filter *.csproj -Recurse |  ForEach-Object {
     $fileName = $_.FullName
     [xml]$projXml = Get-Content $fileName
+    $projXml.Project.PropertyGroup|ForEach-Object{
+        if ($_.DefineConstants){
+            if ($_.DefineConstants -match "XAF"){
+                $regex = [regex] '(?is)XAF([\d]*)'
+                $result = $regex.Replace($_.DefineConstants, $directive)
+                $_.DefineConstants=$result
+            }
+            else{
+                $_.DefineConstants+=";XAF$directive"
+            }
+        }
+    }
     Update-ProjectSign $projXml $fileName "$rootLocation\src\Xpand.key\xpand.snk"
     Update-ProjectLanguageVersion $projXml
     Update-ProjectProperty $projXml DebugSymbols true

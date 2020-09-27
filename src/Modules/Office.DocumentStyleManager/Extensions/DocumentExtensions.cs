@@ -118,12 +118,16 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions{
 	        style.ForeColor = documentStyle.GetStylePropertyValue(documentStyle, document, _ => _.ForeColor);
 	        style.Hidden = documentStyle.GetStylePropertyValue(documentStyle, document, _ => _.Hidden);
 	        style.HighlightColor = documentStyle.GetStylePropertyValue(documentStyle, document, _ => _.HighlightColor);
-	        style.KerningThreshold = documentStyle.GetStylePropertyValue(documentStyle, document, _ => _.KerningThreshold);
-	        style.Position = documentStyle.GetStylePropertyValue(documentStyle, document, _ => _.Position);
-	        style.Scale = documentStyle.GetStylePropertyValue(documentStyle, document, _ => _.Scale);
-	        style.SmallCaps = documentStyle.GetStylePropertyValue(documentStyle, document, _ => _.SmallCaps);
-	        style.SnapToGrid = documentStyle.GetStylePropertyValue(documentStyle, document, _ => _.SnapToGrid);
-	        style.Spacing = documentStyle.GetStylePropertyValue(documentStyle, document, _ => _.Spacing);
+#if !XAF191 && !XAF192
+            style.KerningThreshold = documentStyle.GetStylePropertyValue(documentStyle, document, _ => _.KerningThreshold);
+            style.Position = documentStyle.GetStylePropertyValue(documentStyle, document, _ => _.Position);
+            style.Scale = documentStyle.GetStylePropertyValue(documentStyle, document, _ => _.Scale);
+            style.SnapToGrid = documentStyle.GetStylePropertyValue(documentStyle, document, _ => _.SnapToGrid);
+            style.Spacing = documentStyle.GetStylePropertyValue(documentStyle, document, _ => _.Spacing);
+#endif
+#if !XAF191
+            style.SmallCaps = documentStyle.GetStylePropertyValue(documentStyle, document, _ => _.SmallCaps);
+#endif
 	        style.Strikeout = documentStyle.GetStylePropertyValue(documentStyle, document, _ => _.Strikeout);
 	        style.Subscript = documentStyle.GetStylePropertyValue(documentStyle, document, _ => _.Subscript);
 	        style.Superscript = documentStyle.GetStylePropertyValue(documentStyle, document, _ => _.Superscript);
@@ -214,12 +218,16 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions{
 	        documentStyle.ForeColor = style.GetStylePropertyValue(c => c.ForeColor, documentStyle, defaultCharacterProperties);
 	        documentStyle.Hidden = style.GetStylePropertyValue(c => c.Hidden, documentStyle, defaultCharacterProperties);
 	        documentStyle.HighlightColor = style.GetStylePropertyValue(c => c.HighlightColor, documentStyle, defaultCharacterProperties);
-	        documentStyle.KerningThreshold = style.GetStylePropertyValue(c => c.KerningThreshold, documentStyle, defaultCharacterProperties);
-	        documentStyle.Scale = style.GetStylePropertyValue(c => c.Scale, documentStyle, defaultCharacterProperties);
-	        documentStyle.SmallCaps = style.GetStylePropertyValue(c => c.SmallCaps, documentStyle, defaultCharacterProperties);
-	        documentStyle.Position = style.GetStylePropertyValue(c => c.Position, documentStyle, defaultCharacterProperties);
-	        documentStyle.SnapToGrid = style.GetStylePropertyValue(c => c.SnapToGrid, documentStyle, defaultCharacterProperties);
-	        documentStyle.Spacing = style.GetStylePropertyValue(c => c.Spacing, documentStyle, defaultCharacterProperties);
+#if !XAF191 && !XAF192
+            documentStyle.KerningThreshold = style.GetStylePropertyValue(c => c.KerningThreshold, documentStyle, defaultCharacterProperties);
+            documentStyle.Scale = style.GetStylePropertyValue(c => c.Scale, documentStyle, defaultCharacterProperties);
+            documentStyle.Position = style.GetStylePropertyValue(c => c.Position, documentStyle, defaultCharacterProperties);
+            documentStyle.SnapToGrid = style.GetStylePropertyValue(c => c.SnapToGrid, documentStyle, defaultCharacterProperties);
+            documentStyle.Spacing = style.GetStylePropertyValue(c => c.Spacing, documentStyle, defaultCharacterProperties);
+#endif
+#if !XAF191
+            documentStyle.SmallCaps = style.GetStylePropertyValue(c => c.SmallCaps, documentStyle, defaultCharacterProperties);
+#endif
 	        documentStyle.Strikeout = style.GetStylePropertyValue(c => c.Strikeout, documentStyle, defaultCharacterProperties);
 	        documentStyle.Subscript = style.GetStylePropertyValue(c => c.Subscript, documentStyle, defaultCharacterProperties);
 	        documentStyle.Superscript = style.GetStylePropertyValue(c => c.Superscript, documentStyle, defaultCharacterProperties);
