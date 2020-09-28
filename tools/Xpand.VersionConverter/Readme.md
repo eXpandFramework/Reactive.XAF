@@ -24,7 +24,7 @@ The demo is about how to make `MyCompany.MyPackage` DevExpress version agnostic.
 
 ![LgCT4R1ejP](https://user-images.githubusercontent.com/159464/87150508-db77f980-c2ba-11ea-97c0-59c50a52ac0f.gif)
 
-<twitter>
+</twitter>
 
 [![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/LvxQ-U_0Sbg)
 
