@@ -26,5 +26,18 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
 
         }
 
+        [Test]
+        [XpandTest()]
+        public void ShowPersistentObjectsInNonPersistentView(){
+            using var application = DefaultReactiveModule().Application;
+            using var objectSpace = application.CreateObjectSpace();
+            objectSpace.CreateObject<R>();
+            objectSpace.CommitChanges();
+            
+            var listView = application.NewView<ListView>(typeof(NonPersistentObject));
+            
+            listView.ObjectSpace.GetObjects<R>().ToArray().Length.ShouldBe(1);
+        }
+
     }
 }

@@ -208,6 +208,21 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             .SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(h => item.Reloaded += h, h => item.Reloaded -= h,ImmediateScheduler.Instance)
                 .Select(pattern => (IObjectSpace) pattern.Sender)
             );
+        internal static IObservable<Unit> ShowPersistentObjectsInNonPersistentView(this XafApplication application)
+            => application.WhenObjectViewCreating()
+                .SelectMany(t => t.e.ObjectSpace is NonPersistentObjectSpace nonPersistentObjectSpace
+                    ? t.application.Model.Views[t.e.ViewID].AsObjectView.ModelClass.TypeInfo.Members
+                        .Where(info => info.MemberTypeInfo.IsPersistent)
+                        .Where(info => nonPersistentObjectSpace.AdditionalObjectSpaces.All(space => !space.IsKnownType(info.MemberType)))
+                        .GroupBy(info => t.application.ObjectSpaceProviders(info.MemberType))
+                        .ToObservable(ImmediateScheduler.Instance)
+                        .SelectMany(infos => {
+                            var objectSpace = application.CreateObjectSpace(infos.First().MemberType);
+                            nonPersistentObjectSpace.AdditionalObjectSpaces.Add(objectSpace);
+                            return nonPersistentObjectSpace.WhenDisposed().Do(_ => objectSpace.Dispose()).ToUnit();
+                        })
+                    : Observable.Empty<Unit>());
+
     }
     public enum ObjectModification{
         All,

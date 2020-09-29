@@ -170,7 +170,16 @@ Below we will add interesting examples. All methods can live in a static class.
     ```
 
 ##### Working with NonPersistentObjects
-1. Populate a ListView at any context (Popup, Navigation, Root, Nested)
+1. Use a NonPersistentObjectSpace to query the members with a persistent type. 
+   ```cs
+   public class NonPersistentObject{
+        public PersistentObject PersistentObject{ get; set; }
+   }
+
+   var listView = application.NewView<ListView>(typeof(NonPersistentObject));         
+   listView.ObjectSpace.GetObjects<PersistentObject>().ToArray().Length.ShouldBeGreaterThan(0);
+   ```
+2. Populate a ListView at any context (Popup, Navigation, Root, Nested)
     ```cs
     public override void Setup(ApplicationModulesManager moduleManager){
     base.Setup(moduleManager);
