@@ -106,7 +106,6 @@ namespace Xpand.XAF.Modules.Reactive{
             => manager.AddNonSecuredTypes()
                 .Merge(manager.WhenApplication(application => application.WhenNonPersistentPropertyCollectionSource()
                 .Merge(application.PatchAuthentication())
-                .Merge(application.PatchObjectSpaceProvider())
                 .Merge(application.ShowPersistentObjectsInNonPersistentView())
             ))
             .Merge(manager.SetupPropertyEditorParentView())

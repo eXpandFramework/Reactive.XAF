@@ -141,7 +141,6 @@ namespace TestApplication{
 		public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB){
 			base.GetModuleUpdaters(objectSpace, versionFromDB);
 			yield return new DefaultUserModuleUpdater(objectSpace, versionFromDB);
-            yield return new DocumentStyleManagerModuleUpdater(objectSpace, versionFromDB);
         }
 
 		public override void Setup(XafApplication application){

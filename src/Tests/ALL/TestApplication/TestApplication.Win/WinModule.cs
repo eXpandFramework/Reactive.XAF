@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using DevExpress.ExpressApp;
@@ -14,6 +15,7 @@ using DevExpress.ExpressApp.ReportsV2.Win;
 using DevExpress.ExpressApp.Scheduler.Win;
 using DevExpress.ExpressApp.ScriptRecorder.Win;
 using DevExpress.ExpressApp.TreeListEditors.Win;
+using DevExpress.ExpressApp.Updating;
 using DevExpress.ExpressApp.Validation.Win;
 using DevExpress.ExpressApp.Win.SystemModule;
 using TestApplication.Office.DocumentStyleManager;
@@ -57,7 +59,10 @@ namespace TestApplication.Win{
                 .Subscribe(this);
         }
 
-        
+        public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB){
+            yield return new DocumentStyleManagerModuleUpdater(objectSpace, versionFromDB);
+        }
+
         private static void ExtendModel(ApplicationModulesManager moduleManager){
             var excludeMaps = new[]
                 {PredefinedMap.None, PredefinedMap.LayoutView, PredefinedMap.LayoutViewColumn, PredefinedMap.LabelControl};

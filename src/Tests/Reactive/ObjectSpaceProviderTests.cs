@@ -6,23 +6,21 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.Reactive.Tests{
     public class ObjectSpaceProviderTests:ReactiveBaseTest{
-        [Test]
+        // [Test]
         [XpandTest()]
         public void WhenSchemaUpdating(){
             using var application = DefaultReactiveModule().Application;
-            var testObserver = application.ObjectSpaceProvider.WhenSchemaUpdating().Test();
-
+            using var testObserver = application.ObjectSpaceProvider.WhenSchemaUpdating().Test();
             application.ObjectSpaceProvider.UpdateSchema();
 
             testObserver.ItemCount.ShouldBe(1);
         }
 
-        [Test]
+        // [Test]
         [XpandTest()]
         public void WhenSchemaUpdated(){
             using var application = DefaultReactiveModule().Application;
-            var testObserver = application.ObjectSpaceProvider.WhenSchemaUpdated().Test();
-
+            using var testObserver = application.ObjectSpaceProvider.WhenSchemaUpdated().Test();
             application.ObjectSpaceProvider.UpdateSchema();
 
             testObserver.ItemCount.ShouldBe(1);
