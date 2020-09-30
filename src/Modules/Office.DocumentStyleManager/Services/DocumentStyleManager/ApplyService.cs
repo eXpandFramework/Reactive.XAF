@@ -17,7 +17,8 @@ using Xpand.XAF.Modules.Reactive.Services.Actions;
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleManager{
     public static class ApplyService{
         
-        public static SimpleAction ApplyStyle(this (DocumentStyleManagerModule, Frame frame) tuple) => tuple.frame.Action(nameof(ApplyStyle)).As<SimpleAction>();
+        public static SimpleAction ApplyStyle(this (DocumentStyleManagerModule, Frame frame) tuple) 
+            => tuple.frame.Action(nameof(ApplyStyle)).As<SimpleAction>();
 
         internal static IObservable<Unit> ApplyStyle(this ApplicationModulesManager manager){
             var registerAction = manager.RegisterAction().Publish().RefCount();
@@ -25,30 +26,30 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
                 .Merge(registerAction.ApplyStylesWhenListViewProcessCurrentObject( ));
         }
 
-        private static IObservable<Unit> ApplyStylesWhenListViewProcessCurrentObject(this IObservable<SimpleAction> source) => source
-            .WhenActivated()
-            .SelectMany(action => action.View<DetailView>().WhenControlsCreated()
-                .Select(view => view.GetListPropertyEditor<Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects.DocumentStyleManager>(manager => manager.AllStyles).Frame)
-                .SelectMany(frame => frame.GetController<ListViewProcessCurrentObjectController>().ProcessCurrentObjectAction
-                    .WhenExecuting()
-                    .Do(_ => {
-                        _.e.Cancel = true;
-                        action.DoExecute();
-                    })))
-            .ToUnit();
+        private static IObservable<Unit> ApplyStylesWhenListViewProcessCurrentObject(this IObservable<SimpleAction> source)
+            => source.WhenActivated()
+                .SelectMany(action => action.View<DetailView>().WhenControlsCreated()
+                    .Select(view => view.GetListPropertyEditor<BusinessObjects.DocumentStyleManager>(manager => manager.AllStyles).Frame)
+                    .SelectMany(frame => frame.GetController<ListViewProcessCurrentObjectController>().ProcessCurrentObjectAction
+                        .WhenExecuting()
+                        .Do(_ => {
+                            _.e.Cancel = true;
+                            action.DoExecute();
+                        })))
+                .ToUnit();
 
-        private static IObservable<SimpleAction> RegisterAction(this ApplicationModulesManager manager) => manager
-                .RegisterViewSimpleAction(nameof(ApplyStyle), action => action.Configure());
-                
-        private static IObservable<Unit> ApplyStyle(this IObservable<SimpleAction> source) =>
-            source.WhenExecute()
-	            .SelectMany(e => e.Action.Application.DefaultPropertiesProvider(document => {
-		            var view = e.Action.View<DetailView>();
-		            var server = view.DocumentManagerContentRichEditServer();
-		            var styles = view.AllStylesListView().SelectedObjects.Cast<IDocumentStyle>().ToArray();
-		            server.Document.ApplyStyle(styles.First(), document);
-		            return Unit.Default.ReturnObservable();
-	            }))
-	            .ToUnit();
+        private static IObservable<SimpleAction> RegisterAction(this ApplicationModulesManager manager) 
+            => manager.RegisterViewSimpleAction(nameof(ApplyStyle), action => action.Configure());
+
+        private static IObservable<Unit> ApplyStyle(this IObservable<SimpleAction> source)
+            => source.WhenExecute()
+                .SelectMany(e => e.Action.Application.DefaultPropertiesProvider(document => {
+                    var view = e.Action.View<DetailView>();
+                    var server = view.DocumentManagerContentRichEditServer();
+                    var styles = view.AllStylesListView().SelectedObjects.Cast<IDocumentStyle>().ToArray();
+                    server.Document.ApplyStyle(styles.First(), document);
+                    return Unit.Default.ReturnObservable().TraceDocumentStyleModule(_ => styles.First().StyleName);
+                }))
+                .ToUnit();
     }
 }

@@ -34,6 +34,7 @@ using TestApplication.GoogleService;
 using TestApplication.MicrosoftCalendarService;
 using TestApplication.MicrosoftService;
 using TestApplication.MicrosoftTodoService;
+using TestApplication.Office.DocumentStyleManager;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.TestsLib;
 using Xpand.TestsLib.BO;
@@ -49,6 +50,7 @@ using Xpand.XAF.Modules.Office.Cloud.Google.Calendar;
 using Xpand.XAF.Modules.Office.Cloud.Google.Tasks;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo;
+using Xpand.XAF.Modules.Office.DocumentStyleManager;
 using Xpand.XAF.Modules.ProgressBarViewItem;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
@@ -125,6 +127,7 @@ namespace TestApplication{
 			RequiredModuleTypes.Add(typeof(SequenceGeneratorModule));
 			RequiredModuleTypes.Add(typeof(SuppressConfirmationModule));
 			RequiredModuleTypes.Add(typeof(ViewEditModeModule));
+			RequiredModuleTypes.Add(typeof(DocumentStyleManagerModule));
 			RequiredModuleTypes.Add(typeof(ViewItemValueModule));
 			RequiredModuleTypes.Add(typeof(GoogleModule));
 			RequiredModuleTypes.Add(typeof(GoogleTasksModule));
@@ -138,7 +141,8 @@ namespace TestApplication{
 		public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB){
 			base.GetModuleUpdaters(objectSpace, versionFromDB);
 			yield return new DefaultUserModuleUpdater(objectSpace, versionFromDB);
-		}
+            yield return new DocumentStyleManagerModuleUpdater(objectSpace, versionFromDB);
+        }
 
 		public override void Setup(XafApplication application){
 			base.Setup(application);

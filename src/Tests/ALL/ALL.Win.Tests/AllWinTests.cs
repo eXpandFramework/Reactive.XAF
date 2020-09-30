@@ -40,10 +40,10 @@ namespace ALL.Win.Tests{
         [XpandTest(LongTimeout,3)]
         [Apartment(ApartmentState.STA)]
         public async Task Win_EasyTest_InMemory(){
-            await EasyTest(() => new WinAdapter(), RunWinApplication, adapter => {
+            await EasyTest(() => new WinAdapter(), RunWinApplication, async adapter => {
                 var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
                 adapter.Execute(autoTestCommand);
-                return Task.CompletedTask;
+                await adapter.TestDocumentStyleManager();
             });
         }     
 

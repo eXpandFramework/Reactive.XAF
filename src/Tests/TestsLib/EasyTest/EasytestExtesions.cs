@@ -40,12 +40,19 @@ namespace Xpand.TestsLib.EasyTest{
         public static IObservable<Unit> Execute(this ICommandAdapter adapter, Action retriedAction) 
             => Observable.Defer(() => Observable.Start(retriedAction)).RetryWithBackoff();
 
+        public static void Execute(this ICommandAdapter adapter,int count, params Command[] commands){
+            for (int i = 0; i < count; i++){
+                adapter.Execute(commands);
+            }
+        }
+
         public static void Execute(this ICommandAdapter adapter,params Command[] commands){
             foreach (var command in commands){
                 if (command is IRequireApplicationOptions requireApplicationOptions){
                     requireApplicationOptions.SetApplicationOptions(adapter.GetTestApplication());
                 }
                 try{
+                    
                     ExecuteSilent(adapter, command);
                 }
                 catch (CommandException){

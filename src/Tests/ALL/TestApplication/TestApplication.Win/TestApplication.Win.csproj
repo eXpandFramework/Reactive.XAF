@@ -43,7 +43,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'EasyTest|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
-    <DefineConstants>TRACE;DEBUG;EASYTEST</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;EASYTEST;XAF201XAF201</DefineConstants>
     <DebugType>full</DebugType>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
@@ -60,18 +60,21 @@
     <Compile Include="..\..\..\TestsLib\BO\OrderModuleUpdater.cs" Link="Common\OrderModuleUpdater.cs" />
     <Compile Include="..\..\..\TestsLib\BO\Product.cs" Link="Common\Product.cs" />
     <Compile Include="..\..\..\TestsLib\DefaultUserModuleUpdater.cs" Link="Common\DefaultUserModuleUpdater.cs" />
-    <Compile Include="..\CommonFiles\CloudCalendarService.cs" Link="Cloud.Office\CloudCalendarService.cs" />
-    <Compile Include="..\CommonFiles\GoogleTasksService\GoogleCalendarService.cs" Link="Cloud.Office\Google\GoogleCalendarService.cs" />
-    <Compile Include="..\CommonFiles\GoogleTasksService\GoogleTasksService.cs" Link="Cloud.Office\Google\GoogleTasksService.cs" />
-    <Compile Include="..\CommonFiles\CloudTasksService.cs" Link="Cloud.Office\CloudTasksService.cs" />
+    <Compile Include="..\CommonFiles\CloudCalendarService.cs" Link="Office\Cloud\CloudCalendarService.cs" />
+    <Compile Include="..\CommonFiles\DocumentStyleManager\DocumentObject.cs" Link="Office\DocumentStyleManager\DocumentObject.cs" />
+    <Compile Include="..\CommonFiles\DocumentStyleManager\DocumentStyleManagerModuleUpdater.cs" Link="Office\DocumentStyleManager\DocumentStyleManagerModuleUpdater.cs" />
+    <Compile Include="..\CommonFiles\DocumentStyleManager\DocumentStyleManagerService.cs" Link="Office\DocumentStyleManager\DocumentStyleManagerService.cs" />
+    <Compile Include="..\CommonFiles\GoogleTasksService\GoogleCalendarService.cs" Link="Office\Cloud\Google\GoogleCalendarService.cs" />
+    <Compile Include="..\CommonFiles\GoogleTasksService\GoogleTasksService.cs" Link="Office\Cloud\Google\GoogleTasksService.cs" />
+    <Compile Include="..\CommonFiles\CloudTasksService.cs" Link="Office\Cloud\CloudTasksService.cs" />
     <Compile Include="..\CommonFiles\AgnosticModule.cs" Link="Common\AgnosticModule.cs" />
-    <Compile Include="..\CommonFiles\GoogleService\ShowGoogleAccountInfoService.cs" Link="Cloud.Office\Google\ShowGoogleAccountInfoService.cs" />
-    <Compile Include="..\CommonFiles\MicrosoftCalendarService\MicrosoftCalendarService.cs" Link="Cloud.Office\Microsoft\MicrosoftCalendarService.cs" />
-    <Compile Include="..\CommonFiles\MicrosoftService\MicrosoftService.cs" Link="Cloud.Office\Microsoft\MicrosoftService.cs" />
-    <Compile Include="..\CommonFiles\CloudService.cs" Link="Cloud.Office\CloudService.cs" />
-    <Compile Include="..\CommonFiles\GoogleService\GoogleService.cs" Link="Cloud.Office\Google\GoogleService.cs" />
-    <Compile Include="..\CommonFiles\MicrosoftService\ShowMSAccountInfoService.cs" Link="Cloud.Office\Microsoft\ShowMSAccountInfoService.cs" />
-    <Compile Include="..\CommonFiles\MicrosoftTodoService\MicrosoftTodoService.cs" Link="Cloud.Office\Microsoft\MicrosoftTodoService.cs" />
+    <Compile Include="..\CommonFiles\GoogleService\ShowGoogleAccountInfoService.cs" Link="Office\Cloud\Google\ShowGoogleAccountInfoService.cs" />
+    <Compile Include="..\CommonFiles\MicrosoftCalendarService\MicrosoftCalendarService.cs" Link="Office\Cloud\Microsoft\MicrosoftCalendarService.cs" />
+    <Compile Include="..\CommonFiles\MicrosoftService\MicrosoftService.cs" Link="Office\Cloud\Microsoft\MicrosoftService.cs" />
+    <Compile Include="..\CommonFiles\CloudService.cs" Link="Office\Cloud\CloudService.cs" />
+    <Compile Include="..\CommonFiles\GoogleService\GoogleService.cs" Link="Office\Cloud\Google\GoogleService.cs" />
+    <Compile Include="..\CommonFiles\MicrosoftService\ShowMSAccountInfoService.cs" Link="Office\Cloud\Microsoft\ShowMSAccountInfoService.cs" />
+    <Compile Include="..\CommonFiles\MicrosoftTodoService\MicrosoftTodoService.cs" Link="Office\Cloud\Microsoft\MicrosoftTodoService.cs" />
     <Compile Include="..\CommonFiles\ViewWizard\ViewWizard.cs" Link="ViewWizard\ViewWizard.cs" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.configuration" />
@@ -89,11 +92,16 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="..\CommonFiles\Cloud.Office.xafml" Link="Office\Cloud\Cloud.Office.xafml" />
     <EmbeddedResource Include="..\CommonFiles\SeqeuenceGenerator\SequenceGenerator.xafml" Link="SequenceGenerator\SequenceGenerator.xafml" />
     <Content Include="Model.xafml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <EmbeddedResource Include="..\CommonFiles\Cloud.Office.xafml" Link="Cloud.Office\Cloud.Office.xafml" />
+    <EmbeddedResource Include="..\CommonFiles\DocumentStyleManager\Lorem.docx" Link="Office\DocumentStyleManager\Lorem.docx" />
+    <EmbeddedResource Include="..\CommonFiles\DocumentStyleManager\LoresumV2.docx" Link="Office\DocumentStyleManager\LoresumV2.docx" />
+    <EmbeddedResource Include="..\CommonFiles\DocumentStyleManager\Office.DocumentStyleManager.xafml" Link="Office\DocumentStyleManager\Office.DocumentStyleManager.xafml" />
+    <EmbeddedResource Include="..\CommonFiles\DocumentStyleManager\Lorem2.docx" Link="Office\DocumentStyleManager\Lorem2.docx" />
+    <EmbeddedResource Include="..\CommonFiles\DocumentStyleManager\Lorem3.docx" Link="Office\DocumentStyleManager\Lorem3.docx" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -113,10 +121,12 @@
     <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="20.1.7" />
     <PackageReference Include="DevExpress.EasyTest" Version="20.1.7" />
     <PackageReference Include="Google.Apis.People.v1" Version="1.25.0.830" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="2.202.41" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="2.202.41.3" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Cloud.Office\Google\" />
+    <Folder Include="Office\Cloud\Google\" />
+    <Folder Include="Office\Cloud\Microsoft\" />
+    <Folder Include="Office\DocumentStyleManager\" />
     <Folder Include="SequenceGenerator\" />
   </ItemGroup>
 </Project>

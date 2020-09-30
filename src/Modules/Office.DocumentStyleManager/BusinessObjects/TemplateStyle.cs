@@ -5,6 +5,7 @@ using DevExpress.Xpo;
 using DevExpress.XtraRichEdit.API.Native;
 using DevExpress.XtraRichEdit.Model;
 using JetBrains.Annotations;
+using Xpand.Extensions.XAF.Xpo.ValueConverters;
 using Xpand.XAF.Persistent.BaseImpl;
 using ParagraphAlignment = DevExpress.XtraRichEdit.API.Native.ParagraphAlignment;
 using ParagraphFirstLineIndent = DevExpress.XtraRichEdit.API.Native.ParagraphFirstLineIndent;
@@ -289,7 +290,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
 		}
 
 		Color? _backColor;
-
+		[ValueConverter(typeof(ColorValueConverter))]
 		public Color? BackColor{
 			get => _backColor;
 			set => SetPropertyValue(nameof(BackColor), ref _backColor, value);
@@ -298,7 +299,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
 		public bool? ContextualSpacing{ get; set; }
 
 		Color? _foreColor;
-
+        [ValueConverter(typeof(ColorValueConverter))]
 		public Color? ForeColor{
 			get => _foreColor;
 			set => SetPropertyValue(nameof(ForeColor), ref _foreColor, value);
@@ -315,7 +316,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
 		public bool? NoProof{ get; set; }
 
 		Color? _highlightColor;
-
+        [ValueConverter(typeof(ColorValueConverter))]
 		public Color? HighlightColor{
 			get => _highlightColor;
 			set => SetPropertyValue(nameof(HighlightColor), ref _highlightColor, value);
@@ -385,7 +386,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
 		}
 
 		Color? _underlineColor;
-
+        [ValueConverter(typeof(ColorValueConverter))]
 		public Color? UnderlineColor{
 			get => _underlineColor;
 			set => SetPropertyValue(nameof(UnderlineColor), ref _underlineColor, value);

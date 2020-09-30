@@ -17,7 +17,7 @@ using Xpand.XAF.Modules.Reactive.Services.Actions;
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services{
     internal static class DocumentStyleLinkTemplateService{
         internal static IObservable<Unit> DocumentStyleLinkTemplate(this ApplicationModulesManager manager) =>
-            new[]{typeof(ApplyTemplateStyle), typeof(Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects.DocumentStyleManager)}.ToObservable()
+            new[]{typeof(ApplyTemplateStyle), typeof(BusinessObjects.DocumentStyleManager)}.ToObservable()
                 .SelectMany(type => manager.WhenApplication(application => application.WhenViewOnFrame(type, ViewType.DetailView)
 	                .Select(frame => frame.Action("OpenObject")).WhenNotDefault().WhenExecuted()
 	                .SelectMany(_ => {
@@ -27,7 +27,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services{
 			                : detailView.DocumentManagerContentRichEditServer()).Document;
 		                return ((DocumentStyleLinkTemplate) _.ShowViewParameters.CreatedView.CurrentObject).DocumentStyleLinks
 			                .Do(link => link.SetDefaultPropertiesProvider(document));
-	                }).ToUnit()
+	                }).ToUnit().TraceDocumentStyleModule()
                 ));
 
         internal static IObservable<Unit> AssignStyleLinkDocument(this IObservable<DetailView> source) =>
@@ -37,33 +37,33 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services{
 
         private static IObservable<Unit> AssingStyleLinkDocumentWhenContentChanged(this IObservable<DetailView> source) => source
             .WhenControlsCreated()
-            .SelectMany(view => ((Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects.DocumentStyleManager) view.CurrentObject).WhenPropertyChanged(_ => _.Content)
+            .SelectMany(view => ((BusinessObjects.DocumentStyleManager) view.CurrentObject).WhenPropertyChanged(_ => _.Content)
                 .WhenNotDefault(_ => _.DocumentStyleLinkTemplate)
                 .SelectMany(styleManager => {
                     var server = view.DocumentManagerContentRichEditServer();
                     return styleManager.DocumentStyleLinkTemplate.DocumentStyleLinks
                         .Do(link => link.SetDefaultPropertiesProvider(server.Document));
                 }))
-            .ToUnit();
+            .ToUnit().TraceDocumentStyleModule();
 
         private static IObservable<Unit> AssingStyleLinkDocumentWhenTemplateChanged(this IObservable<DetailView> source) => source
             .WhenControlsCreated()
-            .SelectMany(view => ((Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects.DocumentStyleManager) view.CurrentObject).WhenPropertyChanged(_ => _.DocumentStyleLinkTemplate)
+            .SelectMany(view => ((BusinessObjects.DocumentStyleManager) view.CurrentObject).WhenPropertyChanged(_ => _.DocumentStyleLinkTemplate)
                 .WhenNotDefault(styleManager => styleManager.DocumentStyleLinkTemplate)
                 .SelectMany(styleManager => {
                     var server = view.DocumentManagerContentRichEditServer();
                     return styleManager.DocumentStyleLinkTemplate.DocumentStyleLinks
                         .Do(link => link.SetDefaultPropertiesProvider(server.Document));
                 }))
-            .ToUnit();
+            .ToUnit().TraceDocumentStyleModule();
 
         private static IObservable<Unit> AssignStyleLinkDocumentWhenDetailViweCreated(this IObservable<DetailView> source) => source
-            .SelectMany(view => view.WhenRichEditDocumentServer(nameof(Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects.DocumentStyleManager.Content))
-                .WhenNotDefault(server => ((Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects.DocumentStyleManager) view.CurrentObject).DocumentStyleLinkTemplate)
-                .SelectMany(server => ((Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects.DocumentStyleManager) view.CurrentObject).DocumentStyleLinkTemplate.DocumentStyleLinks
+            .SelectMany(view => view.WhenRichEditDocumentServer(nameof(BusinessObjects.DocumentStyleManager.Content))
+                .WhenNotDefault(server => ((BusinessObjects.DocumentStyleManager) view.CurrentObject).DocumentStyleLinkTemplate)
+                .SelectMany(server => ((BusinessObjects.DocumentStyleManager) view.CurrentObject).DocumentStyleLinkTemplate.DocumentStyleLinks
                     .Do(link => link.SetDefaultPropertiesProvider(server.Document)))
             )
-            .ToUnit();
+            .ToUnit().TraceDocumentStyleModule();
         
     }
 }

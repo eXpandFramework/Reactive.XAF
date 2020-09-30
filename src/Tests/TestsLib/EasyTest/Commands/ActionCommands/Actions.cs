@@ -9,6 +9,7 @@ namespace Xpand.TestsLib.EasyTest.Commands.ActionCommands{
         [DefaultValue("Save and Close")]
         SaveAndClose,
         Close,
+        OK,
         [Obsolete("use the ActionDeleteCommand")]
         Delete,
         Cancel

@@ -3,6 +3,7 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using Fasterflect;
+using JetBrains.Annotations;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -18,6 +19,7 @@ namespace Xpand.XAF.Modules.Reactive{
     }
 
     public static class ReactiveModulesExtension{
+        [PublicAPI]
         public static IObservable<IModelReactiveModules> ReactiveModulesModel(this IObservable<XafApplication> source){
             return source.SelectMany(application => application.ReactiveModulesModel());
         }
@@ -44,5 +46,13 @@ namespace Xpand.XAF.Modules.Reactive{
             var modules = applicationModel as IModelApplicationReactiveModules;
             return modules?.ReactiveModules as TModel;
         }
+    }
+    
+    public interface IModelReactiveModuleOffice : IModelReactiveModule{
+        IModelOffice Office{ get; }
+    }
+
+    public interface IModelOffice:IModelNode{
+        
     }
 }

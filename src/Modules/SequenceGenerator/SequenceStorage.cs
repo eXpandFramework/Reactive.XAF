@@ -50,7 +50,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         }
 
     }
-    [DeferredDeletion(false)][DefaultProperty(nameof(Name))]
+    [DeferredDeletion(false)][DefaultProperty(nameof(Name))][ImageName("PageSetup")]
     public class SequenceStorage : XPBaseObject, ISequenceStorage,IObjectSpaceLink{
         private long _nextSequence;
         public SequenceStorage(Session session)

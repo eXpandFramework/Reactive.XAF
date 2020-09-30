@@ -11,7 +11,6 @@ using DevExpress.XtraRichEdit.API.Native;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
-using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 
@@ -42,9 +41,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
         }
 
         private static void ConfigureShowStyleManagerAction(this SingleChoiceAction showStyleManagerAction,IModelView modelView){
-            var items = modelView.AsObjectView.VisibleMemberViewItems()
-                .OfType<IModelPropertyEditorEnableDocumentStyleManager>()
-                .Where(manager => manager.EnableDocumentStyleManager).ToArray();
+            var items = modelView.Application.DocumentStyleManager().DesignTemplateDetailViews.Where(view => view.DetailView==modelView)
+                .SelectMany(view => view.ContentEditors).Select(editor => editor.ContentEditor).ToArray();
             showStyleManagerAction.Items.Clear();
             showStyleManagerAction.Items.AddRange(items.Cast<IModelViewItem>()
                 .Select(manager => new ChoiceActionItem(manager.Id, manager.Caption, manager)).ToArray());
@@ -55,8 +53,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
             var application = e.Action.Application;
             var view = e.Action.View();
             var showViewParameters = e.ShowViewParameters;
-            var objectSpace = application.CreateObjectSpace(typeof(Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects.DocumentStyleManager));
-            var documentStyleManager = objectSpace.CreateObject<Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects.DocumentStyleManager>();
+            var objectSpace = application.CreateObjectSpace(typeof(BusinessObjects.DocumentStyleManager));
+            var documentStyleManager = objectSpace.CreateObject<BusinessObjects.DocumentStyleManager>();
             var memberInfo = ((IModelPropertyEditor) e.SelectedChoiceActionItem.Data).ModelMember.MemberInfo;
             documentStyleManager.Content = (byte[]) memberInfo.GetValue(view.CurrentObject);
             documentStyleManager.Original = (byte[]) memberInfo.GetValue(view.CurrentObject);

@@ -39,8 +39,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager{
 
         public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders){
             base.ExtendModelInterfaces(extenders);
-            extenders.Add<IModelPropertyEditor, IModelPropertyEditorEnableDocumentStyleManager>();
-            extenders.Add<IModelOptions, IModelOptionsOfficeModule>();
+            extenders.Add<IModelReactiveModules, IModelReactiveModuleOffice>();
+            extenders.Add<IModelOffice, IModelOfficeDocumentStyleManager>();
         }
 
         public static TraceSource TraceSource{ get; set; }

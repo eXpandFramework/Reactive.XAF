@@ -13,13 +13,7 @@ using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.Extensions.Office.Cloud{
-    public interface IModelReactiveModuleOffice : IModelReactiveModule{
-        IModelOffice Office{ get; }
-    }
-
-    public interface IModelOffice:IModelNode{
-        
-    }
+    
 
     [DomainLogic(typeof(IModelOffice))]
     public static class ModelOfficeLogic{
@@ -95,8 +89,11 @@ namespace Xpand.Extensions.Office.Cloud{
             throw new NotImplementedException();
         }
 
+        [UsedImplicitly]
         public static IModelClass Get_NewCloudEvent(this IModelCalendar modelCalendar)
-            => modelCalendar.NewCloudEvents.FirstOrDefault(); 
+            => modelCalendar.NewCloudEvents.FirstOrDefault();
+        
+        [UsedImplicitly]
         public static CalculatedModelNodeList<IModelClass> Get_NewCloudEvents(this IModelCalendar modelCalendar) 
             => modelCalendar.Application.BOModel.Where(c =>c.TypeInfo.IsPersistent&&!c.TypeInfo.IsAbstract&&typeof(IEvent).IsAssignableFrom(c.TypeInfo.Type) ).ToCalculatedModelNodeList();
     }
@@ -108,7 +105,7 @@ namespace Xpand.Extensions.Office.Cloud{
     }
 
     public interface IModelCallDirection{
-        [Required][DefaultValue(CallDirection.Both)]
+        [Required][DefaultValue(CallDirection.Both)][PublicAPI]
         CallDirection CallDirection{ get; set; }
     }
     

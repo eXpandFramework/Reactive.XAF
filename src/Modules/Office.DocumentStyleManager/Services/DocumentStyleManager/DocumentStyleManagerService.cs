@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
@@ -9,6 +10,7 @@ using DevExpress.ExpressApp.Editors;
 using DevExpress.XtraRichEdit;
 using DevExpress.XtraRichEdit.API.Native;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.DetailViewExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ViewExtenions;
@@ -42,6 +44,12 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
                 .Merge(manager.LinkTemplate())
                 .Merge(manager.SynchronizeScrolling());
 
+        internal static IObservable<TSource> TraceDocumentStyleModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
+            Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
+            [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) =>
+            source.Trace(name, DocumentStyleManagerModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
+
+
         private static IObservable<Unit> SynchronizeScrolling(this ApplicationModulesManager manager) 
             => manager.WhenApplication(application => application.WhenDetailViewCreated().ToDetailView()
 		        .SynchronizeScrolling<BusinessObjects.DocumentStyleManager>(style => style.Original, style => style.Content));
@@ -62,7 +70,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
         internal static IObservable<IRichEditDocumentServer> DocumentManagerContentRichEditServer(this IObservable<DetailView> detailView)
             => detailView.SelectMany(view => view.AsDetailView()
                     .WhenRichEditDocumentServer<BusinessObjects.DocumentStyleManager>(styleManager => styleManager.Content)
-                    .TakeUntil(view.WhenDisposingView().Select(unit => unit)))
+                    .TakeUntil(view.WhenDisposingView()))
                 .Publish().RefCount();
 
         internal static IObservable<Unit> DocumentStyleManagerDetailView(this ApplicationModulesManager manager,Func<IObservable<DetailView>,IObservable<Unit>> detailView) 

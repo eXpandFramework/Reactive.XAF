@@ -3,12 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
+using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Security;
@@ -26,6 +28,7 @@ using DevExpress.ExpressApp.Xpo;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 using DevExpress.Web;
+using DevExpress.Xpo;
 using DevExpress.XtraGrid;
 using Fasterflect;
 using JetBrains.Annotations;
@@ -338,6 +341,23 @@ namespace Xpand.TestsLib{
            application.MockListEditor((view, xafApplication, collectionSource) => application is WinApplication
 	           ? (ListEditor) new GridListEditor(view) : new ASPxGridListEditor(view));
         }
+
+        internal static string MemberExpressionCaption<TObject>(this Expression<Func<TObject, object>> memberName){
+            var name = memberName.Body is UnaryExpression unaryExpression
+                ? ((MemberExpression) unaryExpression.Operand).Member.Name
+                : ((MemberExpression) memberName.Body).Member.Name;
+            var displayNameAttribute =
+                typeof(TObject).Property(name).Attribute<XafDisplayNameAttribute>() ??
+                (Attribute) typeof(TObject).Property(name).Attribute<DisplayNameAttribute>() ?? typeof(TObject)
+                    .Property(name).Attribute<System.ComponentModel.DisplayNameAttribute>();
+
+            return (string) (displayNameAttribute?.GetPropertyValue("DisplayName")??name);
+        }
+
+        internal static string MemberExpressionCaption<TObject,TMemeberValue>(this Expression<Func<TObject, TMemeberValue>> memberName) =>
+            memberName.Body is UnaryExpression unaryExpression
+                ? ((MemberExpression) unaryExpression.Operand).Member.Name
+                : ((MemberExpression) memberName.Body).Member.Name;
 
         public static void MockListEditor(this XafApplication application, Func<IModelListView, XafApplication, CollectionSourceBase, ListEditor> listEditor = null){
 	        listEditor ??= ((view, xafApplication, arg3) => application.ListEditorMock(view).Object);

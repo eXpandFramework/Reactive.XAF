@@ -16,12 +16,13 @@ using DevExpress.ExpressApp.ScriptRecorder.Win;
 using DevExpress.ExpressApp.TreeListEditors.Win;
 using DevExpress.ExpressApp.Validation.Win;
 using DevExpress.ExpressApp.Win.SystemModule;
-using DevExpress.ExpressApp.Workflow.Win;
+using TestApplication.Office.DocumentStyleManager;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.GridListEditor;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.OneView;
+using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Win;
 
 namespace TestApplication.Win{
@@ -51,11 +52,19 @@ namespace TestApplication.Win{
 
         public override void Setup(ApplicationModulesManager moduleManager){
 	        base.Setup(moduleManager);
-	        var excludeMaps = new []{PredefinedMap.None,PredefinedMap.LayoutView,PredefinedMap.LayoutViewColumn,PredefinedMap.LabelControl};
-	        if (!Debugger.IsAttached){
-		        // moduleManager.Extend(Enum.GetValues(typeof(PredefinedMap)).OfType<PredefinedMap>().Where(map =>!excludeMaps.Contains(map)&& map.Platform()==Platform.Win));
-	        }
+	        ExtendModel(moduleManager);
+            moduleManager.ConnectDocumentStyleManager()
+                .Subscribe(this);
         }
 
+        
+        private static void ExtendModel(ApplicationModulesManager moduleManager){
+            var excludeMaps = new[]
+                {PredefinedMap.None, PredefinedMap.LayoutView, PredefinedMap.LayoutViewColumn, PredefinedMap.LabelControl};
+            if (!Debugger.IsAttached){
+                moduleManager.Extend(Enum.GetValues(typeof(PredefinedMap)).OfType<PredefinedMap>()
+                    .Where(map => !excludeMaps.Contains(map) && map.Platform() == Platform.Win));
+            }
+        }
     }
 }

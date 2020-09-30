@@ -6,6 +6,7 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
 using DevExpress.XtraRichEdit.API.Native;
+using JetBrains.Annotations;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions;
 using Xpand.XAF.Persistent.BaseImpl;
 
@@ -19,6 +20,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
 		DocumentStyleLinkTemplate _documentStyleLinkTemplate;
 
 		[Association("DocumentStyleLinkTemplate-DocumentStyleLinks")][RuleRequiredField]
+		[UsedImplicitly]
 		public DocumentStyleLinkTemplate DocumentStyleLinkTemplate{
 			get => _documentStyleLinkTemplate;
 			set => SetPropertyValue(nameof(DocumentStyleLinkTemplate), ref _documentStyleLinkTemplate, value);

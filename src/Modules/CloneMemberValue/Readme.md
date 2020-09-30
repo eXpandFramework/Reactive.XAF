@@ -3,7 +3,7 @@
 [![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/CloneMemberValue.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+label%3ACloneMemberValue) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/CloneMemberValue.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+label%3ACloneMemberValue)
 # About 
 
-The `CloneMemberValue` module will help you to selectively `clone` Bussiness object `members`.
+The `CloneMemberValue` module will help you to selectively `clone` Business object `members`.
 
 ## Details
 
@@ -11,8 +11,11 @@ This is a `platform agnostic` module extends the `IModelMember` nodes with the `
 
 1. It monitors the `DetailView` construction sequence and projects the result to a `Previous/Current` pair which is then used to clone if the context is valid.
 2. It monitors the sequence of new object created from the XAF `ListEditor`, it then projects it similarly to a `Previous/Current` pair.
+
 <twitter>
+
 ![image](https://user-images.githubusercontent.com/159464/54979695-7bb5ec00-4fac-11e9-8373-b128982b8bc2.png)
+
 </twitter>
 
 if logging is set to verbose all operations will be logged. 

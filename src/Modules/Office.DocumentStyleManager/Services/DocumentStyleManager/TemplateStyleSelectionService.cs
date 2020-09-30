@@ -31,6 +31,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
         private static IObservable<Unit> AssignStyleLinkDocument(this ApplicationModulesManager manager) 
             => manager.WhenApplication(application => application.WhenDetailViewCreated().ToDetailView()
 	            .When(typeof(BusinessObjects.DocumentStyleManager)).Publish().RefCount()
+                .TraceDocumentStyleModule(view => view.Id)
 	            .AssignStyleLinkDocument());
 
 
@@ -110,8 +111,9 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
                         var whenResultValueChanged = replaceStylesEnabled.WhenResultValueChanged();
 		                return whenResultValueChanged
 			                .Do(_ => templateStyleSelection.Enabled[nameof(ReplaceStylesService.ReplaceStyles)] =
-				                _.e.NewValue);
+				                _.e.NewValue)
+                            .TraceDocumentStyleModule(_ => templateStyleSelection.Id);
 	                })
-	                .ToUnit());
+                    .ToUnit());
     }
 }

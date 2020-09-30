@@ -23,22 +23,22 @@ using DocumentFormat = DevExpress.XtraRichEdit.DocumentFormat;
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManager{
     public class ImportStylesServiceTests:BaseTests{
 	    private void ModelSetup(XafApplication application){
-	        var modelOffieModule = ((IModelOptionsOfficeModule) application.Model.Options).OfficeModule;
-	        var item = modelOffieModule.ImportStyles.AddNode<IModelImportStylesItem>();
+            var documentStyleManager = application.Model.DocumentStyleManager();
+	        var item = documentStyleManager.ImportStyles.AddNode<IModelImportStylesItem>();
 	        item.ModelClass = application.Model.BOModel.GetClass(typeof(DataObject));
         }
 
         [Test][XpandTest()]
         public void Action_should_be_inactive_when_ImportStylesListView_is_not_set(){
-	        using var application=DocumentStyleManagerModule().Application;
+            using var application=DocumentStyleManagerModule().Application;
 	        ModelSetup(application);
-	        var modelOffieModule = ((IModelOptionsOfficeModule) application.Model.Options).OfficeModule;
-	        modelOffieModule.ImportStyles.ClearNodes();
-
+	        var documentStyleManager = application.Model.DocumentStyleManager();
+	        documentStyleManager.ImportStyles.ClearNodes();
+         
             var tuple = application.SetDocumentStyleManagerDetailView(Document);
-
+         
             var action = tuple.window.Action<DocumentStyleManagerModule>().ImportStyles();
-
+         
             var name = nameof(ImportStylesService);
             action.Active.GetKeys().ShouldContain(name);
             action.Active[name].ShouldBe(false);
@@ -138,7 +138,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
 
         [Test][XpandTest()]
         public void FilterImportStyles_Items_Should_Contain_Model_ImportStyleItems(){
-	        using var application=DocumentStyleManagerModule().Application;
+            using var application=DocumentStyleManagerModule().Application;
 	        ModelSetup(application);
 	        var window = application.CreateViewWindow();
 	        window.SetView(application.NewView(ViewType.ListView, typeof(DocumentStyle)));
@@ -147,15 +147,15 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
 	        filterImportStyles.Controller.Active.Clear();
 
             filterImportStyles.Items.Count.ShouldBe(2);
-            filterImportStyles.Items.Any(item => item.Data==((IModelOptionsOfficeModule) application.Model.Options).OfficeModule.ImportStyles.First()).ShouldBeTrue();
-            filterImportStyles.Items.Any(item => item.Data==((IModelOptionsOfficeModule) application.Model.Options).OfficeModule.ImportStyles.Last()).ShouldBeTrue();
+            filterImportStyles.Items.Any(item => item.Data==application.Model.DocumentStyleManager().ImportStyles.First()).ShouldBeTrue();
+            filterImportStyles.Items.Any(item => item.Data==application.Model.DocumentStyleManager().ImportStyles.Last()).ShouldBeTrue();
         }
 
         [Test][XpandTest()]
         public void FilterImportStyles_remembers_last_selection(){
-	        using var application=DocumentStyleManagerModule().Application;
+            using var application=DocumentStyleManagerModule().Application;
 	        ModelSetup(application);
-	        var modelImportStyles = ((IModelOptionsOfficeModule) application.Model.Options).OfficeModule.ImportStyles;
+	        var modelImportStyles = application.Model.DocumentStyleManager().ImportStyles;
 	        
 	        var importStylesItem = modelImportStyles.AddNode<IModelImportStylesItem>();
 	        importStylesItem.ModelClass = application.Model.BOModel.GetClass(typeof(DataObjectParent));
@@ -163,9 +163,9 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
 	        window.SetView(application.NewView(ViewType.ListView, typeof(DocumentStyle)));
 	        var filterImportStyles = window.Action<DocumentStyleManagerModule>().FilterImportStyles();
             filterImportStyles.Active.Clear();
-
+         
             filterImportStyles.SelectedItem.Data.ShouldBe(modelImportStyles.CurrentItem);
-
+         
             filterImportStyles.SelectedItem = filterImportStyles.Items.First(item => item.Data == importStylesItem);
             modelImportStyles.CurrentItem.ShouldBe(importStylesItem);
         }
@@ -186,9 +186,9 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
 
         [Test][XpandTest()]
         public void When_FilterImportStyles_Selection_Changed_Update_ImportedStyles_ListView(){
-	        using var application=DocumentStyleManagerModule().Application;
+            using var application=DocumentStyleManagerModule().Application;
 	        ModelSetup(application);
-	        var modelImportStyles = ((IModelOptionsOfficeModule) application.Model.Options).OfficeModule.ImportStyles;
+	        var modelImportStyles = application.Model.DocumentStyleManager().ImportStyles;
 	        modelImportStyles.CurrentItem = null;
 	        var window = application.CreateViewWindow();
 	        window.SetView(application.NewView(ViewType.ListView, typeof(DocumentStyle)));
@@ -196,9 +196,9 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
 	        filterImportStyles.Controller.Active.Clear();
 	        
 	        var testObserver = ((NonPersistentObjectSpace) filterImportStyles.View().AsListView().ObjectSpace).WhenObjectsGetting().Test();
-
+         
 	        filterImportStyles.SelectedItem = filterImportStyles.Items.Last();
-
+         
             testObserver.ItemCount.ShouldBe(1);
         }
 

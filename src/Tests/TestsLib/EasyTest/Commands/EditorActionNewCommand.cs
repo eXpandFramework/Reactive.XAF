@@ -1,7 +1,16 @@
-﻿using DevExpress.EasyTest.Framework;
+﻿using System;
+using System.Linq.Expressions;
+using DevExpress.EasyTest.Framework;
 using DevExpress.EasyTest.Framework.Commands;
+using Xpand.Extensions.XAF.ObjectExtensions;
 
 namespace Xpand.TestsLib.EasyTest.Commands{
+    public class EditorActionNewCommand<T> : EditorActionNewCommand{
+        public EditorActionNewCommand(Expression<Func<T,object>> editorSelector):base(editorSelector.MemberExpressionCaption()){
+
+        }
+    }
+
     public class EditorActionNewCommand:EasyTestCommand{
         private readonly string _editor;
         public const string Name = "EditorActionNew";
@@ -12,7 +21,7 @@ namespace Xpand.TestsLib.EasyTest.Commands{
 
         protected override void ExecuteCore(ICommandAdapter adapter){
             var executeEditorActionCommand = new ExecuteEditorActionCommand{
-                Parameters = {MainParameter = new MainParameter(_editor), ExtraParameter = new MainParameter("New")}
+                Parameters = {MainParameter = new MainParameter(_editor.CompoundName()), ExtraParameter = new MainParameter("New")}
             };
             executeEditorActionCommand.Execute(adapter);
 

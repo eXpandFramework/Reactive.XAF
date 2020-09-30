@@ -5,6 +5,7 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.XtraRichEdit;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
@@ -32,12 +33,13 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
                 }
 
                 server.Document.DeleteStyles(styles);
-                var documentStyleManager = ((Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects.DocumentStyleManager) view.CurrentObject);
+                var documentStyleManager = ((BusinessObjects.DocumentStyleManager) view.CurrentObject);
                 documentStyleManager.Content = server.Document.ToByteArray(DocumentFormat.OpenXml);
                 return view.Application().DefaultPropertiesProvider(document => {
 		                documentStyleManager.SynchronizeStyles(document);
 		                return Unit.Default.ReturnObservable();
-	                });
+	                })
+                    .TraceDocumentStyleModule(__ => styles.Select(style => style.StyleName).Join(","));
             });
 
         internal static IObservable<Unit> DeleteStyles(this ApplicationModulesManager manager) =>

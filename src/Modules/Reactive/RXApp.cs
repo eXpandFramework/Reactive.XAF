@@ -28,14 +28,14 @@ namespace Xpand.XAF.Modules.Reactive{
         static readonly Subject<Frame> FramesSubject=new Subject<Frame>();
         static readonly Subject<(object theObject,IObjectSpace objectSpace)> NewObjectsSubject=new Subject<(object theObject, IObjectSpace objectSpace)>();
         static readonly Subject<Window> PopupWindowsSubject=new Subject<Window>();
-        
+        internal static Harmony Harmony;
 
         static RxApp(){
-            var harmony = new Harmony(typeof(RxApp).Namespace);
-	        PatchXafApplication(harmony);
+            Harmony = new Harmony(typeof(RxApp).Namespace);
+	        PatchXafApplication(Harmony);
 	        var methodInfo = typeof(BaseObjectSpace).Methods(Flags.AnyVisibility|Flags.Instance,nameof(BaseObjectSpace.CreateObject)).First(info => !info.IsGenericMethod);
 	        var method = GetMethodInfo(nameof(CreateObject));
-	        harmony.Patch(methodInfo,postfix: new HarmonyMethod(method));
+	        Harmony.Patch(methodInfo,postfix: new HarmonyMethod(method));
         }
         
         [SuppressMessage("ReSharper", "InconsistentNaming")]
@@ -61,9 +61,8 @@ namespace Xpand.XAF.Modules.Reactive{
             PopupWindowsSubject.OnNext(__result);
         }
         
-        
-        
-        public static IObservable<(object theObject,IObjectSpace objectSpace)> NewObjects => NewObjectsSubject.AsObservable();
+        public static IObservable<(object theObject,IObjectSpace objectSpace)> NewObjects 
+            => NewObjectsSubject.AsObservable();
 
         private static void PatchXafApplication(Harmony harmony){
             var xafApplicationMethods = typeof(XafApplication).Methods();
@@ -90,10 +89,11 @@ namespace Xpand.XAF.Modules.Reactive{
             harmony.Patch(createModuleManager, finalizer: new HarmonyMethod(GetMethodInfo(nameof(CreateModuleManager))));
         }
 
-        private static MethodInfo GetMethodInfo(string methodName) => typeof(RxApp).GetMethods(BindingFlags.Static|BindingFlags.NonPublic).First(info => info.Name == methodName);
+        private static MethodInfo GetMethodInfo(string methodName) 
+            => typeof(RxApp).GetMethods(BindingFlags.Static|BindingFlags.NonPublic).First(info => info.Name == methodName);
 
-        private static IObservable<Unit> AddNonSecuredTypes(this ApplicationModulesManager applicationModulesManager) =>
-            applicationModulesManager.WhenCustomizeTypesInfo()
+        private static IObservable<Unit> AddNonSecuredTypes(this ApplicationModulesManager applicationModulesManager) 
+            => applicationModulesManager.WhenCustomizeTypesInfo()
                 .Select(_ =>_.e.TypesInfo.PersistentTypes.Where(info => info.Attributes.OfType<NonSecuredTypeAttrbute>().Any())
                     .Select(info => info.Type))
                 .Do(infos => {
@@ -102,17 +102,21 @@ namespace Xpand.XAF.Modules.Reactive{
                 })
                 .ToUnit();
 
-        internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) => manager.AddNonSecuredTypes()
-            .Merge(manager.WhenApplication(application => application.WhenNonPersistentPropertyCollectionSource().ToUnit()
-                .Merge(application.PatchAuthentication().ToUnit())
+        internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
+            => manager.AddNonSecuredTypes()
+                .Merge(manager.WhenApplication(application => application.WhenNonPersistentPropertyCollectionSource()
+                .Merge(application.PatchAuthentication())
+                .Merge(application.PatchObjectSpaceProvider())
+                .Merge(application.ShowPersistentObjectsInNonPersistentView())
             ))
             .Merge(manager.SetupPropertyEditorParentView())
             .Merge(manager.MergedExtraEmbededModels());
 
-        static IObservable<XafApplication> PatchAuthentication(this XafApplication application) =>
-            application.WhenSetupComplete()
+
+        static IObservable<Unit> PatchAuthentication(this XafApplication application) 
+            => application.WhenSetupComplete()
                 .Do(_ => {
-                    var harmony = new Harmony("SecurityAuthentication");
+                    var harmony = new Harmony(nameof(PatchAuthentication));
                     if (application.Security.IsInstanceOf("DevExpress.ExpressApp.Security.SecurityStrategyBase")){
                         var methodInfo = ( application.Security)?.GetPropertyValue("Authentication")?.GetType().Methods("Authenticate")
                             .Last(info =>info.DeclaringType!=null&& !info.DeclaringType.IsAbstract);
@@ -120,7 +124,8 @@ namespace Xpand.XAF.Modules.Reactive{
                             harmony.Patch(methodInfo, new HarmonyMethod(GetMethodInfo(nameof(Authenticate))));	
                         }	
                     }
-                });
+                })
+                .ToUnit();
 
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         private static bool Authenticate(ref object __result,object __instance,IObjectSpace objectSpace) {
@@ -133,8 +138,8 @@ namespace Xpand.XAF.Modules.Reactive{
             return true;
         }
         
-        private static IObservable<Unit> MergedExtraEmbededModels(this ApplicationModulesManager manager) =>
-            manager.WhereApplication().ToObservable()
+        private static IObservable<Unit> MergedExtraEmbededModels(this ApplicationModulesManager manager) 
+            => manager.WhereApplication().ToObservable()
                 .SelectMany(application => application.WhenCreateCustomUserModelDifferenceStore()
                     .Do(_ => {
                         var models = _.application.Modules.SelectMany(m => m.EmbeddedModels().Select(tuple => (id: $"{m.Name},{tuple.id}", tuple.model)))
@@ -152,8 +157,8 @@ namespace Xpand.XAF.Modules.Reactive{
                         }
                     })).ToUnit();
 
-        private static IObservable<Unit> SetupPropertyEditorParentView(this ApplicationModulesManager applicationModulesManager) =>
-            applicationModulesManager.WhereApplication().ToObservable().SelectMany(_ => _.SetupPropertyEditorParentView());
+        private static IObservable<Unit> SetupPropertyEditorParentView(this ApplicationModulesManager applicationModulesManager) 
+            => applicationModulesManager.WhereApplication().ToObservable().SelectMany(_ => _.SetupPropertyEditorParentView());
 
         [PublicAPI]
         public static IObservable<Unit> UpdateMainWindowStatus<T>(IObservable<T> messages,TimeSpan period=default){

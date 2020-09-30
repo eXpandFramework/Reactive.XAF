@@ -1,8 +1,20 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using System.Linq.Expressions;
 using DevExpress.EasyTest.Framework;
 using DevExpress.EasyTest.Framework.Commands;
+using Xpand.Extensions.XAF.ObjectExtensions;
 
 namespace Xpand.TestsLib.EasyTest.Commands{
+
+    public class CheckListViewCommand<TObject> : CheckListViewCommand{
+
+        public CheckListViewCommand(Expression<Func<TObject, object>> tableSelector, int rowCount, params string[] columns) : base(tableSelector.MemberExpressionCaption().CompoundName(), rowCount, columns){
+        }
+        public CheckListViewCommand(int rowCount, params string[] columns) : base(typeof(TObject).Name.CompoundName(), rowCount, columns){
+        }
+    }
+
     public class CheckListViewCommand:EasyTestCommand{
         private string[][] _rows;
         public const string Name = "CheckListView";

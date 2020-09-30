@@ -163,9 +163,6 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<XafApplication> SetupComplete(this IObservable<XafApplication> source) 
             => source.SelectMany(application => application.WhenSetupComplete());
 
-        public static IObservable<View> ViewCreated(this IObservable<XafApplication> source) 
-            => source.SelectMany(application => application.WhenViewCreated());
-
         [PublicAPI]
         public static IObservable<ListView> ToListView(this IObservable<(XafApplication application, ListViewCreatedEventArgs e)> source) 
             => source.Select(_ => _.e.ListView);
@@ -238,9 +235,6 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Where(view => objectType==null||objectType.IsAssignableFrom(view.ObjectTypeInfo.Type))
                 .TraceRX(view => view.Id);
 
-        public static IObservable<ObjectView> WhenObjectViewCreated(this XafApplication application) 
-            => application.ReturnObservable().ObjectViewCreated();
-
         [PublicAPI]
         public static IObservable<DashboardView> DashboardViewCreated(this IObservable<XafApplication> source) 
             => source.SelectMany(application => application.WhenDashboardViewCreated());
@@ -249,14 +243,33 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(XafApplication application, DetailViewCreatedEventArgs e)> WhenDetailViewCreated(this IObservable<XafApplication> source) 
             => source.SelectMany(application => application.WhenDetailViewCreated());
 
+        public static IObservable<ObjectView> WhenObjectViewCreated(this XafApplication application) 
+            => application.ReturnObservable().ObjectViewCreated();
+
         public static IObservable<ObjectView> ObjectViewCreated(this IObservable<XafApplication> source) 
             => source.ViewCreated().OfType<ObjectView>();
+        
+        public static IObservable<(XafApplication application, ViewCreatingEventArgs e)> WhenObjectViewCreating(this XafApplication application) 
+            => application.ReturnObservable().ObjectViewCreating();
+
+        public static IObservable<(XafApplication application, ViewCreatingEventArgs e)> ObjectViewCreating(this IObservable<XafApplication> source) 
+            => source.ViewCreating().WhenNotDefault(t => t.application.Model.Views[t.e.ViewID].AsObjectView);
+
+        public static IObservable<View> ViewCreated(this IObservable<XafApplication> source) 
+            => source.SelectMany(application => application.WhenViewCreated());
 
         public static IObservable<View> WhenViewCreated(this XafApplication application) 
-            => Observable
-                .FromEventPattern<EventHandler<ViewCreatedEventArgs>, ViewCreatedEventArgs>(
+            => Observable.FromEventPattern<EventHandler<ViewCreatedEventArgs>, ViewCreatedEventArgs>(
                     h => application.ViewCreated += h, h => application.ViewCreated -= h, ImmediateScheduler.Instance)
                 .Select(pattern => pattern.EventArgs.View);
+        
+        public static IObservable<(XafApplication application, ViewCreatingEventArgs e)> ViewCreating(this IObservable<XafApplication> source) 
+            => source.SelectMany(application => application.WhenViewCreating());
+
+        public static IObservable<(XafApplication application, ViewCreatingEventArgs e)> WhenViewCreating(this XafApplication application) 
+            => Observable.FromEventPattern<EventHandler<ViewCreatingEventArgs>, ViewCreatingEventArgs>(
+                    h => application.ViewCreating += h, h => application.ViewCreating -= h, ImmediateScheduler.Instance)
+                .TransformPattern<ViewCreatingEventArgs,XafApplication>();
 
         [PublicAPI]
         public static IObservable<(Frame SourceFrame, Frame TargetFrame)> WhenViewShown(this XafApplication application) 
@@ -378,8 +391,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => Observable.FromEventPattern<EventHandler<CreateCustomPropertyCollectionSourceEventArgs>,
                 CreateCustomPropertyCollectionSourceEventArgs>(h => application.CreateCustomPropertyCollectionSource += h,
                 h => application.CreateCustomPropertyCollectionSource += h, Scheduler.Immediate).Select(_ => _.EventArgs);
+        
+        public static IObservable<DatabaseUpdaterEventArgs> WhenDatabaseUpdaterCreating(this XafApplication application) 
+            => Observable.FromEventPattern<EventHandler<DatabaseUpdaterEventArgs>,
+                DatabaseUpdaterEventArgs>(h => application.DatabaseUpdaterCreating += h,
+                h => application.DatabaseUpdaterCreating += h, Scheduler.Immediate).Select(_ => _.EventArgs);
 
-        public static IObservable<NonPersistePropertyCollectionSource> WhenNonPersistentPropertyCollectionSource(this XafApplication application) 
+        internal static IObservable<Unit> WhenNonPersistentPropertyCollectionSource(this XafApplication application) 
             => application.WhenCreateCustomPropertyCollectionSource()
                 .Where(e => e.ObjectSpace is NonPersistentObjectSpace)
                 .Select(e => {
@@ -387,11 +405,14 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     return e.PropertyCollectionSource;
                 })
                 .Cast<NonPersistePropertyCollectionSource>()
-                .TakeUntilDisposed(application);
+                .TakeUntilDisposed(application)
+                .ToUnit();
 
         public static Guid CurrentUserId(this XafApplication application) 
             => application.Security.IsSecurityStrategyComplex() ? (Guid) application.Security.UserId
                 : $"{application.Title}{Environment.MachineName}{Environment.UserName}".ToGuid();
+
+
     }
 
 

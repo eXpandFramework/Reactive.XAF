@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using akarnokd.reactive_extensions;
 using DevExpress.Data.Filtering;
@@ -22,8 +23,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
             dataObject.Content=Document.ToByteArray(DocumentFormat.OpenXml);
             dataObject.Name = "aaaa";
             dataObject.ObjectSpace.CommitChanges();
-            ((IModelOptionsOfficeModule) application.Model.Options).OfficeModule.DefaultPropertiesProviderCriteria =
-	            CriteriaOperator.Parse("Oid=?", dataObject.Oid).ToString();
+            application.Model.DocumentStyleManager().DefaultPropertiesProviderCriteria =
+	           CriteriaOperator.Parse("Oid=?", dataObject.Oid).ToString();
             var window = application.ShowDocumentStyleManagerDetailView(dataObject);
             
             var documentStyleManager = ((BusinessObjects.DocumentStyleManager) window.View.CurrentObject);

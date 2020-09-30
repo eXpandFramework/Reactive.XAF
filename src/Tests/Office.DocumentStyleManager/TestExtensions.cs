@@ -70,7 +70,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests{
 
         public static (Window window, BusinessObjects.ApplyTemplateStyle applyTemplateStyle)  SetDocumentStyleManagerDetailView(this XafApplication application){
 	        var window = application.CreateViewWindow();
-	        var item = ((IModelOptionsOfficeModule) application.Model.Options).OfficeModule.ApplyTemplateListViews.AddNode<IModelApplyTemplateListViewItem>();
+            var item = application.Model.DocumentStyleManager().ApplyTemplateListViews.AddNode<IModelApplyTemplateListViewItem>();
 	        item.ListView = application.Model.BOModel.GetClass(typeof(DataObject)).DefaultListView;
 	        window.SetView(application.NewView(ViewType.ListView, typeof(DataObject)));
 	        var action = window.Action<DocumentStyleManagerModule>().ShowApplyStylesTemplate();
@@ -109,8 +109,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests{
 
 	        document ??= new RichEditDocumentServer().Document;
 	        var modelListView = application.Model.BOModel.GetClass(typeof(DataObject)).DefaultListView;
-	        var modelOffieModule = ((IModelOptionsOfficeModule) application.Model.Options).OfficeModule;
-	        var applyTemplateListViewItem = modelOffieModule.ApplyTemplateListViews.AddNode<IModelApplyTemplateListViewItem>();
+            var modelDocumentStyleManager = application.Model.DocumentStyleManager();
+	        var applyTemplateListViewItem = modelDocumentStyleManager.ApplyTemplateListViews.AddNode<IModelApplyTemplateListViewItem>();
 	        applyTemplateListViewItem.ListView=modelListView;
 	        
 	        var dataObjectSpace = application.CreateObjectSpace();
@@ -132,8 +132,11 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests{
         }
 
         public static void EnableShowStyleManager(this IModelApplication application){
-            var model = application.BOModel.GetClass(typeof(DataObject)).DefaultDetailView.Items.OfType<IModelPropertyEditorEnableDocumentStyleManager>().First(manager => manager.ModelMember.Name==nameof(DataObject.Content));
-            model.EnableDocumentStyleManager = true;
+            var modelDocumentStyleManager = application.DocumentStyleManager();
+            var modelDesignTemplateDetailView = modelDocumentStyleManager.DesignTemplateDetailViews.AddNode<IModelDesignTemplateDetailView>();
+            modelDesignTemplateDetailView.DetailView = application.BOModel.GetClass(typeof(DataObject)).DefaultDetailView;
+            var modelDesignTemplateContentEditor = modelDesignTemplateDetailView.ContentEditors.AddNode<IModelDesignTemplateContentEditor>();
+            modelDesignTemplateContentEditor.ContentEditor = modelDesignTemplateContentEditor.ContentEditors.First();
         }
     }
 }

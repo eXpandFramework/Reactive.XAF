@@ -29,6 +29,18 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ALL.Web.Tests", "..\ALL.Web
 		{6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC} = {6C6F7888-2F0A-4BA9-89BD-A41BDAAC34BC}
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Reactive", "..\..\..\Modules\Reactive\Xpand.XAF.Modules.Reactive.csproj", "{58399364-9ACA-429F-A276-7F01E9E61D7D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.XAF", "..\..\..\Extensions\Xpand.Extensions.XAF\Xpand.Extensions.XAF.csproj", "{5B0B4313-F4D1-4539-8521-8DE46EA2075F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions", "..\..\..\Extensions\Xpand.Extensions\Xpand.Extensions.csproj", "{C39DF5EB-7CDC-4574-AD5C-FABDF7876E37}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Office.DocumentStyleManager", "..\..\..\Modules\Office.DocumentStyleManager\Xpand.XAF.Modules.Office.DocumentStyleManager.csproj", "{C8F69922-8051-4A87-B5BF-3CE60E2633B2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.HideToolBar", "..\..\..\Modules\HideToolBar\Xpand.XAF.Modules.HideToolBar.csproj", "{B76C0852-B1B3-4663-98F5-808FA9AC2D30}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.XAF.Xpo", "..\..\..\Extensions\Xpand.Extensions.XAF.Xpo\Xpand.Extensions.XAF.Xpo.csproj", "{2D0A9675-8493-483D-9D9B-109269A9597A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +75,30 @@ Global
 		{3B0C7B34-9818-4CB3-A1B2-2F2F25459D35}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{3B0C7B34-9818-4CB3-A1B2-2F2F25459D35}.Release|Any CPU.ActiveCfg = Debug|Any CPU
 		{3B0C7B34-9818-4CB3-A1B2-2F2F25459D35}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{58399364-9ACA-429F-A276-7F01E9E61D7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58399364-9ACA-429F-A276-7F01E9E61D7D}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
+		{58399364-9ACA-429F-A276-7F01E9E61D7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B0B4313-F4D1-4539-8521-8DE46EA2075F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B0B4313-F4D1-4539-8521-8DE46EA2075F}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
+		{5B0B4313-F4D1-4539-8521-8DE46EA2075F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C39DF5EB-7CDC-4574-AD5C-FABDF7876E37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C39DF5EB-7CDC-4574-AD5C-FABDF7876E37}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
+		{C39DF5EB-7CDC-4574-AD5C-FABDF7876E37}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8F69922-8051-4A87-B5BF-3CE60E2633B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8F69922-8051-4A87-B5BF-3CE60E2633B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8F69922-8051-4A87-B5BF-3CE60E2633B2}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
+		{C8F69922-8051-4A87-B5BF-3CE60E2633B2}.EasyTest|Any CPU.Build.0 = Release|Any CPU
+		{C8F69922-8051-4A87-B5BF-3CE60E2633B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8F69922-8051-4A87-B5BF-3CE60E2633B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B76C0852-B1B3-4663-98F5-808FA9AC2D30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B76C0852-B1B3-4663-98F5-808FA9AC2D30}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
+		{B76C0852-B1B3-4663-98F5-808FA9AC2D30}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D0A9675-8493-483D-9D9B-109269A9597A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D0A9675-8493-483D-9D9B-109269A9597A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D0A9675-8493-483D-9D9B-109269A9597A}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
+		{2D0A9675-8493-483D-9D9B-109269A9597A}.EasyTest|Any CPU.Build.0 = Release|Any CPU
+		{2D0A9675-8493-483D-9D9B-109269A9597A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D0A9675-8493-483D-9D9B-109269A9597A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

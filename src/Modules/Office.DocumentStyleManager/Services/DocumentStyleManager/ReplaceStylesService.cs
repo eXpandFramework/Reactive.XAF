@@ -4,6 +4,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
@@ -43,7 +44,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
 	                var replacementStyles = view.ReplacementStylesListView().SelectedObjects.Cast<IDocumentStyle>().ToArray();
 	                var styles = view.AllStylesListView().SelectedObjects.Cast<IDocumentStyle>().ToArray();
 	                view.DocumentManagerContentRichEditServer().Document.ReplaceStyles(replacementStyles.First(),document,styles);
-	                return Observable.Empty<Unit>();
+	                return Observable.Empty<Unit>()
+                        .TraceDocumentStyleModule(_ => styles.Select(style => style.StyleName).Join(", "));
                 }));
 
     }

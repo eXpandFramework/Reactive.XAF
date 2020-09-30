@@ -37,7 +37,7 @@ function GetModuleName($_){
     $moduleName
 }
 function UpdateModulesList($rootLocation, $packages,$path) {
-    $moduleList = "|PackageName|Version|[![Custom badge](https://xpandshields.azurewebsites.net/endpoint.svg?label=&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAF)](https://www.nuget.org/packages?q=Xpand.XAF)|Target|Platform|About`r`n|---|---|---|---|---|---|`r`n"
+    $moduleList = "|PackageName|[![Custom badge](https://xpandshields.azurewebsites.net/endpoint.svg?label=Downloads&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAF)](https://www.nuget.org/packages?q=Xpand.XAF)<br>Platform/Target|About`r`n|---|---|---|`r`n"
     $projects=Get-MSBuildProjects $rootLocation\src\Modules
     $assemblies=Get-ChildItem $rootLocation\bin xpand.*.dll
     
@@ -77,7 +77,7 @@ function UpdateModulesList($rootLocation, $packages,$path) {
             }
         }
         
-        $moduleList += "$packageUri|$version|$downloads|$targetFramework|$platform|$about`r`n"
+        $moduleList += "$packageUri|$version$downloads<br>$platform/$targetFramework|$about`r`n"
     }
     
     

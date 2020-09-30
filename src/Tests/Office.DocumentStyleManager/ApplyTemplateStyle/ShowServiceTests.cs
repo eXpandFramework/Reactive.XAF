@@ -22,35 +22,34 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.ApplyTemplateStyle
 			window.SetView(application.NewView(ViewType.ListView, typeof(DataObject)));
 
 			Services.StyleTemplateService.ShowService.ShowApplyStylesTemplate(window.Action<DocumentStyleManagerModule>()).Active[nameof(ShowService)].ShouldBeFalse();
-
-			var item = ((IModelOptionsOfficeModule) application.Model.Options).OfficeModule.ApplyTemplateListViews.AddNode<IModelApplyTemplateListViewItem>();
+            var item = application.Model.DocumentStyleManager().ApplyTemplateListViews.AddNode<IModelApplyTemplateListViewItem>();
 			item.ListView = application.Model.BOModel.GetClass(typeof(DataObject)).DefaultListView;
-
+			
 			window.SetView(application.NewView(ViewType.ListView, typeof(DataObject)));
-
+			
 			Services.StyleTemplateService.ShowService.ShowApplyStylesTemplate(window.Action<DocumentStyleManagerModule>()).Active[nameof(ShowService)].ShouldBeTrue();
 		}
 
 		[Test][Apartment(ApartmentState.STA)][XpandTest()]
 		public void Action_Shows_ApplyTemplateStyle_DetailView_and_initialize_template(){
-			using var application=DocumentStyleManagerModule().Application;
+            using var application=DocumentStyleManagerModule().Application;
 			var window = application.CreateViewWindow();
-			var item = ((IModelOptionsOfficeModule) application.Model.Options).OfficeModule.ApplyTemplateListViews.AddNode<IModelApplyTemplateListViewItem>();
+			var item = application.Model.DocumentStyleManager().ApplyTemplateListViews.AddNode<IModelApplyTemplateListViewItem>();
 			item.ListView = application.Model.BOModel.GetClass(typeof(DataObject)).DefaultListView;
 			window.SetView(application.NewView(ViewType.ListView, typeof(DataObject)));
 			var action = Services.StyleTemplateService.ShowService.ShowApplyStylesTemplate(window.Action<DocumentStyleManagerModule>());
 			action.WhenExecuted().FirstAsync()
 				.Do(e => e.ShowViewParameters.TargetWindow = TargetWindow.NewWindow).Test();
-			var testObserver = application.WhenViewOnFrame(typeof(Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects.ApplyTemplateStyle), ViewType.DetailView).Test();
+			var testObserver = application.WhenViewOnFrame(typeof(BusinessObjects.ApplyTemplateStyle), ViewType.DetailView).Test();
 			var dataObject = window.View.ObjectSpace.CreateObject<DataObject>();
 			dataObject.Content=new byte[]{1};
 			dataObject.Name = nameof(DataObject);
 			dataObject.ObjectSpace.CommitChanges();
-
+			
 			action.DoExecute(space => new object[]{dataObject});
-
+			
 			testObserver.ItemCount.ShouldBe(1);
-			var applyTemplateStyle = ((Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects.ApplyTemplateStyle) testObserver.Items.First().View.CurrentObject);
+			var applyTemplateStyle = ((BusinessObjects.ApplyTemplateStyle) testObserver.Items.First().View.CurrentObject);
 			applyTemplateStyle.ListView.ShouldBe(item.ListView.Id);
 			var documents = applyTemplateStyle.Documents;
 			documents.Count.ShouldBe(1);

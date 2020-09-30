@@ -13,12 +13,13 @@ using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ViewExtenions;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects;
+using Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleManager;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.StyleTemplateService{
 	public static class ShowService{
-		public static SimpleAction ShowApplyStylesTemplate(this (DocumentStyleManagerModule, Frame frame) tuple) => tuple
-			.frame.Action(nameof(ShowApplyStylesTemplate)).As<SimpleAction>();
+		public static SimpleAction ShowApplyStylesTemplate(this (DocumentStyleManagerModule, Frame frame) tuple) 
+            => tuple.frame.Action(nameof(ShowApplyStylesTemplate)).As<SimpleAction>();
 
 		internal static IObservable<Unit> ShowStyleTemplate(this ApplicationModulesManager manager){
 			var registerAction = manager.RegisterApplyStyleTemplateAction();
@@ -28,21 +29,23 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.StyleTemplateSe
 				.ToUnit();
 		}
 
-		private static IObservable<Unit> ShowApplyTemplateStyle(this IObservable<SimpleAction> registerAction) => registerAction
-			.WhenExecute()
-			.Do(e => {
-				var application = e.Action.Application;
-				var templateStyle = application.NewApplyStyleTemplate( e.Action.View().AsListView().Model, e.SelectedObjects.Cast<object>().ToArray());
-				var detailView = application.CreateDetailView(templateStyle);
-				e.ShowViewParameters.CreatedView = detailView;
-				e.ShowViewParameters.TargetWindow=TargetWindow.NewModalWindow;
-			})
-			.ToUnit();
+        private static IObservable<Unit> ShowApplyTemplateStyle(this IObservable<SimpleAction> registerAction)
+            => registerAction
+                .WhenExecute()
+                .Do(e => {
+                    var application = e.Action.Application;
+                    var templateStyle = application.NewApplyStyleTemplate(e.Action.View().AsListView().Model,
+                        e.SelectedObjects.Cast<object>().ToArray());
+                    var detailView = application.CreateDetailView(templateStyle);
+                    e.ShowViewParameters.CreatedView = detailView;
+                    e.ShowViewParameters.TargetWindow = TargetWindow.NewModalWindow;
+                })
+                .ToUnit();
 
 		internal static ApplyTemplateStyle NewApplyStyleTemplate(this XafApplication application, IModelListView listView, params object[] objects){
 			var objectSpace = application.CreateObjectSpace(typeof(ApplyTemplateStyle));
 			var templateStyle = objectSpace.CreateObject<ApplyTemplateStyle>();
-			var defaultMemberMemberInfo = ((IModelOptionsOfficeModule) listView.Application.Options).OfficeModule
+            var defaultMemberMemberInfo = listView.Application.DocumentStyleManager()
 				.ApplyTemplateListViews[listView.Id].DefaultMember.MemberInfo;
 			var objectsData = objects.GroupBy(o => o.GetType())
 				.SelectMany(_ => {
@@ -60,24 +63,26 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.StyleTemplateSe
 			return templateStyle;
 		}
 
-		private static IObservable<Unit> Activate(this IObservable<SimpleAction> registerAction) => registerAction
-			.WhenControllerActivated()
-			.Do(action => action.Active[nameof(ShowService)] = action.Application.Model.IsTemplateListView(action.View().Id))
-			.WhenActive()
-			.ToUnit();
+        private static IObservable<Unit> Activate(this IObservable<SimpleAction> registerAction)
+            => registerAction
+                .WhenControllerActivated()
+                .Do(action => action.Active[nameof(ShowService)] = action.Application.Model.IsTemplateListView(action.View().Id))
+                .WhenActive()
+                .TraceDocumentStyleModule(action => action.Id)
+                .ToUnit();
 
-		internal static bool IsTemplateListView(this IModelApplication applicationModel, string viewID) => ((IModelOptionsOfficeModule) applicationModel
-			.Options).OfficeModule.ApplyTemplateListViews.Any(item => item.ListViewId==viewID);
+		internal static bool IsTemplateListView(this IModelApplication applicationModel, string viewID)
+            => applicationModel.DocumentStyleManager().ApplyTemplateListViews.Any(item => item.ListViewId==viewID);
 
-		private static IObservable<SimpleAction> RegisterApplyStyleTemplateAction(this ApplicationModulesManager manager) => manager
-			.RegisterViewSimpleAction(nameof(ShowApplyStylesTemplate), action => {
-				action.TargetViewNesting=Nesting.Root;
-				action.TargetViewType=ViewType.ListView;
-				action.SelectionDependencyType = SelectionDependencyType.RequireMultipleObjects;
-				action.Caption = "Apply Styles";
-				action.ImageName = "XafBarLinkContainerItem";
-				action.PaintStyle = ActionItemPaintStyle.CaptionAndImage;
-			}, PredefinedCategory.Tools)
-			.Publish().RefCount();
+        private static IObservable<SimpleAction> RegisterApplyStyleTemplateAction(this ApplicationModulesManager manager)
+            => manager.RegisterViewSimpleAction(nameof(ShowApplyStylesTemplate), action => {
+                    action.TargetViewNesting = Nesting.Root;
+                    action.TargetViewType = ViewType.ListView;
+                    action.SelectionDependencyType = SelectionDependencyType.RequireMultipleObjects;
+                    action.Caption = "Apply Styles";
+                    action.ImageName = "XafBarLinkContainerItem";
+                    action.PaintStyle = ActionItemPaintStyle.CaptionAndImage;
+                }, PredefinedCategory.Tools)
+                .Publish().RefCount();
 	}
 }

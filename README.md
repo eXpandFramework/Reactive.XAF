@@ -6,7 +6,7 @@
 | ![image](https://user-images.githubusercontent.com/159464/66713086-c8c5a800-edae-11e9-9bc1-73ffc0c215fb.png) |  [![Custom badge](https://xpandshields.azurewebsites.net/endpoint.svg?label=Nuget.org&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAF)](https://www.nuget.org/packages?q=Xpand.XAF) 
 |----------|--------
 **Stable**|`nuget.exe list Xpand.XAF`
-**Lab**|`nuget.exe list Xpand.XAF -source http://nuget.expandframework.com`
+**Lab**|`nuget.exe list Xpand.XAF -source https://xpandnugetserver.azurewebsites.net/nuget`
 
 
 In the `DevExpress.XAF` repository you can find **low dependency** DevExpress XAF **modules** and **tools** distributed from Nuget.org only. 

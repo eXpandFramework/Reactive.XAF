@@ -7,8 +7,9 @@ using JetBrains.Annotations;
 namespace Xpand.Extensions.XAF.ModelExtensions{
     [PublicAPI]
     public partial class ModelExtensions{
-	    public static IEnumerable<IModelMemberViewItem> MemberViewItems(this IModelObjectView modelObjectView, Type propertyEditorType=null) => 
-	        (modelObjectView is IModelListView modelListView ? modelListView.Columns : ((IModelDetailView) modelObjectView).Items.OfType<IModelMemberViewItem>())
-                .Where(item =>propertyEditorType==null|| propertyEditorType.IsAssignableFrom(item.PropertyEditorType));
+	    public static IEnumerable<IModelMemberViewItem> MemberViewItems(this IModelObjectView modelObjectView, Type propertyEditorType=null)
+            => modelObjectView == null ? Enumerable.Empty<IModelMemberViewItem>()
+                : (modelObjectView is IModelListView modelListView ? modelListView.Columns : ((IModelDetailView) modelObjectView).Items.OfType<IModelMemberViewItem>())
+                .Where(item => propertyEditorType == null || propertyEditorType.IsAssignableFrom(item.PropertyEditorType));
     }
 }

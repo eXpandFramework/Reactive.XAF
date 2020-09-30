@@ -29,41 +29,40 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
 			        .Merge(detailView.SynchronizeEditorPositions( contentRichEditServer));
 	        });
 
-        private static IObservable<Unit> SelectActiveStyle(this IObservable<DetailView> source,IObservable<IRichEditDocumentServer> contentRichEditServer) =>
-            contentRichEditServer.Select(server => server)
+        private static IObservable<Unit> SelectActiveStyle(this IObservable<DetailView> source,IObservable<IRichEditDocumentServer> contentRichEditServer) 
+            => contentRichEditServer.Select(server => server)
                 .Zip(source.Select(view => view))
                 .SelectMany(_ => _.first.WhenSelectionChanged().Select(server => _))
-                .SelectMany(_ => _.second.Application().DefaultPropertiesProvider(defaultPropertiesProvider => {
-		                var server = _.first;
-		                var documentStyleManager = (Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects.DocumentStyleManager) _.second.CurrentObject;
+                .SelectMany(t => t.second.Application().DefaultPropertiesProvider(defaultPropertiesProvider => {
+		                var server = t.first;
+		                var documentStyleManager = (BusinessObjects.DocumentStyleManager) t.second.CurrentObject;
 		                var document = server.Document;
 		                documentStyleManager.Position = document.CaretPosition.ToInt();
 		                documentStyleManager.Paragraph = document.ParagraphFromPosition() + 1;
                     
 		                var documentStyle = document.DocumentStyleFromPosition(defaultPropertiesProvider);
 		                if (documentStyle != null){
-			                var allStylesListView = _.second.AllStylesListView();
+			                var allStylesListView = t.second.AllStylesListView();
 			                var currentObject = allStylesListView.CollectionSource.Objects<DocumentStyle>()
 				                .FirstOrDefault(style => style.Equals(documentStyle));
 			                allStylesListView.CurrentObject = currentObject;
 		                }
 
-		                return Unit.Default.ReturnObservable();
+		                return Unit.Default.ReturnObservable().TraceDocumentStyleModule(_ => documentStyle?.StyleName??nameof(SelectActiveStyle));
                 }));
 
         private static IObservable<Unit> SynchronizeEditorPositions(this IObservable<DetailView> source, IObservable<IRichEditDocumentServer> contentRichEditServer){
-            var originalRichEditServer = source.SelectMany(detailView => detailView.WhenRichEditDocumentServer<Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects.DocumentStyleManager>(m => m.Original));
+            var originalRichEditServer = source.SelectMany(detailView => detailView.WhenRichEditDocumentServer<BusinessObjects.DocumentStyleManager>(m => m.Original));
             return contentRichEditServer.Zip(originalRichEditServer, (contentServer, originalServer) => (contentServer, originalServer))
                 .SelectMany(_ => _.contentServer.WhenSelectionChanged()
                     .Do(server => _.originalServer.Document.CaretPosition = _.originalServer.Document.CreatePosition(server.Document.CaretPosition.ToInt())))
-                .ToUnit();
+                .ToUnit().TraceDocumentStyleModule();
         }
 
         private static IObservable<Unit> SynchronizeStylesWhenContextModified(this IObservable<DetailView> detailView, IObservable<IRichEditDocumentServer> contentRichEditServer){
 	        var documentStyleManagerModified = detailView
-                .SelectMany(view => view.ObjectSpace.WhenModifiedObjects<Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects.DocumentStyleManager>(m => m.Content)
-	                .SelectMany(manager =>
-		                view.Application().DefaultPropertiesProvider(document => {
+                .SelectMany(view => view.ObjectSpace.WhenModifiedObjects<BusinessObjects.DocumentStyleManager>(m => m.Content)
+	                .SelectMany(manager => view.Application().DefaultPropertiesProvider(document => {
 			                manager.SynchronizeStyles(document);
 			                return Unit.Default.ReturnObservable();
 		                })))
@@ -72,18 +71,21 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
             
             var documentContentChanged = detailView
 	            .Zip(contentRichEditServer)
-                .SelectMany(_ => _.second.WhenContentChanged().Select(server => server)
+                .SelectMany(_ => _.second.WhenContentChanged()
+                    // .TakeUntil(server => server.IsDisposed||_.first.IsDisposed||_.second.IsDisposed)
 	                .Throttle(TimeSpan.FromSeconds(1))
+                    // .TakeUntil(server => server.IsDisposed||_.first.IsDisposed||_.second.IsDisposed)
 	                .ObserveOn(SynchronizationContext.Current)
+                    // .TakeUntil(server => server.IsDisposed||_.first.IsDisposed||_.second.IsDisposed)
 	                .SelectMany(server => _.first.Application().DefaultPropertiesProvider(document => server.ResetStyleCollections((_.first,document))
 		                .Do(documentServer => documentServer.SelectActiveStyle((_.first,document))))))
                 .ToUnit();
-            return documentStyleManagerModified.Merge(documentContentChanged);
+            return documentStyleManagerModified.Merge(documentContentChanged).TraceDocumentStyleModule();
         }
 
         private static void SelectActiveStyle(this IRichEditDocumentServer server, (DetailView view, Document defaultPropertiesProvider) detailView){
             var document = server.Document;
-            var documentStyleManager = (Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects.DocumentStyleManager)detailView.view.CurrentObject;
+            var documentStyleManager = (BusinessObjects.DocumentStyleManager)detailView.view.CurrentObject;
             documentStyleManager.Position = document.CaretPosition.ToInt();
             documentStyleManager.Paragraph = document.ParagraphFromPosition() + 1; 
             var documentStyle = document.DocumentStyleFromPosition(detailView.defaultPropertiesProvider);
@@ -100,25 +102,29 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
 			        e.Instance =new BindingList<DocumentStyle>(ImmutableList.CreateRange(styles));
 		        })
 		        .FirstAsync();
-	        return styles == null
-		        ? listView.Application()
-			        .DefaultPropertiesProvider(document => {
-				        var usedStyles = server.Document.UsedStyles(defaultPropertiesProvider: document).ToArray();
-				        var unUsedStyles = usedStyles.ToArray();
-				        styles = unUsedStyles.Concat(server.Document.UnusedStyles(defaultPropertiesProvider: detailView.defaultPropertiesProvider))
-					        .Cast<DocumentStyle>().Distinct().Where(_ => !_.IsDeleted).ToArray();
-				        var documentStyleManager = (Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects.DocumentStyleManager) detailView.view.CurrentObject;
-				        documentStyleManager.UsedStyles.Clear();
-				        documentStyleManager.UsedStyles.AddRange(usedStyles);
-				        documentStyleManager.UnusedStyles.Clear();
-				        documentStyleManager.UnusedStyles.AddRange(unUsedStyles);
-				        return customizeDatasource;
-		        })
-		        : customizeDatasource;
+	        return (styles == null
+                ? listView.Application()
+                    .DefaultPropertiesProvider(document => {
+                        var usedStyles = server.Document.UsedStyles(defaultPropertiesProvider: document).ToArray();
+                        var unUsedStyles = usedStyles.ToArray();
+                        styles = unUsedStyles
+                            .Concat(server.Document.UnusedStyles(
+                                defaultPropertiesProvider: detailView.defaultPropertiesProvider))
+                            .Cast<DocumentStyle>().Distinct().Where(_ => !_.IsDeleted).ToArray();
+                        var documentStyleManager = (BusinessObjects.DocumentStyleManager) detailView.view.CurrentObject;
+                        documentStyleManager.UsedStyles.Clear();
+                        documentStyleManager.UsedStyles.AddRange(usedStyles);
+                        documentStyleManager.UnusedStyles.Clear();
+                        documentStyleManager.UnusedStyles.AddRange(unUsedStyles);
+                        return customizeDatasource;
+                    })
+                : customizeDatasource).TraceDocumentStyleModule();
         }
 
         private static IObservable<IRichEditDocumentServer> ResetStyleCollections(this IRichEditDocumentServer server, (DetailView view, Document defaultPropertiesProvider) detailView){
-            
+            if (detailView.view.IsDisposed){
+                return Observable.Empty<IRichEditDocumentServer>();
+            }
             var allStylesListView = detailView.view.AllStylesListView();
             return Observable.Create<GenericEventArgs<IEnumerable<object>>>(observer => {
                     var publish = server.CustomizeDatasource(allStylesListView,detailView).Publish();
@@ -134,7 +140,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
                     replacementStylesListView.CollectionSource.ResetCollection();
                     return disposable;
                 }).ToUnit())
-                .To(server);
+                .To(server)
+                .TraceDocumentStyleModule();
         }
 
     }

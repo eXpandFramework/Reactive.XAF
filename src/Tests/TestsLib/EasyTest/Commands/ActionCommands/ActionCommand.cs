@@ -2,6 +2,7 @@
 using System.Linq;
 using DevExpress.EasyTest.Framework;
 using EnumsNET;
+using Xpand.Extensions.XAF.ObjectExtensions;
 
 namespace Xpand.TestsLib.EasyTest.Commands.ActionCommands{
     public class ActionCommand:EasyTestCommand{
@@ -14,7 +15,7 @@ namespace Xpand.TestsLib.EasyTest.Commands.ActionCommands{
         }
 
         public ActionCommand(string caption,string item=null){
-            Parameters.MainParameter=new MainParameter(caption);
+            Parameters.MainParameter=new MainParameter(caption.CompoundName());
             Parameters.ExtraParameter=new MainParameter(item);
         }
 
