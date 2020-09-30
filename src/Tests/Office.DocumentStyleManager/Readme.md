@@ -15,62 +15,57 @@ The DocumentStyleManager can massively re-brand a large number of documents usin
 
 This is a `platform agnostic` module that can be used to configure templates that can be applied to XAF domain components that contain members which store RTF documents.
 
-### Template Generation
-
-Using the UI, the end user, from a predefined detailView can execute the `Style Manager` SingleChoice action to display the manager view for template generation or for re-branding of the documents contained in the DetailView Domain Component.
+### Model Configuration
 
 * To configure for which members populate the StyleManager SingleChoiceAction you can use the model as in the next image.
 
   ![image](https://user-images.githubusercontent.com/159464/94731917-34ad7180-036e-11eb-962a-4717cbc90681.png)
 
-* In the `ImportStyles` node you can configure which views contain Domain Components that will be used in case you need to import styles from other documents while you generating the template.
+* In the `ImportStyles` node you can configure which Domain Components will be used in case you need to import styles from other documents while you generating the template.
 
    ![image](https://user-images.githubusercontent.com/159464/94734081-5d833600-0371-11eb-9c8c-2ccf44a07cd9.png)
 
 * The `ApplyTemplateListViews` node contain the ListViews where you can apply the generated template.
   
   ![image](https://user-images.githubusercontent.com/159464/94734174-89062080-0371-11eb-9e9b-4222fa896d20.png)
-Additional options are available as DocumentStyManager attributes.
+* Additional options are available as DocumentStyManager attributes to help you override the default style properties. 
 
-![image](https://user-images.githubusercontent.com/159464/94733854-11d08c80-0371-11eb-8841-610163d19fbb.png)
+  ![image](https://user-images.githubusercontent.com/159464/94733854-11d08c80-0371-11eb-8841-610163d19fbb.png)
 
-You can use the model to `configure`:
+### Template Generation
+
+The StyLeManager action is available only for Detailviews and will display the next view using the DetailView.CurrentObject and the already discussed model configuration.
+
+![TestApplication Win_TFWorDs5wg](https://user-images.githubusercontent.com/159464/94734788-67596900-0372-11eb-960b-610b70b6bc1b.png)
+
+This is a non persistent view and changes sent back to the owner view when `Accept` is executed. The Owner object gets modified but the transaction not committed.
+
+On the right side we have two RichEditPropertyEditors. The top one will display how the changed and the bottom the original content.
+
+On the left side we have two ListViews with styles from the top-changed document. The `green` color means that the style is used. The `Replacement Styles` contains only styles that match the type (Paragraph/Character) of the `All Styles` view.
+
+The following operations can be performed at the top left editor (use the bottom editor for compare with the original):
+1. `Apply Style`: Position the cursor at any place in the top-left editor and change either the paragraph or the character style by selecting from the Apply Styles listview and executing the action.
+2. `Delete Styles`: Select one or many styles from the All Styles ListView and execute the action. Additionally execute the DeleteStyles.Unused to remove all unused styles from the top-left editor.
+3. `Replace Styles`: Select one or many styles from the All Styles ListView to replace them with the single selection of the Replacement Styles ListView. To persist this operation in a template for later usage activate the Linked styles template and execute the `Template Styles` action.
+ ![image](https://user-images.githubusercontent.com/159464/94738015-7393f500-0377-11eb-829f-4c3078fd86e0.png)
+4. `Import Styles`: Will display a popup ListView containing the styles parsed from the Domain Components configured in the XAF model as discussed in the configuration section. 
+![image](https://user-images.githubusercontent.com/159464/94738189-bb1a8100-0377-11eb-91b5-fdc01ac17eb0.png)
+
+
 
 * The subject `Views`, the target container `Calendar` and which Domain Component should be created when a `NewCloudEvent`.</br>
 ![image](https://user-images.githubusercontent.com/159464/93872067-48a30480-fcd8-11ea-92c7-3512999e53e9.png)
 * The CRUD `SynchronizationType` and the `CallDirection`.</br>
 ![image](https://user-images.githubusercontent.com/159464/93872150-6a03f080-fcd8-11ea-92b0-2289b38032d4.png)
+4. `Accept`: Accept the changes to persist the template and sent them to the parent object.
 
+### Apply the generated template to a list of documents.
+Navigate to a predefined view that has the `Apply Styles` action enabled as discussed in the configuration section and execute the action to display the Apply Template Style DetailView.
 
+![image](https://user-images.githubusercontent.com/159464/94738868-b904f200-0378-11eb-9372-f0f966062d10.png)
 
-The package can operate without any configuration by executing a `predefined map` between the `IEvent` and `Google.Apis.Calendar.v3.Event` objects on Update and on Insert for both incoming and outgoing calls.
-
-To customize the predefined map you can use a query like the next one which suffix the Google.Apis.Calendar.v3.Event subject with the current date:
-
-```cs
-
-CalendarService.CustomizeSynchronization
-    .Do(e => {
-        var tuple = e.Instance;
-        if (tuple.mapAction != MapAction.Delete){
-            if (tuple.callDirection == CallDirection.In){
-                tuple.local.Subject = $"{tuple.cloud.Subject} - {DateTime.Now}";
-            }
-            else if (tuple.callDirection == CallDirection.Out){
-                tuple.cloud.Subject = $"{tuple.local.Subject} - {DateTime.Now}";
-            }
-            e.Handled = true;
-        }
-    })
-    .Subscribe();
-```
-
-**Cloud to local synchronization:**
-The package track changes using [synchronization tokens](https://developers.google.com/calendar/v3/sync).
-
-
-> The first time the run method is called it will perform a full sync and store the sync token. On each subsequent execution it will load the saved sync token and perform an incremental sync.
-
+After you select the previously generated template, you can `optionally preview` it and for a final verification by selecting the documents from the left side ListView. On the `Change Styles` view you get a report of the changes that will occur for each document. The changes won't apply unless you execute the `Save Changes` action.
 
 **Possible future improvements:**
 
@@ -82,16 +77,30 @@ Any other need you may have.
 
 ### Examples
 
-In the next screencast you can see all `CRUD` operations on the Event BO and how they synchronize with the `Google` Calendar, for both platforms `Win`, `Web` and both directions `Incoming`, `Outgoing`. At the bottom the [Reactive.Logger.Client.Win](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win) is reporting as the module is used.
+In the screencase we see:
+
+1. First we go note the three documents. We use two different paragraph styles for the two first paragraphs and a character style is applied to a few words of the third paragraph
+2. We then open the detailview of one document to create the style modification template that we will apply later to all three documents massively.
+3. When the DocumentManager detailview opens we use the `Delete Unused styles` to clear the unwanted styles (optional)
+4. To import additional styles we use the ImportStyles action which will parse a predefined list of documents and will extract and display their styles.
+5. Then we replace the first paragraph style with its version 2 style. Once the change is previewed and we feel ok with it, we undo the operation and we add the style to the modification template.
+6. We perform the steps from 5 again for paragraph 2 and 3
+7. We accept the changes and the teample is saved.
+8. We select all three documents and use the `Apply Styles` to preview that the template is applied correctly
+9. We `SaveChanges`
+10. We go again through all document to verify that they now rebranded
+
+At the bottom the [Reactive.Logger.Client.Win](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win) is reporting as the module is used.
+ 
+
 
 <twitter>
 
-[![Xpand XAF Module Office Cloud Google Calendar](https://user-images.githubusercontent.com/159464/94122039-ba0ac080-fe5a-11ea-8723-a973fd1e2852.gif))
-](https://youtu.be/kch5gduu0FQ)
+[![Xpand XAF Modules DocumentStyleManager](https://user-images.githubusercontent.com/159464/94597297-1116f800-0296-11eb-8d88-1938d7286a67.gif)](https://youtu.be/Hbzgfad9yVk)
 
 </twitter>
 
-[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/kch5gduu0FQ)
+[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/Hbzgfad9yVk)
 
 
 ## Installation 
