@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using DevExpress.ExpressApp;
 using Fasterflect;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
@@ -11,7 +12,7 @@ using Polly.Timeout;
 using Xpand.Extensions.TaskExtensions;
 
 namespace Xpand.TestsLib.Attributes{
-    [AttributeUsage(AttributeTargets.Method, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Method|AttributeTargets.Assembly, Inherited = false)]
     public class XpandTestAttribute : Attribute,IRepeatTest{
         private readonly int _tryCount;
         private readonly int _timeout;
@@ -21,26 +22,32 @@ namespace Xpand.TestsLib.Attributes{
             _tryCount = tryCount;
         }
 
+        public string IgnoredXAFVersions{ get; set; }
         public TestCommand Wrap(TestCommand command){
-            
-            return new RetryCommand(command, _tryCount, _timeout);
+            IgnoredXAFVersions ??= command.Test.Method.MethodInfo.DeclaringType?.Assembly.Attribute<XpandTestAttribute>()?.IgnoredXAFVersions;
+            return new RetryCommand(command, _tryCount, _timeout, IgnoredXAFVersions);
         }
-
 
         public class RetryCommand : DelegatingTestCommand{
             private readonly int _tryCount;
             private readonly int _timeout;
+            private readonly string _ignoredXAFVersions;
 
-
-            public RetryCommand(TestCommand innerCommand, int tryCount, int timeout)
+            public RetryCommand(TestCommand innerCommand, int tryCount, int timeout, string ignoredXAFVersions)
                 : base(innerCommand){
                 _tryCount = tryCount;
                 _timeout = timeout;
+                _ignoredXAFVersions = ignoredXAFVersions;
             }
 
             public override TestResult Execute(TestExecutionContext context){
                 var count = _tryCount;
-
+                var version = Version.Parse(XafAssemblyInfo.Version);
+                if ($"{version.Major}.{version.Minor}" == _ignoredXAFVersions){
+                    // context.CurrentTest.MakeInvalid(_ignoredXAFVersions);
+                    context.CurrentTest.RunState=RunState.Skipped;
+                    return context.CurrentResult;
+                }
                 while (count-- > 0){
                     try{
                         // ManualResetEvent resetEvent = new ManualResetEvent(false);

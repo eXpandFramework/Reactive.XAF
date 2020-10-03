@@ -127,7 +127,10 @@ namespace TestApplication{
 			RequiredModuleTypes.Add(typeof(SequenceGeneratorModule));
 			RequiredModuleTypes.Add(typeof(SuppressConfirmationModule));
 			RequiredModuleTypes.Add(typeof(ViewEditModeModule));
-			RequiredModuleTypes.Add(typeof(DocumentStyleManagerModule));
+#if !XAF191
+            RequiredModuleTypes.Add(typeof(DocumentStyleManagerModule));
+#endif
+			
 			RequiredModuleTypes.Add(typeof(ViewItemValueModule));
 			RequiredModuleTypes.Add(typeof(GoogleModule));
 			RequiredModuleTypes.Add(typeof(GoogleTasksModule));

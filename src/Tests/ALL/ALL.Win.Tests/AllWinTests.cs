@@ -43,7 +43,10 @@ namespace ALL.Win.Tests{
             await EasyTest(() => new WinAdapter(), RunWinApplication, async adapter => {
                 var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
                 adapter.Execute(autoTestCommand);
+#if !XAF191
                 await adapter.TestDocumentStyleManager();
+#endif
+                await Task.CompletedTask;
             });
         }     
 

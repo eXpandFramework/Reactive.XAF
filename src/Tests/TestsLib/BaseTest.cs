@@ -38,25 +38,28 @@ namespace Xpand.TestsLib{
             yield return Platform.Win;
         }
 
-        protected static object[] AgnosticModules(){
-            return GetModules("Xpand.XAF.Modules*.dll","Core").Where(o => {
+        protected static object[] AgnosticModules() 
+            => GetModules("Xpand.XAF.Modules*.dll","Core").Where(o => {
                 var name = ((Type) o).Assembly.GetName().Name;
                 return !name.EndsWith(".Win") && !name.EndsWith(".Web") && !name.EndsWith(".Tests");
             }).ToArray();
-        }
 
-        protected static object[] WinModules(){
-            return GetModules("Xpand.XAF.Modules*.dll","Win");
-        }
+        protected static object[] WinModules() 
+            => GetModules("Xpand.XAF.Modules*.dll","Win");
 
-        protected static object[] WebModules(){
-         
-            return GetModules("Xpand.XAF.Modules*.dll","Web");
-        }
+        protected static object[] WebModules() 
+            => GetModules("Xpand.XAF.Modules*.dll","Web");
 
         private static object[] GetModules(string pattern,string platform){
             return Directory.GetFiles(AppDomain.CurrentDomain.ApplicationPath(), pattern)
                 .Where(s => !s.Contains(".Tests."))
+                .Where(s => {
+#if XAF191
+                    return !s.Contains("DocumentStyleManager");
+#else
+                return true;
+#endif
+                })
                 .Select(s => {
                     var assembly = Assembly.LoadFile(s);
                     return assembly.GetCustomAttributes<AssemblyMetadataAttribute>().First(_ => _.Key == "Platform")
