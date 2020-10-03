@@ -11,6 +11,7 @@ using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests{
 	public class MicrosoftServiceTests:CloudServiceTests<MSAuthentication>{
+
         protected MicrosoftModule MicrosoftModule( Platform platform=Platform.Win,params ModuleBase[] modules){
             var application = NewApplication(platform,  modules);
             application.SetupSecurity();
