@@ -4,3 +4,4 @@ System.Reactive
 DevExpress.Persistent.Base
 Newtonsoft.Json
 Google.Apis.Auth
+System.ValueTuple

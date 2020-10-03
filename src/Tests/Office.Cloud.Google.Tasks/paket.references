@@ -14,3 +14,4 @@ Fasterflect.Xpand
 akarnokd.reactive_extensions
 Google.Apis.Auth
 Google.Apis.Tasks.v1
+System.ValueTuple

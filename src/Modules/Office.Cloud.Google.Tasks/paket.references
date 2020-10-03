@@ -7,3 +7,4 @@ JetBrains.Annotations
 Google.Apis.Auth
 Google.Apis.Tasks.v1
 Newtonsoft.Json
+System.ValueTuple

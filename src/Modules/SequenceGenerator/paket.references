@@ -5,3 +5,4 @@ DevExpress.ExpressApp.Xpo
 Fasterflect.Xpand
 System.Reactive
 JetBrains.Annotations
+System.ValueTuple

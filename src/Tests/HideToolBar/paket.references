@@ -7,3 +7,4 @@ NUnit3TestAdapter
 DevExpress.ExpressApp.Win
 Fasterflect.Xpand
 JetBrains.Annotations
+System.ValueTuple

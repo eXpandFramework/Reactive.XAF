@@ -2,3 +2,4 @@ DevExpress.ExpressApp.Win
 System.Reactive
 Fasterflect.Xpand
 JetBrains.Annotations
+System.ValueTuple

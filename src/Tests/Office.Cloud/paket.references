@@ -15,3 +15,4 @@ Microsoft.Graph.Beta
 Castle.Core
 akarnokd.reactive_extensions
 Microsoft.Identity.Client
+System.ValueTuple

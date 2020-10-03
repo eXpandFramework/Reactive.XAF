@@ -14,3 +14,4 @@ Microsoft.Owin.Security.OpenIdConnect
 Microsoft.IdentityModel.Protocols.OpenIdConnect
 Owin
 Newtonsoft.Json
+System.ValueTuple

@@ -3,3 +3,4 @@ System.CodeDom
 System.Reactive
 System.Reflection.Emit
 JetBrains.Annotations
+System.ValueTuple

@@ -9,3 +9,4 @@ DevExpress.ExpressApp.Win
 DevExpress.Xpo
 Fasterflect.Xpand
 JetBrains.Annotations
+System.ValueTuple

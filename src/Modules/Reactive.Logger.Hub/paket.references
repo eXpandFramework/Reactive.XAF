@@ -8,3 +8,4 @@ Jetbrains.Annotations
 YamlDotNet
 Grpc
 Grpc.Core
+System.ValueTuple

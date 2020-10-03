@@ -7,3 +7,4 @@ JetBrains.Annotations
 Google.Apis.Auth
 Google.Apis.Calendar.v3
 Newtonsoft.Json
+System.ValueTuple

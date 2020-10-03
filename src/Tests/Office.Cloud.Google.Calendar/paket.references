@@ -14,3 +14,4 @@ Fasterflect.Xpand
 akarnokd.reactive_extensions
 Google.Apis.Auth
 Google.Apis.Calendar.v3
+System.ValueTuple

@@ -9,3 +9,4 @@ DevExpress.ExpressApp.Win
 DevExpress.ExpressApp.Xpo
 DevExpress.ExpressApp
 DevExpress.Persistent.Base
+System.ValueTuple

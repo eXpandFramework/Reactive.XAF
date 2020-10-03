@@ -14,3 +14,4 @@ Fasterflect.Xpand
 Microsoft.Graph.Beta
 Microsoft.Identity.Client
 akarnokd.reactive_extensions
+System.ValueTuple

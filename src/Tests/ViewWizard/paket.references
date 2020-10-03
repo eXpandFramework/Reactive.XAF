@@ -13,3 +13,4 @@ Moq
 Fasterflect.Xpand
 Xpand.Patcher
 akarnokd.reactive_extensions
+System.ValueTuple

@@ -5,3 +5,4 @@ Fasterflect.Xpand
 Xpand.Patcher
 JetBrains.Annotations
 Newtonsoft.Json
+System.ValueTuple

@@ -2,3 +2,4 @@ Fasterflect.Xpand
 Mono.Cecil
 System.CodeDom
 JetBrains.Annotations
+System.ValueTuple

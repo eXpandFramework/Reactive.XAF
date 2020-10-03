@@ -11,3 +11,4 @@ JetBrains.Annotations
 Moq
 Fasterflect.Xpand
 Xpand.Patcher
+System.ValueTuple

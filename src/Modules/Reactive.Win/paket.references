@@ -4,3 +4,4 @@ System.Interactive
 System.Reactive
 Fasterflect.Xpand
 JetBrains.Annotations
+System.ValueTuple

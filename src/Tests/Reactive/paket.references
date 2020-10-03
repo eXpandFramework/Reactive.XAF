@@ -10,3 +10,4 @@ NUnit3TestAdapter
 JetBrains.Annotations
 Xpand.Patcher
 FasterFlect.Xpand
+System.ValueTuple
