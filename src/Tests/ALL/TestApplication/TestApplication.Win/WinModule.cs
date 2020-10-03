@@ -59,9 +59,9 @@ namespace TestApplication.Win{
                 .Subscribe(this);
         }
 
-        public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB){
-            yield return new DocumentStyleManagerModuleUpdater(objectSpace, versionFromDB);
-        }
+        public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB) 
+            => base.GetModuleUpdaters(objectSpace, versionFromDB).Concat(new[]
+                {new DocumentStyleManagerModuleUpdater(objectSpace, versionFromDB)});
 
         private static void ExtendModel(ApplicationModulesManager moduleManager){
             var excludeMaps = new[]
