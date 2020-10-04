@@ -111,6 +111,6 @@ Invoke-Script{
 
     Move-PaketSource 0 "C:\Program Files (x86)\DevExpress $(Get-VersionPart $DXVersion Minor)\Components\System\Components\Packages"
     New-Item  "$Sourcepath\Bin\Tests" -ItemType Directory -ErrorAction SilentlyContinue 
-    Copy-Item "$Sourcepath\Bin" "$stage\Bin" -Recurse -Force -ErrorAction SilentlyContinue
+    Copy-Item "$Sourcepath\Bin" "$stage\Bin" -Recurse -Force 
     
 }
