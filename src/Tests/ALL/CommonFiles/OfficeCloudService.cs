@@ -16,6 +16,12 @@ using Xpand.TestsLib.Win32;
 
 namespace ALL.Tests{
     public static class OfficeCloudService{
+        public static IObservable<Unit> PushToken(this ICommandAdapter commandAdapter,string serviceName){
+            if (!commandAdapter.GetTestApplication().IsWeb()){
+                commandAdapter.Execute(new ActionCommand($"Push{serviceName}Token"));
+            }
+            return Observable.Empty<Unit>();
+        } 
         private static async Task CheckOperation(this ICommandAdapter commandAdapter, MapAction mapAction){
             await commandAdapter.Execute(() => {
                 commandAdapter.Execute(new ActionCommand(Actions.Refresh));

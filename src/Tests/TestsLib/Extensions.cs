@@ -419,7 +419,7 @@ namespace Xpand.TestsLib{
 
 
         public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB){
-            var defaultUserModuleUpdater = new DefaultUserModuleUpdater(objectSpace, versionFromDB,UserId);
+            var defaultUserModuleUpdater = new DefaultUserModuleUpdater(objectSpace, versionFromDB,UserId,false);
             return new[]{defaultUserModuleUpdater};
         }
 

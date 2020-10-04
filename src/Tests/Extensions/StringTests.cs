@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Reactive;
+using System.Text;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.StringExtensions;

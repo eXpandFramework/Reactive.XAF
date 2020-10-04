@@ -31,25 +31,25 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 	        source.SelectMany(action => action.WhenExecute(retriedExecution));
 
         public static IObservable<T> WhenExecute<T>(this SimpleAction simpleAction,Func<SimpleActionExecuteEventArgs, IObservable<T>> retriedExecution) =>
-	        simpleAction.WhenExecute().SelectMany(retriedExecution).Retry(simpleAction.Application);
+	        simpleAction.WhenExecute().SelectMany(retriedExecution).Retry(() => simpleAction.Application);
         
         public static IObservable<T> WhenExecute<T>(this IObservable<SingleChoiceAction> source,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> retriedExecution) => 
 	        source.SelectMany(action => action.WhenExecute(retriedExecution));
 
         public static IObservable<T> WhenExecute<T>(this SingleChoiceAction singleChoiceAction,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> retriedExecution) =>
-	        singleChoiceAction.WhenExecute().SelectMany(retriedExecution).Retry(singleChoiceAction.Application);
+	        singleChoiceAction.WhenExecute().SelectMany(retriedExecution).Retry(() => singleChoiceAction.Application);
         
         public static IObservable<T> WhenExecute<T>(this IObservable<ParametrizedAction> source,Func<ParametrizedActionExecuteEventArgs, IObservable<T>> retriedExecution) => 
 	        source.SelectMany(action => action.WhenExecute(retriedExecution));
 
         public static IObservable<T> WhenExecute<T>(this ParametrizedAction action,Func<ParametrizedActionExecuteEventArgs, IObservable<T>> retriedExecution) =>
-	        action.WhenExecute().SelectMany(retriedExecution).Retry(action.Application);
+	        action.WhenExecute().SelectMany(retriedExecution).Retry(() => action.Application);
         
         public static IObservable<T> WhenExecute<T>(this IObservable<PopupWindowShowAction> source,Func<PopupWindowShowActionExecuteEventArgs, IObservable<T>> retriedExecution) => 
 	        source.SelectMany(action => action.WhenExecute(retriedExecution));
 
         public static IObservable<T> WhenExecute<T>(this PopupWindowShowAction action,Func<PopupWindowShowActionExecuteEventArgs, IObservable<T>> retriedExecution) =>
-	        action.WhenExecute().SelectMany(retriedExecution).Retry(action.Application);
+	        action.WhenExecute().SelectMany(retriedExecution).Retry(() => action.Application);
 
         public static IObservable<SimpleActionExecuteEventArgs> WhenExecute(this IObservable<SimpleAction> source) =>
 	        source.SelectMany(action => action.WhenExecute());
@@ -218,8 +218,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 			        h => item.Disposing -= h, ImmediateScheduler.Instance)
 		        .Select(pattern => pattern).ToUnit());
 
-        public static IObservable<SimpleAction> ActivateInUserDetails(this IObservable<SimpleAction> registerAction,bool skipWhenNoSecurity=false) =>
-	        registerAction.Select(action => action).WhenControllerActivated()
+        public static IObservable<TAction> ActivateInUserDetails<TAction>(this IObservable<TAction> registerAction,bool skipWhenNoSecurity=false) where TAction:ActionBase 
+	        => registerAction.Select(action => action).WhenControllerActivated()
 		        .Do(action => {
 					if (!skipWhenNoSecurity||!string.IsNullOrEmpty(SecuritySystem.CurrentUserName)){
 						var view = action.View();

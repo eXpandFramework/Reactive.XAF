@@ -143,7 +143,7 @@ namespace TestApplication{
 
 		public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB){
 			base.GetModuleUpdaters(objectSpace, versionFromDB);
-			yield return new DefaultUserModuleUpdater(objectSpace, versionFromDB);
+			yield return new DefaultUserModuleUpdater(objectSpace, versionFromDB,Guid.Parse("5c50f5c6-e697-4e9e-ac1b-969eac1237f3"),true);
         }
 
 		public override void Setup(XafApplication application){

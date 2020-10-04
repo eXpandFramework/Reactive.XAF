@@ -265,9 +265,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Office\Cloud\NewFolder1\" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="..\CommonFiles\SeqeuenceGenerator\SequenceGenerator.xafml">
       <Link>SequenceGenerator\SequenceGenerator.xafml</Link>
     </EmbeddedResource>

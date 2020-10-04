@@ -75,7 +75,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
 
         public static GoogleCalendarModule CalendarModule(this Platform platform,params ModuleBase[] modules){
             var application = NewApplication(platform,  modules);
-            application.SetupGoogleSecurity(platform);
+            application.SetupGoogleSecurity();
             var module = application.AddModule<GoogleCalendarModule>(typeof(Event));
             application.Model.ConfigureGoogle(platform);
             var todoModel = application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Google().Calendar();

@@ -1,22 +1,27 @@
 ﻿using System;
-using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
-using Google.Apis.Tasks.v1;
+using DevExpress.ExpressApp.Actions;
 using Newtonsoft.Json;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
+using Xpand.Extensions.XAF.Xpo.ValueConverters;
 using Xpand.XAF.Modules.Office.Cloud.Google;
-using Xpand.XAF.Modules.Reactive.Services;
+using Xpand.XAF.Modules.Office.Cloud.Google.BusinessObjects;
+using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 // ReSharper disable once CheckNamespace
 namespace TestApplication.GoogleService{
 	public static class GoogleService{
-		public static IObservable<Unit> ConnectGoogleService(this ApplicationModulesManager manager) =>
-        manager.ConnectCloudService("Google",(AppDomain.CurrentDomain.IsHosted() ? Platform.Web : Platform.Win).ToString(),office => office.Google().OAuth)
+        public static SimpleAction PushGoogleToken(this (AgnosticModule module, Frame frame) tuple) 
+            => tuple.frame.Action(nameof(PushGoogleToken)).As<SimpleAction>();
+
+		public static IObservable<Unit> ConnectGoogleService(this ApplicationModulesManager manager) 
+            => manager.ConnectCloudService("Google",(AppDomain.CurrentDomain.IsHosted() ? Platform.Web : Platform.Win).ToString(),office => office.Google().OAuth)
                 .WhenNotDefault()
 				.Do(t => {
 					var json = JsonConvert.DeserializeObject<dynamic>(t.creds);
@@ -34,15 +39,9 @@ namespace TestApplication.GoogleService{
 				})
 				.ToUnit()
                 .Merge(manager.ShowGoogleAccountInfo())
-                // .Merge(manager.WhenApplication(application => SelectMany(application))
-	                
-	                .ToUnit();
+                .Merge(manager.PushTheToken<GoogleAuthentication>("Google",o => new DictionaryValueConverter().ConvertToStorageType(o.OAuthToken).ToString()))
+                .ToUnit();
 
-		private static IObservable<char> SelectMany(XafApplication application){
-			return application.WhenLoggedOn().SelectMany(t =>
-					application.AuthorizeGoogle().Select(credential => credential).NewService<TasksService>())
-				.SelectMany(service => service.Tasklists.List().ExecuteAsync())
-				.SelectMany(lists => lists.Items.First().Id);
-		}
+
 	}
 }

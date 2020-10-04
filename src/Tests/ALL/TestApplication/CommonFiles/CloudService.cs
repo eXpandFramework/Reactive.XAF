@@ -1,24 +1,57 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Windows.Forms;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
+using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl;
+using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 using Xpand.Extensions.AppDomainExtensions;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Office.Cloud;
+using Xpand.Extensions.Office.Cloud.BusinessObjects;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Transform.System.Diagnostics;
 using Xpand.XAF.Modules.CloneModelView;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
+using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 namespace TestApplication{
     public static class CloudService{
+        public static IObservable<Unit> PushTheToken<TObject>(this ApplicationModulesManager manager,string serviceName,Func<TObject,string> tokenFactory) where TObject:CloudOfficeBaseObject
+            => manager.RegisterViewSimpleAction($"Push{serviceName}Token",typeof(PermissionPolicyUser),ViewType.DetailView)
+                .ActivateInUserDetails().FirstAsync()
+                .WhenExecute(e => {
+                    using var objectSpace = e.Action.Application.CreateObjectSpace();
+                    var authentication = objectSpace.GetObjectByKey<TObject>(SecuritySystem.CurrentUserId);
+                    
+                    var token = tokenFactory(authentication);
+
+                    var fullPath = Path.GetFullPath($"{AppDomain.CurrentDomain.ApplicationPath()}\\..\\PushToken.ps1");
+                    File.WriteAllText($"{Path.GetDirectoryName(fullPath)}\\{serviceName}Token.txt",token);
+                    var processStartInfo = new ProcessStartInfo("powershell.exe",$@"""{fullPath}"" '{serviceName}' -SkipPushToken"){WorkingDirectory = Directory.GetCurrentDirectory()};
+                    var process = new Process(){StartInfo = processStartInfo};
+                    process.StartWithEvents(createNoWindow:false);
+                    var output = process.WhenOutputDataReceived().Buffer(process.WhenExited).WhenNotEmpty().Do(t => {
+                        Tracing.Tracer.LogSeparator("PushToken");
+                        Tracing.Tracer.LogText(t.Join(Environment.NewLine));
+                    }).Publish();
+                    output.Connect();
+                    process.WaitForExit();
+                    return output.ToUnit();
+                });
+
         public static IObservable<(string creds, TModelOauth modelOAuth)> ConnectCloudService<TModelOauth>(
             this ApplicationModulesManager manager, string serviceName,string platform, Func<IModelOffice, TModelOauth> oauthFactory) where TModelOauth:IModelOAuth
             => manager.UpdateCloudModel( serviceName, platform, oauthFactory)
                 .Merge(manager.GenerateCloudViews<TModelOauth>(serviceName));
+
 
         private static IObservable<(string creds, TModelOauth modelOAuth)> GenerateCloudViews<TModelOauth>(
             this ApplicationModulesManager manager, string serviceName) where TModelOauth : IModelOAuth 
@@ -60,10 +93,9 @@ namespace TestApplication{
             => deleteAll.Switch().ToUnit()
                 .Merge(application.WhenWindowCreated().When(TemplateContext.ApplicationWindow).FirstAsync()
                     .Do(window => {
-                        using (var objectSpace = window.Application.CreateObjectSpace()){
-                            objectSpace.Delete(objectSpace.GetObjects<TLocalEntity>());
-                            objectSpace.CommitChanges();
-                        }
+                        using var objectSpace = window.Application.CreateObjectSpace();
+                        objectSpace.Delete(objectSpace.GetObjects<TLocalEntity>());
+                        objectSpace.CommitChanges();
                     }).ToUnit());
     }
 }

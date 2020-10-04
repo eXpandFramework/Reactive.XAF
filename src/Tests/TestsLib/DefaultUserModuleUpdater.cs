@@ -10,14 +10,16 @@ using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 namespace Xpand.TestsLib{
     public class DefaultUserModuleUpdater : ModuleUpdater{
         private readonly Guid _userId;
+        private readonly bool _admin;
 
         public DefaultUserModuleUpdater(IObjectSpace objectSpace, Version currentDBVersion) : this(
-            objectSpace, currentDBVersion, Guid.Empty){
+            objectSpace, currentDBVersion, Guid.Empty,false){
         }
         
-        public DefaultUserModuleUpdater(IObjectSpace objectSpace, Version currentDBVersion, Guid userId) : base(objectSpace,
+        public DefaultUserModuleUpdater(IObjectSpace objectSpace, Version currentDBVersion, Guid userId,bool admin) : base(objectSpace,
             currentDBVersion){
             _userId = userId;
+            _admin = admin;
         }
 
         private PermissionPolicyRole CreateDefaultRole(){
@@ -56,7 +58,7 @@ namespace Xpand.TestsLib{
                 sampleUser = ObjectSpace.CreateObject<PermissionPolicyUser>();
                 sampleUser.UserName = "User";
                 sampleUser.SetPassword("");
-                if (_userId!=Guid.Empty){
+                if (_userId!=Guid.Empty&&!_admin){
                     sampleUser.SetMemberValue("oid", _userId);
                 }
             }
@@ -69,6 +71,9 @@ namespace Xpand.TestsLib{
                 userAdmin = ObjectSpace.CreateObject<PermissionPolicyUser>();
                 userAdmin.UserName = "Admin";
                 userAdmin.SetPassword("");
+                if (_userId!=Guid.Empty&&_admin){
+                    userAdmin.SetMemberValue("oid", _userId);
+                }
             }
 
             var adminRole = ObjectSpace.FindObject<PermissionPolicyRole>(new BinaryOperator("Name", "Administrators"));

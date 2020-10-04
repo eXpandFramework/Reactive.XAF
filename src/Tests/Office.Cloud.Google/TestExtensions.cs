@@ -24,8 +24,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tests{
 			},"Google",platform);
 		}
 
-		public static void SetupGoogleSecurity(this XafApplication application, Platform platform) 
-			=> application.SetupSecurity(platform==Platform.Win? Guid.Parse("4acb47a5-1d32-4720-be2d-f9ffd4a65c3e"):Guid.Parse("1a0a3df1-17fe-4f7c-8676-e26484f66390"));
+		public static void SetupGoogleSecurity(this XafApplication application) 
+			=> application.SetupSecurity(true);
 
 		public static void ConfigureGoogle(this IModelApplication application,Platform platform){
 			var json = JsonConvert.DeserializeObject<dynamic>(

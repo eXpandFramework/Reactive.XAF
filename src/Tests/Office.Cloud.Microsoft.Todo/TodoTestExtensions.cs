@@ -70,7 +70,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
 
         public static MicrosoftTodoModule TodoModule(this Platform platform,params ModuleBase[] modules){
             var application = NewApplication(platform,  modules);
-            application.SetupSecurity();
+            application.SetupSecurity(true);
             var module = application.AddModule<MicrosoftTodoModule>(typeof(Task));
             application.Model.ConfigureMicrosoft();
             var todoModel = application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Todo();

@@ -14,7 +14,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests{
 
         protected MicrosoftModule MicrosoftModule( Platform platform=Platform.Win,params ModuleBase[] modules){
             var application = NewApplication(platform,  modules);
-            application.SetupSecurity();
+            application.SetupSecurity(true);
             var module = application.AddModule<MicrosoftModule>();
             application.Model.ConfigureMicrosoft();
             application.Logon();

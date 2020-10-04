@@ -72,7 +72,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
 
         public static MicrosoftCalendarModule CalendarModule(this Platform platform,params ModuleBase[] modules){
             var application = NewApplication(platform,  modules);
-            application.SetupSecurity();
+            application.SetupSecurity(true);
             var module = application.AddModule<MicrosoftCalendarModule>(typeof(DevExpress.Persistent.BaseImpl.Event));
             application.Model.ConfigureMicrosoft();
             var todoModel = application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Calendar();

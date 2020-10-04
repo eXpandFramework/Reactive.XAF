@@ -67,7 +67,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks.Tests{
 
         public static GoogleTasksModule TasksModule(this Platform platform,params ModuleBase[] modules){
             var application = NewApplication(platform,  modules);
-            application.SetupGoogleSecurity(platform);
+            application.SetupGoogleSecurity();
             var module = application.AddModule<GoogleTasksModule>(typeof(Task));
             application.Model.ConfigureGoogle(platform);
             var todoModel = application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Google().Tasks();

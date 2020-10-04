@@ -3,14 +3,21 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Actions;
 using Newtonsoft.Json;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft;
+using Xpand.XAF.Modules.Office.Cloud.Microsoft.BusinessObjects;
+using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 // ReSharper disable once CheckNamespace
 namespace TestApplication.MicrosoftService{
 	public static class MicrosoftService{
+        public static SimpleAction PushAzureToken(this (AgnosticModule module, Frame frame) tuple) 
+            => tuple.frame.Action(nameof(PushAzureToken)).As<SimpleAction>();
+
 		public static IObservable<Unit> ConnectMicrosoftService(this ApplicationModulesManager manager)
         => manager.ConnectCloudService("Microsoft", null, office => office.Microsoft().OAuth)
             .WhenNotDefault()
@@ -25,6 +32,7 @@ namespace TestApplication.MicrosoftService{
                 }
             })
             .ToUnit()
+            .Merge(manager.PushTheToken<MSAuthentication>("Azure",o => o.Token))
             .Merge(manager.ShowMSAccountInfo());
 	}
 }

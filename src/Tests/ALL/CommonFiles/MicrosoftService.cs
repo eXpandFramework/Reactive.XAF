@@ -14,7 +14,7 @@ namespace ALL.Tests{
             => await commandAdapter.TestCloudService(singInCaption 
                 => commandAdapter.Authenticate(singInCaption,"DXMailPass","apostolisb@devexpress.com")
                     .Do(_ => commandAdapter.Execute(new SendKeysCommand(Win32Constants.VirtualKeys.Return),new WaitCommand(OfficeCloudService.WaitInterval)))
-                    .SelectMany(_ => whenConnected().ToObservable()), "Microsoft",new CheckDetailViewCommand(("Mail","apostolisb@devexpress.com")));
+                    .SelectMany(_ => commandAdapter.PushToken("Azure").Concat(whenConnected().ToObservable())), "Microsoft",new CheckDetailViewCommand(("Mail","apostolisb@devexpress.com")));
 
 
     }

@@ -21,7 +21,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tests{
 
         protected GoogleModule GoogleModule( Platform platform=Platform.Win,params ModuleBase[] modules){
             var application = NewApplication(platform,  modules);
-            application.SetupGoogleSecurity(platform);
+            application.SetupGoogleSecurity();
             var module = application.AddModule<GoogleModule>();
             application.Model.ConfigureGoogle(platform);
             application.Logon();

@@ -638,3 +638,6 @@ $RECYCLE.BIN/
 **pass.json
 **/WinAuth.exe
 **/Xpand.testapplication.xml
+GitUserEmail.json
+/src/Tests/ALL/TestApplication/DownloadCloudCreds.ps1
+/src/Tests/ALL/TestApplication/PushToken.ps1
