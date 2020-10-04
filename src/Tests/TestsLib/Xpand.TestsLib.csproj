@@ -18,7 +18,7 @@
     <DebugType>full</DebugType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>TRACE;XAF191</DefineConstants>
+    <DefineConstants>TRACE;XAF201</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="AppDomainExtensions.cs" />
