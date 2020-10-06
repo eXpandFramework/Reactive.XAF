@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <LangVersion>latest</LangVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
@@ -10,6 +9,7 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <ApplicationIcon />
+    <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
     <OutputType>Library</OutputType>
     <StartupObject>
     </StartupObject>
@@ -51,7 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.TestsLib">
-      <HintPath>..\..\..\..\bin\Xpand.TestsLib.dll</HintPath>
+      <HintPath>..\..\..\..\bin\net461\Xpand.TestsLib.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

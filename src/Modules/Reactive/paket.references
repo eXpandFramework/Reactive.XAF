@@ -5,3 +5,4 @@ Fasterflect.Xpand
 Xpand.Patcher
 JetBrains.Annotations
 System.ValueTuple
+System.Configuration.ConfigurationManager

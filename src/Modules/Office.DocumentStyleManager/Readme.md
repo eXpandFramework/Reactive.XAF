@@ -72,7 +72,7 @@ Any other need you may have.
 
 ### Examples
 
-In the screencase we see:
+In the screencast we see:
 
 1. First we note the three documents by navigating through each of them. For the two first paragraphs, two different paragraph styles are used. In the third paragraph a character style is applied to a few words. Next, we will generate a template to re-brand these documents.
 2. The `Style Manager` SingleChoice action is configured to activate in the DetailView of the `DocumentObject` type. So we open this DetailView and execute the action..

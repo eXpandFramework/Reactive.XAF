@@ -18,31 +18,26 @@ namespace Xpand.XAF.Modules.AutoCommit.Tests{
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
         public async Task Signal_When_AutoCommit_Enabled_ObjectView_Created(string platformName){
-            using (var application = DefaultAutoCommitModule(platformName,nameof(Signal_When_AutoCommit_Enabled_ObjectView_Created)).Application){
-
-                var objectViews = application.WhenAutoCommitObjectViewCreated().SubscribeReplay();
+            using var application = DefaultAutoCommitModule(platformName,nameof(Signal_When_AutoCommit_Enabled_ObjectView_Created)).Application;
+            var objectViews = application.WhenAutoCommitObjectViewCreated().SubscribeReplay();
                 
-                var listView = application.NewObjectView<ListView>(typeof(AC));
-                var detailView = application.NewObjectView<DetailView>(typeof(AC));
+            var listView = application.NewObjectView<ListView>(typeof(AC));
+            var detailView = application.NewObjectView<DetailView>(typeof(AC));
 
-                (await objectViews.Take(1).WithTimeOut()).ShouldBe(listView);
-                (await objectViews.Take(2).WithTimeOut()).ShouldBe(detailView);
-                
-            }
+            (await objectViews.Take(1).WithTimeOut()).ShouldBe(listView);
+            (await objectViews.Take(2).WithTimeOut()).ShouldBe(detailView);
         }
         [XpandTest]
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
         public void AutoCommit_When_object_view_closing(string platformName){
-            
-            using (var application = DefaultAutoCommitModule(platformName, nameof(AutoCommit_When_object_view_closing)).Application){
-                var detailView = application.NewObjectView<DetailView>(typeof(AC));
-                detailView.ObjectSpace.CreateObject<AC>();
+            using var application = DefaultAutoCommitModule(platformName, nameof(AutoCommit_When_object_view_closing)).Application;
+            var detailView = application.NewObjectView<DetailView>(typeof(AC));
+            detailView.ObjectSpace.CreateObject<AC>();
 
-                detailView.Close();
+            detailView.Close();
 
-                application.CreateObjectSpace().FindObject<AC>(null).ShouldNotBeNull();
-            }
+            application.CreateObjectSpace().FindObject<AC>(null).ShouldNotBeNull();
         }
 
         private  AutoCommitModule DefaultAutoCommitModule(string platformName,string title){

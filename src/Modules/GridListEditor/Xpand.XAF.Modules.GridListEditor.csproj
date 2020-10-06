@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{D7B0A652-605F-4C0F-B543-FC3FBD568DF3}</ProjectGuid>
     <TargetFramework>net461</TargetFramework>
     <LangVersion>latest</LangVersion>
     <SignAssembly>true</SignAssembly>
@@ -10,10 +9,10 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <OutputPath>..\..\..\bin</OutputPath>
-    <AssemblyTitle>Xpand.XAF.Modules.ViewEditMode</AssemblyTitle>
-    <Product>Xpand.XAF.Modules.ViewEditMode</Product>
+    <AssemblyTitle>Xpand.XAF.Modules.GridListEditor</AssemblyTitle>
+    <Product>Xpand.XAF.Modules.GridListEditor</Product>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
     <DebugType>full</DebugType>
   </PropertyGroup>
   <ItemGroup>

@@ -3,3 +3,4 @@ DevExpress.ExpressApp
 Fasterflect.Xpand
 JetBrains.Annotations
 System.Reactive
+System.Configuration.ConfigurationManager

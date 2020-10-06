@@ -6,15 +6,18 @@ param(
 Use-MonoCecil | Out-Null
 function UpdateALLNuspec($platform, $allNuspec, $nuspecs,$allModuleNuspecs) {
     
-    $platformNuspecs = $allModuleNuspecs | Where-Object {
-        $platformMetada = Get-AssemblyMetadata "$root\bin\$($_.BaseName).dll" -key "Platform"
-        $platformMetada.Value -in $platform
-    } | ForEach-Object {
+    $platformNuspecs = $allModuleNuspecs | ForEach-Object {
         [xml]$nuspec = Get-Content $_.FullName
-        [PSCustomObject]@{
-            Nuspec = $nuspec
-            File   = $_
-        }
+        $nuspecBaseName=$_.BaseName
+        $filesrc=($nuspec.package.Files.file|Where-Object{$_.src -like "*$nuspecBaseName.dll"}).src
+        $platformMetada = Get-AssemblyMetadata "$root\bin\$filesrc" -key "Platform"
+        if ($platformMetada.Value -in $platform){
+            
+            [PSCustomObject]@{
+                Nuspec = $nuspec
+                File   = $_
+            }
+        }        
     }
     
     [version]$modulesVersion=Get-VersionPart ([System.Diagnostics.FileVersionInfo]::GetVersionInfo("$root\bin\Xpand.XAF.Modules.Reactive.dll" ).FileVersion) build

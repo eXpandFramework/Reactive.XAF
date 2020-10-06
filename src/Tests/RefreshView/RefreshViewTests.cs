@@ -24,33 +24,30 @@ namespace Xpand.XAF.Modules.RefreshView.Tests{
         [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task Refresh_ListView_When_Root(){
-            using (var application = RefreshViewModule(nameof(Refresh_ListView_When_Root)).Application){
-                var items = application.Model.ToReactiveModule<IModelReactiveModuleRefreshView>().RefreshView.Items;
+            using var application = RefreshViewModule(nameof(Refresh_ListView_When_Root)).Application;
+            var items = application.Model.ToReactiveModule<IModelReactiveModuleRefreshView>().RefreshView.Items;
             
-                var item = items.AddNode<IModelRefreshViewItem>();
-                item.View = application.Model.BOModel.GetClass(typeof(RV)).DefaultListView;
-                item.Interval = TimeSpan.FromMilliseconds(500);
+            var item = items.AddNode<IModelRefreshViewItem>();
+            item.View = application.Model.BOModel.GetClass(typeof(RV)).DefaultListView;
+            item.Interval = TimeSpan.FromMilliseconds(500);
             
-                application.Logon();
-                var listView = application.NewObjectView<ListView>(typeof(RV));
-                var reloaded = listView.CollectionSource.WhenCollectionReloaded().Select(tuple => tuple).FirstAsync().SubscribeReplay();
-                application.CreateViewWindow().SetView(listView);
+            application.Logon();
+            var listView = application.NewObjectView<ListView>(typeof(RV));
+            var reloaded = listView.CollectionSource.WhenCollectionReloaded().Select(tuple => tuple).FirstAsync().SubscribeReplay();
+            application.CreateViewWindow().SetView(listView);
             
-                var objectSpace = application.CreateObjectSpace();
-                objectSpace.CommitChanges();
+            var objectSpace = application.CreateObjectSpace();
+            objectSpace.CommitChanges();
 
-                await reloaded.Timeout(Timeout).ToTaskWithoutConfigureAwait();
-                application.CreateViewWindow().SetView(listView);
+            await reloaded.Timeout(Timeout).ToTaskWithoutConfigureAwait();
+            application.CreateViewWindow().SetView(listView);
             
-                objectSpace = application.CreateObjectSpace();
-                var guid = objectSpace.CreateObject<RV>().Oid;
-                objectSpace.CommitChanges();
+            objectSpace = application.CreateObjectSpace();
+            var guid = objectSpace.CreateObject<RV>().Oid;
+            objectSpace.CommitChanges();
 
-                var o = ((IEnumerable) listView.CollectionSource.Collection).Cast<RV>().FirstOrDefault(rv => rv.Oid==guid);
-                o.ShouldNotBeNull();
-            }
-
-            
+            var o = ((IEnumerable) listView.CollectionSource.Collection).Cast<RV>().FirstOrDefault(rv => rv.Oid==guid);
+            o.ShouldNotBeNull();
         }
 
 

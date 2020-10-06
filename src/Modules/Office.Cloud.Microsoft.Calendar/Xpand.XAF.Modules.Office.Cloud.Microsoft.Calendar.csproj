@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{9AC9273B-47F0-4935-BCAC-DCE468C726A4}</ProjectGuid>
     <TargetFramework>net461</TargetFramework>
     <FileUpgradeFlags />
     <UpgradeBackupLocation />
@@ -15,7 +14,7 @@
     <AssemblyTitle>Xpand.XAF.Modules.SequenceGenerator</AssemblyTitle>
     <Product>Xpand.XAF.Modules.Reactive</Product>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
     <DebugType>full</DebugType>
   </PropertyGroup>
   <ItemGroup>
@@ -38,7 +37,7 @@
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Office.Cloud.Microsoft">
-      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Office.Cloud.Microsoft.dll</HintPath>
+      <HintPath>..\..\..\bin\net461\Xpand.XAF.Modules.Office.Cloud.Microsoft.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

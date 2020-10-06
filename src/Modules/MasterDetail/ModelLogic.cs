@@ -48,7 +48,7 @@ namespace Xpand.XAF.Modules.MasterDetail{
         [Required]
         IModelClass ModelClass { get; set; }
         [CriteriaOptions("TypeInfo")]
-        [Editor("DevExpress.ExpressApp.Win.Core.ModelEditor.CriteriaModelEditorControl, DevExpress.ExpressApp.Win" + XafAssemblyInfo.VersionSuffix + XafAssemblyInfo.AssemblyNamePostfix, typeof(UITypeEditor))]
+        [Editor("DevExpress.ExpressApp.Win.Core.ModelEditor.CriteriaModelEditorControl, DevExpress.ExpressApp.Win" + XafAssemblyInfo.VersionSuffix + XafAssemblyInfo.AssemblyNamePostfix, "System.Drawing.Design.UITypeEditor, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
         string Criteria{ get; set; }
         [Browsable(false)]
         ITypeInfo TypeInfo { get; }

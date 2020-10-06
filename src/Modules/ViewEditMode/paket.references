@@ -3,3 +3,4 @@ System.Reactive
 Fasterflect.Xpand
 JetBrains.Annotations
 System.ValueTuple
+System.Configuration.ConfigurationManager

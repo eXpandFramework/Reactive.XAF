@@ -6,7 +6,6 @@ using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using System.Web;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using Fasterflect;
@@ -18,6 +17,7 @@ using Google.Apis.Auth.OAuth2.Web;
 using Google.Apis.Requests;
 using Google.Apis.Services;
 using JetBrains.Annotations;
+using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Reactive.Combine;
@@ -104,12 +104,13 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
         static IObservable<Unit> ExchangeCodeForToken(this ApplicationModulesManager manager) 
             => manager.WhenApplication(application => application.WhenWindowCreated().When(TemplateContext.ApplicationWindow)
                 .SelectMany(window => {
-                    var code = HttpContext.Current?.Request["code"];
+                    var httpContext = AppDomain.CurrentDomain.Web().HttpContext();
+                    var code = httpContext?.GetPropertyValue("Request").GetIndexer("code");
                     if (code != null){
-                        var uri = HttpContext.Current.Request.Url.ToString();
-                        var state = HttpContext.Current.Request["state"];
+                        var uri = httpContext.GetPropertyValue("Request").GetPropertyValue("Url").ToString();
+                        var state = httpContext?.GetPropertyValue("Request").GetIndexer("state").ToString();
                         var tokenResponse = window.Application.GoogleAuthorizationCodeFlow().ExchangeCodeForTokenAsync(
-                            window.Application.CurrentUserId().ToString(), code, uri.Substring(0, uri.IndexOf("?", StringComparison.Ordinal)), CancellationToken.None).Result;
+                            window.Application.CurrentUserId().ToString(), code.ToString(), uri.Substring(0, uri.IndexOf("?", StringComparison.Ordinal)), CancellationToken.None).Result;
                         return window.Application.WhenWeb()
                             .TraceGoogleModule(response => $"IdToken={tokenResponse.IdToken}")
                             .Do(api => api.Redirect(state.Substring(0, state.Length - AuthorizationCodeWebApp.StateRandomLength),false)).To((default(TokenResponse)));
@@ -161,10 +162,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
             => Observable.FromAsync(() => new AuthorizationCodeInstalledApp(flow, new LocalServerCodeReceiver()).AuthorizeAsync(application.CurrentUserId().ToString(), CancellationToken.None));
 
         private static IObservable<UserCredential> AuthorizeWebApp(this  IAuthorizationCodeFlow flow,XafApplication application){
-	        if (HttpContext.Current == null){
+	        var redirectUri = AppDomain.CurrentDomain.Web().HttpContext().GetPropertyValue("Request").GetPropertyValue("Url").CallMethod("GetLeftPart",UriPartial.Path).ToString() ;
                 return Observable.Empty<UserCredential>();
 	        }
-	        var redirectUri = HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Path);
 	        return new AuthorizationCodeWebApp(flow, redirectUri, redirectUri)
                 .AuthorizeAsync(application.CurrentUserId().ToString(), CancellationToken.None)
 		        .ToObservable()

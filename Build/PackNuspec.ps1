@@ -5,6 +5,7 @@ param(
     $Filter ,
     [switch]$SkipReadMe,
     [string[]]$ChangedModules =((Get-ChildItem $nugetBin).BaseName|ConvertTo-PackageObject).Id
+    Xpand.Extensions",
 )
 
 Import-Module XpandPwsh -Force -Prefix X

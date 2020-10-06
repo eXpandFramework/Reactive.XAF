@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputPath>..\..\..\bin</OutputPath>
     <TargetFramework>net461</TargetFramework>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
     <LangVersion>latest</LangVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
@@ -26,7 +26,7 @@
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.Xpo.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.TestsLib">
-      <HintPath>..\..\..\bin\Xpand.TestsLib.dll</HintPath>
+      <HintPath>..\..\..\bin\net461\Xpand.TestsLib.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />

@@ -1,8 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{58399364-9ACA-429F-A276-7F01E9E61D7D}</ProjectGuid>
-    <TargetFramework>net461</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <FileUpgradeFlags />
     <UpgradeBackupLocation />
     <LangVersion>latest</LangVersion>
@@ -15,7 +14,7 @@
     <AssemblyTitle>Xpand.XAF.Modules.Reactive</AssemblyTitle>
     <Product>Xpand.XAF.Modules.Reactive</Product>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
     <DebugType>full</DebugType>
   </PropertyGroup>
   <ItemGroup>
@@ -27,7 +26,6 @@
     <None Remove="Xpand.XAF.Modules.Reactive.csproj.DotSettings" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="System.Configuration" />
     <Reference Include="Xpand.Extensions">
       <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
     </Reference>

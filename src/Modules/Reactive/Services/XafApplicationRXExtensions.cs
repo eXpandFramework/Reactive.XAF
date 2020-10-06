@@ -7,7 +7,6 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Model;
@@ -18,6 +17,7 @@ using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
@@ -97,7 +97,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => windowCreated.When(TemplateContext.ApplicationWindow)
                 .TemplateChanged()
                 .SelectMany(_ => Observable.Interval(TimeSpan.FromMilliseconds(300))
-                    .ObserveOn((Control) _.Template)
+                    .ObserveOnWindows(SynchronizationContext.Current)
                     .Select(l => application.MainWindow))
                 .WhenNotDefault()
                 .Select(window => window).Publish().RefCount().FirstAsync()

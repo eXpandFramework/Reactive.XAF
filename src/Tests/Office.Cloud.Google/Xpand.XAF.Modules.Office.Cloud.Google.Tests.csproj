@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputPath>..\..\..\bin</OutputPath>
     <TargetFramework>net461</TargetFramework>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
     <LangVersion>latest</LangVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
@@ -17,7 +17,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Tests">
-      <HintPath>..\..\..\bin\Xpand.TestsLib.dll</HintPath>
+      <HintPath>..\..\..\bin\net461\Xpand.TestsLib.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.Extensions">
       <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
@@ -32,7 +32,7 @@
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Office.Cloud.Tests">
-      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Office.Cloud.Tests.dll</HintPath>
+      <HintPath>..\..\..\bin\net461\Xpand.XAF.Modules.Office.Cloud.Tests.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>

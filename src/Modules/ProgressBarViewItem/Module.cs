@@ -6,6 +6,7 @@ using DevExpress.ExpressApp.SystemModule;
 using Fasterflect;
 using JetBrains.Annotations;
 using Microsoft.CSharp;
+using Xpand.Extensions.Compiler;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
@@ -45,6 +46,7 @@ namespace {GetType().Namespace}{{
                 GenerateInMemory = true
             };
             compilerParameters.ReferencedAssemblies.Add("System.dll");
+            compilerParameters.ReferenceNetStandard();
             compilerParameters.ReferencedAssemblies.Add(typeof(ProgressBarViewItemBase).Assembly.Location);
             compilerParameters.ReferencedAssemblies.Add(typeof(ViewItem).Assembly.Location);
             if (callBackHandler!=null){

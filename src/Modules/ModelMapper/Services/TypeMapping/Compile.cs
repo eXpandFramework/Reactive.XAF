@@ -7,6 +7,7 @@ using System.Reflection;
 using Microsoft.CSharp;
 using Mono.Cecil;
 using Xpand.Extensions.AppDomainExtensions;
+using Xpand.Extensions.Compiler;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 
@@ -26,6 +27,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             
             var strings = references.ToArray();
             compilerParameters.ReferencedAssemblies.AddRange(strings);
+            compilerParameters.ReferenceNetStandard();
 
             var compilerResults = codeProvider.CompileAssemblyFromSource(compilerParameters, code);
             if (compilerResults.Errors.Count > 0){

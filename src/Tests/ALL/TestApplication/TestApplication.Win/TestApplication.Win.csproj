@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <ProductVersion>9.0.30729</ProductVersion>
     <ProjectGuid>{D05D93DF-312D-4D4E-B980-726871EC7833}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <ApplicationIcon>ExpressApp.ico</ApplicationIcon>
+    <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
     <FileUpgradeFlags />
     <UpgradeBackupLocation />
     <TargetFramework>net472</TargetFramework>

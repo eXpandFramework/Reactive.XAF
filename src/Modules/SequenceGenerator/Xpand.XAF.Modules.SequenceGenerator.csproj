@@ -1,8 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{AA212429-F21D-4497-9090-64A3D396288E}</ProjectGuid>
-    <TargetFramework>net461</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <FileUpgradeFlags />
     <UpgradeBackupLocation />
     <LangVersion>latest</LangVersion>
@@ -15,7 +14,7 @@
     <AssemblyTitle>Xpand.XAF.Modules.SequenceGenerator</AssemblyTitle>
     <Product>Xpand.XAF.Modules.Reactive</Product>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
     <DebugType>full</DebugType>
   </PropertyGroup>
   <ItemGroup>

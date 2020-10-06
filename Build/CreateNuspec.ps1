@@ -18,9 +18,10 @@ $nuspec.Save($versionConverterPath)
 
 $allProjects=Get-ChildItem $root *.csproj -Recurse | Select-Object -ExpandProperty BaseName
 Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notlike "*Test*" } | Invoke-Parallel -VariablesToImport @("allProjects","root","Release") -Script {
-# Get-ChildItem "$root\src\" -Include "*Xpand.Extensions.Office.Cloud.csproj" -Recurse | Where-Object { $_ -notlike "*Test*" } | foreach {
+# Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notlike "*Test*" } | foreach {
     Set-Location $root
     $projectPath = $_.FullName
+    "projectPath=$projectPath"
     Write-Output "Creating Nuspec for $($_.baseName)" 
     $uArgs = @{
         NuspecFilename           = "$root\build\nuspec\$($_.baseName).nuspec"
@@ -92,7 +93,7 @@ Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -not
         $versionConverter = [PSCustomObject]@{
             id              = "Xpand.VersionConverter"
             version         = ([xml](Get-Content "$root\Tools\Xpand.VersionConverter\Xpand.VersionConverter.nuspec")).package.metadata.version
-            targetFramework = "net452"
+            targetFramework = "netstandard2.0"
         }
         $versionConverter |Out-String
         Add-NuspecDependency $versionConverter.Id $versionConverter.Version $nuspec

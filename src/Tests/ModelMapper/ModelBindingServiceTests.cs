@@ -61,19 +61,17 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             var typeToMap=typeof(StringValueTypeProperties);
             InitializeMapperService($"{nameof(Bind_Only_NullAble_Properties_That_are_not_Null)}{typeToMap.Name}{platform}");
 
-            using (var module = typeToMap.Extend<IModelListView>()){
-                using (var application = DefaultModelMapperModule(nameof(Bind_Only_NullAble_Properties_That_are_not_Null), platform, module).Application){
-                    var modelListView = application.Model.Views.OfType<IModelListView>().First();
-                    var modelModelMap = (IModelModelMap)modelListView.MapNode(typeToMap);
-                    modelModelMap.SetValue(nameof(StringValueTypeProperties.RWInteger),100);
-                    var stringValueTypeProperties = new StringValueTypeProperties{RWString = "shouldnotchange"};
+            using var module = typeToMap.Extend<IModelListView>();
+            using var application = DefaultModelMapperModule(nameof(Bind_Only_NullAble_Properties_That_are_not_Null), platform, module).Application;
+            var modelListView = application.Model.Views.OfType<IModelListView>().First();
+            var modelModelMap = (IModelModelMap)modelListView.MapNode(typeToMap);
+            modelModelMap.SetValue(nameof(StringValueTypeProperties.RWInteger),100);
+            var stringValueTypeProperties = new StringValueTypeProperties{RWString = "shouldnotchange"};
 
-                    modelModelMap.BindTo(stringValueTypeProperties);
+            modelModelMap.BindTo(stringValueTypeProperties);
 
-                    stringValueTypeProperties.RWInteger.ShouldBe(100);
-                    stringValueTypeProperties.RWString.ShouldBe("shouldnotchange");
-                }
-            }
+            stringValueTypeProperties.RWInteger.ShouldBe(100);
+            stringValueTypeProperties.RWString.ShouldBe("shouldnotchange");
         }
 
         [XpandTest]
@@ -82,20 +80,18 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             var platform = GetPlatform(platformName);
             var typeToMap=typeof(StringValueTypeProperties);
             InitializeMapperService($"{nameof(Do_not_bind_Disable_mode_nodes)}{typeToMap.Name}{platform}");
-            using (var module = typeToMap.Extend<IModelListView>()){
-                using (var application = DefaultModelMapperModule(nameof(Do_not_bind_Disable_mode_nodes), platform, module).Application){
-                    var modelListView = application.Model.Views.OfType<IModelListView>().First();
-                    var modelModelMap = (IModelModelMap)modelListView.MapNode(typeToMap);
-                    modelModelMap.SetValue(nameof(StringValueTypeProperties.RWInteger),100);
-                    var stringValueTypeProperties = new StringValueTypeProperties{RWString = "shouldnotchange"};
+            using var module = typeToMap.Extend<IModelListView>();
+            using var application = DefaultModelMapperModule(nameof(Do_not_bind_Disable_mode_nodes), platform, module).Application;
+            var modelListView = application.Model.Views.OfType<IModelListView>().First();
+            var modelModelMap = (IModelModelMap)modelListView.MapNode(typeToMap);
+            modelModelMap.SetValue(nameof(StringValueTypeProperties.RWInteger),100);
+            var stringValueTypeProperties = new StringValueTypeProperties{RWString = "shouldnotchange"};
 
-                    modelModelMap.NodeDisabled = true;
-                    modelModelMap.BindTo(stringValueTypeProperties);
+            modelModelMap.NodeDisabled = true;
+            modelModelMap.BindTo(stringValueTypeProperties);
 
-                    stringValueTypeProperties.RWString.ShouldBe("shouldnotchange");
-                    stringValueTypeProperties.RWInteger.ShouldBe(0);
-                }
-            }
+            stringValueTypeProperties.RWString.ShouldBe("shouldnotchange");
+            stringValueTypeProperties.RWInteger.ShouldBe(0);
         }
 
         [XpandTest]
@@ -104,16 +100,14 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             var platform = GetPlatform(platformName);
             Type typeToMap=typeof(StringValueTypeProperties);
             InitializeMapperService($"{nameof(Do_not_throw_if_target_object_properties_do_not_exist)}{typeToMap.Name}{platform}");
-            using (var module = typeToMap.Extend<IModelListView>()){
-                using (var application = DefaultModelMapperModule(nameof(Do_not_throw_if_target_object_properties_do_not_exist), platform, module).Application){
-                    var modelListView = application.Model.Views.OfType<IModelListView>().First();
-                    var modelModelMap = (IModelModelMap)modelListView.MapNode(typeToMap);
-                    modelModelMap.Index = 100;
-                    var stringValueTypeProperties = new StringValueTypeProperties();
+            using var module = typeToMap.Extend<IModelListView>();
+            using var application = DefaultModelMapperModule(nameof(Do_not_throw_if_target_object_properties_do_not_exist), platform, module).Application;
+            var modelListView = application.Model.Views.OfType<IModelListView>().First();
+            var modelModelMap = (IModelModelMap)modelListView.MapNode(typeToMap);
+            modelModelMap.Index = 100;
+            var stringValueTypeProperties = new StringValueTypeProperties();
 
-                    modelModelMap.BindTo(stringValueTypeProperties);
-                }
-            }
+            modelModelMap.BindTo(stringValueTypeProperties);
         }
 
         [XpandTest]
@@ -122,20 +116,18 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             var platform = GetPlatform(platformName);
             Type typeToMap=typeof(StringValueTypeProperties);
             InitializeMapperService($"{nameof(Bind_all_public_nullable_type_properties)}{typeToMap.Name}{platform}");
-            using (var module = typeToMap.Extend<IModelListView>()){
-                using (var application = DefaultModelMapperModule(nameof(Bind_all_public_nullable_type_properties), platform, module).Application){
-                    var modelListView = application.Model.Views.OfType<IModelListView>().First();
-                    var modelModelMap = (IModelModelMap)modelListView.MapNode(typeToMap);
-                    modelModelMap.SetValue(nameof(StringValueTypeProperties.RWInteger),100);
-                    modelModelMap.SetValue(nameof(StringValueTypeProperties.NullAbleRWInteger),200);
-                    var stringValueTypeProperties = new StringValueTypeProperties();
+            using var module = typeToMap.Extend<IModelListView>();
+            using var application = DefaultModelMapperModule(nameof(Bind_all_public_nullable_type_properties), platform, module).Application;
+            var modelListView = application.Model.Views.OfType<IModelListView>().First();
+            var modelModelMap = (IModelModelMap)modelListView.MapNode(typeToMap);
+            modelModelMap.SetValue(nameof(StringValueTypeProperties.RWInteger),100);
+            modelModelMap.SetValue(nameof(StringValueTypeProperties.NullAbleRWInteger),200);
+            var stringValueTypeProperties = new StringValueTypeProperties();
             
-                    modelModelMap.BindTo(stringValueTypeProperties);
+            modelModelMap.BindTo(stringValueTypeProperties);
 
-                    stringValueTypeProperties.RWInteger.ShouldBe(100);
-                    stringValueTypeProperties.NullAbleRWInteger.ShouldBe(200);
-                }
-            }
+            stringValueTypeProperties.RWInteger.ShouldBe(100);
+            stringValueTypeProperties.NullAbleRWInteger.ShouldBe(200);
         }
 
         [XpandTest]
@@ -144,18 +136,16 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             var platform = GetPlatform(platformName);
             Type typeToMap=typeof(StringValueTypeProperties);
             InitializeMapperService($"{nameof(Bind_all_public_rw_string_properties)}{typeToMap.Name}{platform}");
-            using (var module = typeToMap.Extend<IModelListView>()){
-                using (var application = DefaultModelMapperModule(nameof(Bind_all_public_rw_string_properties), platform, module).Application){
-                    var modelListView = application.Model.Views.OfType<IModelListView>().First();
-                    var modelModelMap = (IModelModelMap)modelListView.MapNode(typeToMap);
-                    modelModelMap.SetValue(nameof(StringValueTypeProperties.RWString),"test");
-                    var stringValueTypeProperties = new StringValueTypeProperties();
+            using var module = typeToMap.Extend<IModelListView>();
+            using var application = DefaultModelMapperModule(nameof(Bind_all_public_rw_string_properties), platform, module).Application;
+            var modelListView = application.Model.Views.OfType<IModelListView>().First();
+            var modelModelMap = (IModelModelMap)modelListView.MapNode(typeToMap);
+            modelModelMap.SetValue(nameof(StringValueTypeProperties.RWString),"test");
+            var stringValueTypeProperties = new StringValueTypeProperties();
             
-                    modelModelMap.BindTo(stringValueTypeProperties);
+            modelModelMap.BindTo(stringValueTypeProperties);
 
-                    stringValueTypeProperties.RWString.ShouldBe("test");
-                }
-            }
+            stringValueTypeProperties.RWString.ShouldBe("test");
         }
 
         [XpandTest]
@@ -164,17 +154,15 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             var platform = GetPlatform(platformName);
             var typeToMap=typeof(ReferenceTypeProperties);
             InitializeMapperService($"{nameof(Bind_all_public_rw_nested_properties)}{typeToMap.Name}{platform}");
-            using (var module = typeToMap.Extend<IModelListView>()){
-                using (var application = DefaultModelMapperModule(nameof(Bind_all_public_rw_nested_properties), platform, module).Application){
-                    var modelListView = application.Model.Views.OfType<IModelListView>().First();
-                    var modelModelMap = (IModelModelMap)modelListView.MapNode(typeToMap);
-                    modelModelMap.GetNode(nameof(ReferenceTypeProperties.RStringValueTypeProperties)).SetValue(nameof(StringValueTypeProperties.RWString),"test");
-                    var referenceTypeProperties = new ReferenceTypeProperties();
+            using var module = typeToMap.Extend<IModelListView>();
+            using var application = DefaultModelMapperModule(nameof(Bind_all_public_rw_nested_properties), platform, module).Application;
+            var modelListView = application.Model.Views.OfType<IModelListView>().First();
+            var modelModelMap = (IModelModelMap)modelListView.MapNode(typeToMap);
+            modelModelMap.GetNode(nameof(ReferenceTypeProperties.RStringValueTypeProperties)).SetValue(nameof(StringValueTypeProperties.RWString),"test");
+            var referenceTypeProperties = new ReferenceTypeProperties();
 
-                    modelModelMap.BindTo(referenceTypeProperties);
-                    referenceTypeProperties.RStringValueTypeProperties.RWString.ShouldBe("test");
-                }
-            }
+            modelModelMap.BindTo(referenceTypeProperties);
+            referenceTypeProperties.RStringValueTypeProperties.RWString.ShouldBe("test");
         }
 
         [XpandTest]
@@ -201,26 +189,24 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             controlTypes.ToObservable().Do(type => Assembly.LoadFile(type.Assembly.Location)).Subscribe();
             InitializeMapperService($"{nameof(Bind_DetailView_Maps)}{predefinedMaps.First()}",platform);
 
-            using (var module = predefinedMaps.Extend()){
-                var moduleBases = extraModules.Select(type => {
-                        var instance = type.CreateInstance();
-                        return instance;
-                    })
-                    .Cast<ModuleBase>()
-                    .Concat(new[]{module})
-                    .ToArray();
-                using (var application = DefaultModelMapperModule(nameof(Bind_DetailView_Maps), platform, moduleBases).Application){
-                    var controlBound = ModelBindingService.ControlBind.Replay();
-                    using (controlBound.Connect()){
-                        for (int i = 0; i < 2; i++){
-                            var detailView = application.NewObjectView<DetailView>(typeof(MM));
-                            detailView.CreateControls();
-                            if (boundTypes>0){
-                                await controlBound.Take((i+1)*boundTypes).Timeout(Timeout).ToTaskWithoutConfigureAwait();
-                            }
-                            detailView.Close();
-                        }
+            using var module = predefinedMaps.Extend();
+            var moduleBases = extraModules.Select(type => {
+                    var instance = type.CreateInstance();
+                    return instance;
+                })
+                .Cast<ModuleBase>()
+                .Concat(new[]{module})
+                .ToArray();
+            using var application = DefaultModelMapperModule(nameof(Bind_DetailView_Maps), platform, moduleBases).Application;
+            var controlBound = ModelBindingService.ControlBind.Replay();
+            using (controlBound.Connect()){
+                for (int i = 0; i < 2; i++){
+                    var detailView = application.NewObjectView<DetailView>(typeof(MM));
+                    detailView.CreateControls();
+                    if (boundTypes>0){
+                        await controlBound.Take((i+1)*boundTypes).Timeout(Timeout).ToTaskWithoutConfigureAwait();
                     }
+                    detailView.Close();
                 }
             }
         }
@@ -230,22 +216,20 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         public async Task Bind_Subsequent_Views(){
             Assembly.LoadFile(typeof(XafGridView).Assembly.Location);
             InitializeMapperService($"{nameof(Bind_Subsequent_Views)}{PredefinedMap.GridView}",Platform.Win);
-            using (var module = PredefinedMap.GridView.Extend()){
-                using (var application = DefaultModelMapperModule(nameof(Bind_Subsequent_Views), Platform.Win, module).Application){
-                    var bound = ModelBindingService.ControlBind.FirstAsync().SubscribeReplay();
-                    application.Logon();
-                    application.CreateObjectSpace();
-                    application.EditorFactory=new DevExpress.ExpressApp.Editors.EditorsFactory();
-                    var listView = application.NewObjectView<ListView>(typeof(MM));
-                    listView.CreateControls();
-                    await bound;
+            using var module = PredefinedMap.GridView.Extend();
+            using var application = DefaultModelMapperModule(nameof(Bind_Subsequent_Views), Platform.Win, module).Application;
+            var bound = ModelBindingService.ControlBind.FirstAsync().SubscribeReplay();
+            application.Logon();
+            application.CreateObjectSpace();
+            application.EditorFactory=new DevExpress.ExpressApp.Editors.EditorsFactory();
+            var listView = application.NewObjectView<ListView>(typeof(MM));
+            listView.CreateControls();
+            await bound;
                     
-                    bound = ModelBindingService.ControlBind.FirstAsync().SubscribeReplay();
-                    listView = application.NewObjectView<ListView>(typeof(MM));
-                    listView.CreateControls();
-                    await bound;
-                }
-            }
+            bound = ModelBindingService.ControlBind.FirstAsync().SubscribeReplay();
+            listView = application.NewObjectView<ListView>(typeof(MM));
+            listView.CreateControls();
+            await bound;
         }
 
 
@@ -266,39 +250,36 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             InitializeMapperService($"{nameof(Bind_ListView_Maps)}{predefinedMaps.First()}",platform);
             var predefinedMap = predefinedMaps.Last();
 
-            using (var module = predefinedMaps.Extend()){
-                using (var application = DefaultModelMapperModule(nameof(Bind_ListView_Maps), platform, extraModules.Select(_ => {
-                            var instance = _.CreateInstance();
-                            if (instance is DashboardsModule dashboardsModule){
-                                dashboardsModule.DashboardDataType = typeof(DashboardData);
-                            }
+            using var module = predefinedMaps.Extend();
+            using var application = DefaultModelMapperModule(nameof(Bind_ListView_Maps), platform, extraModules.Select(_ => {
+                        var instance = _.CreateInstance();
+                        if (instance is DashboardsModule dashboardsModule){
+                            dashboardsModule.DashboardDataType = typeof(DashboardData);
+                        }
 
-                            return instance;
-                        })
-                        .Cast<ModuleBase>()
-                        .Concat(new[]{module})
-                        .ToArray())
-                    .Application){
-                    application.Logon();
-                    application.CreateObjectSpace();
-                    MockListEditor(platform, controlTypes, application, predefinedMap,null);
-                    var controlBound = ModelBindingService.ControlBind.Replay();
-                    using (controlBound.Connect()){
-                        for (int i = 0; i < 2; i++){
+                        return instance;
+                    })
+                    .Cast<ModuleBase>()
+                    .Concat(new[]{module})
+                    .ToArray())
+                .Application;
+            application.Logon();
+            application.CreateObjectSpace();
+            MockListEditor(platform, controlTypes, application, predefinedMap,null);
+            var controlBound = ModelBindingService.ControlBind.Replay();
+            using (controlBound.Connect()){
+                for (int i = 0; i < 2; i++){
                         
                     
-                            var listView = application.NewObjectView<ListView>(typeof(MM));
-                            listView.Model.EditorType = controlTypes.Last();
-                            listView.Model.BandsLayout.Enable = predefinedMaps.Contains(PredefinedMap.AdvBandedGridView);
+                    var listView = application.NewObjectView<ListView>(typeof(MM));
+                    listView.Model.EditorType = controlTypes.Last();
+                    listView.Model.BandsLayout.Enable = predefinedMaps.Contains(PredefinedMap.AdvBandedGridView);
 
-                            listView.CreateControls();
+                    listView.CreateControls();
                     
-                            if (boundTypes>0){
-                                await controlBound.Take((boundTypes*(i+1))).WithTimeOut(Timeout);
-                            }
-                        }
+                    if (boundTypes>0){
+                        await controlBound.Take((boundTypes*(i+1))).WithTimeOut(Timeout);
                     }
-                    
                 }
             }
         }
@@ -364,33 +345,30 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             var predefinedMaps = new[]{PredefinedMap.RepositoryItem,PredefinedMap.RepositoryItemTextEdit };
             controlTypes.ToObservable().Do(type => Assembly.LoadFile(type.Assembly.Location)).Subscribe();
             InitializeMapperService($"{nameof(Bind_RepositoryItems)}{predefinedMaps.First()}",Platform.Win);
-            using (var module = predefinedMaps.Extend()){
-                using (var application = DefaultModelMapperModule(nameof(Bind_RepositoryItems), Platform.Win, module).Application){
-                    var controlBound = ModelBindingService.ControlBind.Take(boundTypes).Replay();
-                    using (controlBound.Connect()){
-                        var modelPropertyEditor = ((IModelPropertyEditor) application.Model.GetNodeByPath(MMDetailViewTestItemNodePath));
-                        var controlInstance = new StringEdit();
-                        var repositoryItemTextEdit = controlInstance.Properties;
-                        if (viewType == typeof(ListView)){
-                            MockListEditor(Platform.Win, controlTypes, application, PredefinedMap.GridView,repositoryItemTextEdit);
-                        }
-                        else{
-                            application.MockDetailViewEditor( modelPropertyEditor, controlInstance);
-                        }
-
-                        var objectView = application.NewObjectView(viewType, typeof(MM));
-                        var values = ConfigureModelRepositories(objectView);
-                        objectView.DelayedItemsInitialization = false;
-                        objectView.CreateControls();
-
-                        await controlBound.WithTimeOut(Timeout);
-
-                        Debug.Assert(repositoryItemTextEdit != null, nameof(repositoryItemTextEdit) + " != null");
-                        repositoryItemTextEdit.CharacterCasing.ShouldBe(values.concreteTypePropertyValue);
-                        repositoryItemTextEdit.AccessibleDescription.ShouldBe(values.basePropertyValue);
-                    }
-                    
+            using var module = predefinedMaps.Extend();
+            using var application = DefaultModelMapperModule(nameof(Bind_RepositoryItems), Platform.Win, module).Application;
+            var controlBound = ModelBindingService.ControlBind.Take(boundTypes).Replay();
+            using (controlBound.Connect()){
+                var modelPropertyEditor = ((IModelPropertyEditor) application.Model.GetNodeByPath(MMDetailViewTestItemNodePath));
+                var controlInstance = new StringEdit();
+                var repositoryItemTextEdit = controlInstance.Properties;
+                if (viewType == typeof(ListView)){
+                    MockListEditor(Platform.Win, controlTypes, application, PredefinedMap.GridView,repositoryItemTextEdit);
                 }
+                else{
+                    application.MockDetailViewEditor( modelPropertyEditor, controlInstance);
+                }
+
+                var objectView = application.NewObjectView(viewType, typeof(MM));
+                var values = ConfigureModelRepositories(objectView);
+                objectView.DelayedItemsInitialization = false;
+                objectView.CreateControls();
+
+                await controlBound.WithTimeOut(Timeout);
+
+                Debug.Assert(repositoryItemTextEdit != null, nameof(repositoryItemTextEdit) + " != null");
+                repositoryItemTextEdit.CharacterCasing.ShouldBe(values.concreteTypePropertyValue);
+                repositoryItemTextEdit.AccessibleDescription.ShouldBe(values.basePropertyValue);
             }
         }
 

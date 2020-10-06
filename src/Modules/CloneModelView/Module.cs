@@ -2,6 +2,7 @@
 using DevExpress.ExpressApp.Model;
 using HarmonyLib;
 using JetBrains.Annotations;
+using Xpand.Extensions.XAF.TypesInfoExtensions;
 
 namespace Xpand.XAF.Modules.CloneModelView{
     
@@ -9,6 +10,7 @@ namespace Xpand.XAF.Modules.CloneModelView{
         static CloneModelViewModule(){
             var harmony = new Harmony(typeof(IModelViewController).Namespace);
             harmony.PatchAll(typeof(CloneModelViewModule).Assembly);
+            XafTypesInfo.Instance.ReferenceNetStandard();
         }
 
         [PublicAPI]

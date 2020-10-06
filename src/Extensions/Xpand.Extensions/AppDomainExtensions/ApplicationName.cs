@@ -1,17 +1,16 @@
 ﻿using System;
+using System.Reflection;
 using Fasterflect;
-using JetBrains.Annotations;
 
 namespace Xpand.Extensions.AppDomainExtensions{
-    [PublicAPI]
     public static partial class AppDomainExtensions{
-        public static string ApplicationPath(this AppDomain appDomain){
+        public static string ApplicationName(this AppDomain appDomain){
             if (appDomain.UseNetFramework()){
                 var setupInformation = AppDomain.CurrentDomain.GetPropertyValue("SetupInformation");
-                return (string) (setupInformation.GetPropertyValue("PrivateBinPath")??setupInformation.GetPropertyValue("ApplicationBase"));
+                return (string) (setupInformation.GetPropertyValue("ApplicationName")) ;
             }
-            return appDomain.BaseDirectory;
 
+            return Assembly.GetEntryAssembly()?.GetName().Name??"ApplicationName";
         }
     }
 }

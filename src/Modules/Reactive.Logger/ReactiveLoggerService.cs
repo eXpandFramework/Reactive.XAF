@@ -35,7 +35,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         All=Subscribe|OnNext|OnCompleted|Dispose|OnError
     }
     public static class ReactiveLoggerService{
-        public static string RXLoggerLogPath{ get; [PublicAPI]set; }=@$"{AppDomain.CurrentDomain.ApplicationPath()}\{AppDomain.CurrentDomain.SetupInformation.ApplicationName}_RXLogger.log";
+        public static string RXLoggerLogPath{ get; [PublicAPI]set; }=@$"{AppDomain.CurrentDomain.ApplicationPath()}\{AppDomain.CurrentDomain.ApplicationName()}_RXLogger.log";
         private static readonly Subject<ITraceEvent> SavedTraceEventSubject=new Subject<ITraceEvent>();
         public static IObservable<ITraceEvent> ListenerEvents{ get; private set; }
         public static IObservable<ITraceEvent> SavedTraceEvent{ get; }=SavedTraceEventSubject;

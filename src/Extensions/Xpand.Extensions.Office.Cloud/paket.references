@@ -4,3 +4,4 @@ System.Reactive
 DevExpress.Persistent.Base
 Newtonsoft.Json
 System.ValueTuple
+System.Drawing.Common

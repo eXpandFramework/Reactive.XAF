@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.IO.Compression;
 using System.Threading.Tasks;
 using DevExpress.EasyTest.Framework;
 using DevExpress.ExpressApp.Xpo;
@@ -34,11 +33,8 @@ namespace ALL.Tests{
                     var path = Path.GetDirectoryName(easyTestSettingsFile);
                     WriteLine(path);
                     foreach (var file in Directory.GetFiles(path!, "*.log")){
-                        var zipPPath = $"{Path.GetDirectoryName(file)}\\{Path.GetFileNameWithoutExtension(file)}.zip";
-                        using (var gZipStream = new GZipStream(File.Create(zipPPath), CompressionMode.Compress)){
-                            var bytes = File.ReadAllText(file).Bytes();
-                            gZipStream.Write(bytes,0,bytes.Length);
-                        }
+                        var zipPPath = $"{Path.GetDirectoryName(file)}\\{Path.GetFileNameWithoutExtension(file)}.gz";
+                        File.WriteAllBytes(zipPPath,File.ReadAllText(file).GZip());
                         WriteLine($"Attaching {zipPPath}");
                         TestContext.AddTestAttachment(zipPPath);
                     }

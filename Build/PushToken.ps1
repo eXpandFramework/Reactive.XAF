@@ -75,11 +75,9 @@ $dataFile = ".\$Service"
 $dataFile += "AuthenticationDataWin.json"
 Write-Host "Write Token"
 Set-Content $dataFile $Token
-Start-Sleep 2
 Write-Host "Push-Git"
 Push-Git -AddAll -Message "$Service`Token" -UserMail $GitUserEmail -Username "apobekiaris"
-Start-Sleep 2
+
 Write-Host "DownloadCread"
 & "$PSScriptRoot\DownloadCloudCreds.ps1" -SkipPushToken:$SkipPushToken
 Write-Host "Finish"
-Start-Sleep 2

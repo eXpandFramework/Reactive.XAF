@@ -3,3 +3,4 @@ DevExpress.ExpressApp
 Fasterflect.Xpand
 JetBrains.Annotations
 System.ValueTuple
+System.Configuration.ConfigurationManager

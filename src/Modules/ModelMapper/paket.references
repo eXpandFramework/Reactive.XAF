@@ -5,6 +5,8 @@ System.Interactive
 DevExpress.ExpressApp
 System.Reactive
 Fasterflect.Xpand
-Xpand.Collections
 JetBrains.Annotations
 System.ValueTuple
+Xpand.Collections
+System.Collections.Immutable
+System.Configuration.ConfigurationManager

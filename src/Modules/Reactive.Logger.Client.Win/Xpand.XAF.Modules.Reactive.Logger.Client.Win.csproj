@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{F929A9D2-7C98-4138-8F2B-C3D3A8464710}</ProjectGuid>
     <TargetFramework>net461</TargetFramework>
     <LangVersion>latest</LangVersion>
     <SignAssembly>true</SignAssembly>
@@ -12,7 +11,7 @@
     <OutputPathSuffix>ReactiveLoggerClient</OutputPathSuffix>
     <OutputPath>..\..\..\bin\ReactiveLoggerClient</OutputPath>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
     <DebugType>full</DebugType>
     <OutputType>WinExe</OutputType>
     <ApplicationManifest>app1.manifest</ApplicationManifest>
@@ -39,12 +38,11 @@
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="System.Configuration" />
     <Reference Include="Xpand.XAF.Modules.GridListEditor">
-      <HintPath>..\..\..\bin\Xpand.XAF.Modules.GridListEditor.dll</HintPath>
+      <HintPath>..\..\..\bin\net461\Xpand.XAF.Modules.GridListEditor.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.OneView">
-      <HintPath>..\..\..\bin\Xpand.XAF.Modules.OneView.dll</HintPath>
+      <HintPath>..\..\..\bin\net461\Xpand.XAF.Modules.OneView.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>

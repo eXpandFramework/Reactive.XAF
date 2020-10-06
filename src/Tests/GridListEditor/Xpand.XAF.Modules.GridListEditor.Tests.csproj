@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputPath>..\..\..\bin</OutputPath>
     <TargetFramework>net461</TargetFramework>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
     <LangVersion>latest</LangVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
@@ -17,7 +17,7 @@
       <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.TestsLib">
-      <HintPath>..\..\..\bin\Xpand.TestsLib.dll</HintPath>
+      <HintPath>..\..\..\bin\net461\Xpand.TestsLib.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.Extensions">
       <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
@@ -26,7 +26,7 @@
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.GridListEditor">
-      <HintPath>..\..\..\bin\Xpand.XAF.Modules.GridListEditor.dll</HintPath>
+      <HintPath>..\..\..\bin\net461\Xpand.XAF.Modules.GridListEditor.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>

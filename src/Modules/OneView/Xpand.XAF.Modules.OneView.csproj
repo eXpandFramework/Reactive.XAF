@@ -13,7 +13,7 @@
     <AssemblyTitle>Xpand.XAF.Modules.ViewEditMode</AssemblyTitle>
     <Product>Xpand.XAF.Modules.ViewEditMode</Product>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
     <DebugType>full</DebugType>
   </PropertyGroup>
   <ItemGroup>
@@ -28,7 +28,7 @@
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive.Win">
-      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Win.dll</HintPath>
+      <HintPath>..\..\..\bin\net461\Xpand.XAF.Modules.Reactive.Win.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

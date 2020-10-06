@@ -45,12 +45,12 @@ namespace Xpand.XAF.Modules.CloneModelView.Tests{
             var cloneViewId = $"{nameof(Keep_ModelGenerators)}_{cloneViewType}";
             var cloneModelViewModule = new CloneModelViewModule();
             cloneModelViewModule.RequiredModuleTypes.Add(typeof(ModelViewInheritanceModule));
-            var application = DefaultCloneModelViewModule(cloneModelViewModule,info => {
-                var typeInfo = info.FindTypeInfo(typeof(CMV));
-                typeInfo.AddAttribute(new CloneModelViewAttribute(cloneViewType, cloneViewId));
-                typeInfo.AddAttribute(new ModelMergedDifferencesAttribute(cloneViewId,$"CMV_{cloneViewType}"));
-            }, Platform.Win).Application;
-
+            using var application = DefaultCloneModelViewModule(cloneModelViewModule, info => {
+                    var typeInfo = info.FindTypeInfo(typeof(CMV));
+                    typeInfo.AddAttribute(new CloneModelViewAttribute(cloneViewType, cloneViewId));
+                    typeInfo.AddAttribute(new ModelMergedDifferencesAttribute(cloneViewId, $"CMV_{cloneViewType}"));
+                }, Platform.Win)
+                .Application;
             ((IModelObjectViewMergedDifferences) application.Model.Views[cloneViewId]).MergedDifferences.Count.ShouldBe(1);
         }
 
