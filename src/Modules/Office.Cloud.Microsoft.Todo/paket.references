@@ -9,3 +9,4 @@ Microsoft.Graph.Core
 Microsoft.Identity.Client
 Newtonsoft.Json
 System.ValueTuple
+Microsoft.CodeAnalysis.CSharp

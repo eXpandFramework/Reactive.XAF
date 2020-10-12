@@ -17,8 +17,8 @@ Properties {
 
 
 
-Task Build  -depends   Clean, Init, UpdateProjects, Compile,CheckVersions, IndexSources, CreateNuspec, PackNuspec, CompileTests, UpdateAllTests
-Task TestsRun  -depends   Clean, Init, UpdateProjects, Compile,CheckVersions, IndexSources, CreateNuspec, PackNuspec, CompileTests, UpdateAllTests
+Task Build  -depends   Clean, Init, UpdateProjects, Compile,CheckVersions, IndexSources, CreateNuspec, PackNuspec, CompileTests
+Task TestsRun  -depends   Clean, Init, UpdateProjects, Compile,CheckVersions, IndexSources, CreateNuspec, PackNuspec, CompileTests
 
 
 Task IndexSources {
@@ -54,13 +54,8 @@ Task UpdateProjects {
 
 Task CompileTests -precondition { return $compile } {
     Invoke-Script {
-        Write-HostFormatted "Building Tests" -Section
-        $source = "https://api.nuget.org/v3/index.json;$packageSources"
-        $source = "$source;$Root\Bin\Nupkg"
-        dotnet msbuild "$Root\src\Tests\Tests.sln" /t:Clean
-        dotnet restore "$Root\src\Tests\Tests.sln" --source $packageSources --source (Get-PackageFeed -Nuget) /WarnAsError
-        dotnet msbuild "$Root\src\Tests\Tests.sln" "/bl:$Root\Bin\CompileTests.binlog" "/p:configuration=Debug" /WarnAsError /m /v:m 
-    } -Maximum 2
+        & "$Root\Build\UpdateAllTests.ps1" "$Root" $branch $packageSources $dxVersion
+    }
     Get-ChildItem $root\bin "*xpand*.dll"| Test-AssemblyReference -VersionFilter $DXVersion
 }
 
@@ -69,19 +64,23 @@ Task Compile -precondition { return $compile } {
     if ($branch -eq "master"){
         $Configuration="Release"
     }
+    
     Invoke-Script {
         Write-HostFormatted "Building Extensions" -Section
         & dotnet msbuild "$Root\src\Extensions\Extensions.sln" /t:Clean
         dotnet restore "$Root\src\Extensions\Extensions.sln" --source $packageSources --source (Get-PackageFeed -Nuget) /WarnAsError
-        & dotnet msbuild "$Root\src\Extensions\Extensions.sln" "/bl:$Root\Bin\Extensions.binlog" "/p:configuration=$Configuration" /m /v:m /WarnAsError 
+        & dotnet msbuild "$Root\src\Extensions\Extensions.sln" "/bl:$Root\Bin\Extensions.binlog" "/p:configuration=$Configuration;skipNugetReplace=true" /m /v:m /WarnAsError 
     } -Maximum 2
+    
+    
     Invoke-Script {
         Write-HostFormatted "Building Modules" -Section
         dotnet msbuild "$Root\src\Modules\Modules.sln" /t:Clean
         Set-Location "$Root\src\Modules"
         dotnet restore "$Root\src\Modules\Modules.sln" --source $packageSources --source (Get-PackageFeed -Nuget) /WarnAsError
-        dotnet msbuild "$Root\src\Modules\Modules.sln" "/bl:$Root\Bin\Modules.binlog" "/p:configuration=$Configuration" /WarnAsError /m /v:m
+        dotnet msbuild "$Root\src\Modules\Modules.sln" "/bl:$Root\Bin\Modules.binlog" "/p:configuration=$Configuration;skipNugetReplace=true" /WarnAsError /m /v:m
     } -Maximum 2
+    
     Invoke-Script {
         Write-HostFormatted "Building Xpand.XAF.ModelEditor" -Section
         dotnet msbuild "$Root\tools\Xpand.XAF.ModelEditor\Xpand.XAF.ModelEditor.csproj" /t:Clean
@@ -114,13 +113,6 @@ Task PackNuspec {
     Invoke-Script {
         & "$PSScriptRoot\PackNuspec.ps1" -branch $branch -ChangedModules $ChangedModules
     } -Maximum 3
-}
-
-Task UpdateAllTests {
-    Invoke-Script {
-        & "$Root\Build\UpdateAllTests.ps1" "$Root" $branch $packageSources $dxVersion
-    }
-    Get-ChildItem $root\bin "*xpand*.dll"| Test-AssemblyReference -VersionFilter $DXVersion
 }
 
 

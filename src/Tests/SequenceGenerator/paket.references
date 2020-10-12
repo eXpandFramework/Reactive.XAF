@@ -1,6 +1,7 @@
 DevExpress.ExpressApp
 DevExpress.ExpressApp.Security
 DevExpress.ExpressApp.Security.Xpo
+DevExpress.ExpressApp.Validation
 DevExpress.ExpressApp.Web
 System.Interactive
 akarnokd.reactive_extensions

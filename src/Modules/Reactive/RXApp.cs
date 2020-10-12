@@ -27,7 +27,6 @@ namespace Xpand.XAF.Modules.Reactive{
         static readonly Subject<ApplicationModulesManager> ApplicationModulesManagerSubject=new Subject<ApplicationModulesManager>();
         static readonly Subject<Frame> FramesSubject=new Subject<Frame>();
         static readonly Subject<(object theObject,IObjectSpace objectSpace)> NewObjectsSubject=new Subject<(object theObject, IObjectSpace objectSpace)>();
-        static readonly Subject<Window> PopupWindowsSubject=new Subject<Window>();
         internal static Harmony Harmony;
 
         static RxApp(){
@@ -39,58 +38,27 @@ namespace Xpand.XAF.Modules.Reactive{
         }
         
         [SuppressMessage("ReSharper", "InconsistentNaming")]
-        static void CreateObject(IObjectSpace __instance,object __result){
-            NewObjectsSubject.OnNext(( __result,__instance));
-        }
+        static void CreateObject(IObjectSpace __instance,object __result) => NewObjectsSubject.OnNext(( __result,__instance));
 
         [SuppressMessage("ReSharper", "InconsistentNaming")]
-        static void CreateModuleManager(ApplicationModulesManager __result){
-            ApplicationModulesManagerSubject.OnNext(__result);
-        }
+        static void CreateModuleManager(ApplicationModulesManager __result) => ApplicationModulesManagerSubject.OnNext(__result);
+
         [SuppressMessage("ReSharper", "InconsistentNaming")]
-        static void CreateFrame(Frame __result){
-            FramesSubject.OnNext(__result);
-        }
-        [SuppressMessage("ReSharper", "InconsistentNaming")]
-        static void CreateWindow(Window __result){
-            FramesSubject.OnNext(__result);
-        }
-        [SuppressMessage("ReSharper", "InconsistentNaming")]
-        static void CreatePopupWindow(Window __result){
-            FramesSubject.OnNext(__result);
-            PopupWindowsSubject.OnNext(__result);
-        }
-        
+        static void Initialize(Frame __instance) => FramesSubject.OnNext(__instance);
+
         public static IObservable<(object theObject,IObjectSpace objectSpace)> NewObjects 
             => NewObjectsSubject.AsObservable();
 
         private static void PatchXafApplication(Harmony harmony){
-            var xafApplicationMethods = typeof(XafApplication).Methods();
-            var createFrameMethodPatch = GetMethodInfo(nameof(CreateFrame));
-            var frameMethods = new[]{
-                xafApplicationMethods.First(info => info.Name == nameof(XafApplication.CreateNestedFrame)),
-                xafApplicationMethods.First(info => info.Name == nameof(XafApplication.CreateFrame))
-            };
-            foreach (var frameMethod in frameMethods){
-                harmony.Patch(frameMethod, finalizer: new HarmonyMethod(createFrameMethodPatch));
-            }
-
-            var createWindows = xafApplicationMethods.Where(info =>
-                info.Name == nameof(XafApplication.CreateWindow) );
-            foreach (var createWindow in createWindows){
-                harmony.Patch(createWindow, finalizer: new HarmonyMethod(GetMethodInfo(nameof(CreateWindow))));    
-            }
-            
-            
-            var createPopupWindow = xafApplicationMethods.First(info => info.Name == nameof(CreatePopupWindow)&&info.Parameters().Count==5);
-            harmony.Patch(createPopupWindow, finalizer: new HarmonyMethod(GetMethodInfo(nameof(CreatePopupWindow))));
-            
-            var createModuleManager = xafApplicationMethods.First(info => info.Name == nameof(CreateModuleManager));
+            var frameInitialize = typeof(Frame).Method("Initialize");
+            var createFrameMethodPatch = GetMethodInfo(nameof(Initialize));
+            harmony.Patch(frameInitialize,  postfix:new HarmonyMethod(createFrameMethodPatch));
+            var createModuleManager = typeof(XafApplication).Method(nameof(CreateModuleManager));
             harmony.Patch(createModuleManager, finalizer: new HarmonyMethod(GetMethodInfo(nameof(CreateModuleManager))));
         }
 
         private static MethodInfo GetMethodInfo(string methodName) 
-            => typeof(RxApp).GetMethods(BindingFlags.Static|BindingFlags.NonPublic).First(info => info.Name == methodName);
+            => typeof(RxApp).GetMethods(BindingFlags.Static|BindingFlags.NonPublic|BindingFlags.Public).First(info => info.Name == methodName);
 
         private static IObservable<Unit> AddNonSecuredTypes(this ApplicationModulesManager applicationModulesManager) 
             => applicationModulesManager.WhenCustomizeTypesInfo()
@@ -168,10 +136,9 @@ namespace Xpand.XAF.Modules.Reactive{
 
         internal static IObservable<ApplicationModulesManager> ApplicationModulesManager => ApplicationModulesManagerSubject.AsObservable();
 
-        internal static IObservable<Window> PopupWindows => PopupWindowsSubject;
+        internal static IObservable<Window> PopupWindows => Frames.When(TemplateContext.PopupWindow).OfType<Window>();
 
-        internal static IObservable<Frame> Frames{ get; } = FramesSubject.DistinctUntilChanged()
-	        .Merge(PopupWindows);
+        internal static IObservable<Frame> Frames{ get; } = FramesSubject.DistinctUntilChanged();
 
         
     }

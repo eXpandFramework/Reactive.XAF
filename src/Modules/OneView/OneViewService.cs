@@ -19,8 +19,8 @@ using Xpand.XAF.Modules.Reactive.Win.Services;
 namespace Xpand.XAF.Modules.OneView{
     public static class OneViewService{
         
-        internal static IObservable<Unit> Connect(this  ApplicationModulesManager manager) =>
-	        manager.WhenApplication(application => {
+        internal static IObservable<Unit> Connect(this  ApplicationModulesManager manager) 
+	        => manager.WhenApplication(application => {
 		        var cleanStartupNavigationItem = CleanStartupNavigationItem(application);
 		        var showView = application.ShowView().Publish().RefCount();
 		        return showView.EditModel(application)
@@ -29,32 +29,33 @@ namespace Xpand.XAF.Modules.OneView{
 			        .Merge(cleanStartupNavigationItem);
 	        });
 
-        static IObservable<Unit> CleanStartupNavigationItem(this XafApplication application) => application.WhenModelChanged()
+        static IObservable<Unit> CleanStartupNavigationItem(this XafApplication application) 
+	        => application.WhenModelChanged()
 		        .Do(modelApplication => ((IModelApplicationNavigationItems) modelApplication).NavigationItems.StartupNavigationItem = null)
 		        .ToUnit();
 
         private static IObservable<Unit> ExitApplication(this IObservable<ShowViewParameters> showView,XafApplication application){
             var editingModel = showView.SelectMany(_ =>_.Controllers.OfType<OneViewDialogController>().ToObservable()
                 .SelectMany(controller => controller.AcceptAction.WhenExecuting().Select(tuple => tuple)));
-            var closingView = Observable.Defer(() => showView.SelectMany(_ => _.CreatedView.WhenClosed())
+            return  Observable.Defer(() => showView.SelectMany(_ => _.CreatedView.WhenClosed())
                     .TakeUntil(editingModel))
                 .Repeat()
                 .Where(view => !(bool) application.GetFieldValue("exiting"))
                 .Do(view => application.Exit())
-                .Select(view => view);
-            return closingView.ToUnit();
+                .Select(view => view)
+                .ToUnit();
 
         }
 
-        private static IObservable<Unit> EditModel(this IObservable<ShowViewParameters> showView,XafApplication application) =>
-	        showView.SelectMany(_ => _.Controllers.OfType<OneViewDialogController>())
+        private static IObservable<Unit> EditModel(this IObservable<ShowViewParameters> showView,XafApplication application) 
+	        => showView.SelectMany(_ => _.Controllers.OfType<OneViewDialogController>())
 		        .SelectMany(_ => _.AcceptAction.WhenExecuteCompleted()
 			        .Select(tuple => application.MainWindow.GetController<EditModelController>().EditModelAction))
 		        .Do(action => action.DoExecute()).ToUnit()
 		        .TraceOneView();
 
-        private static IObservable<Unit> HideMainWindow(this XafApplication application) =>
-	        application.WhenMainFormVisible()
+        private static IObservable<Unit> HideMainWindow(this XafApplication application) 
+	        => application.WhenMainFormVisible()
 		        .Do(window => {
 			        window.Template.ToForm().Visible = false;
 		        })
@@ -65,11 +66,11 @@ namespace Xpand.XAF.Modules.OneView{
 
         internal static IObservable<TSource> TraceOneView<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
 	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
-	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) =>
-	        source.Trace(name, OneViewModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
+	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
+	        => source.Trace(name, OneViewModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
 
-        private static IObservable<ShowViewParameters> ShowView(this XafApplication application) =>
-	        application.WhenWindowCreated().When(TemplateContext.ApplicationWindow)
+        private static IObservable<ShowViewParameters> ShowView(this XafApplication application) 
+	        => application.WhenWindowCreated().When(TemplateContext.ApplicationWindow)
 		        .SelectMany(window => {
 			        var modelView = application.Model.ToReactiveModule<IModelReactiveModuleOneView>().OneView;
 			        if (modelView.View!=null){

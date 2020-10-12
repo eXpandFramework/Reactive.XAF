@@ -29,60 +29,53 @@ namespace Xpand.XAF.Modules.OneView.Tests{
         [XpandTest]
         [Apartment(ApartmentState.STA)]
         public  void Hide_MainWindow_Template_OnStart(){
-            using (var application = OneViewModule(nameof(Hide_MainWindow_Template_OnStart)).Application){
+	        using var application = OneViewModule().Application;
+	        var visibility = application.WhenViewOnFrame(typeof(OV))
+		        .SelectMany(frame => frame.Template.ToForm().WhenShown())
+		        .Select(form => application.MainWindow.Template.ToForm().Visible)
+		        .FirstAsync()
+		        .Do(form => {
 
-                var visibility = application.WhenViewOnFrame(typeof(OV))
-                    .SelectMany(frame => frame.Template.ToForm().WhenShown())
-                    .Select(form => application.MainWindow.Template.ToForm().Visible)
-                    .FirstAsync()
-                    .Do(form => {
+			        application.Exit();
+		        })
+		        .SubscribeReplay();
 
-                        application.Exit();
-                    })
-                    .SubscribeReplay();
+	        ((TestWinApplication)application).Start();
 
-                ((TestWinApplication)application).Start();
-
-                visibility.Test().AssertValues(false);
-                
-            }
+	        visibility.Test().AssertValues(false);
         }
 
         [Test]
         [XpandTest]
         [Apartment(ApartmentState.STA)]
         public void Show_OneView_OnStart(){
-            using (var application = (TestWinApplication) OneViewModule(nameof(Show_OneView_OnStart)).Application){
-                
-                var test = application.WhenViewOnFrame(typeof(OV))
-                    .Select(frame => frame)
-                    .Do(frame => frame.Application.Exit())
-                    .Test();
+	        using var application = (TestWinApplication) OneViewModule().Application;
+	        var test = application.WhenViewOnFrame(typeof(OV))
+		        .Select(frame => frame)
+		        .Do(frame => frame.Application.Exit())
+		        .Test();
 
-                application.Start();
+	        application.Start();
 
-                test.ItemCount.ShouldBe(1);
-            }
+	        test.ItemCount.ShouldBe(1);
         }
 
         [Test]
         [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task Exit_Application_On_View_Close(){
-            using (var application = OneViewModule(nameof(Exit_Application_On_View_Close)).Application){
-                var closeView = application.WhenViewOnFrame(typeof(OV))
-                    .SelectMany(frame => frame.Template.ToForm().WhenShown().To(frame))
-                    .CombineLatest(application.WhenWindowCreated(true), (frame, window) => frame)
-                    .Do(frame => frame.View.Close())
-                    .FirstAsync()
-                    .SubscribeReplay();
+	        using var application = OneViewModule().Application;
+	        var closeView = application.WhenViewOnFrame(typeof(OV))
+		        .SelectMany(frame => frame.Template.ToForm().WhenShown().To(frame).Select(frame1 => frame1))
+		        .Do(frame => frame.View.Close())
+		        .FirstAsync()
+		        .SubscribeReplay();
 
-                var testWinApplication = ((TestWinApplication) application);
+	        var testWinApplication = ((TestWinApplication) application);
                 
-                testWinApplication.Start();
+	        testWinApplication.Start();
 
-                await closeView;
-            }
+	        await closeView;
         }
 
 
@@ -90,38 +83,37 @@ namespace Xpand.XAF.Modules.OneView.Tests{
         [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task Edit_Model(){
-            using (var application = OneViewModule(nameof(Edit_Model)).Application){
-                var whenViewOneFrame=application.WhenViewOnFrame(typeof(OV))
-                    .SelectMany(frame => frame.Template.ToForm().WhenShown().To(frame))
-                    .Do(frame => frame.GetController<DialogController>().AcceptAction.DoExecute())
-                    .FirstAsync()
-                    .SubscribeReplay();
-                var testWinApplication = ((TestWinApplication) application);
-                var editModel = testWinApplication.ModelEditorForm.SelectMany(form => form.WhenShown())
-                    .SelectMany(form => {
-                        form.Close();
-                        return form.WhenDisposed();
-                    })
-                    .Select(tuple => tuple)
-                    .FirstAsync()
-                    .SubscribeReplay();
-                var showViewAfterModelEdit = application.WhenViewOnFrame(typeof(OV)).Select(frame => frame).When(TemplateContext.PopupWindow)
-                    .SkipUntil(editModel)
-                    .SelectMany(frame => frame.Template.ToForm().WhenShown().To(frame))
-                    .Do(frame => frame.View.Close())
-                    .FirstAsync().SubscribeReplay();
-                testWinApplication.WhenWin().WhenCustomHandleException().Subscribe(args => { args.handledEventArgs.Handled = true; });
-                testWinApplication.Start();
-                await editModel;
-                await showViewAfterModelEdit;
-                await whenViewOneFrame;
-            }
+	        using var application = OneViewModule().Application;
+	        var whenViewOneFrame=application.WhenViewOnFrame(typeof(OV))
+		        .SelectMany(frame => frame.Template.ToForm().WhenShown().To(frame))
+		        .Do(frame => frame.GetController<DialogController>().AcceptAction.DoExecute())
+		        .FirstAsync()
+		        .SubscribeReplay();
+	        var testWinApplication = ((TestWinApplication) application);
+	        var editModel = testWinApplication.ModelEditorForm.SelectMany(form => form.WhenShown())
+		        .SelectMany(form => {
+			        form.Close();
+			        return form.WhenDisposed();
+		        })
+		        .Select(tuple => tuple)
+		        .FirstAsync()
+		        .SubscribeReplay();
+	        var showViewAfterModelEdit = application.WhenViewOnFrame(typeof(OV)).Select(frame => frame).When(TemplateContext.PopupWindow)
+		        .SkipUntil(editModel)
+		        .SelectMany(frame => frame.Template.ToForm().WhenShown().To(frame))
+		        .Do(frame => frame.View.Close())
+		        .FirstAsync().SubscribeReplay();
+	        testWinApplication.WhenWin().WhenCustomHandleException().Subscribe(args => { args.handledEventArgs.Handled = true; });
+	        testWinApplication.Start();
+	        await editModel;
+	        await showViewAfterModelEdit;
+	        await whenViewOneFrame;
         }
 
-        private static OneViewModule OneViewModule(string title,Platform platform=Platform.Win){
+        private static OneViewModule OneViewModule(Platform platform=Platform.Win){
             var application = platform.NewApplication<OneViewModule>(handleExceptions:false);
             application.EditorFactory=new EditorsFactory();
-            var oneViewModule = application.AddModule<OneViewModule>(title,typeof(OV), typeof(A));
+            var oneViewModule = application.AddModule<OneViewModule>(typeof(OV), typeof(A));
             ConfigureModel(application);
             return oneViewModule;
         }

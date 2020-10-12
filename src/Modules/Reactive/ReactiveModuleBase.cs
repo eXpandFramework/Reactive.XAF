@@ -11,7 +11,7 @@ using Fasterflect;
 using HarmonyLib;
 using JetBrains.Annotations;
 using Xpand.Extensions.AppDomainExtensions;
-using Xpand.Extensions.XAF.TypesInfoExtensions;
+using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive{
@@ -24,7 +24,7 @@ namespace Xpand.XAF.Modules.Reactive{
             var original = typeof(ApplicationModulesManager).Method("SetupModules");
             var prefix = typeof(ReactiveModule).Method(nameof(SetupModulesPatch),Flags.StaticAnyVisibility);
             harmony.Patch(original,  new HarmonyMethod(prefix));
-            XafTypesInfo.Instance.ReferenceNetStandard();
+            AppDomain.CurrentDomain.AddModelReference("netstandard");
         }
 
         private static Assembly CurrentDomainOnAssemblyResolve(object sender, ResolveEventArgs args){

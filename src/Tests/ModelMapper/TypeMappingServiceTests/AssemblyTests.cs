@@ -16,6 +16,7 @@ using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.Ty
 namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
     [NonParallelizable]
     public class AssemblyTests:ModelMapperBaseTest{
+	    private string _accessFileMessage = "The process cannot access the file ";
         [XpandTest]
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]
@@ -37,7 +38,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
             var module = typeToMap.Extend<IModelListView>();
             using (DefaultModelMapperModule(nameof(Platform_Detection), platform, module).Application){
-                typeToMap.ModelType().Assembly.GetName().Name.ShouldEndWith(platformName);
+                typeToMap.ModelType().Assembly.Location.ShouldEndWith($"{platformName}.dll");
             }
         }
 
@@ -93,10 +94,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
             var dynamicType2 = CreateDynamicType(mapperService, "2.0.0.0");
 
-            var exception = Should.Throw<Exception>(async () => await new[]{dynamicType2,typeof(TestModelMapper)}.MapToModel().ModelInterfaces());
+            Should.Throw<UnauthorizedAccessException>(async () => await new[]{dynamicType2,typeof(TestModelMapper)}.MapToModel().ModelInterfaces());
 
-
-            exception.Message.ShouldContain("CS0016");
         }
 
         [Test]
@@ -108,9 +107,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             InitializeMapperService($"{nameof(Always_Map_If_ModelMapperModule_HashCode_Changed)}",newAssemblyName:false);
             typeof(TypeMappingService).SetFieldValue("_modelMapperModuleVersion", new Version(2000,100,40));
 
-            var exception = Should.Throw<Exception>(async () => await mappedType.MapToModel().ModelInterfaces());
-
-            exception.Message.ShouldContain("CS0016");
+            Should.Throw<UnauthorizedAccessException>(async () => await mappedType.MapToModel().ModelInterfaces());
         }
 
         [Test]
@@ -126,9 +123,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
             InitializeMapperService(nameof(Always_Map_If_ModelMapperConfiguration_Changed),newAssemblyName:false);
 
-            var exception = Should.Throw<Exception>(async () => await typeToMap.MapToModel(type => new ModelMapperConfiguration(type){MapName = "changed"}).ModelInterfaces());
-
-            exception.Message.ShouldContain("CS0016");
+            Should.Throw<UnauthorizedAccessException>(async () => await typeToMap.MapToModel(type => new ModelMapperConfiguration(type){MapName = "changed"}).ModelInterfaces());
+            
         }
 
     }

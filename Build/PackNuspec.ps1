@@ -1,11 +1,10 @@
 param(
-    $Branch = "master",
+    $Branch = "lab",
     $nugetBin = "$PSScriptRoot\..\bin\Nupkg",
     $sourceDir = "$PSScriptRoot\..",
     $Filter ,
     [switch]$SkipReadMe,
     [string[]]$ChangedModules =((Get-ChildItem $nugetBin).BaseName|ConvertTo-PackageObject).Id
-    Xpand.Extensions",
 )
 
 Import-Module XpandPwsh -Force -Prefix X

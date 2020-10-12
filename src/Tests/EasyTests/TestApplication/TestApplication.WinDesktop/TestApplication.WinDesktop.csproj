@@ -1,0 +1,139 @@
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+  <PropertyGroup>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <ProjectGuid>{55D272EF-2068-4A8E-BF55-F10766942FDA}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <ApplicationIcon>ExpressApp.ico</ApplicationIcon>
+    <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
+    <FileUpgradeFlags />
+    <UpgradeBackupLocation />
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Deterministic>False</Deterministic>
+    <AssemblyTitle>TestApplication.WinDesktop</AssemblyTitle>
+    <Company>-</Company>
+    <Product>TestApplication.WinDesktop</Product>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <OutputPathSuffix>TestWinDesktopApplication</OutputPathSuffix>
+    <OutputPath>..\..\..\..\..\bin\TestWinDesktopApplication</OutputPath>
+    <Configurations>Debug;Release;EasyTest</Configurations>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
+    <LangVersion>latest</LangVersion>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <!--    <RestorePackagesWithLockFile>False</RestorePackagesWithLockFile>-->
+    <!--    <RestoreLockedMode>False</RestoreLockedMode>-->
+    <NoWarn>NU1603;NETSDK1086</NoWarn>
+    <!--    <DisableImplicitNuGetFallbackFolder>False</DisableImplicitNuGetFallbackFolder>-->
+    <AssemblyName>TestApplication.WinDesktop</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugType>full</DebugType>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
+    <LangVersion>latest</LangVersion>
+    <DebugSymbols>true</DebugSymbols>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <OutputPath>..\..\..\..\..\bin\TestWinDesktopApplication</OutputPath>
+    <DefineConstants>TRACE;XAF201</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>full</DebugType>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
+    <LangVersion>latest</LangVersion>
+    <DebugSymbols>true</DebugSymbols>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <OutputPath>..\..\..\..\..\bin\TestWinDesktopApplication</OutputPath>
+    <DefineConstants>TRACE;XAF201</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="_Program.cs" />
+    <PackageReference Include="Mono.Cecil" Version="0.11.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3 ">
+    </PackageReference>
+    <PackageReference Include="FasterFlect.Xpand" Version="2.0.7">
+    </PackageReference>
+    <PackageReference Include="System.Data.OleDb" Version="4.7.1" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\..\TestsLib\BO\Accessory.cs" Link="Common\Accessory.cs" />
+    <Compile Include="..\..\..\TestsLib\BO\Order.cs" Link="Common\Order.cs" />
+    <Compile Include="..\..\..\TestsLib\BO\OrderModuleUpdater.cs" Link="Common\OrderModuleUpdater.cs" />
+    <Compile Include="..\..\..\TestsLib\BO\Product.cs" Link="Common\Product.cs" />
+    <Compile Include="..\..\..\TestsLib\DefaultUserModuleUpdater.cs" Link="Common\DefaultUserModuleUpdater.cs" />
+    <Compile Include="..\CommonFiles\CloudCalendarService.cs" Link="Office\Cloud\CloudCalendarService.cs" />
+    <Compile Include="..\CommonFiles\DocumentStyleManager\DocumentObject.cs" Link="Office\DocumentStyleManager\DocumentObject.cs" />
+    <Compile Include="..\CommonFiles\DocumentStyleManager\DocumentStyleManagerModuleUpdater.cs" Link="Office\DocumentStyleManager\DocumentStyleManagerModuleUpdater.cs" />
+    <Compile Include="..\CommonFiles\DocumentStyleManager\DocumentStyleManagerService.cs" Link="Office\DocumentStyleManager\DocumentStyleManagerService.cs" />
+    <Compile Include="..\CommonFiles\GoogleTasksService\GoogleCalendarService.cs" Link="Office\Cloud\Google\GoogleCalendarService.cs" />
+    <Compile Include="..\CommonFiles\GoogleTasksService\GoogleTasksService.cs" Link="Office\Cloud\Google\GoogleTasksService.cs" />
+    <Compile Include="..\CommonFiles\CloudTasksService.cs" Link="Office\Cloud\CloudTasksService.cs" />
+    <Compile Include="..\CommonFiles\AgnosticModule.cs" Link="Common\AgnosticModule.cs" />
+    <Compile Include="..\CommonFiles\GoogleService\ShowGoogleAccountInfoService.cs" Link="Office\Cloud\Google\ShowGoogleAccountInfoService.cs" />
+    <Compile Include="..\CommonFiles\MicrosoftCalendarService\MicrosoftCalendarService.cs" Link="Office\Cloud\Microsoft\MicrosoftCalendarService.cs" />
+    <Compile Include="..\CommonFiles\MicrosoftService\MicrosoftService.cs" Link="Office\Cloud\Microsoft\MicrosoftService.cs" />
+    <Compile Include="..\CommonFiles\CloudService.cs" Link="Office\Cloud\CloudService.cs" />
+    <Compile Include="..\CommonFiles\GoogleService\GoogleService.cs" Link="Office\Cloud\Google\GoogleService.cs" />
+    <Compile Include="..\CommonFiles\MicrosoftService\ShowMSAccountInfoService.cs" Link="Office\Cloud\Microsoft\ShowMSAccountInfoService.cs" />
+    <Compile Include="..\CommonFiles\MicrosoftTodoService\MicrosoftTodoService.cs" Link="Office\Cloud\Microsoft\MicrosoftTodoService.cs" />
+    <Compile Include="..\CommonFiles\ViewWizard\ViewWizard.cs" Link="ViewWizard\ViewWizard.cs" />
+    <Compile Include="..\CommonFiles\Windows\Program.cs" Link="Program.cs" />
+    <Compile Include="..\CommonFiles\Windows\TestWinApplication.cs" Link="TestWinApplication.cs" />
+    <Compile Include="..\CommonFiles\Windows\WinModule.cs" Link="WinModule.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <EmbeddedResource Include="..\CommonFiles\Cloud.Office.xafml" Link="Office\Cloud\Cloud.Office.xafml" />
+    <EmbeddedResource Include="..\CommonFiles\SeqeuenceGenerator\SequenceGenerator.xafml" Link="SequenceGenerator\SequenceGenerator.xafml" />
+    <Content Include="Model.xafml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <EmbeddedResource Include="..\CommonFiles\DocumentStyleManager\Lorem.docx" Link="Office\DocumentStyleManager\Lorem.docx" />
+    <EmbeddedResource Include="..\CommonFiles\DocumentStyleManager\LoresumV2.docx" Link="Office\DocumentStyleManager\LoresumV2.docx" />
+    <EmbeddedResource Include="..\CommonFiles\DocumentStyleManager\Office.DocumentStyleManager.xafml" Link="Office\DocumentStyleManager\Office.DocumentStyleManager.xafml" />
+    <EmbeddedResource Include="..\CommonFiles\DocumentStyleManager\Lorem2.docx" Link="Office\DocumentStyleManager\Lorem2.docx" />
+    <EmbeddedResource Include="..\CommonFiles\DocumentStyleManager\Lorem3.docx" Link="Office\DocumentStyleManager\Lorem3.docx" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ExpressApp.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="DevExpress.WindowsDesktop.Core" Version="20.1.8" />
+    <PackageReference Include="DevExpress.WindowsDesktop.Xaf" Version="20.1.8-ctp" />
+    <PackageReference Include="Google.Apis.People.v1" Version="1.25.0.830" />
+    <PackageReference Include="System.ServiceModel.Http" Version="4.7.0" />
+    <PackageReference Include="System.ServiceModel.NetTcp" Version="4.7.0" />
+    <PackageReference Include="System.ServiceModel.Security" Version="4.7.0" />
+    <PackageReference Include="System.ServiceProcess.ServiceController" Version="4.7.0" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="2.202.43.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Office\Cloud\Google\" />
+    <Folder Include="Office\Cloud\Microsoft\" />
+    <Folder Include="Office\DocumentStyleManager\" />
+    <Folder Include="SequenceGenerator\" />
+  </ItemGroup>
+</Project>

@@ -37,6 +37,7 @@ using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Google{
     public static class GoogleService{
+        [PublicAPI]
         public static IObservable<(Frame frame, UserCredential userCredential)> AuthorizeGoogle(this IObservable<Frame> source) 
             => source.SelectMany(frame => frame.Application.GoogleNeedsAuthentication().WhenDefault()
 	            .SelectMany(_ => frame.View.AsObjectView().Application().AuthorizeGoogle()
@@ -108,7 +109,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
                     var code = httpContext?.GetPropertyValue("Request").GetIndexer("code");
                     if (code != null){
                         var uri = httpContext.GetPropertyValue("Request").GetPropertyValue("Url").ToString();
-                        var state = httpContext?.GetPropertyValue("Request").GetIndexer("state").ToString();
+                        var state = httpContext.GetPropertyValue("Request").GetIndexer("state").ToString();
                         var tokenResponse = window.Application.GoogleAuthorizationCodeFlow().ExchangeCodeForTokenAsync(
                             window.Application.CurrentUserId().ToString(), code.ToString(), uri.Substring(0, uri.IndexOf("?", StringComparison.Ordinal)), CancellationToken.None).Result;
                         return window.Application.WhenWeb()
@@ -129,9 +130,10 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
             => application.GoogleAuthorizationCodeFlow().AuthorizeGoogle(application,aquireToken)
                 .TraceGoogleModule(credential => credential.UserId);
 
+        [PublicAPI]
         public static IObservable<TResponse> ToObservable<TResponse>(this ClientServiceRequest request) => ((IClientServiceRequest<TResponse>)request).ToObservable();
 
-        public static IObservable<TResponse> ToObservable<TResponse>(this IClientServiceRequest<TResponse> request) => request.ExecuteAsync().ToObservable();
+        public static IObservable<TResponse> ToObservable<TResponse>(this IClientServiceRequest<TResponse> request) => Observable.FromAsync(() => request.ExecuteAsync());
 
         static readonly Subject<GenericEventArgs<Func<XafApplication,XafOAuthDataStore>>> CustomizeOathDataStoreSubject=new Subject<GenericEventArgs<Func<XafApplication, XafOAuthDataStore>>>();
         [PublicAPI]
@@ -146,6 +148,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
             return args.Handled ? args.Instance(application) : new XafOAuthDataStore(application.CreateObjectSpace, application.CurrentUserId(),application.GetPlatform());
         }
         
+        [PublicAPI]
         public static IObservable<GenericEventArgs<IObservable<UserCredential>>> CustomAquireTokenInteractively 
             => CustomAquireTokenInteractivelySubject.AsObservable();
         static readonly Subject<GenericEventArgs<IObservable<UserCredential>>> CustomAquireTokenInteractivelySubject=new Subject<GenericEventArgs<IObservable<UserCredential>>>();
@@ -163,9 +166,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
 
         private static IObservable<UserCredential> AuthorizeWebApp(this  IAuthorizationCodeFlow flow,XafApplication application){
 	        var redirectUri = AppDomain.CurrentDomain.Web().HttpContext().GetPropertyValue("Request").GetPropertyValue("Url").CallMethod("GetLeftPart",UriPartial.Path).ToString() ;
-                return Observable.Empty<UserCredential>();
-	        }
-	        return new AuthorizationCodeWebApp(flow, redirectUri, redirectUri)
+            return new AuthorizationCodeWebApp(flow, redirectUri, redirectUri)
                 .AuthorizeAsync(application.CurrentUserId().ToString(), CancellationToken.None)
 		        .ToObservable()
 		        .SelectMany(result => result.RedirectUri == null ? result.Credential.ReturnObservable() : application.WhenWeb()

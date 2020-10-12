@@ -10,8 +10,8 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <OutputPath>..\..\..\bin</OutputPath>
-    <AssemblyTitle>Xpand.XAF.Modules.ViewEditMode</AssemblyTitle>
-    <Product>Xpand.XAF.Modules.ViewEditMode</Product>
+    <AssemblyTitle>Xpand.XAF.Modules.OneView</AssemblyTitle>
+    <Product>Xpand.XAF.Modules.OneView</Product>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
     <DebugType>full</DebugType>

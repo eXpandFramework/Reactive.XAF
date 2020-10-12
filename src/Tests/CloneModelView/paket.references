@@ -9,3 +9,5 @@ DevExpress.Xpo
 Fasterflect.Xpand
 JetBrains.Annotations
 System.ValueTuple
+Xpand.Patcher
+akarnokd.reactive_extensions

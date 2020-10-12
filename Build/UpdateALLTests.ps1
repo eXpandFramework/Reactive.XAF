@@ -47,8 +47,8 @@ Write-HostFormatted "finalPackages:" -Section
 $packages | Out-String
 
 
-$testApplication = "$root\src\Tests\ALL\TestApplication\TestApplication.sln"
-Set-Location $root\src\Tests\All\
+$testApplication = "$root\src\Tests\\Tests.sln"
+Set-Location $root\src\Tests\EasyTests\
 Write-HostFormatted "Update all package versions" -ForegroundColor Magenta
 Get-ChildItem *.csproj -Recurse|ForEach-Object{
     $prefs=Get-PackageReference $_ 
@@ -92,9 +92,9 @@ Get-XpandPackages $branch XAFAll|ForEach-Object{
     if ($version.revision -eq -1){
         $version=Update-Version -Revision -version $version
     }
-    Add-AssemblyBindingRedirect -id $_.id -version $version -ConfigFile "$testAppPAth\TestApplication.web\Web.config" -PublicToken (Get-XpandPublicKeyToken)
+    Add-AssemblyBindingRedirect -id $_.id -version $version -ConfigFile "$testAppPAth\EasyTests\TestApplication\TestApplication.web\Web.config" -PublicToken (Get-XpandPublicKeyToken)
 }
-[xml]$config=Get-xmlContent "$testAppPAth\TestApplication.web\web.config"
+[xml]$config=Get-xmlContent "$testAppPAth\EasyTests\TestApplication\TestApplication.web\web.config"
 $config.configuration.runtime.assemblyBinding.dependentassembly|ForEach-Object{
     [PSCustomObject]@{
         Name = $_.assemblyIdentity.Name
@@ -103,7 +103,7 @@ $config.configuration.runtime.assemblyBinding.dependentassembly|ForEach-Object{
 }|Format-Table
 Invoke-Script {
     
-    Write-HostFormatted "Complie TestApplication.sln" -ForegroundColor Magenta
+    Write-HostFormatted "Complie Tests.sln" -ForegroundColor Magenta
     "alltestweb","alltestwin","Testwebapplication","testwinapplication"|ForEach-Object{
         if (Test-Path "$root\bin\$_"){
             Remove-Item "$root\bin\$_" -Force -Recurse
@@ -111,8 +111,14 @@ Invoke-Script {
     }
     Clear-NugetCache XpandPackages
     Push-Location "$testAppPAth\.."
-    Use-NugetConfig -Sources $tempNupkg,(Get-PackageFeed -Nuget),(Get-PackageFeed -Xpand) -ScriptBlock{
-        Start-Build "$testAppPAth\TestApplication.sln" -BinaryLogPath $root\bin\TestWebApplication.binlog -WarnAsError
+    $testsource=$tempNupkg,(Get-PackageFeed -Nuget),(Get-PackageFeed -Xpand)
+    $testsource+=$source
+    Use-NugetConfig -Sources $testsource -ScriptBlock{
+        $solutionName="Tests"
+        if (([version]$dxVersion) -lt "20.1.7"){
+            $solutionName="NotCoreTests";
+        }
+        Start-Build "$testAppPAth\$solutionName.sln" -BinaryLogPath $root\bin\Tests.binlog -WarnAsError
     }
     Pop-Location
 } -Maximum 2

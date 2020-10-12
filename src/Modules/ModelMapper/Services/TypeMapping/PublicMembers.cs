@@ -157,7 +157,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 (nameof(PrivateDescriptionRule), PrivateDescriptionRule),
                 (nameof(DefaultValueRule), DefaultValueRule),
                 (nameof(WithNonPublicAttributeParameters), NonPublicAttributeParameters),
-                (nameof(TypeConverterWithDXDesignTimeType), TypeConverterWithDXDesignTimeType)
+                (nameof(TypeConverterWithDXDesignTimeType), TypeConverterWithDXDesignTimeType),
+                (nameof(CompilerIsReadOnly), CompilerIsReadOnly)
             };
         }
 
@@ -165,6 +166,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             return new ObservableCollection<(string key, Action<ModelMapperType> action)>(){
                 (nameof(WithNonPublicAttributeParameters), NonPublicAttributeParameters),
                 (nameof(GenericTypeArguments), GenericTypeArguments),
+                (nameof(CompilerIsReadOnly), CompilerIsReadOnly),
             };
         }
 

@@ -5,3 +5,5 @@ DevExpress.Persistent.Base
 Newtonsoft.Json
 Google.Apis.Auth
 System.ValueTuple
+Microsoft.CodeAnalysis.CSharp
+System.Configuration.ConfigurationManager

@@ -8,6 +8,7 @@ using DevExpress.ExpressApp.Templates;
 using Fasterflect;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
@@ -43,8 +44,7 @@ namespace Xpand.XAF.Modules.HideToolBar{
         public static IObservable<Frame> HideToolBar(this IObservable<Frame> source) =>
             source.Select(frame => {
                 if (frame.Application.GetPlatform() == Platform.Win){
-                    var toolbarVisibilityController = frame.Controllers.Cast<Controller>().FirstOrDefault(controller =>
-                        controller.Name == "DevExpress.ExpressApp.Win.SystemModule.ToolbarVisibilityController");
+                    var toolbarVisibilityController = frame.GetController("DevExpress.ExpressApp.Win.SystemModule.ToolbarVisibilityController");
                     if (toolbarVisibilityController != null){
                         toolbarVisibilityController.Active[HideToolBarModule.CategoryName] = false;
                     }

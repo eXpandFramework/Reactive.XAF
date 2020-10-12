@@ -1,5 +1,5 @@
 param(
-    [version]$DXVersion = "20.1.7"
+    [version]$DXVersion = "19.2.9"
 )
 $ErrorActionPreference = "Stop"
 $rootLocation = "$PSScriptRoot\..\"
@@ -28,14 +28,23 @@ Get-ChildItem -Filter *.csproj -Recurse | ForEach-Object {
     Update-ProjectProperty $projXml DebugType full
     Remove-ProjectLicenseFile $projXml
     Update-ProjectAutoGenerateBindingRedirects $projXml $true
-    if ($fileName -notlike "*.Tests.csproj" -or $fileName -like "*All*.csproj" ) {
+    if ($fileName -notlike "*.Tests.csproj" -or $fileName -like "*EasyTest*.csproj" ) {
         if ($fileName -notlike "*TestApplication.Web*.csproj") {
             Update-OutputPath $fileName "$rootLocation\bin\"
         }
         
     }
-    
-    if ($fileName -notlike "*all*.csproj*"){
+    if ( $fileName -match "DocumentStyleManager" ){
+        if ($DXVersion -lt "20.1.7"){
+            Update-ProjectProperty $projXml TargetFramework "net461"
+            $styleTestProj=Get-XmlContent "$rootLocation\src\tests\Office.DocumentStyleManager\Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.csproj"
+            $styleTestProj.Project.ItemGroup.Reference|Where-Object{$_.Include -eq "Xpand.XAF.Modules.Office.DocumentStyleManager"}|ForEach-Object{
+                $_.HintPath="..\..\..\bin\net461\Xpand.XAF.Modules.Office.DocumentStyleManager.dll"
+            }
+            $styleTestProj.save("$rootLocation\src\tests\Office.DocumentStyleManager\Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.csproj")
+        }
+    }
+    if ($fileName -notlike "*EasyTest*.csproj*"){
         $target = Get-ProjectTargetFramework $projXml -FullName
         Update-ProjectProperty $projXml AppendTargetFrameworkToOutputPath ($target -ne "netstandard2.0")
     }

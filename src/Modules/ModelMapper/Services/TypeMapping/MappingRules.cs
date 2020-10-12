@@ -11,6 +11,21 @@ using Xpand.Extensions.StringExtensions;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     public static partial class TypeMappingService{
+        private static void CompilerIsReadOnly((Type declaringType, List<ModelMapperPropertyInfo> propertyInfos) tuple){
+            foreach (var propertyInfo in tuple.propertyInfos.ToArray()){
+                var isReadOnlyDatas = propertyInfo.GetCustomAttributesData().Where(_ => _.AttributeType.FullName=="System.Runtime.CompilerServices.IsReadOnlyAttribute");
+                foreach (var attributeData in isReadOnlyDatas){
+                    propertyInfo.RemoveAttributeData(attributeData);
+                }
+            }
+
+        }
+        private static void CompilerIsReadOnly(ModelMapperType modelMapperType){
+            foreach (var argument in modelMapperType.CustomAttributeDatas.Where(data => data.AttributeType.FullName=="System.Runtime.CompilerServices.IsReadOnlyAttribute").ToArray()){
+                modelMapperType.CustomAttributeDatas.Remove(argument);
+            }
+        }
+
         private static void TypeConverterWithDXDesignTimeType((Type declaringType, List<ModelMapperPropertyInfo> propertyInfos) tuple){
             
             foreach (var propertyInfo in tuple.propertyInfos.ToArray()){
@@ -181,5 +196,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 }
             }
         }
+
     }
 }

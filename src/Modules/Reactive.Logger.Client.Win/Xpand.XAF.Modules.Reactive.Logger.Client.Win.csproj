@@ -39,7 +39,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.XAF.Modules.GridListEditor">
-      <HintPath>..\..\..\bin\net461\Xpand.XAF.Modules.GridListEditor.dll</HintPath>
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.GridListEditor.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.OneView">
       <HintPath>..\..\..\bin\net461\Xpand.XAF.Modules.OneView.dll</HintPath>

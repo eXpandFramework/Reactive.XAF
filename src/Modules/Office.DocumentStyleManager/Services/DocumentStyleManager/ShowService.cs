@@ -23,6 +23,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
             var registerViewSingleChoiceAction = manager.RegisterViewSingleChoiceAction(nameof(ShowStyleManager),
                 action => {
                     action.Caption = "Style Manager";
+                    action.TargetViewType=ViewType.DetailView;
                     action.ItemType=SingleChoiceActionItemType.ItemIsOperation;
                     action.SelectionDependencyType = SelectionDependencyType.RequireSingleObject;
                     action.Active[nameof(ShowService)] = false;    

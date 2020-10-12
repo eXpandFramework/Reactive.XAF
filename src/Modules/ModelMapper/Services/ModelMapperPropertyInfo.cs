@@ -41,6 +41,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
 
         private ModelMapperPropertyInfo(string name, Type propertyType, Type declaringType, bool canRead, bool canWrite){
             Name = name;
+            if (name == "Diagrams"){
+
+            }
             PropertyType = propertyType;
             DeclaringType = declaringType;
             CanRead = canRead;

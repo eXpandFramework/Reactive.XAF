@@ -5,3 +5,6 @@ Fasterflect.Xpand
 JetBrains.Annotations
 System.Reactive
 System.Interactive
+Microsoft.CodeAnalysis.CSharp
+System.Configuration.ConfigurationManager
+System.ServiceModel.Http

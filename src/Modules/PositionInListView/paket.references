@@ -4,3 +4,4 @@ Fasterflect.Xpand
 JetBrains.Annotations
 System.Reactive
 System.Configuration.ConfigurationManager
+Microsoft.CodeAnalysis.CSharp

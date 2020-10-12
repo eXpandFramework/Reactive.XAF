@@ -10,6 +10,7 @@ using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using JetBrains.Annotations;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.StringExtensions;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 
@@ -217,7 +218,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                     .ToModelMapperPropertyInfo().ToArray();
                 var properties = new List<ModelMapperPropertyInfo>(propertyInfos);
                 _customizeProperties.OnNext((typeToCode,properties));
-                propertiesCode =  String.Join(Environment.NewLine,properties.Select(propertyInfo =>(propertyInfo,data.rootType).ModelCode()));
+                propertiesCode =  String.Join(Environment.NewLine,properties.DistinctBy(info => info.Name).Select(propertyInfo =>(propertyInfo,data.rootType).ModelCode()));
             }
             
             string imageCode = null;

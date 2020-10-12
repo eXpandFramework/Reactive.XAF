@@ -39,70 +39,39 @@ jobs:
       errorActionPreference: continue
       failOnStderr: false
       ignoreLASTEXITCODE: true
-  - task: PowerShell@2
-    displayName: 'Stage files' 
-    inputs:
-      pwsh: true
-      targetType: inline
-      script: |
-        $VerbosePreference="Continue"
-        $ErrorView="NormalView"
-        $SourcePath='$(System.DefaultworkingDirectory)'
-        
-        Set-Location $SourcePath
-        $stage = "$Sourcepath\buildstage"
-        New-Item $stage -ItemType Directory -Force
-        Get-ChildItem $stage -Recurse | Remove-Item -Recurse -Force
-        New-Item $stage\source -ItemType Directory -Force
-        Set-Location $stage
-        New-Item "$stage\TestApplication" -ItemType Directory
-        Write-Host "Copying Bin" 
-        Move-Item "$Sourcepath\Bin" "$stage\Bin" -Force
-        
-        
-        Write-Host "Moving TestWinApplication" 
-        Move-Item "$stage\Bin\TestWinApplication" "$stage\TestApplication" -Force 
-        Write-Host "Moving TestWebApplication" 
-        Move-Item "$stage\Bin\TestWebApplication" "$stage\TestApplication" -Force 
-        Write-Host "Moving AllTestsWin" 
-        Move-Item "$stage\Bin\AllTestWeb" "$stage\TestApplication" -Force 
-        Write-Host "Moving AllTestsWeb" 
-        Move-Item "$stage\Bin\AllTestWin" "$stage\TestApplication" -Force 
-        Remove-Item "$stage\bin\ReactiveLoggerClient" -Recurse -Force
-        
-        
-    
-        "Web","Win"|ForEach-Object{
-            Write-HostFormatted "Zipping DX $_" -ForegroundColor Magenta
-            $webassemblies=((Get-ChildItem "$stage\TestApplication\AllTest$_" DevExpress*.dll -Recurse)+(Get-ChildItem ("$stage\TestApplication\Test$_","Application" -join "") DevExpress*.dll -Recurse))
-            New-Item $stage\DX$_ -ItemType Directory -Force
-            $webassemblies|Move-Item -Destination $stage\DX$_ -Force
-            Compress-Files $stage\DX$_ $stage\DX$_.Zip -compressionLevel NoCompression 
-            Remove-Item $stage\DX$_ -Force -Recurse
-            Get-ChildItem "$stage\bin" DevExpress*.dll|Remove-Item
-            New-Item $stage\DX -ItemType Directory -Force
-            Move-Item $stage\DX$_.Zip $stage\DX
-        }
-        
-        Write-HostFormatted "FINISH" -Section
+  # - task: PowerShell@2
+  #   displayName: 'Stage files' 
+  #   inputs:
+  #     pwsh: true
+  #     targetType: inline
+  #     script: |
+  #       $VerbosePreference = "Continue"
+  #       $ErrorView = "NormalView"
+  #       & '$(System.DefaultWorkingDirectory)\Build\StageBuild.ps1'
+  # - task: PublishBuildArtifacts@1
+  #   displayName: 'Publish Artifact: UnitTests'
+  #   inputs:
+  #     Parallel: true
+  #     PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\bin'
+  #     ArtifactName: 'Bin'
+  # - task: PublishBuildArtifacts@1
+  #   displayName: 'Publish Artifact: XafApplication'
+  #   inputs:
+  #     Parallel: true
+  #     PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\TestApplication'
+  #     ArtifactName: 'Tests'
+  # - task: PublishBuildArtifacts@1
+  #   displayName: 'Publish Artifact: DX'
+  #   inputs:
+  #     Parallel: true
+  #     PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\DX'
+  #     ArtifactName: 'Tests'
   - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: UnitTests'
+    displayName: 'Publish Artifact: Bin'
     inputs:
       Parallel: true
-      PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\bin'
-      ArtifactName: 'Bin'
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: XafApplication'
-    inputs:
-      Parallel: true
-      PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\TestApplication'
-      ArtifactName: 'Tests'
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: DX'
-    inputs:
-      Parallel: true
-      PathtoPublish: '$(System.DefaultworkingDirectory)\buildstage\DX'
-      ArtifactName: 'Tests'
+      PathtoPublish: '$(System.DefaultworkingDirectory)\bin'
+      ArtifactName: 'bin'
   - task: PowerShell@2
     displayName: 'Start Tesing' 
     inputs:

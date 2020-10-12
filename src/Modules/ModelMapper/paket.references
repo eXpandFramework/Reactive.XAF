@@ -10,3 +10,4 @@ System.ValueTuple
 Xpand.Collections
 System.Collections.Immutable
 System.Configuration.ConfigurationManager
+Microsoft.CodeAnalysis.CSharp

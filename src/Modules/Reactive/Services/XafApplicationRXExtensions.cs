@@ -59,7 +59,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.Where(_ => _.Modules.FindModule(moduleType)!=null);
 
         public static IObservable<Frame> WhenFrameCreated(this XafApplication application) 
-            => RxApp.Frames.Where(_ => _.Application==application);
+            => RxApp.Frames.Where(_ => _.Application==application).TraceRX(frame => $"{frame.GetType().Name}-{frame.Context}");
 
         public static IObservable<NestedFrame> WhenNestedFrameCreated(this XafApplication application) 
             => application.WhenFrameCreated().OfType<NestedFrame>();

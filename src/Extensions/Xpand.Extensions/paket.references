@@ -4,3 +4,5 @@ System.CodeDom
 System.Reflection.Emit
 JetBrains.Annotations
 System.ValueTuple
+System.Collections.Immutable
+Microsoft.CodeAnalysis.CSharp

@@ -31,60 +31,55 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
         [TestCase(nameof(Platform.Win))]
         public void When_model_dashboardView_has_listview_detailview_for_the_same_type_is_masterdetail_enabled(string platformName){
             var platform = GetPlatform(platformName);
-            using (var xafApplication = DefaultMasterDetailModule(platform).Application){
-                var modelDashboardView = xafApplication.Model.NewMasterDetailModelDashboardView(typeof(Md));
-                ((IModelDashboardViewMasterDetail) modelDashboardView).MasterDetail.ShouldBe(true);
-            }
+            using var xafApplication = DefaultMasterDetailModule(platform).Application;
+            var modelDashboardView = xafApplication.Model.NewMasterDetailModelDashboardView(typeof(Md));
+            ((IModelDashboardViewMasterDetail) modelDashboardView).MasterDetail.ShouldBe(true);
         }
         [XpandTest]
         [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public async Task Monitor_ListView_DetailView_dashboardViewItem_pair(string platformName){
             var platform = GetPlatform(platformName);
-            using (var xafApplication = DefaultMasterDetailModule(platform).Application){
-                var masterDetailDashoardViewItems = xafApplication.WhenMasterDetailDashboardViewItems().Replay();
-                masterDetailDashoardViewItems.Connect();
-                var modelDashboardView = xafApplication.Model.NewMasterDetailModelDashboardView(typeof(Md));
+            using var xafApplication = DefaultMasterDetailModule(platform).Application;
+            var masterDetailDashoardViewItems = xafApplication.WhenMasterDetailDashboardViewItems().Replay();
+            masterDetailDashoardViewItems.Connect();
+            var modelDashboardView = xafApplication.Model.NewMasterDetailModelDashboardView(typeof(Md));
 
-                var window = xafApplication.CreateWindow(TemplateContext.View, new List<Controller>(), true);
-                var dashboardView = xafApplication.CreateDashboardView(xafApplication.CreateObjectSpace(), modelDashboardView.Id, true);
-                dashboardView.MockCreateControls();
-                window.SetView(dashboardView);
+            var window = xafApplication.CreateWindow(TemplateContext.View, new List<Controller>(), true);
+            var dashboardView = xafApplication.CreateDashboardView(xafApplication.CreateObjectSpace(), modelDashboardView.Id, true);
+            dashboardView.MockCreateControls();
+            window.SetView(dashboardView);
 
-                var pair = await masterDetailDashoardViewItems.FirstAsync().WithTimeOut();
+            var pair = await masterDetailDashoardViewItems.FirstAsync().WithTimeOut();
 
-                (pair.listViewItem.Model.View as IModelListView).ShouldNotBeNull();
-                (pair.detailViewItem.Model.View as IModelDetailView).ShouldNotBeNull();        
-            }
+            (pair.listViewItem.Model.View as IModelListView).ShouldNotBeNull();
+            (pair.detailViewItem.Model.View as IModelDetailView).ShouldNotBeNull();
         }
         [XpandTest]
         [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public async Task Handle_listView_process_selected_object_action(string platformName){
             var platform = GetPlatform(platformName);
-            using (var xafApplication = DefaultMasterDetailModule(platform).Application){
-                var modelDashboardView = xafApplication.Model.NewMasterDetailModelDashboardView(typeof(Md));
-                var masterDetailDashoardViewItems = xafApplication.WhenMasterDetailDashboardViewItems().Replay();
-                masterDetailDashoardViewItems.Connect();
-                var dashboardView = xafApplication.CreateDashboardView(xafApplication.CreateObjectSpace(), modelDashboardView.Id, true);
-                dashboardView.MockCreateControls();
-                var viewItems = await masterDetailDashoardViewItems.FirstAsync().WithTimeOut();
-                var controller = viewItems.listViewItem.Frame.GetController<ListViewProcessCurrentObjectController>();
-                controller.ShouldNotBeNull();
-                controller.ProcessCurrentObjectAction.Active.Clear();
-                var selectionContext = Mock.Of<ISelectionContext>();
-                var value = new object();
-                Mock.Get(selectionContext).Setup(context => context.CurrentObject).Returns(value);
-                controller.ProcessCurrentObjectAction.SelectionContext = selectionContext;
-                var customProcessSelectedItem = controller.WhenCustomProcessSelectedItem().Replay();
-                customProcessSelectedItem.Connect();
+            using var xafApplication = DefaultMasterDetailModule(platform).Application;
+            var modelDashboardView = xafApplication.Model.NewMasterDetailModelDashboardView(typeof(Md));
+            var masterDetailDashoardViewItems = xafApplication.WhenMasterDetailDashboardViewItems().Replay();
+            masterDetailDashoardViewItems.Connect();
+            var dashboardView = xafApplication.CreateDashboardView(xafApplication.CreateObjectSpace(), modelDashboardView.Id, true);
+            dashboardView.MockCreateControls();
+            var viewItems = await masterDetailDashoardViewItems.FirstAsync().WithTimeOut();
+            var controller = viewItems.listViewItem.Frame.GetController<ListViewProcessCurrentObjectController>();
+            controller.ShouldNotBeNull();
+            controller.ProcessCurrentObjectAction.Active.Clear();
+            var selectionContext = Mock.Of<ISelectionContext>();
+            var value = new object();
+            Mock.Get(selectionContext).Setup(context => context.CurrentObject).Returns(value);
+            controller.ProcessCurrentObjectAction.SelectionContext = selectionContext;
+            var customProcessSelectedItem = controller.WhenCustomProcessSelectedItem().Replay();
+            customProcessSelectedItem.Connect();
 
-                controller.ProcessCurrentObjectAction.DoTheExecute(true);
+            controller.ProcessCurrentObjectAction.DoTheExecute(true);
 
-                (await customProcessSelectedItem.FirstAsync().WithTimeOut()).e.Handled.ShouldBe(true);            
-            }
-
-            
+            (await customProcessSelectedItem.FirstAsync().WithTimeOut()).e.Handled.ShouldBe(true);
         }
         [XpandTest]
         [TestCase(nameof(Platform.Web))]
@@ -115,15 +110,12 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
         [TestCase(nameof(Platform.Win))]
         public async Task Master_Detail_Save_Action_is_active_when_detailview(string platformName){
             var platform = GetPlatform(platformName);
-            using (var xafApplication = DefaultMasterDetailModule(platform).Application){
-                var valueTuple = await ViewItems(xafApplication).WithTimeOut();
-                valueTuple.DetailViewItem.Frame.Actions()
-                    .First(action => action.Id == MasterDetailService.MasterDetailSaveAction)
-                    .Active[MasterDetailModule.CategoryName]
-                    .ShouldBe(true);
-            }
-
-            
+            using var xafApplication = DefaultMasterDetailModule(platform).Application;
+            var valueTuple = await ViewItems(xafApplication).WithTimeOut();
+            valueTuple.DetailViewItem.Frame.Actions()
+	            .First(action => action.Id == MasterDetailService.MasterDetailSaveAction)
+	            .Active[MasterDetailModule.CategoryName]
+	            .ShouldBe(true);
         }
         [XpandTest]
         [TestCase(nameof(Platform.Web))]

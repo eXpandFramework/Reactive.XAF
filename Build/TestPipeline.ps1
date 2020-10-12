@@ -8,27 +8,32 @@ param(
     $AzureTenantId=$env:AzTenantId,
     $XpandBlobOwnerSecret=$env:AzXpandBlobOwnerSecret,
     $AzStorageLookup,
-    $GithubToken
+    $GithubTokene
 )
 $ErrorActionPreference = "Stop"
-& "$SourcePath\go.ps1" -InstallModules
+# & "$SourcePath\go.ps1" -InstallModules
 
-
+New-Item -Path "$SourcePath\bin\Tests" -ItemType Directory 
 
 if ($env:Build_DefinitionName){
-    Write-host --------Expanding DxWeb-------------------
-    Expand-Archive -DestinationPath $sourcePath\bin -Path $sourcePath\bin\Tests\DXWeb.Zip -Force
-    Expand-Archive -DestinationPath $sourcePath\bin\Tests\AllTestWeb -Path $sourcePath\bin\Tests\DXWeb.Zip -Force
-    Expand-Archive -DestinationPath $sourcePath\bin\Tests\TestWebApplication\Bin -Path $sourcePath\bin\Tests\DXWeb.Zip -Force
-    Remove-Item $sourcePath\bin\Tests\DXWeb.Zip
-    Write-host --------Expanding DxWin-------------------
-    Expand-Archive -DestinationPath $sourcePath\bin -Path $sourcePath\bin\Tests\DXWin.Zip -Force
-    Expand-Archive -DestinationPath $sourcePath\bin\Tests\AllTestWin -Path $sourcePath\bin\Tests\DXWin.Zip -Force
-    Expand-Archive -DestinationPath $sourcePath\bin\Tests\TestWinApplication -Path $sourcePath\bin\Tests\DXWin.Zip -Force
-    Remove-Item $sourcePath\bin\Tests\DXWin.Zip
+    # Write-host --------Expanding DxWeb-------------------
+    # Expand-Archive -DestinationPath $sourcePath\bin\net461 -Path $sourcePath\bin\Tests\DXWeb.Zip -Force
+    # Expand-Archive -DestinationPath $sourcePath\bin\Tests\AllTestWeb -Path $sourcePath\bin\Tests\DXWeb.Zip -Force
+    # Expand-Archive -DestinationPath $sourcePath\bin\Tests\TestWebApplication\Bin -Path $sourcePath\bin\Tests\DXWeb.Zip -Force
+    # Remove-Item $sourcePath\bin\Tests\DXWeb.Zip
+    # Write-host --------Expanding DxWin-------------------
+    # Expand-Archive -DestinationPath $sourcePath\bin\net461 -Path $sourcePath\bin\Tests\DXWin.Zip -Force
+    # Expand-Archive -DestinationPath $sourcePath\bin\Tests\AllTestWin -Path $sourcePath\bin\Tests\DXWin.Zip -Force
+    # Expand-Archive -DestinationPath $sourcePath\bin\Tests\TestWinApplication -Path $sourcePath\bin\Tests\DXWin.Zip -Force
+    # Remove-Item $sourcePath\bin\Tests\DXWin.Zip
+    # Write-host --------Expanding DxWinnetcoreapp3.1-------------------
+    # Expand-Archive -DestinationPath $sourcePath\bin -Path $sourcePath\bin\Tests\DXWinnetcoreapp3.1.Zip -Force
+    # Expand-Archive -DestinationPath $sourcePath\bin\Tests\AllTestWin\netcoreapp3.1 -Path $sourcePath\bin\Tests\DXWinnetcoreapp3.1.Zip -Force
+    # Expand-Archive -DestinationPath $sourcePath\bin\Tests\TestWinDesktopApplication -Path $sourcePath\bin\Tests\DXWinnetcoreapp3.1.Zip -Force
+    # Remove-Item $sourcePath\bin\Tests\DXWinnetcoreapp3.1.Zip
     
     
-    [version]$dxVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo(((Get-ChildItem $sourcePath\bin *DevExpress*.dll).FullName | Select-Object -First 1)).FileVersion
+    [version]$dxVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo(((Get-ChildItem $sourcePath\bin\net461 *DevExpress*.dll).FullName | Select-Object -First 1)).FileVersion
     Write-Host "dxVersion=$dxVersion" 
     Write-Verbose -Verbose "##vso[build.updatebuildnumber]$env:build_BuildNumber-$dxVersion"
 
@@ -40,7 +45,7 @@ if ($env:Build_DefinitionName){
 
 
 $buildNumber = $env:build_BuildNumber
-
+& "$SourcePath\go.ps1" -InstallModules
 if ($buildNumber){
     $env:AzDevOpsToken=$AzureToken
     $env:AzOrganization="eXpandDevops"

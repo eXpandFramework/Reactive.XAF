@@ -5,3 +5,4 @@ JetBrains.Annotations
 System.ValueTuple
 System.CodeDom
 System.Configuration.ConfigurationManager
+Microsoft.CodeAnalysis.CSharp

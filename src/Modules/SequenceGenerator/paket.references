@@ -6,3 +6,5 @@ Fasterflect.Xpand
 System.Reactive
 JetBrains.Annotations
 System.ValueTuple
+Microsoft.CodeAnalysis.CSharp
+System.Configuration.ConfigurationManager

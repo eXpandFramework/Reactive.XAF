@@ -3,3 +3,4 @@ DevExpress.ExpressApp.Xpo
 DevExpress.Xpo
 JetBrains.Annotations
 System.ValueTuple
+System.ServiceModel.Http

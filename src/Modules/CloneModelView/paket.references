@@ -3,3 +3,7 @@ System.ValueTuple
 DevExpress.ExpressApp
 Xpand.Patcher
 JetBrains.Annotations
+Microsoft.CSharp
+Microsoft.CodeAnalysis.CSharp
+System.Reactive
+System.Configuration.ConfigurationManager

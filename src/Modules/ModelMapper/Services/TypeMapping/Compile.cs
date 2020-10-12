@@ -1,58 +1,45 @@
 ﻿using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Microsoft.CSharp;
+using Microsoft.CodeAnalysis.CSharp;
 using Mono.Cecil;
 using Xpand.Extensions.AppDomainExtensions;
+using Xpand.Extensions.BytesExtensions;
 using Xpand.Extensions.Compiler;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.StreamExtensions;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
+	
     public static partial class TypeMappingService{
         private static bool _skipAssemblyValidation;
-
-
+        
         private static IObservable<Assembly> Compile(this IEnumerable<string> references, string code){
-            
-            var codeProvider = new CSharpCodeProvider();
-            var compilerParameters = new CompilerParameters{
-                CompilerOptions = "/t:library /optimize",
-                OutputAssembly = FormatOutputAssembly()
-            };
-            
-            var strings = references.ToArray();
-            compilerParameters.ReferencedAssemblies.AddRange(strings);
-            compilerParameters.ReferenceNetStandard();
-
-            var compilerResults = codeProvider.CompileAssemblyFromSource(compilerParameters, code);
-            if (compilerResults.Errors.Count > 0){
-                var message = String.Join(Environment.NewLine,
-                    compilerResults.Errors.Cast<CompilerError>().Select(error => error.ToString()));
-                throw new Exception(message);
-            }
-
-            var assembly = RemoveRecursiveProperties(FormatOutputAssembly());
+	        using var memoryStream = CSharpSyntaxTree.ParseText(code).Compile(references.ToArray());
+	        var outputAssembly = FormatOutputAssembly();
+	        if (File.Exists(outputAssembly)){
+                File.Delete(outputAssembly);
+	        }
+	        memoryStream.Bytes().Save(outputAssembly);
+            var assembly = RemoveRecursiveProperties(outputAssembly);
             return assembly.ReturnObservable().TraceModelMapper();
-
         }
 
         private static string FormatOutputAssembly() => string.Format(OutputAssembly, ModelExtendingService.Platform);
-
+				  		
         private static Assembly RemoveRecursiveProperties(string assembly){
-            
-            using (var assemblyDefinition = AssemblyDefinition.ReadAssembly(assembly,new ReaderParameters(){ReadWrite = true})){
+	        using (var assemblyDefinition = AssemblyDefinition.ReadAssembly(assembly,new ReaderParameters(){ReadWrite = true})){
+		        assemblyDefinition.Name = new AssemblyNameDefinition(Path.GetFileNameWithoutExtension(assembly), assemblyDefinition.Name.Version);
                 var typeDefinitions = assemblyDefinition.MainModule.Types.Where(definition => definition.Interfaces.Any(_ => _.InterfaceType.FullName==typeof(IModelModelMap).FullName));
                 foreach (var type in typeDefinitions){
                     assemblyDefinition.RemoveRecursiveProperties(type,type.FullName);    
                 }
                 assemblyDefinition.Write();
             }
-
             return AppDomain.CurrentDomain.LoadAssembly(assembly);
         }
 

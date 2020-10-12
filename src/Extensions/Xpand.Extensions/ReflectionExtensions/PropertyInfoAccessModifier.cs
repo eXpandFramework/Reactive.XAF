@@ -33,6 +33,8 @@ namespace Xpand.Extensions.ReflectionExtensions{
                 return Extensions.ReflectionExtensions.AccessModifier.Internal;
             if (methodInfo.IsPublic)
                 return Extensions.ReflectionExtensions.AccessModifier.Public;
+            if (methodInfo.IsSpecialName&&methodInfo.IsHideBySig)
+                return Extensions.ReflectionExtensions.AccessModifier.Private;
             throw new ArgumentException("Did not find access modifier", nameof(methodInfo));
         }
     }

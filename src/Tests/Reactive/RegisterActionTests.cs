@@ -7,7 +7,6 @@ using DevExpress.ExpressApp.Actions;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.Conditional;
-using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.DetailViewExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
@@ -25,21 +24,19 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
         [TestCase(ViewType.DetailView)]
         [TestCase(ViewType.ListView)]
         public void Register_SimpleAction_For_All_Views(ViewType viewType){
-            using (var application = Platform.Win.NewApplication<ReactiveModule>()){
-                var testObserver = application.WhenApplicationModulesManager()
-                    .SelectMany(manager => {
-                        var registerViewSimpleAction = manager.RegisterViewSimpleAction($"{nameof(SimpleAction)}{viewType}",
-                            Configure<SimpleAction>(viewType,nameof(Register_SimpleAction_For_All_Views))).Publish().RefCount();
-                        var selectMany = registerViewSimpleAction.SelectMany(action => action.WhenActivated().Select(simpleAction => simpleAction));
-                        return registerViewSimpleAction.Merge(selectMany);
-                    })
-                    .Test();
-                DefaultReactiveModule(application);
+	        using var application = Platform.Win.NewApplication<ReactiveModule>();
+	        var testObserver = application.WhenApplicationModulesManager()
+		        .SelectMany(manager => {
+			        var registerViewSimpleAction = manager.RegisterViewSimpleAction($"{nameof(SimpleAction)}{viewType}",
+				        Configure<SimpleAction>(viewType,nameof(Register_SimpleAction_For_All_Views))).Publish().RefCount();
+			        var selectMany = registerViewSimpleAction.SelectMany(action => action.WhenActivated().Select(simpleAction => simpleAction));
+			        return registerViewSimpleAction.Merge(selectMany);
+		        })
+		        .Test();
+	        DefaultReactiveModule(application);
 
-                AssertViewAction<SimpleAction>(application,nameof(Register_SimpleAction_For_All_Views),viewType);
-                testObserver.ItemCount.ShouldBe(4);
-            }
-
+	        AssertViewAction<SimpleAction>(application,nameof(Register_SimpleAction_For_All_Views),viewType);
+	        testObserver.ItemCount.ShouldBe(4);
         }
 
         private Action<T> Configure<T>(ViewType viewType,string caption) where T:ActionBase{
@@ -55,16 +52,14 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
 
         [XpandTest()][Test]
         public void Register_SimpleAction_For_Windows(){
-            using (var application = Platform.Win.NewApplication<ReactiveModule>()){
-                application.WhenApplicationModulesManager()
-                    .SelectMany(manager => manager.RegisterWindowSimpleAction(nameof(SimpleAction)))
-                    .TakeUntilDisposed(application)
-                    .Subscribe();
-                DefaultReactiveModule(application);
+	        using var application = Platform.Win.NewApplication<ReactiveModule>();
+	        application.WhenApplicationModulesManager()
+		        .SelectMany(manager => manager.RegisterWindowSimpleAction(nameof(SimpleAction)))
+		        .TakeUntilDisposed(application)
+		        .Subscribe();
+	        DefaultReactiveModule(application);
 
-                AssertWindowAction<SimpleAction>(application);
-            }
-
+	        AssertWindowAction<SimpleAction>(application);
         }
 
         private static T AssertWindowAction<T>(XafApplication application) where T:ActionBase{
@@ -117,88 +112,76 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
         [TestCase(ViewType.DetailView)]
         [TestCase(ViewType.ListView)]
         public void Register_SingleChoiceAction_For_Views(ViewType viewType){
-            using (var application = Platform.Win.NewApplication<ReactiveModule>()){
-                application.WhenApplicationModulesManager()
-                    .SelectMany(manager => manager.RegisterViewSingleChoiceAction($"{nameof(SingleChoiceAction)}{viewType}",
-                        Configure<SingleChoiceAction>(viewType, nameof(Register_SingleChoiceAction_For_Views))))
-                    .TakeUntilDisposed(application)
-                    .Subscribe();
-                DefaultReactiveModule(application);
+	        using var application = Platform.Win.NewApplication<ReactiveModule>();
+	        application.WhenApplicationModulesManager()
+		        .SelectMany(manager => manager.RegisterViewSingleChoiceAction($"{nameof(SingleChoiceAction)}{viewType}",
+			        Configure<SingleChoiceAction>(viewType, nameof(Register_SingleChoiceAction_For_Views))))
+		        .TakeUntilDisposed(application)
+		        .Subscribe();
+	        DefaultReactiveModule(application);
 
-                var singleChoiceAction = AssertViewAction<SingleChoiceAction>(application,nameof(Register_SingleChoiceAction_For_Views),viewType);
-                singleChoiceAction.Items.Select(item => item.Id).ShouldContain("test");
-            }
-
+	        var singleChoiceAction = AssertViewAction<SingleChoiceAction>(application,nameof(Register_SingleChoiceAction_For_Views),viewType);
+	        singleChoiceAction.Items.Select(item => item.Id).ShouldContain("test");
         }
         [XpandTest()][Test]
         public void Register_SingleChoiceAction_For_Windows(){
-            using (var application = Platform.Win.NewApplication<ReactiveModule>()){
-                application.WhenApplicationModulesManager()
-                    .SelectMany(manager => manager.RegisterWindowSingleChoiceAction(nameof(SingleChoiceAction),
-                        configure:Configure<SingleChoiceAction>(ViewType.Any, nameof(Register_SingleChoiceAction_For_Windows))))
-                    .TakeUntilDisposed(application)
-                    .Subscribe();
-                DefaultReactiveModule(application);
+	        using var application = Platform.Win.NewApplication<ReactiveModule>();
+	        application.WhenApplicationModulesManager()
+		        .SelectMany(manager => manager.RegisterWindowSingleChoiceAction(nameof(SingleChoiceAction),
+			        configure:Configure<SingleChoiceAction>(ViewType.Any, nameof(Register_SingleChoiceAction_For_Windows))))
+		        .TakeUntilDisposed(application)
+		        .Subscribe();
+	        DefaultReactiveModule(application);
 
-                var singleChoiceAction = AssertWindowAction<SingleChoiceAction>(application);
-                singleChoiceAction.Items.Select(item => item.Id).ShouldContain("test");
-            }
-
+	        var singleChoiceAction = AssertWindowAction<SingleChoiceAction>(application);
+	        singleChoiceAction.Items.Select(item => item.Id).ShouldContain("test");
         }
         [XpandTest()][TestCase(ViewType.DetailView)]
         [TestCase(ViewType.ListView)]
         public void Register_PararameterizedAction_For_Views(ViewType viewType){
-            using (var application = Platform.Win.NewApplication<ReactiveModule>()){
-                application.WhenApplicationModulesManager()
-                    .SelectMany(manager => manager.RegisterViewParametrizedAction($"{nameof(ParametrizedAction)}{viewType}",
-                        typeof(int),configure: Configure<ParametrizedAction>(viewType, nameof(Register_PararameterizedAction_For_Views))))
-                    .TakeUntilDisposed(application)
-                    .Subscribe();
-                DefaultReactiveModule(application);
+	        using var application = Platform.Win.NewApplication<ReactiveModule>();
+	        application.WhenApplicationModulesManager()
+		        .SelectMany(manager => manager.RegisterViewParametrizedAction($"{nameof(ParametrizedAction)}{viewType}",
+			        typeof(int),configure: Configure<ParametrizedAction>(viewType, nameof(Register_PararameterizedAction_For_Views))))
+		        .TakeUntilDisposed(application)
+		        .Subscribe();
+	        DefaultReactiveModule(application);
 
-                AssertViewAction<ParametrizedAction>(application,nameof(Register_PararameterizedAction_For_Views),viewType);
-            }
-
+	        AssertViewAction<ParametrizedAction>(application,nameof(Register_PararameterizedAction_For_Views),viewType);
         }
         [XpandTest()][Test]
         public void Register_PararameterizedAction_For_Windows(){
-            using (var application = Platform.Win.NewApplication<ReactiveModule>()){
-                application.WhenApplicationModulesManager()
-                    .SelectMany(manager => manager.RegisterWindowParametrizedAction(nameof(ParametrizedAction),typeof(int)))
-                    .TakeUntilDisposed(application)
-                    .Subscribe();
-                DefaultReactiveModule(application);
+	        using var application = Platform.Win.NewApplication<ReactiveModule>();
+	        application.WhenApplicationModulesManager()
+		        .SelectMany(manager => manager.RegisterWindowParametrizedAction(nameof(ParametrizedAction),typeof(int)))
+		        .TakeUntilDisposed(application)
+		        .Subscribe();
+	        DefaultReactiveModule(application);
 
-                AssertWindowAction<ParametrizedAction>(application);
-            }
-
+	        AssertWindowAction<ParametrizedAction>(application);
         }
         [XpandTest()][TestCase(ViewType.DetailView)]
         public void Register_PopupAction_For_Views(ViewType viewType){
-            using (var application = Platform.Win.NewApplication<ReactiveModule>()){
-                application.WhenApplicationModulesManager()
-                    .SelectMany(manager => manager.RegisterViewPopupWindowShowAction($"{nameof(PopupWindowShowAction)}{viewType}",
-                            Configure<PopupWindowShowAction>(viewType, nameof(Register_PopupAction_For_Views))))
-                    .TakeUntilDisposed(application)
-                    .Subscribe();
-                DefaultReactiveModule(application);
+	        using var application = Platform.Win.NewApplication<ReactiveModule>();
+	        application.WhenApplicationModulesManager()
+		        .SelectMany(manager => manager.RegisterViewPopupWindowShowAction($"{nameof(PopupWindowShowAction)}{viewType}",
+			        Configure<PopupWindowShowAction>(viewType, nameof(Register_PopupAction_For_Views))))
+		        .TakeUntilDisposed(application)
+		        .Subscribe();
+	        DefaultReactiveModule(application);
 
-                AssertViewAction<PopupWindowShowAction>(application,nameof(Register_PopupAction_For_Views),viewType);
-            }
-
+	        AssertViewAction<PopupWindowShowAction>(application,nameof(Register_PopupAction_For_Views),viewType);
         }
         [XpandTest()][Test]
         public void Register_PopupAction_For_Windows(){
-            using (var application = Platform.Win.NewApplication<ReactiveModule>()){
-                application.WhenApplicationModulesManager()
-                    .SelectMany(manager => manager.RegisterWindowPopupWindowShowAction(nameof(PopupWindowShowAction)))
-                    .TakeUntilDisposed(application)
-                    .Subscribe();
-                DefaultReactiveModule(application);
+	        using var application = Platform.Win.NewApplication<ReactiveModule>();
+	        application.WhenApplicationModulesManager()
+		        .SelectMany(manager => manager.RegisterWindowPopupWindowShowAction(nameof(PopupWindowShowAction)))
+		        .TakeUntilDisposed(application)
+		        .Subscribe();
+	        DefaultReactiveModule(application);
             
-                AssertWindowAction<PopupWindowShowAction>(application);
-            }
-
+	        AssertWindowAction<PopupWindowShowAction>(application);
         }
 
     }

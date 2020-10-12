@@ -8,3 +8,5 @@ Google.Apis.Auth
 Google.Apis.Calendar.v3
 Newtonsoft.Json
 System.ValueTuple
+Microsoft.CodeAnalysis.CSharp
+System.Configuration.ConfigurationManager

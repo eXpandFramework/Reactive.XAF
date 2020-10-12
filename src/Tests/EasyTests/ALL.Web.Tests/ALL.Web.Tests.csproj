@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+    <ApplicationIcon />
+    <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
+    <OutputType>Library</OutputType>
+    <StartupObject>
+    </StartupObject>
+    <OutputPathSuffix>AllTestWeb</OutputPathSuffix>
+    <OutputPath>..\..\..\..\bin\AllTestWeb</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Program.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\CommonFiles\GoogleCalendarService.cs" Link="GoogleCalendarService.cs" />
+    <Compile Include="..\CommonFiles\GoogleTasksService.cs" Link="GoogleTasksService.cs" />
+    <Compile Include="..\CommonFiles\MicrosoftCalendarService.cs" Link="MicrosoftCalendarService.cs" />
+    <Compile Include="..\CommonFiles\MicrosoftService.cs" Link="MicrosoftService.cs" />
+    <Compile Include="..\CommonFiles\GoogleService.cs" Link="GoogleService.cs" />
+    <Compile Include="..\CommonFiles\MicrosoftTodoService.cs" Link="MicrosoftTodoService.cs" />
+    <Compile Include="..\CommonFiles\OfficeCloudService.cs" Link="OfficeCloudService.cs" />
+    <Compile Include="..\CommonFiles\SequenceGeneratorService.cs" Link="SequenceGeneratorService.cs" />
+    <Compile Include="..\CommonFiles\BaseTest.cs" Link="BaseTest.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="DevExpress.EasyTest" Version="20.1.8" />
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.1.8" />
+    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WebAdapter" Version="20.1.8" />
+    <PackageReference Include="DevExpress.ExpressApp.Web.All" Version="20.1.8" />
+    <PackageReference Include="Moq" Version="4.13.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="Shouldly" Version="3.0.2" />
+    <PackageReference Include="NUnit" Version="3.12.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.16.1" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="20.1.8" />
+    <PackageReference Include="Unofficial.Microsoft.mshtml" Version="7.0.3300" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="2.202.43.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Xpand.TestsLib">
+      <HintPath>..\..\..\..\bin\net461\Xpand.TestsLib.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

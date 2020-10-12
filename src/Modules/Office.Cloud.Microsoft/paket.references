@@ -15,3 +15,4 @@ Microsoft.IdentityModel.Protocols.OpenIdConnect
 Owin
 Newtonsoft.Json
 System.ValueTuple
+Microsoft.CodeAnalysis.CSharp

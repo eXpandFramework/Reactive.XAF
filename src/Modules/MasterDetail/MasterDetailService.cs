@@ -16,7 +16,6 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
-using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 using Xpand.XAF.Modules.Reactive.Services.Controllers;
@@ -44,8 +43,8 @@ namespace Xpand.XAF.Modules.MasterDetail{
                 .ToUnit();
         }
 
-        private static IObservable<Unit> WhenRefreshListView(this XafApplication application) =>
-            application.WhenMasterDetailDashboardViewItems()
+        private static IObservable<Unit> WhenRefreshListView(this XafApplication application) 
+	        => application.WhenMasterDetailDashboardViewItems()
                 .SelectMany(_ => _.detailViewItem.InnerView.ObjectSpace.WhenCommited()
                     .Select(tuple => _.listViewItem.InnerView.ObjectSpace)
                     .Select(objectSpace => {
@@ -61,8 +60,8 @@ namespace Xpand.XAF.Modules.MasterDetail{
                 )
                 .ToUnit();
 
-        private static IObservable<Unit> WhenSaveAction(this XafApplication application) =>
-            application.WhenMasterDetailDashboardViewItems()
+        private static IObservable<Unit> WhenSaveAction(this XafApplication application) 
+	        => application.WhenMasterDetailDashboardViewItems()
                 .Do(_ => _.detailViewItem.Frame.Actions().First(action => action.Id == MasterDetailSaveAction)
                     .Active[MasterDetailModule.CategoryName] = true)
                 .SelectMany(_ => _.detailViewItem.Frame.Actions<SimpleAction>().Where(action => action.Id == MasterDetailSaveAction)
@@ -71,12 +70,11 @@ namespace Xpand.XAF.Modules.MasterDetail{
                 .TraceMasterDetailModule(_ => _.Action.Id)
                 .ToUnit();
 
-        public static IObservable<DashboardView> WhenMasterDetailDashboardViewCreated(this XafApplication application) =>
-            application.WhenDashboardViewCreated()
-                .Where(_ => ((IModelDashboardViewMasterDetail) _.Model).MasterDetail);
+        public static IObservable<DashboardView> WhenMasterDetailDashboardViewCreated(this XafApplication application) 
+	        => application.WhenDashboardViewCreated().Where(_ => ((IModelDashboardViewMasterDetail) _.Model).MasterDetail);
 
-        public static IObservable<(DashboardViewItem listViewItem, DashboardViewItem detailViewItem)> WhenMasterDetailDashboardViewItems(this XafApplication application,Type objectType=null) =>
-            application.WhenMasterDetailDashboardViewCreated()
+        public static IObservable<(DashboardViewItem listViewItem, DashboardViewItem detailViewItem)> WhenMasterDetailDashboardViewItems(this XafApplication application,Type objectType=null) 
+	        => application.WhenMasterDetailDashboardViewCreated()
                 .SelectMany(_ => _.WhenControlsCreated().Do(tuple => {},() => {}))
                 .SelectMany(_ => _.GetItems<DashboardViewItem>()
                     .Where(item => item.Model.View is IModelListView&&(objectType==null||item.Model.View.AsObjectView.ModelClass.TypeInfo.Type ==objectType))
@@ -87,8 +85,8 @@ namespace Xpand.XAF.Modules.MasterDetail{
                 )
                 .TraceMasterDetailModule(_ =>$"{_.detailViewItem.Model.Id}, {_.listViewItem.Model.Id}" );
 
-        private static IObservable<Unit> WhenSynchronizeDetailView(this XafApplication application) =>
-            application.WhenMasterDetailDashboardViewItems()
+        private static IObservable<Unit> WhenSynchronizeDetailView(this XafApplication application) 
+	        => application.WhenMasterDetailDashboardViewItems()
                 .CombineLatest(application.WhenNestedFrameCreated(),application.WhenMasterDetailDashboardViewCreated().Select(view => view), (_, frame, dashboardView) => {
                     var listView = ((ListView) _.listViewItem.InnerView);
                     if (listView == null)
@@ -130,8 +128,8 @@ namespace Xpand.XAF.Modules.MasterDetail{
             return detailView;
         }
 
-        private static IModelMasterDetailViewObjectTypeLink GetObjectTypeLink(this DetailView detailView, object o, ListView listView) =>
-            ((IModelApplicationMasterDetail) detailView.Model.Application).DashboardMasterDetail.ObjectTypeLinks
+        private static IModelMasterDetailViewObjectTypeLink GetObjectTypeLink(this DetailView detailView, object o, ListView listView) 
+	        => ((IModelApplicationMasterDetail) detailView.Model.Application).DashboardMasterDetail.ObjectTypeLinks
             .FirstOrDefault(link => {
                 if (link.ModelClass.TypeInfo.Type == o.GetType()){
                     var fitForCriteria = listView.ObjectSpace.IsObjectFitForCriteria(o, CriteriaOperator.Parse(link.Criteria));
@@ -141,21 +139,19 @@ namespace Xpand.XAF.Modules.MasterDetail{
             });
 
         public static IObservable<((DashboardViewItem detailViewItem, DashboardViewItem listViewItem) masterDetailItem, CustomProcessListViewSelectedItemEventArgs e)> 
-            WhenMasterDetailListViewProcessSelectedItem(this XafApplication application){
-            
-            return application.WhenMasterDetailDashboardViewItems()
-                .SelectMany(tuple => tuple.listViewItem.Frame
-                    .GetController<ListViewProcessCurrentObjectController>()
-                    .WhenCustomProcessSelectedItem()
-                    .Do(_ => _.e.Handled = true)
-                    .Select(_ => (_: tuple, _.e)))
-                .Publish().AutoConnect()
-                .TraceMasterDetailModule(_ => $"{_._.listViewItem.Id}, {_.e.InnerArgs.CurrentObject}");
-        }
+            WhenMasterDetailListViewProcessSelectedItem(this XafApplication application) 
+	        => application.WhenMasterDetailDashboardViewItems()
+		        .SelectMany(tuple => tuple.listViewItem.Frame
+			        .GetController<ListViewProcessCurrentObjectController>()
+			        .WhenCustomProcessSelectedItem()
+			        .Do(_ => _.e.Handled = true)
+			        .Select(_ => (_: tuple, _.e)))
+		        .Publish().AutoConnect()
+		        .TraceMasterDetailModule(_ => $"{_._.listViewItem.Id}, {_.e.InnerArgs.CurrentObject}");
 
 
-        static IObservable<ActionBase> RegisterActions(this ApplicationModulesManager applicationModulesManager) =>
-            applicationModulesManager.RegisterViewAction(MasterDetailSaveAction, _ => {
+        static IObservable<ActionBase> RegisterActions(this ApplicationModulesManager applicationModulesManager) 
+	        => applicationModulesManager.RegisterViewAction(MasterDetailSaveAction, _ => {
                 var simpleAction =
                     new SimpleAction(_.controller, _.id, PredefinedCategory.Edit.ToString()){
                         Caption = "Save",
@@ -177,16 +173,16 @@ namespace Xpand.XAF.Modules.MasterDetail{
             return modelDashboardView;
         }
 
-        static IObservable<Unit> DisableListViewController(this XafApplication application, string typeName) =>
-            application.WhenMasterDetailDashboardViewItems()
-                .SelectMany(_ => _.listViewItem.Frame.Controllers.Cast<Controller>().Where(controller => controller.GetType().Name==typeName))
-                .Do(controller => controller.Active[MasterDetailModule.CategoryName]=false).ToUnit()
-                .TraceMasterDetailModule();
+        static IObservable<Unit> DisableListViewController(this XafApplication application, string typeName) 
+	        => application.WhenMasterDetailDashboardViewItems()
+		        .SelectMany(_ => _.listViewItem.Frame.Controllers.Cast<Controller>().Where(controller => controller.GetType().Name==typeName))
+		        .Do(controller => controller.Active[MasterDetailModule.CategoryName]=false).ToUnit()
+		        .TraceMasterDetailModule();
 
-        static IObservable<Unit> DisableDetailViewViewController(this XafApplication application,string typeName) =>
-            application.WhenMasterDetailDashboardViewItems()
-                .SelectMany(_ => _.detailViewItem.Frame.Controllers.Cast<Controller>().Where(controller => controller.GetType().Name==typeName))
-                .Do(controller => controller.Active[MasterDetailModule.CategoryName]=false).ToUnit()
-                .TraceMasterDetailModule();
+        static IObservable<Unit> DisableDetailViewViewController(this XafApplication application,string typeName) 
+	        => application.WhenMasterDetailDashboardViewItems()
+		        .SelectMany(_ => _.detailViewItem.Frame.Controllers.Cast<Controller>().Where(controller => controller.GetType().Name==typeName))
+		        .Do(controller => controller.Active[MasterDetailModule.CategoryName]=false).ToUnit()
+		        .TraceMasterDetailModule();
     }
 }

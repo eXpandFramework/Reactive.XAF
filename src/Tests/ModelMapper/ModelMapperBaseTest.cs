@@ -1,5 +1,6 @@
 ﻿using System;
 using System.CodeDom.Compiler;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -23,6 +24,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         protected const string MMDetailViewTestItemNodePath = "Views/" + nameof(MM) + "_DetailView/Items/Test";
         protected const string MMListViewTestItemNodePath = "Views/" + nameof(MM) + "_ListView/Columns/Test";
         public const string DynamicTypeName = "DynamicTypeName";
+
+        [SuppressMessage("ReSharper", "ObjectCreationAsStatement")]
+        protected ModelMapperBaseTest(){
+            new ModelMapperModule();
+        }
+
         internal ModelMapperModule DefaultModelMapperModule(string title,Platform platform,params ModuleBase[] modules){
             var xafApplication = platform.NewApplication<ModelMapperModule>();
             xafApplication.Modules.AddRange(modules);

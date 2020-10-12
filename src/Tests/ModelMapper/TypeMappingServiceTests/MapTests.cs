@@ -50,6 +50,7 @@ using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.Ty
 namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
     [NonParallelizable]
     public class MapTests:ModelMapperBaseTest{
+        
         [Test]
         [XpandTest]
         public async Task Map_RW_StringValueType_Public_Properties(){

@@ -21,17 +21,17 @@ jobs:
         artifactName: 'bin'
         downloadType: single
         downloadPath: '$(System.DefaultWorkingDirectory)'
-    - task: DownloadBuildArtifacts@0
-      displayName: Download EasyTests
-      inputs:
-        buildType: 'specific'
-        project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
-        definition:  '23'
-        buildVersionToDownload: specific
-        buildId: $(DxPipelineBuildId)
-        artifactName: 'Tests'
-        downloadType: single
-        downloadPath: '$(System.DefaultWorkingDirectory)\bin'
+    # - task: DownloadBuildArtifacts@0
+    #   displayName: Download EasyTests
+    #   inputs:
+    #     buildType: 'specific'
+    #     project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
+    #     definition:  '23'
+    #     buildVersionToDownload: specific
+    #     buildId: $(DxPipelineBuildId)
+    #     artifactName: 'Tests'
+    #     downloadType: single
+    #     downloadPath: '$(System.DefaultWorkingDirectory)\bin'
     - task: AzurePowerShell@5
       inputs:
         azureSubscription: 'Visual Studio Enterprise(b48a609a-17f6-4e48-a317-54ab77fbf822)'
@@ -163,7 +163,7 @@ jobs:
   timeoutInMinutes: 70
   dependsOn: 'TestPerAssembly'
   strategy:
-    parallel: 3
+    parallel: 4
   pool:
     vmImage: windows-2019
   variables:
@@ -192,12 +192,13 @@ jobs:
         testSelector: 'testAssemblies'
         diagnosticsEnabled: true
         codeCoverageEnabled: true
-        distributionBatchType: basedOnExecutionTime
+        distributionBatchType: basedOnAssembly
         runInParallel: false
         runSettingsFile: .\bin\Tests.runsettings
         runTestsInIsolation: false
         collectDumpOn: never
         testAssemblyVer2: |
+          **\ALL.Win.Tests.NetCore.dll
           **\Xpand.XAF.Modules.Reactive.Logger.Hub.Tests.dll
           **\Xpand.XAF.Modules.Reactive.Logger.Tests.dll
           **\Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.dll

@@ -4,7 +4,7 @@ param(
     $Branch="master"
 )
 Use-MonoCecil | Out-Null
-function UpdateALLNuspec($platform, $allNuspec, $nuspecs,$allModuleNuspecs) {
+function UpdateALLNuspec($platform, $allNuspec, $nuspecs,$allModuleNuspecs,$csProjects) {
     
     $platformNuspecs = $allModuleNuspecs | ForEach-Object {
         [xml]$nuspec = Get-Content $_.FullName
@@ -12,10 +12,11 @@ function UpdateALLNuspec($platform, $allNuspec, $nuspecs,$allModuleNuspecs) {
         $filesrc=($nuspec.package.Files.file|Where-Object{$_.src -like "*$nuspecBaseName.dll"}).src
         $platformMetada = Get-AssemblyMetadata "$root\bin\$filesrc" -key "Platform"
         if ($platformMetada.Value -in $platform){
-            
+            $target=Get-ProjectTargetFramework (Get-XmlContent ($csProjects|Where-Object{$_.BaseName -eq $nuspecBaseName }).FullName) -FullName
             [PSCustomObject]@{
                 Nuspec = $nuspec
                 File   = $_
+                Target = $target
             }
         }        
     }
@@ -52,15 +53,29 @@ function UpdateALLNuspec($platform, $allNuspec, $nuspecs,$allModuleNuspecs) {
         $allNuspec.package.metadata.dependencies.RemoveAll()
     }
     
-    $platformNuspecs | ForEach-Object {
-        [xml]$nuspec = $_.Nuspec
-        $dependency = [PSCustomObject]@{
-            id      = $_.File.BaseName
-            version = $nuspec.package.metadata.version
+    $platformNuspecs|Group-Object Target | ForEach-Object {
+        $key=$_.Name
+        
+        $_.group|ForEach-Object{
+            [xml]$nuspec = $_.Nuspec
+            $dependency = [PSCustomObject]@{
+                id      = $_.File.BaseName
+                version = $nuspec.package.metadata.version
+            }
+            
+            Add-NuspecDependency $dependency.Id $dependency.version $allNuspec $key
         }
         
-        Add-NuspecDependency $dependency.Id $dependency.version $allNuspec
     }
+    $group=$allNuspec.package.metadata.dependencies.group
+    $standardGroup=($group|Where-Object{$_.targetFramework -eq "netstandard2.0"})
+    $net461Group=($group|Where-Object{$_.targetFramework -eq "net461"})
+    if ($net461Group){
+        $standardGroup.dependency|ForEach-Object{
+            Add-NuspecDependency $_.Id $_.version $allNuspec "net461"
+        }
+    }
+    
 }
 $nuspecs = Get-ChildItem "$root\build\nuspec" *.nuspec
 $nuspecs | ForEach-Object {
@@ -74,29 +89,21 @@ $allFileName = "$root\build\nuspec\Xpand.XAF.Core.All.nuspec"
 Write-HostFormatted "Updating Xpand.XAF.Core.All.nuspec" -Section
 [xml]$allNuspec = Get-Content $allFileName
 $allModuleNuspecs = $nuspecs | Where-Object { $_ -notlike "*ALL*" -and ($_ -like "*.Modules.*" -or $_ -like "*.Extensions.*") -and $_ -notlike "*.Client.*" }
-UpdateALLNuspec "Core" $allNuspec $nuspecs $allModuleNuspecs 
-$allNuspec.Save($allFileName)
+$csProjects=Get-MSBuildProjects $root\src 
+UpdateALLNuspec "Core" $allNuspec $nuspecs $allModuleNuspecs $csProjects
+$allNuspec|Save-Xml $allFileName
 Get-Content $allFileName -Raw
-$coreDependency = [PSCustomObject]@{
-    id      = $allNuspec.package.metadata.id
-    version = $allNuspec.package.metadata.version
-}
-
 $allFileName = "$root\build\nuspec\Xpand.XAF.Win.All.nuspec"
 Write-HostFormatted "Updating Xpand.XAF.Win.All.nuspec" -Section
 [xml]$allNuspec = Get-Content $allFileName
-UpdateALLNuspec @("Core","Win") $allNuspec  $nuspecs $allModuleNuspecs
-Add-NuspecDependency $coreDependency.Id $coreDependency.Version $allNuspec
-$coredependency=$allNuspec.package.metadata.dependencies.dependency|Where-Object{$_.id -eq "Xpand.XAF.Core.all"}|Select-Object -First 1
-# $coreDependency.ParentNode.RemoveChild($coreDependency)
-$allNuspec.Save($allFileName)
+UpdateALLNuspec @("Core","Win") $allNuspec  $nuspecs $allModuleNuspecs $csProjects
+$allNuspec|Save-Xml $allFileName
 Get-Content $allFileName -Raw
 
 $allFileName = "$root\build\nuspec\Xpand.XAF.Web.All.nuspec"
 Write-HostFormatted "Updating Xpand.XAF.Web.All.nuspec"
 [xml]$allNuspec = Get-Content $allFileName
-UpdateALLNuspec @("Core","Web") $allNuspec  $nuspecs $allModuleNuspecs 
+UpdateALLNuspec @("Core","Web") $allNuspec  $nuspecs $allModuleNuspecs $csProjects
 
-Add-NuspecDependency $coreDependency.Id $coreDependency.Version $allNuspec
-$allNuspec.Save($allFileName)
+$allNuspec|Save-Xml $allFileName
 Get-Content $allFileName -Raw

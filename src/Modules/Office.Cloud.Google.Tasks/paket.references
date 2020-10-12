@@ -8,3 +8,5 @@ Google.Apis.Auth
 Google.Apis.Tasks.v1
 Newtonsoft.Json
 System.ValueTuple
+Microsoft.CodeAnalysis.CSharp
+System.Configuration.ConfigurationManager

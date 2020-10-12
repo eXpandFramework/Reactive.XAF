@@ -26,7 +26,7 @@
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.GridListEditor">
-      <HintPath>..\..\..\bin\net461\Xpand.XAF.Modules.GridListEditor.dll</HintPath>
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.GridListEditor.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
