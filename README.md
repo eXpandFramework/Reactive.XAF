@@ -1,6 +1,6 @@
 [![image](https://xpandshields.azurewebsites.net/badge/Exclusive%20services%3F-Head%20to%20the%20dashboard-Blue)](https://github.com/sponsors/apobekiaris) ![GitHub stars](https://xpandshields.azurewebsites.net/github/stars/expandframework/devexpress.xaf?label=Star%20the%20project%20if%20you%20think%20it%20deserves%20it&style=social) ![GitHub forks](https://xpandshields.azurewebsites.net/github/forks/expandframework/Devexpress.Xaf?label=Fork%20the%20project%20to%20extend%20and%20contribute&style=social)
 
-[![image](https://xpandshields.azurewebsites.net/badge/SUBSRCIBE-LinkedIn.eXpandFramework.com-blue)](http://linkedin.expandframework.com/) [![image](https://xpandshields.azurewebsites.net/badge/SUBSRCIBE-YouTube.eXpandFramework.com-blue)](http://youtube.expandframework.com/)
+[![image](https://xpandshields.azurewebsites.net/badge/SUBSRCIBE-LinkedIn.eXpandFramework.com-blue)](http://linkedin.expandframework.com/) [![image](https://xpandshields.azurewebsites.net/badge/SUBSRCIBE-YouTube.eXpandFramework.com-blue)](http://youtube.expandframework.com/) [![image](https://xpandshields.azurewebsites.net/badge/FOLLOW-twitter/eXpandFramework-blue)](https://twitter.com/expandframework/)
 # About 
 
 | ![image](https://user-images.githubusercontent.com/159464/66713086-c8c5a800-edae-11e9-9bc1-73ffc0c215fb.png) |  [![Custom badge](https://xpandshields.azurewebsites.net/endpoint.svg?label=Nuget.org&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAF)](https://www.nuget.org/packages?q=Xpand.XAF) 
