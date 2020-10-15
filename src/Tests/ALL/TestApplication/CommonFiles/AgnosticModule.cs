@@ -34,7 +34,6 @@ using TestApplication.GoogleService;
 using TestApplication.MicrosoftCalendarService;
 using TestApplication.MicrosoftService;
 using TestApplication.MicrosoftTodoService;
-using TestApplication.Office.DocumentStyleManager;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.TestsLib;
 using Xpand.TestsLib.BO;
@@ -98,7 +97,6 @@ namespace TestApplication{
 			RequiredModuleTypes.Add(typeof(SecurityXpoModule));
 			RequiredModuleTypes.Add(typeof(StateMachineModule));
 			RequiredModuleTypes.Add(typeof(TreeListEditorsModuleBase));
-			RequiredModuleTypes.Add(typeof(ModuleBase));
 			RequiredModuleTypes.Add(typeof(SystemModule));
 			RequiredModuleTypes.Add(typeof(ValidationModule));
 			RequiredModuleTypes.Add(typeof(ViewVariantsModule));

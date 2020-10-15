@@ -1,5 +1,6 @@
 [![image](https://xpandshields.azurewebsites.net/badge/Exclusive%20services%3F-Head%20to%20the%20dashboard-Blue)](https://github.com/sponsors/apobekiaris) ![GitHub stars](https://xpandshields.azurewebsites.net/github/stars/expandframework/devexpress.xaf?label=Star%20the%20project%20if%20you%20think%20it%20deserves%20it&style=social) ![GitHub forks](https://xpandshields.azurewebsites.net/github/forks/expandframework/Devexpress.Xaf?label=Fork%20the%20project%20to%20extend%20and%20contribute&style=social)
 
+[![image](https://xpandshields.azurewebsites.net/badge/JOIN-LinkedIn.eXpandFramework.com-blue)](http://linkedin.expandframework.com/) [![image](https://xpandshields.azurewebsites.net/badge/SUBSRCIBE-YouTube.eXpandFramework.com-blue)](http://youtube.expandframework.com/) [![image](https://xpandshields.azurewebsites.net/badge/FOLLOW-twitter/eXpandFramework-blue)](https://twitter.com/expandframework/)
 
 # About 
 

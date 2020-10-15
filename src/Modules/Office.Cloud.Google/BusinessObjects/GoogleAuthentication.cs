@@ -36,7 +36,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.BusinessObjects{
 
         protected override void OnLoaded(){
             base.OnLoaded();
-            if (OAuthToken == null) OAuthToken = new Dictionary<string, string>();
+            OAuthToken ??= new Dictionary<string, string>();
         }
     }
 }

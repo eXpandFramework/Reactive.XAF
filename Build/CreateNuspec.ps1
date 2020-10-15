@@ -18,7 +18,7 @@ $nuspec.Save($versionConverterPath)
 
 $allProjects=Get-ChildItem $root *.csproj -Recurse | Select-Object -ExpandProperty BaseName
 Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notlike "*Test*" } | Invoke-Parallel -VariablesToImport @("allProjects","root","Release") -Script {
-# Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notlike "*Test*" } | foreach {
+# Get-ChildItem "$root\src\" -Include "*Xpand.Extensions.Office.Cloud.csproj" -Recurse | Where-Object { $_ -notlike "*Test*" } | foreach {
     Set-Location $root
     $projectPath = $_.FullName
     Write-Output "Creating Nuspec for $($_.baseName)" 

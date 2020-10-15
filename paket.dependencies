@@ -6,13 +6,13 @@ storage:none
 framework:net461,netstandard2.0
 
 nuget akarnokd.reactive_extensions 0.0.27-alpha
-nuget DevExpress.ExpressApp.Core.All == 20.1.7
-nuget DevExpress.ExpressApp.Win.All == 20.1.7
-nuget DevExpress.ExpressApp.Web.All == 20.1.7
-nuget DevExpress.EasyTest == 20.1.7  
-nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 20.1.7  
-nuget DevExpress.ExpressApp.EasyTest.WinAdapter == 20.1.7  
-nuget DevExpress.ExpressApp.Security.Xpo == 20.1.7  
+nuget DevExpress.ExpressApp.Core.All == 20.1.8
+nuget DevExpress.ExpressApp.Win.All == 20.1.8
+nuget DevExpress.ExpressApp.Web.All == 20.1.8
+nuget DevExpress.EasyTest == 20.1.8  
+nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 20.1.8  
+nuget DevExpress.ExpressApp.EasyTest.WinAdapter == 20.1.8  
+nuget DevExpress.ExpressApp.Security.Xpo == 20.1.8  
 nuget Microsoft.Extensions.Dependencyinjection == 3.1.2  
 nuget Microsoft.Graph.Beta == 0.18.0-preview
 nuget Microsoft.Graph.Core == 1.19.0

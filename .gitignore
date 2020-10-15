@@ -641,3 +641,5 @@ $RECYCLE.BIN/
 GitUserEmail.json
 /src/Tests/ALL/TestApplication/DownloadCloudCreds.ps1
 /src/Tests/ALL/TestApplication/PushToken.ps1
+/src/Tests/EasyTests/TestApplication/DownloadCloudCreds.ps1
+/src/Tests/EasyTests/TestApplication/PushToken.ps1

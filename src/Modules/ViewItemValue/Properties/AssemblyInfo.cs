@@ -1,11 +1,13 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
+using Xpand.XAF.Modules.ViewItemValue;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Xpand.XAF.Modules.ViewItemValue")]
 [assembly: AssemblyMetadata("Platform","Core")]
+[assembly: AssemblyMetadata("Module",nameof(ViewItemValueModule))]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
@@ -29,7 +31,7 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 
-[assembly: AssemblyVersion("2.202.22.0")]
-[assembly: AssemblyFileVersion("2.202.22.0")]
+[assembly: AssemblyVersion("2.202.23.2")]
+[assembly: AssemblyFileVersion("2.202.23.2")]
 //[assembly:AllowPartiallyTrustedCallers]
 //[assembly: SecurityTransparent()]

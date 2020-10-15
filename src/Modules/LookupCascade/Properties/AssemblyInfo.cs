@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
+using Xpand.XAF.Modules.LookupCascade;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
@@ -7,6 +8,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Xpand.XAF.Modules.LookupCascade")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyMetadata("Platform","Web")]
+[assembly: AssemblyMetadata("Module",nameof(LookupCascadeModule))]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Xpand.XAF.Modules.LookupCascade")]
@@ -28,7 +30,7 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("2.202.58.0")]
-[assembly: AssemblyFileVersion("2.202.58.0")]
+[assembly: AssemblyVersion("2.202.59.2")]
+[assembly: AssemblyFileVersion("2.202.59.2")]
 //[assembly:AllowPartiallyTrustedCallers]
 //[assembly: SecurityTransparent()]

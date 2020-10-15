@@ -17,8 +17,6 @@ namespace TestApplication.Web{
             ((ISupportInitialize) this).BeginInit();
             Modules.Add(new WebModule());
             ((ISupportInitialize) this).EndInit();
-            var module = Modules.FindModule(typeof(ModuleBase));
-            module.SetFieldValue("name", "Base");
             this.AlwaysUpdateOnDatabaseVersionMismatch().Subscribe();
             ApplicationName = "TestWebApplication";
             CheckCompatibilityType = CheckCompatibilityType.DatabaseSchema;

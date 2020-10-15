@@ -1,45 +1,21 @@
 param(
-    $Branch = "master",
+    $Branch = "lab",
     $nugetBin = "$PSScriptRoot\..\bin\Nupkg",
     $sourceDir = "$PSScriptRoot\..",
     $Filter ,
     [switch]$SkipReadMe,
-    [string[]]$ChangedModules = @("Xpand.Extensions",
-    "Xpand.Extensions.Mono.Cecil",
-    "Xpand.Extensions.Reactive",
-    "Xpand.Extensions.XAF",
-    "Xpand.Extensions.XAF.Xpo",
-    "Xpand.XAF.Modules.AutoCommit",
-    "Xpand.XAF.Modules.CloneMemberValue",
-    "Xpand.XAF.Modules.CloneModelView",
-    "Xpand.XAF.Modules.GridListEditor",
-    "Xpand.XAF.Modules.HideToolBar",
-    "Xpand.XAF.Modules.MasterDetail",
-    "Xpand.XAF.Modules.ModelMapper",
-    "Xpand.XAF.Modules.ModelViewInheritance",
-    "Xpand.XAF.Modules.OneView",
-    "Xpand.XAF.Modules.ProgressBarViewItem",
-    "Xpand.XAF.Modules.Reactive",
-    "Xpand.XAF.Modules.Reactive.Logger",
-    "Xpand.XAF.Modules.Reactive.Logger.Client.Win",
-    "Xpand.XAF.Modules.Reactive.Logger.Hub",
-    "Xpand.XAF.Modules.Reactive.Win",
-    "Xpand.XAF.Modules.RefreshView",
-    "Xpand.XAF.Modules.SuppressConfirmation",
-    "Xpand.XAF.Modules.ViewEditMode",
-    "Xpand.XAF.Core.All",
-    "Xpand.XAF.Web.All",
-    "Xpand.XAF.Win.All")
+    [string[]]$ChangedModules =((Get-ChildItem $nugetBin).BaseName|ConvertTo-PackageObject).Id
 )
+
 Import-Module XpandPwsh -Force -Prefix X
 $ErrorActionPreference = "Stop"
-get-variable ChangedModules|Out-variable
+Get-Variable ChangedModules | Out-Variable
 New-Item $nugetBin -ItemType Directory -Force | Out-Null
 Get-ChildItem $nugetBin | Remove-Item -Force -Recurse
-$toolPackages=@("Xpand.VersionConverter","Xpand.XAF.ModelEditor")
+$toolPackages = @("Xpand.VersionConverter", "Xpand.XAF.ModelEditor")
 & "$PSScriptRoot\PackTools.ps1" $toolPackages $Branch
 
-if (!$ChangedModules){
+if (!$ChangedModules) {
     $ChangedModules
     Write-HostFormatted "Skipping package creation as no package changed" -ForegroundColor Yellow
     return
@@ -55,6 +31,7 @@ $nugetPath = (Get-XNugetPath)
 
 $packScript = {
     $name = $_.FullName
+    "packScript=$name"
     $basePath = "$sourceDir\bin"
     if ($name -like "*Client*") {
         $basePath += "\ReactiveLoggerClient"
@@ -87,13 +64,13 @@ function AddReadMe {
     )
     if ($Package.Id -like "Xpand.XAF*") {
         $moduleName = (Get-XAFModule $Directory $assemblyList).Name
-        $wikiName="Modules"
-        if ($moduleName){
-            $wikiName="$moduleName".Replace("Module","")
+        $wikiName = "Modules"
+        if ($moduleName) {
+            $wikiName = "$moduleName".Replace("Module", "")
         }
-        $registration="RequiredModuleTypes.Add(typeof($moduleName));"
-        if ($package.Id -like "*all*"){
-            $registration=($modules|Where-Object{$_.platform -eq "Core" -or $package.id -like "*$($_.platform)*"}|ForEach-Object{"RequiredModuleTypes.Add(typeof($($_.FullName)));"}) -join "`r`n                                                "
+        $registration = "RequiredModuleTypes.Add(typeof($moduleName));"
+        if ($package.Id -like "*all*") {
+            $registration = ($modules | Where-Object { $_.platform -eq "Core" -or $package.id -like "*$($_.platform)*" } | ForEach-Object { "RequiredModuleTypes.Add(typeof($($_.FullName)));" }) -join "`r`n                                                "
         }
         
         $message = @"
@@ -102,7 +79,7 @@ function AddReadMe {
         
 ++++++++++++++++++++++++  ++++++++
 ++++++++++++++++++++++##  ++++++++      ➤ 𝗘𝗫𝗖𝗟𝗨𝗦𝗜𝗩𝗘 𝗦𝗘𝗥𝗩𝗜𝗖𝗘𝗦 @ 
-++++++++++++++++++++++  ++++++++++          ☞ http://hire.expandframework.com
+++++++++++++++++++++++  ++++++++++          ☞ http://HireMe.expandframework.com
 ++++++++++    ++++++  ++++++++++++      
 ++++++++++++  ++++++  ++++++++++++      ➤  ɪғ ʏᴏᴜ ʟɪᴋᴇ ᴏᴜʀ ᴡᴏʀᴋ ᴘʟᴇᴀsᴇ ᴄᴏɴsɪᴅᴇʀ ᴛᴏ ɢɪᴠᴇ ᴜs ᴀ STAR. 
 ++++++++++++++  ++  ++++++++++++++          ☞ https://github.com/eXpandFramework/DevExpress.XAF/stargazers
@@ -122,69 +99,81 @@ function AddReadMe {
     }
 }
 
-Write-HostFormatted "Discover XAFModules" -Section
-$packages=& (Get-NugetPath) list -source $nugetBin|ConvertTo-PackageObject|Where-Object{$_.id -notin $toolPackages}
-$assemblyList=(Get-ChildItem "$nugetbin\.." *.dll)
-$modules=Get-XAFModule "$nugetBin\.." -Include "Xpand.XAF.Modules.*" -AssemblyList $assemblyList|ForEach-Object{
-    [PSCustomObject]@{
-        FullName = $_.FullName
-        platform=(Get-AssemblyMetadata $_.Assembly -key platform).value
+Write-HostFormatted "Discover XAF XAFModules" -Section
+$packages = & (Get-NugetPath) list -source $nugetBin | ConvertTo-PackageObject | Where-Object { $_.id -notin $toolPackages }
+$modules = Get-MSBuildProjects "$sourceDir\src\Modules\" | ForEach-Object {
+    $proj=Get-XmlContent $_.fullname
+    if ($proj.project.propertygroup.OutputType -ne "WinExe"){
+        $dir = $_.DirectoryName
+        try {
+            $platform = Get-ProjectAssemblyMetadata "$dir\Properties\AssemblyInfo.cs" "platform"
+            $module = (Get-ProjectAssemblyMetadata "$dir\Properties\AssemblyInfo.cs" "Module").Replace("nameof(", "")
+            $module = "$($_.BaseName).$module"
+            [PSCustomObject]@{
+                platform = $platform
+                fullname = $module
+            }
+        }
+        catch {
+            throw "Missing modulename in $dir"   
+        }
     }
+    
 }
 
-Write-HostFormatted "Update Nupkg files (ReadMe)" -Section
-$packages | ForEach-Object  {
-    $baseName="$($_.Id).$($_.Version)"
-    $zip = "$nugetbin\$baseName.zip" 
-    $nupkgPath="$nugetBin\$baseName.nupkg"
-    Move-Item $nupkgPath $zip
-    $unzipDir = "$nugetBin\$baseName"
-    Expand-Archive $zip $unzipDir
-    Remove-Item $zip
-    AddReadme $_ $unzipDir $assemblyList $modules
-    # if ("Xpand.XAF.Core.ALL" -notin $ChangedModules -and ($_.Id -notlike "*core*") -and ($_.id -like "*.all*")){
-    #     [xml]$n=Get-XmlContent "$unzipDir\$($_.id).nuspec"
-    #     $s="lab"
-    #     if ($Branch -ne $s){
-    #         $s="Release"
-    #     }
-    #     $coreVersion=(Find-XpandPackage "Xpand.XAF.Core.All" $s).version
-    #     ($n.package.metadata.dependencies.dependency|Where-Object{$_.id -eq "Xpand.XAF.Core.All"}).version=$coreVersion
-    #     $n|Save-Xml "$unzipDir\$($_.id).nuspec"|Out-Null
-    # }
-    Compress-Files "$unzipDir" $zip 
-    Move-Item $zip $nupkgPath
-    Remove-Item $unzipDir -Force -Recurse
-}
-if ($Branch -ne "lab"){
+if ($Branch -ne "lab") {
+    Write-HostFormatted "Update Nupkg files (ReadMe)" -Section
+    $packages | ForEach-Object {
+        $baseName = "$($_.Id).$($_.Version)"
+        $zip = "$nugetbin\$baseName.zip" 
+        $nupkgPath = "$nugetBin\$baseName.nupkg"
+        Move-Item $nupkgPath $zip
+        $unzipDir = "$nugetBin\$baseName"
+        Expand-Archive $zip $unzipDir
+        Remove-Item $zip
+        AddReadme $_ $unzipDir $assemblyList $modules
+        # if ("Xpand.XAF.Core.ALL" -notin $ChangedModules -and ($_.Id -notlike "*core*") -and ($_.id -like "*.all*")){
+        #     [xml]$n=Get-XmlContent "$unzipDir\$($_.id).nuspec"
+        #     $s="lab"
+        #     if ($Branch -ne $s){
+        #         $s="Release"
+        #     }
+        #     $coreVersion=(Find-XpandPackage "Xpand.XAF.Core.All" $s).version
+        #     ($n.package.metadata.dependencies.dependency|Where-Object{$_.id -eq "Xpand.XAF.Core.All"}).version=$coreVersion
+        #     $n|Save-Xml "$unzipDir\$($_.id).nuspec"|Out-Null
+        # }
+        Compress-Files "$unzipDir" $zip 
+        Move-Item $zip $nupkgPath
+        Remove-Item $unzipDir -Force -Recurse
+    }
     Write-HostFormatted "Update ReadMe" -Section
     & "$PSScriptRoot\UpdateReadMe.ps1" 
 }
 Write-HostFormatted "Remove not changed packages" -Section
 if ($ChangedModules) {
     
-    $core=@(Get-ChildItem "$sourceDir\bin" Xpand*.dll|Where-Object{$_.BaseName -in $ChangedModules }|ForEach-Object{(Get-AssemblyMetadata $_.FullName -Key platform).value}|Get-Unique|ForEach-Object{
-        "Xpand.XAF.$_.All"
-    })
-    if ($core|Select-String "core"){
-        $core+="Xpand.XAF.Win.All","Xpand.XAF.Web.All"
+    $core = @(Get-ChildItem "$sourceDir\bin" Xpand*.dll | Where-Object { $_.BaseName -in $ChangedModules } | ForEach-Object { (Get-AssemblyMetadata $_.FullName -Key platform).value } | Get-Unique | ForEach-Object {
+            "Xpand.XAF.$_.All"
+        })
+    if ($core | Select-String "core") {
+        $core += "Xpand.XAF.Win.All", "Xpand.XAF.Web.All"
     }
-    $core=$core|Sort-Object -Unique
-    $ChangedModules+=$core
-    $s="lab"
-    if ($Branch -ne $s){
-        $s="Release"
+    $core = $core | Sort-Object -Unique
+    $ChangedModules += $core
+    $s = "lab"
+    if ($Branch -ne $s) {
+        $s = "Release"
     }
-    $toolPackages|ForEach-Object{
-        if ((Find-XpandPackage $_ $s).Version -ne (Get-NugetPackageSearchMetadata $_ -Source $nugetBin).identity.version.version){
-            $ChangedModules+=$_
+    $toolPackages | ForEach-Object {
+        if ((Find-XpandPackage $_ $s).Version -ne (Get-NugetPackageSearchMetadata $_ -Source $nugetBin).identity.version.version) {
+            $ChangedModules += $_
         }
     }
     
     "ChangedModules:"
-    $ChangedModules|Write-Output
+    $ChangedModules | Write-Output
     $nupks = Get-ChildItem $nugetBin
-    & (Get-NugetPath) list -source $nugetBin | ConvertTo-PackageObject| ForEach-Object {
+    & (Get-NugetPath) list -source $nugetBin | ConvertTo-PackageObject | ForEach-Object {
         $p = $_
         if ($p.Id -notin $ChangedModules) {
             $nupks | Where-Object { $_.BaseName -eq "$($p.Id).$($p.Version)" }
