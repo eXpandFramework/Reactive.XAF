@@ -35,10 +35,10 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
 
         public static async Task<(global::Google.Apis.Calendar.v3.CalendarService service, Frame frame)>
             InitializeService(this XafApplication application, string defaultCalendarName = CalendarName,
-                bool keepEvents = false, bool keepCalendar = false){
+                bool keepEvents = false, bool keepCalendar = false,bool newAuthentication=true){
             var modelTodo = application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Google().Calendar();
             modelTodo.DefaultCalendarName = defaultCalendarName;
-            var t = await application.InitService();
+            var t = await application.InitService(newAuthentication);
             var calendarListResource = t.service.CalendarList;
             
             var calendar = await t.service.GetCalendar(defaultCalendarName, !keepCalendar && defaultCalendarName!=CalendarPagingName);
@@ -64,8 +64,10 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
             @event.Subject = $"{nameof(Modify_Event)}{i}";
         }
 
-        public static async Task<(Frame frame, global::Google.Apis.Calendar.v3.CalendarService service)> InitService(this XafApplication application){
-            application.ObjectSpaceProvider.NewAuthentication();
+        public static async Task<(Frame frame, global::Google.Apis.Calendar.v3.CalendarService service)> InitService(this XafApplication application,bool newAuthentication=true){
+	        if (newAuthentication){
+		        application.ObjectSpaceProvider.NewAuthentication();
+	        }
             var todoModel = await application.ReactiveModulesModel().Office().Google().Calendar();
             var window = application.CreateViewWindow();
             var service = Calendar.CalendarService.Credentials.FirstAsync().SubscribeReplay();

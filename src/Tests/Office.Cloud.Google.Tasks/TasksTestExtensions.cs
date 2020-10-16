@@ -26,10 +26,10 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks.Tests{
 
         public const int TasksFolderPagingItemsCount = 21;
 
-        public static async Task<(global::Google.Apis.Tasks.v1.TasksService service, Frame frame)> InitializeService(this XafApplication application,string taskFolderName=TasksFolderName,bool keepTasks=false,bool keepTaskFolder=false){
+        public static async Task<(global::Google.Apis.Tasks.v1.TasksService service, Frame frame)> InitializeService(this XafApplication application,string taskFolderName=TasksFolderName,bool keepTasks=false,bool keepTaskFolder=false,bool newAuthentication=true){
             var modelTodo = application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Google().Tasks();
             modelTodo.DefaultTaskListName = taskFolderName;
-            var t = await application.InitService();
+            var t = await application.InitService(newAuthentication);
             var tasklistsResource = t.service.Tasklists;
             
             var taskFolder = await t.service.GetTaskList(taskFolderName, !keepTaskFolder && taskFolderName!=TasksPagingFolderName);
@@ -56,8 +56,10 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks.Tests{
             task.Status=projectTaskStatus;
         }
         
-        public static async Task<(Frame frame, global::Google.Apis.Tasks.v1.TasksService service)> InitService(this XafApplication application){
-            application.ObjectSpaceProvider.NewAuthentication();
+        public static async Task<(Frame frame, global::Google.Apis.Tasks.v1.TasksService service)> InitService(this XafApplication application,bool newAuthentication=true){
+	        if (newAuthentication){
+		        application.ObjectSpaceProvider.NewAuthentication();
+	        }
             var todoModel = await application.ReactiveModulesModel().Office().Google().Tasks();
             var window = application.CreateViewWindow();
             var service = GoogleTasksService.Credentials.FirstAsync().SubscribeReplay();
@@ -92,13 +94,12 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks.Tests{
             due.ShouldNotBeNull();
             actualStatus.ShouldBe(expectedStatus);
 
-            using (var space = objectSpaceProvider.CreateObjectSpace()){
-                var cloudObjects = space.QueryCloudOfficeObject(cloudEntityType,task).ToArray();
-                cloudObjects.Length.ShouldBe(1);
-                var cloudObject = cloudObjects.First();
-                cloudObject.LocalId.ShouldBe(task.Oid.ToString());
-                cloudObject.CloudId.ShouldBe(taskId);
-            }
+            using var space = objectSpaceProvider.CreateObjectSpace();
+            var cloudObjects = space.QueryCloudOfficeObject(cloudEntityType,task).ToArray();
+            cloudObjects.Length.ShouldBe(1);
+            var cloudObject = cloudObjects.First();
+            cloudObject.LocalId.ShouldBe(task.Oid.ToString());
+            cloudObject.CloudId.ShouldBe(taskId);
         }
 
         public static async Task<IList<(Task task, global::Google.Apis.Tasks.v1.Data.Task cloudTask)>> CreateExistingObjects(
@@ -111,12 +112,11 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks.Tests{
                 .Select((cloudTask,i1) => (application.NewTask(taskStatus,i1), cloudTask))).Buffer(count);
         }
 
-        public static Task NewTask(this XafApplication application, TaskStatus taskStatus,int index=0) {
-            using (var objectSpace = application.CreateObjectSpace()){
-                var task = objectSpace.NewTask(taskStatus,index);
-                objectSpace.CommitChanges();
-                return task;
-            }
+        public static Task NewTask(this XafApplication application, TaskStatus taskStatus,int index=0){
+	        using var objectSpace = application.CreateObjectSpace();
+	        var task = objectSpace.NewTask(taskStatus,index);
+	        objectSpace.CommitChanges();
+	        return task;
         }
         public static Task NewTask(this IObjectSpace objectSpace, TaskStatus taskStatus,int index=0) {
             var task = objectSpace.CreateObject<Task>();

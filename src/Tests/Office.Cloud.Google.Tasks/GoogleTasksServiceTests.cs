@@ -10,9 +10,12 @@ using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.TaskExtensions;
 using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.Office.Cloud.Tests;
 using Xpand.XAF.Modules.Reactive;
+using Xpand.XAF.Modules.Reactive.Logger;
+using Xpand.XAF.Modules.Reactive.Services;
 using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
 using TaskStatus = DevExpress.Persistent.Base.General.TaskStatus;
 
@@ -169,6 +172,21 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks.Tests{
             var service = serviceClient.service;
             var folder = await service.GetTaskList(modelTodo.DefaultTaskListName).WhenNotDefault().FirstAsync();
             await service.Tasklists.Delete(folder.Id).ToObservable();
+        }
+
+        [Test]
+        [XpandTest()]
+        public override Task Skip_Authorization_If_Authentication_Storage_Is_Empty(){
+	        using var application = Platform.Win.TasksModule().Application;
+	        var observer = application.WhenObjectViewCreated().Test();
+
+	        var exceptions = application.WhenTraceError().Test();
+	        Should.ThrowAsync<TimeoutException>(async () =>
+		        await application.InitializeService(newAuthentication: false).Timeout(TimeSpan.FromSeconds(5)));
+
+	        observer.ItemCount.ShouldBe(1);
+	        exceptions.ItemCount.ShouldBe(0);
+	        return Task.CompletedTask;
         }
 
     }

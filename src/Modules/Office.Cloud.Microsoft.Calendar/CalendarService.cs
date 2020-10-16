@@ -68,8 +68,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
                     .When(frame => application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office
                         .Microsoft().Calendar().Items.Select(item => item.ObjectView))
                     .Publish().RefCount();
-                return viewOnFrame
-                    .Authorize()
+                return viewOnFrame.Authorize()
                     .SynchronizeBoth()
                     .Merge(viewOnFrame.SelectMany(frame=>frame.GetController<RefreshController>().RefreshAction.WhenExecute()
                         .Select(e=>frame).TakeUntil(frame.View.WhenClosing())
@@ -107,7 +106,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
                 Guid.Parse($"{_.frame.Application.Security.UserId}"), _.frame.View.ObjectTypeInfo.Type, newCloudEventType);
         }
         static IObservable<(Frame frame, GraphServiceClient client, global::Microsoft.Graph.Calendar calendar, IModelCalendarItem calerdarItem)> Authorize(this  IObservable<Frame> source) 
-            => source.AuthorizeMS()
+            => source
+	            .AuthorizeMS()
                 .EnsureCalendar()
                 .Publish().RefCount()
                 .WhenNotDefault(t => t.frame.Application)

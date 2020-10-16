@@ -27,7 +27,7 @@ namespace ALL.Tests{
 
         private static IObservable<Unit> ExecuteCalendarCloudOperation(this XafApplication application) 
             => application.ExecuteCalendarCloudOperation(typeof(Event),
-                application.AuthorizeGoogle,
+                () => application.AuthorizeGoogle(),
                 authorize => authorize.SelectMany(credential => {
                     var calendarService = credential.NewService<CalendarService>();
                     return calendarService.GetCalendar(returnDefault:true)

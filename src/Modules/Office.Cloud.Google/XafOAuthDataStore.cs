@@ -50,7 +50,6 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
             => Observable.Using(_objectSpaceFactory, objectSpace => {
                     key = FileDataStore.GenerateStoredKey(key, typeof(T));
                     var cloudAuthentication = objectSpace.GetObjectByKey<GoogleAuthentication>(_userId);
-                    // cloudAuthentication = null;
                     return (cloudAuthentication != null && cloudAuthentication.OAuthToken.ContainsKey(key)
                         ? cloudAuthentication.OAuthToken[key] : null).ReturnObservable();
                 })

@@ -22,6 +22,7 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ViewExtenions;
 using Xpand.XAF.Modules.Reactive;
+using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks{
@@ -97,10 +98,10 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks{
             => source.Trace(name, GoogleTasksModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
         
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
-            => manager.WhenApplication(application => application.WhenViewOnFrame()
-                .When(frame => application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Google()
-                    .Tasks().Items.Select(item => item.ObjectView))
-                .Authorize()
+            => manager.WhenApplication(application => Observable.Defer(() => application.WhenViewOnFrame()
+		            .When(frame => application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Google()
+			            .Tasks().Items.Select(item => item.ObjectView)).Authorize())
+	            .Retry(application)
                 .SynchronizeCloud()
                 .ToUnit()
                 .Merge(manager.ConfigureModel()));

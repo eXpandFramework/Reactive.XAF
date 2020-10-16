@@ -10,6 +10,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
         public abstract Task Populate_Modified();
         [Order(1)]
         public abstract Task Create_Entity_Container_When_Not_Exist();
+        public abstract Task Skip_Authorization_If_Authentication_Storage_Is_Empty();
         
         
         

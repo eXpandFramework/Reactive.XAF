@@ -56,14 +56,13 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
             => source.Trace(name, GoogleCalendarModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
 
-        internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) =>
-            manager.WhenApplication(application => {
+        internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
+	        => manager.WhenApplication(application => {
                 var viewOnFrame = application.WhenViewOnFrame()
-                    .When(frame => application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office
-                        .Google().Calendar().Items.Select(item => item.ObjectView))
-                    .Publish().RefCount();
-                return viewOnFrame
-                    .Authorize()
+	                .When(frame => application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office
+		                .Google().Calendar().Items.Select(item => item.ObjectView))
+	                .Publish().RefCount();
+                return viewOnFrame.Authorize()
                     .SynchronizeBoth()
                     .Merge(viewOnFrame.SelectMany(frame=>frame.GetController<RefreshController>().RefreshAction.WhenExecute()
                         .Select(e=>frame).TakeUntil(frame.View.WhenClosing())
@@ -107,7 +106,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
                     Guid.Parse($"{_.frame.Application.Security.UserId}"), _.frame.View.ObjectTypeInfo.Type, newCloudEventType,_.calendar);
         }
 
-        static IObservable<(Frame frame, UserCredential credential, CalendarListEntry calendarListEntry, IModelCalendarItem modelCalendarItem)> Authorize(this  IObservable<Frame> source) 
+        static IObservable<(Frame frame, UserCredential credential, CalendarListEntry calendarListEntry, IModelCalendarItem modelCalendarItem)> Authorize(this IObservable<Frame> source) 
             => source.AuthorizeGoogle()
                 .EnsureCalendar()
                 .Publish().RefCount()

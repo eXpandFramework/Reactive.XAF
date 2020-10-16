@@ -16,11 +16,14 @@ using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.TaskExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.Office.Cloud.Tests;
 using Xpand.XAF.Modules.Reactive;
+using Xpand.XAF.Modules.Reactive.Logger;
+using Xpand.XAF.Modules.Reactive.Services;
 using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
 
 
@@ -280,6 +283,21 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
             objectsQuery.FirstOrDefault(e => e.Subject == "New").ShouldNotBeNull();
             await objectSpace.QueryCloudOfficeObject(tuple.Instance.cloud.Id, CloudObjectType.Event).FirstAsync()
                 .WithTimeOut();
+        }
+
+        [Test]
+        [XpandTest()]
+        public override Task Skip_Authorization_If_Authentication_Storage_Is_Empty(){
+	        using var application = Platform.Win.CalendarModule().Application;
+	        var observer = application.WhenObjectViewCreated().Test();
+	        var exceptions = application.WhenTrace(rxAction: RXAction.OnError).Test();
+	        Should.ThrowAsync<TimeoutException>(async () =>
+		        await application.InitializeService(newAuthentication: false).Timeout(TimeSpan.FromSeconds(5)));
+
+            observer.ItemCount.ShouldBe(1);
+            exceptions.ItemCount.ShouldBe(0);
+
+            return Task.CompletedTask;
         }
 
     }

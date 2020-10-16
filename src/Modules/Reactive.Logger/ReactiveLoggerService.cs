@@ -79,7 +79,11 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         public static IObservable<ITraceEvent> WhenTraceOnNext(this XafApplication application, params string[] methods) => application
 	        .WhenTraceOnNext(null, methods);
 
-        public static IObservable<ITraceEvent> WhenTraceOnNext(this XafApplication application, Type location = null,params string[] methods) => application.WhenTrace(location, RXAction.OnNext, methods);
+        public static IObservable<ITraceEvent> WhenTraceOnNext(this XafApplication application, Type location = null,params string[] methods) 
+	        => application.WhenTrace(location, RXAction.OnNext, methods);
+        
+        public static IObservable<ITraceEvent> WhenTraceError(this XafApplication application, Type location = null,params string[] methods) 
+	        => application.WhenTrace(location, RXAction.OnError, methods);
 
         public static IObservable<ITraceEvent> WhenTrace(this XafApplication application, Type location = null,RXAction rxAction = RXAction.All, params string[] methods) =>
 	        application.Modules.ToTraceSource().SelectMany(_ => _.traceSource.Listeners.OfType<ReactiveTraceListener>()).Distinct().ToObservable()

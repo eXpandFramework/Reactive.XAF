@@ -31,6 +31,7 @@ using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
@@ -147,11 +148,10 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 		}
 
 		private static void UpdateUserName(this XafApplication application, object userId, string userName){
-			using (var objectSpace = application.CreateObjectSpace(typeof(MSAuthentication))){
-				var authentication = objectSpace.GetObjectByKey<MSAuthentication>(userId);
-				authentication.UserName = userName;
-				objectSpace.CommitChanges();
-			}
+			using var objectSpace = application.CreateObjectSpace(typeof(MSAuthentication));
+			var authentication = objectSpace.GetObjectByKey<MSAuthentication>(userId);
+			authentication.UserName = userName;
+			objectSpace.CommitChanges();
 		}
 
 		private static IObservable<AuthenticationResult> AquireTokenByAuthorizationCode(this XafApplication application, string code, object currentUserId){
@@ -172,8 +172,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 
         public static IObservable<(Frame frame, GraphServiceClient client)> AuthorizeMS(this  IObservable<Frame> source,
 	        Func<MsalUiRequiredException,IClientApplicationBase,  IObservable<AuthenticationResult>> aquireToken = null) 
-            => source.SelectMany(frame => frame.View.AsObjectView().Application().AuthorizeMS(aquireToken)
-                    .Select(client => (frame, client)));
+            => source.SelectMany(frame => frame.Application.MicrosoftNeedsAuthentication().WhenDefault()
+	            .SelectMany(b=>frame.View.AsObjectView().Application().AuthorizeMS(aquireToken)
+		            .Select(client => (frame, client))));
 
 		public static IObservable<GraphServiceClient> AuthorizeMS(this XafApplication application, 
 			Func<MsalUiRequiredException,IClientApplicationBase,  IObservable<AuthenticationResult>> aquireToken = null) 

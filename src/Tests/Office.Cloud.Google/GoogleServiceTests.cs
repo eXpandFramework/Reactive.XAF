@@ -13,7 +13,7 @@ using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
 namespace Xpand.XAF.Modules.Office.Cloud.Google.Tests{
     [UsedImplicitly]
     public class GoogleServiceTests:CloudServiceTests<GoogleAuthentication>{
-        
+
 
         protected override IObservable<bool> NeedsAuthentication(XafApplication application) => application.GoogleNeedsAuthentication();
 

@@ -37,9 +37,10 @@ using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Google{
     public static class GoogleService{
-        public static IObservable<(Frame frame, UserCredential userCredential)> AuthorizeGoogle(this  IObservable<Frame> source) 
-            => source.SelectMany(frame => frame.View.AsObjectView().Application().AuthorizeGoogle()
-                .Select(userCredential => (frame, userCredential)));
+        public static IObservable<(Frame frame, UserCredential userCredential)> AuthorizeGoogle(this IObservable<Frame> source) 
+            => source.SelectMany(frame => frame.Application.GoogleNeedsAuthentication().WhenDefault()
+	            .SelectMany(_ => frame.View.AsObjectView().Application().AuthorizeGoogle()
+		            .Select(userCredential => (frame, userCredential))));
 
         public static IObservable<bool> GoogleNeedsAuthentication(this XafApplication application) 
             => application.NeedsAuthentication<GoogleAuthentication>(() => Observable.Using(application.GoogleAuthorizationCodeFlow,
@@ -60,7 +61,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => manager.Connect("Google", typeof(GoogleAuthentication), application
                 => application.GoogleNeedsAuthentication(), application
-                => application.AuthorizeGoogle().ToUnit())
+                => application.AuthorizeGoogle((exception, flow) => flow.AuthorizeApp(application)).ToUnit())
                 .Merge(manager.ExchangeCodeForToken());
 
         internal static IObservable<TSource> TraceGoogleModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
@@ -123,9 +124,10 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
         public static T NewService<T>(this UserCredential credential) where T : BaseClientService 
             => (T) typeof(T).CreateInstance(new BaseClientService.Initializer(){HttpClientInitializer = credential});
 
-        public static IObservable<UserCredential> AuthorizeGoogle(this XafApplication application) 
-            => application.GoogleAuthorizationCodeFlow().AuthorizeGoogle(application)
+        public static IObservable<UserCredential> AuthorizeGoogle(this XafApplication application,Func<UserFriendlyException,IAuthorizationCodeFlow,  IObservable<UserCredential>> aquireToken = null) 
+            => application.GoogleAuthorizationCodeFlow().AuthorizeGoogle(application,aquireToken)
                 .TraceGoogleModule(credential => credential.UserId);
+
         public static IObservable<TResponse> ToObservable<TResponse>(this ClientServiceRequest request) => ((IClientServiceRequest<TResponse>)request).ToObservable();
 
         public static IObservable<TResponse> ToObservable<TResponse>(this IClientServiceRequest<TResponse> request) => request.ExecuteAsync().ToObservable();
@@ -147,18 +149,21 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
             => CustomAquireTokenInteractivelySubject.AsObservable();
         static readonly Subject<GenericEventArgs<IObservable<UserCredential>>> CustomAquireTokenInteractivelySubject=new Subject<GenericEventArgs<IObservable<UserCredential>>>();
 
-        static IObservable<UserCredential> AuthorizeGoogle(this GoogleAuthorizationCodeFlow flow, XafApplication application){
-            var args = new GenericEventArgs<IObservable<UserCredential>>(Observable.Defer(() => ((XafOAuthDataStore) flow.DataStore).Platform == Platform.Win
-                ? flow.AuthorizeInstalledApp(application)
-                : flow.AuthorizeWebApp(application)));
-            CustomAquireTokenInteractivelySubject.OnNext(args);
-            return args.Instance;
-        }
+        static IObservable<UserCredential> AuthorizeGoogle(this GoogleAuthorizationCodeFlow flow, XafApplication application,
+	        Func<UserFriendlyException, IAuthorizationCodeFlow, IObservable<UserCredential>> aquireToken) 
+	        => flow.RequestAuthorizationCode(application,aquireToken);
+
+        private static IObservable<UserCredential> AuthorizeApp(this IAuthorizationCodeFlow flow, XafApplication application) 
+	        => Observable.Defer(() => ((XafOAuthDataStore) flow.DataStore).Platform == Platform.Win
+			        ? flow.AuthorizeInstalledApp(application) : flow.AuthorizeWebApp(application));
 
         private static IObservable<UserCredential> AuthorizeInstalledApp(this IAuthorizationCodeFlow flow, XafApplication application) 
             => Observable.FromAsync(() => new AuthorizationCodeInstalledApp(flow, new LocalServerCodeReceiver()).AuthorizeAsync(application.CurrentUserId().ToString(), CancellationToken.None));
 
         private static IObservable<UserCredential> AuthorizeWebApp(this  IAuthorizationCodeFlow flow,XafApplication application){
+	        if (HttpContext.Current == null){
+                return Observable.Empty<UserCredential>();
+	        }
 	        var redirectUri = HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Path);
 	        return new AuthorizationCodeWebApp(flow, redirectUri, redirectUri)
                 .AuthorizeAsync(application.CurrentUserId().ToString(), CancellationToken.None)
@@ -169,5 +174,17 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
                 .WhenNotDefault();
         }
 
-	}
+        static IObservable<UserCredential> RequestAuthorizationCode(this IAuthorizationCodeFlow flow, XafApplication application,
+	        Func<UserFriendlyException, IAuthorizationCodeFlow, IObservable<UserCredential>> aquireToken) 
+	        => Observable.FromAsync(() => flow.LoadTokenAsync(application.CurrentUserId().ToString(), CancellationToken.None))
+		        .Select(token => flow.ShouldForceTokenRetrieval() || token == null || token.RefreshToken == null && token.IsExpired(flow.Clock))
+		        .SelectMany(b => b ? Observable.Throw<UserCredential>(new UserFriendlyException("Google authentication failed. Use the profile view to authenticate again"))
+			        : default(UserCredential).ReturnObservable())
+		        .Catch<UserCredential,UserFriendlyException>(exception => {
+			        var args = new GenericEventArgs<IObservable<UserCredential>>(aquireToken(exception, flow));
+			        CustomAquireTokenInteractivelySubject.OnNext(args);
+			        return args.Instance;
+		        })
+		        .SelectMany(_ => flow.AuthorizeApp(application));
+    }
 }

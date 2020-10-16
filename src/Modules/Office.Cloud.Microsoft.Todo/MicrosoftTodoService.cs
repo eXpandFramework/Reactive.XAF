@@ -19,6 +19,7 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ViewExtenions;
 using Xpand.XAF.Modules.Reactive;
+using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using TaskStatus = DevExpress.Persistent.Base.General.TaskStatus;
 
@@ -112,9 +113,10 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
             => source.Trace(name, MicrosoftTodoModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
         
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
-            => manager.WhenApplication(application => application.WhenViewOnFrame()
-                .When(frame => application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Todo().Items.Select(item => item.ObjectView))
-                .Authorize()
+            => manager.WhenApplication(application => Observable.Defer(() => application.WhenViewOnFrame()
+		            .When(frame => application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Todo().Items.Select(item => item.ObjectView))
+		            .Authorize())
+	            .Retry(application)
                 .SynchronizeCloud()
                 .ToUnit());
 
