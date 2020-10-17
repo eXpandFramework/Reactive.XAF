@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.Extensions.XAF.Xpo</id>
-    <version>2.202.52.0</version>
+    <version>2.202.54.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -14,20 +14,15 @@
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Xpand.Extensions.XAF.Xpo</tags>
     <dependencies>
-      <dependency id="JetBrains.Annotations" version="2020.1">
-      </dependency>
-      <dependency id="System.ValueTuple" version="4.5">
-      </dependency>
-      <dependency id="Xpand.VersionConverter" version="2.202.10">
-      </dependency>
+      <dependency id="JetBrains.Annotations" version="2020.1" />
+      <dependency id="System.ValueTuple" version="4.5" />
+      <dependency id="Xpand.VersionConverter" version="2.202.10" />
     </dependencies>
   </metadata>
   <files>
     <file src="Xpand.Extensions.XAF.Xpo.dll" target="lib\net461\Xpand.Extensions.XAF.Xpo.dll" />
     <file src="Xpand.Extensions.XAF.Xpo.pdb" target="lib\net461\Xpand.Extensions.XAF.Xpo.pdb" />
-    <file src="..\build\CopySymbols.targets" target="build\Xpand.Extensions.XAF.Xpo.targets">
-    </file>
-    <file src="..\build\CopySymbols.ps1" target="build\CopySymbols.ps1">
-    </file>
+    <file src="..\build\CopySymbols.targets" target="build\Xpand.Extensions.XAF.Xpo.targets" />
+    <file src="..\build\CopySymbols.ps1" target="build\CopySymbols.ps1" />
   </files>
 </package>

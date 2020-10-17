@@ -1,5 +1,5 @@
 param(
-    $Branch = "lab",
+    $Branch = "master",
     $nugetBin = "$PSScriptRoot\..\bin\Nupkg",
     $sourceDir = "$PSScriptRoot\..",
     $Filter ,
@@ -63,10 +63,10 @@ function AddReadMe {
         $modules
     )
     if ($Package.Id -like "Xpand.XAF*") {
-        $moduleName = (Get-XAFModule $Directory $assemblyList).Name
+        $moduleName = $modules|Where-Object{$_.Package -eq $Package.id}
         $wikiName = "Modules"
         if ($moduleName) {
-            $wikiName = "$moduleName".Replace("Module", "")
+            $wikiName = Get-XpandPackageHome $Package.Id
         }
         $registration = "RequiredModuleTypes.Add(typeof($moduleName));"
         if ($package.Id -like "*all*") {
@@ -103,6 +103,7 @@ Write-HostFormatted "Discover XAF XAFModules" -Section
 $packages = & (Get-NugetPath) list -source $nugetBin | ConvertTo-PackageObject | Where-Object { $_.id -notin $toolPackages }
 $modules = Get-MSBuildProjects "$sourceDir\src\Modules\" | ForEach-Object {
     $proj=Get-XmlContent $_.fullname
+    $PackageId=$_.BaseName
     if ($proj.project.propertygroup.OutputType -ne "WinExe"){
         $dir = $_.DirectoryName
         try {
@@ -112,6 +113,7 @@ $modules = Get-MSBuildProjects "$sourceDir\src\Modules\" | ForEach-Object {
             [PSCustomObject]@{
                 platform = $platform
                 fullname = $module
+                package =$PackageId
             }
         }
         catch {
@@ -123,8 +125,9 @@ $modules = Get-MSBuildProjects "$sourceDir\src\Modules\" | ForEach-Object {
 
 if ($Branch -ne "lab") {
     Write-HostFormatted "Update Nupkg files (ReadMe)" -Section
-    $packages | ForEach-Object {
+    $packages| ForEach-Object {
         $baseName = "$($_.Id).$($_.Version)"
+        $baseName
         $zip = "$nugetbin\$baseName.zip" 
         $nupkgPath = "$nugetBin\$baseName.nupkg"
         Move-Item $nupkgPath $zip
@@ -132,16 +135,6 @@ if ($Branch -ne "lab") {
         Expand-Archive $zip $unzipDir
         Remove-Item $zip
         AddReadme $_ $unzipDir $assemblyList $modules
-        # if ("Xpand.XAF.Core.ALL" -notin $ChangedModules -and ($_.Id -notlike "*core*") -and ($_.id -like "*.all*")){
-        #     [xml]$n=Get-XmlContent "$unzipDir\$($_.id).nuspec"
-        #     $s="lab"
-        #     if ($Branch -ne $s){
-        #         $s="Release"
-        #     }
-        #     $coreVersion=(Find-XpandPackage "Xpand.XAF.Core.All" $s).version
-        #     ($n.package.metadata.dependencies.dependency|Where-Object{$_.id -eq "Xpand.XAF.Core.All"}).version=$coreVersion
-        #     $n|Save-Xml "$unzipDir\$($_.id).nuspec"|Out-Null
-        # }
         Compress-Files "$unzipDir" $zip 
         Move-Item $zip $nupkgPath
         Remove-Item $unzipDir -Force -Recurse

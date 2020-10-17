@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.Extensions.Office.Cloud</id>
-    <version>2.202.56.0</version>
+    <version>2.202.58.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -14,32 +14,21 @@
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Xpand.Extensions.Office.Cloud</tags>
     <dependencies>
-      <dependency id="Fasterflect.Xpand" version="2.0.7">
-      </dependency>
-      <dependency id="JetBrains.Annotations" version="2020.1">
-      </dependency>
-      <dependency id="Newtonsoft.Json" version="12.0.3">
-      </dependency>
-      <dependency id="System.Reactive" version="4.4.1">
-      </dependency>
-      <dependency id="System.ValueTuple" version="4.5">
-      </dependency>
-      <dependency id="Xpand.Extensions" version="2.202.55.0">
-      </dependency>
-      <dependency id="Xpand.Extensions.Reactive" version="2.202.56.0">
-      </dependency>
-      <dependency id="Xpand.Extensions.XAF" version="2.202.56.0">
-      </dependency>
-      <dependency id="Xpand.XAF.Modules.Reactive" version="2.202.56.0">
-      </dependency>
+      <dependency id="Fasterflect.Xpand" version="2.0.7" />
+      <dependency id="JetBrains.Annotations" version="2020.1" />
+      <dependency id="Newtonsoft.Json" version="12.0.3" />
+      <dependency id="System.Reactive" version="4.4.1" />
+      <dependency id="System.ValueTuple" version="4.5" />
+      <dependency id="Xpand.Extensions" version="2.202.57.0" />
+      <dependency id="Xpand.Extensions.Reactive" version="2.202.58.0" />
+      <dependency id="Xpand.Extensions.XAF" version="2.202.58.0" />
+      <dependency id="Xpand.XAF.Modules.Reactive" version="2.202.58.0" />
     </dependencies>
   </metadata>
   <files>
     <file src="Xpand.Extensions.Office.Cloud.dll" target="lib\net461\Xpand.Extensions.Office.Cloud.dll" />
     <file src="Xpand.Extensions.Office.Cloud.pdb" target="lib\net461\Xpand.Extensions.Office.Cloud.pdb" />
-    <file src="..\build\CopySymbols.targets" target="build\Xpand.Extensions.Office.Cloud.targets">
-    </file>
-    <file src="..\build\CopySymbols.ps1" target="build\CopySymbols.ps1">
-    </file>
+    <file src="..\build\CopySymbols.targets" target="build\Xpand.Extensions.Office.Cloud.targets" />
+    <file src="..\build\CopySymbols.ps1" target="build\CopySymbols.ps1" />
   </files>
 </package>

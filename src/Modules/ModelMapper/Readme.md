@@ -220,10 +220,10 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |System.Reactive|4.4.1
  |System.ValueTuple|4.5.0
  |Xpand.Collections|1.0.1
- |Xpand.Extensions|2.202.56
- |Xpand.Extensions.Reactive|2.202.57
- |Xpand.Extensions.XAF|2.202.57
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.57
+ |Xpand.Extensions|2.202.57
+ |Xpand.Extensions.Reactive|2.202.58
+ |Xpand.Extensions.XAF|2.202.58
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.58
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.10
 
 ## Issues-Debugging-Troubleshooting

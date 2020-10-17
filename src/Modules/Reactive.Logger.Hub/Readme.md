@@ -72,9 +72,9 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |System.Interactive.Async|4.1.1
  |System.Reactive|4.4.1
  |System.ValueTuple|4.5.0
- |Xpand.Extensions.Reactive|2.202.57
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.57
- |[Xpand.XAF.Modules.Reactive.Logger](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Logger)|2.202.57
+ |Xpand.Extensions.Reactive|2.202.58
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.58
+ |[Xpand.XAF.Modules.Reactive.Logger](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Logger)|2.202.58
  |YamlDotNet|8.1.1
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.10
 

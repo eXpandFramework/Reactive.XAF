@@ -73,7 +73,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Xpand.XAF.Web.All">
-      <Version>2.202.42.2</Version>
+      <Version>2.202.43</Version>
     </PackageReference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="mscorlib">
@@ -143,7 +143,7 @@
     <PackageReference Include="Google.Apis.People.v1">
       <Version>1.25.0.830</Version>
     </PackageReference>
-    <PackageReference Include="Xpand.XAF.Web.All" Version="2.202.42.2">
+    <PackageReference Include="Xpand.XAF.Web.All" Version="2.202.43">
     </PackageReference>
     <PackageReference Include="Google.Apis.People.v1" Version="1.25.0.830" />
   </ItemGroup>

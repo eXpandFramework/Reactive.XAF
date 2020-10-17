@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Reactive</id>
-    <version>2.202.56.0</version>
+    <version>2.202.58.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -14,34 +14,22 @@
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Reactive</tags>
     <dependencies>
-      <dependency id="Fasterflect.Xpand" version="2.0.7">
-      </dependency>
-      <dependency id="JetBrains.Annotations" version="2020.1">
-      </dependency>
-      <dependency id="System.Interactive" version="4.1.1">
-      </dependency>
-      <dependency id="System.Reactive" version="4.4.1">
-      </dependency>
-      <dependency id="System.ValueTuple" version="4.5">
-      </dependency>
-      <dependency id="Xpand.Extensions" version="2.202.55.0">
-      </dependency>
-      <dependency id="Xpand.Extensions.Reactive" version="2.202.56.0">
-      </dependency>
-      <dependency id="Xpand.Extensions.XAF" version="2.202.56.0">
-      </dependency>
-      <dependency id="Xpand.Patcher" version="2.0.24">
-      </dependency>
-      <dependency id="Xpand.VersionConverter" version="2.202.10">
-      </dependency>
+      <dependency id="Fasterflect.Xpand" version="2.0.7" />
+      <dependency id="JetBrains.Annotations" version="2020.1" />
+      <dependency id="System.Interactive" version="4.1.1" />
+      <dependency id="System.Reactive" version="4.4.1" />
+      <dependency id="System.ValueTuple" version="4.5" />
+      <dependency id="Xpand.Extensions" version="2.202.57.0" />
+      <dependency id="Xpand.Extensions.Reactive" version="2.202.58.0" />
+      <dependency id="Xpand.Extensions.XAF" version="2.202.58.0" />
+      <dependency id="Xpand.Patcher" version="2.0.24" />
+      <dependency id="Xpand.VersionConverter" version="2.202.10" />
     </dependencies>
   </metadata>
   <files>
     <file src="Xpand.XAF.Modules.Reactive.dll" target="lib\net461\Xpand.XAF.Modules.Reactive.dll" />
     <file src="Xpand.XAF.Modules.Reactive.pdb" target="lib\net461\Xpand.XAF.Modules.Reactive.pdb" />
-    <file src="..\build\CopySymbols.targets" target="build\Xpand.XAF.Modules.Reactive.targets">
-    </file>
-    <file src="..\build\CopySymbols.ps1" target="build\CopySymbols.ps1">
-    </file>
+    <file src="..\build\CopySymbols.targets" target="build\Xpand.XAF.Modules.Reactive.targets" />
+    <file src="..\build\CopySymbols.ps1" target="build\CopySymbols.ps1" />
   </files>
 </package>
