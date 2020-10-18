@@ -209,7 +209,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
                     }
                     return (localEvent, cloudEvent: tuple.cloud);
                 })
-                .TraceGoogleCalendarModule(tuple => $"source: {tuple.cloudEvent.Id}, target:{tuple.localEvent.Subject}");
+                .TraceGoogleCalendarModule(tuple => $"cloud: {tuple.cloudEvent.Id}, local:{tuple.localEvent?.Subject}");
 
         public static IObservable<(Event e, MapAction mapAction)> PairMapAction(this IObservable<Event> source, Func<IObjectSpace> objectSpaceFactory) 
             => source.Select(e => {
