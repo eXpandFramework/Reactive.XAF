@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{4C3ED41A-EB50-4A59-9A38-0BDBC1967C06}</ProjectGuid>
-    <TargetFramework>net461</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
@@ -13,7 +13,7 @@
     <AssemblyTitle>Xpand.XAF.Modules.OneView</AssemblyTitle>
     <Product>Xpand.XAF.Modules.OneView</Product>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
+    <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
     <DebugType>full</DebugType>
   </PropertyGroup>
   <ItemGroup>
@@ -26,9 +26,6 @@
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
-    </Reference>
-    <Reference Include="Xpand.XAF.Modules.Reactive.Win">
-      <HintPath>..\..\..\bin\net461\Xpand.XAF.Modules.Reactive.Win.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

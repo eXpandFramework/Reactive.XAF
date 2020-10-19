@@ -26,7 +26,7 @@
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.OneView">
-      <HintPath>..\..\..\bin\net461\Xpand.XAF.Modules.OneView.dll</HintPath>
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.OneView.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
@@ -36,9 +36,6 @@
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive.Logger.Hub">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.Hub.dll</HintPath>
-    </Reference>
-    <Reference Include="Xpand.XAF.Modules.Reactive.Win">
-      <HintPath>..\..\..\bin\net461\Xpand.XAF.Modules.Reactive.Win.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.Extensions.XAF.Xpo">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.Xpo.dll</HintPath>

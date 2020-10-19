@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
@@ -18,7 +19,7 @@ using Xpand.XAF.Modules.OneView.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Logger;
 using Xpand.XAF.Modules.Reactive.Services;
-using Xpand.XAF.Modules.Reactive.Win.Services;
+
 using A = Xpand.XAF.Modules.OneView.Tests.BOModel.A;
 
 
@@ -31,8 +32,8 @@ namespace Xpand.XAF.Modules.OneView.Tests{
         public  void Hide_MainWindow_Template_OnStart(){
 	        using var application = OneViewModule().Application;
 	        var visibility = application.WhenViewOnFrame(typeof(OV))
-		        .SelectMany(frame => frame.Template.ToForm().WhenShown())
-		        .Select(form => application.MainWindow.Template.ToForm().Visible)
+		        .SelectMany(frame => frame.Template.WhenWindowsForm().When("Shown"))
+		        .Select(form => ((Form) application.MainWindow.Template).Visible)
 		        .FirstAsync()
 		        .Do(form => {
 
@@ -66,7 +67,7 @@ namespace Xpand.XAF.Modules.OneView.Tests{
         public async Task Exit_Application_On_View_Close(){
 	        using var application = OneViewModule().Application;
 	        var closeView = application.WhenViewOnFrame(typeof(OV))
-		        .SelectMany(frame => frame.Template.ToForm().WhenShown().To(frame).Select(frame1 => frame1))
+		        .SelectMany(frame => frame.Template.WhenWindowsForm().When("Shown").To(frame).Select(frame1 => frame1))
 		        .Do(frame => frame.View.Close())
 		        .FirstAsync()
 		        .SubscribeReplay();
@@ -85,12 +86,12 @@ namespace Xpand.XAF.Modules.OneView.Tests{
         public async Task Edit_Model(){
 	        using var application = OneViewModule().Application;
 	        var whenViewOneFrame=application.WhenViewOnFrame(typeof(OV))
-		        .SelectMany(frame => frame.Template.ToForm().WhenShown().To(frame))
+		        .SelectMany(frame => frame.Template.WhenWindowsForm().When("Shown").To(frame))
 		        .Do(frame => frame.GetController<DialogController>().AcceptAction.DoExecute())
 		        .FirstAsync()
 		        .SubscribeReplay();
 	        var testWinApplication = ((TestWinApplication) application);
-	        var editModel = testWinApplication.ModelEditorForm.SelectMany(form => form.WhenShown())
+	        var editModel = testWinApplication.ModelEditorForm.SelectMany(form => Observable.FromEventPattern(form,nameof(Form.Shown)).To(form))
 		        .SelectMany(form => {
 			        form.Close();
 			        return form.WhenDisposed();
@@ -100,7 +101,7 @@ namespace Xpand.XAF.Modules.OneView.Tests{
 		        .SubscribeReplay();
 	        var showViewAfterModelEdit = application.WhenViewOnFrame(typeof(OV)).Select(frame => frame).When(TemplateContext.PopupWindow)
 		        .SkipUntil(editModel)
-		        .SelectMany(frame => frame.Template.ToForm().WhenShown().To(frame))
+		        .SelectMany(frame => frame.Template.WhenWindowsForm().When("Shown").To(frame))
 		        .Do(frame => frame.View.Close())
 		        .FirstAsync().SubscribeReplay();
 	        testWinApplication.WhenWin().WhenCustomHandleException().Subscribe(args => { args.handledEventArgs.Handled = true; });

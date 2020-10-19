@@ -44,8 +44,5 @@
     </Compile>
     <Compile Update="Module.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Services\Controllers\" />
-  </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

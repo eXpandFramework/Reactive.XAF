@@ -387,6 +387,15 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<IXAFAppWinAPI> WhenWin(this XafApplication application) 
             => application.GetPlatform() == Platform.Win ? new XAFAppWinAPI(application).ReturnObservable() : Observable.Empty<IXAFAppWinAPI>();
 
+        public static IObservable<Window> WhenMainFormShown(this IXAFAppWinAPI api) 
+	        => api.Application.WhenWindowCreated().When(TemplateContext.ApplicationWindow)
+		        .SelectMany(window => window.Template.WhenWindowsForm().When("Shown").To(window));
+
+        public static IObservable<Window> WhenMainFormVisible(this IXAFAppWinAPI api) 
+	        => api.Application.WhenWindowCreated().When(TemplateContext.ApplicationWindow)
+		        .SelectMany(window => window.WhenTemplateChanged().Select(window1 => window1.Template).StartWith(window.Template).WhenNotDefault()
+			        .SelectMany(template => template.WhenWindowsForm().When("VisibleChanged")).To(window));
+
         public static IObservable<CreateCustomPropertyCollectionSourceEventArgs> WhenCreateCustomPropertyCollectionSource(this XafApplication application) 
             => Observable.FromEventPattern<EventHandler<CreateCustomPropertyCollectionSourceEventArgs>,
                 CreateCustomPropertyCollectionSourceEventArgs>(h => application.CreateCustomPropertyCollectionSource += h,

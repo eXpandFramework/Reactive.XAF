@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Chart.Win;
@@ -52,7 +51,6 @@ namespace TestApplication.Win{
 #if !NETCOREAPP3_1
             
             RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.OneView.OneViewModule));
-            RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.Reactive.Win.ReactiveModuleWin));
 #endif
         }
 

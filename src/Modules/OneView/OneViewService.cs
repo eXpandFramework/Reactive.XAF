@@ -4,17 +4,17 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.SystemModule;
-using DevExpress.ExpressApp.Win.SystemModule;
 using Fasterflect;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
-using Xpand.XAF.Modules.Reactive.Win.Services;
 
 namespace Xpand.XAF.Modules.OneView{
     public static class OneViewService{
@@ -50,14 +50,14 @@ namespace Xpand.XAF.Modules.OneView{
         private static IObservable<Unit> EditModel(this IObservable<ShowViewParameters> showView,XafApplication application) 
 	        => showView.SelectMany(_ => _.Controllers.OfType<OneViewDialogController>())
 		        .SelectMany(_ => _.AcceptAction.WhenExecuteCompleted()
-			        .Select(tuple => application.MainWindow.GetController<EditModelController>().EditModelAction))
+			        .Select(tuple => application.MainWindow.GetController("DevExpress.ExpressApp.Win.SystemModule.EditModelController").GetPropertyValue("EditModelAction"))).Cast<SimpleAction>()
 		        .Do(action => action.DoExecute()).ToUnit()
 		        .TraceOneView();
 
         private static IObservable<Unit> HideMainWindow(this XafApplication application) 
-	        => application.WhenMainFormVisible()
+	        => application.WhenWin().SelectMany(api => api.WhenMainFormVisible())
 		        .Do(window => {
-			        window.Template.ToForm().Visible = false;
+			        window.Template.SetPropertyValue("Visible",false);
 		        })
 		        .TraceOneView(window => window.Context)
 		        .ToUnit()
