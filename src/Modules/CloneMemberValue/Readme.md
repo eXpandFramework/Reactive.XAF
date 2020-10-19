@@ -63,17 +63,19 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
-`.NetFramework: net461`
+`.NetFramework: netstandard2.0`
 
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp**|**Any**
 |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |JetBrains.Annotations|2020.1.0
- |System.Reactive|4.4.1
+ |Microsoft.CodeAnalysis.CSharp|3.7.0
+ |System.Configuration.ConfigurationManager|4.7.0
+ |System.Reactive|5.0.0-preview.16
  |System.ValueTuple|4.5.0
- |Xpand.Extensions.Reactive|2.202.58
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.58
+ |Xpand.Extensions.Reactive|2.202.59.2
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.59.2
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.10
 
 ## Issues-Debugging-Troubleshooting

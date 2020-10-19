@@ -165,6 +165,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
             => Observable.FromAsync(() => new AuthorizationCodeInstalledApp(flow, new LocalServerCodeReceiver()).AuthorizeAsync(application.CurrentUserId().ToString(), CancellationToken.None));
 
         private static IObservable<UserCredential> AuthorizeWebApp(this  IAuthorizationCodeFlow flow,XafApplication application){
+	        if (AppDomain.CurrentDomain.Web().HttpContext() == null){
+                return Observable.Empty<UserCredential>();
+	        }
 	        var redirectUri = AppDomain.CurrentDomain.Web().HttpContext().GetPropertyValue("Request").GetPropertyValue("Url").CallMethod("GetLeftPart",UriPartial.Path).ToString() ;
             return new AuthorizationCodeWebApp(flow, redirectUri, redirectUri)
                 .AuthorizeAsync(application.CurrentUserId().ToString(), CancellationToken.None)

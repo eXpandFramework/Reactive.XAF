@@ -58,7 +58,7 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
-`.NetFramework: net461`
+`.NetFramework: netstandard2.0`
 
 |<!-- -->|<!-- -->
 |----|----
@@ -69,12 +69,15 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |Grpc.Core|2.25.0
  |Jetbrains.Annotations|2020.1.0
  |MagicOnion|2.6.3
+ |Microsoft.CodeAnalysis.CSharp|3.7.0
+ |System.Configuration.ConfigurationManager|4.7.0
  |System.Interactive.Async|4.1.1
- |System.Reactive|4.4.1
+ |System.Reactive|5.0.0-preview.16
+ |System.ServiceModel.Http|4.7.0
  |System.ValueTuple|4.5.0
- |Xpand.Extensions.Reactive|2.202.58
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.58
- |[Xpand.XAF.Modules.Reactive.Logger](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Logger)|2.202.58
+ |Xpand.Extensions.Reactive|2.202.59.2
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.59.2
+ |[Xpand.XAF.Modules.Reactive.Logger](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Logger)|2.202.59.2
  |YamlDotNet|8.1.1
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.10
 

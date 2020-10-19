@@ -77,7 +77,7 @@ function UpdateModulesList($rootLocation, $packages,$path) {
             }
         }
         
-        $moduleList += "$packageUri|$version$downloads<br>$platform/$targetFramework|$about`r`n"
+        $moduleList += "$packageUri|![](https://xpandshields.azurewebsites.net/badge/$platform-$targetFramework-yellowgreen)<br>$version$downloads|$about`r`n"
     }
     
     

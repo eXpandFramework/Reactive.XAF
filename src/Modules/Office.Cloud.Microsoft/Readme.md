@@ -147,11 +147,12 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |**DevExpress.Persistent.Base**|**Any**
 |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |JetBrains.Annotations|2020.1.0
+ |Microsoft.CodeAnalysis.CSharp|3.7.0
  |Microsoft.Graph.Beta|0.18.0-preview
  |Microsoft.Graph.Core|1.19.0
  |Microsoft.Identity.Client|4.13.0
  |Microsoft.IdentityModel.Protocols.OpenIdConnect|6.6.0
- |Microsoft.IdentityModel.Tokens|6.6.0
+ |Microsoft.IdentityModel.Tokens|6.7.1
  |Microsoft.Owin|4.1.0
  |Microsoft.Owin.Host.SystemWeb|4.1.0
  |Microsoft.Owin.Security|4.1.0
@@ -159,13 +160,13 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |Microsoft.Owin.Security.OpenIdConnect|4.1.0
  |Newtonsoft.Json|12.0.3
  |Owin|1.0.0
- |System.Reactive|4.4.1
+ |System.Reactive|5.0.0-preview.16
  |System.ValueTuple|4.5.0
- |Xpand.Extensions|2.202.57
- |Xpand.Extensions.Office.Cloud|2.202.58
- |Xpand.Extensions.Reactive|2.202.58
- |Xpand.Extensions.XAF|2.202.58
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.58
+ |Xpand.Extensions|2.202.58.1
+ |Xpand.Extensions.Office.Cloud|2.202.59.2
+ |Xpand.Extensions.Reactive|2.202.59.2
+ |Xpand.Extensions.XAF|2.202.59.2
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.59.2
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.10
 
 ## Issues-Debugging-Troubleshooting
