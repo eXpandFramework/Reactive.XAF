@@ -2,11 +2,13 @@
 using System.Collections;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.AssemblyExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -20,6 +22,8 @@ using Xpand.XAF.Modules.RefreshView.Tests.BOModel;
 namespace Xpand.XAF.Modules.RefreshView.Tests{
     [NonParallelizable]
     public class RefreshViewTests : BaseTest{
+        static RefreshViewTests() => Assembly.GetCallingAssembly().SetAsEntryAssembly();
+
         [Test]
         [XpandTest]
         [Apartment(ApartmentState.STA)]
@@ -57,5 +61,6 @@ namespace Xpand.XAF.Modules.RefreshView.Tests{
             var application = platform.NewApplication<RefreshViewModule>();
             return application.AddModule<RefreshViewModule>(title,typeof(RV));
         }
+        
     }
 }

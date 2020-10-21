@@ -110,7 +110,7 @@ Invoke-Script {
         }
     }
     Clear-NugetCache XpandPackages
-    Push-Location "$testAppPAth\.."
+    Push-Location "$testAppPAth\..\Tests"
     $testsource=$tempNupkg,(Get-PackageFeed -Nuget),(Get-PackageFeed -Xpand)
     $testsource+=$source
     Use-NugetConfig -Sources $testsource -ScriptBlock{

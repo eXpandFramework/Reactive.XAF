@@ -1,5 +1,8 @@
-DevExpress.ExpressApp.Win
+DevExpress.ExpressApp
 System.Reactive
 Fasterflect.Xpand
 JetBrains.Annotations
 System.ValueTuple
+System.Configuration.ConfigurationManager
+System.Collections.Immutable
+Microsoft.CodeAnalysis.CSharp

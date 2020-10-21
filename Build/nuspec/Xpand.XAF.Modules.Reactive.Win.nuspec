@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>Xpand.XAF.Modules.Reactive.Win</id>
+    <version>2.202.59.4</version>
+    <authors>eXpandFramework</authors>
+    <owners>eXpandFramework</owners>
+    <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/Reactive.Win</projectUrl>
+    <iconUrl>http://sign.expandframework.com</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>The `Reactive.Win` module is the platform specific version of the `Reactive module`.</description>
+    <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
+    <copyright>eXpandFramework.com</copyright>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Reactive.Win</tags>
+    <dependencies>
+      <dependency id="Fasterflect.Xpand" version="2.0.7" />
+      <dependency id="JetBrains.Annotations" version="2020.1" />
+      <dependency id="System.Interactive" version="4.1.1" />
+      <dependency id="System.Reactive" version="5.0.0-preview.16" />
+      <dependency id="System.ValueTuple" version="4.5" />
+      <dependency id="Xpand.Extensions.Reactive" version="2.202.59.2" />
+      <dependency id="Xpand.Extensions.XAF" version="2.202.59.2" />
+      <dependency id="Xpand.Patcher" version="2.0.26" />
+      <dependency id="Xpand.XAF.Modules.Reactive" version="2.202.59.3" />
+      <dependency id="Xpand.VersionConverter" version="2.202.10" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="net461\Xpand.XAF.Modules.Reactive.Win.dll" target="lib\net461\Xpand.XAF.Modules.Reactive.Win.dll" />
+    <file src="net461\Xpand.XAF.Modules.Reactive.Win.pdb" target="lib\net461\Xpand.XAF.Modules.Reactive.Win.pdb" />
+    <file src="..\build\CopySymbols.targets" target="build\Xpand.XAF.Modules.Reactive.Win.targets" />
+    <file src="..\build\CopySymbols.ps1" target="build\CopySymbols.ps1" />
+  </files>
+</package>
