@@ -172,9 +172,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 
         public static IObservable<(Frame frame, GraphServiceClient client)> AuthorizeMS(this  IObservable<Frame> source,
 	        Func<MsalUiRequiredException,IClientApplicationBase,  IObservable<AuthenticationResult>> aquireToken = null) 
-            => source.SelectMany(frame => frame.Application.MicrosoftNeedsAuthentication().WhenDefault()
-	            .SelectMany(b=>frame.View.AsObjectView().Application().AuthorizeMS(aquireToken)
-		            .Select(client => (frame, client))));
+            => source.SelectMany(frame => Observable.Defer(() => frame.Application.MicrosoftNeedsAuthentication().WhenDefault()
+                .SelectMany(b=>frame.View.AsObjectView().Application().AuthorizeMS(aquireToken)
+                    .Select(client => (frame, client)))).ObserveOn(SynchronizationContext.Current));
 
 		public static IObservable<GraphServiceClient> AuthorizeMS(this XafApplication application, 
 			Func<MsalUiRequiredException,IClientApplicationBase,  IObservable<AuthenticationResult>> aquireToken = null) 

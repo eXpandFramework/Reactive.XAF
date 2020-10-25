@@ -39,9 +39,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
     public static class GoogleService{
         [PublicAPI]
         public static IObservable<(Frame frame, UserCredential userCredential)> AuthorizeGoogle(this IObservable<Frame> source) 
-            => source.SelectMany(frame => frame.Application.GoogleNeedsAuthentication().WhenDefault()
-	            .SelectMany(_ => frame.View.AsObjectView().Application().AuthorizeGoogle()
-		            .Select(userCredential => (frame, userCredential))));
+            => source.SelectMany(frame => Observable.Defer(() => frame.Application.GoogleNeedsAuthentication().WhenDefault()
+                .SelectMany(_ => frame.View.AsObjectView().Application().AuthorizeGoogle()
+                    .Select(userCredential => (frame, userCredential)))).ObserveOn(SynchronizationContext.Current));
 
         public static IObservable<bool> GoogleNeedsAuthentication(this XafApplication application) 
             => application.NeedsAuthentication<GoogleAuthentication>(() => Observable.Using(application.GoogleAuthorizationCodeFlow,
