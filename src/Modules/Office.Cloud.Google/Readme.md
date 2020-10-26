@@ -110,6 +110,19 @@ In order to execute the asynchronous operations:
 
 In the screencast below we see authentication against `Google/People/Me` service. To demo auth token database persistence we logOff and the clean the browser cookies. At the bottom the [Reactive.Logger.Client.Win](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win) is reporting as the module is used. This demo is Easytested [with this script](https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Tests/ALL/CommonFiles/GoogleService.cs) for the last three XAF major versions, compliments of the `Xpand.VersionConverter`
 
+
+**Blazor**
+
+<twitter>
+
+[![Xpand XAF Modules Office Cloud Google](https://user-images.githubusercontent.com/159464/97125250-012af080-173c-11eb-8504-a8378bceb7df.gif)](https://youtu.be/DOBL70tzsVM)
+
+</twitter>
+
+[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/DOBL70tzsVM)
+
+**WindowsForms/WindowsDesktop/WebForms**
+
 <twitter>
 
 [![Xpand XAF Modules Office Cloud Google](https://user-images.githubusercontent.com/159464/89726928-e8f2e180-da28-11ea-96fc-135719a18f46.gif)](https://www.youtube.com/watch?v=-pZjbGUChp0)
