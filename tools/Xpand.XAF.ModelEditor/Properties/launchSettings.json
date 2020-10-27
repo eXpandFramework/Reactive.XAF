@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Xpand.XAF.ModelEditor": {
+      "commandName": "Project",
+      "commandLineArgs": "d True \"C:\\Work\\eXpandFramework\\DevExpress.XAF\\bin\\TestWinDesktopApplication\\TestApplication.WinDesktop.dll\" \"C:\\Work\\eXpandFramework\\DevExpress.XAF\\src\\Tests\\EasyTests\\TestApplication\\TestApplication.WinDesktop\\Model.xafml\" \"C:\\Work\\eXpandFramework\\DevExpress.XAF\\src\\Tests\\EasyTests\\TestApplication\\TestApplication.WinDesktop\\\""
+    }
+  }
+}

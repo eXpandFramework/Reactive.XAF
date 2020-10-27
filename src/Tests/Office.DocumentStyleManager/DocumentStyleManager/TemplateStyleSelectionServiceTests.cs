@@ -47,7 +47,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
 
 		}
 
-		[Test][XpandTest()]
+		[Test][XpandTest()][Apartment(ApartmentState.STA)]
 		public void Action_SelectionContext_should_be_the_ReplacemenntStyles_ListView(){
 			using var application=DocumentStyleManagerModule().Application;
 			var tuple = application.SetDocumentStyleManagerDetailView(Document);
@@ -58,7 +58,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
 		}
 		
 		[Test]
-        [XpandTest()]
+        [XpandTest()][Apartment(ApartmentState.STA)]
 		public void Action_Enable_is_bound_to_ReplaceStyles_Enable(){
 			using var application=DocumentStyleManagerModule().Application;
 			application.MockListEditor((view, xafApplication, arg3) => new GridListEditor(view));
@@ -73,7 +73,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
 		}
 
 		[TestCase(DocumentStyleType.Character)]
-		[TestCase(DocumentStyleType.Paragraph)][XpandTest()]
+		[TestCase(DocumentStyleType.Paragraph)][XpandTest()][Apartment(ApartmentState.STA)]
 		public void New_TemplateStyle_Stores_Parent_Styles_Seperately(DocumentStyleType type){
 			using var application=DocumentStyleManagerModule().Application;
 			var parentStyle = new DocumentStyle(){DocumentStyleType = type, StyleName = "parent", FontName = "test"};
@@ -89,7 +89,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
 			templateStyle.FontName.ShouldBeNull();
 		}
 		
-		[TestCase(DocumentStyleType.Paragraph)][XpandTest()]
+		[TestCase(DocumentStyleType.Paragraph)][XpandTest()][Apartment(ApartmentState.STA)]
 		public void Existing_TemplateStyle_Reflects_Parent_Style_Properties(DocumentStyleType type){
 			using var application=DocumentStyleManagerModule().Application;
 			using var objectSpace = application.CreateObjectSpace();

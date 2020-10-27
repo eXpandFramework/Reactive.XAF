@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -52,22 +53,28 @@ namespace Xpand.TestsLib.Attributes{
                     try{
                         // ManualResetEvent resetEvent = new ManualResetEvent(false);
                         TestResult ExecuteTest() => context.CurrentResult = innerCommand.Execute(context);
-                        Polly.Policy.Timeout(TimeSpan.FromMilliseconds(_timeout), TimeoutStrategy.Pessimistic)
-                            .Execute(() => {
-                                Task.Factory.StartTask(ExecuteTest, thread => thread.SetApartmentState(GetApartmentState(context))).Wait();
-                                // return;
-                                // if (context.CurrentTest.Arguments.Any(o => o == (object) Platform.Web)){
-                                //     ThreadPool.QueueUserWorkItem(state => {
-                                //         var tuple = ((TestExecutionContext executionContext, TestCommand command)) state;
-                                //         tuple.executionContext.CurrentResult = tuple.command.Execute(tuple.executionContext);
-                                //         resetEvent.Set();
-                                //     }, (context, innerCommand));
-                                //     resetEvent.WaitOne();    
-                                // }
-                                // else{
-                                //     Task.Factory.StartTask(Execute, thread => thread.SetApartmentState(GetApartmentState(context))).Wait();   
-                                // }
-                            });
+                        if (Debugger.IsAttached) {
+                            ExecuteTest();
+                        }
+                        else {
+                            Polly.Policy.Timeout(TimeSpan.FromMilliseconds(_timeout), TimeoutStrategy.Pessimistic)
+                                .Execute(() => {
+                                    Task.Factory.StartTask(ExecuteTest,
+                                        thread => thread.SetApartmentState(GetApartmentState(context))).Wait();
+                                    // return;
+                                    // if (context.CurrentTest.Arguments.Any(o => o == (object) Platform.Web)){
+                                    //     ThreadPool.QueueUserWorkItem(state => {
+                                    //         var tuple = ((TestExecutionContext executionContext, TestCommand command)) state;
+                                    //         tuple.executionContext.CurrentResult = tuple.command.Execute(tuple.executionContext);
+                                    //         resetEvent.Set();
+                                    //     }, (context, innerCommand));
+                                    //     resetEvent.WaitOne();    
+                                    // }
+                                    // else{
+                                    //     Task.Factory.StartTask(Execute, thread => thread.SetApartmentState(GetApartmentState(context))).Wait();   
+                                    // }
+                                });
+                        };
                     }
                     catch (Exception ex){
                         context.CurrentResult ??= context.CurrentTest.MakeTestResult();

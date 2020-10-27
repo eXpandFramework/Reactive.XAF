@@ -1,19 +1,22 @@
 strategy:max
-source C:\Program Files (x86)\DevExpress 20.1\Components\System\Components\Packages
+source F:\devexpress\Packages\
 source https://api.nuget.org/v3/index.json
 source https://xpandnugetserver.azurewebsites.net/nuget
 storage:none
 framework:net461,net472,netstandard2.0,netcoreapp3.1
 
 nuget akarnokd.reactive_extensions 0.0.27-alpha
-nuget DevExpress.ExpressApp.Office == 20.1.8
-nuget DevExpress.ExpressApp.Core.All == 20.1.8
-nuget DevExpress.ExpressApp.Win.All == 20.1.8
-nuget DevExpress.ExpressApp.Web.All == 20.1.8
-nuget DevExpress.EasyTest == 20.1.8  
-nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 20.1.8  
-nuget DevExpress.ExpressApp.EasyTest.WinAdapter == 20.1.8  
-nuget DevExpress.ExpressApp.Security.Xpo == 20.1.8  
+nuget DevExpress.WindowsDesktop.Core == 20.2.3
+nuget DevExpress.WindowsDesktop.Xaf == 20.2.3-ctp
+nuget DevExpress.ExpressApp.Office == 20.2.3
+nuget DevExpress.ExpressApp.Blazor.All == 20.2.3
+nuget DevExpress.ExpressApp.Core.All == 20.2.3
+nuget DevExpress.ExpressApp.Win.All == 20.2.3
+nuget DevExpress.ExpressApp.Web.All == 20.2.3
+nuget DevExpress.EasyTest == 20.2.3  
+nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 20.2.3  
+nuget DevExpress.ExpressApp.EasyTest.WinAdapter == 20.2.3  
+nuget DevExpress.ExpressApp.Security.Xpo == 20.2.3  
 nuget Microsoft.Extensions.Dependencyinjection == 3.1.2  
 nuget Microsoft.Graph.Beta == 0.18.0-preview
 nuget Microsoft.Graph.Core == 1.19.0
@@ -28,7 +31,7 @@ nuget MessagePack 1.7.3.7
 nuget Humanizer.Core 2.7.9
 nuget Microsoft.CSharp 4.7.0
 nuget Microsoft.Identity.Client 4.13.0
-nuget Microsoft.IdentityModel.Tokens == 6.7.1
+nuget Microsoft.IdentityModel.Tokens == 6.8.0
 nuget Microsoft.Owin 4.1.0
 nuget Microsoft.Owin.Host.SystemWeb 4.1.0
 nuget Microsoft.Owin.Security 4.1.0
@@ -37,7 +40,7 @@ nuget Microsoft.Owin.Security.OpenIdConnect 4.1.0
 nuget Owin 1.0.0
 nuget Newtonsoft.Json == 12.0.3
 nuget NUnit 3.12
-nuget NUnit3TestAdapter 3.16.1
+nuget NUnit3TestAdapter 3.17.0
 nuget Ryder 0.8
 nuget Shouldly 3.0.2 
 nuget System.CodeDom 4.7
@@ -59,3 +62,5 @@ nuget Xpand.Collections 1.0.4
 nuget System.Configuration.ConfigurationManager
 nuget Microsoft.CodeAnalysis.CSharp == 3.7.0
 nuget System.ServiceModel.Http == 4.7.0
+nuget Microsoft.AspNetCore.Hosting
+

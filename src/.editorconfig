@@ -1,0 +1,10 @@
+
+[*]
+
+# Microsoft .NET properties
+csharp_indent_braces=false
+csharp_new_line_before_open_brace=none
+
+# ReSharper properties
+resharper_allow_comment_after_lbrace=true
+resharper_csharp_empty_block_style=together

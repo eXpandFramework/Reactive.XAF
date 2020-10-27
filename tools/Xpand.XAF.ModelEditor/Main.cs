@@ -32,7 +32,8 @@ namespace Xpand.XAF.ModelEditor {
 
         [STAThread]
         public static void Main(string[] args) {
-            var manifestResourceStream = typeof(MainClass).Assembly.GetManifestResourceStream(typeof(MainClass),"ExpressApp.ico");
+            var iconName = typeof(MainClass).Assembly.GetManifestResourceNames().First(s => s.EndsWith("ExpressApp.ico"));
+            var manifestResourceStream = typeof(MainClass).Assembly.GetManifestResourceStream(iconName);
             var icon = new Icon(manifestResourceStream ?? throw new InvalidOperationException() );
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
             Application.ThreadException += OnException;

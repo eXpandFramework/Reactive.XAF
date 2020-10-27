@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+  <PropertyGroup>
+    <ApplicationIcon>ExpressApp.ico</ApplicationIcon>
+    <OutputType>WinExe</OutputType>
+    <AssemblyOriginatorKeyFile>..\..\src\Xpand.key\Xpand.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <OutputPath>C:\Work\eXpandFramework\Issues\SolutionBlazor\SolutionBlazor.Blazor.Server\bin\Debug\netcoreapp3.1\</OutputPath>
+    <LangVersion>latest</LangVersion>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <LangVersion>latest</LangVersion>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="build\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Remove="build\**" />
+    <None Remove="ExpressApp.ico" />
+    <None Remove="Xpand.XAF.ModelEditor.csproj.paket.references" />
+    <None Remove="Xpand.XAF.ModelEditor.csproj.references" />
+    <None Remove="Xpand.XAF.ModelEditor.paket.references" />
+    <EmbeddedResource Include="ExpressApp.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="build\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="3.1.6" />
+  </ItemGroup>
+  <Import Project="..\..\.paket\Paket.Restore.targets" />
+</Project>

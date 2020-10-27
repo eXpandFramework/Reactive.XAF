@@ -19,13 +19,12 @@ using Xpand.XAF.Modules.Reactive.Services.Actions;
 namespace Xpand.Extensions.Office.Cloud{
     public static class Extensions{
         public static void SaveToken(this ICloudOfficeToken store, Func<IObjectSpace> objectSpaceFactory){
-            using (var space = objectSpaceFactory()){
-                var storage = (ICloudOfficeToken)(space.GetObject(store) ?? space.CreateObject(store.GetType()));
-                storage.Token = store.Token;
-                storage.TokenType = store.TokenType;
-                storage.EntityName = store.EntityName;
-                space.CommitChanges();
-            }
+            using var space = objectSpaceFactory();
+            var storage = (ICloudOfficeToken)(space.GetObject(store) ?? space.CreateObject(store.GetType()));
+            storage.Token = store.Token;
+            storage.TokenType = store.TokenType;
+            storage.EntityName = store.EntityName;
+            space.CommitChanges();
         }
 
         internal static IObservable<TCloudEntity> MapEntity<TCloudEntity, TLocalEntity>(this Func<IObjectSpace> objectSpaceFactory, TLocalEntity localEntity,
@@ -148,9 +147,9 @@ namespace Xpand.Extensions.Office.Cloud{
                 .ToUnit();
         }
 
-        public static IObservable<bool> NeedsAuthentication<TAuthentication>(this XafApplication application,Func<IObservable<bool>> authrorize) where TAuthentication:CloudOfficeBaseObject 
+        public static IObservable<bool> NeedsAuthentication<TAuthentication>(this XafApplication application,Func<IObservable<bool>> authorize) where TAuthentication:CloudOfficeBaseObject 
             => application.NewObjectSpace(space => (space.GetObjectByKey<TAuthentication>( application.CurrentUserId()) == null).ReturnObservable())
-                .SelectMany(b => !b ? authrorize() : true.ReturnObservable());
+                .SelectMany(b => !b ? authorize() : true.ReturnObservable());
 
         private static IObservable<Unit> ConfigureStyle(this IObservable<SimpleAction> source) 
             => source.WhenCustomizeControl()
@@ -183,16 +182,15 @@ namespace Xpand.Extensions.Office.Cloud{
                 });
 
         private static void UpdateDisconnectActionToolTip(this SimpleAction action, string serviceName, Type serviceStorageType){
-            using (var objectSpace = action.Application.CreateObjectSpace(serviceStorageType)){
-                var disconnectMicrosoft = action.Controller.Frame.Actions().First(a => a.Id==$"Disconnect{serviceName}");
-                var currentUserId = action.Application.CurrentUserId();
-                var objectByKey = objectSpace.GetObjectByKey(serviceStorageType,currentUserId);
-                var userName = objectByKey?.GetPropertyValue("UserName");
-                if (!disconnectMicrosoft.Data.ContainsKey("ToolTip")){
-                    disconnectMicrosoft.Data["ToolTip"] = disconnectMicrosoft.ToolTip;
-                }
-                disconnectMicrosoft.ToolTip = $"{disconnectMicrosoft.Data["ToolTip"]} {userName}";
+            using var objectSpace = action.Application.CreateObjectSpace(serviceStorageType);
+            var disconnectMicrosoft = action.Controller.Frame.Actions().First(a => a.Id==$"Disconnect{serviceName}");
+            var currentUserId = action.Application.CurrentUserId();
+            var objectByKey = objectSpace.GetObjectByKey(serviceStorageType,currentUserId);
+            var userName = objectByKey?.GetPropertyValue("UserName");
+            if (!disconnectMicrosoft.Data.ContainsKey("ToolTip")){
+                disconnectMicrosoft.Data["ToolTip"] = disconnectMicrosoft.ToolTip;
             }
+            disconnectMicrosoft.ToolTip = $"{disconnectMicrosoft.Data["ToolTip"]} {userName}";
         }
 
         private static IObservable<Unit> ExecuteActions(this IObservable<SimpleAction> registerActions,

@@ -24,10 +24,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <!--    <RestorePackagesWithLockFile>False</RestorePackagesWithLockFile>-->
-    <!--    <RestoreLockedMode>False</RestoreLockedMode>-->
     <NoWarn>NU1603;NETSDK1086</NoWarn>
-    <!--    <DisableImplicitNuGetFallbackFolder>False</DisableImplicitNuGetFallbackFolder>-->
     <AssemblyName>TestApplication.WinDesktop</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -38,7 +35,7 @@
     <DebugSymbols>true</DebugSymbols>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <OutputPath>..\..\..\..\..\bin\TestWinDesktopApplication</OutputPath>
-    <DefineConstants>TRACE;XAF201</DefineConstants>
+    <DefineConstants>TRACE;XAF202</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>full</DebugType>
@@ -48,7 +45,7 @@
     <DebugSymbols>true</DebugSymbols>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <OutputPath>..\..\..\..\..\bin\TestWinDesktopApplication</OutputPath>
-    <DefineConstants>TRACE;XAF201</DefineConstants>
+    <DefineConstants>TRACE;XAF202</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="_Program.cs" />
@@ -121,14 +118,14 @@
     <Content Include="ExpressApp.ico" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.WindowsDesktop.Core" Version="20.1.8" />
-    <PackageReference Include="DevExpress.WindowsDesktop.Xaf" Version="20.1.8-ctp" />
+    <PackageReference Include="DevExpress.WindowsDesktop.Core" Version="20.2.3" />
+    <PackageReference Include="DevExpress.WindowsDesktop.Xaf" Version="20.2.3-ctp" />
     <PackageReference Include="Google.Apis.People.v1" Version="1.25.0.830" />
     <PackageReference Include="System.ServiceModel.Http" Version="4.7.0" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.7.0" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.7.0" />
     <PackageReference Include="System.ServiceProcess.ServiceController" Version="4.7.0" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="2.202.43.1" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="2.202.43.2" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Office\Cloud\Google\" />

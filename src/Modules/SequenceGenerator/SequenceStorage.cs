@@ -23,7 +23,9 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
     }
 
     [NonPersistent]
+    [XafDefaultProperty(nameof(Name))]
     public class ObjectType{
+        [Key]
         public string Name{ get; set; }
         [Browsable(false)]
         public Type Type{ get; set; }
@@ -32,7 +34,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
     [NonPersistent][XafDefaultProperty(nameof(Caption))]
     public class ObjectMember{
         public  string Caption{ get; set; }
-        [Browsable(false)]
+        [Browsable(false)][Key]
         public string Name{ get; set; }
     }
     [AttributeUsage(AttributeTargets.Class)]

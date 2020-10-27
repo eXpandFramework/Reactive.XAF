@@ -21,7 +21,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManager{
     public class ContentServiceTests:BaseTests{
-        [Test][XpandTest()]
+        [Test][XpandTest()][Apartment(ApartmentState.STA)]
         public void On_Document_Selection_Changed_Select_Used_Style(){
             using var xafApplication=DocumentStyleManagerModule().Application;
             // application.MockEditorsFactory();
@@ -52,7 +52,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
         }
     
         [TestCase(2)]
-        [TestCase(1)][XpandTest()]
+        [TestCase(1)][XpandTest()][Apartment(ApartmentState.STA)]
         public void Replacement_ListView_Displays_Styles_of_same_type_as_the_Selected_Styles(int selectedStyles){
             using var xafApplication=DocumentStyleManagerModule().Application;
             // application.MockEditorsFactory();

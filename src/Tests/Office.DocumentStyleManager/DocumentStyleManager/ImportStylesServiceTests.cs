@@ -28,7 +28,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
 	        item.ModelClass = application.Model.BOModel.GetClass(typeof(DataObject));
         }
 
-        [Test][XpandTest()]
+        [Test][XpandTest()][Apartment(ApartmentState.STA)]
         public void Action_should_be_inactive_when_ImportStylesListView_is_not_set(){
             using var application=DocumentStyleManagerModule().Application;
 	        ModelSetup(application);
@@ -59,7 +59,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
             testObserver.Items.First().Id.ShouldBe(application.FindListViewId(typeof(DocumentStyle)));
         }
 
-        [Test][Order(2)][XpandTest()]
+        [Test][Order(2)][XpandTest()][Apartment(ApartmentState.STA)]
         public void DocumentStyle_ListView_Contains_all_styles_from_model_ImportStylesClass_datasource(){
 	        using var application=DocumentStyleManagerModule().Application;
 	        ModelSetup(application);
@@ -122,7 +122,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
 
         }
 
-        [Test][XpandTest()]
+        [Test][XpandTest()][Apartment(ApartmentState.STA)]
         public void FilterImportStyles_Should_Be_inactive_by_Default(){
 	        using var application=DocumentStyleManagerModule().Application;
 	        ModelSetup(application);
@@ -136,7 +136,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
             boolList[nameof(ImportStylesService)].ShouldBeFalse();
         }
 
-        [Test][XpandTest()]
+        [Test][XpandTest()][Apartment(ApartmentState.STA)]
         public void FilterImportStyles_Items_Should_Contain_Model_ImportStyleItems(){
             using var application=DocumentStyleManagerModule().Application;
 	        ModelSetup(application);
@@ -151,7 +151,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
             filterImportStyles.Items.Any(item => item.Data==application.Model.DocumentStyleManager().ImportStyles.Last()).ShouldBeTrue();
         }
 
-        [Test][XpandTest()]
+        [Test][XpandTest()][Apartment(ApartmentState.STA)]
         public void FilterImportStyles_remembers_last_selection(){
             using var application=DocumentStyleManagerModule().Application;
 	        ModelSetup(application);
@@ -184,7 +184,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
 	        filterImportStyles.Active[nameof(ImportStylesService)].ShouldBe(true);
         }
 
-        [Test][XpandTest()]
+        [Test][XpandTest()][Apartment(ApartmentState.STA)]
         public void When_FilterImportStyles_Selection_Changed_Update_ImportedStyles_ListView(){
             using var application=DocumentStyleManagerModule().Application;
 	        ModelSetup(application);
@@ -202,7 +202,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
             testObserver.ItemCount.ShouldBe(1);
         }
 
-        [Test][XpandTest()]
+        [Test][XpandTest()][Apartment(ApartmentState.STA)]
         public void ImportStyles_initial_loading_Respects_FilterImportStyles_CurrentValue(){
 	        using var application=DocumentStyleManagerModule().Application;
 	        ModelSetup(application);

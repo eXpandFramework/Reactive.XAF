@@ -10,6 +10,7 @@ namespace Xpand.TestsLib.BO{
 
         public override void UpdateDatabaseAfterUpdateSchema(){
             base.UpdateDatabaseAfterUpdateSchema();
+
             if (!ObjectSpace.GetObjectsQuery<Order>().Any()){
                 for (int i = 0; i < 2; i++){
                     var product = ObjectSpace.CreateObject<Product>();

@@ -18,7 +18,7 @@ $nuspec.Save($versionConverterPath)
 
 $allProjects=Get-ChildItem $root *.csproj -Recurse | Select-Object -ExpandProperty BaseName
 Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notlike "*Test*" } | Invoke-Parallel -VariablesToImport @("allProjects","root","Release") -Script {
-# Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notlike "*Test*" } | foreach {
+# Get-ChildItem "$root\src\" -Include "*Grid*.csproj" -Recurse | Where-Object { $_ -notlike "*Test*" } | foreach {
     Set-Location $root
     $projectPath = $_.FullName
     "projectPath=$projectPath"

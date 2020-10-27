@@ -53,6 +53,7 @@ namespace Xpand.TestsLib{
 
         public override void UpdateDatabaseAfterUpdateSchema(){
             base.UpdateDatabaseAfterUpdateSchema();
+
             var sampleUser = ObjectSpace.FindObject<PermissionPolicyUser>(new BinaryOperator("UserName", "User"));
             if (sampleUser == null){
                 sampleUser = ObjectSpace.CreateObject<PermissionPolicyUser>();

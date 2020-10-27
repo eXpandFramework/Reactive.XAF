@@ -111,13 +111,13 @@ The module follows the Nuget [Version Basics](https://docs.Google.com/en-us/nuge
  |System.Configuration.ConfigurationManager|4.7.0
  |System.Reactive|5.0.0-preview.16
  |System.ValueTuple|4.5.0
- |Xpand.Extensions|2.202.58.1
- |Xpand.Extensions.Office.Cloud|2.202.59.2
- |Xpand.Extensions.Reactive|2.202.59.2
- |Xpand.Extensions.XAF|2.202.59.2
- |Xpand.Extensions.XAF.Xpo|2.202.55.1
- |[Xpand.XAF.Modules.Office.Cloud.Google](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Office.Cloud.Google)|2.202.20.2
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.59.2
+ |Xpand.Extensions|2.202.58
+ |Xpand.Extensions.Office.Cloud|2.202.59
+ |Xpand.Extensions.Reactive|2.202.59
+ |Xpand.Extensions.XAF|2.202.59
+ |Xpand.Extensions.XAF.Xpo|2.202.55
+ |[Xpand.XAF.Modules.Office.Cloud.Google](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Office.Cloud.Google)|2.202.20
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.59
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.10
 
 ## Issues-Debugging-Troubleshooting

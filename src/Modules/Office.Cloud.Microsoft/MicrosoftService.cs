@@ -129,7 +129,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 			var userId = TypeDescriptor.GetConverter(typeof(Guid)).ConvertFromString(propertiesDictionary["userid"]);
 			var result = await application.AquireTokenByAuthorizationCode(notification.Code, userId);
 			if (application.Security.IsSecurityStrategyComplex()){
-				await XafApplicationRXExtensions.Logon(application, userId).FirstAsync();
+				await XafApplicationRxExtensions.Logon(application, userId).FirstAsync();
 			}
 
 			application.UpdateUserName(userId, result.Account.Username);

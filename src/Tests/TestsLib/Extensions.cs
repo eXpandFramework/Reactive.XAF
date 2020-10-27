@@ -128,6 +128,7 @@ namespace Xpand.TestsLib{
         public static void SetupDefaults(this XafApplication application, params ModuleBase[] modules){
             application.RegisterDefaults(modules);
             application.Setup();
+            
             if (!string.IsNullOrEmpty(application.ConnectionString)&&!application.ConnectionString.Contains(InMemoryDataStoreProvider.ConnectionString)){
                 application.ObjectSpaceProvider.DeleteAllData();
             }

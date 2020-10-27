@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Office.Cloud.Google.Tasks</id>
-    <version>2.202.16.0</version>
+    <version>2.202.17.3</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -18,22 +18,24 @@
       <dependency id="Google.Apis.Auth" version="1.49" />
       <dependency id="Google.Apis.Tasks.v1" version="1.49.0.2049" />
       <dependency id="JetBrains.Annotations" version="2020.1" />
+      <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.7" />
       <dependency id="Newtonsoft.Json" version="12.0.3" />
-      <dependency id="System.Reactive" version="4.4.1" />
+      <dependency id="System.Configuration.ConfigurationManager" version="4.7" />
+      <dependency id="System.Reactive" version="5.0.0-preview.16" />
       <dependency id="System.ValueTuple" version="4.5" />
-      <dependency id="Xpand.Extensions" version="2.202.57.0" />
-      <dependency id="Xpand.Extensions.Office.Cloud" version="2.202.58.0" />
-      <dependency id="Xpand.Extensions.Reactive" version="2.202.58.0" />
-      <dependency id="Xpand.Extensions.XAF" version="2.202.58.0" />
-      <dependency id="Xpand.Extensions.XAF.Xpo" version="2.202.54.0" />
-      <dependency id="Xpand.XAF.Modules.Office.Cloud.Google" version="2.202.19.0" />
-      <dependency id="Xpand.XAF.Modules.Reactive" version="2.202.58.0" />
+      <dependency id="Xpand.Extensions" version="2.202.58.2" />
+      <dependency id="Xpand.Extensions.Office.Cloud" version="2.202.59.3" />
+      <dependency id="Xpand.Extensions.Reactive" version="2.202.59.3" />
+      <dependency id="Xpand.Extensions.XAF" version="2.202.59.3" />
+      <dependency id="Xpand.Extensions.XAF.Xpo" version="2.202.55.1" />
+      <dependency id="Xpand.XAF.Modules.Office.Cloud.Google" version="2.202.20.3" />
+      <dependency id="Xpand.XAF.Modules.Reactive" version="2.202.59.5" />
       <dependency id="Xpand.VersionConverter" version="2.202.10" />
     </dependencies>
   </metadata>
   <files>
-    <file src="Xpand.XAF.Modules.Office.Cloud.Google.Tasks.dll" target="lib\net461\Xpand.XAF.Modules.Office.Cloud.Google.Tasks.dll" />
-    <file src="Xpand.XAF.Modules.Office.Cloud.Google.Tasks.pdb" target="lib\net461\Xpand.XAF.Modules.Office.Cloud.Google.Tasks.pdb" />
+    <file src="Xpand.XAF.Modules.Office.Cloud.Google.Tasks.dll" target="lib\netstandard2.0\Xpand.XAF.Modules.Office.Cloud.Google.Tasks.dll" />
+    <file src="Xpand.XAF.Modules.Office.Cloud.Google.Tasks.pdb" target="lib\netstandard2.0\Xpand.XAF.Modules.Office.Cloud.Google.Tasks.pdb" />
     <file src="..\build\CopySymbols.targets" target="build\Xpand.XAF.Modules.Office.Cloud.Google.Tasks.targets" />
     <file src="..\build\CopySymbols.ps1" target="build\CopySymbols.ps1" />
   </files>

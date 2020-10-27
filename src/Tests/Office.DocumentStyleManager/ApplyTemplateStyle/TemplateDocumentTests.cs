@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Threading;
 using DevExpress.ExpressApp;
 using NUnit.Framework;
 using Shouldly;
@@ -12,7 +13,7 @@ using Xpand.XAF.Modules.Office.DocumentStyleManager.Services.StyleTemplateServic
 
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.ApplyTemplateStyle{
 	public class TemplateDocumentTests : BaseTests{
-		[Test][XpandTest()]
+		[Test][XpandTest()][Apartment(ApartmentState.STA)]
 		public void When_Selected_TemplateDocument_Changed_Display_Original_Content(){
 			using var application=DocumentStyleManagerModule().Application;
 			MockDocumentsListEditor(application);
@@ -34,7 +35,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.ApplyTemplateStyle
 
 		[TestCase(DocumentStyleLinkOperation.Ensure)]
 		[TestCase(DocumentStyleLinkOperation.Replace)]
-        [XpandTest()]
+        [XpandTest()][Apartment(ApartmentState.STA)]
 		public void ApplyTemplate_When_Selected_TemplateDocument_Changed_and_template_set(DocumentStyleLinkOperation operation){
 			using var application=DocumentStyleManagerModule().Application;
 			ApplyTemplate(frame => {
@@ -45,7 +46,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.ApplyTemplateStyle
 		}
 
 
-		[Test][XpandTest()]
+		[Test][XpandTest()][Apartment(ApartmentState.STA)]
 		public void Remove_Unused_When_ApplyTemplate(){
 			using var application=DocumentStyleManagerModule().Application;
 			MockDocumentsListEditor(application);

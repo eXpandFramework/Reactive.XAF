@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Threading;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.XAF.FrameExtensions;
@@ -9,8 +11,8 @@ using Xpand.XAF.Modules.Office.DocumentStyleManager.Services.StyleTemplateServic
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.ApplyTemplateStyle{
 	public class ApplyTemplateTests:BaseTests{
 
-		[Test][XpandTest()]
-		public void ApplyTemplateAction_Is_enebled_when_template_has_value(){
+		[Test][XpandTest()][Apartment(ApartmentState.STA)]
+		public void ApplyTemplateAction_Is_enabled_when_template_has_value(){
 			using var application=DocumentStyleManagerModule().Application;
 			var tuple = application.SetApplyTemplateStyleDetailView();
 			var applyTemplate = tuple.window.Action<DocumentStyleManagerModule>().ApplyTemplate();
@@ -23,8 +25,9 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.ApplyTemplateStyle
 		
 		[TestCase(DocumentStyleLinkOperation.Replace)]
 		[TestCase(DocumentStyleLinkOperation.Ensure)]
-        [XpandTest()]
-		public void When_ApplyTemplateAction_Executed_Applies_active_template_to_all_and_saves_changes_to_source_objects(DocumentStyleLinkOperation operation){
+        [XpandTest()][Apartment(ApartmentState.STA)]
+        [SuppressMessage("ReSharper", "AccessToDisposedClosure")]
+        public void When_ApplyTemplateAction_Executed_Applies_active_template_to_all_and_saves_changes_to_source_objects(DocumentStyleLinkOperation operation){
 			using var application=DocumentStyleManagerModule().Application;
 			ApplyTemplate(frame => {
                 var objectSpace = application.CreateObjectSpace();

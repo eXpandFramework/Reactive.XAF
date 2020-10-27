@@ -16,7 +16,7 @@ using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.Ty
 namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
     [NonParallelizable]
     public class AssemblyTests:ModelMapperBaseTest{
-	    private string _accessFileMessage = "The process cannot access the file ";
+	    
         [XpandTest]
         [TestCase(nameof(Platform.Win))]
         [TestCase(nameof(Platform.Web))]

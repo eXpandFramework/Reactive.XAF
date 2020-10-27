@@ -1,9 +1,9 @@
 ﻿using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Office.Win;
+using DevExpress.ExpressApp.Xpo;
 using DevExpress.XtraRichEdit;
 using DevExpress.XtraRichEdit.API.Native;
-using JetBrains.Annotations;
 using NUnit.Framework;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib;
@@ -13,7 +13,7 @@ using Xpand.XAF.Modules.Reactive;
 [assembly:XpandTest(IgnoredXAFVersions="19.1")]
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests{
     public abstract class BaseTests:BaseTest{
-        [UsedImplicitly] protected const string NotImplmemented = "not implemented";
+        
         protected RichEditDocumentServer RichEditDocumentServer;
         protected Document Document;
 
@@ -27,17 +27,19 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests{
         protected DocumentStyleManagerModule DocumentStyleManagerModule(params ModuleBase[] modules){
             var application = Platform.Win.NewApplication<DocumentStyleManagerModule>();
             application.Modules.Add(new OfficeWindowsFormsModule());
+            application.Modules.AddRange(modules);
             var documentStyleManagerModule = application.AddModule<DocumentStyleManagerModule>(typeof(DataObject),typeof(DataObjectParent));
             var xafApplication = documentStyleManagerModule.Application;
-            xafApplication.Modules.AddRange(modules);
             
-            var modelOffieModule = xafApplication.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.DocumentStyleManager();
-            modelOffieModule.DefaultPropertiesProvider = xafApplication.Model.BOModel.GetClass(typeof(DataObject));
+            
+            var modelOfflineModule = xafApplication.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.DocumentStyleManager();
+            modelOfflineModule.DefaultPropertiesProvider = xafApplication.Model.BOModel.GetClass(typeof(DataObject));
             using var objectSpace = xafApplication.CreateObjectSpace();
+            var isKnownType = ((XPObjectSpace) objectSpace).IsKnownType(typeof(DataObject));
             var dataObject = objectSpace.CreateObject<DataObject>();
             dataObject.Content = Document.ToByteArray(DocumentFormat.OpenXml);
             objectSpace.CommitChanges();
-            modelOffieModule.DefaultPropertiesProviderCriteria =
+            modelOfflineModule.DefaultPropertiesProviderCriteria =
                 CriteriaOperator.Parse("Oid=?", dataObject.Oid).ToString();
             
             xafApplication.Logon();

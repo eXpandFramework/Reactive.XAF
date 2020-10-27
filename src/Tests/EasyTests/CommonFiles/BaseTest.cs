@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading.Tasks;
 using DevExpress.EasyTest.Framework;
@@ -11,6 +12,7 @@ using Xpand.TestsLib.EasyTest.Commands;
 
 namespace ALL.Tests{
     public abstract class BaseTest:Xpand.TestsLib.BaseTest{
+        [SuppressMessage("ReSharper", "MethodHasAsyncOverload")]
         protected async Task EasyTest<TAppAdapter>(Func<TAppAdapter> appAdapter,
             Func<TAppAdapter, string, TestApplication> applicationFactory, Func<ICommandAdapter, Task> executeCommands,
             string connectionString = null) where TAppAdapter : IApplicationAdapter{

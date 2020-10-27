@@ -91,7 +91,10 @@ Write-HostFormatted "Updating Xpand.XAF.Core.All.nuspec" -Section
 $allModuleNuspecs = $nuspecs | Where-Object { $_ -notlike "*ALL*" -and ($_ -like "*.Modules.*" -or $_ -like "*.Extensions.*") -and $_ -notlike "*.Client.*" }
 $csProjects=Get-MSBuildProjects $root\src 
 UpdateALLNuspec "Core" $allNuspec $nuspecs $allModuleNuspecs $csProjects
+$googleBlazorVersion=(Get-XmlContent "$root\Build\nuspec\Xpand.Extensions.Office.Cloud.Google.Blazor.nuspec").package.metadata.version
+Add-NuspecDependency Xpand.Extensions.Office.Cloud.Google.Blazor $googleBlazorVersion $allNuspec "netstandard2.0"
 $allNuspec|Save-Xml $allFileName
+
 Get-Content $allFileName -Raw
 $allFileName = "$root\build\nuspec\Xpand.XAF.Win.All.nuspec"
 Write-HostFormatted "Updating Xpand.XAF.Win.All.nuspec" -Section

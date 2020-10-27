@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using NUnit.Framework;
@@ -23,7 +24,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
 
         protected abstract XafApplication Application(Platform platform);
         protected abstract void OnConnect_Action_Creates_Connection(Platform platform, XafApplication application);
-        [Test][XpandTest()]
+        [Test][XpandTest()][Apartment(ApartmentState.STA)]
         public async Task Not_NeedsAuthentication_when_Authentication_current_user_can_authenticate(){
             using var application=Application(Platform.Win);
             NewAuthentication(Platform.Win, application);
@@ -32,7 +33,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
         }
 
         [Test]
-        [XpandTest()]
+        [XpandTest()][Apartment(ApartmentState.STA)]
         public async Task Connect_Action_Creates_Connection(){
             using var application=Application(Platform.Win);
             var compositeView = application.NewView(ViewType.DetailView, application.Security.UserType);
@@ -52,32 +53,27 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
             disconnectMicrosoft.Active[nameof(Extensions.Office.Cloud.Extensions.NeedsAuthentication)].ShouldBeTrue();
         }
 
-        [Test][XpandTest()]
+        [Test][XpandTest()][Apartment(ApartmentState.STA)]
         public async Task NeedsAuthentication_when_AuthenticationStorage_does_not_contain_current_user(){
             using var application=Application(Platform.Win);
             await application.NeedsAuthentication_when_AuthenticationStorage_does_not_contain_current_user(() => NeedsAuthentication(application));
         }
 
-        [Test][XpandTest()]
+        [Test][XpandTest()][Apartment(ApartmentState.STA)]
         public async Task NeedsAuthentication_when_AuthenticationStorage_current_user_cannot_authenticate(){
             using var application=Application(Platform.Win);
             await application.NeedsAuthentication_when_AuthenticationStorage_current_user_cannot_authenticate<TAuthentication>(() =>
                 NeedsAuthentication(application));
         }
         
-        [Test][XpandTest()]
+        [Test][XpandTest()][Apartment(ApartmentState.STA)]
         public void Actions_are_Activated_For_CurrentUser_Details(){
             using var application=Application(Platform.Win);
             application.Actions_are_Activated_For_CurrentUser_Details(ServiceName);
         }
         
-        [Test][XpandTest()]
-        public  void Actions_Active_State_when_authentication_needed(){
-            using var application=Application(Platform.Win);
-            application.Actions_Active_State_when_authentication_needed(ServiceName);
-        }
         
-        [Test][XpandTest()]
+        [Test][XpandTest()][Apartment(ApartmentState.STA)]
         public async Task Actions_Active_State_when_authentication_not_needed(){
             using var application=Application(Platform.Win);
             NewAuthentication(Platform.Win, application);
@@ -85,7 +81,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
         }
         
         [Test]
-        [XpandTest()]
+        [XpandTest()][Apartment(ApartmentState.STA)]
         public async Task Disconnect_Action_Destroys_Connection(){
             using var application=Application(Platform.Win);
             NewAuthentication(Platform.Win, application);

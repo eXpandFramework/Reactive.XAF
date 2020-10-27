@@ -1,19 +1,18 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Configuration;
 using System.Web;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Web;
 using DevExpress.ExpressApp.Web.Editors.ASPx;
 using DevExpress.ExpressApp.Xpo;
 using DevExpress.Persistent.Base;
-using Fasterflect;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace TestApplication.Web{
     public class TestWebApplication : WebApplication{
 
         public TestWebApplication(){
+            
             ((ISupportInitialize) this).BeginInit();
             Modules.Add(new WebModule());
             ((ISupportInitialize) this).EndInit();

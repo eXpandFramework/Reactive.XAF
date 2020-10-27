@@ -16,7 +16,9 @@ using DevExpress.ExpressApp.Objects;
 using DevExpress.ExpressApp.PivotChart;
 using DevExpress.ExpressApp.PivotGrid;
 using DevExpress.ExpressApp.ReportsV2;
-using DevExpress.ExpressApp.Scheduler;
+#if !Blazor
+using DevExpress.ExpressApp.Scheduler;	
+#endif
 using DevExpress.ExpressApp.ScriptRecorder;
 using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.Security.Xpo;
@@ -29,13 +31,10 @@ using DevExpress.ExpressApp.ViewVariantsModule;
 using DevExpress.ExpressApp.Xpo;
 using DevExpress.Persistent.BaseImpl;
 using DevExpress.Persistent.BaseImpl.PermissionPolicy;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using TestApplication.GoogleService;
 using Xpand.Extensions.AppDomainExtensions;
-using Xpand.Extensions.Reactive.Filter;
-using Xpand.Extensions.Reactive.Transform;
-using Xpand.Extensions.WindowManager;
-using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.TestsLib;
 using Xpand.TestsLib.BO;
 using Xpand.XAF.Modules.AutoCommit;
@@ -62,8 +61,6 @@ using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Logger;
 using Xpand.XAF.Modules.Reactive.Logger.Hub;
-using Xpand.XAF.Modules.Reactive.Services;
-using Xpand.XAF.Modules.Reactive.Services.Controllers;
 using Xpand.XAF.Modules.RefreshView;
 using Xpand.XAF.Modules.SequenceGenerator;
 using Xpand.XAF.Modules.SuppressConfirmation;
@@ -72,6 +69,7 @@ using Xpand.XAF.Modules.ViewItemValue;
 using Xpand.XAF.Modules.ViewWizard;
 
 namespace TestApplication{
+    [UsedImplicitly]
     public static class AgnosticExtensions{
         public static void ConfigureConnectionString(this XafApplication application){
             application.ConnectionString = InMemoryDataStoreProvider.ConnectionString;
@@ -100,7 +98,9 @@ namespace TestApplication{
 			RequiredModuleTypes.Add(typeof(PivotChartModuleBase));
 			RequiredModuleTypes.Add(typeof(PivotGridModule));
 			RequiredModuleTypes.Add(typeof(ReportsModuleV2));
+#if !Blazor
 			RequiredModuleTypes.Add(typeof(SchedulerModuleBase));
+#endif
 			RequiredModuleTypes.Add(typeof(ScriptRecorderModuleBase));
 			RequiredModuleTypes.Add(typeof(SecurityModule));
 			RequiredModuleTypes.Add(typeof(SecurityXpoModule));
@@ -123,15 +123,18 @@ namespace TestApplication{
 			RequiredModuleTypes.Add(typeof(MasterDetailModule));
 			
 			RequiredModuleTypes.Add(typeof(ModelViewInheritanceModule));
-         RequiredModuleTypes.Add(typeof(ModelMapperModule));	
+            
             if (!Debugger.IsAttached){
-                // RequiredModuleTypes.Add(typeof(ModelMapperModule));	
+                RequiredModuleTypes.Add(typeof(ModelMapperModule));	
             }
 #if !NETCOREAPP3_1
             
-         RequiredModuleTypes.Add(typeof(MicrosoftCalendarModule));
-         RequiredModuleTypes.Add(typeof(MicrosoftTodoModule));
+            RequiredModuleTypes.Add(typeof(MicrosoftCalendarModule));
+            RequiredModuleTypes.Add(typeof(MicrosoftTodoModule));
 			RequiredModuleTypes.Add(typeof(ProgressBarViewItemModule));
+#endif
+#if !Blazor
+            RequiredModuleTypes.Add(typeof(ModelMapperModule));	
 #endif
 			
 			RequiredModuleTypes.Add(typeof(ReactiveModule));
@@ -154,20 +157,22 @@ namespace TestApplication{
 			AdditionalExportedTypes.Add(typeof(Task));
 		}
 
-		public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB){
-			base.GetModuleUpdaters(objectSpace, versionFromDB);
-			yield return new DefaultUserModuleUpdater(objectSpace, versionFromDB,Guid.Parse("5c50f5c6-e697-4e9e-ac1b-969eac1237f3"),true);
+		public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDb){
+			base.GetModuleUpdaters(objectSpace, versionFromDb);
+			yield return new DefaultUserModuleUpdater(objectSpace, versionFromDb,Guid.Parse("5c50f5c6-e697-4e9e-ac1b-969eac1237f3"),true);
       }
 
 		public override void Setup(XafApplication application){
 			base.Setup(application);
-			application.Security = new SecurityStrategyComplex(typeof(PermissionPolicyUser),
-				typeof(PermissionPolicyRole), new AuthenticationStandard(typeof(PermissionPolicyUser), typeof(AuthenticationStandardLogonParameters)));
+#if !Blazor
+            application.Security = new SecurityStrategyComplex(typeof(PermissionPolicyUser),
+                typeof(PermissionPolicyRole), new AuthenticationStandard(typeof(PermissionPolicyUser), typeof(AuthenticationStandardLogonParameters)));
+#endif
 		}
 
 		public override void Setup(ApplicationModulesManager moduleManager){
 			base.Setup(moduleManager);
-            moduleManager.ConnectGoogleTasksService()
+            moduleManager.ConnectViewWizardService()
 #if !NETCOREAPP3_1
                 .Merge(moduleManager.ConnectMicrosoftTodoService())
                 .Merge(moduleManager.ConnectMicrosoftService())
@@ -176,20 +181,7 @@ namespace TestApplication{
                 .Merge(moduleManager.ConnectGoogleCalendarService())
                 .Merge(moduleManager.ConnectCloudCalendarService())
                 .Merge(moduleManager.ConnectGoogleService())
-                .Merge(moduleManager.ConnectViewWizardService())
-                // .Merge(moduleManager.WhenApplication(xafApplication => xafApplication.WhenFrameCreated()
-		              //   .SelectMany(frame => frame.WhenViewChanging().Where(t => t.args.View is DetailView)))
-	               //  .Select(t => {
-		              //   var controller1 = t.frame.GetController("ShowStyleManagerActionViewController");
-		              //   Interaction.MsgBox(controller1?.Name);
-		              //   return controller1;
-	               //  }).WhenNotDefault()
-	               //  .SelectMany(t => {
-		              //   
-		              //   return t.WhenActivated().Do(controller => {
-			             //    Interaction.MsgBox("a");
-		              //   });
-	               //  }).ToUnit())
+                .Merge(moduleManager.ConnectGoogleTasksService())
                 .Subscribe(this);
         }
 	}

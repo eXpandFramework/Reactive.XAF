@@ -39,7 +39,7 @@ function GetModuleName($_){
 function UpdateModulesList($rootLocation, $packages,$path) {
     $moduleList = "|PackageName|[![Custom badge](https://xpandshields.azurewebsites.net/endpoint.svg?label=Downloads&url=https%3A%2F%2Fxpandnugetstats.azurewebsites.net%2Fapi%2Ftotals%2FXAF)](https://www.nuget.org/packages?q=Xpand.XAF)<br>Platform/Target|About`r`n|---|---|---|`r`n"
     $projects=Get-MSBuildProjects $rootLocation\src\Modules
-    $assemblies=Get-ChildItem $rootLocation\bin xpand.*.dll
+    $assemblies=(Get-ChildItem $rootLocation\bin -Recurse xpand.*.dll)+(Get-ChildItem $rootLocation\bin -Recurse xpand.*.exe)
     
     $packages | ForEach-Object {
         $name = $_.Replace("Xpand.XAF.Modules.", "")
@@ -71,7 +71,10 @@ function UpdateModulesList($rootLocation, $packages,$path) {
             }
             
             $targetFramework =Get-ProjectTargetFramework $project -FullName
-            $platform=($assemblies|Where-Object{$_.BaseName -eq $packageName}|Get-AssemblyMetadata -key Platform).Value
+            $platform=($assemblies|Where-Object{$_.BaseName -eq $packageName}|Get-AssemblyMetadata -key Platform).Value|Select-Object -First 1
+            if (!$platform){
+                throw "Platform missing in $packageName"
+            }
             if ($platform -eq "Core"){
                 $platform="Agnostic"
             }

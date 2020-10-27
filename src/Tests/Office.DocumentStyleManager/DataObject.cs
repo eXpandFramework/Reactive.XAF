@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using DevExpress.ExpressApp;
-using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl;
@@ -8,7 +7,7 @@ using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
 
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests{
-    [DefaultProperty(nameof(Name))][DomainComponent]
+    [DefaultProperty(nameof(Name))]
     public class DataObject : BaseObject,IObjectSpaceLink{
         public DataObject(Session session) : base(session){
         }
@@ -27,7 +26,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests{
 
         public IObjectSpace ObjectSpace{ get; set; }
     }
-    [DefaultProperty(nameof(Name))][DomainComponent]
+    [DefaultProperty(nameof(Name))]
     public class DataObjectParent : DataObject{
         public DataObjectParent(Session session) : base(session){
         }

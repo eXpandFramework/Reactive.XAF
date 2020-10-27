@@ -38,8 +38,7 @@ namespace TestApplication.GoogleService{
 		private static IObservable<Person> ShowAccountInfoView(this IObservable<SimpleActionExecuteEventArgs> source) 
             => source.SelectMany(e => {
 					e.ShowViewParameters.CreatedView = e.Action.Application.NewView(ViewType.DetailView, typeof(EmailAddress));
-                    e.ShowViewParameters.TargetWindow = TargetWindow.NewWindow;
-					return e.Action.Application.GoogleUser().ObserveOn(SynchronizationContext.Current)
+                    return e.Action.Application.GoogleUser().ObserveOn(SynchronizationContext.Current!)
 						.Do(user => e.ShowViewParameters.CreatedView.CurrentObject = user.EmailAddresses.First());
 				});
 

@@ -110,6 +110,19 @@ In order to execute the asynchronous operations:
 
 In the screencast below we see authentication against `Google/People/Me` service. To demo auth token database persistence we logOff and the clean the browser cookies. At the bottom the [Reactive.Logger.Client.Win](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win) is reporting as the module is used. This demo is Easytested [with this script](https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Tests/ALL/CommonFiles/GoogleService.cs) for the last three XAF major versions, compliments of the `Xpand.VersionConverter`
 
+
+**Blazor**
+
+<twitter>
+
+[![Xpand XAF Modules Office Cloud Google](https://user-images.githubusercontent.com/159464/97125250-012af080-173c-11eb-8504-a8378bceb7df.gif)](https://youtu.be/DOBL70tzsVM)
+
+</twitter>
+
+[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/DOBL70tzsVM)
+
+**WindowsForms/WindowsDesktop/WebForms**
+
 <twitter>
 
 [![Xpand XAF Modules Office Cloud Google](https://user-images.githubusercontent.com/159464/89726928-e8f2e180-da28-11ea-96fc-135719a18f46.gif)](https://www.youtube.com/watch?v=-pZjbGUChp0)
@@ -138,7 +151,7 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 
 The module follows the Nuget [Version Basics](https://docs.Google.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
-`.NetFramework: netstandard2.0`
+`.NetFramework: net461`
 
 |<!-- -->|<!-- -->
 |----|----
@@ -146,17 +159,15 @@ The module follows the Nuget [Version Basics](https://docs.Google.com/en-us/nuge
 |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |Google.Apis.Auth|1.49.0
  |JetBrains.Annotations|2020.1.0
- |Microsoft.CodeAnalysis.CSharp|3.7.0
  |Newtonsoft.Json|12.0.3
- |System.Configuration.ConfigurationManager|4.7.0
- |System.Reactive|5.0.0-preview.16
+ |System.Reactive|4.4.1
  |System.ValueTuple|4.5.0
- |Xpand.Extensions|2.202.58.1
- |Xpand.Extensions.Office.Cloud|2.202.59.2
- |Xpand.Extensions.Reactive|2.202.59.2
- |Xpand.Extensions.XAF|2.202.59.2
- |Xpand.Extensions.XAF.Xpo|2.202.55.1
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.59.2
+ |Xpand.Extensions|2.202.57
+ |Xpand.Extensions.Office.Cloud|2.202.58
+ |Xpand.Extensions.Reactive|2.202.58
+ |Xpand.Extensions.XAF|2.202.58
+ |Xpand.Extensions.XAF.Xpo|2.202.54
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.58
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.10
 
 ## Issues-Debugging-Troubleshooting

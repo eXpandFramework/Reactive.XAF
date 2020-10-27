@@ -5,7 +5,10 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Xpo;
+using DevExpress.Utils.Extensions;
+using Fasterflect;
 using JetBrains.Annotations;
 using NUnit.Framework;
 using Xpand.Extensions.AppDomainExtensions;
@@ -33,7 +36,7 @@ namespace Xpand.TestsLib{
             TraceSource.Listeners.Add(TextListener);
         }
         [UsedImplicitly]
-        public static IEnumerable<Platform> PlatformDatasource(){
+        public static IEnumerable<Platform> PlatformDataSource(){
             yield return Platform.Web;
             yield return Platform.Win;
         }
@@ -117,6 +120,11 @@ namespace Xpand.TestsLib{
         public virtual void Dispose(){
             XpoTypesInfoHelper.Reset();
             XafTypesInfo.HardReset();
+            var typesInfo = ((TypesInfo) XafTypesInfo.Instance);
+            var entityStores = ((IList<IEntityStore>) typesInfo.GetFieldValue("entityStores"));
+            entityStores.Remove(store => !(store is NonPersistentTypeInfoSource));
+            
+
             try{
                 var text = GetLogText();
                 if (!string.IsNullOrEmpty(text)){

@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Reactive.Linq;
+using System.Threading;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp.Win.Editors;
 using DevExpress.XtraRichEdit;
@@ -17,7 +18,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManager{
     public class DeleteTests:BaseTests{
-	    [Test][XpandTest()]
+	    [Test][XpandTest()][Apartment(ApartmentState.STA)]
         public void DeleteStylesAction_Removes_Styles_and_update_document(){
             using var xafApplication=DocumentStyleManagerModule().Application;
             // application.MockEditorsFactory();
@@ -45,7 +46,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
             documentStyleManager.Content.ShouldNotBe(content);
         }
 
-        [Test][XpandTest()]
+        [Test][XpandTest()][Apartment(ApartmentState.STA)]
         public void Delete_all_unused_styles(){
             using var application=DocumentStyleManagerModule().Application;
             var server = application.WhenDetailViewCreated().SelectMany(_ => _.e.View.WhenRichEditDocumentServer<BusinessObjects.DocumentStyleManager>(manager => manager.Content)).Test();

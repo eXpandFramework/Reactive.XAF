@@ -45,18 +45,71 @@ namespace Xpand.XAF.ModelEditor {
             XpoTypesInfoHelper.ForceInitialize();
             if (pathInfo.IsApplicationModel) {
                 _currentDomainOnAssemblyResolvePathInfo = pathInfo;
+                // var asl = new AssemblyLoader(Path.GetDirectoryName(pathInfo.AssemblyPath));
+                // var asm = asl.LoadFromAssemblyPath(pathInfo.AssemblyPath);
+                //
+                // var type = asm.GetTypes().First(t => {
+                //     return InheritsFrom(t, typeof(XafApplication).FullName);
+                // });
+                // // var type = asm.GetType("SolutionBlazor.Blazor.Server.SolutionBlazorBlazorApplication");
+                // dynamic obj = Activator.CreateInstance(type);
                 AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += CurrentDomainOnAssemblyResolve;
                 AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainOnAssemblyResolve;
+                
+                
+
+
                 var applicationInstance = Activator.CreateInstance(Assembly.Load(pathInfo.AssemblyPath).GetTypes().First(type => typeof(XafApplication).IsAssignableFrom(type)));
                 AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve -= CurrentDomainOnAssemblyResolve;
                 AppDomain.CurrentDomain.AssemblyResolve -= CurrentDomainOnAssemblyResolve;
                 _currentDomainOnAssemblyResolvePathInfo = null;
 
-                var configFileName = applicationInstance is WinApplication? pathInfo.AssemblyPath+".config":Path.Combine(pathInfo.FullPath,"web.config");
+                var configFileName = applicationInstance is WinApplication ? pathInfo.AssemblyPath + ".config":Path.Combine(pathInfo.FullPath,"web.config");
+                
                 return designerModelFactory.CreateModulesManager((XafApplication) applicationInstance, configFileName,Path.GetDirectoryName(pathInfo.AssemblyPath));
             }
             var moduleFromFile = designerModelFactory.CreateModuleFromFile(pathInfo.AssemblyPath, assemblyPath);
             return designerModelFactory.CreateModulesManager(moduleFromFile, pathInfo.AssemblyPath);
+        }
+        public static IEnumerable<Type> ParentTypes(Type type){
+            if (type == null){
+                yield break;
+            }
+            foreach (var i in type.GetInterfaces()){
+                yield return i;
+            }
+            var currentBaseType = type.BaseType;
+            while (currentBaseType != null){
+                yield return currentBaseType;
+                currentBaseType= currentBaseType.BaseType;
+            }
+        }
+
+        public static bool InheritsFrom(Type type, string typeName) => type
+            .FullName==typeName|| ParentTypes(type).Select(_ => _.FullName).Any(s => typeName.Equals(s,StringComparison.Ordinal));
+
+        public static bool InheritsFrom(Type type, Type baseType){
+            if (type == null){
+                return false;
+            }
+
+            if (type == baseType){
+                return true;
+            }
+            if (baseType == null){
+                return type.IsInterface || type == typeof(object);
+            }
+            if (baseType.IsInterface){
+                return type.GetInterfaces().Contains(baseType);
+            }
+            var currentType = type;
+            while (currentType != null){
+                if (currentType.BaseType == baseType){
+                    return true;
+                }
+                currentType = currentType.BaseType;
+            }
+            return false;
         }
 
         private PathInfo _currentDomainOnAssemblyResolvePathInfo;

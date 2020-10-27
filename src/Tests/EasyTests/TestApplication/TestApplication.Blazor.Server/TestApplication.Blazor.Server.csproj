@@ -1,0 +1,91 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Deterministic>false</Deterministic>
+    <AssemblyVersion>1.0.*</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Configurations>Debug;Release;EasyTest</Configurations>
+    <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
+    <OutputPath>bin</OutputPath>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
+    <LangVersion>latest</LangVersion>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DefineConstants>TRACE;DEBUG;Blazor;XAF202XAF202</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DefineConstants>TRACE;Blazor;XAF202XAF202</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'EasyTest|AnyCPU' ">
+    <DefineConstants>TRACE;DEBUG;EASYTEST;XAF202XAF202</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Model.xafml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\..\TestsLib\BO\Accessory.cs" Link="Common\Accessory.cs" />
+    <Compile Include="..\..\..\TestsLib\BO\Order.cs" Link="Common\Order.cs" />
+    <Compile Include="..\..\..\TestsLib\BO\OrderModuleUpdater.cs" Link="Common\OrderModuleUpdater.cs" />
+    <Compile Include="..\..\..\TestsLib\BO\Product.cs" Link="Common\Product.cs" />
+    <Compile Include="..\..\..\TestsLib\DefaultUserModuleUpdater.cs" Link="Common\DefaultUserModuleUpdater.cs" />
+    <Compile Include="..\CommonFiles\AgnosticModule.cs" Link="Common\AgnosticModule.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="..\CommonFiles\CloudCalendarService.cs" Link="Office\Cloud\CloudCalendarService.cs" />
+    <Compile Include="..\CommonFiles\CloudService.cs" Link="Office\Cloud\CloudService.cs" />
+    <Compile Include="..\CommonFiles\CloudTasksService.cs" Link="Office\Cloud\CloudTasksService.cs" />
+    <Compile Include="..\CommonFiles\DocumentStyleManager\DocumentObject.cs" Link="Office\DocumentStyleManager\DocumentObject.cs" />
+    <Compile Include="..\CommonFiles\DocumentStyleManager\DocumentStyleManagerModuleUpdater.cs" Link="Office\DocumentStyleManager\DocumentStyleManagerModuleUpdater.cs" />
+    <Compile Include="..\CommonFiles\DocumentStyleManager\DocumentStyleManagerService.cs" Link="Office\DocumentStyleManager\DocumentStyleManagerService.cs" />
+    <Compile Include="..\CommonFiles\GoogleService\GoogleService.cs" Link="Office\Cloud\Google\GoogleService.cs" />
+    <Compile Include="..\CommonFiles\GoogleService\ShowGoogleAccountInfoService.cs" Link="Office\Cloud\Google\ShowGoogleAccountInfoService.cs" />
+    <Compile Include="..\CommonFiles\GoogleTasksService\GoogleCalendarService.cs" Link="Office\Cloud\Google\GoogleCalendarService.cs" />
+    <Compile Include="..\CommonFiles\GoogleTasksService\GoogleTasksService.cs" Link="Office\Cloud\Google\GoogleTasksService.cs" />
+    <Compile Include="..\commonfiles\microsoftcalendarservice\MicrosoftCalendarService.cs" Link="Office\Cloud\Microsoft\MicrosoftCalendarService.cs" />
+    <Compile Include="..\CommonFiles\MicrosoftService\MicrosoftService.cs" Link="Office\Cloud\Microsoft\MicrosoftService.cs" />
+    <Compile Include="..\CommonFiles\MicrosoftService\ShowMSAccountInfoService.cs" Link="Office\Cloud\Microsoft\ShowMSAccountInfoService.cs" />
+    <Compile Include="..\CommonFiles\MicrosoftTodoService\MicrosoftTodoService.cs" Link="Office\Cloud\Microsoft\MicrosoftTodoService.cs" />
+    <Compile Include="..\CommonFiles\Web\WebModule.cs" Link="WebModule.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Model.xafml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\CommonFiles\Cloud.Office.xafml" Link="Office\Cloud\Cloud.Office.xafml" />
+    <EmbeddedResource Include="..\CommonFiles\SeqeuenceGenerator\SequenceGenerator.xafml" Link="SequenceGenerator\SequenceGenerator.xafml" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Google.Apis.People.v1" Version="1.25.0.830" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="20.2.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="20.2.3" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="4.7.0" />
+    <PackageReference Include="Xpand.XAF.Core.All">
+      <Version>2.202.43.2</Version>
+    </PackageReference>
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.2.3" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
+    <PackageReference Include="System.Data.OleDb" Version="4.7.1" />
+    <PackageReference Include="System.ServiceModel.Http" Version="4.7.0" />
+    <PackageReference Include="System.ServiceModel.NetTcp" Version="4.7.0" />
+    <PackageReference Include="System.ServiceModel.Security" Version="4.7.0" />
+    <PackageReference Include="System.ServiceProcess.ServiceController" Version="4.7.0" />
+    <PackageReference Include="System.Threading" Version="4.3.0" />
+    <PackageReference Include="System.Text.Json" Version="4.7.2" />
+    <PackageReference Include="System.Threading.AccessControl" Version="4.7.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="3.1.9" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.1.9" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Common\" />
+    <Folder Include="Office\Cloud\Google\" />
+    <Folder Include="Office\Cloud\Microsoft\" />
+    <Folder Include="Office\DocumentStyleManager\" />
+    <Folder Include="SequenceGenerator\" />
+  </ItemGroup>
+</Project>

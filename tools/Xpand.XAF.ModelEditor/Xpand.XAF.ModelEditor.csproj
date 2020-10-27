@@ -7,10 +7,10 @@
     <SignAssembly>true</SignAssembly>
     <TargetFramework>net461</TargetFramework>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <OutputPath>..\..\bin\</OutputPath>
+    <OutputPath>..\..\bin</OutputPath>
     <LangVersion>latest</LangVersion>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -33,6 +33,8 @@
   <ItemGroup>
     <EmbeddedResource Remove="build\**" />
     <None Remove="ExpressApp.ico" />
+    <None Remove="Xpand.XAF.ModelEditor.WinDesktop.csproj.paket.references" />
+    <None Remove="Xpand.XAF.ModelEditor.WinDesktop.paket.references" />
     <EmbeddedResource Include="ExpressApp.ico" />
   </ItemGroup>
   <ItemGroup>

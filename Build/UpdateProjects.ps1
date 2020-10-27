@@ -1,5 +1,5 @@
 param(
-    [version]$DXVersion = "19.2.9"
+    [version]$DXVersion = "20.1.8"
 )
 $ErrorActionPreference = "Stop"
 $rootLocation = "$PSScriptRoot\..\"

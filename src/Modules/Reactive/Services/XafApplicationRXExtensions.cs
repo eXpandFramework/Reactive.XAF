@@ -12,14 +12,12 @@ using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Model;
 using Fasterflect;
 using JetBrains.Annotations;
-using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
-using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -30,7 +28,7 @@ using ListView = DevExpress.ExpressApp.ListView;
 using View = DevExpress.ExpressApp.View;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
-    public static class XafApplicationRXExtensions{
+    public static class XafApplicationRxExtensions{
 	    public static IObservable<T> SelectMany<T>(this XafApplication application, IObservable<T> execute) 
             => application.SelectMany(execute.ToTask);
 
@@ -110,18 +108,18 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.WhenCreateCustomObjectSpaceProvider()
                 .Select(_ => {
                     if (!objectSpaceProviders.Any()){
-                        var xpoASsembly = AppDomain.CurrentDomain.GetAssemblies().First(asm => asm.GetName().Name.StartsWith("DevExpress.ExpressApp.Xpo.v"));
+                        var xpoAssembly = AppDomain.CurrentDomain.GetAssemblies().First(asm => asm.GetName().Name.StartsWith("DevExpress.ExpressApp.Xpo.v"));
                         var dataStoreProvider = $"{application.ConnectionString}".Contains("XpoProvider=InMemoryDataStoreProvider")||$"{application.ConnectionString}"==""
-                            ? xpoASsembly.GetType("DevExpress.ExpressApp.Xpo.MemoryDataStoreProvider").CreateInstance()
-                            : Activator.CreateInstance(xpoASsembly.GetType("DevExpress.ExpressApp.Xpo.ConnectionStringDataStoreProvider"),application.ConnectionString);
+                            ? xpoAssembly.GetType("DevExpress.ExpressApp.Xpo.MemoryDataStoreProvider").CreateInstance()
+                            : Activator.CreateInstance(xpoAssembly.GetType("DevExpress.ExpressApp.Xpo.ConnectionStringDataStoreProvider"),application.ConnectionString);
 
-                        Type[] parameterTypes = {xpoASsembly.GetType("DevExpress.ExpressApp.Xpo.IXpoDataStoreProvider"), typeof(bool)};
+                        Type[] parameterTypes = {xpoAssembly.GetType("DevExpress.ExpressApp.Xpo.IXpoDataStoreProvider"), typeof(bool)};
                         object[] parameterValues = {dataStoreProvider, true};
                         if (application.TypesInfo.XAFVersion() > Version.Parse("19.2.0.0")){
                             parameterTypes=parameterTypes.Add(typeof(bool)).ToArray();
-                            parameterValues=parameterValues.Add(false).ToArray();
+                            parameterValues=parameterValues.Add(true).ToArray();
                         }
-                        var objectSpaceProvider = (IObjectSpaceProvider) xpoASsembly.GetType("DevExpress.ExpressApp.Xpo.XPObjectSpaceProvider")
+                        var objectSpaceProvider = (IObjectSpaceProvider) xpoAssembly.GetType("DevExpress.ExpressApp.Xpo.XPObjectSpaceProvider")
                             .Constructor(parameterTypes)
                             .Invoke(parameterValues);
                         _.e.ObjectSpaceProviders.Add(objectSpaceProvider);
@@ -173,11 +171,6 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<DetailView> ToDetailView(this IObservable<(XafApplication application, DetailViewCreatedEventArgs e)> source) 
             => source.Select(_ => _.e.View);
-
-        public static IObservable<(HandledEventArgs handledEventArgs, Exception exception, Exception originalException)> WhenCustomHandleException(this IObservable<IXAFAppWinAPI> source) 
-            => source.SelectMany(api => Observable.FromEventPattern(api.Application, "CustomHandleException")
-                .Select(pattern => (((HandledEventArgs) pattern.EventArgs), exception:((Exception) pattern.EventArgs.GetPropertyValue("Exception")
-                    ),originalException:((Exception) pattern.EventArgs.GetPropertyValue("Exception")))));
 
         [PublicAPI]
         public static IObservable<Frame> WhenViewOnFrame(this IObservable<XafApplication> source, Type objectType = null,
@@ -291,32 +284,35 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .TransformPattern<DatabaseVersionMismatchEventArgs,XafApplication>();
 
         [PublicAPI]
-        public static IObservable<(XafApplication application, LogonEventArgs e)> WhenLoggedOn(this IObservable<XafApplication> soure) 
-            => soure.SelectMany(application => application.WhenLoggedOn());
+        public static IObservable<(XafApplication application, LogonEventArgs e)> WhenLoggedOn(this IObservable<XafApplication> source) 
+            => source.SelectMany(application => application.WhenLoggedOn());
 
         public static IObservable<(XafApplication application, LogonEventArgs e)> WhenLoggedOn(this XafApplication application) 
             => Observable
                 .FromEventPattern<EventHandler<LogonEventArgs>,LogonEventArgs>(h => application.LoggedOn += h,h => application.LoggedOn -= h,ImmediateScheduler.Instance)
                 .TransformPattern<LogonEventArgs,XafApplication>()
                 .TraceRX(_ => $"{_.e.LogonParameters}");
-        
-        public static IObservable<(XafApplication application, LogonEventArgs e)> WhenLoggingOn(this IObservable<XafApplication> soure) 
-            => soure.SelectMany(application => application.WhenLoggingOn());
+
+        [PublicAPI]
+        public static IObservable<(XafApplication application, LogonEventArgs e)> WhenLoggingOn(this IObservable<XafApplication> source) 
+            => source.SelectMany(application => application.WhenLoggingOn());
 
         public static IObservable<(XafApplication application, LogonEventArgs e)> WhenLoggingOn(this XafApplication application) 
             => Observable.FromEventPattern<EventHandler<LogonEventArgs>,LogonEventArgs>(h => application.LoggingOn += h,h => application.LoggingOn -= h,ImmediateScheduler.Instance)
             .TransformPattern<LogonEventArgs,XafApplication>()
             .TraceRX(_ => $"{_.e.LogonParameters}");
         
-        public static IObservable<(XafApplication application, LoggingOffEventArgs e)> WhenLoggingOff(this IObservable<XafApplication> soure) 
-            => soure.SelectMany(application => application.WhenLoggingOff());
+        [PublicAPI]
+        public static IObservable<(XafApplication application, LoggingOffEventArgs e)> WhenLoggingOff(this IObservable<XafApplication> source) 
+            => source.SelectMany(application => application.WhenLoggingOff());
 
         public static IObservable<(XafApplication application, LoggingOffEventArgs e)> WhenLoggingOff(this XafApplication application) 
             => Observable.FromEventPattern<EventHandler<LoggingOffEventArgs>,LoggingOffEventArgs>(h => application.LoggingOff += h,h => application.LoggingOff -= h,ImmediateScheduler.Instance)
             .TransformPattern<LoggingOffEventArgs,XafApplication>();
         
-        public static IObservable<XafApplication> WhenLoggedOff(this IObservable<XafApplication> soure) 
-            => soure.SelectMany(application => application.WhenLoggedOff());
+        [PublicAPI]
+        public static IObservable<XafApplication> WhenLoggedOff(this IObservable<XafApplication> source) 
+            => source.SelectMany(application => application.WhenLoggedOff());
 
         public static IObservable<XafApplication> WhenLoggedOff(this XafApplication application) 
             => Observable.FromEventPattern<EventHandler<EventArgs>,EventArgs>(h => application.LoggedOff += h,h => application.LoggedOff -= h,ImmediateScheduler.Instance)
@@ -346,62 +342,21 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         [PublicAPI]
         public static IObservable<(XafApplication application, SetupEventArgs e)> WhenSettingUp(this XafApplication application) 
-            => Observable
-                .FromEventPattern<EventHandler<SetupEventArgs>,SetupEventArgs>(h => application.SettingUp += h,h => application.SettingUp -= h,ImmediateScheduler.Instance)
+            => Observable.FromEventPattern<EventHandler<SetupEventArgs>,SetupEventArgs>(h => application.SettingUp += h,h => application.SettingUp -= h,ImmediateScheduler.Instance)
                 .TransformPattern<SetupEventArgs,XafApplication>()
                 .TraceRX(_ => _.e.SetupParameters.ToString());
 
-        public static IObservable<(string parameter, object result)> WhenCallBack(this IObservable<IXAFAppWebAPI> source,string parameter=null) 
-            => source.SelectMany(api => api.Application.WhenWindowCreated().When(TemplateContext.ApplicationWindow)
-                    .TemplateChanged()
-                    .SelectMany(_ => Observable.FromEventPattern<EventArgs>(AppDomain.CurrentDomain.XAF().CurrentRequestPage(),"InitComplete",ImmediateScheduler.Instance).To(_))
-                    .Select(_ => _.Template.GetPropertyValue("CallbackManager").GetPropertyValue("CallbackControl"))
-                    .SelectMany(_ => Observable.FromEventPattern<EventArgs>(_,"Callback",ImmediateScheduler.Instance)))
-                .Select(_ => (parameter:$"{_.EventArgs.GetPropertyValue("Parameter")}",result:_.EventArgs.GetPropertyValue("Result")))
-                .Where(_ => parameter==null||_.parameter.StartsWith($"{parameter}:"));
-
-        public static IObservable<Unit> CheckAsync(this IObservable<IXAFAppWebAPI> source,string module){
-	        var whenTemplate = source.SelectMany(api => api.Application.WhenWindowCreated().When(TemplateContext.ApplicationWindow).FirstAsync().TemplateChanged())
-		        .WhenNotDefault(window => window.Template).Publish().RefCount();
-	        return whenTemplate
-	            .WhenDefault(window => (bool)window.Template.GetPropertyValue("IsAsync")).ToUnit()
-	            .Do(window => AppDomain.CurrentDomain.Web().WriteHttpResponse($"<span style='color:red'>Asynchronous operations not supported, please mark the Page as async, for details refer to {module} wiki page. </span>",true))
-	            .Merge(whenTemplate.SelectMany(_ => SynchronizationContext.Current.ReturnObservable().Where(context => context.GetType().Name!="AspNetSynchronizationContext")
-		            .Do(context => AppDomain.CurrentDomain.Web().WriteHttpResponse($"<span style='color:red'>{context.GetType().FullName} is used instead of System.Web.AspNetSynchronizationContext, please modify your httpRuntime configuration. For details refer to {module} wiki page.</span>",true)).ToUnit()));
-        }
-
-        public static IObservable<IXAFAppWebAPI> WhenWeb(this XafApplication application) 
-            => application.GetPlatform() == Platform.Web ? new XAFAppWebAPI(application).ReturnObservable() : Observable.Empty<IXAFAppWebAPI>();
-
-        [PublicAPI]
-        public static void SetPageError(this IXAFAppWebAPI api, Exception exception) 
-            => api.Application.HandleException(exception);
-
-        [PublicAPI]
-        public static void Redirect(this IXAFAppWebAPI api, string url,bool endResponse=true) 
-            => AppDomain.CurrentDomain.XAF().WebApplicationType().GetMethod("Redirect",new[]{typeof(string),typeof(bool)})?.Invoke(null,new object[]{url,endResponse});
-
         public static IObservable<ApplicationModulesManager> WhenApplicationModulesManager(this XafApplication application) 
             => RxApp.ApplicationModulesManager.Where(manager => manager.Application() == application);
-
-        public static IObservable<IXAFAppWinAPI> WhenWin(this XafApplication application) 
-            => application.GetPlatform() == Platform.Win ? new XAFAppWinAPI(application).ReturnObservable() : Observable.Empty<IXAFAppWinAPI>();
-
-        public static IObservable<Window> WhenMainFormShown(this IXAFAppWinAPI api) 
-	        => api.Application.WhenWindowCreated().When(TemplateContext.ApplicationWindow)
-		        .SelectMany(window => window.Template.WhenWindowsForm().When("Shown").To(window));
-
-        public static IObservable<Window> WhenMainFormVisible(this IXAFAppWinAPI api) 
-	        => api.Application.WhenWindowCreated().When(TemplateContext.ApplicationWindow)
-		        .SelectMany(window => window.WhenTemplateChanged().Select(window1 => window1.Template).StartWith(window.Template).WhenNotDefault()
-			        .SelectMany(template => template.WhenWindowsForm().When("VisibleChanged")).To(window));
 
         public static IObservable<CreateCustomPropertyCollectionSourceEventArgs> WhenCreateCustomPropertyCollectionSource(this XafApplication application) 
             => Observable.FromEventPattern<EventHandler<CreateCustomPropertyCollectionSourceEventArgs>,
                 CreateCustomPropertyCollectionSourceEventArgs>(h => application.CreateCustomPropertyCollectionSource += h,
                 h => application.CreateCustomPropertyCollectionSource += h, Scheduler.Immediate).Select(_ => _.EventArgs);
         
-        public static IObservable<DatabaseUpdaterEventArgs> WhenDatabaseUpdaterCreating(this XafApplication application) 
+        [PublicAPI]
+        public static IObservable<DatabaseUpdaterEventArgs> 
+            WhenDatabaseUpdaterCreating(this XafApplication application) 
             => Observable.FromEventPattern<EventHandler<DatabaseUpdaterEventArgs>,
                 DatabaseUpdaterEventArgs>(h => application.DatabaseUpdaterCreating += h,
                 h => application.DatabaseUpdaterCreating += h, Scheduler.Immediate).Select(_ => _.EventArgs);
@@ -418,10 +373,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .ToUnit();
 
         public static Guid CurrentUserId(this XafApplication application) 
-            => application.Security.IsSecurityStrategyComplex() ? (Guid) application.Security.UserId
+            => application.Security.IsSecurityStrategyComplex()
+                ? (Guid?) application.Security.UserId ?? Guid.Empty
                 : $"{application.Title}{Environment.MachineName}{Environment.UserName}".ToGuid();
-
-
     }
 
 

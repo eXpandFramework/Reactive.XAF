@@ -1,12 +1,1 @@
-DevExpress.RichEdit.Export
-DevExpress.Office.Core
-DevExpress.RichEdit.Core
-DevExpress.Printing.Core
-DevExpress.Data
-DevExpress.Utils
-DevExpress.Xpo
-DevExpress.ExpressApp.Win
-DevExpress.ExpressApp.Xpo
-DevExpress.ExpressApp
-DevExpress.Persistent.Base
 System.ValueTuple

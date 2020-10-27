@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !Blazor
+using System;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Updating;
@@ -31,3 +32,4 @@ namespace TestApplication.Office.DocumentStyleManager{
         }
     }
 }
+#endif

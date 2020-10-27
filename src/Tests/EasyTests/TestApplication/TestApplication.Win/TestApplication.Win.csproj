@@ -31,7 +31,7 @@
     <DebugSymbols>true</DebugSymbols>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <OutputPath>..\..\..\..\..\bin\TestWinApplication</OutputPath>
-    <DefineConstants>TRACE;XAF201</DefineConstants>
+    <DefineConstants>TRACE;XAF202</DefineConstants>
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -42,11 +42,11 @@
     <DebugSymbols>true</DebugSymbols>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <OutputPath>..\..\..\..\..\bin\TestWinApplication</OutputPath>
-    <DefineConstants>TRACE;XAF201</DefineConstants>
+    <DefineConstants>TRACE;XAF202</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'EasyTest|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
-    <DefineConstants>TRACE;DEBUG;XAF201</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;XAF202</DefineConstants>
     <DebugType>full</DebugType>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
@@ -122,12 +122,12 @@
     <Content Include="ExpressApp.ico" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="20.1.8" />
-    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="20.1.8" />
-    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="20.1.8" />
-    <PackageReference Include="DevExpress.EasyTest" Version="20.1.8" />
+    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="20.2.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="20.2.3" />
+    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="20.2.3" />
+    <PackageReference Include="DevExpress.EasyTest" Version="20.2.3" />
     <PackageReference Include="Google.Apis.People.v1" Version="1.25.0.830" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="2.202.43.1" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="2.202.43.2" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Office\Cloud\Google\" />

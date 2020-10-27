@@ -19,7 +19,7 @@ using Xpand.XAF.Modules.Reactive.Services.Actions;
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManager{
     public class ShowServiceTests:BaseTests{
         
-        [Test][XpandTest()]
+        [Test][XpandTest()][Apartment(ApartmentState.STA)]
         public void Is_Inactive_ByDefault(){
             using var application=DocumentStyleManagerModule().Application;
             var window = application.CreateViewWindow();
@@ -29,7 +29,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
             window.Action<DocumentStyleManagerModule>().ShowStyleManager().Active.ResultValue.ShouldBeFalse();
         }
         
-        [Test][XpandTest()]
+        [Test][XpandTest()][Apartment(ApartmentState.STA)]
         public void Is_Active_When_EnableShowStyleManger_model_attribute(){
             using var application=DocumentStyleManagerModule().Application;
             application.Model.EnableShowStyleManager();

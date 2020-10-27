@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Threading;
 using DevExpress.ExpressApp.Editors;
 using NUnit.Framework;
 using Shouldly;
@@ -80,7 +81,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests{
 
         [TestCase( nameof(BusinessObjects.ApplyTemplateStyle)+"_DetailView",nameof(BusinessObjects.ApplyTemplateStyle.Template))]
         [TestCase( nameof(BusinessObjects.DocumentStyleManager)+"_DetailView",nameof(BusinessObjects.DocumentStyleManager.DocumentStyleLinkTemplate))]
-        [XpandTest()]
+        [XpandTest()][Apartment(ApartmentState.STA)]
         public void ViewItemValue_LookupDefaultObject(string objectView,string memberName){
 	        using var application=DocumentStyleManagerModule().Application;
 	        var modelLookupDefaultObject = application.Model.ToReactiveModule<IModelReactiveModulesViewItemValue>().ViewItemValue;
@@ -91,7 +92,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests{
         }
 
         [Test][XpandTest()]
-        public void TemplateListviews_should_lookup_ListViews_that_have_a_byte_array_property(){
+        public void TemplateListViews_should_lookup_ListViews_that_have_a_byte_array_property(){
             using var application=DocumentStyleManagerModule().Application;
 	        var modelDocumentStyleManager = application.Model.DocumentStyleManager();
 	        var item = modelDocumentStyleManager.ApplyTemplateListViews.AddNode<IModelApplyTemplateListViewItem>();

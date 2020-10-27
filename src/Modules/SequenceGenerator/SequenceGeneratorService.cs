@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reactive;
@@ -33,6 +34,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         public const string ParallelTransactionExceptionMessage = "SqlConnection does not support parallel transactions.";
         
         static readonly Subject<Exception> ExceptionsSubject=new Subject<Exception>();
+        [SuppressMessage("ReSharper", "ExplicitCallerInfoArgument")]
         internal static IObservable<TSource> TraceSequenceGeneratorModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) =>
@@ -77,16 +79,16 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         static void SetSequence(Type sequenceStorageType,Type sequenceType,UnitOfWork unitOfWork, string sequenceMember, string customSequence = null,long firstSequence=0,ISequenceStorage sequenceStorage=null) {
             sequenceStorageType ??= typeof(SequenceStorage);
             Guard.TypeArgumentIs(typeof(ISequenceStorage),sequenceStorageType,nameof(sequenceStorageType));
-            var sequencTypeName = SequenceStorageKeyNameAttribute.FindConsumer(sequenceType);
-            Guard.TypeArgumentIs(typeof(IXPObject),sequencTypeName,nameof(sequenceType));
+            var sequenceTypeName = SequenceStorageKeyNameAttribute.FindConsumer(sequenceType);
+            Guard.TypeArgumentIs(typeof(IXPObject),sequenceTypeName,nameof(sequenceType));
             Type customSequenceType = null;
             if (customSequence != null){
                 customSequenceType = XafTypesInfo.Instance.FindTypeInfo(customSequence).Type;
                 Guard.TypeArgumentIs(typeof(IXPObject),customSequenceType,nameof(customSequence));
             }
-            ValidateSequenceParameters(sequenceStorageType, sequencTypeName,unitOfWork, sequenceMember, customSequenceType);
-            sequenceStorage ??= unitOfWork.GetSequenceStorage(sequencTypeName,false,sequenceStorageType) ?? (ISequenceStorage)sequenceStorageType.CreateInstance(unitOfWork);
-            sequenceStorage.Name = sequencTypeName.GetSequenceName();
+            ValidateSequenceParameters(sequenceStorageType, sequenceTypeName,unitOfWork, sequenceMember, customSequenceType);
+            sequenceStorage ??= unitOfWork.GetSequenceStorage(sequenceTypeName,false,sequenceStorageType) ?? (ISequenceStorage)sequenceStorageType.CreateInstance(unitOfWork);
+            sequenceStorage.Name = sequenceTypeName.GetSequenceName();
             if (firstSequence>sequenceStorage.NextSequence){
                 sequenceStorage.NextSequence = firstSequence;
             }
@@ -101,7 +103,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         }
 
 
-        private static void ValidateSequenceParameters(Type sequqneceStorageType,Type sequenceType,UnitOfWork unitOfWork, string sequenceMember, Type customSequenceType) {
+        private static void ValidateSequenceParameters(Type storageType,Type sequenceType,UnitOfWork unitOfWork, string sequenceMember, Type customSequenceType) {
             void ValidateSequenceMember(Type type){
                 var memberInfo = unitOfWork.Dictionary.QueryClassInfo(type).FindMember(sequenceMember);
                 if (memberInfo == null){
@@ -114,7 +116,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
             }
 
             if (customSequenceType != null){
-                var customStorage = unitOfWork.GetSequenceStorage(customSequenceType,sequenceStorageType:sequqneceStorageType);
+                var customStorage = unitOfWork.GetSequenceStorage(customSequenceType,sequenceStorageType:storageType);
                 if (customStorage == null){
                     throw new InvalidOperationException($"{customSequenceType.FullName} is not found ");
                 }
@@ -212,7 +214,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         private static IObservable<object> GenerateSequences(this (ObjectManipulationEventArgs e,ExplicitUnitOfWork explicitUnitOfWork) t, Type sequenceStorageType) 
             => Observable.Defer(() => {
                     var explicitUnitOfWork = t.explicitUnitOfWork;
-                    var afterCommited = t.e.Session.WhenAfterCommitTransaction().FirstAsync().Select(pattern => {
+                    var afterCommit = t.e.Session.WhenAfterCommitTransaction().FirstAsync().Select(pattern => {
                             explicitUnitOfWork.CommitChanges();
                             explicitUnitOfWork.Close();
                             return default(object);
@@ -220,9 +222,9 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
                         .DisposeOnException(explicitUnitOfWork)
                         .IgnoreElements();
                     var currentThreadScheduler = Scheduler.CurrentThread;
-                    var whenTransacationFailed = t.e.Session.WhenTransacationFailed( currentThreadScheduler, explicitUnitOfWork);
-                    return afterCommited.Merge(explicitUnitOfWork.GenerateSequences(t.e.Object,sequenceStorageType), currentThreadScheduler)
-                        .Merge(whenTransacationFailed,currentThreadScheduler);
+                    var whenTransactionFailed = t.e.Session.WhenTransactionFailed( currentThreadScheduler, explicitUnitOfWork);
+                    return afterCommit.Merge(explicitUnitOfWork.GenerateSequences(t.e.Object,sequenceStorageType), currentThreadScheduler)
+                        .Merge(whenTransactionFailed,currentThreadScheduler);
                 })
                 .RetryWhen(exceptions => exceptions.Select(exception => exception).RetryException().Do(ExceptionsSubject.OnNext));
 
@@ -249,7 +251,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
             }
         }
 
-        private static IObservable<EventPattern<EventArgs>> WhenTransacationFailed(this Session session,
+        private static IObservable<EventPattern<EventArgs>> WhenTransactionFailed(this Session session,
             IScheduler scheduler, ExplicitUnitOfWork explicitUnitOfWork) 
             => session.WhenAfterRollbackTransaction()
                 .Merge(session.WhenFailedCommitTransaction(),scheduler)

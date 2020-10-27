@@ -52,23 +52,28 @@ namespace TestApplication.GoogleService{
             => manager.ConnectCloudService("Google",(AppDomain.CurrentDomain.IsHosted() ? Platform.Web : Platform.Win).ToString(),office => office.Google().OAuth)
                 .WhenNotDefault()
 				.Do(t => {
-					var json = JsonConvert.DeserializeObject<dynamic>(t.creds);
+					var json = JsonConvert.DeserializeObject<dynamic>(t.creds!);
 
                     if (AppDomain.CurrentDomain.IsHosted()){
-                        t.modelOAuth.ClientId = json.web.client_id;
-                        t.modelOAuth.ClientSecret = json.web.client_secret;
-                        t.modelOAuth.RedirectUri = json.web.redirect_uris[0];
+                        if (t.modelOAuth != null){
+                            t.modelOAuth.ClientId = json.web.client_id;
+                            t.modelOAuth.ClientSecret = json.web.client_secret;
+                            t.modelOAuth.RedirectUri = json.web.redirect_uris[0];
+                        }
                     }
                     else{
-                        t.modelOAuth.ClientId = json.installed.client_id;
-                        t.modelOAuth.ClientSecret = json.installed.client_secret;
+                        if (t.modelOAuth != null){
+                            t.modelOAuth.ClientId = json.installed.client_id;
+                            t.modelOAuth.ClientSecret = json.installed.client_secret;
+                        }
                     }
 					
 				})
 				.ToUnit()
-                .Merge(manager.RegisterViewSimpleAction(nameof(PersistGoogleToken), action => { }).ActivateInUserDetails().WhenExecute().PersistToken().ToUnit())
+                .Merge(manager.RegisterViewSimpleAction(nameof(PersistGoogleToken),
+                    action => { action.Active[""] = false;}).ActivateInUserDetails().WhenExecute().PersistToken().ToUnit())
                 .Merge(manager.ShowGoogleAccountInfo())
-                // .Merge(manager.PushTheToken<GoogleAuthentication>("Google",o => new DictionaryValueConverter().ConvertToStorageType(o.OAuthToken).ToString()))
+                .Merge(manager.PushTheToken<GoogleAuthentication>("Google",o => new DictionaryValueConverter().ConvertToStorageType(o.OAuthToken).ToString()))
                 .ToUnit();
 
 

@@ -1,5 +1,5 @@
 param(
-    $Branch = "master",
+    $Branch = "lab",
     $SourcePath = "$PSScriptRoot\..",
     $GitHubUserName = "apobekiaris",
     $GitHubToken = $env:GitHubToken,
@@ -7,7 +7,7 @@ param(
     $artifactstagingdirectory,
     $bindirectory,
     [string]$AzureToken = $env:AzDevopsToken,
-    [string]$CustomVersion = "20.1.4.0"
+    [string]$CustomVersion = "20.2.3.0"
 )
 
 if (!(Get-Module eXpandFramework -ListAvailable)) {
@@ -41,7 +41,9 @@ Invoke-Script{
     $DXVersion = Get-DevExpressVersion 
 
     $taskList = "Build"
+    . "$SourcePath\build\UpdateDependencies.ps1" $CustomVersion
     . "$SourcePath\build\UpdateLatestProjectVersion.ps1"
+    
 
     $bArgs = @{
         packageSources = "$(Get-PackageFeed -Xpand);$DxApiFeed"

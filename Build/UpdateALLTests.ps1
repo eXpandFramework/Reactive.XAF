@@ -114,11 +114,11 @@ Invoke-Script {
     $testsource=$tempNupkg,(Get-PackageFeed -Nuget),(Get-PackageFeed -Xpand)
     $testsource+=$source
     Use-NugetConfig -Sources $testsource -ScriptBlock{
-        $solutionName="Tests"
+        $configuration="Debug"
         if (([version]$dxVersion) -lt "20.1.7"){
-            $solutionName="NotCoreTests";
+            $configuration="NetCore";
         }
-        Start-Build "$testAppPAth\$solutionName.sln" -BinaryLogPath $root\bin\Tests.binlog -WarnAsError
+        Start-Build "$testAppPAth\Tests.sln" -BinaryLogPath $root\bin\Tests.binlog -WarnAsError -Configuration $configuration
     }
     Pop-Location
 } -Maximum 2

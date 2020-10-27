@@ -68,28 +68,28 @@ namespace ALL.Tests{
 
         public static async Task TestCloudService(this ICommandAdapter commandAdapter,
             Func<string, IObservable<Unit>> whenConnected, string serviceName,
-            CheckDetailViewCommand checkAccountInfoCOmmand){
+            CheckDetailViewCommand checkAccountInfoCommand){
             var signOutCaption = $"Sign out {serviceName}";
             var signInCaption = $"Sign In {serviceName}";
             commandAdapter.Execute(new NavigateCommand("Default.My Details"),new ActionCommand(signOutCaption){ExpectException = true});
             
             await whenConnected(signInCaption);
-            commandAdapter.CheckConnection(signOutCaption, signInCaption, checkAccountInfoCOmmand,serviceName);
+            commandAdapter.CheckConnection(signOutCaption, signInCaption, checkAccountInfoCommand,serviceName);
             commandAdapter.Execute(new LogOffCommand(),new LoginCommand());
-            commandAdapter.CheckConnection(signOutCaption, signInCaption, checkAccountInfoCOmmand,serviceName);
+            commandAdapter.CheckConnection(signOutCaption, signInCaption, checkAccountInfoCommand,serviceName);
             commandAdapter.Execute(new ActionCloseCommand(),new ActionCloseCommand());
             commandAdapter.Disconnect(signOutCaption,signInCaption);
         }
 
         private static void CheckConnection(this ICommandAdapter commandAdapter, string signOutCaption,
-            string signInCaption, Command checkAccountInfoCOmmand,string serviceName){
+            string signInCaption, Command checkAccountInfoCommand,string serviceName){
             commandAdapter.Execute(new NavigateCommand("Default.My Details"));
             commandAdapter.Execute(new ActionAvailableCommand(signInCaption){ExpectException = true});
             commandAdapter.Execute(new ActionAvailableCommand(signOutCaption));
             commandAdapter.Execute(new CheckActionToolTip((signOutCaption,"Sign out")));
             commandAdapter.Execute(new ActionCommand($"Show {serviceName} Account Info"));
             commandAdapter.Execute(new WaitCommand(WaitInterval));
-            commandAdapter.Execute(checkAccountInfoCOmmand);
+            commandAdapter.Execute(checkAccountInfoCommand);
             commandAdapter.Execute(new ActionCloseCommand());
         }
 

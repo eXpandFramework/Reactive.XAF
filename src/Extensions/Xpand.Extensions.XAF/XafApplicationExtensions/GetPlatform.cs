@@ -12,7 +12,8 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions{
         Agnostic,
         Win,
         Web,
-        Mobile
+        Mobile,
+        Blazor
     }
 
     public static partial class XafApplicationExtensions{
@@ -68,12 +69,18 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions{
             });
 
         public static Platform GetPlatform(this XafApplication application){
-            var appNames = new[]{"WinApplication","WebApplication"};
+            var appNames = new[]{"WinApplication","WebApplication","BlazorApplication"};
             var baseType = application.GetType().BaseType;
             while (baseType != null &&baseType.Namespace!=null&& (!appNames.Contains(baseType.Name)&&!baseType.Namespace.StartsWith("DevExpress.ExpressApp"))){
                 baseType = baseType.BaseType;
             }
-            return baseType?.Name=="WebApplication"?Platform.Web : Platform.Win;
+
+            return baseType?.Name switch{
+	            "WinApplication" => Platform.Win,
+	            "WebApplication" => Platform.Web,
+	            "BlazorApplication" => Platform.Blazor,
+	            _ => throw new NotImplementedException(application.GetType().FullName)
+            };
         }
     }
 }

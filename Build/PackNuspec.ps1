@@ -104,7 +104,8 @@ $packages = & (Get-NugetPath) list -source $nugetBin | ConvertTo-PackageObject |
 $modules = Get-MSBuildProjects "$sourceDir\src\Modules\" | ForEach-Object {
     $proj=Get-XmlContent $_.fullname
     $PackageId=$_.BaseName
-    if ($proj.project.propertygroup.OutputType -ne "WinExe"){
+    $outputType=$proj.project.propertygroup.OutputType|Where-Object{$_}
+    if ($outputType -ne "WinExe"){
         $dir = $_.DirectoryName
         try {
             $platform = Get-ProjectAssemblyMetadata "$dir\Properties\AssemblyInfo.cs" "platform"
