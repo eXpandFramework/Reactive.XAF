@@ -6,3 +6,4 @@ System.ValueTuple
 System.Configuration.ConfigurationManager
 System.Collections.Immutable
 Microsoft.CodeAnalysis.CSharp
+System.ServiceModel.Http

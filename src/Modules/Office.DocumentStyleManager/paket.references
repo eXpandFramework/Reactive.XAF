@@ -11,3 +11,4 @@ DevExpress.ExpressApp.ConditionalAppearance
 System.ValueTuple
 Microsoft.CodeAnalysis.CSharp
 System.Configuration.ConfigurationManager
+System.ServiceModel.Http

@@ -28,22 +28,21 @@ namespace Xpand.XAF.Modules.HideToolBar.Tests{
         [TestCase(nameof(Platform.Win))]
         public async Task Signal_When_frame_with_HideToolBar_Enabled_ListView_controls_created(string platformName){
             var platform = GetPlatform(platformName);
-            using (var application = DefaultHideToolBarModule(platform, nameof(Signal_When_frame_with_HideToolBar_Enabled_ListView_controls_created)).Application){
-                var nestedFrames = application.HideToolBarNestedFrames().Replay();
-                nestedFrames.Connect();
-                var nestedFrame = application.CreateNestedFrame(null, TemplateContext.NestedFrame);
-                nestedFrame.CreateTemplate();
-                var detailView = application.NewObjectView<ListView>(typeof(HTBParent));
-                nestedFrame.SetView(detailView);
+            using var application = DefaultHideToolBarModule(platform, nameof(Signal_When_frame_with_HideToolBar_Enabled_ListView_controls_created)).Application;
+            var nestedFrames = application.HideToolBarNestedFrames().Replay();
+            nestedFrames.Connect();
+            var nestedFrame = application.CreateNestedFrame(null, TemplateContext.NestedFrame);
+            nestedFrame.CreateTemplate();
+            var detailView = application.NewObjectView<ListView>(typeof(HTBParent));
+            nestedFrame.SetView(detailView);
 
 
-                (await nestedFrames.Take(1).WithTimeOut()).ShouldBe(nestedFrame);
-            }
+            (await nestedFrames.Take(1).WithTimeOut()).ShouldBe(nestedFrame);
         }
 
 
         private static Mock<IWindowTemplate> MockFrameTemplate(BarManager barManager=null){
-            barManager = barManager ?? new BarManager();
+            barManager ??= new BarManager();
             var holderMock = new Mock<IBarManagerHolder>();
             holderMock.SetupGet(holder => holder.BarManager).Returns(barManager);
             var templateMock = holderMock.As<IWindowTemplate>();

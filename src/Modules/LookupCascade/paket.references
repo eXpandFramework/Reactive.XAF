@@ -6,3 +6,5 @@ Xpand.Patcher
 JetBrains.Annotations
 Newtonsoft.Json
 System.ValueTuple
+
+System.ServiceModel.Http

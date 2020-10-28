@@ -20,7 +20,7 @@
       <dependency id="System.Configuration.ConfigurationManager" version="4.7" />
       <dependency id="System.Reactive" version="5.0.0-preview.16" />
       <dependency id="System.ValueTuple" version="4.5" />
-      <dependency id="Xpand.Extensions.Reactive" version="2.202.59.3" />
+      <dependency id="Xpand.Extensions.Reactive" version="2.202.59.4" />
       <dependency id="Xpand.XAF.Modules.Reactive" version="2.202.59.5" />
       <dependency id="Xpand.VersionConverter" version="2.202.10" />
     </dependencies>

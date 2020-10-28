@@ -10,3 +10,4 @@ Microsoft.Identity.Client
 Newtonsoft.Json
 System.ValueTuple
 Microsoft.CodeAnalysis.CSharp
+System.ServiceModel.Http

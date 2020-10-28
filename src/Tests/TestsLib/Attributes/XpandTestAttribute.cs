@@ -11,6 +11,7 @@ using NUnit.Framework.Internal;
 using NUnit.Framework.Internal.Commands;
 using Polly.Timeout;
 using Xpand.Extensions.TaskExtensions;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 
 namespace Xpand.TestsLib.Attributes{
     [AttributeUsage(AttributeTargets.Method|AttributeTargets.Assembly, Inherited = false)]
@@ -52,15 +53,17 @@ namespace Xpand.TestsLib.Attributes{
                 while (count-- > 0){
                     try{
                         // ManualResetEvent resetEvent = new ManualResetEvent(false);
-                        TestResult ExecuteTest() => context.CurrentResult = innerCommand.Execute(context);
+                        
+                        void ExecuteTest() => Task.Factory.StartTask(() => context.CurrentResult = innerCommand.Execute(context),
+                                thread => thread.SetApartmentState(GetApartmentState(context))).Wait();
+
                         if (Debugger.IsAttached) {
                             ExecuteTest();
                         }
                         else {
                             Polly.Policy.Timeout(TimeSpan.FromMilliseconds(_timeout), TimeoutStrategy.Pessimistic)
                                 .Execute(() => {
-                                    Task.Factory.StartTask(ExecuteTest,
-                                        thread => thread.SetApartmentState(GetApartmentState(context))).Wait();
+                                    ExecuteTest();
                                     // return;
                                     // if (context.CurrentTest.Arguments.Any(o => o == (object) Platform.Web)){
                                     //     ThreadPool.QueueUserWorkItem(state => {
@@ -74,7 +77,7 @@ namespace Xpand.TestsLib.Attributes{
                                     //     Task.Factory.StartTask(Execute, thread => thread.SetApartmentState(GetApartmentState(context))).Wait();   
                                     // }
                                 });
-                        };
+                        }
                     }
                     catch (Exception ex){
                         context.CurrentResult ??= context.CurrentTest.MakeTestResult();
@@ -96,10 +99,16 @@ namespace Xpand.TestsLib.Attributes{
                 return context.CurrentResult;
             }
             
-            private static ApartmentState GetApartmentState(TestExecutionContext context){
+            private static ApartmentState GetApartmentState(TestExecutionContext context) {
+                ApartmentState GetDefaultGetApartmentState() => ApartmentState.STA;
                 var apartmentAttribute = context.CurrentTest.Method.MethodInfo.Attribute<ApartmentAttribute>();
-                return (ApartmentState?) apartmentAttribute?.Properties[PropertyNames.ApartmentState].OfType<object>().First() ?? Thread.CurrentThread.GetApartmentState();
+                if (apartmentAttribute != null)
+                    return (ApartmentState?) apartmentAttribute.Properties[PropertyNames.ApartmentState]
+                        .OfType<object>().First() ?? GetDefaultGetApartmentState();
+                return context.CurrentTest.Arguments.Any(o => $"{o}" == Platform.Win.ToString()) ? ApartmentState.STA : GetDefaultGetApartmentState();
             }
+
+            
         }
     }
 }

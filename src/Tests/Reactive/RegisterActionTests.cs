@@ -21,9 +21,9 @@ using Xpand.XAF.Modules.Reactive.Tests.BOModel;
 namespace Xpand.XAF.Modules.Reactive.Tests{
     public class ActionRegistrationTests:ReactiveBaseTest{
         [XpandTest()]
-        [TestCase(ViewType.DetailView)]
-        [TestCase(ViewType.ListView)]
-        public void Register_SimpleAction_For_All_Views(ViewType viewType){
+        [TestCase(ViewType.DetailView,3)]
+        [TestCase(ViewType.ListView,4)]
+        public void Register_SimpleAction_For_All_Views(ViewType viewType, int expected){
 	        using var application = Platform.Win.NewApplication<ReactiveModule>();
 	        var testObserver = application.WhenApplicationModulesManager()
 		        .SelectMany(manager => {
@@ -36,7 +36,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
 	        DefaultReactiveModule(application);
 
 	        AssertViewAction<SimpleAction>(application,nameof(Register_SimpleAction_For_All_Views),viewType);
-	        testObserver.ItemCount.ShouldBe(4);
+            testObserver.ItemCount.ShouldBe(expected);
         }
 
         private Action<T> Configure<T>(ViewType viewType,string caption) where T:ActionBase{
@@ -85,8 +85,10 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             detailViewAction.ShouldNotBeNull();
             detailViewAction.Active.ResultValue.ShouldBe(viewType==ViewType.DetailView);
             var listViewAction = viewWindow.View.AsDetailView().GetListPropertyEditor<NonPersistentObject>(o => o.Childs).Frame.Actions(id).FirstOrDefault();
-            listViewAction.ShouldNotBeNull();
-            listViewAction.Active.ResultValue.ShouldBe(viewType==ViewType.ListView);
+            if (viewType==ViewType.ListView) {
+                listViewAction.ShouldNotBeNull();
+                listViewAction.Active.ResultValue.ShouldBe(true);
+            }
             var window = application.CreateViewWindow();
             window.Controllers.Values.OfType<WindowController>().SelectMany(controller => controller.Actions).Select(a => a.Id).ShouldNotContain(id);
             if (detailViewAction.Active.ResultValue){
@@ -94,7 +96,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
                 detailViewAction.DoTheExecute();
                 testObserver.ItemCount.ShouldBe(1);
             }
-            else if (listViewAction.Active.ResultValue){
+            else if (listViewAction != null && listViewAction.Active.ResultValue){
                 var testObserver = listViewAction.WhenExecuted().Test();
                 listViewAction.DoTheExecute();
                 testObserver.ItemCount.ShouldBe(1);
@@ -102,9 +104,12 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             detailViewAction.TargetViewType.ShouldBe(viewType);
             detailViewAction.TargetObjectType.ShouldBe(typeof(NonPersistentObject));
             detailViewAction.Caption.ShouldBe(caption);
-            listViewAction.TargetViewType.ShouldBe(viewType);
-            listViewAction.TargetObjectType.ShouldBe(typeof(NonPersistentObject));
-            listViewAction.Caption.ShouldBe(caption);
+            if (listViewAction != null) {
+                listViewAction.TargetViewType.ShouldBe(viewType);
+                listViewAction.TargetObjectType.ShouldBe(typeof(NonPersistentObject));
+                listViewAction.Caption.ShouldBe(caption);
+            }
+
             return (T)detailViewAction;
         }
 

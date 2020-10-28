@@ -169,7 +169,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         private static Type NewControllerType<T>(string id) where T:Controller{
             var baseController = GetBaseController<T>();
             var typeBuilder = ActionsModule.DefineType(ActionControllerName(id, baseController), TypeAttributes.Public, baseController);
-            return typeBuilder.CreateTypeInfo().AsType();
+            return typeBuilder.CreateTypeInfo()?.AsType();
         }
 
         private static string ActionControllerName(string id, Type baseController) 

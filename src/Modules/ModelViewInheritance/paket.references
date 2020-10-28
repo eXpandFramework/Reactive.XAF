@@ -3,3 +3,4 @@ DevExpress.ExpressApp
 Fasterflect.Xpand
 JetBrains.Annotations
 Microsoft.CodeAnalysis.CSharp
+System.ServiceModel.Http

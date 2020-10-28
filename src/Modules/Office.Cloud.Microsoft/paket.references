@@ -16,3 +16,4 @@ Owin
 Newtonsoft.Json
 System.ValueTuple
 Microsoft.CodeAnalysis.CSharp
+System.ServiceModel.Http
