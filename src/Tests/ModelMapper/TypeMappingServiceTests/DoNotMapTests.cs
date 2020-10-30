@@ -18,7 +18,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [XpandTest]
         public async Task Do_Not_Map_If_recursion_detected(){
             
-            InitializeMapperService(nameof(Do_Not_Map_If_recursion_detected));
+            InitializeMapperService();
             var typeToMap = typeof(RootType);
 
             var modelType = await typeToMap.MapToModel().ModelInterfaces();
@@ -48,15 +48,15 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
         [Test()][Ignore(NotImplemented)]
         [XpandTest]
-        public  Task Do_not_map_Objects_with_no_mapable_properties(){
-//            InitializeMapperService(nameof(Do_not_map_Objects_with_no_mapable_properties));
+        public  Task Do_not_map_Objects_with_no_MapAble_properties(){
+//            InitializeMapperService(nameof(Do_not_map_Objects_with_no_MapAble_properties));
             throw new NotImplementedException();
         }
 
         [Test]
         [XpandTest]
         public async Task Do_Not_Map_TypeConverterAttributes_with_DevExpress_DesignTime_Types(){
-            InitializeMapperService(nameof(Do_Not_Map_TypeConverterAttributes_with_DevExpress_DesignTime_Types));
+            InitializeMapperService();
             var typeToMap = typeof(DXDesignTimeAttributeClass);
 
             var modelType = await typeToMap.MapToModel().ModelInterfaces();
@@ -70,7 +70,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [Test]
         [XpandTest]
         public async Task Do_Not_Map_Reserved_properties(){
-            InitializeMapperService(nameof(Do_Not_Map_Reserved_properties));
+            InitializeMapperService();
             var typeToMap = typeof(ResevredProperties);
 
             var modelType = await typeToMap.MapToModel().ModelInterfaces();
@@ -84,7 +84,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [Test]
         [XpandTest]
         public async Task Do_Not_Map_Non_Browsable_properties(){
-            InitializeMapperService(nameof(Do_Not_Map_Non_Browsable_properties));
+            InitializeMapperService();
             var typeToMap = typeof(NonBrowsableProperties);
 
             var modelType = await typeToMap.MapToModel().ModelInterfaces();
@@ -99,7 +99,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [Test]
         [XpandTest]
         public async Task Do_Not_Map_Obsolete_properties(){
-            InitializeMapperService(nameof(Do_Not_Map_Obsolete_properties));
+            InitializeMapperService();
             var typeToMap = typeof(ObsoleteProperties);
 
             var modelType = await typeToMap.MapToModel().ModelInterfaces();
@@ -116,7 +116,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         public async Task Do_Not_Map_Already_Mapped_Types(){
             var typeToMap1 = typeof(TestModelMapper);
             var typeToMap2 = typeof(TestModelMapper);
-            InitializeMapperService(nameof(Do_Not_Map_Already_Mapped_Types));
+            InitializeMapperService();
 
             await typeToMap1.MapToModel().ModelInterfaces();
             await typeToMap2.MapToModel().ModelInterfaces();
@@ -129,7 +129,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [XpandTest]
         public async Task Do_not_Map_DefaultValueAttribute(){
 
-            InitializeMapperService(nameof(Do_not_Map_DefaultValueAttribute));
+            InitializeMapperService();
             
             var typeToMap = typeof(DefaultValueAttributesClass);
 
@@ -143,7 +143,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [XpandTest]
         public async Task Do_not_Map_Attributes_With_Flag_Parameters(){
 
-            InitializeMapperService(nameof(Do_not_Map_Attributes_With_Flag_Parameters));
+            InitializeMapperService();
             
             var typeToMap = typeof(FlagAttributesClass);
 
@@ -158,7 +158,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [XpandTest]
         public async Task Do_Not_Map_Attributes_With_Non_Public_Types_As_Parameters(){
             var typeToMap1 = typeof(NonPublicAttributeClass);
-            InitializeMapperService(nameof(Do_Not_Map_Attributes_With_Non_Public_Types_As_Parameters));
+            InitializeMapperService();
 
             var type = await typeToMap1.MapToModel().ModelInterfaces();
 
@@ -170,11 +170,35 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [XpandTest]
         public async Task Do_Not_Map_Properties_Marked_With_DesignerSerialization_Hidden(){
             var typeToMap1 = typeof(DesignerSerializationHiddenClass);
-            InitializeMapperService(nameof(Do_Not_Map_Properties_Marked_With_DesignerSerialization_Hidden));
+            InitializeMapperService();
 
             var type = await typeToMap1.MapToModel().ModelInterfaces();
 
             type.Property(nameof(DesignerSerializationHiddenClass.Test)).ShouldBeNull();
+            
+        }
+
+        [Test]
+        [XpandTest]
+        public async Task Do_Not_Map_Generic_Type_Properties(){
+            var typeToMap1 = typeof(GenericTypeProperties);
+            InitializeMapperService();
+
+            var type = await typeToMap1.MapToModel().ModelInterfaces();
+
+            type.Property(nameof(GenericTypeProperties.Test)).ShouldBeNull();
+            
+        }
+
+        [Test]
+        [XpandTest]
+        public async Task Do_Not_Map_Tuple_Type_Properties(){
+            var typeToMap1 = typeof(TupleTypeProperties);
+            InitializeMapperService();
+
+            var type = await typeToMap1.MapToModel().ModelInterfaces();
+
+            type.Property(nameof(TupleTypeProperties.Test)).ShouldBeNull();
             
         }
 

@@ -24,7 +24,11 @@ Task TestsRun  -depends   Clean, Init, UpdateProjects, Compile,CheckVersions, In
 Task IndexSources {
     Invoke-Script {
         $sha = Get-GitLastSha "https://github.com/eXpandFramework/DevExpress.XAF" $branch
-        Get-ChildItem "$root\bin" Xpand.XAF.Modules.*.pdb | Update-XSymbols -SourcesRoot "$Root" -TargetRoot "https://raw.githubusercontent.com/eXpandFramework/DevExpress.XAF/$sha"
+        "Xpand.XAF.Modules.*.pdb","Xpand.Extensions.*.pdb"|ForEach-Object{
+            Get-ChildItem "$root\bin" $_ | Update-XSymbols -SourcesRoot "$Root" -TargetRoot "https://raw.githubusercontent.com/eXpandFramework/DevExpress.XAF/$sha"
+            Get-ChildItem "$root\bin\net461" $_ | Update-XSymbols -SourcesRoot "$Root" -TargetRoot "https://raw.githubusercontent.com/eXpandFramework/DevExpress.XAF/$sha"
+        }
+        
     }
 }
 

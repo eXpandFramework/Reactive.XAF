@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reactive;
 using DevExpress.ExpressApp.Model;
+using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
@@ -14,8 +15,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.Predefined{
             return Unit.Default.ReturnObservable();
         }
 
-        private static void TypeMappingRule(ModelMapperType _){
+        private static void TypeMappingRule(GenericEventArgs<ModelMapperType> e){
             var typeToMap = PredefinedMap.LayoutControlGroup.TypeToMap();
+            var _ = e.Instance;
             if (_.Type == typeToMap){
                 if (_.TypeToMap == null){
                     _.BaseTypeFullNames.Add(typeof(IModelLayoutGroup).FullName);

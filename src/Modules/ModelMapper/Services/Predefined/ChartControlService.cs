@@ -16,7 +16,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.Predefined{
             var genericType = typeof(IList<>).MakeGenericType(propertyInfo.PropertyType);
             TypeMappingService.AdditionalTypesList.Add(genericType);
             TypeMappingService.PropertyMappingRules.Insert(0,(nameof(ChartDiagrams),data => ChartDiagrams(data,genericType,propertyInfo.Name)));
-            TypeMappingService.TypeMappingRules.Insert(0,(nameof(ChartDiagrams),type => ChartDiagrams(type,propertyInfo,typeToMap)));
+            TypeMappingService.TypeMappingRules.Insert(0,(nameof(ChartDiagrams),e => ChartDiagrams(e.Instance,propertyInfo,typeToMap)));
             return Unit.Default.ReturnObservable();
         }
 

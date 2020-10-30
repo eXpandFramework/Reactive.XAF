@@ -22,13 +22,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             Type = type;
             TypeToMap = typeToMap;
             BaseTypeFullNames=new List<string>();
-            CustomAttributeDatas = new List<ModelMapperCustomAttributeData>(type.GetCustomAttributesData()
+            CustomAttributeData = new List<ModelMapperCustomAttributeData>(type.GetCustomAttributesData()
                 .Where(data => data.AttributeType.Attributes<AttributeUsageAttribute>().All(attribute =>
                     attribute.ValidOn == (AttributeTargets.All | AttributeTargets.Interface)))
                 .ToModelMapperConfigurationData());
         }
 
-        public List<ModelMapperCustomAttributeData> CustomAttributeDatas{ get; }
+        public List<ModelMapperCustomAttributeData> CustomAttributeData{ get; }
 
         public List<string> BaseTypeFullNames{ get; }
         public string ModelName{ get; set; }
@@ -36,7 +36,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
     }
 
     public sealed class ModelMapperPropertyInfo : PropertyInfo{
-        readonly List<ModelMapperCustomAttributeData> _customAttributeDatas = new List<ModelMapperCustomAttributeData>();
+        readonly List<ModelMapperCustomAttributeData> _customAttributeData = new List<ModelMapperCustomAttributeData>();
 
 
         private ModelMapperPropertyInfo(string name, Type propertyType, Type declaringType, bool canRead, bool canWrite){
@@ -56,16 +56,16 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
 
         private static IEnumerable<ModelMapperCustomAttributeData> CustomAttributeDatas(PropertyInfo propertyInfo){
             return propertyInfo is ModelMapperPropertyInfo mapperPropertyInfo
-                ? mapperPropertyInfo._customAttributeDatas
+                ? mapperPropertyInfo._customAttributeData
                 : propertyInfo.GetCustomAttributesData().ToModelMapperConfigurationData();
         }
 
         public ModelMapperPropertyInfo(string name, Type propertyType,Type declaringType,IEnumerable<ModelMapperCustomAttributeData> customAttributeDatas = null) : this(name,
             propertyType, declaringType, true, true){
             customAttributeDatas ??= Enumerable.Empty<ModelMapperCustomAttributeData>();
-            _customAttributeDatas.AddRange(customAttributeDatas);
+            _customAttributeData.AddRange(customAttributeDatas);
             if (propertyType != typeof(string)){
-                _customAttributeDatas.RemoveAll(data => typeof(LocalizableAttribute).IsAssignableFrom(data.AttributeType));
+                _customAttributeData.RemoveAll(data => typeof(LocalizableAttribute).IsAssignableFrom(data.AttributeType));
             }
         }
 
@@ -96,7 +96,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         }
 
         public new IList<ModelMapperCustomAttributeData> GetCustomAttributesData(){
-            return _customAttributeDatas;
+            return _customAttributeData;
         }
 
         public override ParameterInfo[] GetIndexParameters(){
@@ -129,16 +129,16 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
 
 
         public void RemoveAttributeData(ModelMapperCustomAttributeData customAttributeData){
-            _customAttributeDatas.Remove(customAttributeData);
+            _customAttributeData.Remove(customAttributeData);
         }
 
         public void AddAttributeData(Type attributeType,params CustomAttributeTypedArgument[] arguments) {
-            _customAttributeDatas.Add(new ModelMapperCustomAttributeData(attributeType,arguments));
+            _customAttributeData.Add(new ModelMapperCustomAttributeData(attributeType,arguments));
         }
 
         public void RemoveAttribute(Type type){
-            var attributeData = _customAttributeDatas.FirstOrDefault(_ => _.AttributeType==type);
-            _customAttributeDatas.Remove(attributeData);
+            var attributeData = _customAttributeData.FirstOrDefault(_ => _.AttributeType==type);
+            _customAttributeData.Remove(attributeData);
         }
     }
 

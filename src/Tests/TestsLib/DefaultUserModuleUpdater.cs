@@ -19,8 +19,8 @@ namespace Xpand.TestsLib {
             this.AddDefaultSecurityObjects();
             if (_userId!=Guid.Empty){
                 ((PermissionPolicyUser) ObjectSpace.GetUser(_admin?"Admin":"User")).SetMemberValue("oid", _userId);
-                ObjectSpace.CommitChanges();
             }
+            ObjectSpace.CommitChanges();
         }
     }
 }

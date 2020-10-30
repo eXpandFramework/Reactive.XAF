@@ -7,6 +7,7 @@ using EnumsNET;
 using Fasterflect;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ReflectionExtensions;
+using Xpand.Extensions.TypeExtensions;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     public static partial class TypeMappingService{
@@ -14,10 +15,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         private static string[] References(this Type type, PropertyInfo[] propertyInfos,Type[] additionalTypes){
             var referencedTypes = propertyInfos.SelectMany(_ => new[]{_.PropertyType,_.DeclaringType}).ToArray();
             return referencedTypes
-                .Concat(additionalTypes.SelectMany(_ => _.PublicProperties().SelectMany(info => info.GetCustomAttributesData().ReferecedTypes())))
-                .Concat(additionalTypes.SelectMany(_ => _.GetCustomAttributesData().ReferecedTypes()))
-                .Concat(referencedTypes.SelectMany(_ => _.GetCustomAttributesData().ReferecedTypes()))
-                .Concat(propertyInfos.SelectMany(_ => _.GetCustomAttributesData().ReferecedTypes()))
+                .Concat(additionalTypes.SelectMany(_ => _.PublicProperties().SelectMany(info => info.GetCustomAttributesData().ReferencedTypes())))
+                .Concat(additionalTypes.SelectMany(_ => _.GetCustomAttributesData().ReferencedTypes()))
+                .Concat(referencedTypes.SelectMany(_ => _.GetCustomAttributesData().ReferencedTypes()))
+                .Concat(propertyInfos.SelectMany(_ => _.GetCustomAttributesData().ReferencedTypes()))
                 .Concat(new []{type})
                 .Select(_ => _.Assembly.Location)
                 .Concat(AdditionalReferences)
@@ -25,8 +26,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 .ToArray();
         }
 
-        private static IEnumerable<Type> ReferecedTypes(this IList<CustomAttributeData> attributeDatas){
-            return attributeDatas.Select(attributeData => attributeData.AttributeType).Concat(attributeDatas
+        private static IEnumerable<Type> ReferencedTypes(this IList<CustomAttributeData> attributeData){
+            return attributeData.Select(data => data.AttributeType).Concat(attributeData
                 .SelectMany(customAttributeData => customAttributeData.ConstructorArguments)
                 .Select(argument => argument.ArgumentType == typeof(Type) ? (Type) argument.Value : argument.ArgumentType))
                 .Where(_ => _!=null);
@@ -54,7 +55,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                         }
                     }
                     var interfaceType = type.GetInterfaces().FirstOrDefault(_ => _.IsGenericType&&typeof(IEnumerable).IsAssignableFrom(_));
-                    if (interfaceType!=null){
+                    if (interfaceType!=null&&!interfaceType.GenericTypeArguments.First().IsTupleFamily()){
                         return interfaceType.GenericTypeArguments.First();
                     }
 

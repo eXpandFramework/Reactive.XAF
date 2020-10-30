@@ -17,7 +17,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [Test]
         [XpandTest]
         public async Task Custom_Container_Image(){
-            InitializeMapperService(nameof(Custom_Container_Image));
+            InitializeMapperService();
             var typeToMap = typeof(TestModelMapper);
             var imageName = "ImageName";
 
@@ -33,7 +33,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [Test]
         [XpandTest]
         public async Task Container_Interface(){
-            InitializeMapperService(nameof(Container_Interface));
+            InitializeMapperService();
             var typeToMap = typeof(TestModelMapper);
 
             var modelType = await typeToMap.MapToModel().ModelInterfaces();
@@ -49,7 +49,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [Test]
         [XpandTest]
         public async Task Custom_Container_Name(){
-            InitializeMapperService(nameof(Custom_Container_Name));
+            InitializeMapperService();
             var typeToMap = typeof(TestModelMapper);
             var containerName = "Custom";
             string mapName="mapName";
@@ -67,12 +67,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [Test]
         [XpandTest]
         public async Task ModelMappers_Interface(){
-            InitializeMapperService(nameof(ModelMappers_Interface));
+            InitializeMapperService();
             var typeToMap = typeof(TestModelMapper);
 
             var modelType = await typeToMap.MapToModel().ModelInterfaces();
 
-            var containerName = typeof(TestModelMapper).Name;
+            var containerName = nameof(TestModelMapper);
             var containerType = modelType.Assembly.GetType($"IModel{containerName}{TypeMappingService.DefaultContainerSuffix}");
             
             var propertyInfo = containerType.GetProperty(containerName)?.PropertyType.GetProperty(TypeMappingService.ModelMappersNodeName);

@@ -118,11 +118,12 @@ namespace Xpand.TestsLib{
 
         [TearDown]
         public virtual void Dispose(){
-            XpoTypesInfoHelper.Reset();
             XafTypesInfo.HardReset();
-            var typesInfo = ((TypesInfo) XafTypesInfo.Instance);
-            var entityStores = ((IList<IEntityStore>) typesInfo.GetFieldValue("entityStores"));
-            entityStores.Remove(store => !(store is NonPersistentTypeInfoSource));
+            // XpoTypesInfoHelper.Reset();
+            
+            // var typesInfo = ((TypesInfo) XafTypesInfo.Instance);
+            // var entityStores = ((IList<IEntityStore>) typesInfo.GetFieldValue("entityStores"));
+            // entityStores.Remove(store => !(store is NonPersistentTypeInfoSource));
             
 
             try{

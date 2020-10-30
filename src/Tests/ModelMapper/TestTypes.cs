@@ -4,11 +4,13 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Reactive.Subjects;
 using System.Security.Principal;
+using DevExpress.DataProcessing;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Utils;
 using DevExpress.Xpo;
+using DevExpress.XtraEditors.Mask;
 
 namespace Xpand.XAF.Modules.ModelMapper.Tests{
     class CollectionsType{
@@ -138,6 +140,16 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
     class DesignerSerializationHiddenClass{
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string Test{ get; set; }
+
+    }
+    class GenericTypeProperties{
+        
+        public IEnumerable<Named<object>> Test{ get; set; }
+
+    }
+    class TupleTypeProperties{
+        
+        public MaskSettings Test{ get; set; }
 
     }
     public class PrivateDescriptionAttributesClass{

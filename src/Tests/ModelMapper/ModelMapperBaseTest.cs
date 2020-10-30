@@ -7,6 +7,7 @@ using System.Reflection;
 using DevExpress.ExpressApp;
 using Fasterflect;
 using Microsoft.CSharp;
+using NUnit.Framework;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib;
@@ -30,10 +31,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             new ModelMapperModule();
         }
 
-        internal ModelMapperModule DefaultModelMapperModule(string title,Platform platform,params ModuleBase[] modules){
+        internal ModelMapperModule DefaultModelMapperModule(Platform platform,params ModuleBase[] modules){
             var xafApplication = platform.NewApplication<ModelMapperModule>();
             xafApplication.Modules.AddRange(modules);
-            var modelMapperModule = xafApplication.AddModule<ModelMapperModule>(title,typeof(MM));
+            var modelMapperModule = xafApplication.AddModule<ModelMapperModule>(typeof(MM));
             xafApplication.Logon();
             using (xafApplication.CreateObjectSpace()){
             }
@@ -74,8 +75,8 @@ public class {DynamicTypeName}{{
             return compilerResults.CompiledAssembly.GetType(DynamicTypeName);
         }
 
-        internal string InitializeMapperService(string modelMapperAssemblyName,Platform platform=Platform.Agnostic,bool newAssemblyName=true ){
-            var mapperAssemblyName = $"{GetType().Name}{modelMapperAssemblyName}{platform}".GetHashCode();
+        internal string InitializeMapperService(Platform platform=Platform.Agnostic,bool newAssemblyName=true ){
+            var mapperAssemblyName = $"{GetType().Name}{TestContext.CurrentContext.Test.MethodName}{platform}".GetHashCode();
             
             if (newAssemblyName){
                 TypeMappingService.ModelMapperAssemblyName = $"{Guid.NewGuid()}{mapperAssemblyName}";

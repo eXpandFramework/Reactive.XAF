@@ -39,7 +39,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.Predefined{
         private static IObservable<Unit> Connect((Type typeToMap, string mapName, Type[] viewItemTypes) info){
             
             var genericList = typeof(IList<>).MakeGenericType(info.typeToMap);
-            TypeMappingService.TypeMappingRules.Add((info.typeToMap.Name,type => ViewItem(type,info.typeToMap,info.viewItemTypes)));
+            TypeMappingService.TypeMappingRules.Add((info.typeToMap.Name,e => ViewItem(e.Instance,info.typeToMap,info.viewItemTypes)));
             
             TypeMappingService.ContainerMappingRules.Add((info.typeToMap.Name,tuple => ViewItem(info.typeToMap,tuple,info.mapName)));
             TypeMappingService.AdditionalTypesList.Add(genericList);    
@@ -49,8 +49,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.Predefined{
         
         private static void ViewItem(ModelMapperType modelMapperType, Type typeToMap, Type[] viewItemTypes){
             if (modelMapperType.Type == typeof(RepositoryItemBaseMap)||modelMapperType.Type == typeof(PropertyEditorControlMap)){
-                if (modelMapperType.CustomAttributeDatas.All(data => data.AttributeType != typeof(ModelAbstractClassAttribute))){
-                    modelMapperType.CustomAttributeDatas.Add(new ModelMapperCustomAttributeData(typeof(ModelAbstractClassAttribute)));
+                if (modelMapperType.CustomAttributeData.All(data => data.AttributeType != typeof(ModelAbstractClassAttribute))){
+                    modelMapperType.CustomAttributeData.Add(new ModelMapperCustomAttributeData(typeof(ModelAbstractClassAttribute)));
                 }
             }
 
@@ -60,7 +60,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.Predefined{
                     var modelMapName = typeToMap.ModelTypeName(typeToMap);
                     modelMapperType.BaseTypeFullNames.Add(modelMapName);
 
-                    modelMapperType.CustomAttributeDatas.Add(new ModelMapperCustomAttributeData(typeof(ModelMapLinkAttribute),
+                    modelMapperType.CustomAttributeData.Add(new ModelMapperCustomAttributeData(typeof(ModelMapLinkAttribute),
                         new CustomAttributeTypedArgument($"{modelMapperType.Type.AssemblyQualifiedName}")));
                     modelMapperType.BaseTypeFullNames.Add(typeof(IModelNode).FullName);
                 }

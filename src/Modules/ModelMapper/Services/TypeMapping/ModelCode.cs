@@ -10,7 +10,9 @@ using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using JetBrains.Annotations;
+using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.ReflectionExtensions;
 using Xpand.Extensions.StringExtensions;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 
@@ -25,14 +27,14 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
 
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
     public class ModelMapperTypeAttribute : Attribute{
-        public ModelMapperTypeAttribute(string mappedType, string mappedAssemmbly, int assemblyHashCode, int configurationHashCode){
-            MappedAssemmbly = mappedAssemmbly;
+        public ModelMapperTypeAttribute(string mappedType, string mappedAssembly, int assemblyHashCode, int configurationHashCode){
+            MappedAssembly = mappedAssembly;
             ConfigurationHashCode = configurationHashCode;
             MappedType = mappedType;
             AssemblyHashCode = assemblyHashCode;
         }
 
-        public string MappedAssemmbly{ get; }
+        public string MappedAssembly{ get; }
 
         public int AssemblyHashCode{ get; }
         public string MappedType{ get; }
@@ -55,7 +57,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     public static partial class TypeMappingService{
         private static Subject<(Type type, Result<(string key, string code)> result)> _customizeContainerCode;
         private static Subject<(Type declaringType,List<ModelMapperPropertyInfo> propertyInfos)> _customizeProperties;
-        private static Subject<ModelMapperType> _customizeTypes;
+        private static Subject<GenericEventArgs<ModelMapperType>> _customizeTypes;
         
         static ((string key, string code,bool map)[] code, IEnumerable<string> references) ModelCode(this Type type,IModelMapperConfiguration configuration=null){
             var propertyInfos = type.PropertyInfos().Concat(AdditionalTypesList.Select(_ => _.GetRealType()).SelectMany(_ => _.PropertyInfos())).ToArray();
@@ -127,7 +129,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                     (string, string,bool) modelListCode = (null, null,false);
                     if (realType != _){
                         mappedTypes.AddMappedType(realType);
-                        modelListCode = ($"{modelCode.key}s",$"{Environment.NewLine}public interface {(realType,type).ModelName()}s:{typeof(IModelNode).FullName},{typeof(IModelList).FullName}<{modelCode.key}>{{}}",false);
+                        if (!realType.IsGenericType||realType.IsNullableType()) {
+                            modelListCode = ($"{modelCode.key}s",$"{Environment.NewLine}public interface {(realType,type).ModelName()}s:{typeof(IModelNode).FullName},{typeof(IModelList).FullName}<{modelCode.key}>{{}}",false);
+                        }
                     }
                     return new[]{modelCode,modelListCode};
                 }).Where(_ => _!=default);
@@ -174,7 +178,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
 
         private static (string key, string code,bool map) ContainerCode(this Type type, IModelMapperConfiguration configuration, string modelName, string mapName){
             if (!configuration.OmitContainer){
-                var modelBrowseableCode = configuration.ModelBrowseableCode();
+                var modelBrowsableCode = configuration.ModelBrowsableCode();
                 var linkAttributeCode = $@"[{typeof(ModelMapLinkAttribute).FullName}(""{type.AssemblyQualifiedName}"")]{Environment.NewLine}";
                 string propertiesCode = null;
                 var result = new Result< (string key, string code)>();
@@ -185,7 +189,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                     key = instanceData.key;
                     propertiesCode = instanceData.code;
                 }
-                propertiesCode ??= $"{modelBrowseableCode}{mapName} {configuration.MapName??type.Name}{{get;}}";
+                propertiesCode ??= $"{modelBrowsableCode}{mapName} {configuration.MapName??type.Name}{{get;}}";
                 var containerCode = (type,Type.EmptyTypes.FirstOrDefault()).ModelCode(null, $"{modelName}".Substring(6),
                     propertiesCode,baseType:typeof(IModelModelMapContainer));
             
@@ -196,7 +200,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             return default;
         }
 
-        private static string ModelBrowseableCode(this IModelMapperConfiguration configuration){
+        private static string ModelBrowsableCode(this IModelMapperConfiguration configuration){
             var visibilityCriteria = configuration?.VisibilityCriteria;
             visibilityCriteria = visibilityCriteria == null ? "null" : $@"""{visibilityCriteria}""";
             return $"[{typeof(ModelMapperBrowsableAttribute).FullName}(typeof({typeof(ModelMapperVisibilityCalculator).FullName}),{visibilityCriteria})]{Environment.NewLine}";
@@ -227,18 +231,23 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             }
 
             var modelName = $"{(typeToCode,data.rootType).ModelName(customName)}";
-            var modelMapperType = new ModelMapperType(typeToCode,data.rootType,modelName,additionalPropertiesCode);
-            
+            var args = new GenericEventArgs<ModelMapperType>(new ModelMapperType(typeToCode,data.rootType,modelName,additionalPropertiesCode));
+
+            var modelMapperType = args.Instance;
             modelMapperType.BaseTypeFullNames.Add(baseType.FullName);
-            _customizeTypes.OnNext(modelMapperType);
-            propertiesCode += $"{Environment.NewLine}{modelMapperType.AdditionalPropertiesCode}";
-            var baseTypes = string.Join(",",modelMapperType.BaseTypeFullNames.Distinct());
-            if (!string.IsNullOrEmpty(baseTypes)){
-                baseTypes = $":{baseTypes}";
-            }
+            _customizeTypes.OnNext(args);
+            if (!args.Handled) {
+                propertiesCode += $"{Environment.NewLine}{modelMapperType.AdditionalPropertiesCode}";
+                var baseTypes = string.Join(",",modelMapperType.BaseTypeFullNames.Distinct());
+                if (!string.IsNullOrEmpty(baseTypes)){
+                    baseTypes = $":{baseTypes}";
+                }
             
-            var attributesCode = $"{modelMapperType.CustomAttributeDatas.ModelCode()}{Environment.NewLine}";
-            return (modelName,$"{imageCode}{Environment.NewLine}{attributesCode}public interface {modelMapperType.ModelName}{baseTypes}{{{Environment.NewLine}{propertiesCode}{Environment.NewLine}}}",false);
+                var attributesCode = $"{modelMapperType.CustomAttributeData.ModelCode()}{Environment.NewLine}";
+                return (modelName,$"{imageCode}{Environment.NewLine}{attributesCode}public interface {modelMapperType.ModelName}{baseTypes}{{{Environment.NewLine}{propertiesCode}{Environment.NewLine}}}",false);
+            }
+
+            return default;
         }
 
         private static string ModelName(this (Type typeToCode,Type rootType) data,string customName=null){

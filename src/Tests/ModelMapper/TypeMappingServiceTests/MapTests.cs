@@ -54,7 +54,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [Test]
         [XpandTest]
         public async Task Map_RW_StringValueType_Public_Properties(){
-            InitializeMapperService(nameof(Map_RW_StringValueType_Public_Properties));
+            InitializeMapperService();
             var typeToMap = typeof(StringValueTypeProperties);
             var propertiesToMap = typeToMap.Properties().Where(info => info.CanRead&&info.CanWrite).ToArray();
 
@@ -90,7 +90,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
             nameof(CollectionsType.ValueTypeArray)
         })]
         public async Task Include_Collections(Type typeToMap,string[] collectionNames){
-            InitializeMapperService($"{nameof(Include_Collections)}");
+            InitializeMapperService();
             
             var modelType = await typeToMap.MapToModel().ModelInterfaces();
             var modelTypeProperties = ModelTypeProperties(modelType);
@@ -106,7 +106,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [XpandTest]
         public async Task Map_All_ReferenceType_Public_Properties(){
             
-            InitializeMapperService(nameof(Map_All_ReferenceType_Public_Properties));
+            InitializeMapperService();
             var typeToMap = typeof(ReferenceTypeProperties);
             var propertiesToMap = typeToMap.Properties().ToArray();
 
@@ -126,7 +126,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [Test]
         [XpandTest]
         public async Task Map_Nested_type_properties(){
-            InitializeMapperService(nameof(Map_Nested_type_properties));
+            InitializeMapperService();
             var typeToMap = typeof(NestedTypeProperties);
 
             var modelType = await typeToMap.MapToModel().ModelInterfaces();
@@ -141,7 +141,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         public async Task Map_Multiple_Objects_from_the_same_subscription_In_the_same_assembly(){
             var typeToMap1 = typeof(TestModelMapper);
             var typeToMap2 = typeof(StringValueTypeProperties);
-            InitializeMapperService(nameof(Map_Multiple_Objects_from_the_same_subscription_In_the_same_assembly));
+            InitializeMapperService();
 
             var mappedTypes = new[]{typeToMap1, typeToMap2}.MapToModel().ModelInterfaces();
 
@@ -156,23 +156,23 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         public void Map_Multiple_Objects_with_common_types(){
             var typeToMap1 = typeof(TestModelMapperCommonType1);
             var typeToMap2 = typeof(TestModelMapperCommonType2);
-            InitializeMapperService(nameof(Map_Multiple_Objects_with_common_types));
+            InitializeMapperService();
 
             var mappedTypes = new List<Type>(new[]{typeToMap1, typeToMap2}.MapToModel().ModelInterfaces().ToEnumerable().ToArray());
 
             var mappedType1 = mappedTypes[0];
             var typesToMap = new[]{typeToMap1,typeToMap2}.Select(type => type.ModelTypeName()).ToArray();
             typesToMap.ShouldContain(mappedType1.Name);
-            var appearenceCell = mappedType1.Properties().First(_ => _.Name==nameof(TestModelMapperCommonType1.AppearanceCell));
-            appearenceCell.ShouldNotBeNull();
-            appearenceCell.GetType().Properties("TextOptions").ShouldNotBeNull();
+            var appearanceCell = mappedType1.Properties().First(_ => _.Name==nameof(TestModelMapperCommonType1.AppearanceCell));
+            appearanceCell.ShouldNotBeNull();
+            appearanceCell.GetType().Properties("TextOptions").ShouldNotBeNull();
             mappedTypes.Remove(mappedType1);
 
             var mappedType2 = mappedTypes[0];
             typesToMap.ShouldContain(mappedType2.Name);
-            appearenceCell = mappedType2.Properties().First(_ => _.Name==nameof(TestModelMapperCommonType2.AppearanceCell));
-            appearenceCell.ShouldNotBeNull();
-            appearenceCell.GetType().Properties("TextOptions").ShouldNotBeNull();
+            appearanceCell = mappedType2.Properties().First(_ => _.Name==nameof(TestModelMapperCommonType2.AppearanceCell));
+            appearanceCell.ShouldNotBeNull();
+            appearanceCell.GetType().Properties("TextOptions").ShouldNotBeNull();
             mappedType1.Assembly.ShouldBe(mappedType2.Assembly);
         }
 
@@ -181,7 +181,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         public async Task Map_Multiple_Objects_from_the_different_subscription_In_the_same_assembly(){
             var typeToMap1 = typeof(TestModelMapper);
             var typeToMap2 = typeof(StringValueTypeProperties);
-            InitializeMapperService(nameof(Map_Multiple_Objects_from_the_different_subscription_In_the_same_assembly));
+            InitializeMapperService();
 
             await new[]{typeToMap1}.MapToModel();
             await new[]{typeToMap2}.MapToModel();
@@ -229,7 +229,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [TestCase(PredefinedMap.RichEditControl,new[]{typeof(RichEditControl)},nameof(Platform.Win),new string[0])]
         public async Task Map_Predefined_Configurations(PredefinedMap predefinedMap, Type[] assembliesToLoad,string platformName, string[] collectionNames){
             var platform = GetPlatform(platformName);
-            InitializeMapperService($"{nameof(Map_Predefined_Configurations)}{predefinedMap}",platform);
+            InitializeMapperService(platform);
             assembliesToLoad.ToObservable().Do(type => Assembly.LoadFile(type.Assembly.Location)).Subscribe();
 
             var modelType = await predefinedMap.MapToModel().ModelInterfaces().FirstAsync();
@@ -266,7 +266,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         private async Task Map_PredefinedMap_ViewItems(Platform platform, IEnumerable<PredefinedMap> predefinedMaps,string mapTypeName, string mapPropertyName,bool checkDescription=false){
             foreach (var predefinedMap in predefinedMaps){
                 try{
-                    InitializeMapperService($"{nameof(Map_PredefinedMap_ViewItems)}{predefinedMap}", platform);
+                    InitializeMapperService( platform);
 
                     var replay = predefinedMap.MapToModel().ModelInterfaces().Replay();
                     replay.Connect();
@@ -334,7 +334,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [TestCase(PredefinedMap.ChartControlXYDiagram3D,new[]{typeof(XYDiagram3D),typeof(ChartListEditor)},nameof(Platform.Win),new string[0])]
         public async Task Map_Predefined_ChartControl_Configurations(PredefinedMap configuration,Type[] assembliesToLoad,string platformName,string[] collectionNames){
             var platform = GetPlatform(platformName);
-            InitializeMapperService($"{nameof(Map_Predefined_ChartControl_Configurations)}{configuration}",platform);
+            InitializeMapperService(platform);
             assembliesToLoad.ToObservable().Do(type => Assembly.LoadFile(type.Assembly.Location)).Subscribe();
 
             var modelType = await configuration.MapToModel().ModelInterfaces();
@@ -382,7 +382,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         public void Map_All_PredefinedConfigurations(string platformName){
             var platform = GetPlatform(platformName);
             Assembly.LoadFile(typeof(ChartControl).Assembly.Location);
-            InitializeMapperService($"{nameof(Map_All_PredefinedConfigurations)}",platform);
+            InitializeMapperService(platform);
             var values = Enums.GetValues<PredefinedMap>()
                 .Where(map =>map.GetAttributes()!.OfType<MapPlatformAttribute>().Any(_ => _.Platform == platform))
                 .ToArray();
@@ -400,7 +400,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [Test]
         [XpandTest]
         public void Map_PredefinedConfigurations_Combination(){
-            InitializeMapperService($"{nameof(Map_All_PredefinedConfigurations)}",Platform.Win);
+            InitializeMapperService(Platform.Win);
 
             var modelInterfaces = new[]{PredefinedMap.GridView,PredefinedMap.GridColumn}.MapToModel().ModelInterfaces().Replay();
             modelInterfaces.Connect();
@@ -416,7 +416,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [Test]
         [XpandTest]
         public void Customize_TypeMapping(){
-            InitializeMapperService($"{nameof(Customize_TypeMapping)}",Platform.Win);
+            InitializeMapperService(Platform.Win);
             TypeMappingService.PropertyMappingRules.Add(("RemoveTreeListMap", _ => {
                 if (_.declaringType == PredefinedMap.TreeList.TypeToMap()){
                     _.propertyInfos.Clear();

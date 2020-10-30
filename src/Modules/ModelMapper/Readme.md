@@ -80,7 +80,7 @@ It is possible for the map to be outdated if an indirect reference of the partic
 ##### What is not mapped
 1. Private or internal Types.
 2. Attributes where any of their argument type is not public.
-3. Properties marked as Obsolete or Browsable false or DesignerSerializationVisibility hidden.
+3. Properties marked as Obsolete, BrowseAble, DesignerSerializationVisibility hidden or are any of Generic Type, ValueTuple, Tuple.
 4. Properties that lead to recursion when a new XAF model node is generated (XAF will follow all possible paths and this can recourse).
 5. DevExpress DesignTime classes.
 5. ReservedPropertyNames, ReservedPropertyTypes, ReservedPropertyInstances (see how to customize a map).

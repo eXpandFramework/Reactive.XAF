@@ -17,6 +17,7 @@ using DevExpress.Persistent.Base;
 using Fasterflect;
 using JetBrains.Annotations;
 using Xpand.Extensions.AppDomainExtensions;
+using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.ReflectionExtensions;
@@ -43,7 +44,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         
         public static ObservableCollection<(string key, Action<(Type declaringType,List<ModelMapperPropertyInfo> propertyInfos)> action)> PropertyMappingRules{ get; private set; }
         public static ObservableCollection<(string key, Action<(Type typeToMap,Result<(string key, string code)> data)> action)> ContainerMappingRules{ get; private set; }
-        public static ObservableCollection<(string key, Action<ModelMapperType> action)> TypeMappingRules{ get; private set; }
+        public static ObservableCollection<(string key, Action<GenericEventArgs<ModelMapperType>> action)> TypeMappingRules{ get; private set; }
 
         static TypeMappingService(){
             Init();
@@ -69,7 +70,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             OutputAssembly = $@"{path}\{MapperAssemblyName}{ModelMapperAssemblyName}{{0}}.dll";
             _customizeContainerCode=new Subject<(Type type, Result<(string key, string code)> data)>();
             _customizeProperties =new Subject<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)>();
-            _customizeTypes =new Subject<ModelMapperType>();
+            _customizeTypes =new Subject<GenericEventArgs<ModelMapperType>>();
             
             TypeMappingRules = GetTypeMappingRules();
             ContainerMappingRules=new ObservableCollection<(string key, Action<(Type typeToMap, Result<(string key, string code)> data)> action)>();
@@ -80,7 +81,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             MappedTypes = GetMappedTypes();
             _modelMapperModuleVersion = typeof(TypeMappingService).Assembly.GetName().Version;
             
-            ConfigureReservedProeprties();
+            ConfigureReservedProperties();
             ConfigureReservedPropertyTypes();
             ConfigureReservedPropertyInstances();
             ConfigureAdditionalReferences();
@@ -88,11 +89,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
 
         private static IObservable<Type> GetMappedTypes(){
             return Observable.Defer(() => {
-                    var distinnctTypesToMap = _typesToMap.Distinct(_ => _.TypeToMap).Do(MappingTypes);
-                    return distinnctTypesToMap
+                    var distinctTypesToMap = _typesToMap.Distinct(_ => _.TypeToMap).Do(MappingTypes);
+                    return distinctTypesToMap
                         .All(_ =>_skipAssemblyValidation|| _.TypeFromPath())
                         .Select(_ => {
-                            var assembly =!_? distinnctTypesToMap.ModelCode().SelectMany(tuple => tuple.references.Compile(tuple.code))
+                            var assembly =!_? distinctTypesToMap.ModelCode().SelectMany(tuple => tuple.references.Compile(tuple.code))
                                 : AppDomain.CurrentDomain.LoadAssembly(GetLastAssemblyPath()).ReturnObservable();
                             return assembly.SelectMany(assembly1 => {
                                 var types = assembly1.GetTypes()
@@ -135,7 +136,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             }
         }
 
-        private static void ConfigureReservedProeprties(){
+        private static void ConfigureReservedProperties(){
             ReservedPropertyNames.Clear();
             new[]{typeof(ModelNode), typeof(IModelNode), typeof(ModelApplicationBase)}
                 .SelectMany(_ => _.Members(MemberTypes.Property | MemberTypes.Method)
@@ -158,15 +159,17 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 (nameof(DefaultValueRule), DefaultValueRule),
                 (nameof(WithNonPublicAttributeParameters), NonPublicAttributeParameters),
                 (nameof(TypeConverterWithDXDesignTimeType), TypeConverterWithDXDesignTimeType),
-                (nameof(CompilerIsReadOnly), CompilerIsReadOnly)
+                (nameof(CompilerIsReadOnly), CompilerIsReadOnly),
+                (nameof(GenericTypeRule), GenericTypeRule),
             };
         }
 
-        private static ObservableCollection<(string key, Action<ModelMapperType> action)> GetTypeMappingRules(){
-            return new ObservableCollection<(string key, Action<ModelMapperType> action)>(){
+        private static ObservableCollection<(string key, Action<GenericEventArgs<ModelMapperType>> action)> GetTypeMappingRules(){
+            return new ObservableCollection<(string key, Action<GenericEventArgs<ModelMapperType>> action)>(){
                 (nameof(WithNonPublicAttributeParameters), NonPublicAttributeParameters),
                 (nameof(GenericTypeArguments), GenericTypeArguments),
                 (nameof(CompilerIsReadOnly), CompilerIsReadOnly),
+                (nameof(GenericTypeRule), GenericTypeRule)
             };
         }
 
@@ -253,8 +256,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         [PublicAPI]
-        public static void Reset(bool skipeAssemblyValidation=false,Platform? platform=null){
-            _skipAssemblyValidation = skipeAssemblyValidation;
+        public static void Reset(bool skipAssemblyValidation=false,Platform? platform=null){
+            _skipAssemblyValidation = skipAssemblyValidation;
             ContainerMappingRules.Clear();
             AdditionalTypesList.Clear();
             AdditionalReferences.Clear();

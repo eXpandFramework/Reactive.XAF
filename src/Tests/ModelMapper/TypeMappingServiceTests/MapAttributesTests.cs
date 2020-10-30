@@ -18,7 +18,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [Test]
         [XpandTest]
         public async Task Map_Private_DescriptionAttributes(){
-            InitializeMapperService(nameof(Map_Private_DescriptionAttributes));
+            InitializeMapperService();
             
             var typeToMap = typeof(PrivateDescriptionAttributesClass);
 
@@ -34,7 +34,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [XpandTest]
         public async Task Map_Attributes(){
             
-            InitializeMapperService(nameof(Map_Attributes));
+            InitializeMapperService();
             var typeToMap = typeof(CopyAttributesClass);
 
             var modelType = await typeToMap.MapToModel().ModelInterfaces();
@@ -56,7 +56,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [XpandTest]
         public async Task Escape_strings(){
 
-            InitializeMapperService(nameof(Escape_strings));
+            InitializeMapperService();
 
             var modelType = await typeof(EscapeAttributeString).MapToModel().ModelInterfaces();
 
@@ -68,7 +68,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [Test]
         [XpandTest]
         public async Task Customize_Attributes_Mapping(){
-            InitializeMapperService(nameof(Customize_Attributes_Mapping));
+            InitializeMapperService();
             TypeMappingService.PropertyMappingRules.Add(("Custom", tuple => {
                 tuple.propertyInfos.First().AddAttributeData(typeof(DescriptionAttribute));
             }));
@@ -83,7 +83,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [Test]
         [XpandTest]
         public async Task Remove_LocalizableAttribute_from_Non_String_Properties(){
-            InitializeMapperService(nameof(Customize_Attributes_Mapping));
+            InitializeMapperService();
             var typeToMap = typeof(LocalizableAttributeClass);
             
             var modelType = await typeToMap.MapToModel().ModelInterfaces();
@@ -96,7 +96,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [Test]
         [XpandTest]
         public async Task Attribute_Mapping_Can_Be_Disabled(){
-            InitializeMapperService(nameof(Attribute_Mapping_Can_Be_Disabled));
+            InitializeMapperService();
             TypeMappingService.PropertyMappingRules.Add(("Disable", tuple => {
                 foreach (var modelMapperPropertyInfo in tuple.propertyInfos){
                     foreach (var modelMapperCustomAttributeData in modelMapperPropertyInfo.GetCustomAttributesData().ToArray()){
