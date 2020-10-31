@@ -101,7 +101,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
             using var objectSpace = objectSpaceProvider.CreateObjectSpace();
             var tokenStorage = objectSpace.CreateObject<CloudOfficeToken>();
             var storageToken = tokenStorage.Token;
-            await listEntities(tokenStorage);
+            await Observable.Start(() => listEntities(tokenStorage).ToTask()).Merge().ToTaskWithoutConfigureAwait();
 
             await modified.Timeout(timeout);
 

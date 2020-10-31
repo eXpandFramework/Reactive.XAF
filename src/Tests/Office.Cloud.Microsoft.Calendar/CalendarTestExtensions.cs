@@ -68,7 +68,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
             
             var todoModel = application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Calendar();
             var window = application.CreateViewWindow();
-            var service = CalendarService.Client.FirstAsync().SubscribeReplay();
+            var service = CalendarService.Client.Select(tuple => tuple).FirstAsync().SubscribeReplay();
             var modelObjectView = todoModel.Items.Select(item => item.ObjectView).First();
             window.SetView(application.NewView(modelObjectView));
             return (await service.ToTaskWithoutConfigureAwait());

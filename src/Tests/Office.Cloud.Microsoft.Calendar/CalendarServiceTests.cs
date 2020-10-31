@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Reactive;
@@ -173,6 +174,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
 
         [TestCase("CPDx077Z9-sCEPDx077Z9-sCGAU=")]
         [XpandTest()]
+        [SuppressMessage("ReSharper", "StringLiteralTypo")]
         public override async Task Populate_All(string syncToken){
             using var application = Platform.Win.CalendarModule().Application;
             var builder = await application.InitializeService(CalendarTestExtensions.PagingCalendarName);
@@ -185,7 +187,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
                 });
         }
 
-        [Test][XpandTest()]
+        [Test]
+        [XpandTest()]
         public override async Task Populate_Modified(){
             using var application = Platform.Win.CalendarModule().Application;
             var builder = await application.InitializeService();
@@ -240,24 +243,27 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
             await client.Me().Calendar.Events.Request().AddAsync(new Event(){Subject = "test"});
             var officeTokenStorage = application.CreateObjectSpace().CloudOfficeToken((Guid) SecuritySystem.CurrentUserId,typeof(Event).FullName,"deltatoken");
             officeTokenStorage.Token.ShouldBeNull();
-            var observeInsert = client.Me().CalendarView.ListDelta(officeTokenStorage,application.CreateObjectSpace ).FirstAsync().Test();
-            observeInsert.AwaitDone(Timeout);
-            observeInsert.Items.Count.ShouldBe(1);
-            observeInsert.Items.Select(_ => _.mapAction).First().ShouldBe(MapAction.Insert);
+
+            var storage = officeTokenStorage;
+            var observeInsert = Observable.Start(() => client.Me().CalendarView.ListDelta(storage,application.CreateObjectSpace ).FirstAsync().SubscribeReplay()).Merge();
+            await observeInsert;
+            var items = observeInsert.ToEnumerable().ToArray();
+            items.Count().ShouldBe(1);
+            items.Select(_ => _.mapAction).First().ShouldBe(MapAction.Insert);
             officeTokenStorage = application.CreateObjectSpace().CloudOfficeToken((Guid) SecuritySystem.CurrentUserId,typeof(Event).FullName,"deltatoken");
             officeTokenStorage.Token.ShouldNotBeNull();
             var objectSpace1 = application.CreateObjectSpace();
             var o = objectSpace1.CreateObject<DevExpress.Persistent.BaseImpl.Event>();
             objectSpace1.CommitChanges();
-            await objectSpace1.NewCloudObject(o, observeInsert.Items.First().@event);
+            await objectSpace1.NewCloudObject(o, items.First().@event);
             objectSpace1.CommitChanges();
             var synchronization = CalendarService.CustomizeSynchronization.FirstAsync(args => args.Instance.mapAction==MapAction.Delete).SubscribeReplay();
             var builder = await application.InitializeService("Calendar",true);
-            await builder.client.Me.Events[observeInsert.Items.First().@event.Id].Request().DeleteAsync();
+            await builder.client.Me.Events[items.First().@event.Id].Request().DeleteAsync();
 
             builder.frame.SetView(application.NewView(ViewType.DetailView, typeof(DevExpress.Persistent.BaseImpl.Event)));
                 
-            var tuple = await synchronization.ToTaskWithoutConfigureAwait();
+            var tuple = await synchronization.Delay(TimeSpan.FromSeconds(1)).ToTaskWithoutConfigureAwait();
             tuple.Instance.mapAction.ShouldBe(MapAction.Delete);
             var objectSpace = application.CreateObjectSpace();
             objectSpace.GetObjectsQuery<DevExpress.Persistent.BaseImpl.Event>().Count().ShouldBe(0);

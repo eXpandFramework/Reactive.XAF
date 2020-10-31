@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
@@ -181,7 +182,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
         public override async Task Populate_All(string syncToken){
             using var application = Platform.Win.CalendarModule().Application;
             var t = await application.InitializeService(CalendarTestExtensions.CalendarPagingName);
-            var calendarId = (await t.service.GetCalendar(CalendarTestExtensions.CalendarPagingName)).Id;
+            var calendarId = (await t.service.GetCalendar(CalendarTestExtensions.CalendarPagingName).ToTaskWithoutConfigureAwait()).Id;
             Func<IObjectSpace> objectSpaceFactory = application.ObjectSpaceProvider.CreateObjectSpace;
             await t.frame.View.ObjectSpace.Populate_All(syncToken,
                 storage => t.service.ListEvents(calendarId,null,
@@ -190,7 +191,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
                     var testObserver = events.Test();
                     testObserver.Items.First().Length.ShouldBe(2);
                     testObserver.Items.First().SelectMany(events1 => events1.Items).Count().ShouldBe(CalendarTestExtensions.PagingItemsCount);
-                });
+                }).ConfigureAwait(false);
         }
 
         [Test]
@@ -270,7 +271,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
 
             t.frame.SetView(application.NewView(ViewType.DetailView, typeof(DevExpress.Persistent.BaseImpl.Event)));
                 
-            var tuple = await synchronization.ToTaskWithoutConfigureAwait();
+            var tuple = await synchronization.Delay(TimeSpan.FromSeconds(1)).ToTaskWithoutConfigureAwait();
             tuple.Instance.mapAction.ShouldBe(MapAction.Delete);
             var objectSpace = application.CreateObjectSpace();
             objectSpace.GetObjectsQuery<DevExpress.Persistent.BaseImpl.Event>().Count().ShouldBe(0);

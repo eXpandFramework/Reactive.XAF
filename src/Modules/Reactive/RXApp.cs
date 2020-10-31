@@ -77,7 +77,7 @@ namespace Xpand.XAF.Modules.Reactive{
                 .Merge(application.ShowPersistentObjectsInNonPersistentView())
             ))
             .Merge(manager.SetupPropertyEditorParentView())
-            .Merge(manager.MergedExtraEmbededModels());
+            .Merge(manager.MergedExtraEmbeddedModels());
 
 
         static IObservable<Unit> PatchAuthentication(this XafApplication application) 
@@ -105,7 +105,7 @@ namespace Xpand.XAF.Modules.Reactive{
             return true;
         }
         
-        private static IObservable<Unit> MergedExtraEmbededModels(this ApplicationModulesManager manager) 
+        private static IObservable<Unit> MergedExtraEmbeddedModels(this ApplicationModulesManager manager) 
             => manager.WhereApplication().ToObservable()
                 .SelectMany(application => application.WhenCreateCustomUserModelDifferenceStore()
                     .Do(_ => {

@@ -42,19 +42,19 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
         [PublicAPI]
         public static IObservable<(Event cloud, IEvent local, MapAction mapAction, CallDirection callDirection)> When(
             this IObservable<(Event cloud,IEvent local, MapAction mapAction,CallDirection callDirection)> source,
-            MapAction mapAction, CallDirection calldirection = CallDirection.Both)
-            => source.Where(_ => _.mapAction == mapAction&& (calldirection == CallDirection.Both || _.callDirection == calldirection));
+            MapAction mapAction, CallDirection callDirection = CallDirection.Both)
+            => source.Where(_ => _.mapAction == mapAction&& (callDirection == CallDirection.Both || _.callDirection == callDirection));
 
         [PublicAPI]
         public static IObservable<GenericEventArgs<(Func<IObjectSpace> objectSpaceFactory, IEvent local, Event cloud, MapAction mapAction, CallDirection callDirection)>> When(
             this IObservable<GenericEventArgs<(Func<IObjectSpace> objectSpaceFactory, IEvent local, Event cloud, MapAction mapAction, CallDirection callDirection)>> source,
-            MapAction mapAction, CallDirection calldirection = CallDirection.Both)
-            => source.Where(_ => _.Instance.mapAction == mapAction&& (calldirection == CallDirection.Both || _.Instance.callDirection == calldirection));
+            MapAction mapAction, CallDirection callDirection = CallDirection.Both)
+            => source.Where(_ => _.Instance.mapAction == mapAction&& (callDirection == CallDirection.Both || _.Instance.callDirection == callDirection));
 
         internal static IObservable<TSource> TraceGoogleCalendarModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
-            => source.Trace(name, GoogleCalendarModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
+            => source.Trace(name, GoogleCalendarModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName);
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
 	        => manager.WhenApplication(application => {
@@ -112,9 +112,10 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
                 .Publish().RefCount()
                 .WhenNotDefault(t => t.frame.Application)
                 .Do(tuple => CredentialsSubject.OnNext((tuple.frame,tuple.credential)))
-                .Select(t => (t.frame, t.credential, t.calendarListEntry,
-                    t.frame.Application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Google().Calendar()
-                        .Items.First(item => item.ObjectView == t.frame.View.Model)))
+                .SelectMany(t => t.frame.Application.Model
+                    .ToReactiveModule<IModelReactiveModuleOffice>().Office
+                    .Google().Calendar().Items.Where(item => item.ObjectView == t.frame.View.Model)
+                    .Select(item => (t.frame, t.credential, t.calendarListEntry, item)))
                 .TraceGoogleCalendarModule(_ => _.frame.View.Id);
 
         private static IObservable<(Event serviceObject, MapAction mapAction)> SynchronizeBoth(
@@ -248,7 +249,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
 
         public static IObservable<(Event e, MapAction mapAction)> ListEvents(this global::Google.Apis.Calendar.v3.CalendarService service, ICloudOfficeToken store,
             Func<IObjectSpace> objectSpaceFactory,string calendarId) 
-            => service.ListEvents(calendarId, store,tokenStore => tokenStore?.SaveToken(objectSpaceFactory)).SelectMany(eventses => eventses).SelectMany(events => events.Items)
+            => service.ListEvents(calendarId, store,tokenStore => tokenStore?.SaveToken(objectSpaceFactory)).SelectMany(events => events).SelectMany(events => events.Items)
                 .PairMapAction(objectSpaceFactory);
 
         public static IObservable<Events[]> ListEvents(this global::Google.Apis.Calendar.v3.CalendarService calendarService,string calendarId, ICloudOfficeToken cloudOfficeToken = null,

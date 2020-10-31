@@ -23,7 +23,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
         [XpandTest()]
         [TestCase(ViewType.DetailView,3)]
         [TestCase(ViewType.ListView,4)]
-        public void Register_SimpleAction_For_All_Views(ViewType viewType, int expected){
+        public void Register_SimpleAction_For_All_Views(ViewType viewType,int expected){
 	        using var application = Platform.Win.NewApplication<ReactiveModule>();
 	        var testObserver = application.WhenApplicationModulesManager()
 		        .SelectMany(manager => {
@@ -36,7 +36,10 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
 	        DefaultReactiveModule(application);
 
 	        AssertViewAction<SimpleAction>(application,nameof(Register_SimpleAction_For_All_Views),viewType);
-            testObserver.ItemCount.ShouldBe(expected);
+            if (Version.Parse(XafAssemblyInfo.Version) > new Version(20, 2, 0, 0)) {
+                testObserver.ItemCount.ShouldBe(expected);
+            }
+            
         }
 
         private Action<T> Configure<T>(ViewType viewType,string caption) where T:ActionBase{

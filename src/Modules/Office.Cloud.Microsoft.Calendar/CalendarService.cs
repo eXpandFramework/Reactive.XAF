@@ -48,19 +48,19 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
         [PublicAPI]
         public static IObservable<(Event cloud, IEvent local, MapAction mapAction, CallDirection callDirection)> When(
             this IObservable<(Event cloud,IEvent local, MapAction mapAction,CallDirection callDirection)> source,
-            MapAction mapAction, CallDirection calldirection = CallDirection.Both)
-            => source.Where(_ => _.mapAction == mapAction&& (calldirection == CallDirection.Both || _.callDirection == calldirection));
+            MapAction mapAction, CallDirection callDirection = CallDirection.Both)
+            => source.Where(_ => _.mapAction == mapAction&& (callDirection == CallDirection.Both || _.callDirection == callDirection));
 
         [PublicAPI]
         public static IObservable<GenericEventArgs<(Func<IObjectSpace> objectSpaceFactory, IEvent local, Event cloud, MapAction mapAction, CallDirection callDirection)>> When(
             this IObservable<GenericEventArgs<(Func<IObjectSpace> objectSpaceFactory, IEvent local, Event cloud, MapAction mapAction, CallDirection callDirection)>> source,
-            MapAction mapAction, CallDirection calldirection = CallDirection.Both)
-            => source.Where(_ => _.Instance.mapAction == mapAction&& (calldirection == CallDirection.Both || _.Instance.callDirection == calldirection));
+            MapAction mapAction, CallDirection callDirection = CallDirection.Both)
+            => source.Where(_ => _.Instance.mapAction == mapAction&& (callDirection == CallDirection.Both || _.Instance.callDirection == callDirection));
 
         internal static IObservable<TSource> TraceMicrosoftCalendarModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
-            => source.Trace(name, MicrosoftCalendarModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
+            => source.Trace(name, MicrosoftCalendarModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName);
         
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) =>
             manager.WhenApplication(application => {
@@ -112,9 +112,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
                 .Publish().RefCount()
                 .WhenNotDefault(t => t.frame.Application)
                 .Do(tuple => ClientSubject.OnNext((tuple.frame,tuple.client)))
-                .Select(t => (t.frame, t.client, t.calendar,
-                    t.frame.Application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft()
-                        .Calendar().Items.First(item => item.ObjectView==t.frame.View.Model)))
+                .SelectMany(t => t.frame.Application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft()
+                    .Calendar().Items.Where(item => item.ObjectView == t.frame.View.Model)
+                    .Select(item => (t.frame, t.client, t.calendar, item)))
                 .TraceMicrosoftCalendarModule(_ => _.frame.View.Id);
 
         private static IObservable<(Event serviceObject, MapAction mapAction)> SynchronizeBoth(

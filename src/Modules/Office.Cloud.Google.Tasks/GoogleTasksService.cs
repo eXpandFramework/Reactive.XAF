@@ -95,7 +95,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks{
         internal static IObservable<TSource> TraceGoogleTasksModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
-            => source.Trace(name, GoogleTasksModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
+            => source.Trace(name, GoogleTasksModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName);
         
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => manager.WhenApplication(application => Observable.Defer(() => application.WhenViewOnFrame()
@@ -153,9 +153,10 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks{
             => source.AuthorizeGoogle().Select(t => t).EnsureTasksList()
             .Publish().RefCount()
             .Do(tuple => CredentialsSubject.OnNext((tuple.frame,tuple.credential)))
-            .Select(t => (t.frame, t.credential, t.taskList,
-                t.frame.Application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Google().Tasks().Items
-                    .First(item => item.ObjectView == t.frame.View.Model)))
+            .SelectMany(t => t.frame.Application.Model
+                .ToReactiveModule<IModelReactiveModuleOffice>().Office
+                .Google().Tasks().Items.Where(item => item.ObjectView == t.frame.View.Model)
+                .Select(item => (t.frame, t.credential, t.taskList, item)))
             .TraceGoogleTasksModule(_ => _.frame.View.Id);
     }
 }

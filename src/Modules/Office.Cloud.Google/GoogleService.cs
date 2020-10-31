@@ -52,9 +52,10 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
 
         public static IObservable<bool> GoogleNeedsAuthentication(this XafApplication application) 
             => application.NeedsAuthentication<GoogleAuthentication>(() => Observable.Using(application.GoogleAuthorizationCodeFlow,
-                flow => flow.LoadTokenAsync(application.CurrentUserId().ToString(), CancellationToken.None).ToObservable()
+                flow => Observable.FromAsync(() => flow.LoadTokenAsync(application.CurrentUserId().ToString(), CancellationToken.None))
+                    .Select(response => response)
                     .WhenNotDefault().RefreshToken(flow, application.CurrentUserId().ToString()))
-                .SwitchIfEmpty(true.ReturnObservable()))
+                .SwitchIfEmpty(Observable.Return(true).Select(b => b)))
                 .Publish().RefCount()
                 .TraceGoogleModule();
 

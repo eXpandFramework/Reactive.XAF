@@ -149,7 +149,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
     }
     class TupleTypeProperties{
         
-        public MaskSettings Test{ get; set; }
+        public IEnumerable<Tuple<string, Type, object>> Test{ get; set; }
 
     }
     public class PrivateDescriptionAttributesClass{

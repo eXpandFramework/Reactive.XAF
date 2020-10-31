@@ -11,7 +11,6 @@ using NUnit.Framework.Internal;
 using NUnit.Framework.Internal.Commands;
 using Polly.Timeout;
 using Xpand.Extensions.TaskExtensions;
-using Xpand.Extensions.XAF.XafApplicationExtensions;
 
 namespace Xpand.TestsLib.Attributes{
     [AttributeUsage(AttributeTargets.Method|AttributeTargets.Assembly, Inherited = false)]
@@ -102,10 +101,9 @@ namespace Xpand.TestsLib.Attributes{
             private static ApartmentState GetApartmentState(TestExecutionContext context) {
                 ApartmentState GetDefaultGetApartmentState() => ApartmentState.STA;
                 var apartmentAttribute = context.CurrentTest.Method.MethodInfo.Attribute<ApartmentAttribute>();
-                if (apartmentAttribute != null)
-                    return (ApartmentState?) apartmentAttribute.Properties[PropertyNames.ApartmentState]
-                        .OfType<object>().First() ?? GetDefaultGetApartmentState();
-                return context.CurrentTest.Arguments.Any(o => $"{o}" == Platform.Win.ToString()) ? ApartmentState.STA : GetDefaultGetApartmentState();
+                return apartmentAttribute != null ? (ApartmentState?) apartmentAttribute.Properties[PropertyNames.ApartmentState]
+                        .OfType<object>().First() ?? GetDefaultGetApartmentState() : GetDefaultGetApartmentState();
+                // return context.CurrentTest.Arguments.Any(o => $"{o}" == Platform.Win.ToString()) ? ApartmentState.STA : GetDefaultGetApartmentState();
             }
 
             

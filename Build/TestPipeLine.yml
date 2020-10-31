@@ -249,7 +249,7 @@ jobs:
           !**\*TestAdapter.dll
           !**\obj\**    
 - job: MicrosoftCloudOffice
-  timeoutInMinutes: 70
+  timeoutInMinutes: 30
   dependsOn: 'TestPerAssembly'
   strategy:
     parallel: 1

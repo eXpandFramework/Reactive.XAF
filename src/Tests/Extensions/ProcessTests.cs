@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.IO;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Xpand.Extensions.Reactive.Transform.System.Diagnostics;
@@ -17,7 +18,7 @@ namespace Xpand.Extensions.Tests{
             return path;
         }
 
-        [Test][XpandTest()]
+        [Test][XpandTest()][Apartment(ApartmentState.MTA)]
         public async Task WhenOutputDataReceived(){
             var path = CreateScriptFile();
             File.WriteAllLines(path,new[]{"Write-Host 'Hello'"});
@@ -31,7 +32,7 @@ namespace Xpand.Extensions.Tests{
             
         }
         
-        [Test][XpandTest()]
+        [Test][XpandTest()][Apartment(ApartmentState.MTA)]
         public async Task WhenErrorDataReceived(){
             var path = CreateScriptFile();
             File.WriteAllLines(path,new[]{"Write-Error 'Fail'"});
@@ -45,7 +46,7 @@ namespace Xpand.Extensions.Tests{
             
         }
 
-        [Test][XpandTest()]
+        [Test][XpandTest()][Apartment(ApartmentState.MTA)]
         public async Task WhenExited(){
             var path = CreateScriptFile();
             var process = new Process(){StartInfo = new ProcessStartInfo(){
