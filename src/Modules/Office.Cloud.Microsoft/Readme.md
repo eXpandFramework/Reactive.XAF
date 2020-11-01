@@ -152,7 +152,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |Microsoft.Graph.Core|1.19.0
  |Microsoft.Identity.Client|4.13.0
  |Microsoft.IdentityModel.Protocols.OpenIdConnect|6.8.0
- |Microsoft.IdentityModel.Tokens|6.7.1
+ |Microsoft.IdentityModel.Tokens|6.8.0
  |Microsoft.Owin|4.1.0
  |Microsoft.Owin.Host.SystemWeb|4.1.0
  |Microsoft.Owin.Security|4.1.0
@@ -161,6 +161,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |Newtonsoft.Json|12.0.3
  |Owin|1.0.0
  |System.Reactive|5.0.0-preview.16
+ |System.ServiceModel.Http|4.7.0
  |System.ValueTuple|4.5.0
  |Xpand.Extensions|2.202.58
  |Xpand.Extensions.Office.Cloud|2.202.59

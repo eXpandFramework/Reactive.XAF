@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="Current">
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="Current">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -74,7 +74,7 @@
   <ItemGroup>
     <PackageReference Include="Unofficial.Microsoft.mshtml" Version="7.0.3300" />
     <PackageReference Include="Xpand.XAF.Web.All">
-      <Version>2.202.43.2</Version>
+      <Version>2.202.44</Version>
     </PackageReference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="mscorlib">
@@ -139,7 +139,7 @@
     <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="20.2.3" />
     <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="20.2.3" />
     <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.2.3" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="2.202.43.2">
+    <PackageReference Include="Xpand.XAF.Web.All" Version="2.202.44">
     </PackageReference>
     <PackageReference Include="Google.Apis.People.v1" Version="1.25.0.830" />
   </ItemGroup>
@@ -210,7 +210,6 @@
     <Compile Include="..\CommonFiles\CloudTasksService.cs" Link="Office\Cloud\CloudTasksService.cs" />
     <Compile Include="..\CommonFiles\Web\WebModule.cs">
       <Link>WebModule.cs</Link>
-      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Default.aspx.designer.cs">
       <DependentUpon>Default.aspx</DependentUpon>
@@ -226,20 +225,15 @@
     </Compile>
     <Compile Include="LookupCascade\LookupCascadeService.cs" />
     <Compile Include="ViewWizard\ViewWizard.cs" />
-    <Compile Include="WebApplication.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="WebApplication.cs" />
     <Compile Include="Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Error.aspx.cs">
       <DependentUpon>Error.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Login.aspx.cs">
       <DependentUpon>Login.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

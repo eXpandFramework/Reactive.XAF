@@ -32,7 +32,7 @@ using Xpand.XAF.Modules.RefreshView;
 //
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("2.202.59.5")]
-[assembly: AssemblyFileVersion("2.202.59.5")]
+[assembly: AssemblyVersion("2.202.60.0")]
+[assembly: AssemblyFileVersion("2.202.60.0")]
 //[assembly:AllowPartiallyTrustedCallers]
 //[assembly: SecurityTransparent()]

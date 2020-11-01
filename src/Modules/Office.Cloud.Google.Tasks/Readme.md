@@ -96,6 +96,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |Newtonsoft.Json|12.0.3
  |System.Configuration.ConfigurationManager|4.7.0
  |System.Reactive|5.0.0-preview.16
+ |System.ServiceModel.Http|4.7.0
  |System.ValueTuple|4.5.0
  |Xpand.Extensions|2.202.58
  |Xpand.Extensions.Office.Cloud|2.202.59

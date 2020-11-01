@@ -69,6 +69,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |JetBrains.Annotations|2020.1.0
  |MagicOnion|2.6.3
  |System.Reactive|5.0.0-preview.16
+ |System.ServiceModel.Http|4.7.0
  |System.ValueTuple|4.5.0
  |[Xpand.XAF.Modules.GridListEditor](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.GridListEditor)|2.202.59
  |[Xpand.XAF.Modules.OneView](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.OneView)|2.202.59

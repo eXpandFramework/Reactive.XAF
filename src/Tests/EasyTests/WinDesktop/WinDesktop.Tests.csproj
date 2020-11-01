@@ -46,7 +46,7 @@
     <PackageReference Include="Shouldly" Version="3.0.2" />
     <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.16.1" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="2.202.43.2" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="2.202.44" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
     <PackageReference Include="System.Data.OleDb" Version="4.7.1" />
     <PackageReference Include="System.ServiceModel.Http" Version="4.7.0" />

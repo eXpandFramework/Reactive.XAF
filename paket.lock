@@ -1180,7 +1180,7 @@ NUGET
     Xpand.Patcher (2.0.26)
       Mono.Cecil (>= 0.11.2) - restriction: || (== net461) (== net472) (&& (== netcoreapp3.1) (>= net45)) (&& (== netstandard2.0) (>= net45))
     YamlDotNet (8.1.1)
-  remote: F:\devexpress\Packages\
+  remote: C:\Program Files (x86)\DevExpress 20.2\Components\System\Components\Packages
     DevExpress.AspNetCore.Common (20.2.3) - restriction: || (&& (== net461) (>= netstandard2.1)) (&& (== net472) (>= netstandard2.1)) (== netcoreapp3.1) (&& (== netstandard2.0) (>= netstandard2.1))
       DevExpress.AspNetCore.Core (20.2.3) - restriction: || (&& (== net461) (>= netstandard2.0)) (== net472) (== netcoreapp3.1) (== netstandard2.0)
       Microsoft.AspNetCore.Mvc.ViewFeatures (>= 2.0) - restriction: || (&& (== net461) (>= netstandard2.0)) (== net472) (== netcoreapp3.1) (== netstandard2.0)

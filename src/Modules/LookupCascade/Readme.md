@@ -131,6 +131,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |JetBrains.Annotations|2020.1.0
  |Newtonsoft.Json|12.0.3
  |System.Reactive|5.0.0-preview.16
+ |System.ServiceModel.Http|4.7.0
  |System.ValueTuple|4.5.0
  |Xpand.Extensions|2.202.58
  |Xpand.Extensions.Reactive|2.202.59
