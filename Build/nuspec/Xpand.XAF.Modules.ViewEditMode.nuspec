@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.ViewEditMode</id>
-    <version>2.202.59.0</version>
+    <version>2.202.60.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -21,9 +21,9 @@
       <dependency id="System.Reactive" version="5.0.0-preview.16" />
       <dependency id="System.ServiceModel.Http" version="4.7" />
       <dependency id="System.ValueTuple" version="4.5" />
-      <dependency id="Xpand.Extensions.Reactive" version="2.202.59.0" />
-      <dependency id="Xpand.Extensions.XAF" version="2.202.59.0" />
-      <dependency id="Xpand.XAF.Modules.Reactive" version="2.202.59.0" />
+      <dependency id="Xpand.Extensions.Reactive" version="2.202.60.1" />
+      <dependency id="Xpand.Extensions.XAF" version="2.202.60.1" />
+      <dependency id="Xpand.XAF.Modules.Reactive" version="2.202.60.2" />
       <dependency id="Xpand.VersionConverter" version="2.202.10" />
     </dependencies>
   </metadata>

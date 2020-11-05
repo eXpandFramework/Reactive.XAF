@@ -131,7 +131,11 @@ Get-ChildItem $sourcePath *.csproj -Recurse | ForEach-Object {
     }
 }
 Write-HostFormatted "CHECK IF REMOTE INDEX IS DELAYED" -Section
-if ((Get-GitLastSha -repoGitUrl .) -ne (Get-GitLastSha -repoGitUrl (Get-XpandRepository -Name DevExpress.XAF -Uri) -Branch lab)){
+$currentSha=Get-GitLastSha -repoGitUrl .
+$repoUri=(Get-XpandRepository -Name DevExpress.XAF -Uri)
+
+$remoteSha=Get-GitLastSha -repoGitUrl $repoUri -Branch lab
+if ($currentSha -ne $remoteSha){
     throw "REMOTE INDEX IS DELAYED. PLEASE PUSH"
 }
 $updateVersion = @(Update-NugetProjectVersion @yArgs -Verbose)
@@ -171,11 +175,16 @@ if ($updateVersion) {
     $relatedPackages=$updateVersion | ForEach-Object {
         $updatedPackage=$_
         $packageDeps|Where-Object{$updatedPackage -in $_.Deps.Id }|ForEach-Object{
-            $dependency=$_
-            $localpackage=($localPackages|Where-Object{$_.Id -eq $dependency.Id})
-            $newVersion="$(Update-Version $localpackage.Version -Revision)"
-            Update-AssemblyInfoVersion -version $newVersion -path "$($localpackage.File.DirectoryName)\properties\assemblyinfo.cs"
-            $dependency
+            try {
+                $dependency=$_
+                $localpackage=($localPackages|Where-Object{$_.Id -eq $dependency.Id})
+                $newVersion="$(Update-Version $localpackage.Version -Revision)"
+                Update-AssemblyInfoVersion -version $newVersion -path "$($localpackage.File.DirectoryName)\properties\assemblyinfo.cs"
+                $dependency
+            }
+            catch {
+                $_
+            }
         }
     }
     $relatedPackages.Id

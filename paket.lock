@@ -1177,7 +1177,7 @@ NUGET
       System.Xml.XPath (>= 4.3)
     Unofficial.Microsoft.mshtml (7.0.3300)
     Xpand.Collections (1.0.4)
-    Xpand.Patcher (2.0.26)
+    Xpand.Patcher (2.0.27)
       Mono.Cecil (>= 0.11.2) - restriction: || (== net461) (== net472) (&& (== netcoreapp3.1) (>= net45)) (&& (== netstandard2.0) (>= net45))
     YamlDotNet (8.1.1)
   remote: C:\Program Files (x86)\DevExpress 20.2\Components\System\Components\Packages

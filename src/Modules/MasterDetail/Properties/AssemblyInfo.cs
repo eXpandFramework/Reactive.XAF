@@ -33,7 +33,7 @@ using DevExpress.ExpressApp;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 
-[assembly: AssemblyVersion("2.202.59.0")]
-[assembly: AssemblyFileVersion("2.202.59.0")]
+[assembly: AssemblyVersion("2.202.60.1")]
+[assembly: AssemblyFileVersion("2.202.60.1")]
 //[assembly:AllowPartiallyTrustedCallers]
 //[assembly: SecurityTransparent()]

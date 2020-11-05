@@ -51,7 +51,7 @@ nuget System.Drawing.Common 4.7
 nuget System.Reactive 5.0.0-preview.16
 nuget System.Collections.Immutable == 1.7.1
 nuget Unofficial.Microsoft.mshtml 7.0.3300
-nuget Xpand.Patcher 2.0.26
+nuget Xpand.Patcher 2.0.27
 nuget YamlDotNet 8.1.1
 nuget JetBrains.Annotations 2020.1.0
 nuget Polly 7.2.1

@@ -43,7 +43,7 @@
     <PackageReference Include="NUnit3TestAdapter" Version="3.16.1" />
     <PackageReference Include="DevExpress.ExpressApp" Version="20.2.3" />
     <PackageReference Include="Unofficial.Microsoft.mshtml" Version="7.0.3300" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="2.202.44" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="2.202.44.1" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.TestsLib">
