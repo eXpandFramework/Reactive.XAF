@@ -29,28 +29,25 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 
         protected void SetSequences(XafApplication application,Type sequenceStorageType=null){
             sequenceStorageType ??= typeof(SequenceStorage);
-            using (var objectSpace = application.CreateObjectSpace()){
-                var emptyType = Type.EmptyTypes.FirstOrDefault();
-                objectSpace.SetSequence<TestObject>(o => o.SequentialNumber,emptyType,sequenceStorageType: sequenceStorageType);
-                objectSpace.SetSequence<TestType2Object>(o => o.SequentialNumber,emptyType,sequenceStorageType: sequenceStorageType);
-                objectSpace.SetSequence<TestObject2>(o => o.SequentialNumber,emptyType,sequenceStorageType: sequenceStorageType);
-                objectSpace.SetSequence<TestObject3>(o => o.SequentialNumber,typeof(TestObject2),sequenceStorageType: sequenceStorageType);
-                objectSpace.SetSequence<CustomSquenceNameTestObject>(o => o.SequentialNumber,emptyType,sequenceStorageType: sequenceStorageType);
-                objectSpace.SetSequence<Child>(o => o.SequentialNumber,emptyType,sequenceStorageType: sequenceStorageType);
-                objectSpace.SetSequence<ParentSequencial>(o => o.SequentialNumber,emptyType,sequenceStorageType: sequenceStorageType);
-                objectSpace.SetSequence<ParentSequencialWithChildOnSaving>(o => o.SequentialNumber,emptyType,sequenceStorageType: sequenceStorageType);
-                
-            }
+            using var objectSpace = application.CreateObjectSpace();
+            var emptyType = Type.EmptyTypes.FirstOrDefault();
+            objectSpace.SetSequence<TestObject>(o => o.SequentialNumber,emptyType,sequenceStorageType: sequenceStorageType);
+            objectSpace.SetSequence<TestType2Object>(o => o.SequentialNumber,emptyType,sequenceStorageType: sequenceStorageType);
+            objectSpace.SetSequence<TestObject2>(o => o.SequentialNumber,emptyType,sequenceStorageType: sequenceStorageType);
+            objectSpace.SetSequence<TestObject3>(o => o.SequentialNumber,typeof(TestObject2),sequenceStorageType: sequenceStorageType);
+            objectSpace.SetSequence<CustomSquenceNameTestObject>(o => o.SequentialNumber,emptyType,sequenceStorageType: sequenceStorageType);
+            objectSpace.SetSequence<Child>(o => o.SequentialNumber,emptyType,sequenceStorageType: sequenceStorageType);
+            objectSpace.SetSequence<ParentSequencial>(o => o.SequentialNumber,emptyType,sequenceStorageType: sequenceStorageType);
+            objectSpace.SetSequence<ParentSequencialWithChildOnSaving>(o => o.SequentialNumber,emptyType,sequenceStorageType: sequenceStorageType);
         }
         
         protected void AssertNextSequences<T>(XafApplication application,int itemsCount, TestObserver<T> nextSequenceTest) where T:ISequentialNumber{
             nextSequenceTest.ItemCount.ShouldBe(itemsCount );
-            using (var space = application.CreateObjectSpace()){
-                for (int i = 0; i < itemsCount ; i++){
-                    var item = nextSequenceTest.Items[i];
-                    item.SequentialNumber.ShouldBe(i);
-                    space.GetObject(item).SequentialNumber.ShouldBe(i);
-                }
+            using var space = application.CreateObjectSpace();
+            for (int i = 0; i < itemsCount ; i++){
+                var item = nextSequenceTest.Items[i];
+                item.SequentialNumber.ShouldBe(i);
+                space.GetObject(item).SequentialNumber.ShouldBe(i);
             }
         }
         
@@ -65,25 +62,22 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         protected IObservable<Unit> TestObjects<T>(XafApplication application,bool parallel, int count = 100, int objectSpaceCount = 1, Action beforeSave = null){
             if (parallel){
                 return Observable.Range(1, count).SelectMany(i => Observable.Defer(() => Observable.Start(() => {
-                    for (int j = 0; j < objectSpaceCount; j++){
-                        using (var objectSpace = application.CreateObjectSpace()){
-                            objectSpace.CreateObject<T>();
-                            beforeSave?.Invoke();
-                            objectSpace.CommitChanges();
-                        }
+                    for (int j = 0; j < objectSpaceCount; j++) {
+                        using var objectSpace = application.CreateObjectSpace();
+                        objectSpace.CreateObject<T>();
+                        beforeSave?.Invoke();
+                        objectSpace.CommitChanges();
                     }
                 })));
             }
             return Observable.Start(() => {
-                    for (int i = 0; i < objectSpaceCount; i++){
-                        using (var objectSpace = application.CreateObjectSpace()){
-                            for (int j = 0; j < count; j++){
-                                objectSpace.CreateObject<T>();
-                                beforeSave?.Invoke();
-                                objectSpace.CommitChanges();
-                            }
+                    for (int i = 0; i < objectSpaceCount; i++) {
+                        using var objectSpace = application.CreateObjectSpace();
+                        for (int j = 0; j < count; j++){
+                            objectSpace.CreateObject<T>();
+                            beforeSave?.Invoke();
+                            objectSpace.CommitChanges();
                         }
-
                     }
             });
         }

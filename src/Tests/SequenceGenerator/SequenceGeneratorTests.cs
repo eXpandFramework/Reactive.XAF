@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive;
@@ -10,11 +11,14 @@ using akarnokd.reactive_extensions;
 using BrokeroTests.SequenceGenerator.BO.BrokeroTests.SequenceGenerator.BO.BrokeroTests.SequenceGenerator.BO.BrokeroTests.SequenceGenerator.BO.BrokeroTests.SequenceGenerator.BO.BrokeroTests.SequenceGenerator.BO.BO.BrokeroTests.SequenceGenerator.BO.BrokeroTests.SequenceGenerator.BO.BrokeroTests.SequenceGenerator.BO;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Security;
+using DevExpress.ExpressApp.Security.ClientServer;
 using DevExpress.ExpressApp.Validation.Win;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
+using Fasterflect;
+using Moq;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.Transform;
@@ -355,6 +359,18 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 			testObserver.ItemCount.ShouldBe(1);
 			testObserver.Items.First().ShouldBe(testObject);
         }
+
+		[Test]
+        public void Middle_Tier_registration_should_not_throw() {
+            using var application = NewApplication();
+			
+            SequenceGeneratorModule( application);
+            var applicationObjectSpaceProviders = ((IList<IObjectSpaceProvider>) application.GetFieldValue("objectSpaceProviders"));
+            applicationObjectSpaceProviders.Clear();
+			applicationObjectSpaceProviders.Add(new MiddleTierServerObjectSpaceProvider(Mock.Of<IMiddleTierSerializableObjectLayer>()));
+            application.CreateObjectSpace();
+        }
+
     }
 
 }

@@ -68,7 +68,7 @@ function AddReadMe {
         if ($moduleName) {
             $wikiName = Get-XpandPackageHome $Package.Id
         }
-        $registration = "RequiredModuleTypes.Add(typeof($moduleName));"
+        $registration = "RequiredModuleTypes.Add(typeof($($moduleName.FullName)));"
         if ($package.Id -like "*all*") {
             $registration = ($modules | Where-Object { $_.platform -eq "Core" -or $package.id -like "*$($_.platform)*" } | ForEach-Object { "RequiredModuleTypes.Add(typeof($($_.FullName)));" }) -join "`r`n                                                "
         }

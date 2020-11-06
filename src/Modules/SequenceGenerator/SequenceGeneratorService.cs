@@ -20,6 +20,7 @@ using DevExpress.Xpo.DB;
 using DevExpress.Xpo.Helpers;
 using Fasterflect;
 using JetBrains.Annotations;
+using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.SecurityExtensions;
@@ -165,6 +166,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
             sequenceStorageType ??= typeof(SequenceStorage);
             Guard.TypeArgumentIs(typeof(ISequenceStorage),sequenceStorageType,nameof(sequenceStorageType));
             return manager.WhenApplication(application => application.WhenCompatibilityChecked().FirstAsync().Select(xafApplication => xafApplication.ObjectSpaceProvider)
+                .Where(provider => !provider.IsInstanceOf("DevExpress.ExpressApp.Security.ClientServer.MiddleTierServerObjectSpaceProvider"))
                 .SelectMany(provider => provider.SequenceGeneratorDatalayer()
                     .SelectMany(dataLayer => application.WhenObjectSpaceCreated().GenerateSequences(dataLayer,sequenceStorageType)
                         .Merge(application.Security.AddAnonymousType(sequenceStorageType).ToObservable())))

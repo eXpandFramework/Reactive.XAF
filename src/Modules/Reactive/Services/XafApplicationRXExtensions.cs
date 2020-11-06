@@ -13,6 +13,7 @@ using DevExpress.ExpressApp.Model;
 using Fasterflect;
 using JetBrains.Annotations;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
@@ -273,7 +274,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<(XafApplication application, DatabaseVersionMismatchEventArgs e)> AlwaysUpdateOnDatabaseVersionMismatch(this XafApplication application) 
             => application.WhenDatabaseVersionMismatch().Select(tuple => {
-                tuple.e.Updater.Update();
+                var updater = tuple.e.Updater;
+                var isMiddleTier = ((IObjectSpaceProvider) updater.GetFieldValue("objectSpaceProvider")).IsInstanceOf("DevExpress.ExpressApp.Security.ClientServer.MiddleTierServerObjectSpaceProvider");
+                if (!isMiddleTier) {
+                    updater.Update();    
+                }
                 tuple.e.Handled = true;
                 return tuple;
             });

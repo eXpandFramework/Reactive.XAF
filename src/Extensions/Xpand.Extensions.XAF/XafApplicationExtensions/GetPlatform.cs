@@ -77,6 +77,7 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions{
 
             return baseType?.Name switch{
 	            "WinApplication" => Platform.Win,
+	            "ServerApplication" => Platform.Win,
 	            "WebApplication" => Platform.Web,
 	            "BlazorApplication" => Platform.Blazor,
 	            _ => throw new NotImplementedException(application.GetType().FullName)
