@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive;
@@ -13,10 +14,12 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.Security.ClientServer;
 using DevExpress.ExpressApp.Validation.Win;
+using DevExpress.ExpressApp.Xpo;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
+using DevExpress.Xpo.DB;
 using Fasterflect;
 using Moq;
 using NUnit.Framework;
@@ -369,6 +372,18 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
             applicationObjectSpaceProviders.Clear();
 			applicationObjectSpaceProviders.Add(new MiddleTierServerObjectSpaceProvider(Mock.Of<IMiddleTierSerializableObjectLayer>()));
             application.CreateObjectSpace();
+        }
+
+		[Test]
+        public void UnSupported_DataStore_registration_should_not_throw() {
+            using var application = NewApplication();
+            SequenceGeneratorModule( application);
+            SetSequences(application);
+			SequenceGeneratorService.SupportedDataStoreTypes.Clear();
+
+            var objectSpace = application.CreateObjectSpace();
+            objectSpace.CreateObject<TestObject>();
+			objectSpace.CommitChanges();
         }
 
     }

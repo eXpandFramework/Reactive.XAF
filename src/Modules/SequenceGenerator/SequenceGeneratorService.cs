@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -193,8 +194,13 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         [PublicAPI]
         public static IObservable<object> Sequence => SequenceSubject.AsObservable();
 
+        private static IObservable<IObjectSpace> WhenSupported(this IObservable<IObjectSpace> source) 
+            => source.Where(space => space.UnitOfWork().DataLayer is BaseDataLayer dataLayer && SupportedDataStoreTypes.Any(type => type.IsInstanceOfType(dataLayer.ConnectionProvider)));
+
+        public static IList<Type> SupportedDataStoreTypes { get; } = new List<Type>(){typeof(MSSqlConnectionProvider), typeof(OracleConnectionProvider), typeof(MySqlConnectionProvider)};
+
         private static IObservable<object> GenerateSequences(this IObservable<IObjectSpace> source, IDataLayer dataLayer,Type sequenceStorageType=null) 
-            => source.SelectMany(space => Observable.Defer(() => space.GetObjectForSave(dataLayer).SelectMany(e => e.GenerateSequences(sequenceStorageType))
+            => source.WhenSupported().SelectMany(space => Observable.Defer(() => space.GetObjectForSave(dataLayer).SelectMany(e => e.GenerateSequences(sequenceStorageType))
                         .TakeUntil(space.WhenCommited().Select(objectSpace => objectSpace)))
                     .RepeatWhen(observable => observable.Where(o => !space.IsDisposed).Do(o => {}))
                 )
@@ -286,10 +292,10 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
             });
 
 
-        public static IObservable<IDataLayer> SequenceGeneratorDatalayer(this  IObjectSpaceProvider objectSpaceProvider) 
+        internal static IObservable<IDataLayer> SequenceGeneratorDatalayer(this  IObjectSpaceProvider objectSpaceProvider) 
             => Observable.Defer(() => XpoDefault.GetDataLayer(objectSpaceProvider.GetConnectionString(),
                 ((TypesInfo) objectSpaceProvider.TypesInfo).EntityStores.OfType<XpoTypeInfoSource>().First().XPDictionary, AutoCreateOption.None
-            ).ReturnObservable()).SubscribeReplay()
+            ).ReturnObservable().Where(layer => layer!=null)).SubscribeReplay()
                 .TraceSequenceGeneratorModule();
     }
 }

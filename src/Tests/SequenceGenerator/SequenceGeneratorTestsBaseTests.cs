@@ -23,8 +23,8 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
             return sequenceGeneratorModule;
         }
 
-        protected XafApplication NewApplication(Platform platform=Platform.Win){
-            return platform.NewApplication<SequenceGeneratorModule>(usePersistentStorage:true);
+        protected XafApplication NewApplication(Platform platform=Platform.Win,bool usePersistentStorage=true){
+            return platform.NewApplication<SequenceGeneratorModule>(usePersistentStorage:usePersistentStorage);
         }
 
         protected void SetSequences(XafApplication application,Type sequenceStorageType=null){
