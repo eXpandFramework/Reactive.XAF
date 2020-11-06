@@ -1,5 +1,5 @@
 param(
-    $Branch = "lab",
+    $Branch = "master",
     $nugetBin = "$PSScriptRoot\..\bin\Nupkg",
     $sourceDir = "$PSScriptRoot\..",
     $Filter ,

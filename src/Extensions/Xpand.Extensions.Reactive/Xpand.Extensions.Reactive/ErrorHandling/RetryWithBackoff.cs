@@ -3,7 +3,7 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 
 namespace Xpand.Extensions.Reactive.ErrorHandling{
-    public static class ErrorHandling{
+    public static partial class ErrorHandling{
         public static IObservable<T> RetryWithBackoff<TException, T>(this IObservable<T> source,
             Func<TException, bool> retryOnError = null, int retryCount = 3,
             Func<int, TimeSpan> strategy = null, IScheduler scheduler = null) where TException : Exception{
@@ -19,6 +19,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling{
                 .Retry(retryCount)
                 .SelectMany(t => t.Item1 ? Observable.Return(t.Item2) : Observable.Throw<T>(t.Item3));
         }
+
         public static IObservable<T> RetryWithBackoff<T>(this IObservable<T> source,int retryCount = 3,
             Func<int, TimeSpan> strategy = null,Func<Exception, bool> retryOnError = null,IScheduler scheduler = null) 
             => source.RetryWithBackoff(retryOnError, retryCount, strategy, scheduler);
