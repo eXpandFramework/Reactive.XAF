@@ -8,14 +8,18 @@ using System.Threading;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using BrokeroTests.SequenceGenerator.BO.BrokeroTests.SequenceGenerator.BO.BrokeroTests.SequenceGenerator.BO.BrokeroTests.SequenceGenerator.BO.BrokeroTests.SequenceGenerator.BO.BrokeroTests.SequenceGenerator.BO.BO.BrokeroTests.SequenceGenerator.BO.BrokeroTests.SequenceGenerator.BO.BrokeroTests.SequenceGenerator.BO;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Security;
+using DevExpress.ExpressApp.Validation.Win;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.PermissionPolicy;
+using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.Attributes;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.SequenceGenerator.Tests.BO;
@@ -26,7 +30,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         
         [Test]
         [XpandTest()]
-        public async Task Cache_datalayer(){
+        public async Task Cache_DataLayer(){
 	        using var application = SequenceGeneratorModule().Application;
 	        var datalayer = application.ObjectSpaceProvider.SequenceGeneratorDatalayer();
 
@@ -116,12 +120,12 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 	        nextSequenceTest.Dispose();
         }
         [Test][XpandTest]
-        public void Increase_Sequence_When_creating_Nested_New_Objects_on_non_sequencial_parent_saving(){
+        public void Increase_Sequence_When_creating_Nested_New_Objects_on_non_sequential_parent_saving(){
             Increase_Sequence_When_creating_Nested_New_Objects_on_parent_saving<ParentNonSequencialWithChildOnSaving>();
         }
 
         [Test][XpandTest]
-        public void Increase_Sequence_When_creating_Nested_New_Objects_on_sequencial_parent_saving(){
+        public void Increase_Sequence_When_creating_Nested_New_Objects_on_sequential_parent_saving(){
             Increase_Sequence_When_creating_Nested_New_Objects_on_parent_saving<ParentSequencialWithChildOnSaving>();
         }
 
@@ -219,7 +223,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         }
         
         [Test][XpandTest]
-        public void Invalid_Lenght_Sequence_Registration(){
+        public void Invalid_length_Sequence_Registration(){
 	        using var application = SequenceGeneratorModule().Application;
 	        SetSequences(application);
 	        Should.Throw<NotSupportedException>(() => {
@@ -329,6 +333,27 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 	        await TestObjects(application, false, 1);
                 
 	        AssertNextSequences(application, 1,testObserver);
+        }
+        [Test][XpandTest]
+        public void Generate_Sequence_When_Error_Inside_transaction(){
+            using var application = NewApplication();
+            application.Modules.AddRange(new ModuleBase[] {new DevExpress.ExpressApp.Validation.ValidationModule(),new ValidationWindowsFormsModule() });
+            application.WhenApplicationModulesManager().WhenCustomizeTypesInfo()
+                .Do(t => t.e.TypesInfo.FindTypeInfo(typeof(TestObject)).FindMember(nameof(TestObject.Title))
+                    .AddAttribute(new RuleRequiredFieldAttribute())).Test();
+            SequenceGeneratorModule( application);
+            SetSequences(application);
+            var testObserver = SequenceGeneratorService.Sequence.OfType<TestObject>().Test();
+            var compositeView = application.NewView<DetailView>(typeof(TestObject));
+            compositeView.CurrentObject = compositeView.ObjectSpace.CreateObject<TestObject>();
+            application.CreateViewWindow().SetView(compositeView);
+            var testObject = ((TestObject) compositeView.CurrentObject);
+            Should.Throw<ValidationException>(() => compositeView.ObjectSpace.CommitChanges());
+            testObject.Title = "test";
+            compositeView.ObjectSpace.CommitChanges();
+
+			testObserver.ItemCount.ShouldBe(1);
+			testObserver.Items.First().ShouldBe(testObject);
         }
     }
 

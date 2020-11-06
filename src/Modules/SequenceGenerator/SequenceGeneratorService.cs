@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -201,13 +202,21 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
 
         static IObservable<(ObjectManipulationEventArgs e, ExplicitUnitOfWork explicitUnitOfWork)> GetObjectForSave(this IObjectSpace objectSpace, IDataLayer dataLayer ){
             var unitOfWork = objectSpace.UnitOfWork();
+            var unitOfWorks = new ConcurrentDictionary<IObjectSpace,ExplicitUnitOfWork>();
             return objectSpace.WhenCommiting().SelectMany(_ => {
-                var explicitUnitOfWork = new ExplicitUnitOfWork(dataLayer);
-                return unitOfWork.WhenObjectSaving()
-                    .Where(e => e.Session.IsNewObject(e.Object))
-                    .Select(e => (e,explicitUnitOfWork))
-                    .TakeUntil(objectSpace.WhenCommited().ToUnit().Merge(objectSpace.WhenRollingBack().ToUnit()))
-                    .Finally(() => explicitUnitOfWork.Close());
+                if (!unitOfWorks.TryGetValue(objectSpace, out var explicitUnitOfWork)) {
+                    explicitUnitOfWork=new ExplicitUnitOfWork(dataLayer);
+                    unitOfWorks.TryAdd(objectSpace, explicitUnitOfWork);
+                    return unitOfWork.WhenObjectSaving().Distinct(e => e.Object)
+                        .Where(e => e.Session.IsNewObject(e.Object))
+                        .Select(e => (e,explicitUnitOfWork))
+                        .TakeUntil(objectSpace.WhenCommited().ToUnit().Merge(objectSpace.WhenRollingBack().Select(tuple => tuple).ToUnit()))
+                        .Finally(() => {
+                            explicitUnitOfWork.Close();
+                            unitOfWorks.TryRemove(objectSpace, out explicitUnitOfWork);
+                        });
+                }
+                return Observable.Empty<(ObjectManipulationEventArgs e, ExplicitUnitOfWork explicitUnitOfWork)>();
             });
         }
 
@@ -253,8 +262,8 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
 
         private static IObservable<EventPattern<EventArgs>> WhenTransactionFailed(this Session session,
             IScheduler scheduler, ExplicitUnitOfWork explicitUnitOfWork) 
-            => session.WhenAfterRollbackTransaction()
-                .Merge(session.WhenFailedCommitTransaction(),scheduler)
+            => session.WhenAfterRollbackTransaction().Select(pattern => pattern)
+                .Merge(session.WhenFailedCommitTransaction().Select(pattern => pattern),scheduler)
                 .IgnoreElements()
                 .DisposeOnException(explicitUnitOfWork)
                 .Do(_ => explicitUnitOfWork.Close()).FirstAsync();
