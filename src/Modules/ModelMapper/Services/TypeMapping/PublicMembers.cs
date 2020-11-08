@@ -87,8 +87,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             ConfigureAdditionalReferences();
         }
 
-        private static IObservable<Type> GetMappedTypes(){
-            return Observable.Defer(() => {
+        private static IObservable<Type> GetMappedTypes() 
+            => Observable.Defer(() => {
                     var distinctTypesToMap = _typesToMap.Distinct(_ => _.TypeToMap).Do(MappingTypes);
                     return distinctTypesToMap
                         .All(_ =>_skipAssemblyValidation|| _.TypeFromPath())
@@ -105,23 +105,20 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                         }).Switch();
                 }).Publish().AutoConnect().Replay().AutoConnect().Distinct()
                 .Finally(() => _skipAssemblyValidation=false);
-        }
 
-        private static void ConfigureAdditionalReferences(){
-            new[]{
+        private static void ConfigureAdditionalReferences() 
+            => new[]{
                     typeof(IModelNode), typeof(DescriptionAttribute), typeof(AssemblyFileVersionAttribute),
                     typeof(ImageNameAttribute), typeof(TypeMappingService)
                 }
                 .ToObservable(Scheduler.Immediate)
                 .Do(type => AdditionalReferences.Add(type.Assembly.Location))
                 .Subscribe();
-        }
 
-        private static void ConfigureReservedPropertyInstances(){
-            new[]{typeof(IDictionary)}.ToObservable(Scheduler.Immediate)
+        private static void ConfigureReservedPropertyInstances() 
+            => new[]{typeof(IDictionary)}.ToObservable(Scheduler.Immediate)
                 .Do(type => ReservedPropertyInstances.Add(type))
                 .Subscribe();
-        }
 
         private static void ConfigureReservedPropertyTypes(){
             new[]{typeof(Type), typeof(IList), typeof(object), typeof(Array), typeof(IComponent), typeof(ISite)}
@@ -150,8 +147,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 .Subscribe();
         }
 
-        private static ObservableCollection<(string key, Action<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)> action)> GetPropertyMappingRules(){
-            return new ObservableCollection<(string key, Action<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)> action)>{
+        private static ObservableCollection<(string key, Action<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)> action)> GetPropertyMappingRules() 
+            => new ObservableCollection<(string key, Action<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)> action)>{
                 (nameof(DesignerSerializationVisibilityAttribute), DesignerSerializationVisibilityAttribute),
                 (nameof(GenericTypeArguments), GenericTypeArguments),
                 (nameof(BrowsableRule), BrowsableRule),
@@ -162,90 +159,73 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 (nameof(CompilerIsReadOnly), CompilerIsReadOnly),
                 (nameof(GenericTypeRule), GenericTypeRule),
             };
-        }
 
-        private static ObservableCollection<(string key, Action<GenericEventArgs<ModelMapperType>> action)> GetTypeMappingRules(){
-            return new ObservableCollection<(string key, Action<GenericEventArgs<ModelMapperType>> action)>(){
+        private static ObservableCollection<(string key, Action<GenericEventArgs<ModelMapperType>> action)> GetTypeMappingRules() 
+            => new ObservableCollection<(string key, Action<GenericEventArgs<ModelMapperType>> action)>(){
                 (nameof(WithNonPublicAttributeParameters), NonPublicAttributeParameters),
                 (nameof(GenericTypeArguments), GenericTypeArguments),
                 (nameof(CompilerIsReadOnly), CompilerIsReadOnly),
                 (nameof(GenericTypeRule), GenericTypeRule)
             };
-        }
 
 
-        public static IEnumerable<Type> ModelMapperContainerTypes(this Type type){
-            return type.Assembly.GetTypes()
+        public static IEnumerable<Type> ModelMapperContainerTypes(this Type type) 
+            => type.Assembly.GetTypes()
                 .Where(_ => _.Name.EndsWith(DefaultContainerSuffix))
                 .Where(_ => _.GetInterfaces().Contains(typeof(IModelModelMapContainer)));
-        }
 
         public static ReplaySubject<IModelMapperConfiguration> MappingTypes{ get;private set; }
         public static IObservable<Type> MappedTypes{ get;private set; }
         
 
-        public static IEnumerable<ModelMapperPropertyInfo> ToModelMapperPropertyInfo(this IEnumerable<PropertyInfo> source){
-            return source.Select(_ => _.ToModelMapperPropertyInfo());
-        }
+        public static IEnumerable<ModelMapperPropertyInfo> ToModelMapperPropertyInfo(this IEnumerable<PropertyInfo> source) 
+            => source.Select(_ => _.ToModelMapperPropertyInfo());
 
-        public static ModelMapperPropertyInfo ToModelMapperPropertyInfo(this PropertyInfo propertyInfo){
-            return new ModelMapperPropertyInfo(propertyInfo);
-        }
+        public static ModelMapperPropertyInfo ToModelMapperPropertyInfo(this PropertyInfo propertyInfo) 
+            => new ModelMapperPropertyInfo(propertyInfo);
 
-        public static IEnumerable<ModelMapperCustomAttributeData> ToModelMapperConfigurationData(this IEnumerable<CustomAttributeData> source){
-            return source.Select(_ => new ModelMapperCustomAttributeData(_.AttributeType, _.ConstructorArguments.ToArray()));
-        }
+        public static IEnumerable<ModelMapperCustomAttributeData> ToModelMapperConfigurationData(this IEnumerable<CustomAttributeData> source) 
+            => source.Select(_ => new ModelMapperCustomAttributeData(_.AttributeType, _.ConstructorArguments.ToArray()));
 
-        public static IObservable<Type> MapToModel(this IModelMapperConfiguration configurations){
-            return new[]{configurations}.ToObservable(Scheduler.Immediate).MapToModel();
-        }
+        public static IObservable<Type> MapToModel(this IModelMapperConfiguration configurations) 
+            => new[]{configurations}.ToObservable(Scheduler.Immediate).MapToModel();
+
         public static IObservable<Type> MapToModel<TModelMapperConfiguration>(this IObservable<TModelMapperConfiguration> configurations)
-            where TModelMapperConfiguration : IModelMapperConfiguration{
-
-            return configurations
+            where TModelMapperConfiguration : IModelMapperConfiguration 
+            => configurations
                 .Do(_ => _typesToMap.OnNext(_))
                 .Select(_ => _.TypeToMap)
                 .TraceModelMapper(type => type.FullName);
-        }
 
-        public static IObservable<Type> MapToModel(this IObservable<Type> types,Func<Type,IModelMapperConfiguration> configSelector=null){
-            return types.Select(_ => configSelector?.Invoke(_)?? new ModelMapperConfiguration(_)).MapToModel();
-        }
-        
-        [PublicAPI]
-        public static IObservable<Type> MapToModel(this Type type,Func<Type,IModelMapperConfiguration> configSelector=null){
-            return new[]{type}.MapToModel(configSelector);
-        }
-
-        public static IObservable<Type> MapToModel(this IEnumerable<Type> types,Func<Type,IModelMapperConfiguration> configSelector=null){
-            return types.ToArray().ToObservable().MapToModel(configSelector);
-        }
+        public static IObservable<Type> MapToModel(this IObservable<Type> types,Func<Type,IModelMapperConfiguration> configSelector=null) 
+            => types.Select(_ => configSelector?.Invoke(_)?? new ModelMapperConfiguration(_)).MapToModel();
 
         [PublicAPI]
-        internal static IObservable<Type> ModelInterfaces(this IModelMapperConfiguration configuration){
-            return new[]{configuration}.ToObservable(Scheduler.Immediate).ModelInterfaces();
-        }
+        public static IObservable<Type> MapToModel(this Type type,Func<Type,IModelMapperConfiguration> configSelector=null) 
+            => new[]{type}.MapToModel(configSelector);
 
-        internal static IObservable<Type> ModelInterfaces(this IObservable<IModelMapperConfiguration> source){
-            return source.Select(_ => _.TypeToMap).ModelInterfaces();
-        }
-
-        internal static IObservable<Type> ModelInterfaces(this IObservable<Type> source){
-            return source.Finally(Start).Select(_ => MappedTypes).Switch().Distinct().TraceModelMapper(type => type.FullName );
-        }
-
-        public static string ModelMapContainerName(this Type type, IModelMapperConfiguration configuration=null){
-            return configuration?.ContainerName?? $"{type.Name}{DefaultContainerSuffix}";
-        }
+        public static IObservable<Type> MapToModel(this IEnumerable<Type> types,Func<Type,IModelMapperConfiguration> configSelector=null) 
+            => types.ToArray().ToObservable().MapToModel(configSelector);
 
         [PublicAPI]
-        public static IModelNode MapNode(this IModelNode modelNode,Type type){
-            return modelNode.GetNode(type.Name);
-        }
+        internal static IObservable<Type> ModelInterfaces(this IModelMapperConfiguration configuration) 
+            => new[]{configuration}.ToObservable(Scheduler.Immediate).ModelInterfaces();
 
-        public static Type ModelType(this Type type, Type rootType = null,IModelMapperConfiguration configuration = null){
-            return DevExpress.ExpressApp.XafTypesInfo.Instance.FindTypeInfo(type.ModelTypeName(rootType, configuration)).Type;
-        }
+        internal static IObservable<Type> ModelInterfaces(this IObservable<IModelMapperConfiguration> source) 
+            => source.Select(_ => _.TypeToMap).ModelInterfaces();
+
+        internal static IObservable<Type> ModelInterfaces(this IObservable<Type> source) 
+            => source.Finally(Start).Select(_ => MappedTypes).Switch().Distinct().TraceModelMapper(type => type.FullName );
+
+        public static string ModelMapContainerName(this Type type, IModelMapperConfiguration configuration=null) 
+            => configuration?.ContainerName?? $"{type.Name}{DefaultContainerSuffix}";
+
+        [PublicAPI]
+        public static IModelNode MapNode(this IModelNode modelNode,Type type) 
+            => modelNode.GetNode(type.Name);
+
+        public static Type ModelType(this Type type, Type rootType = null,IModelMapperConfiguration configuration = null) 
+            => DevExpress.ExpressApp.XafTypesInfo.Instance.FindTypeInfo(type.ModelTypeName(rootType, configuration)).Type;
 
         public static string ModelTypeName(this Type type,Type rootType=null, IModelMapperConfiguration configuration=null){
             if (rootType==null){
