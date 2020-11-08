@@ -197,7 +197,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         private static IObservable<IObjectSpace> WhenSupported(this IObservable<IObjectSpace> source) 
             => source.Where(space => space.UnitOfWork().DataLayer is BaseDataLayer dataLayer && SupportedDataStoreTypes.Any(type => type.IsInstanceOfType(dataLayer.ConnectionProvider)));
 
-        public static IList<Type> SupportedDataStoreTypes { get; } = new List<Type>(){typeof(MSSqlConnectionProvider), typeof(OracleConnectionProvider), typeof(MySqlConnectionProvider)};
+        public static IList<Type> SupportedDataStoreTypes { get; } = new List<Type>(){typeof(MSSqlConnectionProvider), typeof(BaseOracleConnectionProvider), typeof(MySqlConnectionProvider)};
 
         private static IObservable<object> GenerateSequences(this IObservable<IObjectSpace> source, IDataLayer dataLayer,Type sequenceStorageType=null) 
             => source.WhenSupported().SelectMany(space => Observable.Defer(() => space.GetObjectForSave(dataLayer).SelectMany(e => e.GenerateSequences(sequenceStorageType))

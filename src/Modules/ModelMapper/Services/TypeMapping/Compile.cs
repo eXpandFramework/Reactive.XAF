@@ -8,6 +8,7 @@ using Mono.Cecil;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.BytesExtensions;
 using Xpand.Extensions.Compiler;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.StreamExtensions;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
@@ -44,13 +45,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         private static void RemoveRecursiveProperties(this AssemblyDefinition assemblyDefinition,TypeReference type,string chainTypes){
-            var recursiveCandinates = type.RecursiveCandinates();
-            foreach (var propertyInfo in recursiveCandinates){
+            var recursiveCandidates = type.RecursiveCandidates();
+            foreach (var propertyInfo in recursiveCandidates){
                 var remove = type.Remove(chainTypes, propertyInfo);
                 if (!remove){
                     chainTypes += $"/{propertyInfo.PropertyType.FullName}";
                     assemblyDefinition.RemoveRecursiveProperties(propertyInfo.PropertyType,chainTypes);
-                    chainTypes = string.Join("/", chainTypes.Split('/').SkipLast(1));
+                    chainTypes = string.Join("/", chainTypes.Split('/').SkipLastN(1));
                 }
             }
         }
@@ -68,7 +69,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             return false;
         }
 
-        private static PropertyDefinition[] RecursiveCandinates(this TypeReference type){
+        private static PropertyDefinition[] RecursiveCandidates(this TypeReference type){
             return type.Resolve().Properties
                 .Where(_ => !_.PropertyType.IsValueType && _.PropertyType.FullName!=typeof(string).FullName)
                 .Where(definition => !definition.PropertyType.Resolve().Interfaces.Any(_ => _.InterfaceType.IsGenericInstance))

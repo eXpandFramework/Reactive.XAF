@@ -248,7 +248,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
                 storageInfo.ShouldNotBeNull();
                 var propertyInfo = storageInfo.PropertyType.Property(nameof(SchedulerStorage.Appointments)).PropertyType.Property(nameof(AppointmentStorage.Labels));
                 propertyInfo.ShouldNotBeNull();
-                var menusPropertyInfo = propertyInfos.FirstOrDefault(info => info.Name == SchedulerControlService.PopupMenusMoelPropertyName);
+                var menusPropertyInfo = propertyInfos.FirstOrDefault(info => info.Name == SchedulerControlService.PopupMenusModelPropertyName);
                 menusPropertyInfo.PropertyType.ModelListType().ShouldNotBeNull();
             }
         }

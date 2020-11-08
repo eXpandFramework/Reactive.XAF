@@ -5,21 +5,25 @@ using DevExpress.ExpressApp;
 using Fasterflect;
 using HarmonyLib;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.XAF.AppDomainExtensions;
 
 namespace Xpand.Extensions.XAF.XafApplicationExtensions{
     public static partial class XafApplicationExtensions{
         public static void AddNonSecuredType(this XafApplication application,params Type[] objectTypes){
-            if (application.Security != null && application.Security.GetType().FromHierarchy(type => type.BaseType)
+            AppDomain.CurrentDomain.Patch(harmony => {
+                if (application.Security != null && application.Security.GetType().FromHierarchy(type => type.BaseType)
                     .Any(type => type.Name == "SecurityStrategy")){
                 
-                var isSecuredTypeMethod = application.Security.GetType().Method("IsSecuredType",Flags.Static|Flags.Public);
-                var postfix = new HarmonyMethod(typeof(XafApplicationExtensions).Method(nameof(IsSecuredType),Flags.Static|Flags.NonPublic));
-                _harmony.Patch(isSecuredTypeMethod,postfix);
+                
+                    var isSecuredTypeMethod = application.Security.GetType().Method("IsSecuredType",Flags.Static|Flags.Public);
+                    var postfix = new HarmonyMethod(typeof(XafApplicationExtensions).Method(nameof(IsSecuredType),Flags.Static|Flags.NonPublic));
+                    harmony.Patch(isSecuredTypeMethod,postfix);
 
-                foreach (var securedType in objectTypes){
-                    _securedTypes.Add(securedType);   
+                    foreach (var securedType in objectTypes){
+                        _securedTypes.Add(securedType);   
+                    }
                 }
-            }
+            });
         }
 
         

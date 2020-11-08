@@ -217,7 +217,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             if (propertiesCode == null){
                 var propertyInfos = typeToCode.PublicProperties()
                     .Where(_ => mappedTypes == null || !mappedTypes.Contains(_.PropertyType))
-                    .Do(_ =>mappedTypes?.AddMappedType(_.PropertyType) )
+                    .Select(_ => {
+                        mappedTypes?.AddMappedType(_.PropertyType);
+                        return _;
+                    })
                     .Where(info => info.PropertyType!=data.rootType)
                     .ToModelMapperPropertyInfo().ToArray();
                 var properties = new List<ModelMapperPropertyInfo>(propertyInfos);

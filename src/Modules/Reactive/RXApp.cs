@@ -14,6 +14,7 @@ using JetBrains.Annotations;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
 using Xpand.Extensions.XAF.ModuleExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -27,16 +28,19 @@ namespace Xpand.XAF.Modules.Reactive{
         static readonly Subject<ApplicationModulesManager> ApplicationModulesManagerSubject=new Subject<ApplicationModulesManager>();
         static readonly Subject<Frame> FramesSubject=new Subject<Frame>();
         static readonly Subject<(object theObject,IObjectSpace objectSpace)> NewObjectsSubject=new Subject<(object theObject, IObjectSpace objectSpace)>();
-        internal static Harmony Harmony;
-
-        static RxApp(){
-            Harmony = new Harmony(typeof(RxApp).Namespace);
-	        PatchXafApplication(Harmony);
-	        var methodInfo = typeof(BaseObjectSpace).Methods(Flags.AnyVisibility|Flags.Instance,nameof(BaseObjectSpace.CreateObject)).First(info => !info.IsGenericMethod);
-	        var method = GetMethodInfo(nameof(CreateObject));
-	        Harmony.Patch(methodInfo,postfix: new HarmonyMethod(method));
-        }
         
+
+        static RxApp() {
+            AppDomain.CurrentDomain.Patch(harmony => {
+                PatchXafApplication(harmony);
+                var methodInfo = typeof(BaseObjectSpace).Methods(Flags.AnyVisibility|Flags.Instance,nameof(BaseObjectSpace.CreateObject)).First(info => !info.IsGenericMethod);
+                var method = GetMethodInfo(nameof(CreateObject));
+                harmony.Patch(methodInfo,postfix: new HarmonyMethod(method));
+            });
+        }
+
+        
+
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         static void CreateObject(IObjectSpace __instance,object __result) => NewObjectsSubject.OnNext(( __result,__instance));
 
@@ -83,14 +87,15 @@ namespace Xpand.XAF.Modules.Reactive{
         static IObservable<Unit> PatchAuthentication(this XafApplication application) 
             => application.WhenSetupComplete()
                 .Do(_ => {
-                    var harmony = new Harmony(nameof(PatchAuthentication));
-                    if (application.Security.IsInstanceOf("DevExpress.ExpressApp.Security.SecurityStrategyBase")){
-                        var methodInfo = ( application.Security)?.GetPropertyValue("Authentication")?.GetType().Methods("Authenticate")
-                            .Last(info =>info.DeclaringType!=null&& !info.DeclaringType.IsAbstract);
-                        if (methodInfo != null){
-                            harmony.Patch(methodInfo, new HarmonyMethod(GetMethodInfo(nameof(Authenticate))));	
-                        }	
-                    }
+                    AppDomain.CurrentDomain.Patch(harmony => {
+                        if (application.Security.IsInstanceOf("DevExpress.ExpressApp.Security.SecurityStrategyBase")){
+                            var methodInfo = ( application.Security)?.GetPropertyValue("Authentication")?.GetType().Methods("Authenticate")
+                                .Last(info =>info.DeclaringType!=null&& !info.DeclaringType.IsAbstract);
+                            if (methodInfo != null){
+                                harmony.Patch(methodInfo, new HarmonyMethod(GetMethodInfo(nameof(Authenticate))));	
+                            }	
+                        }
+                    });
                 })
                 .ToUnit();
 

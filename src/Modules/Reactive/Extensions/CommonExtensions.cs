@@ -8,6 +8,7 @@ using System.Reactive.Threading.Tasks;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Utils;
 using DevExpress.Persistent.Base;
+using JetBrains.Annotations;
 using Xpand.Extensions.ConfigurationExtensions;
 using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.Reactive.Transform;
@@ -16,11 +17,14 @@ using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
 namespace Xpand.XAF.Modules.Reactive.Extensions{
     public static class CommonExtensions{
+
+        [PublicAPI]
         public static IDisposable Subscribe<T>(this IObservable<T> source, ModuleBase moduleBase){
             var takeUntil = source.TakeUntil(moduleBase.WhenDisposed());
             return moduleBase.Application!=null ? takeUntil.Subscribe(moduleBase.Application) : takeUntil.Subscribe();
         }
-
+        
+        [PublicAPI]
         public static IDisposable Subscribe<T>(this IObservable<T> source, Controller controller){
             return source.TakeUntil(controller.WhenDeactivated()).Subscribe(controller.Application);
         }
@@ -59,6 +63,7 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
         public static IObservable<T> Handle<T>(this Exception exception, Func<Exception, IObservable<T>> exceptionSelector = null) => exception is WarningException ? default(T).ReturnObservable() :
             exceptionSelector != null ? exceptionSelector(exception) : Observable.Throw<T>(exception);
 
+        [PublicAPI]
         public static IObservable<T> HandleException<T>(this IObservable<T> source,Func<Exception,IObservable<T>> exceptionSelector=null){
             
             return source.Catch<T, Exception>(exception => {

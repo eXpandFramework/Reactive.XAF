@@ -71,7 +71,7 @@ Invoke-Script{
     catch {
         "PaketRestore Failed"
         Write-HostFormatted "PaketInstall $SourcePath (due to different Version)" -section
-        dotnet paket install -v
+        dotnet paket install -v|Out-Null
     }
     if ($Branch -eq "lab") {
         Write-HostFormatted "checking for New DevExpress Version ($CustomVersion) " -Section

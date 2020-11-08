@@ -5,7 +5,6 @@ using System.ComponentModel;
 using System.Linq;
 using DevExpress.ExpressApp;
 using Fasterflect;
-using HarmonyLib;
 
 namespace Xpand.Extensions.XAF.XafApplicationExtensions{
     public enum Platform{
@@ -17,7 +16,7 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions{
     }
 
     public static partial class XafApplicationExtensions{
-        private static Harmony _harmony;
+        
         private static ConcurrentBag<Type> _securedTypes;
         static XafApplicationExtensions() => Init();
 
@@ -27,7 +26,7 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions{
             var systemWebAssembly = assemblies.FirstOrDefault(assembly => assembly.GetName().Name == "System.Web");
             var httpContextType = systemWebAssembly?.Types().First(_ => _.Name == "HttpContext");
             IsHosted = httpContextType?.GetPropertyValue("Current") != null;
-            _harmony = new Harmony(typeof(XafApplicationExtensions).Namespace);
+            
         }
 
         public static bool IsHosted{ get; set; }

@@ -19,12 +19,8 @@ namespace Xpand.XAF.Modules.Reactive{
         internal readonly ReplaySubject<ReactiveModuleBase> SetupCompletedSubject=new ReplaySubject<ReactiveModuleBase>(1);
         static readonly Subject<ApplicationModulesManager> SettingUpSubject=new Subject<ApplicationModulesManager>();
         static ReactiveModuleBase(){
-            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainOnAssemblyResolve;
-            var harmony = new Harmony(typeof(ReactiveModuleBase).FullName);
-            var original = typeof(ApplicationModulesManager).Method("SetupModules");
-            var prefix = typeof(ReactiveModule).Method(nameof(SetupModulesPatch),Flags.StaticAnyVisibility);
-            harmony.Patch(original,  new HarmonyMethod(prefix));
-            AppDomain.CurrentDomain.AddModelReference("netstandard");
+            // AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainOnAssemblyResolve;
+            
         }
 
         private static Assembly CurrentDomainOnAssemblyResolve(object sender, ResolveEventArgs args){

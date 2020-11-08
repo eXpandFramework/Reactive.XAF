@@ -6,19 +6,20 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reflection;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.Predefined{
     public static class SchedulerControlService{
-        public const string PopupMenusMoelPropertyName = "PopupMenus";
+        public const string PopupMenusModelPropertyName = "PopupMenus";
 
         internal static IObservable<Unit> Connect(Type typeToMap, Assembly schedulerCoreAssembly){
             var storageData = new[] {
                 (property: "Labels", typeName: "AppointmentLabel", assembly: typeToMap.Assembly),
                 (property: "Mappings", typeName: "ResourceMappingInfo", assembly: schedulerCoreAssembly),
-                (property: PopupMenusMoelPropertyName, typeName: "SchedulerPopupMenu", assembly: typeToMap.Assembly)
+                (property: PopupMenusModelPropertyName, typeName: "SchedulerPopupMenu", assembly: typeToMap.Assembly)
             };
             var types = storageData
                 .Select(_ => (_.property,listType:typeof(IList<>).MakeGenericType(_.assembly.GetType($"DevExpress.XtraScheduler.{_.typeName}"))))
@@ -41,7 +42,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.Predefined{
                 data.propertyInfos.Add(new ModelMapperPropertyInfo(last.property,last.listType,propertyInfo.DeclaringType));
             }
             else if (data.declaringType.FullName == "DevExpress.XtraScheduler.AppointmentStorage"){
-                foreach (var pData in propertyData.SkipLast(1)){
+                foreach (var pData in propertyData.SkipLastN(1)){
                     var propertyInfo = data.propertyInfos.First(info => info.Name==pData.property);
                     data.propertyInfos.Remove(propertyInfo);
                     var modelMapperPropertyInfo = new ModelMapperPropertyInfo(pData.property,pData.listType,propertyInfo.DeclaringType);

@@ -9,6 +9,7 @@ using DevExpress.ExpressApp;
 using Fasterflect;
 using HarmonyLib;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.XAF.AppDomainExtensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ObjectSpaceProviderExtensions{
@@ -24,17 +25,18 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         internal static IObservable<Unit> PatchObjectSpaceProvider(this XafApplication application) 
             => application.WhenSetupComplete()
                 .Do(_ => {
-                    var harmony = new Harmony(nameof(PatchObjectSpaceProvider));
-                    foreach (var provider in application.ObjectSpaceProviders.Where(provider => !(provider is NonPersistentObjectSpaceProvider))){
-                        var methodInfos = provider.GetType().Methods($"{typeof(IObjectSpaceProvider).FullName}.{nameof(IObjectSpaceProvider.UpdateSchema)}")
-                            .Concat(provider.GetType().Methods(nameof(IObjectSpaceProvider.UpdateSchema)));
-                        var methodInfo = methodInfos
-                            .Last(info =>info.DeclaringType!=null&& !info.DeclaringType.IsAbstract);
-                        if (methodInfo != null){
-                            harmony.Patch(methodInfo, new HarmonyMethod(GetMethodInfo(nameof(SchemaUpdating))));	
-                            harmony.Patch(methodInfo, postfix:new HarmonyMethod(GetMethodInfo(nameof(SchemaUpdated))));	
-                        }	
-                    }
+                    AppDomain.CurrentDomain.Patch(harmony => {
+                        foreach (var provider in application.ObjectSpaceProviders.Where(provider => !(provider is NonPersistentObjectSpaceProvider))){
+                            var methodInfos = provider.GetType().Methods($"{typeof(IObjectSpaceProvider).FullName}.{nameof(IObjectSpaceProvider.UpdateSchema)}")
+                                .Concat(provider.GetType().Methods(nameof(IObjectSpaceProvider.UpdateSchema)));
+                            var methodInfo = methodInfos
+                                .Last(info =>info.DeclaringType!=null&& !info.DeclaringType.IsAbstract);
+                            if (methodInfo != null){
+                                harmony.Patch(methodInfo, new HarmonyMethod(GetMethodInfo(nameof(SchemaUpdating))));	
+                                harmony.Patch(methodInfo, postfix:new HarmonyMethod(GetMethodInfo(nameof(SchemaUpdated))));	
+                            }	
+                        }
+                    });
                 })
                 .ToUnit();
 

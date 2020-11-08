@@ -38,7 +38,7 @@ namespace Xpand.XAF.Modules.Reactive {
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
             moduleManager.Connect()
-                .TakeUntilDisposed(this)
+                 .TakeUntilDisposed(this)
                 .Subscribe();
         }
     }

@@ -9,6 +9,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using Fasterflect;
 using JetBrains.Annotations;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -59,7 +60,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         }
 
         private static IObservable<IModelMapperConfiguration> ModelExtenders(){
-            return ModelMapperConfigurations.Distinct(_ => _.TypeToMap).ToObservable().TraceModelMapper();
+            return ModelMapperConfigurations.DistinctBy(_ => _.TypeToMap).ToObservable().TraceModelMapper();
         }
 
         public static void Extend(this ApplicationModulesManager modulesManager, IModelMapperConfiguration configuration){

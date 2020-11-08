@@ -9,3 +9,4 @@ System.ValueTuple
 Microsoft.CodeAnalysis.CSharp
 System.Configuration.ConfigurationManager
 System.ServiceModel.Http
+DevExpress.Xpo
