@@ -28,7 +28,6 @@ using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Repository;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.BandedGrid;
-using DevExpress.XtraLayout;
 using DevExpress.XtraPivotGrid;
 using DevExpress.XtraScheduler;
 using DevExpress.XtraTreeList;
@@ -180,11 +179,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         [XpandTest(LongTimeout)]
-        [TestCase(nameof(Platform.Web),new[]{PredefinedMap.ASPxPopupControl },new[]{typeof(ASPxPopupControl)},new Type[0],0)]
         [TestCase(nameof(Platform.Win),new[]{PredefinedMap.XafLayoutControl },new[]{typeof(XafLayoutControl)},new Type[0],1)]
-        [TestCase(nameof(Platform.Win),new[]{PredefinedMap.LayoutControlGroup },new[]{typeof(LayoutControlGroup)},new Type[0],1)]
-        public async Task Bind_DetailView_Maps(string platformName,PredefinedMap[] predefinedMaps,Type[] controlTypes,Type[] extraModules,int boundTypes){
-            
+        [TestCase(nameof(Platform.Web),new[]{PredefinedMap.ASPxPopupControl },new[]{typeof(ASPxPopupControl)},new Type[0],0)]
+        // [TestCase(nameof(Platform.Win),new[]{PredefinedMap.LayoutControlGroup },new[]{typeof(LayoutControlGroup)},new Type[0],1)]
+        public async Task Bind_DetailView_Maps(string platformName,PredefinedMap[] predefinedMaps,Type[] controlTypes,Type[] extraModules,int boundTypes) {
             var platform = GetPlatform(platformName);
             controlTypes.ToObservable().Do(type => Assembly.LoadFile(type.Assembly.Location)).Subscribe();
             InitializeMapperService(platform);
@@ -288,7 +286,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         [TestCase(nameof(Platform.Win))]
         public async Task Bind_PropertyEditor_Control(string platformName){
             var platform = GetPlatform(platformName);
-            var maps = EnumsNET.Enums.GetValues<PredefinedMap>().Where(map => map.IsPropertyEditor()&&map.Attribute<MapPlatformAttribute>().Platform==platform);
+            var maps = EnumsNET.Enums.GetValues<PredefinedMap>().Where(map => map.IsPropertyEditor() && map.Attribute<MapPlatformAttribute>().Platform == platform);
             foreach (var predefinedMap in maps){
                 try{
                     InitializeMapperService(platform);

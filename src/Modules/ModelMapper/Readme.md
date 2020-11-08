@@ -57,7 +57,7 @@ The cross platform [Xpand.XAF.Modules.ModelMapper](https://github.com/eXpandFram
 [![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/CkJKEfPhS0M)
 
 ##### Map Generation
-Generating maps for many types is costly however it happens in parallel and only once. Afterwards the model interfaces are loaded from the `ModelMapperAssembly.dll` found in path. All mapped types are included in this one assembly even if the map was executed from different modules.
+Generating maps for many types is costly however it happens in parallel and only once. Afterwards the model interfaces are loaded from the `ModelMapperAssembly.dll` found in path. Only the predefined mapped types are included in this one assembly. Another with suffix `Custom` will host any other maps. This design aims to improve startup performance by compiling the prefefined . 
 
 The module will generate automatically the `ModelMapperAssembly.dll` under the following conditions.
 1. If the assembly does not exist in path.
@@ -92,12 +92,14 @@ It is possible for the map to be outdated if an indirect reference of the partic
 The module ships with a large list of maps well tested, ready to use and already integrated with eXpandFramework main modules. 
 
 You are free to install any combination of them like the next snippet which installs the GridView and LayoutView maps:
+
 ```cs
 public override void Setup(ApplicationModulesManager moduleManager){
 	base.Setup(moduleManager);
 	moduleManager.Extend(PredefinedMap.AdvBandedGridView,PredefinedMap.BandedGridColumn,PredefinedMap.GridView,PredefinedMap.GridColumn);
 }
 ```
+
 The predefined maps are categorized as:
 1. Several `ListEditor maps` extend the IModelListView, IModelColumn and their visibility is bound to the respective ListEditor.
 

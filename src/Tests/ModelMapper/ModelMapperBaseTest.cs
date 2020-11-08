@@ -49,7 +49,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
         private void ConfigureLayoutViewPredefinedMapService(PredefinedMap predefinedMap=PredefinedMap.LayoutView){
             if (new[]{PredefinedMap.LayoutView,PredefinedMap.LayoutViewColumn}.Contains(predefinedMap)){
-                typeof(PredefinedMapService).Field("_xpandWinAssembly",Flags.Static|Flags.AnyVisibility).Set(GetType().Assembly);
                 typeof(PredefinedMapService).Field("_layoutViewListEditorTypeName",Flags.Static|Flags.AnyVisibility).Set(typeof(CustomGridListEditor).FullName);
             }
         }
@@ -82,7 +81,11 @@ public class {DynamicTypeName}{{
                 TypeMappingService.ModelMapperAssemblyName = $"{Guid.NewGuid()}{mapperAssemblyName}";
             }
             var applicationPath = AppDomain.CurrentDomain.ApplicationPath();
-            var files = Directory.GetFiles(applicationPath,$"*{mapperAssemblyName}*.dll").ToArray();
+            var files = Directory.GetFiles(applicationPath,"*.dll")
+                .Where(s => {
+                    var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(s);
+                    return fileNameWithoutExtension.StartsWith("ModelMapperAssembly")||fileNameWithoutExtension.StartsWith("ModelAssembly");
+                }).ToArray();
             foreach (var file in files){
                 try{
                     File.Delete(file);

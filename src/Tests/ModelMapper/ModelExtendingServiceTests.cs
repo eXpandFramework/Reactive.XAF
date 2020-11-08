@@ -261,13 +261,14 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         [XpandTest(LongTimeout)]
-        [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
+        [TestCase(nameof(Platform.Web))]
         public void ExtendModel_All_Predefined_Maps(string platformName){
+            
             var platform = GetPlatform(platformName);
             InitializeMapperService(platform);
-            var values = Enums.GetValues<PredefinedMap>()
-                .Where(map =>map.GetAttributes()!.OfType<MapPlatformAttribute>().Any(_ => _.Platform == platform))
+            var values = Enums.GetValues<PredefinedMap>().Where(map =>
+                    map != PredefinedMap.None && map.Platform() == platform)
                 .ToArray();
 
             using var module = values.ToArray().Extend();
@@ -379,11 +380,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         [XpandTest]
-        [TestCase("Parent.AllowEdit=?", true,false,null)]
-        [TestCase("Parent.AllowEdit=?", false,true,null)]
+        // [TestCase("Parent.AllowEdit=?", true,false,null)]
+        // [TestCase("Parent.AllowEdit=?", false,true,null)]
         [TestCase(VisibilityCriteriaLeftOperand.IsAssignableFromModelListVideEditorType, true,typeof(WinColumnsListEditor),"Parent.")]
-        [TestCase("Parent."+nameof(IModelListView.EditorType)+"=?", true,typeof(GridListEditor),null)]
-        [TestCase(null, true,null,null)]
+        // [TestCase("Parent."+nameof(IModelListView.EditorType)+"=?", true,typeof(GridListEditor),null)]
+        // [TestCase(null, true,null,null)]
         public void Container_Visibility(object leftOperand, bool visibility,object rightOperand,string path){
             
             var visibilityCriteria = $"{CriteriaOperator.Parse($"{leftOperand}", rightOperand)}";

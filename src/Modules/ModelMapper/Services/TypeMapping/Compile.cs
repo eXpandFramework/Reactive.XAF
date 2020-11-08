@@ -11,17 +11,19 @@ using Xpand.Extensions.Compiler;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.StreamExtensions;
+using Xpand.Extensions.StringExtensions;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 
 
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
 	
     public static partial class TypeMappingService{
+        public static string CustomAssemblyNameSuffix = "Custom";
         private static bool _skipAssemblyValidation;
         
-        private static IObservable<Assembly> Compile(this IEnumerable<string> references, string code){
+        private static IObservable<Assembly> Compile(this IEnumerable<string> references, string code,bool isCustom){
 	        using var memoryStream = CSharpSyntaxTree.ParseText(code).Compile(references.ToArray());
-	        var outputAssembly = FormatOutputAssembly();
+	        var outputAssembly = FormatOutputAssembly(isCustom);
 	        if (File.Exists(outputAssembly)){
                 File.Delete(outputAssembly);
 	        }
@@ -30,8 +32,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             return assembly.ReturnObservable().TraceModelMapper();
         }
 
-        private static string FormatOutputAssembly() => string.Format(OutputAssembly, ModelExtendingService.Platform);
-				  		
+        private static string FormatOutputAssembly(bool isCustom) {
+            var outputAssembly = string.Format(OutputAssembly, ModelExtendingService.Platform);
+            return isCustom?$"{Path.Combine(Path.GetDirectoryName(outputAssembly)!,$"{Path.GetFileNameWithoutExtension(outputAssembly)}{CustomAssemblyNameSuffix}.dll")}":outputAssembly;
+        }
+
         private static Assembly RemoveRecursiveProperties(string assembly){
 	        using (var assemblyDefinition = AssemblyDefinition.ReadAssembly(assembly,new ReaderParameters(){ReadWrite = true})){
 		        assemblyDefinition.Name = new AssemblyNameDefinition(Path.GetFileNameWithoutExtension(assembly), assemblyDefinition.Name.Version);
@@ -45,8 +50,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         private static void RemoveRecursiveProperties(this AssemblyDefinition assemblyDefinition,TypeReference type,string chainTypes){
-            var recursiveCandidates = type.RecursiveCandidates();
-            foreach (var propertyInfo in recursiveCandidates){
+            foreach (var propertyInfo in type.RecursiveCandidates()){
                 var remove = type.Remove(chainTypes, propertyInfo);
                 if (!remove){
                     chainTypes += $"/{propertyInfo.PropertyType.FullName}";
@@ -69,69 +73,66 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             return false;
         }
 
-        private static PropertyDefinition[] RecursiveCandidates(this TypeReference type){
-            return type.Resolve().Properties
+        private static PropertyDefinition[] RecursiveCandidates(this TypeReference type) 
+            => type.Resolve().Properties
                 .Where(_ => !_.PropertyType.IsValueType && _.PropertyType.FullName!=typeof(string).FullName)
                 .Where(definition => !definition.PropertyType.Resolve().Interfaces.Any(_ => _.InterfaceType.IsGenericInstance))
                 .ToArray();
-        }
 
-        private static bool TypeFromPath(this IModelMapperConfiguration configuration){
-            var assemblyPath = GetLastAssemblyPath();
+        private static bool TypeFromPath(this IModelMapperConfiguration configuration,bool isCustom){
+            var assemblyPath = GetLastAssemblyPath(isCustom);
             if (!string.IsNullOrEmpty(assemblyPath)){
                 using var assembly = AssemblyDefinition.ReadAssembly(assemblyPath);
-                if (assembly.IsMapped(configuration) && !assembly.VersionChanged() && !assembly.ConfigurationChanged()){
-                    return true;
+                if (!assembly.VersionChanged()) {
+                    return !isCustom || assembly.IsMapped(configuration) && !assembly.ConfigurationChanged();
                 }
             }
             return false;
         }
 
-        private static string GetLastAssemblyPath(){
-            var outputAssembly = FormatOutputAssembly();
-            var assemblyPath = Directory
+        private static string GetLastAssemblyPath(bool isCustom){
+            var outputAssembly = FormatOutputAssembly(isCustom);
+            return Directory
                 .GetFiles($"{Path.GetDirectoryName(outputAssembly)}", $"{Path.GetFileNameWithoutExtension(outputAssembly)}*.dll")
-                .OrderByDescending(s => s).FirstOrDefault();
-            return $"{assemblyPath}";
+                .OrderByDescending(s => s)
+                .FirstOrDefault(s => {
+                    var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(s);
+                    return !isCustom ? !fileNameWithoutExtension.EndsWith(CustomAssemblyNameSuffix)
+                        : fileNameWithoutExtension.EndsWith(CustomAssemblyNameSuffix);
+                });
         }
 
-        private static bool ConfigurationChanged(this AssemblyDefinition assembly){
-            var configurationChanged = assembly.CustomAttributes.Any(attribute => {
+        private static bool ConfigurationChanged(this AssemblyDefinition assembly) 
+            => assembly.CustomAttributes.Any(attribute => {
                 if (attribute.AttributeType.FullName != typeof(ModelMapperServiceAttribute).FullName) return false;
                 var hashCode = HashCode();
                 var storedHash = attribute.ConstructorArguments.Last().Value;
                 return !storedHash.Equals(hashCode);
             });
-            return configurationChanged;
-        }
 
-        private static int HashCode(){
-            var text = string.Join(Environment.NewLine, PropertyMappingRules.Select(_ => _.key)
-                .Concat(TypeMappingRules.Select(_ => _.key))
-                .Concat(AdditionalTypesList.Select(_ => _.FullName))
-                .Concat(ReservedPropertyTypes.Select(type => type.FullName))
-                .Concat(ReservedPropertyNames)
-                .Concat(ReservedPropertyInstances.Select(_ => _.FullName))
-                .Concat(new[]{ModelMappersNodeName, MapperAssemblyName, ModelMapperAssemblyName, DefaultContainerSuffix}).OrderBy(s => s));
-            var hashCode = text
-                .GetHashCode();
-            return hashCode;
-        }
+        private static string HashCode() 
+            => string.Join(Environment.NewLine, PropertyMappingRules.Select(_ => _.key)
+                    .Concat(TypeMappingRules.Select(_ => _.key))
+                    .Concat(AdditionalTypesList.Select(_ => _.FullName))
+                    .Concat(ReservedPropertyTypes.Select(type => type.FullName))
+                    .Concat(ReservedPropertyNames)
+                    .Concat(ReservedPropertyInstances.Select(_ => _.FullName))
+                    .Concat(new[]{ModelMappersNodeName, MapperAssemblyName, ModelMapperAssemblyName, DefaultContainerSuffix}).OrderBy(s => s))
+                .ToGuid().ToString();
 
-        private static bool VersionChanged(this AssemblyDefinition assembly){
-            var versionAttribute = assembly.CustomAttributes.First(attribute =>
-                attribute.AttributeType.FullName == typeof(AssemblyFileVersionAttribute).FullName);
-            return Version.Parse(versionAttribute.ConstructorArguments.First().Value.ToString()) !=_modelMapperModuleVersion;
-        }
+        private static bool VersionChanged(this AssemblyDefinition assembly) 
+            => Version.Parse(assembly.CustomAttributes
+                .First(attribute => attribute.AttributeType.FullName == typeof(AssemblyFileVersionAttribute).FullName).ConstructorArguments
+                .First().Value.ToString()) !=_modelMapperModuleVersion;
 
         private static bool IsMapped(this AssemblyDefinition assembly, IModelMapperConfiguration configuration){
-            var typeAssemblyHash = configuration.TypeToMap.Assembly.ManifestModule.ModuleVersionId.GetHashCode();
+            var typeAssemblyHash = configuration.TypeToMap.Assembly.ManifestModule.ModuleVersionId.ToString();
             var modelMapperServiceAttributes = assembly.CustomAttributes.Where(attribute => attribute.AttributeType.FullName == typeof(ModelMapperTypeAttribute).FullName).ToArray();
             return modelMapperServiceAttributes.Any(attribute => {
-                var mappedTypeAssemblyHash = int.Parse(attribute.ConstructorArguments.Skip(2).First().Value.ToString());
+                var mappedTypeAssemblyHash = attribute.ConstructorArguments.Skip(2).First().Value.ToString();
                 var mappedType = (string) attribute.ConstructorArguments.First().Value;
                 return mappedTypeAssemblyHash == typeAssemblyHash && mappedType == configuration.TypeToMap.FullName &&
-                       configuration.GetHashCode() == (int) attribute.ConstructorArguments.Last().Value;
+                       configuration.ToString().ToGuid().ToString() ==  (string) attribute.ConstructorArguments.Last().Value;
 
             });
         }

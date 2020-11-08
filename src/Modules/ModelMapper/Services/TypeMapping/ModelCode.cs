@@ -19,15 +19,15 @@ using Xpand.XAF.Modules.ModelMapper.Configuration;
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
     public class ModelMapperServiceAttribute : Attribute{
-        public ModelMapperServiceAttribute( int hashCode){
+        public ModelMapperServiceAttribute( string hashCode){
             HashCode = hashCode;
         }
-        public int HashCode{ get; }
+        public string HashCode{ get; }
     }
 
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
     public class ModelMapperTypeAttribute : Attribute{
-        public ModelMapperTypeAttribute(string mappedType, string mappedAssembly, int assemblyHashCode, int configurationHashCode){
+        public ModelMapperTypeAttribute(string mappedType, string mappedAssembly, string assemblyHashCode, string configurationHashCode){
             MappedAssembly = mappedAssembly;
             ConfigurationHashCode = configurationHashCode;
             MappedType = mappedType;
@@ -36,9 +36,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
 
         public string MappedAssembly{ get; }
 
-        public int AssemblyHashCode{ get; }
+        public string AssemblyHashCode{ get; }
         public string MappedType{ get; }
-        public int ConfigurationHashCode{ get; }
+        public string ConfigurationHashCode{ get; }
     }
 
     [AttributeUsage(AttributeTargets.Interface|AttributeTargets.Class)]
@@ -65,7 +65,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 .Concat(AdditionalTypesList).Distinct().ToArray();
             var additionalTypesCode = type.AdditionalTypesCode( additionalTypes);
             var containerName = type.ModelMapContainerName( configuration);
-            var mapName = type.ModelTypeName(type, configuration:configuration);
+            var mapName = type.ModelTypeName(type, configuration);
             var containerCode = type.ContainerCode( configuration, $"IModel{containerName}", mapName);
             var modelMappersTypeName = $"IModel{containerName}{ModelMappersNodeName}";
             var modelMappersInterfaceCode = ModelMappersInterfaceCode( modelMappersTypeName);
@@ -78,17 +78,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
 
         private static string AssemblyAttributesCode(this Type type,IModelMapperConfiguration configuration){
             var modelMapperServiceAttributeCode = type.ModelMapperServiceAttributeCode(configuration);
-
-            var hashCode = HashCode();
-            var modelMapperConfigurationCode = $@"[assembly:{typeof(ModelMapperServiceAttribute).FullName}({hashCode})]{Environment.NewLine}";
+            var modelMapperConfigurationCode = $@"[assembly:{typeof(ModelMapperServiceAttribute).FullName}(""{HashCode()}"")]{Environment.NewLine}";
             return string.Join(Environment.NewLine, modelMapperConfigurationCode, modelMapperServiceAttributeCode);
         }
 
-        private static string AssemblyVersionCode(){
-            var assemblyVersionCode =
-                $@"[assembly:{typeof(AssemblyVersionAttribute).FullName}(""{_modelMapperModuleVersion}"")]{Environment.NewLine}[assembly:{typeof(AssemblyFileVersionAttribute).FullName}(""{_modelMapperModuleVersion}"")]";
-            return assemblyVersionCode;
-        }
+        private static string AssemblyVersionCode()
+            => $@"[assembly:{typeof(AssemblyVersionAttribute).FullName}(""{_modelMapperModuleVersion}"")]{Environment.NewLine}[assembly:{typeof(AssemblyFileVersionAttribute).FullName}(""{_modelMapperModuleVersion}"")]";
 
         private static string ModelCode(this (ModelMapperPropertyInfo propertyInfo,Type rootType) data){
             string propertyCode = null;
@@ -172,9 +167,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             return (modelMappersTypeName,modelMappersInterfaceCode,false);
         }
 
-        private static string ModelMapperServiceAttributeCode(this Type type, IModelMapperConfiguration configuration){
-            return $@"[assembly:{typeof(ModelMapperTypeAttribute).FullName}(""{type.FullName}"",""{type.Assembly.GetName().Name}"",{type.Assembly.ManifestModule.ModuleVersionId.GetHashCode()},{configuration.GetHashCode()})]";
-        }
+        private static string ModelMapperServiceAttributeCode(this Type type, IModelMapperConfiguration configuration)
+            => $@"[assembly:{typeof(ModelMapperTypeAttribute).FullName}" +
+               $@"(""{type.FullName}"",""{type.Assembly.GetName().Name}""," +
+               $@"""{type.Assembly.ManifestModule.ModuleVersionId}"",""{configuration.ToString().ToGuid()}"")]";
 
         private static (string key, string code,bool map) ContainerCode(this Type type, IModelMapperConfiguration configuration, string modelName, string mapName){
             if (!configuration.OmitContainer){
@@ -253,41 +249,38 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             return default;
         }
 
-        private static string ModelName(this (Type typeToCode,Type rootType) data,string customName=null){
-            if (customName!=null){
-                return !customName.StartsWith("IModel") ? $"IModel{customName}" : customName;
-            }
+        private static string ModelName(this (Type typeToCode,Type rootType) data,string customName=null) 
+            => customName != null
+                ? !customName.StartsWith("IModel") ? $"IModel{customName}" : customName
+                : $"IModel{data.typeToCode.Namespace?.Replace(".", "")}_{data.typeToCode.Name}";
 
-            return $"IModel{data.typeToCode.Namespace?.Replace(".","")}_{data.typeToCode.Name}";
-        }
+        private static IObservable<(string code, IEnumerable<string> references)> ModelCode(this IObservable<IModelMapperConfiguration> source) 
+            => source.AssemblyCode().Concat(source.SelectMany(_ => Observable.Start(() => {
+                        var code = _.TypeToMap.ModelCode(_);
+                        return code.code.Select(__ => (code: __, code.references)).ToArray();
+                    },ModelCodeScheduler))
+                    .SelectMany(_ => _)
+                    .RemoveDuplicates())
+                .Aggregate((acc, cu) => {
+                    var code = string.Join(Environment.NewLine, acc.code, cu.code);
+                    return (code, acc.references.Concat(cu.references).Distinct());
+                }).TraceModelMapper();
 
-        private static IObservable<(string code, IEnumerable<string> references)> ModelCode(this IObservable<IModelMapperConfiguration> source){
-
-            var assemblyAttributes = source.Select(_ => _.TypeToMap.AssemblyAttributesCode(_))
+        private static IObservable<(string code, IEnumerable<string> references)> AssemblyCode(this IObservable<IModelMapperConfiguration> source) 
+            => source.Select(_ => _.TypeToMap.AssemblyAttributesCode(_))
                 .Aggregate((acc, curr) => {
                     acc += curr;
                     return acc;
                 })
                 .Concat(Observable.Return(AssemblyVersionCode()))
                 .Select(_=>(code:_,references:new[]{typeof(ModelMapperModule).Assembly.Location}.AsEnumerable()));
-            var modelCode = source.SelectMany(_ => {
-                var merge = Observable.Start(() => {
-                    var code = _.TypeToMap.ModelCode(_);
-                    return code.code.Select(__ => (code: __, code.references)).ToArray();
-                },ModelCodeScheduler);
-                return merge;
-            })
-            .SelectMany(_ => _);
-            var typeCode = modelCode.ToEnumerable()
+
+        private static IObservable<(string code, IEnumerable<string> references)> RemoveDuplicates(this 
+            IObservable<((string key, string code, bool map) code, IEnumerable<string> references)> modelCode) 
+            => modelCode.ToEnumerable()
                 .GroupBy(_ => _.code.key).SelectMany(_ => _.OrderByDescending(tuple => tuple.code.map).Take(1))
-                .ToObservable()
+                .ToObservable(ImmediateScheduler.Instance)
                 .Select(_ => (_.code.code, _.references));
-            return assemblyAttributes.Concat(typeCode)
-                .Aggregate((acc, cu) => {
-                    var code = string.Join(Environment.NewLine, acc.code, cu.code);
-                    return (code, acc.references.Concat(cu.references).Distinct());
-                }).TraceModelMapper();
-        }
 
         [PublicAPI]
         public static IScheduler ModelCodeScheduler{ get; set; }=Scheduler.Default;

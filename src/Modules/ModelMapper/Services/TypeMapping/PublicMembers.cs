@@ -57,9 +57,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             _typesToMap.OnCompleted();
         }
 
-        internal static IObservable<Unit> Connect(){
-            return Observable.Return(Unit.Default).TraceModelMapper();
-        }
+        internal static IObservable<Unit> Connect() 
+            => Observable.Return(Unit.Default).TraceModelMapper();
 
         internal static void Init(){
             var tempPath = $@"{Path.GetTempPath()}\{nameof(ModelMapperModule)}";
@@ -78,7 +77,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             _typesToMap = new ReplaySubject<IModelMapperConfiguration>();
             
             MappingTypes=new ReplaySubject<IModelMapperConfiguration>();
-            MappedTypes = GetMappedTypes();
+            
+            MappedTypes = GetMappedTypes().Replay().RefCount();
             _modelMapperModuleVersion = typeof(TypeMappingService).Assembly.GetName().Version;
             
             ConfigureReservedProperties();
@@ -87,24 +87,34 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             ConfigureAdditionalReferences();
         }
 
+        private static Type[] PredefinedMaps() 
+            => EnumsNET.Enums.GetValues<PredefinedMap>().Select(map => map.TypeToMap())
+                .Concat(new[] {typeof(RepositoryItemBaseMap), typeof(PropertyEditorControlMap)}).ToArray();
+
         private static IObservable<Type> GetMappedTypes() 
-            => Observable.Defer(() => {
-                    var distinctTypesToMap = _typesToMap.Distinct(_ => _.TypeToMap).Do(MappingTypes);
-                    return distinctTypesToMap
-                        .All(_ =>_skipAssemblyValidation|| _.TypeFromPath())
-                        .Select(_ => {
-                            var assembly =!_? distinctTypesToMap.ModelCode().SelectMany(tuple => tuple.references.Compile(tuple.code))
-                                : AppDomain.CurrentDomain.LoadAssembly(GetLastAssemblyPath()).ReturnObservable();
-                            return assembly.SelectMany(assembly1 => {
-                                var types = assembly1.GetTypes()
-                                    .Where(type => typeof(IModelModelMap).IsAssignableFrom(type))
-                                    .Where(type => !type.Attributes<ModelAbstractClassAttribute>().Any())
-                                    .ToArray();
-                                return types;
-                            });
-                        }).Switch();
-                }).Publish().AutoConnect().Replay().AutoConnect().Distinct()
+            => Observable.Defer(() => _typesToMap.Distinct(_ => _.TypeToMap).Do(configuration => MappingTypes.OnNext(configuration))
+                    .BufferUntilCompleted()
+                    .SelectMany(_ => {
+                        var predefinedMaps = PredefinedMaps();
+                        return _typesToMap.Distinct(configuration => configuration.TypeToMap).Select(configuration => (configuration,predefinedMaps));
+                    })
+                    .GroupBy(t => t.predefinedMaps.Contains(t.configuration.TypeToMap))
+                    .SelectMany(obs => obs.Select(t => t.configuration).BufferUntilCompleted()
+                        .SelectMany(configurations => {
+                            var skipCompilation = configurations
+                                .All(configuration =>_skipAssemblyValidation || configuration.TypeFromPath(!obs.Key) );
+                            return configurations.ToObservable(ImmediateScheduler.Instance).GetMappedTypes(skipCompilation, !obs.Key);
+                        })))
                 .Finally(() => _skipAssemblyValidation=false);
+
+        private static IObservable<Type> GetMappedTypes(this IObservable<IModelMapperConfiguration> distinctTypesToMap,bool skipCompilation,bool isCustom) 
+            => (!skipCompilation ? distinctTypesToMap.ModelCode().SelectMany(t => t.references.Compile(t.code,isCustom))
+                : AppDomain.CurrentDomain.LoadAssembly(GetLastAssemblyPath(isCustom)).ReturnObservable())
+                .SelectMany(assembly1 => assembly1.GetTypes()
+                    .Where(type => typeof(IModelModelMap).IsAssignableFrom(type))
+                    .Where(type => !type.Attributes<ModelAbstractClassAttribute>().Any())
+                    .Select(type => type)
+                    .ToArray());
 
         private static void ConfigureAdditionalReferences() 
             => new[]{
@@ -237,6 +247,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
 
         [PublicAPI]
         public static void Reset(bool skipAssemblyValidation=false,Platform? platform=null){
+            MappedTypes=Observable.Empty<Type>();
             _skipAssemblyValidation = skipAssemblyValidation;
             ContainerMappingRules.Clear();
             AdditionalTypesList.Clear();

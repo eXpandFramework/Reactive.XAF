@@ -3,7 +3,9 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp.Model;
+using DevExpress.Web;
 using Fasterflect;
 using NUnit.Framework;
 using Shouldly;
@@ -38,7 +40,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
             var module = typeToMap.Extend<IModelListView>();
             using (DefaultModelMapperModule( platform, module).Application){
-                typeToMap.ModelType().Assembly.Location.ShouldEndWith($"{platformName}.dll");
+                typeToMap.ModelType().Assembly.Location.ShouldEndWith($"{platformName}{TypeMappingService.CustomAssemblyNameSuffix}.dll");
             }
         }
 
@@ -125,6 +127,25 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
             Should.Throw<UnauthorizedAccessException>(async () => await typeToMap.MapToModel(type => new ModelMapperConfiguration(type){MapName = "changed"}).ModelInterfaces());
             
+        }
+
+        [Test]
+        [XpandTest]
+        public void Use_separate_assembly_for_custom_map(){
+            
+            InitializeMapperService();
+            var typesToMap = new[] {
+                typeof(TestModelMapper), 
+                typeof(ASPxComboBox)
+            };
+
+            
+            var observer = typesToMap.MapToModel().ModelInterfaces().Select(type => type.Assembly).Test();
+
+            
+            observer.ItemCount.ShouldBe(2);
+            observer.Items.FirstOrDefault(assembly => assembly.GetName().Name.Contains("Custom")).ShouldNotBeNull();
+            observer.Items.FirstOrDefault(assembly => !assembly.GetName().Name.Contains("Custom")).ShouldNotBeNull();
         }
 
     }

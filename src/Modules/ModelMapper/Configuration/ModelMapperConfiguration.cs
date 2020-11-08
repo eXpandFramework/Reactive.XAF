@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Xpand.XAF.Modules.ModelMapper.Configuration{
     public interface IModelMapperConfiguration{
@@ -31,10 +30,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Configuration{
         public string DisplayName{ get; set; }
         public override string ToString(){
             return $"TypeToMap:{TypeToMap},ContainerName:{ContainerName},MapName:{MapName},ImageName:{ImageName},VisibilityCriteria:{VisibilityCriteria},DisplayName:{DisplayName}";
-        }
-        [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
-        public override int GetHashCode(){
-            return ToString().GetHashCode();
         }
     }
 }

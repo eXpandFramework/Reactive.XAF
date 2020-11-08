@@ -265,7 +265,7 @@ namespace Xpand.TestsLib{
         public static XafApplication NewApplication<TModule>(this Platform platform, bool transmitMessage = true,bool handleExceptions=true,bool usePersistentStorage=false)
             where TModule : ModuleBase{
             XafApplication application;
-
+            ApplicationModulesManager.UseStaticCache = false;
             if (platform == Platform.Web){
                 application = new TestWebApplication(typeof(TModule), transmitMessage);
             }
@@ -358,7 +358,7 @@ namespace Xpand.TestsLib{
             return (string) (displayNameAttribute?.GetPropertyValue("DisplayName")??name);
         }
 
-        internal static string MemberExpressionCaption<TObject,TMemeberValue>(this Expression<Func<TObject, TMemeberValue>> memberName) =>
+        internal static string MemberExpressionCaption<TObject,TMemberValue>(this Expression<Func<TObject, TMemberValue>> memberName) =>
             memberName.Body is UnaryExpression unaryExpression
                 ? ((MemberExpression) unaryExpression.Operand).Member.Name
                 : ((MemberExpression) memberName.Body).Member.Name;

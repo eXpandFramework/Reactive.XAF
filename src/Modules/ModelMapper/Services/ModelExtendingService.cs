@@ -50,7 +50,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 .Distinct().Replay().RefCount();
 
             return modelExtenders
-                .SelectMany(_ => mappedContainers.FirstAsync(type =>type.Attribute<ModelMapLinkAttribute>().LinkedTypeName == _.TypeToMap.AssemblyQualifiedName).SelectMany(_.CollectExtenders))
+                .SelectMany(_ => mappedContainers.FirstAsync(type =>type.Attribute<ModelMapLinkAttribute>().LinkedTypeName == _.TypeToMap.AssemblyQualifiedName)
+                    .SelectMany(_.CollectExtenders))
                 .Do(_ => extenders.Add(_.targetInterfaceType,_.extenderInterface));
         }
 

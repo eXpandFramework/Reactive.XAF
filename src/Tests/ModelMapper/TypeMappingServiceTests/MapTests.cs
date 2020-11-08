@@ -391,7 +391,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
             var types = modelInterfaces.ToEnumerable().ToArray();
             types.Length.ShouldBeGreaterThan(0);
-            types.Length.ShouldBe(values.Length);
+            var valuesLength = values.Length;
+            types.Length.ShouldBe(valuesLength);
             foreach (var map in values){
                 var modelTypeName = map.ModelTypeName();
                 types.FirstOrDefault(_ => _.Name == modelTypeName).ShouldNotBeNull();

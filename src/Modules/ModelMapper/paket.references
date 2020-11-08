@@ -11,3 +11,4 @@ System.Collections.Immutable
 System.Configuration.ConfigurationManager
 Microsoft.CodeAnalysis.CSharp
 System.ServiceModel.Http
+System.Interactive

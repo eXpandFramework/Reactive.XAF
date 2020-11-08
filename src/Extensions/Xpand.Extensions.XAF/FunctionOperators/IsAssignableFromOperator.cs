@@ -1,5 +1,8 @@
-﻿using DevExpress.Data.Filtering;
+﻿using System;
+using System.Linq;
+using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp.SystemModule;
+using Xpand.Extensions.AppDomainExtensions;
 
 namespace Xpand.Extensions.XAF.FunctionOperators{
     public class IsAssignableFromOperator : ICustomFunctionOperator{
@@ -8,11 +11,12 @@ namespace Xpand.Extensions.XAF.FunctionOperators{
 
         static IsAssignableFromOperator() => CustomFunctionOperatorHelper.Register(Instance);
 
-        public System.Type ResultType(params System.Type[] operands) => typeof(bool);
+        public Type ResultType(params Type[] operands) => typeof(bool);
 
         public object Evaluate(params object[] operands){
-            var type = System.Type.GetType(operands[1].ToString());
-            return type != null && type.IsAssignableFrom((System.Type) operands[0]);
+            var fullName = operands[1].ToString();
+            var type = AppDomain.CurrentDomain.GetAssemblyType(fullName).FirstOrDefault();
+            return type != null && type.IsAssignableFrom((Type) operands[0]);
         }
 
         public string Name{ get; } = OperatorName;
