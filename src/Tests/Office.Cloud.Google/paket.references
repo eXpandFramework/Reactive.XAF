@@ -1,17 +1,10 @@
 MagicOnion
 Shouldly
-System.Reactive
 NUnit
 NUnit3TestAdapter
-DevExpress.ExpressApp
 DevExpress.ExpressApp.Security
-DevExpress.Xpo
 JetBrains.Annotations
-DevExpress.Persistent.Base
 DevExpress.Persistent.BaseImpl
-DevExpress.ExpressApp.Xpo
 Fasterflect.Xpand
 akarnokd.reactive_extensions
-Google.Apis.Auth
 Google.Apis.People.v1
-System.ValueTuple

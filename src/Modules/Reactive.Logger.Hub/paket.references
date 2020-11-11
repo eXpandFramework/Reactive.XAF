@@ -6,9 +6,5 @@ System.Reactive
 Fasterflect.Xpand
 Jetbrains.Annotations
 YamlDotNet
-Grpc
-Grpc.Core
-System.ValueTuple
 Microsoft.CodeAnalysis.CSharp
 System.Configuration.ConfigurationManager
-System.ServiceModel.Http

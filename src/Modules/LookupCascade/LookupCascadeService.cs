@@ -10,7 +10,6 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Web;
 using Newtonsoft.Json;
-using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
@@ -31,21 +30,21 @@ namespace Xpand.XAF.Modules.LookupCascade{
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) => manager
             .WhenApplication(application => application.RegisterClientScripts().Merge(application.StoreDataSource()));
 
-        private static IObservable<Unit> StoreDataSource(this XafApplication application) =>
-            application.WhenWeb().WhenCallBack(typeof(LookupCascadeService).FullName)
+        private static IObservable<Unit> StoreDataSource(this XafApplication application) 
+            => application.WhenWeb().WhenCallBack(typeof(LookupCascadeService).FullName)
                 .SelectMany(pattern => application.CreateClientDataSource())
                 .Do(_ => {
                     WebWindow.CurrentRequestWindow.RegisterStartupScript($"StoreDatasource_{_.viewId}",
                         $"StoreDatasource('{_.viewId}','{_.objects}','{_.storage}')");
                 })
-                .TraceLookupCascdeModule()
+                .TraceLookupCascadeModule()
                 .ToUnit();
 
-        private static IObservable<Unit> RegisterClientScripts(this XafApplication application) =>
-            application.WhenWindowCreated().Cast<WebWindow>().CombineLatest(application.ReactiveModulesModel().LookupCascadeModel())
+        private static IObservable<Unit> RegisterClientScripts(this XafApplication application) 
+            => application.WhenWindowCreated().Cast<WebWindow>().CombineLatest(application.ReactiveModulesModel().LookupCascadeModel())
                 .Do(_ => {
-                    var window = _.first;
-                    var modelClientDatasource = _.second.ClientDatasource;
+                    var window = _.First;
+                    var modelClientDatasource = _.Second.ClientDatasource;
                     var clientStorage = modelClientDatasource.ClientStorage.ToString().FirstCharacterToLower();
                     var type = typeof(LookupCascadeService);
                     window.RegisterStartupScript($"RequestDatasources_{type.FullName}",
@@ -54,7 +53,7 @@ namespace Xpand.XAF.Modules.LookupCascade{
                     window.RegisterClientScriptResource(type,ASPxClientLookupPropertyEditorScriptResourceName);
                     RegisterPollyFills(window);
                 })
-                .TraceLookupCascdeModule(_ =>$"{_.first.Context}, {_.second.Id()}" )
+                .TraceLookupCascadeModule(_ =>$"{_.First.Context}, {_.Second.Id()}" )
                 .ToUnit();
 
         private static void RegisterPollyFills(WebWindow window){
@@ -67,9 +66,9 @@ namespace Xpand.XAF.Modules.LookupCascade{
         }
 
         public static IEnumerable<(string viewId, string objects, string storage)> CreateClientDataSource(this XafApplication application){
-            var modelClientDatasource = application.ReactiveModulesModel().LookupCascadeModel().Wait().ClientDatasource;
-            var storage = modelClientDatasource.ClientStorage.ToString().FirstCharacterToLower();
-            var viewsIds = modelClientDatasource.LookupViews.Select(view => view.LookupListView.Id);
+            var modelClientDataSource = application.ReactiveModulesModel().LookupCascadeModel().Wait().ClientDatasource;
+            var storage = modelClientDataSource.ClientStorage.ToString().FirstCharacterToLower();
+            var viewsIds = modelClientDataSource.LookupViews.Select(view => view.LookupListView.Id);
             return viewsIds.ToObservable()
                 .SelectMany(viewId => application.CreateClientDataSource((IModelListView) application.FindModelView(viewId))).ToEnumerable()
                 .Select(_ => (_.viewId,_.objects,storage));
@@ -87,38 +86,35 @@ namespace Xpand.XAF.Modules.LookupCascade{
 
             var modelColumns = modelListView.VisibleMemberViewItems().OrderForView();
             return Observable.Start(() => {
-                using (var objectSpace = application.CreateObjectSpace()){
-                    using (var collectionSource = application.CreateCollectionSource(objectSpace,
-                        modelListView.ModelClass.TypeInfo.Type, modelListView.Id, false, CollectionSourceMode.Normal)){
-                        var objects = new[] { (object)null }.Concat(collectionSource.List.Cast<object>())
-                            .Select(o => {
-                                var columns = string.Join("&", modelColumns.Select(column => {
-                                    var value = column.ParentView.AsObjectView.ModelClass.TypeInfo.FindMember(column.PropertyName).GetValue(o);
-                                    return HttpUtility.UrlEncode(GetDisplayText(value, NA, null));
-                                }));
-                                return new{
-                                    Key = o == null ? null : collectionSource.ObjectSpace.GetObjectHandle(o),
-                                    Columns = columns
-                                };
-                            })
-                            .ToArray();
-                        objects = new[]{
-                            new{
-                                Key = FieldNames,
-                                Columns = string.Join("&", modelColumns.Select(column => HttpUtility.UrlEncode(column.Caption)))
-                            }
-                        }.Concat(objects).ToArray();
-                        return ( uniqueId: modelListView.Id, objects: Convert.ToBase64String(JsonConvert.SerializeObject(objects).GZip()) );
+                using var objectSpace = application.CreateObjectSpace();
+                using var collectionSource = application.CreateCollectionSource(objectSpace,
+                    modelListView.ModelClass.TypeInfo.Type, modelListView.Id, false, CollectionSourceMode.Normal);
+                var objects = new[] { (object)null }.Concat(collectionSource.List.Cast<object>())
+                    .Select(o => {
+                        var columns = string.Join("&", modelColumns.Select(column => {
+                            var value = column.ParentView.AsObjectView.ModelClass.TypeInfo.FindMember(column.PropertyName).GetValue(o);
+                            return HttpUtility.UrlEncode(GetDisplayText(value, NA, null));
+                        }));
+                        return new{
+                            Key = o == null ? null : collectionSource.ObjectSpace.GetObjectHandle(o),
+                            Columns = columns
+                        };
+                    })
+                    .ToArray();
+                objects = new[]{
+                    new{
+                        Key = FieldNames,
+                        Columns = string.Join("&", modelColumns.Select(column => HttpUtility.UrlEncode(column.Caption)))
                     }
-                }
-
+                }.Concat(objects).ToArray();
+                return ( uniqueId: modelListView.Id, objects: Convert.ToBase64String(JsonConvert.SerializeObject(objects).GZip()) );
             });
         }
         
-        internal static IObservable<TSource> TraceLookupCascdeModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
+        internal static IObservable<TSource> TraceLookupCascadeModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) =>
-            source.Trace(name, LookupCascadeModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
+            source.Trace(name, LookupCascadeModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName);
 
     }
     

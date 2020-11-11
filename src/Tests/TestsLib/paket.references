@@ -1,5 +1,4 @@
 akarnokd.reactive_extensions
-DevExpress.EasyTest
 DevExpress.ExpressApp.EasyTest.WebAdapter
 DevExpress.ExpressApp.EasyTest.WinAdapter
 DevExpress.ExpressApp.Security.Xpo
@@ -7,20 +6,14 @@ DevExpress.Persistent.BaseImpl
 Enums.NET
 Humanizer.Core
 MagicOnion
-Mono.Cecil
 Moq
 Newtonsoft.Json
 Ryder
 Shouldly
-System.Data.Common
-System.Drawing.Common
-System.Reactive
 DevExpress.ExpressApp.Web
-DevExpress.ExpressApp.Win
 NUnit
 NUnit3TestAdapter
 Fasterflect.Xpand
 Xpand.Patcher
 Polly
 JetBrains.Annotations
-System.ValueTuple

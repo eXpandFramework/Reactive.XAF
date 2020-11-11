@@ -1,10 +1,7 @@
-DevExpress.ExpressApp
 DevExpress.Persistent.Base
 Fasterflect.Xpand
-System.Reflection.Emit
 Xpand.Patcher
 JetBrains.Annotations
 System.ValueTuple
 Microsoft.CodeAnalysis.CSharp
-System.Collections.Immutable
 Xpand.Collections

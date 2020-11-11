@@ -13,6 +13,7 @@
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="Xpand.Extensions.Reactive">
       <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.dll</HintPath>
     </Reference>

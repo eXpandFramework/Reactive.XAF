@@ -4,7 +4,6 @@ System.Reactive
 Fasterflect.Xpand
 Xpand.Patcher
 JetBrains.Annotations
-System.ValueTuple
 System.Configuration.ConfigurationManager
 Microsoft.CSharp
 Microsoft.CodeAnalysis.CSharp

@@ -3,7 +3,5 @@ System.Reactive
 Fasterflect.Xpand
 Xpand.Patcher
 JetBrains.Annotations
-System.ValueTuple
 Microsoft.CodeAnalysis.CSharp
 System.Configuration.ConfigurationManager
-System.ServiceModel.Http

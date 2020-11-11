@@ -7,6 +7,7 @@ using DevExpress.Persistent.Base;
 using DevExpress.XtraEditors;
 
 
+
 namespace Xpand.XAF.Modules.Reactive.Logger.Client.Win {
     public class ReactiveLoggerClientWinModule:ModuleBase{
         

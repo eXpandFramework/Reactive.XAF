@@ -1,9 +1,7 @@
 Fasterflect.Xpand
 JetBrains.Annotations
-DevExpress.ExpressApp.Blazor
 DevExpress.ExpressApp.Xpo
 Microsoft.AspNetCore.Hosting.Abstractions
-System.ValueTuple
 Microsoft.CodeAnalysis.CSharp
-System.Configuration.ConfigurationManager
 Google.Apis.Auth
+System.Configuration.ConfigurationManager

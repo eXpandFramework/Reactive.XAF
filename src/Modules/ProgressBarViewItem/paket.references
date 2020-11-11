@@ -2,7 +2,6 @@ System.Reactive
 DevExpress.ExpressApp
 Fasterflect.Xpand
 JetBrains.Annotations
-System.ValueTuple
 System.CodeDom
 System.Configuration.ConfigurationManager
 Microsoft.CodeAnalysis.CSharp

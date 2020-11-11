@@ -1,13 +1,8 @@
 DevExpress.Persistent.Base
-DevExpress.ExpressApp
 DevExpress.ExpressApp.Xpo
 Fasterflect.Xpand
 System.Reactive
 JetBrains.Annotations
-Google.Apis.Auth
 Google.Apis.Calendar.v3
-Newtonsoft.Json
-System.ValueTuple
 Microsoft.CodeAnalysis.CSharp
 System.Configuration.ConfigurationManager
-System.ServiceModel.Http

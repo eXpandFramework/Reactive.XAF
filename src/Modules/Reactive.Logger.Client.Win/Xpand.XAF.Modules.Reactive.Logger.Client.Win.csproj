@@ -17,6 +17,7 @@
     <ApplicationManifest>app1.manifest</ApplicationManifest>
     <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
     <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+    <StartupObject>Xpand.XAF.Modules.Reactive.Logger.Client.Win.Program</StartupObject>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>1701;1702</NoWarn>
@@ -38,6 +39,7 @@
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="Xpand.XAF.Modules.GridListEditor">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.GridListEditor.dll</HintPath>
     </Reference>

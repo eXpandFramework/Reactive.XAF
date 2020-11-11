@@ -36,14 +36,17 @@
     <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.2.3" />
     <PackageReference Include="DevExpress.ExpressApp.EasyTest.WebAdapter" Version="20.2.3" />
     <PackageReference Include="DevExpress.ExpressApp.Web.All" Version="20.2.3" />
-    <PackageReference Include="Moq" Version="4.13.1" />
+    <PackageReference Include="Moq" Version="4.15.1" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="Shouldly" Version="3.0.2" />
+    <PackageReference Include="Shouldly" Version="4.0.0" />
     <PackageReference Include="NUnit" Version="3.12.0" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.16.1" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
     <PackageReference Include="DevExpress.ExpressApp" Version="20.2.3" />
     <PackageReference Include="Unofficial.Microsoft.mshtml" Version="7.0.3300" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="2.202.44.1" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="2.202.44.6" />
+    <!-- <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.8.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.8.0" /> -->
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.TestsLib">

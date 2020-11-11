@@ -2,7 +2,6 @@ DevExpress.ExpressApp
 System.Reactive
 Fasterflect.Xpand
 JetBrains.Annotations
-System.ValueTuple
 System.Configuration.ConfigurationManager
 Microsoft.CodeAnalysis.CSharp
 System.ServiceModel.Http

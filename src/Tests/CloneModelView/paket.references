@@ -3,11 +3,9 @@ Moq
 NUnit
 NUnit3TestAdapter
 Shouldly
-System.Reactive
 DevExpress.ExpressApp
 DevExpress.Xpo
 Fasterflect.Xpand
 JetBrains.Annotations
-System.ValueTuple
 Xpand.Patcher
 akarnokd.reactive_extensions

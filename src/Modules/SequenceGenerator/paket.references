@@ -1,12 +1,7 @@
-DevExpress.Persistent.Base
-DevExpress.ExpressApp
 DevExpress.ExpressApp.Validation
 DevExpress.ExpressApp.Xpo
 Fasterflect.Xpand
 System.Reactive
 JetBrains.Annotations
-System.ValueTuple
 Microsoft.CodeAnalysis.CSharp
 System.Configuration.ConfigurationManager
-System.ServiceModel.Http
-DevExpress.Xpo

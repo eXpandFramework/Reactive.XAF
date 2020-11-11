@@ -11,7 +11,6 @@ MagicOnion
 Moq
 Shouldly
 System.Interactive
-System.Reactive
 NUnit
 NUnit3TestAdapter
 DevExpress.ExpressApp.Chart.Win
@@ -20,4 +19,3 @@ DevExpress.ExpressApp.Scheduler.Win
 Fasterflect.Xpand
 Xpand.Collections
 JetBrains.Annotations
-System.ValueTuple

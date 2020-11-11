@@ -3,7 +3,5 @@ JetBrains.Annotations
 System.Reactive
 DevExpress.Persistent.Base
 Newtonsoft.Json
-System.ValueTuple
-System.Drawing.Common
 Microsoft.CodeAnalysis.CSharp
 System.Configuration.ConfigurationManager

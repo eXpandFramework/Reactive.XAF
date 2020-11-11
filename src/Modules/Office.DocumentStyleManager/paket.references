@@ -1,14 +1,8 @@
 Fasterflect.Xpand
 JetBrains.Annotations
 System.Reactive
-DevExpress.Persistent.Base
 Newtonsoft.Json
-System.Collections.Immutable
 System.Interactive
-DevExpress.Xpo
 DevExpress.ExpressApp.Office
 DevExpress.ExpressApp.ConditionalAppearance
-System.ValueTuple
 Microsoft.CodeAnalysis.CSharp
-System.Configuration.ConfigurationManager
-System.ServiceModel.Http

@@ -11,7 +11,6 @@ using DevExpress.ExpressApp;
 using DevExpress.XtraRichEdit;
 using DevExpress.XtraRichEdit.API.Native;
 using Xpand.Extensions.EventArgExtensions;
-using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
 using Xpand.Extensions.XAF.ViewExtenions;
@@ -32,17 +31,17 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
         private static IObservable<Unit> SelectActiveStyle(this IObservable<DetailView> source,IObservable<IRichEditDocumentServer> contentRichEditServer) 
             => contentRichEditServer.Select(server => server)
                 .Zip(source.Select(view => view))
-                .SelectMany(_ => _.first.WhenSelectionChanged().Select(server => _))
-                .SelectMany(t => t.second.Application().DefaultPropertiesProvider(defaultPropertiesProvider => {
-		                var server = t.first;
-		                var documentStyleManager = (BusinessObjects.DocumentStyleManager) t.second.CurrentObject;
+                .SelectMany(_ => _.First.WhenSelectionChanged().Select(server => _))
+                .SelectMany(t => t.Second.Application().DefaultPropertiesProvider(defaultPropertiesProvider => {
+		                var server = t.First;
+		                var documentStyleManager = (BusinessObjects.DocumentStyleManager) t.Second.CurrentObject;
 		                var document = server.Document;
 		                documentStyleManager.Position = document.CaretPosition.ToInt();
 		                documentStyleManager.Paragraph = document.ParagraphFromPosition() + 1;
                     
 		                var documentStyle = document.DocumentStyleFromPosition(defaultPropertiesProvider);
 		                if (documentStyle != null){
-			                var allStylesListView = t.second.AllStylesListView();
+			                var allStylesListView = t.Second.AllStylesListView();
 			                var currentObject = allStylesListView.CollectionSource.Objects<DocumentStyle>()
 				                .FirstOrDefault(style => style.Equals(documentStyle));
 			                allStylesListView.CurrentObject = currentObject;
@@ -71,14 +70,11 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
             
             var documentContentChanged = detailView
 	            .Zip(contentRichEditServer)
-                .SelectMany(_ => _.second.WhenContentChanged()
-                    // .TakeUntil(server => server.IsDisposed||_.first.IsDisposed||_.second.IsDisposed)
-	                .Throttle(TimeSpan.FromSeconds(1))
-                    // .TakeUntil(server => server.IsDisposed||_.first.IsDisposed||_.second.IsDisposed)
-	                .ObserveOn(SynchronizationContext.Current)
-                    // .TakeUntil(server => server.IsDisposed||_.first.IsDisposed||_.second.IsDisposed)
-	                .SelectMany(server => _.first.Application().DefaultPropertiesProvider(document => server.ResetStyleCollections((_.first,document))
-		                .Do(documentServer => documentServer.SelectActiveStyle((_.first,document))))))
+                .SelectMany(_ => _.Second.WhenContentChanged()
+                    .Throttle(TimeSpan.FromSeconds(1))
+                    .ObserveOn(SynchronizationContext.Current)
+                    .SelectMany(server => _.First.Application().DefaultPropertiesProvider(document => server.ResetStyleCollections((_.First,document))
+		                .Do(documentServer => documentServer.SelectActiveStyle((_.First,document))))))
                 .ToUnit();
             return documentStyleManagerModified.Merge(documentContentChanged).TraceDocumentStyleModule();
         }
@@ -99,7 +95,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
 	        var customizeDatasource = ((NonPersistePropertyCollectionSource) listView.CollectionSource).Datasource
 		        .Do(e => {
 			        e.Handled = true;
-			        e.Instance =new BindingList<DocumentStyle>(ImmutableList.CreateRange(styles));
+			        e.Instance =new BindingList<DocumentStyle>(ImmutableList.CreateRange(styles!));
 		        })
 		        .FirstAsync();
 	        return (styles == null
