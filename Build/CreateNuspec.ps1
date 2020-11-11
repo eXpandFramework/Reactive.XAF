@@ -97,6 +97,7 @@ Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -not
         }
         $versionConverter |Out-String
         Add-NuspecDependency $versionConverter.Id $versionConverter.Version $nuspec
+         
     }
     
     

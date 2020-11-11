@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Reflection;
 using Microsoft.CodeAnalysis.CSharp;
 using Mono.Cecil;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.BytesExtensions;
 using Xpand.Extensions.Compiler;
+using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.StreamExtensions;
@@ -20,14 +23,23 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     public static partial class TypeMappingService{
         public static string CustomAssemblyNameSuffix = "Custom";
         private static bool _skipAssemblyValidation;
-        
+        static readonly Subject<GenericEventArgs<(string code,IEnumerable<string> references,string outputAssembly)>> CustomCompileSubject=new Subject<GenericEventArgs<(string code, IEnumerable<string> references, string outputAssembly)>>();
+
+        public static IObservable<GenericEventArgs<(string code, IEnumerable<string> references, string outputAssembly)>> CustomCompile1 => CustomCompileSubject.AsObservable();
+
         private static IObservable<Assembly> Compile(this IEnumerable<string> references, string code,bool isCustom){
-	        using var memoryStream = CSharpSyntaxTree.ParseText(code).Compile(references.ToArray());
+	        
 	        var outputAssembly = FormatOutputAssembly(isCustom);
 	        if (File.Exists(outputAssembly)){
                 File.Delete(outputAssembly);
 	        }
-	        memoryStream.Bytes().Save(outputAssembly);
+
+            var args = new GenericEventArgs<(string code, IEnumerable<string> references,string outputAssembly)>();
+            CustomCompileSubject.OnNext(args);
+            if (!args.Handled) {
+                using var memoryStream = CSharpSyntaxTree.ParseText(code).Compile(references.ToArray());
+                memoryStream.Bytes().Save(outputAssembly);
+            }
             var assembly = RemoveRecursiveProperties(outputAssembly);
             return assembly.ReturnObservable().TraceModelMapper();
         }
