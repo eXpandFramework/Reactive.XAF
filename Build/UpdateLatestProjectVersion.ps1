@@ -36,9 +36,31 @@ if ($Branch -eq "master"){
     return
 }
 Write-HostFormatted "Semester version check"  -Section
-
-
-
+$lastLabVersion=($labPackages|Where-Object{$_.id -eq "Xpand.XAF.Core.All"}).Version
+$lastOfficialVersion=($officialPackages|Where-Object{$_.id -eq "Xpand.XAF.Core.All"}).Version
+if ($lastLabVersion -lt [version]"3.202.0.0"){
+    $lastLabVersion=[version]"3.202.0.0"
+}
+if (!$sourcePath){
+    $sourcePath="$PathToScript\..\src"
+}
+$updateVersion=@()
+Get-MSBuildProjects $sourcePath |ForEach-Object{
+    $project=$_
+    $assemblyInfoPath="$($project.DirectoryName)\Properties\AssemblyInfo.cs"
+    if (Test-Path $assemblyInfoPath){
+        $labPackage=$labPackages|Where-Object{$_.Id -eq $project.BaseName}
+        if ($labPackage){
+            $updateVersion+=$_.BaseName
+            if ($lastOfficialVersion -gt $lastLabVersion){
+                $lastLabVersion=$lastOfficialVersion
+            }
+            Update-AssemblyInfoVersion (Update-Version $lastLabVersion -Revision) $assemblyInfoPath
+        }
+    }
+}
+$updateVersion
+return
 Write-HostFormatted "labPackages"  -Section
 $labPackages | Out-String
 

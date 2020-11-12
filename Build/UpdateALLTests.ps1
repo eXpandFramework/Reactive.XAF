@@ -2,7 +2,7 @@ param(
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\"),
     $branch = "lab",
     $source,
-    $dxVersion = "20.1.6"
+    $dxVersion = "20.2.3"
 )
 if (!$source) {
     $source = "$(Get-PackageFeed -Xpand);$env:DxFeed"
@@ -15,7 +15,7 @@ if ($branch -eq "master") {
 $ErrorActionPreference = "Stop"
 # Import-XpandPwsh
 $excludeFilter = "*client*;*extension*"
-$localPackages = @(& (Get-NugetPath) list -source "$root\bin\nupkg"|ConvertTo-PackageObject|Where-Object{$_.id -like "*.ALL"} | ForEach-Object {
+$localPackages = @(& (Get-NugetPath) list -source "$root\bin\nupkg;"|ConvertTo-PackageObject|Where-Object{$_.id -like "*.ALL"} | ForEach-Object {
     $version = [version]$_.Version
     if ($version.revision -eq 0) {
         $version = New-Object System.Version ($version.Major, $version.Minor, $version.build)
