@@ -148,26 +148,20 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |JetBrains.Annotations|2020.1.0
  |Microsoft.CodeAnalysis.CSharp|3.7.0
- |Microsoft.Graph.Beta|0.18.0-preview
- |Microsoft.Graph.Core|1.19.0
- |Microsoft.Identity.Client|4.13.0
+ |Microsoft.Graph.Beta|0.32.0-preview
+ |Microsoft.Identity.Client|4.22.0
  |Microsoft.IdentityModel.Protocols.OpenIdConnect|6.8.0
  |Microsoft.IdentityModel.Tokens|6.8.0
- |Microsoft.Owin|4.1.0
- |Microsoft.Owin.Host.SystemWeb|4.1.0
- |Microsoft.Owin.Security|4.1.0
- |Microsoft.Owin.Security.Cookies|4.1.0
- |Microsoft.Owin.Security.OpenIdConnect|4.1.0
- |Newtonsoft.Json|12.0.3
- |Owin|1.0.0
- |System.Reactive|5.0.0-preview.16
- |System.ServiceModel.Http|4.7.0
- |System.ValueTuple|4.5.0
- |Xpand.Extensions|2.202.58
- |Xpand.Extensions.Office.Cloud|2.202.59
- |Xpand.Extensions.Reactive|2.202.59
- |Xpand.Extensions.XAF|2.202.59
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.59
+ |Microsoft.Owin.Host.SystemWeb|4.1.1
+ |Microsoft.Owin.Security.Cookies|4.1.1
+ |Microsoft.Owin.Security.OpenIdConnect|4.1.1
+ |System.Collections.Immutable|5.0.0
+ |System.Reactive|5.0.0
+ |Xpand.Extensions|4.202.0
+ |Xpand.Extensions.Office.Cloud|4.202.0
+ |Xpand.Extensions.Reactive|4.202.0
+ |Xpand.Extensions.XAF|4.202.0
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.202.0
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.10
 
 ## Issues-Debugging-Troubleshooting

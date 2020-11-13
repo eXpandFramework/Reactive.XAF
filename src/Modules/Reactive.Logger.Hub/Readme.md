@@ -65,20 +65,16 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |**DevExpress.ExpressApp**|**Any**
  |**DevExpress.Xpo**|**Any**
 |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
- |Grpc|2.23.0
- |Grpc.Core|2.25.0
  |Jetbrains.Annotations|2020.1.0
  |MagicOnion|2.6.3
  |Microsoft.CodeAnalysis.CSharp|3.7.0
- |System.Configuration.ConfigurationManager|4.7.0
- |System.Interactive.Async|4.1.1
- |System.Reactive|5.0.0-preview.16
- |System.ServiceModel.Http|4.7.0
- |System.ValueTuple|4.5.0
- |Xpand.Extensions.Reactive|2.202.59
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.59
- |[Xpand.XAF.Modules.Reactive.Logger](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Logger)|2.202.59
- |YamlDotNet|8.1.1
+ |System.Configuration.ConfigurationManager|5.0.0
+ |System.Interactive.Async|5.0.0
+ |System.Reactive|5.0.0
+ |Xpand.Extensions.Reactive|4.202.0
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.202.0
+ |[Xpand.XAF.Modules.Reactive.Logger](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Logger)|4.202.0
+ |YamlDotNet|8.1.2
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.10
 
 ## Issues-Debugging-Troubleshooting

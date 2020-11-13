@@ -41,6 +41,9 @@ function UpdateALLNuspec($platform, $allNuspec, $nuspecs,$allModuleNuspecs,$csPr
     $revision=($nowVersion.Revision + 1)
     if ($Branch -eq "master"){
         $build+=1
+        if ($modulesVersion.Major -gt $nowVersion.Major){
+            $build=0
+        }
         $revision=0
     }
     if ($nowVersion.Minor -ne $modulesVersion.Minor){

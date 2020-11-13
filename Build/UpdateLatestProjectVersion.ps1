@@ -4,20 +4,22 @@ $labPackages = Get-XpandPackages -PackageType XAFAll -Source Lab
 $officialPackages = Get-XpandPackages -PackageType XAFAll -Source Release
 
 $lastVersion=($labPackages|Where-Object{$_.id -eq "Xpand.XAF.Core.All"}).Version
+$newVersion=(Update-Version $lastVersion -Revision)
 if ($Branch -eq "master"){
     $lastVersion=($officialPackages|Where-Object{$_.id -eq "Xpand.XAF.Core.All"}).Version
+    $newVersion=(Update-Version $lastVersion -Build)
 }
 $lastOfficialVersion=($officialPackages|Where-Object{$_.id -eq "Xpand.XAF.Core.All"}).Version
 if ($lastOfficialVersion -gt $lastVersion){
     $lastVersion=$lastOfficialVersion
 }
-if ($lastVersion -lt [version]"3.202.0.0"){
-    $lastVersion=[version]"3.202.0.0"
+if ($lastVersion -lt [version]"4.202.0.0"){
+    $newVersion=[version]"4.202.0.0"
 }
 if (!$sourcePath){
     $sourcePath="$PathToScript\..\src"
 }
-Set-VsoVariable build.updatebuildnumber "$lastVersion-$CustomVersion"
+Set-VsoVariable build.updatebuildnumber "$newVersion-$CustomVersion"
 $updateVersion=@()
 Get-MSBuildProjects $sourcePath |ForEach-Object{
     $project=$_
@@ -26,7 +28,7 @@ Get-MSBuildProjects $sourcePath |ForEach-Object{
         $labPackage=$labPackages|Where-Object{$_.Id -eq $project.BaseName}
         if ($labPackage){
             $updateVersion+=$_.BaseName
-            Update-AssemblyInfoVersion (Update-Version $lastVersion -Revision) $assemblyInfoPath
+            Update-AssemblyInfoVersion $newVersion $assemblyInfoPath
         }
     }
 }

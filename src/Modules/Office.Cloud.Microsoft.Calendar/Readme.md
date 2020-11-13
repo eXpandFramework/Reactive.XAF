@@ -96,25 +96,20 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.Persistent.Base**|**Any**
- |**DevExpress.ExpressApp**|**Any**
  |**DevExpress.ExpressApp.Xpo**|**Any**
 |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |JetBrains.Annotations|2020.1.0
  |Microsoft.CodeAnalysis.CSharp|3.7.0
- |Microsoft.Graph.Beta|0.18.0-preview
- |Microsoft.Graph.Core|1.19.0
- |Microsoft.Identity.Client|4.13.0
- |Newtonsoft.Json|12.0.3
- |System.Reactive|5.0.0-preview.16
- |System.ServiceModel.Http|4.7.0
- |System.ValueTuple|4.5.0
- |Xpand.Extensions|2.202.58
- |Xpand.Extensions.Office.Cloud|2.202.59
- |Xpand.Extensions.Reactive|2.202.59
- |Xpand.Extensions.XAF|2.202.59
- |Xpand.Extensions.XAF.Xpo|2.202.55
- |[Xpand.XAF.Modules.Office.Cloud.Microsoft](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Office.Cloud.Microsoft)|2.202.60
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.59
+ |Microsoft.Graph.Beta|0.32.0-preview
+ |Microsoft.Identity.Client|4.22.0
+ |System.Reactive|5.0.0
+ |Xpand.Extensions|4.202.0
+ |Xpand.Extensions.Office.Cloud|4.202.0
+ |Xpand.Extensions.Reactive|4.202.0
+ |Xpand.Extensions.XAF|4.202.0
+ |Xpand.Extensions.XAF.Xpo|4.202.0
+ |[Xpand.XAF.Modules.Office.Cloud.Microsoft](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Office.Cloud.Microsoft)|4.202.0
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.202.0
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.10
 
 ## Issues-Debugging-Troubleshooting

@@ -119,28 +119,22 @@ The module follows the Nuget [Version Basics](https://docs.Google.com/en-us/nuge
 
 |<!-- -->|<!-- -->
 |----|----
-|**DevExpress.Persistent.Base**|**Any**
- |**DevExpress.Xpo**|**Any**
- |**DevExpress.ExpressApp.Office**|**Any**
+|**DevExpress.ExpressApp.Office**|**Any**
  |**DevExpress.ExpressApp.ConditionalAppearance**|**Any**
 |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |JetBrains.Annotations|2020.1.0
  |Microsoft.CodeAnalysis.CSharp|3.7.0
  |Newtonsoft.Json|12.0.3
- |System.Collections.Immutable|1.7.1
- |System.Configuration.ConfigurationManager|4.7.0
- |System.Interactive|4.1.1
- |System.Reactive|5.0.0-preview.16
- |System.ServiceModel.Http|4.7.0
- |System.ValueTuple|4.5.0
- |Xpand.Extensions|2.202.58
- |Xpand.Extensions.Reactive|2.202.59
- |Xpand.Extensions.XAF|2.202.59
- |Xpand.Extensions.XAF.Xpo|2.202.55
- |[Xpand.XAF.Modules.HideToolBar](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.HideToolBar)|2.202.59
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|2.202.59
- |[Xpand.XAF.Modules.SuppressConfirmation](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.SuppressConfirmation)|2.202.59
- |[Xpand.XAF.Modules.ViewItemValue](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.ViewItemValue)|2.202.25
+ |System.Interactive|5.0.0
+ |System.Reactive|5.0.0
+ |Xpand.Extensions|4.202.0
+ |Xpand.Extensions.Reactive|4.202.0
+ |Xpand.Extensions.XAF|4.202.0
+ |Xpand.Extensions.XAF.Xpo|4.202.0
+ |[Xpand.XAF.Modules.HideToolBar](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.HideToolBar)|4.202.0
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.202.0
+ |[Xpand.XAF.Modules.SuppressConfirmation](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.SuppressConfirmation)|4.202.0
+ |[Xpand.XAF.Modules.ViewItemValue](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.ViewItemValue)|4.202.0
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.10
 
 ## Issues-Debugging-Troubleshooting
