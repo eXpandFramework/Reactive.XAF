@@ -19,8 +19,13 @@ namespace Xpand.XAF.Modules.Reactive{
         internal readonly ReplaySubject<ReactiveModuleBase> SetupCompletedSubject=new ReplaySubject<ReactiveModuleBase>(1);
         static readonly Subject<ApplicationModulesManager> SettingUpSubject=new Subject<ApplicationModulesManager>();
         static ReactiveModuleBase(){
-            // AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainOnAssemblyResolve;
-            
+            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainOnAssemblyResolve;
+            AppDomain.CurrentDomain.Patch(harmony => {
+                var original = typeof(ApplicationModulesManager).Method("SetupModules");
+                var prefix = typeof(ReactiveModule).Method(nameof(SetupModulesPatch),Flags.StaticAnyVisibility);
+                harmony.Patch(original,  new HarmonyMethod(prefix));
+                AppDomain.CurrentDomain.AddModelReference("netstandard");    
+            });
         }
 
         private static Assembly CurrentDomainOnAssemblyResolve(object sender, ResolveEventArgs args){
@@ -61,6 +66,7 @@ namespace Xpand.XAF.Modules.Reactive{
 		        })
 		        .FirstAsync().Subscribe();
 
+        [PublicAPI]
         public IObservable<ReactiveModuleBase> SetupCompleted => Observable.Defer(() => SetupCompletedSubject.Select(module => module)).TraceRX();
 
 

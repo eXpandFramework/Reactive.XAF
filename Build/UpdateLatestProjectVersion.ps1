@@ -2,48 +2,22 @@ Write-HostFormatted "Reset modified assemblyInfo" -Section
 "AssemblyInfo.cs","/.nuspec"|Get-GitDiff |Restore-GitFile
 $labPackages = Get-XpandPackages -PackageType XAFAll -Source Lab
 $officialPackages = Get-XpandPackages -PackageType XAFAll -Source Release
+
+$lastVersion=($labPackages|Where-Object{$_.id -eq "Xpand.XAF.Core.All"}).Version
 if ($Branch -eq "master"){
-    $updateVersion=@()
-    $newPackages=@(Get-ChildItem "$sourcePath\build\Nuspec" -Exclude "Xpand.TestsLib.nuspec"|ForEach-Object{
-        [xml]$nuspec=Get-XmlContent $_.FullName
-        $nuspec.package.metadata.id
-    }|Where-Object{ $_ -notin $officialPackages.id})
-    if ($newPackages){
-        Get-MSBuildProjects $sourcePath|ForEach-Object{
-            if ($_.BaseName -in $newPackages){
-                Update-AssemblyInfo "$($_.DirectoryName)\Properties" -Build
-                $updateVersion+=$_.BaseName
-            }
-        }
-    }
-    
-    Get-ChildItem $sourcePath *.csproj -Recurse |ForEach-Object{
-        $project=$_
-        $assemblyInfoPath="$($project.DirectoryName)\Properties\AssemblyInfo.cs"
-        if (Test-Path $assemblyInfoPath){
-            $labPackage=$labPackages|Where-Object{$_.Id -eq $project.BaseName}
-            if ($labPackage){
-                $projectVersion=[version](Get-AssemblyInfoVersion $assemblyInfoPath)
-                if ((Get-VersionPart $projectVersion Build) -ne (Get-VersionPart $labPackage.version Build) -or 
-                    ($projectVersion -lt $labPackage.Version) -or ($projectVersion.Revision -gt 0)){
-                    $updateVersion+=$_.BaseName
-                    Update-AssemblyInfo $assemblyInfoPath -Build
-                }   
-            }
-        }
-    }
-    $updateVersion
-    return
+    $lastVersion=($officialPackages|Where-Object{$_.id -eq "Xpand.XAF.Core.All"}).Version
 }
-Write-HostFormatted "Semester version check"  -Section
-$lastLabVersion=($labPackages|Where-Object{$_.id -eq "Xpand.XAF.Core.All"}).Version
 $lastOfficialVersion=($officialPackages|Where-Object{$_.id -eq "Xpand.XAF.Core.All"}).Version
-if ($lastLabVersion -lt [version]"3.202.0.0"){
-    $lastLabVersion=[version]"3.202.0.0"
+if ($lastOfficialVersion -gt $lastVersion){
+    $lastVersion=$lastOfficialVersion
+}
+if ($lastVersion -lt [version]"3.202.0.0"){
+    $lastVersion=[version]"3.202.0.0"
 }
 if (!$sourcePath){
     $sourcePath="$PathToScript\..\src"
 }
+Set-VsoVariable build.updatebuildnumber "$lastVersion-$CustomVersion"
 $updateVersion=@()
 Get-MSBuildProjects $sourcePath |ForEach-Object{
     $project=$_
@@ -52,10 +26,7 @@ Get-MSBuildProjects $sourcePath |ForEach-Object{
         $labPackage=$labPackages|Where-Object{$_.Id -eq $project.BaseName}
         if ($labPackage){
             $updateVersion+=$_.BaseName
-            if ($lastOfficialVersion -gt $lastLabVersion){
-                $lastLabVersion=$lastOfficialVersion
-            }
-            Update-AssemblyInfoVersion (Update-Version $lastLabVersion -Revision) $assemblyInfoPath
+            Update-AssemblyInfoVersion (Update-Version $lastVersion -Revision) $assemblyInfoPath
         }
     }
 }
