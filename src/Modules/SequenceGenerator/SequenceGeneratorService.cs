@@ -195,7 +195,16 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         public static IObservable<object> Sequence => SequenceSubject.AsObservable();
 
         private static IObservable<IObjectSpace> WhenSupported(this IObservable<IObjectSpace> source) 
-            => source.Where(space => space.UnitOfWork().DataLayer is BaseDataLayer dataLayer && SupportedDataStoreTypes.Any(type => type.IsInstanceOfType(dataLayer.ConnectionProvider)));
+            => source.Where(space => {
+                if (space.UnitOfWork().DataLayer is BaseDataLayer dataLayer) {
+                    var dataStore = dataLayer.ConnectionProvider;
+                    if (dataStore is DataStorePool dataStorePool) {
+                        dataStore = dataStorePool.AcquireReadProvider();
+                    }
+                    return SupportedDataStoreTypes.Any(type => type.IsInstanceOfType(dataStore));
+                }
+                return false;
+            });
 
         public static IList<Type> SupportedDataStoreTypes { get; } = new List<Type>(){typeof(MSSqlConnectionProvider), typeof(BaseOracleConnectionProvider), typeof(MySqlConnectionProvider)};
 
