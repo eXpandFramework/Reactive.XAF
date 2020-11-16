@@ -63,3 +63,5 @@ nuget System.Configuration.ConfigurationManager 5.0.0
 nuget Microsoft.CodeAnalysis.CSharp 3.7.0
 nuget System.ServiceModel.Http 4.8.0
 nuget Microsoft.AspNetCore.Hosting 2.2.7
+nuget Selenium.Support 3.13.0
+nuget Selenium.WebDriver 3.13.0

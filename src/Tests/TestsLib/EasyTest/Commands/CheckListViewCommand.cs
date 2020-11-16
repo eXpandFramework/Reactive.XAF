@@ -45,7 +45,7 @@ namespace Xpand.TestsLib.EasyTest.Commands{
                 }
             }
 
-            adapter.Execute(this.ConnvertTo<CheckTableCommand>());
+            adapter.Execute(this.ConvertTo<CheckTableCommand>());
         }
 
     }

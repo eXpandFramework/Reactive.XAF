@@ -1,4 +1,7 @@
 ﻿using DevExpress.EasyTest.Framework;
+using DevExpress.ExpressApp.EasyTest.BlazorAdapter;
+using DevExpress.ExpressApp.EasyTest.BlazorAdapter.TestControls;
+using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
 
 namespace Xpand.TestsLib.EasyTest.Commands.DialogCommands{
     public class HandleDialogCommand:EasyTestCommand{
@@ -10,8 +13,14 @@ namespace Xpand.TestsLib.EasyTest.Commands.DialogCommands{
         }
 
         protected override void ExecuteCore(ICommandAdapter adapter){
-            var handleDialogCommand = this.ConnvertTo<DevExpress.EasyTest.Framework.Commands.HandleDialogCommand>();
-            adapter.Execute(handleDialogCommand);
+            if (adapter.GetTestApplication().Platform() == Platform.Blazor) {
+                var dialog = new DialogTestControl(((CommandAdapter) adapter).Driver);
+                dialog.Act(Parameters["Respond"].Value);
+            }
+            else {
+                var handleDialogCommand = this.ConvertTo<DevExpress.EasyTest.Framework.Commands.HandleDialogCommand>();
+                adapter.Execute(handleDialogCommand);
+            }
         }
     }
 }

@@ -8,6 +8,7 @@ using DevExpress.EasyTest.Framework;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.EasyTest;
 using Xpand.TestsLib.EasyTest.Commands;
 using Xpand.TestsLib.EasyTest.Commands.ActionCommands;
@@ -59,7 +60,7 @@ namespace ALL.Tests{
             await commandAdapter.CheckOperation(MapAction.Insert);
             commandAdapter.Execute(new FillObjectViewCommand((editorName, "Update")));
             commandAdapter.Execute(new WaitCommand(2000));
-            commandAdapter.Execute(new ActionCommand(Actions.Save));
+            await commandAdapter.Execute(() => commandAdapter.Execute(new ActionCommand(Actions.Save)));
             await commandAdapter.CheckOperation(MapAction.Update);
             commandAdapter.Execute(new ActionDeleteCommand());
             commandAdapter.Execute(new NavigateCommand(navigationItemCaption));
@@ -103,7 +104,7 @@ namespace ALL.Tests{
         }
 
         public static IObservable<Unit> Authenticate(this ICommandAdapter commandAdapter, string signInCaption,string passFileName,string email,Action afterSingInActionExecuted=null){
-            if (commandAdapter.GetTestApplication().IsWeb()){
+            if (commandAdapter.GetTestApplication().Platform()!=Platform.Win){
                 Observable.Start(() => commandAdapter.Execute(new ActionCommand(signInCaption)))
                     .Timeout(TimeSpan.FromSeconds(Debugger.IsAttached?10:30)).OnErrorResumeNext(Observable.Empty<Unit>().FirstOrDefaultAsync()).Wait();
             }

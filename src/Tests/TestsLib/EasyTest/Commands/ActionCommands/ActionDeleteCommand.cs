@@ -1,4 +1,5 @@
 ﻿using DevExpress.EasyTest.Framework;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.EasyTest.Commands.DialogCommands;
 
 namespace Xpand.TestsLib.EasyTest.Commands.ActionCommands{
@@ -12,7 +13,7 @@ namespace Xpand.TestsLib.EasyTest.Commands.ActionCommands{
         protected override void ExecuteCore(ICommandAdapter adapter){
             base.ExecuteCore(adapter);
             if (_confirm){
-                adapter.Execute(new HandleDialogCommand(adapter.GetTestApplication().IsWeb()?"OK":"Yes"));
+                adapter.Execute(new HandleDialogCommand(adapter.GetTestApplication().Platform()!=Platform.Web?"Yes":"OK"));
             }
         }
     }

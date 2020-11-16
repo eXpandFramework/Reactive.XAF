@@ -20,8 +20,8 @@ namespace Xpand.TestsLib.EasyTest.Commands.ActionCommands{
         }
 
         protected override void ExecuteCore(ICommandAdapter adapter){
-            var actionCommand = !ExpectException ? this.ConnvertTo<DevExpress.EasyTest.Framework.Commands.ActionCommand>()
-                : this.ConnvertTo<DevExpress.EasyTest.Framework.Commands.OptionalActionCommand>();
+            var actionCommand = !ExpectException ? this.ConvertTo<DevExpress.EasyTest.Framework.Commands.ActionCommand>()
+                : this.ConvertTo<DevExpress.EasyTest.Framework.Commands.OptionalActionCommand>();
             ExpectException = false;
             adapter.Execute(actionCommand);
         }

@@ -8,7 +8,7 @@ namespace Xpand.TestsLib.EasyTest.Commands.ActionCommands{
 		}
 
 		protected override void ExecuteCore(ICommandAdapter adapter){
-			var actionAvailableCommand = this.ConnvertTo<DevExpress.EasyTest.Framework.Commands.ActionAvailableCommand>();
+			var actionAvailableCommand = this.ConvertTo<DevExpress.EasyTest.Framework.Commands.ActionAvailableCommand>();
             adapter.Execute(actionAvailableCommand);
 		}
 	}

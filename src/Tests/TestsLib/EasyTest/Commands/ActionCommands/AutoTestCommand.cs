@@ -8,7 +8,7 @@ namespace Xpand.TestsLib.EasyTest.Commands.ActionCommands{
     public class AutoTestCommand:EasyTestCommand{
         private readonly string _excludeMatch;
 
-        private readonly string[] _navigationControlPossibleNames = { "ViewsNavigation.Navigation", "Navigation", "navBarControl", "accordionControl" };
+        private readonly string[] _navigationControlPossibleNames = { "Navigation","ViewsNavigation.Navigation",  "navBarControl", "accordionControl" };
 
         public AutoTestCommand(string excludeMatch=null){
             _excludeMatch = excludeMatch;
@@ -34,7 +34,8 @@ namespace Xpand.TestsLib.EasyTest.Commands.ActionCommands{
         }
 
 
-        protected override void ExecuteCore(ICommandAdapter adapter){
+        protected override void ExecuteCore(ICommandAdapter adapter) {
+            // adapter.Execute(new DevExpress.ExpressApp.EasyTest.BlazorAdapter.Commands.AutoTestCommand());
             string logonCaption="Log In";
             if(adapter.IsControlExist(TestControlType.Action, logonCaption)) {
                 adapter.CreateTestControl(TestControlType.Action, logonCaption).GetInterface<IControlAct>().Act(null);

@@ -1,4 +1,5 @@
 ﻿using DevExpress.EasyTest.Framework;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 
 namespace Xpand.TestsLib.EasyTest.Commands.ActionCommands{
     public class ActionCloseCommand:EasyTestCommand{
@@ -10,7 +11,7 @@ namespace Xpand.TestsLib.EasyTest.Commands.ActionCommands{
         }
 
         protected override void ExecuteCore(ICommandAdapter adapter){
-            if (adapter.GetTestApplication().IsWeb()){
+            if (adapter.GetTestApplication().Platform()==Platform.Web){
                 var command = new ActionCommand("OK"){SuppressExceptions = _optional};
                 command.Execute(adapter);
             }

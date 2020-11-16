@@ -6,22 +6,25 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Xml;
 using DevExpress.EasyTest.Framework;
+using DevExpress.ExpressApp.EasyTest.BlazorAdapter;
 using DevExpress.ExpressApp.EasyTest.WebAdapter;
 using DevExpress.ExpressApp.EasyTest.WinAdapter;
 using Fasterflect;
 using Newtonsoft.Json;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.ErrorHandling;
+using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
 
 namespace Xpand.TestsLib.EasyTest{
-    public static class EasytestExtesions{
+    public static class EasyTestExtensions{
         
 
-        public static bool IsWeb(this TestApplication application) {
-            return application.AdditionalAttributes.Any(_ => _.Name == "URL");
-        }
+        public static Platform Platform(this TestApplication application) 
+            => application.AdditionalAttributes.Any(_ => _.Name == "URL")
+                ? application.Browser == "chrome" ? Xpand.Extensions.XAF.XafApplicationExtensions.Platform.Blazor :
+                Xpand.Extensions.XAF.XafApplicationExtensions.Platform.Web : Xpand.Extensions.XAF.XafApplicationExtensions.Platform.Win;
 
-        public static T ConnvertTo<T>(this Command command) where T:Command{
+        public static T ConvertTo<T>(this Command command) where T:Command{
             var t = (T)typeof(T).CreateInstance();
             t.Parameters.MainParameter = command.Parameters.MainParameter??new MainParameter();
             t.Parameters.ExtraParameter = command.Parameters.ExtraParameter??new MainParameter();
@@ -33,9 +36,9 @@ namespace Xpand.TestsLib.EasyTest{
         }
 
 
-        public static TestApplication GetTestApplication(this ICommandAdapter adapter){
-            return adapter is WebCommandAdapter ? (TestApplication) EasyTestWebApplication.Instance : EasyTestWinApplication.Instance;
-        }
+        public static TestApplication GetTestApplication(this ICommandAdapter adapter) 
+            => adapter is WebCommandAdapter || adapter is CommandAdapter
+                ? (TestApplication) EasyTestWebApplication.Instance : EasyTestWinApplication.Instance;
 
         public static IObservable<Unit> Execute(this ICommandAdapter adapter, Action retriedAction) 
             => Observable.Defer(() => Observable.Start(retriedAction)).RetryWithBackoff();
@@ -71,7 +74,7 @@ namespace Xpand.TestsLib.EasyTest{
 
         public static string EasyTestSettingsFile(this TestApplication application){
             var path = application.AdditionalAttributes.FirstOrDefault(attribute => attribute.LocalName == "FileName")?.Value;
-            path = path != null ? Path.GetDirectoryName(path) : application.AdditionalAttributes.First(attribute => attribute.LocalName=="PhysicalPath").Value;
+            path = path != null ? Path.GetDirectoryName(path) : Path.GetFullPath(application.AdditionalAttributes.First(attribute => attribute.LocalName=="PhysicalPath").Value);
             return $"{path}\\EasyTestSettings.json";
         }
 
@@ -82,6 +85,24 @@ namespace Xpand.TestsLib.EasyTest{
             var attribute = document.CreateAttribute(name);
             attribute.Value = value;
             testApplication.AdditionalAttributes = testApplication.AdditionalAttributes.Add(attribute).ToArray();
+        }
+
+        public static TestApplication RunBlazorApplication(this BlazorAdapter adapter, string physicalPath, int port,
+            string connectionString) {
+            
+            var testApplication = EasyTestWebApplication.New(physicalPath,port,false);
+            testApplication.Browser = "chrome";
+            testApplication.ConfigSettings(connectionString);
+            testApplication.AddAttribute("Configuration","Debug");
+            adapter.RunApplication(testApplication, "");
+
+            // var browser = (IWebBrowser) new ChromeBrowser();
+            // adapter.Driver.Navigate().GoToUrl($"https://localhost:{port}");
+            // var serverResponseAwaiter = new BlazorAppResponseAwaiter().GetServerResponseAwaiter(adapter.Driver);
+            // var wait = new WebDriverWait(adapter.Driver, TimeSpan.FromSeconds(30.0));
+            // wait.Until(SeleniumUtils.ElementExists(By.ClassName("app")));
+            // wait.Until(serverResponseAwaiter);
+            return testApplication;
         }
 
         public static TestApplication RunWebApplication(this WebAdapter adapter, string physicalPath, int port,string connectionString){
@@ -101,7 +122,7 @@ namespace Xpand.TestsLib.EasyTest{
             return testApplication;
         }
 
-        private static void ConfigSettings(this TestApplication application,string connectionString){
+        public static void ConfigSettings(this TestApplication application,string connectionString){
             File.WriteAllText(application.EasyTestSettingsFile(),
                 JsonConvert.SerializeObject(new{ConnectionString = connectionString}));
         }

@@ -6,18 +6,13 @@ using System.Threading.Tasks;
 using ALL.Tests;
 using ALL.Win.Tests;
 using DevExpress.EasyTest.Framework;
-using System.Linq;
-using DevExpress.ExpressApp;
-using Fasterflect;
+
 using NUnit.Framework;
-using Shouldly;
 using Xpand.Extensions.AppDomainExtensions;
-using Xpand.TestsLib;
 using Xpand.TestsLib.Attributes;
 using Xpand.TestsLib.EasyTest;
 using Xpand.TestsLib.EasyTest.Commands.ActionCommands;
 using Xpand.TestsLib.EasyTest.Commands.Automation;
-using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Logger;
 using BaseTest = ALL.Tests.BaseTest;
 
@@ -39,15 +34,20 @@ namespace Web.Tests{
 #endif
 
         private TestApplication RunWebApplication(IApplicationAdapter adapter, string connectionString){
-            
-            var physicalPath = $@"{AppDomain.CurrentDomain.ApplicationPath()}\..\TestWebApplication\";
+
+#if !NETCOREAPP3_1
+            var physicalPath = $@"{AppDomain.CurrentDomain.ApplicationPath()}..\TestWebApplication\";
+#else
+            var physicalPath = $@"{AppDomain.CurrentDomain.ApplicationPath()}..\..\TestBlazorApplication\";
+#endif
             LogPaths.Clear();
             LogPaths.Add(Path.Combine(Path.GetDirectoryName(physicalPath)!,"eXpressAppFramework.log"));
-            LogPaths.Add(Path.Combine(@$"{Path.GetDirectoryName(physicalPath)}\bin",Path.GetFileName(ReactiveLoggerService.RXLoggerLogPath)));
+            LogPaths.Add(Path.Combine(@$"{Path.GetDirectoryName(physicalPath)}\bin",Path.GetFileName(ReactiveLoggerService.RXLoggerLogPath)!));
 #if !NETCOREAPP3_1
             return ((DevExpress.ExpressApp.EasyTest.WebAdapter.WebAdapter) adapter).RunWebApplication(physicalPath, 65477, connectionString);
 #else
-            throw new NotImplementedException();
+            
+            return ((DevExpress.ExpressApp.EasyTest.BlazorAdapter.BlazorAdapter) adapter).RunBlazorApplication(physicalPath,65201,connectionString);
 #endif
             
         }
@@ -85,13 +85,15 @@ namespace Web.Tests{
         }
 #endif
 
-        [XpandTest(LongTimeout,3)]
+        // [XpandTest(LongTimeout,3)]
         [Test][Apartment(ApartmentState.STA)]
         public async Task Web_GoogleCloud_EasyTest(){
+#if !NETCOREAPP3_1
             DeleteBrowserFiles.Execute();
+#endif
             await EasyTest(NewWebAdapter, RunWebApplication, async adapter => {
                 await adapter.TestGoogleService(async () => {
-                    await adapter.TestGoogleCalendarService();
+                    // await adapter.TestGoogleCalendarService();
                     await adapter.TestGoogleTasksService();
                 });
             });

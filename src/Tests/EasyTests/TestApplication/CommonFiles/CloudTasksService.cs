@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Threading;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.SystemModule;
 using Fasterflect;
@@ -19,7 +20,7 @@ namespace ALL.Tests{
             var action = config();
             return action.initializeModule.Merge(manager.WhenApplication(application
                 => application.WhenViewOnFrame(typeof(Task),ViewType.DetailView)
-                    .SelectMany(frame => frame.NotifyTaskOperation(action.updated))
+                    .SelectMany(frame => frame.NotifyTaskOperation(Observable.Defer(() => action.updated).ObserveOn(SynchronizationContext.Current!)))
                     .ToUnit()
                     .Merge(application.DeleteAllEntities<Task>(action.deleteAll))).ToUnit());
         }

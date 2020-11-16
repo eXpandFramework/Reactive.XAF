@@ -20,7 +20,7 @@ namespace Xpand.TestsLib.EasyTest.Commands.ActionCommands{
         }
 
         protected override void ExecuteCore(ICommandAdapter adapter){
-            adapter.Execute(this.ConnvertTo<ExecuteTableActionCommand>());
+            adapter.Execute(this.ConvertTo<ExecuteTableActionCommand>());
         }
     }
 }

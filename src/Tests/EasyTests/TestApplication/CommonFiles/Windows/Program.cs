@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Windows.Forms;
-using DevExpress.ExpressApp.Model.NodeGenerators;
 using DevExpress.ExpressApp.Win.SystemModule;
 using DevExpress.Persistent.Base;
 using DevExpress.XtraEditors;
-using Fasterflect;
-using HarmonyLib;
 using Xpand.Extensions.AppDomainExtensions;
-using Xpand.XAF.Modules.CloneModelView;
 using FileLocation = DevExpress.Persistent.Base.FileLocation;
 
 // ReSharper disable once CheckNamespace

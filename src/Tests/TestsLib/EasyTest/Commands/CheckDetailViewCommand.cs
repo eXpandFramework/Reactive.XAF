@@ -11,7 +11,7 @@ namespace Xpand.TestsLib.EasyTest.Commands{
         }
 
         protected override void ExecuteCore(ICommandAdapter adapter){
-            adapter.Execute(this.ConnvertTo<CheckFieldValuesCommand>());
+            adapter.Execute(this.ConvertTo<CheckFieldValuesCommand>());
         }
     }
 }

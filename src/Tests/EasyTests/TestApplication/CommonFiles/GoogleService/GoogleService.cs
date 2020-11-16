@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
@@ -35,8 +36,9 @@ namespace TestApplication.GoogleService{
 						authentication.Oid = (Guid) SecuritySystem.CurrentUserId;
 						var platform = AppDomain.CurrentDomain.IsHosted() ? Platform.Web : Platform.Win;
 						string parentFolder = null;
-						if (platform==Platform.Web){
+						if (new[]{Platform.Blazor,Platform.Web }.Contains(platform)){
 							parentFolder = "..\\";
+							platform=Platform.Web;
 						}
 
 						string serviceName="Google";
@@ -71,7 +73,7 @@ namespace TestApplication.GoogleService{
 				})
 				.ToUnit()
                 .Merge(manager.RegisterViewSimpleAction(nameof(PersistGoogleToken),
-                    action => { action.Active[""] = false;}).ActivateInUserDetails().WhenExecute().PersistToken().ToUnit())
+                    action => { }).ActivateInUserDetails().WhenExecute().PersistToken().ToUnit())
                 .Merge(manager.ShowGoogleAccountInfo())
                 .Merge(manager.PushTheToken<GoogleAuthentication>("Google",o => new DictionaryValueConverter().ConvertToStorageType(o.OAuthToken).ToString()))
                 .ToUnit();

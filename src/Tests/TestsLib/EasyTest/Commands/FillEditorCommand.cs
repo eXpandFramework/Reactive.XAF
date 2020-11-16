@@ -18,7 +18,7 @@ namespace Xpand.TestsLib.EasyTest.Commands{
         }
 
         protected override void ExecuteCore(ICommandAdapter adapter){
-            var command = _inlineEditor?(Command) this.ConnvertTo<FillRecordCommand>():this.ConnvertTo<FillFieldCommand>();
+            var command = _inlineEditor?(Command) this.ConvertTo<FillRecordCommand>():this.ConvertTo<FillFieldCommand>();
             adapter.Execute(command);
         }
     }

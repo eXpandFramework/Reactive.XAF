@@ -26,7 +26,7 @@ namespace Xpand.TestsLib.EasyTest.Commands{
 
         public SelectObjectsCommand(MainParameter mainParameter=null){
             Parameters.Add(new Parameter("SelectAll = True"));
-            _command = this.ConnvertTo<ExecuteTableActionCommand>();
+            _command = this.ConvertTo<ExecuteTableActionCommand>();
             if (mainParameter != null) _command.Parameters.MainParameter = mainParameter;
         }
 
@@ -37,7 +37,7 @@ namespace Xpand.TestsLib.EasyTest.Commands{
         public SelectObjectsCommand(string column,params string[] rows){
             Parameters.Add(new Parameter($"Columns = {column}"));
             Parameters.AddRange(rows.Select(s => new Parameter($"Row = {s}")));
-            _command = this.ConnvertTo<SelectRecordsCommand>();
+            _command = this.ConvertTo<SelectRecordsCommand>();
         }
 
         protected override void ExecuteCore(ICommandAdapter adapter){

@@ -32,7 +32,7 @@ namespace Xpand.TestsLib.EasyTest.Commands{
         }
 
         protected override void ExecuteCore(ICommandAdapter adapter){
-            adapter.Execute(this.ConnvertTo<DevExpress.EasyTest.Framework.Commands.ProcessRecordCommand>());
+            adapter.Execute(this.ConvertTo<DevExpress.EasyTest.Framework.Commands.ProcessRecordCommand>());
         }
     }
 }
