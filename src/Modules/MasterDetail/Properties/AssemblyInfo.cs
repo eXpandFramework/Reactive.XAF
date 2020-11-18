@@ -9,7 +9,7 @@ using DevExpress.ExpressApp;
 // associated with an assembly.
 [assembly: AssemblyTitle("Xpand.XAF.Modules.MasterDetail")]
 [assembly: AssemblyMetadata("Platform","Core")]
-[assembly: AssemblyMetadata("Module",nameof(MasterDetailMode))]
+[assembly: AssemblyMetadata("Module",nameof(MasterDetailModule))]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
