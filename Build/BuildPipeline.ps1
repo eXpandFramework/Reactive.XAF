@@ -44,16 +44,15 @@ Invoke-Script{
     . "$SourcePath\build\UpdateDependencies.ps1" $CustomVersion
     . "$SourcePath\build\UpdateLatestProjectVersion.ps1"
     
+    
 
     $bArgs = @{
         packageSources = "$(Get-PackageFeed -Xpand);$DxApiFeed"
         tasklist       = $tasklist
         dxVersion      = $CustomVersion
-        ChangedModules = @($updateVersion)
         Branch         = $Branch
     }
-    Write-HostFormatted "ChangedModules:" -Section
-    $bArgs.ChangedModules|Sort-Object | Out-String
+    
     $SourcePath | ForEach-Object {
         Set-Location $_
         Move-PaketSource 0 $DXApiFeed
@@ -73,40 +72,34 @@ Invoke-Script{
         Write-HostFormatted "PaketInstall $SourcePath (due to different Version)" -section
         dotnet paket install 
     }
-    if ($Branch -eq "lab") {
-        Write-HostFormatted "checking for New DevExpress Version ($CustomVersion) " -Section
-        $filter = "DevExpress*"
+    . "$SourcePath\build\targets\SignHangfire.ps1"
+    # if ($Branch -eq "lab") {
+    #     Write-HostFormatted "checking for New DevExpress Version ($CustomVersion) " -Section
+    #     $filter = "DevExpress*"
         
-        [version]$currentVersion = Get-VersionPart (Get-DevExpressVersion) Build
-        $outputFolder = "$([System.IO.Path]::GetTempPath())\GetNugetpackage"
-        $rxdllpath=Get-ChildItem ((get-item (Get-NugetPackage -Name Xpand.XAF.Modules.Reactive -Source (Get-PackageFeed -Xpand) -OutputFolder $outputFolder -ResultType NupkgFile )).DirectoryName) "Xpand.XAF.Modules.Reactive.dll" -Recurse|Select-Object -First 1
-        $assemblyReference=Get-AssemblyReference $rxdllpath.FullName
-        [version]$publishdeVersion = Get-VersionPart (($assemblyReference | Where-Object { $_.Name -like $filter }).version) Build
-        if ($publishdeVersion -lt $currentVersion) {
-            Write-HostFormatted "new DX version detected $currentVersion"
-            $trDeps = Get-NugetPackageDependencies DevExpress.ExpressApp.Core.all -Source $env:DxFeed -filter $filter -Recurse
-            Push-Location 
-            $projectPackages = (Get-ChildItem "$SourcePath\src\modules" *.csproj -Recurse) + (Get-ChildItem "$SourcePath\src\extensions" *.csproj -Recurse) | Invoke-Parallel -VariablesToImport "filter" -Script {
-                Push-Location $_.DirectoryName
-                [PSCustomObject]@{
-                    Project           = $_
-                    InstalledPackages = (Invoke-PaketShowInstalled -Project $_.FullName) | Where-Object { $_.id -like $filter }
-                }
-                Pop-Location
-            }
-            ($projectPackages | Where-Object { $_.InstalledPackages.id | Where-Object { $_ -in $trDeps.id } }).Project | Get-Item | ForEach-Object {
-                Write-HostFormatted "Increase $($_.basename) revision" -ForegroundColor Magenta
-                Update-AssemblyInfo $_.DirectoryName -Revision
-                $bArgs.ChangedModules += $_.basename
-            }
-        }
-    }
-
-    if ($bArgs.ChangedModules) {
-        $bArgs.ChangedModules = $bArgs.ChangedModules | Sort-Object -Unique
-    }
-    Write-HostFormatted "ChangedModules" -Section
-    $bArgs.ChangedModules
+    #     [version]$currentVersion = Get-VersionPart (Get-DevExpressVersion) Build
+    #     $outputFolder = "$([System.IO.Path]::GetTempPath())\GetNugetpackage"
+    #     $rxdllpath=Get-ChildItem ((get-item (Get-NugetPackage -Name Xpand.XAF.Modules.Reactive -Source (Get-PackageFeed -Xpand) -OutputFolder $outputFolder -ResultType NupkgFile )).DirectoryName) "Xpand.XAF.Modules.Reactive.dll" -Recurse|Select-Object -First 1
+    #     $assemblyReference=Get-AssemblyReference $rxdllpath.FullName
+    #     [version]$publishdeVersion = Get-VersionPart (($assemblyReference | Where-Object { $_.Name -like $filter }).version) Build
+    #     if ($publishdeVersion -lt $currentVersion) {
+    #         Write-HostFormatted "new DX version detected $currentVersion"
+    #         $trDeps = Get-NugetPackageDependencies DevExpress.ExpressApp.Core.all -Source $env:DxFeed -filter $filter -Recurse
+    #         Push-Location 
+    #         $projectPackages = (Get-ChildItem "$SourcePath\src\modules" *.csproj -Recurse) + (Get-ChildItem "$SourcePath\src\extensions" *.csproj -Recurse) | Invoke-Parallel -VariablesToImport "filter" -Script {
+    #             Push-Location $_.DirectoryName
+    #             [PSCustomObject]@{
+    #                 Project           = $_
+    #                 InstalledPackages = (Invoke-PaketShowInstalled -Project $_.FullName) | Where-Object { $_.id -like $filter }
+    #             }
+    #             Pop-Location
+    #         }
+    #         ($projectPackages | Where-Object { $_.InstalledPackages.id | Where-Object { $_ -in $trDeps.id } }).Project | Get-Item | ForEach-Object {
+    #             Write-HostFormatted "Increase $($_.basename) revision" -ForegroundColor Magenta
+    #             Update-AssemblyInfo $_.DirectoryName -Revision
+    #         }
+    #     }
+    # }
     
     
     & $SourcePath\go.ps1 @bArgs

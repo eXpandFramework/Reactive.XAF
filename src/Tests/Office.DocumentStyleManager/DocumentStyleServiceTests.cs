@@ -5,7 +5,7 @@ using Fasterflect;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
-using Xpand.TestsLib.Attributes;
+using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions;
 

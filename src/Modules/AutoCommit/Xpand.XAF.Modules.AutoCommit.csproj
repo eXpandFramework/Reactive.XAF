@@ -12,6 +12,7 @@
     <DebugType>full</DebugType>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <OutputPath>..\..\..\bin</OutputPath>
+    <CopyLocalLockFileAssemblie>true</CopyLocalLockFileAssemblie>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Xpand.Extensions">
@@ -30,6 +31,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Module.cs" />
+    <Compile Include="..\..\Common\AssemblyInfoVersion.cs">
+      <Link>Properties\AssemblyInfoVersion.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Readme.md" />

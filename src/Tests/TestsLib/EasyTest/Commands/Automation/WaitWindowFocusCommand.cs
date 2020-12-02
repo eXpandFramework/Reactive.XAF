@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using System.Threading;
 using DevExpress.EasyTest.Framework;
-using Xpand.TestsLib.Win32;
+using Xpand.TestsLib.Common.Win32;
 
 namespace Xpand.TestsLib.EasyTest.Commands.Automation{
     public class WaitWindowFocusCommand:EasyTestCommand{

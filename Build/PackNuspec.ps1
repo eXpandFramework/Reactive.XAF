@@ -1,25 +1,19 @@
 param(
-    $Branch = "master",
+    $Branch = "lab",
     $nugetBin = "$PSScriptRoot\..\bin\Nupkg",
     $sourceDir = "$PSScriptRoot\..",
     $Filter ,
-    [switch]$SkipReadMe,
-    [string[]]$ChangedModules =((Get-ChildItem $nugetBin).BaseName|ConvertTo-PackageObject).Id
+    [switch]$SkipReadMe
 )
 
 Import-Module XpandPwsh -Force -Prefix X
 $ErrorActionPreference = "Stop"
-Get-Variable ChangedModules | Out-Variable
+
 New-Item $nugetBin -ItemType Directory -Force | Out-Null
 Get-ChildItem $nugetBin | Remove-Item -Force -Recurse
 $toolPackages = @("Xpand.VersionConverter", "Xpand.XAF.ModelEditor")
 & "$PSScriptRoot\PackTools.ps1" $toolPackages $Branch
 
-if (!$ChangedModules) {
-    $ChangedModules
-    Write-HostFormatted "Skipping package creation as no package changed" -ForegroundColor Yellow
-    return
-}
 
 Set-Location $sourceDir
 $assemblyVersions = & "$sourceDir\build\AssemblyVersions.ps1" $sourceDir
@@ -142,36 +136,4 @@ if ($Branch -ne "lab") {
     }
     Write-HostFormatted "Update ReadMe" -Section
     & "$PSScriptRoot\UpdateReadMe.ps1" 
-}
-Write-HostFormatted "Remove not changed packages" -Section
-if ($ChangedModules) {
-    
-    $core = @(Get-ChildItem "$sourceDir\bin" Xpand*.dll | Where-Object { $_.BaseName -in $ChangedModules } | ForEach-Object { (Get-AssemblyMetadata $_.FullName -Key platform).value } | Get-Unique | ForEach-Object {
-            "Xpand.XAF.$_.All"
-        })
-    if ($core | Select-String "core") {
-        $core += "Xpand.XAF.Win.All", "Xpand.XAF.Web.All"
-    }
-    $core = $core | Sort-Object -Unique
-    $ChangedModules += $core
-    $s = "lab"
-    if ($Branch -ne $s) {
-        $s = "Release"
-    }
-    $toolPackages | ForEach-Object {
-        if ((Find-XpandPackage $_ $s).Version -ne (Get-NugetPackageSearchMetadata $_ -Source $nugetBin).identity.version.version) {
-            $ChangedModules += $_
-        }
-    }
-    
-    "ChangedModules:"
-    $ChangedModules | Write-Output
-    $nupks = Get-ChildItem $nugetBin
-    & (Get-NugetPath) list -source $nugetBin | ConvertTo-PackageObject | ForEach-Object {
-        $p = $_
-        if ($p.Id -notin $ChangedModules) {
-            $nupks | Where-Object { $_.BaseName -eq "$($p.Id).$($p.Version)" }
-        }
-    } | Remove-Item -Verbose
-    
 }

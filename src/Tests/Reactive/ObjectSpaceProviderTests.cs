@@ -1,7 +1,6 @@
 ﻿using akarnokd.reactive_extensions;
-using NUnit.Framework;
 using Shouldly;
-using Xpand.TestsLib.Attributes;
+using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.Reactive.Tests{

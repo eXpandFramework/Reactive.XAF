@@ -16,6 +16,7 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
     <DebugType>full</DebugType>
+    <CopyLocalLockFileAssemblie>true</CopyLocalLockFileAssemblie>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Diagnostics\**" />
@@ -24,6 +25,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="Xpand.XAF.Modules.Reactive.csproj.DotSettings" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\Common\AssemblyInfoVersion.cs" Link="AssemblyInfoVersion.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.Extensions">

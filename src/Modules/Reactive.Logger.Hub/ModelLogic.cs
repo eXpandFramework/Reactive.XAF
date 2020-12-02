@@ -4,7 +4,7 @@ using DevExpress.ExpressApp.Model.Core;
 
 namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
     public interface IModelLoggerClientRange:IModelLoggerPort{
-        [DefaultValue(61486)]
+        [DefaultValue(61496)]
         int EndPort{ get; set; }
         [Required]
         [DefaultValue("localhost")]
@@ -35,7 +35,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 
     public class ModelServerPosrtsGenerator:ModelNodesGeneratorBase{
         protected override void GenerateNodesCore(ModelNode node){
-            node.AddNode<IModelLoggerClientRange>("default client range 61456-61486");
+            node.AddNode<IModelLoggerClientRange>("default client range 61456-61496");
             node.AddNode<IModelLoggerServerPort>("default server port 61456");
         }
     }

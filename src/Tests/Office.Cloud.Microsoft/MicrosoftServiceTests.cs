@@ -4,7 +4,7 @@ using System.Reactive.Linq;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using Microsoft.Identity.Client;
-using Xpand.TestsLib;
+using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft.BusinessObjects;
 using Xpand.XAF.Modules.Office.Cloud.Tests;
 using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;

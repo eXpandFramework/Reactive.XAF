@@ -11,7 +11,7 @@ using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.TaskExtensions;
-using Xpand.TestsLib.Attributes;
+using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Office.Cloud.Tests;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Logger;

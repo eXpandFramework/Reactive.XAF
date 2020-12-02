@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using DevExpress.EasyTest.Framework;
-using Xpand.TestsLib.InputSimulator;
-using Xpand.TestsLib.Win32;
+using Xpand.TestsLib.Common.InputSimulator;
+using Xpand.TestsLib.Common.Win32;
 
 namespace Xpand.TestsLib.EasyTest.Commands.Automation{
 	public class SendKeysCommand : EasyTestCommand{
@@ -21,7 +21,7 @@ namespace Xpand.TestsLib.EasyTest.Commands.Automation{
         }
 
         protected override void ExecuteCore(ICommandAdapter adapter){
-			var inputSimulator = new InputSimulator.InputSimulator();
+			var inputSimulator = new Common.InputSimulator.InputSimulator();
             if (_action != null){
 				_action(inputSimulator.Keyboard);
                 

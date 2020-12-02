@@ -10,7 +10,7 @@ namespace Xpand.TestsLib.EasyTest.Commands.Automation{
 		}
 
 		protected override void ExecuteCore(ICommandAdapter adapter){
-			var inputSimulator = new InputSimulator.InputSimulator();
+			var inputSimulator = new Common.InputSimulator.InputSimulator();
 			inputSimulator.Keyboard.TextEntry(_text);
 		}
 	}

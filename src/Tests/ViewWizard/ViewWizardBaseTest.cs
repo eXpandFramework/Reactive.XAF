@@ -1,6 +1,6 @@
 ﻿using DevExpress.ExpressApp;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
-using Xpand.TestsLib;
+using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.CloneModelView;
 using Xpand.XAF.Modules.ViewWizard.Tests.BO;
 

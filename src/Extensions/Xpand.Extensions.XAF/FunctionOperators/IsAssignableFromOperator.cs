@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp.SystemModule;
 using Xpand.Extensions.AppDomainExtensions;
@@ -15,7 +14,7 @@ namespace Xpand.Extensions.XAF.FunctionOperators{
 
         public object Evaluate(params object[] operands){
             var fullName = operands[1].ToString();
-            var type = AppDomain.CurrentDomain.GetAssemblyType(fullName).FirstOrDefault();
+            var type = AppDomain.CurrentDomain.GetAssemblyType(fullName);
             return type != null && type.IsAssignableFrom((Type) operands[0]);
         }
 

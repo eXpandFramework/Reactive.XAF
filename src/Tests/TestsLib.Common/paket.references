@@ -1,0 +1,15 @@
+akarnokd.reactive_extensions
+DevExpress.ExpressApp.Security.Xpo
+DevExpress.Persistent.BaseImpl
+Enums.NET
+Humanizer.Core
+MagicOnion
+Moq
+Newtonsoft.Json
+Shouldly
+Fasterflect.Xpand
+Xpand.Patcher
+Polly
+JetBrains.Annotations
+Microsoft.CodeAnalysis.CSharp
+nunit

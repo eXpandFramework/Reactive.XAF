@@ -5,7 +5,7 @@ using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using Google.Apis.Auth.OAuth2;
 using JetBrains.Annotations;
-using Xpand.TestsLib;
+using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.Office.Cloud.Google.BusinessObjects;
 using Xpand.XAF.Modules.Office.Cloud.Tests;
 using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;

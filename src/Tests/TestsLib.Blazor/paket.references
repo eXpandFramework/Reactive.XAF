@@ -1,0 +1,9 @@
+Microsoft.CodeAnalysis.Csharp
+System.Configuration.ConfigurationManager
+System.ServiceModel.Http
+Fasterflect.Xpand
+Microsoft.AspNetCore.Hosting.Abstractions
+Microsoft.Extensions.DependencyInjection.Abstractions
+Microsoft.AspNetCore.Http.Abstractions
+hangfire.aspnetcore
+DevExpress.ExpressApp.Xpo

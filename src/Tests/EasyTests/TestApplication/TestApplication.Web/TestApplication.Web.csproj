@@ -29,6 +29,7 @@
     <RestoreLockedMode>False</RestoreLockedMode>
     <NoWarn>NU1603</NoWarn>
     <DisableImplicitNuGetFallbackFolder>False</DisableImplicitNuGetFallbackFolder>
+    <CopyLocalLockFileAssemblie>true</CopyLocalLockFileAssemblie>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -74,7 +75,7 @@
   <ItemGroup>
     <PackageReference Include="Unofficial.Microsoft.mshtml" Version="7.0.3300" />
     <PackageReference Include="Xpand.XAF.Web.All">
-      <Version>4.202.0</Version>
+      <Version>4.202.0.1</Version>
     </PackageReference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="mscorlib">
@@ -131,15 +132,15 @@
     <Reference Include="System.Xml.Linq">
       <Private>False</Private>
     </Reference>
-    <PackageReference Include="DevExpress.ExpressApp.Web.All" Version="20.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Web" Version="20.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp" Version="20.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WebAdapter" Version="20.2.3" />
-    <PackageReference Include="DevExpress.EasyTest" Version="20.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="20.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="20.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.2.3" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="4.202.0">
+    <PackageReference Include="DevExpress.ExpressApp.Web.All" Version="20.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Web" Version="20.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="20.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WebAdapter" Version="20.2.4" />
+    <PackageReference Include="DevExpress.EasyTest" Version="20.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="20.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="20.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.2.4" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="4.202.0.1">
     </PackageReference>
     <PackageReference Include="Google.Apis.People.v1" Version="1.25.0.830" />
   </ItemGroup>
@@ -151,19 +152,19 @@
     <Content Include="Login.aspx" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\..\TestsLib\BO\Accessory.cs">
+    <Compile Include="..\..\..\TestsLib.Common\BO\Accessory.cs">
       <Link>Common\Accessory.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\TestsLib\BO\Order.cs">
+    <Compile Include="..\..\..\TestsLib.Common\BO\Order.cs">
       <Link>Common\Order.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\TestsLib\BO\OrderModuleUpdater.cs">
+    <Compile Include="..\..\..\TestsLib.Common\BO\OrderModuleUpdater.cs">
       <Link>Common\OrderModuleUpdater.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\TestsLib\BO\Product.cs">
+    <Compile Include="..\..\..\TestsLib.Common\BO\Product.cs">
       <Link>Common\Product.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\TestsLib\DefaultUserModuleUpdater.cs">
+    <Compile Include="..\..\..\TestsLib.Common\DefaultUserModuleUpdater.cs">
       <Link>Common\DefaultUserModuleUpdater.cs</Link>
     </Compile>
     <Compile Include="..\CommonFiles\AgnosticModule.cs">
@@ -208,8 +209,12 @@
     </Compile>
     <Compile Include="..\CommonFiles\GoogleTasksService\GoogleTasksService.cs" Link="Office\Cloud\Google\GoogleTasksService.cs" />
     <Compile Include="..\CommonFiles\CloudTasksService.cs" Link="Office\Cloud\CloudTasksService.cs" />
+    <Compile Include="..\CommonFiles\ViewWizard\ViewWizard.cs">
+      <Link>ViewWizard\ViewWizard.cs</Link>
+    </Compile>
     <Compile Include="..\CommonFiles\Web\WebModule.cs">
       <Link>WebModule.cs</Link>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Default.aspx.designer.cs">
       <DependentUpon>Default.aspx</DependentUpon>
@@ -224,16 +229,20 @@
       <DependentUpon>Login.aspx</DependentUpon>
     </Compile>
     <Compile Include="LookupCascade\LookupCascadeService.cs" />
-    <Compile Include="ViewWizard\ViewWizard.cs" />
-    <Compile Include="WebApplication.cs" />
+    <Compile Include="WebApplication.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Error.aspx.cs">
       <DependentUpon>Error.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Login.aspx.cs">
       <DependentUpon>Login.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -254,6 +263,9 @@
     <EmbeddedResource Include="..\CommonFiles\Cloud.Office.xafml">
       <Link>Office\Cloud\Cloud.Office.xafml</Link>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\..\..\Common\AssemblyInfoVersion.cs" Link="AssemblyInfoVersion.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\CommonFiles\SeqeuenceGenerator\SequenceGenerator.xafml">

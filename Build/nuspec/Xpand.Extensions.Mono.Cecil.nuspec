@@ -15,16 +15,16 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Xpand.Extensions.Mono.Cecil</tags>
     <dependencies>
       <dependency id="Fasterflect.Xpand" version="2.0.7" />
-      <dependency id="JetBrains.Annotations" version="2020.1" />
+      <dependency id="JetBrains.Annotations" version="2020.3" />
       <dependency id="Mono.Cecil" version="0.11.2" />
       <dependency id="System.CodeDom" version="5.0" />
       <dependency id="System.ValueTuple" version="4.5" />
     </dependencies>
   </metadata>
   <files>
-    <file src="Xpand.Extensions.Mono.Cecil.dll" target="lib\netstandard2.0\Xpand.Extensions.Mono.Cecil.dll" />
     <file src="Xpand.Extensions.Mono.Cecil.pdb" target="lib\netstandard2.0\Xpand.Extensions.Mono.Cecil.pdb" />
-    <file src="..\build\CopySymbols.targets" target="build\Xpand.Extensions.Mono.Cecil.targets" />
-    <file src="..\build\CopySymbols.ps1" target="build\CopySymbols.ps1" />
+    <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.Extensions.Mono.Cecil.targets" />
+    <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
+    <file src="Xpand.Extensions.Mono.Cecil.dll" target="lib\netstandard2.0\Xpand.Extensions.Mono.Cecil.dll" />
   </files>
 </package>

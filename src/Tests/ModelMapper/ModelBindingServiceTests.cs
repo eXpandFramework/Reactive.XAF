@@ -40,8 +40,8 @@ using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
-using Xpand.TestsLib;
-using Xpand.TestsLib.Attributes;
+using Xpand.TestsLib.Common;
+using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.ModelMapper.Services.Predefined;
@@ -64,13 +64,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             using var application = DefaultModelMapperModule( platform, module).Application;
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
             var modelModelMap = (IModelModelMap)modelListView.MapNode(typeToMap);
-            modelModelMap.SetValue(nameof(StringValueTypeProperties.RWInteger),100);
-            var stringValueTypeProperties = new StringValueTypeProperties{RWString = "shouldNotChange"};
+            modelModelMap.SetValue(nameof(StringValueTypeProperties.RwInteger),100);
+            var stringValueTypeProperties = new StringValueTypeProperties{RwString = "shouldNotChange"};
 
             modelModelMap.BindTo(stringValueTypeProperties);
 
-            stringValueTypeProperties.RWInteger.ShouldBe(100);
-            stringValueTypeProperties.RWString.ShouldBe("shouldNotChange");
+            stringValueTypeProperties.RwInteger.ShouldBe(100);
+            stringValueTypeProperties.RwString.ShouldBe("shouldNotChange");
         }
 
         [XpandTest]
@@ -83,14 +83,14 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             using var application = DefaultModelMapperModule( platform, module).Application;
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
             var modelModelMap = (IModelModelMap)modelListView.MapNode(typeToMap);
-            modelModelMap.SetValue(nameof(StringValueTypeProperties.RWInteger),100);
-            var stringValueTypeProperties = new StringValueTypeProperties{RWString = "shouldNotChange"};
+            modelModelMap.SetValue(nameof(StringValueTypeProperties.RwInteger),100);
+            var stringValueTypeProperties = new StringValueTypeProperties{RwString = "shouldNotChange"};
 
             modelModelMap.NodeDisabled = true;
             modelModelMap.BindTo(stringValueTypeProperties);
 
-            stringValueTypeProperties.RWString.ShouldBe("shouldNotChange");
-            stringValueTypeProperties.RWInteger.ShouldBe(0);
+            stringValueTypeProperties.RwString.ShouldBe("shouldNotChange");
+            stringValueTypeProperties.RwInteger.ShouldBe(0);
         }
 
         [XpandTest]
@@ -119,14 +119,14 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             using var application = DefaultModelMapperModule( platform, module).Application;
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
             var modelModelMap = (IModelModelMap)modelListView.MapNode(typeToMap);
-            modelModelMap.SetValue(nameof(StringValueTypeProperties.RWInteger),100);
-            modelModelMap.SetValue(nameof(StringValueTypeProperties.NullAbleRWInteger),200);
+            modelModelMap.SetValue(nameof(StringValueTypeProperties.RwInteger),100);
+            modelModelMap.SetValue(nameof(StringValueTypeProperties.NullAbleRwInteger),200);
             var stringValueTypeProperties = new StringValueTypeProperties();
             
             modelModelMap.BindTo(stringValueTypeProperties);
 
-            stringValueTypeProperties.RWInteger.ShouldBe(100);
-            stringValueTypeProperties.NullAbleRWInteger.ShouldBe(200);
+            stringValueTypeProperties.RwInteger.ShouldBe(100);
+            stringValueTypeProperties.NullAbleRwInteger.ShouldBe(200);
         }
 
         [XpandTest]
@@ -139,12 +139,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             using var application = DefaultModelMapperModule( platform, module).Application;
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
             var modelModelMap = (IModelModelMap)modelListView.MapNode(typeToMap);
-            modelModelMap.SetValue(nameof(StringValueTypeProperties.RWString),"test");
+            modelModelMap.SetValue(nameof(StringValueTypeProperties.RwString),"test");
             var stringValueTypeProperties = new StringValueTypeProperties();
             
             modelModelMap.BindTo(stringValueTypeProperties);
 
-            stringValueTypeProperties.RWString.ShouldBe("test");
+            stringValueTypeProperties.RwString.ShouldBe("test");
         }
 
         [XpandTest]
@@ -157,11 +157,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             using var application = DefaultModelMapperModule( platform, module).Application;
             var modelListView = application.Model.Views.OfType<IModelListView>().First();
             var modelModelMap = (IModelModelMap)modelListView.MapNode(typeToMap);
-            modelModelMap.GetNode(nameof(ReferenceTypeProperties.RStringValueTypeProperties)).SetValue(nameof(StringValueTypeProperties.RWString),"test");
+            modelModelMap.GetNode(nameof(ReferenceTypeProperties.RStringValueTypeProperties)).SetValue(nameof(StringValueTypeProperties.RwString),"test");
             var referenceTypeProperties = new ReferenceTypeProperties();
 
             modelModelMap.BindTo(referenceTypeProperties);
-            referenceTypeProperties.RStringValueTypeProperties.RWString.ShouldBe("test");
+            referenceTypeProperties.RStringValueTypeProperties.RwString.ShouldBe("test");
         }
 
         [XpandTest]

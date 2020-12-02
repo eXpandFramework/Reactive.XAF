@@ -5,3 +5,4 @@ DevExpress.Persistent.Base
 Google.Apis.Auth
 Microsoft.CodeAnalysis.CSharp
 System.Configuration.ConfigurationManager
+DevExpress.Xpo

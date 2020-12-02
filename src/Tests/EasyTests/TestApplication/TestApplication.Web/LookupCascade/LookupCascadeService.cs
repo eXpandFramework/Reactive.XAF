@@ -8,7 +8,7 @@ using DevExpress.ExpressApp.Model;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
-using Xpand.TestsLib.BO;
+using Xpand.TestsLib.Common.BO;
 using Xpand.XAF.Modules.CloneModelView;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;

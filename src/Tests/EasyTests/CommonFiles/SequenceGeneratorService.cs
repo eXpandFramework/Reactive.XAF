@@ -1,6 +1,6 @@
 ﻿using DevExpress.EasyTest.Framework;
 using Xpand.Extensions.XAF.ObjectExtensions;
-using Xpand.TestsLib.BO;
+using Xpand.TestsLib.Common.BO;
 using Xpand.TestsLib.EasyTest;
 using Xpand.TestsLib.EasyTest.Commands;
 using Xpand.TestsLib.EasyTest.Commands.ActionCommands;

@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-using Xpand.TestsLib.Win32;
+using Xpand.TestsLib.Common.Win32;
 
 namespace Xpand.TestsLib.EasyTest.Commands.Automation{
     public class DeleteBrowserFiles{
@@ -9,7 +9,7 @@ namespace Xpand.TestsLib.EasyTest.Commands.Automation{
             KillBrowser();
             Process.Start("control", "inetcpl.cpl");
             Thread.Sleep(1400);
-            var keyboard = new InputSimulator.InputSimulator().Keyboard;
+            var keyboard = new Common.InputSimulator.InputSimulator().Keyboard;
             var millisecondsTimeout = 1000;
             keyboard.ModifiedKeyStroke(Win32Constants.VirtualKeys.AltLeft, Win32Constants.VirtualKeys.D);
             Thread.Sleep(millisecondsTimeout);

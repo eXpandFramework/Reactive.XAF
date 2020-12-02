@@ -1,18 +1,23 @@
 ﻿using System;
 using System.IO;
-
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ALL.Tests;
 using ALL.Win.Tests;
 using DevExpress.EasyTest.Framework;
-
+using DevExpress.ExpressApp;
+using Fasterflect;
 using NUnit.Framework;
+using Shouldly;
 using Xpand.Extensions.AppDomainExtensions;
-using Xpand.TestsLib.Attributes;
+using Xpand.TestsLib;
+using Xpand.TestsLib.Common;
+using Xpand.TestsLib.Common.Attributes;
 using Xpand.TestsLib.EasyTest;
 using Xpand.TestsLib.EasyTest.Commands.ActionCommands;
 using Xpand.TestsLib.EasyTest.Commands.Automation;
+using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Logger;
 using BaseTest = ALL.Tests.BaseTest;
 

@@ -9,7 +9,7 @@ using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.BytesExtensions;
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.XAF.Xpo.ValueConverters;
-using Xpand.TestsLib;
+using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.Office.Cloud.Google.BusinessObjects;
 using Xpand.XAF.Modules.Office.Cloud.Tests;
 using Xpand.XAF.Modules.Reactive;

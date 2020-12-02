@@ -1,17 +1,16 @@
-﻿using System.Net.Http;
-using DevExpress.ExpressApp.Security;
+﻿using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.Blazor.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TestApplication.Blazor.Server.Services;
+using Xpand.Extensions.Blazor;
 using Xpand.Extensions.Office.Cloud.Google.Blazor;
-using Xpand.XAF.Modules.Office.Cloud.Google;
+
 [assembly: HostingStartup(typeof(GoogleCodeStateStartup))]
 namespace TestApplication.Blazor.Server {
     public class Startup {

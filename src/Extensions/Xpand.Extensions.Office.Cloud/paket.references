@@ -5,3 +5,4 @@ DevExpress.Persistent.Base
 Newtonsoft.Json
 Microsoft.CodeAnalysis.CSharp
 System.Configuration.ConfigurationManager
+DevExpress.Xpo

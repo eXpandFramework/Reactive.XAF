@@ -1,13 +1,12 @@
 ﻿using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Office.Win;
-using DevExpress.ExpressApp.Xpo;
 using DevExpress.XtraRichEdit;
 using DevExpress.XtraRichEdit.API.Native;
 using NUnit.Framework;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
-using Xpand.TestsLib;
-using Xpand.TestsLib.Attributes;
+using Xpand.TestsLib.Common;
+using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions;
 using Xpand.XAF.Modules.Reactive;
 [assembly:XpandTest(IgnoredXAFVersions="19.1")]
@@ -35,7 +34,6 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests{
             var modelOfflineModule = xafApplication.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.DocumentStyleManager();
             modelOfflineModule.DefaultPropertiesProvider = xafApplication.Model.BOModel.GetClass(typeof(DataObject));
             using var objectSpace = xafApplication.CreateObjectSpace();
-            var isKnownType = ((XPObjectSpace) objectSpace).IsKnownType(typeof(DataObject));
             var dataObject = objectSpace.CreateObject<DataObject>();
             dataObject.Content = Document.ToByteArray(DocumentFormat.OpenXml);
             objectSpace.CommitChanges();

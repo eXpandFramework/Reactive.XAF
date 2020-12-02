@@ -68,6 +68,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             {nameof(ReactiveLoggerModule),Colors[Reactive]},
             {"ReactiveLoggerHubModule",Colors[Reactive]},
             {"AutoCommitModule",Colors[Data]},
+            {"JobSchedulerModule",Colors[Data]},
             {"CloneMemberValueModule",Colors[Data]},
             {"CloneModelViewModule",Colors[Model]},
             {"GridListEditorModule",Colors[Editors]},

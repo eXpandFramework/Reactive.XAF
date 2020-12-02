@@ -9,7 +9,7 @@ using Shouldly;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
-using Xpand.TestsLib.Attributes;
+using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleManager;

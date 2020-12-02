@@ -1,27 +1,49 @@
 param(
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\"),
     [switch]$Release,
-    $dxVersion=$env:FirstDxVersion,
-    $branch="lab"
+    $dxVersion = $env:FirstDxVersion,
+    $branch = "lab"
 )
 
 $ErrorActionPreference = "Stop"
 # Import-XpandPwsh
 
 New-Item -Path "$root\bin\Nupkg" -ItemType Directory  -ErrorAction SilentlyContinue -Force | Out-Null
-[version]$modulesVersion=[System.Diagnostics.FileVersionInfo]::GetVersionInfo("$root\bin\Xpand.XAF.Modules.Reactive.dll" ).FileVersion
-$versionConverterPath="$root\tools\Xpand.VersionConverter\Xpand.VersionConverter.nuspec"
-[xml]$nuspec=Get-Content $versionConverterPath
-[version]$vv=$nuspec.package.metadata.version
-$nuspec.package.metadata.version="$($vv.major).$($modulesVersion.Minor).$($vv.build)"
+[version]$modulesVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo("$root\bin\Xpand.XAF.Modules.Reactive.dll" ).FileVersion
+$versionConverterPath = "$root\tools\Xpand.VersionConverter\Xpand.VersionConverter.nuspec"
+[xml]$nuspec = Get-Content $versionConverterPath
+[version]$vv = $nuspec.package.metadata.version
+$nuspec.package.metadata.version = "$($vv.major).$($modulesVersion.Minor).$($vv.build)"
 $nuspec.Save($versionConverterPath)
 
-$allProjects=Get-ChildItem $root *.csproj -Recurse | Select-Object -ExpandProperty BaseName
-Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notlike "*Test*" } | Invoke-Parallel -VariablesToImport @("allProjects","root","Release") -Script {
-# Get-ChildItem "$root\src\" -Include "*Grid*.csproj" -Recurse | Where-Object { $_ -notlike "*Test*" } | foreach {
+$allProjects = Get-ChildItem $root *.csproj -Recurse | Select-Object -ExpandProperty BaseName
+
+Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notlike "*Test*" } | Invoke-Parallel -VariablesToImport @("allProjects", "root", "Release") -Script {
+    # Get-ChildItem "$root\src\" -Include "*hang*.csproj" -Recurse | Where-Object { $_ -notlike "*Test*" } | foreach {
+    $addTargets = {
+        param (
+            $name   
+        )
+        $a = [ordered]@{
+            src    = "..\build\Targets\$name.targets"
+            target = "build\$($nuspec.package.metadata.id).targets" 
+        }
+        if ($nuspecFileName -like "*Client*") {
+            $a.src = "..\$($a.src)"
+        }
+        Add-XmlElement -Owner $nuspec -elementname "file" -parent "files"-Attributes $a | Out-Null
+        $a = [ordered]@{
+            src    = "..\build\Targets\$name.ps1"
+            target = "build\$name.ps1" 
+        }
+        if ($nuspecFileName -like "*Client*") {
+            $a.src = "..\$($a.src)"
+        }
+        Add-XmlElement -Owner $nuspec -elementname "file" -parent "files"-Attributes $a | Out-Null
+    }
     Set-Location $root
     $projectPath = $_.FullName
-    "projectPath=$projectPath"
+    
     Write-Output "Creating Nuspec for $($_.baseName)" 
     $uArgs = @{
         NuspecFilename           = "$root\build\nuspec\$($_.baseName).nuspec"
@@ -30,7 +52,7 @@ Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -not
         PublishedSource          = (Get-PackageFeed -Xpand)
         Release                  = $Release
         ReadMe                   = $false
-        AllProjects             = $allProjects
+        AllProjects              = $allProjects
     }
     if (!(Test-Path $uArgs.NuspecFilename)) {
         Set-Location $root\build\nuspec
@@ -44,22 +66,12 @@ Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -not
 
     $nuspecFileName = "$root\build\nuspec\$($_.BaseName).nuspec"
     [xml]$nuspec = Get-Content $nuspecFileName
-    $a = [ordered]@{
-        src = "..\build\CopySymbols.targets"
-        target="build\$($nuspec.package.metadata.id).targets" 
+    $psTarget = "CopySymbols"
+    if (Test-Path "..\build\Targets\$($_.BaseName).targets") {
+        $psTarget = $_.BaseName
     }
-    if ($nuspecFileName -like "*Client*") {
-        $a.src = "..\$($a.src)"
-    }
-    Add-XmlElement -Owner $nuspec -elementname "file" -parent "files"-Attributes $a
-    $a = [ordered]@{
-        src = "..\build\CopySymbols.ps1"
-        target="build\CopySymbols.ps1" 
-    }
-    if ($nuspecFileName -like "*Client*") {
-        $a.src = "..\$($a.src)"
-    }
-    Add-XmlElement -Owner $nuspec -elementname "file" -parent "files"-Attributes $a
+    & $addTargets $psTarget
+    Add-XmlElement -Owner $nuspec -elementname "file" -parent "files"-Attributes $a | Out-Null
     $readMePath = "$($_.DirectoryName)\ReadMe.md"
     if (Test-Path $readMePath) {
         $readMe = Get-Content $readMePath -Raw
@@ -89,14 +101,14 @@ Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -not
     $ns.AddNamespace("ns", $nuspec.DocumentElement.NamespaceURI)
     
     if ($nuspec.package.metaData.id -like "Xpand.XAF*" -or $nuspec.package.metaData.id -like "Xpand.Extensions.XAF*") {
-        Write-Output "Adding versionConverter dependency"
+        
         $versionConverter = [PSCustomObject]@{
             id              = "Xpand.VersionConverter"
             version         = ([xml](Get-Content "$root\Tools\Xpand.VersionConverter\Xpand.VersionConverter.nuspec")).package.metadata.version
             targetFramework = "netstandard2.0"
         }
-        $versionConverter |Out-String
-        Add-NuspecDependency $versionConverter.Id $versionConverter.Version $nuspec
+        
+        Add-NuspecDependency $versionConverter.Id $versionConverter.Version $nuspec | Out-Null
          
     }
     
@@ -105,17 +117,17 @@ Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -not
 } 
 
 & "$root\build\UpdateAllNuspec.ps1" $root $Release $branch
-if ($branch -eq "master"){
+if ($branch -eq "master") {
     Write-HostFormatted "Checking nuspec versions" -Section
-    $labnuspecs=Get-ChildItem "$root\build\nuspec" *.nuspec -Recurse|ForEach-Object{
-        [xml]$n=Get-xmlContent $_.FullName
-        $v=[version]$n.package.metadata.version
-        if ($v.Revision -gt 0){
+    $labnuspecs = Get-ChildItem "$root\build\nuspec" *.nuspec -Recurse | ForEach-Object {
+        [xml]$n = Get-xmlContent $_.FullName
+        $v = [version]$n.package.metadata.version
+        if ($v.Revision -gt 0) {
             $n.package.metadata.id
         }
     }
     $labnuspecs
-    if ($labnuspecs){
+    if ($labnuspecs) {
         throw "labNuspec found in a release build"
     }
 }

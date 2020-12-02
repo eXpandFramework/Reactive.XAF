@@ -16,8 +16,8 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
-using Xpand.TestsLib;
-using Xpand.TestsLib.Attributes;
+using Xpand.TestsLib.Common;
+using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Reactive.Logger.Hub.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive.Services;
 

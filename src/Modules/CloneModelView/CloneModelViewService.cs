@@ -9,7 +9,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.CloneModelView{
 	public static class CloneModelViewService{
-		public static IObservable<IModelViews> Connect(this ApplicationModulesManager manager) 
+        internal static IObservable<IModelViews> Connect(this ApplicationModulesManager manager) 
 			=> manager.WhenGeneratingModelNodes(modelApplication => modelApplication.Views)
 				.Do(views => {
 					foreach (var bo in views.Application.BOModel.Where(m =>

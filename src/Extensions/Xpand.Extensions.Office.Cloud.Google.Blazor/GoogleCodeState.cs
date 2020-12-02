@@ -4,14 +4,13 @@ using Google.Apis.Auth.OAuth2.Web;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Xpand.XAF.Modules.Office.Cloud.Google;
+using Xpand.Extensions.Blazor;
 
 namespace Xpand.Extensions.Office.Cloud.Google.Blazor{
     public class GoogleCodeStateStartup : IHostingStartup{
         public void Configure(IWebHostBuilder builder) 
             => builder.ConfigureServices(services => {
                 services.AddTransient<IStartupFilter, GoogleCodeState>();
-                services.AddSingleton<GlobalItems>();
             });
     }
 
@@ -24,7 +23,7 @@ namespace Xpand.Extensions.Office.Cloud.Google.Blazor{
                     if (code != null){
                         var state = context.Request.Query["state"].First();
                         var key = Guid.Parse(state.Substring(0, state.Length - AuthorizationCodeWebApp.StateRandomLength));
-                        app.ApplicationServices.GetService<GlobalItems>().TryAdd(key, code);
+                        app.ApplicationServices.GetService<GlobalItems>()?.TryAdd(key, code);
                     }
                     await next2();
                 });

@@ -1,8 +1,7 @@
 ﻿using System.Linq;
 using DevExpress.ExpressApp;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
-using Xpand.TestsLib;
-
+using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.LookupCascade.Tests.BOModel;
 
 namespace Xpand.XAF.Modules.LookupCascade.Tests{

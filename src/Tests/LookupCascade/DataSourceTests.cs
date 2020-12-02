@@ -8,7 +8,7 @@ using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.BytesExtensions;
 using Xpand.Extensions.StringExtensions;
-using Xpand.TestsLib.Attributes;
+using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.LookupCascade.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive;
 

@@ -121,7 +121,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.Office.Clo
 		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.PositionInListview", "PositionInListview\Xpand.XAF.Modules.PositionInListview.csproj", "{255E47FF-6E55-4368-A90D-BD717AB51B7F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.PositionInListView", "PositionInListview\Xpand.XAF.Modules.PositionInListView.csproj", "{255E47FF-6E55-4368-A90D-BD717AB51B7F}"
 	ProjectSection(ProjectDependencies) = postProject
 		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
 	EndProjectSection
@@ -181,6 +181,11 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.Office.Cloud.Google.Blazor", "..\Extensions\Xpand.Extensions.Office.Cloud.Google.Blazor\Xpand.Extensions.Office.Cloud.Google.Blazor.csproj", "{8834FDAA-BBB5-4BA7-A25F-3A4F55707ABE}"
 	ProjectSection(ProjectDependencies) = postProject
 		{0EB2E3E0-D407-44C8-87A8-28C5DDA51021} = {0EB2E3E0-D407-44C8-87A8-28C5DDA51021}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.JobScheduler.Hangfire", "JobScheduler.Hangfire\Xpand.XAF.Modules.JobScheduler.Hangfire.csproj", "{A2B7513E-3653-47E3-82C7-C00A32CBF692}"
+	ProjectSection(ProjectDependencies) = postProject
+		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
 	EndProjectSection
 EndProject
 Global
@@ -376,6 +381,12 @@ Global
 		{8834FDAA-BBB5-4BA7-A25F-3A4F55707ABE}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{8834FDAA-BBB5-4BA7-A25F-3A4F55707ABE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8834FDAA-BBB5-4BA7-A25F-3A4F55707ABE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2B7513E-3653-47E3-82C7-C00A32CBF692}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2B7513E-3653-47E3-82C7-C00A32CBF692}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2B7513E-3653-47E3-82C7-C00A32CBF692}.EasyTest|Any CPU.ActiveCfg = Release|Any CPU
+		{A2B7513E-3653-47E3-82C7-C00A32CBF692}.EasyTest|Any CPU.Build.0 = Release|Any CPU
+		{A2B7513E-3653-47E3-82C7-C00A32CBF692}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2B7513E-3653-47E3-82C7-C00A32CBF692}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -416,6 +427,7 @@ Global
 		{3CE6057A-EA16-49B8-A127-918944AD6A1E} = {C49DF3D6-B513-4C06-ACD6-4BA2E2FF02C8}
 		{CD368B52-2F68-4239-AB7B-AAC07B97E279} = {C49DF3D6-B513-4C06-ACD6-4BA2E2FF02C8}
 		{8834FDAA-BBB5-4BA7-A25F-3A4F55707ABE} = {E16CA157-6DDC-4B3C-A78C-DA354B452353}
+		{A2B7513E-3653-47E3-82C7-C00A32CBF692} = {8978DDD6-5019-45C4-94AE-1187453A4026}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ADFDF91F-E839-4378-9136-C917729594E2}

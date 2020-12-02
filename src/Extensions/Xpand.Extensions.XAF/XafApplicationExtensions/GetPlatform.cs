@@ -24,7 +24,7 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions{
             _securedTypes=new ConcurrentBag<Type>();
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             var systemWebAssembly = assemblies.FirstOrDefault(assembly => assembly.GetName().Name == "System.Web");
-            var httpContextType = systemWebAssembly?.Types().First(_ => _.Name == "HttpContext");
+            var httpContextType = systemWebAssembly?.Types().FirstOrDefault(_ => _.Name == "HttpContext");
             IsHosted = httpContextType?.GetPropertyValue("Current") != null;
             
         }

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
@@ -16,6 +16,7 @@
     <OutputPath>..\..\..\..\bin\AllTestWeb\netcoreapp3.1</OutputPath>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <RootNamespace>Web.Tests</RootNamespace>
+    <CopyLocalLockFileAssemblie>true</CopyLocalLockFileAssemblie>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>TRACE;XAF202</DefineConstants>
@@ -36,8 +37,8 @@
     <Compile Include="..\CommonFiles\SequenceGeneratorService.cs" Link="SequenceGeneratorService.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="20.2.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="20.2.4" />
     <PackageReference Include="MagicOnion" Version="2.6.3" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.0" />
     <PackageReference Include="Moq" Version="4.15.1" />
@@ -45,7 +46,7 @@
     <PackageReference Include="Shouldly" Version="4.0.0" />
     <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="4.202.0" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="4.202.0.1" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
     <PackageReference Include="System.Data.OleDb" Version="5.0.0" />
     <PackageReference Include="System.ServiceModel.Http" Version="4.8.0" />
@@ -58,13 +59,16 @@
     <PackageReference Include="Selenium.WebDriver" Version="3.13.0" />
     <PackageReference Include="Selenium.Support" Version="3.13.0" />
     <PackageReference Include="Selenium.Support" Version="3.13.0" />
-</ItemGroup>
+  </ItemGroup>
   <ItemGroup>
     <Reference Include="DevExpress.ExpressApp.EasyTest.BlazorAdapter.v20.2">
       <HintPath>..\..\..\..\..\..\..\Program Files (x86)\DevExpress 20.2\Components\Bin\Standard\DevExpress.ExpressApp.EasyTest.BlazorAdapter.v20.2.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.TestsLib">
       <HintPath>..\..\..\..\bin\net461\Xpand.TestsLib.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.TestsLib.Common">
+      <HintPath>..\..\..\..\bin\Xpand.TestsLib.Common.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using akarnokd.reactive_extensions;
 using DevExpress.Data.Filtering;
@@ -8,7 +7,7 @@ using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
-using Xpand.TestsLib.Attributes;
+using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleManager;

@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using DevExpress.EasyTest.Framework;
 using DevExpress.EasyTest.Framework.Commands;
 using Xpand.Extensions.XAF.ObjectExtensions;
+using Xpand.TestsLib.Common;
 
 namespace Xpand.TestsLib.EasyTest.Commands{
     public class EditorActionNewCommand<T> : EditorActionNewCommand{

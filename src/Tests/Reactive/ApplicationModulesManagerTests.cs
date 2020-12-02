@@ -5,7 +5,7 @@ using DevExpress.ExpressApp.Model;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.XAF.ModelExtensions;
-using Xpand.TestsLib.Attributes;
+using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Tests.BOModel;
 

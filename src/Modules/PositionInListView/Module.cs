@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
-namespace Xpand.XAF.Modules.PositionInListview {
+namespace Xpand.XAF.Modules.PositionInListView {
     [UsedImplicitly]
     public sealed class PositionInListViewModule : ReactiveModuleBase {
         static PositionInListViewModule(){

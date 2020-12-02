@@ -12,7 +12,7 @@ using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
-using Xpand.TestsLib;
+using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.Office.Cloud.Google.Tests;
 using Xpand.XAF.Modules.Reactive;
 using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;

@@ -51,7 +51,7 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
         
         public static IObservable<T> HandleErrors<T>(this IObservable<T> source, XafApplication application, CancelEventArgs args=null,Func<Exception, IObservable<T>> exceptionSelector=null){
             Guard.ArgumentNotNull(application,nameof(application));
-            exceptionSelector ??= (exception => Observable.Empty<T>());
+            // exceptionSelector ??= (exception => Observable.Empty<T>());
             return source.Catch<T, Exception>(exception => {
                 if (args != null) args.Cancel = true;
                 application.HandleException( exception);

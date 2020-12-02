@@ -5,8 +5,8 @@ using DevExpress.ExpressApp.Web.SystemModule;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
-using Xpand.TestsLib;
-using Xpand.TestsLib.Attributes;
+using Xpand.TestsLib.Common;
+using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.ViewEditMode.Tests.BOModel;
 

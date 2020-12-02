@@ -9,11 +9,12 @@ using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
+using Xpand.TestsLib.Common.Win32;
 using Xpand.TestsLib.EasyTest;
 using Xpand.TestsLib.EasyTest.Commands;
 using Xpand.TestsLib.EasyTest.Commands.ActionCommands;
 using Xpand.TestsLib.EasyTest.Commands.Automation;
-using Xpand.TestsLib.Win32;
+using Xpand.TestsLib.net461.EasyTest.Commands.ActionCommands;
 
 namespace ALL.Tests{
     public static class OfficeCloudService{

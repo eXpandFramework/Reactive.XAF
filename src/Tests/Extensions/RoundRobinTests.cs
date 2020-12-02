@@ -1,11 +1,10 @@
-﻿using System.IO.Compression;
-using System.Linq;
+﻿using System.Linq;
 using System.Reactive.Linq;
 using akarnokd.reactive_extensions;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.TestsLib;
+using Xpand.TestsLib.Common;
 
 namespace Xpand.Extensions.Tests{
 	public class RoundRobinTests:BaseTest{

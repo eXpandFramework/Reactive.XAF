@@ -26,6 +26,7 @@ Get-ChildItem -Filter *.csproj -Recurse | ForEach-Object {
     Update-ProjectLanguageVersion $projXml
     Update-ProjectProperty $projXml DebugSymbols true
     Update-ProjectProperty $projXml DebugType full
+    Update-ProjectProperty $projXml CopyLocalLockFileAssemblie true
     Remove-ProjectLicenseFile $projXml
     Update-ProjectAutoGenerateBindingRedirects $projXml $true
     if ($fileName -notlike "*.Tests.csproj" -or $fileName -like "*EasyTest*.csproj" ) {
@@ -46,7 +47,7 @@ Get-ChildItem -Filter *.csproj -Recurse | ForEach-Object {
     }
     if ($fileName -notlike "*EasyTest*.csproj*"){
         $target = Get-ProjectTargetFramework $projXml -FullName
-        Update-ProjectProperty $projXml AppendTargetFrameworkToOutputPath ($target -ne "netstandard2.0")
+        Update-ProjectProperty $projXml AppendTargetFrameworkToOutputPath ($target -notlike "netstandard2.*")
     }
     
     $projXml.Save($fileName)

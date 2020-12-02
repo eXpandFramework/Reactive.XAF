@@ -156,7 +156,8 @@ namespace Xpand.XAF.Modules.ModelMapper{
     }
 
     public class ModelMappersNodeGenerator:ModelNodesGeneratorBase{
-        protected override void GenerateNodesCore(ModelNode node){
+        protected override void GenerateNodesCore(ModelNode node) {
+            node.DontUseCaching();
             var modelMapperTypeInfos = XafTypesInfo.Instance.FindTypeInfo(typeof(IModelModelMap)).Descendants .Where(info
                 => info.FindAttribute<ModelAbstractClassAttribute>(false) == null && info.IsInterface);
 

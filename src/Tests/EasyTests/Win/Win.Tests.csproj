@@ -14,6 +14,7 @@
     <OutputPathSuffix>AllTestWin</OutputPathSuffix>
     <OutputPath>..\..\..\..\bin\AllTestWin</OutputPath>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <CopyLocalLockFileAssemblie>true</CopyLocalLockFileAssemblie>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>TRACE;XAF202</DefineConstants>
@@ -36,11 +37,11 @@
     <Compile Include="..\CommonFiles\Windows\DocumentStyleManagerService.cs" Link="DocumentStyleManagerService.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.EasyTest" Version="20.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="20.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.ScriptRecorder" Version="20.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="20.2.3" />
+    <PackageReference Include="DevExpress.EasyTest" Version="20.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="20.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.ScriptRecorder" Version="20.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="20.2.4" />
     <PackageReference Include="MagicOnion" Version="2.6.3" />
     <PackageReference Include="Moq" Version="4.15.1" />
     <PackageReference Include="Shouldly" Version="4.0.0" />
@@ -48,11 +49,14 @@
     <PackageReference Include="System.Reactive" Version="5.0.0" />
     <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.202.0" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.202.0.1" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.TestsLib">
       <HintPath>..\..\..\..\bin\net461\Xpand.TestsLib.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.TestsLib.Common">
+      <HintPath>..\..\..\..\bin\Xpand.TestsLib.Common.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

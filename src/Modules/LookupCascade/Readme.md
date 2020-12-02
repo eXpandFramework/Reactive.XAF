@@ -130,11 +130,11 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |JetBrains.Annotations|2020.1.0
  |Newtonsoft.Json|12.0.3
  |System.Reactive|5.0.0
- |Xpand.Extensions|4.202.0
- |Xpand.Extensions.Reactive|4.202.0
- |Xpand.Extensions.XAF|4.202.0
+ |Xpand.Extensions|3.202.44.8
+ |Xpand.Extensions.Reactive|3.202.44.8
+ |Xpand.Extensions.XAF|3.202.44.8
  |Xpand.Patcher|2.0.27
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.202.0
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|3.202.44.8
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.10
 
 ## Issues-Debugging-Troubleshooting

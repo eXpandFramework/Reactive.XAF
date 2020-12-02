@@ -15,7 +15,7 @@ using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
-namespace Xpand.XAF.Modules.PositionInListview{
+namespace Xpand.XAF.Modules.PositionInListView{
     public static class PositionInListViewService{
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) =>
             manager.WhenApplication(application => {
@@ -28,7 +28,7 @@ namespace Xpand.XAF.Modules.PositionInListview{
         internal static IObservable<TSource> TracePositionInListView<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
 	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
 	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) =>
-	        source.Trace(name, PositionInListViewModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
+	        source.Trace(name, PositionInListViewModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName);
 
 
         private static IObservable<(ListView listView, XafApplication application)> WhenPositionInListCreated(this XafApplication application) =>
@@ -79,7 +79,7 @@ namespace Xpand.XAF.Modules.PositionInListview{
             .ModelPositionInListView().ListViewItems.Select(item => item.ListView.Id()).Contains(viewID);
 
         private static IObservable<Unit> PositionNewObjects(this IObservable<XafApplication> whenApplication) =>
-            whenApplication.SelectMany(application => application.NewObject<object>(true).Pair(application))
+            whenApplication.SelectMany(application => application.NewObject<object>().Pair(application))
                 .Do(_ => {
                     var modelPositionInListView = _.other.Model.ModelPositionInListView();
                     var listViewItems = modelPositionInListView.ListViewItems;

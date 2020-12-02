@@ -1,3 +1,6 @@
 DevExpress.ExpressApp.Xpo
 JetBrains.Annotations
 System.ValueTuple
+System.Drawing.Common
+Fasterflect.Xpand
+Microsoft.CodeAnalysis.CSharp

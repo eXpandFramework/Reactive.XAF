@@ -1,16 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.DC;
+using DevExpress.Persistent.Base;
 using Fasterflect;
 using HarmonyLib;
 using JetBrains.Annotations;
+using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Transform;
@@ -18,6 +23,7 @@ using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
 using Xpand.Extensions.XAF.ModuleExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
+using Xpand.XAF.Modules.Reactive.Attributes;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Security;
 
@@ -81,8 +87,38 @@ namespace Xpand.XAF.Modules.Reactive{
                 .Merge(application.ShowPersistentObjectsInNonPersistentView())
             ))
             .Merge(manager.SetupPropertyEditorParentView())
-            .Merge(manager.MergedExtraEmbeddedModels());
+            .Merge(manager.MergedExtraEmbeddedModels())
+            .Merge(manager.InvisibleInAllViewsAttribute())
+            .Merge(manager.VisibleInAllViewsAttribute())
+            .Merge(manager.XpoAttributes())
+        ;
 
+
+        static IObservable<Unit> VisibleInAllViewsAttribute(this ApplicationModulesManager manager)
+            => manager.WhenCustomizeTypesInfo()
+                .SelectMany(t => t.e.TypesInfo.PersistentTypes
+                    .SelectMany(info =>
+                        info.Members.Where(
+                            memberInfo => memberInfo.FindAttributes<VisibleInAllViewsAttribute>().Any())))
+                .SelectMany(info => new Attribute[] {
+                        new VisibleInDetailViewAttribute(true), new VisibleInListViewAttribute(true),
+                        new VisibleInLookupListViewAttribute(true)
+                    }
+                    .ToObservable(ImmediateScheduler.Instance)
+                    .Do(info.AddAttribute))
+                .ToUnit();
+
+        static IObservable<Unit> InvisibleInAllViewsAttribute(this ApplicationModulesManager manager)
+            => manager.WhenCustomizeTypesInfo()
+                .SelectMany(t => t.e.TypesInfo.PersistentTypes
+                    .SelectMany(info => info.Members.Where(memberInfo => memberInfo.FindAttributes<InvisibleInAllViewsAttribute>().Any())))
+                .SelectMany(info => new Attribute[] {
+                        new VisibleInDetailViewAttribute(false), new VisibleInListViewAttribute(false),
+                        new VisibleInLookupListViewAttribute(false)
+                    }
+                    .ToObservable(ImmediateScheduler.Instance)
+                    .Do(info.AddAttribute))
+                .ToUnit();
 
         static IObservable<Unit> PatchAuthentication(this XafApplication application) 
             => application.WhenSetupComplete()
@@ -109,7 +145,17 @@ namespace Xpand.XAF.Modules.Reactive{
             }
             return true;
         }
-        
+
+        private static IObservable<Unit> XpoAttributes(this ApplicationModulesManager manager)
+            => manager.WhenCustomizeTypesInfo()
+                .SelectMany(t => new[]{"SingleObjectAttribute","PropertyConcatAttribute"})
+                .SelectMany(attributeName => {
+                    var lastObjectAttributeType = AppDomain.CurrentDomain.GetAssemblyType($"Xpand.Extensions.XAF.Xpo.{attributeName}");
+                    return lastObjectAttributeType != null ? (IEnumerable<IMemberInfo>) lastObjectAttributeType
+                        .Method("Configure", Flags.StaticAnyVisibility).Call(null) : Enumerable.Empty<IMemberInfo>();
+                } )
+                .ToUnit();
+
         private static IObservable<Unit> MergedExtraEmbeddedModels(this ApplicationModulesManager manager) 
             => manager.WhereApplication().ToObservable()
                 .SelectMany(application => application.WhenCreateCustomUserModelDifferenceStore()

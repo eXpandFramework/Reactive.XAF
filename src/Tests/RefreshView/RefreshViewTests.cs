@@ -2,18 +2,16 @@
 using System.Collections;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using NUnit.Framework;
 using Shouldly;
-using Xpand.Extensions.AssemblyExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
-using Xpand.TestsLib;
-using Xpand.TestsLib.Attributes;
+using Xpand.TestsLib.Common;
+using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.RefreshView.Tests.BOModel;
@@ -22,7 +20,7 @@ using Xpand.XAF.Modules.RefreshView.Tests.BOModel;
 namespace Xpand.XAF.Modules.RefreshView.Tests{
     [NonParallelizable]
     public class RefreshViewTests : BaseTest{
-        static RefreshViewTests() => Assembly.GetCallingAssembly().SetAsEntryAssembly();
+        
 
         [Test]
         [XpandTest]

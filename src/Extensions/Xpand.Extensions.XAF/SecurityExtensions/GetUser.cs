@@ -1,7 +1,6 @@
 ﻿using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Security;
-using DevExpress.Xpo;
 using Fasterflect;
 
 namespace Xpand.Extensions.XAF.SecurityExtensions {
@@ -16,9 +15,9 @@ namespace Xpand.Extensions.XAF.SecurityExtensions {
             var typeInfo = objectSpace.TypesInfo.FindTypeInfo(user2.GetType());
             typeInfo.FindMember("UserName").SetValue(user2, userName);
             user2.CallMethod("SetPassword",new[]{typeof(string)}, passWord);
-            var roleCollection = (XPBaseCollection)typeInfo.FindMember("Roles").GetValue(user2);
+            var roleCollection = typeInfo.FindMember("Roles").GetValue(user2);
             foreach (var role in roles) {
-                roleCollection.BaseAdd(role);
+                roleCollection.CallMethod("BaseAdd",role);
             }
             return user2;
         }

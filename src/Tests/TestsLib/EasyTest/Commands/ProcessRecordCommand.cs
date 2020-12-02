@@ -3,8 +3,12 @@ using System.Linq;
 using System.Linq.Expressions;
 using DevExpress.EasyTest.Framework;
 using Xpand.Extensions.XAF.ObjectExtensions;
+using Xpand.TestsLib.Common;
+using Xpand.TestsLib.EasyTest;
+using Xpand.TestsLib.EasyTest.Commands;
+using Parameter = Xpand.TestsLib.EasyTest.Commands.Parameter;
 
-namespace Xpand.TestsLib.EasyTest.Commands{
+namespace Xpand.TestsLib.net461.EasyTest.Commands{
 
     public class ProcessRecordCommand<TObject,TColumn> : ProcessRecordCommand{
         public ProcessRecordCommand(params (Expression<Func<TColumn, object>> editor, string value)[] editors) : base(

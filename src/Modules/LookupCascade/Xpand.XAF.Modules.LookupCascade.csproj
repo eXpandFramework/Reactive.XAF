@@ -15,6 +15,7 @@
     <DebugType>full</DebugType>
     <AssemblyName>Xpand.XAF.Modules.LookupCascade</AssemblyName>
     <RootNamespace>Xpand.XAF.Modules.LookupCascade</RootNamespace>
+    <CopyLocalLockFileAssemblie>true</CopyLocalLockFileAssemblie>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="ClientDatasourceStorageController.cs" />
@@ -48,6 +49,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Readme.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\Common\AssemblyInfoVersion.cs" Link="AssemblyInfoVersion.cs" />
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

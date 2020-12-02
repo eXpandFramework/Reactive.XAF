@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
@@ -74,7 +73,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => api.Application.GetPropertyValue("ServiceProvider").CallMethod("GetService", serviceType);
         
         public static object GetService(this IXAFAppWebAPI api,string serviceType) 
-            => AppDomain.CurrentDomain.GetAssemblyType(serviceType).Select(api.GetService).FirstOrDefault();
+            =>api.GetService(AppDomain.CurrentDomain.GetAssemblyType(serviceType));
 
         public static object HttpContext(this IXAFAppWebAPI api)
             => api.Application.GetPlatform() != Platform.Blazor ? AppDomain.CurrentDomain.Web().HttpContext()
@@ -82,7 +81,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static Uri GetRequestUri(this IXAFAppWebAPI api) 
             => (Uri) (api.Application.GetPlatform() == Platform.Blazor
-                ? new Uri(AppDomain.CurrentDomain.GetAssemblyType("Microsoft.AspNetCore.Http.Extensions.UriHelper").First().Method("GetDisplayUrl", Flags.StaticPublic).Call(null, api.HttpContext().GetPropertyValue("Request")).ToString())
+                ? new Uri(AppDomain.CurrentDomain.GetAssemblyType("Microsoft.AspNetCore.Http.Extensions.UriHelper").Method("GetDisplayUrl", Flags.StaticPublic).Call(null, api.HttpContext().GetPropertyValue("Request")).ToString())
                 : api.HttpContext().GetPropertyValue("Request").GetPropertyValue("Url"));
     }
 }

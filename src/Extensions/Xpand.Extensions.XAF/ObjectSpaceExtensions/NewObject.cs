@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Linq;
 using DevExpress.ExpressApp;
-using DevExpress.Persistent.Validation;
 
 namespace Xpand.Extensions.XAF.ObjectSpaceExtensions {
     public static partial class ObjectSpaceExtensions {
+        public static bool Any<T>(this IObjectSpace objectSpace) => objectSpace.GetObjectsQuery<T>().Any();
+
         public static object NewObject(this IObjectSpace objectSpace,Type type, object key) {
             var o = objectSpace.CreateObject(type);
             objectSpace.TypesInfo.FindTypeInfo(type).KeyMember.SetValue(o, key);

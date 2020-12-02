@@ -7,7 +7,6 @@ using System.Reflection;
 using System.Reflection.Emit;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
-using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.Utils;
 using DevExpress.Persistent.Base;
 using HarmonyLib;
@@ -145,18 +144,10 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             Func<(TController controller, string id), TAction> actionBase) where TController : Controller where TAction:ActionBase{
 	        var type = ActionsModule.Assembly.GetType(ActionControllerName(id,GetBaseController<TController>()));
 	        var controllerType = type ?? NewControllerType<TController>(id);
-	        if (DesignerOnlyCalculator.IsRunFromDesigner){
-		        return Observable.Create<TAction>(observer => {
-			        var actionController = Controller.Create(controllerType);
-			        applicationModulesManager.ControllersManager.RegisterController(actionController);
-			        observer.OnNext(actionBase(((TController) actionController, id)));
-			        return actionController;
-		        });
-	        }
 	        if (type == null){
 		        var tryAdd = ControllerCtorState.TryAdd(controllerType, (id, _ => actionBase(((TController) _.controller, _.id))));
 		        if (!tryAdd){
-                 throw new LightDictionaryException(controllerType.FullName);
+					throw new LightDictionaryException(controllerType.FullName);
 		        }
 	        }
 	        var controller = (TController) Controller.Create(controllerType);
@@ -167,9 +158,10 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         static Subject<ActionBase> _actionsSubject=new Subject<ActionBase>();
 
         private static Type NewControllerType<T>(string id) where T:Controller{
-            var baseController = GetBaseController<T>();
-            var typeBuilder = ActionsModule.DefineType(ActionControllerName(id, baseController), TypeAttributes.Public, baseController);
-            return typeBuilder.CreateTypeInfo()?.AsType();
+	        lock (_actionsSubject) {
+		        var baseController = GetBaseController<T>();
+	            return ActionsModule.DefineType(ActionControllerName(id, baseController), TypeAttributes.Public, baseController).CreateTypeInfo()?.AsType();
+            }
         }
 
         private static string ActionControllerName(string id, Type baseController) 

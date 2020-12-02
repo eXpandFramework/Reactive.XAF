@@ -8,7 +8,7 @@ using Microsoft.CSharp;
 
 namespace Xpand.Extensions.AssemblyExtensions{
     
-    public static partial class AssemblyExtensions{
+    public static partial class AssemblyExtensions {
         public static Lazy<CSharpCodeProvider> CodeProvider { get; } = new Lazy<CSharpCodeProvider>(() => {
             var csc = new CSharpCodeProvider();
             var settings = csc
@@ -24,7 +24,7 @@ namespace Xpand.Extensions.AssemblyExtensions{
             return csc;
         });
 
-        public static Assembly NewAssembly(this AssemblyMetadata assemblyMetadata,params TypeMetada[] typeParameters){
+        public static Assembly NewAssembly(this AssemblyMetadata assemblyMetadata,params TypeMetadata[] typeParameters){
             
             var compilerParameters = new CompilerParameters{
                 CompilerOptions = "/t:library",
@@ -59,7 +59,7 @@ namespace Xpand.Extensions.AssemblyExtensions{
             return $"{versionCode}{assemblyMetadata.Attributes.AttributesCode()}";
         }
 
-        private static string TypesCode(this IEnumerable<TypeMetada> typeParameters){
+        private static string TypesCode(this IEnumerable<TypeMetadata> typeParameters){
             return string.Join(Environment.NewLine, typeParameters.Select(_ => _.TypeCode()));
         }
 
@@ -67,10 +67,10 @@ namespace Xpand.Extensions.AssemblyExtensions{
             return string.Join(Environment.NewLine, attributes.Select(AttributeCode));
         }
 
-        private static string TypeCode(this TypeMetada metada){
+        private static string TypeCode(this TypeMetadata metadata){
             return $@"
-public class {metada.Name}{{
-    {metada.Properties.PropertiesCode()}
+public class {metadata.Name}{{
+    {metadata.Properties.PropertiesCode()}
 }}
 ";
         }
@@ -98,8 +98,8 @@ public class {metada.Name}{{
         public List<Attribute> Attributes{ get;  }
     }
     [PublicAPI]
-    public class TypeMetada{
-        public TypeMetada(string name,params PropertyMetadata[] propertyParameters){
+    public class TypeMetadata{
+        public TypeMetadata(string name,params PropertyMetadata[] propertyParameters){
             Name = name;
             Properties=new List<PropertyMetadata>();
             Properties.AddRange(propertyParameters);

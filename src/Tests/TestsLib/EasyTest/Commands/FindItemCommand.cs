@@ -1,8 +1,8 @@
 ﻿using System.Windows.Forms;
 using DevExpress.EasyTest.Framework;
 using Shouldly;
+using Xpand.TestsLib.Common.Win32;
 using Xpand.TestsLib.EasyTest.Commands.Automation;
-using Xpand.TestsLib.Win32;
 
 namespace Xpand.TestsLib.EasyTest.Commands{
     public class FindItemCommand : EasyTestCommand{

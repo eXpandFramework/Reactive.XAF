@@ -4,8 +4,8 @@ using DevExpress.ExpressApp;
 using JetBrains.Annotations;
 using NUnit.Framework;
 using Shouldly;
-using Xpand.TestsLib;
-using Xpand.TestsLib.Attributes;
+using Xpand.TestsLib.Common;
+using Xpand.TestsLib.Common.Attributes;
 
 namespace Xpand.XAF.Modules.Reactive.Tests{
 	public class ProxyTests:BaseTest{

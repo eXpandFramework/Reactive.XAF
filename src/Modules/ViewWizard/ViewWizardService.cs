@@ -23,15 +23,17 @@ using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
 namespace Xpand.XAF.Modules.ViewWizard{
     public static class ViewWizardService{
-        public static SingleChoiceAction ShowWizard(this (ViewWizardModule, Frame frame) tuple) => tuple
-            .frame.Action(nameof(ShowWizard)).As<SingleChoiceAction>();
-        public static SimpleAction NextWizardView(this (ViewWizardModule, Frame frame) tuple) => tuple
-            .frame.Action(nameof(NextWizardView)).As<SimpleAction>();
+        public static SingleChoiceAction ShowWizard(this (ViewWizardModule, Frame frame) tuple) 
+            => tuple.frame.Action(nameof(ShowWizard)).As<SingleChoiceAction>();
+
+        public static SimpleAction NextWizardView(this (ViewWizardModule, Frame frame) tuple) 
+            => tuple.frame.Action(nameof(NextWizardView)).As<SimpleAction>();
         
-        public static SimpleAction PreviousWizardView(this (ViewWizardModule, Frame frame) tuple) => tuple
-            .frame.Action(nameof(PreviousWizardView)).As<SimpleAction>();
-        public static SimpleAction FinishWizardView(this (ViewWizardModule, Frame frame) tuple) => tuple
-            .frame.Action(nameof(FinishWizardView)).As<SimpleAction>();
+        public static SimpleAction PreviousWizardView(this (ViewWizardModule, Frame frame) tuple) 
+            => tuple.frame.Action(nameof(PreviousWizardView)).As<SimpleAction>();
+
+        public static SimpleAction FinishWizardView(this (ViewWizardModule, Frame frame) tuple) 
+            => tuple.frame.Action(nameof(FinishWizardView)).As<SimpleAction>();
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager){
             var registerActions = manager.RegisterActions();
@@ -126,7 +128,7 @@ namespace Xpand.XAF.Modules.ViewWizard{
         internal static IObservable<TSource> TraceViewWizardModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) =>
-            source.Trace(name, ViewWizardModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
+            source.Trace(name, ViewWizardModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName);
 
         private static IObservable<Frame> ActiveAction(this XafApplication application) =>
             application.WhenViewOnFrame()

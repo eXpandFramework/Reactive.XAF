@@ -4,7 +4,7 @@ using DevExpress.ExpressApp.Editors;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.XAF.ModelExtensions;
-using Xpand.TestsLib.Attributes;
+using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.ViewItemValue;
 

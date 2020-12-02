@@ -8,3 +8,6 @@ Jetbrains.Annotations
 YamlDotNet
 Microsoft.CodeAnalysis.CSharp
 System.Configuration.ConfigurationManager
+Xpand.Patcher
+Xpand.Collections
+System.CodeDom

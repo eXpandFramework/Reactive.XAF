@@ -1,13 +1,14 @@
 param(
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\"),
-    $Release=$true,
-    $Branch="master"
+    $Release=$false,
+    $Branch="lab"
 )
 Use-MonoCecil | Out-Null
 function UpdateALLNuspec($platform, $allNuspec, $nuspecs,$allModuleNuspecs,$csProjects) {
     
     $platformNuspecs = $allModuleNuspecs | ForEach-Object {
         [xml]$nuspec = Get-Content $_.FullName
+        
         $nuspecBaseName=$_.BaseName
         $filesrc=($nuspec.package.Files.file|Where-Object{$_.src -like "*$nuspecBaseName.dll"}).src
         $platformMetada = Get-AssemblyMetadata "$root\bin\$filesrc" -key "Platform"
@@ -19,8 +20,9 @@ function UpdateALLNuspec($platform, $allNuspec, $nuspecs,$allModuleNuspecs,$csPr
                 Target = $target
             }
         }        
+        
     }
-    
+    $platformNuspecs
     [version]$modulesVersion=Get-VersionPart ([System.Diagnostics.FileVersionInfo]::GetVersionInfo("$root\bin\Xpand.XAF.Modules.Reactive.dll" ).FileVersion) build
     "Year Version build=$modulesVersion"
     $source="lab"
@@ -78,8 +80,8 @@ function UpdateALLNuspec($platform, $allNuspec, $nuspecs,$allModuleNuspecs,$csPr
             Add-NuspecDependency $_.Id $_.version $allNuspec "net461"
         }
     }
-    
 }
+
 $nuspecs = Get-ChildItem "$root\build\nuspec" *.nuspec
 $nuspecs | ForEach-Object {
     [xml]$nuspec = Get-Content $_.FullName

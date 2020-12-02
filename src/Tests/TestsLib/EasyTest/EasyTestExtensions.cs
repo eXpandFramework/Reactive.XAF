@@ -6,12 +6,13 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Xml;
 using DevExpress.EasyTest.Framework;
-using DevExpress.ExpressApp.EasyTest.BlazorAdapter;
+
 using DevExpress.ExpressApp.EasyTest.WebAdapter;
 using DevExpress.ExpressApp.EasyTest.WinAdapter;
 using Fasterflect;
 using Newtonsoft.Json;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.ErrorHandling;
 using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
 
@@ -37,7 +38,7 @@ namespace Xpand.TestsLib.EasyTest{
 
 
         public static TestApplication GetTestApplication(this ICommandAdapter adapter) 
-            => adapter is WebCommandAdapter || adapter is CommandAdapter
+            => adapter is WebCommandAdapter || adapter.IsInstanceOf("DevExpress.ExpressApp.EasyTest.BlazorAdapter.CommandAdapter")
                 ? (TestApplication) EasyTestWebApplication.Instance : EasyTestWinApplication.Instance;
 
         public static IObservable<Unit> Execute(this ICommandAdapter adapter, Action retriedAction) 
@@ -87,7 +88,7 @@ namespace Xpand.TestsLib.EasyTest{
             testApplication.AdditionalAttributes = testApplication.AdditionalAttributes.Add(attribute).ToArray();
         }
 
-        public static TestApplication RunBlazorApplication(this BlazorAdapter adapter, string physicalPath, int port,
+        public static TestApplication RunBlazorApplication(this IApplicationAdapter adapter, string physicalPath, int port,
             string connectionString) {
             
             var testApplication = EasyTestWebApplication.New(physicalPath,port,false);

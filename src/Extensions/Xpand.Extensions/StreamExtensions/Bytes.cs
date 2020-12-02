@@ -1,7 +1,7 @@
 ﻿using System.IO;
 
 namespace Xpand.Extensions.StreamExtensions{
-    public static partial class StremExtensions{
+    public static partial class StreamExtensions{
         public static byte[] Bytes(this Stream stream){
             if (stream is MemoryStream memoryStream){
                 return memoryStream.ToArray();

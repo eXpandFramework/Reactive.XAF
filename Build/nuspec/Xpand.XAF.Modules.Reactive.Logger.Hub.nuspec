@@ -15,23 +15,26 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Reactive.Logger.Hub</tags>
     <dependencies>
       <dependency id="Fasterflect.Xpand" version="2.0.7" />
-      <dependency id="Jetbrains.Annotations" version="2020.1" />
+      <dependency id="Jetbrains.Annotations" version="2020.3" />
       <dependency id="MagicOnion" version="2.6.3" />
-      <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.7" />
+      <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.8" />
+      <dependency id="System.CodeDom" version="5.0" />
       <dependency id="System.Configuration.ConfigurationManager" version="5.0" />
       <dependency id="System.Interactive.Async" version="5.0" />
       <dependency id="System.Reactive" version="5.0" />
-      <dependency id="Xpand.Extensions.Reactive" version="4.202.0.0" />
-      <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.0.0" />
-      <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.202.0.0" />
-      <dependency id="YamlDotNet" version="8.1.2" />
+      <dependency id="Xpand.Collections" version="1.0.4" />
+      <dependency id="Xpand.Extensions.Reactive" version="4.202.0" />
+      <dependency id="Xpand.Patcher" version="2.0.27" />
+      <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.0" />
+      <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.202.0" />
+      <dependency id="YamlDotNet" version="9.1" />
       <dependency id="Xpand.VersionConverter" version="2.202.10" />
     </dependencies>
   </metadata>
   <files>
-    <file src="Xpand.XAF.Modules.Reactive.Logger.Hub.dll" target="lib\netstandard2.0\Xpand.XAF.Modules.Reactive.Logger.Hub.dll" />
     <file src="Xpand.XAF.Modules.Reactive.Logger.Hub.pdb" target="lib\netstandard2.0\Xpand.XAF.Modules.Reactive.Logger.Hub.pdb" />
-    <file src="..\build\CopySymbols.targets" target="build\Xpand.XAF.Modules.Reactive.Logger.Hub.targets" />
-    <file src="..\build\CopySymbols.ps1" target="build\CopySymbols.ps1" />
+    <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.XAF.Modules.Reactive.Logger.Hub.targets" />
+    <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
+    <file src="Xpand.XAF.Modules.Reactive.Logger.Hub.dll" target="lib\netstandard2.0\Xpand.XAF.Modules.Reactive.Logger.Hub.dll" />
   </files>
 </package>

@@ -54,14 +54,14 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |**DevExpress.ExpressApp**|**Any**
 |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |JetBrains.Annotations|2020.1.0
- |Microsoft.CodeAnalysis.CSharp|3.7.0
+ |Microsoft.CodeAnalysis.CSharp|3.8.0
  |System.Configuration.ConfigurationManager|5.0.0
  |System.Reactive|5.0.0
  |System.ServiceModel.Http|4.8.0
- |Xpand.Extensions|4.202.0
- |Xpand.Extensions.Reactive|4.202.0
- |Xpand.Extensions.XAF|4.202.0
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.202.0
+ |Xpand.Extensions|3.202.44.8
+ |Xpand.Extensions.Reactive|3.202.44.8
+ |Xpand.Extensions.XAF|3.202.44.8
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|3.202.44.8
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.10
 
 ## Issues-Debugging-Troubleshooting

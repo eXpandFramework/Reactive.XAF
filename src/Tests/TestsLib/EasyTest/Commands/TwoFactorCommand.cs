@@ -6,7 +6,6 @@ using System.Linq;
 using System.Windows.Forms;
 using DevExpress.EasyTest.Framework;
 using NUnit.Framework;
-using Xpand.Extensions.AppDomainExtensions;
 using Xpand.TestsLib.EasyTest.Commands.Automation;
 
 namespace Xpand.TestsLib.EasyTest.Commands{
@@ -31,7 +30,6 @@ namespace Xpand.TestsLib.EasyTest.Commands{
                 if (File.Exists(winAuthSettings)){
                     File.Move(winAuthSettings, winAuthSettingsBackup);
                 }
-                // TestContext.Out.WriteLine($"bbbbbbbbbbbbbbbb{AppDomain.CurrentDomain.ApplicationPath()}\\..\\WinAuth.exe");
                 File.Copy(_authenticatorSettingsPath, winAuthSettings);
                 _winAuthPath = @"D:\a\1\s\bin\Tests\WinAuth.exe";
                 if (!File.Exists(_winAuthPath)){

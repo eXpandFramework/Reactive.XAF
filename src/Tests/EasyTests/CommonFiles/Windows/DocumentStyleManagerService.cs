@@ -5,16 +5,17 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using DevExpress.EasyTest.Framework;
 using Xpand.Extensions.XAF.ObjectExtensions;
+using Xpand.TestsLib.Common.Win32;
 using Xpand.TestsLib.EasyTest;
 using Xpand.TestsLib.EasyTest.Commands;
 using Xpand.TestsLib.EasyTest.Commands.ActionCommands;
 using Xpand.TestsLib.EasyTest.Commands.Automation;
 using Xpand.TestsLib.EasyTest.Commands.DialogCommands;
-using Xpand.TestsLib.Win32;
+using Xpand.TestsLib.net461.EasyTest.Commands;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleManager;
 using ActionCommand = Xpand.TestsLib.EasyTest.Commands.ActionCommands.ActionCommand;
-using ProcessRecordCommand = Xpand.TestsLib.EasyTest.Commands.ProcessRecordCommand;
+
 
 namespace ALL.Win.Tests{
     public static class DocumentStyleManagerService{

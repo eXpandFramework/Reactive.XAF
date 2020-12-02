@@ -11,6 +11,7 @@ using DevExpress.ExpressApp.Win.Core.ModelEditor;
 using DevExpress.ExpressApp.Win.Templates.ActionControls.Binding;
 using DevExpress.Persistent.Base;
 
+// ReSharper disable once CheckNamespace
 namespace Xpand.XAF.ModelEditor {
     public static class MainClass {
         private static ModelEditorForm _modelEditorForm;
@@ -64,7 +65,7 @@ namespace Xpand.XAF.ModelEditor {
                 PopupWindowShowActionBinding.Register();
                 _modelEditorForm = new ModelEditorForm(modelEditorViewController, settingsStorageOnRegistry);
                 _modelEditorForm.Shown += (sender, eventArgs) => splashScreen?.Stop();
-                _modelEditorForm.Disposed += (sender, eventArgs) => ((IModelEditorSettings)sender).ModelEditorSaveSettings();
+                _modelEditorForm.Disposed += (sender, eventArgs) => ((IModelEditorSettings)sender)?.ModelEditorSaveSettings();
                 _modelEditorForm.SetCaption($"{Path.GetFileNameWithoutExtension(pathInfo.AssemblyPath)}/{Path.GetFileName(pathInfo.LocalPath)}");
                 _modelEditorForm.Icon=icon;
                 Application.Run(_modelEditorForm);

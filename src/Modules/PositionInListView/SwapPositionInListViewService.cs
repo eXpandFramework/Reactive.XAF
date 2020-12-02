@@ -14,7 +14,7 @@ using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 
-namespace Xpand.XAF.Modules.PositionInListview{
+namespace Xpand.XAF.Modules.PositionInListView{
     public static class SwapPositionInListViewService{
 	    public const string EdgeContext = "On edge";
         public static SimpleAction MoveObjectUp(this (PositionInListViewModule, Frame frame) tuple) => tuple

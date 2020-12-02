@@ -3,14 +3,14 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Threading;
 using DevExpress.EasyTest.Framework;
-using Xpand.TestsLib.InputSimulator;
+using Xpand.TestsLib.Common.InputSimulator;
 
 namespace Xpand.TestsLib.EasyTest.Commands.Automation{
     
     public class MouseCommand:EasyTestCommand{
         private readonly Point _moveTo;
         private readonly Action<IMouseSimulator> _execute;
-        private static readonly InputSimulator.InputSimulator Simulator=new InputSimulator.InputSimulator();
+        private static readonly Common.InputSimulator.InputSimulator Simulator=new Common.InputSimulator.InputSimulator();
 
         public MouseCommand(Point moveTo,Action<IMouseSimulator> execute=null){
             _moveTo = moveTo;

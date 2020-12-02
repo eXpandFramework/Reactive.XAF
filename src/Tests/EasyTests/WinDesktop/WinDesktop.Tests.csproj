@@ -16,6 +16,7 @@
     <OutputPath>..\..\..\..\bin\AllTestWin\netcoreapp3.1</OutputPath>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <RootNamespace>ALL.Win.Tests</RootNamespace>
+    <CopyLocalLockFileAssemblie>true</CopyLocalLockFileAssemblie>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>TRACE;XAF202</DefineConstants>
@@ -38,15 +39,15 @@
     <Compile Include="..\CommonFiles\Windows\DocumentStyleManagerService.cs" Link="DocumentStyleManagerService.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.WindowsDesktop.Core" Version="20.2.3" />
-    <PackageReference Include="DevExpress.WindowsDesktop.Xaf" Version="20.2.3-ctp" />
+    <PackageReference Include="DevExpress.WindowsDesktop.Core" Version="20.2.4" />
+    <PackageReference Include="DevExpress.WindowsDesktop.Xaf" Version="20.2.4-ctp" />
     <PackageReference Include="MagicOnion" Version="2.6.3" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.0" />
     <PackageReference Include="Moq" Version="4.15.1" />
     <PackageReference Include="Shouldly" Version="4.0.0" />
     <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.202.0" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.202.0.1" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
     <PackageReference Include="System.Data.OleDb" Version="4.7.1" />
     <PackageReference Include="System.ServiceModel.Http" Version="4.8.0" />
@@ -58,6 +59,9 @@
   <ItemGroup>
     <Reference Include="Xpand.TestsLib">
       <HintPath>..\..\..\..\bin\net461\Xpand.TestsLib.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.TestsLib.Common">
+      <HintPath>..\..\..\..\bin\Xpand.TestsLib.Common.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

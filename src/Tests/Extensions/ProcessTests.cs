@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Xpand.Extensions.Reactive.Transform.System.Diagnostics;
-using Xpand.TestsLib.Attributes;
+using Xpand.TestsLib.Common.Attributes;
 
 namespace Xpand.Extensions.Tests{
     public class ProcessTests{

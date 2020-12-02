@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using DevExpress.ExpressApp;
-using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Utils;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
 using JetBrains.Annotations;
 using Xpand.Extensions.XAF.ModelExtensions;
+using Xpand.Extensions.XAF.NonPersistentObjects;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 
 namespace Xpand.XAF.Modules.SequenceGenerator{
@@ -22,21 +22,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         string SequenceMember{ get; set; }
     }
 
-    [NonPersistent]
-    [XafDefaultProperty(nameof(Name))]
-    public class ObjectType{
-        [Key]
-        public string Name{ get; set; }
-        [Browsable(false)]
-        public Type Type{ get; set; }
-    }
-
-    [NonPersistent][XafDefaultProperty(nameof(Caption))]
-    public class ObjectMember{
-        public  string Caption{ get; set; }
-        [Browsable(false)][Key]
-        public string Name{ get; set; }
-    }
+    
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class SequenceStorageKeyNameAttribute:Attribute{
         public Type Type{ get; }
@@ -76,12 +62,12 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
                 var sequenceStorageName = Name;
                 if (sequenceStorageName != null){
                     var modelClass =CaptionHelper.ApplicationModel.BOModel.GetClass(SequenceStorageKeyNameAttribute.FindConsumer(XafTypesInfo.Instance.FindTypeInfo(sequenceStorageName).Type));
-                    Type = new ObjectType(){Name = modelClass.Caption, Type = modelClass.TypeInfo.Type};
-                    Member=new ObjectMember(){Caption = modelClass.GetMemberCaption(SequenceMember),Name = SequenceMember};
+                    Type = new ObjectType(modelClass.TypeInfo.Type){Name = modelClass.Caption};
+                    Member=new ObjectString(SequenceMember){Caption = modelClass.GetMemberCaption(SequenceMember)};
                     var customSequence = CustomSequence;
                     if (customSequence!=null){
                         modelClass =CaptionHelper.ApplicationModel.BOModel.GetClass(XafTypesInfo.Instance.FindTypeInfo(customSequence).Type);
-                        CustomType=new ObjectType(){Name = modelClass.Caption,Type = modelClass.TypeInfo.Type};
+                        CustomType=new ObjectType(modelClass.TypeInfo.Type){Name = modelClass.Caption};
                     }
                 }   
             }
@@ -111,30 +97,29 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         [Browsable(false)]
         public List<ObjectType> Types=>CaptionHelper.ApplicationModel.BOModel
             .Where(_ => typeof(IXPObject).IsAssignableFrom(_.TypeInfo.Type)&&_.TypeInfo.IsPersistent)
-            .Select(_ => new ObjectType(){Name = _.Caption,Type=_.TypeInfo.Type})
+            .Select(_ => new ObjectType(_.TypeInfo.Type){Name = _.Caption})
             .ToList();
 
         [Browsable(false)]
         public List<ObjectType> CustomTypes=>CaptionHelper.ApplicationModel.BOModel
             .Where(_ =>Type!=null&&_.TypeInfo.Type!=Type.Type&& _.TypeInfo.Type.IsAssignableFrom(Type.Type))
             .Where(_ => typeof(IXPObject).IsAssignableFrom(_.TypeInfo.Type))
-            .Select(_ => new ObjectType(){Name = _.Caption,Type=_.TypeInfo.Type}).ToList();
+            .Select(_ => new ObjectType(_.TypeInfo.Type){Name = _.Caption}).ToList();
 
         public override string ToString(){
             return $"{Name}";
         }
 
         [Browsable(false)]
-        public List<ObjectMember> Members => Type == null ? new List<ObjectMember>()
+        public List<ObjectString> Members => Type == null ? new List<ObjectString>()
             : Type.Type.ToTypeInfo().Members.Where(info =>info.IsPublic&& info.MemberType == typeof(long)).Select(info =>
-                new ObjectMember() {
-                    Caption = CaptionHelper.ApplicationModel.BOModel.GetClass(info.Owner.Type).GetMemberCaption(info.Name),
-                    Name=info.Name
+                new ObjectString(info.Name) {
+                    Caption = CaptionHelper.ApplicationModel.BOModel.GetClass(info.Owner.Type).GetMemberCaption(info.Name)
                 }).ToList();
         
-        ObjectMember _objectMember;
+        ObjectString _objectMember;
         [RuleRequiredField][NonPersistent][DataSourceProperty(nameof(Members))]
-        public ObjectMember Member{
+        public ObjectString Member{
             get => _objectMember;
             set => SetPropertyValue(nameof(Member), ref _objectMember, value);
         }

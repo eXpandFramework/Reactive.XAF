@@ -16,11 +16,20 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.XAF", "Xpa
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.XAF.Xpo", "Xpand.Extensions.XAF.Xpo\Xpand.Extensions.XAF.Xpo.csproj", "{21693314-46DA-47D2-9CC3-8C3A8E39C981}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D7D2820D-ECD7-4375-8D7D-1D7DD29A8254} = {D7D2820D-ECD7-4375-8D7D-1D7DD29A8254}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.Mono.Cecil", "Xpand.Extensions.Mono.Cecil\Xpand.Extensions.Mono.Cecil.csproj", "{F7207D53-96FC-4617-A9D5-6D55FB6281FA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.Reactive", "Xpand.Extensions.Reactive\Xpand.Extensions.Reactive\Xpand.Extensions.Reactive.csproj", "{FFD98CC7-7E8D-4E40-A062-65239BEFEBE6}"
 	ProjectSection(ProjectDependencies) = postProject
+		{2856A16A-A776-4A9B-B2C1-518644B9B2F3} = {2856A16A-A776-4A9B-B2C1-518644B9B2F3}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.Blazor", "Xpand.Extensions.Blazor\Xpand.Extensions.Blazor.csproj", "{70196D29-CF06-4AC4-9ED1-3EDFA5A53BA6}"
+	ProjectSection(ProjectDependencies) = postProject
+		{21693314-46DA-47D2-9CC3-8C3A8E39C981} = {21693314-46DA-47D2-9CC3-8C3A8E39C981}
 		{2856A16A-A776-4A9B-B2C1-518644B9B2F3} = {2856A16A-A776-4A9B-B2C1-518644B9B2F3}
 	EndProjectSection
 EndProject
@@ -50,6 +59,10 @@ Global
 		{FFD98CC7-7E8D-4E40-A062-65239BEFEBE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FFD98CC7-7E8D-4E40-A062-65239BEFEBE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FFD98CC7-7E8D-4E40-A062-65239BEFEBE6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70196D29-CF06-4AC4-9ED1-3EDFA5A53BA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70196D29-CF06-4AC4-9ED1-3EDFA5A53BA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70196D29-CF06-4AC4-9ED1-3EDFA5A53BA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70196D29-CF06-4AC4-9ED1-3EDFA5A53BA6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

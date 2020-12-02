@@ -1,0 +1,12 @@
+DevExpress.ExpressApp
+DevExpress.Xpo
+Fasterflect.Xpand
+JetBrains.Annotations
+System.Reactive
+System.Interactive
+Microsoft.CodeAnalysis.CSharp
+System.Configuration.ConfigurationManager
+Hangfire.Core
+System.CodeDom
+Hangfire.AspNetCore
+Microsoft.AspNetCore.Hosting.Abstractions

@@ -3,7 +3,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.TestsLib.BO;
+using Xpand.TestsLib.Common.BO;
 using Xpand.XAF.Modules.CloneModelView;
 using Xpand.XAF.Modules.Reactive.Services;
 

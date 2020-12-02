@@ -2,11 +2,9 @@
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using DevExpress.ExpressApp;
@@ -21,13 +19,11 @@ using Google.Apis.Requests;
 using Google.Apis.Services;
 using JetBrains.Annotations;
 using Xpand.Extensions.EventArgExtensions;
-using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
-using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.SecurityExtensions;
 using Xpand.Extensions.XAF.ViewExtenions;
@@ -37,11 +33,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
 
-
-
 namespace Xpand.XAF.Modules.Office.Cloud.Google{
-    public class GlobalItems:ConcurrentDictionary<object,object>{
-    }
 
     public static class GoogleService{
         [PublicAPI]
@@ -67,26 +59,14 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
         public static SimpleAction DisconnectGoogle(this (GoogleModule googleModule, Frame frame) tuple) 
             => tuple.frame.Action(nameof(DisconnectGoogle)).As<SimpleAction>();
 
-        static IObservable<Unit> CheckBlazor(this ApplicationModulesManager manager) 
-            => manager.WhereApplication().ToObservable(ImmediateScheduler.Instance)
-                .SelectMany(application => {
-                    if (application.GetPlatform() == Platform.Blazor){
-                        var startup = Assembly.GetEntryAssembly().Attributes()
-                            .Where(attribute => attribute.IsInstanceOf("Microsoft.AspNetCore.Hosting.HostingStartupAttribute"))
-                            .Where(attribute => ((Type) attribute.GetPropertyValue("HostingStartupType")).FullName=="Xpand.Extensions.Office.Cloud.Google.Blazor.GoogleCodeStateStartup");
-                        if (!startup.Any()){
-                            throw new InvalidOperationException("Install the Xpand.Extensions.Office.Cloud.Google.Blazor package in the front end project and add [assembly: HostingStartup(typeof(GoogleCodeStateStartup))]");
-                        }
-                    }
-                    return Observable.Empty<Unit>();
-                });
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => manager.Connect("Google", typeof(GoogleAuthentication), application
                 => application.GoogleNeedsAuthentication(), application
                 => application.AuthorizeGoogle((exception, flow) => flow.AuthorizeApp(application)).ToUnit())
                 .Merge(manager.ExchangeCodeForToken())
-                .Merge(manager.CheckBlazor());
+                .Merge(manager.CheckBlazor("Xpand.Extensions.Office.Cloud.Google.Blazor.GoogleCodeStateStartup", "Xpand.Extensions.Office.Cloud.Google.Blazor"))
+                ;
 
         internal static IObservable<TSource> TraceGoogleModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
 	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
@@ -160,7 +140,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
 
 
         static string GetCodeFromObject(this XafApplication application){
-            var service = application.WhenWeb().Wait().GetService<GlobalItems>();
+            var service = (ConcurrentDictionary<object,object>)application.WhenWeb().Wait().GetService("Xpand.Extensions.Blazor.GlobalItems");
             service.TryRemove(application.CurrentUserId(), out var value);
             return (string) value;
         }

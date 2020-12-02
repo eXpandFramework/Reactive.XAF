@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using DevExpress.Xpo;
 using NUnit.Framework;
 using Shouldly;
-using Xpand.TestsLib.Attributes;
+using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.SequenceGenerator.Tests.BO;
 
 namespace Xpand.XAF.Modules.SequenceGenerator.Tests{

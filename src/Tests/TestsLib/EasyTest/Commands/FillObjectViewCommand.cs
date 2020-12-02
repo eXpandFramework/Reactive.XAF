@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using DevExpress.EasyTest.Framework;
+using Xpand.TestsLib.Common;
 
 namespace Xpand.TestsLib.EasyTest.Commands{
     public class FillObjectViewCommand<T> : FillObjectViewCommand{

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Security;
@@ -14,7 +13,7 @@ namespace Xpand.Extensions.XAF.SecurityExtensions {
         private static readonly Type PermissionSettingHelperType;
 
         static SecurityExtensions() {
-            PermissionSettingHelperType = AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Security.PermissionSettingHelper").First();
+            PermissionSettingHelperType = AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Security.PermissionSettingHelper");
         }
 
         [PublicAPI]
@@ -28,8 +27,8 @@ namespace Xpand.Extensions.XAF.SecurityExtensions {
                 defaultRole.AddMemberPermission(SecuritySystem.UserType,SecurityOperations.ReadWriteAccess, "ChangePasswordOnFirstLogon; StoredPassword", null, SecurityPermissionState.Allow);
                 defaultRole.AddMemberPermission(SecuritySystem.UserType,SecurityOperations.Write, "StoredPassword", "[Oid] = CurrentUserId()", SecurityPermissionState.Allow);
                 defaultRole.AddTypePermissionsRecursively(defaultRole.GetType(),SecurityOperations.Read, SecurityPermissionState.Deny);
-                var modelDifferenceType = AppDomain.CurrentDomain.GetAssemblyType("DevExpress.Persistent.BaseImpl.ModelDifference").First();
-                var modelDifferenceAspectType = AppDomain.CurrentDomain.GetAssemblyType("DevExpress.Persistent.BaseImpl.ModelDifferenceAspect").First();
+                var modelDifferenceType = AppDomain.CurrentDomain.GetAssemblyType("DevExpress.Persistent.BaseImpl.ModelDifference");
+                var modelDifferenceAspectType = AppDomain.CurrentDomain.GetAssemblyType("DevExpress.Persistent.BaseImpl.ModelDifferenceAspect");
                 defaultRole.AddTypePermissionsRecursively(modelDifferenceType,SecurityOperations.Read, SecurityPermissionState.Deny);
                 defaultRole.AddTypePermissionsRecursively(modelDifferenceAspectType,SecurityOperations.Read, SecurityPermissionState.Deny);
                 defaultRole.AddTypePermissionsRecursively(modelDifferenceType,SecurityOperations.Create, SecurityPermissionState.Allow);

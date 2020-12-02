@@ -10,7 +10,6 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Utils;
 using DevExpress.Xpo;
-using DevExpress.XtraEditors.Mask;
 
 namespace Xpand.XAF.Modules.ModelMapper.Tests{
     class CollectionsType{
@@ -69,15 +68,15 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         public Size Size{ get; set; }
-        public int? NullAbleRWInteger{ get; set; }
-        public int RWInteger{ get; set; }
+        public int? NullAbleRwInteger{ get; set; }
+        public int RwInteger{ get; set; }
         public int RInteger{ get; }
 
         public int WInteger{
             set => WIntegerField = value;
         }
 
-        public string RWString{ get; set; }
+        public string RwString{ get; set; }
         public string RString{ get; }
 
         public string WString{
@@ -315,11 +314,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             RStringValueTypeProperties = new StringValueTypeProperties();
         }
 
-        public StringValueTypeProperties RWStringValueTypeProperties{ get; set; }
+        public StringValueTypeProperties RwStringValueTypeProperties{ get; set; }
         public StringValueTypeProperties RStringValueTypeProperties{ get; }
     }
 
-    public class RWPropeerties{
+    public class RwPropeerties{
         public TestModelMapper Mapper{ get; set; }
     }
 

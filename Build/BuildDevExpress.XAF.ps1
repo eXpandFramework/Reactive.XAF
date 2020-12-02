@@ -12,7 +12,6 @@ Properties {
     $branch = $null
     $CustomVersion = $false
     $Root = "$nugetbin\..\..\"
-    $ChangedModules=@()
 }
 
 
@@ -105,7 +104,6 @@ Task Compile -precondition { return $compile } {
 Task  CreateNuspec {
     Invoke-Script {
         $a = @{
-            ChangedModules   = $ChangedModules
             DxVersion = $dxVersion
             Branch=$branch
         }
@@ -115,7 +113,7 @@ Task  CreateNuspec {
 
 Task PackNuspec {
     Invoke-Script {
-        & "$PSScriptRoot\PackNuspec.ps1" -branch $branch -ChangedModules $ChangedModules
+        & "$PSScriptRoot\PackNuspec.ps1" -branch $branch 
     } -Maximum 3
 }
 

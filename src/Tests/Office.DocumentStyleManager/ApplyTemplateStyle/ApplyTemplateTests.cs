@@ -1,10 +1,12 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
+using DevExpress.XtraGrid;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.XAF.FrameExtensions;
-using Xpand.TestsLib.Attributes;
+using Xpand.TestsLib;
+using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.Services.StyleTemplateService;
 
@@ -12,7 +14,9 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.ApplyTemplateStyle
 	public class ApplyTemplateTests:BaseTests{
 
 		[Test][XpandTest()][Apartment(ApartmentState.STA)]
-		public void ApplyTemplateAction_Is_enabled_when_template_has_value(){
+		public void ApplyTemplateAction_Is_enabled_when_template_has_value() {
+			var type = typeof(TestWinApplication);
+			new GridControl();
 			using var application=DocumentStyleManagerModule().Application;
 			var tuple = application.SetApplyTemplateStyleDetailView();
 			var applyTemplate = tuple.window.Action<DocumentStyleManagerModule>().ApplyTemplate();

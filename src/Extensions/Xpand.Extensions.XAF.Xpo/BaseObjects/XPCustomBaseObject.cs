@@ -10,8 +10,8 @@ namespace Xpand.Extensions.XAF.Xpo.BaseObjects {
     [NonPersistent]
     public abstract class XPCustomBaseObject: XPCustomObject,IObjectSpaceLink{
         protected override void OnSaving() {
-            if (TrucateStrings)
-                DoTrucateStrings();
+            if (TruncateStrings)
+                DoTruncateStrings();
             base.OnSaving();
         }
 
@@ -67,9 +67,9 @@ namespace Xpand.Extensions.XAF.Xpo.BaseObjects {
         [Browsable(false)]
         [NonPersistent]
         [MemberDesignTimeVisibility(false)]
-        public bool TrucateStrings { get; set; }
+        public bool TruncateStrings { get; set; }
 
-        private void DoTrucateStrings() {
+        private void DoTruncateStrings() {
             foreach (XPMemberInfo xpMemberInfo in ClassInfo.PersistentProperties) {
                 if (xpMemberInfo.MemberType == typeof(string)) {
                     if (xpMemberInfo.GetValue(this) is string value) {

@@ -11,6 +11,7 @@ using JetBrains.Annotations;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.Reactive.Logger.Hub;
 
 namespace Xpand.TestsLib{
@@ -25,8 +26,8 @@ namespace Xpand.TestsLib{
                     throw e.Exception;
                 }
             };
-            TraceClientConnected = this.ClientConnect();
-            TraceClientBroadcast = this.ClientBroadcast();
+            TraceClientConnected = TestApplicationExtensions.ClientConnect(this);
+            TraceClientBroadcast = TestApplicationExtensions.ClientBroadcast(this);
         }
 
         public bool TransmitMessage => _transmitMessage;
@@ -94,8 +95,8 @@ namespace Xpand.TestsLib{
         public  TestWebApplication(Type sutModule, bool transmitMessage = true){
             _transmitMessage = transmitMessage;
             SUTModule = sutModule;
-            TraceClientConnected = this.ClientConnect();
-            TraceClientBroadcast = this.ClientBroadcast();
+            TraceClientConnected = TestApplicationExtensions.ClientConnect(this);
+            TraceClientBroadcast = TestApplicationExtensions.ClientBroadcast(this);
             TransmitMessage = transmitMessage;
         }
 
@@ -123,12 +124,6 @@ namespace Xpand.TestsLib{
     }
     [PublicAPI]
 
-    public interface ITestApplication{
-        bool TransmitMessage{ get; }
-        IObservable<Unit> TraceClientBroadcast{ get; set; }
-        IObservable<Unit> TraceClientConnected{ get; set; }
-        Type SUTModule{ get; }
-    }
 
     static class TestApplicationExtensions{
         public static IObservable<Unit> ClientBroadcast(this ITestApplication application){

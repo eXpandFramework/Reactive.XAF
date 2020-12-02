@@ -65,15 +65,14 @@ namespace Xpand.Extensions.Office.Cloud{
                         .Select(officeObject => (officeObject,bo:(TLocalEntity)o));
                 }))
                 .SelectMany(t => delete(t).Select(s => t.officeObject))
-                // .DeleteObjectSpaceLink()
                 .To((TCloudEntity)typeof(TCloudEntity).CreateInstance())
                 .Select(o => (o,MapAction.Delete)):Observable.Empty<(TCloudEntity serviceObject, MapAction mapAction)>();
 
-            var newObjects = synchronizationType.IsCreate() ? objectSpace.WhenModifiedObjects<TLocalEntity>(true, ObjectModification.New)
-                .SelectMany(_ => _.objects).Cast<TLocalEntity>().SelectMany(map):Observable.Empty<(TCloudEntity serviceObject, MapAction mapAction)>();
+            var newObjects = synchronizationType.IsCreate() ? objectSpace.WhenCommiting<TLocalEntity>(ObjectModification.New,true)
+                .SelectMany(_ => _.objects).SelectMany(map):Observable.Empty<(TCloudEntity serviceObject, MapAction mapAction)>();
             
-            var updateObjects = synchronizationType.IsUpdate() ? objectSpace.WhenModifiedObjects<TLocalEntity>(true, ObjectModification.Updated)
-                .SelectMany(_ => _.objects).Cast<TLocalEntity>().SelectMany(map):Observable.Empty<(TCloudEntity serviceObject, MapAction mapAction)>();
+            var updateObjects = synchronizationType.IsUpdate() ? objectSpace.WhenCommiting<TLocalEntity>(ObjectModification.Updated,true)
+                .SelectMany(_ => _.objects).SelectMany(map):Observable.Empty<(TCloudEntity serviceObject, MapAction mapAction)>();
             return updateObjects.Merge(newObjects).Merge(deleteObjects);
         }
         public static IObservable<TServiceObject> MapEntities<TBO, TServiceObject>(this IObjectSpace objectSpace,IObservable<TBO> deletedObjects,
@@ -84,7 +83,6 @@ namespace Xpand.Extensions.Office.Cloud{
                         var deletedId = objectSpace.GetKeyValue(_).ToString();
                         return objectSpace.QueryCloudOfficeObject(typeof(TServiceObject), _).Where(o => o.LocalId == deletedId).ToObservable();
                     })
-                    // .DeleteObjectSpaceLink()
                     .SelectMany(cloudOfficeObject => delete(cloudOfficeObject).Select(s => cloudOfficeObject))
                     .To<TServiceObject>());
         }

@@ -5,6 +5,7 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
@@ -25,6 +26,7 @@ using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 using Xpand.XAF.Modules.Reactive.Services.Security;
+using AssemblyExtensions = Xpand.Extensions.AssemblyExtensions.AssemblyExtensions;
 using ListView = DevExpress.ExpressApp.ListView;
 using View = DevExpress.ExpressApp.View;
 
@@ -107,31 +109,46 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static void AddObjectSpaceProvider(this XafApplication application, params IObjectSpaceProvider[] objectSpaceProviders) 
             => application.WhenCreateCustomObjectSpaceProvider()
-                .Select(_ => {
-                    if (!objectSpaceProviders.Any()){
-                        var xpoAssembly = AppDomain.CurrentDomain.GetAssemblies().First(asm => asm.GetName().Name.StartsWith("DevExpress.ExpressApp.Xpo.v"));
-                        var dataStoreProvider = $"{application.ConnectionString}".Contains("XpoProvider=InMemoryDataStoreProvider")||$"{application.ConnectionString}"==""
-                            ? xpoAssembly.GetType("DevExpress.ExpressApp.Xpo.MemoryDataStoreProvider").CreateInstance()
-                            : Activator.CreateInstance(xpoAssembly.GetType("DevExpress.ExpressApp.Xpo.ConnectionStringDataStoreProvider"),application.ConnectionString);
-
-                        Type[] parameterTypes = {xpoAssembly.GetType("DevExpress.ExpressApp.Xpo.IXpoDataStoreProvider"), typeof(bool)};
-                        object[] parameterValues = {dataStoreProvider, true};
-                        if (application.TypesInfo.XAFVersion() > Version.Parse("19.2.0.0")){
-                            parameterTypes=parameterTypes.Add(typeof(bool)).ToArray();
-                            parameterValues=parameterValues.Add(true).ToArray();
-                        }
-                        var objectSpaceProvider = (IObjectSpaceProvider) xpoAssembly.GetType("DevExpress.ExpressApp.Xpo.XPObjectSpaceProvider")
-                            .Constructor(parameterTypes)
-                            .Invoke(parameterValues);
-                        _.e.ObjectSpaceProviders.Add(objectSpaceProvider);
-                        _.e.ObjectSpaceProviders.Add(new NonPersistentObjectSpaceProvider());
+                .Select(t => {
+                    if (!objectSpaceProviders.Any()) {
+                        t.e.ObjectSpaceProviders.Add(application.NewObjectSpaceProvider());
+                        t.e.ObjectSpaceProviders.Add(new NonPersistentObjectSpaceProvider());
                     }
                     else{
-                        _.e.ObjectSpaceProviders.AddRange(objectSpaceProviders);
+                        t.e.ObjectSpaceProviders.AddRange(objectSpaceProviders);
                     }
-                    return _;
+                    return t;
                 })
                 .Subscribe();
+
+        public static IObjectSpaceProvider NewObjectSpaceProvider(this XafApplication application, object dataStoreProvider=null) {
+            var xpoAssembly = GetXpoAssembly();
+            dataStoreProvider??= $"{application.ConnectionString}".Contains("XpoProvider=InMemoryDataStoreProvider") ||
+                                                        $"{application.ConnectionString}" == ""
+                ? xpoAssembly.GetType("DevExpress.ExpressApp.Xpo.MemoryDataStoreProvider").CreateInstance()
+                : Activator.CreateInstance(xpoAssembly.GetType("DevExpress.ExpressApp.Xpo.ConnectionStringDataStoreProvider"),
+                    application.ConnectionString);
+            
+            Type[] parameterTypes = {xpoAssembly.GetType("DevExpress.ExpressApp.Xpo.IXpoDataStoreProvider"), typeof(bool)};
+            object[] parameterValues = {dataStoreProvider, true};
+            if (application.TypesInfo.XAFVersion() > Version.Parse("19.2.0.0")) {
+                parameterTypes = parameterTypes.Add(typeof(bool)).ToArray();
+                parameterValues = parameterValues.Add(true).ToArray();
+            }
+
+            return (IObjectSpaceProvider) xpoAssembly
+                .GetType("DevExpress.ExpressApp.Xpo.XPObjectSpaceProvider")
+                .Constructor(parameterTypes)
+                .Invoke(parameterValues);
+            
+            
+        }
+
+        private static Assembly GetXpoAssembly() {
+            var xpoAssembly = AppDomain.CurrentDomain.GetAssemblies()
+                .First(asm => asm.GetName().Name.StartsWith("DevExpress.ExpressApp.Xpo.v"));
+            return xpoAssembly;
+        }
 
         public static IObservable<IModelApplication> WhenModelChanged(this XafApplication application) 
             => Observable.FromEventPattern<EventHandler,EventArgs>(h => application.ModelChanged += h,h => application.ModelChanged -= h,ImmediateScheduler.Instance)
@@ -381,6 +398,29 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.Security.IsSecurityStrategyComplex()
                 ? (Guid?) application.Security.UserId ?? Guid.Empty
                 : $"{application.Title}{Environment.MachineName}{Environment.UserName}".ToGuid();
+
+        public static IObservable<Unit> CheckBlazor(this ApplicationModulesManager manager, Type hostingStartupType, Type requiredPackage) 
+            => manager.CheckBlazor(hostingStartupType.FullName, requiredPackage.Namespace);
+
+        public static IObservable<Unit> CheckBlazor(this ApplicationModulesManager manager, string hostingStartupType, string requiredPackage) 
+            => manager.WhereApplication().ToObservable().SelectMany(application => new[] {(hostingStartupType, requiredPackage),
+                ("Xpand.Extensions.Blazor.HostingStartup", "Xpand.Extensions.Blazor")
+            }.ToObservable().SelectMany(t => application.CheckBlazor(t.Item1, t.Item2)));
+
+
+        public static IObservable<Unit> CheckBlazor(this XafApplication xafApplication, string hostingStartupType, string requiredPackage) {
+            if (xafApplication.GetPlatform() == Platform.Blazor) {
+                var startup = AssemblyExtensions.EntryAssembly.Attributes()
+                    .Where(attribute => attribute.IsInstanceOf("Microsoft.AspNetCore.Hosting.HostingStartupAttribute"))
+                    .Where(attribute => ((Type) attribute.GetPropertyValue("HostingStartupType")).FullName == hostingStartupType);
+                if (!startup.Any()) {
+                    throw new InvalidOperationException(
+                        $"Install the {requiredPackage} package in the front end project and add: [assembly: HostingStartup(typeof({hostingStartupType}))]");
+                }
+            }
+
+            return Observable.Empty<Unit>();
+        }
     }
 
 

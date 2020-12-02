@@ -14,8 +14,8 @@ using Shouldly;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
-using Xpand.TestsLib;
-using Xpand.TestsLib.Attributes;
+using Xpand.TestsLib.Common;
+using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Reactive.Logger.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive.Services;
 
@@ -120,7 +120,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
         public  void Populate_TracedSource_Modules_to_Model(){
             using var application = LoggerModule().Application;
             var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger;
-            logger.TraceSources.Count.ShouldBeGreaterThanOrEqualTo(TestsLib.Extensions.ModulePorts.Count-2);
+            logger.TraceSources.Count.ShouldBeGreaterThanOrEqualTo(Xpand.TestsLib.Common.Extensions.ModulePorts.Count-2);
             var module = logger.TraceSources[nameof(ReactiveLoggerModule)];
             module.ShouldNotBeNull();
                 

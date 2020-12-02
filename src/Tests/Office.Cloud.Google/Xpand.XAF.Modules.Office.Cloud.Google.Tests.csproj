@@ -11,13 +11,17 @@
     <DebugType>full</DebugType>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+    <CopyLocalLockFileAssemblie>true</CopyLocalLockFileAssemblie>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\Office.Cloud\CloudServiceTests.cs" Link="CloudServiceTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Tests">
+    <Reference Include="Xpand.TestsLib">
       <HintPath>..\..\..\bin\net461\Xpand.TestsLib.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.TestsLib.Common">
+      <HintPath>..\..\..\bin\Xpand.TestsLib.Common.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.Extensions">
       <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>

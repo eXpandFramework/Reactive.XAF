@@ -5,6 +5,7 @@ using DevExpress.EasyTest.Framework;
 using DevExpress.EasyTest.Framework.Commands;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.XAF.ObjectExtensions;
+using Xpand.TestsLib.Common;
 
 namespace Xpand.TestsLib.EasyTest.Commands{
     public class CheckListViewSelectionCommand<TObject> : CheckListViewSelectionCommand{

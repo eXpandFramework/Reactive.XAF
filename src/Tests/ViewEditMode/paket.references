@@ -1,4 +1,5 @@
 DevExpress.ExpressApp.Web
+DevExpress.ExpressApp.Xpo
 MagicOnion
 Moq
 Shouldly
@@ -6,3 +7,4 @@ System.Reactive
 NUnit
 NUnit3TestAdapter
 JetBrains.Annotations
+DevExpress.Xpo

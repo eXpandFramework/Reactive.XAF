@@ -12,6 +12,7 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <AssemblyName>Xpand.XAF.Modules.LookupCascade.Tests</AssemblyName>
+    <CopyLocalLockFileAssemblie>true</CopyLocalLockFileAssemblie>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AppDomainToolkit">
@@ -29,6 +30,9 @@
     </Reference>
     <Reference Include="Xpand.TestsLib">
       <HintPath>..\..\..\bin\net461\Xpand.TestsLib.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.TestsLib.Common">
+      <HintPath>..\..\..\bin\Xpand.TestsLib.Common.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.LookupCascade">
       <HintPath>..\..\..\bin\net461\Xpand.XAF.Modules.LookupCascade.dll</HintPath>

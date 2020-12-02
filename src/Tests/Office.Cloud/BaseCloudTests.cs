@@ -1,5 +1,5 @@
 ﻿using NUnit.Framework;
-using Xpand.TestsLib;
+using Xpand.TestsLib.Common;
 using Task = System.Threading.Tasks.Task;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Tests{

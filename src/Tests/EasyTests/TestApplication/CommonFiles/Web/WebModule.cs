@@ -24,12 +24,11 @@ using Xpand.XAF.Modules.LookupCascade;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
-using Xpand.TestsLib.BO;
-
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using DevExpress.ExpressApp.Updating;
+using Xpand.TestsLib.Common.BO;
 
 
 namespace TestApplication.Web{

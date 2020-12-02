@@ -15,26 +15,27 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Office.DocumentStyleManager</tags>
     <dependencies>
       <dependency id="Fasterflect.Xpand" version="2.0.7" />
-      <dependency id="JetBrains.Annotations" version="2020.1" />
-      <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.7" />
+      <dependency id="JetBrains.Annotations" version="2020.3" />
+      <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.8" />
       <dependency id="Newtonsoft.Json" version="12.0.3" />
+      <dependency id="System.CodeDom" version="5.0" />
       <dependency id="System.Interactive" version="5.0" />
       <dependency id="System.Reactive" version="5.0" />
-      <dependency id="Xpand.Extensions" version="4.202.0.0" />
-      <dependency id="Xpand.Extensions.Reactive" version="4.202.0.0" />
-      <dependency id="Xpand.Extensions.XAF" version="4.202.0.0" />
-      <dependency id="Xpand.Extensions.XAF.Xpo" version="4.202.0.0" />
-      <dependency id="Xpand.XAF.Modules.HideToolBar" version="4.202.0.0" />
-      <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.0.0" />
-      <dependency id="Xpand.XAF.Modules.SuppressConfirmation" version="4.202.0.0" />
-      <dependency id="Xpand.XAF.Modules.ViewItemValue" version="4.202.0.0" />
+      <dependency id="Xpand.Extensions" version="4.202.0" />
+      <dependency id="Xpand.Extensions.Reactive" version="4.202.0" />
+      <dependency id="Xpand.Extensions.XAF" version="4.202.0" />
+      <dependency id="Xpand.Extensions.XAF.Xpo" version="4.202.0" />
+      <dependency id="Xpand.XAF.Modules.HideToolBar" version="4.202.0" />
+      <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.0" />
+      <dependency id="Xpand.XAF.Modules.SuppressConfirmation" version="4.202.0" />
+      <dependency id="Xpand.XAF.Modules.ViewItemValue" version="4.202.0" />
       <dependency id="Xpand.VersionConverter" version="2.202.10" />
     </dependencies>
   </metadata>
   <files>
-    <file src="Xpand.XAF.Modules.Office.DocumentStyleManager.dll" target="lib\netstandard2.0\Xpand.XAF.Modules.Office.DocumentStyleManager.dll" />
     <file src="Xpand.XAF.Modules.Office.DocumentStyleManager.pdb" target="lib\netstandard2.0\Xpand.XAF.Modules.Office.DocumentStyleManager.pdb" />
-    <file src="..\build\CopySymbols.targets" target="build\Xpand.XAF.Modules.Office.DocumentStyleManager.targets" />
-    <file src="..\build\CopySymbols.ps1" target="build\CopySymbols.ps1" />
+    <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.XAF.Modules.Office.DocumentStyleManager.targets" />
+    <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
+    <file src="Xpand.XAF.Modules.Office.DocumentStyleManager.dll" target="lib\netstandard2.0\Xpand.XAF.Modules.Office.DocumentStyleManager.dll" />
   </files>
 </package>

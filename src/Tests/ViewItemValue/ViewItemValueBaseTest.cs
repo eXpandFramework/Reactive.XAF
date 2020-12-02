@@ -1,7 +1,7 @@
 ﻿using DevExpress.ExpressApp;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
-using Xpand.TestsLib;
-using Xpand.TestsLib.BO;
+using Xpand.TestsLib.Common;
+using Xpand.TestsLib.Common.BO;
 
 namespace Xpand.XAF.Modules.ViewItemValue.Tests{
     public abstract class ViewItemValueBaseTest:BaseTest{

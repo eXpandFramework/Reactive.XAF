@@ -1,6 +1,8 @@
 ﻿using DevExpress.EasyTest.Framework;
+using Xpand.TestsLib.EasyTest;
+using Xpand.TestsLib.EasyTest.Commands;
 
-namespace Xpand.TestsLib.EasyTest.Commands.ActionCommands{
+namespace Xpand.TestsLib.net461.EasyTest.Commands.ActionCommands{
 	public class ActionAvailableCommand:EasyTestCommand{
 
         public ActionAvailableCommand(string caption){

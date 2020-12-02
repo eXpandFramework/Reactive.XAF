@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 
 namespace Xpand.Extensions.LinqExtensions{
     public static partial class LinqExtensions{
-	    [PublicAPI]
+        [PublicAPI]
 	    public static void AddRange(this  IList list,IEnumerable enumerable){
             foreach (var o in enumerable){
                 list.Add(o);
