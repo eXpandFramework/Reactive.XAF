@@ -57,11 +57,27 @@ Task UpdateProjects {
 
 Task CompileTests -precondition { return $compile } {
     Invoke-Script {
-        & "$Root\Build\UpdateAllTests.ps1" "$Root" $branch $packageSources $dxVersion
+        # & "$Root\Build\UpdateAllTests.ps1" "$Root" $branch $packageSources $dxVersion
     }
-    Get-ChildItem $root\bin "*xpand*.dll"| Test-AssemblyReference -VersionFilter $DXVersion
+    # Get-ChildItem $root\bin "*xpand*.dll"| Test-AssemblyReference -VersionFilter $DXVersion
 }
-
+function GetConfiguration($solution,$Configuration){
+    $minor=Get-VersionPart $dxVersion Minor
+    $match=(Read-MSBuildSolutionFile $solution).SolutionConfigurations.ConfigurationName|ForEach-Object{
+        if (Test-Version $_){
+            if (([version]$_) -ge ([version]$minor)){
+                $_
+            }
+        }
+    }
+    
+    if ($match){
+        $match
+    }
+    else{
+        $Configuration
+    }
+}
 Task Compile -precondition { return $compile } {
     $Configuration="Debug"
     if ($branch -eq "master"){
@@ -70,18 +86,22 @@ Task Compile -precondition { return $compile } {
     
     Invoke-Script {
         Write-HostFormatted "Building Extensions" -Section
-        & dotnet msbuild "$Root\src\Extensions\Extensions.sln" /t:Clean
-        dotnet restore "$Root\src\Extensions\Extensions.sln" --source $packageSources --source (Get-PackageFeed -Nuget) /WarnAsError
-        & dotnet msbuild "$Root\src\Extensions\Extensions.sln" "/bl:$Root\Bin\Extensions.binlog" "/p:configuration=$Configuration;skipNugetReplace=true" /m /v:m /WarnAsError 
+        $solution="$Root\src\Extensions\Extensions.sln"
+        & dotnet msbuild $solution /t:Clean
+        dotnet restore $solution --source $packageSources --source (Get-PackageFeed -Nuget) /WarnAsError
+        $Configuration=GetConfiguration $solution $Configuration
+        & dotnet msbuild $solution "/bl:$Root\Bin\Extensions.binlog" "/p:configuration=$Configuration;skipNugetReplace=true" /m /v:m /WarnAsError 
     } -Maximum 2
     
     
     Invoke-Script {
+        $solution="$Root\src\Modules\Modules.sln"
         Write-HostFormatted "Building Modules" -Section
-        dotnet msbuild "$Root\src\Modules\Modules.sln" /t:Clean
+        dotnet msbuild $solution /t:Clean
         Set-Location "$Root\src\Modules"
-        dotnet restore "$Root\src\Modules\Modules.sln" --source $packageSources --source (Get-PackageFeed -Nuget) /WarnAsError
-        dotnet msbuild "$Root\src\Modules\Modules.sln" "/bl:$Root\Bin\Modules.binlog" "/p:configuration=$Configuration;skipNugetReplace=true" /WarnAsError /m /v:m
+        dotnet restore $solution --source $packageSources --source (Get-PackageFeed -Nuget) /WarnAsError
+        $Configuration=GetConfiguration $solution $Configuration
+        dotnet msbuild $solution "/bl:$Root\Bin\Modules.binlog" "/p:configuration=$Configuration;skipNugetReplace=true" /WarnAsError /m /v:m
     } -Maximum 2
     
     Invoke-Script {
@@ -113,7 +133,7 @@ Task  CreateNuspec {
 
 Task PackNuspec {
     Invoke-Script {
-        & "$PSScriptRoot\PackNuspec.ps1" -branch $branch 
+        & "$PSScriptRoot\PackNuspec.ps1" -branch $branch -dxversion $dxVersion
     } -Maximum 3
 }
 

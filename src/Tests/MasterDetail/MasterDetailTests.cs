@@ -24,7 +24,7 @@ using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
 namespace Xpand.XAF.Modules.MasterDetail.Tests{
     [NonParallelizable]
-    public class MasterDetailTests:BaseTest {
+    public class MasterDetailTests:CommonTest {
 
         [XpandTest]
         [TestCase(nameof(Platform.Web))]

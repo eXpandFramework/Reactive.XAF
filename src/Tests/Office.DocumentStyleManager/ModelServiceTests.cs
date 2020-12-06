@@ -9,7 +9,7 @@ using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.ViewItemValue;
 
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests{
-    public class ModelServiceTests:BaseTests{
+    public class ModelServiceTests:CommonTests{
         
         [Test][XpandTest()]
         public void DesignTemplateDetailViews_contains_views_With_RichEdit_PropertyEditor(){

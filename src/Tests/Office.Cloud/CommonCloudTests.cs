@@ -1,9 +1,9 @@
 ﻿using NUnit.Framework;
-using Xpand.TestsLib.Common;
+using Xpand.TestsLib;
 using Task = System.Threading.Tasks.Task;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Tests{
-    public abstract class BaseCloudTests:BaseTest{
+    public abstract class CommonCloudTests:BaseTest{
         [Order(0)]
         public abstract Task Populate_All(string syncToken);
         [Order(1)]

@@ -17,7 +17,7 @@ jobs:
     inputs:
       targetType: inline
       script: |
-        $VerbosePreference="Continue"
+        
         $ErrorView="NormalView"
         "Nugetpackage=$env:Nuget_PACKAGES"
         $goArgs = @{

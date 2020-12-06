@@ -18,7 +18,7 @@ using Xpand.XAF.Modules.ModelMapper.Tests.BOModel;
 using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.TypeMappingService;
 
 namespace Xpand.XAF.Modules.ModelMapper.Tests{
-    public abstract class ModelMapperBaseTest:BaseTest{
+    public abstract class ModelMapperCommonTest:BaseTest{
         
 
         protected const string MMListViewNodePath = "Views/" + nameof(MM) + "_ListView";
@@ -28,7 +28,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         public const string DynamicTypeName = "DynamicTypeName";
 
         [SuppressMessage("ReSharper", "ObjectCreationAsStatement")]
-        protected ModelMapperBaseTest(){
+        protected ModelMapperCommonTest(){
             new ModelMapperModule();
         }
 

@@ -19,7 +19,7 @@ using Xpand.XAF.Modules.RefreshView.Tests.BOModel;
 
 namespace Xpand.XAF.Modules.RefreshView.Tests{
     [NonParallelizable]
-    public class RefreshViewTests : BaseTest{
+    public class RefreshViewTests : CommonTest{
         
 
         [Test]

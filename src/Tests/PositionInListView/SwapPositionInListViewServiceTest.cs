@@ -13,7 +13,7 @@ using Xpand.XAF.Modules.PositionInListView.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.XAF.Modules.PositionInListView.Tests{
-	public class SwapPositionInListViewServiceTest : PositionInListViewBaseTest{
+	public class SwapPositionInListViewServiceTest : PositionInListViewCommonTest{
 		[Test]
 		[XpandTest]
 		public void Move_object_actions_are_active_only_for_model_views() {

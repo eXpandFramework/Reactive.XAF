@@ -20,7 +20,7 @@ using Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleManage
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManager{
-    public class ContentServiceTests:BaseTests{
+    public class ContentServiceTests:CommonTests{
         [Test][XpandTest()][Apartment(ApartmentState.STA)]
         public void On_Document_Selection_Changed_Select_Used_Style(){
             using var xafApplication=DocumentStyleManagerModule().Application;

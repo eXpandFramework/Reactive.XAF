@@ -30,7 +30,7 @@ using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
     [NonParallelizable]
-    public class CalendarServiceTests : BaseCalendarTests{
+    public class CalendarServiceTests : CommonCalendarTests{
         
         [Test]
         [XpandTest()]

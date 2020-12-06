@@ -9,7 +9,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Tests.BOModel;
 
 namespace Xpand.XAF.Modules.Reactive.Tests{
-    public class ObjectSpaceExtensionsTests:ReactiveBaseTest{
+    public class ObjectSpaceExtensionsTests:ReactiveCommonTest{
         
         [Test()]
         [XpandTest()]

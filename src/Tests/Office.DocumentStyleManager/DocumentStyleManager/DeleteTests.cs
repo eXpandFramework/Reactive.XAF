@@ -17,7 +17,7 @@ using Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleManage
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManager{
-    public class DeleteTests:BaseTests{
+    public class DeleteTests:CommonTests{
 	    [Test][XpandTest()][Apartment(ApartmentState.STA)]
         public void DeleteStylesAction_Removes_Styles_and_update_document(){
             using var xafApplication=DocumentStyleManagerModule().Application;

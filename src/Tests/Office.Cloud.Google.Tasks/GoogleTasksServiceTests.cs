@@ -22,7 +22,7 @@ using TaskStatus = DevExpress.Persistent.Base.General.TaskStatus;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks.Tests{
     [NonParallelizable]
-    public class GoogleTasksServiceTests : BaseTaskTests{
+    public class GoogleTasksServiceTests : CommonTaskTests{
         [TestCase(TaskStatus.NotStarted,"needsAction")]
         [TestCase(TaskStatus.Completed,"completed")]
         [XpandTest()]

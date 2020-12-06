@@ -23,7 +23,6 @@ using Xpand.Extensions.Blazor;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
-using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
@@ -32,7 +31,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
-    public static class ScheduledJobService {
+    public static class JobService {
         public static SimpleAction TriggerJob(this (JobSchedulerModule, Frame frame) tuple) 
             => tuple.frame.Action(nameof(TriggerJob)).As<SimpleAction>();
         

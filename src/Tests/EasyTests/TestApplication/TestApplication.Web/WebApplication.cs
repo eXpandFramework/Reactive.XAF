@@ -10,7 +10,6 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 namespace TestApplication.Web{
     public class TestWebApplication : WebApplication{
-
         public TestWebApplication(){
             
             ((ISupportInitialize) this).BeginInit();

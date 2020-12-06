@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.Extensions.Mono.Cecil</id>
-    <version>4.202.0.0</version>
+    <version>4.202.44.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -14,11 +14,13 @@
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Xpand.Extensions.Mono.Cecil</tags>
     <dependencies>
-      <dependency id="Fasterflect.Xpand" version="2.0.7" />
-      <dependency id="JetBrains.Annotations" version="2020.3" />
-      <dependency id="Mono.Cecil" version="0.11.2" />
-      <dependency id="System.CodeDom" version="5.0" />
-      <dependency id="System.ValueTuple" version="4.5" />
+      <group targetFramework="netstandard2.0">
+        <dependency id="Fasterflect.Xpand" version="2.0.7" />
+        <dependency id="Mono.Cecil" version="0.11.2" />
+        <dependency id="System.CodeDom" version="5.0" />
+        <dependency id="JetBrains.Annotations" version="2020.3" />
+        <dependency id="System.ValueTuple" version="4.5" />
+      </group>
     </dependencies>
   </metadata>
   <files>

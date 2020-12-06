@@ -11,3 +11,4 @@ Microsoft.CodeAnalysis.CSharp
 Microsoft.IdentityModel.Protocols.OpenIdConnect
 Microsoft.IdentityModel.Tokens
 System.Collections.Immutable
+Microsoft.Graph.Core

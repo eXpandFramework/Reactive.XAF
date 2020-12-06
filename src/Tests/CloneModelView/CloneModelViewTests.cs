@@ -8,6 +8,7 @@ using Fasterflect;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
+using Xpand.TestsLib;
 using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.CloneModelView.Tests.BOModel;

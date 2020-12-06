@@ -12,7 +12,7 @@ using Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.Services.StyleTemplateService;
 
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.ApplyTemplateStyle{
-	public class TemplateDocumentTests : BaseTests{
+	public class TemplateDocumentTests : CommonTests{
 		[Test][XpandTest()][Apartment(ApartmentState.STA)]
 		public void When_Selected_TemplateDocument_Changed_Display_Original_Content(){
 			using var application=DocumentStyleManagerModule().Application;

@@ -21,7 +21,7 @@ using Xpand.XAF.Modules.Reactive.Services.Actions;
 using DocumentFormat = DevExpress.XtraRichEdit.DocumentFormat;
 
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManager{
-    public class ImportStylesServiceTests:BaseTests{
+    public class ImportStylesServiceTests:CommonTests{
 	    private void ModelSetup(XafApplication application){
             var documentStyleManager = application.Model.DocumentStyleManager();
 	        var item = documentStyleManager.ImportStyles.AddNode<IModelImportStylesItem>();

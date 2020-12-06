@@ -17,7 +17,7 @@ using Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleManage
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManager{
-    public class ReplaceServiceTests:BaseTests{
+    public class ReplaceServiceTests:CommonTests{
         [Test][XpandTest()][Apartment(ApartmentState.STA)]
         public void ReplaceStylesAction_SelectionContext_should_be_the_ReplacemenntStyles_ListView(){
             using var application=DocumentStyleManagerModule().Application;

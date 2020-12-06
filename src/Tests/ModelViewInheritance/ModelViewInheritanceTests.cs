@@ -17,7 +17,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{
     [NonParallelizable]
-    public class ModelViewInheritanceTests:BaseTest {
+    public class ModelViewInheritanceTests:CommonTest {
         [XpandTest]
         [TestCase(ViewType.DetailView,false,nameof(Platform.Win))]
         [TestCase(ViewType.DetailView,true,nameof(Platform.Win))]

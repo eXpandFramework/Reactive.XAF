@@ -30,7 +30,7 @@ using Xpand.XAF.Modules.SequenceGenerator.Tests.BO;
 
 namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
     [NonParallelizable]
-    public class SequenceGeneratorTests:SequenceGeneratorTestsBaseTests{
+    public class SequenceGeneratorTests:SequenceGeneratorTestsCommonTests{
         
         [Test]
         [XpandTest()]

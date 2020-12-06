@@ -10,7 +10,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Tests.BOModel;
 
 namespace Xpand.XAF.Modules.Reactive.Tests{
-	public class ApplicationModulesManagerTests:ReactiveBaseTest{
+	public class ApplicationModulesManagerTests:ReactiveCommonTest{
 		[Test][XpandTest()]
 		public void WhenCustomizeTypeInfo(){
 			using (var application = NewXafApplication()){

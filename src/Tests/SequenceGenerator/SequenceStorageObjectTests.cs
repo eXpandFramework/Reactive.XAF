@@ -7,6 +7,7 @@ using DevExpress.Persistent.Base;
 using DevExpress.Xpo;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.XAF.NonPersistentObjects;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.Common;
@@ -14,7 +15,7 @@ using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.SequenceGenerator.Tests.BO;
 
 namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
-    public class SequenceStorageObjectTests:SequenceGeneratorTestsBaseTests{
+    public class SequenceStorageObjectTests:SequenceGeneratorTestsCommonTests{
         [Test][XpandTest()]
         public void SequenceStorageObjectType_Lookup_should_list_all_persistent_types(){
 	        using var application = SequenceGeneratorModule().Application;
@@ -29,7 +30,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 	        using var application = SequenceGeneratorModule().Application;
 	        using var objectSpace = application.CreateObjectSpace();
 	        var sequenceStorage = objectSpace.CreateObject<SequenceStorage>();
-	        sequenceStorage.Type=new ObjectType(){Type = typeof(TestObject)};
+	        sequenceStorage.Type=new ObjectType(typeof(TestObject));
                 
 	        sequenceStorage.Members.Count.ShouldBe(1);
 	        sequenceStorage.Members.Select(member => member.Name).First().ShouldBe(nameof(TestObject.SequentialNumber));
@@ -41,7 +42,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 	        SetSequences(application);
 	        using var objectSpace = application.CreateObjectSpace();
 	        var storage =(SequenceStorage) objectSpace.GetSequenceStorage(typeof(TestObject3));
-	        storage.Type=new ObjectType(){Type = typeof(TestObject3)};
+	        storage.Type=new ObjectType(typeof(TestObject3));
 	        storage.CustomTypes.Select(type => type.Type).ShouldNotContain(typeof(TestObject3));
 	        storage.CustomTypes.Select(type => type.Type).ShouldContain(typeof(TestObject2));
         }
@@ -99,7 +100,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
             compositeView.ObjectSpace.CommitChanges();
             testObserver.Items.Count.ShouldBe(2);
             testObserver.Items.Last().Message.ShouldContain("Cannot find the '' property within the ");
-            sequenceStorage.Member = new ObjectMember(){Name = nameof(TestObject.SequentialNumber)};
+            sequenceStorage.Member = new ObjectString(nameof(TestObject.SequentialNumber));
             compositeView.ObjectSpace.CommitChanges();
             testObserver.Items.Count.ShouldBe(2);
         }

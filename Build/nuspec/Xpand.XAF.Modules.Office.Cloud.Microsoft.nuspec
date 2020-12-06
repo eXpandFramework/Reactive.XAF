@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Office.Cloud.Microsoft</id>
-    <version>4.202.0.0</version>
+    <version>4.202.44.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -14,24 +14,30 @@
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Office.Cloud.Microsoft</tags>
     <dependencies>
-      <dependency id="Fasterflect.Xpand" version="2.0.7" />
-      <dependency id="JetBrains.Annotations" version="2020.3" />
-      <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.8" />
-      <dependency id="Microsoft.Graph.Beta" version="0.33.0-preview" />
-      <dependency id="Microsoft.Identity.Client" version="4.23" />
-      <dependency id="Microsoft.IdentityModel.Protocols.OpenIdConnect" version="6.8" />
-      <dependency id="Microsoft.IdentityModel.Tokens" version="6.8" />
-      <dependency id="Microsoft.Owin.Host.SystemWeb" version="4.1.1" />
-      <dependency id="Microsoft.Owin.Security.Cookies" version="4.1.1" />
-      <dependency id="Microsoft.Owin.Security.OpenIdConnect" version="4.1.1" />
-      <dependency id="System.Collections.Immutable" version="5.0" />
-      <dependency id="System.Reactive" version="5.0" />
-      <dependency id="Xpand.Extensions" version="4.202.0" />
-      <dependency id="Xpand.Extensions.Office.Cloud" version="4.202.44.1" />
-      <dependency id="Xpand.Extensions.Reactive" version="4.202.0" />
-      <dependency id="Xpand.Extensions.XAF" version="4.202.0" />
-      <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.0" />
-      <dependency id="Xpand.VersionConverter" version="2.202.10" />
+      <group targetFramework="net461">
+        <dependency id="Xpand.Extensions" version="4.202.44.1" />
+        <dependency id="Xpand.Extensions.Office.Cloud" version="4.202.44.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.44.1" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.202.44.1" />
+        <dependency id="Xpand.Extensions.XAF" version="4.202.44.1" />
+        <dependency id="Fasterflect.Xpand" version="2.0.7" />
+        <dependency id="JetBrains.Annotations" version="2020.3" />
+        <dependency id="System.Reactive" version="5.0" />
+        <dependency id="DevExpress.Persistent.Base" version="20.2.4" />
+        <dependency id="Microsoft.Graph.Beta" version="0.33.0-preview" />
+        <dependency id="Microsoft.Identity.Client" version="4.24" />
+        <dependency id="Microsoft.Owin.Host.SystemWeb" version="4.1.1" />
+        <dependency id="Microsoft.Owin.Security.Cookies" version="4.1.1" />
+        <dependency id="Microsoft.Owin.Security.OpenIdConnect" version="4.1.1" />
+        <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.8" />
+        <dependency id="Microsoft.IdentityModel.Protocols.OpenIdConnect" version="6.8" />
+        <dependency id="Microsoft.IdentityModel.Tokens" version="6.8" />
+        <dependency id="System.Collections.Immutable" version="5.0" />
+        <dependency id="Microsoft.Graph.Core" version="1.23" />
+      </group>
+      <group targetFramework="netstandard2.0">
+        <dependency id="Xpand.VersionConverter" version="2.202.11" />
+      </group>
     </dependencies>
   </metadata>
   <files>

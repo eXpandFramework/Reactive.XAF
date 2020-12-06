@@ -1,7 +1,7 @@
 param(
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\"),
     [switch]$Release,
-    $dxVersion = $env:FirstDxVersion,
+    $dxVersion = "20.2.4",
     $branch = "lab"
 )
 
@@ -17,9 +17,13 @@ $nuspec.package.metadata.version = "$($vv.major).$($modulesVersion.Minor).$($vv.
 $nuspec.Save($versionConverterPath)
 
 $allProjects = Get-ChildItem $root *.csproj -Recurse | Select-Object -ExpandProperty BaseName
+$filter="test"
+if ($dxVersion -lt "20.2.0"){
+    $filter += "|blazor|hangfire"
+}
 
-Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notlike "*Test*" } | Invoke-Parallel -VariablesToImport @("allProjects", "root", "Release") -Script {
-    # Get-ChildItem "$root\src\" -Include "*hang*.csproj" -Recurse | Where-Object { $_ -notlike "*Test*" } | foreach {
+Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notmatch $filter} | Invoke-Parallel -VariablesToImport @("allProjects", "root", "Release") -Script {
+    # Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notmatch $filter} | foreach {
     $addTargets = {
         param (
             $name   
@@ -62,7 +66,7 @@ Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -not
         $uArgs.PublishedSource = (Get-PackageFeed -Nuget)
     }
     
-    Update-Nuspec @uArgs 
+    & "$root\build\Update-Nuspec.ps1" @uArgs 
 
     $nuspecFileName = "$root\build\nuspec\$($_.BaseName).nuspec"
     [xml]$nuspec = Get-Content $nuspecFileName
@@ -108,15 +112,16 @@ Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -not
             targetFramework = "netstandard2.0"
         }
         
-        Add-NuspecDependency $versionConverter.Id $versionConverter.Version $nuspec | Out-Null
+        Add-NuspecDependency $versionConverter.Id $versionConverter.Version $nuspec "netstandard2.0"| Out-Null
          
     }
     
     
     $nuspec.Save($nuspecFileName)
+    Format-Xml -Path $nuspecFileName
 } 
 
-& "$root\build\UpdateAllNuspec.ps1" $root $Release $branch
+& "$root\build\UpdateAllNuspec.ps1" $root $Release $branch $dxVersion
 if ($branch -eq "master") {
     Write-HostFormatted "Checking nuspec versions" -Section
     $labnuspecs = Get-ChildItem "$root\build\nuspec" *.nuspec -Recurse | ForEach-Object {

@@ -21,6 +21,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="AppDomainExtensions.cs" />
+    <Compile Include="..\..\Common\AssemblyInfoVersion.cs">
+      <Link>Properties\AssemblyInfoVersion.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Web" />
@@ -55,9 +58,6 @@
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.Hub.dll</HintPath>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\..\Common\AssemblyInfoVersion.cs" Link="AssemblyInfoVersion.cs" />
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

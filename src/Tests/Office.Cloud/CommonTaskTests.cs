@@ -3,7 +3,7 @@ using JetBrains.Annotations;
 using NUnit.Framework;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Tests{
-    public abstract class BaseTaskTests:BaseCloudTests{
+    public abstract class CommonTaskTests:CommonCloudTests{
         
         [UsedImplicitly][Order(2)]
         public abstract Task Map_Two_New_Tasks(DevExpress.Persistent.Base.General.TaskStatus projectTaskStatus,string taskStatus);

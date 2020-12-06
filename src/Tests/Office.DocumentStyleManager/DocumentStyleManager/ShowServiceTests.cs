@@ -17,7 +17,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManager{
-    public class ShowServiceTests:BaseTests{
+    public class ShowServiceTests:CommonTests{
         
         [Test][XpandTest()][Apartment(ApartmentState.STA)]
         public void Is_Inactive_ByDefault(){

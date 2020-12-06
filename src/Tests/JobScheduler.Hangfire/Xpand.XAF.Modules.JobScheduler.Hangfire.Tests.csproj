@@ -19,6 +19,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageReference Include="hangfire.core" Version="1.7.18" />
     <PackageReference Include="hangfire.sqlserver" Version="1.7.18" />
+    <PackageReference Include="hangfire.aspnetcore" Version="1.7.18" />
+    <PackageReference Include="hangfire.memorystorage" Version="1.7.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.0" />
   </ItemGroup>
@@ -36,7 +38,7 @@
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.Xpo.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.TestsLib.Blazor">
-      <HintPath>..\..\..\bin\Xpand.TestsLib.Blazor.dll</HintPath>
+      <HintPath>..\..\..\bin\netcoreapp3.1\Xpand.TestsLib.Blazor.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.TestsLib.Common">
       <HintPath>..\..\..\bin\Xpand.TestsLib.Common.dll</HintPath>

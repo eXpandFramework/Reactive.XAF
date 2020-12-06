@@ -1,7 +1,7 @@
 ﻿using Xpand.TestsLib;
 
 namespace Xpand.XAF.Modules.ViewWizard.Tests{
-    public class ModelLogicTests:ViewWizardBaseTest{
+    public class ModelLogicTests:ViewWizardCommonTest{
         
 
         // [Test][XpandTest()]

@@ -11,7 +11,7 @@ using Xpand.XAF.Modules.PositionInListView.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.XAF.Modules.PositionInListView.Tests{
-	public class PositionInListServiceTests : PositionInListViewBaseTest{
+	public class PositionInListServiceTests : PositionInListViewCommonTest{
 
 		[TestCase(null, 1, 2, 3, 4)]
 		[TestCase(PositionInListViewNewObjectsStrategy.Last, 1, 2, 3, 4)]

@@ -2,7 +2,7 @@ param(
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\"),
     $branch = "lab",
     $source,
-    $dxVersion = "20.2.3"
+    $dxVersion = "20.1.9"
 )
 if (!$source) {
     $source = "$(Get-PackageFeed -Xpand);$env:DxFeed"
@@ -101,6 +101,24 @@ $config.configuration.runtime.assemblyBinding.dependentassembly|ForEach-Object{
         Version=$_.bindingRedirect.NewVersion
     }
 }|Format-Table
+function GetConfiguration($solution,$Configuration){
+    $minor=Get-VersionPart $dxVersion Minor
+    $match=(Read-MSBuildSolutionFile $solution).SolutionConfigurations.ConfigurationName|ForEach-Object{
+        if (Test-Version $_){
+            if (([version]$_) -ge ([version]$minor)){
+                $_
+            }
+        }
+    }|Select-Object -First 1
+    
+    if ($match){
+        $match
+    }
+    else{
+        $Configuration
+    }
+}
+
 Invoke-Script {
     
     Write-HostFormatted "Complie Tests.sln" -ForegroundColor Magenta
@@ -114,10 +132,7 @@ Invoke-Script {
     $testsource=$tempNupkg,(Get-PackageFeed -Nuget),(Get-PackageFeed -Xpand)
     $testsource+=$source
     Use-NugetConfig -Sources $testsource -ScriptBlock{
-        $configuration="Debug"
-        if (([version]$dxVersion) -lt "20.1.7"){
-            $configuration="NetCore";
-        }
+        $configuration=GetConfiguration "$testAppPAth\Tests.sln" "debug"
         Start-Build "$testAppPAth\Tests.sln" -BinaryLogPath $root\bin\Tests.binlog -WarnAsError -Configuration $configuration
     }
     Pop-Location

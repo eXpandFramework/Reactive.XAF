@@ -9,7 +9,7 @@ using Xpand.TestsLib.Common.BO;
 using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.XAF.Modules.ViewItemValue.Tests{
-    public class ViewItemValueTests:ViewItemValueBaseTest{
+    public class ViewItemValueTests:ViewItemValueCommonTest{
         [Test][XpandTest()]
         public void ViewItemValue_action_is_inactive_bydefault(){
             using var application=ViewItemValueModule().Application;

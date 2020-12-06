@@ -38,7 +38,7 @@ using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.Ty
 
 namespace Xpand.XAF.Modules.ModelMapper.Tests{
     [NonParallelizable]
-    public class ModelMapperExtenderServiceTests : ModelMapperBaseTest{
+    public class ModelMapperExtenderServiceTests : ModelMapperCommonTest{
         [XpandTest]
         [TestCase(typeof(TestModelMapper),nameof(Platform.Win))]
         [TestCase(typeof(TestModelMapper),nameof(Platform.Web))]

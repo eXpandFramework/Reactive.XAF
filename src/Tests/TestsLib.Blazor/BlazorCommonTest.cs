@@ -7,11 +7,11 @@ using Microsoft.Extensions.Hosting;
 using Xpand.TestsLib.Common;
 
 namespace Xpand.TestsLib.Blazor {
-    public class BlazorBaseTest:BaseTest {
+    public class BlazorCommonTest:CommonTest {
         private IHost _webHost;
 
 
-        static BlazorBaseTest() {
+        static BlazorCommonTest() {
             TestsLib.Common.Extensions.ApplicationType = typeof(TestBlazorApplication);
         }
         public override void Dispose() {

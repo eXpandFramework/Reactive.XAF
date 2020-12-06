@@ -3,7 +3,7 @@ using akarnokd.reactive_extensions;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.Transform.System;
-using Xpand.TestsLib.Common;
+using Xpand.TestsLib;
 using Xpand.TestsLib.Common.Attributes;
 
 namespace Xpand.Extensions.Tests {

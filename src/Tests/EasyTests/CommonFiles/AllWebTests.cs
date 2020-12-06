@@ -19,11 +19,11 @@ using Xpand.TestsLib.EasyTest.Commands.ActionCommands;
 using Xpand.TestsLib.EasyTest.Commands.Automation;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Logger;
-using BaseTest = ALL.Tests.BaseTest;
+using CommonTest = ALL.Tests.CommonTest;
 
 namespace Web.Tests{
     [NonParallelizable]
-    public class AllWebTests : BaseTest{
+    public class AllWebTests : CommonTest{
 #if !NETCOREAPP3_1
         [Test()]
         [TestCaseSource(nameof(AgnosticModules))]

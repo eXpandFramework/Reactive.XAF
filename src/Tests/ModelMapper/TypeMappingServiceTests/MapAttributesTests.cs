@@ -14,7 +14,7 @@ using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
     [NonParallelizable]
-    public class MapAttributesTests:ModelMapperBaseTest{
+    public class MapAttributesTests:ModelMapperCommonTest{
         [Test]
         [XpandTest]
         public async Task Map_Private_DescriptionAttributes(){

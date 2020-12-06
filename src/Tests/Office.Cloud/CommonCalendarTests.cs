@@ -2,7 +2,7 @@
 using JetBrains.Annotations;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Tests{
-    public abstract class BaseCalendarTests:BaseCloudTests{
+    public abstract class CommonCalendarTests:CommonCloudTests{
         
         [UsedImplicitly]
         public abstract Task Map_Two_New_Events();

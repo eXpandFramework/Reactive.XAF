@@ -13,7 +13,7 @@ using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.Ty
 
 namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
     [NonParallelizable]
-    public class DoNotMapTests:ModelMapperBaseTest{
+    public class DoNotMapTests:ModelMapperCommonTest{
         [Test]
         [XpandTest]
         public async Task Do_Not_Map_If_recursion_detected(){

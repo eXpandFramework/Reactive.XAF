@@ -281,7 +281,7 @@ namespace Xpand.TestsLib.Common{
             string applicationTypeName;
             if (platform == Platform.Web) {
                 applicationTypeName = "Xpand.TestsLib.TestWebApplication";
-                application = (XafApplication) AppDomain.CurrentDomain.CreateTypeInstance(applicationTypeName, typeof(TModule), transmitMessage, handleExceptions);
+                application = (XafApplication) AppDomain.CurrentDomain.CreateTypeInstance(applicationTypeName, typeof(TModule), transmitMessage);
             }
             else if (platform == Platform.Win){
                 applicationTypeName = "Xpand.TestsLib.TestWinApplication";

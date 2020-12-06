@@ -15,7 +15,7 @@ using Xpand.XAF.Modules.Reactive.Services.Actions;
 using Xpand.XAF.Modules.ViewWizard.Tests.BO;
 
 namespace Xpand.XAF.Modules.ViewWizard.Tests{
-    public class ViewWizardTests:ViewWizardBaseTest{
+    public class ViewWizardTests:ViewWizardCommonTest{
         [Test]
         [XpandTest()]
         public void ShowWizard_Action_disabled_always(){

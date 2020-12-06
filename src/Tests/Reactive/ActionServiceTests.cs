@@ -11,7 +11,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 namespace Xpand.XAF.Modules.Reactive.Tests{
-    public class ActionServiceTests:ReactiveBaseTest{
+    public class ActionServiceTests:ReactiveCommonTest{
         [TestCase(ViewType.ListView,false)]
         [XpandTest()][TestCase(ViewType.DetailView,true)]
         public void ActivateForCurrentUser(ViewType viewType, bool active) {

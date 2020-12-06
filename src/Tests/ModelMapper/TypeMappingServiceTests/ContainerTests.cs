@@ -13,7 +13,7 @@ using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.Ty
 
 namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
     [NonParallelizable]
-    public class ContainerTests:ModelMapperBaseTest{
+    public class ContainerTests:ModelMapperCommonTest{
         [Test]
         [XpandTest]
         public async Task Custom_Container_Image(){

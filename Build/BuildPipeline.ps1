@@ -3,11 +3,11 @@ param(
     $SourcePath = "$PSScriptRoot\..",
     $GitHubUserName = "apobekiaris",
     $GitHubToken = $env:GitHubToken,
-    $DXApiFeed = $env:LocalDXFeed,
+    $DXApiFeed = $env:DxFeed,
     $artifactstagingdirectory,
     $bindirectory,
     [string]$AzureToken = $env:AzDevopsToken,
-    [string]$CustomVersion = "20.2.3.0"
+    [string]$CustomVersion = "20.2.4.0"
 )
 
 if (!(Get-Module eXpandFramework -ListAvailable)) {
@@ -59,11 +59,11 @@ Invoke-Script{
     }
 
     Set-Location "$SourcePath"
-    "PaketRestore $SourcePath"
+    
 
     Write-HostFormatted "Start-ProjectConverter version $CustomVersion"  -Section
     Start-XpandProjectConverter -version $CustomVersion -path $SourcePath -SkipInstall
-
+    "PaketRestore $SourcePath"
     try {
         Invoke-PaketRestore -Strict 
     }
@@ -72,7 +72,15 @@ Invoke-Script{
         Write-HostFormatted "PaketInstall $SourcePath (due to different Version)" -section
         dotnet paket install 
     }
-    . "$SourcePath\build\targets\SignHangfire.ps1"
+    $nugetPackageFolder="$env:USERPROFILE\.nuget\packages"
+    if (Test-AzDevops){
+        $nugetPackageFolder="D:\a\1\.nuget\packages"
+    }
+    & powershell.exe "$SourcePath\build\targets\Xpand.XAF.Modules.JobScheduler.Hangfire.ps1" -nugetPackagesFolder $nugetPackageFolder
+    
+    Get-AssemblyPublicKeyToken (Get-ChildItem $nugetPackageFolder "*Hangfire.core.dll" -Recurse|Select-Object -First 1)
+    # New-Command "Gac Assemblies" -commandPath "c:\windows\syswow64\WindowsPowerShell\v1.0\powershell.exe" -commandArguments "$SourcePath\build\targets\Xpand.XAF.Modules.JobScheduler.Hangfire.ps1"
+    
     # if ($Branch -eq "lab") {
     #     Write-HostFormatted "checking for New DevExpress Version ($CustomVersion) " -Section
     #     $filter = "DevExpress*"

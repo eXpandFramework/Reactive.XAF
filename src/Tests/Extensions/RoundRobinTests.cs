@@ -4,7 +4,7 @@ using akarnokd.reactive_extensions;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.TestsLib.Common;
+using Xpand.TestsLib;
 
 namespace Xpand.Extensions.Tests{
 	public class RoundRobinTests:BaseTest{

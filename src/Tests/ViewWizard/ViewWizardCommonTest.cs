@@ -1,11 +1,12 @@
 ﻿using DevExpress.ExpressApp;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
+using Xpand.TestsLib;
 using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.CloneModelView;
 using Xpand.XAF.Modules.ViewWizard.Tests.BO;
 
 namespace Xpand.XAF.Modules.ViewWizard.Tests{
-    public abstract class ViewWizardBaseTest:BaseTest{
+    public abstract class ViewWizardCommonTest:BaseTest{
         protected static ViewWizardModule ViewWizardModule(params ModuleBase[] modules){
             var application = Platform.Win.NewApplication<ViewWizardModule>();
             application.Modules.Add(new CloneModelViewModule());

@@ -19,7 +19,7 @@ using Xpand.XAF.Modules.Reactive.Services.Actions;
 using Xpand.XAF.Modules.Reactive.Tests.BOModel;
 
 namespace Xpand.XAF.Modules.Reactive.Tests{
-    public class ActionRegistrationTests:ReactiveBaseTest{
+    public class ActionRegistrationTests:ReactiveCommonTest{
         [XpandTest()]
         [TestCase(ViewType.DetailView,3)]
         [TestCase(ViewType.ListView,4)]

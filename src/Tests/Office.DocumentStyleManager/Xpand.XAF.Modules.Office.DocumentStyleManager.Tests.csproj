@@ -36,7 +36,7 @@
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.ViewItemValue.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Office.DocumentStyleManager">
-      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Office.DocumentStyleManager.dll</HintPath>
+      <HintPath>..\..\..\bin\net461\Xpand.XAF.Modules.Office.DocumentStyleManager.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive.Logger">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.dll</HintPath>

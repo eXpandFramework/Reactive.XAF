@@ -44,12 +44,12 @@
     <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="20.2.4" />
     <PackageReference Include="MagicOnion" Version="2.6.3" />
     <PackageReference Include="Moq" Version="4.15.1" />
-    <PackageReference Include="Shouldly" Version="4.0.0" />
+    <PackageReference Include="Shouldly" Version="4.0.1" />
     <PackageReference Include="System.Buffers" Version="4.5.1" />
     <PackageReference Include="System.Reactive" Version="5.0.0" />
     <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.202.0.1" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.202.44.1" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.TestsLib">

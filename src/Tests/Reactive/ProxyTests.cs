@@ -4,6 +4,7 @@ using DevExpress.ExpressApp;
 using JetBrains.Annotations;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.TestsLib;
 using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
 

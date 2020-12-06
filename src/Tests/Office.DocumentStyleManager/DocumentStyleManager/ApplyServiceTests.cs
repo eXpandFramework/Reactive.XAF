@@ -21,7 +21,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManager{
-    public class ApplyServiceTests:BaseTests{
+    public class ApplyServiceTests:CommonTests{
         [Test][XpandTest()][Apartment(ApartmentState.STA)]
         public void Apply_Style_to_Document(){
 	        using var application=DocumentStyleManagerModule().Application;

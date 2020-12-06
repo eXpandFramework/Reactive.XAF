@@ -22,6 +22,7 @@
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="20.2.4" />
     <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="20.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="20.2.4" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.Extensions">

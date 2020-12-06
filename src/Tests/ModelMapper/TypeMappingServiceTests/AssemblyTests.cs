@@ -17,7 +17,7 @@ using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.Ty
 
 namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
     [NonParallelizable]
-    public class AssemblyTests:ModelMapperBaseTest{
+    public class AssemblyTests:ModelMapperCommonTest{
 	    
         [XpandTest]
         [TestCase(nameof(Platform.Win))]

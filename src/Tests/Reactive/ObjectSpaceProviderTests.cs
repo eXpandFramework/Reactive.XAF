@@ -4,7 +4,7 @@ using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.Reactive.Tests{
-    public class ObjectSpaceProviderTests:ReactiveBaseTest{
+    public class ObjectSpaceProviderTests:ReactiveCommonTest{
         // [Test]
         [XpandTest()]
         public void WhenSchemaUpdating(){

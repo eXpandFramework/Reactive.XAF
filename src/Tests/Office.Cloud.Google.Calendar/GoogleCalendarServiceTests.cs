@@ -28,7 +28,7 @@ using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
     [NonParallelizable]
-    public class GoogleCalendarServiceTests : BaseCalendarTests{
+    public class GoogleCalendarServiceTests : CommonCalendarTests{
         
         [Test]
         [XpandTest()]

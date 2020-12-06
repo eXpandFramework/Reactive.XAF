@@ -18,19 +18,19 @@ using AssemblyExtensions = Xpand.Extensions.AssemblyExtensions.AssemblyExtension
 using IDisposable = System.IDisposable;
 
 namespace Xpand.TestsLib.Common{
-    public abstract class BaseTest : IDisposable{
+    public abstract class CommonTest : IDisposable{
         public const int LongTimeout = 900000;
         [UsedImplicitly]
         protected Platform GetPlatform(string platformName) => (Platform) Enum.Parse(typeof(Platform), platformName);
 
         [UsedImplicitly] protected TimeSpan Timeout = TimeSpan.FromSeconds(Debugger.IsAttached ? 120 : 5);
 
-        protected BaseTest() => AssemblyExtensions.EntryAssembly=GetType().Assembly;
+        protected CommonTest() => AssemblyExtensions.EntryAssembly=GetType().Assembly;
 
-        static BaseTest() {
+        static CommonTest() {
             TextListener = new TextWriterTraceListener($@"{AppDomain.CurrentDomain.ApplicationPath()}\reactive.log");
             var traceSourceSwitch = new SourceSwitch("SourceSwitch", "Verbose");
-            TraceSource = new TraceSource(nameof(BaseTest)){Switch = traceSourceSwitch};
+            TraceSource = new TraceSource(nameof(CommonTest)){Switch = traceSourceSwitch};
             TraceSource.Listeners.Add(TextListener);
         }
         [UsedImplicitly]

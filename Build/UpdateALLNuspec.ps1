@@ -1,14 +1,19 @@
 param(
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\"),
     $Release=$false,
-    $Branch="lab"
+    $Branch="lab",
+    $dxVersion
 )
 Use-MonoCecil | Out-Null
+# $VerbosePreference ="continue"
 function UpdateALLNuspec($platform, $allNuspec, $nuspecs,$allModuleNuspecs,$csProjects) {
     
     $platformNuspecs = $allModuleNuspecs | ForEach-Object {
         [xml]$nuspec = Get-Content $_.FullName
         
+        if ($_.BaseName -eq "Xpand.XAF.Modules.Reactive"){
+            Write-Verbose $_.BaseName
+        }
         $nuspecBaseName=$_.BaseName
         $filesrc=($nuspec.package.Files.file|Where-Object{$_.src -like "*$nuspecBaseName.dll"}).src
         $platformMetada = Get-AssemblyMetadata "$root\bin\$filesrc" -key "Platform"
@@ -22,37 +27,8 @@ function UpdateALLNuspec($platform, $allNuspec, $nuspecs,$allModuleNuspecs,$csPr
         }        
         
     }
-    $platformNuspecs
-    [version]$modulesVersion=Get-VersionPart ([System.Diagnostics.FileVersionInfo]::GetVersionInfo("$root\bin\Xpand.XAF.Modules.Reactive.dll" ).FileVersion) build
-    "Year Version build=$modulesVersion"
-    $source="lab"
-    if ($branch -eq "master"){
-        $source="Release"
-    }
-    [version]$nowVersion = (Find-XpandPackage $allNuspec.package.metadata.Id -packagesource $source).Version
-    $releasedVersion=[version](Get-VersionPart (Find-XpandPackage $allNuspec.package.metadata.Id -packagesource Release).Version Build)
-    "release build=$releasedVersion"
-    $nowBuild=([version](Get-VersionPart $nowVersion Build))
-    "nowBuild=$nowBuild"
-    if ($releasedVersion -gt $nowBuild){
-        $nowVersion=[version]"$releasedVersion.0"
-    }
-    "nowVersion=$nowVersion"
-
-    $build=$nowVersion.Build
-    $revision=($nowVersion.Revision + 1)
-    if ($Branch -eq "master"){
-        $build+=1
-        if ($modulesVersion.Major -gt $nowVersion.Major){
-            $build=0
-        }
-        $revision=0
-    }
-    if ($nowVersion.Minor -ne $modulesVersion.Minor){
-        $revision=0
-    }
-    $v = New-Object System.version($modulesVersion.Major, $modulesVersion.Minor, $build, $revision)
-    "newVersion=$v"
+    
+    $v=Get-AssemblyInfoVersion "$root\src\Common\AssemblyInfoVersion.cs"
     $allNuspec.package.metadata.version = ($v).ToString()
     if ($allNuspec.package.metadata.dependencies) {
         $allNuspec.package.metadata.dependencies.RemoveAll()
@@ -82,7 +58,7 @@ function UpdateALLNuspec($platform, $allNuspec, $nuspecs,$allModuleNuspecs,$csPr
     }
 }
 
-$nuspecs = Get-ChildItem "$root\build\nuspec" *.nuspec
+$nuspecs = Get-ChildItem "$root\build\nuspec" *.nuspec|Where-Object{$dxVersion -gt "20.2.0" -or $_.BaseName -notmatch "blazor|hangfire"}
 $nuspecs | ForEach-Object {
     [xml]$nuspec = Get-Content $_.FullName
     $nuspec.package.metaData.dependencies.dependency | Where-Object { $_.Id -like "DevExpress*" } | ForEach-Object {

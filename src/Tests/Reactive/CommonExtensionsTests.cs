@@ -10,7 +10,7 @@ using Xpand.TestsLib.Common.Attributes;
 
 namespace Xpand.XAF.Modules.Reactive.Tests{
     [NonParallelizable]
-    public class CommonExtensionsTests:BaseTest{
+    public class CommonExtensionsTests:CommonTest{
         [Test]
         [XpandTest]
         public void CountSubSequent(){

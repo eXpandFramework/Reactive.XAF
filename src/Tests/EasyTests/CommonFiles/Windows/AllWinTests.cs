@@ -20,11 +20,11 @@ using Xpand.TestsLib.EasyTest.Commands.Automation;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Logger;
 using AutoTestCommand = Xpand.TestsLib.EasyTest.Commands.ActionCommands.AutoTestCommand;
-using BaseTest = ALL.Tests.BaseTest;
+using CommonTest = ALL.Tests.CommonTest;
 
 namespace ALL.Win.Tests{
 	[NonParallelizable]
-    public class AllWinTests : BaseTest{
+    public class AllWinTests : CommonTest{
         [Test()]
         [TestCaseSource(nameof(AgnosticModules))]
         [TestCaseSource(nameof(WinModules))]

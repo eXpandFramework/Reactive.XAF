@@ -10,7 +10,7 @@ using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.SequenceGenerator.Tests.BO;
 
 namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
-    public class ExplicitConnectionTests:SequenceGeneratorTestsBaseTests{
+    public class ExplicitConnectionTests:SequenceGeneratorTestsCommonTests{
         [XpandTest()]
         [Test()][Apartment(ApartmentState.MTA)]
         [SuppressMessage("ReSharper", "ObjectCreationAsStatement")]

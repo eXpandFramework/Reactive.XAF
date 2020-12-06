@@ -24,7 +24,7 @@ using TaskStatus = DevExpress.Persistent.Base.General.TaskStatus;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
     [NonParallelizable]
-    public class MicrosoftTodoServiceTests : BaseTaskTests{
+    public class MicrosoftTodoServiceTests : CommonTaskTests{
         [TestCase(TaskStatus.NotStarted,nameof(TaskStatus.NotStarted))]
         // [TestCase(TaskStatus.Completed,nameof(TaskStatus.Completed))]
         [XpandTest()]

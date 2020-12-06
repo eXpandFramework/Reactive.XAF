@@ -7,7 +7,7 @@ using Xpand.XAF.Modules.PositionInListView.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.XAF.Modules.PositionInListView.Tests{
-    public class ModelLogicTests:PositionInListViewBaseTest{
+    public class ModelLogicTests:PositionInListViewCommonTest{
         [Test][XpandTest()][Order(1)]
         public void ModelListView_datasource_contains_only_views_with_int_Members(){
             using (var applicatin=PositionInListViewModuleModule().Application){

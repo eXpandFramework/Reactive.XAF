@@ -11,7 +11,7 @@ using Xpand.TestsLib.EasyTest;
 using Xpand.TestsLib.EasyTest.Commands;
 
 namespace ALL.Tests{
-    public abstract class BaseTest:Xpand.TestsLib.Common.BaseTest{
+    public abstract class CommonTest:Xpand.TestsLib.Common.CommonTest{
         [SuppressMessage("ReSharper", "MethodHasAsyncOverload")]
         protected async Task EasyTest<TAppAdapter>(Func<TAppAdapter> appAdapter,
             Func<TAppAdapter, string, TestApplication> applicationFactory, Func<ICommandAdapter, Task> executeCommands,

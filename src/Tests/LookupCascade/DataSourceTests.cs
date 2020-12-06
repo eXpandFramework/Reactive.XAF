@@ -13,7 +13,7 @@ using Xpand.XAF.Modules.LookupCascade.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.XAF.Modules.LookupCascade.Tests{
-    public class DataSourceTests:LookupCascadeBaseTest{
+    public class DataSourceTests:LookupCascadeCommonTest{
         [XpandTest]
         [Test]
         [Order(1)]

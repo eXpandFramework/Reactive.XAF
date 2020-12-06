@@ -14,6 +14,7 @@ using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
+using Xpand.TestsLib;
 using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.HideToolBar.Tests.BOModel;

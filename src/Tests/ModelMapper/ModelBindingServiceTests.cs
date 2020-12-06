@@ -52,7 +52,7 @@ using Task = System.Threading.Tasks.Task;
 
 namespace Xpand.XAF.Modules.ModelMapper.Tests{
     [NonParallelizable]
-    public class ModelMapperBinderServiceTests:ModelMapperBaseTest{
+    public class ModelMapperBinderServiceTests:ModelMapperCommonTest{
         [XpandTest]
         [TestCase(nameof(Platform.Win))]
         public void Bind_Only_NullAble_Properties_That_are_not_Null(string platformName){

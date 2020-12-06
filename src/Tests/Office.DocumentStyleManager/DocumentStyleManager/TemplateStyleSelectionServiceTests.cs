@@ -18,7 +18,7 @@ using Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleManage
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManager{
-	public class TemplateStyleSelectionServiceTests:BaseTests{
+	public class TemplateStyleSelectionServiceTests:CommonTests{
 		[Test][Apartment(ApartmentState.STA)][XpandTest()]
 		public void Action_should_be_disable_by_default(){
 			using var application=DocumentStyleManagerModule().Application;

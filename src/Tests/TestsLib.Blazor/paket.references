@@ -7,3 +7,4 @@ Microsoft.Extensions.DependencyInjection.Abstractions
 Microsoft.AspNetCore.Http.Abstractions
 hangfire.aspnetcore
 DevExpress.ExpressApp.Xpo
+System.Diagnostics.PerformanceCounter

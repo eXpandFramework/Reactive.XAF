@@ -4,7 +4,7 @@ using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.XAF.ModelExtensions;
-using Xpand.TestsLib.Common;
+using Xpand.TestsLib;
 using Xpand.TestsLib.Common.Attributes;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{

@@ -33,10 +33,10 @@ namespace Xpand.TestsLib.Blazor{
             
             TraceClientConnected = this.ClientConnect();
             TraceClientBroadcast = this.ClientBroadcast();
-            this.WhenCreateCustomObjectSpaceProvider()
-                .SelectMany(t => {
-                    var xpoDataStoreProvider = ServiceProvider.GetRequiredService<XpoDataStoreProviderAccessor>().DataStoreProvider;
-                })
+            // this.WhenCreateCustomObjectSpaceProvider()
+            //     .SelectMany(t => {
+            //         var xpoDataStoreProvider = ServiceProvider.GetRequiredService<XpoDataStoreProviderAccessor>().DataStoreProvider;
+            //     })
         }
 
         public bool TransmitMessage => false;

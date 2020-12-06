@@ -13,7 +13,7 @@ using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
     [NonParallelizable]
-    public class JobSchedulerTests:JobSchedulerBaseTest{
+    public class JobSchedulerTests:JobSchedulerCommonTest{
 
 
         [TestCase(false)]
@@ -24,9 +24,9 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
             using var application = JobSchedulerModule().Application;
             var objectSpace = application.CreateObjectSpace();
             
-            var scheduledJob = objectSpace.CreateObject<ScheduledJob>();
+            var scheduledJob = objectSpace.CreateObject<Job>();
             scheduledJob.Id = "test";
-            var testObserver = ScheduledJobService.CustomJobSchedule.Handle().SelectMany(args => args.Instance).Test();
+            var testObserver = JobService.CustomJobSchedule.Handle().SelectMany(args => args.Instance).Test();
             objectSpace.CommitChanges();
             
             testObserver.ItemCount.ShouldBe(1);
@@ -71,14 +71,14 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
             
             application.CommitNewJob();
             
-            var jobExecution = await observable;
+            var jobState = await observable;
             var objectSpace = application.CreateObjectSpace();
-            jobExecution=objectSpace.GetObjectByKey<JobState>(jobExecution.Oid);
-            var job = jobExecution.Job;
-            job.State.ShouldBe(ScheduledJobState.Succeeded);
-            job.ScheduledJob.Executions.ShouldBe(1);
-            job.ScheduledJob.FailedJobs.ShouldBe(0);
-            job.ScheduledJob.SuccessFullJobs.ShouldBe(1);
+            jobState=objectSpace.GetObjectByKey<JobState>(jobState.Oid);
+            var shooter = jobState.Shooter;
+            shooter.State.ShouldBe(ScheduledJobState.Succeeded);
+            shooter.Job.Executions.ShouldBe(1);
+            shooter.Job.FailedJobs.ShouldBe(0);
+            shooter.Job.SuccessFullJobs.ShouldBe(1);
             
         }
         
@@ -92,19 +92,19 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
             application.CommitNewJob(methodName:methodName);
             using var objectSpace = application.CreateObjectSpace();
 
-            var jobExecution = await execute;
+            var jobState = await execute;
             
-            jobExecution=objectSpace.GetObjectByKey<JobState>(jobExecution.Oid);
-            jobExecution.Job.State.ShouldBe(ScheduledJobState.Failed);
-            jobExecution.Job.ScheduledJob.Executions.ShouldBe(executions);
-            jobExecution.Job.ScheduledJob.FailedJobs.ShouldBe(failedJobs);
-            jobExecution.Job.ScheduledJob.SuccessFullJobs.ShouldBe(successFullJobs);
+            jobState=objectSpace.GetObjectByKey<JobState>(jobState.Oid);
+            jobState.Shooter.State.ShouldBe(ScheduledJobState.Failed);
+            jobState.Shooter.Job.Executions.ShouldBe(executions);
+            jobState.Shooter.Job.FailedJobs.ShouldBe(failedJobs);
+            jobState.Shooter.Job.SuccessFullJobs.ShouldBe(successFullJobs);
         }
 
         private static  IObservable<JobState> JobExecution(ScheduledJobState lastState) 
-            => ScheduledJobService.JobExecution.FirstAsync(t => t.State == ScheduledJobState.Enqueued).IgnoreElements()
-                .Concat(ScheduledJobService.JobExecution.FirstAsync(t => t.State == ScheduledJobState.Processing).IgnoreElements())
-                .Concat(ScheduledJobService.JobExecution.FirstAsync(t => t.State == lastState))
+            => JobService.JobExecution.FirstAsync(t => t.State == ScheduledJobState.Enqueued).IgnoreElements()
+                .Concat(JobService.JobExecution.FirstAsync(t => t.State == ScheduledJobState.Processing).IgnoreElements())
+                .Concat(JobService.JobExecution.FirstAsync(t => t.State == lastState))
                 .FirstAsync();
     }
 }

@@ -19,8 +19,10 @@ namespace Xpand.Extensions.XAF.Xpo.ValueConverters {
 
             var stream = new MemoryStream();
             try {
+#if !XAF192
                 var binaryFormatter = new BinaryFormatter { AssemblyFormat = FormatterAssemblyStyle.Full };
                 binaryFormatter.Serialize(stream, value);
+#endif
                 result = Convert.ToBase64String(stream.ToArray());
             } finally {
                 stream.Close();
@@ -37,8 +39,10 @@ namespace Xpand.Extensions.XAF.Xpo.ValueConverters {
                 try {
                     byte[] base64String = Convert.FromBase64String((string)value);
                     stream = new MemoryStream(base64String) { Position = 0 };
+#if !XAF192
                     var binaryFormatter = new BinaryFormatter { AssemblyFormat = FormatterAssemblyStyle.Full };
                     result = binaryFormatter.Deserialize(stream);
+#endif
                 }
                 catch (Exception) {
                     // ignored

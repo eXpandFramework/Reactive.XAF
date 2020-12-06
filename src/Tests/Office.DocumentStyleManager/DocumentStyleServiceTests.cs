@@ -10,7 +10,7 @@ using Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions;
 
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests{
-	public class DocumentStyleServiceTests:BaseTests{
+	public class DocumentStyleServiceTests:CommonTests{
         [Test][XpandTest()]
         public void Property_Attributes_are_synchronized(){
 	        using var application=DocumentStyleManagerModule().Application;

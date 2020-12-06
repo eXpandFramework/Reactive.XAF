@@ -9,7 +9,7 @@ param(
     [string]$branch="lab",
     [switch]$InstallModules,
     [string[]]$taskList=@("Build"),
-    [string]$XpandPwshVersion = "1.202.46.4",
+    [string]$XpandPwshVersion = "1.202.47.1",
     [switch]$CustomVersion
 )
 $ErrorActionPreference = "Stop"

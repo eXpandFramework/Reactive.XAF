@@ -9,7 +9,7 @@ using Xpand.XAF.Modules.Reactive.Tests.BOModel;
 
 namespace Xpand.XAF.Modules.Reactive.Tests{
     [NonParallelizable]
-    public class CollectionSourceTests : ReactiveBaseTest{
+    public class CollectionSourceTests : ReactiveCommonTest{
         [XpandTest()][Test]
         public void When_Non_Persistent_DetailView_Nested_ListView_create_NonPersistentCollectionSource(){
             using (var application = DefaultReactiveModule().Application){

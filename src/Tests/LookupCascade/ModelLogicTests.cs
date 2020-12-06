@@ -9,7 +9,7 @@ using Xpand.XAF.Modules.LookupCascade.Tests.BOModel;
 using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.XAF.Modules.LookupCascade.Tests{
-    public class ModelLogicTests:LookupCascadeBaseTest{
+    public class ModelLogicTests:LookupCascadeCommonTest{
         [XpandTest][Order(0)]
         [TestCase("Order_ListView")]
         [TestCase("Order_DetailView")]

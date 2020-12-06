@@ -14,7 +14,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.ApplyTemplateStyle{
-	public class ShowServiceTests:Tests.BaseTests{
+	public class ShowServiceTests:Tests.CommonTests{
 		[Test][XpandTest()][Apartment(ApartmentState.STA)]
 		public void Action_is_Active_only_for_ModelTemplateListViews(){
 			using var application=DocumentStyleManagerModule().Application;

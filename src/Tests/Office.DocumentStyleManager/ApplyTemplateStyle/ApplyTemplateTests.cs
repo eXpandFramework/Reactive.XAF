@@ -11,7 +11,7 @@ using Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.Services.StyleTemplateService;
 
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.ApplyTemplateStyle{
-	public class ApplyTemplateTests:BaseTests{
+	public class ApplyTemplateTests:CommonTests{
 
 		[Test][XpandTest()][Apartment(ApartmentState.STA)]
 		public void ApplyTemplateAction_Is_enabled_when_template_has_value() {

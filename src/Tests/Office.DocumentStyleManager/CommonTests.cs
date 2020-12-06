@@ -5,13 +5,14 @@ using DevExpress.XtraRichEdit;
 using DevExpress.XtraRichEdit.API.Native;
 using NUnit.Framework;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
+using Xpand.TestsLib;
 using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions;
 using Xpand.XAF.Modules.Reactive;
 [assembly:XpandTest(IgnoredXAFVersions="19.1")]
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests{
-    public abstract class BaseTests:BaseTest{
+    public abstract class CommonTests:BaseTest{
         
         protected RichEditDocumentServer RichEditDocumentServer;
         protected Document Document;

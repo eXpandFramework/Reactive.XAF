@@ -14,7 +14,7 @@ using Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleManage
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManager{
-	public class AcceptServiceTests:BaseTests{
+	public class AcceptServiceTests:CommonTests{
         [Test][Apartment(ApartmentState.STA)][XpandTest()]
         public void AcceptChangesAction_updates_caller_member_value_and_close_view(){
             using var application=DocumentStyleManagerModule().Application;

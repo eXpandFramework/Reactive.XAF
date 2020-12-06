@@ -7,7 +7,7 @@ using Xpand.TestsLib.Common.BO;
 using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.XAF.Modules.ViewItemValue.Tests{
-    public class ModelLogicTests:ViewItemValueBaseTest{
+    public class ModelLogicTests:ViewItemValueCommonTest{
         [Test][XpandTest()]
         public void ModelObjectView_datasource_contains_only_views_with_Lookup_Members(){
             using (var applicatin=ViewItemValueModule().Application){

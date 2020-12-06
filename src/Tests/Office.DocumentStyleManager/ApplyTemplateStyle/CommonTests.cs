@@ -11,7 +11,7 @@ using Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleManage
 using Xpand.XAF.Modules.Office.DocumentStyleManager.Services.StyleTemplateService;
 
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.ApplyTemplateStyle{
-	public abstract class BaseTests:Tests.BaseTests{
+	public abstract class CommonTests:Tests.CommonTests{
 		protected void MockDocumentsListEditor(XafApplication xafApplication){
 			// xafApplication.MockEditorsFactory();
 			xafApplication.MockListEditor((view, application, collectionsource) =>

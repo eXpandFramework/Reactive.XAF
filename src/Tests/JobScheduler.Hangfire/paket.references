@@ -10,8 +10,6 @@ Xpand.Patcher
 akarnokd.reactive_extensions
 Xpand.Collections
 DevExpress.Xpo
-hangfire.memorystorage
-hangfire.aspnetcore
 Microsoft.NET.Test.SDK
 Microsoft.CodeAnalysis.CSharp
 System.Text.Json
