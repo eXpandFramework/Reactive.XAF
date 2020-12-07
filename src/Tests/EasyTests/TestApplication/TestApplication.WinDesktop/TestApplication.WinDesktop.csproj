@@ -124,7 +124,7 @@
     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.8.0" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.8.0" />
     <PackageReference Include="System.ServiceProcess.ServiceController" Version="4.7.0" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.202.44.1" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.202.44.3" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Office\Cloud\Google\" />

@@ -1,64 +1,153 @@
-trigger: none
+variables:
+    - group: keys
+    - name: NUGET_PACKAGES
+      value: $(Pipeline.Workspace)\.nuget\packages
+trigger: none 
 jobs:
-- job: BuildArtifacts
-  timeoutInMinutes: 70
-  strategy:
-    parallel: 1
+- job: TestAssemblies
+  strategy: 
+    parallel: 10
   pool:
     vmImage: windows-2019
   variables:
     - group: keys
   steps:
     - checkout: self
-    - task: DownloadBuildArtifacts@0
+    - task: DownloadPipelineArtifact@2
+      condition: ne(variables['SkipTestAssemblies'], 'Yes')
       displayName: Download Bin
       inputs:
         buildType: 'specific'
         project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
-        definition:  '23'
+        definition: '23'
         buildVersionToDownload: 'specific'
-        buildId: $(DxPipelineBuildId)
+        pipelineId: '$(DxPipelineBuildId)'
         artifactName: 'bin'
-        downloadType: single
-        downloadPath: '$(System.DefaultWorkingDirectory)'
-    # - task: DownloadBuildArtifacts@0
-    #   displayName: Download EasyTests
-    #   inputs:
-    #     buildType: 'specific'
-    #     project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
-    #     definition:  '23'
-    #     buildVersionToDownload: specific
-    #     buildId: $(DxPipelineBuildId)
-    #     artifactName: 'Tests'
-    #     downloadType: single
-    #     downloadPath: '$(System.DefaultWorkingDirectory)\bin'
+        targetPath: '$(System.DefaultWorkingDirectory)\bin'
     - task: AzurePowerShell@5
+      condition: and(ne(variables['SkipTestAssemblies'], 'Yes'),ne(variables['AzStorageLookup'], '0'))
+      name: AzStorageLookup
       inputs:
-        azureSubscription: 'Visual Studio Enterprise(b48a609a-17f6-4e48-a317-54ab77fbf822)'
-        ScriptType: 'InlineScript'
+        errorActionPreference: stop
+        FailOnStandardError: true
+        azureSubscription: "Visual Studio Enterprise(b48a609a-17f6-4e48-a317-54ab77fbf822)"
+        ScriptType: "InlineScript"
+        azurePowerShellVersion: "LatestVersion"
+        pwsh: true
         Inline: |
-          $a = @{
-            Sourcepath = '$(System.DefaultWorkingDirectory)'
-            AzureToken ='$(AzureToken)'
-            AzureApplicationId='$(AzureApplicationId)'
-            AzureTenantId='$(AzureTenantId)'
-            XpandBlobOwnerSecret='$(XpandBlobOwnerSecret)'
-            AzStorageLookup=('$(AzStorageLookup)' -eq "1")
+          $ErrorView="NormalView"
+          "Nugetpackage=$env:Nuget_PACKAGES"
+          $ErrorActionPreference="stop"
+          $goArgs = @{
+              GithubToken              = '$(GitHubToken)'
+              AzureToken               = '$(AzureToken)' 
+              GitHubUserName           = '$(GitHubUserName)' 
+              DXApiFeed                = '$(DXApiFeed)'
+              Branch                   = '$(Build.SourceBranchName)'
+              SourcePath               = '$(System.DefaultworkingDirectory)'
+              ArtifactStagingDirectory = '$(Build.Artifactstagingdirectory)'
+              BinDirectory             = '$(System.DefaultworkingDirectory)\bin'
+              CustomVersion            = '$(CustomVersion)'
+              UseLastVersion           = '$(UseLastVersion)'
+              XpandBlobOwnerSecret     = '$(XpandBlobOwnerSecret)'
+              AzureApplicationId       = '$(AzureApplicationId)'
+              AzureTenantId            = '$(AzureTenantId)'
           }
-          $a|write-output
-          & '$(System.DefaultWorkingDirectory)/build/TestPipeline.ps1' @a
-        azurePowerShellVersion: 'LatestVersion'
-  
-    - task: PublishPipelineArtifact@1
+          "goArgs:"
+          $goArgs | Out-String
+          & '$(System.DefaultWorkingDirectory)\Build\AzureStorageLookup.ps1' 
+    - task: VSTest@2
+      condition: ne(variables['SkipTestAssemblies'], 'Yes')
+      displayName: 'TestAssembliesWithNet461'
+      enabled: true
+      continueOnError: true
       inputs:
-        targetPath: '$(Pipeline.Workspace)'
-        artifact: 'bin'
-        publishLocation: 'pipeline'
-- job: ALLWinTests
-  timeoutInMinutes: 70
-  dependsOn: 'BuildArtifacts'
-  strategy:
-    parallel: 10
+        searchFolder: '$(System.DefaultWorkingDirectory)\bin\net461'
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: |
+          **\Xpand.XAF.Modules.Google.Tests.dll
+          **\Xpand.XAF.Modules.Google.Tasks.Tests.dll
+          **\Xpand.XAF.Modules.Google.Calendar.Tests.dll
+          **\Xpand.XAF.Modules.Microsoft.Tests.dll
+          **\Xpand.XAF.Modules.Microsoft.Todo.Tests.dll
+          **\Xpand.XAF.Modules.Microsoft.Calendar.Tests.dll
+          **\Xpand.XAF.Modules.DocumentStyleManager*.Tests.dll
+
+          **\Xpand.XAF.Modules.AutoCommit.Tests.dll
+          **\Xpand.XAF.Modules.ClientLookupCascade.Tests.dll
+          **\Xpand.XAF.Modules.CloneMemberValue.Tests.dll
+          **\Xpand.XAF.Modules.CloneModelView.Tests.dll
+          **\Xpand.Extensions.Tests.dll
+          **\Xpand.XAF.Modules.GridListEditor.Tests.dll
+          **\Xpand.XAF.Modules.HideToolBar.Tests.dll
+          **\Xpand.XAF.Modules.LookupCascade.Tests.dll
+          **\Xpand.XAF.Modules.ModelMapper.Tests.dll
+          **\Xpand.XAF.Modules.ModelViewInheritance.Tests.dll
+          **\Xpand.XAF.Modules.OneView.Tests.dll
+          **\Xpand.XAF.Modules.PositionInListView.Tests.dll
+          **\Xpand.XAF.Modules.ProgressBarViewItem.Tests.dll
+          **\Xpand.XAF.Modules.Reactive.Tests.dll
+          **\Xpand.XAF.Modules.Reactive.Logger.Tests.dll
+          **\Xpand.XAF.Modules.Reactive.Logger.Hub.Tests.dll
+          **\Xpand.XAF.Modules.RefreshView.Tests.dll
+          **\Xpand.XAF.Modules.SequenceGenerator.Tests.dll
+          **\Xpand.XAF.Modules.SuppressConfirmations.Tests.dll
+          **\Xpand.XAF.Modules.ViewEditMode.Tests.dll
+          **\Xpand.XAF.Modules.ViewItemValue.Tests.dll
+          **\Xpand.XAF.Modules.ViewWizard.Tests.dll
+          
+          !**\obj\**    
+        diagnosticsEnabled: true
+        codeCoverageEnabled: true
+        distributionBatchType: basedOnExecutionTime
+        runInParallel: false
+        runSettingsFile: $(System.DefaultWorkingDirectory)\build\Tests.runsettings
+        runTestsInIsolation: false
+        collectDumpOn: never
+- job: AddPastVersionBuild
+  dependsOn: TestAssemblies
+  strategy: 
+    parallel: 1
+  pool:
+    vmImage: windows-2019
+  variables:
+    - group: keys
+  steps:
+    - checkout: self
+    - task: PowerShell@2
+      continueOnError: false
+      name: AddBuild
+      condition: eq(variables['BuildPastVersion'], 'Yes')
+      inputs:
+        pwsh: true
+        targetType: 'inline'
+        script: |
+          $ErrorView="NormalView"
+          $ErrorActionPreference="stop"
+          $env:AzureToken='$(AzureToken)'
+          $env:AzProject="eXpandFramework"
+          $env:AzOrganization="eXpandDevOps"
+          & '$(System.DefaultWorkingDirectory)\go.ps1' -InstallModules -OnlyXpwsh
+          $CustomVersion='$(CustomVersion)'
+          Set-VsoVariable build.updatebuildnumber "$env:build_BuildNumber-$CustomVersion"
+          $minors=Get-XAFLatestMinors -source '$(DXApiFeed)'
+          $latest=$minors|Select-Object -First 1
+          $past=$minors|Select-Object -Skip 1 -First 1
+          $last=$minors|Select-Object -Last 1
+
+          if ('$(CustomVersion)' -eq $past){
+              $past=$last
+          }
+          $parameters = @{
+              CustomVersion = "$past"
+              NupkgBuild = (Get-AzBuilds -Definition DevExpress.XAF-Lab -Result succeeded -Tag '$(CustomVersion)' -Top 1).Id
+          }
+          "past=$past"
+          Add-AzBuild -Definition DevExpress.XAF-Lab -Tag $past -Parameters $parameters
+- job: TestNugetChecConsumerPipeline
+  dependsOn: TestAssemblies
+  strategy: 
+    parallel: 2
   pool:
     vmImage: windows-2019
   variables:
@@ -66,279 +155,48 @@ jobs:
   steps:
     - checkout: self
     - task: DownloadPipelineArtifact@2
+      displayName: Download NugetConsumers
+      inputs:
+        buildType: 'specific'
+        project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
+        definition: '23'
+        buildVersionToDownload: 'specific'
+        pipelineId: '$(DxPipelineBuildId)'
+        artifactName: 'NugetConsumers'
+        targetPath: '$(System.DefaultWorkingDirectory)\bin\'
+    - task: PowerShell@2
+      continueOnError: false
+      name: WaitForBinArtifact
+      inputs:
+        pwsh: true
+        targetType: 'inline'
+        script: |
+          $ErrorView="NormalView"
+          $ErrorActionPreference="stop"
+          $env:AzureToken='$(AzureToken)'
+          & '$(System.DefaultWorkingDirectory)\Build\WaitForArtifact.ps1' -BuildId '$(DxPipelineBuildId)' -GitUserEmail '$(GitUserEmail)' -GithubToken '$(GithubToken)'
+    - task: VSTest@2
+      displayName: 'TestNugetConsumers'
       enabled: true
-      inputs:
-        buildType: 'current'
-        artifactName: 'bin'
-        targetPath: '$(Pipeline.Workspace)'
-    - task: PowerShell@2
-      enabled: true
-      displayName: Download Cloud creds
-      inputs: 
-        pwsh: true
-        targetType: inline
-        script: |
-          $VerbosePreference="Continue"
-          $ErrorView="NormalView"
-          & '$(System.DefaultWorkingDirectory)/build/DownloadCloudCreds.ps1' '$(GitHubToken)'
-    - task: VSTest@2
-      displayName: 'ALL.Win.Tests'
-      enabled: true
       continueOnError: true
       inputs:
-        searchFolder: '$(System.DefaultWorkingDirectory)'
+        searchFolder: '$(System.DefaultWorkingDirectory)\bin\'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
-          **\Xpand.XAF.Modules.ViewWizard.Tests.dll
-          **\Xpand.XAF.Modules.Reactive.Tests.dll
-          **\Xpand.XAF.Modules.HideToolBar.Tests.dll
-          **\Xpand.XAF.Modules.MasterDetail.Tests.dll
-          **\Xpand.XAF.Modules.OneView.Tests.dll
-          **\Xpand.XAF.Modules.PositionInListView.Tests.dll
-          **\Xpand.XAF.Modules.RefreshView.Tests.dll
-          **\Xpand.XAF.Modules.SuppressConfirmation.Tests.dll
-          **\Xpand.XAF.Modules.ViewEditMode.Tests.dll
-          **\Xpand.XAF.Modules.SequenceGenerator.Tests.dll
-          **\ALL.Win.Tests.dll
+          **\Win.Tests.dll
+          **\Web.Tests.dll
           !**\obj\**    
         diagnosticsEnabled: true
         codeCoverageEnabled: true
         distributionBatchType: basedOnAssembly
         runInParallel: false
-        runSettingsFile: .\bin\Tests.runsettings
-        runTestsInIsolation: false
-        collectDumpOn: never
-- job: TestPerAssembly
-  timeoutInMinutes: 70
-  dependsOn: 'ALLWinTests'
-  strategy:
-    parallel: 10
-  pool:
-    vmImage: windows-2019
-  variables:
-    - group: keys
-  steps:
-    - checkout: none
-    - task: DownloadPipelineArtifact@2
-      inputs:
-        buildType: 'current'
-        artifactName: 'bin'
-        targetPath: '$(Pipeline.Workspace)'
-    - task: PowerShell@2
-      displayName: Download Cloud creds
-      inputs: 
-        pwsh: true
-        targetType: inline
-        script: |
-          $VerbosePreference="Continue"
-          $ErrorView="NormalView"
-          & '$(System.DefaultWorkingDirectory)/build/DownloadCloudCreds.ps1' '$(GitHubToken)'
-    - task: VSTest@2
-      displayName: 'Test Modules'
-      continueOnError: true
-      inputs:
-        searchFolder: '$(System.DefaultWorkingDirectory)'
-        testSelector: 'testAssemblies'
-        diagnosticsEnabled: true
-        codeCoverageEnabled: true
-        distributionBatchType: basedOnExecutionTime
-        runInParallel: false
-        runSettingsFile: .\bin\Tests.runsettings
-        runTestsInIsolation: false
-        collectDumpOn: never
-        testAssemblyVer2: |
-          **\Xpand.XAF.Modules.AutoCommit.Tests.dll
-          **\Xpand.XAF.Modules.CloneMemberValue.Tests.dll
-          **\Xpand.XAF.Modules.ViewItemValue.Tests.dll
-          **\Xpand.XAF.Modules.GridListEditor.Tests.dll
-          **\Xpand.XAF.Modules.LookupCascade.Tests.dll
-          **\Xpand.XAF.Modules.ProgressBarViewItem.Tests.dll
-          **\Xpand.Extensions.Tests.dll
-          **\Xpand.XAF.Modules.CloneModelView.Tests.dll
-          **\Xpand.XAF.Modules.ModelViewInheritance.Tests.dll
-          **\Xpand.XAF.Modules.Office.Cloud.Tests.dll
-          !**\*TestAdapter.dll
-          !**\obj\**    
-- job: TestPerAssembly2
-  timeoutInMinutes: 70
-  dependsOn: 'TestPerAssembly'
-  strategy:
-    parallel: 4
-  pool:
-    vmImage: windows-2019
-  variables:
-    - group: keys
-  steps:
-    - checkout: none
-    - task: DownloadPipelineArtifact@2
-      inputs:
-        buildType: 'current'
-        artifactName: 'bin'
-        targetPath: '$(Pipeline.Workspace)'
-    - task: PowerShell@2
-      displayName: Download Cloud creds
-      inputs: 
-        pwsh: true
-        targetType: inline
-        script: |
-          $VerbosePreference="Continue"
-          $ErrorView="NormalView"
-          & '$(System.DefaultWorkingDirectory)/build/DownloadCloudCreds.ps1' '$(GitHubToken)'
-    - task: VSTest@2
-      displayName: 'Test Modules'
-      continueOnError: true
-      inputs:
-        searchFolder: '$(System.DefaultWorkingDirectory)'
-        testSelector: 'testAssemblies'
-        diagnosticsEnabled: true
-        codeCoverageEnabled: true
-        distributionBatchType: basedOnAssembly
-        runInParallel: false
-        runSettingsFile: .\bin\Tests.runsettings
-        runTestsInIsolation: false
-        collectDumpOn: never
-        testAssemblyVer2: |
-          **\ALL.Win.Tests.NetCore.dll
-          **\Xpand.XAF.Modules.Reactive.Logger.Hub.Tests.dll
-          **\Xpand.XAF.Modules.Reactive.Logger.Tests.dll
-          **\Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.dll
-          !**\*TestAdapter.dll
-          !**\obj\**    
-- job: GoogleCloudOffice
-  timeoutInMinutes: 70
-  dependsOn: 'TestPerAssembly'
-  strategy:
-    parallel: 1
-  pool:
-    vmImage: windows-2019
-  variables:
-    - group: keys
-  steps:
-    - checkout: none
-    - task: DownloadPipelineArtifact@2
-      inputs:
-        buildType: 'current'
-        artifactName: 'bin'
-        targetPath: '$(Pipeline.Workspace)'
-    - task: PowerShell@2
-      displayName: Download Cloud creds
-      inputs: 
-        pwsh: true
-        targetType: inline
-        script: |
-          $VerbosePreference="Continue"
-          $ErrorView="NormalView"
-          & '$(System.DefaultWorkingDirectory)/build/DownloadCloudCreds.ps1' '$(GitHubToken)'
-    - task: VSTest@2
-      displayName: 'Test Modules'
-      continueOnError: true
-      inputs:
-        searchFolder: '$(System.DefaultWorkingDirectory)'
-        testSelector: 'testAssemblies'
-        diagnosticsEnabled: true
-        codeCoverageEnabled: true
-        distributionBatchType: basedOnAssembly
-        runInParallel: false
-        runSettingsFile: .\bin\Tests.runsettings
-        runTestsInIsolation: false
-        collectDumpOn: never
-        testAssemblyVer2: |
-          **\Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests.dll
-          **\Xpand.XAF.Modules.Office.Cloud.Google.Tasks.Tests.dll
-          **\Xpand.XAF.Modules.Office.Cloud.Google.Tests.dll
-          !**\*TestAdapter.dll
-          !**\obj\**    
-- job: MicrosoftCloudOffice
-  timeoutInMinutes: 30
-  dependsOn: 'TestPerAssembly'
-  strategy:
-    parallel: 1
-  pool:
-    vmImage: windows-2019
-  variables:
-    - group: keys
-  steps:
-    - checkout: none
-    - task: DownloadPipelineArtifact@2
-      inputs:
-        buildType: 'current'
-        artifactName: 'bin'
-        targetPath: '$(Pipeline.Workspace)'
-    - task: PowerShell@2
-      displayName: Download Cloud creds
-      inputs: 
-        pwsh: true
-        targetType: inline
-        script: |
-          $VerbosePreference="Continue"
-          $ErrorView="NormalView"
-          & '$(System.DefaultWorkingDirectory)/build/DownloadCloudCreds.ps1' '$(GitHubToken)'
-    - task: VSTest@2
-      displayName: 'Test Modules'
-      continueOnError: true
-      inputs:
-        searchFolder: '$(System.DefaultWorkingDirectory)'
-        testSelector: 'testAssemblies'
-        diagnosticsEnabled: true
-        codeCoverageEnabled: true
-        distributionBatchType: basedOnAssembly
-        runInParallel: false
-        runSettingsFile: .\bin\Tests.runsettings
-        runTestsInIsolation: false
-        collectDumpOn: never
-        testAssemblyVer2: |
-          **\Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests.dll
-          **\Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests.dll
-          **\Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests.dll
-          !**\*TestAdapter.dll
-          !**\obj\**    
-- job: TestPerExecutionTime
-  timeoutInMinutes: 70
-  dependsOn: 
-    - GoogleCloudOffice
-    - MicrosoftCloudOffice
-    - TestPerAssembly2
-  strategy:
-    parallel: 10
-  pool:
-    vmImage: windows-2019
-  variables:
-    - group: keys
-  steps:
-    - checkout: none
-    - task: DownloadPipelineArtifact@2
-      inputs:
-        buildType: 'current'
-        artifactName: 'bin'
-        targetPath: '$(Pipeline.Workspace)'
-    - task: PowerShell@2
-      displayName: Download Cloud creds
-      inputs: 
-        pwsh: true
-        targetType: inline
-        script: |
-          $VerbosePreference="Continue"
-          $ErrorView="NormalView"
-          & '$(System.DefaultWorkingDirectory)/build/DownloadCloudCreds.ps1' '$(GitHubToken)'
-    - task: VSTest@2
-      displayName: 'Tests'
-      continueOnError: true
-      inputs:
-        searchFolder: '$(System.DefaultWorkingDirectory)'
-        testSelector: 'testAssemblies'
-        testAssemblyVer2: |
-          **\ALL.Web.Tests.dll
-          **\*ModelMapper*Tests.dll
-          !**\obj\**    
-        diagnosticsEnabled: true
-        codeCoverageEnabled: true
-        distributionBatchType: basedOnExecutionTime
-        runInParallel: false
-        runSettingsFile: .\bin\Tests.runsettings
+        runSettingsFile: $(System.DefaultWorkingDirectory)\build\Tests.runsettings
         runTestsInIsolation: false
         collectDumpOn: never
 - job: CheckTests
-  dependsOn: TestPerExecutionTime
+  dependsOn: TestNugetChecConsumerPipeline
+  strategy: 
+    parallel: 1
   pool:
     vmImage: windows-2019
   variables:
@@ -346,14 +204,16 @@ jobs:
   steps:
     - checkout: self
     - task: PowerShell@2
-      displayName: 'CheckTest'
+      continueOnError: false
+      name: CheckTests
       inputs:
         pwsh: true
-        targetType: inline
+        targetType: 'inline'
         script: |
-          if (('$(AzStorageLookup)' -eq "1")){
-              throw "Start full build with AzStorageLookup"
-          }
-          & '$(System.DefaultWorkingDirectory)\build\check-tests.ps1' '$(System.DefaultWorkingDirectory)' '$(AzureToken)' '$(DxApiFeed)' '$(Build.BuildNumber)' '$(DxPipelineBuildId)'
+          $ErrorView="NormalView"
+          $ErrorActionPreference="stop"
+          $env:AzureToken='$(AzureToken)'
+          $env:AzProject="eXpandFramework"
+          $env:AzOrganization="eXpandDevOps"
+          $(System.DefaultWorkingDirectory)\Build\check-tests.ps1 '$(System.DefaultWorkingDirectory)' '$(AzureToken)' '$(DXApiFeed)' '$(DxPipelineBuildId)'
           
-

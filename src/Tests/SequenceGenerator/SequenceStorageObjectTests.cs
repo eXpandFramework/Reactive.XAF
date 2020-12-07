@@ -25,7 +25,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 	        sequenceStorage.Types.All(type => type.Type.ToTypeInfo().IsPersistent).ShouldBeTrue();
         }
         
-        [Test]
+        [Test][XpandTest()]
         public void SequenceStorage_Member_Lookup_should_list_all__long_ObjectType_types(){
 	        using var application = SequenceGeneratorModule().Application;
 	        using var objectSpace = application.CreateObjectSpace();
@@ -36,7 +36,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 	        sequenceStorage.Members.Select(member => member.Name).First().ShouldBe(nameof(TestObject.SequentialNumber));
         }
         
-        [Test]
+        [Test][XpandTest()]
         public void SequenceStorageCustomSequence_Lookup_should_list_all_sequence_base_types(){
 	        using var application = SequenceGeneratorModule().Application;
 	        SetSequences(application);
@@ -48,7 +48,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         }
 
         
-        [Test]
+        [Test][XpandTest()]
         public void Create_New_SequenceStorage_From_DetailView(){
 	        using var application = SequenceGeneratorModule().Application;
 	        SetSequences(application);
@@ -59,9 +59,10 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         }
 
         [TestCase(typeof(ExplicitUnitOfWork))]
-        [TestCase(typeof(UnitOfWork))]
+        [TestCase(typeof(UnitOfWork))][XpandTest()]
         public void SequenceStorage_UI_Properties_are_configured_on_load(Type uowType){
 	        using var application = SequenceGeneratorModule().Application;
+            
 	        SetSequences(application);
 	        using (application.CreateObjectSpace()){
 		        IDataLayer dataLayer = ((XPObjectSpaceProvider) application.ObjectSpaceProvider).DataLayer;
@@ -81,8 +82,8 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 	        }
         }
 
-        [TestCase(typeof(DetailView))]
-        public void Configure_SequencStorage_When_ObjectSpace_Commits(Type objectViewType){
+        [TestCase(typeof(DetailView))][XpandTest()]
+        public void Configure_SequenceStorage_When_ObjectSpace_Commits(Type objectViewType){
             Tracing.Close();
             var testObserver = new TestTracing().WhenException().Test();
             Tracing.Initialize();
@@ -95,7 +96,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
             var sequenceStorage = compositeView.ObjectSpace.GetObjectsQuery<SequenceStorage>().First();
             sequenceStorage.Member = null;
             compositeView.ObjectSpace.CommitChanges();
-            testObserver.Items.Count.ShouldBe(1);
+
             testObserver.Items.First().Message.ShouldContain("Cannot find the '' property within the ");
             compositeView.ObjectSpace.CommitChanges();
             testObserver.Items.Count.ShouldBe(2);

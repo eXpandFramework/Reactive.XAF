@@ -1,32 +1,28 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Application>
   <Views>
-    <ListView Id="JobExpression_LookupListView" DataAccessMode="Client" />
     <DetailView Id="Job_DetailView">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="SimpleEditors" RelativeSize="15.177713736791546">
-            <LayoutGroup Id="ScheduledJob" RelativeSize="100" Caption="ScheduledJob" ShowCaption="False">
-              <LayoutGroup Id="ScheduledJob_col1" RelativeSize="49.84740590030519">
+            <LayoutGroup Id="Job" RelativeSize="100" ShowCaption="False">
+              <LayoutGroup Id="Job_col1" RelativeSize="49.94913530010173">
                 <LayoutItem Id="Id" ViewItem="Id" Index="0" RelativeSize="20.253164556962027" IsNewNode="True" />
-                <LayoutItem Id="JobType" ViewItem="JobType" Index="1" RelativeSize="15.189873417721518" IsNewNode="True" />
-                <LayoutItem Id="JobMethod" ViewItem="JobMethod" Index="2" RelativeSize="15.189873417721518" IsNewNode="True" />
-                <LayoutItem Id="CronExpression" ViewItem="CronExpression" Index="3" RelativeSize="15.189873417721518" IsNewNode="True" Removed="True" />
-                <LayoutItem Id="LastExecution" Index="4" RelativeSize="11.650485436893204" ViewItem="LastExecution" Removed="True" />
-                <LayoutItem Id="State" Index="4" RelativeSize="10.434782608695652" ViewItem="State" Removed="True" />
-                <LayoutItem Id="Total" Index="4" RelativeSize="15.189873417721518" ViewItem="Total" />
-                <LayoutItem Id="Created" Index="5" RelativeSize="18.9873417721519" ViewItem="Created" />
-                <LayoutItem Id="Executions" Index="6" RelativeSize="16.483516483516482" Removed="True" />
+                <LayoutItem Id="JobType" Index="1" RelativeSize="15.189873417721518" />
+                <LayoutItem Id="JobMethod" Index="2" RelativeSize="15.189873417721518" />
+                <LayoutItem Id="CronExpression" Index="3" RelativeSize="15.189873417721518" />
+                <LayoutItem Id="State" Index="4" RelativeSize="34.177215189873415" />
+                <LayoutItem Id="Total" Index="4" RelativeSize="15" Removed="True" />
+                <LayoutItem Id="Created" Index="6" RelativeSize="17.391304347826086" Removed="True" />
               </LayoutGroup>
-              <LayoutGroup Id="ScheduledJob_col2" RelativeSize="50.15259409969481">
-                <LayoutItem Id="JobType" ViewItem="JobType" Index="0" RelativeSize="17.582417582417584" Removed="True" />
-                <LayoutItem Id="State" ViewItem="State" Index="0" RelativeSize="20.253164556962027" IsNewNode="True" />
-                <LayoutItem Id="SuccessFullJobs" RelativeSize="15.189873417721518" Index="1" ViewItem="SuccessFullJobs" />
-                <LayoutItem Id="FirstJob" ViewItem="FirstJob" Index="2" RelativeSize="15.189873417721518" IsNewNode="True" />
-                <LayoutItem Id="FailedJobs" RelativeSize="15.189873417721518" Index="3" ViewItem="FailedJobs" />
-                <LayoutItem Id="Executions" ViewItem="Executions" Index="4" RelativeSize="34.177215189873415" IsNewNode="True" />
-                <LayoutItem Id="JobMethod" Index="5" RelativeSize="29.67032967032967" ViewItem="JobMethod" Removed="True" />
-                <LayoutItem Id="Id" ViewItem="Id" Removed="True" />
+              <LayoutGroup Id="Job_col2" RelativeSize="50.05086469989827">
+                <LayoutItem Id="Created" ViewItem="Created" Index="0" RelativeSize="20.253164556962027" IsNewNode="True" />
+                <LayoutItem Id="LastExecution" RelativeSize="15.189873417721518" Index="1" />
+                <LayoutItem Id="Executions" RelativeSize="15.189873417721518" Index="2" />
+                <LayoutItem Id="SuccessFullJobs" RelativeSize="15.189873417721518" Index="3" />
+                <LayoutItem Id="FailedJobs" RelativeSize="15.189873417721518" Index="4" />
+                <LayoutItem Id="Total" ViewItem="Total" Index="5" RelativeSize="18.9873417721519" IsNewNode="True" />
+                <LayoutItem Id="Id" Removed="True" />
               </LayoutGroup>
             </LayoutGroup>
           </LayoutGroup>
@@ -36,11 +32,5 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <ListView Id="Job_JobExpressions_ListView" DataAccessMode="Client">
-      <Columns>
-        <ColumnInfo Id="Created" Index="0" DisplayFormat="{0: ddd, dd MMMM yyyy hh:mm:ss tt}" Width="195" />
-        <ColumnInfo Id="State" Index="1" />
-      </Columns>
-    </ListView>
   </Views>
 </Application>

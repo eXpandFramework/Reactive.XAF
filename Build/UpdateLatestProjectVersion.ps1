@@ -20,6 +20,5 @@ if (!$sourcePath){
 Set-VsoVariable build.updatebuildnumber "$newVersion-$CustomVersion"
 Update-AssemblyInfoVersion $newVersion "$sourcePath\src\Common\AssemblyInfoVersion.cs"
 
-$updateVersion=Get-MSBuildProjects $sourcePath 
-$updateVersion
+
 return

@@ -20,7 +20,9 @@ namespace Xpand.Extensions.XAF.AppDomainExtensions{
 
         [PublicAPI]
         public static void AddModelReference(this AppDomain appDomain, params string[] name){
-	        var locations = AppDomain.CurrentDomain.GetAssemblies().Where(assembly => name.Contains(assembly.GetName().Name)).Select(assembly => assembly.Location);
+	        var locations = AppDomain.CurrentDomain.GetAssemblies()
+                .Where(assembly => name.Contains(assembly.GetName().Name))
+                .Select(assembly => assembly.Location);
 	        foreach (var location in locations){
 		        References.Add(location);
 	        }

@@ -75,9 +75,10 @@ namespace Xpand.Extensions.Office.Cloud{
                 .SelectMany(_ => _.objects).SelectMany(map):Observable.Empty<(TCloudEntity serviceObject, MapAction mapAction)>();
             return updateObjects.Merge(newObjects).Merge(deleteObjects);
         }
+
         public static IObservable<TServiceObject> MapEntities<TBO, TServiceObject>(this IObjectSpace objectSpace,IObservable<TBO> deletedObjects,
-            IObservable<TBO> newOrUpdatedObjects, Func<CloudOfficeObject, IObservable<TServiceObject>> delete, Func<TBO, IObservable<TServiceObject>> map){
-            return newOrUpdatedObjects.SelectMany(map)
+            IObservable<TBO> newOrUpdatedObjects, Func<CloudOfficeObject, IObservable<TServiceObject>> delete, Func<TBO, IObservable<TServiceObject>> map) 
+            => newOrUpdatedObjects.SelectMany(map)
                 .Merge(deletedObjects
                     .SelectMany(_ => {
                         var deletedId = objectSpace.GetKeyValue(_).ToString();
@@ -85,7 +86,6 @@ namespace Xpand.Extensions.Office.Cloud{
                     })
                     .SelectMany(cloudOfficeObject => delete(cloudOfficeObject).Select(s => cloudOfficeObject))
                     .To<TServiceObject>());
-        }
 
         public static IObservable<T> NewCloudObject<T>(this IObservable<T> source, Func<IObjectSpace> objectSpaceFactory, string localId) 
             => source.SelectMany(@event => Observable.Using(objectSpaceFactory, 
@@ -100,6 +100,7 @@ namespace Xpand.Extensions.Office.Cloud{
             var cloudId = cloudEntity.GetPropertyValue("Id").ToString();
             return space.NewCloudObject(localId, cloudId, cloudEntity.GetType().ToCloudObjectType());
         }
+
         [PublicAPI]
         public static IObservable<CloudOfficeObject> NewCloudObject(this IObjectSpace space, string localId, string cloudId, CloudObjectType cloudObjectType){
             var cloudObject = space.CreateObject<CloudOfficeObject>();
@@ -109,6 +110,7 @@ namespace Xpand.Extensions.Office.Cloud{
             space.CommitChanges();
             return cloudObject.ReturnObservable();
         }
+
         [PublicAPI]
         public static string GetCloudId(this IObjectSpace objectSpace, string localId, Type cloudEntityType) 
             => objectSpace.QueryCloudOfficeObject(localId, cloudEntityType).FirstOrDefault()?.CloudId;
@@ -133,15 +135,10 @@ namespace Xpand.Extensions.Office.Cloud{
         }
     
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager, string serviceName,
-            Type serviceStorageType, Func<XafApplication, IObservable<bool>> needsAuthentication,
-            Func<XafApplication, IObservable<Unit>> authorize){
+            Type serviceStorageType, Func<XafApplication, IObservable<bool>> needsAuthentication, Func<XafApplication, IObservable<Unit>> authorize){
             var registerActions = manager.RegisterAuthActions(serviceName);
-            var whenApplication = manager.WhenApplication(application => registerActions.ExecuteActions(needsAuthentication,serviceName,serviceStorageType,authorize)
-                .Merge(registerActions.ConfigureStyle())
-                .Merge(application.WhenWeb().CheckAsync(serviceName)));
-
-            return registerActions.ToUnit()
-                .Merge(whenApplication)
+            return registerActions.ConfigureStyle()
+                .Merge(registerActions.ExecuteActions(needsAuthentication,serviceName,serviceStorageType,authorize))
                 .ToUnit();
         }
 
@@ -151,27 +148,29 @@ namespace Xpand.Extensions.Office.Cloud{
 
         private static IObservable<Unit> ConfigureStyle(this IObservable<SimpleAction> source) 
             => source.WhenCustomizeControl()
-            .Select(_ => {
-                var application = _.sender.Application;
-                if (application.GetPlatform()==Platform.Web){
-                    if (_.sender.Id.StartsWith("Connect")){
-                        _.sender.Model.SetValue("IsPostBackRequired",true);
+                .Select(_ => {
+                    var application = _.sender.Application;
+                    if (application.GetPlatform() == Platform.Web) {
+                        if (_.sender.Id.StartsWith("Connect")) {
+                            _.sender.Model.SetValue("IsPostBackRequired", true);
+                        }
+
+                        var menuItem = _.e.Control.GetPropertyValue("MenuItem");
+                        var itemStyle = menuItem.GetPropertyValue("ItemStyle");
+                        itemStyle.GetPropertyValue("Font").SetPropertyValue("Name", "Roboto Medium");
+                        itemStyle.GetPropertyValue("SelectedStyle").SetPropertyValue("BackColor", Color.White);
+                        itemStyle.SetPropertyValue("ForeColor", ColorTranslator.FromHtml("#757575"));
+                        itemStyle.GetPropertyValue("HoverStyle").SetPropertyValue("BackColor", Color.White);
+                        menuItem.CallMethod("ForceMenuRendering");
                     }
-                    var menuItem = _.e.Control.GetPropertyValue("MenuItem");
-                    var itemStyle = menuItem.GetPropertyValue("ItemStyle");
-                    itemStyle.GetPropertyValue("Font").SetPropertyValue("Name", "Roboto Medium");
-                    itemStyle.GetPropertyValue("SelectedStyle").SetPropertyValue("BackColor", Color.White);
-                    itemStyle.SetPropertyValue("ForeColor", ColorTranslator.FromHtml("#757575"));
-                    itemStyle.GetPropertyValue("HoverStyle").SetPropertyValue("BackColor", Color.White);
-                    menuItem.CallMethod("ForceMenuRendering");
-                }
-                return _.sender;
-            })
-            .ToUnit();
+
+                    return _.sender;
+                })
+                .ToUnit();
 
         private static IObservable<SimpleAction> Activate(this IObservable<(bool needsAuth, SimpleAction action)> source, string serviceName, Type serviceStorageType) 
             => source.Select(t => {
-                    t.action.Active(nameof(NeedsAuthentication), t.action.Id.StartsWith("Connect") ? t.needsAuth : !t.needsAuth);
+                    t.action.Activate(nameof(NeedsAuthentication), t.action.Id.StartsWith("Connect") ? t.needsAuth : !t.needsAuth);
                     if (!t.needsAuth && t.action.Id.StartsWith("Disconnect")){
                         t.action.UpdateDisconnectActionToolTip(serviceName,serviceStorageType);
                     }
@@ -195,7 +194,7 @@ namespace Xpand.Extensions.Office.Cloud{
             Func<XafApplication, IObservable<bool>> needsAuthentication, string serviceName, Type serviceStorageType,
             Func<XafApplication, IObservable<Unit>> authorize) 
             => registerActions.ActivateWhenUserDetails()
-                .SelectMany(action => needsAuthentication(action.Application).Pair(action).Activate(serviceName, serviceStorageType)
+                .SelectMany(action => needsAuthentication(action.Application).Select(b => b).Pair(action).Activate(serviceName, serviceStorageType)
                     .Merge(action.Authorize(serviceName,serviceStorageType,authorize,needsAuthentication))
                 ).ToUnit();
 
@@ -217,21 +216,20 @@ namespace Xpand.Extensions.Office.Cloud{
             });
 
         private static IObservable<SimpleAction> ActivateWhenUserDetails(this IObservable<SimpleAction> registerActions) 
-            => registerActions.ActivateInUserDetails(true)
-                .Do(action => action.Active(nameof(NeedsAuthentication),false) )
-                .Publish().RefCount();
+            => registerActions.Select(action => action).ActivateInUserDetails(true)
+                .Do(action => action.Activate(nameof(NeedsAuthentication),false) );
 
         
         private static IObservable<SimpleAction> ActivateWhenAuthenticationNeeded(
             this IObservable<(bool needsAuth, SimpleAction action)> source, string serviceName, Type serviceStorageType) 
             => source.Select(t => {
                     if (t.action.Id == $"Connect{serviceName}"){
-                        t.action.Active(nameof(NeedsAuthentication), t.needsAuth);
-                        t.action.Controller.Frame.Action($"Disconnect{serviceName}").Active(nameof(NeedsAuthentication), !t.needsAuth);
+                        t.action.Activate(nameof(NeedsAuthentication), t.needsAuth);
+                        t.action.Controller.Frame.Action($"Disconnect{serviceName}").Activate(nameof(NeedsAuthentication), !t.needsAuth);
                     }
                     else{
-                        t.action.Active(nameof(NeedsAuthentication), !t.needsAuth);
-                        t.action.Controller.Frame.Action($"Connect{serviceName}").Active(nameof(NeedsAuthentication), t.needsAuth);
+                        t.action.Activate(nameof(NeedsAuthentication), !t.needsAuth);
+                        t.action.Controller.Frame.Action($"Connect{serviceName}").Activate(nameof(NeedsAuthentication), t.needsAuth);
                     }
                     t.action.UpdateDisconnectActionToolTip(serviceName, serviceStorageType);
                     return t.action;

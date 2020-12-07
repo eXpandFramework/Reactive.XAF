@@ -23,6 +23,7 @@ using Xpand.Extensions.Blazor;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.TypeExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
@@ -51,7 +52,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
 
         private static IObservable<Unit> JobDashboard(this ApplicationModulesManager manager)
             => manager.RegisterViewSimpleAction(nameof(JobDashboard), action => {
-                    action.TargetObjectType = typeof(Shooter);
+                    action.TargetObjectType = typeof(JobWorker);
                     action.SelectionDependencyType = SelectionDependencyType.RequireMultipleObjects;
                 })
                 .WhenExecute()
@@ -59,7 +60,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
                     var serviceProvider = args.Action.Application.ToBlazor().ServiceProvider;
                     var uri = $"{new Uri($"{serviceProvider.GetService<IHttpContextAccessor>()?.HttpContext.Request.GetDisplayUrl()}").GetLeftPart(UriPartial.Authority)}/hangfire/jobs/details/";
                     var jsRuntime = serviceProvider.GetService<IJSRuntime>();
-                    return args.SelectedObjects.Cast<Shooter>().ToObservable(ImmediateScheduler.Instance).SelectMany(
+                    return args.SelectedObjects.Cast<JobWorker>().ToObservable(ImmediateScheduler.Instance).SelectMany(
                             job => jsRuntime?.InvokeAsync<object>("open", new object[] {$"{uri}{job.Id}", "_blank"}).AsTask());
 
                 })
@@ -69,7 +70,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
             using var objectSpace = application.CreateObjectSpace();
             var scheduledJob = objectSpace.GetObjectsQuery<Job>().FirstOrDefault(job1 => job1.Id==recurringJobId);
             if (scheduledJob!=null) {
-                var job = objectSpace.EnsureObjectByKey<Shooter>(context.BackgroundJob.Id);
+                var job = objectSpace.EnsureObjectByKey<JobWorker>(context.BackgroundJob.Id);
                 if (objectSpace.IsNewObject(job)) {
                     job.Job = scheduledJob;
                 }
@@ -100,7 +101,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
             => RecurringJob.AddOrUpdate(job.Id,() => job.CallExpression(),() => job.CronExpression.Expression);
 
         static IObservable<Unit> ScheduleJobs(this XafApplication application) 
-            => application.WhenCommited<Job>(ObjectModification.NewOrUpdated).Objects()
+            => application.WhenCommitted<Job>(ObjectModification.NewOrUpdated).Objects()
                 .SelectMany(scheduledJob => {
                     var args = new GenericEventArgs<IObservable<Job>>(scheduledJob.ReturnObservable());
                     CustomJobScheduleSubject.OnNext(args);
@@ -122,10 +123,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
         public static IObservable<JobState> JobExecution => JobExecutionSubject.AsObservable();
 
         public static Expression CallExpression(this Job job) {
-            var lambdaParser = new NReco.Linq.LambdaParser();
-            return lambdaParser.Parse(job.JobExpression.Expression);
-            // Console.WriteLine( value ); // --> 5
-            // return job.JobExpression.JobType.Type.CallExpression(job.JobMethod.Name.Replace(" ", ""));
+            return job.JobType.Type.CallExpression(job.JobMethod.Name.Replace(" ", ""));
         }
 
         internal static IObservable<TSource> TraceJobSchedulerModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,

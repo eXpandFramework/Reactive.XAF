@@ -2,7 +2,7 @@
 $SourcePath = "$PSScriptRoot\.."
         
 Set-Location $SourcePath
-$stage = "$Sourcepath\buildstage"
+
 New-Item $stage -ItemType Directory -Force
 Get-ChildItem $stage -Recurse | Remove-Item -Recurse -Force
 New-Item $stage\source -ItemType Directory -Force

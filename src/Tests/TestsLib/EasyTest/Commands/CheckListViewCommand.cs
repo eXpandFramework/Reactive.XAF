@@ -9,9 +9,8 @@ using Xpand.TestsLib.Common;
 namespace Xpand.TestsLib.EasyTest.Commands{
 
     public class CheckListViewCommand<TObject> : CheckListViewCommand{
-
-        public CheckListViewCommand(Expression<Func<TObject, object>> tableSelector, int rowCount, params string[] columns) : base(tableSelector.MemberExpressionCaption().CompoundName(), rowCount, columns){
-        }
+        public CheckListViewCommand(Expression<Func<TObject, object>> tableSelector, int rowCount,
+            params string[] columns) : base(tableSelector.MemberExpressionCaption().CompoundName(), rowCount, columns) { }
         public CheckListViewCommand(int rowCount, params string[] columns) : base(typeof(TObject).Name.CompoundName(), rowCount, columns){
         }
     }

@@ -1,6 +1,6 @@
 Framework "4.6"
 $ErrorActionPreference = "Stop"
-
+$Global:Configuration="Debug"
 
 Properties {
     $packageSources = $null
@@ -14,11 +14,19 @@ Properties {
     $Root = "$nugetbin\..\..\"
 }
 
+Task BuildNugetConsumers -depends   CreateNuspec, PackNuspec, CompileNugetConsumers
+Task Build  -depends   Clean, Init, UpdateProjects, Compile,CheckVersions, IndexSources,CompileTests
 
-
-Task Build  -depends   Clean, Init, UpdateProjects, Compile,CheckVersions, IndexSources, CreateNuspec, PackNuspec, CompileTests
-Task TestsRun  -depends   Clean, Init, UpdateProjects, Compile,CheckVersions, IndexSources, CreateNuspec, PackNuspec, CompileTests
-
+function CompileTestSolution($conf){
+    Write-HostFormatted "Building Tests" -Section
+    New-Item -Name Nupkg -ItemType Directory -Path "$root\bin" -ErrorAction SilentlyContinue
+    $solution="$Root\src\Tests\Tests.sln"
+    $conf=GetConfiguration $solution $conf
+    "Configuration=$conf"
+    Start-Build -Path $solution -Configuration $conf -BinaryLogPath "$Root\Bin\Test$conf.binlog" -Verbosity minimal -WarnAsError 
+    Start-Build -Path $solution -Configuration FixWrongPersistentBaseFramework
+    Copy-Item -path $root\bin\runtimes -Recurse -Destination $root\bin\TestWinApplication\runtimes -Container -Force
+}
 
 Task IndexSources {
     Invoke-Script {
@@ -32,6 +40,7 @@ Task IndexSources {
 }
 
 Task Init {
+    
     Invoke-Script {
         "Create bin directory in $Root"
         New-Item "$Root\bin" -ItemType Directory -Force 
@@ -57,59 +66,89 @@ Task UpdateProjects {
 
 Task CompileTests -precondition { return $compile } {
     Invoke-Script {
-        # & "$Root\Build\UpdateAllTests.ps1" "$Root" $branch $packageSources $dxVersion
-    }
-    # Get-ChildItem $root\bin "*xpand*.dll"| Test-AssemblyReference -VersionFilter $DXVersion
+        CompileTestSolution $Global:Configuration
+        if (!(Test-AzDevops)){
+            Invoke-Task -taskName BuildNugetConsumers
+        }
+    } -Maximum 3
+    Get-ChildItem $root\bin "*xpand*.dll"| Test-AssemblyReference -VersionFilter $DXVersion
 }
-function GetConfiguration($solution,$Configuration){
-    $minor=Get-VersionPart $dxVersion Minor
-    $match=(Read-MSBuildSolutionFile $solution).SolutionConfigurations.ConfigurationName|ForEach-Object{
-        if (Test-Version $_){
-            if (([version]$_) -ge ([version]$minor)){
+
+Task CompileNugetConsumers -precondition { return $compile } {
+    Invoke-Script {
+        $localPackages = @(& (Get-NugetPath) list -source "$root\bin\nupkg;"|ConvertTo-PackageObject|Where-Object{$_.id -like "*.ALL"} | ForEach-Object {
+            $version = [version]$_.Version
+            if ($version.revision -eq 0) {
+                $version = New-Object System.Version ($version.Major, $version.Minor, $version.build)
+            }
+            [PSCustomObject]@{
+                Id      = $_.Id
+                Version = $version
+            }
+        })
+        
+        Write-HostFormatted "Update all package versions" -ForegroundColor Magenta
+        Get-ChildItem "$root\src\Tests\EasyTests" *.csproj -Recurse|ForEach-Object{
+            $prefs=Get-PackageReference $_ 
+            $prefs|Where-Object{$_.include -like "Xpand.XAF.*"}|ForEach-Object{
+                $ref=$_
+                $localPackages|Where-Object{$_.id-eq $ref.include}|ForEach-Object{
+                    $ref.version=$_.version.ToString()
+                }
+            }
+            ($prefs|Select-Object -First 1).OwnerDocument.Save($_)
+        }
+        CompileTestSolution "NugetConsumers"
+    } -Maximum 3
+    Get-ChildItem $root\bin "*xpand*.dll"| Test-AssemblyReference -VersionFilter $DXVersion
+}
+
+function GetConfiguration($solution,$conf){
+    $conf=$conf.ToLower()
+    $match=(Read-MSBuildSolutionFile $solution).SolutionConfigurations.ConfigurationName|Sort-Object -Unique|ForEach-Object{
+        $configVersion=$_.ToLower().Replace("$conf`_","") 
+        if ((($_ -like "$conf`_*") -and (Test-Version $configVersion))){
+            if (([version]$configVersion) -ge ([version](Get-VersionPart $dxVersion Minor))){
                 $_
             }
+            
         }
     }
-    
     if ($match){
         $match
     }
     else{
-        $Configuration
+        $conf
     }
 }
+
 Task Compile -precondition { return $compile } {
-    $Configuration="Debug"
-    if ($branch -eq "master"){
-        $Configuration="Release"
+    if ($branch -eq "master" -and (Get-DevExpressVersion -eq $DXVersion)){
+        $Global:Configuration="Release"
     }
     
     Invoke-Script {
         Write-HostFormatted "Building Extensions" -Section
         $solution="$Root\src\Extensions\Extensions.sln"
-        & dotnet msbuild $solution /t:Clean
-        dotnet restore $solution --source $packageSources --source (Get-PackageFeed -Nuget) /WarnAsError
-        $Configuration=GetConfiguration $solution $Configuration
-        & dotnet msbuild $solution "/bl:$Root\Bin\Extensions.binlog" "/p:configuration=$Configuration;skipNugetReplace=true" /m /v:m /WarnAsError 
-    } -Maximum 2
+        
+        $Configuration=GetConfiguration $solution $Global:Configuration
+        Start-Build -Path $solution -Configuration $Configuration -BinaryLogPath "$Root\Bin\Extensions.binlog" -Verbosity minimal -WarnAsError -PropertyValue "skipNugetReplace=true"
+    } -Maximum 3
     
     
     Invoke-Script {
         $solution="$Root\src\Modules\Modules.sln"
         Write-HostFormatted "Building Modules" -Section
-        dotnet msbuild $solution /t:Clean
-        Set-Location "$Root\src\Modules"
-        dotnet restore $solution --source $packageSources --source (Get-PackageFeed -Nuget) /WarnAsError
-        $Configuration=GetConfiguration $solution $Configuration
-        dotnet msbuild $solution "/bl:$Root\Bin\Modules.binlog" "/p:configuration=$Configuration;skipNugetReplace=true" /WarnAsError /m /v:m
-    } -Maximum 2
+        $Configuration=GetConfiguration $solution $Global:Configuration
+        Start-Build -Path $solution -Configuration $Configuration -BinaryLogPath "$Root\Bin\Modules.binlog" -Verbosity minimal -WarnAsError -PropertyValue "skipNugetReplace=true"
+    } -Maximum 3
     
     Invoke-Script {
         Write-HostFormatted "Building Xpand.XAF.ModelEditor" -Section
         dotnet msbuild "$Root\tools\Xpand.XAF.ModelEditor\Xpand.XAF.ModelEditor.csproj" /t:Clean
         dotnet restore "$Root\tools\Xpand.XAF.ModelEditor\Xpand.XAF.ModelEditor.csproj" --source $packageSources --source (Get-PackageFeed -Nuget) /WarnAsError
-        dotnet msbuild "$Root\tools\Xpand.XAF.ModelEditor\Xpand.XAF.ModelEditor.csproj" "/bl:$Root\Bin\ModelEditor.binlog" "/p:configuration=$Configuration" /WarnAsError /m /v:m
-    } -Maximum 2
+        dotnet msbuild "$Root\tools\Xpand.XAF.ModelEditor\Xpand.XAF.ModelEditor.csproj" "/bl:$Root\Bin\ModelEditor.binlog" "/p:configuration=Release" /WarnAsError /m /v:m
+    } -Maximum 3
     
     Write-HostFormatted "Build Versions:" -Section
     Get-ChildItem "$Root\Bin" "*Xpand.*.dll"|ForEach-Object{
@@ -127,13 +166,23 @@ Task  CreateNuspec {
             DxVersion = $dxVersion
             Branch=$branch
         }
-        & "$PSScriptRoot\CreateNuspec.ps1" @a
+        $version=(& (Get-NugetPath) list -source "$root\bin\nupkg;"|ConvertTo-PackageObject|Select-Object -First 1).Version
+        $currentVersion=[System.Diagnostics.FileVersionInfo]::GetVersionInfo("$root\bin\Xpand.XAF.Modules.Reactive.dll").FileVersion
+        if ($currentVersion -ne $version){
+            Remove-Item "$root\bin\nupkg" -Force -Recurse
+        }
+        if (!(Test-Path "$Root\bin\Nupkg") -or !(Get-ChildItem "$Root\bin\Nupkg")){
+            & "$PSScriptRoot\CreateNuspec.ps1" @a
+        }
+        
     } -Maximum 3
 }
 
 Task PackNuspec {
     Invoke-Script {
-        & "$PSScriptRoot\PackNuspec.ps1" -branch $branch -dxversion $dxVersion
+        if (!(Test-Path "$Root\bin\Nupkg") -or !(Get-ChildItem "$Root\bin\Nupkg")){
+            & "$PSScriptRoot\PackNuspec.ps1" -branch $branch -dxversion $dxVersion
+        }
     } -Maximum 3
 }
 
@@ -141,9 +190,9 @@ Task PackNuspec {
 Task Clean -precondition { return $cleanBin } {
     $bin = "$Root\bin\"
     if (Test-Path $bin) {
-        Get-ChildItem $bin -Recurse|Remove-Item -Force -Recurse
+        Get-ChildItem $bin -Recurse -Exclude "*Nupkg*"|Remove-Item -Force -Recurse
     }
-        
+    Set-Location "$Root\src"
     Clear-XProjectDirectories
 }
 

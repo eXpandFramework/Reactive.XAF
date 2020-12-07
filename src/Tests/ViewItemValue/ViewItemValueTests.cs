@@ -11,7 +11,7 @@ using Xpand.XAF.Modules.Reactive;
 namespace Xpand.XAF.Modules.ViewItemValue.Tests{
     public class ViewItemValueTests:ViewItemValueCommonTest{
         [Test][XpandTest()]
-        public void ViewItemValue_action_is_inactive_bydefault(){
+        public void ViewItemValue_action_is_inactive_by_default(){
             using var application=ViewItemValueModule().Application;
             var compositeView = application.NewView(application.FindModelDetailView(typeof(Order)));
             var viewWindow = application.CreateViewWindow();

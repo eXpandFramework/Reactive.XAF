@@ -36,7 +36,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests{
         protected override string ServiceName => "Microsoft";
 
         protected override void OnConnect_Action_Creates_Connection(Platform platform, XafApplication application) 
-            => MicrosoftService.CustomAquireTokenInteractively
+            => MicrosoftService.CustomAcquireTokenInteractively
                 .Do(args => application.ObjectSpaceProvider.NewAuthentication(platform))
                 .Do(e => e.Instance=Observable.Empty<AuthenticationResult>().FirstOrDefaultAsync()).Test();
     }

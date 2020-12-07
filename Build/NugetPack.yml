@@ -1,0 +1,40 @@
+steps:
+  - checkout: none
+  - task: DownloadPipelineArtifact@2
+    name: DownloadLatestBin
+    inputs:
+      buildType: "current"
+      artifactName: "PipelineWorkspace"
+      targetPath: "$(Pipeline.Workspace)"
+  - task: AzurePowerShell@5
+    name: NugetPack
+    inputs:
+      azureSubscription: "Visual Studio Enterprise(b48a609a-17f6-4e48-a317-54ab77fbf822)"
+      ScriptType: "InlineScript"
+      azurePowerShellVersion: "LatestVersion"
+      pwsh: true
+      Inline: |
+        $ErrorView="NormalView"
+        "Nugetpackage=$env:Nuget_PACKAGES"
+        $goArgs = @{
+            GithubToken ='$(GitHubToken)'
+            AzureToken ='$(AzureToken)' 
+            GitHubUserName ='$(GitHubUserName)' 
+            DXApiFeed ='$(DXApiFeed)'
+            Branch                   = '$(Build.SourceBranchName)'
+            SourcePath               = '$(System.DefaultworkingDirectory)'
+            ArtifactStagingDirectory = '$(Build.Artifactstagingdirectory)'
+            BinDirectory             = '$(System.DefaultworkingDirectory)\bin'
+            CustomVersion            = '$(CustomVersion)'
+            UseLastVersion           = ('$(UseLastVersion)' -eq "True")
+        }
+        "goArgs:"
+        $goArgs | Out-String
+
+        & '$(System.DefaultWorkingDirectory)\Build\NugetPackPipeline.ps1' @goArgs
+  - task: PublishPipelineArtifact@1
+    name: PublishNugetPack
+    inputs:
+      targetPath: '$(Pipeline.Workspace)\bin\Nupkg'
+      artifact: "Nupkg"
+      publishLocation: "pipeline"

@@ -27,7 +27,7 @@ namespace ALL.Tests{
         private static async Task CheckOperation(this ICommandAdapter commandAdapter, MapAction mapAction){
             await commandAdapter.Execute(() => {
                 commandAdapter.Execute(new ActionCommand(Actions.Refresh));
-                commandAdapter.Execute(new CheckActionToolTip(("Save",mapAction.ToString())));
+                commandAdapter.Execute(new CheckDetailViewCommand<DevExpress.Persistent.BaseImpl.Task>((task => task.Description,mapAction.ToString())));
             });
         }
 
@@ -89,6 +89,7 @@ namespace ALL.Tests{
             commandAdapter.Execute(new ActionAvailableCommand(signInCaption){ExpectException = true});
             commandAdapter.Execute(new ActionAvailableCommand(signOutCaption));
             commandAdapter.Execute(new CheckActionToolTip((signOutCaption,"Sign out")));
+            commandAdapter.Execute(new WaitCommand(WaitInterval));
             commandAdapter.Execute(new ActionCommand($"Show {serviceName} Account Info"));
             commandAdapter.Execute(new WaitCommand(WaitInterval));
             commandAdapter.Execute(checkAccountInfoCommand);
@@ -98,7 +99,7 @@ namespace ALL.Tests{
         public static int WaitInterval => Debugger.IsAttached?2500:5000;
 
         private static void Disconnect(this ICommandAdapter commandAdapter, string signOutCaption, string signInCaption){
-            commandAdapter.Execute(new NavigateCommand("Default.My Details"),new ActionCommand(signOutCaption),
+            commandAdapter.Execute(new NavigateCommand("Default.My Details"),new ActionCommand(signOutCaption),new WaitCommand(2000),
                 new ActionAvailableCommand(signOutCaption)
                     {ExpectException = true},
                 new ActionAvailableCommand(signInCaption));

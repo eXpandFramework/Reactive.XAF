@@ -6,17 +6,16 @@ variables:
 steps:
   - checkout: self
     clean: true
-  - task: DownloadBuildArtifacts@0
-    displayName: "Download Bin"
+  - task: DownloadPipelineArtifact@2
+    displayName: Download Bin
     inputs:
-        buildType: 'specific'
-        project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
-        pipeline: '23'
-        buildVersionToDownload: specific
-        buildId: '$(DxPipelineBuildId)'
-        downloadType: specific
-        artifactName: 'bin'
-        downloadPath: '$(System.DefaultworkingDirectory)'
+      buildType: 'specific'
+      project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
+      definition: '23'
+      buildVersionToDownload: 'specific'
+      pipelineId: '$(DxPipelineBuildId)'
+      artifactName: 'Nupkg'
+      targetPath: '$(System.DefaultWorkingDirectory)\bin\Nupkg'
   - task: AzurePowerShell@5
     inputs:
       azureSubscription: 'Visual Studio Enterprise(b48a609a-17f6-4e48-a317-54ab77fbf822)'
@@ -33,7 +32,7 @@ steps:
             AzPowerShellScriptsApplicationId='$(AzPowerShellScriptsApplicationId)'
             AzApoTenantId='$(AzApoTenantId)'
           }
-          $env:AzDevopsToken='$(AzureToken)'
+          $env:AzureToken='$(AzureToken)'
           $env:AzOrganization="eXpandDevOps"
           $env:AzProject ="eXpandFramework"
           $env:DXFeed='$(DXApiFeed)'

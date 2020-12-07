@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 
 namespace Xpand.Extensions.Reactive.Transform.System.Net{
@@ -10,7 +11,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net{
         
         public static IObservable<IPEndPoint> Listening(this IEnumerable<IPEndPoint> source,bool repeatWhenOffine=true,TimeSpan? timeSpan=null){
             timeSpan ??= TimeSpan.FromMilliseconds(500);
-            return source.ToObservable()
+            return source.ToObservable(ImmediateScheduler.Instance)
                 .SelectMany(endPoint => {
                     var inUsed = Observable.While(() => !endPoint.Listening(), Observable.Empty<IPEndPoint>().Delay(timeSpan.Value))
                         .Concat(endPoint.ReturnObservable());

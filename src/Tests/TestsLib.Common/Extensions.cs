@@ -363,8 +363,8 @@ namespace Xpand.TestsLib.Common{
 
         public static void MockPlatformListEditor(this XafApplication application){
            application.MockListEditor((view, xafApplication, collectionSource) => (ListEditor) (application.GetPlatform()==Platform.Win
-               ? (ListEditor) AppDomain.CurrentDomain.CreateTypeInstance("DevExpress.ExpressApp.Win.Editors.GridListEditor")
-               : AppDomain.CurrentDomain.CreateTypeInstance("DevExpress.ExpressApp.Web.Editors.ASPx.ASPxGridListEditor")));
+               ? (ListEditor) Activator.CreateInstance(AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Win.Editors.GridListEditor"),view)
+               : Activator.CreateInstance(AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Web.Editors.ASPx.ASPxGridListEditor"),view)));
         }
 
         public static string MemberExpressionCaption<TObject>(this Expression<Func<TObject, object>> memberName){

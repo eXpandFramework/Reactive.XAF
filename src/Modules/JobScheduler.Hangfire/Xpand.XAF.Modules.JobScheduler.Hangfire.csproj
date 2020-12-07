@@ -46,6 +46,8 @@
     </Reference>
     <PackageReference Include="DevExpress.ExpressApp" Version="20.2.4" />
     <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="20.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Validation" Version="20.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="20.2.4" />
     <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="20.2.4" />
     <PackageReference Include="DevExpress.Persistent.Base" Version="20.2.4" />
     <PackageReference Include="DevExpress.Persistent.BaseImpl" Version="20.2.4" />

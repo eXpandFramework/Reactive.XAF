@@ -1,0 +1,70 @@
+steps:
+  - task: AzurePowerShell@5
+    name: StartPipeline
+    inputs:
+      azureSubscription: 'Visual Studio Enterprise(b48a609a-17f6-4e48-a317-54ab77fbf822)'
+      ScriptType: 'InlineScript'
+      azurePowerShellVersion: 'LatestVersion'
+      pwsh: true
+      Inline: |
+        $ErrorView="NormalView"
+        "Nugetpackage=$env:Nuget_PACKAGES"
+        $goArgs = @{
+            GithubToken ='$(GitHubToken)'
+            AzureToken ='$(AzureToken)' 
+            GitHubUserName ='$(GitHubUserName)' 
+            DXApiFeed ='$(DXApiFeed)'
+            Branch                   = '$(Build.SourceBranchName)'
+            SourcePath               = '$(System.DefaultworkingDirectory)'
+            ArtifactStagingDirectory = '$(Build.Artifactstagingdirectory)'
+            BinDirectory             = '$(System.DefaultworkingDirectory)\bin'
+            CustomVersion            = '$(CustomVersion)'
+            UseLastVersion           = '$(UseLastVersion)'
+            XpandBlobOwnerSecret     = '$(XpandBlobOwnerSecret)'
+            AzureApplicationId       = '$(AzureApplicationId)'
+            AzureTenantId            = '$(AzureTenantId)'
+        }
+        "goArgs:"
+        $goArgs | Out-String
+        $env:AzureToken=$AzureToken
+        $env:AzOrganization="eXpandDevops"
+        $env:AzProject ="eXpandFramework"
+        & '$(System.DefaultWorkingDirectory)\Build\StartPipeline.ps1' @goArgs
+      
+  - task: PublishPipelineArtifact@1
+    name: PublishPipelineWorkspace
+    inputs:
+      targetPath: '$(Pipeline.Workspace)'
+      artifact: 'PipelineWorkspace'
+      publishLocation: 'pipeline'
+  
+  # - task: PublishPipelineArtifact@1
+  #   name: 'PublishNetCoreApp31'
+  #   inputs:
+  #     targetPath: '$(System.DefaultworkingDirectory)\bin\netcoreapp3.1'
+  #     artifact: 'netcoreapp3.1'
+  #     publishLocation: 'pipeline'
+  # - task: PublishPipelineArtifact@1
+  #   name: PublishTestWinDesktopApplication
+  #   inputs:
+  #     targetPath: '$(System.DefaultworkingDirectory)\bin\TestWinDesktopApplication'
+  #     artifact: 'TestWinDesktopApplication'
+  #     publishLocation: 'pipeline'
+  # - task: PublishPipelineArtifact@1
+  #   name: PublishAllTestWin
+  #   inputs:
+  #     targetPath: '$(System.DefaultworkingDirectory)\bin\AllTestWin'
+  #     artifact: 'AllTestWin'
+  #     publishLocation: 'pipeline'
+  # - task: PublishPipelineArtifact@1
+  #   name: PublishAllTestWeb
+  #   inputs:
+  #     targetPath: '$(System.DefaultworkingDirectory)\bin\AllTestWin'
+  #     artifact: 'AllTestWeb'
+  #     publishLocation: 'pipeline'
+  # - task: PublishPipelineArtifact@1
+  #   name: PublishNugetPackages
+  #   inputs:
+  #     targetPath: '$(System.DefaultworkingDirectory)\bin\Nupkg'
+  #     artifact: 'Nupkg'
+  #     publishLocation: 'pipeline'

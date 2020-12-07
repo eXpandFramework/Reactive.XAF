@@ -30,12 +30,12 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
             set => SetPropertyValue(nameof(Created), ref _created, value);
         }
         
-        Shooter _shooter;
+        JobWorker _jobWorker;
 
-        [Association("Shooter-JobStates")]
-        public Shooter Shooter {
-            get => _shooter;
-            set => SetPropertyValue(nameof(Shooter), ref _shooter, value);
+        [Association("JobWorker-JobStates")]
+        public JobWorker JobWorker {
+            get => _jobWorker;
+            set => SetPropertyValue(nameof(JobWorker), ref _jobWorker, value);
         }
         
         

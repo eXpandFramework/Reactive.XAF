@@ -36,7 +36,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
                     cloudAuthentication.OAuthToken[key] = serialize;
                 cloudAuthentication.Save();
                 objectSpace.CommitChanges();
-                return Observable.Return(default(T));
+                return default(T).ReturnObservable();
             }).ToTask();
 
         Task IDataStore.DeleteAsync<T>(string key) 

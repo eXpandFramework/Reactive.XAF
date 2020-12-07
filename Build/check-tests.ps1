@@ -1,16 +1,13 @@
 param(
-    $Root = "..\..\",
-    $AzureToken = $env:AzDevopsToken,
+    $Root = "..\",
+    $AzureToken = $env:AzureToken,
     $DXApiFeed = $env:DXFeed,
-    $BuildNumber = "19.2",
     $DxPipelineBuildId
 )
 $ErrorActionPreference="stop"
-"DxPipelineBuildId=$DxPipelineBuildId"
-"BuildNumber=$BuildNumber"
 & $Root\go.ps1 -InstallModules
 Invoke-Script {
-    $env:AzDevopsToken = $AzureToken
+    $env:AzureToken = $AzureToken
     $env:AzOrganization = "eXpandDevOps"
     $env:AzProject = "eXpandFramework"
     $env:DXFeed = $DXApiFeed
@@ -18,34 +15,12 @@ Invoke-Script {
     if (Get-AzTestRuns -buildIds $env:Build_BuildId -FailedOnly) {
         throw "There are fail tests"
     }
-    Write-Host "Query latest minors"
-    $latestMinors = Get-XAFLatestMinors
-    $latestDxVersion = $latestMinors | Select-Object -first 1
-    "latestDxVersion =$latestDxVersion" 
-    $latestPastVersion = $latestMinors | Select-Object -first 1 -skip 1
-    "latestPastVersion:$latestPastVersion"
-    $firstPastVersion = $latestMinors | Select-Object -first 1 -skip 2
-    "firstPastVersion=$firstPastVersion"
-    if ($buildNumber -like "*$latestDxVersion*") {
-        Write-Host "adding PublishNugets-DevExpress.XAF for build $DxPipelineBuildId"
+    if ($env:CustomVersion -eq (Get-XAFLatestMinors -Source $DXApiFeed|Select-Object -Last 1)){
         $parameters = @{
-            DxPipelineBuildId = $DxPipelineBuildId
+            CustomVersion = $env:CustomVersion
+            DxPipelineBuildId = $env:DxPipelineBuildId
         }
-        Add-AzBuild PublishNugets-DevExpress.XAF -Parameters $parameters -Tag $latestDxVersion
-              
-        $b = Get-AzBuilds -Tag "$latestPastVersion" -Status completed -Result succeeded -Top 1 -Definition DevExpress.XAF-Lab
-        $b
-        $parameters = @{
-            DxPipelineBuildId = $b.id
-        }
-        Add-AzBuild -Definition DevExpress.XAF-Lab-Tests -Parameters $parameters -Tag "$latestPastVersion"
+        Add-AzBuild -Definition PublishNugets-DevExpress.XAF -Parameters $parameters
     }
-    elseif ($BuildNumber -like "*$latestPastVersion*") {
-        $b = Get-AzBuilds -Tag "$firstPastVersion" -Status completed -Result succeeded -Top 1 -Definition DevExpress.XAF-Lab
-        $b
-        $parameters = @{
-            DxPipelineBuildId = $b.id
-        }
-        Add-AzBuild -Definition DevExpress.XAF-Lab-Tests -Parameters $parameters -Tag "$firstPastVersion"
-    }
+    
 }

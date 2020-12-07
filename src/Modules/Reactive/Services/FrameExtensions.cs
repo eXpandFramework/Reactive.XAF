@@ -53,7 +53,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.WhenViewChanged().Where(_ => _.frame.View == null);
 
         public static IObservable<(TFrame frame, ViewChangedEventArgs args)> WhenViewChanged<TFrame>(this TFrame source) where TFrame : Frame 
-            => Observable.Return(source).ViewChanged();
+            => source.ReturnObservable().ViewChanged();
 
         public static IObservable<(TFrame frame, ViewChangedEventArgs args)> ViewChanged<TFrame>(
             this IObservable<TFrame> source) where TFrame : Frame 
@@ -64,7 +64,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 		        .TransformPattern<ViewChangedEventArgs, TFrame>();
         
         public static IObservable<(TFrame frame, ViewChangingEventArgs args)> WhenViewChanging<TFrame>(this TFrame source) where TFrame : Frame 
-            => Observable.Return(source).WhenViewChanging();
+            => source.ReturnObservable().WhenViewChanging();
 
         public static IObservable<(TFrame frame, ViewChangingEventArgs args)> WhenViewChanging<TFrame>(
             this IObservable<TFrame> source) where TFrame : Frame 
@@ -83,10 +83,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             });
 
         public static IObservable<TFrame> WhenTemplateChanged<TFrame>(this TFrame source) where TFrame : Frame 
-            => Observable.Return(source).TemplateChanged();
+            => source.ReturnObservable().TemplateChanged();
 
         public static IObservable<TFrame> WhenTemplateViewChanged<TFrame>(this TFrame source) where TFrame : Frame 
-            => Observable.Return(source).TemplateViewChanged();
+            => source.ReturnObservable().TemplateViewChanged();
 
         public static IObservable<T> TemplateViewChanged<T>(this IObservable<T> source) where T : Frame 
             => source.SelectMany(item => {
@@ -96,7 +96,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             });
 
         public static IObservable<Unit> WhenDisposingFrame<TFrame>(this TFrame source) where TFrame : Frame 
-            => DisposingFrame(Observable.Return(source));
+            => DisposingFrame(source.ReturnObservable());
 
         public static IObservable<Unit> DisposingFrame<TFrame>(this IObservable<TFrame> source) where TFrame : Frame 
             => source.WhenNotDefault().SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(

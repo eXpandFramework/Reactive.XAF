@@ -14,14 +14,14 @@ namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ViewExtensions{
         
 
-        public static IObservable<T> WhenClosing<T>(this T view) where T : View => Observable.Return(view).WhenNotDefault().Closing();
+        public static IObservable<T> WhenClosing<T>(this T view) where T : View => view.ReturnObservable().WhenNotDefault().Closing();
 
         public static IObservable<T> Closing<T>(this IObservable<T> source) where T:View =>
             source.Cast<View>().SelectMany(view => Observable.FromEventPattern<EventHandler, EventArgs>(
                     handler => view.Closing += handler,
                     handler => view.Closing -= handler,ImmediateScheduler.Instance))
                 .Select(pattern => (T)pattern.Sender);
-        public static IObservable<T> WhenActivated<T>(this T view) where T : View => Observable.Return(view).Activated();
+        public static IObservable<T> WhenActivated<T>(this T view) where T : View => view.ReturnObservable().Activated();
 
         public static IObservable<T> Activated<T>(this IObservable<T> source) where T:View =>
             source.Cast<View>().SelectMany(view => Observable.FromEventPattern<EventHandler, EventArgs>(
@@ -29,7 +29,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     handler => view.Activated -= handler,ImmediateScheduler.Instance))
                 .Select(pattern => (T)pattern.Sender);
 
-        public static IObservable<T> WhenClosed<T>(this T view) where T : View => view == null ? Observable.Empty<T>() : Observable.Return(view).Closed();
+        public static IObservable<T> WhenClosed<T>(this T view) where T : View => view == null ? Observable.Empty<T>() : view.ReturnObservable().Closed();
 
         public static IObservable<T> Closed<T>(this IObservable<T> source) where T:View =>
             source.SelectMany(view => Observable.FromEventPattern<EventHandler, EventArgs>(
@@ -37,13 +37,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     handler => view.Closed -= handler,ImmediateScheduler.Instance))
                 .Select(pattern => (T)pattern.Sender);
 
-        public static IObservable<(T view, CancelEventArgs e)> WhenQueryCanClose<T>(this T view) where T : View => Observable.Return(view).QueryCanClose();
+        public static IObservable<(T view, CancelEventArgs e)> WhenQueryCanClose<T>(this T view) where T : View => view.ReturnObservable().QueryCanClose();
 
         public static IObservable<(T view, CancelEventArgs e)> QueryCanClose<T>(this IObservable<T> source) where T:View =>
             source.Cast<View>().SelectMany(view => Observable.FromEventPattern<EventHandler<CancelEventArgs>, CancelEventArgs>(
                 handler => view.QueryCanClose += handler,
                 handler => view.QueryCanClose -= handler,ImmediateScheduler.Instance)).TransformPattern<CancelEventArgs,T>();
-        public static IObservable<(T view, CancelEventArgs e)> WhenQueryCanChangeCurrentObject<T>(this T view) where T : View => Observable.Return(view).QueryCanClose();
+        public static IObservable<(T view, CancelEventArgs e)> WhenQueryCanChangeCurrentObject<T>(this T view) where T : View => view.ReturnObservable().QueryCanClose();
 
         public static IObservable<(T view, CancelEventArgs e)> QueryCanChangeCurrentObject<T>(this IObservable<T> source) where T:View =>
             source.Cast<View>().SelectMany(view => Observable.FromEventPattern<EventHandler<CancelEventArgs>, CancelEventArgs>(
@@ -70,14 +70,14 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     handler => item.SelectionChanged -= handler,ImmediateScheduler.Instance))
                 .Select(pattern => pattern.Sender).Cast<T>();
 
-        public static IObservable<T> WhenCurrentObjectChanged<T>(this T controller) where T : View => Observable.Return(controller).CurrentObjectChanged();
+        public static IObservable<T> WhenCurrentObjectChanged<T>(this T controller) where T : View => controller.ReturnObservable().CurrentObjectChanged();
 
         public static IObservable<T> CurrentObjectChanged<T>(this IObservable<T> source) where T:View =>
             source.SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(
                 handler => item.CurrentObjectChanged += handler,
                 handler => item.CurrentObjectChanged -= handler,ImmediateScheduler.Instance)).TransformPattern<T>();
 
-        public static IObservable<Unit> WhenDisposingView<TView>(this TView view) where TView:View => Observable.Return(view).Disposing();
+        public static IObservable<Unit> WhenDisposingView<TView>(this TView view) where TView:View => view.ReturnObservable().Disposing();
 
         public static IObservable<Unit> Disposing<TView>(this IObservable<TView> source) where TView:View =>
             source.SelectMany(item => Observable.FromEventPattern<CancelEventHandler, EventArgs>(handler => item.Disposing += handler,

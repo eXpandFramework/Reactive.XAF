@@ -11,6 +11,7 @@ nuget DevExpress.ExpressApp.Office == 20.2.4
 nuget DevExpress.ExpressApp.Core.All == 20.2.4
 nuget DevExpress.ExpressApp.Win.All == 20.2.4
 nuget DevExpress.ExpressApp.Web.All == 20.2.4
+nuget DevExpress.ExpressApp.Blazor.All == 20.2.4
 nuget DevExpress.EasyTest == 20.2.4  
 nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 20.2.4  
 nuget DevExpress.ExpressApp.EasyTest.WinAdapter == 20.2.4  
@@ -70,11 +71,10 @@ nuget Google.Apis.People.v1
 nuget Xpand.Collections
 nuget System.Configuration.ConfigurationManager
 nuget Microsoft.CodeAnalysis.CSharp
+nuget Microsoft.CodeAnalysis
 nuget System.ServiceModel.Http
 nuget Microsoft.AspNetCore.Hosting
 nuget Selenium.Support
 nuget Selenium.WebDriver
 nuget Microsoft.NET.Test.SDK
 nuget Xpand.VersionConverter 2.202.11
-
-

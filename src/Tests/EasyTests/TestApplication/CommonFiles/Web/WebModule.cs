@@ -68,7 +68,7 @@ namespace TestApplication.Web{
 #if !NETCOREAPP3_1
             if (!Debugger.IsAttached){
 
-                moduleManager.Extend(Enum.GetValues(typeof(PredefinedMap)).OfType<PredefinedMap>().Where(map =>map!=PredefinedMap.None&& map.Platform()==Platform.Web));
+                // moduleManager.Extend(Enum.GetValues(typeof(PredefinedMap)).OfType<PredefinedMap>().Where(map =>map!=PredefinedMap.None&& map.Platform()==Platform.Web));
 
             }
 	        moduleManager.LookupCascade().ToUnit()

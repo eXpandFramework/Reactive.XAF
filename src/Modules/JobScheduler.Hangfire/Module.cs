@@ -5,6 +5,8 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor.SystemModule;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Updating;
+using DevExpress.ExpressApp.Validation;
+using DevExpress.ExpressApp.Validation.Blazor;
 using JetBrains.Annotations;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
@@ -20,6 +22,8 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
         public JobSchedulerModule() {
             RequiredModuleTypes.Add(typeof(ReactiveModule));
             RequiredModuleTypes.Add(typeof(SystemBlazorModule));
+            RequiredModuleTypes.Add(typeof(ValidationModule));
+            RequiredModuleTypes.Add(typeof(ValidationBlazorModule));
         }
 
         public override void Setup(ApplicationModulesManager moduleManager){

@@ -20,7 +20,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
 
         public static IObservable<TController> When<TController>(this TController source, ActionBase actionBase)
             where TController : Controller =>
-            Observable.Return(source).When(actionBase);
+            source.ReturnObservable().When(actionBase);
 
         public static IObservable<TController> When<TController>(this IObservable<TController> source,
             ActionBase actionBase) where TController : Controller => source
@@ -32,18 +32,10 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
             where TController : Controller{
             objectType ??= typeof(object);
             return source
-                .SelectMany(controller => {
-                    if (controller.Frame?.View != null)
-                        return Observable.Return(controller)
-                            .Where(_ => _.Frame.View.Fits(viewType, nesting) &&
-                                        objectType.IsAssignableFrom(_.Frame.View.ObjectTypeInfo.Type));
-                    return Observable.Return(controller)
-                            .FrameAssigned()
-                            .SelectMany(_ => _.Frame.WhenViewChanged().Select(tuple => _))
-                        ;
-                }).Where(_ =>
-                    _.Frame.View.Fits(viewType, nesting) &&
-                    objectType.IsAssignableFrom(_.Frame.View.ObjectTypeInfo.Type));
+                .SelectMany(controller => controller.Frame?.View != null ? controller.ReturnObservable()
+                        .Where(_ => _.Frame.View.Fits(viewType, nesting) && objectType.IsAssignableFrom(_.Frame.View.ObjectTypeInfo.Type))
+                    : Observable.Return(controller).FrameAssigned().SelectMany(_ => _.Frame.WhenViewChanged().Select(tuple => _)))
+                .Where(_ => _.Frame.View.Fits(viewType, nesting) && objectType.IsAssignableFrom(_.Frame.View.ObjectTypeInfo.Type));
         }
 
 

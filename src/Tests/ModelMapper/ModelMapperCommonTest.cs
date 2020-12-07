@@ -28,9 +28,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         public const string DynamicTypeName = "DynamicTypeName";
 
         [SuppressMessage("ReSharper", "ObjectCreationAsStatement")]
-        protected ModelMapperCommonTest(){
-            new ModelMapperModule();
-        }
+        protected ModelMapperCommonTest() => new ModelMapperModule();
 
         internal ModelMapperModule DefaultModelMapperModule(Platform platform,params ModuleBase[] modules){
             var xafApplication = platform.NewApplication<ModelMapperModule>();
@@ -43,10 +41,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             return modelMapperModule;
         }
 
-        protected static PropertyInfo[] ModelTypeProperties(Type modelType){
-            return modelType.Properties().Where(info =>!TypeMappingService.ReservedPropertyNames.Contains(info.Name) &&
-                                                       info.Name!=TypeMappingService.ModelMappersNodeName).ToArray();
-        }
+        protected static PropertyInfo[] ModelTypeProperties(Type modelType) 
+            => modelType.Properties().Where(info =>!TypeMappingService.ReservedPropertyNames.Contains(info.Name) &&
+                                                   info.Name!=TypeMappingService.ModelMappersNodeName).ToArray();
 
         private void ConfigureLayoutViewPredefinedMapService(PredefinedMap predefinedMap=PredefinedMap.LayoutView){
             if (new[]{PredefinedMap.LayoutView,PredefinedMap.LayoutViewColumn}.Contains(predefinedMap)){

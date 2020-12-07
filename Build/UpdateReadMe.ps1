@@ -1,12 +1,12 @@
 using namespace system.text.RegularExpressions
 param(
-    $AzureToken =$env:AzDevOpsToken,
+    $AzureToken =$env:AzureToken,
     [version]$ExistingVersion
 )
 
 $ErrorActionPreference = "Stop"
 if ($buildNumber){
-    $env:AzDevOpsToken=$AzureToken
+    $env:AzureToken=$AzureToken
     $env:AzOrganization="eXpandDevops"
     $env:AzProject ="eXpandFramework"
 }

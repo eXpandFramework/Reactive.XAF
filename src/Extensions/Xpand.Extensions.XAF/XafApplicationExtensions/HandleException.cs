@@ -7,7 +7,7 @@ using static DevExpress.Persistent.Base.Tracing;
 namespace Xpand.Extensions.XAF.XafApplicationExtensions{
     public static partial class XafApplicationExtensions{
         public static void HandleException(this DevExpress.ExpressApp.XafApplication application, Exception exception){
-            Tracer.LogError(exception);
+
             try {
                 var platform = application.GetPlatform();
                 switch (platform) {
@@ -21,6 +21,7 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions{
                         Console.WriteLine(exception);
                         break;
                 }
+                Tracer.LogError(exception);
             }
             catch (Exception e){
                 Tracer.LogError(e);

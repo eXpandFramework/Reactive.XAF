@@ -15,7 +15,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
         [XpandTest()]
         public void NewObjects(){
             using var application = DefaultReactiveModule().Application;
-            var testObserver = application.NewObject<R>().Test();
+            var testObserver = application.WhenNewObjectCreated<R>().Test();
             var objectSpace = application.CreateObjectSpace();
             var o = objectSpace.CreateObject<R>();
             objectSpace.CommitChanges();

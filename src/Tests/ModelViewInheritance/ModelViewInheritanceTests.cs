@@ -7,6 +7,7 @@ using DevExpress.ExpressApp.Model.Core;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
+using Xpand.TestsLib;
 using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.CloneModelView;
@@ -17,7 +18,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{
     [NonParallelizable]
-    public class ModelViewInheritanceTests:CommonTest {
+    public class ModelViewInheritanceTests:BaseTest {
         [XpandTest]
         [TestCase(ViewType.DetailView,false,nameof(Platform.Win))]
         [TestCase(ViewType.DetailView,true,nameof(Platform.Win))]
@@ -34,7 +35,7 @@ namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{
             var models = GetModels(viewType, attribute, platform);
 
             var application = platform.NewApplication<ModelViewInheritanceModule>();
-            var module = CreateModelViewIneritanceModule(viewType, attribute, application,false);
+            var module = CreateModelViewInheritanceModule(viewType, attribute, application,false);
             var testModule1 = new TestModule1{DiffsStore = new StringModelStore(models[0])};
             var baseBoTypes = new[]{typeof(ABaseMvi), typeof(TagMvi)};
             var boTypes = new[]{typeof(AMvi), typeof(FileMvi)};
@@ -52,7 +53,7 @@ namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{
 
         private  string[] GetModels(ViewType viewType, bool attribute, Platform platform){
             var application = platform.NewApplication<ModelViewInheritanceModule>();
-            CreateModelViewIneritanceModule(viewType, attribute, application);
+            CreateModelViewInheritanceModule(viewType, attribute, application);
             var inheritAndModifyBaseView = new InheritAndModifyBaseView(application, viewType, attribute);
             var models = inheritAndModifyBaseView.GetModels().ToArray();
             ModelViewInheritanceUpdater.Disabled = false;
@@ -61,9 +62,9 @@ namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{
         }
 
 
-        private ModelViewInheritanceModule CreateModelViewIneritanceModule(ViewType viewType, bool attribute, XafApplication application,bool setup=true){
+        private ModelViewInheritanceModule CreateModelViewInheritanceModule(ViewType viewType, bool attribute, XafApplication application,bool setup=true){
             CustomizeTypesInfo(viewType, attribute,application);
-            var module = DefaultModelViewInheritancerModule(application,setup,typeof(ReactiveModule));
+            var module = DefaultModelViewInheritanceModule(application,setup,typeof(ReactiveModule));
             return module;
         }
 
@@ -81,7 +82,7 @@ namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{
             }
         }
 
-        private ModelViewInheritanceModule DefaultModelViewInheritancerModule(XafApplication application,bool setup=true,params Type[] modules){
+        private ModelViewInheritanceModule DefaultModelViewInheritanceModule(XafApplication application,bool setup=true,params Type[] modules){
             var baseBoTypes = new[]{typeof(ABaseMvi), typeof(TagMvi),typeof(Element)};
             var boTypes = new[]{typeof(AMvi), typeof(FileMvi)};
             var modelViewInheritanceModule = new ModelViewInheritanceModule();
@@ -92,32 +93,30 @@ namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{
         [XpandTest]
         [TestCase(true)]
         [TestCase(false)]
-        public void Chained_Cloned_listview_merging(bool deepMerge){
+        public void Chained_Cloned_ListView_merging(bool deepMerge){
             string GetModel(){
-                string xml;
-                using (var xafApplication = Platform.Win.NewApplication<ModelViewInheritanceModule>()){
-                    var inheritanceModule = DefaultModelViewInheritancerModule(xafApplication, true, typeof(CloneModelViewModule));
-                    var model = inheritanceModule.Application.Model;
-                    var modelApplication = ((ModelApplicationBase) model).CreatorInstance.CreateModelApplication();
-                    ModelApplicationHelper.AddLayer(((ModelApplicationBase) model), modelApplication);
+                using var xafApplication = Platform.Win.NewApplication<ModelViewInheritanceModule>();
+                var inheritanceModule = DefaultModelViewInheritanceModule(xafApplication, true, typeof(CloneModelViewModule));
+                var model = inheritanceModule.Application.Model;
+                var modelApplication = ((ModelApplicationBase) model).CreatorInstance.CreateModelApplication();
+                ModelApplicationHelper.AddLayer(((ModelApplicationBase) model), modelApplication);
 
-                    var elementListView = model.BOModel.GetClass(typeof(Element)).DefaultListView;
-                    elementListView.Columns[nameof(Element.Street)].Index = -1;
-                    var lvBase = ((IModelListView) model.Views[Element.ListViewBase]);
-                    var mergedDifferences = ((IModelObjectViewMergedDifferences) lvBase).MergedDifferences;
-                    var mergedDifference = mergedDifferences.AddNode<IModelMergedDifference>();
-                    mergedDifference.View = elementListView;
-                    mergedDifferences = ((IModelObjectViewMergedDifferences) model.Views[Element.ListViewBaseNested]).MergedDifferences;
+                var elementListView = model.BOModel.GetClass(typeof(Element)).DefaultListView;
+                elementListView.Columns[nameof(Element.Street)].Index = -1;
+                var lvBase = ((IModelListView) model.Views[Element.ListViewBase]);
+                var mergedDifferences = ((IModelObjectViewMergedDifferences) lvBase).MergedDifferences;
+                var mergedDifference = mergedDifferences.AddNode<IModelMergedDifference>();
+                mergedDifference.View = elementListView;
+                mergedDifferences = ((IModelObjectViewMergedDifferences) model.Views[Element.ListViewBaseNested]).MergedDifferences;
+                mergedDifference = mergedDifferences.AddNode<IModelMergedDifference>();
+                mergedDifference.View = elementListView;
+                mergedDifference.DeepMerge = deepMerge;
+                if (!deepMerge){
                     mergedDifference = mergedDifferences.AddNode<IModelMergedDifference>();
-                    mergedDifference.View = elementListView;
-                    mergedDifference.DeepMerge = deepMerge;
-                    if (!deepMerge){
-                        mergedDifference = mergedDifferences.AddNode<IModelMergedDifference>();
-                        mergedDifference.View = lvBase;
-                    }
-                    xml = modelApplication.Xml;
-                    ModelApplicationHelper.RemoveLayer((ModelApplicationBase) xafApplication.Model);
+                    mergedDifference.View = lvBase;
                 }
+                var xml = modelApplication.Xml;
+                ModelApplicationHelper.RemoveLayer((ModelApplicationBase) xafApplication.Model);
 
                 return xml;
             }
@@ -125,16 +124,15 @@ namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{
             
             var modelXml = GetModel();
 
-            using (var newApplication = Platform.Win.NewApplication<ModelViewInheritanceModule>()){
-                var module = DefaultModelViewInheritancerModule(newApplication,false, typeof(CloneModelViewModule));
-                var testModule1 = new TestModule1{DiffsStore = new StringModelStore(modelXml)};
-                testModule1.AdditionalExportedTypes.Add(typeof(Element));
-                newApplication.SetupDefaults(module, testModule1,new CloneModelViewModule());
+            using var newApplication = Platform.Win.NewApplication<ModelViewInheritanceModule>();
+            var module = DefaultModelViewInheritanceModule(newApplication,false, typeof(CloneModelViewModule));
+            var testModule1 = new TestModule1{DiffsStore = new StringModelStore(modelXml)};
+            testModule1.AdditionalExportedTypes.Add(typeof(Element));
+            newApplication.SetupDefaults(module, testModule1,new CloneModelViewModule());
 
-                var listViewBase = ((IModelListView) newApplication.Model.Views[Element.ListViewBase]);
-                listViewBase.Columns[nameof(Element.Street)].Index.ShouldBe(-1);
-                ((IModelListView) newApplication.Model.Views[Element.ListViewBaseNested]).Columns[nameof(Element.Street)].Index.ShouldBe(-1);
-            }
+            var listViewBase = ((IModelListView) newApplication.Model.Views[Element.ListViewBase]);
+            listViewBase.Columns[nameof(Element.Street)].Index.ShouldBe(-1);
+            ((IModelListView) newApplication.Model.Views[Element.ListViewBaseNested]).Columns[nameof(Element.Street)].Index.ShouldBe(-1);
         }
     }
 

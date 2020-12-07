@@ -15,7 +15,7 @@
     <CopyLocalLockFileAssemblie>true</CopyLocalLockFileAssemblie>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DefineConstants>TRACE;XAF192</DefineConstants>
+    <DefineConstants>TRACE;XAF202</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Xpand.Extensions">

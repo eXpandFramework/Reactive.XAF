@@ -1,0 +1,47 @@
+steps:
+  - task: PowerShell@2
+    inputs:
+      targetType: 'inline'
+      script: |
+        Write-Host "##vso[task.setvariable variable=AzureToken;]testvalue"
+        Write-Verbose -Verbose "##vso[task.setvariable variable=AzureToken]crushed tomatoes"
+        Write-Verbose -Verbose "##vso[task.setvariable variable=sauce1]crushed tomatoes"
+        "t=$env:sauce1"
+        "t=$env:AzureToken"
+        '$(AzureToken)'
+#   - task: AzurePowerShell@5
+#     name: SetSharedVariables
+#     inputs:
+#       azureSubscription: 'Visual Studio Enterprise(b48a609a-17f6-4e48-a317-54ab77fbf822)'
+#       ScriptType: 'InlineScript'
+#       azurePowerShellVersion: 'LatestVersion'
+#       pwsh: true
+#       Inline: |
+#         $ErrorView="NormalView"
+#           "Nugetpackage=$env:Nuget_PACKAGES"
+#           $ErrorActionPreference="stop"
+#           $goArgs = @{
+#               GithubToken              = '$(GitHubToken)'
+#               AzureToken               = '$(AzureToken)' 
+#               GitHubUserName           = '$(GitHubUserName)' 
+#               DXApiFeed                = '$(DXApiFeed)'
+#               Branch                   = '$(Build.SourceBranchName)'
+#               SourcePath               = '$(System.DefaultworkingDirectory)'
+#               ArtifactStagingDirectory = '$(Build.Artifactstagingdirectory)'
+#               BinDirectory             = '$(System.DefaultworkingDirectory)\bin'
+#               CustomVersion            = '$(CustomVersion)'
+#               UseLastVersion           = '$(UseLastVersion)'
+#               XpandBlobOwnerSecret     = '$(XpandBlobOwnerSecret)'
+#               AzureApplicationId       = '$(AzureApplicationId)'
+#               AzureTenantId            = '$(AzureTenantId)'
+#           }
+#           "goArgs:"
+#           $goArgs | Out-String  
+#           [Environment]::SetEnvironmentVariable("AzureToken", '$(AzureToken)', "User")
+  - task: PowerShell@2
+    name: Read1
+    inputs:
+      targetType: 'inline'
+      Inline: |
+          "t=$env:sauce1"
+          "t=$env:AzureToken"

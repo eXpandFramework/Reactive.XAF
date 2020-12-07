@@ -5,9 +5,13 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Windows.Forms;
+using DevExpress.ExpressApp.Layout;
+using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Web;
+using DevExpress.ExpressApp.Web.Layout;
 using DevExpress.ExpressApp.Win;
 using JetBrains.Annotations;
+using Moq;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -26,8 +30,8 @@ namespace Xpand.TestsLib{
                     throw e.Exception;
                 }
             };
-            TraceClientConnected = TestApplicationExtensions.ClientConnect(this);
-            TraceClientBroadcast = TestApplicationExtensions.ClientBroadcast(this);
+            TraceClientConnected = this.ClientConnect();
+            TraceClientBroadcast = this.ClientBroadcast();
         }
 
         public bool TransmitMessage => _transmitMessage;
@@ -121,6 +125,13 @@ namespace Xpand.TestsLib{
         public IObservable<Unit> TraceClientConnected{ get; set; }
         [PublicAPI]
         public Type SUTModule{ get; set; }
+
+        protected override LayoutManager CreateLayoutManagerCore(bool simple) {
+            var controlMock = new Mock<Control>() {CallBase = true};
+            var layoutManagerMock = new Mock<WebLayoutManager>() {CallBase = true};
+            layoutManagerMock.Setup(_ => _.LayoutControls(It.IsAny<IModelNode>(), It.IsAny<ViewItemsCollection>())).Returns(controlMock.Object);
+            return layoutManagerMock.Object;
+        }
     }
     [PublicAPI]
 

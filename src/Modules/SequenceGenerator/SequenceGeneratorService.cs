@@ -185,7 +185,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
 
         private static IObservable<object> Configure(XafApplication application, ObjectView view, (IObjectSpace objectSpace, CancelEventArgs e) _) 
             => view.ObjectSpace.ModifiedObjects.Cast<SequenceStorage>().Where(storage => !storage.ObjectSpace.IsObjectToDelete(storage))
-                .ToObservable()
+                .ToObservable(ImmediateScheduler.Instance)
                 .SelectMany(storage => storage.Configure().HandleErrors(application, _.e)).ToUnit()
                 .To(new object());
 
@@ -210,7 +210,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
 
         private static IObservable<object> GenerateSequences(this IObservable<IObjectSpace> source, IDataLayer dataLayer,Type sequenceStorageType=null) 
             => source.WhenSupported().SelectMany(space => Observable.Defer(() => space.GetObjectForSave(dataLayer).SelectMany(e => e.GenerateSequences(sequenceStorageType))
-                        .TakeUntil(space.WhenCommited().Select(objectSpace => objectSpace)))
+                        .TakeUntil(space.WhenCommitted().Select(objectSpace => objectSpace)))
                     .RepeatWhen(observable => observable.Where(o => !space.IsDisposed).Do(o => {}))
                 )
                 .Select(o => o)
@@ -227,7 +227,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
                     return unitOfWork.WhenObjectSaving().Distinct(e => e.Object)
                         .Where(e => e.Session.IsNewObject(e.Object))
                         .Select(e => (e,explicitUnitOfWork))
-                        .TakeUntil(objectSpace.WhenCommited().ToUnit().Merge(objectSpace.WhenRollingBack().Select(tuple => tuple).ToUnit()))
+                        .TakeUntil(objectSpace.WhenCommitted().ToUnit().Merge(objectSpace.WhenRollingBack().Select(tuple => tuple).ToUnit()))
                         .Finally(() => {
                             explicitUnitOfWork.Close();
                             unitOfWorks.TryRemove(objectSpace, out explicitUnitOfWork);

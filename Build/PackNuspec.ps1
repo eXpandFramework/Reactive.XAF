@@ -4,7 +4,7 @@ param(
     $sourceDir = "$PSScriptRoot\..",
     $Filter ,
     [switch]$SkipReadMe,
-    $dxVersion=20.2.4.0
+    $dxVersion="20.2.4.0"
 )
 
 
@@ -20,7 +20,7 @@ Set-Location $sourceDir
 $assemblyVersions = & "$sourceDir\build\AssemblyVersions.ps1" $sourceDir
 
 # Get-ChildItem "$sourceDir\tools\nuspec" "Xpand*$filter*.nuspec" -Recurse | ForEach-Object {
-$nuspecs = Get-ChildItem "$sourceDir\build\nuspec" "Xpand.*$filter*.nuspec" -Recurse|Where-Object{$dxVersion -gt "20.2.2" -and $_.BaseName -notmatch "Test"-or $_.BaseName -notmatch "Test|Blazor|Hangfire"}
+$nuspecs = Get-ChildItem "$sourceDir\build\nuspec" "Xpand.*$filter*.nuspec" -Recurse|Where-Object{(($dxVersion -gt "20.2.2") -or ($_.BaseName -notmatch "Test|Blazor|Hangfire")) -and $_.BaseName -notmatch "Test"}
 
 $nugetPath = (Get-NugetPath)
 

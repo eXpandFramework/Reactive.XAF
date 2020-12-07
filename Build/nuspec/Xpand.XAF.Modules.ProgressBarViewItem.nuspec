@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.ProgressBarViewItem</id>
-    <version>4.202.44.1</version>
+    <version>4.202.44.3</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -15,10 +15,10 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  ProgressBarViewItem</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.Extensions" version="4.202.44.1" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.202.44.1" />
-        <dependency id="Xpand.Extensions.XAF" version="4.202.44.1" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.44.1" />
+        <dependency id="Xpand.Extensions" version="4.202.44.3" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.202.44.3" />
+        <dependency id="Xpand.Extensions.XAF" version="4.202.44.3" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.44.3" />
         <dependency id="System.Reactive" version="5.0" />
         <dependency id="DevExpress.ExpressApp" version="20.2.4" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />

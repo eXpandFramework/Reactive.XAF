@@ -1,10 +1,11 @@
 ﻿using DevExpress.ExpressApp;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
+using Xpand.TestsLib;
 using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.Reactive.Tests.BOModel;
 
 namespace Xpand.XAF.Modules.Reactive.Tests{
-    public abstract class ReactiveCommonTest:CommonTest{
+    public abstract class ReactiveCommonTest:BaseTest{
         protected ReactiveModule DefaultReactiveModule(XafApplication application){
             application.AddModule<TestModule>(typeof(R),typeof(NonPersistentObject));
             return application.Modules.FindModule<ReactiveModule>();

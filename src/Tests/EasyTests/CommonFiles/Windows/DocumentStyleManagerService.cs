@@ -1,8 +1,5 @@
 ﻿#if !NETCOREAPP3_1
 
-using System.Drawing;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
 using DevExpress.EasyTest.Framework;
 using Xpand.Extensions.XAF.ObjectExtensions;
 using Xpand.TestsLib.Common.Win32;
@@ -19,15 +16,15 @@ using ActionCommand = Xpand.TestsLib.EasyTest.Commands.ActionCommands.ActionComm
 
 namespace ALL.Win.Tests{
     public static class DocumentStyleManagerService{
-        public static async Task TestDocumentStyleManager(this ICommandAdapter adapter){
+        public static void TestDocumentStyleManager(this ICommandAdapter adapter){
             adapter.Execute(new NavigateCommand("DocumentStyleManager.Document Object".CompoundName()));
             adapter.Execute(new ProcessRecordCommand("DocumentObject",("Name", "Test document 1")));
             adapter.Execute(new ActionCommand("StyleManager"));
             adapter.Execute(new MoveWindowCommand());
-            await adapter.TestAllStyles();
+            // await adapter.TestAllStyles();
             adapter.TestDeleteStyles();
             adapter.TestImportStyles();
-            await adapter.TestReplaceStyles();
+            // await adapter.TestReplaceStyles();
             adapter.TestTemplateStyles();
             adapter.TestApplyStyles();
         }
@@ -58,53 +55,53 @@ namespace ALL.Win.Tests{
             adapter.Execute(new ActionCommand(Actions.Close));
         }
 
-        private static async Task TestReplaceStyles(this ICommandAdapter adapter){
-            var firstWord = new Point(155, 196);
-            var styleV2 = "QuoteV2";
-            var styleV1 = "Quote";
-            adapter.Execute(new MouseCommand(firstWord),new WaitCommand(2000));
-            adapter.Execute(new ProcessRecordCommand<DocumentStyleManager>(manager => manager.ReplacementStyles, ("Name", styleV2)){SuppressExceptions = true});
-            adapter.Execute(new MouseCommand(new Point(185, 196)), new WaitCommand(2000));
-            adapter.Execute(new ProcessRecordCommand<DocumentStyleManager>(manager => manager.ReplacementStyles, ("Name", styleV2)){SuppressExceptions = true});
-            adapter.Execute(new ActionCommand(nameof(ReplaceStylesService.ReplaceStyles)));
-            await adapter.Execute(() => adapter.Execute(new CheckListViewSelectionCommand<DocumentStyleManager>(m => m.AllStyles, ("Name", styleV2))));
-            adapter.Execute(new MouseCommand(firstWord), new WaitCommand(2000));
-            adapter.Execute(new SendKeysCommand(Win32Constants.VirtualKeys.Z, Win32Constants.VirtualKeys.Control));
-            await adapter.Execute(() => adapter.Execute(new CheckListViewSelectionCommand<DocumentStyleManager>(m => m.AllStyles, ("Name", styleV1))));
+        // private static async Task TestReplaceStyles(this ICommandAdapter adapter){
+        //     var firstWord = new Point(155, 196);
+        //     var styleV2 = "QuoteV2";
+        //     var styleV1 = "Quote";
+        //     adapter.Execute(new MouseCommand(firstWord),new WaitCommand(2000));
+        //     adapter.Execute(new ProcessRecordCommand<DocumentStyleManager>(manager => manager.ReplacementStyles, ("Name", styleV2)){SuppressExceptions = true});
+        //     adapter.Execute(new MouseCommand(new Point(185, 196)), new WaitCommand(2000));
+        //     adapter.Execute(new ProcessRecordCommand<DocumentStyleManager>(manager => manager.ReplacementStyles, ("Name", styleV2)){SuppressExceptions = true});
+        //     adapter.Execute(new ActionCommand(nameof(ReplaceStylesService.ReplaceStyles)));
+        //     await adapter.Execute(() => adapter.Execute(new CheckListViewSelectionCommand<DocumentStyleManager>(m => m.AllStyles, ("Name", styleV2))));
+        //     adapter.Execute(new MouseCommand(firstWord), new WaitCommand(2000));
+        //     adapter.Execute(new SendKeysCommand(Win32Constants.VirtualKeys.Z, Win32Constants.VirtualKeys.Control));
+        //     await adapter.Execute(() => adapter.Execute(new CheckListViewSelectionCommand<DocumentStyleManager>(m => m.AllStyles, ("Name", styleV1))));
+        //
+        // }
 
-        }
 
+        // private static async Task TestAllStyles(this ICommandAdapter adapter){
+        //     // await adapter.TestAllStyleContentSynchronization();
+        //     // await adapter.TestAllStylesCharacter();
+        // }
 
-        private static async Task TestAllStyles(this ICommandAdapter adapter){
-            await adapter.TestAllStyleContentSynchronization();
-            await adapter.TestAllStylesCharacter();
-        }
+        // private static async Task TestAllStyleContentSynchronization(this ICommandAdapter adapter){
+        //     adapter.Execute(new CheckListViewCommand<DocumentStyleManager>(m => m.AllStyles, 9));
+        //
+        //     adapter.Execute(new CheckListViewSelectionCommand<DocumentStyleManager>(m => m.AllStyles, ("Name", "Quote")));
+        //
+        //     adapter.Execute(new SendKeysCommand(Win32Constants.VirtualKeys.PageDown));
+        //     adapter.Execute(new SendKeysCommand(Win32Constants.VirtualKeys.PageDown));
+        //     await adapter.Execute(() => {
+        //         adapter.Execute(
+        //             new CheckListViewSelectionCommand<DocumentStyleManager>(m => m.AllStyles, ("Name", "Intense Quote")));
+        //     });
+        //
+        //     adapter.Execute(new SendKeysCommand(Win32Constants.VirtualKeys.PageDown));
+        //     adapter.Execute(new SendKeysCommand(Win32Constants.VirtualKeys.PageDown));
+        //     await adapter.Execute(() => {
+        //         adapter.Execute(new CheckListViewSelectionCommand<DocumentStyleManager>(m => m.AllStyles, ("Name", "Normal")));
+        //     });
+        //     adapter.Execute(new CheckListViewCommand<DocumentStyleManager>(m => m.ReplacementStyles, 3));
+        // }
 
-        private static async Task TestAllStyleContentSynchronization(this ICommandAdapter adapter){
-            adapter.Execute(new CheckListViewCommand<DocumentStyleManager>(m => m.AllStyles, 9));
-
-            adapter.Execute(new CheckListViewSelectionCommand<DocumentStyleManager>(m => m.AllStyles, ("Name", "Quote")));
-
-            adapter.Execute(new SendKeysCommand(Win32Constants.VirtualKeys.PageDown));
-            adapter.Execute(new SendKeysCommand(Win32Constants.VirtualKeys.PageDown));
-            await adapter.Execute(() => {
-                adapter.Execute(
-                    new CheckListViewSelectionCommand<DocumentStyleManager>(m => m.AllStyles, ("Name", "Intense Quote")));
-            });
-
-            adapter.Execute(new SendKeysCommand(Win32Constants.VirtualKeys.PageDown));
-            adapter.Execute(new SendKeysCommand(Win32Constants.VirtualKeys.PageDown));
-            await adapter.Execute(() => {
-                adapter.Execute(new CheckListViewSelectionCommand<DocumentStyleManager>(m => m.AllStyles, ("Name", "Normal")));
-            });
-            adapter.Execute(new CheckListViewCommand<DocumentStyleManager>(m => m.ReplacementStyles, 3));
-        }
-
-        private static async Task TestAllStylesCharacter(this ICommandAdapter adapter){
-            adapter.Execute(6, new SendKeysCommand(Win32Constants.VirtualKeys.Up));
-            await adapter.Execute(() => adapter.Execute(new CheckListViewSelectionCommand<DocumentStyleManager>(m => m.AllStyles, ("Name", "Hyperlink"))));
-            adapter.Execute(new CheckListViewCommand<DocumentStyleManager>(m => m.ReplacementStyles, 6));
-        }
+        // private static async Task TestAllStylesCharacter(this ICommandAdapter adapter){
+        //     adapter.Execute(6, new SendKeysCommand(Win32Constants.VirtualKeys.Up));
+        //     await adapter.Execute(() => adapter.Execute(new CheckListViewSelectionCommand<DocumentStyleManager>(m => m.AllStyles, ("Name", "Hyperlink"))));
+        //     adapter.Execute(new CheckListViewCommand<DocumentStyleManager>(m => m.ReplacementStyles, 6));
+        // }
 
         private static void TestImportStyles(this ICommandAdapter adapter){
             adapter.Execute(new ActionCommand(nameof(DeleteService.DeleteStyles), "Unused"));

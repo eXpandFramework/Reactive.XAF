@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Web;
@@ -69,7 +70,7 @@ namespace Xpand.XAF.Modules.LookupCascade{
             var modelClientDataSource = application.ReactiveModulesModel().LookupCascadeModel().Wait().ClientDatasource;
             var storage = modelClientDataSource.ClientStorage.ToString().FirstCharacterToLower();
             var viewsIds = modelClientDataSource.LookupViews.Select(view => view.LookupListView.Id);
-            return viewsIds.ToObservable()
+            return viewsIds.ToObservable(ImmediateScheduler.Instance)
                 .SelectMany(viewId => application.CreateClientDataSource((IModelListView) application.FindModelView(viewId))).ToEnumerable()
                 .Select(_ => (_.viewId,_.objects,storage));
         }

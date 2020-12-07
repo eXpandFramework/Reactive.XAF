@@ -6,25 +6,29 @@ param(
     [string]$dxVersion = "18.2.11",
     [bool]$build = $true,
     [bool]$cleanBin = $true,
-    [string]$branch="lab",
+    [string]$branch = "lab",
     [switch]$InstallModules,
-    [string[]]$taskList=@("Build"),
-    [string]$XpandPwshVersion = "1.202.47.1",
-    [switch]$CustomVersion
+    [string[]]$taskList = @("Build"),
+    [string]$XpandPwshVersion = "1.202.47.7",
+    [switch]$CustomVersion,
+    [switch]$OnlyXpwsh
 )
 $ErrorActionPreference = "Stop"
-
-@([PSCustomObject]@{
-    Name = "psake"
-    Version ="4.9.0"
-},[PSCustomObject]@{
-    Name = "XpandPwsh"
-    Version =$XpandPwshVersion
-})|ForEach-Object{
+$m=@([PSCustomObject]@{
+    Name    = "XpandPwsh"
+    Version = $XpandPwshVersion
+})
+if (!$OnlyXpwsh){
+    $m+=[PSCustomObject]@{
+        Name    = "psake"
+        Version = "4.9.0"
+    }
+}
+$m| ForEach-Object {
     & "$PSScriptRoot\build\Install-Module.ps1" $_
 }
 "XpandPwshVersion=$((Get-Module XpandPwsh -ListAvailable).Version)"
-if ($InstallModules){
+if ($InstallModules) {
     return
 }
 
@@ -34,8 +38,8 @@ Invoke-XPsake  "$PSScriptRoot\build\BuildDevExpress.XAF.ps1" -properties @{
     "nugetApiKey"    = $nugetApiKey;
     "packageSources" = $packageSources;
     "build"          = $build;
-    "dxVersion"          = $dxVersion;
-    "branch"=$branch;
-    "CustomVersion"=$CustomVersion;
-    "Root"=$PSScriptRoot;
+    "dxVersion"      = $dxVersion;
+    "branch"         = $branch;
+    "CustomVersion"  = $CustomVersion;
+    "Root"           = $PSScriptRoot;
 } -taskList $taskList

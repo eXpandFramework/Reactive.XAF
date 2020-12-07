@@ -123,14 +123,15 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 	        }
 	        nextSequenceTest.Dispose();
         }
-        [Test][XpandTest]
-        public void Increase_Sequence_When_creating_Nested_New_Objects_on_non_sequential_parent_saving(){
-            Increase_Sequence_When_creating_Nested_New_Objects_on_parent_saving<ParentNonSequencialWithChildOnSaving>();
-        }
 
         [Test][XpandTest]
         public void Increase_Sequence_When_creating_Nested_New_Objects_on_sequential_parent_saving(){
             Increase_Sequence_When_creating_Nested_New_Objects_on_parent_saving<ParentSequencialWithChildOnSaving>();
+        }
+
+        [Test][XpandTest]
+        public void Increase_Sequence_When_creating_Nested_New_Objects_on_non_sequential_parent_saving(){
+            Increase_Sequence_When_creating_Nested_New_Objects_on_parent_saving<ParentNonSequencialWithChildOnSaving>();
         }
 
         private void Increase_Sequence_When_creating_Nested_New_Objects_on_parent_saving<TParent>() where TParent:Parent{
@@ -338,8 +339,10 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
                 
 	        AssertNextSequences(application, 1,testObserver);
         }
+
         [Test][XpandTest]
         public void Generate_Sequence_When_Error_Inside_transaction(){
+			
             using var application = NewApplication();
             application.Modules.AddRange(new ModuleBase[] {new DevExpress.ExpressApp.Validation.ValidationModule(),new ValidationWindowsFormsModule() });
             application.WhenApplicationModulesManager().WhenCustomizeTypesInfo()
@@ -360,7 +363,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 			testObserver.Items.First().ShouldBe(testObject);
         }
 
-		[Test]
+		[Test][XpandTest]
         public void Middle_Tier_registration_should_not_throw() {
             using var application = NewApplication();
 			
@@ -371,7 +374,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
             application.CreateObjectSpace();
         }
 
-		[Test]
+		[Test][XpandTest]
         public void UnSupported_DataStore_registration_should_not_throw() {
             using var application = NewApplication();
             SequenceGeneratorModule( application);

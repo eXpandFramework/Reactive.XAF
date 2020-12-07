@@ -21,9 +21,9 @@ using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
+using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.ModuleExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
-using Xpand.XAF.Modules.Reactive.Attributes;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Security;
 

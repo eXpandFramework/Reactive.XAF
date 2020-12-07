@@ -3,7 +3,7 @@ using namespace System.Reflection
 using namespace System.IO
 param(
     $SourcePath = ([Path]::GetFullPath("$PSScriptRoot\..")),
-    $AzureToken=$env:AzDevOpsToken,
+    $AzureToken=$env:AzureToken,
     $AzureApplicationId=$env:AzApplicationId,
     $AzureTenantId=$env:AzTenantId,
     $XpandBlobOwnerSecret=$env:AzXpandBlobOwnerSecret,
@@ -47,7 +47,7 @@ if ($env:Build_DefinitionName){
 $buildNumber = $env:build_BuildNumber
 & "$SourcePath\go.ps1" -InstallModules
 if ($buildNumber){
-    $env:AzDevOpsToken=$AzureToken
+    $env:AzureToken=$AzureToken
     $env:AzOrganization="eXpandDevops"
     $env:AzProject ="eXpandFramework"
     Write-HostFormatted "Install Az powershell" -Section

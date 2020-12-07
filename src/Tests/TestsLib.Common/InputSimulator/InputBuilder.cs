@@ -324,12 +324,12 @@ namespace Xpand.TestsLib.Common.InputSimulator{
 
         private MouseButton GetSwappedMouseButton(MouseButton button){
             
-            if ((bool) AppDomain.CurrentDomain.GetAssemblyType("System.Windows.Forms.SystemInformation").Property("MouseButtonsSwapped").Get(null)) {
-                if (button == MouseButton.LeftButton)
-                    button = MouseButton.RightButton;
-                else if (button == MouseButton.RightButton)
-                    button = MouseButton.LeftButton;
-            }
+            // if ((bool) AppDomain.CurrentDomain.GetAssemblyType("System.Windows.Forms.SystemInformation").Property("MouseButtonsSwapped",Flags.StaticAnyVisibility).Get()) {
+            //     if (button == MouseButton.LeftButton)
+            //         button = MouseButton.RightButton;
+            //     else if (button == MouseButton.RightButton)
+            //         button = MouseButton.LeftButton;
+            // }
             return button;
         }
 

@@ -158,10 +158,9 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         static Subject<ActionBase> _actionsSubject=new Subject<ActionBase>();
 
         private static Type NewControllerType<T>(string id) where T:Controller{
-	        lock (_actionsSubject) {
-		        var baseController = GetBaseController<T>();
-	            return ActionsModule.DefineType(ActionControllerName(id, baseController), TypeAttributes.Public, baseController).CreateTypeInfo()?.AsType();
-            }
+            var baseController = GetBaseController<T>();
+            var actionControllerName = ActionControllerName(id, baseController);
+            return ActionsModule.GetType(actionControllerName)??ActionsModule.DefineType(actionControllerName, TypeAttributes.Public, baseController).CreateTypeInfo()?.AsType();
         }
 
         private static string ActionControllerName(string id, Type baseController) 

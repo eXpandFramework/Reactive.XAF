@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Xpand.XAF.Modules.Reactive.Attributes {
+namespace Xpand.Extensions.XAF.Attributes {
     [AttributeUsage(AttributeTargets.Property)]
     public class InvisibleInAllViewsAttribute:Attribute {
     }

@@ -17,96 +17,92 @@ namespace Xpand.XAF.Modules.LookupCascade.Tests{
         [XpandTest]
         [Test]
         [Order(1)]
-        public void First_record_is_the_listview_columns_captions(){
-            using (var application = ClientLookupCascadeModule().Application){
-                var lookupView = application.ReactiveModulesModel().LookupCascadeModel().Wait().ClientDatasource.LookupViews.AddNode<IModelClientDatasourceLookupView>();
-                var producLookupListView = application.FindModelClass(typeof(Product)).DefaultListView;
-                lookupView.LookupListView = producLookupListView;
+        public void First_record_is_the_ListView_columns_captions() {
+            using var application = ClientLookupCascadeModule().Application;
+            var lookupView = application.ReactiveModulesModel().LookupCascadeModel().Wait().ClientDatasource.LookupViews.AddNode<IModelClientDatasourceLookupView>();
+            var productLookupListView = application.FindModelClass(typeof(Product)).DefaultListView;
+            lookupView.LookupListView = productLookupListView;
 
-                var clientDataSource = application.CreateClientDataSource().ToArray();
+            var clientDataSource = application.CreateClientDataSource().ToArray();
                 
-                var bytes = Convert.FromBase64String(clientDataSource.First(_ => _.viewId==producLookupListView.Id).objects);
-                var products = JsonConvert.DeserializeObject<dynamic>(bytes.Unzip());
-                ((int) products.Count).ShouldBe(2);
-                $"{products[0].Key}".ShouldBe(LookupCascadeService.FieldNames);
-                $"{products[0].Columns}".ShouldBe(string.Join("&", HttpUtility.UrlEncode(producLookupListView.Columns[nameof(Product.ProductName)].Caption),
-                    HttpUtility.UrlEncode(producLookupListView.Columns[nameof(Product.Price)].Caption)));
-            }
+            var bytes = Convert.FromBase64String(clientDataSource.First(_ => _.viewId==productLookupListView.Id).objects);
+            var products = JsonConvert.DeserializeObject<dynamic>(bytes.Unzip());
+            ((int) products.Count).ShouldBe(2);
+            $"{products[0].Key}".ShouldBe(LookupCascadeService.FieldNames);
+            $"{products[0].Columns}".ShouldBe(string.Join("&", HttpUtility.UrlEncode(productLookupListView.Columns[nameof(Product.ProductName)].Caption),
+                HttpUtility.UrlEncode(productLookupListView.Columns[nameof(Product.Price)].Caption)));
         }
         [XpandTest]
         [Test][Order(2)]
-        public void Second_record_is_the_NA_record(){
-            using (var application = ClientLookupCascadeModule().Application){
-                var lookupView = application.ReactiveModulesModel().LookupCascadeModel().Wait().ClientDatasource.LookupViews.AddNode<IModelClientDatasourceLookupView>();
-                var producLookupListView = application.FindModelClass(typeof(Product)).DefaultListView;
-                lookupView.LookupListView = producLookupListView;
+        public void Second_record_is_the_NA_record() {
+            using var application = ClientLookupCascadeModule().Application;
+            var lookupView = application.ReactiveModulesModel().LookupCascadeModel().Wait().ClientDatasource.LookupViews.AddNode<IModelClientDatasourceLookupView>();
+            var productLookupListView = application.FindModelClass(typeof(Product)).DefaultListView;
+            lookupView.LookupListView = productLookupListView;
         
-                var clientDataSource = application.CreateClientDataSource().ToArray();
+            var clientDataSource = application.CreateClientDataSource().ToArray();
                 
-                var bytes = Convert.FromBase64String(clientDataSource.First(_ => _.viewId==producLookupListView.Id).objects);
-                var products = JsonConvert.DeserializeObject<dynamic>(bytes.Unzip());
-                ((int) products.Count).ShouldBe(2);
-                $"{products[1].Key}".ShouldBe(string.Empty);
-                HttpUtility.UrlDecode($"{products[1].Columns}").ShouldBe(LookupCascadeService.NA.Repeat(2,"&"));
-            }
+            var bytes = Convert.FromBase64String(clientDataSource.First(_ => _.viewId==productLookupListView.Id).objects);
+            var products = JsonConvert.DeserializeObject<dynamic>(bytes.Unzip());
+            ((int) products.Count).ShouldBe(2);
+            $"{products[1].Key}".ShouldBe(string.Empty);
+            HttpUtility.UrlDecode($"{products[1].Columns}").ShouldBe(LookupCascadeService.NA.Repeat(2,"&"));
         }
         
         [XpandTest]
         [Test]
-        public void Third_record_is_the_values_of_all_visible_columns(){
-            using (var application = ClientLookupCascadeModule().Application){
-                var lookupView = application.ReactiveModulesModel().LookupCascadeModel().Wait().ClientDatasource.LookupViews.AddNode<IModelClientDatasourceLookupView>();
-                var accesporyLookupListView = application.FindModelClass(typeof(Accessory)).DefaultListView;
-                accesporyLookupListView.Columns[nameof(Accessory.Product)].Remove();
-                accesporyLookupListView.Columns[nameof(Accessory.IsGlobal)].Index=-1;
-                var productColumn = accesporyLookupListView.Columns.AddNode<IModelColumn>("Product");
-                productColumn.Index = 2;
-                productColumn.PropertyName = "Product.Oid";
-                lookupView.LookupListView = accesporyLookupListView;
-                var objectSpace = application.CreateObjectSpace();
-                var accessory = objectSpace.CreateObject<Accessory>();
-                accessory.AccessoryName = "acc";
-                accessory.Product=objectSpace.CreateObject<Product>();
-                objectSpace.CommitChanges();
+        public void Third_record_is_the_values_of_all_visible_columns() {
+            using var application = ClientLookupCascadeModule().Application;
+            var lookupView = application.ReactiveModulesModel().LookupCascadeModel().Wait().ClientDatasource.LookupViews.AddNode<IModelClientDatasourceLookupView>();
+            var accessoryLookupListView = application.FindModelClass(typeof(Accessory)).DefaultListView;
+            accessoryLookupListView.Columns[nameof(Accessory.Product)].Remove();
+            accessoryLookupListView.Columns[nameof(Accessory.IsGlobal)].Index=-1;
+            var productColumn = accessoryLookupListView.Columns.AddNode<IModelColumn>("Product");
+            productColumn.Index = 2;
+            productColumn.PropertyName = "Product.Oid";
+            lookupView.LookupListView = accessoryLookupListView;
+            var objectSpace = application.CreateObjectSpace();
+            var accessory = objectSpace.CreateObject<Accessory>();
+            accessory.AccessoryName = "acc";
+            accessory.Product=objectSpace.CreateObject<Product>();
+            objectSpace.CommitChanges();
                 
-                var clientDataSource = application.CreateClientDataSource().ToArray();
+            var clientDataSource = application.CreateClientDataSource().ToArray();
                 
-                var bytes = Convert.FromBase64String(clientDataSource.First(_ => _.viewId==accesporyLookupListView.Id).objects);
-                var products = JsonConvert.DeserializeObject<dynamic>(bytes.Unzip());
-                ((int) products.Count).ShouldBe(3);
-                objectSpace.GetObjectByHandle($"{products[2].Key}").ShouldBe(accessory);
-                HttpUtility.UrlDecode($"{products[2].Columns}").ShouldBe($"{accessory.AccessoryName}&{accessory.Product.Oid}");
-            }
+            var bytes = Convert.FromBase64String(clientDataSource.First(_ => _.viewId==accessoryLookupListView.Id).objects);
+            var products = JsonConvert.DeserializeObject<dynamic>(bytes.Unzip());
+            ((int) products.Count).ShouldBe(3);
+            objectSpace.GetObjectByHandle($"{products[2].Key}").ShouldBe(accessory);
+            HttpUtility.UrlDecode($"{products[2].Columns}").ShouldBe($"{accessory.AccessoryName}&{accessory.Product.Oid}");
         }
         
         [XpandTest]
         [Test]
-        public void Each_Lookupview_has_a_different_datasource(){
-            using (var application = ClientLookupCascadeModule().Application){
-                var lookupView = application.ReactiveModulesModel().LookupCascadeModel().Wait().ClientDatasource.LookupViews.AddNode<IModelClientDatasourceLookupView>();
-                var productLookupListView = application.FindModelClass(typeof(Product)).DefaultListView;
-                lookupView.LookupListView = productLookupListView;
-                lookupView = application.ReactiveModulesModel().LookupCascadeModel().Wait().ClientDatasource.LookupViews.AddNode<IModelClientDatasourceLookupView>();
-                var accesoryListView = application.FindModelClass(typeof(Accessory)).DefaultListView;
-                lookupView.LookupListView = accesoryListView;
-                var objectSpace = application.CreateObjectSpace();
-                var product = objectSpace.CreateObject<Product>();
-                var accessory = objectSpace.CreateObject<Accessory>();
-                objectSpace.CommitChanges();
+        public void Each_LookupView_has_a_different_datasource() {
+            using var application = ClientLookupCascadeModule().Application;
+            var lookupView = application.ReactiveModulesModel().LookupCascadeModel().Wait().ClientDatasource.LookupViews.AddNode<IModelClientDatasourceLookupView>();
+            var productLookupListView = application.FindModelClass(typeof(Product)).DefaultListView;
+            lookupView.LookupListView = productLookupListView;
+            lookupView = application.ReactiveModulesModel().LookupCascadeModel().Wait().ClientDatasource.LookupViews.AddNode<IModelClientDatasourceLookupView>();
+            var accessoryListView = application.FindModelClass(typeof(Accessory)).DefaultListView;
+            lookupView.LookupListView = accessoryListView;
+            var objectSpace = application.CreateObjectSpace();
+            var product = objectSpace.CreateObject<Product>();
+            var accessory = objectSpace.CreateObject<Accessory>();
+            objectSpace.CommitChanges();
                 
-                var clientDataSource = application.CreateClientDataSource().ToArray();
+            var clientDataSource = application.CreateClientDataSource().ToArray();
                 
-                clientDataSource.Length.ShouldBe(2);
-                var bytes = Convert.FromBase64String(clientDataSource.First(_ => _.viewId==productLookupListView.Id).objects);
-                var objects = JsonConvert.DeserializeObject<dynamic>(bytes.Unzip());
-                ((int) objects.Count).ShouldBe(3);
-                objectSpace.GetObjectByHandle($"{objects[2].Key}").ShouldBe(product);
+            clientDataSource.Length.ShouldBe(2);
+            var bytes = Convert.FromBase64String(clientDataSource.First(_ => _.viewId==productLookupListView.Id).objects);
+            var objects = JsonConvert.DeserializeObject<dynamic>(bytes.Unzip());
+            ((int) objects.Count).ShouldBe(3);
+            objectSpace.GetObjectByHandle($"{objects[2].Key}").ShouldBe(product);
                 
-                bytes = Convert.FromBase64String(clientDataSource.First(_ => _.viewId==accesoryListView.Id).objects);
-                objects = JsonConvert.DeserializeObject<dynamic>(bytes.Unzip());
-                ((int) objects.Count).ShouldBe(3);
-                objectSpace.GetObjectByHandle($"{objects[2].Key}").ShouldBe(accessory);
-            }
+            bytes = Convert.FromBase64String(clientDataSource.First(_ => _.viewId==accessoryListView.Id).objects);
+            objects = JsonConvert.DeserializeObject<dynamic>(bytes.Unzip());
+            ((int) objects.Count).ShouldBe(3);
+            objectSpace.GetObjectByHandle($"{objects[2].Key}").ShouldBe(accessory);
         }
 
     }

@@ -25,31 +25,7 @@ using CommonTest = ALL.Tests.CommonTest;
 namespace ALL.Win.Tests{
 	[NonParallelizable]
     public class AllWinTests : CommonTest{
-        [Test()]
-        [TestCaseSource(nameof(AgnosticModules))]
-        [TestCaseSource(nameof(WinModules))]
-        [XpandTest]
-        public void UnloadWinModules(Type moduleType){
-            ReactiveModuleBase.Unload(moduleType);
-            using var application = new TestWinApplication(moduleType, false);
-            application.AddModule((ModuleBase) moduleType.CreateInstance(), nameof(UnloadWinModules));
-
-            application.Modules.FirstOrDefault(m => m.GetType()==moduleType).ShouldBeNull();
-        } 
         
-        [Test]
-        [XpandTest(LongTimeout,3)]
-        [Apartment(ApartmentState.STA)]
-        public async Task Win_EasyTest_InMemory(){
-            await EasyTest(() => new WinAdapter(), RunWinApplication, async adapter => {
-                var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
-                adapter.Execute(autoTestCommand);
-#if !XAF191 && !NETCOREAPP3_1
-                await adapter.TestDocumentStyleManager();
-#endif
-                await Task.CompletedTask;
-            });
-        }
 
 #if !NETCOREAPP3_1
         [XpandTest(LongTimeout,3)]
@@ -68,7 +44,7 @@ namespace ALL.Win.Tests{
 
         [Apartment(ApartmentState.STA)]
         [XpandTest(LongTimeout,3)]
-        [Test]
+        [Test][Ignore("Google limit exception")]
         public async Task Win_GoogleCloud_EasyTest(){
             DeleteBrowserFiles.Execute();
             await EasyTest(() => new WinAdapter(), RunWinApplication, async adapter => {
@@ -108,5 +84,30 @@ namespace ALL.Win.Tests{
             
         }
 
+        [Test()]
+        [TestCaseSource(nameof(AgnosticModules))]
+        [TestCaseSource(nameof(WinModules))]
+        [XpandTest]
+        public void UnloadWinModules(Type moduleType){
+            ReactiveModuleBase.Unload(moduleType);
+            using var application = new TestWinApplication(moduleType, false);
+            application.AddModule((ModuleBase) moduleType.CreateInstance(), nameof(UnloadWinModules));
+
+            application.Modules.FirstOrDefault(m => m.GetType()==moduleType).ShouldBeNull();
+        } 
+        
+        [Test]
+        [XpandTest(LongTimeout,3)]
+        [Apartment(ApartmentState.STA)]
+        public async Task Win_EasyTest_InMemory(){
+            await EasyTest(() => new WinAdapter(), RunWinApplication, async adapter => {
+                var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
+                adapter.Execute(autoTestCommand);
+#if !XAF191 && !NETCOREAPP3_1
+                adapter.TestDocumentStyleManager();
+#endif
+                await Task.CompletedTask;
+            });
+        }
     }
 }

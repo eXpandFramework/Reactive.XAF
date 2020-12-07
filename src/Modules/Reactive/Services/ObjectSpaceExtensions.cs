@@ -21,10 +21,6 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return objectSpace.WhenObjectChanged().Where(_ => _.e.Object is T && _.e.MemberInfo.Name == memberName)
                 .Select(_ => _.e.Object).Cast<T>();
         }
-        public static IObservable<(T theObject, IObjectSpace objectSpace)> NewObject<T>(this XafApplication application) 
-            => application.WhenObjectSpaceCreated().SelectMany(_ =>
-                RxApp.NewObjects.Where(tuple => tuple.objectSpace==_.e.ObjectSpace&&tuple.theObject is T)
-                    .Select(tuple => ((T)tuple.theObject,tuple.objectSpace)));
         [PublicAPI]
         public static IObservable<(IObjectSpace objectSpace, object[] objects)> WhenModifiedObjects(
             this IObjectSpace objectSpace, bool emitAfterCommit, params Type[] objectTypes) 
@@ -42,7 +38,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             }
             return objectSpace.WhenCommiting().SelectMany(_ => {
                 var modifiedObjects = objectSpace.ModifiedObjects(objectModification).Where(o => objectTypes.Any(type => type.IsInstanceOfType(o))).ToArray();
-                return modifiedObjects.Any() ? emitAfterCommit ? objectSpace.WhenCommited().FirstAsync().Select(space => (space, modifiedObjects))
+                return modifiedObjects.Any() ? emitAfterCommit ? objectSpace.WhenCommitted().FirstAsync().Select(space => (space, modifiedObjects))
                     : (objectSpace, modifiedObjects).ReturnObservable() : Observable.Empty<(IObjectSpace objectSpace, object[] objects)>();
             });
         }
@@ -121,8 +117,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
 
         [PublicAPI]
-        public static IObservable<T> WhenObjectCommited<T>(this IObservable<T> source) where T:IObjectSpaceLink 
-            => source.SelectMany(_ => _.ObjectSpace.WhenCommited().FirstAsync().Select(tuple => _));
+        public static IObservable<T> WhenObjectCommitted<T>(this IObservable<T> source) where T:IObjectSpaceLink 
+            => source.SelectMany(_ => _.ObjectSpace.WhenCommitted().FirstAsync().Select(tuple => _));
 
         public static IObservable<T> WhenNewObjectCommiting<T>(this IObjectSpace objectSpace) 
             => objectSpace.WhenCommiting()
@@ -134,7 +130,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.WhenObjectSpaceCreated()
                 .SelectMany(_ => _.e.ObjectSpace.WhenCommiting<T>(objectModification));
         
-        public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenCommited<T>(
+        public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenCommitted<T>(
             this XafApplication application, ObjectModification objectModification = ObjectModification.All)
             => application.WhenObjectSpaceCreated()
                 .SelectMany(_ => _.e.ObjectSpace.WhenModifiedObjects(true,typeof(T)).Select(t => (t.objectSpace,t.objects.Cast<T>())));
@@ -144,6 +140,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenExistingObjectCommiting<T>(this XafApplication application) 
             => application.WhenObjectSpaceCreated().SelectMany(_ => _.e.ObjectSpace.WhenCommiting<T>(ObjectModification.Updated));
+
         public static IObservable<(T theObject, IObjectSpace objectSpace)> WhenNewObjectCreated<T>(this XafApplication application) 
             => application.WhenObjectSpaceCreated().SelectMany(_ => RxApp.NewObjects.Where(tuple => tuple.objectSpace==_.e.ObjectSpace&&tuple.theObject is T)
                     .Select(tuple => ((T)tuple.theObject,tuple.objectSpace)));
@@ -164,7 +161,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => Observable.FromEventPattern<EventHandler<ObjectsGettingEventArgs>, ObjectsGettingEventArgs>(h => item.ObjectsGetting += h, h => item.ObjectsGetting -= h,ImmediateScheduler.Instance)
                 .TransformPattern<ObjectsGettingEventArgs, NonPersistentObjectSpace>();
 
-        public static IObservable<IObjectSpace> Commited(this IObservable<IObjectSpace> source) 
+        public static IObservable<IObjectSpace> Committed(this IObservable<IObjectSpace> source) 
             => source.SelectMany(item => Observable
                 .FromEventPattern<EventHandler, EventArgs>(h => item.Committed += h, h => item.Committed -= h,ImmediateScheduler.Instance)
                 .TransformPattern<IObjectSpace>());
@@ -175,8 +172,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .TransformPattern<CancelEventArgs, IObjectSpace>()
                 .TraceRX());
 
-        public static IObservable<IObjectSpace> WhenCommited(this IObjectSpace item) 
-            => item.ReturnObservable().Commited();
+        public static IObservable<IObjectSpace> WhenCommitted(this IObjectSpace item) 
+            => item.ReturnObservable().Committed();
 
         public static IObservable<(IObjectSpace objectSpace, CancelEventArgs e)> WhenCommiting(this IObjectSpace item) 
             => item.ReturnObservable().Commiting();

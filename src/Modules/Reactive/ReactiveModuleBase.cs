@@ -24,7 +24,7 @@ namespace Xpand.XAF.Modules.Reactive{
                 var original = typeof(ApplicationModulesManager).Method("SetupModules");
                 var prefix = typeof(ReactiveModule).Method(nameof(SetupModulesPatch),Flags.StaticAnyVisibility);
                 harmony.Patch(original,  new HarmonyMethod(prefix));
-                AppDomain.CurrentDomain.AddModelReference("netstandard");    
+                AppDomain.CurrentDomain.AddModelReference("netstandard");
             });
         }
 

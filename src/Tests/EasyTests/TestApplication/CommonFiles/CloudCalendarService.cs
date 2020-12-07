@@ -7,7 +7,6 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
-using DevExpress.ExpressApp.SystemModule;
 using DevExpress.Persistent.Base.General;
 using DevExpress.Persistent.BaseImpl;
 using Fasterflect;
@@ -29,12 +28,20 @@ namespace ALL.Tests{
 
         public static IObservable<Unit> ConnectCloudCalendarService<TCloud>(this ApplicationModulesManager manager,
             Func<(IObservable<(TCloud cloud,IEvent local, MapAction mapAction, CallDirection callDirection)> updated,
-                IObservable<IObservable<Unit>> deleteAll, IObservable<Unit> initializeModule)> config){
-            var action = config();
-            return action.initializeModule.Merge(manager.WhenApplication(application
-                => application.NotifyCalendarOperation(action.updated).ToUnit()
-                    .Merge(application.DeleteAllEntities<Event>(action.deleteAll))).ToUnit());
-        }
+                IObservable<IObservable<Unit>> deleteAll, IObservable<Unit> initializeModule)> config) 
+            => config().initializeModule
+                .Merge(manager.WhenApplication(application
+                    => application.WhenViewOnFrame(typeof(Event),ViewType.DetailView)
+                        .SelectMany(frame => frame.View.ObjectSpace.WhenCommiting().SelectMany(t => config().updated.TakeUntil(frame.WhenDisposingFrame()))
+                            .Do(tuple => {
+                                using var objectSpace = frame.Application.CreateObjectSpace();
+                                var cloudOfficeObject = objectSpace.QueryCloudOfficeObject(tuple.cloud.GetPropertyValue("Id").ToString(), CloudObjectType.Event).First();
+                                var @event = objectSpace.GetObjectByKey<Event>(Guid.Parse(cloudOfficeObject.LocalId));
+                                @event.Description = tuple.mapAction.ToString();
+                                objectSpace.CommitChanges();
+                            }))
+                        .ToUnit()
+                        .Merge(application.DeleteAllEntities<Task>(config().deleteAll))).ToUnit());
 
         private static IObservable<Unit> RegisterCloudCalendarOperation(this ApplicationModulesManager manager) 
             => manager.RegisterViewSingleChoiceAction(nameof(CloudCalendarOperation), action => {
@@ -45,17 +52,6 @@ namespace ALL.Tests{
                 action.Items.Add(new ChoiceActionItem("Delete", "Delete"));
             }).ToUnit();
 
-        private static IObservable<(TCloud cloud, IEvent local, MapAction mapAction, CallDirection callDirection)> NotifyCalendarOperation<TCloud>(this XafApplication application,
-                IObservable<(TCloud cloud,IEvent local, MapAction mapAction, CallDirection callDirection)> updated) 
-            => application.WhenViewOnFrame(typeof(Event),ViewType.DetailView)
-                .SelectMany(frame => updated.Where(t => t.callDirection==CallDirection.Out)
-                    .Do(tuple => {
-	                    using var objectSpace = application.CreateObjectSpace();
-	                    var cloudOfficeObject = objectSpace.QueryCloudOfficeObject(tuple.cloud.GetPropertyValue("Id")?.ToString(), CloudObjectType.Event).FirstOrDefault();
-	                    if (cloudOfficeObject!=null){
-		                    frame.GetController<ModificationsController>().SaveAction.ToolTip = tuple.mapAction.ToString();
-	                    }
-                    }).TakeUntil(frame.View.WhenClosed()));
 
         public static IObservable<Unit> InitializeCloudCalendarModule(this ApplicationModulesManager manager,
             Func<IModelOffice, IModelCalendar> modelCalendarSelector, string serviceName){

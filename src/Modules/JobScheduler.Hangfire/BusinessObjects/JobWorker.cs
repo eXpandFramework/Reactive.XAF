@@ -1,14 +1,14 @@
 ﻿using System;
 using System.ComponentModel;
 using DevExpress.Xpo;
+using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.Xpo;
 using Xpand.Extensions.XAF.Xpo.BaseObjects;
-using Xpand.XAF.Modules.Reactive.Attributes;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
     [DefaultProperty(nameof(Id))]
-    public class Shooter:XPCustomBaseObject {
-        public Shooter(Session session) : base(session) {
+    public class JobWorker:XPCustomBaseObject {
+        public JobWorker(Session session) : base(session) {
         }
 
         string _id;
@@ -36,7 +36,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
             get => _job;
             set => SetPropertyValue(nameof(Job), ref _job, value);
         }
-        [Association("Shooter-JobStates")]
+        [Association("JobWorker-JobStates")]
         public XPCollection<JobState> Executions => GetCollection<JobState>(nameof(Executions));
     }
 }

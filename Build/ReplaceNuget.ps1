@@ -6,13 +6,11 @@ param(
     $SkipNugetReplace,
     [switch]$FixVersion
 )
-
- 
-Import-Module XpandPwsh
 $ErrorActionPreference = "Stop"
 $VerbosePreference="continue"
 $nugetFolder = "$env:USERPROFILE\.nuget\packages"    
 if ((Test-Path $nugetFolder) -and !$SkipNugetReplace) {
+    
     $targetItem=Get-Item $targetPath
     $packageFolder = Get-ChildItem $nugetFolder "$(((Get-Item $ProjectPath).BaseName))"
     if ($packageFolder){

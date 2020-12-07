@@ -2,8 +2,8 @@
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
+using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.Xpo.BaseObjects;
-using Xpand.XAF.Modules.Reactive.Attributes;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
     [XafDefaultProperty(nameof(Name))][NavigationItem("JobScheduler")][DefaultClassOptions]

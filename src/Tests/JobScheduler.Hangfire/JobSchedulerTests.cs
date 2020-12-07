@@ -74,7 +74,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
             var jobState = await observable;
             var objectSpace = application.CreateObjectSpace();
             jobState=objectSpace.GetObjectByKey<JobState>(jobState.Oid);
-            var shooter = jobState.Shooter;
+            var shooter = jobState.JobWorker;
             shooter.State.ShouldBe(ScheduledJobState.Succeeded);
             shooter.Job.Executions.ShouldBe(1);
             shooter.Job.FailedJobs.ShouldBe(0);
@@ -95,10 +95,10 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
             var jobState = await execute;
             
             jobState=objectSpace.GetObjectByKey<JobState>(jobState.Oid);
-            jobState.Shooter.State.ShouldBe(ScheduledJobState.Failed);
-            jobState.Shooter.Job.Executions.ShouldBe(executions);
-            jobState.Shooter.Job.FailedJobs.ShouldBe(failedJobs);
-            jobState.Shooter.Job.SuccessFullJobs.ShouldBe(successFullJobs);
+            jobState.JobWorker.State.ShouldBe(ScheduledJobState.Failed);
+            jobState.JobWorker.Job.Executions.ShouldBe(executions);
+            jobState.JobWorker.Job.FailedJobs.ShouldBe(failedJobs);
+            jobState.JobWorker.Job.SuccessFullJobs.ShouldBe(successFullJobs);
         }
 
         private static  IObservable<JobState> JobExecution(ScheduledJobState lastState) 

@@ -31,7 +31,7 @@ namespace Xpand.XAF.Modules.SuppressConfirmation{
                                 .Select(tuple => tuple).FirstAsync().ToUnit();
                         }
                         return whenNewDetailViewObjectChangedOnce
-                            .Merge(frame.View.ObjectSpace.WhenCommited().Select(tuple => tuple).ToUnit()).ToUnit()
+                            .Merge(frame.View.ObjectSpace.WhenCommitted().Select(tuple => tuple).ToUnit()).ToUnit()
                             .SelectMany(_ => frame.ChangeModificationHandlingMode());
                     }).ToUnit()
                     .Merge(suppressConfirmationWindows.Select(DisableWebControllers).ToUnit());

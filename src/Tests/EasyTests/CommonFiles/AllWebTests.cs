@@ -37,6 +37,18 @@ namespace Web.Tests{
             application.Modules.FirstOrDefault(m => m.GetType()==moduleType).ShouldBeNull();
         }
 #endif
+        [Test]
+        [XpandTest(LongTimeout,3)]
+        [Apartment(ApartmentState.STA)]
+        public async Task Web_EasyTest_InLocalDb(){
+            var connectionString = $"Integrated Security=SSPI;Pooling=false;Data Source=(localdb)\\mssqllocaldb;Initial Catalog=TestApplicationWeb{AppDomain.CurrentDomain.UseNetFramework()}";
+            await EasyTest(NewWebAdapter, RunWebApplication,  adapter => {
+                adapter.TestSequenceGeneratorService();
+                return Task.CompletedTask;
+            
+            },connectionString);
+            
+        }
 
         private TestApplication RunWebApplication(IApplicationAdapter adapter, string connectionString){
 
@@ -90,7 +102,7 @@ namespace Web.Tests{
         }
 #endif
 
-        // [XpandTest(LongTimeout,3)]
+        [XpandTest(LongTimeout,3)]
         [Test][Apartment(ApartmentState.STA)]
         public async Task Web_GoogleCloud_EasyTest(){
 #if !NETCOREAPP3_1
@@ -98,24 +110,12 @@ namespace Web.Tests{
 #endif
             await EasyTest(NewWebAdapter, RunWebApplication, async adapter => {
                 await adapter.TestGoogleService(async () => {
-                    // await adapter.TestGoogleCalendarService();
+                    await adapter.TestGoogleCalendarService();
                     await adapter.TestGoogleTasksService();
                 });
             });
         }
 
-        [Test]
-        [XpandTest(LongTimeout,3)]
-        [Apartment(ApartmentState.STA)]
-        public async Task Web_EasyTest_InLocalDb(){
-            var connectionString = $"Integrated Security=SSPI;Pooling=false;Data Source=(localdb)\\mssqllocaldb;Initial Catalog=TestApplicationWeb{AppDomain.CurrentDomain.UseNetFramework()}";
-            await EasyTest(NewWebAdapter, RunWebApplication,  adapter => {
-                adapter.TestSequenceGeneratorService();
-                return Task.CompletedTask;
-            
-            },connectionString);
-            
-        }
 
 
     }

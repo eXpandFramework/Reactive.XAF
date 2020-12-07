@@ -47,7 +47,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
                 flow => Observable.FromAsync(() => flow.LoadTokenAsync(application.CurrentUserId().ToString(), CancellationToken.None))
                     .Select(response => response)
                     .WhenNotDefault().RefreshToken(flow, application.CurrentUserId().ToString()))
-                .SwitchIfEmpty(Observable.Return(true).Select(b => b)))
+                .SwitchIfEmpty(true.ReturnObservable()))
                 .Publish().RefCount()
                 .TraceGoogleModule();
 
@@ -213,6 +213,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
 		        .SelectMany(b => b ? Observable.Throw<UserCredential>(new UserFriendlyException("Google authentication failed. Use the profile view to authenticate again"))
 			        : default(UserCredential).ReturnObservable())
 		        .Catch<UserCredential,UserFriendlyException>(exception => {
+                    acquireToken??=(friendlyException, codeFlow) => Observable.Empty<UserCredential>();
 			        var args = new GenericEventArgs<IObservable<UserCredential>>(acquireToken(exception, flow));
 			        CustomAcquireTokenInteractivelySubject.OnNext(args);
 			        return args.Instance;

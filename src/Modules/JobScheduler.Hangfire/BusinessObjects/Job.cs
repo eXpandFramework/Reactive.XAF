@@ -1,28 +1,60 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
+using Fasterflect;
 using Hangfire;
+using Xpand.Extensions.XAF.Attributes;
+using Xpand.Extensions.XAF.NonPersistentObjects;
+using Xpand.Extensions.XAF.ObjectExtensions;
 using Xpand.Extensions.XAF.Xpo;
-using Xpand.XAF.Modules.Reactive.Attributes;
+using Xpand.Extensions.XAF.Xpo.ValueConverters;
 using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
     [DefaultProperty(nameof(Id))]
     [DefaultClassOptions][NavigationItem("JobScheduler")]
-    public class Job:CustomBaseObject {
+    public class  Job:CustomBaseObject {
         public Job(Session session) : base(session) {
         }
+        ObjectType _jobType;
 
-        JobExpression _jobExpression;
         [RuleRequiredField]
-        public JobExpression JobExpression {
-            get => _jobExpression;
-            set => SetPropertyValue(nameof(JobExpression), ref _jobExpression, value);
+        [DataSourceProperty(nameof(JobTypes))][Size(SizeAttribute.Unlimited)]
+        [ValueConverter(typeof(ObjectTypeValueConverter))]
+        [Persistent]
+        public ObjectType JobType {
+            get => _jobType;
+            set {
+                SetPropertyValue(nameof(JobType), ref _jobType, value);
+                OnChanged(nameof(JobMethod));
+            }
         }
+
+        ObjectString _jobMethod;
+        [ValueConverter(typeof(ObjectStringValueConverter))]
+        [Persistent][DataSourceProperty(nameof(JobMethods))][Size(SizeAttribute.Unlimited)]
+        [RuleRequiredField]
+        public ObjectString JobMethod {
+            get => _jobMethod;
+            set => SetPropertyValue(nameof(JobMethod), ref _jobMethod, value);
+        }
+
+        [Browsable(false)]
+        public IList<ObjectString> JobMethods 
+            => AppDomain.CurrentDomain.JobMethods().Where(info => info.DeclaringType==JobType?.Type)
+                .Select(info => new ObjectString(info.Attribute<JobProviderAttribute>().DisplayName??info.Name.CompoundName() ))
+                .ToArray();
+        
+        [Browsable(false)]
+        public IList<ObjectType> JobTypes => AppDomain.CurrentDomain.JobMethods().Select(m=>m.DeclaringType).Distinct()
+            .Select(type => new ObjectType(type){Name = type.Attribute<JobProviderAttribute>().DisplayName??type.Name.CompoundName()})
+            .ToArray();
 
         public override void AfterConstruction() {
             base.AfterConstruction();
@@ -38,31 +70,31 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
             set => SetPropertyValue(nameof(CronExpression), ref _cronExpression, value);
         }
 
-        [PersistentAlias(nameof(LastShooter)+"."+nameof(Shooter.State))]
+        [PersistentAlias(nameof(LastJobWorker)+"."+nameof(JobWorker.State))]
         public ScheduledJobState? State => (ScheduledJobState?) EvaluateAlias();
 
         [Association("Job-Jobs")][CollectionOperationSet(AllowAdd = false,AllowRemove = false)]
-        public XPCollection<Shooter> Jobs => GetCollection<Shooter>(nameof(Jobs));
+        public XPCollection<JobWorker> Jobs => GetCollection<JobWorker>(nameof(Jobs));
         
-        [PersistentAlias(nameof(FirstShooter)+"."+nameof(Shooter.Created))]
+        [PersistentAlias(nameof(FirstJobWorker)+"."+nameof(JobWorker.Created))]
         public DateTime? Created => (DateTime?) EvaluateAlias();
 
-        [SingleObject(nameof(Jobs),nameof(Shooter.Created))][InvisibleInAllViews]
-        public Shooter LastShooter => EvaluateAlias() as Shooter;
+        [SingleObject(nameof(Jobs),nameof(JobWorker.Created))][InvisibleInAllViews]
+        public JobWorker LastJobWorker => EvaluateAlias() as JobWorker;
 
-        [SingleObject(nameof(Jobs),nameof(Shooter.Created),Aggregate.Min)][InvisibleInAllViews]
-        public Shooter FirstShooter => (Shooter) EvaluateAlias();
+        [SingleObject(nameof(Jobs),nameof(JobWorker.Created),Aggregate.Min)][InvisibleInAllViews]
+        public JobWorker FirstJobWorker => (JobWorker) EvaluateAlias();
 
-        [PersistentAlias(nameof(LastShooter) + "." + nameof(Shooter.LastState) + "." +nameof(JobState.Created))]
+        [PersistentAlias(nameof(LastJobWorker) + "." + nameof(JobWorker.LastState) + "." +nameof(JobState.Created))]
         public DateTime? LastExecution => (DateTime?) EvaluateAlias();
 
-        [PersistentAlias(nameof(Jobs) + ".Sum(" +nameof(Shooter.ExecutionsCount)+ ")")]
+        [PersistentAlias(nameof(Jobs) + ".Sum(" +nameof(JobWorker.ExecutionsCount)+ ")")]
         public int? Executions => (int?) EvaluateAlias();
 
-        [PersistentAlias(nameof(Jobs) + "[" + nameof(Shooter.State)+ "='" +nameof(ScheduledJobState.Succeeded)+ "'].Count")]
+        [PersistentAlias(nameof(Jobs) + "[" + nameof(JobWorker.State)+ "='" +nameof(ScheduledJobState.Succeeded)+ "'].Count")]
         public int SuccessFullJobs => (int) EvaluateAlias();
         
-        [PersistentAlias(nameof(Jobs) + "[" + nameof(Shooter.State)+ "='" +nameof(ScheduledJobState.Failed)+ "'].Count")]
+        [PersistentAlias(nameof(Jobs) + "[" + nameof(JobWorker.State)+ "='" +nameof(ScheduledJobState.Failed)+ "'].Count")]
         public int FailedJobs => (int) EvaluateAlias();
 
         string _id;

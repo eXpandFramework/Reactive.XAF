@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Threading;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using Google.Apis.People.v1;
@@ -26,21 +25,21 @@ namespace TestApplication.GoogleService{
 
 		public static IObservable<Unit> ShowGoogleAccountInfo(this ApplicationModulesManager manager){
 			manager.Modules.OfType<AgnosticModule>().First().AdditionalExportedTypes.Add(typeof(EmailAddress));
-            var registerViewSimpleAction = manager.RegisterViewSimpleAction(nameof(ShowGoogleAccountInfo)).ActivateInUserDetails().Publish().RefCount(); 
-			return manager.WhenApplication(application => registerViewSimpleAction.WhenExecute().ShowAccountInfoView().ToUnit())
-				.Merge(registerViewSimpleAction.ToUnit())
-				.Merge(manager.ConfigureModel());
+            var registerViewSimpleAction = manager.RegisterViewSimpleAction(nameof(ShowGoogleAccountInfo)).Publish().RefCount();
+            var googleUser = registerViewSimpleAction.WhenActivated().Select(action => action).SelectMany(action => action.Application.GoogleUser());
+            return registerViewSimpleAction.SelectMany(action => googleUser
+                    .SelectMany(person => action.WhenExecute()
+                        .Do(e => {
+                            e.ShowViewParameters.CreatedView = e.Action.Application.NewView(ViewType.DetailView, typeof(EmailAddress));
+                            e.ShowViewParameters.CreatedView.CurrentObject = person.EmailAddresses.First();
+                        }))).ToUnit()
+				.Merge(registerViewSimpleAction.ActivateInUserDetails().ToUnit())
+                .Merge(manager.ConfigureModel());
 		}
 		private static IObservable<Unit> ConfigureModel(this ApplicationModulesManager manager) 
 			=> manager.WhenGeneratingModelNodes(modelApplication => modelApplication.BOModel)
 				.Do(model => model.Application.ToReactiveModule<IModelReactiveModuleOffice>().Office.Google().OAuth
 					.AddScopes(PeopleService.Scope.UserinfoEmail,PeopleService.Scope.UserinfoProfile)).ToUnit();
-		private static IObservable<Person> ShowAccountInfoView(this IObservable<SimpleActionExecuteEventArgs> source) 
-            => source.SelectMany(e => {
-					e.ShowViewParameters.CreatedView = e.Action.Application.NewView(ViewType.DetailView, typeof(EmailAddress));
-                    return e.Action.Application.GoogleUser().ObserveOn(SynchronizationContext.Current!)
-						.Do(user => e.ShowViewParameters.CreatedView.CurrentObject = user.EmailAddresses.First());
-				});
 
 		private static IObservable<Person> GoogleUser(this XafApplication application) 
             => application.AuthorizeGoogle().NewService<PeopleService>()

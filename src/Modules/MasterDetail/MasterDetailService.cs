@@ -45,7 +45,7 @@ namespace Xpand.XAF.Modules.MasterDetail{
 
         private static IObservable<Unit> WhenRefreshListView(this XafApplication application) 
 	        => application.WhenMasterDetailDashboardViewItems()
-                .SelectMany(_ => _.detailViewItem.InnerView.ObjectSpace.WhenCommited()
+                .SelectMany(_ => _.detailViewItem.InnerView.ObjectSpace.WhenCommitted()
                     .Select(tuple => _.listViewItem.InnerView.ObjectSpace)
                     .Select(objectSpace => {
                         if (_.listViewItem.Frame.Application.GetPlatform() == Platform.Win){
