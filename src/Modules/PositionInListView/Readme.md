@@ -1,6 +1,6 @@
 ![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.PositionInListView.svg?&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.PositionInListView.svg?&style=flat)
 
-[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/PositionInListView.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+PositionInListView) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/PositionInListView.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+PositionInListView)
+[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/PositionInListView.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+label%3APositionInListView) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/PositionInListView.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+label%3APositionInListView)
 # About 
 
 The `PositionInListView`, controls how objects are positioned in a ListView at runtime.    
@@ -69,17 +69,22 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
-`.NetFramework: net461`
+`.NetFramework: netstandard2.0`
 
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp**|**Any**
-|Fasterflect.Xpand|2.0.7
- |JetBrains.Annotations|2019.1.3
- |System.ValueTuple|4.5.0
- |Xpand.Extensions|2.201.29
- |Xpand.Extensions.XAF|2.201.29
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.201.7
+|Xpand.Extensions.Reactive|4.202.45
+ |Xpand.Extensions.XAF|4.202.45
+ |Xpand.Extensions|4.202.45
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.202.45
+ |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
+ |JetBrains.Annotations|2020.3.0
+ |System.Reactive|5.0.0
+ |System.Configuration.ConfigurationManager|5.0.0
+ |Microsoft.CodeAnalysis.CSharp|3.8.0
+ |System.ServiceModel.Http|4.8.0
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.11
 
 ## Issues-Debugging-Troubleshooting
 

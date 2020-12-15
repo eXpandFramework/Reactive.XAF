@@ -145,24 +145,25 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.Persistent.Base**|**Any**
-|[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
- |JetBrains.Annotations|2020.1.0
- |Microsoft.CodeAnalysis.CSharp|3.7.0
- |Microsoft.Graph.Beta|0.32.0-preview
- |Microsoft.Identity.Client|4.22.0
- |Microsoft.IdentityModel.Protocols.OpenIdConnect|6.8.0
- |Microsoft.IdentityModel.Tokens|6.8.0
+|Xpand.Extensions|4.202.45
+ |Xpand.Extensions.Office.Cloud|4.202.45
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.202.45
+ |Xpand.Extensions.Reactive|4.202.45
+ |Xpand.Extensions.XAF|4.202.45
+ |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
+ |JetBrains.Annotations|2020.3.0
+ |System.Reactive|5.0.0
+ |Microsoft.Graph.Beta|0.34.0-preview
+ |Microsoft.Identity.Client|4.24.0
  |Microsoft.Owin.Host.SystemWeb|4.1.1
  |Microsoft.Owin.Security.Cookies|4.1.1
  |Microsoft.Owin.Security.OpenIdConnect|4.1.1
+ |Microsoft.CodeAnalysis.CSharp|3.8.0
+ |Microsoft.IdentityModel.Protocols.OpenIdConnect|6.8.0
+ |Microsoft.IdentityModel.Tokens|6.8.0
  |System.Collections.Immutable|5.0.0
- |System.Reactive|5.0.0
- |Xpand.Extensions|4.202.0
- |Xpand.Extensions.Office.Cloud|4.202.0
- |Xpand.Extensions.Reactive|4.202.0
- |Xpand.Extensions.XAF|4.202.0
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.202.0
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.10
+ |Microsoft.Graph.Core|1.23.0
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.11
 
 ## Issues-Debugging-Troubleshooting
 

@@ -136,5 +136,6 @@ if ($Branch -ne "lab") {
         Remove-Item $unzipDir -Force -Recurse
     }
     Write-HostFormatted "Update ReadMe" -Section
+    
     & "$PSScriptRoot\UpdateReadMe.ps1" 
 }

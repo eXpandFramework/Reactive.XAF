@@ -123,7 +123,7 @@ function GetConfiguration($solution,$conf){
 }
 
 Task Compile -precondition { return $compile } {
-    if ($branch -eq "master" -and (Get-DevExpressVersion -eq $DXVersion)){
+    if (($branch -eq "master") -and ((Get-DevExpressVersion) -eq $DXVersion)){
         $Global:Configuration="Release"
     }
     
