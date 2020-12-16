@@ -12,7 +12,6 @@ using BrokeroTests.SequenceGenerator.BO.BrokeroTests.SequenceGenerator.BO.Broker
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.Security.ClientServer;
-using DevExpress.ExpressApp.Validation.Win;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 using DevExpress.Persistent.Validation;
@@ -344,7 +343,6 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         public void Generate_Sequence_When_Error_Inside_transaction(){
 			
             using var application = NewApplication();
-            application.Modules.AddRange(new ModuleBase[] {new DevExpress.ExpressApp.Validation.ValidationModule(),new ValidationWindowsFormsModule() });
             application.WhenApplicationModulesManager().WhenCustomizeTypesInfo()
                 .Do(t => t.e.TypesInfo.FindTypeInfo(typeof(TestObject)).FindMember(nameof(TestObject.Title))
                     .AddAttribute(new RuleRequiredFieldAttribute())).Test();
