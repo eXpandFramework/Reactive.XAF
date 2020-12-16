@@ -136,6 +136,8 @@ if ($Branch -ne "lab") {
         Remove-Item $unzipDir -Force -Recurse
     }
     Write-HostFormatted "Update ReadMe" -Section
+    if ((Get-DevExpressVersion) -eq $dxVersion){
+        & "$PSScriptRoot\UpdateReadMe.ps1" 
+    }
     
-    & "$PSScriptRoot\UpdateReadMe.ps1" 
 }
