@@ -4,7 +4,7 @@ variables:
       value: $(Pipeline.Workspace)\.nuget\packages
 trigger: none 
 jobs:
-- job: TestAssemblies
+- job: TestStage1
   strategy: 
     parallel: 10
   pool:
@@ -24,6 +24,106 @@ jobs:
         pipelineId: '$(DxPipelineBuildId)'
         artifactName: 'bin'
         targetPath: '$(System.DefaultWorkingDirectory)\bin'
+    - task: PowerShell@2
+      continueOnError: false
+      name: DownloadCloudCreds
+      inputs:
+        pwsh: true
+        targetType: 'inline'
+        script: |
+          $ErrorView="NormalView"
+          $ErrorActionPreference="stop"
+          $CustomVersion='$(CustomVersion)'
+          $CustomVersion="$env:build_BuildNumber-$CustomVersion"
+          Write-Verbose -verbose "##vso[task.setvariable variable=build.updatebuildnumber]$CsutomVersion"
+          & "$(System.DefaultWorkingDirectory)\Build\DownloadCloudCreds.ps1" -GitHubToken '$(GitHubToken)' -GitUserEmail '$(GitUserEmail)'
+    - task: AzurePowerShell@5
+      condition: and(ne(variables['SkipTestAssemblies'], 'Yes'),ne(variables['AzStorageLookup'], '0'))
+      name: AzStorageLookup
+      inputs:
+        errorActionPreference: stop
+        FailOnStandardError: true
+        azureSubscription: "Visual Studio Enterprise(b48a609a-17f6-4e48-a317-54ab77fbf822)"
+        ScriptType: "InlineScript"
+        azurePowerShellVersion: "LatestVersion"
+        pwsh: true
+        Inline: |
+          $ErrorView="NormalView"
+          "Nugetpackage=$env:Nuget_PACKAGES"
+          $ErrorActionPreference="stop"
+          $goArgs = @{
+              GithubToken              = '$(GitHubToken)'
+              AzureToken               = '$(AzureToken)' 
+              GitHubUserName           = '$(GitHubUserName)' 
+              DXApiFeed                = '$(DXApiFeed)'
+              Branch                   = '$(Build.SourceBranchName)'
+              SourcePath               = '$(System.DefaultworkingDirectory)'
+              ArtifactStagingDirectory = '$(Build.Artifactstagingdirectory)'
+              BinDirectory             = '$(System.DefaultworkingDirectory)\bin'
+              CustomVersion            = '$(CustomVersion)'
+              UseLastVersion           = '$(UseLastVersion)'
+              XpandBlobOwnerSecret     = '$(XpandBlobOwnerSecret)'
+              AzureApplicationId       = '$(AzureApplicationId)'
+              AzureTenantId            = '$(AzureTenantId)'
+          }
+          "goArgs:"
+          $goArgs | Out-String
+          & '$(System.DefaultWorkingDirectory)\Build\AzureStorageLookup.ps1' 
+    - task: VSTest@2
+      condition: ne(variables['SkipTestAssemblies'], 'Yes')
+      displayName: 'TestAssembliesWithNet461'
+      enabled: true
+      continueOnError: true
+      inputs:
+        searchFolder: '$(System.DefaultWorkingDirectory)\bin\net461'
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: |
+          **\Xpand.XAF.Modules.ModelMapper.Tests.dll
+          **\Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.dll
+          **\Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests.dll
+          **\Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests.dll
+          !**\obj\**    
+        diagnosticsEnabled: true
+        codeCoverageEnabled: true
+        distributionBatchType: basedOnExecutionTime
+        runInParallel: false
+        runSettingsFile: $(System.DefaultWorkingDirectory)\build\Tests.runsettings
+        runTestsInIsolation: false
+        collectDumpOn: never
+- job: TestStage2
+  dependsOn: TestStage1
+  strategy: 
+    parallel: 10
+  pool:
+    vmImage: windows-2019
+  variables:
+    - group: keys
+  steps:
+    - checkout: self
+    - task: DownloadPipelineArtifact@2
+      condition: ne(variables['SkipTestAssemblies'], 'Yes')
+      displayName: Download Bin
+      inputs:
+        buildType: 'specific'
+        project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
+        definition: '23'
+        buildVersionToDownload: 'specific'
+        pipelineId: '$(DxPipelineBuildId)'
+        artifactName: 'bin'
+        targetPath: '$(System.DefaultWorkingDirectory)\bin'
+    - task: PowerShell@2
+      continueOnError: false
+      name: DownloadCloudCreds
+      inputs:
+        pwsh: true
+        targetType: 'inline'
+        script: |
+          $ErrorView="NormalView"
+          $ErrorActionPreference="stop"
+          $CustomVersion='$(CustomVersion)'
+          $CustomVersion="$env:build_BuildNumber-$CustomVersion"
+          Write-Verbose -verbose "##vso[task.setvariable variable=build.updatebuildnumber]$CsutomVersion"
+          & "$(System.DefaultWorkingDirectory)\Build\DownloadCloudCreds.ps1" -GitHubToken '$(GitHubToken)' -GitUserEmail '$(GitUserEmail)'
     - task: AzurePowerShell@5
       condition: and(ne(variables['SkipTestAssemblies'], 'Yes'),ne(variables['AzStorageLookup'], '0'))
       name: AzStorageLookup
@@ -73,15 +173,11 @@ jobs:
           **\Xpand.XAF.Modules.HideToolBar.Tests.dll
           **\Xpand.XAF.Modules.LookupCascade.Tests.dll
           **\Xpand.XAF.Modules.MasterDetail.Tests.dll
-          **\Xpand.XAF.Modules.ModelMapper.Tests.dll
           **\Xpand.XAF.Modules.ModelViewInheritance.Tests.dll
           **\Xpand.XAF.Modules.Office.Cloud.Google.Tasks.Tests.dll
           **\Xpand.XAF.Modules.Office.Cloud.Google.Tests.dll
-          **\Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests.dll
           **\Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests.dll
-          **\Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests.dll
           **\Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests.dll
-          **\Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.dll
           **\Xpand.XAF.Modules.OneView.Tests.dll
           **\Xpand.XAF.Modules.ProgressBarViewItem.Tests.dll
           **\Xpand.XAF.Modules.Reactive.Logger.Hub.Tests.dll
@@ -102,7 +198,7 @@ jobs:
         runTestsInIsolation: false
         collectDumpOn: never
 - job: AddPastVersionBuild
-  dependsOn: TestAssemblies
+  dependsOn: TestStage2
   strategy: 
     parallel: 1
   pool:
@@ -142,7 +238,7 @@ jobs:
           "past=$past"
           Add-AzBuild -Definition DevExpress.XAF-Lab -Tag $past -Parameters $parameters
 - job: TestNugetChecConsumerPipeline
-  dependsOn: TestAssemblies
+  dependsOn: TestStage2
   strategy: 
     parallel: 2
   pool:

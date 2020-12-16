@@ -8,7 +8,7 @@ param(
 $ErrorActionPreference = "Stop"
 # Import-XpandPwsh
 
-New-Item -Path "$root\bin\Nupkg" -ItemType Directory  -ErrorAction SilentlyContinue -Force | Out-Null
+
 [version]$modulesVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo("$root\bin\Xpand.XAF.Modules.Reactive.dll" ).FileVersion
 $versionConverterPath = "$root\tools\Xpand.VersionConverter\Xpand.VersionConverter.nuspec"
 [xml]$nuspec = Get-Content $versionConverterPath
@@ -128,7 +128,10 @@ if ($branch -eq "master") {
         [xml]$n = Get-xmlContent $_.FullName
         $v = [version]$n.package.metadata.version
         if ($v.Revision -gt 0) {
-            $n.package.metadata.id
+            [PSCustomObject]@{
+                Id = $n.package.metadata.id
+                Version=$n.package.metadata.Version
+            }
         }
     }
     $labnuspecs

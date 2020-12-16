@@ -166,11 +166,13 @@ Task  CreateNuspec {
             DxVersion = $dxVersion
             Branch=$branch
         }
+        New-Item -Path "$root\bin\Nupkg" -ItemType Directory  -ErrorAction SilentlyContinue -Force | Out-Null
         $version=(& (Get-NugetPath) list -source "$root\bin\nupkg;"|ConvertTo-PackageObject|Select-Object -First 1).Version
         $currentVersion=[System.Diagnostics.FileVersionInfo]::GetVersionInfo("$root\bin\Xpand.XAF.Modules.Reactive.dll").FileVersion
         if ($currentVersion -ne $version){
-            Remove-Item "$root\bin\nupkg" -Force -Recurse
+            Get-ChildItem "$root\bin\nupkg" |Remove-Item -Force
         }
+        
         if (!(Test-Path "$Root\bin\Nupkg") -or !(Get-ChildItem "$Root\bin\Nupkg")){
             & "$PSScriptRoot\CreateNuspec.ps1" @a
         }
