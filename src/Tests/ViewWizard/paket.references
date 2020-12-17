@@ -3,10 +3,14 @@ MagicOnion
 Shouldly
 NUnit
 NUnit3TestAdapter
-DevExpress.ExpressApp.Win
+DevExpress.ExpressApp.Win 
 DevExpress.Persistent.BaseImpl
+DevExpress.Persistent.Base
 JetBrains.Annotations
 Moq
 Fasterflect.Xpand
 Xpand.Patcher
 akarnokd.reactive_extensions
+Microsoft.CodeAnalysis.CSharp
+Microsoft.CodeAnalysis
+Newtonsoft.Json

@@ -2,7 +2,7 @@ param(
     $Branch = "lab",
     $sourcesRoot = "$PSScriptRoot\..",
     $apiKey=$env:NugetApiKey,
-    $localPackageSource = "$PSScriptRoot\..\..\bin\Nupkg",
+    $localPackageSource = "$PSScriptRoot\..\bin\Nupkg",
     $AzApoPowerSHellScriptsSecret=$env:AzApoSecret,
     $AzPowerShellScriptsApplicationId=$env:AzPowerShellScriptsApplicationId,
     $AzApoTenantId=$env:AzApoTenantId,
@@ -19,7 +19,7 @@ $VerbosePreference="Continue"
 "localPackageSource=$localPackageSource"
 
 "Build_DefinitionName=$env:Build_DefinitionName"
-New-Item $sourcesRoot\build\Nuget -ItemType Directory
+New-Item $sourcesRoot\build\Nuget -ItemType Directory -ErrorAction SilentlyContinue
 $nupkg=Get-ChildItem "$localPackageSource" 
 $localPackages=((& (Get-NugetPath) list -source $localPackageSource)|ConvertTo-PackageObject)
 $localPackages=$localPackages|ForEach-Object{

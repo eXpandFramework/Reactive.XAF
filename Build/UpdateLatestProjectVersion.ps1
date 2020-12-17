@@ -12,7 +12,11 @@ if ($Branch -eq "master") {
 else {
     $lastOfficialVersion = ($officialPackages | Where-Object { $_.id -eq "Xpand.XAF.Core.All" }).Version
     if ($lastOfficialVersion -gt $lastVersion) {
-        $newVersion = [version]"$($lastOfficialVersion.Major).$($lastOfficialVersion.Minor).$($lastVersion.Build).1"
+        $build=$lastOfficialVersion.Build
+        if ($lastVersion.Build -gt $lastOfficialVersion.Build){
+            $build=$lastVersion.Build
+        }
+        $newVersion = [version]"$($lastOfficialVersion.Major).$($lastOfficialVersion.Minor).$build.1"
     }
 }
 

@@ -24,8 +24,10 @@ function CompileTestSolution($conf){
     $conf=GetConfiguration $solution $conf
     "Configuration=$conf"
     Start-Build -Path $solution -Configuration $conf -BinaryLogPath "$Root\Bin\Test$conf.binlog" -Verbosity minimal -WarnAsError 
+    # Get-ChildItem "$root\bin" "DevExpress.Persistent.Base.v*.*"|Copy-Item -Destination "$root\bin\net461" -Force
+
     # FixWrongPersistentBaseFramework
-    Start-Build -Path "$Root\src\Modules\ViewWizard\Xpand.XAF.Modules.ViewWizard.csproj"
+    Start-Build -Path "$Root\src\Tests\Office.DocumentStyleManager\Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.csproj"
     # Start-Build -Path $solution -Configuration FixWrongPersistentBaseFramework
     Copy-Item -path $root\bin\runtimes -Recurse -Destination $root\bin\TestWinApplication\runtimes -Container -Force
 }

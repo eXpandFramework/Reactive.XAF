@@ -6,7 +6,6 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Xml;
 using DevExpress.EasyTest.Framework;
-
 using DevExpress.ExpressApp.EasyTest.WebAdapter;
 using DevExpress.ExpressApp.EasyTest.WinAdapter;
 using Fasterflect;
@@ -14,7 +13,7 @@ using Newtonsoft.Json;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.ErrorHandling;
-using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 
 namespace Xpand.TestsLib.EasyTest{
     public static class EasyTestExtensions{
@@ -22,8 +21,8 @@ namespace Xpand.TestsLib.EasyTest{
 
         public static Platform Platform(this TestApplication application) 
             => application.AdditionalAttributes.Any(_ => _.Name == "URL")
-                ? application.Browser == "chrome" ? Xpand.Extensions.XAF.XafApplicationExtensions.Platform.Blazor :
-                Xpand.Extensions.XAF.XafApplicationExtensions.Platform.Web : Xpand.Extensions.XAF.XafApplicationExtensions.Platform.Win;
+                ? application.Browser != "chrome" ? Extensions.XAF.XafApplicationExtensions.Platform.Web :
+                Extensions.XAF.XafApplicationExtensions.Platform.Blazor : Extensions.XAF.XafApplicationExtensions.Platform.Win;
 
         public static T ConvertTo<T>(this Command command) where T:Command{
             var t = (T)typeof(T).CreateInstance();

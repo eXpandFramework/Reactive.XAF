@@ -1,9 +1,9 @@
-source C:\Program Files (x86)\DevExpress 20.2\Components\System\Components\Packages
+source https://nuget.devexpress.com/88luCgoeuPFTrDrTDcc6zKg22U2cVcTm3vdKCv88I7PHF9St6i/api
 source https://api.nuget.org/v3/index.json
 source https://xpandnugetserver.azurewebsites.net/nuget
 storage:none
 copy_local:true
-framework:net461,net472,netstandard2.0,netstandard2.1,netcoreapp3.1
+framework:net461,net5.0,netstandard2.0,netstandard2.1,netcoreapp3.1
 
 nuget DevExpress.WindowsDesktop.Core == 20.2.4
 nuget DevExpress.WindowsDesktop.Xaf == 20.2.4-ctp
@@ -25,6 +25,7 @@ nuget Hangfire.Core 1.7.18 framework:netstandard2.1
 nuget Hangfire.SqlServer 1.7.18
 nuget Hangfire.AspNetCore 1.7.18
 nuget hangfire.memorystorage 1.7.0
+nuget Shouldly 4.0.3
 nuget System.Data.SqlClient
 nuget Microsoft.Extensions.Dependencyinjection
 nuget Microsoft.Extensions.DependencyInjection.Abstractions
@@ -52,7 +53,6 @@ nuget Newtonsoft.Json
 nuget NUnit
 nuget NUnit3TestAdapter
 nuget Ryder
-nuget Shouldly
 nuget System.CodeDom
 nuget System.Data.Common
 nuget System.Interactive
@@ -78,3 +78,5 @@ nuget Selenium.Support
 nuget Selenium.WebDriver
 nuget Microsoft.NET.Test.SDK
 nuget Xpand.VersionConverter 2.202.11
+
+
