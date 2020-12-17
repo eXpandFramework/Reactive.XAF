@@ -1,0 +1,9 @@
+Fasterflect.Xpand
+JetBrains.Annotations
+System.Reactive
+System.Interactive
+Microsoft.CodeAnalysis.CSharp
+System.Configuration.ConfigurationManager
+System.CodeDom
+Microsoft.AspNetCore.Hosting.Abstractions
+System.ServiceModel.Http

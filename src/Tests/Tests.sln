@@ -362,6 +362,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.JobSchedu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.Blazor", "..\Extensions\Xpand.Extensions.Blazor\Xpand.Extensions.Blazor.csproj", "{46085B00-5001-4F59-ADE8-8CE21097B6EB}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Blazor", "Blazor", "{867851CE-7CE6-4F28-9DE2-23E4D70B3A7B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Blazor", "..\Modules\Blazor\Xpand.XAF.Modules.Blazor.csproj", "{678EC7D1-471A-477D-80F5-CAAF3899FFC8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_20.1|Any CPU = Debug_20.1|Any CPU
@@ -370,8 +374,6 @@ Global
 		Debug|x86 = Debug|x86
 		EasyTest|Any CPU = EasyTest|Any CPU
 		EasyTest|x86 = EasyTest|x86
-		FixWrongPersistentBaseFramework|Any CPU = FixWrongPersistentBaseFramework|Any CPU
-		FixWrongPersistentBaseFramework|x86 = FixWrongPersistentBaseFramework|x86
 		NetCore|Any CPU = NetCore|Any CPU
 		NetCore|x86 = NetCore|x86
 		NugetConsumers_20.1|Any CPU = NugetConsumers_20.1|Any CPU
@@ -392,9 +394,6 @@ Global
 		{5685573C-15E0-43DF-B939-D842211BA5ED}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{5685573C-15E0-43DF-B939-D842211BA5ED}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{5685573C-15E0-43DF-B939-D842211BA5ED}.EasyTest|x86.Build.0 = Release|Any CPU
-		{5685573C-15E0-43DF-B939-D842211BA5ED}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{5685573C-15E0-43DF-B939-D842211BA5ED}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{5685573C-15E0-43DF-B939-D842211BA5ED}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{5685573C-15E0-43DF-B939-D842211BA5ED}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{5685573C-15E0-43DF-B939-D842211BA5ED}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{5685573C-15E0-43DF-B939-D842211BA5ED}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -417,9 +416,6 @@ Global
 		{6D9F55AA-D9C1-462E-9057-29EFC8DCC3BB}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{6D9F55AA-D9C1-462E-9057-29EFC8DCC3BB}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{6D9F55AA-D9C1-462E-9057-29EFC8DCC3BB}.EasyTest|x86.Build.0 = Release|Any CPU
-		{6D9F55AA-D9C1-462E-9057-29EFC8DCC3BB}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{6D9F55AA-D9C1-462E-9057-29EFC8DCC3BB}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{6D9F55AA-D9C1-462E-9057-29EFC8DCC3BB}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{6D9F55AA-D9C1-462E-9057-29EFC8DCC3BB}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{6D9F55AA-D9C1-462E-9057-29EFC8DCC3BB}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{6D9F55AA-D9C1-462E-9057-29EFC8DCC3BB}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -442,9 +438,6 @@ Global
 		{FB456706-C7F0-455C-B2F1-D75B143FDC28}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{FB456706-C7F0-455C-B2F1-D75B143FDC28}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{FB456706-C7F0-455C-B2F1-D75B143FDC28}.EasyTest|x86.Build.0 = Release|Any CPU
-		{FB456706-C7F0-455C-B2F1-D75B143FDC28}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{FB456706-C7F0-455C-B2F1-D75B143FDC28}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{FB456706-C7F0-455C-B2F1-D75B143FDC28}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{FB456706-C7F0-455C-B2F1-D75B143FDC28}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{FB456706-C7F0-455C-B2F1-D75B143FDC28}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{FB456706-C7F0-455C-B2F1-D75B143FDC28}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -467,9 +460,6 @@ Global
 		{79060F89-8991-476F-B536-6DCB5492178E}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{79060F89-8991-476F-B536-6DCB5492178E}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{79060F89-8991-476F-B536-6DCB5492178E}.EasyTest|x86.Build.0 = Release|Any CPU
-		{79060F89-8991-476F-B536-6DCB5492178E}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{79060F89-8991-476F-B536-6DCB5492178E}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{79060F89-8991-476F-B536-6DCB5492178E}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{79060F89-8991-476F-B536-6DCB5492178E}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{79060F89-8991-476F-B536-6DCB5492178E}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{79060F89-8991-476F-B536-6DCB5492178E}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -492,9 +482,6 @@ Global
 		{194C38C8-A636-4570-A46D-2E8FE04C94C4}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{194C38C8-A636-4570-A46D-2E8FE04C94C4}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{194C38C8-A636-4570-A46D-2E8FE04C94C4}.EasyTest|x86.Build.0 = Release|Any CPU
-		{194C38C8-A636-4570-A46D-2E8FE04C94C4}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{194C38C8-A636-4570-A46D-2E8FE04C94C4}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{194C38C8-A636-4570-A46D-2E8FE04C94C4}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{194C38C8-A636-4570-A46D-2E8FE04C94C4}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{194C38C8-A636-4570-A46D-2E8FE04C94C4}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{194C38C8-A636-4570-A46D-2E8FE04C94C4}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -517,9 +504,6 @@ Global
 		{58399364-9ACA-429F-A276-7F01E9E61D7D}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{58399364-9ACA-429F-A276-7F01E9E61D7D}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{58399364-9ACA-429F-A276-7F01E9E61D7D}.EasyTest|x86.Build.0 = Release|Any CPU
-		{58399364-9ACA-429F-A276-7F01E9E61D7D}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{58399364-9ACA-429F-A276-7F01E9E61D7D}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{58399364-9ACA-429F-A276-7F01E9E61D7D}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{58399364-9ACA-429F-A276-7F01E9E61D7D}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{58399364-9ACA-429F-A276-7F01E9E61D7D}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{58399364-9ACA-429F-A276-7F01E9E61D7D}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -542,9 +526,6 @@ Global
 		{7D3556B8-8CF9-4622-94F1-0F28A7765D0E}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{7D3556B8-8CF9-4622-94F1-0F28A7765D0E}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{7D3556B8-8CF9-4622-94F1-0F28A7765D0E}.EasyTest|x86.Build.0 = Release|Any CPU
-		{7D3556B8-8CF9-4622-94F1-0F28A7765D0E}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{7D3556B8-8CF9-4622-94F1-0F28A7765D0E}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{7D3556B8-8CF9-4622-94F1-0F28A7765D0E}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{7D3556B8-8CF9-4622-94F1-0F28A7765D0E}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{7D3556B8-8CF9-4622-94F1-0F28A7765D0E}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{7D3556B8-8CF9-4622-94F1-0F28A7765D0E}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -567,9 +548,6 @@ Global
 		{D9233585-0907-4561-9C53-14D9AD5EEC0E}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{D9233585-0907-4561-9C53-14D9AD5EEC0E}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{D9233585-0907-4561-9C53-14D9AD5EEC0E}.EasyTest|x86.Build.0 = Release|Any CPU
-		{D9233585-0907-4561-9C53-14D9AD5EEC0E}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{D9233585-0907-4561-9C53-14D9AD5EEC0E}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{D9233585-0907-4561-9C53-14D9AD5EEC0E}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{D9233585-0907-4561-9C53-14D9AD5EEC0E}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{D9233585-0907-4561-9C53-14D9AD5EEC0E}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{D9233585-0907-4561-9C53-14D9AD5EEC0E}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -592,9 +570,6 @@ Global
 		{B76C0852-B1B3-4663-98F5-808FA9AC2D30}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{B76C0852-B1B3-4663-98F5-808FA9AC2D30}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{B76C0852-B1B3-4663-98F5-808FA9AC2D30}.EasyTest|x86.Build.0 = Release|Any CPU
-		{B76C0852-B1B3-4663-98F5-808FA9AC2D30}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{B76C0852-B1B3-4663-98F5-808FA9AC2D30}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{B76C0852-B1B3-4663-98F5-808FA9AC2D30}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{B76C0852-B1B3-4663-98F5-808FA9AC2D30}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{B76C0852-B1B3-4663-98F5-808FA9AC2D30}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{B76C0852-B1B3-4663-98F5-808FA9AC2D30}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -617,9 +592,6 @@ Global
 		{5B65629B-E5C9-4686-967B-9AF271EA47EA}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{5B65629B-E5C9-4686-967B-9AF271EA47EA}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{5B65629B-E5C9-4686-967B-9AF271EA47EA}.EasyTest|x86.Build.0 = Release|Any CPU
-		{5B65629B-E5C9-4686-967B-9AF271EA47EA}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{5B65629B-E5C9-4686-967B-9AF271EA47EA}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{5B65629B-E5C9-4686-967B-9AF271EA47EA}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{5B65629B-E5C9-4686-967B-9AF271EA47EA}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{5B65629B-E5C9-4686-967B-9AF271EA47EA}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{5B65629B-E5C9-4686-967B-9AF271EA47EA}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -642,9 +614,6 @@ Global
 		{F15810E7-4D84-4305-B9DE-74E7976C9018}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{F15810E7-4D84-4305-B9DE-74E7976C9018}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{F15810E7-4D84-4305-B9DE-74E7976C9018}.EasyTest|x86.Build.0 = Release|Any CPU
-		{F15810E7-4D84-4305-B9DE-74E7976C9018}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{F15810E7-4D84-4305-B9DE-74E7976C9018}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{F15810E7-4D84-4305-B9DE-74E7976C9018}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{F15810E7-4D84-4305-B9DE-74E7976C9018}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{F15810E7-4D84-4305-B9DE-74E7976C9018}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{F15810E7-4D84-4305-B9DE-74E7976C9018}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -669,9 +638,6 @@ Global
 		{9180C5A5-FC53-43A0-BFAA-98C4602FC833}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{9180C5A5-FC53-43A0-BFAA-98C4602FC833}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{9180C5A5-FC53-43A0-BFAA-98C4602FC833}.EasyTest|x86.Build.0 = Release|Any CPU
-		{9180C5A5-FC53-43A0-BFAA-98C4602FC833}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{9180C5A5-FC53-43A0-BFAA-98C4602FC833}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{9180C5A5-FC53-43A0-BFAA-98C4602FC833}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{9180C5A5-FC53-43A0-BFAA-98C4602FC833}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{9180C5A5-FC53-43A0-BFAA-98C4602FC833}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{9180C5A5-FC53-43A0-BFAA-98C4602FC833}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -698,9 +664,6 @@ Global
 		{AA8914B9-C94F-48B2-AA36-2F3177F64737}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{AA8914B9-C94F-48B2-AA36-2F3177F64737}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{AA8914B9-C94F-48B2-AA36-2F3177F64737}.EasyTest|x86.Build.0 = Release|Any CPU
-		{AA8914B9-C94F-48B2-AA36-2F3177F64737}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{AA8914B9-C94F-48B2-AA36-2F3177F64737}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{AA8914B9-C94F-48B2-AA36-2F3177F64737}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{AA8914B9-C94F-48B2-AA36-2F3177F64737}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{AA8914B9-C94F-48B2-AA36-2F3177F64737}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{AA8914B9-C94F-48B2-AA36-2F3177F64737}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -727,9 +690,6 @@ Global
 		{04718ADE-1588-4849-95B9-3C225438333A}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{04718ADE-1588-4849-95B9-3C225438333A}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{04718ADE-1588-4849-95B9-3C225438333A}.EasyTest|x86.Build.0 = Release|Any CPU
-		{04718ADE-1588-4849-95B9-3C225438333A}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{04718ADE-1588-4849-95B9-3C225438333A}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{04718ADE-1588-4849-95B9-3C225438333A}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{04718ADE-1588-4849-95B9-3C225438333A}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{04718ADE-1588-4849-95B9-3C225438333A}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{04718ADE-1588-4849-95B9-3C225438333A}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -756,9 +716,6 @@ Global
 		{7E4F6822-FDAC-4A74-8EA2-3233569BAF45}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{7E4F6822-FDAC-4A74-8EA2-3233569BAF45}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{7E4F6822-FDAC-4A74-8EA2-3233569BAF45}.EasyTest|x86.Build.0 = Release|Any CPU
-		{7E4F6822-FDAC-4A74-8EA2-3233569BAF45}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{7E4F6822-FDAC-4A74-8EA2-3233569BAF45}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{7E4F6822-FDAC-4A74-8EA2-3233569BAF45}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{7E4F6822-FDAC-4A74-8EA2-3233569BAF45}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{7E4F6822-FDAC-4A74-8EA2-3233569BAF45}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{7E4F6822-FDAC-4A74-8EA2-3233569BAF45}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -785,9 +742,6 @@ Global
 		{4EA31B2E-E022-428A-BA19-A3C729E9A7CB}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{4EA31B2E-E022-428A-BA19-A3C729E9A7CB}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{4EA31B2E-E022-428A-BA19-A3C729E9A7CB}.EasyTest|x86.Build.0 = Release|Any CPU
-		{4EA31B2E-E022-428A-BA19-A3C729E9A7CB}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{4EA31B2E-E022-428A-BA19-A3C729E9A7CB}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{4EA31B2E-E022-428A-BA19-A3C729E9A7CB}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{4EA31B2E-E022-428A-BA19-A3C729E9A7CB}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{4EA31B2E-E022-428A-BA19-A3C729E9A7CB}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{4EA31B2E-E022-428A-BA19-A3C729E9A7CB}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -814,9 +768,6 @@ Global
 		{CE8D07AB-781C-4872-9AC0-45773A37B7BD}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{CE8D07AB-781C-4872-9AC0-45773A37B7BD}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{CE8D07AB-781C-4872-9AC0-45773A37B7BD}.EasyTest|x86.Build.0 = Release|Any CPU
-		{CE8D07AB-781C-4872-9AC0-45773A37B7BD}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{CE8D07AB-781C-4872-9AC0-45773A37B7BD}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{CE8D07AB-781C-4872-9AC0-45773A37B7BD}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{CE8D07AB-781C-4872-9AC0-45773A37B7BD}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{CE8D07AB-781C-4872-9AC0-45773A37B7BD}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{CE8D07AB-781C-4872-9AC0-45773A37B7BD}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -843,9 +794,6 @@ Global
 		{8B038EC0-77C2-4F04-8E12-6796431C1668}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{8B038EC0-77C2-4F04-8E12-6796431C1668}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{8B038EC0-77C2-4F04-8E12-6796431C1668}.EasyTest|x86.Build.0 = Release|Any CPU
-		{8B038EC0-77C2-4F04-8E12-6796431C1668}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{8B038EC0-77C2-4F04-8E12-6796431C1668}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{8B038EC0-77C2-4F04-8E12-6796431C1668}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{8B038EC0-77C2-4F04-8E12-6796431C1668}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{8B038EC0-77C2-4F04-8E12-6796431C1668}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{8B038EC0-77C2-4F04-8E12-6796431C1668}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -872,9 +820,6 @@ Global
 		{DAED53F9-1297-48D3-9942-111017718742}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{DAED53F9-1297-48D3-9942-111017718742}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{DAED53F9-1297-48D3-9942-111017718742}.EasyTest|x86.Build.0 = Release|Any CPU
-		{DAED53F9-1297-48D3-9942-111017718742}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{DAED53F9-1297-48D3-9942-111017718742}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{DAED53F9-1297-48D3-9942-111017718742}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{DAED53F9-1297-48D3-9942-111017718742}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{DAED53F9-1297-48D3-9942-111017718742}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{DAED53F9-1297-48D3-9942-111017718742}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -901,9 +846,6 @@ Global
 		{B77832E5-2136-44DB-BC8F-87BAD2A55CC7}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{B77832E5-2136-44DB-BC8F-87BAD2A55CC7}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{B77832E5-2136-44DB-BC8F-87BAD2A55CC7}.EasyTest|x86.Build.0 = Release|Any CPU
-		{B77832E5-2136-44DB-BC8F-87BAD2A55CC7}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{B77832E5-2136-44DB-BC8F-87BAD2A55CC7}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{B77832E5-2136-44DB-BC8F-87BAD2A55CC7}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{B77832E5-2136-44DB-BC8F-87BAD2A55CC7}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{B77832E5-2136-44DB-BC8F-87BAD2A55CC7}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{B77832E5-2136-44DB-BC8F-87BAD2A55CC7}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -930,9 +872,6 @@ Global
 		{28B22EFA-1B2E-46AB-A566-2536A0A0F1D3}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{28B22EFA-1B2E-46AB-A566-2536A0A0F1D3}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{28B22EFA-1B2E-46AB-A566-2536A0A0F1D3}.EasyTest|x86.Build.0 = Release|Any CPU
-		{28B22EFA-1B2E-46AB-A566-2536A0A0F1D3}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{28B22EFA-1B2E-46AB-A566-2536A0A0F1D3}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{28B22EFA-1B2E-46AB-A566-2536A0A0F1D3}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{28B22EFA-1B2E-46AB-A566-2536A0A0F1D3}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{28B22EFA-1B2E-46AB-A566-2536A0A0F1D3}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{28B22EFA-1B2E-46AB-A566-2536A0A0F1D3}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -959,9 +898,6 @@ Global
 		{B911EE53-A7F1-4C10-85F4-5A0955671EFF}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{B911EE53-A7F1-4C10-85F4-5A0955671EFF}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{B911EE53-A7F1-4C10-85F4-5A0955671EFF}.EasyTest|x86.Build.0 = Release|Any CPU
-		{B911EE53-A7F1-4C10-85F4-5A0955671EFF}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{B911EE53-A7F1-4C10-85F4-5A0955671EFF}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{B911EE53-A7F1-4C10-85F4-5A0955671EFF}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{B911EE53-A7F1-4C10-85F4-5A0955671EFF}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{B911EE53-A7F1-4C10-85F4-5A0955671EFF}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{B911EE53-A7F1-4C10-85F4-5A0955671EFF}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -986,9 +922,6 @@ Global
 		{FCC60F32-B678-40B7-9226-9FBEB82B0FDA}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{FCC60F32-B678-40B7-9226-9FBEB82B0FDA}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{FCC60F32-B678-40B7-9226-9FBEB82B0FDA}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{FCC60F32-B678-40B7-9226-9FBEB82B0FDA}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{FCC60F32-B678-40B7-9226-9FBEB82B0FDA}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{FCC60F32-B678-40B7-9226-9FBEB82B0FDA}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{FCC60F32-B678-40B7-9226-9FBEB82B0FDA}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{FCC60F32-B678-40B7-9226-9FBEB82B0FDA}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{FCC60F32-B678-40B7-9226-9FBEB82B0FDA}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -1014,9 +947,6 @@ Global
 		{BA9EEDA1-6BB9-4398-98B2-03FD86086442}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{BA9EEDA1-6BB9-4398-98B2-03FD86086442}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{BA9EEDA1-6BB9-4398-98B2-03FD86086442}.EasyTest|x86.Build.0 = Release|Any CPU
-		{BA9EEDA1-6BB9-4398-98B2-03FD86086442}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{BA9EEDA1-6BB9-4398-98B2-03FD86086442}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{BA9EEDA1-6BB9-4398-98B2-03FD86086442}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{BA9EEDA1-6BB9-4398-98B2-03FD86086442}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{BA9EEDA1-6BB9-4398-98B2-03FD86086442}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{BA9EEDA1-6BB9-4398-98B2-03FD86086442}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -1041,9 +971,6 @@ Global
 		{F81172D2-C7A6-4159-ADB7-38E8C1B1460D}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{F81172D2-C7A6-4159-ADB7-38E8C1B1460D}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{F81172D2-C7A6-4159-ADB7-38E8C1B1460D}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{F81172D2-C7A6-4159-ADB7-38E8C1B1460D}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{F81172D2-C7A6-4159-ADB7-38E8C1B1460D}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{F81172D2-C7A6-4159-ADB7-38E8C1B1460D}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{F81172D2-C7A6-4159-ADB7-38E8C1B1460D}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{F81172D2-C7A6-4159-ADB7-38E8C1B1460D}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{F81172D2-C7A6-4159-ADB7-38E8C1B1460D}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -1068,9 +995,6 @@ Global
 		{F929A9D2-7C98-4138-8F2B-C3D3A8464710}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{F929A9D2-7C98-4138-8F2B-C3D3A8464710}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{F929A9D2-7C98-4138-8F2B-C3D3A8464710}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{F929A9D2-7C98-4138-8F2B-C3D3A8464710}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{F929A9D2-7C98-4138-8F2B-C3D3A8464710}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{F929A9D2-7C98-4138-8F2B-C3D3A8464710}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{F929A9D2-7C98-4138-8F2B-C3D3A8464710}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{F929A9D2-7C98-4138-8F2B-C3D3A8464710}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{F929A9D2-7C98-4138-8F2B-C3D3A8464710}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -1096,9 +1020,6 @@ Global
 		{23073668-9F5F-4CFC-861F-71499EB29F1C}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{23073668-9F5F-4CFC-861F-71499EB29F1C}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{23073668-9F5F-4CFC-861F-71499EB29F1C}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{23073668-9F5F-4CFC-861F-71499EB29F1C}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{23073668-9F5F-4CFC-861F-71499EB29F1C}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{23073668-9F5F-4CFC-861F-71499EB29F1C}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{23073668-9F5F-4CFC-861F-71499EB29F1C}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{23073668-9F5F-4CFC-861F-71499EB29F1C}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{23073668-9F5F-4CFC-861F-71499EB29F1C}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -1123,9 +1044,6 @@ Global
 		{4C3ED41A-EB50-4A59-9A38-0BDBC1967C06}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{4C3ED41A-EB50-4A59-9A38-0BDBC1967C06}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{4C3ED41A-EB50-4A59-9A38-0BDBC1967C06}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{4C3ED41A-EB50-4A59-9A38-0BDBC1967C06}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{4C3ED41A-EB50-4A59-9A38-0BDBC1967C06}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{4C3ED41A-EB50-4A59-9A38-0BDBC1967C06}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{4C3ED41A-EB50-4A59-9A38-0BDBC1967C06}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{4C3ED41A-EB50-4A59-9A38-0BDBC1967C06}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{4C3ED41A-EB50-4A59-9A38-0BDBC1967C06}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -1150,9 +1068,6 @@ Global
 		{C779EE99-707B-4418-859D-C0686147A969}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{C779EE99-707B-4418-859D-C0686147A969}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{C779EE99-707B-4418-859D-C0686147A969}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{C779EE99-707B-4418-859D-C0686147A969}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{C779EE99-707B-4418-859D-C0686147A969}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{C779EE99-707B-4418-859D-C0686147A969}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{C779EE99-707B-4418-859D-C0686147A969}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{C779EE99-707B-4418-859D-C0686147A969}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{C779EE99-707B-4418-859D-C0686147A969}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -1177,9 +1092,6 @@ Global
 		{4C65406D-13A1-488F-8945-9C38DBC6ECD5}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{4C65406D-13A1-488F-8945-9C38DBC6ECD5}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{4C65406D-13A1-488F-8945-9C38DBC6ECD5}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{4C65406D-13A1-488F-8945-9C38DBC6ECD5}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{4C65406D-13A1-488F-8945-9C38DBC6ECD5}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{4C65406D-13A1-488F-8945-9C38DBC6ECD5}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{4C65406D-13A1-488F-8945-9C38DBC6ECD5}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{4C65406D-13A1-488F-8945-9C38DBC6ECD5}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{4C65406D-13A1-488F-8945-9C38DBC6ECD5}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -1204,9 +1116,6 @@ Global
 		{BED760F8-8A0D-4973-9B01-210EB12F7A5E}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{BED760F8-8A0D-4973-9B01-210EB12F7A5E}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{BED760F8-8A0D-4973-9B01-210EB12F7A5E}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{BED760F8-8A0D-4973-9B01-210EB12F7A5E}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{BED760F8-8A0D-4973-9B01-210EB12F7A5E}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{BED760F8-8A0D-4973-9B01-210EB12F7A5E}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{BED760F8-8A0D-4973-9B01-210EB12F7A5E}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{BED760F8-8A0D-4973-9B01-210EB12F7A5E}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{BED760F8-8A0D-4973-9B01-210EB12F7A5E}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -1231,9 +1140,6 @@ Global
 		{D7B0A652-605F-4C0F-B543-FC3FBD568DF3}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{D7B0A652-605F-4C0F-B543-FC3FBD568DF3}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{D7B0A652-605F-4C0F-B543-FC3FBD568DF3}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{D7B0A652-605F-4C0F-B543-FC3FBD568DF3}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{D7B0A652-605F-4C0F-B543-FC3FBD568DF3}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{D7B0A652-605F-4C0F-B543-FC3FBD568DF3}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{D7B0A652-605F-4C0F-B543-FC3FBD568DF3}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{D7B0A652-605F-4C0F-B543-FC3FBD568DF3}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{D7B0A652-605F-4C0F-B543-FC3FBD568DF3}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -1258,9 +1164,6 @@ Global
 		{E183745A-8372-48D3-BD10-C330B929A57F}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{E183745A-8372-48D3-BD10-C330B929A57F}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{E183745A-8372-48D3-BD10-C330B929A57F}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{E183745A-8372-48D3-BD10-C330B929A57F}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{E183745A-8372-48D3-BD10-C330B929A57F}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{E183745A-8372-48D3-BD10-C330B929A57F}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{E183745A-8372-48D3-BD10-C330B929A57F}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{E183745A-8372-48D3-BD10-C330B929A57F}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{E183745A-8372-48D3-BD10-C330B929A57F}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -1285,9 +1188,6 @@ Global
 		{1811451F-C54B-4ACC-9E26-501AC25BB71F}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{1811451F-C54B-4ACC-9E26-501AC25BB71F}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{1811451F-C54B-4ACC-9E26-501AC25BB71F}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{1811451F-C54B-4ACC-9E26-501AC25BB71F}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{1811451F-C54B-4ACC-9E26-501AC25BB71F}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{1811451F-C54B-4ACC-9E26-501AC25BB71F}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{1811451F-C54B-4ACC-9E26-501AC25BB71F}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{1811451F-C54B-4ACC-9E26-501AC25BB71F}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{1811451F-C54B-4ACC-9E26-501AC25BB71F}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -1310,9 +1210,6 @@ Global
 		{B2F53772-D0E8-4E48-8FA8-CB983FADE98E}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{B2F53772-D0E8-4E48-8FA8-CB983FADE98E}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{B2F53772-D0E8-4E48-8FA8-CB983FADE98E}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{B2F53772-D0E8-4E48-8FA8-CB983FADE98E}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{B2F53772-D0E8-4E48-8FA8-CB983FADE98E}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{B2F53772-D0E8-4E48-8FA8-CB983FADE98E}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{B2F53772-D0E8-4E48-8FA8-CB983FADE98E}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{B2F53772-D0E8-4E48-8FA8-CB983FADE98E}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{B2F53772-D0E8-4E48-8FA8-CB983FADE98E}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -1335,9 +1232,6 @@ Global
 		{A5B2A209-8345-4041-8964-C3EFEA3E1AA5}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{A5B2A209-8345-4041-8964-C3EFEA3E1AA5}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{A5B2A209-8345-4041-8964-C3EFEA3E1AA5}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{A5B2A209-8345-4041-8964-C3EFEA3E1AA5}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{A5B2A209-8345-4041-8964-C3EFEA3E1AA5}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{A5B2A209-8345-4041-8964-C3EFEA3E1AA5}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{A5B2A209-8345-4041-8964-C3EFEA3E1AA5}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{A5B2A209-8345-4041-8964-C3EFEA3E1AA5}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{A5B2A209-8345-4041-8964-C3EFEA3E1AA5}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -1360,9 +1254,6 @@ Global
 		{49AF3A69-BFF0-4176-B1A9-829A0CA9713A}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{49AF3A69-BFF0-4176-B1A9-829A0CA9713A}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{49AF3A69-BFF0-4176-B1A9-829A0CA9713A}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{49AF3A69-BFF0-4176-B1A9-829A0CA9713A}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{49AF3A69-BFF0-4176-B1A9-829A0CA9713A}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{49AF3A69-BFF0-4176-B1A9-829A0CA9713A}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{49AF3A69-BFF0-4176-B1A9-829A0CA9713A}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{49AF3A69-BFF0-4176-B1A9-829A0CA9713A}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{49AF3A69-BFF0-4176-B1A9-829A0CA9713A}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -1387,9 +1278,6 @@ Global
 		{DD67D36C-83A3-4487-BC1B-6E247C76B289}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{DD67D36C-83A3-4487-BC1B-6E247C76B289}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{DD67D36C-83A3-4487-BC1B-6E247C76B289}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{DD67D36C-83A3-4487-BC1B-6E247C76B289}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{DD67D36C-83A3-4487-BC1B-6E247C76B289}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{DD67D36C-83A3-4487-BC1B-6E247C76B289}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{DD67D36C-83A3-4487-BC1B-6E247C76B289}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{DD67D36C-83A3-4487-BC1B-6E247C76B289}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{DD67D36C-83A3-4487-BC1B-6E247C76B289}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -1414,9 +1302,6 @@ Global
 		{1B9C3106-17DA-4EE4-8E65-1562F551373F}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{1B9C3106-17DA-4EE4-8E65-1562F551373F}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{1B9C3106-17DA-4EE4-8E65-1562F551373F}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{1B9C3106-17DA-4EE4-8E65-1562F551373F}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{1B9C3106-17DA-4EE4-8E65-1562F551373F}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{1B9C3106-17DA-4EE4-8E65-1562F551373F}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{1B9C3106-17DA-4EE4-8E65-1562F551373F}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{1B9C3106-17DA-4EE4-8E65-1562F551373F}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{1B9C3106-17DA-4EE4-8E65-1562F551373F}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -1441,9 +1326,6 @@ Global
 		{54729669-5FA9-41E3-A567-C935BB754203}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{54729669-5FA9-41E3-A567-C935BB754203}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{54729669-5FA9-41E3-A567-C935BB754203}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{54729669-5FA9-41E3-A567-C935BB754203}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{54729669-5FA9-41E3-A567-C935BB754203}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{54729669-5FA9-41E3-A567-C935BB754203}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{54729669-5FA9-41E3-A567-C935BB754203}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{54729669-5FA9-41E3-A567-C935BB754203}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{54729669-5FA9-41E3-A567-C935BB754203}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -1468,9 +1350,6 @@ Global
 		{EAC4F34F-31F9-47D6-B2FF-659B567D7E5F}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{EAC4F34F-31F9-47D6-B2FF-659B567D7E5F}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{EAC4F34F-31F9-47D6-B2FF-659B567D7E5F}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{EAC4F34F-31F9-47D6-B2FF-659B567D7E5F}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{EAC4F34F-31F9-47D6-B2FF-659B567D7E5F}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{EAC4F34F-31F9-47D6-B2FF-659B567D7E5F}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{EAC4F34F-31F9-47D6-B2FF-659B567D7E5F}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{EAC4F34F-31F9-47D6-B2FF-659B567D7E5F}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{EAC4F34F-31F9-47D6-B2FF-659B567D7E5F}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -1493,9 +1372,6 @@ Global
 		{AA212429-F21D-4497-9090-64A3D396288E}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{AA212429-F21D-4497-9090-64A3D396288E}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{AA212429-F21D-4497-9090-64A3D396288E}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{AA212429-F21D-4497-9090-64A3D396288E}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{AA212429-F21D-4497-9090-64A3D396288E}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{AA212429-F21D-4497-9090-64A3D396288E}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{AA212429-F21D-4497-9090-64A3D396288E}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{AA212429-F21D-4497-9090-64A3D396288E}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{AA212429-F21D-4497-9090-64A3D396288E}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -1520,9 +1396,6 @@ Global
 		{8740DD80-C463-40CB-962A-FC3274A236E2}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{8740DD80-C463-40CB-962A-FC3274A236E2}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{8740DD80-C463-40CB-962A-FC3274A236E2}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{8740DD80-C463-40CB-962A-FC3274A236E2}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{8740DD80-C463-40CB-962A-FC3274A236E2}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{8740DD80-C463-40CB-962A-FC3274A236E2}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{8740DD80-C463-40CB-962A-FC3274A236E2}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{8740DD80-C463-40CB-962A-FC3274A236E2}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{8740DD80-C463-40CB-962A-FC3274A236E2}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -1547,9 +1420,6 @@ Global
 		{DCF66753-EB48-4AD9-BCBA-82B2BBF581C1}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{DCF66753-EB48-4AD9-BCBA-82B2BBF581C1}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{DCF66753-EB48-4AD9-BCBA-82B2BBF581C1}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{DCF66753-EB48-4AD9-BCBA-82B2BBF581C1}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{DCF66753-EB48-4AD9-BCBA-82B2BBF581C1}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{DCF66753-EB48-4AD9-BCBA-82B2BBF581C1}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{DCF66753-EB48-4AD9-BCBA-82B2BBF581C1}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{DCF66753-EB48-4AD9-BCBA-82B2BBF581C1}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{DCF66753-EB48-4AD9-BCBA-82B2BBF581C1}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -1574,9 +1444,6 @@ Global
 		{8C782671-0452-44A1-9986-D6F77BFD69B9}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{8C782671-0452-44A1-9986-D6F77BFD69B9}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{8C782671-0452-44A1-9986-D6F77BFD69B9}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{8C782671-0452-44A1-9986-D6F77BFD69B9}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{8C782671-0452-44A1-9986-D6F77BFD69B9}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{8C782671-0452-44A1-9986-D6F77BFD69B9}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{8C782671-0452-44A1-9986-D6F77BFD69B9}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{8C782671-0452-44A1-9986-D6F77BFD69B9}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{8C782671-0452-44A1-9986-D6F77BFD69B9}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -1603,9 +1470,6 @@ Global
 		{D09DD4CD-77A6-48B8-A4CD-E1CBBF9E435D}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{D09DD4CD-77A6-48B8-A4CD-E1CBBF9E435D}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{D09DD4CD-77A6-48B8-A4CD-E1CBBF9E435D}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{D09DD4CD-77A6-48B8-A4CD-E1CBBF9E435D}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{D09DD4CD-77A6-48B8-A4CD-E1CBBF9E435D}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{D09DD4CD-77A6-48B8-A4CD-E1CBBF9E435D}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{D09DD4CD-77A6-48B8-A4CD-E1CBBF9E435D}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{D09DD4CD-77A6-48B8-A4CD-E1CBBF9E435D}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{D09DD4CD-77A6-48B8-A4CD-E1CBBF9E435D}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -1632,9 +1496,6 @@ Global
 		{CA132575-F22C-4655-B00A-648FBF7315D3}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{CA132575-F22C-4655-B00A-648FBF7315D3}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{CA132575-F22C-4655-B00A-648FBF7315D3}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{CA132575-F22C-4655-B00A-648FBF7315D3}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{CA132575-F22C-4655-B00A-648FBF7315D3}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{CA132575-F22C-4655-B00A-648FBF7315D3}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{CA132575-F22C-4655-B00A-648FBF7315D3}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{CA132575-F22C-4655-B00A-648FBF7315D3}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{CA132575-F22C-4655-B00A-648FBF7315D3}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -1659,9 +1520,6 @@ Global
 		{255E47FF-6E55-4368-A90D-BD717AB51B7F}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{255E47FF-6E55-4368-A90D-BD717AB51B7F}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{255E47FF-6E55-4368-A90D-BD717AB51B7F}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{255E47FF-6E55-4368-A90D-BD717AB51B7F}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{255E47FF-6E55-4368-A90D-BD717AB51B7F}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{255E47FF-6E55-4368-A90D-BD717AB51B7F}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{255E47FF-6E55-4368-A90D-BD717AB51B7F}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{255E47FF-6E55-4368-A90D-BD717AB51B7F}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{255E47FF-6E55-4368-A90D-BD717AB51B7F}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -1684,9 +1542,6 @@ Global
 		{125454E1-8A59-4765-8383-A24AC2F5BE0A}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{125454E1-8A59-4765-8383-A24AC2F5BE0A}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{125454E1-8A59-4765-8383-A24AC2F5BE0A}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{125454E1-8A59-4765-8383-A24AC2F5BE0A}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{125454E1-8A59-4765-8383-A24AC2F5BE0A}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{125454E1-8A59-4765-8383-A24AC2F5BE0A}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{125454E1-8A59-4765-8383-A24AC2F5BE0A}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{125454E1-8A59-4765-8383-A24AC2F5BE0A}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{125454E1-8A59-4765-8383-A24AC2F5BE0A}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -1711,9 +1566,6 @@ Global
 		{D788FBE6-73C8-41FC-B186-F796A2140D30}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{D788FBE6-73C8-41FC-B186-F796A2140D30}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{D788FBE6-73C8-41FC-B186-F796A2140D30}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{D788FBE6-73C8-41FC-B186-F796A2140D30}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{D788FBE6-73C8-41FC-B186-F796A2140D30}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{D788FBE6-73C8-41FC-B186-F796A2140D30}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{D788FBE6-73C8-41FC-B186-F796A2140D30}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{D788FBE6-73C8-41FC-B186-F796A2140D30}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{D788FBE6-73C8-41FC-B186-F796A2140D30}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -1738,9 +1590,6 @@ Global
 		{0B93122C-FE57-439D-A775-9771E15428EC}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{0B93122C-FE57-439D-A775-9771E15428EC}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{0B93122C-FE57-439D-A775-9771E15428EC}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{0B93122C-FE57-439D-A775-9771E15428EC}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{0B93122C-FE57-439D-A775-9771E15428EC}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{0B93122C-FE57-439D-A775-9771E15428EC}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{0B93122C-FE57-439D-A775-9771E15428EC}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{0B93122C-FE57-439D-A775-9771E15428EC}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{0B93122C-FE57-439D-A775-9771E15428EC}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -1765,9 +1614,6 @@ Global
 		{ACC7754C-DC61-46E0-B8D9-637AC9D98FD3}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{ACC7754C-DC61-46E0-B8D9-637AC9D98FD3}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{ACC7754C-DC61-46E0-B8D9-637AC9D98FD3}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{ACC7754C-DC61-46E0-B8D9-637AC9D98FD3}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{ACC7754C-DC61-46E0-B8D9-637AC9D98FD3}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{ACC7754C-DC61-46E0-B8D9-637AC9D98FD3}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{ACC7754C-DC61-46E0-B8D9-637AC9D98FD3}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{ACC7754C-DC61-46E0-B8D9-637AC9D98FD3}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{ACC7754C-DC61-46E0-B8D9-637AC9D98FD3}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -1792,9 +1638,6 @@ Global
 		{6D92353B-7E54-4BBB-AFB3-4E67439AF618}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{6D92353B-7E54-4BBB-AFB3-4E67439AF618}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{6D92353B-7E54-4BBB-AFB3-4E67439AF618}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{6D92353B-7E54-4BBB-AFB3-4E67439AF618}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{6D92353B-7E54-4BBB-AFB3-4E67439AF618}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{6D92353B-7E54-4BBB-AFB3-4E67439AF618}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{6D92353B-7E54-4BBB-AFB3-4E67439AF618}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{6D92353B-7E54-4BBB-AFB3-4E67439AF618}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{6D92353B-7E54-4BBB-AFB3-4E67439AF618}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -1819,10 +1662,6 @@ Global
 		{42A903E6-C1BB-4A61-8AF3-F5A090558A04}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{42A903E6-C1BB-4A61-8AF3-F5A090558A04}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{42A903E6-C1BB-4A61-8AF3-F5A090558A04}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{42A903E6-C1BB-4A61-8AF3-F5A090558A04}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{42A903E6-C1BB-4A61-8AF3-F5A090558A04}.FixWrongPersistentBaseFramework|Any CPU.Build.0 = Debug|Any CPU
-		{42A903E6-C1BB-4A61-8AF3-F5A090558A04}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{42A903E6-C1BB-4A61-8AF3-F5A090558A04}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{42A903E6-C1BB-4A61-8AF3-F5A090558A04}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{42A903E6-C1BB-4A61-8AF3-F5A090558A04}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{42A903E6-C1BB-4A61-8AF3-F5A090558A04}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -1849,9 +1688,6 @@ Global
 		{DACB24B2-35B6-47A2-9C82-931D0514233C}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{DACB24B2-35B6-47A2-9C82-931D0514233C}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{DACB24B2-35B6-47A2-9C82-931D0514233C}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{DACB24B2-35B6-47A2-9C82-931D0514233C}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{DACB24B2-35B6-47A2-9C82-931D0514233C}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{DACB24B2-35B6-47A2-9C82-931D0514233C}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{DACB24B2-35B6-47A2-9C82-931D0514233C}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{DACB24B2-35B6-47A2-9C82-931D0514233C}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{DACB24B2-35B6-47A2-9C82-931D0514233C}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -1876,9 +1712,6 @@ Global
 		{9AC9273B-47F0-4935-BCAC-DCE468C726A4}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{9AC9273B-47F0-4935-BCAC-DCE468C726A4}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{9AC9273B-47F0-4935-BCAC-DCE468C726A4}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{9AC9273B-47F0-4935-BCAC-DCE468C726A4}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{9AC9273B-47F0-4935-BCAC-DCE468C726A4}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{9AC9273B-47F0-4935-BCAC-DCE468C726A4}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{9AC9273B-47F0-4935-BCAC-DCE468C726A4}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{9AC9273B-47F0-4935-BCAC-DCE468C726A4}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{9AC9273B-47F0-4935-BCAC-DCE468C726A4}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -1901,9 +1734,6 @@ Global
 		{9EA8BB13-A3AC-40A4-8A00-18F086273A62}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{9EA8BB13-A3AC-40A4-8A00-18F086273A62}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{9EA8BB13-A3AC-40A4-8A00-18F086273A62}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{9EA8BB13-A3AC-40A4-8A00-18F086273A62}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{9EA8BB13-A3AC-40A4-8A00-18F086273A62}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{9EA8BB13-A3AC-40A4-8A00-18F086273A62}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{9EA8BB13-A3AC-40A4-8A00-18F086273A62}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{9EA8BB13-A3AC-40A4-8A00-18F086273A62}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{9EA8BB13-A3AC-40A4-8A00-18F086273A62}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -1926,9 +1756,6 @@ Global
 		{54C7060F-4211-4445-9D52-4E7786CA2C6E}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{54C7060F-4211-4445-9D52-4E7786CA2C6E}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{54C7060F-4211-4445-9D52-4E7786CA2C6E}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{54C7060F-4211-4445-9D52-4E7786CA2C6E}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{54C7060F-4211-4445-9D52-4E7786CA2C6E}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{54C7060F-4211-4445-9D52-4E7786CA2C6E}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{54C7060F-4211-4445-9D52-4E7786CA2C6E}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{54C7060F-4211-4445-9D52-4E7786CA2C6E}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{54C7060F-4211-4445-9D52-4E7786CA2C6E}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -1953,9 +1780,6 @@ Global
 		{AF82C199-F6CA-467F-A5BC-B75075ADCC84}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{AF82C199-F6CA-467F-A5BC-B75075ADCC84}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{AF82C199-F6CA-467F-A5BC-B75075ADCC84}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{AF82C199-F6CA-467F-A5BC-B75075ADCC84}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{AF82C199-F6CA-467F-A5BC-B75075ADCC84}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{AF82C199-F6CA-467F-A5BC-B75075ADCC84}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{AF82C199-F6CA-467F-A5BC-B75075ADCC84}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{AF82C199-F6CA-467F-A5BC-B75075ADCC84}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{AF82C199-F6CA-467F-A5BC-B75075ADCC84}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -1982,9 +1806,6 @@ Global
 		{9F08B73B-E58D-4543-BF4F-4E8A4DCC392A}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{9F08B73B-E58D-4543-BF4F-4E8A4DCC392A}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{9F08B73B-E58D-4543-BF4F-4E8A4DCC392A}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{9F08B73B-E58D-4543-BF4F-4E8A4DCC392A}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{9F08B73B-E58D-4543-BF4F-4E8A4DCC392A}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{9F08B73B-E58D-4543-BF4F-4E8A4DCC392A}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{9F08B73B-E58D-4543-BF4F-4E8A4DCC392A}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{9F08B73B-E58D-4543-BF4F-4E8A4DCC392A}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{9F08B73B-E58D-4543-BF4F-4E8A4DCC392A}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -2009,9 +1830,6 @@ Global
 		{B2170D1F-3D0B-4693-890D-8A9D3BE01FD0}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{B2170D1F-3D0B-4693-890D-8A9D3BE01FD0}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{B2170D1F-3D0B-4693-890D-8A9D3BE01FD0}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{B2170D1F-3D0B-4693-890D-8A9D3BE01FD0}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{B2170D1F-3D0B-4693-890D-8A9D3BE01FD0}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{B2170D1F-3D0B-4693-890D-8A9D3BE01FD0}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{B2170D1F-3D0B-4693-890D-8A9D3BE01FD0}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{B2170D1F-3D0B-4693-890D-8A9D3BE01FD0}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{B2170D1F-3D0B-4693-890D-8A9D3BE01FD0}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -2034,9 +1852,6 @@ Global
 		{E6C713D8-13D3-405E-BF10-BB373116F98C}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{E6C713D8-13D3-405E-BF10-BB373116F98C}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{E6C713D8-13D3-405E-BF10-BB373116F98C}.EasyTest|x86.Build.0 = Release|Any CPU
-		{E6C713D8-13D3-405E-BF10-BB373116F98C}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{E6C713D8-13D3-405E-BF10-BB373116F98C}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{E6C713D8-13D3-405E-BF10-BB373116F98C}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{E6C713D8-13D3-405E-BF10-BB373116F98C}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{E6C713D8-13D3-405E-BF10-BB373116F98C}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{E6C713D8-13D3-405E-BF10-BB373116F98C}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -2061,9 +1876,6 @@ Global
 		{7D2EE19D-C2F2-4B88-BE86-5C181992691A}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{7D2EE19D-C2F2-4B88-BE86-5C181992691A}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{7D2EE19D-C2F2-4B88-BE86-5C181992691A}.EasyTest|x86.Build.0 = Release|Any CPU
-		{7D2EE19D-C2F2-4B88-BE86-5C181992691A}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{7D2EE19D-C2F2-4B88-BE86-5C181992691A}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{7D2EE19D-C2F2-4B88-BE86-5C181992691A}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{7D2EE19D-C2F2-4B88-BE86-5C181992691A}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{7D2EE19D-C2F2-4B88-BE86-5C181992691A}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{7D2EE19D-C2F2-4B88-BE86-5C181992691A}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -2090,9 +1902,6 @@ Global
 		{C705B00B-244E-4F4B-960F-9A6BBE93DDA5}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{C705B00B-244E-4F4B-960F-9A6BBE93DDA5}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{C705B00B-244E-4F4B-960F-9A6BBE93DDA5}.EasyTest|x86.Build.0 = Release|Any CPU
-		{C705B00B-244E-4F4B-960F-9A6BBE93DDA5}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{C705B00B-244E-4F4B-960F-9A6BBE93DDA5}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{C705B00B-244E-4F4B-960F-9A6BBE93DDA5}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{C705B00B-244E-4F4B-960F-9A6BBE93DDA5}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{C705B00B-244E-4F4B-960F-9A6BBE93DDA5}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{C705B00B-244E-4F4B-960F-9A6BBE93DDA5}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -2117,9 +1926,6 @@ Global
 		{BBBA6770-65A9-40DC-86E4-EE1063E95718}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{BBBA6770-65A9-40DC-86E4-EE1063E95718}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{BBBA6770-65A9-40DC-86E4-EE1063E95718}.EasyTest|x86.Build.0 = Release|Any CPU
-		{BBBA6770-65A9-40DC-86E4-EE1063E95718}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{BBBA6770-65A9-40DC-86E4-EE1063E95718}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{BBBA6770-65A9-40DC-86E4-EE1063E95718}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{BBBA6770-65A9-40DC-86E4-EE1063E95718}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{BBBA6770-65A9-40DC-86E4-EE1063E95718}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{BBBA6770-65A9-40DC-86E4-EE1063E95718}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -2142,9 +1948,6 @@ Global
 		{AD0A8FF1-9335-4FEA-85A7-74EB5BCCA105}.EasyTest|Any CPU.Build.0 = EasyTest|Any CPU
 		{AD0A8FF1-9335-4FEA-85A7-74EB5BCCA105}.EasyTest|x86.ActiveCfg = EasyTest|Any CPU
 		{AD0A8FF1-9335-4FEA-85A7-74EB5BCCA105}.EasyTest|x86.Build.0 = EasyTest|Any CPU
-		{AD0A8FF1-9335-4FEA-85A7-74EB5BCCA105}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{AD0A8FF1-9335-4FEA-85A7-74EB5BCCA105}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{AD0A8FF1-9335-4FEA-85A7-74EB5BCCA105}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{AD0A8FF1-9335-4FEA-85A7-74EB5BCCA105}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{AD0A8FF1-9335-4FEA-85A7-74EB5BCCA105}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{AD0A8FF1-9335-4FEA-85A7-74EB5BCCA105}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -2171,9 +1974,6 @@ Global
 		{D05D93DF-312D-4D4E-B980-726871EC7833}.EasyTest|Any CPU.Build.0 = EasyTest|Any CPU
 		{D05D93DF-312D-4D4E-B980-726871EC7833}.EasyTest|x86.ActiveCfg = EasyTest|Any CPU
 		{D05D93DF-312D-4D4E-B980-726871EC7833}.EasyTest|x86.Build.0 = EasyTest|Any CPU
-		{D05D93DF-312D-4D4E-B980-726871EC7833}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{D05D93DF-312D-4D4E-B980-726871EC7833}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{D05D93DF-312D-4D4E-B980-726871EC7833}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{D05D93DF-312D-4D4E-B980-726871EC7833}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{D05D93DF-312D-4D4E-B980-726871EC7833}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{D05D93DF-312D-4D4E-B980-726871EC7833}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -2200,9 +2000,6 @@ Global
 		{55D272EF-2068-4A8E-BF55-F10766942FDA}.EasyTest|Any CPU.Build.0 = EasyTest|Any CPU
 		{55D272EF-2068-4A8E-BF55-F10766942FDA}.EasyTest|x86.ActiveCfg = EasyTest|Any CPU
 		{55D272EF-2068-4A8E-BF55-F10766942FDA}.EasyTest|x86.Build.0 = EasyTest|Any CPU
-		{55D272EF-2068-4A8E-BF55-F10766942FDA}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Release|Any CPU
-		{55D272EF-2068-4A8E-BF55-F10766942FDA}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{55D272EF-2068-4A8E-BF55-F10766942FDA}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{55D272EF-2068-4A8E-BF55-F10766942FDA}.NetCore|Any CPU.ActiveCfg = Release|Any CPU
 		{55D272EF-2068-4A8E-BF55-F10766942FDA}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{55D272EF-2068-4A8E-BF55-F10766942FDA}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -2227,9 +2024,6 @@ Global
 		{B5720CA0-B564-48A6-BDC1-1D80A9AEAC61}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{B5720CA0-B564-48A6-BDC1-1D80A9AEAC61}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{B5720CA0-B564-48A6-BDC1-1D80A9AEAC61}.EasyTest|x86.Build.0 = Release|Any CPU
-		{B5720CA0-B564-48A6-BDC1-1D80A9AEAC61}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{B5720CA0-B564-48A6-BDC1-1D80A9AEAC61}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{B5720CA0-B564-48A6-BDC1-1D80A9AEAC61}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{B5720CA0-B564-48A6-BDC1-1D80A9AEAC61}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{B5720CA0-B564-48A6-BDC1-1D80A9AEAC61}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{B5720CA0-B564-48A6-BDC1-1D80A9AEAC61}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -2252,9 +2046,6 @@ Global
 		{E444C2B6-5D58-4A3F-AD82-FDB051015B52}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{E444C2B6-5D58-4A3F-AD82-FDB051015B52}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{E444C2B6-5D58-4A3F-AD82-FDB051015B52}.EasyTest|x86.Build.0 = Release|Any CPU
-		{E444C2B6-5D58-4A3F-AD82-FDB051015B52}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{E444C2B6-5D58-4A3F-AD82-FDB051015B52}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{E444C2B6-5D58-4A3F-AD82-FDB051015B52}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{E444C2B6-5D58-4A3F-AD82-FDB051015B52}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{E444C2B6-5D58-4A3F-AD82-FDB051015B52}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{E444C2B6-5D58-4A3F-AD82-FDB051015B52}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -2281,9 +2072,6 @@ Global
 		{D2427E8A-2723-4C27-AC31-6DACB18225C6}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{D2427E8A-2723-4C27-AC31-6DACB18225C6}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{D2427E8A-2723-4C27-AC31-6DACB18225C6}.EasyTest|x86.Build.0 = Release|Any CPU
-		{D2427E8A-2723-4C27-AC31-6DACB18225C6}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{D2427E8A-2723-4C27-AC31-6DACB18225C6}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{D2427E8A-2723-4C27-AC31-6DACB18225C6}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{D2427E8A-2723-4C27-AC31-6DACB18225C6}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{D2427E8A-2723-4C27-AC31-6DACB18225C6}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{D2427E8A-2723-4C27-AC31-6DACB18225C6}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -2310,9 +2098,6 @@ Global
 		{7BFDD199-BE2E-4D2A-B4D6-4F31A2CDAB95}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{7BFDD199-BE2E-4D2A-B4D6-4F31A2CDAB95}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{7BFDD199-BE2E-4D2A-B4D6-4F31A2CDAB95}.EasyTest|x86.Build.0 = Release|Any CPU
-		{7BFDD199-BE2E-4D2A-B4D6-4F31A2CDAB95}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{7BFDD199-BE2E-4D2A-B4D6-4F31A2CDAB95}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{7BFDD199-BE2E-4D2A-B4D6-4F31A2CDAB95}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{7BFDD199-BE2E-4D2A-B4D6-4F31A2CDAB95}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{7BFDD199-BE2E-4D2A-B4D6-4F31A2CDAB95}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{7BFDD199-BE2E-4D2A-B4D6-4F31A2CDAB95}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -2337,9 +2122,6 @@ Global
 		{F060492B-2278-42AA-B776-0C914E282B57}.EasyTest|Any CPU.Build.0 = EasyTest|Any CPU
 		{F060492B-2278-42AA-B776-0C914E282B57}.EasyTest|x86.ActiveCfg = EasyTest|Any CPU
 		{F060492B-2278-42AA-B776-0C914E282B57}.EasyTest|x86.Build.0 = EasyTest|Any CPU
-		{F060492B-2278-42AA-B776-0C914E282B57}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{F060492B-2278-42AA-B776-0C914E282B57}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{F060492B-2278-42AA-B776-0C914E282B57}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{F060492B-2278-42AA-B776-0C914E282B57}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{F060492B-2278-42AA-B776-0C914E282B57}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{F060492B-2278-42AA-B776-0C914E282B57}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -2364,9 +2146,6 @@ Global
 		{CB74CE82-4A67-4E52-AE9A-A73867210FCB}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{CB74CE82-4A67-4E52-AE9A-A73867210FCB}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{CB74CE82-4A67-4E52-AE9A-A73867210FCB}.EasyTest|x86.Build.0 = Release|Any CPU
-		{CB74CE82-4A67-4E52-AE9A-A73867210FCB}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{CB74CE82-4A67-4E52-AE9A-A73867210FCB}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{CB74CE82-4A67-4E52-AE9A-A73867210FCB}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{CB74CE82-4A67-4E52-AE9A-A73867210FCB}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{CB74CE82-4A67-4E52-AE9A-A73867210FCB}.NetCore|x86.ActiveCfg = Debug|Any CPU
 		{CB74CE82-4A67-4E52-AE9A-A73867210FCB}.NetCore|x86.Build.0 = Debug|Any CPU
@@ -2391,9 +2170,6 @@ Global
 		{4E412BA1-0254-41C7-B668-DD2364958584}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{4E412BA1-0254-41C7-B668-DD2364958584}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{4E412BA1-0254-41C7-B668-DD2364958584}.EasyTest|x86.Build.0 = Release|Any CPU
-		{4E412BA1-0254-41C7-B668-DD2364958584}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{4E412BA1-0254-41C7-B668-DD2364958584}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{4E412BA1-0254-41C7-B668-DD2364958584}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{4E412BA1-0254-41C7-B668-DD2364958584}.NetCore|Any CPU.ActiveCfg = Release|Any CPU
 		{4E412BA1-0254-41C7-B668-DD2364958584}.NetCore|Any CPU.Build.0 = Release|Any CPU
 		{4E412BA1-0254-41C7-B668-DD2364958584}.NetCore|x86.ActiveCfg = Release|Any CPU
@@ -2420,9 +2196,6 @@ Global
 		{99C44A4A-51EC-4577-8355-482159DE0105}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{99C44A4A-51EC-4577-8355-482159DE0105}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{99C44A4A-51EC-4577-8355-482159DE0105}.EasyTest|x86.Build.0 = Release|Any CPU
-		{99C44A4A-51EC-4577-8355-482159DE0105}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{99C44A4A-51EC-4577-8355-482159DE0105}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{99C44A4A-51EC-4577-8355-482159DE0105}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{99C44A4A-51EC-4577-8355-482159DE0105}.NetCore|Any CPU.ActiveCfg = Release|Any CPU
 		{99C44A4A-51EC-4577-8355-482159DE0105}.NetCore|Any CPU.Build.0 = Release|Any CPU
 		{99C44A4A-51EC-4577-8355-482159DE0105}.NetCore|x86.ActiveCfg = Release|Any CPU
@@ -2448,9 +2221,6 @@ Global
 		{629C6C63-A341-4F60-964E-8A670365B6A5}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{629C6C63-A341-4F60-964E-8A670365B6A5}.EasyTest|x86.ActiveCfg = Release|Any CPU
 		{629C6C63-A341-4F60-964E-8A670365B6A5}.EasyTest|x86.Build.0 = Release|Any CPU
-		{629C6C63-A341-4F60-964E-8A670365B6A5}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{629C6C63-A341-4F60-964E-8A670365B6A5}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{629C6C63-A341-4F60-964E-8A670365B6A5}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{629C6C63-A341-4F60-964E-8A670365B6A5}.NetCore|Any CPU.ActiveCfg = Release|Any CPU
 		{629C6C63-A341-4F60-964E-8A670365B6A5}.NetCore|Any CPU.Build.0 = Release|Any CPU
 		{629C6C63-A341-4F60-964E-8A670365B6A5}.NetCore|x86.ActiveCfg = Release|Any CPU
@@ -2476,9 +2246,6 @@ Global
 		{D2D23F1B-85FC-49CE-B356-67A20D5EAE72}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{D2D23F1B-85FC-49CE-B356-67A20D5EAE72}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{D2D23F1B-85FC-49CE-B356-67A20D5EAE72}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{D2D23F1B-85FC-49CE-B356-67A20D5EAE72}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{D2D23F1B-85FC-49CE-B356-67A20D5EAE72}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{D2D23F1B-85FC-49CE-B356-67A20D5EAE72}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{D2D23F1B-85FC-49CE-B356-67A20D5EAE72}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{D2D23F1B-85FC-49CE-B356-67A20D5EAE72}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{D2D23F1B-85FC-49CE-B356-67A20D5EAE72}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -2503,9 +2270,6 @@ Global
 		{8917447D-A41C-47E5-8941-103D89BB802F}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{8917447D-A41C-47E5-8941-103D89BB802F}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{8917447D-A41C-47E5-8941-103D89BB802F}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{8917447D-A41C-47E5-8941-103D89BB802F}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{8917447D-A41C-47E5-8941-103D89BB802F}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{8917447D-A41C-47E5-8941-103D89BB802F}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{8917447D-A41C-47E5-8941-103D89BB802F}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{8917447D-A41C-47E5-8941-103D89BB802F}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{8917447D-A41C-47E5-8941-103D89BB802F}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -2529,9 +2293,6 @@ Global
 		{46085B00-5001-4F59-ADE8-8CE21097B6EB}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{46085B00-5001-4F59-ADE8-8CE21097B6EB}.EasyTest|x86.ActiveCfg = Debug|Any CPU
 		{46085B00-5001-4F59-ADE8-8CE21097B6EB}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{46085B00-5001-4F59-ADE8-8CE21097B6EB}.FixWrongPersistentBaseFramework|Any CPU.ActiveCfg = Debug|Any CPU
-		{46085B00-5001-4F59-ADE8-8CE21097B6EB}.FixWrongPersistentBaseFramework|x86.ActiveCfg = Debug|Any CPU
-		{46085B00-5001-4F59-ADE8-8CE21097B6EB}.FixWrongPersistentBaseFramework|x86.Build.0 = Debug|Any CPU
 		{46085B00-5001-4F59-ADE8-8CE21097B6EB}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
 		{46085B00-5001-4F59-ADE8-8CE21097B6EB}.NetCore|Any CPU.Build.0 = Debug|Any CPU
 		{46085B00-5001-4F59-ADE8-8CE21097B6EB}.NetCore|x86.ActiveCfg = Debug|Any CPU
@@ -2545,6 +2306,31 @@ Global
 		{46085B00-5001-4F59-ADE8-8CE21097B6EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{46085B00-5001-4F59-ADE8-8CE21097B6EB}.Release|x86.ActiveCfg = Release|Any CPU
 		{46085B00-5001-4F59-ADE8-8CE21097B6EB}.Release|x86.Build.0 = Release|Any CPU
+		{678EC7D1-471A-477D-80F5-CAAF3899FFC8}.Debug_20.1|Any CPU.ActiveCfg = Debug|Any CPU
+		{678EC7D1-471A-477D-80F5-CAAF3899FFC8}.Debug_20.1|x86.ActiveCfg = Debug|Any CPU
+		{678EC7D1-471A-477D-80F5-CAAF3899FFC8}.Debug_20.1|x86.Build.0 = Debug|Any CPU
+		{678EC7D1-471A-477D-80F5-CAAF3899FFC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{678EC7D1-471A-477D-80F5-CAAF3899FFC8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{678EC7D1-471A-477D-80F5-CAAF3899FFC8}.Debug|x86.Build.0 = Debug|Any CPU
+		{678EC7D1-471A-477D-80F5-CAAF3899FFC8}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{678EC7D1-471A-477D-80F5-CAAF3899FFC8}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
+		{678EC7D1-471A-477D-80F5-CAAF3899FFC8}.EasyTest|x86.ActiveCfg = Debug|Any CPU
+		{678EC7D1-471A-477D-80F5-CAAF3899FFC8}.EasyTest|x86.Build.0 = Debug|Any CPU
+		{678EC7D1-471A-477D-80F5-CAAF3899FFC8}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
+		{678EC7D1-471A-477D-80F5-CAAF3899FFC8}.NetCore|Any CPU.Build.0 = Debug|Any CPU
+		{678EC7D1-471A-477D-80F5-CAAF3899FFC8}.NetCore|x86.ActiveCfg = Debug|Any CPU
+		{678EC7D1-471A-477D-80F5-CAAF3899FFC8}.NetCore|x86.Build.0 = Debug|Any CPU
+		{678EC7D1-471A-477D-80F5-CAAF3899FFC8}.NugetConsumers_20.1|Any CPU.ActiveCfg = Debug|Any CPU
+		{678EC7D1-471A-477D-80F5-CAAF3899FFC8}.NugetConsumers_20.1|x86.ActiveCfg = Debug|Any CPU
+		{678EC7D1-471A-477D-80F5-CAAF3899FFC8}.NugetConsumers_20.1|x86.Build.0 = Debug|Any CPU
+		{678EC7D1-471A-477D-80F5-CAAF3899FFC8}.NugetConsumers|Any CPU.ActiveCfg = Debug|Any CPU
+		{678EC7D1-471A-477D-80F5-CAAF3899FFC8}.NugetConsumers|Any CPU.Build.0 = Debug|Any CPU
+		{678EC7D1-471A-477D-80F5-CAAF3899FFC8}.NugetConsumers|x86.ActiveCfg = Debug|Any CPU
+		{678EC7D1-471A-477D-80F5-CAAF3899FFC8}.NugetConsumers|x86.Build.0 = Debug|Any CPU
+		{678EC7D1-471A-477D-80F5-CAAF3899FFC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{678EC7D1-471A-477D-80F5-CAAF3899FFC8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{678EC7D1-471A-477D-80F5-CAAF3899FFC8}.Release|x86.ActiveCfg = Release|Any CPU
+		{678EC7D1-471A-477D-80F5-CAAF3899FFC8}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -2659,6 +2445,7 @@ Global
 		{D2D23F1B-85FC-49CE-B356-67A20D5EAE72} = {A93C9BDD-7A96-4022-A02E-DEE698F3C76C}
 		{8917447D-A41C-47E5-8941-103D89BB802F} = {A93C9BDD-7A96-4022-A02E-DEE698F3C76C}
 		{46085B00-5001-4F59-ADE8-8CE21097B6EB} = {9E8D268A-937D-4295-8C5B-82E9A19A65AE}
+		{678EC7D1-471A-477D-80F5-CAAF3899FFC8} = {867851CE-7CE6-4F28-9DE2-23E4D70B3A7B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C0A41578-813B-4E26-B5DF-D979F1C0A7D7}

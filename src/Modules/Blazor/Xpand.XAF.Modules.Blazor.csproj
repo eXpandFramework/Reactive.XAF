@@ -17,9 +17,6 @@
     <CopyLocalLockFileAssemblie>true</CopyLocalLockFileAssemblie>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="Model.DesignedDiffs.xafml" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Update="Module.cs" />
     <Compile Include="..\..\Common\AssemblyInfoVersion.cs">
       <Link>Properties\AssemblyInfoVersion.cs</Link>
@@ -41,21 +38,11 @@
     <Reference Include="Xpand.Extensions.XAF.Xpo">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.Xpo.dll</HintPath>
     </Reference>
-    <Reference Include="Xpand.XAF.Modules.Blazor">
-      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Blazor.dll</HintPath>
-    </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
     </Reference>
     <PackageReference Include="DevExpress.ExpressApp" Version="20.2.4" />
     <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="20.2.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Validation" Version="20.2.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="20.2.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="20.2.4" />
-    <PackageReference Include="DevExpress.Persistent.Base" Version="20.2.4" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

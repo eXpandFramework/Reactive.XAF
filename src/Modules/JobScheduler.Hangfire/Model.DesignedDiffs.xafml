@@ -4,29 +4,23 @@
     <DetailView Id="Job_DetailView">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors" RelativeSize="15.177713736791546">
-            <LayoutGroup Id="Job" RelativeSize="100" ShowCaption="False">
-              <LayoutGroup Id="Job_col1" RelativeSize="49.94913530010173">
-                <LayoutItem Id="Id" ViewItem="Id" Index="0" RelativeSize="20.253164556962027" IsNewNode="True" />
-                <LayoutItem Id="JobType" Index="1" RelativeSize="15.189873417721518" />
-                <LayoutItem Id="JobMethod" Index="2" RelativeSize="15.189873417721518" />
-                <LayoutItem Id="CronExpression" Index="3" RelativeSize="15.189873417721518" />
-                <LayoutItem Id="State" Index="4" RelativeSize="34.177215189873415" />
-                <LayoutItem Id="Total" Index="4" RelativeSize="15" Removed="True" />
-                <LayoutItem Id="Created" Index="6" RelativeSize="17.391304347826086" Removed="True" />
+          <LayoutGroup Id="SimpleEditors" RelativeSize="5.95581171950048">
+            <LayoutGroup Id="Job" RelativeSize="100" ShowCaption="False" Direction="Horizontal">
+              <LayoutGroup Id="Auto4da81272-0e93-406d-932c-05e6da33c2bd" ShowCaption="False" Caption="" Index="0" RelativeSize="49.95944849959449" IsNewNode="True">
+                <LayoutItem Id="JobType" ViewItem="JobType" Index="0" RelativeSize="51.61290322580645" IsNewNode="True" />
+                <LayoutItem Id="JobMethod" ViewItem="JobMethod" Index="1" RelativeSize="48.38709677419355" IsNewNode="True" />
               </LayoutGroup>
-              <LayoutGroup Id="Job_col2" RelativeSize="50.05086469989827">
-                <LayoutItem Id="Created" ViewItem="Created" Index="0" RelativeSize="20.253164556962027" IsNewNode="True" />
-                <LayoutItem Id="LastExecution" RelativeSize="15.189873417721518" Index="1" />
-                <LayoutItem Id="Executions" RelativeSize="15.189873417721518" Index="2" />
-                <LayoutItem Id="SuccessFullJobs" RelativeSize="15.189873417721518" Index="3" />
-                <LayoutItem Id="FailedJobs" RelativeSize="15.189873417721518" Index="4" />
-                <LayoutItem Id="Total" ViewItem="Total" Index="5" RelativeSize="18.9873417721519" IsNewNode="True" />
-                <LayoutItem Id="Id" Removed="True" />
+              <LayoutItem Id="JobType" Index="0" RelativeSize="37.2093023255814" Removed="True" />
+              <LayoutGroup Id="Auto215c5931-97ca-4d11-b4e5-703d791cc00a" ShowCaption="False" Caption="" Index="1" RelativeSize="50.04055150040551" IsNewNode="True">
+                <LayoutItem Id="CronExpression" ViewItem="CronExpression" Index="0" RelativeSize="51.61290322580645" IsNewNode="True" />
+                <LayoutItem Id="Id" ViewItem="Id" Index="1" RelativeSize="48.38709677419355" IsNewNode="True" />
               </LayoutGroup>
+              <LayoutItem Id="JobMethod" Index="1" RelativeSize="21.818181818181817" Removed="True" />
+              <LayoutItem Id="CronExpression" Index="2" RelativeSize="34.883720930232556" Removed="True" />
+              <LayoutItem Id="Id" Index="2" RelativeSize="21.818181818181817" Removed="True" />
             </LayoutGroup>
           </LayoutGroup>
-          <LayoutGroup Id="Jobs_Group" Direction="Vertical" RelativeSize="84.82228626320845" ShowCaption="False">
+          <LayoutGroup Id="Jobs_Group" Direction="Vertical" RelativeSize="94.04418828049953" ShowCaption="False">
             <LayoutItem Id="Jobs" RelativeSize="100" ViewItem="Jobs" />
           </LayoutGroup>
         </LayoutGroup>

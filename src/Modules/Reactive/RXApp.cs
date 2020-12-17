@@ -97,13 +97,8 @@ namespace Xpand.XAF.Modules.Reactive{
         static IObservable<Unit> VisibleInAllViewsAttribute(this ApplicationModulesManager manager)
             => manager.WhenCustomizeTypesInfo()
                 .SelectMany(t => t.e.TypesInfo.PersistentTypes
-                    .SelectMany(info =>
-                        info.Members.Where(
-                            memberInfo => memberInfo.FindAttributes<VisibleInAllViewsAttribute>().Any())))
-                .SelectMany(info => new Attribute[] {
-                        new VisibleInDetailViewAttribute(true), new VisibleInListViewAttribute(true),
-                        new VisibleInLookupListViewAttribute(true)
-                    }
+                    .SelectMany(info => info.Members.Where(memberInfo => memberInfo.FindAttributes<VisibleInAllViewsAttribute>().Any())))
+                .SelectMany(info => new Attribute[] {new VisibleInDetailViewAttribute(true), new VisibleInListViewAttribute(true), new VisibleInLookupListViewAttribute(true)}
                     .ToObservable(ImmediateScheduler.Instance)
                     .Do(info.AddAttribute))
                 .ToUnit();
@@ -125,7 +120,7 @@ namespace Xpand.XAF.Modules.Reactive{
                 .Do(_ => {
                     AppDomain.CurrentDomain.Patch(harmony => {
                         if (application.Security.IsInstanceOf("DevExpress.ExpressApp.Security.SecurityStrategyBase")){
-                            var methodInfo = ( application.Security)?.GetPropertyValue("Authentication")?.GetType().Methods("Authenticate")
+                            var methodInfo = application.Security?.GetPropertyValue("Authentication")?.GetType().Methods("Authenticate")
                                 .Last(info =>info.DeclaringType!=null&& !info.DeclaringType.IsAbstract);
                             if (methodInfo != null){
                                 harmony.Patch(methodInfo, new HarmonyMethod(GetMethodInfo(nameof(Authenticate))));	

@@ -186,6 +186,12 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.JobScheduler.Hangfire", "JobScheduler.Hangfire\Xpand.XAF.Modules.JobScheduler.Hangfire.csproj", "{A2B7513E-3653-47E3-82C7-C00A32CBF692}"
 	ProjectSection(ProjectDependencies) = postProject
 		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
+		{187981FC-4A03-46A1-B19B-01827CF5F379} = {187981FC-4A03-46A1-B19B-01827CF5F379}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Blazor", "Blazor\Xpand.XAF.Modules.Blazor.csproj", "{187981FC-4A03-46A1-B19B-01827CF5F379}"
+	ProjectSection(ProjectDependencies) = postProject
+		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
 	EndProjectSection
 EndProject
 Global
@@ -450,6 +456,13 @@ Global
 		{A2B7513E-3653-47E3-82C7-C00A32CBF692}.EasyTest|Any CPU.Build.0 = Release|Any CPU
 		{A2B7513E-3653-47E3-82C7-C00A32CBF692}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A2B7513E-3653-47E3-82C7-C00A32CBF692}.Release|Any CPU.Build.0 = Release|Any CPU
+		{187981FC-4A03-46A1-B19B-01827CF5F379}.Debug_20.1|Any CPU.ActiveCfg = Debug|Any CPU
+		{187981FC-4A03-46A1-B19B-01827CF5F379}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{187981FC-4A03-46A1-B19B-01827CF5F379}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{187981FC-4A03-46A1-B19B-01827CF5F379}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{187981FC-4A03-46A1-B19B-01827CF5F379}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
+		{187981FC-4A03-46A1-B19B-01827CF5F379}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{187981FC-4A03-46A1-B19B-01827CF5F379}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

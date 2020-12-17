@@ -24,7 +24,9 @@ function CompileTestSolution($conf){
     $conf=GetConfiguration $solution $conf
     "Configuration=$conf"
     Start-Build -Path $solution -Configuration $conf -BinaryLogPath "$Root\Bin\Test$conf.binlog" -Verbosity minimal -WarnAsError 
-    Start-Build -Path $solution -Configuration FixWrongPersistentBaseFramework
+    # FixWrongPersistentBaseFramework
+    Start-Build -Path "$Root\src\Modules\ViewWizard\Xpand.XAF.Modules.ViewWizard.csproj"
+    # Start-Build -Path $solution -Configuration FixWrongPersistentBaseFramework
     Copy-Item -path $root\bin\runtimes -Recurse -Destination $root\bin\TestWinApplication\runtimes -Container -Force
 }
 

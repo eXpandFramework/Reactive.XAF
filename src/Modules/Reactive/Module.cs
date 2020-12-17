@@ -16,13 +16,9 @@ namespace Xpand.XAF.Modules.Reactive {
         internal IObservable<ModelInterfaceExtenders> ExtendingModel=>_extendingModelSubject;
         internal Subject<ModelNodesGeneratorUpdaters> GeneratingModelNodes=>_generatingModelNodesSubject;
 
-        static ReactiveModule(){
-            TraceSource=new ReactiveTraceSource(nameof(ReactiveModule));
-        }
-        
-        public ReactiveModule() {
-            RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));
-        }
+        static ReactiveModule() => TraceSource=new ReactiveTraceSource(nameof(ReactiveModule));
+
+        public ReactiveModule() => RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));
 
         public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders){
             base.ExtendModelInterfaces(extenders);
