@@ -1,0 +1,20 @@
+﻿@using System.Reactive
+@using Microsoft.AspNetCore.Components.Web
+@using Xpand.XAF.Modules.Blazor.Editors.UploadFile
+@using DevExpress.Blazor
+@using DevExpress.XtraPrinting.Native
+@System.Web.HttpUtility.HtmlEncode(@ComponentModel.DropZone)
+<DxUpload Name="@ComponentModel.Name"
+          UploadUrl="@ComponentModel.UploadUrl"
+          FileUploaded="args => ComponentModel.UploadedSubject.OnNext(Unit.Default)"
+          AllowMultiFileUpload="@ComponentModel.AllowMultiFileUpload"
+          AllowCancel="@ComponentModel.AllowCancel"
+          AllowPause="ComponentModel.AllowPause"
+          ExternalDropZoneCssSelector="#overviewDemoDropZone"
+          ExternalDropZoneDragOverCssClass="custom-drag-over border-light text-white">
+</DxUpload>
+@code {
+    [Parameter]
+    public UploadFileModel ComponentModel { get; set; }
+    public static RenderFragment Create(UploadFileModel componentModel) =>@<UploadFileComponent ComponentModel=@componentModel />;
+}

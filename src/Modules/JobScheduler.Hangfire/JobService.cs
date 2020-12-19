@@ -8,6 +8,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Blazor;
@@ -97,8 +98,10 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
             => RecurringJob.Trigger(job.Id);
 
 
-        public static void AddOrUpdateHangfire(this Job job) 
-            => RecurringJob.AddOrUpdate(job.Id,() => job.CallExpression(),() => job.CronExpression.Expression);
+        public static void AddOrUpdateHangfire(this Job job) {
+            var cronExpressionExpression = job.CronExpression.Expression;
+            RecurringJob.AddOrUpdate(job.Id,() => job.CallExpression() , () => cronExpressionExpression);
+        }
 
         static IObservable<Unit> ScheduleJobs(this XafApplication application) 
             => application.WhenCommitted<Job>(ObjectModification.NewOrUpdated).Objects()
@@ -122,9 +125,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
         
         public static IObservable<JobState> JobExecution => JobExecutionSubject.AsObservable();
 
-        public static Expression CallExpression(this Job job) {
-            return job.JobType.Type.CallExpression(job.JobMethod.Name.Replace(" ", ""));
-        }
+        public static Expression CallExpression(this Job job) => job.JobType.Type.CallExpression(job.JobMethod.Name.Replace(" ", ""));
 
         internal static IObservable<TSource> TraceJobSchedulerModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,

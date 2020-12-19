@@ -70,7 +70,7 @@
     <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="20.2.4" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" Version="5.0.0" />
     <PackageReference Include="Xpand.XAF.Core.All">
-      <Version>4.202.45</Version>
+      <Version>4.202.45.1</Version>
     </PackageReference>
     <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.2.4" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />

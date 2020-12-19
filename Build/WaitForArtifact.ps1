@@ -9,7 +9,6 @@ param(
 $env:AzProject="eXpandFramework"
 $env:AzOrganization="eXpandDevOps"
 & "$PSScriptRoot\..\go.ps1" -InstallModules -OnlyXpwsh
-& "$PSScriptRoot\DownloadCloudCreds.ps1" -GitHubToken $GitHubToken -GitUserEmail $GitUserEmail
 do {
     Write-HostFormatted "Checking artifact $artifactName in Build $BuildId"
     Start-Sleep -Seconds 5

@@ -8,7 +8,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Utils;
 using Microsoft.AspNetCore.Components;
 
-namespace Xpand.XAF.Modules.Blazor.Editors {
+namespace Xpand.XAF.Modules.Blazor.Editors.DisplayText {
     [PropertyEditor(typeof(object), nameof(DisplayTextPropertyEditor),false)]
     public class DisplayTextPropertyEditor : BlazorPropertyEditorBase {
         public DisplayTextPropertyEditor(Type objectType, IModelMemberViewItem model) : base(objectType, model) { }

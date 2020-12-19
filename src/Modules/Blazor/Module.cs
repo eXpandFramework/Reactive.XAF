@@ -1,4 +1,5 @@
-﻿using DevExpress.ExpressApp.Blazor.SystemModule;
+﻿using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Blazor.SystemModule;
 using JetBrains.Annotations;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
@@ -16,7 +17,10 @@ namespace Xpand.XAF.Modules.Blazor {
             RequiredModuleTypes.Add(typeof(SystemBlazorModule));
         }
 
-
-
+        public override void Setup(ApplicationModulesManager moduleManager) {
+            base.Setup(moduleManager);
+            moduleManager.Connect()
+                .Subscribe(this);
+        }
     }
 }

@@ -14,3 +14,4 @@ Microsoft.NET.Test.SDK
 Microsoft.CodeAnalysis.CSharp
 System.Text.Json
 Polly
+Microsoft.AspNetCore.Http.Features
