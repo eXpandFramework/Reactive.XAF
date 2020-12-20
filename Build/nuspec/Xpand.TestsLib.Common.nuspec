@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>Xpand.TestsLib.Common</id>
+    <version>4.202.45.1</version>
+    <authors>eXpandFramework</authors>
+    <owners>eXpandFramework</owners>
+    <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Tests/TestsLib.Common</projectUrl>
+    <iconUrl>http://sign.expandframework.com</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Xpand.TestsLib.Common</description>
+    <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
+    <copyright>eXpandFramework.com</copyright>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Xpand.TestsLib.Common</tags>
+  </metadata>
+  <files>
+    <file src="Xpand.TestsLib.Common.pdb" target="lib\netstandard2.0\Xpand.TestsLib.Common.pdb" />
+    <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.TestsLib.Common.targets" />
+    <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
+    <file src="Xpand.TestsLib.Common.dll" target="lib\netstandard2.0\Xpand.TestsLib.Common.dll" />
+  </files>
+</package>

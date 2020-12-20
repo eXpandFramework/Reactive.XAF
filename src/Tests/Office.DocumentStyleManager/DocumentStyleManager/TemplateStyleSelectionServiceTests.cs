@@ -30,7 +30,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
 
 		}
 		[Test][Apartment(ApartmentState.STA)][XpandTest()]
-		public void Action_should_be_enabled_when_templatelink_has_value(){
+		public void Action_should_be_enabled_when_TemplateLink_has_value(){
 			using var application=DocumentStyleManagerModule().Application;
 			var dataObject = application.CreateObjectSpace().CreateObject<DataObject>();
 			dataObject.Content=Document.ToByteArray(DocumentFormat.OpenXml);
@@ -48,7 +48,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
 		}
 
 		[Test][XpandTest()][Apartment(ApartmentState.STA)]
-		public void Action_SelectionContext_should_be_the_ReplacemenntStyles_ListView(){
+		public void Action_SelectionContext_should_be_the_ReplacementStyles_ListView(){
 			using var application=DocumentStyleManagerModule().Application;
 			var tuple = application.SetDocumentStyleManagerDetailView(Document);
 
@@ -74,7 +74,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
 
 		[TestCase(DocumentStyleType.Character)]
 		[TestCase(DocumentStyleType.Paragraph)][XpandTest()][Apartment(ApartmentState.STA)]
-		public void New_TemplateStyle_Stores_Parent_Styles_Seperately(DocumentStyleType type){
+		public void New_TemplateStyle_Stores_Parent_Styles_Separately(DocumentStyleType type){
 			using var application=DocumentStyleManagerModule().Application;
 			var parentStyle = new DocumentStyle(){DocumentStyleType = type, StyleName = "parent", FontName = "test"};
 			var childStyle = new DocumentStyle(){DocumentStyleType = type, StyleName = "child", Parent = parentStyle};
@@ -115,7 +115,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
 		public void Action_adds_selected_styles(){
 			using var xafApplication=DocumentStyleManagerModule().Application;
 			// application.MockEditorsFactory();
-			xafApplication.MockListEditor((view, application, collectionsource) => {
+			xafApplication.MockListEditor((view, application, collectionSource) => {
 				if (view.Id.Contains(nameof(BusinessObjects.DocumentStyleManager.AllStyles)))
 					return application.ListEditorMock(view).Object;
 				if (view.Id.Contains(nameof(BusinessObjects.DocumentStyleManager.ReplacementStyles)))

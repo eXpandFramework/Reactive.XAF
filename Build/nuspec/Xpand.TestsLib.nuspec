@@ -2,20 +2,22 @@
 <package>
   <metadata>
     <id>Xpand.TestsLib</id>
-    <version>0.0.20.0</version>
+    <version>4.202.45.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
-    <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Extensions/Xpand.Extensions</projectUrl>
+    <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Tests/TestsLib</projectUrl>
     <iconUrl>http://sign.expandframework.com</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Xpand.Extensions</description>
+    <description>Xpand.TestsLib</description>
     <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Xpand.TestsLib</tags>
   </metadata>
   <files>
-    <file src="Xpand.TestsLib.dll" target="lib\net461\Xpand.TestsLib.dll" />
-    <file src="Xpand.TestsLib.pdb" target="lib\net461\Xpand.TestsLib.pdb" />
+    <file src="net461\Xpand.TestsLib.pdb" target="lib\net461\Xpand.TestsLib.pdb" />
+    <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.TestsLib.targets" />
+    <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
+    <file src="net461\Xpand.TestsLib.dll" target="lib\net461\Xpand.TestsLib.dll" />
   </files>
 </package>

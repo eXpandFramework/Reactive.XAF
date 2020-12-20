@@ -20,13 +20,13 @@ Set-Location $sourceDir
 $assemblyVersions = & "$sourceDir\build\AssemblyVersions.ps1" $sourceDir
 
 # Get-ChildItem "$sourceDir\tools\nuspec" "Xpand*$filter*.nuspec" -Recurse | ForEach-Object {
-$nuspecs = Get-ChildItem "$sourceDir\build\nuspec" "Xpand.*$filter*.nuspec" -Recurse|Where-Object{(($dxVersion -gt "20.2.2") -or ($_.BaseName -notmatch "Test|Blazor|Hangfire")) -and $_.BaseName -notmatch "Test"}
+$nuspecs = Get-ChildItem "$sourceDir\build\nuspec" "Xpand.*$filter*.nuspec" -Recurse|Where-Object{(($dxVersion -gt "20.2.2") -or ($_.BaseName -notmatch "Blazor|Hangfire")) }
 
 $nugetPath = (Get-NugetPath)
 
 $packScript = {
     $name = $_.FullName
-    "packScript=$name"
+    "-----------------packScript=$name------------------"
     $basePath = "$sourceDir\bin"
     if ($name -like "*Client*") {
         $basePath += "\ReactiveLoggerClient"
@@ -49,7 +49,7 @@ $packScript = {
 }
 $varsToImport = @("assemblyVersions", "SkipReadMe", "nugetPath", "sourceDir", "nugetBin", "SkipReadMe")
 $nuspecs | Invoke-Parallel -VariablesToImport $varsToImport -Script $packScript
-# $nuspecs | ForEach-Object { Invoke-Command $packScript -ArgumentList $_ }
+# $nuspecs|where{$_.BaseName -eq "Xpand.TestsLib.Blazor"} | ForEach-Object { Invoke-Command $packScript -ArgumentList $_ }
 function AddReadMe {
     param(
         $Package,

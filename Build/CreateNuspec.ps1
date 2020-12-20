@@ -21,9 +21,10 @@ $filter="test"
 if ($dxVersion -lt "20.2.0"){
     $filter += "|blazor|hangfire"
 }
-
-Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notmatch $filter} | Invoke-Parallel -VariablesToImport @("allProjects", "root", "Release") -Script {
-    # Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notmatch $filter} | foreach {
+$filteredProjects=Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notmatch $filter} 
+$filteredProjects+=Get-ChildItem "$root\src\" -Include "*Xpand.TestsLib*.csproj" -Recurse  
+$filteredProjects| Invoke-Parallel -VariablesToImport @("allProjects", "root", "Release") -Script {
+# $filteredProjects| foreach {
     $addTargets = {
         param (
             $name   

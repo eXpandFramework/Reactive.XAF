@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>Xpand.TestsLib.Blazor</id>
+    <version>4.202.45.1</version>
+    <authors>eXpandFramework</authors>
+    <owners>eXpandFramework</owners>
+    <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Tests/TestsLib.Blazor</projectUrl>
+    <iconUrl>http://sign.expandframework.com</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Xpand.TestsLib.Blazor</description>
+    <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
+    <copyright>eXpandFramework.com</copyright>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Xpand.TestsLib.Blazor</tags>
+  </metadata>
+  <files>
+    <file src="netcoreapp3.1\Xpand.TestsLib.Blazor.pdb" target="lib\netcoreapp3.1\Xpand.TestsLib.Blazor.pdb" />
+    <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.TestsLib.Blazor.targets" />
+    <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
+    <file src="netcoreapp3.1\Xpand.TestsLib.Blazor.dll" target="lib\netcoreapp3.1\Xpand.TestsLib.Blazor.dll" />
+  </files>
+</package>
