@@ -76,7 +76,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
                 }
                 var jobState = objectSpace.CreateObject<JobState>();
                 jobState.Created = DateTime.Now;
-                jobState.State=(ScheduledJobState) Enum.Parse(typeof(ScheduledJobState),context.NewState.Name);
+                jobState.State=(WorkerState) Enum.Parse(typeof(WorkerState),context.NewState.Name);
                 jobState.Reason = context.NewState.Reason;
                 job.Executions.Add(jobState);
                 objectSpace.CommitChanges();

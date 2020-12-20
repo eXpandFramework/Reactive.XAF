@@ -67,7 +67,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
         public async Task Schedule_Successful_job() {
             MockHangfire().Test();
             using var application = JobSchedulerModule().Application.ToBlazor();
-            var observable = JobExecution(ScheduledJobState.Succeeded).SubscribeReplay();
+            var observable = JobExecution(WorkerState.Succeeded).SubscribeReplay();
             
             application.CommitNewJob();
             
@@ -75,11 +75,11 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
             var objectSpace = application.CreateObjectSpace();
             jobState=objectSpace.GetObjectByKey<JobState>(jobState.Oid);
             var jobWorker = jobState.JobWorker;
-            jobWorker.State.ShouldBe(ScheduledJobState.Succeeded);
+            jobWorker.State.ShouldBe(WorkerState.Succeeded);
             
-            jobWorker.Executions.Count(state => state.State==ScheduledJobState.Processing).ShouldBe(1);
-            jobWorker.Executions.Count(state => state.State==ScheduledJobState.Failed).ShouldBe(0);
-            jobWorker.Executions.Count(state => state.State==ScheduledJobState.Succeeded).ShouldBe(1);
+            jobWorker.Executions.Count(state => state.State==WorkerState.Processing).ShouldBe(1);
+            jobWorker.Executions.Count(state => state.State==WorkerState.Failed).ShouldBe(0);
+            jobWorker.Executions.Count(state => state.State==WorkerState.Succeeded).ShouldBe(1);
             
         }
         
@@ -89,20 +89,20 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
         public async Task Schedule_Failed_Recurrent_job(string methodName,int executions,int failedJobs,int successFullJobs) {
             MockHangfire(testName:methodName).FirstAsync().Test();
             using var application = JobSchedulerModule().Application.ToBlazor();
-            var execute = JobExecution(ScheduledJobState.Failed).SubscribeReplay();
+            var execute = JobExecution(WorkerState.Failed).SubscribeReplay();
             application.CommitNewJob(methodName:methodName);
             using var objectSpace = application.CreateObjectSpace();
 
             var jobState = await execute;
             
             jobState=objectSpace.GetObjectByKey<JobState>(jobState.Oid);
-            jobState.JobWorker.State.ShouldBe(ScheduledJobState.Failed);
+            jobState.JobWorker.State.ShouldBe(WorkerState.Failed);
             
         }
 
-        private static  IObservable<JobState> JobExecution(ScheduledJobState lastState) 
-            => JobService.JobExecution.FirstAsync(t => t.State == ScheduledJobState.Enqueued).IgnoreElements()
-                .Concat(JobService.JobExecution.FirstAsync(t => t.State == ScheduledJobState.Processing).IgnoreElements())
+        private static  IObservable<JobState> JobExecution(WorkerState lastState) 
+            => JobService.JobExecution.FirstAsync(t => t.State == WorkerState.Enqueued).IgnoreElements()
+                .Concat(JobService.JobExecution.FirstAsync(t => t.State == WorkerState.Processing).IgnoreElements())
                 .Concat(JobService.JobExecution.FirstAsync(t => t.State == lastState))
                 .FirstAsync();
     }

@@ -58,9 +58,10 @@ function UpdateALLNuspec($platform, $allNuspec, $nuspecs,$allModuleNuspecs,$csPr
     }
 }
 
-$nuspecs = Get-ChildItem "$root\build\nuspec" *.nuspec|Where-Object{$dxVersion -gt "20.2.0" -or $_.BaseName -notmatch "blazor|hangfire"}
+$nuspecs = Get-ChildItem "$root\build\nuspec" *.nuspec|Where-Object{$dxVersion -gt "20.2.0" -or $_.BaseName -notmatch "blazor|hangfire|Client.Win"}
 $nuspecs | ForEach-Object {
-    [xml]$nuspec = Get-Content $_.FullName
+    $fullName=$_.FullName
+    [xml]$nuspec = Get-Content $fullName
     $nuspec.package.metaData.dependencies.dependency | Where-Object { $_.Id -like "DevExpress*" } | ForEach-Object {
         $_.ParentNode.RemoveChild($_)
     }

@@ -1,4 +1,4 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="Current">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="Current">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -75,7 +75,7 @@
   <ItemGroup>
     <PackageReference Include="Unofficial.Microsoft.mshtml" Version="7.0.3300" />
     <PackageReference Include="Xpand.XAF.Web.All">
-      <Version>4.202.45.1</Version>
+      <Version>4.202.46</Version>
     </PackageReference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="mscorlib">
@@ -140,7 +140,7 @@
     <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="20.2.4" />
     <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="20.2.4" />
     <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.2.4" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="4.202.45.1">
+    <PackageReference Include="Xpand.XAF.Web.All" Version="4.202.46">
     </PackageReference>
     <PackageReference Include="Google.Apis.People.v1" Version="1.25.0.830" />
   </ItemGroup>

@@ -2,36 +2,46 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Blazor</id>
-    <version>4.202.45.0</version>
+    <version>4.202.46.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
-    <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Extensions/Xpand.Extensions.Blazor</projectUrl>
+    <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/Blazor</projectUrl>
     <iconUrl>http://sign.expandframework.com</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Xpand.Extensions.Blazor</description>
+    <description>The `Blazor` package hosts and activates Blazor specific XAF artifacts.</description>
     <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Xpand.Extensions.Blazor</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Blazor</tags>
     <dependencies>
       <group targetFramework="netstandard2.1">
-        <dependency id="Xpand.Extensions" version="4.202.45.0" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.202.45.0" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.202.46.0" />
+        <dependency id="Xpand.Extensions.Blazor" version="4.202.46.0" />
+        <dependency id="Xpand.Extensions.XAF" version="4.202.46.0" />
+        <dependency id="Xpand.Extensions" version="4.202.46.0" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.202.46.0" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.46.0" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="JetBrains.Annotations" version="2020.3" />
-        <dependency id="Microsoft.AspNetCore.Hosting.Abstractions" version="2.2" />
+        <dependency id="System.Reactive" version="5.0" />
+        <dependency id="System.Interactive" version="5.0" />
         <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.8" />
         <dependency id="System.Configuration.ConfigurationManager" version="5.0" />
-        <dependency id="DevExpress.ExpressApp.Blazor" version="20.2.4" />
-        <dependency id="DevExpress.ExpressApp.Xpo" version="20.2.4" />
+        <dependency id="System.CodeDom" version="5.0" />
+        <dependency id="Microsoft.AspNetCore.Hosting.Abstractions" version="2.2" />
+        <dependency id="System.ServiceModel.Http" version="4.8" />
         <dependency id="DevExpress.ExpressApp" version="20.2.4" />
+        <dependency id="DevExpress.ExpressApp.Blazor" version="20.2.4" />
+      </group>
+      <group targetFramework="netstandard2.0">
+        <dependency id="Xpand.VersionConverter" version="2.202.12" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="Xpand.Extensions.Blazor.pdb" target="lib\netstandard2.1\Xpand.Extensions.Blazor.pdb" />
-    <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.Extensions.Blazor.targets" />
+    <file src="Xpand.XAF.Modules.Blazor.pdb" target="lib\netstandard2.1\Xpand.XAF.Modules.Blazor.pdb" />
+    <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.XAF.Modules.Blazor.targets" />
     <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
-    <file src="Xpand.Extensions.Blazor.dll" target="lib\netstandard2.1\Xpand.Extensions.Blazor.dll" />
+    <file src="Xpand.XAF.Modules.Blazor.dll" target="lib\netstandard2.1\Xpand.XAF.Modules.Blazor.dll" />
   </files>
 </package>

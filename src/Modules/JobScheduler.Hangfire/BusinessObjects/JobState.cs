@@ -17,9 +17,9 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
             set => SetPropertyValue(nameof(Reason), ref _reason, value);
         }
         
-        ScheduledJobState _state;
+        WorkerState _state;
 
-        public ScheduledJobState State {
+        public WorkerState State {
             get => _state;
             set => SetPropertyValue(nameof(State), ref _state, value);
         }

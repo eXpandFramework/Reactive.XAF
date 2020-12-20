@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor.SystemModule;
+using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Updating;
 using DevExpress.ExpressApp.Validation;
 using DevExpress.ExpressApp.Validation.Blazor;
 using JetBrains.Annotations;
-using Xpand.XAF.Modules.Blazor.Editors;
 using Xpand.XAF.Modules.Blazor.Editors.DisplayText;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
@@ -27,6 +27,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
             RequiredModuleTypes.Add(typeof(SystemBlazorModule));
             RequiredModuleTypes.Add(typeof(ValidationModule));
             RequiredModuleTypes.Add(typeof(ValidationBlazorModule));
+            RequiredModuleTypes.Add(typeof(ConditionalAppearanceModule));
         }
 
         protected override void RegisterEditorDescriptors(EditorDescriptorsFactory editorDescriptorsFactory) {

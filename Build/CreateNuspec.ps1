@@ -1,7 +1,7 @@
 param(
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\"),
     [switch]$Release,
-    $dxVersion = "20.1.9",
+    $dxVersion = "20.2.4",
     $branch = "lab"
 )
 
@@ -19,11 +19,11 @@ $nuspec.Save($versionConverterPath)
 $allProjects = Get-ChildItem $root *.csproj -Recurse | Select-Object -ExpandProperty BaseName
 $filter="test"
 if ($dxVersion -lt "20.2.0"){
-    $filter += "|blazor|hangfire"
+    $filter += "|Blazor|Hangfire|Xpand.XAF.Modules.Reactive.Logger.Client.Win"
 }
-$filteredProjects=Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse 
-$filteredProjects+=Get-ChildItem "$root\src\" -Include "*Xpand.TestsLib*.csproj" -Recurse  
-$filteredProjects| Where-Object { $_ -notmatch $filter} | Invoke-Parallel -VariablesToImport @("allProjects", "root", "Release") -Script {
+$filteredProjects=Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notmatch $filter} 
+$filteredProjects+=Get-ChildItem "$root\src\" -Include "*Xpand.TestsLib*.csproj" -Recurse  |Where-Object{$dxVersion -gt "20.2.0" -or $_.BaseName -notmatch "Blazor"}
+$filteredProjects| Invoke-Parallel -StepInterval 200 -VariablesToImport @("allProjects", "root", "Release") -Script {
 # $filteredProjects| foreach {
     $addTargets = {
         param (
@@ -49,7 +49,7 @@ $filteredProjects| Where-Object { $_ -notmatch $filter} | Invoke-Parallel -Varia
     Set-Location $root
     $projectPath = $_.FullName
     
-    Write-Output "Creating Nuspec for $($_.baseName)" 
+    Write-Output "--------> Creating Nuspec for $($_.baseName)  <----------------" 
     $uArgs = @{
         NuspecFilename           = "$root\build\nuspec\$($_.baseName).nuspec"
         ProjectFileName          = $projectPath

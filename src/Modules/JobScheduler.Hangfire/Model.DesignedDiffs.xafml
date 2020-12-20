@@ -10,21 +10,19 @@
                 <LayoutItem Id="JobType" ViewItem="JobType" Index="0" RelativeSize="51.61290322580645" IsNewNode="True" />
                 <LayoutItem Id="JobMethod" ViewItem="JobMethod" Index="1" RelativeSize="48.38709677419355" IsNewNode="True" />
               </LayoutGroup>
-              <LayoutItem Id="JobType" Index="0" RelativeSize="37.2093023255814" Removed="True" />
+              <LayoutItem Id="JobType" Index="0" RelativeSize="37.2093023255814" ViewItem="JobType" Removed="True" />
               <LayoutGroup Id="Auto215c5931-97ca-4d11-b4e5-703d791cc00a" ShowCaption="False" Caption="" Index="1" RelativeSize="50.04055150040551" IsNewNode="True">
                 <LayoutItem Id="CronExpression" ViewItem="CronExpression" Index="0" RelativeSize="51.61290322580645" IsNewNode="True" />
                 <LayoutItem Id="Id" ViewItem="Id" Index="1" RelativeSize="48.38709677419355" IsNewNode="True" />
               </LayoutGroup>
-              <LayoutItem Id="JobMethod" Index="1" RelativeSize="21.818181818181817" Removed="True" />
-              <LayoutItem Id="CronExpression" Index="2" RelativeSize="34.883720930232556" Removed="True" />
-              <LayoutItem Id="Id" Index="2" RelativeSize="21.818181818181817" Removed="True" />
+              <LayoutItem Id="JobMethod" Index="1" RelativeSize="21.818181818181817" ViewItem="JobMethod" Removed="True" />
+              <LayoutItem Id="CronExpression" Index="2" RelativeSize="34.883720930232556" ViewItem="CronExpression" Removed="True" />
+              <LayoutItem Id="Id" Index="2" RelativeSize="21.818181818181817" ViewItem="Id" Removed="True" />
             </LayoutGroup>
-          </LayoutGroup>
-          <LayoutGroup Id="Jobs_Group" Direction="Vertical" RelativeSize="94.04418828049953" ShowCaption="False">
-            <LayoutItem Id="Jobs" RelativeSize="100" ViewItem="Jobs" />
           </LayoutGroup>
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <ListView Id="Job_Workers_ListView" MasterDetailMode="ListViewAndDetailView" />
   </Views>
 </Application>

@@ -68,7 +68,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
         }
 
         [Association("Job-Jobs")][CollectionOperationSet(AllowAdd = false,AllowRemove = false)]
-        public XPCollection<JobWorker> Jobs => GetCollection<JobWorker>(nameof(Jobs));
+        public XPCollection<JobWorker> Workers => GetCollection<JobWorker>(nameof(Workers));
 
         string _id;
         [RuleUniqueValue][RuleRequiredField][VisibleInListView(true)]
@@ -78,7 +78,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
         }
     }
 
-    public enum ScheduledJobState {
+    public enum WorkerState {
         Scheduled,
         Enqueued,
         Processing,
