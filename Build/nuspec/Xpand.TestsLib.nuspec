@@ -13,6 +13,41 @@
     <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Xpand.TestsLib</tags>
+    <dependencies>
+      <group targetFramework="net461">
+        <dependency id="Xpand.Extensions" version="4.202.45.1" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.202.45.1" />
+        <dependency id="Xpand.Extensions.XAF" version="4.202.45.1" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.202.45.1" />
+        <dependency id="Xpand.TestsLib.Common" version="4.202.45.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.45.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.202.45.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.202.45.1" />
+        <dependency id="akarnokd.reactive_extensions" version="0.0.27-alpha" />
+        <dependency id="DevExpress.ExpressApp.EasyTest.WinAdapter" version="20.2.4" />
+        <dependency id="DevExpress.ExpressApp.EasyTest.WebAdapter" version="20.2.4" />
+        <dependency id="DevExpress.ExpressApp.Web" version="20.2.4" />
+        <dependency id="DevExpress.ExpressApp.Win" version="20.2.4" />
+        <dependency id="DevExpress.ExpressApp.Security.Xpo" version="20.2.4" />
+        <dependency id="DevExpress.Persistent.BaseImpl" version="20.2.4" />
+        <dependency id="Enums.NET" version="3.0.3" />
+        <dependency id="Humanizer.Core" version="2.8.26" />
+        <dependency id="MagicOnion" version="2.6.3" />
+        <dependency id="Moq" version="4.15.2" />
+        <dependency id="Newtonsoft.Json" version="12.0.3" />
+        <dependency id="Ryder" version="0.8" />
+        <dependency id="Shouldly" version="4.0.3" />
+        <dependency id="NUnit" version="3.12" />
+        <dependency id="NUnit3TestAdapter" version="3.17" />
+        <dependency id="Fasterflect.Xpand" version="2.0.7" />
+        <dependency id="Xpand.Patcher" version="2.0.27" />
+        <dependency id="Polly" version="7.2.1" />
+        <dependency id="JetBrains.Annotations" version="2020.3" />
+        <dependency id="Selenium.Support" version="3.141" />
+        <dependency id="Selenium.WebDriver" version="3.141" />
+        <dependency id="System.Reactive" version="5.0" />
+      </group>
+    </dependencies>
   </metadata>
   <files>
     <file src="net461\Xpand.TestsLib.pdb" target="lib\net461\Xpand.TestsLib.pdb" />

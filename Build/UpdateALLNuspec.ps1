@@ -2,7 +2,7 @@ param(
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\"),
     $Release=$false,
     $Branch="lab",
-    $dxVersion
+    $dxVersion=(Get-DevExpressVersion)
 )
 Use-MonoCecil | Out-Null
 # $VerbosePreference ="continue"
@@ -89,5 +89,11 @@ Write-HostFormatted "Updating Xpand.XAF.Web.All.nuspec"
 [xml]$allNuspec = Get-Content $allFileName
 UpdateALLNuspec @("Core","Web") $allNuspec  $nuspecs $allModuleNuspecs $csProjects
 
+$allNuspec.package.metadata.dependencies.group|Where-Object{$_.targetFramework -eq "netstandard2.1"}|ForEach-Object{
+    ($allNuspec.package.metadata.dependencies.group|Where-Object{$_.targetFramework -eq "netstandard2.0"}).dependency|ForEach-Object{
+        Add-NuspecDependency -Id $_.Id -Version $_.version -Nuspec $allNuspec -TargetFramework "netstandard2.1"
+    }
+    
+}
 $allNuspec|Save-Xml $allFileName
 Get-Content $allFileName -Raw

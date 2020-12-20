@@ -59,7 +59,6 @@
     <PackageReference Include="System.Text.Json" Version="5.0.0" />
     <PackageReference Include="Selenium.WebDriver" Version="3.13.0" />
     <PackageReference Include="Selenium.Support" Version="3.13.0" />
-    <PackageReference Include="Selenium.Support" Version="3.13.0" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="DevExpress.ExpressApp.EasyTest.BlazorAdapter.v20.2">

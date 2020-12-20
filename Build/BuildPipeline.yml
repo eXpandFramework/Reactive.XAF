@@ -129,7 +129,7 @@ jobs:
           $env:AzOrganization="eXpandDevOps"
           $env:AzProject ="eXpandFramework"
           $BuildPastVersion='Yes'
-          if ('$(CustomVersion)' -ne (Get-XAFLatestMinors -source '$(DXApiFeed)'|select-object -last 1)){
+          if ('$(CustomVersion)' -eq (Get-XAFLatestMinors -source '$(DXApiFeed)'|select-object -last 1)){
               $BuildPastVersion='No'
           }
           $parameters = @{

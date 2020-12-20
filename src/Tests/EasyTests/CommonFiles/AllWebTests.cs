@@ -18,7 +18,6 @@ using Xpand.TestsLib.EasyTest;
 using Xpand.TestsLib.EasyTest.Commands.ActionCommands;
 using Xpand.TestsLib.EasyTest.Commands.Automation;
 using Xpand.XAF.Modules.Reactive;
-using Xpand.XAF.Modules.Reactive.Logger;
 using CommonTest = ALL.Tests.CommonTest;
 
 namespace Web.Tests{
@@ -59,7 +58,7 @@ namespace Web.Tests{
 #endif
             LogPaths.Clear();
             LogPaths.Add(Path.Combine(Path.GetDirectoryName(physicalPath)!,"eXpressAppFramework.log"));
-            LogPaths.Add(Path.Combine(@$"{Path.GetDirectoryName(physicalPath)}\bin",Path.GetFileName(ReactiveLoggerService.RXLoggerLogPath)!));
+            // LogPaths.Add(Path.Combine(@$"{Path.GetDirectoryName(physicalPath)}\bin",Path.GetFileName(ReactiveLoggerService.RXLoggerLogPath)!));
 #if !NETCOREAPP3_1
             return ((DevExpress.ExpressApp.EasyTest.WebAdapter.WebAdapter) adapter).RunWebApplication(physicalPath, 65477, connectionString);
 #else

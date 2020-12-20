@@ -1,7 +1,7 @@
 param(
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\"),
     [switch]$Release,
-    $dxVersion = "20.2.4",
+    $dxVersion = "20.1.9",
     $branch = "lab"
 )
 
@@ -21,9 +21,9 @@ $filter="test"
 if ($dxVersion -lt "20.2.0"){
     $filter += "|blazor|hangfire"
 }
-$filteredProjects=Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notmatch $filter} 
+$filteredProjects=Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse 
 $filteredProjects+=Get-ChildItem "$root\src\" -Include "*Xpand.TestsLib*.csproj" -Recurse  
-$filteredProjects| Invoke-Parallel -VariablesToImport @("allProjects", "root", "Release") -Script {
+$filteredProjects| Where-Object { $_ -notmatch $filter} | Invoke-Parallel -VariablesToImport @("allProjects", "root", "Release") -Script {
 # $filteredProjects| foreach {
     $addTargets = {
         param (

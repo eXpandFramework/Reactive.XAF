@@ -104,10 +104,9 @@ namespace Xpand.TestsLib.Common{
                 $"{TestContext.CurrentContext.Test.MethodName}_{TestContext.CurrentContext.Test.ID}_RXLogger{TestContext.CurrentContext.CurrentRepeatCount}.log");
 
         [TearDown]
-        public virtual void Dispose(){
-            // XafTypesInfo.HardReset();
-            // XpoTypesInfoHelper.Reset();
-            
+        public virtual void Dispose() {
+            ResetXAF();
+
             // var typesInfo = ((TypesInfo) XafTypesInfo.Instance);
             // var entityStores = ((IList<IEntityStore>) typesInfo.GetFieldValue("entityStores"));
             // entityStores.Remove(store => !(store is NonPersistentTypeInfoSource));
@@ -124,7 +123,11 @@ namespace Xpand.TestsLib.Common{
             catch (Exception e){
                 TestContext.Out.Write(e);
             }
-            
+        }
+
+        protected virtual void ResetXAF() {
+            XafTypesInfo.HardReset();
+            // XpoTypesInfoHelper.Reset();
         }
 
         private static string GetTestName() 
