@@ -105,7 +105,7 @@ namespace Xpand.TestsLib.Common{
 
         [TearDown]
         public virtual void Dispose(){
-            XafTypesInfo.HardReset();
+            // XafTypesInfo.HardReset();
             // XpoTypesInfoHelper.Reset();
             
             // var typesInfo = ((TypesInfo) XafTypesInfo.Instance);

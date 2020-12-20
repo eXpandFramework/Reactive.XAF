@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using DevExpress.ExpressApp.Blazor;
 using DevExpress.ExpressApp.Blazor.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,13 +31,15 @@ namespace Xpand.Extensions.Blazor {
         }
 
         protected virtual BlazorApplication NewBlazorApplication() {
-            var applicationFactory = _serviceProvider.GetService<IXafApplicationFactory>();
+            using var serviceScope = _serviceProvider.CreateScope();
+            var applicationFactory = serviceScope.ServiceProvider.GetService<IXafApplicationFactory>();
             if (applicationFactory != null) {
                 var blazorApplication = applicationFactory.CreateApplication();
                 blazorApplication.ServiceProvider = _serviceProvider;
                 blazorApplication.Setup();
                 return blazorApplication;
             }
+
 
             throw new NotImplementedException();
         }

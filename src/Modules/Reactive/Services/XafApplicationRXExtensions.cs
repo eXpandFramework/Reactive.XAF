@@ -5,7 +5,6 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
@@ -122,12 +121,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Subscribe();
 
         public static IObjectSpaceProvider NewObjectSpaceProvider(this XafApplication application, object dataStoreProvider=null) {
-            var xpoAssembly = GetXpoAssembly();
-            dataStoreProvider??= $"{application.ConnectionString}".Contains("XpoProvider=InMemoryDataStoreProvider") ||
-                                                        $"{application.ConnectionString}" == ""
+            var xpoAssembly = AppDomain.CurrentDomain.GetAssemblies().First(asm => asm.GetName().Name.StartsWith("DevExpress.ExpressApp.Xpo.v"));
+            dataStoreProvider??= $"{application.ConnectionString}".Contains("XpoProvider=InMemoryDataStoreProvider") || $"{application.ConnectionString}" == ""
                 ? xpoAssembly.GetType("DevExpress.ExpressApp.Xpo.MemoryDataStoreProvider").CreateInstance()
-                : Activator.CreateInstance(xpoAssembly.GetType("DevExpress.ExpressApp.Xpo.ConnectionStringDataStoreProvider"),
-                    application.ConnectionString);
+                : Activator.CreateInstance(xpoAssembly.GetType("DevExpress.ExpressApp.Xpo.ConnectionStringDataStoreProvider"), application.ConnectionString);
             
             Type[] parameterTypes = {xpoAssembly.GetType("DevExpress.ExpressApp.Xpo.IXpoDataStoreProvider"), typeof(bool)};
             object[] parameterValues = {dataStoreProvider, true};
@@ -140,14 +137,6 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .GetType("DevExpress.ExpressApp.Xpo.XPObjectSpaceProvider")
                 .Constructor(parameterTypes)
                 .Invoke(parameterValues);
-            
-            
-        }
-
-        private static Assembly GetXpoAssembly() {
-            var xpoAssembly = AppDomain.CurrentDomain.GetAssemblies()
-                .First(asm => asm.GetName().Name.StartsWith("DevExpress.ExpressApp.Xpo.v"));
-            return xpoAssembly;
         }
 
         public static IObservable<IModelApplication> WhenModelChanged(this XafApplication application) 

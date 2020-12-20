@@ -10,8 +10,7 @@ namespace Xpand.TestsLib.Blazor {
     public class TestXafApplicationProvider<TModule>:SharedXafApplicationProvider where TModule:ModuleBase, new() {
         private readonly IServiceProvider _serviceProvider;
 
-        public TestXafApplicationProvider(IServiceProvider serviceProvider,
-            IValueManagerStorageContainerInitializer containerInitializer) :
+        public TestXafApplicationProvider(IServiceProvider serviceProvider, IValueManagerStorageContainerInitializer containerInitializer) :
             base(serviceProvider, containerInitializer) {
             _serviceProvider = serviceProvider;
         }

@@ -10,17 +10,16 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
             app => {
                 app.UseHangfireServer();
                 next(app);
-                
             };
     }
 
-    public class JobSchedulerStartup : IHostingStartup{
+    public class HangfireStartup : IHostingStartup{
         public void Configure(IWebHostBuilder builder) 
             => builder.ConfigureServices(services => services
-                .AddSingleton<ScheduledJobPersistAttribute>()
                 .AddHangfire(ConfigureHangfire)
                 .AddHangfireServer()
-                .AddSingleton<IStartupFilter, UseHangfire>());
+                .AddSingleton<IStartupFilter, UseHangfire>()
+                .AddSingleton<JobFilterAttribute>());
 
         private static void ConfigureHangfire(IServiceProvider provider,IGlobalConfiguration configuration) 
             => configuration
@@ -28,7 +27,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
                 .UseDefaultTypeSerializer()
                 .UseRecommendedSerializerSettings()
                 .UseActivator(new ServiceJobActivator(provider.GetService<IServiceScopeFactory>()))
-                .UseFilter(provider.GetService<ScheduledJobPersistAttribute>())
+                .UseFilter(provider.GetService<JobFilterAttribute>())
                 .UseFilter(new AutomaticRetryAttribute(){Attempts = 0});
     }
 }

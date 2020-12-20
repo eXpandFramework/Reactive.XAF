@@ -15,9 +15,7 @@ namespace Xpand.TestsLib.Blazor {
     public abstract class XafHostingStartup<TModule> where TModule : ModuleBase, new() {
         public IConfiguration Configuration { get; }
 
-        protected XafHostingStartup(IConfiguration configuration) {
-            Configuration = configuration;
-        }
+        protected XafHostingStartup(IConfiguration configuration) => Configuration = configuration;
 
         public void Configure(IApplicationBuilder app) => app.UseXaf();
 
@@ -34,8 +32,9 @@ namespace Xpand.TestsLib.Blazor {
             }));
             var appProviderMock = new Mock<IXafApplicationProvider>();
             appProviderMock.Setup(provider => provider.GetApplication()).Returns(NewApplication);
-            services.AddSingleton(provider => appProviderMock.Object);
-            services.AddSingleton<ISharedXafApplicationProvider, TestXafApplicationProvider<TModule>>();
+            services.AddSingleton(provider => appProviderMock.Object)
+                .AddSingleton<ISharedXafApplicationProvider, TestXafApplicationProvider<TModule>>()
+                .AddSingleton<XpoDataStoreProviderAccessor>();
         }
 
         internal sealed class XafApplicationFactory : IXafApplicationFactory {

@@ -4,11 +4,11 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp.Blazor;
 using NUnit.Framework;
 using Xpand.Extensions.EventArgExtensions;
+using Xpand.Extensions.XAF.NonPersistentObjects;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
     public static class JobSchedulerTestExtensions {
-        // private static string _scheduledJobId;
 
         public static IObservable<GenericEventArgs<IObservable<Job>>> Handle(this IObservable<GenericEventArgs<IObservable<Job>>> source)
             => source.Do(e => e.Handled = true).Select(args => args);
@@ -18,13 +18,11 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
             methodName??=nameof(TestJob.Test);
             using var objectSpace = application.CreateObjectSpace();
             var scheduledJob = objectSpace.CreateObject<Job>();
-            throw new NotImplementedException();
-            // scheduledJob.JobType = new ObjectType(testJobType);
-            // scheduledJob.JobMethod = new ObjectString(methodName);
-            // _scheduledJobId = ScheduledJobId;
-            // scheduledJob.Id = _scheduledJobId;
-            // objectSpace.CommitChanges();
-            // return scheduledJob;
+            scheduledJob.JobType = new ObjectType(testJobType);
+            scheduledJob.JobMethod = new ObjectString(methodName);
+            scheduledJob.Id = ScheduledJobId;
+            objectSpace.CommitChanges();
+            return scheduledJob;
         }
 
         public static string ScheduledJobId => $"{TestContext.CurrentContext.Test.MethodName}{TestContext.CurrentContext.Test.ID}";

@@ -1,13 +1,13 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reactive;
 using System.Reactive.Linq;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor;
 using DevExpress.ExpressApp.Xpo;
-using Fasterflect;
 using Microsoft.Extensions.DependencyInjection;
-using Moq;
 using Xpand.Extensions.AppDomainExtensions;
-using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions;
 using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.Reactive.Services;
 
@@ -17,26 +17,20 @@ namespace Xpand.TestsLib.Blazor{
     }
 
     public class TestBlazorApplication : BlazorApplication, ITestApplication{
-        private IXpoDataStoreProvider GetDataStoreProvider(string connectionString) {
-            XpoDataStoreProviderAccessor accessor = ServiceProvider.GetRequiredService<XpoDataStoreProviderAccessor>();
-            lock(accessor) {
-                accessor.DataStoreProvider ??= XPObjectSpaceProvider.GetDataStoreProvider(connectionString, null, true);
-            }
-            return accessor.DataStoreProvider;
-        }
 
-        // private readonly bool _transmitMessage;
 
+        [SuppressMessage("ReSharper", "UnusedParameter.Local")]
         public TestBlazorApplication(Type sutModule, bool transmitMessage = true, bool handleExceptions=true):this(){
-            
             SUTModule = sutModule;
-            
             TraceClientConnected = this.ClientConnect();
             TraceClientBroadcast = this.ClientBroadcast();
-            // this.WhenCreateCustomObjectSpaceProvider()
-            //     .SelectMany(t => {
-            //         var xpoDataStoreProvider = ServiceProvider.GetRequiredService<XpoDataStoreProviderAccessor>().DataStoreProvider;
-            //     })
+            this.WhenSetupComplete().FirstAsync()
+                .Select(application => application.ObjectSpaceProvider.DataStoreProvider())
+                .Do(provider => {
+                    var dataStoreProviderAccessor = ServiceProvider.GetService<XpoDataStoreProviderAccessor>();
+                    if (dataStoreProviderAccessor != null) dataStoreProviderAccessor.DataStoreProvider = provider;
+                })
+                .Subscribe();
         }
 
         public bool TransmitMessage => false;
@@ -48,47 +42,26 @@ namespace Xpand.TestsLib.Blazor{
         
         public Type SUTModule{ get; }
 
-        // protected override void Dispose(bool disposing){
-        //     if (_transmitMessage){
-        //         TraceClientConnected.ToTaskWithoutConfigureAwait().GetAwaiter().GetResult();
-        //         TraceClientBroadcast.ToTaskWithoutConfigureAwait().GetAwaiter().GetResult();
-        //     }
-        //
-        //     base.Dispose(disposing);
-        // }
-
         public TestBlazorApplication() {
-            // ServiceProvider = Mock.Of<IServiceProvider>();
-            // typeof(BlazorApplication).Field("sharedModelManager",Flags.StaticPrivate).Set(null,null);
+            
         }
 
-        
-
-
-//        protected override LayoutManager CreateLayoutManagerCore(bool simple){
-//            if (!simple){
-//                var controlMock = new Mock<Control>(){CallBase = true};
-//                var layoutManagerMock = new Mock<WinLayoutManager>(){CallBase = true};
-//                layoutManagerMock.Setup(_ => _.LayoutControls(It.IsAny<IModelNode>(), It.IsAny<ViewItemsCollection>())).Returns(controlMock.Object);
-//            
-//                return layoutManagerMock.Object;
-//            }
-//
-//            return new WinSimpleLayoutManager();
-//        }
-
-        protected override string GetModelCacheFileLocationPath(){
-            return null;
+        protected override void OnCreateCustomObjectSpaceProvider(CreateCustomObjectSpaceProviderEventArgs args) {
+            var provider = ServiceProvider.GetRequiredService<XpoDataStoreProviderAccessor>().DataStoreProvider;
+            if (provider != null) {
+                args.ObjectSpaceProvider = this.NewObjectSpaceProvider(provider);
+                args.ObjectSpaceProviders.Add(new NonPersistentObjectSpaceProvider());
+            }
+            else {
+                base.OnCreateCustomObjectSpaceProvider(args);
+            }
         }
 
-        protected override string GetDcAssemblyFilePath(){
-            return null;
-        }
+        protected override string GetModelCacheFileLocationPath() => null;
 
+        protected override string GetDcAssemblyFilePath() => null;
 
-        protected override string GetModelAssemblyFilePath(){
-            return $@"{AppDomain.CurrentDomain.ApplicationPath()}\ModelAssembly{Guid.NewGuid()}.dll";
-        }
+        protected override string GetModelAssemblyFilePath() => $@"{AppDomain.CurrentDomain.ApplicationPath()}\ModelAssembly{Guid.NewGuid()}.dll";
     }
 
 }

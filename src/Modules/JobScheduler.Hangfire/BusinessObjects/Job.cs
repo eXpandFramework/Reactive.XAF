@@ -57,7 +57,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
 
         public override void AfterConstruction() {
             base.AfterConstruction();
-            _cronExpression = Session.GetObjectByKey<CronExpression>(nameof(Cron.Minutely));
+            _cronExpression = Session.GetObjectByKey<CronExpression>(nameof(Cron.Daily));
         }
 
         CronExpression _cronExpression;

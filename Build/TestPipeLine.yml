@@ -35,7 +35,7 @@ jobs:
           $ErrorActionPreference="stop"
           $CustomVersion='$(CustomVersion)'
           $CustomVersion="$env:build_BuildNumber-$CustomVersion"
-          Write-Verbose -verbose "##vso[task.setvariable variable=build.updatebuildnumber]$CsutomVersion"
+          Write-Verbose -verbose '##vso[task.setvariable variable=build.updatebuildnumber]$(CustomVersion)'
           & "$(System.DefaultWorkingDirectory)\Build\DownloadCloudCreds.ps1" -GitHubToken '$(GitHubToken)' -GitUserEmail '$(GitUserEmail)'
     - task: AzurePowerShell@5
       condition: and(ne(variables['SkipTestAssemblies'], 'Yes'),ne(variables['AzStorageLookup'], '0'))

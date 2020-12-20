@@ -6,10 +6,10 @@ using Hangfire.Storage;
 using Xpand.Extensions.Blazor;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
-    public class ScheduledJobPersistAttribute:JobFilterAttribute,   IApplyStateFilter {
+    internal class JobFilterAttribute:global::Hangfire.Common.JobFilterAttribute, IApplyStateFilter {
         private readonly IServiceProvider _provider;
 
-        public ScheduledJobPersistAttribute(IServiceProvider provider) => _provider = provider;
+        public JobFilterAttribute(IServiceProvider provider) => _provider = provider;
 
         public virtual void OnStateApplied(ApplyStateContext context, IWriteOnlyTransaction transaction) {
             var recurringJobId = $"{context.Connection.GetJobParameter(context.BackgroundJob.Id, "RecurringJobId")}"

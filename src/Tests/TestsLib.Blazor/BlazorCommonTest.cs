@@ -8,7 +8,7 @@ using Xpand.TestsLib.Common;
 
 namespace Xpand.TestsLib.Blazor {
     public class BlazorCommonTest:CommonTest {
-        private IHost _webHost;
+        protected IHost WebHost;
 
 
         static BlazorCommonTest() {
@@ -16,23 +16,24 @@ namespace Xpand.TestsLib.Blazor {
         }
         public override void Dispose() {
             base.Dispose();
-            _webHost.StopAsync().Wait();
+            // WebHost.StopAsync().Wait();
+            WebHost.Dispose();
         }
 
         protected BlazorApplication NewBlazorApplication(Type startupType){
             IHostBuilder defaultBuilder = Host.CreateDefaultBuilder();
             
-            _webHost = defaultBuilder
+            WebHost = defaultBuilder
                 .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup(startupType))
                 .Build();
-            _webHost.Start();
-            var containerInitializer = _webHost.Services.GetService<IValueManagerStorageContainerInitializer>();
+            WebHost.Start();
+            var containerInitializer = WebHost.Services.GetService<IValueManagerStorageContainerInitializer>();
             if (((IValueManagerStorageAccessor) containerInitializer)?.Storage == null) {
                 containerInitializer.Initialize();
             }
-            var newBlazorApplication = _webHost.Services.GetService<IXafApplicationProvider>()?.GetApplication();
+            var newBlazorApplication = WebHost.Services.GetService<IXafApplicationProvider>()?.GetApplication();
             if (newBlazorApplication != null) {
-                newBlazorApplication.ServiceProvider = _webHost.Services;
+                newBlazorApplication.ServiceProvider = WebHost.Services;
             }
             return newBlazorApplication;
         }
