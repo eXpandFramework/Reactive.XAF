@@ -123,6 +123,11 @@ $filteredProjects| Invoke-Parallel -StepInterval 200 -VariablesToImport @("allPr
 } 
 
 & "$root\build\UpdateAllNuspec.ps1" $root $Release $branch $dxVersion
+Get-ChildItem "$root\build\nuspec" *.nuspec |ForEach-Object{
+    $nuspec=Get-XmlContent $_.FullName
+    $nuspec.package.metadata.dependencies.group.dependency|Where-Object{$_.id -match "DevExpress"}|Remove-XmlElement 
+    $nuspec|Save-Xml $_.FullName
+} 
 if ($branch -eq "master") {
     Write-HostFormatted "Checking nuspec versions" -Section
     $labnuspecs = Get-ChildItem "$root\build\nuspec" *.nuspec -Recurse | ForEach-Object {

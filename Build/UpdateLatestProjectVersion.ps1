@@ -5,12 +5,17 @@ $officialPackages = Get-XpandPackages -PackageType XAFAll -Source Release
 
 $lastVersion = ($labPackages | Where-Object { $_.id -eq "Xpand.XAF.Core.All" }).Version
 $newVersion = (Update-Version $lastVersion -Revision)
+$lastOfficialVersion = ($officialPackages | Where-Object { $_.id -eq "Xpand.XAF.Core.All" }).Version
 if ($Branch -eq "master") {
     $lastVersion = ($labPackages | Where-Object { $_.id -eq "Xpand.XAF.Core.All" }).Version
+    $lastOfficialVersion = ($officialPackages | Where-Object { $_.id -eq "Xpand.XAF.Core.All" }).Version
+    if ($lastOfficialVersion -gt $lastVersion){
+        $lastVersion=$lastOfficialVersion
+    }
     $newVersion = (Update-Version $lastVersion -Build)
 }
 else {
-    $lastOfficialVersion = ($officialPackages | Where-Object { $_.id -eq "Xpand.XAF.Core.All" }).Version
+    
     if ($lastOfficialVersion -gt $lastVersion) {
         $build=$lastOfficialVersion.Build
         if ($lastVersion.Build -gt $lastOfficialVersion.Build){
