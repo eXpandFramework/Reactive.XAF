@@ -372,6 +372,7 @@ jobs:
         searchFolder: '$(System.DefaultWorkingDirectory)\bin\'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
+          **\WinDesktop.Tests.dll
           **\Win.Tests.dll
           **\Web.Tests.dll
           !**\obj\**    

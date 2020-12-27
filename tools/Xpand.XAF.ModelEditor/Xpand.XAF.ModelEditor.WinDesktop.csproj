@@ -12,6 +12,7 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
     <PublishReadyToRunShowWarnings>true</PublishReadyToRunShowWarnings>
+    <PreserveCompilationContext>false</PreserveCompilationContext>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

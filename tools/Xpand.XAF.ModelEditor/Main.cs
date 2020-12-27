@@ -16,6 +16,7 @@ namespace Xpand.XAF.ModelEditor {
     public static class MainClass {
         private static ModelEditorForm _modelEditorForm;
         private static void HandleException(Exception e) {
+            MessageBox.Show(e.ToString());
             Tracing.Tracer.LogError(e);
             Messaging.GetMessaging(null).Show(ModelEditorForm.Title, e);
         }
