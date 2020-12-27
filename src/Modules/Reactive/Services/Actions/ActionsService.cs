@@ -241,6 +241,15 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 			        h => item.Disposing -= h, ImmediateScheduler.Instance)
 		        .Select(pattern => pattern).ToUnit());
 
+        public static IObservable<TAction> ActivateWhenEnabled<TAction>(this TAction action) where TAction : ActionBase 
+            => action.Enabled.WhenResultValueChanged()
+                .Do(t => action.Active[nameof(ActivateWhenEnabled)] = t.e.NewValue).To(action)
+                .IgnoreElements()
+                .StartWith(action);
+
+        public static IObservable<TAction> ActivateWhenEnabled<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
+            => source.SelectMany(a => a.ActivateWhenEnabled());
+
         public static IObservable<TAction> ActivateInUserDetails<TAction>(this IObservable<TAction> registerAction,bool skipWhenNoSecurity=false) where TAction:ActionBase 
 	        => registerAction.WhenControllerActivated()
                 .Do(action => {

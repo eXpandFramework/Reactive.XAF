@@ -4,12 +4,18 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
+using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Blazor.Editors.Grid;
+using DevExpress.ExpressApp.Blazor.Editors.Grid.Models;
 using Hangfire;
 using Hangfire.MemoryStorage;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Blazor;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.XAF.FrameExtensions;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
+using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
 
@@ -87,7 +93,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
         [TestCase(nameof(TestJob.FailMethodRetry),2,1,0)]
         [XpandTest()]
         public async Task Schedule_Failed_Recurrent_job(string methodName,int executions,int failedJobs,int successFullJobs) {
-            MockHangfire(testName:methodName).FirstAsync().Test();
+            MockHangfire().Test();
             using var application = JobSchedulerModule().Application.ToBlazor();
             var execute = JobExecution(WorkerState.Failed).SubscribeReplay();
             application.CommitNewJob(methodName:methodName);
@@ -100,10 +106,74 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
             
         }
 
-        private static  IObservable<JobState> JobExecution(WorkerState lastState) 
-            => JobService.JobExecution.FirstAsync(t => t.State == WorkerState.Enqueued).IgnoreElements()
-                .Concat(JobService.JobExecution.FirstAsync(t => t.State == WorkerState.Processing).IgnoreElements())
-                .Concat(JobService.JobExecution.FirstAsync(t => t.State == lastState))
-                .FirstAsync();
+        [XpandTest()][Test]
+        public async Task Pause_Job() {
+            MockHangfire().Test();
+            using var application = JobSchedulerModule().Application.ToBlazor();
+            var observable = JobExecution(WorkerState.Succeeded).SubscribeReplay();
+            var jobsObserver = TestJob.Jobs.Test();
+            application.CommitNewJob().Pause();
+
+            var jobState = await observable;
+
+            jobsObserver.ItemCount.ShouldBe(0);
+        }
+        [XpandTest()][Test]
+        public async Task Resume_Job() {
+            MockHangfire().Test();
+            using var application = JobSchedulerModule().Application.ToBlazor();
+            var observable = JobExecution(WorkerState.Succeeded).SubscribeReplay();
+            var jobsObserver = TestJob.Jobs.Test();
+            application.CommitNewJob().Pause().Resume();
+
+            await observable;
+
+            jobsObserver.ItemCount.ShouldBe(1);
+        }
+        [XpandTest()][Test]
+        public void JobPause_Action() {
+            MockHangfire().Test();
+            using var application = JobSchedulerModule().Application.ToBlazor();
+
+            var job = application.CommitNewJob();
+            var view = application.NewDetailView(job);
+            var viewWindow = application.CreateViewWindow();
+            viewWindow.SetView(view);
+
+            var action = viewWindow.Action<JobSchedulerModule>().PauseJob();
+            action.Active.ResultValue.ShouldBeTrue();
+            action.DoExecute(space => new[]{job});
+            
+            job.IsPaused.ShouldBeTrue();
+            view.ObjectSpace.Refresh();
+
+            action.Active.ResultValue.ShouldBeFalse();
+            viewWindow.Action<JobSchedulerModule>().ResumeJob().Active.ResultValue.ShouldBeTrue();
+            
+        }
+        [XpandTest()][Test]
+        public void JobResume_Action() {
+            MockHangfire().Test();
+            using var application = JobSchedulerModule().Application.ToBlazor();
+
+            var job = application.CommitNewJob();
+            var view = application.NewDetailView(job);
+            var viewWindow = application.CreateViewWindow();
+            viewWindow.SetView(view);
+
+            var action = viewWindow.Action<JobSchedulerModule>().ResumeJob();
+            action.Active.ResultValue.ShouldBeFalse();
+            job.Pause();
+            view.ObjectSpace.Refresh();
+            action.Enabled.ResultValue.ShouldBeTrue();
+            action.DoExecute(space => new[]{job});
+            
+            job.IsPaused.ShouldBeFalse();
+            view.ObjectSpace.Refresh();
+
+            action.Active.ResultValue.ShouldBeFalse();
+            viewWindow.Action<JobSchedulerModule>().PauseJob().Active.ResultValue.ShouldBeTrue();
+        }
+
     }
 }

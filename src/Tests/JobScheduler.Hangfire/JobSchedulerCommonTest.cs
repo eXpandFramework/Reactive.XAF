@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using Hangfire;
 using Hangfire.MemoryStorage;
@@ -18,6 +19,12 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
         protected override void ResetXAF() {
             
         }
+
+        protected  IObservable<JobState> JobExecution(WorkerState lastState) 
+            => JobService.JobExecution.FirstAsync(t => t.State == WorkerState.Enqueued).IgnoreElements()
+                .Concat(JobService.JobExecution.FirstAsync(t => t.State == WorkerState.Processing).IgnoreElements())
+                .Concat(JobService.JobExecution.FirstAsync(t => t.State == lastState))
+                .FirstAsync();
 
         protected JobSchedulerModule JobSchedulerModule(params ModuleBase[] modules) {
             var newBlazorApplication = NewBlazorApplication(typeof(JobSchedulerStartup));

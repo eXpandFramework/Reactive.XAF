@@ -33,8 +33,13 @@ using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
     public static class JobService {
+        public const string PausedJobsSetName = "paused-jobs";
         public static SimpleAction TriggerJob(this (JobSchedulerModule, Frame frame) tuple) 
             => tuple.frame.Action(nameof(TriggerJob)).As<SimpleAction>();
+        public static SimpleAction PauseJob(this (JobSchedulerModule, Frame frame) tuple) 
+            => tuple.frame.Action(nameof(PauseJob)).As<SimpleAction>();
+        public static SimpleAction ResumeJob(this (JobSchedulerModule, Frame frame) tuple) 
+            => tuple.frame.Action(nameof(ResumeJob)).As<SimpleAction>();
         
         public static SimpleAction JobDashboard(this (JobSchedulerModule, Frame frame) tuple) 
             => tuple.frame.Action(nameof(JobDashboard)).As<SimpleAction>();
@@ -47,6 +52,8 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
                 .Merge(manager.WhenApplication(application => application.ScheduleJobs()
                             .Merge(application.DeleteJobs()))
                     .Merge(manager.TriggerJobsFromAction())
+                    .Merge(manager.PauseJobsFromAction())
+                    .Merge(manager.ResumeJobsFromAction())
                     .Merge(manager.JobDashboard())
                 );
 
@@ -84,9 +91,37 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
             }
         }
 
+        public static Job Pause(this Job job) {
+            using var transaction = JobStorage.Current.GetConnection().CreateWriteTransaction();
+            transaction.AddToSet(PausedJobsSetName, job.Id);
+            transaction.Commit();
+            return job;
+        }
+
+        public static Job Resume(this Job job) {
+            using var transaction = JobStorage.Current.GetConnection().CreateWriteTransaction();
+            transaction.RemoveFromSet(PausedJobsSetName, job.Id);
+            transaction.Commit();
+            return job;
+        }
+
         private static IObservable<Unit> TriggerJobsFromAction(this ApplicationModulesManager manager)
             => manager.RegisterViewSimpleAction(nameof(TriggerJob), Configure)
                 .WhenExecute().SelectMany(args => args.SelectedObjects.Cast<Job>()).Do(job => job.Trigger()).ToUnit();
+        
+        private static IObservable<Unit> PauseJobsFromAction(this ApplicationModulesManager manager)
+            => manager.RegisterViewSimpleAction(nameof(PauseJob), Configure)
+                .WhenExecute()
+                .SelectMany(args => args.SelectedObjects.Cast<Job>())
+                .Do(job => job.Pause())
+            .ToUnit();
+
+        private static IObservable<Unit> ResumeJobsFromAction(this ApplicationModulesManager manager)
+            => manager.RegisterViewSimpleAction(nameof(ResumeJob), Configure)
+                .WhenExecute()
+                .SelectMany(args => args.SelectedObjects.Cast<Job>())
+                .Do(job => job.Resume())
+            .ToUnit();
 
         private static void Configure(ActionBase action) {
             action.TargetObjectType = typeof(Job);

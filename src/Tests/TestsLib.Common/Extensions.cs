@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
@@ -348,9 +347,12 @@ namespace Xpand.TestsLib.Common{
 	        var listEditorMock = new Mock<TEditor>(listView){CallBase = true};
             listEditorMock.Setup(editor => editor.SupportsDataAccessMode(CollectionSourceDataAccessMode.Client)).Returns(true);
             listEditorMock.Setup(editor => editor.GetSelectedObjects()).Returns(new object[0]);
-            listEditorMock.Protected().Setup<object>("CreateControlsCore")
-                .Returns(application.GetPlatform()==Platform.Win ? AppDomain.CurrentDomain
-                    .CreateTypeInstance("DevExpress.XtraGrid.GridControl") : AppDomain.CurrentDomain.CreateTypeInstance("DevExpress.Web.ASPxGridView"));
+            var platform = application.GetPlatform();
+            if (platform!=Platform.Blazor) {
+                listEditorMock.Protected().Setup<object>("CreateControlsCore")
+                    .Returns(platform==Platform.Win ? AppDomain.CurrentDomain
+                        .CreateTypeInstance("DevExpress.XtraGrid.GridControl") : AppDomain.CurrentDomain.CreateTypeInstance("DevExpress.Web.ASPxGridView"));
+            }
             if (typeof(TEditor) == typeof(ListEditor)){
                 application.WhenViewOnFrame(typeof(object), ViewType.ListView)
                     .Where(frame => frame.View.AsListView().Editor==listEditorMock.Object)

@@ -19,7 +19,8 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
                 .AddHangfire(ConfigureHangfire)
                 .AddHangfireServer()
                 .AddSingleton<IStartupFilter, UseHangfire>()
-                .AddSingleton<JobFilterAttribute>());
+                .AddSingleton<HangfireJobFilterState>()
+            );
 
         private static void ConfigureHangfire(IServiceProvider provider,IGlobalConfiguration configuration) 
             => configuration
@@ -27,7 +28,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
                 .UseDefaultTypeSerializer()
                 .UseRecommendedSerializerSettings()
                 .UseActivator(new ServiceJobActivator(provider.GetService<IServiceScopeFactory>()))
-                .UseFilter(provider.GetService<JobFilterAttribute>())
+                .UseFilter(provider.GetService<HangfireJobFilterState>())
                 .UseFilter(new AutomaticRetryAttribute(){Attempts = 0});
     }
 }

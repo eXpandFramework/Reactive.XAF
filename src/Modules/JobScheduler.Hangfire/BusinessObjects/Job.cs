@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.ConditionalAppearance;
+using DevExpress.ExpressApp.Editors;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
 using Fasterflect;
 using Hangfire;
+using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.NonPersistentObjects;
 using Xpand.Extensions.XAF.ObjectExtensions;
 using Xpand.Extensions.XAF.Xpo.ValueConverters;
@@ -16,6 +19,8 @@ using Xpand.XAF.Persistent.BaseImpl;
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
     [DefaultProperty(nameof(Id))]
     [DefaultClassOptions][NavigationItem("JobScheduler")]
+    [Appearance("PauseAction",AppearanceItemType.Action, nameof(IsPaused)+"=1",Visibility = ViewItemVisibility.Hide,TargetItems = nameof(JobService.PauseJob))]
+    [Appearance("ResumeAction",AppearanceItemType.Action, nameof(IsPaused)+"=0",Visibility = ViewItemVisibility.Hide,TargetItems = nameof(JobService.ResumeJob))]
     public class  Job:CustomBaseObject {
         public Job(Session session) : base(session) {
         }
@@ -33,6 +38,9 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
                 OnChanged(nameof(JobMethod));
             }
         }
+
+        [InvisibleInAllViews]
+        public bool IsPaused => JobStorage.Current.GetConnection().GetAllItemsFromSet(JobService.PausedJobsSetName).Contains(Id);
 
         ObjectString _jobMethod;
         [ValueConverter(typeof(ObjectStringValueConverter))]

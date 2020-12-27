@@ -326,7 +326,7 @@ jobs:
 - job: TestNugetChecConsumerPipeline
   dependsOn: TestNet461
   strategy: 
-    parallel: 2
+    parallel: 3
   pool:
     vmImage: windows-2019
   variables:

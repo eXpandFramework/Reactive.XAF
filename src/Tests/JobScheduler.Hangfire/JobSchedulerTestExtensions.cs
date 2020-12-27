@@ -33,8 +33,6 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
                 job.AddOrUpdateHangfire();
                 job.Trigger();
                 return job;
-                // return JobService.JobExecution.FirstAsync()
-                // .Do(state => job.Trigger()).To(job);
 
             })).FirstAsync();
 
