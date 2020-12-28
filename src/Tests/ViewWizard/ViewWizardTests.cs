@@ -18,14 +18,15 @@ namespace Xpand.XAF.Modules.ViewWizard.Tests{
     public class ViewWizardTests:ViewWizardCommonTest{
         [Test]
         [XpandTest()]
-        public void ShowWizard_Action_disabled_always(){
-	        using var application = ViewWizardModule().Application;
+        public void ShowWizard_Action_disabled_always() {
+            using var application = ViewWizardModule().Application;
 	        var window = application.CreateViewWindow();
         
 	        window.SetView(application.NewView<DetailView>(typeof(VW)));
         
 	        window.Action<ViewWizardModule>().ShowWizard().Active.ResultValue.ShouldBeFalse();
         }
+
         [Test]
         [XpandTest()]
         public void ShowWizard_Action_enabled_with_Model(){

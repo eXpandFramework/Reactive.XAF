@@ -326,7 +326,7 @@ jobs:
 - job: TestNugetChecConsumerPipeline
   dependsOn: TestNet461
   strategy: 
-    parallel: 3
+    parallel: 4
   pool:
     vmImage: windows-2019
   variables:
@@ -372,6 +372,7 @@ jobs:
         searchFolder: '$(System.DefaultWorkingDirectory)\bin\'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
+          **\Blazor.Tests.dll
           **\WinDesktop.Tests.dll
           **\Win.Tests.dll
           **\Web.Tests.dll

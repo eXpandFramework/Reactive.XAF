@@ -1,23 +1,25 @@
-﻿using System;
-using System.IO;
+﻿#if !NETCOREAPP3_1
 using System.Linq;
+using DevExpress.ExpressApp;
+using Fasterflect;
+using Shouldly;
+using Xpand.TestsLib;
+using Xpand.TestsLib.Common;
+using Xpand.TestsLib.EasyTest.Commands.Automation;
+using Xpand.XAF.Modules.Reactive;
+#endif
+using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using ALL.Tests;
 using ALL.Win.Tests;
 using DevExpress.EasyTest.Framework;
-using DevExpress.ExpressApp;
-using Fasterflect;
 using NUnit.Framework;
-using Shouldly;
 using Xpand.Extensions.AppDomainExtensions;
-using Xpand.TestsLib;
-using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.TestsLib.EasyTest;
 using Xpand.TestsLib.EasyTest.Commands.ActionCommands;
-using Xpand.TestsLib.EasyTest.Commands.Automation;
-using Xpand.XAF.Modules.Reactive;
 using CommonTest = ALL.Tests.CommonTest;
 
 namespace Web.Tests{
@@ -35,7 +37,7 @@ namespace Web.Tests{
 
             application.Modules.FirstOrDefault(m => m.GetType()==moduleType).ShouldBeNull();
         }
-#endif
+
         [Test]
         [XpandTest(LongTimeout,3)]
         [Apartment(ApartmentState.STA)]
@@ -48,7 +50,7 @@ namespace Web.Tests{
             },connectionString);
             
         }
-
+#endif
         private TestApplication RunWebApplication(IApplicationAdapter adapter, string connectionString){
 
 #if !NETCOREAPP3_1
@@ -63,7 +65,7 @@ namespace Web.Tests{
             return ((DevExpress.ExpressApp.EasyTest.WebAdapter.WebAdapter) adapter).RunWebApplication(physicalPath, 65477, connectionString);
 #else
             
-            return ((DevExpress.ExpressApp.EasyTest.BlazorAdapter.BlazorAdapter) adapter).RunBlazorApplication(physicalPath,65201,connectionString);
+            return ((DevExpress.ExpressApp.EasyTest.BlazorAdapter.BlazorAdapter) adapter).RunBlazorApplication(physicalPath,44318,connectionString);
 #endif
             
         }

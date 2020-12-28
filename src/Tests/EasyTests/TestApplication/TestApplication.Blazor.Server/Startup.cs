@@ -12,6 +12,7 @@ using Xpand.Extensions.Blazor;
 using Xpand.Extensions.Office.Cloud.Google.Blazor;
 
 [assembly: HostingStartup(typeof(GoogleCodeStateStartup))]
+[assembly: HostingStartup(typeof(HostingStartup))]
 namespace TestApplication.Blazor.Server {
     public class Startup {
         public Startup(IConfiguration configuration) {
