@@ -6,7 +6,7 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Blazor {
     [UsedImplicitly]
-    public sealed class BlazorModule : ReactiveModuleBase {
+    public sealed class BlazorModule : ModuleBase {
 
         static BlazorModule() => TraceSource=new ReactiveTraceSource(nameof(BlazorModule));
 

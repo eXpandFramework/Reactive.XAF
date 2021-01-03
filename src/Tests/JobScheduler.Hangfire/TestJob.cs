@@ -2,8 +2,10 @@
 using System.Reactive.Subjects;
 using DevExpress.ExpressApp.Blazor;
 using Hangfire;
+using Hangfire.Server;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
+    [JobProvider]
     public class TestJobDI:TestJob {
         public TestJobDI(BlazorApplication provider):base(provider) {
         }
@@ -11,8 +13,12 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
         public TestJobDI() { }
     }
 
+    [JobProvider]
     public class TestJob {
-        public static Subject<TestJob> Jobs=new Subject<TestJob>();    
+        public static Subject<TestJob> Jobs=new Subject<TestJob>();
+
+        public PerformContext Context { get; private set; }
+
         public TestJob() { }
         public BlazorApplication Application { get; }
 
@@ -31,6 +37,10 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
         }
 
         public void Test() {
+            Jobs.OnNext(this);
+        }
+        public void TestJobId(PerformContext context) {
+            Context = context;
             Jobs.OnNext(this);
         }
     }

@@ -3,9 +3,11 @@ using System.Linq.Expressions;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp.Blazor;
 using NUnit.Framework;
+using Shouldly;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.XAF.NonPersistentObjects;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
+using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
     public static class JobSchedulerTestExtensions {
@@ -17,12 +19,19 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
             testJobType ??= typeof(TestJobDI);
             methodName??=nameof(TestJob.Test);
             using var objectSpace = application.CreateObjectSpace();
-            var scheduledJob = objectSpace.CreateObject<Job>();
-            scheduledJob.JobType = new ObjectType(testJobType);
-            scheduledJob.JobMethod = new ObjectString(methodName);
-            scheduledJob.Id = ScheduledJobId;
+            var job = objectSpace.CreateObject<Job>();
+            job.JobType = new ObjectType(testJobType);
+            job.JobMethod = new ObjectString(methodName);
+            job.Id = ScheduledJobId;
+            job.JobMethods.Count.ShouldBeGreaterThan(0);
             objectSpace.CommitChanges();
-            return scheduledJob;
+            return job;
+        }
+
+        public static void ConfigureModel(this BlazorApplication newBlazorApplication) {
+            var source = newBlazorApplication.Model.ToReactiveModule<IModelReactiveModulesJobScheduler>().JobScheduler.Sources
+                .AddNode<IModelJobSchedulerSource>();
+            source.AssemblyName = typeof(JobSchedulerTestExtensions).Assembly.GetName().Name;
         }
 
         public static string ScheduledJobId => $"{TestContext.CurrentContext.Test.MethodName}{TestContext.CurrentContext.Test.ID}";

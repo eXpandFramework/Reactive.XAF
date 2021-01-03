@@ -5,6 +5,7 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using Fasterflect;
 using TestApplication;
+using TestApplication.Module;
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.Reactive;
@@ -20,18 +21,19 @@ namespace ALL.Tests{
                     => application.WhenViewOnFrame(typeof(Task),ViewType.DetailView)
                         .SelectMany(frame => frame.View.ObjectSpace.WhenCommiting().SelectMany(t => config().updated)
                             .Do(tuple => {
-                                using var objectSpace = frame.Application.CreateObjectSpace();
-                                var cloudOfficeObject = objectSpace.QueryCloudOfficeObject(tuple.cloud.GetPropertyValue("Id").ToString(), CloudObjectType.Task).First();
-                                var task = objectSpace.GetObjectByKey<Task>(Guid.Parse(cloudOfficeObject.LocalId));
-                                task.Description = tuple.mapAction.ToString();
-                                objectSpace.CommitChanges();
+                                using (var objectSpace = frame.Application.CreateObjectSpace()) {
+                                    var cloudOfficeObject = objectSpace.QueryCloudOfficeObject(tuple.cloud.GetPropertyValue("Id").ToString(), CloudObjectType.Task).First();
+                                    var task = objectSpace.GetObjectByKey<Task>(Guid.Parse(cloudOfficeObject.LocalId));
+                                    task.Description = tuple.mapAction.ToString();
+                                    objectSpace.CommitChanges();
+                                }
                             }))
                         .ToUnit()
                         .Merge(application.DeleteAllEntities<Task>(config().deleteAll))).ToUnit());
 
 
         public static IObservable<Unit> InitializeCloudTasksModule(this ApplicationModulesManager manager,Action<IModelOffice> action){
-            manager.Modules.OfType<AgnosticModule>().First().AdditionalExportedTypes.Add(typeof(Task));
+            manager.Modules.OfType<TestApplicationModule>().First().AdditionalExportedTypes.Add(typeof(Task));
             return manager.WhenGeneratingModelNodes(application => application.Views)
                 .Do(views => action(views.Application.ToReactiveModule<IModelReactiveModuleOffice>().Office))
                 .ToUnit();

@@ -2,7 +2,7 @@
   "profiles": {
     "Xpand.XAF.ModelEditor": {
       "commandName": "Project",
-      "commandLineArgs": "False \"C:\\Work\\eXpandFramework\\XWebCrawler\\XWebCrawler.Module.Blazor\\bin\\Debug\\netstandard2.1\\XWebCrawler.Module.Blazor.dll\" \"C:\\Work\\eXpandFramework\\XWebCrawler\\XWebCrawler.Module.Blazor\\Model.DesignedDiffs.xafml\" \"C:\\Work\\eXpandFramework\\XWebCrawler\\XWebCrawler.Module.Blazor\\\""
+      "commandLineArgs": "d True \"C:\\Work\\eXpandFramework\\DevExpress.XAF\\src\\Tests\\EasyTests\\TestApplication\\TestApplication.Blazor.Server\\bin\\TestApplication.Blazor.Server.dll\" \"C:\\Work\\eXpandFramework\\DevExpress.XAF\\src\\Tests\\EasyTests\\TestApplication\\TestApplication.Blazor.Server\\Model.xafml\" \"C:\\Work\\eXpandFramework\\DevExpress.XAF\\src\\Tests\\EasyTests\\TestApplication\\TestApplication.Blazor.Server\\\""
     }
   }
 }

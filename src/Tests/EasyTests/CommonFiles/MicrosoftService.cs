@@ -3,9 +3,9 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using DevExpress.EasyTest.Framework;
-using Xpand.TestsLib.EasyTest;
-using Xpand.TestsLib.EasyTest.Commands;
-using Xpand.TestsLib.EasyTest.Commands.Automation;
+using Xpand.TestsLib.Common.EasyTest;
+using Xpand.TestsLib.Common.EasyTest.Commands;
+using Xpand.TestsLib.Common.EasyTest.Commands.Automation;
 using Xpand.TestsLib.Common.Win32;
 
 namespace ALL.Tests{

@@ -216,7 +216,7 @@ namespace Xpand.Extensions.Office.Cloud{
             });
 
         private static IObservable<SimpleAction> ActivateWhenUserDetails(this IObservable<SimpleAction> registerActions) 
-            => registerActions.Select(action => action).ActivateInUserDetails(true)
+            => registerActions.Select(action => action).ActivateInUserDetails()
                 .Do(action => action.Activate(nameof(NeedsAuthentication),false) );
 
         

@@ -50,5 +50,5 @@ Get-ChildItem -Filter *.csproj -Recurse | ForEach-Object {
         Update-ProjectProperty $projXml AppendTargetFrameworkToOutputPath ($target -notlike "netstandard2.*")
     }
     
-    $projXml.Save($fileName)
+    $projXml.Save($fileName)|Out-null
 } 

@@ -66,11 +66,6 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
                 NeedsAuthentication(application));
         }
         
-        [Test][XpandTest()][Apartment(ApartmentState.STA)]
-        public void Actions_are_Activated_For_CurrentUser_Details(){
-            using var application=Application(Platform.Win);
-            application.Actions_are_Activated_For_CurrentUser_Details(ServiceName);
-        }
         
         
         [Test][XpandTest()][Apartment(ApartmentState.STA)]

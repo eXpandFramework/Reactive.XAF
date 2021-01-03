@@ -13,6 +13,7 @@
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <AssemblyName>Xpand.XAF.Modules.LookupCascade.Tests</AssemblyName>
     <CopyLocalLockFileAssemblie>true</CopyLocalLockFileAssemblie>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AppDomainToolkit">

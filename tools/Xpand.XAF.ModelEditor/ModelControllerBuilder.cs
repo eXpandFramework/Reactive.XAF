@@ -2,17 +2,18 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.DC;
+using DevExpress.ExpressApp.Design;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.Utils;
-using DevExpress.ExpressApp.Win;
 using DevExpress.ExpressApp.Win.Core.ModelEditor;
 using DevExpress.ExpressApp.Xpo;
 using DevExpress.Persistent.Base;
 using Xpand.XAF.ModelEditor.ModelDifference;
 
+// ReSharper disable once CheckNamespace
 namespace Xpand.XAF.ModelEditor {
     public class ModelControllerBuilder {
         public ModelEditorViewController GetController(PathInfo pathInfo) {
@@ -23,9 +24,8 @@ namespace Xpand.XAF.ModelEditor {
             var modelApplication = GetModelApplication(applicationModulesManager, pathInfo, fileModelStore);
             return GetController(fileModelStore, modelApplication);
         }
-        ModelEditorViewController GetController(FileModelStore fileModelStore, ModelApplicationBase modelApplication) {
-            return new ModelEditorViewController((IModelApplication)modelApplication, fileModelStore);
-        }
+        ModelEditorViewController GetController(FileModelStore fileModelStore, ModelApplicationBase modelApplication) 
+            => new ModelEditorViewController((IModelApplication)modelApplication, fileModelStore);
 
         ModelApplicationBase GetModelApplication(ApplicationModulesManager applicationModulesManager, PathInfo pathInfo, FileModelStore fileModelStore) {
             var modelApplication = ModelApplicationHelper.CreateModel(XafTypesInfo.Instance, applicationModulesManager.DomainComponents, applicationModulesManager.Modules, applicationModulesManager.ControllersManager, Type.EmptyTypes, fileModelStore.GetAspects(), null, null);
@@ -38,39 +38,39 @@ namespace Xpand.XAF.ModelEditor {
         }
 
         ApplicationModulesManager GetApplicationModulesManager(PathInfo pathInfo) {
-            string assemblyPath = Path.GetDirectoryName(pathInfo.AssemblyPath);
             var designerModelFactory = new DesignerModelFactory();
             ReflectionHelper.Reset();
             XafTypesInfo.HardReset();
             XpoTypesInfoHelper.ForceInitialize();
             if (pathInfo.IsApplicationModel) {
-                _currentDomainOnAssemblyResolvePathInfo = pathInfo;
-                // var asl = new AssemblyLoader(Path.GetDirectoryName(pathInfo.AssemblyPath));
-                // var asm = asl.LoadFromAssemblyPath(pathInfo.AssemblyPath);
-                //
-                // var type = asm.GetTypes().First(t => {
-                //     return InheritsFrom(t, typeof(XafApplication).FullName);
-                // });
-                // // var type = asm.GetType("SolutionBlazor.Blazor.Server.SolutionBlazorBlazorApplication");
-                // dynamic obj = Activator.CreateInstance(type);
-                AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += CurrentDomainOnAssemblyResolve;
-                AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainOnAssemblyResolve;
-                
-                
-
-
-                var applicationInstance = Activator.CreateInstance(Assembly.Load(pathInfo.AssemblyPath).GetTypes().First(type => typeof(XafApplication).IsAssignableFrom(type)));
-                AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve -= CurrentDomainOnAssemblyResolve;
-                AppDomain.CurrentDomain.AssemblyResolve -= CurrentDomainOnAssemblyResolve;
-                _currentDomainOnAssemblyResolvePathInfo = null;
-
-                var configFileName = applicationInstance is WinApplication ? pathInfo.AssemblyPath + ".config":Path.Combine(pathInfo.FullPath,"web.config");
-                
-                return designerModelFactory.CreateModulesManager((XafApplication) applicationInstance, configFileName,Path.GetDirectoryName(pathInfo.AssemblyPath));
+                var assembliesPath = Path.GetDirectoryName(pathInfo.AssemblyPath);
+                var application = designerModelFactory.CreateApplicationFromFile(pathInfo.AssemblyPath, assembliesPath);
+                InitializeTypeInfoSources(application.Modules,assembliesPath);
+                var applicationModulesManager = designerModelFactory.CreateModulesManager(application, null, assembliesPath);
+                return applicationModulesManager;
             }
-            var moduleFromFile = designerModelFactory.CreateModuleFromFile(pathInfo.AssemblyPath, assemblyPath);
+            var moduleFromFile = designerModelFactory.CreateModuleFromFile(pathInfo.AssemblyPath, Path.GetDirectoryName(pathInfo.AssemblyPath));
             return designerModelFactory.CreateModulesManager(moduleFromFile, pathInfo.AssemblyPath);
         }
+
+        private void InitializeTypeInfoSources(IList<ModuleBase> modules, string assembliesPath) {
+            DefaultTypesInfoInitializer.Initialize(
+                (TypesInfo)XafTypesInfo.Instance,
+                baseType => GetRegularTypes(modules).Where(baseType.IsAssignableFrom),
+                (assemblyName, typeName) => DefaultTypesInfoInitializer.CreateTypesInfoInitializer(assembliesPath, assemblyName, typeName));
+        }
+
+        private IEnumerable<Type> GetRegularTypes(IList<ModuleBase> modules) {
+            List<Type> types = new List<Type>();
+            foreach(ModuleBase module in modules) {
+                IEnumerable<Type> regularTypes = ModuleHelper.GetRegularTypes(module);
+                if(regularTypes != null) {
+                    types.AddRange(regularTypes);
+                }
+            }
+            return types;
+        }
+
         public static IEnumerable<Type> ParentTypes(Type type){
             if (type == null){
                 yield break;
@@ -110,29 +110,6 @@ namespace Xpand.XAF.ModelEditor {
                 currentType = currentType.BaseType;
             }
             return false;
-        }
-
-        private PathInfo _currentDomainOnAssemblyResolvePathInfo;
-
-        private Assembly CurrentDomainOnAssemblyResolve(object sender, ResolveEventArgs args) {
-            if (File.Exists(args.Name)) {
-                return GetLoadedAssembly(args.Name) ?? Assembly.LoadFrom(args.Name);
-            }
-
-            var dllName = args.Name.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries).First().Trim();
-            var localAssemblyName =
-                Path.Combine(Directory.GetParent(_currentDomainOnAssemblyResolvePathInfo.AssemblyPath).FullName,
-                    $"{dllName}.dll");
-            if (File.Exists(localAssemblyName)) {
-                return GetLoadedAssembly(localAssemblyName) ?? Assembly.LoadFrom(localAssemblyName);
-            }
-
-            return null;
-        }
-
-        private static Assembly GetLoadedAssembly(string assemblyPath) {
-            var assemblyName = AssemblyName.GetAssemblyName(assemblyPath);
-            return AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(s => s.GetName() == assemblyName);
         }
 
         void AddLayers(ModelApplicationBase modelApplication, ApplicationModulesManager applicationModulesManager, PathInfo pathInfo) {

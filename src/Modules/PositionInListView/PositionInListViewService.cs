@@ -79,12 +79,12 @@ namespace Xpand.XAF.Modules.PositionInListView{
             .ModelPositionInListView().ListViewItems.Select(item => item.ListView.Id()).Contains(viewID);
 
         private static IObservable<Unit> PositionNewObjects(this IObservable<XafApplication> whenApplication) =>
-            whenApplication.SelectMany(application => application.WhenNewObjectCreated<object>().Select(tuple => tuple).Pair(application))
-                .Do(_ => {
-                    var modelPositionInListView = _.other.Model.ModelPositionInListView();
+            whenApplication.SelectMany(application => application.WhenObjectSpaceCreated().SelectMany(t => t.e.ObjectSpace.WhenNewObjectCommiting<object>().Pair(t.e.ObjectSpace))
+                .Do(t => {
+                    var modelPositionInListView = application.Model.ModelPositionInListView();
                     var listViewItems = modelPositionInListView.ListViewItems;
                     if (listViewItems.Any()){
-                        var objectType = _.source.theObject.GetType();
+                        var objectType = t.source.GetType();
                         var listViewItem = listViewItems.FirstOrDefault(item => item.ListView.ModelClass.TypeInfo.Type==objectType);
                         if (listViewItem != null){
                             var modelClassItem = modelPositionInListView.ModelClassItems
@@ -95,8 +95,8 @@ namespace Xpand.XAF.Modules.PositionInListView{
                             }
                             var memberInfo = listViewItem.PositionMember.MemberInfo;
                             var aggregateOperand = new AggregateOperand("", memberInfo.Name, aggregate);
-                            var value = (int)(_.source.objectSpace.Evaluate(objectType, aggregateOperand, null) ?? 0) ;
-                            var allValues = _.source.objectSpace.ModifiedObjects.Cast<object>().Select(o => memberInfo.GetValue(o)??0).Cast<int>().Add(value);
+                            var value = (int)(t.other.Evaluate(objectType, aggregateOperand, null) ?? 0) ;
+                            var allValues = t.other.ModifiedObjects.Cast<object>().Select(o => memberInfo.GetValue(o)??0).Cast<int>().Add(value);
                             if (aggregate == Aggregate.Max){
                                 value = allValues.Max();
                                 value++;    
@@ -105,11 +105,12 @@ namespace Xpand.XAF.Modules.PositionInListView{
                                 value = allValues.Min();
                                 value--;
                             }
-                            memberInfo.SetValue(_.source.theObject,value);
+                            memberInfo.SetValue(t.source,value);
                         }                    
                     }
-                })
-                .TracePositionInListView(_ => _.source.theObject.ToString())
+                }))
+                
+                .TracePositionInListView(_ => $"{_.source}")
                 .ToUnit();
 
         

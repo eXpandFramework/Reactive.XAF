@@ -13,6 +13,7 @@
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <AssemblyName>Xpand.XAF.Modules.Office.Cloud.Tests</AssemblyName>
     <CopyLocalLockFileAssemblie>true</CopyLocalLockFileAssemblie>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="CloudServiceTests.cs" />

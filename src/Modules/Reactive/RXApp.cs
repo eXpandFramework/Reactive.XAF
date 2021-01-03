@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
+using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using Fasterflect;
 using HarmonyLib;
@@ -22,6 +23,7 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
 using Xpand.Extensions.XAF.Attributes;
+using Xpand.Extensions.XAF.Attributes.Custom;
 using Xpand.Extensions.XAF.ModuleExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -33,31 +35,16 @@ namespace Xpand.XAF.Modules.Reactive{
             AuthenticateSubject = Subject.Synchronize(new Subject<(object authentication, GenericEventArgs<object> args)>());
         static readonly Subject<ApplicationModulesManager> ApplicationModulesManagerSubject=new Subject<ApplicationModulesManager>();
         static readonly Subject<Frame> FramesSubject=new Subject<Frame>();
-        static readonly Subject<(object theObject,IObjectSpace objectSpace)> NewObjectsSubject=new Subject<(object theObject, IObjectSpace objectSpace)>();
-        
 
         static RxApp() {
-            AppDomain.CurrentDomain.Patch(harmony => {
-                PatchXafApplication(harmony);
-                var methodInfo = typeof(BaseObjectSpace).Methods(Flags.AnyVisibility|Flags.Instance,nameof(BaseObjectSpace.CreateObject)).First(info => !info.IsGenericMethod);
-                var method = GetMethodInfo(nameof(CreateObject));
-                harmony.Patch(methodInfo,postfix: new HarmonyMethod(method));
-            });
+            AppDomain.CurrentDomain.Patch(PatchXafApplication);
         }
-
-        
-
-        [SuppressMessage("ReSharper", "InconsistentNaming")]
-        static void CreateObject(IObjectSpace __instance,object __result) => NewObjectsSubject.OnNext(( __result,__instance));
 
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         static void CreateModuleManager(ApplicationModulesManager __result) => ApplicationModulesManagerSubject.OnNext(__result);
 
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         static void Initialize(Frame __instance) => FramesSubject.OnNext(__instance);
-
-        public static IObservable<(object theObject,IObjectSpace objectSpace)> NewObjects 
-            => NewObjectsSubject.AsObservable();
 
         private static void PatchXafApplication(Harmony harmony){
             var frameInitialize = typeof(Frame).Method("Initialize");
@@ -90,9 +77,24 @@ namespace Xpand.XAF.Modules.Reactive{
             .Merge(manager.MergedExtraEmbeddedModels())
             .Merge(manager.InvisibleInAllViewsAttribute())
             .Merge(manager.VisibleInAllViewsAttribute())
+            .Merge(manager.CustomAttributes())
             .Merge(manager.XpoAttributes())
         ;
 
+
+        static IObservable<Unit> CustomAttributes(this ApplicationModulesManager manager) 
+            => manager.WhenCustomizeTypesInfo()
+                .SelectMany(t => t.e.TypesInfo.PersistentTypes
+                    .SelectMany(info => info.Members.SelectMany(memberInfo => memberInfo.FindAttributes<Attribute>().OfType<ICustomAttribute>().ToArray()
+                        .Select(attribute => {
+                            for (int index = 0; index < attribute.Name.Split(';').Length; index++) {
+                                string s = attribute.Name.Split(';')[index];
+                                var theValue = attribute.Value.Split(';')[index];
+                                memberInfo.AddAttribute(new ModelDefaultAttribute(s, theValue));
+                            }
+                            return attribute;
+                        }))))
+                .ToUnit();
 
         static IObservable<Unit> VisibleInAllViewsAttribute(this ApplicationModulesManager manager)
             => manager.WhenCustomizeTypesInfo()
@@ -153,7 +155,7 @@ namespace Xpand.XAF.Modules.Reactive{
 
         private static IObservable<Unit> MergedExtraEmbeddedModels(this ApplicationModulesManager manager) 
             => manager.WhereApplication().ToObservable()
-                .SelectMany(application => application.WhenCreateCustomUserModelDifferenceStore()
+                .SelectMany(application => application.WhenCreateCustomModelDifferenceStore()
                     .Do(_ => {
                         var models = _.application.Modules.SelectMany(m => m.EmbeddedModels().Select(tuple => (id: $"{m.Name},{tuple.id}", tuple.model)))
                             .Where(tuple => {

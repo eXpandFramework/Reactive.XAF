@@ -5,24 +5,26 @@ using Fasterflect;
 using Shouldly;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Common;
-using Xpand.TestsLib.EasyTest.Commands.Automation;
 using Xpand.XAF.Modules.Reactive;
+using ALL.Win.Tests;
 #endif
 using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using ALL.Tests;
-using ALL.Win.Tests;
 using DevExpress.EasyTest.Framework;
 using NUnit.Framework;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.TestsLib.Common.Attributes;
-using Xpand.TestsLib.EasyTest;
-using Xpand.TestsLib.EasyTest.Commands.ActionCommands;
+using Xpand.TestsLib.Common.EasyTest;
+using Xpand.TestsLib.Common.EasyTest.Commands.ActionCommands;
+using Xpand.TestsLib.Common.EasyTest.Commands.Automation;
+using Xpand.XAF.Modules.Reactive.Logger;
 using CommonTest = ALL.Tests.CommonTest;
 
 namespace Web.Tests{
+    
     [NonParallelizable]
     public class AllWebTests : CommonTest{
 #if !NETCOREAPP3_1
@@ -60,7 +62,7 @@ namespace Web.Tests{
 #endif
             LogPaths.Clear();
             LogPaths.Add(Path.Combine(Path.GetDirectoryName(physicalPath)!,"eXpressAppFramework.log"));
-            // LogPaths.Add(Path.Combine(@$"{Path.GetDirectoryName(physicalPath)}\bin",Path.GetFileName(ReactiveLoggerService.RXLoggerLogPath)!));
+            LogPaths.Add(Path.Combine(@$"{Path.GetDirectoryName(physicalPath)}\bin",Path.GetFileName(ReactiveLoggerService.RXLoggerLogPath)!));
 #if !NETCOREAPP3_1
             return ((DevExpress.ExpressApp.EasyTest.WebAdapter.WebAdapter) adapter).RunWebApplication(physicalPath, 65477, connectionString);
 #else
@@ -73,10 +75,14 @@ namespace Web.Tests{
         [XpandTest(LongTimeout,3)]
         [Test][Apartment(ApartmentState.STA)]
         public async Task Web_EasyTest_InMemory(){
-            await EasyTest(NewWebAdapter, RunWebApplication,  adapter => {
+            await EasyTest(NewWebAdapter, RunWebApplication, async adapter => {
                 var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
                 adapter.Execute(autoTestCommand);
-                return Task.CompletedTask;
+                await Task.CompletedTask;
+#if NETCOREAPP3_1
+                await adapter.TestJobScheduler();
+#endif
+
             });
         }
 

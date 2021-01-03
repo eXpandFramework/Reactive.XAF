@@ -8,13 +8,16 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using DevExpress.DataAccess.Native.ObjectBinding;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Blazor;
 using DevExpress.ExpressApp.Utils;
 using Fasterflect;
 using Hangfire;
+using Hangfire.Server;
 using Hangfire.States;
+using Hangfire.Storage;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +29,7 @@ using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.TypeExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
+using Xpand.Extensions.XAF.Xpo.BaseObjects;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -50,7 +54,16 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager)
             => manager.CheckBlazor(typeof(HangfireStartup).FullName, typeof(JobSchedulerModule).Namespace)
                 .Merge(manager.WhenApplication(application => application.ScheduleJobs()
-                            .Merge(application.DeleteJobs()))
+                            .Merge(application.DeleteJobs())
+                            .Merge(application.WhenLoggedOn().SelectMany(_ => {
+                                return Observable.Empty<Unit>();
+                                // var serviceProvider = application.ToBlazor().ServiceProvider;
+                                // var httpClient = serviceProvider.GetService<HttpClient>();
+                                // return httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Get, "api/JobScheduler"))
+                                // .ToObservable()
+                                // .Select(message => message).ToUnit();
+                            }).ToUnit())
+                    )
                     .Merge(manager.TriggerJobsFromAction())
                     .Merge(manager.PauseJobsFromAction())
                     .Merge(manager.ResumeJobsFromAction())
@@ -61,6 +74,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
             => manager.RegisterViewSimpleAction(nameof(JobDashboard), action => {
                     action.TargetObjectType = typeof(JobWorker);
                     action.SelectionDependencyType = SelectionDependencyType.RequireMultipleObjects;
+                    action.Caption = action.Caption.Replace("Job", "").Trim();
                 })
                 .WhenExecute()
                 .SelectMany(args => {
@@ -95,6 +109,8 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
             using var transaction = JobStorage.Current.GetConnection().CreateWriteTransaction();
             transaction.AddToSet(PausedJobsSetName, job.Id);
             transaction.Commit();
+            job.OnChanged(nameof(Job.IsPaused));
+            job.ObjectSpace.CommitChanges();
             return job;
         }
 
@@ -102,8 +118,13 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
             using var transaction = JobStorage.Current.GetConnection().CreateWriteTransaction();
             transaction.RemoveFromSet(PausedJobsSetName, job.Id);
             transaction.Commit();
+            job.OnChanged(nameof(Job.IsPaused));
+            job.ObjectSpace.CommitChanges();
             return job;
         }
+
+        public static string RecurringJobId(this IStorageConnection connection,string backgroundJobId) 
+            => $"{connection.GetJobParameter(backgroundJobId, "RecurringJobId")}".Replace(@"\", "").Replace(@"""", "");
 
         private static IObservable<Unit> TriggerJobsFromAction(this ApplicationModulesManager manager)
             => manager.RegisterViewSimpleAction(nameof(TriggerJob), Configure)
@@ -125,7 +146,8 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
 
         private static void Configure(ActionBase action) {
             action.TargetObjectType = typeof(Job);
-            action.SelectionDependencyType=SelectionDependencyType.RequireSingleObject;
+            action.SelectionDependencyType = SelectionDependencyType.RequireMultipleObjects;
+            action.Caption = action.Caption.Replace("Job", "").Trim();
         }
 
         public static void Trigger(this Job job) 
@@ -156,7 +178,12 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
         
         public static IObservable<JobState> JobExecution => JobExecutionSubject.AsObservable();
 
-        public static Expression<Action> CallExpression(this Job job) => job.JobType.Type.CallExpression(job.JobMethod.Name.Replace(" ", ""));
+        public static Expression<Action> CallExpression(this Job job) {
+            var method = job.JobType.Type.Method(job.JobMethod.Name.Replace(" ", ""));
+            var arguments = method.Parameters().Count == 1 && method.Parameters().Any(info => info.ParameterType == typeof(PerformContext))
+                    ? new Expression[] {Expression.Constant(null, typeof(PerformContext))} : new Expression[0];
+            return job.JobType.Type.CallExpression(method,arguments);
+        }
 
         internal static IObservable<TSource> TraceJobSchedulerModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
@@ -164,12 +191,29 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
             => source.Trace(name, JobSchedulerModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName);
 
         internal static IEnumerable<MethodInfo> JobMethods(this AppDomain appDomain) 
-            => appDomain.GetAssemblies().Where(assembly =>
-                    CaptionHelper.ApplicationModel.ToReactiveModule<IModelReactiveModulesJobScheduler>().JobScheduler
-                        .Sources.Select(source => source.AssemblyName).Contains(assembly.GetName().Name))
-                .SelectMany(assembly => assembly.GetTypes()
-                    .Where(type => type.Attributes<JobProviderAttribute>().Any()&&type.Constructors().Any(info => !info.Parameters().Any())))
-                .SelectMany(type => type.Methods().Where(info => info.Attributes<JobProviderAttribute>().Any()&&!info.Parameters().Any()));
-        
+            => appDomain.GetAssemblies().FromModelSources().SelectMany(assembly => assembly.JobMethods());
+
+        public static IEnumerable<Assembly> FromModelSources(this IEnumerable<Assembly> assemblies) 
+            => assemblies.Where(assembly =>
+                CaptionHelper.ApplicationModel.ToReactiveModule<IModelReactiveModulesJobScheduler>().JobScheduler
+                    .Sources.Select(source => source.AssemblyName).Contains(assembly.GetName().Name));
+
+        public static IEnumerable<MethodInfo> JobMethods(this Assembly assembly) 
+            => assembly.GetTypes()
+                .Where(type => type.Attributes<JobProviderAttribute>().Any())
+                .Do(type => {
+                    if (!type.Constructors().Any(info => info.IsPublic )) {
+                        throw new NoDefaultConstructorException(type);
+                    }
+                })
+                .SelectMany(type => type.Methods().Where(info => {
+                    var parameterInfos = info.Parameters();
+                    return !info.IsSpecialName && info.IsPublic && 
+                           (!parameterInfos.Any() || (parameterInfos.Count == 1 && parameterInfos
+                               .Any(parameterInfo => parameterInfo.ParameterType == typeof(PerformContext))));
+                }));
+
+        public static string JobId(this PerformContext performContext) 
+            => performContext.Connection.RecurringJobId(performContext.BackgroundJob.Id);
     }
 }

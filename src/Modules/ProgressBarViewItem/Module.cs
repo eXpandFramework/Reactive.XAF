@@ -46,6 +46,10 @@ namespace {GetType().Namespace}{{
                 var xafWebAssembly = AppDomain.CurrentDomain.GetAssemblies().First(assembly => assembly.FullName.StartsWith("DevExpress.ExpressApp.Web"));
                 references = references.Add(xafWebAssembly.Location);
             }
+            else {
+                var location = AppDomain.CurrentDomain.GetAssemblies().First(assembly => assembly.FullName.StartsWith("System.Private.CoreLib")).Location;
+                references = references.Add(location);
+            }
 
             using var memoryStream = CSharpSyntaxTree.ParseText(code).Compile(references);
             var type = AppDomain.CurrentDomain.LoadAssembly(memoryStream).Types().First(_ => !_.IsAbstract && typeof(ProgressBarViewItemBase).IsAssignableFrom(_));

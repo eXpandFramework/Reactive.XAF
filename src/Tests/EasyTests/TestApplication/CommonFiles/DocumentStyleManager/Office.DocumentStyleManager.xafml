@@ -11,7 +11,7 @@
   </NavigationItems>
   <ReactiveModules>
     <Office>
-      <DocumentStyleManager DefaultPropertiesProvider="TestApplication.Office.DocumentStyleManager.DocumentObject">
+      <DocumentStyleManager DefaultPropertiesProvider="TestApplication.Module.Win.Office.DocumentStyleManager.DocumentObject">
         <ApplyTemplateListViews>
           <ApplyTemplateListViewItem ListViewId="DocumentObject_ListView" IsNewNode="True" />
         </ApplyTemplateListViews>
@@ -23,7 +23,7 @@
           </DesignTemplateDetailView>
         </DesignTemplateDetailViews>
         <ImportStyles>
-          <ImportStylesItem ModelClassId="TestApplication.Office.DocumentStyleManager.DocumentObject" Criteria="[Name] = 'Template'" IsNewNode="True" />
+          <ImportStylesItem ModelClassId="TestApplication.Module.Win.Office.DocumentStyleManager.DocumentObject" Criteria="[Name] = 'Template'" IsNewNode="True" />
         </ImportStyles>
       </DocumentStyleManager>
     </Office>

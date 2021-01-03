@@ -1,5 +1,7 @@
 ﻿using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.Blazor.Services;
+using Hangfire;
+using Hangfire.MemoryStorage;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Server.Circuits;
@@ -13,6 +15,7 @@ using Xpand.Extensions.Office.Cloud.Google.Blazor;
 
 [assembly: HostingStartup(typeof(GoogleCodeStateStartup))]
 [assembly: HostingStartup(typeof(HostingStartup))]
+[assembly: HostingStartup(typeof(Xpand.XAF.Modules.JobScheduler.Hangfire.HangfireStartup))]
 namespace TestApplication.Blazor.Server {
     public class Startup {
         public Startup(IConfiguration configuration) {
@@ -21,16 +24,7 @@ namespace TestApplication.Blazor.Server {
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services){
-            
-            // services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
-            // {
-            //     builder.AllowAnyOrigin()
-            //         .AllowAnyMethod()
-            //         .AllowAnyHeader();
-            // }));
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddHttpContextAccessor();
@@ -50,6 +44,7 @@ namespace TestApplication.Blazor.Server {
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options => {
                 options.LoginPath = "/LoginPage";
             });
+            GlobalConfiguration.Configuration.UseMemoryStorage();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

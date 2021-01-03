@@ -1,0 +1,55 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net461</TargetFramework>
+    <Deterministic>false</Deterministic>
+    <AssemblyVersion>1.0.*</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Configurations>Debug;Release;EasyTest</Configurations>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
+    <LangVersion>latest</LangVersion>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DefineConstants>TRACE;DEBUG;XAF202XAF202</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DefineConstants>TRACE;XAF202XAF202</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'EasyTest|AnyCPU' ">
+    <DefineConstants>TRACE;DEBUG;EASYTEST;XAF202XAF202</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="UnusableNodes.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\CommonFiles\Microsoft\MicrosoftCalendarService.cs" Link="Office\Microsoft\MicrosoftCalendarService.cs" />
+    <Compile Include="..\CommonFiles\Microsoft\MicrosoftService.cs" Link="Office\Microsoft\MicrosoftService.cs" />
+    <Compile Include="..\CommonFiles\Microsoft\MicrosoftTodoService.cs" Link="Office\Microsoft\MicrosoftTodoService.cs" />
+    <Compile Include="..\CommonFiles\Microsoft\ShowMSAccountInfoService.cs" Link="Office\Microsoft\ShowMSAccountInfoService.cs" />
+    <Compile Include="..\CommonFiles\Windows\WinModule.cs" Link="WinModule.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\CommonFiles\DocumentStyleManager\Lorem.docx" Link="Office\DocumentStyleManager\Lorem.docx" />
+    <EmbeddedResource Include="..\CommonFiles\DocumentStyleManager\Lorem2.docx" Link="Office\DocumentStyleManager\Lorem2.docx" />
+    <EmbeddedResource Include="..\CommonFiles\DocumentStyleManager\Lorem3.docx" Link="Office\DocumentStyleManager\Lorem3.docx" />
+    <EmbeddedResource Include="..\CommonFiles\DocumentStyleManager\LoresumV2.docx" Link="Office\DocumentStyleManager\LoresumV2.docx" />
+    <EmbeddedResource Include="..\CommonFiles\DocumentStyleManager\Office.DocumentStyleManager.xafml" Link="Office\DocumentStyleManager\Office.DocumentStyleManager.xafml" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="20.2.4" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.202.47.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="TestApplication.Module">
+      <HintPath>..\TestApplication.Module\bin\Debug\netstandard2.0\TestApplication.Module.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Office\Microsoft\" />
+  </ItemGroup>
+</Project>

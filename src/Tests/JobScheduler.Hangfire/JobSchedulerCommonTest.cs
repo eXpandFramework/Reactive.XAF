@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Blazor;
 using Hangfire;
 using Hangfire.MemoryStorage;
 using Microsoft.AspNetCore.Hosting;
@@ -10,6 +11,7 @@ using Xpand.TestsLib.Blazor;
 using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.BO;
+using Xpand.XAF.Modules.Reactive;
 
 [assembly: HostingStartup(typeof(Xpand.XAF.Modules.JobScheduler.Hangfire.HangfireStartup))]
 [assembly: HostingStartup(typeof(HostingStartup))]
@@ -26,13 +28,16 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
                 .Concat(JobService.JobExecution.FirstAsync(t => t.State == lastState))
                 .FirstAsync();
 
-        protected JobSchedulerModule JobSchedulerModule(params ModuleBase[] modules) {
+        public JobSchedulerModule JobSchedulerModule(params ModuleBase[] modules) {
             var newBlazorApplication = NewBlazorApplication(typeof(JobSchedulerStartup));
             var module = newBlazorApplication.AddModule<JobSchedulerModule>(typeof(JS));
+            newBlazorApplication.ConfigureModel();
             newBlazorApplication.Logon();
             using var objectSpace = newBlazorApplication.CreateObjectSpace();
             return module;
         }
+
+        
 
         protected IObservable<Job> MockHangfire(Type testJobType = null, string testName = null) {
             GlobalConfiguration.Configuration.UseMemoryStorage();

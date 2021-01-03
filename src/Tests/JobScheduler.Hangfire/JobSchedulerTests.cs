@@ -47,7 +47,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
         [TestCase(typeof(TestJobDI))]
         [TestCase(typeof(TestJob))]
         [XpandTest()]
-        public async Task Inject_Service_Provider_In_JobType_Ctor(Type testJobType) {
+        public async Task Inject_BlazorApplication_In_JobType_Ctor(Type testJobType) {
             MockHangfire().Test();
             var jobs = TestJob.Jobs.SubscribeReplay();
             using var application = JobSchedulerModule().Application.ToBlazor();
@@ -62,6 +62,23 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
                 testJob.Application.ShouldBeNull();
             }
             
+        }
+        
+        [Test()]
+        [XpandTest()]
+        public async Task Inject_PerformContext_In_JobType_Method() {
+            MockHangfire().Test();
+            var jobs = TestJob.Jobs.SubscribeReplay();
+            using var application = JobSchedulerModule().Application.ToBlazor();
+            var job = application.CommitNewJob(typeof(TestJob),nameof(TestJob.TestJobId));
+            
+            var testJob = await jobs.FirstAsync();
+
+            testJob.Context.ShouldNotBeNull();
+            testJob.Context.JobId().ShouldBe(job.Id);
+            var objectSpace = application.CreateObjectSpace();
+            job = objectSpace.GetObject(job);
+            job.JobMethods.Count.ShouldBeGreaterThan(0);            
         }
 
         
@@ -111,7 +128,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
             var jobsObserver = TestJob.Jobs.Test();
             application.CommitNewJob().Pause();
 
-            var jobState = await observable;
+            await observable;
 
             jobsObserver.ItemCount.ShouldBe(0);
         }

@@ -7,8 +7,8 @@ using DevExpress.ExpressApp.Xpo;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using Xpand.Extensions.StringExtensions;
-using Xpand.TestsLib.EasyTest;
-using Xpand.TestsLib.EasyTest.Commands;
+using Xpand.TestsLib.Common.EasyTest;
+using Xpand.TestsLib.Common.EasyTest.Commands;
 
 namespace ALL.Tests{
     public abstract class CommonTest:Xpand.TestsLib.Common.CommonTest{
@@ -33,7 +33,7 @@ namespace ALL.Tests{
                 winAdapter.KillApplication(testApplication, KillApplicationContext.TestNormalEnded);
                 if (TestContext.CurrentContext.Result.Outcome.Status != TestStatus.Passed){
                     var path = Path.GetDirectoryName(easyTestSettingsFile);
-                    WriteLine(path);
+                    WriteLine(path!);
                     foreach (var file in Directory.GetFiles(path!, "*.log")){
                         var zipPPath = $"{Path.GetDirectoryName(file)}\\{Path.GetFileNameWithoutExtension(file)}.gz";
                         File.WriteAllBytes(zipPPath,File.ReadAllText(file).GZip());

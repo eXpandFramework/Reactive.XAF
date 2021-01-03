@@ -2,16 +2,14 @@
 
 using DevExpress.EasyTest.Framework;
 using Xpand.Extensions.XAF.ObjectExtensions;
+using Xpand.TestsLib.Common.EasyTest;
+using Xpand.TestsLib.Common.EasyTest.Commands;
+using Xpand.TestsLib.Common.EasyTest.Commands.ActionCommands;
+using Xpand.TestsLib.Common.EasyTest.Commands.Automation;
+using Xpand.TestsLib.Common.EasyTest.Commands.DialogCommands;
 using Xpand.TestsLib.Common.Win32;
-using Xpand.TestsLib.EasyTest;
-using Xpand.TestsLib.EasyTest.Commands;
-using Xpand.TestsLib.EasyTest.Commands.ActionCommands;
-using Xpand.TestsLib.EasyTest.Commands.Automation;
-using Xpand.TestsLib.EasyTest.Commands.DialogCommands;
-using Xpand.TestsLib.net461.EasyTest.Commands;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleManager;
-using ActionCommand = Xpand.TestsLib.EasyTest.Commands.ActionCommands.ActionCommand;
 
 
 namespace ALL.Win.Tests{
@@ -45,7 +43,8 @@ namespace ALL.Win.Tests{
             adapter.Execute(new EditorActionNewCommand<DocumentStyleManager>(m => m.DocumentStyleLinkTemplate));
             adapter.Execute(new FillObjectViewCommand<DocumentStyleLinkTemplate>((template => template.Name,"Template")));
             adapter.Execute(new ActionCommand(Actions.SaveAndClose));
-            adapter.Execute(new ProcessRecordCommand<DocumentStyleManager,DocumentStyle>(manager => manager.ReplacementStyles, (style => style.StyleName,"QuoteV2")){SuppressExceptions = true});
+            adapter.Execute(new ProcessRecordCommand<DocumentStyleManager, DocumentStyle>(manager => manager.ReplacementStyles,
+                    (style => style.StyleName, "QuoteV2")) {SuppressExceptions = true});
             adapter.Execute(new ActionCommand("Template Styles"));
             adapter.Execute(new CheckListViewSelectionCommand("Document Style Links", (nameof(DocumentStyleLink.Original), "Quote")));
             adapter.Execute(new CheckListViewSelectionCommand("Document Style Links", (nameof(DocumentStyleLink.Replacement), "QuoteV2")));

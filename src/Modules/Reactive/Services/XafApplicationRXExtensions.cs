@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.Model.Core;
 using Fasterflect;
 using JetBrains.Annotations;
 using Xpand.Extensions.LinqExtensions;
@@ -392,8 +393,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => manager.CheckBlazor(hostingStartupType.FullName, requiredPackage.Namespace);
 
         public static IObservable<Unit> CheckBlazor(this ApplicationModulesManager manager, string hostingStartupType, string requiredPackage) 
-            => manager.WhereApplication().ToObservable().SelectMany(application => new[] {(hostingStartupType, requiredPackage),
-                ("Xpand.Extensions.Blazor.HostingStartup", "Xpand.Extensions.Blazor")
+            => manager.WhereApplication().ToObservable().Where(_ => DesignerOnlyCalculator.IsRunTime)
+                .SelectMany(application => new[] {(hostingStartupType, requiredPackage), ("Xpand.Extensions.Blazor.HostingStartup", "Xpand.Extensions.Blazor")
             }.ToObservable().SelectMany(t => application.CheckBlazor(t.Item1, t.Item2)));
 
 

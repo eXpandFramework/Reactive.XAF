@@ -16,10 +16,10 @@ using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ModelExtensions;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.Predefined;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
-using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services{
@@ -40,22 +40,25 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         [PublicAPI]
         public static IObservable<Parameter> ControlBind => ControlBindSubject;
 
-        internal static IObservable<Unit> BindConnect(this ApplicationModulesManager manager) =>
-            manager.WhenApplication(application => {
-                var controlsCreated = application.WhenObjectViewCreated()
-                    .WhenControlsCreated().Select(tuple => tuple)
-                    .Publish().RefCount();
+        internal static IObservable<Unit> BindConnect(this ApplicationModulesManager manager) 
+            => manager.WhenApplication(application => {
+                if (application.GetPlatform() != Platform.Blazor) {
+                    var controlsCreated = application.WhenObjectViewCreated()
+                        .WhenControlsCreated().Select(tuple => tuple)
+                        .Publish().RefCount();
 
-                return controlsCreated.ViewModelProperties()
-                    .Merge(controlsCreated.ViewItemBindData())
-                    .Do(tuple => BindTo(tuple))
-                    .TraceModelMapper()
-                    .ToUnit()
-                    .Merge(application.BindLayoutGroupControl().TraceModelMapper().ToUnit());
+                    return controlsCreated.ViewModelProperties()
+                        .Merge(controlsCreated.ViewItemBindData())
+                        .Do(tuple => BindTo(tuple))
+                        .TraceModelMapper()
+                        .ToUnit()
+                        .Merge(application.BindLayoutGroupControl().TraceModelMapper().ToUnit());
+                }
+                return Observable.Empty<Unit>();
             });
 
-        private static IObservable<(IModelModelMap modelMap, object control, ObjectView objectView)> ViewItemBindData(this IObservable<ObjectView> controlsCreated){
-            var viewItemBindData = controlsCreated.ViewItemData(ViewItemService.RepositoryItemsMapName)
+        private static IObservable<(IModelModelMap modelMap, object control, ObjectView objectView)> ViewItemBindData(this IObservable<ObjectView> controlsCreated) 
+            => controlsCreated.ViewItemData(ViewItemService.RepositoryItemsMapName)
                 .Merge(controlsCreated.ViewItemData(ViewItemService.PropertyEditorControlMapName, view => view is DetailView))
                 .Select(_ => {
                     var mapType = _.modelMap.GetType().GetInterfaces().First(type =>
@@ -65,12 +68,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                     var predefinedMap = EnumsNET.Enums.GetValues<PredefinedMap>().First(map => map.TypeToMap() == controlType);
                     var control = predefinedMap.GetViewControl(_.objectView, _.modelMap.Parent.Parent.Id());
                     return (_.modelMap, control, _.objectView);
-                });
-            return viewItemBindData.TraceModelMapper(_ => $"{_.control.GetType().Name}, {_.modelMap.Id()}, {_.objectView.Id}");
-        }
+                }).TraceModelMapper(_ => $"{_.control.GetType().Name}, {_.modelMap.Id()}, {_.objectView.Id}");
 
-        private static IObservable<(IModelModelMap modelMap, object control, ObjectView view)> BindLayoutGroupControl(this XafApplication application){
-            var bindLayoutGroupControl = application.WhenDetailViewCreated().ToDetailView()
+        private static IObservable<(IModelModelMap modelMap, object control, ObjectView view)> BindLayoutGroupControl(this XafApplication application) 
+            => application.WhenDetailViewCreated().ToDetailView()
                 .SelectMany(_ => _.LayoutManager.WhenCustomizeAppearence().Select(pattern => (view: _, pattern.EventArgs)))
                 .Where(_ => {
                     var item = _.EventArgs.Item.GetPropertyValue("Item");
@@ -86,18 +87,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 })
                 .TraceModelMapper(_ => $"{_.control.GetType().Name}, {_.view.Id}, {_.modelMap.Id()}")
                 .Do(tuple => tuple.BindTo());
-            return bindLayoutGroupControl;
-        }
 
         private static IObservable<(ObjectView objectView, IModelModelMap modelMap)> ViewItemData(
-            this IObservable<ObjectView> controlsCreated, string propertyMapName,Func<ObjectView, bool> viewMatch = null){
-
-            return controlsCreated.Where(objectView => viewMatch?.Invoke(objectView)??true).SelectMany(objectView => {
-                return objectView.Model.AsObjectView.CommonMemberViewItems().Cast<IModelNode>()
-                    .SelectMany(item => item.GetNode(propertyMapName)?.Nodes().Cast<IModelModelMap>() ?? Enumerable.Empty<IModelModelMap>())
-                    .Select(node => (objectView,node));
-            });
-        }
+            this IObservable<ObjectView> controlsCreated, string propertyMapName,Func<ObjectView, bool> viewMatch = null) 
+            => controlsCreated.Where(objectView => viewMatch?.Invoke(objectView)??true)
+                .SelectMany(objectView => objectView.Model.AsObjectView.CommonMemberViewItems().Cast<IModelNode>()
+                .SelectMany(item => item.GetNode(propertyMapName)?.Nodes().Cast<IModelModelMap>() ?? Enumerable.Empty<IModelModelMap>())
+                .Select(node => (objectView,node)));
 
         private static (IModelModelMap modelMap, object control,ObjectView view) BindData((PropertyInfo info, IModelNode model, ObjectView view) data,object control=null){
             var modelMap=data.model as IModelModelMap;
@@ -110,10 +106,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 control = EnumsNET.Enums.GetMember<PredefinedMap>(type?.Name!)?.Value.GetViewControl(data.view, model);
                 modelMap = data.info.GetValue(data.model) as IModelModelMap;
             }
-            if (control!=null){
-                return (modelMap, control,data.view);
-            }
-            return default;
+            return control!=null ? (modelMap, control,data.view) : default;
         }
 
         private static void BindTo(this (IModelNodeDisabled model, object control, ObjectView view) data){
@@ -124,20 +117,19 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             }
         }
 
-        internal static IObservable<(IModelModelMap modelMap, object control, ObjectView view)> ViewModelProperties(this IObservable<ObjectView> source){
-            return source.SelectMany(objectView => {
+        internal static IObservable<(IModelModelMap modelMap, object control, ObjectView view)> ViewModelProperties(this IObservable<ObjectView> source) 
+            => source.SelectMany(objectView => {
                     var items = objectView.Model is IModelListView modelListView
-                    ? modelListView.Columns.Concat(new[]{modelListView.SplitLayout}.Cast<IModelNode>())
-                    : ((IModelDetailView) objectView.Model).Items.OfType<IModelCommonMemberViewItem>()
-                    .Cast<IModelNode>();
-                var viewItemData = items.SelectMany(column =>column.ToBindableData(objectView));
-                var viewData = objectView.Model.ToBindableData(objectView);
-                return viewData.Concat(viewItemData);
-            })
-            .Select(_ => BindData(_))
-            .WhenNotDefault()
-            .TraceModelMapper(_ =>$"{_.control.GetType().Name}, {_.view.Id}, {_.modelMap.Id()}" );
-        }
+                        ? modelListView.Columns.Concat(new[]{modelListView.SplitLayout}.Cast<IModelNode>())
+                        : ((IModelDetailView) objectView.Model).Items.OfType<IModelCommonMemberViewItem>()
+                        .Cast<IModelNode>();
+                    var viewItemData = items.SelectMany(column =>column.ToBindableData(objectView));
+                    var viewData = objectView.Model.ToBindableData(objectView);
+                    return viewData.Concat(viewItemData);
+                })
+                .Select(_ => BindData(_))
+                .WhenNotDefault()
+                .TraceModelMapper(_ =>$"{_.control.GetType().Name}, {_.view.Id}, {_.modelMap.Id()}" );
 
         private static IEnumerable<(PropertyInfo info, IModelNode model, ObjectView view)> ToBindableData(this IModelNode node,ObjectView objectView){
             if (node is IModelModelMappersContextDependency contextDependency){
@@ -151,9 +143,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 .Select(info => (info, model: node,view:objectView));
         }
 
-        public static void BindTo(this IModelNodeDisabled modelNode, object instance){
-            modelNode.BindToModel( instance);
-        }
+        public static void BindTo(this IModelNodeDisabled modelNode, object instance) => modelNode.BindToModel( instance);
 
         private static void BindToModel(this IModelNodeDisabled modelNodeDisabled, object instance){
             if (!modelNodeDisabled.NodeDisabled){
@@ -194,8 +184,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             }
         }
 
-        private static bool IsValidInfo(ModelValueInfo info, Dictionary<string, PropertyInfo> properties){
-            return !info.IsReadOnly &&  properties.ContainsKey(info.Name);
-        }
+        private static bool IsValidInfo(ModelValueInfo info, Dictionary<string, PropertyInfo> properties) 
+            => !info.IsReadOnly &&  properties.ContainsKey(info.Name);
     }
 }

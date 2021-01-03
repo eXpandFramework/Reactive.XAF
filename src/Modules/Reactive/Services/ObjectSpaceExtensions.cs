@@ -141,10 +141,6 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenExistingObjectCommiting<T>(this XafApplication application) 
             => application.WhenObjectSpaceCreated().SelectMany(_ => _.e.ObjectSpace.WhenCommiting<T>(ObjectModification.Updated));
 
-        public static IObservable<(T theObject, IObjectSpace objectSpace)> WhenNewObjectCreated<T>(this XafApplication application) 
-            => application.WhenObjectSpaceCreated().SelectMany(_ => RxApp.NewObjects.Where(tuple => tuple.objectSpace==_.e.ObjectSpace&&tuple.theObject is T)
-                    .Select(tuple => ((T)tuple.theObject,tuple.objectSpace)));
-
         public static IObservable<(T theObject, IObjectSpace objectSpace)> ExistingObject<T>(this IObjectSpace objectSpace,Func<IQueryable<T>,IQueryable<T>> query=null){
             var objectsQuery = objectSpace.GetObjectsQuery<T>();
             if (query != null){

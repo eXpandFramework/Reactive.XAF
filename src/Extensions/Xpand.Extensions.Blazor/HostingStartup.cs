@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using System;
+using System.Net.Http;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Xpand.Extensions.Blazor {
@@ -7,6 +10,10 @@ namespace Xpand.Extensions.Blazor {
             => builder.ConfigureServices(services => {
                 services.AddSingleton<GlobalItems>();
                 services.AddSingleton<ISharedXafApplicationProvider,SharedXafApplicationProvider>();
+                services.AddScoped(sp => {
+                    var navigationManager = sp.GetRequiredService<NavigationManager>();
+                    return new HttpClient { BaseAddress = new Uri(navigationManager.BaseUri) };
+                });
             });
     }
 }

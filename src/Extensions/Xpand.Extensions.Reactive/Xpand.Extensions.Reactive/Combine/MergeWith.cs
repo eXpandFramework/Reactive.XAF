@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Xpand.Extensions.Reactive.Combine{
     public static partial class Combine{

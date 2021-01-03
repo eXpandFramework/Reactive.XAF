@@ -29,7 +29,7 @@ if (!$sourcePath) {
     $sourcePath = "$PathToScript\..\src"
 }
 Set-VsoVariable build.updatebuildnumber "$newVersion-$CustomVersion"
-Update-AssemblyInfoVersion $newVersion "$sourcePath\src\Common\AssemblyInfoVersion.cs"
+Update-AssemblyInfoVersion $newVersion "$PSScriptRoot\..\src\Common\AssemblyInfoVersion.cs"
 
 
 return

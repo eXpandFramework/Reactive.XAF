@@ -19,7 +19,7 @@ namespace Xpand.TestsLib.Blazor {
 
         public void Configure(IApplicationBuilder app) => app.UseXaf();
 
-        public void ConfigureServices(IServiceCollection services) {
+        public virtual void ConfigureServices(IServiceCollection services) {
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddHttpContextAccessor();

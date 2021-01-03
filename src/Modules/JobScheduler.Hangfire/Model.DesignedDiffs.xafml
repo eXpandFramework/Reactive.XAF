@@ -1,5 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Application>
+  <ActionDesign>
+    <Actions>
+      <Action Id="PauseJob" ImageName="Action_PauseRecording" PaintStyle="CaptionAndImage" />
+      <Action Id="ResumeJob" ImageName="Action_ResumeRecording" PaintStyle="CaptionAndImage" />
+    </Actions>
+  </ActionDesign>
   <Views>
     <DetailView Id="Job_DetailView">
       <Layout>
@@ -24,5 +30,10 @@
       </Layout>
     </DetailView>
     <ListView Id="Job_Workers_ListView" MasterDetailMode="ListViewAndDetailView" />
+    <ListView Id="JobWorker_Executions_ListView">
+      <Columns>
+        <ColumnInfo Id="Created" SortOrder="Descending" />
+      </Columns>
+    </ListView>
   </Views>
 </Application>

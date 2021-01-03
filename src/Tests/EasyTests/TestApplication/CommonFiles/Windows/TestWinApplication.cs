@@ -1,13 +1,12 @@
 ﻿using System;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Security;
+using DevExpress.ExpressApp.Security.ClientServer;
 using DevExpress.ExpressApp.Win;
 using DevExpress.ExpressApp.Xpo;
 using Xpand.XAF.Modules.Reactive.Services;
 
-// ReSharper disable once CheckNamespace
 namespace TestApplication.Win{
-	
-
     public class TestWinApplication:WinApplication{
         public TestWinApplication(){
 	        DevExpress.ExpressApp.Utils.ImageLoader.Instance.UseSvgImages = true;
@@ -16,9 +15,7 @@ namespace TestApplication.Win{
             OptimizedControllersCreation = true;
             UseLightStyle = true;
             ExecuteStartupLogicBeforeClosingLogonWindow = true;
-
-            Modules.Add(new WinModule());
-            
+            Modules.Add(new TestApplication.Module.Win.TestApplicationWinModule());
             CheckCompatibilityType=CheckCompatibilityType.DatabaseSchema;
             this.AlwaysUpdateOnDatabaseVersionMismatch().Subscribe();
             ModelCacheManager.UseCacheWhenDebuggerIsAttached = true;
@@ -34,7 +31,7 @@ namespace TestApplication.Win{
         }
 
         protected override void CreateDefaultObjectSpaceProvider(CreateCustomObjectSpaceProviderEventArgs args){
-            args.ObjectSpaceProvider=new XPObjectSpaceProvider(new ConnectionStringDataStoreProvider(args.ConnectionString),true);
+            args.ObjectSpaceProvider=new SecuredObjectSpaceProvider((ISelectDataSecurityProvider) Security, new ConnectionStringDataStoreProvider(args.ConnectionString), true);
             args.ObjectSpaceProviders.Add(new NonPersistentObjectSpaceProvider(TypesInfo, null));
             // args.ObjectSpaceProvider = new XPObjectSpaceProvider(new ConnectionStringDataStoreProvider(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString), true);
         }

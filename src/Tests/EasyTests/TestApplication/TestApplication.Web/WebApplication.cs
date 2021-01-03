@@ -2,10 +2,13 @@
 using System.ComponentModel;
 using System.Web;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Security;
+using DevExpress.ExpressApp.Security.ClientServer;
 using DevExpress.ExpressApp.Web;
 using DevExpress.ExpressApp.Web.Editors.ASPx;
 using DevExpress.ExpressApp.Xpo;
 using DevExpress.Persistent.Base;
+using TestApplication.Module.Web;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace TestApplication.Web{
@@ -13,7 +16,7 @@ namespace TestApplication.Web{
         public TestWebApplication(){
             
             ((ISupportInitialize) this).BeginInit();
-            Modules.Add(new WebModule());
+            Modules.Add(new TestApplicationWebModule());
             ((ISupportInitialize) this).EndInit();
             this.AlwaysUpdateOnDatabaseVersionMismatch().Subscribe();
             ApplicationName = "TestWebApplication";
@@ -24,7 +27,7 @@ namespace TestApplication.Web{
 
         protected override void CreateDefaultObjectSpaceProvider(CreateCustomObjectSpaceProviderEventArgs args){
             var xpoDataStoreProvider = GetDataStoreProvider(args);
-            args.ObjectSpaceProvider = new XPObjectSpaceProvider(xpoDataStoreProvider, true);
+            args.ObjectSpaceProvider = new SecuredObjectSpaceProvider((ISelectDataSecurityProvider) Security, xpoDataStoreProvider, true);
         }
 
         private IXpoDataStoreProvider GetDataStoreProvider(CreateCustomObjectSpaceProviderEventArgs args){

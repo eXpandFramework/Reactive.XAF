@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing.Design;
 using System.Linq;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
@@ -61,7 +60,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager{
     }
 
     [DomainLogic(typeof(IModelDocumentStyleManager))]
-    public static class ModelOffieModuleLogic{
+    public static class ModelOfficeModuleLogic{
 	    [UsedImplicitly]
         public static IModelList<IModelClass> Get_DocumentProviders(this IModelDocumentStyleManager modelDocumentStyleManager) 
             => modelDocumentStyleManager.Application.DocumentModelClasses();

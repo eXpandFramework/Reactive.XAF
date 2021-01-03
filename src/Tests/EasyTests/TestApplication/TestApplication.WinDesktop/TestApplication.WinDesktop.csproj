@@ -27,6 +27,7 @@
     <NoWarn>NU1603;NETSDK1086</NoWarn>
     <AssemblyName>TestApplication.WinDesktop</AssemblyName>
     <CopyLocalLockFileAssemblie>true</CopyLocalLockFileAssemblie>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugType>full</DebugType>
@@ -54,32 +55,8 @@
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\..\TestsLib.Common\BO\Accessory.cs" Link="Common\Accessory.cs" />
-    <Compile Include="..\..\..\TestsLib.Common\BO\Order.cs" Link="Common\Order.cs" />
-    <Compile Include="..\..\..\TestsLib.Common\BO\OrderModuleUpdater.cs" Link="Common\OrderModuleUpdater.cs" />
-    <Compile Include="..\..\..\TestsLib.Common\BO\Product.cs" Link="Common\Product.cs" />
-    <Compile Include="..\..\..\TestsLib.Common\DefaultUserModuleUpdater.cs" Link="Common\DefaultUserModuleUpdater.cs" />
-    <Compile Include="..\CommonFiles\CloudCalendarService.cs" Link="Office\Cloud\CloudCalendarService.cs" />
-    <Compile Include="..\CommonFiles\DocumentStyleManager\DocumentObject.cs" Link="Office\DocumentStyleManager\DocumentObject.cs" />
-    <Compile Include="..\CommonFiles\DocumentStyleManager\DocumentStyleManagerModuleUpdater.cs" Link="Office\DocumentStyleManager\DocumentStyleManagerModuleUpdater.cs" />
-    <Compile Include="..\CommonFiles\DocumentStyleManager\DocumentStyleManagerService.cs" Link="Office\DocumentStyleManager\DocumentStyleManagerService.cs" />
-    <Compile Include="..\CommonFiles\GoogleTasksService\GoogleCalendarService.cs" Link="Office\Cloud\Google\GoogleCalendarService.cs" />
-    <Compile Include="..\CommonFiles\GoogleTasksService\GoogleTasksService.cs" Link="Office\Cloud\Google\GoogleTasksService.cs" />
-    <Compile Include="..\CommonFiles\CloudTasksService.cs" Link="Office\Cloud\CloudTasksService.cs" />
-    <Compile Include="..\CommonFiles\AgnosticModule.cs" Link="Common\AgnosticModule.cs" />
-    <Compile Include="..\CommonFiles\GoogleService\ShowGoogleAccountInfoService.cs" Link="Office\Cloud\Google\ShowGoogleAccountInfoService.cs" />
-    <Compile Include="..\CommonFiles\MicrosoftCalendarService\MicrosoftCalendarService.cs" Link="Office\Cloud\Microsoft\MicrosoftCalendarService.cs" />
-    <Compile Include="..\CommonFiles\MicrosoftService\MicrosoftService.cs" Link="Office\Cloud\Microsoft\MicrosoftService.cs" />
-    <Compile Include="..\CommonFiles\CloudService.cs" Link="Office\Cloud\CloudService.cs" />
-    <Compile Include="..\CommonFiles\GoogleService\GoogleService.cs" Link="Office\Cloud\Google\GoogleService.cs" />
-    <Compile Include="..\CommonFiles\MicrosoftService\ShowMSAccountInfoService.cs" Link="Office\Cloud\Microsoft\ShowMSAccountInfoService.cs" />
-    <Compile Include="..\CommonFiles\MicrosoftTodoService\MicrosoftTodoService.cs" Link="Office\Cloud\Microsoft\MicrosoftTodoService.cs" />
-    <Compile Include="..\CommonFiles\ViewWizard\ViewWizard.cs">
-      <Link>ViewWizard\ViewWizard.cs</Link>
-    </Compile>
     <Compile Include="..\CommonFiles\Windows\Program.cs" Link="Program.cs" />
     <Compile Include="..\CommonFiles\Windows\TestWinApplication.cs" Link="TestWinApplication.cs" />
-    <Compile Include="..\CommonFiles\Windows\WinModule.cs" Link="WinModule.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="Properties\Resources.resx">
@@ -92,16 +69,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="..\CommonFiles\Cloud.Office.xafml" Link="Office\Cloud\Cloud.Office.xafml" />
-    <EmbeddedResource Include="..\CommonFiles\SeqeuenceGenerator\SequenceGenerator.xafml" Link="SequenceGenerator\SequenceGenerator.xafml" />
     <Content Include="Model.xafml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <EmbeddedResource Include="..\CommonFiles\DocumentStyleManager\Lorem.docx" Link="Office\DocumentStyleManager\Lorem.docx" />
-    <EmbeddedResource Include="..\CommonFiles\DocumentStyleManager\LoresumV2.docx" Link="Office\DocumentStyleManager\LoresumV2.docx" />
-    <EmbeddedResource Include="..\CommonFiles\DocumentStyleManager\Office.DocumentStyleManager.xafml" Link="Office\DocumentStyleManager\Office.DocumentStyleManager.xafml" />
-    <EmbeddedResource Include="..\CommonFiles\DocumentStyleManager\Lorem2.docx" Link="Office\DocumentStyleManager\Lorem2.docx" />
-    <EmbeddedResource Include="..\CommonFiles\DocumentStyleManager\Lorem3.docx" Link="Office\DocumentStyleManager\Lorem3.docx" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -123,16 +93,18 @@
     <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.8.0" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.8.0" />
-    <PackageReference Include="System.ServiceProcess.ServiceController" Version="4.7.0" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.202.47" />
+    <PackageReference Include="System.ServiceProcess.ServiceController" Version="5.0.0" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.202.47.3" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Office\Cloud\Google\" />
-    <Folder Include="Office\Cloud\Microsoft\" />
-    <Folder Include="Office\DocumentStyleManager\" />
-    <Folder Include="SequenceGenerator\" />
+    <Compile Include="..\..\..\..\Common\AssemblyInfoVersion.cs" Link="Properties\AssemblyInfoVersion.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\..\..\Common\AssemblyInfoVersion.cs" Link="AssemblyInfoVersion.cs" />
+    <Reference Include="TestApplication.Module">
+      <HintPath>..\TestApplication.Module\bin\Debug\netstandard2.0\TestApplication.Module.dll</HintPath>
+    </Reference>
+    <Reference Include="TestApplication.Module.WinDesktop">
+      <HintPath>..\TestApplication.Module.WinDesktop\bin\Debug\netcoreapp3.1\TestApplication.Module.WinDesktop.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>

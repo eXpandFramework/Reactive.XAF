@@ -2,6 +2,7 @@
 using DevExpress.Persistent.Base;
 using DevExpress.ExpressApp.Web;
 using DevExpress.Web;
+using TestApplication.Module.Common;
 
 namespace TestApplication.Web {
     public class Global : System.Web.HttpApplication {

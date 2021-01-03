@@ -3,10 +3,10 @@ using System.Windows.Forms;
 using DevExpress.ExpressApp.Win.SystemModule;
 using DevExpress.Persistent.Base;
 using DevExpress.XtraEditors;
+using TestApplication.Module.Common;
 using Xpand.Extensions.AppDomainExtensions;
 using FileLocation = DevExpress.Persistent.Base.FileLocation;
 
-// ReSharper disable once CheckNamespace
 namespace TestApplication.Win {
     
     static class Program {

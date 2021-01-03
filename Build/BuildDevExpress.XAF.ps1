@@ -17,11 +17,10 @@ Properties {
 Task BuildNugetConsumers -depends   CreateNuspec, PackNuspec, CompileNugetConsumers
 Task Build  -depends   Clean, Init, UpdateProjects, Compile,CheckVersions, IndexSources,CompileTests
 
-function CompileTestSolution($conf){
+function CompileTestSolution($solution){
     Write-HostFormatted "Building Tests" -Section
     New-Item -Name Nupkg -ItemType Directory -Path "$root\bin" -ErrorAction SilentlyContinue
-    $solution="$Root\src\Tests\Tests.sln"
-    $conf=GetConfiguration $solution $conf
+    $conf=GetConfiguration $solution "Debug"
     "Configuration=$conf"
     Start-Build -Path $solution -Configuration $conf -BinaryLogPath "$Root\Bin\Test$conf.binlog" -Verbosity minimal -WarnAsError 
     
@@ -68,7 +67,17 @@ Task UpdateProjects {
 
 Task CompileTests -precondition { return $compile } {
     Invoke-Script {
-        CompileTestSolution $Global:Configuration
+        if ((Test-AzDevops)){
+            $nugetConfigPath="$root\src\tests\nuget.config"
+            $nugetConfig=Get-XmlContent $nugetConfigPath
+            $a=@{
+                key="DXAzDevops"
+                value=$env:DxFeed
+            }
+            Add-XmlElement $nugetConfig "add" "packageSources" -Attributes $a
+            $nugetConfig|Save-Xml $nugetConfigPath
+        }
+        CompileTestSolution "$Root\src\Tests\Tests.sln"
         if (!(Test-AzDevops)){
             Invoke-Task -taskName BuildNugetConsumers
         }
@@ -100,7 +109,7 @@ Task CompileNugetConsumers -precondition { return $compile } {
             }
             ($prefs|Select-Object -First 1).OwnerDocument.Save($_)
         }
-        CompileTestSolution "NugetConsumers"
+        CompileTestSolution "$Root\src\Tests\\EasyTests\EasyTests.sln"
     } -Maximum 3
     Get-ChildItem $root\bin "*xpand*.dll"| Test-AssemblyReference -VersionFilter $DXVersion
 }
@@ -147,9 +156,9 @@ Task Compile -precondition { return $compile } {
     
     Invoke-Script {
         Write-HostFormatted "Building Xpand.XAF.ModelEditor" -Section
-        dotnet msbuild "$Root\tools\Xpand.XAF.ModelEditor\Xpand.XAF.ModelEditor.csproj" /t:Clean
-        dotnet restore "$Root\tools\Xpand.XAF.ModelEditor\Xpand.XAF.ModelEditor.csproj" --source $packageSources --source (Get-PackageFeed -Nuget) /WarnAsError
-        dotnet msbuild "$Root\tools\Xpand.XAF.ModelEditor\Xpand.XAF.ModelEditor.csproj" "/bl:$Root\Bin\ModelEditor.binlog" "/p:configuration=Release" /WarnAsError /m /v:m
+        Start-Build -Path "$Root\tools\Xpand.XAF.ModelEditor\Xpand.XAF.ModelEditor.csproj" -WarnAsError
+        Write-HostFormatted "Building Xpand.XAF.ModelEditor.WinDesktop" -Section
+        Start-Build -Path "$Root\tools\Xpand.XAF.ModelEditor\Xpand.XAF.ModelEditor.WinDesktop.csproj" -WarnAsError
     } -Maximum 3
     
     Write-HostFormatted "Build Versions:" -Section

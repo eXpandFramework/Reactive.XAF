@@ -250,16 +250,16 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static IObservable<TAction> ActivateWhenEnabled<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
             => source.SelectMany(a => a.ActivateWhenEnabled());
 
-        public static IObservable<TAction> ActivateInUserDetails<TAction>(this IObservable<TAction> registerAction,bool skipWhenNoSecurity=false) where TAction:ActionBase 
+        public static IObservable<TAction> ActivateInUserDetails<TAction>(this IObservable<TAction> registerAction) where TAction:ActionBase 
 	        => registerAction.WhenControllerActivated()
                 .Do(action => {
-					if ((!skipWhenNoSecurity||!string.IsNullOrEmpty(SecuritySystem.CurrentUserName)) ){
+                    bool active=false;
+                    if (!string.IsNullOrEmpty(SecuritySystem.CurrentUserName)) {
                         var view = action.View();
-                        var active =view is DetailView&& view.CurrentObject != null && view.ObjectSpace.GetKeyValue(view.CurrentObject)?.ToString() == SecuritySystem.CurrentUserId.ToString();
-                        action.Active[nameof(ActivateInUserDetails)] = active;
+                        active =view is DetailView&& view.CurrentObject != null && view.ObjectSpace.GetKeyValue(view.CurrentObject)?.ToString() == SecuritySystem.CurrentUserId.ToString();    
                     }
+                    action.Active[nameof(ActivateInUserDetails)] = active;
 		        })
-                // .SelectMany(a => a.Controller.WhenDeactivated().To(a).Do(action => action.Activate(nameof(ActivateInUserDetails),false)).FirstAsync().IgnoreElements().StartWith(a))
                 .WhenNotDefault(a => a.Active[nameof(ActivateInUserDetails)])
 		        .TraceRX(action => $"{action.Id}, {SecuritySystem.CurrentUserName}");
 

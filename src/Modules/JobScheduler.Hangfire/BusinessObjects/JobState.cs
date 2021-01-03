@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using DevExpress.Xpo;
+using Xpand.Extensions.XAF.Attributes.Custom;
 using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
@@ -24,7 +25,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
             set => SetPropertyValue(nameof(State), ref _state, value);
         }
         DateTime _created;
-
+        [DisplayDateAndTime]
         public DateTime Created {
             get => _created;
             set => SetPropertyValue(nameof(Created), ref _created, value);

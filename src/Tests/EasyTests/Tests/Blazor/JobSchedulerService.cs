@@ -1,0 +1,67 @@
+﻿using System.Reactive.Linq;
+using System.Threading.Tasks;
+using DevExpress.EasyTest.Framework;
+using Hangfire;
+using Shouldly;
+using Xpand.Extensions.XAF.ObjectExtensions;
+using Xpand.TestsLib.Blazor;
+using Xpand.TestsLib.Common.BO;
+using Xpand.TestsLib.Common.EasyTest;
+using Xpand.TestsLib.Common.EasyTest.Commands;
+using Xpand.TestsLib.Common.EasyTest.Commands.ActionCommands;
+using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
+
+namespace Web.Tests {
+    public static class JobSchedulerService {
+        public static async Task TestJobScheduler(this ICommandAdapter adapter) {
+            adapter.Execute(new NavigateCommand("JobScheduler.Job"));
+            adapter.CreateJob()
+                .TestPauseResume();
+            await adapter.TestJob(WorkerState.Succeeded, 1);
+
+            adapter.Execute(new NavigateCommand("JobScheduler.Job"));
+            adapter.Execute(new ProcessRecordCommand<Job, Job>((job => job.Id, "test")));
+            adapter.Execute(new FillObjectViewCommand((nameof(Job.JobMethod),"Failed")));
+            adapter.Execute(new ActionCommand(Actions.Save));
+            await adapter.TestJob(WorkerState.Failed, 2);
+        }
+
+        private static ICommandAdapter CreateJob(this ICommandAdapter adapter) {
+            adapter.Execute(new ActionCommand(Actions.New));
+            adapter.Execute(new FillObjectViewCommand<Job>((job => job.Id, "test"),(job => job.CronExpression, nameof(Cron.Yearly))));
+            adapter.Execute(new FillObjectViewCommand((nameof(Job.JobType),"Job"),(nameof(Job.JobMethod),"ImportOrders".CompoundName())));
+            adapter.Execute(new ActionCommand(Actions.Save));
+            return adapter;
+        }
+
+        private static async Task TestJob(this ICommandAdapter adapter, WorkerState workerState, int workersCount) {
+            adapter.Execute(new ActionCommand("Trigger"));
+            await adapter.Execute(() => adapter.Execute(new ActionCommand(Actions.Refresh),new CheckListViewCommand<Job>(job => job.Workers, workersCount)));
+            adapter.Execute(new SelectObjectsCommand<Job>(job => job.Workers,nameof(JobWorker.State),new []{workerState.ToString()}));
+
+            adapter.Execute(new ActionCommand("Dashboard"));
+            await adapter.Execute(() => {
+                var webDriver = adapter.Driver();
+                webDriver.SwitchTo().Window(webDriver.WindowHandles[1]);
+                webDriver.Url.ShouldContain("/hangfire/jobs/details/");
+                webDriver.Close();
+                webDriver.SwitchTo().Window(webDriver.WindowHandles[0]);
+            });
+            adapter.Execute(new ProcessRecordCommand<Job,JobWorker>(job => job.Workers,(worker => worker.State,workerState.ToString())));
+            adapter.Execute(new CheckDetailViewCommand<JobWorker>((worker => worker.State, workerState.ToString())));
+            adapter.Execute(new ActionCommand(Actions.OK));
+            adapter.Execute(new NavigateCommand("Default.Order"));
+            adapter.Execute(new CheckListViewCommand(nameof(Order), 10));
+        }
+
+        private static void TestPauseResume(this ICommandAdapter adapter) {
+            adapter.Execute(new ActionAvailableCommand("Resume") {ExpectException = true});
+            adapter.Execute(new ActionCommand("Pause"));
+            adapter.Execute(new ActionAvailableCommand("Pause") {ExpectException = true});
+            adapter.Execute(new ActionCommand("Resume"));
+            adapter.Execute(new ActionAvailableCommand("Pause"));
+            adapter.Execute(new ActionAvailableCommand("Resume") {ExpectException = true});
+            
+        }
+    }
+}

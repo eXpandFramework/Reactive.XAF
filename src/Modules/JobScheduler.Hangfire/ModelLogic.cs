@@ -1,4 +1,4 @@
-﻿using DevExpress.ExpressApp.Model;
+﻿ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using Xpand.XAF.Modules.Reactive;
 
