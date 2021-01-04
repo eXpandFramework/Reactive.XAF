@@ -155,7 +155,7 @@ namespace Xpand.XAF.Modules.Reactive{
 
         private static IObservable<Unit> MergedExtraEmbeddedModels(this ApplicationModulesManager manager) 
             => manager.WhereApplication().ToObservable()
-                .SelectMany(application => application.WhenCreateCustomModelDifferenceStore()
+                .SelectMany(application => application.WhenCreateCustomUserModelDifferenceStore()
                     .Do(_ => {
                         var models = _.application.Modules.SelectMany(m => m.EmbeddedModels().Select(tuple => (id: $"{m.Name},{tuple.id}", tuple.model)))
                             .Where(tuple => {

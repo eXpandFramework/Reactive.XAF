@@ -11,7 +11,7 @@
     <DebugType>full</DebugType>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
-    <AssemblyName>Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests</AssemblyName>
+    <AssemblyName>Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests</AssemblyName>
     <CopyLocalLockFileAssemblie>true</CopyLocalLockFileAssemblie>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>

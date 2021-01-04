@@ -1,5 +1,5 @@
 param(
-    [version]$DXVersion = "20.1.8"
+    [version]$DXVersion = "20.1.9"
 )
 $ErrorActionPreference = "Stop"
 $rootLocation = "$PSScriptRoot\..\"
@@ -31,7 +31,7 @@ Get-ChildItem -Filter *.csproj -Recurse | ForEach-Object {
     Update-ProjectAutoGenerateBindingRedirects $projXml $true
     if ($fileName -notlike "*.Tests.csproj" -or $fileName -like "*EasyTest*.csproj" ) {
         if ($fileName -notlike "*TestApplication.Web*.csproj") {
-            Update-OutputPath $fileName "$rootLocation\bin\"
+            Update-OutputPath $fileName "$rootLocation\bin\"|Out-Null
         }
         
     }

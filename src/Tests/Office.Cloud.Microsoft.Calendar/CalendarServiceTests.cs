@@ -151,7 +151,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
             var builder = await application.InitializeService();
 
             await builder.frame.View.ObjectSpace.Delete_Event_Resource(pmeEvent =>
-                CalendarService.Updated.Select(_ => _.local).TakeUntilDisposed(application), async () => {
+                CalendarService.Updated.Select(_ => _.local).TakeUntilDisposed(application), async () => { 
                 var events = await builder.requestBuilder.Events.Request().GetAsync();
                 events.Count.ShouldBe(1);
                 events.First().Attendees.Count().ShouldBe(0);

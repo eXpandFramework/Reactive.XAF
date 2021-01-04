@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Threading.Tasks;
 using DevExpress.ExpressApp.Blazor;
 using Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions;
 using Xpand.TestsLib.Common.BO;
 using Xpand.XAF.Modules.JobScheduler.Hangfire;
+using Task = System.Threading.Tasks.Task;
 
 namespace TestApplication.Module.Blazor.JobScheduler {
     [JobProvider]
@@ -30,4 +30,5 @@ namespace TestApplication.Module.Blazor.JobScheduler {
 
 
     }
+
 }

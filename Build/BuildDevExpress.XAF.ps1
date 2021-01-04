@@ -1,6 +1,6 @@
 Framework "4.6"
 $ErrorActionPreference = "Stop"
-$Global:Configuration="Debug"
+$Global:Configuration = "Debug"
 
 Properties {
     $packageSources = $null
@@ -15,16 +15,14 @@ Properties {
 }
 
 Task BuildNugetConsumers -depends   CreateNuspec, PackNuspec, CompileNugetConsumers
-Task Build  -depends   Clean, Init, UpdateProjects, Compile,CheckVersions, IndexSources,CompileTests
+Task Build  -depends   Clean, Init, UpdateProjects, Compile, CheckVersions, IndexSources, CompileTests
 
-function CompileTestSolution($solution){
+function CompileTestSolution($solution) {
     Write-HostFormatted "Building Tests" -Section
     New-Item -Name Nupkg -ItemType Directory -Path "$root\bin" -ErrorAction SilentlyContinue
-    $conf=GetConfiguration $solution "Debug"
+    $conf = GetConfiguration $solution "Debug"
     "Configuration=$conf"
     Start-Build -Path $solution -Configuration $conf -BinaryLogPath "$Root\Bin\Test$conf.binlog" -Verbosity minimal -WarnAsError 
-    
-    Start-Build -Path "$Root\src\Tests\Office.DocumentStyleManager\Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.csproj"
     
     Copy-Item -path $root\bin\runtimes -Recurse -Destination $root\bin\TestWinApplication\runtimes -Container -Force
 }
@@ -32,7 +30,7 @@ function CompileTestSolution($solution){
 Task IndexSources {
     Invoke-Script {
         $sha = Get-GitLastSha "https://github.com/eXpandFramework/DevExpress.XAF" $branch
-        "Xpand.XAF.Modules.*.pdb","Xpand.Extensions.*.pdb"|ForEach-Object{
+        "Xpand.XAF.Modules.*.pdb", "Xpand.Extensions.*.pdb" | ForEach-Object {
             Get-ChildItem "$root\bin" $_ | Update-XSymbols -SourcesRoot "$Root" -TargetRoot "https://raw.githubusercontent.com/eXpandFramework/DevExpress.XAF/$sha"
             Get-ChildItem "$root\bin\net461" $_ | Update-XSymbols -SourcesRoot "$Root" -TargetRoot "https://raw.githubusercontent.com/eXpandFramework/DevExpress.XAF/$sha"
         }
@@ -52,9 +50,9 @@ Task Init {
 
         dotnet tool restore
         Set-Location $root
-        Invoke-Script{Invoke-PaketRestore -strict }
+        Invoke-Script { Invoke-PaketRestore -strict }
         
-        Get-ChildItem "$(Get-NugetInstallationFolder)\grpc.core" "runtimes" -Recurse|Select-Object -Last 1|Copy-Item -Destination "$root\bin\runtimes" -Recurse -Force
+        Get-ChildItem "$(Get-NugetInstallationFolder)\grpc.core" "runtimes" -Recurse | Select-Object -Last 1 | Copy-Item -Destination "$root\bin\runtimes" -Recurse -Force
     }
 }
 
@@ -67,124 +65,144 @@ Task UpdateProjects {
 
 Task CompileTests -precondition { return $compile } {
     Invoke-Script {
-        if ((Test-AzDevops)){
-            $nugetConfigPath="$root\src\tests\nuget.config"
-            $nugetConfig=Get-XmlContent $nugetConfigPath
-            $a=@{
-                key="DXAzDevops"
-                value=$env:DxFeed
+        if ((Test-AzDevops)) {
+            $nugetConfigPath = "$root\src\tests\nuget.config"
+            $nugetConfig = Get-XmlContent $nugetConfigPath
+            $a = @{
+                key   = "DXAzDevops"
+                value = $env:DxFeed
             }
             Add-XmlElement $nugetConfig "add" "packageSources" -Attributes $a
-            $nugetConfig|Save-Xml $nugetConfigPath
+            $nugetConfig | Save-Xml $nugetConfigPath
         }
         CompileTestSolution "$Root\src\Tests\Tests.sln"
-        if (!(Test-AzDevops)){
+        FixNet461DXAssembliesTargetFramework
+        if (!(Test-AzDevops)) {
             Invoke-Task -taskName BuildNugetConsumers
         }
     } -Maximum 3
-    Get-ChildItem $root\bin "*xpand*.dll"| Test-AssemblyReference -VersionFilter $DXVersion
+    Get-ChildItem $root\bin "*xpand*.dll" | Test-AssemblyReference -VersionFilter $DXVersion
 }
 
+function FixNet461DXAssembliesTargetFramework {
+    Start-Build -Path "$root\src\Tests\ModelMapper\Xpand.XAF.Modules.ModelMapper.Tests.csproj"
+    return
+    $nugetAssemblies = Get-ChildItem (Get-NugetInstallationFolder) DevExpress*.dll -Recurse | Where-Object {
+        $_.Directory.Name -eq "net452" -and $_.Directory.Parent.Parent.Name -eq "20.2.4"
+    }
+    get-childitem "$root\bin\net461" Dev*.dll | ForEach-Object {
+        [PSCustomObject]@{
+            Name      = $_.BaseName
+            Framework = Get-AssemblyTargetFramework $_.FullName
+        }
+    } | Where-Object { $_.Framework -notmatch ".netframework" } | ForEach-Object {
+        $name = $_.Name
+        $nugetAssemblies | Where-Object { $_.BaseName -eq $name }
+    } | Copy-Item -Destination "$root\bin\net461" -Force -Verbose
+    
+}
 Task CompileNugetConsumers -precondition { return $compile } {
     Invoke-Script {
-        $localPackages = @(& (Get-NugetPath) list -source "$root\bin\nupkg;"|ConvertTo-PackageObject|Where-Object{$_.id -like "*.ALL"} | ForEach-Object {
-            $version = [version]$_.Version
-            if ($version.revision -eq 0) {
-                $version = New-Object System.Version ($version.Major, $version.Minor, $version.build)
-            }
-            [PSCustomObject]@{
-                Id      = $_.Id
-                Version = $version
-            }
-        })
+        $localPackages = @(& (Get-NugetPath) list -source "$root\bin\nupkg;" | ConvertTo-PackageObject | Where-Object { $_.id -like "*.ALL" } | ForEach-Object {
+                $version = [version]$_.Version
+                if ($version.revision -eq 0) {
+                    $version = New-Object System.Version ($version.Major, $version.Minor, $version.build)
+                }
+                [PSCustomObject]@{
+                    Id      = $_.Id
+                    Version = $version
+                }
+            })
         
         Write-HostFormatted "Update all package versions" -ForegroundColor Magenta
-        Get-ChildItem "$root\src\Tests\EasyTests" *.csproj -Recurse|ForEach-Object{
-            $prefs=Get-PackageReference $_ 
-            $prefs|Where-Object{$_.include -like "Xpand.XAF.*"}|ForEach-Object{
-                $ref=$_
-                $localPackages|Where-Object{$_.id-eq $ref.include}|ForEach-Object{
-                    $ref.version=$_.version.ToString()
+        Get-ChildItem "$root\src\Tests\EasyTests" *.csproj -Recurse | ForEach-Object {
+            $prefs = Get-PackageReference $_ 
+            $prefs | Where-Object { $_.include -like "Xpand.XAF.*" } | ForEach-Object {
+                $ref = $_
+                $localPackages | Where-Object { $_.id -eq $ref.include } | ForEach-Object {
+                    $ref.version = $_.version.ToString()
                 }
             }
-            ($prefs|Select-Object -First 1).OwnerDocument.Save($_)
+            ($prefs | Select-Object -First 1).OwnerDocument.Save($_)
         }
         CompileTestSolution "$Root\src\Tests\\EasyTests\EasyTests.sln"
     } -Maximum 3
-    Get-ChildItem $root\bin "*xpand*.dll"| Test-AssemblyReference -VersionFilter $DXVersion
+    Get-ChildItem $root\bin "*xpand*.dll" | Test-AssemblyReference -VersionFilter $DXVersion
 }
 
-function GetConfiguration($solution,$conf){
-    $conf=$conf.ToLower()
-    $match=(Read-MSBuildSolutionFile $solution).SolutionConfigurations.ConfigurationName|Sort-Object -Unique|ForEach-Object{
-        $configVersion=$_.ToLower().Replace("$conf`_","") 
-        if ((($_ -like "$conf`_*") -and (Test-Version $configVersion))){
-            if (([version]$configVersion) -ge ([version](Get-VersionPart $dxVersion Minor))){
+function GetConfiguration($solution, $conf) {
+    $conf = $conf.ToLower()
+    $match = (Read-MSBuildSolutionFile $solution).SolutionConfigurations.ConfigurationName | Sort-Object -Unique | ForEach-Object {
+        $configVersion = $_.ToLower().Replace("$conf`_", "") 
+        if ((($_ -like "$conf`_*") -and (Test-Version $configVersion))) {
+            if (([version]$configVersion) -ge ([version](Get-VersionPart $dxVersion Minor))) {
                 $_
             }
             
         }
     }
-    if ($match){
+    if ($match) {
         $match
     }
-    else{
+    else {
         $conf
     }
 }
 
 Task Compile -precondition { return $compile } {
-    if (($branch -eq "master") -and ((Get-DevExpressVersion) -eq $DXVersion)){
-        $Global:Configuration="Release"
+    if (($branch -eq "master") -and ((Get-DevExpressVersion) -eq $DXVersion)) {
+        $Global:Configuration = "Release"
     }
     
     Invoke-Script {
         Write-HostFormatted "Building Extensions" -Section
-        $solution="$Root\src\Extensions\Extensions.sln"
+        $solution = "$Root\src\Extensions\Extensions.sln"
         
-        $Configuration=GetConfiguration $solution $Global:Configuration
+        $Configuration = GetConfiguration $solution $Global:Configuration
         Start-Build -Path $solution -Configuration $Configuration -BinaryLogPath "$Root\Bin\Extensions.binlog" -Verbosity minimal -WarnAsError -PropertyValue "skipNugetReplace=true"
     } -Maximum 3
     
     
     Invoke-Script {
-        $solution="$Root\src\Modules\Modules.sln"
+        $solution = "$Root\src\Modules\Modules.sln"
         Write-HostFormatted "Building Modules" -Section
-        $Configuration=GetConfiguration $solution $Global:Configuration
+        $Configuration = GetConfiguration $solution $Global:Configuration
         Start-Build -Path $solution -Configuration $Configuration -BinaryLogPath "$Root\Bin\Modules.binlog" -Verbosity minimal -WarnAsError -PropertyValue "skipNugetReplace=true"
     } -Maximum 3
     
-    Invoke-Script {
-        Write-HostFormatted "Building Xpand.XAF.ModelEditor" -Section
-        Start-Build -Path "$Root\tools\Xpand.XAF.ModelEditor\Xpand.XAF.ModelEditor.csproj" -WarnAsError
-        Write-HostFormatted "Building Xpand.XAF.ModelEditor.WinDesktop" -Section
-        Start-Build -Path "$Root\tools\Xpand.XAF.ModelEditor\Xpand.XAF.ModelEditor.WinDesktop.csproj" -WarnAsError
-    } -Maximum 3
+    if ($dxVersion -eq (Get-XAFLatestMinors | Select-Object -First 1)) {
+        Invoke-Script {
+            Write-HostFormatted "Building Xpand.XAF.ModelEditor" -Section
+            Start-Build -Path "$Root\tools\Xpand.XAF.ModelEditor\Xpand.XAF.ModelEditor.csproj" -WarnAsError
+            Write-HostFormatted "Building Xpand.XAF.ModelEditor.WinDesktop" -Section
+            Start-Build -Path "$Root\tools\Xpand.XAF.ModelEditor\Xpand.XAF.ModelEditor.WinDesktop.csproj" -WarnAsError
+        } -Maximum 3
+    }
     
     Write-HostFormatted "Build Versions:" -Section
-    Get-ChildItem "$Root\Bin" "*Xpand.*.dll"|ForEach-Object{
+    Get-ChildItem "$Root\Bin" "*Xpand.*.dll" | ForEach-Object {
         [PSCustomObject]@{
-            Id = $_.BaseName
-            Version=[System.Diagnostics.FileVersionInfo]::GetVersionInfo($_.FullName).FileVersion
-        }|Write-Output
-    }|Format-Table
-    Get-ChildItem $root\bin "*xpand*.dll"| Test-AssemblyReference -VersionFilter $DXVersion|Format-Table -AutoSize
+            Id      = $_.BaseName
+            Version = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($_.FullName).FileVersion
+        } | Write-Output
+    } | Format-Table
+    Get-ChildItem $root\bin "*xpand*.dll" | Test-AssemblyReference -VersionFilter $DXVersion | Format-Table -AutoSize
 }
 
 Task  CreateNuspec {
     Invoke-Script {
         $a = @{
             DxVersion = $dxVersion
-            Branch=$branch
+            Branch    = $branch
         }
         New-Item -Path "$root\bin\Nupkg" -ItemType Directory  -ErrorAction SilentlyContinue -Force | Out-Null
-        $version=(& (Get-NugetPath) list -source "$root\bin\nupkg;"|ConvertTo-PackageObject|Select-Object -First 1).Version
-        $currentVersion=[System.Diagnostics.FileVersionInfo]::GetVersionInfo("$root\bin\Xpand.XAF.Modules.Reactive.dll").FileVersion
-        if ($currentVersion -ne $version){
-            Get-ChildItem "$root\bin\nupkg" |Remove-Item -Force
+        $version = (& (Get-NugetPath) list -source "$root\bin\nupkg;" | ConvertTo-PackageObject | Select-Object -First 1).Version
+        $currentVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo("$root\bin\Xpand.XAF.Modules.Reactive.dll").FileVersion
+        if ($currentVersion -ne $version) {
+            Get-ChildItem "$root\bin\nupkg" | Remove-Item -Force
         }
         
-        if (!(Test-Path "$Root\bin\Nupkg") -or !(Get-ChildItem "$Root\bin\Nupkg")){
+        if (!(Test-Path "$Root\bin\Nupkg") -or !(Get-ChildItem "$Root\bin\Nupkg")) {
             & "$PSScriptRoot\CreateNuspec.ps1" @a
         }
         
@@ -193,7 +211,7 @@ Task  CreateNuspec {
 
 Task PackNuspec {
     Invoke-Script {
-        if (!(Test-Path "$Root\bin\Nupkg") -or !(Get-ChildItem "$Root\bin\Nupkg")){
+        if (!(Test-Path "$Root\bin\Nupkg") -or !(Get-ChildItem "$Root\bin\Nupkg")) {
             & "$PSScriptRoot\PackNuspec.ps1" -branch $branch -dxversion $dxVersion
         }
     } -Maximum 3
@@ -203,7 +221,7 @@ Task PackNuspec {
 Task Clean -precondition { return $cleanBin } {
     $bin = "$Root\bin\"
     if (Test-Path $bin) {
-        Get-ChildItem $bin -Recurse -Exclude "*Nupkg*"|Remove-Item -Force -Recurse
+        Get-ChildItem $bin -Recurse -Exclude "*Nupkg*" | Remove-Item -Force -Recurse
     }
     Set-Location "$Root\src"
     Clear-XProjectDirectories
@@ -211,8 +229,8 @@ Task Clean -precondition { return $cleanBin } {
 
 Task CheckVersions -precondition { return $branch -eq "master" } {
     Push-Location "$Root\bin\"
-    $labPackages=Get-ChildItem Xpand*.dll|Where-Object{([version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($_).FileVersion).Revision -gt 0}
-    if ($labPackages){
+    $labPackages = Get-ChildItem Xpand*.dll | Where-Object { ([version][System.Diagnostics.FileVersionInfo]::GetVersionInfo($_).FileVersion).Revision -gt 0 }
+    if ($labPackages) {
         $labPackages
         throw "Lab packages found in a release build"
     }    

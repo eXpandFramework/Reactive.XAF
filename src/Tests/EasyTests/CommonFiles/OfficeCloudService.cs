@@ -31,7 +31,6 @@ namespace ALL.Tests{
         }
 
         public static async Task TestOfficeCloudService(this ICommandAdapter commandAdapter, string serviceName){
-            
             commandAdapter.Execute(new NavigateCommand($"Cloud.{serviceName} Event"));
             var cloudCalendarOperation = "Cloud Calendar Operation";
             commandAdapter.Execute(new ActionCommand(cloudCalendarOperation, "New"),new WaitCommand(2500));

@@ -21,14 +21,6 @@ namespace TestApplication.Module.Blazor.JobScheduler {
             return manager.ConfigureNewJob();
         }
 
-        private static IObservable<Unit> ConfigureModel(this ApplicationModulesManager manager)
-            => manager.WhenGeneratingModelNodes<IModelJobSchedulerSources>()
-                .Do(sources => {
-                    var source = sources.AddNode<IModelJobSchedulerSource>();
-                    source.AssemblyName = typeof(JobService).Assembly.GetName().Name;
-                })
-                .ToUnit();
-
         private static IObservable<Unit> ConfigureNewJob(this ApplicationModulesManager manager) 
             => manager.WhenApplication(application => application.WhenDetailViewCreated(typeof(Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects.Job)))
                 .Do(t => {

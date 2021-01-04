@@ -2,7 +2,7 @@ param(
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\"),
     $Release=$false,
     $Branch="lab",
-    $dxVersion=(Get-DevExpressVersion)
+    $dxVersion="20.1.9"
 )
 Use-MonoCecil | Out-Null
 # $VerbosePreference ="continue"
@@ -10,10 +10,6 @@ function UpdateALLNuspec($platform, $allNuspec, $nuspecs,$allModuleNuspecs,$csPr
     
     $platformNuspecs = $allModuleNuspecs | ForEach-Object {
         [xml]$nuspec = Get-Content $_.FullName
-        
-        if ($_.BaseName -eq "Xpand.XAF.Modules.Reactive"){
-            Write-Verbose $_.BaseName
-        }
         $nuspecBaseName=$_.BaseName
         $filesrc=($nuspec.package.Files.file|Where-Object{$_.src -like "*$nuspecBaseName.dll"}).src
         $platformMetada = Get-AssemblyMetadata "$root\bin\$filesrc" -key "Platform"
@@ -74,7 +70,10 @@ $allModuleNuspecs = $nuspecs | Where-Object { $_ -notlike "*ALL*" -and ($_ -like
 $csProjects=Get-MSBuildProjects $root\src 
 UpdateALLNuspec "Core" $allNuspec $nuspecs $allModuleNuspecs $csProjects
 $googleBlazorVersion=(Get-XmlContent "$root\Build\nuspec\Xpand.Extensions.Office.Cloud.Google.Blazor.nuspec").package.metadata.version
-Add-NuspecDependency Xpand.Extensions.Office.Cloud.Google.Blazor $googleBlazorVersion $allNuspec "netstandard2.0"
+if ($dxVersion -gt "20.2.2"){
+    Add-NuspecDependency Xpand.Extensions.Office.Cloud.Google.Blazor $googleBlazorVersion $allNuspec "netstandard2.1"
+}
+
 $allNuspec|Save-Xml $allFileName
 
 Get-Content $allFileName -Raw

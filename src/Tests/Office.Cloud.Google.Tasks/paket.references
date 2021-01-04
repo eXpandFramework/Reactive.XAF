@@ -9,3 +9,4 @@ DevExpress.Persistent.BaseImpl
 Fasterflect.Xpand
 akarnokd.reactive_extensions
 Google.Apis.Tasks.v1
+Moq
