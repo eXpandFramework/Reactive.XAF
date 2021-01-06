@@ -3,9 +3,13 @@ Moq
 NUnit
 NUnit3TestAdapter
 Shouldly
-DevExpress.ExpressApp
-DevExpress.Xpo
 Fasterflect.Xpand
 JetBrains.Annotations
 Xpand.Patcher
 akarnokd.reactive_extensions
+Microsoft.CodeAnalysis
+Microsoft.CodeAnalysis.Csharp
+Newtonsoft.Json
+Microsoft.NET.Test.Sdk
+DevExpress.WindowsDesktop.Core
+DevExpress.WindowsDesktop.Xaf

@@ -1,16 +1,11 @@
+DevExpress.WindowsDesktop.Core
+DevExpress.WindowsDesktop.XAF
 akarnokd.reactive_extensions
-DevExpress.ExpressApp.EasyTest.WinAdapter
-DevExpress.ExpressApp.EasyTest.WebAdapter
-DevExpress.ExpressApp.Web
-DevExpress.ExpressApp.Win
-DevExpress.ExpressApp.Security.Xpo
-DevExpress.Persistent.BaseImpl
 Enums.NET
 Humanizer.Core
 MagicOnion
 Moq
 Newtonsoft.Json
-Ryder
 Shouldly
 NUnit
 NUnit3TestAdapter
@@ -21,3 +16,5 @@ JetBrains.Annotations
 Selenium.Support
 Selenium.WebDriver
 System.Reactive
+Microsoft.CodeAnalysis
+Microsoft.CodeAnalysis.Csharp

@@ -23,14 +23,6 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
         protected  abstract IObservable<bool> NeedsAuthentication(XafApplication application);
 
         protected abstract XafApplication Application(Platform platform);
-        protected abstract void OnConnect_Action_Creates_Connection(Platform platform, XafApplication application);
-        [Test][XpandTest()][Apartment(ApartmentState.STA)]
-        public async Task Not_NeedsAuthentication_when_Authentication_current_user_can_authenticate(){
-            using var application=Application(Platform.Win);
-            NewAuthentication(Platform.Win, application);
-        
-            await NeedsAuthentication(application).Select(b => b).Not_NeedsAuthentication_when_AuthenticationStorage_current_user_can_authenticate();
-        }
 
         [Test]
         [XpandTest()][Apartment(ApartmentState.STA)]
@@ -52,6 +44,22 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
             connectMicrosoft.Active[nameof(Extensions.Office.Cloud.Extensions.NeedsAuthentication)].ShouldBeFalse();
             disconnectMicrosoft.Active[nameof(Extensions.Office.Cloud.Extensions.NeedsAuthentication)].ShouldBeTrue();
         }
+
+        [Test][XpandTest()][Apartment(ApartmentState.STA)]
+        public void Actions_are_Activated_For_CurrentUser_Details(){
+            using var application=Application(Platform.Win);
+            application.Actions_are_Activated_For_CurrentUser_Details(ServiceName);
+        }
+
+        protected abstract void OnConnect_Action_Creates_Connection(Platform platform, XafApplication application);
+        [Test][XpandTest()][Apartment(ApartmentState.STA)]
+        public async Task Not_NeedsAuthentication_when_Authentication_current_user_can_authenticate(){
+            using var application=Application(Platform.Win);
+            NewAuthentication(Platform.Win, application);
+        
+            await NeedsAuthentication(application).Select(b => b).Not_NeedsAuthentication_when_AuthenticationStorage_current_user_can_authenticate();
+        }
+
 
         [Test][XpandTest()][Apartment(ApartmentState.STA)]
         public async Task NeedsAuthentication_when_AuthenticationStorage_does_not_contain_current_user(){

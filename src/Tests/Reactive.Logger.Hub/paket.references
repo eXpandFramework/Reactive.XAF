@@ -1,9 +1,4 @@
-DevExpress.Xpo
 akarnokd.reactive_extensions
-DevExpress.ExpressApp.ConditionalAppearance
-DevExpress.ExpressApp.Web
-DevExpress.ExpressApp.Win
-DevExpress.Persistent.BaseImpl
 MagicOnion
 Moq
 Shouldly
@@ -11,3 +6,9 @@ NUnit
 NUnit3TestAdapter
 Fasterflect.Xpand
 JetBrains.Annotations
+Microsoft.CodeAnalysis
+Microsoft.CodeAnalysis.Csharp
+Newtonsoft.Json
+Microsoft.NET.Test.Sdk
+DevExpress.WindowsDesktop.Core
+DevExpress.WindowsDesktop.Xaf

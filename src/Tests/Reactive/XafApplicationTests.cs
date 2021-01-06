@@ -20,7 +20,6 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
     public class XafApplicationTests : ReactiveCommonTest{
         [XpandTest]
         [TestCase(nameof(Platform.Win))]
-        [TestCase(nameof(Platform.Web))]
         public async Task WhenFrameCreated(string platformName){
             var platform = GetPlatform(platformName);
             using var application = DefaultReactiveModule(platform).Application;
@@ -40,7 +39,6 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
 
         [XpandTest]
         [TestCase(nameof(Platform.Win))]
-        [TestCase(nameof(Platform.Web))]
         public async Task WhenWindowCreated(string platformName){
             var platform = GetPlatform(platformName);
             using var application = DefaultReactiveModule(platform).Application;
@@ -55,7 +53,6 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
 
         [XpandTest]
         [TestCase(nameof(Platform.Win))]
-        [TestCase(nameof(Platform.Web))]
         public async Task WhenPopupWindowCreated(string platformName){
             var platform = GetPlatform(platformName);
             using var application = DefaultReactiveModule(platform).Application;
@@ -68,7 +65,6 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
 
         [XpandTest]
         [TestCase(nameof(Platform.Win))]
-        [TestCase(nameof(Platform.Web))]
         public async Task WHen_NestedFrameCreated(string platformName){
             var platform = GetPlatform(platformName);
             using var application = DefaultReactiveModule(platform).Application;
@@ -99,7 +95,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
 
         
         [Test]
-        [XpandTest()]
+        [XpandTest()][Ignore("Net461 only")]
         public async Task Logon_with_user_key(){
             using var application = NewXafApplication();
             application.SetupSecurity();

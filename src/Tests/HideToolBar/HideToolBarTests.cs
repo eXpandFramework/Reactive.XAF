@@ -25,7 +25,6 @@ namespace Xpand.XAF.Modules.HideToolBar.Tests{
     public class HideToolBarTests : BaseTest{
 
         [XpandTest]
-        [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public async Task Signal_When_frame_with_HideToolBar_Enabled_ListView_controls_created(string platformName){
             var platform = GetPlatform(platformName);
@@ -51,46 +50,41 @@ namespace Xpand.XAF.Modules.HideToolBar.Tests{
             return templateMock;
         }
         [XpandTest]
-        [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public async Task Hide_Nested_ToolBar(string platformName){
             var platform = GetPlatform(platformName);
-            using (var newApplication = platform.NewApplication<HideToolBarModule>()){
-                newApplication.Title = nameof(Hide_Nested_ToolBar);
-                var nestedFrame = new NestedFrame(newApplication, TemplateContext.NestedFrame, null, new List<Controller>());
-                nestedFrame.CreateTemplate();
-                if (platform == Platform.Web){
-                    nestedFrame.Template.GetMock().As<ISupportActionsToolbarVisibility>()
-                        .Setup(visibility => visibility.SetVisible(false));
-                }
-                await nestedFrame.ReturnObservable().HideToolBar();
-
-                if (platform==Platform.Win){
-                    ((IBarManagerHolder) nestedFrame.Template).BarManager.Bars.Any(bar => bar.Visible).ShouldBe(false);
-                }
-                else{
-                    nestedFrame.Template.GetMock().Verify();
-                }
+            using var newApplication = platform.NewApplication<HideToolBarModule>();
+            newApplication.Title = nameof(Hide_Nested_ToolBar);
+            var nestedFrame = new NestedFrame(newApplication, TemplateContext.NestedFrame, null, new List<Controller>());
+            nestedFrame.CreateTemplate();
+            if (platform == Platform.Web){
+                nestedFrame.Template.GetMock().As<ISupportActionsToolbarVisibility>()
+                    .Setup(visibility => visibility.SetVisible(false));
             }
+            await nestedFrame.ReturnObservable().HideToolBar();
 
-            
+            if (platform==Platform.Win){
+                ((IBarManagerHolder) nestedFrame.Template).BarManager.Bars.Any(bar => bar.Visible).ShouldBe(false);
+            }
+            else{
+                nestedFrame.Template.GetMock().Verify();
+            }
         }
 
         [Test]
         [XpandTest]
-        public async Task Hide_ToolbarVisibilityController(){
-            using (var application = Platform.Win.NewApplication<HideToolBarModule>()){
-                application.Title = nameof(Hide_ToolbarVisibilityController);
-                var frame = new Frame(application, TemplateContext.ApplicationWindow);
-                var frameTemplate = MockFrameTemplate();
-                frame.SetFieldValue("template", frameTemplate.Object);
-                var controller = new ToolbarVisibilityController();
-                frame.RegisterController(controller);
+        public async Task Hide_ToolbarVisibilityController() {
+            using var application = Platform.Win.NewApplication<HideToolBarModule>();
+            application.Title = nameof(Hide_ToolbarVisibilityController);
+            var frame = new Frame(application, TemplateContext.ApplicationWindow);
+            var frameTemplate = MockFrameTemplate();
+            frame.SetFieldValue("template", frameTemplate.Object);
+            var controller = new ToolbarVisibilityController();
+            frame.RegisterController(controller);
 
-                await frame.ReturnObservable().HideToolBar();
+            await frame.ReturnObservable().HideToolBar();
 
-                controller.Active[HideToolBarModule.CategoryName].ShouldBe(false);
-            }
+            controller.Active[HideToolBarModule.CategoryName].ShouldBe(false);
         }
 
 

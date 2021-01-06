@@ -35,6 +35,7 @@
         <dependency id="JetBrains.Annotations" version="2020.3" />
         <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.8" />
         <dependency id="nunit" version="3.12" />
+        <dependency id="Microsoft.CodeAnalysis" version="3.8" />
         <dependency id="TextCopy" version="4.2.0" />
       </group>
     </dependencies>

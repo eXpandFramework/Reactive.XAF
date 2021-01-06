@@ -30,8 +30,18 @@ namespace Xpand.XAF.Modules.ProgressBarViewItem{
         protected override void RegisterEditorDescriptors(EditorDescriptorsFactory editorDescriptorsFactory){
             base.RegisterEditorDescriptors(editorDescriptorsFactory);
             string callBackHandler = null;
+            
+            var references = new []{typeof(ProgressBarViewItemBase).Assembly.Location,typeof(ViewItem).Assembly.Location};
             if (Application != null && Application.GetPlatform() == Platform.Web){
                 callBackHandler = ",DevExpress.ExpressApp.Web.Templates.IXafCallbackHandler";
+                var xafWebAssembly = AppDomain.CurrentDomain.GetAssemblies().First(assembly => assembly.FullName.StartsWith("DevExpress.ExpressApp.Web"));
+                references = references.Add(xafWebAssembly.Location);
+            }
+            else {
+                var location = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(assembly => assembly.FullName.StartsWith("System.Private.CoreLib"))?.Location;
+                if (location != null) {
+                    references = references.Add(location);
+                }
             }
             string code = $@"
 namespace {GetType().Namespace}{{
@@ -41,16 +51,7 @@ namespace {GetType().Namespace}{{
     }}
 }}
 ";
-            var references = new []{typeof(ProgressBarViewItemBase).Assembly.Location,typeof(ViewItem).Assembly.Location};
-            if (callBackHandler!=null){
-                var xafWebAssembly = AppDomain.CurrentDomain.GetAssemblies().First(assembly => assembly.FullName.StartsWith("DevExpress.ExpressApp.Web"));
-                references = references.Add(xafWebAssembly.Location);
-            }
-            else {
-                var location = AppDomain.CurrentDomain.GetAssemblies().First(assembly => assembly.FullName.StartsWith("System.Private.CoreLib")).Location;
-                references = references.Add(location);
-            }
-
+            
             using var memoryStream = CSharpSyntaxTree.ParseText(code).Compile(references);
             var type = AppDomain.CurrentDomain.LoadAssembly(memoryStream).Types().First(_ => !_.IsAbstract && typeof(ProgressBarViewItemBase).IsAssignableFrom(_));
             editorDescriptorsFactory.List.Add(new ViewItemDescriptor(new ViewItemRegistration(typeof(IModelProgressBarViewItem),type,true)));

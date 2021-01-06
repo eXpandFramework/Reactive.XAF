@@ -21,8 +21,8 @@ namespace Xpand.XAF.Modules.CloneMemberValue.Tests{
     [NonParallelizable]
     public class CloneMemberValueTests : BaseTest{
 
-        private static CloneMemberValueModule DefaultCloneMemberValueModule(Platform platform,string title){
-            var application = platform.NewApplication<CloneMemberValueModule>();
+        private static CloneMemberValueModule DefaultCloneMemberValueModule(string title){
+            var application = Platform.Win.NewApplication<CloneMemberValueModule>();
             application.Title = title;
             var cloneMemberValueModule = new CloneMemberValueModule();
             cloneMemberValueModule.AdditionalExportedTypes.AddRange(new[]{typeof(ACmv),typeof(BCmv)});
@@ -32,11 +32,9 @@ namespace Xpand.XAF.Modules.CloneMemberValue.Tests{
         }
 
         [XpandTest]
-        [TestCase(nameof(Platform.Web))]
-        [TestCase(nameof(Platform.Win))]
-        public async Task Collect_Previous_Current_DetailViews_with_cloneable_members(string platformName){
-            var platform = GetPlatform(platformName);
-            using var application = DefaultCloneMemberValueModule(platform,nameof(Collect_Previous_Current_DetailViews_with_cloneable_members)).Application;
+        [Test()]
+        public async Task Collect_Previous_Current_DetailViews_with_cloneable_members(){
+            using var application = DefaultCloneMemberValueModule(nameof(Collect_Previous_Current_DetailViews_with_cloneable_members)).Application;
             var modelClass = application.FindModelClass(typeof(ACmv));
             foreach (var modelBOModelClassMember in modelClass.OwnMembers.Cast<IModelMemberCloneValue>()){
                 modelBOModelClassMember.CloneValue = true;
@@ -56,11 +54,9 @@ namespace Xpand.XAF.Modules.CloneMemberValue.Tests{
         }
 
         [XpandTest]
-        [TestCase(nameof(Platform.Web))]
-        [TestCase(nameof(Platform.Win))]
-        public async Task Collect_editable_ListViews_with_clonable_members(string platformName){
-            var platform = GetPlatform(platformName);
-            var cloneMemberValueModule = DefaultCloneMemberValueModule(platform,nameof(Collect_editable_ListViews_with_clonable_members));
+        [Test()]
+        public async Task Collect_editable_ListViews_with_clonable_members(){
+            var cloneMemberValueModule = DefaultCloneMemberValueModule(nameof(Collect_editable_ListViews_with_clonable_members));
             var application = cloneMemberValueModule.Application;
             var modelClass = application.FindModelClass(typeof(ACmv));
             foreach (var modelBOModelClassMember in modelClass.OwnMembers.Cast<IModelMemberCloneValue>()){
@@ -84,19 +80,21 @@ namespace Xpand.XAF.Modules.CloneMemberValue.Tests{
             
         }
         [XpandTest]
-        [TestCase(nameof(Platform.Web))]
-        [TestCase(nameof(Platform.Win))]
-        public async Task Collect_ListView_Previous_Current_New_Objects(string platformName){
-            var platform = GetPlatform(platformName);
-            using var application = DefaultCloneMemberValueModule(platform, nameof(Collect_ListView_Previous_Current_New_Objects)).Application;
+        [Test()]
+        public async Task Collect_ListView_Previous_Current_New_Objects(){
+            using var application = DefaultCloneMemberValueModule( nameof(Collect_ListView_Previous_Current_New_Objects)).Application;
             var objectSpace = application.CreateObjectSpace();
             var mock = new Mock<ListEditor>{CallBase = true};
             var aCmv1 = objectSpace.CreateObject<ACmv>();
             var aCmv2 = objectSpace.CreateObject<ACmv>();
             var listEditor = mock.Object;
             var createObjects = listEditor.WhenNewObjectAdding()
-                .FirstAsync().Do(t => t.e.AddedObject = aCmv1)
-                .Merge(listEditor.WhenNewObjectAdding().Skip(1).FirstAsync().Do(t => t.e.AddedObject=aCmv2))
+                .FirstAsync().Do(t => {
+                    if (t.e != null) t.e.AddedObject = aCmv1;
+                })
+                .Merge(listEditor.WhenNewObjectAdding().Skip(1).FirstAsync().Do(t => {
+                    if (t.e != null) t.e.AddedObject = aCmv2;
+                }))
                 .Replay();
             createObjects.Connect();
             var objects = listEditor.NewObjectPairs().Replay();
@@ -110,11 +108,9 @@ namespace Xpand.XAF.Modules.CloneMemberValue.Tests{
             application.Dispose();
         }
         [XpandTest]
-        [TestCase(nameof(Platform.Web))]
-        [TestCase(nameof(Platform.Win))]
-        public async Task CloneMemberValues(string platformName){
-            var platform = GetPlatform(platformName);
-            using var application = DefaultCloneMemberValueModule(platform, nameof(CloneMemberValues)).Application;
+        [Test()]
+        public async Task CloneMemberValues(){
+            using var application = DefaultCloneMemberValueModule(nameof(CloneMemberValues)).Application;
             var objectSpace1 = application.CreateObjectSpace();
             var aCmv1 = objectSpace1.CreateObject<ACmv>();
             aCmv1.PrimitiveProperty = "test";

@@ -1,7 +1,3 @@
-DevExpress.Xpo
-DevExpress.ExpressApp.Win
-DevExpress.ExpressApp.Security
-DevExpress.Persistent.BaseImpl
 akarnokd.reactive_extensions
 MagicOnion
 Moq
@@ -11,3 +7,9 @@ NUnit3TestAdapter
 JetBrains.Annotations
 Xpand.Patcher
 FasterFlect.Xpand
+Microsoft.CodeAnalysis
+Microsoft.CodeAnalysis.Csharp
+Newtonsoft.Json
+Microsoft.NET.Test.Sdk
+DevExpress.WindowsDesktop.Core
+DevExpress.WindowsDesktop.Xaf

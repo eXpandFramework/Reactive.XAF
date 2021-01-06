@@ -22,13 +22,8 @@ namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{
         [XpandTest]
         [TestCase(ViewType.DetailView,false,nameof(Platform.Win))]
         [TestCase(ViewType.DetailView,true,nameof(Platform.Win))]
-        [TestCase(ViewType.DetailView,false,nameof(Platform.Web))]
-        [TestCase(ViewType.DetailView,true,nameof(Platform.Web))]
-        
         [TestCase(ViewType.ListView,false,nameof(Platform.Win))]
         [TestCase(ViewType.ListView,true,nameof(Platform.Win))]
-        [TestCase(ViewType.ListView,false,nameof(Platform.Web))]
-        [TestCase(ViewType.ListView,true,nameof(Platform.Web))]
         public void Inherit_And_Modify_A_BaseView(ViewType viewType, bool attribute,string platformName){
             var platform = GetPlatform(platformName);
             ModelViewInheritanceUpdater.Disabled = true;

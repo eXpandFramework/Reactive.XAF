@@ -5,6 +5,10 @@ Moq
 Shouldly
 NUnit
 NUnit3TestAdapter
-DevExpress.ExpressApp
-DevExpress.Xpo
 JetBrains.Annotations
+Microsoft.CodeAnalysis
+Microsoft.CodeAnalysis.Csharp
+Newtonsoft.Json
+Microsoft.NET.Test.Sdk
+DevExpress.WindowsDesktop.Core
+DevExpress.WindowsDesktop.Xaf

@@ -30,7 +30,7 @@ namespace Xpand.XAF.Modules.PositionInListView{
 
         private static IObservable<SimpleAction> RegisterActions(this ApplicationModulesManager manager) =>
             new[]{nameof(MoveObjectUp), nameof(MoveObjectDown)}.ToObservable()
-                .SelectMany(actionnId => manager.RegisterViewSimpleAction(actionnId, Configure, PredefinedCategory.RecordsNavigation))
+                .SelectMany(actionId => manager.RegisterViewSimpleAction(actionId, Configure, PredefinedCategory.RecordsNavigation))
                 .TracePositionInListView(action => action.Id)
                 .Publish().RefCount();
 
@@ -41,8 +41,8 @@ namespace Xpand.XAF.Modules.PositionInListView{
 	        action.TargetViewType=ViewType.ListView;
         }
 
-        static IObservable<Unit> SwapSelectedObject(this IObservable<SimpleAction> source) => source
-            .WhenExecute().Do(_ => _.Action.SwapPosition(_.SelectedObjects.Cast<object>().First()))
+        static IObservable<Unit> SwapSelectedObject(this IObservable<SimpleAction> source) 
+            => source.WhenExecute().CommitChanges().Do(_ => _.Action.SwapPosition(_.SelectedObjects.Cast<object>().First()))
             .TracePositionInListView(e => $"{e.Action.Id}, {string.Join(", ",e.SelectedObjects.Cast<object>().Select(o => o.ToString()))}")
             .ToUnit();
 

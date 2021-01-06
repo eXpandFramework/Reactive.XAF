@@ -1,5 +1,3 @@
-DevExpress.Xpo
-DevExpress.ExpressApp.Win
 MagicOnion
 Moq
 Shouldly
@@ -7,3 +5,9 @@ System.Reactive
 NUnit
 NUnit3TestAdapter
 JetBrains.Annotations
+Microsoft.CodeAnalysis
+Microsoft.CodeAnalysis.Csharp
+Newtonsoft.Json
+Microsoft.NET.Test.Sdk
+DevExpress.WindowsDesktop.Core
+DevExpress.WindowsDesktop.Xaf

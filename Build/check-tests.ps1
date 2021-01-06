@@ -4,7 +4,7 @@ param(
     $DXApiFeed = $env:DXFeed,
     $DxPipelineBuildId
 )
-$ErrorActionPreference="stop"
+$ErrorActionPreference = "stop"
 & $Root\go.ps1 -InstallModules
 Invoke-Script {
     $env:AzureToken = $AzureToken
@@ -15,12 +15,18 @@ Invoke-Script {
     if (Get-AzTestRuns -buildIds $env:Build_BuildId -FailedOnly) {
         throw "There are fail tests"
     }
-    if ($env:CustomVersion -eq (Get-XAFLatestMinors -Source $DXApiFeed|Select-Object -Last 1)){
-        $parameters = @{
-            CustomVersion = $env:CustomVersion
-            DxPipelineBuildId = $env:DxPipelineBuildId
+    if ($env:CustomVersion -eq (Get-XAFLatestMinors -Source $DXApiFeed | Select-Object -Last 1)) {
+        $failedBuilds = Get-XAFLatestMinors -Source $env:DxFeed|Where-Object{$_ -gt "20.1.0"} | ForEach-Object {
+            $build = Get-AzBuilds -Definition DevExpress.XAF-Lab-Tests -Tag "$_" -Top 1 -BranchName $env:Build_SourceBranchName
+            Get-AzTestRuns -buildIds $build.Id -FailedOnly
         }
-        Add-AzBuild -Definition PublishNugets-DevExpress.XAF -Parameters $parameters
+        if (!$failedBuilds) {
+            $parameters = @{
+                CustomVersion     = $env:CustomVersion
+                DxPipelineBuildId = $env:DxPipelineBuildId
+            }
+            Add-AzBuild -Definition PublishNugets-DevExpress.XAF -Parameters $parameters
+        }
     }
     
 }

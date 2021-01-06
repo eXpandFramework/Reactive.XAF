@@ -10,6 +10,7 @@ using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
+using Xpand.Extensions.XAF.ViewExtenions;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
@@ -51,6 +52,12 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 
         public static IObservable<T> WhenExecute<T>(this PopupWindowShowAction action,Func<PopupWindowShowActionExecuteEventArgs, IObservable<T>> retriedExecution) 
             => action.WhenExecute().SelectMany(retriedExecution).Retry(() => action.Application);
+
+        public static IObservable<T> CommitChanges<T>(this IObservable<T> source) where T : ActionBaseEventArgs
+            => source.Do(args => {
+                var view = args.Action.View();
+                view?.AsObjectView()?.ObjectSpace.CommitChanges();
+            });
 
         public static IObservable<SimpleActionExecuteEventArgs> WhenExecute(this IObservable<SimpleAction> source) 
             => source.SelectMany(action => action.WhenExecute());
@@ -240,15 +247,6 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => source .SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(h => item.Disposing += h,
 			        h => item.Disposing -= h, ImmediateScheduler.Instance)
 		        .Select(pattern => pattern).ToUnit());
-
-        public static IObservable<TAction> ActivateWhenEnabled<TAction>(this TAction action) where TAction : ActionBase 
-            => action.Enabled.WhenResultValueChanged()
-                .Do(t => action.Active[nameof(ActivateWhenEnabled)] = t.e.NewValue).To(action)
-                .IgnoreElements()
-                .StartWith(action);
-
-        public static IObservable<TAction> ActivateWhenEnabled<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
-            => source.SelectMany(a => a.ActivateWhenEnabled());
 
         public static IObservable<TAction> ActivateInUserDetails<TAction>(this IObservable<TAction> registerAction) where TAction:ActionBase 
 	        => registerAction.WhenControllerActivated()

@@ -54,8 +54,8 @@
     <PackageReference Include="Xpand.XAF.Win.All" Version="4.202.47.3" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Xpand.TestsLib">
-      <HintPath>..\..\..\..\..\bin\net461\Xpand.TestsLib.dll</HintPath>
+    <Reference Include="Xpand.TestsLib.Net461">
+      <HintPath>..\..\..\..\..\bin\net461\Xpand.TestsLib.Net461.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.TestsLib.Common">
       <HintPath>..\..\..\..\..\bin\Xpand.TestsLib.Common.dll</HintPath>

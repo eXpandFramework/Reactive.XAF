@@ -16,10 +16,9 @@ namespace Xpand.XAF.Modules.AutoCommit.Tests{
     public class AutoCommitTests : BaseTest{
 
         [XpandTest]
-        [TestCase(nameof(Platform.Win))]
-        [TestCase(nameof(Platform.Web))]
-        public async Task Signal_When_AutoCommit_Enabled_ObjectView_Created(string platformName){
-            using var application = DefaultAutoCommitModule(platformName,nameof(Signal_When_AutoCommit_Enabled_ObjectView_Created)).Application;
+        [Test()]
+        public async Task Signal_When_AutoCommit_Enabled_ObjectView_Created(){
+            using var application = DefaultAutoCommitModule(Platform.Win,nameof(Signal_When_AutoCommit_Enabled_ObjectView_Created)).Application;
             var objectViews = application.WhenAutoCommitObjectViewCreated().SubscribeReplay();
                 
             var listView = application.NewObjectView<ListView>(typeof(AC));
@@ -29,10 +28,9 @@ namespace Xpand.XAF.Modules.AutoCommit.Tests{
             (await objectViews.Take(2).WithTimeOut()).ShouldBe(detailView);
         }
         [XpandTest]
-        [TestCase(nameof(Platform.Win))]
-        [TestCase(nameof(Platform.Web))]
-        public void AutoCommit_When_object_view_closing(string platformName){
-            using var application = DefaultAutoCommitModule(platformName, nameof(AutoCommit_When_object_view_closing)).Application;
+        [Test]
+        public void AutoCommit_When_object_view_closing(){
+            using var application = DefaultAutoCommitModule(Platform.Win, nameof(AutoCommit_When_object_view_closing)).Application;
             var detailView = application.NewObjectView<DetailView>(typeof(AC));
             detailView.ObjectSpace.CreateObject<AC>();
 
@@ -41,8 +39,8 @@ namespace Xpand.XAF.Modules.AutoCommit.Tests{
             application.CreateObjectSpace().FindObject<AC>(null).ShouldNotBeNull();
         }
 
-        private  AutoCommitModule DefaultAutoCommitModule(string platformName,string title){
-            var platform = GetPlatform(platformName);
+        private  AutoCommitModule DefaultAutoCommitModule(Platform platformName,string title){
+            var platform = GetPlatform(platformName.ToString());
             var autoCommitModule = new AutoCommitModule();
             var application = platform.NewApplication<AutoCommitModule>();
             application.Title = title;

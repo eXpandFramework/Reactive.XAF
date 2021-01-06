@@ -18,8 +18,8 @@
     <Compile Include="..\Office.Cloud\CloudServiceTests.cs" Link="CloudServiceTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Xpand.TestsLib">
-      <HintPath>..\..\..\bin\net461\Xpand.TestsLib.dll</HintPath>
+    <Reference Include="Xpand.TestsLib.net461">
+      <HintPath>..\..\..\bin\net461\Xpand.TestsLib.net461.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.TestsLib.Common">
       <HintPath>..\..\..\bin\Xpand.TestsLib.Common.dll</HintPath>

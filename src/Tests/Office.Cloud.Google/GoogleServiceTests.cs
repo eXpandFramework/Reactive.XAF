@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Threading;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using Google.Apis.Auth.OAuth2;
 using JetBrains.Annotations;
-using NUnit.Framework;
 using Xpand.TestsLib.Common;
-using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Office.Cloud.Google.BusinessObjects;
 using Xpand.XAF.Modules.Office.Cloud.Tests;
 using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
@@ -16,12 +13,6 @@ using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
 namespace Xpand.XAF.Modules.Office.Cloud.Google.Tests{
     [UsedImplicitly]
     public class GoogleServiceTests:CloudServiceTests<GoogleAuthentication>{
-        [Test][XpandTest()][Apartment(ApartmentState.STA)]
-        public void Actions_are_Activated_For_CurrentUser_Details(){
-            using var application=Application(Platform.Win);
-            application.Actions_are_Activated_For_CurrentUser_Details(ServiceName);
-        }
-
 
         protected override IObservable<bool> NeedsAuthentication(XafApplication application) => application.GoogleNeedsAuthentication();
 

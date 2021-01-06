@@ -14,11 +14,11 @@ Properties {
     $Root = "$nugetbin\..\..\"
 }
 
-Task BuildNugetConsumers -depends   CreateNuspec, PackNuspec, CompileNugetConsumers
+Task BuildNugetConsumers -precondition { return ((Get-VersionPart $DXVersion Minor) -ne "19.2") } -depends   CreateNuspec, PackNuspec, CompileNugetConsumers
 Task Build  -depends   Clean, Init, UpdateProjects, Compile, CheckVersions, IndexSources, CompileTests
 
 function CompileTestSolution($solution) {
-    Write-HostFormatted "Building Tests" -Section
+    Write-HostFormatted "Building $solution" -Section
     New-Item -Name Nupkg -ItemType Directory -Path "$root\bin" -ErrorAction SilentlyContinue
     $conf = GetConfiguration $solution "Debug"
     "Configuration=$conf"
@@ -63,7 +63,7 @@ Task UpdateProjects {
 }
 
 
-Task CompileTests -precondition { return $compile } {
+Task CompileTests -precondition { return ((Get-VersionPart $DXVersion Minor) -ne "19.2") } {
     Invoke-Script {
         if ((Test-AzDevops)) {
             $nugetConfigPath = "$root\src\tests\nuget.config"

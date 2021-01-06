@@ -28,7 +28,6 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
     public class MasterDetailTests:BaseTest {
 
         [XpandTest]
-        [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public void When_model_dashboardView_has_ListView_detailview_for_the_same_type_is_MasterDetail_enabled(string platformName){
             var platform = GetPlatform(platformName);
@@ -37,7 +36,6 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
             ((IModelDashboardViewMasterDetail) modelDashboardView).MasterDetail.ShouldBe(true);
         }
         [XpandTest]
-        [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public async Task Monitor_ListView_DetailView_dashboardViewItem_pair(string platformName){
             var platform = GetPlatform(platformName);
@@ -57,7 +55,6 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
             (pair.detailViewItem.Model.View as IModelDetailView).ShouldNotBeNull();
         }
         [XpandTest]
-        [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public async Task Handle_listView_process_selected_object_action(string platformName){
             var platform = GetPlatform(platformName);
@@ -83,7 +80,6 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
             (await customProcessSelectedItem.FirstAsync().WithTimeOut()).e.Handled.ShouldBe(true);
         }
         [XpandTest]
-        [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public async Task When_List_View_Selection_Changed_Synchronize_DetailView_Current_Object(string platformName){
             var platform = GetPlatform(platformName);
@@ -107,7 +103,6 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
         }
 
         [XpandTest]
-        [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public async Task Master_Detail_Save_Action_is_active_when_DetailView(string platformName){
             var platform = GetPlatform(platformName);
@@ -119,7 +114,6 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
 	            .ShouldBe(true);
         }
         [XpandTest]
-        [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public async Task Refresh_ListView_object_when_Detailview_ObjectsSpace_committed(string platformName){
             var platform = GetPlatform(platformName);
@@ -135,7 +129,6 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
             info.DetailViewItem.Frame.Application.Dispose();
         }
         [XpandTest]
-        [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public async Task Conditional_Detailview(string platformName){
             var platform = GetPlatform(platformName);

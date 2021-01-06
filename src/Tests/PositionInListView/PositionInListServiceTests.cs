@@ -36,12 +36,12 @@ namespace Xpand.XAF.Modules.PositionInListView.Tests{
             var pil1 = objectSpace.CreateObject<PIL>();
             var pil2 = objectSpace.CreateObject<PIL>();
             var pil3 = objectSpace.CreateObject<PIL>();
-				
+            objectSpace.CommitChanges();	
 
             pil1.Order.ShouldBe(first);
             pil2.Order.ShouldBe(second);
             pil3.Order.ShouldBe(third);
-            objectSpace.CommitChanges();
+            
             objectSpace = application.CreateObjectSpace();
             var pil4 = objectSpace.CreateObject<PIL>();
             objectSpace.CommitChanges();

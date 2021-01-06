@@ -16,7 +16,6 @@ namespace Xpand.TestsLib.Blazor {
         }
         public override void Dispose() {
             base.Dispose();
-            // WebHost.StopAsync().Wait();
             WebHost.Dispose();
         }
 

@@ -34,18 +34,18 @@ namespace Xpand.XAF.Modules.ProgressBarViewItem{
                 _platform = platform;
                 var assemblies = AppDomain.CurrentDomain.GetAssemblies();
                 if (_platform == Platform.Win){
-                    var assemmbly = assemblies
-                        .FirstOrDefault(assembly => assembly.FullName.StartsWith("DevExpress.XtraEditors"));
-                    _progressBarControlType = assemmbly?.GetType("DevExpress.XtraEditors.ProgressBarControl");
+                    var assembly = assemblies
+                        .FirstOrDefault(a => a.FullName.StartsWith("DevExpress.XtraEditors"));
+                    _progressBarControlType = assembly?.GetType("DevExpress.XtraEditors.ProgressBarControl");
                 }
                 else if (_platform == Platform.Web){
-                    var assemmbly = assemblies
-                        .FirstOrDefault(assembly => assembly.FullName.StartsWith("DevExpress.Web.v"));
-                    _progressBarControlType = assemmbly?.GetType("DevExpress.Web.ASPxProgressBar");
+                    var assembly = assemblies
+                        .FirstOrDefault(a => a.FullName.StartsWith("DevExpress.Web.v"));
+                    _progressBarControlType = assembly?.GetType("DevExpress.Web.ASPxProgressBar");
 
                     _percentage = AppDomain.CurrentDomain.Web().TypeUnitPercentage();
                     var assemblyDevExpressExpressAppWeb = AppDomain.CurrentDomain.XAF().AssemblyDevExpressExpressAppWeb();
-                    _asssignClientHanderSafe = assemblyDevExpressExpressAppWeb.TypeClientSideEventsHelper().AsssignClientHanderSafe();
+                    _assignClientHandlerSafe = assemblyDevExpressExpressAppWeb.TypeClientSideEventsHelper().AsssignClientHanderSafe();
 
                 
                     var methodInfoGetShowMessageScript = assemblyDevExpressExpressAppWeb.GetType("DevExpress.ExpressApp.Web.PopupWindowManager").GetMethod("GetShowMessageScript",BindingFlags.Static|BindingFlags.NonPublic);
@@ -85,7 +85,7 @@ namespace Xpand.XAF.Modules.ProgressBarViewItem{
                 throw new ArgumentNullException(nameof(synchronizationContext));
             }
             if (_platform == Platform.Web){
-                _asssignClientHanderSafe(null,Control,"Init", GetInitScript(), "grid.Init");
+                _assignClientHandlerSafe(null,Control,"Init", GetInitScript(), "grid.Init");
             }
             _positionSubject
                 .ObserveOn(synchronizationContext)
@@ -97,7 +97,7 @@ namespace Xpand.XAF.Modules.ProgressBarViewItem{
         }
 
         private string GetInitScript(){
-            var script = _callBackManager.CallMethod("GetScript", _handlerId, $"'{_clientInstancename}'", "", false);
+            var script = _callBackManager.CallMethod("GetScript", _handlerId, $"'{_clientInstance}'", "", false);
             return $@"function(s,e) {{
                     s.timer = window.setInterval(function(){{
                                 if (s.GetPosition()==100){{
@@ -132,22 +132,22 @@ console.log('p='+previous);
         [PublicAPI]
         public int PollingInterval{ get; set; }
         string _handlerId; 
-        private static MethodInvoker _asssignClientHanderSafe;
+        private static MethodInvoker _assignClientHandlerSafe;
         private object _callBackManager;
-        private string _clientInstancename;
+        private string _clientInstance;
         private static MethodInvoker _delegateForGetShowMessageScript;
         private IDisposable _registerHandlerSubscription;
 
         protected override object CreateControlCore(){
             var instance = _progressBarControlType.CreateInstance();
             if (_platform == Platform.Web){
-                instance.SetPropertyValue("ClientInstanceName", _clientInstancename);
+                instance.SetPropertyValue("ClientInstanceName", _clientInstance);
                 instance.SetPropertyValue("Width", _percentage(null, 100d));
                 _registerHandlerSubscription = View.WhenControlsCreated()
                     .FirstAsync()
                     .Do(_ => {
-                        _clientInstancename = Id.CleanCodeName();
-                        _handlerId = $"{GetType().FullName}{_clientInstancename}";
+                        _clientInstance = Id.CleanCodeName();
+                        _handlerId = $"{GetType().FullName}{_clientInstance}";
                         _callBackManager = _application.MainWindow.Template.GetPropertyValue("CallbackManager");
                         _callBackManager.CallMethod("RegisterHandler", _handlerId, this);
                     })

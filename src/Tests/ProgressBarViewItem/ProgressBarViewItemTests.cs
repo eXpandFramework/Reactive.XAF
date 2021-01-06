@@ -69,32 +69,31 @@ namespace Xpand.XAF.Modules.ProgressBarViewItem.Tests{
         [XpandTest]
         [TestCase(nameof(Platform.Win))]
         [Apartment(ApartmentState.STA)]
-        public async Task Can_Observe_an_asynchronous_sequencial_percentance_sequence(string platformName){
+        public async Task Can_Observe_an_asynchronous_sequential_percentage_sequence(string platformName){
             var platform = GetPlatform(platformName);
             var signal = Observable.Interval(TimeSpan.FromMilliseconds(10))
                 .Select(l => (decimal) l)
                 .Take(2).Do(obj => { }, () => { });
 
-            using (var newApplication = DefaultProgressBarViewItemModule(platform).Application){
-                if (platform == Platform.Win){
-                    var unused = new ProgressBarControl();
-                    var progressBarViewItem =
-                        new Mock<ProgressBarViewItemBase>(Mock.Of<IModelProgressBarViewItem>(), GetType())
-                            {CallBase = true}.Object;
-                    progressBarViewItem.Setup(null, newApplication);
-                    progressBarViewItem.CreateControl();
-                    progressBarViewItem.Start();
-                    var progressBarControl = (ProgressBarControl) progressBarViewItem.Control;
-                    var whenPositionChanged = Observable
-                        .FromEventPattern<EventHandler, EventArgs>(h => progressBarControl.PositionChanged += h,
-                            h => progressBarControl.PositionChanged -= h, ImmediateScheduler.Instance).Replay();
-                    whenPositionChanged.Connect();
+            using var newApplication = DefaultProgressBarViewItemModule(platform).Application;
+            if (platform == Platform.Win){
+                var unused = new ProgressBarControl();
+                var progressBarViewItem =
+                    new Mock<ProgressBarViewItemBase>(Mock.Of<IModelProgressBarViewItem>(), GetType())
+                        {CallBase = true}.Object;
+                progressBarViewItem.Setup(null, newApplication);
+                progressBarViewItem.CreateControl();
+                progressBarViewItem.Start();
+                var progressBarControl = (ProgressBarControl) progressBarViewItem.Control;
+                var whenPositionChanged = Observable
+                    .FromEventPattern<EventHandler, EventArgs>(h => progressBarControl.PositionChanged += h,
+                        h => progressBarControl.PositionChanged -= h, ImmediateScheduler.Instance).Replay();
+                whenPositionChanged.Connect();
 
-                    await signal.Do(progressBarViewItem).Timeout(Timeout).ToTaskWithoutConfigureAwait();
+                await signal.Do(progressBarViewItem).Timeout(Timeout).ToTaskWithoutConfigureAwait();
 
-                    await whenPositionChanged.Take(2).Timeout(Timeout).ToTaskWithoutConfigureAwait();
-                    progressBarViewItem.Position.ShouldBe(0);
-                }
+                await whenPositionChanged.Take(2).Timeout(Timeout).ToTaskWithoutConfigureAwait();
+                progressBarViewItem.Position.ShouldBe(0);
             }
         }
     }

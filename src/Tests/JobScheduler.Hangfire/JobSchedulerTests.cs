@@ -120,7 +120,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
             
         }
 
-        [XpandTest()][Test]
+        [XpandTest()][Test][Order(1)]
         public async Task Pause_Job() {
             MockHangfire().Test();
             using var application = JobSchedulerModule().Application.ToBlazor();

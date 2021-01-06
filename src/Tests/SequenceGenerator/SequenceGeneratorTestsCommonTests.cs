@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -8,6 +9,7 @@ using DevExpress.ExpressApp.Xpo;
 using DevExpress.Xpo;
 using DevExpress.Xpo.DB;
 using Shouldly;
+using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Common;
@@ -17,6 +19,12 @@ using Xpand.XAF.Modules.SequenceGenerator.Tests.BO;
 
 namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
     public abstract class SequenceGeneratorTestsCommonTests:BaseTest{
+        static SequenceGeneratorTestsCommonTests() {
+            var path = $"{AppDomain.CurrentDomain.ApplicationPath()}\\microsoft.data.sqlclient.dll";
+            if (File.Exists(path)) {
+                File.Delete(path);
+            }
+        }
         protected  SequenceGeneratorModule SequenceGeneratorModule( XafApplication application=null,Platform platform=Platform.Win){
             application ??= NewApplication(platform);
             var sequenceGeneratorModule = application.AddModule<SequenceGeneratorModule>(typeof(TestObject).Assembly.GetTypes().Where(type => typeof(IXPSimpleObject).IsAssignableFrom(type)).Concat(new []{typeof(CustomSequenceTypeName)}).ToArray());

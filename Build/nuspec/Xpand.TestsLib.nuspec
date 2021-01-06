@@ -14,7 +14,7 @@
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Xpand.TestsLib</tags>
     <dependencies>
-      <group targetFramework="net461">
+      <group targetFramework="netcoreapp3.1">
         <dependency id="Xpand.Extensions" version="4.202.47.3" />
         <dependency id="Xpand.Extensions.Reactive" version="4.202.47.3" />
         <dependency id="Xpand.Extensions.XAF" version="4.202.47.3" />
@@ -29,7 +29,6 @@
         <dependency id="MagicOnion" version="2.6.3" />
         <dependency id="Moq" version="4.15.2" />
         <dependency id="Newtonsoft.Json" version="12.0.3" />
-        <dependency id="Ryder" version="0.8" />
         <dependency id="Shouldly" version="4.0.3" />
         <dependency id="NUnit" version="3.12" />
         <dependency id="NUnit3TestAdapter" version="3.17" />
@@ -40,13 +39,15 @@
         <dependency id="Selenium.Support" version="3.141" />
         <dependency id="Selenium.WebDriver" version="3.141" />
         <dependency id="System.Reactive" version="5.0" />
+        <dependency id="Microsoft.CodeAnalysis" version="3.8" />
+        <dependency id="Microsoft.CodeAnalysis.Csharp" version="3.8" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="net461\Xpand.TestsLib.pdb" target="lib\net461\Xpand.TestsLib.pdb" />
+    <file src="netcoreapp3.1\Xpand.TestsLib.pdb" target="lib\netcoreapp3.1\Xpand.TestsLib.pdb" />
     <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.TestsLib.targets" />
     <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
-    <file src="net461\Xpand.TestsLib.dll" target="lib\net461\Xpand.TestsLib.dll" />
+    <file src="netcoreapp3.1\Xpand.TestsLib.dll" target="lib\netcoreapp3.1\Xpand.TestsLib.dll" />
   </files>
 </package>

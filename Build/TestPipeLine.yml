@@ -90,7 +90,7 @@ jobs:
         collectDumpOn: never
 - job: TestStageCloudOffice
   strategy: 
-    parallel: 6
+    parallel: 8
   pool:
     vmImage: windows-2019
   variables:
@@ -168,6 +168,8 @@ jobs:
           **\Xpand.XAF.Modules.Office.Cloud.Google.Tests.dll
           **\Xpand.XAF.Modules.Office.Cloud.Microsoft.Tests.dll
           **\Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests.dll
+          **\Xpand.XAF.Modules.LookupCascade.Tests.dll
+          **\Xpand.XAF.Modules.ProgressBarViewItem.Tests.dll
           !**\obj\**    
         diagnosticsEnabled: true
         codeCoverageEnabled: true
@@ -181,7 +183,7 @@ jobs:
     - TestStageCloudOffice
     - TestStageBaseOnExecutionTime
   strategy: 
-    parallel: 21
+    parallel: 19
   pool:
     vmImage: windows-2019
   variables:
@@ -250,7 +252,7 @@ jobs:
       enabled: true
       continueOnError: true
       inputs:
-        searchFolder: '$(System.DefaultWorkingDirectory)\bin\net461'
+        searchFolder: '$(System.DefaultWorkingDirectory)\bin\netcoreapp3.1'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
           **\Xpand.Extensions.Tests.dll
@@ -260,12 +262,9 @@ jobs:
           **\Xpand.XAF.Modules.GridListEditor.Tests.dll
           **\Xpand.XAF.Modules.HideToolBar.Tests.dll
           **\Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.dll
-          **\Xpand.XAF.Modules.LookupCascade.Tests.dll
           **\Xpand.XAF.Modules.MasterDetail.Tests.dll
           **\Xpand.XAF.Modules.ModelViewInheritance.Tests.dll
-          
           **\Xpand.XAF.Modules.OneView.Tests.dll
-          **\Xpand.XAF.Modules.ProgressBarViewItem.Tests.dll
           **\Xpand.XAF.Modules.Reactive.Logger.Hub.Tests.dll
           **\Xpand.XAF.Modules.Reactive.Logger.Tests.dll
           **\Xpand.XAF.Modules.Reactive.Tests.dll
@@ -282,6 +281,7 @@ jobs:
         runInParallel: false
         runSettingsFile: $(System.DefaultWorkingDirectory)\build\Tests.runsettings
         runTestsInIsolation: false
+        otherConsoleOptions: '/Framework:.NETCoreApp,Version=v3.1 /logger:console;verbosity="normal"'
         collectDumpOn: never
 - job: AddPastVersionBuild
   dependsOn: TestNet461

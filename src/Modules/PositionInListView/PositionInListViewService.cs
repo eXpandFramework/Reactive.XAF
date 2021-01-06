@@ -17,8 +17,8 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.PositionInListView{
     public static class PositionInListViewService{
-        internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) =>
-            manager.WhenApplication(application => {
+        internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
+            => manager.WhenApplication(application => {
                 var positionInListCreated = application.WhenPositionInListCreated();
                 return positionInListCreated.SortCollectionSource()
                     .Merge(positionInListCreated.DisableSorting())
@@ -27,18 +27,18 @@ namespace Xpand.XAF.Modules.PositionInListView{
 
         internal static IObservable<TSource> TracePositionInListView<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
 	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
-	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) =>
-	        source.Trace(name, PositionInListViewModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName);
+	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
+            => source.Trace(name, PositionInListViewModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName);
 
 
-        private static IObservable<(ListView listView, XafApplication application)> WhenPositionInListCreated(this XafApplication application) =>
-            application.WhenListViewCreated()
+        private static IObservable<(ListView listView, XafApplication application)> WhenPositionInListCreated(this XafApplication application) 
+            => application.WhenListViewCreated()
                 .Where(_ => application.Model.IsPositionInListView(_.Model.Id))
                 .Pair(application)
                 .Publish().RefCount();
 
-        private static IObservable<Unit> DisableSorting(this IObservable<(ListView listView, XafApplication application)> whenPositionInListCreated) =>
-            whenPositionInListCreated
+        private static IObservable<Unit> DisableSorting(this IObservable<(ListView listView, XafApplication application)> whenPositionInListCreated) 
+            => whenPositionInListCreated
                 .SelectMany(_ => _.listView.WhenControlsCreated())
                 .SelectMany(view => ((ColumnsListEditor) view.Editor).Columns)
                 .Do(wrapper => {
@@ -48,8 +48,8 @@ namespace Xpand.XAF.Modules.PositionInListView{
                 .TracePositionInListView(wrapper => wrapper.Caption)
                 .ToUnit();
 
-        private static IObservable<Unit> SortCollectionSource(this IObservable<(ListView listView, XafApplication application)> whenPositionInListCreated) =>
-            whenPositionInListCreated
+        private static IObservable<Unit> SortCollectionSource(this IObservable<(ListView listView, XafApplication application)> whenPositionInListCreated) 
+            => whenPositionInListCreated
                 .Where(tuple => tuple.application.Model.IsPositionInListView( tuple.listView.Id))
                 .Select(_ => {
                     var item = _.application.Model.ModelPositionInListView().ListViewItems
@@ -75,11 +75,11 @@ namespace Xpand.XAF.Modules.PositionInListView{
                 .TracePositionInListView(view => view.Id)
                 .ToUnit();
 
-        internal static bool IsPositionInListView(this IModelApplication applicationModel, string viewID) => applicationModel
-            .ModelPositionInListView().ListViewItems.Select(item => item.ListView.Id()).Contains(viewID);
+        internal static bool IsPositionInListView(this IModelApplication applicationModel, string viewID) 
+            => applicationModel.ModelPositionInListView().ListViewItems.Select(item => item.ListView.Id()).Contains(viewID);
 
-        private static IObservable<Unit> PositionNewObjects(this IObservable<XafApplication> whenApplication) =>
-            whenApplication.SelectMany(application => application.WhenObjectSpaceCreated().SelectMany(t => t.e.ObjectSpace.WhenNewObjectCommiting<object>().Pair(t.e.ObjectSpace))
+        private static IObservable<Unit> PositionNewObjects(this IObservable<XafApplication> whenApplication) 
+            => whenApplication.SelectMany(application => application.WhenObjectSpaceCreated().SelectMany(t => t.e.ObjectSpace.WhenNewObjectCommiting<object>().Pair(t.e.ObjectSpace))
                 .Do(t => {
                     var modelPositionInListView = application.Model.ModelPositionInListView();
                     var listViewItems = modelPositionInListView.ListViewItems;

@@ -5,13 +5,8 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Windows.Forms;
-using DevExpress.ExpressApp.Layout;
-using DevExpress.ExpressApp.Model;
-using DevExpress.ExpressApp.Web;
-using DevExpress.ExpressApp.Web.Layout;
 using DevExpress.ExpressApp.Win;
 using JetBrains.Annotations;
-using Moq;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -93,49 +88,7 @@ namespace Xpand.TestsLib{
         }
     }
 
-    public class TestWebApplication : WebApplication, ITestApplication{
-        private readonly bool _transmitMessage;
-
-        public  TestWebApplication(Type sutModule, bool transmitMessage = true){
-            _transmitMessage = transmitMessage;
-            SUTModule = sutModule;
-            TraceClientConnected = TestApplicationExtensions.ClientConnect(this);
-            TraceClientBroadcast = TestApplicationExtensions.ClientBroadcast(this);
-            TransmitMessage = transmitMessage;
-        }
-
-        public bool TransmitMessage{ get; }
-        public IObservable<Unit> TraceClientBroadcast{ get; set; }
-
-        protected override bool CanLoadTypesInfo(){
-            return true;
-        }
-
-        protected override void Dispose(bool disposing){
-            if (_transmitMessage){
-//                var timeout = TimeSpan.FromMilliseconds(5000);
-//                TraceClientConnected.Timeout(timeout).Wait();
-//                TraceClientBroadcast.Timeout(timeout).Wait();
-            }
-
-            base.Dispose(disposing);
-        }
-
-        protected override bool IsSharedModel => false;
-        public IObservable<Unit> TraceClientConnected{ get; set; }
-        [PublicAPI]
-        public Type SUTModule{ get; set; }
-
-        protected override LayoutManager CreateLayoutManagerCore(bool simple) {
-            var controlMock = new Mock<Control>() {CallBase = true};
-            var layoutManagerMock = new Mock<WebLayoutManager>() {CallBase = true};
-            layoutManagerMock.Setup(_ => _.LayoutControls(It.IsAny<IModelNode>(), It.IsAny<ViewItemsCollection>())).Returns(controlMock.Object);
-            return layoutManagerMock.Object;
-        }
-    }
     [PublicAPI]
-
-
     static class TestApplicationExtensions{
         public static IObservable<Unit> ClientBroadcast(this ITestApplication application){
             return Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()

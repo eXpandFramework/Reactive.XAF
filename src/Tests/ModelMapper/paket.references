@@ -1,11 +1,4 @@
 akarnokd.reactive_extensions
-DevExpress.ExpressApp.ConditionalAppearance
-DevExpress.ExpressApp.Dashboards.Web
-DevExpress.ExpressApp.Dashboards.Win
-DevExpress.ExpressApp.HtmlPropertyEditor.Web
-DevExpress.ExpressApp.Scheduler.Web
-DevExpress.ExpressApp.TreeListEditors.Win
-DevExpress.Persistent.BaseImpl
 Enums.NET
 MagicOnion
 Moq
@@ -13,10 +6,10 @@ Shouldly
 System.Interactive
 NUnit
 NUnit3TestAdapter
-DevExpress.ExpressApp.Chart.Win
-DevExpress.ExpressApp.PivotGrid.Win
-DevExpress.ExpressApp.Scheduler.Win
 Fasterflect.Xpand
 Xpand.Collections
 JetBrains.Annotations
 DevExpress.Xpo
+DevExpress.ExpressApp.Core.All
+DevExpress.ExpressApp.Win.All
+DevExpress.ExpressApp.Web.All

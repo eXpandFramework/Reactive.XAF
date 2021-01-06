@@ -1,9 +1,5 @@
-DevExpress.ExpressApp.Security.Xpo
-DevExpress.ExpressApp.Validation.Win
-DevExpress.ExpressApp.Web
 System.Interactive
 akarnokd.reactive_extensions
-DevExpress.Persistent.BaseImpl
 MagicOnion
 Moq
 Shouldly
@@ -11,5 +7,10 @@ NUnit
 NUnit3TestAdapter
 JetBrains.Annotations
 FasterFlect.Xpand
-DevExpress.Xpo
 System.Drawing.Common
+Microsoft.CodeAnalysis
+Microsoft.CodeAnalysis.Csharp
+Newtonsoft.Json
+Microsoft.NET.Test.Sdk
+DevExpress.WindowsDesktop.Core
+DevExpress.WindowsDesktop.Xaf

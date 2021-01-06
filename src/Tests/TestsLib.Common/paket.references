@@ -14,3 +14,4 @@ JetBrains.Annotations
 Microsoft.CodeAnalysis.CSharp
 nunit
 DevExpress.EasyTest
+Microsoft.CodeAnalysis

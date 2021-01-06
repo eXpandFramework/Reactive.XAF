@@ -73,17 +73,6 @@ jobs:
         tags: '$(CustomVersion)'
         artifactName: 'bin'
         targetPath: '$(System.DefaultWorkingDirectory)\bin'
-    # - task: DownloadPipelineArtifact@2
-    #   condition: ne(variables['NupkgBuild'], '')
-    #   name: UseNupkg
-    #   inputs:
-    #     buildType: 'specific'
-    #     project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
-    #     definition: '23'
-    #     buildVersionToDownload: 'specific'
-    #     pipelineId: '$(NupkgBuild)'
-    #     artifactName: 'Nupkg'
-    #     targetPath: '$(System.DefaultWorkingDirectory)\bin\Nupkg'
     - task: AzurePowerShell@5
       name: BuildNugetConsumers
       inputs:
@@ -129,7 +118,8 @@ jobs:
           $env:AzOrganization="eXpandDevOps"
           $env:AzProject ="eXpandFramework"
           $BuildPastVersion='Yes'
-          if ('$(CustomVersion)' -eq (Get-XAFLatestMinors -source '$(DXApiFeed)'|select-object -last 1)){
+          $lastVersion=(Get-XAFLatestMinors -source '$(DXApiFeed)'|select-object -last 1)
+          if ('$(CustomVersion)' -eq $lastVersion){
               $BuildPastVersion='No'
           }
           $parameters = @{
@@ -138,8 +128,30 @@ jobs:
               BuildPastVersion = $BuildPastVersion
               AzStorageLookup = '0'
           }
-          Add-AzBuild -Definition DevExpress.XAF-Lab-Tests -Tag '$(CustomVersion)' -Parameters $parameters
+          $minor=(Get-VersionPart $lastVersion Minor)
+          "minor=$minor"
+          if ($minor -ne "19.2"){
+              Add-AzBuild -Definition DevExpress.XAF-Lab-Tests -Tag '$(CustomVersion)' -Parameters $parameters
+          }
+          else{
+                $xafMinors=Get-XAFLatestMinors -Source '$(DXApiFeed)'
+                $failedBuilds = $xafMinors|Where-Object{$_ -gt "20.1.0"} | ForEach-Object {
+                  $build = Get-AzBuilds -Definition DevExpress.XAF-Lab-Tests -Tag "$_" -Top 1 -BranchName $env:Build_SourceBranchName
+                  Get-AzTestRuns -buildIds $build.Id -FailedOnly
+                }
+                if (!$failedBuilds) {
+                    $xafMinor=$xafMinors|select-object -first 1
+                    $build=Get-AzBuilds -Definition DevExpress.XAF-Lab-Tests -Tag "$xafMinor" -Top 1 -BranchName $env:Build_SourceBranchName
+                    $parameters = @{
+                        CustomVersion     = $xafMinor
+                        DxPipelineBuildId = $build.Id
+                    }
+                    $parameters|Out-String
+                    Add-AzBuild -Definition PublishNugets-DevExpress.XAF -Parameters $parameters
+                }
+          }
           & "$(System.DefaultWorkingDirectory)\go.ps1" @goArgs
+          New-Item '$(System.DefaultWorkingDirectory)\bin\Nupkg' -ItemType Directory -ErrorAction SilentlyContinue
     - task: PublishPipelineArtifact@1
       name: PublishNugetConsumers
       inputs:

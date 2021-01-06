@@ -87,7 +87,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
             Tracing.Close();
             var testObserver = new TestTracing().WhenException().Test();
             Tracing.Initialize();
-            using var application=NewApplication(Platform.Web);
+            using var application=NewApplication();
             SequenceGeneratorModule( application);
             SetSequences(application);
             var modelClass = application.Model.BOModel.GetClass(typeof(SequenceStorage));

@@ -1,10 +1,13 @@
-DevExpress.Xpo
 akarnokd.reactive_extensions
-DevExpress.ExpressApp.Win
-DevExpress.ExpressApp.Xpo
 MagicOnion
 Moq
 Shouldly
 NUnit
 NUnit3TestAdapter
 JetBrains.Annotations
+Microsoft.CodeAnalysis
+Microsoft.CodeAnalysis.Csharp
+Newtonsoft.Json
+Microsoft.NET.Test.Sdk
+DevExpress.WindowsDesktop.Core
+DevExpress.WindowsDesktop.Xaf
