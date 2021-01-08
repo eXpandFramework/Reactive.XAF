@@ -128,7 +128,7 @@ jobs:
               BuildPastVersion = $BuildPastVersion
               AzStorageLookup = '0'
           }
-          $minor=(Get-VersionPart $lastVersion Minor)
+          $minor=(Get-VersionPart '$(CustomVersion)' Minor)
           "minor=$minor"
           if ($minor -ne "19.2"){
               Add-AzBuild -Definition DevExpress.XAF-Lab-Tests -Tag '$(CustomVersion)' -Parameters $parameters
@@ -140,6 +140,10 @@ jobs:
                   Get-AzTestRuns -buildIds $build.Id -FailedOnly
                 }
                 if (!$failedBuilds) {
+                    $env:AzureToken = '$(AzureToken)' 
+                    $env:AzOrganization = "eXpandDevOps"
+                    $env:AzProject = "eXpandFramework"
+                    $env:DXFeed = '$(DXApiFeed)'
                     $xafMinor=$xafMinors|select-object -first 1
                     $build=Get-AzBuilds -Definition DevExpress.XAF-Lab-Tests -Tag "$xafMinor" -Top 1 -BranchName $env:Build_SourceBranchName
                     $parameters = @{
