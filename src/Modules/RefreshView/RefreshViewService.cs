@@ -30,8 +30,8 @@ namespace Xpand.XAF.Modules.RefreshView{
                                 .TakeUntil(frame.View.WhenClosing())
                                 .ObserveOn(synchronizationContext)
                                 .Select(l => {
-                                    frame.View.RefreshDataSource();
-                                    return frame.View;
+                                    frame.View?.RefreshDataSource();
+                                    return frame?.View;
                                 })
                             );
                     }).Merge()
