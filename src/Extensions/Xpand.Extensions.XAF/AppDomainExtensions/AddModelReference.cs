@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using ConcurrentCollections;
@@ -6,6 +7,7 @@ using DevExpress.ExpressApp.Utils.CodeGeneration;
 using Fasterflect;
 using HarmonyLib;
 using JetBrains.Annotations;
+using Xpand.Extensions.LinqExtensions;
 
 namespace Xpand.Extensions.XAF.AppDomainExtensions{
     public static partial class AppDomainExtensions{
@@ -37,6 +39,6 @@ namespace Xpand.Extensions.XAF.AppDomainExtensions{
 
         [UsedImplicitly]
         internal static void ModifyCSCodeCompilerReferences(string sourceCode, ref string[] references, string assemblyFile) 
-	        => references = references.Concat(References).Distinct().ToArray();
+	        => references = references.Concat(References).DistinctBy(Path.GetFileName).ToArray();
     }
 }

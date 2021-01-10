@@ -9,10 +9,10 @@ namespace Xpand.Extensions.XAF.AppDomainExtensions {
 
         [PublicAPI]
         public static void Patch(this AppDomain appDomain, Action<Harmony> patch) {
-            if (DesignerOnlyCalculator.IsRunTime) {
+            // if (DesignerOnlyCalculator.IsRunTime) {
                 _harmony ??= new Harmony("XAF");
                 patch(_harmony);
-            }
+            // }
         }
     }
 }

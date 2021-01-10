@@ -11,6 +11,7 @@ using DevExpress.ExpressApp.EasyTest.WinAdapter;
 using Fasterflect;
 using NUnit.Framework;
 using Shouldly;
+using Win.Tests;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Common;
@@ -105,8 +106,9 @@ namespace ALL.Win.Tests {
                 var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
                 adapter.Execute(autoTestCommand);
 #if !XAF191 && !NETCOREAPP3_1
-                adapter.TestDocumentStyleManager();
+                // adapter.TestDocumentStyleManager();
 #endif
+                adapter.TestModelViewInheritance();
                 await Task.CompletedTask;
             });
         }

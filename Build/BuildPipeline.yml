@@ -130,13 +130,16 @@ jobs:
           }
           $minor=(Get-VersionPart '$(CustomVersion)' Minor)
           "minor=$minor"
+          $env:BranchName=$env:Build_SourceBranchName
+          $env:BranchName
           if ($minor -ne "19.2"){
               Add-AzBuild -Definition DevExpress.XAF-Lab-Tests -Tag '$(CustomVersion)' -Parameters $parameters
           }
           else{
                 $xafMinors=Get-XAFLatestMinors -Source '$(DXApiFeed)'
+                
                 $failedBuilds = $xafMinors|Where-Object{$_ -gt "20.1.0"} | ForEach-Object {
-                  $build = Get-AzBuilds -Definition DevExpress.XAF-Lab-Tests -Tag "$_" -Top 1 -BranchName $env:Build_SourceBranchName
+                  $build = Get-AzBuilds -Definition DevExpress.XAF-Lab-Tests -Tag "$_" -Top 1 -BranchName 
                   Get-AzTestRuns -buildIds $build.Id -FailedOnly
                 }
                 if (!$failedBuilds) {
@@ -145,10 +148,10 @@ jobs:
                     $env:AzProject = "eXpandFramework"
                     $env:DXFeed = '$(DXApiFeed)'
                     $xafMinor=$xafMinors|select-object -first 1
-                    $build=Get-AzBuilds -Definition DevExpress.XAF-Lab-Tests -Tag "$xafMinor" -Top 1 -BranchName $env:Build_SourceBranchName
+                    $build=Get-AzBuilds -Definition DevExpress.XAF-Lab -Tag "$xafMinor" -Top 1 
                     $parameters = @{
-                        CustomVersion     = $xafMinor
-                        DxPipelineBuildId = $build.Id
+                        CustomVersion     = "$xafMinor"
+                        DxPipelineBuildId = "$($build.Id)"
                     }
                     $parameters|Out-String
                     Add-AzBuild -Definition PublishNugets-DevExpress.XAF -Parameters $parameters

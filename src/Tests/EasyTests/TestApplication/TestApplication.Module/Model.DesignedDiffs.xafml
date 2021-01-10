@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Application>
+  <Views>
+    <DetailView Id="ModelViewInheritanceBaseObject_DetailView">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="34.632683658170912">
+            <LayoutGroup Id="Person" Index="0" RelativeSize="53.246753246753244">
+              <LayoutGroup Id="Person_col1" RelativeSize="50">
+                <LayoutItem Id="LastName" Index="0" RelativeSize="36.363636363636367" />
+                <LayoutItem Id="MiddleName" Index="1" RelativeSize="63.636363636363633" />
+                <LayoutItem Id="FirstName" Removed="True" />
+              </LayoutGroup>
+              <LayoutGroup Id="Person_col2" RelativeSize="50">
+                <LayoutItem Id="Birthday" RelativeSize="36.363636363636367" />
+                <LayoutItem Id="FullName" RelativeSize="27.272727272727273" />
+                <LayoutItem Id="Email" RelativeSize="36.363636363636367" />
+              </LayoutGroup>
+            </LayoutGroup>
+            <LayoutGroup Id="Party" Index="1" RelativeSize="46.753246753246756">
+              <LayoutItem Id="Photo" RelativeSize="27.777777777777779" />
+              <LayoutItem Id="Address1" RelativeSize="22.222222222222221" />
+              <LayoutItem Id="Address2" RelativeSize="22.222222222222221" />
+              <LayoutItem Id="DisplayName" RelativeSize="27.777777777777779" />
+            </LayoutGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="PhoneNumbers_Group" Direction="Vertical" RelativeSize="65.367316341829081">
+            <LayoutItem Id="PhoneNumbers" RelativeSize="100" />
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+  </Views>
+</Application>

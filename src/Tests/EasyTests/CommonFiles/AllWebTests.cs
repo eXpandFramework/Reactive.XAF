@@ -15,11 +15,11 @@ using System.Threading.Tasks;
 using ALL.Tests;
 using DevExpress.EasyTest.Framework;
 using NUnit.Framework;
+using Win.Tests;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.TestsLib.Common.EasyTest;
 using Xpand.TestsLib.Common.EasyTest.Commands.ActionCommands;
-using Xpand.TestsLib.Common.EasyTest.Commands.Automation;
 using Xpand.XAF.Modules.Reactive.Logger;
 using CommonTest = ALL.Tests.CommonTest;
 
@@ -82,7 +82,7 @@ namespace Web.Tests{
 #if NETCOREAPP3_1
                 await adapter.TestJobScheduler();
 #endif
-
+                adapter.TestModelViewInheritance();
             });
         }
 
@@ -99,7 +99,7 @@ namespace Web.Tests{
         [XpandTest(LongTimeout,3)]
         [Test][Apartment(ApartmentState.STA)]
         public async Task Web_MicrosoftCloud_EasyTest(){
-            DeleteBrowserFiles.Execute();
+            Xpand.TestsLib.Common.EasyTest.Commands.Automation.DeleteBrowserFiles.Execute();
             await EasyTest(NewWebAdapter, RunWebApplication, async adapter => {
                 await adapter.TestMicrosoftService(async () => {
                     await adapter.TestMicrosoftCalendarService();
@@ -113,7 +113,7 @@ namespace Web.Tests{
         [Test][Apartment(ApartmentState.STA)]
         public async Task Web_GoogleCloud_EasyTest(){
 #if !NETCOREAPP3_1
-            DeleteBrowserFiles.Execute();
+            Xpand.TestsLib.Common.EasyTest.Commands.Automation.DeleteBrowserFiles.Execute();
 #endif
             await EasyTest(NewWebAdapter, RunWebApplication, async adapter => {
                 await adapter.TestGoogleService(async () => {

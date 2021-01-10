@@ -1,7 +1,9 @@
-System.Reactive
-DevExpress.ExpressApp
 Fasterflect.Xpand
+DevExpress.ExpressApp
+Xpand.Patcher
 JetBrains.Annotations
-System.Configuration.ConfigurationManager
+Microsoft.CSharp
 Microsoft.CodeAnalysis.CSharp
+System.Reactive
+System.Configuration.ConfigurationManager
 System.ServiceModel.Http

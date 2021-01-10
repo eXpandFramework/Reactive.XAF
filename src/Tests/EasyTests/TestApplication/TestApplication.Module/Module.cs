@@ -42,7 +42,6 @@ using Xpand.XAF.Modules.ProgressBarViewItem;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Logger;
-using Xpand.XAF.Modules.Reactive.Logger.Hub;
 using Xpand.XAF.Modules.RefreshView;
 using Xpand.XAF.Modules.SequenceGenerator;
 using Xpand.XAF.Modules.SuppressConfirmation;
@@ -81,11 +80,11 @@ namespace TestApplication.Module {
 
             AdditionalExportedTypes.Add(typeof(Order));
 
-			RequiredModuleTypes.Add(typeof(AutoCommitModule));
-			RequiredModuleTypes.Add(typeof(CloneMemberValueModule));
-			RequiredModuleTypes.Add(typeof(CloneModelViewModule));
-			RequiredModuleTypes.Add(typeof(HideToolBarModule));
-			RequiredModuleTypes.Add(typeof(MasterDetailModule));
+            RequiredModuleTypes.Add(typeof(AutoCommitModule));
+            RequiredModuleTypes.Add(typeof(CloneMemberValueModule));
+            RequiredModuleTypes.Add(typeof(CloneModelViewModule));
+            RequiredModuleTypes.Add(typeof(HideToolBarModule));
+            RequiredModuleTypes.Add(typeof(MasterDetailModule));
             RequiredModuleTypes.Add(typeof(ModelViewInheritanceModule));
             RequiredModuleTypes.Add(typeof(ProgressBarViewItemModule));
             RequiredModuleTypes.Add(typeof(ModelMapperModule));
@@ -99,7 +98,7 @@ namespace TestApplication.Module {
 			RequiredModuleTypes.Add(typeof(GoogleModule));
 			RequiredModuleTypes.Add(typeof(GoogleTasksModule));
 			RequiredModuleTypes.Add(typeof(GoogleCalendarModule));
-            // RequiredModuleTypes.Add(typeof(ReactiveLoggerModule));
+            RequiredModuleTypes.Add(typeof(ReactiveLoggerModule));
 			// RequiredModuleTypes.Add(typeof(ReactiveLoggerHubModule));
 			RequiredModuleTypes.Add(typeof(ViewWizardModule));
 			AdditionalExportedTypes.Add(typeof(Event));

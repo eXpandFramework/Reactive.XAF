@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
@@ -32,6 +32,7 @@
     <Compile Include="..\..\CommonFiles\MicrosoftService.cs" Link="MicrosoftService.cs" />
     <Compile Include="..\..\CommonFiles\MicrosoftTodoService.cs" Link="MicrosoftTodoService.cs" />
     <Compile Include="..\..\CommonFiles\GoogleTasksService.cs" Link="GoogleTasksService.cs" />
+    <Compile Include="..\..\CommonFiles\ModelViewInheritanceService.cs" Link="ModelViewInheritanceService.cs" />
     <Compile Include="..\..\CommonFiles\OfficeCloudService.cs" Link="OfficeCloudService.cs" />
     <Compile Include="..\..\CommonFiles\SequenceGeneratorService.cs" Link="SequenceGeneratorService.cs" />
     <Compile Include="..\..\CommonFiles\BaseTest.cs" Link="BaseTest.cs" />

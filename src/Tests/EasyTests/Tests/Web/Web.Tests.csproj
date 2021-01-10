@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <LangVersion>latest</LangVersion>
@@ -29,6 +29,7 @@
     <Compile Include="..\..\CommonFiles\MicrosoftService.cs" Link="MicrosoftService.cs" />
     <Compile Include="..\..\CommonFiles\GoogleService.cs" Link="GoogleService.cs" />
     <Compile Include="..\..\CommonFiles\MicrosoftTodoService.cs" Link="MicrosoftTodoService.cs" />
+    <Compile Include="..\..\CommonFiles\ModelViewInheritanceService.cs" Link="ModelViewInheritanceService.cs" />
     <Compile Include="..\..\CommonFiles\OfficeCloudService.cs" Link="OfficeCloudService.cs" />
     <Compile Include="..\..\CommonFiles\BaseTest.cs" Link="BaseTest.cs" />
     <Compile Include="..\..\CommonFiles\SequenceGeneratorService.cs" Link="SequenceGeneratorService.cs" />

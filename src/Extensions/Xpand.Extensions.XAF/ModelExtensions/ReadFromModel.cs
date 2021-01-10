@@ -8,8 +8,13 @@ namespace Xpand.Extensions.XAF.ModelExtensions{
             for (var i = 0; i < modelApplication.AspectCount; i++){
                 var aspect = modelApplication.GetAspect(i);
                 var xml = new ModelXmlWriter().WriteToString(readFrom, i);
-                if (!string.IsNullOrEmpty(xml))
+                
+                if (!string.IsNullOrEmpty(xml)) {
+                    if (!(readFrom is IModelApplication)) {
+                        xml = xml.Replace(@$"Id=""{readFrom.Id()}""", @$"Id=""{modelNode.Id()}""");
+                    }
                     new ModelXmlReader().ReadFromString(modelNode, aspect, xml);
+                }
             }
         }
 

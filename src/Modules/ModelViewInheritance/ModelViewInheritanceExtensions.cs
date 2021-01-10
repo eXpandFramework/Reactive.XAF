@@ -13,43 +13,33 @@ using Xpand.Extensions.XAF.TypesInfoExtensions;
 
 namespace Xpand.XAF.Modules.ModelViewInheritance{
     internal static class ModelViewInheritanceExtensions{
-        internal static IEnumerable<(int index, (int? index, IModelView parentView,bool deepMerge) diffData, string objectViewId)> ModelInfos(this IModelApplication[] modelApplications) =>
-	        modelApplications.ModelViews()
-		        .SelectMany(_ => _.objectView.MergedDifferences.Select(difference => {
-			        var diffData = (difference.Index,difference.GetParent<IModelView>(),difference.DeepMerge);
-			        var tuple = (_.index, diffData, ViewId(difference));
-			        return tuple;
-		        }))
+        internal static IEnumerable<(int index, (int? index, IModelView parentView,bool deepMerge) diffData, string objectViewId)> ModelInfos(this IModelApplication[] modelApplications) 
+            => modelApplications.ModelViews().SelectMany(t => t.objectView.MergedDifferences
+                    .Select(difference => (t.index, (difference.Index,difference.GetParent<IModelView>(),difference.DeepMerge), ViewId(difference))))
 		        .ToDeepMergeInfos(modelApplications);
 
-        private static IEnumerable<(int index, IModelObjectViewMergedDifferences objectView)> ModelViews(this IEnumerable<IModelApplication> source) => source
-	        .SelectMany((application, index) => application.Views?.OfType<IModelObjectViewMergedDifferences>().Where(differences => differences.MergedDifferences != null)
+        private static IEnumerable<(int index, IModelObjectViewMergedDifferences objectView)> ModelViews(this IEnumerable<IModelApplication> source) 
+            => source.SelectMany((application, index) => application.Views?.OfType<IModelObjectViewMergedDifferences>().Where(differences => differences.MergedDifferences != null)
 		        .Select(mergedDifferences => (index: index + 1, mergedDifferences)) ?? Enumerable.Empty<(int index, IModelObjectViewMergedDifferences objectView)>());
 
         internal static IEnumerable<(int index, (int? index, IModelView parentView, bool deepMerge) diffData, string objectViewId)>
-            ToDeepMergeInfos(this IEnumerable<(int index, (int? index, IModelView parentView, bool deepMerge) diffData, string objectViewId)> source, IModelApplication[] modelApplications) =>
-	        source.SelectMany(_ => {
-		        if (_.diffData.deepMerge){
-			        return modelApplications.Take(_.index)
-				        .Select(application => application.Views?[_.objectViewId])
-				        .Where(view => view!=null).OfType<IModelObjectViewMergedDifferences>().Where(differences => differences.MergedDifferences!=null)
-				        .SelectMany(differences => differences.MergedDifferences)
-				        .Select((difference, i) => (_.index,(_.diffData.index+i-1000,_.diffData.parentView,false),difference.ViewId()))
-				        .Concat(new []{_});
-                    
-		        }
+            ToDeepMergeInfos(this IEnumerable<(int index, (int? index, IModelView parentView, bool deepMerge) diffData, string objectViewId)> source, IModelApplication[] modelApplications) 
+            => source.SelectMany(_ => !_.diffData.deepMerge ? new[] {_} : modelApplications.Take(_.index)
+                    .Select(application => application.Views?[_.objectViewId])
+                    .Where(view => view != null).OfType<IModelObjectViewMergedDifferences>()
+                    .Where(differences => differences.MergedDifferences != null)
+                    .SelectMany(differences => differences.MergedDifferences)
+                    .Select((difference, i) => (_.index,
+                        (_.diffData.index + i - 1000, _.diffData.parentView, false), difference.ViewId()))
+                    .Concat(new[] {_}));
 
-		        return new[]{_};
-	        });
-
-        private static string ViewId(this IModelMergedDifference difference) => 
-	        new Regex("View=\"([^\"]*)\"").Match(difference.Xml()).Groups[1].Value;
+        private static string ViewId(this IModelMergedDifference difference) 
+            => new Regex("View=\"([^\"]*)\"").Match(difference.Xml()).Groups[1].Value;
 
         internal static void UpdateModel(this (int index, (int? index, IModelView parentView, bool deepMerge) diffData, string objectViewId) info,
             IModelApplication[] modulesDifferences, ModelNode master){
             var newViewId = info.diffData.parentView.Id;
-            var modelApplications = modulesDifferences
-                .Where(application => application.Views!=null)
+            var modelApplications = modulesDifferences.Where(application => application.Views!=null)
                 .Select(application => UpdateDetailViewModel(info,application,master))
                 .Where(view => view!=null)
                 .ToArray();
@@ -60,6 +50,7 @@ namespace Xpand.XAF.Modules.ModelViewInheritance{
                 var modelObjectView = application.Application.Views[info.objectViewId];
                 modelApplication.ReadViewInLayer( modelObjectView, newViewId);
                 ((ModelApplicationBase) master).InsertLayer(info.index+index, modelApplication);
+                ((ModelApplicationBase) master).Merge(modelApplication);
             }
         }
 
@@ -92,9 +83,8 @@ namespace Xpand.XAF.Modules.ModelViewInheritance{
             return sourceModelView;
         }
 
-        internal static IModelApplication[] ModuleApplications(this ModuleBase[] source, ModelNode node) =>
-	        source.Select((module, i) => ModuleApplication(node, module,i==source.Length-1))
-		        .ToArray();
+        internal static IModelApplication[] ModuleApplications(this ModuleBase[] source, ModelNode node) 
+            => source.Select((module, i) => ModuleApplication(node, module,i==source.Length-1)).ToArray();
 
         private static IModelApplication ModuleApplication(ModelNode node, ModuleBase module, bool isLastLayer){
             var creator = node.CreatorInstance;
@@ -103,13 +93,11 @@ namespace Xpand.XAF.Modules.ModelViewInheritance{
             if (isLastLayer && module.DiffsStore == ModelStoreBase.Empty && !XafTypesInfo.Instance.RuntimeMode()){
                 var assembly = module.GetType().Assembly;
                 var modelResourceName = assembly.GetManifestResourceNames().FirstOrDefault(s => s.EndsWith(".xafml"));
-                using (var stream = assembly.GetManifestResourceStream(modelResourceName)){
-                    using (var streamReader = new StreamReader(stream ?? throw new InvalidOperationException(module.Name))){
-                        var xml = streamReader.ReadToEnd();
-                        var stringModelStore = new StringModelStore(xml);
-                        stringModelStore.Load(application);
-                    }
-                }
+                using var stream = assembly.GetManifestResourceStream(modelResourceName);
+                using var streamReader = new StreamReader(stream ?? throw new InvalidOperationException(module.Name));
+                var xml = streamReader.ReadToEnd();
+                var stringModelStore = new StringModelStore(xml);
+                stringModelStore.Load(application);
             }
             else{
                 module.DiffsStore.Load(application);

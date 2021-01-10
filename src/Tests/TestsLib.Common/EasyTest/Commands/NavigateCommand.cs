@@ -1,11 +1,12 @@
 ﻿using DevExpress.EasyTest.Framework;
+using Xpand.Extensions.XAF.ObjectExtensions;
 
 namespace Xpand.TestsLib.Common.EasyTest.Commands{
     public class NavigateCommand:EasyTestCommand{
         public const string Name = "Navigate";
 
         public NavigateCommand(string navigationItemCaption){
-            Parameters.MainParameter=new MainParameter(navigationItemCaption);
+            Parameters.MainParameter=new MainParameter(navigationItemCaption.CompoundName());
         }
 
         protected override void ExecuteCore(ICommandAdapter adapter){

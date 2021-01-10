@@ -8,9 +8,10 @@ namespace Xpand.TestsLib.Common.EasyTest.Commands{
 
         protected sealed override void InternalExecute(ICommandAdapter adapter){
             var suppressException = SuppressExceptions;
+            var expectException = ExpectException;
             try {
                 ExecuteCore(adapter);
-                if(ExpectException) {
+                if(expectException) {
                     throw new EasyTeCommandException(this,new ExpectedExceptionCommandException(StartPosition));
                 }
             }
@@ -19,7 +20,7 @@ namespace Xpand.TestsLib.Common.EasyTest.Commands{
                     Logger.Instance.Exception(e);
                 }
                 else {
-                    if(!ExpectException) {
+                    if(!expectException) {
                         throw new EasyTeCommandException(this,e);
                     }
                 }
@@ -29,7 +30,7 @@ namespace Xpand.TestsLib.Common.EasyTest.Commands{
                     Logger.Instance.Exception(e);
                 } 
                 else {
-                    if(!ExpectException) {
+                    if(!expectException) {
                         throw new EasyTeCommandException(this,e);
                     }
                 }

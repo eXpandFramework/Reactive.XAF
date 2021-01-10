@@ -23,7 +23,7 @@ namespace Xpand.XAF.Modules.Reactive{
                 var original = typeof(ApplicationModulesManager).Method("SetupModules");
                 var prefix = typeof(ReactiveModule).Method(nameof(SetupModulesPatch),Flags.StaticAnyVisibility);
                 harmony.Patch(original,  new HarmonyMethod(prefix));
-                AppDomain.CurrentDomain.AddModelReference("netstandard",typeof(FontStyle).Assembly.GetName().Name,"System.Drawing.Common");
+                AppDomain.CurrentDomain.AddModelReference("netstandard",typeof(FontStyle?).Assembly.GetName().Name);
             });
         }
 

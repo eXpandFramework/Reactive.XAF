@@ -4,7 +4,6 @@ using System.Linq.Expressions;
 using DevExpress.EasyTest.Framework;
 using DevExpress.EasyTest.Framework.Commands;
 using Xpand.Extensions.XAF.ObjectExtensions;
-using Parameter = Xpand.TestsLib.Common.EasyTest.Commands.Parameter;
 
 namespace Xpand.TestsLib.Common.EasyTest.Commands{
     public class CheckDetailViewCommand<T>:CheckDetailViewCommand {

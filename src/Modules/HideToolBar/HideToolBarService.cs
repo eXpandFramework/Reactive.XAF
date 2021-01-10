@@ -4,6 +4,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.Templates;
 using Fasterflect;
 using Xpand.Extensions.Reactive.Transform;
@@ -27,14 +28,9 @@ namespace Xpand.XAF.Modules.HideToolBar{
                 .TemplateChanged()
                 .Where(_ => _.Template is ISupportActionsToolbarVisibility)
                 .TemplateViewChanged()
-                .Where(frame => {
-                    if (frame.View is ListView&& frame.View.Model is IModelListViewHideToolBar modelListViewHideToolBar){
-                        var hideToolBar = modelListViewHideToolBar.HideToolBar;
-                        return hideToolBar.HasValue&&hideToolBar.Value;
-                    }
-
-                    return false;
-                })
+                .Where(frame => frame.View is ListView && frame.View.Model is IModelListViewHideToolBar modelListViewHideToolBar &&
+                                (modelListViewHideToolBar.HasValue(nameof(modelListViewHideToolBar.HideToolBar)) &&
+                                 modelListViewHideToolBar.HideToolBar))
                 .TraceHideToolBarModule(frame => $"{frame.ViewItem.View.Id}, {frame.View.Id}")
                 .Publish().RefCount();
 

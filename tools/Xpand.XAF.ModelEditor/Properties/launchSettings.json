@@ -2,7 +2,7 @@
   "profiles": {
     "Xpand.XAF.ModelEditor": {
       "commandName": "Project",
-      "commandLineArgs": "d True \"C:\\Work\\eXpandFramework\\DevExpress.XAF\\src\\Tests\\EasyTests\\TestApplication\\TestApplication.Blazor.Server\\bin\\TestApplication.Blazor.Server.dll\" \"C:\\Work\\eXpandFramework\\DevExpress.XAF\\src\\Tests\\EasyTests\\TestApplication\\TestApplication.Blazor.Server\\Model.xafml\" \"C:\\Work\\eXpandFramework\\DevExpress.XAF\\src\\Tests\\EasyTests\\TestApplication\\TestApplication.Blazor.Server\\\""
+      "commandLineArgs": "d False \"C:\\Work\\eXpandFramework\\DevExpress.XAF\\src\\Tests\\EasyTests\\TestApplication\\TestApplication.Module\\bin\\Debug\\netstandard2.0\\TestApplication.Module.dll\" \"C:\\Work\\eXpandFramework\\DevExpress.XAF\\src\\Tests\\EasyTests\\TestApplication\\TestApplication.Module\\ModelViewInheritance\\ModelViewInheritance.xafml\" \"C:\\Work\\eXpandFramework\\DevExpress.XAF\\src\\Tests\\EasyTests\\TestApplication\\TestApplication.Module\\\""
     }
   }
 }

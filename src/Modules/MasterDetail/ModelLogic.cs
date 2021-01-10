@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using System.Drawing.Design;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;

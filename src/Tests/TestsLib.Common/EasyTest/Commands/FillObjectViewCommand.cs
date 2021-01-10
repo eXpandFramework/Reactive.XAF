@@ -21,7 +21,7 @@ namespace Xpand.TestsLib.Common.EasyTest.Commands{
         }
 
         protected override void ExecuteCore(ICommandAdapter adapter){
-            foreach (var command in _tuples.Select(_ => new FillEditorCommand(_.editor.CompoundName(),_.value))){
+            foreach (var command in _tuples.Select(_ => new FillEditorCommand(_.editor.CompoundName(),_.value){})){
                 command.Execute(adapter);
             }
 

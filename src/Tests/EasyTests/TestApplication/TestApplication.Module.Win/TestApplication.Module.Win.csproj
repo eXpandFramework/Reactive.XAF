@@ -23,6 +23,7 @@
     <DefineConstants>TRACE;DEBUG;EASYTEST;XAF202XAF202</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Model.DesignedDiffs.xafml" />
     <None Remove="UnusableNodes.xml" />
   </ItemGroup>
   <ItemGroup>
@@ -38,6 +39,7 @@
     <EmbeddedResource Include="..\CommonFiles\DocumentStyleManager\Lorem3.docx" Link="Office\DocumentStyleManager\Lorem3.docx" />
     <EmbeddedResource Include="..\CommonFiles\DocumentStyleManager\LoresumV2.docx" Link="Office\DocumentStyleManager\LoresumV2.docx" />
     <EmbeddedResource Include="..\CommonFiles\DocumentStyleManager\Office.DocumentStyleManager.xafml" Link="Office\DocumentStyleManager\Office.DocumentStyleManager.xafml" />
+    <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.2.4" />

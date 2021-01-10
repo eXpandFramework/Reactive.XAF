@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Deterministic>false</Deterministic>
@@ -23,7 +23,7 @@
     <DefineConstants>TRACE;DEBUG;EASYTEST;XAF202XAF202</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="ModelViewInheritance\ModelViewInheritance.xafml" />
+    <None Remove="Model.DesignedDiffs.xafml" />
     <None Remove="UnusableNodes.xml" />
   </ItemGroup>
   <ItemGroup>
@@ -43,7 +43,7 @@
   <ItemGroup>
     <EmbeddedResource Include="..\CommonFiles\Cloud.Office.xafml" Link="Office\Cloud\Cloud.Office.xafml" />
     <EmbeddedResource Include="..\CommonFiles\SeqeuenceGenerator\SequenceGenerator.xafml" Link="SequenceGenerator\SequenceGenerator.xafml" />
-    <EmbeddedResource Include="ModelViewInheritance\ModelViewInheritance.xafml" />
+    <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.2.4" />

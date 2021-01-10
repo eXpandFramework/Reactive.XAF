@@ -1,5 +1,6 @@
 ﻿using DevExpress.EasyTest.Framework;
 using DevExpress.EasyTest.Framework.Commands;
+using Xpand.Extensions.XAF.ObjectExtensions;
 
 namespace Xpand.TestsLib.Common.EasyTest.Commands{
     public class FillEditorCommand:EasyTestCommand{
@@ -9,11 +10,11 @@ namespace Xpand.TestsLib.Common.EasyTest.Commands{
         public FillEditorCommand(string editor,string value,bool inlineEditor=false){
             _inlineEditor = inlineEditor;
             if (inlineEditor){
-                Parameters.Add(new Parameter($"Columns = {editor}"));
+                Parameters.Add(new Parameter($"Columns = {editor.CompoundName()}"));
                 Parameters.Add(new Parameter($"Values = {value}"));
             }
             else{
-                Parameters.Add(new Parameter(editor,value));
+                Parameters.Add(new Parameter(editor.CompoundName(),value));
             }
         }
 

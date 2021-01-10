@@ -25,7 +25,7 @@ Invoke-Script {
                 CustomVersion     = $env:CustomVersion
                 DxPipelineBuildId = $env:DxPipelineBuildId
             }
-            Add-AzBuild -Definition PublishNugets-DevExpress.XAF -Parameters $parameters
+            Add-AzBuild -Definition PublishNugets-DevExpress.XAF -Parameters $parameters -Branch $env:Build_SourceBranchName
         }
     }
     

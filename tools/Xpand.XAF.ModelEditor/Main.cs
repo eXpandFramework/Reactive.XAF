@@ -2,6 +2,7 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
 using DevExpress.ExpressApp.Model.Core;
@@ -34,6 +35,7 @@ namespace Xpand.XAF.ModelEditor {
 
         [STAThread]
         public static void Main(string[] args) {
+            
             var iconName = typeof(MainClass).Assembly.GetManifestResourceNames().First(s => s.EndsWith("ExpressApp.ico"));
             var manifestResourceStream = typeof(MainClass).Assembly.GetManifestResourceStream(iconName);
             var icon = new Icon(manifestResourceStream ?? throw new InvalidOperationException() );
