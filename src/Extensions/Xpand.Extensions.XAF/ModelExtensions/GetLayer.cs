@@ -5,7 +5,7 @@ using Fasterflect;
 
 namespace Xpand.Extensions.XAF.ModelExtensions{
     public static partial class ModelExtensions{
-        public static List<ModelNode> GetLayers(this ModelApplicationBase modelApplicationBase) => ((List<ModelNode>)modelApplicationBase.GetPropertyValue("Layers")).ToList();
+        public static List<ModelNode> GetLayers(this ModelApplicationBase modelApplicationBase) => ((List<ModelNode>)modelApplicationBase.GetPropertyValue("Layers"));
 
         public static ModelApplicationBase GetLayer(this ModelApplicationBase modelApplicationBase, int index) => 
             (ModelApplicationBase) ((List<ModelNode>)modelApplicationBase.GetPropertyValue("Layers"))[index];

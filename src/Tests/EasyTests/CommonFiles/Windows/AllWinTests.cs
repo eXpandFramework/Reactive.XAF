@@ -106,7 +106,7 @@ namespace ALL.Win.Tests {
                 var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
                 adapter.Execute(autoTestCommand);
 #if !XAF191 && !NETCOREAPP3_1
-                // adapter.TestDocumentStyleManager();
+                adapter.TestDocumentStyleManager();
 #endif
                 adapter.TestModelViewInheritance();
                 await Task.CompletedTask;

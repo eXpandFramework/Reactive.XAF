@@ -22,7 +22,7 @@ namespace Xpand.XAF.Modules.ModelViewInheritance {
 
     public class MergedDifferencesGenerator : ModelNodesGeneratorBase {
         protected override void GenerateNodesCore(ModelNode node){
-
+            return;
             var modelObjectView = node.GetParent<IModelObjectView>();
             
             var typeInfo = modelObjectView.ModelClass.TypeInfo;

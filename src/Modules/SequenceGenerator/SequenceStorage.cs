@@ -27,16 +27,13 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
     public sealed class SequenceStorageKeyNameAttribute:Attribute{
         public Type Type{ get; }
 
-        public SequenceStorageKeyNameAttribute(Type type){
-            Type = type;
-        }
+        public SequenceStorageKeyNameAttribute(Type type) 
+            => Type = type;
 
-        public static Type FindConsumer(Type sequenceType){
-            return XafTypesInfo.Instance.PersistentTypes.SelectMany(info => info
+        public static Type FindConsumer(Type sequenceType) 
+            => XafTypesInfo.Instance.PersistentTypes.SelectMany(info => info
                 .FindAttributes<SequenceStorageKeyNameAttribute>()
                 .Where(attribute => attribute.Type == sequenceType).Select(attribute => info.Type)).FirstOrDefault()??sequenceType;
-        }
-
     }
     [DeferredDeletion(false)][DefaultProperty(nameof(Name))][ImageName("PageSetup")]
     public class SequenceStorage : XPBaseObject, ISequenceStorage,IObjectSpaceLink{
@@ -81,9 +78,12 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
 
         ObjectType _type;
         [DataSourceProperty(nameof(Types))][NonPersistent][RuleRequiredField][ImmediatePostData]
-        public ObjectType Type{
+        public ObjectType Type {
             get => _type;
-            set => SetPropertyValue(nameof(Type), ref _type, value);
+            set {
+                SetPropertyValue(nameof(Type), ref _type, value);
+                OnChanged(nameof(Member));
+            }
         }
 
         ObjectType _customType;

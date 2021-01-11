@@ -6,13 +6,13 @@ using Shouldly;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.Reactive;
-using ALL.Win.Tests;
 #endif
 using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using ALL.Tests;
+using ALL.Win.Tests;
 using DevExpress.EasyTest.Framework;
 using NUnit.Framework;
 using Win.Tests;
@@ -40,6 +40,7 @@ namespace Web.Tests{
             application.Modules.FirstOrDefault(m => m.GetType()==moduleType).ShouldBeNull();
         }
 
+#endif
         [Test]
         [XpandTest(LongTimeout,3)]
         [Apartment(ApartmentState.STA)]
@@ -52,7 +53,6 @@ namespace Web.Tests{
             },connectionString);
             
         }
-#endif
         private TestApplication RunWebApplication(IApplicationAdapter adapter, string connectionString){
 
 #if !NETCOREAPP3_1

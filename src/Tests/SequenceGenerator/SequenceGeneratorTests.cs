@@ -23,6 +23,7 @@ using Shouldly;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
+using Xpand.Extensions.XAF.Xpo.SessionExtensions;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.SequenceGenerator.Tests.BO;

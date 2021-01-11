@@ -1,10 +1,9 @@
 ﻿using System;
 using DevExpress.ExpressApp.Model;
-using DevExpress.ExpressApp.Model.Core;
 
 namespace Xpand.Extensions.XAF.ModelExtensions{
     public partial class ModelExtensions{
-        public static T ReadViewInLayer<T>(this ModelApplicationBase modelApplication, T modelView, string newViewId) where T:IModelView{
+        public static T ReadViewInLayer<T>(this IModelApplication modelApplication, T modelView, string newViewId) where T:IModelView{
             var modelViews =modelApplication.Application.Views?? modelApplication.AddNode<IModelViews>();
             if (modelViews[modelView.Id]!=null)
                 throw new NotSupportedException($"{modelView.Id} already exists");

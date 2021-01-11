@@ -61,10 +61,6 @@ namespace TestApplication.Module.Web {
             RequiredModuleTypes.Add(typeof(MicrosoftCalendarModule));
         }
 
-
-        public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB) => 
-            base.GetModuleUpdaters(objectSpace, versionFromDB).Add(new OrderModuleUpdater(objectSpace, versionFromDB));
-
         public override void Setup(XafApplication application){
             base.Setup(application);
             application.Security = new SecurityStrategyComplex(typeof(PermissionPolicyUser),

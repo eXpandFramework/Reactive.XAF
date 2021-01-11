@@ -9,7 +9,8 @@ namespace TestApplication.Module.ModelViewInheritance {
         public ModelViewInheritanceBaseObject(Session session) : base(session) { }
     }    
 
-    [DefaultClassOptions][ModelMergedDifferences(typeof(ModelViewInheritanceBaseObject))]
+    [DefaultClassOptions]
+    // [ModelMergedDifferences(typeof(ModelViewInheritanceBaseObject))]
     public class ModelViewInheritance:Person {
         public ModelViewInheritance(Session session) : base(session) { }
     }

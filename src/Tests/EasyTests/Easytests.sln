@@ -67,6 +67,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.TestsLib.Blazor", "..
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.TestsLib.Common", "..\TestsLib.Common\Xpand.TestsLib.Common.csproj", "{31AA6B00-1336-40D3-9BA4-9A8719A6BBCD}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.SequenceGenerator", "..\..\Modules\SequenceGenerator\Xpand.XAF.Modules.SequenceGenerator.csproj", "{AF8A2987-0C42-4AC6-92DE-125CF7BC1230}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.SequenceGenerator.Tests", "..\SequenceGenerator\Xpand.XAF.Modules.SequenceGenerator.Tests.csproj", "{0C603DDD-82B2-40EF-97CF-E5227903E060}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_20.1|Any CPU = Debug_20.1|Any CPU
@@ -191,6 +195,14 @@ Global
 		{31AA6B00-1336-40D3-9BA4-9A8719A6BBCD}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{31AA6B00-1336-40D3-9BA4-9A8719A6BBCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31AA6B00-1336-40D3-9BA4-9A8719A6BBCD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF8A2987-0C42-4AC6-92DE-125CF7BC1230}.Debug_20.1|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF8A2987-0C42-4AC6-92DE-125CF7BC1230}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF8A2987-0C42-4AC6-92DE-125CF7BC1230}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF8A2987-0C42-4AC6-92DE-125CF7BC1230}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C603DDD-82B2-40EF-97CF-E5227903E060}.Debug_20.1|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C603DDD-82B2-40EF-97CF-E5227903E060}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C603DDD-82B2-40EF-97CF-E5227903E060}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C603DDD-82B2-40EF-97CF-E5227903E060}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

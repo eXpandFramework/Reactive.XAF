@@ -27,6 +27,7 @@ using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.SecurityExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions;
+using Xpand.Extensions.XAF.Xpo.SessionExtensions;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
@@ -62,8 +63,8 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         [DebuggerStepThrough][PublicAPI]
         public static void SetSequence<T>(this IObjectSpace objectSpace, Expression<Func<T, long>> sequenceMember,
             Type customSequence = null, long firstSequence = 0, Type sequenceStorageType = null)
-            where T : class, IXPSimpleObject => objectSpace.SetSequence(sequenceMember, firstSequence,
-            customSequence?.FullName, sequenceStorageType);
+            where T : class, IXPSimpleObject 
+            => objectSpace.SetSequence(sequenceMember, firstSequence, customSequence?.FullName, sequenceStorageType);
 
         public static void SetSequence<T>(this IObjectSpace objectSpace, Expression<Func<T, long>> sequenceMember,
             long firstSequence = 0, string customSequence = null, Type sequenceStorageType = null) where T : class, IXPSimpleObject 
@@ -135,8 +136,8 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         [DebuggerStepThrough][PublicAPI]
         public static void SetSequence<T>(this UnitOfWork unitOfWork, Expression<Func<T, long>> sequenceMember,
             string customSequence = null, long firstSequence = 0, Type sequenceStorageType = null)
-            where T : class, IXPObject => unitOfWork.SetSequence(typeof(T),
-            ((MemberExpression) sequenceMember.Body).Member.Name, customSequence, firstSequence, sequenceStorageType);
+            where T : class, IXPObject 
+            => unitOfWork.SetSequence(typeof(T), ((MemberExpression) sequenceMember.Body).Member.Name, customSequence, firstSequence, sequenceStorageType);
 
         [DebuggerStepThrough]
         public static void SetSequence(this UnitOfWork unitOfWork, Type sequenceType, string sequenceMember,
@@ -288,11 +289,6 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         private static IObservable<Exception> RetryException(this IObservable<Exception> source) 
             => source.OfType<Exception>().Where(exception => exception.HResult == ParallelTransactionExceptionHResult)
                 .TraceSequenceGeneratorModule(exception => $"{exception.GetType().Name}, {exception.Message}");
-
-        public static void Close(this ExplicitUnitOfWork explicitUnitOfWork){
-            explicitUnitOfWork.Disconnect();
-            explicitUnitOfWork.Dispose();
-        }
 
         private static IObservable<T> DisposeOnException<T>(this IObservable<T> source,ExplicitUnitOfWork explicitUnitOfWork) 
             => source.Catch<T, Exception>(exception => {

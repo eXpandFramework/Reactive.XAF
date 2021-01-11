@@ -109,6 +109,7 @@ namespace TestApplication.Module {
         public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDb){
             base.GetModuleUpdaters(objectSpace, versionFromDb);
             yield return new DefaultUserModuleUpdater(objectSpace, versionFromDb,Guid.Parse("5c50f5c6-e697-4e9e-ac1b-969eac1237f3"),true);
+            yield return new OrderModuleUpdater(objectSpace, versionFromDb);
         }
 
         public override void Setup(ApplicationModulesManager moduleManager){

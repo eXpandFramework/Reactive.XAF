@@ -83,12 +83,9 @@ namespace Xpand.XAF.Modules.CloneModelView{
 		}
 
 		[PublicAPI]
-		public static Type ModelViewType(this CloneViewType viewType){
-			if (viewType == CloneViewType.ListView || viewType == CloneViewType.LookupListView)
-				return typeof(IModelListView);
-			return typeof(IModelDetailView);
-		}
-
-
-	}
+		public static Type ModelViewType(this CloneViewType viewType) 
+            => viewType == CloneViewType.ListView || viewType == CloneViewType.LookupListView
+                ? typeof(IModelListView)
+                : typeof(IModelDetailView);
+    }
 }

@@ -15,7 +15,7 @@ namespace Xpand.XAF.Modules.ModelViewInheritance{
     internal static class ModelViewInheritanceExtensions{
         internal static IEnumerable<(int index, (int? index, IModelView parentView,bool deepMerge) diffData, string objectViewId)> ModelInfos(this IModelApplication[] modelApplications) 
             => modelApplications.ModelViews().SelectMany(t => t.objectView.MergedDifferences
-                    .Select(difference => (t.index, (difference.Index,difference.GetParent<IModelView>(),difference.DeepMerge), ViewId(difference))))
+                    .Select(difference => (t.index, (difference.Index,difference.GetParent<IModelView>(),difference.DeepMerge), difference.ViewId())))
 		        .ToDeepMergeInfos(modelApplications);
 
         private static IEnumerable<(int index, IModelObjectViewMergedDifferences objectView)> ModelViews(this IEnumerable<IModelApplication> source) 
@@ -37,7 +37,8 @@ namespace Xpand.XAF.Modules.ModelViewInheritance{
             => new Regex("View=\"([^\"]*)\"").Match(difference.Xml()).Groups[1].Value;
 
         internal static void UpdateModel(this (int index, (int? index, IModelView parentView, bool deepMerge) diffData, string objectViewId) info,
-            IModelApplication[] modulesDifferences, ModelNode master){
+            IModelApplication[] modulesDifferences, ModelNode node){
+            var master = ((ModelApplicationBase) node.Application).Master;
             var newViewId = info.diffData.parentView.Id;
             var modelApplications = modulesDifferences.Where(application => application.Views!=null)
                 .Select(application => UpdateDetailViewModel(info,application,master))
@@ -48,9 +49,8 @@ namespace Xpand.XAF.Modules.ModelViewInheritance{
                 var modelApplication = master.CreatorInstance.CreateModelApplication();
                 modelApplication.Id = $"{index}. {application.Id}";
                 var modelObjectView = application.Application.Views[info.objectViewId];
-                modelApplication.ReadViewInLayer( modelObjectView, newViewId);
-                ((ModelApplicationBase) master).InsertLayer(info.index+index, modelApplication);
-                ((ModelApplicationBase) master).Merge(modelApplication);
+                modelApplication.Application.ReadViewInLayer( modelObjectView, newViewId);
+                node.Merge((ModelNode)modelApplication.Application.Views);
             }
         }
 
