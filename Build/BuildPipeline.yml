@@ -139,7 +139,7 @@ jobs:
                 $xafMinors=Get-XAFLatestMinors -Source '$(DXApiFeed)'
                 
                 $failedBuilds = $xafMinors|Where-Object{$_ -gt "20.1.0"} | ForEach-Object {
-                  $build = Get-AzBuilds -Definition DevExpress.XAF-Lab-Tests -Tag "$_" -Top 1 -BranchName 
+                  $build = Get-AzBuilds -Definition DevExpress.XAF-Lab-Tests -Tag "$_" -Top 1 
                   Get-AzTestRuns -buildIds $build.Id -FailedOnly
                 }
                 if (!$failedBuilds) {

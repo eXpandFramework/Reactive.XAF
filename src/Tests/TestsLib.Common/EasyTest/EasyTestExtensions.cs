@@ -25,16 +25,15 @@ namespace Xpand.TestsLib.Common.EasyTest{
         public static T ConvertTo<T>(this Command command) where T:Command{
             var t = (T)typeof(T).CreateInstance();
             var parameterList = command.Parameters;
-            var firstLine = $"{(!command.ExpectException ? "*" : "!")}{typeof(T).Name.Replace("Command","")} {parameterList?.MainParameter?.Value}";
-            var parameters =parameterList==null?"": parameterList.Select(parameter => $" {parameter.Name} = {parameter.Value}").JoinNewLine();
-            var param = new CommandCreationParam(new ScriptStringList(firstLine,parameters), 0);
+            var extraParameterValue = parameterList?.ExtraParameter?.Value;
+            if (extraParameterValue != null) {
+                extraParameterValue = $"({extraParameterValue})";
+            }
+            var firstLine = $"{(!command.ExpectException ? "*" : "!")}{typeof(T).Name.Replace("Command","")} {parameterList?.MainParameter?.Value} {extraParameterValue}";
+            var parameters =parameterList==null?new string[0]: parameterList.Select(parameter => $" {parameter.Name} = {parameter.Value}");
+            var lines = new []{firstLine}.Concat(parameters).ToArray();
+            var param = new CommandCreationParam(new ScriptStringList(lines), 0);
             t.ParseCommand(param);
-            // t.Parameters.MainParameter = command.Parameters.MainParameter??new MainParameter();
-            // t.Parameters.ExtraParameter = command.Parameters.ExtraParameter??new MainParameter();
-            // t.SetPropertyValue("ExpectException",command.ExpectException);
-            // foreach (var parameter in command.Parameters){
-                // t.Parameters.Add(parameter);
-            // }
             return t;
         }
 

@@ -35,12 +35,11 @@ namespace ALL.Tests{
                     => application.WhenViewOnFrame(typeof(Event),ViewType.DetailView)
                         .SelectMany(frame => frame.View.ObjectSpace.WhenCommiting().SelectMany(t => config().updated.TakeUntil(frame.WhenDisposingFrame()))
                             .Do(tuple => {
-                                using (var objectSpace = frame.Application.CreateObjectSpace()) {
-                                    var cloudOfficeObject = objectSpace.QueryCloudOfficeObject(tuple.cloud.GetPropertyValue("Id").ToString(), CloudObjectType.Event).First();
-                                    var @event = objectSpace.GetObjectByKey<Event>(Guid.Parse(cloudOfficeObject.LocalId));
-                                    @event.Description = tuple.mapAction.ToString();
-                                    objectSpace.CommitChanges();
-                                }
+                                using var objectSpace = frame.Application.CreateObjectSpace();
+                                var cloudOfficeObject = objectSpace.QueryCloudOfficeObject(tuple.cloud.GetPropertyValue("Id").ToString(), CloudObjectType.Event).First();
+                                var @event = objectSpace.GetObjectByKey<Event>(Guid.Parse(cloudOfficeObject.LocalId));
+                                @event.Description = tuple.mapAction.ToString();
+                                objectSpace.CommitChanges();
                             }))
                         .ToUnit()
                         .Merge(application.DeleteAllEntities<Task>(config().deleteAll))).ToUnit());

@@ -15,19 +15,31 @@ This is a `platform agnostic` module that extends the model views nodes with the
 Doing such a complex task without building a similar functionality is not possible. You need an engine that will generate model layers out of user predefined rules. You need to have tests and EasyTest for it. In this case that eye cannot do it. 
 </br><u>Xpand.XAF.Modules Solution:</u>
 The cross platform [Xpand.XAF.Modules.ModuleViewInheritance](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/ModelViewInheritance) module `reprograms` the default `design-time` model `view generation` to respect existing view model differences.
- </br>In the next screencast: 
+ </br>
+
+In the next screencast (Blazor): 
+1. We create a new Customer class of type Person
+2. We modify the DetailView Layout of our Customer removing ViewItems using the XpandModelEditor
+3. We create a Partner class of type Person (Partner != Customer)
+4. We open again the XpandModelEditor to verify that Customer Layout is not the same as Partner.
+5. We apply an attribute to the Partner and the layouts match
+6. We verify in Blazor XAF UI that both views look exactly the same.
+
+<Twitter>
+
+[![Xpand XAF Modules ModelViewInheritance Blazor](https://user-images.githubusercontent.com/159464/104476203-a5e4fd80-55c8-11eb-8b75-c62bf5d7c1d7.gif)](https://www.youtube.com/watch?v=6O02vQzNRPs&t=8s)
+</Twitter>
+
+[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/uh4SMPwJ5pU)
+
+
+In the next screencast (WinForms/WinDesktop/WebForms): 
    1. First we extend the model with the GridView component using the [Xpand.XAF.Modules.ModelMapper](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/ModelMapper).
    1. Then, we used the [CloneView](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/CloneModelView) package to clone the `BaseObject_ListView` as a `CommonGridView_ListView`. 
    2. Next, the [Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive) `WhenGeneratingModelNodes` is used to assign the `CommonGridView_ListView` as a `base` view.
    2. Finally, we `modify` the CopyToClipBoard value on the `CommonGridView_ListView` and `check` that is reflected appropriately on the `Customer_ListView`. </br></br>
-   
-   <Twitter>
 
-   [![jiRSdwmukl](https://user-images.githubusercontent.com/159464/86963022-84640e80-c16c-11ea-8f8d-523a4d6f3312.gif)](https://youtu.be/uh4SMPwJ5pU)
-
-   </Twitter>
-
-   [![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/uh4SMPwJ5pU)
+[![jiRSdwmukl](https://user-images.githubusercontent.com/159464/86963022-84640e80-c16c-11ea-8f8d-523a4d6f3312.gif)](https://youtu.be/uh4SMPwJ5pU)
 
 **v1.1.39**
 [#471](https://github.com/eXpandFramework/eXpand/issues/471). Adds the `DeepMerge` attribute which if enable the module will recourse and merge the source view differences. 
