@@ -1,24 +1,19 @@
 ﻿using DevExpress.ExpressApp;
-using DevExpress.ExpressApp.Model;
-using DevExpress.ExpressApp.Model.Core;
 using JetBrains.Annotations;
+using Xpand.XAF.Modules.Reactive;
+using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.ModelViewInheritance {
     [UsedImplicitly]
-    public sealed class ModelViewInheritanceModule : ModuleBase {
+    public sealed class ModelViewInheritanceModule : ReactiveModuleBase {
         public ModelViewInheritanceModule() {
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));
         }
 
-        public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders) {
-            base.ExtendModelInterfaces(extenders);
-            extenders.Add<IModelObjectView, IModelObjectViewMergedDifferences>();
-        }
 
-        public override void AddGeneratorUpdaters(ModelNodesGeneratorUpdaters updaters) {
-            updaters.Add(new ModelViewInheritanceUpdater());
+        public override void Setup(ApplicationModulesManager moduleManager) {
+            base.Setup(moduleManager);
+            moduleManager.Connect().Subscribe(this);
         }
-
     }
-    
 }

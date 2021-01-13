@@ -109,7 +109,7 @@ namespace Web.Tests{
         }
 #endif
 
-        [XpandTest(LongTimeout,3)]
+        // [XpandTest(LongTimeout,3)]
         [Test][Apartment(ApartmentState.STA)]
         public async Task Web_GoogleCloud_EasyTest(){
 #if !NETCOREAPP3_1

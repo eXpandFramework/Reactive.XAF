@@ -16,6 +16,20 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Model0.xafml" />
+    <None Remove="Model1.xafml" />
+    <None Remove="Model2.xafml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Model0.xafml" />
+    <EmbeddedResource Include="Model1.xafml">
+      <SubType>Form</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Model2.xafml">
+      <SubType>Form</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="Xpand.TestsLib">
       <HintPath>..\..\..\bin\netcoreapp3.1\Xpand.TestsLib.dll</HintPath>
     </Reference>

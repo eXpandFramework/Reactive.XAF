@@ -72,7 +72,8 @@ namespace ALL.Tests{
             CheckDetailViewCommand checkAccountInfoCommand){
             var signOutCaption = $"Sign out {serviceName}";
             var signInCaption = $"Sign In {serviceName}";
-            commandAdapter.Execute(new NavigateCommand("Default.My Details"),new ActionCommand(signOutCaption){ExpectException = true});
+            commandAdapter.Execute(new NavigateCommand("Default.My Details"));
+            commandAdapter.Execute(new ActionCommand(signOutCaption){ExpectException = true});
             
             await whenConnected(signInCaption);
             commandAdapter.CheckConnection(signOutCaption, signInCaption, checkAccountInfoCommand,serviceName);

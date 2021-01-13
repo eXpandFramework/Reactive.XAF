@@ -19,10 +19,8 @@ namespace Xpand.TestsLib.Common.EasyTest.Commands.ActionCommands{
             Parameters.ExtraParameter=new MainParameter(item);
         }
 
-        protected override void ExecuteCore(ICommandAdapter adapter){
-            var actionCommand = !ExpectException ? this.ConvertTo<DevExpress.EasyTest.Framework.Commands.ActionCommand>()
-                : this.ConvertTo<DevExpress.EasyTest.Framework.Commands.OptionalActionCommand>();
-            ExpectException = false;
+        protected override void ExecuteCore(ICommandAdapter adapter) {
+            var actionCommand = this.ConvertTo<DevExpress.EasyTest.Framework.Commands.ActionCommand>();
             adapter.Execute(actionCommand);
         }
     }

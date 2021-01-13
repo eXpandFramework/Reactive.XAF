@@ -1,0 +1,14 @@
+﻿<Application>
+  <Views>
+    <DetailView Id="AMvi_DetailView">
+      <MergedDifferences>
+        <MergedDifference Id="@00c4587b-51b8-4f5e-9630-65e090f5e812" View="ABaseMvi_DetailView" IsNewNode="True" />
+      </MergedDifferences>
+    </DetailView>
+    <DetailView Id="AMvi_ListView">
+      <MergedDifferences>
+        <MergedDifference Id="@00c4587b-51b8-4f5e-9630-65e090f5e812" View="ABaseMvi_ListView" IsNewNode="True" />
+      </MergedDifferences>
+    </DetailView>
+  </Views>
+</Application>

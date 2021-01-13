@@ -10,9 +10,6 @@ namespace Xpand.Extensions.XAF.ModelExtensions{
                 var xml = new ModelXmlWriter().WriteToString(readFrom, i);
                 
                 if (!string.IsNullOrEmpty(xml)) {
-                    if (!(readFrom is IModelApplication)) {
-                        xml = xml.Replace(@$"Id=""{readFrom.Id()}""", @$"Id=""{modelNode.Id()}""");
-                    }
                     new ModelXmlReader().ReadFromString(modelNode, aspect, xml);
                 }
             }

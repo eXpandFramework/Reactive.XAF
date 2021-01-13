@@ -37,7 +37,7 @@ namespace Xpand.XAF.Modules.HideToolBar.Tests{
             nestedFrame.SetView(detailView);
 
 
-            (await nestedFrames.Take(1).WithTimeOut()).ShouldBe(nestedFrame);
+            (await nestedFrames.Take(1)).ShouldBe(nestedFrame);
         }
 
 

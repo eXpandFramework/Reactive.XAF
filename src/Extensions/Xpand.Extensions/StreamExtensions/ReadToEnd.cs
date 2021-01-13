@@ -6,5 +6,9 @@ namespace Xpand.Extensions.StreamExtensions{
             using var streamReader = new StreamReader(stream);
             return streamReader.ReadToEnd();
         }
+        public static string ReadToEndAsString(this Stream stream){
+            using var streamReader = new StreamReader(stream);
+            return streamReader.ReadToEnd();
+        }
     }
 }

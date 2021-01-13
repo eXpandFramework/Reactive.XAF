@@ -1,0 +1,27 @@
+﻿<Application>
+  <Views>
+    <DetailView Id="ABaseMvi_DetailView" Caption="Changed">
+      <Layout>
+        <LayoutGroup Id="Main">
+          <LayoutItem Id="Oid" ViewItem="Oid" Index="1" IsNewNode="True" />
+          <LayoutGroup Id="Tags_Group" Index="2" />
+          <LayoutGroup Id="SimpleEditors">
+            <LayoutGroup Id="ABaseMvi">
+              <LayoutItem Id="Name" Removed="True" />
+            </LayoutGroup>
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <ListView Id="ABaseMvi_ListView" Caption="Changed">
+      <Columns>
+        <ColumnInfo Id="Oid" Index="100" />
+        <ColumnInfo Id="Description" Caption="New" />
+        <ColumnInfo Id="Name" Removed="True" />
+      </Columns>
+      <HiddenActions>
+        <ActionLink ActionId="Save" IsNewNode="True" />
+      </HiddenActions>
+    </ListView>
+  </Views>
+</Application>

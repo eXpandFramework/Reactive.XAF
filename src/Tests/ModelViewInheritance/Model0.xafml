@@ -1,0 +1,6 @@
+﻿<Application>
+  <Views>
+    <DetailView Id="ABaseMvi_DetailView" AllowDelete="False" />
+    <ListView Id="ABaseMvi_ListView" AllowDelete="False" />
+  </Views>
+</Application>

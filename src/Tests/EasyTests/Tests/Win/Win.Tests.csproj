@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net461</TargetFramework>
     <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
@@ -52,7 +52,7 @@
     <PackageReference Include="System.Reactive" Version="5.0.0" />
     <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.202.48" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.202.48.1" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.TestsLib.Net461">

@@ -1,3 +1,4 @@
+Fasterflect.Xpand
 MagicOnion
 Shouldly
 System.Reactive
@@ -11,3 +12,4 @@ Newtonsoft.Json
 Microsoft.NET.Test.Sdk
 DevExpress.WindowsDesktop.Core
 DevExpress.WindowsDesktop.Xaf
+Xpand.Patcher

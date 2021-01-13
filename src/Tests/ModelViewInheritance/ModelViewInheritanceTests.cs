@@ -18,44 +18,35 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.ModelViewInheritance.Tests{
     [NonParallelizable]
+    
     public class ModelViewInheritanceTests:BaseTest {
+        
+
+
         [XpandTest]
         [TestCase(ViewType.DetailView,false,nameof(Platform.Win))]
         [TestCase(ViewType.DetailView,true,nameof(Platform.Win))]
         [TestCase(ViewType.ListView,false,nameof(Platform.Win))]
         [TestCase(ViewType.ListView,true,nameof(Platform.Win))]
         public void Inherit_And_Modify_A_BaseView(ViewType viewType, bool attribute,string platformName){
+            
             var platform = GetPlatform(platformName);
-            ModelViewInheritanceUpdater.Disabled = true;
-            var models = GetModels(viewType, attribute, platform);
-
             var application = platform.NewApplication<ModelViewInheritanceModule>();
             var module = CreateModelViewInheritanceModule(viewType, attribute, application,false);
-            var testModule1 = new TestModule1{DiffsStore = new StringModelStore(models[0])};
+            var testModule1 = new TestModule1{DiffsStore = new ResourcesModelStore(GetType().Assembly,"Model0")};
             var baseBoTypes = new[]{typeof(ABaseMvi), typeof(TagMvi)};
             var boTypes = new[]{typeof(AMvi), typeof(FileMvi)};
             testModule1.AdditionalExportedTypes.AddRange(baseBoTypes);
-            var testModule2 = new TestModule2{DiffsStore = new StringModelStore(models[1])};
+            var testModule2 = new TestModule2{DiffsStore = new ResourcesModelStore(GetType().Assembly,"Model1")};
             testModule2.AdditionalExportedTypes.AddRange(boTypes);
 
             application.SetupDefaults(module, testModule1, testModule2,
-                new TestModule3{DiffsStore = new StringModelStore(models[2])});
-            var inheritAndModifyBaseView = new InheritAndModifyBaseView(application, viewType, attribute);
+                new TestModule3{DiffsStore = new ResourcesModelStore(GetType().Assembly,"Model2")});
+            var inheritAndModifyBaseView = new InheritAndModifyBaseView(viewType);
 
             inheritAndModifyBaseView.Verify(application.Model);
             application.Dispose();
         }
-
-        private  string[] GetModels(ViewType viewType, bool attribute, Platform platform){
-            var application = platform.NewApplication<ModelViewInheritanceModule>();
-            CreateModelViewInheritanceModule(viewType, attribute, application);
-            var inheritAndModifyBaseView = new InheritAndModifyBaseView(application, viewType, attribute);
-            var models = inheritAndModifyBaseView.GetModels().ToArray();
-            ModelViewInheritanceUpdater.Disabled = false;
-            application.Dispose();
-            return models;
-        }
-
 
         private ModelViewInheritanceModule CreateModelViewInheritanceModule(ViewType viewType, bool attribute, XafApplication application,bool setup=true){
             CustomizeTypesInfo(viewType, attribute,application);
