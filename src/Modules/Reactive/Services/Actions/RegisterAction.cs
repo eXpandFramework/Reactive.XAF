@@ -7,7 +7,6 @@ using System.Reflection;
 using System.Reflection.Emit;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
-using DevExpress.ExpressApp.Utils;
 using DevExpress.Persistent.Base;
 using HarmonyLib;
 using JetBrains.Annotations;
@@ -145,11 +144,9 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 	        var type = ActionsModule.Assembly.GetType(ActionControllerName(id,GetBaseController<TController>()));
 	        var controllerType = type ?? NewControllerType<TController>(id);
 	        if (type == null){
-		        var tryAdd = ControllerCtorState.TryAdd(controllerType, (id, _ => actionBase(((TController) _.controller, _.id))));
-		        if (!tryAdd){
-					throw new LightDictionaryException(controllerType.FullName);
-		        }
-	        }
+		        ControllerCtorState
+                    .AddOrUpdate(controllerType, type1 => (id, _ => actionBase(((TController) _.controller, _.id))),(type1, tuple) => tuple);
+            }
 	        var controller = (TController) Controller.Create(controllerType);
 	        applicationModulesManager.ControllersManager.RegisterController(controller);
 	        return _actionsSubject.Select(a => a).OfType<TAction>().Where(_ => _.Id == id);
@@ -160,7 +157,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         private static Type NewControllerType<T>(string id) where T:Controller{
             var baseController = GetBaseController<T>();
             var actionControllerName = ActionControllerName(id, baseController);
-            return ActionsModule.GetType(actionControllerName)??ActionsModule.DefineType(actionControllerName, TypeAttributes.Public, baseController).CreateTypeInfo()?.AsType();
+            return ActionsModule.GetType(actionControllerName)
+                   ??ActionsModule.DefineType(actionControllerName, TypeAttributes.Public, baseController).CreateTypeInfo()?.AsType();
         }
 
         private static string ActionControllerName(string id, Type baseController) 
