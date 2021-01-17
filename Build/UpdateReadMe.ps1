@@ -43,7 +43,7 @@ function UpdateModulesList($rootLocation, $packages,$path) {
     
     $packages | ForEach-Object {
         $name = $_.Replace("Xpand.XAF.Modules.", "")
-        $packageUri = "[$name](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/$name)"
+        $packageUri = "[$name](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/$name)"
         $version = "![](https://xpandshields.azurewebsites.net/nuget/v/$_.svg?label=&style=flat)"
         $downloads = "![](https://xpandshields.azurewebsites.net/nuget/dt/$_.svg?label=&style=flat)"
          
@@ -103,13 +103,13 @@ function UpdateDependencies($_, $packagespath, $readMePath) {
     $metadata = ((Get-NugetPackageSearchMetadata -Name $_.BaseName -Source $packagesPath).DependencySets.Packages | ForEach-Object {
             $id = $_.Id
             if ($id -like "Xpand.XAF*") {
-                $id = "[$id](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/$id)"
+                $id = "[$id](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/$id)"
             }
             elseif ($id -eq "Fasterflect.Xpand") {
                 $id = "[$id](https://github.com/eXpandFramework/Fasterflect)"
             }
             elseif ($id -eq "Xpand.VersionConverter") {
-                $id = "[$id](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)"
+                $id = "[$id](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)"
             }
             if ($id -notlike "DevExpress*") {
                 "|$id|$($_.VersionRange.MinVersion)`r`n"
@@ -148,14 +148,14 @@ function UpdateIssues($_, $packagespath, $readMePath) {
     $result = $regex.Replace($readMe, @"
 ## Issues-Debugging-Troubleshooting
 $1
-To ``Step in the source code`` you need to ``enable Source Server support`` in your Visual Studio/Tools/Options/Debugging/Enable Source Server Support. See also [How to boost your DevExpress Debugging Experience](https://github.com/eXpandFramework/DevExpress.XAF/wiki/How-to-boost-your-DevExpress-Debugging-Experience#1-index-the-symbols-to-your-custom-devexpresss-installation-location).
+To ``Step in the source code`` you need to ``enable Source Server support`` in your Visual Studio/Tools/Options/Debugging/Enable Source Server Support. See also [How to boost your DevExpress Debugging Experience](https://github.com/eXpandFramework/Reactive.XAF/wiki/How-to-boost-your-DevExpress-Debugging-Experience#1-index-the-symbols-to-your-custom-devexpresss-installation-location).
 
 If the package is installed in a way that you do not have access to uninstall it, then you can ``unload`` it with the next call at the constructor of your module.
 ``````cs
 Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof($moduleName))
 ``````
 $additionalTroubleShootingThe 
-The [Reactive.Logger.Client.Win](https://github.com/eXpandFramework/DevExpress.XAF/wiki/Reactive.Logger.Client.Win) is a must-have tool to help you troubleshoot and monitor in details a module, even from a remote location.
+The [Reactive.Logger.Client.Win](https://github.com/eXpandFramework/Reactive.XAF/wiki/Reactive.Logger.Client.Win) is a must-have tool to help you troubleshoot and monitor in details a module, even from a remote location.
 ## Details
 "@
     )
@@ -167,7 +167,7 @@ function Tests($_, $packagespath, $readMePath) {
     $moduleName=(GetModuleName $_).Replace("Module","")
     $text=@"
 The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/$moduleName). 
-All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
+All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/Reactive.XAF#compatibility-matrix)
 "@
     $readMe=Get-Content $readMePath -raw
     $regex = [regex] '(?s)(### Tests(.*)### Examples)'

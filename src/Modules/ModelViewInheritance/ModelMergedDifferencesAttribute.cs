@@ -7,10 +7,9 @@ namespace Xpand.XAF.Modules.ModelViewInheritance {
         public Type TargetType { get; }
         public ViewType ViewType { get; }
 
-        public ModelMergedDifferencesAttribute(string targetView, string sourceView,bool deepMerge=false) {
+        public ModelMergedDifferencesAttribute(string targetView, string sourceView) {
             TargetView = targetView;
             SourceView = sourceView;
-            DeepMerge = deepMerge;
         }
 
         public ModelMergedDifferencesAttribute(Type targetType,ViewType viewType=ViewType.DetailView) {
@@ -19,6 +18,5 @@ namespace Xpand.XAF.Modules.ModelViewInheritance {
         }
         public string TargetView { get; }
         public string SourceView { get; }
-        public bool DeepMerge{ get; }
     }
 }

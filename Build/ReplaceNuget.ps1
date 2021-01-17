@@ -1,8 +1,8 @@
 using namespace system.text.RegularExpressions
 using namespace System.IO
 param(
-    $ProjectPath = "C:\Work\eXpandFramework\DevExpress.XAF\src\Modules\Reactive\Xpand.XAF.Modules.Reactive.csproj",
-    $TargetPath = "C:\Work\eXpandFramework\DevExpress.XAF\bin\Xpand.XAF.Modules.Reactive.dll",
+    $ProjectPath = "C:\Work\eXpandFramework\Reactive.XAF\src\Modules\Reactive\Xpand.XAF.Modules.Reactive.csproj",
+    $TargetPath = "C:\Work\eXpandFramework\Reactive.XAF\bin\Xpand.XAF.Modules.Reactive.dll",
     $SkipNugetReplace,
     [switch]$FixVersion
 )

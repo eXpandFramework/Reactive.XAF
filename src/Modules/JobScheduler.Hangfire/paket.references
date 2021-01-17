@@ -10,3 +10,4 @@ Hangfire.Core
 System.CodeDom
 Hangfire.AspNetCore
 Microsoft.AspNetCore.Hosting.Abstractions
+Microsoft.Extensions.DependencyInjection.Abstractions

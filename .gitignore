@@ -644,3 +644,4 @@ GitUserEmail.json
 /src/Tests/EasyTests/TestApplication/DownloadCloudCreds.ps1
 /src/Tests/EasyTests/TestApplication/PushToken.ps1
 **/Startup.DevExpress.cs
+**JobScheduler.Maintenance**

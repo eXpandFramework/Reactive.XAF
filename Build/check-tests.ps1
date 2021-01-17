@@ -17,15 +17,16 @@ Invoke-Script {
     }
     if ($env:CustomVersion -eq (Get-XAFLatestMinors -Source $DXApiFeed | Select-Object -Last 1)) {
         $failedBuilds = Get-XAFLatestMinors -Source $env:DxFeed|Where-Object{$_ -gt "20.1.0"} | ForEach-Object {
-            $build = Get-AzBuilds -Definition DevExpress.XAF-Lab-Tests -Tag "$_" -Top 1 -BranchName $env:Build_SourceBranchName
+            $build = Get-AzBuilds -Definition Reactive.XAF-Lab-Tests -Tag "$_" -Top 1 -BranchName $env:Build_SourceBranchName
             Get-AzTestRuns -buildIds $build.Id -FailedOnly
         }
+        "failedBuilds=$failedBuilds"
         if (!$failedBuilds) {
             $parameters = @{
                 CustomVersion     = $env:CustomVersion
                 DxPipelineBuildId = $env:DxPipelineBuildId
             }
-            Add-AzBuild -Definition PublishNugets-DevExpress.XAF -Parameters $parameters -Branch $env:Build_SourceBranchName
+            Add-AzBuild -Definition PublishNugets-Reactive.XAF -Parameters $parameters -Branch $env:Build_SourceBranchName
         }
     }
     

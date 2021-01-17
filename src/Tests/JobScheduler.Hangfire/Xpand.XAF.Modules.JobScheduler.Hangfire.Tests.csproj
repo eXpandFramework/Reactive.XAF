@@ -18,9 +18,9 @@
     <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="20.2.4" />
     <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.2.4" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
-    <PackageReference Include="hangfire.core" Version="1.7.18" />
-    <PackageReference Include="hangfire.sqlserver" Version="1.7.18" />
-    <PackageReference Include="hangfire.aspnetcore" Version="1.7.18" />
+    <PackageReference Include="hangfire.core" Version="1.7.19" />
+    <PackageReference Include="hangfire.sqlserver" Version="1.7.19" />
+    <PackageReference Include="hangfire.aspnetcore" Version="1.7.19" />
     <PackageReference Include="hangfire.memorystorage" Version="1.7.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.0" />

@@ -69,5 +69,5 @@ if ($clearCache){
     Connect-Az $AzApoPowerSHellScriptsSecret $AzPowerShellScriptsApplicationId $AzApoTenantId
     Get-AzWebApp -Name XpandNugetStats|Restart-AzWebApp
     $c=[System.Net.WebClient]::new()
-    $c.DownloadString("https://github.com/eXpandFramework/DevExpress.XAF")|Out-Null
+    $c.DownloadString("https://github.com/eXpandFramework/Reactive.XAF")|Out-Null
 }

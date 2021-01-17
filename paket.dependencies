@@ -21,9 +21,9 @@ nuget MagicOnion 2.6.3
 nuget Grpc 2.23.0
 nuget Grpc.Core 2.25.0
 nuget MessagePack 1.7.3.7
-nuget Hangfire.Core 1.7.18 framework:netstandard2.1
-nuget Hangfire.SqlServer 1.7.18
-nuget Hangfire.AspNetCore 1.7.18
+nuget Hangfire.Core 1.7.19 framework:netstandard2.1
+nuget Hangfire.SqlServer 1.7.19
+nuget Hangfire.AspNetCore 1.7.19
 nuget hangfire.memorystorage 1.7.0
 nuget Shouldly 4.0.3
 nuget System.Data.SqlClient
@@ -77,4 +77,4 @@ nuget Microsoft.AspNetCore.Hosting
 nuget Selenium.Support
 nuget Selenium.WebDriver
 nuget Microsoft.NET.Test.SDK
-nuget Xpand.VersionConverter 2.202.11
+nuget Xpand.VersionConverter

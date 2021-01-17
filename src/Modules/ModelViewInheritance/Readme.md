@@ -41,8 +41,6 @@ In the next screencast (WinForms/WinDesktop/WebForms):
 
 [![jiRSdwmukl](https://user-images.githubusercontent.com/159464/86963022-84640e80-c16c-11ea-8f8d-523a4d6f3312.gif)](https://youtu.be/uh4SMPwJ5pU)
 
-**v1.1.39**
-[#471](https://github.com/eXpandFramework/eXpand/issues/471). Adds the `DeepMerge` attribute which if enable the module will recourse and merge the source view differences. 
 
 --- 
 

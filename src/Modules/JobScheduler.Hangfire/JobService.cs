@@ -55,14 +55,6 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
             => manager.CheckBlazor(typeof(HangfireStartup).FullName, typeof(JobSchedulerModule).Namespace)
                 .Merge(manager.WhenApplication(application => application.ScheduleJobs()
                             .Merge(application.DeleteJobs())
-                            .Merge(application.WhenLoggedOn().SelectMany(_ => {
-                                return Observable.Empty<Unit>();
-                                // var serviceProvider = application.ToBlazor().ServiceProvider;
-                                // var httpClient = serviceProvider.GetService<HttpClient>();
-                                // return httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Get, "api/JobScheduler"))
-                                // .ToObservable()
-                                // .Select(message => message).ToUnit();
-                            }).ToUnit())
                     )
                     .Merge(manager.TriggerJobsFromAction())
                     .Merge(manager.PauseJobsFromAction())

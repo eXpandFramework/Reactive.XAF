@@ -63,9 +63,9 @@ namespace Xpand.Extensions.Blazor {
             // var serviceType = AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Blazor.Services.IValueManagerStorageContainerAccessor");
             // var requiredService = _serviceProvider.GetRequiredService(serviceType);
             //
-            // if (((IValueManagerStorageAccessor) _containerInitializer).Storage == null) {
-            //     _containerInitializer.Initialize();
-            // }
+            if (((IValueManagerStorageAccessor) _containerInitializer).Storage == null) {
+                _containerInitializer.Initialize();
+            }
             return NewBlazorApplication();
         }
     

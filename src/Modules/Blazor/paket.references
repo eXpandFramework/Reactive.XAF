@@ -7,3 +7,4 @@ System.Configuration.ConfigurationManager
 System.CodeDom
 Microsoft.AspNetCore.Hosting.Abstractions
 System.ServiceModel.Http
+Microsoft.Extensions.DependencyInjection.Abstractions

@@ -28,7 +28,9 @@ namespace TestApplication.Blazor.Server {
 
         protected override void CreateDefaultObjectSpaceProvider(CreateCustomObjectSpaceProviderEventArgs args) {
             var dataStoreProvider = GetDataStoreProvider(args.ConnectionString, args.Connection);
-            args.ObjectSpaceProviders.Add(new SecuredObjectSpaceProvider((ISelectDataSecurityProvider) Security, dataStoreProvider, true));
+            args.ObjectSpaceProviders.Add(Security != null
+                ? new SecuredObjectSpaceProvider((ISelectDataSecurityProvider) Security, dataStoreProvider, true)
+                : new XPObjectSpaceProvider(dataStoreProvider, true));
             args.ObjectSpaceProviders.Add(new NonPersistentObjectSpaceProvider(TypesInfo, null));
         }
 

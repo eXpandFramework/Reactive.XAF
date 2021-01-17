@@ -1,0 +1,19 @@
+﻿<Application>
+  <Views>
+    <ListView Id="Element_ListView">
+      <Columns>
+        <ColumnInfo Id="Street" Index="-1" />
+      </Columns>
+    </ListView>
+    <ListView Id="Element_ListViewBase">
+      <MergedDifferences>
+        <MergedDifference Id="@41aeb4fe-6648-4089-93d2-e53cb22d536f" View="Element_ListView" IsNewNode="True" />
+      </MergedDifferences>
+    </ListView>
+    <ListView Id="Element_ListViewNestedBase">
+      <MergedDifferences>
+        <MergedDifference Id="@a743af2c-0421-41f6-a96d-beafe6c669b2" View="Element_ListView" IsNewNode="True" />
+      </MergedDifferences>
+    </ListView>
+  </Views>
+</Application>

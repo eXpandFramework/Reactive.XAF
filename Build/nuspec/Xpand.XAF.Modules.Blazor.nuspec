@@ -30,6 +30,7 @@
         <dependency id="System.CodeDom" version="5.0" />
         <dependency id="Microsoft.AspNetCore.Hosting.Abstractions" version="2.2" />
         <dependency id="System.ServiceModel.Http" version="4.8" />
+        <dependency id="Microsoft.Extensions.DependencyInjection.Abstractions" version="5.0" />
       </group>
       <group targetFramework="netstandard2.0">
         <dependency id="Xpand.VersionConverter" version="2.202.12" />

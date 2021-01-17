@@ -1,5 +1,5 @@
 param(
-    $BuildId = (Get-AzBuilds -Definition DevExpress.XAF-Lab -Tag $CustomVersion -Status inProgress |Select-Object -First 1).Id,
+    $BuildId = (Get-AzBuilds -Definition Reactive.XAF-Lab -Tag $CustomVersion -Status inProgress |Select-Object -First 1).Id,
     $GitHubToken=$env:GitHubToken,
     $GitUserEmail,
     $artifactName = "NugetConsumers",

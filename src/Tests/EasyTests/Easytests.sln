@@ -67,6 +67,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.TestsLib.Blazor", "..
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.TestsLib.Common", "..\TestsLib.Common\Xpand.TestsLib.Common.csproj", "{31AA6B00-1336-40D3-9BA4-9A8719A6BBCD}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.JobScheduler.Hangfire", "..\..\Modules\JobScheduler.Hangfire\Xpand.XAF.Modules.JobScheduler.Hangfire.csproj", "{AE8A49E0-2B98-446E-AAF4-B013F3096C95}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.Blazor", "..\..\Extensions\Xpand.Extensions.Blazor\Xpand.Extensions.Blazor.csproj", "{FECAC22C-A15D-48C9-BDB3-F84BFC2B3A8A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Blazor", "..\..\Modules\Blazor\Xpand.XAF.Modules.Blazor.csproj", "{5FD3B198-B2BA-4EB0-9E61-4BE1054AB320}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_20.1|Any CPU = Debug_20.1|Any CPU
@@ -191,6 +197,18 @@ Global
 		{31AA6B00-1336-40D3-9BA4-9A8719A6BBCD}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{31AA6B00-1336-40D3-9BA4-9A8719A6BBCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31AA6B00-1336-40D3-9BA4-9A8719A6BBCD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE8A49E0-2B98-446E-AAF4-B013F3096C95}.Debug_20.1|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE8A49E0-2B98-446E-AAF4-B013F3096C95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE8A49E0-2B98-446E-AAF4-B013F3096C95}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE8A49E0-2B98-446E-AAF4-B013F3096C95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FECAC22C-A15D-48C9-BDB3-F84BFC2B3A8A}.Debug_20.1|Any CPU.ActiveCfg = Debug|Any CPU
+		{FECAC22C-A15D-48C9-BDB3-F84BFC2B3A8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FECAC22C-A15D-48C9-BDB3-F84BFC2B3A8A}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{FECAC22C-A15D-48C9-BDB3-F84BFC2B3A8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FD3B198-B2BA-4EB0-9E61-4BE1054AB320}.Debug_20.1|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FD3B198-B2BA-4EB0-9E61-4BE1054AB320}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FD3B198-B2BA-4EB0-9E61-4BE1054AB320}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FD3B198-B2BA-4EB0-9E61-4BE1054AB320}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -92,10 +92,10 @@ $filteredProjects| Invoke-Parallel -StepInterval 200 -VariablesToImport @("allPr
     }
 
     $relativeLocation = $_.DirectoryName.Replace($root, "").Replace("\", "/")
-    $nuspec.package.metaData.projectUrl = "https://github.com/eXpandFramework/DevExpress.XAF/blob/master/$relativeLocation"
+    $nuspec.package.metaData.projectUrl = "https://github.com/eXpandFramework/Reactive.XAF/blob/master/$relativeLocation"
     $nuspec.package.metaData.iconUrl = "http://sign.expandframework.com"
     $nuspec.package.metaData.authors = "eXpandFramework"
-    $nuspec.package.metaData.releaseNotes = "https://github.com/eXpandFramework/DevExpress.XAF/releases"
+    $nuspec.package.metaData.releaseNotes = "https://github.com/eXpandFramework/Reactive.XAF/releases"
     $nuspec.package.metaData.copyright = "eXpandFramework.com"
     $nameTag = $nuspec.package.metaData.id.Replace("Xpand.XAF.Modules.", "").Replace("Xpand.XAF.Extensions.", "")
     $nuspec.package.metaData.tags = "DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  $nameTag"

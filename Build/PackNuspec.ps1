@@ -77,11 +77,11 @@ function AddReadMe {
 ++++++++++++++++++++++  ++++++++++          ☞ http://HireMe.expandframework.com
 ++++++++++    ++++++  ++++++++++++      
 ++++++++++++  ++++++  ++++++++++++      ➤  ɪғ ʏᴏᴜ ʟɪᴋᴇ ᴏᴜʀ ᴡᴏʀᴋ ᴘʟᴇᴀsᴇ ᴄᴏɴsɪᴅᴇʀ ᴛᴏ ɢɪᴠᴇ ᴜs ᴀ STAR. 
-++++++++++++++  ++  ++++++++++++++          ☞ https://github.com/eXpandFramework/DevExpress.XAF/stargazers
+++++++++++++++  ++  ++++++++++++++          ☞ https://github.com/eXpandFramework/Reactive.XAF/stargazers
 ++++++++++++++    ++++++++++++++++      
 ++++++++++++++  ++  ++++++++++++++      ➤ Package Notes
 ++++++++++++  ++++    ++++++++++++         ☞ Build the project before opening the model editor.
-++++++++++  ++++++++  ++++++++++++         ☞ Documentation can be found @ https://github.com/eXpandFramework/DevExpress.XAF/wiki/$wikiName.
+++++++++++  ++++++++  ++++++++++++         ☞ Documentation can be found @ https://github.com/eXpandFramework/Reactive.XAF/wiki/$wikiName.
 ++++++++++  ++++++++++  ++++++++++         ☞ $($package.id) only adds the required references. To register the included packages add the next line/s in the constructor of your XAF module.
 ++++++++  ++++++++++++++++++++++++              
 ++++++  ++++++++++++++++++++++++++            $registration

@@ -23,6 +23,7 @@
         <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.8" />
         <dependency id="System.Configuration.ConfigurationManager" version="5.0" />
         <dependency id="System.Reactive" version="5.0" />
+        <dependency id="Microsoft.Extensions.DependencyInjection.Abstractions" version="5.0" />
       </group>
     </dependencies>
   </metadata>

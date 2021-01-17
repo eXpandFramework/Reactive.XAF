@@ -13,7 +13,7 @@ The `JobScheduler.Hangfire` package integrates Hangfire for fire & forget job sc
 
 ---
 
-This `Blazor only` module is valuable when you have background process. The JobScheduler module  
+This `Blazor only` module is valuable when you want to schedule background processes.
 
 
 To schedule a new Job follow the next steps:
@@ -74,13 +74,23 @@ To schedule a new Job follow the next steps:
     }
    ```
    Note that the BlazorApplication is not authenticated and the default constructor must exist.
+4. Modify your BlazorApplication not to use a SecuredObjectSpaceProvider when the Job SharedBlazorApp is created like:
+   ```cs
+   protected override void CreateDefaultObjectSpaceProvider(CreateCustomObjectSpaceProviderEventArgs args) {
+        var dataStoreProvider = GetDataStoreProvider(args.ConnectionString, args.Connection);
+        args.ObjectSpaceProviders.Add(Security != null
+            ? new SecuredObjectSpaceProvider((ISelectDataSecurityProvider) Security, dataStoreProvider, true)
+            : new XPObjectSpaceProvider(dataStoreProvider, true));
+        args.ObjectSpaceProviders.Add(new NonPersistentObjectSpaceProvider(TypesInfo, null));
+    }
+   ```
 5. Use a Job descendant to pass job specific parameters.
    ```cs
     public class CustomJob:Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects.Job {
         public CustomJob(Session session) : base(session) { }
-        string _ordersCount;
+        int _ordersCount;
 
-        public string OrdersCount {
+        public int OrdersCount {
             get => _ordersCount;
             set => SetPropertyValue(nameof(OrdersCount), ref _ordersCount, value);
         }

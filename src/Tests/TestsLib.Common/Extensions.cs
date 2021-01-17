@@ -9,6 +9,7 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
+using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.DC;
@@ -209,6 +210,15 @@ namespace Xpand.TestsLib.Common{
             {"JobSchedulerModule", 61487}
         };
 
+        public static TestObserver<T> StartTest<T>(this XafApplication application,IObservable<T> test,int delay=200) {
+            var testObserver = test
+                .Timeout(TimeSpan.FromSeconds(10))
+                .AsyncFinally(async () => await Task.Delay(delay).ToObservable().Do(_ => application.Exit()).ToTask())
+                .Test();
+            application.CallMethod("Start");
+            return testObserver;
+        }
+
         public static IObservable<IModelReactiveLogger> ConfigureModel<TModule>(this XafApplication application,
             bool transmitMessage = true) where TModule : ModuleBase{
             return application.WhenModelChanged().FirstAsync()
@@ -218,9 +228,14 @@ namespace Xpand.TestsLib.Common{
                     if (logger != null){
                         logger.TraceSources.Enabled = true;
                         var modelTraceSourcedModules = logger.TraceSources.Where(module => module.Id()!=typeof(TModule).Name);
-                        var traceSourcedModule = logger.TraceSources.First(module => module.Id()==typeof(TModule).Name);
-                        traceSourcedModule.Level=SourceLevels.Verbose;
-                        
+                        var traceSourcedModule = logger.TraceSources.FirstOrDefault(module => module.Id()==typeof(TModule).Name);
+                        if (traceSourcedModule != null) {
+                            traceSourcedModule.Level = SourceLevels.Verbose;
+                        }
+                        else {
+                            return logger;
+                        }
+
                         foreach (var modelTraceSourcedModule in modelTraceSourcedModules){
                             modelTraceSourcedModule.Level=SourceLevels.Off;    
                         }
@@ -430,7 +445,7 @@ namespace Xpand.TestsLib.Common{
         }
 
         public static void MockFrameTemplate(this XafApplication application){
-            var frameTemplateMock = new Mock<IFrameTemplate>();
+            var frameTemplateMock = new Mock<IWindowTemplate>();
             frameTemplateMock.Setup(template => template.GetContainers()).Returns(() => new IActionContainer[0]);
             application.WhenCreateCustomTemplate()
                 .Do(_ => _.e.Template = frameTemplateMock.Object)

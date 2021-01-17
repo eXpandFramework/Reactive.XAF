@@ -36,10 +36,7 @@ namespace Xpand.XAF.Modules.OneView.Tests{
 		        .SelectMany(frame => frame.Template.WhenWindowsForm().When("Shown"))
 		        .Select(form => ((Form) application.MainWindow.Template).Visible)
 		        .FirstAsync()
-		        .Do(form => {
-
-			        application.Exit();
-		        })
+		        .Do(form => application.Exit())
 		        .SubscribeReplay();
 
 	        ((TestWinApplication)application).Start();

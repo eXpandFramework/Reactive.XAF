@@ -32,7 +32,6 @@ namespace Xpand.XAF.Modules.ModelViewInheritance {
                 var difference = node.AddNode<IModelMergedDifference>(info.TargetView);
                 var sourceView = GetSourceView(node, info);
                 difference.View = node.Application.Views[sourceView].AsObjectView;
-                difference.DeepMerge = info.DeepMerge;
             }
         }
 
@@ -51,7 +50,7 @@ namespace Xpand.XAF.Modules.ModelViewInheritance {
         [Required]
         [RefreshProperties(RefreshProperties.All)]
         IModelObjectView View { get; set; }
-        bool DeepMerge{ get; set; }
+        
         [Browsable(false)]
         IModelList<IModelObjectView> Views { get; }
     }
