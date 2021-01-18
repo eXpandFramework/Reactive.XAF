@@ -10,6 +10,11 @@ using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
     public static class JobSchedulerTestExtensions {
+        public static IObservable<JobState> Executed(this WorkerState lastState) 
+            => JobService.JobState.FirstAsync(t => t.State == WorkerState.Enqueued).IgnoreElements()
+                .Concat(JobService.JobState.FirstAsync(t => t.State == WorkerState.Processing).IgnoreElements())
+                .Concat(JobService.JobState.FirstAsync(t => t.State == lastState))
+                .FirstAsync();
 
         public static IObservable<GenericEventArgs<IObservable<Job>>> Handle(this IObservable<GenericEventArgs<IObservable<Job>>> source)
             => source.Do(e => e.Handled = true).Select(args => args);

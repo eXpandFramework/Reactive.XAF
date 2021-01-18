@@ -93,7 +93,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
                 jobState.Reason = context.NewState.Reason;
                 job.Executions.Add(jobState);
                 objectSpace.CommitChanges();
-                JobExecutionSubject.OnNext(jobState);
+                JobStateSubject.OnNext(jobState);
             }
         }
 
@@ -166,9 +166,9 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
                 .SelectMany(t => t.objects.Cast<Job>().Do(job => RecurringJob.RemoveIfExists(job.Id)))
                 .TraceJobSchedulerModule().ToUnit();
 
-        static readonly ISubject<JobState> JobExecutionSubject=Subject.Synchronize(new Subject<JobState>());
+        static readonly ISubject<JobState> JobStateSubject=Subject.Synchronize(new Subject<JobState>());
         
-        public static IObservable<JobState> JobExecution => JobExecutionSubject.AsObservable();
+        public static IObservable<JobState> JobState => JobStateSubject.AsObservable();
 
         internal static Expression<Action> CallExpression(this Job job) {
             var method = job.JobType.Type.Method(job.JobMethod.Name.Replace(" ", ""));

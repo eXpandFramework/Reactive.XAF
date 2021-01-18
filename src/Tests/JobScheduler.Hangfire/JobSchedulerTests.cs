@@ -87,7 +87,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
         public async Task Schedule_Successful_job() {
             MockHangfire().Test();
             using var application = JobSchedulerModule().Application.ToBlazor();
-            var observable = JobExecution(WorkerState.Succeeded).SubscribeReplay();
+            var observable = WorkerState.Succeeded.Executed().SubscribeReplay();
             
             application.CommitNewJob();
             
@@ -109,7 +109,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
         public async Task Schedule_Failed_Recurrent_job(string methodName,int executions,int failedJobs,int successFullJobs) {
             MockHangfire().Test();
             using var application = JobSchedulerModule().Application.ToBlazor();
-            var execute = JobExecution(WorkerState.Failed).SubscribeReplay();
+            var execute = WorkerState.Failed.Executed().SubscribeReplay();
             application.CommitNewJob(methodName:methodName);
             using var objectSpace = application.CreateObjectSpace();
 
@@ -124,7 +124,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
         public async Task Pause_Job() {
             MockHangfire().Test();
             using var application = JobSchedulerModule().Application.ToBlazor();
-            var observable = JobExecution(WorkerState.Succeeded).SubscribeReplay();
+            var observable = WorkerState.Succeeded.Executed().SubscribeReplay();
             var jobsObserver = TestJob.Jobs.Test();
             application.CommitNewJob().Pause();
 
@@ -132,11 +132,12 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
 
             jobsObserver.ItemCount.ShouldBe(0);
         }
+
         [XpandTest()][Test]
         public async Task Resume_Job() {
             MockHangfire().Test();
             using var application = JobSchedulerModule().Application.ToBlazor();
-            var observable = JobExecution(WorkerState.Succeeded).SubscribeReplay();
+            var observable = WorkerState.Succeeded.Executed().SubscribeReplay();
             var jobsObserver = TestJob.Jobs.Test();
             application.CommitNewJob().Pause().Resume();
 
@@ -144,6 +145,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
 
             jobsObserver.ItemCount.ShouldBe(1);
         }
+
         [XpandTest()][Test]
         public void JobPause_Action() {
             MockHangfire().Test();
@@ -165,6 +167,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
             viewWindow.Action<JobSchedulerModule>().ResumeJob().Active.ResultValue.ShouldBeTrue();
             
         }
+
         [XpandTest()][Test]
         public void JobResume_Action() {
             MockHangfire().Test();

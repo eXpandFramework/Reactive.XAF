@@ -148,7 +148,7 @@ jobs:
                     $env:AzProject = "eXpandFramework"
                     $env:DXFeed = '$(DXApiFeed)'
                     $xafMinor=$xafMinors|select-object -first 1
-                    $build=Get-AzBuilds -Definition Reactive.XAF-Lab -Tag "$xafMinor" -Top 1 
+                    $build=Get-AzBuilds -Definition Reactive.XAF -Tag "$xafMinor" -Top 1 
                     $parameters = @{
                         CustomVersion     = "$xafMinor"
                         DxPipelineBuildId = "$($build.Id)"
