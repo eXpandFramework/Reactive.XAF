@@ -170,10 +170,10 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
         
         public static IObservable<JobState> JobExecution => JobExecutionSubject.AsObservable();
 
-        public static Expression<Action> CallExpression(this Job job) {
+        internal static Expression<Action> CallExpression(this Job job) {
             var method = job.JobType.Type.Method(job.JobMethod.Name.Replace(" ", ""));
             var arguments = method.Parameters().Count == 1 && method.Parameters().Any(info => info.ParameterType == typeof(PerformContext))
-                    ? new Expression[] {Expression.Constant(null, typeof(PerformContext))} : new Expression[0];
+                ? new Expression[] {Expression.Constant(null, typeof(PerformContext))} : new Expression[0];
             return job.JobType.Type.CallExpression(method,arguments);
         }
 

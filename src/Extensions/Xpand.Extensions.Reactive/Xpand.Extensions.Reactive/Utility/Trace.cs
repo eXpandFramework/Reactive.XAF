@@ -17,10 +17,13 @@ namespace Xpand.Extensions.Reactive.Utility{
 
     public static partial class Utility{
         private static ConcurrentDictionary<Type, Func<object, string>> Serialization{ get; }
-        
+        private static readonly Random Random;
 
         public static Func<object, string> Serializer = o => o.ToString();
-        static Utility() => Serialization=new ConcurrentDictionary<Type, Func<object,string>>();
+        static Utility() {
+            Serialization = new ConcurrentDictionary<Type, Func<object, string>>();
+            Random = new Random((int) DateTime.Now.Ticks);
+        }
 
         public static bool AddTraceSerialization(Type type) => Serialization.TryAdd(type, Serializer);
 

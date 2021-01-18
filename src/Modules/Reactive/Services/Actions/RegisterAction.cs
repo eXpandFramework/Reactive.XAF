@@ -157,8 +157,13 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         private static Type NewControllerType<T>(string id) where T:Controller{
             var baseController = GetBaseController<T>();
             var actionControllerName = ActionControllerName(id, baseController);
-            return ActionsModule.GetType(actionControllerName)
-                   ??ActionsModule.DefineType(actionControllerName, TypeAttributes.Public, baseController).CreateTypeInfo()?.AsType();
+            try {
+                return ActionsModule.GetType(actionControllerName)
+                       ??ActionsModule.DefineType(actionControllerName, TypeAttributes.Public, baseController).CreateTypeInfo()?.AsType();
+            }
+            catch {
+                return ActionsModule.GetType(actionControllerName);
+            }
         }
 
         private static string ActionControllerName(string id, Type baseController) 
