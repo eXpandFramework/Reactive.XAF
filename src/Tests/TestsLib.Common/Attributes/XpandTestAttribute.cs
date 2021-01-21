@@ -23,29 +23,29 @@ namespace Xpand.TestsLib.Common.Attributes{
             _tryCount = tryCount;
         }
 
-        public string IgnoredXAFVersions{ get; set; }
+        public string IgnoredXAFMinorVersions{ get; set; }
         public TestCommand Wrap(TestCommand command){
-            IgnoredXAFVersions ??= command.Test.Method.MethodInfo.DeclaringType?.Assembly.Attribute<XpandTestAttribute>()?.IgnoredXAFVersions;
-            return new RetryCommand(command, _tryCount, _timeout, IgnoredXAFVersions);
+            IgnoredXAFMinorVersions ??= command.Test.Method?.MethodInfo.DeclaringType?.Assembly.Attribute<XpandTestAttribute>()?.IgnoredXAFMinorVersions;
+            return new RetryCommand(command, _tryCount, _timeout, IgnoredXAFMinorVersions);
         }
 
         public class RetryCommand : DelegatingTestCommand{
             private readonly int _tryCount;
             private readonly int _timeout;
-            private readonly string _ignoredXAFVersions;
+            private readonly string _ignoredXAFMinorVersions;
 
-            public RetryCommand(TestCommand innerCommand, int tryCount, int timeout, string ignoredXAFVersions)
+            public RetryCommand(TestCommand innerCommand, int tryCount, int timeout, string ignoredXAFMinorVersions)
                 : base(innerCommand){
                 _tryCount = tryCount;
                 _timeout = timeout;
-                _ignoredXAFVersions = ignoredXAFVersions;
+                _ignoredXAFMinorVersions = ignoredXAFMinorVersions;
             }
 
             public override TestResult Execute(TestExecutionContext context){
                 var count = _tryCount;
                 var version = Version.Parse(XafAssemblyInfo.Version);
-                if ($"{version.Major}.{version.Minor}" == _ignoredXAFVersions){
-                    // context.CurrentTest.MakeInvalid(_ignoredXAFVersions);
+                if ($"{version.Major}.{version.Minor}" == _ignoredXAFMinorVersions){
+                    // context.CurrentTest.MakeInvalid(_ignoredXAFMinorVersions);
                     context.CurrentTest.RunState=RunState.Skipped;
                     return context.CurrentResult;
                 }

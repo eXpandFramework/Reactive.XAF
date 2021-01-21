@@ -10,7 +10,7 @@ using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions;
 using Xpand.XAF.Modules.Reactive;
-[assembly:XpandTest(IgnoredXAFVersions="19.1")]
+[assembly:XpandTest(IgnoredXAFMinorVersions="19.1")]
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests{
     public abstract class CommonTests:BaseTest{
         

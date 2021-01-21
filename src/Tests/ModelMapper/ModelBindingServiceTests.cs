@@ -282,7 +282,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                 }
             }
         }
-        [XpandTest()]
+        [XpandTest(IgnoredXAFMinorVersions="20.2")]
         [TestCase(nameof(Platform.Win))]
         public async Task Bind_PropertyEditor_Control(string platformName){
             var platform = GetPlatform(platformName);

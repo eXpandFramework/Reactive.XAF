@@ -13,7 +13,7 @@ using Xpand.XAF.Modules.Reactive.Services.Actions;
 namespace Xpand.XAF.Modules.Reactive.Tests{
     public class ActionServiceTests:ReactiveCommonTest{
         [TestCase(ViewType.ListView,false)]
-        [XpandTest(IgnoredXAFVersions = "20.1")]
+        [XpandTest(IgnoredXAFMinorVersions = "20.1")]
         [TestCase(ViewType.DetailView,true)]
         public void ActivateForCurrentUser(ViewType viewType, bool active) {
             using var application = Platform.Win.NewApplication<ReactiveModule>();

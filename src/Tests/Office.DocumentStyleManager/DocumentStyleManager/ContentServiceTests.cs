@@ -24,9 +24,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
         [Test][XpandTest()][Apartment(ApartmentState.STA)]
         public void On_Document_Selection_Changed_Select_Used_Style(){
             using var xafApplication=DocumentStyleManagerModule().Application;
-            // application.MockEditorsFactory();
-            
-            xafApplication.MockListEditor((view, application, collectionsource) => view.Id.Contains(nameof(BusinessObjects.DocumentStyleManager.AllStyles))
+            xafApplication.MockListEditor((view, application, collectionSource) => view.Id.Contains(nameof(BusinessObjects.DocumentStyleManager.AllStyles))
                 ? application.ListEditorMock(view).Object : new GridListEditor(view));
             var serverObserver = xafApplication.WhenDetailViewCreated().SelectMany(_ => _.e.View.WhenRichEditDocumentServer<BusinessObjects.DocumentStyleManager>(manager => manager.Content)).Test();
             var tuple = xafApplication.SetDocumentStyleManagerDetailView(Document);
@@ -55,9 +53,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
         [TestCase(1)][XpandTest()][Apartment(ApartmentState.STA)]
         public void Replacement_ListView_Displays_Styles_of_same_type_as_the_Selected_Styles(int selectedStyles){
             using var xafApplication=DocumentStyleManagerModule().Application;
-            // application.MockEditorsFactory();
-            
-            xafApplication.MockListEditor((view, application, collectionsource) => view.Id.Contains(nameof(BusinessObjects.DocumentStyleManager.AllStyles))
+
+            xafApplication.MockListEditor((view, application, collectionSource) => view.Id.Contains(nameof(BusinessObjects.DocumentStyleManager.AllStyles))
                 ? application.ListEditorMock(view).Object : new GridListEditor(view));
             
             Document.NewDocumentStyle(3, DocumentStyleType.Paragraph);
@@ -77,8 +74,9 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
             replacementStyles.Length.ShouldBeGreaterThan(0);
             replacementStyles.All(style => style.DocumentStyleType == DocumentStyleType.Paragraph).ShouldBeTrue();
         }
-        [Test][Apartment(ApartmentState.STA)][XpandTest()]
-        public async Task Synrhonize_styles_when_document_modified(){
+
+        [Test][Apartment(ApartmentState.STA)][XpandTest(IgnoredXAFMinorVersions = "20.2")]
+        public async Task Synchronize_styles_when_document_modified(){
             using var application=DocumentStyleManagerModule().Application;
             var serverObserver = application.WhenDetailViewCreated(typeof(BusinessObjects.DocumentStyleManager)).ToDetailView()
                 .SelectMany(detailView => detailView.AsDetailView().WhenRichEditDocumentServer<BusinessObjects.DocumentStyleManager>(manager => manager.Content)).Test();
