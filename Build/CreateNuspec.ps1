@@ -1,7 +1,7 @@
 param(
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\"),
     [switch]$Release,
-    $dxVersion = "20.2.4",
+    $dxVersion = "20.2.5",
     $branch = "lab"
 )
 
@@ -12,7 +12,7 @@ $ErrorActionPreference = "Stop"
 [version]$modulesVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo("$root\bin\Xpand.XAF.Modules.Reactive.dll" ).FileVersion
 $versionConverterPath = "$root\tools\Xpand.VersionConverter\Xpand.VersionConverter.nuspec"
 [xml]$nuspec = Get-Content $versionConverterPath
-$nuspec.package.metadata.version = $modulesVersion
+$nuspec.package.metadata.version = "$modulesVersion"
 $nuspec.Save($versionConverterPath)
 
 $allProjects = Get-ChildItem $root *.csproj -Recurse | Select-Object -ExpandProperty BaseName
@@ -22,8 +22,10 @@ if ($dxVersion -lt "20.2.0"){
 }
 $filteredProjects=Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notmatch $filter} 
 $filteredProjects+=Get-ChildItem "$root\src\" -Include "*Xpand.TestsLib*.csproj" -Recurse  |Where-Object{$dxVersion -gt "20.2.0" -or $_.BaseName -notmatch "Blazor"}
-$filteredProjects| Invoke-Parallel -StepInterval 200 -VariablesToImport @("allProjects", "root", "Release") -Script {
-# $filteredProjects| foreach {
+# $filteredProjects| Invoke-Parallel -StepInterval 200 -VariablesToImport @("allProjects", "root", "Release") -Script {
+
+# $filteredProjects|where{$_.BaseName -eq "Xpand.TestsLib.Blazor"}| foreach {
+$filteredProjects| foreach {
     $addTargets = {
         param (
             $name   
@@ -67,15 +69,25 @@ $filteredProjects| Invoke-Parallel -StepInterval 200 -VariablesToImport @("allPr
     }
     
     & "$root\build\Update-Nuspec.ps1" @uArgs 
-
+    
     $nuspecFileName = "$root\build\nuspec\$($_.BaseName).nuspec"
     [xml]$nuspec = Get-Content $nuspecFileName
+
     $psTarget = "CopySymbols"
     if (Test-Path "..\build\Targets\$($_.BaseName).targets") {
         $psTarget = $_.BaseName
     }
     & $addTargets $psTarget
-    Add-XmlElement -Owner $nuspec -elementname "file" -parent "files"-Attributes $a | Out-Null
+    
+    # $nuspec.Save($NuspecFilename)
+    # "2. $NuspecFilename"
+    # Format-Xml -Path $nuspecFileName
+
+    # Add-XmlElement -Owner $nuspec -elementname "file" -parent "files" -Attributes $a | Out-Null
+    # $nuspec.Save($NuspecFilename)
+    # "3. $NuspecFilename"
+
+    # Format-Xml -Path $nuspecFileName
     $readMePath = "$($_.DirectoryName)\ReadMe.md"
     if (Test-Path $readMePath) {
         $readMe = Get-Content $readMePath -Raw
@@ -99,9 +111,13 @@ $filteredProjects| Invoke-Parallel -StepInterval 200 -VariablesToImport @("allPr
     $nameTag = $nuspec.package.metaData.id.Replace("Xpand.XAF.Modules.", "").Replace("Xpand.XAF.Extensions.", "")
     $nuspec.package.metaData.tags = "DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  $nameTag"
     
+    
+    
     $ns = New-Object System.Xml.XmlNamespaceManager($nuspec.NameTable)
     $ns.AddNamespace("ns", $nuspec.DocumentElement.NamespaceURI)
-    
+    $nuspec.Save($NuspecFilename)
+    "3. $NuspecFilename"
+    Format-Xml -Path $nuspecFileName
     if ($nuspec.package.metaData.id -like "Xpand.XAF*" -or $nuspec.package.metaData.id -like "Xpand.Extensions.XAF*") {
         
         $versionConverter = [PSCustomObject]@{

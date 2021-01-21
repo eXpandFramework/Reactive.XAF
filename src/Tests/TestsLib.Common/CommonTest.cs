@@ -124,9 +124,11 @@ namespace Xpand.TestsLib.Common{
                 TestContext.Out.Write(e);
             }
         }
-
+        static readonly object Locker=new object();
         protected virtual void ResetXAF() {
-            XafTypesInfo.HardReset();
+            lock (Locker) {
+                XafTypesInfo.HardReset();
+            }
             // XpoTypesInfoHelper.Reset();
         }
 

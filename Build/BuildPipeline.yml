@@ -158,7 +158,7 @@ jobs:
                 }
           }
           & "$(System.DefaultWorkingDirectory)\go.ps1" @goArgs
-          New-Item '$(System.DefaultWorkingDirectory)\bin\Nupkg' -ItemType Directory -ErrorAction SilentlyContinue
+          "LASTEXITCODE=$LASTEXITCODE"
     - task: PublishPipelineArtifact@1
       name: PublishNugetConsumers
       inputs:

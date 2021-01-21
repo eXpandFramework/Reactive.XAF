@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
+using DevExpress.ExpressApp.Core;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.Conditional;
@@ -20,6 +21,26 @@ using Xpand.XAF.Modules.Reactive.Tests.BOModel;
 
 namespace Xpand.XAF.Modules.Reactive.Tests{
     public class ActionRegistrationTests:ReactiveCommonTest{
+        [TestCase(1)]
+        [TestCase(1)]
+        [TestCase(1)]
+        [TestCase(1)]
+        [TestCase(1)]
+        [TestCase(1)]
+        [TestCase(1)]
+        [TestCase(1)]
+        [TestCase(1)]
+        [TestCase(1)]
+        [TestCase(1)]
+        [TestCase(1)]
+        [Parallelizable(ParallelScope.Children)]
+        public void RegisterAction_In_Parallel(int i) {
+            var applicationModulesManager = new ApplicationModulesManager(new ControllersManager(), "");
+            var testObserver = applicationModulesManager.RegisterViewSimpleAction("test").FirstAsync().Test();
+
+            testObserver.ItemCount.ShouldBe(i);
+        }
+
         [XpandTest()]
         [TestCase(ViewType.DetailView,3)]
         [TestCase(ViewType.ListView,4)]
@@ -146,19 +167,19 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
         }
         [XpandTest()][TestCase(ViewType.DetailView)]
         [TestCase(ViewType.ListView)]
-        public void Register_PararameterizedAction_For_Views(ViewType viewType){
+        public void Register_ParameterizedAction_For_Views(ViewType viewType){
 	        using var application = Platform.Win.NewApplication<ReactiveModule>();
 	        application.WhenApplicationModulesManager()
 		        .SelectMany(manager => manager.RegisterViewParametrizedAction($"{nameof(ParametrizedAction)}{viewType}",
-			        typeof(int),configure: Configure<ParametrizedAction>(viewType, nameof(Register_PararameterizedAction_For_Views))))
+			        typeof(int),configure: Configure<ParametrizedAction>(viewType, nameof(Register_ParameterizedAction_For_Views))))
 		        .TakeUntilDisposed(application)
 		        .Subscribe();
 	        DefaultReactiveModule(application);
 
-	        AssertViewAction<ParametrizedAction>(application,nameof(Register_PararameterizedAction_For_Views),viewType);
+	        AssertViewAction<ParametrizedAction>(application,nameof(Register_ParameterizedAction_For_Views),viewType);
         }
         [XpandTest()][Test]
-        public void Register_PararameterizedAction_For_Windows(){
+        public void Register_ParameterizedAction_For_Windows(){
 	        using var application = Platform.Win.NewApplication<ReactiveModule>();
 	        application.WhenApplicationModulesManager()
 		        .SelectMany(manager => manager.RegisterWindowParametrizedAction(nameof(ParametrizedAction),typeof(int)))

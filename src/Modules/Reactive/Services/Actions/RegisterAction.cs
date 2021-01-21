@@ -152,7 +152,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 	        return _actionsSubject.Select(a => a).OfType<TAction>().Where(_ => _.Id == id);
         }
 
-        static Subject<ActionBase> _actionsSubject=new Subject<ActionBase>();
+        static ISubject<ActionBase> _actionsSubject=Subject.Synchronize(new ReplaySubject<ActionBase>());
 
         private static Type NewControllerType<T>(string id) where T:Controller{
             var baseController = GetBaseController<T>();
