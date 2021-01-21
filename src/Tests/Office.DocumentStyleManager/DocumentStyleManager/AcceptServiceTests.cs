@@ -35,7 +35,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
             acceptAction.DoExecute();
 
             dataObject.Content.ShouldBe(documentStyleManager.Content);
-            RichEditDocumentServer.LoadDocument(dataObject.Content).ParagraphStyles
+            RichEditDocumentServerExtensions.LoadDocument(RichEditDocumentServer, dataObject.Content).ParagraphStyles
                 .FirstOrDefault(style => style.Name.StartsWith(TestExtensions.PsStyleName)).ShouldNotBeNull();
             viewCLosingObserver.Items.Count.ShouldBe(1);
         }
@@ -74,7 +74,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
             cancelAction.DoTheExecute();
             
             dataObject.Content.ShouldNotBe(documentStyleManager.Content);
-            RichEditDocumentServer.LoadDocument(dataObject.Content).ParagraphStyles
+            RichEditDocumentServerExtensions.LoadDocument(RichEditDocumentServer, dataObject.Content).ParagraphStyles
                 .FirstOrDefault(style => style.Name.StartsWith(TestExtensions.PsStyleName)).ShouldBeNull();
             viewCLosingObserver.Items.Count.ShouldBe(1);
         }

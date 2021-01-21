@@ -30,6 +30,7 @@ if (!$sourcePath) {
 }
 Set-VsoVariable build.updatebuildnumber "$newVersion-$CustomVersion"
 Update-AssemblyInfoVersion $newVersion "$PSScriptRoot\..\src\Common\AssemblyInfoVersion.cs"
-
-
+[xml]$Nuspec=Get-XmlContent "$PSScriptRoot\..\Tools\Xpand.VersionConverter\Xpand.VersionConverter.nuspec"
+$Nuspec.package.metadata.version=$newVersion
+$Nuspec.Save("$PSScriptRoot\..\Tools\Xpand.VersionConverter\Xpand.VersionConverter.nuspec")
 return

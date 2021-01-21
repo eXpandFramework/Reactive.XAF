@@ -42,15 +42,15 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Polly" Version="7.2.1" />
-    <PackageReference Include="DevExpress.WindowsDesktop.Core" Version="20.2.4" />
-    <PackageReference Include="DevExpress.WindowsDesktop.Xaf" Version="20.2.4-ctp" />
+    <PackageReference Include="DevExpress.WindowsDesktop.Core" Version="20.2.5" />
+    <PackageReference Include="DevExpress.WindowsDesktop.Xaf" Version="20.2.5-ctp" />
     <PackageReference Include="MagicOnion" Version="2.6.3" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.0" />
-    <PackageReference Include="Moq" Version="4.15.2" />
+    <PackageReference Include="Moq" Version="4.16" />
     <PackageReference Include="Shouldly" Version="4.0.3" />
-    <PackageReference Include="NUnit" Version="3.12.0" />
+    <PackageReference Include="NUnit" Version="3.13.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.202.48.1" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.202.48.3" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
     <PackageReference Include="System.Data.OleDb" Version="5.0.0" />
     <PackageReference Include="System.ServiceModel.Http" Version="4.8.0" />

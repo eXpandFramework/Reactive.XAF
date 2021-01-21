@@ -12,12 +12,11 @@ $ErrorActionPreference = "Stop"
 [version]$modulesVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo("$root\bin\Xpand.XAF.Modules.Reactive.dll" ).FileVersion
 $versionConverterPath = "$root\tools\Xpand.VersionConverter\Xpand.VersionConverter.nuspec"
 [xml]$nuspec = Get-Content $versionConverterPath
-[version]$vv = $nuspec.package.metadata.version
-$nuspec.package.metadata.version = "$($vv.major).$($modulesVersion.Minor).$($vv.build)"
+$nuspec.package.metadata.version = $modulesVersion
 $nuspec.Save($versionConverterPath)
 
 $allProjects = Get-ChildItem $root *.csproj -Recurse | Select-Object -ExpandProperty BaseName
-$filter="test"
+$filter="test|Maintenance"
 if ($dxVersion -lt "20.2.0"){
     $filter += "|Blazor|Hangfire|Xpand.XAF.Modules.Reactive.Logger.Client.Win"
 }

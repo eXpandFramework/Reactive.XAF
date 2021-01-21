@@ -2,20 +2,20 @@
 <package>
   <metadata>
     <id>Xpand.Extensions.Reactive</id>
-    <version>4.202.48.1</version>
+    <version>4.202.48.3</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
-    <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive</projectUrl>
+    <projectUrl>https://github.com/eXpandFramework/Reactive.XAF/blob/master/src/Extensions/Xpand.Extensions.Reactive/Xpand.Extensions.Reactive</projectUrl>
     <iconUrl>http://sign.expandframework.com</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Xpand.Extensions.Reactive</description>
-    <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
+    <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Xpand.Extensions.Reactive</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.Extensions" version="4.202.48.1" />
+        <dependency id="Xpand.Extensions" version="4.202.48.3" />
         <dependency id="akarnokd.reactive_extensions" version="0.0.27-alpha" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="System.CodeDom" version="5.0" />

@@ -1,6 +1,6 @@
 param(
-    [string[]]$Toolpackages = "Xpand.XAF.ModelEditor",
-    $Branch = "master",
+    [string[]]$Toolpackages = "Xpand.VersionConverter",
+    $Branch = "lab",
     $sourceDir = "$PSScriptRoot\.."
 )
 $releasepackages=Get-XpandPackages Release XAFAll 

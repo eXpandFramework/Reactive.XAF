@@ -92,7 +92,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager{
 	        using var objectSpace = application.CreateObjectSpace(documentStyleManager.DefaultPropertiesProvider.TypeInfo.Type);
 	        var theObject = objectSpace.GetObjects(documentStyleManager.DefaultPropertiesProvider.TypeInfo.Type, objectSpace.ParseCriteria(documentStyleManager.DefaultPropertiesProviderCriteria)).Cast<object>().FirstOrDefault();
 	        var value = (byte[])documentStyleManager.DefaultPropertiesProviderMember.MemberInfo.GetValue(theObject);
-	        return Observable.Using(() => new RichEditDocumentServer(), server => factory(server.LoadDocument(value)));
+	        return Observable.Using(() => new RichEditDocumentServer(), server => factory(RichEditDocumentServerExtensions.LoadDocument(server, value)));
         }
 
     }

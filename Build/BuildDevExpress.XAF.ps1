@@ -14,7 +14,7 @@ Properties {
     $Root = "$nugetbin\..\..\"
 }
 
-Task BuildNugetConsumers -precondition { return ((Get-VersionPart $DXVersion Minor) -ne "19.2") } -depends   CreateNuspec, PackNuspec, CompileNugetConsumers
+Task BuildNugetConsumers -depends   CreateNuspec, PackNuspec, CompileNugetConsumers -precondition { return ((Get-VersionPart $DXVersion Minor) -ne "19.2") } 
 Task Build  -depends   Clean, Init, UpdateProjects, Compile, CheckVersions, IndexSources, CompileTests
 
 function CompileTestSolution($solution) {
@@ -86,21 +86,8 @@ Task CompileTests -precondition { return ((Get-VersionPart $DXVersion Minor) -ne
 
 function FixNet461DXAssembliesTargetFramework {
     Start-Build -Path "$root\src\Tests\ModelMapper\Xpand.XAF.Modules.ModelMapper.Tests.csproj"
-    return
-    $nugetAssemblies = Get-ChildItem (Get-NugetInstallationFolder) DevExpress*.dll -Recurse | Where-Object {
-        $_.Directory.Name -eq "net452" -and $_.Directory.Parent.Parent.Name -eq "20.2.4"
-    }
-    get-childitem "$root\bin\net461" Dev*.dll | ForEach-Object {
-        [PSCustomObject]@{
-            Name      = $_.BaseName
-            Framework = Get-AssemblyTargetFramework $_.FullName
-        }
-    } | Where-Object { $_.Framework -notmatch ".netframework" } | ForEach-Object {
-        $name = $_.Name
-        $nugetAssemblies | Where-Object { $_.BaseName -eq $name }
-    } | Copy-Item -Destination "$root\bin\net461" -Force -Verbose
-    
 }
+
 Task CompileNugetConsumers -precondition { return $compile } {
     Invoke-Script {
         $localPackages = @(& (Get-NugetPath) list -source "$root\bin\nupkg;" | ConvertTo-PackageObject | Where-Object { $_.id -like "*.ALL" } | ForEach-Object {

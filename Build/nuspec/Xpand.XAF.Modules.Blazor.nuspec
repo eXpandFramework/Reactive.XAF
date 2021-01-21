@@ -2,25 +2,25 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Blazor</id>
-    <version>4.202.48.1</version>
+    <version>4.202.48.3</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
-    <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/Blazor</projectUrl>
+    <projectUrl>https://github.com/eXpandFramework/Reactive.XAF/blob/master/src/Modules/Blazor</projectUrl>
     <iconUrl>http://sign.expandframework.com</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>The `Blazor` package hosts and activates Blazor specific XAF artifacts.</description>
-    <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
+    <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Blazor</tags>
     <dependencies>
       <group targetFramework="netstandard2.1">
-        <dependency id="Xpand.Extensions.Reactive" version="4.202.48.1" />
-        <dependency id="Xpand.Extensions.Blazor" version="4.202.48.1" />
-        <dependency id="Xpand.Extensions.XAF" version="4.202.48.1" />
-        <dependency id="Xpand.Extensions" version="4.202.48.1" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.202.48.1" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.48.1" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.202.48.3" />
+        <dependency id="Xpand.Extensions.Blazor" version="4.202.48.3" />
+        <dependency id="Xpand.Extensions.XAF" version="4.202.48.3" />
+        <dependency id="Xpand.Extensions" version="4.202.48.3" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.202.48.3" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.48.3" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="JetBrains.Annotations" version="2020.3" />
         <dependency id="System.Reactive" version="5.0" />
@@ -33,7 +33,7 @@
         <dependency id="Microsoft.Extensions.DependencyInjection.Abstractions" version="5.0" />
       </group>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.VersionConverter" version="2.202.12" />
+        <dependency id="Xpand.VersionConverter" version="4.202.48.3" />
       </group>
     </dependencies>
   </metadata>

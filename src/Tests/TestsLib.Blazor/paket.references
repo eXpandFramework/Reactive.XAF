@@ -8,3 +8,4 @@ Microsoft.AspNetCore.Http.Abstractions
 hangfire.aspnetcore
 DevExpress.ExpressApp.Xpo
 System.Diagnostics.PerformanceCounter
+Moq

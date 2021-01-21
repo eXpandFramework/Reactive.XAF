@@ -38,9 +38,9 @@
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.WindowsDesktop.Core" Version="20.2.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="20.2.4" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="4.202.48.1" />
+    <PackageReference Include="DevExpress.WindowsDesktop.Core" Version="20.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="20.2.5" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="4.202.48.3" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.8.0" />

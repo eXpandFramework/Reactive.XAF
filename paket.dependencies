@@ -5,17 +5,17 @@ storage:none
 copy_local:true
 framework:net461,net5.0,netstandard2.0,netstandard2.1,netcoreapp3.1
 
-nuget DevExpress.WindowsDesktop.Core == 20.2.4
-nuget DevExpress.WindowsDesktop.Xaf == 20.2.4-ctp
-nuget DevExpress.ExpressApp.Office == 20.2.4
-nuget DevExpress.ExpressApp.Core.All == 20.2.4
-nuget DevExpress.ExpressApp.Win.All == 20.2.4
-nuget DevExpress.ExpressApp.Web.All == 20.2.4
-nuget DevExpress.ExpressApp.Blazor.All == 20.2.4
-nuget DevExpress.EasyTest == 20.2.4  
-nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 20.2.4  
-nuget DevExpress.ExpressApp.EasyTest.WinAdapter == 20.2.4  
-nuget DevExpress.ExpressApp.Security.Xpo == 20.2.4  
+nuget DevExpress.WindowsDesktop.Core == 20.2.5
+nuget DevExpress.WindowsDesktop.Xaf == 20.2.5-ctp
+nuget DevExpress.ExpressApp.Office == 20.2.5
+nuget DevExpress.ExpressApp.Core.All == 20.2.5
+nuget DevExpress.ExpressApp.Win.All == 20.2.5
+nuget DevExpress.ExpressApp.Web.All == 20.2.5
+nuget DevExpress.ExpressApp.Blazor.All == 20.2.5
+nuget DevExpress.EasyTest == 20.2.5  
+nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 20.2.5  
+nuget DevExpress.ExpressApp.EasyTest.WinAdapter == 20.2.5  
+nuget DevExpress.ExpressApp.Security.Xpo == 20.2.5  
 nuget Mono.Cecil 0.11.2
 nuget MagicOnion 2.6.3
 nuget Grpc 2.23.0
@@ -26,6 +26,9 @@ nuget Hangfire.SqlServer 1.7.19
 nuget Hangfire.AspNetCore 1.7.19
 nuget hangfire.memorystorage 1.7.0
 nuget Shouldly 4.0.3
+nuget Moq 4.16
+nuget NUnit 3.13.0
+nuget NUnit3TestAdapter 3.17.0
 nuget System.Data.SqlClient
 nuget Microsoft.Extensions.Dependencyinjection
 nuget Microsoft.Extensions.DependencyInjection.Abstractions
@@ -37,7 +40,6 @@ nuget FasterFlect.Xpand
 nuget System.Text.Encoding.CodePages
 nuget System.Text.Json
 nuget akarnokd.reactive_extensions
-nuget Moq
 nuget Humanizer.Core
 nuget Microsoft.CSharp
 nuget System.Runtime.CompilerServices.Unsafe
@@ -50,8 +52,6 @@ nuget Microsoft.Owin.Security.Cookies
 nuget Microsoft.Owin.Security.OpenIdConnect
 nuget Owin
 nuget Newtonsoft.Json
-nuget NUnit
-nuget NUnit3TestAdapter
 nuget Ryder
 nuget System.CodeDom
 nuget System.Data.Common
@@ -77,4 +77,4 @@ nuget Microsoft.AspNetCore.Hosting
 nuget Selenium.Support
 nuget Selenium.WebDriver
 nuget Microsoft.NET.Test.SDK
-nuget Xpand.VersionConverter
+nuget Xpand.VersionConverter 2.202.11

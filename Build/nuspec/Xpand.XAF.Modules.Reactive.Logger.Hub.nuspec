@@ -2,34 +2,34 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Reactive.Logger.Hub</id>
-    <version>4.202.48.1</version>
+    <version>4.202.48.3</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
-    <projectUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/src/Modules/Reactive.Logger.Hub</projectUrl>
+    <projectUrl>https://github.com/eXpandFramework/Reactive.XAF/blob/master/src/Modules/Reactive.Logger.Hub</projectUrl>
     <iconUrl>http://sign.expandframework.com</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>The `Reactive.Logger.Hub` transmits or receives the execution pipeLine flow.</description>
-    <releaseNotes>https://github.com/eXpandFramework/DevExpress.XAF/releases</releaseNotes>
+    <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  Reactive.Logger.Hub</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.Extensions.Reactive" version="4.202.48.1" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.48.1" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.202.48.1" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.202.48.3" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.48.3" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.202.48.3" />
         <dependency id="MagicOnion" version="2.6.3" />
         <dependency id="System.Interactive.Async" version="5.0" />
         <dependency id="System.Reactive" version="5.0" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="Jetbrains.Annotations" version="2020.3" />
-        <dependency id="YamlDotNet" version="9.1" />
+        <dependency id="YamlDotNet" version="9.1.4" />
         <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.8" />
         <dependency id="System.Configuration.ConfigurationManager" version="5.0" />
         <dependency id="Xpand.Patcher" version="2.0.27" />
         <dependency id="Xpand.Collections" version="1.0.4" />
         <dependency id="System.CodeDom" version="5.0" />
-        <dependency id="Xpand.VersionConverter" version="2.202.12" />
+        <dependency id="Xpand.VersionConverter" version="4.202.48.3" />
       </group>
     </dependencies>
   </metadata>
