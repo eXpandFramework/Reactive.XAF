@@ -1,14 +1,45 @@
 . "$PSScriptRoot\Common.ps1"
+function Resolve-Refs{
+    $dirBuld="$((Get-Item $projectFile).DirectoryName)\Directory.build.targets"
+    if (!(Test-Path $dirBuld)){
+        $xml=@"
+<Project>
+    <Target Name="PrintReferences" DependsOnTargets="ResolveProjectReferences;ResolveAssemblyReferences">
+	  <Message Text="@(_ResolveAssemblyReferenceResolvedFiles)" />
+    </Target>
+</Project>
+"@
+        Set-Content $dirBuld  $xml
+        $removeTargets=$true
+    }
+    else{
+        $target=@"
+    <Target Name="PrintReferences" DependsOnTargets="ResolveProjectReferences;ResolveAssemblyReferences">
+	  <Message Text="@(_ResolveAssemblyReferenceResolvedFiles)" />
+    </Target>
+</Project>
+"@
+        $xml=Get-Content $dirBuld
+        if (!($xml|select-string "PrintReferences")){
+            Set-Content $dirBuld $xml.Replace("</Project>",$target)
+        }
+    }
+
+    $referenceAssemblies=(& "$msbuild\msbuild.exe" $projectFile "/t:PrintReferences" /nologo).Split(';')|Where-Object{$_ -and (Test-Path $_)}|Get-item
+    if ($removeTargets){
+        Remove-Item $dirBuld
+    }
+    $referenceAssemblies
+
+}
 function Get-UnPatchedPackages {
     param(
-        $moduleDirectories,
-        $dxVersion
+       $assemblyList,
+       $dxVersion
     )
-    $unpatchedPackages = $moduleDirectories | ForEach-Object {
-        (@(Get-ChildItem $_ "Xpand.XAF*.dll" -Recurse ) + @(Get-ChildItem $_ "Xpand.Extensions*.dll" -Recurse )) | ForEach-Object {
-            if (!(Test-Path "$($_.DirectoryName)\VersionConverter.v.$dxVersion.DoNotDelete")) {
-                $_.fullname
-            }
+    $unpatchedPackages=$assemblyList|Where-Object{$_.BaseName -match "Xpand.XAF|Xpand.Extensions"}|ForEach-Object{
+        if (!(Test-Path "$($_.DirectoryName)\VersionConverter.v.$dxVersion.DoNotDelete") -and ($_.Directory.Parent.Parent.Name)) {
+            $_.fullname
         }
     }
     Write-VerboseLog "unpatchedPackages:"

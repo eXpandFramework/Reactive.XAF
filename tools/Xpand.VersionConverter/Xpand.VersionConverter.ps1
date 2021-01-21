@@ -3,18 +3,18 @@ using namespace System.Threading
 using namespace System.Reflection
 using namespace System.IO
 using namespace System.IO.Compression
-using namespace System.Reflection
 using namespace System.Text.RegularExpressions
 using namespace Mono.Cecil
 using namespace Mono.Cecil.pdb
 param(
-    [string]$projectFile ="C:\Work\eXpandFramework\Issues\Solution1\Solution1.Module.Win\Solution1.Module.Win.csproj",
-    [string]$targetPath ="C:\Work\eXpandFramework\Issues\Solution1\Solution1.Module.Win\bin\Debug\net472\",
+    [string]$projectFile ="C:\Work\eXpandFramework\DevExpress.XAF\src\Tests\EasyTests\TestApplication\TestApplication.Module\TestApplication.Module.csproj",
+    [string]$MSBuild="C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\MSBuild.exe",
     $DevExpressVersion,
-    [string]$VerboseOutput = "Continue" ,
-    [string]$referenceFilter ,
+    [string]$VerboseOutput = "Continue",
+    [string]$referenceFilter,
     [string]$targetFilter ="(?is)Xpand\.XAF|Xpand\.Extensions"
 )
+
 if (!$referenceFilter){
     $referenceFilter="DevExpress*"
 }
@@ -46,20 +46,18 @@ Write-VerboseLog "DxVersion=$dxVersion"
 
 $packagesFolder = Get-PackagesFolder
 Write-VerboseLog "nugetPackageFoldersPath=$packagesFolder"
-$nugetPackageFolders = [Path]::GetFullPath($packagesFolder)
-$moduleDirectories = [Directory]::GetDirectories($nugetPackageFolders) | Where-Object {
-    $baseName = (Get-Item $_).BaseName
-    $regex = [regex] $targetFilter
-    $regex.IsMatch($baseName);
+$referenceAssemblies=Resolve-Refs
+$firstRef=$referenceAssemblies|Where-Object{$_.basename -match $referenceFilter}|Select-Object -First 1
+if ($firstRef.Directory.Parent.Parent.Name -eq $dxversion){
+    Write-VerboseLog "patching not required"
+    return
 }
-
-$unpatchedPackages = Get-UnPatchedPackages $moduleDirectories $dxversion
+$unpatchedPackages = Get-UnPatchedPackages $referenceAssemblies $dxversion
 if (!$unpatchedPackages) {
     Write-VerboseLog "All packages already patched for $dxversion"
     return
 }
-wh "ModuleDirectories:" -Section
-$moduleDirectories
+
 wh "UnpatchedPackages:" -Section
 $unpatchedPackages
 
@@ -71,11 +69,11 @@ catch {
 }
 $mtx.WaitOne() | Out-Null
 try {    
-    
     Install-MonoCecil $targetPath
-    $assemblyList=Get-ChildItem $packagesFolder -Include "*.dll","*.exe" -Recurse|Where-Object{$_.GetType() -ne [DirectoryInfo]}
-    $assemblyList+=Get-ChildItem $targetPath -Include "*.dll","*.exe" 
-    $assemblyList+=Get-ChildItem "$env:windir\Microsoft.NET\assembly\GAC_MSIL"  *.dll -Recurse
+    $r=[Mono.Cecil.DefaultAssemblyResolver]::new()
+    $referenceAssemblies|ForEach-Object{
+        $r.AddSearchDirectory($_.DirectoryName)  
+    }
     $unpatchedPackages | Get-Item | ForEach-Object {
         $packageFile = $_.FullName
         $packageDir = $_.DirectoryName
@@ -89,14 +87,15 @@ try {
                 Version         = $dxversion
                 referenceFilter = $referenceFilter
                 snkFile        = "$PSScriptRoot\Xpand.snk"
-                AssemblyList=$assemblyList
+                AssemblyList=$referenceAssemblies
             }
             $a
-            Switch-AssemblyDependencyVersion @a
+            Switch-DependencyVersion @a
             "Flag $versionConverterFlag"
             New-Item $versionConverterFlag -ItemType Directory | Out-Null
         }
     }
+    $r.Dispose()
 }
 catch {
     throw "$_`r`n$($_.ScriptStackTrace)"

@@ -76,9 +76,8 @@ function Get-MonoAssembly($path, $AssemblyList, [switch]$ReadSymbols) {
     $readerParams = New-Object ReaderParameters
     $readerParams.ReadWrite = $true
     $readerParams.ReadSymbols = $ReadSymbols
-    . "$PSScriptRoot\AssemblyResolver.ps1"
-    $assemblyResolver = [AssemblyResolver]::new($assemblyList)
-    $readerParams.AssemblyResolver = $assemblyResolver
+    $resolver=[Mono.Cecil.DefaultAssemblyResolver]::new()
+    $readerParams.AssemblyResolver = $resolver
     try {
         $m = [ModuleDefinition]::ReadModule($path, $readerParams)
         [PSCustomObject]@{
@@ -114,7 +113,7 @@ function Test-Version {
         
     }
 }
-function Switch-AssemblyDependencyVersion() {
+function Switch-DependencyVersion() {
     param(
         [string]$modulePath, 
         [version]$Version,
@@ -122,7 +121,8 @@ function Switch-AssemblyDependencyVersion() {
         [string]$snkFile,
         [System.IO.FileInfo[]]$assemblyList
     )
-    $moduleAssemblyData = Get-MonoAssembly $modulePath $assemblyList -ReadSymbols
+    
+    $moduleAssemblyData = Get-MonoAssembly $modulePath $r -ReadSymbols
     $moduleAssembly = $moduleAssemblyData.assembly
     $switchedRefs = Switch-AssemblyNameReferences $moduleAssembly $referenceFilter $version
     if ($switchedRefs) {
@@ -130,7 +130,6 @@ function Switch-AssemblyDependencyVersion() {
         Switch-Attributeparameters $moduleAssembly $referenceFilter $switchedRefs
         Write-Assembly $modulePath $moduleAssembly $snkFile $Version
     }
-    $moduleAssemblyData.Resolver.Dispose()
     $moduleAssembly.Dispose()
 }
 
@@ -308,18 +307,15 @@ function Use-Object {
     }
 }
 
-function Get-MonoAssembly($path, $AssemblyList, [switch]$ReadSymbols) {
+function Get-MonoAssembly($path, $resolver, [switch]$ReadSymbols) {
     $readerParams = New-Object ReaderParameters
     $readerParams.ReadWrite = $true
-    $readerParams.ReadSymbols = $ReadSymbols
-    . "$PSScriptRoot\AssemblyResolver.ps1"
-    $assemblyResolver = [AssemblyResolver]::new($assemblyList)
-    $readerParams.AssemblyResolver = $assemblyResolver
+    $readerParams.AssemblyResolver = $resolver
     try {
         $m = [ModuleDefinition]::ReadModule($path, $readerParams)
         [PSCustomObject]@{
             Assembly = $m.assembly
-            Resolver = $assemblyResolver
+            Resolver = $r
         }
     }
     catch {
