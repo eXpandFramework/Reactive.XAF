@@ -28,9 +28,9 @@
     </dependencies>
   </metadata>
   <files>
+    <file src="Xpand.XAF.Modules.SuppressConfirmation.dll" target="lib\netstandard2.0\Xpand.XAF.Modules.SuppressConfirmation.dll" />
     <file src="Xpand.XAF.Modules.SuppressConfirmation.pdb" target="lib\netstandard2.0\Xpand.XAF.Modules.SuppressConfirmation.pdb" />
     <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.XAF.Modules.SuppressConfirmation.targets" />
     <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
-    <file src="Xpand.XAF.Modules.SuppressConfirmation.dll" target="lib\netstandard2.0\Xpand.XAF.Modules.SuppressConfirmation.dll" />
   </files>
 </package>

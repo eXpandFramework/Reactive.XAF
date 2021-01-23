@@ -40,9 +40,9 @@
     </dependencies>
   </metadata>
   <files>
+    <file src="net461\Xpand.XAF.Modules.Office.Cloud.Microsoft.dll" target="lib\net461\Xpand.XAF.Modules.Office.Cloud.Microsoft.dll" />
     <file src="net461\Xpand.XAF.Modules.Office.Cloud.Microsoft.pdb" target="lib\net461\Xpand.XAF.Modules.Office.Cloud.Microsoft.pdb" />
     <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.XAF.Modules.Office.Cloud.Microsoft.targets" />
     <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
-    <file src="net461\Xpand.XAF.Modules.Office.Cloud.Microsoft.dll" target="lib\net461\Xpand.XAF.Modules.Office.Cloud.Microsoft.dll" />
   </files>
 </package>

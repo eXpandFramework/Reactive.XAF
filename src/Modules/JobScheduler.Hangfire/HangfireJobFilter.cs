@@ -6,7 +6,7 @@ using Hangfire.Storage;
 using Xpand.Extensions.Blazor;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
-    internal class HangfireJobFilter:global::Hangfire.Common.JobFilterAttribute, IApplyStateFilter,IServerFilter {
+    public class HangfireJobFilter:global::Hangfire.Common.JobFilterAttribute, IApplyStateFilter,IServerFilter {
         private readonly IServiceProvider _provider;
 
         public HangfireJobFilter(IServiceProvider provider) => _provider = provider;
@@ -23,7 +23,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
         public virtual void OnStateUnapplied(ApplyStateContext context, IWriteOnlyTransaction transaction) { }
 
         public void OnPerforming(PerformingContext filterContext) 
-            => filterContext.Canceled = filterContext.Connection.GetAllItemsFromSet(JobService.PausedJobsSetName)
+            => filterContext.Canceled = filterContext.Connection.GetAllItemsFromSet(JobSchedulerService.PausedJobsSetName)
                 .Contains(filterContext.Connection.RecurringJobId(filterContext.BackgroundJob.Id));
 
         public void OnPerformed(PerformedContext filterContext) { }

@@ -7,9 +7,6 @@ param(
     $dxVersion="20.2.4.0"
 )
 
-
-
-
 New-Item $nugetBin -ItemType Directory -Force | Out-Null
 Get-ChildItem $nugetBin | Remove-Item -Force -Recurse
 $toolPackages = @("Xpand.VersionConverter", "Xpand.XAF.ModelEditor")
@@ -49,7 +46,7 @@ $packScript = {
 }
 $varsToImport = @("assemblyVersions", "SkipReadMe", "nugetPath", "sourceDir", "nugetBin", "SkipReadMe")
 # $nuspecs | Invoke-Parallel -VariablesToImport $varsToImport -Script $packScript
-$nuspecs|where{$_.BaseName -eq "Xpand.TestsLib.Blazor"} | ForEach-Object { Invoke-Command $packScript -ArgumentList $_ }
+$nuspecs| ForEach-Object { Invoke-Command $packScript -ArgumentList $_ }
 function AddReadMe {
     param(
         $Package,

@@ -36,7 +36,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
-    public static class JobService {
+    public static class JobSchedulerService {
         public const string PausedJobsSetName = "paused-jobs";
         public static SimpleAction TriggerJob(this (JobSchedulerModule, Frame frame) tuple) 
             => tuple.frame.Action(nameof(TriggerJob)).As<SimpleAction>();
@@ -68,7 +68,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
                     action.SelectionDependencyType = SelectionDependencyType.RequireMultipleObjects;
                     action.Caption = action.Caption.Replace("Job", "").Trim();
                 })
-                .WhenExecute()
+                .WhenExecuted()
                 .SelectMany(args => {
                     var serviceProvider = args.Action.Application.ToBlazor().ServiceProvider;
                     var uri = $"{new Uri($"{serviceProvider.GetService<IHttpContextAccessor>()?.HttpContext.Request.GetDisplayUrl()}").GetLeftPart(UriPartial.Authority)}/hangfire/jobs/details/";
@@ -163,7 +163,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
 
         private static IObservable<Unit> DeleteJobs(this XafApplication application) 
             => application.DeletedObjects<Job>()
-                .SelectMany(t => t.objects.Cast<Job>().Do(job => RecurringJob.RemoveIfExists(job.Id)))
+                .SelectMany(t => t.objects.Do(job => RecurringJob.RemoveIfExists(job.Id)))
                 .TraceJobSchedulerModule().ToUnit();
 
         static readonly ISubject<JobState> JobStateSubject=Subject.Synchronize(new Subject<JobState>());

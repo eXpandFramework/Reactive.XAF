@@ -45,9 +45,9 @@
     </dependencies>
   </metadata>
   <files>
+    <file src="netcoreapp3.1\Xpand.TestsLib.dll" target="lib\netcoreapp3.1\Xpand.TestsLib.dll" />
     <file src="netcoreapp3.1\Xpand.TestsLib.pdb" target="lib\netcoreapp3.1\Xpand.TestsLib.pdb" />
     <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.TestsLib.targets" />
     <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
-    <file src="netcoreapp3.1\Xpand.TestsLib.dll" target="lib\netcoreapp3.1\Xpand.TestsLib.dll" />
   </files>
 </package>

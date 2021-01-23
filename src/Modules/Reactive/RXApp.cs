@@ -36,9 +36,7 @@ namespace Xpand.XAF.Modules.Reactive{
         static readonly Subject<ApplicationModulesManager> ApplicationModulesManagerSubject=new Subject<ApplicationModulesManager>();
         static readonly Subject<Frame> FramesSubject=new Subject<Frame>();
 
-        static RxApp() {
-            AppDomain.CurrentDomain.Patch(PatchXafApplication);
-        }
+        static RxApp() => AppDomain.CurrentDomain.Patch(PatchXafApplication);
 
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         static void CreateModuleManager(ApplicationModulesManager __result) => ApplicationModulesManagerSubject.OnNext(__result);

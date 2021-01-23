@@ -60,31 +60,28 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => !objectSpace.IsNewObject(t)&&!objectSpace.IsDeletedObject(t);
 
         [PublicAPI]
-        public static IObservable<(IObjectSpace objectSpace, object[] objects)> WhenDeletedObjects<T>(this IObjectSpace objectSpace,bool emitAfterCommit=false) 
-            => emitAfterCommit ? objectSpace.WhenCommiting( ObjectModification.Deleted,true,typeof(T))
+        public static IObservable<(IObjectSpace objectSpace, T[] objects)> WhenDeletedObjects<T>(this IObjectSpace objectSpace,bool emitAfterCommit=false) 
+            => emitAfterCommit ?  objectSpace.WhenCommiting( ObjectModification.Deleted,true,typeof(T)).Select(t => (t.objectSpace,t.objects.Cast<T>().ToArray()))
                 : objectSpace.WhenObjectDeleted()
-                    .Select(pattern => (pattern.objectSpace,pattern.e.Objects.Cast<object>().ToArray()))
+                    .Select(pattern => (pattern.objectSpace,pattern.e.Objects.OfType<T>().ToArray()))
                     .TakeUntil(objectSpace.WhenDisposed());
 
 
         [PublicAPI]
-        public static IEnumerable<object> ModifiedObjects(this IObjectSpace objectSpace,
-            ObjectModification objectModification)
-            => objectSpace.ModifiedObjects.Cast<object>().Where(_ => {
-                return objectModification switch{
-                    ObjectModification.Deleted => objectSpace.IsDeletedObject(_),
-                    ObjectModification.New => objectSpace.IsNewObject(_),
-                    ObjectModification.Updated => objectSpace.IsUpdated(_),
-                    ObjectModification.NewOrDeleted => objectSpace.IsNewObject(_) || objectSpace.IsDeletedObject(_),
-                    ObjectModification.NewOrUpdated => objectSpace.IsNewObject(_) || objectSpace.IsUpdated(_),
-                    ObjectModification.DeletedOrUpdated => objectSpace.IsUpdated(_) || objectSpace.IsDeletedObject(_),
-                    _ => true
-                };
+        public static IEnumerable<object> ModifiedObjects(this IObjectSpace objectSpace, ObjectModification objectModification)
+            => objectSpace.ModifiedObjects.Cast<object>().Where(_ => objectModification switch{
+                ObjectModification.Deleted => objectSpace.IsDeletedObject(_),
+                ObjectModification.New => objectSpace.IsNewObject(_),
+                ObjectModification.Updated => objectSpace.IsUpdated(_),
+                ObjectModification.NewOrDeleted => objectSpace.IsNewObject(_) || objectSpace.IsDeletedObject(_),
+                ObjectModification.NewOrUpdated => objectSpace.IsNewObject(_) || objectSpace.IsUpdated(_),
+                ObjectModification.DeletedOrUpdated => objectSpace.IsUpdated(_) || objectSpace.IsDeletedObject(_),
+                _ => true
             });
 
         [PublicAPI]
         public static IEnumerable<T> ModifiedObjects<T>(this IObjectSpace objectSpace, ObjectModification objectModification) 
-            => objectSpace.ModifiedObjects(objectModification).Cast<T>();
+            => objectSpace.ModifiedObjects(objectModification).OfType<T>();
 
         [PublicAPI]
         public static IObservable<T> ModifiedExistingObject<T>(this XafApplication application,
@@ -99,7 +96,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return application.AllModifiedObjects<T>(_ => filter(_) && _.objectSpace.IsNewObject(_.e.Object));
         }
 
-        public static IObservable<(IObjectSpace objectSpace, object[] objects)> DeletedObjects<T>(this XafApplication application) 
+        public static IObservable<(IObjectSpace objectSpace, T[] objects)> DeletedObjects<T>(this XafApplication application) 
             => application.WhenObjectSpaceCreated().SelectMany(t => t.e.ObjectSpace.WhenDeletedObjects<T>());
 
         public static IObservable<T> AllModifiedObjects<T>(this XafApplication application,Func<(IObjectSpace objectSpace,ObjectChangedEventArgs e),bool> filter=null ) 

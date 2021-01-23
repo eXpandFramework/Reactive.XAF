@@ -112,7 +112,7 @@ To schedule a new Job follow the next steps:
    ```
 6. Observe job state.
    ```cs
-    Xpand.XAF.Modules.JobScheduler.Hangfire.JobService.JobState.Subscribe(state => {
+    Xpand.XAF.Modules.JobScheduler.Hangfire.JobSchedulerService.JobState.Subscribe(state => {
         var job = state.JobWorker.Job;
     });
    ```

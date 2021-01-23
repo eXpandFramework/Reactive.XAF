@@ -13,10 +13,8 @@ using JetBrains.Annotations;
 using Xpand.XAF.Modules.Blazor.Editors.DisplayText;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
-using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
-    [UsedImplicitly]
     public sealed class JobSchedulerModule : ReactiveModuleBase {
 
         static JobSchedulerModule() => TraceSource=new ReactiveTraceSource(nameof(JobSchedulerModule));

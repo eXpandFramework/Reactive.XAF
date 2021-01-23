@@ -19,8 +19,8 @@ using Xpand.XAF.Persistent.BaseImpl;
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
     [DefaultProperty(nameof(Id))]
     [DefaultClassOptions][NavigationItem("JobScheduler")]
-    [Appearance("PauseAction",AppearanceItemType.Action, nameof(IsPaused)+"=1",Visibility = ViewItemVisibility.Hide,TargetItems = nameof(JobService.PauseJob))]
-    [Appearance("ResumeAction",AppearanceItemType.Action, nameof(IsPaused)+"=0",Visibility = ViewItemVisibility.Hide,TargetItems = nameof(JobService.ResumeJob))]
+    [Appearance("PauseAction",AppearanceItemType.Action, nameof(IsPaused)+"=1",Visibility = ViewItemVisibility.Hide,TargetItems = nameof(JobSchedulerService.PauseJob))]
+    [Appearance("ResumeAction",AppearanceItemType.Action, nameof(IsPaused)+"=0",Visibility = ViewItemVisibility.Hide,TargetItems = nameof(JobSchedulerService.ResumeJob))]
     public class  Job:CustomBaseObject {
         public Job(Session session) : base(session) {
         }
@@ -40,7 +40,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
         }
 
         [InvisibleInAllViews]
-        public bool IsPaused => JobStorage.Current.GetConnection().GetAllItemsFromSet(JobService.PausedJobsSetName).Contains(Id);
+        public bool IsPaused => JobStorage.Current.GetConnection().GetAllItemsFromSet(JobSchedulerService.PausedJobsSetName).Contains(Id);
 
         ObjectString _jobMethod;
         [ValueConverter(typeof(ObjectStringValueConverter))]

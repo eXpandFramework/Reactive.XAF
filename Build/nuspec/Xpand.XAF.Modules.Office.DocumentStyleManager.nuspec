@@ -37,9 +37,9 @@
     </dependencies>
   </metadata>
   <files>
+    <file src="net461\Xpand.XAF.Modules.Office.DocumentStyleManager.dll" target="lib\net461\Xpand.XAF.Modules.Office.DocumentStyleManager.dll" />
     <file src="net461\Xpand.XAF.Modules.Office.DocumentStyleManager.pdb" target="lib\net461\Xpand.XAF.Modules.Office.DocumentStyleManager.pdb" />
     <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.XAF.Modules.Office.DocumentStyleManager.targets" />
     <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
-    <file src="net461\Xpand.XAF.Modules.Office.DocumentStyleManager.dll" target="lib\net461\Xpand.XAF.Modules.Office.DocumentStyleManager.dll" />
   </files>
 </package>

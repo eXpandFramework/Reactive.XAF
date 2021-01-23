@@ -41,9 +41,9 @@
     </dependencies>
   </metadata>
   <files>
+    <file src="Xpand.TestsLib.Common.dll" target="lib\netstandard2.0\Xpand.TestsLib.Common.dll" />
     <file src="Xpand.TestsLib.Common.pdb" target="lib\netstandard2.0\Xpand.TestsLib.Common.pdb" />
     <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.TestsLib.Common.targets" />
     <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
-    <file src="Xpand.TestsLib.Common.dll" target="lib\netstandard2.0\Xpand.TestsLib.Common.dll" />
   </files>
 </package>

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Actions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ActionExtensions;
@@ -19,7 +20,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services{
         internal static IObservable<Unit> DocumentStyleLinkTemplate(this ApplicationModulesManager manager) =>
             new[]{typeof(ApplyTemplateStyle), typeof(BusinessObjects.DocumentStyleManager)}.ToObservable()
                 .SelectMany(type => manager.WhenApplication(application => application.WhenViewOnFrame(type, ViewType.DetailView)
-	                .Select(frame => frame.Action("OpenObject")).WhenNotDefault().WhenExecuted()
+	                .Select(frame => frame.Action("OpenObject")).WhenNotDefault().Cast<SimpleAction>().WhenExecuted()
 	                .SelectMany(_ => {
 		                var detailView = _.Action.View<DetailView>();
 		                var document = (detailView.ObjectTypeInfo.Type == typeof(ApplyTemplateStyle)

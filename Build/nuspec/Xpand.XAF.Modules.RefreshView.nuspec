@@ -28,9 +28,9 @@
     </dependencies>
   </metadata>
   <files>
+    <file src="Xpand.XAF.Modules.RefreshView.dll" target="lib\netstandard2.0\Xpand.XAF.Modules.RefreshView.dll" />
     <file src="Xpand.XAF.Modules.RefreshView.pdb" target="lib\netstandard2.0\Xpand.XAF.Modules.RefreshView.pdb" />
     <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.XAF.Modules.RefreshView.targets" />
     <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
-    <file src="Xpand.XAF.Modules.RefreshView.dll" target="lib\netstandard2.0\Xpand.XAF.Modules.RefreshView.dll" />
   </files>
 </package>

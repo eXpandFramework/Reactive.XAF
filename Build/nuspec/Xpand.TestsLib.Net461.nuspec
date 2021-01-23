@@ -42,9 +42,9 @@
     </dependencies>
   </metadata>
   <files>
+    <file src="net461\Xpand.TestsLib.Net461.dll" target="lib\net461\Xpand.TestsLib.Net461.dll" />
     <file src="net461\Xpand.TestsLib.Net461.pdb" target="lib\net461\Xpand.TestsLib.Net461.pdb" />
     <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.TestsLib.Net461.targets" />
     <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
-    <file src="net461\Xpand.TestsLib.Net461.dll" target="lib\net461\Xpand.TestsLib.Net461.dll" />
   </files>
 </package>

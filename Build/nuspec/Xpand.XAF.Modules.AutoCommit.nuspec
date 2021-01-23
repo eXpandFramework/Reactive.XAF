@@ -30,9 +30,9 @@
     </dependencies>
   </metadata>
   <files>
+    <file src="Xpand.XAF.Modules.AutoCommit.dll" target="lib\netstandard2.0\Xpand.XAF.Modules.AutoCommit.dll" />
     <file src="Xpand.XAF.Modules.AutoCommit.pdb" target="lib\netstandard2.0\Xpand.XAF.Modules.AutoCommit.pdb" />
     <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.XAF.Modules.AutoCommit.targets" />
     <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
-    <file src="Xpand.XAF.Modules.AutoCommit.dll" target="lib\netstandard2.0\Xpand.XAF.Modules.AutoCommit.dll" />
   </files>
 </package>

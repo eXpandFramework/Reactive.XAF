@@ -30,9 +30,9 @@
     </dependencies>
   </metadata>
   <files>
+    <file src="Xpand.XAF.Modules.PositionInListView.dll" target="lib\netstandard2.0\Xpand.XAF.Modules.PositionInListView.dll" />
     <file src="Xpand.XAF.Modules.PositionInListView.pdb" target="lib\netstandard2.0\Xpand.XAF.Modules.PositionInListView.pdb" />
     <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.XAF.Modules.PositionInListView.targets" />
     <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
-    <file src="Xpand.XAF.Modules.PositionInListView.dll" target="lib\netstandard2.0\Xpand.XAF.Modules.PositionInListView.dll" />
   </files>
 </package>

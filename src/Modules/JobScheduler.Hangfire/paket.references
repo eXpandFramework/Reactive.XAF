@@ -11,3 +11,4 @@ System.CodeDom
 Hangfire.AspNetCore
 Microsoft.AspNetCore.Hosting.Abstractions
 Microsoft.Extensions.DependencyInjection.Abstractions
+Xpand.Patcher

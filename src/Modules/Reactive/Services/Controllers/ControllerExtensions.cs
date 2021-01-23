@@ -66,7 +66,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
                 : Observable.FromEventPattern<EventHandler, EventArgs>(
                         handler => controller.Activated += handler,
                         handler => controller.Activated -= handler, ImmediateScheduler.Instance)
-                    .Select(pattern => controller));
+                    .Select(pattern => controller))
+                .TraceRX(controller => controller.Name);
 
         public static IObservable<T> WhenDeactivated<T>(this T controller) where T : Controller =>
             Observable.FromEventPattern<EventHandler, EventArgs>(

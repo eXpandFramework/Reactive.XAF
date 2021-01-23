@@ -348,15 +348,17 @@ namespace Xpand.TestsLib.Common{
             editorsFactoryMock.Setup(_ => _.CreateDetailViewEditor(It.IsAny<bool>(), It.IsAny<IModelViewItem>(), It.IsAny<Type>(), It.IsAny<XafApplication>(), It.IsAny<IObjectSpace>()))
                 .Returns((bool needProtectedContent, IModelViewItem modelViewItem, Type objectType, XafApplication app, IObjectSpace objectSpace) 
                     => new EditorsFactory().CreateDetailViewEditor(needProtectedContent, modelViewItem, objectType, application, objectSpace));
+            
+            editorsFactoryMock.Setup(_ => _.CreateDetailViewEditor(It.IsAny<bool>(), It.IsAny<IModelMemberViewItem>(), It.IsAny<Type>(), It.IsAny<XafApplication>(), It.IsAny<IObjectSpace>()))
+                .Returns((bool needProtectedContent, IModelMemberViewItem modelViewItem, Type objectType, XafApplication app, IObjectSpace objectSpace) 
+                    => new EditorsFactory().CreateDetailViewEditor(needProtectedContent, modelViewItem, objectType, application, objectSpace));
             editorsFactoryMock.Setup(_ => _.CreatePropertyEditorByType(It.IsAny<Type>(),It.IsAny<IModelMemberViewItem>(),It.IsAny<Type>(),It.IsAny<XafApplication>(),It.IsAny<IObjectSpace>()))
                 .Returns((Type editorType, IModelMemberViewItem modelViewItem, Type objectType, XafApplication xafApplication, IObjectSpace objectSpace)
                     =>new EditorsFactory().CreatePropertyEditorByType(editorType, modelViewItem, objectType, xafApplication, objectSpace));
         }
 
 
-        public static Mock<ListEditor> ListEditorMock(this XafApplication application, IModelListView listView){
-	        return application.ListEditorMock<ListEditor>(listView);
-        }
+        public static Mock<ListEditor> ListEditorMock(this XafApplication application, IModelListView listView) => application.ListEditorMock<ListEditor>(listView);
 
         public static Mock<TEditor> ListEditorMock<TEditor>(this XafApplication application ,IModelListView listView) where TEditor :  ListEditor{
 	        var listEditorMock = new Mock<TEditor>(listView){CallBase = true};

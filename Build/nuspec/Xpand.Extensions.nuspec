@@ -26,9 +26,9 @@
     </dependencies>
   </metadata>
   <files>
+    <file src="Xpand.Extensions.dll" target="lib\netstandard2.0\Xpand.Extensions.dll" />
     <file src="Xpand.Extensions.pdb" target="lib\netstandard2.0\Xpand.Extensions.pdb" />
     <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.Extensions.targets" />
     <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
-    <file src="Xpand.Extensions.dll" target="lib\netstandard2.0\Xpand.Extensions.dll" />
   </files>
 </package>

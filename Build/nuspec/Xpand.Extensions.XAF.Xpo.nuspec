@@ -27,9 +27,9 @@
     </dependencies>
   </metadata>
   <files>
+    <file src="Xpand.Extensions.XAF.Xpo.dll" target="lib\netstandard2.0\Xpand.Extensions.XAF.Xpo.dll" />
     <file src="Xpand.Extensions.XAF.Xpo.pdb" target="lib\netstandard2.0\Xpand.Extensions.XAF.Xpo.pdb" />
     <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.Extensions.XAF.Xpo.targets" />
     <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
-    <file src="Xpand.Extensions.XAF.Xpo.dll" target="lib\netstandard2.0\Xpand.Extensions.XAF.Xpo.dll" />
   </files>
 </package>

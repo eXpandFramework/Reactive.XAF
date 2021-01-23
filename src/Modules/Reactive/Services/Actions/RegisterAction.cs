@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
 using System.Reflection.Emit;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
+using DevExpress.ExpressApp.Core;
+using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using HarmonyLib;
 using JetBrains.Annotations;
@@ -19,8 +22,15 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 	        ControllerCtorState = new ConcurrentDictionary<Type, (string id, Func<(Controller controller, string id), ActionBase> actionBase)>();
 	        var dynamicAssembly = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("ActionsAssembly"),AssemblyBuilderAccess.Run);
             ActionsModule = dynamicAssembly.DefineDynamicModule("ActionsModule");
+            // AppDomain.CurrentDomain.Patch(harmony => {
+            //     var original = typeof(Controller).Method(nameof(SetInfo));
+            //     harmony.Patch(original, postfix: new HarmonyMethod(typeof(ActionsService), nameof(SetInfo)));
+            // });
         }
-        
+
+        public static void SetInfo(Controller destController, IModelApplication modelApplication) {
+
+        }
         private static ModuleBuilder ActionsModule{ get; }
 
         public static IObservable<TAction> RegisterMainWindowAction<TAction>(this ApplicationModulesManager applicationModulesManager, string id,
@@ -147,12 +157,25 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 		        ControllerCtorState
                     .AddOrUpdate(controllerType, type1 => (id, _ => actionBase(((TController) _.controller, _.id))),(type1, tuple) => tuple);
             }
-	        var controller = (TController) Controller.Create(controllerType);
-	        applicationModulesManager.ControllersManager.RegisterController(controller);
-	        return _actionsSubject.Select(a => a).OfType<TAction>().Where(_ => _.Id == id);
+
+            // var registerAction = _actionsSubject.Select(a => a).OfType<TAction>().FirstAsync(_ => _.Id == id).Replay(1);
+            // registerAction.Connect();
+            // applicationModulesManager.Application().CreateController<TController>()
+            var controller = (TController) Controller.Create(controllerType);
+            applicationModulesManager.ControllersManager.RegisterController(controller);
+            return ((IActionController) controller).WhenCloned
+                .SelectMany(viewController => viewController.Actions).Cast<TAction>()
+                .StartWith(controller.Actions.Cast<TAction>())
+                // .Merge(controller.WhenClone().SelectMany(controller=>c.Actions))
+                ;
         }
 
-        static ISubject<ActionBase> _actionsSubject=Subject.Synchronize(new ReplaySubject<ActionBase>());
+        public static IObservable<ActionBase> WhenActionAdded(this ActionList actionList)
+            => Observable.FromEventPattern<EventHandler<ActionManipulationEventArgs>, ActionManipulationEventArgs>(
+                h => actionList.ActionAdded += h, h => actionList.ActionAdded -= h, ImmediateScheduler.Instance)
+                .Select(p => p.EventArgs.Action);
+
+        static Subject<ActionBase> _actionsSubject=new Subject<ActionBase>();
 
         private static Type NewControllerType<T>(string id) where T:Controller{
             var baseController = GetBaseController<T>();
@@ -172,22 +195,39 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         private static Type GetBaseController<T>() where T : Controller 
 	        => typeof(T) == typeof(ViewController) ? typeof(ActionViewController) : typeof(ActionWindowController);
 
-        internal static void Notify(this Controller controller){
+        internal static void NewAction(this Controller controller){
 	        var tuple = ControllerCtorState[controller.GetType()];
-	        var actionBase = tuple.actionBase((controller, tuple.id));
-	        _actionsSubject.OnNext(actionBase);
+	        tuple.actionBase((controller, tuple.id));
+        }
+    }
+
+    public abstract class ActionWindowController:WindowController,IActionController{
+	    protected ActionWindowController() => this.NewAction();
+        readonly Subject<Controller> _clonedSubject=new Subject<Controller>();
+        public IObservable<Controller> WhenCloned => _clonedSubject.AsObservable();
+        public override Controller Clone(IModelApplication modelApplication) {
+            var controller = base.Clone(modelApplication);
+            _clonedSubject.OnNext(this);
+            return controller;
+        }
+    }
+
+    public interface IActionController {
+        IObservable<Controller> WhenCloned { get; }
+    }
+
+    public abstract class ActionViewController:ViewController, IActionController {
+        protected ActionViewController() => this.NewAction();
+        readonly Subject<ActionViewController> _clonedSubject=new Subject<ActionViewController>();
+        public IObservable<Controller> WhenCloned => _clonedSubject.AsObservable();
+        protected override void OnActivated() {
+            base.OnActivated();
         }
 
-    }
-
-    public abstract class ActionWindowController:WindowController{
-	    protected ActionWindowController(){
-		    this.Notify();
-	    }
-    }
-    public abstract class ActionViewController:ViewController{
-	    protected ActionViewController(){
-		    this.Notify();
-	    }
+        public override Controller Clone(IModelApplication modelApplication) {
+            var controller = base.Clone(modelApplication);
+            _clonedSubject.OnNext((ActionViewController) controller);
+            return controller;
+        }
     }
 }

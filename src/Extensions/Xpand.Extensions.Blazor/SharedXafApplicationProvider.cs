@@ -8,6 +8,10 @@ namespace Xpand.Extensions.Blazor {
     public interface ISharedXafApplicationProvider {
         BlazorApplication Application { get; }
     }
+    public interface ISharedBlazorApplication {
+        bool UseNonSecuredObjectSpaceProvider { get; set; }
+    }
+
     public class SharedXafApplicationProvider : ISharedXafApplicationProvider {
         
         private readonly Lazy<BlazorApplication> _sharedApplication;
@@ -34,7 +38,14 @@ namespace Xpand.Extensions.Blazor {
             var applicationFactory = serviceScope.ServiceProvider.GetService<IXafApplicationFactory>();
             if (applicationFactory != null) {
                 var blazorApplication = applicationFactory.CreateApplication();
+                if (!(blazorApplication is ISharedBlazorApplication)) {
+                    throw new NotImplementedException(
+                        $"Please implement {typeof(ISharedBlazorApplication)} in your {blazorApplication.GetType().FullName} and use a NonSecuredObjectSpaceProvider when is false.");
+                }
+
                 blazorApplication.ServiceProvider = _serviceProvider;
+                ((ISharedBlazorApplication) blazorApplication).UseNonSecuredObjectSpaceProvider = true;
+                blazorApplication.Security = null;
                 blazorApplication.Setup();
                 return blazorApplication;
             }

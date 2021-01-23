@@ -8,12 +8,12 @@ using DevExpress.ExpressApp.Xpo;
 using TestApplication.Blazor.Server.Services;
 using TestApplication.Module.Blazor;
 using TestApplication.Module.Common;
+using Xpand.Extensions.Blazor;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace TestApplication.Blazor.Server {
-    public class ServerBlazorApplication : BlazorApplication {
-        
 
+    public class ServerBlazorApplication : BlazorApplication,ISharedBlazorApplication {
         public ServerBlazorApplication(){
             Modules.Add(new TestBlazorModule());
             this.AlwaysUpdateOnDatabaseVersionMismatch().Subscribe();
@@ -28,9 +28,7 @@ namespace TestApplication.Blazor.Server {
 
         protected override void CreateDefaultObjectSpaceProvider(CreateCustomObjectSpaceProviderEventArgs args) {
             var dataStoreProvider = GetDataStoreProvider(args.ConnectionString, args.Connection);
-            args.ObjectSpaceProviders.Add(Security != null
-                ? new SecuredObjectSpaceProvider((ISelectDataSecurityProvider) Security, dataStoreProvider, true)
-                : new XPObjectSpaceProvider(dataStoreProvider, true));
+            args.ObjectSpaceProviders.Add(new XPObjectSpaceProvider(dataStoreProvider, true));
             args.ObjectSpaceProviders.Add(new NonPersistentObjectSpaceProvider(TypesInfo, null));
         }
 
@@ -41,5 +39,7 @@ namespace TestApplication.Blazor.Server {
             }
             return accessor.DataStoreProvider;
         }
+
+        public bool UseNonSecuredObjectSpaceProvider { get; set; }
     }
 }

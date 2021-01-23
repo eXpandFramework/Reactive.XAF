@@ -30,9 +30,9 @@
     </dependencies>
   </metadata>
   <files>
+    <file src="net461\Xpand.XAF.Modules.Reactive.Logger.Client.Win.exe" target="lib\net461\Xpand.XAF.Modules.Reactive.Logger.Client.Win.exe" />
     <file src="net461\Xpand.XAF.Modules.Reactive.Logger.Client.Win.pdb" target="lib\net461\Xpand.XAF.Modules.Reactive.Logger.Client.Win.pdb" />
     <file src="..\..\build\Targets\CopySymbols.targets" target="build\Xpand.XAF.Modules.Reactive.Logger.Client.Win.targets" />
     <file src="..\..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
-    <file src="net461\Xpand.XAF.Modules.Reactive.Logger.Client.Win.exe" target="lib\net461\Xpand.XAF.Modules.Reactive.Logger.Client.Win.exe" />
   </files>
 </package>

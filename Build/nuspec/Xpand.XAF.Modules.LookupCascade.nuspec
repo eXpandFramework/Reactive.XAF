@@ -31,9 +31,9 @@
     </dependencies>
   </metadata>
   <files>
+    <file src="net461\Xpand.XAF.Modules.LookupCascade.dll" target="lib\net461\Xpand.XAF.Modules.LookupCascade.dll" />
     <file src="net461\Xpand.XAF.Modules.LookupCascade.pdb" target="lib\net461\Xpand.XAF.Modules.LookupCascade.pdb" />
     <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.XAF.Modules.LookupCascade.targets" />
     <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
-    <file src="net461\Xpand.XAF.Modules.LookupCascade.dll" target="lib\net461\Xpand.XAF.Modules.LookupCascade.dll" />
   </files>
 </package>

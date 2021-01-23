@@ -33,7 +33,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
             testJobType ??= typeof(TestJobDI);
             testName ??= nameof(TestJob.Test);
 
-            return JobService.CustomJobSchedule.ScheduleImmediate(testJobType.CallExpression(testName));
+            return JobSchedulerService.CustomJobSchedule.ScheduleImmediate(testJobType.CallExpression(testName));
         }
     }
 }

@@ -31,7 +31,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
             
             var scheduledJob = objectSpace.CreateObject<Job>();
             scheduledJob.Id = "test";
-            var testObserver = JobService.CustomJobSchedule.Handle().SelectMany(args => args.Instance).Test();
+            var testObserver = JobSchedulerService.CustomJobSchedule.Handle().SelectMany(args => args.Instance).Test();
             objectSpace.CommitChanges();
             
             testObserver.ItemCount.ShouldBe(1);                           

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
@@ -22,28 +23,29 @@ using Xpand.XAF.Modules.Reactive.Tests.BOModel;
 namespace Xpand.XAF.Modules.Reactive.Tests{
     public class ActionRegistrationTests:ReactiveCommonTest{
         [TestCase(1)]
-        [TestCase(1)]
-        [TestCase(1)]
-        [TestCase(1)]
-        [TestCase(1)]
-        [TestCase(1)]
-        [TestCase(1)]
-        [TestCase(1)]
-        [TestCase(1)]
-        [TestCase(1)]
-        [TestCase(1)]
-        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(3)]
+        [TestCase(4)]
+        [TestCase(5)]
+        [TestCase(6)]
+        [TestCase(7)]
+        [TestCase(8)]
+        [TestCase(9)]
+        [TestCase(10)]
+        [TestCase(11)]
+        [TestCase(12)]
         [Parallelizable(ParallelScope.Children)]
-        public void RegisterAction_In_Parallel(int i) {
+        public async Task RegisterAction_In_Parallel(int i) {
             var applicationModulesManager = new ApplicationModulesManager(new ControllersManager(), "");
-            var testObserver = applicationModulesManager.RegisterViewSimpleAction("test").FirstAsync().Test();
+            var id = $"test{i}";
+            var simpleAction = await applicationModulesManager.RegisterViewSimpleAction(id).FirstAsync();
 
-            testObserver.ItemCount.ShouldBe(i);
+            simpleAction.Id.ShouldBe(id);
         }
 
         [XpandTest()]
-        [TestCase(ViewType.DetailView,3)]
-        [TestCase(ViewType.ListView,4)]
+        [TestCase(ViewType.DetailView,4)]
+        [TestCase(ViewType.ListView,5)]
         public void Register_SimpleAction_For_All_Views(ViewType viewType,int expected){
 	        using var application = Platform.Win.NewApplication<ReactiveModule>();
 	        var testObserver = application.WhenApplicationModulesManager()
@@ -63,8 +65,8 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             
         }
 
-        private Action<T> Configure<T>(ViewType viewType,string caption) where T:ActionBase{
-            return action => {
+        private Action<T> Configure<T>(ViewType viewType,string caption) where T:ActionBase 
+            => action => {
                 action.TargetViewType = viewType;
                 action.Caption = caption;
                 action.TargetObjectType = typeof(NonPersistentObject);
@@ -72,7 +74,6 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
                     singleChoiceAction.Items.Add(new ChoiceActionItem("test", null));
                 }
             };
-        }
 
         [XpandTest()][Test]
         public void Register_SimpleAction_For_Windows(){

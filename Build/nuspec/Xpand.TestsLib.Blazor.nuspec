@@ -45,9 +45,9 @@
     </dependencies>
   </metadata>
   <files>
+    <file src="netcoreapp3.1\Xpand.TestsLib.Blazor.dll" target="lib\netcoreapp3.1\Xpand.TestsLib.Blazor.dll" />
     <file src="netcoreapp3.1\Xpand.TestsLib.Blazor.pdb" target="lib\netcoreapp3.1\Xpand.TestsLib.Blazor.pdb" />
     <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.TestsLib.Blazor.targets" />
     <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
-    <file src="netcoreapp3.1\Xpand.TestsLib.Blazor.dll" target="lib\netcoreapp3.1\Xpand.TestsLib.Blazor.dll" />
   </files>
 </package>

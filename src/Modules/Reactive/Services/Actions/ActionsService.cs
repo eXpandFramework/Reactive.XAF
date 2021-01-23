@@ -148,8 +148,15 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 		        .Select(pattern => pattern.EventArgs);
         public static IObservable<ActionBaseEventArgs> WhenExecuteCompleted<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
             => source.SelectMany(a=>a.WhenExecuteCompleted());
-        public static IObservable<ActionBaseEventArgs> WhenExecuted<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
-            => source.SelectMany(a=>a.WhenExecuted());
+
+        public static IObservable<SimpleActionExecuteEventArgs> WhenExecuted(this IObservable<SimpleAction> source) 
+            => source.SelectMany(a=>a.WhenExecuted()).Cast<SimpleActionExecuteEventArgs>();
+        
+        public static IObservable<SingleChoiceActionExecuteEventArgs> WhenExecuted(this IObservable<SingleChoiceAction> source) 
+            => source.SelectMany(a=>a.WhenExecuted()).Cast<SingleChoiceActionExecuteEventArgs>();
+        
+        public static IObservable<PopupWindowShowActionExecuteEventArgs> WhenExecuted(this IObservable<PopupWindowShowAction> source) 
+            => source.SelectMany(a=>a.WhenExecuted()).Cast<PopupWindowShowActionExecuteEventArgs>();
 
         public static IObservable<SimpleActionExecuteEventArgs> WhenExecuteCompleted(this SimpleAction action) 
             => Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(
@@ -188,8 +195,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static IObservable<Unit> WhenDisposing<TAction>(this TAction simpleAction) where TAction : ActionBase 
             => Disposing(simpleAction.ReturnObservable());
 
-        public static IObservable<TAction> WhenControllerActivated<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
-            => source.SelectMany(a =>a.Controller.WhenActivated().To(a) );
+        public static IObservable<TAction> WhenControllerActivated<TAction>(this IObservable<TAction> source,bool emitWhenActive=false) where TAction : ActionBase 
+            => source.SelectMany(a =>a.Controller.WhenActivated(emitWhenActive).To(a) );
 
         public static IObservable<TAction> WhenActive<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
             => source.Where(a => a.Active);
