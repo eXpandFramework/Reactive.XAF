@@ -22,10 +22,11 @@ if ($dxVersion -lt "20.2.0"){
 }
 $filteredProjects=Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notmatch $filter} 
 $filteredProjects+=Get-ChildItem "$root\src\" -Include "*Xpand.TestsLib*.csproj" -Recurse  |Where-Object{$dxVersion -gt "20.2.0" -or $_.BaseName -notmatch "Blazor"}
-$filteredProjects| Invoke-Parallel -StepInterval 200 -VariablesToImport @("allProjects", "root", "Release") -Script {
+$dxVersionBuild=Get-VersionPart $dxVersion Build
+# $filteredProjects| Invoke-Parallel -StepInterval 200 -VariablesToImport @("allProjects", "root", "Release","dxVersionBuild") -Script {
 
 # $filteredProjects|where{$_.BaseName -eq "Xpand.TestsLib.Blazor"}| foreach {
-# $filteredProjects| foreach {
+$filteredProjects| foreach {
     $addTargets = {
         param (
             $name   
@@ -109,15 +110,14 @@ $filteredProjects| Invoke-Parallel -StepInterval 200 -VariablesToImport @("allPr
     $nuspec.package.metaData.releaseNotes = "https://github.com/eXpandFramework/Reactive.XAF/releases"
     $nuspec.package.metaData.copyright = "eXpandFramework.com"
     $nameTag = $nuspec.package.metaData.id.Replace("Xpand.XAF.Modules.", "").Replace("Xpand.XAF.Extensions.", "")
-    $nuspec.package.metaData.tags = "DevExpress XAF modules, eXpandFramework, XAF, eXpressApp,  $nameTag"
+    $nuspec.package.metaData.tags = "DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, $nameTag, $dxVersionBuild"
     
     
     
     $ns = New-Object System.Xml.XmlNamespaceManager($nuspec.NameTable)
     $ns.AddNamespace("ns", $nuspec.DocumentElement.NamespaceURI)
     $nuspec.Save($NuspecFilename)
-    "3. $NuspecFilename"
-    Format-Xml -Path $nuspecFileName
+    
     if ($nuspec.package.metaData.id -like "Xpand.XAF*" -or $nuspec.package.metaData.id -like "Xpand.Extensions.XAF*") {
         
         $versionConverter = [PSCustomObject]@{

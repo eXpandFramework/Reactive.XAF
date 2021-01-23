@@ -35,11 +35,15 @@ function Resolve-Refs{
 function Get-UnPatchedPackages {
     param(
        $assemblyList,
-       $dxVersion
+       $dxVersion,
+       $targetFilter
     )
-    $unpatchedPackages=$assemblyList|Where-Object{$_.BaseName -match "Xpand.XAF|Xpand.Extensions"}|ForEach-Object{
-        if (!(Test-Path "$($_.DirectoryName)\VersionConverter.v.$dxVersion.DoNotDelete") -and ($_.Directory.Parent.Parent.Name)) {
-            $_.fullname
+    $unpatchedPackages=$assemblyList|Where-Object{$_.BaseName -match $targetFilter}|ForEach-Object{
+        $path="$($_.Directory.Parent.Parent.FullName)\$($_.BaseName).nuspec"
+        [xml]$nuspec=Get-Content $Path
+        $currentDxVersion=($nuspec.package.metadata.tags.Split(",")|select-object -last 1).Trim()
+        if ($currentDxVersion -ne $dxVersion){
+            $_
         }
     }
     Write-VerboseLog "unpatchedPackages:"
