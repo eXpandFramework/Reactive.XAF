@@ -5,12 +5,14 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using JetBrains.Annotations;
 using NUnit.Framework;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.StringExtensions;
+using Xpand.Extensions.Threading;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Logger;
@@ -132,6 +134,10 @@ namespace Xpand.TestsLib.Common{
             // XpoTypesInfoHelper.Reset();
         }
 
+        protected void Await(Func<Task> invoker) {
+            SingleThreadedSynchronizationContext.Await(invoker);
+        }
+
         private static string GetTestName() 
             => $"{TestContext.CurrentContext.Test.MethodName}{TestContext.CurrentContext.Test.Arguments.Select(o => $"{o}").Join("_")}";
 
@@ -145,4 +151,5 @@ namespace Xpand.TestsLib.Common{
                 return null;
             }).Join(Environment.NewLine).Trim();
     }
+
 }

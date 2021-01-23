@@ -7,6 +7,7 @@ using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
+using Xpand.TestsLib.Net461;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
     [NonParallelizable]

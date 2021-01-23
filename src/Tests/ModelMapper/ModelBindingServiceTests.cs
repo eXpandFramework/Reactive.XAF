@@ -282,9 +282,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                 }
             }
         }
-        [XpandTest(IgnoredXAFMinorVersions="20.2")]
+        [XpandTest()]
         [TestCase(nameof(Platform.Win))]
-        public async Task Bind_PropertyEditor_Control(string platformName){
+        public void Bind_PropertyEditor_Control(string platformName){
             var platform = GetPlatform(platformName);
             var maps = EnumsNET.Enums.GetValues<PredefinedMap>().Where(map => map.IsPropertyEditor() && map.Attribute<MapPlatformAttribute>().Platform == platform);
             foreach (var predefinedMap in maps){
@@ -319,7 +319,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                                 detailView.DelayedItemsInitialization = false;
                                 detailView.CreateControls();
 
-                                await controlBound.Take(1).WithTimeOut(TimeSpan.FromSeconds(10)); 
+                                Await(async () => await controlBound.Take(1).WithTimeOut(TimeSpan.FromSeconds(10)) );
                                 application.Dispose();
                             }
                             

@@ -81,7 +81,7 @@ namespace Xpand.XAF.Modules.OneView.Tests{
         [Test]
         [XpandTest]
         [Apartment(ApartmentState.STA)]
-        public async Task Edit_Model(){
+        public void Edit_Model(){
 	        using var application = OneViewModule().Application;
 	        var whenViewOneFrame=application.WhenViewOnFrame(typeof(OV))
 		        .SelectMany(frame => frame.Template.WhenWindowsForm().When("Shown").To(frame))
@@ -104,9 +104,11 @@ namespace Xpand.XAF.Modules.OneView.Tests{
 		        .FirstAsync().SubscribeReplay();
 	        testWinApplication.WhenWin().WhenCustomHandleException().Subscribe(args => { args.handledEventArgs.Handled = true; });
 	        testWinApplication.Start();
-	        await editModel;
-	        await showViewAfterModelEdit;
-	        await whenViewOneFrame;
+	        Await(async () => {
+                await editModel;
+                await showViewAfterModelEdit;
+                await whenViewOneFrame;
+            });
         }
 
         private static OneViewModule OneViewModule(Platform platform=Platform.Win){

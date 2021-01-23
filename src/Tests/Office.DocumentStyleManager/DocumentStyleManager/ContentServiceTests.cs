@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp.Win.Editors;
 using DevExpress.XtraRichEdit;
@@ -75,24 +74,29 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
             replacementStyles.All(style => style.DocumentStyleType == DocumentStyleType.Paragraph).ShouldBeTrue();
         }
 
-        [Test][Apartment(ApartmentState.STA)][XpandTest(IgnoredXAFMinorVersions = "20.2")]
-        public async Task Synchronize_styles_when_document_modified(){
-            using var application=DocumentStyleManagerModule().Application;
-            var serverObserver = application.WhenDetailViewCreated(typeof(BusinessObjects.DocumentStyleManager)).ToDetailView()
-                .SelectMany(detailView => detailView.AsDetailView().WhenRichEditDocumentServer<BusinessObjects.DocumentStyleManager>(manager => manager.Content)).Test();
+        [Test][Apartment(ApartmentState.STA)]
+        public void Synchronize_styles_when_document_modified(){
             
-            var tuple = application.SetDocumentStyleManagerDetailView(Document);
-            var richEditDocumentServer = serverObserver.Items.First();
+            Await(async () => {
+                using var application=DocumentStyleManagerModule().Application;
+                var serverObserver = application.WhenDetailViewCreated(typeof(BusinessObjects.DocumentStyleManager)).ToDetailView()
+                    .SelectMany(detailView => detailView.AsDetailView().WhenRichEditDocumentServer<BusinessObjects.DocumentStyleManager>(manager => manager.Content)).Test();
+            
+                var tuple = application.SetDocumentStyleManagerDetailView(Document);
+                var richEditDocumentServer = serverObserver.Items.First();
         
-            var style = richEditDocumentServer.Document.NewDocumentStyle(1,DocumentStyleType.Paragraph).First().ToDocumentStyle(Document);
+                var style = richEditDocumentServer.Document.NewDocumentStyle(1,DocumentStyleType.Paragraph).First().ToDocumentStyle(Document);
 
-            await Observable.While(() => !tuple.documentStyleManager.AllStyles.ToArray().Contains(style) ,
-                    Observable.Timer(TimeSpan.FromMilliseconds(200)))
-                .Timeout(TimeSpan.FromSeconds(10)).ToTaskWithoutConfigureAwait();
+                await Observable.While(() => !tuple.documentStyleManager.AllStyles.ToArray().Contains(style) ,
+                        Observable.Timer(TimeSpan.FromMilliseconds(200)))
+                    .Timeout(TimeSpan.FromSeconds(10)).ToTaskWithoutConfigureAwait();
             
-            application.Dispose();
+                application.Dispose();
+
+            });            
         }
 
 
     }
+
 }

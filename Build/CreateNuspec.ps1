@@ -22,10 +22,10 @@ if ($dxVersion -lt "20.2.0"){
 }
 $filteredProjects=Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notmatch $filter} 
 $filteredProjects+=Get-ChildItem "$root\src\" -Include "*Xpand.TestsLib*.csproj" -Recurse  |Where-Object{$dxVersion -gt "20.2.0" -or $_.BaseName -notmatch "Blazor"}
-# $filteredProjects| Invoke-Parallel -StepInterval 200 -VariablesToImport @("allProjects", "root", "Release") -Script {
+$filteredProjects| Invoke-Parallel -StepInterval 200 -VariablesToImport @("allProjects", "root", "Release") -Script {
 
 # $filteredProjects|where{$_.BaseName -eq "Xpand.TestsLib.Blazor"}| foreach {
-$filteredProjects| foreach {
+# $filteredProjects| foreach {
     $addTargets = {
         param (
             $name   
