@@ -8,10 +8,11 @@ using namespace Mono.Cecil
 using namespace Mono.Cecil.pdb
 param(
     [string]$projectFile ="C:\Work\eXpandFramework\expand\Demos\XVideoRental\XVideoRental.Module.Win\XVideoRental.Module.Win.csproj",
-    $DevExpressVersion,
     [string]$VerboseOutput = "Continue",
     [string]$referenceFilter,
-    [string]$targetFilter ="(?is)Xpand\.XAF|Xpand\.Extensions"
+    [string]$targetFilter ="(?is)Xpand\.XAF|Xpand\.Extensions",
+    [string]$DevExpressVersion,
+    [string]$targetPath="C:\Work\eXpandFramework\expand\Xpand.dll\"
 )
 $MSBuild=& "${env:ProgramFiles(x86)}\microsoft visual studio\installer\vswhere.exe" -latest -prerelease -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe
 Write-Verbose "MSBuild=$MSBuild" -Verbose
@@ -31,9 +32,14 @@ Write-VerboseLog "targetPath=$targetPath"
 Write-VerboseLog "DevExpressVersion=$DevExpressVersion"
 Write-VerboseLog "referenceFilter=$referenceFilter"
 Write-VerboseLog "targetFilter=$targetFilter"
-"aaaaaaaaaaaaaaaaaaaaa"
 $referenceAssemblies=Resolve-Refs $projectFile $targetFilter $referenceFilter
 $dxversion=($referenceAssemblies|Where-Object{$_.basename -match $referenceFilter}|Select-Object -First 1).Directory.Parent.Parent.Name
+[version]$v=$null
+
+if (!([version]::TryParse($dxversion,[ref]$v))){
+    $dxversion=GetDevExpressVersion $targetPath $referenceFilter $projectFile
+}
+
 Write-VerboseLog "DxVersion=$dxVersion"
 
 $unpatchedPackages = Get-UnPatchedPackages $referenceAssemblies $dxversion $targetFilter
