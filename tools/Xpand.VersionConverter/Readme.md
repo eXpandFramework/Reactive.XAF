@@ -34,7 +34,6 @@ The demo is about how to make `MyCompany.MyPackage` DevExpress version agnostic.
 
 
 1. `Xpand.VersionConverter` patch all Xpand assemblies found in your Nuget cache to match the DevExpress version of the current project. This patching occurs before the actual build.
-2. If the package fails to detect the DevExpress version due to for e.g to indirect references you can help it with the `DevExpressVersion` MSBuild property. 
 2. The patching requires locking so the the patched packages are flagged to avoid locks in subsequent builds. To remove the flags you can use the [Remove-VersionConverterFlags](https://github.com/eXpandFramework/XpandPwsh/wiki/Remove-VersionConverterFlags) XpandPwsh Cmdlet.
 3. To troubleshoot you can enable verbose logging you can set the Environmental `VersionConverterVerbose` to 1 and an extensions.log will be created in the package directory.
 4. `Xpand.Versionconverter` is already a dependency to all Xpand packages that use DevExpress assemblies in this repository.

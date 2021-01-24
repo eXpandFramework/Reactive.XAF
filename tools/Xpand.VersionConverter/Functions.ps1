@@ -1,5 +1,10 @@
 . "$PSScriptRoot\Common.ps1"
 function Resolve-Refs{
+    param(
+        $projectFile,
+        $targetFilter,
+        $referenceFilter
+    )
     $dirBuld="$((Get-Item $projectFile).DirectoryName)\Directory.build.targets"
     if (!(Test-Path $dirBuld)){
         $xml=@"
@@ -25,7 +30,16 @@ function Resolve-Refs{
         }
     }
 
-    $referenceAssemblies=(& "$msbuild\msbuild.exe" $projectFile "/t:PrintReferences" /nologo).Split(';')|Where-Object{$_ -and (Test-Path $_)}|Get-item
+    $referenceAssemblies=(& "$msbuild" $projectFile "/t:PrintReferences" /nologo).Split(';')|
+        Where-Object{
+            try {
+                Test-Path $_ 
+            }
+            catch {
+                
+            }
+        }|
+        Get-item
     if ($removeTargets){
         Remove-Item $dirBuld
     }

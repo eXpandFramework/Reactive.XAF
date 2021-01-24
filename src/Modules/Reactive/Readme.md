@@ -233,6 +233,12 @@ Below we will add interesting examples. All methods can live in a static class.
 
     ```
 
+#### YouTube
+
+[On .NET Live - Common usage patterns for Reactive Extensions](https://www.youtube.com/watch?v=U-vznhAzSCo&t=1336)
+
+An introduction to the .NET RX world for very starters. Note, that our packages operate a layer above what u will see in video with operators designed for XAF which hide all that boilerplate code presented there.
+
 ## Versioning
 The module is **not bound** to **DevExpress versioning**, which means you can use the latest version with your old DevExpress projects [Read more](https://github.com/eXpandFramework/XAF/tree/master/tools/Xpand.VersionConverter).
 

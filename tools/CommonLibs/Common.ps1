@@ -28,7 +28,7 @@ function Write-VerboseLog {
 
     process {
         if ($VerbosePreference -eq "continue") {
-            Write-Verbose $Message
+            Write-Verbose $Message -Verbose
             $fs=[System.IO.File]::Open("$PSScriptRoot\execution.log",[System.IO.FileMode]::OpenOrCreate,[System.IO.FileAccess]::ReadWrite,[System.IO.FileShare]::ReadWrite)
             $sw=[System.IO.StreamWriter]::new($fs)
             $sw.WriteLine($Message)

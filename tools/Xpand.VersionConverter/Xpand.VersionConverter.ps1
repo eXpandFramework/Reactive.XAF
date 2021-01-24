@@ -7,14 +7,14 @@ using namespace System.Text.RegularExpressions
 using namespace Mono.Cecil
 using namespace Mono.Cecil.pdb
 param(
-    [string]$projectFile ="C:\Work\eXpandFramework\DevExpress.XAF\src\Tests\EasyTests\TestApplication\TestApplication.Module\TestApplication.Module.csproj",
-    [string]$MSBuild="C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\",
+    [string]$projectFile ="C:\Work\eXpandFramework\expand\Demos\XVideoRental\XVideoRental.Module.Win\XVideoRental.Module.Win.csproj",
     $DevExpressVersion,
     [string]$VerboseOutput = "Continue",
     [string]$referenceFilter,
     [string]$targetFilter ="(?is)Xpand\.XAF|Xpand\.Extensions"
 )
-
+$MSBuild=& "${env:ProgramFiles(x86)}\microsoft visual studio\installer\vswhere.exe" -latest -prerelease -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe
+Write-Verbose "MSBuild=$MSBuild" -Verbose
 if (!$referenceFilter){
     $referenceFilter="DevExpress*"
 }
@@ -31,12 +31,8 @@ Write-VerboseLog "targetPath=$targetPath"
 Write-VerboseLog "DevExpressVersion=$DevExpressVersion"
 Write-VerboseLog "referenceFilter=$referenceFilter"
 Write-VerboseLog "targetFilter=$targetFilter"
-
-
-
-$packagesFolder = Get-PackagesFolder
-Write-VerboseLog "nugetPackageFoldersPath=$packagesFolder"
-$referenceAssemblies=Resolve-Refs
+"aaaaaaaaaaaaaaaaaaaaa"
+$referenceAssemblies=Resolve-Refs $projectFile $targetFilter $referenceFilter
 $dxversion=($referenceAssemblies|Where-Object{$_.basename -match $referenceFilter}|Select-Object -First 1).Directory.Parent.Parent.Name
 Write-VerboseLog "DxVersion=$dxVersion"
 
