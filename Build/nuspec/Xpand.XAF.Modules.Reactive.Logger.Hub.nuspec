@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Reactive.Logger.Hub</id>
-    <version>4.202.48.4</version>
+    <version>4.202.49.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -15,9 +15,9 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Reactive.Logger.Hub, 20.2.5</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.Extensions.Reactive" version="4.202.48.4" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.48.4" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.202.48.4" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.202.49.0" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.49.0" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.202.49.0" />
         <dependency id="MagicOnion" version="2.6.3" />
         <dependency id="System.Interactive.Async" version="5.0" />
         <dependency id="System.Reactive" version="5.0" />
@@ -29,7 +29,7 @@
         <dependency id="Xpand.Patcher" version="2.0.27" />
         <dependency id="Xpand.Collections" version="1.0.4" />
         <dependency id="System.CodeDom" version="5.0" />
-        <dependency id="Xpand.VersionConverter" version="4.202.48.4" />
+        <dependency id="Xpand.VersionConverter" version="4.202.49.0" />
       </group>
     </dependencies>
   </metadata>
