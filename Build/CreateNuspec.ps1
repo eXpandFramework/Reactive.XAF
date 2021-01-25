@@ -141,7 +141,7 @@ Get-ChildItem "$root\build\nuspec" *.nuspec |ForEach-Object{
     $nuspec.package.metadata.dependencies.group.dependency|Where-Object{$_.id -match "DevExpress"}|Remove-XmlElement 
     $nuspec|Save-Xml $_.FullName
 } 
-if ($branch -eq "master") {
+if ($branch -eq "master" -and ($dxVersion -gt "20.2.0")) {
     Write-HostFormatted "Checking nuspec versions" -Section
     $labnuspecs = Get-ChildItem "$root\build\nuspec" *.nuspec -Recurse | ForEach-Object {
         [xml]$n = Get-xmlContent $_.FullName

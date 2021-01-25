@@ -20,7 +20,7 @@ namespace TestApplication.Module.Blazor.JobScheduler {
                 var order = objectSpace.CreateObject<Order>();
                 order.OrderID = i;
             }
-
+            
             await objectSpace.CommitChangesAsync();
         }
 

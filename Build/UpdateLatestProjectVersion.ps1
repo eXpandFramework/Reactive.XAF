@@ -9,9 +9,6 @@ $lastOfficialVersion = ($officialPackages | Where-Object { $_.id -eq "Xpand.XAF.
 if ($Branch -eq "master") {
     $lastVersion = ($labPackages | Where-Object { $_.id -eq "Xpand.XAF.Core.All" }).Version
     $lastOfficialVersion = ($officialPackages | Where-Object { $_.id -eq "Xpand.XAF.Core.All" }).Version
-    if ($lastOfficialVersion -gt $lastVersion){
-        $lastVersion=$lastOfficialVersion
-    }
     $newVersion = (Update-Version $lastVersion -Build)
 }
 else {

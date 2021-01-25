@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Office.Cloud.Google</id>
-    <version>4.202.49.0</version>
+    <version>4.202.48.7</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -15,19 +15,19 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Office.Cloud.Google, 20.2.5</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.Extensions" version="4.202.49.0" />
-        <dependency id="Xpand.Extensions.Office.Cloud" version="4.202.49.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.49.0" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.202.49.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.202.49.0" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.202.49.0" />
+        <dependency id="Xpand.Extensions" version="4.202.48.7" />
+        <dependency id="Xpand.Extensions.Office.Cloud" version="4.202.48.7" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.48.7" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.202.48.7" />
+        <dependency id="Xpand.Extensions.XAF" version="4.202.48.7" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.202.48.7" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="JetBrains.Annotations" version="2020.3" />
         <dependency id="System.Reactive" version="5.0" />
         <dependency id="Google.Apis.Auth" version="1.49" />
         <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.8" />
         <dependency id="System.Configuration.ConfigurationManager" version="5.0" />
-        <dependency id="Xpand.VersionConverter" version="4.202.49.0" />
+        <dependency id="Xpand.VersionConverter" version="4.202.48.7" />
       </group>
     </dependencies>
   </metadata>

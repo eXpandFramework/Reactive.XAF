@@ -1,5 +1,0 @@
-<Project>
-    <Target Name="PrintReferences" DependsOnTargets="ResolveProjectReferences;ResolveAssemblyReferences">
-	  <Message Text="@(_ResolveAssemblyReferenceResolvedFiles)" />
-    </Target>
-</Project>

@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.MasterDetail</id>
-    <version>4.202.49.0</version>
+    <version>4.202.48.7</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -15,9 +15,9 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, MasterDetail, 20.2.5</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.Extensions.Reactive" version="4.202.49.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.202.49.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.49.0" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.202.48.7" />
+        <dependency id="Xpand.Extensions.XAF" version="4.202.48.7" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.48.7" />
         <dependency id="Xpand.Patcher" version="2.0.27" />
         <dependency id="System.Reactive" version="5.0" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
@@ -25,7 +25,7 @@
         <dependency id="System.Configuration.ConfigurationManager" version="5.0" />
         <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.8" />
         <dependency id="System.ServiceModel.Http" version="4.8" />
-        <dependency id="Xpand.VersionConverter" version="4.202.49.0" />
+        <dependency id="Xpand.VersionConverter" version="4.202.48.7" />
       </group>
     </dependencies>
   </metadata>
