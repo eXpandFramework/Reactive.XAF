@@ -11,7 +11,8 @@ param(
     [string]$UseLastVersion="1",
     $XpandBlobOwnerSecret=$env:AzXpandBlobOwnerSecret,
     $AzureApplicationId=$env:AzApplicationId,
-    $AzureTenantId=$env:AzTenantId
+    $AzureTenantId=$env:AzTenantId,
+    [switch]$SkipVersioning
 )
 
 if (!(Get-Module eXpandFramework -ListAvailable)) {

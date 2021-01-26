@@ -1,3 +1,6 @@
+if ($SkipVersioning){
+    return
+}
 Write-HostFormatted "Reset modified assemblyInfo" -Section
 "AssemblyInfo.cs", "/.nuspec" | Get-GitDiff | Restore-GitFile
 $labPackages = Get-XpandPackages -PackageType XAFAll -Source Lab
