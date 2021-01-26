@@ -14,8 +14,7 @@ param(
     [string]$DevExpressVersion,
     [string]$targetPath="C:\Work\eXpandFramework\expand\Xpand.dll\"
 )
-$MSBuild=& "${env:ProgramFiles(x86)}\microsoft visual studio\installer\vswhere.exe" -latest -prerelease -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe
-Write-Verbose "MSBuild=$MSBuild" -Verbose
+
 if (!$referenceFilter){
     $referenceFilter="DevExpress*"
 }
@@ -32,12 +31,14 @@ Write-VerboseLog "targetPath=$targetPath"
 Write-VerboseLog "DevExpressVersion=$DevExpressVersion"
 Write-VerboseLog "referenceFilter=$referenceFilter"
 Write-VerboseLog "targetFilter=$targetFilter"
-$referenceAssemblies=Resolve-Refs $projectFile $targetFilter $referenceFilter
-$dxversion=($referenceAssemblies|Where-Object{$_.basename -match $referenceFilter}|Select-Object -First 1).Directory.Parent.Parent.Name
+$dxversion=GetDevExpressVersion $targetPath $referenceFilter $projectFile
+Write-Verbose "dxVersion=$dxVersion" -Verbose
 [version]$v=$null
-
 if (!([version]::TryParse($dxversion,[ref]$v))){
-    $dxversion=GetDevExpressVersion $targetPath $referenceFilter $projectFile
+    $MSBuild=& "${env:ProgramFiles(x86)}\microsoft visual studio\installer\vswhere.exe" -latest -prerelease -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe
+    Write-Verbose "MSBuild=$MSBuild" -Verbose
+    $referenceAssemblies=Resolve-Refs $projectFile $targetFilter $referenceFilter
+    $dxversion=($referenceAssemblies|Where-Object{$_.basename -match $referenceFilter}|Select-Object -First 1).Directory.Parent.Parent.Name    
 }
 
 Write-VerboseLog "DxVersion=$dxVersion"
