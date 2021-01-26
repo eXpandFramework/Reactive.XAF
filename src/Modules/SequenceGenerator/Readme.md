@@ -25,16 +25,21 @@ The cross platform [Xpand.XAF.Modules.SequenceGenerator](https://github.com/eXpa
 
 </br>In the next screencast we use the XAF UI to create a `subscription` to the `sequence` generator and `assign` the generated sequence to our  `Order.OrderId` configuring the initial sequence to `1000`. Similarly for `Accessory.AccessoryId` where we set the initial value to `2000`. Finally we test by creating an Order and an Accessory where we can `observe` the assigned `values` of OrderId, AccessoryId.
 
+**Blazor**
+
 <twitter>
 
-[![hfvTo7UsCI](https://user-images.githubusercontent.com/159464/80309035-f918e500-87da-11ea-8f52-7799457213cf.gif)](https://www.youtube.com/watch?v=t1BDPFU01z8)
+[![Xpand XAF Modules SequenceGenerator Blazor](https://user-images.githubusercontent.com/159464/105914046-74dbe280-6036-11eb-8d32-45c7355311d8.gif)](https://youtu.be/M87TEftU4hU)
 
 </twitter>
 
-[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://www.youtube.com/watch?v=t1BDPFU01z8)
+[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/M87TEftU4hU)
 
 ---
 
+**WinForms/WinDesktop/WebForms**
+
+[![hfvTo7UsCI](https://user-images.githubusercontent.com/159464/80309035-f918e500-87da-11ea-8f52-7799457213cf.gif)](https://www.youtube.com/watch?v=t1BDPFU01z8)
 
 The SequenceStorage table is a normal XAF BO, therefore it is possible to create sequence bindings in code by creating instances of that object. However we do not recommend creating instances directly but use the provided API (possibly in a [ModuleUpdater](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.Updating.ModuleUpdater)). The API respects additional constrains and validations.
 
