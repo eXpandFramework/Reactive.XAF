@@ -1,0 +1,8 @@
+<Project>
+ <Target Name="ReplaceNuget" AfterTargets="Build">
+   <Exec Command="powershell.exe –NonInteractive –ExecutionPolicy Unrestricted –command &quot;&amp; { &amp;&apos;$(MSBuildThisFileDirectory)\..\Build\ReplaceNuget.ps1&apos; &apos;$(ProjectPath)&apos; &apos;$(TargetPath)&apos; &apos;$(skipNugetReplace)&apos; } &quot; " LogStandardErrorAsError="True" ContinueOnError="False" />
+ </Target>
+ <Target Name="FixVersion" AfterTargets="Build">
+   <Exec Command="powershell.exe –NonInteractive –ExecutionPolicy Unrestricted –command &quot;&amp; { &amp;&apos;$(MSBuildThisFileDirectory)\..\Build\ReplaceNuget.ps1&apos; &apos;$(ProjectPath)&apos; &apos;$(TargetPath)&apos; &apos;$(skipNugetReplace)&apos; -FixVersion; } &quot; " LogStandardErrorAsError="True" ContinueOnError="False" />
+ </Target>
+</Project>
