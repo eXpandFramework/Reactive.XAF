@@ -21,44 +21,6 @@ using Xpand.XAF.Modules.JobScheduler.Hangfire;
 [assembly: HostingStartup(typeof(Xpand.XAF.Modules.JobScheduler.Hangfire.HangfireStartup))]
 
 namespace TestApplication.Blazor.Server {
-    // public class UseHangfire : IStartupFilter {
-    //     public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next) 
-    //         => app => {
-    //             UseHangfireServer?.Invoke(app);
-    //             UseHangfireDashboard?.Invoke(app);
-    //             next(app);
-    //         };
-    //
-    //     public static Action<IApplicationBuilder> UseHangfireServer = builder => builder.UseHangfireServer();
-    //     public static Action<IApplicationBuilder> UseHangfireDashboard = builder => builder.UseHangfireDashboard(options:new DashboardOptions {
-    //         Authorization = new[] { new AuthorizationFilter() }
-    //     });
-    // }
-    //
-    // public class AuthorizationFilter : IDashboardAuthorizationFilter {
-    //     public bool Authorize(DashboardContext context) 
-    //         => context.GetHttpContext().User.Identity.IsAuthenticated;
-    // }
-
-    // public class HangfireStartup : IHostingStartup{
-    //     public void Configure(IWebHostBuilder builder) 
-    //         => builder.ConfigureServices(services => services
-    //             .AddHangfire(ConfigureHangfire)
-    //             .AddHangfireServer()
-    //             .AddSingleton<IStartupFilter, UseHangfire>()
-    //             .AddSingleton<HangfireJobFilter>()
-    //         );
-    //
-    //     private static void ConfigureHangfire(IServiceProvider provider,IGlobalConfiguration configuration) 
-    //         => configuration
-    //             .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
-    //             .UseDefaultTypeSerializer()
-    //             .UseRecommendedSerializerSettings()
-    //             .UseActivator(new ServiceJobActivator(provider.GetService<IServiceScopeFactory>()))
-    //             .UseFilter(provider.GetService<HangfireJobFilter>())
-    //             .UseFilter(new AutomaticRetryAttribute(){Attempts = 0});
-    // }
-
     public class Startup {
         public Startup(IConfiguration configuration) {
             Configuration = configuration;
