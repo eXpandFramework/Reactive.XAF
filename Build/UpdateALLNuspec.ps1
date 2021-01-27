@@ -2,13 +2,13 @@ param(
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\"),
     $Release=$false,
     $Branch="lab",
-    $dxVersion="20.1.9"
+    $dxVersion="20.2.5"
 )
 Use-MonoCecil | Out-Null
 # $VerbosePreference ="continue"
 function UpdateALLNuspec($platform, $allNuspec, $nuspecs,$allModuleNuspecs,$csProjects) {
     
-    $platformNuspecs = $allModuleNuspecs | ForEach-Object {
+    $platformNuspecs = $allModuleNuspecs| ForEach-Object {
         [xml]$nuspec = Get-Content $_.FullName
         $nuspecBaseName=$_.BaseName
         $filesrc=($nuspec.package.Files.file|Where-Object{$_.src -like "*$nuspecBaseName.dll"}).src
