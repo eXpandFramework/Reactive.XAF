@@ -55,18 +55,15 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
 
         protected override void OnLoaded(){
             base.OnLoaded();
-            if (!(Session is ExplicitUnitOfWork)){
-                var sequenceStorageName = Name;
-                if (sequenceStorageName != null){
-                    var modelClass =CaptionHelper.ApplicationModel.BOModel.GetClass(SequenceStorageKeyNameAttribute.FindConsumer(XafTypesInfo.Instance.FindTypeInfo(sequenceStorageName).Type));
-                    Type = new ObjectType(modelClass.TypeInfo.Type){Name = modelClass.Caption};
-                    Member=new ObjectString(SequenceMember){Caption = modelClass.GetMemberCaption(SequenceMember)};
-                    var customSequence = CustomSequence;
-                    if (customSequence!=null){
-                        modelClass =CaptionHelper.ApplicationModel.BOModel.GetClass(XafTypesInfo.Instance.FindTypeInfo(customSequence).Type);
-                        CustomType=new ObjectType(modelClass.TypeInfo.Type){Name = modelClass.Caption};
-                    }
-                }   
+            if (!(Session is ExplicitUnitOfWork) && Name != null){
+                var type = SequenceStorageKeyNameAttribute.FindConsumer(XafTypesInfo.Instance.FindTypeInfo(Name).Type);
+                var modelClass =CaptionHelper.ApplicationModel.BOModel.GetClass(type);
+                _type = new ObjectType(modelClass.TypeInfo.Type){Name = modelClass.Caption};
+                _objectMember=new ObjectString(SequenceMember){Caption = modelClass.GetMemberCaption(SequenceMember)};
+                if (CustomSequence!=null){
+                    modelClass =CaptionHelper.ApplicationModel.BOModel.GetClass(XafTypesInfo.Instance.FindTypeInfo(CustomSequence).Type);
+                    _customType=new ObjectType(modelClass.TypeInfo.Type){Name = modelClass.Caption};
+                }
             }
         }
 
@@ -81,19 +78,24 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         public ObjectType Type {
             get => _type;
             set {
-                SetPropertyValue(nameof(Type), ref _type, value);
-                OnChanged(nameof(Member));
+                if (SetPropertyValue(nameof(Type), ref _type, value)) {
+                    OnChanged(nameof(Member));
+                    OnChanged(nameof(CustomType));
+                }
             }
         }
 
         ObjectType _customType;
         [DataSourceProperty(nameof(CustomTypes))][NonPersistent]
-        public ObjectType CustomType{
+        public ObjectType CustomType {
             get => _customType;
-            set => SetPropertyValue(nameof(CustomType), ref _customType, value);
+            set {
+                if (SetPropertyValue(nameof(CustomType), ref _customType, value)) {
+                    CustomSequence = CustomType?.Type?.FullName;
+                }
+            }
         }
 
-        
         [Browsable(false)]
         public List<ObjectType> Types=>CaptionHelper.ApplicationModel.BOModel
             .Where(_ => typeof(IXPObject).IsAssignableFrom(_.TypeInfo.Type)&&_.TypeInfo.IsPersistent)
@@ -106,14 +108,12 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
             .Where(_ => typeof(IXPObject).IsAssignableFrom(_.TypeInfo.Type))
             .Select(_ => new ObjectType(_.TypeInfo.Type){Name = _.Caption}).ToList();
 
-        public override string ToString(){
-            return $"{Name}";
-        }
+        public override string ToString() => $"{Name}";
 
         [Browsable(false)]
         public List<ObjectString> Members => Type == null ? new List<ObjectString>()
-            : Type.Type.ToTypeInfo().Members.Where(info =>info.IsPublic&& info.MemberType == typeof(long)).Select(info =>
-                new ObjectString(info.Name) {
+            : Type.Type.ToTypeInfo().Members.Where(info =>info.IsPublic&& info.MemberType == typeof(long))
+                .Select(info => new ObjectString(info.Name) {
                     Caption = CaptionHelper.ApplicationModel.BOModel.GetClass(info.Owner.Type).GetMemberCaption(info.Name)
                 }).ToList();
         

@@ -48,15 +48,15 @@ namespace TestApplication.Blazor.Server {
                 options.LoginPath = "/LoginPage";
             });
 
-            // GlobalConfiguration.Configuration.UseMemoryStorage();
-            GlobalConfiguration.Configuration.UseSqlServerStorage(
-                Configuration.GetConnectionString("ConnectionString"), new SqlServerStorageOptions {
-                    CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
-                    SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
-                    QueuePollInterval = TimeSpan.Zero,
-                    UseRecommendedIsolationLevel = true,
-                    DisableGlobalLocks = true
-                });
+            GlobalConfiguration.Configuration.UseMemoryStorage();
+            // GlobalConfiguration.Configuration.UseSqlServerStorage(
+            //     Configuration.GetConnectionString("ConnectionString"), new SqlServerStorageOptions {
+            //         CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+            //         SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+            //         QueuePollInterval = TimeSpan.Zero,
+            //         UseRecommendedIsolationLevel = true,
+            //         DisableGlobalLocks = true
+            //     });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

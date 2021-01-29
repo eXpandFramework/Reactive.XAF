@@ -31,8 +31,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 	    public static IObservable<ModelInterfaceExtenders> WhenExtendingModel(this IObservable<ApplicationModulesManager> source) 
             => source.SelectMany(manager => manager.WhenExtendingModel());
 
-	    public static IObservable<ModelInterfaceExtenders> WhenExtendingModel(this ApplicationModulesManager manager) =>
-	        manager.Modules.OfType<ReactiveModule>().First().ExtendingModel;
+	    public static IObservable<ModelInterfaceExtenders> WhenExtendingModel(this ApplicationModulesManager manager) 
+            => manager.Modules.FindModule<ReactiveModule>().ExtendingModel;
 
         public static IObservable<T> WhenGeneratingModelNodes<T>(this IObservable<ApplicationModulesManager> source,Expression<Func<IModelApplication,T>> selector=null) where T : IEnumerable<IModelNode> 
             => source.SelectMany(manager => manager.WhenGeneratingModelNodes(selector));
@@ -41,7 +41,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 		    => application.WhenApplicationModulesManager().SelectMany(manager => manager.WhenGeneratingModelNodes(selector));
 
 	    public static IObservable<T> WhenGeneratingModelNodes<T>(this ApplicationModulesManager manager,Expression<Func<IModelApplication,T>> selector=null,bool emitCached=false) where T : IEnumerable<IModelNode> 
-		    => manager.Modules.OfType<ReactiveModule>().First().GeneratingModelNodes
+		    => manager.Modules.FindModule<ReactiveModule>().GeneratingModelNodes
 			    .SelectMany(updaters => {
 				    var updaterType = (Type)typeof(T).GetCustomAttributesData().First(data => data.AttributeType==typeof(ModelNodesGeneratorAttribute)).ConstructorArguments.First().Value;
 				    var updater = typeof(NodesUpdater<>).MakeGenericType(updaterType).CreateInstance();

@@ -8,6 +8,7 @@ namespace Xpand.XAF.Modules.ModelViewInheritance {
     public sealed class ModelViewInheritanceModule : ReactiveModuleBase {
         public ModelViewInheritanceModule() {
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));
+            RequiredModuleTypes.Add(typeof(ReactiveModule));
         }
 
 

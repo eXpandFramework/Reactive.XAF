@@ -18,7 +18,7 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions{
                         CurrentDomain.XAF().ErrorHandling().CallMethod("SetPageError", exception);
                         break;
                     default:
-                        Console.WriteLine(exception);
+                        application.GetPropertyValue("ExceptionService").CallMethod("HandleException", exception);
                         break;
                 }
                 Tracer.LogError(exception);
