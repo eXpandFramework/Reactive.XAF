@@ -142,6 +142,7 @@ jobs:
                   $build = Get-AzBuilds -Definition Reactive.XAF-Tests -Tag "$_" -Top 1 
                   Get-AzTestRuns -buildIds $build.Id -FailedOnly
                 }
+                "failedBuilds=$failedBuilds"
                 if (!$failedBuilds) {
                     $env:AzureToken = '$(AzureToken)' 
                     $env:AzOrganization = "eXpandDevOps"

@@ -42,21 +42,21 @@
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp.EasyTest.BlazorAdapter" Version="20.2.5" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.2" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
     <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.2.5" />
     <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="20.2.5" />
-    <PackageReference Include="System.ServiceModel.Security" Version="4.8.0" />
-    <PackageReference Include="System.ServiceModel.NetTcp" Version="4.8.0" />
-    <PackageReference Include="System.ServiceModel.Duplex" Version="4.8.0" />
+    <PackageReference Include="System.ServiceModel.Security" Version="4.8.1" />
+    <PackageReference Include="System.ServiceModel.NetTcp" Version="4.8.1" />
+    <PackageReference Include="System.ServiceModel.Duplex" Version="4.8.1" />
     <!-- <PackageReference Include="MagicOnion" Version="2.6.3" /> -->
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.3" />
     <PackageReference Include="Moq" Version="4.16" />
     <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="86.0.4240.2200" />
     <PackageReference Include="Shouldly" Version="4.0.3" />
-    <PackageReference Include="NUnit" Version="3.13.0" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="4.202.50" />
+    <PackageReference Include="NUnit" Version="3.13" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.17" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="4.202.50.1" />
     <!-- <PackageReference Include="System.Data.SqlClient" Version="4.8.2" /> -->
     <!-- <PackageReference Include="System.Data.OleDb" Version="5.0.0" /> -->
     <!-- <PackageReference Include="System.ServiceModel.Http" Version="4.8.0" /> -->
@@ -66,8 +66,8 @@
     <!-- <PackageReference Include="System.ServiceProcess.ServiceController" Version="5.0.0" /> -->
     <!-- <PackageReference Include="System.Collections.Immutable" Version="5.0.0" /> -->
     <!-- <PackageReference Include="System.Text.Json" Version="5.0.0" /> -->
-    <PackageReference Include="Selenium.WebDriver" Version="3.13.0" />
-    <PackageReference Include="Selenium.Support" Version="3.13.0" />
+    <PackageReference Include="Selenium.WebDriver" Version="3.141" />
+    <PackageReference Include="Selenium.Support" Version="3.141" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.TestsLib.Common">

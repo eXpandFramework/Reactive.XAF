@@ -75,6 +75,7 @@ Task CompileTests -precondition { return ((Get-VersionPart $DXVersion Minor) -ne
             Add-XmlElement $nugetConfig "add" "packageSources" -Attributes $a
             $nugetConfig | Save-Xml $nugetConfigPath
         }
+        SyncrhonizePaketVersion
         CompileTestSolution "$Root\src\Tests\Tests.sln"
         FixNet461DXAssembliesTargetFramework
         if (!(Test-AzDevops)) {
@@ -88,30 +89,58 @@ function FixNet461DXAssembliesTargetFramework {
     Start-Build -Path "$root\src\Tests\ModelMapper\Xpand.XAF.Modules.ModelMapper.Tests.csproj"
 }
 
-Task CompileNugetConsumers -precondition { return $compile } {
-    Invoke-Script {
-        $localPackages = @(& (Get-NugetPath) list -source "$root\bin\nupkg;" | ConvertTo-PackageObject | Where-Object { $_.id -like "*.ALL" } | ForEach-Object {
-                $version = [version]$_.Version
-                if ($version.revision -eq 0) {
-                    $version = New-Object System.Version ($version.Major, $version.Minor, $version.build)
-                }
-                [PSCustomObject]@{
-                    Id      = $_.Id
-                    Version = $version
-                }
-            })
-        
-        Write-HostFormatted "Update all package versions" -ForegroundColor Magenta
-        Get-ChildItem "$root\src\Tests\EasyTests" *.csproj -Recurse | ForEach-Object {
-            $prefs = Get-PackageReference $_ 
-            $prefs | Where-Object { $_.include -like "Xpand.XAF.*" } | ForEach-Object {
-                $ref = $_
-                $localPackages | Where-Object { $_.id -eq $ref.include } | ForEach-Object {
-                    $ref.version = $_.version.ToString()
+function Update-NugetConsumersPackageVersion {
+    $localPackages = @(& (Get-NugetPath) list -source "$root\bin\nupkg;" | ConvertTo-PackageObject | Where-Object { $_.id -like "*.ALL" } | ForEach-Object {
+        $version = [version]$_.Version
+        if ($version.revision -eq 0) {
+            $version = New-Object System.Version ($version.Major, $version.Minor, $version.build)
+        }
+        [PSCustomObject]@{
+            Id      = $_.Id
+            Version = $version
+        }
+    })
+
+    Write-HostFormatted "Update Xpand package versions" -ForegroundColor Magenta
+    Get-ChildItem "$root\src\Tests\EasyTests" *.csproj -Recurse | ForEach-Object {
+        $prefs = Get-PackageReference $_ 
+        $prefs | Where-Object { $_.include -like "Xpand.XAF.*" } | ForEach-Object {
+            $ref = $_
+            $localPackages | Where-Object { $_.id -eq $ref.include } | ForEach-Object {
+                $ref.version = $_.version.ToString()
+            }
+        }
+        ($prefs | Select-Object -First 1).OwnerDocument.Save($_)
+    }
+}
+
+function SyncrhonizePaketVersion {
+    Write-HostFormatted "Synchronize paket versions" -ForegroundColor Magenta
+    $pakets=Invoke-PaketShowInstalled
+    (Get-MSBuildProjects "$root\src\Tests\EasyTests\")+(Get-ChildItem "$root\src\" "*Blazor*.csproj" -Recurse)|ForEach-Object{
+        $_.Fullname
+        [xml]$csproj=Get-XmlContent $_
+        Get-PackageReference $_|Where-Object{$_.Include -notmatch "Xpand|DevExpress"} |ForEach-Object{
+            $id=$_.Include
+            $version=$_.Version
+            $paket=$pakets|Where-Object{$_.Id -eq $id}
+            if ($paket){
+                if ($paket.Version -ne $version){
+                    $package=$csproj.Project.ItemGroup.PackageReference|Where-Object{$_.Include -eq $id}
+                    $package.version=$paket.version
                 }
             }
-            ($prefs | Select-Object -First 1).OwnerDocument.Save($_)
+            else{
+                "$Id not found"
+            }
         }
+        $csproj|Save-Xml $_.Fullname
+    }
+}
+
+Task CompileNugetConsumers -precondition { return $compile } {
+    Invoke-Script {
+        Update-NugetConsumersPackageVersion
         CompileTestSolution "$Root\src\Tests\\EasyTests\EasyTests.sln"
     } -Maximum 3
     Get-ChildItem $root\bin "*xpand*.dll" | Test-AssemblyReference -VersionFilter $DXVersion

@@ -38,14 +38,14 @@
   <ItemGroup>
     <PackageReference Include="DevExpress.WindowsDesktop.Core" Version="20.2.5" />
     <PackageReference Include="DevExpress.WindowsDesktop.Xaf" Version="20.2.5-ctp" />
-    <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
-    <PackageReference Include="System.ServiceProcess.ServiceController" Version="5.0.0" />
-    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="5.0.0" />
-    <PackageReference Include="System.Data.OleDb" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Win32.Registry" Version="5.0" />
+    <PackageReference Include="System.ServiceProcess.ServiceController" Version="5.0" />
+    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="5.0" />
+    <PackageReference Include="System.Data.OleDb" Version="5.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
-    <PackageReference Include="System.ServiceModel.Security" Version="4.8.0" />
-    <PackageReference Include="System.ServiceModel.NetTcp" Version="4.8.0" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.202.50" />
+    <PackageReference Include="System.ServiceModel.Security" Version="4.8.1" />
+    <PackageReference Include="System.ServiceModel.NetTcp" Version="4.8.1" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.202.50.1" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="TestApplication.Module">

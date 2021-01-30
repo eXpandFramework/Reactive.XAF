@@ -16,6 +16,10 @@ nuget DevExpress.EasyTest == 20.2.5
 nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 20.2.5  
 nuget DevExpress.ExpressApp.EasyTest.WinAdapter == 20.2.5  
 nuget DevExpress.ExpressApp.Security.Xpo == 20.2.5  
+nuget System.ServiceModel.NetTcp == 4.8.1
+nuget System.ServiceModel.Security == 4.8.1
+nuget System.ServiceModel.Http == 4.8.1
+nuget System.ServiceModel.Duplex == 4.8.1
 nuget Mono.Cecil 0.11.2
 nuget MagicOnion 2.6.3
 nuget Grpc 2.23.0
