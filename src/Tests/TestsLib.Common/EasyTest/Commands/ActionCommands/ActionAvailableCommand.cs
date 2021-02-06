@@ -1,10 +1,11 @@
 ﻿using DevExpress.EasyTest.Framework;
+using Xpand.Extensions.XAF.ObjectExtensions;
 
 namespace Xpand.TestsLib.Common.EasyTest.Commands.ActionCommands{
 	public class ActionAvailableCommand:EasyTestCommand{
 
         public ActionAvailableCommand(string caption){
-            Parameters.MainParameter=new MainParameter(caption);
+            Parameters.MainParameter=new MainParameter(caption.CompoundName());
 		}
 
 		protected override void ExecuteCore(ICommandAdapter adapter){

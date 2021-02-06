@@ -58,7 +58,7 @@ namespace Web.Tests{
 #if !NETCOREAPP3_1
             var physicalPath = $@"{AppDomain.CurrentDomain.ApplicationPath()}..\TestWebApplication\";
 #else
-            var physicalPath = $@"{AppDomain.CurrentDomain.ApplicationPath()}..\..\TestBlazorApplication\";
+            var physicalPath = Path.GetFullPath($@"{AppDomain.CurrentDomain.ApplicationPath()}..\..\TestBlazorApplication\");
 #endif
             LogPaths.Clear();
             LogPaths.Add(Path.Combine(Path.GetDirectoryName(physicalPath)!,"eXpressAppFramework.log"));
@@ -67,7 +67,7 @@ namespace Web.Tests{
             return ((DevExpress.ExpressApp.EasyTest.WebAdapter.WebAdapter) adapter).RunWebApplication(physicalPath, 65477, connectionString);
 #else
             
-            return ((DevExpress.ExpressApp.EasyTest.BlazorAdapter.BlazorAdapter) adapter).RunBlazorApplication(physicalPath,44318,connectionString);
+            return ((DevExpress.ExpressApp.EasyTest.BlazorAdapter.BlazorAdapter) adapter).RunBlazorApplication(physicalPath,5001,connectionString);
 #endif
             
         }
@@ -79,10 +79,13 @@ namespace Web.Tests{
                 var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
                 adapter.Execute(autoTestCommand);
                 await Task.CompletedTask;
+
+                adapter.TestModelViewInheritance();
+                adapter.TestPositionInListView();
+                
 #if NETCOREAPP3_1
                 await adapter.TestJobScheduler();
 #endif
-                adapter.TestModelViewInheritance();
             });
         }
 
@@ -109,7 +112,7 @@ namespace Web.Tests{
         }
 #endif
 
-        // [XpandTest(LongTimeout,3)]
+        [XpandTest(LongTimeout,3)]
         [Test][Apartment(ApartmentState.STA)]
         public async Task Web_GoogleCloud_EasyTest(){
 #if !NETCOREAPP3_1

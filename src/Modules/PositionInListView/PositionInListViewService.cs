@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -13,6 +14,8 @@ using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ModelExtensions;
+using Xpand.Extensions.XAF.ViewExtenions;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.PositionInListView{
@@ -31,16 +34,18 @@ namespace Xpand.XAF.Modules.PositionInListView{
             => source.Trace(name, PositionInListViewModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName);
 
 
-        private static IObservable<(ListView listView, XafApplication application)> WhenPositionInListCreated(this XafApplication application) 
-            => application.WhenListViewCreated()
-                .Where(_ => application.Model.IsPositionInListView(_.Model.Id))
-                .Pair(application)
-                .Publish().RefCount();
+        private static IObservable<ListView> WhenPositionInListCreated(this XafApplication application) 
+            => application.WhenListViewCreated().Where(_ => application.Model.IsPositionInListView(_.Model.Id));
 
-        private static IObservable<Unit> DisableSorting(this IObservable<(ListView listView, XafApplication application)> whenPositionInListCreated) 
-            => whenPositionInListCreated
-                .SelectMany(_ => _.listView.WhenControlsCreated())
-                .SelectMany(view => ((ColumnsListEditor) view.Editor).Columns)
+        private static IObservable<Unit> DisableSorting(this IObservable<ListView> source) 
+            => source
+                .SelectMany(listView => {
+                    var platform = listView.Application().GetPlatform();
+                    var modelColumn = listView.PositionMember().modelColumn;
+                    return listView.WhenControlsCreated()
+                        .SelectMany(view => ((ColumnsListEditor) view.Editor).Columns)
+                        .Where(wrapper => platform != Platform.Blazor || wrapper.Id!=modelColumn.PropertyName);
+                })
                 .Do(wrapper => {
                     wrapper.AllowGroupingChange = false;
                     wrapper.AllowSortingChange = false;
@@ -48,32 +53,37 @@ namespace Xpand.XAF.Modules.PositionInListView{
                 .TracePositionInListView(wrapper => wrapper.Caption)
                 .ToUnit();
 
-        private static IObservable<Unit> SortCollectionSource(this IObservable<(ListView listView, XafApplication application)> whenPositionInListCreated) 
-            => whenPositionInListCreated
-                .Where(tuple => tuple.application.Model.IsPositionInListView( tuple.listView.Id))
-                .Select(_ => {
-                    var item = _.application.Model.ModelPositionInListView().ListViewItems
-                        .First(rule => rule.ListView.Id() == _.listView.Id);
-                    foreach (var listViewColumn in item.ListView.Columns){
+        private static IObservable<Unit> SortCollectionSource(this IObservable<ListView> source) 
+            => source
+                .Select(listView => {
+                    var t = listView.PositionMember();
+                    foreach (var listViewColumn in t.modelColumn.GetParent<IModelListView>().Columns){
                         listViewColumn.SortOrder=ColumnSortOrder.None;
+                        listViewColumn.SortIndex = -1;
                     }
 
-                    if (!_.listView.CollectionSource.CanApplySorting){
-	                    var modelColumn = _.listView.Model.Columns.FirstOrDefault(column => column.ModelMember==item.PositionMember);
-	                    if (modelColumn == null){
-		                    modelColumn = _.listView.Model.Columns.AddNode<IModelColumn>();
-		                    modelColumn.PropertyName = item.PositionMember.Name;
-		                    modelColumn.Index = -1;
-	                    }
-	                    modelColumn.SortIndex = 0;
-	                    modelColumn.SortOrder = (ColumnSortOrder) Enum.Parse(typeof(ColumnSortOrder), item.SortingDirection.ToString());
+                    if (listView.Application().GetPlatform() == Platform.Blazor) {
+                        t.modelColumn.Index = -1;
                     }
-                    
-                    _.listView.CollectionSource.Sorting.Insert(0, new SortProperty(item.PositionMember.MemberInfo.Name, item.SortingDirection));
-                    return _.listView;
+                    t.modelColumn.SortIndex = 0;
+                    t.modelColumn.SortOrder = (ColumnSortOrder) Enum.Parse(typeof(ColumnSortOrder), t.item.SortingDirection.ToString());
+                    listView.CollectionSource.Sorting=new List<SortProperty>(){new SortProperty(t.item.PositionMember.MemberInfo.Name, t.item.SortingDirection)};
+                    return listView;
                 })
                 .TracePositionInListView(view => view.Id)
                 .ToUnit();
+
+        private static (IModelColumn modelColumn, IModelPositionInListViewListViewItem item) PositionMember(this ListView listView) {
+            var item = listView.Application().Model.ModelPositionInListView()
+                .ListViewItems.First(rule => rule.ListView.Id() == listView.Id);
+            var modelColumn = listView.Model.Columns.FirstOrDefault(column => column.ModelMember==item.PositionMember);
+            if (modelColumn == null){
+                modelColumn = listView.Model.Columns.AddNode<IModelColumn>();
+                modelColumn.PropertyName = item.PositionMember.Name;
+                modelColumn.Index = -1;
+            }
+            return (modelColumn,item);
+        }
 
         internal static bool IsPositionInListView(this IModelApplication applicationModel, string viewID) 
             => applicationModel.ModelPositionInListView().ListViewItems.Select(item => item.ListView.Id()).Contains(viewID);

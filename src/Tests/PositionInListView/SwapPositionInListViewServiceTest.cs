@@ -31,11 +31,11 @@ namespace Xpand.XAF.Modules.PositionInListView.Tests{
             moduleAction.MoveObjectDown().Active.ResultValue.ShouldBeTrue();
         }
 
-		[TestCase(nameof(SwapPositionInListViewService.MoveObjectUp))]
-		[TestCase(nameof(SwapPositionInListViewService.MoveObjectDown))]
+		[TestCase(nameof(SwapPositionInListViewService.MoveObjectUp),nameof(SwapPositionInListViewService.MoveObjectDown))]
+		[TestCase(nameof(SwapPositionInListViewService.MoveObjectDown),nameof(SwapPositionInListViewService.MoveObjectUp))]
 		[XpandTest]
 		[SuppressMessage("ReSharper", "AccessToModifiedClosure")][Apartment(ApartmentState.STA)]
-		public void Move_object_action_is_disabled_when_on_edge(string actionId) {
+		public void Move_object_action_is_disabled_when_on_edge(string disabledAction,string enabledAction) {
             using var application = PositionInListViewModuleModule().Application;
 
             var objectSpace = application.CreateObjectSpace();
@@ -49,17 +49,20 @@ namespace Xpand.XAF.Modules.PositionInListView.Tests{
             PIL pil1 = null;
             PIL pil2 = null;
             var view = application.NewView(listViewItem.ListView,
-                space => new[]{space.GetObject(actionId == nameof(SwapPositionInListViewService.MoveObjectUp) ? pil1 : pil2)},objectSpace);
+                space => new[]{space.GetObject(disabledAction == nameof(SwapPositionInListViewService.MoveObjectUp) ? pil1 : pil2)},objectSpace);
             viewWindow.SetView(view);
             pil1 = objectSpace.CreateObject<PIL>();
             pil1.Name = "a";
             pil2 = objectSpace.CreateObject<PIL>();
             pil2.Name = "b";
+            objectSpace.CommitChanges();
 
             view.AsObjectView().OnSelectionChanged();
 
 
-            viewWindow.Action(actionId).Enabled[SwapPositionInListViewService.EdgeContext].ShouldBeFalse();
+            viewWindow.Action(disabledAction).Enabled[SwapPositionInListViewService.EdgeContext].ShouldBeFalse();
+            viewWindow.Action(enabledAction).Enabled[SwapPositionInListViewService.EdgeContext].ShouldBeTrue();
+            view.AsListView().CollectionSource.Objects<PIL>().Count().ShouldBe(2);
         }
 
 		[TestCase(nameof(SwapPositionInListViewService.MoveObjectUp), 3)]
@@ -85,6 +88,7 @@ namespace Xpand.XAF.Modules.PositionInListView.Tests{
             compositeView.CollectionSource.Add(pil2);
             compositeView.CollectionSource.Add(pil1);
             compositeView.CollectionSource.Add(pil3);
+            compositeView.ObjectSpace.CommitChanges();
             compositeView.CollectionSource.Objects().Count().ShouldBe(3);
             var action = viewWindow.Action(direction);
             var edgeObject = direction == nameof(SwapPositionInListViewService.MoveObjectUp) ? pil3 : pil1;

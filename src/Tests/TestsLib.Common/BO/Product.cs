@@ -5,7 +5,7 @@ using DevExpress.Persistent.BaseImpl;
 using DevExpress.Xpo;
 
 namespace Xpand.TestsLib.Common.BO{
-    [FriendlyKeyProperty(nameof(ProductName))]
+    [FriendlyKeyProperty(nameof(ProductName))][DefaultClassOptions]
     public class Product : BaseObject,IObjectSpaceLink{
         public Product(Session session) : base(session){
         }
@@ -15,6 +15,13 @@ namespace Xpand.TestsLib.Common.BO{
         public string ProductName{
             get => _productName;
             set => SetPropertyValue(nameof(ProductName), ref _productName, value);
+        }
+
+        int _id;
+
+        public int Id {
+            get => _id;
+            set => SetPropertyValue(nameof(Id), ref _id, value);
         }
 
         [Association("P-To-C")]

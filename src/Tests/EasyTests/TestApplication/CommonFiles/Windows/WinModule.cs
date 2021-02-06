@@ -5,6 +5,7 @@ using DevExpress.ExpressApp.Chart.Win;
 using DevExpress.ExpressApp.Dashboards.Win;
 using DevExpress.ExpressApp.FileAttachments.Win;
 using DevExpress.ExpressApp.Notifications.Win;
+using DevExpress.ExpressApp.Office;
 using DevExpress.ExpressApp.Office.Win;
 using DevExpress.ExpressApp.PivotChart.Win;
 using DevExpress.ExpressApp.PivotGrid.Win;

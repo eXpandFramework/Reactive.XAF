@@ -11,6 +11,7 @@ namespace Win.Tests {
             
             adapter.Execute(new FillEditorCommand(nameof(Person.FirstName),"test"){ExpectException = true});
             adapter.Execute(new FillEditorCommand(nameof(Person.LastName),"test"));
+            adapter.Execute(new ActionCommand(Actions.Save));
         }
 
     }

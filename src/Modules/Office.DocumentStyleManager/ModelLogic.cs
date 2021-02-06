@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
@@ -87,6 +88,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager{
             => new CalculatedModelNodeList<IModelMember>(modelClass == null
 		        ? Enumerable.Empty<IModelMember>() : modelClass.AllMembers.Where(item => item.Type == typeof(byte[])));
 
+        [SuppressMessage("ReSharper", "InvokeAsExtensionMethod")]
         internal static IObservable<T> DefaultPropertiesProvider<T>(this XafApplication application,Func<Document,IObservable<T>> factory){
             var documentStyleManager = application.Model.DocumentStyleManager();
 	        using var objectSpace = application.CreateObjectSpace(documentStyleManager.DefaultPropertiesProvider.TypeInfo.Type);

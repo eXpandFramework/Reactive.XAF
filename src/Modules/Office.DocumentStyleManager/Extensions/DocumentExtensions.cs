@@ -18,8 +18,11 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions{
 	    private const string DefaultDocumentStyleName = "DefaultDocumentStyleName";
 
 	    [PublicAPI]
-        public static IEnumerable<IDocumentStyle> WhenDefaultStyle(this IEnumerable<IDocumentStyle> source) => source.Where(_ => _.IsDefault);
-        public static IEnumerable<IDocumentStyle> WhenNotDefaultStyle(this IEnumerable<IDocumentStyle> source) => source.Where(_ => !_.IsDefault);
+        public static IEnumerable<IDocumentStyle> WhenDefaultStyle(this IEnumerable<IDocumentStyle> source) 
+            => source.Where(documentStyle => documentStyle.IsDefault);
+
+        public static IEnumerable<IDocumentStyle> WhenNotDefaultStyle(this IEnumerable<IDocumentStyle> source) 
+            => source.Where(documentStyle => !documentStyle.IsDefault);
 
         [PublicAPI]
         public static void ApplyStyle(this Document document,IDocumentStyle documentStyle,Document defaultPropertiesProvider=null){
@@ -49,11 +52,11 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions{
 	        return true;
         }
 
-        public static CharacterPropertiesBase Get(this IDocumentStyle documentStyle, Document document,Document defaultPropertiesProvider=null) => documentStyle
-	        .Find( document) ?? document.CreateNewStyle(documentStyle,defaultPropertiesProvider);
+        public static CharacterPropertiesBase Get(this IDocumentStyle documentStyle, Document document,Document defaultPropertiesProvider=null) 
+            => documentStyle.Find( document) ?? document.CreateNewStyle(documentStyle,defaultPropertiesProvider);
 
-        public static CharacterPropertiesBase Find(this IDocumentStyle documentStyle, Document document) =>
-	        documentStyle.DocumentStyleType==DocumentStyleType.Paragraph ?(CharacterPropertiesBase) document.ParagraphStyles
+        public static CharacterPropertiesBase Find(this IDocumentStyle documentStyle, Document document) 
+            => documentStyle.DocumentStyleType==DocumentStyleType.Paragraph ?(CharacterPropertiesBase) document.ParagraphStyles
 		        .FirstOrDefault(_ => _.Name==documentStyle.StyleName):document.CharacterStyles
 		        .FirstOrDefault(_ => _.Name==documentStyle.StyleName);
 
@@ -148,8 +151,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions{
         }
 
         private static TProperty GetStylePropertyValue<TStyle, TProperty>(this TStyle style, IDocumentStyle documentStyle, Document document,
-	        Expression<Func<IDocumentStyle, TProperty>> valueSelector) where TStyle:IDocumentStyle =>
-	        style.GetStylePropertyValueCore<TProperty>(valueSelector.MemberExpressionName(),documentStyle,document);
+	        Expression<Func<IDocumentStyle, TProperty>> valueSelector) where TStyle:IDocumentStyle 
+            => style.GetStylePropertyValueCore<TProperty>(valueSelector.MemberExpressionName(),documentStyle,document);
 
         private static TValue GetStylePropertyValueCore<TValue>(this IDocumentStyle style, string propertyName,
 	        IDocumentStyle documentStyle, Document document){
@@ -179,8 +182,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions{
 	        return documentStyle;
         }
 
-        public static bool IsParagraphStyle(this CharacterPropertiesBase style) => 
-	        style is ParagraphStyle || (style is IDocumentStyle docStyle && docStyle.DocumentStyleType == DocumentStyleType.Paragraph);
+        public static bool IsParagraphStyle(this CharacterPropertiesBase style) 
+            => style is ParagraphStyle || (style is IDocumentStyle docStyle && docStyle.DocumentStyleType == DocumentStyleType.Paragraph);
 
         private static void MapProperties(this IDocumentStyle documentStyle,CharacterPropertiesBase style, Document defaultPropertiesProvider){
 	        documentStyle.IsDeleted = (bool) style.GetPropertyValue("IsDeleted");
@@ -239,14 +242,15 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions{
 	        return next?.Name()==style.Name() ? documentStyle : next?.ToDocumentStyle(defaultPropertiesProvider,used,isDefault);
         }
 
-        private static CharacterPropertiesBase Next(this CharacterPropertiesBase style) =>
-	        style is ParagraphStyle? ((CharacterPropertiesBase) style.GetPropertyValue("NextStyle")):null;
+        private static CharacterPropertiesBase Next(this CharacterPropertiesBase style) 
+            => style is ParagraphStyle? ((CharacterPropertiesBase) style.GetPropertyValue("NextStyle")):null;
 
-        private static CharacterPropertiesBase Parent(this CharacterPropertiesBase style) => ((CharacterPropertiesBase) style.GetPropertyValue("Parent"));
+        private static CharacterPropertiesBase Parent(this CharacterPropertiesBase style) 
+            => ((CharacterPropertiesBase) style.GetPropertyValue("Parent"));
 
         private static TProperty GetStylePropertyValue<TStyle,TProperty>(this TStyle style, Expression<Func<TStyle, TProperty>> valueSelector,
-	        IDocumentStyle documentStyle,TStyle defaultProperties) =>
-	        (TProperty) style.GetStylePropertyValueCore(valueSelector.MemberExpressionName(),documentStyle,defaultProperties);
+	        IDocumentStyle documentStyle,TStyle defaultProperties) 
+            => (TProperty) style.GetStylePropertyValueCore(valueSelector.MemberExpressionName(),documentStyle,defaultProperties);
 
         private static object GetStylePropertyValueCore<TStyle>(this TStyle style,string propertyName,IDocumentStyle documentStyle,TStyle defaultProperties){
 	        var propertyValue = style.GetPropertyValue(propertyName);
@@ -259,8 +263,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions{
 	        return propertyValue;
         }
 
-        public static IEnumerable<IDocumentStyle> AllStyles(this Document document, DocumentStyleType? type = null,Document defaultPropertiesProvider=null) => document
-	        .UsedStyles(type,defaultPropertiesProvider).ToArray().Concat(document.UnusedStyles(type,defaultPropertiesProvider));
+        public static IEnumerable<IDocumentStyle> AllStyles(this Document document, DocumentStyleType? type = null,Document defaultPropertiesProvider=null) 
+            => document.UsedStyles(type,defaultPropertiesProvider).ToArray().Concat(document.UnusedStyles(type,defaultPropertiesProvider));
 
         public static IEnumerable<IDocumentStyle> UnusedStyles(this Document document,DocumentStyleType? type=null,Document defaultPropertiesProvider=null){
 	        defaultPropertiesProvider ??= document;
@@ -280,8 +284,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions{
             return style is ParagraphStyle ? name == paragraphDefaultStyle : name == characterDefaultStyle;
         }
 
-        public static IDocumentStyle DefaultStyle(this Document document,Document defaultPropertiesProvider,DocumentStyleType type) =>
-	        type == DocumentStyleType.Paragraph ? document.ParagraphStyles.First().ToDocumentStyle(defaultPropertiesProvider)
+        public static IDocumentStyle DefaultStyle(this Document document,Document defaultPropertiesProvider,DocumentStyleType type) 
+            => type == DocumentStyleType.Paragraph ? document.ParagraphStyles.First().ToDocumentStyle(defaultPropertiesProvider)
 		        : document.CharacterStyles.First().ToDocumentStyle(defaultPropertiesProvider);
 
         public static IEnumerable<IDocumentStyle> UsedStyles(this Document document,DocumentStyleType? type=null,Document defaultPropertiesProvider=null){
@@ -291,22 +295,22 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions{
 		        .Distinct().Where(style => type == null || style.DocumentStyleType == type.Value);
         }
 
-        private static IEnumerable<DocumentStyle> UsedCharacterStyles(this Document document,Document defaultPropertiesProvider) =>
-	        document.CharacterRanges().Select(_ => _.Key).Distinct()
+        private static IEnumerable<DocumentStyle> UsedCharacterStyles(this Document document,Document defaultPropertiesProvider) 
+            => document.CharacterRanges().Select(_ => _.Key).Distinct()
 		        .SelectMany(s => document.CharacterStyles.Where(style => style.Name() == s)
 		        .SelectMany(style => style.FromHierarchy(characterStyle => characterStyle.Parent))
 		        .DistinctBy(style => style.Name)
 		        .Select(style => style.ToDocumentStyle(defaultPropertiesProvider,true,document.IsDefaultStyle(style,defaultPropertiesProvider))).Do(style => style.Used=true));
 
-        private static IEnumerable<DocumentStyle> UsedParagraphStyles(this Document document,Document defaultPropertiesProvider) =>
-	        document.Paragraphs.SelectMany(_ => _.Style.FromHierarchy(style => style.Parent)
+        private static IEnumerable<DocumentStyle> UsedParagraphStyles(this Document document,Document defaultPropertiesProvider) 
+            => document.Paragraphs.SelectMany(_ => _.Style.FromHierarchy(style => style.Parent)
 		        .Concat(UsedNextStyles(_))
 		        .WhereNotDefault()
 		        .DistinctBy(style => style.Name)
 		        .Select(style => style.ToDocumentStyle( defaultPropertiesProvider,true,document.IsDefaultStyle(style,defaultPropertiesProvider))).Do(style => style.Used=true));
 
-        private static IEnumerable<ParagraphStyle> UsedNextStyles(Paragraph paragraph) =>
-	        paragraph.Style.NextStyle?.NextStyle == paragraph.Style.NextStyle
+        private static IEnumerable<ParagraphStyle> UsedNextStyles(Paragraph paragraph) 
+            => paragraph.Style.NextStyle?.NextStyle == paragraph.Style.NextStyle
 		        ? new[]{paragraph.Style.NextStyle} : paragraph.Style.FromHierarchy(style => style.NextStyle,
 			        style => style?.NextStyle?.Name != style?.Name);
 
@@ -334,7 +338,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions{
             return visitor;
         }
 
-        public static Dictionary<string, List<DocumentRange>> CharacterRanges(this Document document) => document.Visit(new CharacterStyleVisitor(document)).Ranges;
+        public static Dictionary<string, List<DocumentRange>> CharacterRanges(this Document document) 
+            => document.Visit(new CharacterStyleVisitor(document)).Ranges;
 
         public static CharacterPropertiesBase[] ReplaceStyles(this Document document, IDocumentStyle replacement, Document defaultPropertiesProvider , params IDocumentStyle[] styles){
 	        defaultPropertiesProvider ??= document;
@@ -345,12 +350,12 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions{
 	        return characterProperties;
         }
 
-        private static CharacterPropertiesBase[] ReplaceStyles(this Document document, Document defaultPropertiesProvider, IDocumentStyle[] styles, CharacterPropertiesBase replacementStyle) =>
-	        replacementStyle is ParagraphStyle paragraphStyle ? document.ReplaceParagraphStyles( defaultPropertiesProvider, styles, paragraphStyle)
+        private static CharacterPropertiesBase[] ReplaceStyles(this Document document, Document defaultPropertiesProvider, IDocumentStyle[] styles, CharacterPropertiesBase replacementStyle) 
+            => replacementStyle is ParagraphStyle paragraphStyle ? document.ReplaceParagraphStyles( defaultPropertiesProvider, styles, paragraphStyle)
 		        : document.ReplaceCharacterStyles( styles, replacementStyle);
 
-        private static CharacterPropertiesBase[] ReplaceCharacterStyles(this Document document, IDocumentStyle[] styles, CharacterPropertiesBase replacementStyle) =>
-	        document.CharacterRanges()
+        private static CharacterPropertiesBase[] ReplaceCharacterStyles(this Document document, IDocumentStyle[] styles, CharacterPropertiesBase replacementStyle) 
+            => document.CharacterRanges()
 		        .Select(pair => (ranges: pair.Value, style: styles.FirstOrDefault(style => style.StyleName == pair.Key)))
 		        .Where(_ => _.style != null)
 		        .SelectMany(_ => _.ranges.Select(range => (charProps: document.BeginUpdateCharacters(range), _.style)))
@@ -360,15 +365,17 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions{
 		        })
 		        .Select(_ => replacementStyle).ToArray();
 
-        private static CharacterPropertiesBase[] ReplaceParagraphStyles(this Document document, Document defaultPropertiesProvider, IDocumentStyle[] styles, ParagraphStyle paragraphStyle) =>
-	        document.Paragraphs.Where(paragraph => styles.Contains(paragraph.Style.ToDocumentStyle(defaultPropertiesProvider))).ToArray()
+        private static CharacterPropertiesBase[] ReplaceParagraphStyles(this Document document, Document defaultPropertiesProvider, IDocumentStyle[] styles, ParagraphStyle paragraphStyle) 
+            => document.Paragraphs.Where(paragraph => styles.Contains(paragraph.Style.ToDocumentStyle(defaultPropertiesProvider))).ToArray()
 		        .Do(paragraph => paragraph.Style = paragraphStyle)
 		        .Select(paragraph => paragraphStyle).Cast<CharacterPropertiesBase>().ToArray();
 
         [PublicAPI]
-        public static void ReplaceStyles(this Document document, IDocumentStyle replacement,params IDocumentStyle[] styles) => document.ReplaceStyles(replacement,null,styles);
+        public static void ReplaceStyles(this Document document, IDocumentStyle replacement,params IDocumentStyle[] styles) 
+            => document.ReplaceStyles(replacement,null,styles);
 
-        public static string Name(this CharacterPropertiesBase style) => style is IDocumentStyle documentStyle ? documentStyle.StyleName : (string) style.GetPropertyValue("Name");
+        public static string Name(this CharacterPropertiesBase style) 
+            => style is IDocumentStyle documentStyle ? documentStyle.StyleName : (string) style.GetPropertyValue("Name");
 
         public static byte[] ToByteArray(this Document document, DocumentFormat documentFormat){
 	        using var memoryStream = new MemoryStream();
@@ -384,8 +391,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions{
 	        return element != null ? document.CreateRange(element.Range.Start, element.Range.Length) : document.CreateRange(0, 0);
         }
 
-        public static int FromPosition(this ParagraphCollection paragraphs, int position) =>
-	        paragraphs.Select((paragraph, i) => (paragraph, i))
+        public static int FromPosition(this ParagraphCollection paragraphs, int position) 
+            => paragraphs.Select((paragraph, i) => (paragraph, i))
 		        .Where(_ => _.paragraph.Range.Start.ToInt() <= position && position < _.paragraph.Range.End.ToInt())
 		        .Select(_ => _.i).FirstOrDefault();
 
@@ -408,8 +415,6 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions{
             return document.Paragraphs[paragraphFromPosition].Style.ToDocumentStyle(defaultPropertiesProvider,true);
         }
 
-
-        
         public static void DeleteStyles(this Document document, params IDocumentStyle[] documentStyles){
             documentStyles = documentStyles.WhenNotDefaultStyle().ToArray();
             document.BeginUpdate();

@@ -16,7 +16,7 @@ namespace Xpand.XAF.Modules.PositionInListView.Tests{
             positionInListView.ListViews.Count().ShouldBeGreaterThanOrEqualTo(1);
             positionInListView.ListViews.Select(view => view.ModelClass.TypeInfo.Type).ShouldContain(typeof(PIL));
             positionInListView.ListViews.All(view =>
-                view.ModelClass.AllMembers.Any(member => member.Type == typeof(int))).ShouldBeTrue();
+                view.ModelClass.AllMembers.Any(member => member.Type == typeof(int)||member.Type == typeof(long))).ShouldBeTrue();
         }
         [Test][XpandTest()][Order(1)]
         public void ListViewModelMember_datasource_contains_int_Members() {
@@ -44,7 +44,7 @@ namespace Xpand.XAF.Modules.PositionInListView.Tests{
             positionInListView.ModelClasses.Count().ShouldBeGreaterThanOrEqualTo(1);
             positionInListView.ModelClasses.Select(modelClass => modelClass.TypeInfo.Type).ShouldContain(typeof(PIL));
             positionInListView.ModelClasses.All(modelClass =>
-                modelClass.AllMembers.Any(member => member.Type == typeof(int))).ShouldBeTrue();
+                modelClass.AllMembers.Any(member => member.Type == typeof(int)||member.Type == typeof(long))).ShouldBeTrue();
         }
 
         [Test][XpandTest()][Order(1)]

@@ -1,8 +1,6 @@
 ﻿using System;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor;
-using DevExpress.ExpressApp.Security;
-using DevExpress.ExpressApp.Security.ClientServer;
 using Microsoft.Extensions.DependencyInjection;
 using DevExpress.ExpressApp.Xpo;
 using TestApplication.Blazor.Server.Services;

@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using Xpand.XAF.Modules.JobScheduler.Hangfire;
 
@@ -12,7 +12,7 @@ using Xpand.XAF.Modules.JobScheduler.Hangfire;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Xpand.XAF.Modules.JobScheduler.Hangfire")]
-[assembly: AssemblyCopyright("Copyright eXpandFramework � 2018")]
+[assembly: AssemblyCopyright("Copyright eXpandFramework ? 2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

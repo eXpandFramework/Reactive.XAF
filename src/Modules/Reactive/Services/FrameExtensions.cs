@@ -38,8 +38,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Where(frame => frame.View.Fits(viewType, nesting, objectType))
                 .Where(_ => {
                     if (isPopupLookup.HasValue){
-                        var ispopupLookupTemplate = _.Template is ILookupPopupFrameTemplate;
-                        return isPopupLookup.Value ? ispopupLookupTemplate : !ispopupLookupTemplate;
+                        var popupLookupTemplate = _.Template is ILookupPopupFrameTemplate;
+                        return isPopupLookup.Value ? popupLookupTemplate : !popupLookupTemplate;
                     }
 
                     return true;
@@ -89,11 +89,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.ReturnObservable().TemplateViewChanged();
 
         public static IObservable<T> TemplateViewChanged<T>(this IObservable<T> source) where T : Frame 
-            => source.SelectMany(item => {
-                return Observable.FromEventPattern<EventHandler, EventArgs>(
-                    handler => item.TemplateViewChanged += handler,
-                    handler => item.TemplateViewChanged -= handler,ImmediateScheduler.Instance).Select(pattern => item);
-            });
+            => source.SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(
+                handler => item.TemplateViewChanged += handler,
+                handler => item.TemplateViewChanged -= handler,ImmediateScheduler.Instance).Select(pattern => item));
 
         public static IObservable<Unit> WhenDisposingFrame<TFrame>(this TFrame source) where TFrame : Frame 
             => DisposingFrame(source.ReturnObservable());

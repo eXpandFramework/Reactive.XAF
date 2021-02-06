@@ -51,7 +51,7 @@ namespace Web.Tests {
             adapter.Execute(new CheckDetailViewCommand<JobWorker>((worker => worker.State, workerState.ToString())));
             adapter.Execute(new ActionCommand(Actions.OK));
             adapter.Execute(new NavigateCommand("Default.Order"));
-            adapter.Execute(new CheckListViewCommand(nameof(Order), 10));
+            adapter.Execute(new CheckListViewCommand(nameof(Order), 12));
         }
 
         private static void TestPauseResume(this ICommandAdapter adapter) {

@@ -37,6 +37,7 @@
     <Compile Include="..\..\CommonFiles\MicrosoftTodoService.cs" Link="MicrosoftTodoService.cs" />
     <Compile Include="..\..\CommonFiles\ModelViewInheritanceService.cs" Link="ModelViewInheritanceService.cs" />
     <Compile Include="..\..\CommonFiles\OfficeCloudService.cs" Link="OfficeCloudService.cs" />
+    <Compile Include="..\..\CommonFiles\PositionInListViewService.cs" Link="PositionInListViewService.cs" />
     <Compile Include="..\..\CommonFiles\SequenceGeneratorService.cs" Link="SequenceGeneratorService.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -49,23 +50,13 @@
     <PackageReference Include="System.ServiceModel.Security" Version="4.8.1" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.8.1" />
     <PackageReference Include="System.ServiceModel.Duplex" Version="4.8.1" />
-    <!-- <PackageReference Include="MagicOnion" Version="2.6.3" /> -->
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.3" />
     <PackageReference Include="Moq" Version="4.16" />
-    <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="86.0.4240.2200" />
+    <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="88.0.4324.9600" />
     <PackageReference Include="Shouldly" Version="4.0.3" />
     <PackageReference Include="NUnit" Version="3.13" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.17" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="4.202.50.1" />
-    <!-- <PackageReference Include="System.Data.SqlClient" Version="4.8.2" /> -->
-    <!-- <PackageReference Include="System.Data.OleDb" Version="5.0.0" /> -->
-    <!-- <PackageReference Include="System.ServiceModel.Http" Version="4.8.0" /> -->
-    <!-- <PackageReference Include="System.ServiceModel.NetTcp" Version="4.8.0" /> -->
-    <!-- <PackageReference Include="System.ServiceModel.Security" Version="4.8.0" /> -->
-    <!-- <PackageReference Include="System.ServiceModel.Duplex" Version="4.8.0" /> -->
-    <!-- <PackageReference Include="System.ServiceProcess.ServiceController" Version="5.0.0" /> -->
-    <!-- <PackageReference Include="System.Collections.Immutable" Version="5.0.0" /> -->
-    <!-- <PackageReference Include="System.Text.Json" Version="5.0.0" /> -->
+    <PackageReference Include="Xpand.XAF.Web.All" Version="4.202.50.2" />
     <PackageReference Include="Selenium.WebDriver" Version="3.141" />
     <PackageReference Include="Selenium.Support" Version="3.141" />
   </ItemGroup>

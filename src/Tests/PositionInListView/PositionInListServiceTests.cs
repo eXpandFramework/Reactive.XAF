@@ -78,19 +78,5 @@ namespace Xpand.XAF.Modules.PositionInListView.Tests{
             objects[last].ShouldBe(pil3.Name);
         }
 
-		[Test]
-		[XpandTest]
-		public void When_ListView_Creating_Clear_Model_Sort() {
-            using var application = PositionInListViewModuleModule().Application;
-            var positionInListView = application.Model.ToReactiveModule<IModelReactiveModulesPositionInListView>()
-                .PositionInListView.ListViewItems.AddNode<IModelPositionInListViewListViewItem>();
-            positionInListView.ListView = application.Model.BOModel.GetClass(typeof(PIL)).DefaultListView;
-            var listViewColumn = positionInListView.ListView.Columns[nameof(PIL.Name)];
-            listViewColumn.SortOrder = ColumnSortOrder.Ascending;
-
-            application.NewView(positionInListView.ListView);
-
-            listViewColumn.SortOrder.ShouldBe(ColumnSortOrder.None);
-        }
 	}
 }

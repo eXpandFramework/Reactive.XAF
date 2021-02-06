@@ -109,6 +109,7 @@ namespace ALL.Win.Tests {
                 adapter.TestDocumentStyleManager();
 #endif
                 adapter.TestModelViewInheritance();
+                adapter.TestPositionInListView();
                 await Task.CompletedTask;
             });
         }

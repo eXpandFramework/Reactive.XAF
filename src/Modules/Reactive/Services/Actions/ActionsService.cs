@@ -1,11 +1,13 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Utils;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ActionExtensions;
@@ -207,7 +209,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static IObservable<TAction> WhenActive<TAction>(this TAction simpleAction) where TAction : ActionBase 
             => simpleAction.ReturnObservable().WhenActive();
 
-		public static IObservable<TAction> WhenActivated<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
+		public static IObservable<TAction> WhenActivated<TAction>(this IObservable<TAction> source,params string[] contexts) where TAction : ActionBase 
             => source.SelectMany(a => a.WhenActivated());
 		
 		public static IObservable<TAction> WhenInActive<TAction>(this TAction simpleAction) where TAction : ActionBase 
@@ -216,15 +218,15 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 		public static IObservable<TAction> WhenDeactivated<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
             => source.SelectMany(a => a.WhenDeactivated());
 
-        public static IObservable<TAction> WhenActivated<TAction>(this TAction simpleAction) where TAction : ActionBase 
-            => simpleAction.ResultValueChanged(action => action.Active)
-		        .Where(tuple => tuple.action.Active.ResultValue)
-		        .Select(_ => _.action);
+        public static IObservable<TAction> WhenActivated<TAction>(this TAction simpleAction,params string[] contexts) where TAction : ActionBase 
+            => simpleAction.ResultValueChanged(action => action.Active).SelectMany(t => contexts.Add(Controller.ControllerActiveKey).Select(context => (t,context)))
+		        .Where(t => t.t.action.Active.ResultValue&&t.t.action.Active.Contains(t.context)&& t.t.action.Active[t.context])
+		        .Select(t => t.t.action);
         
         public static IObservable<TAction> WhenDeactivated<TAction>(this TAction simpleAction) where TAction : ActionBase 
             => simpleAction.ResultValueChanged(action => action.Active)
 		        .Where(tuple => !tuple.action.Active.ResultValue)
-		        .Select(_ => _.action);
+		        .Select(t => t.action);
 
         public static IObservable<TAction> WhenChanged<TAction>(this IObservable<TAction> source,ActionChangedType? actionChangedType = null)where TAction : ActionBase 
             => source.SelectMany(a => a.WhenChanged(actionChangedType));

@@ -16,7 +16,6 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="20.2.5" />
-    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.2.5" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageReference Include="hangfire.core" Version="1.7.19" />
     <PackageReference Include="hangfire.sqlserver" Version="1.7.19" />

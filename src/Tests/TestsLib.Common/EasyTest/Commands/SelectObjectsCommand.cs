@@ -4,6 +4,9 @@ using System.Linq.Expressions;
 using DevExpress.EasyTest.Framework;
 using DevExpress.EasyTest.Framework.Commands;
 using Xpand.Extensions.XAF.ObjectExtensions;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
+using Xpand.TestsLib.Common.EasyTest.Commands.Automation;
+using Xpand.TestsLib.Common.Win32;
 
 namespace Xpand.TestsLib.Common.EasyTest.Commands{
     public class SelectObjectsCommand<TObject,TColumn> : SelectObjectsCommand{
@@ -16,15 +19,17 @@ namespace Xpand.TestsLib.Common.EasyTest.Commands{
             base(tableSelector.MemberExpressionCaption(), column, rows){
         }
     
-        public SelectObjectsCommand(Expression<Func<T, object>> column, string[] rows) : base(typeof(T).Name, column.MemberExpressionCaption(), rows){
+        public SelectObjectsCommand(Expression<Func<T, object>> column, string[] rows) : base(typeof(T).Name, column.MemberExpressionCaption().CompoundName(), rows){
         }
     }
 
     public class SelectObjectsCommand : EasyTestCommand{
         private readonly Command _command;
+        private bool _selectAll;
         public const string Name = "SelectObjects";
 
-        public SelectObjectsCommand(MainParameter mainParameter=null){
+        public SelectObjectsCommand(MainParameter mainParameter=null) {
+            _selectAll = true;
             Parameters.Add(new Parameter("SelectAll = True"));
             _command = this.ConvertTo<ExecuteTableActionCommand>();
             if (mainParameter != null) _command.Parameters.MainParameter = mainParameter;
@@ -41,7 +46,14 @@ namespace Xpand.TestsLib.Common.EasyTest.Commands{
         }
 
         protected override void ExecuteCore(ICommandAdapter adapter){
-            adapter.Execute(_command);
+            if (_selectAll&&adapter.GetTestApplication().Platform() == Platform.Win) {
+                adapter.Execute(new SendKeysCommand(Win32Constants.VirtualKeys.A,
+                    Win32Constants.VirtualKeys.ControlLeft));
+            }
+            else {
+                adapter.Execute(_command);
+            }
+            
         }
     }
 }

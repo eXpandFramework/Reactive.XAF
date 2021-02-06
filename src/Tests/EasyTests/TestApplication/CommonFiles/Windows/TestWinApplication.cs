@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.Security.ClientServer;

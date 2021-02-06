@@ -145,13 +145,13 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
                 showViewParameters.CreatedView = application.NewView(application.FindListViewId(typeof(DocumentStyle)));
                 showViewParameters.TargetWindow = TargetWindow.NewModalWindow;
                 var dialogController = new DialogController();
-                var conntrollerType = application.Model.ActionDesign.Actions[nameof(FilterImportStyles)].Controller
+                var controllerType = application.Model.ActionDesign.Actions[nameof(FilterImportStyles)].Controller
                     .ControllerType(application.ControllersManager());
-                showViewParameters.Controllers.Add(application.CreateController(conntrollerType));
+                showViewParameters.Controllers.Add(application.CreateController(controllerType));
                 showViewParameters.Controllers.Add(dialogController);
                 return dialogController.WhenActivated()
-                    .Do(_ => {
-                        var frame = _.Frame;
+                    .Do(controller => {
+                        var frame = controller.Frame;
                         frame.GetController<ListViewProcessCurrentObjectController>()
                             .Active[nameof(ImportStylesService)] = false;
                         var filterImportStyles = frame.Action<DocumentStyleManagerModule>().FilterImportStyles();

@@ -41,6 +41,7 @@ using Xpand.Extensions.XAF.ViewExtenions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions;
 using Xpand.XAF.Modules.Reactive;
+using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Logger;
 using Xpand.XAF.Modules.Reactive.Logger.Hub;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -304,12 +305,19 @@ namespace Xpand.TestsLib.Common{
             }
             else if (platform == Platform.Blazor){
                 application = (XafApplication) ApplicationType.CreateInstance(typeof(TModule), transmitMessage, handleExceptions);
+                application.WhenWindowCreated()
+                    .Do(window => {
+                        var windowTemplate = (IWindowTemplate) AppDomain.CurrentDomain
+                            .CreateTypeInstance("DevExpress.ExpressApp.Blazor.Templates.WindowTemplate");
+                        window.SetTemplate(windowTemplate);
+                    })
+                    .Subscribe(application);
             }
             else{
                 throw new NotSupportedException(
                     "if implemented make sure all tests pass with TestExplorer and live testing");
             }
-
+            
             
             application.Title = TestContext.CurrentContext.Test.FullName;
             application.ConnectionString =usePersistentStorage?

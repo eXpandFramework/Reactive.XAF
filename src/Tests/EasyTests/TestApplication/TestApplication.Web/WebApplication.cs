@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Configuration;
 using System.Web;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Security;

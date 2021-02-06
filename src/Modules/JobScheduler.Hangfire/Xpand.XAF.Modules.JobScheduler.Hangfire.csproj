@@ -14,7 +14,6 @@
     <AllowPackageReference>True</AllowPackageReference>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <DebugType>full</DebugType>
-    <CopyLocalLockFileAssemblie>true</CopyLocalLockFileAssemblie>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Model.DesignedDiffs.xafml" />

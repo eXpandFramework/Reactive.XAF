@@ -14,7 +14,7 @@ using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
-    public static class ObjectSpaceExtensions{
+    public static class ObjectSpaceExtensions {
         [PublicAPI]
         public static IObservable<T> WhenModifiedObjects<T>(this IObjectSpace objectSpace,Expression<Func<T,object>> memberSelector){
             var memberName = ((MemberExpression) memberSelector.Body).Member.Name;
@@ -121,6 +121,19 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T> WhenObjectCommitted<T>(this IObservable<T> source) where T:IObjectSpaceLink 
             => source.SelectMany(_ => _.ObjectSpace.WhenCommitted().FirstAsync().Select(tuple => _));
 
+        public static IObservable<object> WhenNewObjectCreated(
+            this IObjectSpace objectSpace, Type objectSpaceLinkType = null)
+#if !XAF192
+            => objectSpace.WhenModifiedChanging().Where(t => !t.e.Cancel && t.objectSpace.IsNewObject(t.e.Object) && t.e.MemberInfo == null)
+                .Where(t => objectSpaceLinkType == null || objectSpaceLinkType.IsInstanceOfType(t.e.Object))
+                .Select(t => t.e.Object);
+#else
+            => Observable.Throw<object>(new NotImplementedException());
+#endif
+
+        public static IObservable<T> WhenNewObjectCreated<T>(this IObjectSpace objectSpace) where T:IObjectSpaceLink
+            => objectSpace.WhenNewObjectCreated(typeof(T)).OfType<T>();
+
         public static IObservable<T> WhenNewObjectCommiting<T>(this IObjectSpace objectSpace) 
             => objectSpace.WhenCommiting()
                 .SelectMany(t => objectSpace.ModifiedObjects.OfType<T>().Where(r => t.objectSpace.IsNewObject(r)))
@@ -199,13 +212,23 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.ReturnObservable().Disposed();
 
         [PublicAPI]
-        public static IObservable<IObjectSpace> WhenModifyChanged(this IObjectSpace source) 
-            => source.ReturnObservable().WhenModifyChanged();
+        public static IObservable<IObjectSpace> WhenModifyChanged(this IObjectSpace objectSpace) 
+            => Observable.FromEventPattern<EventHandler, EventArgs>(h => objectSpace.ModifiedChanged += h, h => objectSpace.ModifiedChanged -= h,ImmediateScheduler.Instance)
+                .Select(pattern => (IObjectSpace) pattern.Sender);
 
         public static IObservable<IObjectSpace> WhenModifyChanged(this IObservable<IObjectSpace> source) 
-            => source.SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(h => item.ModifiedChanged += h, h => item.ModifiedChanged -= h,ImmediateScheduler.Instance)
-                .Select(pattern => (IObjectSpace) pattern.Sender)
-            );
+            => source.SelectMany(item => item.WhenModifyChanged());
+
+#if !XAF192
+        [PublicAPI]
+        public static IObservable<(IObjectSpace objectSpace, ObjectSpaceModificationEventArgs e)> WhenModifiedChanging(this IObjectSpace objectSpace) 
+            => Observable.FromEventPattern<EventHandler<ObjectSpaceModificationEventArgs>, ObjectSpaceModificationEventArgs>(h => ((BaseObjectSpace) objectSpace).ModifiedChanging += h, h => ((BaseObjectSpace) objectSpace).ModifiedChanging -= h,ImmediateScheduler.Instance)
+                .TransformPattern<ObjectSpaceModificationEventArgs,IObjectSpace>();
+
+        public static IObservable<(IObjectSpace objectSpace, ObjectSpaceModificationEventArgs e)> WhenModifiedChanging(this IObservable<IObjectSpace> source) 
+            => source.SelectMany(item => item.WhenModifiedChanging());
+#endif
+
         
         public static IObservable<IObjectSpace> WhenReloaded(this IObjectSpace source) 
             => source.ReturnObservable().WhenReloaded();

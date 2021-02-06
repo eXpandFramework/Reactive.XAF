@@ -19,6 +19,9 @@
     <CopyLocalLockFileAssemblie>true</CopyLocalLockFileAssemblie>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
+  <PropertyGroup>
+    <DefineConstants>TRACE;XAF202</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Diagnostics\**" />
     <EmbeddedResource Remove="Diagnostics\**" />

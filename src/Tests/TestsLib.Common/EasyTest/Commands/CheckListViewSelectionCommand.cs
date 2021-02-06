@@ -5,13 +5,12 @@ using DevExpress.EasyTest.Framework;
 using DevExpress.EasyTest.Framework.Commands;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.XAF.ObjectExtensions;
-using Parameter = Xpand.TestsLib.Common.EasyTest.Commands.Parameter;
 
 namespace Xpand.TestsLib.Common.EasyTest.Commands{
     public class CheckListViewSelectionCommand<TObject> : CheckListViewSelectionCommand{
-        public CheckListViewSelectionCommand(Expression<Func<TObject, object>> tableNameSelectotr,
+        public CheckListViewSelectionCommand(Expression<Func<TObject, object>> tableNameSelector,
             params (string column, string value)[] columns) : base(
-            tableNameSelectotr.MemberExpressionCaption().CompoundName(), columns){
+            tableNameSelector.MemberExpressionCaption().CompoundName(), columns){
         }
     }
 
@@ -22,8 +21,9 @@ namespace Xpand.TestsLib.Common.EasyTest.Commands{
             Parameters.AddRange(columns.Select(_ => new Parameter($"Row = {_.value}")));
         }
 
-        protected override void ExecuteCore(ICommandAdapter adapter){
-            adapter.Execute(this.ConvertTo<CheckTableSelectionCommand>());
+        protected override void ExecuteCore(ICommandAdapter adapter) {
+            var command = this.ConvertTo<CheckTableSelectionCommand>();
+            adapter.Execute(command);
         }
-    }
+    } 
 }

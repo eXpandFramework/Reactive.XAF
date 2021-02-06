@@ -38,6 +38,7 @@ using Xpand.XAF.Modules.ModelViewInheritance;
 using Xpand.XAF.Modules.Office.Cloud.Google;
 using Xpand.XAF.Modules.Office.Cloud.Google.Calendar;
 using Xpand.XAF.Modules.Office.Cloud.Google.Tasks;
+using Xpand.XAF.Modules.PositionInListView;
 using Xpand.XAF.Modules.ProgressBarViewItem;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
@@ -89,8 +90,8 @@ namespace TestApplication.Module {
             RequiredModuleTypes.Add(typeof(ProgressBarViewItemModule));
             RequiredModuleTypes.Add(typeof(ModelMapperModule));
             RequiredModuleTypes.Add(typeof(ReactiveModule));
-			
-			RequiredModuleTypes.Add(typeof(RefreshViewModule));
+            RequiredModuleTypes.Add(typeof(PositionInListViewModule));
+            RequiredModuleTypes.Add(typeof(RefreshViewModule));
 			RequiredModuleTypes.Add(typeof(SequenceGeneratorModule));
 			RequiredModuleTypes.Add(typeof(SuppressConfirmationModule));
 			RequiredModuleTypes.Add(typeof(ViewEditModeModule));

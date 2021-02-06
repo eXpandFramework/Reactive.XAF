@@ -58,17 +58,19 @@ namespace Xpand.XAF.Modules.PositionInListView{
 	[DomainLogic(typeof(IModelPositionInListViewModelClassItem))]
 	public static class ModelPositionInListViewModelClassItemLogic{
 		[UsedImplicitly]
-		public static CalculatedModelNodeList<IModelClass> Get_ModelClasses(this IModelPositionInListViewModelClassItem item) => item
-			.Application.BOModel.Where(m => m.AllMembers.Any(member => member.Type == typeof(int))).ToCalculatedModelNodeList();
+		public static CalculatedModelNodeList<IModelClass> Get_ModelClasses(this IModelPositionInListViewModelClassItem item) 
+            => item.Application.BOModel.Where(m => m.AllMembers.Any(MemberFits)).ToCalculatedModelNodeList();
 
 		[UsedImplicitly]
-		public static CalculatedModelNodeList<IModelMember> Get_ModelMembers(this IModelPositionInListViewModelClassItem item) => item
-			.ModelClass != null ? item.ModelClass.AllMembers.Where(member => member.Type == typeof(int)).ToCalculatedModelNodeList()
+		public static CalculatedModelNodeList<IModelMember> Get_ModelMembers(this IModelPositionInListViewModelClassItem item) 
+            => item.ModelClass != null ? item.ModelClass.AllMembers.Where(MemberFits).ToCalculatedModelNodeList()
 				: new CalculatedModelNodeList<IModelMember>();
 
-		[UsedImplicitly]
-		public static IModelMember Get_ModelMember(this IModelPositionInListViewModelClassItem item) =>
-			item.ModelClass?.AllMembers.First(member => member.Type == typeof(int));
+        internal static bool MemberFits(this IModelMember member) => new[]{typeof(int),typeof(long)}.Contains(member.Type);
+
+        [UsedImplicitly]
+		public static IModelMember Get_ModelMember(this IModelPositionInListViewModelClassItem item) 
+            => item.ModelClass?.AllMembers.First(MemberFits);
 	}
 
 	public enum PositionInListViewNewObjectsStrategy{
@@ -124,20 +126,20 @@ namespace Xpand.XAF.Modules.PositionInListView{
 		public static void Set_ListView(IModelPositionInListViewListViewItem item, IModelListView listView) => item.ListViewId = listView.Id;
 
 		[UsedImplicitly]
-		public static IModelList<IModelListView> Get_ListViews(this IModelPositionInListViewListViewItem positionInListView) =>
-			positionInListView.Application.Views.OfType<IModelListView>().Where(view => view.ModelClass.AllMembers.Any(member => member.Type == typeof(int)))
+		public static IModelList<IModelListView> Get_ListViews(this IModelPositionInListViewListViewItem positionInListView) 
+            => positionInListView.Application.Views.OfType<IModelListView>().Where(view => view.ModelClass.AllMembers.Any(member => member.MemberFits()))
 				.ToCalculatedModelNodeList();
 
 		[UsedImplicitly]
 		public static IModelList<IModelMember> Get_PositionMembers(this IModelPositionInListViewListViewItem positionInListView){
 			var modelListView = positionInListView.ListView;
-			return modelListView != null ? modelListView.ModelClass.AllMembers.Where(member => member.Type == typeof(int))
+			return modelListView != null ? modelListView.ModelClass.AllMembers.Where(member => member.MemberFits())
 					.ToCalculatedModelNodeList() : Enumerable.Empty<IModelMember>().ToCalculatedModelNodeList();
 		}
 
 		[UsedImplicitly]
-		public static IModelMember Get_PositionMember(this IModelPositionInListViewListViewItem positionInListView) => positionInListView
-			.PositionMembers.FirstOrDefault();
+		public static IModelMember Get_PositionMember(this IModelPositionInListViewListViewItem positionInListView) 
+            => positionInListView.PositionMembers.FirstOrDefault();
 
 		
 	}
