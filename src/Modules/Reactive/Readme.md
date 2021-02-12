@@ -181,15 +181,13 @@ Below we will add interesting examples. All methods can live in a static class.
    ```
 2. Populate a ListView at any context (Popup, Navigation, Root, Nested)
     ```cs
-    public override void Setup(ApplicationModulesManager moduleManager){
-    base.Setup(moduleManager);
-    moduleManager.WhenApplication().WhenListViewCreating(typeof(NonPersistentObject))
-        .SelectMany(tuple => ((NonPersistentObjectSpace) tuple.args.ObjectSpace)
-            .WhenObjectsGetting().Do(_ => {
-                _.e.Objects = new BindingList<NonPersistentObject>();
-            })
-        )
-        .Subscribe(this);
+    public override void Setup(ApplicationModulesManager moduleManager) {
+        base.Setup(moduleManager); 
+        moduleManager.WhenApplication(application => application.WhenListViewCreating(typeof(NonPersistentObject))
+            .SelectMany(t => ((NonPersistentObjectSpace) t.e.ObjectSpace)
+                .WhenObjectsGetting()
+                .Do(_ => _.e.Objects = new BindingList<NonPersistentObject>())) )
+            .Subscribe(this);
     }
     ```
 
