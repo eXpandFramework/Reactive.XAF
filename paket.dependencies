@@ -10,6 +10,8 @@ nuget DevExpress.WindowsDesktop.Xaf == 20.2.5-ctp
 nuget DevExpress.ExpressApp.Office == 20.2.5
 nuget DevExpress.ExpressApp.Core.All == 20.2.5
 nuget DevExpress.ExpressApp.Win.All == 20.2.5
+nuget DevExpress.ExpressApp.Blazor.All == 20.2.5
+nuget DevExpress.ExpressApp.EasyTest.BlazorAdapter == 20.2.5
 nuget DevExpress.ExpressApp.Web.All == 20.2.5
 nuget DevExpress.EasyTest == 20.2.5  
 nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 20.2.5  
