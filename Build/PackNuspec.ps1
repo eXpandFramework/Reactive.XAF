@@ -4,7 +4,7 @@ param(
     $sourceDir = "$PSScriptRoot\..",
     $Filter ,
     [switch]$SkipReadMe,
-    $dxVersion="20.2.4.0"
+    $dxVersion="20.2.5.0"
 )
 
 New-Item $nugetBin -ItemType Directory -Force | Out-Null
@@ -137,4 +137,7 @@ if ($Branch -ne "lab") {
         & "$PSScriptRoot\UpdateReadMe.ps1" 
     }
     
+}
+if ((Get-VersionPart (Get-DevExpressVersion) Minor) -eq (Get-VersionPart $dxVersion Minor)){
+    & "$PSScriptRoot\UpdateReadMe.ps1" 
 }
