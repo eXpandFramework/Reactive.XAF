@@ -18,8 +18,8 @@ using Xpand.XAF.Modules.JobScheduler.Hangfire;
 
 [assembly: HostingStartup(typeof(GoogleCodeStateStartup))]
 [assembly: HostingStartup(typeof(HostingStartup))]
-[assembly: HostingStartup(typeof(Xpand.XAF.Modules.JobScheduler.Hangfire.HangfireStartup))]
-
+[assembly: HostingStartup(typeof(HangfireStartup))]
+[assembly: HostingStartup(typeof(Xpand.XAF.Modules.Blazor.BlazorStartup))]
 namespace TestApplication.Blazor.Server {
     public class Startup {
         public Startup(IConfiguration configuration) {

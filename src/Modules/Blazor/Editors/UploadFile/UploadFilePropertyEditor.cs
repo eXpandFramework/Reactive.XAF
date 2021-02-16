@@ -13,7 +13,6 @@ using DevExpress.ExpressApp.Blazor.Editors;
 using DevExpress.ExpressApp.Blazor.Editors.Adapters;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
-using DevExpress.ExpressApp.Utils;
 using DevExpress.Persistent.Base;
 using Fasterflect;
 using Microsoft.AspNetCore.Components;
@@ -103,37 +102,12 @@ namespace Xpand.XAF.Modules.Blazor.Editors.UploadFile {
         }
     }
 
-    public class UploadFileAdapter : ComponentAdapterBase {
-        public UploadFileAdapter(UploadFileModel componentModel) 
-            => ComponentModel = componentModel ?? throw new ArgumentNullException(nameof(componentModel));
-
-        public UploadFileModel ComponentModel { get; }
-
+    public class UploadFileAdapter : ComponentAdapterBase<UploadFileModel> {
+        public UploadFileAdapter(UploadFileModel componentModel) => ComponentModel = componentModel ;
         public override void SetAllowEdit(bool allowEdit) => ComponentModel.ReadOnly = !allowEdit;
-
-        public override object GetValue() => ComponentModel.Value;
-
-        public override void SetValue(object value) { }
-
         protected override RenderFragment CreateComponent() => ComponentModelObserver.Create(ComponentModel, UploadFileComponent.Create(ComponentModel));
-
-        public override void SetAllowNull(bool allowNull) { }
-
-        public override void SetDisplayFormat(string displayFormat) { }
-
-        public override void SetEditMask(string editMask) { }
-
-        public override void SetEditMaskType(EditMaskType editMaskType) { }
-
-        public override void SetErrorIcon(ImageInfo errorIcon) { }
-
-        public override void SetErrorMessage(string errorMessage) { }
-
-        public override void SetIsPassword(bool isPassword) { }
-
-        public override void SetMaxLength(int maxLength) { }
-
-        public override void SetNullText(string nullText) { }
+        public override object GetValue() => ComponentModel.Value;
+        public override UploadFileModel ComponentModel { get; }
     }
 
     [PropertyEditor(typeof(IEnumerable<IFileData>),nameof(UploadFilePropertyEditor), false)]
@@ -141,9 +115,8 @@ namespace Xpand.XAF.Modules.Blazor.Editors.UploadFile {
         readonly Guid _guid=Guid.NewGuid();
         private readonly UploadFileAdapter _uploadFileAdapter;
 
-        public UploadFilePropertyEditor(Type objectType, IModelMemberViewItem model) : base(objectType, model) {
-            _uploadFileAdapter = new UploadFileAdapter(new UploadFileModel(_guid));
-        }
+        public UploadFilePropertyEditor(Type objectType, IModelMemberViewItem model) : base(objectType, model) 
+            => _uploadFileAdapter = new UploadFileAdapter(new UploadFileModel(_guid));
 
         protected override IComponentAdapter CreateComponentAdapter() => _uploadFileAdapter;
 
@@ -154,7 +127,6 @@ namespace Xpand.XAF.Modules.Blazor.Editors.UploadFile {
                 .Do(formFile => {
                     var elementType = MemberInfo.ListElementType;
                     var fileData = (IFileData) objectSpace.CreateObject(elementType);
-                    
                     fileData.LoadFromStream(formFile.name,new MemoryStream(formFile.bytes));
                     PropertyValue.CallMethod("BaseAdd", fileData);
                     objectSpace.SetModified(CurrentObject);

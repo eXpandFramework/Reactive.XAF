@@ -1,7 +1,9 @@
-﻿using System.Linq;
-using DevExpress.ExpressApp;
+﻿using System;
+using System.Linq;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Utils;
+using Fasterflect;
+using Xpand.Extensions.AppDomainExtensions;
 
 namespace Xpand.Extensions.XAF.ActionExtensions{
     public static partial class ActionExtensions{
@@ -34,8 +36,16 @@ namespace Xpand.Extensions.XAF.ActionExtensions{
             var singleChoiceAction = actionBase as SingleChoiceAction;
             singleChoiceAction?.DoExecute(singleChoiceAction.SelectedItem??singleChoiceAction.Items.FirstOrDefault());
 
-            var popupWindowShowAction = actionBase as PopupWindowShowAction;
-            popupWindowShowAction?.DoExecute((Window)popupWindowShowAction.Controller.Frame);
+            if (actionBase is PopupWindowShowAction popupWindowShowAction) {
+                var helper = (IDisposable)Activator.CreateInstance(AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Win.PopupWindowShowActionHelper"),popupWindowShowAction);
+                var view = actionBase.View();
+                void OnClosing(object sender, EventArgs args) {
+                    view.Closing -= OnClosing;
+                    helper.Dispose();
+                }
+                view.Closing += OnClosing;
+                helper.CallMethod("ShowPopupWindow");
+            }
 
             var parametrizedAction = actionBase as ParametrizedAction;
             parametrizedAction?.DoExecute(parametrizedAction.Value);

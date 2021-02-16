@@ -138,6 +138,6 @@ if ($Branch -ne "lab") {
     }
     
 }
-if ((Get-VersionPart (Get-DevExpressVersion) Minor) -eq (Get-VersionPart $dxVersion Minor)){
+if (((Get-VersionPart (Get-DevExpressVersion) Minor) -eq (Get-VersionPart $dxVersion Minor)) -and (([version]$dxVersion).Revision -eq 0)){
     & "$PSScriptRoot\UpdateReadMe.ps1" 
 }
