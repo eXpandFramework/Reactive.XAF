@@ -17,6 +17,9 @@
     <DebugType>full</DebugType>
   </PropertyGroup>
   <ItemGroup>
+    <Content Remove="Editors\UploadFile\UploadFileComponent.razor" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Update="Module.cs" />
     <Compile Include="..\..\Common\AssemblyInfoVersion.cs">
       <Link>Properties\AssemblyInfoVersion.cs</Link>
@@ -43,6 +46,11 @@
     </Reference>
     <PackageReference Include="DevExpress.ExpressApp" Version="20.2.5" />
     <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="20.2.5" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Editors\DisplayText\" />
+    <Folder Include="Editors\FrameWebPage\" />
+    <Folder Include="Editors\UploadFile\" />
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

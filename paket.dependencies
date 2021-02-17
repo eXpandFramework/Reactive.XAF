@@ -77,7 +77,6 @@ nuget Xpand.Collections
 nuget System.Configuration.ConfigurationManager
 nuget Microsoft.CodeAnalysis.CSharp
 nuget Microsoft.CodeAnalysis
-nuget System.ServiceModel.Http
 nuget Microsoft.AspNetCore.Hosting
 nuget Selenium.Support
 nuget Selenium.WebDriver
