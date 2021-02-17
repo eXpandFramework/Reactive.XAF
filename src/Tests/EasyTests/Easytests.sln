@@ -69,11 +69,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.TestsLib.Common", "..
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.TestsLib.Net461", "..\TestsLib.Net461\Xpand.TestsLib.Net461.csproj", "{482E3D8F-7B7D-4E18-898A-B0294AAE35D8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Blazor", "..\..\Modules\Blazor\Xpand.XAF.Modules.Blazor.csproj", "{15E85BF4-2317-460F-B8F6-43E19EB780E1}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions", "..\..\Extensions\Xpand.Extensions\Xpand.Extensions.csproj", "{D519C185-59F9-4341-A0BD-C70EB0CBEE1D}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.JobScheduler.Hangfire", "..\..\Modules\JobScheduler.Hangfire\Xpand.XAF.Modules.JobScheduler.Hangfire.csproj", "{F9D9AB29-5860-4742-8CC8-82AECB4FFC63}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Blazor", "..\..\Modules\Blazor\Xpand.XAF.Modules.Blazor.csproj", "{FC5B92C8-465A-4475-9719-A69117BE9687}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -203,18 +199,10 @@ Global
 		{482E3D8F-7B7D-4E18-898A-B0294AAE35D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{482E3D8F-7B7D-4E18-898A-B0294AAE35D8}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
 		{482E3D8F-7B7D-4E18-898A-B0294AAE35D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{15E85BF4-2317-460F-B8F6-43E19EB780E1}.Debug_20.1|Any CPU.ActiveCfg = Debug|Any CPU
-		{15E85BF4-2317-460F-B8F6-43E19EB780E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{15E85BF4-2317-460F-B8F6-43E19EB780E1}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
-		{15E85BF4-2317-460F-B8F6-43E19EB780E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D519C185-59F9-4341-A0BD-C70EB0CBEE1D}.Debug_20.1|Any CPU.ActiveCfg = Debug|Any CPU
-		{D519C185-59F9-4341-A0BD-C70EB0CBEE1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D519C185-59F9-4341-A0BD-C70EB0CBEE1D}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
-		{D519C185-59F9-4341-A0BD-C70EB0CBEE1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F9D9AB29-5860-4742-8CC8-82AECB4FFC63}.Debug_20.1|Any CPU.ActiveCfg = Debug|Any CPU
-		{F9D9AB29-5860-4742-8CC8-82AECB4FFC63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F9D9AB29-5860-4742-8CC8-82AECB4FFC63}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
-		{F9D9AB29-5860-4742-8CC8-82AECB4FFC63}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC5B92C8-465A-4475-9719-A69117BE9687}.Debug_20.1|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC5B92C8-465A-4475-9719-A69117BE9687}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC5B92C8-465A-4475-9719-A69117BE9687}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC5B92C8-465A-4475-9719-A69117BE9687}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

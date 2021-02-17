@@ -10,7 +10,7 @@ using DevExpress.ExpressApp.Updating;
 using DevExpress.ExpressApp.Validation;
 using DevExpress.ExpressApp.Validation.Blazor;
 using JetBrains.Annotations;
-using Xpand.XAF.Modules.Blazor.Editors.DisplayText;
+using Xpand.XAF.Modules.Blazor.Editors;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 

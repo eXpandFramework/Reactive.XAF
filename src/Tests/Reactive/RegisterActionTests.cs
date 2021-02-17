@@ -9,6 +9,7 @@ using DevExpress.ExpressApp.Core;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.Conditional;
+using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.DetailViewExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
@@ -117,7 +118,12 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             var window = application.CreateViewWindow();
             window.Controllers.Values.OfType<WindowController>().SelectMany(controller => controller.Actions).Select(a => a.Id).ShouldNotContain(id);
             if (detailViewAction.Active.ResultValue){
-                var testObserver = detailViewAction.WhenExecuted().Test();
+                var testObserver = detailViewAction.WhenExecuted().ToUnit().Test();
+                if (detailViewAction is PopupWindowShowAction popupWindowShowAction) {
+                    popupWindowShowAction.IsModal = false;
+                    testObserver=popupWindowShowAction.WhenCustomizePopupWindowParams().Do(args => args.View = application.NewView<DetailView>(typeof(R))).FirstAsync().ToUnit().Test();
+                }
+                
                 detailViewAction.DoTheExecute();
                 testObserver.ItemCount.ShouldBe(1);
             }

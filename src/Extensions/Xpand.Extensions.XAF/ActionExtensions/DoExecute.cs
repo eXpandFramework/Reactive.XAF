@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Linq;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Utils;
 using Fasterflect;
 using Xpand.Extensions.AppDomainExtensions;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 
 namespace Xpand.Extensions.XAF.ActionExtensions{
     public static partial class ActionExtensions{
@@ -37,14 +39,19 @@ namespace Xpand.Extensions.XAF.ActionExtensions{
             singleChoiceAction?.DoExecute(singleChoiceAction.SelectedItem??singleChoiceAction.Items.FirstOrDefault());
 
             if (actionBase is PopupWindowShowAction popupWindowShowAction) {
-                var helper = (IDisposable)Activator.CreateInstance(AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Win.PopupWindowShowActionHelper"),popupWindowShowAction);
-                var view = actionBase.View();
-                void OnClosing(object sender, EventArgs args) {
-                    view.Closing -= OnClosing;
-                    helper.Dispose();
+                if (popupWindowShowAction.Application.GetPlatform() == Platform.Win) {
+                    var helper = (IDisposable)Activator.CreateInstance(AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Win.PopupWindowShowActionHelper"),popupWindowShowAction);
+                    var view = actionBase.View();
+                    void OnClosing(object sender, EventArgs args) {
+                        helper.Dispose();
+                        view.Closing -= OnClosing;
+                    }
+                    view.Closing += OnClosing;
+                    helper.CallMethod("ShowPopupWindow");
                 }
-                view.Closing += OnClosing;
-                helper.CallMethod("ShowPopupWindow");
+                else {
+                    popupWindowShowAction?.DoExecute((Window)popupWindowShowAction.Controller.Frame);
+                }
             }
 
             var parametrizedAction = actionBase as ParametrizedAction;

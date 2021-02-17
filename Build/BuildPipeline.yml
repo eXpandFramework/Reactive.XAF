@@ -144,6 +144,7 @@ jobs:
                 }
                 "failedBuilds=$failedBuilds"
                 if (!$failedBuilds) {
+                    "PublishNugets-Reactive.XAF"
                     $env:AzureToken = '$(AzureToken)' 
                     $env:AzOrganization = "eXpandDevOps"
                     $env:AzProject = "eXpandFramework"
