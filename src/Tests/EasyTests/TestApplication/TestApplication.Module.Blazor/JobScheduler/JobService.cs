@@ -10,7 +10,7 @@ using Xpand.XAF.Modules.JobScheduler.Hangfire;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace TestApplication.Module.Blazor.JobScheduler {
-    class MyClass:ModelNodesGeneratorUpdater<ModelJobSchedulerSourceModelGenerator> {
+    class JoSchedulerSourceUpdater:ModelNodesGeneratorUpdater<ModelJobSchedulerSourceModelGenerator> {
         public override void UpdateNode(ModelNode node) {
             var source = node.AddNode<IModelJobSchedulerSource>();
             source.AssemblyName = typeof(JobService).Assembly.GetName().Name;
