@@ -1,6 +1,6 @@
 ![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.JobScheduler.Hangfire.svg?&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.JobScheduler.Hangfire.svg?&style=flat)
 
-[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/JobScheduler.Hangfire.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+label%3AJobScheduler.Hangfire) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/JobScheduler.Hangfire.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+label%3AJobScheduler.Hangfire)
+[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/JobScheduler.Hangfire.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AJobScheduler.Hangfire) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/JobScheduler.Hangfire.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AJobScheduler.Hangfire)
 # About 
 
 The `JobScheduler.Hangfire` package integrates Hangfire for fire & forget job schedules.
@@ -156,23 +156,38 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
-`.NetFramework: netstandard2.0`
+`.NetFramework: netstandard2.1`
 
 |<!-- -->|<!-- -->
 |----|----
-|**DevExpress.ExpressApp.Validation**|**Any**
+|**DevExpress.ExpressApp.ConditionalAppearance**|**Any**
+ |**DevExpress.Xpo**|**Any**
+ |**DevExpress.ExpressApp**|**Any**
+ |**DevExpress.ExpressApp.Blazor**|**Any**
+ |**DevExpress.ExpressApp.Validation**|**Any**
+ |**DevExpress.ExpressApp.Validation.Blazor**|**Any**
  |**DevExpress.ExpressApp.Xpo**|**Any**
-|Xpand.Extensions|4.202.45
- |Xpand.Extensions.Reactive|4.202.45
- |Xpand.Extensions.XAF|4.202.45
- |Xpand.Extensions.XAF.Xpo|4.202.45
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.202.45
+ |**DevExpress.Persistent.Base**|**Any**
+|Xpand.Extensions.Reactive|4.202.52
+ |Xpand.Extensions.Blazor|4.202.52
+ |Xpand.Extensions.XAF|4.202.52
+ |Xpand.Extensions|4.202.52
+ |Xpand.Extensions.XAF.Xpo|4.202.52
+ |[Xpand.XAF.Modules.Blazor](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Blazor)|4.202.52
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.202.52
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
- |System.Reactive|5.0.0
  |JetBrains.Annotations|2020.3.0
+ |System.Reactive|5.0.0
+ |System.Interactive|5.0.0
  |Microsoft.CodeAnalysis.CSharp|3.8.0
  |System.Configuration.ConfigurationManager|5.0.0
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.11
+ |Hangfire.Core|1.7.19
+ |System.CodeDom|5.0.0
+ |Hangfire.AspNetCore|1.7.19
+ |Microsoft.AspNetCore.Hosting.Abstractions|2.2.0
+ |Microsoft.Extensions.DependencyInjection.Abstractions|5.0.0
+ |Xpand.Patcher|2.0.27
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.202.52
 
 ## Issues-Debugging-Troubleshooting
 

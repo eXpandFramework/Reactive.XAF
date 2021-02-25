@@ -1,6 +1,6 @@
 ![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.svg?&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.svg?&style=flat)
 
-[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/Office.Cloud.Microsoft.Calendar.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+label%3AOffice.Cloud.Microsoft.Calendar) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/Office.Cloud.Microsoft.Calendar.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+label%3AOffice.Cloud.Microsoft.Calendar)
+[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/Office.Cloud.Microsoft.Calendar.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AOffice.Cloud.Microsoft.Calendar) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/Office.Cloud.Microsoft.Calendar.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AOffice.Cloud.Microsoft.Calendar)
 # About 
 
 The `Microsoft.Calendar` package integrates with the Office365 Calendar cloud service.
@@ -97,20 +97,20 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |----|----
 |**DevExpress.Persistent.Base**|**Any**
  |**DevExpress.ExpressApp.Xpo**|**Any**
-|Xpand.Extensions|4.202.45
- |Xpand.Extensions.Office.Cloud|4.202.45
- |Xpand.Extensions.Reactive|4.202.45
- |Xpand.Extensions.XAF|4.202.45
- |Xpand.Extensions.XAF.Xpo|4.202.45
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.202.45
- |[Xpand.XAF.Modules.Office.Cloud.Microsoft](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Office.Cloud.Microsoft)|4.202.45
+|Xpand.Extensions|4.202.52
+ |Xpand.Extensions.Office.Cloud|4.202.52
+ |Xpand.Extensions.Reactive|4.202.52
+ |Xpand.Extensions.XAF|4.202.52
+ |Xpand.Extensions.XAF.Xpo|4.202.52
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.202.52
+ |[Xpand.XAF.Modules.Office.Cloud.Microsoft](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Office.Cloud.Microsoft)|4.202.52
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |System.Reactive|5.0.0
  |JetBrains.Annotations|2020.3.0
- |Microsoft.Graph.Beta|0.34.0-preview
- |Microsoft.Identity.Client|4.24.0
+ |Microsoft.Graph.Beta|0.37.0-preview
+ |Microsoft.Identity.Client|4.25.0
  |Microsoft.CodeAnalysis.CSharp|3.8.0
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.11
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.202.52
 
 ## Issues-Debugging-Troubleshooting
 

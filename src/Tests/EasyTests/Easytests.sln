@@ -71,6 +71,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.TestsLib.Net461", "..
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Blazor", "..\..\Modules\Blazor\Xpand.XAF.Modules.Blazor.csproj", "{FC5B92C8-465A-4475-9719-A69117BE9687}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DevExpress.ExpressApp.Blazor.NetStandard", "..\..\..\..\..\..\Program Files (x86)\DevExpress 20.2\Components\Sources\DevExpress.ExpressApp\DevExpress.ExpressApp.Blazor\DevExpress.ExpressApp.Blazor.NetStandard.csproj", "{5C24EC69-4A60-4C4D-B074-2AA508875F3A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Reactive", "..\..\Modules\Reactive\Xpand.XAF.Modules.Reactive.csproj", "{F9558EFE-69DB-45CC-8E3E-D1CE0AEF0C72}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_20.1|Any CPU = Debug_20.1|Any CPU
@@ -203,6 +207,14 @@ Global
 		{FC5B92C8-465A-4475-9719-A69117BE9687}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FC5B92C8-465A-4475-9719-A69117BE9687}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
 		{FC5B92C8-465A-4475-9719-A69117BE9687}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C24EC69-4A60-4C4D-B074-2AA508875F3A}.Debug_20.1|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C24EC69-4A60-4C4D-B074-2AA508875F3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C24EC69-4A60-4C4D-B074-2AA508875F3A}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C24EC69-4A60-4C4D-B074-2AA508875F3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9558EFE-69DB-45CC-8E3E-D1CE0AEF0C72}.Debug_20.1|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9558EFE-69DB-45CC-8E3E-D1CE0AEF0C72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9558EFE-69DB-45CC-8E3E-D1CE0AEF0C72}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9558EFE-69DB-45CC-8E3E-D1CE0AEF0C72}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

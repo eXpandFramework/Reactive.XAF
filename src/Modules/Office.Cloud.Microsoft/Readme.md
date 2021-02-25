@@ -1,6 +1,6 @@
 ![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.Office.Cloud.Microsoft.svg?&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.Office.Cloud.Microsoft.svg?&style=flat)
 
-[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/Office.Cloud.Microsoft.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AStandalone_xaf_modules+label%3AOffice.Cloud.Microsoft) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/Office.Cloud.Microsoft.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AStandalone_XAF_Modules+label%3AOffice.Cloud.Microsoft)
+[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/Office.Cloud.Microsoft.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AOffice.Cloud.Microsoft) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/Office.Cloud.Microsoft.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AOffice.Cloud.Microsoft)
 # About 
 
 The `Microsoft` authenticates against Azure Active Directory and queries the MSGraph endpoints.
@@ -145,16 +145,16 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.Persistent.Base**|**Any**
-|Xpand.Extensions|4.202.45
- |Xpand.Extensions.Office.Cloud|4.202.45
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.202.45
- |Xpand.Extensions.Reactive|4.202.45
- |Xpand.Extensions.XAF|4.202.45
+|Xpand.Extensions|4.202.52
+ |Xpand.Extensions.Office.Cloud|4.202.52
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.202.52
+ |Xpand.Extensions.Reactive|4.202.52
+ |Xpand.Extensions.XAF|4.202.52
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |JetBrains.Annotations|2020.3.0
  |System.Reactive|5.0.0
- |Microsoft.Graph.Beta|0.34.0-preview
- |Microsoft.Identity.Client|4.24.0
+ |Microsoft.Graph.Beta|0.37.0-preview
+ |Microsoft.Identity.Client|4.25.0
  |Microsoft.Owin.Host.SystemWeb|4.1.1
  |Microsoft.Owin.Security.Cookies|4.1.1
  |Microsoft.Owin.Security.OpenIdConnect|4.1.1
@@ -162,8 +162,8 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |Microsoft.IdentityModel.Protocols.OpenIdConnect|6.8.0
  |Microsoft.IdentityModel.Tokens|6.8.0
  |System.Collections.Immutable|5.0.0
- |Microsoft.Graph.Core|1.23.0
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.VersionConverter)|2.202.11
+ |Microsoft.Graph.Core|1.24.0
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.202.52
 
 ## Issues-Debugging-Troubleshooting
 
