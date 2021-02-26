@@ -1,7 +1,5 @@
 ﻿using System;
-using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor.Services;
-using DevExpress.ExpressApp.Security;
 using Fasterflect;
 using Hangfire;
 using Hangfire.Dashboard;
@@ -26,7 +24,6 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
             => app => {
                 Server?.Invoke(app);
                 next(app);
-                
             };
 
         public static Action<IApplicationBuilder> Server = builder => builder.UseHangfireServer();

@@ -8,8 +8,6 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
         public JobProviderAttribute() {
         }
 
-        public JobProviderAttribute(string displayName) {
-            DisplayName = displayName;
-        }
+        public JobProviderAttribute(string displayName) => DisplayName = displayName;
     }
 }

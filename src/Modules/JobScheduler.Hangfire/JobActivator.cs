@@ -21,8 +21,6 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
             return ActivatorUtilities.GetServiceOrCreateInstance(_serviceScope.ServiceProvider, type);
             
         }
-
-
     }
 
     public class ServiceJobActivator : JobActivator {

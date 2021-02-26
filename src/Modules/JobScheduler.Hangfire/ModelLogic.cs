@@ -12,14 +12,10 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire{
     }
 
     [ModelNodesGenerator(typeof(ModelJobSchedulerSourceModelGenerator))]
-    public interface IModelJobSchedulerSources:IModelList<IModelJobSchedulerSource>,IModelNode{
-        
-    }
+    public interface IModelJobSchedulerSources:IModelList<IModelJobSchedulerSource>,IModelNode{ }
 
     public class ModelJobSchedulerSourceModelGenerator:ModelNodesGeneratorBase {
-        protected override void GenerateNodesCore(ModelNode node) {
-            
-        }
+        protected override void GenerateNodesCore(ModelNode node) { }
     }
 
     [KeyProperty(nameof(AssemblyName))]
