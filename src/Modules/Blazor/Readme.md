@@ -3,7 +3,7 @@
 [![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/Blazor.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3ABlazor) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/Blazor.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3ABlazor)
 # About 
 
-The `Blazor` package hosts and activates Blazor specific XAF artifacts.
+The `Blazor` package hosts and activates Blazor specific XAF artifacts (Editors, Services, etc).
 
 ## Details
 
@@ -13,7 +13,10 @@ The `Blazor` package hosts and activates Blazor specific XAF artifacts.
 
 ---
 
-This `Blazor only` module currently contains the `UploadFilePropertyEditor` and the `DisplayTextPropertyEditor` which are demoed in the next screencast.
+This `Blazor only` module currently contains: 
+
+1. The `UploadFilePropertyEditor` and the `DisplayTextPropertyEditor` which are demoed in the next screencast.
+
 <twitter>
 
 [![BlazorFileUpload](https://user-images.githubusercontent.com/159464/102690443-2274fe00-420e-11eb-88e9-0d5014a7280c.gif)
@@ -25,6 +28,14 @@ This `Blazor only` module currently contains the `UploadFilePropertyEditor` and 
 
 ---
 
+2. The `ComponentPropertyEditor` which can be used to render any Blazor component/html lighting fast. 
+
+[![ComponentPropertyEditor](https://user-images.githubusercontent.com/131656/109025740-aee8e480-76c7-11eb-8b05-5dc4675fb924.gif)
+](https://youtu.be/VyP53DkIgTc)
+
+</twitter>
+
+[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/VyP53DkIgTc)
 
 
 **Possible future improvements:**
