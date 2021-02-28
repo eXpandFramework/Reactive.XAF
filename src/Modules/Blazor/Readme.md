@@ -17,7 +17,7 @@ This `Blazor only` module currently contains:
 
 1. The `UploadFilePropertyEditor` and the `DisplayTextPropertyEditor` which are demoed in the next screencast.
 
-<twitter>
+<twitter tags="#Blazor">
 
 [![BlazorFileUpload](https://user-images.githubusercontent.com/159464/102690443-2274fe00-420e-11eb-88e9-0d5014a7280c.gif)
 ](https://youtu.be/SroXOxf_m74)
@@ -30,10 +30,13 @@ This `Blazor only` module currently contains:
 
 2. The `ComponentPropertyEditor` which can be used to render any Blazor component/html lighting fast. 
 
+<twitter tags="#WinForms #WebForms">
+
 [![ComponentPropertyEditor](https://user-images.githubusercontent.com/131656/109025740-aee8e480-76c7-11eb-8b05-5dc4675fb924.gif)
-](https://youtu.be/VyP53DkIgTc)
+](2)
 
 </twitter>
+
 
 [![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/VyP53DkIgTc)
 
