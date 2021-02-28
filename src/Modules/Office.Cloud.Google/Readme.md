@@ -113,7 +113,7 @@ In the screencast below we see authentication against `Google/People/Me` service
 
 **Blazor**
 
-<twitter>
+<twitter tags="#Blazor">
 
 [![Xpand XAF Modules Office Cloud Google](https://user-images.githubusercontent.com/159464/97125250-012af080-173c-11eb-8504-a8378bceb7df.gif)](https://youtu.be/DOBL70tzsVM)
 
@@ -123,7 +123,7 @@ In the screencast below we see authentication against `Google/People/Me` service
 
 **WindowsForms/WindowsDesktop/WebForms**
 
-<twitter>
+<twitter tags="#WinForms #WebForms">
 
 [![Xpand XAF Modules Office Cloud Google](https://user-images.githubusercontent.com/159464/89726928-e8f2e180-da28-11ea-96fc-135719a18f46.gif)](https://www.youtube.com/watch?v=-pZjbGUChp0)
 

@@ -12,6 +12,7 @@ This is a `WinForma module`. To freeze the TopRowIndex of a ListView when its Co
 <twitter>
 
 ![image](https://user-images.githubusercontent.com/159464/64824092-c9a5c700-d5c1-11e9-96b8-5267876fa7c4.png)
+
 </twitter>
 
 The module is valuable in scenarios where an external signal notifies about new data and you refresh your View. Such an example is the [Reactive.Logger.Client](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win)

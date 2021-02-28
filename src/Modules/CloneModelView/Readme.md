@@ -13,6 +13,7 @@ This is a `platform agnostic` module. Using the `CloneModelViewAttribute` in you
 3. If you cloned a `ListView` it is possible the configure related `DetailView`
 
 <twitter>
+
 Next snippet is taken from the ModelDifference module.
 
 ```cs

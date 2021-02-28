@@ -15,8 +15,9 @@ The `JobScheduler.Hangfire` package integrates Hangfire for fire & forget job sc
 
 This `Blazor only` module is valuable when you want to schedule background processes.
 
+### Job Scheduling
 
-To schedule a new Job follow the next steps:
+Follow the next steps:
 1. Configure the Hangfire [default storage](https://docs.hangfire.io/en/latest/configuration/using-sql-server.html). Additionally consult Hangfire docs to configure/implement any other Hangfire related scenario, there are no restrictions.
 1. Add a model assembly `job source` pointing to the assembly containing your Job types.</br>
     ![image](https://user-images.githubusercontent.com/159464/103508193-4b7dcb80-4e69-11eb-82be-7fa109720368.png)
@@ -119,7 +120,7 @@ To schedule a new Job follow the next steps:
 
 In the screencast you can see `how to declare, schedule, pause, resume and get more details` for a Job.
 
-<twitter>
+<twitter tags="#Hangfire #Blazor">
 
 [![Xpand XAF Modules JobScheduler Hangfire](https://user-images.githubusercontent.com/159464/103535471-6bc57e80-4e99-11eb-9c59-f54b9abb2023.gif)
 ](https://youtu.be/0LJ2bM1CfMg)
@@ -130,7 +131,18 @@ In the screencast you can see `how to declare, schedule, pause, resume and get m
 
 ---
 
+### Security
 
+Hangfire Dashboard access can be configured using the XAF Security system as shown:
+
+<twitter tags="#Hangfire #Blazor #Security #Dashboard">
+
+[![Hangfire Security Dashboard](https://user-images.githubusercontent.com/159464/109437432-7893c800-7a2d-11eb-967d-da3c6f90dabf.gif))
+](https://youtu.be/Ep_DqomR6D8)
+
+</twitter>
+
+[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/Ep_DqomR6D8)
 
 **Possible future improvements:**
 

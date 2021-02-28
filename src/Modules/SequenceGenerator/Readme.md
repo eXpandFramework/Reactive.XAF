@@ -27,7 +27,7 @@ The cross platform [Xpand.XAF.Modules.SequenceGenerator](https://github.com/eXpa
 
 **Blazor**
 
-<twitter>
+<twitter tags="#Blazor">
 
 [![Xpand XAF Modules SequenceGenerator Blazor](https://user-images.githubusercontent.com/159464/105914046-74dbe280-6036-11eb-8d32-45c7355311d8.gif)](https://youtu.be/M87TEftU4hU)
 
@@ -39,7 +39,11 @@ The cross platform [Xpand.XAF.Modules.SequenceGenerator](https://github.com/eXpa
 
 **WinForms/WinDesktop/WebForms**
 
+<twitter tags="#WinForms #WebForms">
+
 [![hfvTo7UsCI](https://user-images.githubusercontent.com/159464/80309035-f918e500-87da-11ea-8f52-7799457213cf.gif)](https://www.youtube.com/watch?v=t1BDPFU01z8)
+
+</twitter>
 
 The SequenceStorage table is a normal XAF BO, therefore it is possible to create sequence bindings in code by creating instances of that object. However we do not recommend creating instances directly but use the provided API (possibly in a [ModuleUpdater](https://docs.devexpress.com/eXpressAppFramework/DevExpress.ExpressApp.Updating.ModuleUpdater)). The API respects additional constrains and validations.
 

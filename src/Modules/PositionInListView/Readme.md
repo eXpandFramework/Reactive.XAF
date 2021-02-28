@@ -27,7 +27,7 @@ If a `NewObjectsStrategy` for the ModelClass is not configured it defaults to `L
 
 **Blazor**
 
-<twitter>
+<twitter tags="#Blazor">
 
 [![Xpand XAF Modules PositionInListView Blazor](https://user-images.githubusercontent.com/159464/107925591-4f7b2e00-6f7d-11eb-96b0-1fef859d4dd1.gif)](https://youtu.be/65Vi7Jv1hIs)
 
@@ -41,9 +41,11 @@ If a `NewObjectsStrategy` for the ModelClass is not configured it defaults to `L
 In the screencast we create three customers at runtime and demo the feature by executing the MoveUp/MoveDown actions and close/reopen the view`. At the bottom the [Reactive.Logger.Client.Win](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win)
 
 
+<twitter tags="#WinForms #WebForms">
 
 [![sqFoseHS2q](https://user-images.githubusercontent.com/159464/82759129-e4d50180-9df3-11ea-8bb9-eb6b36452c51.gif)](https://www.youtube.com/watch?v=JBoVNXo19ek)
 
+</twitter>
 
 [![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://www.youtube.com/watch?v=JBoVNXo19ek)
 

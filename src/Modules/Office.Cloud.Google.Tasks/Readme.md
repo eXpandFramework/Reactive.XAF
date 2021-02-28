@@ -57,7 +57,7 @@ In the next screencast you can see all `CRUD` operations on the Task BO and how 
 
 **Blazor**
 
-<twitter>
+<twitter tags="#Blazor">
 
 [![Xpand XAF Modules Office Cloud Google Tasks](https://user-images.githubusercontent.com/159464/99307934-dd9d2680-285f-11eb-8b74-869ccabffc19.gif)
 ](https://youtu.be/tfiWaC-4UVA)
@@ -69,8 +69,12 @@ In the next screencast you can see all `CRUD` operations on the Task BO and how 
 
 **WinForms/WinDesktop/WebForms**
 
+<twitter tags="#Winforms #WebForms">
+
 [![Xpand XAF Modules Office Cloud Google Tasks](https://user-images.githubusercontent.com/159464/90682880-56dfaa00-e26e-11ea-981b-d6179572e945.gif)
 ](https://youtu.be/rxEnuRzY-PA)
+
+</twitter>
 
 [![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/rxEnuRzY-PA)
 
