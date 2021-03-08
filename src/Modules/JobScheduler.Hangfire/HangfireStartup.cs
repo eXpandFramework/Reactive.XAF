@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Linq;
+using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp.Blazor.Services;
+using DevExpress.ExpressApp.Security;
+using DevExpress.Persistent.Base;
 using Fasterflect;
 using Hangfire;
 using Hangfire.Dashboard;
@@ -7,7 +11,9 @@ using HarmonyLib;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Xpand.Extensions.Blazor;
 using Xpand.Extensions.XAF.AppDomainExtensions;
+using Xpand.Extensions.XAF.SecurityExtensions;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
     public class UseHangfire : IStartupFilter {
@@ -34,8 +40,26 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
     }
 
     public class DashboardAuthorization : IDashboardAuthorizationFilter {
-        public bool Authorize(DashboardContext context)
-            => context.GetHttpContext().User.Identity.IsAuthenticated;
+        public bool Authorize(DashboardContext context) {
+            var httpContext = context.GetHttpContext();
+            var userIdentity = httpContext.User.Identity;
+            if (userIdentity.IsAuthenticated) {
+                var provider = httpContext.RequestServices.GetRequiredService<ISharedXafApplicationProvider>();
+                var blazorApplication = provider.Application;
+                var security = provider.Security;
+                if (security.IsSecurityStrategyComplex()) {
+                    if (!security.IsActionPermissionGranted(nameof(JobSchedulerService.JobDashboard)) &&
+                        !security.IsAdminPermissionGranted()) {
+                        using var objectSpace = blazorApplication.CreateObjectSpace(security?.UserType);
+                        var user = (ISecurityUserWithRoles) objectSpace.FindObject(security?.UserType, CriteriaOperator.Parse($"{nameof(ISecurityUser.UserName)}=?", userIdentity.Name));
+                        return user.Roles.Cast<IPermissionPolicyRole>().Any(role => role.IsAdministrative);
+                    }
+                    return true;
+                }
+                return true;
+            }
+            return false;
+        }
     }
 
     public class HangfireStartup : IHostingStartup{
