@@ -31,7 +31,13 @@ Write-VerboseLog "targetPath=$targetPath"
 Write-VerboseLog "DevExpressVersion=$DevExpressVersion"
 Write-VerboseLog "referenceFilter=$referenceFilter"
 Write-VerboseLog "targetFilter=$targetFilter"
-$dxversion=GetDevExpressVersion $targetPath $referenceFilter $projectFile
+
+if (!$DevExpressVersion){
+    $dxVersion = Get-DevExpressVersion $targetPath $referenceFilter $projectFile 
+}
+else{
+    $dxVersion=$DevExpressVersion
+}
 Write-Verbose "dxVersion=$dxVersion" -Verbose
 [version]$v=$null
 if (!([version]::TryParse($dxversion,[ref]$v))){
