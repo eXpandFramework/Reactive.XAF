@@ -27,7 +27,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Xpand.TestsLib.Common")]
-[assembly: AssemblyCopyright("Copyright eXpandFramework �  2018")]
+[assembly: AssemblyCopyright("Copyright eXpandFramework ?  2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

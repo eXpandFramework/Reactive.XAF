@@ -73,8 +73,7 @@ namespace TestApplication.GoogleService{
 					
 				})
 				.ToUnit()
-                .Merge(manager.RegisterViewSimpleAction(nameof(PersistGoogleToken),
-                    action => { }).ActivateInUserDetails().WhenExecute().PersistToken().ToUnit())
+                .Merge(manager.RegisterViewSimpleAction(nameof(PersistGoogleToken)).ActivateInUserDetails().WhenExecute().PersistToken().ToUnit())
                 .Merge(manager.ShowGoogleAccountInfo())
                 .Merge(manager.PushTheToken<GoogleAuthentication>("Google",o => new DictionaryValueConverter().ConvertToStorageType(o.OAuthToken).ToString()))
                 .ToUnit();

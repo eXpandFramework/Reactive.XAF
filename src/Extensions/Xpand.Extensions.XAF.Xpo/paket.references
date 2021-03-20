@@ -4,3 +4,4 @@ System.ValueTuple
 System.Drawing.Common
 Fasterflect.Xpand
 Microsoft.CodeAnalysis.CSharp
+Newtonsoft.Json

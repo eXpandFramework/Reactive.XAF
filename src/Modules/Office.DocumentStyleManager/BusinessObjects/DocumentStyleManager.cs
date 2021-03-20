@@ -58,8 +58,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
 			}
 		}
 
-		public BindingList<DocumentStyle> AllStyles =>
-		   new BindingList<DocumentStyle>(ImmutableList.CreateRange(UsedStyles
+		public BindingList<DocumentStyle> AllStyles => new(ImmutableList.CreateRange(UsedStyles
 		       .Concat(UnusedStyles).Cast<DocumentStyle>().Distinct()));
 
 		[Browsable(false)]
@@ -88,8 +87,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
 		[Browsable(false)]
 		public List<IDocumentStyle> UsedStyles{ get;  }
 
-		public BindingList<DocumentStyle> ReplacementStyles => new BindingList<DocumentStyle>(ImmutableList.CreateRange(UsedStyles
-		   .Concat(UnusedStyles).Cast<DocumentStyle>().Distinct()));
+		public BindingList<DocumentStyle> ReplacementStyles => new(ImmutableList.CreateRange(UsedStyles.Concat(UnusedStyles).Cast<DocumentStyle>().Distinct()));
 		public event PropertyChangedEventHandler PropertyChanged;
 
 		[NotifyPropertyChangedInvocator]

@@ -19,9 +19,10 @@ namespace Xpand.Extensions.XAF.Xpo.ValueConverters {
 
             var stream = new MemoryStream();
             try {
+
 #if !XAF192
                 var binaryFormatter = new BinaryFormatter { AssemblyFormat = FormatterAssemblyStyle.Full };
-                binaryFormatter.Serialize(stream, value);
+                binaryFormatter.Serialize(stream, value);                
 #endif
                 result = Convert.ToBase64String(stream.ToArray());
             } finally {

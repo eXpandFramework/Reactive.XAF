@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using JetBrains.Annotations;
 using Xpand.XAF.Modules.Reactive.Extensions;
+using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.Reactive {
     public sealed class ReactiveModule : ReactiveModuleBase {

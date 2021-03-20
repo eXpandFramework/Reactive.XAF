@@ -18,23 +18,28 @@ using HarmonyLib;
 using JetBrains.Annotations;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.EventArgExtensions;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.Attributes.Custom;
 using Xpand.Extensions.XAF.ModuleExtensions;
+using Xpand.Extensions.XAF.ObjectExtensions;
+using Xpand.Extensions.XAF.ObjectSpaceExtensions;
+using Xpand.Extensions.XAF.SecurityExtensions;
+using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
-using Xpand.XAF.Modules.Reactive.Services.Security;
 
 namespace Xpand.XAF.Modules.Reactive{
 	public static class RxApp{
         internal static readonly ISubject<(object authentication, GenericEventArgs<object> args)>
             AuthenticateSubject = Subject.Synchronize(new Subject<(object authentication, GenericEventArgs<object> args)>());
-        static readonly Subject<ApplicationModulesManager> ApplicationModulesManagerSubject=new Subject<ApplicationModulesManager>();
-        static readonly Subject<Frame> FramesSubject=new Subject<Frame>();
+        static readonly Subject<ApplicationModulesManager> ApplicationModulesManagerSubject=new();
+        static readonly Subject<Frame> FramesSubject=new();
 
         static RxApp() => AppDomain.CurrentDomain.Patch(PatchXafApplication);
 
@@ -57,7 +62,7 @@ namespace Xpand.XAF.Modules.Reactive{
 
         private static IObservable<Unit> AddNonSecuredTypes(this ApplicationModulesManager applicationModulesManager) 
             => applicationModulesManager.WhenCustomizeTypesInfo()
-                .Select(_ =>_.e.TypesInfo.PersistentTypes.Where(info => info.Attributes.OfType<NonSecuredTypeAttrbute>().Any())
+                .Select(_ =>_.e.TypesInfo.PersistentTypes.Where(info => info.Attributes.OfType<NonSecuredTypeAttribute>().Any())
                     .Select(info => info.Type))
                 .Do(infos => {
                     var xafApplication = applicationModulesManager.Application();
@@ -65,33 +70,58 @@ namespace Xpand.XAF.Modules.Reactive{
                 })
                 .ToUnit();
 
-        internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
-            => manager.AddNonSecuredTypes()
-                .Merge(manager.WhenApplication(application => application.WhenNonPersistentPropertyCollectionSource()
-                .Merge(application.PatchAuthentication())
-                .Merge(application.ShowPersistentObjectsInNonPersistentView())
-            ))
-            .Merge(manager.SetupPropertyEditorParentView())
-            .Merge(manager.MergedExtraEmbeddedModels())
-            .Merge(manager.InvisibleInAllViewsAttribute())
-            .Merge(manager.VisibleInAllViewsAttribute())
-            .Merge(manager.CustomAttributes())
-            .Merge(manager.XpoAttributes())
-        ;
 
+        internal static IObservable<Unit> Connect(this ApplicationModulesManager manager)
+            => manager.ReadOnlyObjectViewAttribute() 
+                .Merge(manager.CustomAttributes())
+                .Merge(manager.AddNonSecuredTypes())
+                .Merge(manager.MergedExtraEmbeddedModels())
+                .Merge(manager.InvisibleInAllViewsAttribute())
+                .Merge(manager.VisibleInAllViewsAttribute())
+                // .Merge(manager.ReadOnlyObjectViewAttribute())
+                .Merge(manager.XpoAttributes())
+                .Merge(manager.ConnectObjectString())
+                .Merge(manager.WhenApplication(application => application.WhenNonPersistentPropertyCollectionSource()
+                    .Merge(application.PatchAuthentication())
+                    // .Merge(application.HandleObjectSpaceGetNonPersistentObject())
+                    .Merge(application.ShowPersistentObjectsInNonPersistentView())))
+                .Merge(manager.SetupPropertyEditorParentView());
+
+        static IObservable<Unit> HandleObjectSpaceGetNonPersistentObject(this XafApplication application)
+            => application.WhenNonPersistentObjectSpaceCreated()
+                .SelectMany(t => t.ObjectSpace.AsNonPersistentObjectSpace().WhenObjectGetting()
+                    .SelectMany(tuple => {
+                        tuple.e.TargetObject = tuple.e.SourceObject;
+                        if (tuple.e.TargetObject is IObjectSpaceLink objectSpaceLink) {
+                            objectSpaceLink.ObjectSpace = tuple.objectSpace;
+                        }
+                        return tuple.e.TargetObject.GetTypeInfo().Members.Where(info =>
+                                typeof(IObjectSpaceLink).IsAssignableFrom(info.MemberType))
+                            .ToObservable(Scheduler.Immediate)
+                            .Select(info => info.GetValue(tuple.e.TargetObject)).WhenNotDefault()
+                            .Cast<IObjectSpaceLink>()
+                            .Do(link => link.ObjectSpace = tuple.objectSpace);
+                    })
+                    .ToUnit());
 
         static IObservable<Unit> CustomAttributes(this ApplicationModulesManager manager) 
             => manager.WhenCustomizeTypesInfo()
                 .SelectMany(t => t.e.TypesInfo.PersistentTypes
-                    .SelectMany(info => info.Members.SelectMany(memberInfo => memberInfo.FindAttributes<Attribute>().OfType<ICustomAttribute>().ToArray()
-                        .Select(attribute => {
-                            for (int index = 0; index < attribute.Name.Split(';').Length; index++) {
-                                string s = attribute.Name.Split(';')[index];
-                                var theValue = attribute.Value.Split(';')[index];
-                                memberInfo.AddAttribute(new ModelDefaultAttribute(s, theValue));
-                            }
-                            return attribute;
-                        }))))
+                    .SelectMany(info => info.Members.SelectMany(memberInfo => memberInfo.FindAttributes<Attribute>()
+                        .OfType<ICustomAttribute>().ToArray().Select(memberInfo.AddCustomAttribute))
+                    ).Concat(t.e.TypesInfo.PersistentTypes.SelectMany(typeInfo => typeInfo
+                        .FindAttributes<Attribute>().OfType<ICustomAttribute>().ToArray().Select(typeInfo.AddCustomAttribute))))
+                .ToUnit();
+
+        static IObservable<Unit> ReadOnlyObjectViewAttribute(this ApplicationModulesManager manager)
+            => manager.WhenGeneratingModelNodes<IModelViews>().SelectMany().OfType<IModelObjectView>()
+                .SelectMany(view => view.ModelClass.TypeInfo.FindAttributes<ReadOnlyObjectViewAttribute>()
+                    .Where(objectView =>objectView is IModelDetailView&& objectView.ViewType==ViewType.DetailView||objectView is IModelListView&& objectView.ViewType==ViewType.ListView||objectView.ViewType==ViewType.Any)
+                    .Execute(objectView => {
+                        view.AllowEdit = objectView.AllowEdit;
+                        view.AllowDelete = objectView.AllowDelete;
+                        view.AllowNew = objectView.AllowNew;
+                    }).ToObservable(Scheduler.Immediate))
                 .ToUnit();
 
         static IObservable<Unit> VisibleInAllViewsAttribute(this ApplicationModulesManager manager)
@@ -143,7 +173,7 @@ namespace Xpand.XAF.Modules.Reactive{
 
         private static IObservable<Unit> XpoAttributes(this ApplicationModulesManager manager)
             => manager.WhenCustomizeTypesInfo()
-                .SelectMany(t => new[]{"SingleObjectAttribute","PropertyConcatAttribute"})
+                .SelectMany(_ => new[]{"SingleObjectAttribute","PropertyConcatAttribute"})
                 .SelectMany(attributeName => {
                     var lastObjectAttributeType = AppDomain.CurrentDomain.GetAssemblyType($"Xpand.Extensions.XAF.Xpo.{attributeName}");
                     return lastObjectAttributeType != null ? (IEnumerable<IMemberInfo>) lastObjectAttributeType

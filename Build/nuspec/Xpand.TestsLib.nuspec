@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.TestsLib</id>
-    <version>4.202.52.0</version>
+    <version>4.202.52.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -12,17 +12,17 @@
     <description>Xpand.TestsLib</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.TestsLib, 20.2.5</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.TestsLib, 20.2.6</tags>
     <dependencies>
       <group targetFramework="netcoreapp3.1">
-        <dependency id="Xpand.Extensions" version="4.202.52.0" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.202.52.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.202.52.0" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.202.52.0" />
-        <dependency id="Xpand.TestsLib.Common" version="4.202.52.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.52.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.202.52.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.202.52.0" />
+        <dependency id="Xpand.Extensions" version="4.202.52.1" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.202.52.1" />
+        <dependency id="Xpand.Extensions.XAF" version="4.202.52.1" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.202.52.1" />
+        <dependency id="Xpand.TestsLib.Common" version="4.202.52.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.52.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.202.52.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.202.52.1" />
         <dependency id="akarnokd.reactive_extensions" version="0.0.27-alpha" />
         <dependency id="Enums.NET" version="3.0.3" />
         <dependency id="Humanizer.Core" version="2.8.26" />
@@ -39,8 +39,8 @@
         <dependency id="Selenium.Support" version="3.141" />
         <dependency id="Selenium.WebDriver" version="3.141" />
         <dependency id="System.Reactive" version="5.0" />
-        <dependency id="Microsoft.CodeAnalysis" version="3.8" />
-        <dependency id="Microsoft.CodeAnalysis.Csharp" version="3.8" />
+        <dependency id="Microsoft.CodeAnalysis" version="3.9" />
+        <dependency id="Microsoft.CodeAnalysis.Csharp" version="3.9" />
       </group>
     </dependencies>
   </metadata>

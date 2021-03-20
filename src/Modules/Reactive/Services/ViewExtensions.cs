@@ -8,7 +8,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.XAF.Modules.Reactive.Extensions;
+using Xpand.Extensions.XAF.ViewExtensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ViewExtensions{
@@ -94,12 +94,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             });
             return listPropertyEditors.Where(editor => objectTypes.Any(type => type.IsAssignableFrom(editor.Frame.View.ObjectTypeInfo.Type))).Merge(nestedEditors);
         }
-
-
         public static IObservable<TView> When<TView>(this IObservable<TView> source,Type objectType=null,ViewType viewType=ViewType.Any,Nesting nesting=Nesting.Any) where TView:View{
             objectType ??= typeof(object);
-            return source.Where(view =>view.Fits(viewType,nesting,objectType));
+            return source.Where(view =>view.Is(viewType,nesting,objectType));
         }
+        
 
     }
 }

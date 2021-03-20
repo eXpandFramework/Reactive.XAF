@@ -12,3 +12,4 @@ Hangfire.AspNetCore
 Microsoft.AspNetCore.Hosting.Abstractions
 Microsoft.Extensions.DependencyInjection.Abstractions
 Xpand.Patcher
+Newtonsoft.Json

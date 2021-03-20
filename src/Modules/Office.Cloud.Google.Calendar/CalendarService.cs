@@ -20,7 +20,7 @@ using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
-using Xpand.Extensions.XAF.ViewExtenions;
+using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
@@ -30,7 +30,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
         private static readonly ISubject<(Frame frame, UserCredential userCredential)> CredentialsSubject=new Subject<(Frame frame, UserCredential client)>();
         public static IObservable<(Frame frame, UserCredential credential)> Credentials => CredentialsSubject.AsObservable();
         public const string DefaultCalendarId = "primary";
-        static readonly Subject<(Event cloud,IEvent local, MapAction mapAction,CallDirection callDirection)> UpdatedSubject=new Subject<(Event cloud, IEvent local, MapAction mapAction, CallDirection callDirection)>();
+        static readonly Subject<(Event cloud,IEvent local, MapAction mapAction,CallDirection callDirection)> UpdatedSubject=new();
         public static IObservable<(Event cloud, IEvent local, MapAction mapAction, CallDirection callDirection)> Updated{ get; }=UpdatedSubject.AsObservable();
         static readonly Subject<GenericEventArgs<(Func<IObjectSpace> objectSpace, IEvent local, Event cloud, MapAction mapAction, CallDirection callDirection)>> CustomizeSynchronizationSubject =
             new Subject<GenericEventArgs<(Func<IObjectSpace> objectSpace, IEvent target, Event source, MapAction mapAction, CallDirection callDirection)>>();
@@ -59,13 +59,13 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
 	        => manager.WhenApplication(application => {
                 var viewOnFrame = application.WhenViewOnFrame()
-	                .When(frame => application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office
+	                .When(_ => application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office
 		                .Google().Calendar().Items.Select(item => item.ObjectView))
 	                .Publish().RefCount();
                 return viewOnFrame.Authorize()
                     .SynchronizeBoth()
                     .Merge(viewOnFrame.SelectMany(frame=>frame.GetController<RefreshController>().RefreshAction.WhenExecute()
-                        .Select(e=>frame).TakeUntil(frame.View.WhenClosing())
+                        .Select(_=>frame).TakeUntil(frame.View.WhenClosing())
                         .Authorize().SynchronizeLocal()
                         .ObserveOnWindows(SynchronizationContext.Current)
                         .Select(tuple => {
@@ -235,8 +235,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
                 return calendarService.CalendarList.Get("primary").ToObservable();
             }
             var addNew = createNew.ReturnObservable().WhenNotDefault()
-                .SelectMany(b => calendarService.Calendars.Insert(new global::Google.Apis.Calendar.v3.Data.Calendar() { Summary = summary}).ToObservable())
-                .SelectMany(calendar => calendarService.GetCalendar(summary));
+                .SelectMany(_ => calendarService.Calendars.Insert(new global::Google.Apis.Calendar.v3.Data.Calendar() { Summary = summary}).ToObservable())
+                .SelectMany(_ => calendarService.GetCalendar(summary));
             return calendarService.CalendarList.List().ToObservable().SelectMany(list => list.Items)
                 .FirstOrDefaultAsync(entry => entry.Summary == summary).SwitchIfDefault(addNew);
         }

@@ -26,17 +26,24 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions{
 
         public static ObjectView NewObjectView(this XafApplication application,
             Type viewType,Type objectType) {
+            var objectSpace = application.CreateObjectSpace(objectType);
             if (viewType == typeof(ListView)){
                 var listViewId = application.FindListViewId(objectType);
-                var collectionSource = application.CreateCollectionSource(application.CreateObjectSpace(),objectType,listViewId);
+                var collectionSource = application.CreateCollectionSource(objectSpace,objectType,listViewId);
                 return application.CreateListView((IModelListView) application.Model.Views[listViewId], collectionSource, true);
             }
             var modelDetailView = application.Model.BOModel.GetClass(objectType).DefaultDetailView;
-            return application.CreateDetailView(application.CreateObjectSpace(), modelDetailView,true);
+            return application.CreateDetailView(objectSpace, modelDetailView,true);
         }
 
-        public static CompositeView NewView<TView>(this XafApplication application,  Type objectType) where TView:View => application
-	        .NewView(typeof(DetailView).IsAssignableFrom(typeof(TView))?ViewType.DetailView : ViewType.ListView,objectType);
+        public static TView NewView<TView>(this XafApplication application,  Type objectType) where TView:CompositeView 
+            => (TView)application.NewView(typeof(DetailView).IsAssignableFrom(typeof(TView))?ViewType.DetailView : ViewType.ListView,objectType);
+        
+        public static ListView NewListView(this XafApplication application,  Type objectType)  
+            => application.NewView<ListView>(objectType);
+        
+        public static DetailView NewDetailView(this XafApplication application,  Type objectType)  
+            => application.NewView<DetailView>(objectType);
 
         public static CompositeView NewView(this XafApplication application,ViewType viewType,Type objectType){
 	        var modelClass = application.Model.BOModel.GetClass(objectType);
@@ -45,8 +52,8 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions{
 
         public static CompositeView NewView(this XafApplication application,string viewId) => application.NewView(application.Model.Views[viewId]);
 
-        public static CompositeView NewView(this XafApplication application,IModelView modelView,IObjectSpace objectSpace=null) => 
-	        (CompositeView) (objectSpace==null?(CompositeView) application.CallMethod("CreateView", modelView):application.CreateView(modelView, objectSpace));
+        public static CompositeView NewView(this XafApplication application,IModelView modelView,IObjectSpace objectSpace=null) 
+            => (CompositeView) (objectSpace==null?(CompositeView) application.CallMethod("CreateView", modelView):application.CreateView(modelView, objectSpace));
 
         static View CreateView(this XafApplication application,IModelView viewModel,IObjectSpace objectSpace) {
 	        View view = null;
@@ -68,7 +75,7 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions{
 
 
 
-        public static TObjectView NewObjectView<TObjectView>(this XafApplication application,Type objectType) where TObjectView:ObjectView =>
-            (TObjectView) application.NewObjectView(typeof(TObjectView), objectType);
+        public static TObjectView NewObjectView<TObjectView>(this XafApplication application,Type objectType) where TObjectView:ObjectView 
+            => (TObjectView) application.NewObjectView(typeof(TObjectView), objectType);
     }
 }

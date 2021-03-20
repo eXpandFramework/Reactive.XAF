@@ -6,3 +6,4 @@ JetBrains.Annotations
 Microsoft.Graph.Beta
 Microsoft.Identity.Client
 Microsoft.CodeAnalysis.CSharp
+Newtonsoft.Json

@@ -8,7 +8,7 @@ using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
-using Xpand.Extensions.XAF.ViewExtenions;
+using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects;
@@ -22,7 +22,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
         public void DeleteStylesAction_Removes_Styles_and_update_document(){
             using var xafApplication=DocumentStyleManagerModule().Application;
             // application.MockEditorsFactory();
-            xafApplication.MockListEditor((view, application, collectionsource) =>
+            xafApplication.MockListEditor((view, application, _) =>
                 view.Id.Contains(nameof(BusinessObjects.DocumentStyleManager.AllStyles)) ? application.ListEditorMock(view).Object : new GridListEditor(view));
             var server = xafApplication.WhenDetailViewCreated().SelectMany(_ => _.e.View.WhenRichEditDocumentServer<BusinessObjects.DocumentStyleManager>(manager => manager.Content)).Test();
             var tuple = xafApplication.SetDocumentStyleManagerDetailView(Document);

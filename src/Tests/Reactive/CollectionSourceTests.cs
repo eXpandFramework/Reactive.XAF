@@ -11,13 +11,11 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
     [NonParallelizable]
     public class CollectionSourceTests : ReactiveCommonTest{
         [XpandTest()][Test]
-        public void When_Non_Persistent_DetailView_Nested_ListView_create_NonPersistentCollectionSource(){
-            using (var application = DefaultReactiveModule().Application){
-                var compositeView =(DetailView) application.NewView(application.FindDetailViewId(typeof(NonPersistentObject)));
-                application.CreateViewWindow().SetView(compositeView);
-                compositeView.GetListPropertyEditor<NonPersistentObject>(r => r.Childs).ListView.CollectionSource.GetType().ShouldBe(typeof(NonPersistePropertyCollectionSource));
-            }
-
+        public void When_Non_Persistent_DetailView_Nested_ListView_create_NonPersistentCollectionSource() {
+            using var application = DefaultReactiveModule().Application;
+            var compositeView =(DetailView) application.NewView(application.FindDetailViewId(typeof(NonPersistentObject)));
+            application.CreateViewWindow().SetView(compositeView);
+            compositeView.GetListPropertyEditor<NonPersistentObject>(r => r.Childs).ListView.CollectionSource.GetType().ShouldBe(typeof(NonPersistentPropertyCollectionSource));
         }
 
 

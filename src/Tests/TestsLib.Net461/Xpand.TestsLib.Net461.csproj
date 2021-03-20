@@ -27,6 +27,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\TestsLib.Common\Xpand.TestsLib.Common.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="Xpand.Extensions">

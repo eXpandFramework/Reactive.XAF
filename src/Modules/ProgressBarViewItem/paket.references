@@ -7,3 +7,4 @@ System.Configuration.ConfigurationManager
 Microsoft.CodeAnalysis.CSharp
 System.ServiceModel.Http
 System.Drawing.Common
+Newtonsoft.Json

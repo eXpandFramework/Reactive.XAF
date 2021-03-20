@@ -183,7 +183,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions{
         }
 
         public static bool IsParagraphStyle(this CharacterPropertiesBase style) 
-            => style is ParagraphStyle || (style is IDocumentStyle docStyle && docStyle.DocumentStyleType == DocumentStyleType.Paragraph);
+            => style is ParagraphStyle || (style is IDocumentStyle {DocumentStyleType: DocumentStyleType.Paragraph});
 
         private static void MapProperties(this IDocumentStyle documentStyle,CharacterPropertiesBase style, Document defaultPropertiesProvider){
 	        documentStyle.IsDeleted = (bool) style.GetPropertyValue("IsDeleted");
@@ -316,7 +316,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions{
 
         class CharacterStyleVisitor:DocumentVisitorBase{
             private readonly Document _document;
-            public Dictionary<string,List<DocumentRange>> Ranges{ get; } = new Dictionary<string, List<DocumentRange>>();
+            public Dictionary<string,List<DocumentRange>> Ranges{ get; } = new();
 
             public CharacterStyleVisitor(Document document) => _document = document;
 
@@ -368,7 +368,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions{
         private static CharacterPropertiesBase[] ReplaceParagraphStyles(this Document document, Document defaultPropertiesProvider, IDocumentStyle[] styles, ParagraphStyle paragraphStyle) 
             => document.Paragraphs.Where(paragraph => styles.Contains(paragraph.Style.ToDocumentStyle(defaultPropertiesProvider))).ToArray()
 		        .Do(paragraph => paragraph.Style = paragraphStyle)
-		        .Select(paragraph => paragraphStyle).Cast<CharacterPropertiesBase>().ToArray();
+		        .Select(_ => paragraphStyle).Cast<CharacterPropertiesBase>().ToArray();
 
         [PublicAPI]
         public static void ReplaceStyles(this Document document, IDocumentStyle replacement,params IDocumentStyle[] styles) 

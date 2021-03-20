@@ -1,8 +1,7 @@
 ﻿using DevExpress.ExpressApp;
-using Fasterflect;
 
-namespace Xpand.Extensions.XAF.ViewExtenions{
-    public static partial class ViewExtenions{
+namespace Xpand.Extensions.XAF.ViewExtensions{
+    public static partial class ViewExtensions{
 	    public static DetailView AsDetailView(this View view) => view as DetailView;
     }
 }

@@ -5,3 +5,4 @@ Microsoft.CodeAnalysis.CSharp
 System.Configuration.ConfigurationManager
 System.Reactive
 Microsoft.Extensions.DependencyInjection.Abstractions
+Newtonsoft.Json

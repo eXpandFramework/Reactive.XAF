@@ -20,7 +20,7 @@ using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
-using Xpand.Extensions.XAF.ViewExtenions;
+using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -30,10 +30,10 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks{
         private static readonly ISubject<(Frame frame, UserCredential userCredential)> CredentialsSubject=new Subject<(Frame frame, UserCredential client)>();
         public static IObservable<(Frame frame, UserCredential credential)> Credentials => CredentialsSubject.AsObservable();
         public const string DefaultTasksListId = "@default";
-        static readonly Subject<(Task serviceObject, MapAction mapAction)> UpdatedSubject=new Subject<(Task serviceObject, MapAction mapAction)>();
+        static readonly Subject<(Task serviceObject, MapAction mapAction)> UpdatedSubject=new();
         public static IObservable<(Task cloud, MapAction mapAction)> Updated{ get; }=UpdatedSubject.AsObservable();
         static readonly Subject<GenericEventArgs<(IObjectSpace objectSpace, ITask local, Task cloud, MapAction mapAction)>> CustomizeSynchronizationSubject =
-            new Subject<GenericEventArgs<(IObjectSpace objectSpace, ITask local, Task cloud, MapAction mapAction)>>();
+            new();
         
         [PublicAPI]
         public static IObservable<GenericEventArgs<(IObjectSpace objectSpace, ITask local, Task cloud, MapAction mapAction)>> CustomizeSynchronization 
@@ -86,8 +86,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks{
                 return tasksService.Tasklists.Get(DefaultTasksListId).ToObservable();
             }
             var addNew = createNew.ReturnObservable().WhenNotDefault()
-                .SelectMany(b => tasksService.Tasklists.Insert(new TaskList() { Title = title }).ToObservable())
-                .SelectMany(calendar => tasksService.GetTaskList(title));
+                .SelectMany(_ => tasksService.Tasklists.Insert(new TaskList() { Title = title }).ToObservable())
+                .SelectMany(_ => tasksService.GetTaskList(title));
             return tasksService.Tasklists.List().ToObservable().SelectMany(list => list.Items).FirstOrDefaultAsync(entry => entry.Title == title)
                 .SwitchIfDefault(addNew);
         }
@@ -99,7 +99,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks{
         
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => manager.WhenApplication(application => Observable.Defer(() => application.WhenViewOnFrame()
-		            .When(frame => application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Google()
+		            .When(_ => application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Google()
 			            .Tasks().Items.Select(item => item.ObjectView)).Authorize())
 	            .Retry(application)
                 .SynchronizeCloud()

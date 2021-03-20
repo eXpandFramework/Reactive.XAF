@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
@@ -15,17 +16,19 @@ using Fasterflect;
 using JetBrains.Annotations;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
+using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
+using Xpand.Extensions.XAF.FrameExtensions;
+using Xpand.Extensions.XAF.SecurityExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
-using Xpand.XAF.Modules.Reactive.Services.Security;
 using AssemblyExtensions = Xpand.Extensions.AssemblyExtensions.AssemblyExtensions;
 using ListView = DevExpress.ExpressApp.ListView;
 using View = DevExpress.ExpressApp.View;
@@ -36,7 +39,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.SelectMany(execute.ToTask);
 
         public static IObservable<T> SelectMany<T>(this XafApplication application, Func<IObservable<T>> execute) 
-            => Observable.Defer(() => Observable.Start(execute).Merge().Wait().ReturnObservable()).Catch<T,InvalidOperationException>(exception => Observable.Empty<T>());
+            => Observable.Defer(() => Observable.Start(execute).Merge().Wait().ReturnObservable()).Catch<T,InvalidOperationException>(_ => Observable.Empty<T>());
         
 	    public static IObservable<T> SelectMany<T>(this XafApplication application, Func<Task<T>> execute) 
             => application.GetPlatform()==Platform.Web?Task.Run(execute).Result.ReturnObservable():Observable.FromAsync(execute);
@@ -99,7 +102,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .TemplateChanged()
                 .SelectMany(_ => Observable.Interval(TimeSpan.FromMilliseconds(300))
                     .ObserveOnWindows(SynchronizationContext.Current)
-                    .Select(l => application.MainWindow))
+                    .Select(_ => application.MainWindow))
                 .WhenNotDefault()
                 .Select(window => window).Publish().RefCount().FirstAsync()
                 .TraceRX(window => window.Context);
@@ -109,17 +112,25 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static void AddObjectSpaceProvider(this XafApplication application, params IObjectSpaceProvider[] objectSpaceProviders) 
             => application.WhenCreateCustomObjectSpaceProvider()
-                .Select(t => {
-                    if (!objectSpaceProviders.Any()) {
-                        t.e.ObjectSpaceProviders.Add(application.NewObjectSpaceProvider());
-                        t.e.ObjectSpaceProviders.Add(new NonPersistentObjectSpaceProvider());
-                    }
-                    else{
-                        t.e.ObjectSpaceProviders.AddRange(objectSpaceProviders);
-                    }
-                    return t;
-                })
+                .SelectMany(t => application.WhenWeb()
+                    .Do(api => application.AddObjectSpaceProvider(objectSpaceProviders, t, api.GetService<NonPersistentObjectSpaceProvider>())).ToUnit()
+                    .SwitchIfEmpty(Unit.Default.ReturnObservable().Do(_ => application.AddObjectSpaceProvider(objectSpaceProviders, t))))
                 .Subscribe();
+
+        private static void AddObjectSpaceProvider(this XafApplication application,
+            IObjectSpaceProvider[] objectSpaceProviders,
+            (XafApplication application, CreateCustomObjectSpaceProviderEventArgs e) t,
+            NonPersistentObjectSpaceProvider nonPersistentObjectSpaceProvider = null) {
+            nonPersistentObjectSpaceProvider??=new NonPersistentObjectSpaceProvider(t.application.TypesInfo,null);
+            if (!objectSpaceProviders.Any()) {
+                t.e.ObjectSpaceProviders.Add(application.NewObjectSpaceProvider());
+
+                t.e.ObjectSpaceProviders.Add(nonPersistentObjectSpaceProvider);
+            }
+            else {
+                t.e.ObjectSpaceProviders.AddRange(objectSpaceProviders);
+            }
+        }
 
         public static IObjectSpaceProvider NewObjectSpaceProvider(this XafApplication application, object dataStoreProvider=null) {
             var xpoAssembly = AppDomain.CurrentDomain.GetAssemblies().First(asm => asm.GetName().Name.StartsWith("DevExpress.ExpressApp.Xpo.v"));
@@ -159,6 +170,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(XafApplication application, ObjectSpaceCreatedEventArgs e)> WhenObjectSpaceCreated(this IObservable<XafApplication> source) 
             => source.SelectMany(application => application.WhenObjectSpaceCreated());
 
+        public static IObservable<(XafApplication application, NonPersistentObjectSpace ObjectSpace)> WhenNonPersistentObjectSpaceCreated(this XafApplication application)
+            => application.WhenObjectSpaceCreated(true).Where(t => t.e.ObjectSpace is NonPersistentObjectSpace).Select(t => (application,(NonPersistentObjectSpace)t.e.ObjectSpace));
+
         public static IObservable<(XafApplication application, ObjectSpaceCreatedEventArgs e)> WhenObjectSpaceCreated(this XafApplication application,bool includeNonPersistent=false) 
             => Observable.FromEventPattern<EventHandler<ObjectSpaceCreatedEventArgs>,ObjectSpaceCreatedEventArgs>(h => application.ObjectSpaceCreated += h,h => application.ObjectSpaceCreated -= h,ImmediateScheduler.Instance)
                 .TransformPattern<ObjectSpaceCreatedEventArgs,XafApplication>()
@@ -190,6 +204,32 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 	            .Where(frame => nesting==Nesting.Any|| frame is NestedFrame&&nesting==Nesting.Nested||!(frame is NestedFrame)&&nesting==Nesting.Root)
                 .SelectMany(window => (window.View.ReturnObservable().When(objectType, viewType, nesting)).To(window))
                 .TraceRX(window => window.View.Id);
+
+        public static IEnumerable<Frame> WhenFrame<T>(this IEnumerable<T> source, Type objectType = null,
+            ViewType viewType = ViewType.Any, Nesting nesting = Nesting.Any) where T:Frame
+            => source.ToObservable(Scheduler.Immediate).WhenFrame(objectType,viewType,nesting).ToEnumerable();
+
+        public static IObservable<T> WhenFrame<T>(this IObservable<T> source, params Type[] objectTypes) where T:Frame 
+            => source.Where(frame => frame.Is(objectTypes));
+        
+        public static IObservable<T> WhenFrame<T>(this IObservable<T> source, params Nesting[] nesting) where T:Frame 
+            => source.Where(frame => frame.Is(nesting));
+
+        public static IObservable<T> WhenFrame<T>(this IObservable<T> source, params ViewType[] viewTypes) where T : Frame
+            => source.Where(frame => frame.Is(viewTypes));
+
+        public static IObservable<T> WhenFrame<T>(this IObservable<T> source, Type objectType = null,
+            ViewType viewType = ViewType.Any, Nesting nesting = Nesting.Any) where T:Frame
+            => source.Where(frame => frame.Is(nesting))
+                .SelectMany(frame => frame.View != null ? frame.Is(viewType) && frame.Is(objectType) ? frame.ReturnObservable() : Observable.Empty<T>()
+                    : frame.WhenViewChanged().Where(t => t.frame.Is(viewType) && t.frame.Is(objectType)).To(frame));
+
+
+        public static IObservable<Frame> WhenFrameViewChanged(this XafApplication application) 
+            => application.WhenFrameCreated().WhenViewChanged().Select(tuple => tuple.frame);
+        
+        public static IObservable<Frame> WhenFrameViewControls(this XafApplication application) 
+            => application.WhenFrameViewChanged().SelectMany(frame => frame.View.WhenControlsCreated().Select(view => view).To(frame));
 
         [PublicAPI]
         public static IObservable<(XafApplication application, DetailViewCreatingEventArgs e)> WhenDetailViewCreating(this XafApplication application) 
@@ -377,10 +417,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.WhenCreateCustomPropertyCollectionSource()
                 .Where(e => e.ObjectSpace is NonPersistentObjectSpace)
                 .Select(e => {
-                    e.PropertyCollectionSource = new NonPersistePropertyCollectionSource(e.ObjectSpace, e.MasterObjectType, e.MasterObject, e.MemberInfo,e.DataAccessMode, e.Mode);
+                    e.PropertyCollectionSource = new NonPersistentPropertyCollectionSource(e.ObjectSpace, e.MasterObjectType, e.MasterObject, e.MemberInfo,e.DataAccessMode, e.Mode);
                     return e.PropertyCollectionSource;
                 })
-                .Cast<NonPersistePropertyCollectionSource>()
+                .Cast<NonPersistentPropertyCollectionSource>()
                 .TakeUntilDisposed(application)
                 .ToUnit();
 

@@ -4,7 +4,7 @@ using DevExpress.Xpo.DB;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
-using Xpand.Extensions.XAF.ViewExtenions;
+using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.PositionInListView.Tests.BOModel;
@@ -48,8 +48,8 @@ namespace Xpand.XAF.Modules.PositionInListView.Tests{
             pil4.Order.ShouldBe(fourth);
         }
 
-		[TestCase(SortingDirection.Ascending, 0, 2)]
 		[TestCase(SortingDirection.Descending, 2, 0)]
+		[TestCase(SortingDirection.Ascending, 0, 2)]
 		[XpandTest]
 		public void When_ListView_Creating_Sort_CollectionSource(SortingDirection sortingDirection, int first, int last) {
             using var application = PositionInListViewModuleModule().Application;
@@ -63,11 +63,14 @@ namespace Xpand.XAF.Modules.PositionInListView.Tests{
             var objectSpace = application.CreateObjectSpace();
             var pil1 = objectSpace.CreateObject<PIL>();
             pil1.Name = "c";
+            objectSpace.CommitChanges();
             var pil2 = objectSpace.CreateObject<PIL>();
             pil2.Name = "a";
+            objectSpace.CommitChanges();
             var pil3 = objectSpace.CreateObject<PIL>();
             pil3.Name = "b";
             objectSpace.CommitChanges();
+            
 
             var listView = application.NewView(positionInListView.ListView).AsListView();
             application.CreateViewWindow().SetView(listView);

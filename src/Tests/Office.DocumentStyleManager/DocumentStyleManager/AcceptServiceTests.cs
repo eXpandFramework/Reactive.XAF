@@ -55,7 +55,9 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
 
             window.Action<DocumentStyleManagerModule>().AcceptStyleManagerChanges().DoExecute();
 
-            application.CreateObjectSpace().GetObject(template).DocumentStyleLinks.Count.ShouldBe(1);
+            var space = application.CreateObjectSpace();
+            var documentStyleLinkTemplate = space.GetObject(template);
+            documentStyleLinkTemplate.DocumentStyleLinks.Count.ShouldBe(1);
         }
 
         [Test][Apartment(ApartmentState.STA)][XpandTest()]

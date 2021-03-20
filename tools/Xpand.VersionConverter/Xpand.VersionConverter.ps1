@@ -33,7 +33,7 @@ Write-VerboseLog "referenceFilter=$referenceFilter"
 Write-VerboseLog "targetFilter=$targetFilter"
 
 if (!$DevExpressVersion){
-    $dxVersion = Get-DevExpressVersion $targetPath $referenceFilter $projectFile 
+    $dxVersion = GetDevExpressVersion $targetPath $referenceFilter $projectFile 
 }
 else{
     $dxVersion=$DevExpressVersion

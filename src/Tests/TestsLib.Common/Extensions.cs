@@ -37,7 +37,7 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
-using Xpand.Extensions.XAF.ViewExtenions;
+using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions;
 using Xpand.XAF.Modules.Reactive;
@@ -50,16 +50,17 @@ using EditorsFactory = DevExpress.ExpressApp.Editors.EditorsFactory;
 namespace Xpand.TestsLib.Common{
     [PublicAPI]
     public static class Extensions{
-        public static IObservable<Exception> WhenException(this TestTracing tracing){
-            return Observable.FromEventPattern<EventHandler<CreateCustomTracerEventArgs>, CreateCustomTracerEventArgs>(
+        public static IObservable<Exception> WhenException(this TestTracing tracing) 
+            => Observable.FromEventPattern<EventHandler<CreateCustomTracerEventArgs>, CreateCustomTracerEventArgs>(
                     h => Tracing.CreateCustomTracer += h, h => Tracing.CreateCustomTracer -= h, ImmediateScheduler.Instance).FirstAsync()
                 .SelectMany(_ => {
                     _.EventArgs.Tracer=tracing;
                     return tracing.Exceptions;
                 });
-        }
 
-        public static void SetupSecurity(this XafApplication application, Guid userId){
+        public static void SetupSecurity(this XafApplication application, Guid userId,Type userType=null,Type roleType=null) {
+            userType ??= typeof(PermissionPolicyUser);
+            roleType ??= typeof(PermissionPolicyRole);
             application.Modules.Add(new SecurityModule());
             var testApplicationModule = application.Modules.FindModule<TestApplicationModule>();
             if (testApplicationModule == null){
@@ -67,18 +68,13 @@ namespace Xpand.TestsLib.Common{
                 application.Modules.Add(testApplicationModule);
             }
             testApplicationModule.UserId = userId;
-            application.Security = new SecurityStrategyComplex(typeof(PermissionPolicyUser),
-                typeof(PermissionPolicyRole), new AuthenticationStandard(typeof(PermissionPolicyUser),
-                    typeof(AuthenticationStandardLogonParameters)));
+            application.Security = new SecurityStrategyComplex(userType, roleType, new AuthenticationStandard(userType, typeof(AuthenticationStandardLogonParameters)));
         }
 
-        public static void SetupSecurity(this XafApplication application,bool fixedUserId=false){
-            application.SetupSecurity(fixedUserId?Guid.Parse("5c50f5c6-e697-4e9e-ac1b-969eac1237f3") :Guid.Empty );
-        }
+        public static void SetupSecurity(this XafApplication application,bool fixedUserId=false,Type userType=null,Type roleType=null) 
+            => application.SetupSecurity(fixedUserId?Guid.Parse("5c50f5c6-e697-4e9e-ac1b-969eac1237f3") :Guid.Empty ,userType,roleType);
 
-        public static async Task<T> WithTimeOut<T>(this Task<T> source, TimeSpan? timeout = null){
-            return await source.ToObservable().WithTimeOut(timeout);
-        }
+        public static async Task<T> WithTimeOut<T>(this Task<T> source, TimeSpan? timeout = null) => await source.ToObservable().WithTimeOut(timeout);
 
         public static async Task<T> WithTimeOut<T>(this IObservable<T> source, TimeSpan? timeout = null){
             timeout ??= TimeSpan.FromSeconds(5);
@@ -87,13 +83,9 @@ namespace Xpand.TestsLib.Common{
 
         public static Mock<T> GetMock<T>(this T t) where T : class => Mock.Get(t);
 
-        public static void OnSelectionChanged(this ListEditor editor){
-	        editor.CallMethod(nameof(OnSelectionChanged));
-        }
+        public static void OnSelectionChanged(this ListEditor editor) => editor.CallMethod(nameof(OnSelectionChanged));
 
-        public static void OnSelectionChanged(this ObjectView objectView){
-	        objectView.CallMethod(nameof(OnSelectionChanged));
-        }
+        public static void OnSelectionChanged(this ObjectView objectView) => objectView.CallMethod(nameof(OnSelectionChanged));
 
         public static CompositeView NewView(this XafApplication application, IModelView modelView,Func<IObjectSpace,IList> selectedObjectsFactory,IObjectSpace objectSpace=null){
 	        application.WhenListViewCreating().Where(_ => _.e.ViewID == modelView.Id).Do(_ => {
@@ -108,6 +100,7 @@ namespace Xpand.TestsLib.Common{
         public static void DoExecute(this ActionBase action,Func<IObjectSpace,IList> selectedObjectsFactory){
             var selectionContextMock = new Mock<ISelectionContext>();
             selectionContextMock.SetupGet(context => context.SelectedObjects).Returns(() => selectedObjectsFactory(action.View().ObjectSpace));
+            selectionContextMock.SetupGet(context => context.CurrentObject).Returns(() => selectedObjectsFactory(action.View().ObjectSpace).Cast<object>().First());
             action.SelectionContext = selectionContextMock.Object;
             action.Active[ ActionBase.RequireSingleObjectContext] = true;
             action.Active[ ActionBase.RequireMultipleObjectsContext] = true;
@@ -178,7 +171,7 @@ namespace Xpand.TestsLib.Common{
             application.AddObjectSpaceProvider();
         }
 
-        public static readonly Dictionary<string, int> ModulePorts = new Dictionary<string, int>(){
+        public static readonly Dictionary<string, int> ModulePorts = new(){
             {"AutoCommitModule", 61457},
             {"CloneMemberValueModule", 61458},
             {"CloneModelViewModule", 61459},
@@ -208,7 +201,8 @@ namespace Xpand.TestsLib.Common{
             {"GoogleTasksModule", 61484},
             {"GoogleCalendarModule", 61485},
             {"DocumentStyleManagerModule", 61486},
-            {"JobSchedulerModule", 61487}
+            {"JobSchedulerModule", 61487},
+            {"RestModule", 61488}
         };
 
         public static TestObserver<T> StartTest<T>(this XafApplication application,IObservable<T> test,int delay=200) {
@@ -276,19 +270,16 @@ namespace Xpand.TestsLib.Common{
         }
 
         public static T AddModule<T>(this XafApplication application, string title,
-            params Type[] additionalExportedTypes) where T : ModuleBase, new(){
-            return (T) application.AddModule(new T(), title, true, additionalExportedTypes);
-        }
+            params Type[] additionalExportedTypes) where T : ModuleBase, new() 
+            => (T) application.AddModule(new T(), title, true, additionalExportedTypes);
 
-        public static T AddModule<T>(this XafApplication application, params Type[] additionalExportedTypes)
-            where T : ModuleBase, new(){
-            return (T) application.AddModule(new T(), null, true, additionalExportedTypes);
-        }
-    
+        public static T AddModule<T>(this XafApplication application, params Type[] additionalExportedTypes) where T : ModuleBase, new() 
+            => (T) application.AddModule(new T(), null, true, additionalExportedTypes);
+
         public static TModule NewModule<TModule>(this Platform platform, string title = null,
-            params Type[] additionalExportedTypes) where TModule : ModuleBase, new(){
-            return platform.NewApplication<TModule>().AddModule<TModule>(title, additionalExportedTypes);
-        }
+            params Type[] additionalExportedTypes) where TModule : ModuleBase, new() 
+            => platform.NewApplication<TModule>().AddModule<TModule>(title, additionalExportedTypes);
+
         public static Type ApplicationType { get; set; }
         public static XafApplication NewApplication<TModule>(this Platform platform, bool transmitMessage = true,bool handleExceptions=true,bool usePersistentStorage=false)
             where TModule : ModuleBase{
@@ -354,11 +345,11 @@ namespace Xpand.TestsLib.Common{
             application.MockListEditor();
 
             editorsFactoryMock.Setup(_ => _.CreateDetailViewEditor(It.IsAny<bool>(), It.IsAny<IModelViewItem>(), It.IsAny<Type>(), It.IsAny<XafApplication>(), It.IsAny<IObjectSpace>()))
-                .Returns((bool needProtectedContent, IModelViewItem modelViewItem, Type objectType, XafApplication app, IObjectSpace objectSpace) 
+                .Returns((bool needProtectedContent, IModelViewItem modelViewItem, Type objectType, XafApplication _, IObjectSpace objectSpace) 
                     => new EditorsFactory().CreateDetailViewEditor(needProtectedContent, modelViewItem, objectType, application, objectSpace));
             
             editorsFactoryMock.Setup(_ => _.CreateDetailViewEditor(It.IsAny<bool>(), It.IsAny<IModelMemberViewItem>(), It.IsAny<Type>(), It.IsAny<XafApplication>(), It.IsAny<IObjectSpace>()))
-                .Returns((bool needProtectedContent, IModelMemberViewItem modelViewItem, Type objectType, XafApplication app, IObjectSpace objectSpace) 
+                .Returns((bool needProtectedContent, IModelMemberViewItem modelViewItem, Type objectType, XafApplication _, IObjectSpace objectSpace) 
                     => new EditorsFactory().CreateDetailViewEditor(needProtectedContent, modelViewItem, objectType, application, objectSpace));
             editorsFactoryMock.Setup(_ => _.CreatePropertyEditorByType(It.IsAny<Type>(),It.IsAny<IModelMemberViewItem>(),It.IsAny<Type>(),It.IsAny<XafApplication>(),It.IsAny<IObjectSpace>()))
                 .Returns((Type editorType, IModelMemberViewItem modelViewItem, Type objectType, XafApplication xafApplication, IObjectSpace objectSpace)
@@ -389,11 +380,10 @@ namespace Xpand.TestsLib.Common{
             return listEditorMock;
         }
 
-        public static void MockPlatformListEditor(this XafApplication application){
-           application.MockListEditor((view, xafApplication, collectionSource) => (ListEditor) (application.GetPlatform()==Platform.Win
-               ? (ListEditor) Activator.CreateInstance(AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Win.Editors.GridListEditor"),view)
-               : Activator.CreateInstance(AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Web.Editors.ASPx.ASPxGridListEditor"),view)));
-        }
+        public static void MockPlatformListEditor(this XafApplication application) 
+            => application.MockListEditor((view, _, _) => (ListEditor) (application.GetPlatform()==Platform.Win
+                ? (ListEditor) Activator.CreateInstance(AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Win.Editors.GridListEditor"),view)
+                : Activator.CreateInstance(AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Web.Editors.ASPx.ASPxGridListEditor"),view)));
 
         public static string MemberExpressionCaption<TObject>(this Expression<Func<TObject, object>> memberName){
             var name = memberName.Body is UnaryExpression unaryExpression
@@ -407,16 +397,16 @@ namespace Xpand.TestsLib.Common{
             return (string) (displayNameAttribute?.GetPropertyValue("DisplayName")??name);
         }
 
-        internal static string MemberExpressionCaption<TObject,TMemberValue>(this Expression<Func<TObject, TMemberValue>> memberName) =>
-            memberName.Body is UnaryExpression unaryExpression
+        internal static string MemberExpressionCaption<TObject,TMemberValue>(this Expression<Func<TObject, TMemberValue>> memberName) 
+            => memberName.Body is UnaryExpression unaryExpression
                 ? ((MemberExpression) unaryExpression.Operand).Member.Name
                 : ((MemberExpression) memberName.Body).Member.Name;
 
         public static void MockListEditor(this XafApplication application, Func<IModelListView, XafApplication, CollectionSourceBase, ListEditor> listEditor = null){
-	        listEditor ??= ((view, xafApplication, arg3) => application.ListEditorMock(view).Object);
+	        listEditor ??= ((view, _, _) => application.ListEditorMock(view).Object);
            var editorsFactoryMock = application.EditorFactory.GetMock();
            editorsFactoryMock.Setup(_ => _.CreateListEditor(It.IsAny<IModelListView>(), It.IsAny<XafApplication>(), It.IsAny<CollectionSourceBase>()))
-                .Returns((IModelListView modelListView, XafApplication app, CollectionSourceBase collectionSourceBase) =>
+                .Returns((IModelListView modelListView, XafApplication _, CollectionSourceBase collectionSourceBase) =>
                         listEditor(modelListView, application, collectionSourceBase));
         }
 
@@ -431,10 +421,7 @@ namespace Xpand.TestsLib.Common{
             return (ListEditor) listEditor;
         }
 
-
-        public static void OnCurrentObjectChanged(this ObjectView objectView){
-            objectView.CallMethod("OnCurrentObjectChanged");
-        }
+        public static void OnCurrentObjectChanged(this ObjectView objectView) => objectView.CallMethod("OnCurrentObjectChanged");
 
         public static void MockDetailViewEditor(this XafApplication application,
             IModelPropertyEditor modelPropertyEditor, object controlInstance){
@@ -444,7 +431,7 @@ namespace Xpand.TestsLib.Common{
                         modelPropertyEditor.ModelMember.ModelClass.TypeInfo.Type, application,
                         It.IsAny<IObjectSpace>()))
                 .Returns((bool needProtectedContent, IModelMemberViewItem modelViewItem, Type objectType,
-                    XafApplication xafApplication, IObjectSpace objectSpace) => {
+                    XafApplication _, IObjectSpace objectSpace) => {
                     if (modelViewItem == modelPropertyEditor){
                         return new CustomPropertyEditor(objectType, modelViewItem, controlInstance);
                     }
@@ -462,18 +449,17 @@ namespace Xpand.TestsLib.Common{
                 .Subscribe();
         }
 
-        public static IObservable<Unit> ClientBroadcast(this ITestApplication application){
-            return Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()
-                ? TraceEventHub.Broadcasted.FirstAsync(_ => _.Source == application.SUTModule.Name).ToUnit()
+        public static IObservable<Unit> ClientBroadcast(this ITestApplication application) 
+            => Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()
+                ? TraceEventHub.Trace.FirstAsync(_ => _.Source == application.SUTModule.Name).ToUnit()
                     .SubscribeReplay()
                 : Unit.Default.ReturnObservable();
-        }
+
         [PublicAPI]
-        public static IObservable<Unit> ClientConnect(this ITestApplication application){
-            return Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()
+        public static IObservable<Unit> ClientConnect(this ITestApplication application) 
+            => Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()
                 ? TraceEventHub.Connecting.FirstAsync().SubscribeReplay()
                 : Unit.Default.ReturnObservable();
-        }
     }
 
     public class TestApplicationModule : ModuleBase{
@@ -482,15 +468,10 @@ namespace Xpand.TestsLib.Common{
             application.LoggingOn += ApplicationOnLoggingOn;
         }
 
-        private void ApplicationOnLoggingOn(object sender, LogonEventArgs e){
-            ((AuthenticationStandardLogonParameters) e.LogonParameters).UserName = "User";
-        }
+        private void ApplicationOnLoggingOn(object sender, LogonEventArgs e) => ((AuthenticationStandardLogonParameters) e.LogonParameters).UserName = "User";
 
-
-        public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB){
-            var defaultUserModuleUpdater = new DefaultUserModuleUpdater(objectSpace, versionFromDB,UserId,false);
-            return new[]{defaultUserModuleUpdater};
-        }
+        public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB) 
+            => new[]{new DefaultUserModuleUpdater(objectSpace, versionFromDB,UserId,false)};
 
         public Guid UserId{ get; set; }
     }

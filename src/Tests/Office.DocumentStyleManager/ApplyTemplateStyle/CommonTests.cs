@@ -3,7 +3,7 @@ using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Win.Editors;
 using Shouldly;
-using Xpand.Extensions.XAF.ViewExtenions;
+using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions;
@@ -14,7 +14,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.ApplyTemplateStyle
 	public abstract class CommonTests:Tests.CommonTests{
 		protected void MockDocumentsListEditor(XafApplication xafApplication){
 			// xafApplication.MockEditorsFactory();
-			xafApplication.MockListEditor((view, application, collectionsource) =>
+			xafApplication.MockListEditor((view, _, _) =>
 				view.Id.Contains(nameof(Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects.ApplyTemplateStyle.Documents))
 					? xafApplication.ListEditorMock(view).Object
 					: new GridListEditor(view));

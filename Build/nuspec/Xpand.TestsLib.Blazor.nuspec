@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.TestsLib.Blazor</id>
-    <version>4.202.52.0</version>
+    <version>4.202.52.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -12,19 +12,19 @@
     <description>Xpand.TestsLib.Blazor</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.TestsLib.Blazor, 20.2.5</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.TestsLib.Blazor, 20.2.6</tags>
     <dependencies>
       <group targetFramework="netcoreapp3.1">
-        <dependency id="Xpand.Extensions" version="4.202.52.0" />
-        <dependency id="Xpand.Extensions.Blazor" version="4.202.52.0" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.202.52.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.202.52.0" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.202.52.0" />
-        <dependency id="Xpand.TestsLib.Common" version="4.202.52.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.52.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.202.52.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.202.52.0" />
-        <dependency id="Microsoft.CodeAnalysis.Csharp" version="3.8" />
+        <dependency id="Xpand.Extensions" version="4.202.52.1" />
+        <dependency id="Xpand.Extensions.Blazor" version="4.202.52.1" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.202.52.1" />
+        <dependency id="Xpand.Extensions.XAF" version="4.202.52.1" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.202.52.1" />
+        <dependency id="Xpand.TestsLib.Common" version="4.202.52.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.52.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.202.52.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.202.52.1" />
+        <dependency id="Microsoft.CodeAnalysis.Csharp" version="3.9" />
         <dependency id="Microsoft.AspNetCore.Hosting.Abstractions" version="2.2" />
         <dependency id="Microsoft.Extensions.DependencyInjection.Abstractions" version="5.0" />
         <dependency id="Microsoft.AspNetCore.Http.Abstractions" version="2.2" />
@@ -35,7 +35,7 @@
         <dependency id="Microsoft.AspNetCore.Hosting" version="2.2.7" />
         <dependency id="Microsoft.Extensions.Hosting" version="5.0.0" />
         <dependency id="System.Reactive" version="5.0" />
-        <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.8" />
+        <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.9" />
         <dependency id="System.Configuration.ConfigurationManager" version="5.0" />
         <dependency id="System.ServiceProcess.ServiceController" version="5.0" />
         <dependency id="System.ServiceModel.Http" version="4.8.1" />

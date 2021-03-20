@@ -16,7 +16,7 @@ namespace Xpand.TestsLib.Blazor {
         }
         public override void Dispose() {
             base.Dispose();
-            WebHost.Dispose();
+            WebHost?.Dispose();
         }
 
         protected BlazorApplication NewBlazorApplication(Type startupType){

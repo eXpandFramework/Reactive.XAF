@@ -26,7 +26,7 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.SecurityExtensions;
-using Xpand.Extensions.XAF.ViewExtenions;
+using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Office.Cloud.Google.BusinessObjects;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -63,7 +63,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => manager.Connect("Google", typeof(GoogleAuthentication), application
                 => application.GoogleNeedsAuthentication(), application
-                => application.AuthorizeGoogle((exception, flow) => flow.AuthorizeApp(application)).ToUnit())
+                => application.AuthorizeGoogle((_, flow) => flow.AuthorizeApp(application)).ToUnit())
                 .Merge(manager.ExchangeCodeForToken())
                 .Merge(manager.CheckBlazor("Xpand.Extensions.Office.Cloud.Google.Blazor.GoogleCodeStateStartup", "Xpand.Extensions.Office.Cloud.Google.Blazor"))
                 ;
@@ -94,7 +94,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
         };
 
         public static AuthorizationCodeFlow GoogleAuthorizationCodeFlow(this XafApplication application)
-            => new AuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer{
+            => new(new GoogleAuthorizationCodeFlow.Initializer{
                 ClientSecrets = application.NewClientSecrets(), Scopes = application.Model.OAuthGoogle().Scopes(),
                 DataStore = application.NewXafOAuthDataStore(),Prompt = application.Model.OAuthGoogle().Prompt.ToString().ToLower()
             });
@@ -161,7 +161,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
 
         public static IObservable<TResponse> ToObservable<TResponse>(this IClientServiceRequest<TResponse> request) => Observable.FromAsync(() => request.ExecuteAsync());
 
-        static readonly Subject<GenericEventArgs<Func<XafApplication,XafOAuthDataStore>>> CustomizeOathDataStoreSubject=new Subject<GenericEventArgs<Func<XafApplication, XafOAuthDataStore>>>();
+        static readonly Subject<GenericEventArgs<Func<XafApplication,XafOAuthDataStore>>> CustomizeOathDataStoreSubject=new();
         [PublicAPI]
         public static IObservable<GenericEventArgs<Func<XafApplication, XafOAuthDataStore>>> CustomizeOathDataStore => CustomizeOathDataStoreSubject.AsObservable();
 
@@ -178,7 +178,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
         public static IObservable<GenericEventArgs<IObservable<UserCredential>>> CustomAcquireTokenInteractively 
             => CustomAcquireTokenInteractivelySubject.AsObservable();
 
-        static readonly Subject<GenericEventArgs<IObservable<UserCredential>>> CustomAcquireTokenInteractivelySubject=new Subject<GenericEventArgs<IObservable<UserCredential>>>();
+        static readonly Subject<GenericEventArgs<IObservable<UserCredential>>> CustomAcquireTokenInteractivelySubject=new();
 
         static IObservable<UserCredential> AuthorizeGoogle(this GoogleAuthorizationCodeFlow flow, XafApplication application,
 	        Func<UserFriendlyException, IAuthorizationCodeFlow, IObservable<UserCredential>> acquireToken) 
@@ -213,7 +213,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
 		        .SelectMany(b => b ? Observable.Throw<UserCredential>(new UserFriendlyException("Google authentication failed. Use the profile view to authenticate again"))
 			        : default(UserCredential).ReturnObservable())
 		        .Catch<UserCredential,UserFriendlyException>(exception => {
-                    acquireToken??=(friendlyException, codeFlow) => Observable.Empty<UserCredential>();
+                    acquireToken??=(_, _) => Observable.Empty<UserCredential>();
 			        var args = new GenericEventArgs<IObservable<UserCredential>>(acquireToken(exception, flow));
 			        CustomAcquireTokenInteractivelySubject.OnNext(args);
 			        return args.Instance;

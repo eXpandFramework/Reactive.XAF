@@ -13,19 +13,6 @@ using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
-    public interface IXAFAppWebAPI{
-        XafApplication Application{ get; }
-    }
-
-    class XAFAppWebAPI:IXAFAppWebAPI{
-        public XafApplication Application{ get; }
-
-        public XAFAppWebAPI(XafApplication application){
-            Application = application;
-        }
-
-    }
-
     public static class XafWebApiExtensions{
         public static IObservable<(string parameter, object result)> WhenCallBack(this IObservable<IXAFAppWebAPI> source,string parameter=null) 
             => source.SelectMany(api => api.Application.WhenWindowCreated().When(TemplateContext.ApplicationWindow)
@@ -38,12 +25,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<Unit> CheckAsync(this IObservable<IXAFAppWebAPI> source,string module) 
             => source.Where(api => api.Application.GetPlatform()!=Platform.Blazor)
-                .SelectMany(api => {
+                .SelectMany(_ => {
                     var whenTemplate = source.SelectMany(webAPI => webAPI.Application.WhenWindowCreated().When(TemplateContext.ApplicationWindow).FirstAsync().TemplateChanged())
                         .WhenNotDefault(window => window.Template).Publish().RefCount();
                     return whenTemplate
                         .WhenDefault(window => (bool)window.Template.GetPropertyValue("IsAsync")).ToUnit()
-                        .Do(window => AppDomain.CurrentDomain.Web().WriteHttpResponse($"<span style='color:red'>Asynchronous operations not supported, please mark the Page as async, for details refer to {module} wiki page. </span>",true))
+                        .Do(_ => AppDomain.CurrentDomain.Web().WriteHttpResponse($"<span style='color:red'>Asynchronous operations not supported, please mark the Page as async, for details refer to {module} wiki page. </span>",true))
                         .Merge(whenTemplate.SelectMany(_ => SynchronizationContext.Current.ReturnObservable().Where(context => context.GetType().Name!="AspNetSynchronizationContext")
                             .Do(context => AppDomain.CurrentDomain.Web().WriteHttpResponse($"<span style='color:red'>{context.GetType().FullName} is used instead of System.Web.AspNetSynchronizationContext, please modify your httpRuntime configuration. For details refer to {module} wiki page.</span>",true)).ToUnit()));
                 });
@@ -70,7 +57,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static T GetService<T>(this IXAFAppWebAPI api) => (T) api.GetService(typeof(T));
 
         public static object GetService(this IXAFAppWebAPI api,Type serviceType) 
-            => api.Application.GetPropertyValue("ServiceProvider").CallMethod("GetService", serviceType);
+            =>api.Application.GetPlatform()==Platform.Blazor? api.Application.GetPropertyValue("ServiceProvider")?.CallMethod("GetService", serviceType):null;
         
         public static object GetService(this IXAFAppWebAPI api,string serviceType) 
             =>api.GetService(AppDomain.CurrentDomain.GetAssemblyType(serviceType));
@@ -83,5 +70,17 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => (Uri) (api.Application.GetPlatform() == Platform.Blazor
                 ? new Uri(AppDomain.CurrentDomain.GetAssemblyType("Microsoft.AspNetCore.Http.Extensions.UriHelper").Method("GetDisplayUrl", Flags.StaticPublic).Call(null, api.HttpContext().GetPropertyValue("Request")).ToString())
                 : api.HttpContext().GetPropertyValue("Request").GetPropertyValue("Url"));
+    }
+
+    public interface IXAFAppWebAPI{
+        XafApplication Application{ get; }
+    }
+
+    class XAFAppWebAPI:IXAFAppWebAPI{
+        public XafApplication Application{ get; }
+
+        public XAFAppWebAPI(XafApplication application){
+            Application = application;
+        }
     }
 }

@@ -31,7 +31,7 @@
     <None Remove="Xpand.XAF.Modules.Reactive.csproj.DotSettings" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\Common\AssemblyInfoVersion.cs" Link="AssemblyInfoVersion.cs" />
+    <Compile Include="..\..\Common\AssemblyInfoVersion.cs" Link="Properties\AssemblyInfoVersion.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.Extensions">
@@ -52,6 +52,9 @@
     </Compile>
     <Compile Update="Module.cs" />
     <Compile Update="ReactiveModuleBase.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Services\Network\" />
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

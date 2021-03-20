@@ -69,8 +69,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.TestsLib.Common", "..
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.TestsLib.Net461", "..\TestsLib.Net461\Xpand.TestsLib.Net461.csproj", "{482E3D8F-7B7D-4E18-898A-B0294AAE35D8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.JobScheduler.Hangfire", "..\..\Modules\JobScheduler.Hangfire\Xpand.XAF.Modules.JobScheduler.Hangfire.csproj", "{D078A97C-C69E-40C8-8E1C-65B16BE85AAD}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_20.1|Any CPU = Debug_20.1|Any CPU
@@ -199,10 +197,6 @@ Global
 		{482E3D8F-7B7D-4E18-898A-B0294AAE35D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{482E3D8F-7B7D-4E18-898A-B0294AAE35D8}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
 		{482E3D8F-7B7D-4E18-898A-B0294AAE35D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D078A97C-C69E-40C8-8E1C-65B16BE85AAD}.Debug_20.1|Any CPU.ActiveCfg = Debug|Any CPU
-		{D078A97C-C69E-40C8-8E1C-65B16BE85AAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D078A97C-C69E-40C8-8E1C-65B16BE85AAD}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
-		{D078A97C-C69E-40C8-8E1C-65B16BE85AAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

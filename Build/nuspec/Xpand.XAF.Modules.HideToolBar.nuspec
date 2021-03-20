@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.HideToolBar</id>
-    <version>4.202.52.0</version>
+    <version>4.202.52.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -12,21 +12,22 @@
     <description>The `HideToolBar` package uses the the `IModelListView.HideToolBar` attribute to hide the toolbar.</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, HideToolBar, 20.2.5</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, HideToolBar, 20.2.6</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.Extensions.Reactive" version="4.202.52.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.202.52.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.52.0" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.202.52.1" />
+        <dependency id="Xpand.Extensions.XAF" version="4.202.52.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.52.1" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="Xpand.Patcher" version="2.0.27" />
         <dependency id="JetBrains.Annotations" version="2020.3" />
         <dependency id="Microsoft.CSharp" version="4.7" />
-        <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.8" />
+        <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.9" />
         <dependency id="System.Reactive" version="5.0" />
         <dependency id="System.Configuration.ConfigurationManager" version="5.0" />
         <dependency id="System.ServiceModel.Http" version="4.8.1" />
-        <dependency id="Xpand.VersionConverter" version="4.202.52.0" />
+        <dependency id="Newtonsoft.Json" version="12.0.3" />
+        <dependency id="Xpand.VersionConverter" version="4.202.52.1" />
       </group>
     </dependencies>
   </metadata>

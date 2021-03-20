@@ -32,10 +32,18 @@ namespace Xpand.TestsLib.Blazor {
             }));
             var appProviderMock = new Mock<IXafApplicationProvider>();
             appProviderMock.Setup(provider => provider.GetApplication()).Returns(NewApplication);
-            services.AddSingleton(provider => appProviderMock.Object)
+            services.AddSingleton(_ => appProviderMock.Object)
                 .AddSingleton<ISharedXafApplicationProvider, TestXafApplicationProvider<TModule>>()
-                .AddSingleton<XpoDataStoreProviderAccessor>();
+                .AddSingleton<XpoDataStoreProviderAccessor>()
+                .AddScoped<IExceptionHandlerService,MyClass>();
+
         }
+        class MyClass:IExceptionHandlerService {
+            public void HandleException(Exception exception) {
+                throw exception;
+            }
+        }
+
 
         internal sealed class XafApplicationFactory : IXafApplicationFactory {
             private readonly Func<BlazorApplication> _createApplication;

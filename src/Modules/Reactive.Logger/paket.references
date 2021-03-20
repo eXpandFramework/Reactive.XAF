@@ -6,3 +6,4 @@ Xpand.Patcher
 JetBrains.Annotations
 Microsoft.CodeAnalysis.CSharp
 System.Configuration.ConfigurationManager
+Newtonsoft.Json

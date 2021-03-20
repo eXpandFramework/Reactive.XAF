@@ -93,7 +93,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
                 
             await startServer.Timeout(Timeout);
             var receive = TraceEventReceiver.TraceEvent.FirstAsync(_ => _.Method==nameof(XafApplicationRxExtensions.WhenDetailViewCreated)).SubscribeReplay();
-            var broadcast = TraceEventHub.Broadcasted.FirstAsync(_ => _.Method==nameof(XafApplicationRxExtensions.WhenDetailViewCreated))
+            var broadcast = TraceEventHub.Trace.FirstAsync(_ => _.Method==nameof(XafApplicationRxExtensions.WhenDetailViewCreated))
                 .SubscribeReplay();
             using var clientWinApp = new ClientWinApp {EditorFactory = new EditorsFactory()};
             clientWinApp.AddModule<ReactiveLoggerHubModule>();

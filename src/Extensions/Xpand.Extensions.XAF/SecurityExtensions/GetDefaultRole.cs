@@ -11,9 +11,13 @@ namespace Xpand.Extensions.XAF.SecurityExtensions {
     [UsedImplicitly]
     public static partial class SecurityExtensions {
         private static readonly Type PermissionSettingHelperType;
+        private static readonly Type ActionPermissionRequest;
+        private static readonly Type AdministrativePermissionRequest;
 
         static SecurityExtensions() {
             PermissionSettingHelperType = AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Security.PermissionSettingHelper");
+            ActionPermissionRequest = AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Security.ActionPermissionRequest");
+            AdministrativePermissionRequest = AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Security.AdministrativePermissionRequest");
         }
 
         [PublicAPI]

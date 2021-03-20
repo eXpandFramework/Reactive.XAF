@@ -15,6 +15,12 @@
     <CopyLocalLockFileAssemblie>true</CopyLocalLockFileAssemblie>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;XAF202</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DefineConstants>TRACE;XAF202;</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Xpand.Extensions">
       <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
@@ -22,6 +28,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\Common\AssemblyInfoVersion.cs" Link="Properties\AssemblyInfoVersion.cs" />
+    <Compile Update="CollectionSourceExtensions\DynamicCollection.cs">
+      <DependentUpon>AddObjects.cs</DependentUpon>
+    </Compile>
+    <Compile Update="NonPersistentObjects\NonPersistentBaseObject-192.cs">
+      <DependentUpon>NonPersistentBaseObject.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

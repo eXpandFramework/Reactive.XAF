@@ -4,7 +4,7 @@ using DevExpress.ExpressApp;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.XAF.DetailViewExtensions;
-using Xpand.Extensions.XAF.ViewExtenions;
+using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects;
@@ -29,8 +29,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.ApplyTemplateStyle
 
 			var applyTemplateStyle = tuple.applyTemplateStyle;
 
-			applyTemplateStyle.Documents.Any(document => applyTemplateStyle.Original!=null).ShouldBeTrue();
-			applyTemplateStyle.Documents.Any(document => applyTemplateStyle.Changed!=null).ShouldBeTrue();
+			applyTemplateStyle.Documents.Any(_ => applyTemplateStyle.Original!=null).ShouldBeTrue();
+			applyTemplateStyle.Documents.Any(_ => applyTemplateStyle.Changed!=null).ShouldBeTrue();
 		}
 
 		[TestCase(DocumentStyleLinkOperation.Ensure)]

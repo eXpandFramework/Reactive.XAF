@@ -14,9 +14,9 @@ using DevExpress.Persistent.Base;
 using Fasterflect;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Http;
-using Xpand.Extensions.Blazor;
 using Xpand.Extensions.StreamExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
+using EditorAliases = Xpand.Extensions.XAF.Attributes.EditorAliases;
 
 namespace Xpand.XAF.Modules.Blazor.Editors {
     public class UploadFileMiddleware {
@@ -25,7 +25,7 @@ namespace Xpand.XAF.Modules.Blazor.Editors {
         private readonly RequestDelegate _next;
         public UploadFileMiddleware(RequestDelegate next) => _next = next;
 
-        public async Task Invoke(HttpContext context,GlobalItems globalItems) {
+        public async Task Invoke(HttpContext context) {
             string requestPath = context.Request.Path.Value.TrimStart('/');
             if(requestPath.StartsWith("api/Upload/UploadFile") ) {
                 var formFile = context.Request.Form.Files.First();
@@ -37,10 +37,10 @@ namespace Xpand.XAF.Modules.Blazor.Editors {
         }
     }
 
-    [PropertyEditor(typeof(IEnumerable<IFileData>),nameof(UploadFilePropertyEditor), false)]
-    public class UploadFilePropertyEditor : BlazorPropertyEditorBase,IComplexViewItem {
+    [PropertyEditor(typeof(IEnumerable<IFileData>),EditorAliases.UploadFile, false)]
+    public class UploadFilePropertyEditor : ComponentPropertyEditor,IComplexViewItem {
         readonly Guid _guid=Guid.NewGuid();
-        readonly Subject<Unit> _upLoaded=new Subject<Unit>();
+        readonly Subject<Unit> _upLoaded=new();
         public UploadFilePropertyEditor(Type objectType, IModelMemberViewItem model) : base(objectType, model) {}
 
         protected override RenderFragment RenderComponent() 
@@ -65,7 +65,7 @@ namespace Xpand.XAF.Modules.Blazor.Editors {
                 ExternalDropZoneCssSelector = "#overviewDemoDropZone",
                 ExternalDropZoneDragOverCssClass = "custom-drag-over border-light text-white"
             };
-            dxUpload.FileUploaded += args => _upLoaded.OnNext(Unit.Default);
+            dxUpload.FileUploaded += _ => _upLoaded.OnNext(Unit.Default);
             return dxUpload;
         }
 

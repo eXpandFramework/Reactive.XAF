@@ -9,7 +9,7 @@ using Shouldly;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.DetailViewExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
-using Xpand.Extensions.XAF.ViewExtenions;
+using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects;
@@ -61,7 +61,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
         [XpandTest()][Apartment(ApartmentState.STA)]
 		public void Action_Enable_is_bound_to_ReplaceStyles_Enable(){
 			using var application=DocumentStyleManagerModule().Application;
-			application.MockListEditor((view, xafApplication, arg3) => new GridListEditor(view));
+			application.MockListEditor((view, _, _) => new GridListEditor(view));
 			var tuple = application.SetDocumentStyleManagerDetailView(Document);
 
 			var templateStyleSelection = tuple.window.Action<DocumentStyleManagerModule>().TemplateStyleSelection();
@@ -115,7 +115,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
 		public void Action_adds_selected_styles(){
 			using var xafApplication=DocumentStyleManagerModule().Application;
 			// application.MockEditorsFactory();
-			xafApplication.MockListEditor((view, application, collectionSource) => {
+			xafApplication.MockListEditor((view, application, _) => {
 				if (view.Id.Contains(nameof(BusinessObjects.DocumentStyleManager.AllStyles)))
 					return application.ListEditorMock(view).Object;
 				if (view.Id.Contains(nameof(BusinessObjects.DocumentStyleManager.ReplacementStyles)))

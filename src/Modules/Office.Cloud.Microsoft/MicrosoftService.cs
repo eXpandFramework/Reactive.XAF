@@ -37,13 +37,13 @@ using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
-using Xpand.Extensions.XAF.ViewExtenions;
+using Xpand.Extensions.XAF.SecurityExtensions;
+using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft.BusinessObjects;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
-using Xpand.XAF.Modules.Reactive.Services.Security;
 using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
 using Prompt = Microsoft.Identity.Client.Prompt;
 
@@ -51,14 +51,14 @@ using Prompt = Microsoft.Identity.Client.Prompt;
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 	public static class MicrosoftService{
 		
-		private static readonly Uri AuthorityUri=new Uri(string.Format(CultureInfo.InvariantCulture, "https://login.microsoftonline.com/{0}{1}", "common", "/v2.0"));
+		private static readonly Uri AuthorityUri=new(string.Format(CultureInfo.InvariantCulture, "https://login.microsoftonline.com/{0}{1}", "common", "/v2.0"));
         
         private static readonly string AuthenticationType=OpenIdConnectAuthenticationDefaults.AuthenticationType;
 
         public static IObservable<bool> MicrosoftNeedsAuthentication(this XafApplication application) 
             => application.NeedsAuthentication<MSAuthentication>(() 
-                => application.AuthorizeMS((exception, client) => Observable.Throw<AuthenticationResult>(new AuthenticationException(nameof(MicrosoftService))))
-	                .Catch<GraphServiceClient,AuthenticationException>(e => Observable.Empty<GraphServiceClient>())
+                => application.AuthorizeMS((_, _) => Observable.Throw<AuthenticationResult>(new AuthenticationException(nameof(MicrosoftService))))
+	                .Catch<GraphServiceClient,AuthenticationException>(_ => Observable.Empty<GraphServiceClient>())
 	                .To(false).SwitchIfEmpty(true.ReturnObservable()))
                 .TraceMicrosoftModule();
 
@@ -71,7 +71,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => manager.Connect("Microsoft", typeof(MSAuthentication), application 
                 => application.MicrosoftNeedsAuthentication(), application 
-                => application.AuthorizeMS((exception, app) => app.AcquireTokenInteractively(application)).ToUnit());
+                => application.AuthorizeMS((_, app) => app.AcquireTokenInteractively(application)).ToUnit());
 
         internal static IObservable<TSource> TraceMicrosoftModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
 	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
@@ -108,12 +108,12 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
         }
 
 		private static CookieAuthenticationOptions CookieAuthenticationOptions() 
-            => new CookieAuthenticationOptions{AuthenticationType = AuthenticationType, AuthenticationMode = AuthenticationMode.Passive,
+            => new() {AuthenticationType = AuthenticationType, AuthenticationMode = AuthenticationMode.Passive,
 				CookieName = $".AspNet.{AuthenticationType}", ExpireTimeSpan = TimeSpan.FromMinutes(5)
 			};
 
 		private static OpenIdConnectAuthenticationOptions OpenIdConnectOptions() 
-            => new OpenIdConnectAuthenticationOptions{ 
+            => new() { 
 				ResponseType = OpenIdConnectResponseType.CodeIdToken,
                 Scope = OpenIdConnectScope.OpenIdProfile,
                 Authority = AuthorityUri.ToString(),
@@ -121,7 +121,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 				Notifications = new OpenIdConnectAuthenticationNotifications{
 					RedirectToIdentityProvider = RedirectToIdentityProvider,
 					AuthorizationCodeReceived = async notification => await AuthorizationCodeReceived(notification),
-					AuthenticationFailed = async notification => await Task.CompletedTask
+					AuthenticationFailed = async _ => await Task.CompletedTask
 				}
 			};
 
@@ -133,7 +133,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 			var userId = TypeDescriptor.GetConverter(typeof(Guid)).ConvertFromString(propertiesDictionary["userid"]);
 			var result = await application.AcquireTokenByAuthorizationCode(notification.Code, userId);
 			if (application.Security.IsSecurityStrategyComplex()){
-				await XafApplicationRxExtensions.Logon(application, userId).FirstAsync();
+				await application.Logon(userId).FirstAsync();
 			}
 
 			application.UpdateUserName(userId, result.Account.Username);
@@ -171,13 +171,13 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 
 		private static string[] Scopes(this XafApplication application) => application.Model.OAuthMS().Scopes().Add("User.Read");
 
-		static readonly Subject<GraphServiceClient> ClientSubject=new Subject<GraphServiceClient>();
+		static readonly Subject<GraphServiceClient> ClientSubject=new();
 		public static IObservable<GraphServiceClient> Client => ClientSubject.AsObservable();
 
         public static IObservable<(Frame frame, GraphServiceClient client)> AuthorizeMS(this  IObservable<Frame> source,
 	        Func<MsalUiRequiredException,IClientApplicationBase,  IObservable<AuthenticationResult>> acquireToken = null) 
             => source.SelectMany(frame => Observable.Defer(() => frame.Application.MicrosoftNeedsAuthentication().WhenDefault()
-                .SelectMany(b=>frame.View.AsObjectView().Application().AuthorizeMS(acquireToken)
+                .SelectMany(_=>frame.View.AsObjectView().Application().AuthorizeMS(acquireToken)
                     .Select(client => (frame, client)))).ObserveOn(SynchronizationContext.Current));
 
 		public static IObservable<GraphServiceClient> AuthorizeMS(this XafApplication application, 
@@ -194,13 +194,13 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 		static IObservable<GraphServiceClient> Authorize(this IClientApplicationBase clientApp, Func<ITokenCache, IObservable<TokenCacheNotificationArgs>> storeResults,
 			Func<MsalUiRequiredException,IClientApplicationBase, IObservable<AuthenticationResult>> acquireToken, XafApplication application){
 
-			acquireToken ??= ((exception,app) =>Observable.Throw<AuthenticationResult>(new UserFriendlyException("Azure authentication failed. Use the profile view to authenticate again")));
+			acquireToken ??= ((_,_) =>Observable.Throw<AuthenticationResult>(new UserFriendlyException("Azure authentication failed. Use the profile view to authenticate again")));
 			var authResults = Observable.FromAsync(clientApp.GetAccountsAsync)
 				.Select(accounts => accounts.FirstOrDefault())
 				.SelectMany(account => Observable.FromAsync(() => clientApp.AcquireTokenSilent(application.Scopes(), account).ExecuteAsync()))
 				.Catch<AuthenticationResult, MsalUiRequiredException>(e => acquireToken(e,clientApp));
 			var authenticationResult = storeResults(clientApp.UserTokenCache)
-				.Select(args => (AuthenticationResult)null).IgnoreElements()
+				.Select(_ => (AuthenticationResult)null).IgnoreElements()
 				.Merge(authResults).FirstAsync();
 			return authenticationResult.Select(result => new GraphServiceClient(new DelegateAuthenticationProvider(request => {
 				request.Headers.Authorization = new AuthenticationHeaderValue("bearer", result.AccessToken);
@@ -225,7 +225,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 
 		public static IObservable<GenericEventArgs<IObservable<AuthenticationResult>>> CustomAcquireTokenInteractively 
             => CustomAcquireTokenInteractivelySubject.AsObservable();
-        static readonly Subject<GenericEventArgs<IObservable<AuthenticationResult>>> CustomAcquireTokenInteractivelySubject=new Subject<GenericEventArgs<IObservable<AuthenticationResult>>>();
+        static readonly Subject<GenericEventArgs<IObservable<AuthenticationResult>>> CustomAcquireTokenInteractivelySubject=new();
 
 		private static IObservable<AuthenticationResult> AcquireTokenInteractively(this IClientApplicationBase clientApp, XafApplication application){
 			var acquireTokenInteractively = HttpContext.Current == null

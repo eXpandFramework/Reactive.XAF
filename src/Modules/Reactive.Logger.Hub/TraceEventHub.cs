@@ -12,9 +12,9 @@ using Xpand.Extensions.Reactive.Transform;
 namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
     [UsedImplicitly]
     public class TraceEventHub : StreamingHubBase<ITraceEventHub, ITraceEventHubReceiver>,ITraceEventHub{
-        static readonly ISubject<TraceEventMessage> BroadcastedSubject=new Subject<TraceEventMessage>();
+        static readonly ISubject<TraceEventMessage> TraceSubject=new Subject<TraceEventMessage>();
 
-        public static IObservable<TraceEventMessage> Broadcasted => BroadcastedSubject;
+        public static IObservable<TraceEventMessage> Trace => TraceSubject;
 
         static readonly ISubject<Unit> ConnectingSubject=Subject.Synchronize(new Subject<Unit>());
         static readonly ISubject<Unit> DisconnectingSubject=Subject.Synchronize(new Subject<Unit>());
@@ -33,7 +33,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
                 .Select(e => {
                     var message = (TraceEventMessage) e;
                     Broadcast(_group).OnTraceEvent(message);
-                    BroadcastedSubject.OnNext(message);
+                    TraceSubject.OnNext(message);
                     return Unit.Default;
                 })
                 .DoNotComplete()

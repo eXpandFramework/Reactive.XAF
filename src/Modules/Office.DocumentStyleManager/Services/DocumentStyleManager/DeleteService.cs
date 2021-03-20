@@ -10,7 +10,7 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
-using Xpand.Extensions.XAF.ViewExtenions;
+using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
@@ -39,7 +39,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
 		                documentStyleManager.SynchronizeStyles(document);
 		                return Unit.Default.ReturnObservable();
 	                })
-                    .TraceDocumentStyleModule(__ => styles.Select(style => style.StyleName).Join(","));
+                    .TraceDocumentStyleModule(_ => styles.Select(style => style.StyleName).Join(","));
             });
 
         internal static IObservable<Unit> DeleteStyles(this ApplicationModulesManager manager) =>

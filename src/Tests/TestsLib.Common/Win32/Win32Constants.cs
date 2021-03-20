@@ -429,7 +429,7 @@ namespace Xpand.TestsLib.Common.Win32 {
             /// </summary>
             SWP_NOOWNERZORDER = 0x200,
             /// <summary>
-            /// Does not redraw changes. If this flag is set; no repainting of any kind occurs. This applies to the client area; the nonclient area (including the title bar and scroll bars); and any part of the parent window uncovered as a result of the window being moved. When this flag is set; the application must explicitly invalidate or redraw any parts of the window and parent window that need redrawing.
+            /// Does not redraw changes. If this flag is set; no repainting of any kind occurs. This applies to the client area; the nonclient area (including the title bar and scroll bars); and any part of the parent window uncovered as a result of the window being moved. Any this flag is set; the application must explicitly invalidate or redraw any parts of the window and parent window that need redrawing.
             /// </summary>
             SWP_NOREDRAW = 0x8,
             /// <summary>

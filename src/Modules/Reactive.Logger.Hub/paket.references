@@ -11,3 +11,4 @@ System.Configuration.ConfigurationManager
 Xpand.Patcher
 Xpand.Collections
 System.CodeDom
+Newtonsoft.Json

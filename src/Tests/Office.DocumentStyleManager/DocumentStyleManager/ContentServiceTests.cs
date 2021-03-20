@@ -10,7 +10,7 @@ using Shouldly;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
 using Xpand.Extensions.XAF.DetailViewExtensions;
-using Xpand.Extensions.XAF.ViewExtenions;
+using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects;
@@ -23,7 +23,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
         [Test][XpandTest()][Apartment(ApartmentState.STA)]
         public void On_Document_Selection_Changed_Select_Used_Style(){
             using var xafApplication=DocumentStyleManagerModule().Application;
-            xafApplication.MockListEditor((view, application, collectionSource) => view.Id.Contains(nameof(BusinessObjects.DocumentStyleManager.AllStyles))
+            xafApplication.MockListEditor((view, application, _) => view.Id.Contains(nameof(BusinessObjects.DocumentStyleManager.AllStyles))
                 ? application.ListEditorMock(view).Object : new GridListEditor(view));
             var serverObserver = xafApplication.WhenDetailViewCreated().SelectMany(_ => _.e.View.WhenRichEditDocumentServer<BusinessObjects.DocumentStyleManager>(manager => manager.Content)).Test();
             var tuple = xafApplication.SetDocumentStyleManagerDetailView(Document);
@@ -53,7 +53,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
         public void Replacement_ListView_Displays_Styles_of_same_type_as_the_Selected_Styles(int selectedStyles){
             using var xafApplication=DocumentStyleManagerModule().Application;
 
-            xafApplication.MockListEditor((view, application, collectionSource) => view.Id.Contains(nameof(BusinessObjects.DocumentStyleManager.AllStyles))
+            xafApplication.MockListEditor((view, application, _) => view.Id.Contains(nameof(BusinessObjects.DocumentStyleManager.AllStyles))
                 ? application.ListEditorMock(view).Object : new GridListEditor(view));
             
             Document.NewDocumentStyle(3, DocumentStyleType.Paragraph);

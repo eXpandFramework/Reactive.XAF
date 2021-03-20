@@ -2,11 +2,14 @@
 using System;
 using DevExpress.ExpressApp.Blazor;
 using DevExpress.ExpressApp.Blazor.Services;
+using DevExpress.ExpressApp.Security;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Xpand.Extensions.Blazor {
     public interface ISharedXafApplicationProvider {
         BlazorApplication Application { get; }
+        ISecurityStrategyBase? Security { get; }
     }
     public interface ISharedBlazorApplication {
         bool UseNonSecuredObjectSpaceProvider { get; set; }
@@ -17,13 +20,16 @@ namespace Xpand.Extensions.Blazor {
         private readonly Lazy<BlazorApplication> _sharedApplication;
         private readonly IServiceProvider _serviceProvider;
         private readonly IValueManagerStorageContainerInitializer _containerInitializer;
-    
+
         public SharedXafApplicationProvider(IServiceProvider serviceProvider, IValueManagerStorageContainerInitializer containerInitializer) {
             _serviceProvider = serviceProvider;
             _containerInitializer = containerInitializer;
             _sharedApplication = new Lazy<BlazorApplication>(CreateApplication, true);
         }
-    
+
+        [NotNull]
+        public ISecurityStrategyBase? Security { get; private set; }
+
         public BlazorApplication Application => _sharedApplication.Value;
     
         protected BlazorApplication CreateApplication() {
@@ -45,6 +51,7 @@ namespace Xpand.Extensions.Blazor {
 
                 blazorApplication.ServiceProvider = _serviceProvider;
                 ((ISharedBlazorApplication) blazorApplication).UseNonSecuredObjectSpaceProvider = true;
+                Security = blazorApplication.Security;
                 blazorApplication.Security = null;
                 blazorApplication.Setup();
                 return blazorApplication;

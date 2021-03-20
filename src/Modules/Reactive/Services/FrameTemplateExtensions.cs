@@ -21,6 +21,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 		public static IObservable<IWindowsForm> WhenWindowsForm(this IFrameTemplate frameTemplate) 
 			=> frameTemplate.ReturnObservable().Where(_ => frameTemplate != null && frameTemplate.GetType().InheritsFrom("System.Windows.Forms.Form")).WhenNotDefault()
 				.Select(template => new WindowsForm(template));
+        
 
 		public static IObservable<IWindowsForm> When(this IObservable<IWindowsForm> source, string eventName) 
 			=> source.SelectMany(form => Observable.FromEventPattern(form.Template,eventName).To(form));

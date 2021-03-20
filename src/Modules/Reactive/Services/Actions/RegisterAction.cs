@@ -13,6 +13,8 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using HarmonyLib;
 using JetBrains.Annotations;
+using Xpand.Extensions.StringExtensions;
+using Xpand.Extensions.XAF.ObjectExtensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services.Actions{
     [PublicAPI]
@@ -69,6 +71,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             Type targetObjectType=null,ViewType viewType=ViewType.Any,PredefinedCategory category = PredefinedCategory.View) 
                 => manager.RegisterViewAction(id, category.NewAction<SimpleAction,ViewController>( targetObjectType.Configure(viewType)));
 
+
         public static IObservable<SimpleAction> RegisterViewSimpleAction(this ApplicationModulesManager manager, string id, 
             Action<SimpleAction> configure,PredefinedCategory category = PredefinedCategory.View) 
                 => manager.RegisterViewAction(id, category.NewAction<SimpleAction,ViewController>( configure));
@@ -76,6 +79,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static IObservable<SingleChoiceAction> RegisterViewSingleChoiceAction(this ApplicationModulesManager manager, string id, 
             Type targetObjectType=null,ViewType viewType=ViewType.Any ,PredefinedCategory category = PredefinedCategory.View) 
                 => manager.RegisterViewAction(id, category.NewAction<SingleChoiceAction,ViewController>( targetObjectType.Configure(viewType)));
+
         public static IObservable<SingleChoiceAction> RegisterViewSingleChoiceAction(this ApplicationModulesManager manager, string id, 
              Action<SingleChoiceAction> configure ,PredefinedCategory category = PredefinedCategory.View) 
                 => manager.RegisterViewAction(id, category.NewAction<SingleChoiceAction,ViewController>( configure));
@@ -155,7 +159,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 	        var controllerType = type ?? NewControllerType<TController>(id);
 	        if (type == null){
 		        ControllerCtorState
-                    .AddOrUpdate(controllerType, type1 => (id, _ => actionBase(((TController) _.controller, _.id))),(type1, tuple) => tuple);
+                    .AddOrUpdate(controllerType, type1 => (id, _ => actionBase(((TController) _.controller, _.id))),(_, tuple) => tuple);
             }
 
             // var registerAction = _actionsSubject.Select(a => a).OfType<TAction>().FirstAsync(_ => _.Id == id).Replay(1);
@@ -175,7 +179,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
                 h => actionList.ActionAdded += h, h => actionList.ActionAdded -= h, ImmediateScheduler.Instance)
                 .Select(p => p.EventArgs.Action);
 
-        static Subject<ActionBase> _actionsSubject=new Subject<ActionBase>();
+        static Subject<ActionBase> _actionsSubject=new();
 
         private static Type NewControllerType<T>(string id) where T:Controller{
             var baseController = GetBaseController<T>();
@@ -197,13 +201,14 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 
         internal static void NewAction(this Controller controller){
 	        var tuple = ControllerCtorState[controller.GetType()];
-	        tuple.actionBase((controller, tuple.id));
+            var actionBase = tuple.actionBase((controller, tuple.id));
+            actionBase.Caption = actionBase.Caption.Replace("_"," ").FirstCharacterToUpper().CompoundName();
         }
     }
 
     public abstract class ActionWindowController:WindowController,IActionController{
 	    protected ActionWindowController() => this.NewAction();
-        readonly Subject<Controller> _clonedSubject=new Subject<Controller>();
+        readonly Subject<Controller> _clonedSubject=new();
         public IObservable<Controller> WhenCloned => _clonedSubject.AsObservable();
         public override Controller Clone(IModelApplication modelApplication) {
             var controller = base.Clone(modelApplication);
@@ -218,11 +223,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 
     public abstract class ActionViewController:ViewController, IActionController {
         protected ActionViewController() => this.NewAction();
-        readonly Subject<ActionViewController> _clonedSubject=new Subject<ActionViewController>();
+        readonly Subject<ActionViewController> _clonedSubject=new();
         public IObservable<Controller> WhenCloned => _clonedSubject.AsObservable();
-        protected override void OnActivated() {
-            base.OnActivated();
-        }
 
         public override Controller Clone(IModelApplication modelApplication) {
             var controller = base.Clone(modelApplication);

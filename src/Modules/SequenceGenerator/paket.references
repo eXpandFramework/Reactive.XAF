@@ -5,3 +5,4 @@ System.Reactive
 JetBrains.Annotations
 Microsoft.CodeAnalysis.CSharp
 System.Configuration.ConfigurationManager
+Newtonsoft.Json

@@ -22,7 +22,7 @@ using ListView = DevExpress.ExpressApp.ListView;
 
 namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
     public static class ReactiveLoggerHubService{
-        static readonly TraceEventReceiver Receiver = new TraceEventReceiver();
+        static readonly TraceEventReceiver Receiver = new();
         
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) =>
@@ -44,7 +44,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 	        });
 
         public static void CleanUpHubResources(this XafApplication application, IObservable<Server> startServer){
-            application.WhenDisposed().Zip(startServer, (tuple, server) => server.ShutDownServer())
+            application.WhenDisposed().Zip(startServer, (_, server) => server.ShutDownServer())
                 .Concat()
                 .FirstOrDefaultAsync()
                 .Subscribe();
@@ -64,8 +64,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 			        return events;
 		        }).ToUnit();
 
-        private static IObservable<TraceEvent[]> SaveServerTraceMessages(this XafApplication application) =>
-	        application.BufferUntilCompatibilityChecked(TraceEventReceiver.TraceEvent)
+        private static IObservable<TraceEvent[]> SaveServerTraceMessages(this XafApplication application) 
+            => application.BufferUntilCompatibilityChecked(TraceEventReceiver.TraceEvent)
 		        .Buffer(TimeSpan.FromSeconds(2)).WhenNotEmpty()
 		        .TakeUntil(application.WhenDisposed())
 		        .Select(list => application.ObjectSpaceProvider.NewObjectSpace(space => space.SaveTraceEvent(list)).ToEnumerable().ToArray());
@@ -73,7 +73,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
         internal static IObservable<TSource> TraceRXLoggerHub<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
 	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
 	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) =>
-	        source.Trace(name, ReactiveLoggerHubModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
+	        source.Trace(name, ReactiveLoggerHubModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName);
 
 
         private static IObservable<Server> StartServer(this  XafApplication application) =>
@@ -129,7 +129,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
             return server;
         }
 
-        private static ServerPort ToServerPort(this IPEndPoint endPoint) => new ServerPort(endPoint.Address.ToString(), endPoint.Port, ServerCredentials.Insecure);
+        private static ServerPort ToServerPort(this IPEndPoint endPoint) => new(endPoint.Address.ToString(), endPoint.Port, ServerCredentials.Insecure);
 
         public static ITraceEventHub NewClient(this ServerPort serverPort,TraceEventReceiver receiver) => StreamingHubClient
 	        .Connect<ITraceEventHub, ITraceEventHubReceiver>(new Channel(serverPort.Host, serverPort.Port, ChannelCredentials.Insecure),receiver);

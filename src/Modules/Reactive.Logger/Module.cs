@@ -26,7 +26,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger {
 
         public override void AddGeneratorUpdaters(ModelNodesGeneratorUpdaters updaters){
             base.AddGeneratorUpdaters(updaters);
-            updaters.Add(new TraceEventAppearenceRulesGenerator());
+            updaters.Add(new TraceEventAppearanceRulesGenerator());
         }
 
         public override void Setup(ApplicationModulesManager manager){

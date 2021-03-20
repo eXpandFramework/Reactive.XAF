@@ -7,3 +7,4 @@ Microsoft.CodeAnalysis.CSharp
 System.Reactive
 System.Configuration.ConfigurationManager
 System.ServiceModel.Http
+Newtonsoft.Json

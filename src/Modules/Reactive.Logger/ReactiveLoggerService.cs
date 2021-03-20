@@ -36,7 +36,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
     }
     public static class ReactiveLoggerService{
         public static string RXLoggerLogPath{ get; [PublicAPI]set; }=@$"{AppDomain.CurrentDomain.ApplicationPath()}\{AppDomain.CurrentDomain.ApplicationName()}_RXLogger.log";
-        private static readonly Subject<ITraceEvent> SavedTraceEventSubject=new Subject<ITraceEvent>();
+        private static readonly Subject<ITraceEvent> SavedTraceEventSubject=new();
         public static IObservable<ITraceEvent> ListenerEvents{ get; private set; }
         public static IObservable<ITraceEvent> SavedTraceEvent{ get; }=SavedTraceEventSubject;
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
@@ -180,7 +180,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         private static IObservable<TraceEvent> SaveEvent(this IObservable<ITraceEvent> events, XafApplication application) 
             => events.Select(_ => _)
 		        .Buffer(TimeSpan.FromSeconds(3)).WhenNotEmpty()
-		        .Where(list => application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger.GetActiveSources().Any())
+		        .Where(_ => application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger.GetActiveSources().Any())
 		        .SelectMany(list => application.ObjectSpaceProvider.NewObjectSpace(space => space.SaveTraceEvent(list)));
 
         public static IObservable<TraceEvent> SaveTraceEvent(this IObjectSpace objectSpace, IList<ITraceEvent> traceEventMessages){

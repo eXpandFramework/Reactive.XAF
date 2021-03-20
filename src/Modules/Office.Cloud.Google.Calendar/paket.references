@@ -6,3 +6,4 @@ JetBrains.Annotations
 Google.Apis.Calendar.v3
 Microsoft.CodeAnalysis.CSharp
 System.Configuration.ConfigurationManager
+Newtonsoft.Json

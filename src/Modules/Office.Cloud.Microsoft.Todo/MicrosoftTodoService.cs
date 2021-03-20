@@ -17,7 +17,7 @@ using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
-using Xpand.Extensions.XAF.ViewExtenions;
+using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -34,10 +34,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
         private static IUserRequestBuilder Me(this IBaseRequestBuilder builder) => builder.Client.Me();
         private static IUserRequestBuilder Me(this IBaseClient client) => ((GraphServiceClient)client).Me;
 
-        static readonly Subject<(OutlookTask serviceObject, MapAction mapAction)> UpdatedSubject=new Subject<(OutlookTask serviceObject, MapAction mapAction)>();
+        static readonly Subject<(OutlookTask serviceObject, MapAction mapAction)> UpdatedSubject=new();
         public static IObservable<(OutlookTask cloud, MapAction mapAction)> Updated{ get; }=UpdatedSubject.AsObservable();
-        static readonly Subject<GenericEventArgs<(IObjectSpace objectSpace, ITask local, OutlookTask cloud, MapAction mapAction)>> CustomizeSynchronizationSubject =
-            new Subject<GenericEventArgs<(IObjectSpace objectSpace, ITask local, OutlookTask cloud, MapAction mapAction)>>();
+        static readonly Subject<GenericEventArgs<(IObjectSpace objectSpace, ITask local, OutlookTask cloud, MapAction mapAction)>> CustomizeSynchronizationSubject = new();
 
         [PublicAPI]
         public static IObservable<GenericEventArgs<(IObjectSpace objectSpace, ITask local, OutlookTask cloud, MapAction mapAction)>> CustomizeSynchronization 
@@ -51,7 +50,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
         public static IObservable<GenericEventArgs<(IObjectSpace objectSpace, ITask local, OutlookTask cloud, MapAction mapAction)>> When(
             this IObservable<GenericEventArgs<(IObjectSpace objectSpace, ITask local, OutlookTask cloud, MapAction mapAction)>> source, MapAction mapAction)
             => source.Where(_ => _.Instance.mapAction == mapAction);
-        static readonly Subject<IBaseRequest> CustomizeSubject = new Subject<IBaseRequest>();
+        static readonly Subject<IBaseRequest> CustomizeSubject = new();
 
         [PublicAPI]
         public static IObservable<IBaseRequest> Customize => CustomizeSubject.AsObservable();
@@ -61,7 +60,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
             => source.SelectMany(builder => objectSpaceFactory.SynchronizeCloud<OutlookTask, ITask>(modelTodoItem.SynchronizationType,objectSpace,
                 cloudId => ((IOutlookTaskRequest)RequestCustomization.Default(builder.Me().Outlook.Tasks[cloudId].Request())).DeleteAsync().ToObservable(),
                 task => ((IOutlookTaskFolderTasksCollectionRequest)RequestCustomization.Default(builder.Tasks.Request())).AddAsync(task).ToObservable(),
-                cloudId => new OutlookTask().ReturnObservable(),
+                _ => new OutlookTask().ReturnObservable(),
                 t => ((IOutlookTaskRequest)RequestCustomization.Default(builder.Me().Outlook.Tasks[t.cloudId].Request())).UpdateAsync(t.cloudEntity).ToObservable(),
                 e => e.Handled=MapAction.Delete.CustomSynchronization(e.Instance.cloudOfficeObject.ObjectSpace, e.Instance.localEntinty, null).Handled,
                 t => MapAction.Insert.CustomSynchronization(null, t.source, t.target),
@@ -102,7 +101,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
 
         public static IObservable<OutlookTaskFolder> GetFolder(this IOutlookUserTaskFoldersCollectionRequestBuilder builder, string name, bool createNew = false){
             var request = builder.Request();
-            var addNew = createNew.ReturnObservable().WhenNotDefault().SelectMany(b => request.AddAsync(new OutlookTaskFolder() { Name = name }));
+            var addNew = createNew.ReturnObservable().WhenNotDefault().SelectMany(_ => request.AddAsync(new OutlookTaskFolder() { Name = name }));
             return request.Filter($"{nameof(OutlookTaskFolder.Name)} eq '{name}'").GetAsync().ToObservable(ImmediateScheduler.Instance)
                 .SelectMany(page => page).SwitchIfEmpty(addNew).FirstOrDefaultAsync().Publish().RefCount();
         }
@@ -114,7 +113,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
         
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => manager.WhenApplication(application => Observable.Defer(() => application.WhenViewOnFrame()
-		            .When(frame => application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Todo().Items.Select(item => item.ObjectView))
+		            .When(_ => application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Todo().Items.Select(item => item.ObjectView))
 		            .Authorize())
 	            .Retry(application)
                 .SynchronizeCloud()

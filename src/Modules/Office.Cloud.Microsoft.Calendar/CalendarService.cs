@@ -20,7 +20,7 @@ using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
-using Xpand.Extensions.XAF.ViewExtenions;
+using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
@@ -32,7 +32,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
         public static IObservable<(Frame frame, GraphServiceClient client)> Client => ClientSubject.AsObservable();
         private static IUserRequestBuilder Me(this IBaseRequestBuilder builder) => builder.Client.Me();
         private static IUserRequestBuilder Me(this IBaseClient client) => ((GraphServiceClient)client).Me;
-        static readonly Subject<(Event cloud,IEvent local, MapAction mapAction,CallDirection callDirection)> UpdatedSubject=new Subject<(Event cloud, IEvent local, MapAction mapAction, CallDirection callDirection)>();
+        static readonly Subject<(Event cloud,IEvent local, MapAction mapAction,CallDirection callDirection)> UpdatedSubject=new();
         static readonly Subject<GenericEventArgs<(Func<IObjectSpace> objectSpace, IEvent local, Event cloud, MapAction mapAction, CallDirection callDirection)>> CustomizeSynchronizationSubject =
             new Subject<GenericEventArgs<(Func<IObjectSpace> objectSpace, IEvent target, Event source, MapAction mapAction, CallDirection callDirection)>>();
         
@@ -65,13 +65,13 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) =>
             manager.WhenApplication(application => {
                 var viewOnFrame = application.WhenViewOnFrame()
-                    .When(frame => application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office
+                    .When(_ => application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office
                         .Microsoft().Calendar().Items.Select(item => item.ObjectView))
                     .Publish().RefCount();
                 return viewOnFrame.Authorize()
                     .SynchronizeBoth()
                     .Merge(viewOnFrame.SelectMany(frame=>frame.GetController<RefreshController>().RefreshAction.WhenExecute()
-                        .Select(e=>frame).TakeUntil(frame.View.WhenClosing())
+                        .Select(_=>frame).TakeUntil(frame.View.WhenClosing())
                         .Authorize().SynchronizeLocal()
                         .ObserveOnWindows(SynchronizationContext.Current)
                         .Select(tuple => {

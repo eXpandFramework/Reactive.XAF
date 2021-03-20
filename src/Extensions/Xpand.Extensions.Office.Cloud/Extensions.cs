@@ -62,7 +62,7 @@ namespace Xpand.Extensions.Office.Cloud{
                 .SelectMany(_ => _.objects.SelectMany(o => {
 	                var deletedId = _.objectSpace.GetKeyValue(o).ToString();
 	                return _.objectSpace.QueryCloudOfficeObject(typeof(TCloudEntity), o).Where(officeObject => officeObject.LocalId == deletedId).ToArray()
-                        .Select(officeObject => (officeObject,bo:(TLocalEntity)o));
+                        .Select(officeObject => (officeObject,bo:o));
                 }))
                 .SelectMany(t => delete(t).Select(s => t.officeObject))
                 .To((TCloudEntity)typeof(TCloudEntity).CreateInstance())

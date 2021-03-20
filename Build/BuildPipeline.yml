@@ -143,21 +143,19 @@ jobs:
                   Get-AzTestRuns -buildIds $build.Id -FailedOnly
                 }
                 "failedBuilds=$failedBuilds"
-                if (!$failedBuilds) {
-                    "PublishNugets-Reactive.XAF"
-                    $env:AzureToken = '$(AzureToken)' 
-                    $env:AzOrganization = "eXpandDevOps"
-                    $env:AzProject = "eXpandFramework"
-                    $env:DXFeed = '$(DXApiFeed)'
-                    $xafMinor=$xafMinors|select-object -first 1
-                    $build=Get-AzBuilds -Definition Reactive.XAF -Tag "$xafMinor" -Top 1 
-                    $parameters = @{
-                        CustomVersion     = "$xafMinor"
-                        DxPipelineBuildId = "$($build.Id)"
-                    }
-                    $parameters|Out-String
-                    Add-AzBuild -Definition PublishNugets-Reactive.XAF -Parameters $parameters
+                if ($failedBuilds){
+                  throw "Failed tests $failedBuilds"
                 }
+                "PublishNugets-Reactive.XAF"
+                $env:DXFeed = '$(DXApiFeed)'
+                $xafMinor=$xafMinors|select-object -first 1
+                $build=Get-AzBuilds -Definition Reactive.XAF -Tag "$xafMinor" -Top 1 
+                $parameters = @{
+                    CustomVersion     = "$xafMinor"
+                    DxPipelineBuildId = "$($build.Id)"
+                }
+                $parameters|Out-String
+                Add-AzBuild -Definition PublishNugets-Reactive.XAF -Parameters $parameters
           }
           & "$(System.DefaultWorkingDirectory)\go.ps1" @goArgs
           New-Item '$(System.DefaultWorkingDirectory)\bin\Nupkg' -ItemType Directory -ErrorAction SilentlyContinue

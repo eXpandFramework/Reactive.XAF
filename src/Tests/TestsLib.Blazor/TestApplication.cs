@@ -36,8 +36,6 @@ namespace Xpand.TestsLib.Blazor{
         public bool TransmitMessage => false;
 
         public IObservable<Unit> TraceClientBroadcast{ get; set; }
-
-
         public IObservable<Unit> TraceClientConnected{ get; set; }
         
         public Type SUTModule{ get; }
@@ -50,7 +48,7 @@ namespace Xpand.TestsLib.Blazor{
             var provider = ServiceProvider.GetRequiredService<XpoDataStoreProviderAccessor>().DataStoreProvider;
             if (provider != null) {
                 args.ObjectSpaceProvider = this.NewObjectSpaceProvider(provider);
-                args.ObjectSpaceProviders.Add(new NonPersistentObjectSpaceProvider());
+                args.ObjectSpaceProviders.Add(ServiceProvider.GetService<NonPersistentObjectSpaceProvider>()??new NonPersistentObjectSpaceProvider(TypesInfo, null));
             }
             else {
                 base.OnCreateCustomObjectSpaceProvider(args);

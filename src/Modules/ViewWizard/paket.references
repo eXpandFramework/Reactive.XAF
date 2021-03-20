@@ -6,3 +6,4 @@ System.Reactive
 System.Interactive
 Microsoft.CodeAnalysis.CSharp
 System.Configuration.ConfigurationManager
+Newtonsoft.Json

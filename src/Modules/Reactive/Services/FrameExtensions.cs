@@ -10,7 +10,7 @@ using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.XAF.Modules.Reactive.Extensions;
+using Xpand.Extensions.XAF.ViewExtensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class FrameExtensions{
@@ -35,7 +35,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         internal static IObservable<TFrame> WhenFits<TFrame>(this IObservable<TFrame> source, ViewType viewType,
             Type objectType = null, Nesting nesting = Nesting.Any, bool? isPopupLookup = null) where TFrame : Frame 
             => source.SelectMany(_ => _.View != null ? _.ReturnObservable() : _.WhenViewChanged().Select(tuple => _))
-                .Where(frame => frame.View.Fits(viewType, nesting, objectType))
+                .Where(frame => frame.View.Is(viewType, nesting, objectType))
                 .Where(_ => {
                     if (isPopupLookup.HasValue){
                         var popupLookupTemplate = _.Template is ILookupPopupFrameTemplate;
@@ -72,6 +72,15 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 				        h => item.ViewChanging += h, h => item.ViewChanging -= h, ImmediateScheduler.Instance))
 		        .Select(pattern => pattern)
 		        .TransformPattern<ViewChangingEventArgs, TFrame>();
+        
+        public static IObservable<(TFrame frame, ViewChangedEventArgs args)> WhenViewChanged<TFrame>(
+            this IObservable<TFrame> source) where TFrame : Frame 
+            => source.SelectMany(item => Observable.FromEventPattern<EventHandler<ViewChangedEventArgs>, ViewChangedEventArgs>(
+				        h => item.ViewChanged += h, h => item.ViewChanged -= h, ImmediateScheduler.Instance))
+		        .Select(pattern => pattern)
+		        .TransformPattern<ViewChangedEventArgs, TFrame>();
+        
+        
 
         public static IObservable<T> TemplateChanged<T>(this IObservable<T> source) where T : Frame 
             => source.SelectMany(item => {
@@ -79,7 +88,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 return Observable.FromEventPattern<EventHandler, EventArgs>(
                         handler => item.TemplateChanged += handler,
                         handler => item.TemplateChanged -= handler,ImmediateScheduler.Instance)
-                    .Select(pattern => item);
+                    .Select(_ => item);
             });
 
         public static IObservable<TFrame> WhenTemplateChanged<TFrame>(this TFrame source) where TFrame : Frame 
@@ -91,7 +100,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T> TemplateViewChanged<T>(this IObservable<T> source) where T : Frame 
             => source.SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(
                 handler => item.TemplateViewChanged += handler,
-                handler => item.TemplateViewChanged -= handler,ImmediateScheduler.Instance).Select(pattern => item));
+                handler => item.TemplateViewChanged -= handler,ImmediateScheduler.Instance).Select(_ => item));
 
         public static IObservable<Unit> WhenDisposingFrame<TFrame>(this TFrame source) where TFrame : Frame 
             => DisposingFrame(source.ReturnObservable());

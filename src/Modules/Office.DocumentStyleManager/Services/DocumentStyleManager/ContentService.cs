@@ -13,7 +13,7 @@ using DevExpress.XtraRichEdit.API.Native;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
-using Xpand.Extensions.XAF.ViewExtenions;
+using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -92,7 +92,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
         }
         static IObservable<GenericEventArgs<IEnumerable<object>>> CustomizeDatasource(
             this IRichEditDocumentServer server, ListView listView,  (DetailView view, Document defaultPropertiesProvider) detailView,IEnumerable<DocumentStyle> styles=null){
-	        var customizeDatasource = ((NonPersistePropertyCollectionSource) listView.CollectionSource).Datasource
+	        var customizeDatasource = ((NonPersistentPropertyCollectionSource) listView.CollectionSource).Datasource
 		        .Do(e => {
 			        e.Handled = true;
 			        e.Instance =new BindingList<DocumentStyle>(ImmutableList.CreateRange(styles!));

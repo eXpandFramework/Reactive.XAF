@@ -18,7 +18,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         private static readonly Regex Regex;
 
         private static Lazy<FileStream> NewStream(){
-            return new Lazy<FileStream>(() => File.Open(ReactiveLoggerService.RXLoggerLogPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite));
+            return new(() => File.Open(ReactiveLoggerService.RXLoggerLogPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite));
         }
 
         public ReactiveTraceListener(string applicationTitle) : base(_stream.Value){

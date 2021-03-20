@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using DevExpress.Data;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
@@ -14,7 +15,7 @@ using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ModelExtensions;
-using Xpand.Extensions.XAF.ViewExtenions;
+using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
@@ -67,7 +68,7 @@ namespace Xpand.XAF.Modules.PositionInListView{
                     }
                     t.modelColumn.SortIndex = 0;
                     t.modelColumn.SortOrder = (ColumnSortOrder) Enum.Parse(typeof(ColumnSortOrder), t.item.SortingDirection.ToString());
-                    listView.CollectionSource.Sorting=new List<SortProperty>(){new SortProperty(t.item.PositionMember.MemberInfo.Name, t.item.SortingDirection)};
+                    listView.CollectionSource.Sorting=new List<SortProperty>(){new(t.item.PositionMember.MemberInfo.Name, t.item.SortingDirection)};
                     return listView;
                 })
                 .TracePositionInListView(view => view.Id)
@@ -89,36 +90,47 @@ namespace Xpand.XAF.Modules.PositionInListView{
             => applicationModel.ModelPositionInListView().ListViewItems.Select(item => item.ListView.Id()).Contains(viewID);
 
         private static IObservable<Unit> PositionNewObjects(this IObservable<XafApplication> whenApplication) 
-            => whenApplication.SelectMany(application => application.WhenObjectSpaceCreated().SelectMany(t => t.e.ObjectSpace.WhenNewObjectCommiting<object>().Pair(t.e.ObjectSpace))
-                .Do(t => {
-                    var modelPositionInListView = application.Model.ModelPositionInListView();
-                    var listViewItems = modelPositionInListView.ListViewItems;
-                    if (listViewItems.Any()){
-                        var objectType = t.source.GetType();
-                        var listViewItem = listViewItems.FirstOrDefault(item => item.ListView.ModelClass.TypeInfo.Type==objectType);
-                        if (listViewItem != null){
-                            var modelClassItem = modelPositionInListView.ModelClassItems
-                                .FirstOrDefault(item => item.ModelClass.TypeInfo.Type == objectType && item.ModelMember == listViewItem.PositionMember);
-                            var aggregate = Aggregate.Max;
-                            if (modelClassItem != null&&modelClassItem.NewObjectsStrategy==PositionInListViewNewObjectsStrategy.First){
-                                aggregate=Aggregate.Min;
+            => whenApplication.SelectMany(application => {
+                    var synchronizationContext = SynchronizationContext.Current;
+                    return Observable.Defer(() => application.WhenObjectSpaceCreated()
+                            .SelectMany(t => t.e.ObjectSpace.WhenNewObjectCommiting<object>().Pair(t.e.ObjectSpace)))
+                        .Do(t => {
+                            var modelPositionInListView = application.Model.ModelPositionInListView();
+                            var listViewItems = modelPositionInListView.ListViewItems;
+                            if (listViewItems.Any()) {
+                                var objectType = t.source.GetType();
+                                var listViewItem = listViewItems.FirstOrDefault(item =>
+                                    item.ListView.ModelClass.TypeInfo.Type == objectType);
+                                if (listViewItem != null) {
+                                    var modelClassItem = modelPositionInListView.ModelClassItems
+                                        .FirstOrDefault(item =>
+                                            item.ModelClass.TypeInfo.Type == objectType &&
+                                            item.ModelMember == listViewItem.PositionMember);
+                                    var aggregate = Aggregate.Max;
+                                    if (modelClassItem != null && modelClassItem.NewObjectsStrategy ==
+                                        PositionInListViewNewObjectsStrategy.First) {
+                                        aggregate = Aggregate.Min;
+                                    }
+
+                                    var memberInfo = listViewItem.PositionMember.MemberInfo;
+                                    var aggregateOperand = new AggregateOperand("", memberInfo.Name, aggregate);
+                                    var value = (int) (t.other.Evaluate(objectType, aggregateOperand, null) ?? 0);
+                                    var allValues = t.other.ModifiedObjects.Cast<object>()
+                                        .Select(o => memberInfo.GetValue(o) ?? 0).Cast<int>().Add(value);
+                                    if (aggregate == Aggregate.Max) {
+                                        value = allValues.Max();
+                                        value++;
+                                    }
+                                    else {
+                                        value = allValues.Min();
+                                        value--;
+                                    }
+
+                                    memberInfo.SetValue(t.source, value);
+                                }
                             }
-                            var memberInfo = listViewItem.PositionMember.MemberInfo;
-                            var aggregateOperand = new AggregateOperand("", memberInfo.Name, aggregate);
-                            var value = (int)(t.other.Evaluate(objectType, aggregateOperand, null) ?? 0) ;
-                            var allValues = t.other.ModifiedObjects.Cast<object>().Select(o => memberInfo.GetValue(o)??0).Cast<int>().Add(value);
-                            if (aggregate == Aggregate.Max){
-                                value = allValues.Max();
-                                value++;    
-                            }
-                            else{
-                                value = allValues.Min();
-                                value--;
-                            }
-                            memberInfo.SetValue(t.source,value);
-                        }                    
-                    }
-                }))
+                        });
+                })
                 
                 .TracePositionInListView(_ => $"{_.source}")
                 .ToUnit();

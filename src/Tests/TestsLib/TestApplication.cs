@@ -92,7 +92,7 @@ namespace Xpand.TestsLib{
     static class TestApplicationExtensions{
         public static IObservable<Unit> ClientBroadcast(this ITestApplication application){
             return Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()
-                ? TraceEventHub.Broadcasted.FirstAsync(_ => _.Source == application.SUTModule.Name).ToUnit()
+                ? TraceEventHub.Trace.FirstAsync(_ => _.Source == application.SUTModule.Name).ToUnit()
                     .SubscribeReplay()
                 : Unit.Default.ReturnObservable();
         }

@@ -6,6 +6,7 @@ using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Editors;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
@@ -33,9 +34,9 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
             objectType ??= typeof(object);
             return source
                 .SelectMany(controller => controller.Frame?.View != null ? controller.ReturnObservable()
-                        .Where(_ => _.Frame.View.Fits(viewType, nesting) && objectType.IsAssignableFrom(_.Frame.View.ObjectTypeInfo.Type))
+                        .Where(_ => _.Frame.View.Is(viewType, nesting) && objectType.IsAssignableFrom(_.Frame.View.ObjectTypeInfo.Type))
                     : Observable.Return(controller).FrameAssigned().SelectMany(_ => _.Frame.WhenViewChanged().Select(tuple => _)))
-                .Where(_ => _.Frame.View.Fits(viewType, nesting) && objectType.IsAssignableFrom(_.Frame.View.ObjectTypeInfo.Type));
+                .Where(_ => _.Frame.View.Is(viewType, nesting) && objectType.IsAssignableFrom(_.Frame.View.ObjectTypeInfo.Type));
         }
 
 
@@ -44,7 +45,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
                 return Observable.FromEventPattern<EventHandler, EventArgs>(
                         handler => controller.ViewControlsCreated += handler,
                         handler => controller.ViewControlsCreated -= handler, ImmediateScheduler.Instance)
-                    .Select(pattern => controller);
+                    .Select(_ => controller);
             });
 
         public static T As<T>(this Controller controller) where T : Controller{
@@ -66,7 +67,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
                 : Observable.FromEventPattern<EventHandler, EventArgs>(
                         handler => controller.Activated += handler,
                         handler => controller.Activated -= handler, ImmediateScheduler.Instance)
-                    .Select(pattern => controller))
+                    .Select(_ => controller))
                 .TraceRX(controller => controller.Name);
 
         public static IObservable<T> WhenDeactivated<T>(this T controller) where T : Controller =>
@@ -79,7 +80,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
             controllers.SelectMany(controller => Observable.FromEventPattern<EventHandler, EventArgs>(
                     handler => controller.Deactivated += handler,
                     handler => controller.Deactivated -= handler, ImmediateScheduler.Instance)
-                .Select(pattern => controller));
+                .Select(_ => controller));
 
         public static IObservable<T> FrameAssigned<T>(this IObservable<T> controllers,
             TemplateContext templateContext = default) where T : Controller =>
@@ -87,7 +88,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
                     var frameAssigned = Observable.FromEventPattern<EventHandler, EventArgs>(
                             handler => controller.FrameAssigned += handler,
                             handler => controller.FrameAssigned -= handler, ImmediateScheduler.Instance)
-                        .Select(pattern => controller);
+                        .Select(_ => controller);
                     return controller.Frame != null ? frameAssigned.StartWith(controller) : frameAssigned;
                 })
                 .Concat()

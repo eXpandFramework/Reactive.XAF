@@ -16,29 +16,34 @@ namespace Xpand.TestsLib.Common.Attributes{
     [AttributeUsage(AttributeTargets.Method|AttributeTargets.Assembly, Inherited = false)]
     public class XpandTestAttribute : Attribute,IRepeatTest{
         private readonly int _tryCount;
+        private readonly ApartmentState _state;
         private readonly int _timeout;
 
-        public XpandTestAttribute(int timeout = 60000, int tryCount = 2){
+        public XpandTestAttribute(int timeout = 60000, int tryCount = 2,ApartmentState state=ApartmentState.STA){
             _timeout = timeout;
             _tryCount = tryCount;
+            _state = state;
         }
 
         public string IgnoredXAFMinorVersions{ get; set; }
         public TestCommand Wrap(TestCommand command){
             IgnoredXAFMinorVersions ??= command.Test.Method?.MethodInfo.DeclaringType?.Assembly.Attribute<XpandTestAttribute>()?.IgnoredXAFMinorVersions;
-            return new RetryCommand(command, _tryCount, _timeout, IgnoredXAFMinorVersions);
+            return new RetryCommand(command, _tryCount, _timeout, IgnoredXAFMinorVersions,_state);
         }
 
         public class RetryCommand : DelegatingTestCommand{
             private readonly int _tryCount;
             private readonly int _timeout;
             private readonly string _ignoredXAFMinorVersions;
+            private readonly ApartmentState _apartmentState;
 
-            public RetryCommand(TestCommand innerCommand, int tryCount, int timeout, string ignoredXAFMinorVersions)
+            public RetryCommand(TestCommand innerCommand, int tryCount, int timeout, string ignoredXAFMinorVersions,
+                ApartmentState apartmentState)
                 : base(innerCommand){
                 _tryCount = tryCount;
                 _timeout = timeout;
                 _ignoredXAFMinorVersions = ignoredXAFMinorVersions;
+                _apartmentState = apartmentState;
             }
 
             public override TestResult Execute(TestExecutionContext context){
@@ -54,7 +59,7 @@ namespace Xpand.TestsLib.Common.Attributes{
                         // ManualResetEvent resetEvent = new ManualResetEvent(false);
                         
                         void ExecuteTest() => Task.Factory.StartTask(() => context.CurrentResult = innerCommand.Execute(context),
-                                thread => thread.SetApartmentState(GetApartmentState(context))).Wait();
+                                thread => thread.SetApartmentState(GetApartmentState(context,_apartmentState))).Wait();
 
                         if (Debugger.IsAttached) {
                             ExecuteTest();
@@ -98,11 +103,10 @@ namespace Xpand.TestsLib.Common.Attributes{
                 return context.CurrentResult;
             }
             
-            private static ApartmentState GetApartmentState(TestExecutionContext context) {
-                ApartmentState GetDefaultGetApartmentState() => ApartmentState.STA;
-                var apartmentAttribute = context.CurrentTest.Method.MethodInfo.Attribute<ApartmentAttribute>();
+            private static ApartmentState GetApartmentState(TestExecutionContext context, ApartmentState apartmentState) {
+                var apartmentAttribute = context.CurrentTest.Method?.MethodInfo.Attribute<ApartmentAttribute>();
                 return apartmentAttribute != null ? (ApartmentState?) apartmentAttribute.Properties[PropertyNames.ApartmentState]
-                        .OfType<object>().First() ?? GetDefaultGetApartmentState() : GetDefaultGetApartmentState();
+                        .OfType<object>().First() ?? apartmentState : apartmentState;
                 // return context.CurrentTest.Arguments.Any(o => $"{o}" == Platform.Win.ToString()) ? ApartmentState.STA : GetDefaultGetApartmentState();
             }
 

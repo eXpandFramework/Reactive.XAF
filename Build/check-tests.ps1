@@ -6,6 +6,7 @@ param(
 )
 $ErrorActionPreference = "stop"
 & $Root\go.ps1 -InstallModules
+$VerbosePreference="continue"
 Invoke-Script {
     $env:AzureToken = $AzureToken
     $env:AzOrganization = "eXpandDevOps"

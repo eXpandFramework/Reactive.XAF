@@ -47,29 +47,30 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         bool Enabled{ get; set; }
     }
 
-    public class TraceEventAppearenceRulesGenerator:ModelNodesGeneratorUpdater<AppearanceRulesModelNodesGenerator>{
+    public class TraceEventAppearanceRulesGenerator:ModelNodesGeneratorUpdater<AppearanceRulesModelNodesGenerator>{
         private const string Reactive = "Reactive";
         private const string Data = "Data";
         private const string Editors = "Editors";
         private const string Model = "Model";
         private const string Office = "Office";
         private const string View = "View";
-        public static readonly Dictionary<string, Color> Colors=new Dictionary<string,Color>{
+        public static readonly Dictionary<string, Color> Colors=new() {
             {Reactive,Color.Black},
             {Data,Color.DimGray},
             {Editors,Color.DarkOrange},
             {Model,Color.Blue},
             {Office,Color.BlueViolet},
-            {View,Color.Brown}
+            {View,Color.Brown},
         };
 
-        public static readonly Dictionary<string, Color> Modules=new Dictionary<string,Color>{
+        public static readonly Dictionary<string, Color> Modules=new() {
             {nameof(ReactiveModule),Colors[Reactive]},
             {nameof(ReactiveLoggerModule),Colors[Reactive]},
             {"ReactiveLoggerHubModule",Colors[Reactive]},
             {"AutoCommitModule",Colors[Data]},
             {"JobSchedulerModule",Colors[Data]},
             {"CloneMemberValueModule",Colors[Data]},
+            {"RestModule",Colors[Data]},
             {"CloneModelViewModule",Colors[Model]},
             {"GridListEditorModule",Colors[Editors]},
             {"ViewWizardModule",Colors[View]},
@@ -111,10 +112,10 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
     }
     public class TraceSourcedModulesNodesGenerator:ModelNodesGeneratorBase{
         protected override void GenerateNodesCore(ModelNode node){
-            foreach (var module in TraceEventAppearenceRulesGenerator.Modules){
+            foreach (var module in TraceEventAppearanceRulesGenerator.Modules){
                 node.AddNode<IModelTraceSourcedModule>(module.Key);
             }
-            var modules = TraceEventAppearenceRulesGenerator.Modules
+            var modules = TraceEventAppearanceRulesGenerator.Modules
                 .SelectMany(_ => ((IModelSources) node.Application).Modules.Where(m => m.Name==_.Key).ToTraceSource());
             foreach (var valueTuple in modules){
                 var moduleName = valueTuple.module.Name;

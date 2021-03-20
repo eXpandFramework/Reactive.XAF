@@ -6,15 +6,133 @@ using System.Linq.Expressions;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
+using DevExpress.Xpo;
+using Fasterflect;
 using JetBrains.Annotations;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Transform.Collections;
+using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.XAF.CollectionSourceExtensions;
+using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ObjectSpaceExtensions {
+        private static readonly Subject<(IObjectSpace objectSpace,object instance)> ObjectsSubject = new();
+
+        public static IObservable<T> Link<T>(this IObservable<T> source, IObjectSpace objectSpace) 
+            => source.Do(obj => {
+                if (obj is IObjectSpaceLink link) {
+                    link.ObjectSpace=objectSpace;
+                }
+            });
+
+        public static IEnumerable<T> ShapeData<T>(this IObjectSpace objectSpace,Type objectType,CriteriaOperator criteria=null,IEnumerable<SortProperty> sorting=null,int topReturned=0,params T[] objects) {
+            var filterEvaluator = objectSpace.GetExpressionEvaluator(objectType,criteria);
+            var data = objects.Where(o => filterEvaluator.Fit(o));
+            if (sorting!=null){
+                foreach(var sortInfo in sorting) {
+                    var sortingEvaluator = objectSpace.GetExpressionEvaluator(objectType, sortInfo.Property);
+                    data = sortInfo.Direction == DevExpress.Xpo.DB.SortingDirection.Ascending ? data.OrderBy(o => sortingEvaluator.Evaluate(o)) : data.OrderByDescending(o => sortingEvaluator.Evaluate(o));
+                }
+            }
+            if(topReturned > 0) {
+                data = data.Take(topReturned);
+            }
+
+            return data;
+        }
+
+        public static IObservable<T> WhenObjects<T>(this NonPersistentObjectSpace objectSpace) => objectSpace.WhenObjects(typeof(T)).Cast<T>();
+        public static IObservable<object> WhenObjects(this NonPersistentObjectSpace objectSpace,Type objectType=null) 
+            => ObjectsSubject.Where(t => t.objectSpace==objectSpace)
+                .Select(t => t.instance).Where(o =>objectType==null|| objectType.IsInstanceOfType(o));
+
+        public static IObservable<T> WhenObjects<T>(this NonPersistentObjectSpace objectSpace,Func<(NonPersistentObjectSpace objectSpace, ObjectsGettingEventArgs e), IObservable<T>> source,Type objectType=null) {
+            objectType ??= typeof(T);
+#if !XAF192
+            objectSpace.AutoSetModifiedOnObjectChange = true;
+#endif
+            objectSpace.NonPersistentChangesEnabled = true;
+            return objectSpace.WhenObjectsGetting()
+                    .Where(t => objectType.IsAssignableFrom(t.e.ObjectType))
+                .SelectMany(t => {
+                    var objects = new DynamicCollection(objectSpace, t.e.ObjectType);
+                    t.e.Objects = objects;
+                    return objects.WhenFetchObjects()
+                        .TakeWhile(_ => !objectSpace.IsDisposed)
+                        .SelectMany(t1 => source(t)
+                            .ObserveOn(Scheduler.CurrentThread)
+#if !XAF192
+                            .Where(buffer => objectSpace.IsObjectFitForCriteria(t1.e.Criteria,buffer))
+                            .TakeWhile(_ => !objectSpace.IsDisposed)
+                            .Take(t1.e.TopReturnedObjects,true)
+                            .ObserveOn(Scheduler.CurrentThread)
+#endif
+                            .TakeWhile(_ => !objectSpace.IsDisposed)
+                            .BufferUntilCompleted()
+                            .Do(items => objects.AddObjects(items))
+                            .SelectMany()
+                            .Do(item => {
+                                objectSpace.AcceptObject(item);
+                                if (objectType.IsInstanceOfType(item)) {
+                                    ObjectsSubject.OnNext((objectSpace, item));
+                                }
+                            })
+                            .Finally(() => {
+                                objects.CallMethod("RaiseLoaded");
+                                objects.CallMethod("RaiseListChangedEvent", new ListChangedEventArgs((ListChangedType) (-10000), 0));
+                            })).IgnoreElements().Merge(ObjectsSubject.Where(t2 => t2.objectSpace==objectSpace).Select(t2 => t2.instance).Cast<T>()
+                        );
+                })
+                ;
+        }
+
+        public static void AcceptObject(this NonPersistentObjectSpace objectSpace, object item) => objectSpace.CallMethod("AcceptObject", item);
+
+        public static IObservable<Unit> Commit(this IObjectSpace objectSpace,Func<object,IObservable<object>> sourceSelector) 
+            => objectSpace.AsNonPersistentObjectSpace().WhenCommitingObjects(sourceSelector ).ToUnit()
+                .Merge(Unit.Default.ReturnObservable().Do(_ => objectSpace.CommitChanges()).IgnoreElements());
+
+        public static IObservable<Unit> WhenCommitingObjects(this NonPersistentObjectSpace objectSpace,Func<object,IObservable<object>> sourceSelector)
+            => objectSpace.WhenCommiting()
+                .SelectMany(t => t.objectSpace.ModifiedObjects.Cast<object>().ToObservable(Scheduler.Immediate)
+                    .SelectMany(sourceSelector)
+                    .ToUnit().IgnoreElements()
+                    .Merge(t.objectSpace.WhenModifyChanged().FirstAsync(space => !space.IsModified).Do(space => space.SetIsModified(true)).ToUnit().IgnoreElements())
+                    .Concat(Observable.Return(Unit.Default).Do(_ => t.objectSpace.SetIsModified(false))))
+                .ToUnit();
+
+        
+        public static IObservable<T> Request<T>(this IObjectSpace objectSpace) 
+            => objectSpace.Request(typeof(T)).Cast<T>();
+
+        public static IObservable<T[]> RequestAll<T>(this IObjectSpace objectSpace) 
+            => objectSpace.Request<T>().BufferUntilCompleted();
+        
+        public static IObservable<object[]> RequestAll(this IObjectSpace objectSpace,Type objectType) 
+            => objectSpace.Request(objectType).BufferUntilCompleted();
+
+        public static IObservable<Unit> Commit(this IObjectSpace objectSpace) => objectSpace.Commit(_ => Observable.Empty<object>());
+
+        public static IObservable<object> Request(this IObjectSpace objectSpace,Type objectType) 
+            => ((IBindingList) objectSpace.CreateCollection(objectType)).WhenObjects();
+
+        public static IObservable<object> WhenObjects(this IBindingList bindingList,bool waitForTrigger=false) {
+            var whenListChanged = bindingList.WhenListChanged().Publish().RefCount();
+            var signalCompletion = whenListChanged.FirstAsync(t => t.e.ListChangedType == (ListChangedType) (-10000))
+                .Select(t => t.sender);
+            return waitForTrigger ? signalCompletion.SelectMany(list => list.Cast<object>()) : signalCompletion
+                .Merge(bindingList.Cast<object>().TakeLast(1).ToObservable(Scheduler.Immediate).IgnoreElements().To(bindingList))
+                .SelectMany(list => list.Cast<object>());
+        }
+
         [PublicAPI]
         public static IObservable<T> WhenModifiedObjects<T>(this IObjectSpace objectSpace,Expression<Func<T,object>> memberSelector){
             var memberName = ((MemberExpression) memberSelector.Body).Member.Name;
@@ -150,7 +268,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .SelectMany(_ => _.e.ObjectSpace.WhenModifiedObjects(true,objectModification,typeof(T)).Select(t => (t.objectSpace,t.objects.Cast<T>())));
 
         public static IObservable<T> Objects<T>(this IObservable<(IObjectSpace, IEnumerable<T> objects)> source)
-            => source.SelectMany(t => t.objects);
+        => source.SelectMany(t => t.objects);
         
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenExistingObjectCommiting<T>(this XafApplication application) 
             => application.WhenObjectSpaceCreated().SelectMany(_ => _.e.ObjectSpace.WhenCommiting<T>(ObjectModification.Updated));
@@ -170,6 +288,14 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(NonPersistentObjectSpace objectSpace,ObjectsGettingEventArgs e)> WhenObjectsGetting(this NonPersistentObjectSpace item) 
             => Observable.FromEventPattern<EventHandler<ObjectsGettingEventArgs>, ObjectsGettingEventArgs>(h => item.ObjectsGetting += h, h => item.ObjectsGetting -= h,ImmediateScheduler.Instance)
                 .TransformPattern<ObjectsGettingEventArgs, NonPersistentObjectSpace>();
+        
+        [PublicAPI]
+        public static IObservable<(NonPersistentObjectSpace objectSpace,ObjectGettingEventArgs e)> ObjectGetting(this IObservable<NonPersistentObjectSpace> source) 
+            => source.SelectMany(item => item.WhenObjectGetting());
+
+        public static IObservable<(NonPersistentObjectSpace objectSpace,ObjectGettingEventArgs e)> WhenObjectGetting(this NonPersistentObjectSpace item) 
+            => Observable.FromEventPattern<EventHandler<ObjectGettingEventArgs>, ObjectGettingEventArgs>(h => item.ObjectGetting += h, h => item.ObjectGetting -= h,ImmediateScheduler.Instance)
+                .TransformPattern<ObjectGettingEventArgs, NonPersistentObjectSpace>();
 
         public static IObservable<IObjectSpace> Committed(this IObservable<IObjectSpace> source) 
             => source.SelectMany(item => Observable
@@ -181,6 +307,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .FromEventPattern<EventHandler<CancelEventArgs>, CancelEventArgs>(h => item.Committing += h, h => item.Committing -= h,ImmediateScheduler.Instance)
                 .TransformPattern<CancelEventArgs, IObjectSpace>()
                 .TraceRX());
+        
+        public static IObservable<(IObjectSpace objectSpace,HandledEventArgs e)> WhenCustomCommitChanges(this IObjectSpace source) 
+            => Observable.FromEventPattern<EventHandler<HandledEventArgs>, HandledEventArgs>(h => source.CustomCommitChanges += h, h => source.CustomCommitChanges -= h,ImmediateScheduler.Instance)
+                .TransformPattern<HandledEventArgs, IObjectSpace>()
+                .TraceRX();
 
         public static IObservable<IObjectSpace> WhenCommitted(this IObjectSpace item) 
             => item.ReturnObservable().Committed();
@@ -213,7 +344,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         [PublicAPI]
         public static IObservable<IObjectSpace> WhenModifyChanged(this IObjectSpace objectSpace) 
-            => Observable.FromEventPattern<EventHandler, EventArgs>(h => objectSpace.ModifiedChanged += h, h => objectSpace.ModifiedChanged -= h,ImmediateScheduler.Instance)
+            => Observable.FromEventPattern<EventHandler, EventArgs>(h => objectSpace.ModifiedChanged += h, h => objectSpace.ModifiedChanged -= h,Scheduler.Immediate)
                 .Select(pattern => (IObjectSpace) pattern.Sender);
 
         public static IObservable<IObjectSpace> WhenModifyChanged(this IObservable<IObjectSpace> source) 

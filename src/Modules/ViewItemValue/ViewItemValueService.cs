@@ -15,7 +15,7 @@ using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
-using Xpand.Extensions.XAF.ViewExtenions;
+using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 using Xpand.XAF.Modules.ViewItemValue.BusinessObjects;
@@ -60,10 +60,9 @@ namespace Xpand.XAF.Modules.ViewItemValue{
             ViewItemValueObject Query(IObjectSpace space) 
                 => space.GetObjectsQuery<ViewItemValueObject>()
                     .FirstOrDefault(o => o.ViewItemId == memberInfo.Name && o.ObjectView == view.Id);
-            if (!view.ObjectTypeInfo.IsPersistent){
-                using (var space = view.Application().CreateObjectSpace()){
-                    return Query(space);
-                }
+            if (!view.ObjectTypeInfo.IsPersistent) {
+                using var space = view.Application().CreateObjectSpace();
+                return Query(space);
             }
             return Query(view.ObjectSpace);
         }
@@ -72,20 +71,19 @@ namespace Xpand.XAF.Modules.ViewItemValue{
             .WhenExecute()
             .Select(e => {
                 var item = ((IModelViewItemValueObjectViewItem) e.SelectedChoiceActionItem.Data);
-                using (var objectSpace = e.Action.Application.CreateObjectSpace()){
-                    var defaultObjectItem = item.GetParent<IModelViewItemValueItem>();
-                    var memberInfo = item.MemberViewItem.ModelMember.MemberInfo;
-                    var memberName = memberInfo.Name;
-                    var objectViewId = defaultObjectItem.ObjectView.Id;
-                    var defaultObject = objectSpace.GetObjectsQuery<ViewItemValueObject>(true)
-                                            .FirstOrDefault(o => o.ViewItemId == memberName && o.ObjectView == objectViewId) ??
-                                        objectSpace.CreateObject<ViewItemValueObject>();
-                    defaultObject.ObjectView = objectViewId;
-                    defaultObject.ViewItemId = memberName;
-                    var value = memberInfo.GetValue(e.SelectedObjects.Cast<object>().First());
-                    defaultObject.ViewItemValue=value!=null?$"{objectSpace.GetKeyValue(value)}":null;
-                    objectSpace.CommitChanges();
-                }
+                using var objectSpace = e.Action.Application.CreateObjectSpace();
+                var defaultObjectItem = item.GetParent<IModelViewItemValueItem>();
+                var memberInfo = item.MemberViewItem.ModelMember.MemberInfo;
+                var memberName = memberInfo.Name;
+                var objectViewId = defaultObjectItem.ObjectView.Id;
+                var defaultObject = objectSpace.GetObjectsQuery<ViewItemValueObject>(true)
+                                        .FirstOrDefault(o => o.ViewItemId == memberName && o.ObjectView == objectViewId) ??
+                                    objectSpace.CreateObject<ViewItemValueObject>();
+                defaultObject.ObjectView = objectViewId;
+                defaultObject.ViewItemId = memberName;
+                var value = memberInfo.GetValue(e.SelectedObjects.Cast<object>().First());
+                defaultObject.ViewItemValue=value!=null?$"{objectSpace.GetKeyValue(value)}":null;
+                objectSpace.CommitChanges();
 
                 return item;
             })
@@ -125,7 +123,7 @@ namespace Xpand.XAF.Modules.ViewItemValue{
         internal static IObservable<TSource> TraceDefaultObjectValue<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) =>
-            source.Trace(name, ViewItemValueModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
+            source.Trace(name, ViewItemValueModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName);
 
     }
 }

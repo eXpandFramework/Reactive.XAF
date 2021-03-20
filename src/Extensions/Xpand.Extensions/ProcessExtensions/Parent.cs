@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Threading.Tasks;
 using Xpand.Extensions.IntPtrExtensions;
 
 namespace Xpand.Extensions.ProcessExtensions{

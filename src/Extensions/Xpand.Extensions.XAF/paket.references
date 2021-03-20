@@ -7,3 +7,4 @@ Microsoft.CodeAnalysis.CSharp
 Xpand.Collections
 System.ServiceModel.Http
 System.CodeDom
+Newtonsoft.Json

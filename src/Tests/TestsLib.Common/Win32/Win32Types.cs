@@ -50,7 +50,7 @@ namespace Xpand.TestsLib.Common.Win32 {
             public Win32Constants.DEVMODE_DisplayFlags dmDisplayFlags;
 
             /// <summary>
-            /// Specifies the frequency, in hertz (cycles per second), of the display device in a particular mode. This value is also known as the display device's vertical refresh rate. Display drivers use this member. It is used, for example, in the ChangeDisplaySettings function. Printer drivers do not use this member. When you call the EnumDisplaySettings function, the dmDisplayFrequency member may return with the value 0 or 1. These values represent the display hardware's default refresh rate. This default rate is typically set by switches on a display card or computer motherboard, or by a configuration program that does not use display functions such as ChangeDisplaySettings. 
+            /// Specifies the frequency, in hertz (cycles per second), of the display device in a particular mode. This value is also known as the display device's vertical refresh rate. Display drivers use this member. It is used, for example, in the ChangeDisplaySettings function. Printer drivers do not use this member. Any you call the EnumDisplaySettings function, the dmDisplayFrequency member may return with the value 0 or 1. These values represent the display hardware's default refresh rate. This default rate is typically set by switches on a display card or computer motherboard, or by a configuration program that does not use display functions such as ChangeDisplaySettings. 
             /// </summary>
             public int dmDisplayFrequency;
 

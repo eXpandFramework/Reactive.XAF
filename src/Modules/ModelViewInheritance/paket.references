@@ -7,3 +7,4 @@ System.ServiceModel.Http
 Xpand.Patcher
 System.Configuration.ConfigurationManager
 System.Reactive
+Newtonsoft.Json
