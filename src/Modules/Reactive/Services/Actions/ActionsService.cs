@@ -219,7 +219,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => source.SelectMany(a => a.WhenDeactivated());
 
         public static IObservable<TAction> WhenActivated<TAction>(this TAction simpleAction,params string[] contexts) where TAction : ActionBase 
-            => simpleAction.ResultValueChanged(action => action.Active).SelectMany(t => contexts.Add(Controller.ControllerActiveKey).Select(context => (t,context)))
+            => simpleAction.ResultValueChanged(action => action.Active).SelectMany(t => contexts.Concat(Controller.ControllerActiveKey.YieldItem()).Select(context => (t,context)))
 		        .Where(t => t.t.action.Active.ResultValue&&t.t.action.Active.Contains(t.context)&& t.t.action.Active[t.context])
 		        .Select(t => t.t.action);
         

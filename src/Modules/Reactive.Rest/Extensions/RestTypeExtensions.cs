@@ -37,9 +37,9 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Extensions {
             => types.SelectMany(info => info.FindAttributes<RestActionOperationAttribute>()
                 .Select(attribute => (attribute, info))).ToArray();
 
-        public static IObservable<(object o1, IMemberInfo target)> RestPropertiesDefault(this IObjectSpace objectSpace, object o) 
+        public static IObservable<(object o1, IMemberInfo target)> RestPropertiesDefault(this IObjectSpace objectSpace, object o,ICredentialBearer bearer) 
             => o.GetType().RestProperties().Where(t => t.attribute.PropertyName!=null)
-                .SelectMany(t => objectSpace.Get(t.info.MemberType)
+                .SelectMany(t => objectSpace.Get(t.info.MemberType,bearer)
                     .Select(o1 => (o1, target: t.info, source: t.info.Owner.FindMember(t.attribute.PropertyName).GetValue(o), key: t.info.Owner.KeyMember))
                     .Where(t1 => t1.source.Equals(t1.o1.GetTypeInfo().KeyMember.GetValue(t1.o1)))
                     .Select(t1 => (t1.o1, t1.target)));

@@ -13,3 +13,4 @@ DevExpress.Xpo
 DevExpress.ExpressApp.Core.All
 DevExpress.ExpressApp.Win.All
 DevExpress.ExpressApp.Web.All
+Newtonsoft.Json

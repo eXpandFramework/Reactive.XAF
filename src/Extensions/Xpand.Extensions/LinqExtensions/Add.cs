@@ -1,34 +1,39 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using JetBrains.Annotations;
 
 namespace Xpand.Extensions.LinqExtensions{
     public static partial class LinqExtensions{
-        [PublicAPI]
-	    public static void AddRange(this  IList list,IEnumerable enumerable){
-            foreach (var o in enumerable){
-                list.Add(o);
-            }
-        }
-	    public static void AddRange<T>(this  IList<T> list,IEnumerable<T> enumerable,bool ignoreDuplicates){
-            foreach (var o in enumerable.Where(arg =>!ignoreDuplicates|| !list.Contains(arg))){
-                list.Add(o);
+
+        public static T[] AddRange<T>(this IEnumerable<T> source,IEnumerable<T> enumerable,bool ignoreDuplicates=false) 
+            => source is IList<T> list
+                    ? enumerable.Where(arg => !ignoreDuplicates || !source.Contains(arg)).Execute(list.Add).ToArray()
+                    : source.AddToArray(enumerable, ignoreDuplicates);
+
+        public static void Add(this IList source, object item, bool ignoreDuplicates=false) {
+            if (!ignoreDuplicates || !source.Contains(item)) {
+                source.Add(item);
             }
         }
 
-        public static TSource[] Add<TSource>(this IEnumerable<TSource> source,TSource item){
-            source ??= Enumerable.Empty<TSource>();
-            return source.Concat(new[]{item}).ToArray();
+        public static T[] AddToArray<T>(this IEnumerable<T> source, T item, bool ignoreDuplicates = false) {
+            var enumerable = source as T[] ?? source.ToArray();
+            return !ignoreDuplicates && enumerable.Any(arg => arg.Equals(item))
+                ? enumerable : enumerable.Concat(item.YieldItem()).ToArray();
         }
-        
-        public static void Add<TSource>(this IList<TSource> source,TSource item,bool ignoreDuplicates){
-            if (ignoreDuplicates&&source.Contains(item)) {
-                return;
+
+        public static T[] AddToArray<T>(this IEnumerable<T> source, IEnumerable<T> items, bool ignoreDuplicates = false) 
+            => items.SelectMany(arg => source.AddToArray(arg, ignoreDuplicates)).ToArray();
+
+        public static T Add<T>(this IList<T> source, T item, bool ignoreDuplicates = false) {
+            if (!ignoreDuplicates || !source.Contains(item)) {
+                source.Add(item);
+                return item;
             }
 
-            source.Add(item);
+            return default;
         }
-
+            
     }
 }

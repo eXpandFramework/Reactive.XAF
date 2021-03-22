@@ -31,7 +31,7 @@ namespace Xpand.XAF.Modules.Blazor {
     public static class BlazorService {
         internal static  IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => manager.DefaultLookupPropertyEditor()
-                .Merge(manager.UrlPropertyAttribute())
+                .Merge(manager.MarkupPropertyAttribute())
                 .Merge(manager.CheckBlazor(typeof(BlazorStartup).FullName, typeof(BlazorModule).Namespace))
                 .Merge(manager.WhenApplication(application => application.UseCustomNestedFrameTemplate()
                     .Merge(application.ApplyDxDataGridModel())).ToUnit());
@@ -44,25 +44,25 @@ namespace Xpand.XAF.Modules.Blazor {
                     .Do(member => member.PropertyEditorType = typeof(Editors.LookupPropertyEditor))
                 ).ToUnit();
 
-        static IObservable<Unit> UrlPropertyAttribute(this ApplicationModulesManager manager)
+        static IObservable<Unit> MarkupPropertyAttribute(this ApplicationModulesManager manager)
             => manager.WhenCustomizeTypesInfo()
                 .SelectMany(t => t.e.TypesInfo.PersistentTypes.SelectMany(info => info.Members.ToArray()
                     .SelectMany(memberInfo => memberInfo.AddMarkupPropertyEditorAttributes<UrlPropertyAttribute>(_ => "<a href='{0}'>{0}</a>").Cast<Attribute>()
                         .Concat(memberInfo.AddMarkupPropertyEditorAttributes<ImgPropertyAttribute>(attribute => {
                             var imgSrc = "<img src='{0}'/>";
-                            if (attribute.Width > 0) {
-                                imgSrc = imgSrc.Replace("/>", $" width='{attribute.Width}' />");
-                            }
-                            return imgSrc;
-                        })))))
+                            return attribute.Width > 0 ? imgSrc.Replace("/>", $" width='{attribute.Width}' />") : imgSrc;
+                        }))
+                    )))
                 .ToUnit();
 
-        private static IEnumerable<T> AddMarkupPropertyEditorAttributes<T>(this IMemberInfo memberInfo,Func<T,string> valueFactory) where T:Attribute
+        private static IEnumerable<T> AddMarkupPropertyEditorAttributes<T>(this IMemberInfo memberInfo,Func<T,string> valueFactory=null) where T:Attribute
             => memberInfo.FindAttributes<T>().ToArray()
                 .Execute(_ => {
-                    var value=valueFactory.Invoke(_);
-                    memberInfo.AddAttribute(new EditorAliasAttribute(nameof(MarkupContentPropertyEditor)));
-                    memberInfo.AddAttribute(new ModelDefaultAttribute("DisplayFormat",value));
+                    memberInfo.AddAttribute(new EditorAliasAttribute(EditorAliases.MarkupContent));
+                    if (valueFactory != null) {
+                        var value=valueFactory.Invoke(_);
+                        memberInfo.AddAttribute(new ModelDefaultAttribute("DisplayFormat",value));
+                    }
                 });
 
         private static IObservable<Unit> ApplyDxDataGridModel(this XafApplication application) 

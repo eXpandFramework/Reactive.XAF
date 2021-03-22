@@ -31,6 +31,7 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 using AssemblyExtensions = Xpand.Extensions.AssemblyExtensions.AssemblyExtensions;
 using ListView = DevExpress.ExpressApp.ListView;
+using SecurityExtensions = Xpand.XAF.Modules.Reactive.Services.Security.SecurityExtensions;
 using View = DevExpress.ExpressApp.View;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
@@ -45,7 +46,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.GetPlatform()==Platform.Web?Task.Run(execute).Result.ReturnObservable():Observable.FromAsync(execute);
         
         public static IObservable<Unit> Logon(this XafApplication application,object userKey) 
-            => RxApp.AuthenticateSubject.Where(_ => _.authentication== application.Security.GetPropertyValue("Authentication"))
+            => SecurityExtensions.AuthenticateSubject.Where(_ => _.authentication== application.Security.GetPropertyValue("Authentication"))
                 .Do(_ => _.args.Instance=userKey).SelectMany(_ => application.WhenLoggedOn().FirstAsync()).ToUnit()
                 .Merge(Unit.Default.ReturnObservable().Do(_ => application.Logon()).IgnoreElements());
 
@@ -141,8 +142,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             Type[] parameterTypes = {xpoAssembly.GetType("DevExpress.ExpressApp.Xpo.IXpoDataStoreProvider"), typeof(bool)};
             object[] parameterValues = {dataStoreProvider, true};
             if (application.TypesInfo.XAFVersion() > Version.Parse("19.2.0.0")) {
-                parameterTypes = parameterTypes.Add(typeof(bool)).ToArray();
-                parameterValues = parameterValues.Add(true).ToArray();
+                parameterTypes = parameterTypes.Concat(typeof(bool).YieldItem()).ToArray();
+                parameterValues = parameterValues.Concat(true.YieldItem().Cast<object>()).ToArray();
             }
 
             return (IObjectSpaceProvider) xpoAssembly

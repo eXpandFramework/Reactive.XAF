@@ -35,12 +35,12 @@ namespace Xpand.XAF.Modules.ProgressBarViewItem{
             if (Application != null && Application.GetPlatform() == Platform.Web){
                 callBackHandler = ",DevExpress.ExpressApp.Web.Templates.IXafCallbackHandler";
                 var xafWebAssembly = AppDomain.CurrentDomain.GetAssemblies().First(assembly => assembly.FullName.StartsWith("DevExpress.ExpressApp.Web"));
-                references = references.Add(xafWebAssembly.Location);
+                references = references.Concat(xafWebAssembly.Location.YieldItem()).ToArray();
             }
             else {
                 var location = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(assembly => assembly.FullName.StartsWith("System.Private.CoreLib"))?.Location;
                 if (location != null) {
-                    references = references.Add(location);
+                    references = references.Concat(location.YieldItem()).ToArray();
                 }
             }
             string code = $@"

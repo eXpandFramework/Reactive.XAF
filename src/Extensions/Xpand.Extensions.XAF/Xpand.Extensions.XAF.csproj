@@ -28,8 +28,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\Common\AssemblyInfoVersion.cs" Link="Properties\AssemblyInfoVersion.cs" />
-    <Compile Update="CollectionSourceExtensions\DynamicCollection.cs">
-      <DependentUpon>AddObjects.cs</DependentUpon>
+    <Compile Update="CollectionSourceExtensions\DynamicCollection192.cs">
+      <DependentUpon>DynamicCollection.cs</DependentUpon>
     </Compile>
     <Compile Update="NonPersistentObjects\NonPersistentBaseObject-192.cs">
       <DependentUpon>NonPersistentBaseObject.cs</DependentUpon>

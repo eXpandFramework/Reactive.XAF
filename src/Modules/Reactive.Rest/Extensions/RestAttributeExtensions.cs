@@ -2,7 +2,6 @@
 using System.Net.Http;
 using System.Reactive.Linq;
 using System.Text.RegularExpressions;
-using DevExpress.ExpressApp;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ObjectExtensions;
@@ -30,8 +29,8 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Extensions {
             return operationAttribute.RequestUrl.TrimEnd('/');
         }
 
-        internal static IObservable<object> Send(this IRestAttribute attribute,  object instance,string requestUrl=null,Func<string,object[]> deserializeResponse=null) {
-            var user = ((ICredentialBearer) SecuritySystem.CurrentUser);
+        internal static IObservable<object> Send(this IRestAttribute attribute,  object instance,ICredentialBearer user,string requestUrl=null,Func<string,object[]> deserializeResponse=null) {
+            // var user = ((ICredentialBearer) SecuritySystem.CurrentUser);
             requestUrl ??= attribute.RequestUrl(instance);
             var url = $"{user.BaseAddress}{requestUrl}";
             var pollInterval = attribute.PollInterval>0?TimeSpan.FromSeconds(attribute.PollInterval) :(TimeSpan?) null ;

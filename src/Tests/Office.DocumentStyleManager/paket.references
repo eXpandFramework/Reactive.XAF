@@ -12,3 +12,5 @@ Fasterflect.Xpand
 akarnokd.reactive_extensions
 Moq
 Xpand.Collections
+
+Newtonsoft.Json

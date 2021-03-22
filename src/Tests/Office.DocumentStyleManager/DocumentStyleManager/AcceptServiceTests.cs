@@ -2,6 +2,7 @@
 using System.Threading;
 using akarnokd.reactive_extensions;
 using DevExpress.Data.Filtering;
+using DevExpress.Pdf.Native.BouncyCastle.Asn1.X509.Qualified;
 using DevExpress.XtraRichEdit;
 using NUnit.Framework;
 using Shouldly;
@@ -55,7 +56,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
 
             window.Action<DocumentStyleManagerModule>().AcceptStyleManagerChanges().DoExecute();
 
-            var space = application.CreateObjectSpace();
+            var space = application.CreateObjectSpace(template.GetType());
             var documentStyleLinkTemplate = space.GetObject(template);
             documentStyleLinkTemplate.DocumentStyleLinks.Count.ShouldBe(1);
         }

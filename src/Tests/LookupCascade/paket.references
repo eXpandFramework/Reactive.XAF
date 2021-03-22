@@ -10,3 +10,4 @@ NUnit
 NUnit3TestAdapter
 JetBrains.Annotations
 DevExpress.Xpo
+Newtonsoft.Json

@@ -169,7 +169,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 				.TraceMicrosoftModule(result => result.Account?.Username);
 		}
 
-		private static string[] Scopes(this XafApplication application) => application.Model.OAuthMS().Scopes().Add("User.Read");
+		private static string[] Scopes(this XafApplication application) => application.Model.OAuthMS().Scopes().Concat("User.Read".YieldItem()).ToArray();
 
 		static readonly Subject<GraphServiceClient> ClientSubject=new();
 		public static IObservable<GraphServiceClient> Client => ClientSubject.AsObservable();

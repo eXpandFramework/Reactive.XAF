@@ -50,8 +50,5 @@
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.Xpo.dll</HintPath>
     </Reference>
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-  </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

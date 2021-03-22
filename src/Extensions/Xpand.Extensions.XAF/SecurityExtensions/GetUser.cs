@@ -5,6 +5,9 @@ using Fasterflect;
 
 namespace Xpand.Extensions.XAF.SecurityExtensions {
     public static partial class SecurityExtensions {
+        public static T GetCurrentUser<T>(this XafApplication application) => (T) application.Security.User;
+        public static T GetCurrentUser<T>(this ISecurityStrategyBase security) => (T) security.User;
+
         public static ISecurityUserWithRoles GetUser(this IObjectSpace objectSpace, string userName,
             string passWord = "", params ISecurityRole[] roles) 
             => (ISecurityUserWithRoles) objectSpace.FindObject(SecuritySystem.UserType, new BinaryOperator("UserName", userName)) ??

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using DevExpress.Data;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
@@ -90,9 +89,7 @@ namespace Xpand.XAF.Modules.PositionInListView{
             => applicationModel.ModelPositionInListView().ListViewItems.Select(item => item.ListView.Id()).Contains(viewID);
 
         private static IObservable<Unit> PositionNewObjects(this IObservable<XafApplication> whenApplication) 
-            => whenApplication.SelectMany(application => {
-                    var synchronizationContext = SynchronizationContext.Current;
-                    return Observable.Defer(() => application.WhenObjectSpaceCreated()
+            => whenApplication.SelectMany(application => Observable.Defer(() => application.WhenObjectSpaceCreated()
                             .SelectMany(t => t.e.ObjectSpace.WhenNewObjectCommiting<object>().Pair(t.e.ObjectSpace)))
                         .Do(t => {
                             var modelPositionInListView = application.Model.ModelPositionInListView();
@@ -116,7 +113,7 @@ namespace Xpand.XAF.Modules.PositionInListView{
                                     var aggregateOperand = new AggregateOperand("", memberInfo.Name, aggregate);
                                     var value = (int) (t.other.Evaluate(objectType, aggregateOperand, null) ?? 0);
                                     var allValues = t.other.ModifiedObjects.Cast<object>()
-                                        .Select(o => memberInfo.GetValue(o) ?? 0).Cast<int>().Add(value);
+                                        .Select(o => memberInfo.GetValue(o) ?? 0).Cast<int>().Concat(value.YieldItem());
                                     if (aggregate == Aggregate.Max) {
                                         value = allValues.Max();
                                         value++;
@@ -129,8 +126,7 @@ namespace Xpand.XAF.Modules.PositionInListView{
                                     memberInfo.SetValue(t.source, value);
                                 }
                             }
-                        });
-                })
+                        }))
                 
                 .TracePositionInListView(_ => $"{_.source}")
                 .ToUnit();

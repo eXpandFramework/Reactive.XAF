@@ -24,6 +24,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Extensions {
         static NetworkExtensions() {
             
         }
+
         static HttpRequestMessage Sign(this HttpRequestMessage requestMessage,string key,string secret) {
             if (key != null) {
                 using HMACSHA256 hmac = new HMACSHA256(Encoding.ASCII.GetBytes(secret));

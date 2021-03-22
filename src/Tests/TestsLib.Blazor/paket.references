@@ -9,3 +9,4 @@ hangfire.aspnetcore
 DevExpress.ExpressApp.Xpo
 System.Diagnostics.PerformanceCounter
 Moq
+Newtonsoft.Json

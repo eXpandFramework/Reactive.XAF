@@ -86,7 +86,9 @@ namespace Xpand.TestsLib.Common.EasyTest{
             var document = new XmlDocument();
             var attribute = document.CreateAttribute(name);
             attribute.Value = value;
-            testApplication.AdditionalAttributes = testApplication.AdditionalAttributes.Add(attribute).ToArray();
+            testApplication.AdditionalAttributes = testApplication.AdditionalAttributes != null
+                ? testApplication.AdditionalAttributes.Concat(attribute.YieldItem()).ToArray()
+                : attribute.YieldItem().ToArray();
         }
 
         public static TestApplication RunBlazorApplication(this IApplicationAdapter adapter, string physicalPath, int port,

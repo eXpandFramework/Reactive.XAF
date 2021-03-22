@@ -18,7 +18,6 @@ using Fasterflect;
 using JetBrains.Annotations;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.EventArgExtensions;
-using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.ReflectionExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -149,7 +148,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 .SelectMany(_ => _.Members(MemberTypes.Property | MemberTypes.Method)
                     .Where(info => info is MethodBase method
                         ? !method.IsPrivate
-                        : AccessModifier.Public.YieldItem().Add(AccessModifier.Protected)
+                        : new []{AccessModifier.Public,AccessModifier.Protected}
                             .Contains(((PropertyInfo) info).AccessModifier()))).Select(_ => _.Name)
                 .Concat(new[]{"Item", "IsReadOnly", "Remove", "Id", "Nodes", "IsValid"}).Distinct()
                 .ToObservable(Scheduler.Immediate)

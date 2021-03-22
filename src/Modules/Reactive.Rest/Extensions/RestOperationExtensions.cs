@@ -13,6 +13,7 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
 using Xpand.Extensions.XAF.ObjectExtensions;
+using Xpand.Extensions.XAF.SecurityExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
@@ -23,12 +24,12 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Extensions {
             => manager.ReturnObservable(modulesManager => modulesManager.WhenCustomizeTypesInfo().Select(t => t.e.TypesInfo)
                 .SelectMany(typesInfo => typesInfo.KeyDefaultAttributes()));
 
-        public static IObservable<object> Commit(this IObjectSpace objectSpace, object o) 
-            => objectSpace.IsNewObject(o) ? o.Create() : objectSpace.IsDeletedObject(o) ? o.Delete() : objectSpace.CommitingRestCall(o, o.Update());
+        public static IObservable<object> Commit(this IObjectSpace objectSpace, object o,ICredentialBearer bearer) 
+            => objectSpace.IsNewObject(o) ? o.Create(bearer) : objectSpace.IsDeletedObject(o) ? o.Delete(bearer) : objectSpace.CommitingRestCall(o, o.Update(bearer),bearer);
 
-        public static IObservable<object> Get(this IObjectSpace objectSpace, Type type)
+        public static IObservable<object> Get(this IObjectSpace objectSpace, Type type,ICredentialBearer bearer)
             => Operation.Get.RestOperation(type.ToTypeInfo())
-                .SelectMany(attribute => attribute.Send(type.CreateInstance()).Link(objectSpace));
+                .SelectMany(attribute => attribute.Send(type.CreateInstance(),bearer).Link(objectSpace));
 
         public static IObservable<ApplicationModulesManager> RestOperationAction(this IObservable<ApplicationModulesManager> source)
             => source.MergeIgnored(manager => manager.ExportedTypes().ToTypeInfo().OperationActionTypes().ToObservable()
@@ -58,36 +59,35 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Extensions {
 
 
         static IObservable<Unit> SendAction(this RestActionOperationAttribute attribute,SimpleAction action) 
-            => action.WhenExecute().SelectMany(t1 => t1.SelectedObjects.Cast<object>().ToObservable().SelectMany(t2 => attribute.Send(t2))).ToUnit();
+            => action.WhenExecute().SelectMany(t1 => t1.SelectedObjects.Cast<object>().ToObservable()
+                    .SelectMany(instance => attribute.Send(instance,t1.Action.Application
+                        .GetCurrentUser<ICredentialBearer>()))).ToUnit();
 
         private static IObservable<RestOperationAttribute> RestOperation(this Operation operation,IBaseInfo info) 
             => info.FindAttributes<RestOperationAttribute>().Where(attribute => attribute.Operation==operation).ToObservable();
 
-        private static IObservable<object> CommitingRestCall(this  IObjectSpace objectSpace,object o, IObservable<object> crudSource) {
-            
-            return o.GetTypeInfo().Members.Where(info =>
+        private static IObservable<object> CommitingRestCall(this IObjectSpace objectSpace,object o, IObservable<object> crudSource,ICredentialBearer bearer) 
+            => o.GetTypeInfo().Members.Where(info =>
                     info.MemberType == typeof(bool) && info.FindAttributes<RestOperationAttribute>().Any())
                 .ToObservable(Scheduler.Immediate)
                 .SelectMany(info => info.FindAttributes<RestOperationAttribute>()).Where(attribute => {
-                    var isObjectFitForCriteria =
-                        objectSpace.IsObjectFitForCriteria(o, CriteriaOperator.Parse(attribute.Criteria));
+                    var isObjectFitForCriteria = objectSpace.IsObjectFitForCriteria(o, CriteriaOperator.Parse(attribute.Criteria));
                     return isObjectFitForCriteria.HasValue && isObjectFitForCriteria.Value;
                 })
-                .SelectMany(attribute => attribute.Send(o))
+                .SelectMany(attribute => attribute.Send(o, bearer))
                 .Concat(Observable.Defer(() => crudSource));
-        }
 
-        static IObservable<object> Create(this object instance) 
+        static IObservable<object> Create(this object instance,ICredentialBearer bearer) 
             => Operation.Create.RestOperation(instance.GetTypeInfo())
-                .SelectMany(attribute => attribute.Send(instance));
+                .SelectMany(attribute => attribute.Send(instance,bearer));
 
-        static IObservable<object> Update(this object instance) 
+        static IObservable<object> Update(this object instance,ICredentialBearer bearer) 
             => Operation.Update.RestOperation(instance.GetTypeInfo())
-                .SelectMany(attribute => attribute.Send(instance));
+                .SelectMany(attribute => attribute.Send(instance, bearer));
 
-        static IObservable<object> Delete(this object instance) 
+        static IObservable<object> Delete(this object instance,ICredentialBearer bearer) 
             => Operation.Delete.RestOperation(instance.GetTypeInfo())
-                .SelectMany(attribute => attribute.Send(instance));
+                .SelectMany(attribute => attribute.Send(instance,bearer));
 
     }
 }

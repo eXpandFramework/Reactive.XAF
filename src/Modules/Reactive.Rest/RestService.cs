@@ -15,7 +15,9 @@ using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.XAF.CollectionSourceExtensions;
 using Xpand.Extensions.XAF.NonPersistentObjects;
+using Xpand.Extensions.XAF.SecurityExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.XAF.Modules.Reactive.Rest.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -40,32 +42,27 @@ namespace Xpand.XAF.Modules.Reactive.Rest {
                     .Merge(application.FullTextSearch()
                     .Merge(application.ObjectStringLookup())
                     .ToUnit())));
-            
-
-
+        
         private static IObservable<Unit> ObjectStringLookup(this XafApplication application) 
             => application.WhenFrameViewChanged().WhenFrame(typeof(ObjectString),ViewType.ListView,Nesting.Nested)
                 .SelectMany(frame => {
-                    var source = frame.View.AsListView().CollectionSource as NonPersistentPropertyCollectionSource;
-                    if (source != null) {
+                    if (frame.View.AsListView().CollectionSource is NonPersistentPropertyCollectionSource source) {
                         return source.MasterObjectType.RestListMembers()
                             .Where(t => t.attribute.PropertyName == source.MemberInfo.Name)
                             .SelectMany(_ => frame.GetController<NewObjectViewController>().NewObjectAction
                                 .WhenExecute()
                                 // .TakeUntil(source.WhenDisposed())
                                 .SelectMany(e => {
-                                    var dataSourceProperty = source.MemberInfo
-                                        .FindAttribute<DataSourcePropertyAttribute>().DataSourceProperty;
-                                    var datasourceMember =
-                                        source.MemberInfo.Owner.FindMember(dataSourceProperty);
+                                    var dataSourceProperty = source.MemberInfo.FindAttribute<DataSourcePropertyAttribute>().DataSourceProperty;
+                                    var datasourceMember = source.MemberInfo.Owner.FindMember(dataSourceProperty);
                                     var objectString =
                                         ((ObjectString) e.ShowViewParameters.CreatedView.CurrentObject);
                                     var dynamicCollection =
                                         ((DynamicCollection) datasourceMember.GetValue(source.MasterObject));
                                     return dynamicCollection.WhenObjects().IgnoreElements()
                                         .Merge(dynamicCollection.WhenLoaded())
-                                        .Merge(dynamicCollection.GetPropertyValue("Objects").ToEnumerable<ObjectString>().FirstOrDefault().ReturnObservable().WhenNotDefault())
-                                        .Do(o =>  objectString.DataSource.AddRange(dynamicCollection.GetPropertyValue("Objects").ToEnumerable<ObjectString>(),true));
+                                        .Merge(dynamicCollection.Objects().Cast<ObjectString>().FirstOrDefault().ReturnObservable().WhenNotDefault())
+                                        .Do(_ =>  objectString.DataSource.AddRange(dynamicCollection.Objects().Cast<ObjectString>(),true));
                                 })).ToUnit();
                     }
                     return Observable.Empty<Unit>();
@@ -83,8 +80,8 @@ namespace Xpand.XAF.Modules.Reactive.Rest {
                     .Do(t => t.e.SearchCriteriaBuilder=new SearchCriteriaBuilder())).ToUnit();
 
         private static IObservable<Unit> WhenNonPersistentObjectSpace(this XafApplication application) 
-            => application.WhenNonPersistentObjectSpaceCreated()
-                .SelectMany(t => t.ObjectSpace.WhenObjects(t1 => t1.WhenRestObjects())
+            => application.WhenLoggedOn().SelectMany(_ => application.WhenNonPersistentObjectSpaceCreated()
+                .SelectMany(t => t.ObjectSpace.WhenObjects(t1 => t1.WhenRestObjects(application))
                     .Select(o => o)
                     // .MergeIgnored(o => {
                     //     var nonPersistentBaseObject = ((NonPersistentBaseObject) o);
@@ -93,15 +90,16 @@ namespace Xpand.XAF.Modules.Reactive.Rest {
                     // })
                     .RestPropertyDependentChange()
                     .RestPropertyBindingListsChange()
-                    // .RestPropertyBindingListsDataSource(t.ObjectSpace,application) slow
-                    .ReactiveCollectionsFetch()
+                    // .RestPropertyBindingListsDataSource(t.ObjectSpace,application) //slow
+                    .ReactiveCollectionsFetch(application.GetCurrentUser<ICredentialBearer>())
                     .ToUnit().IgnoreElements()
-                    .Merge(Observable.Defer(() => t.ObjectSpace.WhenCommitingObjects(o => t.ObjectSpace.Commit(o)))));
+                    .Merge(Observable.Defer(() => t.ObjectSpace.WhenCommitingObjects(o => t.ObjectSpace.Commit(o,application.GetCurrentUser<ICredentialBearer>()))))));
 
-        private static IObservable<object> WhenRestObjects(this (NonPersistentObjectSpace objectSpace, ObjectsGettingEventArgs e) t1) {
+        private static IObservable<object> WhenRestObjects(
+            this (NonPersistentObjectSpace objectSpace, ObjectsGettingEventArgs e) t1, XafApplication application) {
             var objectSpace = t1.objectSpace;
-            return objectSpace.Get(t1.e.ObjectType).BufferUntilCompleted()
-                    .RestPropertyDependent(objectSpace, t1.e.ObjectType)
+            return objectSpace.Get(t1.e.ObjectType,application.GetCurrentUser<ICredentialBearer>()).BufferUntilCompleted()
+                    .RestPropertyDependent(objectSpace,t1.e.ObjectType,application.GetCurrentUser<ICredentialBearer>())
                     .SelectMany(o => ((IEnumerable) o).Cast<object>())
                     .RestPropertyBindingListsInit(objectSpace)
                     .ReactiveCollectionsInit(objectSpace)

@@ -53,15 +53,15 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Extensions {
                             {AllowAdd = true, AllowRemove = true});
                 }));
 
-        public static IObservable<object> RestPropertyDependent(this IObservable<object[]> source,IObjectSpace objectSpace,Type objectType)
+        public static IObservable<object> RestPropertyDependent(this IObservable<object[]> source,IObjectSpace objectSpace,Type objectType,ICredentialBearer bearer)
             => source.ConcatIgnored(objects => objectSpace.RestPropertyDependentName(objectType, objects))
-                .ConcatIgnored(objects => objects.RestPropertyDependentReadOnly(objectType))
+                .ConcatIgnored(objects => objects.RestPropertyDependentReadOnly(objectType,bearer))
             ;
 
-        private static IObservable<object> RestPropertyDependentReadOnly(this object[] objects,Type objectTpe) 
+        private static IObservable<object> RestPropertyDependentReadOnly(this object[] objects,Type objectTpe,ICredentialBearer bearer) 
             =>objectTpe.RestDependentMembersByReadOnly()
                 .SelectMany(t => objects.ToObservable(Scheduler.Immediate)
-                    .SelectMany(o => t.attribute.Send(t.info.MemberType.CreateInstance(),t.attribute.RequestUrl(o))
+                    .SelectMany(o => t.attribute.Send(t.info.MemberType.CreateInstance(),bearer,t.attribute.RequestUrl(o))
                         .Do(o1 => t.info.SetValue(o,o1))));
 
         private static IObservable<object> RestPropertyDependentName(this IObjectSpace objectSpace,Type objectType, object[] objects) {
@@ -151,20 +151,16 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Extensions {
             => source.ConcatIgnored(o => o.GetType().ReactiveCollectionMembers()
                 .Do(t => t.info.SetValue(o, t.info.MemberType.CreateInstance(objectSpace))));
 
-        public static IObservable<object> ReactiveCollectionsFetch(this IObservable<object> source)
+        public static IObservable<object> ReactiveCollectionsFetch(this IObservable<object> source,ICredentialBearer bearer)
             => source.MergeIgnored(o => o.GetType().ReactiveCollectionMembers()
-                .SelectMany(t => {
-                    var dynamicCollection = ((DynamicCollection) t.info.GetValue(o));
-                    return dynamicCollection.WhenFetchObjects()
-                        .SelectMany(t2 => {
-                            var realType = t.info.MemberType.RealType();
-                            return t.attribute.Send(realType.CreateInstance(), t.attribute.RequestUrl(o), realType.DeserializeResponse(t2.sender.ObjectSpace))
-                                    .BufferUntilCompleted() 
-                                    .Do(objects => t2.sender.AddObjects(objects,true))
-                                ;
-                        })
-                        .Do(objects => { },() => {});
-                }));
+                .SelectMany(t => ((DynamicCollection) t.info.GetValue(o)).WhenFetchObjects()
+                    .SelectMany(t2 => {
+                        var realType = t.info.MemberType.RealType();
+                        return t.attribute.Send(realType.CreateInstance(), bearer,t.attribute.RequestUrl(o), realType.DeserializeResponse(t2.sender.ObjectSpace))
+                                .BufferUntilCompleted() 
+                                .Do(objects => t2.sender.AddObjects(objects,true))
+                            ;
+                    })));
 
         private static Func<string, object[]> DeserializeResponse(this Type realType, IObjectSpace objectSpace) 
             => s => realType != typeof(ObjectString) ? realType.Deserialize<object>(s) : typeof(string).Deserialize<string>(s)

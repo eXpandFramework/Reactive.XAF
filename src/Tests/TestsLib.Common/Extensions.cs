@@ -127,7 +127,7 @@ namespace Xpand.TestsLib.Common{
         public static void RegisterDefaults(this XafApplication application, params ModuleBase[] modules){
             if (modules.Any() && application.Security is SecurityStrategyComplex){
                 if (!modules.OfType<TestApplicationModule>().Any()){
-                    modules = modules.Add(new TestApplicationModule()).ToArray();
+                    modules=modules.AddToArray(new TestApplicationModule());
                 }
             }
 
@@ -150,15 +150,15 @@ namespace Xpand.TestsLib.Common{
             }
             var moduleBases = new[]{
                 new SystemModule(),
-                instance
+                (ModuleBase) instance
             }
             .Concat(modules)
             .Concat(new []{new ReactiveLoggerModule()})
-                ;
+            .ToArray();
 
             if (((ITestApplication) application).TransmitMessage){
                 if (Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()){
-                    moduleBases = moduleBases.Add(new ReactiveLoggerHubModule());   
+                    moduleBases.Add(new ReactiveLoggerHubModule());   
                 }
             }
 

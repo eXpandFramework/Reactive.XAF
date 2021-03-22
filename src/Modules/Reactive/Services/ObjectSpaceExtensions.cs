@@ -13,7 +13,6 @@ using DevExpress.Xpo;
 using Fasterflect;
 using JetBrains.Annotations;
 using Xpand.Extensions.LinqExtensions;
-using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.Collections;
 using Xpand.Extensions.Reactive.Utility;
@@ -156,7 +155,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(IObjectSpace objectSpace, object[] objects)> WhenCommiting(this IObjectSpace objectSpace, ObjectModification objectModification, 
             bool emitAfterCommit , params Type[] objectTypes){
             if (!objectTypes.Any()){
-                objectTypes = objectTypes.Add(typeof(object));
+                objectTypes = objectTypes.Concat(typeof(object).YieldItem()).ToArray();
             }
             return objectSpace.WhenCommiting().SelectMany(_ => {
                 var modifiedObjects = objectSpace.ModifiedObjects(objectModification).Where(o => objectTypes.Any(type => type.IsInstanceOfType(o))).ToArray();
