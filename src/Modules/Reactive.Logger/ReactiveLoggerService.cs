@@ -133,7 +133,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             var applyModel = application.WhenModelChanged()
                 .Select(_ =>application.Model.ToReactiveModule<IModelReactiveModuleLogger>()?.ReactiveLogger).WhenNotDefault()
                 .Do(model => {
-	                var modelTraceSourcedModules = model.GetActiveSources().ToArray();
+	                var modelTraceSourcedModules = model.GetEnabledSources().ToArray();
 	                foreach (var module in modelTraceSourcedModules){
                         var tuples = application.Modules.Where(m => m.Name == module.Id()).ToTraceSource();
                         foreach (var tuple in tuples){
@@ -178,10 +178,12 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             => traceSource.TraceEvent(TraceEventType.Information, traceSource.GetHashCode(), $"{traceEvent.Location}.{traceEvent.Method}({traceEvent.Line}): {traceEvent.Action}({traceEvent.Value})");
 
         private static IObservable<TraceEvent> SaveEvent(this IObservable<ITraceEvent> events, XafApplication application) 
-            => events.Select(_ => _)
+            => events.Where(_ => {
+                    var modelReactiveLogger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger;
+                    return modelReactiveLogger.GetEnabledSources().Any()&&modelReactiveLogger.TraceSources.Persist;
+                })
 		        .Buffer(TimeSpan.FromSeconds(3)).WhenNotEmpty()
-		        .Where(_ => application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger.GetActiveSources().Any())
-		        .SelectMany(list => application.ObjectSpaceProvider.NewObjectSpace(space => space.SaveTraceEvent(list)));
+                .SelectMany(list => application.ObjectSpaceProvider.NewObjectSpace(space => space.SaveTraceEvent(list)));
 
         public static IObservable<TraceEvent> SaveTraceEvent(this IObjectSpace objectSpace, IList<ITraceEvent> traceEventMessages){
             var lastEvent = objectSpace.GetObjectsQuery<TraceEvent>().OrderByDescending(_ => _.Timestamp).FirstOrDefault();

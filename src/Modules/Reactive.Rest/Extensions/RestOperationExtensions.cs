@@ -87,7 +87,6 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Extensions {
                 .SelectMany(attribute => attribute.Send(instance, bearer))
                 .InvalidateCache(instance,bearer);
 
-
         static IObservable<object> InvalidateCache(this IObservable<object> source, object instance, ICredentialBearer bearer)
             => source.Concat(Operation.Get.RestOperation(instance.GetTypeInfo())
                 .Do(getAttribute => RestService.CacheStorage.TryRemove($"{bearer.BaseAddress}{getAttribute.RequestUrl(instance)}", out _)));

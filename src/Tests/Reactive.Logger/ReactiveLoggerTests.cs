@@ -7,7 +7,6 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
-using AppDomainToolkit;
 using DevExpress.ExpressApp;
 using NUnit.Framework;
 using Shouldly;
@@ -67,37 +66,97 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             }
         }
 
-
-        
         [Test]
         [XpandTest]
         [Apartment(ApartmentState.STA)]
-        public void Do_Not_Trace_If_TraceSources_Level_Off(){
+        public async Task Do_Not_Trace_If_TraceSources_Level_Off(){
+            using var application = LoggerModule().Application;
+            application.WhenModelChanged().FirstAsync()
+                .Select(_ => {
+                    var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger;
+                    logger.TraceSources[nameof(ReactiveLoggerModule)].Level = SourceLevels.Off;
+                    return Unit.Default;
+                }).Subscribe();
+            application.Logon();
+            
+            application.CreateViewWindow(() => application.NewListView(typeof(TraceEvent)));
+            var testObserver = application.WhenTraceEvent().FirstAsync(e => e.Value.Contains("test")).Test();
 
-            Should.Throw<TimeoutException>(async () => {
-                await SaveTraceEvent(application => {
-                    application.WhenModelChanged().FirstAsync()
-                        .Select(_ => {
-                            var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger;
-                            logger.TraceSources[nameof(ReactiveLoggerModule)].Level = SourceLevels.Off;
-                            return Unit.Default;
-                        }).Subscribe();
-                });
-            });
+            ReactiveLoggerModule.TraceSource.TraceMessage("test");
+            await application.WhenTrace().FirstAsync(e => e.Value.Contains("test"));
+
+            testObserver.ItemCount.ShouldBe(0);
+            var objectSpace = application.CreateObjectSpace();
+            objectSpace.GetObjectsQuery<TraceEvent>().FirstOrDefault(_ => _.Value.Contains("test")).ShouldBeNull();
+            objectSpace.GetObjectsCount(typeof(TraceEvent),null).ShouldBe(0);
         }
 
-        // [Test][Ignore(NotImplemented)]
+        [Test]
+        [XpandTest]
+        [Apartment(ApartmentState.STA)]
+        public async Task Do_Not_Trace_If_TraceSources_Disabled(){
+            using var application = LoggerModule().Application;
+            application.WhenModelChanged().FirstAsync()
+                .Select(_ => {
+                    var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger;
+                    logger.TraceSources.Enabled=false;
+                    return Unit.Default;
+                }).Subscribe();
+            application.Logon();
+            
+            application.CreateViewWindow(() => application.NewListView(typeof(TraceEvent)));
+            var testObserver = application.WhenTraceEvent().FirstAsync(e => e.Value.Contains("test")).Test();
+
+            ReactiveLoggerModule.TraceSource.TraceMessage("test");
+            await application.WhenTrace().FirstAsync(e => e.Value.Contains("test"));
+
+            testObserver.ItemCount.ShouldBe(0);
+            var objectSpace = application.CreateObjectSpace();
+            objectSpace.GetObjectsQuery<TraceEvent>().FirstOrDefault(_ => _.Value.Contains("test")).ShouldBeNull();
+            objectSpace.GetObjectsCount(typeof(TraceEvent),null).ShouldBe(0);
+        }
+        [Test]
+        [XpandTest]
+        [Apartment(ApartmentState.STA)]
+        public async Task Do_Not_Persist_TraceSources(){
+            using var application = LoggerModule().Application;
+            application.WhenModelChanged().FirstAsync()
+                .Select(_ => {
+                    var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger;
+                    logger.TraceSources.Persist=false;
+                    return Unit.Default;
+                }).Subscribe();
+            application.Logon();
+            
+            application.CreateViewWindow(() => application.NewListView(typeof(TraceEvent)));
+            var testObserver = application.WhenTraceEvent().FirstAsync(e => e.Value.Contains("test")).Test();
+
+            ReactiveLoggerModule.TraceSource.TraceMessage("test");
+            await application.WhenTrace().FirstAsync(e => e.Value.Contains("test"));
+
+            testObserver.ItemCount.ShouldBe(0);
+            var objectSpace = application.CreateObjectSpace();
+            objectSpace.GetObjectsQuery<TraceEvent>().FirstOrDefault(_ => _.Value.Contains("test")).ShouldBeNull();
+            objectSpace.GetObjectsCount(typeof(TraceEvent),null).ShouldBe(0);
+        }
+
+        [Test]
         [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task Save_TraceEvent(){
-            await SaveTraceEvent(afterSaveTrace: async () => {
-                using var appDomainContext2 = AppDomainContext.Create(AppDomain.CurrentDomain.SetupInformation);
-                await RemoteFuncAsync.InvokeAsync(appDomainContext2.Domain, async () => {
-                    await SaveTraceEvent().ConfigureAwait(false);
-                    return Unit.Default;
-                }).ConfigureAwait(false);
-                appDomainContext2.Dispose();
-            });
+            using var application = LoggerModule().Application;
+            application.Logon();
+            
+            application.CreateViewWindow(() => application.NewListView(typeof(TraceEvent)));
+
+            
+            ReactiveLoggerModule.TraceSource.TraceMessage("test");
+
+            await application.WhenTraceEvent().FirstAsync(e => e.Value.Contains("test"));
+
+            var objectSpace = application.CreateObjectSpace();
+            objectSpace.GetObjectsQuery<TraceEvent>().FirstOrDefault(_ => _.Value.Contains("test")).ShouldNotBeNull();
+            objectSpace.GetObjectsCount(typeof(TraceEvent),null).ShouldBeGreaterThan(0);
         }
 
         private static async Task SaveTraceEvent(Action<XafApplication> created=null, Action afterSaveTrace=null){
@@ -148,7 +207,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
         [Test]
         [XpandTest]
         [Apartment(ApartmentState.STA)]
-        public async Task Trace_Events_Before_CompatibityCheck(){
+        public async Task Trace_Events_Before_CompatibilityCheck(){
             using var application = Platform.Win.NewApplication<ReactiveLoggerModule>();
             application.AddModule<ReactiveLoggerModule>();
             var test = application.WhenTraceEvent().FirstAsync(_ => _.Value == "test").SubscribeReplay();

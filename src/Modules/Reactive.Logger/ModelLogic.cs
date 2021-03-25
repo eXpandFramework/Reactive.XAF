@@ -34,7 +34,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
     }
 
     public static class ModelReactiveLoggerService{
-        public static IEnumerable<IModelTraceSourcedModule> GetActiveSources(this IModelReactiveLogger logger){
+        public static IEnumerable<IModelTraceSourcedModule> GetEnabledSources(this IModelReactiveLogger logger){
             return logger.TraceSources.Enabled
                 ? new CalculatedModelNodeList<IModelTraceSourcedModule>( logger.TraceSources.Where(_ => _.Level!=SourceLevels.Off))
                 : new CalculatedModelNodeList<IModelTraceSourcedModule>(Enumerable.Empty<IModelTraceSourcedModule>());
@@ -45,6 +45,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
     public interface IModelTraceSourcedModules:IModelNode,IModelList<IModelTraceSourcedModule>{
         [DefaultValue(false)]
         bool Enabled{ get; set; }
+        [DefaultValue(false)]
+        bool Persist{ get; set; }
     }
 
     public class TraceEventAppearanceRulesGenerator:ModelNodesGeneratorUpdater<AppearanceRulesModelNodesGenerator>{

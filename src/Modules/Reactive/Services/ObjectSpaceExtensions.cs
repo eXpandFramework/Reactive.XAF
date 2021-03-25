@@ -25,6 +25,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ObjectSpaceExtensions {
         private static readonly Subject<(IObjectSpace objectSpace,object instance)> ObjectsSubject = new();
 
+        public static IObservable<TObject> WhenNewObjectCreated<TObjectSpace, TObject>(
+            this IObservable<TObjectSpace> source) where TObjectSpace : IObjectSpace where TObject : IObjectSpaceLink 
+            => source.SelectMany(objectSpace => objectSpace.WhenNewObjectCreated<TObject>());
+
         public static IObservable<T> Link<T>(this IObservable<T> source, IObjectSpace objectSpace) 
             => source.Do(obj => {
                 if (obj is IObjectSpaceLink link) {
@@ -214,11 +218,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
 
         public static IObservable<(IObjectSpace objectSpace, T[] objects)> DeletedObjects<T>(this XafApplication application) 
-            => application.WhenObjectSpaceCreated().SelectMany(t => t.e.ObjectSpace.WhenDeletedObjects<T>());
+            => application.WhenObjectSpaceCreated().SelectMany(objectSpace => objectSpace.WhenDeletedObjects<T>());
 
         public static IObservable<T> AllModifiedObjects<T>(this XafApplication application,Func<(IObjectSpace objectSpace,ObjectChangedEventArgs e),bool> filter=null ) 
             => application.WhenObjectSpaceCreated()
-                .SelectMany(_ => _.e.ObjectSpace.WhenObjectChanged()
+                .SelectMany(objectSpace => objectSpace.WhenObjectChanged()
                     .Where(tuple => filter == null || filter(tuple))
                     .SelectMany(tuple => tuple.objectSpace.ModifiedObjects.OfType<T>()));
 
@@ -259,18 +263,18 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenCommiting<T>(
             this XafApplication application, ObjectModification objectModification = ObjectModification.All)
             => application.WhenObjectSpaceCreated()
-                .SelectMany(_ => _.e.ObjectSpace.WhenCommiting<T>(objectModification));
+                .SelectMany(objectSpace => objectSpace.WhenCommiting<T>(objectModification));
         
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenCommitted<T>(
             this XafApplication application, ObjectModification objectModification = ObjectModification.All)
             => application.WhenObjectSpaceCreated()
-                .SelectMany(_ => _.e.ObjectSpace.WhenModifiedObjects(true,objectModification,typeof(T)).Select(t => (t.objectSpace,t.objects.Cast<T>())));
+                .SelectMany(objectSpace => objectSpace.WhenModifiedObjects(true,objectModification,typeof(T)).Select(t => (t.objectSpace,t.objects.Cast<T>())));
 
         public static IObservable<T> Objects<T>(this IObservable<(IObjectSpace, IEnumerable<T> objects)> source)
         => source.SelectMany(t => t.objects);
         
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenExistingObjectCommiting<T>(this XafApplication application) 
-            => application.WhenObjectSpaceCreated().SelectMany(_ => _.e.ObjectSpace.WhenCommiting<T>(ObjectModification.Updated));
+            => application.WhenObjectSpaceCreated().SelectMany(objectSpace => objectSpace.WhenCommiting<T>(ObjectModification.Updated));
 
         public static IObservable<(T theObject, IObjectSpace objectSpace)> ExistingObject<T>(this IObjectSpace objectSpace,Func<IQueryable<T>,IQueryable<T>> query=null){
             var objectsQuery = objectSpace.GetObjectsQuery<T>();

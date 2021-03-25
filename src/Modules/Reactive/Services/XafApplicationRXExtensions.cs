@@ -57,7 +57,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<XafApplication> WhenCompatibilityChecked(this XafApplication application) 
             => (bool) application.GetPropertyValue("IsCompatibilityChecked")
                 ? application.ReturnObservable() : application.WhenObjectSpaceCreated().FirstAsync()
-                    .Select(_ => _.application).TraceRX();
+                    .Select(_ => application).TraceRX();
 
         [PublicAPI]
         public static IObservable<XafApplication> WhenModule(this IObservable<XafApplication> source, Type moduleType) 
@@ -168,17 +168,18 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .TraceRX(_ => _.e.Context);
 
         [PublicAPI]
-        public static IObservable<(XafApplication application, ObjectSpaceCreatedEventArgs e)> WhenObjectSpaceCreated(this IObservable<XafApplication> source) 
+        public static IObservable<IObjectSpace> WhenObjectSpaceCreated(this IObservable<XafApplication> source) 
             => source.SelectMany(application => application.WhenObjectSpaceCreated());
 
         public static IObservable<(XafApplication application, NonPersistentObjectSpace ObjectSpace)> WhenNonPersistentObjectSpaceCreated(this XafApplication application)
-            => application.WhenObjectSpaceCreated(true).Where(t => t.e.ObjectSpace is NonPersistentObjectSpace).Select(t => (application,(NonPersistentObjectSpace)t.e.ObjectSpace));
+            => application.WhenObjectSpaceCreated(true).Where(objectSpace => objectSpace is NonPersistentObjectSpace).Select(objectSpace => (application,(NonPersistentObjectSpace)objectSpace));
 
-        public static IObservable<(XafApplication application, ObjectSpaceCreatedEventArgs e)> WhenObjectSpaceCreated(this XafApplication application,bool includeNonPersistent=false) 
+        public static IObservable<IObjectSpace> WhenObjectSpaceCreated(this XafApplication application,bool includeNonPersistent=false) 
             => Observable.FromEventPattern<EventHandler<ObjectSpaceCreatedEventArgs>,ObjectSpaceCreatedEventArgs>(h => application.ObjectSpaceCreated += h,h => application.ObjectSpaceCreated -= h,ImmediateScheduler.Instance)
                 .TransformPattern<ObjectSpaceCreatedEventArgs,XafApplication>()
                 .Where(_ => includeNonPersistent || !(_.e.ObjectSpace is NonPersistentObjectSpace))
-                .TraceRX(_ => _.e.ObjectSpace.ToString());
+                .TraceRX(_ => _.e.ObjectSpace.ToString())
+                .Select(t => t.e.ObjectSpace);
 
         [PublicAPI]
         public static IObservable<XafApplication> SetupComplete(this IObservable<XafApplication> source) 
