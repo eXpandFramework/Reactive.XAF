@@ -59,23 +59,23 @@ namespace Xpand.XAF.Modules.Reactive{
                 .Merge(manager.SetupPropertyEditorParentView());
 
         static IObservable<Unit> HandleObjectSpaceGetNonPersistentObject(this XafApplication application)
-            => application.WhenNonPersistentObjectSpaceCreated().ToUnit();
-                // .SelectMany(t => t.ObjectSpace.AsNonPersistentObjectSpace()
-                    // .WhenObjectGetting()
-                    // .SelectMany(tuple => {
-                    //     tuple.e.TargetObject = tuple.e.SourceObject;
-                    //     if (tuple.e.TargetObject is IObjectSpaceLink objectSpaceLink) {
-                    //         objectSpaceLink.ObjectSpace = tuple.objectSpace;
-                    //     }
-                    //     return tuple.e.TargetObject.GetTypeInfo().Members.Where(info =>
-                    //             typeof(IObjectSpaceLink).IsAssignableFrom(info.MemberType))
-                    //         .ToObservable(Scheduler.Immediate)
-                    //         .Select(info => info.GetValue(tuple.e.TargetObject)).WhenNotDefault()
-                    //         .Cast<IObjectSpaceLink>()
-                    //         .Do(link => link.ObjectSpace = tuple.objectSpace);
-                    // })
-                    // .ToUnit()
-                // );
+            => application.WhenNonPersistentObjectSpaceCreated()
+                .SelectMany(t => t.ObjectSpace.AsNonPersistentObjectSpace()
+                    .WhenObjectGetting()
+                    .SelectMany(tuple => {
+                        tuple.e.TargetObject = tuple.e.SourceObject;
+                        if (tuple.e.TargetObject is IObjectSpaceLink objectSpaceLink) {
+                            objectSpaceLink.ObjectSpace = tuple.objectSpace;
+                        }
+                        return tuple.e.TargetObject.GetTypeInfo().Members.Where(info =>
+                                typeof(IObjectSpaceLink).IsAssignableFrom(info.MemberType))
+                            .ToObservable(Scheduler.Immediate)
+                            .Select(info => info.GetValue(tuple.e.TargetObject)).WhenNotDefault()
+                            .Cast<IObjectSpaceLink>()
+                            .Do(link => link.ObjectSpace = tuple.objectSpace);
+                    })
+                    .ToUnit()
+                );
 
         // static IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> ReadOnlyCollection(
         //     this IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> source)

@@ -37,9 +37,10 @@ namespace Xpand.XAF.Modules.Reactive.Services {
         public static BindingList<ObjectString> ToObjectString(this IEnumerable<object> source, IObjectSpace objectSpace)
             => source.Select(o1 => {
                 var isModified =objectSpace.IsDisposed || objectSpace.ModifiedObjects.Contains(o1);
-                var objectString =objectSpace.IsDisposed?new ObjectString(): objectSpace.CreateObject<ObjectString>();
-                objectString.Name = $"{o1}";
-                objectString.Caption = $"{o1}";
+                var name = $"{o1}";
+                var objectString =objectSpace.IsDisposed?new ObjectString(name): objectSpace.CreateObject<ObjectString>();
+                objectString.Name = name;
+                objectString.Caption = name;
                 if (!isModified) {
                     objectSpace.RemoveFromModifiedObjects(objectString);
                 }

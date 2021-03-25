@@ -1,4 +1,5 @@
 ﻿using System;
+using DevExpress.DataAccess.Excel;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
@@ -6,6 +7,13 @@ using DevExpress.ExpressApp.Model.Core;
 
 namespace Xpand.Extensions.XAF.ModelExtensions{
     public partial class ModelExtensions{
+        public static ModelNode AddNode<T>(this IModelNode node, string id,bool checkForDuplicates) where T:IModelNode{
+            if (!checkForDuplicates||(((ModelNode) node)[id] == null)) {
+                return (ModelNode) (IModelNode)node.AddNode<T>(id);
+            }
+            throw new DuplicateNameValidationException($"{node}");
+        }
+
         public static ModelNode AddNode(this IModelNode node, string id = null) => node.AddNode(node.ModelListType(), id);
 
         public static ModelNode AddNode(this IModelNode node, Type type,string id=null) => node.AddNode(XafTypesInfo.Instance.FindTypeInfo(type),id);

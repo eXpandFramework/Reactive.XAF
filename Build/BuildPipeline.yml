@@ -144,7 +144,8 @@ jobs:
                 }
                 "failedBuilds=$failedBuilds"
                 if ($failedBuilds){
-                  throw "Failed tests $failedBuilds"
+                  $failedBuilds
+                  throw "Failed tests "
                 }
                 "PublishNugets-Reactive.XAF"
                 $env:DXFeed = '$(DXApiFeed)'

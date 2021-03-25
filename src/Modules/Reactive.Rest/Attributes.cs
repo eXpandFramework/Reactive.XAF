@@ -32,11 +32,11 @@ namespace Xpand.XAF.Modules.Reactive.Rest {
                 PollInterval=DefaultPollingInterval;
             }
         }
-        public RestOperationAttribute(string actionId,string requestUrl,string httpMethod=null) {
+        public RestOperationAttribute(string actionId,string requestUrl,string httpMethod=null,int pollInterval=0) {
             ActionId = actionId;
             RequestUrl = requestUrl;
             HttpMethod = httpMethod;
-            if (httpMethod==nameof(System.Net.Http.HttpMethod.Get)) {
+            if (httpMethod==nameof(System.Net.Http.HttpMethod.Get)&&pollInterval==0) {
                 PollInterval=DefaultPollingInterval;
             }
         }

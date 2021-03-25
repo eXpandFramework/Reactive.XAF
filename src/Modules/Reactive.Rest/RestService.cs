@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Net.Http;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Filtering;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.Persistent.Base;
-using Fasterflect;
 using Xpand.Extensions.LinqExtensions;
-using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -27,6 +27,7 @@ using Xpand.XAF.Modules.Reactive.Services.Controllers;
 namespace Xpand.XAF.Modules.Reactive.Rest {
 
     public static class RestService {
+        public static readonly ConcurrentDictionary<object, IConnectableObservable<object>> CacheStorage = new();
         public static HttpClient HttpClient=NetworkExtensions.HttpClient;
         public static IObservable<(HttpResponseMessage message, string content, object instance)> Object => NetworkExtensions.Object;
         public static IObservable<(HttpResponseMessage message, string content, T instance)> When<T>(

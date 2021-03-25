@@ -2,11 +2,17 @@
 
 namespace Xpand.Extensions.XAF.Attributes {
     [AttributeUsage(AttributeTargets.Property)]
-    public class ReadOnlyCollectionAttribute:Attribute {
-        
+    public class ReadOnlyCollectionAttribute:Attribute,IReadOnlyAttribute {
+        public bool AllowEdit { get; }
+        public bool AllowDelete { get; }
+        public bool AllowNew { get; }
+        public bool DisableListViewProcess { get; }
 
-        public ReadOnlyCollectionAttribute() {
-            
+        public ReadOnlyCollectionAttribute(bool allowEdit=false,bool allowDelete=false,bool allowNew=false,bool disableListViewProcess=false) {
+            AllowEdit = allowEdit;
+            AllowDelete = allowDelete;
+            AllowNew = allowNew;
+            DisableListViewProcess = disableListViewProcess;
         }
     }
 }

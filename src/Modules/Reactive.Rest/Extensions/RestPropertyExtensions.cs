@@ -9,11 +9,13 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
 using Fasterflect;
+using Xpand.Extensions.JsonExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.Collections;
 using Xpand.Extensions.TypeExtensions;
+using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
 using Xpand.Extensions.XAF.NonPersistentObjects;
 using Xpand.Extensions.XAF.ObjectExtensions;
@@ -42,7 +44,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Extensions {
 
         private static IObservable<ITypeInfo> MarkReactiveCollectionMembers(this IObservable<ITypeInfo> source)
             => source.ConcatIgnored(info => info.Type.ReactiveCollectionMembers()
-                .Do(t1 => t1.info.AddAttribute(new CollectionOperationSetAttribute() {AllowAdd = false, AllowRemove = false})));
+                .Do(t1 => t1.info.AddAttribute(new ReadOnlyCollectionAttribute(disableListViewProcess:true))));
 
         private static IObservable<ITypeInfo> MarkListMembers(this IObservable<ITypeInfo> source) 
             => source.ConcatIgnored(info => info.Type.RestListMembers()
@@ -153,14 +155,23 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Extensions {
 
         public static IObservable<object> ReactiveCollectionsFetch(this IObservable<object> source,ICredentialBearer bearer)
             => source.MergeIgnored(o => o.GetType().ReactiveCollectionMembers()
-                .SelectMany(t => ((DynamicCollection) t.info.GetValue(o)).WhenFetchObjects()
-                    .SelectMany(t2 => {
-                        var realType = t.info.MemberType.RealType();
-                        return t.attribute.Send(realType.CreateInstance(), bearer,t.attribute.RequestUrl(o), realType.DeserializeResponse(t2.sender.ObjectSpace))
-                                .BufferUntilCompleted() 
-                                .Do(objects => t2.sender.AddObjects(objects,true))
-                            ;
-                    })));
+                .SelectMany(t => {
+                    var dynamicCollection = ((DynamicCollection) t.info.GetValue(o));
+                    return dynamicCollection.WhenFetchObjects()
+                        
+                        
+                        .SelectMany(t2 => {
+                            var realType = t.info.MemberType.RealType();
+                            return t.attribute.Send(realType.CreateInstance(), bearer, t.attribute.RequestUrl(o),
+                                        realType.DeserializeResponse(t2.sender.ObjectSpace))
+                                    .Do(o1 => {},() => {})
+                                    
+                                    .BufferUntilCompleted()
+
+                                    .Do(objects => t2.sender.AddObjects(objects, true))
+                                ;
+                        });
+                }));
 
         private static Func<string, object[]> DeserializeResponse(this Type realType, IObjectSpace objectSpace) 
             => s => realType != typeof(ObjectString) ? realType.Deserialize<object>(s) : typeof(string).Deserialize<string>(s)

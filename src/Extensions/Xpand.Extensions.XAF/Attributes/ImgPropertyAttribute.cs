@@ -3,10 +3,9 @@
 namespace Xpand.Extensions.XAF.Attributes {
     [AttributeUsage(AttributeTargets.Property)]
     public class ImgPropertyAttribute:Attribute {
-        public int Width { get; }
+        public ImgPropertyAttribute(int width=20) => Width = width;
 
-        public ImgPropertyAttribute(int width=0) {
-            Width = width;
-        }
+        public int DetailViewWidth { get; set; }
+        public int Width { get; }
     }
 }

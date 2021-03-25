@@ -79,15 +79,23 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Extensions {
 
         static IObservable<object> Create(this object instance,ICredentialBearer bearer) 
             => Operation.Create.RestOperation(instance.GetTypeInfo())
-                .SelectMany(attribute => attribute.Send(instance,bearer));
+                .SelectMany(attribute => attribute.Send(instance,bearer))
+                .InvalidateCache(instance,bearer);
 
-        static IObservable<object> Update(this object instance,ICredentialBearer bearer) 
+        static IObservable<object> Update(this object instance, ICredentialBearer bearer)
             => Operation.Update.RestOperation(instance.GetTypeInfo())
-                .SelectMany(attribute => attribute.Send(instance, bearer));
+                .SelectMany(attribute => attribute.Send(instance, bearer))
+                .InvalidateCache(instance,bearer);
+
+
+        static IObservable<object> InvalidateCache(this IObservable<object> source, object instance, ICredentialBearer bearer)
+            => source.Concat(Operation.Get.RestOperation(instance.GetTypeInfo())
+                .Do(getAttribute => RestService.CacheStorage.TryRemove($"{bearer.BaseAddress}{getAttribute.RequestUrl(instance)}", out _)));
 
         static IObservable<object> Delete(this object instance,ICredentialBearer bearer) 
             => Operation.Delete.RestOperation(instance.GetTypeInfo())
-                .SelectMany(attribute => attribute.Send(instance,bearer));
+                .SelectMany(attribute => attribute.Send(instance,bearer))
+                .InvalidateCache(instance,bearer);
 
     }
 }
