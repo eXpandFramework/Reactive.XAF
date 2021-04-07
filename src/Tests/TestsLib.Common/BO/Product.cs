@@ -24,7 +24,7 @@ namespace Xpand.TestsLib.Common.BO{
             set => SetPropertyValue(nameof(Id), ref _id, value);
         }
 
-        [Association("P-To-C")]
+        [Association("P-To-Instance")]
         public XPCollection<Accessory> Accessories => GetCollection<Accessory>(nameof(Accessories));
         [Browsable(false)][NonPersistent]
 

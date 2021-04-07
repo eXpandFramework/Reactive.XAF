@@ -7,7 +7,7 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ObjectExtensions;
 
 namespace Xpand.XAF.Modules.Reactive.Rest.Extensions {
-    internal static class RestAttributeExtensions {
+    public static class RestAttributeExtensions {
         private static HttpMethod HttpMethod(this IRestAttribute attribute) 
             => attribute.HttpMethod == null && attribute is RestOperationAttribute operationAttribute
                 ? operationAttribute.Operation == Operation.Get ? System.Net.Http.HttpMethod.Get
@@ -16,7 +16,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Extensions {
                             ? new HttpMethod("PATCH") : new HttpMethod(attribute.HttpMethod)
                 : new HttpMethod(attribute.HttpMethod);
 
-        public static string RequestUrl(this IRestAttribute operationAttribute,object instance) {
+        internal static string RequestUrl(this IRestAttribute operationAttribute,object instance) {
             var regexObj = new Regex("(.*){([^}]*)}(.*)", RegexOptions.IgnoreCase | RegexOptions.Singleline);
             var match = regexObj.Match(operationAttribute.RequestUrl);
             if (match.Success) {
@@ -30,7 +30,6 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Extensions {
         }
 
         internal static IObservable<object> Send(this IRestAttribute attribute,  object instance,ICredentialBearer user,string requestUrl=null,Func<string,object[]> deserializeResponse=null) {
-            // var user = ((ICredentialBearer) SecuritySystem.CurrentUser);
             requestUrl ??= attribute.RequestUrl(instance);
             var url = $"{user.BaseAddress}{requestUrl}";
             var pollInterval = attribute.PollInterval>0?TimeSpan.FromSeconds(attribute.PollInterval) :(TimeSpan?) null ;

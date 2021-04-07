@@ -40,8 +40,8 @@
   <ItemGroup>
     <PackageReference Include="DevExpress.WindowsDesktop.Core" Version="20.2.6" />
     <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="20.2.6" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="4.202.53" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.2" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="4.202.53.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.5" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.8.1" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.8.1" />

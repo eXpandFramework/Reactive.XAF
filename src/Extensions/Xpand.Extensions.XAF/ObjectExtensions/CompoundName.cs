@@ -1,7 +1,11 @@
-﻿using DevExpress.ExpressApp.Utils;
+﻿using System.Linq;
+using DevExpress.ExpressApp.Utils;
+using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.StringExtensions;
 
 namespace Xpand.Extensions.XAF.ObjectExtensions{
     public static partial class ObjectExtensions{
-        public static string CompoundName(this object obj) => CaptionHelper.ConvertCompoundName($"{obj}".Replace("_",""));
+        public static string CompoundName(this object obj) 
+            => CaptionHelper.ConvertCompoundName($"{obj}".Split('_').Select(s => s.FirstCharacterToUpper()).Join(""));
     }
 }

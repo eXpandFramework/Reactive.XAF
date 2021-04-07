@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputPath>..\..\..\bin</OutputPath>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
     <LangVersion>latest</LangVersion>
@@ -34,9 +34,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Xpand.TestsLib">
-      <HintPath>..\..\..\bin\netcoreapp3.1\Xpand.TestsLib.dll</HintPath>
-    </Reference>
     <Reference Include="Xpand.TestsLib.Common">
       <HintPath>..\..\..\bin\Xpand.TestsLib.Common.dll</HintPath>
     </Reference>
@@ -61,6 +58,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Update="TestModule.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TestsLib\Xpand.TestsLib.csproj" />
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

@@ -13,8 +13,6 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using HarmonyLib;
 using JetBrains.Annotations;
-using Xpand.Extensions.StringExtensions;
-using Xpand.Extensions.XAF.ObjectExtensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services.Actions{
     [PublicAPI]
@@ -201,8 +199,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 
         internal static void NewAction(this Controller controller){
 	        var tuple = ControllerCtorState[controller.GetType()];
-            var actionBase = tuple.actionBase((controller, tuple.id));
-            actionBase.Caption = actionBase.Caption.Replace("_"," ").FirstCharacterToUpper().CompoundName();
+            tuple.actionBase((controller, tuple.id));
         }
     }
 

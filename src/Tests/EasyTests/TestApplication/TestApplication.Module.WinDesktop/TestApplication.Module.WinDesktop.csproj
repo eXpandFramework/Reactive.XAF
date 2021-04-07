@@ -40,12 +40,12 @@
     <PackageReference Include="DevExpress.WindowsDesktop.Xaf" Version="20.2.6-ctp" />
     <PackageReference Include="Microsoft.Win32.Registry" Version="5.0" />
     <PackageReference Include="System.ServiceProcess.ServiceController" Version="5.0" />
-    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="5.0" />
+    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="5.0.1" />
     <PackageReference Include="System.Data.OleDb" Version="5.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.8.1" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.8.1" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.202.53" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.202.53.1" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="TestApplication.Module">

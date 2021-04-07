@@ -9,20 +9,19 @@ namespace Xpand.Extensions.Reactive.Utility {
             ConcurrentDictionary<object, IConnectableObservable<object>> storage, object key,
             Func<T, IObservable<T2>> secondSelector, TimeSpan? interval) where T2 : class
             => source.SelectMany(message => {
-                if (interval.HasValue) {
-                    if (storage.TryGetValue(key, out var value)) {
-                        return value.Select(o => o).FirstAsync().Cast<T2>().Finally(() => { });
+                    if (interval.HasValue) {
+                        if (storage.TryGetValue(key, out var value)) {
+                            return value.Select(o => o).FirstAsync().Cast<T2>().Finally(() => { });
+                        }
+                        var publish = Observable.Interval(interval.Value).StartWith(0)
+                            .SelectMany(_ => secondSelector(message))
+                            .Publish().RefCount().Replay(1);
+                        publish.Connect();
+                        storage.TryAdd(key, publish);
+                        return publish.Select(o => o).FirstAsync().Cast<T2>().Finally(() => { });
                     }
 
-                    var publish = Observable.Interval(interval.Value).StartWith(0)
-                        .SelectMany(_ => secondSelector(message))
-                        .Publish().RefCount().Replay(1);
-                    publish.Connect();
-                    storage.TryAdd(key, publish);
-                    return publish.Select(o => o).FirstAsync().Cast<T2>().Finally(() => { });
-                }
-
-                return secondSelector(message);
-            });
+                    return secondSelector(message);
+                });
     }
 }

@@ -105,7 +105,7 @@ namespace ALL.Win.Tests {
             await EasyTest(() => new WinAdapter(), RunWinApplication, async adapter => {
                 var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
                 adapter.Execute(autoTestCommand);
-#if !XAF191 && !NETCOREAPP3_1
+#if !XAF191 && !NET5_0
                 adapter.TestDocumentStyleManager();
 #endif
                 adapter.TestModelViewInheritance();

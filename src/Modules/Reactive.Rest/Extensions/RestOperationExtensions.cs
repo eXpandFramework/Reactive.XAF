@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
@@ -8,7 +9,6 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Data;
 using DevExpress.ExpressApp.DC;
-using Fasterflect;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
@@ -29,7 +29,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Extensions {
 
         public static IObservable<object> Get(this IObjectSpace objectSpace, Type type,ICredentialBearer bearer)
             => Operation.Get.RestOperation(type.ToTypeInfo())
-                .SelectMany(attribute => attribute.Send(type.CreateInstance(),bearer).Link(objectSpace));
+                .SelectMany(attribute => attribute.Send(objectSpace.CreateObject(type),bearer).Link(objectSpace));
 
         public static IObservable<ApplicationModulesManager> RestOperationAction(this IObservable<ApplicationModulesManager> source)
             => source.MergeIgnored(manager => manager.ExportedTypes().ToTypeInfo().OperationActionTypes().ToObservable()
@@ -38,7 +38,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Extensions {
                         action.TargetObjectType = t.info.Type;
                     })
                     .WhenExecute()
-                    .SelectMany(e => t.attribute.SendAction(e.Action.AsSimpleAction()))));
+                    .SelectMany(e => e.SelectedObjects.Cast<object>().SendAction(t.attribute,e.Action.AsSimpleAction()))));
 
         private static IObservable<Unit> KeyDefaultAttributes(this ITypesInfo typesInfo) 
             => typesInfo.RestOperationTypes()
@@ -58,17 +58,15 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Extensions {
             => typesInfo.PersistentTypes.Where(info => info.FindAttributes<RestOperationAttribute>().Any()).ToObservable();
 
 
-        static IObservable<Unit> SendAction(this RestActionOperationAttribute attribute,SimpleAction action) 
-            => action.WhenExecute().SelectMany(t1 => t1.SelectedObjects.Cast<object>().ToObservable()
-                    .SelectMany(instance => attribute.Send(instance,t1.Action.Application
-                        .GetCurrentUser<ICredentialBearer>()))).ToUnit();
+        static IObservable<Unit> SendAction(this IEnumerable<object> source, RestActionOperationAttribute attribute,SimpleAction action) 
+            => source.ToObservable().SelectMany(instance => attribute.Send(instance,action.Application
+                    .GetCurrentUser<ICredentialBearer>())).ToUnit();
 
         private static IObservable<RestOperationAttribute> RestOperation(this Operation operation,IBaseInfo info) 
             => info.FindAttributes<RestOperationAttribute>().Where(attribute => attribute.Operation==operation).ToObservable();
 
         private static IObservable<object> CommitingRestCall(this IObjectSpace objectSpace,object o, IObservable<object> crudSource,ICredentialBearer bearer) 
-            => o.GetTypeInfo().Members.Where(info =>
-                    info.MemberType == typeof(bool) && info.FindAttributes<RestOperationAttribute>().Any())
+            => o.GetTypeInfo().Members.Where(info => info.MemberType == typeof(bool) && info.FindAttributes<RestOperationAttribute>().Any())
                 .ToObservable(Scheduler.Immediate)
                 .SelectMany(info => info.FindAttributes<RestOperationAttribute>()).Where(attribute => {
                     var isObjectFitForCriteria = objectSpace.IsObjectFitForCriteria(o, CriteriaOperator.Parse(attribute.Criteria));
@@ -76,20 +74,21 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Extensions {
                 })
                 .SelectMany(attribute => attribute.Send(o, bearer))
                 .Concat(Observable.Defer(() => crudSource));
-
-        static IObservable<object> Create(this object instance,ICredentialBearer bearer) 
+        
+        static IObservable<object> Create(this object instance, ICredentialBearer bearer)
             => Operation.Create.RestOperation(instance.GetTypeInfo())
-                .SelectMany(attribute => attribute.Send(instance,bearer))
-                .InvalidateCache(instance,bearer);
+                .SelectMany(attribute => attribute.Send(instance, bearer))
+                .InvalidateCache(instance, bearer);
 
         static IObservable<object> Update(this object instance, ICredentialBearer bearer)
             => Operation.Update.RestOperation(instance.GetTypeInfo())
                 .SelectMany(attribute => attribute.Send(instance, bearer))
                 .InvalidateCache(instance,bearer);
 
-        static IObservable<object> InvalidateCache(this IObservable<object> source, object instance, ICredentialBearer bearer)
-            => source.Concat(Operation.Get.RestOperation(instance.GetTypeInfo())
-                .Do(getAttribute => RestService.CacheStorage.TryRemove($"{bearer.BaseAddress}{getAttribute.RequestUrl(instance)}", out _)));
+        static IObservable<T> InvalidateCache<T>(this IObservable<T> source, object instance, ICredentialBearer bearer)
+            => source.Merge(Operation.Get.RestOperation(instance.GetTypeInfo())
+                .Do(attribute => RestService.CacheStorage.TryRemove($"{bearer.BaseAddress}{attribute.RequestUrl(instance)}", out _))
+                .Cast<T>().IgnoreElements());
 
         static IObservable<object> Delete(this object instance,ICredentialBearer bearer) 
             => Operation.Delete.RestOperation(instance.GetTypeInfo())

@@ -26,8 +26,17 @@ namespace Xpand.XAF.Modules.Blazor.Editors {
         protected override RenderFragment RenderComponent() 
             => builder => Render(builder, PropertyValue);
 
-        private void Render(RenderTreeBuilder builder,object propertyValue) 
-            => builder.AddMarkupContent(0, $"{propertyValue}".StringFormat(Model.DisplayFormat));
+        private void Render(RenderTreeBuilder builder,object propertyValue) {
+
+            var markupContent = $@"
+<div class=""dxbs-fl-ctrl""><!--!-->
+    <div data-item-name=""{MemberInfo.Name}"" class=""d-none""></div><!--!-->
+    <!--!-->{$"{propertyValue}".StringFormat(Model.DisplayFormat)}<!--!-->
+</div>
+";
+            
+            builder.AddMarkupContent(0, markupContent);
+        }
     }
 
     public static class MarkupContentPropertyEditorService {
@@ -42,7 +51,7 @@ namespace Xpand.XAF.Modules.Blazor.Editors {
 
         private static IObservable<Unit> ReaOnlyViewAttribute(this IObservable<IModelView> source)
             => source.OfType<IModelDetailView>().ConcatIgnored(view => view.ModelClass.TypeInfo
-                    .FindAttributes<ReadOnlyObjectViewAttribute>()
+                    .FindAttributes<ReadOnlyObjectViewAttribute>().Where(attribute => !attribute.AllowEdit)
                     .SelectMany(_ => view.MemberViewItems().Where(item => !item.ModelMember.MemberInfo.IsList)
                         .Execute(item => item.PropertyEditorType = typeof(MarkupContentPropertyEditor)))
                     .ToObservable())

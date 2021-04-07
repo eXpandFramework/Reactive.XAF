@@ -28,7 +28,7 @@ To initialize the TraceSources that operate before model e.g. ModelMapper add th
       <add name="sourceSwitch" value="Verbose"/>  
     </switches>  
   </system.diagnostics>  
-</configuration>
+</configuration>i
 ```
 
 --- 

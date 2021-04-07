@@ -1,4 +1,4 @@
-﻿#if !NETCOREAPP3_1
+﻿#if !NET5_0
 
 using DevExpress.EasyTest.Framework;
 using Xpand.Extensions.XAF.ObjectExtensions;

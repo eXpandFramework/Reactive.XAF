@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
@@ -10,9 +11,17 @@ using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.TypeExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
+using Xpand.Extensions.XAF.TypesInfoExtensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
-    public static class PropertyEditorService{
+    public static class PropertyEditorExtensions{
+        public static IObservable<ListPropertyEditor> FrameChanged(this IEnumerable<ListPropertyEditor> source) 
+            => source.ToObservable()
+                .SelectMany(item => Observable
+                    .FromEventPattern<EventHandler<EventArgs>, EventArgs>(h => item.FrameChanged += h,
+                        h => item.FrameChanged -= h,ImmediateScheduler.Instance)
+                    .Select(_ => item));
+
         internal static IObservable<Unit> SetupPropertyEditorParentView(this XafApplication application){
             var detailViewEditors = application.WhenDetailViewCreated().ToDetailView()
                 .SelectMany(detailView => detailView.GetItems<IParentViewPropertyEditor>().Select(editor => (view: (ObjectView) detailView, editor)));
@@ -30,6 +39,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return setupParentView;
         }
 
+        public static object DisplayableMemberValue(this PropertyEditor editor,object currentObject=null,object propertyValue=null) {
+            currentObject ??= editor.CurrentObject;
+            propertyValue ??= editor.PropertyValue;
+            var defaultMember = editor.MemberInfo.FindDisplayableMember();
+            return defaultMember != null ? defaultMember.GetValue(currentObject) : propertyValue;
+        }
+            
         public static IObservable<T> WhenVisibilityChanged<T>(this T editor) where T:PropertyEditor 
             => Observable.FromEventPattern<EventHandler, EventArgs>(h => editor.VisibilityChanged += h,
                     h => editor.VisibilityChanged -= h, Scheduler.Immediate)

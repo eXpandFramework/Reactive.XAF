@@ -1,4 +1,4 @@
-﻿#if !NETCOREAPP3_1
+﻿#if !NET5_0
 using System.Linq;
 using DevExpress.ExpressApp;
 using Fasterflect;
@@ -27,7 +27,7 @@ namespace Web.Tests{
     
     [NonParallelizable]
     public class AllWebTests : CommonTest{
-#if !NETCOREAPP3_1
+#if !NET5_0
         [Test()]
         [TestCaseSource(nameof(AgnosticModules))]
         [TestCaseSource(nameof(WebModules))]
@@ -55,7 +55,7 @@ namespace Web.Tests{
         }
         private TestApplication RunWebApplication(IApplicationAdapter adapter, string connectionString){
 
-#if !NETCOREAPP3_1
+#if !NET5_0
             var physicalPath = $@"{AppDomain.CurrentDomain.ApplicationPath()}..\TestWebApplication\";
 #else
             var physicalPath = Path.GetFullPath($@"{AppDomain.CurrentDomain.ApplicationPath()}..\..\TestBlazorApplication\");
@@ -63,7 +63,7 @@ namespace Web.Tests{
             LogPaths.Clear();
             LogPaths.Add(Path.Combine(Path.GetDirectoryName(physicalPath)!,"eXpressAppFramework.log"));
             LogPaths.Add(Path.Combine(@$"{Path.GetDirectoryName(physicalPath)}\bin",Path.GetFileName(ReactiveLoggerService.RXLoggerLogPath)!));
-#if !NETCOREAPP3_1
+#if !NET5_0
             return ((DevExpress.ExpressApp.EasyTest.WebAdapter.WebAdapter) adapter).RunWebApplication(physicalPath, 65477, connectionString);
 #else
             
@@ -90,7 +90,7 @@ namespace Web.Tests{
         }
 
         private static IApplicationAdapter NewWebAdapter(){
-#if !NETCOREAPP3_1
+#if !NET5_0
             return new DevExpress.ExpressApp.EasyTest.WebAdapter.WebAdapter();
 #else
             return new DevExpress.ExpressApp.EasyTest.BlazorAdapter.BlazorAdapter();

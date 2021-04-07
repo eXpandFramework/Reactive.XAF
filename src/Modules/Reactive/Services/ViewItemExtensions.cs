@@ -8,14 +8,6 @@ using DevExpress.ExpressApp.Editors;
 using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
-    public static class ListPropertyEditorExtensions{
-        public static IObservable<ListPropertyEditor> FrameChanged(this IEnumerable<ListPropertyEditor> source) 
-            => source.ToObservable()
-                .SelectMany(item => Observable
-                    .FromEventPattern<EventHandler<EventArgs>, EventArgs>(h => item.FrameChanged += h,
-                        h => item.FrameChanged -= h,ImmediateScheduler.Instance)
-                    .Select(pattern => item));
-    }
     public static class ViewItemExtensions{
         public static IObservable<(ViewItem viewItem, NestedFrame nestedFrame)> ToNestedFrames(this IObservable<ViewItem> source, params Type[] nestedObjectTypes) 
             => source.Cast<IFrameContainer>()

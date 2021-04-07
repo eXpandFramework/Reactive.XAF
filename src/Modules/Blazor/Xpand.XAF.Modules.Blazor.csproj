@@ -17,10 +17,16 @@
     <DebugType>full</DebugType>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Model.DesignedDiffs.xafml" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Update="Module.cs" />
     <Compile Include="..\..\Common\AssemblyInfoVersion.cs">
       <Link>Properties\AssemblyInfoVersion.cs</Link>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.Extensions.Reactive">

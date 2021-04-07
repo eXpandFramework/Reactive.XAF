@@ -3,7 +3,6 @@ using System.Configuration;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
@@ -12,13 +11,10 @@ using DevExpress.ExpressApp;
 using Fasterflect;
 using HarmonyLib;
 using JetBrains.Annotations;
-using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
 using Xpand.Extensions.XAF.ModuleExtensions;
-using Xpand.Extensions.XAF.ObjectExtensions;
-using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Security;
 
@@ -54,36 +50,8 @@ namespace Xpand.XAF.Modules.Reactive{
                 .Merge(manager.ConnectObjectString())
                 .Merge(manager.WhenApplication(application => application.WhenNonPersistentPropertyCollectionSource()
                     .Merge(application.PatchAuthentication())
-                    .Merge(application.HandleObjectSpaceGetNonPersistentObject())
                     .Merge(application.ShowPersistentObjectsInNonPersistentView())))
                 .Merge(manager.SetupPropertyEditorParentView());
-
-        static IObservable<Unit> HandleObjectSpaceGetNonPersistentObject(this XafApplication application)
-            => application.WhenNonPersistentObjectSpaceCreated()
-                .SelectMany(t => t.ObjectSpace.AsNonPersistentObjectSpace()
-                    .WhenObjectGetting()
-                    .SelectMany(tuple => {
-                        tuple.e.TargetObject = tuple.e.SourceObject;
-                        if (tuple.e.TargetObject is IObjectSpaceLink objectSpaceLink) {
-                            objectSpaceLink.ObjectSpace = tuple.objectSpace;
-                        }
-                        return tuple.e.TargetObject.GetTypeInfo().Members.Where(info =>
-                                typeof(IObjectSpaceLink).IsAssignableFrom(info.MemberType))
-                            .ToObservable(Scheduler.Immediate)
-                            .Select(info => info.GetValue(tuple.e.TargetObject)).WhenNotDefault()
-                            .Cast<IObjectSpaceLink>()
-                            .Do(link => link.ObjectSpace = tuple.objectSpace);
-                    })
-                    .ToUnit()
-                );
-
-        // static IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> ReadOnlyCollection(
-        //     this IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> source)
-        //     => source.ConcatIgnored(_ => source.SelectMany(t => t.e.TypesInfo.GetPersistentMembers<ReadOnlyCollectionAttribute>()
-        //             .Execute(t1 => t1.info.AddAttribute(new CollectionOperationSetAttribute()
-        //                 {AllowAdd = false, AllowRemove = false})))
-        //         .ToUnit());
-
 
 
 

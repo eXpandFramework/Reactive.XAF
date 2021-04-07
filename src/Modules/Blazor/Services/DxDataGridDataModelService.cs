@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -16,28 +15,44 @@ using Xpand.XAF.Modules.Reactive.Services;
 namespace Xpand.XAF.Modules.Blazor.Services {
     public static class DxDataGridDataModelService {
         internal static IObservable<Unit> ApplyDxDataGridModel(this XafApplication application) 
-            => application.WhenFrameViewControls().WhenFrame(viewType: ViewType.ListView)
-                .DxDataGridModel().Apply();
-
-        private static IEnumerable<(Frame frame, IModelListViewFeature feature)> FrameFeatures(this Frame frame) 
-            => frame.Application.Model.ToReactiveModule<IModelReactiveModulesBlazor>().Blazor.ListViewFeatures.Where(feature => feature.ListView==frame.View.Model)
-                .Select(feature => (frame,feature));
-
-        private static IObservable<Unit> Apply(this IObservable<(Frame frame, IModelListViewFeature feature)> source) {
-            var propertyInfos=new HashSet<string>(typeof(IModelDxDataGridModel).GetProperties().Select(info => info.Name));
-            return source.SelectMany(t => {
-                    var dxDataGridModel = ((GridListEditor) t.frame.View.AsListView().Editor).GetDataGridAdapter().DataGridModel;
-                    return propertyInfos.Select(s => (name:s,value:t.feature.DxDataGridModel.GetValue(s))).Where(t3 => t3.value!=null)
-                        .Select(t1 =>( t1.name,t1.value,t.frame))
-                        .Do(t2 => dxDataGridModel.SetPropertyValue(t2.name, t2.value));
-                })
-                
+            => application.WhenFrameViewControls()
+                .WhenFrame(viewType: ViewType.ListView)
+                .MergeIgnored(frame => frame.GridModel().Apply())
+                .MergeIgnored(frame => frame.ColumnModel().Apply())
                 .ToUnit();
-        }
 
-        private static IObservable<(Frame frame, IModelListViewFeature feature)> DxDataGridModel(this IObservable<Frame> source) 
-            => source.SelectMany(frame => frame
-                .FrameFeatures().Where(t => (t.feature.IsPropertyVisible(nameof(IModelListViewFeature.DxDataGridModel))))
-                .Select(t => (frame,t.feature)));
+        private static IObservable<(Frame frame, IModelListViewFeatureDxDataGridColumnModel model)> ColumnModel(this Frame frame) 
+            =>frame.Application.Model.ToReactiveModule<IModelReactiveModulesBlazor>().Blazor.ListViewFeatures.OfType<IModelListViewFeatureDxDataGridColumnModel>()
+                .SelectMany(model => model.ListViewColumns.Select(column => (column,model)).Where(t => t.column.ListView==frame.View.Model))
+                .Select(t => (frame,t.model)).ToObservable();
+
+        private static IObservable<(Frame frame, IModelListViewFeatureDxDataGridModel model)> GridModel(this Frame frame) 
+            => frame.Application.Model.ToReactiveModule<IModelReactiveModulesBlazor>().Blazor.ListViewFeatures.OfType<IModelListViewFeatureDxDataGridModel>()
+                .SelectMany(model => model.ListViews.Select(key => (key,model))).Where(t => t.key.ListView==frame.View.Model)
+                .Select(t => (frame,t.model)).ToObservable();
+
+        private static IObservable<Unit> Apply(this IObservable<(Frame frame, IModelListViewFeatureDxDataGridColumnModel model)> source) 
+            => source.SelectMany(t => ColumnModelProperties
+                    .Select(s => (name:s,value:t.model.GetValue(s))).Where(t3 => t3.value!=null)
+                    .Select(t1 =>( t1.name,t1.value,t.frame))
+                    .SelectMany(t2 => ((GridListEditor) t.frame.View.AsListView().Editor).Columns.Cast<GridColumnWrapper>()
+                        .Select(wrapper => wrapper.DxDataGridColumnModel)
+                        .Do(model => model.SetPropertyValue(t2.name, t2.value))))
+                .ToUnit();
+
+        private static IObservable<Unit> Apply(this IObservable<(Frame frame, IModelListViewFeatureDxDataGridModel model)> source) 
+            => source.SelectMany(t => GridModelProperties
+                    .Select(s => (name:s,value:t.model.GetValue(s))).Where(t3 => t3.value!=null)
+                    .Select(t1 =>( t1.name,t1.value,t.frame))
+                    .Do(t2 => ((GridListEditor) t.frame.View.AsListView().Editor).GetDataGridAdapter()
+                        .DataGridModel.SetPropertyValue(t2.name, t2.value)))
+                .ToUnit();
+
+        private static string[] GridModelProperties { get; } = typeof(IModelListViewFeatureDxDataGridModel).GetProperties()
+            .Select(info => info.Name).Where(s => s != nameof(IModelListViewFeatureDxDataGridModel.ListViews)).ToArray();
+        
+        private static string[] ColumnModelProperties { get; } = typeof(IDxDataGridColumnModel).GetProperties()
+            .Select(info => info.Name).Where(s => s != nameof(IModelListViewFeatureDxDataGridColumnModel.ListViewColumns)).ToArray();
+
     }
 }

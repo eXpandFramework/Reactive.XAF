@@ -18,14 +18,17 @@ namespace Xpand.TestsLib.Common {
         public static async Task<Frame> TestListViewProcessSelectedItem(this XafApplication application,Type objectType) {
             var window = await TestListView(application, objectType);
             var action = window.GetController<ListViewProcessCurrentObjectController>().ProcessCurrentObjectAction;
-            var frameViewChanged = application.WhenFrameViewChanged().FirstAsync().SubscribeReplay();
+            var frameViewChanged = application.WhenFrameViewChanged().Select(frame1 => frame1)
+                .WhenFrame(ViewType.DetailView).FirstAsync().SubscribeReplay();
 
-            action.DoExecute(_ =>
-                window.View.AsListView().CollectionSource.Objects().Take(1).ToArray());
+            action.DoExecute(objectSpace => {
+                var objects = window.View.AsListView().CollectionSource.Objects().Take(1).ToArray();
+                return objects.Select(objectSpace.GetObject).ToArray();
+            },true);
 
             var frame = await frameViewChanged;
             
-            frame.View.ShouldBeOfType<ListView>();
+            frame.View.ShouldBeOfType<DetailView>();
             return frame;
         }
 

@@ -10,6 +10,7 @@ using DevExpress.Persistent.Base.General;
 using JetBrains.Annotations;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
+using Xpand.Extensions.XAF.ModelExtensions.Shapes;
 using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.Extensions.Office.Cloud{

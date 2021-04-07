@@ -5,7 +5,7 @@ using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using JetBrains.Annotations;
 using Xpand.Extensions.Office.Cloud;
-using Xpand.Extensions.XAF.ModelExtensions;
+using Xpand.Extensions.XAF.ModelExtensions.Shapes;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks{
     

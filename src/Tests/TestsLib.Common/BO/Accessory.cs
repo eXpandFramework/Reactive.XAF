@@ -22,7 +22,7 @@ namespace Xpand.TestsLib.Common.BO{
             set => SetPropertyValue(nameof(AccesoryID), ref _accessoryID, value);
         }
 
-        [Association("P-To-C")]
+        [Association("P-To-Instance")]
         public Product Product{
             get => _product;
             set => SetPropertyValue(nameof(Product), ref _product, value);

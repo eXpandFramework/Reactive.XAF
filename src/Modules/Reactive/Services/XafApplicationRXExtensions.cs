@@ -64,7 +64,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.Where(_ => _.Modules.FindModule(moduleType)!=null);
 
         public static IObservable<Frame> WhenFrameCreated(this XafApplication application) 
-            => RxApp.Frames.Where(_ => _.Application==application).TraceRX(frame => $"{frame.GetType().Name}-{frame.Context}");
+            => RxApp.Frames.Where(_ => _.Application==application)
+                .TraceRX(frame => $"{frame.GetType().Name}-{frame.Context}");
 
         public static IObservable<NestedFrame> WhenNestedFrameCreated(this XafApplication application) 
             => application.WhenFrameCreated().OfType<NestedFrame>();
@@ -228,7 +229,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
 
         public static IObservable<Frame> WhenFrameViewChanged(this XafApplication application) 
-            => application.WhenFrameCreated().WhenViewChanged().Select(tuple => tuple.frame);
+            => application.WhenFrameCreated().WhenViewChanged().Select(tuple => tuple.frame)
+                .StartWith(application.MainWindow).WhenNotDefault();
         
         public static IObservable<Frame> WhenFrameViewControls(this XafApplication application) 
             => application.WhenFrameViewChanged().SelectMany(frame => frame.View.WhenControlsCreated().Select(view => view).To(frame));

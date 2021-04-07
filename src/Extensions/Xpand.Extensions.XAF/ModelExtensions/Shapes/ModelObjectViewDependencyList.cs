@@ -7,7 +7,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using JetBrains.Annotations;
 
-namespace Xpand.Extensions.XAF.ModelExtensions{
+namespace Xpand.Extensions.XAF.ModelExtensions.Shapes{
     
     [PublicAPI]
     public interface IModelObjectViewDependency:IModelNode{
@@ -18,7 +18,7 @@ namespace Xpand.Extensions.XAF.ModelExtensions{
     }
     [DomainLogic(typeof(IModelObjectViewDependency))]
     public static class ModelObjectViewDependencyLogic {
-        public static readonly ConcurrentDictionary<Type,Type> ObjectViewsMap=new ConcurrentDictionary<Type, Type>();
+        public static readonly ConcurrentDictionary<Type,Type> ObjectViewsMap=new();
 
         public static void AddObjectViewMap(Type modelType,Type entityType ) 
             => ObjectViewsMap.TryAdd(modelType, entityType);

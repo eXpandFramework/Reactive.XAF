@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <FileUpgradeFlags />
     <UpgradeBackupLocation />
     <LangVersion>latest</LangVersion>
@@ -14,8 +14,10 @@
     <DebugType>full</DebugType>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
-    <CopyLocalLockFileAssemblie>true</CopyLocalLockFileAssemblie>
+    <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
+    <OutputPathSuffix>net</OutputPathSuffix>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <OutputType>Library</OutputType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>TRACE;XAF202</DefineConstants>
@@ -23,16 +25,20 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp.EasyTest.BlazorAdapter" Version="20.2.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="20.2.6" />
     <PackageReference Include="DevExpress.EasyTest" Version="20.2.6" />
     <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="20.2.6" />
     <PackageReference Include="Fasterflect.Xpand" Version="2.0.7" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.2" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0" />
     <PackageReference Include="System.Reactive" Version="5.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.9" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0" />
     <PackageReference Include="System.ServiceProcess.ServiceController" Version="5.0" />
     <PackageReference Include="System.ServiceModel.Http" Version="4.8.1" />
+    <PackageReference Include="System.ServiceModel.NetTcp" Version="4.8.1" />
+    <PackageReference Include="System.ServiceModel.Security" Version="4.8.1" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.Extensions">

@@ -1,10 +1,12 @@
 ﻿using DevExpress.Blazor;
 using DevExpress.ExpressApp.Model;
 using JetBrains.Annotations;
+using Xpand.Extensions.XAF.ModelExtensions.Shapes;
 
 namespace Xpand.XAF.Modules.Blazor.Model {
-    
-    public interface IModelDxDataGridModel:IModelNode {
+    [ModelDisplayName("GridListEditor Grid Model")]
+    public interface IModelListViewFeatureDxDataGridModel:IModelListViewFeature {
+        IModelListViewKeys ListViews { get; }
         bool? ShowColumnHeaders { get; set; }
         bool? ShowFilterRow { get; set; }
         bool? ShowPager { get; set; }

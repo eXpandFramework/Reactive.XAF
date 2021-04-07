@@ -6,3 +6,4 @@ System.Configuration.ConfigurationManager
 Microsoft.CodeAnalysis.CSharp
 System.ServiceModel.Http
 Newtonsoft.Json
+System.Security.Cryptography.Xml

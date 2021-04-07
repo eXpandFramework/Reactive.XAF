@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
@@ -55,10 +56,10 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Extensions {
                             {AllowAdd = true, AllowRemove = true});
                 }));
 
-        public static IObservable<object> RestPropertyDependent(this IObservable<object[]> source,IObjectSpace objectSpace,Type objectType,ICredentialBearer bearer)
-            => source.ConcatIgnored(objects => objectSpace.RestPropertyDependentName(objectType, objects))
+        public static IObservable<object> RestPropertyDependent(this IObservable<object> source,IObjectSpace objectSpace,Type objectType,ICredentialBearer bearer)
+            => source.BufferUntilCompleted().ConcatIgnored(objects => objectSpace.RestPropertyDependentName(objectType, objects))
                 .ConcatIgnored(objects => objects.RestPropertyDependentReadOnly(objectType,bearer))
-            ;
+                .SelectMany();
 
         private static IObservable<object> RestPropertyDependentReadOnly(this object[] objects,Type objectTpe,ICredentialBearer bearer) 
             =>objectTpe.RestDependentMembersByReadOnly()
@@ -66,8 +67,8 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Extensions {
                     .SelectMany(o => t.attribute.Send(t.info.MemberType.CreateInstance(),bearer,t.attribute.RequestUrl(o))
                         .Do(o1 => t.info.SetValue(o,o1))));
 
-        private static IObservable<object> RestPropertyDependentName(this IObjectSpace objectSpace,Type objectType, object[] objects) {
-            return objectType.RestDependentMembersByName()
+        private static IObservable<object> RestPropertyDependentName(this IObjectSpace objectSpace,Type objectType, object[] objects) 
+            => objectType.RestDependentMembersByName()
                 .SelectMany(t => objectSpace.RequestAll(t.info.Owner.FindMember(t.attribute.PropertyName).MemberType)
                     .SelectMany(dependedObjects => objects.ToObservable()
                         .Do(sourceObject => {
@@ -77,19 +78,22 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Extensions {
                                 t.info.Owner.FindMember(t.attribute.PropertyName).SetValue(sourceObject, dependedObject);
                             }
                         })));
-        }
 
         public static IObservable<object> RestPropertyBindingListsInit(this IObservable<object> source, IObjectSpace objectSpace)
             => source.ConcatIgnored(o => o.GetType().RestListMembers()
                 .WhenDefault(_ => objectSpace.IsDisposed)
                 .Do(t => {
-                    var realType = t.info.MemberType.RealType();
-                    var targetMember = t.info.Owner.FindMember(t.attribute.PropertyName);
-                    var objects = ((IEnumerable) t.info.GetValue(o)).Cast<object>();
-                    var bindingList = (realType.IsValueType || realType == typeof(string)
-                        ? objects.ToObjectString(objectSpace)
-                        : objects.ToBindingList(realType));
-                    targetMember.SetValue(o, bindingList);
+                    var value = t.info.GetValue(o);
+                    if (value!=null) {
+                        var realType = t.info.MemberType.RealType();
+                        var targetMember = t.info.Owner.FindMember(t.attribute.PropertyName);
+                    
+                        var objects = ((IEnumerable) value).Cast<object>();
+                        var bindingList = (realType.IsValueType || realType == typeof(string)
+                            ? objects.ToObjectString(objectSpace)
+                            : objects.ToBindingList(realType));
+                        targetMember.SetValue(o, bindingList);
+                    }
                 }));
 
         public static IObservable<object> RestPropertyDependentChange(this IObservable<object> source)
@@ -138,7 +142,10 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Extensions {
 
         public static IObservable<object> RestPropertyBindingListsChange(this IObservable<object> source)
             => source.MergeIgnored(o => o.GetType().RestListMembers()
-                .SelectMany(t => ((IBindingList) ((IEnumerable) t.info.Owner.FindMember(t.attribute.PropertyName).GetValue(o))).WhenListChanged().To(t))
+                .SelectMany(t => {
+                    var value = t.info.Owner.FindMember(t.attribute.PropertyName).GetValue(o);
+                    return value != null ? ((IBindingList) ((IEnumerable) value)).WhenListChanged().To(t) : Observable.Empty<Unit>().To(t);
+                })
                 .Do(t => {
                     var realType = t.info.MemberType.RealType();
                     var sourceMember = t.info.Owner.FindMember(t.attribute.PropertyName);

@@ -38,7 +38,7 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                     .SelectMany(editor => editor.MemberInfo.FindAttributes<ReadOnlyCollectionAttribute>()
                         .Select(attribute => (attribute, editor))
                         .Do(t => {
-                            var nestedFrameView = t.editor.View;
+                            var nestedFrameView = t.editor.Frame.View;
                             nestedFrameView.AllowEdit[nameof(ReadOnlyCollectionAttribute)] = t.attribute.AllowEdit;
                             nestedFrameView.AllowDelete[nameof(ReadOnlyCollectionAttribute)] = t.attribute.AllowDelete;
                             nestedFrameView.AllowNew[nameof(ReadOnlyCollectionAttribute)] = t.attribute.AllowNew;
@@ -69,10 +69,11 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                         view.AllowDelete = attribute.AllowDelete;
                         view.AllowNew = attribute.AllowNew;
                         var modelHiddenActions = ((IModelViewHiddenActions) view).HiddenActions;
-                        modelHiddenActions.AddNode<IModelActionLink>("Save", true);
+                        if (!view.AllowEdit) {
+                            modelHiddenActions.AddNode<IModelActionLink>("Save", true);
+                        }
                         if (attribute.DisableListViewProcess && view is IModelListView) {
-                            modelHiddenActions.AddNode<IModelActionLink>(
-                                ListViewProcessCurrentObjectController.ListViewShowObjectActionId, true);
+                            modelHiddenActions.AddNode<IModelActionLink>(ListViewProcessCurrentObjectController.ListViewShowObjectActionId, true);
                         }
                     }).ToObservable(Scheduler.Immediate))
                 .ToUnit()

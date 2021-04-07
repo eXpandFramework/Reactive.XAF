@@ -57,7 +57,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest {
         public RestActionOperationAttribute(string requestUrl,string actionId=null) {
             RequestUrl = requestUrl;
             actionId ??= requestUrl.Substring(requestUrl.LastIndexOf("/", StringComparison.Ordinal) + 1).CompoundName();
-            ActionId = actionId;
+            ActionId = actionId.CompoundName();
             HttpMethod = nameof(System.Net.Http.HttpMethod.Post);
         }
     }

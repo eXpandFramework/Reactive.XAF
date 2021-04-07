@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.TestsLib.Blazor</id>
-    <version>4.202.53.0</version>
+    <version>4.202.53.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -14,38 +14,38 @@
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.TestsLib.Blazor, 20.2.6</tags>
     <dependencies>
-      <group targetFramework="netcoreapp3.1">
-        <dependency id="Xpand.Extensions" version="4.202.53.0" />
-        <dependency id="Xpand.Extensions.Blazor" version="4.202.53.0" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.202.53.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.202.53.0" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.202.53.0" />
-        <dependency id="Xpand.TestsLib.Common" version="4.202.53.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.53.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.202.53.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.202.53.0" />
+      <group targetFramework="net5.0">
+        <dependency id="Xpand.Extensions" version="4.202.53.1" />
+        <dependency id="Xpand.Extensions.Blazor" version="4.202.53.1" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.202.53.1" />
+        <dependency id="Xpand.Extensions.XAF" version="4.202.53.1" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.202.53.1" />
+        <dependency id="Xpand.TestsLib.Common" version="4.202.53.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.53.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.202.53.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.202.53.1" />
         <dependency id="Microsoft.CodeAnalysis.Csharp" version="3.9" />
-        <dependency id="Microsoft.AspNetCore.Hosting.Abstractions" version="2.2" />
         <dependency id="Microsoft.Extensions.DependencyInjection.Abstractions" version="5.0" />
-        <dependency id="Microsoft.AspNetCore.Http.Abstractions" version="2.2" />
-        <dependency id="hangfire.aspnetcore" version="1.7.19" />
-        <dependency id="System.Diagnostics.PerformanceCounter" version="5.0" />
+        <dependency id="System.Diagnostics.PerformanceCounter" version="5.0.1" />
         <dependency id="Moq" version="4.16" />
         <dependency id="Newtonsoft.Json" version="13.0.1" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
+        <dependency id="Microsoft.AspNetCore" version="2.2" />
         <dependency id="Microsoft.AspNetCore.Hosting" version="2.2.7" />
-        <dependency id="Microsoft.Extensions.Hosting" version="5.0.0" />
+        <dependency id="Microsoft.Extensions.Hosting" version="5.0" />
         <dependency id="System.Reactive" version="5.0" />
         <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.9" />
         <dependency id="System.Configuration.ConfigurationManager" version="5.0" />
         <dependency id="System.ServiceProcess.ServiceController" version="5.0" />
         <dependency id="System.ServiceModel.Http" version="4.8.1" />
+        <dependency id="System.ServiceModel.NetTcp" version="4.8.1" />
+        <dependency id="System.ServiceModel.Security" version="4.8.1" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="netcoreapp3.1\Xpand.TestsLib.Blazor.dll" target="lib\netcoreapp3.1\Xpand.TestsLib.Blazor.dll" />
-    <file src="netcoreapp3.1\Xpand.TestsLib.Blazor.pdb" target="lib\netcoreapp3.1\Xpand.TestsLib.Blazor.pdb" />
+    <file src="net5.0\Xpand.TestsLib.Blazor.dll" target="lib\net5.0\Xpand.TestsLib.Blazor.dll" />
+    <file src="net5.0\Xpand.TestsLib.Blazor.pdb" target="lib\net5.0\Xpand.TestsLib.Blazor.pdb" />
     <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.TestsLib.Blazor.targets" />
     <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
   </files>

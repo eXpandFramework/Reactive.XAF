@@ -81,8 +81,6 @@ namespace Xpand.TestsLib.Common{
             return await source.Timeout(timeout.Value);
         }
 
-        public static Mock<T> GetMock<T>(this T t) where T : class => Mock.Get(t);
-
         public static void OnSelectionChanged(this ListEditor editor) => editor.CallMethod(nameof(OnSelectionChanged));
 
         public static void OnSelectionChanged(this ObjectView objectView) => objectView.CallMethod(nameof(OnSelectionChanged));
@@ -97,14 +95,14 @@ namespace Xpand.TestsLib.Common{
 	        return application.NewView(modelView,objectSpace);
         }
 
-        public static void DoExecute(this ActionBase action,Func<IObjectSpace,IList> selectedObjectsFactory){
+        public static void DoExecute(this ActionBase action,Func<IObjectSpace,IList> selectedObjectsFactory,bool force=false){
             var selectionContextMock = new Mock<ISelectionContext>();
             selectionContextMock.SetupGet(context => context.SelectedObjects).Returns(() => selectedObjectsFactory(action.View().ObjectSpace));
             selectionContextMock.SetupGet(context => context.CurrentObject).Returns(() => selectedObjectsFactory(action.View().ObjectSpace).Cast<object>().First());
             action.SelectionContext = selectionContextMock.Object;
             action.Active[ ActionBase.RequireSingleObjectContext] = true;
             action.Active[ ActionBase.RequireMultipleObjectsContext] = true;
-            action.DoTheExecute();
+            action.DoTheExecute(force);
         }
 
         public static void MockCreateControls(this DashboardView view){
@@ -356,6 +354,7 @@ namespace Xpand.TestsLib.Common{
                     =>new EditorsFactory().CreatePropertyEditorByType(editorType, modelViewItem, objectType, xafApplication, objectSpace));
         }
 
+        
 
         public static Mock<ListEditor> ListEditorMock(this XafApplication application, IModelListView listView) => application.ListEditorMock<ListEditor>(listView);
 

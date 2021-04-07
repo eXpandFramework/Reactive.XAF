@@ -5,9 +5,9 @@ using System.Linq;
 
 namespace Xpand.Extensions.LinqExtensions{
     public static partial class LinqExtensions{
-        public static IEnumerable<T> GetItems<T>(this IEnumerable collection,Func<T, IEnumerable> selector,Func<T,object> distincSelector=null) {
+        public static IEnumerable<T> GetItems<T>(this IEnumerable collection,Func<T, IEnumerable> selector,Func<T,object> distinctSelector=null) {
             HashSet<object> hashSet=null;
-            if (distincSelector!=null){
+            if (distinctSelector!=null){
                 hashSet=new HashSet<object>();
             }
             var stack = new Stack<IEnumerable<T>>();
@@ -16,7 +16,7 @@ namespace Xpand.Extensions.LinqExtensions{
             while (stack.Count > 0) {
                 var items = stack.Pop();
                 foreach (var item in items){
-                    var o = distincSelector?.Invoke(item);
+                    var o = distinctSelector?.Invoke(item);
                     if (hashSet != null ){
                         if (!hashSet.Contains(o)){
                             hashSet.Add(o);

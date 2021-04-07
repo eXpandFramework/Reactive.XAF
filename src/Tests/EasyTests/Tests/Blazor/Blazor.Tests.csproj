@@ -1,6 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
     <LangVersion>latest</LangVersion>
@@ -12,8 +12,8 @@
     <OutputType>Library</OutputType>
     <StartupObject>
     </StartupObject>
-    <OutputPathSuffix>AllTestWweb\netcoreapp3.1</OutputPathSuffix>
-    <OutputPath>..\..\..\..\..\bin\AllTestWeb\netcoreapp3.1</OutputPath>
+    <OutputPathSuffix>AllTestWweb\net5.0-windows</OutputPathSuffix>
+    <OutputPath>..\..\..\..\..\bin\AllTestWeb\net5.0-windows</OutputPath>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <RootNamespace>Web.Tests</RootNamespace>
     <CopyLocalLockFileAssemblie>true</CopyLocalLockFileAssemblie>
@@ -43,20 +43,20 @@
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp.EasyTest.BlazorAdapter" Version="20.2.6" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.2" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0" />
     <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.2.6" />
     <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="20.2.6" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.8.1" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.8.1" />
     <PackageReference Include="System.ServiceModel.Duplex" Version="4.8.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.3" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
     <PackageReference Include="Moq" Version="4.16" />
     <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="88.0.4324.9600" />
     <PackageReference Include="Shouldly" Version="4.0.3" />
     <PackageReference Include="NUnit" Version="3.13" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.17" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="4.202.53" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="4.202.53.1" />
     <PackageReference Include="Selenium.WebDriver" Version="3.141" />
     <PackageReference Include="Selenium.Support" Version="3.141" />
   </ItemGroup>
@@ -65,7 +65,7 @@
       <HintPath>..\..\..\..\..\bin\Xpand.TestsLib.Common.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.TestsLib.Blazor">
-      <HintPath>..\..\..\..\..\bin\netcoreapp3.1\Xpand.TestsLib.Blazor.dll</HintPath>
+      <HintPath>..\..\..\..\..\bin\net5.0\Xpand.TestsLib.Blazor.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

@@ -90,7 +90,7 @@ namespace Xpand.XAF.Modules.PositionInListView{
 
         private static IObservable<Unit> PositionNewObjects(this IObservable<XafApplication> whenApplication) 
             => whenApplication.SelectMany(application => Observable.Defer(() => application.WhenObjectSpaceCreated()
-                            .SelectMany(t => t.e.ObjectSpace.WhenNewObjectCommiting<object>().Pair(t.e.ObjectSpace)))
+                            .SelectMany(objectSpace => objectSpace.WhenNewObjectCommiting<object>().Pair(objectSpace)))
                         .Do(t => {
                             var modelPositionInListView = application.Model.ModelPositionInListView();
                             var listViewItems = modelPositionInListView.ListViewItems;

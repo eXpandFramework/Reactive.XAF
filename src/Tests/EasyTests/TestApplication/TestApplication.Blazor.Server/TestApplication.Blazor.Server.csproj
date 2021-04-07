@@ -54,10 +54,10 @@
     <PackageReference Include="Hangfire.SqlServer" Version="1.7.19" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" Version="5.0.1" />
     <PackageReference Include="Xpand.XAF.Core.All">
-      <Version>4.202.53</Version>
+      <Version>4.202.53.1</Version>
     </PackageReference>
     <PackageReference Include="Xpand.XAF.Web.All">
-      <Version>4.202.53</Version>
+      <Version>4.202.53.1</Version>
     </PackageReference>
     <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.2.6" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
@@ -67,9 +67,9 @@
     <PackageReference Include="System.ServiceModel.Security" Version="4.8.1" />
     <PackageReference Include="System.ServiceProcess.ServiceController" Version="5.0" />
     <PackageReference Include="System.Threading" Version="4.3" />
-    <PackageReference Include="System.Text.Json" Version="5.0.1" />
+    <PackageReference Include="System.Text.Json" Version="5.0.2" />
     <PackageReference Include="System.Threading.AccessControl" Version="5.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.5" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0" />
   </ItemGroup>
   <ItemGroup>

@@ -21,22 +21,21 @@ namespace Xpand.Extensions.XAF.NonPersistentObjects {
         }
 
         public ObjectString() {
-            _c = this;
+            _instance = this;
         }
         [Browsable(false)]
         public object Owner { get; set; }
-        ObjectString _c;
+        ObjectString _instance;
         [DataSourceProperty(nameof(DataSource))]
-        public ObjectString C {
-            get => _c;
-            set => SetPropertyValue(ref _c, value);
+        [DisplayName("Name")][VisibleInListView(false)][VisibleInLookupListView(false)]
+        public ObjectString Instance {
+            get => _instance;
+            set => SetPropertyValue(ref _instance, value);
         }
 
         string _name;
         [DevExpress.ExpressApp.Data.Key]
-        // [InvisibleInAllViews]
-        
-        [VisibleInAllViews]
+        [InvisibleInAllViews]
         public string Name {
             get => _name;
             set => SetPropertyValue(ref _name, value);
@@ -44,13 +43,21 @@ namespace Xpand.Extensions.XAF.NonPersistentObjects {
 
         string _caption;
         
-
+        [VisibleInDetailView(false)]
+        [DisplayName("Name")]
         public string Caption {
             get => _caption;
             set => SetPropertyValue(ref _caption, value);
         }
 
-        
+        protected override void OnPropertyChanged(string memberName = "") {
+            base.OnPropertyChanged(memberName);
+            if (memberName == nameof(Instance)) {
+                Caption = Instance?.Caption;
+                Name = Instance?.Name;
+            }
+        }
+
         public static implicit operator string(ObjectString objectString) {
             return objectString?.Name;
         }

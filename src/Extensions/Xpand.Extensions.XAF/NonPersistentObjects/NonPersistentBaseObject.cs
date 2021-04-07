@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
+using JetBrains.Annotations;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 
 namespace Xpand.Extensions.XAF.NonPersistentObjects {
@@ -11,6 +12,7 @@ namespace Xpand.Extensions.XAF.NonPersistentObjects {
         public event EventHandler<EventArgs> ObjectSpaceChanged;
         private bool _isDefaultPropertyAttributeInit;
         private IMemberInfo _defaultPropertyMemberInfo;
+        [NotifyPropertyChangedInvocator]
         [SuppressMessage("ReSharper", "OptionalParameterHierarchyMismatch")]
         protected override void OnPropertyChanged([CallerMemberName] string memberName = "") => base.OnPropertyChanged(memberName);
 

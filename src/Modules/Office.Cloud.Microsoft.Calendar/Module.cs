@@ -4,7 +4,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base.General;
 using JetBrains.Annotations;
 using Xpand.Extensions.Office.Cloud;
-using Xpand.Extensions.XAF.ModelExtensions;
+using Xpand.Extensions.XAF.ModelExtensions.Shapes;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 

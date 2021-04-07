@@ -16,6 +16,8 @@ namespace Xpand.XAF.Modules.Blazor.Editors {
             return _componentAdapter;
         }
 
+        public override bool CanFormatPropertyValue => true;
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "BL0005:Component parameter should not be set outside of its component.", Justification = "<Pending>")]
         protected override RenderFragment RenderComponent() => ComponentModelObserver.Create(_componentAdapter.DisplayTextModel, RenderComponent);
 

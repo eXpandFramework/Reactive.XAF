@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <OutputPath>..\..\..\bin</OutputPath>
     <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
@@ -24,9 +24,7 @@
     <None Remove="MasterDetail\**" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Xpand.TestsLib">
-      <HintPath>..\..\..\bin\netcoreapp3.1\Xpand.TestsLib.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\TestsLib\Xpand.TestsLib.csproj" />
     <Reference Include="Xpand.TestsLib.Common">
       <HintPath>..\..\..\bin\Xpand.TestsLib.Common.dll</HintPath>
     </Reference>
