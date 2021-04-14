@@ -100,7 +100,6 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
 
         private T AssertViewAction<T>(XafApplication application,string caption,ViewType viewType=ViewType.DetailView) where T:ActionBase{
             var viewWindow = application.CreateViewWindow();
-            caption = caption.CompoundName();
             var compositeView = application.NewView(application.FindDetailViewId(typeof(NonPersistentObject)));
             viewWindow.SetView(compositeView);
             var id = $"{typeof(T).Name}{viewType}";

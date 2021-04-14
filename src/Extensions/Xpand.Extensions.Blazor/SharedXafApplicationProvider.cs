@@ -40,25 +40,20 @@ namespace Xpand.Extensions.Blazor {
         }
     
         protected virtual BlazorApplication NewBlazorApplication() {
-            using var serviceScope = _serviceProvider.CreateScope();
-            var applicationFactory = serviceScope.ServiceProvider.GetService<IXafApplicationFactory>();
-            if (applicationFactory != null) {
-                var blazorApplication = applicationFactory.CreateApplication();
-                if (!(blazorApplication is ISharedBlazorApplication)) {
-                    throw new NotImplementedException(
-                        $"Please implement {typeof(ISharedBlazorApplication)} in your {blazorApplication.GetType().FullName} and use a NonSecuredObjectSpaceProvider when is false.");
-                }
-
-                blazorApplication.ServiceProvider = _serviceProvider;
-                ((ISharedBlazorApplication) blazorApplication).UseNonSecuredObjectSpaceProvider = true;
-                Security = blazorApplication.Security;
-                blazorApplication.Security = null;
-                blazorApplication.Setup();
-                return blazorApplication;
+            var serviceScope = _serviceProvider.CreateScope();
+            var applicationFactory = serviceScope.ServiceProvider.GetRequiredService<IXafApplicationFactory>();
+            var blazorApplication = applicationFactory.CreateApplication();
+            if (!(blazorApplication is ISharedBlazorApplication)) {
+                throw new NotImplementedException(
+                    $"Please implement {typeof(ISharedBlazorApplication)} in your {blazorApplication.GetType().FullName} and use a NonSecuredObjectSpaceProvider when is false.");
             }
-    
-    
-            throw new NotImplementedException();
+
+            blazorApplication.ServiceProvider = serviceScope.ServiceProvider;
+            ((ISharedBlazorApplication) blazorApplication).UseNonSecuredObjectSpaceProvider = true;
+            Security = blazorApplication.Security;
+            blazorApplication.Security = null;
+            blazorApplication.Setup();
+            return blazorApplication;
         }
     }
 }

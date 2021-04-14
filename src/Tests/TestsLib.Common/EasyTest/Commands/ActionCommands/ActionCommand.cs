@@ -20,7 +20,8 @@ namespace Xpand.TestsLib.Common.EasyTest.Commands.ActionCommands{
 
         public ActionCommand(string caption,string item=null){
             Parameters.MainParameter=new MainParameter(caption.CompoundName());
-            Parameters.ExtraParameter=new MainParameter(item);
+            var value = item?.CompoundName();
+            Parameters.ExtraParameter=new MainParameter(value);
         }
 
         protected override void ExecuteCore(ICommandAdapter adapter) {

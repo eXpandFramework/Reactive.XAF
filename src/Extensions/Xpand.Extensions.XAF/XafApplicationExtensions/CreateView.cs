@@ -53,7 +53,7 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions{
         public static CompositeView NewView(this XafApplication application,string viewId) => application.NewView(application.Model.Views[viewId]);
 
         public static CompositeView NewView(this XafApplication application,IModelView modelView,IObjectSpace objectSpace=null) 
-            => (CompositeView) (objectSpace==null?(CompositeView) application.CallMethod("CreateView", modelView):application.CreateView(modelView, objectSpace));
+            => (CompositeView) (objectSpace==null?application.CallMethod("CreateView", modelView):application.CreateView(modelView, objectSpace));
 
         static View CreateView(this XafApplication application,IModelView viewModel,IObjectSpace objectSpace) {
 	        View view = null;

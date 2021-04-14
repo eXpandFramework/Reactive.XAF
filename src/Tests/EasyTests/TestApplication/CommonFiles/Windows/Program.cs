@@ -22,7 +22,7 @@ namespace TestApplication.Win {
             WindowsFormsSettings.LoadApplicationSettings();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-#if !NETCOREAPP3_1
+#if !NETCOREAPP3_1_OR_GREATER
             EditModelPermission.AlwaysGranted = System.Diagnostics.Debugger.IsAttached;
 #endif
             if(Tracing.GetFileLocationFromSettings() == FileLocation.CurrentUserApplicationDataFolder) {

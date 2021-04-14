@@ -14,7 +14,7 @@ using Xpand.XAF.Modules.CloneMemberValue;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Xpand.XAF.Modules.CloneMemberValue")]
-[assembly: AssemblyCopyright("Copyright eXpandFramework � 2018")]
+[assembly: AssemblyCopyright("Copyright eXpandFramework ? 2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

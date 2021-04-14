@@ -47,11 +47,11 @@ namespace Xpand.XAF.Modules.Reactive.Rest {
                 .RestPropertyTypes()
                 .ToUnit()
                 .Merge(manager.WhenApplication(application => application.WhenNonPersistentObjectSpace()
+                    .Merge(application.HandleObjectSpaceGetNonPersistentObject()
                     .Merge(application.FullTextSearch()
                     .Merge(application.ObjectStringLookup())
                     .Merge(application.EnableSortingGrouping())
-                    .Merge(application.HandleObjectSpaceGetNonPersistentObject())
-                    .ToUnit())));
+                    .ToUnit()))));
         
         private static IObservable<Unit> ObjectStringLookup(this XafApplication application) 
             => application.WhenFrameViewChanged().WhenFrame(typeof(ObjectString),ViewType.ListView,Nesting.Nested)
@@ -77,7 +77,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest {
             => application.WhenNonPersistentObjectSpaceCreated()
                 .SelectMany(t => t.ObjectSpace.AsNonPersistentObjectSpace()
                     .WhenObjectGetting()
-                    .Where(tuple => tuple.e.TargetObject != tuple.e.SourceObject)
+                    // .Where(tuple => tuple.e.TargetObject != tuple.e.SourceObject)
                     .SelectMany(tuple => {
                         tuple.e.TargetObject = tuple.e.SourceObject;
                         if (tuple.e.TargetObject is IObjectSpaceLink objectSpaceLink) {

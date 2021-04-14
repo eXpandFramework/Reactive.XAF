@@ -56,13 +56,13 @@ namespace Xpand.XAF.Modules.Blazor.Editors {
                         .Execute(item => item.PropertyEditorType = typeof(MarkupContentPropertyEditor)))
                     .ToObservable())
                 .ToUnit();
-                
-
+        
         private static IObservable<IModelMember> UrlPropertyAttribute(this IObservable<IModelMember> source)
             => source.ConcatIgnored(member => member.MemberInfo.FindAttributes<UrlPropertyAttribute>()
-                .Do(_ => {
+                .Do(attribute => {
                     member.PropertyEditorType = typeof(MarkupContentPropertyEditor);
-                    member.DisplayFormat = "<a href='{0}' target='_blank'>{0}</a>";
+                    var mailto = (attribute.IsEmail ? "mailto:" : "//");
+                    member.DisplayFormat = $"<a href='{mailto}{{0}}' target='_blank' onclick='event.stopPropagation()'>{{0}}</a>";
                 }).ToObservable());
 
         private static IObservable<IModelMember> ImgPropertyAttribute(this IObservable<IModelMember> source) 

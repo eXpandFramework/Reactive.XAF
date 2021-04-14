@@ -33,7 +33,7 @@ namespace Xpand.TestsLib.Common {
         }
 
         public static async Task<Window> TestListView(this XafApplication application, Type objectType) {
-            if (application.GetPlatform() == Platform.Blazor) {
+            if (application.GetPlatform() == Platform.Blazor&&application.MainWindow==null) {
                 application.CallMethod("CreateMainWindow");
             }
             var listView = application.NewListView(objectType);

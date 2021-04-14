@@ -178,11 +178,13 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             => traceSource.TraceEvent(TraceEventType.Information, traceSource.GetHashCode(), $"{traceEvent.Location}.{traceEvent.Method}({traceEvent.Line}): {traceEvent.Action}({traceEvent.Value})");
 
         private static IObservable<TraceEvent> SaveEvent(this IObservable<ITraceEvent> events, XafApplication application) 
-            => events.Where(_ => {
-                    var modelReactiveLogger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger;
-                    return modelReactiveLogger.GetEnabledSources().Any()&&modelReactiveLogger.TraceSources.Persist;
+            => application.WhenSetupComplete()
+                .Where(_ => {
+                    var modelReactiveLogger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>()?.ReactiveLogger;
+                    return modelReactiveLogger != null && modelReactiveLogger.GetEnabledSources().Any() && modelReactiveLogger.TraceSources.Persist;
                 })
-		        .Buffer(TimeSpan.FromSeconds(3)).WhenNotEmpty()
+                .SelectMany(_ => events)
+                .Buffer(TimeSpan.FromSeconds(3)).WhenNotEmpty()
                 .SelectMany(list => application.ObjectSpaceProvider.NewObjectSpace(space => space.SaveTraceEvent(list)));
 
         public static IObservable<TraceEvent> SaveTraceEvent(this IObjectSpace objectSpace, IList<ITraceEvent> traceEventMessages){

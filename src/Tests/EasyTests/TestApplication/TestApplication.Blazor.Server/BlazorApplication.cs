@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor;
+using DevExpress.ExpressApp.Security;
 using Microsoft.Extensions.DependencyInjection;
 using DevExpress.ExpressApp.Xpo;
+using Fasterflect;
 using Microsoft.Extensions.Configuration;
 using TestApplication.Blazor.Server.Services;
 using TestApplication.Module.Blazor;
@@ -18,11 +21,14 @@ namespace TestApplication.Blazor.Server {
             this.AlwaysUpdateOnDatabaseVersionMismatch().Subscribe();
             CheckCompatibilityType = CheckCompatibilityType.DatabaseSchema;
             DatabaseUpdateMode = DatabaseUpdateMode.UpdateDatabaseAlways;
+            this.WhenViewOnFrame(typeof(AuthenticationStandardLogonParameters))
+                .Do(frame => { frame.View.CurrentObject.SetPropertyValue("UserName", "Admin"); })
+                .Subscribe();
         }
         protected override void OnSetupStarted() {
             base.OnSetupStarted();
             this.ConfigureConnectionString();
-            ConnectionString = ServiceProvider.GetRequiredService<IConfiguration>().GetConnectionString("ConnectionString");
+            // ConnectionString = ServiceProvider.GetRequiredService<IConfiguration>().GetConnectionString("ConnectionString");
         }
 
         protected override void CreateDefaultObjectSpaceProvider(CreateCustomObjectSpaceProviderEventArgs args) {

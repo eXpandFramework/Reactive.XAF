@@ -32,6 +32,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests {
         
         [Test]
         public async Task Create_object() {
+	        
             HandlerMock.SetupRestOperationObject(_restObjects);
             var objectSpace = Application.CreateObjectSpace(typeof(RestOperationObject));
             objectSpace.CreateObject<RestOperationObject>();

@@ -35,7 +35,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         public ObjectView ObjectView{ get; }
     }
     public static class ModelBindingService{
-        static readonly Subject<Parameter> ControlBindSubject=new Subject<Parameter>();
+        static readonly Subject<Parameter> ControlBindSubject=new();
 
         [PublicAPI]
         public static IObservable<Parameter> ControlBind => ControlBindSubject;
@@ -57,9 +57,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 return Observable.Empty<Unit>();
             });
 
-        private static IObservable<(IModelModelMap modelMap, object control, ObjectView objectView)> ViewItemBindData(this IObservable<ObjectView> controlsCreated) 
-            => controlsCreated.ViewItemData(ViewItemService.RepositoryItemsMapName)
-                .Merge(controlsCreated.ViewItemData(ViewItemService.PropertyEditorControlMapName, view => view is DetailView))
+        private static IObservable<(IModelModelMap modelMap, object control, ObjectView objectView)> ViewItemBindData(this IObservable<ObjectView> source) 
+            => source.ViewItemData(ViewItemService.RepositoryItemsMapName)
+                .Merge(source.ViewItemData(ViewItemService.PropertyEditorControlMapName, view => view is DetailView))
                 .Select(_ => {
                     var mapType = _.modelMap.GetType().GetInterfaces().First(type =>
                         typeof(IModelModelMap) != type && typeof(IModelModelMap).IsAssignableFrom(type) &&
@@ -89,8 +89,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 .Do(tuple => tuple.BindTo());
 
         private static IObservable<(ObjectView objectView, IModelModelMap modelMap)> ViewItemData(
-            this IObservable<ObjectView> controlsCreated, string propertyMapName,Func<ObjectView, bool> viewMatch = null) 
-            => controlsCreated.Where(objectView => viewMatch?.Invoke(objectView)??true)
+            this IObservable<ObjectView> source, string propertyMapName,Func<ObjectView, bool> viewMatch = null) 
+            => source.Where(objectView => viewMatch?.Invoke(objectView)??true)
                 .SelectMany(objectView => objectView.Model.AsObjectView.CommonMemberViewItems().Cast<IModelNode>()
                 .SelectMany(item => item.GetNode(propertyMapName)?.Nodes().Cast<IModelModelMap>() ?? Enumerable.Empty<IModelModelMap>())
                 .Select(node => (objectView,node)));

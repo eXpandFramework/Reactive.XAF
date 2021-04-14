@@ -1,4 +1,4 @@
-﻿#if !NET5_0
+﻿#if !NETCOREAPP3_1_OR_GREATER
 using System.Linq;
 using DevExpress.ExpressApp;
 using Fasterflect;
@@ -27,7 +27,7 @@ namespace Web.Tests{
     
     [NonParallelizable]
     public class AllWebTests : CommonTest{
-#if !NET5_0
+#if !NETCOREAPP3_1_OR_GREATER
         [Test()]
         [TestCaseSource(nameof(AgnosticModules))]
         [TestCaseSource(nameof(WebModules))]
@@ -55,7 +55,7 @@ namespace Web.Tests{
         }
         private TestApplication RunWebApplication(IApplicationAdapter adapter, string connectionString){
 
-#if !NET5_0
+#if !NETCOREAPP3_1_OR_GREATER
             var physicalPath = $@"{AppDomain.CurrentDomain.ApplicationPath()}..\TestWebApplication\";
 #else
             var physicalPath = Path.GetFullPath($@"{AppDomain.CurrentDomain.ApplicationPath()}..\..\TestBlazorApplication\");
@@ -63,7 +63,7 @@ namespace Web.Tests{
             LogPaths.Clear();
             LogPaths.Add(Path.Combine(Path.GetDirectoryName(physicalPath)!,"eXpressAppFramework.log"));
             LogPaths.Add(Path.Combine(@$"{Path.GetDirectoryName(physicalPath)}\bin",Path.GetFileName(ReactiveLoggerService.RXLoggerLogPath)!));
-#if !NET5_0
+#if !NETCOREAPP3_1_OR_GREATER
             return ((DevExpress.ExpressApp.EasyTest.WebAdapter.WebAdapter) adapter).RunWebApplication(physicalPath, 65477, connectionString);
 #else
             
@@ -83,14 +83,14 @@ namespace Web.Tests{
                 adapter.TestModelViewInheritance();
                 adapter.TestPositionInListView();
                 
-#if NETCOREAPP3_1
+#if NETCOREAPP3_1_OR_GREATER
                 await adapter.TestJobScheduler();
 #endif
             });
         }
 
         private static IApplicationAdapter NewWebAdapter(){
-#if !NET5_0
+#if !NETCOREAPP3_1_OR_GREATER
             return new DevExpress.ExpressApp.EasyTest.WebAdapter.WebAdapter();
 #else
             return new DevExpress.ExpressApp.EasyTest.BlazorAdapter.BlazorAdapter();

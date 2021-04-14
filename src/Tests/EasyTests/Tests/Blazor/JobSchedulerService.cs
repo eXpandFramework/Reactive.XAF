@@ -14,14 +14,38 @@ using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
 namespace Web.Tests {
     public static class JobSchedulerService {
         public static async Task TestJobScheduler(this ICommandAdapter adapter) {
+            await adapter.TestJob();
+            adapter.TestExecuteActionJob();
+        }
+
+        private static void TestExecuteActionJob(this ICommandAdapter adapter) {
+            adapter.Execute(new NavigateCommand("Default.Product"));
+            adapter.Execute(new ActionCommand(Actions.New));
+            adapter.Execute(new FillObjectViewCommand<Product>((product => product.ProductName, "deleteme")));
+            adapter.Execute(new ActionCommand(Actions.Save));
+
             adapter.Execute(new NavigateCommand("JobScheduler.Job"));
-            adapter.CreateJob()
-                .TestPauseResume();
+            adapter.Execute(new ActionCommand("New",nameof(ExecuteActionJob)));
+            adapter.Execute(new FillObjectViewCommand<ExecuteActionJob>((job => job.Action, "Delete"),
+                (job => job.Object, nameof(Product)), (job => job.View, $"{nameof(Product)}_ListView"),(job => job.SelectedObjectsCriteria, $"{nameof(Product.ProductName)}='deleteme'"),
+                (job => job.Id,"executeDelete")));
+            adapter.Execute(new ActionCommand(Actions.Save));
+            adapter.Execute(new ActionCommand("Trigger"));
+            adapter.Execute(new NavigateCommand("Default.Product"));
+            var checkListViewCommand = new CheckListViewCommand(nameof(Product.ProductName));
+            checkListViewCommand.AddRows(new []{"deleteme"});
+            checkListViewCommand.ExpectException = true;
+            adapter.Execute(checkListViewCommand);
+        }
+
+        private static async Task TestJob(this ICommandAdapter adapter) {
+            adapter.Execute(new NavigateCommand("JobScheduler.Job"));
+            adapter.CreateJob().TestPauseResume();
             await adapter.TestJob(WorkerState.Succeeded, 1);
 
             adapter.Execute(new NavigateCommand("JobScheduler.Job"));
             adapter.Execute(new ProcessRecordCommand<Job, Job>((job => job.Id, "test")));
-            adapter.Execute(new FillObjectViewCommand((nameof(Job.JobMethod),"Failed")));
+            adapter.Execute(new FillObjectViewCommand((nameof(Job.JobMethod), "Failed")));
             adapter.Execute(new ActionCommand(Actions.Save));
             await adapter.TestJob(WorkerState.Failed, 2);
         }

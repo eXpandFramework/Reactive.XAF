@@ -18,10 +18,11 @@ using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
     [DefaultProperty(nameof(Id))]
-    [DefaultClassOptions][NavigationItem("JobScheduler")]
+    [DefaultClassOptions][NavigationItem(nameof(NavigationItem))]
     [Appearance("PauseAction",AppearanceItemType.Action, nameof(IsPaused)+"=1",Visibility = ViewItemVisibility.Hide,TargetItems = nameof(JobSchedulerService.PauseJob))]
     [Appearance("ResumeAction",AppearanceItemType.Action, nameof(IsPaused)+"=0",Visibility = ViewItemVisibility.Hide,TargetItems = nameof(JobSchedulerService.ResumeJob))]
     public class  Job:CustomBaseObject {
+        public const string NavigationItem = "JobScheduler";
         public Job(Session session) : base(session) {
         }
         ObjectType _jobType;

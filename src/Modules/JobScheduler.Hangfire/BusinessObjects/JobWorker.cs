@@ -15,6 +15,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
     [Appearance("State_Failed_Color",AppearanceItemType.ViewItem, nameof(State)+"='"+nameof(WorkerState.Failed)+"'",FontColor = "Red",TargetItems = nameof(State))]
     [Appearance("State_Green_Color",AppearanceItemType.ViewItem, nameof(State)+"='"+nameof(WorkerState.Succeeded)+"'",FontColor = "Green",TargetItems = nameof(State))]
     [Appearance("State_Proccesing_Color",AppearanceItemType.ViewItem, nameof(State)+"='"+nameof(WorkerState.Processing)+"'",FontStyle = FontStyle.Bold,TargetItems = nameof(State))]
+    [ReadOnlyObjectView()]
     public class JobWorker:XPCustomBaseObject {
         public JobWorker(Session session) : base(session) {
         }
@@ -46,6 +47,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
             set => SetPropertyValue(nameof(Job), ref _job, value);
         }
         [Association("JobWorker-JobStates")][CollectionOperationSet(AllowAdd = false,AllowRemove = false)][Aggregated]
+        [ReadOnlyCollection(disableListViewProcess:true)]
         public XPCollection<JobState> Executions => GetCollection<JobState>(nameof(Executions));
     }
 }

@@ -229,7 +229,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
 
         public static IObservable<Frame> WhenFrameViewChanged(this XafApplication application) 
-            => application.WhenFrameCreated().WhenViewChanged().Select(tuple => tuple.frame)
+            => application.WhenFrameCreated().Merge(application.MainWindow.ReturnObservable().WhenNotDefault())
+                .WhenViewChanged().Select(tuple => tuple.frame)
                 .StartWith(application.MainWindow).WhenNotDefault();
         
         public static IObservable<Frame> WhenFrameViewControls(this XafApplication application) 

@@ -32,8 +32,8 @@
         <dependency id="NUnit" version="3.13" />
         <dependency id="NUnit3TestAdapter" version="3.17" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
-        <dependency id="Xpand.Patcher" version="2.0.27" />
-        <dependency id="Polly" version="7.2.1" />
+        <dependency id="Xpand.Patcher" version="2.0.28" />
+        <dependency id="Polly" version="7.2.2" />
         <dependency id="JetBrains.Annotations" version="2021.1" />
         <dependency id="Selenium.Support" version="3.141" />
         <dependency id="Selenium.WebDriver" version="3.141" />

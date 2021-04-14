@@ -220,6 +220,7 @@ namespace Xpand.TestsLib.Common{
                     var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>()?.ReactiveLogger;
                     if (logger != null){
                         logger.TraceSources.Enabled = true;
+                        logger.TraceSources.Persist = true;
                         var modelTraceSourcedModules = logger.TraceSources.Where(module => module.Id()!=typeof(TModule).Name);
                         var traceSourcedModule = logger.TraceSources.FirstOrDefault(module => module.Id()==typeof(TModule).Name);
                         if (traceSourcedModule != null) {

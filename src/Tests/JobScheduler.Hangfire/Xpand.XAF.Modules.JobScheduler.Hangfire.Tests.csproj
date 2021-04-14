@@ -25,6 +25,9 @@
     <PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\TestsLib.Blazor\Xpand.TestsLib.Blazor.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="Xpand.Extensions">
       <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
     </Reference>
@@ -36,9 +39,6 @@
     </Reference>
     <Reference Include="Xpand.Extensions.XAF.Xpo">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.Xpo.dll</HintPath>
-    </Reference>
-    <Reference Include="Xpand.TestsLib.Blazor">
-      <HintPath>..\..\..\bin\net5.0\Xpand.TestsLib.Blazor.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.TestsLib.Common">
       <HintPath>..\..\..\bin\Xpand.TestsLib.Common.dll</HintPath>

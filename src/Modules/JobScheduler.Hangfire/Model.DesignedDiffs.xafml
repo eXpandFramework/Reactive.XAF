@@ -6,7 +6,66 @@
       <Action Id="ResumeJob" ImageName="Action_ResumeRecording" PaintStyle="CaptionAndImage" />
     </Actions>
   </ActionDesign>
+  <NavigationItems>
+    <Items>
+      <Item Id="JobScheduler">
+        <Items>
+          <Item Id="Job" ViewId="Job_ListView" IsNewNode="True" />
+        </Items>
+      </Item>
+    </Items>
+  </NavigationItems>
   <Views>
+    <DetailView Id="ExecuteActionJob_DetailView">
+      <Items>
+        <PropertyEditor Id="Actions" Removed="True" />
+      </Items>
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="100">
+            <LayoutGroup Id="ExecuteActionJob" Caption="ExecuteActionJob" RelativeSize="8.837656099903938">
+              <LayoutItem Id="Id" ViewItem="Id" Index="0" RelativeSize="34.78260869565217" IsNewNode="True" />
+              <LayoutItem Id="Action" ViewItem="Action" Index="1" RelativeSize="26.08695652173913" Removed="True" />
+              <LayoutGroup Id="Autofe52c333-e505-462e-9bb1-343db5a6eccc" ShowCaption="False" Caption="" Direction="Horizontal" Index="1" RelativeSize="26.08695652173913" IsNewNode="True">
+                <LayoutItem Id="Action" ViewItem="Action" Index="0" RelativeSize="50" IsNewNode="True" />
+                <LayoutItem Id="CronExpression" ViewItem="CronExpression" Index="1" RelativeSize="50" IsNewNode="True" />
+              </LayoutGroup>
+              <LayoutGroup Id="Auto1c956300-e3fc-4fc0-ab47-9e0e8b16ca08" ShowCaption="False" Caption="Auto1c956300-e3fc-4fc0-ab47-9e0e8b16ca08(6)" Direction="Horizontal" Index="2" RelativeSize="39.130434782608695" IsNewNode="True">
+                <LayoutItem Id="Object" ViewItem="Object" Index="0" RelativeSize="50" IsNewNode="True" />
+                <LayoutItem Id="View" ViewItem="View" Index="1" RelativeSize="50" IsNewNode="True" />
+              </LayoutGroup>
+              <LayoutItem Id="Object" ViewItem="Object" Removed="True" />
+              <LayoutItem Id="View" RelativeSize="45.76271186440678" ViewItem="View" Removed="True" />
+            </LayoutGroup>
+            <LayoutGroup Id="Job" RelativeSize="91.16234390009606" Caption="Job">
+              <LayoutItem Id="CronExpression" RelativeSize="100" Index="0" ViewItem="CronExpression" Removed="True" />
+              <TabbedGroup Id="Item4" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
+                <LayoutGroup Id="Item1" ShowCaption="True" Caption="Selected Objects Criteria" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
+                  <LayoutItem Id="SelectedObjectsCriteria" ShowCaption="False" ViewItem="SelectedObjectsCriteria" Index="0" RelativeSize="100" IsNewNode="True" />
+                </LayoutGroup>
+                <LayoutGroup Id="Item5" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="1" Caption="Workers" RelativeSize="100" IsNewNode="True">
+                  <LayoutItem Id="Workers" ViewItem="Workers" Index="0" RelativeSize="100" IsNewNode="True" />
+                </LayoutGroup>
+              </TabbedGroup>
+              <LayoutItem Id="JobMethod" RelativeSize="47.36842105263158" Index="0" ViewItem="JobMethod" Removed="True" />
+              <LayoutItem Id="Id" ViewItem="Id" Removed="True" />
+              <LayoutItem Id="JobType" RelativeSize="33.333333333333336" ViewItem="JobType" Removed="True" />
+            </LayoutGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="SizeableEditors" RelativeSize="46.20557156580211" Caption="Selected Objects Criteria" Removed="True">
+            <LayoutItem Id="SelectedObjectsCriteria" RelativeSize="100" ViewItem="SelectedObjectsCriteria" Removed="True" />
+          </LayoutGroup>
+          <TabbedGroup Id="Tabs" RelativeSize="44.38040345821326" Removed="True">
+            <LayoutGroup Id="Actions" RelativeSize="100">
+              <LayoutItem Id="Actions" RelativeSize="100" ViewItem="Actions" />
+            </LayoutGroup>
+            <LayoutGroup Id="Workers" RelativeSize="100">
+              <LayoutItem Id="Workers" RelativeSize="100" ViewItem="Workers" />
+            </LayoutGroup>
+          </TabbedGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <DetailView Id="Job_DetailView">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
@@ -30,6 +89,31 @@
       </Layout>
     </DetailView>
     <ListView Id="Job_Workers_ListView" MasterDetailMode="ListViewAndDetailView" />
+    <DetailView Id="JobWorker_DetailView">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="5.95581171950048">
+            <LayoutGroup Id="JobWorker" RelativeSize="100" Direction="Horizontal">
+              <LayoutGroup Id="Auto7a2d920c-c9f8-4440-99ae-c7629315885e" ShowCaption="False" Caption="" Index="0" RelativeSize="50" IsNewNode="True">
+                <LayoutItem Id="State" ViewItem="State" Index="0" RelativeSize="51.61290322580645" IsNewNode="True" />
+                <LayoutItem Id="Created" ViewItem="Created" Index="1" RelativeSize="48.38709677419355" IsNewNode="True" />
+              </LayoutGroup>
+              <LayoutGroup Id="Autod1fec358-5266-4105-9ede-29d337613ca3" ShowCaption="False" Caption="" Index="1" RelativeSize="50" IsNewNode="True">
+                <LayoutItem Id="Id" ViewItem="Id" Index="0" RelativeSize="51.61290322580645" IsNewNode="True" />
+                <LayoutItem Id="ExecutionsCount" ViewItem="ExecutionsCount" Index="1" RelativeSize="48.38709677419355" IsNewNode="True" />
+              </LayoutGroup>
+              <LayoutItem Id="Created" Index="1" RelativeSize="27.906976744186046" Removed="True" />
+              <LayoutItem Id="ExecutionsCount" Index="2" RelativeSize="34.883720930232556" Removed="True" />
+              <LayoutItem Id="Id" Removed="True" />
+              <LayoutItem Id="State" Removed="True" />
+            </LayoutGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="Executions_Group" Direction="Vertical" RelativeSize="94.04418828049953">
+            <LayoutItem Id="Executions" RelativeSize="100" />
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
     <ListView Id="JobWorker_Executions_ListView">
       <Columns>
         <ColumnInfo Id="Created" SortOrder="Descending" />

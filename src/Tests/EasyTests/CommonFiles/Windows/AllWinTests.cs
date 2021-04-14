@@ -55,7 +55,7 @@ namespace ALL.Win.Tests {
         }
 
         private TestApplication RunWinApplication(WinAdapter adapter, string connectionString) {
-#if !NETCOREAPP3_1
+#if !NETCOREAPP3_1_OR_GREATER
             var fileName =
                 Path.GetFullPath(
                     $@"{AppDomain.CurrentDomain.ApplicationPath()}\..\TestWinApplication\TestApplication.Win.exe");
@@ -105,7 +105,7 @@ namespace ALL.Win.Tests {
             await EasyTest(() => new WinAdapter(), RunWinApplication, async adapter => {
                 var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
                 adapter.Execute(autoTestCommand);
-#if !XAF191 && !NET5_0
+#if !XAF191 && !NETCOREAPP3_1_OR_GREATER
                 adapter.TestDocumentStyleManager();
 #endif
                 adapter.TestModelViewInheritance();

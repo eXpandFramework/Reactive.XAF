@@ -16,7 +16,7 @@ namespace Xpand.TestsLib.Blazor {
             item?.SynchronizationContext.ExecuteSynchronously(null, item.Callback, item.State);
         };
 
-        private static readonly Action<Task, object> BackgroundWorkThunk = (task, state) => {
+        private static readonly Action<Task, object> BackgroundWorkThunk = (_, state) => {
             var item = (WorkItem) state;
             item.SynchronizationContext.ExecuteBackground(item);
         };
@@ -74,16 +74,16 @@ namespace Xpand.TestsLib.Blazor {
         public Task<TResult> InvokeAsync<TResult>(Func<TResult> function) {
             var completion = new RendererSynchronizationTaskCompletionSource<Func<TResult>, TResult>(function);
             ExecuteSynchronouslyIfPossible(state => {
-                var completion = (RendererSynchronizationTaskCompletionSource<Func<TResult>, TResult>) state;
+                var source = (RendererSynchronizationTaskCompletionSource<Func<TResult>, TResult>) state;
                 try {
-                    var result = completion.Callback();
-                    completion.SetResult(result);
+                    var result = source.Callback();
+                    source.SetResult(result);
                 }
                 catch (OperationCanceledException) {
-                    completion.SetCanceled();
+                    source.SetCanceled();
                 }
                 catch (Exception exception) {
-                    completion.SetException(exception);
+                    source.SetException(exception);
                 }
             }, completion);
 
@@ -229,12 +229,12 @@ namespace Xpand.TestsLib.Blazor {
 
         private void DispatchException(Exception ex) {
             var handler = UnhandledException;
-            if (handler != null) handler(this, new UnhandledExceptionEventArgs(ex, false));
+            handler?.Invoke(this, new UnhandledExceptionEventArgs(ex, false));
         }
 
         private class State {
             public bool IsBusy; // Just for debugging
-            public readonly object Lock = new object();
+            public readonly object Lock = new();
             public Task Task = Task.CompletedTask;
 
             public override string ToString() {

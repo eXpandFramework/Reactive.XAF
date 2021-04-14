@@ -66,7 +66,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             }
         }
 
-        [Test]
+        // [Test]
         [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task Do_Not_Trace_If_TraceSources_Level_Off(){

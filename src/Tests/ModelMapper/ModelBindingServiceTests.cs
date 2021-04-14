@@ -392,7 +392,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
         private static void MockListEditor(Platform platform, Type[] controlTypes, XafApplication application,
             PredefinedMap predefinedMap, RepositoryItemTextEdit repositoryItemTextEdit){
-            application.MockListEditor((view, xafApplication, collectionSource) => {
+            application.MockListEditor((view, _, collectionSource) => {
                 ListEditor listEditor;
                 if (new[]{PredefinedMap.PivotGridControl,PredefinedMap.ChartControl,PredefinedMap.SchedulerControl,PredefinedMap.TreeList, }.Any(map => map==predefinedMap)){
                     listEditor =

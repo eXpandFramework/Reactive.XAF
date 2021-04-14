@@ -24,6 +24,7 @@ namespace ALL.Tests{
                 commandAdapter.Execute(new LoginCommand());
                 await executeCommands(commandAdapter);
             }
+
             finally{
                 var easyTestSettingsFile = testApplication.EasyTestSettingsFile();
                 if (File.Exists(easyTestSettingsFile)){

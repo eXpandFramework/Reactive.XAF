@@ -6,11 +6,12 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using DevExpress.ExpressApp.Utils;
+using Xpand.XAF.ModelEditor.ModelDifference;
 
-namespace Xpand.XAF.ModelEditor.ModelDifference {
+namespace Xpand.XAF.ModelEditor.WinDesktop.ModelDifference {
     public class ResourceModelCollector {
         private const int MaxExpectedEncodingStringLengthInBytes = 512;
-        private static readonly Encoding[] ExpectedEncodings = new[] { Encoding.UTF8, Encoding.ASCII, Encoding.Unicode, Encoding.UTF7, Encoding.UTF32, Encoding.BigEndianUnicode };
+        private static readonly Encoding[] ExpectedEncodings = new[] { Encoding.UTF8, Encoding.ASCII, Encoding.Unicode, Encoding.UTF32, Encoding.BigEndianUnicode };
         private static readonly Encoding DefaultEncoding = Encoding.UTF8;
         public Dictionary<string, ResourceInfo> Collect(IEnumerable<Assembly> assemblies, string prefix) {
             var assemblyResourcesNames = assemblies.SelectMany(assembly => assembly.GetManifestResourceNames().Where(s => s.EndsWith(".xafml")), (assembly1, s) => new { assembly1, s });
@@ -22,7 +23,7 @@ namespace Xpand.XAF.ModelEditor.ModelDifference {
                 string path = GetPath(prefix, resourceName);
                 resourceName = GetResourceName(prefix, path);
                 if (!(dictionary.ContainsKey(resourceName)))
-                    dictionary.Add(resourceName, new ResourceInfo(resourceName, new AssemblyName(assemblyResourcesName.assembly1.FullName).Name));
+                    dictionary.Add(resourceName, new ResourceInfo(resourceName, new AssemblyName(assemblyResourcesName.assembly1.FullName!).Name));
                 var assembly1 = assemblyResourcesName.assembly1;
                 var xml = GetXml(assemblyResourcesName.s, assembly1);
                 string aspectName = GetAspectName(assemblyResourcesName.s);
@@ -54,14 +55,12 @@ namespace Xpand.XAF.ModelEditor.ModelDifference {
         }
 
         string GetXml(string resourceName, Assembly assembly1) {
-            string readToEnd;
-            using (Stream manifestResourceStream = assembly1.GetManifestResourceStream(resourceName)) {
-                if (manifestResourceStream == null) throw new NullReferenceException(resourceName);
-                Encoding encoding = GetStreamEncoding(manifestResourceStream) ?? DefaultEncoding;
-                using (var streamReader = new StreamReader(manifestResourceStream, encoding)) {
-                    readToEnd = streamReader.ReadToEnd();
-                }
-            }
+            using Stream manifestResourceStream = assembly1.GetManifestResourceStream(resourceName);
+            if (manifestResourceStream == null) throw new NullReferenceException(resourceName);
+            Encoding encoding = GetStreamEncoding(manifestResourceStream) ?? DefaultEncoding;
+            using var streamReader = new StreamReader(manifestResourceStream, encoding);
+            var readToEnd = streamReader.ReadToEnd();
+
             return readToEnd;
         }
 

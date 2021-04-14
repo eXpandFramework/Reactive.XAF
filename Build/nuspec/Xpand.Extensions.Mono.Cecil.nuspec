@@ -16,7 +16,7 @@
     <dependencies>
       <group targetFramework="netstandard2.0">
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
-        <dependency id="Mono.Cecil" version="0.11.2" />
+        <dependency id="Mono.Cecil" version="0.11.3" />
         <dependency id="System.CodeDom" version="5.0" />
         <dependency id="JetBrains.Annotations" version="2021.1" />
         <dependency id="System.ValueTuple" version="4.5" />

@@ -36,7 +36,7 @@
     <Compile Include="..\..\CommonFiles\SequenceGeneratorService.cs" Link="SequenceGeneratorService.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Polly" Version="7.2.1" />
+    <PackageReference Include="Polly" Version="7.2.2" />
     <PackageReference Include="DevExpress.EasyTest" Version="20.2.6" />
     <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.2.6" />
     <PackageReference Include="DevExpress.ExpressApp.EasyTest.WebAdapter" Version="20.2.6" />

@@ -12,6 +12,7 @@ using DevExpress.ExpressApp.Win.Core.ModelEditor;
 using DevExpress.ExpressApp.Xpo;
 using DevExpress.Persistent.Base;
 using Xpand.XAF.ModelEditor.ModelDifference;
+using Xpand.XAF.ModelEditor.WinDesktop.ModelDifference;
 
 // ReSharper disable once CheckNamespace
 namespace Xpand.XAF.ModelEditor {

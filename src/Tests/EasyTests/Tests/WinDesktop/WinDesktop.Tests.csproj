@@ -42,7 +42,7 @@
     <Compile Include="..\..\CommonFiles\Windows\DocumentStyleManagerService.cs" Link="DocumentStyleManagerService.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Polly" Version="7.2.1" />
+    <PackageReference Include="Polly" Version="7.2.2" />
     <PackageReference Include="DevExpress.WindowsDesktop.Core" Version="20.2.6" />
     <PackageReference Include="DevExpress.WindowsDesktop.Xaf" Version="20.2.6-ctp" />
     <PackageReference Include="MagicOnion" Version="2.6.3" />

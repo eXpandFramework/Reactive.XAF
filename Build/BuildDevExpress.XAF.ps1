@@ -172,6 +172,7 @@ Task Compile -precondition { return $compile } {
     
     Invoke-Script {
         Write-HostFormatted "Building Extensions" -Section
+        New-Item "$Root\bin\nupkg" -ItemType Directory -Force -ErrorAction SilentlyContinue
         $solution = "$Root\src\Extensions\Extensions.sln"
         
         $Configuration = GetConfiguration $solution $Global:Configuration

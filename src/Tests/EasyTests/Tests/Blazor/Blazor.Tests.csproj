@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net5.0-windows</TargetFramework>
-    <UseWindowsForms>true</UseWindowsForms>
+    <TargetFramework>net5.0</TargetFramework>
+    <!-- <UseWindowsForms>true</UseWindowsForms> -->
     <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
     <LangVersion>latest</LangVersion>
     <SignAssembly>true</SignAssembly>
@@ -12,8 +12,8 @@
     <OutputType>Library</OutputType>
     <StartupObject>
     </StartupObject>
-    <OutputPathSuffix>AllTestWweb\net5.0-windows</OutputPathSuffix>
-    <OutputPath>..\..\..\..\..\bin\AllTestWeb\net5.0-windows</OutputPath>
+    <OutputPathSuffix>AllTestWweb\net5.0</OutputPathSuffix>
+    <OutputPath>..\..\..\..\..\bin\AllTestWeb\net5.0</OutputPath>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <RootNamespace>Web.Tests</RootNamespace>
     <CopyLocalLockFileAssemblie>true</CopyLocalLockFileAssemblie>
@@ -61,11 +61,11 @@
     <PackageReference Include="Selenium.Support" Version="3.141" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Xpand.TestsLib.Common">
-      <HintPath>..\..\..\..\..\bin\Xpand.TestsLib.Common.dll</HintPath>
-    </Reference>
     <Reference Include="Xpand.TestsLib.Blazor">
       <HintPath>..\..\..\..\..\bin\net5.0\Xpand.TestsLib.Blazor.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.TestsLib.Common">
+      <HintPath>..\..\..\..\..\bin\Xpand.TestsLib.Common.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

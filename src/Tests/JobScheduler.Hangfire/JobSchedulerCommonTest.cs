@@ -1,5 +1,6 @@
 ﻿using System;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Blazor;
 using Hangfire;
 using Hangfire.MemoryStorage;
 using Microsoft.AspNetCore.Hosting;
@@ -20,7 +21,14 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
         }
 
         public JobSchedulerModule JobSchedulerModule(params ModuleBase[] modules) {
-            var newBlazorApplication = NewBlazorApplication(typeof(JobSchedulerStartup));
+            var newBlazorApplication = NewBlazorApplication();
+            return JobSchedulerModule(newBlazorApplication);
+        }
+
+        protected BlazorApplication NewBlazorApplication() 
+            => NewBlazorApplication(typeof(JobSchedulerStartup));
+
+        protected JobSchedulerModule JobSchedulerModule(BlazorApplication newBlazorApplication) {
             var module = newBlazorApplication.AddModule<JobSchedulerModule>(typeof(JS));
             newBlazorApplication.ConfigureModel();
             newBlazorApplication.Logon();

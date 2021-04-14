@@ -176,7 +176,6 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
                 ? new Expression[] {Expression.Constant(null, typeof(PerformContext))} : new Expression[0];
             return job.JobType.Type.CallExpression(method,arguments);
         }
-
         internal static IObservable<TSource> TraceJobSchedulerModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 

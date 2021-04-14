@@ -3,7 +3,7 @@ source https://api.nuget.org/v3/index.json
 source https://xpandnugetserver.azurewebsites.net/nuget
 storage:none
 copy_local:true
-framework:net461,net5.0,netstandard2.0,netstandard2.1,netcoreapp3.1,net5.0-windows
+framework:net461,net5.0,net5.0-windows,netstandard2.0,netstandard2.1
 
 nuget DevExpress.WindowsDesktop.Core == 20.2.6
 nuget DevExpress.WindowsDesktop.Xaf == 20.2.6-ctp
@@ -22,7 +22,7 @@ nuget System.ServiceModel.Security == 4.8.1
 nuget System.ServiceModel.Http == 4.8.1
 nuget System.ServiceModel.Duplex == 4.8.1
 nuget System.Security.Cryptography.Xml == 5.0.0
-nuget Mono.Cecil 0.11.2
+nuget Mono.Cecil 0.11.3
 nuget MagicOnion 2.6.3
 nuget Grpc 2.23.0
 nuget Grpc.Core 2.25.0

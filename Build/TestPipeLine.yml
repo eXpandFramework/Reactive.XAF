@@ -252,7 +252,7 @@ jobs:
       enabled: true
       continueOnError: true
       inputs:
-        searchFolder: '$(System.DefaultWorkingDirectory)\bin\netcoreapp3.1'
+        searchFolder: '$(System.DefaultWorkingDirectory)\bin\'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
           **\Xpand.Extensions.Tests.dll
