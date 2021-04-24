@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.ModelMapper</id>
-    <version>4.202.53.1</version>
+    <version>4.202.54.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -15,10 +15,10 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, ModelMapper, 20.2.6</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.Extensions" version="4.202.53.1" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.202.53.1" />
-        <dependency id="Xpand.Extensions.XAF" version="4.202.53.1" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.53.1" />
+        <dependency id="Xpand.Extensions" version="4.202.54.0" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.202.54.0" />
+        <dependency id="Xpand.Extensions.XAF" version="4.202.54.0" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.54.0" />
         <dependency id="Enums.NET" version="4.0" />
         <dependency id="Mono.Cecil" version="0.11.3" />
         <dependency id="System.CodeDom" version="5.0" />
@@ -31,7 +31,7 @@
         <dependency id="System.ServiceModel.Http" version="4.8.1" />
         <dependency id="System.Interactive" version="5.0" />
         <dependency id="Newtonsoft.Json" version="13.0.1" />
-        <dependency id="Xpand.VersionConverter" version="4.202.53.1" />
+        <dependency id="Xpand.VersionConverter" version="4.202.54.0" />
       </group>
     </dependencies>
   </metadata>

@@ -91,7 +91,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             objectSpace.GetObjectsCount(typeof(TraceEvent),null).ShouldBe(0);
         }
 
-        [Test]
+        // [Test]
         [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task Do_Not_Trace_If_TraceSources_Disabled(){
@@ -115,7 +115,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             objectSpace.GetObjectsQuery<TraceEvent>().FirstOrDefault(_ => _.Value.Contains("test")).ShouldBeNull();
             objectSpace.GetObjectsCount(typeof(TraceEvent),null).ShouldBe(0);
         }
-        [Test]
+        // [Test]
         [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task Do_Not_Persist_TraceSources(){
