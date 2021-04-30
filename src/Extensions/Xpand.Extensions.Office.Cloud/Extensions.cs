@@ -64,7 +64,7 @@ namespace Xpand.Extensions.Office.Cloud{
 	                return _.objectSpace.QueryCloudOfficeObject(typeof(TCloudEntity), o).Where(officeObject => officeObject.LocalId == deletedId).ToArray()
                         .Select(officeObject => (officeObject,bo:o));
                 }))
-                .SelectMany(t => delete(t).Select(s => t.officeObject))
+                .SelectMany(t => delete(t).Select(_ => t.officeObject))
                 .To((TCloudEntity)typeof(TCloudEntity).CreateInstance())
                 .Select(o => (o,MapAction.Delete)):Observable.Empty<(TCloudEntity serviceObject, MapAction mapAction)>();
 
@@ -84,13 +84,13 @@ namespace Xpand.Extensions.Office.Cloud{
                         var deletedId = objectSpace.GetKeyValue(_).ToString();
                         return objectSpace.QueryCloudOfficeObject(typeof(TServiceObject), _).Where(o => o.LocalId == deletedId).ToObservable();
                     })
-                    .SelectMany(cloudOfficeObject => delete(cloudOfficeObject).Select(s => cloudOfficeObject))
+                    .SelectMany(cloudOfficeObject => delete(cloudOfficeObject).Select(_ => cloudOfficeObject))
                     .To<TServiceObject>());
 
         public static IObservable<T> NewCloudObject<T>(this IObservable<T> source, Func<IObjectSpace> objectSpaceFactory, string localId) 
             => source.SelectMany(@event => Observable.Using(objectSpaceFactory, 
                 space => space.NewCloudObject(localId, (string)@event.GetPropertyValue("Id"), @event.GetType().ToCloudObjectType())
-                    .Select(unit => @event)));
+                    .Select(_ => @event)));
         [PublicAPI]
         public static IObservable<CloudOfficeObject> NewCloudObject(this IObjectSpace space, string localId, string cloudId, Type cloudObjectType) 
             => space.NewCloudObject(localId, cloudId, cloudObjectType.ToCloudObjectType());
@@ -194,7 +194,8 @@ namespace Xpand.Extensions.Office.Cloud{
             Func<XafApplication, IObservable<bool>> needsAuthentication, string serviceName, Type serviceStorageType,
             Func<XafApplication, IObservable<Unit>> authorize) 
             => registerActions.ActivateWhenUserDetails()
-                .SelectMany(action => needsAuthentication(action.Application).Select(b => b).Pair(action).Activate(serviceName, serviceStorageType)
+                .SelectMany(action => needsAuthentication(action.Application).Select(b => b).Pair(action)
+                    .Activate(serviceName, serviceStorageType)
                     .Merge(action.Authorize(serviceName,serviceStorageType,authorize,needsAuthentication))
                 ).ToUnit();
 
@@ -203,7 +204,7 @@ namespace Xpand.Extensions.Office.Cloud{
             Func<XafApplication, IObservable<bool>> needsAuthentication) 
             => action.WhenExecute(e => {
                 var execute = e.Action.Id == $"Disconnect{serviceName}"
-                    ? e.Action.Application.NewObjectSpace(space => {
+                    ? e.Action.Application.NewObjectSpace(_ => {
                         var objectSpace = e.Action.View().ObjectSpace;
                         objectSpace.Delete(objectSpace.GetObjectByKey(serviceStorageType,e.Action.Application.CurrentUserId()));
                         objectSpace.CommitChanges();

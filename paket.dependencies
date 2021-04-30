@@ -5,18 +5,18 @@ storage:none
 copy_local:true
 framework:net461,net5.0,net5.0-windows,netstandard2.0,netstandard2.1
 
-nuget DevExpress.WindowsDesktop.Core == 20.2.6
-nuget DevExpress.WindowsDesktop.Xaf == 20.2.6-ctp
-nuget DevExpress.ExpressApp.Office == 20.2.6
-nuget DevExpress.ExpressApp.Core.All == 20.2.6
-nuget DevExpress.ExpressApp.Win.All == 20.2.6
-nuget DevExpress.ExpressApp.Web.All == 20.2.6
-nuget DevExpress.ExpressApp.Blazor.All == 20.2.6
-nuget DevExpress.ExpressApp.EasyTest.BlazorAdapter == 20.2.6
-nuget DevExpress.EasyTest == 20.2.6  
-nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 20.2.6  
-nuget DevExpress.ExpressApp.EasyTest.WinAdapter == 20.2.6  
-nuget DevExpress.ExpressApp.Security.Xpo == 20.2.6  
+nuget DevExpress.WindowsDesktop.Core == 20.2.7
+nuget DevExpress.WindowsDesktop.Xaf == 20.2.7-ctp
+nuget DevExpress.ExpressApp.Office == 20.2.7
+nuget DevExpress.ExpressApp.Core.All == 20.2.7
+nuget DevExpress.ExpressApp.Win.All == 20.2.7
+nuget DevExpress.ExpressApp.Web.All == 20.2.7
+nuget DevExpress.ExpressApp.Blazor.All == 20.2.7
+nuget DevExpress.ExpressApp.EasyTest.BlazorAdapter == 20.2.7
+nuget DevExpress.EasyTest == 20.2.7  
+nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 20.2.7  
+nuget DevExpress.ExpressApp.EasyTest.WinAdapter == 20.2.7  
+nuget DevExpress.ExpressApp.Security.Xpo == 20.2.7  
 nuget System.ServiceModel.NetTcp == 4.8.1
 nuget System.ServiceModel.Security == 4.8.1
 nuget System.ServiceModel.Http == 4.8.1

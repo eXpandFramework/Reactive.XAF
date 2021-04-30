@@ -20,7 +20,7 @@ using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services;
-#if !NETCOREAPP3_1
+#if !NETCOREAPP3_1_OR_GREATER
 using System.Reactive.Linq;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar;
@@ -44,7 +44,7 @@ namespace TestApplication.Module.Win {
         private void AddXpandModules() {
             RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.GridListEditor.GridListEditorModule));
             RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.OneView.OneViewModule));
-#if !NETCOREAPP3_1
+#if !NETCOREAPP3_1_OR_GREATER
             RequiredModuleTypes.Add(typeof(DocumentStyleManagerModule));
             RequiredModuleTypes.Add(typeof(MicrosoftModule));
             RequiredModuleTypes.Add(typeof(MicrosoftTodoModule));
@@ -56,7 +56,7 @@ namespace TestApplication.Module.Win {
             RequiredModuleTypes.Add(typeof(ChartWindowsFormsModule));
             RequiredModuleTypes.Add(typeof(DashboardsWindowsFormsModule));
             RequiredModuleTypes.Add(typeof(FileAttachmentsWindowsFormsModule));
-#if !NETCOREAPP3_1
+#if !NETCOREAPP3_1_OR_GREATER
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.HtmlPropertyEditor.Win.HtmlPropertyEditorWindowsFormsModule));
 #endif
 
@@ -81,7 +81,7 @@ namespace TestApplication.Module.Win {
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
             ExtendModel(moduleManager);
-#if !NETCOREAPP3_1
+#if !NETCOREAPP3_1_OR_GREATER
             moduleManager.ConnectDocumentStyleManager()
                 .Merge(moduleManager.ConnectMicrosoftCalendarService())
                 .Merge(moduleManager.ConnectMicrosoftService())
@@ -90,7 +90,7 @@ namespace TestApplication.Module.Win {
 #endif
         }
 
-#if !NETCOREAPP3_1
+#if !NETCOREAPP3_1_OR_GREATER
         public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB) 
             => base.GetModuleUpdaters(objectSpace, versionFromDB).Concat(new[]
                 {new DocumentStyleManagerModuleUpdater(objectSpace, versionFromDB)});

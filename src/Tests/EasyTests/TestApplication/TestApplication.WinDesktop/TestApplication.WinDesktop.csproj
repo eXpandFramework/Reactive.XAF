@@ -86,15 +86,15 @@
     <Content Include="ExpressApp.ico" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.WindowsDesktop.Core" Version="20.2.6" />
-    <PackageReference Include="DevExpress.WindowsDesktop.Xaf" Version="20.2.6-ctp" />
+    <PackageReference Include="DevExpress.WindowsDesktop.Core" Version="20.2.7" />
+    <PackageReference Include="DevExpress.WindowsDesktop.Xaf" Version="20.2.7-ctp" />
     <PackageReference Include="Google.Apis.People.v1" Version="1.25.0.830" />
     <PackageReference Include="System.ServiceModel.Http" Version="4.8.1" />
     <PackageReference Include="System.Collections.Immutable" Version="5.0" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.8.1" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.8.1" />
     <PackageReference Include="System.ServiceProcess.ServiceController" Version="5.0" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.202.54" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.202.54.1" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\..\..\Common\AssemblyInfoVersion.cs" Link="Properties\AssemblyInfoVersion.cs" />
@@ -104,7 +104,7 @@
       <HintPath>..\TestApplication.Module\bin\Debug\netstandard2.0\TestApplication.Module.dll</HintPath>
     </Reference>
     <Reference Include="TestApplication.Module.WinDesktop">
-      <HintPath>..\TestApplication.Module.WinDesktop\bin\Debug\netcoreapp3.1\TestApplication.Module.WinDesktop.dll</HintPath>
+      <HintPath>..\TestApplication.Module.WinDesktop\bin\Debug\net5.0-windows\TestApplication.Module.WinDesktop.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

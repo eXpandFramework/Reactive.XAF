@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.TestsLib</id>
-    <version>4.202.54.0</version>
+    <version>4.202.54.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -12,20 +12,20 @@
     <description>Xpand.TestsLib</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.TestsLib, 20.2.6</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.TestsLib, 20.2.7</tags>
     <dependencies>
-      <group targetFramework="net5.0-windows">
-        <dependency id="Xpand.Extensions" version="4.202.54.0" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.202.54.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.202.54.0" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.202.54.0" />
-        <dependency id="Xpand.TestsLib.Common" version="4.202.54.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.54.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.202.54.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.202.54.0" />
+      <group targetFramework="net5.0-windows7.0">
+        <dependency id="Xpand.Extensions" version="4.202.54.1" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.202.54.1" />
+        <dependency id="Xpand.Extensions.XAF" version="4.202.54.1" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.202.54.1" />
+        <dependency id="Xpand.TestsLib.Common" version="4.202.54.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.202.54.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.202.54.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.202.54.1" />
         <dependency id="akarnokd.reactive_extensions" version="0.0.27-alpha" />
         <dependency id="Enums.NET" version="4.0" />
-        <dependency id="Humanizer.Core" version="2.8.26" />
+        <dependency id="Humanizer.Core" version="2.9.9" />
         <dependency id="MagicOnion" version="2.6.3" />
         <dependency id="Moq" version="4.16" />
         <dependency id="Newtonsoft.Json" version="13.0.1" />
@@ -33,7 +33,7 @@
         <dependency id="NUnit" version="3.13" />
         <dependency id="NUnit3TestAdapter" version="3.17" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
-        <dependency id="Xpand.Patcher" version="2.0.29" />
+        <dependency id="Xpand.Patcher" version="2.0.30" />
         <dependency id="Polly" version="7.2.2" />
         <dependency id="JetBrains.Annotations" version="2021.1" />
         <dependency id="Selenium.Support" version="3.141" />
@@ -45,8 +45,8 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="net5.0-windows\Xpand.TestsLib.dll" target="lib\net5.0-windows\Xpand.TestsLib.dll" />
-    <file src="net5.0-windows\Xpand.TestsLib.pdb" target="lib\net5.0-windows\Xpand.TestsLib.pdb" />
+    <file src="net5.0-windows7.0\Xpand.TestsLib.dll" target="lib\net5.0-windows7.0\Xpand.TestsLib.dll" />
+    <file src="net5.0-windows7.0\Xpand.TestsLib.pdb" target="lib\net5.0-windows7.0\Xpand.TestsLib.pdb" />
     <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.TestsLib.targets" />
     <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
   </files>

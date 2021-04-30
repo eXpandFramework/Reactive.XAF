@@ -69,8 +69,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.TestsLib.Common", "..
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.TestsLib.Net461", "..\TestsLib.Net461\Xpand.TestsLib.Net461.csproj", "{482E3D8F-7B7D-4E18-898A-B0294AAE35D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevExpress.ExpressApp.EasyTest.WinAdapter", "..\..\..\..\..\..\Program Files (x86)\DevExpress 20.2\Components\Sources\DevExpress.ExpressApp.Modules\DevExpress.ExpressApp.EasyTest.WinAdapter\DevExpress.ExpressApp.EasyTest.WinAdapter.csproj", "{A1C2FBA7-B74E-43AE-BB92-BCBEDDDA4B1E}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_20.1|Any CPU = Debug_20.1|Any CPU
@@ -199,10 +197,6 @@ Global
 		{482E3D8F-7B7D-4E18-898A-B0294AAE35D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{482E3D8F-7B7D-4E18-898A-B0294AAE35D8}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
 		{482E3D8F-7B7D-4E18-898A-B0294AAE35D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A1C2FBA7-B74E-43AE-BB92-BCBEDDDA4B1E}.Debug_20.1|Any CPU.ActiveCfg = Debug|Any CPU
-		{A1C2FBA7-B74E-43AE-BB92-BCBEDDDA4B1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A1C2FBA7-B74E-43AE-BB92-BCBEDDDA4B1E}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
-		{A1C2FBA7-B74E-43AE-BB92-BCBEDDDA4B1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
