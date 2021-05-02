@@ -1,5 +1,5 @@
 param(
-    $Branch = "lab",
+    $Branch = "Release",
     $nugetBin = "$PSScriptRoot\..\bin\Nupkg",
     $sourceDir = "$PSScriptRoot\..",
     $Filter ,
@@ -133,7 +133,7 @@ if ($Branch -ne "lab") {
         Remove-Item $unzipDir -Force -Recurse
     }
     Write-HostFormatted "Update ReadMe" -Section
-    if ((Get-DevExpressVersion) -eq $dxVersion){
+    if ((Get-VersionPart (Get-DevExpressVersion) Build) -eq (Get-VersionPart $dxVersion Build)){
         & "$PSScriptRoot\UpdateReadMe.ps1" 
     }
     

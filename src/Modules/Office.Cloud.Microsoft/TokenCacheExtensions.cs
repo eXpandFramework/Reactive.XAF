@@ -20,31 +20,29 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
                 return args;
             });
 
-        private static IObservable<TokenCacheNotificationArgs> WriteStorage(this ITokenCache tokenCache, Func<IObjectSpace> objectspaceFactory, Guid userId) 
+        private static IObservable<TokenCacheNotificationArgs> WriteStorage(this ITokenCache tokenCache, Func<IObjectSpace> objectSpaceFactory, Guid userId) 
             => tokenCache.AfterAccess().Select(args => {
-                using (var objectSpace = objectspaceFactory()){
-                    var authentication = objectSpace.GetObjectByKey<MSAuthentication>(userId) ?? objectSpace.CreateObject<MSAuthentication>();
-                    authentication.Oid = userId;
-                    authentication.Token = args.TokenCache.SerializeMsalV3().GetString();
-                    objectSpace.CommitChanges();
-                }
-                return args;
+	            using var objectSpace = objectSpaceFactory();
+	            var authentication = objectSpace.GetObjectByKey<MSAuthentication>(userId) ?? objectSpace.CreateObject<MSAuthentication>();
+	            authentication.Oid = userId;
+	            authentication.Token = args.TokenCache.SerializeMsalV3().GetString();
+	            objectSpace.CommitChanges();
+	            return args;
             });
 
-        public static IObservable<TokenCacheNotificationArgs> SynchStorage(this ITokenCache tokenCache, Func<IObjectSpace> objectspaceFactory, Guid userId) 
-            => tokenCache.ReadStorage(objectspaceFactory, userId).Merge(tokenCache.WriteStorage(objectspaceFactory, userId));
+        public static IObservable<TokenCacheNotificationArgs> SynchStorage(this ITokenCache tokenCache, Func<IObjectSpace> objectSpaceFactory, Guid userId) 
+            => tokenCache.ReadStorage(objectSpaceFactory, userId).Merge(tokenCache.WriteStorage(objectSpaceFactory, userId));
         [UsedImplicitly]
         public static IObservable<TokenCacheNotificationArgs> SynchStorage(this ITokenCache tokenCache, string cacheFilePath) 
             => tokenCache.ReadStorage(cacheFilePath).Merge(tokenCache.WriteStorage(cacheFilePath));
 
-        private static IObservable<TokenCacheNotificationArgs> ReadStorage(this ITokenCache tokenCache, Func<IObjectSpace> objectspaceFactory, Guid userId) 
+        private static IObservable<TokenCacheNotificationArgs> ReadStorage(this ITokenCache tokenCache, Func<IObjectSpace> objectSpaceFactory, Guid userId) 
             => tokenCache.BeforeAccess().Select(args => {
-                using (var objectSpace = objectspaceFactory()){
-                    var authentication = objectSpace.GetObjectByKey<MSAuthentication>(userId) ;
-                    args.TokenCache.DeserializeMsalV3(authentication?.Token?.Bytes());
-                    objectSpace.CommitChanges();
-                }
-                return args;
+	            using var objectSpace = objectSpaceFactory();
+	            var authentication = objectSpace.GetObjectByKey<MSAuthentication>(userId) ;
+	            args.TokenCache.DeserializeMsalV3(authentication?.Token?.Bytes());
+	            objectSpace.CommitChanges();
+	            return args;
             });
 
         private static IObservable<TokenCacheNotificationArgs> ReadStorage(this ITokenCache tokenCache, string cacheFilePath) => tokenCache.BeforeAccess()

@@ -94,7 +94,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
         static IClientApplicationBase CreateClientApp(this XafApplication application){
 	        var modelOAuth = application.Model.OAuthMS();
 	        return application.GetPlatform() == Platform.Web
-		        ? (IClientApplicationBase) ConfidentialClientApplicationBuilder.Create(modelOAuth.ClientId)
+		        ? ConfidentialClientApplicationBuilder.Create(modelOAuth.ClientId)
 			        .WithRedirectUri(modelOAuth.RedirectUri).WithClientSecret(modelOAuth.ClientSecret).WithAuthority(AuthorityUri).Build()
 		        : PublicClientApplicationBuilder.Create(modelOAuth.ClientId).WithAuthority(AuthorityUri)
 			        .WithRedirectUri(modelOAuth.RedirectUri).Build();

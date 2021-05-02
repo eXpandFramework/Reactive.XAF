@@ -49,7 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.2.7" />
-    <PackageReference Include="Xpand.XAF.Core.All" Version="4.202.54.1" />
+    <PackageReference Include="Xpand.XAF.Core.All" Version="4.202.55" />
     <PackageReference Include="Google.Apis.People.v1" Version="1.25.0.830" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.8.1" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.8.1" />
