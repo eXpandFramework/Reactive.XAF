@@ -7,8 +7,8 @@ using DevExpress.ExpressApp.Xpo;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using Xpand.Extensions.StringExtensions;
-using Xpand.TestsLib.Common.EasyTest;
-using Xpand.TestsLib.Common.EasyTest.Commands;
+using Xpand.TestsLib.EasyTest;
+using Xpand.TestsLib.EasyTest.Commands;
 
 namespace ALL.Tests{
     public abstract class CommonTest:Xpand.TestsLib.Common.CommonTest{

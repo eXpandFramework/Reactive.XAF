@@ -81,7 +81,7 @@ $csproj.Project.ItemGroup.Reference | Where-Object { "$($_.Include)" -like $Refe
             $packagePath = Resolve-Path $_.HintPath
             Pop-Location
             $version = [System.Diagnostics.FileVersionInfo]::GetVersionInfo("$packagePath").FileVersion
-            Add-NuspecDependency $matchedPackageName $version $nuspec $targetFrameworkVersion| Out-Null
+            Add-NuspecDependency $matchedPackageName $version $nuspec ($targetFrameworkVersion.Split("-")[0])| Out-Null
         }
                 
         $nuspec.Save($NuspecFilename)
@@ -92,7 +92,7 @@ $packageReference = Get-PackageReference $ProjectFileName
         
 $packageReference | Where-Object { $_.Include -and $_.PrivateAssets -ne "all" } | ForEach-Object {
     if (!$ResolveNugetDependecies -or $_.Include -in $allDependencies) {
-        Add-NuspecDependency $_.Include $_.version $nuspec $targetFrameworkVersion| Out-Null
+        Add-NuspecDependency $_.Include $_.version $nuspec ($targetFrameworkVersion.Split("-")[0])| Out-Null
     }
 }
 $nuspec.Save($NuspecFilename)
@@ -103,11 +103,11 @@ if ($targetFrameworkVersion -notmatch "netstandard" -and $appendTargetFrameworkT
 }
 $file = $nuspec.CreateElement("file", $nuspec.DocumentElement.NamespaceURI)
 $file.SetAttribute("src", "$sourcePath$($id).$extension")
-$file.SetAttribute("target", "lib\$targetFrameworkVersion\$id.$extension")
+$file.SetAttribute("target", "lib\$($targetFrameworkVersion.Split("-")[0])\$id.$extension")
 $nuspec.SelectSingleNode("//ns:files", $ns).AppendChild($file) | Out-Null
 $file = $nuspec.CreateElement("file", $nuspec.DocumentElement.NamespaceURI)
 $file.SetAttribute("src", "$sourcePath$($id).pdb")
-$file.SetAttribute("target", "lib\$targetFrameworkVersion\$id.pdb")
+$file.SetAttribute("target", "lib\$($targetFrameworkVersion.Split("-")[0])\$id.pdb")
 $nuspec.SelectSingleNode("//ns:files", $ns).AppendChild($file) | Out-Null
 
 $nuspec.Save($NuspecFilename)

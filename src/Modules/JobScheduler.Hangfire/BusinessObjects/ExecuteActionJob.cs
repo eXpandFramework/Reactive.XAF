@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
-using DevExpress.Blazor.Internal.Compatibility.System.ComponentModel;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Editors;

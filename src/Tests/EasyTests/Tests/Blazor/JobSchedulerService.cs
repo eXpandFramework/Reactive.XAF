@@ -6,9 +6,9 @@ using Shouldly;
 using Xpand.Extensions.XAF.ObjectExtensions;
 using Xpand.TestsLib.Blazor;
 using Xpand.TestsLib.Common.BO;
-using Xpand.TestsLib.Common.EasyTest;
-using Xpand.TestsLib.Common.EasyTest.Commands;
-using Xpand.TestsLib.Common.EasyTest.Commands.ActionCommands;
+using Xpand.TestsLib.EasyTest;
+using Xpand.TestsLib.EasyTest.Commands;
+using Xpand.TestsLib.EasyTest.Commands.ActionCommands;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
 
 namespace Web.Tests {

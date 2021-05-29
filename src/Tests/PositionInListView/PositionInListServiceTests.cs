@@ -19,18 +19,16 @@ namespace Xpand.XAF.Modules.PositionInListView.Tests{
 		[XpandTest]
 		public void When_new_objects_position_them_by_model_strategy(PositionInListViewNewObjectsStrategy? strategy,
 			int first, int second, int third, int fourth) {
-            using var application = PositionInListViewModuleModule().Application;
-            var modelPositionInListView = application.Model.ToReactiveModule<IModelReactiveModulesPositionInListView>()
-                .PositionInListView;
-            var listViewItem = modelPositionInListView.ListViewItems.AddNode<IModelPositionInListViewListViewItem>();
-            var modelClass = application.Model.BOModel.GetClass(typeof(PIL));
-            listViewItem.ListView = modelClass.DefaultListView;
-            if (strategy != null){
-                var modelClassItem = modelPositionInListView.ModelClassItems
-                    .AddNode<IModelPositionInListViewModelClassItem>();
-                modelClassItem.ModelClass = modelClass;
-                modelClassItem.NewObjectsStrategy = strategy.Value;
-            }
+            using var application = PositionInListViewModuleModule(xafApplication => {
+	            var modelPositionInListView = xafApplication.Model
+		            .ToReactiveModule<IModelReactiveModulesPositionInListView>().PositionInListView;
+	            if (strategy != null){
+		            var modelClassItem = modelPositionInListView.ModelClassItems
+			            .AddNode<IModelPositionInListViewModelClassItem>();
+		            modelClassItem.ModelClass = ListViewItem.ListView.ModelClass;
+		            modelClassItem.NewObjectsStrategy = strategy.Value;
+	            }
+            }).Application;
 
             var objectSpace = application.CreateObjectSpace();
             var pil1 = objectSpace.CreateObject<PIL>();
@@ -53,8 +51,7 @@ namespace Xpand.XAF.Modules.PositionInListView.Tests{
 		[XpandTest]
 		public void When_ListView_Creating_Sort_CollectionSource(SortingDirection sortingDirection, int first, int last) {
             using var application = PositionInListViewModuleModule().Application;
-            var positionInListView = application.Model.ToReactiveModule<IModelReactiveModulesPositionInListView>()
-                .PositionInListView.ListViewItems.AddNode<IModelPositionInListViewListViewItem>();
+            var positionInListView = ListViewItem;
             positionInListView.ListView = application.Model.BOModel.GetClass(typeof(PIL)).DefaultListView;
             positionInListView.SortingDirection = sortingDirection;
             var listViewColumn = positionInListView.ListView.Columns[nameof(PIL.Name)];

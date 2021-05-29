@@ -1,10 +1,9 @@
 ﻿using DevExpress.EasyTest.Framework;
-using Xpand.TestsLib.Common.EasyTest;
-using Xpand.TestsLib.Common.EasyTest.Commands;
-using Xpand.TestsLib.Common.EasyTest.Commands.ActionCommands;
+using Xpand.TestsLib.EasyTest;
+using Xpand.TestsLib.EasyTest.Commands;
+using Xpand.TestsLib.EasyTest.Commands.ActionCommands;
 using Xpand.XAF.Modules.PositionInListView;
-using ActionAvailableCommand = Xpand.TestsLib.Common.EasyTest.Commands.ActionCommands.ActionAvailableCommand;
-using ActionCommand = Xpand.TestsLib.Common.EasyTest.Commands.ActionCommands.ActionCommand;
+
 
 namespace Win.Tests {
     public static class PositionInListViewService {

@@ -1,7 +1,7 @@
 ﻿using System;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Updating;
-using DevExpress.Persistent.BaseImpl.PermissionPolicy;
+using DevExpress.Xpo;
 using Xpand.Extensions.XAF.SecurityExtensions;
 
 namespace Xpand.TestsLib.Common {
@@ -18,7 +18,7 @@ namespace Xpand.TestsLib.Common {
             base.UpdateDatabaseAfterUpdateSchema();
             this.AddDefaultSecurityObjects();
             if (_userId!=Guid.Empty){
-                ((PermissionPolicyUser) ObjectSpace.GetUser(_admin?"Admin":"User")).SetMemberValue("oid", _userId);
+                ((XPBaseObject) ObjectSpace.GetUser(_admin?"Admin":"User")).SetMemberValue("oid", _userId);
             }
             ObjectSpace.CommitChanges();
         }

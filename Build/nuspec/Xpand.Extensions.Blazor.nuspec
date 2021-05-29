@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.Extensions.Blazor</id>
-    <version>4.202.55.0</version>
+    <version>4.211.0.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -12,11 +12,11 @@
     <description>Xpand.Extensions.Blazor</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.Extensions.Blazor, 20.2.7</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.Extensions.Blazor, 21.1.3</tags>
     <dependencies>
-      <group targetFramework="netstandard2.1">
-        <dependency id="Xpand.Extensions" version="4.202.55.0" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.202.55.0" />
+      <group targetFramework="net5.0">
+        <dependency id="Xpand.Extensions" version="4.211.0.1" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.211.0.1" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="JetBrains.Annotations" version="2021.1" />
         <dependency id="Microsoft.AspNetCore.Hosting.Abstractions" version="2.2" />
@@ -29,8 +29,8 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="Xpand.Extensions.Blazor.dll" target="lib\netstandard2.1\Xpand.Extensions.Blazor.dll" />
-    <file src="Xpand.Extensions.Blazor.pdb" target="lib\netstandard2.1\Xpand.Extensions.Blazor.pdb" />
+    <file src="net5.0\Xpand.Extensions.Blazor.dll" target="lib\net5.0\Xpand.Extensions.Blazor.dll" />
+    <file src="net5.0\Xpand.Extensions.Blazor.pdb" target="lib\net5.0\Xpand.Extensions.Blazor.pdb" />
     <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.Extensions.Blazor.targets" />
     <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
   </files>

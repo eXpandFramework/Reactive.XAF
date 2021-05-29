@@ -10,7 +10,6 @@ using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.PositionInListView.Tests.BOModel;
-using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.XAF.Modules.PositionInListView.Tests{
 	public class SwapPositionInListViewServiceTest : PositionInListViewCommonTest{
@@ -18,13 +17,10 @@ namespace Xpand.XAF.Modules.PositionInListView.Tests{
 		[XpandTest]
 		public void Move_object_actions_are_active_only_for_model_views() {
             using var application = PositionInListViewModuleModule().Application;
-            var modelPositionInListView = application.Model.ToReactiveModule<IModelReactiveModulesPositionInListView>()
-                .PositionInListView;
-            var listViewItem = modelPositionInListView.ListViewItems.AddNode<IModelPositionInListViewListViewItem>();
-            listViewItem.ListView = application.Model.BOModel.GetClass(typeof(PIL)).DefaultListView;
+            
             var viewWindow = application.CreateViewWindow();
 
-            viewWindow.SetView(application.NewView(listViewItem.ListView));
+            viewWindow.SetView(application.NewView(ListViewItem.ListView));
 
             var moduleAction = viewWindow.Action<PositionInListViewModule>();
             moduleAction.MoveObjectUp().Active.ResultValue.ShouldBeTrue();
@@ -40,15 +36,10 @@ namespace Xpand.XAF.Modules.PositionInListView.Tests{
 
             var objectSpace = application.CreateObjectSpace();
 
-            var modelPositionInListView = application.Model.ToReactiveModule<IModelReactiveModulesPositionInListView>()
-                .PositionInListView;
-            var listViewItem = modelPositionInListView.ListViewItems.AddNode<IModelPositionInListViewListViewItem>();
-
-            listViewItem.ListView = application.Model.BOModel.GetClass(typeof(PIL)).DefaultListView;
             var viewWindow = application.CreateViewWindow();
             PIL pil1 = null;
             PIL pil2 = null;
-            var view = application.NewView(listViewItem.ListView,
+            var view = application.NewView(ListViewItem.ListView,
                 space => new[]{space.GetObject(disabledAction == nameof(SwapPositionInListViewService.MoveObjectUp) ? pil1 : pil2)},objectSpace);
             viewWindow.SetView(view);
             pil1 = objectSpace.CreateObject<PIL>();
@@ -69,15 +60,13 @@ namespace Xpand.XAF.Modules.PositionInListView.Tests{
 		[TestCase(nameof(SwapPositionInListViewService.MoveObjectDown), 1)]
 		[XpandTest]
 		public void When_moving_object_swap_position_with_next_object(string direction, int otherObjectPosition) {
+			
             using var application = PositionInListViewModuleModule().Application;
-            var modelPositionInListView = application.Model.ToReactiveModule<IModelReactiveModulesPositionInListView>()
-                .PositionInListView;
-            var listViewItem = modelPositionInListView.ListViewItems.AddNode<IModelPositionInListViewListViewItem>();
-            listViewItem.ListView = application.Model.BOModel.GetClass(typeof(PIL)).DefaultListView;
+            
             var objectSpace = application.CreateObjectSpace();
 				
             var viewWindow = application.CreateViewWindow();
-            var compositeView = application.NewView(listViewItem.ListView,objectSpace).AsListView();
+            var compositeView = application.NewView(ListViewItem.ListView,objectSpace).AsListView();
             viewWindow.SetView(compositeView);
             var pil1 = objectSpace.CreateObject<PIL>();
             pil1.Name = "a";
@@ -104,10 +93,7 @@ namespace Xpand.XAF.Modules.PositionInListView.Tests{
 		[XpandTest]
 		public void When_moving_edge_object_towards_edge_position_should_not_change(string direction) {
             using var application = PositionInListViewModuleModule().Application;
-            var modelPositionInListView = application.Model.ToReactiveModule<IModelReactiveModulesPositionInListView>()
-                .PositionInListView;
-            var listViewItem = modelPositionInListView.ListViewItems.AddNode<IModelPositionInListViewListViewItem>();
-            listViewItem.ListView = application.Model.BOModel.GetClass(typeof(PIL)).DefaultListView;
+            
             var objectSpace = application.CreateObjectSpace();
             var pil1 = objectSpace.CreateObject<PIL>();
             pil1.Name = "a";
@@ -117,7 +103,7 @@ namespace Xpand.XAF.Modules.PositionInListView.Tests{
             pil3.Name = "c";
             objectSpace.CommitChanges();
             var viewWindow = application.CreateViewWindow();
-            viewWindow.SetView(application.NewView(listViewItem.ListView));
+            viewWindow.SetView(application.NewView(ListViewItem.ListView));
             var action = viewWindow.Action(direction);
             var edgeObject = direction == nameof(SwapPositionInListViewService.MoveObjectUp) ? pil1 : pil3;
 

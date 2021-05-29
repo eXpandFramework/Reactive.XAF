@@ -9,6 +9,6 @@ Microsoft.CodeAnalysis
 Microsoft.CodeAnalysis.Csharp
 Newtonsoft.Json
 Microsoft.NET.Test.Sdk
-DevExpress.WindowsDesktop.Core
-DevExpress.WindowsDesktop.Xaf
 System.Data.SqlClient
+DevExpress.ExpressApp.Win
+DevExpress.Persistent.BaseImpl

@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <Deterministic>false</Deterministic>
     <AssemblyVersion>1.0.*</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
@@ -16,13 +16,13 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DefineConstants>TRACE;DEBUG;XAF202XAF202</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;XAF211XAF211</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DefineConstants>TRACE;XAF202XAF202</DefineConstants>
+    <DefineConstants>TRACE;XAF211XAF211</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'EasyTest|AnyCPU' ">
-    <DefineConstants>TRACE;DEBUG;EASYTEST;XAF202XAF202</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;EASYTEST;XAF211XAF211</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Office\**" />
@@ -38,9 +38,8 @@
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.WindowsDesktop.Core" Version="20.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="20.2.7" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="4.202.55" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="21.1.3" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="4.211.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.5" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.8.1" />

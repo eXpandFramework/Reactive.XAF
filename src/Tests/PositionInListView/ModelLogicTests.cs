@@ -21,20 +21,16 @@ namespace Xpand.XAF.Modules.PositionInListView.Tests{
         [Test][XpandTest()][Order(1)]
         public void ListViewModelMember_datasource_contains_int_Members() {
             using var application=PositionInListViewModuleModule().Application;
-            var positionInListView = application.Model.ToReactiveModule<IModelReactiveModulesPositionInListView>()
-                .PositionInListView.ListViewItems.AddNode<IModelPositionInListViewListViewItem>();
-            positionInListView.ListView = application.Model.BOModel.GetClass(typeof(PIL)).DefaultListView;
+            var positionInListView = ListViewItem;
+            
             positionInListView.PositionMembers.Count().ShouldBe(1);
             positionInListView.PositionMembers.First().Id().ShouldBe(nameof(PIL.Order));
         }
         [Test][XpandTest()][Order(2)]
         public void ModelListViewPositionMember_defaults_to_first_long_member() {
             using var application=PositionInListViewModuleModule().Application;
-            var positionInListView = application.Model.ToReactiveModule<IModelReactiveModulesPositionInListView>()
-                .PositionInListView.ListViewItems.AddNode<IModelPositionInListViewListViewItem>();
-            positionInListView.ListView = application.Model.BOModel.GetClass(typeof(PIL)).DefaultListView;
-            positionInListView.PositionMember.ShouldNotBeNull();
-            positionInListView.PositionMember.Id().ShouldBe(nameof(PIL.Order));
+            ListViewItem.PositionMember.ShouldNotBeNull();
+            ListViewItem.PositionMember.Id().ShouldBe(nameof(PIL.Order));
         }
         [Test][XpandTest()][Order(1)]
         public void ModelClass_datasource_contains_only_classes_with_int_Members() {

@@ -323,7 +323,7 @@ jobs:
               NupkgBuild = (Get-AzBuilds -Definition Reactive.XAF -Result succeeded -Tag '$(CustomVersion)' -Top 1).Id
           }
           "past=$past"
-          Add-AzBuild -Definition Reactive.XAF -Tag $past -Parameters $parameters
+          # Add-AzBuild -Definition Reactive.XAF -Tag $past -Parameters $parameters
 - job: TestNugetChecConsumerPipeline
   dependsOn: TestNet461
   strategy: 

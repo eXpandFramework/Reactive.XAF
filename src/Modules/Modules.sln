@@ -201,6 +201,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Reactive.
 		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions.Blazor", "..\Extensions\Xpand.Extensions.Blazor\Xpand.Extensions.Blazor.csproj", "{4C7CD7BF-3E36-4592-BBBC-847863602546}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_20.1|Any CPU = Debug_20.1|Any CPU
@@ -478,6 +480,10 @@ Global
 		{AEEFF920-B496-4F3A-BC29-971995F07CCA}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{AEEFF920-B496-4F3A-BC29-971995F07CCA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AEEFF920-B496-4F3A-BC29-971995F07CCA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C7CD7BF-3E36-4592-BBBC-847863602546}.Debug_20.1|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C7CD7BF-3E36-4592-BBBC-847863602546}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C7CD7BF-3E36-4592-BBBC-847863602546}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C7CD7BF-3E36-4592-BBBC-847863602546}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

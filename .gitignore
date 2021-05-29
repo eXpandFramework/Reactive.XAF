@@ -645,3 +645,6 @@ GitUserEmail.json
 /src/Tests/EasyTests/TestApplication/PushToken.ps1
 **/Startup.DevExpress.cs
 **JobScheduler.Maintenance**
+/tools/2/
+/tools/Xpand.Rider.ModelEditor/
+**/Xpand.XAF.ModelEditor.bat

@@ -143,6 +143,7 @@ Task CompileNugetConsumers -precondition { return $compile } {
         Update-NugetConsumersPackageVersion
         CompileTestSolution "$Root\src\Tests\\EasyTests\EasyTests.sln"
     } -Maximum 3
+    Write-HostFormatted "Test-AssemblyReference" -Section
     Get-ChildItem $root\bin "*xpand*.dll" | Test-AssemblyReference -VersionFilter $DXVersion
 }
 

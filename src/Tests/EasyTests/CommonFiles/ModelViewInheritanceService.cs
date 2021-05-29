@@ -1,8 +1,8 @@
 ﻿using DevExpress.EasyTest.Framework;
 using DevExpress.Persistent.BaseImpl;
-using Xpand.TestsLib.Common.EasyTest;
-using Xpand.TestsLib.Common.EasyTest.Commands;
-using Xpand.TestsLib.Common.EasyTest.Commands.ActionCommands;
+using Xpand.TestsLib.EasyTest;
+using Xpand.TestsLib.EasyTest.Commands;
+using Xpand.TestsLib.EasyTest.Commands.ActionCommands;
 
 namespace Win.Tests {
     public static class ModelViewInheritanceService {

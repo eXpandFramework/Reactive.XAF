@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -20,7 +20,7 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
   <PropertyGroup>
-    <DefineConstants>TRACE;XAF202</DefineConstants>
+    <DefineConstants>TRACE;XAF211</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Diagnostics\**" />

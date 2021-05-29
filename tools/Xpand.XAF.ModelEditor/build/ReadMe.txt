@@ -3,11 +3,11 @@
 +++++++++++++++++++++++  +++++++++          ☞ http://apobekiaris.expandframework.com
 ++++++++++    +++++++   +++++++++++      
 ++++++++++++  ++++++  ++++++++++++      ➤  ɪғ ʏᴏᴜ ʟɪᴋᴇ ᴏᴜʀ ᴡᴏʀᴋ ᴘʟᴇᴀsᴇ ᴄᴏɴsɪᴅᴇʀ ᴛᴏ ɢɪᴠᴇ ᴜs ᴀ STAR. 
-++++++++++++++  ++  ++++++++++++++          ☞ https://github.com/eXpandFramework/DevExpress.XAF/stargazers
+++++++++++++++  ++  ++++++++++++++          ☞ https://github.com/eXpandFramework/Reactive.XAF/stargazers
 ++++++++++++++    ++++++++++++++++      
 ++++++++++++++  ++  ++++++++++++++      ➤ Package Notes
 ++++++++++++  ++++    ++++++++++++         ☞ The Xpand.XAF.ModelEditor package contains a standalone version of the XAF ModelEditor and integrates with both Visual Studio and Rider.
-++++++++++  ++++++++   +++++++++++         ☞ Documentation can be found @ https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.XAF.ModelEditor.
+++++++++++  ++++++++   +++++++++++         ☞ Documentation can be found @ https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.XAF.ModelEditor.
 +++++++++  +++++++++++  ++++++++++         ☞ The package does not have any dependencies to DevExpress or eXpandFramework assemblies. 
 ++++++++  +++++++++++++  +++++++++            The required DevExpress assemblies will de detected on each build and downloaded from your Nuget.config feeds.
 ++++++  ++++++++++++++++  ++++++++         ☞ There is no need to install the package to more than one projects in your solution.

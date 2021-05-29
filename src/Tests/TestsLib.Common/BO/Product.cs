@@ -1,12 +1,10 @@
-﻿using System.ComponentModel;
-using DevExpress.ExpressApp;
-using DevExpress.Persistent.Base;
-using DevExpress.Persistent.BaseImpl;
+﻿using DevExpress.Persistent.Base;
 using DevExpress.Xpo;
+using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.TestsLib.Common.BO{
     [FriendlyKeyProperty(nameof(ProductName))][DefaultClassOptions]
-    public class Product : BaseObject,IObjectSpaceLink{
+    public class Product : CustomBaseObject{
         public Product(Session session) : base(session){
         }
 
@@ -26,8 +24,8 @@ namespace Xpand.TestsLib.Common.BO{
 
         [Association("P-To-Instance")]
         public XPCollection<Accessory> Accessories => GetCollection<Accessory>(nameof(Accessories));
-        [Browsable(false)][NonPersistent]
+        
 
-        public IObjectSpace ObjectSpace{ get; set; }
+        
     }
 }

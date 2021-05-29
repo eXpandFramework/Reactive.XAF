@@ -120,7 +120,12 @@ function GetOutputType {
         [parameter(Mandatory)]
         [xml]$proj
     )
-    $proj.Project.PropertyGroup.OutputType | Select-Object -First 1
+    try {
+        $proj.Project.PropertyGroup.OutputType | Select-Object -First 1 
+    }
+    catch {
+        "dll"
+    }
 }
 function GetAssemblyExtension {
     param (

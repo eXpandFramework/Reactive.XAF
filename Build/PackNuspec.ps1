@@ -4,7 +4,7 @@ param(
     $sourceDir = "$PSScriptRoot\..",
     $Filter ,
     [switch]$SkipReadMe,
-    $dxVersion="20.2.7.0"
+    $dxVersion="21.1.3.0"
 )
 
 New-Item $nugetBin -ItemType Directory -Force | Out-Null
@@ -45,8 +45,8 @@ $packScript = {
     
 }
 $varsToImport = @("assemblyVersions", "SkipReadMe", "nugetPath", "sourceDir", "nugetBin", "SkipReadMe")
-$nuspecs | Invoke-Parallel -VariablesToImport $varsToImport -Script $packScript
-# $nuspecs|Where-Object{$_ -match "Xpand.TestsLib.nuspec"}| ForEach-Object { Invoke-Command $packScript -ArgumentList $_ }
+# $nuspecs | Invoke-Parallel -VariablesToImport $varsToImport -Script $packScript
+$nuspecs| ForEach-Object { Invoke-Command $packScript -ArgumentList $_ }
 function AddReadMe {
     param(
         $Package,

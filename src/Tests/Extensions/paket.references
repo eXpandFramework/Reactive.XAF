@@ -10,5 +10,3 @@ Microsoft.CodeAnalysis
 Microsoft.CodeAnalysis.Csharp
 Newtonsoft.Json
 Microsoft.NET.Test.Sdk
-DevExpress.WindowsDesktop.Core
-DevExpress.WindowsDesktop.Xaf

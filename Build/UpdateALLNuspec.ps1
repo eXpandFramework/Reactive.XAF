@@ -46,10 +46,14 @@ function UpdateALLNuspec($platform, $allNuspec, $nuspecs,$allModuleNuspecs,$csPr
     }
     $group=$allNuspec.package.metadata.dependencies.group
     $standardGroup=($group|Where-Object{$_.targetFramework -eq "netstandard2.0"})
-    $net461Group=($group|Where-Object{$_.targetFramework -eq "net461"})
-    if ($net461Group){
+    if (($group|Where-Object{$_.targetFramework -eq "net461"})){
         $standardGroup.dependency|ForEach-Object{
             Add-NuspecDependency $_.Id $_.version $allNuspec "net461"
+        }
+    }
+    if (($group|Where-Object{$_.targetFramework -eq "net5.0"})){
+        $standardGroup.dependency|ForEach-Object{
+            Add-NuspecDependency $_.Id $_.version $allNuspec "net5.0"
         }
     }
 }

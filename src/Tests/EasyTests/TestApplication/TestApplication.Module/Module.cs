@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reactive.Linq;
 using ALL.Tests;
 using DevExpress.ExpressApp;
+
 using DevExpress.ExpressApp.Chart;
 using DevExpress.ExpressApp.CloneObject;
 using DevExpress.ExpressApp.ConditionalAppearance;
@@ -43,12 +44,14 @@ using Xpand.XAF.Modules.ProgressBarViewItem;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Logger;
+using Xpand.XAF.Modules.Reactive.Logger.Hub;
 using Xpand.XAF.Modules.RefreshView;
 using Xpand.XAF.Modules.SequenceGenerator;
 using Xpand.XAF.Modules.SuppressConfirmation;
 using Xpand.XAF.Modules.ViewEditMode;
 using Xpand.XAF.Modules.ViewItemValue;
 using Xpand.XAF.Modules.ViewWizard;
+
 
 namespace TestApplication.Module {
     public interface IWebModule {
@@ -58,7 +61,7 @@ namespace TestApplication.Module {
         public TestApplicationModule() {
             			#region XAF Modules
 
-			// RequiredModuleTypes.Add(typeof(AuditTrailModule));
+			
 			RequiredModuleTypes.Add(typeof(ChartModule));
 			RequiredModuleTypes.Add(typeof(CloneObjectModule));
 			RequiredModuleTypes.Add(typeof(ConditionalAppearanceModule));
@@ -69,9 +72,9 @@ namespace TestApplication.Module {
 			RequiredModuleTypes.Add(typeof(PivotChartModuleBase));
 			RequiredModuleTypes.Add(typeof(PivotGridModule));
 			RequiredModuleTypes.Add(typeof(ReportsModuleV2));
-            RequiredModuleTypes.Add(typeof(ScriptRecorderModuleBase));
+			RequiredModuleTypes.Add(typeof(ScriptRecorderModuleBase));
 			RequiredModuleTypes.Add(typeof(SecurityModule));
-            RequiredModuleTypes.Add(typeof(StateMachineModule));
+			RequiredModuleTypes.Add(typeof(StateMachineModule));
 			RequiredModuleTypes.Add(typeof(TreeListEditorsModuleBase));
 			RequiredModuleTypes.Add(typeof(SystemModule));
 			RequiredModuleTypes.Add(typeof(ValidationModule));
@@ -79,7 +82,7 @@ namespace TestApplication.Module {
 
             #endregion
 
-            AdditionalExportedTypes.Add(typeof(Order));
+            // AdditionalExportedTypes.Add(typeof(Order));
 
             RequiredModuleTypes.Add(typeof(AutoCommitModule));
             RequiredModuleTypes.Add(typeof(CloneMemberValueModule));
@@ -92,18 +95,18 @@ namespace TestApplication.Module {
             RequiredModuleTypes.Add(typeof(ReactiveModule));
             RequiredModuleTypes.Add(typeof(PositionInListViewModule));
             RequiredModuleTypes.Add(typeof(RefreshViewModule));
-			RequiredModuleTypes.Add(typeof(SequenceGeneratorModule));
-			RequiredModuleTypes.Add(typeof(SuppressConfirmationModule));
-			RequiredModuleTypes.Add(typeof(ViewEditModeModule));
+            RequiredModuleTypes.Add(typeof(SequenceGeneratorModule));
+            RequiredModuleTypes.Add(typeof(SuppressConfirmationModule));
+            RequiredModuleTypes.Add(typeof(ViewEditModeModule));
             RequiredModuleTypes.Add(typeof(ViewItemValueModule));
-			RequiredModuleTypes.Add(typeof(GoogleModule));
-			RequiredModuleTypes.Add(typeof(GoogleTasksModule));
-			RequiredModuleTypes.Add(typeof(GoogleCalendarModule));
+            RequiredModuleTypes.Add(typeof(GoogleModule));
+            RequiredModuleTypes.Add(typeof(GoogleTasksModule));
+            RequiredModuleTypes.Add(typeof(GoogleCalendarModule));
             RequiredModuleTypes.Add(typeof(ReactiveLoggerModule));
-			// RequiredModuleTypes.Add(typeof(ReactiveLoggerHubModule));
-			RequiredModuleTypes.Add(typeof(ViewWizardModule));
-			AdditionalExportedTypes.Add(typeof(Event));
-			AdditionalExportedTypes.Add(typeof(Task));
+            RequiredModuleTypes.Add(typeof(ReactiveLoggerHubModule));
+            RequiredModuleTypes.Add(typeof(ViewWizardModule));
+            AdditionalExportedTypes.Add(typeof(Event));
+            AdditionalExportedTypes.Add(typeof(Task));
 
         }
 

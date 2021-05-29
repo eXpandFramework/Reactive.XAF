@@ -1,6 +1,4 @@
 akarnokd.reactive_extensions
-DevExpress.ExpressApp.Security.Xpo
-DevExpress.Persistent.BaseImpl
 Enums.NET
 Humanizer.Core
 MagicOnion
@@ -13,5 +11,4 @@ Polly
 JetBrains.Annotations
 Microsoft.CodeAnalysis.CSharp
 nunit
-DevExpress.EasyTest
 Microsoft.CodeAnalysis

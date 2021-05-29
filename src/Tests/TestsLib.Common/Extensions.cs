@@ -190,7 +190,7 @@ namespace Xpand.TestsLib.Common{
             {"LookupCascadeModule", 61474},
             {"SequenceGeneratorModule", 61475},
             {"MicrosoftTodoModule", 61476},
-            {"PositionInlistViewModule", 61478},
+            {"PositionInListViewModule", 61478},
             {"ViewWizardModule", 61482},
             {"ViewItemValueModule", 61479},
             {"MicrosoftModule", 61480},

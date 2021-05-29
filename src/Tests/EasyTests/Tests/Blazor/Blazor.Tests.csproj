@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <!-- <UseWindowsForms>true</UseWindowsForms> -->
@@ -20,7 +20,7 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>TRACE;XAF202</DefineConstants>
+    <DefineConstants>TRACE;XAF211</DefineConstants>
     <NoWarn>1701;1702;CS8002</NoWarn>
   </PropertyGroup>
   <ItemGroup>
@@ -41,28 +41,31 @@
     <Compile Include="..\..\CommonFiles\SequenceGeneratorService.cs" Link="SequenceGeneratorService.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.EasyTest.BlazorAdapter" Version="20.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp.EasyTest.BlazorAdapter" Version="21.1.3" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.5" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0" />
-    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="20.2.7" />
-    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="20.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="21.1.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="21.1.3" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.8.1" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.8.1" />
     <PackageReference Include="System.ServiceModel.Duplex" Version="4.8.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
     <PackageReference Include="Moq" Version="4.16" />
-    <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="88.0.4324.9600" />
+    <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="91.0.4472.1900" />
     <PackageReference Include="Shouldly" Version="4.0.3" />
     <PackageReference Include="NUnit" Version="3.13" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.17" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="4.202.55" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="4.211.0.2" />
     <PackageReference Include="Selenium.WebDriver" Version="3.141" />
     <PackageReference Include="Selenium.Support" Version="3.141" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.TestsLib.Blazor">
       <HintPath>..\..\..\..\..\bin\net5.0\Xpand.TestsLib.Blazor.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.TestsLib.EasyTest">
+      <HintPath>..\..\..\..\..\bin\net5.0\Xpand.TestsLib.EasyTest.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.TestsLib.Common">
       <HintPath>..\..\..\..\..\bin\Xpand.TestsLib.Common.dll</HintPath>

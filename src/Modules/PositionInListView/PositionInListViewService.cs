@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using DevExpress.Data;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
@@ -89,48 +90,50 @@ namespace Xpand.XAF.Modules.PositionInListView{
             => applicationModel.ModelPositionInListView().ListViewItems.Select(item => item.ListView.Id()).Contains(viewID);
 
         private static IObservable<Unit> PositionNewObjects(this IObservable<XafApplication> whenApplication) 
-            => whenApplication.SelectMany(application => Observable.Defer(() => application.WhenObjectSpaceCreated()
-                            .SelectMany(objectSpace => objectSpace.WhenNewObjectCommiting<object>().Pair(objectSpace)))
-                        .Do(t => {
-                            var modelPositionInListView = application.Model.ModelPositionInListView();
-                            var listViewItems = modelPositionInListView.ListViewItems;
-                            if (listViewItems.Any()) {
-                                var objectType = t.source.GetType();
-                                var listViewItem = listViewItems.FirstOrDefault(item =>
-                                    item.ListView.ModelClass.TypeInfo.Type == objectType);
-                                if (listViewItem != null) {
-                                    var modelClassItem = modelPositionInListView.ModelClassItems
-                                        .FirstOrDefault(item =>
-                                            item.ModelClass.TypeInfo.Type == objectType &&
-                                            item.ModelMember == listViewItem.PositionMember);
-                                    var aggregate = Aggregate.Max;
-                                    if (modelClassItem != null && modelClassItem.NewObjectsStrategy ==
-                                        PositionInListViewNewObjectsStrategy.First) {
-                                        aggregate = Aggregate.Min;
-                                    }
+            => whenApplication.SelectMany(application => application.WhenModelChanged().To(application).Skip(1).FirstAsync())
+	            .SelectMany(application => {
+		            var modelPositionInListView = application.Model.ModelPositionInListView();
+		            var positionMembers = modelPositionInListView.ListViewItems
+			            .Select(item => item.PositionMember.MemberInfo).ToArray();
+		            var classMembers = modelPositionInListView.ModelClassItems
+			            .Select(item => new{item.ModelMember.MemberInfo,item.NewObjectsStrategy}).ToArray();
+		            return Observable.Defer(() => application.WhenObjectSpaceCreated()
+				            .SelectMany(objectSpace => objectSpace.WhenNewObjectCommiting<object>().Pair(objectSpace)))
+			            .Do(t => {
+				            if (positionMembers.Any()) {
+					            var objectType = t.source.GetType();
+					            var listViewItem = positionMembers.FirstOrDefault(item =>
+						            item.Owner.Type == objectType);
+					            if (listViewItem != null) {
+						            var modelClassItem = classMembers
+							            .FirstOrDefault(item => item.MemberInfo.Owner.Type == objectType && item.MemberInfo == listViewItem);
+						            var aggregate = Aggregate.Max;
+						            if (modelClassItem != null && modelClassItem.NewObjectsStrategy ==
+							            PositionInListViewNewObjectsStrategy.First) {
+							            aggregate = Aggregate.Min;
+						            }
 
-                                    var memberInfo = listViewItem.PositionMember.MemberInfo;
-                                    var aggregateOperand = new AggregateOperand("", memberInfo.Name, aggregate);
-                                    var value = (int) (t.other.Evaluate(objectType, aggregateOperand, null) ?? 0);
-                                    var allValues = t.other.ModifiedObjects.Cast<object>()
-                                        .Select(o => memberInfo.GetValue(o) ?? 0).Cast<int>().Concat(value.YieldItem());
-                                    if (aggregate == Aggregate.Max) {
-                                        value = allValues.Max();
-                                        value++;
-                                    }
-                                    else {
-                                        value = allValues.Min();
-                                        value--;
-                                    }
+						            var memberInfo = listViewItem;
+						            var aggregateOperand = new AggregateOperand("", memberInfo.Name, aggregate);
+						            var value = (int) (t.other.Evaluate(objectType, aggregateOperand, null) ?? 0);
+						            var allValues = t.other.ModifiedObjects.Cast<object>()
+							            .Select(o => memberInfo.GetValue(o) ?? 0).Cast<int>().Concat(value.YieldItem());
+						            if (aggregate == Aggregate.Max) {
+							            value = allValues.Max();
+							            value++;
+						            }
+						            else {
+							            value = allValues.Min();
+							            value--;
+						            }
 
-                                    memberInfo.SetValue(t.source, value);
-                                }
-                            }
-                        }))
-                
-                .TracePositionInListView(_ => $"{_.source}")
+						            memberInfo.SetValue(t.source, value);
+					            }
+				            }
+			            });
+
+	            })
+	            .TracePositionInListView(_ => $"{_.source}")
                 .ToUnit();
-
-        
     }
 }

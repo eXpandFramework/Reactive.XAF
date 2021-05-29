@@ -12,7 +12,7 @@ namespace ModellerLibDownloader
             version = Assembly.GetAssembly(typeof(DevExpress.ExpressApp.Frame)).GetCustomAttribute<AssemblyVersionAttribute>().Version;
             version = Assembly.GetAssembly(typeof(DevExpress.Office.AzureCompatibility)).GetCustomAttribute<AssemblyVersionAttribute>().Version;
             version = Assembly.GetAssembly(typeof(DevExpress.Persistent.Base.Method)).GetCustomAttribute<AssemblyVersionAttribute>().Version;
-            version = Assembly.GetAssembly(typeof(DevExpress.Printing.Core.FieldListNodeSpecifics)).GetCustomAttribute<AssemblyVersionAttribute>().Version;
+            version = Assembly.GetAssembly(typeof(DevExpress.Printing.Core.Native.IdGenerator)).GetCustomAttribute<AssemblyVersionAttribute>().Version;
             version = Assembly.GetAssembly(typeof(DevExpress.RichEdit.Export.Settings)).GetCustomAttribute<AssemblyVersionAttribute>().Version;
             version = Assembly.GetAssembly(typeof(DevExpress.Utils.Action0)).GetCustomAttribute<AssemblyVersionAttribute>().Version;
             version = Assembly.GetAssembly(typeof(DevExpress.XtraTreeList.ScrollVisibility)).GetCustomAttribute<AssemblyVersionAttribute>().Version;

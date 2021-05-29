@@ -18,8 +18,8 @@ using NUnit.Framework;
 using Win.Tests;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.TestsLib.Common.Attributes;
-using Xpand.TestsLib.Common.EasyTest;
-using Xpand.TestsLib.Common.EasyTest.Commands.ActionCommands;
+using Xpand.TestsLib.EasyTest;
+using Xpand.TestsLib.EasyTest.Commands.ActionCommands;
 using Xpand.XAF.Modules.Reactive.Logger;
 using CommonTest = ALL.Tests.CommonTest;
 
@@ -41,7 +41,7 @@ namespace Web.Tests{
         }
 
 #endif
-        [Test]
+        // [Test]
         [XpandTest(LongTimeout,3)]
         [Apartment(ApartmentState.STA)]
         public async Task Web_EasyTest_InLocalDb(){
@@ -73,7 +73,8 @@ namespace Web.Tests{
         }
 
         [XpandTest(LongTimeout,3)]
-        [Test][Apartment(ApartmentState.STA)]
+        // [Test]
+        [Apartment(ApartmentState.STA)]
         public async Task Web_EasyTest_InMemory(){
             await EasyTest(NewWebAdapter, RunWebApplication, async adapter => {
                 var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
@@ -98,11 +99,11 @@ namespace Web.Tests{
             
         }
 
-#if !NETCOREAPP3_1
+#if !NETCOREAPP3_1_OR_GREATER
         [XpandTest(LongTimeout,3)]
         [Test][Apartment(ApartmentState.STA)]
         public async Task Web_MicrosoftCloud_EasyTest(){
-            Xpand.TestsLib.Common.EasyTest.Commands.Automation.DeleteBrowserFiles.Execute();
+            DeleteBrowserFiles.Execute();
             await EasyTest(NewWebAdapter, RunWebApplication, async adapter => {
                 await adapter.TestMicrosoftService(async () => {
                     await adapter.TestMicrosoftCalendarService();
@@ -113,10 +114,11 @@ namespace Web.Tests{
 #endif
 
         [XpandTest(LongTimeout,3)]
-        [Test][Apartment(ApartmentState.STA)]
+        // [Test]
+        [Apartment(ApartmentState.STA)]
         public async Task Web_GoogleCloud_EasyTest(){
-#if !NETCOREAPP3_1
-            Xpand.TestsLib.Common.EasyTest.Commands.Automation.DeleteBrowserFiles.Execute();
+#if !NETCOREAPP3_1_OR_GREATER
+            DeleteBrowserFiles.Execute();
 #endif
             await EasyTest(NewWebAdapter, RunWebApplication, async adapter => {
                 await adapter.TestGoogleService(async () => {

@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>Xpand.XAF.ModelEditor</id>
-    <version>1.201.6.0</version>
+    <version>4.211.0.1</version>
     <title>DevExpress eXpandFramework Standalone Model Editor VS/Rider/Explorer integration.</title>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
@@ -22,8 +22,8 @@
     </frameworkAssemblies>
   </metadata>
   <files>
-    <file src="..\..\..\bin\Xpand.XAF.ModelEditor.exe" target="build\Xpand.XAF.ModelEditor.exe" />
-    <file src="..\..\..\bin\Xpand.XAF.ModelEditor.pdb" target="build\Xpand.XAF.ModelEditor.pdb" />
+    <file src="..\..\..\bin\net461\Xpand.XAF.ModelEditor.exe" target="build\Xpand.XAF.ModelEditor.exe" />
+    <file src="..\..\..\bin\net461\Xpand.XAF.ModelEditor.pdb" target="build\Xpand.XAF.ModelEditor.pdb" />
     <file src="..\..\..\src\Xpand.Key\Xpand.snk" target="build\Xpand.snk" />
     <file src=".\Xpand.XAF.ModelEditor.ps1" target="build\Xpand.XAF.ModelEditor.ps1" />
     <file src=".\Functions.ps1" target="build\Functions.ps1" />

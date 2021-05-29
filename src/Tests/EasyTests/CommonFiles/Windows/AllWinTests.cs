@@ -16,17 +16,17 @@ using Xpand.Extensions.AppDomainExtensions;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
-using Xpand.TestsLib.Common.EasyTest;
-using Xpand.TestsLib.Common.EasyTest.Commands.Automation;
+using Xpand.TestsLib.EasyTest;
+using Xpand.TestsLib.EasyTest.Commands.Automation;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Logger;
-using AutoTestCommand = Xpand.TestsLib.Common.EasyTest.Commands.ActionCommands.AutoTestCommand;
+using AutoTestCommand = Xpand.TestsLib.EasyTest.Commands.ActionCommands.AutoTestCommand;
 using CommonTest = ALL.Tests.CommonTest;
 
 namespace ALL.Win.Tests {
     [NonParallelizable]
     public class AllWinTests : CommonTest {
-#if !NETCOREAPP3_1
+#if !NETCOREAPP3_1_OR_GREATER
         [XpandTest(LongTimeout, 3)]
         [Test]
         [Apartment(ApartmentState.STA)]

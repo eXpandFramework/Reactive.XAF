@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -41,7 +42,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
             var t = await application.InitializeService(tasksFolderName,keepEvents:keepTaskFolder);
             await t.frame.View.ObjectSpace.Map_Two_New_Entity(
                 (space, i) => space.NewEvent(i), Timeout,
-                space => CalendarService.Updated.When(MapAction.Insert).TakeUntilDisposed(application), async (@event, _, i) => {
+                _ => CalendarService.Updated.When(MapAction.Insert).TakeUntilDisposed(application), async (@event, _, i) => {
                     if (afterAssert != null){
                         await afterAssert(t.service);
                     }
@@ -105,7 +106,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
                                 _.Handled = true;
                             }).To(default(Event)).IgnoreElements())
                         .TakeUntilDisposed(application),
-                (pmeTask, cloudTask) => {
+                (_, cloudTask) => {
                     cloudTask.Summary.ShouldBe(nameof(Customize_Map_Existing_Event_Two_Times));
                     return Task.CompletedTask;
                 },Timeout);
@@ -184,7 +185,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
             var calendarId = (await t.service.GetCalendar(CalendarTestExtensions.CalendarPagingName).ToTaskWithoutConfigureAwait()).Id;
             Func<IObjectSpace> objectSpaceFactory = application.ObjectSpaceProvider.CreateObjectSpace;
             await t.frame.View.ObjectSpace.Populate_All(syncToken,
-                storage => t.service.ListEvents(calendarId,null,
+                _ => t.service.ListEvents(calendarId,null,
                     store => store.SaveToken(objectSpaceFactory),250), Timeout,
                 events => {
                     var testObserver = events.Test();
@@ -204,7 +205,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
             await t.frame.Application.ObjectSpaceProvider
                 .Populate_Modified(storage => t.service.ListEvents(calendarId,storage), calendarEvent.ReturnObservable()
                         .Do(cloudEvent => cloudEvent.Description="updated")
-                        .SelectMany(unit => t.service.Events.Update(calendarEvent, calendarId,calendarEvent.Id ).ExecuteAsync()).ToUnit() ,
+                        .SelectMany(_ => t.service.Events.Update(calendarEvent, calendarId,calendarEvent.Id ).ExecuteAsync()).ToUnit() ,
                     Timeout, events => {
                         var testObserver = events.Test();
                         testObserver.Items.First().SelectMany(_ => _.Items).First().Description.ShouldBe("updated");
@@ -302,13 +303,13 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
 
         [Test]
         [XpandTest()]
+        [SuppressMessage("ReSharper", "AccessToDisposedClosure")]
         public override Task Skip_Authorization_If_Authentication_Storage_Is_Empty(){
 	        using var application = Platform.Win.CalendarModule().Application;
 	        var observer = application.WhenObjectViewCreated().Test();
 
 	        var exceptions = application.WhenTrace(rxAction: RXAction.OnError).Test();
-	        Should.ThrowAsync<TimeoutException>(async () =>
-		        await application.InitializeService(newAuthentication: false).Timeout(TimeSpan.FromSeconds(5)));
+	        Should.ThrowAsync<TimeoutException>(async () => await application.InitializeService(newAuthentication: false).Timeout(TimeSpan.FromSeconds(5)));
 
 	        observer.ItemCount.ShouldBe(1);
 	        exceptions.ItemCount.ShouldBe(0);

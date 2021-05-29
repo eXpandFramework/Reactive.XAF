@@ -1,7 +1,8 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <FileUpgradeFlags />
     <UpgradeBackupLocation />
     <LangVersion>latest</LangVersion>
@@ -17,7 +18,7 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>TRACE;XAF202</DefineConstants>
+    <DefineConstants>TRACE;XAF211</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="AppDomainExtensions.cs" />
@@ -27,6 +28,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="TextCopy" Version="4.2.0" />
+    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="21.1.3" />
+    <PackageReference Include="DevExpress.Persistent.BaseImpl" Version="21.1.3" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.Extensions">

@@ -12,5 +12,6 @@ Microsoft.CodeAnalysis
 Microsoft.CodeAnalysis.Csharp
 Newtonsoft.Json
 Microsoft.NET.Test.Sdk
-DevExpress.WindowsDesktop.Core
-DevExpress.WindowsDesktop.Xaf
+DevExpress.Persistent.BaseImpl
+DevExpress.ExpressApp.Security
+DevExpress.ExpressApp.Security.Xpo
