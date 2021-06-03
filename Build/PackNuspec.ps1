@@ -4,7 +4,8 @@ param(
     $sourceDir = "$PSScriptRoot\..",
     $Filter ,
     [switch]$SkipReadMe,
-    $dxVersion="21.1.3.0"
+    $dxVersion="21.1.3.0",
+    $Feed
 )
 
 New-Item $nugetBin -ItemType Directory -Force | Out-Null
@@ -45,8 +46,8 @@ $packScript = {
     
 }
 $varsToImport = @("assemblyVersions", "SkipReadMe", "nugetPath", "sourceDir", "nugetBin", "SkipReadMe")
-# $nuspecs | Invoke-Parallel -VariablesToImport $varsToImport -Script $packScript
-$nuspecs| ForEach-Object { Invoke-Command $packScript -ArgumentList $_ }
+$nuspecs | Invoke-Parallel -VariablesToImport $varsToImport -Script $packScript
+# $nuspecs| ForEach-Object { Invoke-Command $packScript -ArgumentList $_ }
 function AddReadMe {
     param(
         $Package,
@@ -133,6 +134,7 @@ if ($Branch -ne "lab") {
         Remove-Item $unzipDir -Force -Recurse
     }
     Write-HostFormatted "Update ReadMe" -Section
+    
     if ((Get-VersionPart (Get-DevExpressVersion) Build) -eq (Get-VersionPart $dxVersion Build)){
         & "$PSScriptRoot\UpdateReadMe.ps1" 
     }

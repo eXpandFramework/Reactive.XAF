@@ -125,16 +125,16 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 
 |<!-- -->|<!-- -->
 |----|----
-|Xpand.Extensions|4.202.55
- |Xpand.Extensions.Reactive|4.202.55
- |Xpand.Extensions.XAF|4.202.55
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.202.55
+|Xpand.Extensions|4.211.1
+ |Xpand.Extensions.Reactive|4.211.1
+ |Xpand.Extensions.XAF|4.211.1
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.211.1
  |System.Reactive|5.0.0
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |Xpand.Patcher|2.0.30
  |JetBrains.Annotations|2021.1.0
  |Newtonsoft.Json|13.0.1
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.202.55
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.211.1
 
 ## Issues-Debugging-Troubleshooting
 

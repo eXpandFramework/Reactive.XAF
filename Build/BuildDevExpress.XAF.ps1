@@ -41,6 +41,7 @@ Task IndexSources {
 Task Init {
     
     Invoke-Script {
+        
         "Create bin directory in $Root"
         New-Item "$Root\bin" -ItemType Directory -Force 
         New-Item "$Root\bin\ReactiveLoggerClient" -ItemType Directory -Force | Out-Null

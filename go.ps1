@@ -9,11 +9,12 @@ param(
     [string]$branch = "lab",
     [switch]$InstallModules,
     [string[]]$taskList = @("Build"),
-    [string]$XpandPwshVersion = "1.211.0.1",
+    [string]$XpandPwshVersion = "1.211.0.3",
     [switch]$CustomVersion,
     [switch]$OnlyXpwsh
 )
 $ErrorActionPreference = "Stop"
+
 $m=@([PSCustomObject]@{
     Name    = "XpandPwsh"
     Version = $XpandPwshVersion

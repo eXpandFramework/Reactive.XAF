@@ -117,6 +117,7 @@ jobs:
           $env:AzureToken='$(AzureToken)'
           $env:AzOrganization="eXpandDevOps"
           $env:AzProject ="eXpandFramework"
+          $env:DXFeed='$(DXApiFeed)'
           $BuildPastVersion='Yes'
           $lastVersion=(Get-XAFLatestMinors -source '$(DXApiFeed)'|select-object -last 1)
           if ('$(CustomVersion)' -eq $lastVersion){

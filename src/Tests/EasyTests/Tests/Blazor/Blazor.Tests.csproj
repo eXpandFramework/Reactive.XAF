@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <!-- <UseWindowsForms>true</UseWindowsForms> -->
@@ -56,7 +56,7 @@
     <PackageReference Include="Shouldly" Version="4.0.3" />
     <PackageReference Include="NUnit" Version="3.13" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.17" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="4.211.0.2" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="4.211.1" />
     <PackageReference Include="Selenium.WebDriver" Version="3.141" />
     <PackageReference Include="Selenium.Support" Version="3.141" />
   </ItemGroup>
