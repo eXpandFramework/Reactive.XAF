@@ -42,7 +42,7 @@ namespace Web.Tests{
 
 #endif
         // [Test]
-        [XpandTest(LongTimeout,3)]
+        // [XpandTest(LongTimeout,3)]
         [Apartment(ApartmentState.STA)]
         public async Task Web_EasyTest_InLocalDb(){
             var connectionString = $"Integrated Security=SSPI;Pooling=false;Data Source=(localdb)\\mssqllocaldb;Initial Catalog=TestApplicationWeb{AppDomain.CurrentDomain.UseNetFramework()}";
@@ -72,10 +72,11 @@ namespace Web.Tests{
             
         }
 
-        [XpandTest(LongTimeout,3)]
-        // [Test]
+        // [XpandTest(LongTimeout,3)]
+        [Test]
         [Apartment(ApartmentState.STA)]
-        public async Task Web_EasyTest_InMemory(){
+        public async Task Web_EasyTest_InMemory() {
+	        // Xpand.Extensions.WindowManager.Interaction.MsgBox("a");
             await EasyTest(NewWebAdapter, RunWebApplication, async adapter => {
                 var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
                 adapter.Execute(autoTestCommand);
@@ -113,7 +114,7 @@ namespace Web.Tests{
         }
 #endif
 
-        [XpandTest(LongTimeout,3)]
+        // [XpandTest(LongTimeout,3)]
         // [Test]
         [Apartment(ApartmentState.STA)]
         public async Task Web_GoogleCloud_EasyTest(){

@@ -59,7 +59,8 @@ namespace ALL.Tests{
             commandAdapter.Execute(new FillObjectViewCommand((editorName, "New")),new WaitCommand(2000),new ActionCommand(Actions.Save));
             await commandAdapter.CheckOperation(MapAction.Insert);
             commandAdapter.Execute(new FillObjectViewCommand((editorName, "Update")));
-            commandAdapter.Execute(new WaitCommand(2000));
+            commandAdapter.Execute(new SendKeysCommand(Win32Constants.VirtualKeys.Tab));
+            commandAdapter.Execute(new WaitCommand(1000));
             await commandAdapter.Execute(() => commandAdapter.Execute(new ActionCommand(Actions.Save)));
             await commandAdapter.CheckOperation(MapAction.Update);
             commandAdapter.Execute(new ActionDeleteCommand());

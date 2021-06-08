@@ -27,8 +27,10 @@ namespace Web.Tests {
             adapter.Execute(new NavigateCommand("JobScheduler.Job"));
             adapter.Execute(new ActionCommand("New",nameof(ExecuteActionJob)));
             adapter.Execute(new FillObjectViewCommand<ExecuteActionJob>((job => job.Action, "Delete"),
-                (job => job.Object, nameof(Product)), (job => job.View, $"{nameof(Product)}_ListView"),(job => job.SelectedObjectsCriteria, $"{nameof(Product.ProductName)}='deleteme'"),
+                (job => job.Object, nameof(Product)), (job => job.View, $"{nameof(Product)}_ListView"),
                 (job => job.Id,"executeDelete")));
+            adapter.Execute(new FillObjectViewCommand<ExecuteActionJob>((job => job.SelectedObjectsCriteria,
+	            $"{nameof(Product.ProductName)}='deleteme'")));
             adapter.Execute(new ActionCommand(Actions.Save));
             adapter.Execute(new ActionCommand("Trigger"));
             adapter.Execute(new NavigateCommand("Default.Product"));
@@ -72,7 +74,6 @@ namespace Web.Tests {
                 webDriver.SwitchTo().Window(webDriver.WindowHandles[0]);
             });
             adapter.Execute(new ProcessRecordCommand<Job,JobWorker>(job => job.Workers,(worker => worker.State,workerState.ToString())));
-            adapter.Execute(new CheckDetailViewCommand<JobWorker>((worker => worker.State, workerState.ToString())));
             adapter.Execute(new ActionCommand(Actions.OK));
             adapter.Execute(new NavigateCommand("Default.Order"));
             adapter.Execute(new CheckListViewCommand(nameof(Order), 12));

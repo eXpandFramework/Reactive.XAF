@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using System.Threading;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
@@ -208,6 +209,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
 
         [Test]
         [XpandTest()]
+        [Apartment(ApartmentState.STA)]
         public override async Task Update_Cloud_Event(){
             using var application = Platform.Win.CalendarModule().Application;
             await application.MSGraphClient(true);
@@ -230,9 +232,13 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
             var tuple = await synchronization;
 
             tuple.Instance.mapAction.ShouldBe(MapAction.Update);
-            var objectSpace = application.CreateObjectSpace();
-            objectSpace.GetObject(@event).Subject.ShouldBe("updated");
-            objectSpace.GetObjects<DevExpress.Persistent.BaseImpl.Event>().Count.ShouldBe(1);
+            await Observable.Interval(TimeSpan.FromSeconds(1))
+	            .Select(_ => {
+		            var objectSpace = application.CreateObjectSpace();
+		            objectSpace.GetObject(@event).Subject.ShouldBe("updated");
+		            return objectSpace.GetObjects<DevExpress.Persistent.BaseImpl.Event>().Count;
+	            }).WhenNotDefault().FirstAsync();
+            
         }
 
         [Test]
@@ -269,7 +275,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
             objectSpace.GetObjectsQuery<DevExpress.Persistent.BaseImpl.Event>().Count().ShouldBe(0);
         }
 
-        [Test]
+        [Test][Apartment(ApartmentState.STA)]
         [XpandTest()]
         public override async Task Insert_Cloud_Event(){
             using var application = Platform.Win.CalendarModule().Application;
@@ -284,11 +290,13 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
 
             tuple.Instance.mapAction.ShouldBe(MapAction.Insert);
             var objectSpace = application.CreateObjectSpace();
-            var objectsQuery = objectSpace.GetObjectsQuery<DevExpress.Persistent.BaseImpl.Event>().ToArray();
-            objectsQuery.Length.ShouldBe(1);
-            objectsQuery.FirstOrDefault(e => e.Subject == "New").ShouldNotBeNull();
             await objectSpace.QueryCloudOfficeObject(tuple.Instance.cloud.Id, CloudObjectType.Event).FirstAsync()
                 .WithTimeOut();
+
+
+            await Observable.Interval(TimeSpan.FromSeconds(1))
+	            .Select(_ => objectSpace.GetObjectsQuery<DevExpress.Persistent.BaseImpl.Event>().Count(e => e.Subject=="New"))
+	            .WhenNotDefault().FirstAsync();
         }
 
         [Test]

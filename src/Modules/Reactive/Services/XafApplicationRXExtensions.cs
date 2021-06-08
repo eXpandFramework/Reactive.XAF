@@ -40,7 +40,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.SelectMany(execute.ToTask);
 
         public static IObservable<T> SelectMany<T>(this XafApplication application, Func<IObservable<T>> execute) 
-            => Observable.Defer(() => Observable.Start(execute).Merge().Wait().ReturnObservable()).Catch<T,InvalidOperationException>(_ => Observable.Empty<T>());
+            => Observable.Defer(() => application.GetPlatform()==Platform.Web?Observable.Start(execute).Merge().Wait().ReturnObservable():Observable.Start(execute).Merge())
+	            .Catch<T,InvalidOperationException>(_ => Observable.Empty<T>());
         
 	    public static IObservable<T> SelectMany<T>(this XafApplication application, Func<Task<T>> execute) 
             => application.GetPlatform()==Platform.Web?Task.Run(execute).Result.ReturnObservable():Observable.FromAsync(execute);

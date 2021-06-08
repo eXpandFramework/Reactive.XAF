@@ -34,8 +34,9 @@ namespace ALL.Tests{
                 .Merge(manager.WhenApplication(application
                     => application.WhenViewOnFrame(typeof(Event),ViewType.DetailView)
                         .SelectMany(frame => frame.View.ObjectSpace.WhenCommiting().SelectMany(t => config().updated.TakeUntil(frame.WhenDisposingFrame()))
+	                        .Where(t => t.mapAction!=MapAction.Delete)
                             .Do(tuple => {
-                                using var objectSpace = frame.Application.CreateObjectSpace();
+	                            using var objectSpace = frame.Application.CreateObjectSpace();
                                 var cloudOfficeObject = objectSpace.QueryCloudOfficeObject(tuple.cloud.GetPropertyValue("Id").ToString(), CloudObjectType.Event).First();
                                 var @event = objectSpace.GetObjectByKey<Event>(Guid.Parse(cloudOfficeObject.LocalId));
                                 @event.Description = tuple.mapAction.ToString();

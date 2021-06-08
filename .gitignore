@@ -648,3 +648,4 @@ GitUserEmail.json
 /tools/2/
 /tools/Xpand.Rider.ModelEditor/
 **/Xpand.XAF.ModelEditor.bat
+/src/Tests/Clipboard_data.txt

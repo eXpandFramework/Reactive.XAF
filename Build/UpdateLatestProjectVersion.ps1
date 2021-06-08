@@ -8,13 +8,14 @@ $labPackages = Get-XpandPackages -PackageType XAFAll -Source Lab
 $officialPackages = Get-XpandPackages -PackageType XAFAll -Source Release
  
 $lastVersion = ($labPackages | Where-Object { $_.id -eq "Xpand.XAF.Core.All" }).Version
-$srcVersion=Get-AssemblyInfoVersion "$PSScriptRoot\..\src\Common\AssemblyInfoVersion.cs"
-if ($srcVersion -gt $lastVersion){
-    $lastVersion=$srcVersion
-}
-$newVersion = (Update-Version $lastVersion -Revision)
+
 $lastOfficialVersion = ($officialPackages | Where-Object { $_.id -eq "Xpand.XAF.Core.All" }).Version
 if ($Branch -eq "master") {
+    $srcVersion=Get-AssemblyInfoVersion "$PSScriptRoot\..\src\Common\AssemblyInfoVersion.cs"
+    if ($srcVersion -gt $lastVersion){
+        $lastVersion=$srcVersion
+    }
+    $newVersion = (Update-Version $lastVersion -Revision)
     $lastVersion = ($labPackages | Where-Object { $_.id -eq "Xpand.XAF.Core.All" }).Version
     $lastOfficialVersion = ($officialPackages | Where-Object { $_.id -eq "Xpand.XAF.Core.All" }).Version
     $newVersion = (Update-Version $lastVersion -Build)

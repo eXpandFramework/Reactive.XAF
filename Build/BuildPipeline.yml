@@ -13,13 +13,13 @@ jobs:
     - group: keys
   steps:
     - checkout: self
-    - task: CacheBeta@0
-      inputs:
-        key: 'nuget | "$(CustomVersion)" | paket.lock'
-        restoreKeys: |
-          nuget | "$(CustomVersion)"
-        path: $(NUGET_PACKAGES)
-      displayName: Cache NuGet packages
+    # - task: CacheBeta@0
+    #   inputs:
+    #     key: 'nuget | "$(CustomVersion)" | paket.lock'
+    #     restoreKeys: |
+    #       nuget | "$(CustomVersion)"
+    #     path: $(NUGET_PACKAGES)
+    #   displayName: Cache NuGet packages
     - task: AzurePowerShell@5
       condition: eq(variables['UseLastVersion'], '')
       name: Build
@@ -166,6 +166,12 @@ jobs:
       inputs:
         targetPath: '$(System.DefaultWorkingDirectory)\bin\'
         artifact: 'NugetConsumers'
+        publishLocation: 'pipeline'
+    - task: PublishPipelineArtifact@1
+      name: All
+      inputs:
+        targetPath: '$(System.DefaultWorkingDirectory)\'
+        artifact: 'All'
         publishLocation: 'pipeline'
     - task: PublishPipelineArtifact@1
       name: PublishNugets

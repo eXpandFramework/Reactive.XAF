@@ -14,7 +14,7 @@ namespace TestApplication.Module.Common {
             var easyTestSettingsFile = AppDomain.CurrentDomain.EasyTestSettingsFile();
             if (File.Exists(easyTestSettingsFile)){
                 var settings = JsonConvert.DeserializeObject<dynamic>(File.ReadAllText(easyTestSettingsFile));
-                application.ConnectionString = settings.ConnectionString;
+                application.ConnectionString = settings?.ConnectionString;
             }
         }
 
