@@ -238,9 +238,12 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
             var tuple = await synchronization.Timeout(Timeout);
             
             tuple.Instance.mapAction.ShouldBe(MapAction.Update);
-            var objectSpace = application.CreateObjectSpace();
-            objectSpace.GetObject(@event).Subject.ShouldBe(nameof(Update_Cloud_Event));
-            objectSpace.GetObjects<DevExpress.Persistent.BaseImpl.Event>().Count.ShouldBe(1);
+            await Observable.Interval(TimeSpan.FromSeconds(1))
+	            .Select(_ => {
+		            var objectSpace = application.CreateObjectSpace();
+		            objectSpace.GetObject(@event).Subject.ShouldBe(nameof(Update_Cloud_Event));
+		            return objectSpace.GetObjects<DevExpress.Persistent.BaseImpl.Event>().Count;
+	            }).WhenNotDefault().FirstAsync();
         }
 
         [Test]
@@ -294,11 +297,13 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
             
             tuple.Instance.mapAction.ShouldBe(MapAction.Insert);
             var objectSpace = application.CreateObjectSpace();
-            var objectsQuery = objectSpace.GetObjectsQuery<DevExpress.Persistent.BaseImpl.Event>().ToArray();
-            objectsQuery.Length.ShouldBe(1);
-            objectsQuery.FirstOrDefault(e => e.Subject == "New").ShouldNotBeNull();
             await objectSpace.QueryCloudOfficeObject(tuple.Instance.cloud.Id, CloudObjectType.Event).FirstAsync()
-                .WithTimeOut();
+	            .WithTimeOut();
+
+
+            await Observable.Interval(TimeSpan.FromSeconds(1))
+	            .Select(_ => objectSpace.GetObjectsQuery<DevExpress.Persistent.BaseImpl.Event>().Count(e => e.Subject=="New"))
+	            .WhenNotDefault().FirstAsync();
         }
 
         [Test]

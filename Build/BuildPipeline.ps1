@@ -39,6 +39,7 @@ Invoke-Script {
         dotnet nuget add source "https://api.nuget.org/v3/index.json" --name "nuget.org"
     }
     catch { }
+    $LASTEXITCODE=0
     dotnet nuget list source
     Write-HostFormatted "Installing paket" -Section
     dotnet tool restore

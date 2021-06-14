@@ -161,23 +161,83 @@ jobs:
           }
           & "$(System.DefaultWorkingDirectory)\go.ps1" @goArgs
           New-Item '$(System.DefaultWorkingDirectory)\bin\Nupkg' -ItemType Directory -ErrorAction SilentlyContinue
-    - task: PublishPipelineArtifact@1
-      name: PublishNugetConsumers
+          & '$(System.DefaultWorkingDirectory)\Build\DownloadCloudCreds.ps1' -GitHubToken '$(GitHubToken)' -GitUserEmail '$(GitUserEmail)'
+    - task: VSTest@2
+      displayName: 'TestNugetConsumers'
+      enabled: true
+      continueOnError: true
       inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)\bin\'
-        artifact: 'NugetConsumers'
-        publishLocation: 'pipeline'
-    - task: PublishPipelineArtifact@1
-      name: All
+        searchFolder: '$(System.DefaultWorkingDirectory)\bin\'
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: |
+          **\Blazor.Tests.dll
+          **\WinDesktop.Tests.dll
+          **\Win.Tests.dll
+          **\Web.Tests.dll
+          !**\obj\**    
+        diagnosticsEnabled: true
+        codeCoverageEnabled: true
+        distributionBatchType: basedOnAssembly
+        runInParallel: false
+        runSettingsFile: $(System.DefaultWorkingDirectory)\build\Tests.runsettings
+        runTestsInIsolation: false
+        collectDumpOn: never
+    - task: PowerShell@2
+      continueOnError: false
+      name: CheckTests
       inputs:
-        targetPath: '$(System.DefaultWorkingDirectory)\'
-        artifact: 'All'
-        publishLocation: 'pipeline'
+        pwsh: true
+        targetType: 'inline'
+        script: |
+          $ErrorView="NormalView"
+          $ErrorActionPreference="stop"
+          $env:AzureToken='$(AzureToken)'
+          $env:AzProject="eXpandFramework"
+          $env:AzOrganization="eXpandDevOps"
+          $testbuild=$null
+          do {
+              $testbuild=(Get-AzBuilds -Definition Reactive.XAF-Tests )|Select-Object -First 1
+              Write-Host "Waiting build  $($testbuild.id)..."
+              Start-Sleep 5
+          } while ($testbuild.status -ne "completed")
+          Write-Host "Checking build  $($testbuild.id)..."
+          $(System.DefaultWorkingDirectory)\Build\check-tests.ps1 '$(System.DefaultWorkingDirectory)' '$(AzureToken)' '$(DXApiFeed)' '$(testBuild.Id)'
+          Write-Host "Checking build  '$(Build.BuildId)'..."
+          $(System.DefaultWorkingDirectory)\Build\check-tests.ps1 '$(System.DefaultWorkingDirectory)' '$(AzureToken)' '$(DXApiFeed)' '$(Build.BuildId)' -publish
+
+          "PublishNugets-Reactive.XAF"
+          $env:DXFeed = '$(DXApiFeed)'
+          $xafMinor=$xafMinors|select-object -first 1
+          $build=Get-AzBuilds -Definition Reactive.XAF -Tag "$xafMinor" -Top 1 
+          $parameters = @{
+              CustomVersion     = "$xafMinor"
+              DxPipelineBuildId = '$(Build.BuildId)'
+          }
+          $parameters|Out-String
+          Add-AzBuild -Definition PublishNugets-Reactive.XAF -Parameters $parameters
+    # - task: PublishPipelineArtifact@1
+    #   name: PublishNugetConsumers
+    #   inputs:
+    #     targetPath: '$(System.DefaultWorkingDirectory)\bin\'
+    #     artifact: 'NugetConsumers'
+    #     publishLocation: 'pipeline'
+    # - task: PublishPipelineArtifact@1
+    #   name: All
+    #   inputs:
+    #     targetPath: '$(System.DefaultWorkingDirectory)\'
+    #     artifact: 'All'
+    #     publishLocation: 'pipeline'
     - task: PublishPipelineArtifact@1
       name: PublishNugets
       inputs:
         targetPath: '$(System.DefaultWorkingDirectory)\bin\Nupkg'
         artifact: 'Nupkg'
         publishLocation: 'pipeline'
+    # - task: PublishPipelineArtifact@1
+    #   name: PublishNugetCache
+    #   inputs:
+    #     targetPath: '$(NUGET_PACKAGES)'
+    #     artifact: 'NupkgCache'
+    #     publishLocation: 'pipeline'
     
     

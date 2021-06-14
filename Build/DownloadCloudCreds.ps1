@@ -4,7 +4,25 @@ param(
     [switch]$SkipPushToken
 )
 $ErrorActionPreference = "Stop"
+function InvokeGit($Command) {
+    
+    try {
+        $old_env = $env:GIT_REDIRECT_STDERR
+        $env:GIT_REDIRECT_STDERR = '2>&1'
 
+        Write-Host -ForegroundColor Green "`nExecuting: git $Command "
+        $output = Invoke-Expression "git $Command "
+        if ( $LASTEXITCODE -gt 0 ) {
+            Throw "Error Encountered executing: 'git $Command '"
+        }
+        else {
+            $output | Write-Host 
+        }
+    }
+    finally {
+        $env:GIT_REDIRECT_STDERR = $old_env
+    }
+}
 Write-Host "Download office credential" 
 if ($GithubToken){
     Remove-Item $env:TEMP\storage -Force -Recurse -ErrorAction SilentlyContinue
@@ -22,7 +40,7 @@ if ($GithubToken){
             Copy-Item -Destination "$PSScriptRoot\..\src\Tests\EasyTests\TestApplication" -Force -Path "$_" -Verbose
         }
     }
-    git clone "https://apobekiaris:$GithubToken@github.com/eXpandFramework/storage.git"
+    InvokeGit  "clone `"https://apobekiaris:$GithubToken@github.com/eXpandFramework/storage.git`""
     
     Set-Location $env:TEMP\storage\Azure
     "MicrosoftAppCredentials.json","MicrosoftAuthenticationDataWin.json","MicrosoftAuthenticationDataWeb.json","dxmailpass.json"|ForEach-Object{

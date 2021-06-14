@@ -117,7 +117,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
             
             await calendarService.DeleteAllEvents(calendar.Id);
             return await Observable.Range(0, count)
-                .SelectMany(i => calendarService.NewCalendarEvents(1,calendar.Id, title)
+                .SelectMany(_ => calendarService.NewCalendarEvents(1,calendar.Id, title)
                     .SelectMany(lst => lst).Select(outlookTask1 => (application.NewEvent(), outlookTask1)))
                 .Buffer(count);
         }

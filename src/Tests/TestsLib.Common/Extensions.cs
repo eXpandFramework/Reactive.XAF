@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reactive;
@@ -152,7 +153,7 @@ namespace Xpand.TestsLib.Common{
             }
             .Concat(modules)
             .Concat(new []{new ReactiveLoggerModule()})
-            .ToArray();
+            .ToList();
 
             if (((ITestApplication) application).TransmitMessage){
                 if (Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()){
@@ -212,6 +213,7 @@ namespace Xpand.TestsLib.Common{
             return testObserver;
         }
 
+        [SuppressMessage("ReSharper", "SuspiciousTypeConversion.Global")]
         public static IObservable<IModelReactiveLogger> ConfigureModel<TModule>(this XafApplication application,
             bool transmitMessage = true) where TModule : ModuleBase{
             return application.WhenModelChanged().FirstAsync()

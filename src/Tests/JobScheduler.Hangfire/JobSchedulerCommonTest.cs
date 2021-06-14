@@ -13,6 +13,7 @@ using Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.BO;
 
 [assembly: HostingStartup(typeof(Xpand.XAF.Modules.JobScheduler.Hangfire.HangfireStartup))]
 [assembly: HostingStartup(typeof(HostingStartup))]
+[assembly:HostingStartup(typeof(Xpand.XAF.Modules.Blazor.BlazorStartup))]
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
     public abstract class JobSchedulerCommonTest : BlazorCommonTest {

@@ -38,7 +38,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tests{
         protected override string ServiceName => "Google";
         protected override void OnConnect_Action_Creates_Connection(Platform platform, XafApplication application) 
             => GoogleService.CustomAcquireTokenInteractively
-                .Do(args => NewAuthentication(platform, application))
+                .Do(_ => NewAuthentication(platform, application))
                 .Do(e => e.Instance=Observable.Empty<UserCredential>().FirstOrDefaultAsync()).Test();
     }
 }

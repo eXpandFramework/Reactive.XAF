@@ -3,6 +3,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor.Templates;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -11,7 +12,7 @@ namespace Xpand.XAF.Modules.Blazor.Services {
     internal static class HideToolBarService {
         internal static IObservable<Unit> HideToolBarConnect(this ApplicationModulesManager manager) 
             => manager.WhenApplication(application => application.WhenNestedFrameCreated()
-                .SelectMany(frame => frame.WhenTemplateChanged()
+                .SelectMany(frame => frame.WhenTemplateChanged().WhenNotDefault(nestedFrame => nestedFrame.View)
                     .WhenToolBarNeedHide()
                     .Do(template => {
                         // ((List<IActionControlContainer>) template.ViewActionContainers).Clear();

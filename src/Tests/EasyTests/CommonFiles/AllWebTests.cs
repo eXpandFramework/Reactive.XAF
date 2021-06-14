@@ -72,12 +72,11 @@ namespace Web.Tests{
             
         }
 
-        // [XpandTest(LongTimeout,3)]
+        [XpandTest(LongTimeout,3)]
         [Test]
         [Apartment(ApartmentState.STA)]
         public async Task Web_EasyTest_InMemory() {
-	        // Xpand.Extensions.WindowManager.Interaction.MsgBox("a");
-            await EasyTest(NewWebAdapter, RunWebApplication, async adapter => {
+	        await EasyTest(NewWebAdapter, RunWebApplication, async adapter => {
                 var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
                 adapter.Execute(autoTestCommand);
                 await Task.CompletedTask;

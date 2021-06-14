@@ -229,10 +229,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     : frame.WhenViewChanged().Where(t => t.frame.Is(viewType) && t.frame.Is(objectType)).To(frame));
 
 
-        public static IObservable<Frame> WhenFrameViewChanged(this XafApplication application) 
+        public static IObservable<Frame> WhenFrameViewChanged(this XafApplication application,bool emitDefaultView=false) 
             => application.WhenFrameCreated().Merge(application.MainWindow.ReturnObservable().WhenNotDefault())
                 .WhenViewChanged().Select(tuple => tuple.frame)
-                .StartWith(application.MainWindow).WhenNotDefault();
+                .StartWith(application.MainWindow).WhenNotDefault(frame => frame?.View);
         
         public static IObservable<Frame> WhenFrameViewControls(this XafApplication application) 
             => application.WhenFrameViewChanged().SelectMany(frame => frame.View.WhenControlsCreated().Select(view => view).To(frame));

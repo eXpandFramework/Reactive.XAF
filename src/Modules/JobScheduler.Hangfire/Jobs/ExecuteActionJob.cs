@@ -30,15 +30,15 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Jobs {
 
         [JobProvider]
         public void Execute(PerformContext context) {
+	        var containerInitializer = Application.ServiceProvider.GetService<IValueManagerStorageContainerInitializer>();
+	        if (((IValueManagerStorageAccessor) containerInitializer)?.Storage == null) {
+		        containerInitializer.Initialize();
+	        }
             using var objectSpace = Application.CreateObjectSpace();
             var jobId = context.JobId();
             var job = objectSpace.GetObjectsQuery<BusinessObjects.ExecuteActionJob>().First(actionJob => actionJob.Id==jobId);
             var modelView = Application.Model.Views[job.View.Name];
             CreateView(job, modelView).Subscribe();
-            var containerInitializer = Application.ServiceProvider.GetService<IValueManagerStorageContainerInitializer>();
-            if (((IValueManagerStorageAccessor) containerInitializer)?.Storage == null) {
-                containerInitializer.Initialize();
-            }
             var newView = Application.NewView(modelView.ViewType(),modelView.AsObjectView.ModelClass.TypeInfo.Type);
             var window = Application.CreateViewWindow();
             window.SetView(newView);

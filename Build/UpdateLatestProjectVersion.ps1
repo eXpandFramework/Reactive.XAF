@@ -28,6 +28,13 @@ else {
         }
         $newVersion = [version]"$($lastOfficialVersion.Major).$($lastOfficialVersion.Minor).$build.1"
     }
+    else{
+        $srcVersion=Get-AssemblyInfoVersion "$PSScriptRoot\..\src\Common\AssemblyInfoVersion.cs"
+        if ($srcVersion -gt $lastVersion){
+            $lastVersion=$srcVersion
+        }
+        $newVersion=Update-Version $lastVersion -Revision
+    }
 }
 
 if (!$sourcePath) {

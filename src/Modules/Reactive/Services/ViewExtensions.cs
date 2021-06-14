@@ -69,7 +69,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T> WhenControlsCreated<T>(this T view) where T : View 
             => Observable.FromEventPattern<EventHandler, EventArgs>(
                     handler => view.ControlsCreated += handler, handler => view.ControlsCreated -= handler,ImmediateScheduler.Instance)
-                .Select(pattern => pattern.Sender).Cast<T>();
+                .Select(pattern => pattern.Sender)
+                .Cast<T>();
 
         public static IObservable<T> WhenControlsCreated<T>(this IObservable<T> source) where T:View 
             => source.SelectMany(view => Observable.FromEventPattern<EventHandler, EventArgs>(

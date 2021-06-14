@@ -82,11 +82,10 @@ namespace TestApplication.Module {
 
             #endregion
 
-            // AdditionalExportedTypes.Add(typeof(Order));
+            AdditionalExportedTypes.Add(typeof(Order));
 
             RequiredModuleTypes.Add(typeof(AutoCommitModule));
             RequiredModuleTypes.Add(typeof(CloneMemberValueModule));
-            RequiredModuleTypes.Add(typeof(CloneModelViewModule));
             RequiredModuleTypes.Add(typeof(HideToolBarModule));
             RequiredModuleTypes.Add(typeof(MasterDetailModule));
             RequiredModuleTypes.Add(typeof(ModelViewInheritanceModule));
@@ -99,15 +98,17 @@ namespace TestApplication.Module {
             RequiredModuleTypes.Add(typeof(SuppressConfirmationModule));
             RequiredModuleTypes.Add(typeof(ViewEditModeModule));
             RequiredModuleTypes.Add(typeof(ViewItemValueModule));
-            RequiredModuleTypes.Add(typeof(GoogleModule));
-            RequiredModuleTypes.Add(typeof(GoogleTasksModule));
-            RequiredModuleTypes.Add(typeof(GoogleCalendarModule));
             RequiredModuleTypes.Add(typeof(ReactiveLoggerModule));
             RequiredModuleTypes.Add(typeof(ReactiveLoggerHubModule));
             RequiredModuleTypes.Add(typeof(ViewWizardModule));
+
+
             AdditionalExportedTypes.Add(typeof(Event));
             AdditionalExportedTypes.Add(typeof(Task));
-
+            RequiredModuleTypes.Add(typeof(CloneModelViewModule));
+            RequiredModuleTypes.Add(typeof(GoogleModule));
+            RequiredModuleTypes.Add(typeof(GoogleTasksModule));
+            RequiredModuleTypes.Add(typeof(GoogleCalendarModule));
         }
 
         public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDb){

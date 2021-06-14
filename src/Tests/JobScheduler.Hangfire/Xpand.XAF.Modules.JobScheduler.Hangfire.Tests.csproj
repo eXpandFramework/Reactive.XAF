@@ -46,6 +46,9 @@
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
     </Reference>
+    <Reference Include="Xpand.XAF.Modules.Blazor">
+      <HintPath>..\..\..\bin\net5.0\Xpand.XAF.Modules.Blazor.dll</HintPath>
+    </Reference>
     <Reference Include="Xpand.Extensions.XAF.Xpo">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.Xpo.dll</HintPath>
     </Reference>

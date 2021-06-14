@@ -284,109 +284,120 @@ jobs:
         runTestsInIsolation: false
         otherConsoleOptions: '/Framework:.NETCoreApp,Version=v5.0 /logger:console;verbosity="normal"'
         collectDumpOn: never
-- job: AddPastVersionBuild
-  dependsOn: TestNet461
-  strategy: 
-    parallel: 1
-  pool:
-    vmImage: windows-2019
-  variables:
-    - group: keys
-  steps:
-    - checkout: self
-    - task: PowerShell@2
-      continueOnError: false
-      name: AddBuild
-      condition: eq(variables['BuildPastVersion'], 'Yes')
-      inputs:
-        pwsh: true
-        targetType: 'inline'
-        script: |
-          $ErrorView="NormalView"
-          $ErrorActionPreference="stop"
-          $env:AzureToken='$(AzureToken)'
-          $env:AzProject="eXpandFramework"
-          $env:AzOrganization="eXpandDevOps"
-          & '$(System.DefaultWorkingDirectory)\go.ps1' -InstallModules -OnlyXpwsh
-          $CustomVersion='$(CustomVersion)'
-          Set-VsoVariable build.updatebuildnumber "$env:build_BuildNumber-$CustomVersion"
-          $minors=Get-XAFLatestMinors -source '$(DXApiFeed)'
-          $latest=$minors|Select-Object -First 1
-          $past=$minors|Select-Object -Skip 1 -First 1
-          $last=$minors|Select-Object -Last 1
+# - job: AddPastVersionBuild
+#   dependsOn: TestNet461
+#   strategy: 
+#     parallel: 1
+#   pool:
+#     vmImage: windows-2019
+#   variables:
+#     - group: keys
+#   steps:
+#     - checkout: self
+#     - task: PowerShell@2
+#       continueOnError: false
+#       name: AddBuild
+#       condition: eq(variables['BuildPastVersion'], 'Yes')
+#       inputs:
+#         pwsh: true
+#         targetType: 'inline'
+#         script: |
+#           $ErrorView="NormalView"
+#           $ErrorActionPreference="stop"
+#           $env:AzureToken='$(AzureToken)'
+#           $env:AzProject="eXpandFramework"
+#           $env:AzOrganization="eXpandDevOps"
+#           & '$(System.DefaultWorkingDirectory)\go.ps1' -InstallModules -OnlyXpwsh
+#           $CustomVersion='$(CustomVersion)'
+#           Set-VsoVariable build.updatebuildnumber "$env:build_BuildNumber-$CustomVersion"
+#           $minors=Get-XAFLatestMinors -source '$(DXApiFeed)'
+#           $latest=$minors|Select-Object -First 1
+#           $past=$minors|Select-Object -Skip 1 -First 1
+#           $last=$minors|Select-Object -Last 1
 
-          if ('$(CustomVersion)' -eq $past){
-              $past=$last
-          }
-          $parameters = @{
-              CustomVersion = "$past"
-              NupkgBuild = (Get-AzBuilds -Definition Reactive.XAF -Result succeeded -Tag '$(CustomVersion)' -Top 1).Id
-          }
-          "past=$past"
-          # Add-AzBuild -Definition Reactive.XAF -Tag $past -Parameters $parameters
-- job: TestNugetChecConsumerPipeline
-  dependsOn: TestNet461
-  strategy: 
-    parallel: 4
-  pool:
-    vmImage: windows-2019
-  variables:
-    - group: keys
-  steps:
-    - checkout: self
-    - task: PowerShell@2
-      continueOnError: false
-      name: WaitForBinArtifact
-      inputs:
-        pwsh: true
-        targetType: 'inline'
-        script: |
-          $ErrorView="NormalView"
-          $ErrorActionPreference="stop"
-          $env:AzureToken='$(AzureToken)'
-          & '$(System.DefaultWorkingDirectory)\Build\WaitForArtifact.ps1' -BuildId '$(DxPipelineBuildId)' -GitUserEmail '$(GitUserEmail)' -GithubToken '$(GithubToken)'
-    - task: DownloadPipelineArtifact@2
-      displayName: Download NugetConsumers
-      inputs:
-        buildType: 'specific'
-        project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
-        definition: '23'
-        buildVersionToDownload: 'specific'
-        pipelineId: '$(DxPipelineBuildId)'
-        artifactName: 'NugetConsumers'
-        targetPath: '$(System.DefaultWorkingDirectory)\bin\'
-    - task: PowerShell@2
-      continueOnError: false
-      name: DownloadCloudCreds
-      inputs:
-        pwsh: true
-        targetType: 'inline'
-        script: |
-          $ErrorView="NormalView"
-          $ErrorActionPreference="stop"
-          & '$(System.DefaultWorkingDirectory)\Build\DownloadCloudCreds.ps1' -GitHubToken '$(GitHubToken)' -GitUserEmail '$(GitUserEmail)'
-    - task: VSTest@2
-      displayName: 'TestNugetConsumers'
-      enabled: true
-      continueOnError: true
-      inputs:
-        searchFolder: '$(System.DefaultWorkingDirectory)\bin\'
-        testSelector: 'testAssemblies'
-        testAssemblyVer2: |
-          **\Blazor.Tests.dll
-          **\WinDesktop.Tests.dll
-          **\Win.Tests.dll
-          **\Web.Tests.dll
-          !**\obj\**    
-        diagnosticsEnabled: true
-        codeCoverageEnabled: true
-        distributionBatchType: basedOnAssembly
-        runInParallel: false
-        runSettingsFile: $(System.DefaultWorkingDirectory)\build\Tests.runsettings
-        runTestsInIsolation: false
-        collectDumpOn: never
+#           if ('$(CustomVersion)' -eq $past){
+#               $past=$last
+#           }
+#           $parameters = @{
+#               CustomVersion = "$past"
+#               NupkgBuild = (Get-AzBuilds -Definition Reactive.XAF -Result succeeded -Tag '$(CustomVersion)' -Top 1).Id
+#           }
+#           "past=$past"
+#           # Add-AzBuild -Definition Reactive.XAF -Tag $past -Parameters $parameters
+# - job: TestNugetChecConsumerPipeline
+#   dependsOn: TestNet461
+#   strategy: 
+#     parallel: 4
+#   pool:
+#     vmImage: windows-2019
+#   variables:
+#     - group: keys
+#   steps:
+#     - checkout: self
+#     - task: PowerShell@2
+#       continueOnError: false
+#       name: WaitForBinArtifact
+#       inputs:
+#         pwsh: true
+#         targetType: 'inline'
+#         script: |
+#           $ErrorView="NormalView"
+#           $ErrorActionPreference="stop"
+#           $env:AzureToken='$(AzureToken)'
+#           & '$(System.DefaultWorkingDirectory)\Build\WaitForArtifact.ps1' -BuildId '$(DxPipelineBuildId)' -GitUserEmail '$(GitUserEmail)' -GithubToken '$(GithubToken)'
+#     - task: DownloadPipelineArtifact@2
+#       displayName: Download NugetCache
+#       inputs:
+#         buildType: 'specific'
+#         project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
+#         definition: '23'
+#         buildVersionToDownload: 'specific'
+#         pipelineId: '$(DxPipelineBuildId)'
+#         artifactName: 'NupkgCache'
+#         targetPath: '$(NUGET_PACKAGES)'
+#     - task: DownloadPipelineArtifact@2
+#       displayName: Download NugetConsumers
+#       inputs:
+#         buildType: 'specific'
+#         project: 'dc0010e5-9ecf-45ac-b89d-2d51897f3855'
+#         definition: '23'
+#         buildVersionToDownload: 'specific'
+#         pipelineId: '$(DxPipelineBuildId)'
+#         artifactName: 'NugetConsumers'
+#         targetPath: '$(System.DefaultWorkingDirectory)\bin\'
+#     - task: PowerShell@2
+#       continueOnError: false
+#       name: DownloadCloudCreds
+#       inputs:
+#         pwsh: true
+#         targetType: 'inline'
+#         script: |
+#           $ErrorView="NormalView"
+#           $ErrorActionPreference="stop"
+#           Get-childitem '$(NUGET_PACKAGES)'
+#           & '$(System.DefaultWorkingDirectory)\Build\DownloadCloudCreds.ps1' -GitHubToken '$(GitHubToken)' -GitUserEmail '$(GitUserEmail)'
+#     - task: VSTest@2
+#       displayName: 'TestNugetConsumers'
+#       enabled: true
+#       continueOnError: true
+#       inputs:
+#         searchFolder: '$(System.DefaultWorkingDirectory)\bin\'
+#         testSelector: 'testAssemblies'
+#         testAssemblyVer2: |
+#           **\Blazor.Tests.dll
+#           **\WinDesktop.Tests.dll
+#           **\Win.Tests.dll
+#           **\Web.Tests.dll
+#           !**\obj\**    
+#         diagnosticsEnabled: true
+#         codeCoverageEnabled: true
+#         distributionBatchType: basedOnAssembly
+#         runInParallel: false
+#         runSettingsFile: $(System.DefaultWorkingDirectory)\build\Tests.runsettings
+#         runTestsInIsolation: false
+#         collectDumpOn: never
 - job: CheckTests
-  dependsOn: TestNugetChecConsumerPipeline
+  dependsOn: TestNet461
   strategy: 
     parallel: 1
   pool:
@@ -407,5 +418,5 @@ jobs:
           $env:AzureToken='$(AzureToken)'
           $env:AzProject="eXpandFramework"
           $env:AzOrganization="eXpandDevOps"
-          $(System.DefaultWorkingDirectory)\Build\check-tests.ps1 '$(System.DefaultWorkingDirectory)' '$(AzureToken)' '$(DXApiFeed)' '$(DxPipelineBuildId)'
+          $(System.DefaultWorkingDirectory)\Build\check-tests.ps1 '$(System.DefaultWorkingDirectory)' '$(AzureToken)' '$(DXApiFeed)' '$(DxPipelineBuildId)' 
           
