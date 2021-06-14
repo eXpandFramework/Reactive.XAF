@@ -372,4 +372,75 @@ function Update-Symbols {
 }
 
 
+function AddXmlElement {
+    [CmdletBinding(DefaultParameterSetName = "Parent")]
+    param (
+        [parameter(Mandatory, Position = 0)]
+        [System.Xml.XmlDocument]$Owner,
+        [parameter(Mandatory, Position = 1)]
+        [string]$ElementName,
+        [parameter(Mandatory, ParameterSetName = "Parent", Position = 2)]
+        [string]$Parent,
+        [parameter(Position = 3)]
+        [System.Collections.IDictionary]$Attributes,
+        [parameter(Position = 4)]
+        [string]$InnerText,
+        [parameter(Mandatory, ParameterSetName = "ParentNode", Position = 5)]
+        [System.Xml.XmlElement]$ParentNode
+    )
+    
+    begin {
 
+    }
+    
+    process {
+        $ns = New-Object System.Xml.XmlNamespaceManager($Owner.NameTable)
+        $nsUri = $Owner.DocumentElement.NamespaceURI
+        $ns.AddNamespace("ns", $nsUri)
+        if ($Attributes) {
+            $attributesFilter="["
+            $attributesFilter=$Attributes.Keys | ForEach-Object {
+                "@$_='$($Attributes[$_])'"
+            } |Join-String -Separator " and "
+            $attributesFilter="[$attributesFilter]"
+        }
+        
+        $element = $Owner.SelectSingleNode("//ns:$ElementName$($attributesFilter)", $ns)
+        if (($ParentNode -and $element.ParentNode -ne $ParentNode) -or ($Parent -and $element.ParentNode.LocalName -ne $Parent)){
+            $element = $Owner.CreateElement($ElementName, $nsUri)
+        }
+        if ($Attributes) {
+            $Attributes.Keys | ForEach-Object {
+                $element.SetAttribute($_, $Attributes[$_])
+            }
+        }
+        if ($InnerText){
+            $element.InnerText = $InnerText;
+        }
+        
+        if (!$ParentNode) {
+            $parentNode = $Owner.SelectSingleNode("//ns:$Parent", $ns)
+        }
+        $parentNode.AppendChild($Owner.CreateTextNode([System.Environment]::NewLine)) | Out-Null
+        $parentNode.AppendChild($Owner.CreateTextNode("    ")) | Out-Null
+        
+        $parentNode.AppendChild($element) | Out-Null
+        $element
+    }
+    
+    end {
+        
+    }
+}
+
+function UpdateBlazor {
+    [xml]$proj=Get-Content $ProjectFile
+    if ($proj.Project.Sdk -eq "Microsoft.NET.Sdk.Web" -and $proj.Project.PropertyGroup.TargetFramework -eq "net5.0"){
+        $enable=$proj.Project.PropertyGroup.EnableUnsafeBinaryFormatterSerialization|Where-Object{$_}
+        if (!$enable){   
+            AddXmlElement $proj EnableUnsafeBinaryFormatterSerialization  PropertyGroup -InnerText "true"|Out-Null
+            $proj.Save($projectFile)
+        }
+    }
+    
+}

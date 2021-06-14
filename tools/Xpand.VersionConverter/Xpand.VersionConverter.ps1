@@ -7,7 +7,7 @@ using namespace System.Text.RegularExpressions
 using namespace Mono.Cecil
 using namespace Mono.Cecil.pdb
 param(
-    [string]$projectFile ="C:\Work\eXpandFramework\expand\Demos\XVideoRental\XVideoRental.Module.Win\XVideoRental.Module.Win.csproj",
+    [string]$projectFile ="C:\Work\Reactive.XAF\src\Tests\EasyTests\TestApplication\TestApplication.Blazor.Server\TestApplication.Blazor.Server.csproj",
     [string]$VerboseOutput = "Continue",
     [string]$referenceFilter,
     [string]$targetFilter ="(?is)Xpand\.XAF|Xpand\.Extensions",
@@ -32,6 +32,7 @@ Write-VerboseLog "DevExpressVersion=$DevExpressVersion"
 Write-VerboseLog "referenceFilter=$referenceFilter"
 Write-VerboseLog "targetFilter=$targetFilter"
 
+UpdateBlazor
 if (!$DevExpressVersion){
     $dxVersion = GetDevExpressVersion $targetPath $referenceFilter $projectFile 
 }
