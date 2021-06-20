@@ -27,7 +27,7 @@ Invoke-Script {
         if (!("$failedBuilds".Trim())) {
             $parameters = @{
                 CustomVersion     = $env:CustomVersion
-                DxPipelineBuildId = $env:DxPipelineBuildId
+                DxPipelineBuildId = $DxPipelineBuildId
             }
             "Parameters:"
             $parameters

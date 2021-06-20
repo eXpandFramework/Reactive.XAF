@@ -203,18 +203,16 @@ jobs:
           Write-Host "Checking build  $($testbuild.id)..."
           $(System.DefaultWorkingDirectory)\Build\check-tests.ps1 '$(System.DefaultWorkingDirectory)' '$(AzureToken)' '$(DXApiFeed)' '$(testBuild.Id)'
           Write-Host "Checking build  '$(Build.BuildId)'..."
-          $(System.DefaultWorkingDirectory)\Build\check-tests.ps1 '$(System.DefaultWorkingDirectory)' '$(AzureToken)' '$(DXApiFeed)' '$(Build.BuildId)' -publish
-
           "PublishNugets-Reactive.XAF"
           $env:DXFeed = '$(DXApiFeed)'
+          $xafMinors=Get-XAFLatestMinors -Source '$(DXApiFeed)'
           $xafMinor=$xafMinors|select-object -first 1
-          $build=Get-AzBuilds -Definition Reactive.XAF -Tag "$xafMinor" -Top 1 
-          $parameters = @{
-              CustomVersion     = "$xafMinor"
-              DxPipelineBuildId = '$(Build.BuildId)'
-          }
-          $parameters|Out-String
-          Add-AzBuild -Definition PublishNugets-Reactive.XAF -Parameters $parameters
+          $env:CustomVersion=$xafminor
+          $env:DxPipelineBuildId='$(Build.BuildId)'
+          $(System.DefaultWorkingDirectory)\Build\check-tests.ps1 '$(System.DefaultWorkingDirectory)' '$(AzureToken)' '$(DXApiFeed)' '$(Build.BuildId)' -publish
+
+          
+          
     # - task: PublishPipelineArtifact@1
     #   name: PublishNugetConsumers
     #   inputs:

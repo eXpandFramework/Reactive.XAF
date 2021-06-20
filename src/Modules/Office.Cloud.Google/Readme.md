@@ -157,12 +157,12 @@ The module follows the Nuget [Version Basics](https://docs.Google.com/en-us/nuge
 |----|----
 |**DevExpress.Persistent.Base**|**Any**
  |**DevExpress.Xpo**|**Any**
-|Xpand.Extensions|4.211.1
- |Xpand.Extensions.Office.Cloud|4.211.1
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.211.1
- |Xpand.Extensions.Reactive|4.211.1
- |Xpand.Extensions.XAF|4.211.1
- |Xpand.Extensions.XAF.Xpo|4.211.1
+|Xpand.Extensions|4.211.2
+ |Xpand.Extensions.Office.Cloud|4.211.2
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.211.2
+ |Xpand.Extensions.Reactive|4.211.2
+ |Xpand.Extensions.XAF|4.211.2
+ |Xpand.Extensions.XAF.Xpo|4.211.2
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |JetBrains.Annotations|2021.1.0
  |System.Reactive|5.0.0
@@ -170,7 +170,7 @@ The module follows the Nuget [Version Basics](https://docs.Google.com/en-us/nuge
  |Microsoft.CodeAnalysis.CSharp|3.9.0
  |System.Configuration.ConfigurationManager|5.0.0
  |Newtonsoft.Json|13.0.1
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.211.1
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.211.2
 
 ## Issues-Debugging-Troubleshooting
 
