@@ -34,11 +34,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
 
         internal static string OutputAssembly;
 
-        public static ConcurrentHashSet<string> ReservedPropertyNames{ get; }=new ConcurrentHashSet<string>();
-        public static ConcurrentHashSet<Type> ReservedPropertyTypes{ get; }=new ConcurrentHashSet<Type>();
-        public static ConcurrentHashSet<Type> ReservedPropertyInstances{ get; }=new ConcurrentHashSet<Type>();
-        public static ConcurrentHashSet<Type> AdditionalTypesList{ get; }=new ConcurrentHashSet<Type>();
-        public static ConcurrentHashSet<string> AdditionalReferences{ get; }=new ConcurrentHashSet<string>();
+        public static ConcurrentHashSet<string> ReservedPropertyNames{ get; }=new();
+        public static ConcurrentHashSet<Type> ReservedPropertyTypes{ get; }=new();
+        public static ConcurrentHashSet<Type> ReservedPropertyInstances{ get; }=new();
+        public static ConcurrentHashSet<Type> AdditionalTypesList{ get; }=new();
+        public static ConcurrentHashSet<string> AdditionalReferences{ get; }=new();
         static ISubject<IModelMapperConfiguration> _typesToMap;
         
         public static ObservableCollection<(string key, Action<(Type declaringType,List<ModelMapperPropertyInfo> propertyInfos)> action)> PropertyMappingRules{ get; private set; }
@@ -157,7 +157,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         private static ObservableCollection<(string key, Action<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)> action)> GetPropertyMappingRules() 
-            => new ObservableCollection<(string key, Action<(Type declaringType, List<ModelMapperPropertyInfo> propertyInfos)> action)>{
+            => new() {
                 (nameof(DesignerSerializationVisibilityAttribute), DesignerSerializationVisibilityAttribute),
                 (nameof(GenericTypeArguments), GenericTypeArguments),
                 (nameof(BrowsableRule), BrowsableRule),
@@ -170,7 +170,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             };
 
         private static ObservableCollection<(string key, Action<GenericEventArgs<ModelMapperType>> action)> GetTypeMappingRules() 
-            => new ObservableCollection<(string key, Action<GenericEventArgs<ModelMapperType>> action)>(){
+            => new(){
                 (nameof(WithNonPublicAttributeParameters), NonPublicAttributeParameters),
                 (nameof(GenericTypeArguments), GenericTypeArguments),
                 (nameof(CompilerIsReadOnly), CompilerIsReadOnly),
@@ -191,7 +191,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             => source.Select(_ => _.ToModelMapperPropertyInfo());
 
         public static ModelMapperPropertyInfo ToModelMapperPropertyInfo(this PropertyInfo propertyInfo) 
-            => new ModelMapperPropertyInfo(propertyInfo);
+            => new(propertyInfo);
 
         public static IEnumerable<ModelMapperCustomAttributeData> ToModelMapperConfigurationData(this IEnumerable<CustomAttributeData> source) 
             => source.Select(_ => new ModelMapperCustomAttributeData(_.AttributeType, _.ConstructorArguments.ToArray()));
@@ -236,10 +236,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         public static Type ModelType(this Type type, Type rootType = null,IModelMapperConfiguration configuration = null) 
             => DevExpress.ExpressApp.XafTypesInfo.Instance.FindTypeInfo(type.ModelTypeName(rootType, configuration)).Type;
 
-        public static string ModelTypeName(this Type type,Type rootType=null, IModelMapperConfiguration configuration=null){
-            if (rootType==null){
-                rootType = type;
-            }
+        public static string ModelTypeName(this Type type,Type rootType=null, IModelMapperConfiguration configuration=null) {
+            rootType ??= type;
 
             return (type, rootType).ModelName(configuration?.MapName);
         }

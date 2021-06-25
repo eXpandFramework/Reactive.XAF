@@ -18,8 +18,8 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive{
     public abstract class ReactiveModuleBase:ModuleBase{
-        internal readonly ReplaySubject<ReactiveModuleBase> SetupCompletedSubject=new ReplaySubject<ReactiveModuleBase>(1);
-        static readonly Subject<ApplicationModulesManager> SettingUpSubject=new Subject<ApplicationModulesManager>();
+        internal readonly ReplaySubject<ReactiveModuleBase> SetupCompletedSubject=new(1);
+        static readonly Subject<ApplicationModulesManager> SettingUpSubject=new();
         static ReactiveModuleBase(){
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainOnAssemblyResolve;
             AppDomain.CurrentDomain.Patch(harmony => {
@@ -53,26 +53,33 @@ namespace Xpand.XAF.Modules.Reactive{
             return SetupModules(__instance);
 
         }
+        public static Type[] UnloadedModules { get; private set; }
+        
+
         [PublicAPI]
-        public static void Unload(params Type[] modules) =>
-	        SettingUpSubject.Do(_ => {
-			        foreach (var module in _.Modules.Where(m => m.RequiredModuleTypes.Any(modules.Contains))){
-				        foreach (var type in modules){
-					        module.RequiredModuleTypes.Remove(type);
-				        }
-			        }
-			        foreach (var m in modules){
-				        var module = _.Modules.FindModule(m);
-				        _.Modules.Remove(module);
-				        module.Dispose();
-			        }
-		        })
-		        .FirstAsync().Subscribe();
+        public static void Unload(params Type[] modules) {
+            UnloadedModules=modules;
+            SettingUpSubject.Do(_ => {
+                    foreach (var module in _.Modules.Where(m => m.RequiredModuleTypes.Any(modules.Contains))) {
+                        foreach (var type in modules) {
+                            module.RequiredModuleTypes.Remove(type);
+                        }
+                    }
+
+                    foreach (var m in modules) {
+                        var module = _.Modules.FindModule(m);
+                        _.Modules.Remove(module);
+                        module.Dispose();
+                    }
+                })
+                .FirstAsync().Subscribe();
+        }
 
         [PublicAPI]
         public IObservable<ReactiveModuleBase> SetupCompleted => Observable.Defer(() => SetupCompletedSubject.Select(module => module)).TraceRX();
 
 
+        [SuppressMessage("ReSharper", "SuspiciousTypeConversion.Global")]
         private static bool SetupModules(ApplicationModulesManager applicationModulesManager){
             SettingUpSubject.OnNext(applicationModulesManager);
             foreach(var module in applicationModulesManager.Modules) {

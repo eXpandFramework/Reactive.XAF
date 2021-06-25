@@ -20,6 +20,7 @@ using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.Predefined;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
+using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.ModelMapper.Services{
@@ -182,7 +183,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             }
             else if (map.IsRepositoryItem() ){
                
-                new[]{map}.MapToModel((predefinedMap, configuration) => {
+                new[]{map}.MapToModel((_, configuration) => {
                     configuration.DisplayName = map.DisplayName();
                     configuration.OmitContainer = true;
                     configure?.Invoke(configuration);
@@ -191,7 +192,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 modulesManager.Extend(result.modelMapperConfiguration);
             }
             else if (map.IsPropertyEditor()){
-                new[]{map}.MapToModel((predefinedMap, configuration) => {
+                new[]{map}.MapToModel((_, configuration) => {
                     configuration.OmitContainer = true;
                     configure?.Invoke(configuration);
                 }).Wait();
@@ -207,7 +208,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         private static void EnvironmentChecks(ApplicationModulesManager modulesManager){
             
             var mapperModule = modulesManager.Modules.OfType<ModelMapperModule>().FirstOrDefault();
-            if (mapperModule == null){
+            if (mapperModule == null&&!ReactiveModuleBase.UnloadedModules.Contains(typeof(ModelMapperModule))){
                 throw new NotSupportedException($"{nameof(ModelMapperModule)} not installed");
             }
 //            if (AppDomain.CurrentDomain.GetAssemblies()
@@ -229,16 +230,16 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             var maps = predefinedMaps.Where(_ => _!=PredefinedMap.None).ToArray();
             var results = maps.Select(_ => _.ModelMapperConfiguration(configuration => configure?.Invoke(_, configuration)));
             var repositoryItemResults = maps.Where(map => map.IsRepositoryItem())
-                .Select(map => new ModelMapperConfiguration(typeof(RepositoryItemBaseMap), typeof(IModelPropertyEditor), typeof(IModelColumn)))
+                .Select(_ => new ModelMapperConfiguration(typeof(RepositoryItemBaseMap), typeof(IModelPropertyEditor), typeof(IModelColumn)))
                 .Take(1);
             var propertyEditorControlResults = maps.Where(map => map.IsPropertyEditor())
-                .Select(map => new ModelMapperConfiguration(typeof(PropertyEditorControlMap), typeof(IModelPropertyEditor)))
+                .Select(_ => new ModelMapperConfiguration(typeof(PropertyEditorControlMap), typeof(IModelPropertyEditor)))
                 .Take(1);
             return results.Concat(repositoryItemResults).Concat(propertyEditorControlResults).ToObservable().MapToModel();
         }
 
         public static IObservable<Type> MapToModel(this PredefinedMap predefinedMap,Action<ModelMapperConfiguration> configure=null){
-            return new[]{ predefinedMap}.MapToModel((mapperConfiguration, modelMapperConfiguration) => configure?.Invoke(modelMapperConfiguration));
+            return new[]{ predefinedMap}.MapToModel((_, modelMapperConfiguration) => configure?.Invoke(modelMapperConfiguration));
         }
 
         private static ModelMapperConfiguration ModelMapperConfiguration(this PredefinedMap predefinedMap,Action<ModelMapperConfiguration> configure=null){

@@ -15,6 +15,7 @@ using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services.TypeMapping;
+using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 using TypeMappingService = Xpand.XAF.Modules.ModelMapper.Services.TypeMapping.TypeMappingService;
 
@@ -26,7 +27,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
 
         public static IObservable<Unit> Connected => Observable.Defer(() => ConnectedSubject);
 
-        private static ConcurrentHashSet<IModelMapperConfiguration> ModelMapperConfigurations{ get; } =new ConcurrentHashSet<IModelMapperConfiguration>();
+        private static ConcurrentHashSet<IModelMapperConfiguration> ModelMapperConfigurations{ get; } =new();
 
         internal static IObservable<Unit> ConnectExtendingService(this ApplicationModulesManager applicationModulesManager){
 	        Platform = applicationModulesManager.Modules.GetPlatform();
@@ -65,8 +66,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         }
 
         public static void Extend(this ApplicationModulesManager modulesManager, IModelMapperConfiguration configuration){
-            if (modulesManager.Modules.FindModule<ModelMapperModule>()==null)
-                throw new NotSupportedException($"{typeof(ModelMapperModule)} is not registered");
+            if (modulesManager.Modules.FindModule<ModelMapperModule>()==null) {
+                if (!ReactiveModuleBase.UnloadedModules.Contains(typeof(ModelMapperModule))) {
+                    throw new NotSupportedException($"{typeof(ModelMapperModule)} is not registered");
+                }
+                return;
+            }
             TypeMappingService.Connect().Wait();
             var installed = ModelMapperConfigurations.FirstOrDefault(_ => _.TypeToMap==configuration.TypeToMap);
             if (installed != null){
