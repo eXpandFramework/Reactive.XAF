@@ -15,7 +15,7 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="21.1.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="21.1.4" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageReference Include="hangfire.core" Version="1.7.19" />
     <PackageReference Include="hangfire.sqlserver" Version="1.7.19" />
