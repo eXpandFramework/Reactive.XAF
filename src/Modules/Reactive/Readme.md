@@ -247,9 +247,9 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp**|**Any**
-|Xpand.Extensions|4.211.2
- |Xpand.Extensions.Reactive|4.211.2
- |Xpand.Extensions.XAF|4.211.2
+|Xpand.Extensions|4.211.3
+ |Xpand.Extensions.Reactive|4.211.3
+ |Xpand.Extensions.XAF|4.211.3
  |System.Interactive|5.0.0
  |System.Reactive|5.0.0
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
@@ -257,10 +257,10 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |JetBrains.Annotations|2021.1.0
  |System.Configuration.ConfigurationManager|5.0.0
  |Microsoft.CSharp|4.7.0
- |Microsoft.CodeAnalysis.CSharp|3.9.0
+ |Microsoft.CodeAnalysis.CSharp|3.10.0
  |Newtonsoft.Json|13.0.1
  |System.Security.Cryptography.Xml|5.0.0
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.211.2
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.211.3
 
 ## Issues-Debugging-Troubleshooting
 

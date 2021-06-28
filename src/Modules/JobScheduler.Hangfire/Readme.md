@@ -193,18 +193,18 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |**DevExpress.ExpressApp.Validation.Blazor**|**Any**
  |**DevExpress.ExpressApp.Xpo**|**Any**
  |**DevExpress.Persistent.Base**|**Any**
-|Xpand.Extensions.Blazor|4.211.2
- |Xpand.Extensions.Reactive|4.211.2
- |Xpand.Extensions.XAF|4.211.2
- |Xpand.Extensions|4.211.2
- |Xpand.Extensions.XAF.Xpo|4.211.2
- |[Xpand.XAF.Modules.Blazor](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Blazor)|4.211.2
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.211.2
+|Xpand.Extensions.Blazor|4.211.3
+ |Xpand.Extensions.Reactive|4.211.3
+ |Xpand.Extensions.XAF|4.211.3
+ |Xpand.Extensions|4.211.3
+ |Xpand.Extensions.XAF.Xpo|4.211.3
+ |[Xpand.XAF.Modules.Blazor](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Blazor)|4.211.3
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.211.3
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |JetBrains.Annotations|2021.1.0
  |System.Reactive|5.0.0
  |System.Interactive|5.0.0
- |Microsoft.CodeAnalysis.CSharp|3.9.0
+ |Microsoft.CodeAnalysis.CSharp|3.10.0
  |System.Configuration.ConfigurationManager|5.0.0
  |Hangfire.Core|1.7.19
  |System.CodeDom|5.0.0
@@ -213,7 +213,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |Microsoft.Extensions.DependencyInjection.Abstractions|5.0.0
  |Xpand.Patcher|2.0.30
  |Newtonsoft.Json|13.0.1
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.211.2
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.211.3
 
 ## Issues-Debugging-Troubleshooting
 
