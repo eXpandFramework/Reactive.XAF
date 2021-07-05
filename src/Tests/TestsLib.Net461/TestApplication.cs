@@ -25,7 +25,7 @@ namespace Xpand.TestsLib{
         public TestWinApplication(Type sutModule, bool transmitMessage = true, bool handleExceptions=true){
             _transmitMessage = transmitMessage;
             SUTModule = sutModule;
-            CustomHandleException += (sender, e) => {
+            CustomHandleException += (_, e) => {
                 if (handleExceptions){
                     throw e.Exception;
                 }

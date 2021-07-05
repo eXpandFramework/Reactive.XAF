@@ -45,6 +45,7 @@ using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Logger;
 using Xpand.XAF.Modules.Reactive.Logger.Hub;
+using Xpand.XAF.Modules.Reactive.Rest;
 using Xpand.XAF.Modules.RefreshView;
 using Xpand.XAF.Modules.SequenceGenerator;
 using Xpand.XAF.Modules.SuppressConfirmation;
@@ -101,6 +102,7 @@ namespace TestApplication.Module {
             RequiredModuleTypes.Add(typeof(ReactiveLoggerModule));
             RequiredModuleTypes.Add(typeof(ReactiveLoggerHubModule));
             RequiredModuleTypes.Add(typeof(ViewWizardModule));
+            RequiredModuleTypes.Add(typeof(RestModule));
 
 
             AdditionalExportedTypes.Add(typeof(Event));

@@ -1,4 +1,4 @@
-﻿using System;
+﻿ using System;
 using DevExpress.ExpressApp.Blazor;
 using DevExpress.ExpressApp.Blazor.Services;
 using Microsoft.Extensions.Configuration;

@@ -81,6 +81,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             {"MasterDetailModule",Colors[View]},
             {"PositionInListViewModule",Colors[View]},
             {"ModelMapperModule",Colors[Model]},
+            {"WindowsModule",Colors[Model]},
             {"ModelViewInheritanceModule",Colors[Model]},
             {"OneViewModule",Colors[View]},
             {"ProgressBarViewItemModule",Colors[Editors]},

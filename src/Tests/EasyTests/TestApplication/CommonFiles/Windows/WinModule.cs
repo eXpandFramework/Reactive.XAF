@@ -44,6 +44,7 @@ namespace TestApplication.Module.Win {
         private void AddXpandModules() {
             RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.GridListEditor.GridListEditorModule));
             RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.OneView.OneViewModule));
+            RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.Windows.WindowsModule));
 #if !NETCOREAPP3_1_OR_GREATER
             RequiredModuleTypes.Add(typeof(DocumentStyleManagerModule));
             RequiredModuleTypes.Add(typeof(MicrosoftModule));

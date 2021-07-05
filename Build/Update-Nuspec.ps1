@@ -54,8 +54,8 @@ $assemblyPath = "$outputPath\$id.$extension"
         
 $allDependencies = @()
 
-$fileVersion = Get-AssemblyVersion -assembly $assemblyPath
-        
+$fileVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($assemblyPath).FileVersion
+
 $nuspec.package.metadata.version = "$fileVersion"
         
 $csproj.Project.ItemGroup.Reference | Where-Object { "$($_.Include)" -like $ReferenceToPackageFilter } | ForEach-Object {

@@ -1,6 +1,6 @@
 ﻿using JetBrains.Annotations;
 
-namespace Xpand.Extensions.WindowManager{
+namespace Xpand.Extensions.Windows.Manager{
     public static class Interaction{
         private static string GetTitleFromAssembly(System.Reflection.Assembly callingAssembly){
             try{

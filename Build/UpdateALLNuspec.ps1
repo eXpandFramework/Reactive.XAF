@@ -2,7 +2,7 @@ param(
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\"),
     $Release=$false,
     $Branch="lab",
-    $dxVersion="20.2.5"
+    $dxVersion="21.1.3"
 )
 Use-MonoCecil | Out-Null
 # $VerbosePreference ="continue"
@@ -51,9 +51,10 @@ function UpdateALLNuspec($platform, $allNuspec, $nuspecs,$allModuleNuspecs,$csPr
             Add-NuspecDependency $_.Id $_.version $allNuspec "net461"
         }
     }
-    if (($group|Where-Object{$_.targetFramework -eq "net5.0"})){
+    $net5Targetframework=($group.targetFramework|Where-Object{$_ -match "net5.0"})
+    if ($net5Targetframework){
         $standardGroup.dependency|ForEach-Object{
-            Add-NuspecDependency $_.Id $_.version $allNuspec "net5.0"
+            Add-NuspecDependency $_.Id $_.version $allNuspec $net5Targetframework
         }
     }
 }

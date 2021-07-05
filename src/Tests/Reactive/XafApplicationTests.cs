@@ -110,5 +110,17 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             SecuritySystem.CurrentUserId.ShouldBe(policyUser.Oid);
         }
 
+        [XpandTest]
+        [TestCase(nameof(Platform.Win))]
+        public void WHen_Exiting(string platformName){
+            var platform = GetPlatform(platformName);
+            using var application = DefaultReactiveModule(platform).Application;
+            var exiTest = application.WhenExiting().Test();
+
+            application.Exit();
+
+            exiTest.Items.Count.ShouldBe(1);
+        }
+
     }
 }

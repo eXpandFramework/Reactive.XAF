@@ -1,0 +1,15 @@
+akarnokd.reactive_extensions
+MagicOnion
+Moq
+Shouldly
+NUnit
+NUnit3TestAdapter
+JetBrains.Annotations
+Microsoft.CodeAnalysis
+Microsoft.CodeAnalysis.Csharp
+Newtonsoft.Json
+Microsoft.NET.Test.Sdk
+DevExpress.ExpressApp.Win
+DevExpress.ExpressApp.Security
+Xpand.Patcher
+FasterFlect.Xpand

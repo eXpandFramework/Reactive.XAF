@@ -2,7 +2,6 @@
 using System.Configuration;
 using System.Windows.Forms;
 using DevExpress.ExpressApp;
-using DevExpress.ExpressApp.Security;
 using DevExpress.Persistent.Base;
 using DevExpress.XtraEditors;
 
@@ -24,7 +23,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Client.Win {
             WindowsFormsSettings.LoadApplicationSettings();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            EditModelPermission.AlwaysGranted = System.Diagnostics.Debugger.IsAttached;
+            // EditModelPermission.AlwaysGranted = System.Diagnostics.Debugger.IsAttached;
             if(Tracing.GetFileLocationFromSettings() == FileLocation.CurrentUserApplicationDataFolder) {
                 Tracing.LocalUserAppDataPath = Application.LocalUserAppDataPath;
             }

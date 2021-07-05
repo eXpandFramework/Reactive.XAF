@@ -1,6 +1,6 @@
 ﻿using JetBrains.Annotations;
 
-namespace Xpand.Extensions.WindowManager{
+namespace Xpand.Extensions.Windows.Manager{
     [System.Flags][PublicAPI]
     public enum MsgBoxStyle{
         /// <summary>

@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,7 +38,8 @@ using View = DevExpress.ExpressApp.View;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class XafApplicationRxExtensions{
-	    public static IObservable<T> SelectMany<T>(this XafApplication application, IObservable<T> execute) 
+
+        public static IObservable<T> SelectMany<T>(this XafApplication application, IObservable<T> execute) 
             => application.SelectMany(execute.ToTask);
 
         public static IObservable<T> SelectMany<T>(this XafApplication application, Func<IObservable<T>> execute) 
@@ -64,9 +67,18 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<XafApplication> WhenModule(this IObservable<XafApplication> source, Type moduleType) 
             => source.Where(_ => _.Modules.FindModule(moduleType)!=null);
 
-        public static IObservable<Frame> WhenFrameCreated(this XafApplication application) 
-            => RxApp.Frames.Where(_ => _.Application==application)
+        public static IObservable<Frame> WhenFrameCreated(this XafApplication application,TemplateContext templateContext=default)
+            => RxApp.Frames.Where(frame => frame.Application==application&& (templateContext==default ||frame.Context == templateContext))
                 .TraceRX(frame => $"{frame.GetType().Name}-{frame.Context}");
+
+        private static readonly Subject<XafApplication> WhenExitingSubject = new();
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        public static void Exit(XafApplication __instance) {
+            WhenExitingSubject.OnNext(__instance);
+        }
+
+        public static IObservable<XafApplication> WhenExiting(this XafApplication application)
+            => WhenExitingSubject.FirstAsync(xafApplication => xafApplication==application);
 
         public static IObservable<NestedFrame> WhenNestedFrameCreated(this XafApplication application) 
             => application.WhenFrameCreated().OfType<NestedFrame>();

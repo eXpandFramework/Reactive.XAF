@@ -16,13 +16,10 @@ namespace Xpand.XAF.Modules.OneView{
 
     
     public static class ModelReactiveModuleOneView{
-        public static IObservable<IModelOneView> OneViewModel(this IObservable<IModelReactiveModules> source){
-            return source.Select(modules => modules.OneViewModel());
-        }
+        public static IObservable<IModelOneView> OneViewModel(this IObservable<IModelReactiveModules> source) 
+            => source.Select(modules => modules.OneViewModel());
 
-        public static IModelOneView OneViewModel(this IModelReactiveModules reactiveModules){
-            return ((IModelReactiveModuleOneView) reactiveModules).OneView;
-        }
-
+        public static IModelOneView OneViewModel(this IModelReactiveModules reactiveModules) 
+            => ((IModelReactiveModuleOneView) reactiveModules).OneView;
     }
 }

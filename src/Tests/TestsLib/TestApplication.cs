@@ -20,7 +20,7 @@ namespace Xpand.TestsLib{
         public TestWinApplication(Type sutModule, bool transmitMessage = true, bool handleExceptions=true){
             _transmitMessage = transmitMessage;
             SUTModule = sutModule;
-            CustomHandleException += (sender, e) => {
+            CustomHandleException += (_, e) => {
                 if (handleExceptions){
                     throw e.Exception;
                 }
@@ -47,7 +47,7 @@ namespace Xpand.TestsLib{
             base.Dispose(disposing);
         }
 
-        readonly Subject<Form> _modelEditorForm = new Subject<Form>();
+        readonly Subject<Form> _modelEditorForm = new();
 
         public TestWinApplication(){
         }
@@ -72,35 +72,28 @@ namespace Xpand.TestsLib{
 //            return new WinSimpleLayoutManager();
 //        }
 
-        protected override string GetModelCacheFileLocationPath(){
-            return null;
-        }
+        protected override string GetModelCacheFileLocationPath() => null;
 
-        protected override string GetDcAssemblyFilePath(){
-            return null;
-        }
+        protected override string GetDcAssemblyFilePath() => null;
 
         public override void StartSplash(){
         }
 
-        protected override string GetModelAssemblyFilePath(){
-            return $@"{AppDomain.CurrentDomain.ApplicationPath()}\ModelAssembly{Guid.NewGuid()}.dll";
-        }
+        protected override string GetModelAssemblyFilePath() => $@"{AppDomain.CurrentDomain.ApplicationPath()}\ModelAssembly{Guid.NewGuid()}.dll";
     }
 
     [PublicAPI]
     static class TestApplicationExtensions{
-        public static IObservable<Unit> ClientBroadcast(this ITestApplication application){
-            return Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()
+        public static IObservable<Unit> ClientBroadcast(this ITestApplication application) 
+            => Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()
                 ? TraceEventHub.Trace.FirstAsync(_ => _.Source == application.SUTModule.Name).ToUnit()
                     .SubscribeReplay()
                 : Unit.Default.ReturnObservable();
-        }
+
         [PublicAPI]
-        public static IObservable<Unit> ClientConnect(this ITestApplication application){
-            return Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()
+        public static IObservable<Unit> ClientConnect(this ITestApplication application) 
+            => Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()
                 ? TraceEventHub.Connecting.FirstAsync().SubscribeReplay()
                 : Unit.Default.ReturnObservable();
-        }
     }
 }

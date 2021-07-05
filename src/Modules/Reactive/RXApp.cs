@@ -38,6 +38,8 @@ namespace Xpand.XAF.Modules.Reactive{
             harmony.Patch(frameInitialize,  postfix:new HarmonyMethod(createFrameMethodPatch));
             var createModuleManager = typeof(XafApplication).Method(nameof(CreateModuleManager));
             harmony.Patch(createModuleManager, finalizer: new HarmonyMethod(GetMethodInfo(nameof(CreateModuleManager))));
+            harmony.Patch(typeof(XafApplication).Method(nameof(XafApplication.Exit)),
+                new HarmonyMethod(typeof(XafApplicationRxExtensions), nameof(XafApplicationRxExtensions.Exit)));
         }
 
         private static MethodInfo GetMethodInfo(string methodName) 
@@ -48,7 +50,7 @@ namespace Xpand.XAF.Modules.Reactive{
                 .Merge(manager.AddNonSecuredTypes())
                 .Merge(manager.MergedExtraEmbeddedModels())
                 .Merge(manager.ConnectObjectString())
-                .Merge(manager.WhenApplication(application => application.WhenNonPersistentPropertyCollectionSource()
+                .Merge(manager.WhenApplication(application =>application.WhenNonPersistentPropertyCollectionSource()
                     .Merge(application.PatchAuthentication())
                     .Merge(application.ShowPersistentObjectsInNonPersistentView())))
                 .Merge(manager.SetupPropertyEditorParentView());

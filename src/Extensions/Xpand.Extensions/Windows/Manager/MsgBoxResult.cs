@@ -1,6 +1,6 @@
 ﻿using JetBrains.Annotations;
 
-namespace Xpand.Extensions.WindowManager{
+namespace Xpand.Extensions.Windows.Manager{
     [PublicAPI]
     public enum MsgBoxResult{
         Abort = 3,

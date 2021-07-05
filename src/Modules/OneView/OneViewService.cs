@@ -36,29 +36,23 @@ namespace Xpand.XAF.Modules.OneView{
 
         private static IObservable<Unit> ExitApplication(this IObservable<ShowViewParameters> showView,XafApplication application){
             var editingModel = showView.SelectMany(_ =>_.Controllers.OfType<OneViewDialogController>().ToObservable()
-                .SelectMany(controller => controller.AcceptAction.WhenExecuting().Select(tuple => tuple)));
+                .SelectMany(controller => controller.AcceptAction.WhenExecuting()));
             return  Observable.Defer(() => showView.SelectMany(_ => _.CreatedView.WhenClosed())
-                    .TakeUntil(editingModel))
-                .Repeat()
-                .Where(view => !(bool) application.GetFieldValue("exiting"))
-                .Do(view => application.Exit())
-                .Select(view => view)
+                    .TakeUntil(editingModel)).Repeat()
+                .Do(_ => application.MainWindow.Close())
                 .ToUnit();
-
         }
 
         private static IObservable<Unit> EditModel(this IObservable<ShowViewParameters> showView,XafApplication application) 
 	        => showView.SelectMany(_ => _.Controllers.OfType<OneViewDialogController>())
 		        .SelectMany(_ => _.AcceptAction.WhenExecuteCompleted()
-			        .Select(tuple => application.MainWindow.GetController("DevExpress.ExpressApp.Win.SystemModule.EditModelController").GetPropertyValue("EditModelAction"))).Cast<SimpleAction>()
+			        .Select(_ => application.MainWindow.GetController("DevExpress.ExpressApp.Win.SystemModule.EditModelController").GetPropertyValue("EditModelAction"))).Cast<SimpleAction>()
 		        .Do(action => action.DoExecute()).ToUnit()
 		        .TraceOneView();
 
         private static IObservable<Unit> HideMainWindow(this XafApplication application) 
 	        => application.WhenWin().SelectMany(api => api.WhenMainFormVisible())
-		        .Do(window => {
-			        window.Template.SetPropertyValue("Visible",false);
-		        })
+		        .Do(window => window.Template.SetPropertyValue("Visible",false))
 		        .TraceOneView(window => window.Context)
 		        .ToUnit()
 		        .TakeUntil(application.ToReactiveModule<IModelReactiveModuleOneView>().Where(view => view.OneView.View==null));
@@ -67,18 +61,18 @@ namespace Xpand.XAF.Modules.OneView{
         internal static IObservable<TSource> TraceOneView<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
 	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
 	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
-	        => source.Trace(name, OneViewModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
+	        => source.Trace(name, OneViewModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName);
 
         private static IObservable<ShowViewParameters> ShowView(this XafApplication application) 
 	        => application.WhenWindowCreated().When(TemplateContext.ApplicationWindow)
-		        .SelectMany(window => {
+		        .SelectMany(_ => {
 			        var modelView = application.Model.ToReactiveModule<IModelReactiveModuleOneView>().OneView;
 			        if (modelView.View!=null){
 				        var showViewParameters = new ShowViewParameters();
 				        var dialogController = new OneViewDialogController();
 				        dialogController.AcceptAction.Caption = "Configure";
 				        dialogController.CancelAction.Active[""] = false;
-				        showViewParameters.Controllers.Add(dialogController);
+                        showViewParameters.Controllers.Add(dialogController);
 				        showViewParameters.NewWindowTarget = NewWindowTarget.Separate;
 				        showViewParameters.Context = TemplateContext.PopupWindow;
 
@@ -95,6 +89,5 @@ namespace Xpand.XAF.Modules.OneView{
     }
 
     public class OneViewDialogController:DialogController{
-        
     }
 }

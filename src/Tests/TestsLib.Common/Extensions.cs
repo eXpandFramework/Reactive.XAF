@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reactive;
@@ -126,7 +127,7 @@ namespace Xpand.TestsLib.Common{
         public static void RegisterDefaults(this XafApplication application, params ModuleBase[] modules){
             if (modules.Any() && application.Security is SecurityStrategyComplex){
                 if (!modules.OfType<TestApplicationModule>().Any()){
-                    modules=modules.AddToArray(new TestApplicationModule());
+                    modules=LinqExtensions.AddToArray(modules, new TestApplicationModule());
                 }
             }
 
@@ -201,7 +202,8 @@ namespace Xpand.TestsLib.Common{
             {"GoogleCalendarModule", 61485},
             {"DocumentStyleManagerModule", 61486},
             {"JobSchedulerModule", 61487},
-            {"RestModule", 61488}
+            {"RestModule", 61488},
+            {"WindowsModule", 61489}
         };
 
         public static TestObserver<T> StartTest<T>(this XafApplication application,IObservable<T> test,int delay=200) {
@@ -294,6 +296,10 @@ namespace Xpand.TestsLib.Common{
             else if (platform == Platform.Win){
                 applicationTypeName = "Xpand.TestsLib.TestWinApplication";
                 application = (XafApplication) AppDomain.CurrentDomain.CreateTypeInstance(applicationTypeName, typeof(TModule), transmitMessage, handleExceptions);
+                var userModelPath = $"{AppDomain.CurrentDomain.ApplicationPath()}Model.User.xafml";
+                if (File.Exists(userModelPath)) {
+                    File.Delete(userModelPath);
+                }
             }
             else if (platform == Platform.Blazor){
                 application = (XafApplication) ApplicationType.CreateInstance(typeof(TModule), transmitMessage, handleExceptions);
@@ -443,6 +449,7 @@ namespace Xpand.TestsLib.Common{
                 });
         }
 
+
         public static void MockFrameTemplate(this XafApplication application){
             var frameTemplateMock = new Mock<IWindowTemplate>();
             frameTemplateMock.Setup(template => template.GetContainers()).Returns(() => new IActionContainer[0]);
@@ -468,6 +475,7 @@ namespace Xpand.TestsLib.Common{
         public override void Setup(XafApplication application){
             base.Setup(application);
             application.LoggingOn += ApplicationOnLoggingOn;
+            
         }
 
         private void ApplicationOnLoggingOn(object sender, LogonEventArgs e) => ((AuthenticationStandardLogonParameters) e.LogonParameters).UserName = "User";

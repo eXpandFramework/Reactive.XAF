@@ -50,5 +50,11 @@ Get-ChildItem -Filter *.csproj -Recurse | ForEach-Object {
         Update-ProjectProperty $projXml AppendTargetFrameworkToOutputPath ($target -notlike "netstandard2.*")
     }
     
+    $target = Get-ProjectTargetFramework $projXml -FullName
+    $regex = [regex] '(?<t>.*-windows$)'
+    $result = $regex.Replace($target, '${t}7.0')
+    $projXml.Project.PropertyGroup|Where-Object{$_["TargetFramework"]}|ForEach-Object{
+        $_.TargetFramework=$result
+    }
     $projXml.Save($fileName)|Out-null
 } 

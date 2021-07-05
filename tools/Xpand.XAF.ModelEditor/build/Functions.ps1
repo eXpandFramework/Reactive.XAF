@@ -13,8 +13,8 @@ function DownloadDependencies($dxVersion) {
     if ($LASTEXITCODE) {
         throw $buildResult
     }
-    "exe", "pdb" | ForEach-Object {
-        Copy-Item ".\Xpand.XAF.ModelEditor.$_" $outputDir
+    "exe", "pdb","dll" | ForEach-Object {
+        Copy-Item ".\Xpand.XAF.ModelEditor.$_" $outputDir -Force
     }
 }
 

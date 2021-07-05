@@ -25,7 +25,7 @@ $filteredProjects+=Get-ChildItem "$root\src\" -Include "*Xpand.TestsLib*.csproj"
 $dxVersionBuild=Get-VersionPart $dxVersion Build
 $filteredProjects| Invoke-Parallel -StepInterval 500 -VariablesToImport @("allProjects", "root", "Release","dxVersionBuild") -Script {
 
-# $filteredProjects|where{$_.BaseName -eq "Xpand.TestsLib.EasyTest"}| foreach {
+# $filteredProjects|where{$_.BaseName -eq "Xpand.XAF.Modules.Reactive.Logger.Client.Win"}| foreach {
 # $filteredProjects| foreach {
     $addTargets = {
         param (
