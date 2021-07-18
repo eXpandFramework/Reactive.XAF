@@ -7,7 +7,7 @@ The `GridListEditor` module hosts features related to XAF GridListEditor.
 
 ## Details
 
-This is a `WinForma module`. To freeze the TopRowIndex of a ListView when its CollectionSource get reloaded add a new rule to your model as in next image.
+This is a `WinForms module` which can be configured using model rules as shown .
 
 <twitter>
 
@@ -15,7 +15,10 @@ This is a `WinForma module`. To freeze the TopRowIndex of a ListView when its Co
 
 </twitter>
 
-The module is valuable in scenarios where an external signal notifies about new data and you refresh your View. Such an example is the [Reactive.Logger.Client](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win)
+**Rules:**
+1. `RememberTopRow`: To freeze the TopRowIndex of a ListView when its CollectionSource get reloaded add a new rule to your model as in image above. The rule is valuable in scenarios where an external signal notifies about new data and you refresh your View. Such an example is the [Reactive.Logger.Client](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win)
+
+2. `FocusAutoFilterRow`: When a listview is shown the AutoFilterRow will be focused by default. 
 
 --- 
 

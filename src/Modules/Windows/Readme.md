@@ -33,13 +33,13 @@ This is a `WinForms module`. To configure the `Application.Windows` module look 
   `ControlBox`, `MinimizeBox`, `MaximizeBox`, `ShowInTaskbar`, `ShowInTaskbar`, `FormBorderStyle`: Control Form properties.\
   `PopupWindows`: Applies previous attributes to popup windows e.g OneView package architecture.
 1. **MultiInstance Node:**\
-  `Disabled`: If true all other model node attributres are respected.\
+  `Disabled`: If true all other model node attributes are respected.\
   `NotifyMessage`: if empty then when additional application instances will terminate silently.\
   `FocusRunning`: When additional application instances terminated the main app will be focused.\
 1. **NotifyIcon Node:**\
-  `Enabled`: If true all other model node attributres are respected.\
+  `Enabled`: If true all other model node attributes are respected.\
   `ShowText`,`ExitText`,`LogoffText`,`HideText`: They provide text for the notifyIcon menu. If empty the menu item is not visible.\
-  `ShowOnDblClick`: Displays aplication on NotifyIcon double click.\
+  `ShowOnDblClick`: Displays application on NotifyIcon double click.\
 
 **Possible future improvements:**
 
