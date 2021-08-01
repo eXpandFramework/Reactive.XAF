@@ -24,7 +24,7 @@
         <dependency id="JetBrains.Annotations" version="2021.1" />
         <dependency id="System.Reactive" version="5.0" />
         <dependency id="Microsoft.Graph.Beta" version="0.49.0-preview" />
-        <dependency id="Microsoft.Identity.Client" version="4.33" />
+        <dependency id="Microsoft.Identity.Client" version="4.34" />
         <dependency id="Microsoft.Owin.Host.SystemWeb" version="4.2" />
         <dependency id="Microsoft.Owin.Security.Cookies" version="4.2" />
         <dependency id="Microsoft.Owin.Security.OpenIdConnect" version="4.2" />

@@ -28,7 +28,7 @@ using Xpand.XAF.Modules.Reactive.Services.Actions;
 namespace TestApplication{
     public static class CloudService{
         public static IObservable<Unit> PushTheToken<TObject>(this ApplicationModulesManager manager,string serviceName,Func<TObject,string> tokenFactory) where TObject:CloudOfficeBaseObject
-            => manager.RegisterViewSimpleAction($"Push{serviceName}Token",typeof(PermissionPolicyUser),ViewType.DetailView)
+            => manager.RegisterViewSimpleAction($"Push{serviceName}Token",typeof(User),ViewType.DetailView)
                 .ActivateInUserDetails().FirstAsync()
                 .WhenExecute(e => {
 #if !NETCOREAPP3_1

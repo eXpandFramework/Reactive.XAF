@@ -51,8 +51,9 @@
     <PackageReference Include="Google.Apis.People.v1" Version="1.25.0.830" />
     <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="21.1.4" />
     <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="21.1.4" />
-    <PackageReference Include="Hangfire.MemoryStorage" Version="1.7" />
-    <PackageReference Include="Hangfire.SqlServer" Version="1.7.19" />
+    <PackageReference Include="Hangfire.MemoryStorage" Version="1.7.24.2" />
+    <PackageReference Include="Hangfire.SqlServer" Version="1.7.24" />
+    <PackageReference Include="Hangfire.Core" Version="1.7.24" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" Version="5.0.1" />
     <PackageReference Include="Xpand.XAF.Core.All">
       <Version>4.211.3.1</Version>
@@ -70,7 +71,7 @@
     <PackageReference Include="System.Threading" Version="4.3" />
     <PackageReference Include="System.Text.Json" Version="5.0.2" />
     <PackageReference Include="System.Threading.AccessControl" Version="5.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.7" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.8" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0" />
   </ItemGroup>
   <ItemGroup>

@@ -13,15 +13,15 @@ using Xpand.XAF.Modules.Reactive.Services.Actions;
 namespace Xpand.XAF.Modules.Windows {
     static class ExitService {
         public static IObservable<Window> OnWindowEscape(this IObservable<Window> source)
-            => source.Cast<WinWindow>().MergeIgnored(window => window.Template
-                .WhenEvent<Form, KeyEventArgs>(nameof(WinWindow.KeyDown)).Where(t => t.args.KeyCode == Keys.Escape).To(window)
+            => source.Cast<WinWindow>().MergeIgnored(window => window
+                .WhenEvent<WinWindow, KeyEventArgs>(nameof(WinWindow.KeyDown)).Where(t => t.args.KeyCode == Keys.Escape).To(window)
                 .Do(model => model.OnEscape.CloseWindow,model => model.OnEscape.MinimizeWindow)
-                .To(window),window => window.Application.Model().Exit.OnEscape.CloseWindow);
+                .To(window),window => window.Model().Exit.OnEscape.CloseWindow);
 
         static IObservable<Window> Do(this IObservable<Window> source, Func<IModelWindowsExit, bool> closeWindow,
             Func<IModelWindowsExit, bool> minimizeWindow)
             => source.Do(window => {
-                var model = window.Application.Model().Exit;
+                var model = window.Model().Exit;
                 if (closeWindow(model)) {
                     window.Close();
                 }
@@ -31,23 +31,24 @@ namespace Xpand.XAF.Modules.Windows {
                 }
             });
 
-        public static IObservable<Window> OnWindowDeactivation(this IObservable<Window> source)
+        public static IObservable<Window> OnWindowDeactivation(this IObservable<Window> source,Func<Window,bool> apply=null)
             => source.MergeIgnored(window => window.Template
-                .WhenEvent<Form, EventArgs>(nameof(Form.Deactivate))
+	            .WhenEvent<Form, EventArgs>(nameof(Form.Activated))
+                .Select(_ => window.Template.WhenEvent<Form, EventArgs>(nameof(Form.Deactivate))).Switch()
                 .Do(_ => window.Close())
-                .To(window),window => window.Application.Model().Exit.OnDeactivation.CloseWindow);
+                .To(window),window => window.Model().Exit.OnDeactivation.CloseWindow&& (apply==null||apply(window)));
 
         public static IObservable<Window> CancelExit(this IObservable<Window> source) 
             => source.MergeIgnored(window => window.Template.WhenEvent<Form, FormClosingEventArgs>(nameof(Form.FormClosing))
                 .TakeUntil(window.WhenCustomExit())
                 .Select(t => {
                     t.args.Cancel = window.CanExit();
-                    return (t.source, window.Application.Model().Exit);
+                    return (t.source, window.Model().Exit);
                 }).ChangeFormState().To(window));
 
         private static bool CanExit(this Window window) {
             var application = window.Application;
-            var modelWindowsExit = window.Application.Model().Exit;
+            var modelWindowsExit = window.Model().Exit;
             var prompt = modelWindowsExit.Prompt;
             return prompt.Enabled
                 ? WinApplication.Messaging.GetUserChoice(

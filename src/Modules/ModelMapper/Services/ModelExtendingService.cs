@@ -32,7 +32,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         internal static IObservable<Unit> ConnectExtendingService(this ApplicationModulesManager applicationModulesManager){
 	        Platform = applicationModulesManager.Modules.GetPlatform();
 	        return applicationModulesManager.WhenExtendingModel().FirstAsync()
-                .Select(AddExtenders).Switch()
+                .SelectMany(AddExtenders).Select(tuple => tuple)
                 .Finally(() => {
                     ConnectedSubject.OnNext(Unit.Default);
                     ModelMapperConfigurations.Clear();
@@ -58,7 +58,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
 
         private static IEnumerable<(Type targetInterfaceType, Type extenderInterface)> CollectExtenders(this IModelMapperConfiguration configuration, Type extenderInterface){
             XafTypesInfo.Instance.FindTypeInfo(extenderInterface);
-            return configuration.TargetInterfaceTypes.Select(targetInterfaceType => (targetInterfaceType, configuration.IsDependency?typeof(IModelModelMappersContextDependency):extenderInterface));
+            return configuration.TargetInterfaceTypes
+                .Select(targetInterfaceType => (targetInterfaceType, configuration.IsDependency?typeof(IModelModelMappersContextDependency):extenderInterface));
         }
 
         private static IObservable<IModelMapperConfiguration> ModelExtenders(){

@@ -4,3 +4,4 @@ System.CodeDom
 System.Reflection.Emit
 JetBrains.Annotations
 System.Collections.Immutable
+System.Text.Json

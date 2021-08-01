@@ -1,9 +1,7 @@
-﻿using System;
-using DevExpress.ExpressApp.Security;
+﻿using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.Blazor.Services;
 using Hangfire;
 using Hangfire.MemoryStorage;
-using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Server.Circuits;
@@ -37,7 +35,7 @@ namespace TestApplication.Blazor.Server {
             services.AddXaf<ServerBlazorApplication>(Configuration);
             services.AddXafSecurity(options => {
                 options.RoleType = typeof(DevExpress.Persistent.BaseImpl.PermissionPolicy.PermissionPolicyRole);
-                options.UserType = typeof(DevExpress.Persistent.BaseImpl.PermissionPolicy.PermissionPolicyUser);
+                options.UserType = typeof(User);
                 options.Events.OnSecurityStrategyCreated = securityStrategy => ((SecurityStrategy)securityStrategy).RegisterXPOAdapterProviders();
                 options.SupportNavigationPermissionsForTypes = false;
             }).AddExternalAuthentication<HttpContextPrincipalProvider>()

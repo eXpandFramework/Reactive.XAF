@@ -28,9 +28,9 @@
         <dependency id="System.Interactive" version="5.0" />
         <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.10" />
         <dependency id="System.Configuration.ConfigurationManager" version="5.0" />
-        <dependency id="Hangfire.Core" version="1.7.19" />
+        <dependency id="Hangfire.Core" version="1.7.24" />
         <dependency id="System.CodeDom" version="5.0" />
-        <dependency id="Hangfire.AspNetCore" version="1.7.19" />
+        <dependency id="Hangfire.AspNetCore" version="1.7.24" />
         <dependency id="Microsoft.AspNetCore.Hosting.Abstractions" version="2.2" />
         <dependency id="Microsoft.Extensions.DependencyInjection.Abstractions" version="5.0" />
         <dependency id="Xpand.Patcher" version="2.0.30" />

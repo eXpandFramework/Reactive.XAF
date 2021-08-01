@@ -28,7 +28,7 @@ namespace Xpand.XAF.Modules.GridListEditor.Tests{
     public class GridListEditorTests : BaseTest{
         [Test]
         [XpandTest]
-        // [Ignore("Random fail on azure")]
+        [Ignore("Random fail on azure")]
         [Apartment(ApartmentState.STA)]
         public async Task Remember_TopRowIndex_WHen_Refresh_View_DataSource(){
             
@@ -74,7 +74,9 @@ namespace Xpand.XAF.Modules.GridListEditor.Tests{
         public void FocusRow(bool upArrowMoveToRowHandle){
             
             var application = GridListEditorModule().Application;
-            
+            var objectSpace = application.CreateObjectSpace();
+            objectSpace.CreateObject<GLE>();
+            objectSpace.CommitChanges();
             var items = application.Model.ToReactiveModule<IModelReactiveModuleGridListEditor>().GridListEditor;
             var focusRow = items.GridListEditorRules.AddNode<IModelGridListEditorFocusRow>();
             var modelClass = application.Model.BOModel.GetClass(typeof(GLE));
@@ -90,6 +92,7 @@ namespace Xpand.XAF.Modules.GridListEditor.Tests{
                 .Select(frame => {
                     var gridView = ((DevExpress.ExpressApp.Win.Editors.GridListEditor) frame.View.AsListView().Editor).GridView;
                     if (upArrowMoveToRowHandle) {
+	                    gridView.FocusedRowHandle = 0;
                         gridView.CallMethod("RaiseKeyDown", new KeyEventArgs(Keys.Up));
                     }
                     return gridView.FocusedRowHandle;

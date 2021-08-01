@@ -90,7 +90,7 @@ namespace TestApplication.Module {
             RequiredModuleTypes.Add(typeof(HideToolBarModule));
             RequiredModuleTypes.Add(typeof(MasterDetailModule));
             RequiredModuleTypes.Add(typeof(ModelViewInheritanceModule));
-            RequiredModuleTypes.Add(typeof(ProgressBarViewItemModule));
+            // RequiredModuleTypes.Add(typeof(ProgressBarViewItemModule));
             RequiredModuleTypes.Add(typeof(ModelMapperModule));
             RequiredModuleTypes.Add(typeof(ReactiveModule));
             RequiredModuleTypes.Add(typeof(PositionInListViewModule));

@@ -11,7 +11,7 @@ namespace Xpand.XAF.Modules.Windows {
         public static IObservable<Window> MultiInstance(this IObservable<Window> source)
             => source.ConcatIgnored(frame => Process.GetCurrentProcess().WhenSameNameProcesses()
                 .Do(process => {
-                    var modelWindowsMultiInstance = frame.Application.Model().MultiInstance;
+                    var modelWindowsMultiInstance = frame.Model().MultiInstance;
                     if (!modelWindowsMultiInstance.Disabled) return;
                     if (!string.IsNullOrEmpty(modelWindowsMultiInstance.NotifyMessage)) {
                         throw new WarningException(

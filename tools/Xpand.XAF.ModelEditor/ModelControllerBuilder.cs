@@ -26,7 +26,7 @@ namespace Xpand.XAF.ModelEditor {
             return GetController(fileModelStore, modelApplication);
         }
         ModelEditorViewController GetController(FileModelStore fileModelStore, ModelApplicationBase modelApplication) 
-            => new ModelEditorViewController((IModelApplication)modelApplication, fileModelStore);
+            => new((IModelApplication)modelApplication, fileModelStore);
 
         ModelApplicationBase GetModelApplication(ApplicationModulesManager applicationModulesManager, PathInfo pathInfo, FileModelStore fileModelStore) {
             var modelApplication = ModelApplicationHelper.CreateModel(XafTypesInfo.Instance, applicationModulesManager.DomainComponents, applicationModulesManager.Modules, applicationModulesManager.ControllersManager, Type.EmptyTypes, fileModelStore.GetAspects(), null, null);

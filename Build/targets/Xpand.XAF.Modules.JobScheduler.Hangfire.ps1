@@ -3,6 +3,7 @@ param(
     $ProjectPath = "DoNotRemove",
     $nugetPackagesFolder="$env:USERPROFILE\.nuget\packages"
 )
+
 Write-Host ------- Patch Hangfire------------
 
 # Get-ChildItem $nugetPackagesFolder *hangfire*|Remove-Item -Recurse -Force

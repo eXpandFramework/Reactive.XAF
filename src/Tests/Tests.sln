@@ -376,9 +376,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.TestsLib.EasyTest", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Windows", "Windows", "{FF16749C-E219-4C94-BD51-E4A171E4BFCF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Windows", "B:\work\Reactive.XAF\src\Modules\Windows\Xpand.XAF.Modules.Windows.csproj", "{44614EEB-5C33-4B66-8822-17BDD8A4D234}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Windows", "..\Modules\Windows\Xpand.XAF.Modules.Windows.csproj", "{44614EEB-5C33-4B66-8822-17BDD8A4D234}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Windows.Tests", "B:\Work\Reactive.XAF\src\Tests\Windows\Xpand.XAF.Modules.Windows.Tests.csproj", "{E0F16E87-F342-44AF-92AB-C84BD3390E2B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Windows.Tests", "Windows\Xpand.XAF.Modules.Windows.Tests.csproj", "{E0F16E87-F342-44AF-92AB-C84BD3390E2B}"
 	ProjectSection(ProjectDependencies) = postProject
 		{99C44A4A-51EC-4577-8355-482159DE0105} = {99C44A4A-51EC-4577-8355-482159DE0105}
 	EndProjectSection

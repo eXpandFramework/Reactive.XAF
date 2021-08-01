@@ -63,6 +63,8 @@ namespace Xpand.XAF.Modules.Windows{
     public interface IModelOn:IModelNode {
         bool CloseWindow { get; set; }
         bool MinimizeWindow { get; set; }
+        [DefaultValue(true)]
+        bool ApplyInMainWindow { get; set; }
     }
     public interface IModelWindowsMainFormBox:IModelNode {
 	    [DefaultValue(true)]

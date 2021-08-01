@@ -4,15 +4,15 @@
     <OutputType>WinExe</OutputType>
     <AssemblyOriginatorKeyFile>..\..\src\Xpand.key\Xpand.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
-    <TargetFramework>net5.0-windows</TargetFramework>
+    <TargetFramework>net5.0-windows7.0</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <OutputPath>..\..\bin\</OutputPath>
     <LangVersion>latest</LangVersion>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
     <PublishReadyToRunShowWarnings>true</PublishReadyToRunShowWarnings>
     <PreserveCompilationContext>false</PreserveCompilationContext>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -40,5 +40,13 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="3.1.6" />
   </ItemGroup>
-  <Import Project="..\..\.paket\Paket.Restore.targets" />
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="21.1.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Win" Version="21.1.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="21.1.4" />
+    <PackageReference Include="DevExpress.Persistent.Base" Version="21.1.4" />
+    <PackageReference Include="DevExpress.Persistent.BaseImpl" Version="21.1.4" />
+  </ItemGroup>
+  <!-- <Import Project="..\..\.paket\Paket.Restore.targets" /> -->
 </Project>

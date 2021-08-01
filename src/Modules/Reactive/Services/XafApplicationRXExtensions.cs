@@ -312,7 +312,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.ReturnObservable().ObjectViewCreating();
 
         public static IObservable<(XafApplication application, ViewCreatingEventArgs e)> ObjectViewCreating(this IObservable<XafApplication> source) 
-            => source.ViewCreating().WhenNotDefault(t => t.application.Model.Views[t.e.ViewID].AsObjectView);
+            => source.ViewCreating().WhenNotDefault(t => t.application.Model.Views[t.e.ViewID]?.AsObjectView);
 
         public static IObservable<View> ViewCreated(this IObservable<XafApplication> source) 
             => source.SelectMany(application => application.WhenViewCreated());

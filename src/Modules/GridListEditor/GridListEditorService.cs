@@ -38,7 +38,7 @@ namespace Xpand.XAF.Modules.GridListEditor{
                 .ToObservable().ToUnit();
 
         private static IObservable<Unit> MoveFocus(this IModelGridListEditorFocusRow rule, object gridView) 
-            => gridView.WhenEvent("KeyDown").Where(p => p.EventArgs.GetPropertyValue("KeyCode").ToString()=="Up")
+            => gridView.WhenEvent("KeyDown").Where(p =>(int)gridView.GetPropertyValue("FocusedRowHandle")==0&& p.EventArgs.GetPropertyValue("KeyCode").ToString()=="Up")
                 .SelectMany(_ => AppDomain.CurrentDomain.GridControlHandles().Where(info => info.Name == rule.UpArrowMoveToRowHandle)
                     .Select(info => info.GetValue(null))
                     .Do(o => gridView.SetPropertyValue("FocusedRowHandle", o))).ToUnit();

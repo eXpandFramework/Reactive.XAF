@@ -12,3 +12,5 @@ Microsoft.NET.Test.Sdk
 System.Data.SqlClient
 DevExpress.ExpressApp.Win
 DevExpress.Persistent.BaseImpl
+akarnokd.reactive_extensions
+Fasterflect.Xpand

@@ -23,7 +23,7 @@
         <dependency id="System.Reactive" version="5.0" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="Jetbrains.Annotations" version="2021.1" />
-        <dependency id="YamlDotNet" version="11.2" />
+        <dependency id="YamlDotNet" version="11.2.1" />
         <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.10" />
         <dependency id="System.Configuration.ConfigurationManager" version="5.0" />
         <dependency id="Xpand.Patcher" version="2.0.30" />

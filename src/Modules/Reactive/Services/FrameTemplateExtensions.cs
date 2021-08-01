@@ -24,9 +24,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 				.Select(template => new WindowsForm(template));
 
 
-        public static IObservable<Frame> WhenWindowTemplate(this XafApplication application,TemplateContext templateContext=default)
+        public static IObservable<Window> WhenWindowTemplate(this XafApplication application,TemplateContext templateContext=default)
             => application.WhenFrameCreated(templateContext==default?TemplateContext.ApplicationWindow:templateContext)
-                .SelectMany(frame => frame.WhenTemplateChanged());
+                .SelectMany(frame => frame.WhenTemplateChanged()).Cast<Window>();
 
 		public static IObservable<IWindowsForm> When(this IObservable<IWindowsForm> source, string eventName) 
 			=> source.SelectMany(form => Observable.FromEventPattern(form.Template,eventName).To(form));

@@ -21,7 +21,7 @@ namespace Xpand.XAF.Modules.Windows {
 
         internal static IObservable<Window> NotifyIcon(this IObservable<Window> source)
             => source.MergeIgnored(frame => Observable.Using(() => new Container(), container => {
-                if (frame.Application.Model().NotifyIcon.Enabled) {
+                if (frame.Model().NotifyIcon.Enabled) {
                     var notifyIcon = new NotifyIcon(container)
                         {Visible = true, ContextMenuStrip = new ContextMenuStrip(container)};
                     notifyIcon.SetupIcon();
@@ -45,14 +45,14 @@ namespace Xpand.XAF.Modules.Windows {
 
 
         private static IObservable<Frame> ShowOnDoubleClick(this NotifyIcon notifyIcon, Frame frame) 
-            => notifyIcon.WhenEvent(nameof(notifyIcon.DoubleClick)).Where(_ => frame.Application.Model().NotifyIcon.ShowOnDblClick)
+            => notifyIcon.WhenEvent(nameof(notifyIcon.DoubleClick)).Where(_ => frame.Model().NotifyIcon.ShowOnDblClick)
                 .Do(_ => ((Form) frame.Application.MainWindow.Template).Show()).To(frame);
 
         private static IObservable<Frame> ExecuteMenuItems(this NotifyIcon notifyIcon,Frame frame) 
             => notifyIcon.ContextMenuStrip.UpdateMenuItems(frame).Finally(() => NotifyIconSubject.OnNext(notifyIcon))
                 .SelectMany(item => item.WhenEvent(nameof(item.Click)).ObserveOn(SynchronizationContext.Current!).To(item))
                 .Do(item => {
-                    var model = frame.Application.Model().NotifyIcon;
+                    var model = frame.Model().NotifyIcon;
                     var mainForm = ((Form) frame.Application.MainWindow.Template);
                     if (item.Text == model.LogOffText) {
                         frame.Application.LogOff();
@@ -70,7 +70,7 @@ namespace Xpand.XAF.Modules.Windows {
 
         private static IObservable<ToolStripMenuItem> UpdateMenuItems(this ContextMenuStrip strip, Frame frame) {
             strip.Items.Clear();
-            var model = frame.Application.Model().NotifyIcon;
+            var model = frame.Model().NotifyIcon;
             if (!string.IsNullOrEmpty(model.ShowText)) {
                 strip.Items.Add(new ToolStripMenuItem(model.ShowText));
             }

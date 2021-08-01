@@ -14,6 +14,9 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="MicrosoftServiceTests.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="..\Office.Cloud\CloudServiceTests.cs" Link="CloudServiceTests.cs" />
   </ItemGroup>
   <ItemGroup>

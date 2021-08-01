@@ -31,6 +31,7 @@
     <None Remove="ViewWizard\**" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="Model - Copy.DesignedDiffs.xafml" />
     <None Remove="Model.DesignedDiffs.xafml" />
     <None Remove="PositionInListView\PositionInListView.xafml" />
     <None Remove="UnusableNodes.xml" />
@@ -41,6 +42,7 @@
     <Compile Include="..\..\..\TestsLib.Common\BO\OrderModuleUpdater.cs" Link="Common\OrderModuleUpdater.cs" />
     <Compile Include="..\..\..\TestsLib.Common\BO\Product.cs" Link="Common\Product.cs" />
     <Compile Include="..\..\..\TestsLib.Common\DefaultUserModuleUpdater.cs" Link="Common\DefaultUserModuleUpdater.cs" />
+    <Compile Include="..\..\CommonFiles\PermissionPolicyUser.cs" Link="Common\PermissionPolicyUser.cs" />
     <Compile Include="..\CommonFiles\CloudCalendarService.cs" Link="Office\Cloud\CloudCalendarService.cs" />
     <Compile Include="..\CommonFiles\CloudService.cs" Link="Office\Cloud\CloudService.cs" />
     <Compile Include="..\CommonFiles\CloudTasksService.cs" Link="Office\Cloud\CloudTasksService.cs" />
@@ -54,6 +56,7 @@
   <ItemGroup>
     <EmbeddedResource Include="..\CommonFiles\Cloud.Office.xafml" Link="Office\Cloud\Cloud.Office.xafml" />
     <EmbeddedResource Include="..\CommonFiles\SeqeuenceGenerator\SequenceGenerator.xafml" Link="SequenceGenerator\SequenceGenerator.xafml" />
+    <EmbeddedResource Include="Model - Copy.DesignedDiffs.xafml" />
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>

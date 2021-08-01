@@ -75,8 +75,8 @@ namespace TestApplication.Module.Win {
 
         public override void Setup(XafApplication application){
             base.Setup(application);
-            application.Security = new SecurityStrategyComplex(typeof(PermissionPolicyUser),
-                typeof(PermissionPolicyRole), new AuthenticationStandard(typeof(PermissionPolicyUser), typeof(AuthenticationStandardLogonParameters)));
+            application.Security = new SecurityStrategyComplex(typeof(User),
+                typeof(PermissionPolicyRole), new AuthenticationStandard(typeof(User), typeof(AuthenticationStandardLogonParameters)));
         }
 
         public override void Setup(ApplicationModulesManager moduleManager){

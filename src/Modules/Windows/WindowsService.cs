@@ -14,13 +14,13 @@ namespace Xpand.XAF.Modules.Windows{
     internal static class WindowsService{
         
         internal static IObservable<Unit> Connect(this  ApplicationModulesManager manager) 
-	        => manager.WhenApplication(application => application.WhenWindowTemplate().Cast<Window>()
-                .MultiInstance()
-                .Startup().ConfigureForm().NotifyIcon()
+	        => manager.WhenApplication(application => application.WhenWindowTemplate()
+                .MultiInstance().Startup().ConfigureForm().NotifyIcon()
                 .CancelExit()
-                .OnWindowDeactivation().OnWindowEscape()
+                .OnWindowDeactivation(window => !window.Model().Exit.OnDeactivation.ApplyInMainWindow)
+                .OnWindowEscape()
                 .Merge(application.WhenPopupWindows()
-                    .ConfigureForm(window => window.Application.Model().Form.PopupWindows)
+                    .ConfigureForm(window => window.Model().Form.PopupWindows)
                     .OnWindowDeactivation().OnWindowEscape())
             ).ToUnit();
 
@@ -31,7 +31,7 @@ namespace Xpand.XAF.Modules.Windows{
             => source.Do(frame => {
                 string deskDir = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
                 var path = deskDir + "\\" + frame.Application.Title + ".url";
-                if (frame.Application.Model().Startup) {
+                if (frame.Model().Startup) {
                     using StreamWriter writer = new StreamWriter(path);
                     string app = System.Reflection.Assembly.GetExecutingAssembly().Location;
                     writer.WriteLine("[InternetShortcut]");
@@ -49,7 +49,7 @@ namespace Xpand.XAF.Modules.Windows{
 	        => source.Do(frame => {
                 if (apply == null || apply(frame)) {
                     var form = ((Form) frame.Template);
-                    var controlBox = frame.Application.Model().Form;
+                    var controlBox = frame.Model().Form;
                     form.MinimizeBox = controlBox.MinimizeBox;
                     form.MaximizeBox = controlBox.MaximizeBox;
                     form.ControlBox = controlBox.ControlBox;
@@ -60,6 +60,9 @@ namespace Xpand.XAF.Modules.Windows{
 
         internal static IModelWindows Model(this XafApplication application) 
             => application.Model.ToReactiveModule<IModelReactiveModuleWindows>().Windows;
+        
+        internal static IModelWindows Model(this Frame frame) 
+            => frame.Application.Model();
 
         internal static IObservable<TSource> TraceWindows<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
 	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,

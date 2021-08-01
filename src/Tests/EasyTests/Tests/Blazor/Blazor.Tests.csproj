@@ -44,7 +44,7 @@
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp.EasyTest.BlazorAdapter" Version="21.1.4" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.7" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.8" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0" />
     <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="21.1.4" />
     <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="21.1.4" />

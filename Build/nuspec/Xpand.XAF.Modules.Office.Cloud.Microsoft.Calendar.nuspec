@@ -26,7 +26,7 @@
         <dependency id="System.Reactive" version="5.0" />
         <dependency id="JetBrains.Annotations" version="2021.1" />
         <dependency id="Microsoft.Graph.Beta" version="0.49.0-preview" />
-        <dependency id="Microsoft.Identity.Client" version="4.33" />
+        <dependency id="Microsoft.Identity.Client" version="4.34" />
         <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.10" />
         <dependency id="Newtonsoft.Json" version="13.0.1" />
       </group>

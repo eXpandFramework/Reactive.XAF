@@ -15,6 +15,9 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="CalendarServiceTests.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="Xpand.TestsLib.net461">
       <HintPath>..\..\..\bin\net461\Xpand.TestsLib.net461.dll</HintPath>
     </Reference>

@@ -11,14 +11,15 @@ This is a `WinForms module` which can be configured using model rules as shown .
 
 <twitter>
 
-![image](https://user-images.githubusercontent.com/159464/64824092-c9a5c700-d5c1-11e9-96b8-5267876fa7c4.png)
+![image](https://user-images.githubusercontent.com/159464/126141781-32096b48-6b88-4109-9431-8800909a5576.png)
 
 </twitter>
 
 **Rules:**
 1. `RememberTopRow`: To freeze the TopRowIndex of a ListView when its CollectionSource get reloaded add a new rule to your model as in image above. The rule is valuable in scenarios where an external signal notifies about new data and you refresh your View. Such an example is the [Reactive.Logger.Client](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Reactive.Logger.Client.Win)
 
-2. `FocusAutoFilterRow`: When a listview is shown the AutoFilterRow will be focused by default. 
+2. `FocusRow`: Configure which gridview row handle will get focused once a ListView is shown. 
+
 
 --- 
 

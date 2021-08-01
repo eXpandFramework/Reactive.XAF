@@ -17,10 +17,10 @@
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="21.1.4" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
-    <PackageReference Include="hangfire.core" Version="1.7.19" />
-    <PackageReference Include="hangfire.sqlserver" Version="1.7.19" />
-    <PackageReference Include="hangfire.aspnetcore" Version="1.7.19" />
-    <PackageReference Include="hangfire.memorystorage" Version="1.7.0" />
+    <PackageReference Include="hangfire.core" Version="1.7.24" />
+    <PackageReference Include="hangfire.sqlserver" Version="1.7.24" />
+    <PackageReference Include="hangfire.aspnetcore" Version="1.7.24" />
+    <PackageReference Include="hangfire.memorystorage" Version="1.7.24.2" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.0" />
   </ItemGroup>

@@ -22,6 +22,7 @@
         <dependency id="System.Reflection.Emit" version="4.7" />
         <dependency id="JetBrains.Annotations" version="2021.1" />
         <dependency id="System.Collections.Immutable" version="5.0" />
+        <dependency id="System.Text.Json" version="5.0.2" />
       </group>
     </dependencies>
   </metadata>
