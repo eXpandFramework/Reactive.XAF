@@ -54,14 +54,6 @@ Invoke-Script {
 
     $DXVersion = Get-DevExpressVersion 
 
-    if ($UseLastVersion -eq "1"){
-        # Write-HostFormatted "Connecting to Azure" -Section
-        # Connect-Az -ApplicationSecret $XpandBlobOwnerSecret -AzureApplicationId $AzureApplicationId -AzureTenantId $AzureTenantId
-        # $build=(Get-AzBuilds -Definition Reactive.XAF-Lab -Tag "$DXVersion.0" -Top 1).id
-        # Get-AzArtifact -BuildId $build -ArtifactName PipelineWorkspace -Outpath "$SourcePath"
-        # "Bin files= $((Get-ChildItem "$SourcePath\bin" -Recurse).count)"
-    }
-
     $taskList = "Build"
     . "$SourcePath\build\UpdateDependencies.ps1" $CustomVersion
     . "$SourcePath\build\UpdateLatestProjectVersion.ps1"

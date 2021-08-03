@@ -45,7 +45,7 @@ $Toolpackages | ForEach-Object {
     
     [xml]$nuspec = Get-Content $_.Nuspec
     $nuspecVersion = ([version]$nuspec.package.metadata.Version)
-    if ($publishedVersion -lt $nuspecVersion) {
+    if ($publishedVersion -ne $nuspecVersion) {
         $minor = ([version]([System.Diagnostics.FileVersionInfo]::GetVersionInfo("$sourceDir\bin\Xpand.XAF.Modules.Reactive.dll").FileVersion)).Minor
         if ($nuspecVersion.Minor -ne $minor) {
             $nuspec.package.metadata.version = "$($nuspecVersion.Major).$Minor.0.0"

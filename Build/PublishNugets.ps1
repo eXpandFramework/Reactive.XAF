@@ -10,7 +10,7 @@ param(
     $criteria = "Xpand.*"
 
 )
-
+Get-ChildItem D:\a\1\s\bin\Nupkg -ErrorAction Continue
 & "$sourcesRoot\go.ps1" -InstallModules
 
 
