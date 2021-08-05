@@ -71,12 +71,12 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |----|----
 |**DevExpress.ExpressApp**|**Any**
  |**DevExpress.ExpressApp.Blazor**|**Any**
-|Xpand.Extensions.Blazor|4.211.3
- |Xpand.Extensions.Reactive|4.211.3
- |Xpand.Extensions.XAF|4.211.3
- |Xpand.Extensions|4.211.3
- |Xpand.Extensions.XAF.Xpo|4.211.3
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.211.3
+|Xpand.Extensions.Blazor|4.211.4
+ |Xpand.Extensions.Reactive|4.211.4
+ |Xpand.Extensions.XAF|4.211.4
+ |Xpand.Extensions|4.211.4
+ |Xpand.Extensions.XAF.Xpo|4.211.4
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.211.4
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |JetBrains.Annotations|2021.1.0
  |System.Reactive|5.0.0
@@ -88,7 +88,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |System.ServiceModel.Http|4.8.1
  |Microsoft.Extensions.DependencyInjection.Abstractions|5.0.0
  |Newtonsoft.Json|13.0.1
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.211.3
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.211.4
 
 ## Issues-Debugging-Troubleshooting
 

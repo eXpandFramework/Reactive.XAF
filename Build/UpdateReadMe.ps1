@@ -46,7 +46,7 @@ function UpdateModulesList($rootLocation, $packages,$path) {
         $packageUri = "[$name](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/$name)"
         $version = "![](https://xpandshields.azurewebsites.net/nuget/v/$_.svg?label=&style=flat)"
         $downloads = "![](https://xpandshields.azurewebsites.net/nuget/dt/$_.svg?label=&style=flat)"
-         
+        $_
         $targetFramework =$null
         if ($_ -like "*.All"){
             $regex = [regex] '(?is)Xpand\.XAF\.(?<platform>[^\.]*)\.All'
@@ -71,7 +71,14 @@ function UpdateModulesList($rootLocation, $packages,$path) {
             }
             
             $targetFramework =Get-ProjectTargetFramework $project -FullName
-            $platform=($assemblies|Where-Object{$_.BaseName -eq $packageName}|Get-AssemblyMetadata -key Platform).Value|Select-Object -First 1
+            
+            $assembly=$assemblies|Where-Object{$_.BaseName -eq $packageName}|Select-Object -First 1
+            if ($assembly.Extension -eq ".exe"){
+                $platform="Win"
+            }
+            else{
+                $platform=($assembly|Get-AssemblyMetadata -key Platform).Value
+            }
             if (!$platform){
                 throw "Platform missing in $packageName"
             }
