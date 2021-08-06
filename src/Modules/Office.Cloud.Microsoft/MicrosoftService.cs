@@ -10,7 +10,6 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Runtime.CompilerServices;
-using System.Security.Authentication;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -44,6 +43,7 @@ using Xpand.XAF.Modules.Office.Cloud.Microsoft;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft.BusinessObjects;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
+using AuthenticationException = System.Security.Authentication.AuthenticationException;
 using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
 using Prompt = Microsoft.Identity.Client.Prompt;
 

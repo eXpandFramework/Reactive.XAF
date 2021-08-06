@@ -29,13 +29,17 @@ namespace Xpand.XAF.ModelEditor {
             => new((IModelApplication)modelApplication, fileModelStore);
 
         ModelApplicationBase GetModelApplication(ApplicationModulesManager applicationModulesManager, PathInfo pathInfo, FileModelStore fileModelStore) {
-            var modelApplication = ModelApplicationHelper.CreateModel(XafTypesInfo.Instance, applicationModulesManager.DomainComponents, applicationModulesManager.Modules, applicationModulesManager.ControllersManager, Type.EmptyTypes, fileModelStore.GetAspects(), null, null);
-            AddLayers(modelApplication, applicationModulesManager, pathInfo);
-            Tracing.Tracer.LogText("AddLayers");
-            ModelApplicationBase lastLayer = modelApplication.CreatorInstance.CreateModelApplication();
-            fileModelStore.Load(lastLayer);
-            ModelApplicationHelper.AddLayer(modelApplication, lastLayer);
-            return modelApplication;
+	        ApplicationModelManager applicationModelManager = new ApplicationModelManager();
+	        applicationModelManager.Setup(XafTypesInfo.Instance, applicationModulesManager.DomainComponents,
+		        applicationModulesManager.Modules, applicationModulesManager.ControllersManager.Controllers,
+		        Type.EmptyTypes, fileModelStore.GetAspects(), null, null);
+	        var modelApplication = applicationModelManager.CreateModelApplication(new ModelApplicationBase[0]);
+	        AddLayers(modelApplication, applicationModulesManager, pathInfo);
+	        Tracing.Tracer.LogText("AddLayers");
+	        ModelApplicationBase lastLayer = modelApplication.CreatorInstance.CreateModelApplication();
+	        fileModelStore.Load(lastLayer);
+	        ModelApplicationHelper.AddLayer(modelApplication, lastLayer);
+	        return modelApplication;
         }
 
         ApplicationModulesManager GetApplicationModulesManager(PathInfo pathInfo) {

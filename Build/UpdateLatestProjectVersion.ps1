@@ -21,7 +21,7 @@ if ($Branch -eq "master") {
     $newVersion = (Update-Version $lastVersion -Build)
 }
 else {
-    if ($lastOfficialVersion -gt $lastVersion) {
+    if (($lastOfficialVersion -gt $lastVersion) -or ($lastVersion.Build -lt (Get-DevExpressVersion).Build)) {
         $build=$lastOfficialVersion.Build
         if ($lastVersion.Build -gt $lastOfficialVersion.Build){
             $build=$lastVersion.Build

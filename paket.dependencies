@@ -5,16 +5,16 @@ storage:none
 copy_local:true
 framework:net461,net472,net5.0,net5.0-windows,netstandard2.0,netstandard2.1
 
-nuget DevExpress.ExpressApp.Office == 21.1.4
-nuget DevExpress.ExpressApp.Core.All == 21.1.4
-nuget DevExpress.ExpressApp.Win.All == 21.1.4
-nuget DevExpress.ExpressApp.Web.All == 21.1.4
-nuget DevExpress.ExpressApp.Blazor.All == 21.1.4
-nuget DevExpress.ExpressApp.EasyTest.BlazorAdapter == 21.1.4
-nuget DevExpress.EasyTest == 21.1.4  
-nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 21.1.4  
-nuget DevExpress.ExpressApp.EasyTest.WinAdapter == 21.1.4  
-nuget DevExpress.ExpressApp.Security.Xpo == 21.1.4  
+nuget DevExpress.ExpressApp.Office == 21.1.5
+nuget DevExpress.ExpressApp.Core.All == 21.1.5
+nuget DevExpress.ExpressApp.Win.All == 21.1.5
+nuget DevExpress.ExpressApp.Web.All == 21.1.5
+nuget DevExpress.ExpressApp.Blazor.All == 21.1.5
+nuget DevExpress.ExpressApp.EasyTest.BlazorAdapter == 21.1.5
+nuget DevExpress.EasyTest == 21.1.5  
+nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 21.1.5  
+nuget DevExpress.ExpressApp.EasyTest.WinAdapter == 21.1.5  
+nuget DevExpress.ExpressApp.Security.Xpo == 21.1.5  
 nuget System.ServiceModel.NetTcp == 4.8.1
 nuget System.ServiceModel.Security == 4.8.1
 nuget System.ServiceModel.Http == 4.8.1
@@ -34,6 +34,7 @@ nuget Moq 4.16
 nuget NUnit 3.13.0
 nuget NUnit3TestAdapter 3.17.0
 nuget Newtonsoft.Json == 13.0.1
+nuget Microsoft.IdentityModel.Tokens
 nuget System.Data.SqlClient
 nuget Microsoft.Extensions.Dependencyinjection
 nuget Microsoft.Extensions.DependencyInjection.Abstractions
@@ -49,7 +50,6 @@ nuget Humanizer.Core
 nuget Microsoft.CSharp
 nuget System.Runtime.CompilerServices.Unsafe
 nuget Microsoft.Identity.Client
-nuget Microsoft.IdentityModel.Tokens
 nuget Microsoft.Owin
 nuget Microsoft.Owin.Host.SystemWeb
 nuget Microsoft.Owin.Security
