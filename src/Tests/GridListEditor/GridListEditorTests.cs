@@ -26,7 +26,7 @@ using ListView = DevExpress.ExpressApp.ListView;
 namespace Xpand.XAF.Modules.GridListEditor.Tests{
     [NonParallelizable]
     public class GridListEditorTests : BaseTest{
-        [Test]
+        // [Test]
         [XpandTest]
         [Ignore("Random fail on azure")]
         [Apartment(ApartmentState.STA)]

@@ -56,6 +56,9 @@ namespace Xpand.XAF.Modules.Windows.Tests{
         [XpandTest][Test][Combinatorial]
         [Apartment(ApartmentState.STA)]
         public void CloseWindow_On([Values(false,true)]bool hide,[Values(false,true)]bool popup,[Values("OnDeactivate","OnKeyDown")]string when){
+            if (hide && !popup && when == "OnDeactivate") {
+                return;
+            }
             using var application = WindowsModule().Application;
             var modelWindows = application.Model.ToReactiveModule<IModelReactiveModuleWindows>().Windows;
             modelWindows.Exit.OnEscape.CloseWindow = when=="OnKeyDown";
