@@ -55,12 +55,13 @@ namespace Xpand.XAF.Modules.Windows.Tests{
         
         [XpandTest][Test][Combinatorial]
         [Apartment(ApartmentState.STA)]
-        public void CloseWindow_On([Values(true,false)]bool hide,[Values(true,false)]bool popup,[Values("OnKeyDown","OnDeactivate")]string when){
+        public void CloseWindow_On([Values(false,true)]bool hide,[Values(false,true)]bool popup,[Values("OnDeactivate","OnKeyDown")]string when){
             using var application = WindowsModule().Application;
             var modelWindows = application.Model.ToReactiveModule<IModelReactiveModuleWindows>().Windows;
             modelWindows.Exit.OnEscape.CloseWindow = when=="OnKeyDown";
             modelWindows.Exit.OnDeactivation.CloseWindow = when=="OnDeactivate";
             modelWindows.Exit.OnExit.HideMainWindow = hide;
+            modelWindows.Exit.OnDeactivation.ApplyInMainWindow = popup;
             application.WhenWindowCreated(true)
                 .WhenNotDefault(_ => popup)
                 .Do(_ => {
@@ -73,11 +74,11 @@ namespace Xpand.XAF.Modules.Windows.Tests{
                 .When(!popup?TemplateContext.ApplicationWindow:TemplateContext.PopupWindow)
                 .Select(frame => {
                     var eventArgs =when=="OnKeyDown"? new KeyEventArgs(Keys.Escape):new EventArgs();
+                    frame.Template.CallMethod("OnActivated",eventArgs);
                     frame.Template.CallMethod(when,eventArgs);
-                    if (hide && !popup) return ((Form) frame.Template).Visible;
+                    if (hide && !popup) return frame.Template==null;
                     return frame.Template != null;
                 })
-                
                 .Do(_ => {
                     if (hide||popup) {
                         application.Exit();

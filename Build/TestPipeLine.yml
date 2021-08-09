@@ -183,7 +183,7 @@ jobs:
     - TestStageCloudOffice
     - TestStageBaseOnExecutionTime
   strategy: 
-    parallel: 20
+    parallel: 21
   pool:
     vmImage: windows-2019
   variables:
@@ -275,6 +275,7 @@ jobs:
           **\Xpand.XAF.Modules.ViewEditMode.Tests.dll
           **\Xpand.XAF.Modules.ViewItemValue.Tests.dll
           **\Xpand.XAF.Modules.ViewWizard.Tests.dll
+          **\Xpand.XAF.Modules.Windows.Tests.dll
           !**\obj\**    
         diagnosticsEnabled: true
         codeCoverageEnabled: true
