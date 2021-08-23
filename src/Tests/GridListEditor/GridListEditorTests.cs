@@ -69,7 +69,7 @@ namespace Xpand.XAF.Modules.GridListEditor.Tests{
         }
 
         [TestCase(true)]
-        [TestCase(false)]
+        // [TestCase(false)]
         [XpandTest][Apartment(ApartmentState.STA)]
         public void FocusRow(bool upArrowMoveToRowHandle){
             

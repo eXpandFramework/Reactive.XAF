@@ -20,7 +20,7 @@ if ($Branch -eq "master") {
     $lastOfficialVersion = ($officialPackages | Where-Object { $_.id -eq "Xpand.XAF.Core.All" }).Version
     $newVersion = (Update-Version $lastVersion -Build)
 }
-else {
+elseif (!$SkipVersioning) {
     if (($lastOfficialVersion -gt $lastVersion) -or ($lastVersion.Build -lt (Get-DevExpressVersion).Build)) {
         $build=$lastOfficialVersion.Build
         if ($lastVersion.Build -gt $lastOfficialVersion.Build){
