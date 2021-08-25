@@ -25,7 +25,7 @@ $filteredProjects+=Get-ChildItem "$root\src\" -Include "*Xpand.TestsLib*.csproj"
 $dxVersionBuild=Get-VersionPart $dxVersion Build
 $filteredProjects| Invoke-Parallel -StepInterval 500 -VariablesToImport @("allProjects", "root", "Release","dxVersionBuild") -Script {
 
-# $filteredProjects|where{$_.BaseName -eq "Xpand.XAF.Modules.Reactive.Logger.Client.Win"}| foreach {
+# $filteredProjects|where{$_.BaseName -eq "Xpand.XAF.Modules.Windows"}| foreach {
 # $filteredProjects| foreach {
     $addTargets = {
         param (
@@ -117,30 +117,50 @@ $filteredProjects| Invoke-Parallel -StepInterval 500 -VariablesToImport @("allPr
     $ns = New-Object System.Xml.XmlNamespaceManager($nuspec.NameTable)
     $ns.AddNamespace("ns", $nuspec.DocumentElement.NamespaceURI)
     $nuspec.Save($NuspecFilename)
-    
     if ($nuspec.package.metaData.id -like "Xpand.XAF*" -or $nuspec.package.metaData.id -like "Xpand.Extensions.XAF*") {
-        
         $versionConverter = [PSCustomObject]@{
             id              = "Xpand.VersionConverter"
             version         = ([xml](Get-Content "$root\Tools\Xpand.VersionConverter\Xpand.VersionConverter.nuspec")).package.metadata.version
             targetFramework = "netstandard2.0"
-        }
-        
-        Add-NuspecDependency $versionConverter.Id $versionConverter.Version $nuspec "netstandard2.0"| Out-Null
-         
+        }        
+        Add-NuspecDependency $versionConverter.Id $versionConverter.Version $nuspec "netstandard2.0"| Out-Null    
     }
-    
-    
     $nuspec.Save($nuspecFileName)
     Format-Xml -Path $nuspecFileName
 } 
 
 & "$root\build\UpdateAllNuspec.ps1" $root $Release $branch $dxVersion
-Get-ChildItem "$root\build\nuspec" *.nuspec |ForEach-Object{
+$nuspecs=Get-ChildItem "$root\build\nuspec" *.nuspec
+$nuspecs |ForEach-Object{
     $nuspec=Get-XmlContent $_.FullName
     $nuspec.package.metadata.dependencies.group.dependency|Where-Object{$_.id -match "DevExpress"}|Remove-XmlElement 
     $nuspec|Save-Xml $_.FullName
 } 
+$filteredProjects|ForEach-Object{
+    $project=$_
+    [xml]$csproj = Get-Content $project.FullName
+    if ((Get-ProjectTargetFramework $csproj -FullName).count -gt 1){
+        $nFileName=($nuspecs|Where-Object{$_.BaseName -eq $project.BaseName})
+        $n=Get-XmlContent $nFileName
+        ($n.package.metadata.dependencies.group|Select-Object -First 1).dependency|ForEach-Object{
+            Add-NuspecDependency $_.id $_.version $n "net461"
+        }
+        $ns = New-Object System.Xml.XmlNamespaceManager($n.NameTable)
+        $ns.AddNamespace("ns", $n.DocumentElement.NamespaceURI)
+        $n.package.files.file|Where-Object{$_.src -match "\.dll|\.pdb"}|ForEach-Object{
+            $regex = [regex] '.*(\\.*)'
+            $result = $regex.Replace($_.src, 'net461$1')
+            $file = $n.CreateElement("file", $n.DocumentElement.NamespaceURI)
+            $file.SetAttribute("src", $result)
+
+            $regex = [regex] 'lib\\(.*)\\(.*)'
+            $result = $regex.Replace($_.target, 'lib\net461\$2')
+            $file.SetAttribute("target", $result)
+            $n.SelectSingleNode("//ns:files", $ns).AppendChild($file) | Out-Null
+        }
+        $n|Save-Xml $nFileName
+    }
+}
 if ($branch -eq "master" -and ($dxVersion -gt "20.2.0")) {
     Write-HostFormatted "Checking nuspec versions" -Section
     $labnuspecs = Get-ChildItem "$root\build\nuspec" *.nuspec -Recurse | ForEach-Object {

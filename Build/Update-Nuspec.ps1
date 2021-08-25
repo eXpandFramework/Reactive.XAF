@@ -40,7 +40,7 @@ if (!$outputPath) {
     throw "$ProjectFileName outputpath not set"
 }
 $outputPath = "$(Resolve-Path $outputPath)"
-$targetFrameworkVersion = Get-ProjectTargetFramework $csproj -FullName
+$targetFrameworkVersion = Get-ProjectTargetFramework $csproj -FullName|Select-Object -Last 1
 $appendTargetFrameworkToOutputPath = $csproj.Project.PropertyGroup.AppendTargetFrameworkToOutputPath -eq "true"
 if ($appendTargetFrameworkToOutputPath -and ($targetFrameworkVersion -notmatch "netstandard")) {
     $outputPath += "\$targetFrameworkVersion"
