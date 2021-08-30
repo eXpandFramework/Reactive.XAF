@@ -29,7 +29,14 @@ First off you have to create an Azure application following the next steps:
 6. From the left pane, select `Certificates & secrets` > New client secret. Enter a description, select the validity duration, and select Add. Copy the value into the related XAF model entry. This step is only required for Web applications.
 8. From the left pane, select API permissions > Add a permission to configure additional endpoint access. In the [Query the MSGraph endpoints](https://github.com/eXpandFramework/DevExpress.XAF/tree/lab/src/Modules/Office.Cloud.Microsoft#query-the-msgraph-endpoints) you can see an example of how to use the API to query the User endpoint. Copy these permissions to into the related XAF model.
 1. The related XAF model is available at:
+
    ![image](https://user-images.githubusercontent.com/159464/86536412-f1b73b80-beef-11ea-8cca-490aeb16bb7d.png)
+
+   Note: By default the `Common` tenant is used, but you can configure it using the application AppSettings configuration.
+   ```xml
+   <appSettings>
+    <add key="TenantId" value="YOURTENANTID" />
+   ``` 
 
 
 #### Authentication

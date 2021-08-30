@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http.Headers;
@@ -50,8 +51,8 @@ using Prompt = Microsoft.Identity.Client.Prompt;
 [assembly: OwinStartup(typeof(MicrosoftService))]
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 	public static class MicrosoftService{
-		
-		private static readonly Uri AuthorityUri=new(string.Format(CultureInfo.InvariantCulture, "https://login.microsoftonline.com/{0}{1}", "common", "/v2.0"));
+        private static readonly Uri AuthorityUri = new(string.Format(CultureInfo.InvariantCulture,
+            "https://login.microsoftonline.com/{0}{1}", ConfigurationManager.AppSettings["TenantId"] ?? "Common", "/v2.0"));
         
         private static readonly string AuthenticationType=OpenIdConnectAuthenticationDefaults.AuthenticationType;
 
