@@ -133,7 +133,7 @@ $filteredProjects| Invoke-Parallel -StepInterval 500 -VariablesToImport @("allPr
 $nuspecs=Get-ChildItem "$root\build\nuspec" *.nuspec
 $nuspecs |ForEach-Object{
     $nuspec=Get-XmlContent $_.FullName
-    $nuspec.package.metadata.dependencies.group.dependency|Where-Object{$_.id -match "DevExpress"}|Remove-XmlElement 
+    # $nuspec.package.metadata.dependencies.group.dependency|Where-Object{$_.id -match "DevExpress"}|Remove-XmlElement 
     $nuspec|Save-Xml $_.FullName
 } 
 $filteredProjects|ForEach-Object{
