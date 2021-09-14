@@ -65,6 +65,13 @@ namespace Xpand.XAF.Modules.Windows {
                     return (t.source, window.Model().Exit);
                 }).ChangeFormState().To(window));
 
+        public static IObservable<Window> ExitAfterModelEdit(this IObservable<Window> source) 
+            => source.MergeIgnored(window => {
+                var application = window.Application;
+                return window.GetController<EditModelController>().EditModelAction.WhenExecuteCompleted()
+                    .Do(_ => application.Exit());
+            },window => window.Model().Exit.ExitAfterModelEdit);
+
         private static bool CanExit(this Window window) {
             var application = window.Application;
             var modelWindowsExit = window.Model().Exit;

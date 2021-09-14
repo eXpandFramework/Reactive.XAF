@@ -54,17 +54,23 @@ namespace Xpand.XAF.Modules.Windows{
 	    IModelOnExit OnExit { get; }
         IModelOn OnEscape { get; }
         IModelOn OnDeactivation { get; }
-        bool AfterModelEdit { get; set; }
+        [Category("Exit")]
+        bool ExitAfterModelEdit { get;  }
     }
 
     public interface IModelOnExit:IModelNode {
         bool HideMainWindow { get; set; }
         bool MinimizeMainWindow { get; set; }
     }
-    public interface IModelOn:IModelNode {
+
+    public interface IModelExitApplication:IModelNode {
+        bool ExitApplication { get; set; }
+    }
+
+    public interface IModelOn: IModelExitApplication {
         bool CloseWindow { get; set; }
         bool MinimizeWindow { get; set; }
-        bool ExitApplication { get; set; }
+
         [DefaultValue(true)]
         bool ApplyInMainWindow { get; set; }
     }
