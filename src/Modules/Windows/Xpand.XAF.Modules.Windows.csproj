@@ -15,7 +15,6 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
     <DebugType>full</DebugType>
-    <CopyLocalLockFileAssemblie>true</CopyLocalLockFileAssemblie>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
   <ItemGroup>

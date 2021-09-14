@@ -54,6 +54,7 @@ namespace Xpand.XAF.Modules.Windows{
 	    IModelOnExit OnExit { get; }
         IModelOn OnEscape { get; }
         IModelOn OnDeactivation { get; }
+        bool AfterModelEdit { get; set; }
     }
 
     public interface IModelOnExit:IModelNode {
@@ -63,6 +64,7 @@ namespace Xpand.XAF.Modules.Windows{
     public interface IModelOn:IModelNode {
         bool CloseWindow { get; set; }
         bool MinimizeWindow { get; set; }
+        bool ExitApplication { get; set; }
         [DefaultValue(true)]
         bool ApplyInMainWindow { get; set; }
     }
@@ -78,6 +80,7 @@ namespace Xpand.XAF.Modules.Windows{
 	    bool ShowInTaskbar { get; set; }
         [DefaultValue(FormBorderStyle.Sizable)]
         FormBorderStyle FormBorderStyle { get; set; }
+        string Text { get; set; }
     }
     
     public static class ModelReactiveModuleOneView{

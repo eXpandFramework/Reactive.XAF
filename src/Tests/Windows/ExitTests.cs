@@ -55,15 +55,16 @@ namespace Xpand.XAF.Modules.Windows.Tests{
         
         [XpandTest][Test][Combinatorial]
         [Apartment(ApartmentState.STA)]
-        public void CloseWindow_On([Values(false,true)]bool hide,[Values(false,true)]bool popup,[Values("OnDeactivate","OnKeyDown")]string when){
-            if (hide && !popup && when == "OnDeactivate") {
+        public void CloseWindow_On([Values(false, true)] bool hideMainWindow, [Values(false, true)] bool popup,
+            [Values("OnDeactivate", "OnKeyDown")] string when, [Values(nameof(IModelOn.ExitApplication),nameof(IModelOn.CloseWindow))] string action) {
+            if (hideMainWindow && !popup && when == "OnDeactivate") {
                 return;
             }
             using var application = WindowsModule().Application;
             var modelWindows = application.Model.ToReactiveModule<IModelReactiveModuleWindows>().Windows;
-            modelWindows.Exit.OnEscape.CloseWindow = when=="OnKeyDown";
-            modelWindows.Exit.OnDeactivation.CloseWindow = when=="OnDeactivate";
-            modelWindows.Exit.OnExit.HideMainWindow = hide;
+            modelWindows.Exit.OnEscape.SetPropertyValue(action, when == "OnKeyDown");
+            modelWindows.Exit.OnDeactivation.SetPropertyValue(action, when == "OnDeactivate");
+            modelWindows.Exit.OnExit.HideMainWindow = hideMainWindow;
             modelWindows.Exit.OnDeactivation.ApplyInMainWindow = popup;
             application.WhenWindowCreated(true)
                 .WhenNotDefault(_ => popup)
@@ -79,20 +80,23 @@ namespace Xpand.XAF.Modules.Windows.Tests{
                     var eventArgs =when=="OnKeyDown"? new KeyEventArgs(Keys.Escape):new EventArgs();
                     frame.Template.CallMethod("OnActivated",eventArgs);
                     frame.Template.CallMethod(when,eventArgs);
-                    if (hide && !popup) return frame.Template==null;
+                    if (hideMainWindow && !popup) return frame.Template==null;
                     return frame.Template != null;
                 })
                 .Do(_ => {
-                    if (hide||popup) {
+                    if (hideMainWindow||popup) {
                         application.Exit();
                     }
                 })
                 .Test();
 
-
+            
             ((TestWinApplication)application).Start();
 
-            test.AssertValues(false);
+            if (!hideMainWindow && action != nameof(IModelOn.ExitApplication)) {
+                test.AssertValues(action == nameof(IModelOn.ExitApplication));
+            }
+            
             
         }
 
@@ -149,7 +153,6 @@ namespace Xpand.XAF.Modules.Windows.Tests{
 
 
         }
-
 
         [Test]
         [XpandTest]

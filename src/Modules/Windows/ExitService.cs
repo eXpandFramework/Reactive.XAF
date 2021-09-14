@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Win;
 using DevExpress.ExpressApp.Win.SystemModule;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.StringExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -15,28 +16,46 @@ namespace Xpand.XAF.Modules.Windows {
         public static IObservable<Window> OnWindowEscape(this IObservable<Window> source)
             => source.Cast<WinWindow>().MergeIgnored(window => window
                 .WhenEvent<WinWindow, KeyEventArgs>(nameof(WinWindow.KeyDown)).Where(t => t.args.KeyCode == Keys.Escape).To(window)
-                .Do(model => model.OnEscape.CloseWindow,model => model.OnEscape.MinimizeWindow)
-                .To(window),window => window.Model().Exit.OnEscape.CloseWindow);
+                .Do(model => model.OnEscape.CloseWindow,model => model.OnEscape.MinimizeWindow,model => model.OnEscape.ExitApplication)
+                .To(window),window => {
+                var onEscape = window.Model().Exit.OnEscape;
+                return onEscape.CloseWindow||onEscape.ExitApplication;
+            });
 
         static IObservable<Window> Do(this IObservable<Window> source, Func<IModelWindowsExit, bool> closeWindow,
-            Func<IModelWindowsExit, bool> minimizeWindow)
-            => source.Do(window => {
-                var model = window.Model().Exit;
-                if (closeWindow(model)) {
-                    window.Close();
-                }
+            Func<IModelWindowsExit, bool> minimizeWindow,Func<IModelWindowsExit, bool> exitApplication)
+            => source.WhenNotDefault(window => window.Application)
+                .Do(window => {
+                    var model = window.Model().Exit;
+                    if (closeWindow(model)) {
+                        window.Close();
+                    }
 
-                if (minimizeWindow(model)) {
-                    ((Form) window.Template).WindowState = FormWindowState.Minimized;
-                }
-            });
+                    if (minimizeWindow(model)) {
+                        ((Form) window.Template).WindowState = FormWindowState.Minimized;
+                    }
+
+                    if (exitApplication(model)) {
+                        window.Application.Exit();
+                    }
+                });
 
         public static IObservable<Window> OnWindowDeactivation(this IObservable<Window> source,Func<Window,bool> apply=null)
             => source.MergeIgnored(window => window.Template
 	            .WhenEvent<Form, EventArgs>(nameof(Form.Activated))
                 .Select(_ => window.Template.WhenEvent<Form, EventArgs>(nameof(Form.Deactivate))).Switch()
-                .Do(_ => window.Close())
-                .To(window),window => window.Model().Exit.OnDeactivation.CloseWindow&& (apply==null||apply(window)));
+                .Do(_ => {
+                    if (window.Model().Exit.OnDeactivation.CloseWindow) {
+                        window.Close();
+                    }
+                    else {
+                        window.Application.Exit();
+                    }
+                })
+                .To(window),window => {
+                var onDeactivation = window.Model().Exit.OnDeactivation;
+                return (onDeactivation.CloseWindow || onDeactivation.ExitApplication) && (apply == null || apply(window));
+            });
 
         public static IObservable<Window> CancelExit(this IObservable<Window> source) 
             => source.MergeIgnored(window => window.Template.WhenEvent<Form, FormClosingEventArgs>(nameof(Form.FormClosing))

@@ -19,27 +19,29 @@ This is a `WinForms module`. To configure the `Application.Windows` module look 
 **Attributes:**
 
 1. **Windows Node:**\
-  `Startup`: Starts the application when current user login to Windows OS. \
+  `Startup`: Starts the application when current user login to Windows OS. 
 1. **Exit/OnDeactivation Node:**\
   `CloseWindow`, `MinimizeWindow`: Results in closing/minimizing the active window when focus is lost. \
+  `ExitApplication`: Results in application exit when focus is lost. 
 1. **Exit/OnEscape Node:**\
   `CloseWindow`, `MinimizeWindow`: Results in closing/minimizing the active window when Escape key. \
+  `ExitApplication`: Results in application exit when Escape key. 
 1. **Exit/OnExit Node:**\
-  `HideMainWindowWindow`, `MinimizeMainWindow`: Results in hiding/minimizing the Main window when user tries to exit the application. \
+  `HideMainWindowWindow`, `MinimizeMainWindow`: Results in hiding/minimizing the Main window when user tries to exit the application. 
 1. **Exit/Prompt Node:**\
   `Enable`: Displays cancelable confirmation before application exiting. \
-  `Message`: The message to display. \
-1. **Form Node:**\
+  `Message`: The message to display. 
+1. **Form Node:**
   `ControlBox`, `MinimizeBox`, `MaximizeBox`, `ShowInTaskbar`, `ShowInTaskbar`, `FormBorderStyle`: Control Form properties.\
   `PopupWindows`: Applies previous attributes to popup windows e.g OneView package architecture.
 1. **MultiInstance Node:**\
   `Disabled`: If true all other model node attributes are respected.\
   `NotifyMessage`: if empty then when additional application instances will terminate silently.\
-  `FocusRunning`: When additional application instances terminated the main app will be focused.\
+  `FocusRunning`: When additional application instances terminated the main app will be focused.
 1. **NotifyIcon Node:**\
   `Enabled`: If true all other model node attributes are respected.\
   `ShowText`,`ExitText`,`LogoffText`,`HideText`: They provide text for the notifyIcon menu. If empty the menu item is not visible.\
-  `ShowOnDblClick`: Displays application on NotifyIcon double click.\
+  `ShowOnDblClick`: Displays application on NotifyIcon double click.
 
 **Possible future improvements:**
 

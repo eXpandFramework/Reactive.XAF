@@ -46,16 +46,20 @@ namespace Xpand.XAF.Modules.Windows{
             });
 
         private static IObservable<Window> ConfigureForm(this IObservable<Window> source,Func<Window,bool> apply=null)
-	        => source.Do(frame => {
+	        => source.SelectMany(frame => {
                 if (apply == null || apply(frame)) {
                     var form = ((Form) frame.Template);
-                    var controlBox = frame.Model().Form;
-                    form.MinimizeBox = controlBox.MinimizeBox;
-                    form.MaximizeBox = controlBox.MaximizeBox;
-                    form.ControlBox = controlBox.ControlBox;
-                    form.ShowInTaskbar = controlBox.ShowInTaskbar;
-                    form.FormBorderStyle  = controlBox.FormBorderStyle ;
+                    var modelForm = frame.Model().Form;
+                    form.MinimizeBox = modelForm.MinimizeBox;
+                    form.MaximizeBox = modelForm.MaximizeBox;
+                    form.ControlBox = modelForm.ControlBox;
+                    form.ShowInTaskbar = modelForm.ShowInTaskbar;
+                    form.FormBorderStyle  = modelForm.FormBorderStyle ;
+                    return modelForm.Text != null ? form.WhenEvent(nameof(Form.TextChanged))
+                            .Do(_ => form.Text = modelForm.Text).To(frame) : frame.ReturnObservable();
                 }
+
+                return frame.ReturnObservable();
             });
 
         internal static IModelWindows Model(this XafApplication application) 
