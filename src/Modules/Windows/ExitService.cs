@@ -44,6 +44,7 @@ namespace Xpand.XAF.Modules.Windows {
             => source.MergeIgnored(window => window.Template
 	            .WhenEvent<Form, EventArgs>(nameof(Form.Activated))
                 .Select(_ => window.Template.WhenEvent<Form, EventArgs>(nameof(Form.Deactivate))).Switch()
+                .WhenNotDefault(_ => window.Application)
                 .Do(_ => {
                     if (window.Model().Exit.OnDeactivation.CloseWindow) {
                         window.Close();

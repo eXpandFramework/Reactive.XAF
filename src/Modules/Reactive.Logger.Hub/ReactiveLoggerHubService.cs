@@ -17,13 +17,15 @@ using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.System.Net;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using ListView = DevExpress.ExpressApp.ListView;
 
 namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
     public static class ReactiveLoggerHubService{
         static readonly TraceEventReceiver Receiver = new();
-        
+        private static Server _server;
+
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) =>
 	        manager.WhenApplication(application => {
@@ -32,10 +34,11 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 		        }
 		        var startServer = application.StartServer().Publish().RefCount();
 		        var client = Observable.Start(application.ConnectClient).Merge().Publish().RefCount();
+                if (!new[] { Platform.Blazor, Platform.Web, }.Contains(application.GetPlatform())) {
+                    application.CleanUpHubResources( startServer);
+                }
 
-		        application.CleanUpHubResources( startServer);
-
-		        var saveServerTraceMessages = application.SaveServerTraceMessages().Publish().RefCount();
+                var saveServerTraceMessages = application.SaveServerTraceMessages().Publish().RefCount();
 		        return startServer.ToUnit()
 			        .Merge(client.ToUnit())
 			        .Merge(saveServerTraceMessages.ToUnit())
@@ -43,12 +46,11 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 				        .SelectMany(frame => saveServerTraceMessages.LoadTracesToListView(frame)));
 	        });
 
-        public static void CleanUpHubResources(this XafApplication application, IObservable<Server> startServer){
-            application.WhenDisposed().Zip(startServer, (_, server) => server.ShutDownServer())
+        public static void CleanUpHubResources(this XafApplication application, IObservable<Server> startServer) 
+            => application.WhenDisposed().Zip(startServer, (_, server) => server.ShutDownServer())
                 .Concat()
                 .FirstOrDefaultAsync()
                 .Subscribe();
-        }
 
         private static IObservable<Unit> ShutDownServer(this Server server) => server.ShutdownAsync().ToObservable().TakeUntil(Observable.Timer(TimeSpan.FromSeconds(5)));
 
@@ -78,7 +80,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 
         private static IObservable<Server> StartServer(this  XafApplication application) =>
 	        application is ILoggerHubClientApplication ? Observable.Empty<Server>() : application.ServerPortsList().FirstAsync()
-			        .Select(modelServerPort => modelServerPort.ToServerPort().StartServer())
+			        .Select(modelServerPort => modelServerPort.ToServerPort().StartServer(application))
 			        .TraceRXLoggerHub(server => string.Join(", ",server.Ports.Select(port => $"{port.Host}, {port.Port}")));
 
         private static IObservable<ITraceEventHub> ConnectClient(this XafApplication application) =>
@@ -118,15 +120,17 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 		        .Where(ports => ports.LoggerPorts.Enabled)
 		        .Select(logger => logger).Cast<IModelServerPorts>();
 
-        public static Server StartServer(this ServerPort serverPort){
+        public static Server StartServer(this ServerPort serverPort, XafApplication application){
 	        var options = new MagicOnionOptions{IsReturnExceptionStackTraceInErrorDetail = true};
             var service = MagicOnionEngine.BuildServerServiceDefinition(new[]{typeof(ReactiveLoggerHubService).GetTypeInfo().Assembly},options);
-            var server = new Server{
-	            Services = {service.ServerServiceDefinition},
-	            Ports = {serverPort}
-            };
-            server.Start();
-            return server;
+            if (_server!=null||application.GetPlatform()==Platform.Win) {
+                _server = new Server{
+                    Services = {service.ServerServiceDefinition},
+                    Ports = {serverPort}
+                };
+                _server.Start();
+            }
+            return _server;
         }
 
         private static ServerPort ToServerPort(this IPEndPoint endPoint) => new(endPoint.Address.ToString(), endPoint.Port, ServerCredentials.Insecure);

@@ -2,7 +2,7 @@
   "profiles": {
     "Xpand.XAF.ModelEditor": {
       "commandName": "Project",
-      "commandLineArgs": "False \"C:\\Work\\Reactive.XAF\\src\\Tests\\EasyTests\\TestApplication\\TestApplication.Module.Blazor\\bin\\Debug\\net5.0\\TestApplication.Module.Blazor.dll\" \"C:\\Work\\Reactive.XAF\\src\\Tests\\EasyTests\\TestApplication\\TestApplication.Module.Blazor\\Model.DesignedDiffs.xafml\" \"C:\\Work\\Reactive.XAF\\src\\Tests\\EasyTests\\TestApplication\\TestApplication.Module.Blazor\\\""
+      "commandLineArgs": " True \"C:\\Work\\eXpandFramework\\Issues\\NET5\\NET5.Win\\bin\\Debug\\\\net5.0-windows\\NET5.Win.dll\" \"C:\\Work\\eXpandFramework\\Issues\\NET5\\NET5.Win\\Model.xafml\" \"C:\\Work\\eXpandFramework\\Issues\\NET5\\NET5.Win\\NET5.Win.csproj\""
     }
   }
 }

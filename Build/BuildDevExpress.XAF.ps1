@@ -103,7 +103,7 @@ function Update-NugetConsumersPackageVersion {
     })
 
     Write-HostFormatted "Update Xpand package versions" -ForegroundColor Magenta
-    Get-ChildItem "$root\src\Tests\EasyTests" *.csproj -Recurse | ForEach-Object {
+    (Get-ChildItem "$root\src\Tests\EasyTests" *.csproj -Recurse)+(Get-ChildItem "$root\tools\Xpand.XAF.ModelEditor" *.csproj -Recurse) | ForEach-Object {
         $prefs = Get-PackageReference $_ 
         $prefs | Where-Object { $_.include -like "Xpand.XAF.*" } | ForEach-Object {
             $ref = $_
@@ -117,6 +117,7 @@ function Update-NugetConsumersPackageVersion {
 
 function SyncrhonizePaketVersion {
     Write-HostFormatted "Synchronize paket versions" -ForegroundColor Magenta
+    Set-Location $root
     $pakets=Invoke-PaketShowInstalled
     (Get-MSBuildProjects "$root\src\Tests\EasyTests\")+(Get-ChildItem "$root\src\" "*Blazor*.csproj" -Recurse)|ForEach-Object{
         $_.Fullname
@@ -143,6 +144,22 @@ Task CompileNugetConsumers -precondition { return $compile } {
     Invoke-Script {
         Update-NugetConsumersPackageVersion
         CompileTestSolution "$Root\src\Tests\\EasyTests\EasyTests.sln"
+
+        if ($dxVersion -eq (Get-XAFLatestMinors | Select-Object -First 1)) {
+            Invoke-Script {
+                
+                & $root\build\ZipMe.ps1
+                if (!(Test-AzDevops)){
+                    Write-HostFormatted "Building XVSIX" -Section
+                    Set-Location "$Root\tools\Xpand.XAF.ModelEditor\IDE\XVSIX"
+                    Start-Build
+                    Write-HostFormatted "Building Rider" -Section
+                    Set-Location "$Root\tools\Xpand.XAF.ModelEditor\IDE\Rider"
+                    Start-Build
+                }
+                
+            } -Maximum 3
+        }
     } -Maximum 3
     Write-HostFormatted "Test-AssemblyReference" -Section
     Get-ChildItem $root\bin "*xpand*.dll" | Test-AssemblyReference -VersionFilter $DXVersion
@@ -188,15 +205,6 @@ Task Compile -precondition { return $compile } {
         $Configuration = GetConfiguration $solution $Global:Configuration
         Start-Build -Path $solution -Configuration $Configuration -BinaryLogPath "$Root\Bin\Modules.binlog" -Verbosity minimal -WarnAsError -PropertyValue "skipNugetReplace=true"
     } -Maximum 3
-    
-    if ($dxVersion -eq (Get-XAFLatestMinors | Select-Object -First 1)) {
-        Invoke-Script {
-            Write-HostFormatted "Building Xpand.XAF.ModelEditor" -Section
-            Start-Build -Path "$Root\tools\Xpand.XAF.ModelEditor\Xpand.XAF.ModelEditor.csproj" -WarnAsError
-            Write-HostFormatted "Building Xpand.XAF.ModelEditor.WinDesktop" -Section
-            Start-Build -Path "$Root\tools\Xpand.XAF.ModelEditor\Xpand.XAF.ModelEditor.WinDesktop.csproj" -WarnAsError
-        } -Maximum 3
-    }
     
     Write-HostFormatted "Build Versions:" -Section
     Get-ChildItem "$Root\Bin" "*Xpand.*.dll" | ForEach-Object {

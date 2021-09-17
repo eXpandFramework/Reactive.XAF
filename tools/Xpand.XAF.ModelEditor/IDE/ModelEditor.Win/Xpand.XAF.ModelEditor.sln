@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.ModelEditor.Module.Win", "Xpand.XAF.ModelEditor.Module.Win\Xpand.XAF.ModelEditor.Module.Win.csproj", "{9FDD92DF-E505-4B27-AE6E-11CC431BCF5E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.ModelEditor.Win", "Xpand.XAF.ModelEditor.Win\Xpand.XAF.ModelEditor.Win.csproj", "{9CC3FE70-F5CA-4668-BC98-A55612C16714}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Windows", "B:\work\Reactive.XAF\src\Modules\Windows\Xpand.XAF.Modules.Windows.csproj", "{448C38EA-755D-4133-8194-2A095D327DB4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.OneView", "B:\work\Reactive.XAF\src\Modules\OneView\Xpand.XAF.Modules.OneView.csproj", "{4C3ED41A-EB50-4A59-9A38-0BDBC1967C06}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9FDD92DF-E505-4B27-AE6E-11CC431BCF5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FDD92DF-E505-4B27-AE6E-11CC431BCF5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FDD92DF-E505-4B27-AE6E-11CC431BCF5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FDD92DF-E505-4B27-AE6E-11CC431BCF5E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9CC3FE70-F5CA-4668-BC98-A55612C16714}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CC3FE70-F5CA-4668-BC98-A55612C16714}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CC3FE70-F5CA-4668-BC98-A55612C16714}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CC3FE70-F5CA-4668-BC98-A55612C16714}.Release|Any CPU.Build.0 = Release|Any CPU
+		{448C38EA-755D-4133-8194-2A095D327DB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{448C38EA-755D-4133-8194-2A095D327DB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{448C38EA-755D-4133-8194-2A095D327DB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{448C38EA-755D-4133-8194-2A095D327DB4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C3ED41A-EB50-4A59-9A38-0BDBC1967C06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C3ED41A-EB50-4A59-9A38-0BDBC1967C06}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C3ED41A-EB50-4A59-9A38-0BDBC1967C06}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C3ED41A-EB50-4A59-9A38-0BDBC1967C06}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E26A5013-93F8-406B-B73C-13718301425C}
+	EndGlobalSection
+EndGlobal

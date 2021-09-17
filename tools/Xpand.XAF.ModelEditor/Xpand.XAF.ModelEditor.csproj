@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ApplicationIcon>ExpressApp.ico</ApplicationIcon>
@@ -29,16 +29,24 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="build\**" />
+    <Compile Remove="IDE\**" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Remove="build\**" />
+    <EmbeddedResource Remove="IDE\**" />
     <None Remove="ExpressApp.ico" />
+    <None Remove="paket.dependencies" />
     <None Remove="Xpand.XAF.ModelEditor.WinDesktop.csproj.paket.references" />
     <None Remove="Xpand.XAF.ModelEditor.WinDesktop.paket.references" />
     <EmbeddedResource Include="ExpressApp.ico" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="21.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Win" Version="21.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="21.1.5" />
+    <PackageReference Include="DevExpress.Persistent.Base" Version="21.1.5" />
+    <PackageReference Include="DevExpress.Persistent.BaseImpl" Version="21.1.5" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="build\**" />
+    <None Remove="IDE\**" />
   </ItemGroup>
-  <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

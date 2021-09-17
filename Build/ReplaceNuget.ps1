@@ -1,8 +1,8 @@
 using namespace system.text.RegularExpressions
 using namespace System.IO
 param(
-    $ProjectPath = "C:\Work\eXpandFramework\Reactive.XAF\src\Modules\Reactive\Xpand.XAF.Modules.Reactive.csproj",
-    $TargetPath = "C:\Work\eXpandFramework\Reactive.XAF\bin\Xpand.XAF.Modules.Reactive.dll",
+    $ProjectPath = "C:\Work\Reactive.XAF\src\Modules\Windows\Xpand.XAF.Modules.Windows.csproj",
+    $TargetPath = "C:\Work\Reactive.XAF\bin\net461\Xpand.XAF.Modules.Windows.dll",
     $SkipNugetReplace,
     [switch]$FixVersion
 )
@@ -53,7 +53,7 @@ if ((Test-Path $nugetFolder) -and !$SkipNugetReplace) {
                 BaseName=$_.BaseName
             }
         }|Group-Object BaseName|ForEach-Object{
-            $item=($_.group|Sort-Object Version -Descending|Select-Object -First 1).Item
+            $item=($_.group|Where-Object{$_.item.FullName -notmatch "net461"}|Sort-Object Version -Descending|Select-Object -First 1).Item
             if ($FixVersion){
                 $destinationVersion=$item.Directory.Parent.Parent.Name
                 Update-AssemblyInfoVersion $destinationVersion  $projectItem.DirectoryName

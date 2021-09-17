@@ -107,12 +107,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             this XafApplication application, Func<TController, TAction> action) where TController : Controller where TAction:ActionBase
             => application.WhenWindowCreated().ToController<TController>().SelectMany(_ => action(_).WhenExecuteCompleted());
 
-        public static IObservable<Window> WhenWindowCreated(this XafApplication application,bool isMain=false){
+        public static IObservable<Window> WhenWindowCreated(this XafApplication application,bool isMain=false,bool emitIfMainExists=true) {
             var windowCreated = application.WhenFrameCreated().OfType<Window>();
-            return isMain ? WhenMainWindowAvailable(application, windowCreated) : windowCreated.TraceRX(window => window.Context);
+            return isMain ? emitIfMainExists && application.MainWindow != null ? application.MainWindow.ReturnObservable()
+                    : application.WhenMainWindowAvailable(windowCreated) : windowCreated.TraceRX(window => window.Context);
         }
 
-        private static IObservable<Window> WhenMainWindowAvailable(XafApplication application, IObservable<Window> windowCreated) 
+        private static IObservable<Window> WhenMainWindowAvailable(this XafApplication application, IObservable<Window> windowCreated) 
             => windowCreated.When(TemplateContext.ApplicationWindow)
                 .TemplateChanged()
                 .SelectMany(_ => Observable.Interval(TimeSpan.FromMilliseconds(300))
@@ -335,7 +336,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => Observable
                 .FromEventPattern<EventHandler<ViewShownEventArgs>,ViewShownEventArgs>(h => application.ViewShown += h,h => application.ViewShown -= h,ImmediateScheduler.Instance)
                 .Select(pattern => (pattern.EventArgs.SourceFrame,pattern.EventArgs.TargetFrame))
-                .TraceRX(_ => $"source:{_.SourceFrame.View.Id}, target:{_.TargetFrame.View.Id}");
+                .TraceRX(_ => $"source:{_.SourceFrame?.View.Id}, target:{_.TargetFrame.View.Id}");
 
         public static IObservable<(XafApplication application, DatabaseVersionMismatchEventArgs e)> AlwaysUpdateOnDatabaseVersionMismatch(this XafApplication application) 
             => application.WhenDatabaseVersionMismatch().Select(tuple => {
@@ -388,10 +389,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => Observable.FromEventPattern<EventHandler<EventArgs>,EventArgs>(h => application.LoggedOff += h,h => application.LoggedOff -= h,ImmediateScheduler.Instance)
             .TransformPattern<XafApplication>();
 
-        public static IObservable<XafApplication> WhenSetupComplete(this XafApplication application) 
-            => Observable.FromEventPattern<EventHandler<EventArgs>,EventArgs>(h => application.SetupComplete += h,h => application.SetupComplete -= h,ImmediateScheduler.Instance)
-                .TransformPattern<XafApplication>()
-                .TraceRX();
+        public static IObservable<XafApplication> WhenSetupComplete(this XafApplication application,bool emitIfSetupAlready=true) 
+            => emitIfSetupAlready && application.MainWindow != null ? application.ReturnObservable()
+                : Observable.FromEventPattern<EventHandler<EventArgs>, EventArgs>(h => application.SetupComplete += h,
+                        h => application.SetupComplete -= h, ImmediateScheduler.Instance)
+                    .TransformPattern<XafApplication>()
+                    .TraceRX();
 
         [PublicAPI]
         public static IObservable<(XafApplication application, CreateCustomModelDifferenceStoreEventArgs e)> WhenCreateCustomModelDifferenceStore(this XafApplication application) 

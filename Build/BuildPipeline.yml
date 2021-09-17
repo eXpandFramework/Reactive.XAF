@@ -162,6 +162,12 @@ jobs:
           & "$(System.DefaultWorkingDirectory)\go.ps1" @goArgs
           New-Item '$(System.DefaultWorkingDirectory)\bin\Nupkg' -ItemType Directory -ErrorAction SilentlyContinue
           & '$(System.DefaultWorkingDirectory)\Build\DownloadCloudCreds.ps1' -GitHubToken '$(GitHubToken)' -GitUserEmail '$(GitUserEmail)'
+    - task: PublishPipelineArtifact@1
+      name: PublishZips
+      inputs:
+        targetPath: '$(System.DefaultWorkingDirectory)\bin\zip'
+        artifact: 'Zip'
+        publishLocation: 'pipeline'
     - task: VSTest@2
       displayName: 'TestNugetConsumers'
       enabled: true
@@ -231,6 +237,7 @@ jobs:
         targetPath: '$(System.DefaultWorkingDirectory)\bin\Nupkg'
         artifact: 'Nupkg'
         publishLocation: 'pipeline'
+    
     # - task: PublishPipelineArtifact@1
     #   name: PublishNugetCache
     #   inputs:

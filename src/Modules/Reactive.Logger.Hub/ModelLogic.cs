@@ -27,13 +27,13 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
         int Port{ get; set; }
     }
 
-    [ModelNodesGenerator(typeof(ModelServerPosrtsGenerator))]
+    [ModelNodesGenerator(typeof(ModelServerPortGenerator))]
     public interface IModelLoggerPortsList:IModelNode,IModelList<IModelLoggerPort>{
         [DefaultValue(true)]
         bool Enabled{ get; set; }
     }
 
-    public class ModelServerPosrtsGenerator:ModelNodesGeneratorBase{
+    public class ModelServerPortGenerator:ModelNodesGeneratorBase{
         protected override void GenerateNodesCore(ModelNode node){
             node.AddNode<IModelLoggerClientRange>("default client range 61456-61496");
             node.AddNode<IModelLoggerServerPort>("default server port 61456");

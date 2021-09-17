@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net5.0-windows7.0</TargetFramework>
+    <DisableMSBuildAssemblyCopyCheck>true</DisableMSBuildAssemblyCopyCheck>
+    <Deterministic>false</Deterministic>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="DevExpress.Persistent.BaseImpl" Version="21.1.5" />
+    <PackageReference Include="Fasterflect.Xpand" Version="2.0.7" />
+    <PackageReference Include="Microsoft.Build" Version="16.10.0" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="16.10.0" />
+    <PackageReference Include="Mono.Cecil" Version="0.11.4" />
+    <PackageReference Include="System.Management" Version="5.0.0" />
+    <PackageReference Include="Xpand.Extensions.Reactive" Version="4.211.6.5" />
+    <PackageReference Include="Xpand.XAF.Modules.OneView" Version="4.211.6.5" />
+    <PackageReference Include="Xpand.XAF.Modules.Reactive.Logger.Hub" Version="4.211.6.5" />
+    <PackageReference Include="Xpand.XAF.Modules.Windows" Version="4.211.6.5" />
+    <PackageReference Include="Xpand.XAF.Modules.GridListEditor" Version="4.211.6.5" />
+    <PackageReference Include="Xpand.XAF.Modules.ModelMapper" Version="4.211.6.5" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Model.DesignedDiffs.xafml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="UnusableNodes1.xml">
+      <DependentUpon>Model.DesignedDiffs.xafml</DependentUpon>
+    </None>
+  </ItemGroup>
+</Project>

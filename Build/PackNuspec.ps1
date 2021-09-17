@@ -4,13 +4,14 @@ param(
     $sourceDir = "$PSScriptRoot\..",
     $Filter ,
     [switch]$SkipReadMe,
-    $dxVersion="21.1.3.0",
+    $dxVersion="21.1.5.0",
     $Feed
 )
 
 New-Item $nugetBin -ItemType Directory -Force | Out-Null
 Get-ChildItem $nugetBin | Remove-Item -Force -Recurse
-$toolPackages = @("Xpand.VersionConverter", "Xpand.XAF.ModelEditor")
+$toolPackages = @("Xpand.VersionConverter")
+# $toolPackages = @("Xpand.VersionConverter", "Xpand.XAF.ModelEditor")
 & "$PSScriptRoot\PackTools.ps1" $toolPackages $Branch
 
 

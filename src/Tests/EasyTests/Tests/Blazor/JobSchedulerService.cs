@@ -2,9 +2,7 @@
 using System.Threading.Tasks;
 using DevExpress.EasyTest.Framework;
 using Hangfire;
-using Shouldly;
 using Xpand.Extensions.XAF.ObjectExtensions;
-using Xpand.TestsLib.Blazor;
 using Xpand.TestsLib.Common.BO;
 using Xpand.TestsLib.EasyTest;
 using Xpand.TestsLib.EasyTest.Commands;
@@ -20,6 +18,8 @@ namespace Web.Tests {
 
         private static void TestExecuteActionJob(this ICommandAdapter adapter) {
             adapter.Execute(new NavigateCommand("Default.Product"));
+            adapter.Execute(new SelectObjectsCommand<Product>(product => product.ProductName,new []{"ProductName0","ProductName1"}));
+            adapter.Execute(new ActionDeleteCommand());
             adapter.Execute(new ActionCommand(Actions.New));
             adapter.Execute(new FillObjectViewCommand<Product>((product => product.ProductName, "deleteme")));
             adapter.Execute(new ActionCommand(Actions.Save));

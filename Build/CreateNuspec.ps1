@@ -1,7 +1,7 @@
 param(
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\"),
     [switch]$Release,
-    $dxVersion = "21.1.3",
+    $dxVersion = "21.1.5",
     $branch = "lab"
 )
 
@@ -131,9 +131,12 @@ $filteredProjects| Invoke-Parallel -StepInterval 500 -VariablesToImport @("allPr
 
 & "$root\build\UpdateAllNuspec.ps1" $root $Release $branch $dxVersion
 $nuspecs=Get-ChildItem "$root\build\nuspec" *.nuspec
+
 $nuspecs |ForEach-Object{
     $nuspec=Get-XmlContent $_.FullName
-    # $nuspec.package.metadata.dependencies.group.dependency|Where-Object{$_.id -match "DevExpress"}|Remove-XmlElement 
+    $nuspec.package.metadata.dependencies.group.dependency|Where-Object{$_.id -match "DevExpress"}|ForEach-Object{
+        $_.Version=Get-VersionPart $dxVersion -Part Minor
+    }
     $nuspec|Save-Xml $_.FullName
 } 
 $filteredProjects|ForEach-Object{

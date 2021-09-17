@@ -41,8 +41,8 @@ namespace Web.Tests{
         }
 
 #endif
-        // [Test]
-        // [XpandTest(LongTimeout,3)]
+        [Test]
+        [XpandTest(LongTimeout,3)]
         [Apartment(ApartmentState.STA)]
         public async Task Web_EasyTest_InLocalDb(){
             var connectionString = $"Integrated Security=SSPI;Pooling=false;Data Source=(localdb)\\mssqllocaldb;Initial Catalog=TestApplicationWeb{AppDomain.CurrentDomain.UseNetFramework()}";

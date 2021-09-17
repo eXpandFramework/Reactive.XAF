@@ -7,7 +7,7 @@ param(
     $artifactstagingdirectory,
     $bindirectory,
     [string]$AzureToken = $env:AzureToken,
-    [string]$CustomVersion = "20.2.4.0",
+    [string]$CustomVersion = "21.1.5.0",
     [string]$UseLastVersion="1",
     $XpandBlobOwnerSecret=$env:AzXpandBlobOwnerSecret,
     $AzureApplicationId=$env:AzApplicationId,

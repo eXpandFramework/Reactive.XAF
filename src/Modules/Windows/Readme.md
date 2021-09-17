@@ -26,6 +26,7 @@ This is a `WinForms module`. To configure the `Application.Windows` module look 
 1. **Exit/OnEscape Node:**\
   `CloseWindow`, `MinimizeWindow`: Results in closing/minimizing the active window when Escape key. \
   `ExitApplication`: Results in application exit when Escape key. 
+  `ExitAfterModelEdit`: Results in application exit when XAF Model is modified. 
 1. **Exit/OnExit Node:**\
   `HideMainWindowWindow`, `MinimizeMainWindow`: Results in hiding/minimizing the Main window when user tries to exit the application. 
 1. **Exit/Prompt Node:**\

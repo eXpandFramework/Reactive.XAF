@@ -11,6 +11,7 @@ using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.FrameExtensions;
+using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -23,7 +24,7 @@ namespace Xpand.XAF.Modules.OneView{
 	        => manager.WhenApplication(application => {
 		        var cleanStartupNavigationItem = CleanStartupNavigationItem(application);
 		        var showView = application.ShowView().Publish().RefCount();
-		        return showView.EditModel(application)
+		        return showView.EditModel().ToUnit()
 			        .Merge(showView.ExitApplication(application))
 			        .Merge(application.HideMainWindow())
 			        .Merge(cleanStartupNavigationItem);
@@ -40,16 +41,16 @@ namespace Xpand.XAF.Modules.OneView{
             return  Observable.Defer(() => showView.SelectMany(parameters => parameters.CreatedView.WhenClosing()
 			            .SelectMany(_ => parameters.CreatedView.WhenClosed().To(application.MainWindow)))
 		            .TakeUntil(editingModel)).Repeat()
-                .Do(window => window.Close())
+                .Do(window => window?.Close())
                 .ToUnit();
         }
 
-        private static IObservable<Unit> EditModel(this IObservable<ShowViewParameters> showView,XafApplication application) 
-	        => showView.SelectMany(_ => _.Controllers.OfType<OneViewDialogController>())
-		        .SelectMany(_ => _.AcceptAction.WhenExecuteCompleted()
-			        .Select(_ => application.MainWindow.GetController("DevExpress.ExpressApp.Win.SystemModule.EditModelController").GetPropertyValue("EditModelAction"))).Cast<SimpleAction>()
-		        .Do(action => action.DoExecute()).ToUnit()
-		        .TraceOneView();
+        public static IObservable<ShowViewParameters> EditModel(this IObservable<ShowViewParameters> showView) 
+	        => showView.SelectMany(parameters => parameters.Controllers.OfType<OneViewDialogController>().ToObservable()
+                    .SelectMany(controller => controller.AcceptAction.WhenExecuteCompleted()
+                        .Select(e => e.Action.Application.MainWindow.GetController("DevExpress.ExpressApp.Win.SystemModule.EditModelController").GetPropertyValue("EditModelAction"))).Cast<SimpleAction>()
+                    .Do(action => action.DoExecute()).To(parameters)
+                ).TraceOneView();
 
         private static IObservable<Unit> HideMainWindow(this XafApplication application) 
 	        => application.WhenWin().SelectMany(api => api.WhenMainFormVisible())
@@ -57,8 +58,7 @@ namespace Xpand.XAF.Modules.OneView{
 		        .TraceOneView(window => window.Context)
 		        .ToUnit()
 		        .TakeUntil(application.ToReactiveModule<IModelReactiveModuleOneView>().Where(view => view.OneView.View==null));
-		        
-
+        
         internal static IObservable<TSource> TraceOneView<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
 	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
 	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
@@ -66,27 +66,33 @@ namespace Xpand.XAF.Modules.OneView{
 
         private static IObservable<ShowViewParameters> ShowView(this XafApplication application) 
 	        => application.WhenWindowCreated().When(TemplateContext.ApplicationWindow)
-		        .SelectMany(_ => {
-			        var modelView = application.Model.ToReactiveModule<IModelReactiveModuleOneView>().OneView;
-			        if (modelView.View!=null){
-				        var showViewParameters = new ShowViewParameters();
-				        var dialogController = new OneViewDialogController();
-				        dialogController.AcceptAction.Caption = "Configure";
-				        dialogController.CancelAction.Active[""] = false;
-                        showViewParameters.Controllers.Add(dialogController);
-				        showViewParameters.NewWindowTarget = NewWindowTarget.Separate;
-				        showViewParameters.Context = TemplateContext.PopupWindow;
-
-				        showViewParameters.TargetWindow = TargetWindow.NewWindow;
-				        showViewParameters.CreatedView = application.NewView(modelView.View);
-				        application.ShowViewStrategy.ShowView(showViewParameters, new ShowViewSource(null, null));
-				        return showViewParameters.ReturnObservable();
-			        }
-
-			        return Observable.Empty<ShowViewParameters>();
-		        })
+		        .SelectMany(_ => application.ShowOneViewParameters().ShowOneView())
 		        .TraceOneView(parameters => parameters.CreatedView.Id)
 		        .WhenNotDefault();
+
+        public static IObservable<ShowViewParameters> ShowOneViewParameters(this XafApplication application,IObjectSpace objectSpace=null) {
+            var modelView = application.Model.ToReactiveModule<IModelReactiveModuleOneView>().OneView;
+            if (modelView.View!=null) {
+                objectSpace ??= application.CreateObjectSpace(modelView.View.AsObjectView.ModelClass.TypeInfo.Type);
+                var showViewParameters = new ShowViewParameters();
+                var dialogController = new OneViewDialogController();
+                dialogController.AcceptAction.Caption = "Configure";
+                dialogController.CancelAction.Active[""] = false;
+                showViewParameters.Controllers.Add(dialogController);
+                showViewParameters.NewWindowTarget = NewWindowTarget.Separate;
+                showViewParameters.Context = TemplateContext.PopupWindow;
+                showViewParameters.TargetWindow = TargetWindow.NewWindow;
+                showViewParameters.CreatedView = application.NewView(modelView.View,objectSpace);
+                return showViewParameters.ReturnObservable();
+            }
+
+            return Observable.Empty<ShowViewParameters>();
+        }
+
+        public static IObservable<ShowViewParameters> ShowOneView(this IObservable<ShowViewParameters> source) 
+            => source.Do(parameters => ((CompositeView) parameters.CreatedView).Application().ShowViewStrategy
+                .ShowView(parameters, new ShowViewSource(null, null)))
+                .TraceOneView();
     }
 
     public class OneViewDialogController:DialogController{

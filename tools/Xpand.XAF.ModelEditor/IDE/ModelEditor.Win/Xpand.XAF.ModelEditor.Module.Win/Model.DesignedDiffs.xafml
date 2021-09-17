@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Application>
+  <ReactiveModules>
+    <ReactiveLogger>
+      <TraceSources Enabled="True">
+        <TraceSourcedModule Id="ModelEditorWindowsFormsModule" IsNewNode="True" />
+      </TraceSources>
+    </ReactiveLogger>
+    <GridListEditor>
+      <GridListEditorRules>
+        <GridListEditorFocusRow Id="Move to AutoFilterRowHandle" ListView="XafModel_ListView" RowHandle="" UpArrowMoveToRowHandle="AutoFilterRowHandle" IsNewNode="True" />
+      </GridListEditorRules>
+    </GridListEditor>
+    <OneView View="XafModel_ListView" />
+    <Windows>
+      <Exit ExitAfterModelEdit="True">
+        <OnDeactivation CloseWindow="True" />
+        <OnEscape CloseWindow="True" />
+        <OnExit HideMainWindow="True" />
+      </Exit>
+      <Form FormBorderStyle="Sizable" MaximizeBox="False" MinimizeBox="False" ControlBox="False" ShowInTaskbar="False" Text="" PopupWindows="True" />
+      <MultiInstance Disabled="True" NotifyMessage="" />
+    </Windows>
+  </ReactiveModules>
+
+  <SchemaModules>
+    <SchemaModule Name="SystemModule" Version="21.1.5.0" IsNewNode="True" />
+    <SchemaModule Name="SystemWindowsFormsModule" Version="21.1.5.0" IsNewNode="True" />
+  </SchemaModules>
+  <Views>
+    <ListView Id="XafModel_ListView" ShowAutoFilterRow="True" AllowEdit="True">
+      <Columns>
+        <ColumnInfo Id="Name" AllowEdit="False" />
+      </Columns>
+      <GridView>
+        <OptionsView ShowFilterPanelMode="Never" ShowColumnHeaders="False" />
+      </GridView>
+    </ListView>
+  </Views>
+</Application>
