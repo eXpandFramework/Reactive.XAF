@@ -73,6 +73,12 @@ Invoke-Script {
     
 
     Write-HostFormatted "Start-ProjectConverter version $CustomVersion"  -Section
+    $bin = "$SourcePath\bin\"
+    if (Test-Path $bin) {
+        Get-ChildItem $bin -Recurse -Exclude "*Nupkg*" | Remove-Item -Force -Recurse
+    }
+    Set-Location "$SourcePath\src"
+    Clear-XProjectDirectories
     Start-XpandProjectConverter -version $CustomVersion -path $SourcePath -SkipInstall
     "PaketRestore $SourcePath"
     try {

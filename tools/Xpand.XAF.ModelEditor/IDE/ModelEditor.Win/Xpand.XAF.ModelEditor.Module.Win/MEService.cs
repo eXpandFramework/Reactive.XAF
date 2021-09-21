@@ -7,6 +7,7 @@ using System.Management;
 using System.Net.Http;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
+using System.Runtime.InteropServices;
 using System.Threading;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
@@ -24,14 +25,15 @@ using Xpand.XAF.ModelEditor.Module.Win.BusinessObjects;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Controllers;
 using Unit = System.Reactive.Unit;
+using Window = DevExpress.ExpressApp.Window;
 
 namespace Xpand.XAF.ModelEditor.Module.Win {
-    internal static class MEService {
+    public static class MEService {
         static readonly HttpClient HttpClient = new();
 
         static MEService() => HttpClient.DefaultRequestHeaders.Add("User-Agent",nameof(MEService));
 
-        public static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
+        internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => manager.WhenApplication(application => Observable.Defer(() => application.DeleteMESettings(true).ShowModelListView().RunME().ToUnit()
                     .Merge(application.CloseViewWhenNotSettings(MeInstallationPath))))
                 .Merge(manager.WhenExtendingModel().Do(extenders => extenders.Add<IModelApplication,IModelApplicationME>()).ToUnit());
@@ -52,7 +54,7 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
                     })
                     .SelectMany(xafModel => xafModel.DownloadME(((IModelApplicationME)application.Model).ModelEditor).StartMEProcess(xafModel))));
 
-        public static XafApplication DeleteMESettings(this XafApplication application,bool setup=false) {
+        internal static XafApplication DeleteMESettings(this XafApplication application,bool setup=false) {
             var path = GetMESettingsPath();
             if (File.Exists(path)) {
                 File.Delete(path);
@@ -66,19 +68,19 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
             return application;
         }
 
-        public static IObservable<string> WhenMESettings() 
+        internal static IObservable<string> WhenMESettings() 
             => Observable.Using(() => new FileSystemWatcher(MeInstallationPath), watcher => {
                     watcher.EnableRaisingEvents = true;
                     var meSettingsPath = GetMESettingsPath();
                     return watcher.WhenEvent<FileSystemWatcher,FileSystemEventArgs>(nameof(watcher.Created)).Where(t => t.args.FullPath == meSettingsPath)
-                        .Delay(TimeSpan.FromMilliseconds(500))
-                        .Select(_ => $"{JsonConvert.DeserializeObject<dynamic>(File.ReadAllText(meSettingsPath))?.Solution}")
+                        .SelectMany(_ => Observable.Defer(() => $"{JsonConvert.DeserializeObject<dynamic>(File.ReadAllText(meSettingsPath))?.Solution}".ReturnObservable()).Retry())
                         .Merge("".ReturnObservable().Do(_ => File.CreateText(GetReadyPath())).IgnoreElements());
-                }).ObserveOn(SynchronizationContext.Current!)
+                })
+                .ObserveOn(SynchronizationContext.Current!)
                 .TraceModelEditorWindowsFormsModule();
 
-        public static string GetReadyPath() => $"{AppDomain.CurrentDomain.ApplicationPath()}\\Ready.txt";
-        public static string GetMESettingsPath() => $"{MeInstallationPath}\\MESettings.json";
+        internal static string GetReadyPath() => $"{AppDomain.CurrentDomain.ApplicationPath()}\\Ready.txt";
+        internal static string GetMESettingsPath() => $"{MeInstallationPath}\\MESettings.json";
 
         private static IObservable<string> DownloadME(this XafModel xafModel, IModelME modelME) {
             var assemblyPath = xafModel.Project.AssemblyPath;
@@ -86,7 +88,8 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
                 throw new UserFriendlyException($"File {assemblyPath} not found, please build the project");
             }
 
-            var versionsGroup = Directory.GetFiles(Path.GetDirectoryName(assemblyPath)!,"DevExpress*.dll").GroupBy(s => Version.Parse(FileVersionInfo.GetVersionInfo(s).FileVersion!)).ToArray();
+            var versionsGroup = Directory.GetFiles(Path.GetDirectoryName(assemblyPath)!,"DevExpress*.dll")
+                .GroupBy(s => Version.Parse(FileVersionInfo.GetVersionInfo(s).FileVersion!)).ToArray();
             if (versionsGroup.Length > 1) {
                 throw new UserFriendlyException($"Multiple DevExpress versions found in {assemblyPath}");
             }
@@ -101,20 +104,22 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
                     }
 
                     var directory = $"{MeInstallationPath}\\{meType}\\{version}\\";
-                    var path = $"{directory}Xpand.XAF.ModelEditor.{meType}.exe";
+                    string filename=$"Xpand.XAF.ModelEditor.{meType}.exe";
+                    var path = $"{directory}{filename}";
                     if (!File.Exists(path)) {
                         if (!Directory.Exists(directory)) {
                             Directory.CreateDirectory(directory);
                         }
-
-                        var requestUri = modelME.DownloadUrl.StringFormat($"{version}");
-                        return HttpClient.GetByteArrayAsync(requestUri).ToObservable()
-                            .Do(bytes => {
-                                var pathToZip = $"{directory}Xpand.XAF.ModelEditor.{meType}.zip";
-                                bytes.Save(pathToZip);
-                                using var archive = ZipFile.OpenRead(pathToZip);
-                                archive.ExtractToDirectory(directory);
-                            }).To(path);
+                        return modelME.DownloadUrl.StringFormat($"{version}",meType).ReturnObservable()
+                                .TraceModelEditorWindowsFormsModule(s => $"Download {s}")
+                            .SelectMany(url => HttpClient.GetByteArrayAsync(url).ToObservable()
+                                    .ObserveOn(SynchronizationContext.Current!)
+                                    .Do(bytes => {
+                                        var pathToZip = $"{directory}Xpand.XAF.ModelEditor.{meType}.zip";
+                                        bytes.Save(pathToZip);
+                                        using var archive = ZipFile.OpenRead(pathToZip);
+                                        archive.ExtractToDirectory(directory);
+                                    }).To(path));
                     }
 
                     return path.ReturnObservable();
@@ -125,9 +130,11 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
             => HttpClient.GetStringAsync("https://api.github.com/repos/expandframework/reactive.xaf/tags").ToObservable()
                 .SelectMany(s => JsonConvert.DeserializeObject<JArray>(s)!.Select(token => Version.Parse($"{token["name"]}")))
                 .FirstAsync(version => (version.Revision == 0 && !preRelease)||preRelease)
-                .FirstAsync(version => $"{version.Minor}" == $"{dxVersion.Major}{dxVersion.Minor}");
+                .FirstAsync(version => $"{version.Minor}" == $"{dxVersion.Major}{dxVersion.Minor}")
+                .ObserveOn(SynchronizationContext.Current!)
+                .TraceModelEditorWindowsFormsModule(version => $"Locating {dxVersion} release = {version}");
 
-        private static string MeInstallationPath =>
+        public static string MeInstallationPath =>
             $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\\Xpand.XAF.ModelEditor.Win";
 
         static IObservable<Unit> StartMEProcess(this IObservable<string> source, XafModel xafModel) 
@@ -139,10 +146,18 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
 	                .ToObservable().ToUnit().Concat(xafModel.StartME(xafModel.Project.Path, destFileName));
             }).ToUnit();
 
+        
+        // [DllImport("msvcrt.dll")]
+        // public static extern int system(string format);
+
+        
         private static IObservable<Unit> StartME(this XafModel xafModel, string fullPath, string destFileName) {
             string debugMe = xafModel.Debug ? "d" : null;
             string arguments = String.Format("{0} {4} \"{1}\" \"{3}\" \"{2}\"", debugMe, xafModel.Project.AssemblyPath,
                 fullPath, xafModel.Path, xafModel.Project.IsApplicationProject);
+            // system($"{destFileName} {arguments}");
+            // return Observable.Empty<Unit>();
+            
             var process = new Process() {
 	            StartInfo = new ProcessStartInfo(destFileName,arguments) {
                     WorkingDirectory = Path.GetDirectoryName(destFileName)!

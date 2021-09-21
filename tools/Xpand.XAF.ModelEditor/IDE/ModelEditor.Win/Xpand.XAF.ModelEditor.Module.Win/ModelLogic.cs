@@ -8,7 +8,7 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
 
     public interface IModelME:IModelNode {
         [Required]
-        [DefaultValue("https://github.com/eXpandFramework/Reactive.XAF/releases/download/{0}/Xpand.XAF.ModelEditor.Zip")]
+        [DefaultValue("https://github.com/eXpandFramework/Reactive.XAF/releases/download/{0}/Xpand.XAF.ModelEditor.{1}.Zip")]
         string DownloadUrl { get; set; }
 
         bool DownloadPreRelease { get; set; }

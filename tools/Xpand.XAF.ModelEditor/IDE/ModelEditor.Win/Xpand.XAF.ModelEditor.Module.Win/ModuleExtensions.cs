@@ -22,14 +22,25 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
         public static IObservable<XafApplication> ShowModelListView(this XafApplication application)
             => application.WhenSetupComplete()
                 .SelectMany(_ => application.WhenWindowCreated(true).To(application))
-                .MergeIgnored(_ => MEService.WhenMESettings()
-                    .SelectMany(solutionPath => application.ShowOneViewParameters()
-                        .ParseProjects(solutionPath)
-                        .ShowOneView().Delay(TimeSpan.FromMilliseconds(100)).ObserveOn(SynchronizationContext.Current!)
-                        .Do(parameters => parameters.CreatedView.ObjectSpace.Refresh())
-                        .TraceModelEditorWindowsFormsModule(TradeParameters)
-                        .EditModel()
-                    ));
+                .TraceModelEditorWindowsFormsModule()
+                .Select(_ => {
+                    var synchronizationContext = SynchronizationContext.Current;
+                    var selectMany = MEService.WhenMESettings()
+                        .SelectMany(solutionPath => {
+                            
+                            
+                            return application.ShowOneViewParameters()
+                                .ParseProjects(solutionPath)
+                                .ShowOneView()
+                                .Delay(TimeSpan.FromMilliseconds(100))
+                                .ObserveOn(synchronizationContext!)
+                                .Do(parameters => parameters.CreatedView.ObjectSpace.Refresh())
+                                .TraceModelEditorWindowsFormsModule(TradeParameters)
+                                .EditModel();
+                        });
+                    return selectMany;
+                }).Switch().IgnoreElements()
+                .To(application).StartWith(application);
 
         private static IObservable<ShowViewParameters> ParseProjects(this IObservable<ShowViewParameters> source, string solutionPath)
             => source.MergeIgnored(parameters => parameters.CreatedView.ObjectSpace.AsNonPersistentObjectSpace()

@@ -3,6 +3,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Windows.Forms;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Win;
 using DevExpress.ExpressApp.Win.SystemModule;
 using Xpand.Extensions.Reactive.Filter;
@@ -16,15 +17,16 @@ namespace Xpand.XAF.Modules.Windows {
         public static IObservable<Window> OnWindowEscape(this IObservable<Window> source)
             => source.Cast<WinWindow>().MergeIgnored(window => window
                 .WhenEvent<WinWindow, KeyEventArgs>(nameof(WinWindow.KeyDown)).Where(t => t.args.KeyCode == Keys.Escape).To(window)
-                .Do(model => model.OnEscape.CloseWindow,model => model.OnEscape.MinimizeWindow,model => model.OnEscape.ExitApplication)
+                .OnWindowEscape(model => model.OnEscape.CloseWindow,model => model.OnEscape.MinimizeWindow,model => model.OnEscape.ExitApplication)
                 .To(window),window => {
                 var onEscape = window.Model().Exit.OnEscape;
                 return onEscape.CloseWindow||onEscape.ExitApplication;
             });
 
-        static IObservable<Window> Do(this IObservable<Window> source, Func<IModelWindowsExit, bool> closeWindow,
+        static IObservable<Window> OnWindowEscape(this IObservable<Window> source, Func<IModelWindowsExit, bool> closeWindow,
             Func<IModelWindowsExit, bool> minimizeWindow,Func<IModelWindowsExit, bool> exitApplication)
             => source.WhenNotDefault(window => window.Application)
+                .TraceWindows()
                 .Do(window => {
                     var model = window.Model().Exit;
                     if (closeWindow(model)) {
@@ -45,6 +47,7 @@ namespace Xpand.XAF.Modules.Windows {
 	            .WhenEvent<Form, EventArgs>(nameof(Form.Activated))
                 .Select(_ => window.Template.WhenEvent<Form, EventArgs>(nameof(Form.Deactivate))).Switch()
                 .WhenNotDefault(_ => window.Application)
+                .TraceWindows(_ => $"{nameof(IModelOn.CloseWindow)}={window.Model().Exit.OnDeactivation.CloseWindow}")
                 .Do(_ => {
                     if (window.Model().Exit.OnDeactivation.CloseWindow) {
                         window.Close();
@@ -64,14 +67,17 @@ namespace Xpand.XAF.Modules.Windows {
                 .Select(t => {
                     t.args.Cancel = window.CanExit();
                     return (t.source, window.Model().Exit);
-                }).ChangeFormState().To(window));
+                }).ChangeFormState().To(window))
+                .TraceWindows();
 
         public static IObservable<Window> ExitAfterModelEdit(this IObservable<Window> source) 
-            => source.MergeIgnored(window => {
-                var application = window.Application;
-                return window.GetController<EditModelController>().EditModelAction.WhenExecuteCompleted()
-                    .Do(_ => application.Exit());
-            },window => window.Model().Exit.ExitAfterModelEdit);
+            => source.MergeIgnored(ExitAfterModelEdit,window => window.Model().Exit.ExitAfterModelEdit);
+
+        private static IObservable<SimpleActionExecuteEventArgs> ExitAfterModelEdit(Window window) {
+            var application = window.Application;
+            return window.GetController<EditModelController>().EditModelAction.WhenExecuteCompleted()
+                .Do(_ => application.Exit()).TraceWindows();
+        }
 
         private static bool CanExit(this Window window) {
             var application = window.Application;

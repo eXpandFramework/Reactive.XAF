@@ -8,7 +8,8 @@
 
   <description>
 <![CDATA[
-<p>Sample description</p>
+<p>Xpand ModelEditor with .NET5 and newer support for DevExpress-XAF .NET Bussiness application projects.</p>
+<p>Execute the XpandModelEditor action to display a list of Xaf models avaialble in the solution. Select the model you want to modify and hit Enter to open the XpandModelEditor</p>
 ]]>
   </description>
 

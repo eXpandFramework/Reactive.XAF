@@ -91,25 +91,13 @@ function FixNet461DXAssembliesTargetFramework {
 }
 
 function Update-NugetConsumersPackageVersion {
-    $localPackages = @(& (Get-NugetPath) list -source "$root\bin\nupkg;" | ConvertTo-PackageObject | Where-Object { $_.id -like "*.ALL" } | ForEach-Object {
-        $version = [version]$_.Version
-        if ($version.revision -eq 0) {
-            $version = New-Object System.Version ($version.Major, $version.Minor, $version.build)
-        }
-        [PSCustomObject]@{
-            Id      = $_.Id
-            Version = $version
-        }
-    })
+    $localVersion = Get-AssemblyInfoVersion "$root\src\Common\AssemblyInfoVersion.cs"
 
     Write-HostFormatted "Update Xpand package versions" -ForegroundColor Magenta
     (Get-ChildItem "$root\src\Tests\EasyTests" *.csproj -Recurse)+(Get-ChildItem "$root\tools\Xpand.XAF.ModelEditor" *.csproj -Recurse) | ForEach-Object {
         $prefs = Get-PackageReference $_ 
-        $prefs | Where-Object { $_.include -like "Xpand.XAF.*" } | ForEach-Object {
-            $ref = $_
-            $localPackages | Where-Object { $_.id -eq $ref.include } | ForEach-Object {
-                $ref.version = $_.version.ToString()
-            }
+        $prefs | Where-Object { $_.include -like "Xpand.*" } | ForEach-Object {
+            $_.version = $localVersion
         }
         ($prefs | Select-Object -First 1).OwnerDocument.Save($_)
     }
@@ -147,17 +135,7 @@ Task CompileNugetConsumers -precondition { return $compile } {
 
         if ($dxVersion -eq (Get-XAFLatestMinors | Select-Object -First 1)) {
             Invoke-Script {
-                
                 & $root\build\ZipMe.ps1
-                if (!(Test-AzDevops)){
-                    Write-HostFormatted "Building XVSIX" -Section
-                    Set-Location "$Root\tools\Xpand.XAF.ModelEditor\IDE\XVSIX"
-                    Start-Build
-                    Write-HostFormatted "Building Rider" -Section
-                    Set-Location "$Root\tools\Xpand.XAF.ModelEditor\IDE\Rider"
-                    Start-Build
-                }
-                
             } -Maximum 3
         }
     } -Maximum 3

@@ -2,7 +2,33 @@
 
 [![image](https://xpandshields.azurewebsites.net/badge/Exclusive%20services%3F-Head%20to%20the%20dashboard-Blue)](https://github.com/sponsors/apobekiaris) ![GitHub stars](https://xpandshields.azurewebsites.net/github/stars/expandframework/devexpress.xaf?label=Star%20the%20project%20if%20you%20think%20it%20deserves%20it&style=social) ![GitHub forks](https://xpandshields.azurewebsites.net/github/forks/expandframework/Devexpress.Xaf?label=Fork%20the%20project%20to%20extend%20and%20contribute&style=social)
 
-![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.ModelEditor.svg?label=nuget.org&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.ModelEditor.svg?style=flat)
+
+![Visual Studio Marketplace Downloads](https://xpandshields.azurewebsites.net/visual-studio-marketplace/d/eXpandFramework.XVSIX-x86?label=Visual%20Studio) ![JetBrains ReSharper plugins](https://xpandshields.azurewebsites.net/resharper/dt/17617-xpand?label=JetBrains.Rider)
+
+# About
+
+The `Xpand.XAF.ModelEditor.Win` is a XAF application which integrates both `MS Visual Studio` & `Jetbrains Rider` with the standalone DevExpress XAF ModelEditor.
+
+## Installation
+
+The application is distributed from [Visual Studio](https://marketplace.visualstudio.com/items?itemName=eXpandFramework.XVSIX-x86) and [JetBrains]() market place. You can install it from within Visual Studio or Rider as per the next screencast. Both IDE will handle effortless future version updates, so you do not need to worry about them.
+
+![Xpand XAF ModelEditor Win](https://user-images.githubusercontent.com/159464/134785037-e40fe22e-a9c6-4ee5-9f4a-70101f318f7d.gif)
+
+## Plugin operation 
+
+Both `Visual Studio` and `Rider` plugins share the same code and are designed to have zero friction with the IDE, minimizing that way performance or other kind of issues. They both use the only the [ModelEditor static class](https://github.com/eXpandFramework/Reactive.XAF/blob/master/tools/Xpand.XAF.ModelEditor/IDE/XpandModelEditor.cs) and nothing else. The plugin operates as following:
+
+1. On the first execution of the `XpandModelEditor` command after either and VS or Rider starts (see screencast), it will extract the embedded XAF application to `%APPDATA%\Xpand.XAF.ModelEditor.Win` directory. If the XAF application already exists extraction will be skipped.
+2. On each execution of the `XpandModelEditor` command, it will lookup if the `Xpand.XAF.ModelEditor.Win` process is running and will start it. 
+3. On each execution of the `XpandModelEditor` command, if the `Xpand.XAF.ModelEditor.Win` process is already started then it will located all embedded xafml files in the solution assemblies and will display them in an Xaf ListView. 
+4. Finally by selecting a model from the ListView and double click a second application will be placed if not exist in the `%APPDATA%\Xpand.XAF.ModelEditor.Win\WinDesktop`. That application is downloaded directly from this repository releases page base on the selected ListView project's DevExpress version.
+
+<details><summary>Legacy documentation</summary>
+<p>
+
+
+
 # About
 
 The `Xpand.XAF.ModelEditor` package contains a standalone version of XAF Model Editor, designed to integrate with Visual Studio, Rider, Explorer as standalone without any dependency to eXpandFramework packages. ALternatively you can use the VSIX package where the XpandModelEditor is embedded as described in [VSIX integration section](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/tools/Xpand.XAF.ModelEditor#vsix-integration). 
@@ -90,3 +116,7 @@ If you prefer to work with Rider without having installed DevExpress consider th
 
 
 
+
+
+</p>
+</details>

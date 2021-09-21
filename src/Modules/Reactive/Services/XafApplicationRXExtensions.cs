@@ -109,7 +109,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<Window> WhenWindowCreated(this XafApplication application,bool isMain=false,bool emitIfMainExists=true) {
             var windowCreated = application.WhenFrameCreated().OfType<Window>();
-            return isMain ? emitIfMainExists && application.MainWindow != null ? application.MainWindow.ReturnObservable()
+            return isMain ? emitIfMainExists && application.MainWindow != null ? application.MainWindow.ReturnObservable().ObserveOn(SynchronizationContext.Current)
                     : application.WhenMainWindowAvailable(windowCreated) : windowCreated.TraceRX(window => window.Context);
         }
 

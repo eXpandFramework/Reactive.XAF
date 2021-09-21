@@ -1,9 +1,11 @@
 
+using System.IO;
 using JetBrains.Application.DataContext;
 using JetBrains.Application.UI.Actions;
 using JetBrains.Application.UI.ActionsRevised.Menu;
 using JetBrains.Application.UI.ActionSystem.ActionsRevised.Menu;
 using JetBrains.ReSharper.Psi.Files;
+using JetBrains.Util;
 using ModelEditor;
 
 namespace ReSharperPlugin.Xpand{
@@ -16,10 +18,16 @@ namespace ReSharperPlugin.Xpand{
             => true;
 
         public async void Execute(IDataContext context, DelegateExecute nextExecute){
+            var solution = context.GetData(JetBrains.ProjectModel.DataContext.ProjectModelDataConstants.SOLUTION);
+            var solutionFileName = solution?.SolutionFilePath.FullPath;
             await XpandModelEditor.ExtractMEAsync();
             await XpandModelEditor.StartMEAsync();
-            var solution = context.GetData(JetBrains.ProjectModel.DataContext.ProjectModelDataConstants.SOLUTION);
-            XpandModelEditor.WriteSettings(solution?.SolutionFilePath.FullPath);
+            
+            
+            if (!File.Exists(solutionFileName)){
+                MessageBox.ShowInfo($"aaa{solutionFileName}");
+            }
+            XpandModelEditor.WriteSettings(solutionFileName);
         }
     }
 }

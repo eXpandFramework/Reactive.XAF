@@ -24,7 +24,7 @@ namespace Xpand.XAF.Modules.Windows {
                     }
 
                     frame.Application.Exit();
-                }));
+                })).TraceWindows();
 
         private static IObservable<Process> WhenSameNameProcesses(this Process currentProcess) {
             var processesByName = Process.GetProcessesByName(currentProcess.ProcessName);

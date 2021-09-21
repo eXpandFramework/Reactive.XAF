@@ -2,6 +2,7 @@
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -39,8 +40,8 @@ namespace ModelEditor{
             }
         }
 
-        static string MESettingsPath =>
-            $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\\Xpand.XAF.ModelEditor.Win\\";
+        static string MESettingsPath 
+            => $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\\Xpand.XAF.ModelEditor.Win\\";
 
         public static async Task ExtractMEAsync() => await Task.FromResult(ExtractME());
 
@@ -49,14 +50,13 @@ namespace ModelEditor{
             if (!Directory.Exists(MESettingsPath)){
                 Directory.CreateDirectory(MESettingsPath);
             }
-
             var assembly = typeof(XpandModelEditor).Assembly;
             using var memoryStream = new MemoryStream();
             var resourceName = assembly.GetManifestResourceNames().First(s => s.EndsWith(".zip"));
             var resourceStream = assembly.GetManifestResourceStream(resourceName) ??
                                  throw new InvalidOperationException("packageVersion");
             var fileName = Path.GetFileNameWithoutExtension(resourceName);
-            var version = fileName.Substring(fileName.Length - 7);
+            var version = Regex.Match(fileName, @"\.[\d]*\.[\d]*\.[\d]*\.[\d]*").Value.Trim('.');
             var zipPath = $"{MESettingsPath}\\Xpand.XAF.ModelEditor.Win.{version}.zip";
             if (!File.Exists(zipPath)){
                 SaveToFile(resourceStream, zipPath);

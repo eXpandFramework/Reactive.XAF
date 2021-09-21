@@ -1,11 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net5.0-windows</TargetFramework>
+    <TargetFramework>net5.0-windows7.0</TargetFramework>
     <ApplicationIcon>ExpressApp.ico</ApplicationIcon>
-    <Deterministic>false</Deterministic>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>1.0.0.0</FileVersion>
+    <!-- <Deterministic>false</Deterministic> -->
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -13,6 +12,9 @@
   <ItemGroup>
     <None Remove="Model.xafml" />
     <None Remove="Images\Logo.svg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="B:\Work\Reactive.XAF\src\Common\AssemblyInfoVersion.cs" Link="Properties\AssemblyInfoVersion.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Model.xafml">

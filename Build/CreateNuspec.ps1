@@ -135,7 +135,7 @@ $nuspecs=Get-ChildItem "$root\build\nuspec" *.nuspec
 $nuspecs |ForEach-Object{
     $nuspec=Get-XmlContent $_.FullName
     $nuspec.package.metadata.dependencies.group.dependency|Where-Object{$_.id -match "DevExpress"}|ForEach-Object{
-        $_.Version=Get-VersionPart $dxVersion -Part Minor
+        # $_.Version=Get-VersionPart $dxVersion -Part Minor
     }
     $nuspec|Save-Xml $_.FullName
 } 

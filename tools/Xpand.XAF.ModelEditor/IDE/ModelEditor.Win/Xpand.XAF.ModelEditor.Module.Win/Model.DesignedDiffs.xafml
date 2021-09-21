@@ -13,7 +13,7 @@
     </GridListEditor>
     <OneView View="XafModel_ListView" />
     <Windows>
-      <Exit ExitAfterModelEdit="True">
+      <Exit >
         <OnDeactivation CloseWindow="True" />
         <OnEscape CloseWindow="True" />
         <OnExit HideMainWindow="True" />

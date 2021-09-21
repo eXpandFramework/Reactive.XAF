@@ -4,16 +4,16 @@
   <Options UIType="TabbedMDI" FormStyle="Ribbon" ShowTabImage="False" Skin="The Bezier">
     <LayoutManagerOptions EnableLayoutGroupImages="False" />
   </Options>
-  <ReactiveModules>
-    <Windows>
-      <Exit>
-        <OnEscape CloseWindow="True" />
-        <OnExit HideMainWindow="True" />
-      </Exit>
-      <FormBox ControlBox="False" MaximizeBox="False" MinimizeBox="False" PopupWindows="True" ShowInTaskbar="False" FormBorderStyle="None" />
-      <NotifyIcon Enabled="False" />
-    </Windows>
-  </ReactiveModules>
+  <!-- <ReactiveModules> -->
+  <!--   <Windows> -->
+  <!--     <Exit> -->
+  <!--       <OnEscape CloseWindow="True" /> -->
+  <!--       <OnExit HideMainWindow="True" /> -->
+  <!--     </Exit> -->
+  <!--     <FormBox ControlBox="False" MaximizeBox="False" MinimizeBox="False" PopupWindows="True" ShowInTaskbar="False" FormBorderStyle="None" /> -->
+  <!--     <NotifyIcon Enabled="False" /> -->
+  <!--   </Windows> -->
+  <!-- </ReactiveModules> -->
   <SchemaModules>
     <SchemaModule Name="SystemModule" Version="21.1.4.0" IsNewNode="True" />
     <SchemaModule Name="SystemWindowsFormsModule" Version="21.1.4.0" IsNewNode="True" />

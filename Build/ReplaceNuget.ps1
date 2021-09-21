@@ -49,20 +49,23 @@ if ((Test-Path $nugetFolder) -and !$SkipNugetReplace) {
         Get-ChildItem $packageFolder.FullName "$assemblyName.dll" -Recurse | ForEach-Object {
             [PSCustomObject]@{
                 Item = $_
-                Version = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($_.FullName).fileversion
+                Version = [version]::Parse(([System.Diagnostics.FileVersionInfo]::GetVersionInfo($_.FullName).fileversion))
                 BaseName=$_.BaseName
             }
         }|Group-Object BaseName|ForEach-Object{
-            $item=($_.group|Where-Object{$_.item.FullName -notmatch "net461"}|Sort-Object Version -Descending|Select-Object -First 1).Item
-            if ($FixVersion){
-                $destinationVersion=$item.Directory.Parent.Parent.Name
-                Update-AssemblyInfoVersion $destinationVersion  $projectItem.DirectoryName
+            $_.group|Where-Object{$_.item.FullName -notmatch "net461"}|ForEach-Object{
+                $item=$_.item
+                if ($FixVersion){
+                    $destinationVersion=$item.Directory.Parent.Parent.Name
+                    Update-AssemblyInfoVersion $destinationVersion  $projectItem.DirectoryName
+                }
+                else{
+                    $destination=$item.FullName
+                    Copy-Item $TargetPath $destination -Force -Verbose
+                    Copy-Item "$($targetItem.DirectoryName)\$($targetItem.BaseName).pdb" $item.DirectoryName -Force -Verbose
+                }
             }
-            else{
-                $destination=$item.FullName
-                Copy-Item $TargetPath $destination -Force -Verbose
-                Copy-Item "$($targetItem.DirectoryName)\$($targetItem.BaseName).pdb" $item.DirectoryName -Force -Verbose
-            }
+            
             
         }
     }

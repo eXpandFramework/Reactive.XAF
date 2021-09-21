@@ -20,7 +20,10 @@ namespace Xpand.XAF.Modules.Windows {
         public static IObservable<NotifyIcon> NotifyIconUpdated => NotifyIconSubject.AsObservable();
 
         internal static IObservable<Window> NotifyIcon(this IObservable<Window> source)
-            => source.MergeIgnored(frame => Observable.Using(() => new Container(), container => {
+            => source.MergeIgnored(NotifyIcon);
+
+        private static IObservable<Frame> NotifyIcon(Window frame) 
+            => Observable.Using(() => new Container(), container => {
                 if (frame.Model().NotifyIcon.Enabled) {
                     var notifyIcon = new NotifyIcon(container)
                         {Visible = true, ContextMenuStrip = new ContextMenuStrip(container)};
@@ -32,7 +35,7 @@ namespace Xpand.XAF.Modules.Windows {
                             .To(frame));
                 }
                 return Observable.Empty<Frame>();
-            }));
+            }).TraceWindows();
 
         private static void SetupIcon(this NotifyIcon icon) {
             string path = $"{AppDomain.CurrentDomain.ApplicationPath()}\\ExpressApp.ico";
@@ -43,10 +46,9 @@ namespace Xpand.XAF.Modules.Windows {
             if (resourceStream != null) icon.Icon = new Icon(resourceStream);
         }
 
-
         private static IObservable<Frame> ShowOnDoubleClick(this NotifyIcon notifyIcon, Frame frame) 
             => notifyIcon.WhenEvent(nameof(notifyIcon.DoubleClick)).Where(_ => frame.Model().NotifyIcon.ShowOnDblClick)
-                .Do(_ => ((Form) frame.Application.MainWindow.Template).Show()).To(frame);
+                .Do(_ => ((Form) frame.Application.MainWindow.Template).Show()).To(frame).TraceWindows();
 
         private static IObservable<Frame> ExecuteMenuItems(this NotifyIcon notifyIcon,Frame frame) 
             => notifyIcon.ContextMenuStrip.UpdateMenuItems(frame).Finally(() => NotifyIconSubject.OnNext(notifyIcon))
@@ -66,7 +68,7 @@ namespace Xpand.XAF.Modules.Windows {
                     if (item.Text == model.HideText) {
                         mainForm.Hide();
                     }
-                }).To(frame);
+                }).To(frame).TraceWindows();
 
         private static IObservable<ToolStripMenuItem> UpdateMenuItems(this ContextMenuStrip strip, Frame frame) {
             strip.Items.Clear();

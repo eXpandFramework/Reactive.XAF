@@ -46,21 +46,21 @@ namespace Xpand.XAF.Modules.Windows{
             });
 
         private static IObservable<Window> ConfigureForm(this IObservable<Window> source,Func<Window,bool> apply=null)
-	        => source.SelectMany(frame => {
-                if (apply == null || apply(frame)) {
-                    var form = ((Form) frame.Template);
-                    var modelForm = frame.Model().Form;
-                    form.MinimizeBox = modelForm.MinimizeBox;
-                    form.MaximizeBox = modelForm.MaximizeBox;
-                    form.ControlBox = modelForm.ControlBox;
-                    form.ShowInTaskbar = modelForm.ShowInTaskbar;
-                    form.FormBorderStyle  = modelForm.FormBorderStyle ;
-                    return modelForm.Text != null ? form.WhenEvent(nameof(Form.TextChanged))
-                            .Do(_ => form.Text = modelForm.Text).To(frame) : frame.ReturnObservable();
-                }
+	        => source.SelectMany(frame => apply == null || apply(frame) ? frame.ConfigureForm() : frame.ReturnObservable());
 
-                return frame.ReturnObservable();
-            });
+        private static IObservable<Window> ConfigureForm(this Window frame) {
+            var form = ((Form)frame.Template);
+            var modelForm = frame.Model().Form;
+            form.MinimizeBox = modelForm.MinimizeBox;
+            form.MaximizeBox = modelForm.MaximizeBox;
+            form.ControlBox = modelForm.ControlBox;
+            form.ShowInTaskbar = modelForm.ShowInTaskbar;
+            form.FormBorderStyle = modelForm.FormBorderStyle;
+            return modelForm.Text != null ? form.WhenEvent(nameof(Form.TextChanged))
+                .Where(_ => form.Text != modelForm.Text)
+                .Do(_ => form.Text = modelForm.Text).To(frame) : frame.ReturnObservable()
+                .TraceWindows();
+        }
 
         internal static IModelWindows Model(this XafApplication application) 
             => application.Model.ToReactiveModule<IModelReactiveModuleWindows>().Windows;
