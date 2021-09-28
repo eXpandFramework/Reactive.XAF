@@ -26,18 +26,14 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
                 .Select(_ => {
                     var synchronizationContext = SynchronizationContext.Current;
                     var selectMany = MEService.WhenMESettings()
-                        .SelectMany(solutionPath => {
-                            
-                            
-                            return application.ShowOneViewParameters()
-                                .ParseProjects(solutionPath)
-                                .ShowOneView()
-                                .Delay(TimeSpan.FromMilliseconds(100))
-                                .ObserveOn(synchronizationContext!)
-                                .Do(parameters => parameters.CreatedView.ObjectSpace.Refresh())
-                                .TraceModelEditorWindowsFormsModule(TradeParameters)
-                                .EditModel();
-                        });
+                        .SelectMany(solutionPath => application.ShowOneViewParameters()
+                            .ParseProjects(solutionPath)
+                            .ShowOneView()
+                            .Delay(TimeSpan.FromMilliseconds(100))
+                            .ObserveOn(synchronizationContext!)
+                            .Do(parameters => parameters.CreatedView.ObjectSpace.Refresh())
+                            .TraceModelEditorWindowsFormsModule(TradeParameters)
+                            .EditModel());
                     return selectMany;
                 }).Switch().IgnoreElements()
                 .To(application).StartWith(application);
@@ -45,8 +41,8 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
         private static IObservable<ShowViewParameters> ParseProjects(this IObservable<ShowViewParameters> source, string solutionPath)
             => source.MergeIgnored(parameters => parameters.CreatedView.ObjectSpace.AsNonPersistentObjectSpace()
                 .WhenObjects(t1 => SolutionFile.Parse(solutionPath).Projects().Models(t1.objectSpace).ToObservable()
-                    .Do(_ => MEService.DeleteMESettings(null))))
-                .TraceModelEditorWindowsFormsModule(TradeParameters);
+                    .TraceModelEditorWindowsFormsModule(model => model.Name))
+                .Do(_ => MEService.DeleteMESettings(null)));
 
         private static string TradeParameters(ShowViewParameters parameters) => parameters.CreatedView.Id;
 

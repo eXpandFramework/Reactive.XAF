@@ -24,6 +24,7 @@ if (!(Test-AzDevops)){
     Set-Location "$Root\tools\Xpand.XAF.ModelEditor\IDE\ModelEditor.Win\Xpand.XAF.ModelEditor.Win"
     dotnet publish -p:PublishProfile="Folderprofile.pubxml" ".\Xpand.XAF.ModelEditor.Win.csproj"
     Set-Location "$(Get-Location)\bin\Release\net5.0-windows\publish"
+    Get-ChildItem|Copy-Item -Destination "$env:APPDATA\Xpand.XAF.ModelEditor.Win\Xpand.XAF.ModelEditor.Win" -Force -Recurse
     $zip="$(Get-Location)\..\Xpand.XAF.ModelEditor.Win.zip"
     Compress-Files -zipfileName $zip -Force 
     $version=[System.Diagnostics.FileVersionInfo]::GetVersionInfo("$(Get-Location)\Xpand.XAF.ModelEditor.Win.exe").FileVersion

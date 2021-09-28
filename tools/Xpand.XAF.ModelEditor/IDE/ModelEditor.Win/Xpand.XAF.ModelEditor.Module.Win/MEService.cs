@@ -146,18 +146,10 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
 	                .ToObservable().ToUnit().Concat(xafModel.StartME(xafModel.Project.Path, destFileName));
             }).ToUnit();
 
-        
-        // [DllImport("msvcrt.dll")]
-        // public static extern int system(string format);
-
-        
         private static IObservable<Unit> StartME(this XafModel xafModel, string fullPath, string destFileName) {
             string debugMe = xafModel.Debug ? "d" : null;
             string arguments = String.Format("{0} {4} \"{1}\" \"{3}\" \"{2}\"", debugMe, xafModel.Project.AssemblyPath,
                 fullPath, xafModel.Path, xafModel.Project.IsApplicationProject);
-            // system($"{destFileName} {arguments}");
-            // return Observable.Empty<Unit>();
-            
             var process = new Process() {
 	            StartInfo = new ProcessStartInfo(destFileName,arguments) {
                     WorkingDirectory = Path.GetDirectoryName(destFileName)!

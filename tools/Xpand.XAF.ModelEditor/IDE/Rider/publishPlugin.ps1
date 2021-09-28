@@ -1,7 +1,7 @@
 Param(
     [string]$Configuration = "Release",
     # [Parameter(Mandatory=$true)]
-    [string]$Version="1.5",
+    [string]$Version="1.6",
     # [Parameter(Mandatory=$true)]
     [string]$ApiKey=$env:RiderMarketPlaceToken
 )
@@ -17,4 +17,4 @@ Set-Location $PSScriptRoot
 
 Invoke-Exe $MSBuildPath "/t:Restore;Rebuild;Pack" "$SolutionPath" "/v:minimal" "/p:Configuration=$Configuration" "/p:PackageOutputPath=$OutputDirectory" "/p:PackageVersion=$Version" #"/p:PackageReleaseNotes=`"$ChangelogText`""
 $PackageFile = "$OutputDirectory\$PluginId.$Version*.nupkg"
-Invoke-Exe $NuGetPath push $PackageFile -Source "https://plugins.jetbrains.com/api/v2/package" -ApiKey $ApiKey
+# Invoke-Exe $NuGetPath push $PackageFile -Source "https://plugins.jetbrains.com/api/v2/package" -ApiKey $ApiKey
