@@ -47,8 +47,8 @@
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
     </Reference>
-    <PackageReference Include="DevExpress.ExpressApp" Version="21.1.5" />
-    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="21.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="21.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="21.1.6" />
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

@@ -5,10 +5,13 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading;
+using System.Windows.Forms;
 using DevExpress.ExpressApp;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
+using Xpand.Extensions.IntPtrExtensions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -19,6 +22,8 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.ModelEditor.Module.Win {
     internal static class ModuleExtensions {
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetForegroundWindow();
         public static IObservable<XafApplication> ShowModelListView(this XafApplication application)
             => application.WhenSetupComplete()
                 .SelectMany(_ => application.WhenWindowCreated(true).To(application))
@@ -31,12 +36,30 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
                             .ShowOneView()
                             .Delay(TimeSpan.FromMilliseconds(100))
                             .ObserveOn(synchronizationContext!)
-                            .Do(parameters => parameters.CreatedView.ObjectSpace.Refresh())
+                            .Do(parameters => {
+                                parameters.CreatedView.ObjectSpace.Refresh();
+                                ((Form)parameters.Controllers.OfType<OneViewDialogController>().First().Frame.Template).Handle.ForceWindowToForeGround();
+                            })
+                            .SelectMany(parameters => parameters.CloseViewWhenNotForeground(synchronizationContext))
                             .TraceModelEditorWindowsFormsModule(TradeParameters)
                             .EditModel());
                     return selectMany;
                 }).Switch().IgnoreElements()
                 .To(application).StartWith(application);
+
+        private static IObservable<ShowViewParameters> CloseViewWhenNotForeground(this ShowViewParameters parameters,SynchronizationContext synchronizationContext) 
+            => Observable.Interval(TimeSpan.FromSeconds(1))
+                .ObserveOn(synchronizationContext)
+                .SelectMany(_ => parameters.Controllers.OfType<OneViewDialogController>()
+                    .Select(controller => controller.Frame).ToObservable().WhenNotDefault()
+                    .Do(frame => {
+                        var intPtr = ((Form)frame.Template).Handle;
+                        var foregroundWindow = GetForegroundWindow();
+                        if (foregroundWindow != intPtr&&intPtr!=IntPtr.Zero) {
+                            parameters.CreatedView.Close();
+                        }
+                    }))
+                .To(parameters).StartWith(parameters);
 
         private static IObservable<ShowViewParameters> ParseProjects(this IObservable<ShowViewParameters> source, string solutionPath)
             => source.MergeIgnored(parameters => parameters.CreatedView.ObjectSpace.AsNonPersistentObjectSpace()
@@ -44,7 +67,7 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
                     .TraceModelEditorWindowsFormsModule(model => model.Name))
                 .Do(_ => MEService.DeleteMESettings(null)));
 
-        private static string TradeParameters(ShowViewParameters parameters) => parameters.CreatedView.Id;
+        private static string TradeParameters(this ShowViewParameters parameters) => parameters.CreatedView.Id;
 
         public static IObservable<Unit> CloseViewWhenNotSettings(this XafApplication application, string meInstallationPath) 
             => application.WhenViewShown()

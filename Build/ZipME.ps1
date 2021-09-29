@@ -2,7 +2,8 @@
 param (
     [Parameter()]
     [string]
-    $Root=([System.IO.Path]::GetFullPath("$PSScriptRoot\..\"))
+    $Root=([System.IO.Path]::GetFullPath("$PSScriptRoot\..\")),
+    [switch]$SkipIDEBuild
 )
 
 
@@ -19,7 +20,7 @@ if (!(Test-Path "$root\bin\zip")){
 
 Copy-Item $zip "$root\bin\zip\Xpand.XAF.ModelEditor.WinDesktop.zip" -Verbose
 
-if (!(Test-AzDevops)){
+if (!(Test-AzDevops) -and !$SkipIDEBuild){
     Write-HostFormatted "Building Xpand.XAF.ModelEditor.Win" -Section
     Set-Location "$Root\tools\Xpand.XAF.ModelEditor\IDE\ModelEditor.Win\Xpand.XAF.ModelEditor.Win"
     dotnet publish -p:PublishProfile="Folderprofile.pubxml" ".\Xpand.XAF.ModelEditor.Win.csproj"

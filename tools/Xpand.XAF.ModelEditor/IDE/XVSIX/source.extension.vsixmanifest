@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="XVSIX.2949c0e7-0388-4388-93b0-8aab7d13e4a1" Version="1.82" Language="en-US" Publisher="eXpandFramework" />
+        <Identity Id="XVSIX.2949c0e7-0388-4388-93b0-8aab7d13e4a1" Version="1.85" Language="en-US" Publisher="eXpandFramework" />
         <DisplayName>Xpand.XVSIX</DisplayName>
         <Description xml:space="preserve">VSIX Project for eXpandFramework featuring the Xpand ModelEditor for the DevExpress XAF .NET Application framework (non compatible with VS2022).</Description>
         <Icon>eXpand-Sign128.png</Icon>

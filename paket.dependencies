@@ -5,16 +5,16 @@ storage:none
 copy_local:true
 framework:net461,net472,net5.0,net5.0-windows,netstandard2.0,netstandard2.1
 
-nuget DevExpress.ExpressApp.Office == 21.1.5
-nuget DevExpress.ExpressApp.Core.All == 21.1.5
-nuget DevExpress.ExpressApp.Win.All == 21.1.5
-nuget DevExpress.ExpressApp.Web.All == 21.1.5
-nuget DevExpress.ExpressApp.Blazor.All == 21.1.5
-nuget DevExpress.ExpressApp.EasyTest.BlazorAdapter == 21.1.5
-nuget DevExpress.EasyTest == 21.1.5  
-nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 21.1.5  
-nuget DevExpress.ExpressApp.EasyTest.WinAdapter == 21.1.5  
-nuget DevExpress.ExpressApp.Security.Xpo == 21.1.5  
+nuget DevExpress.ExpressApp.Office == 21.1.6
+nuget DevExpress.ExpressApp.Core.All == 21.1.6
+nuget DevExpress.ExpressApp.Win.All == 21.1.6
+nuget DevExpress.ExpressApp.Web.All == 21.1.6
+nuget DevExpress.ExpressApp.Blazor.All == 21.1.6
+nuget DevExpress.ExpressApp.EasyTest.BlazorAdapter == 21.1.6
+nuget DevExpress.EasyTest == 21.1.6  
+nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 21.1.6  
+nuget DevExpress.ExpressApp.EasyTest.WinAdapter == 21.1.6  
+nuget DevExpress.ExpressApp.Security.Xpo == 21.1.6  
 nuget System.ServiceModel.NetTcp == 4.8.1
 nuget System.ServiceModel.Security == 4.8.1
 nuget System.ServiceModel.Http == 4.8.1
@@ -75,7 +75,7 @@ nuget Google.Apis.People.v1
 nuget Xpand.Collections
 nuget System.Configuration.ConfigurationManager
 nuget Microsoft.CodeAnalysis.CSharp
-nuget Microsoft.CodeAnalysis
+nuget Microsoft.CodeAnalysis == 3.11
 nuget Microsoft.AspNetCore.Hosting
 nuget Microsoft.Extensions.Hosting
 nuget Microsoft.AspNetCore

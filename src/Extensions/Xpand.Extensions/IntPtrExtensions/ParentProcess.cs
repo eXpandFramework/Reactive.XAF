@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace Xpand.Extensions.IntPtrExtensions{
-    public static class IntPtrExtensions{
+    public static partial class IntPtrExtensions{
         public static Process ParentProcess(this IntPtr handle){
             var pbi = new ProcessInformation();
             var status = NtQueryInformationProcess(handle, 0, ref pbi, Marshal.SizeOf(pbi), out _);

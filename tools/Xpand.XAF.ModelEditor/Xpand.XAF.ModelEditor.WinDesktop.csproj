@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ApplicationIcon>ExpressApp.ico</ApplicationIcon>
@@ -14,6 +14,7 @@
     <PublishReadyToRunShowWarnings>true</PublishReadyToRunShowWarnings>
     <PreserveCompilationContext>false</PreserveCompilationContext>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <OutputPath>..\..\bin\net5.0-windows7.0\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -45,10 +46,10 @@
   </ItemGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="DevExpress.ExpressApp" Version="21.1.5" />
-    <PackageReference Include="DevExpress.ExpressApp.Win" Version="21.1.5" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="21.1.5" />
-    <PackageReference Include="DevExpress.Persistent.Base" Version="21.1.5" />
-    <PackageReference Include="DevExpress.Persistent.BaseImpl" Version="21.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="21.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Win" Version="21.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="21.1.6" />
+    <PackageReference Include="DevExpress.Persistent.Base" Version="21.1.6" />
+    <PackageReference Include="DevExpress.Persistent.BaseImpl" Version="21.1.6" />
   </ItemGroup>
 </Project>

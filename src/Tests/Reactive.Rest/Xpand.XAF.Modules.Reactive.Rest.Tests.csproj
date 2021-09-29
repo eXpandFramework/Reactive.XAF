@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <OutputPath>..\..\..\bin</OutputPath>
@@ -19,7 +19,7 @@
     <WarningsAsErrors>;NU1605;SYSLIB0011</WarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="21.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="21.1.6" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.0" />

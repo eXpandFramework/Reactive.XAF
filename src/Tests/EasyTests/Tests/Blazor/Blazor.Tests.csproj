@@ -42,12 +42,12 @@
     <Compile Include="..\..\CommonFiles\SequenceGeneratorService.cs" Link="SequenceGeneratorService.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.EasyTest.BlazorAdapter" Version="21.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.EasyTest.BlazorAdapter" Version="21.1.6" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.8" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0" />
-    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="21.1.5" />
-    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="21.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="21.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="21.1.6" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.8.1" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.8.1" />
     <PackageReference Include="System.ServiceModel.Duplex" Version="4.8.1" />
@@ -57,7 +57,7 @@
     <PackageReference Include="Shouldly" Version="4.0.3" />
     <PackageReference Include="NUnit" Version="3.13" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.17" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="4.211.6.10" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="4.211.7.3" />
     <PackageReference Include="Selenium.WebDriver" Version="3.141" />
     <PackageReference Include="Selenium.Support" Version="3.141" />
   </ItemGroup>

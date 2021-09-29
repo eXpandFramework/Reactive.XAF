@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.TestsLib</id>
-    <version>4.211.6.2</version>
+    <version>4.211.7.3</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -12,17 +12,17 @@
     <description>Xpand.TestsLib</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.TestsLib, 21.1.5</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.TestsLib, 21.1.6</tags>
     <dependencies>
       <group targetFramework="net5.0">
-        <dependency id="Xpand.Extensions" version="4.211.6.2" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.211.6.2" />
-        <dependency id="Xpand.Extensions.XAF" version="4.211.6.2" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.211.6.2" />
-        <dependency id="Xpand.TestsLib.Common" version="4.211.6.2" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.211.6.2" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.211.6.2" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.211.6.2" />
+        <dependency id="Xpand.Extensions" version="4.211.7.3" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.211.7.3" />
+        <dependency id="Xpand.Extensions.XAF" version="4.211.7.3" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.211.7.3" />
+        <dependency id="Xpand.TestsLib.Common" version="4.211.7.3" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.211.7.3" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.211.7.3" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.211.7.3" />
         <dependency id="akarnokd.reactive_extensions" version="0.0.27-alpha" />
         <dependency id="Enums.NET" version="4.0" />
         <dependency id="Humanizer.Core" version="2.11.10" />
@@ -37,8 +37,9 @@
         <dependency id="Polly" version="7.2.2" />
         <dependency id="JetBrains.Annotations" version="2021.2" />
         <dependency id="System.Reactive" version="5.0" />
-        <dependency id="Microsoft.CodeAnalysis" version="3.10" />
-        <dependency id="Microsoft.CodeAnalysis.Csharp" version="3.10" />
+        <dependency id="Microsoft.CodeAnalysis" version="3.11" />
+        <dependency id="Microsoft.CodeAnalysis.Csharp" version="3.11" />
+        <dependency id="DevExpress.ExpressApp.Win" version="21.1.6" />
       </group>
     </dependencies>
   </metadata>

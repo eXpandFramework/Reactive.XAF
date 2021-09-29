@@ -6,21 +6,13 @@
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <OutputPath>..\..\..\..\..\bin\net5.0-windows7.0\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="akarnokd.reactive_extensions" Version="0.0.27-alpha" />
-    <PackageReference Include="DevExpress.Persistent.BaseImpl" Version="21.1.5" />
-    <PackageReference Include="Fasterflect.Xpand" Version="2.0.7" />
     <PackageReference Include="Microsoft.Build" Version="16.10.0" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="16.10.0" />
-    <PackageReference Include="Mono.Cecil" Version="0.11.4" />
     <PackageReference Include="System.Management" Version="5.0.0" />
-    <PackageReference Include="Xpand.Extensions.Reactive" Version="4.211.6.10" />
-    <PackageReference Include="Xpand.XAF.Modules.OneView" Version="4.211.6.10" />
-    <PackageReference Include="Xpand.XAF.Modules.Reactive.Logger.Hub" Version="4.211.6.10" />
-    <PackageReference Include="Xpand.XAF.Modules.Windows" Version="4.211.6.10" />
-    <PackageReference Include="Xpand.XAF.Modules.GridListEditor" Version="4.211.6.10" />
-    <PackageReference Include="Xpand.XAF.Modules.ModelMapper" Version="4.211.6.10" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.211.7.3" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Model.DesignedDiffs.xafml" />

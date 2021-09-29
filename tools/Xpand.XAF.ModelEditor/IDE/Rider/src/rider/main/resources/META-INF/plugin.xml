@@ -14,7 +14,7 @@
   </description>
 
   <extensions defaultExtensionNs="com.intellij">
-    <applicationConfigurable groupId="language" instance="com.jetbrains.rider.plugins.xpand.SampleOptionsPage" id="SampleOptionsPage" />
+<!--    <applicationConfigurable groupId="language" instance="com.jetbrains.rider.plugins.xpand.SampleOptionsPage" id="SampleOptionsPage" />-->
   </extensions>
 
   <actions>

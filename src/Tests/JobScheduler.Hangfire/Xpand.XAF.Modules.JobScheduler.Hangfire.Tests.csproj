@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputPath>..\..\..\bin</OutputPath>
@@ -15,7 +15,7 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="21.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="21.1.6" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageReference Include="hangfire.core" Version="1.7.24" />
     <PackageReference Include="hangfire.sqlserver" Version="1.7.24" />

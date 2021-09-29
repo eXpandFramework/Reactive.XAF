@@ -135,7 +135,7 @@ Task CompileNugetConsumers -precondition { return $compile } {
 
         if ($dxVersion -eq (Get-XAFLatestMinors | Select-Object -First 1)) {
             Invoke-Script {
-                & $root\build\ZipMe.ps1
+                & $root\build\ZipMe.ps1 -SkipIDEBuild
             } -Maximum 3
         }
     } -Maximum 3
@@ -230,6 +230,8 @@ Task Clean -precondition { return $cleanBin } {
     }
     Set-Location "$Root\src"
     Clear-XProjectDirectories
+    Set-Location "$Root\Tools\Xpand.XAF.ModelEditor\IDE"
+    Get-ChildItem . -Recurse -Include "build","output",".gradle"|Remove-Item -Force -Recurse        
 }
 
 Task CheckVersions -precondition { return $branch -eq "master" } {

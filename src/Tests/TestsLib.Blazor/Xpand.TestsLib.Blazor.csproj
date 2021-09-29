@@ -26,16 +26,16 @@
     <NoWarn>1701;1702;CS8002</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.EasyTest.BlazorAdapter" Version="21.1.5" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="21.1.5" />
-    <PackageReference Include="DevExpress.EasyTest" Version="21.1.5" />
-    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="21.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.EasyTest.BlazorAdapter" Version="21.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="21.1.6" />
+    <PackageReference Include="DevExpress.EasyTest" Version="21.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="21.1.6" />
     <PackageReference Include="Fasterflect.Xpand" Version="2.0.7" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.2" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0" />
     <PackageReference Include="System.Reactive" Version="5.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.10" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.11" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0" />
     <PackageReference Include="System.ServiceProcess.ServiceController" Version="5.0" />
     <PackageReference Include="System.ServiceModel.Http" Version="4.8.1" />
