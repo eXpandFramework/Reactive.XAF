@@ -213,10 +213,10 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp**|**Any**
-|Xpand.Extensions|4.211.6
- |Xpand.Extensions.Reactive|4.211.6
- |Xpand.Extensions.XAF|4.211.6
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.211.6
+|Xpand.Extensions|4.211.8
+ |Xpand.Extensions.Reactive|4.211.8
+ |Xpand.Extensions.XAF|4.211.8
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.211.8
  |Enums.NET|4.0.0
  |Mono.Cecil|0.11.3
  |System.CodeDom|5.0.0
@@ -225,11 +225,11 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |JetBrains.Annotations|2021.2.0
  |Xpand.Collections|1.0.4
  |System.Configuration.ConfigurationManager|5.0.0
- |Microsoft.CodeAnalysis.CSharp|3.10.0
+ |Microsoft.CodeAnalysis.CSharp|3.11.0
  |System.ServiceModel.Http|4.8.1
  |System.Interactive|5.0.0
  |Newtonsoft.Json|13.0.1
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.211.6
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.211.8
 
 ## Issues-Debugging-Troubleshooting
 

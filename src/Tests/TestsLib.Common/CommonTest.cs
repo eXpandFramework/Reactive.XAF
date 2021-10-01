@@ -56,7 +56,7 @@ namespace Xpand.TestsLib.Common{
         private static object[] GetModules(string pattern,string platform){
             return Directory.GetFiles(AppDomain.CurrentDomain.ApplicationPath(), pattern)
                 .Where(s => !s.Contains(".Tests."))
-                .Where(s => {
+                .Where(_ => {
 #if XAF191
                     return !s.Contains("DocumentStyleManager");
 #else
@@ -91,7 +91,7 @@ namespace Xpand.TestsLib.Common{
         [PublicAPI]
         protected void WriteLine(decimal value) => TestContext.WriteLine(value);
 
-        protected readonly List<string> LogPaths=new List<string>(){ReactiveLoggerService.RXLoggerLogPath,Path.Combine(TestContext.CurrentContext.TestDirectory,"expressappframework.log")};
+        protected readonly List<string> LogPaths=new(){ReactiveLoggerService.RXLoggerLogPath,Path.Combine(TestContext.CurrentContext.TestDirectory,"expressappframework.log")};
         
         public static TextWriterTraceListener TextListener{ get; }
 
@@ -101,9 +101,11 @@ namespace Xpand.TestsLib.Common{
         [UsedImplicitly] public const string NotImplemented = "NotImplemented";
 
         [SetUp]
-        public virtual void Setup() 
-            => ReactiveLoggerService.RXLoggerLogPath = Path.Combine(TestContext.CurrentContext.TestDirectory,
+        public virtual void Setup() {
+            TestContext.Out.Write(TestContext.CurrentContext.Test.Name);
+            ReactiveLoggerService.RXLoggerLogPath = Path.Combine(TestContext.CurrentContext.TestDirectory,
                 $"{TestContext.CurrentContext.Test.MethodName}_{TestContext.CurrentContext.Test.ID}_RXLogger{TestContext.CurrentContext.CurrentRepeatCount}.log");
+        }
 
         [TearDown]
         public virtual void Dispose() {
@@ -126,7 +128,7 @@ namespace Xpand.TestsLib.Common{
                 TestContext.Out.Write(e);
             }
         }
-        static readonly object Locker=new object();
+        static readonly object Locker=new();
         protected virtual void ResetXAF() {
             lock (Locker) {
                 XafTypesInfo.HardReset();

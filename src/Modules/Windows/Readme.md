@@ -76,24 +76,35 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
-`.NetFramework: net5.0-windows7.0`
+`.NetFramework: `
 
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp**|**Any**
  |**DevExpress.ExpressApp.Win**|**Any**
-|Xpand.Extensions.Reactive|4.211.6
- |Xpand.Extensions.XAF|4.211.6
- |Xpand.Extensions|4.211.6
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.211.6
+|Xpand.Extensions.Reactive|4.211.8
+ |Xpand.Extensions.XAF|4.211.8
+ |Xpand.Extensions|4.211.8
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.211.8
  |System.Reactive|5.0.0
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |JetBrains.Annotations|2021.2.0
  |System.Configuration.ConfigurationManager|5.0.0
- |Microsoft.CodeAnalysis.CSharp|3.10.0
+ |Microsoft.CodeAnalysis.CSharp|3.11.0
  |System.ServiceModel.Http|4.8.1
  |Newtonsoft.Json|13.0.1
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.211.6
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.211.8
+ |Xpand.Extensions.Reactive|4.211.8
+ |Xpand.Extensions.XAF|4.211.8
+ |Xpand.Extensions|4.211.8
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.211.8
+ |System.Reactive|5.0.0
+ |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
+ |JetBrains.Annotations|2021.2.0
+ |System.Configuration.ConfigurationManager|5.0.0
+ |Microsoft.CodeAnalysis.CSharp|3.11.0
+ |System.ServiceModel.Http|4.8.1
+ |Newtonsoft.Json|13.0.1
 
 ## Issues-Debugging-Troubleshooting
 

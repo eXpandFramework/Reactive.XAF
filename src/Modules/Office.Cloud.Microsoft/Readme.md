@@ -152,26 +152,26 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.Persistent.Base**|**Any**
-|Xpand.Extensions|4.211.6
- |Xpand.Extensions.Office.Cloud|4.211.6
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.211.6
- |Xpand.Extensions.Reactive|4.211.6
- |Xpand.Extensions.XAF|4.211.6
+|Xpand.Extensions|4.211.8
+ |Xpand.Extensions.Office.Cloud|4.211.8
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.211.8
+ |Xpand.Extensions.Reactive|4.211.8
+ |Xpand.Extensions.XAF|4.211.8
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |JetBrains.Annotations|2021.2.0
  |System.Reactive|5.0.0
- |Microsoft.Graph.Beta|4.7.0-preview
- |Microsoft.Identity.Client|4.35.1
+ |Microsoft.Graph.Beta|4.14.0-preview
+ |Microsoft.Identity.Client|4.36.2
  |Microsoft.Owin.Host.SystemWeb|4.2.0
  |Microsoft.Owin.Security.Cookies|4.2.0
  |Microsoft.Owin.Security.OpenIdConnect|4.2.0
- |Microsoft.CodeAnalysis.CSharp|3.10.0
- |Microsoft.IdentityModel.Protocols.OpenIdConnect|6.12.0
- |Microsoft.IdentityModel.Tokens|6.12.0
+ |Microsoft.CodeAnalysis.CSharp|3.11.0
+ |Microsoft.IdentityModel.Protocols.OpenIdConnect|6.12.2
+ |Microsoft.IdentityModel.Tokens|6.12.2
  |System.Collections.Immutable|5.0.0
- |Microsoft.Graph.Core|2.0.1
+ |Microsoft.Graph.Core|2.0.5
  |Newtonsoft.Json|13.0.1
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.211.6
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.211.8
 
 ## Issues-Debugging-Troubleshooting
 
