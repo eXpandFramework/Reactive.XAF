@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Windows.Forms;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Layout;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Web;
@@ -16,15 +18,21 @@ using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.TestsLib.Common;
+using Xpand.XAF.Modules.Reactive.Logger;
 using Xpand.XAF.Modules.Reactive.Logger.Hub;
 
+// ReSharper disable once CheckNamespace
 namespace Xpand.TestsLib{
     public class TestWinApplication : WinApplication, ITestApplication{
         private readonly bool _transmitMessage;
 
+        [SuppressMessage("ReSharper", "ParameterOnlyUsedForPreconditionCheck.Local")]
         public TestWinApplication(Type sutModule, bool transmitMessage = true, bool handleExceptions=true){
+            SettingUp += (_, args) => ((ExportedTypeCollection)args.SetupParameters.DomainComponents).Add(typeof(TraceEvent));
             _transmitMessage = transmitMessage;
+            
             SUTModule = sutModule;
+            
             CustomHandleException += (_, e) => {
                 if (handleExceptions){
                     throw e.Exception;
@@ -52,7 +60,7 @@ namespace Xpand.TestsLib{
             base.Dispose(disposing);
         }
 
-        readonly Subject<Form> _modelEditorForm = new Subject<Form>();
+        readonly Subject<Form> _modelEditorForm = new();
 
         public TestWinApplication(){
         }
@@ -97,10 +105,11 @@ namespace Xpand.TestsLib{
         private readonly bool _transmitMessage;
 
         public  TestWebApplication(Type sutModule, bool transmitMessage = true){
+            SettingUp += (_, args) => ((ExportedTypeCollection)args.SetupParameters.DomainComponents).Add(typeof(TraceEvent));
             _transmitMessage = transmitMessage;
             SUTModule = sutModule;
-            TraceClientConnected = TestApplicationExtensions.ClientConnect(this);
-            TraceClientBroadcast = TestApplicationExtensions.ClientBroadcast(this);
+            TraceClientConnected = this.ClientConnect();
+            TraceClientBroadcast = this.ClientBroadcast();
             TransmitMessage = transmitMessage;
         }
 

@@ -31,8 +31,8 @@ nuget Hangfire.AspNetCore 1.7.24
 nuget hangfire.memorystorage 1.7.24.2
 nuget Shouldly 4.0.3
 nuget Moq 4.16
-nuget NUnit 3.13.0
-nuget NUnit3TestAdapter 3.17.0
+nuget NUnit 3.13.2
+nuget NUnit3TestAdapter 4.0.0
 nuget Newtonsoft.Json == 13.0.1
 nuget Microsoft.IdentityModel.Tokens
 nuget System.Data.SqlClient

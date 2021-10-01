@@ -5,19 +5,22 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Windows.Forms;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Win;
 using JetBrains.Annotations;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.TestsLib.Common;
+using Xpand.XAF.Modules.Reactive.Logger;
 using Xpand.XAF.Modules.Reactive.Logger.Hub;
 
 namespace Xpand.TestsLib{
     public class TestWinApplication : WinApplication, ITestApplication{
         private readonly bool _transmitMessage;
 
-        public TestWinApplication(Type sutModule, bool transmitMessage = true, bool handleExceptions=true){
+        public TestWinApplication(Type sutModule, bool transmitMessage = true, bool handleExceptions=true) {
+            SettingUp += (_, args) => ((ExportedTypeCollection)args.SetupParameters.DomainComponents).Add(typeof(TraceEvent));
             _transmitMessage = transmitMessage;
             SUTModule = sutModule;
             CustomHandleException += (_, e) => {

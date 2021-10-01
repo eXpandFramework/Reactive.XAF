@@ -7,6 +7,7 @@ using Shouldly;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Common.Attributes;
+using Xpand.TestsLib.Net461;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.Services.StyleTemplateService;
 

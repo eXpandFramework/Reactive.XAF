@@ -127,7 +127,7 @@ namespace Xpand.TestsLib.Common{
         public static void RegisterDefaults(this XafApplication application, params ModuleBase[] modules){
             if (modules.Any() && application.Security is SecurityStrategyComplex){
                 if (!modules.OfType<TestApplicationModule>().Any()){
-                    modules=LinqExtensions.AddToArray(modules, new TestApplicationModule());
+                    modules=modules.AddToArray(new TestApplicationModule());
                 }
             }
 
@@ -370,7 +370,7 @@ namespace Xpand.TestsLib.Common{
         public static Mock<TEditor> ListEditorMock<TEditor>(this XafApplication application ,IModelListView listView) where TEditor :  ListEditor{
 	        var listEditorMock = new Mock<TEditor>(listView){CallBase = true};
             listEditorMock.Setup(editor => editor.SupportsDataAccessMode(CollectionSourceDataAccessMode.Client)).Returns(true);
-            listEditorMock.Setup(editor => editor.GetSelectedObjects()).Returns(new object[0]);
+            listEditorMock.Setup(editor => editor.GetSelectedObjects()).Returns(Array.Empty<object>());
             var platform = application.GetPlatform();
             if (platform!=Platform.Blazor) {
                 listEditorMock.Protected().Setup<object>("CreateControlsCore")
@@ -452,7 +452,7 @@ namespace Xpand.TestsLib.Common{
 
         public static void MockFrameTemplate(this XafApplication application){
             var frameTemplateMock = new Mock<IWindowTemplate>();
-            frameTemplateMock.Setup(template => template.GetContainers()).Returns(() => new IActionContainer[0]);
+            frameTemplateMock.Setup(template => template.GetContainers()).Returns(Array.Empty<IActionContainer>);
             application.WhenCreateCustomTemplate()
                 .Do(_ => _.e.Template = frameTemplateMock.Object)
                 .Subscribe();
