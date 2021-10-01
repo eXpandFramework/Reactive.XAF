@@ -58,7 +58,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest {
                 .SelectMany(frame => frame.View.AsListView().CollectionSource is NonPersistentPropertyCollectionSource source
                     ? source.MasterObjectType.RestListMembers().Where(t => t.attribute.PropertyName == source.MemberInfo.Name)
                         .SelectMany(_ => frame.GetController<NewObjectViewController>().NewObjectAction.WhenExecute()
-                            .Merge(frame.GetController<ListViewProcessCurrentObjectController>().ProcessCurrentObjectAction.WhenExecute())
+                            .Merge(frame.GetController<ListViewProcessCurrentObjectController>().ProcessCurrentObjectAction.WhenExecuted())
                             .SelectMany(e => {
                                 var dataSourceProperty = source.MemberInfo.FindAttribute<DataSourcePropertyAttribute>().DataSourceProperty;
                                 var datasourceMember = source.MemberInfo.Owner.FindMember(dataSourceProperty);

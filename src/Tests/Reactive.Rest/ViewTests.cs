@@ -20,6 +20,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests {
 		public async Task TestListViewProcessSelectedItem() {
 			HandlerMock.SetupRestPropertyObject(Application.CreateObjectSpace(typeof(RestPropertyObject)),
 				o => o.StringArray = new[] {"a"});
+			
 			await Application.TestListViewProcessSelectedItem(typeof(RestPropertyObject));
 		}
 
@@ -27,9 +28,8 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests {
 		public async Task Arrays_BindingList_Lookup_Datasource() {
 			HandlerMock.SetupRestPropertyObject(Application.CreateObjectSpace(typeof(RestPropertyObject)),
 				o => o.StringArray = new[] {"a"});
-			var detailViewFrame = await Application.TestListViewProcessSelectedItem(typeof(RestPropertyObject));
-			var nestedFrame = detailViewFrame.View.AsDetailView()
-				.GetListPropertyEditor<RestPropertyObject>(o => o.StringArrayList).Frame;
+			var detailView = await Application.TestListViewProcessSelectedItem(typeof(RestPropertyObject));
+			var nestedFrame = detailView.GetListPropertyEditor<RestPropertyObject>(o => o.StringArrayList).Frame;
 			var whenDetailViewCreated =
 				Application.WhenDetailViewCreated(typeof(ObjectString)).FirstAsync().SubscribeReplay();
 			var newObjectAction = nestedFrame.GetController<NewObjectViewController>().NewObjectAction;
@@ -40,7 +40,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests {
 			var t = await whenDetailViewCreated;
 
 			var currentObject = ((ObjectString) t.e.View.CurrentObject);
-			var restPropertyObject = ((RestPropertyObject) detailViewFrame.View.CurrentObject);
+			var restPropertyObject = ((RestPropertyObject) detailView.CurrentObject);
 			currentObject.DataSource.Count.ShouldBe(restPropertyObject.StringArraySource.Count);
 			currentObject.DataSource.Select(s => s.Name).First()
 				.ShouldBe(restPropertyObject.StringArraySource.Select(s => s.Name).First());
