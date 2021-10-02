@@ -17,6 +17,7 @@
     <RootNamespace>Xpand.XAF.Modules.LookupCascade</RootNamespace>
     <CopyLocalLockFileAssemblie>true</CopyLocalLockFileAssemblie>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="ClientDatasourceStorageController.cs" />

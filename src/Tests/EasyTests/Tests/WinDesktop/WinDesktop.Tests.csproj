@@ -18,6 +18,7 @@
     <RootNamespace>ALL.Win.Tests</RootNamespace>
     <CopyLocalLockFileAssemblie>true</CopyLocalLockFileAssemblie>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>TRACE;XAF211</DefineConstants>
@@ -48,9 +49,9 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10" />
     <PackageReference Include="Moq" Version="4.16" />
     <PackageReference Include="Shouldly" Version="4.0.3" />
-    <PackageReference Include="NUnit" Version="3.13" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.17" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.211.8.0" />
+    <PackageReference Include="NUnit" Version="3.13.2" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.0" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.211.8.6" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
     <PackageReference Include="System.Data.OleDb" Version="5.0" />
     <PackageReference Include="System.ServiceModel.Http" Version="4.8.1" />

@@ -44,7 +44,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                 application.AddNonSecuredType(typeof(TraceEvent));
 		        var listener = new ReactiveTraceListener(application.Title);
 		        ListenerEvents = listener.EventTrace.Publish().RefCount();
-		        return application.BufferUntilCompatibilityChecked(ListenerEvents).Select(_ => _)
+		        return application.BufferUntilCompatibilityChecked(ListenerEvents)
 			        .SaveEvent(application)
 			        .ToUnit()
 			        .Merge(ListenerEvents.RefreshViewDataSource(application))
@@ -54,10 +54,10 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         public static IObservable<Unit> RefreshViewDataSource(this IObservable<ITraceEvent> events, XafApplication application) 
             => application.GetPlatform() == Platform.Web ? Observable.Empty<Unit>()
 		        : application.WhenViewOnFrame(typeof(TraceEvent), ViewType.ListView)
-			        .SelectMany(frame => events.Throttle(TimeSpan.FromSeconds(1))
+                    .SelectMany(frame => events.Throttle(TimeSpan.FromSeconds(1))
 				        .TakeUntil(frame.WhenDisposingFrame())
 				        .DistinctUntilChanged(_ => _.TraceKey())
-				        .ObserveOn(SynchronizationContext.Current)
+                        .ObserveOn(SynchronizationContext.Current)
 				        .SelectMany(e => {
 					        if (e.Method != nameof(RefreshViewDataSource)){
 						        frame?.View?.RefreshDataSource();

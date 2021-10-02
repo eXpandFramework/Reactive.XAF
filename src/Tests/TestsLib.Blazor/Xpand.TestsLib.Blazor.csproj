@@ -20,6 +20,7 @@
     <OutputType>Library</OutputType>
     <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
     <NoWarn>$(NoWarn);SYSLIB0011</NoWarn>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>TRACE;XAF211</DefineConstants>

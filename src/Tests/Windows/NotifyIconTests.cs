@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
@@ -21,7 +22,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
         [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task Enable() {
-            var application = Platform.Win.NewApplication<WindowsModule>();
+            using var application = Platform.Win.NewApplication<WindowsModule>();
             application.SetupSecurity();
             application.AddModule<WindowsModule>();
             
@@ -39,7 +40,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
         [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task ExitApplication() {
-            var application = Platform.Win.NewApplication<WindowsModule>();
+            using var application = Platform.Win.NewApplication<WindowsModule>();
             application.SetupSecurity();
             application.AddModule<WindowsModule>();
             
@@ -50,17 +51,21 @@ namespace Xpand.XAF.Modules.Windows.Tests {
                 .Do(icon => icon.ContextMenuStrip.Items.Cast<ToolStripMenuItem>()
                     .First(item => item.Text == modelWindows.NotifyIcon.ExitText).PerformClick())
                 .FirstAsync().SubscribeReplay();
+            var whenExiting = application.WhenExiting().FirstAsync().SubscribeReplay();
             application.Logon();
             await updated;
-            await application.WhenExiting().FirstAsync();
-
+            await whenExiting;
+        
+            await Task.Delay(TimeSpan.FromSeconds(3));
+        
         }
+
 
         [Test]
         [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task LogOffApplication() {
-            var application = Platform.Win.NewApplication<WindowsModule>();
+            using var application = Platform.Win.NewApplication<WindowsModule>();
             application.SetupSecurity();
             application.AddModule<WindowsModule>();
             
@@ -84,7 +89,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
         [Apartment(ApartmentState.STA)]
         public async Task HideApplication() {
             
-            var application = Platform.Win.NewApplication<WindowsModule>();
+            using var application = Platform.Win.NewApplication<WindowsModule>();
             application.SetupSecurity();
             application.AddModule<WindowsModule>();
             

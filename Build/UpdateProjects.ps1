@@ -25,6 +25,7 @@ Get-ChildItem -Filter *.csproj -Recurse | ForEach-Object {
     Update-ProjectSign $projXml $fileName "$rootLocation\src\Xpand.key\xpand.snk"
     Update-ProjectLanguageVersion $projXml
     Update-ProjectProperty $projXml DebugSymbols true
+    Update-ProjectProperty $projXml ProduceReferenceAssembly false
     Update-ProjectProperty $projXml DebugType full
     Update-ProjectProperty $projXml CopyLocalLockFileAssemblies true
     Remove-ProjectLicenseFile $projXml

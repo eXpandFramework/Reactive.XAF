@@ -25,7 +25,7 @@ namespace ReSharperPlugin.Xpand{
             
             
             if (!File.Exists(solutionFileName)){
-                MessageBox.ShowInfo($"aaa{solutionFileName}");
+                MessageBox.ShowInfo($"Canot find solution file {solutionFileName}");
             }
             XpandModelEditor.WriteSettings(solutionFileName);
         }

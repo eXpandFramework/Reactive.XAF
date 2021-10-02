@@ -16,6 +16,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using Fasterflect;
 using JetBrains.Annotations;
+using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
@@ -71,14 +72,16 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => RxApp.Frames.Where(frame => frame.Application==application&& (templateContext==default ||frame.Context == templateContext))
                 .TraceRX(frame => $"{frame.GetType().Name}-{frame.Context}");
 
-        private static readonly Subject<XafApplication> WhenExitingSubject = new();
+        private static readonly Subject<GenericEventArgs<XafApplication>> WhenExitingSubject = new();
         [SuppressMessage("ReSharper", "InconsistentNaming")]
-        public static void Exit(XafApplication __instance) {
-            WhenExitingSubject.OnNext(__instance);
+        public static bool Exit(XafApplication __instance) {
+            var args = new GenericEventArgs<XafApplication>(__instance);
+            WhenExitingSubject.OnNext(args);
+            return !args.Handled;
         }
 
-        public static IObservable<XafApplication> WhenExiting(this XafApplication application)
-            => WhenExitingSubject.FirstAsync(xafApplication => xafApplication==application);
+        public static IObservable<GenericEventArgs<XafApplication>> WhenExiting(this XafApplication application)
+            => WhenExitingSubject.FirstAsync(t => t.Instance==application);
 
         public static IObservable<NestedFrame> WhenNestedFrameCreated(this XafApplication application) 
             => application.WhenFrameCreated().OfType<NestedFrame>();

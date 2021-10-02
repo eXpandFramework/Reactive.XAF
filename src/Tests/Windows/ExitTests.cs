@@ -158,7 +158,7 @@ namespace Xpand.XAF.Modules.Windows.Tests{
         [XpandTest]
         [Apartment(ApartmentState.STA)]
         public void LogOffApplication() {
-            var application = Platform.Win.NewApplication<WindowsModule>();
+            using var application = Platform.Win.NewApplication<WindowsModule>();
             application.SetupSecurity();
             application.AddModule<WindowsModule>();
 

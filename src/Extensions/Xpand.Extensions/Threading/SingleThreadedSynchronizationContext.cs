@@ -5,8 +5,7 @@ using System.Threading.Tasks;
 
 namespace Xpand.Extensions.Threading {
     public sealed class SingleThreadedSynchronizationContext : SynchronizationContext {
-        private readonly BlockingCollection<(SendOrPostCallback d, object state)> _queue =
-            new BlockingCollection<(SendOrPostCallback, object)>();
+        private readonly BlockingCollection<(SendOrPostCallback d, object state)> _queue = new();
 
         public override void Post(SendOrPostCallback d, object state) => _queue.Add((d, state));
 

@@ -28,7 +28,7 @@ namespace Xpand.TestsLib{
 
         [SuppressMessage("ReSharper", "ParameterOnlyUsedForPreconditionCheck.Local")]
         public TestWinApplication(Type sutModule, bool transmitMessage = true, bool handleExceptions=true){
-            SettingUp += (_, args) => ((ExportedTypeCollection)args.SetupParameters.DomainComponents).Add(typeof(TraceEvent));
+            // SettingUp += (_, args) => ((ExportedTypeCollection)args.SetupParameters.DomainComponents).Add(typeof(TraceEvent));
             _transmitMessage = transmitMessage;
             
             SUTModule = sutModule;
@@ -105,7 +105,7 @@ namespace Xpand.TestsLib{
         private readonly bool _transmitMessage;
 
         public  TestWebApplication(Type sutModule, bool transmitMessage = true){
-            SettingUp += (_, args) => ((ExportedTypeCollection)args.SetupParameters.DomainComponents).Add(typeof(TraceEvent));
+            // SettingUp += (_, args) => ((ExportedTypeCollection)args.SetupParameters.DomainComponents).Add(typeof(TraceEvent));
             _transmitMessage = transmitMessage;
             SUTModule = sutModule;
             TraceClientConnected = this.ClientConnect();
