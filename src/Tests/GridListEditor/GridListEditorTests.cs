@@ -32,7 +32,7 @@ namespace Xpand.XAF.Modules.GridListEditor.Tests{
         [Apartment(ApartmentState.STA)]
         public async Task Remember_TopRowIndex_WHen_Refresh_View_DataSource(){
             
-            var application = GridListEditorModule().Application;
+            using var application = GridListEditorModule().Application;
             
             var items = application.Model.ToReactiveModule<IModelReactiveModuleGridListEditor>().GridListEditor;
             var topRow = items.GridListEditorRules.AddNode<IModelGridListEditorTopRow>();
@@ -73,7 +73,7 @@ namespace Xpand.XAF.Modules.GridListEditor.Tests{
         [XpandTest][Apartment(ApartmentState.STA)]
         public void FocusRow(bool upArrowMoveToRowHandle){
             
-            var application = GridListEditorModule().Application;
+            using var application = GridListEditorModule().Application;
             var objectSpace = application.CreateObjectSpace();
             objectSpace.CreateObject<GLE>();
             objectSpace.CommitChanges();

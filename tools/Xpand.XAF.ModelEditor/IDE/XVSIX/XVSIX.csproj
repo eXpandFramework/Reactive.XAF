@@ -56,8 +56,8 @@
     <Compile Include="XVSIXPackage.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="..\ModelEditor.Win\Xpand.XAF.ModelEditor.Win\bin\Release\net5.0-windows\Xpand.XAF.ModelEditor.Win.4.211.6.10.zip">
-      <Link>Resources\Xpand.XAF.ModelEditor.Win.4.211.6.10.zip</Link>
+    <EmbeddedResource Include="..\ModelEditor.Win\Xpand.XAF.ModelEditor.Win\bin\Release\net5.0-windows\Xpand.XAF.ModelEditor.Win.4.211.8.10.zip">
+      <Link>Resources\Xpand.XAF.ModelEditor.Win.4.211.8.10.zip</Link>
     </EmbeddedResource>
     <None Include=".editorconfig" />
     <None Include="source.extension.vsixmanifest">
