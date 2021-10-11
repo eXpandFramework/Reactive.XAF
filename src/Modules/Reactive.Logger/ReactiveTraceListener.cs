@@ -62,7 +62,11 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                 traceEvent.ResultType = traceEvent.Method.Substring(traceEvent.Method.IndexOf(">", StringComparison.Ordinal) + 1);
                 traceEvent.Method = traceEvent.Method.Substring(0, traceEvent.Method.IndexOf(" ", StringComparison.Ordinal));
             }
-            traceEvent.Line = Convert.ToInt32(match.Groups["Ln"].Value);
+
+            var value = match.Groups["Ln"].Value;
+            if (!string.IsNullOrEmpty(value)) {
+                traceEvent.Line = Convert.ToInt32(value);
+            }
             traceEvent.LogicalOperationStack = string.Join(Environment.NewLine, eventCache.LogicalOperationStack.ToArray());
             
             _eventTraceSubject.OnNext(traceEvent);

@@ -1,11 +1,14 @@
 ﻿ using System;
 using DevExpress.ExpressApp.Blazor;
 using DevExpress.ExpressApp.Blazor.Services;
-using Microsoft.Extensions.Configuration;
+ using Microsoft.AspNetCore.Hosting;
+ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Xpand.Extensions.Blazor;
 using Xpand.TestsLib.Blazor;
-
+ [assembly: HostingStartup(typeof(Xpand.XAF.Modules.JobScheduler.Hangfire.HangfireStartup))]
+ [assembly: HostingStartup(typeof(HostingStartup))]
+ [assembly:HostingStartup(typeof(Xpand.XAF.Modules.Blazor.BlazorStartup))]
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
     public class JobSchedulerStartup : XafHostingStartup<JobSchedulerModule> {
         public JobSchedulerStartup(IConfiguration configuration) : base(configuration) { }

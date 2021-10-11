@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Xpand.Extensions.JsonExtensions {
     public static partial class JsonExtensions {
@@ -17,5 +20,10 @@ namespace Xpand.Extensions.JsonExtensions {
             using var reader = new JsonTextReader(stringReader);
             return reader.DeserializeSingleOrList(type);
         }
+        
+        public static Dictionary<string, object> DeserializeDictionary(this byte[] bytes) 
+            => JsonConvert.DeserializeObject<Dictionary<string,object>>(Encoding.UTF8.GetString(bytes));
+        public static JArray DeserializeArray(this byte[] bytes,string key) 
+            => (JArray)JsonConvert.DeserializeObject<Dictionary<string,object>>(Encoding.UTF8.GetString(bytes))?[key];
     }
 }

@@ -9,7 +9,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions;
 using Xpand.TestsLib.Common;
-using Xpand.XAF.Modules.Reactive.Logger;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.TestsLib.Blazor{
@@ -22,7 +21,6 @@ namespace Xpand.TestsLib.Blazor{
 
         [SuppressMessage("ReSharper", "UnusedParameter.Local")]
         public TestBlazorApplication(Type sutModule, bool transmitMessage = true, bool handleExceptions=true):this(){
-            SettingUp += (_, args) => ((ExportedTypeCollection)args.SetupParameters.DomainComponents).Add(typeof(TraceEvent));
             SUTModule = sutModule;
             TraceClientConnected = this.ClientConnect();
             TraceClientBroadcast = this.ClientBroadcast();
@@ -43,7 +41,7 @@ namespace Xpand.TestsLib.Blazor{
         public Type SUTModule{ get; }
 
         public TestBlazorApplication() {
-            
+            this.AlwaysUpdateOnDatabaseVersionMismatch().Subscribe();
         }
 
         protected override void OnCreateCustomObjectSpaceProvider(CreateCustomObjectSpaceProviderEventArgs args) {

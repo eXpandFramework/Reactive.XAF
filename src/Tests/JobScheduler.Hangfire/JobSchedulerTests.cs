@@ -21,7 +21,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
     public class JobSchedulerTests:JobSchedulerCommonTest{
 
 
-        [TestCase(false)]
+        [TestCase(false)] 
         [TestCase(true)]
         [XpandTest()]
         public void Customize_Job_Schedule(bool newObject) {

@@ -34,9 +34,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 		        }
 		        var startServer = application.StartServer().Publish().RefCount();
 		        var client = Observable.Start(application.ConnectClient).Merge().Publish().RefCount();
-                if (!new[] { Platform.Blazor, Platform.Web, }.Contains(application.GetPlatform())) {
-                    application.CleanUpHubResources( startServer);
-                }
+		        application.CleanUpHubResources( startServer);
 
                 var saveServerTraceMessages = application.SaveServerTraceMessages().Publish().RefCount();
 		        return startServer.ToUnit()
@@ -52,7 +50,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
                 .FirstOrDefaultAsync()
                 .Subscribe();
 
-        private static IObservable<Unit> ShutDownServer(this Server server) => server.ShutdownAsync().ToObservable().TakeUntil(Observable.Timer(TimeSpan.FromSeconds(5)));
+        private static IObservable<Unit> ShutDownServer(this Server server) 
+	        => server.ShutdownAsync().ToObservable().TakeUntil(Observable.Timer(TimeSpan.FromSeconds(5)));
 
         private static IObservable<Unit> LoadTracesToListView(this IObservable<TraceEvent[]> source,Frame frame) =>
 	        source.Select(_ => _)
@@ -123,13 +122,11 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
         public static Server StartServer(this ServerPort serverPort, XafApplication application){
 	        var options = new MagicOnionOptions{IsReturnExceptionStackTraceInErrorDetail = true};
             var service = MagicOnionEngine.BuildServerServiceDefinition(new[]{typeof(ReactiveLoggerHubService).GetTypeInfo().Assembly},options);
-            if (_server!=null||application.GetPlatform()==Platform.Win) {
-                _server = new Server{
-                    Services = {service.ServerServiceDefinition},
-                    Ports = {serverPort}
-                };
-                _server.Start();
-            }
+            _server = new Server{
+	            Services = {service.ServerServiceDefinition},
+	            Ports = {serverPort}
+            };
+            _server.Start();
             return _server;
         }
 

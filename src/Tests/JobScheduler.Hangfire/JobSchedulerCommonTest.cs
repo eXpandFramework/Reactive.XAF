@@ -3,17 +3,13 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor;
 using Hangfire;
 using Hangfire.MemoryStorage;
-using Microsoft.AspNetCore.Hosting;
-using Xpand.Extensions.Blazor;
 using Xpand.Extensions.TypeExtensions;
 using Xpand.TestsLib.Blazor;
 using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.BO;
 
-[assembly: HostingStartup(typeof(Xpand.XAF.Modules.JobScheduler.Hangfire.HangfireStartup))]
-[assembly: HostingStartup(typeof(HostingStartup))]
-[assembly:HostingStartup(typeof(Xpand.XAF.Modules.Blazor.BlazorStartup))]
+
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
     public abstract class JobSchedulerCommonTest : BlazorCommonTest {

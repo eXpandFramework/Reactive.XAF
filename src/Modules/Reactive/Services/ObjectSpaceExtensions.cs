@@ -264,11 +264,19 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             this XafApplication application, ObjectModification objectModification = ObjectModification.All)
             => application.WhenObjectSpaceCreated()
                 .SelectMany(objectSpace => objectSpace.WhenCommiting<T>(objectModification));
-        
+
+        public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenProviderCommitted<T>(
+            this XafApplication application, ObjectModification objectModification = ObjectModification.All) {
+            return application.WhenProviderObjectSpaceCreated().WhenCommitted<T>();
+        }
+
+        static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenCommitted<T>(
+            this IObservable<IObjectSpace> source, ObjectModification objectModification = ObjectModification.All) 
+            => source.SelectMany(objectSpace => objectSpace.WhenModifiedObjects(true,objectModification,typeof(T)).Select(t => (t.objectSpace,t.objects.Cast<T>())));
+
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenCommitted<T>(
             this XafApplication application, ObjectModification objectModification = ObjectModification.All)
-            => application.WhenObjectSpaceCreated()
-                .SelectMany(objectSpace => objectSpace.WhenModifiedObjects(true,objectModification,typeof(T)).Select(t => (t.objectSpace,t.objects.Cast<T>())));
+            => application.WhenObjectSpaceCreated().WhenCommitted<T>();
 
         public static IObservable<T> Objects<T>(this IObservable<(IObjectSpace, IEnumerable<T> objects)> source)
         => source.SelectMany(t => t.objects);

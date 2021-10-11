@@ -66,7 +66,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             }
         }
 
-        // [Test]
+        [Test]
         [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task Do_Not_Trace_If_TraceSources_Level_Off(){
@@ -91,7 +91,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             objectSpace.GetObjectsCount(typeof(TraceEvent),null).ShouldBe(0);
         }
 
-        // [Test]
+        [Test]
         [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task Do_Not_Trace_If_TraceSources_Disabled(){
@@ -115,7 +115,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             objectSpace.GetObjectsQuery<TraceEvent>().FirstOrDefault(_ => _.Value.Contains("test")).ShouldBeNull();
             objectSpace.GetObjectsCount(typeof(TraceEvent),null).ShouldBe(0);
         }
-        // [Test]
+        [Test]
         [XpandTest]
         [Apartment(ApartmentState.STA)]
         public async Task Do_Not_Persist_TraceSources(){
@@ -123,7 +123,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             application.WhenModelChanged().FirstAsync()
                 .Select(_ => {
                     var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger;
-                    logger.TraceSources.Persist=false;
+                    logger.TraceSources.PersistStrategy=ObservableTraceStrategy.None;
                     return Unit.Default;
                 }).Subscribe();
             application.Logon();
@@ -193,6 +193,13 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
         [Apartment(ApartmentState.STA)]
         public async Task Refresh_TraceEvent_ListView_when_trace(){
             using var application = LoggerModule().Application;
+            application.WhenModelChanged().FirstAsync()
+                .Select(_ => {
+                    var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger;
+                    logger.TraceSources.PersistStrategy=ObservableTraceStrategy.All;
+                    return Unit.Default;
+                }).Subscribe();
+            application.Logon();
             var listView = application.NewObjectView<ListView>(typeof(TraceEvent));
             application.CreateViewWindow().SetView(listView);
             var refresh = application.WhenTraceEvent(typeof(ReactiveLoggerService), RXAction.OnNext,

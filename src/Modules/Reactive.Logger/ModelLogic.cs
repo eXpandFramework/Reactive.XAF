@@ -11,6 +11,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using JetBrains.Annotations;
 using Xpand.Extensions.Reactive.Filter;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ModelExtensions;
 
 
@@ -45,8 +46,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
     public interface IModelTraceSourcedModules:IModelNode,IModelList<IModelTraceSourcedModule>{
         [DefaultValue(false)]
         bool Enabled{ get; set; }
-        [DefaultValue(false)]
-        bool Persist{ get; set; }
+        [DefaultValue(ObservableTraceStrategy.None)]
+        ObservableTraceStrategy PersistStrategy{ get; set; }
     }
 
     public class TraceEventAppearanceRulesGenerator:ModelNodesGeneratorUpdater<AppearanceRulesModelNodesGenerator>{

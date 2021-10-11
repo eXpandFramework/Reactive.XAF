@@ -224,7 +224,7 @@ namespace Xpand.TestsLib.Common{
                     var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>()?.ReactiveLogger;
                     if (logger != null){
                         logger.TraceSources.Enabled = true;
-                        logger.TraceSources.Persist = true;
+                        logger.TraceSources.PersistStrategy=ObservableTraceStrategy.All;
                         var modelTraceSourcedModules = logger.TraceSources.Where(module => module.Id()!=typeof(TModule).Name);
                         var traceSourcedModule = logger.TraceSources.FirstOrDefault(module => module.Id()==typeof(TModule).Name);
                         if (traceSourcedModule != null) {
@@ -261,7 +261,7 @@ namespace Xpand.TestsLib.Common{
 
         public static ModuleBase AddModule(this XafApplication application, ModuleBase moduleBase, string title = null,
             bool setup = true, params Type[] additionalExportedTypes){
-            var applicationTitle = title ?? $"{moduleBase.GetType().Name}_Tests";
+            var applicationTitle = title ?? application.Title;
             application.Title = applicationTitle;
             moduleBase.AdditionalExportedTypes.AddRange(additionalExportedTypes);
             if (setup){
@@ -285,7 +285,8 @@ namespace Xpand.TestsLib.Common{
 
         public static Type ApplicationType { get; set; }
         public static XafApplication NewApplication<TModule>(this Platform platform, bool transmitMessage = true,bool handleExceptions=true,bool usePersistentStorage=false)
-            where TModule : ModuleBase{
+            where TModule : ModuleBase {
+            Tracing.Initialize(AppDomain.CurrentDomain.ApplicationPath(),TraceLevel.Verbose.ToString());
             XafApplication application;
             ApplicationModulesManager.UseStaticCache = false;
             string applicationTypeName;

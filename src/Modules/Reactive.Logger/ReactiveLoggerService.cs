@@ -114,7 +114,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         internal static IObservable<TSource> TraceLogger<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
 	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
 	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
-            => source.Trace(name, ReactiveLoggerModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName);
+            => source.Trace(name, ReactiveLoggerModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
 
 
         public static IEnumerable<(ModuleBase module, TraceSource traceSource)> ToTraceSource(this IEnumerable<ModuleBase> moduleList) 
@@ -181,9 +181,18 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             => application.WhenSetupComplete()
                 .Where(_ => {
                     var modelReactiveLogger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>()?.ReactiveLogger;
-                    return modelReactiveLogger != null && modelReactiveLogger.GetEnabledSources().Any() && modelReactiveLogger.TraceSources.Persist;
+                    return modelReactiveLogger != null && modelReactiveLogger.GetEnabledSources().Any() ;
                 })
-                .SelectMany(_ => events)
+                .SelectMany(_ => events.Where(e => {
+                    var modelReactiveLogger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>()?.ReactiveLogger;
+                    if (modelReactiveLogger != null) {
+                        var strategy = modelReactiveLogger.TraceSources.PersistStrategy;
+                        return e.RXAction == RXAction.OnNext && strategy.Is(ObservableTraceStrategy.OnNext)||e.RXAction == RXAction.OnError &&
+                            strategy.Is(ObservableTraceStrategy.OnError)||new[] { RXAction.Dispose, RXAction.Subscribe, RXAction.OnCompleted, RXAction.None }
+                                .Contains(e.RXAction) && strategy.Is(ObservableTraceStrategy.All);
+                    }
+                    return false;
+                }))
                 .Buffer(TimeSpan.FromSeconds(3)).WhenNotEmpty()
                 .SelectMany(list => application.ObjectSpaceProvider.NewObjectSpace(space => space.SaveTraceEvent(list)));
 

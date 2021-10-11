@@ -4,15 +4,16 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Runtime.CompilerServices;
 using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.LinqExtensions;
 
 namespace Xpand.Extensions.Reactive.Utility{
     public enum ObservableTraceStrategy{
         None,
+        OnNext,
+        OnError,
+        All,
         Default,
-        All
     }
 
     public static partial class Utility{
@@ -33,9 +34,7 @@ namespace Xpand.Extensions.Reactive.Utility{
         public static IObservable<TSource> Trace<TSource>(this IObservable<TSource> source, string name = null,TraceSource traceSource=null,
             Func<TSource,string> messageFactory=null,Func<Exception,string> errorMessageFactory=null, Action<string> traceAction = null, 
             ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
-            [CallerMemberName] string memberName = "",
-            [CallerFilePath] string sourceFilePath = "",
-            [CallerLineNumber] int sourceLineNumber = 0) => Observable.Create<TSource>(observer => {
+             string memberName = "", string sourceFilePath = "", int sourceLineNumber = 0) => Observable.Create<TSource>(observer => {
                 void Action(string m, object v, Action<string> ta){
                     if (traceSource?.Switch.Level == SourceLevels.Off){
                         return;
@@ -55,30 +54,41 @@ namespace Xpand.Extensions.Reactive.Utility{
                     ta(message);
                 }
 
-                if (traceStrategy == ObservableTraceStrategy.All)
+                if (traceStrategy.Is(ObservableTraceStrategy.All))
                     Action("Subscribe", "", traceAction.TraceInformation(traceSource));
+                
                 var disposable = source.Subscribe(
                     v => {
-                        if (traceStrategy != ObservableTraceStrategy.None){
+                        if (traceStrategy.Is(ObservableTraceStrategy.OnNext)){
                             Action("OnNext", v, traceAction.TraceInformation(traceSource));
                         }
                         observer.OnNext(v);
                     },
                     e => {
-                        Action("OnError", e.GetAllInfo(), traceAction.TraceError(traceSource));
+                        if (traceStrategy.Is(ObservableTraceStrategy.OnError)) {
+                            Action("OnError", e.GetAllInfo(), traceAction.TraceError(traceSource));
+                        }
                         observer.OnError(e);
                     },
                     () => {
-                        if (traceStrategy == ObservableTraceStrategy.All)
+                        if (traceStrategy.Is(ObservableTraceStrategy.All))
                             Action("OnCompleted", "", traceAction.TraceInformation(traceSource));
                         observer.OnCompleted();
                     });
                 return () => {
-                    if (traceStrategy == ObservableTraceStrategy.All)
+                    if (traceStrategy.Is(ObservableTraceStrategy.All))
                         Action("Dispose", "", traceAction.TraceInformation(traceSource));
                     disposable.Dispose();
                 };
             });
+
+        public static bool Is(this ObservableTraceStrategy source,ObservableTraceStrategy target) 
+            => source == ObservableTraceStrategy.All || target == ObservableTraceStrategy.All || source switch {
+                ObservableTraceStrategy.OnNext => new[] { ObservableTraceStrategy.OnNext, ObservableTraceStrategy.Default }.Contains(target),
+                ObservableTraceStrategy.OnError => new[] { ObservableTraceStrategy.OnError, ObservableTraceStrategy.Default }.Contains(target),
+                ObservableTraceStrategy.None => new[] { ObservableTraceStrategy.None }.Contains(target),
+                _ => throw new NotImplementedException()
+            };
 
         private static string GetMessageValue<TSource>(this Func<TSource, string> messageFactory, Func<Exception, string> errorMessageFactory, object o){
             try{

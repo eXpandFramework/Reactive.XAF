@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using Newtonsoft.Json;
 
 namespace Xpand.Extensions.JsonExtensions {
@@ -11,7 +12,7 @@ namespace Xpand.Extensions.JsonExtensions {
 
                     case JsonToken.StartObject:
                         var instance = new JsonSerializer().Deserialize<T>(jsonReader);
-                        return new []{instance};
+                        return new [] { instance };
                 }
             }
 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Reflection;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
@@ -138,6 +139,9 @@ namespace Xpand.TestsLib.Common{
 
         protected void Await(Func<Task> invoker) {
             SingleThreadedSynchronizationContext.Await(invoker);
+        }
+        protected void Await(Func<IObservable<object>> invoker) {
+            SingleThreadedSynchronizationContext.Await(() => invoker().ToTask());
         }
 
         private static string GetTestName() 
