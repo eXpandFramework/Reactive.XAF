@@ -192,6 +192,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                                 .Contains(e.RXAction) && strategy.Is(ObservableTraceStrategy.All);
                     }
                     return false;
+                    
                 }))
                 .Buffer(TimeSpan.FromSeconds(3)).WhenNotEmpty()
                 .SelectMany(list => application.ObjectSpaceProvider.NewObjectSpace(space => space.SaveTraceEvent(list)));
@@ -209,7 +210,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             }
             var traceEvents = objectSpace.ModifiedObjects.Cast<TraceEvent>().ToArray();
             objectSpace.CommitChanges();
-            return traceEvents.ToObservable(Scheduler.Immediate).Do(_ => SavedTraceEventSubject.OnNext(_));
+            return traceEvents.ToObservable(Scheduler.Immediate).Do(traceEvent => SavedTraceEventSubject.OnNext(traceEvent));
         }
 
     }
