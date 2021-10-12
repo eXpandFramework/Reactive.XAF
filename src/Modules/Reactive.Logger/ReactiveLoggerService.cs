@@ -175,7 +175,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         }
 
         public static void TraceEventMessage(this TraceSource traceSource,ITraceEvent traceEvent) 
-            => traceSource.TraceEvent(TraceEventType.Information, traceSource.GetHashCode(), $"{traceEvent.Location}.{traceEvent.Method}({traceEvent.Line}): {traceEvent.Action}({traceEvent.Value})");
+            => traceSource.TraceEvent(traceEvent.TraceEventType, traceSource.GetHashCode(), $"{traceEvent.Location}.{traceEvent.Method}({traceEvent.Line}): {traceEvent.Action}({traceEvent.Value})");
 
         private static IObservable<TraceEvent> SaveEvent(this IObservable<ITraceEvent> events, XafApplication application) 
             => application.WhenSetupComplete()

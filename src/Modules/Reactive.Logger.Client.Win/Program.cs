@@ -33,7 +33,9 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Client.Win {
             if(ConfigurationManager.ConnectionStrings["ConnectionString"] != null) {
                 winApplication.ConnectionString = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
             }
+
 #if EASYTEST
+
             if(ConfigurationManager.ConnectionStrings["EasyTestConnectionString"] != null) {
                 winApplication.ConnectionString = ConfigurationManager.ConnectionStrings["EasyTestConnectionString"].ConnectionString;
             }

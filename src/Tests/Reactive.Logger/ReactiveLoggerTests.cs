@@ -224,6 +224,23 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
 
             await test.Timeout(Timeout);
         }
+        
+        [TestCase(TraceEventType.Error)]
+        [TestCase(TraceEventType.Warning)]
+        [XpandTest]
+        [Apartment(ApartmentState.STA)]
+        public async Task Trace_EventType(TraceEventType eventType){
+            using var application = Platform.Win.NewApplication<ReactiveLoggerModule>();
+            application.AddModule<ReactiveLoggerModule>();
+            var test = application.WhenTraceEvent().FirstAsync(_ => _.Value == "test").SubscribeReplay();
+            ReactiveLoggerModule.TraceSource.TraceMessage("test",eventType);
+            application.Logon();
+            application.CreateObjectSpace();
+
+            var traceEvent = await test.Timeout(Timeout);
+            
+            traceEvent.TraceEventType.ShouldBe(eventType);
+        }
 
         internal ReactiveLoggerModule LoggerModule(params ModuleBase[] modules){
             var xafApplication = Platform.Win.NewApplication<ReactiveLoggerModule>();
