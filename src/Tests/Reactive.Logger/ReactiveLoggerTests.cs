@@ -139,6 +139,47 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             objectSpace.GetObjectsQuery<TraceEvent>().FirstOrDefault(_ => _.Value.Contains("test")).ShouldBeNull();
             objectSpace.GetObjectsCount(typeof(TraceEvent),null).ShouldBe(0);
         }
+        
+        [XpandTest]
+        [Apartment(ApartmentState.STA)]
+        [TestCase(ObservableTraceStrategy.OnNext)]
+        public void Persist_Only_OnNext(ObservableTraceStrategy strategy) => Persist_Only(strategy);
+        
+        [XpandTest]
+        [Apartment(ApartmentState.STA)]
+        [TestCase(ObservableTraceStrategy.OnError)]
+        public void Persist_Only_OnError(ObservableTraceStrategy strategy) => Persist_Only(strategy);
+
+        private void Persist_Only(ObservableTraceStrategy strategy) {
+            using var application = Platform.Win.NewApplication<ReactiveLoggerModule>();
+            application.WhenModelChanged().FirstAsync()
+                .Select(_ => {
+                    var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger;
+                    logger.TraceSources[nameof(ReactiveModule)].Level = SourceLevels.Verbose;
+                    logger.TraceSources.PersistStrategy = strategy;
+                    return Unit.Default;
+                }).Subscribe();
+            application.AddModule<ReactiveLoggerModule>(typeof(RL));
+            application.Logon();
+            var objectSpace = application.CreateObjectSpace();
+            objectSpace.Delete(objectSpace.GetObjectsQuery<TraceEvent>().ToArray());
+            objectSpace.CommitChanges();
+
+
+            var testObserver = application.WhenObjectSpaceCreated()
+                .Do(_ => {
+                    if (strategy == ObservableTraceStrategy.OnError) {
+                        throw new NotImplementedException();
+                    }
+                }).FirstAsync().Test();
+            var eventObserver = application.WhenTraceEvent(rxAction:EnumsNET.Enums.Parse<RXAction>(strategy.ToString())).FirstAsync().Test();
+            application.CreateObjectSpace();
+            testObserver.AwaitDone(Timeout);
+            eventObserver.AwaitDone(Timeout);
+
+            objectSpace = application.CreateObjectSpace();
+            objectSpace.GetObjectsQuery<TraceEvent>().FirstOrDefault(_ => _.RXAction != RXAction.OnNext).ShouldBeNull();
+        }
 
         [Test]
         [XpandTest]
