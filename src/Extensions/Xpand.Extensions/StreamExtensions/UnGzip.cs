@@ -9,7 +9,7 @@ namespace Xpand.Extensions.StreamExtensions{
                 zip.CopyTo(decompressed);
             }
             decompressed.Seek(0, SeekOrigin.Begin);
-            return decompressed.ReadToEnd();
+            return decompressed.ReadToEndAsString();
         }
     }
 }

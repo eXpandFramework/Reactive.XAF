@@ -12,9 +12,9 @@ namespace Xpand.Extensions.StreamExtensions{
             return streamReader.ReadToEnd();
         }
 
-        public static Task<string> ReadToEndAsStringAsync(this Stream stream){
+        public static async Task<string> ReadToEndAsStringAsync(this Stream stream){
             using var streamReader = new StreamReader(stream);
-            return streamReader.ReadToEndAsync();
+            return await streamReader.ReadToEndAsync();
         }
     }
 }

@@ -53,7 +53,7 @@ namespace Xpand.Extensions.Reactive.Utility{
                     var message = $"{name}.{Path.GetFileNameWithoutExtension(sourceFilePath)}.{mName}({sourceLineNumber}): {m}({value})".TrimStart('.');
                     ta(message);
                 }
-
+                
                 if (traceStrategy.Is(ObservableTraceStrategy.All))
                     Action("Subscribe", "", traceAction.TraceInformation(traceSource));
                 
@@ -83,9 +83,11 @@ namespace Xpand.Extensions.Reactive.Utility{
             });
 
         public static bool Is(this ObservableTraceStrategy source,ObservableTraceStrategy target) 
-            => source == ObservableTraceStrategy.All || target == ObservableTraceStrategy.All || source switch {
-                ObservableTraceStrategy.OnNext => new[] { ObservableTraceStrategy.OnNext, ObservableTraceStrategy.Default }.Contains(target),
-                ObservableTraceStrategy.OnError => new[] { ObservableTraceStrategy.OnError, ObservableTraceStrategy.Default }.Contains(target),
+            => source == ObservableTraceStrategy.All || source switch {
+                ObservableTraceStrategy.OnNext => new[]
+                    { ObservableTraceStrategy.OnNext, ObservableTraceStrategy.Default }.Contains(target),
+                ObservableTraceStrategy.OnError => new[]
+                    { ObservableTraceStrategy.OnError, ObservableTraceStrategy.Default }.Contains(target),
                 ObservableTraceStrategy.None => new[] { ObservableTraceStrategy.None }.Contains(target),
                 _ => throw new NotImplementedException()
             };
