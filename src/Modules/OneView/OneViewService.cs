@@ -62,7 +62,7 @@ namespace Xpand.XAF.Modules.OneView{
         internal static IObservable<TSource> TraceOneView<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
 	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
 	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
-	        => source.Trace(name, OneViewModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName);
+	        => source.Trace(name, OneViewModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
 
         private static IObservable<ShowViewParameters> ShowView(this XafApplication application) 
 	        => application.WhenWindowCreated().When(TemplateContext.ApplicationWindow)

@@ -115,7 +115,7 @@ namespace Xpand.XAF.Modules.LookupCascade{
         internal static IObservable<TSource> TraceLookupCascadeModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) =>
-            source.Trace(name, LookupCascadeModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName);
+            source.Trace(name, LookupCascadeModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
 
     }
     
