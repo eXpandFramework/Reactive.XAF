@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using Xpand.Extensions.Blazor;
 using Xpand.TestsLib.Common.Attributes;
+using Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 

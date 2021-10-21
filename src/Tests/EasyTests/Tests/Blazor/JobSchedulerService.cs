@@ -13,10 +13,9 @@ namespace Web.Tests {
     public static class JobSchedulerService {
         public static async Task TestJobScheduler(this ICommandAdapter adapter) {
             await adapter.TestJob();
-            adapter.TestExecuteActionJob();
         }
 
-        private static void TestExecuteActionJob(this ICommandAdapter adapter) {
+        public static void TestExecuteActionJob(this ICommandAdapter adapter) {
             adapter.Execute(new NavigateCommand("Default.Product"));
             adapter.Execute(new SelectObjectsCommand<Product>(product => product.ProductName,new []{"ProductName0","ProductName1"}));
             adapter.Execute(new ActionDeleteCommand());
@@ -46,7 +45,7 @@ namespace Web.Tests {
             await adapter.TestJob(WorkerState.Succeeded, 1);
 
             adapter.Execute(new NavigateCommand("JobScheduler.Job"));
-            adapter.Execute(new ProcessRecordCommand<Job, Job>((job => job.Id, "test")));
+            adapter.Execute(new ProcessRecordCommand<Job, Job>((job => job.Id, nameof(JobSchedulerService))));
             adapter.Execute(new FillObjectViewCommand((nameof(Job.JobMethod), "Failed")));
 
             adapter.Execute(new ActionCommand(Actions.Save));
@@ -56,7 +55,7 @@ namespace Web.Tests {
 
         private static ICommandAdapter CreateJob(this ICommandAdapter adapter) {
             adapter.Execute(new ActionCommand(Actions.New));
-            adapter.Execute(new FillObjectViewCommand<Job>((job => job.Id, "test"),(job => job.CronExpression, nameof(Cron.Yearly))));
+            adapter.Execute(new FillObjectViewCommand<Job>((job => job.Id, nameof(JobSchedulerService)),(job => job.CronExpression, nameof(Cron.Yearly))));
             adapter.Execute(new FillObjectViewCommand((nameof(Job.JobType),"Job"),(nameof(Job.JobMethod),"ImportOrders".CompoundName())));
             adapter.Execute(new ActionCommand(Actions.Save));
             return adapter;

@@ -9,7 +9,7 @@
         <AppearanceRule Id="OnNext" Context="ListView" Criteria="[RXAction] = ##Enum#Xpand.XAF.Modules.Reactive.Logger.RXAction,OnNext#" FontColor="Green" TargetItems="RXAction" Index="10001" IsNewNode="True" />
         <AppearanceRule Id="Subscribe" Context="ListView" Criteria="[RXAction] = ##Enum#Xpand.XAF.Modules.Reactive.Logger.RXAction,Subscribe#" FontColor="0, 0, 192" TargetItems="RXAction" Index="10001" IsNewNode="True" />
         <AppearanceRule Id="TraceEventType_Error" Criteria="[TraceEventType] In (##Enum#System.Diagnostics.TraceEventType,Critical#, ##Enum#System.Diagnostics.TraceEventType,Error#, ##Enum#System.Diagnostics.TraceEventType,Stop#)" FontColor="Red" TargetItems="TraceEventType,Method,Location" IsNewNode="True" />
-        <AppearanceRule Id="TraceEventType_Warning" Criteria="[TraceEventType] In (##Enum#System.Diagnostics.TraceEventType,Suspend#, ##Enum#System.Diagnostics.TraceEventType,Warning#)" TargetItems="TraceEventType,Method,Location" BackColor="255, 255, 0" IsNewNode="True" />
+        <AppearanceRule Id="TraceEventType_Warning" Criteria="[TraceEventType] In (##Enum#System.Diagnostics.TraceEventType,Suspend#, ##Enum#System.Diagnostics.TraceEventType,Warning#)" TargetItems="TraceEventType,Method,Location" BackColor="Yellow" IsNewNode="True" />
       </AppearanceRules>
     </Class>
   </BOModel>
@@ -47,7 +47,7 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
-    <ListView Id="TraceEvent_ListView" IsFooterVisible="True" DataAccessMode="Server" ShowAutoFilterRow="True" TopReturnedObjects="5000">
+    <ListView Id="TraceEvent_ListView" IsFooterVisible="True" ShowAutoFilterRow="True" TopReturnedObjects="5000">
       <Columns>
         <ColumnInfo Id="Action" Index="-1" Width="58" />
         <ColumnInfo Id="DateTime" Width="248" Index="-1" />

@@ -5,7 +5,7 @@ using Xpand.Extensions.XAF.ObjectExtensions;
 
 namespace Xpand.Extensions.XAF.NonPersistentObjects {
     [DomainComponent]
-    [XafDefaultProperty(nameof(Name))]
+    [DefaultProperty(nameof(Name))]
     public class ObjectType:NonPersistentBaseObject{
         private string _name;
         private Type _type;

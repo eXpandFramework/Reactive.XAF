@@ -128,7 +128,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<Window> WhenPopupWindowCreated(this XafApplication application) 
             => RxApp.PopupWindows.Where(_ => _.Application==application);
-
+        
         public static void AddObjectSpaceProvider(this XafApplication application, params IObjectSpaceProvider[] objectSpaceProviders) 
             => application.WhenCreateCustomObjectSpaceProvider()
                 .SelectMany(t => application.WhenWeb()
@@ -136,8 +136,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     .SwitchIfEmpty(Unit.Default.ReturnObservable().Do(_ => application.AddObjectSpaceProvider(objectSpaceProviders, t))))
                 .Subscribe();
 
-        private static void AddObjectSpaceProvider(this XafApplication application,
-            IObjectSpaceProvider[] objectSpaceProviders,
+        private static void AddObjectSpaceProvider(this XafApplication application, IObjectSpaceProvider[] objectSpaceProviders,
             (XafApplication application, CreateCustomObjectSpaceProviderEventArgs e) t,
             NonPersistentObjectSpaceProvider nonPersistentObjectSpaceProvider = null) {
             nonPersistentObjectSpaceProvider??=new NonPersistentObjectSpaceProvider(t.application.TypesInfo,null);
@@ -481,6 +480,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
             return Observable.Empty<Unit>();
         }
+        
+        public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenCommitedDetailed<T>(
+            this XafApplication application, ObjectModification objectModification = ObjectModification.All)
+            => application.WhenObjectSpaceCreated()
+                .SelectMany(objectSpace => objectSpace.WhenCommitedDetailed<T>(objectModification));
+
     }
 
 

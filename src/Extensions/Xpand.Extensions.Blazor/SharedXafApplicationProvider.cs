@@ -3,7 +3,6 @@ using System;
 using DevExpress.ExpressApp.Blazor;
 using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Security;
-using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Xpand.Extensions.Blazor {
@@ -26,8 +25,7 @@ namespace Xpand.Extensions.Blazor {
             _containerInitializer = containerInitializer;
             _sharedApplication = new Lazy<BlazorApplication>(CreateApplication, true);
         }
-
-        [NotNull]
+        
         public ISecurityStrategyBase? Security { get; private set; }
 
         public BlazorApplication Application => _sharedApplication.Value;
@@ -39,21 +37,23 @@ namespace Xpand.Extensions.Blazor {
             return NewBlazorApplication();
         }
     
-        protected virtual BlazorApplication NewBlazorApplication() {
+        protected BlazorApplication NewBlazorApplication() {
             var serviceScope = _serviceProvider.CreateScope();
             var applicationFactory = serviceScope.ServiceProvider.GetRequiredService<IXafApplicationFactory>();
-            var blazorApplication = applicationFactory.CreateApplication();
-            if (!(blazorApplication is ISharedBlazorApplication)) {
+            var blazorApplication = CreateApplication(applicationFactory);
+            if (!(blazorApplication is ISharedBlazorApplication sharedBlazorApplication)) {
                 throw new NotImplementedException(
                     $"Please implement {typeof(ISharedBlazorApplication)} in your {blazorApplication.GetType().FullName} and use a NonSecuredObjectSpaceProvider when is false.");
             }
 
             blazorApplication.ServiceProvider = serviceScope.ServiceProvider;
-            ((ISharedBlazorApplication) blazorApplication).UseNonSecuredObjectSpaceProvider = true;
+            sharedBlazorApplication.UseNonSecuredObjectSpaceProvider = true;
             Security = blazorApplication.Security;
             blazorApplication.Security = null;
             blazorApplication.Setup();
-            return blazorApplication;
+            return (BlazorApplication)sharedBlazorApplication;
         }
+
+        protected virtual BlazorApplication CreateApplication(IXafApplicationFactory applicationFactory) => applicationFactory.CreateApplication();
     }
 }

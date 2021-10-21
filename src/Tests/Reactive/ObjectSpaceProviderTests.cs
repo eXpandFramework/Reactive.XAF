@@ -1,8 +1,15 @@
 ﻿using akarnokd.reactive_extensions;
+using DevExpress.DataAccess.Native;
+using DevExpress.ExpressApp.Security;
+using DevExpress.ExpressApp.Security.ClientServer;
+using DevExpress.ExpressApp.Xpo;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
+using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Reactive.Services;
+using Xpand.XAF.Modules.Reactive.Tests.Common;
 
 namespace Xpand.XAF.Modules.Reactive.Tests{
     public class ObjectSpaceProviderTests:ReactiveCommonTest{
@@ -33,8 +40,21 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
         public void WhenObjectSpaceCreated(){
             using var application = DefaultReactiveModule().Application;
             using var testObserver = application.ObjectSpaceProvider.WhenObjectSpaceCreated().Test();
-
+            
             application.ObjectSpaceProvider.CreateObjectSpace();
+
+            testObserver.ItemCount.ShouldBe(1);
+        }
+        [Test]
+        [XpandTest()]
+        public void When_Secured_ObjectSpaceCreated(){
+            var application = NewXafApplication();
+            application.SetupSecurity();
+            DefaultReactiveModule(application);
+            var securedObjectSpaceProvider = new SecuredObjectSpaceProvider((ISelectDataSecurityProvider)application.Security, new ConnectionStringDataStoreProvider("XpoProvider=InMemoryDataStoreProvider"));
+            using var testObserver = securedObjectSpaceProvider.WhenObjectSpaceCreated().Test();
+
+            securedObjectSpaceProvider.CreateObjectSpace();
 
             testObserver.ItemCount.ShouldBe(1);
         }

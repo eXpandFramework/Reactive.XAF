@@ -54,8 +54,5 @@
     <Compile Update="Module.cs" />
     <Compile Update="ReactiveModuleBase.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Services\Network\" />
-  </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

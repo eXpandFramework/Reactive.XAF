@@ -11,7 +11,8 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests.Common {
         protected Mock<HttpMessageHandler> HandlerMock;
 
         [OneTimeSetUp]
-        public void Init() {
+        public override void Init() {
+            base.Init();
             SynchronizationContext.SetSynchronizationContext(new RendererSynchronizationContext());
             _blazorModule = BlazorModule();
             Application = _blazorModule.Application;
@@ -19,7 +20,8 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests.Common {
         public override void Dispose() { }
 
         [OneTimeTearDown]
-        public void Cleanup() {
+        public override void Cleanup() {
+            
             Application?.Dispose();
             WebHost?.Dispose();
         }

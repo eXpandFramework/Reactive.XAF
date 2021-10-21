@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Reflection;
 using System.Threading.Tasks;
+using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using JetBrains.Annotations;
 using NUnit.Framework;
@@ -22,6 +23,7 @@ using IDisposable = System.IDisposable;
 
 namespace Xpand.TestsLib.Common{
     public abstract class CommonTest : IDisposable{
+        protected TestScheduler TestScheduler=new();
         public const int LongTimeout = 900000;
         [UsedImplicitly]
         protected Platform GetPlatform(string platformName) => (Platform) Enum.Parse(typeof(Platform), platformName);
@@ -40,6 +42,16 @@ namespace Xpand.TestsLib.Common{
         public static IEnumerable<Platform> PlatformDataSource(){
             yield return Platform.Web;
             yield return Platform.Win;
+        }
+
+        [OneTimeSetUp]
+        public virtual void Init() {
+            TestScheduler.AdvanceTimeBy((long)DateTime.Now.ToUniversalTime().Subtract(TestScheduler.Now.Date).TotalMilliseconds);
+        }
+
+        [OneTimeTearDown]
+        public virtual void Cleanup() {
+            
         }
 
         protected static object[] AgnosticModules() 

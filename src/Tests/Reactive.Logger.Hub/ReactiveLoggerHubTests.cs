@@ -29,9 +29,9 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
     public class ReactiveLoggerHubTests : BaseTest{
         [Test]
         [XpandTest]
-        [Apartment(ApartmentState.STA)]
+        [Apartment(ApartmentState.STA)][Order(0)]
         public async Task Start_Server_After_Logon() {
-            using var application = HubModule(nameof(Start_Server_After_Logon)).Application;
+            using var application = HubModule().Application;
             var startServer = application.WhenTraceOnNext(nameof(ReactiveLoggerHubService.StartServer))
                 .FirstAsync().SubscribeReplay();
             var startServerSave = application.WhenTraceOnNextEvent(nameof(ReactiveLoggerHubService.StartServer))
@@ -46,7 +46,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
 
         [Test()]
         [XpandTest]
-        [Apartment(ApartmentState.STA)]
+        [Apartment(ApartmentState.STA)][Order(100)]
         public async Task Connect_Client() {
             using var clientWinApp = new ClientWinApp();
             clientWinApp.AddModule<ReactiveLoggerHubModule>(typeof(RLH),typeof(BaseObject));
@@ -75,9 +75,9 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
             }
         }
 
-        [Test()][Ignore("Work posted to the synchronization context did not complete within ten seconds. Consider explicitly waiting for the work to complete")]
+        [Test()]
         [XpandTest]
-        [Apartment(ApartmentState.STA)]
+        [Apartment(ApartmentState.STA)][Order(300)]
         public async Task Display_TraceEvent_On_New_Client(){
             var dictionary = XpoTypesInfoHelper.GetXpoTypeInfoSource().XPDictionary;
             dictionary.CollectClassInfos(GetType().Assembly);
@@ -126,7 +126,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
 
         [Test]
         [XpandTest]
-        [Apartment(ApartmentState.STA)]
+        [Apartment(ApartmentState.STA)][Order(200)]
         public async Task Display_TraceEvent_On_Running_Client(){
             XpoTypesInfoHelper.GetXpoTypeInfoSource().XPDictionary.CollectClassInfos(GetType().Assembly);
             using var clientWinApp = new ClientWinApp {EditorFactory = new EditorsFactory()};
@@ -162,10 +162,10 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
             events.FirstOrDefault(_ => _.Location==nameof(ReactiveLoggerHubService)).ShouldNotBeNull();
         }
 
-        internal ReactiveLoggerHubModule HubModule(string title,params ModuleBase[] modules){
+        internal ReactiveLoggerHubModule HubModule(params ModuleBase[] modules){
             var xafApplication = Platform.Win.NewApplication<ReactiveLoggerHubModule>();
             xafApplication.Modules.AddRange(modules);
-            return xafApplication.AddModule<ReactiveLoggerHubModule>(title);
+            return xafApplication.AddModule<ReactiveLoggerHubModule>();
         }
 
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp.Blazor.Services;
@@ -43,6 +44,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
         public bool Authorize(DashboardContext context) {
             var httpContext = context.GetHttpContext();
             var userIdentity = httpContext.User.Identity;
+            Debug.Assert(userIdentity != null, nameof(userIdentity) + " != null");
             if (userIdentity.IsAuthenticated) {
                 var provider = httpContext.RequestServices.GetRequiredService<ISharedXafApplicationProvider>();
                 var blazorApplication = provider.Application;

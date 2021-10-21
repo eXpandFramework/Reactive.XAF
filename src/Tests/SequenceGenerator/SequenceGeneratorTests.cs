@@ -86,7 +86,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 
         [Combinatorial]
         [XpandTest(LongTimeout)]
-        public async Task Increase_Sequence_When_Saving_New_Objects([Values(2, 102, 500)] int itemsCount, [Values(true, false)] bool parallel, [Values(1, 2)] int objectSpaceCount){
+        public async Task Increase_Sequence_When_Saving_New_Objects([Values(2, 102, 300)] int itemsCount, [Values(true, false)] bool parallel, [Values(1, 2)] int objectSpaceCount){
 	        using var application = SequenceGeneratorModule().Application;
 	        SetSequences(application);
 	        var nextSequenceTest = SequenceGeneratorService.Sequence.OfType<TestObject>().Test();

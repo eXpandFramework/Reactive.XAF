@@ -57,10 +57,10 @@
     <PackageReference Include="Hangfire.Core" Version="1.7.24" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" Version="5.0.1" />
     <PackageReference Include="Xpand.XAF.Core.All">
-      <Version>4.211.9.0</Version>
+      <Version>4.211.9.1</Version>
     </PackageReference>
     <PackageReference Include="Xpand.XAF.Web.All">
-      <Version>4.211.9.0</Version>
+      <Version>4.211.9.1</Version>
     </PackageReference>
     <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="21.1.6" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />

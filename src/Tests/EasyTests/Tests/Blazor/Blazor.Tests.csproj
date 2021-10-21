@@ -54,11 +54,11 @@
     <PackageReference Include="System.ServiceModel.Duplex" Version="4.8.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10" />
     <PackageReference Include="Moq" Version="4.16" />
-    <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="93.0.4577.6300" />
+    <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="94.0.4606.6100" />
     <PackageReference Include="Shouldly" Version="4.0.3" />
     <PackageReference Include="NUnit" Version="3.13.2" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.0" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="4.211.9.0" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="4.211.9.1" />
     <PackageReference Include="Selenium.WebDriver" Version="3.141" />
     <PackageReference Include="Selenium.Support" Version="3.141" />
   </ItemGroup>

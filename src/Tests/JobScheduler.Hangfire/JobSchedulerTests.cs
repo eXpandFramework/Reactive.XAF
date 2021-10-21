@@ -15,6 +15,7 @@ using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
+using Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
 	[NonParallelizable]
@@ -76,9 +77,9 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
 
             testJob.Context.ShouldNotBeNull();
             testJob.Context.JobId().ShouldBe(job.Id);
-            var objectSpace = application.CreateObjectSpace();
-            job = objectSpace.GetObject(job);
-            job.JobMethods.Count.ShouldBeGreaterThan(0);            
+            // var objectSpace = application.CreateObjectSpace();
+            // job = objectSpace.GetObject(job);
+            // job.JobMethods.Count.ShouldBeGreaterThan(0);            
         }
 
         

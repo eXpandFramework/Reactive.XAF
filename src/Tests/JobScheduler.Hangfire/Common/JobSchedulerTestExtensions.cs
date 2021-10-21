@@ -8,7 +8,7 @@ using Xpand.Extensions.XAF.NonPersistentObjects;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
 using Xpand.XAF.Modules.Reactive;
 
-namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
+namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
     public static class JobSchedulerTestExtensions {
         public static IObservable<JobState> Executed(this WorkerState lastState) 
             => JobSchedulerService.JobState.FirstAsync(t => t.State == WorkerState.Enqueued).IgnoreElements()

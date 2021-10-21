@@ -7,7 +7,6 @@ using Newtonsoft.Json;
 using Xpand.Extensions.AppDomainExtensions;
 
 namespace TestApplication.Module.Common {
-    [UsedImplicitly]
     public static class Extensions{
         public static void ConfigureConnectionString(this XafApplication application){
             application.ConnectionString = InMemoryDataStoreProvider.ConnectionString;

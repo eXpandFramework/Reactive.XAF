@@ -2,16 +2,21 @@ param(
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\"),
     $Release=$false,
     $Branch="lab",
-    $dxVersion="21.1.3"
+    $dxVersion="21.1.6"
 )
 Use-MonoCecil | Out-Null
+
+
 # $VerbosePreference ="continue"
 function UpdateALLNuspec($platform, $allNuspec, $nuspecs,$allModuleNuspecs,$csProjects) {
     
     $platformNuspecs = $allModuleNuspecs| ForEach-Object {
+        Write-Verbose $_.FullName -Verbose
+        
         [xml]$nuspec = Get-Content $_.FullName
         $nuspecBaseName=$_.BaseName
-        $filesrc=($nuspec.package.Files.file|Where-Object{$_.src -like "*$nuspecBaseName.dll"}).src
+        $filesrc=($nuspec.package.Files.file|Where-Object{$_.src -like "*$nuspecBaseName.dll"}).src|Select-Object -First 1
+        
         $platformMetada = Get-AssemblyMetadata "$root\bin\$filesrc" -key "Platform"
         if ($platformMetada.Value -in $platform){
             $target=Get-ProjectTargetFramework (Get-XmlContent ($csProjects|Where-Object{$_.BaseName -eq $nuspecBaseName }).FullName) -FullName|select-object -Last 1
@@ -44,19 +49,20 @@ function UpdateALLNuspec($platform, $allNuspec, $nuspecs,$allModuleNuspecs,$csPr
         }
         
     }
-    $group=$allNuspec.package.metadata.dependencies.group
-    $standardGroup=($group|Where-Object{$_.targetFramework -eq "netstandard2.0"})
-    if (($group|Where-Object{$_.targetFramework -eq "net461"})){
-        $standardGroup.dependency|ForEach-Object{
-            Add-NuspecDependency $_.Id $_.version $allNuspec "net461"
-        }
-    }
-    $net5Targetframework=($group.targetFramework|Where-Object{$_ -match "net5.0"})
-    if ($net5Targetframework){
-        $standardGroup.dependency|ForEach-Object{
-            Add-NuspecDependency $_.Id $_.version $allNuspec $net5Targetframework
-        }
-    }
+    # $group=$allNuspec.package.metadata.dependencies.group
+    # $standardGroup=($group|Where-Object{$_.targetFramework -eq "netstandard2.0"})
+    # if (($group|Where-Object{$_.targetFramework -eq "net461"})){
+    #     $standardGroup.dependency|ForEach-Object{
+    #         Add-NuspecDependency $_.Id $_.version $allNuspec "net461"
+            
+    #     }
+    # }
+    # $net5Targetframework=($group.targetFramework|Where-Object{$_ -match "net5.0"})
+    # if ($net5Targetframework){
+    #     $standardGroup.dependency|ForEach-Object{
+    #         Add-NuspecDependency $_.Id $_.version $allNuspec $net5Targetframework
+    #     }
+    # }
 }
 
 $nuspecs = Get-ChildItem "$root\build\nuspec" *.nuspec|Where-Object{$dxVersion -gt "20.2.0" -or $_.BaseName -notmatch "blazor|hangfire|Client.Win"}
@@ -76,9 +82,21 @@ $csProjects=Get-MSBuildProjects $root\src
 UpdateALLNuspec "Core" $allNuspec $nuspecs $allModuleNuspecs $csProjects
 $googleBlazorVersion=(Get-XmlContent "$root\Build\nuspec\Xpand.Extensions.Office.Cloud.Google.Blazor.nuspec").package.metadata.version
 if ($dxVersion -gt "20.2.2"){
-    Add-NuspecDependency Xpand.Extensions.Office.Cloud.Google.Blazor $googleBlazorVersion $allNuspec "netstandard2.1"
+    Add-NuspecDependency Xpand.Extensions.Office.Cloud.Google.Blazor $googleBlazorVersion $allNuspec "net5.0"
+    Add-NuspecDependency Xpand.Extensions.Office.Cloud.Google.Blazor $googleBlazorVersion $allNuspec "net5.0-windows7.0"
 }
-
+function CloneNetstandard ($target){
+    $allNuspec.package.metadata.dependencies.group|Where-Object{$_.targetFramework -eq "netstandard2.0"}|ForEach-Object{
+        $_.dependency|ForEach-Object{
+            Add-NuspecDependency -Id $_.Id -Version $_.version -Nuspec $allNuspec -TargetFramework "$target"
+        }
+        
+    }
+    
+}
+CloneNetstandard "net5.0"
+CloneNetstandard "net5.0-windows7.0"
+CloneNetstandard "net461"
 $allNuspec|Save-Xml $allFileName
 
 Get-Content $allFileName -Raw
@@ -87,6 +105,9 @@ Write-HostFormatted "Updating Xpand.XAF.Win.All.nuspec" -Section
 [xml]$allNuspec = Get-Content $allFileName
 UpdateALLNuspec @("Core","Win") $allNuspec  $nuspecs $allModuleNuspecs $csProjects
 Add-NuspecDependency -Id Xpand.XAF.Modules.Windows -Version $allNuspec.package.metadata.version -Nuspec $allNuspec -TargetFramework "net461"
+CloneNetstandard "net5.0"
+CloneNetstandard "net5.0-windows7.0"
+CloneNetstandard "net461"
 $allNuspec|Save-Xml $allFileName
 Get-Content $allFileName -Raw
 
@@ -100,8 +121,13 @@ UpdateALLNuspec @("Core","Web") $allNuspec  $nuspecs $allModuleNuspecs $csProjec
 $allNuspec.package.metadata.dependencies.group|Where-Object{$_.targetFramework -eq "netstandard2.1"}|ForEach-Object{
     ($allNuspec.package.metadata.dependencies.group|Where-Object{$_.targetFramework -eq "netstandard2.0"}).dependency|ForEach-Object{
         Add-NuspecDependency -Id $_.Id -Version $_.version -Nuspec $allNuspec -TargetFramework "netstandard2.1"
+        Add-NuspecDependency -Id $_.Id -Version $_.version -Nuspec $allNuspec -TargetFramework "net5.0"
+        Add-NuspecDependency -Id $_.Id -Version $_.version -Nuspec $allNuspec -TargetFramework "net5.0-windows7.0"
     }
     
 }
+CloneNetstandard "net5.0"
+CloneNetstandard "net5.0-windows7.0"
+CloneNetstandard "net461"
 $allNuspec|Save-Xml $allFileName
 Get-Content $allFileName -Raw

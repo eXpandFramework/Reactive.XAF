@@ -53,7 +53,6 @@ namespace Xpand.Extensions.Reactive.Utility{
                     var message = $"{name}.{Path.GetFileNameWithoutExtension(sourceFilePath)}.{mName}({sourceLineNumber}): {m}({value})".TrimStart('.');
                     ta(message);
                 }
-                
                 if (traceStrategy.Is(ObservableTraceStrategy.All))
                     Action("Subscribe", "", traceAction.TraceInformation(traceSource));
                 

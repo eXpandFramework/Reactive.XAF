@@ -19,6 +19,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.CloneMemb
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.CloneModelView", "CloneModelView\Xpand.XAF.Modules.CloneModelView.csproj", "{FB456706-C7F0-455C-B2F1-D75B143FDC28}"
+	ProjectSection(ProjectDependencies) = postProject
+		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.MasterDetail", "MasterDetail\Xpand.XAF.Modules.MasterDetail.csproj", "{79060F89-8991-476F-B536-6DCB5492178E}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -26,6 +29,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.MasterDet
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.ModelViewInheritance", "ModelViewInheritance\Xpand.XAF.Modules.ModelViewInheritance.csproj", "{194C38C8-A636-4570-A46D-2E8FE04C94C4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Reactive", "Reactive\Xpand.XAF.Modules.Reactive.csproj", "{58399364-9ACA-429F-A276-7F01E9E61D7D}"
 EndProject
@@ -204,6 +210,18 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Windows", "Windows\Xpand.XAF.Modules.Windows.csproj", "{ECE41E89-6D8D-4935-BDF3-27A705D05C6B}"
 	ProjectSection(ProjectDependencies) = postProject
 		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.ObjectTemplate", "ObjectTemplate\Xpand.XAF.Modules.ObjectTemplate.csproj", "{7B9C75F8-F171-426C-8C22-42CE191A62AD}"
+	ProjectSection(ProjectDependencies) = postProject
+		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "JobScheduler", "JobScheduler", "{B08D6FF9-EB01-42E5-B0F4-DE738CB56C0A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.JobScheduler.Notification", "JobScheduler.Notification\Xpand.XAF.Modules.JobScheduler.Notification.csproj", "{1FF72C42-53F4-469B-AF00-D69238E27A26}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A2B7513E-3653-47E3-82C7-C00A32CBF692} = {A2B7513E-3653-47E3-82C7-C00A32CBF692}
 	EndProjectSection
 EndProject
 Global
@@ -423,6 +441,18 @@ Global
 		{ECE41E89-6D8D-4935-BDF3-27A705D05C6B}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{ECE41E89-6D8D-4935-BDF3-27A705D05C6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ECE41E89-6D8D-4935-BDF3-27A705D05C6B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7B9C75F8-F171-426C-8C22-42CE191A62AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B9C75F8-F171-426C-8C22-42CE191A62AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B9C75F8-F171-426C-8C22-42CE191A62AD}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B9C75F8-F171-426C-8C22-42CE191A62AD}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
+		{7B9C75F8-F171-426C-8C22-42CE191A62AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B9C75F8-F171-426C-8C22-42CE191A62AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1FF72C42-53F4-469B-AF00-D69238E27A26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FF72C42-53F4-469B-AF00-D69238E27A26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FF72C42-53F4-469B-AF00-D69238E27A26}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FF72C42-53F4-469B-AF00-D69238E27A26}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
+		{1FF72C42-53F4-469B-AF00-D69238E27A26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FF72C42-53F4-469B-AF00-D69238E27A26}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -463,8 +493,11 @@ Global
 		{3CE6057A-EA16-49B8-A127-918944AD6A1E} = {C49DF3D6-B513-4C06-ACD6-4BA2E2FF02C8}
 		{CD368B52-2F68-4239-AB7B-AAC07B97E279} = {C49DF3D6-B513-4C06-ACD6-4BA2E2FF02C8}
 		{8834FDAA-BBB5-4BA7-A25F-3A4F55707ABE} = {E16CA157-6DDC-4B3C-A78C-DA354B452353}
-		{A2B7513E-3653-47E3-82C7-C00A32CBF692} = {8978DDD6-5019-45C4-94AE-1187453A4026}
+		{A2B7513E-3653-47E3-82C7-C00A32CBF692} = {B08D6FF9-EB01-42E5-B0F4-DE738CB56C0A}
 		{AEEFF920-B496-4F3A-BC29-971995F07CCA} = {FF0B834E-CEE1-450F-AB35-B5045ABF2C56}
+		{7B9C75F8-F171-426C-8C22-42CE191A62AD} = {C49DF3D6-B513-4C06-ACD6-4BA2E2FF02C8}
+		{B08D6FF9-EB01-42E5-B0F4-DE738CB56C0A} = {8978DDD6-5019-45C4-94AE-1187453A4026}
+		{1FF72C42-53F4-469B-AF00-D69238E27A26} = {B08D6FF9-EB01-42E5-B0F4-DE738CB56C0A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ADFDF91F-E839-4378-9136-C917729594E2}

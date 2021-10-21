@@ -53,6 +53,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
     public class TraceEventAppearanceRulesGenerator:ModelNodesGeneratorUpdater<AppearanceRulesModelNodesGenerator>{
         private const string Reactive = "Reactive";
         private const string Data = "Data";
+        private const string Network = "Network";
         private const string Editors = "Editors";
         private const string Model = "Model";
         private const string Office = "Office";
@@ -60,6 +61,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         public static readonly Dictionary<string, Color> Colors=new() {
             {Reactive,Color.Black},
             {Data,Color.DimGray},
+            {Network,Color.Olive},
             {Editors,Color.DarkOrange},
             {Model,Color.Blue},
             {Office,Color.BlueViolet},
@@ -72,8 +74,10 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             {"ReactiveLoggerHubModule",Colors[Reactive]},
             {"AutoCommitModule",Colors[Data]},
             {"JobSchedulerModule",Colors[Data]},
+            {"JobSchedulerNotificationModule",Colors[Data]},
             {"CloneMemberValueModule",Colors[Data]},
             {"RestModule",Colors[Data]},
+            {"Notification",Colors[Data]},
             {"CloneModelViewModule",Colors[Model]},
             {"ModelEditorWindowsFormsModule",Colors[Model]},
             {"GridListEditorModule",Colors[Editors]},

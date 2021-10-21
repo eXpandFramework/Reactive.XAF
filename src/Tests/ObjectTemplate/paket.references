@@ -1,0 +1,16 @@
+MagicOnion
+Shouldly
+NUnit
+NUnit3TestAdapter
+JetBrains.Annotations
+Moq
+Fasterflect.Xpand
+Xpand.Patcher
+akarnokd.reactive_extensions
+Xpand.Collections
+Microsoft.NET.Test.SDK
+Microsoft.CodeAnalysis.CSharp
+System.Text.Json
+Polly
+Newtonsoft.Json
+Enums.Net

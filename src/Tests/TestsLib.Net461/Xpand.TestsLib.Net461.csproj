@@ -64,5 +64,9 @@
       <SpecificVersion>false</SpecificVersion>
     </Reference>
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Update="Selenium.WebDriver" Version="4.0.0" />
+    <PackageReference Update="Selenium.Support" Version="4.0.0" />
+  </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

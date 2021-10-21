@@ -9,6 +9,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
+using DevExpress.Utils;
 using DevExpress.Xpo;
 using Fasterflect;
 using JetBrains.Annotations;
@@ -135,82 +136,108 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Merge(bindingList.Cast<object>().TakeLast(1).ToObservable(Scheduler.Immediate).IgnoreElements().To(bindingList))
                 .SelectMany(list => list.Cast<object>());
         }
-
-        [PublicAPI]
+        
         public static IObservable<T> WhenModifiedObjects<T>(this IObjectSpace objectSpace,Expression<Func<T,object>> memberSelector){
             var memberName = ((MemberExpression) memberSelector.Body).Member.Name;
             return objectSpace.WhenObjectChanged().Where(_ => _.e.Object is T && _.e.MemberInfo.Name == memberName)
                 .Select(_ => _.e.Object).Cast<T>();
         }
-        [PublicAPI]
-        public static IObservable<(IObjectSpace objectSpace, object[] objects)> WhenModifiedObjects(
-            this IObjectSpace objectSpace, bool emitAfterCommit, params Type[] objectTypes) 
-            => objectSpace.WhenCommiting(ObjectModification.All, emitAfterCommit, objectTypes);
-
-        [PublicAPI]
-        public static IObservable<(IObjectSpace objectSpace, object[] objects)> WhenModifiedObjects(this IObjectSpace objectSpace,
-            bool emitAfterCommit,ObjectModification objectModification = ObjectModification.All, params Type[] objectTypes) 
-            => objectSpace.WhenCommiting(objectModification, emitAfterCommit, objectTypes);
         
-        public static IObservable<(IObjectSpace objectSpace, object[] objects)> WhenModifiedObjects(this IObjectSpace objectSpace,
-            ObjectModification objectModification = ObjectModification.All, params Type[] objectTypes) 
-            => objectSpace.WhenCommiting(objectModification, false, objectTypes);
+        public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenModifiedObjectsDetailed<T>(
+            this IObjectSpace objectSpace, bool emitAfterCommit, params Type[] objectTypes) 
+            => objectSpace.WhenCommitingDetailed<T>(ObjectModification.All, emitAfterCommit, objectTypes);
 
-        public static IObservable<(IObjectSpace objectSpace, object[] objects)> WhenCommiting(this IObjectSpace objectSpace, ObjectModification objectModification, 
-            bool emitAfterCommit , params Type[] objectTypes){
+
+        public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)>
+            WhenModifiedObjectsDetailed<T>(this IObjectSpace objectSpace,
+            bool emitAfterCommit,ObjectModification objectModification = ObjectModification.All, params Type[] objectTypes) 
+            => objectSpace.WhenCommitingDetailed<T>(objectModification, emitAfterCommit, objectTypes);
+        
+        public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenModifiedObjectsDetailed<T>(this IObjectSpace objectSpace,
+            ObjectModification objectModification,bool emitAfterCommit=true, params Type[] objectTypes) 
+            => objectSpace.WhenCommitingDetailed<T>( emitAfterCommit,objectModification, objectTypes);
+        
+        public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenModifiedObjectsDetailed<T>(this IObjectSpace objectSpace,
+            ObjectModification objectModification = ObjectModification.All, params Type[] objectTypes) 
+            => objectSpace.WhenCommitingDetailed<T>(objectModification, false, objectTypes);
+
+        public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenCommitingDetailed<T>(
+                this IObjectSpace objectSpace, bool emitAfterCommit, ObjectModification objectModification, params Type[] objectTypes) {
             if (!objectTypes.Any()){
-                objectTypes = objectTypes.Concat(typeof(object).YieldItem()).ToArray();
+                objectTypes = objectTypes.Concat(typeof(T).YieldItem()).ToArray();
             }
             return objectSpace.WhenCommiting().SelectMany(_ => {
-                var modifiedObjects = objectSpace.ModifiedObjects(objectModification).Where(o => objectTypes.Any(type => type.IsInstanceOfType(o))).ToArray();
+                var modifiedObjects = objectSpace.ModifiedObjects<T>(objectModification)
+                    .Where(o => objectTypes.Any(type => type.IsInstanceOfType(o.instance))).ToArray();
                 return modifiedObjects.Any() ? emitAfterCommit ? objectSpace.WhenCommitted().FirstAsync().Select(space => (space, modifiedObjects))
-                    : (objectSpace, modifiedObjects).ReturnObservable() : Observable.Empty<(IObjectSpace objectSpace, object[] objects)>();
+                    : (objectSpace, modifiedObjects).ReturnObservable() : Observable.Empty<(IObjectSpace,(T instance, ObjectModification modification)[])>();
             });
         }
 
+        public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)>
+            WhenCommitingDetailed<T>(this IObjectSpace objectSpace, ObjectModification objectModification, 
+            bool emitAfterCommit , params Type[] objectTypes) 
+            => objectSpace.WhenCommitingDetailed<T>(emitAfterCommit, objectModification, objectTypes);
+        
+        public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)>
+            WhenCommitedDetailed<T>(this IObjectSpace objectSpace, ObjectModification objectModification, params Type[] objectTypes) 
+            => objectSpace.WhenCommitingDetailed<T>(true, objectModification, objectTypes);
+
         [PublicAPI]
-        public static IObservable<(IObjectSpace objectSpace, object[] objects)> WhenModifiedObjects(this IObjectSpace objectSpace, params Type[] objectTypes) 
-            => objectSpace.WhenCommiting(ObjectModification.All, false, objectTypes);
+        public static
+            IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)>
+            WhenModifiedObjectsDetailed<T>(this IObjectSpace objectSpace, params Type[] objectTypes) 
+            => objectSpace.WhenCommitingDetailed<T>(ObjectModification.All, false, objectTypes);
 
         [PublicAPI]
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenCommiting<T>(this IObjectSpace objectSpace, 
             ObjectModification objectModification = ObjectModification.All,bool emitAfterCommit = false) 
-            => objectSpace.WhenCommiting(objectModification, emitAfterCommit, typeof(T)).Select(t => (t.objectSpace,t.objects.Cast<T>()));
+            => objectSpace.WhenCommitingDetailed<T>(objectModification, emitAfterCommit, typeof(T))
+                .Select(t => (t.objectSpace,t.details.Select(t1 => t1.instance)));
 
-        static bool IsUpdated<T>(this IObjectSpace objectSpace, T t) 
+        public static bool IsUpdated<T>(this IObjectSpace objectSpace, T t) 
             => !objectSpace.IsNewObject(t)&&!objectSpace.IsDeletedObject(t);
 
         [PublicAPI]
         public static IObservable<(IObjectSpace objectSpace, T[] objects)> WhenDeletedObjects<T>(this IObjectSpace objectSpace,bool emitAfterCommit=false) 
-            => emitAfterCommit ?  objectSpace.WhenCommiting( ObjectModification.Deleted,true,typeof(T)).Select(t => (t.objectSpace,t.objects.Cast<T>().ToArray()))
+            => emitAfterCommit ? objectSpace.WhenCommiting<T>(ObjectModification.Deleted, true)
+                    .Select(t => (t.objectSpace, t.objects.Select(t1 => t1).ToArray())).Finally(() => { })
                 : objectSpace.WhenObjectDeleted()
-                    .Select(pattern => (pattern.objectSpace,pattern.e.Objects.OfType<T>().ToArray()))
+                    .Select(pattern => (pattern.objectSpace, pattern.e.Objects.OfType<T>().ToArray()))
                     .TakeUntil(objectSpace.WhenDisposed());
 
 
-        [PublicAPI]
-        public static IEnumerable<object> ModifiedObjects(this IObjectSpace objectSpace, ObjectModification objectModification)
-            => objectSpace.ModifiedObjects.Cast<object>().Where(_ => objectModification switch{
-                ObjectModification.Deleted => objectSpace.IsDeletedObject(_),
-                ObjectModification.New => objectSpace.IsNewObject(_),
-                ObjectModification.Updated => objectSpace.IsUpdated(_),
-                ObjectModification.NewOrDeleted => objectSpace.IsNewObject(_) || objectSpace.IsDeletedObject(_),
-                ObjectModification.NewOrUpdated => objectSpace.IsNewObject(_) || objectSpace.IsUpdated(_),
-                ObjectModification.DeletedOrUpdated => objectSpace.IsUpdated(_) || objectSpace.IsDeletedObject(_),
-                _ => true
-            });
+        public static IEnumerable<(object instance, ObjectModification modification)> ModifiedObjects(this IObjectSpace objectSpace,ObjectModification objectModification)
+            => objectSpace.ModifiedObjects.Cast<object>().Select(o => {
+                if (objectSpace.IsDeletedObject(o) && objectModification.HasAnyValue(ObjectModification.Deleted,
+                    ObjectModification.All, ObjectModification.NewOrDeleted, ObjectModification.UpdatedOrDeleted)) {
+                    return (o, ObjectModification.Deleted);
+                }
 
-        [PublicAPI]
-        public static IEnumerable<T> ModifiedObjects<T>(this IObjectSpace objectSpace, ObjectModification objectModification) 
-            => objectSpace.ModifiedObjects(objectModification).OfType<T>();
+                if (objectSpace.IsNewObject(o) && objectModification.HasAnyValue(ObjectModification.New,
+                    ObjectModification.All, ObjectModification.NewOrDeleted, ObjectModification.NewOrUpdated)) {
+                    return (o, ObjectModification.New);
+                }
 
-        [PublicAPI]
+                if (objectSpace.IsUpdated(o) && objectModification.HasAnyValue(ObjectModification.Updated,
+                    ObjectModification.All, ObjectModification.UpdatedOrDeleted, ObjectModification.NewOrUpdated)) {
+                    return (o, ObjectModification.Updated);
+                }
+
+                return default;
+                
+            }).WhereNotDefault();
+
+        
+        public static IEnumerable<(T instance, ObjectModification modification)> ModifiedObjects<T>(this IObjectSpace objectSpace, ObjectModification objectModification) 
+            => objectSpace.ModifiedObjects(objectModification).Where(t => t.instance is T).Select(t => ((T)t.instance,t.modification));
+        
         public static IObservable<T> ModifiedExistingObject<T>(this XafApplication application,
             Func<(IObjectSpace objectSpace,ObjectChangedEventArgs e),bool> filter = null){
             filter ??= (_ => true);
             return application.AllModifiedObjects<T>(_ => filter(_) && !_.objectSpace.IsNewObject(_.e.Object));
         }
-        [PublicAPI]
+
         public static IObservable<T> ModifiedNewObject<T>(this XafApplication application,
             Func<(IObjectSpace objectSpace,ObjectChangedEventArgs e),bool> filter = null){
             filter ??= (_ => true);
@@ -264,22 +291,23 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             this XafApplication application, ObjectModification objectModification = ObjectModification.All)
             => application.WhenObjectSpaceCreated()
                 .SelectMany(objectSpace => objectSpace.WhenCommiting<T>(objectModification));
-
+        
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenProviderCommitted<T>(
             this XafApplication application, ObjectModification objectModification = ObjectModification.All) {
             return application.WhenProviderObjectSpaceCreated().WhenCommitted<T>();
         }
 
-        static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenCommitted<T>(
+        public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenCommitted<T>(
             this IObservable<IObjectSpace> source, ObjectModification objectModification = ObjectModification.All) 
-            => source.SelectMany(objectSpace => objectSpace.WhenModifiedObjects(true,objectModification,typeof(T)).Select(t => (t.objectSpace,t.objects.Cast<T>())));
+            => source.SelectMany(objectSpace => objectSpace.WhenModifiedObjectsDetailed<T>(true,objectModification)
+                .Select(t => (t.objectSpace,t.details.Select(t1 => t1.instance))));
 
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenCommitted<T>(
             this XafApplication application, ObjectModification objectModification = ObjectModification.All)
-            => application.WhenObjectSpaceCreated().WhenCommitted<T>();
-
+            => application.WhenObjectSpaceCreated().WhenCommitted<T>(objectModification);
+        
         public static IObservable<T> Objects<T>(this IObservable<(IObjectSpace, IEnumerable<T> objects)> source)
-        => source.SelectMany(t => t.objects);
+            => source.SelectMany(t => t.objects);
         
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenExistingObjectCommiting<T>(this XafApplication application) 
             => application.WhenObjectSpaceCreated().SelectMany(objectSpace => objectSpace.WhenCommiting<T>(ObjectModification.Updated));
@@ -307,28 +335,26 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(NonPersistentObjectSpace objectSpace,ObjectGettingEventArgs e)> WhenObjectGetting(this NonPersistentObjectSpace item) 
             => Observable.FromEventPattern<EventHandler<ObjectGettingEventArgs>, ObjectGettingEventArgs>(h => item.ObjectGetting += h, h => item.ObjectGetting -= h,ImmediateScheduler.Instance)
                 .TransformPattern<ObjectGettingEventArgs, NonPersistentObjectSpace>();
-
-        public static IObservable<IObjectSpace> Committed(this IObservable<IObjectSpace> source) 
-            => source.SelectMany(item => Observable
-                .FromEventPattern<EventHandler, EventArgs>(h => item.Committed += h, h => item.Committed -= h,ImmediateScheduler.Instance)
-                .TransformPattern<IObjectSpace>());
-
+        
         public static IObservable<(IObjectSpace objectSpace,CancelEventArgs e)> Commiting(this IObservable<IObjectSpace> source) 
-            => source.SelectMany(item => Observable
-                .FromEventPattern<EventHandler<CancelEventArgs>, CancelEventArgs>(h => item.Committing += h, h => item.Committing -= h,ImmediateScheduler.Instance)
-                .TransformPattern<CancelEventArgs, IObjectSpace>()
-                .TraceRX());
+            => source.SelectMany(space => space.WhenCommiting());
         
         public static IObservable<(IObjectSpace objectSpace,HandledEventArgs e)> WhenCustomCommitChanges(this IObjectSpace source) 
             => Observable.FromEventPattern<EventHandler<HandledEventArgs>, HandledEventArgs>(h => source.CustomCommitChanges += h, h => source.CustomCommitChanges -= h,ImmediateScheduler.Instance)
                 .TransformPattern<HandledEventArgs, IObjectSpace>()
                 .TraceRX();
 
-        public static IObservable<IObjectSpace> WhenCommitted(this IObjectSpace item) 
-            => item.ReturnObservable().Committed();
+        public static IObservable<IObjectSpace> Committed(this IObservable<IObjectSpace> source) 
+            => source.SelectMany(objectSpace => objectSpace.WhenCommitted());
+        
+        public static IObservable<IObjectSpace> WhenCommitted(this IObjectSpace objectSpace) 
+            => Observable.FromEventPattern<EventHandler, EventArgs>(h => objectSpace.Committed += h, h => objectSpace.Committed -= h,ImmediateScheduler.Instance)
+                .TransformPattern<IObjectSpace>();
 
         public static IObservable<(IObjectSpace objectSpace, CancelEventArgs e)> WhenCommiting(this IObjectSpace item) 
-            => item.ReturnObservable().Commiting();
+            => Observable.FromEventPattern<EventHandler<CancelEventArgs>, CancelEventArgs>(h => item.Committing += h, h => item.Committing -= h,ImmediateScheduler.Instance)
+                .TransformPattern<CancelEventArgs, IObjectSpace>()
+                .TraceRX();
 
         [PublicAPI]
         public static IObservable<(IObjectSpace objectSpace,ObjectsManipulatingEventArgs e)> ObjectDeleted(this IObservable<IObjectSpace> source) 
@@ -347,11 +373,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .TransformPattern<ObjectChangedEventArgs, IObjectSpace>();
 
         public static IObservable<Unit> Disposed(this IObservable<IObjectSpace> source) 
-            => source.SelectMany(item => Observable.FromEventPattern<EventHandler,EventArgs>(h => item.Disposed += h, h => item.Disposed -= h,ImmediateScheduler.Instance))
-                .ToUnit();
+            => source.SelectMany(objectSpace => objectSpace.WhenDisposed());
 
-        public static IObservable<Unit> WhenDisposed(this IObjectSpace source)
-            => source.ReturnObservable().Disposed();
+        public static IObservable<Unit> WhenDisposed(this IObjectSpace objectSpace)
+            => Observable.FromEventPattern<EventHandler,EventArgs>(h => objectSpace.Disposed += h, h => objectSpace.Disposed -= h,ImmediateScheduler.Instance)
+                .ToUnit();
 
         [PublicAPI]
         public static IObservable<IObjectSpace> WhenModifyChanged(this IObjectSpace objectSpace) 
@@ -372,13 +398,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 #endif
 
         
-        public static IObservable<IObjectSpace> WhenReloaded(this IObjectSpace source) 
-            => source.ReturnObservable().WhenReloaded();
+        public static IObservable<IObjectSpace> WhenReloaded(this IObjectSpace objectSpace) 
+            => Observable.FromEventPattern<EventHandler, EventArgs>(h => objectSpace.Reloaded += h, h => objectSpace.Reloaded -= h,ImmediateScheduler.Instance)
+                .Select(pattern => (IObjectSpace) pattern.Sender);
 
         public static IObservable<IObjectSpace> WhenReloaded(this IObservable<IObjectSpace> source) 
-            => source.SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(h => item.Reloaded += h, h => item.Reloaded -= h,ImmediateScheduler.Instance)
-                .Select(pattern => (IObjectSpace) pattern.Sender)
-            );
+            => source.SelectMany(item => item.WhenReloaded());
 
         internal static IObservable<Unit> ShowPersistentObjectsInNonPersistentView(this XafApplication application)
             => application.WhenObjectViewCreating()
@@ -397,14 +422,15 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
     }
 
+    
     public enum ObjectModification{
         All,
         New,
-        Deleted,
-        Updated,
-        NewOrDeleted,
         NewOrUpdated,
-        DeletedOrUpdated
+        NewOrDeleted,
+        Updated,
+        UpdatedOrDeleted,
+        Deleted
     }
 
 }

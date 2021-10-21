@@ -61,11 +61,12 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
             var map = synchronize(objectSpace).SubscribeReplay();
             objectSpace.Delete(localEntity1);
             objectSpace.CommitChanges();
+            await Task.Delay(TimeSpan.FromSeconds(3));
             objectSpace.Delete(localEntity2);
             objectSpace.CommitChanges();
 
             
-            await map.Take(2).LastAsync().Delay(TimeSpan.FromSeconds(3)).SelectMany((cloudEntity, i) => Observable.FromAsync(assert)).Timeout(timeout);
+            await map.Take(2).LastAsync().Delay(TimeSpan.FromSeconds(3)).SelectMany((_, _) => Observable.FromAsync(assert)).Timeout(timeout);
 
         }
 
@@ -83,13 +84,13 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
             modifyLocalEntity(localEntity,0);
             objectSpace.CommitChanges();
             
-            await map.Take(1).SelectMany((cloudEntity, i) => assert( localEntity, cloudEntity).ToObservable())
+            await map.Take(1).SelectMany((cloudEntity, _) => assert( localEntity, cloudEntity).ToObservable())
                 .Timeout(timeout).ToTaskWithoutConfigureAwait();
             
             modifyLocalEntity(localEntity,1);
             objectSpace.CommitChanges();
             
-            await map.Take(1).Select((cloudEntity, i) => {
+            await map.Take(1).Select((cloudEntity, _) => {
                     assert( localEntity, cloudEntity);
                     return Unit.Default;
                 })
@@ -105,7 +106,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
 
             await modified.Timeout(timeout);
 
-            var entities = listEntities(tokenStorage).SubscribeReplay().Do(entity => { });
+            var entities = listEntities(tokenStorage).SubscribeReplay();
             await entities.Timeout(timeout);
 
             tokenStorage.Token.ShouldNotBeNull();
@@ -121,7 +122,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
             var localEntity1 = localEntityFactory(objectSpace,0);
             objectSpace.CommitChanges();
             
-            await map.FirstAsync().Select((cloudEntity, i) => {
+            await map.FirstAsync().Select((cloudEntity, _) => {
                     assert( localEntity1, cloudEntity,0);
                     return Unit.Default;
                 })
@@ -131,7 +132,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
             var localEntity2 = localEntityFactory(objectSpace,1);
             objectSpace.CommitChanges();
 
-            await map.LastAsync().Select((cloudEntity, i) => {
+            await map.LastAsync().Select((cloudEntity, _) => {
                     assert( localEntity2, cloudEntity,1);
                     return Unit.Default;
                 })
@@ -181,11 +182,11 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
         private static async Task ActiveState(Window viewWindow, bool authenticationNeeded, string serviceName){
             
             await Observable.Interval(TimeSpan.FromMilliseconds(200))
-                .Where(l => viewWindow.ConnectAction(serviceName).Active[nameof(Extensions.Office.Cloud.Extensions.NeedsAuthentication)]==authenticationNeeded)
+                .Where(_ => viewWindow.ConnectAction(serviceName).Active[nameof(Extensions.Office.Cloud.Extensions.NeedsAuthentication)]==authenticationNeeded)
                 .FirstAsync()
                 .ToTaskWithoutConfigureAwait();
             await Observable.Interval(TimeSpan.FromMilliseconds(200))
-                .Where(l => viewWindow.DisconnectAction(serviceName).Active[nameof(Extensions.Office.Cloud.Extensions.NeedsAuthentication)]=!authenticationNeeded)
+                .Where(_ => viewWindow.DisconnectAction(serviceName).Active[nameof(Extensions.Office.Cloud.Extensions.NeedsAuthentication)]=!authenticationNeeded)
                 .FirstAsync()
                 .ToTaskWithoutConfigureAwait();
         }

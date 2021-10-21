@@ -37,7 +37,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             var name = nameof(IObjectSpaceProvider.CreateObjectSpace);
             if (harmony.GetPatchedMethods().Select(m => m.Name).All(s => s != name)) {
                 foreach (var provider in application.ObjectSpaceProviders) {
-                    var methodInfo = provider.GetType().Method(name,Flags.InstancePublic);
+                    var methodInfo = provider.GetType().Methods(name).First(info => !info.Parameters().Any());
                     harmony.Patch(methodInfo, postfix: new HarmonyMethod(typeof(ObjectSpaceProviderExtensions), nameof(CreateObjectSpace)));
                 }
             }

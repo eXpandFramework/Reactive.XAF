@@ -104,7 +104,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         }
 
         [VisibleInListView(false), VisibleInDetailView(false), VisibleInLookupListView(false), Key(true)][NonCloneable]
-        public Guid Oid{ get; set; }
+        public long Index{ get; set; }
 
         string _resultType;
         [Size(255)]

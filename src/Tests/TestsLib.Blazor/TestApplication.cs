@@ -7,6 +7,7 @@ using DevExpress.ExpressApp.Blazor;
 using DevExpress.ExpressApp.Xpo;
 using Microsoft.Extensions.DependencyInjection;
 using Xpand.Extensions.AppDomainExtensions;
+using Xpand.Extensions.Blazor;
 using Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions;
 using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -16,11 +17,10 @@ namespace Xpand.TestsLib.Blazor{
         public IXpoDataStoreProvider DataStoreProvider { get; set; }
     }
 
-    public class TestBlazorApplication : BlazorApplication, ITestApplication{
-
-
+    public class TestBlazorApplication : BlazorApplication, ITestApplication,ISharedBlazorApplication{
         [SuppressMessage("ReSharper", "UnusedParameter.Local")]
-        public TestBlazorApplication(Type sutModule, bool transmitMessage = true, bool handleExceptions=true):this(){
+        public TestBlazorApplication(Type sutModule, bool transmitMessage = true, bool handleExceptions=true):this() {
+            TransmitMessage = transmitMessage;
             SUTModule = sutModule;
             TraceClientConnected = this.ClientConnect();
             TraceClientBroadcast = this.ClientBroadcast();
@@ -33,7 +33,7 @@ namespace Xpand.TestsLib.Blazor{
                 .Subscribe();
         }
 
-        public bool TransmitMessage => false;
+        public bool TransmitMessage { get; }
 
         public IObservable<Unit> TraceClientBroadcast{ get; set; }
         public IObservable<Unit> TraceClientConnected{ get; set; }
@@ -60,6 +60,7 @@ namespace Xpand.TestsLib.Blazor{
         protected override string GetDcAssemblyFilePath() => null;
 
         protected override string GetModelAssemblyFilePath() => $@"{AppDomain.CurrentDomain.ApplicationPath()}\ModelAssembly{Guid.NewGuid()}.dll";
+        public bool UseNonSecuredObjectSpaceProvider { get; set; }
     }
 
 }

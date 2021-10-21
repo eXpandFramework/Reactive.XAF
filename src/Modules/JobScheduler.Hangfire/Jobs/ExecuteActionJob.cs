@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor;
@@ -29,21 +30,24 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Jobs {
         public ExecuteActionJob(BlazorApplication application) => Application = application;
 
         [JobProvider]
-        public void Execute(PerformContext context) {
+        public async Task Execute(PerformContext context) {
 	        var containerInitializer = Application.ServiceProvider.GetService<IValueManagerStorageContainerInitializer>();
 	        if (((IValueManagerStorageAccessor) containerInitializer)?.Storage == null) {
 		        containerInitializer.Initialize();
 	        }
-            using var objectSpace = Application.CreateObjectSpace();
-            var jobId = context.JobId();
-            var job = objectSpace.GetObjectsQuery<BusinessObjects.ExecuteActionJob>().First(actionJob => actionJob.Id==jobId);
-            var modelView = Application.Model.Views[job.View.Name];
-            CreateView(job, modelView).Subscribe();
-            var newView = Application.NewView(modelView.ViewType(),modelView.AsObjectView.ModelClass.TypeInfo.Type);
-            var window = Application.CreateViewWindow();
-            window.SetView(newView);
-            var action = window.Action(job.Action.Name);
-            action.DoTheExecute();
+            await Observable.Start(() => {
+                
+                using var objectSpace = Application.CreateObjectSpace();
+                var jobId = context.JobId();
+                var job = objectSpace.GetObjectsQuery<BusinessObjects.ExecuteActionJob>().First(actionJob => actionJob.Id==jobId);
+                var modelView = Application.Model.Views[job.View.Name];
+                CreateView(job, modelView).Subscribe();
+                var newView = Application.NewView(modelView.ViewType(),modelView.AsObjectView.ModelClass.TypeInfo.Type);
+                var window = Application.CreateViewWindow();
+                window.SetView(newView);
+                var action = window.Action(job.Action.Name);
+                action.DoTheExecute();
+            });
         }
 
         private IObservable<View> CreateView(BusinessObjects.ExecuteActionJob job, IModelView modelView) 

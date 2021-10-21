@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Application>
+  <Views>
+    <DetailView Id="ObjectStateNotification_DetailView">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="8.837656099903938">
+            <LayoutGroup Id="ObjectStateNotification" RelativeSize="38.04347826086956" Caption="Object">
+              <LayoutItem Id="Id" ViewItem="Id" Index="0" RelativeSize="100" IsNewNode="True" />
+              <LayoutItem Id="Object" Index="1" RelativeSize="45.76271186440678" Removed="True" />
+            </LayoutGroup>
+            <LayoutGroup Id="Job" RelativeSize="61.95652173913044">
+              <LayoutItem Id="Object" ViewItem="Object" Index="0" RelativeSize="47.36842105263158" IsNewNode="True" />
+              <LayoutItem Id="CronExpression" RelativeSize="52.63157894736842" Index="1" />
+              <LayoutItem Id="JobMethod" RelativeSize="29.62962962962963" Index="1" Removed="True" />
+              <LayoutItem Id="Id" Removed="True" />
+              <LayoutItem Id="JobType" RelativeSize="33.333333333333336" Removed="True" />
+            </LayoutGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="SizeableEditors" RelativeSize="45.53314121037464">
+            <LayoutItem Id="SelectedObjectsCriteria" RelativeSize="100" />
+          </LayoutGroup>
+          <TabbedGroup Id="Tabs" RelativeSize="45.629202689721424">
+            <LayoutGroup Id="NotificationChannels" RelativeSize="100">
+              <LayoutItem Id="NotificationChannels" RelativeSize="100" />
+            </LayoutGroup>
+            <LayoutGroup Id="Workers" RelativeSize="100">
+              <LayoutItem Id="Workers" RelativeSize="100" />
+            </LayoutGroup>
+          </TabbedGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+    <ListView Id="ObjectStateNotification_NotificationChannels_ListView">
+      <Columns>
+        <ColumnInfo Id="Name" Width="898" />
+      </Columns>
+    </ListView>
+  </Views>
+</Application>

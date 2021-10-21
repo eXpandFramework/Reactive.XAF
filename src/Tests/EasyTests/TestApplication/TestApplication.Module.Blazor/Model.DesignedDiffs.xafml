@@ -1,4 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Application>
-  
+  <ReactiveModules>
+    <ReactiveLogger>
+      <TraceSources Enabled="True" PersistStrategy="All" />
+    </ReactiveLogger>
+  </ReactiveModules>
 </Application>

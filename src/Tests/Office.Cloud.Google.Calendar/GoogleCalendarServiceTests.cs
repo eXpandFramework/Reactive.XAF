@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
@@ -31,7 +32,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
     [NonParallelizable]
     public class GoogleCalendarServiceTests : CommonCalendarTests{
         
-        [Test]
+        [Test][Apartment(ApartmentState.STA)]
         [XpandTest()]
         public override async Task Map_Two_New_Events(){
             await MapTwoNewEvents(CalendarTestExtensions.CalendarName);
@@ -47,7 +48,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
                         await afterAssert(t.service);
                     }
                     else{
-                        application.ObjectSpaceProvider.AssertEvent(typeof(Event), @event, _.cloud.Description,
+                        application.ObjectSpaceProvider.AssertEvent(typeof(Event), @event, _.cloud.Summary,
                             _.cloud.End.DateTime, _.cloud.Id, @event.Subject);    
                     }
                 });
@@ -112,13 +113,12 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
                 },Timeout);
         }
 
-        [Test]
+        [Test][Apartment(ApartmentState.STA)]
         [XpandTest()]
         public override async Task Delete_Two_Events(){
             using var application = Platform.Win.CalendarModule().Application;
             var t = await application.InitializeService();
             var existingObjects = await application.CreateExistingObjects(nameof(Delete_Two_Events),count:2);
-            
             await t.frame.View.ObjectSpace.Delete_Two_Entities(existingObjects.Select(tuple => tuple.local).ToArray(),
                 space => CalendarService.Updated.When(MapAction.Delete).Select(_ => _.cloud).TakeUntilDisposed(application), async () => {
                     var allEvents = await t.service.GetCalendar(CalendarTestExtensions.CalendarName).SelectMany(list => t.service.Events.List(list.Id).ToObservable());
@@ -126,8 +126,8 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
                 }, Timeout,existingObjects.Select(_ => _.cloudEvent).ToArray());
         }
 
-        // [TestCase(false)]
-        // [TestCase(true)]
+        [TestCase(false)]
+        [TestCase(true)]
         [XpandTest()]
         public override async Task Customize_Delete_Two_Events(bool handleDeletion){
             using var application = Platform.Win.CalendarModule().Application;

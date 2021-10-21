@@ -11,10 +11,12 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Model;
 using DevExpress.Utils;
 using JetBrains.Annotations;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.ExpressionExtensions;
+using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -48,8 +50,15 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
 			        .SaveEvent(application)
 			        .ToUnit()
 			        .Merge(ListenerEvents.RefreshViewDataSource(application))
-			        .Merge(application.RegisterListener(listener), Scheduler.Immediate);
+			        .Merge(application.RegisterListener(listener), Scheduler.Immediate)
+			        .Merge(manager.TraceEventListViewDataAccess());
 	        });
+
+        private static IObservable<Unit> TraceEventListViewDataAccess(this ApplicationModulesManager manager) 
+            => manager.WhenGeneratingModelNodes<IModelViews>()
+                .Where(views => ((IModelSources)views.Application).Modules.GetPlatform()==Platform.Blazor)
+                .SelectMany(views => views.OfType<IModelListView>().Where(view => view.ModelClass.TypeInfo.Type==typeof(TraceEvent))
+                    .Do(view => view.DataAccessMode=CollectionSourceDataAccessMode.Queryable).ToNowObservable().ToUnit());
 
         public static IObservable<Unit> RefreshViewDataSource(this IObservable<ITraceEvent> events, XafApplication application) 
             => application.GetPlatform() == Platform.Web ? Observable.Empty<Unit>()
@@ -187,9 +196,11 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                     var modelReactiveLogger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>()?.ReactiveLogger;
                     if (modelReactiveLogger != null) {
                         var strategy = modelReactiveLogger.TraceSources.PersistStrategy;
-                        return e.RXAction == RXAction.OnNext && strategy.Is(ObservableTraceStrategy.OnNext)||e.RXAction == RXAction.OnError &&
-                            strategy.Is(ObservableTraceStrategy.OnError)||new[] { RXAction.Dispose, RXAction.Subscribe, RXAction.OnCompleted, RXAction.None }
-                                .Contains(e.RXAction) && strategy.Is(ObservableTraceStrategy.All);
+                        if (e.RXAction == RXAction.OnNext && strategy.Is(ObservableTraceStrategy.OnNext)||e.RXAction == RXAction.OnError &&
+                            strategy.Is(ObservableTraceStrategy.OnError)) return true;
+                        if (new[] { RXAction.Dispose, RXAction.Subscribe, RXAction.OnCompleted }
+                            .Contains(e.RXAction) && strategy.Is(ObservableTraceStrategy.All)) return true;
+                        if (e.RXAction == RXAction.None && strategy.Is(ObservableTraceStrategy.All)) return true;
                     }
                     return false;
                     

@@ -203,7 +203,8 @@ namespace Xpand.TestsLib.Common{
             {"DocumentStyleManagerModule", 61486},
             {"JobSchedulerModule", 61487},
             {"RestModule", 61488},
-            {"WindowsModule", 61489}
+            {"WindowsModule", 61489},
+            {"JobSchedulerNotificationModule", 61490}
         };
 
         public static TestObserver<T> StartTest<T>(this XafApplication application,IObservable<T> test,int delay=200) {

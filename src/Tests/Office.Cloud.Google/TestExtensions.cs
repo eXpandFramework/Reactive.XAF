@@ -34,13 +34,13 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tests{
 			modelOAuth.AddScopes("https://www.googleapis.com/auth/tasks","https://www.googleapis.com/auth/calendar.events","https://www.googleapis.com/auth/calendar");
             
             if (platform == Platform.Win){
-				modelOAuth.ClientId = json.installed.client_id;
-				modelOAuth.ClientSecret = json.installed.client_secret;	
+				modelOAuth.ClientId = json?.installed.client_id;
+				modelOAuth.ClientSecret = json?.installed.client_secret;	
 			}
 			else{
-				modelOAuth.ClientId = json.web.client_id;
-				modelOAuth.ClientSecret = json.web.client_secret;
-                modelOAuth.RedirectUri = json.web.redirect_uris[0];
+				modelOAuth.ClientId = json?.web.client_id;
+				modelOAuth.ClientSecret = json?.web.client_secret;
+                modelOAuth.RedirectUri = json?.web.redirect_uris[0];
 			}
 			
         }

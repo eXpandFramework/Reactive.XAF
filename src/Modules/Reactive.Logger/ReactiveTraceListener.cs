@@ -66,7 +66,9 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                 traceEvent.Line = Convert.ToInt32(value);
             }
             traceEvent.LogicalOperationStack = string.Join(Environment.NewLine, eventCache.LogicalOperationStack.ToArray());
-            
+            if (source.Contains("Notifica")) {
+                
+            }
             _eventTraceSubject.OnNext(traceEvent);
         }
 

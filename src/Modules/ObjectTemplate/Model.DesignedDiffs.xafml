@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Application>
+  <Views>
+    <DetailView Id="NotificationRule_DetailView">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="100">
+            <LayoutGroup Id="NotificationRule" RelativeSize="100">
+              <TabbedGroup Id="Item2" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
+                <LayoutGroup Id="Item1" ShowCaption="True" CaptionLocation="Top" Index="0" RelativeSize="100" Caption="Main" IsNewNode="True">
+                  <LayoutItem Id="Name" ViewItem="Name" Index="0" RelativeSize="3.21285140562249" IsNewNode="True" />
+                  <LayoutGroup Id="Autoec61e15a-2fe0-4430-9ad3-647cf918b0ad" ShowCaption="False" Caption="Autoec61e15a-2fe0-4430-9ad3-647cf918b0ad(7)" Direction="Horizontal" Index="1" RelativeSize="3.6144578313253013" IsNewNode="True">
+                    <LayoutItem Id="Object" ViewItem="Object" Index="0" RelativeSize="50" IsNewNode="True" />
+                    <LayoutItem Id="MonitorContext" ViewItem="MonitorContext" Index="1" RelativeSize="50" IsNewNode="True" />
+                  </LayoutGroup>
+                  <LayoutItem Id="UserCriteria" ViewItem="UserCriteria" Index="2" RelativeSize="9.437751004016064" IsNewNode="True" />
+                  <LayoutGroup Id="NotificationProviders_Group" ShowCaption="True" Caption="Notification Providers" Index="3" RelativeSize="83.73493975903614" IsNewNode="True">
+                    <LayoutItem Id="NotificationProviders" ViewItem="NotificationProviders" Index="0" RelativeSize="100" IsNewNode="True" />
+                  </LayoutGroup>
+                </LayoutGroup>
+                <LayoutGroup Id="Item3" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="1" Caption="Template" RelativeSize="100" IsNewNode="True">
+                  <LayoutGroup Id="Item4" ShowCaption="False" CaptionLocation="Top" Index="0" RelativeSize="100" Caption="Item4" Direction="Horizontal" IsNewNode="True">
+                    <LayoutItem Id="Item5" Index="0" RelativeSize="1.0775862068965518" SizeConstraintsType="Custom" MinSize="10, 10" MaxSize="10, 0" IsNewNode="True" />
+                    <LayoutItem Id="Template" ShowCaption="False" ViewItem="Template" Index="1" RelativeSize="98.92241379310344" IsNewNode="True" />
+                  </LayoutGroup>
+                </LayoutGroup>
+              </TabbedGroup>
+              <LayoutItem Id="MonitorContext" ViewItem="MonitorContext" Removed="True" />
+              <LayoutItem Id="Name" ViewItem="Name" Removed="True" />
+              <LayoutItem Id="Object" ViewItem="Object" Removed="True" />
+            </LayoutGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="NotificationProviders_Group" Direction="Vertical" RelativeSize="44.860710854947165" Removed="True">
+            <LayoutItem Id="NotificationProviders" RelativeSize="100" ViewItem="NotificationProviders" />
+          </LayoutGroup>
+          <LayoutGroup Id="SizeableEditors" RelativeSize="72.8146013448607" Removed="True">
+            <LayoutItem Id="Criteria" RelativeSize="43.147751605995715" Index="1" ViewItem="Criteria" Removed="True" />
+            <LayoutItem Id="Template" RelativeSize="85.79545454545455" Index="1" ShowCaption="False" ViewItem="Template" Removed="True" />
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+  </Views>
+</Application>

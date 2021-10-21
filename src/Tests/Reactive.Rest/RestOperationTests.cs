@@ -20,7 +20,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests {
             _restObjects = new[] {new RestOperationObject() {Name = "test"}, new RestOperationObject() {Name = "test2"}};
         }
 
-        [Test]
+        [Test][Order(100)]
         public async Task Request_object() {
             HandlerMock.SetupRestOperationObject(_restObjects);
             
@@ -30,7 +30,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests {
             restObject.Name.ShouldBe(_restObjects.Last().Name);
         }
         
-        [Test]
+        [Test][Order(200)]
         public async Task Create_object() {
 	        
             HandlerMock.SetupRestOperationObject(_restObjects);
@@ -41,7 +41,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests {
             await RestService.Object.FirstAsync();
         }
 
-        [Test]
+        [Test][Order(300)]
         public async Task Update_object() {
             var objects = new[]{new RestOperationObject()};
             HandlerMock.SetupRestOperationObject(objects);
@@ -53,7 +53,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests {
             await RestService.Object.FirstAsync();
         }
 
-        [Test]
+        [Test][Order(400)]
         public async Task Delete_object() {
             var objectSpace = Application.CreateObjectSpace(typeof(RestOperationObject));
             var objects = new[]{objectSpace.CreateObject<RestOperationObject>()};
@@ -66,7 +66,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests {
         }
 
         [TestCase(false,"disable")]
-        [TestCase(true,"enable")]
+        [TestCase(true,"enable")][Order(500)]
         public async Task Property_Operation_on_existing_object(bool isEnable,string name) {
             var objects = new[]{new RestOperationPropertyObject(){IsEnabled = !isEnable}};
             HandlerMock.SetupRestOperationObject(objects);
@@ -81,7 +81,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests {
 
         }
 
-        [Test]
+        [Test][Order(600)]
         public void RestOperation_Action() {
             HandlerMock.SetupRestOperationObject(_restObjects);
             var window = Application.CreateViewWindow();

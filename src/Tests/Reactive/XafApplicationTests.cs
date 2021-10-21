@@ -13,6 +13,7 @@ using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Reactive.Services;
+using Xpand.XAF.Modules.Reactive.Tests.Common;
 
 
 namespace Xpand.XAF.Modules.Reactive.Tests{

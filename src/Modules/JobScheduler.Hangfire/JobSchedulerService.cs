@@ -54,8 +54,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager)
             => manager.CheckBlazor(typeof(HangfireStartup).FullName, typeof(JobSchedulerModule).Namespace)
                 .Merge(manager.WhenApplication(application => application.ScheduleJobs()
-                            .Merge(application.DeleteJobs())
-                    )
+                            .Merge(application.DeleteJobs()))
                     .Merge(manager.TriggerJobsFromAction())
                     .Merge(manager.PauseJobsFromAction())
                     .Merge(manager.ResumeJobsFromAction())
@@ -71,7 +70,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
                 .WhenExecuted()
                 .SelectMany(args => {
                     var serviceProvider = args.Action.Application.ToBlazor().ServiceProvider;
-                    var uri = $"{new Uri($"{serviceProvider.GetService<IHttpContextAccessor>()?.HttpContext.Request.GetDisplayUrl()}").GetLeftPart(UriPartial.Authority)}/hangfire/jobs/details/";
+                    var uri = $"{new Uri($"{serviceProvider.GetService<IHttpContextAccessor>()?.HttpContext?.Request.GetDisplayUrl()}").GetLeftPart(UriPartial.Authority)}/hangfire/jobs/details/";
                     var jsRuntime = serviceProvider.GetService<IJSRuntime>();
                     return args.SelectedObjects.Cast<JobWorker>().ToObservable(ImmediateScheduler.Instance).SelectMany(
                             job => jsRuntime?.InvokeAsync<object>("open", new object[] {$"{uri}{job.Id}", "_blank"}).AsTask());
@@ -173,7 +172,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
         internal static Expression<Action> CallExpression(this Job job) {
             var method = job.JobType.Type.Method(job.JobMethod.Name.Replace(" ", ""));
             var arguments = method.Parameters().Count == 1 && method.Parameters().Any(info => info.ParameterType == typeof(PerformContext))
-                ? new Expression[] {Expression.Constant(null, typeof(PerformContext))} : new Expression[0];
+                ? new Expression[] {Expression.Constant(null, typeof(PerformContext))} : Array.Empty<Expression>();
             return job.JobType.Type.CallExpression(method,arguments);
         }
         internal static IObservable<TSource> TraceJobSchedulerModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,

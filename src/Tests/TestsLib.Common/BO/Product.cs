@@ -5,6 +5,7 @@ using Xpand.XAF.Persistent.BaseImpl;
 namespace Xpand.TestsLib.Common.BO{
     [FriendlyKeyProperty(nameof(ProductName))][DefaultClassOptions]
     public class Product : CustomBaseObject{
+        
         public Product(Session session) : base(session){
         }
 

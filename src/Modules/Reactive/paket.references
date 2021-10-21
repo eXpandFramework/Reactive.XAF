@@ -10,3 +10,4 @@ Microsoft.CodeAnalysis.CSharp
 System.ServiceModel.Http                             
 Newtonsoft.Json
 System.Security.Cryptography.Xml
+Enums.Net

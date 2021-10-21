@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reactive.Subjects;
 using DevExpress.ExpressApp.Blazor;
 using Hangfire;
@@ -6,6 +7,7 @@ using Hangfire.Server;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
     [JobProvider]
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     public class TestJobDI:TestJob {
         public TestJobDI(BlazorApplication provider):base(provider) {
         }
@@ -15,7 +17,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
 
     [JobProvider]
     public class TestJob {
-        public static Subject<TestJob> Jobs=new Subject<TestJob>();
+        public static Subject<TestJob> Jobs=new();
 
         public PerformContext Context { get; private set; }
 

@@ -9,9 +9,7 @@ using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.BO;
 
-
-
-namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
+namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
     public abstract class JobSchedulerCommonTest : BlazorCommonTest {
         protected override void ResetXAF() {
             

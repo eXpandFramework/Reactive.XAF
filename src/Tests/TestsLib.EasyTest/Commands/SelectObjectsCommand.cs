@@ -41,7 +41,7 @@ namespace Xpand.TestsLib.EasyTest.Commands{
             
         }
         public SelectObjectsCommand(string column,params string[] rows){
-            Parameters.Add(new Parameter($"Columns = {column}"));
+            Parameters.Add(new Parameter($"Columns = {column.CompoundName()}"));
             Parameters.AddRange(rows.Select(s => new Parameter($"Row = {s}")));
             _command = this.ConvertTo<SelectRecordsCommand>();
         }

@@ -26,7 +26,7 @@ namespace Xpand.TestsLib.Blazor {
         }
 
         protected BlazorApplication NewBlazorApplication(Type startupType){
-            IHostBuilder defaultBuilder = Host.CreateDefaultBuilder();
+            var defaultBuilder = Host.CreateDefaultBuilder();
             
             WebHost = defaultBuilder
                 .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup(startupType))

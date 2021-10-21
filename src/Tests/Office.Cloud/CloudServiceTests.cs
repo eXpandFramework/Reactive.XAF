@@ -4,15 +4,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
 using NUnit.Framework;
-using Shouldly;
 using Xpand.Extensions.Office.Cloud.BusinessObjects;
-using Xpand.Extensions.Reactive.Transform;
-using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
-using Xpand.TestsLib;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.TestsLib.Net461;
-using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 // ReSharper disable once CheckNamespace
 namespace Xpand.XAF.Modules.Office.Cloud.Tests{
@@ -40,17 +35,13 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
         
             await NeedsAuthentication(application).Select(b => b).Not_NeedsAuthentication_when_AuthenticationStorage_current_user_can_authenticate();
         }
-
-
+        
         [Test][XpandTest()][Apartment(ApartmentState.STA)]
         public async Task NeedsAuthentication_when_AuthenticationStorage_does_not_contain_current_user(){
             using var application=Application(Platform.Win);
             await application.NeedsAuthentication_when_AuthenticationStorage_does_not_contain_current_user(() => NeedsAuthentication(application));
         }
 
-        
-        
-        
         [Test][XpandTest()][Apartment(ApartmentState.STA)]
         public async Task Actions_Active_State_when_authentication_not_needed(){
             using var application=Application(Platform.Win);
@@ -65,8 +56,6 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
             NewAuthentication(Platform.Win, application);
             await application.Disconnect_Action_Destroys_Connection(ServiceName);
         }
-        
-        
-        
+
     }
 }

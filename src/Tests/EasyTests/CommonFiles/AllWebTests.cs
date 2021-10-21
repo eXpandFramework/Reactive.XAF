@@ -9,6 +9,7 @@ using Xpand.XAF.Modules.Reactive;
 #endif
 using System;
 using System.IO;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ALL.Tests;
@@ -86,6 +87,8 @@ namespace Web.Tests{
                 
 #if NETCOREAPP3_1_OR_GREATER
                 await adapter.TestJobScheduler();
+                await adapter.TestJobSchedulerNotification();
+                adapter.TestExecuteActionJob();
 #endif
             });
         }
