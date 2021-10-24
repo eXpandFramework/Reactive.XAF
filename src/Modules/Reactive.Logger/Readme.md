@@ -80,10 +80,10 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |----|----
 |**DevExpress.ExpressApp.ConditionalAppearance**|**Any**
  |**DevExpress.Xpo**|**Any**
-|Xpand.Extensions|4.211.9
- |Xpand.Extensions.Reactive|4.211.9
- |Xpand.Extensions.XAF|4.211.9
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.211.9
+|Xpand.Extensions|4.211.10
+ |Xpand.Extensions.Reactive|4.211.10
+ |Xpand.Extensions.XAF|4.211.10
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.211.10
  |System.Reactive|5.0.0
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |Xpand.Patcher|2.0.30
@@ -91,7 +91,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |Microsoft.CodeAnalysis.CSharp|3.11.0
  |System.Configuration.ConfigurationManager|5.0.0
  |Newtonsoft.Json|13.0.1
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.211.9
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.211.10
 
 ## Issues-Debugging-Troubleshooting
 

@@ -79,11 +79,14 @@ Task CompileTests -precondition { return ((Get-VersionPart $DXVersion Minor) -ne
         SyncrhonizePaketVersion
         CompileTestSolution "$Root\src\Tests\Tests.sln"
         FixNet461DXAssembliesTargetFramework
-        if (!(Test-AzDevops)) {
-            Invoke-Task -taskName BuildNugetConsumers
-        }
+        
     } -Maximum 3
+
+    if (!(Test-AzDevops)) {
+        Invoke-Task -taskName BuildNugetConsumers
+    }
     Get-ChildItem $root\bin "*xpand*.dll" | Test-AssemblyReference -VersionFilter $DXVersion
+    
 }
 
 function FixNet461DXAssembliesTargetFramework {
@@ -201,7 +204,7 @@ Task  CreateNuspec {
             Branch    = $branch
         }
         New-Item -Path "$root\bin\Nupkg" -ItemType Directory  -ErrorAction SilentlyContinue -Force | Out-Null
-        $version = (& (Get-NugetPath) list -source "$root\bin\nupkg;" | ConvertTo-PackageObject | Select-Object -First 1).Version
+        $version = (Get-NugetPackageSearchMetadata -Name Xpand.XAF.Modules.Reactive -Source C:\Work\Reactive.XAF\bin\nupkg\).identity.version.version
         $currentVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo("$root\bin\Xpand.XAF.Modules.Reactive.dll").FileVersion
         if ($currentVersion -ne $version) {
             Get-ChildItem "$root\bin\nupkg" | Remove-Item -Force

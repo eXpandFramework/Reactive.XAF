@@ -102,9 +102,9 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp**|**Any**
-|Xpand.Extensions|4.211.9
- |Xpand.Extensions.XAF|4.211.9
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.211.9
+|Xpand.Extensions|4.211.10
+ |Xpand.Extensions.XAF|4.211.10
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.211.10
  |System.ValueTuple|4.5.0
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |JetBrains.Annotations|2021.2.0
@@ -114,7 +114,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |System.Configuration.ConfigurationManager|5.0.0
  |System.Reactive|5.0.0
  |Newtonsoft.Json|13.0.1
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.211.9
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.211.10
 
 ## Issues-Debugging-Troubleshooting
 
