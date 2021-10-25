@@ -46,10 +46,16 @@ Invoke-Script {
 }
 Invoke-Script {
     
-    $latestMinors = Get-XAFLatestMinors 
+    $latestMinors = Get-XAFLatestMinors -Source "$DxApiFeed" 
     "latestMinors:"
     $latestMinors | Format-Table
-    $CustomVersion = $latestMinors | Where-Object { "$($_.Major).$($_.Minor)" -eq $result }
+    if ($latestMinors -is [array]){
+        $CustomVersion = $latestMinors | Where-Object { "$($_.Major).$($_.Minor)" -eq $result }
+    }
+    else{
+        $CustomVersion=$latestMinors
+    }
+    
     "CustomVersion=$CustomVersion"
 
     $DXVersion = Get-DevExpressVersion 
@@ -79,7 +85,7 @@ Invoke-Script {
     }
     Set-Location "$SourcePath\src"
     Clear-XProjectDirectories
-    Start-XpandProjectConverter -version $CustomVersion -path $SourcePath -SkipInstall
+    # Start-XpandProjectConverter -version $CustomVersion -path $SourcePath -SkipInstall
     "PaketRestore $SourcePath"
     try {
         Invoke-PaketRestore -Strict 

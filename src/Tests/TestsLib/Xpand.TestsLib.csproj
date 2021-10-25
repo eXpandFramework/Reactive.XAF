@@ -20,7 +20,7 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>TRACE;XAF211</DefineConstants>
+    <DefineConstants>TRACE;XAF212</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="AppDomainExtensions.cs" />

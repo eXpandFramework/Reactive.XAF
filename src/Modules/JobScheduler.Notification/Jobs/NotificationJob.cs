@@ -22,9 +22,9 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Jobs {
         [JobProvider]
         public async Task Execute(PerformContext context) {
             var containerInitializer = Application.ServiceProvider.GetService<IValueManagerStorageContainerInitializer>();
-            if (((IValueManagerStorageAccessor) containerInitializer)?.Storage == null) {
-                containerInitializer.Initialize();
-            }
+            // if (((IValueManagerStorageAccessor) containerInitializer)?.Storage == null) {
+                // containerInitializer.Initialize();
+            // }
 	        using var objectSpace = Application.CreateObjectSpace();
 	        await Application.JobNotification(context.JobId())
                 .SwitchIfEmpty(Unit.Default.ReturnObservable()).ToTask();

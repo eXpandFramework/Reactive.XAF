@@ -34,7 +34,7 @@
     <DebugSymbols>true</DebugSymbols>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <OutputPath>..\..\..\..\..\bin\TestWinApplication</OutputPath>
-    <DefineConstants>TRACE;XAF211</DefineConstants>
+    <DefineConstants>TRACE;XAF212.2.2</DefineConstants>
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -45,11 +45,11 @@
     <DebugSymbols>true</DebugSymbols>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <OutputPath>..\..\..\..\..\bin\TestWinApplication</OutputPath>
-    <DefineConstants>TRACE;XAF211</DefineConstants>
+    <DefineConstants>TRACE;XAF212.2.2</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'EasyTest|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
-    <DefineConstants>TRACE;DEBUG;XAF211</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;XAF212.2.2</DefineConstants>
     <DebugType>full</DebugType>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
@@ -102,10 +102,10 @@
     <Content Include="ExpressApp.ico" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="21.1.6" />
-    <PackageReference Include="DevExpress.EasyTest" Version="21.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.EasyTest" Version="21.2.2-beta-beta-beta-beta-beta" />
     <PackageReference Include="Google.Apis.People.v1" Version="1.25.0.830" />
     <PackageReference Include="Xpand.XAF.Win.All" Version="4.211.10.0" />
   </ItemGroup>

@@ -37,7 +37,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin</OutputPath>
-    <DefineConstants>TRACE;DEBUG;XAF211</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;XAF212.2.2</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -50,7 +50,7 @@
     <DebugType>full</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin</OutputPath>
-    <DefineConstants>TRACE;XAF211</DefineConstants>
+    <DefineConstants>TRACE;XAF212.2.2</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -63,7 +63,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'EasyTest|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin</OutputPath>
-    <DefineConstants>TRACE;DEBUG;EASYTEST;XAF211</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;EASYTEST;XAF212.2.2</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
@@ -134,14 +134,14 @@
     <Reference Include="System.Xml.Linq">
       <Private>False</Private>
     </Reference>
-    <PackageReference Include="DevExpress.ExpressApp.Web.All" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Web" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WebAdapter" Version="21.1.6" />
-    <PackageReference Include="DevExpress.EasyTest" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="21.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Web.All" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.Web" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WebAdapter" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.EasyTest" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="21.2.2-beta-beta-beta-beta-beta" />
     <PackageReference Include="Xpand.XAF.Web.All" Version="4.211.10.0">
     </PackageReference>
     <PackageReference Include="Google.Apis.People.v1" Version="1.25.0.830" />

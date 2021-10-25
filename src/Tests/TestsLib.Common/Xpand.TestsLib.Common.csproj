@@ -19,7 +19,7 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>TRACE;XAF211</DefineConstants>
+    <DefineConstants>TRACE;XAF212</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="AppDomainExtensions.cs" />
@@ -29,8 +29,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="TextCopy" Version="4.2.0" />
-    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="21.1.6" />
-    <PackageReference Include="DevExpress.Persistent.BaseImpl" Version="21.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="21.2.2-beta" />
+    <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="21.2.2-beta" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.Extensions">

@@ -17,10 +17,10 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <DefineConstants>TRACE;XAF211</DefineConstants>
+    <DefineConstants>TRACE;XAF212</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DefineConstants>TRACE;XAF211</DefineConstants>
+    <DefineConstants>TRACE;XAF212</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Xpand.Extensions">

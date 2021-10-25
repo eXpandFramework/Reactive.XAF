@@ -32,7 +32,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
             var modelTodo = application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Todo();
             modelTodo.DefaultTodoListName = taskFolderName;
             var client = await application.InitGraphServiceClient(newAuthentication:newAuthentication);
-            var foldersRequestBuilder = client.client.Me.Outlook.TaskFolders;
+            var foldersRequestBuilder = client.client.Me().Outlook.TaskFolders;
             var taskFolder = await foldersRequestBuilder.GetFolder(taskFolderName, !keepTaskFolder && taskFolderName!=TasksPagingFolderName);
             if (taskFolderName==TasksPagingFolderName){
                 taskFolder ??= await foldersRequestBuilder.Request()
@@ -106,10 +106,10 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo.Tests{
         public static async Task<IList<(Task task, OutlookTask outlookTask)>> CreateExistingObjects(
             this XafApplication application, string title, TaskStatus taskStatus = TaskStatus.InProgress,int count=1){
             var builder =await application.AuthorizeTestMS();
-            var folder = await builder.Me.Outlook.TaskFolders.GetFolder(TasksFolderName, true);
-            await builder.Me.Outlook.TaskFolders[folder.Id].DeleteAllTasks();
-            return await Observable.Range(0, count).SelectMany(i => {
-                return builder.Me.Outlook.TaskFolders[folder.Id].NewFolderTasks(1, title)
+            var folder = await builder.Me().Outlook.TaskFolders.GetFolder(TasksFolderName, true);
+            await builder.Me().Outlook.TaskFolders[folder.Id].DeleteAllTasks();
+            return await Observable.Range(0, count).SelectMany(_ => {
+                return builder.Me().Outlook.TaskFolders[folder.Id].NewFolderTasks(1, title)
                     .SelectMany(lst => lst).Select(outlookTask1 => (application.NewTask(taskStatus), outlookTask1));
             }).Buffer(count);
         }

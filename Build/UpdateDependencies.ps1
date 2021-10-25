@@ -1,5 +1,5 @@
 param(
-    [version]$CustomVersion=19.2.10.0
+    $CustomVersion=19.2.10.0
 )
 
 if ($CustomVersion -lt "20.2.0"){

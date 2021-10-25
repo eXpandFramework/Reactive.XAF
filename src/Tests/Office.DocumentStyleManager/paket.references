@@ -6,7 +6,7 @@ NUnit3TestAdapter
 DevExpress.ExpressApp.Office.Win
 DevExpress.ExpressApp.Security
 JetBrains.Annotations
-DevExpress.Persistent.BaseImpl
+DevExpress.Persistent.BaseImpl.Xpo
 DevExpress.Persistent.Base
 Fasterflect.Xpand
 akarnokd.reactive_extensions

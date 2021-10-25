@@ -39,7 +39,7 @@
     <DebugSymbols>true</DebugSymbols>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <OutputPath>..\..\..\..\..\bin\TestWinDesktopApplication</OutputPath>
-    <DefineConstants>TRACE;XAF211</DefineConstants>
+    <DefineConstants>TRACE;XAF212.2.2</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>full</DebugType>
@@ -49,7 +49,7 @@
     <DebugSymbols>true</DebugSymbols>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <OutputPath>..\..\..\..\..\bin\TestWinDesktopApplication</OutputPath>
-    <DefineConstants>TRACE;XAF211</DefineConstants>
+    <DefineConstants>TRACE;XAF212.2.2</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="_Program.cs" />
@@ -88,8 +88,8 @@
     <Content Include="ExpressApp.ico" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="21.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="21.2.2-beta-beta-beta-beta-beta" />
     <PackageReference Include="Google.Apis.People.v1" Version="1.25.0.830" />
     <PackageReference Include="System.ServiceModel.Http" Version="4.8.1" />
     <PackageReference Include="System.Collections.Immutable" Version="5.0" />

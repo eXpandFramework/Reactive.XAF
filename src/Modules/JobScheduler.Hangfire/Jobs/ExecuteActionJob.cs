@@ -32,9 +32,9 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Jobs {
         [JobProvider]
         public async Task Execute(PerformContext context) {
 	        var containerInitializer = Application.ServiceProvider.GetService<IValueManagerStorageContainerInitializer>();
-	        if (((IValueManagerStorageAccessor) containerInitializer)?.Storage == null) {
-		        containerInitializer.Initialize();
-	        }
+	        // if (((IValueManagerStorageAccessor) containerInitializer)?.Storage == null) {
+		        // containerInitializer.Initialize();
+	        // }
             await Observable.Start(() => {
                 
                 using var objectSpace = Application.CreateObjectSpace();

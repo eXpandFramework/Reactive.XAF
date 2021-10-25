@@ -16,7 +16,7 @@
     <RootNamespace>Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Tests</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="21.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="21.2.2-beta" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageReference Include="hangfire.core" Version="1.7.24" />
     <PackageReference Include="hangfire.sqlserver" Version="1.7.24" />

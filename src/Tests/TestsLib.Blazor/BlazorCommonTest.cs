@@ -33,9 +33,9 @@ namespace Xpand.TestsLib.Blazor {
                 .Build();
             WebHost.Start();
             var containerInitializer = WebHost.Services.GetService<IValueManagerStorageContainerInitializer>();
-            if (((IValueManagerStorageAccessor) containerInitializer)?.Storage == null) {
-                containerInitializer.Initialize();
-            }
+            // if (((IValueManagerStorageAccessor) containerInitializer)?.Storage == null) {
+                // containerInitializer.Initialize();
+            // }
             var newBlazorApplication = WebHost.Services.GetService<IXafApplicationProvider>()?.GetApplication();
             if (newBlazorApplication != null) {
                 newBlazorApplication.ServiceProvider = WebHost.Services;

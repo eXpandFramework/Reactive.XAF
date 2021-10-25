@@ -31,9 +31,9 @@ namespace Xpand.Extensions.Blazor {
         public BlazorApplication Application => _sharedApplication.Value;
     
         protected BlazorApplication CreateApplication() {
-            if (((IValueManagerStorageAccessor) _containerInitializer).Storage == null) {
-                _containerInitializer.Initialize();
-            }
+            // if (((IValueManagerStorageAccessor) _containerInitializer).Storage == null) {
+                // _containerInitializer.Initialize();
+            // }
             return NewBlazorApplication();
         }
     

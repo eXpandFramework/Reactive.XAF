@@ -15,13 +15,13 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DefineConstants>TRACE;DEBUG;XAF211XAF211</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;XAF212.2.2XAF212.2.2</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DefineConstants>TRACE;XAF211XAF211</DefineConstants>
+    <DefineConstants>TRACE;XAF212.2.2XAF212.2.2</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'EasyTest|AnyCPU' ">
-    <DefineConstants>TRACE;DEBUG;EASYTEST;XAF211XAF211</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;EASYTEST;XAF212.2.2XAF212.2.2</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Common\**" />
@@ -61,23 +61,23 @@
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Chart" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.CloneObject" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Dashboards" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Kpi" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Notifications" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.PivotChart" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.PivotGrid" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.ReportsV2" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.ScriptRecorder" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Security" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.StateMachine" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.TreeListEditors" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.ViewVariantsModule" Version="21.1.6" />
-    <PackageReference Include="DevExpress.Persistent.BaseImpl" Version="21.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.Chart" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.CloneObject" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.ConditionalAppearance" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.Dashboards" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.Kpi" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.Notifications" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.PivotChart" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.PivotGrid" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.ReportsV2" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.ScriptRecorder" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.Security" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.StateMachine" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.TreeListEditors" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.ViewVariantsModule" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.Persistent.BaseImpl" Version="21.2.2-beta-beta-beta-beta-beta" />
     <!-- <PackageReference Include="Xpand.XAF.Modules.Reactive" Version="4.202.55.1" /> -->
     <!-- <PackageReference Include="System.Drawing.Common" Version="5.0.2" /> -->
     <PackageReference Include="Xpand.XAF.Core.All" Version="4.211.10.0" />

@@ -11,6 +11,6 @@ Newtonsoft.Json
 Microsoft.NET.Test.Sdk
 System.Data.SqlClient
 DevExpress.ExpressApp.Win
-DevExpress.Persistent.BaseImpl
+DevExpress.Persistent.BaseImpl.Xpo
 akarnokd.reactive_extensions
 Fasterflect.Xpand

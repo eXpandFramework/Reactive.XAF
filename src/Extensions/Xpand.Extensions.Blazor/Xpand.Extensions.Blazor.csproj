@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -22,9 +22,9 @@
     <Compile Include="..\..\Common\AssemblyInfoVersion.cs" Link="Properties\AssemblyInfoVersion.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp" Version="21.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="21.2.2-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="21.2.2-beta" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="21.2.2-beta" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.Extensions">

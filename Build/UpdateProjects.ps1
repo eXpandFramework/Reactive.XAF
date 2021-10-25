@@ -1,12 +1,12 @@
 param(
-    [version]$DXVersion = "20.1.9"
+    $DXVersion = "21.2.2-beta"
 )
 $ErrorActionPreference = "Stop"
 $rootLocation = "$PSScriptRoot\..\"
 Set-Location "$rootLocation\src"
 
 
-$directive = "XAF$($DXVersion.Major)$($DXVersion.Minor)"
+$directive = "XAF$(Get-VersionPart $DXVersion Minor)".Replace(".","")
 Get-ChildItem -Filter *.csproj -Recurse | ForEach-Object {
     $fileName = $_.FullName
     [xml]$projXml = Get-Content $fileName

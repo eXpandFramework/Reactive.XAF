@@ -21,13 +21,13 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DefineConstants>TRACE;DEBUG;Blazor;XAF211XAF211</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;Blazor;XAF212.2.2XAF212.2.2</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DefineConstants>TRACE;Blazor;XAF211XAF211</DefineConstants>
+    <DefineConstants>TRACE;Blazor;XAF212.2.2XAF212.2.2</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'EasyTest|AnyCPU' ">
-    <DefineConstants>TRACE;DEBUG;EASYTEST;XAF211XAF211</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;EASYTEST;XAF212.2.2XAF212.2.2</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Common\**" />
@@ -53,8 +53,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Google.Apis.People.v1" Version="1.25.0.830" />
-    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="21.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="21.2.2-beta-beta-beta-beta-beta" />
     <PackageReference Include="Hangfire.MemoryStorage" Version="1.7.24.2" />
     <PackageReference Include="Hangfire.SqlServer" Version="1.7.24" />
     <PackageReference Include="Hangfire.Core" Version="1.7.24" />
@@ -65,7 +65,7 @@
     <PackageReference Include="Xpand.XAF.Web.All">
       <Version>4.211.10.0</Version>
     </PackageReference>
-    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="21.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="21.2.2-beta-beta-beta-beta-beta" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
     <PackageReference Include="System.Data.OleDb" Version="5.0" />
     <PackageReference Include="System.ServiceModel.Http" Version="4.8.1" />

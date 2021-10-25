@@ -79,11 +79,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
             => source.Trace(name, MicrosoftModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
         
-        [PublicAPI]
-        public static IUserRequestBuilder Me(this IBaseRequestBuilder builder) => builder.Client.Me();
-        [PublicAPI]
-        public static IUserRequestBuilder Me(this IBaseRequest builder) => builder.Client.Me();
-        public static IUserRequestBuilder Me(this IBaseClient client) => ((GraphServiceClient)client).Me;
+        
         
         static Prompt ToPrompt(this OAuthPrompt prompt) 
             => prompt switch{

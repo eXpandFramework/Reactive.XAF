@@ -29,9 +29,9 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
 
         public static async Task<GraphServiceClient> MSGraphClient(this XafApplication application,bool deleteAll=false){
             application.ObjectSpaceProvider.NewAuthentication();
-            var authorizeMS = await application.AuthorizeMS((exception, client) => Observable.Empty<AuthenticationResult>());
+            var authorizeMS = await application.AuthorizeMS((_, _) => Observable.Empty<AuthenticationResult>());
             if (deleteAll){
-                await authorizeMS.Me.Calendar.DeleteAllEvents();
+                await authorizeMS.Me().Calendar.DeleteAllEvents();
             }
             return authorizeMS;
         }
@@ -42,7 +42,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
             var modelTodo = application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Calendar();
             modelTodo.DefaultCalendarName = calendarName;
             var client =  await application.InitGraphServiceClient(newAuthentication);
-            var requestBuilder = client.client.Me.Calendars;
+            var requestBuilder = client.client.Me().Calendars;
             var calendar = await requestBuilder.GetCalendar(calendarName, !keepEvents && calendarName!=PagingCalendarName).ToTaskWithoutConfigureAwait();
             if (calendarName==PagingCalendarName){
                 calendar ??= await requestBuilder.Request().AddAsync(new global::Microsoft.Graph.Calendar(){Name = PagingCalendarName});
@@ -130,10 +130,10 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar.Tests{
         public static async Task<IList<(DevExpress.Persistent.BaseImpl.Event local, Event cloud)>> CreateExistingObjects(
             this XafApplication application, string title,int count=1){
             var builder =await application.AuthorizeTestMS();
-            var calendar = await builder.Me.Calendars.GetCalendar(CalendarName, true);
-            await builder.Me.Calendars[calendar.Id].DeleteAllEvents();
+            var calendar = await builder.Me().Calendars.GetCalendar(CalendarName, true);
+            await builder.Me().Calendars[calendar.Id].DeleteAllEvents();
             return await Observable.Range(0, count)
-                .SelectMany(i => builder.Me.Calendars[calendar.Id].NewCalendarEvents(1, title)
+                .SelectMany(_ => builder.Me().Calendars[calendar.Id].NewCalendarEvents(1, title)
                     .SelectMany(lst => lst).Select(outlookTask1 => (application.NewEvent(), outlookTask1)))
                 .Buffer(count);
         }

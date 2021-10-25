@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk.Razor">
   <PropertyGroup>
     <RazorLangVersion>3.0</RazorLangVersion>
@@ -48,8 +48,8 @@
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
     </Reference>
-    <PackageReference Include="DevExpress.ExpressApp" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="21.1.6" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="21.2.2-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="21.2.2-beta" />
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

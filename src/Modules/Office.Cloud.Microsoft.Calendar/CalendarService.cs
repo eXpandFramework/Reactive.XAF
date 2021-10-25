@@ -31,7 +31,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
         private static readonly ISubject<(Frame frame, GraphServiceClient client)> ClientSubject=new Subject<(Frame frame, GraphServiceClient client)>();
         public static IObservable<(Frame frame, GraphServiceClient client)> Client => ClientSubject.AsObservable();
         private static IUserRequestBuilder Me(this IBaseRequestBuilder builder) => builder.Client.Me();
-        private static IUserRequestBuilder Me(this IBaseClient client) => ((GraphServiceClient)client).Me;
+        public static IUserRequestBuilder Me(this IBaseClient client) => new UserRequestBuilder(((GraphServiceClient)client).BaseUrl + "/me", client);
         static readonly Subject<(Event cloud,IEvent local, MapAction mapAction,CallDirection callDirection)> UpdatedSubject=new();
         static readonly Subject<GenericEventArgs<(Func<IObjectSpace> objectSpace, IEvent local, Event cloud, MapAction mapAction, CallDirection callDirection)>> CustomizeSynchronizationSubject =
             new Subject<GenericEventArgs<(Func<IObjectSpace> objectSpace, IEvent target, Event source, MapAction mapAction, CallDirection callDirection)>>();
@@ -82,7 +82,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
             });
 
         private static IObservable<(Frame frame, GraphServiceClient client, global::Microsoft.Graph.Calendar calendar)> EnsureCalendar(this IObservable<(Frame frame, GraphServiceClient client)> source) 
-            => source.Select(_ => _.frame.Application.SelectMany(() => _.client.Me.Calendars
+            => source.Select(_ => _.frame.Application.SelectMany(() => _.client.Me().Calendars
                         .GetCalendar(_.frame.View.AsObjectView().Application().Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().Calendar().DefaultCalendarName, true))
                     .Select(calendar => (_.frame,_.client,calendar))
                 ).Merge()
@@ -102,7 +102,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
             this (Frame frame, GraphServiceClient client, global::Microsoft.Graph.Calendar calendar,IModelCalendarItem calerdarItem) _, SynchronizationType synchronizationType){
             var newCloudEventType = _.frame.View.Model.Application.Calendar().NewCloudEvent.TypeInfo.Type;
             Func<IObjectSpace> objectSpaceFactory = _.frame.Application.CreateObjectSpace;
-            return _.client.Me.CalendarView.ReturnObservable().SynchronizeLocalEvent(objectSpaceFactory,synchronizationType,
+            return _.client.Me().CalendarView.ReturnObservable().SynchronizeLocalEvent(objectSpaceFactory,synchronizationType,
                 Guid.Parse($"{_.frame.Application.Security.UserId}"), _.frame.View.ObjectTypeInfo.Type, newCloudEventType);
         }
         static IObservable<(Frame frame, GraphServiceClient client, global::Microsoft.Graph.Calendar calendar, IModelCalendarItem calerdarItem)> Authorize(this  IObservable<Frame> source) 
@@ -126,7 +126,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
         private static IObservable<(Event serviceObject, MapAction mapAction)> SynchronizeCloud(
             this IObservable<(Frame frame, GraphServiceClient client, global::Microsoft.Graph.Calendar calendar,
                 IModelCalendarItem calerdarItem)> source) 
-            => source.Select(client => client.client.Me.Calendars[client.calendar.Id].ReturnObservable()
+            => source.Select(client => client.client.Me().Calendars[client.calendar.Id].ReturnObservable()
                     .SynchronizeCloud(client.calerdarItem.SynchronizationType,
                         client.frame.View.ObjectSpace, client.frame.View.AsObjectView().Application().CreateObjectSpace)
                 )

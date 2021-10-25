@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{00D2F9A9-F3B7-4A5D-8556-DCF05493D5A6}</ProjectGuid>
@@ -11,20 +11,20 @@
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.RichEdit.Export" Version="21.1.6" />
-    <PackageReference Include="DevExpress.Office.Core" Version="21.1.6" />
-    <PackageReference Include="DevExpress.RichEdit.Core" Version="21.1.6" />
-    <PackageReference Include="DevExpress.Printing.Core" Version="21.1.6" />
-    <PackageReference Include="DevExpress.Data" Version="21.1.6" />
-    <PackageReference Include="DevExpress.Utils" Version="21.1.6" />
-    <PackageReference Include="DevExpress.Xpo" Version="21.1.6" />
-    <PackageReference Include="DevExpress.Win.Navigation" Version="21.1.6" />
-    <PackageReference Include="DevExpress.Win.Navigation" Version="21.1.6" />
-    <PackageReference Include="DevExpress.Win.TreeList" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Win" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="21.1.6" />
-    <PackageReference Include="DevExpress.ExpressApp" Version="21.1.6" />
-    <PackageReference Include="DevExpress.Persistent.Base" Version="21.1.6" />
+    <PackageReference Include="DevExpress.RichEdit.Export" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.Office.Core" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.RichEdit.Core" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.Printing.Core" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.Data" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.Utils" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.Xpo" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.Win.Navigation" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.Win.Navigation" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.Win.TreeList" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.Win" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="21.2.2-beta-beta-beta-beta-beta" />
+    <PackageReference Include="DevExpress.Persistent.Base" Version="21.2.2-beta-beta-beta-beta-beta" />
   </ItemGroup>
   <Import Project="..\..\..\..\.paket\Paket.Restore.targets" />
 </Project>

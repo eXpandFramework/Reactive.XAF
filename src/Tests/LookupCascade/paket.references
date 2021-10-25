@@ -2,7 +2,7 @@ akarnokd.reactive_extensions
 DevExpress.ExpressApp.ConditionalAppearance
 DevExpress.ExpressApp.Security.Xpo
 DevExpress.ExpressApp.Web
-DevExpress.Persistent.BaseImpl
+DevExpress.Persistent.BaseImpl.Xpo
 MagicOnion
 Moq
 Shouldly
