@@ -9,3 +9,4 @@ System.Configuration.ConfigurationManager
 Microsoft.CodeAnalysis.CSharp
 System.ServiceModel.Http
 Newtonsoft.Json
+Xpand.Collections

@@ -5,7 +5,7 @@ using DevExpress.ExpressApp.Model;
 using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.XAF.Modules.ObjectTemplate{
-	public interface IModelReactiveModulesObjectTemplat : IModelReactiveModule{
+	public interface IModelReactiveModulesObjectTemplate : IModelReactiveModule{
 		IModelObjectTemplate ObjectTemplate{ get; }
 	}
 
@@ -16,9 +16,9 @@ namespace Xpand.XAF.Modules.ObjectTemplate{
 			=> source.Select(modules => modules.ObjectTemplate());
 
 		public static IModelObjectTemplate ObjectTemplate(this IModelReactiveModules reactiveModules) 
-			=> ((IModelReactiveModulesObjectTemplat) reactiveModules).ObjectTemplate;
+			=> ((IModelReactiveModulesObjectTemplate) reactiveModules).ObjectTemplate;
 		internal static IModelObjectTemplate ModelObjectTemplate(this IModelApplication modelApplication) 
-			=> modelApplication.ToReactiveModule<IModelReactiveModulesObjectTemplat>().ObjectTemplate;
+			=> modelApplication.ToReactiveModule<IModelReactiveModulesObjectTemplate>().ObjectTemplate;
 
 	}
 

@@ -23,8 +23,9 @@ namespace Xpand.XAF.Modules.Blazor.Editors {
         protected override RenderFragment CreateViewComponentCore(object dataContext) 
             => builder => Render(builder,MemberInfo.GetValue(dataContext));
 
-        protected override RenderFragment RenderComponent() 
-            => builder => Render(builder, PropertyValue);
+        protected override void RenderComponent(RenderTreeBuilder builder) {
+            Render(builder, PropertyValue);
+        }
 
         private void Render(RenderTreeBuilder builder,object propertyValue) {
 

@@ -12,9 +12,9 @@
     <DebugType>full</DebugType>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
-    <CopyLocalLockFileAssemblie>true</CopyLocalLockFileAssemblie>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <PreserveCompilationContext>true</PreserveCompilationContext>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="21.1.6" />

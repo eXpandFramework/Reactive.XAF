@@ -19,14 +19,14 @@ namespace Xpand.XAF.Modules.ObjectTemplate.Tests.Common {
             
         }
         
-        public ObjectTemplateModule NotificationModule(params ModuleBase[] modules) {
+        public ObjectTemplateModule ObjectTemplateModule(params ModuleBase[] modules) {
             var newBlazorApplication = NewBlazorApplication();
-            return NotificationModule(newBlazorApplication);
+            return ObjectTemplateModule(newBlazorApplication);
         }
         
         protected BlazorApplication NewBlazorApplication() => NewBlazorApplication(typeof(NotificationStartup));
 
-        protected ObjectTemplateModule NotificationModule(BlazorApplication newBlazorApplication) {
+        protected ObjectTemplateModule ObjectTemplateModule(BlazorApplication newBlazorApplication) {
             var module = newBlazorApplication.AddModule<ObjectTemplateModule>(GetType().CollectExportedTypesFromAssembly().ToArray());
             // newBlazorApplication.ConfigureModel();
             newBlazorApplication.Logon();

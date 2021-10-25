@@ -1,16 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Application>
   <Views Id="Views">
-    <DetailView Id="NotificationRule_DetailView">
+    <DetailView Id="ObjectTemplate_DetailView">
       <Layout Id="Layout">
         <LayoutGroup Id="Main">
           <LayoutGroup Id="SimpleEditors">
-            <LayoutGroup Id="NotificationRule">
-              <TabbedGroup Id="Item2">
-                <LayoutGroup Id="Item1">
-                  <LayoutItem Id="Criteria" ViewItem="Criteria" />
-                </LayoutGroup>
-              </TabbedGroup>
+            <LayoutGroup Id="ObjectTemplate">
+              <LayoutItem Id="TestObjectType" Index="1" RelativeSize="48.38709677419355" ViewItem="TestObjectType" Removed="True" />
+              <LayoutGroup Id="Item2">
+                <LayoutItem Id="TestObjectCriteria" ViewItem="TestObjectCriteria" />
+                <LayoutItem Id="TestObjectType" ViewItem="TestObjectType" />
+              </LayoutGroup>
             </LayoutGroup>
           </LayoutGroup>
         </LayoutGroup>

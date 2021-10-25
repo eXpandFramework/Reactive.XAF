@@ -1,9 +1,11 @@
-﻿using DevExpress.Persistent.Base;
+﻿using System.ComponentModel;
+using DevExpress.Persistent.Base;
 using DevExpress.Xpo;
 using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.TestsLib.Common.BO{
     [FriendlyKeyProperty(nameof(AccessoryName))]
+    [DefaultProperty(nameof(AccessoryName))]
     public class Accessory : CustomBaseObject{
         private string _accessoryName;
         private long _accessoryID;

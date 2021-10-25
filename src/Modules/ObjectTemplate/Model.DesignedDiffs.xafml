@@ -1,41 +1,36 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Application>
   <Views>
-    <DetailView Id="NotificationRule_DetailView">
+    <DetailView Id="ObjectTemplate_DetailView">
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="SimpleEditors" RelativeSize="100">
-            <LayoutGroup Id="NotificationRule" RelativeSize="100">
-              <TabbedGroup Id="Item2" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
-                <LayoutGroup Id="Item1" ShowCaption="True" CaptionLocation="Top" Index="0" RelativeSize="100" Caption="Main" IsNewNode="True">
-                  <LayoutItem Id="Name" ViewItem="Name" Index="0" RelativeSize="3.21285140562249" IsNewNode="True" />
-                  <LayoutGroup Id="Autoec61e15a-2fe0-4430-9ad3-647cf918b0ad" ShowCaption="False" Caption="Autoec61e15a-2fe0-4430-9ad3-647cf918b0ad(7)" Direction="Horizontal" Index="1" RelativeSize="3.6144578313253013" IsNewNode="True">
-                    <LayoutItem Id="Object" ViewItem="Object" Index="0" RelativeSize="50" IsNewNode="True" />
-                    <LayoutItem Id="MonitorContext" ViewItem="MonitorContext" Index="1" RelativeSize="50" IsNewNode="True" />
+            <LayoutGroup Id="ObjectTemplate" RelativeSize="100" Caption="ObjectTemplate" Direction="Horizontal">
+              <LayoutGroup Id="Autod6f2cccb-f319-4ccc-89ea-1b9c6fe04103" ShowCaption="False" Caption="Autod6f2cccb-f319-4ccc-89ea-1b9c6fe04103(4)" Index="0" RelativeSize="37.97216699801193" IsNewNode="True">
+                <LayoutGroup Id="Item1" ShowCaption="False" CaptionLocation="Top" Index="0" RelativeSize="100" Caption="Template" IsNewNode="True">
+                  <LayoutItem Id="Name" ViewItem="Name" Index="0" RelativeSize="3.073967339097022" IsNewNode="True" />
+                  <LayoutItem Id="ModelType" ViewItem="ModelType" Index="1" RelativeSize="2.3054755043227666" IsNewNode="True" />
+                  <LayoutGroup Id="Autoe569aeaa-0033-4c79-90ae-8d08a1849b4e" ShowCaption="False" Caption="Autoe569aeaa-0033-4c79-90ae-8d08a1849b4e(8)" Direction="Vertical" Index="2" RelativeSize="9.221902017291066" IsNewNode="True">
+                    <LayoutItem Id="ModelCriteria" ViewItem="ModelCriteria" Index="0" RelativeSize="100" IsNewNode="True" />
                   </LayoutGroup>
-                  <LayoutItem Id="UserCriteria" ViewItem="UserCriteria" Index="2" RelativeSize="9.437751004016064" IsNewNode="True" />
-                  <LayoutGroup Id="NotificationProviders_Group" ShowCaption="True" Caption="Notification Providers" Index="3" RelativeSize="83.73493975903614" IsNewNode="True">
-                    <LayoutItem Id="NotificationProviders" ViewItem="NotificationProviders" Index="0" RelativeSize="100" IsNewNode="True" />
-                  </LayoutGroup>
+                  <LayoutItem Id="Error" ViewItem="Error" Index="3" RelativeSize="5.187319884726225" ShowCaption="False" IsNewNode="True" />
+                  <LayoutItem Id="Template" ShowCaption="False" ViewItem="Template" CaptionLocation="Top" Index="4" RelativeSize="80.21133525456293" IsNewNode="True" />
                 </LayoutGroup>
-                <LayoutGroup Id="Item3" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="1" Caption="Template" RelativeSize="100" IsNewNode="True">
-                  <LayoutGroup Id="Item4" ShowCaption="False" CaptionLocation="Top" Index="0" RelativeSize="100" Caption="Item4" Direction="Horizontal" IsNewNode="True">
-                    <LayoutItem Id="Item5" Index="0" RelativeSize="1.0775862068965518" SizeConstraintsType="Custom" MinSize="10, 10" MaxSize="10, 0" IsNewNode="True" />
-                    <LayoutItem Id="Template" ShowCaption="False" ViewItem="Template" Index="1" RelativeSize="98.92241379310344" IsNewNode="True" />
-                  </LayoutGroup>
-                </LayoutGroup>
-              </TabbedGroup>
-              <LayoutItem Id="MonitorContext" ViewItem="MonitorContext" Removed="True" />
-              <LayoutItem Id="Name" ViewItem="Name" Removed="True" />
-              <LayoutItem Id="Object" ViewItem="Object" Removed="True" />
+              </LayoutGroup>
+              <LayoutItem Id="Name" Index="0" RelativeSize="91.71636845593108" ViewItem="Name" Removed="True" />
+              <LayoutGroup Id="Auto2fddd95b-9d3a-4e7b-b64a-54cb4cbaba94" ShowCaption="False" Caption="Auto2fddd95b-9d3a-4e7b-b64a-54cb4cbaba94(12)" Index="1" RelativeSize="62.02783300198807" IsNewNode="True">
+                <LayoutItem Id="Preview" ViewItem="Preview" Index="0" RelativeSize="100" CaptionLocation="Top" ShowCaption="False" IsNewNode="True" />
+              </LayoutGroup>
+              <LayoutItem Id="ModelType" ViewItem="ModelType" Removed="True" />
             </LayoutGroup>
           </LayoutGroup>
-          <LayoutGroup Id="NotificationProviders_Group" Direction="Vertical" RelativeSize="44.860710854947165" Removed="True">
-            <LayoutItem Id="NotificationProviders" RelativeSize="100" ViewItem="NotificationProviders" />
+          <LayoutGroup Id="ModelProperties_Group" Direction="Horizontal" Index="1" RelativeSize="15.081652257444764" Caption="Model Properties" Removed="True">
+            <LayoutItem Id="ModelProperties" RelativeSize="100" ViewItem="ModelProperties" Removed="True" />
           </LayoutGroup>
-          <LayoutGroup Id="SizeableEditors" RelativeSize="72.8146013448607" Removed="True">
-            <LayoutItem Id="Criteria" RelativeSize="43.147751605995715" Index="1" ViewItem="Criteria" Removed="True" />
-            <LayoutItem Id="Template" RelativeSize="85.79545454545455" Index="1" ShowCaption="False" ViewItem="Template" Removed="True" />
+          <LayoutGroup Id="SizeableEditors" RelativeSize="7.492795389048991" Removed="True">
+            <LayoutItem Id="Template" RelativeSize="91.83895538628944" Index="0" ViewItem="Template" Removed="True" />
+            <LayoutItem Id="Preview" RelativeSize="87.25590955806783" ViewItem="Preview" Removed="True" />
+            <LayoutItem Id="TestObjectCriteria" RelativeSize="33.299284984678245" ViewItem="TestObjectCriteria" Removed="True" />
           </LayoutGroup>
         </LayoutGroup>
       </Layout>

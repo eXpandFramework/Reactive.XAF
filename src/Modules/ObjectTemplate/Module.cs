@@ -33,7 +33,7 @@ namespace Xpand.XAF.Modules.ObjectTemplate{
         
         public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders){
             base.ExtendModelInterfaces(extenders);
-            extenders.Add<IModelReactiveModules,IModelReactiveModulesObjectTemplat>();
+            extenders.Add<IModelReactiveModules,IModelReactiveModulesObjectTemplate>();
         }
     }
 }

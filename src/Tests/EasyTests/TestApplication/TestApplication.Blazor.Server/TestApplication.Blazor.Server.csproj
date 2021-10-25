@@ -2,6 +2,9 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <Deterministic>false</Deterministic>
+    <PublishWithAspNetCoreTargetManifest>false</PublishWithAspNetCoreTargetManifest>
+    <PreserveCompilationReferences>true</PreserveCompilationReferences>
+    <PreserveCompilationContext>true</PreserveCompilationContext>
     <AssemblyVersion>1.0.*</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
     <Configurations>Debug;Release;EasyTest</Configurations>

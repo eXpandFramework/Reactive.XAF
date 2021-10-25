@@ -9,12 +9,17 @@ namespace Xpand.XAF.Modules.Blazor.Editors {
     public class ComponentAdapter:ComponentAdapterBase {
         
         private readonly Func<RenderFragment> _fragmentFactory;
-        protected ComponentAdapter() { }
+
+        protected ComponentAdapter() {
+            ((IComponentModel)DisplayTextModel).Changed += (sender, args) => {
+
+            };
+        }
         
         public ComponentAdapter(Func<RenderFragment> fragmentFactory) => _fragmentFactory = fragmentFactory;
         public override void SetAllowEdit(bool allowEdit) { }
         public override object GetValue() => null;
-        public override void SetValue(object value) => DisplayTextModel.DisplayText = $"{value}";
+        public override void SetValue(object value) => DisplayTextModel.Text = $"{value}";
         public override void SetAllowNull(bool allowNull) { }
         public override void SetDisplayFormat(string displayFormat) { }
         public override void SetEditMask(string editMask) { }
@@ -25,7 +30,7 @@ namespace Xpand.XAF.Modules.Blazor.Editors {
         public override void SetMaxLength(int maxLength) { }
         public override void SetNullText(string nullText) { }
         protected override RenderFragment CreateComponent() => _fragmentFactory();
-        public DisplayTextModel DisplayTextModel { get; }=new();
+        public DxTextBoxModel DisplayTextModel { get; }=new();
     }
     
 }

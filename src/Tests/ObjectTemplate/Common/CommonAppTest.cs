@@ -1,8 +1,5 @@
 ﻿using DevExpress.ExpressApp.Blazor;
 using NUnit.Framework;
-using Xpand.Extensions.XAF.NonPersistentObjects;
-
-using Xpand.XAF.Modules.Notification.Tests.BOModel;
 
 namespace Xpand.XAF.Modules.ObjectTemplate.Tests.Common {
     public abstract class CommonAppTest:CommonTest{
@@ -32,7 +29,7 @@ namespace Xpand.XAF.Modules.ObjectTemplate.Tests.Common {
         public override void Init() {
             base.Init();
             Application = NewBlazorApplication();
-            NotificationModule(Application);
+            ObjectTemplateModule(Application);
         }
     }
 }

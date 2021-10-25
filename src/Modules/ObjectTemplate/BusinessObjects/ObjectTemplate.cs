@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.ConditionalAppearance;
+using DevExpress.ExpressApp.Editors;
+using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Utils;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
@@ -12,21 +14,42 @@ using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.ObjectTemplate.BusinessObjects {
     [DefaultClassOptions]
+    [Appearance("Color Error",AppearanceItemType.ViewItem, nameof(Error)+"!=''",TargetItems = nameof(Error),FontColor = "Red")]
+    [Appearance("Hide Error",AppearanceItemType.ViewItem, nameof(Error)+" Is null",TargetItems = nameof(Error),Visibility = ViewItemVisibility.Hide)]
     public class ObjectTemplate:CustomBaseObject {
-        private ObjectType _object;
+        private ObjectType _modelType;
         public ObjectTemplate(Session session) : base(session) { }
 
         [DataSourceProperty(nameof(Objects))]
         [ValueConverter(typeof(ObjectTypeValueConverter))]
-        [Persistent]
-        public ObjectType Object {
-            get => _object;
+        public ObjectType ModelType {
+            get => _modelType;
             set {
-                if (SetPropertyValue(nameof(Object), ref _object, value)) {
-                    OnChanged(nameof(View));
-                }
+                SetPropertyValue(nameof(ModelType), ref _modelType, value);
+                OnChanged(nameof(ModelProperties));
             }
         }
+
+        string _error;
+
+        [Size(SizeAttribute.Unlimited)]
+        public string Error {
+            get => _error;
+            internal set => SetPropertyValue(nameof(Error), ref _error, value);
+        }
+        
+        public List<ObjectString> ModelProperties => CaptionHelper.ApplicationModel.BOModel
+            .Where(c => c.TypeInfo.Type == _modelType?.Type).SelectMany(c => c.AllMembers)
+            .Select(c => new ObjectString(c.Caption) { Name = c.Name }).ToList();
+        
+        string _modelCriteria;
+        [CriteriaOptions(nameof(ModelType)+"."+nameof(ObjectType.Type))]
+        [EditorAlias(EditorAliases.CriteriaPropertyEditor), Size(SizeAttribute.Unlimited)]
+        public string ModelCriteria {
+            get => _modelCriteria;
+            set => SetPropertyValue(nameof(ModelCriteria), ref _modelCriteria, value);
+        }
+        
         [Browsable(false)]
         public IList<ObjectType> Objects 
             => CaptionHelper.ApplicationModel.BOModel.Where(c => c.TypeInfo.IsPersistent)
@@ -37,11 +60,25 @@ namespace Xpand.XAF.Modules.ObjectTemplate.BusinessObjects {
 
         [Size(SizeAttribute.Unlimited)]
         [RuleRequiredField]
+        [ModelDefault("RowCount","40")]
+        [EditorAlias(EditorAliases.RichTextPropertyEditor)]
+        [ImmediatePostData]
         public string Template {
             get => _template;
             set => SetPropertyValue(nameof(Template), ref _template, value);
         }
 
+        string _preview;
+
+        [Size(SizeAttribute.Unlimited)][NonPersistent]
+        [ModelDefault("RowCount","30")]
+        // [EditorAlias(Extensions.XAF.Attributes.EditorAliases.MarkupContent)]
+        [EditorAlias(EditorAliases.RichTextPropertyEditor)] 
+        public string Preview {
+            get => _preview;
+            set => SetPropertyValue(nameof(Preview), ref _preview, value);
+        }
+        
         string _name;
 
         [RuleRequiredField][RuleUniqueValue]

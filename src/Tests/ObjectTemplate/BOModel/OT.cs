@@ -3,10 +3,10 @@ using DevExpress.Persistent.Base;
 using DevExpress.Xpo;
 using Xpand.XAF.Persistent.BaseImpl;
 
-namespace Xpand.XAF.Modules.PositionInListView.Tests.BOModel{
+namespace Xpand.XAF.Modules.ObjectTemplate.Tests.BOModel{
     [DefaultProperty(nameof(Name))]
-    public class PIL:CustomBaseObject{
-        public PIL(Session session) : base(session){
+    public class OT:CustomBaseObject{
+        public OT(Session session) : base(session){
         }
 
         string _name;

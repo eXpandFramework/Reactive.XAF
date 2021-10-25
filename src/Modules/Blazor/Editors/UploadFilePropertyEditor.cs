@@ -12,7 +12,7 @@ using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using Fasterflect;
-using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.Http;
 using Xpand.Extensions.StreamExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -43,17 +43,16 @@ namespace Xpand.XAF.Modules.Blazor.Editors {
         readonly Subject<Unit> _upLoaded=new();
         public UploadFilePropertyEditor(Type objectType, IModelMemberViewItem model) : base(objectType, model) {}
 
-        protected override RenderFragment RenderComponent() 
-            => builder => {
-                builder.AddMarkupContent(0,@"
+        protected override void RenderComponent(RenderTreeBuilder builder) {
+            builder.AddMarkupContent(0,@"
 <div id=""overviewDemoDropZone"" class=""card custom-drop-zone jumbotron"">
     <svg class=""drop-file-icon mb-3"" role=""img"" style=""width: 42px; height: 42px;""><use href=""#drop-file-icon""></use></svg>
     <span>Drag and Drop File Here</span>
 </div>
 ");
-                builder.AddComponent(NewDxUpload(),1);
+            builder.AddComponent(NewDxUpload(),1);
 
-            };
+        }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "BL0005:Component parameter should not be set outside of its component.", Justification = "<Pending>")]
         protected DxUpload NewDxUpload() {

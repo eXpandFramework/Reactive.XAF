@@ -34,7 +34,7 @@ namespace TestApplication.Win{
         protected override void CreateDefaultObjectSpaceProvider(CreateCustomObjectSpaceProviderEventArgs args){
             args.ObjectSpaceProvider=new SecuredObjectSpaceProvider((ISelectDataSecurityProvider) Security, new ConnectionStringDataStoreProvider(args.ConnectionString), true);
             args.ObjectSpaceProviders.Add(new NonPersistentObjectSpaceProvider(TypesInfo, null));
-            // args.ObjectSpaceProvider = new XPObjectSpaceProvider(new ConnectionStringDataStoreProvider(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString), true);
+            args.ObjectSpaceProvider = new XPObjectSpaceProvider(new ConnectionStringDataStoreProvider(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString), true);
         }
     }
 

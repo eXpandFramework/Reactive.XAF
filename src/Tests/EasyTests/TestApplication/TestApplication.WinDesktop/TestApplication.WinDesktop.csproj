@@ -2,6 +2,8 @@
   <PropertyGroup>
     <ProductVersion>9.0.30729</ProductVersion>
     <ProjectGuid>{55D272EF-2068-4A8E-BF55-F10766942FDA}</ProjectGuid>
+    <PreserveCompilationReferences>true</PreserveCompilationReferences>
+    <PreserveCompilationContext>true</PreserveCompilationContext>
     <OutputType>WinExe</OutputType>
     <ApplicationIcon>ExpressApp.ico</ApplicationIcon>
     <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
@@ -26,7 +28,6 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <NoWarn>NU1603;NETSDK1086</NoWarn>
     <AssemblyName>TestApplication.WinDesktop</AssemblyName>
-    <CopyLocalLockFileAssemblie>true</CopyLocalLockFileAssemblie>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
