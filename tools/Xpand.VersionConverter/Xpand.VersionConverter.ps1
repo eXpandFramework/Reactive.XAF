@@ -35,6 +35,9 @@ Write-VerboseLog "targetFilter=$targetFilter"
 UpdateBlazor
 if (!$DevExpressVersion){
     $dxVersion = GetDevExpressVersion $targetPath $referenceFilter $projectFile 
+    if (!$dxVersion){
+        return
+    }
 }
 else{
     $dxVersion=$DevExpressVersion

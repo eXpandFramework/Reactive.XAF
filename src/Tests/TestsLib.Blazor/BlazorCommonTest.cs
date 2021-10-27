@@ -32,7 +32,8 @@ namespace Xpand.TestsLib.Blazor {
                 .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup(startupType))
                 .Build();
             WebHost.Start();
-            var containerInitializer = WebHost.Services.GetService<IValueManagerStorageContainerInitializer>();
+            var containerInitializer = WebHost.Services.GetRequiredService<IValueManagerStorageContainerInitializer>();
+            containerInitializer.Initialize();
             // if (((IValueManagerStorageAccessor) containerInitializer)?.Storage == null) {
                 // containerInitializer.Initialize();
             // }

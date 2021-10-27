@@ -25,7 +25,7 @@ namespace Xpand.XAF.Modules.ObjectTemplate.Tests {
 
             var render = await objectTemplate.Render();
             
-            render.ShouldBe($"30{Environment.NewLine}20{Environment.NewLine}10");
+            render.ShouldBe("302010");
         }
 
         [Test][Order(200)]

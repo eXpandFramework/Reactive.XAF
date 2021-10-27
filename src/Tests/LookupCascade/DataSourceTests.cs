@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Web;
@@ -27,7 +28,7 @@ namespace Xpand.XAF.Modules.LookupCascade.Tests{
                 
             var bytes = Convert.FromBase64String(clientDataSource.First(_ => _.viewId==productLookupListView.Id).objects);
             var products = JsonConvert.DeserializeObject<dynamic>(bytes.Unzip());
-            ((int) products.Count).ShouldBe(2);
+            ((int) products?.Count).ShouldBe(2);
             $"{products[0].Key}".ShouldBe(LookupCascadeService.FieldNames);
             $"{products[0].Columns}".ShouldBe(string.Join("&", HttpUtility.UrlEncode(productLookupListView.Columns[nameof(Product.ProductName)].Caption),
                 HttpUtility.UrlEncode(productLookupListView.Columns[nameof(Product.Price)].Caption)));
@@ -44,7 +45,7 @@ namespace Xpand.XAF.Modules.LookupCascade.Tests{
                 
             var bytes = Convert.FromBase64String(clientDataSource.First(_ => _.viewId==productLookupListView.Id).objects);
             var products = JsonConvert.DeserializeObject<dynamic>(bytes.Unzip());
-            ((int) products.Count).ShouldBe(2);
+            ((int) products?.Count).ShouldBe(2);
             $"{products[1].Key}".ShouldBe(string.Empty);
             HttpUtility.UrlDecode($"{products[1].Columns}").ShouldBe(LookupCascadeService.NA.Repeat(2,"&"));
         }
@@ -71,7 +72,7 @@ namespace Xpand.XAF.Modules.LookupCascade.Tests{
                 
             var bytes = Convert.FromBase64String(clientDataSource.First(_ => _.viewId==accessoryLookupListView.Id).objects);
             var products = JsonConvert.DeserializeObject<dynamic>(bytes.Unzip());
-            ((int) products.Count).ShouldBe(3);
+            ((int) products?.Count).ShouldBe(3);
             objectSpace.GetObjectByHandle($"{products[2].Key}").ShouldBe(accessory);
             HttpUtility.UrlDecode($"{products[2].Columns}").ShouldBe($"{accessory.AccessoryName}&{accessory.Product.Oid}");
         }
@@ -96,12 +97,12 @@ namespace Xpand.XAF.Modules.LookupCascade.Tests{
             clientDataSource.Length.ShouldBe(2);
             var bytes = Convert.FromBase64String(clientDataSource.First(_ => _.viewId==productLookupListView.Id).objects);
             var objects = JsonConvert.DeserializeObject<dynamic>(bytes.Unzip());
-            ((int) objects.Count).ShouldBe(3);
+            ((int) objects?.Count).ShouldBe(3);
             objectSpace.GetObjectByHandle($"{objects[2].Key}").ShouldBe(product);
                 
             bytes = Convert.FromBase64String(clientDataSource.First(_ => _.viewId==accessoryListView.Id).objects);
             objects = JsonConvert.DeserializeObject<dynamic>(bytes.Unzip());
-            ((int) objects.Count).ShouldBe(3);
+            ((int) objects?.Count).ShouldBe(3);
             objectSpace.GetObjectByHandle($"{objects[2].Key}").ShouldBe(accessory);
         }
 

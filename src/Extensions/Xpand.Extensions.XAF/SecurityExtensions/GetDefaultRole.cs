@@ -1,6 +1,7 @@
 ﻿using System;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Security;
 using DevExpress.Persistent.Base;
 using Fasterflect;
@@ -42,9 +43,8 @@ namespace Xpand.Extensions.XAF.SecurityExtensions {
         }
 
         static void AddTypePermissionsRecursively(this IPermissionPolicyRole role, Type targetType, string operations, SecurityPermissionState? state)
-            => PermissionSettingHelperType
-                .Method(nameof(AddTypePermissionsRecursively), new[] {typeof(IPermissionPolicyRole), typeof(Type), typeof(string), typeof(SecurityPermissionState)}, Flags.StaticPublic)
-                .Call(null,role, targetType, operations, state);
+            => PermissionSettingHelperType.Method(nameof(AddTypePermissionsRecursively), new[] {typeof(IPermissionPolicyRole), typeof(Type), typeof(string), typeof(SecurityPermissionState?),typeof(ITypesInfo)}, Flags.StaticPublic)
+                .Call(null,role, targetType, operations, state,XafTypesInfo.Instance);
 
         static IPermissionPolicyMemberPermissionsObject AddMemberPermission(this IPermissionPolicyRole role,
             Type type, string operations, string members, string criteria, SecurityPermissionState? state) 

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Reactive.Linq;
+using Hangfire;
+using Hangfire.MemoryStorage;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using Xpand.Extensions.Blazor;
@@ -15,6 +17,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
 		[TestCase(true)]
 		[XpandTest()]
 		public void Customize_Job_Schedule(bool newObject) {
+            GlobalConfiguration.Configuration.UseMemoryStorage();
 			var application = NewBlazorApplication();
 			using var _ = application.WhenApplicationModulesManager()
 				.SelectMany(manager => manager.RegisterViewSimpleAction("test"))

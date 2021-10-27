@@ -2,6 +2,7 @@
 using DevExpress.ExpressApp;
 using Microsoft.AspNetCore.Hosting;
 using Xpand.Extensions.Blazor;
+using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.TestsLib.Blazor;
 using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.Reactive.Rest.Tests.BO;
@@ -15,7 +16,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests.Common {
         public RestModule BlazorModule(params ModuleBase[] modules) {
             var newBlazorApplication = NewBlazorApplication(typeof(RestStartup));
             newBlazorApplication.SetupSecurity(userType:typeof(RestUser));
-            var module = newBlazorApplication.AddModule<RestModule>(GetType().Assembly.GetTypes().Where(type => type.Namespace==typeof(RestOperationObject).Namespace).ToArray());
+            var module = newBlazorApplication.AddModule<RestModule>(GetType().CollectExportedTypesFromAssembly().ToArray());
             // newBlazorApplication.ConfigureModel();
             newBlazorApplication.Logon();
             using var objectSpace = newBlazorApplication.CreateObjectSpace();

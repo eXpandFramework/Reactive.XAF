@@ -309,7 +309,7 @@ namespace Xpand.TestsLib.Common{
                 application.WhenWindowCreated()
                     .Do(window => {
                         var windowTemplate = (IWindowTemplate) AppDomain.CurrentDomain
-                            .CreateTypeInstance("DevExpress.ExpressApp.Blazor.Templates.WindowTemplate");
+                            .CreateTypeInstance("DevExpress.ExpressApp.Blazor.Templates.ApplicationWindowTemplate");
                         window.SetTemplate(windowTemplate);
                     })
                     .Subscribe(application);

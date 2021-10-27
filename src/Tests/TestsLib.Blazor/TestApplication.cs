@@ -46,13 +46,13 @@ namespace Xpand.TestsLib.Blazor{
 
         protected override void OnCreateCustomObjectSpaceProvider(CreateCustomObjectSpaceProviderEventArgs args) {
             var provider = ServiceProvider.GetRequiredService<XpoDataStoreProviderAccessor>().DataStoreProvider;
-            if (provider != null) {
+            // if (provider != null) {
                 args.ObjectSpaceProvider = this.NewObjectSpaceProvider(provider);
                 args.ObjectSpaceProviders.Add(ServiceProvider.GetService<NonPersistentObjectSpaceProvider>()??new NonPersistentObjectSpaceProvider(TypesInfo, null));
-            }
-            else {
-                base.OnCreateCustomObjectSpaceProvider(args);
-            }
+            // }
+            // else {
+                // base.OnCreateCustomObjectSpaceProvider(args);
+            // }
         }
 
         protected override string GetModelCacheFileLocationPath() => null;
