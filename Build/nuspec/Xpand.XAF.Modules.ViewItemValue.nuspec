@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.ViewItemValue</id>
-    <version>4.211.10.0</version>
+    <version>4.211.10.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -12,16 +12,16 @@
     <description>The `ViewItemValue` helps end-users to configure the default values for lookup view items.</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, ViewItemValue, 21.1.6</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, ViewItemValue, 21.2.2</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.Extensions.Reactive" version="4.211.10.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.211.10.0" />
-        <dependency id="Xpand.Extensions" version="4.211.10.0" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.211.10.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.211.10.0" />
-        <dependency id="DevExpress.ExpressApp.Validation" version="21.1.6" />
-        <dependency id="DevExpress.Xpo" version="21.1.6" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.211.10.1" />
+        <dependency id="Xpand.Extensions.XAF" version="4.211.10.1" />
+        <dependency id="Xpand.Extensions" version="4.211.10.1" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.211.10.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.211.10.1" />
+        <dependency id="DevExpress.ExpressApp.Validation" version="21.2.2-beta" />
+        <dependency id="DevExpress.Xpo" version="21.2.2-beta" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="JetBrains.Annotations" version="2021.2" />
         <dependency id="System.Reactive" version="5.0" />
@@ -29,7 +29,7 @@
         <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.11" />
         <dependency id="System.Configuration.ConfigurationManager" version="5.0" />
         <dependency id="Newtonsoft.Json" version="13.0.1" />
-        <dependency id="Xpand.VersionConverter" version="4.211.10.0" />
+        <dependency id="Xpand.VersionConverter" version="4.211.10.1" />
       </group>
     </dependencies>
   </metadata>

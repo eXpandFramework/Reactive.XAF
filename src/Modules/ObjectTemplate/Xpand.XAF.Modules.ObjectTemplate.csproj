@@ -55,5 +55,10 @@
   <ItemGroup>
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
+  <ItemGroup>
+    <None Update="UnusableNodes1.xml">
+      <DependentUpon>Model.DesignedDiffs.xafml</DependentUpon>
+    </None>
+  </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

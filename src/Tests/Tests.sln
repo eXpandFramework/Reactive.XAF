@@ -399,6 +399,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.JobSchedu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.JobScheduler.Notification.Tests", "JobScheduler.Notification\Xpand.XAF.Modules.JobScheduler.Notification.Tests.csproj", "{5A2B803A-CC92-4987-BF9D-B92489BD6D08}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevExpress.ExpressApp", "..\..\..\..\Program Files (x86)\DevExpress 21.2\Components\Sources\DevExpress.ExpressApp\DevExpress.ExpressApp\DevExpress.ExpressApp.csproj", "{39E0DE91-4458-44FA-9320-55F94BD812AB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DevExpress.ExpressApp.Blazor.NetStandard", "..\..\..\..\Program Files (x86)\DevExpress 21.2\Components\Sources\DevExpress.ExpressApp\DevExpress.ExpressApp.Blazor\DevExpress.ExpressApp.Blazor.NetStandard.csproj", "{17368221-7314-4DFB-B9D9-EC1CB5996C45}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1885,6 +1889,44 @@ Global
 		{5A2B803A-CC92-4987-BF9D-B92489BD6D08}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5A2B803A-CC92-4987-BF9D-B92489BD6D08}.Release|x86.ActiveCfg = Release|Any CPU
 		{5A2B803A-CC92-4987-BF9D-B92489BD6D08}.Release|x86.Build.0 = Release|Any CPU
+		{39E0DE91-4458-44FA-9320-55F94BD812AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39E0DE91-4458-44FA-9320-55F94BD812AB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{39E0DE91-4458-44FA-9320-55F94BD812AB}.Debug|x86.Build.0 = Debug|Any CPU
+		{39E0DE91-4458-44FA-9320-55F94BD812AB}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{39E0DE91-4458-44FA-9320-55F94BD812AB}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
+		{39E0DE91-4458-44FA-9320-55F94BD812AB}.EasyTest|x86.ActiveCfg = Debug|Any CPU
+		{39E0DE91-4458-44FA-9320-55F94BD812AB}.EasyTest|x86.Build.0 = Debug|Any CPU
+		{39E0DE91-4458-44FA-9320-55F94BD812AB}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
+		{39E0DE91-4458-44FA-9320-55F94BD812AB}.NetCore|Any CPU.Build.0 = Debug|Any CPU
+		{39E0DE91-4458-44FA-9320-55F94BD812AB}.NetCore|x86.ActiveCfg = Debug|Any CPU
+		{39E0DE91-4458-44FA-9320-55F94BD812AB}.NetCore|x86.Build.0 = Debug|Any CPU
+		{39E0DE91-4458-44FA-9320-55F94BD812AB}.NugetConsumers|Any CPU.ActiveCfg = Debug|Any CPU
+		{39E0DE91-4458-44FA-9320-55F94BD812AB}.NugetConsumers|Any CPU.Build.0 = Debug|Any CPU
+		{39E0DE91-4458-44FA-9320-55F94BD812AB}.NugetConsumers|x86.ActiveCfg = Debug|Any CPU
+		{39E0DE91-4458-44FA-9320-55F94BD812AB}.NugetConsumers|x86.Build.0 = Debug|Any CPU
+		{39E0DE91-4458-44FA-9320-55F94BD812AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39E0DE91-4458-44FA-9320-55F94BD812AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{39E0DE91-4458-44FA-9320-55F94BD812AB}.Release|x86.ActiveCfg = Release|Any CPU
+		{39E0DE91-4458-44FA-9320-55F94BD812AB}.Release|x86.Build.0 = Release|Any CPU
+		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.Debug|x86.Build.0 = Debug|Any CPU
+		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
+		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.EasyTest|x86.ActiveCfg = Debug|Any CPU
+		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.EasyTest|x86.Build.0 = Debug|Any CPU
+		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
+		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.NetCore|Any CPU.Build.0 = Debug|Any CPU
+		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.NetCore|x86.ActiveCfg = Debug|Any CPU
+		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.NetCore|x86.Build.0 = Debug|Any CPU
+		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.NugetConsumers|Any CPU.ActiveCfg = Debug|Any CPU
+		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.NugetConsumers|Any CPU.Build.0 = Debug|Any CPU
+		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.NugetConsumers|x86.ActiveCfg = Debug|Any CPU
+		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.NugetConsumers|x86.Build.0 = Debug|Any CPU
+		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.Release|x86.ActiveCfg = Release|Any CPU
+		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,5 +1,6 @@
 ﻿using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.Blazor.Services;
+using DevExpress.ExpressApp.Office.Blazor;
 using Hangfire;
 using Hangfire.MemoryStorage;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -33,6 +34,7 @@ namespace TestApplication.Blazor.Server {
             services.AddSingleton<XpoDataStoreProviderAccessor>();
             services.AddScoped<CircuitHandler, CircuitHandlerProxy>();
             services.AddXaf<ServerBlazorApplication>(Configuration);
+            services.AddXafOffice();
             services.AddXafSecurity(options => {
                 options.RoleType = typeof(DevExpress.Persistent.BaseImpl.PermissionPolicy.PermissionPolicyRole);
                 options.UserType = typeof(User);

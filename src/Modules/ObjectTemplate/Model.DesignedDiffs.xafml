@@ -1,36 +1,40 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Application>
+  <SchemaModules>
+    <SchemaModule Name="SystemModule" Version="21.2.2.0" IsNewNode="True" />
+  </SchemaModules>
   <Views>
     <DetailView Id="ObjectTemplate_DetailView">
+      <Items>
+        <PropertyEditor Id="Html" Caption="Template" />
+      </Items>
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
-          <LayoutGroup Id="SimpleEditors" RelativeSize="100">
-            <LayoutGroup Id="ObjectTemplate" RelativeSize="100" Caption="ObjectTemplate" Direction="Horizontal">
-              <LayoutGroup Id="Autod6f2cccb-f319-4ccc-89ea-1b9c6fe04103" ShowCaption="False" Caption="Autod6f2cccb-f319-4ccc-89ea-1b9c6fe04103(4)" Index="0" RelativeSize="37.97216699801193" IsNewNode="True">
-                <LayoutGroup Id="Item1" ShowCaption="False" CaptionLocation="Top" Index="0" RelativeSize="100" Caption="Template" IsNewNode="True">
-                  <LayoutItem Id="Name" ViewItem="Name" Index="0" RelativeSize="3.073967339097022" IsNewNode="True" />
-                  <LayoutItem Id="ModelType" ViewItem="ModelType" Index="1" RelativeSize="2.3054755043227666" IsNewNode="True" />
-                  <LayoutGroup Id="Autoe569aeaa-0033-4c79-90ae-8d08a1849b4e" ShowCaption="False" Caption="Autoe569aeaa-0033-4c79-90ae-8d08a1849b4e(8)" Direction="Vertical" Index="2" RelativeSize="9.221902017291066" IsNewNode="True">
-                    <LayoutItem Id="ModelCriteria" ViewItem="ModelCriteria" Index="0" RelativeSize="100" IsNewNode="True" />
-                  </LayoutGroup>
-                  <LayoutItem Id="Error" ViewItem="Error" Index="3" RelativeSize="5.187319884726225" ShowCaption="False" IsNewNode="True" />
-                  <LayoutItem Id="Template" ShowCaption="False" ViewItem="Template" CaptionLocation="Top" Index="4" RelativeSize="80.21133525456293" IsNewNode="True" />
-                </LayoutGroup>
+          <LayoutGroup Id="SimpleEditors" RelativeSize="13.80443714050945">
+            <LayoutGroup Id="ObjectTemplate" Caption="ObjectTemplate" RelativeSize="100">
+              <LayoutGroup Id="Autoa0c8ac44-38fa-4be9-ab49-c2543a12ccec" ShowCaption="False" Caption="Autoa0c8ac44-38fa-4be9-ab49-c2543a12ccec(4)" Direction="Horizontal" Index="0" RelativeSize="31.547619047619047" IsNewNode="True">
+                <LayoutItem Id="Name" ViewItem="Name" Index="0" RelativeSize="50" IsNewNode="True" />
+                <LayoutItem Id="ModelType" ViewItem="ModelType" Index="1" RelativeSize="50" IsNewNode="True" />
               </LayoutGroup>
-              <LayoutItem Id="Name" Index="0" RelativeSize="91.71636845593108" ViewItem="Name" Removed="True" />
-              <LayoutGroup Id="Auto2fddd95b-9d3a-4e7b-b64a-54cb4cbaba94" ShowCaption="False" Caption="Auto2fddd95b-9d3a-4e7b-b64a-54cb4cbaba94(12)" Index="1" RelativeSize="62.02783300198807" IsNewNode="True">
-                <LayoutItem Id="Preview" ViewItem="Preview" Index="0" RelativeSize="100" CaptionLocation="Top" ShowCaption="False" IsNewNode="True" />
-              </LayoutGroup>
-              <LayoutItem Id="ModelType" ViewItem="ModelType" Removed="True" />
+              <LayoutItem Id="ModelCriteria" ViewItem="ModelCriteria" Index="1" RelativeSize="68.45238095238095" IsNewNode="True" />
+              <LayoutItem Id="ModelType" Removed="True" />
+              <LayoutItem Id="Name" Removed="True" />
             </LayoutGroup>
           </LayoutGroup>
-          <LayoutGroup Id="ModelProperties_Group" Direction="Horizontal" Index="1" RelativeSize="15.081652257444764" Caption="Model Properties" Removed="True">
-            <LayoutItem Id="ModelProperties" RelativeSize="100" ViewItem="ModelProperties" Removed="True" />
+          <LayoutGroup Id="Auto8854a0e0-5429-477c-9c44-098bd652154d" ShowCaption="False" Caption="" Direction="Horizontal" Index="1" RelativeSize="86.19556285949055" IsNewNode="True">
+            <LayoutGroup Id="Autoe197d814-eba8-4a8d-be1d-1e73f57ae2a4" ShowCaption="False" Caption="" Index="0" RelativeSize="50" IsNewNode="True">
+              <LayoutItem Id="Error" ViewItem="Error" Index="0" RelativeSize="8.198284080076263" IsNewNode="True" />
+              <LayoutItem Id="Template" ViewItem="Template" CaptionLocation="Top" Index="1" RelativeSize="91.80171591992374" IsNewNode="True" />
+            </LayoutGroup>
+            <LayoutItem Id="Preview" ViewItem="Preview" CaptionLocation="Top" Index="1" RelativeSize="50" IsNewNode="True" />
           </LayoutGroup>
-          <LayoutGroup Id="SizeableEditors" RelativeSize="7.492795389048991" Removed="True">
-            <LayoutItem Id="Template" RelativeSize="91.83895538628944" Index="0" ViewItem="Template" Removed="True" />
-            <LayoutItem Id="Preview" RelativeSize="87.25590955806783" ViewItem="Preview" Removed="True" />
-            <LayoutItem Id="TestObjectCriteria" RelativeSize="33.299284984678245" ViewItem="TestObjectCriteria" Removed="True" />
+          <LayoutGroup Id="SizeableEditors" RelativeSize="77.2391125718981" Index="2" Removed="True">
+            <LayoutItem Id="Error" RelativeSize="80.31914893617021" Index="1" Removed="True" />
+            <LayoutItem Id="Template" RelativeSize="46.845124282982795" Index="1" Removed="True" />
+            <LayoutItem Id="Html" Index="2" RelativeSize="31.26787416587226" Removed="True" />
+            <LayoutItem Id="Preview" RelativeSize="29.73231357552581" Index="2" Removed="True" />
+            <LayoutItem Id="ModelCriteria" RelativeSize="23.539518900343644" Removed="True" />
+            <LayoutItem Id="PreviewHtml" Removed="True" />
           </LayoutGroup>
         </LayoutGroup>
       </Layout>

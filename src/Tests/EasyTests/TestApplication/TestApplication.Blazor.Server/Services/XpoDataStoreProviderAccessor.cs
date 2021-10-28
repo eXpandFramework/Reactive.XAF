@@ -1,5 +1,4 @@
-﻿using System;
-using DevExpress.ExpressApp.Xpo;
+﻿using DevExpress.ExpressApp.Xpo;
 
 namespace TestApplication.Blazor.Server.Services {
     public class XpoDataStoreProviderAccessor {

@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using ConcurrentCollections;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.Model.Core;
 using Microsoft.CodeAnalysis;
 using RazorLight;
 using Xpand.Extensions.AppDomainExtensions;
@@ -18,6 +20,7 @@ using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
+using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.XAF.Modules.ObjectTemplate.Template;
 using Xpand.XAF.Modules.Reactive.Services;
 
@@ -37,8 +40,24 @@ namespace Xpand.XAF.Modules.ObjectTemplate{
         
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager)
             => manager.WhenApplication(application => application.WhenSetupComplete()
-                    .SelectMany(_ => application.RenderPreview())
-            ).ToUnit();
+                    .SelectMany(_ => application.RenderPreview())).ToUnit()
+                .Merge(ConfigureRichEditFormat(manager));
+
+        private static IObservable<Unit> ConfigureRichEditFormat(this ApplicationModulesManager manager) 
+            => manager.WhenGeneratingModelNodes<IModelBOModel>()
+                .SelectMany(model => {
+                    var modelClass = model.GetClass(typeof(BusinessObjects.ObjectTemplate));
+                    return new[] { nameof(BusinessObjects.ObjectTemplate.Preview), nameof(BusinessObjects.ObjectTemplate.Template) }.ToNowObservable()
+                        .Select(member => modelClass.FindMember(member))
+                        .Do(member => {
+                            var modelNode = ((ModelNode)member);
+                            var modelValueInfo = modelNode.GetValueInfo("DocumentStorageFormat");
+                            if (modelValueInfo != null) {
+                                modelNode.SetValue("DocumentStorageFormat", modelValueInfo.PropertyType,Enum.Parse(modelValueInfo.PropertyType,"Html"));   
+                            }
+                        });
+                })
+                .ToUnit();
 
         private static IObservable<Unit> RenderPreview(this XafApplication application) 
             => application.WhenFrameViewChanged()

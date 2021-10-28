@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using DevExpress.ExpressApp.DC;
+using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.ObjectExtensions;
 
 namespace Xpand.Extensions.XAF.NonPersistentObjects {
@@ -15,7 +16,7 @@ namespace Xpand.Extensions.XAF.NonPersistentObjects {
             Name = type?.Name.CompoundName();
         }
 
-        [DevExpress.ExpressApp.Data.Key]
+        [DevExpress.ExpressApp.Data.Key][VisibleInAllViews]
         public string Name {
             get => _name;
             set {

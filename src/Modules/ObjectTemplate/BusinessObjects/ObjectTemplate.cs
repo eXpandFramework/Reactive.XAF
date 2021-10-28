@@ -24,10 +24,7 @@ namespace Xpand.XAF.Modules.ObjectTemplate.BusinessObjects {
         [ValueConverter(typeof(ObjectTypeValueConverter))]
         public ObjectType ModelType {
             get => _modelType;
-            set {
-                SetPropertyValue(nameof(ModelType), ref _modelType, value);
-                OnChanged(nameof(ModelProperties));
-            }
+            set => SetPropertyValue(nameof(ModelType), ref _modelType, value);
         }
 
         string _error;
@@ -37,11 +34,7 @@ namespace Xpand.XAF.Modules.ObjectTemplate.BusinessObjects {
             get => _error;
             internal set => SetPropertyValue(nameof(Error), ref _error, value);
         }
-        
-        public List<ObjectString> ModelProperties => CaptionHelper.ApplicationModel.BOModel
-            .Where(c => c.TypeInfo.Type == _modelType?.Type).SelectMany(c => c.AllMembers)
-            .Select(c => new ObjectString(c.Caption) { Name = c.Name }).ToList();
-        
+
         string _modelCriteria;
         [CriteriaOptions(nameof(ModelType)+"."+nameof(ObjectType.Type))]
         [EditorAlias(EditorAliases.CriteriaPropertyEditor), Size(SizeAttribute.Unlimited)]
@@ -61,7 +54,6 @@ namespace Xpand.XAF.Modules.ObjectTemplate.BusinessObjects {
         [Size(SizeAttribute.Unlimited)]
         [RuleRequiredField]
         [ModelDefault("RowCount","40")]
-        [EditorAlias(EditorAliases.RichTextPropertyEditor)]
         [ImmediatePostData]
         public string Template {
             get => _template;
@@ -71,12 +63,10 @@ namespace Xpand.XAF.Modules.ObjectTemplate.BusinessObjects {
         string _preview;
 
         [Size(SizeAttribute.Unlimited)][NonPersistent]
-        [ModelDefault("RowCount","30")]
-        // [EditorAlias(Extensions.XAF.Attributes.EditorAliases.MarkupContent)]
-        [EditorAlias(EditorAliases.RichTextPropertyEditor)] 
+        [EditorAlias(EditorAliases.RichTextPropertyEditor)]
         public string Preview {
             get => _preview;
-            set => SetPropertyValue(nameof(Preview), ref _preview, value);
+            internal set => SetPropertyValue(nameof(Preview), ref _preview, value);
         }
         
         string _name;
@@ -88,10 +78,6 @@ namespace Xpand.XAF.Modules.ObjectTemplate.BusinessObjects {
         }
         
     }
-
-    public enum MonitorContext {
-        Application,Universal
-    }
-
+    
     
 }

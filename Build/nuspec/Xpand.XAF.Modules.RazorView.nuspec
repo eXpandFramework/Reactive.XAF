@@ -1,42 +1,47 @@
 <?xml version="1.0"?>
 <package>
   <metadata>
-    <id>Xpand.XAF.Modules.ViewWizard</id>
+    <id>Xpand.XAF.Modules.RazorView</id>
     <version>4.211.10.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
-    <projectUrl>https://github.com/eXpandFramework/Reactive.XAF/blob/master/src/Modules/ViewWizard</projectUrl>
+    <projectUrl>https://github.com/eXpandFramework/Reactive.XAF/blob/master/src/Modules/RazorView</projectUrl>
     <iconUrl>http://sign.expandframework.com</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Xpand.XAF.Modules.ViewWizard</description>
+    <description>The `MasterDetail` module can help you create platform agnostic master detail `XAF` views using only the Model Editor.</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, ViewWizard, 21.2.2</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, RazorView, 21.2.2</tags>
     <dependencies>
-      <group targetFramework="netstandard2.0">
+      <group targetFramework="net5.0">
         <dependency id="Xpand.Extensions.Reactive" version="4.211.10.1" />
-        <dependency id="Xpand.Extensions.XAF" version="4.211.10.1" />
         <dependency id="Xpand.Extensions" version="4.211.10.1" />
+        <dependency id="Xpand.Extensions.XAF" version="4.211.10.1" />
         <dependency id="Xpand.Extensions.XAF.Xpo" version="4.211.10.1" />
         <dependency id="Xpand.XAF.Modules.Reactive" version="4.211.10.1" />
+        <dependency id="Xpand.Patcher" version="2.0.30" />
+        <dependency id="System.Reactive" version="5.0" />
         <dependency id="DevExpress.ExpressApp" version="21.2.2-beta" />
         <dependency id="DevExpress.Xpo" version="21.2.2-beta" />
+        <dependency id="DevExpress.ExpressApp.Validation" version="21.2.2-beta" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="JetBrains.Annotations" version="2021.2" />
-        <dependency id="System.Reactive" version="5.0" />
-        <dependency id="System.Interactive" version="5.0" />
-        <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.11" />
         <dependency id="System.Configuration.ConfigurationManager" version="5.0" />
+        <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.11" />
+        <dependency id="System.ServiceModel.Http" version="4.8.1" />
         <dependency id="Newtonsoft.Json" version="13.0.1" />
+        <dependency id="Xpand.Collections" version="1.0.4" />
+      </group>
+      <group targetFramework="netstandard2.0">
         <dependency id="Xpand.VersionConverter" version="4.211.10.1" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="Xpand.XAF.Modules.ViewWizard.dll" target="lib\netstandard2.0\Xpand.XAF.Modules.ViewWizard.dll" />
-    <file src="Xpand.XAF.Modules.ViewWizard.pdb" target="lib\netstandard2.0\Xpand.XAF.Modules.ViewWizard.pdb" />
-    <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.XAF.Modules.ViewWizard.targets" />
+    <file src="Xpand.XAF.Modules.RazorView.dll" target="lib\net5.0\Xpand.XAF.Modules.RazorView.dll" />
+    <file src="Xpand.XAF.Modules.RazorView.pdb" target="lib\net5.0\Xpand.XAF.Modules.RazorView.pdb" />
+    <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.XAF.Modules.RazorView.targets" />
     <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
   </files>
 </package>
