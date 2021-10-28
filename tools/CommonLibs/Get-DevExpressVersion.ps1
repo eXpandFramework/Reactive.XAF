@@ -11,6 +11,9 @@ function GetDevExpressVersion($targetPath, $referenceFilter, $projectFile) {
     if ($packageReference) {
         $v = ($packageReference ).Version | Select-Object -First 1
         if ($packageReference) {
+            if ($v -match "-"){
+                return
+            }
             $version = [version]$v
             if ($version.Revision -eq -1) {
                 $v += ".0"

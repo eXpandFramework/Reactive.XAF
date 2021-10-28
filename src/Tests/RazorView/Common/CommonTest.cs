@@ -6,7 +6,7 @@ using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.TestsLib.Blazor;
 using Xpand.TestsLib.Common;
 
-namespace Xpand.XAF.Modules.ObjectTemplate.Tests.Common {
+namespace Xpand.XAF.Modules.RazorView.Tests.Common {
     public abstract class CommonTest : BlazorCommonTest {
         
 
@@ -19,15 +19,15 @@ namespace Xpand.XAF.Modules.ObjectTemplate.Tests.Common {
             
         }
         
-        public ObjectTemplateModule ObjectTemplateModule(params ModuleBase[] modules) {
+        public RazorViewModule RazorViewModule(params ModuleBase[] modules) {
             var newBlazorApplication = NewBlazorApplication();
-            return ObjectTemplateModule(newBlazorApplication);
+            return RazorViewModule(newBlazorApplication);
         }
         
         protected BlazorApplication NewBlazorApplication() => NewBlazorApplication(typeof(NotificationStartup));
 
-        protected ObjectTemplateModule ObjectTemplateModule(BlazorApplication newBlazorApplication) {
-            var module = newBlazorApplication.AddModule<ObjectTemplateModule>(GetType().CollectExportedTypesFromAssembly().ToArray());
+        protected RazorViewModule RazorViewModule(BlazorApplication newBlazorApplication) {
+            var module = newBlazorApplication.AddModule<RazorViewModule>(GetType().CollectExportedTypesFromAssembly().ToArray());
             // newBlazorApplication.ConfigureModel();
             newBlazorApplication.Logon();
             using var objectSpace = newBlazorApplication.CreateObjectSpace();

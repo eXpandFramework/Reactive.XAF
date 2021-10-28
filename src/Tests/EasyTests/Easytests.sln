@@ -47,11 +47,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.TestsLib.Net461", "..
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.TestsLib.EasyTest", "..\TestsLib.EasyTest\Xpand.TestsLib.EasyTest.csproj", "{0E279695-9A3A-4C3D-BDAE-7ADE23DAE82B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Modules.ObjectTemplate", "..\..\Modules\ObjectTemplate\Xpand.XAF.Modules.ObjectTemplate.csproj", "{AE563A3B-F273-4C0B-BFDA-05C7D7FEBBF9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Blazor", "..\..\Modules\Blazor\Xpand.XAF.Modules.Blazor.csproj", "{23E19303-B9E6-4AB2-AEB8-35142BD57ABF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Modules.Blazor", "..\..\Modules\Blazor\Xpand.XAF.Modules.Blazor.csproj", "{23E19303-B9E6-4AB2-AEB8-35142BD57ABF}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevExpress.ExpressApp.Blazor.NetStandard", "..\..\..\..\..\Program Files (x86)\DevExpress 21.1\Components\Sources\DevExpress.ExpressApp\DevExpress.ExpressApp.Blazor\DevExpress.ExpressApp.Blazor.NetStandard.csproj", "{82479FF3-EBE9-49E7-894A-351FBC149254}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DevExpress.ExpressApp.Blazor.NetStandard", "..\..\..\..\..\Program Files (x86)\DevExpress 21.1\Components\Sources\DevExpress.ExpressApp\DevExpress.ExpressApp.Blazor\DevExpress.ExpressApp.Blazor.NetStandard.csproj", "{82479FF3-EBE9-49E7-894A-351FBC149254}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -125,12 +123,6 @@ Global
 		{0E279695-9A3A-4C3D-BDAE-7ADE23DAE82B}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{0E279695-9A3A-4C3D-BDAE-7ADE23DAE82B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0E279695-9A3A-4C3D-BDAE-7ADE23DAE82B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AE563A3B-F273-4C0B-BFDA-05C7D7FEBBF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AE563A3B-F273-4C0B-BFDA-05C7D7FEBBF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AE563A3B-F273-4C0B-BFDA-05C7D7FEBBF9}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
-		{AE563A3B-F273-4C0B-BFDA-05C7D7FEBBF9}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
-		{AE563A3B-F273-4C0B-BFDA-05C7D7FEBBF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AE563A3B-F273-4C0B-BFDA-05C7D7FEBBF9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{23E19303-B9E6-4AB2-AEB8-35142BD57ABF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{23E19303-B9E6-4AB2-AEB8-35142BD57ABF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{23E19303-B9E6-4AB2-AEB8-35142BD57ABF}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU

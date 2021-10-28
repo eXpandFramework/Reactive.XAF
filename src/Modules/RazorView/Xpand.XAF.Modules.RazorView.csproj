@@ -23,9 +23,6 @@
     <NoWarn>1701;1702;CS8002</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="RazorLight, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\..\..\RazorLight\src\RazorLight\bin\Debug\net5.0\RazorLight.dll</HintPath>
-    </Reference>
     <Reference Include="Xpand.Extensions.Reactive">
       <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.dll</HintPath>
     </Reference>

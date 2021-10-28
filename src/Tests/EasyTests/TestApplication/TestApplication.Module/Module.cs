@@ -36,11 +36,11 @@ using Xpand.XAF.Modules.HideToolBar;
 using Xpand.XAF.Modules.MasterDetail;
 using Xpand.XAF.Modules.ModelMapper;
 using Xpand.XAF.Modules.ModelViewInheritance;
-using Xpand.XAF.Modules.ObjectTemplate;
 using Xpand.XAF.Modules.Office.Cloud.Google;
 using Xpand.XAF.Modules.Office.Cloud.Google.Calendar;
 using Xpand.XAF.Modules.Office.Cloud.Google.Tasks;
 using Xpand.XAF.Modules.PositionInListView;
+using Xpand.XAF.Modules.RazorView;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Logger;
@@ -102,7 +102,7 @@ namespace TestApplication.Module {
             // RequiredModuleTypes.Add(typeof(ReactiveLoggerHubModule));
             RequiredModuleTypes.Add(typeof(ViewWizardModule));
             RequiredModuleTypes.Add(typeof(RestModule));
-            RequiredModuleTypes.Add(typeof(ObjectTemplateModule));
+            RequiredModuleTypes.Add(typeof(RazorViewModule));
 
 
             AdditionalExportedTypes.Add(typeof(Event));

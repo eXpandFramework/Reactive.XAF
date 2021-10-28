@@ -9,7 +9,7 @@
     <projectUrl>https://github.com/eXpandFramework/Reactive.XAF/blob/master/src/Modules/RazorView</projectUrl>
     <iconUrl>http://sign.expandframework.com</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>The `MasterDetail` module can help you create platform agnostic master detail `XAF` views using only the Model Editor.</description>
+    <description>The `RazorView` module uses the Razor c</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, RazorView, 21.2.2</tags>
@@ -32,6 +32,7 @@
         <dependency id="System.ServiceModel.Http" version="4.8.1" />
         <dependency id="Newtonsoft.Json" version="13.0.1" />
         <dependency id="Xpand.Collections" version="1.0.4" />
+        <dependency id="RazorLight" version="2.0.0-rc.3" />
       </group>
       <group targetFramework="netstandard2.0">
         <dependency id="Xpand.VersionConverter" version="4.211.10.1" />

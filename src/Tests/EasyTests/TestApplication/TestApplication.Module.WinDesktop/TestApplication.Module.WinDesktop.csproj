@@ -45,11 +45,11 @@
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.8.1" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.8.1" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.211.10.0" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.211.10.1" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="TestApplication.Module">
-      <HintPath>..\TestApplication.Module\bin\Debug\netstandard2.0\TestApplication.Module.dll</HintPath>
+      <HintPath>..\TestApplication.Module\bin\Debug\net5.0\TestApplication.Module.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

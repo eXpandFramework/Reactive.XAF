@@ -25,7 +25,7 @@
         <dependency id="JetBrains.Annotations" version="2021.2" />
         <dependency id="System.Reactive" version="5.0" />
         <dependency id="DevExpress.Persistent.Base" version="21.2.2-beta" />
-        <dependency id="Google.Apis.Auth" version="1.53" />
+        <dependency id="Google.Apis.Auth" version="1.55" />
         <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.11" />
         <dependency id="System.Configuration.ConfigurationManager" version="5.0" />
         <dependency id="DevExpress.Xpo" version="21.2.2-beta" />

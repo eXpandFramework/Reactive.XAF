@@ -5,8 +5,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Xpand.TestsLib.Blazor;
 
-namespace Xpand.XAF.Modules.ObjectTemplate.Tests.Common {
-    public class NotificationStartup : XafHostingStartup<ObjectTemplateModule> {
+namespace Xpand.XAF.Modules.RazorView.Tests.Common {
+    public class NotificationStartup : XafHostingStartup<RazorViewModule> {
         public NotificationStartup(IConfiguration configuration) : base(configuration) { }
 
         public override void ConfigureServices(IServiceCollection services) {
@@ -18,7 +18,7 @@ namespace Xpand.XAF.Modules.ObjectTemplate.Tests.Common {
     
     public class XpoDataStoreProviderAccessor:Xpand.TestsLib.Blazor.XpoDataStoreProviderAccessor{ }
     
-    class NotificationApplicationProvider:TestXafApplicationProvider<ObjectTemplateModule> {
+    class NotificationApplicationProvider:TestXafApplicationProvider<RazorViewModule> {
         
         protected override BlazorApplication CreateApplication(IXafApplicationFactory applicationFactory) {
             var blazorApplication = base.CreateApplication(applicationFactory);

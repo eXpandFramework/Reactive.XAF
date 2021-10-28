@@ -1,7 +1,7 @@
 ﻿using DevExpress.ExpressApp.Blazor;
 using NUnit.Framework;
 
-namespace Xpand.XAF.Modules.ObjectTemplate.Tests.Common {
+namespace Xpand.XAF.Modules.RazorView.Tests.Common {
     public abstract class CommonAppTest:CommonTest{
         protected BlazorApplication Application;
 
@@ -29,7 +29,7 @@ namespace Xpand.XAF.Modules.ObjectTemplate.Tests.Common {
         public override void Init() {
             base.Init();
             Application = NewBlazorApplication();
-            ObjectTemplateModule(Application);
+            RazorViewModule(Application);
         }
     }
 }

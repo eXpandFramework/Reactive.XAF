@@ -3,7 +3,7 @@ using DevExpress.Persistent.Base;
 using DevExpress.Xpo;
 using Xpand.XAF.Persistent.BaseImpl;
 
-namespace Xpand.XAF.Modules.ObjectTemplate.Tests.BOModel{
+namespace Xpand.XAF.Modules.RazorView.Tests.BOModel{
     [DefaultProperty(nameof(Name))]
     public class OT:CustomBaseObject{
         public OT(Session session) : base(session){

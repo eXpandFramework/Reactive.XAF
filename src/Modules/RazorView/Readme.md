@@ -1,29 +1,47 @@
-![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.ObjectTemplate.svg?&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.ObjectTemplate.svg?&style=flat)
+![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.RazorView.svg?&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.RazorView.svg?&style=flat)
 
-[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/ObjectTemplate.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AObjectTemplate) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/ObjectTemplate.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AObjectTemplate)
+[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/RazorView.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3ARazorView) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/RazorView.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3ARazorView)
 # About 
 
-The `MasterDetail` module can help you create platform agnostic master detail `XAF` views using only the Model Editor. 
+The `RazorView` module uses the Razor c# syntax to generate views out of Bossiness data. 
 
 ## Details
-This is a `platform agnostic` module that satisfies the following conditions:
-1. If a `DashboardView` contains a `one ListView and one DetailView` of the `same type`, then it will be Master-Detail `enabled by default`. It can be disabled by setting the `IModelDashboardViewMasterDetail.MasterDetail` to false.
+This is a `platform agnostic` module, to generate a view simply create a new `RazorView` business object and configure the available properties as shown below.
 
-   ![image](https://user-images.githubusercontent.com/159464/55990839-67af0180-5cb1-11e9-84cd-6ef0bb5d0137.png)
+![image](https://user-images.githubusercontent.com/159464/139310461-4dba9eda-0633-4975-8bed-2b1871479afd.png)
 
-3. Each time a ListView selection change, it will synchronize the DetailView CurrentObject with the selected from the ListView.
-2. `ALL CRUD` operations are `supported`. A valuable module for forcing the DetailView to open in edit mode is the [ViewEditModeModule](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/ViewEditMode). Additionaly you can use the [AutoCommitModule](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Agnostic/AutoCommit), for auto commiting the DetailView.
-3. Conditional detailviews can be configured from the model by creating `IModelMasterDetailViewObjectTypeLinks`
+To customize the rendering per `RazorView` object use the next snippet:
 
-   ![image](https://user-images.githubusercontent.com/159464/55991766-b1005080-5cb3-11e9-9dc2-bee3dfb627ac.png)
+```c#
+Application.WhenRazorViewRendering()
+    .Where(e => e.Instance.razorView.Name=="Product view")
+    .Do(e => e.Handled = e.SetInstance(t => {
+        t.renderedView = "<b>template oveerriden</b>";
+        return t;
+    })).Subscribe();
+```
+
+To customize the rendering per `Bussiness object` object use the next snippet:
+
+```c#
+Application.WhenRazorViewDataSourceObjectRendering()
+    .Where(e => e.Instance.razorView.Name == "Product view"&&e.Instance.razorView.ObjectSpace.GetKeyValue(e.Instance.instance)==(object)1)
+    .Do(e => e.Handled = e.SetInstance(t => {
+        t.renderedView = "override template for product with Oid==1".ReturnObservable();
+        return t;
+    })).Subscribe();
+```
 ### Examples
-The module is integrated with the `ExcelImporter`, `XtraDashboard` modules.
 
+In the next screencast we create a `Product RazorView`   
 
-Next screenshot is an example from ExcelImporter from the view tha maps the Excel columns with the BO members. 
-<twitter>
-![image](https://user-images.githubusercontent.com/159464/55381194-238e6500-552b-11e9-8314-f1b1132d09f3.png)
+<twitter tags="#RazorView #Blazor">
+
+[![Xpand XAF Modules RazorView](https://user-images.githubusercontent.com/159464/139330687-e28673b9-c460-400c-9862-77f161ee0d99.gif)](https://youtu.be/sywu43jqV88)
+
 </twitter>
+
+[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/sywu43jqV88)
 
 --- 
 

@@ -4,22 +4,22 @@ using System.Linq;
 using System.Threading.Tasks;
 using RazorLight.Razor;
 
-namespace Xpand.XAF.Modules.ObjectTemplate.Template {
-    sealed class ObjectTemplateRazorProject : RazorLightProject {
+namespace Xpand.XAF.Modules.RazorView.Template {
+    sealed class RazorViewProject : RazorLightProject {
         private readonly MemoryStream _objectTemplate;
-        public ObjectTemplateRazorProject(MemoryStream template) => _objectTemplate = template;
+        public RazorViewProject(MemoryStream template) => _objectTemplate = template;
 
         public override Task<RazorLightProjectItem> GetItemAsync(string templateKey) 
-            => Task.FromResult((RazorLightProjectItem)new NotificationRazorProjectItem(templateKey, _objectTemplate));
+            => Task.FromResult((RazorLightProjectItem)new RazorViewProjectItem(templateKey, _objectTemplate));
         
         public override Task<IEnumerable<RazorLightProjectItem>> GetImportsAsync(string templateKey) =>
             Task.FromResult(Enumerable.Empty<RazorLightProjectItem>());
     }
 
-    class NotificationRazorProjectItem : RazorLightProjectItem {
+    class RazorViewProjectItem : RazorLightProjectItem {
         private readonly MemoryStream _stream;
 
-        public NotificationRazorProjectItem(string templateKey, MemoryStream stream) {
+        public RazorViewProjectItem(string templateKey, MemoryStream stream) {
             Key = templateKey;
             _stream = stream;
         }

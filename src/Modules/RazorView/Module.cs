@@ -8,17 +8,17 @@ using Xpand.Extensions.Reactive.Conditional;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
-namespace Xpand.XAF.Modules.ObjectTemplate{
+namespace Xpand.XAF.Modules.RazorView{
     [UsedImplicitly]
-    public sealed class ObjectTemplateModule : ReactiveModuleBase{
-        public const string CategoryName = "Xpand.XAF.Modules.ObjectTemplate";
+    public sealed class RazorViewModule : ReactiveModuleBase{
+        
         [PublicAPI]
         public static ReactiveTraceSource TraceSource{ get; set; }
-        static ObjectTemplateModule(){
-            TraceSource=new ReactiveTraceSource(nameof(ObjectTemplateModule));
+        static RazorViewModule(){
+            TraceSource=new ReactiveTraceSource(nameof(RazorViewModule));
         }
         
-        public ObjectTemplateModule(){
+        public RazorViewModule(){
             RequiredModuleTypes.Add(typeof(SystemModule));
             RequiredModuleTypes.Add(typeof(ReactiveModule));
             RequiredModuleTypes.Add(typeof(ValidationModule));
@@ -33,7 +33,7 @@ namespace Xpand.XAF.Modules.ObjectTemplate{
         
         public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders){
             base.ExtendModelInterfaces(extenders);
-            extenders.Add<IModelReactiveModules,IModelReactiveModulesObjectTemplate>();
+            extenders.Add<IModelReactiveModules,IModelReactiveModulesRazorView>();
         }
     }
 }

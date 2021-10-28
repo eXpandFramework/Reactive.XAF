@@ -80,4 +80,5 @@ nuget Microsoft.AspNetCore
 nuget Selenium.Support 
 nuget Selenium.WebDriver == 4.0.1
 nuget Microsoft.NET.Test.SDK
+nuget RazorLight == 2.0.0-rc.3
 nuget Xpand.VersionConverter 2.202.11

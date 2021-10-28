@@ -40,7 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="21.2.2-beta" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="4.211.10.0" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="4.211.10.1" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.8" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.8.1" />
@@ -48,7 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="TestApplication.Module">
-      <HintPath>..\TestApplication.Module\bin\Debug\netstandard2.0\TestApplication.Module.dll</HintPath>
+      <HintPath>..\TestApplication.Module\bin\Debug\net5.0\TestApplication.Module.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

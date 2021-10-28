@@ -205,7 +205,7 @@ namespace Xpand.TestsLib.Common{
             {"RestModule", 61488},
             {"WindowsModule", 61489},
             {"JobSchedulerNotificationModule", 61490},
-            {"ObjectTemplateModule", 61491}
+            {"RazorViewModule", 61491}
         };
 
         public static TestObserver<T> StartTest<T>(this XafApplication application,IObservable<T> test,int delay=200) {

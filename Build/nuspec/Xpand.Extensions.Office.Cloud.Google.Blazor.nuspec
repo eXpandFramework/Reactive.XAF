@@ -21,7 +21,7 @@
         <dependency id="JetBrains.Annotations" version="2021.2" />
         <dependency id="Microsoft.AspNetCore.Hosting.Abstractions" version="2.2" />
         <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.11" />
-        <dependency id="Google.Apis.Auth" version="1.53" />
+        <dependency id="Google.Apis.Auth" version="1.55" />
         <dependency id="System.Configuration.ConfigurationManager" version="5.0" />
       </group>
     </dependencies>

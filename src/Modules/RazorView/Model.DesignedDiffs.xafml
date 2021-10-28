@@ -4,14 +4,14 @@
     <SchemaModule Name="SystemModule" Version="21.2.2.0" IsNewNode="True" />
   </SchemaModules>
   <Views>
-    <DetailView Id="ObjectTemplate_DetailView">
+    <DetailView Id="RazorView_DetailView">
       <Items>
         <PropertyEditor Id="Html" Caption="Template" />
       </Items>
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="SimpleEditors" RelativeSize="13.80443714050945">
-            <LayoutGroup Id="ObjectTemplate" Caption="ObjectTemplate" RelativeSize="100">
+            <LayoutGroup Id="RazorView" Caption="RazorView" RelativeSize="100">
               <LayoutGroup Id="Autoa0c8ac44-38fa-4be9-ab49-c2543a12ccec" ShowCaption="False" Caption="Autoa0c8ac44-38fa-4be9-ab49-c2543a12ccec(4)" Direction="Horizontal" Index="0" RelativeSize="31.547619047619047" IsNewNode="True">
                 <LayoutItem Id="Name" ViewItem="Name" Index="0" RelativeSize="50" IsNewNode="True" />
                 <LayoutItem Id="ModelType" ViewItem="ModelType" Index="1" RelativeSize="50" IsNewNode="True" />

@@ -12,13 +12,13 @@ using Xpand.Extensions.XAF.NonPersistentObjects;
 using Xpand.Extensions.XAF.Xpo.ValueConverters;
 using Xpand.XAF.Persistent.BaseImpl;
 
-namespace Xpand.XAF.Modules.ObjectTemplate.BusinessObjects {
+namespace Xpand.XAF.Modules.RazorView.BusinessObjects {
     [DefaultClassOptions]
     [Appearance("Color Error",AppearanceItemType.ViewItem, nameof(Error)+"!=''",TargetItems = nameof(Error),FontColor = "Red")]
     [Appearance("Hide Error",AppearanceItemType.ViewItem, nameof(Error)+" Is null",TargetItems = nameof(Error),Visibility = ViewItemVisibility.Hide)]
-    public class ObjectTemplate:CustomBaseObject {
+    public class RazorView:CustomBaseObject {
         private ObjectType _modelType;
-        public ObjectTemplate(Session session) : base(session) { }
+        public RazorView(Session session) : base(session) { }
 
         [DataSourceProperty(nameof(Objects))]
         [ValueConverter(typeof(ObjectTypeValueConverter))]
@@ -53,7 +53,7 @@ namespace Xpand.XAF.Modules.ObjectTemplate.BusinessObjects {
 
         [Size(SizeAttribute.Unlimited)]
         [RuleRequiredField]
-        [ModelDefault("RowCount","40")]
+        [ModelDefault("RowCount","30")]
         [ImmediatePostData]
         public string Template {
             get => _template;
