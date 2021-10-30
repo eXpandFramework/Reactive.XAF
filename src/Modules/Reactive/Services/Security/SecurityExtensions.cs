@@ -28,7 +28,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Security{
                     AppDomain.CurrentDomain.Patch(harmony => {
                         if (application.Security.IsInstanceOf("DevExpress.ExpressApp.Security.SecurityStrategyBase")){
                             var methodInfo = application.Security?.GetPropertyValue("Authentication")?.GetType().Methods("Authenticate")
-                                .Last(info =>info.DeclaringType!=null&& !info.DeclaringType.IsAbstract);
+                                .Last(info =>info.DeclaringType is { IsAbstract: false });
                             if (methodInfo != null){
                                 harmony.Patch(methodInfo, new HarmonyMethod(GetMethodInfo(nameof(Authenticate))));	
                             }	
@@ -63,7 +63,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Security{
 
         public static IObservable<Unit> Logon(this XafApplication application,object userKey) =>
             AuthenticateSubject.Where(_ => _.authentication== application.Security.GetPropertyValue("Authentication"))
-                .Do(_ => _.args.Instance=userKey).SelectMany(_ => application.WhenLoggedOn().FirstAsync()).ToUnit()
+                .Do(_ => _.args.SetInstance(_ => userKey)).SelectMany(_ => application.WhenLoggedOn().FirstAsync()).ToUnit()
                 .Merge(Unit.Default.ReturnObservable().Do(_ => application.Logon()).IgnoreElements())
                 .TraceRX(_ => $"{userKey}");
     }

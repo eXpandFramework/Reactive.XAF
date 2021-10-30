@@ -26,6 +26,7 @@ using DevExpress.ExpressApp.ViewVariantsModule;
 using DevExpress.ExpressApp.Xpo;
 using DevExpress.Persistent.BaseImpl;
 using TestApplication.GoogleService;
+using TestApplication.Module.Email;
 using TestApplication.Module.ViewWizard;
 using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.BO;
@@ -103,6 +104,7 @@ namespace TestApplication.Module {
             RequiredModuleTypes.Add(typeof(ViewWizardModule));
             RequiredModuleTypes.Add(typeof(RestModule));
             RequiredModuleTypes.Add(typeof(RazorViewModule));
+            RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.Email.EmailModule));
 
 
             AdditionalExportedTypes.Add(typeof(Event));
@@ -123,6 +125,7 @@ namespace TestApplication.Module {
             base.Setup(moduleManager);
             moduleManager.ConnectViewWizardService()
                 .Merge(moduleManager.ConnectGoogleCalendarService())
+                .Merge(moduleManager.ConnectEmail())
                 .Merge(moduleManager.ConnectCloudCalendarService())
                 .Merge(moduleManager.ConnectGoogleService())
                 .Merge(moduleManager.ConnectGoogleTasksService())

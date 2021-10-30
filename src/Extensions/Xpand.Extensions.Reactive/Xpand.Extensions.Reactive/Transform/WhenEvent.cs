@@ -10,7 +10,7 @@ namespace Xpand.Extensions.Reactive.Transform {
         public static IObservable<(TEventArgs args, TSource source)> WhenEvent<TSource,TEventArgs>(this object source, string eventName)
             => Observable.FromEventPattern(source, eventName).Select(pattern => (((TEventArgs) pattern.EventArgs),(TSource)source));
         
-        public static IObservable<(TEventArgs args, object source)> WhenEvent<TEventArgs>(this object source, string eventName)
-            => Observable.FromEventPattern(source, eventName).Select(pattern => (((TEventArgs) pattern.EventArgs),source));
+        public static IObservable<TEventArgs> WhenEvent<TEventArgs>(this object source, string eventName)
+            => Observable.FromEventPattern(source, eventName).Select(pattern => ((TEventArgs) pattern.EventArgs));
     }
 }

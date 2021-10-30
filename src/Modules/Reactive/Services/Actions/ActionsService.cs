@@ -33,9 +33,18 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 
         public static IObservable<T> WhenExecute<T>(this IObservable<SimpleAction> source,Func<SimpleActionExecuteEventArgs, IObservable<T>> retriedExecution) 
             => source.SelectMany(action => action.WhenExecute(retriedExecution));
+        public static IObservable<T> WhenExecuted<T>(this IObservable<SimpleAction> source,Func<SimpleActionExecuteEventArgs, IObservable<T>> retriedExecution) 
+            => source.SelectMany(action => action.WhenExecuted(retriedExecution));
+        public static IObservable<T> WhenExecuted<T>(this IObservable<SingleChoiceAction> source,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> retriedExecution) 
+            => source.SelectMany(action => action.WhenExecuted(retriedExecution));
 
         public static IObservable<T> WhenExecute<T>(this SimpleAction simpleAction,Func<SimpleActionExecuteEventArgs, IObservable<T>> retriedExecution) 
             => simpleAction.WhenExecute().SelectMany(retriedExecution).Retry(() => simpleAction.Application);
+        
+        public static IObservable<T> WhenExecuted<T>(this SimpleAction simpleAction,Func<SimpleActionExecuteEventArgs, IObservable<T>> retriedExecution) 
+            => simpleAction.WhenExecuted().SelectMany(retriedExecution).Retry(() => simpleAction.Application);
+        public static IObservable<T> WhenExecuted<T>(this SingleChoiceAction simpleAction,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> retriedExecution) 
+            => simpleAction.WhenExecuted().SelectMany(retriedExecution).Retry(() => simpleAction.Application);
         
         public static IObservable<T> WhenExecute<T>(this IObservable<SingleChoiceAction> source,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> retriedExecution) 
             => source.SelectMany(action => action.WhenExecute(retriedExecution));
@@ -127,6 +136,14 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(
 		        h => action.Executed += h, h => action.Executed -= h, ImmediateScheduler.Instance).Select(_ =>(SimpleActionExecuteEventArgs) _.EventArgs);
 
+        public static IObservable<SingleChoiceAction> AddItems(this IObservable<SingleChoiceAction> source,Func<SingleChoiceAction,IObservable<Unit>> addItems)
+            => source.WhenControllerActivated()
+                .Select(action => action)
+                .ConcatIgnored(addItems)
+                .Select(action => action)
+                .WhenActive()
+                .Merge(source.WhenControllerDeActivated().Do(action => action.Items.Clear()).IgnoreElements())
+        ;
         public static IObservable<SingleChoiceActionExecuteEventArgs> WhenExecuted(this SingleChoiceAction action) 
             => Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(
 		        h => action.Executed += h, h => action.Executed -= h, ImmediateScheduler.Instance).Select(_ => (SingleChoiceActionExecuteEventArgs)_.EventArgs);
@@ -199,6 +216,9 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 
         public static IObservable<TAction> WhenControllerActivated<TAction>(this IObservable<TAction> source,bool emitWhenActive=false) where TAction : ActionBase 
             => source.SelectMany(a =>a.Controller.WhenActivated(emitWhenActive).To(a) );
+        
+        public static IObservable<TAction> WhenControllerDeActivated<TAction>(this IObservable<TAction> source,bool emitWhenActive=false) where TAction : ActionBase 
+            => source.SelectMany(a =>a.Controller.WhenDeactivated().To(a) );
 
         public static IObservable<TAction> WhenActive<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
             => source.Where(a => a.Active);

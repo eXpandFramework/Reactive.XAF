@@ -1,39 +1,45 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Application>
-    <Views>
-        <DetailView Id="ModelViewInheritance_DetailView">
-            <MergedDifferences>
-                <MergedDifference Id="@0242566a-2efa-4969-8627-a3289a83a376" View="ModelViewInheritanceBaseObject_DetailView" IsNewNode="True" />
-            </MergedDifferences>
-        </DetailView>
-        <DetailView Id="ModelViewInheritanceBaseObject_DetailView">
-            <Layout>
-                <LayoutGroup Id="Main" RelativeSize="100">
-                    <LayoutGroup Id="SimpleEditors" RelativeSize="34.632683658170912">
-                        <LayoutGroup Id="Person" Index="0" RelativeSize="53.246753246753244">
-                            <LayoutGroup Id="Person_col1" RelativeSize="50">
-                                <LayoutItem Id="LastName" Index="0" RelativeSize="36.363636363636367" ViewItem="LastName" />
-                                <LayoutItem Id="MiddleName" Index="1" RelativeSize="63.636363636363633" ViewItem="MiddleName" />
-                                <LayoutItem Id="FirstName" ViewItem="FirstName" Removed="True" />
-                            </LayoutGroup>
-                            <LayoutGroup Id="Person_col2" RelativeSize="50">
-                                <LayoutItem Id="Birthday" RelativeSize="36.363636363636367" ViewItem="Birthday" />
-                                <LayoutItem Id="FullName" RelativeSize="27.272727272727273" ViewItem="FullName" />
-                                <LayoutItem Id="Email" RelativeSize="36.363636363636367" ViewItem="Email" />
-                            </LayoutGroup>
-                        </LayoutGroup>
-                        <LayoutGroup Id="Party" Index="1" RelativeSize="46.753246753246756">
-                            <LayoutItem Id="Photo" RelativeSize="27.777777777777779" ViewItem="Photo" />
-                            <LayoutItem Id="Address1" RelativeSize="22.222222222222221" ViewItem="Address1" />
-                            <LayoutItem Id="Address2" RelativeSize="22.222222222222221" ViewItem="Address2" />
-                            <LayoutItem Id="DisplayName" RelativeSize="27.777777777777779" ViewItem="DisplayName" />
-                        </LayoutGroup>
-                    </LayoutGroup>
-                    <LayoutGroup Id="PhoneNumbers_Group" Direction="Vertical" RelativeSize="65.367316341829081">
-                        <LayoutItem Id="PhoneNumbers" RelativeSize="100" ViewItem="PhoneNumbers" />
-                    </LayoutGroup>
-                </LayoutGroup>
-            </Layout>
-        </DetailView>
-    </Views>
+  <ReactiveModules>
+  </ReactiveModules>
+  <SchemaModules>
+    <SchemaModule Name="CloneObjectModule" Version="21.2.2.0" IsNewNode="True" />
+    <SchemaModule Name="SystemModule" Version="21.2.2.0" IsNewNode="True" />
+  </SchemaModules>
+  <Views>
+    <DetailView Id="ModelViewInheritance_DetailView">
+      <MergedDifferences>
+        <MergedDifference Id="@0242566a-2efa-4969-8627-a3289a83a376" View="ModelViewInheritanceBaseObject_DetailView" IsNewNode="True" />
+      </MergedDifferences>
+    </DetailView>
+    <DetailView Id="ModelViewInheritanceBaseObject_DetailView">
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="34.63268365817091">
+            <LayoutGroup Id="Person" Index="0" RelativeSize="53.246753246753244">
+              <LayoutGroup Id="Person_col1" RelativeSize="50">
+                <LayoutItem Id="LastName" Index="0" RelativeSize="36.36363636363637" ViewItem="LastName" />
+                <LayoutItem Id="MiddleName" Index="1" RelativeSize="63.63636363636363" ViewItem="MiddleName" />
+                <LayoutItem Id="FirstName" ViewItem="FirstName" Removed="True" />
+              </LayoutGroup>
+              <LayoutGroup Id="Person_col2" RelativeSize="50">
+                <LayoutItem Id="Birthday" RelativeSize="36.36363636363637" ViewItem="Birthday" />
+                <LayoutItem Id="FullName" RelativeSize="27.272727272727273" ViewItem="FullName" />
+                <LayoutItem Id="Email" RelativeSize="36.36363636363637" ViewItem="Email" />
+              </LayoutGroup>
+            </LayoutGroup>
+            <LayoutGroup Id="Party" Index="1" RelativeSize="46.753246753246756">
+              <LayoutItem Id="Photo" RelativeSize="27.77777777777778" ViewItem="Photo" />
+              <LayoutItem Id="Address1" RelativeSize="22.22222222222222" ViewItem="Address1" />
+              <LayoutItem Id="Address2" RelativeSize="22.22222222222222" ViewItem="Address2" />
+              <LayoutItem Id="DisplayName" RelativeSize="27.77777777777778" ViewItem="DisplayName" />
+            </LayoutGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="PhoneNumbers_Group" Direction="Vertical" RelativeSize="65.36731634182908">
+            <LayoutItem Id="PhoneNumbers" RelativeSize="100" ViewItem="PhoneNumbers" />
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+  </Views>
 </Application>

@@ -1,52 +1,69 @@
-![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.RazorView.svg?&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.RazorView.svg?&style=flat)
+![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.Email.svg?&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.Email.svg?&style=flat)
 
-[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/RazorView.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3ARazorView) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/RazorView.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3ARazorView)
+[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/Email.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AEmail) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/Email.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AEmail)
 # About 
 
-The `RazorView` module uses the Razor c# syntax to generate views out of Bossiness data. 
+The `Email` module sends your Bussiness Object as email to your users. 
 
 ## Details
-This is a `platform agnostic` module, to generate a view simply create a new `RazorView` business object and configure the available properties as shown below.
+This is a `platform agnostic` module, that generates an `Email` action using predefined model configurations like the next one.
 
-![image](https://user-images.githubusercontent.com/159464/139310461-4dba9eda-0633-4975-8bed-2b1871479afd.png)
+```xml
+<Application>
+  <ReactiveModules>
+    <Email>
+      <EmailAddress>
+        <EmailAddress Address="mail@gmail.com" Index="0" />
+      </EmailAddress>
+      <Recipients>
+        <EmailRecipient Id="Admins" Index="0" />
+      </Recipients>
+      <Rules>
+        <EmailRule Id="RazorView rules">
+          <ObjectViews>
+            <EmailObjectView Id="Preview" Index="0" />
+            <EmailObjectView Id="Template" Index="0" />
+          </ObjectViews>
+          <ViewRecipients>
+            <EmailViewRecipient Id="Preview to Admins" Index="0" />
+            <EmailViewRecipient Id="Template to Admins" Index="0" />
+          </ViewRecipients>
+        </EmailRule>
+      </Rules>
+      <SmtpClients>
+        <EmailSmtpClient Id="smtp.gmail.com" Index="0">
+          <ReplyTo>
+            <EmailAddressesDep Email="mail@gmail.com" Index="0" />
+          </ReplyTo>
+        </EmailSmtpClient>
+      </SmtpClients>
+    </Email>
+  </ReactiveModules>
+</Application>
+```
 
-To customize the rendering per `RazorView` object use the next snippet:
+![image](https://user-images.githubusercontent.com/159464/139561271-138cc53b-41d6-4569-a5e1-2ab65a66aa91.png)
+
+To customize the sending use the next snippet:
 
 ```c#
-Application.WhenRazorViewRendering()
-    .Where(e => e.Instance.razorView.Name=="Product view")
-    .Do(e => e.Handled = e.SetInstance(t => {
-        t.renderedView = "<b>template oveerriden</b>";
-        return t;
-    })).Subscribe();
+Application.WhenSendingEmail()
+    .Do(e => {
+        var smtpClient = e.Instance.client; //configure the client
+        var mailMessage = e.Instance.message; //configure the message
+    }).Subscribe()
 ```
 
 To customize the rendering per `Bussiness object` object use the next snippet:
 
-```c#
-Application.WhenRazorViewDataSourceObjectRendering()
-    .Where(e => e.Instance.razorView.Name == "Product view"&&e.Instance.razorView.ObjectSpace.GetKeyValue(e.Instance.instance)==(object)1)
-    .Do(e => e.Handled = e.SetInstance(t => {
-        t.renderedView = "override template for product with Oid==1".ReturnObservable();
-        return t;
-    })).Subscribe();
-```
 
-### Requirements
-
-After installing the nuget package the next attributes should be set in your project.
-
-```xml
-<PreserveCompilationReferences>true</PreserveCompilationReferences>
-<PreserveCompilationContext>true</PreserveCompilationContext>
-```
 ### Examples
 
-In the next screencast we create a `Product RazorView`   
+In the next screencast we create the previous model configuration resulting in the `Email` action activation. Then we test the action by sending an Email in both the `Blazor and the Windows` platforms.   
 
-<twitter tags="#RazorView #Blazor">
+<twitter tags="#Email #Blazor">
 
-[![Xpand XAF Modules RazorView](https://user-images.githubusercontent.com/159464/139330687-e28673b9-c460-400c-9862-77f161ee0d99.gif)](https://youtu.be/sywu43jqV88)
+[![Xpand XAF Modules Email](https://user-images.githubusercontent.com/159464/139561334-29a19d4f-085a-43f8-b93f-4c5fdf2aa1a4.gif)](https://youtu.be/sywu43jqV88)
 
 </twitter>
 

@@ -124,6 +124,7 @@ $filteredProjects| Invoke-Parallel -StepInterval 500 -VariablesToImport @("allPr
             targetFramework = "netstandard2.0"
         }        
         Add-NuspecDependency $versionConverter.Id $versionConverter.Version $nuspec "netstandard2.0"| Out-Null    
+        
     }
     $nuspec.Save($nuspecFileName)
     Format-Xml -Path $nuspecFileName

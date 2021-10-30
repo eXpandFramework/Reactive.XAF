@@ -45,6 +45,7 @@
         <dependency id="Xpand.XAF.Modules.ViewWizard" version="4.211.10.1" />
       </group>
       <group targetFramework="net5.0">
+        <dependency id="Xpand.XAF.Modules.Email" version="4.211.10.1" />
         <dependency id="Xpand.XAF.Modules.RazorView" version="4.211.10.1" />
         <dependency id="Xpand.Extensions.Office.Cloud.Google.Blazor" version="4.211.10.1" />
         <dependency id="Xpand.Extensions.Mono.Cecil" version="4.211.10.1" />

@@ -21,7 +21,7 @@ namespace Xpand.XAF.Modules.RazorView.BusinessObjects {
         public RazorView(Session session) : base(session) { }
 
         [DataSourceProperty(nameof(Objects))]
-        [ValueConverter(typeof(ObjectTypeValueConverter))]
+        [ValueConverter(typeof(ObjectTypeValueConverter))][RuleRequiredField]
         public ObjectType ModelType {
             get => _modelType;
             set => SetPropertyValue(nameof(ModelType), ref _modelType, value);

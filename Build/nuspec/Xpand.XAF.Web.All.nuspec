@@ -48,6 +48,7 @@
         <dependency id="Xpand.Extensions.Blazor" version="4.211.10.1" />
         <dependency id="Xpand.Extensions.Office.Cloud.Google.Blazor" version="4.211.10.1" />
         <dependency id="Xpand.XAF.Modules.Blazor" version="4.211.10.1" />
+        <dependency id="Xpand.XAF.Modules.Email" version="4.211.10.1" />
         <dependency id="Xpand.XAF.Modules.JobScheduler.Hangfire" version="4.211.10.1" />
         <dependency id="Xpand.XAF.Modules.JobScheduler.Notification" version="4.211.10.1" />
         <dependency id="Xpand.XAF.Modules.RazorView" version="4.211.10.1" />
