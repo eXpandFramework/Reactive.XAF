@@ -12,7 +12,7 @@
     <description>The `Reactive.Logger.Hub` transmits or receives the execution pipeLine flow.</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Reactive.Logger.Hub, 21.2.2</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Reactive.Logger.Hub, 21.2.3</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
         <dependency id="Xpand.Extensions.Reactive" version="4.212.0.1" />
@@ -21,11 +21,11 @@
         <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.212.0.1" />
         <dependency id="MagicOnion" version="2.6.3" />
         <dependency id="System.Interactive.Async" version="5.0" />
-        <dependency id="DevExpress.ExpressApp" version="21.2.2-beta" />
-        <dependency id="DevExpress.Xpo" version="21.2.2-beta" />
+        <dependency id="DevExpress.ExpressApp" version="21.2.3" />
+        <dependency id="DevExpress.Xpo" version="21.2.3" />
         <dependency id="System.Reactive" version="5.0" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
-        <dependency id="Jetbrains.Annotations" version="2021.2" />
+        <dependency id="Jetbrains.Annotations" version="2021.3" />
         <dependency id="YamlDotNet" version="11.2.1" />
         <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.11" />
         <dependency id="System.Configuration.ConfigurationManager" version="5.0" />

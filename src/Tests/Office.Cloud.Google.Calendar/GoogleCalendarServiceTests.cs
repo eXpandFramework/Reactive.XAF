@@ -311,7 +311,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
         [SuppressMessage("ReSharper", "AccessToDisposedClosure")]
         public override Task Skip_Authorization_If_Authentication_Storage_Is_Empty(){
 	        using var application = Platform.Win.CalendarModule().Application;
-	        var observer = application.WhenObjectViewCreated().Test();
+	        var observer = application.WhenObjectViewCreated().FirstAsync().Test();
 
 	        var exceptions = application.WhenTrace(rxAction: RXAction.OnError).Test();
 	        Should.ThrowAsync<TimeoutException>(async () => await application.InitializeService(newAuthentication: false).Timeout(TimeSpan.FromSeconds(5)));

@@ -23,7 +23,7 @@ namespace Xpand.XAF.Modules.PositionInListView.Tests{
             using var application=PositionInListViewModuleModule().Application;
             var positionInListView = ListViewItem;
             
-            positionInListView.PositionMembers.Count().ShouldBe(1);
+            positionInListView.PositionMembers.Count().ShouldBe(2);
             positionInListView.PositionMembers.First().Id().ShouldBe(nameof(PIL.Order));
         }
         [Test][XpandTest()][Order(2)]
@@ -49,7 +49,7 @@ namespace Xpand.XAF.Modules.PositionInListView.Tests{
             var positionInListView = application.Model.ToReactiveModule<IModelReactiveModulesPositionInListView>()
                 .PositionInListView.ModelClassItems.AddNode<IModelPositionInListViewModelClassItem>();
             positionInListView.ModelClass = application.Model.BOModel.GetClass(typeof(PIL));
-            positionInListView.ModelMembers.Count().ShouldBe(1);
+            positionInListView.ModelMembers.Count().ShouldBe(2);
             positionInListView.ModelMembers.First().Id().ShouldBe(nameof(PIL.Order));
         }
 

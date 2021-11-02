@@ -73,16 +73,14 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                         .TakeWhile(_ => !objectSpace.IsDisposed)
                         .SelectMany(t1 => source(t)
                             .ObserveOn(Scheduler.CurrentThread)
-#if !XAF192
                             .Where(buffer => objectSpace.IsObjectFitForCriteria(t1.e.Criteria,buffer))
                             .TakeWhile(_ => !objectSpace.IsDisposed)
                             .Take(t1.e.TopReturnedObjects,true)
                             .ObserveOn(Scheduler.CurrentThread)
-#endif
-                            .TakeWhile(_ => !objectSpace.IsDisposed)
                             .BufferUntilCompleted()
                             .Do(items => objects.AddObjects(items))
                             .SelectMany()
+                            .TakeWhile(_ => !objectSpace.IsDisposed)
                             .Do(item => {
                                 objectSpace.AcceptObject(item);
                                 if (objectType.IsInstanceOfType(item)) {

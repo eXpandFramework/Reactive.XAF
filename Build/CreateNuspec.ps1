@@ -1,7 +1,7 @@
 param(
     $root = [System.IO.Path]::GetFullPath("$PSScriptRoot\..\"),
     [switch]$Release,
-    $dxVersion = "21.2.2-beta",
+    $dxVersion = "21.2.3",
     $branch = "lab"
 )
 

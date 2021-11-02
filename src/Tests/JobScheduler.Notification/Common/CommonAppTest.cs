@@ -1,29 +1,16 @@
-﻿using DevExpress.ExpressApp.Blazor;
+﻿using System;
 using NUnit.Framework;
+using Xpand.TestsLib.Blazor;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Tests.Common {
-    public abstract class CommonAppTest:CommonTest{
-        protected BlazorApplication Application;
+    public abstract class CommonAppTest:BlazorCommonAppTest{
+        protected override Type StartupType => typeof(Startup);
 
-        protected void AwaitInit(){ }
-
-        public override void Dispose(){ }
-
-        protected override void ResetXAF(){ }
-
-
-        [OneTimeTearDown]
-        public override void Cleanup() {
-            base.Cleanup();
-            Application?.Dispose();
-            base.Dispose();
-        }
 
         [OneTimeSetUp]
         public override void Init() {
             base.Init();
-            Application = NewBlazorApplication();
-            JobSchedulerNotificationModule(Application);
+            Application.JobSchedulerNotificationModule();
         }
     }
 }

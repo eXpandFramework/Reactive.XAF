@@ -12,7 +12,7 @@
     <description>The DocumentStyleManager can re-brand a large number of documents using style templates.</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Office.DocumentStyleManager, 21.2.2</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Office.DocumentStyleManager, 21.2.3</tags>
     <dependencies>
       <group targetFramework="net461">
         <dependency id="Xpand.Extensions" version="4.212.0.1" />
@@ -24,12 +24,12 @@
         <dependency id="Xpand.Extensions.XAF" version="4.212.0.1" />
         <dependency id="Xpand.Extensions.XAF.Xpo" version="4.212.0.1" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
-        <dependency id="JetBrains.Annotations" version="2021.2" />
+        <dependency id="JetBrains.Annotations" version="2021.3" />
         <dependency id="System.Reactive" version="5.0" />
         <dependency id="Newtonsoft.Json" version="13.0.1" />
         <dependency id="System.Interactive" version="5.0" />
-        <dependency id="DevExpress.ExpressApp.Office" version="21.2.2-beta" />
-        <dependency id="DevExpress.ExpressApp.ConditionalAppearance" version="21.2.2-beta" />
+        <dependency id="DevExpress.ExpressApp.Office" version="21.2.3" />
+        <dependency id="DevExpress.ExpressApp.ConditionalAppearance" version="21.2.3" />
         <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.11" />
         <dependency id="System.CodeDom" version="5.0" />
       </group>

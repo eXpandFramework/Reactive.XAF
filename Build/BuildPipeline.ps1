@@ -85,7 +85,7 @@ Invoke-Script {
     }
     Set-Location "$SourcePath\src"
     Clear-XProjectDirectories
-    # Start-XpandProjectConverter -version $CustomVersion -path $SourcePath -SkipInstall
+    Start-XpandProjectConverter -version $CustomVersion -path $SourcePath -SkipInstall
     "PaketRestore $SourcePath"
     try {
         Invoke-PaketRestore -Strict 

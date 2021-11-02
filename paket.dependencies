@@ -1,18 +1,19 @@
-source C:\Work\DXPackages\
+source https://nuget.devexpress.com/88luCgoeuPFTrDrTDcc6zKg22U2cVcTm3vdKCv88I7PHF9St6i/api
 source https://api.nuget.org/v3/index.json
 source https://xpandnugetserver.azurewebsites.net/nuget
 storage:none
 copy_local:true
 framework:net461,net472,net5.0,net5.0-windows,netstandard2.0,netstandard2.1
 
-nuget DevExpress.ExpressApp.Office == 21.2.2-beta
-nuget DevExpress.ExpressApp.Core.All == 21.2.2-beta
-nuget DevExpress.ExpressApp.Win.All == 21.2.2-beta
-nuget DevExpress.ExpressApp.Web.All == 21.2.2-beta
-nuget DevExpress.EasyTest == 21.2.2-beta  
-nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 21.2.2-beta  
-nuget DevExpress.ExpressApp.EasyTest.WinAdapter == 21.2.2-beta  
-nuget DevExpress.ExpressApp.Security.Xpo == 21.2.2-beta  
+nuget DevExpress.ExpressApp.Office == 21.2.3.0
+nuget DevExpress.ExpressApp.Core.All == 21.2.3.0
+nuget DevExpress.ExpressApp.Win.All == 21.2.3.0
+nuget DevExpress.ExpressApp.Web.All == 21.2.3.0
+nuget DevExpress.ExpressApp.Blazor.All == 21.2.3.0
+nuget DevExpress.EasyTest == 21.2.3.0  
+nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 21.2.3.0  
+nuget DevExpress.ExpressApp.EasyTest.WinAdapter == 21.2.3.0  
+nuget DevExpress.ExpressApp.Security.Xpo == 21.2.3.0  
 nuget System.ServiceModel.NetTcp == 4.8.1
 nuget System.ServiceModel.Security == 4.8.1
 nuget System.ServiceModel.Http == 4.8.1
@@ -82,3 +83,5 @@ nuget Selenium.WebDriver == 4.0.1
 nuget Microsoft.NET.Test.SDK
 nuget RazorLight == 2.0.0-rc.3
 nuget Xpand.VersionConverter 2.202.11
+
+

@@ -7,3 +7,4 @@ System.Diagnostics.PerformanceCounter
 Moq
 Newtonsoft.Json
 System.Data.SqlClient
+Nunit

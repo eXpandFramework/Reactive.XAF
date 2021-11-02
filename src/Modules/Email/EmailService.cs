@@ -44,7 +44,7 @@ namespace Xpand.XAF.Modules.Email{
             var recipients = singleChoiceAction.Items.Select(item => item.Data).Cast<IModelEmailViewRecipient>()
                 .Select(recipient => recipient.Id()).ToArray();
             var selectedObjects = view.SelectedObjects.Cast<object>().ToArray();
-            var sendCount = selectedObjects.Select(o => view.ObjectSpace.GetKeyValue(o).ToString())
+            var sendCount = selectedObjects.Select(o => $"{view.ObjectSpace.GetKeyValue(o)}").Where(s => s!=String.Empty)
                 .SelectMany(key => objectSpace.GetObjectsQuery<EmailStorage>()
                     .Where(storage => storage.Key == key && recipients.Contains(storage.ViewRecipient))).Count() ;
             singleChoiceAction.Enabled[nameof(DisableIfSent)] = selectedObjects.Length>sendCount;
@@ -129,8 +129,8 @@ namespace Xpand.XAF.Modules.Email{
 
         private static IObservable<(IModelEmailViewRecipient receipient, IModelEmailRule rule)> ViewRecipients(this ActionBase action) 
             => action.Model.Application.ModelEmail().Rules.SelectMany(rule => rule.ViewRecipients
-                .Where(receipient => receipient.ObjectView.ObjectView==action.View().Model)
-                .Select(receipient => (receipient,rule))).ToNowObservable();
+                .Where(recipient => recipient.ObjectView.ObjectView==action.View().Model)
+                .Select(recipient => (receipient: recipient,rule))).ToNowObservable();
 
         private static IObservable<SingleChoiceAction> RegisterAction(this ApplicationModulesManager manager) 
             => manager.RegisterViewSingleChoiceAction(nameof(Email),action => action.ConfigureAction());
@@ -143,8 +143,8 @@ namespace Xpand.XAF.Modules.Email{
 
         private static IObservable<ChoiceActionItem> AddItems(this SingleChoiceAction action) 
             => action.Model.Application.ModelEmail().Rules
-                .SelectMany(rule => rule.ViewRecipients).Where(viewReceipient => viewReceipient.ObjectView.ObjectView == action.View().Model)
-                .Select(viewReceipient => new ChoiceActionItem(viewReceipient.Caption, viewReceipient)).ToNowObservable()
+                .SelectMany(rule => rule.ViewRecipients).Where(viewRecipient => viewRecipient.ObjectView.ObjectView == action.View().Model)
+                .Select(viewRecipient => new ChoiceActionItem(viewRecipient.Caption, viewRecipient)).ToNowObservable()
                 .Do(item => action.Items.Add(item)).TraceEmail(item => item.Caption);
         
         internal static IObservable<TSource> TraceEmail<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,

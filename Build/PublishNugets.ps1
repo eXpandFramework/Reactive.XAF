@@ -15,7 +15,7 @@ Get-ChildItem D:\a\1\s\bin\Nupkg -ErrorAction Continue
 
 
 $ErrorActionPreference="stop"
-$VerbosePreference="Continue"
+# $VerbosePreference="Continue"
 "localPackageSource=$localPackageSource"
 
 "Build_DefinitionName=$env:Build_DefinitionName"

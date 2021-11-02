@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
@@ -7,6 +8,8 @@ using Fasterflect;
 using NUnit.Framework;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.NonPersistentObjects;
+using Xpand.Extensions.XAF.TypesInfoExtensions;
+using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.BusinessObjects;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Tests.BO;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -14,6 +17,13 @@ using Xpand.XAF.Modules.Reactive.Services;
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Tests.Common {
     static class NotificationTestExtension {
         public static string ScheduledJobId => $"{TestContext.CurrentContext.Test.MethodName}{TestContext.CurrentContext.Test.ID}";
+        
+        public static JobSchedulerNotificationModule JobSchedulerNotificationModule(this BlazorApplication newBlazorApplication) {
+            var module = newBlazorApplication.AddModule<JobSchedulerNotificationModule>(typeof(JSNE).CollectExportedTypesFromAssembly().ToArray());
+            newBlazorApplication.Logon();
+            using var objectSpace = newBlazorApplication.CreateObjectSpace();
+            return module;
+        }
         
         public static ObjectStateNotification NewNotificationJob(this IObjectSpace objectSpace,Type objectType=null) {
             objectType ??= typeof(JSNE);

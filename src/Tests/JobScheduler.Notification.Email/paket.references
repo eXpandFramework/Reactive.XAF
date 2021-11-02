@@ -16,4 +16,4 @@ System.Text.Json
 Polly
 Microsoft.AspNetCore.Http.Features
 Newtonsoft.Json
-DevExpress.ExpressApp.Win
+DevExpress.ExpressApp.Blazor.All

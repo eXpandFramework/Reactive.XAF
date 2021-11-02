@@ -29,7 +29,7 @@ Get-ChildItem -Filter *.csproj -Recurse | ForEach-Object {
     Update-ProjectProperty $projXml DebugType full
     Update-ProjectProperty $projXml CopyLocalLockFileAssemblies true
     Remove-ProjectLicenseFile $projXml
-    Update-ProjectAutoGenerateBindingRedirects $projXml $true
+    # Update-ProjectAutoGenerateBindingRedirects $projXml $true
     if ($fileName -notlike "*.Tests.csproj" -or $fileName -like "*EasyTest*.csproj" ) {
         if ($fileName -notlike "*TestApplication.Web*.csproj") {
             Update-OutputPath $fileName "$rootLocation\bin\"|Out-Null

@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Reactive.Linq;
+using System.Threading;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor;
+using DevExpress.ExpressApp.Blazor.AmbientContext;
 using DevExpress.ExpressApp.Blazor.Editors.Grid;
 using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Model;
+using Fasterflect;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -22,7 +26,14 @@ namespace Xpand.TestsLib.Blazor {
         }
         public override void Dispose() {
             base.Dispose();
+            CleanBlazorEnviroment();
+        }
+
+        protected void CleanBlazorEnviroment() {
             WebHost?.Dispose();
+            typeof(ValueManagerContext).Field("storageHolder", Flags.StaticPrivate).SetValue(null,
+                typeof(AsyncLocal<>).MakeGenericType(AppDomain.CurrentDomain.GetAssemblyType(
+                    "DevExpress.ExpressApp.Blazor.AmbientContext.ValueManagerContext+StorageHolder")).CreateInstance());
         }
 
         protected BlazorApplication NewBlazorApplication(Type startupType){
@@ -34,9 +45,6 @@ namespace Xpand.TestsLib.Blazor {
             WebHost.Start();
             var containerInitializer = WebHost.Services.GetRequiredService<IValueManagerStorageContainerInitializer>();
             containerInitializer.Initialize();
-            // if (((IValueManagerStorageAccessor) containerInitializer)?.Storage == null) {
-                // containerInitializer.Initialize();
-            // }
             var newBlazorApplication = WebHost.Services.GetService<IXafApplicationProvider>()?.GetApplication();
             if (newBlazorApplication != null) {
                 newBlazorApplication.ServiceProvider = WebHost.Services;

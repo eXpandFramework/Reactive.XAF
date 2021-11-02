@@ -65,11 +65,11 @@ In the next screencast we create the previous model configuration resulting in t
 
 <twitter tags="#Email #Blazor">
 
-[![Xpand XAF Modules Email](https://user-images.githubusercontent.com/159464/139561334-29a19d4f-085a-43f8-b93f-4c5fdf2aa1a4.gif)](https://youtu.be/sywu43jqV88)
+[![Xpand XAF Modules Email](https://user-images.githubusercontent.com/159464/139561334-29a19d4f-085a-43f8-b93f-4c5fdf2aa1a4.gif)](https://youtu.be/Xy3IzZM6HYY)
 
 </twitter>
 
-[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/sywu43jqV88)
+[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/Xy3IzZM6HYY)
 
 --- 
 

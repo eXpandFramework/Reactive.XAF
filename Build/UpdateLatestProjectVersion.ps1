@@ -21,26 +21,11 @@ if ($Branch -eq "master") {
     $newVersion = (Update-Version $lastVersion -Build)
 }
 elseif (!$SkipVersioning) {
-    if (($lastOfficialVersion -gt $lastVersion) -or ($lastVersion.Build -lt (Get-DevExpressVersion).Build)) {
-        $build=$lastOfficialVersion.Build
-        if ($lastVersion.Build -gt $lastOfficialVersion.Build){
-            $build=$lastVersion.Build
-        }
-        $srcVersion=[version](Get-AssemblyInfoVersion "$PSScriptRoot\..\src\Common\AssemblyInfoVersion.cs")
-        $major=$lastOfficialVersion.Major
-        $minor=$lastOfficialVersion.Minor
-        if ($minor -lt $srcVersion.Minor){
-            $minor=$srcVersion.minor
-            $build=0
-        }
-        $newVersion = [version]"$major.$minor.$build.1"
+    $srcVersion=[version](Get-AssemblyInfoVersion "$PSScriptRoot\..\src\Common\AssemblyInfoVersion.cs")
+    if ($srcVersion -gt $lastVersion){
+        $newVersion=$srcVersion
     }
     else{
-        $srcVersion=[version](Get-AssemblyInfoVersion "$PSScriptRoot\..\src\Common\AssemblyInfoVersion.cs")
-        if ($srcVersion -gt $lastVersion){
-            $lastVersion=$srcVersion
-        }
-        
         $newVersion=Update-Version $lastVersion -Revision
     }
 }

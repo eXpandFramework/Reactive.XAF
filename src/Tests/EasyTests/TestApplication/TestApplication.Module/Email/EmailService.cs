@@ -5,10 +5,11 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
+using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ModelExtensions;
+using Xpand.TestsLib.Common.BO;
 using Xpand.XAF.Modules.Email;
-using Xpand.XAF.Modules.RazorView.BusinessObjects;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 
@@ -23,22 +24,22 @@ namespace TestApplication.Module.Email {
                     var smtpClient = modelEmail.SmtpClient(emailAddress);
                     var modelEmailRule = modelEmail.EmailRule();
                     var emailRecipient = modelEmail.EmailRecipient(recipientType);
-                    var emailObjectView = modelEmailRule.ObjectView(nameof(RazorView.Preview));
+                    var emailObjectView = modelEmailRule.ObjectView(nameof(Product.ProductName));
                     modelEmailRule.SetupViewRecipient( emailObjectView, emailRecipient, smtpClient);
                 }).ToUnit();
         }
 
         private static IModelEmailRule EmailRule(this IModelEmail modelEmail) {
             var modelEmailRule = modelEmail.Rules.AddNode<IModelEmailRule>();
-            modelEmailRule.Type = modelEmail.Application.BOModel.GetClass(typeof(RazorView));
-            ((ModelNode)modelEmailRule).Id = $"{nameof(RazorView)} rules";
+            modelEmailRule.Type = modelEmail.Application.BOModel.GetClass(typeof(Product));
+            ((ModelNode)modelEmailRule).Id = $"{nameof(Product)} rules";
             return modelEmailRule;
         }
 
         private static IModelEmailObjectView ObjectView(this IModelEmailRule modelEmailRule, string body) {
             var emailObjectView = modelEmailRule.ObjectViews.AddNode<IModelEmailObjectView>();
-            emailObjectView.ObjectView = emailObjectView.Application.BOModel.GetClass(typeof(RazorView)).DefaultDetailView;
-            emailObjectView.Subject = emailObjectView.ObjectView.ModelClass.FindMember(nameof(RazorView.Preview));
+            emailObjectView.ObjectView = emailObjectView.Application.BOModel.GetClass(typeof(Product)).DefaultDetailView;
+            emailObjectView.Subject = emailObjectView.ObjectView.ModelClass.FindMember(nameof(Product.ProductName));
             emailObjectView.Body = emailObjectView.ObjectView.ModelClass.FindMember(body);
             ((ModelNode)emailObjectView).Id = body;
             return emailObjectView;
@@ -83,8 +84,8 @@ namespace TestApplication.Module.Email {
             smtpClient.EnableSsl = true;
             smtpClient.UserName=emailAddress;
             smtpClient.DeliveryMethod=SmtpDeliveryMethod.SpecifiedPickupDirectory;
-            // smtpClient.UseDefaultCredentials = false;
             smtpClient.Password = "password";
+            smtpClient.PickupDirectoryLocation = $"{AppDomain.CurrentDomain.ApplicationPath()}\\TestApplication";
             ((ModelNode)smtpClient).Id = "smtp.gmail.com";
             var emailAddressesDep = smtpClient.ReplyTo.AddNode<IModelEmailAddressesDep>();
             emailAddressesDep.EmailAddress=emailAddress;

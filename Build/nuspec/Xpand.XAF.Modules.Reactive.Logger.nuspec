@@ -12,19 +12,19 @@
     <description>The `Reactive.Logger` module monitors calls to the RX delegates OnNext, OnSubscribe, OnDispose, OnCompleted, OnError</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Reactive.Logger, 21.2.2</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Reactive.Logger, 21.2.3</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
         <dependency id="Xpand.Extensions" version="4.212.0.1" />
         <dependency id="Xpand.Extensions.Reactive" version="4.212.0.1" />
         <dependency id="Xpand.Extensions.XAF" version="4.212.0.1" />
         <dependency id="Xpand.XAF.Modules.Reactive" version="4.212.0.1" />
-        <dependency id="DevExpress.ExpressApp.ConditionalAppearance" version="21.2.2-beta" />
-        <dependency id="DevExpress.Xpo" version="21.2.2-beta" />
+        <dependency id="DevExpress.ExpressApp.ConditionalAppearance" version="21.2.3" />
+        <dependency id="DevExpress.Xpo" version="21.2.3" />
         <dependency id="System.Reactive" version="5.0" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="Xpand.Patcher" version="2.0.30" />
-        <dependency id="JetBrains.Annotations" version="2021.2" />
+        <dependency id="JetBrains.Annotations" version="2021.3" />
         <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.11" />
         <dependency id="System.Configuration.ConfigurationManager" version="5.0" />
         <dependency id="Newtonsoft.Json" version="13.0.1" />

@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using ALL.Win.Tests;
 using DevExpress.EasyTest.Framework;
 using Shouldly;
 using Xpand.TestsLib.Common.BO;
@@ -12,7 +13,7 @@ using ActionCommand = Xpand.TestsLib.EasyTest.Commands.ActionCommands.ActionComm
 namespace Web.Tests {
     public static class EmailService {
         public static async Task TestEmail(this ICommandAdapter adapter) {
-            var pickupDirectory = $@"{Path.GetTempPath()}\TestApplication";
+            var pickupDirectory = $"{Path.GetDirectoryName(AllWinTests.ApplicationPath)}\\TestApplication";
             if (Directory.Exists(pickupDirectory)) {
                 Directory.Delete(pickupDirectory,true);
             }

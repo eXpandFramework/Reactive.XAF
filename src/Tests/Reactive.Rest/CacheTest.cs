@@ -24,9 +24,9 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests {
             
             await Application.CreateObjectSpace(typeof(RestPropertyObject))
                 .Request(typeof(RestPropertyObject)).Timeout(Timeout);
-
+        
             HandlerMock.VerifySend(Times.Exactly(times),message => $"{message.RequestUri}".Contains($"Get{nameof(RestPropertyObject)}") );
-
+        
             operationAttribute.PollInterval = RestOperationAttribute.DefaultPollingInterval;
         }
 

@@ -16,7 +16,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.Email.Tests {
     public class EmailModuleTests : CommonAppTest {
-        private IModelEmailObjectView _emailObjectView;
+        
         private IModelEmailViewRecipient _viewRecipient;
 
         public override void Init() {
@@ -32,13 +32,13 @@ namespace Xpand.XAF.Modules.Email.Tests {
             smtpClient.From=emailAddress;
             smtpClient.Host = "mail.mail.com";
             var modelEmailRule = modelEmail.Rules.AddNode<IModelEmailRule>();
-            _emailObjectView = modelEmailRule.ObjectViews.AddNode<IModelEmailObjectView>();
-            _emailObjectView.ObjectView = _emailObjectView.Application.BOModel.GetClass(typeof(E)).DefaultDetailView;
-            _emailObjectView.Subject = _emailObjectView.ObjectView.ModelClass.FindMember(nameof(E.Name));
+            var emailObjectView = modelEmailRule.ObjectViews.AddNode<IModelEmailObjectView>();
+            emailObjectView.ObjectView = emailObjectView.Application.BOModel.GetClass(typeof(E)).DefaultDetailView;
+            emailObjectView.Subject = emailObjectView.ObjectView.ModelClass.FindMember(nameof(E.Name));
             var emailRecipient = modelEmail.Recipients.AddNode<IModelEmailRecipient>();
             emailRecipient.RecipientType=recipientType;
             _viewRecipient = modelEmailRule.ViewRecipients.AddNode<IModelEmailViewRecipient>();
-            _viewRecipient.ObjectView=_emailObjectView;
+            _viewRecipient.ObjectView=emailObjectView;
             _viewRecipient.Recipient = emailRecipient;
             _viewRecipient.SmtpClient=smtpClient;
         }
@@ -58,7 +58,7 @@ namespace Xpand.XAF.Modules.Email.Tests {
         }
         [Test][Order(100)]
         public void Disable_EmailAction_When_Email_Already_Sent() {
-            _emailObjectView.UniqueSend = true;
+            _viewRecipient.ObjectView.UniqueSend = true;
             var objectSpace = Application.CreateObjectSpace();
             var e = objectSpace.CreateObject<E>();
             objectSpace.CommitChanges();
@@ -73,8 +73,10 @@ namespace Xpand.XAF.Modules.Email.Tests {
             
             window.Action(nameof(EmailService.Email)).Enabled["DisableIfSent"].ShouldBeFalse();
             
+            emailStorage.ObjectSpace.Delete(emailStorage);
+            emailStorage.ObjectSpace.CommitChanges();
             window.Close();
-            _emailObjectView.UniqueSend = false;
+            _viewRecipient.ObjectView.UniqueSend = false;
         }
         [Test][Order(200)]
         public void Send_Email() {

@@ -37,7 +37,8 @@
     <Compile Include="..\CommonFiles\Windows\WinModule.cs" Link="WinModule.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="21.2.2-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="21.2.3" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="5.0" />
     <PackageReference Include="Microsoft.Win32.Registry" Version="5.0" />
     <PackageReference Include="System.ServiceProcess.ServiceController" Version="5.0" />
     <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="5.0.1" />

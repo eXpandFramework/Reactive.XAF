@@ -14,3 +14,7 @@ System.Text.Json
 Polly
 Newtonsoft.Json
 Enums.Net
+DevExpress.ExpressApp.Blazor.All
+
+DevExpress.ExpressApp.Security
+DevExpress.ExpressApp.Security.Xpo

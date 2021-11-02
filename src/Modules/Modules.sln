@@ -220,6 +220,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.JobSchedu
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.RazorView", "RazorView\Xpand.XAF.Modules.RazorView.csproj", "{ED44EA7B-A16E-4C8B-B8DA-F5DE64771167}"
+	ProjectSection(ProjectDependencies) = postProject
+		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Email", "Email\Xpand.XAF.Modules.Email.csproj", "{E25CA9A0-F88E-48AC-B6B9-CE5F9218A7E5}"
 	ProjectSection(ProjectDependencies) = postProject

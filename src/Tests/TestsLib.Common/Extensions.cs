@@ -60,7 +60,7 @@ namespace Xpand.TestsLib.Common{
                     return tracing.Exceptions;
                 });
 
-        public static void SetupSecurity(this XafApplication application, Guid userId,Type userType=null,Type roleType=null) {
+        public static Guid SetupSecurity(this XafApplication application, Guid userId,Type userType=null,Type roleType=null,bool notAdmin=false) {
             userType ??= typeof(PermissionPolicyUser);
             roleType ??= typeof(PermissionPolicyRole);
             application.Modules.Add(new SecurityModule());
@@ -70,11 +70,13 @@ namespace Xpand.TestsLib.Common{
                 application.Modules.Add(testApplicationModule);
             }
             testApplicationModule.UserId = userId;
+            testApplicationModule.NotAdmin = notAdmin;
             application.Security = new SecurityStrategyComplex(userType, roleType, new AuthenticationStandard(userType, typeof(AuthenticationStandardLogonParameters)));
+            return userId;
         }
 
-        public static void SetupSecurity(this XafApplication application,bool fixedUserId=false,Type userType=null,Type roleType=null) 
-            => application.SetupSecurity(fixedUserId?Guid.Parse("5c50f5c6-e697-4e9e-ac1b-969eac1237f3") :Guid.Empty ,userType,roleType);
+        public static Guid SetupSecurity(this XafApplication application,bool fixedUserId=false,Type userType=null,Type roleType=null) 
+            => application.SetupSecurity(fixedUserId?Guid.Parse("5c50f5c6-e697-4e9e-ac1b-969eac1237f3") :Guid.NewGuid() ,userType,roleType);
 
         public static async Task<T> WithTimeOut<T>(this Task<T> source, TimeSpan? timeout = null) => await source.ToObservable().WithTimeOut(timeout);
 
@@ -481,12 +483,13 @@ namespace Xpand.TestsLib.Common{
             
         }
 
-        private void ApplicationOnLoggingOn(object sender, LogonEventArgs e) => ((AuthenticationStandardLogonParameters) e.LogonParameters).UserName = "User";
+        private void ApplicationOnLoggingOn(object sender, LogonEventArgs e) => ((AuthenticationStandardLogonParameters) e.LogonParameters).UserName = NotAdmin?"User":"Admin";
 
         public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB) 
-            => new[]{new DefaultUserModuleUpdater(objectSpace, versionFromDB,UserId,false)};
+            => new[]{new DefaultUserModuleUpdater(objectSpace, versionFromDB,UserId,!NotAdmin)};
 
         public Guid UserId{ get; set; }
+        public bool NotAdmin { get; set; }
     }
 
     public interface ITestApplication{

@@ -23,7 +23,7 @@ using IDisposable = System.IDisposable;
 
 namespace Xpand.TestsLib.Common{
     public abstract class CommonTest : IDisposable{
-        protected TestScheduler TestScheduler=new();
+        protected readonly TestScheduler TestScheduler=new();
         public const int LongTimeout = 900000;
         [UsedImplicitly]
         protected Platform GetPlatform(string platformName) => (Platform) Enum.Parse(typeof(Platform), platformName);
@@ -115,9 +115,7 @@ namespace Xpand.TestsLib.Common{
 
         [SetUp]
         public virtual void Setup() {
-            TestContext.Out.Write(TestContext.CurrentContext.Test.Name);
-            ReactiveLoggerService.RXLoggerLogPath = Path.Combine(TestContext.CurrentContext.TestDirectory,
-                $"{TestContext.CurrentContext.Test.MethodName}_{TestContext.CurrentContext.Test.ID}_RXLogger{TestContext.CurrentContext.CurrentRepeatCount}.log");
+            TestContext.Out.Write(TestContext.CurrentContext.Test.FullName);
         }
 
         [TearDown]
@@ -130,12 +128,16 @@ namespace Xpand.TestsLib.Common{
             
 
             try{
-                var text = GetLogText();
-                if (!string.IsNullOrEmpty(text)){
-                    var zipPPath = Path.Combine(TestContext.CurrentContext.TestDirectory,$"{GetTestName()}.gz");
-                    File.WriteAllBytes(zipPPath,text.GZip());
-                    TestContext.AddTestAttachment(zipPPath);    
-                }
+                LogPaths.ForEach(path => {
+                    if (File.Exists(path)) {
+                        var tempFileName = Path.GetTempFileName();
+                        File.Copy(path!, tempFileName, true);
+                        var text = $"{File.ReadAllText(tempFileName)}{Environment.NewLine}";
+                        var zipPPath = Path.Combine(TestContext.CurrentContext.TestDirectory,$"{Path.GetFileNameWithoutExtension(path)}.gz");
+                        File.WriteAllBytes(zipPPath,text.GZip());
+                        TestContext.AddTestAttachment(zipPPath);   
+                    }
+                });
             }
             catch (Exception e){
                 TestContext.Out.Write(e);
@@ -155,19 +157,7 @@ namespace Xpand.TestsLib.Common{
         protected void Await(Func<IObservable<object>> invoker) {
             SingleThreadedSynchronizationContext.Await(() => invoker().ToTask());
         }
-
-        private static string GetTestName() 
-            => $"{TestContext.CurrentContext.Test.MethodName}{TestContext.CurrentContext.Test.Arguments.Select(o => $"{o}").Join("_")}";
-
-        private string GetLogText() 
-            => LogPaths.Select(logPath => {
-                if (File.Exists(logPath)){
-                    var tempFileName = Path.GetTempFileName();
-                    File.Copy(logPath!, tempFileName, true);
-                    return $"{File.ReadAllText(tempFileName)}{Environment.NewLine}";
-                }
-                return null;
-            }).Join(Environment.NewLine).Trim();
+        
     }
 
 }

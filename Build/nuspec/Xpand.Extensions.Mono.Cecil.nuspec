@@ -12,13 +12,13 @@
     <description>Xpand.Extensions.Mono.Cecil</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.Extensions.Mono.Cecil, 21.2.2</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.Extensions.Mono.Cecil, 21.2.3</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="Mono.Cecil" version="0.11.3" />
         <dependency id="System.CodeDom" version="5.0" />
-        <dependency id="JetBrains.Annotations" version="2021.2" />
+        <dependency id="JetBrains.Annotations" version="2021.3" />
         <dependency id="System.ValueTuple" version="4.5" />
       </group>
     </dependencies>

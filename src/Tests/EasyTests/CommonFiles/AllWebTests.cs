@@ -79,16 +79,16 @@ namespace Web.Tests{
         public async Task Web_EasyTest_InMemory() {
 	        await EasyTest(NewWebAdapter, RunWebApplication, async adapter => {
                 var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
-                // adapter.Execute(autoTestCommand);
+                adapter.Execute(autoTestCommand);
                 await Task.CompletedTask;
                 await adapter.TestEmail();
-                // adapter.TestModelViewInheritance();
-                // adapter.TestPositionInListView();
+                adapter.TestModelViewInheritance();
+                adapter.TestPositionInListView();
                 
 #if NETCOREAPP3_1_OR_GREATER
-                // await adapter.TestJobScheduler();
-                // await adapter.TestJobSchedulerNotification();
-                // adapter.TestExecuteActionJob();
+                await adapter.TestJobScheduler();
+                await adapter.TestJobSchedulerNotification();
+                adapter.TestExecuteActionJob();
                 
 #endif
             });

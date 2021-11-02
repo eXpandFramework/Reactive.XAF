@@ -12,7 +12,7 @@
     <description>Xpand.TestsLib.Blazor</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.TestsLib.Blazor, 21.2.2</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.TestsLib.Blazor, 21.2.3</tags>
     <dependencies>
       <group targetFramework="net5.0">
         <dependency id="Xpand.Extensions" version="4.212.0.1" />
@@ -30,10 +30,10 @@
         <dependency id="Moq" version="4.16" />
         <dependency id="Newtonsoft.Json" version="13.0.1" />
         <dependency id="System.Data.SqlClient" version="4.8.3" />
-        <dependency id="DevExpress.ExpressApp.EasyTest.BlazorAdapter" version="21.2.2-beta" />
-        <dependency id="DevExpress.ExpressApp.Xpo" version="21.2.2-beta" />
-        <dependency id="DevExpress.EasyTest" version="21.2.2-beta" />
-        <dependency id="DevExpress.ExpressApp.Blazor" version="21.2.2-beta" />
+        <dependency id="DevExpress.ExpressApp.EasyTest.BlazorAdapter" version="21.2.3" />
+        <dependency id="DevExpress.ExpressApp.Xpo" version="21.2.3" />
+        <dependency id="DevExpress.EasyTest" version="21.2.3" />
+        <dependency id="DevExpress.ExpressApp.Blazor" version="21.2.3" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="Microsoft.AspNetCore" version="2.2" />
         <dependency id="Microsoft.AspNetCore.Hosting" version="2.2.7" />

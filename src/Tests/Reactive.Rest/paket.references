@@ -13,4 +13,4 @@ Microsoft.CodeAnalysis.CSharp
 System.Text.Json
 Polly
 Newtonsoft.Json
-
+DevExpress.ExpressApp.Blazor.All

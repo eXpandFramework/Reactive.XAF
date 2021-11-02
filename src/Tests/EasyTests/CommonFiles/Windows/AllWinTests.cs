@@ -55,14 +55,14 @@ namespace ALL.Win.Tests {
             });
         }
 
+        public static readonly string ApplicationPath = $@"{AppDomain.CurrentDomain.ApplicationPath()}\..\..\TestWinDesktopApplication\TestApplication.WinDesktop.exe";
         private TestApplication RunWinApplication(WinAdapter adapter, string connectionString) {
 #if !NETCOREAPP3_1_OR_GREATER
             var fileName =
                 Path.GetFullPath(
                     $@"{AppDomain.CurrentDomain.ApplicationPath()}\..\TestWinApplication\TestApplication.Win.exe");
 #else
-            var fileName =
- Path.GetFullPath($@"{AppDomain.CurrentDomain.ApplicationPath()}\..\..\TestWinDesktopApplication\TestApplication.WinDesktop.exe");
+            var fileName = Path.GetFullPath(ApplicationPath);
 #endif
             foreach (var process in Process.GetProcessesByName(Path.GetFileNameWithoutExtension(fileName))) {
                 process.Kill();
@@ -70,8 +70,7 @@ namespace ALL.Win.Tests {
 
             LogPaths.Clear();
             LogPaths.Add(Path.Combine(Path.GetDirectoryName(fileName)!, "eXpressAppFramework.log"));
-            LogPaths.Add(Path.Combine(Path.GetDirectoryName(fileName)!,
-                Path.GetFileName(ReactiveLoggerService.RXLoggerLogPath)!));
+            LogPaths.Add(Path.Combine(Path.GetDirectoryName(fileName)!, Path.GetFileName(ReactiveLoggerService.RXLoggerLogPath)!));
             return adapter.RunWinApplication(fileName, connectionString);
         }
 

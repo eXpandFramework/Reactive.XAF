@@ -96,7 +96,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
 
         
         [Test]
-        [XpandTest()][Ignore("Net461 only")]
+        [XpandTest()]
         public async Task Logon_with_user_key(){
             using var application = NewXafApplication();
             application.SetupSecurity();

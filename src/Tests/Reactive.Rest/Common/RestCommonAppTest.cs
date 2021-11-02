@@ -1,29 +1,34 @@
+using System;
+using System.Linq;
 using System.Net.Http;
-using System.Threading;
 using DevExpress.ExpressApp;
 using Moq;
 using NUnit.Framework;
+using Xpand.Extensions.Blazor;
+using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.TestsLib.Blazor;
+using Xpand.TestsLib.Common;
+using Xpand.XAF.Modules.Reactive.Rest.Tests.BO;
 
 namespace Xpand.XAF.Modules.Reactive.Rest.Tests.Common {
-    public abstract class RestCommonAppTest:RestCommonTest {
+    public abstract class RestCommonAppTest:BlazorCommonAppTest {
         private RestModule _blazorModule;
         protected Mock<HttpMessageHandler> HandlerMock;
+        protected override Type StartupType => typeof(RestStartup);
+
+        protected RestModule BlazorModule(params ModuleBase[] modules) {
+            Application.SetupSecurity(userType:typeof(RestUser));
+            var module = Application.AddModule<RestModule>(GetType().CollectExportedTypesFromAssembly().ToArray());
+            Application.Logon();
+            using var objectSpace = Application.CreateObjectSpace();
+            return module;
+        }
 
         [OneTimeSetUp]
         public override void Init() {
             base.Init();
-            SynchronizationContext.SetSynchronizationContext(new RendererSynchronizationContext());
             _blazorModule = BlazorModule();
-            Application = _blazorModule.Application;
-        }
-        public override void Dispose() { }
-
-        [OneTimeTearDown]
-        public override void Cleanup() {
-            
-            Application?.Dispose();
-            WebHost?.Dispose();
+            Application = _blazorModule.Application.ToBlazor();
         }
 
         public override void Setup() {
@@ -33,7 +38,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests.Common {
             RestService.HttpClient=new HttpClient(HandlerMock.Object);
         }
 
-        public XafApplication Application { get; private set; }
+
         
     }
 }

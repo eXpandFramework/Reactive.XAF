@@ -23,8 +23,8 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
 
         public static IObservable<JobState> Executed(this WorkerState lastState,Func<Job,bool> job=null) 
             => JobSchedulerService.JobState.FirstAsync(jobState => jobState.Fit(job, WorkerState.Enqueued)).IgnoreElements()
-                .Concat(JobSchedulerService.JobState.FirstAsync(jobState => jobState.Fit(job, WorkerState.Processing)).IgnoreElements())
-                .Concat(JobSchedulerService.JobState.FirstAsync(jobState => jobState.Fit(job, lastState)))
+                .Concat(Observable.Defer(() => JobSchedulerService.JobState.FirstAsync(jobState => jobState.Fit(job, WorkerState.Processing)).IgnoreElements()))
+                .Concat(Observable.Defer(() => JobSchedulerService.JobState.FirstAsync(jobState => jobState.Fit(job, lastState))))
                 .FirstAsync();
 
         private static bool Fit(this JobState jobState, Func<Job, bool> job, WorkerState workerState) 
@@ -41,7 +41,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
             job.JobType = new ObjectType(testJobType);
             job.JobMethod = new ObjectString(methodName);
             job.CronExpression = job.ObjectSpace.GetObjectsQuery<CronExpression>()
-                .First(expression => expression.Name == nameof(Cron.Yearly));
+                .First(expression => expression.Name == nameof(Cron.Minutely));
             job.Id = ScheduledJobId;
             modify?.Invoke(job);
             objectSpace.CommitChanges();

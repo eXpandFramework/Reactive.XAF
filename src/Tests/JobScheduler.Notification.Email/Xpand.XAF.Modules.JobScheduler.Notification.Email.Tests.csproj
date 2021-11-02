@@ -16,7 +16,6 @@
     <RootNamespace>Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Email.Tests</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="21.2.2-beta" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageReference Include="hangfire.core" Version="1.7.24" />
     <PackageReference Include="hangfire.sqlserver" Version="1.7.24" />
@@ -26,8 +25,6 @@
     <PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Modules\JobScheduler.Notification.Email\Xpand.XAF.Modules.JobScheduler.Notification.Email.csproj" />
-    <ProjectReference Include="..\..\Modules\JobScheduler.Notification\Xpand.XAF.Modules.JobScheduler.Notification.csproj" />
     <ProjectReference Include="..\TestsLib.Blazor\Xpand.TestsLib.Blazor.csproj" />
   </ItemGroup>
   <ItemGroup>
@@ -58,9 +55,14 @@
     <Reference Include="Xpand.Extensions.XAF.Xpo">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.Xpo.dll</HintPath>
     </Reference>
-    
     <Reference Include="Xpand.XAF.Modules.JobScheduler.Hangfire">
       <HintPath>..\..\..\bin\net5.0\Xpand.XAF.Modules.JobScheduler.Hangfire.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.JobScheduler.Notification">
+      <HintPath>..\..\..\bin\net5.0\Xpand.XAF.Modules.JobScheduler.Notification.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.JobScheduler.Notification.Email">
+      <HintPath>..\..\..\bin\net5.0\Xpand.XAF.Modules.JobScheduler.Notification.Email.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.Extensions.Blazor">
       <HintPath>..\..\..\bin\net5.0\Xpand.Extensions.Blazor.dll</HintPath>

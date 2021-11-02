@@ -3,8 +3,6 @@ using System.Reactive.Linq;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor;
-using Hangfire;
-using Hangfire.MemoryStorage;
 using Xpand.Extensions.TypeExtensions;
 using Xpand.TestsLib.Blazor;
 using Xpand.TestsLib.Common;
@@ -36,14 +34,12 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
 
         protected JobSchedulerModule JobSchedulerModule(BlazorApplication newBlazorApplication) {
             var module = newBlazorApplication.AddModule<JobSchedulerModule>(typeof(JS));
-            // newBlazorApplication.ConfigureModel();
             newBlazorApplication.Logon();
             using var objectSpace = newBlazorApplication.CreateObjectSpace();
             return module;
         }
 
         protected IObservable<Job> MockHangfire(Type testJobType = null, string testName = null) {
-            GlobalConfiguration.Configuration.UseMemoryStorage();
             testJobType ??= typeof(TestJobDI);
             testName ??= nameof(TestJob.Test);
 

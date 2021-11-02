@@ -4,7 +4,7 @@ param(
     $sourceDir = "$PSScriptRoot\..",
     $Filter ,
     [switch]$SkipReadMe,
-    $dxVersion="21.2.2-beta",
+    $dxVersion="21.2.3",
     $Feed
 )
 

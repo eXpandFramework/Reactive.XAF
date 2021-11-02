@@ -9,3 +9,5 @@ Microsoft.AspNetCore.Hosting.Abstractions
 System.ServiceModel.Http
 Microsoft.Extensions.DependencyInjection.Abstractions
 Newtonsoft.Json
+DevExpress.ExpressApp.Blazor
+DevExpress.ExpressApp

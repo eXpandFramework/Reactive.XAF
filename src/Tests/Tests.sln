@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28917.182
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31825.309
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{60EFB26D-0B7F-424C-B440-8DF98EEB8017}"
 	ProjectSection(SolutionItems) = preProject
@@ -395,10 +395,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.JobSchedu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.JobScheduler.Notification.Tests", "JobScheduler.Notification\Xpand.XAF.Modules.JobScheduler.Notification.Tests.csproj", "{5A2B803A-CC92-4987-BF9D-B92489BD6D08}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevExpress.ExpressApp", "..\..\..\..\Program Files (x86)\DevExpress 21.2\Components\Sources\DevExpress.ExpressApp\DevExpress.ExpressApp\DevExpress.ExpressApp.csproj", "{39E0DE91-4458-44FA-9320-55F94BD812AB}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DevExpress.ExpressApp.Blazor.NetStandard", "..\..\..\..\Program Files (x86)\DevExpress 21.2\Components\Sources\DevExpress.ExpressApp\DevExpress.ExpressApp.Blazor\DevExpress.ExpressApp.Blazor.NetStandard.csproj", "{17368221-7314-4DFB-B9D9-EC1CB5996C45}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.RazorView", "..\Modules\RazorView\Xpand.XAF.Modules.RazorView.csproj", "{2F26A0D7-2018-4F0A-BD57-F238B20E46CB}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.RazorView.Tests", "RazorView\Xpand.XAF.Modules.RazorView.Tests.csproj", "{567330C8-F875-49FA-977D-2E4D34377D1C}"
@@ -412,8 +408,13 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Email", "Email", "{0624BEE6-630A-44F1-82B5-4E91FE17E1C5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.JobScheduler.Notification.Email", "..\Modules\JobScheduler.Notification.Email\Xpand.XAF.Modules.JobScheduler.Notification.Email.csproj", "{D8B6EB89-24B1-4698-A1AA-230B1CBF688B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{629C6C63-A341-4F60-964E-8A670365B6A5} = {629C6C63-A341-4F60-964E-8A670365B6A5}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.JobScheduler.Notification.Email.Tests", "JobScheduler.Notification.Email\Xpand.XAF.Modules.JobScheduler.Notification.Email.Tests.csproj", "{80443F0F-B373-45FA-AB16-2AD593230101}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DevExpress.ExpressApp.NetStandard", "..\..\..\..\Program Files (x86)\DevExpress 21.2\Components\Sources\DevExpress.ExpressApp\DevExpress.ExpressApp\DevExpress.ExpressApp.NetStandard.csproj", "{57CF03BC-4C97-41A3-B700-408E9144FB66}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1862,42 +1863,6 @@ Global
 		{5A2B803A-CC92-4987-BF9D-B92489BD6D08}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5A2B803A-CC92-4987-BF9D-B92489BD6D08}.Release|x86.ActiveCfg = Release|Any CPU
 		{5A2B803A-CC92-4987-BF9D-B92489BD6D08}.Release|x86.Build.0 = Release|Any CPU
-		{39E0DE91-4458-44FA-9320-55F94BD812AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{39E0DE91-4458-44FA-9320-55F94BD812AB}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{39E0DE91-4458-44FA-9320-55F94BD812AB}.Debug|x86.Build.0 = Debug|Any CPU
-		{39E0DE91-4458-44FA-9320-55F94BD812AB}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
-		{39E0DE91-4458-44FA-9320-55F94BD812AB}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
-		{39E0DE91-4458-44FA-9320-55F94BD812AB}.EasyTest|x86.ActiveCfg = Debug|Any CPU
-		{39E0DE91-4458-44FA-9320-55F94BD812AB}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{39E0DE91-4458-44FA-9320-55F94BD812AB}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
-		{39E0DE91-4458-44FA-9320-55F94BD812AB}.NetCore|Any CPU.Build.0 = Debug|Any CPU
-		{39E0DE91-4458-44FA-9320-55F94BD812AB}.NetCore|x86.ActiveCfg = Debug|Any CPU
-		{39E0DE91-4458-44FA-9320-55F94BD812AB}.NetCore|x86.Build.0 = Debug|Any CPU
-		{39E0DE91-4458-44FA-9320-55F94BD812AB}.NugetConsumers|Any CPU.ActiveCfg = Debug|Any CPU
-		{39E0DE91-4458-44FA-9320-55F94BD812AB}.NugetConsumers|Any CPU.Build.0 = Debug|Any CPU
-		{39E0DE91-4458-44FA-9320-55F94BD812AB}.NugetConsumers|x86.ActiveCfg = Debug|Any CPU
-		{39E0DE91-4458-44FA-9320-55F94BD812AB}.NugetConsumers|x86.Build.0 = Debug|Any CPU
-		{39E0DE91-4458-44FA-9320-55F94BD812AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{39E0DE91-4458-44FA-9320-55F94BD812AB}.Release|x86.ActiveCfg = Release|Any CPU
-		{39E0DE91-4458-44FA-9320-55F94BD812AB}.Release|x86.Build.0 = Release|Any CPU
-		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.Debug|x86.Build.0 = Debug|Any CPU
-		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
-		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
-		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.EasyTest|x86.ActiveCfg = Debug|Any CPU
-		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.EasyTest|x86.Build.0 = Debug|Any CPU
-		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
-		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.NetCore|Any CPU.Build.0 = Debug|Any CPU
-		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.NetCore|x86.ActiveCfg = Debug|Any CPU
-		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.NetCore|x86.Build.0 = Debug|Any CPU
-		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.NugetConsumers|Any CPU.ActiveCfg = Debug|Any CPU
-		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.NugetConsumers|Any CPU.Build.0 = Debug|Any CPU
-		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.NugetConsumers|x86.ActiveCfg = Debug|Any CPU
-		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.NugetConsumers|x86.Build.0 = Debug|Any CPU
-		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.Release|x86.ActiveCfg = Release|Any CPU
-		{17368221-7314-4DFB-B9D9-EC1CB5996C45}.Release|x86.Build.0 = Release|Any CPU
 		{2F26A0D7-2018-4F0A-BD57-F238B20E46CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2F26A0D7-2018-4F0A-BD57-F238B20E46CB}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{2F26A0D7-2018-4F0A-BD57-F238B20E46CB}.Debug|x86.Build.0 = Debug|Any CPU
@@ -2015,6 +1980,25 @@ Global
 		{80443F0F-B373-45FA-AB16-2AD593230101}.Release|Any CPU.Build.0 = Release|Any CPU
 		{80443F0F-B373-45FA-AB16-2AD593230101}.Release|x86.ActiveCfg = Release|Any CPU
 		{80443F0F-B373-45FA-AB16-2AD593230101}.Release|x86.Build.0 = Release|Any CPU
+		{57CF03BC-4C97-41A3-B700-408E9144FB66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57CF03BC-4C97-41A3-B700-408E9144FB66}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{57CF03BC-4C97-41A3-B700-408E9144FB66}.Debug|x86.Build.0 = Debug|Any CPU
+		{57CF03BC-4C97-41A3-B700-408E9144FB66}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{57CF03BC-4C97-41A3-B700-408E9144FB66}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
+		{57CF03BC-4C97-41A3-B700-408E9144FB66}.EasyTest|x86.ActiveCfg = Debug|Any CPU
+		{57CF03BC-4C97-41A3-B700-408E9144FB66}.EasyTest|x86.Build.0 = Debug|Any CPU
+		{57CF03BC-4C97-41A3-B700-408E9144FB66}.NetCore|Any CPU.ActiveCfg = Debug|Any CPU
+		{57CF03BC-4C97-41A3-B700-408E9144FB66}.NetCore|Any CPU.Build.0 = Debug|Any CPU
+		{57CF03BC-4C97-41A3-B700-408E9144FB66}.NetCore|x86.ActiveCfg = Debug|Any CPU
+		{57CF03BC-4C97-41A3-B700-408E9144FB66}.NetCore|x86.Build.0 = Debug|Any CPU
+		{57CF03BC-4C97-41A3-B700-408E9144FB66}.NugetConsumers|Any CPU.ActiveCfg = Debug|Any CPU
+		{57CF03BC-4C97-41A3-B700-408E9144FB66}.NugetConsumers|Any CPU.Build.0 = Debug|Any CPU
+		{57CF03BC-4C97-41A3-B700-408E9144FB66}.NugetConsumers|x86.ActiveCfg = Debug|Any CPU
+		{57CF03BC-4C97-41A3-B700-408E9144FB66}.NugetConsumers|x86.Build.0 = Debug|Any CPU
+		{57CF03BC-4C97-41A3-B700-408E9144FB66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57CF03BC-4C97-41A3-B700-408E9144FB66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57CF03BC-4C97-41A3-B700-408E9144FB66}.Release|x86.ActiveCfg = Release|Any CPU
+		{57CF03BC-4C97-41A3-B700-408E9144FB66}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

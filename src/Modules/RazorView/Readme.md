@@ -3,7 +3,7 @@
 [![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/RazorView.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3ARazorView) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/RazorView.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3ARazorView)
 # About 
 
-The `RazorView` module uses the Razor c# syntax to generate views out of Bossiness data. 
+The `RazorView` module uses the Razor c# syntax to generate views out of Business data. 
 
 ## Details
 This is a `platform agnostic` module, to generate a view simply create a new `RazorView` business object and configure the available properties as shown below.
@@ -42,15 +42,15 @@ After installing the nuget package the next attributes should be set in your pro
 ```
 ### Examples
 
-In the next screencast we create a `Product RazorView`   
+In the next screencast we create a `Product RazorView` thats lists `ProductNames` and their `Accessories`
 
 <twitter tags="#RazorView #Blazor">
 
-[![Xpand XAF Modules RazorView](https://user-images.githubusercontent.com/159464/139330687-e28673b9-c460-400c-9862-77f161ee0d99.gif)](https://youtu.be/sywu43jqV88)
+[![Xpand XAF Modules RazorView](https://user-images.githubusercontent.com/159464/139330687-e28673b9-c460-400c-9862-77f161ee0d99.gif)](https://youtu.be/Kn_mkat-oJs)
 
 </twitter>
 
-[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/sywu43jqV88)
+[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/Kn_mkat-oJs)
 
 --- 
 

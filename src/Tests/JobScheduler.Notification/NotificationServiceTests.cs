@@ -90,7 +90,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Tests {
 		public async Task WhenNotification_For_Modified_Job_Type() {
 			using var application = NewBlazorApplication().ToBlazor();
 			application.CreateExistingObjects<JSNE2>().Test();
-			JobSchedulerNotificationModule(application);
+			application.JobSchedulerNotificationModule();
 			
 			var testObserver = application.WhenCommitted<NotificationJobIndex>().SelectMany(t => t.objects).FirstAsync(index => index.ObjectType==typeof(JSNE2)).Timeout(Timeout).Test();
 			var objectSpace = application.CreateObjectSpace();

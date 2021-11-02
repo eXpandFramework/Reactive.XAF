@@ -1,9 +1,24 @@
-﻿using DevExpress.ExpressApp.Blazor;
+﻿using System;
+using System.Linq;
+using DevExpress.ExpressApp.Blazor;
+using Hangfire;
+using Hangfire.MemoryStorage;
 using NUnit.Framework;
+using Xpand.Extensions.XAF.TypesInfoExtensions;
+using Xpand.TestsLib.Blazor;
+using Xpand.TestsLib.Common;
+using Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Email.Tests.BO;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Email.Tests.Common {
-    public abstract class CommonAppTest:CommonTest{
-        protected BlazorApplication Application;
+    public abstract class CommonAppTest:BlazorCommonAppTest{
+        protected override Type StartupType => throw new NotImplementedException();
+        
+        protected EmailNotificationModule EmailNotificationModule(BlazorApplication newBlazorApplication) {
+            var module = newBlazorApplication.AddModule<EmailNotificationModule>(typeof(JSNEE).CollectExportedTypesFromAssembly().ToArray());
+            newBlazorApplication.Logon();
+            using var objectSpace = newBlazorApplication.CreateObjectSpace();
+            return module;
+        }
 
         protected void AwaitInit(){ }
 
@@ -22,7 +37,8 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Email.Tests.Commo
         [OneTimeSetUp]
         public override void Init() {
             base.Init();
-            Application = NewBlazorApplication();
+            GlobalConfiguration.Configuration.UseMemoryStorage();
+            Application = NewBlazorApplication(StartupType);
             EmailNotificationModule(Application);
         }
     }

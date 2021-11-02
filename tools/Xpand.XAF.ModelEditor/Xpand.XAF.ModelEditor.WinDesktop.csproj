@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ApplicationIcon>ExpressApp.ico</ApplicationIcon>
@@ -46,10 +46,10 @@
   </ItemGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="DevExpress.ExpressApp" Version="21.2.2-beta" />
-    <PackageReference Include="DevExpress.ExpressApp.Win" Version="21.2.2-beta" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="21.2.2-beta" />
-    <PackageReference Include="DevExpress.Persistent.Base" Version="21.2.2-beta" />
-    <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="21.2.2-beta" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="21.2.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Win" Version="21.2.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="21.2.3" />
+    <PackageReference Include="DevExpress.Persistent.Base" Version="21.2.3" />
+    <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="21.2.3" />
   </ItemGroup>
 </Project>

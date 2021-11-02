@@ -1,28 +1,27 @@
-﻿using DevExpress.ExpressApp.Blazor;
+﻿using System;
+using System.Linq;
+using DevExpress.ExpressApp.Blazor;
 using NUnit.Framework;
+using Xpand.Extensions.XAF.TypesInfoExtensions;
+using Xpand.TestsLib.Blazor;
+using Xpand.TestsLib.Common;
 
 namespace Xpand.XAF.Modules.Email.Tests.Common {
-    public abstract class CommonAppTest:CommonTest{
-        protected BlazorApplication Application;
+    public abstract class CommonAppTest:BlazorCommonAppTest{
+        protected override Type StartupType => typeof(Startup);
+        
+        protected BlazorApplication NewBlazorApplication() => NewBlazorApplication(typeof(Startup));
 
-        protected void AwaitInit(){ }
-
-        public override void Dispose(){ }
-
-        protected override void ResetXAF(){ }
-
-
-        [OneTimeTearDown]
-        public override void Cleanup() {
-            base.Cleanup();
-            Application?.Dispose();
-            base.Dispose();
+        protected EmailModule EmailModule(BlazorApplication newBlazorApplication) {
+            var module = newBlazorApplication.AddModule<EmailModule>(GetType().CollectExportedTypesFromAssembly().ToArray());
+            newBlazorApplication.Logon();
+            using var objectSpace = newBlazorApplication.CreateObjectSpace();
+            return module;
         }
 
         [OneTimeSetUp]
         public override void Init() {
             base.Init();
-            Application = NewBlazorApplication();
             EmailModule(Application);
         }
     }

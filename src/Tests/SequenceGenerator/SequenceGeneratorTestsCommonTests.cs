@@ -60,8 +60,8 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
             }
         }
         
-        protected IDataLayer NewSimpleDataLayer(XafApplication application) =>
-            XpoDefault.GetDataLayer(
+        protected IDataLayer NewSimpleDataLayer(XafApplication application)
+            => XpoDefault.GetDataLayer(
                 application.ConnectionString,
                 XpoTypesInfoHelper.GetXpoTypeInfoSource().XPDictionary,
                 AutoCreateOption.DatabaseAndSchema
@@ -70,7 +70,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 
         protected IObservable<Unit> TestObjects<T>(XafApplication application,bool parallel, int count = 100, int objectSpaceCount = 1, Action beforeSave = null){
             if (parallel){
-                return Observable.Range(1, count).SelectMany(i => Observable.Defer(() => Observable.Start(() => {
+                return Observable.Range(1, count).SelectMany(_ => Observable.Defer(() => Observable.Start(() => {
                     for (int j = 0; j < objectSpaceCount; j++) {
                         using var objectSpace = application.CreateObjectSpace();
                         objectSpace.CreateObject<T>();

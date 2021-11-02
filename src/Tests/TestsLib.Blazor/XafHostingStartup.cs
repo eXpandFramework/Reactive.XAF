@@ -103,7 +103,7 @@ namespace Xpand.TestsLib.Blazor {
         //     public XafApplicationFactory(Func<BlazorApplication> createApplication) 
         //         => _createApplication = createApplication ?? throw new ArgumentNullException(nameof(createApplication));
         //     public BlazorApplication CreateApplication() => _createApplication();
-        // }
+        // }d
 
     }
 

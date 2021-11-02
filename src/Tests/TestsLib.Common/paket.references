@@ -12,3 +12,5 @@ JetBrains.Annotations
 Microsoft.CodeAnalysis.CSharp
 nunit
 Microsoft.CodeAnalysis
+DevExpress.ExpressApp.Security.Xpo
+DevExpress.Persistent.BaseImpl.Xpo

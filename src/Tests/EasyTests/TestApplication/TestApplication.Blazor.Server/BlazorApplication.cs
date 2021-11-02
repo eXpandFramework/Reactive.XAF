@@ -6,7 +6,6 @@ using DevExpress.ExpressApp.Security;
 using Microsoft.Extensions.DependencyInjection;
 using DevExpress.ExpressApp.Xpo;
 using Fasterflect;
-using Microsoft.Extensions.Configuration;
 using TestApplication.Blazor.Server.Services;
 using TestApplication.Module.Blazor;
 using TestApplication.Module.Common;
@@ -28,7 +27,7 @@ namespace TestApplication.Blazor.Server {
         protected override void OnSetupStarted() {
             base.OnSetupStarted();
             this.ConfigureConnectionString();
-            ConnectionString = ServiceProvider.GetRequiredService<IConfiguration>().GetConnectionString("ConnectionString");
+            // ConnectionString = ServiceProvider.GetRequiredService<IConfiguration>().GetConnectionString("ConnectionString");
         }
 
         protected override void CreateDefaultObjectSpaceProvider(CreateCustomObjectSpaceProviderEventArgs args) {
