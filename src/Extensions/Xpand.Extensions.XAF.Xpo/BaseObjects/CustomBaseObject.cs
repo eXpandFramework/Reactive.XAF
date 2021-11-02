@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Diagnostics.CodeAnalysis;
 using DevExpress.Persistent.Base;
 using DevExpress.Xpo;
 using Xpand.Extensions.XAF.Xpo.BaseObjects;
@@ -9,17 +9,14 @@ namespace Xpand.XAF.Persistent.BaseImpl{
     public abstract class CustomBaseObject : XPCustomBaseObject {
                 
         [Persistent(nameof(Oid)), Key(true), VisibleInListView(false), VisibleInDetailView(false), VisibleInLookupListView(false), MemberDesignTimeVisibility(false)]
-        private Guid _oid = Guid.Empty;
+        private long _oid=0 ;
         [PersistentAlias(nameof(_oid)), VisibleInListView(false), VisibleInDetailView(false), VisibleInLookupListView(false)]
-        public Guid Oid => _oid;
+        [SuppressMessage("ReSharper", "ConvertToAutoProperty")]
+        public long Oid => _oid;
         
         protected CustomBaseObject(Session session):base(session){
         }
 
-        public override void AfterConstruction(){
-            base.AfterConstruction();
-            _oid = XpoDefault.NewGuid();
-        }
 
     }
 

@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Net.Mail;
 using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.XAF.Modules.Email;
 using Xpand.XAF.Modules.RazorView.BusinessObjects;
 using Xpand.XAF.Modules.Reactive;
@@ -16,14 +18,12 @@ namespace TestApplication.Module.Email {
             return manager.WhenGeneratingModelNodes<IModelBOModel>()
                 .Do(model => {
                     var modelEmail = model.Application.ToReactiveModule<IModelReactiveModulesEmail>().Email;
-                    modelEmail.SetupUser();
+                    var recipientType = modelEmail.RecipientType();
                     var emailAddress = modelEmail.SetupEmailAddress();
                     var smtpClient = modelEmail.SmtpClient(emailAddress);
                     var modelEmailRule = modelEmail.EmailRule();
-                    var emailRecipient = modelEmail.EmailRecipient();
-                    var emailObjectView = modelEmailRule.ObjectView(nameof(RazorView.Template));
-                    modelEmailRule.SetupViewRecipient( emailObjectView, emailRecipient, smtpClient);
-                    emailObjectView = modelEmailRule.ObjectView(nameof(RazorView.Preview));
+                    var emailRecipient = modelEmail.EmailRecipient(recipientType);
+                    var emailObjectView = modelEmailRule.ObjectView(nameof(RazorView.Preview));
                     modelEmailRule.SetupViewRecipient( emailObjectView, emailRecipient, smtpClient);
                 }).ToUnit();
         }
@@ -31,14 +31,14 @@ namespace TestApplication.Module.Email {
         private static IModelEmailRule EmailRule(this IModelEmail modelEmail) {
             var modelEmailRule = modelEmail.Rules.AddNode<IModelEmailRule>();
             modelEmailRule.Type = modelEmail.Application.BOModel.GetClass(typeof(RazorView));
-            ((ModelNode)modelEmailRule).Id = "RazorView rules";
+            ((ModelNode)modelEmailRule).Id = $"{nameof(RazorView)} rules";
             return modelEmailRule;
         }
 
         private static IModelEmailObjectView ObjectView(this IModelEmailRule modelEmailRule, string body) {
             var emailObjectView = modelEmailRule.ObjectViews.AddNode<IModelEmailObjectView>();
             emailObjectView.ObjectView = emailObjectView.Application.BOModel.GetClass(typeof(RazorView)).DefaultDetailView;
-            emailObjectView.Subject = emailObjectView.ObjectView.ModelClass.FindMember(nameof(RazorView.Name));
+            emailObjectView.Subject = emailObjectView.ObjectView.ModelClass.FindMember(nameof(RazorView.Preview));
             emailObjectView.Body = emailObjectView.ObjectView.ModelClass.FindMember(body);
             ((ModelNode)emailObjectView).Id = body;
             return emailObjectView;
@@ -53,22 +53,26 @@ namespace TestApplication.Module.Email {
             ((ModelNode)viewRecipient).Id = viewRecipient.Caption;
         }
 
-        private static IModelEmailRecipient EmailRecipient(this IModelEmail modelEmail) {
+        private static IModelEmailRecipient EmailRecipient(this IModelEmail modelEmail, IModelEmailRecipientType recipientType) {
             var emailRecipient = modelEmail.Recipients.AddNode<IModelEmailRecipient>();
-            emailRecipient.UserCriteria = "[Roles][StartsWith([Name], 'Admin')]";
+            emailRecipient.RecipientTypeCriteria = "[Roles][StartsWith([Name], 'Admin')]";
+            emailRecipient.RecipientType = recipientType;
             ((ModelNode)emailRecipient).Id = "Admins";
             return emailRecipient;
         }
 
         private static IModelEmailAddress SetupEmailAddress(this IModelEmail modelEmail) {
             var emailAddress = modelEmail.EmailAddress.AddNode<IModelEmailAddress>();
-            emailAddress.Address = "expandframework@gmail.com";
+            emailAddress.Address = "mail@gmail.com";
             return emailAddress;
         }
 
-        private static void SetupUser(this IModelEmail modelEmail) {
-            modelEmail.UserType = modelEmail.Application.BOModel.GetClass(typeof(User));
-            modelEmail.UserEmailMember = modelEmail.UserType.FindMember(nameof(User.Email));
+        private static IModelEmailRecipientType RecipientType(this IModelEmail modelEmail) {
+            var recipientType = modelEmail.RecipientTypes.AddNode<IModelEmailRecipientType>();
+            recipientType.Type = modelEmail.Application.BOModel.GetClass(typeof(User));
+            recipientType.EmailMember = recipientType.Type.FindMember(nameof(User.Email));
+            recipientType.Id("User-Email");
+            return recipientType;
         }
 
         private static IModelEmailSmtpClient SmtpClient(this IModelEmail modelEmail, IModelEmailAddress emailAddress) {
@@ -78,8 +82,9 @@ namespace TestApplication.Module.Email {
             smtpClient.Port = 587;
             smtpClient.EnableSsl = true;
             smtpClient.UserName=emailAddress;
-            smtpClient.UseDefaultCredentials = false;
-            smtpClient.Password = "89#AgCkOKbCW";
+            smtpClient.DeliveryMethod=SmtpDeliveryMethod.SpecifiedPickupDirectory;
+            // smtpClient.UseDefaultCredentials = false;
+            smtpClient.Password = "password";
             ((ModelNode)smtpClient).Id = "smtp.gmail.com";
             var emailAddressesDep = smtpClient.ReplyTo.AddNode<IModelEmailAddressesDep>();
             emailAddressesDep.EmailAddress=emailAddress;

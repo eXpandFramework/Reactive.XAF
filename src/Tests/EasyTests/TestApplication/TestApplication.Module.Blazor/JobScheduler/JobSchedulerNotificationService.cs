@@ -11,9 +11,9 @@ using Xpand.TestsLib.Common.BO;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.Notification;
 using Xpand.XAF.Modules.Reactive.Services;
 
-namespace TestApplication.Module.Blazor.JobScheduler.Notification {
+namespace TestApplication.Module.Blazor.JobScheduler {
     public static class JobSchedulerNotificationService {
-        public static IObservable<Unit> ConnectJobSchedulerNotification(this ApplicationModulesManager manager) 
+        internal static IObservable<Unit> ConnectJobSchedulerNotification(this ApplicationModulesManager manager) 
             => manager.WhenApplication(application => {
                     var useNonSecuredObjectSpaceProvider = ((ISharedBlazorApplication)application).UseNonSecuredObjectSpaceProvider;
                     if (!useNonSecuredObjectSpaceProvider) {
@@ -28,13 +28,6 @@ namespace TestApplication.Module.Blazor.JobScheduler.Notification {
                     return Observable.Empty<Unit>();
                 })
                 .ToUnit()
-                .Merge(manager.WhenGeneratingModelNodes<IModelNotificationTypes>()
-                    .Do(notification => {
-                        var modelNotificationType = notification.AddNode<IModelNotificationType>();
-                        modelNotificationType.Type = modelNotificationType.Application.BOModel.GetClass(typeof(Product));
-                        modelNotificationType.ObjectIndexMember =
-                            modelNotificationType.ObjectIndexMembers.First(member => member.Name == nameof(Product.Id));
-                    })
-                    .ToUnit());
+        ;
     }
 }

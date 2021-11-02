@@ -11,6 +11,7 @@ using DevExpress.ExpressApp.EasyTest.WinAdapter;
 using Fasterflect;
 using NUnit.Framework;
 using Shouldly;
+using Web.Tests;
 using Win.Tests;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.TestsLib;
@@ -105,6 +106,7 @@ namespace ALL.Win.Tests {
             await EasyTest(() => new WinAdapter(), RunWinApplication, async adapter => {
                 var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
                 adapter.Execute(autoTestCommand);
+                await adapter.TestEmail();
 #if !XAF191 && !NETCOREAPP3_1_OR_GREATER
                 adapter.TestDocumentStyleManager();
 #endif

@@ -3,7 +3,7 @@
 [![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/Email.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AEmail) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/Email.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AEmail)
 # About 
 
-The `Email` module sends your Bussiness Object as email to your users. 
+The `Email` module sends your Business Object as email. 
 
 ## Details
 This is a `platform agnostic` module, that generates an `Email` action using predefined model configurations like the next one.
@@ -42,6 +42,8 @@ This is a `platform agnostic` module, that generates an `Email` action using pre
 </Application>
 ```
 
+> To avoid sending email twice use the `IModelEmailObjectView.UniqueSend` attribute, which will result a disabled Email action for the match BO instance.  
+> 
 ![image](https://user-images.githubusercontent.com/159464/139561271-138cc53b-41d6-4569-a5e1-2ab65a66aa91.png)
 
 To customize the sending use the next snippet:

@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputPath>..\..\..\bin</OutputPath>
+    <TargetFramework>net5.0</TargetFramework>
+    <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
+    <LangVersion>latest</LangVersion>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <RootNamespace>Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Email.Tests</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="21.2.2-beta" />
+    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
+    <PackageReference Include="hangfire.core" Version="1.7.24" />
+    <PackageReference Include="hangfire.sqlserver" Version="1.7.24" />
+    <PackageReference Include="hangfire.aspnetcore" Version="1.7.24" />
+    <PackageReference Include="hangfire.memorystorage" Version="1.7.24.2" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Modules\JobScheduler.Notification.Email\Xpand.XAF.Modules.JobScheduler.Notification.Email.csproj" />
+    <ProjectReference Include="..\..\Modules\JobScheduler.Notification\Xpand.XAF.Modules.JobScheduler.Notification.csproj" />
+    <ProjectReference Include="..\TestsLib.Blazor\Xpand.TestsLib.Blazor.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Xpand.Extensions">
+      <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions.Reactive">
+      <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions.XAF">
+      <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions.XAF.Xpo">
+      <HintPath>..\..\..\bin\Xpand.Extensions.XAF.Xpo.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.TestsLib.Common">
+      <HintPath>..\..\..\bin\Xpand.TestsLib.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Reactive">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Reactive.Logger">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Blazor">
+      <HintPath>..\..\..\bin\net5.0\Xpand.XAF.Modules.Blazor.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions.XAF.Xpo">
+      <HintPath>..\..\..\bin\Xpand.Extensions.XAF.Xpo.dll</HintPath>
+    </Reference>
+    
+    <Reference Include="Xpand.XAF.Modules.JobScheduler.Hangfire">
+      <HintPath>..\..\..\bin\net5.0\Xpand.XAF.Modules.JobScheduler.Hangfire.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions.Blazor">
+      <HintPath>..\..\..\bin\net5.0\Xpand.Extensions.Blazor.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <Import Project="..\..\..\.paket\Paket.Restore.targets" />
+</Project>

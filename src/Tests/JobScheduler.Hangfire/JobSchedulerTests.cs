@@ -54,7 +54,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
             using var application = JobSchedulerModule().Application.ToBlazor();
             application.CommitNewJob(testJobType);
 
-            var testJob = await jobs.FirstAsync();
+            var testJob = await jobs.FirstAsync().Timeout(Timeout);
 
             if (testJobType==typeof(TestJobDI)) {
                 testJob.Application.ShouldNotBeNull();
@@ -62,7 +62,6 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
             else {
                 testJob.Application.ShouldBeNull();
             }
-            
         }
         
         [Test()]
@@ -71,28 +70,30 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
             MockHangfire().Test();
             var jobs = TestJob.Jobs.SubscribeReplay();
             using var application = JobSchedulerModule().Application.ToBlazor();
+            
             var job = application.CommitNewJob(typeof(TestJob),nameof(TestJob.TestJobId));
             
-            var testJob = await jobs.FirstAsync();
+            var testJob = await jobs.FirstAsync().Timeout(Timeout);
 
             testJob.Context.ShouldNotBeNull();
             testJob.Context.JobId().ShouldBe(job.Id);
-            // var objectSpace = application.CreateObjectSpace();
-            // job = objectSpace.GetObject(job);
-            // job.JobMethods.Count.ShouldBeGreaterThan(0);            
+            var objectSpace = application.CreateObjectSpace();
+            job = objectSpace.GetObject(job);
+            job.JobMethods.Count.ShouldBeGreaterThan(0);            
         }
-
+        
         
         [Test][Apartment(ApartmentState.STA)]
         [XpandTest()]
-        public async Task Schedule_Successful_job() {
+        public void Schedule_Successful_job() {
             MockHangfire().Test();
             using var application = JobSchedulerModule().Application.ToBlazor();
-            var observable = WorkerState.Succeeded.Executed().SubscribeReplay();
+            using var testObserver = WorkerState.Succeeded.Executed().Test();
             
             application.CommitNewJob();
             
-            var jobState = await observable;
+            
+            var jobState = testObserver.AwaitDone(Timeout).Items.First();
             var objectSpace = application.CreateObjectSpace();
             jobState=objectSpace.GetObjectByKey<JobState>(jobState.Oid);
             var jobWorker = jobState.JobWorker;
@@ -102,6 +103,34 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
             jobWorker.Executions.Count(state => state.State==WorkerState.Failed).ShouldBe(0);
             jobWorker.Executions.Count(state => state.State==WorkerState.Succeeded).ShouldBe(1);
             
+        }
+        
+        [Test][Apartment(ApartmentState.STA)]
+        [XpandTest()]
+        public void ChainedJob() {
+            MockHangfire().Test();
+            using var application = JobSchedulerModule().Application.ToBlazor();
+            using var parentJobObserver = WorkerState.Succeeded.Executed().Test();
+
+            application.CommitNewJob(modify: job => {
+                var chainJob = job.ObjectSpace.CreateObject<BusinessObjects.ChainJob>();
+                chainJob.Job = chainJob.ObjectSpace.GetObject(application.CommitNewJob(typeof(ChainJob),modify:job1 => {
+                    job1.Id = nameof(ChainJob);
+                    job1.CronExpression = job1.ObjectSpace.GetObjectsQuery<CronExpression>()
+                        .First(expression => expression.Name == nameof(Cron.Never));
+                }));
+                job.ChainJobs.Add(chainJob);
+            });
+
+            var jobState = parentJobObserver.AwaitDone(Timeout).Items.First();
+            using var chainJobObserver = WorkerState.Succeeded.Executed().Test();
+            var objectSpace = application.CreateObjectSpace();
+            jobState=objectSpace.GetObjectByKey<JobState>(jobState.Oid);
+            var jobWorker = jobState.JobWorker;
+            jobWorker.State.ShouldBe(WorkerState.Succeeded);
+            
+            
+            chainJobObserver.AwaitDone(Timeout);
         }
         
         [TestCase(nameof(TestJob.FailMethodNoRetry),1,1,0)]

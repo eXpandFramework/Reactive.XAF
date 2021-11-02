@@ -95,7 +95,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
 	        var customizeDatasource = ((NonPersistentPropertyCollectionSource) listView.CollectionSource).Datasource
 		        .Do(e => {
 			        e.Handled = true;
-			        e.Instance =new BindingList<DocumentStyle>(ImmutableList.CreateRange(styles!));
+			        e.SetInstance(_ => new BindingList<DocumentStyle>(ImmutableList.CreateRange(styles!)));
 		        })
 		        .FirstAsync();
 	        return (styles == null

@@ -16,8 +16,13 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
     }
 
     [JobProvider]
+    public class ChainJob:TestJob {
+        
+    }
+
+    [JobProvider]
     public class TestJob {
-        public static Subject<TestJob> Jobs=new();
+        public static readonly Subject<TestJob> Jobs=new();
 
         public PerformContext Context { get; private set; }
 
@@ -28,19 +33,22 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
             Application = application;
         }
 
-        [AutomaticRetry(Attempts = 0)]
+        [AutomaticRetry(Attempts = 0)][JobProvider]
         public void FailMethodNoRetry() {
             throw new NotImplementedException();
         }
         
-        [AutomaticRetry(Attempts = 1,DelaysInSeconds = new[] {1,1})]
+        [AutomaticRetry(Attempts = 1,DelaysInSeconds = new[] {1,1})][JobProvider]
         public void FailMethodRetry() {
             throw new NotImplementedException();
         }
 
+        [JobProvider]
         public void Test() {
             Jobs.OnNext(this);
         }
+        
+        [JobProvider]
         public void TestJobId(PerformContext context) {
             Context = context;
             Jobs.OnNext(this);

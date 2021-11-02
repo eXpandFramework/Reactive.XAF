@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -8,10 +9,12 @@ using System.Net.Http;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
+using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.Persistent.Base;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xpand.Extensions.AppDomainExtensions;
@@ -95,7 +98,8 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
             if (!versionsGroup.Any()) {
                 throw new UserFriendlyException($"Cannot find any DevExpress assembly in {assemblyPath}");
             }
-            return versionsGroup.First().Key.RXXafReleaseVersion(modelME.DownloadPreRelease)
+
+            return versionsGroup.First().Key.RXXafReleaseVersion(modelME.DownloadPreRelease, modelME.NoFoundVersion())
                 .SelectMany(version => {
                     var meType = "WinDesktop";
                     if (xafModel.Project.TargetFramework.StartsWith("net4")) {
@@ -111,7 +115,7 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
                         }
                         return modelME.DownloadUrl.StringFormat($"{version}",meType).ReturnObservable()
                                 .TraceModelEditorWindowsFormsModule(s => $"Download {s}")
-                            .SelectMany(url => HttpClient.GetByteArrayAsync(url).ToObservable()
+                            .SelectMany(url => MEBytes(url)
                                     .ObserveOn(SynchronizationContext.Current!)
                                     .Do(bytes => {
                                         var pathToZip = $"{directory}Xpand.XAF.ModelEditor.{meType}.zip";
@@ -125,11 +129,20 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
                 });
         }
 
-        private static IObservable<Version> RXXafReleaseVersion(this Version dxVersion, bool preRelease) 
+        private static IObservable<byte[]> MEBytes(string url) 
+            => File.Exists(url) ? File.ReadAllBytes(url).ReturnObservable() : HttpClient.GetByteArrayAsync(url).ToObservable();
+
+        private static Func<Version, IObservable<Version>> NoFoundVersion(this IModelME modelME) 
+            => dxVersion =>modelME.DevVersion==null? Observable.Throw<Version>(new VersionNotFoundException(
+                $"Version {dxVersion} not on GitHub. Consider the ${nameof(IModelME.DownloadPreRelease)}, or the ({nameof(IModelME.DevVersion)}, {nameof(IModelME.DownloadUrl)}) model attributes")):modelME.DevVersion.ReturnObservable();
+
+        private static IObservable<Version> RXXafReleaseVersion(this Version dxVersion, bool preRelease, Func<Version,IObservable<Version>> noFound) 
             => HttpClient.GetStringAsync("https://api.github.com/repos/expandframework/reactive.xaf/tags").ToObservable()
                 .SelectMany(s => JsonConvert.DeserializeObject<JArray>(s)!.Select(token => Version.Parse($"{token["name"]}")))
                 .FirstAsync(version => (version.Revision == 0 && !preRelease)||preRelease)
-                .FirstAsync(version => $"{version.Minor}" == $"{dxVersion.Major}{dxVersion.Minor}")
+                .Where(version => $"{version.Minor}" == $"{dxVersion.Major}{dxVersion.Minor}")
+                .SwitchIfEmpty(noFound(dxVersion))
+                .FirstAsync()
                 .ObserveOn(SynchronizationContext.Current!)
                 .TraceModelEditorWindowsFormsModule(version => $"Locating {dxVersion} release = {version}");
 

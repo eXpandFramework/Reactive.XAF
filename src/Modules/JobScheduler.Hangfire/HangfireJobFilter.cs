@@ -22,9 +22,9 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
 
         public virtual void OnStateUnapplied(ApplyStateContext context, IWriteOnlyTransaction transaction) { }
 
-        public void OnPerforming(PerformingContext filterContext) 
-            => filterContext.Canceled = filterContext.Connection.GetAllItemsFromSet(JobSchedulerService.PausedJobsSetName)
-                .Contains(filterContext.Connection.RecurringJobId(filterContext.BackgroundJob.Id));
+        public void OnPerforming(PerformingContext performingContext) 
+            => performingContext.Canceled = performingContext.Connection.GetAllItemsFromSet(JobSchedulerService.PausedJobsSetName)
+                .Contains(performingContext.Connection.RecurringJobId(performingContext.BackgroundJob.Id));
 
         public void OnPerformed(PerformedContext filterContext) { }
     }

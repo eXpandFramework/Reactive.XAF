@@ -137,11 +137,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 		        h => action.Executed += h, h => action.Executed -= h, ImmediateScheduler.Instance).Select(_ =>(SimpleActionExecuteEventArgs) _.EventArgs);
 
         public static IObservable<SingleChoiceAction> AddItems(this IObservable<SingleChoiceAction> source,Func<SingleChoiceAction,IObservable<Unit>> addItems)
-            => source.WhenControllerActivated()
-                .Select(action => action)
-                .ConcatIgnored(addItems)
-                .Select(action => action)
-                .WhenActive()
+            => source.WhenControllerActivated().ConcatIgnored(addItems).WhenActive()
                 .Merge(source.WhenControllerDeActivated().Do(action => action.Items.Clear()).IgnoreElements())
         ;
         public static IObservable<SingleChoiceActionExecuteEventArgs> WhenExecuted(this SingleChoiceAction action) 

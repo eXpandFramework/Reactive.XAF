@@ -12,9 +12,11 @@ using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
 using Xpand.Extensions.XAF.NonPersistentObjects;
 using Xpand.Extensions.XAF.Xpo.ValueConverters;
+using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
     [Appearance("DisableSelectedObjectsCriteria",AppearanceItemType.ViewItem, nameof(Object)+" Is Null",TargetItems = nameof(SelectedObjectsCriteria),Enabled = false)]
+    [Appearance("HideParameter",AppearanceItemType.ViewItem, nameof(IsParameterDisabled)+"=true",TargetItems = nameof(Parameter),Enabled = false)]
     public class ExecuteActionJob : Job {
         public ExecuteActionJob(Session session) : base(session) {
         }
@@ -36,9 +38,22 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
         }
 
         [Browsable(false)]
+        public bool IsParameterDisabled => Action==null|| CaptionHelper.ApplicationModel.ActionDesign.Actions
+            .Select(action => action.GetValue<ActionBase>(ModelActionsNodesGenerator.ActionPropertyName)).OfType<SimpleAction>()
+            .Any(action => action.Id == Action.Name);
+        
+        string _parameter;
+
+        public string Parameter {
+            get => _parameter;
+            set => SetPropertyValue(nameof(Parameter), ref _parameter, value);
+        }
+        
+        [Browsable(false)]
         public IList<ObjectString> Actions 
-            => CaptionHelper.ApplicationModel.ActionDesign.Actions
-                .Select(action => action.GetValue<ActionBase>(ModelActionsNodesGenerator.ActionPropertyName)).OfType<SimpleAction>()
+            => CaptionHelper.ApplicationModel.ToReactiveModule<IModelReactiveModulesJobScheduler>()
+                .JobScheduler.Actions.Where(action => action.Enable).Select(action => action.Action)
+                .Select(action => action.GetValue<ActionBase>(ModelActionsNodesGenerator.ActionPropertyName))
                 .Select(action => new ObjectString(action.Id) {Caption = action.Caption}).ToArray();
 
         [Browsable(false)]

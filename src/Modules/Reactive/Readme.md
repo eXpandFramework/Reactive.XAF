@@ -76,14 +76,14 @@ All Xpand.XAF.Modules that reference this package are developed the RX way. Foll
 
 Below we will add interesting examples. All methods can live in a static class.
 ##### Working with actions
-1. First we register the action inside our module Setup method as registration needs an `ApplicationModulesManager`. The `RegisterViewSimpleAction` is an `Observable` which we need to `Subscribe` to it else it does nothing, same as IEnumerable does nothing if we do not enumerate. We pass the `this` argument to dispose subscription resources along with the module.
+1. We register the action inside our module Setup method as registration needs an `ApplicationModulesManager`. The `RegisterViewSimpleAction` is an `Observable` which we need to `Subscribe` to it else it does nothing, same as IEnumerable does nothing if we do not enumerate. We pass the `this` argument to dispose subscription resources along with the module.
     ```cs
     public override void Setup(ApplicationModulesManager manager){
         base.Setup(manager);
         manager.RegisterViewSimpleAction(nameof(MyCustomAction)).Subscribe(this);
     }
     ```
-1. Previously we used the `nameof(MyCustomAction)` to provide an action id, so now we will implement it like below:
+2. Previously we used the `nameof(MyCustomAction)` to provide an action id, so now we will implement it like below:
     ```cs
     public static SimpleAction MyCustomAction(this (MyCustomModule, Frame frame) tuple) => tuple
         .frame.Action(nameof(MyCustomAction)).As<SimpleAction>();
@@ -116,6 +116,12 @@ Below we will add interesting examples. All methods can live in a static class.
                 //implement any master-child view scenario as all dependencies are known
             });
 
+    ```
+4. Dynamically add items to a SingleChoiceAction
+    ```c#
+    internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
+            => manager.RegisterAction().AddItems(action => Observable.Range(0,2)
+                        .Do(i => action.Items.Add(new ChoiceActionItem($"{i}",null))).ToUnit());
     ```
 ##### Working with Views
 1. Modifying View artifacts similar to what was demoed with working with Actions:

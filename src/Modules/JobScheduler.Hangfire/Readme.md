@@ -133,7 +133,7 @@ In the screencast you can see `how to declare, schedule, pause, resume and get m
 
 ### ExecuteActionJob
 
-The ExecutionActionJob uses a Shared-Non authenticated XAF application instance to create the configured View and assign it to a frame so all XAF artifacts gets in place. Finally it selects the `ExecuteActionJob.SelectedObjectsCriteria` and executes the configure action with them.
+The `ExecutionActionJob` uses a Shared-Non authenticated XAF application instance to create the configured View and assign it to a frame so all XAF artifacts gets in place. Finally it selects the `ExecuteActionJob.SelectedObjectsCriteria` and executes the configure action with them.
 
 In the screencast you can see how we use the `Xpand.XAF.Modules.JobScheduler.HangFire` package to create an `ExecuteActionJob` where we `schedule` the `Delete` action on the `Product_ListView`.
 
@@ -141,8 +141,9 @@ In the screencast you can see how we use the `Xpand.XAF.Modules.JobScheduler.Han
 
 [![Jobsscheduler HangFire XAF Actions](https://user-images.githubusercontent.com/159464/114714259-9cd80980-9d3a-11eb-89f3-e5dccdb4c180.gif)
 ](https://youtu.be/3KRhNgOAFnQ)
-
 </twitter>
+
+To configure the ExecuteActionJob `Action` lookup list use the Application/ReactiveModules/JobScheduler/Actions model node.
 
 ### Security
 

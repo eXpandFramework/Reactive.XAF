@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.TestsLib</id>
-    <version>4.211.10.1</version>
+    <version>4.212.0.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -15,14 +15,14 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.TestsLib, 21.2.2</tags>
     <dependencies>
       <group targetFramework="net5.0">
-        <dependency id="Xpand.Extensions" version="4.211.10.1" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.211.10.1" />
-        <dependency id="Xpand.Extensions.XAF" version="4.211.10.1" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.211.10.1" />
-        <dependency id="Xpand.TestsLib.Common" version="4.211.10.1" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.211.10.1" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.211.10.1" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.211.10.1" />
+        <dependency id="Xpand.Extensions" version="4.212.0.1" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.212.0.1" />
+        <dependency id="Xpand.Extensions.XAF" version="4.212.0.1" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.212.0.1" />
+        <dependency id="Xpand.TestsLib.Common" version="4.212.0.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.212.0.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.212.0.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.212.0.1" />
         <dependency id="akarnokd.reactive_extensions" version="0.0.27-alpha" />
         <dependency id="Enums.NET" version="4.0" />
         <dependency id="Humanizer.Core" version="2.11.10" />

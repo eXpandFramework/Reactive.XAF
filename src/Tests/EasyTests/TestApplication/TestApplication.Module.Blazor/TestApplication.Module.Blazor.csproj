@@ -40,7 +40,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="21.2.2-beta" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="4.211.10.1" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="4.212.0.1" />
+    <PackageReference Include="Xpand.XAF.Modules.JobScheduler.Notification.Email" Version="4.212.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.8" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.8.1" />

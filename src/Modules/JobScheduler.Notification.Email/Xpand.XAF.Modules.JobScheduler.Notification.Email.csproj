@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
+    <DebugSymbols>true</DebugSymbols>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+    <OutputPath>..\..\..\bin</OutputPath>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
+    <AllowPackageReference>True</AllowPackageReference>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <DebugType>full</DebugType>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <RootNamespace>Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Email</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Model.DesignedDiffs.xafml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Module.cs" />
+    <Compile Include="..\..\Common\AssemblyInfoVersion.cs">
+      <Link>Properties\AssemblyInfoVersion.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Xpand.Extensions.Blazor">
+      <HintPath>..\..\..\bin\net5.0\Xpand.Extensions.Blazor.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions.Reactive">
+      <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions.XAF">
+      <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions">
+      <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions.XAF.Xpo">
+      <HintPath>..\..\..\bin\Xpand.Extensions.XAF.Xpo.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Blazor">
+      <HintPath>..\..\..\bin\net5.0\Xpand.XAF.Modules.Blazor.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Blazor">
+      <HintPath>..\..\..\bin\net5.0\Xpand.XAF.Modules.JobScheduler.Hangfire.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Reactive">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.JobScheduler.Notification">
+      <HintPath>..\..\..\bin\net5.0\Xpand.XAF.Modules.JobScheduler.Notification.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Email">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Email.dll</HintPath>
+    </Reference>
+    <PackageReference Include="DevExpress.ExpressApp" Version="21.2.2-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="21.2.2-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.Validation" Version="21.2.2-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="21.2.2-beta" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="21.2.2-beta" />
+    <PackageReference Include="DevExpress.Persistent.Base" Version="21.2.2-beta" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
+  </ItemGroup>
+  <Import Project="..\..\..\.paket\Paket.Restore.targets" />
+</Project>

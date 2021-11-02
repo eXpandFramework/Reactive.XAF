@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Reactive.Linq;
+using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor;
 using Hangfire;
@@ -8,6 +10,7 @@ using Xpand.TestsLib.Blazor;
 using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.BO;
+using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
     public abstract class JobSchedulerCommonTest : BlazorCommonTest {
@@ -20,12 +23,20 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
             return JobSchedulerModule(newBlazorApplication);
         }
 
-        protected BlazorApplication NewBlazorApplication() 
-            => NewBlazorApplication(typeof(JobSchedulerStartup));
+        protected BlazorApplication NewBlazorApplication() {
+            var newBlazorApplication = NewBlazorApplication(typeof(JobSchedulerStartup));
+            newBlazorApplication.WhenApplicationModulesManager()
+                .SelectMany(manager => manager.WhenGeneratingModelNodes<IModelJobSchedulerSources>()
+                    .Do(sources => {
+                        var source = sources.AddNode<IModelJobSchedulerSource>();
+                        source.AssemblyName = GetType().Assembly.GetName().Name;
+                    })).FirstAsync().Test();
+            return newBlazorApplication;
+        }
 
         protected JobSchedulerModule JobSchedulerModule(BlazorApplication newBlazorApplication) {
             var module = newBlazorApplication.AddModule<JobSchedulerModule>(typeof(JS));
-            newBlazorApplication.ConfigureModel();
+            // newBlazorApplication.ConfigureModel();
             newBlazorApplication.Logon();
             using var objectSpace = newBlazorApplication.CreateObjectSpace();
             return module;

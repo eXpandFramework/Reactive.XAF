@@ -9,8 +9,8 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 namespace TestApplication.Win{
     public class TestWinApplication:WinApplication{
-        public TestWinApplication(){
-	        DevExpress.ExpressApp.Utils.ImageLoader.Instance.UseSvgImages = true;
+        public TestWinApplication() {
+            DevExpress.ExpressApp.Utils.ImageLoader.Instance.UseSvgImages = true;
             UseOldTemplates = false;
             LinkNewObjectToParentImmediately = false;
             OptimizedControllersCreation = true;

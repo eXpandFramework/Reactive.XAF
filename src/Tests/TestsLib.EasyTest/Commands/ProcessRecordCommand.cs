@@ -18,7 +18,7 @@ namespace Xpand.TestsLib.EasyTest.Commands{
     }
 
     public class ProcessRecordCommand<T> : ProcessRecordCommand{
-        public ProcessRecordCommand(params (string editor, string value)[] editors) : base(typeof(T).Name, editors){
+        public ProcessRecordCommand(params (string editor, string value)[] editors) : base(typeof(T).Name.CompoundName(), editors){
         }
 
         public ProcessRecordCommand(Expression<Func<T, object>> tableSelector,
@@ -29,7 +29,7 @@ namespace Xpand.TestsLib.EasyTest.Commands{
     public class ProcessRecordCommand:EasyTestCommand{
         public ProcessRecordCommand(string tableName,params (string editor,string value)[] editors){
             Parameters.MainParameter = new MainParameter(tableName.CompoundName());
-            Parameters.AddRange(editors.Select(_ => new Parameter($"{_.editor} = {_.value}")));
+            Parameters.AddRange(editors.Select(_ => new Parameter($"{_.editor.CompoundName()} = {_.value}")));
         }
 
         protected override void ExecuteCore(ICommandAdapter adapter){

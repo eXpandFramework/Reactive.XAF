@@ -21,12 +21,19 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
     [DefaultClassOptions][NavigationItem(nameof(NavigationItem))]
     [Appearance("PauseAction",AppearanceItemType.Action, nameof(IsPaused)+"=1",Visibility = ViewItemVisibility.Hide,TargetItems = nameof(JobSchedulerService.PauseJob))]
     [Appearance("ResumeAction",AppearanceItemType.Action, nameof(IsPaused)+"=0",Visibility = ViewItemVisibility.Hide,TargetItems = nameof(JobSchedulerService.ResumeJob))]
+    [Appearance("ChainJobVisibility",AppearanceItemType.ViewItem, nameof(UseChainJob)+"=0",Visibility = ViewItemVisibility.Show,TargetItems = nameof(ChainJobs))]
     public class  Job:CustomBaseObject {
         public const string NavigationItem = "JobScheduler";
         public Job(Session session) : base(session) {
         }
-        ObjectType _jobType;
 
+        [Browsable(false)]
+        public virtual bool UseChainJob => true;
+        [Association("Job-ChainJobs")][Aggregated]
+        public XPCollection<ChainJob> ChainJobs => GetCollection<ChainJob>(nameof(ChainJobs));
+        
+        ObjectType _jobType;
+        
         [RuleRequiredField]
         [DataSourceProperty(nameof(JobTypes))]
         [Size(SizeAttribute.Unlimited)]
@@ -39,7 +46,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
                 OnChanged(nameof(JobMethod));
             }
         }
-
+        
         [InvisibleInAllViews]
         public bool IsPaused => JobStorage.Current.GetConnection().GetAllItemsFromSet(JobSchedulerService.PausedJobsSetName).Contains(Id);
 
@@ -66,7 +73,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
 
         public override void AfterConstruction() {
             base.AfterConstruction();
-            _cronExpression = Session.GetObjectByKey<CronExpression>(nameof(Cron.Daily));
+            _cronExpression=Session.Query<CronExpression>().FirstOrDefault(expression => expression.Name == nameof(Cron.Never));
         }
 
         CronExpression _cronExpression;

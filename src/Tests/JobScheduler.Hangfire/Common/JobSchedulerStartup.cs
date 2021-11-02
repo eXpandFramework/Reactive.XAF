@@ -23,7 +23,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
     class JobSchedulerApplicationProvider:TestXafApplicationProvider<JobSchedulerModule> {
         protected override BlazorApplication CreateApplication(IXafApplicationFactory applicationFactory) {
             var blazorApplication = base.CreateApplication(applicationFactory);
-            blazorApplication.ConfigureModel();
+            // blazorApplication.ConfigureModel();
             return blazorApplication;
         }
         

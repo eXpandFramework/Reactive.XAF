@@ -23,11 +23,10 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Tests.Common {
             return notificationJob;
         }
 
-        public static IObservable<Unit> NotificationJob(this BlazorApplication application,ObjectStateNotification notificationJob) {
-            return Unit.Default.ReturnObservable().Delay(TimeSpan.FromMilliseconds(300))
+        public static IObservable<Unit> NotificationJob(this BlazorApplication application,ObjectStateNotification notificationJob) 
+            => Unit.Default.ReturnObservable().Delay(TimeSpan.FromMilliseconds(300))
                 .SelectMany(_ => ((IObservable<Unit>)typeof(NotificationService).Method("JobNotification", Flags.StaticPrivate)
                     .Call(new object[] { application, notificationJob.Id })).Select(unit => unit));
-        }
 
         public static IObservable<XafApplication> CreateExistingObjects<T>(this BlazorApplication application) where T:IJSNE 
             => application.WhenSetupComplete()

@@ -19,6 +19,8 @@ using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
+using Xpand.XAF.Modules.Email.BusinessObjects;
+using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 
 namespace Xpand.XAF.Modules.Email{
@@ -27,16 +29,33 @@ namespace Xpand.XAF.Modules.Email{
             => tuple.frame.Action(nameof(Email)).As<SingleChoiceAction>();
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
-            => manager.RegisterAction().AddItems(action => action.AddItems().ToUnit()).SendEmail();
+            => manager.RegisterAction().AddItems(action => action.AddItems().ToUnit()
+                .Concat(Observable.Defer(() => action.DisableIfSent().SendEmail()))).ToUnit();
+
+        private static IObservable<SingleChoiceAction> DisableIfSent(this SingleChoiceAction singleChoiceAction) {
+            var view = singleChoiceAction.View();
+            singleChoiceAction.DisableIfSent( view);
+            return view.WhenSelectionChanged().Do(singleChoiceAction.DisableIfSent).IgnoreElements()
+                .To(singleChoiceAction).StartWith(singleChoiceAction);
+        }
+
+        private static void DisableIfSent(this SingleChoiceAction singleChoiceAction, View view) {
+            var objectSpace = view.ObjectSpace;
+            var recipients = singleChoiceAction.Items.Select(item => item.Data).Cast<IModelEmailViewRecipient>()
+                .Select(recipient => recipient.Id()).ToArray();
+            var selectedObjects = view.SelectedObjects.Cast<object>().ToArray();
+            var sendCount = selectedObjects.Select(o => view.ObjectSpace.GetKeyValue(o).ToString())
+                .SelectMany(key => objectSpace.GetObjectsQuery<EmailStorage>()
+                    .Where(storage => storage.Key == key && recipients.Contains(storage.ViewRecipient))).Count() ;
+            singleChoiceAction.Enabled[nameof(DisableIfSent)] = selectedObjects.Length>sendCount;
+        }
 
         private static IObservable<Unit> SendEmail(this IObservable<SingleChoiceAction> source)
-            => source.Select(action => action)
-                .WhenExecuted(e => e.Action.ViewRecipients().Where(t => t.receipient==e.SelectedChoiceActionItem.Data)
+            => source.WhenExecuted(e => e.Action.ViewRecipients().Where(t => t.receipient==e.SelectedChoiceActionItem.Data)
                 .SelectMany(t => {
-                    var modelEmail = e.Action.Model.Application.ModelEmail();
                     var sendToAddresses = e.Action.View().ObjectSpace.GetObjects(SecuritySystem.UserType,
-                            CriteriaOperator.Parse(t.receipient.Recipient.UserCriteria)).Cast<object>()
-                        .Select(o => new MailAddress($"{modelEmail.UserEmailMember.MemberInfo.GetValue(o)}")).ToArray();
+                            CriteriaOperator.Parse(t.receipient.Recipient.RecipientTypeCriteria)).Cast<object>()
+                        .Select(o => new MailAddress($"{t.receipient.Recipient.RecipientType.EmailMember.MemberInfo.GetValue(o)}")).ToArray();
                     return sendToAddresses.Any() ? e.SendEmail(t.receipient,  sendToAddresses) : Observable.Empty<Unit>();
                 }));
 
@@ -50,17 +69,26 @@ namespace Xpand.XAF.Modules.Email{
                     message.IsBodyHtml = true;
                     recipient.SmtpClient.ReplyTo.ForEach(address => message.ReplyToList.Add(new MailAddress(address.EmailAddress.Address)));
                     users.ForEach(address => message.To.Add(address));
-                    return message.SendEmail(recipient,  o);
+                    return message.SendEmail(recipient,  o).Store(e.Action.Application);
                 }))
                 .ToUnit();
 
-        private static IObservable<MailMessage> SendEmail(this MailMessage message,IModelEmailViewRecipient recipient,  object o) {
+        private static IObservable<Unit> Store(this IObservable<(IModelEmailViewRecipient recipient,object o)> source,XafApplication application) 
+            => source.SelectMany(t => Observable.Using(application.CreateObjectSpace, space => {
+                var emailStorage = space.CreateObject<EmailStorage>();
+                emailStorage.Key = $"{space.GetKeyValue(t.o)}";
+                emailStorage.ViewRecipient = t.recipient.Id();
+                space.CommitChanges();
+                return Observable.Empty<Unit>();
+            }));
+
+        private static IObservable<(IModelEmailViewRecipient recipient,object o)> SendEmail(this MailMessage message,IModelEmailViewRecipient recipient,  object o) {
             var customizeSend = message.NewSmtpClient(o, recipient);
             return customizeSend.client.WhenEvent<AsyncCompletedEventArgs>(nameof(customizeSend.client.SendCompleted))
-                .SelectMany(e => e.Error != null ? Observable.Throw<AsyncCompletedEventArgs>(e.Error)
-                        : Observable.Empty<AsyncCompletedEventArgs>()).ToUnit().Merge(customizeSend.client
-                    .SendMailAsync(customizeSend.message).ToObservable())
-                .Finally(() => customizeSend.client.Dispose()).To(message).TraceEmail();
+                .SelectMany(e => e.Error != null ? Observable.Throw<(IModelEmailViewRecipient,object)>(e.Error)
+                        : Observable.Empty<(IModelEmailViewRecipient,object)>())
+                .Merge(customizeSend.client.SendMailAsync(customizeSend.message).ToObservable().Select(_ => (recipient,o)))
+                .Finally(() => customizeSend.client.Dispose()).Select(_ => (recipient,o)).TraceEmail();
         }
 
         private static readonly Subject<GenericEventArgs<(SmtpClient client,MailMessage message,object bo,string viewId)>> CustomizeSendSubject = new();
@@ -75,8 +103,9 @@ namespace Xpand.XAF.Modules.Email{
             var smtpClient = new SmtpClient {
                 DeliveryMethod = modelSmtpClient.DeliveryMethod,
             };
-            if (!string.IsNullOrEmpty(modelSmtpClient.PickupDirectoryLocation))
+            if (!string.IsNullOrEmpty(modelSmtpClient.PickupDirectoryLocation)) {
                 smtpClient.PickupDirectoryLocation = Path.GetFullPath(Environment.ExpandEnvironmentVariables(modelSmtpClient.PickupDirectoryLocation));
+            }
             if (smtpClient.DeliveryMethod == SmtpDeliveryMethod.Network){
                 smtpClient.Host = modelSmtpClient.Host;
                 smtpClient.Port = modelSmtpClient.Port;

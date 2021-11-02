@@ -12,7 +12,7 @@
     <None Remove="Images\Logo.svg" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="B:\Work\Reactive.XAF\src\Common\AssemblyInfoVersion.cs" Link="Properties\AssemblyInfoVersion.cs" />
+    <Compile Include="..\..\..\..\..\src\Common\AssemblyInfoVersion.cs" Link="Properties\AssemblyInfoVersion.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Model.xafml">
@@ -23,7 +23,7 @@
     <EmbeddedResource Include="Images\Logo.svg" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.211.10.0" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.212.0.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Xpand.XAF.ModelEditor.Module.Win\Xpand.XAF.ModelEditor.Module.Win.csproj">

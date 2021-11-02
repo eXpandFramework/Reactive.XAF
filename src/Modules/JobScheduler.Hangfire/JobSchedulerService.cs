@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -8,10 +9,12 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using DevExpress.Data.Filtering;
 using DevExpress.DataAccess.Native.ObjectBinding;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Blazor;
+using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Utils;
 using Fasterflect;
 using Hangfire;
@@ -27,8 +30,12 @@ using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.TypeExtensions;
+using Xpand.Extensions.XAF.ActionExtensions;
+using Xpand.Extensions.XAF.CollectionSourceExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
+using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.Extensions.XAF.Xpo.BaseObjects;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
 using Xpand.XAF.Modules.Reactive;
@@ -82,17 +89,21 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
             using var objectSpace = application.CreateObjectSpace();
             var scheduledJob = objectSpace.GetObjectsQuery<Job>().FirstOrDefault(job1 => job1.Id==recurringJobId);
             if (scheduledJob!=null) {
-                var job = objectSpace.EnsureObjectByKey<JobWorker>(context.BackgroundJob.Id);
-                if (objectSpace.IsNewObject(job)) {
-                    job.Job = scheduledJob;
+                var worker = objectSpace.EnsureObjectByKey<JobWorker>(context.BackgroundJob.Id);
+                if (objectSpace.IsNewObject(worker)) {
+                    worker.Job = scheduledJob;
                 }
                 var jobState = objectSpace.CreateObject<JobState>();
                 jobState.Created = DateTime.Now;
                 jobState.State=(WorkerState) Enum.Parse(typeof(WorkerState),context.NewState.Name);
                 jobState.Reason = context.NewState.Reason;
-                job.Executions.Add(jobState);
+                worker.Executions.Add(jobState);
                 objectSpace.CommitChanges();
                 JobStateSubject.OnNext(jobState);
+                
+                if (worker.State == WorkerState.Succeeded) {
+                    worker.Job.ChainJobs.AsParallel().ForEach(chainJob => chainJob.Job.Trigger());    
+                }
             }
         }
 
@@ -145,7 +156,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
             => RecurringJob.Trigger(job.Id);
 
         public static void AddOrUpdateHangfire(this Job job) 
-            => RecurringJob.AddOrUpdate(job.Id,job.CallExpression(), () => job.CronExpression.Expression);
+            => RecurringJob.AddOrUpdate(job.Id, job.CallExpression(), () => job.CronExpression.Expression);
 
         static IObservable<Unit> ScheduleJobs(this XafApplication application) 
             => application.WhenCommitted<Job>(ObjectModification.NewOrUpdated).Objects()
@@ -168,6 +179,55 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
         static readonly ISubject<JobState> JobStateSubject=Subject.Synchronize(new Subject<JobState>());
         
         public static IObservable<JobState> JobState => JobStateSubject.AsObservable();
+
+        internal static IObservable<Unit> ExecuteAction(this XafApplication application,string jobId) 
+            => Observable.Using(application.CreateObjectSpace, objectSpace => objectSpace
+                .GetObjectsQuery<ExecuteActionJob>().Where(actionJob => actionJob.Id == jobId).ToArray().ToNowObservable()
+                .SelectMany(job => application.CreateView(job, application.Model.Views[job.View.Name]).ToUnit()
+                    .Merge(application.ExecuteAction(job)))
+                .ToUnit());
+
+        private static IObservable<Unit> ExecuteAction(this XafApplication application, ExecuteActionJob job) 
+            => Unit.Default.ReturnObservable()
+                .Do(_ => {
+                    var modelView = application.Model.Views[job.View.Name];
+                    var newView = application.NewView(modelView.ViewType(),
+                        modelView.AsObjectView.ModelClass.TypeInfo.Type);
+                    var window = application.CreateViewWindow();
+                    window.SetView(newView);
+                    var action = window.Action(job.Action.Name);
+                    if (action is SingleChoiceAction singleChoiceAction) {
+                        singleChoiceAction.SelectedItem = singleChoiceAction.Items.First();
+                    }
+                    action.DoTheExecute();
+                });
+
+        private static IObservable<View> CreateView(this XafApplication application,ExecuteActionJob job, IModelView modelView) 
+            => application.WhenViewCreating()
+                .Select(t => {
+                    var objectType = modelView.AsObjectView.ModelClass.TypeInfo.Type;
+                    t.e.View = application.CreateView( job, modelView, application.CreateObjectSpace(objectType), objectType);
+                    return t.e.View;
+                }).FirstAsync().IgnoreElements();
+
+        private static ObjectView CreateView(this XafApplication application, ExecuteActionJob job, IModelView modelView, IObjectSpace space, Type objectType) 
+            => modelView is IModelListView modelListView
+                ? new ListView(modelListView, application.CreateCollectionSource(space, objectType, modelView.Id), application, job.SelectedObjectsCriteria)
+                : new DetailView((IModelDetailView)modelView, space, space.FindObject(objectType, CriteriaOperator.Parse(job.SelectedObjectsCriteria)), application, true);
+
+        class ListView:DevExpress.ExpressApp.ListView {
+            private readonly string _selectedObjectsCriteria;
+
+            public ListView(IModelListView modelListView, CollectionSourceBase collectionSource, XafApplication application,
+                string selectedObjectsCriteria) : base(modelListView, collectionSource, application, true) {
+                _selectedObjectsCriteria = selectedObjectsCriteria;
+            }
+            public override SelectionType SelectionType => SelectionType.MultipleSelection;
+            public override IList SelectedObjects 
+                => CollectionSource.Objects()
+                    .Where(o => ObjectSpace.IsObjectFitForCriteria(CriteriaOperator.Parse(_selectedObjectsCriteria), o))
+                    .ToArray();
+        }
 
         internal static Expression<Action> CallExpression(this Job job) {
             var method = job.JobType.Type.Method(job.JobMethod.Name.Replace(" ", ""));
@@ -198,7 +258,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
                 })
                 .SelectMany(type => type.Methods().Where(info => {
                     var parameterInfos = info.Parameters();
-                    return !info.IsSpecialName && info.IsPublic && 
+                    return !info.IsSpecialName && info.IsPublic &&
                            (!parameterInfos.Any() || (parameterInfos.Count == 1 && parameterInfos
                                .Any(parameterInfo => parameterInfo.ParameterType == typeof(PerformContext))));
                 }));

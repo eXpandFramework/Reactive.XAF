@@ -7,6 +7,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 using Xpand.Extensions.XAF.ModelExtensions;
@@ -18,22 +19,44 @@ namespace Xpand.XAF.Modules.Email{
 	}
 
 	public interface IModelEmail : IModelNode{
-		[RefreshProperties(RefreshProperties.All)]
-		[RuleRequiredField]
-		[DataSourceProperty(nameof(UserTypes))]
-		IModelClass UserType { get; set; }
-		[DataSourceProperty(nameof(UserEmailMembers))]
-		IModelMember UserEmailMember { get; set; }
+		IModelRecipientTypes RecipientTypes { get; }
 		IModelEmailRules Rules { get; }
 		IModelRecipients Recipients { get; }
 		IModelSmtpClients SmtpClients { get; }
 		IModelEmailAddresses EmailAddress { get; }
-		[Browsable(false)]
-		IModelList<IModelClass> UserTypes { get; }
-		[Browsable(false)]
-		IModelList<IModelMember> UserEmailMembers { get; }
+		
 	}
 
+	[ModelNodesGenerator(typeof(ModelRecipientTypesNodesGenerator))]
+	public interface IModelRecipientTypes:IModelNode,IModelList<IModelEmailRecipientType> { }
+
+	public class ModelRecipientTypesNodesGenerator:ModelNodesGeneratorBase {
+		protected override void GenerateNodesCore(ModelNode node) { }
+	}
+
+	public interface IModelEmailRecipientType:IModelNode {
+		[RefreshProperties(RefreshProperties.All)]
+		[Required]
+		[DataSourceProperty(nameof(RecipientTypes))]
+		IModelClass Type { get; set; }
+		[DataSourceProperty(nameof(RecipientEmailMembers))][Required]
+		IModelMember EmailMember { get; set; }
+		
+		[Browsable(false)]
+		IModelList<IModelClass> RecipientTypes { get; }
+		[Browsable(false)]
+		IModelList<IModelMember> RecipientEmailMembers { get; }
+	}
+
+	[DomainLogic(typeof(IModelEmailRecipientType))]
+	public class ModelRecipientTypeLogic {
+		public static IModelList<IModelClass> Get_RecipientTypes(IModelEmailRecipientType recipientType) 
+			=> recipientType.Application.BOModel.ToCalculatedModelNodeList();
+		
+		public static IModelList<IModelMember> Get_RecipientEmailMembers(IModelEmailRecipientType recipientType)
+			=> recipientType.Type == null ? new CalculatedModelNodeList<IModelMember>()
+				: recipientType.Type.AllMembers.Where(member => member.MemberInfo.MemberType == typeof(string)).ToCalculatedModelNodeList();
+	}
 	public interface IModelEmailAddresses:IModelList<IModelEmailAddress>,IModelNode {
 		
 	}
@@ -46,19 +69,6 @@ namespace Xpand.XAF.Modules.Email{
 
 	[DomainLogic(typeof(IModelEmail))]
 	public static class ModelEmailLogic {
-        public static IModelClass Get_UserType(IModelEmail email)
-            => email.UserTypes.FirstOrDefault();
-
-		public static string Get_NoReplyAddress(IModelEmail email)
-			=> $"noreply@{email.Application.Title}.com";
-		
-		public static IModelList<IModelClass> Get_UserTypes(IModelEmail email) 
-			=> email.Application.BOModel.Where(c => typeof(IPermissionPolicyUser).IsAssignableFrom(c.TypeInfo.Type)).ToCalculatedModelNodeList();
-		
-		public static IModelList<IModelMember> Get_UserEmailMembers(IModelEmail email)
-			=> email.UserType == null ? new CalculatedModelNodeList<IModelMember>()
-				: email.UserType.AllMembers.Where(member => member.MemberInfo.MemberType == typeof(string)).ToCalculatedModelNodeList();
-		
 		public static IObservable<IModelEmail> Email(this IObservable<IModelReactiveModules> source) 
 			=> source.Select(modules => modules.Email());
 
@@ -114,20 +124,14 @@ namespace Xpand.XAF.Modules.Email{
 	public interface IModelRecipients:IModelNode,IModelList<IModelEmailRecipient> { }
 
 	public interface IModelEmailRecipient : IModelNode {
-		[CriteriaOptions(nameof(UserTypeInfo))]
+		[Required][RefreshProperties(RefreshProperties.All)]
+		IModelEmailRecipientType RecipientType { get; set; }
+		[CriteriaOptions(nameof(RecipientType)+"."+nameof(IModelEmailRecipientType.Type)+"."+nameof(IModelEmailRecipientType.Type.TypeInfo))]
 		[Editor("DevExpress.ExpressApp.Win.Core.ModelEditor.CriteriaModelEditorControl, DevExpress.ExpressApp.Win" + XafAssemblyInfo.VersionSuffix + XafAssemblyInfo.AssemblyNamePostfix, DevExpress.Utils.ControlConstants.UITypeEditor)]
-		string UserCriteria { get; set; }
-		[Browsable(false)]
-		ITypeInfo UserTypeInfo { get; }
+		string RecipientTypeCriteria { get; set; }
+		
 	}
 
-	[DomainLogic(typeof(IModelEmailRecipient))]
-	public class ModelRecipientLogic {
-		public static ITypeInfo Get_UserTypeInfo(IModelEmailRecipient recipient) 
-			=> recipient.GetParent<IModelEmail>().UserType?.TypeInfo;
-	}
-
-	
 	public interface IModelEmailObjectViews:IModelNode,IModelList<IModelEmailObjectView> { }
 
 	public interface IModelEmailObjectView : IModelNode {
@@ -142,10 +146,14 @@ namespace Xpand.XAF.Modules.Email{
 		[DataSourceProperty(nameof(StringMembers))]
 		[Category("MailMessage")]
 		IModelMember Body { get; set; }
+		[DefaultValue(true)]
+		bool UniqueSend { get; set; }
 		[Browsable(false)]
 		IModelList<IModelObjectView> ObjectViews { get; }
 		[Browsable(false)]
 		IModelList<IModelMember> StringMembers { get; }
+		[Browsable(false)]
+		IModelList<IModelMember> AllMembers { get; }
 
 	}
 
@@ -177,7 +185,6 @@ namespace Xpand.XAF.Modules.Email{
 		int Port { get; set; }
 		[Required][DataSourceProperty(nameof(FromEmails))]
 		IModelEmailAddress From { get; set; }
-		// [Required]
 		IModelEmailAddressesDeps ReplyTo { get;  }
 		
 		[Category("Credentials"), ModelBrowsable(typeof(ModelSmtpClientDeliveryMethodVisibilityCalculator)), DefaultValue(true), RefreshProperties(RefreshProperties.All)]
@@ -220,25 +227,22 @@ namespace Xpand.XAF.Modules.Email{
 	[DomainLogic(typeof(IModelEmailSmtpClient))]
 	public class ModelSmtpClientLogic {
 		public static IModelList<IModelEmailAddress> Get_FromEmails(IModelEmailSmtpClient client) => client.GetParent<IModelEmail>().EmailAddress;
+		public static string Get_PickupDirectoryLocation(IModelEmailSmtpClient client) => $@"%temp%\{client.Application.Title}";
 	}
 	
 	public class ModelSmtpClientDeliveryMethodVisibilityCalculator:IModelIsVisible{
-		public bool IsVisible(IModelNode node, string propertyName){
-			return ((IModelEmailSmtpClient) node).DeliveryMethod == SmtpDeliveryMethod.Network;
-		}
+		public bool IsVisible(IModelNode node, string propertyName) 
+			=> ((IModelEmailSmtpClient) node).DeliveryMethod == SmtpDeliveryMethod.Network;
 	}
 
 	public class ModelSmtpClientUseDefaultCredentialsVisibilityCalculator : IModelIsVisible {
-		public bool IsVisible(IModelNode node, string propertyName) {
-			return !((IModelEmailSmtpClient) node).UseDefaultCredentials &&
-			       new ModelSmtpClientDeliveryMethodVisibilityCalculator().IsVisible(node, propertyName);
-		}
+		public bool IsVisible(IModelNode node, string propertyName) 
+			=> !((IModelEmailSmtpClient) node).UseDefaultCredentials && new ModelSmtpClientDeliveryMethodVisibilityCalculator().IsVisible(node, propertyName);
 	}
 	
 	public class ModelSmtpClientDeliveryMethodRequiredCalculator:IModelIsRequired{
-		public bool IsRequired(IModelNode node, string propertyName){
-			return new ModelSmtpClientDeliveryMethodVisibilityCalculator().IsVisible(node, propertyName);
-		}
+		public bool IsRequired(IModelNode node, string propertyName) 
+			=> new ModelSmtpClientDeliveryMethodVisibilityCalculator().IsVisible(node, propertyName);
 	}
 
 }

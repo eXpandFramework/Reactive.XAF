@@ -26,7 +26,14 @@ elseif (!$SkipVersioning) {
         if ($lastVersion.Build -gt $lastOfficialVersion.Build){
             $build=$lastVersion.Build
         }
-        $newVersion = [version]"$($lastOfficialVersion.Major).$($lastOfficialVersion.Minor).$build.1"
+        $srcVersion=[version](Get-AssemblyInfoVersion "$PSScriptRoot\..\src\Common\AssemblyInfoVersion.cs")
+        $major=$lastOfficialVersion.Major
+        $minor=$lastOfficialVersion.Minor
+        if ($minor -lt $srcVersion.Minor){
+            $minor=$srcVersion.minor
+            $build=0
+        }
+        $newVersion = [version]"$major.$minor.$build.1"
     }
     else{
         $srcVersion=[version](Get-AssemblyInfoVersion "$PSScriptRoot\..\src\Common\AssemblyInfoVersion.cs")

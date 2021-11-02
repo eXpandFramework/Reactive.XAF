@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using DevExpress.ExpressApp.Model;
 
 namespace Xpand.XAF.ModelEditor.Module.Win {
@@ -12,5 +13,6 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
         string DownloadUrl { get; set; }
 
         bool DownloadPreRelease { get; set; }
+        Version DevVersion { get; set; }
     }
 }

@@ -62,8 +62,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Tests {
 			application.CreateObjectSpace().GetObjectsQuery<NotificationJobIndex>()
 				.First(index => index.ObjectType == objectType).Index.ShouldBe(jsne.Index);
 		}
-
-		// [TestCase(true)]
+		
 		[Test()]
 		[XpandTest()][Order(3000)]
 		public async Task WhenNotification_For_Job_Created_After_Startup() {

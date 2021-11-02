@@ -20,8 +20,8 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification {
     public static class NotificationService {
         private static readonly ISubject<(ObjectStateNotification job, object[] objects)> NotificationSubject =
             Subject.Synchronize(new Subject<(ObjectStateNotification job, object[] objects)>());
-        
-        public static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
+
+        internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => manager.GenerateModelNodes()
                 .Merge(manager.WhenApplication(application => application.WhenSetupComplete()
                         .WhenDefault(_ => ((ISharedBlazorApplication)application).UseNonSecuredObjectSpaceProvider)
