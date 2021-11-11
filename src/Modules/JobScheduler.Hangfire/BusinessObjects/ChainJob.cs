@@ -1,4 +1,5 @@
-﻿using DevExpress.Persistent.Validation;
+﻿using System.ComponentModel;
+using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
 using Xpand.XAF.Persistent.BaseImpl;
 
@@ -23,6 +24,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
             set => SetPropertyValue(nameof(Job), ref _job, value);
         }
         
+        [Browsable(false)]
         public int Index {
             get => _index;
             set => SetPropertyValue(nameof(Index), ref _index, value);

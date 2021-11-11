@@ -1,13 +1,15 @@
 ﻿using System;
-using DevExpress.ExpressApp.Blazor;
+using DevExpress.ExpressApp.Blazor.AmbientContext;
 using DevExpress.ExpressApp.Blazor.Services;
+using Hangfire.States;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Xpand.Extensions.Blazor;
 using Xpand.TestsLib.Blazor;
+using Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire;
 
-[assembly: HostingStartup(typeof(Xpand.XAF.Modules.JobScheduler.Hangfire.HangfireStartup))]
+[assembly: HostingStartup(typeof(HangfireStartup))]
  [assembly: HostingStartup(typeof(HostingStartup))]
  [assembly:HostingStartup(typeof(Xpand.XAF.Modules.Blazor.BlazorStartup))]
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
@@ -16,17 +18,21 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
 
         public override void ConfigureServices(IServiceCollection services) {
             base.ConfigureServices(services);
-            services.AddSingleton<ISharedXafApplicationProvider, JobSchedulerApplicationProvider>();
+            services.AddSingleton<IHangfireJobFilter>(provider => new HangfireJobFilter(provider));
         }
     }
 
-    class JobSchedulerApplicationProvider:TestXafApplicationProvider<JobSchedulerModule> {
-        protected override BlazorApplication CreateApplication(IXafApplicationFactory applicationFactory) {
-            var blazorApplication = base.CreateApplication(applicationFactory);
-            // blazorApplication.ConfigureModel();
-            return blazorApplication;
-        }
-        
-        public JobSchedulerApplicationProvider(IServiceProvider serviceProvider, IValueManagerStorageContainerInitializer containerInitializer) : base(serviceProvider, containerInitializer) { }
+    class HangfireJobFilter:Hangfire.HangfireJobFilter {
+	    public HangfireJobFilter(IServiceProvider provider) : base(provider) { }
+
+	    protected override void ApplyJobState(ApplyStateContext context, IServiceProvider serviceProvider) {
+		    ValueManagerContext.RunIsolated(() => {
+                // serviceProvider.GetRequiredService<IValueManagerStorageContainerInitializer>().Initialize();
+                // serviceProvider.RunWithStorage(blazorApplication => context.ApplyJobState(blazorApplication));
+                var blazorApplication = serviceProvider.GetRequiredService<IXafApplicationProvider>().GetApplication();
+                context.ApplyJobState(blazorApplication);
+            });
+	    }
     }
+
 }

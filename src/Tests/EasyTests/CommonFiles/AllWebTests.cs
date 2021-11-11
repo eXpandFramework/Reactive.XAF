@@ -54,12 +54,13 @@ namespace Web.Tests{
             },connectionString);
             
         }
+        public static readonly string ApplicationPath = Path.GetFullPath($@"{AppDomain.CurrentDomain.ApplicationPath()}..\..\TestBlazorApplication\");
         private TestApplication RunWebApplication(IApplicationAdapter adapter, string connectionString){
 
 #if !NETCOREAPP3_1_OR_GREATER
             var physicalPath = $@"{AppDomain.CurrentDomain.ApplicationPath()}..\TestWebApplication\";
 #else
-            var physicalPath = Path.GetFullPath($@"{AppDomain.CurrentDomain.ApplicationPath()}..\..\TestBlazorApplication\");
+            var physicalPath = ApplicationPath;
 #endif
             LogPaths.Clear();
             LogPaths.Add(Path.Combine(Path.GetDirectoryName(physicalPath)!,"eXpressAppFramework.log"));
@@ -81,14 +82,17 @@ namespace Web.Tests{
                 var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
                 adapter.Execute(autoTestCommand);
                 await Task.CompletedTask;
-                await adapter.TestEmail();
+                var binPath = @$"{ApplicationPath}bin\";
+                await adapter.TestEmail(binPath);
                 adapter.TestModelViewInheritance();
                 adapter.TestPositionInListView();
                 
 #if NETCOREAPP3_1_OR_GREATER
                 await adapter.TestJobScheduler();
                 await adapter.TestJobSchedulerNotification();
-                adapter.TestExecuteActionJob();
+                
+                await adapter.TestChainJob(binPath);
+                await adapter.TestExecuteActionJob();
                 
 #endif
             });

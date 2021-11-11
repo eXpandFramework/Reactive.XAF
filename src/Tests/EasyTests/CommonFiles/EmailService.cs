@@ -1,8 +1,8 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using ALL.Win.Tests;
 using DevExpress.EasyTest.Framework;
 using Shouldly;
 using Xpand.TestsLib.Common.BO;
@@ -12,21 +12,27 @@ using ActionCommand = Xpand.TestsLib.EasyTest.Commands.ActionCommands.ActionComm
 
 namespace Web.Tests {
     public static class EmailService {
-        public static async Task TestEmail(this ICommandAdapter adapter) {
-            var pickupDirectory = $"{Path.GetDirectoryName(AllWinTests.ApplicationPath)}\\TestApplication";
+        public static async Task TestEmail(this ICommandAdapter adapter, string appicationPath) 
+            => await TestEmailCreation(adapter, appicationPath,"ProductName0", () => {
+                adapter.Execute(new NavigateCommand("Default.Product"));
+                adapter.Execute(new ProcessRecordCommand<Product>((nameof(Product.ProductName), "ProductName0")));
+                adapter.Execute(new ActionCommand(nameof(Xpand.XAF.Modules.Email.EmailService.Email)));    
+            });
+
+        public static async Task TestEmailCreation(this ICommandAdapter adapter, string appicationPath,string productName,Action sendEmail) {
+            var pickupDirectory = $"{Path.GetDirectoryName(appicationPath)}\\TestApplication";
             if (Directory.Exists(pickupDirectory)) {
                 Directory.Delete(pickupDirectory,true);
             }
-            adapter.Execute(new NavigateCommand("Default.Product"));
-            adapter.Execute(new ProcessRecordCommand<Product>((nameof(Product.ProductName), "ProductName0")));
-            adapter.Execute(new ActionCommand(nameof(Xpand.XAF.Modules.Email.EmailService.Email)));
+
+            sendEmail();
             await adapter.Execute(() => {
                 Directory.Exists(pickupDirectory).ShouldBeTrue();
-                var files = Directory.GetFiles(pickupDirectory,"*.eml");
+                var files = Directory.GetFiles(pickupDirectory, "*.eml");
                 files.Length.ShouldBe(1);
-                File.ReadAllText(files.First()).ShouldContain("ProductName0");
+                File.ReadAllText(files.First()).ShouldContain(productName);
+                Directory.Delete(pickupDirectory, true);
             });
         }
-
     }
 }

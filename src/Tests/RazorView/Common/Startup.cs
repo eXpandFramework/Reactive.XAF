@@ -18,14 +18,14 @@ namespace Xpand.XAF.Modules.RazorView.Tests.Common {
     
     public class XpoDataStoreProviderAccessor:Xpand.TestsLib.Blazor.XpoDataStoreProviderAccessor{ }
     
-    class ApplicationProvider:TestXafApplicationProvider<RazorViewModule> {
-        
-        protected override BlazorApplication CreateApplication(IXafApplicationFactory applicationFactory) {
-            var blazorApplication = base.CreateApplication(applicationFactory);
-            // blazorApplication.ConfigureModel();
-            return blazorApplication;
-        }
-
-        public ApplicationProvider(IServiceProvider serviceProvider, IValueManagerStorageContainerInitializer containerInitializer) : base(serviceProvider, containerInitializer) { }
-    }
+    // class ApplicationProvider:TestXafApplicationProvider<RazorViewModule> {
+    //     
+    //     protected override BlazorApplication CreateApplication(IXafApplicationFactory applicationFactory) {
+    //         var blazorApplication = base.CreateApplication(applicationFactory);
+    //         // blazorApplication.ConfigureModel();
+    //         return blazorApplication;
+    //     }
+    //
+    //     public ApplicationProvider(IServiceProvider serviceProvider, IValueManagerStorageContainerInitializer containerInitializer) : base(serviceProvider, containerInitializer) { }
+    // }
 }

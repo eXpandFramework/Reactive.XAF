@@ -8,14 +8,56 @@ using Xpand.TestsLib.EasyTest;
 using Xpand.TestsLib.EasyTest.Commands;
 using Xpand.TestsLib.EasyTest.Commands.ActionCommands;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
+using Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.BusinessObjects;
 
 namespace Web.Tests {
     public static class JobSchedulerService {
-        public static async Task TestJobScheduler(this ICommandAdapter adapter) {
-            await adapter.TestJob();
+        public static async Task TestJobScheduler(this ICommandAdapter adapter) => await adapter.TestJob();
+
+        public static async Task TestChainJob(this ICommandAdapter adapter, string appicationPath) {
+            adapter.NewEmailJob();
+            adapter.NewChainedJob();
+            adapter.NewChainedProduct();
+            adapter.Execute(new NavigateCommand("JobScheduler.Job"));
+            adapter.Execute(new SelectObjectsCommand<Job>(job => job.Id,new[] { "ChainJob" }));
+            await adapter.TestEmailCreation(appicationPath,nameof(NewChainedProduct), () => adapter.Execute(
+                    new ActionCommand(nameof(Xpand.XAF.Modules.JobScheduler.Hangfire.JobSchedulerService.Trigger))));
+            adapter.Execute(new NavigateCommand("Default.Product"));
+            adapter.Execute(new SelectObjectsCommand<Product>(product => product.ProductName,
+                new[] { nameof(NewChainedProduct) }));
+            adapter.Execute(new ActionDeleteCommand());
         }
 
-        public static void TestExecuteActionJob(this ICommandAdapter adapter) {
+        private static void NewChainedProduct(this ICommandAdapter adapter) {
+            adapter.Execute(new NavigateCommand("Default.Product"));
+            adapter.Execute(new ActionCommand(Actions.New));
+            adapter.Execute(new FillObjectViewCommand<Product>((product => product.ProductName, nameof(NewChainedProduct)),
+                (product => product.Id, "2")));
+            adapter.Execute(new ActionCommand(Actions.Save));
+        }
+
+        private static void NewChainedJob(this ICommandAdapter adapter) {
+            adapter.Execute(new NavigateCommand("JobScheduler.Job"));
+            adapter.Execute(new ActionCommand("New", nameof(ObjectStateNotification)));
+            adapter.Execute(new FillObjectViewCommand<ObjectStateNotification>((job => job.Object, nameof(Product)),
+                (job => job.Id, "ChainJob")));
+            adapter.Execute(new ActionCommand($"{nameof(Job.ChainJobs).CompoundName()}.New"));
+            adapter.Execute(new FillObjectViewCommand<ChainJob>((job => job.Job, "EmailJob")));
+            adapter.Execute(new ActionCommand(Actions.OK));
+            adapter.Execute(new ActionCommand(Actions.Save));
+        }
+
+        private static void NewEmailJob(this ICommandAdapter adapter) {
+            adapter.Execute(new NavigateCommand("JobScheduler.Job"));
+            adapter.Execute(new ActionCommand("New", nameof(ExecuteActionJob)));
+            adapter.Execute(new FillObjectViewCommand<ExecuteActionJob>(
+                (job => job.Action, nameof(Xpand.XAF.Modules.Email.EmailService.Email)),
+                (job => job.Object, nameof(Product)), (job => job.View, $"{nameof(Product)}_DetailView"),
+                (job => job.Id, "EmailJob"),(job => job.SelectedObjectsCriteria,$"{nameof(Product.ProductName)}='{nameof(NewChainedProduct)}'")));
+            adapter.Execute(new ActionCommand(Actions.Save));
+        }
+
+        public static async Task TestExecuteActionJob(this ICommandAdapter adapter) {
             adapter.Execute(new NavigateCommand("Default.Product"));
             adapter.Execute(new SelectObjectsCommand<Product>(product => product.ProductName,new []{"ProductName0","ProductName1"}));
             adapter.Execute(new ActionDeleteCommand());
@@ -33,10 +75,14 @@ namespace Web.Tests {
             adapter.Execute(new ActionCommand(Actions.Save));
             adapter.Execute(new ActionCommand("Trigger"));
             adapter.Execute(new NavigateCommand("Default.Product"));
-            var checkListViewCommand = new CheckListViewCommand(nameof(Product.ProductName));
-            checkListViewCommand.AddRows(new []{"deleteme"});
-            checkListViewCommand.ExpectException = true;
-            adapter.Execute(checkListViewCommand);
+            
+            await adapter.Execute(() => {
+                adapter.Execute(new ActionCommand(Actions.Refresh));
+                var checkListViewCommand = new CheckListViewCommand(nameof(Product.ProductName));
+                checkListViewCommand.AddRows(new []{"deleteme"});
+                checkListViewCommand.ExpectException = true;
+                adapter.Execute(checkListViewCommand);
+            });
         }
 
         private static async Task TestJob(this ICommandAdapter adapter) {
@@ -63,8 +109,8 @@ namespace Web.Tests {
 
         private static async Task TestJob(this ICommandAdapter adapter, WorkerState workerState, int workersCount) {
             adapter.Execute(new ActionCommand("Trigger"));
-            
-            
+
+            adapter.Execute(new ActionCommand(nameof(Job.Workers)));
             await adapter.Execute(() => adapter.Execute(new ActionCommand(Actions.Refresh),new CheckListViewCommand<Job>(job => job.Workers, workersCount)));
             adapter.Execute(new SelectObjectsCommand<Job>(job => job.Workers,nameof(JobWorker.State),new []{workerState.ToString()}));
             //

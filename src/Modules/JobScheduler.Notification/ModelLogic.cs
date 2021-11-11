@@ -72,7 +72,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification{
 			=> types.First(type => type.Type==objectType);
 
 		internal static NotificationType[] NotificationTypes(this IModelApplication application) 
-			=> JobSchedulerNotification(application).Types.Select(type => new NotificationType(type)).ToArray();
+			=> application.JobSchedulerNotification().Types.Select(type => new NotificationType(type)).ToArray();
 
 		public static IModelNotification JobSchedulerNotification(this IModelApplication application) 
 			=> ((IModelJobSchedulerNotification)application.ToReactiveModule<IModelReactiveModulesJobScheduler>().JobScheduler).Notification;

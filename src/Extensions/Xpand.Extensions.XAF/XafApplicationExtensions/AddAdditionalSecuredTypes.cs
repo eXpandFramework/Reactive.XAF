@@ -9,6 +9,8 @@ using Xpand.Extensions.XAF.AppDomainExtensions;
 
 namespace Xpand.Extensions.XAF.XafApplicationExtensions{
     public static partial class XafApplicationExtensions{
+        
+
         public static void AddNonSecuredType(this XafApplication application,params Type[] objectTypes){
             AppDomain.CurrentDomain.Patch(harmony => {
                 if (application.Security != null && application.Security.GetType().FromHierarchy(type => type.BaseType)

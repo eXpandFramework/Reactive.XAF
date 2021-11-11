@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.TestsLib.Blazor</id>
-    <version>4.212.0.1</version>
+    <version>4.212.0.3</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -15,21 +15,25 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.TestsLib.Blazor, 21.2.3</tags>
     <dependencies>
       <group targetFramework="net5.0">
-        <dependency id="Xpand.Extensions" version="4.212.0.1" />
-        <dependency id="Xpand.Extensions.Blazor" version="4.212.0.1" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.212.0.1" />
-        <dependency id="Xpand.Extensions.XAF" version="4.212.0.1" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.212.0.1" />
-        <dependency id="Xpand.TestsLib.Common" version="4.212.0.1" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.212.0.1" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.212.0.1" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.212.0.1" />
+        <dependency id="Xpand.Extensions" version="4.212.0.3" />
+        <dependency id="Xpand.Extensions.Blazor" version="4.212.0.3" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.212.0.3" />
+        <dependency id="Xpand.Extensions.XAF" version="4.212.0.3" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.212.0.3" />
+        <dependency id="Xpand.TestsLib.Common" version="4.212.0.3" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.212.0.3" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.212.0.3" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.212.0.3" />
         <dependency id="Microsoft.CodeAnalysis.Csharp" version="3.11" />
         <dependency id="Microsoft.Extensions.DependencyInjection.Abstractions" version="5.0" />
         <dependency id="System.Diagnostics.PerformanceCounter" version="5.0.1" />
         <dependency id="Moq" version="4.16" />
         <dependency id="Newtonsoft.Json" version="13.0.1" />
         <dependency id="System.Data.SqlClient" version="4.8.3" />
+        <dependency id="Nunit" version="3.13.2" />
+        <dependency id="DevExpress.ExpressApp.Security" version="21.2.3" />
+        <dependency id="DevExpress.ExpressApp.Security.Xpo" version="21.2.3" />
+        <dependency id="DevExpress.Persistent.BaseImpl.Xpo" version="21.2.3" />
         <dependency id="DevExpress.ExpressApp.EasyTest.BlazorAdapter" version="21.2.3" />
         <dependency id="DevExpress.ExpressApp.Xpo" version="21.2.3" />
         <dependency id="DevExpress.EasyTest" version="21.2.3" />

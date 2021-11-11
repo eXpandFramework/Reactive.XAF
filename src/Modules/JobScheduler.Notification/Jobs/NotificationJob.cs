@@ -1,28 +1,26 @@
-﻿using System.Reactive;
-using System.Reactive.Threading.Tasks;
+﻿using System;
 using System.Threading.Tasks;
-using DevExpress.ExpressApp.Blazor;
 using Hangfire.Server;
-using Xpand.Extensions.Reactive.Combine;
+using Microsoft.Extensions.DependencyInjection;
+using Xpand.Extensions.Blazor;
 using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Jobs {
     
     public class NotificationJob {
         
-        public BlazorApplication Application { get; }
+        public IServiceProvider ServiceProvider { get; }
 
         public NotificationJob() {
         }
 
-        public NotificationJob(BlazorApplication application) => Application = application;
+        [ActivatorUtilitiesConstructor]
+        public NotificationJob(IServiceProvider provider) => ServiceProvider = provider;
 
 
-        public async Task Execute(PerformContext context) {
-            await Application.JobNotification(context.JobId())
-                .SwitchIfEmpty(Unit.Default.ReturnObservable()).ToTask();
-        }
-
+        public async Task<bool> Execute(PerformContext context) 
+            => await ServiceProvider.RunWithStorageAsync(application => application
+                .JobNotification(context.BackgroundJob.Id).To(true));
     }
 
 }

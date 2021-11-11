@@ -4,10 +4,15 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace Xpand.Extensions.Threading {
+    public static class SingleThreadedSynchronizationContextExtenions {
+        public static void AwaitTask(this Task invoker) => SingleThreadedSynchronizationContext.Await(() => invoker);
+    }
     public sealed class SingleThreadedSynchronizationContext : SynchronizationContext {
         private readonly BlockingCollection<(SendOrPostCallback d, object state)> _queue = new();
 
         public override void Post(SendOrPostCallback d, object state) => _queue.Add((d, state));
+
+        
 
         public static void Await(Func<Task> invoker) {
             var originalContext = Current;

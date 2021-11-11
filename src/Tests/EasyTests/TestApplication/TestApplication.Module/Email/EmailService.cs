@@ -15,8 +15,8 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 namespace TestApplication.Module.Email {
     public static class EmailService {
-        public static IObservable<Unit> ConnectEmail(this ApplicationModulesManager manager) {
-            return manager.WhenGeneratingModelNodes<IModelBOModel>()
+        public static IObservable<Unit> ConnectEmail(this ApplicationModulesManager manager) 
+            => manager.WhenGeneratingModelNodes<IModelBOModel>()
                 .Do(model => {
                     var modelEmail = model.Application.ToReactiveModule<IModelReactiveModulesEmail>().Email;
                     var recipientType = modelEmail.RecipientType();
@@ -24,10 +24,9 @@ namespace TestApplication.Module.Email {
                     var smtpClient = modelEmail.SmtpClient(emailAddress);
                     var modelEmailRule = modelEmail.EmailRule();
                     var emailRecipient = modelEmail.EmailRecipient(recipientType);
-                    var emailObjectView = modelEmailRule.ObjectView(nameof(Product.ProductName));
+                    var emailObjectView = modelEmailRule.ObjectView(null);
                     modelEmailRule.SetupViewRecipient( emailObjectView, emailRecipient, smtpClient);
                 }).ToUnit();
-        }
 
         private static IModelEmailRule EmailRule(this IModelEmail modelEmail) {
             var modelEmailRule = modelEmail.Rules.AddNode<IModelEmailRule>();
@@ -40,8 +39,7 @@ namespace TestApplication.Module.Email {
             var emailObjectView = modelEmailRule.ObjectViews.AddNode<IModelEmailObjectView>();
             emailObjectView.ObjectView = emailObjectView.Application.BOModel.GetClass(typeof(Product)).DefaultDetailView;
             emailObjectView.Subject = emailObjectView.ObjectView.ModelClass.FindMember(nameof(Product.ProductName));
-            emailObjectView.Body = emailObjectView.ObjectView.ModelClass.FindMember(body);
-            ((ModelNode)emailObjectView).Id = body;
+            ((ModelNode)emailObjectView).Id = nameof(Product.ProductName);
             return emailObjectView;
         }
 
@@ -84,7 +82,6 @@ namespace TestApplication.Module.Email {
             smtpClient.EnableSsl = true;
             smtpClient.UserName=emailAddress;
             smtpClient.DeliveryMethod=SmtpDeliveryMethod.SpecifiedPickupDirectory;
-            smtpClient.Password = "password";
             smtpClient.PickupDirectoryLocation = $"{AppDomain.CurrentDomain.ApplicationPath()}\\TestApplication";
             ((ModelNode)smtpClient).Id = "smtp.gmail.com";
             var emailAddressesDep = smtpClient.ReplyTo.AddNode<IModelEmailAddressesDep>();

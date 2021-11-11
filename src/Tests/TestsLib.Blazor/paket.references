@@ -8,3 +8,6 @@ Moq
 Newtonsoft.Json
 System.Data.SqlClient
 Nunit
+DevExpress.ExpressApp.Security
+DevExpress.ExpressApp.Security.Xpo
+DevExpress.Persistent.BaseImpl.Xpo

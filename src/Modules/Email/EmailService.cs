@@ -35,8 +35,9 @@ namespace Xpand.XAF.Modules.Email{
         private static IObservable<SingleChoiceAction> DisableIfSent(this SingleChoiceAction singleChoiceAction) {
             var view = singleChoiceAction.View();
             singleChoiceAction.DisableIfSent( view);
-            return view.WhenSelectionChanged().Do(singleChoiceAction.DisableIfSent).IgnoreElements()
-                .To(singleChoiceAction).StartWith(singleChoiceAction);
+            return view.WhenSelectionChanged().Do(singleChoiceAction.DisableIfSent).To(singleChoiceAction)
+                .Merge(singleChoiceAction.WhenExecuteFinished().Do(action => action.DisableIfSent()))
+                .IgnoreElements().StartWith(singleChoiceAction).WhenActive();
         }
 
         private static void DisableIfSent(this SingleChoiceAction singleChoiceAction, View view) {
@@ -56,7 +57,7 @@ namespace Xpand.XAF.Modules.Email{
                     var sendToAddresses = e.Action.View().ObjectSpace.GetObjects(SecuritySystem.UserType,
                             CriteriaOperator.Parse(t.receipient.Recipient.RecipientTypeCriteria)).Cast<object>()
                         .Select(o => new MailAddress($"{t.receipient.Recipient.RecipientType.EmailMember.MemberInfo.GetValue(o)}")).ToArray();
-                    return sendToAddresses.Any() ? e.SendEmail(t.receipient,  sendToAddresses) : Observable.Empty<Unit>();
+                    return sendToAddresses.Any() ? e.SendEmail(t.receipient,  sendToAddresses).Do(_ => e.Action.ExecutionFinished()) : Observable.Empty<Unit>();
                 }));
 
         private static IObservable<Unit> SendEmail(this SingleChoiceActionExecuteEventArgs e,
@@ -69,7 +70,8 @@ namespace Xpand.XAF.Modules.Email{
                     message.IsBodyHtml = true;
                     recipient.SmtpClient.ReplyTo.ForEach(address => message.ReplyToList.Add(new MailAddress(address.EmailAddress.Address)));
                     users.ForEach(address => message.To.Add(address));
-                    return message.SendEmail(recipient,  o).Store(e.Action.Application);
+                    return message.SendEmail(recipient,  o)
+                        .Store(e.Action.Application);
                 }))
                 .ToUnit();
 
@@ -79,7 +81,7 @@ namespace Xpand.XAF.Modules.Email{
                 emailStorage.Key = $"{space.GetKeyValue(t.o)}";
                 emailStorage.ViewRecipient = t.recipient.Id();
                 space.CommitChanges();
-                return Observable.Empty<Unit>();
+                return Unit.Default.ReturnObservable();
             }));
 
         private static IObservable<(IModelEmailViewRecipient recipient,object o)> SendEmail(this MailMessage message,IModelEmailViewRecipient recipient,  object o) {
@@ -139,6 +141,7 @@ namespace Xpand.XAF.Modules.Email{
             action.SelectionDependencyType=SelectionDependencyType.RequireMultipleObjects;
             action.ItemType=SingleChoiceActionItemType.ItemIsOperation;
             action.ImageName = "Actions_Send";
+            action.CustomizeExecutionFinished();
         }
 
         private static IObservable<ChoiceActionItem> AddItems(this SingleChoiceAction action) 

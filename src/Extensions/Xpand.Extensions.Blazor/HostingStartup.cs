@@ -9,7 +9,6 @@ namespace Xpand.Extensions.Blazor {
         public void Configure(IWebHostBuilder builder) 
             => builder.ConfigureServices(services => {
                 services.AddSingleton<GlobalItems>();
-                services.AddSingleton<ISharedXafApplicationProvider,SharedXafApplicationProvider>();
                 services.AddScoped(sp => {
                     var navigationManager = sp.GetRequiredService<NavigationManager>();
                     return new HttpClient { BaseAddress = new Uri(navigationManager.BaseUri) };

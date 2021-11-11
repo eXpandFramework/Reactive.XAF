@@ -20,29 +20,30 @@
       <Layout>
         <LayoutGroup Id="Main" RelativeSize="100">
           <LayoutGroup Id="SimpleEditors" RelativeSize="100">
-            <LayoutGroup Id="ExecuteActionJob" Caption="ExecuteActionJob" RelativeSize="8.742714404662781">
-              <LayoutGroup Id="Autoff7bc9a3-d981-4761-8f6f-cc99cde28201" ShowCaption="False" Caption="Autoff7bc9a3-d981-4761-8f6f-cc99cde28201(4)" Direction="Horizontal" Index="0" RelativeSize="36.19047619047619" IsNewNode="True">
-                <LayoutItem Id="Id" ViewItem="Id" Index="0" RelativeSize="49.96415770609319" IsNewNode="True" />
-                <LayoutItem Id="CronExpression" ViewItem="CronExpression" Index="1" RelativeSize="50.03584229390681" IsNewNode="True" />
+            <LayoutGroup Id="ExecuteActionJob" Caption="ExecuteActionJob" RelativeSize="9.41402497598463">
+              <LayoutGroup Id="Autoff7bc9a3-d981-4761-8f6f-cc99cde28201" ShowCaption="False" Caption="Autoff7bc9a3-d981-4761-8f6f-cc99cde28201(4)" Direction="Horizontal" Index="0" RelativeSize="35.714285714285715" IsNewNode="True">
+                <LayoutItem Id="Id" ViewItem="Id" Index="0" RelativeSize="49.83277591973244" IsNewNode="True" />
+                <LayoutItem Id="CronExpression" ViewItem="CronExpression" Index="1" RelativeSize="50.16722408026756" IsNewNode="True" />
               </LayoutGroup>
               <LayoutItem Id="Action" ViewItem="Action" Index="1" RelativeSize="26.08695652173913" Removed="True" />
-              <LayoutGroup Id="Autofe52c333-e505-462e-9bb1-343db5a6eccc" ShowCaption="False" Caption="Autofe52c333-e505-462e-9bb1-343db5a6eccc(5)" Direction="Horizontal" Index="1" RelativeSize="30.476190476190474" IsNewNode="True">
-                <LayoutItem Id="Action" ViewItem="Action" Index="0" RelativeSize="49.96415770609319" IsNewNode="True" />
-                <LayoutItem Id="Parameter" ViewItem="Parameter" Index="1" RelativeSize="50.03584229390681" IsNewNode="True" />
+              <LayoutGroup Id="Autofe52c333-e505-462e-9bb1-343db5a6eccc" ShowCaption="False" Caption="Autofe52c333-e505-462e-9bb1-343db5a6eccc(5)" Direction="Horizontal" Index="1" RelativeSize="30.612244897959183" IsNewNode="True">
+                <LayoutItem Id="Action" ViewItem="Action" Index="0" RelativeSize="49.83277591973244" IsNewNode="True" />
+                <LayoutItem Id="Parameter" ViewItem="Parameter" Index="1" RelativeSize="50.16722408026756" IsNewNode="True" />
               </LayoutGroup>
-              <LayoutGroup Id="Auto1c956300-e3fc-4fc0-ab47-9e0e8b16ca08" ShowCaption="False" Caption="Auto1c956300-e3fc-4fc0-ab47-9e0e8b16ca08(6)" Direction="Horizontal" Index="2" RelativeSize="33.333333333333336" IsNewNode="True">
-                <LayoutItem Id="Object" ViewItem="Object" Index="0" RelativeSize="49.96415770609319" IsNewNode="True" />
-                <LayoutItem Id="View" ViewItem="View" Index="1" RelativeSize="50.03584229390681" IsNewNode="True" />
+              <LayoutGroup Id="Auto1c956300-e3fc-4fc0-ab47-9e0e8b16ca08" ShowCaption="False" Caption="Auto1c956300-e3fc-4fc0-ab47-9e0e8b16ca08(6)" Direction="Horizontal" Index="2" RelativeSize="33.673469387755105" IsNewNode="True">
+                <LayoutItem Id="Object" ViewItem="Object" Index="0" RelativeSize="49.83277591973244" IsNewNode="True" />
+                <LayoutItem Id="View" ViewItem="View" Index="1" RelativeSize="50.16722408026756" IsNewNode="True" />
               </LayoutGroup>
               <LayoutItem Id="Parameter" Index="2" RelativeSize="18.75" ViewItem="Parameter" Removed="True" />
               <LayoutItem Id="Object" ViewItem="Object" Removed="True" />
               <LayoutItem Id="View" RelativeSize="45.76271186440678" ViewItem="View" Removed="True" />
             </LayoutGroup>
-            <LayoutGroup Id="Job" RelativeSize="91.25728559533722" Caption="Job">
+            <LayoutGroup Id="Job" RelativeSize="90.58597502401537" Caption="Job">
               <LayoutItem Id="CronExpression" RelativeSize="100" Index="0" ViewItem="CronExpression" Removed="True" />
               <TabbedGroup Id="Item4" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
-                <LayoutGroup Id="Item1" ShowCaption="True" Caption="Selected Objects Criteria" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
-                  <LayoutItem Id="SelectedObjectsCriteria" ShowCaption="False" ViewItem="SelectedObjectsCriteria" Index="0" RelativeSize="100" IsNewNode="True" />
+                <LayoutGroup Id="Item1" ShowCaption="True" Caption="Criteria" CaptionLocation="Top" Index="0" RelativeSize="100" IsNewNode="True">
+                  <LayoutItem Id="AuthenticateUserCriteria" ViewItem="AuthenticateUserCriteria" Index="0" RelativeSize="49.944629014396455" CaptionLocation="Top" IsNewNode="True" />
+                  <LayoutItem Id="SelectedObjectsCriteria" ShowCaption="True" ViewItem="SelectedObjectsCriteria" Index="1" RelativeSize="50.055370985603545" CaptionLocation="Top" IsNewNode="True" />
                 </LayoutGroup>
                 <LayoutGroup Id="Item2" ShowCaption="True" CaptionLocation="Top" Direction="Vertical" Index="1" Caption="Chain Jobs" RelativeSize="100" IsNewNode="True">
                   <LayoutItem Id="ChainJobs" ViewItem="ChainJobs" Index="0" RelativeSize="100" IsNewNode="True" />

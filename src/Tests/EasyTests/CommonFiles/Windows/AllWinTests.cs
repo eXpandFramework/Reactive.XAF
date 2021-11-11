@@ -105,7 +105,7 @@ namespace ALL.Win.Tests {
             await EasyTest(() => new WinAdapter(), RunWinApplication, async adapter => {
                 var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
                 adapter.Execute(autoTestCommand);
-                await adapter.TestEmail();
+                await adapter.TestEmail(ApplicationPath);
 #if !XAF191 && !NETCOREAPP3_1_OR_GREATER
                 adapter.TestDocumentStyleManager();
 #endif

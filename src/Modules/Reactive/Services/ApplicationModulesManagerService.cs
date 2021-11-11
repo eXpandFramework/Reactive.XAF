@@ -16,6 +16,7 @@ using Xpand.Extensions.TypeExtensions;
 using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
 using Xpand.Extensions.XAF.Attributes.Custom;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
@@ -39,10 +40,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                                 t1.memberInfo.AddAttribute(t1.attribute);
                             }
                         })));
-
-        public static IObservable<T> WhenApplication<T>(this ApplicationModulesManager manager,Func<XafApplication,IObservable<T>> retriedExecution) 
-            => manager.WhereApplication().ToObservable(ImmediateScheduler.Instance)
-		    .SelectMany(application => Observable.Defer(() => retriedExecution(application)).Retry(application));
+        
+        public static IObservable<T> WhenApplication<T>(this ApplicationModulesManager manager,Func<XafApplication,IObservable<T>> retriedExecution,bool emitInternalApplications=true) 
+            => manager.WhereApplication().Where(application => emitInternalApplications||!application.IsInternal()).ToObservable(ImmediateScheduler.Instance)
+	            .SelectMany(application => Observable.Defer(() => retriedExecution(application)).Retry(application));
 		
 
 	    public static IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> WhenCustomizeTypesInfo(this IObservable<ApplicationModulesManager> source) 

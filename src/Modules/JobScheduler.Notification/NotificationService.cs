@@ -7,59 +7,69 @@ using System.Runtime.CompilerServices;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor;
-using Xpand.Extensions.Blazor;
-using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.TypeExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
+using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.BusinessObjects;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification {
     public static class NotificationService {
-        private static readonly ISubject<(ObjectStateNotification job, object[] objects)> NotificationSubject =
-            Subject.Synchronize(new Subject<(ObjectStateNotification job, object[] objects)>());
+        private static readonly ISubject<(JobWorker worker, object[] objects)> NotificationSubject =
+            Subject.Synchronize(new Subject<(JobWorker worker, object[] objects)>());
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => manager.GenerateModelNodes()
-                .Merge(manager.WhenApplication(application => application.WhenSetupComplete()
-                        .WhenDefault(_ => ((ISharedBlazorApplication)application).UseNonSecuredObjectSpaceProvider)
+                .Merge(manager.WhenApplication(application => application.WhenSetupComplete().Where(_ => !application.IsInternal())
                         .SelectMany(_ => application.WhenNotificationJobModification(application.Model.NotificationTypes())))
                     .ToUnit());
 
-        public static IObservable<(ObjectStateNotification job, T[] objects)> WhenNotification<T>(this XafApplication application) 
-            => application.WhenNotification(typeof(T)).Select(t => (t.job,t.objects.Cast<T>().ToArray())).AsObservable();
+        public static IObservable<(JobWorker worker, T[] objects)> WhenNotification<T>(this XafApplication application)
+            => application.IsInternal() ? Observable.Empty<(JobWorker worker, T[] objects)>()
+                : application.WhenNotification(typeof(T)).Select(t => (t.worker,t.objects.Cast<T>().ToArray()));
         
-        public static IObservable<(ObjectStateNotification job, object[] objects)> WhenNotification(this XafApplication application,Type objectType=null) {
+        public static IObservable<(JobWorker worker, object[] objects)> WhenNotification(this XafApplication application,Type objectType=null) {
             objectType ??= typeof(object);
-            return NotificationSubject.Select(t =>(t.job,t.objects.Where(o => objectType.IsInstanceOfType(o)).ToArray()) )
-                .AsObservable().TraceNotificationModule(t => t.job.Object.Name);
+            return NotificationSubject.Select(e => (e.worker,e.objects.Where(o => objectType.IsInstanceOfType(o)).ToArray()));
         }
 
-        internal static IObservable<Unit> JobNotification(this BlazorApplication application, string notificationJobId) 
-            => Observable.Using(application.CreateObjectSpace, objectSpace => {
-                var notificationJob = objectSpace.GetObjectsQuery<ObjectStateNotification>().FirstOrDefault(job => job.Id==notificationJobId);
-                if (notificationJob != null) {
-                    var objectType = notificationJob.Object.Type;
+        internal static IObservable<Unit> JobNotification(this BlazorApplication application, string workerId) 
+            => Observable.Using(application.CreateNonSecuredObjectSpace, objectSpace => {
+                var jobWorker = objectSpace.GetObjectsQuery<JobWorker>().FirstOrDefault(job => job.Id==workerId);
+                if (jobWorker != null) {
+                    var job = ((ObjectStateNotification)jobWorker.Job);
+                    var objectType = job.Object.Type;
                     var notificationTypes = application.Model.NotificationTypes();
                     var notificationType = notificationTypes.FirstOrDefault(type => type.Type==objectType);
-                    var criteriaOperator = notificationJob.NonIndexCriteriaOperator(notificationTypes, objectType);
+                    var criteriaOperator = job.NonIndexCriteriaOperator(notificationTypes, objectType);
                     if (notificationType!=null) {
-                        notificationJob.CreateOrUpdateIndex(notificationTypes);
-                        notificationJob.ObjectSpace.CommitChanges();
+                        job.CreateOrUpdateIndex(notificationTypes);
+                        jobWorker.ObjectSpace.CommitChanges();
                         if (!ReferenceEquals(criteriaOperator, null)) {
-                            var objects = notificationJob.ObjectSpace.GetObjects(objectType, criteriaOperator).Cast<object>().ToArray();
+                            var objects = jobWorker.ObjectSpace.GetObjects(objectType, criteriaOperator).Cast<object>().ToArray();
                             if (objects.Any()) {
-                                NotificationSubject.OnNext((notificationJob, objects));
+                                var publish = NotifyWorkerFinished.FirstAsync(id => id==workerId); 
+                                if (job.ChainJobs.Any()) {
+                                    return publish.Select(unit => unit)
+                                        .ToUnit()
+                                        .Select(unit => unit)
+                                        .Merge(Unit.Default.ReturnObservable().Do(_ => NotificationSubject.OnNext((jobWorker, objects))).IgnoreElements());
+                                }
+                                NotificationSubject.OnNext((jobWorker, objects));
                             }
-                            return objects.ToNowObservable().ToUnit();
                         }
                     }
                 }
                 return Observable.Empty<Unit>();
             });
-        
+
+        private static readonly ISubject<string> NotifyWorkerFinished = Subject.Synchronize(new Subject<string>());
+        public static void NotifyFinish(this JobWorker worker) => NotifyWorkerFinished.OnNext(worker.Id);
+
+
         private static CriteriaOperator NonIndexCriteriaOperator(this  ObjectStateNotification objectStateNotification,NotificationType[] notificationTypes, Type objectType) {
             var index = objectStateNotification.ObjectSpace.GetObjectsQuery<NotificationJobIndex>()
                 .FirstOrDefault(index =>index.ObjectStateNotification.Oid==objectStateNotification.Oid)?.Index;
@@ -68,14 +78,14 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification {
         }
         
         private static IObservable<object> WhenNotificationJobModification(this XafApplication application, NotificationType[] modelNotificationTypes) 
-            => Observable.Using(application.CreateObjectSpace,objectSpace => objectSpace.SaveIndexes(modelNotificationTypes))
+            => Observable.Using(application.CreateNonSecuredObjectSpace,objectSpace => objectSpace.SaveIndexes(modelNotificationTypes))
                 .Merge(application.WhenCommitedDetailed<ObjectStateNotification>(ObjectModification.NewOrUpdated)
                     .SelectMany(t => application.SaveIndexes(t.details.Select(t1 =>t1.instance ).ToArray(),modelNotificationTypes)
                             .TraceNotificationModule(job => $"{ObjectModification.NewOrUpdated}-{job}")));
 
         private static IObservable<ObjectStateNotification> SaveIndexes(this XafApplication application,
             ObjectStateNotification[] jobs, NotificationType[] modelNotificationTypes) 
-            => Observable.Using(application.CreateObjectSpace, objectSpace => jobs.Do(notificationJob => {
+            => Observable.Using(application.CreateNonSecuredObjectSpace, objectSpace => jobs.Do(notificationJob => {
                 notificationJob = objectSpace.GetObject(notificationJob)
                     .CreateOrUpdateIndex(modelNotificationTypes);
                 notificationJob.ObjectSpace.CommitChanges();

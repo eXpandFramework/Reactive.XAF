@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Editors;
@@ -18,6 +20,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
     [Appearance("DisableSelectedObjectsCriteria",AppearanceItemType.ViewItem, nameof(Object)+" Is Null",TargetItems = nameof(SelectedObjectsCriteria),Enabled = false)]
     [Appearance("HideParameter",AppearanceItemType.ViewItem, nameof(IsParameterDisabled)+"=true",TargetItems = nameof(Parameter),Enabled = false)]
     public class ExecuteActionJob : Job {
+        
         public ExecuteActionJob(Session session) : base(session) {
         }
 
@@ -25,8 +28,21 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
             base.AfterConstruction();
             JobType = new ObjectType(typeof(Jobs.ExecuteActionJob));
             JobMethod = new ObjectString(nameof(Jobs.ExecuteActionJob.Execute));
+            AuthenticateUserCriteria = "UserName='Admin'";
         }
 
+        string _authenticateUserCriteria;
+        
+        [CriteriaOptions(nameof(UserType))]
+        [EditorAlias(EditorAliases.CriteriaPropertyEditor), Size(SizeAttribute.Unlimited)]
+        public string AuthenticateUserCriteria {
+            get => _authenticateUserCriteria;
+            set => SetPropertyValue(nameof(AuthenticateUserCriteria), ref _authenticateUserCriteria, value);
+        }
+
+        [Browsable(false)]
+        public Type UserType => SecuritySystem.UserType;
+        
         ObjectString _action;
         [DataSourceProperty(nameof(Actions))]
         [RuleRequiredField]

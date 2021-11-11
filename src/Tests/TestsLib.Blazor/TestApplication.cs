@@ -7,7 +7,6 @@ using DevExpress.ExpressApp.Blazor;
 using DevExpress.ExpressApp.Xpo;
 using Microsoft.Extensions.DependencyInjection;
 using Xpand.Extensions.AppDomainExtensions;
-using Xpand.Extensions.Blazor;
 using Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions;
 using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -17,7 +16,10 @@ namespace Xpand.TestsLib.Blazor{
         public IXpoDataStoreProvider DataStoreProvider { get; set; }
     }
 
-    public class TestBlazorApplication : BlazorApplication, ITestApplication,ISharedBlazorApplication{
+    public class TestBlazorApplication : BlazorApplication, ITestApplication{
+        public TestBlazorApplication() {
+            this.AlwaysUpdateOnDatabaseVersionMismatch().Subscribe();
+        }
         [SuppressMessage("ReSharper", "UnusedParameter.Local")]
         public TestBlazorApplication(Type sutModule, bool transmitMessage = true, bool handleExceptions=true):this() {
             TransmitMessage = transmitMessage;
@@ -40,9 +42,7 @@ namespace Xpand.TestsLib.Blazor{
         
         public Type SUTModule{ get; }
 
-        public TestBlazorApplication() {
-            this.AlwaysUpdateOnDatabaseVersionMismatch().Subscribe();
-        }
+        
 
         protected override void OnCreateCustomObjectSpaceProvider(CreateCustomObjectSpaceProviderEventArgs args) {
             var provider = ServiceProvider.GetRequiredService<XpoDataStoreProviderAccessor>().DataStoreProvider;
@@ -60,7 +60,7 @@ namespace Xpand.TestsLib.Blazor{
         protected override string GetDcAssemblyFilePath() => null;
 
         protected override string GetModelAssemblyFilePath() => $@"{AppDomain.CurrentDomain.ApplicationPath()}\ModelAssembly{Guid.NewGuid()}.dll";
-        public bool UseNonSecuredObjectSpaceProvider { get; set; }
+        
     }
 
 }

@@ -3,6 +3,9 @@ using System.Reactive.Linq;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor;
+using Hangfire;
+using Hangfire.MemoryStorage;
+using Hangfire.MemoryStorage.Database;
 using Xpand.Extensions.TypeExtensions;
 using Xpand.TestsLib.Blazor;
 using Xpand.TestsLib.Common;
@@ -12,6 +15,16 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
     public abstract class JobSchedulerCommonTest : BlazorCommonTest {
+        public override void Setup() {
+            base.Setup();
+            GlobalConfiguration.Configuration.UseMemoryStorage(new MemoryStorageOptions(),new Data());
+        }
+
+        public override void Dispose() {
+            base.Dispose();
+            JobStorage.Current = null;
+        }
+
         protected override void ResetXAF() {
             
         }

@@ -13,17 +13,18 @@
     <!--    <OutputPath>..\..\..\..\..\..\..\bin\Rider</OutputPath>-->
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="JetBrains.Rider.SDK" Version="$(SdkVersion)" />
+    <None Remove="Resources\Xpand.XAF.ModelEditor.Win.4.212.0.1.zip" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="..\..\..\..\ModelEditor.Win\Xpand.XAF.ModelEditor.Win\bin\release\net5.0-windows\Xpand.XAF.ModelEditor.Win.4.211.10.1.zip">
-      <Link>Resources\Xpand.XAF.ModelEditor.Win.4.211.10.1.zip</Link>
-    </EmbeddedResource>
+    <PackageReference Include="JetBrains.Rider.SDK" Version="$(SdkVersion)" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\..\..\XpandModelEditor.cs">
       <Link>XpandModelEditor.cs</Link>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Xpand.XAF.ModelEditor.Win.4.212.0.1.zip" />
   </ItemGroup>
   <!-- TODO: uncomment for xaml icons -->
   <!--<ItemGroup>-->

@@ -7,6 +7,8 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.SystemModule;
 using NUnit.Framework;
 using Shouldly;
+using Xpand.Extensions.XAF.ActionExtensions;
+using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
@@ -42,5 +44,66 @@ namespace Xpand.XAF.Modules.Reactive.Tests {
                 testObserver.Items.First().Active[nameof(ActionsService.ActivateInUserDetails)].ShouldBeTrue();    
             }
         }
+
+        public class ActionExecuteFinishedTests:ReactiveCommonTest {
+            [Test]
+            public void Emits_When_ExecuteCompleted_by_default() {
+                using var application = Platform.Win.NewApplication<ReactiveModule>();
+                using var testObserver = application.WhenApplicationModulesManager()
+                    .SelectMany(manager => manager.RegisterViewSimpleAction("test"))
+                    .WhenExecuteFinished()
+                    .Test();
+                DefaultReactiveModule(application);
+                var window = application.CreateViewWindow();
+                var actionBase = window.Action("test");
+                window.SetView(application.NewView<ListView>(typeof(R)));
+                
+                actionBase.DoTheExecute();
+                
+                testObserver.ItemCount.ShouldBe(1);
+            }
+            
+            [TestCase(false,true)]
+            [TestCase(true,false)]
+            public void Do_Not_Emit_ByDefault_When_Custom_Emit(bool parameter,bool data) {
+                using var application = Platform.Win.NewApplication<ReactiveModule>();
+                using var testObserver = application.WhenApplicationModulesManager()
+                    .SelectMany(manager => manager.RegisterViewSimpleAction("test",action => action.CustomizeExecutionFinished(data)))
+                    .WhenExecuteFinished(parameter)
+                    .Test();
+                DefaultReactiveModule(application);
+                var window = application.CreateViewWindow();
+                var actionBase = window.Action("test");
+                window.SetView(application.NewView<ListView>(typeof(R)));
+                
+                actionBase.DoTheExecute();
+                
+                testObserver.ItemCount.ShouldBe(0);
+            }
+            
+            [TestCase(false,true)]
+            [TestCase(true,false)]
+            public void Custom_Emit(bool parameter,bool data) {
+                using var application = Platform.Win.NewApplication<ReactiveModule>();
+                using var testObserver = application.WhenApplicationModulesManager()
+                    .SelectMany(manager => manager.RegisterViewSimpleAction("test",action => action.CustomizeExecutionFinished(data)))
+                    .WhenExecuteFinished(parameter)
+                    .Test();
+                DefaultReactiveModule(application);
+                var window = application.CreateViewWindow();
+                var actionBase = window.Action("test");
+                window.SetView(application.NewView<ListView>(typeof(R)));
+                
+                actionBase.DoTheExecute();
+                actionBase.ExecutionFinished();
+                
+                testObserver.ItemCount.ShouldBe(1);
+            }
+
+        }
+        public void When_Action_Execute_Finished() {
+            
+        }
+
     }
 }

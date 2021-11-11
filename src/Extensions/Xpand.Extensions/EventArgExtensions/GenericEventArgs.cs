@@ -15,6 +15,6 @@ namespace Xpand.Extensions.EventArgExtensions{
             return true;
         }
 
-        public void SetInstance(Action<T> apply) => apply(Instance);
+        // public void SetInstance(Action<T> apply) => apply(Instance);
     }
 }

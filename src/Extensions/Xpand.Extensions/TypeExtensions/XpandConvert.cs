@@ -92,7 +92,7 @@ namespace Xpand.Extensions.TypeExtensions {
         public static bool CanChange(this object value, Type destinationType, CultureInfo culture, Conversion options) {
             return TryToChange(value, destinationType, out _, options, culture);
         }
-
+        
         public static bool TryToChange(this object value, Type destinationType, out object result) {
             return TryToChange(value, destinationType, out result, DefaultCultureInfo);
         }

@@ -30,7 +30,7 @@ Application.WhenNotification<Product>()
 
 ```
 
-In order to provide unique notifications the package uses `Index Object member`. Use the model to configure each type Index members. To create index member for your objects see the [SequenceGenerator](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/SequenceGenerator) package.
+The package uses `Object member` values to identify the last notification. To configure which member for which type use the model. To create unique indexed member for your objects see the [SequenceGenerator](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/SequenceGenerator) package. if you certain that your data are unique e.g. Product No you can use any integer member as indexer. Members with duplicate values may result in duplicate notifications. 
 
 ![image](https://user-images.githubusercontent.com/159464/138351939-6e55c3eb-c66e-415c-a948-641e833315a0.png)
 

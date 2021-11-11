@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reactive;
+using System.Reactive.Linq;
 using DevExpress.EasyTest.Framework;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.TestsLib.Common.BO;
@@ -16,25 +17,29 @@ namespace Web.Tests {
             adapter.CreateProduct();
             adapter.TriggerJob();
             adapter.Execute(new NavigateCommand("Default.Test Task"));
-            adapter.Execute(new SelectObjectsCommand(nameof(DevExpress.Persistent.BaseImpl.Task.Subject), new []{"1"}));
-            adapter.Execute(new ActionDeleteCommand());
-            adapter.Execute(new NavigateCommand("Default.Product"));
-            adapter.Execute(new SelectObjectsCommand(nameof(Product.ProductName), new []{nameof(JobSchedulerNotificationService)}));
-            adapter.Execute(new ActionDeleteCommand());
-            return Unit.Default.ReturnObservable();
+            return adapter.Execute(() => {
+                adapter.Execute(new ActionCommand(Actions.Refresh));
+                adapter.Execute(new SelectObjectsCommand(nameof(DevExpress.Persistent.BaseImpl.Task.Subject), new []{"1"}));
+            })
+            .Do(_ => {
+                adapter.Execute(new ActionDeleteCommand());
+                adapter.Execute(new NavigateCommand("Default.Product"));
+                adapter.Execute(new SelectObjectsCommand(nameof(Product.ProductName), new []{nameof(JobSchedulerNotificationService)}));
+                adapter.Execute(new ActionDeleteCommand());
+            });
         }
 
         private static void TriggerJob(this ICommandAdapter adapter) {
             adapter.Execute(new NavigateCommand("JobScheduler.Job"));
-            adapter.Execute(
-                new SelectObjectsCommand<Job>(notification => notification.Id, new[] { nameof(JobSchedulerNotificationService) }));
+            adapter.Execute(new SelectObjectsCommand<Job>(notification => notification.Id, new[] { nameof(JobSchedulerNotificationService) }));
             adapter.Execute(new ActionCommand(nameof(Xpand.XAF.Modules.JobScheduler.Hangfire.JobSchedulerService.Trigger)));
         }
 
         private static void CreateProduct(this ICommandAdapter adapter) {
             adapter.Execute(new NavigateCommand($"Default.{nameof(Product)}"));
             adapter.Execute(new ActionCommand(Actions.New));
-            adapter.Execute(new FillObjectViewCommand<Product>((product => product.Id, 1.ToString()),(product => product.ProductName, nameof(JobSchedulerNotificationService))));
+            adapter.Execute(new FillObjectViewCommand<Product>((product => product.Id, 1.ToString()),
+                (product => product.ProductName, nameof(JobSchedulerNotificationService))));
             adapter.Execute(new ActionCommand(Actions.Save));
         }
 

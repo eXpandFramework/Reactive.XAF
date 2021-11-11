@@ -1,8 +1,10 @@
-﻿using DevExpress.ExpressApp.Security;
+﻿using System;
+using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Office.Blazor;
 using Hangfire;
 using Hangfire.MemoryStorage;
+using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Server.Circuits;
@@ -13,7 +15,7 @@ using Microsoft.Extensions.Hosting;
 using TestApplication.Blazor.Server.Services;
 using Xpand.Extensions.Blazor;
 using Xpand.Extensions.Office.Cloud.Google.Blazor;
-using Xpand.XAF.Modules.JobScheduler.Hangfire;
+using Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire;
 
 [assembly: HostingStartup(typeof(GoogleCodeStateStartup))]
 [assembly: HostingStartup(typeof(HostingStartup))]

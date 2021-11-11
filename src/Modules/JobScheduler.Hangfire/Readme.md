@@ -19,15 +19,15 @@ This `Blazor only` module is valuable when you want to schedule background proce
 
 Follow the next steps:
 1. Configure the Hangfire [default storage](https://docs.hangfire.io/en/latest/configuration/using-sql-server.html). Additionally consult Hangfire docs to configure/implement any other Hangfire related scenario, there are no restrictions.
-1. Add a model assembly `job source` pointing to the assembly containing your Job types.</br>
+2. Add a model assembly `job source` pointing to the assembly containing your Job types.<br><br>
     ![image](https://user-images.githubusercontent.com/159464/103508193-4b7dcb80-4e69-11eb-82be-7fa109720368.png)
-2. Mark any type with a default constructor with the `Xpand.XAF.Modules.JobScheduler.Hangfire.JobProviderAttribute`. 
+3. Mark any type with a default constructor with the `Xpand.XAF.Modules.JobScheduler.Hangfire.JobProviderAttribute`. 
    ```cs
     [JobProvider]
     public class Job {
     }
    ```
-3. All public methods without parameters can be scheduled using the UI or code.
+4. All public methods without parameters can be scheduled using the UI or code.
    ```cs
     [JobProvider]
     public class Import {
@@ -53,39 +53,28 @@ Follow the next steps:
     Job.Resume();
    ```
    Note that the methods are scheduled in the background therefore the `HttpContext` is not available.
-4. Inject a `BlazorApplication` in the constructor to use its `ServiceProvider` or to query data. 
+5. Use DI to inject object instances in the constructor for e.g. to inject an `IServiceProvider` and later use it to get a BlazorApplication use the next snippet. Note that depending on your needs a NonSecuredObjectSpace should be created if your did not explicitly authenticate. 
    ```cs
     [JobProvider]
     public class Import {
-        public BlazorApplication Application { get; }
+        public IServiceProvider Provider { get; }
         public Import() { }
-        public Import(BlazorApplication application) {
-            Application = application;
+        public Import(IServiceProvider provider) {
+            Provider = provider;
         }
 
-        // [JobProvider("Customize-Name")]
+        [JobProvider("Customize-Name")]
         public async Task DailyOrders() {
-            using var objectSpace = Application.CreateObjectSpace();
-            for (int i = 0; i < 10; i++) {
-                var order = objectSpace.CreateObject<Order>();
-                order.OrderID = i;
-            }
-            await objectSpace.CommitChangesAsync();
+            await ServiceProvider.WhenApplication(application => Observable.Using(() => application.CreateNonSecuredObjectSpace(true,true), objectSpace 
+                => Observable.Range(0, 10).Do(i => {
+                        var order = objectSpace.CreateObject<Order>();
+                        order.OrderID = i;
+                    }).Finally(objectSpace.CommitChanges)));
         }
     }
    ```
    Note that the BlazorApplication is not authenticated and the default constructor must exist.
-4. Modify your BlazorApplication not to use a SecuredObjectSpaceProvider when the Job SharedBlazorApp is created like:
-   ```cs
-   protected override void CreateDefaultObjectSpaceProvider(CreateCustomObjectSpaceProviderEventArgs args) {
-        var dataStoreProvider = GetDataStoreProvider(args.ConnectionString, args.Connection);
-        args.ObjectSpaceProviders.Add(Security != null
-            ? new SecuredObjectSpaceProvider((ISelectDataSecurityProvider) Security, dataStoreProvider, true)
-            : new XPObjectSpaceProvider(dataStoreProvider, true));
-        args.ObjectSpaceProviders.Add(new NonPersistentObjectSpaceProvider(TypesInfo, null));
-    }
-   ```
-5. Use a Job descendant to pass job specific parameters.
+6. Use a Job descendant to pass job specific parameters.
    ```cs
     public class CustomJob:Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects.Job {
         public CustomJob(Session session) : base(session) { }
@@ -97,21 +86,23 @@ Follow the next steps:
         }
     }
 
+    //same as #5
+    [JobProvider] 
     public async Task ImportOrders(PerformContext context) {
-        using var objectSpace = Application.CreateObjectSpace();
         var jobId = context.JobId();
-        var ordersCount=objectSpace.GetObjectsQuery<CustomJob>()
-            .First(job1 => job1.Id == jobId).OrdersCount
-        for (int i = 0; i < ordersCount; i++) {
-            var order = objectSpace.CreateObject<Order>();
-            order.OrderID = i;
-        }
-
-        await objectSpace.CommitChangesAsync();
+        await ServiceProvider.WhenApplication(application => Observable.Using(() => application.CreateNonSecuredObjectSpace(true,true),
+            objectSpace => { var ordersCount=objectSpace.GetObjectsQuery<CustomJob>()
+                        .First(job1 => job1.Id == jobId).OrdersCount
+                    for (int i = 0; i < ordersCount; i++) {
+                        var order = objectSpace.CreateObject<Order>();
+                        order.OrderID = i;
+                    }
+                    objectSpace.CommitChanges();
+                }));
     }
 
    ```
-6. Observe job state.
+7. Observe job state.
    ```cs
     Xpand.XAF.Modules.JobScheduler.Hangfire.JobSchedulerService.JobState.Subscribe(state => {
         var job = state.JobWorker.Job;
@@ -133,7 +124,7 @@ In the screencast you can see `how to declare, schedule, pause, resume and get m
 
 ### ExecuteActionJob
 
-The `ExecutionActionJob` uses a Shared-Non authenticated XAF application instance to create the configured View and assign it to a frame so all XAF artifacts gets in place. Finally it selects the `ExecuteActionJob.SelectedObjectsCriteria` and executes the configure action with them.
+The `ExecutionActionJob` uses XAF application instances to create the configured View and assign it to a frame so all XAF artifacts gets in place. Then it selects the `ExecuteActionJob.SelectedObjectsCriteria` and executes the related action on them.
 
 In the screencast you can see how we use the `Xpand.XAF.Modules.JobScheduler.HangFire` package to create an `ExecuteActionJob` where we `schedule` the `Delete` action on the `Product_ListView`.
 

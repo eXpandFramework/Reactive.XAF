@@ -8,6 +8,7 @@ using DevExpress.ExpressApp.Blazor;
 using Fasterflect;
 using Hangfire;
 using NUnit.Framework;
+using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.NonPersistentObjects;
@@ -16,14 +17,14 @@ using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
     public static class JobSchedulerTestExtensions {
         public static IObservable<Unit> ExecuteAction(this BlazorApplication application,Job job) 
-            => Unit.Default.ReturnObservable()
-                .Delay(TimeSpan.FromMilliseconds(300))
-                .SelectMany(_ => ((IObservable<Unit>)typeof(JobSchedulerService).Method("ExecuteAction", new []{typeof(XafApplication),typeof(string)},Flags.StaticPrivate)
+            => Unit.Default.ReturnObservable().Delay(TimeSpan.FromMilliseconds(300))
+                .SelectMany(_ => ((IObservable<Unit>)AppDomain.CurrentDomain.GetAssemblyType("Xpand.XAF.Modules.JobScheduler.Hangfire.ExecuteJobActionExtensions")
+                    .Method("ExecuteAction", new []{typeof(XafApplication),typeof(string)},Flags.StaticPrivate)
                     .Call(new object[] { application, job.Id })).Select(unit => unit));
 
         public static IObservable<JobState> Executed(this WorkerState lastState,Func<Job,bool> job=null) 
-            => JobSchedulerService.JobState.FirstAsync(jobState => jobState.Fit(job, WorkerState.Enqueued)).IgnoreElements()
-                .Concat(Observable.Defer(() => JobSchedulerService.JobState.FirstAsync(jobState => jobState.Fit(job, WorkerState.Processing)).IgnoreElements()))
+            => JobSchedulerService.JobState.FirstAsync(t => t.Fit(null, WorkerState.Enqueued)).IgnoreElements()
+                .Concat(Observable.Defer(() => JobSchedulerService.JobState.FirstAsync(jobState => jobState.Fit(null, WorkerState.Processing)).IgnoreElements()))
                 .Concat(Observable.Defer(() => JobSchedulerService.JobState.FirstAsync(jobState => jobState.Fit(job, lastState))))
                 .FirstAsync();
 
@@ -35,7 +36,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
 
         public static Job CommitNewJob(this BlazorApplication application,Type testJobType=null,string methodName=null,Action<Job> modify=null) {
             testJobType ??= typeof(TestJobDI);
-            methodName??=nameof(TestJob.Test);
+            methodName??=nameof(TestJob.TestJobId);
             var objectSpace = application.CreateObjectSpace();
             var job = objectSpace.CreateObject<Job>();
             job.JobType = new ObjectType(testJobType);
@@ -52,12 +53,12 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
 
         public static IObservable<Job> ScheduleImmediate(this
             IObservable<GenericEventArgs<IObservable<Job>>> source, Expression<Action> expression)
-            => source.Handle().SelectMany(args => args.Instance.Select(job => {
+            => source.Handle().SelectMany(args => args.Instance.SelectMany(job => {
                 job.AddOrUpdateHangfire();
                 if (job.CronExpression.Name != nameof(Cron.Never)) {
-                    job.Trigger();    
+                    return Observable.Start(job.Trigger).To(job);
                 }
-                return job;
+                return job.ReturnObservable();
 
             }));
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Utils;
@@ -31,6 +32,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 		    this IObservable<Frame> source) where TModule : ModuleBase 
             => source.Select(frame => frame.Action<TModule>());
 
+         
         public static IObservable<T> WhenExecute<T>(this IObservable<SimpleAction> source,Func<SimpleActionExecuteEventArgs, IObservable<T>> retriedExecution) 
             => source.SelectMany(action => action.WhenExecute(retriedExecution));
         public static IObservable<T> WhenExecuted<T>(this IObservable<SimpleAction> source,Func<SimpleActionExecuteEventArgs, IObservable<T>> retriedExecution) 
@@ -161,6 +163,21 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(
 			        h => action.ExecuteCompleted += h, h => action.ExecuteCompleted -= h, ImmediateScheduler.Instance)
 		        .Select(pattern => pattern.EventArgs);
+
+        private static ISubject<ActionBase> _executeFinishedSubject = Subject.Synchronize(new Subject<ActionBase>());
+        public static IObservable<TAction> WhenExecuteFinished<TAction>(this TAction action,bool customEmit=false) where TAction : ActionBase
+            => customEmit || (action.Data.ContainsKey(nameof(ExecutionFinished)) && (bool)action.Data[nameof(ExecutionFinished)])
+                ? _executeFinishedSubject.Where(a => a == action).Cast<TAction>() : action.WhenExecuteCompleted().To(action);
+
+        public static void CustomizeExecutionFinished<TAction>(this TAction action, bool enable=true)
+            where TAction : ActionBase
+            => action.Data[nameof(ExecutionFinished)] = enable;
+        
+        public static void ExecutionFinished<TAction>(this TAction action) where TAction:ActionBase 
+            => _executeFinishedSubject.OnNext(action);
+
+        public static IObservable<TAction> WhenExecuteFinished<TAction>(this IObservable<TAction> source,bool customEmit=false) where TAction : ActionBase 
+            => source.SelectMany(a=>a.WhenExecuteFinished(customEmit));
         public static IObservable<ActionBaseEventArgs> WhenExecuteCompleted<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
             => source.SelectMany(a=>a.WhenExecuteCompleted());
 

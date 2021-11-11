@@ -13,10 +13,11 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Xpand.Extensions.Blazor;
+using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.Extensions.XAF.SecurityExtensions;
 
-namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
+namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire {
     public class UseHangfire : IStartupFilter {
         static UseHangfire() {
             AppDomain.CurrentDomain.Patch(harmony => {
@@ -33,8 +34,8 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
                 next(app);
             };
 
-        public static Action<IApplicationBuilder> Server = builder => builder.UseHangfireServer();
-        public static Action<IApplicationBuilder> Dashboard = builder 
+        public static readonly Action<IApplicationBuilder> Server = builder => builder.UseHangfireServer();
+        public static readonly Action<IApplicationBuilder> Dashboard = builder 
             => builder.UseHangfireDashboard(options:new DashboardOptions {
                 Authorization = new[] {new DashboardAuthorization()}
         });
@@ -46,19 +47,20 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
             var userIdentity = httpContext.User.Identity;
             Debug.Assert(userIdentity != null, nameof(userIdentity) + " != null");
             if (userIdentity.IsAuthenticated) {
-                var provider = httpContext.RequestServices.GetRequiredService<ISharedXafApplicationProvider>();
-                var blazorApplication = provider.Application;
-                var security = provider.Security;
-                if (security.IsSecurityStrategyComplex()) {
-                    if (!security.IsActionPermissionGranted(nameof(JobSchedulerService.JobDashboard)) &&
-                        !security.IsAdminPermissionGranted()) {
-                        using var objectSpace = blazorApplication.CreateObjectSpace(security?.UserType);
-                        var user = (ISecurityUserWithRoles) objectSpace.FindObject(security?.UserType, CriteriaOperator.Parse($"{nameof(ISecurityUser.UserName)}=?", userIdentity.Name));
-                        return user.Roles.Cast<IPermissionPolicyRole>().Any(role => role.IsAdministrative);
+                return httpContext.RequestServices.RunWithStorageAsync(application => {
+                    var security = application.Security;
+                    if (security.IsSecurityStrategyComplex()) {
+                        if (!security.IsActionPermissionGranted(nameof(JobSchedulerService.JobDashboard)) && !security.IsAdminPermissionGranted()) {
+                            using var objectSpace = application.CreateObjectSpace(security?.UserType);
+                            var user = (ISecurityUserWithRoles)objectSpace.FindObject(security?.UserType,
+                                CriteriaOperator.Parse($"{nameof(ISecurityUser.UserName)}=?", userIdentity.Name));
+                            return user.Roles.Cast<IPermissionPolicyRole>().Any(role => role.IsAdministrative).ReturnObservable();
+                        }
+                        return true.ReturnObservable();
                     }
-                    return true;
-                }
-                return true;
+                    return true.ReturnObservable();
+                }).Wait(TimeSpan.FromSeconds(10));
+                
             }
             return false;
         }
@@ -70,16 +72,17 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
                 .AddHangfire(ConfigureHangfire)
                 .AddHangfireServer()
                 .AddSingleton<IStartupFilter, UseHangfire>()
-                .AddSingleton<HangfireJobFilter>()
+                .AddSingleton<IHangfireJobFilter>(provider => new HangfireJobFilter(provider))
             );
 
-        private static void ConfigureHangfire(IServiceProvider provider,IGlobalConfiguration configuration) 
-            => configuration
-                .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+        private static void ConfigureHangfire(IServiceProvider provider,IGlobalConfiguration configuration) {
+            configuration.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
                 .UseDefaultTypeSerializer()
                 .UseRecommendedSerializerSettings()
                 .UseActivator(new ServiceJobActivator(provider.GetService<IServiceScopeFactory>()))
-                .UseFilter(provider.GetService<HangfireJobFilter>())
-                .UseFilter(new AutomaticRetryAttribute(){Attempts = 0});
+                .UseFilter(provider.GetService<IHangfireJobFilter>())
+                .UseFilter(new AutomaticRetryAttribute() { Attempts = 0 });
+            GlobalStateHandlers.Handlers.Add(new ChainJobState.Handler());
+        }
     }
 }

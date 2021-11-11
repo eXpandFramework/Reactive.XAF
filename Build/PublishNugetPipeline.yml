@@ -22,7 +22,7 @@ steps:
       ScriptType: 'InlineScript'
       Inline: |
         $ErrorView="NormalView"
-        $VerbosePreference="Continue"
+        # $VerbosePreference="Continue"
         $goArgs=@{
             Branch ='$(Build.SourceBranchName)'
             SourcesRoot ='$(System.DefaultworkingDirectory)'

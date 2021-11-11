@@ -285,7 +285,9 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
                 
 	        new TestObject(explicitUnitOfWork);
 	        explicitUnitOfWork.FlushChanges();
-	        await TestObjects(application, false, 1).Merge(Unit.Default.ReturnObservable().Delay(TimeSpan.FromMilliseconds(300)).Do(unit => explicitUnitOfWork.CommitChanges())).FirstAsync();
+	        await TestObjects(application, false, 1)
+		        .Merge(Unit.Default.ReturnObservable().Delay(TimeSpan.FromMilliseconds(300))
+		        .Do(_ => explicitUnitOfWork.CommitChanges())).FirstAsync();
 	        explicitUnitOfWork.Close();
 	        simpleDataLayer.Dispose();
                 

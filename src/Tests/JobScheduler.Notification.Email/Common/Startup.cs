@@ -2,8 +2,9 @@
 using Microsoft.Extensions.Configuration;
 using Xpand.Extensions.Blazor;
 using Xpand.TestsLib.Blazor;
+using Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire;
 
-[assembly: HostingStartup(typeof(Xpand.XAF.Modules.JobScheduler.Hangfire.HangfireStartup))]
+[assembly: HostingStartup(typeof(HangfireStartup))]
  [assembly: HostingStartup(typeof(HostingStartup))]
  [assembly:HostingStartup(typeof(Xpand.XAF.Modules.Blazor.BlazorStartup))]
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Email.Tests.Common {

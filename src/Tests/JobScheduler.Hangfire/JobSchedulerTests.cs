@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
-using Hangfire;
-using Hangfire.MemoryStorage;
-using Hangfire.MemoryStorage.Database;
 using NUnit.Framework;
+using NUnit.Framework.Internal;
 using Shouldly;
 using Xpand.Extensions.Blazor;
 using Xpand.Extensions.Reactive.Utility;
@@ -20,34 +17,24 @@ using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
-	[NonParallelizable]
+    [NonParallelizable]
     public class JobSchedulerTests:JobSchedulerCommonTest{
-        public override void Setup() {
-            base.Setup();
-            GlobalConfiguration.Configuration.UseMemoryStorage(new MemoryStorageOptions(),new Data());
-        }
-
-        public override void Dispose() {
-            base.Dispose();
-            JobStorage.Current = null;
-        }
-
+        
         [TestCase(typeof(TestJobDI))]
         [TestCase(typeof(TestJob))]
         [XpandTest()][Order(0)]
         public void Inject_BlazorApplication_In_JobType_Ctor(Type testJobType) {
-            using var testObserver = MockHangfire().Test();
             using var jobs = TestJob.Jobs.FirstAsync().Test();
             using var application = JobSchedulerModule().Application.ToBlazor();
-            application.CommitNewJob(testJobType);
+            application.CommitNewJob(testJobType).Trigger();
 
             var testJob = jobs.AwaitDone(Timeout).Items.First();
 
             if (testJobType==typeof(TestJobDI)) {
-                testJob.Application.ShouldNotBeNull();
+                testJob.Provider.ShouldNotBeNull();
             }
             else {
-                testJob.Application.ShouldBeNull();
+                testJob.Provider.ShouldBeNull();
             }
         }
 
@@ -75,14 +62,13 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
         }
 
         
-        [Test()]
+        [Test()][Apartment(ApartmentState.MTA)]
         [XpandTest()][Order(200)]
         public void Inject_PerformContext_In_JobType_Method() {
-            using var testObserver =MockHangfire().Test();
             using var jobs = TestJob.Jobs.FirstAsync().Test();
             using var application = JobSchedulerModule().Application.ToBlazor();
             
-            var job = application.CommitNewJob(typeof(TestJob),nameof(TestJob.TestJobId));
+            var job = application.CommitNewJob(typeof(TestJob),nameof(TestJob.TestJobId)).Trigger();
             
             var testJob = jobs.AwaitDone(Timeout).Items.First();
 
@@ -95,16 +81,16 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
         
         
         [Test][Apartment(ApartmentState.STA)]
-        [XpandTest()][Order(300)]
+        [XpandTest()]
+        [Order(300)]
         public void Schedule_Successful_job() {
-            using var mockObserver =MockHangfire().Test();
             using var application = JobSchedulerModule().Application.ToBlazor();
             using var testObserver = WorkerState.Succeeded.Executed().Test();
             
-            application.CommitNewJob();
-            
+            application.CommitNewJob().Trigger();
             
             var jobState = testObserver.AwaitDone(Timeout).Items.First();
+            
             var objectSpace = application.CreateObjectSpace();
             jobState=objectSpace.GetObjectByKey<JobState>(jobState.Oid);
             var jobWorker = jobState.JobWorker;
@@ -115,74 +101,29 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
             jobWorker.Executions.Count(state => state.State==WorkerState.Succeeded).ShouldBe(1);
             
         }
-        
-        [Test][Apartment(ApartmentState.STA)]
-        [XpandTest()][Order(400)]
-        public void ChainedJob() {
-            using var mockObserver =MockHangfire().Test();
-            using var application = JobSchedulerModule().Application.ToBlazor();
-            using var parentJobObserver = WorkerState.Succeeded.Executed().Test();
-
-            application.CommitNewJob(modify: job => {
-                var chainJob = job.ObjectSpace.CreateObject<BusinessObjects.ChainJob>();
-                chainJob.Job = chainJob.ObjectSpace.GetObject(application.CommitNewJob(typeof(ChainJob),modify:job1 => {
-                    job1.Id = nameof(ChainJob);
-                    job1.CronExpression = job1.ObjectSpace.GetObjectsQuery<CronExpression>()
-                        .First(expression => expression.Name == nameof(Cron.Never));
-                }));
-                job.ChainJobs.Add(chainJob);
-            });
-
-            using var chainJobObserver = WorkerState.Succeeded.Executed().Test();
-            var jobState = parentJobObserver.AwaitDone(Timeout).Items.First();
-
-            chainJobObserver.AwaitDone(Timeout);
-            
-            var objectSpace = application.CreateObjectSpace();
-            jobState=objectSpace.GetObjectByKey<JobState>(jobState.Oid);
-            var jobWorker = jobState.JobWorker;
-            jobWorker.State.ShouldBe(WorkerState.Succeeded);
-        }
-        
-       
 
         [XpandTest()][Test][Order(600)]
-        public async Task Pause_Job() {
-            using var mockObserver =MockHangfire().Test();
+        public void Pause_Job() {
             using var application = JobSchedulerModule().Application.ToBlazor();
-            using var testObserver = WorkerState.Succeeded.Executed().Test();
-            using var jobsObserver = TestJob.Jobs.Test();
-            var job = application.CommitNewJob();
-            jobsObserver.AwaitDone(Timeout);
+            using var jobsObserver = TestJob.Jobs.FirstAsync(job => job.Context.JobId()==JobSchedulerTestExtensions.ScheduledJobId).Timeout(Timeout).Test();
+            application.CommitNewJob().Pause().Trigger();
             
-            var jobsObserver2 = TestJob.Jobs.FirstAsync().Timeout(Timeout).ReplayConnect();
-            job.Pause();
-            job.Trigger();
-
-            await Should.ThrowAsync<TimeoutException>(() => jobsObserver2.ToTask());
+            jobsObserver.AwaitDone(Timeout).ItemCount.ShouldBe(0);
         }
 
         [XpandTest()][Test][Order(700)]
         public void Resume_Job() {
-            using var mockObserver =MockHangfire().Test();
             using var application = JobSchedulerModule().Application.ToBlazor();
-            
             using var jobsCommitObserver = TestJob.Jobs.FirstAsync().Test();
-            var job = application.CommitNewJob();
-            jobsCommitObserver.AwaitDone(Timeout);
-            job.Pause();
-            using var finishSuccess = WorkerState.Succeeded.Executed().FirstAsync().Test();
             
-            job.Resume();
-
-            finishSuccess.AwaitDone(Timeout);
-
-            jobsCommitObserver.ItemCount.ShouldBe(1);
+            application.CommitNewJob().Pause().Resume().Trigger();
+            
+            jobsCommitObserver.AwaitDone(Timeout).ItemCount.ShouldBe(1);
+            
         }
 
         [XpandTest()][Test][Order(800)]
         public void JobPause_Action() {
-            using var mockObserver =MockHangfire().Test();
             using var application = JobSchedulerModule().Application.ToBlazor();
 
             var job = application.CommitNewJob();
@@ -204,7 +145,6 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
 
         [XpandTest()][Test][Order(900)]
         public void JobResume_Action() {
-            using var mockObserver =MockHangfire().Test();
             using var application = JobSchedulerModule().Application.ToBlazor();
 
             var job = application.CommitNewJob();
@@ -230,10 +170,9 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
         [TestCase(nameof(TestJob.FailMethodRetry),2)]
         [XpandTest()][Order(1000)]
         public async Task Schedule_Failed_Recurrent_job(string methodName,int executions) {
-            using var mockObserver =MockHangfire().Test();
             using var application = JobSchedulerModule().Application.ToBlazor();
             var testObserver = JobSchedulerService.JobState.FirstAsync(state => state.State==WorkerState.Failed).ReplayConnect();
-            application.CommitNewJob(methodName:methodName);
+            application.CommitNewJob(methodName:methodName).Trigger();
 
             var observer = await testObserver;
             
