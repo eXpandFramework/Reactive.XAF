@@ -22,11 +22,11 @@ namespace Xpand.XAF.Modules.Reactive.Tests {
         [TestCase(ViewType.ListView, false)]
         [XpandTest(IgnoredXAFMinorVersions = "20.1")]
         [Apartment(ApartmentState.STA)]
-        [TestCase(ViewType.DetailView,true)]
+        [TestCase(ViewType.DetailView,true)][Order(0)]
         public async Task ActivateForCurrentUser(ViewType viewType, bool active) {
             using var application = Platform.Win.NewApplication<ReactiveModule>();
             using var testObserver = application.WhenApplicationModulesManager()
-	            .SelectMany(manager => manager.RegisterViewSimpleAction("test"))
+	            .SelectMany(manager => manager.RegisterViewSimpleAction(nameof(ActivateForCurrentUser)))
 	            .ActivateInUserDetails()
 	            .Test();
             var user = application.SetupSecurity();
@@ -46,16 +46,34 @@ namespace Xpand.XAF.Modules.Reactive.Tests {
         }
 
         public class ActionExecuteFinishedTests:ReactiveCommonTest {
-            [Test]
+            [TestCase(false,true)]
+            [TestCase(true,false)][Order(100)]
+            public void Do_Not_Emit_ByDefault_When_Custom_Emit(bool parameter,bool data) {
+                using var application = Platform.Win.NewApplication<ReactiveModule>();
+                using var testObserver = application.WhenApplicationModulesManager()
+                    .SelectMany(manager => manager.RegisterViewSimpleAction(nameof(Do_Not_Emit_ByDefault_When_Custom_Emit),action => action.CustomizeExecutionFinished(data)))
+                    .WhenExecuteFinished(parameter)
+                    .Test();
+                DefaultReactiveModule(application);
+                var window = application.CreateViewWindow();
+                var actionBase = window.Action(nameof(Do_Not_Emit_ByDefault_When_Custom_Emit));
+                window.SetView(application.NewView<ListView>(typeof(R)));
+                
+                actionBase.DoTheExecute();
+                
+                testObserver.ItemCount.ShouldBe(0);
+            }
+
+            [Test][Order(200)]
             public void Emits_When_ExecuteCompleted_by_default() {
                 using var application = Platform.Win.NewApplication<ReactiveModule>();
                 using var testObserver = application.WhenApplicationModulesManager()
-                    .SelectMany(manager => manager.RegisterViewSimpleAction("test"))
+                    .SelectMany(manager => manager.RegisterViewSimpleAction(nameof(Emits_When_ExecuteCompleted_by_default)))
                     .WhenExecuteFinished()
                     .Test();
                 DefaultReactiveModule(application);
                 var window = application.CreateViewWindow();
-                var actionBase = window.Action("test");
+                var actionBase = window.Action(nameof(Emits_When_ExecuteCompleted_by_default));
                 window.SetView(application.NewView<ListView>(typeof(R)));
                 
                 actionBase.DoTheExecute();
@@ -63,35 +81,18 @@ namespace Xpand.XAF.Modules.Reactive.Tests {
                 testObserver.ItemCount.ShouldBe(1);
             }
             
-            [TestCase(false,true)]
-            [TestCase(true,false)]
-            public void Do_Not_Emit_ByDefault_When_Custom_Emit(bool parameter,bool data) {
-                using var application = Platform.Win.NewApplication<ReactiveModule>();
-                using var testObserver = application.WhenApplicationModulesManager()
-                    .SelectMany(manager => manager.RegisterViewSimpleAction("test",action => action.CustomizeExecutionFinished(data)))
-                    .WhenExecuteFinished(parameter)
-                    .Test();
-                DefaultReactiveModule(application);
-                var window = application.CreateViewWindow();
-                var actionBase = window.Action("test");
-                window.SetView(application.NewView<ListView>(typeof(R)));
-                
-                actionBase.DoTheExecute();
-                
-                testObserver.ItemCount.ShouldBe(0);
-            }
             
             [TestCase(false,true)]
-            [TestCase(true,false)]
+            [TestCase(true,false)][Order(300)]
             public void Custom_Emit(bool parameter,bool data) {
                 using var application = Platform.Win.NewApplication<ReactiveModule>();
                 using var testObserver = application.WhenApplicationModulesManager()
-                    .SelectMany(manager => manager.RegisterViewSimpleAction("test",action => action.CustomizeExecutionFinished(data)))
+                    .SelectMany(manager => manager.RegisterViewSimpleAction(nameof(Custom_Emit),action => action.CustomizeExecutionFinished(data)))
                     .WhenExecuteFinished(parameter)
                     .Test();
                 DefaultReactiveModule(application);
                 var window = application.CreateViewWindow();
-                var actionBase = window.Action("test");
+                var actionBase = window.Action(nameof(Custom_Emit));
                 window.SetView(application.NewView<ListView>(typeof(R)));
                 
                 actionBase.DoTheExecute();
@@ -100,9 +101,6 @@ namespace Xpand.XAF.Modules.Reactive.Tests {
                 testObserver.ItemCount.ShouldBe(1);
             }
 
-        }
-        public void When_Action_Execute_Finished() {
-            
         }
 
     }
