@@ -7,7 +7,7 @@ param(
 )
 $ErrorActionPreference = "stop"
 & $Root\go.ps1 -InstallModules
-$VerbosePreference="continue"
+# $VerbosePreference="continue"
 Invoke-Script {
     $env:AzureToken = $AzureToken
     $env:AzOrganization = "eXpandDevOps"
@@ -24,7 +24,7 @@ Invoke-Script {
         }
         "failedBuilds=$failedBuilds"
         "$failedBuilds".Length
-        if (!("$failedBuilds".Trim())) {
+        if (!$failedBuilds) {
             $parameters = @{
                 CustomVersion     = $env:CustomVersion
                 DxPipelineBuildId = $DxPipelineBuildId
