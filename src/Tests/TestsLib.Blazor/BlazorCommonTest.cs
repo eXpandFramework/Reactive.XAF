@@ -46,15 +46,12 @@ namespace Xpand.TestsLib.Blazor {
             var containerInitializer = WebHost.Services.GetRequiredService<IValueManagerStorageContainerInitializer>();
             containerInitializer.Initialize();
             var newBlazorApplication = WebHost.Services.GetService<IXafApplicationProvider>()?.GetApplication();
-            // if (newBlazorApplication != null) {
-                // newBlazorApplication.ServiceProvider = WebHost.Services;
-            // }
 
-            // newBlazorApplication.WhenApplicationModulesManager().FirstAsync()
-	           //  .SelectMany(manager => manager.WhenGeneratingModelNodes<IModelViews>().FirstAsync()
-		          //   .SelectMany().OfType<IModelListView>().Where(view => view.EditorType==typeof(GridListEditor))
-		          //   .Do(view => view.DataAccessMode = CollectionSourceDataAccessMode.Client))
-	           //  .Subscribe();
+            newBlazorApplication.WhenApplicationModulesManager().FirstAsync()
+	            .SelectMany(manager => manager.WhenGeneratingModelNodes<IModelViews>().FirstAsync()
+		            .SelectMany().OfType<IModelListView>().Where(view => view.EditorType==typeof(GridListEditor))
+		            .Do(view => view.DataAccessMode = CollectionSourceDataAccessMode.Client))
+	            .Subscribe();
             return newBlazorApplication;
         }
 

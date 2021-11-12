@@ -50,10 +50,9 @@ namespace Xpand.TestsLib.Blazor {
 	        services.AddSingleton<XpoDataStoreProviderAccessor>();
 	        // services.AddScoped<CircuitHandler, CircuitHandlerProxy>();
 	        services.AddXaf(Configuration,() => Platform.Blazor.NewApplication<TModule>().ToBlazor());
-	        // services.AddXafOffice();
 	        services.AddXafSecurity(options => {
 			        options.RoleType = typeof(PermissionPolicyRole);
-			        options.UserType = typeof(PermissionPolicyUser);
+			        options.UserType = UserType();
 			        options.Events.OnSecurityStrategyCreated = securityStrategy => ((SecurityStrategy)securityStrategy).RegisterXPOAdapterProviders();
 			        options.SupportNavigationPermissionsForTypes = false;
 		        }).AddExternalAuthentication<HttpContextPrincipalProvider>()
@@ -67,6 +66,8 @@ namespace Xpand.TestsLib.Blazor {
 		        options.LoginPath = "/LoginPage";
 	        });
         }
+
+        protected virtual Type UserType() => typeof(PermissionPolicyUser);
     }
     class MyClass:IExceptionHandlerService {
 	    public void HandleException(Exception exception) {

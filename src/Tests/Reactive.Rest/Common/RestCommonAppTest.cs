@@ -17,7 +17,6 @@ namespace Xpand.XAF.Modules.Reactive.Rest.Tests.Common {
         protected override Type StartupType => typeof(RestStartup);
 
         protected RestModule BlazorModule(params ModuleBase[] modules) {
-            Application.SetupSecurity(userType:typeof(RestUser));
             var module = Application.AddModule<RestModule>(GetType().CollectExportedTypesFromAssembly().ToArray());
             Application.Logon();
             using var objectSpace = Application.CreateObjectSpace();
