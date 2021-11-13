@@ -46,9 +46,14 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
                 OnChanged(nameof(JobMethod));
             }
         }
-        
+        [Persistent]
+        bool _isPaused;
         [InvisibleInAllViews]
-        public bool IsPaused => JobStorage.Current.GetConnection().GetAllItemsFromSet(JobSchedulerService.PausedJobsSetName).Contains(Id);
+        [PersistentAlias(nameof(_isPaused))]
+        public bool IsPaused {
+            get => _isPaused;
+            internal set => SetPropertyValue(nameof(IsPaused), ref _isPaused, value);
+        }
 
         ObjectString _jobMethod;
         [ValueConverter(typeof(ObjectStringValueConverter))]

@@ -53,7 +53,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
         [AutomaticRetry(Attempts = 0)][JobProvider]
         public void FailMethodNoRetry() => throw new NotImplementedException();
 
-        [AutomaticRetry(Attempts = 1,DelaysInSeconds = new[] {1,1})][JobProvider]
+        [AutomaticRetry(Attempts = 1,DelaysInSeconds = new[] {1})][JobProvider]
         public void FailMethodRetry() => throw new NotImplementedException();
 
         [JobProvider]
@@ -62,6 +62,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests {
         [JobProvider]
         public void TestJobId(PerformContext context) {
             Context = context;
+            
             Jobs.OnNext(this);
         }
     }

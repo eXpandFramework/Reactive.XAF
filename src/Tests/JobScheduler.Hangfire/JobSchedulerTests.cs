@@ -2,13 +2,10 @@
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using NUnit.Framework;
-using NUnit.Framework.Internal;
 using Shouldly;
 using Xpand.Extensions.Blazor;
-using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.Common;
@@ -105,16 +102,17 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
         [XpandTest()][Test][Order(600)]
         public void Pause_Job() {
             using var application = JobSchedulerModule().Application.ToBlazor();
-            using var jobsObserver = TestJob.Jobs.FirstAsync(job => job.Context.JobId()==JobSchedulerTestExtensions.ScheduledJobId).Timeout(Timeout).Test();
+            using var jobsObserver = TestJob.Jobs.Timeout(Timeout).FirstAsync().Test();
             application.CommitNewJob().Pause().Trigger();
-            
-            jobsObserver.AwaitDone(Timeout).ItemCount.ShouldBe(0);
+
+            var itemCount = jobsObserver.AwaitDone(Timeout).ItemCount;
+            itemCount.ShouldBe(0);
         }
 
         [XpandTest()][Test][Order(700)]
         public void Resume_Job() {
             using var application = JobSchedulerModule().Application.ToBlazor();
-            using var jobsCommitObserver = TestJob.Jobs.FirstAsync().Test();
+            using var jobsCommitObserver = TestJob.Jobs.Timeout(Timeout).FirstAsync().Test();
             
             application.CommitNewJob().Pause().Resume().Trigger();
             
@@ -166,18 +164,19 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
             viewWindow.Action<JobSchedulerModule>().PauseJob().Active.ResultValue.ShouldBeTrue();
         }
 
-        // [TestCase(nameof(TestJob.FailMethodNoRetry),1)]
+        [TestCase(nameof(TestJob.FailMethodNoRetry),1)]
         [TestCase(nameof(TestJob.FailMethodRetry),2)]
         [XpandTest()][Order(1000)]
-        public async Task Schedule_Failed_Recurrent_job(string methodName,int executions) {
+        public void Schedule_Failed_Recurrent_job(string methodName,int executions) {
             using var application = JobSchedulerModule().Application.ToBlazor();
-            var testObserver = JobSchedulerService.JobState.FirstAsync(state => state.State==WorkerState.Failed).ReplayConnect();
+            var testObserver = JobSchedulerService.JobState.FirstAsync(state => state.State==WorkerState.Failed).Test();
             application.CommitNewJob(methodName:methodName).Trigger();
 
-            var observer = await testObserver;
+            using var observer = testObserver.AwaitDone(Timeout*3);
+            observer.ItemCount.ShouldBe(1);
             
             var objectSpace = application.CreateObjectSpace();
-            var jobState = objectSpace.GetObject(observer);
+            var jobState = objectSpace.GetObject(observer.Items.Last());
             jobState.JobWorker.ExecutionsCount.ShouldBe(executions);
         }
     }

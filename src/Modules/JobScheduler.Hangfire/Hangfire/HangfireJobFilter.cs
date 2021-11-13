@@ -14,23 +14,25 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire {
             var recurringJobId = context.Connection.RecurringJobId(context.BackgroundJob.Id);
             if (!string.IsNullOrEmpty(recurringJobId)) {
 	            using var serviceScope = _provider.CreateScope();
-                var serviceProvider = serviceScope.ServiceProvider;
-                ApplyJobState(context, serviceProvider);
+                ApplyJobState(context, serviceScope.ServiceProvider);
             }
         }
 
         protected virtual void ApplyJobState(ApplyStateContext context, IServiceProvider serviceProvider) 
 	        => serviceProvider.RunWithStorage(context.ApplyJobState);
+        
+        protected virtual void ApplyPaused(PerformingContext context, IServiceProvider serviceProvider) 
+	        => serviceProvider.RunWithStorage(context.ApplyPaused);
 
         public void OnStateElection(ElectStateContext context) {
         }
         
         public virtual void OnStateUnapplied(ApplyStateContext context, IWriteOnlyTransaction transaction) { }
 
-        public void OnPerforming(PerformingContext performingContext) 
-            => performingContext.Canceled=performingContext.Connection
-                .GetAllItemsFromSet(JobSchedulerService.PausedJobsSetName)
-                .Contains(performingContext.Connection.RecurringJobId(performingContext.BackgroundJob.Id));
+        public void OnPerforming(PerformingContext performingContext) {
+            using var serviceScope = _provider.CreateScope();
+            ApplyPaused(performingContext, serviceScope.ServiceProvider);
+        }
 
         public void OnPerformed(PerformedContext filterContext) {
             

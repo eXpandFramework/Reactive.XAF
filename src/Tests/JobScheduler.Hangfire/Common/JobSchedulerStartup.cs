@@ -1,6 +1,8 @@
 ﻿using System;
+using DevExpress.ExpressApp.Blazor;
 using DevExpress.ExpressApp.Blazor.AmbientContext;
 using DevExpress.ExpressApp.Blazor.Services;
+using Hangfire.Server;
 using Hangfire.States;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -25,14 +27,14 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
     class HangfireJobFilter:Hangfire.HangfireJobFilter {
 	    public HangfireJobFilter(IServiceProvider provider) : base(provider) { }
 
-	    protected override void ApplyJobState(ApplyStateContext context, IServiceProvider serviceProvider) {
-		    ValueManagerContext.RunIsolated(() => {
-                // serviceProvider.GetRequiredService<IValueManagerStorageContainerInitializer>().Initialize();
-                // serviceProvider.RunWithStorage(blazorApplication => context.ApplyJobState(blazorApplication));
-                var blazorApplication = serviceProvider.GetRequiredService<IXafApplicationProvider>().GetApplication();
-                context.ApplyJobState(blazorApplication);
-            });
-	    }
+	    protected override void ApplyJobState(ApplyStateContext context, IServiceProvider serviceProvider) 
+            => ValueManagerContext.RunIsolated(() => context.ApplyJobState(GetApplication(serviceProvider)));
+
+        private static BlazorApplication GetApplication(IServiceProvider serviceProvider) 
+            => serviceProvider.GetRequiredService<IXafApplicationProvider>().GetApplication();
+
+        protected override void ApplyPaused(PerformingContext context, IServiceProvider serviceProvider) 
+            => ValueManagerContext.RunIsolated(() => context.ApplyPaused(GetApplication(serviceProvider)));
     }
 
 }

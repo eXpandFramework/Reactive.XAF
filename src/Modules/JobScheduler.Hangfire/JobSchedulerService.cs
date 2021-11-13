@@ -33,7 +33,6 @@ using Xpand.Extensions.TypeExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
-using Xpand.Extensions.XAF.Xpo.BaseObjects;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire;
 using Xpand.XAF.Modules.Reactive;
@@ -110,6 +109,13 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
         private static JobDetailsDto JobDetails(this BackgroundJob job) 
             => JobStorage.Current.GetMonitoringApi().JobDetails(job.Id);
 
+        public static void ApplyPaused(this PerformingContext context, BlazorApplication application) {
+            using var objectSpace = application.CreateNonSecuredObjectSpace();
+            var recurringJobId = context.Connection.RecurringJobId(context.BackgroundJob.Id);
+            var scheduledJob = objectSpace.GetObjectsQuery<Job>().FirstOrDefault(job1 => job1.Id==recurringJobId);
+            context.Canceled= scheduledJob == null || scheduledJob.IsPaused;
+        }
+        
         public static void ApplyJobState(this ApplyStateContext context,BlazorApplication application) {
             using var objectSpace = application.CreateNonSecuredObjectSpace();
             var recurringJobId = context.Connection.RecurringJobId(context.BackgroundJob.Id);
@@ -126,31 +132,18 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
                 worker.Executions.Add(jobState);
                 objectSpace.CommitChanges();
                 JobStateSubject.OnNext(jobState);
-                if (worker.State == WorkerState.Succeeded) {
-                    if (worker.Job.ChainJobs.Any()) {
-                        // JobStorage.Current.GetMonitoringApi().JobDetails(jobState.JobWorker.Id);
-                    }
-                    // if (context.BackgroundJob.ReturnedItems<bool>().All(b => b)) {
-                    //     // worker.Job.ChainJobs.AsParallel().ForEach(chainJob => chainJob.Job.Trigger());
-                    // }
-                }
+                
             }
         }
 
         public static Job Pause(this Job job) {
-            using var transaction = JobStorage.Current.GetConnection().CreateWriteTransaction();
-            transaction.AddToSet(PausedJobsSetName, job.Id);
-            transaction.Commit();
-            job.OnChanged(nameof(Job.IsPaused));
+            job.IsPaused = true;
             job.ObjectSpace.CommitChanges();
             return job;
         }
 
         public static Job Resume(this Job job) {
-            using var transaction = JobStorage.Current.GetConnection().CreateWriteTransaction();
-            transaction.RemoveFromSet(PausedJobsSetName, job.Id);
-            transaction.Commit();
-            job.OnChanged(nameof(Job.IsPaused));
+            job.IsPaused = false;
             job.ObjectSpace.CommitChanges();
             return job;
         }
