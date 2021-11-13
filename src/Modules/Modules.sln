@@ -229,11 +229,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Email", "
 		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.JobScheduler.Notification.Email", "JobScheduler.Notification.Email\Xpand.XAF.Modules.JobScheduler.Notification.Email.csproj", "{E5A19DE1-6E8A-421E-830D-8CCD983C6C28}"
-	ProjectSection(ProjectDependencies) = postProject
-		{1FF72C42-53F4-469B-AF00-D69238E27A26} = {1FF72C42-53F4-469B-AF00-D69238E27A26}
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -469,12 +464,6 @@ Global
 		{E25CA9A0-F88E-48AC-B6B9-CE5F9218A7E5}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{E25CA9A0-F88E-48AC-B6B9-CE5F9218A7E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E25CA9A0-F88E-48AC-B6B9-CE5F9218A7E5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E5A19DE1-6E8A-421E-830D-8CCD983C6C28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E5A19DE1-6E8A-421E-830D-8CCD983C6C28}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E5A19DE1-6E8A-421E-830D-8CCD983C6C28}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
-		{E5A19DE1-6E8A-421E-830D-8CCD983C6C28}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
-		{E5A19DE1-6E8A-421E-830D-8CCD983C6C28}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E5A19DE1-6E8A-421E-830D-8CCD983C6C28}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -520,7 +509,6 @@ Global
 		{1FF72C42-53F4-469B-AF00-D69238E27A26} = {B08D6FF9-EB01-42E5-B0F4-DE738CB56C0A}
 		{ED44EA7B-A16E-4C8B-B8DA-F5DE64771167} = {C49DF3D6-B513-4C06-ACD6-4BA2E2FF02C8}
 		{E25CA9A0-F88E-48AC-B6B9-CE5F9218A7E5} = {C49DF3D6-B513-4C06-ACD6-4BA2E2FF02C8}
-		{E5A19DE1-6E8A-421E-830D-8CCD983C6C28} = {B08D6FF9-EB01-42E5-B0F4-DE738CB56C0A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ADFDF91F-E839-4378-9136-C917729594E2}

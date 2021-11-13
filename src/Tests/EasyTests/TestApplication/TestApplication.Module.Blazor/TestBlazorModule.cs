@@ -2,7 +2,6 @@
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model.Core;
 using TestApplication.Module.Blazor.JobScheduler;
-using Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Email;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace TestApplication.Module.Blazor{
@@ -16,7 +15,6 @@ namespace TestApplication.Module.Blazor{
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.Office.Blazor.OfficeBlazorModule));
             RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.JobScheduler.Hangfire.JobSchedulerModule));
             RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.JobSchedulerNotificationModule));
-            // RequiredModuleTypes.Add(typeof(EmailNotificationModule));
             RequiredModuleTypes.Add(typeof(TestApplicationModule));
         }
 
@@ -28,7 +26,6 @@ namespace TestApplication.Module.Blazor{
             base.Setup(moduleManager);
             moduleManager.ConnectJobScheduler()
                 .Merge(moduleManager.ConnectJobSchedulerNotification())
-                .Merge(moduleManager.ConnectEmailNotification())
                 .Subscribe(this);
         }
     }
