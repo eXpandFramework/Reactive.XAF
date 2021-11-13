@@ -59,6 +59,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Modules.Reactive"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.Extensions.XAF", "..\..\Extensions\Xpand.Extensions.XAF\Xpand.Extensions.XAF.csproj", "{D3F42F5B-E612-4627-9F5A-E600171956C9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.XAF.Modules.SequenceGenerator", "..\..\Modules\SequenceGenerator\Xpand.XAF.Modules.SequenceGenerator.csproj", "{3F218C0E-7CB0-4AB6-B5C2-F9FC8424FEB3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -166,6 +168,12 @@ Global
 		{D3F42F5B-E612-4627-9F5A-E600171956C9}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{D3F42F5B-E612-4627-9F5A-E600171956C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D3F42F5B-E612-4627-9F5A-E600171956C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F218C0E-7CB0-4AB6-B5C2-F9FC8424FEB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F218C0E-7CB0-4AB6-B5C2-F9FC8424FEB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F218C0E-7CB0-4AB6-B5C2-F9FC8424FEB3}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F218C0E-7CB0-4AB6-B5C2-F9FC8424FEB3}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
+		{3F218C0E-7CB0-4AB6-B5C2-F9FC8424FEB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F218C0E-7CB0-4AB6-B5C2-F9FC8424FEB3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
