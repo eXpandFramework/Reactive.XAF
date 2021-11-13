@@ -22,16 +22,16 @@ Follow the next steps:
 2. Add a model assembly `job source` pointing to the assembly containing your Job types.<br><br>
     ![image](https://user-images.githubusercontent.com/159464/103508193-4b7dcb80-4e69-11eb-82be-7fa109720368.png)
 3. Mark any type with a default constructor with the `Xpand.XAF.Modules.JobScheduler.Hangfire.JobProviderAttribute`. 
-   ```cs
+   ```c#
     [JobProvider]
     public class Job {
     }
    ```
 4. All public methods without parameters can be scheduled using the UI or code.
-   ```cs
+   ```c#
     [JobProvider]
     public class Import {
-        // [JobProvider("Customize-Name")]
+        [JobProvider("Customize-Name")]
         public void DailyOrders() {
             throw new NotImplementedException();
         }
@@ -54,7 +54,7 @@ Follow the next steps:
    ```
    Note that the methods are scheduled in the background therefore the `HttpContext` is not available.
 5. Use DI to inject object instances in the constructor for e.g. to inject an `IServiceProvider` and later use it to get a BlazorApplication use the next snippet. Note that depending on your needs a NonSecuredObjectSpace should be created if your did not explicitly authenticate. 
-   ```cs
+   ```c#
     [JobProvider]
     public class Import {
         public IServiceProvider Provider { get; }
@@ -65,7 +65,7 @@ Follow the next steps:
 
         [JobProvider("Customize-Name")]
         public async Task DailyOrders() {
-            await ServiceProvider.WhenApplication(application => Observable.Using(() => application.CreateNonSecuredObjectSpace(true,true), objectSpace 
+            await ServiceProvider.RunWithStorageAsync(application => Observable.Using(() => application.CreateNonSecuredObjectSpace(true,true), objectSpace 
                 => Observable.Range(0, 10).Do(i => {
                         var order = objectSpace.CreateObject<Order>();
                         order.OrderID = i;
@@ -75,7 +75,7 @@ Follow the next steps:
    ```
    Note that the BlazorApplication is not authenticated and the default constructor must exist.
 6. Use a Job descendant to pass job specific parameters.
-   ```cs
+   ```c#
     public class CustomJob:Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects.Job {
         public CustomJob(Session session) : base(session) { }
         int _ordersCount;
@@ -90,7 +90,7 @@ Follow the next steps:
     [JobProvider] 
     public async Task ImportOrders(PerformContext context) {
         var jobId = context.JobId();
-        await ServiceProvider.WhenApplication(application => Observable.Using(() => application.CreateNonSecuredObjectSpace(true,true),
+        await ServiceProvider.RunWithStorageAsync(application => Observable.Using(() => application.CreateNonSecuredObjectSpace(true,true),
             objectSpace => { var ordersCount=objectSpace.GetObjectsQuery<CustomJob>()
                         .First(job1 => job1.Id == jobId).OrdersCount
                     for (int i = 0; i < ordersCount; i++) {
@@ -109,7 +109,7 @@ Follow the next steps:
     });
    ```
 
-In the screencast you can see `how to declare, schedule, pause, resume and get more details` for a Job.
+In the screencast you can see `how to declare, schedule, pause, resume and get more details` for a Job. Consult the previous code snippets as the video record uses outdated api.
 
 <twitter tags="#Hangfire #Blazor">
 
@@ -121,6 +121,31 @@ In the screencast you can see `how to declare, schedule, pause, resume and get m
 [![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/0LJ2bM1CfMg)
 
 ---
+
+### ChainJobs
+
+I the next screencast:
+
+1. We create a new `ExecuteActionJob` that will schedule the `Email` action for a Product.
+2. We create a new `ObjectStateNotificationJob` for new Products.
+3. We add a new `ChainedJob` to run te Email ExecuteActionJob after a successful with new Products execution of the ObjectStateNotification job.
+4. We check the recipient email to verify that emails send for the new Products found.
+
+<twitter tags="#Hangfire #Blazor #ChainedJob">
+
+[![Xpand XAF Modules JobScheduler Hangfire ChainJobs](https://user-images.githubusercontent.com/159464/140794868-3cf822b7-1542-47b6-b174-245cdc2524dc.gif)
+](https://youtu.be/AV0lCSxETxU)
+</twitter>
+
+[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/3KRhNgOAFnQ)
+
+All Chained jobs will run in parallel after successful execution of the parent job as in the next snippet. 
+
+```c#
+[JobProvider]
+public async Task<bool> Execute(PerformContext context)
+    => await Task.FromResult(true);
+```
 
 ### ExecuteActionJob
 
@@ -134,7 +159,11 @@ In the screencast you can see how we use the `Xpand.XAF.Modules.JobScheduler.Han
 ](https://youtu.be/3KRhNgOAFnQ)
 </twitter>
 
-To configure the ExecuteActionJob `Action` lookup list use the Application/ReactiveModules/JobScheduler/Actions model node.
+[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/3KRhNgOAFnQ)
+
+> To configure the ExecuteActionJob `Action` lookup list use the Application/ReactiveModules/JobScheduler/Actions model node.
+
+> If you want to run background code with your action you have to configure the Scheduler to keep the Scope alive. For this call `action.CustomizeExecutionFinished()` when you create the action and `action.ExecutionFinished()` after your background job finishes (e.g. EmailModule/EmailService).
 
 ### Security
 
@@ -142,7 +171,7 @@ Hangfire Dashboard access can be configured using the XAF Security system as sho
 
 <twitter tags="#Hangfire #Blazor #Security #Dashboard">
 
-[![Hangfire Security Dashboard](https://user-images.githubusercontent.com/159464/109437432-7893c800-7a2d-11eb-967d-da3c6f90dabf.gif))
+[![Hangfire Security Dashboard](https://user-images.githubusercontent.com/159464/109437432-7893c800-7a2d-11eb-967d-da3c6f90dabf.gif)
 ](https://youtu.be/Ep_DqomR6D8)
 
 </twitter>

@@ -26,7 +26,9 @@ To subscribe to the above `ObjectStateNotification` events use a snippet like th
 ```c#
 Application.WhenNotification<Product>()
     .Do(t =>  //e.g. create a Task)
+    .Finally(() => t.worker.NotifyFinish())//optional line notifies the scheduler to trigger the linked ChainJobs.
     .Subscribe();
+
 
 ```
 
