@@ -202,10 +202,13 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
             => source.Where(space => {
                 if (space.UnitOfWork().DataLayer is BaseDataLayer dataLayer) {
                     var dataStore = dataLayer.ConnectionProvider;
+                    bool supported = false;
                     if (dataStore is DataStorePool dataStorePool) {
                         dataStore = dataStorePool.AcquireReadProvider();
+                        supported = SupportedDataStoreTypes.Any(type => type.IsInstanceOfType(dataStore));
+                        dataStorePool.ReleaseReadProvider(dataStore);
                     }
-                    return SupportedDataStoreTypes.Any(type => type.IsInstanceOfType(dataStore));
+                    return supported;
                 }
                 return false;
             });
