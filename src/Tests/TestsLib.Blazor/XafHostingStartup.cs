@@ -62,9 +62,9 @@ namespace Xpand.TestsLib.Blazor {
 	        
 	        services.AddSingleton<IXafApplicationProvider, ApplicationProvider>()
 		        .AddScoped<IExceptionHandlerService,MyClass>();
-	        services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options => {
-		        options.LoginPath = "/LoginPage";
-	        });
+	        // services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options => {
+		       //  options.LoginPath = "/LoginPage";
+	        // });
         }
 
         protected virtual Type UserType() => typeof(PermissionPolicyUser);

@@ -10,12 +10,13 @@ using Shouldly;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.NonPersistentObjects;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
+using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.RazorView.Tests.BOModel;
 using Xpand.XAF.Modules.RazorView.Tests.Common;
 
 namespace Xpand.XAF.Modules.RazorView.Tests {
     public class RazorViewTests:CommonAppTest {
-
+        // [XpandTest()]
         [Test][Order(100)]
         public async Task RazorView_From_DataSource() {
             var objectSpace = Application.CreateObjectSpace();
@@ -30,11 +31,11 @@ namespace Xpand.XAF.Modules.RazorView.Tests {
 
             var render = await objectTemplate.Render();
             
-            render.ShouldBe("302010");
-            RemoveObjetcs(objectSpace);
+            render.ShouldBe("102030");
+            RemoveObjects(objectSpace);
         }
 
-        [Test][Order(200)]
+        [Test][Order(200)][XpandTest()]
         public void Render_When_RazorView_DetailView_Shown() {
             var objectSpace = Application.CreateObjectSpace();
             objectSpace.CreateObject<OT>();
@@ -48,9 +49,9 @@ namespace Xpand.XAF.Modules.RazorView.Tests {
             window.SetView(Application.CreateDetailView(objectSpace,objectTemplate));
 
             testObserver.ItemCount.ShouldBe(1);
-            RemoveObjetcs(objectSpace);
+            RemoveObjects(objectSpace);
         }
-        [Test][Order(200)]
+        [Test][Order(200)][XpandTest()]
         public void Customize_Render_For_RazorView_Object() {
             var objectSpace = Application.CreateObjectSpace();
             objectSpace.CreateObject<OT>();
@@ -70,16 +71,16 @@ namespace Xpand.XAF.Modules.RazorView.Tests {
 
             testObserver.ItemCount.ShouldBe(1);
             objectTemplate.Preview.ShouldBe(nameof(Customize_Render_For_RazorView_Object));
-            RemoveObjetcs(objectSpace);
+            RemoveObjects(objectSpace);
         }
 
-        private static void RemoveObjetcs(IObjectSpace objectSpace) {
+        private static void RemoveObjects(IObjectSpace objectSpace) {
             objectSpace.Delete(objectSpace.GetObjectsQuery<OT>().ToArray());
             objectSpace.Delete(objectSpace.GetObjectsQuery<BusinessObjects.RazorView>().ToArray());
             objectSpace.CommitChanges();
         }
 
-        [Test][Order(201)]
+        [Test][Order(201)][XpandTest()]
         public async Task Customize_Render_For_DataSource_Object() {
             var objectSpace = Application.CreateObjectSpace();
             objectSpace.CreateObject<OT>();
@@ -100,7 +101,7 @@ namespace Xpand.XAF.Modules.RazorView.Tests {
             await Observable.While(() => objectTemplate.Preview == null, Unit.Default.ReturnObservable()).Timeout(Timeout);
             testObserver.ItemCount.ShouldBe(1);
             objectTemplate.Preview.ShouldBe(nameof(Customize_Render_For_DataSource_Object));
-            RemoveObjetcs(objectSpace);
+            RemoveObjects(objectSpace);
         }
         
         [Test][Order(300)]
@@ -117,10 +118,10 @@ namespace Xpand.XAF.Modules.RazorView.Tests {
             objectTemplate.Template = $"@Model.{nameof(OT.Order)}";
             
             testObserver.ItemCount.ShouldBe(1);
-            RemoveObjetcs(objectSpace);
+            RemoveObjects(objectSpace);
         }
 
-        [Test][Order(400)]
+        [Test][Order(400)][XpandTest()]
         public void WhenError() {
             var objectSpace = Application.CreateObjectSpace();
             objectSpace.CreateObject<OT>();
@@ -134,7 +135,7 @@ namespace Xpand.XAF.Modules.RazorView.Tests {
             window.SetView(Application.CreateDetailView(objectSpace,objectTemplate));
             
             objectTemplate.Error.ShouldNotBeNull();
-            RemoveObjetcs(objectSpace);
+            RemoveObjects(objectSpace);
 
         }
 

@@ -16,7 +16,7 @@ namespace Xpand.TestsLib.Blazor {
             base.Cleanup();
             Application?.Dispose();
             base.Dispose();
-            CleanBlazorEnviroment();
+            CleanBlazorEnvironment();
         }
 
         [OneTimeSetUp]

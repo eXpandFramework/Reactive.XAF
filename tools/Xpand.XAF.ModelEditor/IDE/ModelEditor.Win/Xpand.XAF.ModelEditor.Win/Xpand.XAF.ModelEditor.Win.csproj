@@ -23,7 +23,7 @@
     <EmbeddedResource Include="Images\Logo.svg" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.212.0.5" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.212.1.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Xpand.XAF.ModelEditor.Module.Win\Xpand.XAF.ModelEditor.Module.Win.csproj">

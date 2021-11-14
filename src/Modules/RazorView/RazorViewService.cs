@@ -41,7 +41,7 @@ namespace Xpand.XAF.Modules.RazorView{
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager)
             => manager.WhenApplication(application => application.WhenSetupComplete()
                     .SelectMany(_ => application.RenderPreview())).ToUnit()
-                .Merge(ConfigureRichEditFormat(manager));
+                .Merge(manager.ConfigureRichEditFormat());
 
         private static IObservable<Unit> ConfigureRichEditFormat(this ApplicationModulesManager manager) 
             => manager.WhenGeneratingModelNodes<IModelBOModel>()

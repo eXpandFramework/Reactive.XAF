@@ -26,10 +26,10 @@ namespace Xpand.TestsLib.Blazor {
         }
         public override void Dispose() {
             base.Dispose();
-            CleanBlazorEnviroment();
+            CleanBlazorEnvironment();
         }
 
-        protected void CleanBlazorEnviroment() {
+        protected void CleanBlazorEnvironment() {
             WebHost?.Dispose();
             typeof(ValueManagerContext).Field("storageHolder", Flags.StaticPrivate).SetValue(null,
                 typeof(AsyncLocal<>).MakeGenericType(AppDomain.CurrentDomain.GetAssemblyType(
