@@ -41,7 +41,7 @@ namespace Xpand.XAF.Modules.RazorView{
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager)
             => manager.WhenApplication(application => application.WhenSetupComplete()
                     .SelectMany(_ => application.RenderPreview())).ToUnit()
-                .Merge(manager.ConfigureRichEditFormat());
+                .Merge(ConfigureRichEditFormat(manager));
 
         private static IObservable<Unit> ConfigureRichEditFormat(this ApplicationModulesManager manager) 
             => manager.WhenGeneratingModelNodes<IModelBOModel>()
@@ -106,21 +106,22 @@ namespace Xpand.XAF.Modules.RazorView{
                 if (!args.Handled) {
                     var engine = razorView.NewRazorEngine();
                     razorView.Error = null;
-                    return await razorView.ObjectSpace.GetObjects(razorView.ModelType.Type,
-                            CriteriaOperator.Parse(razorView.ModelCriteria))
-                        .Cast<object>().ToNowObservable()
-                        .SelectMany(o => {
-                            var eventArgs = new GenericEventArgs<(RazorLightEngine engine,BusinessObjects.RazorView razorView, object instance, IObservable<string>
-                                    renderedView)>((engine,razorView, o, Observable.Empty<string>()));
-                            CustomObjectRenderingSubject.OnNext(eventArgs);
-                            return eventArgs.Handled ? eventArgs.Instance.renderedView : engine.CompileRenderAsync(razorView.Oid.ToString(), o).ToObservable();
-                        })
-                        .Aggregate((b4, curr) => b4.JoinString("",curr))
-                        .TraceObjectTemplate()
-                        .Catch<string,Exception>(exception => {
-                            razorView.Error = exception.Message;
-                            return Observable.Never<string>();
-                        });
+                    var @catch = await razorView.ObjectSpace.GetObjects(razorView.ModelType.Type,
+		                    CriteriaOperator.Parse(razorView.ModelCriteria))
+	                    .Cast<object>().ToNowObservable()
+	                    .SelectMany(o => {
+		                    var eventArgs = new GenericEventArgs<(RazorLightEngine engine,BusinessObjects.RazorView razorView, object instance, IObservable<string>
+			                    renderedView)>((engine,razorView, o, Observable.Empty<string>()));
+		                    CustomObjectRenderingSubject.OnNext(eventArgs);
+		                    return eventArgs.Handled ? eventArgs.Instance.renderedView : engine.CompileRenderAsync(razorView.Oid.ToString(), o).ToObservable();
+	                    })
+	                    .Aggregate((b4, curr) => b4.JoinString("",curr))
+	                    .TraceObjectTemplate()
+	                    .Catch<string,Exception>(exception => {
+		                    razorView.Error = exception.Message;
+		                    return Observable.Never<string>();
+	                    });
+                    return @catch;
                 }
                 return args.Instance.renderedView;
             }

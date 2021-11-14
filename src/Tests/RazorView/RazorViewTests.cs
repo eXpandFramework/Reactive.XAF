@@ -31,7 +31,7 @@ namespace Xpand.XAF.Modules.RazorView.Tests {
 
             var render = await objectTemplate.Render();
             
-            render.ShouldBe("102030");
+            render.ShouldSatisfyAllConditions(() => render.ShouldContain("10"),() => render.ShouldContain("20"),() => render.ShouldContain("30"));
             RemoveObjects(objectSpace);
         }
 
@@ -90,7 +90,8 @@ namespace Xpand.XAF.Modules.RazorView.Tests {
             objectSpace.CommitChanges();
             using var testObserver = Application.WhenRazorViewDataSourceObjectRendering()
                 .Do(e => e.Handled=e.SetInstance(t => {
-                    t.renderedView = nameof(Customize_Render_For_DataSource_Object).ReturnObservable().Delay(TimeSpan.FromMilliseconds(200));
+                    t.renderedView = nameof(Customize_Render_For_DataSource_Object).ReturnObservable()
+	                    .Select(s => s).FirstAsync();
                     return t;
                 }))
                 .Test();
@@ -98,7 +99,7 @@ namespace Xpand.XAF.Modules.RazorView.Tests {
             
             window.SetView(Application.CreateDetailView(objectSpace,objectTemplate));
 
-            await Observable.While(() => objectTemplate.Preview == null, Unit.Default.ReturnObservable()).Timeout(Timeout);
+            await Observable.While(() => objectTemplate.Preview == null, Unit.Default.ReturnObservable()).DefaultIfEmpty().Timeout(Timeout);
             testObserver.ItemCount.ShouldBe(1);
             objectTemplate.Preview.ShouldBe(nameof(Customize_Render_For_DataSource_Object));
             RemoveObjects(objectSpace);
