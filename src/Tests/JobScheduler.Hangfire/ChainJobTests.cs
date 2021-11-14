@@ -1,13 +1,11 @@
 ﻿using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using Hangfire;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Blazor;
-using Xpand.Extensions.Reactive.Utility;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common;

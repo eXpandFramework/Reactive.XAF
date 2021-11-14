@@ -20,7 +20,8 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
 
         public override void ConfigureServices(IServiceCollection services) {
             base.ConfigureServices(services);
-            services.AddSingleton<IHangfireJobFilter>(provider => new HangfireJobFilter(provider));
+            services.AddSingleton<IHangfireJobFilter,HangfireJobFilter>();
+            services.AddSingleton<IBackgroundProcessingServer, BackgroundProcessingServer>();
         }
     }
 

@@ -18,8 +18,8 @@ Invoke-Script {
         throw "There are fail tests in $DxPipelineBuildId"
     }
     if ($env:CustomVersion -eq (Get-XAFLatestMinors -Source $DXApiFeed | Select-Object -First 1) -and $Publish) {
-        $failedBuilds = Get-XAFLatestMinors -Source $env:DxFeed|Where-Object{$_ -gt "20.1.0"} | ForEach-Object {
-            $build = Get-AzBuilds -Definition Reactive.XAF-Lab-Tests -Tag "$_" -Top 1 -BranchName $env:Build_SourceBranchName
+        $failedBuilds = Get-XAFLatestMinors -Source $env:DxFeed|Select-Object -First 1|Where-Object{$_ -gt "20.1.0"} | ForEach-Object {
+            $build = Get-AzBuilds -Definition Reactive.XAF-Lab-Tests -Tag "$_" -Top 1 -BranchName master
             Get-AzTestRuns -buildIds $build.Id -FailedOnly
         }
         "failedBuilds=$failedBuilds"
