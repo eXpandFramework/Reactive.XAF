@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28917.182
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{FEFFB6D8-960C-4910-AF46-8957F605E2C2}"
 	ProjectSection(SolutionItems) = preProject
@@ -225,6 +225,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.RazorView
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Email", "Email\Xpand.XAF.Modules.Email.csproj", "{E25CA9A0-F88E-48AC-B6B9-CE5F9218A7E5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.BulkObjectUpdate", "BulkObjectUpdate\Xpand.XAF.Modules.BulkObjectUpdate.csproj", "{2C5EE90C-C2A0-42B0-ABA9-16CC4F58F31C}"
 	ProjectSection(ProjectDependencies) = postProject
 		{58399364-9ACA-429F-A276-7F01E9E61D7D} = {58399364-9ACA-429F-A276-7F01E9E61D7D}
 	EndProjectSection
@@ -464,6 +469,12 @@ Global
 		{E25CA9A0-F88E-48AC-B6B9-CE5F9218A7E5}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{E25CA9A0-F88E-48AC-B6B9-CE5F9218A7E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E25CA9A0-F88E-48AC-B6B9-CE5F9218A7E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C5EE90C-C2A0-42B0-ABA9-16CC4F58F31C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C5EE90C-C2A0-42B0-ABA9-16CC4F58F31C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C5EE90C-C2A0-42B0-ABA9-16CC4F58F31C}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C5EE90C-C2A0-42B0-ABA9-16CC4F58F31C}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
+		{2C5EE90C-C2A0-42B0-ABA9-16CC4F58F31C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C5EE90C-C2A0-42B0-ABA9-16CC4F58F31C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -509,6 +520,7 @@ Global
 		{1FF72C42-53F4-469B-AF00-D69238E27A26} = {B08D6FF9-EB01-42E5-B0F4-DE738CB56C0A}
 		{ED44EA7B-A16E-4C8B-B8DA-F5DE64771167} = {C49DF3D6-B513-4C06-ACD6-4BA2E2FF02C8}
 		{E25CA9A0-F88E-48AC-B6B9-CE5F9218A7E5} = {C49DF3D6-B513-4C06-ACD6-4BA2E2FF02C8}
+		{2C5EE90C-C2A0-42B0-ABA9-16CC4F58F31C} = {8978DDD6-5019-45C4-94AE-1187453A4026}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ADFDF91F-E839-4378-9136-C917729594E2}

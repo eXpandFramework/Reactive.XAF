@@ -1,4 +1,5 @@
 ﻿using System;
+using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.ObjectExtensions;
 
 namespace Xpand.XAF.Modules.Reactive.Rest {

@@ -74,6 +74,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             {"ReactiveLoggerHubModule",Colors[Reactive]},
             {"AutoCommitModule",Colors[Data]},
             {"JobSchedulerModule",Colors[Data]},
+            {"ObjectStateManagerModule",Colors[Data]},
             {"JobSchedulerNotificationModule",Colors[Data]},
             {"CloneMemberValueModule",Colors[Data]},
             {"RestModule",Colors[Data]},
@@ -103,6 +104,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             {"GoogleCalendarModule",Colors[Office]},
             {"DocumentStyleManagerModule",Colors[Office]},
             {"RazorViewModule",Colors[Office]},
+            {"EmailModule",Colors[Office]},
             {"ViewEditModule",Colors[View]}
             
         };

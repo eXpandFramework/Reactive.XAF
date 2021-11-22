@@ -40,6 +40,8 @@ After installing the nuget package the next attributes should be set in your pro
 <PreserveCompilationReferences>true</PreserveCompilationReferences>
 <PreserveCompilationContext>true</PreserveCompilationContext>
 ```
+
+The `Preview` editor is configured natively to use the `RichTextBoxEditor` which comes when you install the `Xaf 0ffice` module. If you do not install the Xaf Office module the editor will display raw html insteead. As an alternative editor you may wish to try the `MarkupContentEditor` that comes when you install the `Xpand.XAF.Modules.Blazor` package.
 ### Examples
 
 In the next screencast we create a `Product RazorView` thats lists `ProductNames` and their `Accessories`

@@ -76,9 +76,8 @@ namespace Xpand.XAF.Modules.Email{
 			=> ((IModelReactiveModulesEmail) reactiveModules).Email;
 		internal static IModelEmail ModelEmail(this IModelApplication modelApplication) 
 			=> modelApplication.ToReactiveModule<IModelReactiveModulesEmail>().Email;
-
-		
 	}
+	
 	public interface IModelEmailRules:IModelNode,IModelList<IModelEmailRule> {
 		
 	}

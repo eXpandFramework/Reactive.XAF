@@ -24,13 +24,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Select(pattern => (T)pattern.Sender);
 
         public static IObservable<T> WhenActivated<T>(this T view) where T : View 
-            => view.ReturnObservable().Activated();
+            => Observable.FromEventPattern<EventHandler, EventArgs>(
+                handler => view.Activated += handler,
+                handler => view.Activated -= handler,ImmediateScheduler.Instance)
+                .Select(pattern => (T)pattern.Sender);
 
         public static IObservable<T> Activated<T>(this IObservable<T> source) where T:View 
-            => source.Cast<View>().SelectMany(view => Observable.FromEventPattern<EventHandler, EventArgs>(
-                    handler => view.Activated += handler,
-                    handler => view.Activated -= handler,ImmediateScheduler.Instance))
-                .Select(pattern => (T)pattern.Sender);
+            => source.SelectMany(view => view.WhenActivated());
         
         public static IObservable<T> WhenModelChanged<T>(this T view) where T : View 
             => view.ReturnObservable().ModelChanged();

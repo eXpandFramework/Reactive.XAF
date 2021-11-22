@@ -16,6 +16,7 @@ using DevExpress.Utils;
 using JetBrains.Annotations;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.ExpressionExtensions;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
@@ -95,10 +96,9 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
 	        => application.WhenTrace(location, RXAction.OnError, methods);
 
         public static IObservable<ITraceEvent> WhenTrace(this XafApplication application, Type location = null,RXAction rxAction = RXAction.All, params string[] methods) 
-            => application.Modules.ToTraceSource().SelectMany(_ => _.traceSource.Listeners.OfType<ReactiveTraceListener>()).Distinct().ToObservable()
+            => application.Modules.ToTraceSource().SelectMany(t => t.traceSource.Listeners.OfType<ReactiveTraceListener>()).DistinctBy(listener => listener.Name).ToObservable()
 		        .SelectMany(listener => listener.EventTrace)
-		        .Select(_ => _)
-		        .When(location, rxAction,methods);
+                .When(location, rxAction,methods);
 
         public static IObservable<ITraceEvent> When(this IObservable<ITraceEvent> source, Type location, RXAction rxAction,params string[] methods) 
             => source.Where(_ => location == null || _.Location == location.Name)

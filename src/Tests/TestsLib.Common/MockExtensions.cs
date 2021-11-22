@@ -16,6 +16,7 @@ using Moq.Language.Flow;
 using Moq.Protected;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
+using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.StringExtensions;
 
 namespace Xpand.TestsLib.Common {
@@ -82,12 +83,16 @@ namespace Xpand.TestsLib.Common {
             return handlerMock.Protected()
                 .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(),
                     ItExpr.IsAny<CancellationToken>())
-                .Returns(async (HttpRequestMessage requestMessage, CancellationToken _)
-                    => await Observable.Start(() => new HttpResponseMessage {
+                .Returns((HttpRequestMessage requestMessage, CancellationToken _)
+                    =>  new HttpResponseMessage {
                             StatusCode = HttpStatusCode.OK,
                             RequestMessage = requestMessage
-                        }).Delay(TimeSpan.FromMilliseconds(50),scheduler)
-                        .Do(configure));
+                        }.ReturnObservable()
+                        .Do(configure)
+                        .Delay(Delay,scheduler)
+                        .ToTask(_, scheduler));
         }
+
+        public static TimeSpan Delay { get; set; } = TimeSpan.FromMilliseconds(200);
     }
 }

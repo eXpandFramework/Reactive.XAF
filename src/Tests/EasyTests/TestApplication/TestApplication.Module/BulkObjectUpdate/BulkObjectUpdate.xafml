@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Application>
+  <ReactiveModules>
+    <BulkObjectUpdate>
+      <Rules>
+        <BulkObjectUpdateRule Caption="Update" ListView="TestTask_ListView" DetailView="TaskBulkUpdate_DetailView" IsNewNode="True" />
+      </Rules>
+    </BulkObjectUpdate>
+  </ReactiveModules>
+  <Views>
+    <DetailView Id="TaskBulkUpdate_DetailView">
+      <Items>
+        <PropertyEditor Id="AssignedTo" Removed="True" />
+        <PropertyEditor Id="DateCompleted" Removed="True" />
+        <PropertyEditor Id="Description" Removed="True" />
+        <PropertyEditor Id="DueDate" Removed="True" />
+        <PropertyEditor Id="Oid" Removed="True" />
+        <PropertyEditor Id="PercentCompleted" Removed="True" />
+        <PropertyEditor Id="StartDate" Removed="True" />
+        <PropertyEditor Id="Subject" Removed="True" />
+      </Items>
+      <Layout>
+        <LayoutGroup Id="Main" RelativeSize="100">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="5.984251968503937" Caption="SimpleEditors">
+            <LayoutItem Id="Status" ViewItem="Status" Index="0" RelativeSize="100" IsNewNode="True" />
+            <LayoutGroup Id="Task" RelativeSize="89.90536277602524" Removed="True">
+              <LayoutGroup Id="Task_col1" RelativeSize="50">
+                <LayoutItem Id="AssignedTo" RelativeSize="25.88235294117647" />
+                <LayoutItem Id="DueDate" RelativeSize="24.705882352941178" />
+                <LayoutItem Id="StartDate" RelativeSize="24.705882352941178" />
+                <LayoutItem Id="Subject" RelativeSize="24.705882352941178" />
+              </LayoutGroup>
+              <LayoutGroup Id="Task_col2" RelativeSize="50">
+                <LayoutItem Id="PercentCompleted" Index="0" RelativeSize="55.68627450980392" />
+                <LayoutItem Id="DateCompleted" Index="1" RelativeSize="44.31372549019608" />
+                <LayoutItem Id="Status" Removed="True" />
+              </LayoutGroup>
+            </LayoutGroup>
+          </LayoutGroup>
+          <LayoutGroup Id="SizeableEditors" RelativeSize="94.01574803149606" Caption="Description">
+            <LayoutItem Id="Description" RelativeSize="100" Removed="True" />
+          </LayoutGroup>
+        </LayoutGroup>
+      </Layout>
+    </DetailView>
+  </Views>
+</Application>

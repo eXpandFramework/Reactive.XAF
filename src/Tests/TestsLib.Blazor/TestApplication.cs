@@ -11,56 +11,57 @@ using Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions;
 using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.Reactive.Services;
 
-namespace Xpand.TestsLib.Blazor{
-    public class XpoDataStoreProviderAccessor {
-        public IXpoDataStoreProvider DataStoreProvider { get; set; }
-    }
+namespace Xpand.TestsLib.Blazor {
+	public class XpoDataStoreProviderAccessor {
+		public IXpoDataStoreProvider DataStoreProvider { get; set; }
+	}
 
-    public class TestBlazorApplication : BlazorApplication, ITestApplication{
-        public TestBlazorApplication() {
-            this.AlwaysUpdateOnDatabaseVersionMismatch().Subscribe();
-        }
-        [SuppressMessage("ReSharper", "UnusedParameter.Local")]
-        public TestBlazorApplication(Type sutModule, bool transmitMessage = true, bool handleExceptions=true):this() {
-            TransmitMessage = transmitMessage;
-            SUTModule = sutModule;
-            TraceClientConnected = this.ClientConnect();
-            TraceClientBroadcast = this.ClientBroadcast();
-            this.WhenSetupComplete().FirstAsync()
-                .Select(application => application.ObjectSpaceProvider.DataStoreProvider())
-                .Do(provider => {
-                    var dataStoreProviderAccessor = ServiceProvider.GetService<XpoDataStoreProviderAccessor>();
-                    if (dataStoreProviderAccessor != null) dataStoreProviderAccessor.DataStoreProvider = provider;
-                })
-                .Subscribe();
-        }
+	public class TestBlazorApplication : BlazorApplication, ITestApplication {
+		public TestBlazorApplication() {
+			// this.AlwaysUpdateOnDatabaseVersionMismatch().FirstAsync().Subscribe();
+		}
 
-        public bool TransmitMessage { get; }
+		[SuppressMessage("ReSharper", "UnusedParameter.Local")]
+		public TestBlazorApplication(Type sutModule, bool transmitMessage = true, bool handleExceptions = true) :
+			this() {
+			TransmitMessage = transmitMessage;
+			SUTModule = sutModule;
+			TraceClientConnected = this.ClientConnect();
+			TraceClientBroadcast = this.ClientBroadcast();
+			this.WhenSetupComplete().FirstAsync()
+				.Select(application => application.ObjectSpaceProvider.DataStoreProvider())
+				.Do(provider => {
+					var dataStoreProviderAccessor = ServiceProvider.GetService<XpoDataStoreProviderAccessor>();
+					if (dataStoreProviderAccessor != null) dataStoreProviderAccessor.DataStoreProvider = provider;
+				})
+				.Subscribe();
+		}
 
-        public IObservable<Unit> TraceClientBroadcast{ get; set; }
-        public IObservable<Unit> TraceClientConnected{ get; set; }
-        
-        public Type SUTModule{ get; }
+		public bool TransmitMessage { get; }
 
-        
+		public IObservable<Unit> TraceClientBroadcast { get; set; }
+		public IObservable<Unit> TraceClientConnected { get; set; }
 
-        protected override void OnCreateCustomObjectSpaceProvider(CreateCustomObjectSpaceProviderEventArgs args) {
-            var provider = ServiceProvider.GetRequiredService<XpoDataStoreProviderAccessor>().DataStoreProvider;
-            // if (provider != null) {
-                args.ObjectSpaceProvider = this.NewObjectSpaceProvider(provider);
-                args.ObjectSpaceProviders.Add(ServiceProvider.GetService<NonPersistentObjectSpaceProvider>()??new NonPersistentObjectSpaceProvider(TypesInfo, null));
-            // }
-            // else {
-                // base.OnCreateCustomObjectSpaceProvider(args);
-            // }
-        }
+		public Type SUTModule { get; }
 
-        protected override string GetModelCacheFileLocationPath() => null;
 
-        protected override string GetDcAssemblyFilePath() => null;
+		protected override void OnCreateCustomObjectSpaceProvider(CreateCustomObjectSpaceProviderEventArgs args) {
+			var provider = ServiceProvider.GetRequiredService<XpoDataStoreProviderAccessor>().DataStoreProvider;
+			// if (provider != null) {
+			args.ObjectSpaceProvider = this.NewObjectSpaceProvider(provider);
+			args.ObjectSpaceProviders.Add(ServiceProvider.GetService<NonPersistentObjectSpaceProvider>() ??
+			                              new NonPersistentObjectSpaceProvider(TypesInfo, null));
+			// }
+			// else {
+			// base.OnCreateCustomObjectSpaceProvider(args);
+			// }
+		}
 
-        protected override string GetModelAssemblyFilePath() => $@"{AppDomain.CurrentDomain.ApplicationPath()}\ModelAssembly{Guid.NewGuid()}.dll";
-        
-    }
+		protected override string GetModelCacheFileLocationPath() => null;
 
+		protected override string GetDcAssemblyFilePath() => null;
+
+		protected override string GetModelAssemblyFilePath() =>
+			$@"{AppDomain.CurrentDomain.ApplicationPath()}\ModelAssembly{Guid.NewGuid()}.dll";
+	}
 }

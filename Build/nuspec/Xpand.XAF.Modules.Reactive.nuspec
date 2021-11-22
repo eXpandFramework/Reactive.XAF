@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Reactive</id>
-    <version>4.212.1.0</version>
+    <version>4.212.1.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -15,9 +15,9 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Reactive, 21.2.3</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.Extensions" version="4.212.1.0" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.212.1.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.212.1.0" />
+        <dependency id="Xpand.Extensions" version="4.212.1.1" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.212.1.1" />
+        <dependency id="Xpand.Extensions.XAF" version="4.212.1.1" />
         <dependency id="DevExpress.ExpressApp" version="21.2.3" />
         <dependency id="System.Interactive" version="5.0" />
         <dependency id="System.Reactive" version="5.0" />
@@ -30,7 +30,7 @@
         <dependency id="Newtonsoft.Json" version="13.0.1" />
         <dependency id="System.Security.Cryptography.Xml" version="5.0" />
         <dependency id="Enums.Net" version="4.0" />
-        <dependency id="Xpand.VersionConverter" version="4.212.1.0" />
+        <dependency id="Xpand.VersionConverter" version="4.212.1.1" />
       </group>
     </dependencies>
   </metadata>

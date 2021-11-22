@@ -58,13 +58,15 @@
   <ItemGroup>
     <EmbeddedResource Include="..\CommonFiles\Cloud.Office.xafml" Link="Office\Cloud\Cloud.Office.xafml" />
     <EmbeddedResource Include="..\CommonFiles\SeqeuenceGenerator\SequenceGenerator.xafml" Link="SequenceGenerator\SequenceGenerator.xafml" />
+    <EmbeddedResource Include="BulkObjectUpdate\BulkObjectUpdate.xafml" />
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="21.2.3" />
     <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="21.2.3" />
     <PackageReference Include="DevExpress.Xpo" Version="21.2.3" />
-    <PackageReference Include="Xpand.XAF.Core.All" Version="4.212.1.0" />
+    <PackageReference Include="Xpand.XAF.Core.All" Version="4.212.1.1" />
+    <PackageReference Include="Xpand.XAF.Modules.BulkObjectUpdate" Version="4.212.1.1" />
     <PackageReference Include="Google.Apis.People.v1" Version="1.25.0.830" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.8.1" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.8.1" />

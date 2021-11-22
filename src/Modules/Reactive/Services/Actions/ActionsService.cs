@@ -34,37 +34,37 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 
          
         public static IObservable<T> WhenExecute<T>(this IObservable<SimpleAction> source,Func<SimpleActionExecuteEventArgs, IObservable<T>> retriedExecution) 
-            => source.SelectMany(action => action.WhenExecute(retriedExecution));
+            => source.SelectMany(action => action.WhenExecute(retriedExecution).TakeUntilDeactivated(action.Controller));
         public static IObservable<T> WhenExecuted<T>(this IObservable<SimpleAction> source,Func<SimpleActionExecuteEventArgs, IObservable<T>> retriedExecution) 
-            => source.SelectMany(action => action.WhenExecuted(retriedExecution));
+            => source.SelectMany(action => action.WhenExecuted(retriedExecution).TakeUntilDeactivated(action.Controller));
         public static IObservable<T> WhenExecuted<T>(this IObservable<SingleChoiceAction> source,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> retriedExecution) 
-            => source.SelectMany(action => action.WhenExecuted(retriedExecution));
+            => source.SelectMany(action => action.WhenExecuted(retriedExecution).TakeUntilDeactivated(action.Controller));
 
         public static IObservable<T> WhenExecute<T>(this SimpleAction simpleAction,Func<SimpleActionExecuteEventArgs, IObservable<T>> retriedExecution) 
-            => simpleAction.WhenExecute().SelectMany(retriedExecution).Retry(() => simpleAction.Application);
+            => simpleAction.WhenExecute().SelectMany(retriedExecution).Retry(() => simpleAction.Application).TakeUntilDeactivated(simpleAction.Controller);
         
         public static IObservable<T> WhenExecuted<T>(this SimpleAction simpleAction,Func<SimpleActionExecuteEventArgs, IObservable<T>> retriedExecution) 
-            => simpleAction.WhenExecuted().SelectMany(retriedExecution).Retry(() => simpleAction.Application);
+            => simpleAction.WhenExecuted().SelectMany(retriedExecution).Retry(() => simpleAction.Application).TakeUntilDeactivated(simpleAction.Controller);
         public static IObservable<T> WhenExecuted<T>(this SingleChoiceAction simpleAction,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> retriedExecution) 
-            => simpleAction.WhenExecuted().SelectMany(retriedExecution).Retry(() => simpleAction.Application);
+            => simpleAction.WhenExecuted().SelectMany(retriedExecution).Retry(() => simpleAction.Application).TakeUntilDeactivated(simpleAction.Controller);
         
         public static IObservable<T> WhenExecute<T>(this IObservable<SingleChoiceAction> source,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> retriedExecution) 
-            => source.SelectMany(action => action.WhenExecute(retriedExecution));
+            => source.SelectMany(action => action.WhenExecute(retriedExecution).TakeUntilDeactivated(action.Controller));
 
         public static IObservable<T> WhenExecute<T>(this SingleChoiceAction singleChoiceAction,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> retriedExecution) 
-            => singleChoiceAction.WhenExecute().SelectMany(retriedExecution).Retry(() => singleChoiceAction.Application);
+            => singleChoiceAction.WhenExecute().SelectMany(retriedExecution).Retry(() => singleChoiceAction.Application).TakeUntilDeactivated(singleChoiceAction.Controller);
         
         public static IObservable<T> WhenExecute<T>(this IObservable<ParametrizedAction> source,Func<ParametrizedActionExecuteEventArgs, IObservable<T>> retriedExecution) 
-            => source.SelectMany(action => action.WhenExecute(retriedExecution));
+            => source.SelectMany(action => action.WhenExecute(retriedExecution).TakeUntilDeactivated(action.Controller));
 
         public static IObservable<T> WhenExecute<T>(this ParametrizedAction action,Func<ParametrizedActionExecuteEventArgs, IObservable<T>> retriedExecution) 
-            => action.WhenExecute().SelectMany(retriedExecution).Retry(() => action.Application);
+            => action.WhenExecute().SelectMany(retriedExecution).Retry(() => action.Application).TakeUntilDeactivated(action.Controller);
         
         public static IObservable<T> WhenExecute<T>(this IObservable<PopupWindowShowAction> source,Func<PopupWindowShowActionExecuteEventArgs, IObservable<T>> retriedExecution) 
-            => source.SelectMany(action => action.WhenExecute(retriedExecution));
+            => source.SelectMany(action => action.WhenExecute(retriedExecution).TakeUntilDeactivated(action.Controller));
 
         public static IObservable<T> WhenExecute<T>(this PopupWindowShowAction action,Func<PopupWindowShowActionExecuteEventArgs, IObservable<T>> retriedExecution) 
-            => action.WhenExecute().SelectMany(retriedExecution).Retry(() => action.Application);
+            => action.WhenExecute().SelectMany(retriedExecution).Retry(() => action.Application).TakeUntilDeactivated(action.Controller);
 
         public static IObservable<T> CommitChanges<T>(this IObservable<T> source) where T : ActionBaseEventArgs
             => source.Do(args => {

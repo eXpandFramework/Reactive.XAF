@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Reactive.Logger.Client.Win</id>
-    <version>4.212.1.0</version>
+    <version>4.212.1.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -15,11 +15,11 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Reactive.Logger.Client.Win, 21.2.3</tags>
     <dependencies>
       <group targetFramework="net5.0">
-        <dependency id="Xpand.XAF.Modules.GridListEditor" version="4.212.1.0" />
-        <dependency id="Xpand.XAF.Modules.OneView" version="4.212.1.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.212.1.0" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.212.1.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.212.1.0" />
+        <dependency id="Xpand.XAF.Modules.GridListEditor" version="4.212.1.1" />
+        <dependency id="Xpand.XAF.Modules.OneView" version="4.212.1.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.212.1.1" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.212.1.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.212.1.1" />
         <dependency id="DevExpress.ExpressApp.ConditionalAppearance" version="21.2.3" />
         <dependency id="DevExpress.ExpressApp.Win" version="21.2.3" />
         <dependency id="DevExpress.ExpressApp.Xpo" version="21.2.3" />
@@ -30,7 +30,7 @@
         <dependency id="Newtonsoft.Json" version="13.0.1" />
       </group>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.VersionConverter" version="4.212.1.0" />
+        <dependency id="Xpand.VersionConverter" version="4.212.1.1" />
       </group>
     </dependencies>
   </metadata>

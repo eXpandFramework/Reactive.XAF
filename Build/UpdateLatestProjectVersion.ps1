@@ -6,10 +6,13 @@ Write-HostFormatted "Reset modified assemblyInfo" -Section
 "AssemblyInfo.cs", "/.nuspec" | Get-GitDiff | Restore-GitFile
 $labPackages = Get-XpandPackages -PackageType XAFAll -Source Lab
 $officialPackages = Get-XpandPackages -PackageType XAFAll -Source Release
- 
-$lastVersion = ($labPackages | Where-Object { $_.id -eq "Xpand.XAF.Core.All" }).Version
 
 $lastOfficialVersion = ($officialPackages | Where-Object { $_.id -eq "Xpand.XAF.Core.All" }).Version
+$lastVersion = ($labPackages | Where-Object { $_.id -eq "Xpand.XAF.Core.All" }).Version
+if ($lastOfficialVersion -gt $lastVersion){
+    $lastVersion=$lastOfficialVersion
+}
+
 if ($Branch -eq "master") {
     $srcVersion=[version](Get-AssemblyInfoVersion "$PSScriptRoot\..\src\Common\AssemblyInfoVersion.cs")
     if ($srcVersion -gt $lastVersion){

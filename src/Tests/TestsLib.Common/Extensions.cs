@@ -133,7 +133,7 @@ namespace Xpand.TestsLib.Common{
                 }
             }
 
-            application.AlwaysUpdateOnDatabaseVersionMismatch().Subscribe();
+            application.AlwaysUpdateOnDatabaseVersionMismatch().FirstAsync().Subscribe();
             object instance;
             var platform = application.GetPlatform();
             if (platform == Platform.Win)
@@ -207,7 +207,9 @@ namespace Xpand.TestsLib.Common{
             {"RestModule", 61488},
             {"WindowsModule", 61489},
             {"JobSchedulerNotificationModule", 61490},
-            {"RazorViewModule", 61491}
+            {"RazorViewModule", 61491},
+            {"EmailModule", 61492},
+            {"ObjectStateManagerModule", 61493},
         };
 
         public static TestObserver<T> StartTest<T>(this XafApplication application,IObservable<T> test,int delay=200) {

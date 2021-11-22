@@ -1,6 +1,8 @@
 ﻿#nullable enable
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -9,12 +11,16 @@ using System.Reflection;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
+using HarmonyLib;
 using JetBrains.Annotations;
 using NUnit.Framework;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.StreamExtensions;
 using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.Threading;
+using Xpand.Extensions.TypeExtensions;
+using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Logger;
@@ -23,7 +29,7 @@ using IDisposable = System.IDisposable;
 
 namespace Xpand.TestsLib.Common{
     public abstract class CommonTest : IDisposable{
-        protected readonly TestScheduler TestScheduler=new();
+        public readonly TestScheduler TestScheduler=new();
         public const int LongTimeout = 900000;
         [UsedImplicitly]
         protected Platform GetPlatform(string platformName) => (Platform) Enum.Parse(typeof(Platform), platformName);
@@ -31,12 +37,31 @@ namespace Xpand.TestsLib.Common{
         [UsedImplicitly] protected TimeSpan Timeout = TimeSpan.FromSeconds(Debugger.IsAttached ? 120 : 5);
 
         protected CommonTest() => AssemblyExtensions.EntryAssembly=GetType().Assembly;
-
+        public static string EasyTestTraceLevel = "Verbose";
+        public static bool Get(string name,ref object __result) {
+            if (name == nameof(EasyTestTraceLevel)) {
+                __result = EasyTestTraceLevel;
+                return false;
+            }
+            return true;
+        }
         static CommonTest() {
             TextListener = new TextWriterTraceListener($@"{AppDomain.CurrentDomain.ApplicationPath()}\reactive.log");
             var traceSourceSwitch = new SourceSwitch("SourceSwitch", "Verbose");
             TraceSource = new TraceSource(nameof(CommonTest)){Switch = traceSourceSwitch};
             TraceSource.Listeners.Add(TextListener);
+            Trace.Listeners.Add(new TextWriterTraceListener($@"{AppDomain.CurrentDomain.ApplicationPath()}\easytest.log"));
+            // AppDomain.CurrentDomain.Patch(harmony => {
+            //     var original = typeof(NameValueCollection).GetMethod(nameof(NameValueCollection.Get),new Type[]{typeof(string)});
+            //     harmony.Patch(original, new HarmonyMethod(typeof(CommonTest), nameof(Get)));
+            // });
+        
+            // var appCOnfigResourceName = GetType().Assembly.GetManifestResourceNames().FirstOrDefault(s => s.EndsWith("App.config"));
+            
+            // var testDllName = GetType().Assembly.GetName().Name;
+            // var configName = testDllName + ".dll.config";
+            // GetType().Assembly.GetManifestResourceStream(appCOnfigResourceName).SaveToFile($"{AppDomain.CurrentDomain.ApplicationPath()}{configName}");
+            // AppDomain.CurrentDomain.SetData("APP_CONFIG_FILE", $"{AppDomain.CurrentDomain.ApplicationPath()}{configName}");
         }
         [UsedImplicitly]
         public static IEnumerable<Platform> PlatformDataSource(){

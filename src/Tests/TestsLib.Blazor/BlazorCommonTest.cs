@@ -17,43 +17,42 @@ using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.TestsLib.Blazor {
-    public class BlazorCommonTest:CommonTest {
-        protected IHost WebHost;
+	public class BlazorCommonTest : CommonTest {
+		protected IHost WebHost;
 
 
-        static BlazorCommonTest() {
-            TestsLib.Common.Extensions.ApplicationType = typeof(TestBlazorApplication);
-        }
-        public override void Dispose() {
-            base.Dispose();
-            CleanBlazorEnvironment();
-        }
+		static BlazorCommonTest() {
+			TestsLib.Common.Extensions.ApplicationType = typeof(TestBlazorApplication);
+		}
 
-        protected void CleanBlazorEnvironment() {
-            WebHost?.Dispose();
-            typeof(ValueManagerContext).Field("storageHolder", Flags.StaticPrivate).SetValue(null,
-                typeof(AsyncLocal<>).MakeGenericType(AppDomain.CurrentDomain.GetAssemblyType(
-                    "DevExpress.ExpressApp.Blazor.AmbientContext.ValueManagerContext+StorageHolder")).CreateInstance());
-        }
+		public override void Dispose() {
+			base.Dispose();
+			CleanBlazorEnvironment();
+		}
 
-        protected BlazorApplication NewBlazorApplication(Type startupType){
-            var defaultBuilder = Host.CreateDefaultBuilder();
-            
-            WebHost = defaultBuilder
-                .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup(startupType))
-                .Build();
-            WebHost.Start();
-            var containerInitializer = WebHost.Services.GetRequiredService<IValueManagerStorageContainerInitializer>();
-            containerInitializer.Initialize();
-            var newBlazorApplication = WebHost.Services.GetService<IXafApplicationProvider>()?.GetApplication();
+		protected void CleanBlazorEnvironment() {
+			WebHost?.Dispose();
+			typeof(ValueManagerContext).Field("storageHolder", Flags.StaticPrivate).SetValue(null,
+				typeof(AsyncLocal<>).MakeGenericType(AppDomain.CurrentDomain.GetAssemblyType(
+					"DevExpress.ExpressApp.Blazor.AmbientContext.ValueManagerContext+StorageHolder")).CreateInstance());
+		}
 
-            newBlazorApplication.WhenApplicationModulesManager().FirstAsync()
-	            .SelectMany(manager => manager.WhenGeneratingModelNodes<IModelViews>().FirstAsync()
-		            .SelectMany().OfType<IModelListView>().Where(view => view.EditorType==typeof(GridListEditor))
-		            .Do(view => view.DataAccessMode = CollectionSourceDataAccessMode.Client))
-	            .Subscribe();
-            return newBlazorApplication;
-        }
+		protected BlazorApplication NewBlazorApplication(Type startupType) {
+			var defaultBuilder = Host.CreateDefaultBuilder();
+			WebHost = defaultBuilder
+				.ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup(startupType))
+				.Build();
+			WebHost.Start();
+			var containerInitializer = WebHost.Services.GetRequiredService<IValueManagerStorageContainerInitializer>();
+			containerInitializer.Initialize();
+			var newBlazorApplication = WebHost.Services.GetService<IXafApplicationProvider>()?.GetApplication();
 
-    }
+			newBlazorApplication.WhenApplicationModulesManager().FirstAsync()
+				.SelectMany(manager => manager.WhenGeneratingModelNodes<IModelViews>().FirstAsync()
+					.SelectMany().OfType<IModelListView>().Where(view => view.EditorType == typeof(GridListEditor))
+					.Do(view => view.DataAccessMode = CollectionSourceDataAccessMode.Client))
+				.Subscribe();
+			return newBlazorApplication;
+		}
+	}
 }

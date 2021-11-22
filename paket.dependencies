@@ -1,4 +1,4 @@
-source C:\Program Files (x86)\DevExpress 21.1\Components\System\Components\Packages
+source C:\Program Files (x86)\DevExpress 21.2\Components\System\Components\Packages
 source https://api.nuget.org/v3/index.json
 source https://xpandnugetserver.azurewebsites.net/nuget
 storage:none
@@ -83,5 +83,3 @@ nuget Selenium.WebDriver == 4.0.1
 nuget Microsoft.NET.Test.SDK
 nuget RazorLight == 2.0.0-rc.3
 nuget Xpand.VersionConverter 2.202.11
-
-

@@ -3,28 +3,28 @@ using DevExpress.ExpressApp.Blazor;
 using NUnit.Framework;
 
 namespace Xpand.TestsLib.Blazor {
-    public abstract class BlazorCommonAppTest:BlazorCommonTest{
-        protected BlazorApplication Application;
+	public abstract class BlazorCommonAppTest : BlazorCommonTest {
+		protected BlazorApplication Application;
 
-        public override void Dispose(){ }
+		public override void Dispose() { }
 
-        protected override void ResetXAF(){ }
+		protected override void ResetXAF() { }
 
 
-        [OneTimeTearDown]
-        public override void Cleanup() {
-            base.Cleanup();
-            Application?.Dispose();
-            base.Dispose();
-            CleanBlazorEnvironment();
-        }
+		[OneTimeTearDown]
+		public override void Cleanup() {
+			base.Cleanup();
+			Application?.Dispose();
+			base.Dispose();
+			CleanBlazorEnvironment();
+		}
 
-        [OneTimeSetUp]
-        public override void Init() {
-            base.Init();
-            Application = NewBlazorApplication(StartupType);
-        }
+		[OneTimeSetUp]
+		public override void Init() {
+			base.Init();
+			Application = NewBlazorApplication(StartupType);
+		}
 
-        protected abstract Type StartupType { get; }
-    }
+		protected abstract Type StartupType { get; }
+	}
 }

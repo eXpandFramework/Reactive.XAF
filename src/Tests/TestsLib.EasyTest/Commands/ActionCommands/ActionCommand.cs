@@ -2,6 +2,7 @@
 using System.Linq;
 using DevExpress.EasyTest.Framework;
 using EnumsNET;
+using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.ObjectExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 

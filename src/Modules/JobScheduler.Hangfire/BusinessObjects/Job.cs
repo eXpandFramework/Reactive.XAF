@@ -10,6 +10,7 @@ using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
 using Fasterflect;
 using Hangfire;
+using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.NonPersistentObjects;
 using Xpand.Extensions.XAF.ObjectExtensions;

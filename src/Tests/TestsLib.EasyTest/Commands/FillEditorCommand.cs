@@ -1,5 +1,6 @@
 ﻿using DevExpress.EasyTest.Framework;
 using DevExpress.EasyTest.Framework.Commands;
+using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.ObjectExtensions;
 
 namespace Xpand.TestsLib.EasyTest.Commands{

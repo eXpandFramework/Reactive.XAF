@@ -23,7 +23,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification {
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => manager.GenerateModelNodes()
-                .Merge(manager.WhenApplication(application => application.WhenSetupComplete().Where(_ => !application.IsInternal())
+                .Merge(manager.WhenApplication(application => application.WhenObjectSpaceCreated().FirstAsync().Where(_ => !application.IsInternal())
                         .SelectMany(_ => application.WhenNotificationJobModification(application.Model.NotificationTypes())))
                     .ToUnit());
 

@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 using DevExpress.EasyTest.Framework;
 using DevExpress.EasyTest.Framework.Commands;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.ObjectExtensions;
 using Xpand.TestsLib.Common;
 using Parameter = Xpand.TestsLib.EasyTest.Commands.Parameter;

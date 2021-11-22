@@ -117,11 +117,12 @@ Below we will add interesting examples. All methods can live in a static class.
             });
 
     ```
-4. Dynamically add items to a SingleChoiceAction
+4. Dynamically add items to a SingleChoiceAction and subscribe to execution only when the action is active.
     ```c#
     internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => manager.RegisterAction().AddItems(action => Observable.Range(0,2)
-                        .Do(i => action.Items.Add(new ChoiceActionItem($"{i}",null))).ToUnit());
+                        .Do(i => action.Items.Add(new ChoiceActionItem($"{i}",null))).ToUnit()
+                        .Concat(Observable.Defer(()=>action.WhenActive().WhenExecute(action => action.Execute()))));
     ```
 ##### Working with Views
 1. Modifying View artifacts similar to what was demoed with working with Actions:

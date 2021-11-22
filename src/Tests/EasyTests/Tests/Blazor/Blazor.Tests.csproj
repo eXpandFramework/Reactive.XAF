@@ -34,6 +34,9 @@
     <Compile Include="..\..\CommonFiles\EmailService.cs">
       <Link>EmailService.cs</Link>
     </Compile>
+    <Compile Include="..\..\CommonFiles\BulkObjectUpdateService.cs">
+      <Link>BulkObjectUpdateService.cs</Link>
+    </Compile>
     <Compile Include="..\..\CommonFiles\GoogleCalendarService.cs" Link="GoogleCalendarService.cs" />
     <Compile Include="..\..\CommonFiles\GoogleService.cs" Link="GoogleService.cs" />
     <Compile Include="..\..\CommonFiles\GoogleTasksService.cs" Link="GoogleTasksService.cs" />
@@ -57,11 +60,11 @@
     <PackageReference Include="System.ServiceModel.Duplex" Version="4.8.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0" />
     <PackageReference Include="Moq" Version="4.16" />
-    <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="95.0.4638.6900" />
+    <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="96.0.4664.4500" />
     <PackageReference Include="Shouldly" Version="4.0.3" />
     <PackageReference Include="NUnit" Version="3.13.2" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.0" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="4.212.1.0" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="4.212.1.1" />
     <PackageReference Include="Selenium.WebDriver" Version="4.0.1" />
   </ItemGroup>
   <ItemGroup>

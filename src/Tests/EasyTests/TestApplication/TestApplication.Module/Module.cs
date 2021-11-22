@@ -26,13 +26,16 @@ using DevExpress.ExpressApp.ViewVariantsModule;
 using DevExpress.ExpressApp.Xpo;
 using DevExpress.Persistent.BaseImpl;
 using TestApplication.GoogleService;
+using TestApplication.Module.BulkObjectUpdate;
 using TestApplication.Module.Email;
 using TestApplication.Module.ViewWizard;
 using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.BO;
 using Xpand.XAF.Modules.AutoCommit;
+using Xpand.XAF.Modules.BulkObjectUpdate;
 using Xpand.XAF.Modules.CloneMemberValue;
 using Xpand.XAF.Modules.CloneModelView;
+using Xpand.XAF.Modules.Email;
 using Xpand.XAF.Modules.HideToolBar;
 using Xpand.XAF.Modules.MasterDetail;
 using Xpand.XAF.Modules.ModelMapper;
@@ -104,7 +107,8 @@ namespace TestApplication.Module {
             RequiredModuleTypes.Add(typeof(ViewWizardModule));
             RequiredModuleTypes.Add(typeof(RestModule));
             RequiredModuleTypes.Add(typeof(RazorViewModule));
-            RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.Email.EmailModule));
+            RequiredModuleTypes.Add(typeof(EmailModule));
+            RequiredModuleTypes.Add(typeof(BulkObjectUpdateModule));
 
 
             AdditionalExportedTypes.Add(typeof(Event));
@@ -123,9 +127,10 @@ namespace TestApplication.Module {
 
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
-            moduleManager.ConnectViewWizardService()
-                .Merge(moduleManager.ConnectGoogleCalendarService())
+            moduleManager.ConnectGoogleCalendarService()
+	            .Merge(moduleManager.ConnectBulkObjectUpdate())
                 .Merge(moduleManager.ConnectEmail())
+                .Merge(moduleManager.ConnectViewWizardService())
                 .Merge(moduleManager.ConnectCloudCalendarService())
                 .Merge(moduleManager.ConnectGoogleService())
                 .Merge(moduleManager.ConnectGoogleTasksService())

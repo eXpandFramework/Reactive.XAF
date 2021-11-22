@@ -1,5 +1,4 @@
 ﻿#if !NETCOREAPP3_1_OR_GREATER
-
 using DevExpress.EasyTest.Framework;
 using Xpand.Extensions.XAF.ObjectExtensions;
 using Xpand.TestsLib.Common.EasyTest;
@@ -115,7 +114,8 @@ namespace ALL.Win.Tests{
             adapter.Execute(new SendKeysCommand(Win32Constants.VirtualKeys.Home,Win32Constants.VirtualKeys.Control));
             adapter.Execute(new ActionCommand(nameof(DeleteService.DeleteStyles)));
             adapter.Execute(new CheckListViewCommand<DocumentStyleManager>(m => m.AllStyles, 8));
-            adapter.Execute(new CheckListViewSelectionCommand<DocumentStyleManager>(m => m.AllStyles, ("Name", "Quote")){ExpectException = true});
+            adapter.Execute(new CheckListViewSelectionCommand<DocumentStyleManager>(m => m.AllStyles, ("Name", "Quote")){ExpectException
+ = true});
             adapter.Execute(new CheckListViewSelectionCommand<DocumentStyleManager>(m =>m.AllStyles , ("Name", "Normal")));
 
             adapter.Execute(new ActionCommand(nameof(DeleteService.DeleteStyles), "Unused"));

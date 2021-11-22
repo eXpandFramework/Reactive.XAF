@@ -11,6 +11,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using Fasterflect;
 using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.TypeExtensions;
 using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
@@ -65,9 +66,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
 	    public static IObservable<T> WhenGeneratingModelNodes<T>(this XafApplication application,Expression<Func<IModelApplication,T>> selector=null) where T : IEnumerable<IModelNode> 
 		    => application.WhenApplicationModulesManager().SelectMany(manager => manager.WhenGeneratingModelNodes(selector));
-
-	    public static IObservable<T> WhenGeneratingModelNodes<T>(this ApplicationModulesManager manager,Expression<Func<IModelApplication,T>> selector=null,bool emitCached=false) where T : IEnumerable<IModelNode> 
-		    => manager.Modules.FindModule<ReactiveModule>().GeneratingModelNodes
+	    
+	    public static IObservable<T> WhenGeneratingModelNodes<T>(this ApplicationModulesManager manager,bool emitCached) where T : IEnumerable<IModelNode> 
+		    => ReactiveModule.GeneratingModelNodes.WhenNotDefault()
 			    .SelectMany(updaters => {
 				    var updaterType = (Type)typeof(T).GetCustomAttributesData().First(data => data.AttributeType==typeof(ModelNodesGeneratorAttribute)).ConstructorArguments.First().Value;
 				    var updater = typeof(NodesUpdater<>).MakeGenericType(updaterType).CreateInstance();
@@ -76,12 +77,15 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 				    return ((IObservable<ModelNode>) updater.GetPropertyValue(name)).Cast<T>();
 			    });
 
+	    public static IObservable<T> WhenGeneratingModelNodes<T>(this ApplicationModulesManager manager,Expression<Func<IModelApplication,T>> selector=null,bool emitCached=false) where T : IEnumerable<IModelNode> 
+		    => manager.WhenGeneratingModelNodes<T>(emitCached);
+
 	    class NodesUpdater<T> : ModelNodesGeneratorUpdater<T> where T : ModelNodesGeneratorBase{
 		    readonly Subject<ModelNode> _updateSubject = new();
 		    readonly Subject<ModelNode> _updateCachedSubject = new();
 
-		    public IObservable<ModelNode> Update => _updateSubject.AsObservable();
-		    public IObservable<ModelNode> UpdateCached => _updateCachedSubject.AsObservable();
+		    public IObservable<ModelNode> Update => _updateSubject;
+		    public IObservable<ModelNode> UpdateCached => _updateCachedSubject;
 
 		    public override void UpdateNode(ModelNode node) => _updateSubject.OnNext(node);
 

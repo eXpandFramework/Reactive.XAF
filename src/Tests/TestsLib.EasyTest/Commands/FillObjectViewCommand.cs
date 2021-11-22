@@ -9,7 +9,7 @@ using Xpand.TestsLib.Common;
 namespace Xpand.TestsLib.EasyTest.Commands{
     public class FillObjectViewCommand<T> : FillObjectViewCommand{
         public FillObjectViewCommand(params (Expression<Func<T, object>> editor, string value)[] tuples) : base(
-            tuples.Select(t => (t.editor.MemberExpressionCaption().CompoundName(), t.value)).ToArray()){
+            tuples.Select(t => (t.editor.MemberExpressionCaption().CompoundName(), t.value.CompoundName())).ToArray()){
         }
     }
 
@@ -22,7 +22,7 @@ namespace Xpand.TestsLib.EasyTest.Commands{
         }
 
         protected override void ExecuteCore(ICommandAdapter adapter){
-            foreach (var command in _tuples.Select(_ => new FillEditorCommand(_.editor.CompoundName(),_.value){})){
+            foreach (var command in _tuples.Select(_ => new FillEditorCommand(_.editor.CompoundName(),_.value))){
                 command.Execute(adapter);
             }
 

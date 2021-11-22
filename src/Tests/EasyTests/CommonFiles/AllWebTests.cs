@@ -8,6 +8,7 @@ using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.Reactive;
 #endif
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reactive.Linq;
 using System.Threading;
@@ -78,7 +79,11 @@ namespace Web.Tests{
         [Test]
         [Apartment(ApartmentState.STA)]
         public async Task Web_EasyTest_InMemory() {
-	        await EasyTest(NewWebAdapter, RunWebApplication, async adapter => {
+            var easyTestTracer = EasyTestTracer.Tracer;
+            easyTestTracer.SetTraceLevel(TraceLevel.Verbose);
+            
+            await EasyTest(NewWebAdapter, RunWebApplication, async adapter => {
+                adapter.TestBulkObjectUpdate();
                 var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
                 adapter.Execute(autoTestCommand);
                 await Task.CompletedTask;
@@ -93,7 +98,6 @@ namespace Web.Tests{
                 
                 await adapter.TestChainJob(binPath);
                 await adapter.TestExecuteActionJob();
-                
 #endif
             });
         }

@@ -55,6 +55,7 @@ namespace Xpand.XAF.Modules.Email.Tests {
             
             window.Close();
             
+            
         }
         [Test][Order(100)]
         public void Disable_EmailAction_When_Email_Already_Sent() {

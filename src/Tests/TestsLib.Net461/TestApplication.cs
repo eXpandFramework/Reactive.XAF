@@ -22,56 +22,55 @@ using Xpand.XAF.Modules.Reactive.Logger;
 using Xpand.XAF.Modules.Reactive.Logger.Hub;
 
 // ReSharper disable once CheckNamespace
-namespace Xpand.TestsLib{
-    public class TestWinApplication : WinApplication, ITestApplication{
-        private readonly bool _transmitMessage;
+namespace Xpand.TestsLib {
+	public class TestWinApplication : WinApplication, ITestApplication {
+		private readonly bool _transmitMessage;
 
-        [SuppressMessage("ReSharper", "ParameterOnlyUsedForPreconditionCheck.Local")]
-        public TestWinApplication(Type sutModule, bool transmitMessage = true, bool handleExceptions=true){
-            // SettingUp += (_, args) => ((ExportedTypeCollection)args.SetupParameters.DomainComponents).Add(typeof(TraceEvent));
-            _transmitMessage = transmitMessage;
-            
-            SUTModule = sutModule;
-            
-            CustomHandleException += (_, e) => {
-                if (handleExceptions){
-                    throw e.Exception;
-                }
-            };
-            TraceClientConnected = this.ClientConnect();
-            TraceClientBroadcast = this.ClientBroadcast();
-        }
+		[SuppressMessage("ReSharper", "ParameterOnlyUsedForPreconditionCheck.Local")]
+		public TestWinApplication(Type sutModule, bool transmitMessage = true, bool handleExceptions = true) {
+			// SettingUp += (_, args) => ((ExportedTypeCollection)args.SetupParameters.DomainComponents).Add(typeof(TraceEvent));
+			_transmitMessage = transmitMessage;
 
-        public bool TransmitMessage => _transmitMessage;
+			SUTModule = sutModule;
 
-        public IObservable<Unit> TraceClientBroadcast{ get; set; }
+			CustomHandleException += (_, e) => {
+				if (handleExceptions) {
+					throw e.Exception;
+				}
+			};
+			TraceClientConnected = this.ClientConnect();
+			TraceClientBroadcast = this.ClientBroadcast();
+		}
+
+		public bool TransmitMessage => _transmitMessage;
+
+		public IObservable<Unit> TraceClientBroadcast { get; set; }
 
 
-        public IObservable<Unit> TraceClientConnected{ get; set; }
-        
-        public Type SUTModule{ get; }
+		public IObservable<Unit> TraceClientConnected { get; set; }
 
-        protected override void Dispose(bool disposing){
-            if (_transmitMessage){
-                // TraceClientConnected.ToTaskWithoutConfigureAwait().GetAwaiter().GetResult();
-                // TraceClientBroadcast.ToTaskWithoutConfigureAwait().GetAwaiter().GetResult();
-            }
+		public Type SUTModule { get; }
 
-            base.Dispose(disposing);
-        }
+		protected override void Dispose(bool disposing) {
+			if (_transmitMessage) {
+				// TraceClientConnected.ToTaskWithoutConfigureAwait().GetAwaiter().GetResult();
+				// TraceClientBroadcast.ToTaskWithoutConfigureAwait().GetAwaiter().GetResult();
+			}
 
-        readonly Subject<Form> _modelEditorForm = new();
+			base.Dispose(disposing);
+		}
 
-        public TestWinApplication(){
-        }
+		readonly Subject<Form> _modelEditorForm = new();
 
-        public IObservable<Form> ModelEditorForm => _modelEditorForm.AsObservable();
+		public TestWinApplication() { }
 
-        protected override Form CreateModelEditorForm(){
-            var modelEditorForm = base.CreateModelEditorForm();
-            _modelEditorForm.OnNext(modelEditorForm);
-            return modelEditorForm;
-        }
+		public IObservable<Form> ModelEditorForm => _modelEditorForm.AsObservable();
+
+		protected override Form CreateModelEditorForm() {
+			var modelEditorForm = base.CreateModelEditorForm();
+			_modelEditorForm.OnNext(modelEditorForm);
+			return modelEditorForm;
+		}
 
 //        protected override LayoutManager CreateLayoutManagerCore(bool simple){
 //            if (!simple){
@@ -85,78 +84,77 @@ namespace Xpand.TestsLib{
 //            return new WinSimpleLayoutManager();
 //        }
 
-        protected override string GetModelCacheFileLocationPath(){
-            return null;
-        }
+		protected override string GetModelCacheFileLocationPath() {
+			return null;
+		}
 
-        protected override string GetDcAssemblyFilePath(){
-            return null;
-        }
+		protected override string GetDcAssemblyFilePath() {
+			return null;
+		}
 
-        public override void StartSplash(){
-        }
+		public override void StartSplash() { }
 
-        protected override string GetModelAssemblyFilePath(){
-            return $@"{AppDomain.CurrentDomain.ApplicationPath()}\ModelAssembly{Guid.NewGuid()}.dll";
-        }
-    }
+		protected override string GetModelAssemblyFilePath() {
+			return $@"{AppDomain.CurrentDomain.ApplicationPath()}\ModelAssembly{Guid.NewGuid()}.dll";
+		}
+	}
 
-    public class TestWebApplication : WebApplication, ITestApplication{
-        private readonly bool _transmitMessage;
+	public class TestWebApplication : WebApplication, ITestApplication {
+		private readonly bool _transmitMessage;
 
-        public  TestWebApplication(Type sutModule, bool transmitMessage = true){
-            // SettingUp += (_, args) => ((ExportedTypeCollection)args.SetupParameters.DomainComponents).Add(typeof(TraceEvent));
-            _transmitMessage = transmitMessage;
-            SUTModule = sutModule;
-            TraceClientConnected = this.ClientConnect();
-            TraceClientBroadcast = this.ClientBroadcast();
-            TransmitMessage = transmitMessage;
-        }
+		public TestWebApplication(Type sutModule, bool transmitMessage = true) {
+			// SettingUp += (_, args) => ((ExportedTypeCollection)args.SetupParameters.DomainComponents).Add(typeof(TraceEvent));
+			_transmitMessage = transmitMessage;
+			SUTModule = sutModule;
+			TraceClientConnected = this.ClientConnect();
+			TraceClientBroadcast = this.ClientBroadcast();
+			TransmitMessage = transmitMessage;
+		}
 
-        public bool TransmitMessage{ get; }
-        public IObservable<Unit> TraceClientBroadcast{ get; set; }
+		public bool TransmitMessage { get; }
+		public IObservable<Unit> TraceClientBroadcast { get; set; }
 
-        protected override bool CanLoadTypesInfo(){
-            return true;
-        }
+		protected override bool CanLoadTypesInfo() {
+			return true;
+		}
 
-        protected override void Dispose(bool disposing){
-            if (_transmitMessage){
+		protected override void Dispose(bool disposing) {
+			if (_transmitMessage) {
 //                var timeout = TimeSpan.FromMilliseconds(5000);
 //                TraceClientConnected.Timeout(timeout).Wait();
 //                TraceClientBroadcast.Timeout(timeout).Wait();
-            }
+			}
 
-            base.Dispose(disposing);
-        }
+			base.Dispose(disposing);
+		}
 
-        protected override bool IsSharedModel => false;
-        public IObservable<Unit> TraceClientConnected{ get; set; }
-        [PublicAPI]
-        public Type SUTModule{ get; set; }
+		protected override bool IsSharedModel => false;
+		public IObservable<Unit> TraceClientConnected { get; set; }
+		[PublicAPI] public Type SUTModule { get; set; }
 
-        protected override LayoutManager CreateLayoutManagerCore(bool simple) {
-            var controlMock = new Mock<Control>() {CallBase = true};
-            var layoutManagerMock = new Mock<WebLayoutManager>() {CallBase = true};
-            layoutManagerMock.Setup(_ => _.LayoutControls(It.IsAny<IModelNode>(), It.IsAny<ViewItemsCollection>())).Returns(controlMock.Object);
-            return layoutManagerMock.Object;
-        }
-    }
-    [PublicAPI]
+		protected override LayoutManager CreateLayoutManagerCore(bool simple) {
+			var controlMock = new Mock<Control>() { CallBase = true };
+			var layoutManagerMock = new Mock<WebLayoutManager>() { CallBase = true };
+			layoutManagerMock.Setup(_ => _.LayoutControls(It.IsAny<IModelNode>(), It.IsAny<ViewItemsCollection>()))
+				.Returns(controlMock.Object);
+			return layoutManagerMock.Object;
+		}
+	}
 
+	[PublicAPI]
+	static class TestApplicationExtensions {
+		public static IObservable<Unit> ClientBroadcast(this ITestApplication application) {
+			return Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()
+				? TraceEventHub.Trace.FirstAsync(_ => _.Source == application.SUTModule.Name).ToUnit()
+					.SubscribeReplay()
+				: Unit.Default.ReturnObservable();
+		}
 
-    static class TestApplicationExtensions{
-        public static IObservable<Unit> ClientBroadcast(this ITestApplication application){
-            return Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()
-                ? TraceEventHub.Trace.FirstAsync(_ => _.Source == application.SUTModule.Name).ToUnit()
-                    .SubscribeReplay()
-                : Unit.Default.ReturnObservable();
-        }
-        [PublicAPI]
-        public static IObservable<Unit> ClientConnect(this ITestApplication application){
-            return Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()
-                ? TraceEventHub.Connecting.FirstAsync().SubscribeReplay()
-                : Unit.Default.ReturnObservable();
-        }
-    }
+		[PublicAPI]
+		public static IObservable<Unit> ClientConnect(this ITestApplication application) {
+			return Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()
+				? TraceEventHub.Connecting.FirstAsync().SubscribeReplay()
+				: Unit.Default.ReturnObservable();
+		}
+	}
 }

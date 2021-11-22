@@ -27,6 +27,9 @@
     <Compile Remove="Program.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\CommonFiles\BulkObjectUpdateService.cs">
+      <Link>BulkObjectUpdateService.cs</Link>
+    </Compile>
     <Compile Include="..\..\CommonFiles\EmailService.cs">
       <Link>EmailService.cs</Link>
     </Compile>
@@ -54,8 +57,7 @@
     <PackageReference Include="Shouldly" Version="4.0.3" />
     <PackageReference Include="NUnit" Version="3.13.2" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.0" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.212.1.0" />
-    <PackageReference Include="Xpand.XAF.Modules.Email" Version="4.212.1.0" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.212.1.1" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
     <PackageReference Include="System.Data.OleDb" Version="5.0" />
     <PackageReference Include="System.ServiceModel.Http" Version="4.8.1" />
