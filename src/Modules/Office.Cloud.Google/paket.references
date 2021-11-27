@@ -7,3 +7,4 @@ Microsoft.CodeAnalysis.CSharp
 System.Configuration.ConfigurationManager
 DevExpress.Xpo
 Newtonsoft.Json
+DevExpress.ExpressApp.CodeAnalysis

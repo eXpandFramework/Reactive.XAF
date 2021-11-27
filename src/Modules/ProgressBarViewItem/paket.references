@@ -8,3 +8,4 @@ Microsoft.CodeAnalysis.CSharp
 System.ServiceModel.Http
 System.Drawing.Common
 Newtonsoft.Json
+DevExpress.ExpressApp.CodeAnalysis

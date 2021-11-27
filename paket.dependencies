@@ -11,6 +11,7 @@ nuget DevExpress.ExpressApp.Win.All == 21.2.3.0
 nuget DevExpress.ExpressApp.Web.All == 21.2.3.0
 nuget DevExpress.ExpressApp.Blazor.All == 21.2.3.0
 nuget DevExpress.EasyTest == 21.2.3.0  
+nuget DevExpress.ExpressApp.CodeAnalysis == 21.2.3.0
 nuget DevExpress.ExpressApp.EasyTest.WebAdapter == 21.2.3.0  
 nuget DevExpress.ExpressApp.EasyTest.WinAdapter == 21.2.3.0  
 nuget DevExpress.ExpressApp.Security.Xpo == 21.2.3.0  

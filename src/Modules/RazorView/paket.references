@@ -11,3 +11,4 @@ System.ServiceModel.Http
 Newtonsoft.Json
 Xpand.Collections
 RazorLight
+DevExpress.ExpressApp.CodeAnalysis

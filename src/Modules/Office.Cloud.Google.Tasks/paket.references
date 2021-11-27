@@ -7,3 +7,4 @@ Google.Apis.Tasks.v1
 Microsoft.CodeAnalysis.CSharp
 System.Configuration.ConfigurationManager
 Newtonsoft.Json
+DevExpress.ExpressApp.CodeAnalysis

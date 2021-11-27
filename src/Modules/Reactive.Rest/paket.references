@@ -8,3 +8,4 @@ System.Reactive
 System.Configuration.ConfigurationManager
 System.ServiceModel.Http
 Newtonsoft.Json
+DevExpress.ExpressApp.CodeAnalysis

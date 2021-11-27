@@ -11,3 +11,4 @@ Microsoft.CodeAnalysis.CSharp
 System.ServiceModel.Http
 System.Interactive
 Newtonsoft.Json
+DevExpress.ExpressApp.CodeAnalysis

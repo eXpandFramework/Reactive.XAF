@@ -11,3 +11,4 @@ System.ServiceModel.Http
 Newtonsoft.Json
 System.Security.Cryptography.Xml
 Enums.Net
+DevExpress.ExpressApp.CodeAnalysis

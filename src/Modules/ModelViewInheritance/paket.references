@@ -8,3 +8,4 @@ Xpand.Patcher
 System.Configuration.ConfigurationManager
 System.Reactive
 Newtonsoft.Json
+DevExpress.ExpressApp.CodeAnalysis
