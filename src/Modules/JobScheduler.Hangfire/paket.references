@@ -13,4 +13,4 @@ Microsoft.AspNetCore.Hosting.Abstractions
 Microsoft.Extensions.DependencyInjection.Abstractions
 Xpand.Patcher
 Newtonsoft.Json
-
+DevExpress.ExpressApp.CodeAnalysis

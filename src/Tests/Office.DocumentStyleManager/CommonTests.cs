@@ -1,6 +1,7 @@
 ﻿using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Office.Win;
+using DevExpress.ExpressApp.Win.Editors;
 using DevExpress.XtraRichEdit;
 using DevExpress.XtraRichEdit.API.Native;
 using NUnit.Framework;
@@ -18,6 +19,13 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests{
         protected RichEditDocumentServer RichEditDocumentServer;
         protected Document Document;
 
+        protected void MockAllStylesListEditor(XafApplication xafApplication){
+	        // xafApplication.MockEditorsFactory();
+	        xafApplication.MockListEditor((view, application, _) =>
+		        view.Id.Contains(nameof(BusinessObjects.DocumentStyleManager.AllStyles))
+			        ? application.ListEditorMock(view).Object
+			        : new GridListEditor(view));
+        }
         [SetUp]
         public override void Setup(){
             base.Setup();

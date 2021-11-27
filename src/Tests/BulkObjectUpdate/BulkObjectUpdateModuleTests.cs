@@ -5,7 +5,6 @@ using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.SystemModule;
 using NUnit.Framework;
 using Shouldly;
-using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
@@ -72,22 +71,8 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate.Tests {
         }
 
         [Test][Order(30)]
-        public void Does_Not_Commit() 
-            => _window.View.ObjectSpace.IsModified.ShouldBeTrue();
-
-        [Test][Order(30)]
-        public void Can_Execute_ListView_Save_Action() {
-            var action = _window.Action("Save");
-            action.Available().ShouldBeTrue();
-            
-            action.DoTheExecute();
-            
-            _window.View.ObjectSpace.IsModified.ShouldBeFalse();
-        }
-
-
-            
-
+        public void Commit_The_Transaction() 
+            => _window.View.ObjectSpace.IsModified.ShouldBeFalse();
 
     }
 }

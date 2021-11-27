@@ -74,24 +74,16 @@ namespace Xpand.TestsLib.Common {
 
         public static Mock<T> GetMock<T>(this T t) where T : class => Mock.Get(t);
 
-        public static void VerifySend(this Mock<HttpMessageHandler> handlerMock, Times times,Func<HttpRequestMessage, bool> filter) 
+        public static void VerifySend<THandler>(this Mock<THandler> handlerMock, Times times,Func<HttpRequestMessage, bool> filter) where THandler:HttpMessageHandler 
             => handlerMock.Protected().Verify("SendAsync", times, ItExpr.Is<HttpRequestMessage>(message => filter==null||filter(message)),
                 ItExpr.IsAny<CancellationToken>());
 
-        public static IReturnsResult<HttpMessageHandler> SetupSend(this Mock<HttpMessageHandler> handlerMock, Action<HttpResponseMessage> configure,IScheduler scheduler=null) {
-            scheduler??=Scheduler.Default;
-            return handlerMock.Protected()
-                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(),
-                    ItExpr.IsAny<CancellationToken>())
+        public static IReturnsResult<THandler> SetupSend<THandler>(this Mock<THandler> handlerMock, Action<HttpResponseMessage> configure,IScheduler scheduler=null) where THandler:HttpMessageHandler 
+            => handlerMock.Protected()
+                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
                 .Returns((HttpRequestMessage requestMessage, CancellationToken _)
-                    =>  new HttpResponseMessage {
-                            StatusCode = HttpStatusCode.OK,
-                            RequestMessage = requestMessage
-                        }.ReturnObservable()
-                        .Do(configure)
-                        .Delay(Delay,scheduler)
-                        .ToTask(_, scheduler));
-        }
+                    =>  new HttpResponseMessage { StatusCode = HttpStatusCode.OK, RequestMessage = requestMessage }.ReturnObservable()
+                        .Do(configure).Delay(Delay,scheduler??=Scheduler.Default).ToTask(_, scheduler));
 
         public static TimeSpan Delay { get; set; } = TimeSpan.FromMilliseconds(200);
     }

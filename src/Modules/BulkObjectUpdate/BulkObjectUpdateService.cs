@@ -28,8 +28,7 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate{
                 .Concat(Observable.Defer(() => action.ShowView(update => update.UpdateObject())))).ToUnit();
 
         static IObservable<Unit> UpdateObject(this IObservable<(Frame listViewFrame, object o, DialogController dialogController)> source)
-            => source.SelectMany(t => t.dialogController.AcceptAction.WhenExecuted().FirstAsync()
-                    .SelectMany(_ => t.dialogController.Frame.View.AsDetailView().GetItems<PropertyEditor>()
+            => source.SelectMany(t => t.dialogController.AcceptAction.WhenExecuted(_ => t.dialogController.Frame.View.AsDetailView().GetItems<PropertyEditor>()
                         .Where(editor => ((IAppearanceEnabled)editor).Enabled&& ((IAppearanceVisibility)editor).Visibility==ViewItemVisibility.Show)
                         .Do(editor => {
                             var sourceValue = editor.MemberInfo.GetValue(editor.CurrentObject);
@@ -38,19 +37,21 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate{
                             }
                             var member = t.listViewFrame.View.ObjectTypeInfo.FindMember(editor.MemberInfo.Name);
                             member.SetValue(t.o,sourceValue);
+                        }).ToNowObservable()
+                        .Finally(() => {
+                            if (t.listViewFrame.Application.GetPlatform() == Platform.Win) {
+                                t.listViewFrame.Action("Save")?.Active.SetItemValue("OnlyForDetailView", t.listViewFrame.View.ObjectSpace.IsModified);
+                                t.dialogController.Frame.View.ObjectSpace.SetIsModified(false);    
+                            }
+                            else {
+                                t.listViewFrame.View.ObjectSpace.CommitChanges();
+                            }
                         }))
-                    .Finally(() => {
-                        if (t.listViewFrame.Application.GetPlatform() == Platform.Win) {
-                            t.listViewFrame.Action("Save").Active.SetItemValue("OnlyForDetailView", t.listViewFrame.View.ObjectSpace.IsModified);
-                            t.dialogController.Frame.View.ObjectSpace.SetIsModified(false);    
-                        }
-                        else {
-                            t.listViewFrame.View.ObjectSpace.CommitChanges();
-                        }
-                    })
                 )
                 .ToUnit();
-        static IObservable<Unit> ShowView(this SingleChoiceAction action,Func<IObservable<(Frame listViewFrame, object o, DialogController dialogController)>,IObservable<Unit>> update) 
+
+        static IObservable<Unit> ShowView(this SingleChoiceAction action,
+            Func<IObservable<(Frame listViewFrame, object o, DialogController dialogController)>, IObservable<Unit>> update) 
             => action.WhenActive()
                 .WhenExecuted(e => {
                     var showViewParameters = e.ShowViewParameters;

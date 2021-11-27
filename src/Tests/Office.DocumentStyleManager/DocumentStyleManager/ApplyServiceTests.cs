@@ -40,14 +40,6 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
             retainUndo.ShouldBeTrue();
         }
 
-        private void MockAllStylesListEditor(XafApplication xafApplication){
-	        // xafApplication.MockEditorsFactory();
-	        xafApplication.MockListEditor((view, application, _) =>
-		        view.Id.Contains(nameof(BusinessObjects.DocumentStyleManager.AllStyles))
-			        ? application.ListEditorMock(view).Object
-			        : new GridListEditor(view));
-        }
-
         [Test][Apartment(ApartmentState.STA)][XpandTest()]
         public void Executes_When_AllStyles_ListViewShowObjectAction_executes(){
 	        using var application=DocumentStyleManagerModule().Application;

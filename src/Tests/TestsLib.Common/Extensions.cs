@@ -378,6 +378,7 @@ namespace Xpand.TestsLib.Common{
 	        var listEditorMock = new Mock<TEditor>(listView){CallBase = true};
             listEditorMock.Setup(editor => editor.SupportsDataAccessMode(CollectionSourceDataAccessMode.Client)).Returns(true);
             listEditorMock.Setup(editor => editor.GetSelectedObjects()).Returns(Array.Empty<object>());
+            listEditorMock.Setup(editor => editor.SelectionType).Returns(() => application.GetPlatform()==Platform.Win?SelectionType.Full : SelectionType.MultipleSelection);
             var platform = application.GetPlatform();
             if (platform!=Platform.Blazor) {
                 listEditorMock.Protected().Setup<object>("CreateControlsCore")

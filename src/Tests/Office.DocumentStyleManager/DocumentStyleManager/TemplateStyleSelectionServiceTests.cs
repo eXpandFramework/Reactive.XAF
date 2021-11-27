@@ -32,6 +32,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.DocumentStyleManag
 		[Test][Apartment(ApartmentState.STA)][XpandTest()]
 		public void Action_should_be_enabled_when_TemplateLink_has_value(){
 			using var application=DocumentStyleManagerModule().Application;
+			application.MockListEditor((view, _, _) => new GridListEditor(view));
+
 			var dataObject = application.CreateObjectSpace().CreateObject<DataObject>();
 			dataObject.Content=Document.ToByteArray(DocumentFormat.OpenXml);
 			var window = application.ShowDocumentStyleManagerDetailView(dataObject);

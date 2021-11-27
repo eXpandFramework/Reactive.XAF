@@ -364,6 +364,7 @@ jobs:
           **\Xpand.XAF.Modules.Windows.Tests.dll
           **\Xpand.XAF.Modules.Email.Tests.dll
           **\Xpand.XAF.Modules.RazorView.Tests.dll
+          **\Xpand.XAF.Modules.BulkObjectUpdate.Tests.dll
           !**\obj\**;!**\ref\**
         diagnosticsEnabled: true
         codeCoverageEnabled: true

@@ -10,7 +10,6 @@ using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
 using Fasterflect;
 using Hangfire;
-using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.NonPersistentObjects;
 using Xpand.Extensions.XAF.ObjectExtensions;
@@ -29,7 +28,8 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
         }
 
         [Browsable(false)]
-        public virtual bool UseChainJob => true;
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "XAF0002:XPO business class properties should not be overriden", Justification = "<Pending>")]
+		public virtual bool UseChainJob => true;
         [Association("Job-ChainJobs")][Aggregated]
         public XPCollection<ChainJob> ChainJobs => GetCollection<ChainJob>(nameof(ChainJobs));
         

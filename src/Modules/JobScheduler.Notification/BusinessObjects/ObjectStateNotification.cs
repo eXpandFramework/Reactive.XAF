@@ -19,6 +19,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.BusinessObjects {
         }
 
         [Browsable(false)]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "XAF0002:XPO business class properties should not be overriden", Justification = "<Pending>")]
         public override bool UseChainJob => true;
 
         [Association("NotificationJob-NotificationJobIndexs")][Browsable(false)][Aggregated]
