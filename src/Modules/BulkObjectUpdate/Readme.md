@@ -86,11 +86,12 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |**DevExpress.ExpressApp**|**Any**
  |**DevExpress.Xpo**|**Any**
  |**DevExpress.ExpressApp.Validation**|**Any**
-|Xpand.Extensions.Reactive|4.212.1
- |Xpand.Extensions|4.212.1
- |Xpand.Extensions.XAF|4.212.1
- |Xpand.Extensions.XAF.Xpo|4.212.1
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.212.1
+ |**DevExpress.ExpressApp.CodeAnalysis**|**Any**
+|Xpand.Extensions.Reactive|4.212.2
+ |Xpand.Extensions|4.212.2
+ |Xpand.Extensions.XAF|4.212.2
+ |Xpand.Extensions.XAF.Xpo|4.212.2
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.212.2
  |Xpand.Patcher|2.0.30
  |System.Reactive|5.0.0
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
@@ -100,7 +101,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |System.ServiceModel.Http|4.8.1
  |Newtonsoft.Json|13.0.1
  |Xpand.Collections|1.0.4
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.212.1
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.212.2
 
 ## Issues-Debugging-Troubleshooting
 
