@@ -69,8 +69,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.Where(_ => _.Modules.FindModule(moduleType)!=null);
 
         public static IObservable<Frame> WhenFrameCreated(this XafApplication application,TemplateContext templateContext=default)
-            => RxApp.Frames.Where(frame => frame.Application==application&& (templateContext==default ||frame.Context == templateContext))
-                .TraceRX(frame => $"{frame.GetType().Name}-{frame.Context}");
+            => Observable.FromEventPattern<EventHandler<FrameCreatedEventArgs>,FrameCreatedEventArgs>(h => application.FrameCreated+=h,h => application.FrameCreated-=h,Scheduler.Immediate)
+                .Select(p => p.EventArgs.Frame)
+                .Where(frame => frame.Application==application&& (templateContext==default ||frame.Context == templateContext));
+        
+        // public static IObservable<Frame> WhenFrameCreated(this XafApplication application,TemplateContext templateContext=default)
+        //     => RxApp.Frames.Where(frame => frame.Application==application&& (templateContext==default ||frame.Context == templateContext))
+        //         .TraceRX(frame => $"{frame.GetType().Name}-{frame.Context}");
 
         private static readonly Subject<GenericEventArgs<XafApplication>> WhenExitingSubject = new();
         [SuppressMessage("ReSharper", "InconsistentNaming")]
@@ -127,7 +132,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .TraceRX(window => window.Context);
 
         public static IObservable<Window> WhenPopupWindowCreated(this XafApplication application) 
-            => RxApp.PopupWindows.Where(_ => _.Application==application);
+            => application.WhenFrameCreated().Where(_ => _.Application==application).Cast<Window>();
         
         public static void AddObjectSpaceProvider(this XafApplication application, params IObjectSpaceProvider[] objectSpaceProviders) 
             => application.WhenCreateCustomObjectSpaceProvider()

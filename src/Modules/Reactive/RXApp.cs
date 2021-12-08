@@ -22,20 +22,14 @@ namespace Xpand.XAF.Modules.Reactive{
 	public static class RxApp{
         
         static readonly Subject<ApplicationModulesManager> ApplicationModulesManagerSubject=new();
-        static readonly Subject<Frame> FramesSubject=new();
+        
 
         static RxApp() => AppDomain.CurrentDomain.Patch(PatchXafApplication);
 
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         static void CreateModuleManager(ApplicationModulesManager __result) => ApplicationModulesManagerSubject.OnNext(__result);
-
-        [SuppressMessage("ReSharper", "InconsistentNaming")]
-        static void Initialize(Frame __instance) => FramesSubject.OnNext(__instance);
-
+        
         private static void PatchXafApplication(Harmony harmony){
-            var frameInitialize = typeof(Frame).Method("Initialize");
-            var createFrameMethodPatch = GetMethodInfo(nameof(Initialize));
-            harmony.Patch(frameInitialize,  postfix:new HarmonyMethod(createFrameMethodPatch));
             var createModuleManager = typeof(XafApplication).Method(nameof(CreateModuleManager));
             harmony.Patch(createModuleManager, finalizer: new HarmonyMethod(GetMethodInfo(nameof(CreateModuleManager))));
             harmony.Patch(typeof(XafApplication).Method(nameof(XafApplication.Exit)),
@@ -88,12 +82,6 @@ namespace Xpand.XAF.Modules.Reactive{
         }
 
         internal static IObservable<ApplicationModulesManager> ApplicationModulesManager => ApplicationModulesManagerSubject.AsObservable();
-
-        internal static IObservable<Window> PopupWindows => Frames.When(TemplateContext.PopupWindow).OfType<Window>();
-
-        internal static IObservable<Frame> Frames{ get; } = FramesSubject.DistinctUntilChanged();
-
-        
     }
 
 }

@@ -137,7 +137,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<T> WhenModifiedObjects<T>(this IObjectSpace objectSpace,Expression<Func<T,object>> memberSelector){
             var memberName = ((MemberExpression) memberSelector.Body).Member.Name;
-            return objectSpace.WhenObjectChanged().Where(_ => _.e.Object is T && _.e.MemberInfo.Name == memberName)
+            return objectSpace.WhenObjectChanged().Where(t => t.e.Object is T && (t.e.MemberInfo?.Name == memberName||t.e.PropertyName==memberName))
                 .Select(_ => _.e.Object).Cast<T>();
         }
         
