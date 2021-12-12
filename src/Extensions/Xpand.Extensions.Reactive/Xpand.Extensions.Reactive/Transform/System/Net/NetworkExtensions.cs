@@ -4,11 +4,12 @@ using System.Net.Http;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
-using System.Security.Cryptography;
 using System.Text;
 using Fasterflect;
+using Xpand.Extensions.BytesExtensions;
 using Xpand.Extensions.JsonExtensions;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.StringExtensions;
 
 namespace Xpand.Extensions.Reactive.Transform.System.Net {
     public static class NetworkExtensions {
@@ -21,12 +22,11 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
 
         static HttpRequestMessage Sign(this HttpRequestMessage requestMessage,string key,string secret) {
             if (key != null) {
-                using HMACSHA256 hmac = new HMACSHA256(Encoding.ASCII.GetBytes(secret));
                 var toSing = requestMessage.RequestUri.PathAndQuery;
                 if (requestMessage.Method != HttpMethod.Get) {
                     toSing = $"{requestMessage.RequestUri.AbsolutePath}?{requestMessage.Content.ReadAsStringAsync().Result}";
                 }
-                var sign = BitConverter.ToString(hmac.ComputeHash(Encoding.ASCII.GetBytes(toSing))).Replace("-", "").ToLower();
+                var sign = secret.Bytes().CryptoSign(toSing).Replace("-", "").ToLower();
                 requestMessage.Headers.Add("Signature", sign);
                 requestMessage.Headers.Add("APIKEY", key);
             }

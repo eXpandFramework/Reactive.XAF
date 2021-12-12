@@ -42,6 +42,7 @@ using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions;
+using Xpand.TestsLib.Common.BO;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Logger;
@@ -485,6 +486,12 @@ namespace Xpand.TestsLib.Common{
             application.LoggingOn += ApplicationOnLoggingOn;
             
         }
+
+        
+        public override bool IsExportedType(Type type) 
+            => (type.Namespace != typeof(Order).Namespace || !SkipCommonLibBOExport) && base.IsExportedType(type);
+
+        public static bool SkipCommonLibBOExport { get; set; }
 
         private void ApplicationOnLoggingOn(object sender, LogonEventArgs e) => ((AuthenticationStandardLogonParameters) e.LogonParameters).UserName = NotAdmin?"User":"Admin";
 

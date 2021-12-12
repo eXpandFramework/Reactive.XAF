@@ -491,6 +491,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.WhenObjectSpaceCreated()
                 .SelectMany(objectSpace => objectSpace.WhenCommitedDetailed<T>(objectModification));
 
+        public static IObservable<T> UseObjectSpace<T>(this XafApplication application,Func<IObjectSpace,IObservable<T>> factory,bool useObjectSpaceProvider=false) 
+            => Observable.Using(() => application.CreateObjectSpace(useObjectSpaceProvider),factory);
     }
 
 
