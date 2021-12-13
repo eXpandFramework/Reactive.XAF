@@ -1,8 +1,0 @@
-DevExpress.ExpressApp.Web framework:net461
-DevExpress.Persistent.Base framework:netstandard2.0
-System.Reactive
-Fasterflect.Xpand
-Xpand.Patcher
-JetBrains.Annotations
-Newtonsoft.Json
-DevExpress.ExpressApp.CodeAnalysis

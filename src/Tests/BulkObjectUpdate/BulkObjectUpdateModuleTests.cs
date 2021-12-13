@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
@@ -62,10 +63,12 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate.Tests {
         public void Updates_Selected_ListView_Objects() {
             var dialogController = _detailViewFrame.GetController<DialogController>();
             ((BOU)dialogController.Frame.View.CurrentObject).Name = "string";
-            
+            var listView = _window.View.AsListView();
+            listView.Editor.GetMock().Setup(editor => editor.GetSelectedObjects())
+                .Returns(() => listView.CollectionSource.Objects().ToList());
             dialogController.AcceptAction.DoExecute();
 
-            var asListView = _window.View.AsListView();
+            var asListView = listView;
             var bou = asListView.CollectionSource.Objects().Cast<BOU>().First();
             bou.Name.ShouldBe("string");
         }

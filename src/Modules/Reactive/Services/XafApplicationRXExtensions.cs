@@ -132,7 +132,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .TraceRX(window => window.Context);
 
         public static IObservable<Window> WhenPopupWindowCreated(this XafApplication application) 
-            => application.WhenFrameCreated().Where(_ => _.Application==application).Cast<Window>();
+            => application.WhenFrameCreated(TemplateContext.PopupWindow).Where(_ => _.Application==application).Cast<Window>();
         
         public static void AddObjectSpaceProvider(this XafApplication application, params IObjectSpaceProvider[] objectSpaceProviders) 
             => application.WhenCreateCustomObjectSpaceProvider()
