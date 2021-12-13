@@ -5,6 +5,8 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
+using System.Reflection.Metadata;
+using System.Reflection.PortableExecutable;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using ConcurrentCollections;
@@ -30,9 +32,14 @@ namespace Xpand.XAF.Modules.RazorView{
 
         static RazorViewService() 
             => MetadataReferences = new ConcurrentHashSet<MetadataReference>(Directory.GetFiles(AppDomain.CurrentDomain.ApplicationPath(), "*.dll").ToNowObservable()
+                .Where(IsAssembly)
                 .SelectMany(path => Observable.Start(() => MetadataReference.CreateFromFile(path))
                     .OnErrorResumeNext(Observable.Empty<MetadataReference>())).ToEnumerable());
-
+        static bool IsAssembly(string path) {
+            using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using var peReader = new PEReader(fs);
+            return peReader.HasMetadata && peReader.GetMetadataReader().IsAssembly;
+        }
         internal static IObservable<TSource> TraceObjectTemplate<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 

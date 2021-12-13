@@ -2,12 +2,15 @@ using System;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using NUnit.Framework;
 using Shouldly;
+using Swordfish.NET.Collections.Auxiliary;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.TaskExtensions;
 using Xpand.Extensions.XAF.NonPersistentObjects;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.Common.Attributes;
@@ -29,7 +32,9 @@ namespace Xpand.XAF.Modules.RazorView.Tests {
             objectTemplate.ModelType = new ObjectType(typeof(OT));
             objectTemplate.Template = $"@Model.{nameof(OT.Order)}";
 
-            var render = await objectTemplate.Render();
+            // var concurrentHashSet = RazorViewService.MetadataReferences;
+            
+            var render = await objectTemplate.Render().Timeout(Timeout);
             
             render.ShouldSatisfyAllConditions(() => render.ShouldContain("10"),() => render.ShouldContain("20"),() => render.ShouldContain("30"));
             RemoveObjects(objectSpace);
