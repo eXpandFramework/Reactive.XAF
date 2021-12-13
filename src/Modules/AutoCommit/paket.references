@@ -2,8 +2,5 @@ System.Reactive
 DevExpress.ExpressApp
 Fasterflect.Xpand
 JetBrains.Annotations
-System.Configuration.ConfigurationManager
-Microsoft.CodeAnalysis.CSharp
-System.ServiceModel.Http
 Newtonsoft.Json
 DevExpress.ExpressApp.CodeAnalysis

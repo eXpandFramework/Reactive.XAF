@@ -3,14 +3,9 @@ JetBrains.Annotations
 System.Reactive
 DevExpress.Persistent.Base
 Microsoft.Graph.Beta
-Microsoft.Identity.Client
 Microsoft.Owin.Host.SystemWeb
 Microsoft.Owin.Security.Cookies
 Microsoft.Owin.Security.OpenIdConnect
-Microsoft.CodeAnalysis.CSharp
-Microsoft.IdentityModel.Protocols.OpenIdConnect
-Microsoft.IdentityModel.Tokens
-System.Collections.Immutable
-Microsoft.Graph.Core
 Newtonsoft.Json
 DevExpress.ExpressApp.CodeAnalysis
+System.Memory

@@ -2,9 +2,5 @@ DevExpress.Persistent.Base
 Fasterflect.Xpand
 Xpand.Patcher
 JetBrains.Annotations
-System.ValueTuple
-Microsoft.CodeAnalysis.CSharp
 Xpand.Collections
-System.ServiceModel.Http
-System.CodeDom
 Newtonsoft.Json

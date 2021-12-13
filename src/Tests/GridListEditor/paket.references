@@ -1,15 +1,11 @@
 MagicOnion
 Moq
 Shouldly
-System.Reactive
 NUnit
 NUnit3TestAdapter
 JetBrains.Annotations
 Microsoft.CodeAnalysis
-Microsoft.CodeAnalysis.Csharp
-Newtonsoft.Json
 Microsoft.NET.Test.Sdk
-System.Data.SqlClient
 DevExpress.ExpressApp.Win
 DevExpress.Persistent.BaseImpl.Xpo
 akarnokd.reactive_extensions

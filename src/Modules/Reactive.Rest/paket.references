@@ -3,9 +3,6 @@ DevExpress.ExpressApp
 Xpand.Patcher
 JetBrains.Annotations
 Microsoft.CSharp
-Microsoft.CodeAnalysis.CSharp
 System.Reactive
-System.Configuration.ConfigurationManager
-System.ServiceModel.Http
 Newtonsoft.Json
 DevExpress.ExpressApp.CodeAnalysis

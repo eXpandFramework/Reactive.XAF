@@ -9,11 +9,7 @@ Fasterflect.Xpand
 Xpand.Patcher
 akarnokd.reactive_extensions
 Xpand.Collections
-DevExpress.Xpo
 Microsoft.NET.Test.SDK
-Microsoft.CodeAnalysis.CSharp
-System.Text.Json
 Polly
 Microsoft.AspNetCore.Http.Features
-Newtonsoft.Json
 DevExpress.ExpressApp.Win

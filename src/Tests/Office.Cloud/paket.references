@@ -5,13 +5,8 @@ NUnit3TestAdapter
 JetBrains.Annotations
 Fasterflect.Xpand
 Microsoft.Graph.Beta
-Castle.Core
 akarnokd.reactive_extensions
-Microsoft.Identity.Client
 Moq
 Microsoft.CodeAnalysis
-Microsoft.CodeAnalysis.Csharp
-Newtonsoft.Json
 Microsoft.NET.Test.Sdk
-DevExpress.ExpressApp.Core.All
 DevExpress.ExpressApp.Win.All

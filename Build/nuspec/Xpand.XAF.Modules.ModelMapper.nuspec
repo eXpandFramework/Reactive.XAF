@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.ModelMapper</id>
-    <version>4.212.2.0</version>
+    <version>4.212.2.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -12,28 +12,25 @@
     <description>The `ModelMapper` allows to control all XAF components from the application model.</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, ModelMapper, 21.2.3</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, ModelMapper, 21.2.4</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.Extensions" version="4.212.2.0" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.212.2.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.212.2.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.212.2.0" />
+        <dependency id="Xpand.Extensions" version="4.212.2.1" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.212.2.1" />
+        <dependency id="Xpand.Extensions.XAF" version="4.212.2.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.212.2.1" />
         <dependency id="Enums.NET" version="4.0" />
-        <dependency id="Mono.Cecil" version="0.11.3" />
+        <dependency id="Mono.Cecil" version="0.11.4" />
         <dependency id="System.CodeDom" version="5.0" />
-        <dependency id="DevExpress.ExpressApp" version="21.2.3" />
+        <dependency id="DevExpress.ExpressApp" version="21.2.4" />
         <dependency id="System.Reactive" version="5.0" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="JetBrains.Annotations" version="2021.3" />
         <dependency id="Xpand.Collections" version="1.0.4" />
-        <dependency id="System.Configuration.ConfigurationManager" version="5.0" />
-        <dependency id="Microsoft.CodeAnalysis.CSharp" version="3.11" />
-        <dependency id="System.ServiceModel.Http" version="4.8.1" />
         <dependency id="System.Interactive" version="5.0" />
         <dependency id="Newtonsoft.Json" version="13.0.1" />
-        <dependency id="DevExpress.ExpressApp.CodeAnalysis" version="21.2.3" />
-        <dependency id="Xpand.VersionConverter" version="4.212.2.0" />
+        <dependency id="DevExpress.ExpressApp.CodeAnalysis" version="21.2.4" />
+        <dependency id="Xpand.VersionConverter" version="4.212.2.1" />
       </group>
     </dependencies>
   </metadata>

@@ -9,8 +9,5 @@ Xpand.Patcher
 akarnokd.reactive_extensions
 Xpand.Collections
 Microsoft.NET.Test.SDK
-Microsoft.CodeAnalysis.CSharp
-System.Text.Json
 Polly
-Newtonsoft.Json
 DevExpress.ExpressApp.Blazor.All

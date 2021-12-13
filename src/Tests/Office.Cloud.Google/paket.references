@@ -6,11 +6,7 @@ JetBrains.Annotations
 Fasterflect.Xpand
 akarnokd.reactive_extensions
 Google.Apis.People.v1
-System.ValueTuple
 Moq
 Microsoft.CodeAnalysis
-Microsoft.CodeAnalysis.Csharp
-Newtonsoft.Json
 Microsoft.NET.Test.Sdk
-DevExpress.ExpressApp.Core.All
 DevExpress.ExpressApp.Win.All

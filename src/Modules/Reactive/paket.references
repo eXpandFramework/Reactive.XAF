@@ -4,11 +4,7 @@ System.Reactive
 Fasterflect.Xpand
 Xpand.Patcher
 JetBrains.Annotations
-System.Configuration.ConfigurationManager
 Microsoft.CSharp
-Microsoft.CodeAnalysis.CSharp
-System.ServiceModel.Http                             
 Newtonsoft.Json
-System.Security.Cryptography.Xml
 Enums.Net
 DevExpress.ExpressApp.CodeAnalysis

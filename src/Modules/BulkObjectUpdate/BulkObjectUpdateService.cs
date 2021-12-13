@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -25,33 +26,31 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate{
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => manager.RegisterAction().AddItems(action => action.AddItems().ToUnit()
-                .Concat(Observable.Defer(() => action.ShowView(update => update.UpdateObject())))).ToUnit();
+                .Concat(Observable.Defer(() => action.ShowView().UpdateListViewObjects()))).ToUnit();
 
-        static IObservable<Unit> UpdateObject(this IObservable<(Frame listViewFrame, object o, DialogController dialogController)> source)
-            => source.SelectMany(t => t.dialogController.AcceptAction.WhenExecuted(_ => t.dialogController.Frame.View.AsDetailView().GetItems<PropertyEditor>()
-                        .Where(editor => ((IAppearanceEnabled)editor).Enabled&& ((IAppearanceVisibility)editor).Visibility==ViewItemVisibility.Show)
-                        .Do(editor => {
-                            var sourceValue = editor.MemberInfo.GetValue(editor.CurrentObject);
-                            if (editor.MemberInfo.MemberTypeInfo.IsPersistent) {
-                                sourceValue = t.listViewFrame.View.ObjectSpace.GetObject(sourceValue);
-                            }
-                            var member = t.listViewFrame.View.ObjectTypeInfo.FindMember(editor.MemberInfo.Name);
-                            member.SetValue(t.o,sourceValue);
-                        }).ToNowObservable()
-                        .Finally(() => {
-                            if (t.listViewFrame.Application.GetPlatform() == Platform.Win) {
-                                t.listViewFrame.Action("Save")?.Active.SetItemValue("OnlyForDetailView", t.listViewFrame.View.ObjectSpace.IsModified);
-                                t.dialogController.Frame.View.ObjectSpace.SetIsModified(false);    
-                            }
-                            else {
-                                t.listViewFrame.View.ObjectSpace.CommitChanges();
-                            }
-                        }))
-                )
-                .ToUnit();
+        static IObservable<Unit> UpdateListViewObjects(this IObservable<(Frame listView, Frame detailView)> source) 
+	        => source.SelectMany(t => t.detailView.GetController<DialogController>().AcceptAction.WhenExecuted(
+		        _ => t.PropertyEditors().SelectMany(editor => t.listView.View.SelectedObjects.Cast<object>()
+				        .Do(o => {
+					        var sourceValue = editor.MemberInfo.GetValue(editor.CurrentObject);
+					        if (editor.MemberInfo.MemberTypeInfo.IsPersistent) {
+						        sourceValue = t.listView.View.ObjectSpace.GetObject(sourceValue);
+					        }
+                            editor.MemberInfo.SetValue(o, sourceValue);
+				        }))
+			        .ToNowObservable()
+			        .Finally(() => {
+                        t.detailView.View.ObjectSpace.SetIsModified(false);
+				        if (t.listView.Application.GetPlatform() != Platform.Win) {
+					        t.listView.View.ObjectSpace.CommitChanges();
+				        }
+			        }))).ToUnit();
 
-        static IObservable<Unit> ShowView(this SingleChoiceAction action,
-            Func<IObservable<(Frame listViewFrame, object o, DialogController dialogController)>, IObservable<Unit>> update) 
+        private static IEnumerable<PropertyEditor> PropertyEditors(this (Frame listView, Frame detailView) t) 
+	        => t.detailView.View.AsDetailView().GetItems<PropertyEditor>().Where(editor =>
+		        ((IAppearanceEnabled)editor).Enabled && ((IAppearanceVisibility)editor).Visibility == ViewItemVisibility.Show);
+
+        static IObservable<(Frame listView, Frame detailView)> ShowView(this SingleChoiceAction action) 
             => action.WhenActive()
                 .WhenExecuted(e => {
                     var showViewParameters = e.ShowViewParameters;
@@ -64,9 +63,9 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate{
                     var dialogController = new DialogController();
                     dialogController.SaveOnAccept = false;
                     showViewParameters.Controllers.Add(dialogController);
-                    return update(application.WhenViewOnFrame(modelDetailView.ModelClass.TypeInfo.Type).WhenFrame(ViewType.DetailView).FirstAsync()
-                        .SelectMany(_ => e.SelectedObjects.Cast<object>().Select(o => (listView:e.Action.Controller.Frame,o, dialogController))));
-            });
+                    return application.WhenViewOnFrame(modelDetailView.ModelClass.TypeInfo.Type).WhenFrame(ViewType.DetailView).FirstAsync()
+	                    .Select(frame => (listView:e.Action.Controller.Frame,detailView:frame));
+                });
 
         private static IObservable<SingleChoiceAction> RegisterAction(this ApplicationModulesManager manager) 
             => manager.RegisterViewSingleChoiceAction(nameof(BulkUpdate),action => action.ConfigureAction());

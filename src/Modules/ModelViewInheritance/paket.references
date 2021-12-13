@@ -2,10 +2,7 @@ System.ValueTuple
 DevExpress.ExpressApp
 Fasterflect.Xpand
 JetBrains.Annotations
-Microsoft.CodeAnalysis.CSharp
-System.ServiceModel.Http
 Xpand.Patcher
-System.Configuration.ConfigurationManager
 System.Reactive
 Newtonsoft.Json
 DevExpress.ExpressApp.CodeAnalysis

@@ -56,6 +56,7 @@
     <None Update="UnusableNodes1.xml">
       <DependentUpon>Model.DesignedDiffs.xafml</DependentUpon>
     </None>
+    <!-- <packagereference Include="Microsoft.AspNetCore.Razor.Language" Version="5.0.12.0"/> -->
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

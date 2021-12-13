@@ -4,7 +4,4 @@ Fasterflect.Xpand
 System.Reactive
 JetBrains.Annotations
 Google.Apis.Tasks.v1
-Microsoft.CodeAnalysis.CSharp
-System.Configuration.ConfigurationManager
-Newtonsoft.Json
 DevExpress.ExpressApp.CodeAnalysis

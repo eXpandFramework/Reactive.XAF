@@ -7,6 +7,4 @@ NUnit
 NUnit3TestAdapter
 JetBrains.Annotations
 Microsoft.CodeAnalysis
-Microsoft.CodeAnalysis.Csharp
-Newtonsoft.Json
 Microsoft.NET.Test.Sdk

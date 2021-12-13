@@ -1,10 +1,7 @@
 DevExpress.ExpressApp.ConditionalAppearance
-DevExpress.Xpo
 System.Reactive
 Fasterflect.Xpand
 Xpand.Patcher
 JetBrains.Annotations
-Microsoft.CodeAnalysis.CSharp
-System.Configuration.ConfigurationManager
 Newtonsoft.Json
 DevExpress.ExpressApp.CodeAnalysis

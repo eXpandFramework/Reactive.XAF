@@ -8,7 +8,5 @@ Fasterflect.Xpand
 Xpand.Patcher
 akarnokd.reactive_extensions
 Microsoft.CodeAnalysis
-Microsoft.CodeAnalysis.Csharp
-Newtonsoft.Json
 Microsoft.NET.Test.Sdk
 DevExpress.ExpressApp.Win

@@ -1,9 +1,5 @@
-DevExpress.ExpressApp
 DevExpress.ExpressApp.Win
 System.Reactive
 Fasterflect.Xpand
-System.Configuration.ConfigurationManager
-Microsoft.CodeAnalysis.CSharp
-System.ServiceModel.Http
 Newtonsoft.Json
 DevExpress.ExpressApp.CodeAnalysis

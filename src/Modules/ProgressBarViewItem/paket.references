@@ -3,9 +3,5 @@ DevExpress.ExpressApp
 Fasterflect.Xpand
 JetBrains.Annotations
 System.CodeDom
-System.Configuration.ConfigurationManager
-Microsoft.CodeAnalysis.CSharp
-System.ServiceModel.Http
-System.Drawing.Common
 Newtonsoft.Json
 DevExpress.ExpressApp.CodeAnalysis

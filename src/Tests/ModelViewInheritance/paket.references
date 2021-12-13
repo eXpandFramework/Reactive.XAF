@@ -7,8 +7,6 @@ NUnit3TestAdapter
 JetBrains.Annotations
 Moq
 Microsoft.CodeAnalysis
-Microsoft.CodeAnalysis.Csharp
-Newtonsoft.Json
 Microsoft.NET.Test.Sdk
 Xpand.Patcher
 DevExpress.ExpressApp.Win

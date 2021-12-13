@@ -1,4 +1,3 @@
-DevExpress.Xpo
 MagicOnion
 Shouldly
 NUnit
@@ -7,10 +6,8 @@ DevExpress.ExpressApp.Office.Win
 DevExpress.ExpressApp.Security
 JetBrains.Annotations
 DevExpress.Persistent.BaseImpl.Xpo
-DevExpress.Persistent.Base
 Fasterflect.Xpand
 akarnokd.reactive_extensions
 Moq
 Xpand.Collections
-
 Newtonsoft.Json

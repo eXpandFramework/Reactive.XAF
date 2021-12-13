@@ -2,13 +2,11 @@ DevExpress.ExpressApp.Core.All
 DevExpress.ExpressApp.EasyTest.WinAdapter
 DevExpress.ExpressApp.EasyTest.WebAdapter
 DevExpress.ExpressApp.Web
-DevExpress.ExpressApp.Win
 akarnokd.reactive_extensions
 Enums.NET
 Humanizer.Core
 MagicOnion
 Moq
-Newtonsoft.Json
 Shouldly
 NUnit
 NUnit3TestAdapter
@@ -17,5 +15,3 @@ Xpand.Patcher
 Polly
 JetBrains.Annotations
 Selenium.Support
-Selenium.WebDriver
-System.Reactive

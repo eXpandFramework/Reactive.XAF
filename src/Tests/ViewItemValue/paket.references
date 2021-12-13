@@ -8,7 +8,5 @@ Moq
 Fasterflect.Xpand
 Xpand.Patcher
 Microsoft.CodeAnalysis
-Microsoft.CodeAnalysis.Csharp
-Newtonsoft.Json
 Microsoft.NET.Test.Sdk
 DevExpress.ExpressApp.Win

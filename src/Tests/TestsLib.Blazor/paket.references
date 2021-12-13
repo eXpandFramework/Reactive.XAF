@@ -1,13 +1,7 @@
-Microsoft.CodeAnalysis.Csharp
-System.Configuration.ConfigurationManager
-System.ServiceModel.Http
 Fasterflect.Xpand
-Microsoft.Extensions.DependencyInjection.Abstractions
 System.Diagnostics.PerformanceCounter
 Moq
 Newtonsoft.Json
-System.Data.SqlClient
 Nunit
-DevExpress.ExpressApp.Security
 DevExpress.ExpressApp.Security.Xpo
 DevExpress.Persistent.BaseImpl.Xpo

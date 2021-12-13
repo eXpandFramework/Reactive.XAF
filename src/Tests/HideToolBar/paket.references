@@ -7,7 +7,5 @@ NUnit3TestAdapter
 Fasterflect.Xpand
 JetBrains.Annotations
 Microsoft.CodeAnalysis
-Microsoft.CodeAnalysis.Csharp
-Newtonsoft.Json
 Microsoft.NET.Test.Sdk
 DevExpress.ExpressApp.Win

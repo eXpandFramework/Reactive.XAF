@@ -4,7 +4,5 @@ Fasterflect.Xpand
 System.Reactive
 JetBrains.Annotations
 Microsoft.Graph.Beta
-Microsoft.Identity.Client
-Microsoft.CodeAnalysis.CSharp
 Newtonsoft.Json
 DevExpress.ExpressApp.CodeAnalysis

@@ -8,9 +8,9 @@ Write-Host ------- Patch Hangfire------------
 
 # Get-ChildItem $nugetPackagesFolder *hangfire*|Remove-Item -Recurse -Force
 # XpandPwsh\Invoke-PaketRestore -Strict
-$versionConverterPath = (Get-ChildItem "$nugetPackagesFolder\xpand.versionconverter" | Select-Object -Last 1).FullName
+$versionConverterPath = (Get-ChildItem "$nugetPackagesFolder\xpand.versionconverter" -Directory | Select-Object -Last 1).FullName
 $netstandard=get-item "$nugetPackagesFolder\netstandard.library\2.0.3\build\netstandard2.0\ref\netstandard.dll"
-[System.Reflection.Assembly]::Load([System.IO.File]::ReadAllBytes("$versionConverterPath\build\Mono.Cecil\Mono.Cecil.dll")) | Out-Null
+[System.Reflection.Assembly]::Load([System.IO.File]::ReadAllBytes("$([System.IO.Path]::GetDirectoryName($versionConverterPath))\2.202.11\build\Mono.Cecil\Mono.Cecil.dll")) | Out-Null
 . "$versionConverterPath\build\AssemblyResolver.ps1"
 "Xpand.XAF.Modules.JobScheduler", "hangfire*" | ForEach-Object {
     Get-ChildItem $nugetPackagesFolder $_ | ForEach-Object {

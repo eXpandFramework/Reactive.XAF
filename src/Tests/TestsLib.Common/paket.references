@@ -1,6 +1,5 @@
 akarnokd.reactive_extensions
 Enums.NET
-Humanizer.Core
 MagicOnion
 Moq
 Newtonsoft.Json
@@ -9,7 +8,6 @@ Fasterflect.Xpand
 Xpand.Patcher
 Polly
 JetBrains.Annotations
-Microsoft.CodeAnalysis.CSharp
 nunit
 Microsoft.CodeAnalysis
 DevExpress.ExpressApp.Security.Xpo

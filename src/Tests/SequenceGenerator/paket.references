@@ -7,12 +7,8 @@ NUnit
 NUnit3TestAdapter
 JetBrains.Annotations
 FasterFlect.Xpand
-System.Drawing.Common
 Microsoft.CodeAnalysis
-Microsoft.CodeAnalysis.Csharp
-Newtonsoft.Json
 Microsoft.NET.Test.Sdk
 DevExpress.Persistent.BaseImpl.Xpo
-DevExpress.ExpressApp.Security
 DevExpress.ExpressApp.Security.Xpo
 DevExpress.ExpressApp.Win

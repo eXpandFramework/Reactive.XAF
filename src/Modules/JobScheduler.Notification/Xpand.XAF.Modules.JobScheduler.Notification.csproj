@@ -17,6 +17,13 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
     <RootNamespace>Xpand.XAF.Modules.JobScheduler.Hangfire.Notification</RootNamespace>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <NoWarn>1701;1702;NU1701</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <WarningsAsErrors>;NU1605</WarningsAsErrors>
+    <NoWarn>1701;1702;NU1701</NoWarn>
+  </PropertyGroup>
   <ItemGroup>
     <None Remove="Model.DesignedDiffs.xafml" />
   </ItemGroup>
@@ -51,12 +58,12 @@
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
     </Reference>
-    <PackageReference Include="DevExpress.ExpressApp" Version="21.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="21.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Validation" Version="21.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="21.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="21.2.3" />
-    <PackageReference Include="DevExpress.Persistent.Base" Version="21.2.3" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="21.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="21.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Validation" Version="21.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="21.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="21.2.4" />
+    <PackageReference Include="DevExpress.Persistent.Base" Version="21.2.4" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />

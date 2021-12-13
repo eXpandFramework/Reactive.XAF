@@ -41,11 +41,11 @@
     <Compile Include="..\..\CommonFiles\Windows\DocumentStyleManagerService.cs" Link="DocumentStyleManagerService.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.EasyTest" Version="21.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="21.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="21.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.ScriptRecorder" Version="21.2.3" />
-    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="21.2.3" />
+    <PackageReference Include="DevExpress.EasyTest" Version="21.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="21.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WinAdapter" Version="21.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.ScriptRecorder" Version="21.2.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="21.2.4" />
     <PackageReference Include="MagicOnion" Version="2.6.3" />
     <PackageReference Include="Moq" Version="4.16" />
     <PackageReference Include="Polly" Version="7.2.2" />
@@ -54,7 +54,7 @@
     <PackageReference Include="System.Reactive" Version="5.0" />
     <PackageReference Include="NUnit" Version="3.13.2" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.0" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.212.2.0" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.212.2.1" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.TestsLib.Net461">

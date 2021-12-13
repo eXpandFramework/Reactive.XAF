@@ -9,8 +9,5 @@ NUnit3TestAdapter
 Fasterflect.Xpand
 Xpand.Collections
 JetBrains.Annotations
-DevExpress.Xpo
-DevExpress.ExpressApp.Core.All
 DevExpress.ExpressApp.Win.All
 DevExpress.ExpressApp.Web.All
-Newtonsoft.Json

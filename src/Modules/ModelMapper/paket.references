@@ -6,9 +6,6 @@ System.Reactive
 Fasterflect.Xpand
 JetBrains.Annotations
 Xpand.Collections
-System.Configuration.ConfigurationManager
-Microsoft.CodeAnalysis.CSharp
-System.ServiceModel.Http
 System.Interactive
 Newtonsoft.Json
 DevExpress.ExpressApp.CodeAnalysis
