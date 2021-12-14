@@ -4,7 +4,6 @@ using System.Threading;
 using System.Windows.Forms;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
-using DevExpress.ExpressApp.Win.Templates.Bars;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.Reactive.Utility;
@@ -32,7 +31,6 @@ namespace Xpand.XAF.Modules.Windows.Tests {
                         var popupWindow = application.CreatePopupWindow(TemplateContext.PopupWindow,
                             window.Application.FindListViewId(typeof(W)));
                         popupWindow.SetView(application.NewListView(typeof(W)));
-                        popupWindow.SetTemplate(new DetailFormV2());
                         return popupWindow;
                     }
 
@@ -40,7 +38,7 @@ namespace Xpand.XAF.Modules.Windows.Tests {
                 })
 				.FirstAsync()
 				.Select(window => ((Form) window.Template).ControlBox)
-                .Do(b => application.Exit())
+                .Do(_ => application.Exit())
                 .SubscribeReplay();
 
 			((TestWinApplication)application).Start();
