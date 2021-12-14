@@ -70,20 +70,22 @@ function UpdateModulesList($rootLocation, $packages,$path) {
                 }
             }
             
-            $targetFramework =Get-ProjectTargetFramework $project -FullName
+            if ($project){
+                $targetFramework =Get-ProjectTargetFramework $project -FullName
             
-            $assembly=$assemblies|Where-Object{$_.BaseName -eq $packageName}|Select-Object -First 1
-            if ($assembly.Extension -eq ".exe"){
-                $platform="Win"
-            }
-            else{
-                $platform=($assembly|Get-AssemblyMetadata -key Platform).Value
-            }
-            if (!$platform){
-                throw "Platform missing in $packageName"
-            }
-            if ($platform -eq "Core"){
-                $platform="Agnostic"
+                $assembly=$assemblies|Where-Object{$_.BaseName -eq $packageName}|Select-Object -First 1
+                if ($assembly.Extension -eq ".exe"){
+                    $platform="Win"
+                }
+                else{
+                    $platform=($assembly|Get-AssemblyMetadata -key Platform).Value
+                }
+                if (!$platform){
+                    throw "Platform missing in $packageName"
+                }
+                if ($platform -eq "Core"){
+                    $platform="Agnostic"
+                }
             }
         }
         

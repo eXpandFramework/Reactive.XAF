@@ -115,29 +115,27 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 
 The module follows the Nuget [Version Basics](https://docs.Google.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
-`.NetFramework: net461`
+`.NetFramework: `
 
 |<!-- -->|<!-- -->
 |----|----
 |**DevExpress.ExpressApp.Office**|**Any**
  |**DevExpress.ExpressApp.ConditionalAppearance**|**Any**
  |**DevExpress.ExpressApp.CodeAnalysis**|**Any**
-|Xpand.Extensions|4.212.2
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.212.2
- |[Xpand.XAF.Modules.SuppressConfirmation](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.SuppressConfirmation)|4.212.2
- |[Xpand.XAF.Modules.HideToolBar](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.HideToolBar)|4.212.2
- |[Xpand.XAF.Modules.ViewItemValue](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.ViewItemValue)|4.212.2
- |Xpand.Extensions.Reactive|4.212.2
- |Xpand.Extensions.XAF|4.212.2
- |Xpand.Extensions.XAF.Xpo|4.212.2
+|Xpand.Extensions|4.212.3
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.212.3
+ |[Xpand.XAF.Modules.SuppressConfirmation](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.SuppressConfirmation)|4.212.3
+ |[Xpand.XAF.Modules.HideToolBar](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.HideToolBar)|4.212.3
+ |[Xpand.XAF.Modules.ViewItemValue](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.ViewItemValue)|4.212.3
+ |Xpand.Extensions.Reactive|4.212.3
+ |Xpand.Extensions.XAF|4.212.3
+ |Xpand.Extensions.XAF.Xpo|4.212.3
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |JetBrains.Annotations|2021.3.0
  |System.Reactive|5.0.0
  |Newtonsoft.Json|13.0.1
  |System.Interactive|5.0.0
- |Microsoft.CodeAnalysis.CSharp|3.11.0
- |System.CodeDom|5.0.0
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.212.2
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.212.3
 
 ## Issues-Debugging-Troubleshooting
 

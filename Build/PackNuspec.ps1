@@ -1,10 +1,10 @@
 param(
-    $Branch = "lab",
+    $Branch = "master",
     $nugetBin = "$PSScriptRoot\..\bin\Nupkg",
     $sourceDir = "$PSScriptRoot\..",
     $Filter ,
     [switch]$SkipReadMe,
-    $dxVersion="21.2.3",
+    $dxVersion="21.2.4",
     $Feed
 )
 

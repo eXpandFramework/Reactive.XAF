@@ -8,4 +8,3 @@ Microsoft.Owin.Security.Cookies
 Microsoft.Owin.Security.OpenIdConnect
 Newtonsoft.Json
 DevExpress.ExpressApp.CodeAnalysis
-System.Memory

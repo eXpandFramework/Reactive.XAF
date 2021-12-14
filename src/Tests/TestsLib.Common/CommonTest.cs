@@ -71,7 +71,7 @@ namespace Xpand.TestsLib.Common{
 
         [OneTimeSetUp]
         public virtual void Init() {
-            TestScheduler.AdvanceTimeBy((long)DateTime.Now.ToUniversalTime().Subtract(TestScheduler.Now.Date).TotalMilliseconds);
+            TestScheduler.AdvanceTimeBy((long)DateTimeOffset.Now.ToUniversalTime().Subtract(TestScheduler.Now).TotalMilliseconds);
         }
 
         [OneTimeTearDown]

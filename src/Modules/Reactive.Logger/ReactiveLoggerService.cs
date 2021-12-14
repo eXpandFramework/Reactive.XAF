@@ -221,7 +221,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             }
             var traceEvents = objectSpace.ModifiedObjects.Cast<TraceEvent>().ToArray();
             objectSpace.CommitChanges();
-            return traceEvents.ToObservable(Scheduler.Immediate).Do(traceEvent => SavedTraceEventSubject.OnNext(traceEvent));
+            return traceEvents.ToNowObservable().Do(traceEvent => SavedTraceEventSubject.OnNext(traceEvent));
         }
 
     }
