@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Reactive.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Xpand.Extensions.Reactive.Transform{
     public static partial class Transform{

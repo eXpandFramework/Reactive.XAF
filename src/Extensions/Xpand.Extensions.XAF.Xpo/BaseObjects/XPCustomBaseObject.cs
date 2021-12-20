@@ -9,6 +9,7 @@ using DevExpress.Xpo.Metadata;
 namespace Xpand.Extensions.XAF.Xpo.BaseObjects {
     [NonPersistent]
     public abstract class XPCustomBaseObject: XPCustomObject,IObjectSpaceLink{
+        
         protected override void OnSaving() {
             if (TruncateStrings)
                 DoTruncateStrings();

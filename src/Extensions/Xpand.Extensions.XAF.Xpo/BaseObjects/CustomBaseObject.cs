@@ -15,6 +15,7 @@ namespace Xpand.XAF.Persistent.BaseImpl{
         public long Oid => _oid;
         
         protected CustomBaseObject(Session session):base(session){
+            
         }
 
 

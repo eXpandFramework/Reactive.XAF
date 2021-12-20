@@ -61,12 +61,12 @@ namespace Xpand.TestsLib.Common {
             return true;
         }
 
-        public static IDisposable PatchWebRequest(this  Harmony harmony,Func<Uri,bool> matchUri,Mock<HttpWebResponse> mockResoponse){
+        public static IDisposable PatchWebRequest(this  Harmony harmony,Func<Uri,bool> matchUri,Mock<HttpWebResponse> mockResponse){
             var methodInfo = typeof(WebRequest).GetMethod(nameof(WebRequest.CreateHttp),new[]{typeof(Uri)});
             var harmonyMethod = new HarmonyMethod(typeof(MockExtensions), nameof(WebRequestCreate));
             harmony.Patch(methodInfo, harmonyMethod);
             _matchUri = matchUri;
-            _mockResponse=mockResoponse;
+            _mockResponse=mockResponse;
             return Observable.While(() => TestContext.CurrentContext.Result.Outcome.Status == TestStatus.Inconclusive, Observable.Empty<Unit>())
                 .Finally(() => harmony.Unpatch(methodInfo, harmonyMethod.method))
                 .SubscribeOn(Scheduler.Default).Subscribe();
@@ -85,6 +85,8 @@ namespace Xpand.TestsLib.Common {
                     =>  new HttpResponseMessage { StatusCode = HttpStatusCode.OK, RequestMessage = requestMessage }.ReturnObservable()
                         .Do(configure).Delay(Delay,scheduler??=Scheduler.Default).ToTask(_, scheduler));
 
+        
+        
         public static TimeSpan Delay { get; set; } = TimeSpan.FromMilliseconds(200);
     }
 }

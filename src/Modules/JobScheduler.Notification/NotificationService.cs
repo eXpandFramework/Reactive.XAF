@@ -79,7 +79,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification {
         
         private static IObservable<object> WhenNotificationJobModification(this XafApplication application, NotificationType[] modelNotificationTypes) 
             => Observable.Using(application.CreateNonSecuredObjectSpace,objectSpace => objectSpace.SaveIndexes(modelNotificationTypes))
-                .Merge(application.WhenCommitedDetailed<ObjectStateNotification>(ObjectModification.NewOrUpdated)
+                .Merge(application.WhenCommittedDetailed<ObjectStateNotification>(ObjectModification.NewOrUpdated)
                     .SelectMany(t => application.SaveIndexes(t.details.Select(t1 =>t1.instance ).ToArray(),modelNotificationTypes)
                             .TraceNotificationModule(job => $"{ObjectModification.NewOrUpdated}-{job}")));
 

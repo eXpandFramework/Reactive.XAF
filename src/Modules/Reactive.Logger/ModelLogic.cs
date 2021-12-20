@@ -7,8 +7,13 @@ using System.Linq;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.ConditionalAppearance;
+using DevExpress.ExpressApp.DC;
+using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
+using DevExpress.Persistent.Base;
+using DevExpress.Persistent.Base.General;
+using DevExpress.Xpo;
 using JetBrains.Annotations;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Utility;
@@ -32,6 +37,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
     }
     public interface IModelReactiveLogger:IModelNode{
         IModelTraceSourcedModules TraceSources{ get; }
+        IModelReactiveLoggerNotifications Notifications { get; }
     }
 
     public static class ModelReactiveLoggerService{
@@ -48,7 +54,35 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         bool Enabled{ get; set; }
         [DefaultValue(ObservableTraceStrategy.None)]
         ObservableTraceStrategy PersistStrategy{ get; set; }
+        
+        
     }
+
+    public interface IModelReactiveLoggerNotifications:IModelList<IModelReactiveLoggerNotification>,IModelNode {
+        
+    }
+    public interface IModelReactiveLoggerNotification : IModelNode {
+        [CriteriaOptions(nameof(TraceEventObjectType))]
+        [Editor("DevExpress.ExpressApp.Win.Core.ModelEditor.CriteriaModelEditorControl, DevExpress.ExpressApp.Win" + XafAssemblyInfo.VersionSuffix + XafAssemblyInfo.AssemblyNamePostfix, DevExpress.Utils.ControlConstants.UITypeEditor)]
+        string Criteria { get; set; }
+        [Required]
+        [DataSourceProperty(nameof(Types))]
+        IModelClass ObjectType { get; set; }
+        [Browsable(false)]
+        Type TraceEventObjectType { get;  }
+        
+        IModelList<IModelClass> Types { get; }
+    }
+
+    [DomainLogic(typeof(IModelReactiveLoggerNotification))]
+    public class ModelReactiveLoggerNotificationLogic {
+        public static Type Get_TraceEventObjectType(IModelReactiveLoggerNotification notification)
+            => typeof(TraceEvent);
+        
+        public static IModelList<IModelClass> Get_Types(IModelReactiveLoggerNotification notification) 
+            => notification.Application.BOModel.Where(c => typeof(ISupportNotifications).IsAssignableFrom(c.TypeInfo.Type)).ToCalculatedModelNodeList();
+    }
+    
 
     public class TraceEventAppearanceRulesGenerator:ModelNodesGeneratorUpdater<AppearanceRulesModelNodesGenerator>{
         private const string Reactive = "Reactive";

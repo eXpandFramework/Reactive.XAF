@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
@@ -168,10 +169,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 parameterValues = parameterValues.Concat(true.YieldItem().Cast<object>()).ToArray();
             }
 
-            return (IObjectSpaceProvider) xpoAssembly
-                .GetType("DevExpress.ExpressApp.Xpo.XPObjectSpaceProvider")
-                .Constructor(parameterTypes)
-                .Invoke(parameterValues);
+            var type = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(assembly => assembly.GetName().Name=="Xpand.Extensions.XAF.Xpo")
+                           ?.GetType("Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions.FastObjectSpaceProvider") ??
+                       xpoAssembly.GetType("DevExpress.ExpressApp.Xpo.XPObjectSpaceProvider");
+            return (IObjectSpaceProvider) type.Constructor(parameterTypes).Invoke(parameterValues);
         }
 
         public static IObservable<IModelApplication> WhenModelChanged(this XafApplication application) 
@@ -485,14 +486,32 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
             return Observable.Empty<Unit>();
         }
-        
-        public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenCommitedDetailed<T>(
-            this XafApplication application, ObjectModification objectModification = ObjectModification.All)
+
+        public static IObservable<T> ToObjects<T>(this IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> source) 
+            => source.SelectMany(t => t.details.Select(t1 => t1.instance));
+
+        public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenCommittedDetailed<T>(
+            this XafApplication application, ObjectModification objectModification = ObjectModification.All,params string[] modifiedProperties)
             => application.WhenObjectSpaceCreated()
-                .SelectMany(objectSpace => objectSpace.WhenCommitedDetailed<T>(objectModification));
+                .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed<T>(objectModification));
+        
+        public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenProviderCommittedDetailed<T>(
+            this XafApplication application, ObjectModification objectModification = ObjectModification.All,params string[] modifiedProperties)
+            => application.WhenProviderObjectSpaceCreated()
+                .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed<T>(objectModification));
 
         public static IObservable<T> UseObjectSpace<T>(this XafApplication application,Func<IObjectSpace,IObservable<T>> factory,bool useObjectSpaceProvider=false) 
             => Observable.Using(() => application.CreateObjectSpace(useObjectSpaceProvider),factory);
+
+        public static IObservable<T> WhenObject<T>(this XafApplication application,Expression<Func<T, bool>> criteriaExpression=null,params string[] modifiedProperties)
+            => application.WhenObject(ObjectModification.NewOrUpdated,criteriaExpression,modifiedProperties);
+        
+        public static IObservable<T> WhenObject<T>(this XafApplication application,ObjectModification objectModification ,Expression<Func<T, bool>> criteriaExpression=null,params string[] modifiedProperties) {
+            var criteria = (criteriaExpression ?? (arg1 => true)).Compile();
+            return application.UseObjectSpace(space => space.GetObjectsQuery<T>().Where(criteriaExpression ?? (arg => true)).ToNowObservable())
+                .Merge(application.WhenObjectSpaceCreated().SelectMany(space => space.WhenCommittedDetailed<T>(objectModification, modifiedProperties)
+                    .SelectMany(t => t.details.Select(t1 => t1.instance)))).Where(arg => criteria(arg));
+        }
     }
 
 
