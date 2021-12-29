@@ -7,14 +7,12 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Reactive.Threading.Tasks;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
-using DevExpress.ExpressApp.Notifications;
 using DevExpress.Persistent.Base.General;
 using DevExpress.Utils;
 using JetBrains.Annotations;
@@ -54,10 +52,12 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
 		        var listener = new ReactiveTraceListener(application.Title);
 		        ListenerEvents = listener.EventTrace.Publish().RefCount();
 		        return application.BufferUntilCompatibilityChecked(ListenerEvents)
-			        .SaveEvent(application).Notifications(application).ToUnit()
+			        .SaveEvent(application).ToUnit()
+                    .Merge(application.Notifications())
 			        .Merge(ListenerEvents.RefreshViewDataSource(application))
                     .Merge(application.RegisterListener(listener))
-			        .Merge(manager.TraceEventListViewDataAccess());
+			        .Merge(manager.TraceEventListViewDataAccess())
+                    ;
 	        });
         
         private static IObservable<Unit> TraceEventListViewDataAccess(this ApplicationModulesManager manager) 
@@ -230,22 +230,18 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             return traceEvents.ToNowObservable().Do(traceEvent => SavedTraceEventSubject.OnNext(traceEvent));
         }
 
-        private static IObservable<Unit> Notifications(this IObservable<TraceEvent> source, XafApplication xafApplication) 
+        private static IObservable<Unit> Notifications(this XafApplication xafApplication) 
             => xafApplication.WhenModelChanged().Skip(1).FirstAsync()
                 .SelectMany(application => {
                     var rules = application.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger.Notifications
                         .Select(notification => (notification.ObjectType.TypeInfo.Type, notification.Criteria)).ToArray();
-                    return source.SelectMany(traceEvent => rules
+                    return SavedTraceEvent.Cast<TraceEvent>().SelectMany(traceEvent => rules
                         .Where(t => traceEvent.ObjectSpace.IsObjectFitForCriteria(CriteriaOperator.Parse(t.Criteria)))
-                        .ToNowObservable()
-                        .SelectMany(rule => {
+                        .Do(rule => {
                             var @event = (ISupportNotifications)traceEvent.ObjectSpace.CreateObject(rule.Type);
                             @event.AlarmTime = DateTime.Now;
                             @event.GetTypeInfo().FindMember(nameof(ISupportNotifications.NotificationMessage)).SetValue(@event, traceEvent.Value);
-                            return traceEvent.ObjectSpace.CommitChangesAsync().ToObservable().ToUnit()
-                                .Concat(xafApplication.Modules.OfType<NotificationsModule>().ToNowObservable()
-                                    .Do(notificationsModule => notificationsModule.NotificationsService.RefreshNotifications())
-                                    .ToUnit());
+                            traceEvent.ObjectSpace.CommitChanges();
                         }));
 
                 }).ToUnit();

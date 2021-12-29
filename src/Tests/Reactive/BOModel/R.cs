@@ -7,7 +7,26 @@ namespace Xpand.XAF.Modules.Reactive.Tests.BOModel{
     public class R:CustomBaseObject{
         public R(Session session) : base(session){
         }
-        
-        
+
+        string _test;
+
+        public string Test {
+            get => _test;
+            set => SetPropertyValue(nameof(Test), ref _test, value);
+        }
+
+        string _test1;
+
+        public string Test1 {
+            get => _test1;
+            set => SetPropertyValue(nameof(Test1), ref _test1, value);
+        }
+
+        string _test3;
+
+        public string Test3 {
+            get => _test3;
+            set => SetPropertyValue(nameof(Test3), ref _test3, value);
+        }
     }
 }

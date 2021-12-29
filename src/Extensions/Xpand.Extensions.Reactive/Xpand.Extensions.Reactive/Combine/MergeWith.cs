@@ -3,6 +3,7 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.Extensions.Reactive.Combine{
     public static partial class Combine{

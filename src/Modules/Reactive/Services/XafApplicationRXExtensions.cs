@@ -57,13 +57,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Merge(Unit.Default.ReturnObservable().Do(_ => application.Logon()).IgnoreElements());
 
         public static IObservable<TSource> BufferUntilCompatibilityChecked<TSource>(this XafApplication application,IObservable<TSource> source) 
-            => source.Buffer(application.WhenCompatibilityChecked().FirstAsync()).FirstAsync().SelectMany(list => list)
-                .Concat(Observable.Defer(() => source)).Select(source1 => source1);
+            => source.Buffer(application.WhenCompatibilityChecked().FirstAsync()).FirstAsync().SelectMany()
+                .Concat(Observable.Defer(() => source));
 
         public static IObservable<XafApplication> WhenCompatibilityChecked(this XafApplication application) 
             => (bool) application.GetPropertyValue("IsCompatibilityChecked")
                 ? application.ReturnObservable() : application.WhenObjectSpaceCreated().FirstAsync()
-                    .Select(_ => application).TraceRX();
+                    .Select(_ => application);
 
         [PublicAPI]
         public static IObservable<XafApplication> WhenModule(this IObservable<XafApplication> source, Type moduleType) 
@@ -207,7 +207,6 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => Observable.FromEventPattern<EventHandler<ObjectSpaceCreatedEventArgs>,ObjectSpaceCreatedEventArgs>(h => application.ObjectSpaceCreated += h,h => application.ObjectSpaceCreated -= h,ImmediateScheduler.Instance)
                 .TransformPattern<ObjectSpaceCreatedEventArgs,XafApplication>()
                 .Where(_ => includeNonPersistent || !(_.e.ObjectSpace is NonPersistentObjectSpace))
-                .TraceRX(_ => _.e.ObjectSpace.ToString())
                 .Select(t => t.e.ObjectSpace);
 
         [PublicAPI]
@@ -479,38 +478,68 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     .Where(attribute => attribute.IsInstanceOf("Microsoft.AspNetCore.Hosting.HostingStartupAttribute"))
                     .Where(attribute => ((Type) attribute.GetPropertyValue("HostingStartupType")).FullName == hostingStartupType);
                 if (!startup.Any()) {
-                    throw new InvalidOperationException(
-                        $"Install the {requiredPackage} package in the front end project and add: [assembly: HostingStartup(typeof({hostingStartupType}))]");
+                    throw new InvalidOperationException($"Install the {requiredPackage} package in the front end project and add: [assembly: HostingStartup(typeof({hostingStartupType}))]");
                 }
             }
-
             return Observable.Empty<Unit>();
         }
 
         public static IObservable<T> ToObjects<T>(this IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> source) 
             => source.SelectMany(t => t.details.Select(t1 => t1.instance));
-
+        
+        public static IObservable<T[]> ToObjectsGroup<T>(this IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> source) 
+            => source.Select(t => t.details.Select(t1 => t1.instance).ToArray());
+        
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenCommittedDetailed<T>(
-            this XafApplication application, ObjectModification objectModification = ObjectModification.All,params string[] modifiedProperties)
+            this XafApplication application,ObjectModification objectModification,Func<T,bool> criteria,params string[] modifiedProperties)
             => application.WhenObjectSpaceCreated()
-                .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed<T>(objectModification));
+                .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed(objectModification, criteria, modifiedProperties).TakeUntil(objectSpace.WhenDisposed()));
         
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenProviderCommittedDetailed<T>(
-            this XafApplication application, ObjectModification objectModification = ObjectModification.All,params string[] modifiedProperties)
+            this XafApplication application,ObjectModification objectModification,Func<T,bool> criteria,params string[] modifiedProperties)
             => application.WhenProviderObjectSpaceCreated()
-                .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed<T>(objectModification));
-
+                .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed(objectModification, criteria, modifiedProperties).TakeUntil(objectSpace.WhenDisposed()));
+        
+        public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenProviderNewOrUpdatedCommittedDetailed<T>(
+            this XafApplication application,Func<T,bool> criteria,params string[] updatedObjectModifiedProperties)
+            => application.WhenProviderCommittedDetailed(ObjectModification.New,criteria)
+                .Merge(application.WhenProviderCommittedDetailed(ObjectModification.Updated,criteria,updatedObjectModifiedProperties));
+        
+        public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenNewOrUpdatedCommittedDetailed<T>(
+            this XafApplication application,Func<T,bool> criteria,params string[] updatedObjectModifiedProperties)
+            => application.WhenCommittedDetailed(ObjectModification.New,criteria)
+                .Merge(application.WhenCommittedDetailed(ObjectModification.Updated,criteria,updatedObjectModifiedProperties));
+        
         public static IObservable<T> UseObjectSpace<T>(this XafApplication application,Func<IObjectSpace,IObservable<T>> factory,bool useObjectSpaceProvider=false) 
             => Observable.Using(() => application.CreateObjectSpace(useObjectSpaceProvider),factory);
 
         public static IObservable<T> WhenObject<T>(this XafApplication application,Expression<Func<T, bool>> criteriaExpression=null,params string[] modifiedProperties)
-            => application.WhenObject(ObjectModification.NewOrUpdated,criteriaExpression,modifiedProperties);
+            => application.WhenObject(ObjectModification.All,criteriaExpression,modifiedProperties);
         
-        public static IObservable<T> WhenObject<T>(this XafApplication application,ObjectModification objectModification ,Expression<Func<T, bool>> criteriaExpression=null,params string[] modifiedProperties) {
+        public static IObservable<T> WhenProviderObject<T>(this XafApplication application,Expression<Func<T, bool>> criteriaExpression=null,params string[] modifiedProperties)
+            => application.WhenProviderObject(ObjectModification.All,criteriaExpression,modifiedProperties);
+
+        public static IObservable<T> WhenExistingObject<T>(this XafApplication application, Expression<Func<T, bool>> criteriaExpression = null) 
+            => application.UseObjectSpace(space => space.GetObjectsQuery<T>().Where(criteriaExpression ?? (arg => true)).ToNowObservable());
+
+        public static IObservable<T> WhenObject<T>(this XafApplication application,ObjectModification objectModification ,Expression<Func<T, bool>> criteriaExpression=null,params string[] modifiedProperties) 
+            => application.WhenObject( objectModification, criteriaExpression, modifiedProperties, (criteriaExpression ?? (arg1 => true)).Compile(),application.WhenObjectSpaceCreated());
+        
+        public static IObservable<T> WhenProviderObject<T>(this XafApplication application,ObjectModification objectModification ,Expression<Func<T, bool>> criteriaExpression=null,params string[] modifiedProperties) 
+            => application.WhenObject( objectModification, criteriaExpression, modifiedProperties, (criteriaExpression ?? (arg1 => true)).Compile(),application.WhenProviderObjectSpaceCreated());
+
+        private static IObservable<T> WhenObject<T>(this XafApplication application, ObjectModification objectModification,
+            Expression<Func<T, bool>> criteriaExpression, string[] modifiedProperties, Func<T, bool> criteria,IObservable<IObjectSpace> spaceSource) 
+            => application.UseObjectSpace(space => space.GetObjectsQuery<T>().Where(criteriaExpression ?? (arg => true)).ToNowObservable())
+                .Merge(spaceSource.SelectMany(space => space.WhenCommittedDetailed(objectModification, criteria,modifiedProperties)
+                    .SelectMany(t => t.details.Select(t1 => t1.instance))));
+
+        public static IObservable<T> WhenObject<T>(this XafApplication application,ObjectModification objectModification,bool existing ,Expression<Func<T, bool>> criteriaExpression=null,params string[] modifiedProperties) {
             var criteria = (criteriaExpression ?? (arg1 => true)).Compile();
-            return application.UseObjectSpace(space => space.GetObjectsQuery<T>().Where(criteriaExpression ?? (arg => true)).ToNowObservable())
-                .Merge(application.WhenObjectSpaceCreated().SelectMany(space => space.WhenCommittedDetailed<T>(objectModification, modifiedProperties)
-                    .SelectMany(t => t.details.Select(t1 => t1.instance)))).Where(arg => criteria(arg));
+            var whenCommitted = application.WhenObjectSpaceCreated().SelectMany(space => space.WhenCommittedDetailed(objectModification, criteria,modifiedProperties)
+                .SelectMany(t => t.details.Select(t1 => t1.instance)));
+            var whenExist = application.UseObjectSpace(space => space.GetObjectsQuery<T>().Where(criteriaExpression ?? (arg => true)).ToNowObservable());
+            return Observable.If(() => existing,whenCommitted.Merge(whenExist),whenCommitted);
         }
     }
 

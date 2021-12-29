@@ -50,7 +50,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
                 .Send(obj??typeof(T).CreateInstance(), deserializeResponse);
         public static IObservable<T> Send<T>(this HttpClient client, HttpRequestMessage httpRequestMessage, 
             T obj = null, Func<string, T[]> deserializeResponse = null) where T : class
-            => Observable.FromAsync(() => client.SendAsync(httpRequestMessage))
+            => Observable.FromAsync(() => client.SendAsync(httpRequestMessage,HttpCompletionOption.ResponseHeadersRead))
                 .Do(message => ResponseSubject.OnNext((message, obj)))
                 .SelectMany(response => response.Content.ReadAsStringAsync().ToObservable()
                     .Select(s => new { response, json = s })).Select(e => (e.json, e.response))
@@ -70,7 +70,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
                         return Observable.Empty<T>();
                     }
                     else
-                        return deserializeResponse(t.json).ToObservable()
+                        return deserializeResponse(t.json).ToNowObservable()
                             .Do(obj1 => ObjectSentSubject.OnNext((t.response, t.json, obj1)));
 
                 return Observable.Throw<T>(new HttpResponseException(nameof(t.response.StatusCode),t.response));

@@ -6,13 +6,16 @@ using System.Threading;
 
 namespace Xpand.Extensions.Reactive.Utility {
     public static partial class Utility {
+        /// <summary>
+        /// Invokes an action sequentially for each element in the observable sequence,
+        /// on the specified scheduler, skipping and dropping elements that are received
+        /// during the execution of a previous action, except from the latest element.
+        /// </summary>
         public static IObservable<TSource> DroppingDo<TSource>(this IObservable<TSource> source,
-            Action<TSource> action, IScheduler scheduler = null) {
-            scheduler ??= Scheduler.Default;
-            return Observable.Defer(() => {
+            Action<TSource> action, IScheduler scheduler = null) 
+            => Observable.Defer(() => {
                 Tuple<TSource> latest = null;
-                return source
-                    .Select(item => {
+                return source.Select(item => {
                         var previous = Interlocked.Exchange(ref latest, Tuple.Create(item));
                         if (previous != null) return Observable.Empty<TSource>();
                         return Observable.Defer(() => {
@@ -20,13 +23,12 @@ namespace Xpand.Extensions.Reactive.Utility {
                             Debug.Assert(current != null);
                             var unBoxed = current.Item1;
                             return Observable.Start(() => {
-                                    action(unBoxed);
-                                    return unBoxed;
-                                }, scheduler);
+                                action(unBoxed);
+                                return unBoxed;
+                            }, scheduler ??= Scheduler.Default);
                         });
                     })
                     .Concat();
             });
-        }
     }
 }

@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Reactive.Concurrency;
-using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Text.RegularExpressions;
+using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.XAF.Modules.Reactive.Logger{
     public class ReactiveTraceListener : TextWriterTraceListener{
@@ -30,7 +29,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             base.Dispose(disposing);
         }
 
-        public IObservable<ITraceEvent> EventTrace => _eventTraceSubject.ObserveOn(DefaultScheduler.Instance);
+        public IObservable<ITraceEvent> EventTrace => _eventTraceSubject.ObserveOnDefault();
 
         public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string message){
             base.TraceEvent(eventCache, source, eventType, id, message);
@@ -66,9 +65,6 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                 traceEvent.Line = Convert.ToInt32(value);
             }
             traceEvent.LogicalOperationStack = string.Join(Environment.NewLine, eventCache.LogicalOperationStack.ToArray());
-            if (source.Contains("Notifica")) {
-                
-            }
             _eventTraceSubject.OnNext(traceEvent);
         }
 
