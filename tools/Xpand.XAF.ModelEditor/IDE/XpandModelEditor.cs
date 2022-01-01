@@ -89,7 +89,7 @@ namespace ModelEditor{
             stream.CopyTo(fileStream);
         }
 
-        public static void WriteSettings(string solutionFileName) => File.WriteAllText(
-            $"{MESettingsPath}MESettings.json", JsonConvert.SerializeObject(new{ Solution = solutionFileName }));
+        public static void WriteSettings(string solutionFileName) 
+            => File.WriteAllText($"{MESettingsPath}MESettings.json", JsonConvert.SerializeObject(new{ Solution = solutionFileName }));
     }
 }

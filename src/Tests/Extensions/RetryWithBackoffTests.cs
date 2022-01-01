@@ -9,6 +9,36 @@ using Xpand.TestsLib.Common;
 
 namespace Xpand.Extensions.Tests {
     public class RetryWithBackoffTests:CommonTest {
+        [TestCase(1,2)]
+        [TestCase(2,4)]
+        [TestCase(3,8)]
+        [TestCase(4,16)]
+        [TestCase(5,32)]
+        [TestCase(6,64)]
+        [TestCase(7,128)]
+        [TestCase(8,180)]
+        [TestCase(9,180)]
+        public void SecondsBackoffStrategy_Strategy(int index,int time) {
+            var timeSpan = ErrorHandling.SecondsBackoffStrategy(index);
+            
+            timeSpan.ShouldBe(TimeSpan.FromSeconds(time));
+        }
+        
+        [TestCase(1,400)]
+        [TestCase(2,800)]
+        [TestCase(3,1600)]
+        [TestCase(4,3200)]
+        [TestCase(5,6400)]
+        [TestCase(6,12800)]
+        [TestCase(7,25600)]
+        [TestCase(8,36000)]
+        [TestCase(9,36000)]
+        public void MilliSecondsBackoffStrategy_Strategy(int index,int time) {
+            var timeSpan = ErrorHandling.MilliSecondsBackoffStrategy(index);
+            
+            timeSpan.ShouldBe(TimeSpan.FromMilliseconds(time));
+        }
+
         [Test]
         public void retries_indefinitely_if_no_retry_count_specified() {
             var tries = 0;
@@ -23,7 +53,7 @@ namespace Xpand.Extensions.Tests {
         }
         
         
-        [TestCase(0)]
+        [TestCase(3)]
         [TestCase(1)]
         [TestCase(5)]
         [TestCase(42)]
@@ -34,10 +64,10 @@ namespace Xpand.Extensions.Tests {
                         ++tries;
                         return Observable.Throw<Unit>(new Exception());
                     });
-            source.RetryWithBackoff(retryCount, scheduler: TestScheduler).Subscribe(_ => { }, _ => { });
+            source.RetryWithBackoff(retryCount, scheduler: scheduler).Subscribe(_ => { }, _ => { });
             scheduler.Start();
 
-            tries.ShouldBe(tries);
+            tries.ShouldBe(retryCount);
         }
 
         [Test]

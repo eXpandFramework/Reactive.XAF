@@ -10,3 +10,4 @@ Xpand.Patcher
 Microsoft.CodeAnalysis
 Microsoft.NET.Test.Sdk
 DevExpress.ExpressApp.Win
+Microsoft.Reactive.Testing

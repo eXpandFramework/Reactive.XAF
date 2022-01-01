@@ -10,3 +10,4 @@ Fasterflect.Xpand
 JetBrains.Annotations
 Microsoft.CodeAnalysis
 Microsoft.NET.Test.Sdk
+Microsoft.Reactive.Testing

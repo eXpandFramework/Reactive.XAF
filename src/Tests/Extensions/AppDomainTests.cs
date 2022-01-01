@@ -7,6 +7,7 @@ using Xpand.TestsLib;
 using Xpand.TestsLib.Common.Attributes;
 
 namespace Xpand.Extensions.Tests {
+    
     public class AppDomainTests:BaseTest {
         [Test][XpandTest()]
         public void ExecuteOnce() {

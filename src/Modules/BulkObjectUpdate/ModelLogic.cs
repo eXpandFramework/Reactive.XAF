@@ -10,17 +10,6 @@ using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.XAF.Modules.BulkObjectUpdate{
-	[AttributeUsage(AttributeTargets.Class)]
-	public class BulkObjectUpdateAttribute:Attribute {
-		public BulkObjectUpdateAttribute(string detailViewId) {
-			DetailViewId = detailViewId;
-		}
-
-		public BulkObjectUpdateAttribute(){
-		}
-
-		public string DetailViewId { get; }
-	}
 	public interface IModelReactiveModulesBulkObjectUpdate : IModelReactiveModule{
 		IModelBulkObjectUpdate BulkObjectUpdate{ get; }
 	}
@@ -47,15 +36,6 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate{
 	
 	public class ModelBulkObjectUpdateRulesNodesGenerator:ModelNodesGeneratorBase {
 		protected override void GenerateNodesCore(ModelNode node) {
-			var attributes = node.Application.BOModel.SelectMany(c => c.TypeInfo.FindAttributes<BulkObjectUpdateAttribute>().Select(attribute => (attribute,c)));
-			var modelListViews = node.Application.Views.OfType<IModelListView>().ToArray();
-			foreach (var t in attributes) {
-				foreach (var modelListView in modelListViews.Where(view => view.ModelClass == t.c)) {
-					var rule = node.AddNode<IModelBulkObjectUpdateRule>($"{t.c.Name}-{modelListView.Id()}");
-					rule.ListView=modelListView;
-					rule.DetailView = (IModelDetailView)node.Application.Views[t.attribute.DetailViewId??t.c.DefaultDetailView.Id()];	
-				}
-			}
 		}
 	}
 

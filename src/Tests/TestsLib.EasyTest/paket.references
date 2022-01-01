@@ -12,3 +12,4 @@ nunit
 Microsoft.CodeAnalysis
 DevExpress.EasyTest
 DevExpress.ExpressApp.Security.Xpo
+Microsoft.Reactive.Testing

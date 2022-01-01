@@ -10,3 +10,4 @@ Moq
 Microsoft.CodeAnalysis
 Microsoft.NET.Test.Sdk
 DevExpress.ExpressApp.Win.All
+Microsoft.Reactive.Testing

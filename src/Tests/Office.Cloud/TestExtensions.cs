@@ -48,13 +48,13 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
         }
 
         public static async Task Delete_Two_Entities<TCloudEntity,TLocalEntity>(this IObjectSpace objectSpace,
-            TLocalEntity[] localEntites, Func<IObjectSpace, IObservable<TCloudEntity>> synchronize,
+            TLocalEntity[] localEntities, Func<IObjectSpace, IObservable<TCloudEntity>> synchronize,
             Func<Task> assert,TimeSpan timeout,TCloudEntity[] existingEntities){
             
-            var localEntity1 = objectSpace.GetObject(localEntites[0]);
+            var localEntity1 = objectSpace.GetObject(localEntities[0]);
             var cloudEntity1 = existingEntities.First();
             await objectSpace.NewCloudObject(localEntity1, cloudEntity1);
-            var localEntity2 = objectSpace.GetObject(localEntites[1]);
+            var localEntity2 = objectSpace.GetObject(localEntities[1]);
             var cloudEntity2 = existingEntities.Skip(1).First();
             await objectSpace.NewCloudObject(localEntity2, cloudEntity2);
 
@@ -234,7 +234,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Tests{
         }
 
         public static async Task NeedsAuthentication_when_AuthenticationStorage_current_user_cannot_authenticate<TAuth>(this XafApplication application,Func<IObservable<bool>> needsAuthenticationFactory) where TAuth:CloudOfficeBaseObject{
-            await application.NewObjectSpace(space => {
+            await application.UseObjectSpace(space => {
                 var msAuthentication = space.CreateObject<TAuth>();
                 msAuthentication.Oid = (Guid) SecuritySystem.CurrentUserId;
                 space.CommitChanges();

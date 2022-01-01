@@ -28,9 +28,14 @@ To initialize the TraceSources that operate before model e.g. ModelMapper add th
       <add name="sourceSwitch" value="Verbose"/>  
     </switches>  
   </system.diagnostics>  
-</configuration>i
+</configuration>
 ```
 
+### Notifications
+
+Use the XAF notifications module to display specific messages on the UI. For the next model uses the custom `Error` object to send `OnError` notifications.
+
+![image](https://user-images.githubusercontent.com/159464/146700386-9bb36fa6-473d-4917-ae22-e1362a1b1589.png)
 --- 
 
 **Possible future improvements:**

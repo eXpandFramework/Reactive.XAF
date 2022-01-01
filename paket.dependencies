@@ -1,11 +1,10 @@
-source C:\Program Files (x86)\DevExpress 21.2\Components\System\Components\Packages
+source https://nuget.devexpress.com/88luCgoeuPFTrDrTDcc6zKg22U2cVcTm3vdKCv88I7PHF9St6i/api
 source https://api.nuget.org/v3/index.json
 source https://xpandnugetserver.azurewebsites.net/nuget
 storage:none
 strategy: min
 lowest_matching: true
 copy_local:true
-redirects: on
 specific_version : false
 framework:net461,net472,net5.0,net5.0-windows,netstandard2.0,netstandard2.1
 
@@ -69,6 +68,9 @@ nuget Selenium.WebDriver 3.141.0
 nuget Microsoft.NET.Test.SDK 17.0
 nuget RazorLight 2.0.0-rc.3
 nuget System.Reactive 5.0.0
+nuget Microsoft.Reactive.Testing 5.0.0
 nuget System.Collections.Concurrent 4.3.0
 nuget System.Memory 4.5.4
 nuget Xpand.VersionConverter 2.202.11
+
+

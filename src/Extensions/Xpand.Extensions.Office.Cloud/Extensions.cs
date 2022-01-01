@@ -143,7 +143,7 @@ namespace Xpand.Extensions.Office.Cloud{
         }
 
         public static IObservable<bool> NeedsAuthentication<TAuthentication>(this XafApplication application,Func<IObservable<bool>> authorize) where TAuthentication:CloudOfficeBaseObject 
-            => application.NewObjectSpace(space => (space.GetObjectByKey<TAuthentication>( application.CurrentUserId()) == null).ReturnObservable())
+            => application.UseObjectSpace(space => (space.GetObjectByKey<TAuthentication>( application.CurrentUserId()) == null).ReturnObservable())
                 .SelectMany(b => !b ? authorize() : true.ReturnObservable());
 
         private static IObservable<Unit> ConfigureStyle(this IObservable<SimpleAction> source) 
@@ -204,7 +204,7 @@ namespace Xpand.Extensions.Office.Cloud{
             Func<XafApplication, IObservable<bool>> needsAuthentication) 
             => action.WhenExecute(e => {
                 var execute = e.Action.Id == $"Disconnect{serviceName}"
-                    ? e.Action.Application.NewObjectSpace(_ => {
+                    ? e.Action.Application.UseObjectSpace(_ => {
                         var objectSpace = e.Action.View().ObjectSpace;
                         objectSpace.Delete(objectSpace.GetObjectByKey(serviceStorageType,e.Action.Application.CurrentUserId()));
                         objectSpace.CommitChanges();

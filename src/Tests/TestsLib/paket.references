@@ -12,3 +12,4 @@ Polly
 JetBrains.Annotations
 Microsoft.CodeAnalysis
 DevExpress.ExpressApp.Win
+Microsoft.Reactive.Testing

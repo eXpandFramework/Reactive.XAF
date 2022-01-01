@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <MinimumVisualStudioVersion>16.0</MinimumVisualStudioVersion>
@@ -56,8 +56,8 @@
     <Compile Include="XVSIXPackage.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="..\ModelEditor.Win\Xpand.XAF.ModelEditor.Win\bin\Release\net5.0-windows\Xpand.XAF.ModelEditor.Win.4.212.0.5.zip">
-      <Link>Resources\Xpand.XAF.ModelEditor.Win.4.212.0.5.zip</Link>
+    <EmbeddedResource Include="..\ModelEditor.Win\Xpand.XAF.ModelEditor.Win\bin\Release\net5.0-windows\Xpand.XAF.ModelEditor.Win.4.212.3.1.zip">
+      <Link>Resources\Xpand.XAF.ModelEditor.Win.4.212.3.1.zip</Link>
     </EmbeddedResource>
     <None Include=".editorconfig" />
     <None Include="source.extension.vsixmanifest">
@@ -115,3 +115,4 @@
   </Target>
   -->
 </Project>
+

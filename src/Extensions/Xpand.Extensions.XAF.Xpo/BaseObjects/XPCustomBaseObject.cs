@@ -7,7 +7,7 @@ using DevExpress.Xpo;
 using DevExpress.Xpo.Metadata;
 
 namespace Xpand.Extensions.XAF.Xpo.BaseObjects {
-    [NonPersistent]
+    [NonPersistent][OptimisticLocking(OptimisticLockingBehavior.LockModified)]
     public abstract class XPCustomBaseObject: XPCustomObject,IObjectSpaceLink{
         
         protected override void OnSaving() {

@@ -10,3 +10,4 @@ Microsoft.CodeAnalysis
 Microsoft.NET.Test.Sdk
 DevExpress.Persistent.BaseImpl.Xpo
 DevExpress.ExpressApp.Win
+Microsoft.Reactive.Testing

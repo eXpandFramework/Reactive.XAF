@@ -8,7 +8,8 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
         /// <summary>
         /// The default retry strategy for <see cref="RetryWithBackoff{T}"/>, which waits n^2 seconds between each retry, or 180 seconds, whichever is smaller.
         /// </summary>
-        public static readonly Func<int, TimeSpan> DefaultRetryWithBackoffStrategy = n => TimeSpan.FromSeconds(Math.Min(Math.Pow(2, n), 180));
+        public static readonly Func<int, TimeSpan> SecondsBackoffStrategy = n => TimeSpan.FromSeconds(Math.Min(Math.Pow(2, n), 180));
+        public static readonly Func<int, TimeSpan> MilliSecondsBackoffStrategy = n => TimeSpan.FromMilliseconds(Math.Min(Math.Pow(2, n), 180)*200);
 
         /// <summary>
         /// Retries an observable upon failure, using the provided strategy to determine how long to wait between retries.
@@ -18,7 +19,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
         /// This extension method can be used to retry any source pipeline a specified number of times, with a custom
         /// wait period between those retries. The <paramref name="retryCount"/> parameter determines the maximum number of retries. The
         /// default value is <see langword="null"/>, which means there is no maximum (will retry indefinitely). The
-        /// <paramref name="strategy"/> parameter dictates the period between retries, and it defaults to <see cref="DefaultRetryWithBackoffStrategy"/>.
+        /// <paramref name="strategy"/> parameter dictates the period between retries, and it defaults to <see cref="SecondsBackoffStrategy"/>.
         /// </para>
         /// <para>
         /// The <paramref name="retryOnError"/> parameter can be used to determine whether a particular exception should instigate a
@@ -35,7 +36,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
         /// How many times to retry, or <see langword="null"/> to retry indefinitely.
         /// </param>
         /// <param name="strategy">
-        /// The strategy to use when retrying, or <see langword="null"/> to use <see cref="DefaultRetryWithBackoffStrategy"/>.
+        /// The strategy to use when retrying, or <see langword="null"/> to use <see cref="SecondsBackoffStrategy"/>.
         /// </param>
         /// <param name="retryOnError">
         /// Predicate to determine whether a given error should result in a retry, or <see langword="null"/> to always retry on error.
@@ -48,7 +49,7 @@ namespace Xpand.Extensions.Reactive.ErrorHandling {
         /// </returns>
         public static IObservable<T> RetryWithBackoff<T>(this IObservable<T> source, int? retryCount = null, Func<int, TimeSpan> strategy = null,
             Func<Exception, bool> retryOnError = null, IScheduler scheduler = null) {
-            strategy ??= DefaultRetryWithBackoffStrategy;
+            strategy ??= SecondsBackoffStrategy;
             scheduler ??= DefaultScheduler.Instance;
             retryOnError ??= (_ => true);
             var attempt = 0;

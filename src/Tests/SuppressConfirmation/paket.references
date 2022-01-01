@@ -8,3 +8,4 @@ JetBrains.Annotations
 Microsoft.CodeAnalysis
 Microsoft.NET.Test.Sdk
 DevExpress.ExpressApp.Win
+Microsoft.Reactive.Testing

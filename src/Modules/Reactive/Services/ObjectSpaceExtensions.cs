@@ -207,16 +207,14 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenCommiting<T>(this IObjectSpace objectSpace, 
-            ObjectModification objectModification = ObjectModification.All,bool emitAfterCommit = false) where T : class 
-            => objectSpace.WhenCommitingDetailed<T>(objectModification, emitAfterCommit)
+            ObjectModification objectModification = ObjectModification.All,bool emitAfterCommit = false) => objectSpace.WhenCommitingDetailed<T>(objectModification, emitAfterCommit)
                 .Select(t => (t.objectSpace,t.details.Select(t1 => t1.instance)));
 
         public static bool IsUpdated<T>(this IObjectSpace objectSpace, T t) where T:class 
             => !objectSpace.IsNewObject(t)&&!objectSpace.IsDeletedObject(t);
 
         [PublicAPI]
-        public static IObservable<(IObjectSpace objectSpace, T[] objects)> WhenDeletedObjects<T>(this IObjectSpace objectSpace,bool emitAfterCommit=false) where T : class 
-            => emitAfterCommit ? objectSpace.WhenCommiting<T>(ObjectModification.Deleted, true)
+        public static IObservable<(IObjectSpace objectSpace, T[] objects)> WhenDeletedObjects<T>(this IObjectSpace objectSpace,bool emitAfterCommit=false) => emitAfterCommit ? objectSpace.WhenCommiting<T>(ObjectModification.Deleted, true)
                     .Select(t => (t.objectSpace, t.objects.Select(t1 => t1).ToArray())).Finally(() => { })
                 : objectSpace.WhenObjectDeleted()
                     .Select(pattern => (pattern.objectSpace, pattern.e.Objects.OfType<T>().ToArray()))

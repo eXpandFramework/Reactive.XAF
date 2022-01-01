@@ -83,7 +83,9 @@ namespace Xpand.TestsLib.Common {
                 .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
                 .Returns((HttpRequestMessage requestMessage, CancellationToken _)
                     =>  new HttpResponseMessage { StatusCode = HttpStatusCode.OK, RequestMessage = requestMessage }.ReturnObservable()
-                        .Do(configure).Delay(Delay,scheduler??=Scheduler.Default).ToTask(_, scheduler));
+                        .Do(configure)
+                        .Delay(Delay,scheduler??=Scheduler.Default)
+                        .ToTask(_, scheduler));
 
         
         

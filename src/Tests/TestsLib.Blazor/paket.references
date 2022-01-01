@@ -5,3 +5,4 @@ Newtonsoft.Json
 Nunit
 DevExpress.ExpressApp.Security.Xpo
 DevExpress.Persistent.BaseImpl.Xpo
+Microsoft.Reactive.Testing
