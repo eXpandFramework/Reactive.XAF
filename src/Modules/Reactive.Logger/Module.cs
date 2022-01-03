@@ -16,7 +16,6 @@ namespace Xpand.XAF.Modules.Reactive.Logger {
         public ReactiveLoggerModule() {
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.ConditionalAppearance.ConditionalAppearanceModule));
-            RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.Notifications.NotificationsModule));
             RequiredModuleTypes.Add(typeof(ReactiveModule));
             
         }

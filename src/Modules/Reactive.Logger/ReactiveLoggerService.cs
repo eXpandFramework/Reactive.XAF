@@ -15,6 +15,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base.General;
 using DevExpress.Utils;
+using Fasterflect;
 using JetBrains.Annotations;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.ExpressionExtensions;
@@ -51,15 +52,14 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                 application.AddNonSecuredType(typeof(TraceEvent));
 		        var listener = new ReactiveTraceListener(application.Title);
 		        ListenerEvents = listener.EventTrace.Publish().RefCount();
-		        return application.BufferUntilCompatibilityChecked(ListenerEvents)
+                return application.BufferUntilCompatibilityChecked(ListenerEvents)
 			        .SaveEvent(application).ToUnit()
                     .Merge(application.Notifications())
 			        .Merge(ListenerEvents.RefreshViewDataSource(application))
                     .Merge(application.RegisterListener(listener))
-			        .Merge(manager.TraceEventListViewDataAccess())
-                    ;
+			        .Merge(manager.TraceEventListViewDataAccess());
 	        });
-        
+
         private static IObservable<Unit> TraceEventListViewDataAccess(this ApplicationModulesManager manager) 
             => manager.WhenGeneratingModelNodes<IModelViews>()
                 .Where(views => ((IModelSources)views.Application).Modules.GetPlatform()==Platform.Blazor)
@@ -231,19 +231,25 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         }
 
         private static IObservable<Unit> Notifications(this XafApplication xafApplication) 
-            => xafApplication.WhenModelChanged().Skip(1).FirstAsync()
-                .SelectMany(application => {
-                    var rules = application.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger.Notifications
-                        .Select(notification => (notification.ObjectType.TypeInfo.Type, notification.Criteria)).ToArray();
-                    return SavedTraceEvent.Cast<TraceEvent>().SelectMany(traceEvent => rules
-                        .Where(t => traceEvent.ObjectSpace.IsObjectFitForCriteria(CriteriaOperator.Parse(t.Criteria)))
-                        .Do(rule => {
-                            var @event = (ISupportNotifications)traceEvent.ObjectSpace.CreateObject(rule.Type);
-                            @event.AlarmTime = DateTime.Now;
-                            @event.GetTypeInfo().FindMember(nameof(ISupportNotifications.NotificationMessage)).SetValue(@event, traceEvent.Value);
-                            traceEvent.ObjectSpace.CommitChanges();
-                        }));
+            => xafApplication.WhenSetupComplete().SelectMany(_ => {
+                var moduleType = AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Notifications.NotificationsModule");
+                var service = xafApplication.Modules.FindModule(moduleType).GetPropertyValue("NotificationsService");
+                return xafApplication.WhenModelChanged().FirstAsync()
+                    .SelectMany(application => {
+                        var rules = application.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger.Notifications
+                            .Select(notification => (notification.ObjectType.TypeInfo.Type, notification.Criteria)).ToArray();
+                        return SavedTraceEvent.Cast<TraceEvent>().SelectMany(traceEvent => rules
+                                .Where(t => traceEvent.ObjectSpace.IsObjectFitForCriteria(CriteriaOperator.Parse(t.Criteria)))
+                                .Do(rule => {
+                                    var @event = (ISupportNotifications)traceEvent.ObjectSpace.CreateObject(rule.Type);
+                                    @event.AlarmTime = DateTime.Now;
+                                    @event.GetTypeInfo().FindMember(nameof(ISupportNotifications.NotificationMessage)).SetValue(@event, traceEvent.Value);
+                                    traceEvent.ObjectSpace.CommitChanges();
+                                }))
+                            .ObserveOnContext()
+                            .Do(_ => service.CallMethod("Refresh"));
 
-                }).ToUnit();
+                    }).ToUnit();
+                });
     }
 }

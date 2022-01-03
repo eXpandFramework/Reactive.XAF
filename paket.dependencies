@@ -34,6 +34,7 @@ nuget Hangfire.AspNetCore 1.7.24
 nuget hangfire.memorystorage 1.7.24.2
 nuget System.Collections.Immutable 5.0.0
 nuget Microsoft.Windows.Compatibility 5.0.0
+nuget Microsoft.Bcl.AsyncInterfaces 5.0.0
 nuget Shouldly 4.0.3
 nuget Moq 4.16
 nuget NUnit 3.13.2

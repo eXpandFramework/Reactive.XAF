@@ -41,7 +41,6 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate{
 
 
 	[ModelDisplayName("Rule")]
-	[KeyProperty(nameof(Caption))]
 	public interface IModelBulkObjectUpdateRule:IModelNode {
 		[Required][Localizable(true)]
 		string Caption { get; set; }

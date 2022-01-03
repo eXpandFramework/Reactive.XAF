@@ -42,17 +42,17 @@ namespace Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions{
 
         public FastUnitOfWork(XPDictionary dictionary)
             : base(dictionary) {
-            // TrackPropertiesModifications = true;
+            TrackPropertiesModifications = true;
         }
 
         public FastUnitOfWork(IDataLayer layer, params IDisposable[] disposeOnDisconnect)
             : base(layer, disposeOnDisconnect){
-            // TrackPropertiesModifications = true;
+            TrackPropertiesModifications = true;
         }
 
         public FastUnitOfWork(IObjectLayer layer, params IDisposable[] disposeOnDisconnect)
             : base(layer, disposeOnDisconnect) {
-            // TrackPropertiesModifications = true;
+            TrackPropertiesModifications = true;
         }
 
         protected override MemberInfoCollection GetPropertiesListForUpdateInsert(object theObject, bool isUpdate,
@@ -65,7 +65,7 @@ namespace Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions{
                         members.Add(mi);
                 return members;
             }
-
+        
             return defaultMembers;
         }
 

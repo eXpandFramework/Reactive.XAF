@@ -29,5 +29,28 @@ namespace Xpand.XAF.Modules.Reactive.Tests.BOModel{
             get => _test3;
             set => SetPropertyValue(nameof(Test3), ref _test3, value);
         }
+
+        [Association("R-RChilds")][Aggregated]
+        public XPCollection<RChild> RChilds => GetCollection<RChild>(nameof(RChilds));
+    }
+
+    public class RChild:CustomBaseObject {
+        public RChild(Session session) : base(session) { }
+
+        R _r;
+
+        string _name;
+
+        public string Name {
+            get => _name;
+            set => SetPropertyValue(nameof(Name), ref _name, value);
+        }
+        
+
+        [Association("R-RChilds")]
+        public R R {
+            get => _r;
+            set => SetPropertyValue(nameof(R), ref _r, value);
+        }
     }
 }
