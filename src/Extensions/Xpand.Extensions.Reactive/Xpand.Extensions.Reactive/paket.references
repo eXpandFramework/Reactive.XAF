@@ -6,4 +6,5 @@ JetBrains.Annotations
 System.Collections.Immutable
 System.Text.Json
 System.Interactive.Async
+System.Interactive
 System.Linq.Async

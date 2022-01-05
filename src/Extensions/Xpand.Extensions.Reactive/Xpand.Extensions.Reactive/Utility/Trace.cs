@@ -50,7 +50,7 @@ namespace Xpand.Extensions.Reactive.Utility{
                         mName = $"{memberName} =>{GetSourceName<TSource>()}";
                     }
 
-                    var message = $"{name}.{Path.GetFileNameWithoutExtension(sourceFilePath)}.{mName}({sourceLineNumber}): {m}({value})".TrimStart('.');
+                    var message = $"{name}.{Path.GetFileNameWithoutExtension(sourceFilePath)}.{mName}({sourceLineNumber.ToString()}): {m}({value})".TrimStart('.');
                     ta(message);
                 }
                 if (traceStrategy.Is(ObservableTraceStrategy.All))

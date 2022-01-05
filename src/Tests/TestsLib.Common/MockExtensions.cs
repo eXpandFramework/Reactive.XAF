@@ -10,6 +10,7 @@ using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
+using Fasterflect;
 using HarmonyLib;
 using Moq;
 using Moq.Language.Flow;
@@ -77,6 +78,9 @@ namespace Xpand.TestsLib.Common {
         public static void VerifySend<THandler>(this Mock<THandler> handlerMock, Times times,Func<HttpRequestMessage, bool> filter) where THandler:HttpMessageHandler 
             => handlerMock.Protected().Verify("SendAsync", times, ItExpr.Is<HttpRequestMessage>(message => filter==null||filter(message)),
                 ItExpr.IsAny<CancellationToken>());
+
+        public static HttpClientHandler Handler(this HttpClient client) 
+            => (HttpClientHandler)client.GetFieldValue("_handler");
 
         public static IReturnsResult<THandler> SetupSend<THandler>(this Mock<THandler> handlerMock, Action<HttpResponseMessage> configure,IScheduler scheduler=null) where THandler:HttpMessageHandler 
             => handlerMock.Protected()

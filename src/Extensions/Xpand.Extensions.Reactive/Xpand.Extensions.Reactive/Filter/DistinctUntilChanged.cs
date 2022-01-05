@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using JetBrains.Annotations;
+using Xpand.Extensions.Reactive.Combine;
 
 namespace Xpand.Extensions.Reactive.Filter{
     public static partial class Filter{
