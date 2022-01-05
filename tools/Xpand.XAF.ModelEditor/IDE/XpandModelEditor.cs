@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using JetBrains.ReSharper.UnitTestFramework.Common.Extensions;
 using Newtonsoft.Json;
 using MemoryStream = System.IO.MemoryStream;
 using Process = System.Diagnostics.Process;
@@ -35,7 +36,7 @@ namespace ModelEditor{
                 watcher.Created += CreatedHandler;
                 Process.Start($"{MESettingsPath}\\Xpand.XAF.ModelEditor.Win\\Xpand.XAF.ModelEditor.Win.exe");
                 
-                await tsc.Task;
+                await tsc.Task.TimeoutAfter(TimeSpan.FromSeconds(20));
 
             }
         }

@@ -32,8 +32,6 @@ namespace Xpand.XAF.ModelEditor.Win {
 
             Tracing.Initialize();
             ModelEditorWindowsFormsApplication winApplication = new ModelEditorWindowsFormsApplication();
-            // MEService.SolutionPath = "C:\\Work\\Reactive.XAF\\src\\Tests\\EasyTests\\Easytests.sln";
-            // MEService.SolutionPath = "C:\\Work\\Reactive.XAF\\src\\Tests\\EasyTests\\Easytests.sln";
             if (ConfigurationManager.ConnectionStrings["ConnectionString"] != null) {
                 winApplication.ConnectionString =
                     ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;

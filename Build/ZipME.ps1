@@ -37,10 +37,15 @@ if (!(Test-AzDevops) -and !$SkipIDEBuild){
     $currentValue=$allmatches[0].Value
     $newValue="Xpand.XAF.ModelEditor.Win.$version.zip"
     Set-Content "$root\tools\Xpand.XAF.ModelEditor\IDE\XVSIX\XVSIX.csproj" $proj.Replace($currentValue,$newValue)
-    
+    if ($proj -notlike "*$newValue*"){
+        throw "Resource replacement failed $newValue"
+    }
+
     $proj=Get-Content "$root\tools\Xpand.XAF.ModelEditor\IDE\Rider\src\dotnet\ReSharperPlugin.Xpand\ReSharperPlugin.Xpand.Rider.csproj" -Raw
     Set-Content       "$root\tools\Xpand.XAF.ModelEditor\IDE\Rider\src\dotnet\ReSharperPlugin.Xpand\ReSharperPlugin.Xpand.Rider.csproj" $proj.Replace($currentValue,$newValue)
-
+    if ($proj -notlike "*$newValue*"){
+        throw "Resource replacement failed $newValue"
+    }
     $proj=Get-Content "$root\tools\Xpand.XAF.ModelEditor\IDE\Rider\src\dotnet\ReSharperPlugin.Xpand\ReSharperPlugin.Xpand.csproj" -Raw
     Set-Content       "$root\tools\Xpand.XAF.ModelEditor\IDE\Rider\src\dotnet\ReSharperPlugin.Xpand\ReSharperPlugin.Xpand.csproj" $proj.Replace($currentValue,$newValue)
 
@@ -52,4 +57,4 @@ if (!(Test-AzDevops) -and !$SkipIDEBuild){
     Start-Build
 }
 
-Pop-Location
+Pop-Locationf
