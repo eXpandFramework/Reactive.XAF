@@ -33,7 +33,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
     public class GoogleCalendarServiceTests : CommonCalendarTests{
         
         [Test][Apartment(ApartmentState.STA)]
-        [XpandTest()]
+        [XpandTest()][Order(0)]
         public override async Task Map_Two_New_Events(){
             await MapTwoNewEvents(CalendarTestExtensions.CalendarName);
         }
@@ -55,7 +55,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
         }
 
         [Test]
-        [XpandTest()]
+        [XpandTest()][Order(10)]
         public override async Task Customize_Two_New_Event(){
             using var application = Platform.Win.CalendarModule().Application;
             var builder = await application.InitializeService();
@@ -76,7 +76,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
         }
 
         [Test]
-        [XpandTest()]
+        [XpandTest()][Order(20)]
         public override async Task Map_Existing_Event_Two_Times(){
             using var application = Platform.Win.CalendarModule().Application;
             var builderData = await application.InitializeService();
@@ -92,7 +92,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
         }
 
         [Test]
-        [XpandTest()]
+        [XpandTest()][Order(30)]
         public override async Task Customize_Map_Existing_Event_Two_Times(){
             using var application = Platform.Win.CalendarModule().Application;
             var builder = await application.InitializeService();
@@ -114,7 +114,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
         }
 
         [Test][Apartment(ApartmentState.STA)]
-        [XpandTest()]
+        [XpandTest()][Order(40)]
         public override async Task Delete_Two_Events(){
             using var application = Platform.Win.CalendarModule().Application;
             var t = await application.InitializeService();
@@ -128,7 +128,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
 
         [TestCase(false)]
         [TestCase(true)][Ignore("randomly fails")]
-        [XpandTest()]
+        [XpandTest()][Order(50)]
         public override async Task Customize_Delete_Two_Events(bool handleDeletion){
             using var application = Platform.Win.CalendarModule().Application;
             var builder = await application.InitializeService();
@@ -149,11 +149,11 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
         }
 
         [Test]
-        [XpandTest()]
+        [XpandTest()][Order(60)]
         public override async Task Delete_Local_Event_Resource(){
             using var application = Platform.Win.CalendarModule().Application;
-            var t = await application.InitializeService();
-            var calendar = await t.service.GetCalendar(CalendarTestExtensions.CalendarName);
+            var t = await application.InitializeService().Timeout(Timeout);
+            var calendar = await t.service.GetCalendar(CalendarTestExtensions.CalendarName).Timeout(Timeout);
             await t.frame.View.ObjectSpace.Delete_Event_Resource(pmeEvent =>
                 CalendarService.Updated.Select(_ => _.local).TakeUntilDisposed(application), async () => {
                 var events = await t.service.ListEvents(calendar.Id);
@@ -163,7 +163,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
         }
 
         [XpandTest()]
-        [Test]
+        [Test][Order(70)]
         public override async Task Create_Entity_Container_When_Not_Exist(){
             using var application = Platform.Win.CalendarModule().Application;
             var modelTodo = application.Model.ToReactiveModule<IModelReactiveModuleOffice>().Office.Google().Calendar();
@@ -178,12 +178,12 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
 
         [TestCase(null)]
         [TestCase("invalidToken")]
-        [XpandTest()]
+        [XpandTest()][Order(80)]
         public override async Task Populate_All(string syncToken){
             using var application = Platform.Win.CalendarModule().Application;
             var t = await application.InitializeService(CalendarTestExtensions.CalendarPagingName);
             var calendarId = (await t.service.GetCalendar(CalendarTestExtensions.CalendarPagingName).ToTaskWithoutConfigureAwait()).Id;
-            Func<IObjectSpace> objectSpaceFactory = application.ObjectSpaceProvider.CreateObjectSpace;
+            Func<IObjectSpace> objectSpaceFactory = application.CreateObjectSpace;
             await t.frame.View.ObjectSpace.Populate_All(syncToken,
                 _ => t.service.ListEvents(calendarId,null,
                     store => store.SaveToken(objectSpaceFactory),250), Timeout,
@@ -195,7 +195,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
         }
 
         [Test]
-        [XpandTest()]
+        [XpandTest()][Order(90)]
         public override async Task Populate_Modified(){
             using var application = Platform.Win.CalendarModule().Application;
             var t = await application.InitializeService();
@@ -214,7 +214,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
 
 
         [Test]
-        [XpandTest()]
+        [XpandTest()][Order(100)]
         public override async Task Update_Cloud_Event(){
             using var application = Platform.Win.CalendarModule().Application;
             await application.CalendarService(true);
@@ -247,7 +247,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
         }
 
         [Test]
-        [XpandTest()]
+        [XpandTest()][Order(110)]
         public override async Task Delete_Cloud_Event(){
             using var application = Platform.Win.CalendarModule().Application;
             var calendarService = await application.CalendarService(true);
@@ -281,7 +281,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
         }
 
         [Test]
-        [XpandTest()]
+        [XpandTest()][Order(120)]
         public override async Task Insert_Cloud_Event(){
             using var application = Platform.Win.CalendarModule().Application;
             await application.CalendarService(true);
@@ -308,7 +308,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar.Tests{
 
         [Test]
         [XpandTest()]
-        [SuppressMessage("ReSharper", "AccessToDisposedClosure")]
+        [SuppressMessage("ReSharper", "AccessToDisposedClosure")][Order(130)]
         public override Task Skip_Authorization_If_Authentication_Storage_Is_Empty(){
 	        using var application = Platform.Win.CalendarModule().Application;
 	        var observer = application.WhenObjectViewCreated().FirstAsync().Test();

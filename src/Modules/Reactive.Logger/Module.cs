@@ -20,12 +20,23 @@ namespace Xpand.XAF.Modules.Reactive.Logger {
             
         }
 
+        internal ReactiveTraceListener Listener;
+        protected override void Dispose(bool disposing) {
+            base.Dispose(disposing);
+            Listener?.Dispose();
+        }
+
         [PublicAPI]
         public static ReactiveTraceSource TraceSource{ get; set; }
 
         public override void AddGeneratorUpdaters(ModelNodesGeneratorUpdaters updaters){
             base.AddGeneratorUpdaters(updaters);
             updaters.Add(new TraceEventAppearanceRulesGenerator());
+        }
+
+        public override void Setup(XafApplication application) {
+            base.Setup(application);
+            Listener = new ReactiveTraceListener(application.Title);
         }
 
         public override void Setup(ApplicationModulesManager manager){

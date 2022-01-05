@@ -17,17 +17,33 @@ namespace Xpand.XAF.Modules.Reactive.Logger {
         readonly ISubject<ITraceEvent> _eventTraceSubject = Subject.Synchronize(new Subject<ITraceEvent>());
         
         private static readonly Regex Regex;
-        
+        private bool _isDisposed;
+
         public ReactiveTraceListener(string applicationTitle)  {
             _applicationTitle = applicationTitle;
             TraceOutputOptions = TraceOptions.DateTime;
             Template = "{DateTime:u} {Message}";
         }
-        
+
+        protected override void Dispose(bool disposing) {
+            base.Dispose(disposing);
+            _isDisposed = true;
+        }
+
         public IObservable<ITraceEvent> EventTrace => _eventTraceSubject.ObserveOnDefault();
+
+        public override void Flush() {
+            if (_isDisposed) {
+                return;
+            }
+            base.Flush();
+        }
 
         protected override void WriteTrace(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string message,
             Guid? relatedActivityId, object[] data) {
+            if (_isDisposed) {
+                return;
+            }
             base.WriteTrace(eventCache, message, eventType, id, message, relatedActivityId, data);
 
             var traceEvent = new TraceEventMessage {
