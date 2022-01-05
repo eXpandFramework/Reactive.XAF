@@ -33,7 +33,7 @@ $result = $regex.Match($CustomVersion).Groups[1].Value;
 
 Clear-NugetCache -Filter XpandPackages
 Invoke-Script {
-    Set-VsoVariable build.updatebuildnumber "$env:build_BuildNumber-$CustomVersion"
+    
     Set-Location $SourcePath
     try {
         dotnet nuget add source "https://api.nuget.org/v3/index.json" --name "nuget.org"

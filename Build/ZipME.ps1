@@ -57,4 +57,4 @@ if (!(Test-AzDevops) -and !$SkipIDEBuild){
     Start-Build
 }
 
-Pop-Locationf
+Pop-Location

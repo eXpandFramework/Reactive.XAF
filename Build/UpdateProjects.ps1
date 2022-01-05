@@ -1,5 +1,5 @@
 param(
-    $DXVersion = "21.2.2-beta"
+    $DXVersion = "21.2.4"
 )
 $ErrorActionPreference = "Stop"
 $rootLocation = "$PSScriptRoot\..\"
@@ -47,8 +47,13 @@ Get-ChildItem -Filter *.csproj -Recurse | ForEach-Object {
         }
     }
     if ($fileName -notlike "*EasyTest*.csproj*"){
-        # $target = Get-ProjectTargetFramework $projXml -FullName
-        # Update-ProjectProperty $projXml AppendTargetFrameworkToOutputPath ($target -notlike "netstandard2.*")
+        try {
+            $target = Get-ProjectTargetFramework $projXml -FullName
+            Update-ProjectProperty $projXml AppendTargetFrameworkToOutputPath ($target -notlike "netstandard2.*")
+        }
+        catch {
+            
+        }
     }
     
     $target = Get-ProjectTargetFramework $projXml -FullName

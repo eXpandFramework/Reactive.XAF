@@ -46,7 +46,7 @@
       <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Email">
-      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Email.dll</HintPath>
+      <HintPath>..\..\..\bin\net5.0\Xpand.XAF.Modules.Email.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
