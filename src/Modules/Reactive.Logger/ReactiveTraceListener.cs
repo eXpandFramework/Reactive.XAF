@@ -8,7 +8,7 @@ using Xpand.Extensions.Tracing;
 namespace Xpand.XAF.Modules.Reactive.Logger {
     public class ReactiveTraceListener : RollingFileTraceListener {
         private readonly string _applicationTitle;
-
+        public static bool DisableFileWriter;
         static ReactiveTraceListener() {
             Regex = new Regex(@"(?<Location>[^.]*)\.(?<Method>[^(]*)\((?<Ln>[\d]*)\): (?<Action>[^(]*)\((?<Value>.*)\)",
                 RegexOptions.Singleline | RegexOptions.Compiled);
@@ -17,19 +17,32 @@ namespace Xpand.XAF.Modules.Reactive.Logger {
         readonly ISubject<ITraceEvent> _eventTraceSubject = Subject.Synchronize(new Subject<ITraceEvent>());
         
         private static readonly Regex Regex;
-        
+        private bool _isDisposed;
+
         public ReactiveTraceListener(string applicationTitle)  {
             _applicationTitle = applicationTitle;
             TraceOutputOptions = TraceOptions.DateTime;
             Template = "{DateTime:u} {Message}";
         }
-        
+
+        protected override void Dispose(bool disposing) {
+            base.Dispose(disposing);
+            _isDisposed = true;
+        }
+
         public IObservable<ITraceEvent> EventTrace => _eventTraceSubject.ObserveOnDefault();
+
+        public override void Flush() {
+            if (!_isDisposed&&!DisableFileWriter) {
+                base.Flush();
+            }
+        }
 
         protected override void WriteTrace(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string message,
             Guid? relatedActivityId, object[] data) {
-            base.WriteTrace(eventCache, message, eventType, id, message, relatedActivityId, data);
-
+            if (!_isDisposed&&!DisableFileWriter) {
+                base.WriteTrace(eventCache, message, eventType, id, message, relatedActivityId, data);
+            }
             var traceEvent = new TraceEventMessage {
                 CallStack = eventCache.Callstack,
                 DateTime = eventCache.DateTime,

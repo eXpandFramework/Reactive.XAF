@@ -134,11 +134,14 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => objectSpace.WhenModifiedObjects(typeof(T),properties).Cast<T>().TakeUntil(objectSpace.WhenDisposed());
         
         public static IObservable<object> WhenModifiedObjects(this IObjectSpace objectSpace,Type objectType, params string[] properties) 
-            => Observable.Defer(() => objectSpace.WhenObjectChanged().Where(t => objectType.IsInstanceOfType(t.e.Object) && ( t.e.MemberInfo!=null&&properties.Contains(t.e.MemberInfo.Name) ||
-                        (t.e.PropertyName!=null&&properties.Contains(t.e.PropertyName))))
+            => Observable.Defer(() => objectSpace.WhenObjectChanged().Where(t => objectType.IsInstanceOfType(t.e.Object) && PropertiesMatch(properties, t))
                 .Select(_ => _.e.Object).Take(1))
                 .RepeatWhen(observable => observable.SelectMany(_ => objectSpace.WhenModifyChanged().Where(space => !space.IsModified).Take(1)))
                 .TakeUntil(objectSpace.WhenDisposed());
+
+        private static bool PropertiesMatch(this string[] properties, (IObjectSpace objectSpace, ObjectChangedEventArgs e) t) 
+            => !properties.Any()||(t.e.MemberInfo != null && properties.Contains(t.e.MemberInfo.Name) ||
+                t.e.PropertyName != null && properties.Contains(t.e.PropertyName));
 
         public static IObservable<T> WhenModifiedObjects<T>(this IObjectSpace objectSpace,Expression<Func<T,object>> memberSelector) 
             => objectSpace.WhenModifiedObjects(typeof(T),((MemberExpression) memberSelector.Body).Member.Name).Cast<T>();

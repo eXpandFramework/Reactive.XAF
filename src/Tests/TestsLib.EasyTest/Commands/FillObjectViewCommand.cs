@@ -9,7 +9,7 @@ using Xpand.TestsLib.Common;
 namespace Xpand.TestsLib.EasyTest.Commands{
     public class FillObjectViewCommand<T> : FillObjectViewCommand{
         public FillObjectViewCommand(params (Expression<Func<T, object>> editor, string value)[] tuples) : base(
-            tuples.Select(t => (t.editor.MemberExpressionCaption().CompoundName(), t.value.CompoundName())).ToArray()){
+            tuples.Select(t => (t.editor.MemberExpressionCaption().CompoundName(), t.value)).ToArray()){
         }
     }
 

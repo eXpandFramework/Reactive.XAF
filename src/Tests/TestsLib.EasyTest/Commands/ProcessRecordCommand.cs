@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Linq.Expressions;
 using DevExpress.EasyTest.Framework;
-using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.ObjectExtensions;
 using Xpand.TestsLib.Common;
 

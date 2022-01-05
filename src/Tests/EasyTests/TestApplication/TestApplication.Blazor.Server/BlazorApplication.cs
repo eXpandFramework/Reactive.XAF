@@ -22,7 +22,8 @@ namespace TestApplication.Blazor.Server {
             CheckCompatibilityType = CheckCompatibilityType.DatabaseSchema;
             DatabaseUpdateMode = DatabaseUpdateMode.UpdateDatabaseAlways;
             this.WhenViewOnFrame(typeof(AuthenticationStandardLogonParameters))
-                .Do(frame => { frame.View.CurrentObject.SetPropertyValue("UserName", "Admin"); })
+                .Do(frame => 
+	                { frame.View.CurrentObject.SetPropertyValue("UserName", "Admin"); })
                 .Subscribe();
         }
         protected override void OnSetupStarted() {

@@ -39,9 +39,14 @@ namespace ALL.Tests {
 					WriteLine(path!);
 					foreach (var file in Directory.GetFiles(path!, "*.log")) {
 						var zipPPath = $"{Path.GetDirectoryName(file)}\\{Path.GetFileNameWithoutExtension(file)}.gz";
-						File.WriteAllBytes(zipPPath, File.ReadAllText(file).GZip());
-						WriteLine($"Attaching {zipPPath}");
-						TestContext.AddTestAttachment(zipPPath);
+						try {
+							File.WriteAllBytes(zipPPath, File.ReadAllText(file).GZip());
+							WriteLine($"Attaching {zipPPath}");
+							TestContext.AddTestAttachment(zipPPath);
+						}
+						catch (Exception) {
+							// ignored
+						}
 					}
 				}
 			}

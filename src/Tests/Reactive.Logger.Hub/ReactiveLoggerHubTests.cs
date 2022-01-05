@@ -27,6 +27,9 @@ using Task = System.Threading.Tasks.Task;
 namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
     [NonParallelizable]
     public class ReactiveLoggerHubTests : BaseTest{
+        static ReactiveLoggerHubTests() {
+            ReactiveTraceListener.DisableFileWriter = true;
+        }
         [Test]
         [XpandTest]
         [Apartment(ApartmentState.STA)][Order(0)]
@@ -39,9 +42,9 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
 
             application.Logon();
             application.CreateObjectSpace();
-            await startServer.Timeout(Timeout).ToTaskWithoutConfigureAwait();
+            await startServer.Timeout(Timeout);
 
-            await startServerSave.Timeout(Timeout).ToTaskWithoutConfigureAwait();
+            await startServerSave.Timeout(Timeout);
         }
 
         [Test()]
@@ -76,7 +79,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
         }
 
         [Test()]
-        [XpandTest]
+        [XpandTest][Ignore("")]
         [Apartment(ApartmentState.STA)][Order(300)]
         public async Task Display_TraceEvent_On_New_Client(){
             var dictionary = XpoTypesInfoHelper.GetXpoTypeInfoSource().XPDictionary;
@@ -115,7 +118,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub.Tests{
             application.NewObjectView<DetailView>(typeof(RLH));
 
 
-            await broadcast.Timeout(Timeout).ToTaskWithoutConfigureAwait();
+            await broadcast.Timeout(Timeout);
             await receive.Timeout(Timeout);
             await detailViewCreated.Timeout(Timeout);
             await collectionReloaded;

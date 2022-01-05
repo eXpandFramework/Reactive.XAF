@@ -20,6 +20,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger {
             
         }
 
+        
+
         [PublicAPI]
         public static ReactiveTraceSource TraceSource{ get; set; }
 
@@ -27,6 +29,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger {
             base.AddGeneratorUpdaters(updaters);
             updaters.Add(new TraceEventAppearanceRulesGenerator());
         }
+
 
         public override void Setup(ApplicationModulesManager manager){
             base.Setup(manager);

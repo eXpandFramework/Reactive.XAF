@@ -60,12 +60,12 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
         static JobSchedulerService() {
             JobState.Where(state =>state.State==WorkerState.Succeeded)
                 .Where(state => state.JobWorker.Job.ChainJobs.Any())
-                .SelectMany(state => state.WhenSucceded().WhenNeedTrigger()
+                .SelectMany(state => state.WhenSucceeded().WhenNeedTrigger()
                     .SelectMany(_ => state.JobWorker.Job.ChainJobs.Do(job => job.Job.Trigger())))
                 .Subscribe();
         }
 
-        private static IObservable<StateHistoryDto> WhenSucceded(this JobState state)
+        private static IObservable<StateHistoryDto> WhenSucceeded(this JobState state)
             => Observable.Defer(() => JobStorage.Current.GetMonitoringApi().JobDetails(state.JobWorker.Id).History.Where(dto => dto.StateName==SucceededState.StateName)
                 .ToNowObservable()).RepeatWhen(o => o.Delay(TimeSpan.FromSeconds(1))).FirstAsync();
 

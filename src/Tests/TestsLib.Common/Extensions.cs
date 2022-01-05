@@ -156,7 +156,7 @@ namespace Xpand.TestsLib.Common{
                 (ModuleBase) instance
             }
             .Concat(modules)
-            .Concat(new []{new ReactiveLoggerModule()})
+            // .Concat(new []{new ReactiveLoggerModule()})
             .ToList();
 
             if (((ITestApplication) application).TransmitMessage){

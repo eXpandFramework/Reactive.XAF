@@ -5,7 +5,7 @@ using Xpand.Extensions.XAF.Xpo.BaseObjects;
 
 // ReSharper disable once CheckNamespace
 namespace Xpand.XAF.Persistent.BaseImpl{
-    [NonPersistent][OptimisticLocking(OptimisticLockingBehavior.LockModified)]
+    [NonPersistent]
     public abstract class CustomBaseObject : XPCustomBaseObject {
                 
         [Persistent(nameof(Oid)), Key(true), VisibleInListView(false), VisibleInDetailView(false), VisibleInLookupListView(false), MemberDesignTimeVisibility(false)]

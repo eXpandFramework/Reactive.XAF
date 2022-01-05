@@ -14,6 +14,7 @@ using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common;
+using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
     [NonParallelizable]
@@ -110,8 +111,8 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
         [XpandTest()][Test][Order(Int32.MaxValue)]
         public void Pause_Job() {
             using var application = JobSchedulerModule().Application.ToBlazor();
-            using var jobsObserver = TestJob.Jobs.Timeout(Timeout).FirstAsync().Test();
-            application.CommitNewJob().Pause().Trigger();
+            using var jobsObserver = TestJob.Jobs.FirstAsync().Test();
+            application.CommitNewJob(modify:job => job.SetMemberValue(nameof(Job.IsPaused),true)).Trigger();
 
             var itemCount = jobsObserver.AwaitDone(Timeout).ItemCount;
             itemCount.ShouldBe(0);
@@ -121,9 +122,9 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
         public async Task Resume_Job() {
             using var application = JobSchedulerModule().Application.ToBlazor();
             var jobsCommitObserver = TestJob.Jobs.Timeout(Timeout).FirstAsync().ReplayConnect();
-            
-            application.CommitNewJob().Pause().Resume().Trigger();
-            
+
+            application.CommitNewJob( ).Pause().Resume().Trigger();
+
             await jobsCommitObserver.Timeout(Timeout);
             
         }
@@ -143,7 +144,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
             
             job.IsPaused.ShouldBeTrue();
             view.ObjectSpace.Refresh();
-
+            
             action.Active.ResultValue.ShouldBeFalse();
             viewWindow.Action<JobSchedulerModule>().ResumeJob().Active.ResultValue.ShouldBeTrue();
             
