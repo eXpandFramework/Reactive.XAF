@@ -75,7 +75,7 @@ namespace Web.Tests{
             
         }
 
-        [XpandTest(LongTimeout,3)]
+        // [XpandTest(LongTimeout,3)]
         [Test]
         [Apartment(ApartmentState.STA)]
         public async Task Web_EasyTest_InMemory() {
@@ -83,21 +83,21 @@ namespace Web.Tests{
             easyTestTracer.SetTraceLevel(TraceLevel.Verbose);
             
             await EasyTest(NewWebAdapter, RunWebApplication, async adapter => {
-                adapter.TestBulkObjectUpdate();
-                var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
-                adapter.Execute(autoTestCommand);
-                await Task.CompletedTask;
-                var binPath = @$"{ApplicationPath}bin\";
-                await adapter.TestEmail(binPath);
-                adapter.TestModelViewInheritance();
-                adapter.TestPositionInListView();
+                // adapter.TestBulkObjectUpdate();
+                // var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
+                // adapter.Execute(autoTestCommand);
+                // await Task.CompletedTask;
+                // var binPath = @$"{ApplicationPath}bin\";
+                // await adapter.TestEmail(binPath);
+                // adapter.TestModelViewInheritance();
+                // adapter.TestPositionInListView();
                 
 #if NETCOREAPP3_1_OR_GREATER
                 await adapter.TestJobScheduler();
-                await adapter.TestJobSchedulerNotification();
+                // await adapter.TestJobSchedulerNotification();
                 
-                await adapter.TestChainJob(binPath);
-                await adapter.TestExecuteActionJob();
+                // await adapter.TestChainJob(binPath);
+                // await adapter.TestExecuteActionJob();
 #endif
             });
         }

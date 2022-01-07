@@ -88,35 +88,35 @@ namespace TestApplication.Module {
 
             AdditionalExportedTypes.Add(typeof(Order));
 
-            RequiredModuleTypes.Add(typeof(AutoCommitModule));
-            RequiredModuleTypes.Add(typeof(CloneMemberValueModule));
-            RequiredModuleTypes.Add(typeof(HideToolBarModule));
-            RequiredModuleTypes.Add(typeof(MasterDetailModule));
-            RequiredModuleTypes.Add(typeof(ModelViewInheritanceModule));
+            // RequiredModuleTypes.Add(typeof(AutoCommitModule));
+            // RequiredModuleTypes.Add(typeof(CloneMemberValueModule));
+            // RequiredModuleTypes.Add(typeof(HideToolBarModule));
+            // RequiredModuleTypes.Add(typeof(MasterDetailModule));
+            // RequiredModuleTypes.Add(typeof(ModelViewInheritanceModule));
             // RequiredModuleTypes.Add(typeof(ProgressBarViewItemModule));
-            RequiredModuleTypes.Add(typeof(ModelMapperModule));
-            RequiredModuleTypes.Add(typeof(ReactiveModule));
-            RequiredModuleTypes.Add(typeof(PositionInListViewModule));
-            RequiredModuleTypes.Add(typeof(RefreshViewModule));
-            RequiredModuleTypes.Add(typeof(SequenceGeneratorModule));
-            RequiredModuleTypes.Add(typeof(SuppressConfirmationModule));
-            RequiredModuleTypes.Add(typeof(ViewEditModeModule));
-            RequiredModuleTypes.Add(typeof(ViewItemValueModule));
-            RequiredModuleTypes.Add(typeof(ReactiveLoggerModule));
+            // RequiredModuleTypes.Add(typeof(ModelMapperModule));
+            // RequiredModuleTypes.Add(typeof(ReactiveModule));
+            // RequiredModuleTypes.Add(typeof(PositionInListViewModule));
+            // RequiredModuleTypes.Add(typeof(RefreshViewModule));
+            // RequiredModuleTypes.Add(typeof(SequenceGeneratorModule));
+            // RequiredModuleTypes.Add(typeof(SuppressConfirmationModule));
+            // RequiredModuleTypes.Add(typeof(ViewEditModeModule));
+            // RequiredModuleTypes.Add(typeof(ViewItemValueModule));
+            // RequiredModuleTypes.Add(typeof(ReactiveLoggerModule));
             // RequiredModuleTypes.Add(typeof(ReactiveLoggerHubModule));
-            RequiredModuleTypes.Add(typeof(ViewWizardModule));
-            RequiredModuleTypes.Add(typeof(RestModule));
-            RequiredModuleTypes.Add(typeof(RazorViewModule));
-            RequiredModuleTypes.Add(typeof(EmailModule));
-            RequiredModuleTypes.Add(typeof(BulkObjectUpdateModule));
+            // RequiredModuleTypes.Add(typeof(ViewWizardModule));
+            // RequiredModuleTypes.Add(typeof(RestModule));
+            // RequiredModuleTypes.Add(typeof(RazorViewModule));
+            // RequiredModuleTypes.Add(typeof(EmailModule));
+            // RequiredModuleTypes.Add(typeof(BulkObjectUpdateModule));
 
 
             AdditionalExportedTypes.Add(typeof(Event));
             AdditionalExportedTypes.Add(typeof(Task));
-            RequiredModuleTypes.Add(typeof(CloneModelViewModule));
-            RequiredModuleTypes.Add(typeof(GoogleModule));
-            RequiredModuleTypes.Add(typeof(GoogleTasksModule));
-            RequiredModuleTypes.Add(typeof(GoogleCalendarModule));
+            // RequiredModuleTypes.Add(typeof(CloneModelViewModule));
+            // RequiredModuleTypes.Add(typeof(GoogleModule));
+            // RequiredModuleTypes.Add(typeof(GoogleTasksModule));
+            // RequiredModuleTypes.Add(typeof(GoogleCalendarModule));
         }
 
         public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDb){
@@ -127,14 +127,14 @@ namespace TestApplication.Module {
 
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
-            moduleManager.ConnectGoogleCalendarService()
-	            .Merge(moduleManager.ConnectBulkObjectUpdate())
-                .Merge(moduleManager.ConnectEmail())
-                .Merge(moduleManager.ConnectViewWizardService())
-                .Merge(moduleManager.ConnectCloudCalendarService())
-                .Merge(moduleManager.ConnectGoogleService())
-                .Merge(moduleManager.ConnectGoogleTasksService())
-                .Subscribe(this);
+            // moduleManager.ConnectGoogleCalendarService()
+	           //  .Merge(moduleManager.ConnectBulkObjectUpdate())
+            //     .Merge(moduleManager.ConnectEmail())
+            //     .Merge(moduleManager.ConnectViewWizardService())
+            //     .Merge(moduleManager.ConnectCloudCalendarService())
+            //     .Merge(moduleManager.ConnectGoogleService())
+            //     .Merge(moduleManager.ConnectGoogleTasksService())
+            //     .Subscribe(this);
         }
 
         public override void CustomizeTypesInfo(ITypesInfo typesInfo) {

@@ -23,7 +23,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
         [PublicAPI]
         public static ReactiveTraceSource TraceSource{ get; set; }
         public JobSchedulerModule() {
-            RequiredModuleTypes.Add(typeof(BlazorModule));
+            // RequiredModuleTypes.Add(typeof(BlazorModule));
             RequiredModuleTypes.Add(typeof(SystemBlazorModule));
             RequiredModuleTypes.Add(typeof(ValidationModule));
             RequiredModuleTypes.Add(typeof(ValidationBlazorModule));
@@ -32,14 +32,14 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
 
         protected override void RegisterEditorDescriptors(EditorDescriptorsFactory editorDescriptorsFactory) {
             base.RegisterEditorDescriptors(editorDescriptorsFactory);
-            editorDescriptorsFactory.RegisterPropertyEditor(nameof(DisplayTextPropertyEditor),typeof(object),typeof(DisplayTextPropertyEditor),false);
-            editorDescriptorsFactory.RegisterPropertyEditorAlias(nameof(DisplayTextPropertyEditor),typeof(object),false);
+            // editorDescriptorsFactory.RegisterPropertyEditor(nameof(DisplayTextPropertyEditor),typeof(object),typeof(DisplayTextPropertyEditor),false);
+            // editorDescriptorsFactory.RegisterPropertyEditorAlias(nameof(DisplayTextPropertyEditor),typeof(object),false);
         }
 
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
-            moduleManager.Connect()
-                .Subscribe(this);
+            // moduleManager.Connect()
+                // .Subscribe(this);
         }
 
         public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB) 

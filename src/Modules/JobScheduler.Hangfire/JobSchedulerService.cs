@@ -77,14 +77,14 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
                     return result == "true" ;
                 }).WhenNotDefault();
 
-        internal static IObservable<Unit> Connect(this ApplicationModulesManager manager)
-            => manager.CheckBlazor(typeof(HangfireStartup).FullName, typeof(JobSchedulerModule).Namespace)
-                .Merge(manager.WhenApplication(application => application.ScheduleJobs().Merge(application.DeleteJobs()))
-                    .Merge(manager.TriggerJobsFromAction())
-                    .Merge(manager.PauseJobsFromAction())
-                    .Merge(manager.ResumeJobsFromAction())
-                    .Merge(manager.JobDashboard())
-                );
+        // internal static IObservable<Unit> Connect(this ApplicationModulesManager manager)
+        //     => manager.CheckBlazor(typeof(HangfireStartup).FullName, typeof(JobSchedulerModule).Namespace)
+        //         .Merge(manager.WhenApplication(application => application.ScheduleJobs().Merge(application.DeleteJobs()))
+        //             .Merge(manager.TriggerJobsFromAction())
+        //             .Merge(manager.PauseJobsFromAction())
+        //             .Merge(manager.ResumeJobsFromAction())
+        //             .Merge(manager.JobDashboard())
+        //         );
 
         private static IObservable<Unit> JobDashboard(this ApplicationModulesManager manager)
             => manager.RegisterViewSimpleAction(nameof(JobDashboard), action => {

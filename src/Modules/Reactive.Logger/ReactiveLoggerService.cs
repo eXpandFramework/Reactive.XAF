@@ -51,7 +51,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             => manager.WhenApplication(application => {
                 application.AddNonSecuredType(typeof(TraceEvent));
                 var listener = manager.Modules.OfType<ReactiveLoggerModule>().First().Listener;
-                ListenerEvents = listener.EventTrace.Publish().RefCount().Finally(() => {});
+                ListenerEvents = listener.EventTrace.Publish().RefCount();
                 return 
                     application.BufferUntilCompatibilityChecked(ListenerEvents)
                     .SaveEvent(application).ToUnit()

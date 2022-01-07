@@ -28,7 +28,7 @@ namespace TestApplication.Blazor.Server {
         protected override void OnSetupStarted() {
             base.OnSetupStarted();
             this.ConfigureConnectionString();
-            // ConnectionString = ServiceProvider.GetRequiredService<IConfiguration>().GetConnectionString("ConnectionString");
+            ConnectionString = ServiceProvider.GetRequiredService<IConfiguration>().GetConnectionString("ConnectionString");
         }
 
         protected override void CreateDefaultObjectSpaceProvider(CreateCustomObjectSpaceProviderEventArgs args) {

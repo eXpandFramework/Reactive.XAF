@@ -18,7 +18,7 @@ namespace Web.Tests {
             adapter.NewEmailJob();
             adapter.NewChainedJob();
             adapter.NewChainedProduct();
-            adapter.Execute(new NavigateCommand("JobScheduler.Job"));
+            adapter.Execute(new NavigateCommand("JobScheduler.Job",false));
             adapter.Execute(new SelectObjectsCommand<Job>(job => job.Id,new[] { "ChainJob" }));
             await adapter.TestEmailCreation(appicationPath,nameof(NewChainedProduct), () => adapter.Execute(
                     new ActionCommand(nameof(Xpand.XAF.Modules.JobScheduler.Hangfire.JobSchedulerService.Trigger))));
@@ -86,11 +86,11 @@ namespace Web.Tests {
         }
 
         private static async Task TestJob(this ICommandAdapter adapter) {
-            adapter.Execute(new NavigateCommand("JobScheduler.Job"));
+            adapter.Execute(new NavigateCommand("JobScheduler.Job",false));
             adapter.CreateJob().TestPauseResume();
             await adapter.TestJob(WorkerState.Succeeded, 1);
 
-            adapter.Execute(new NavigateCommand("JobScheduler.Job"));
+            adapter.Execute(new NavigateCommand("JobScheduler.Job",false));
             adapter.Execute(new ProcessRecordCommand<Job, Job>((job => job.Id, nameof(JobSchedulerService))));
             adapter.Execute(new FillObjectViewCommand((nameof(Job.JobMethod), "Failed")));
 

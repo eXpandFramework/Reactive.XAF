@@ -53,7 +53,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
         [PersistentAlias(nameof(_isPaused))]
         public bool IsPaused {
             get => _isPaused;
-            internal set => SetPropertyValue(nameof(IsPaused), ref _isPaused, value);
+            set => SetPropertyValue(nameof(IsPaused), ref _isPaused, value);
         }
 
         ObjectString _jobMethod;
@@ -67,15 +67,19 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects {
         }
 
         [Browsable(false)]
-        public IList<ObjectString> JobMethods 
-            => AppDomain.CurrentDomain.JobMethods().Where(info => info.DeclaringType==JobType?.Type)
-                .Select(info => new ObjectString(info.Attribute<JobProviderAttribute>()?.DisplayName??info.Name.CompoundName() ))
-                .ToArray();
+        public IList<ObjectString> JobMethods
+	        => new List<ObjectString>();
+
+            // => AppDomain.CurrentDomain.JobMethods().Where(info => info.DeclaringType==JobType?.Type)
+                // .Select(info => new ObjectString(info.Attribute<JobProviderAttribute>()?.DisplayName??info.Name.CompoundName() ))
+                // .ToArray();
         
         [Browsable(false)]
-        public IList<ObjectType> JobTypes => AppDomain.CurrentDomain.JobMethods().Select(m=>m.DeclaringType).Distinct()
-            .Select(type => new ObjectType(type){Name = type.Attribute<JobProviderAttribute>().DisplayName??type.Name.CompoundName()})
-            .ToArray();
+        public IList<ObjectType> JobTypes 
+			=> new List<ObjectType>();
+	        // => AppDomain.CurrentDomain.JobMethods().Select(m=>m.DeclaringType).Distinct()
+            // .Select(type => new ObjectType(type){Name = type.Attribute<JobProviderAttribute>().DisplayName??type.Name.CompoundName()})
+            // .ToArray();
 
         public override void AfterConstruction() {
             base.AfterConstruction();

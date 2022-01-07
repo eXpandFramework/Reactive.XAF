@@ -19,7 +19,7 @@ using Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire;
 
 [assembly: HostingStartup(typeof(GoogleCodeStateStartup))]
 [assembly: HostingStartup(typeof(HostingStartup))]
-[assembly: HostingStartup(typeof(HangfireStartup))]
+// [assembly: HostingStartup(typeof(HangfireStartup))]
 [assembly: HostingStartup(typeof(Xpand.XAF.Modules.Blazor.BlazorStartup))]
 namespace TestApplication.Blazor.Server {
     public class Startup {
@@ -50,7 +50,7 @@ namespace TestApplication.Blazor.Server {
                 options.LoginPath = "/LoginPage";
             });
 
-            GlobalConfiguration.Configuration.UseMemoryStorage();
+            // GlobalConfiguration.Configuration.UseMemoryStorage();
             // GlobalConfiguration.Configuration.UseSqlServerStorage(
             //     Configuration.GetConnectionString("ConnectionString"), new SqlServerStorageOptions {
             //         CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
