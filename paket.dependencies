@@ -54,7 +54,7 @@ nuget System.Reflection.Metadata 5.0.0
 nuget System.Interactive 5.0
 nuget System.Interactive.Async 5.0
 nuget Unofficial.Microsoft.mshtml 7.0.3300
-nuget Xpand.Patcher 2.0.30
+nuget Xpand.Patcher 2.0.31
 nuget YamlDotNet 11.2.1
 nuget JetBrains.Annotations 2021.3
 nuget Polly 7.2.2
