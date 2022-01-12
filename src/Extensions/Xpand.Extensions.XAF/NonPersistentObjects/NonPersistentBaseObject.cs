@@ -44,6 +44,8 @@ namespace Xpand.Extensions.XAF.NonPersistentObjects {
 
             return base.ToString();
         }
+        protected bool SetPropertyValue<T>(string propertyName ,ref T propertyValue, T newValue ) 
+            => base.SetPropertyValue(ref propertyValue, newValue, propertyName);
 
         protected override void OnObjectSpaceChanged() {
             base.OnObjectSpaceChanged();

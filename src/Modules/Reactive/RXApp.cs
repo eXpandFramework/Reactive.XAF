@@ -14,6 +14,7 @@ using JetBrains.Annotations;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
+using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.ModuleExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Security;
@@ -39,6 +40,11 @@ namespace Xpand.XAF.Modules.Reactive{
         private static MethodInfo GetMethodInfo(string methodName) 
             => typeof(RxApp).GetMethods(BindingFlags.Static|BindingFlags.NonPublic|BindingFlags.Public).First(info => info.Name == methodName);
 
+        internal static IObservable<Unit> NonPersistentChangesEnabledAttribute(this XafApplication application) 
+            => application.WhenObjectViewCreated().Where(view => view.ObjectTypeInfo.FindAttributes<NonPersistentChangesEnabledAttribute>().Any())
+                .Do(view => view.ObjectSpace.NonPersistentChangesEnabled = true)
+                .ToUnit();
+
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager)
             => manager.Attributes()
                 .Merge(manager.AddNonSecuredTypes())
@@ -47,6 +53,7 @@ namespace Xpand.XAF.Modules.Reactive{
                 .Merge(manager.WhenApplication(application =>application.WhenNonPersistentPropertyCollectionSource()
                     .Merge(application.PatchAuthentication())
                     .Merge(application.PatchObjectSpaceProvider())
+                    .Merge(application.NonPersistentChangesEnabledAttribute())
                     .Merge(application.ShowPersistentObjectsInNonPersistentView())))
                 .Merge(manager.SetupPropertyEditorParentView());
 
