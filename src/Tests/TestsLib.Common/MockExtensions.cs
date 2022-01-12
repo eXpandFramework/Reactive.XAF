@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Net.WebSockets;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
@@ -18,6 +19,7 @@ using Moq.Protected;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
 
 namespace Xpand.TestsLib.Common {
@@ -82,6 +84,14 @@ namespace Xpand.TestsLib.Common {
         public static HttpClientHandler Handler(this HttpClient client) 
             => (HttpClientHandler)client.GetFieldValue("_handler");
 
+        public static void SetupReceive(this Mock<WebSocket> mock, byte[] bytes) {
+            mock.Setup(socket => socket.ReceiveAsync(It.IsAny<ArraySegment<byte>>(), It.IsAny<CancellationToken>()))
+                .Returns((ArraySegment<byte> buffer, CancellationToken _) => {
+                    Array.Copy(bytes,buffer.Array!,bytes.Length);
+                    return new WebSocketReceiveResult(bytes.Length,WebSocketMessageType.Text, true).ReturnObservable().ObserveOnDefault().ToTask(_);
+                });
+            mock.Setup(socket => socket.State).Returns(WebSocketState.Open);
+        }
         public static IReturnsResult<THandler> SetupSend<THandler>(this Mock<THandler> handlerMock, Action<HttpResponseMessage> configure,IScheduler scheduler=null) where THandler:HttpMessageHandler 
             => handlerMock.Protected()
                 .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())

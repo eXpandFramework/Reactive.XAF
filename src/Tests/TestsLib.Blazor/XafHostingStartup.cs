@@ -24,7 +24,7 @@ namespace Xpand.TestsLib.Blazor {
 
 		protected XafHostingStartup(IConfiguration configuration) => Configuration = configuration;
 
-		public void Configure(IApplicationBuilder app, IWebHostEnvironment env) {
+		public virtual void Configure(IApplicationBuilder app, IWebHostEnvironment env) {
 			if (env.IsDevelopment()) {
 				app.UseDeveloperExceptionPage();
 			}
