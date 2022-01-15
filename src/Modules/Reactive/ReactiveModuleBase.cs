@@ -57,9 +57,9 @@ namespace Xpand.XAF.Modules.Reactive{
         
 
         [PublicAPI]
-        public static void Unload(params Type[] modules) {
+        public static IDisposable Unload(params Type[] modules) {
             UnloadedModules=modules;
-            SettingUpSubject.Do(_ => {
+            return SettingUpSubject.Do(_ => {
                     foreach (var module in _.Modules.Where(m => m.RequiredModuleTypes.Any(modules.Contains))) {
                         foreach (var type in modules) {
                             module.RequiredModuleTypes.Remove(type);

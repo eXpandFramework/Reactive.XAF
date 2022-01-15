@@ -84,11 +84,11 @@ namespace Xpand.TestsLib.Common {
         public static HttpClientHandler Handler(this HttpClient client) 
             => (HttpClientHandler)client.GetFieldValue("_handler");
 
-        public static void SetupReceive(this Mock<WebSocket> mock, byte[] bytes) {
+        public static void SetupReceive(this Mock<WebSocket> mock, byte[] bytes,Func<Task<WebSocketReceiveResult>> resultSelector=null) {
             mock.Setup(socket => socket.ReceiveAsync(It.IsAny<ArraySegment<byte>>(), It.IsAny<CancellationToken>()))
                 .Returns((ArraySegment<byte> buffer, CancellationToken _) => {
                     Array.Copy(bytes,buffer.Array!,bytes.Length);
-                    return new WebSocketReceiveResult(bytes.Length,WebSocketMessageType.Text, true).ReturnObservable().ObserveOnDefault().ToTask(_);
+                    return resultSelector?.Invoke()??new WebSocketReceiveResult(bytes.Length,WebSocketMessageType.Text, true).ReturnObservable().ObserveOnDefault().ToTask(_);
                 });
             mock.Setup(socket => socket.State).Returns(WebSocketState.Open);
         }

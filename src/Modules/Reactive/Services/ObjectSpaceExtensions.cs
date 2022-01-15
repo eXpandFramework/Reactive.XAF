@@ -61,6 +61,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<T> WhenObjects<T>(this NonPersistentObjectSpace objectSpace,Func<(NonPersistentObjectSpace objectSpace, ObjectsGettingEventArgs e), IObservable<T>> source,Type objectType=null) where T:class{
             objectType ??= typeof(T);
+#if !XAF192
+            objectSpace.AutoSetModifiedOnObjectChange = true;
+#endif
             objectSpace.NonPersistentChangesEnabled = true;
             return objectSpace.WhenObjectsGetting()
                     .Where(t => objectType.IsAssignableFrom(t.e.ObjectType))
@@ -190,7 +193,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     .SelectMany(_ => objectSpace.WhenCommitingDetailed(objectModification, emitAfterCommit,criteria)):
                 objectSpace.WhenCommitingDetailed(objectModification, emitAfterCommit,criteria).TakeUntil(objectSpace.WhenDisposed());
         
-        public static void DeleteObject<T>(this T value) where T:class,IObjectSpaceLink => value.ObjectSpace.Delete(value);
+        public static void DeleteObject<T>(this T value, Expression<Func<T, bool>> criteria = null) where T:class,IObjectSpaceLink => value.ObjectSpace.Delete(value);
 
         public static void DeleteObject<T>(this IObjectSpace objectSpace, Expression<Func<T, bool>> criteria=null) {
             var query = objectSpace.GetObjectsQuery<T>();

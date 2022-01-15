@@ -47,10 +47,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.TestsLib.Net461", "..
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.TestsLib.EasyTest", "..\TestsLib.EasyTest\Xpand.TestsLib.EasyTest.csproj", "{0E279695-9A3A-4C3D-BDAE-7ADE23DAE82B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.JobScheduler.Hangfire", "..\..\Modules\JobScheduler.Hangfire\Xpand.XAF.Modules.JobScheduler.Hangfire.csproj", "{CFF46954-9E6C-4677-BDA4-EF7A4C166CB9}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.XAF.Modules.Reactive.Logger", "..\..\Modules\Reactive.Logger\Xpand.XAF.Modules.Reactive.Logger.csproj", "{763A3172-2F2C-4577-960A-5341978F487D}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -122,18 +118,6 @@ Global
 		{0E279695-9A3A-4C3D-BDAE-7ADE23DAE82B}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
 		{0E279695-9A3A-4C3D-BDAE-7ADE23DAE82B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0E279695-9A3A-4C3D-BDAE-7ADE23DAE82B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CFF46954-9E6C-4677-BDA4-EF7A4C166CB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CFF46954-9E6C-4677-BDA4-EF7A4C166CB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CFF46954-9E6C-4677-BDA4-EF7A4C166CB9}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
-		{CFF46954-9E6C-4677-BDA4-EF7A4C166CB9}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
-		{CFF46954-9E6C-4677-BDA4-EF7A4C166CB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CFF46954-9E6C-4677-BDA4-EF7A4C166CB9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{763A3172-2F2C-4577-960A-5341978F487D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{763A3172-2F2C-4577-960A-5341978F487D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{763A3172-2F2C-4577-960A-5341978F487D}.EasyTest|Any CPU.ActiveCfg = Debug|Any CPU
-		{763A3172-2F2C-4577-960A-5341978F487D}.EasyTest|Any CPU.Build.0 = Debug|Any CPU
-		{763A3172-2F2C-4577-960A-5341978F487D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{763A3172-2F2C-4577-960A-5341978F487D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

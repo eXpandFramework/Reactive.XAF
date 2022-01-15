@@ -78,7 +78,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 
         private static IObservable<Server> StartServer(this  XafApplication application) 
 	        => application is ILoggerHubClientApplication ? Observable.Empty<Server>() : application.ServerPortsList().FirstAsync()
-			        .Select(modelServerPort => modelServerPort.ToServerPort().StartServer(application))
+			        .Select(modelServerPort => modelServerPort.ToServerPort().StartServer())
 			        .TraceRXLoggerHub(server => string.Join(", ",server.Ports.Select(port => $"{port.Host}, {port.Port}")));
 
         private static IObservable<ITraceEventHub> ConnectClient(this XafApplication application) 
@@ -120,7 +120,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 		        .Where(ports => ports.LoggerPorts.Enabled)
 		        .Select(logger => logger).Cast<IModelServerPorts>();
 
-        public static Server StartServer(this ServerPort serverPort, XafApplication application){
+        public static Server StartServer(this ServerPort serverPort){
 	        var options = new MagicOnionOptions{IsReturnExceptionStackTraceInErrorDetail = true};
             var service = MagicOnionEngine.BuildServerServiceDefinition(new[]{typeof(ReactiveLoggerHubService).GetTypeInfo().Assembly},options);
             _server = new Server{

@@ -96,6 +96,9 @@ namespace ALL.Win.Tests {
 		[TestCaseSource(nameof(WinModules))]
 		[XpandTest]
 		public void UnloadWinModules(Type moduleType) {
+			if (moduleType.Name==nameof(ReactiveLoggerModule)||moduleType.Name==nameof(ReactiveModule)) {
+				return;
+			}
 			ReactiveModuleBase.Unload(moduleType);
 			using var application = new TestWinApplication(moduleType, false);
 			application.AddModule((ModuleBase)moduleType.CreateInstance(), nameof(UnloadWinModules));
