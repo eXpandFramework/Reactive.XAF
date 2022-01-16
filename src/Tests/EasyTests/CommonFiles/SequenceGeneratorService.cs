@@ -1,4 +1,5 @@
-﻿using DevExpress.EasyTest.Framework;
+﻿using System;
+using DevExpress.EasyTest.Framework;
 using Xpand.Extensions.XAF.ObjectExtensions;
 using Xpand.TestsLib.Common.BO;
 using Xpand.TestsLib.EasyTest;
@@ -13,6 +14,7 @@ namespace ALL.Win.Tests {
 			commandAdapter.Execute(new SelectObjectsCommand(new MainParameter(nameof(SequenceStorage).CompoundName()))
 				{ SuppressExceptions = true });
 			commandAdapter.Execute(new ActionDeleteObjectsCommand() { SuppressExceptions = true });
+			throw new Exception();
 			commandAdapter.Execute(new ActionCommand(Actions.New));
 			commandAdapter.Execute(new FillEditorCommand(nameof(SequenceStorage.Type), nameof(Order)));
 			commandAdapter.Execute(new FillEditorCommand(nameof(SequenceStorage.Member),

@@ -13,6 +13,7 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
+using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -47,8 +48,8 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate{
 			        }))).ToUnit();
 
         private static IEnumerable<PropertyEditor> PropertyEditors(this (Frame listView, Frame detailView) t) 
-	        => t.detailView.View.AsDetailView().GetItems<PropertyEditor>().Where(editor =>
-		        ((IAppearanceEnabled)editor).Enabled && ((IAppearanceVisibility)editor).Visibility == ViewItemVisibility.Show);
+	        => t.detailView.View.AsDetailView().GetItems<PropertyEditor>()
+                .Where(editor => ((IAppearanceVisibility)editor).Visibility == ViewItemVisibility.Show&&editor.Model.IsLayout());
 
         static IObservable<(Frame listView, Frame detailView)> ShowView(this SingleChoiceAction action) 
             => action.WhenActive()

@@ -80,8 +80,8 @@ namespace ALL.Win.Tests {
 
 
 		[Test]
-		[XpandTest(LongTimeout, 3)]
-		[Apartment(ApartmentState.STA)]
+		// [XpandTest(LongTimeout, 3)]
+		// [Apartment(ApartmentState.STA)]
 		public async Task Win_EasyTest_InLocalDb() {
 			var connectionString =
 				$"Integrated Security=SSPI;Pooling=false;Data Source=(localdb)\\mssqllocaldb;Initial Catalog=TestApplicationWin{AppDomain.CurrentDomain.UseNetFramework()}";
@@ -110,8 +110,8 @@ namespace ALL.Win.Tests {
 		[XpandTest(LongTimeout, 3)]
 		public async Task Win_EasyTest_InMemory() {
 			await EasyTest(() => new WinAdapter(), RunWinApplication, async adapter => {
-				var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
-				adapter.Execute(autoTestCommand);
+				// var autoTestCommand = new AutoTestCommand("Event|Task|Reports");
+				// adapter.Execute(autoTestCommand);
 				adapter.TestBulkObjectUpdate();
 				await adapter.TestEmail(ApplicationPath);
 #if !XAF191 && !NETCOREAPP3_1_OR_GREATER
