@@ -55,8 +55,7 @@ namespace Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions{
             TrackPropertiesModifications = true;
         }
 
-        protected override MemberInfoCollection GetPropertiesListForUpdateInsert(object theObject, bool isUpdate,
-            bool addDelayedReference){
+        protected override MemberInfoCollection GetPropertiesListForUpdateInsert(object theObject, bool isUpdate, bool addDelayedReference){
             var defaultMembers = base.GetPropertiesListForUpdateInsert(theObject, isUpdate, addDelayedReference);
             if (TrackPropertiesModifications && isUpdate){
                 var members = new MemberInfoCollection(GetClassInfo(theObject));

@@ -18,7 +18,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         private static readonly Subject<IObjectSpaceProvider> SchemaUpdatingSubject=new();
         private static readonly Subject<IObjectSpaceProvider> SchemaUpdatedSubject=new();
-        private static readonly Subject<IObjectSpace> ObjectSpaceCreatedSubject=new();
+        private static readonly ISubject<IObjectSpace> ObjectSpaceCreatedSubject=Subject.Synchronize(new Subject<IObjectSpace>());
 
         private static MethodInfo GetMethodInfo(string methodName) 
             => typeof(ObjectSpaceProviderExtensions).GetMethods(BindingFlags.Static|BindingFlags.NonPublic).First(info => info.Name == methodName);

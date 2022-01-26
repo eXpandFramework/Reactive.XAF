@@ -199,7 +199,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<IObjectSpace> WhenProviderObjectSpaceCreated(this XafApplication application,Func<IObjectSpaceProvider> provider=null) {
             var objectSpaceProvider = provider?.Invoke()??application.ObjectSpaceProvider;
-            return application.ObjectSpaceProviders.Where(spaceProvider => spaceProvider == objectSpaceProvider).ToObservable()
+            return application.ObjectSpaceProviders.Where(spaceProvider => spaceProvider == objectSpaceProvider).ToNowObservable()
                 .SelectMany(spaceProvider => spaceProvider.WhenObjectSpaceCreated());
         }
 
@@ -484,6 +484,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return Observable.Empty<Unit>();
         }
 
+        public static IObservable<T> ToObjects<T>(this IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> source)
+            => source.SelectMany(t => t.objects);
+        
         public static IObservable<T> ToObjects<T>(this IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> source) 
             => source.SelectMany(t => t.details.Select(t1 => t1.instance));
         

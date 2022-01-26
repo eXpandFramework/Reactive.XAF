@@ -170,9 +170,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => objectSpace.WhenCommiting()
                 .SelectMany(_ => {
                     var modifiedObjects = objectSpace.ModifiedObjects<T>(objectModification).Where(t => criteria==null|| criteria.Invoke(t.instance)).ToArray();
-                    return modifiedObjects.Any()
-                        ? emitAfterCommit ? objectSpace.WhenCommitted().FirstAsync().Select(space => (space, modifiedObjects))
-                        : (objectSpace, modifiedObjects).ReturnObservable() : Observable.Empty<(IObjectSpace, (T instance, ObjectModification modification)[])>();
+                    if (modifiedObjects.Any())
+                        return emitAfterCommit
+                            ? objectSpace.WhenCommitted().FirstAsync().Select(space => (space, modifiedObjects))
+                            : (objectSpace, modifiedObjects).ReturnObservable();
+                    else
+                        return Observable.Empty<(IObjectSpace, (T instance, ObjectModification modification)[])>();
                 });
 
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)>
@@ -185,13 +188,17 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)>
             WhenCommittedDetailed<T>(this IObjectSpace objectSpace, ObjectModification objectModification,Func<T, bool> criteria=null,params string[] modifiedProperties) 
-            => objectSpace.WhenCommitingDetailed(true, objectModification,criteria, modifiedProperties).TakeUntil(objectSpace.WhenDisposed());
+            => objectSpace.WhenCommitingDetailed(true, objectModification,criteria, modifiedProperties);
+                // .TakeUntil(objectSpace.WhenDisposed().Select(unit => unit)
+                // );
         
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)>
             WhenCommitingDetailed<T>(this IObjectSpace objectSpace, bool emitAfterCommit, ObjectModification objectModification,Func<T, bool> criteria,params string[] modifiedProperties) 
             => modifiedProperties.Any()?objectSpace.WhenModifiedObjects<T>(modifiedProperties).Take(1)
                     .SelectMany(_ => objectSpace.WhenCommitingDetailed(objectModification, emitAfterCommit,criteria)):
-                objectSpace.WhenCommitingDetailed(objectModification, emitAfterCommit,criteria).TakeUntil(objectSpace.WhenDisposed());
+                objectSpace.WhenCommitingDetailed(objectModification, emitAfterCommit,criteria)
+                    // .TakeUntil(objectSpace.WhenDisposed())
+                ;
         
         public static void DeleteObject<T>(this T value, Expression<Func<T, bool>> criteria = null) where T:class,IObjectSpaceLink => value.ObjectSpace.Delete(value);
 

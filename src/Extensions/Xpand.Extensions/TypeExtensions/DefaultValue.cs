@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq.Expressions;
 
 namespace Xpand.Extensions.TypeExtensions{
 	public static partial class TypeExtensions{

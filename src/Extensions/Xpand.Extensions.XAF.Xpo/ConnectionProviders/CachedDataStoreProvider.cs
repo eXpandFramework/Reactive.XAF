@@ -26,10 +26,9 @@ namespace Xpand.Extensions.XAF.Xpo.ConnectionProviders {
         public CachedDataStoreProvider(string connectionString) : base(connectionString) {
         }
 
-        public static Func<(bool allowUpdateSchema, IDisposable[] rootDisposables, IDataStore dataStore)>
-            CustomCreateUpdatingStore;
+        public static readonly Func<(bool allowUpdateSchema, IDisposable[] rootDisposables, IDataStore dataStore)> CustomCreateUpdatingStore;
 
-        public static Func<(IDisposable[] rootDisposables, IDataStore dataStore)> CreateStore;
+        public static readonly Func<(IDisposable[] rootDisposables, IDataStore dataStore)> CreateStore;
 
         public new IDataStore CreateWorkingStore(out IDisposable[] disposableObjects) 
             => ((IXpoDataStoreProvider) this).CreateWorkingStore(out disposableObjects);

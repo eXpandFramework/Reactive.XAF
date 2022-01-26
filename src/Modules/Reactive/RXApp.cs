@@ -54,8 +54,8 @@ namespace Xpand.XAF.Modules.Reactive{
                     .Merge(application.PatchAuthentication())
                     .Merge(application.PatchObjectSpaceProvider())
                     .Merge(application.NonPersistentChangesEnabledAttribute())
-                    .Merge(application.ShowPersistentObjectsInNonPersistentView())))
-                .Merge(manager.SetupPropertyEditorParentView());
+                    // .Merge(application.ShowPersistentObjectsInNonPersistentView())))
+                .Merge(manager.SetupPropertyEditorParentView())));
 
 
 

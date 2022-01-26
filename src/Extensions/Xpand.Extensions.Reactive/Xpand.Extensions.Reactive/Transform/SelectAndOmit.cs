@@ -5,14 +5,15 @@ using System.Threading;
 namespace Xpand.Extensions.Reactive.Transform{
     public static partial class Transform{
         public static IObservable<TResult> SelectAndOmit<T, TResult>(this IObservable<T> source,
-            Func<T, IObservable<TResult>> process, Action<T> noProcess, int maximumConcurrencyCount = 1){
-            var semaphore = new SemaphoreSlim(maximumConcurrencyCount, maximumConcurrencyCount);
+            Func<T, IObservable<TResult>> process,SemaphoreSlim semaphoreSlim=null, Action<T> noProcess=null, int maximumConcurrencyCount = 1){
+            semaphoreSlim ??= new SemaphoreSlim(maximumConcurrencyCount, maximumConcurrencyCount);
             return source.SelectMany(item => {
-                    if (semaphore.Wait(0)){
-                        return Observable.Return(process(item).Finally(() => { semaphore.Release(); }));
+                    if (semaphoreSlim.Wait(0)){
+                        return Observable.Return(process(item)
+                            .Finally(() => { semaphoreSlim.Release(); }));
                     }
 
-                    noProcess(item);
+                    noProcess?.Invoke(item);
                     return Observable.Empty<IObservable<TResult>>();
                 })
                 .Merge(maximumConcurrencyCount);

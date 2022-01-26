@@ -14,10 +14,18 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions {
 
         public static IObjectSpace CreateNonSecuredObjectSpace(this XafApplication application)
             => application.CreateObjectSpace(true, true);
-        public static IObjectSpace CreateObjectSpace(this XafApplication application, bool useObjectSpaceProvider,bool nonSecuredObjectSpace=false)
-            => useObjectSpaceProvider ? !nonSecuredObjectSpace ? application.ObjectSpaceProvider.CreateObjectSpace()
-                    : application.ObjectSpaceProvider is INonsecuredObjectSpaceProvider nonsecuredObjectSpaceProvider
-                        ? nonsecuredObjectSpaceProvider.CreateNonsecuredObjectSpace() : application.ObjectSpaceProvider.CreateUpdatingObjectSpace(false)
-                : application.CreateObjectSpace();
+        public static IObjectSpace CreateObjectSpace(this XafApplication application, bool useObjectSpaceProvider,bool nonSecuredObjectSpace=false) {
+            if (useObjectSpaceProvider)
+                if (!nonSecuredObjectSpace)
+                    return application.ObjectSpaceProvider.CreateObjectSpace();
+                else
+                    return application.ObjectSpaceProvider is INonsecuredObjectSpaceProvider
+                        nonsecuredObjectSpaceProvider
+                        ? nonsecuredObjectSpaceProvider.CreateNonsecuredObjectSpace()
+                        : application.ObjectSpaceProvider.CreateUpdatingObjectSpace(false);
+            else
+                return application.CreateObjectSpace();
+        }
     }
+    
 }

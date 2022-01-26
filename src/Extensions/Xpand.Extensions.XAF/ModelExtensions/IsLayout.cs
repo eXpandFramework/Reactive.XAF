@@ -13,5 +13,5 @@ public static partial class ModelExtensions {
 
     public static bool IsLayout(this IModelViewItem modelViewItem)
         => modelViewItem.GetParent<IModelDetailView>().Layout.GetItems<IModelLayoutGroup>(item => item)
-            .SelectMany().Any(element => element.Id() == modelViewItem.Id);
+            .SelectMany().OfType<IModelLayoutViewItem>().Any(element => element.ViewItem.Id == modelViewItem.Id);
 }

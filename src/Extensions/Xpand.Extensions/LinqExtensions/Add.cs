@@ -5,7 +5,6 @@ using System.Linq;
 
 namespace Xpand.Extensions.LinqExtensions{
     public static partial class LinqExtensions{
-
         public static T[] AddRange<T>(this IEnumerable<T> source,IEnumerable<T> enumerable,bool ignoreDuplicates=false) 
             => source is IList<T> list
                     ? enumerable.Where(arg => !ignoreDuplicates || !source.Contains(arg)).Execute(list.Add).ToArray()
