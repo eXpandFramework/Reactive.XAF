@@ -3,7 +3,7 @@ if ($SkipVersioning){
 }
 
 Write-HostFormatted "Reset modified assemblyInfo" -Section
-"AssemblyInfo.cs", "/.nuspec" | Get-GitDiff | Restore-GitFile
+"AssemblyInfoVersion.cs", "/.nuspec" | Get-GitDiff | Restore-GitFile
 $labPackages = Get-XpandPackages -PackageType XAFAll -Source Lab
 $officialPackages = Get-XpandPackages -PackageType XAFAll -Source Release
 
@@ -18,8 +18,8 @@ if ($Branch -eq "master") {
     if ($srcVersion -gt $lastVersion){
         $lastVersion=$srcVersion
     }
-    $newVersion = (Update-Version $lastVersion -Revision)
-    $lastVersion = ($labPackages | Where-Object { $_.id -eq "Xpand.XAF.Core.All" }).Version
+    # $newVersion = (Update-Version $lastVersion -Revision)
+    # $lastVersion = ($labPackages | Where-Object { $_.id -eq "Xpand.XAF.Core.All" }).Version
     $lastOfficialVersion = ($officialPackages | Where-Object { $_.id -eq "Xpand.XAF.Core.All" }).Version
     $newVersion = (Update-Version $lastVersion -Build)
 }

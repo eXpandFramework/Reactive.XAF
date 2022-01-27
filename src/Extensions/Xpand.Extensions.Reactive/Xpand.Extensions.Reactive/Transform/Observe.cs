@@ -22,6 +22,20 @@ namespace Xpand.Extensions.Reactive.Transform {
                 }
                 return observable.Concat(arg.ReturnObservable());
             });
+        public static IObservable<T> ConcatIgnoredFirst<T,T2>(this IObservable<T> source,Func<T,IObservable<T2>> secondSelector,Func<T,bool> merge=null)
+            => source.SelectMany((arg, i) => {
+                var observable = Observable.Empty<T>();
+                if (i == 0) {
+                    merge ??= _ => true;
+                    if (merge(arg)) {
+                        observable = secondSelector(arg).IgnoreElements().To(arg);
+                    }
+                    return observable.Concat(arg.ReturnObservable());
+                }
+
+                return arg.ReturnObservable();
+
+            });
         
     }
 }

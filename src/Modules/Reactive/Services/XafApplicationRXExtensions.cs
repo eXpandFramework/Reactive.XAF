@@ -493,6 +493,22 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T[]> ToObjectsGroup<T>(this IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> source) 
             => source.Select(t => t.details.Select(t1 => t1.instance).ToArray());
         
+        [SuppressMessage("ReSharper", "HeapView.PossibleBoxingAllocation")]
+        public static IObservable<T> ReloadViewUpdatedObject<T>(this XafApplication application,IObservable<T> source)
+            => application.WhenFrameViewChanged().SelectMany(frame => source.ObserveOnContext()
+                .TakeUntil(frame.WhenDisposingFrame())
+                    .Do(symbol => frame.View.ObjectSpace.ReloadObject(symbol)));
+
+        public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenUpdated<T>(
+            this XafApplication application,Func<T,bool> criteria,params string[] modifiedProperties)
+            => application.WhenObjectSpaceCreated()
+                .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed(ObjectModification.Updated,criteria, modifiedProperties).TakeUntil(objectSpace.WhenDisposed()));
+        
+        public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenProviderUpdated<T>(
+            this XafApplication application,Func<T,bool> criteria,params string[] modifiedProperties)
+            => application.WhenProviderObjectSpaceCreated()
+                .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed(ObjectModification.Updated,criteria, modifiedProperties).TakeUntil(objectSpace.WhenDisposed()));
+        
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenCommittedDetailed<T>(
             this XafApplication application,ObjectModification objectModification,Func<T,bool> criteria,params string[] modifiedProperties)
             => application.WhenObjectSpaceCreated()

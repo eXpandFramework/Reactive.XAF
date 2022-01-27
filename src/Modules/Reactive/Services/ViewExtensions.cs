@@ -6,13 +6,20 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
+using DevExpress.ExpressApp.SystemModule;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ViewExtensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ViewExtensions{
-        
+        public static IObservable<CustomizeShowViewParametersEventArgs> ShowNonModalNestedListViewPopup(
+            this DetailView detailView, params Type[] objectTypes) 
+            => detailView.NestedListViews(objectTypes)
+                .SelectMany(editor => editor.Frame.GetController<ListViewProcessCurrentObjectController>()
+                    .WhenEvent(nameof(ListViewProcessCurrentObjectController.CustomizeShowViewParameters))
+                    .Select(pattern => pattern.EventArgs).Cast<CustomizeShowViewParametersEventArgs>()
+                    .Do(e => e.ShowViewParameters.TargetWindow = TargetWindow.NewWindow));
 
         public static IObservable<T> WhenClosing<T>(this T view) where T : View 
             => view.ReturnObservable().WhenNotDefault().Closing();
@@ -105,7 +112,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => views.WhenControlsCreated().SelectMany(detailView => detailView.NestedListViews(objectTypes));
 
         public static IObservable<ListPropertyEditor> NestedListViews<TView>(this TView view, params Type[] objectTypes ) where TView : DetailView{
-            var listPropertyEditors = view.GetItems<ListPropertyEditor>().Where(editor =>editor.Frame?.View != null).ToObservable();
+            var lazyListPropertyEditors = view.GetItems<ListPropertyEditor>().Where(editor =>editor.Frame?.View == null).ToNowObservable()
+                .SelectMany(editor => editor.WhenControlCreated().To(editor));
+            var listPropertyEditors = view.GetItems<ListPropertyEditor>().Where(editor =>editor.Frame?.View != null).ToNowObservable()
+                .Merge(lazyListPropertyEditors);
+            
             var nestedEditors = listPropertyEditors.SelectMany(editor => {
                 var detailView = ((ListView) editor.Frame.View).EditView;
                 return detailView != null ? detailView.NestedListViews(objectTypes) : Observable.Never<ListPropertyEditor>();

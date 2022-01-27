@@ -202,9 +202,15 @@ jobs:
           $env:AzOrganization="eXpandDevOps"
           $testbuild=$null
           do {
-              $testbuild=(Get-AzBuilds -Definition Reactive.XAF-Tests )|Select-Object -First 1
+              
+              try {
+                $testbuild=(Get-AzBuilds -Definition Reactive.XAF-Tests )|Select-Object -First 1
+              }
+              catch {
+                  
+              }
               Write-Host "Waiting build  $($testbuild.id)..."
-              Start-Sleep 5
+              Start-Sleep 20
           } while ($testbuild.status -ne "completed")
           Write-Host "Checking build  $($testbuild.id)..."
           $(System.DefaultWorkingDirectory)\Build\check-tests.ps1 '$(System.DefaultWorkingDirectory)' '$(AzureToken)' '$(DXApiFeed)' '$(testBuild.Id)'

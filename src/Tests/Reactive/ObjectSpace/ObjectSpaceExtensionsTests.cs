@@ -12,7 +12,7 @@ using Xpand.XAF.Modules.Reactive.Tests.Common;
 namespace Xpand.XAF.Modules.Reactive.Tests.ObjectSpace{
     public class ObjectSpaceExtensionsTests:ReactiveCommonAppTest{                                                   
         [Test]
-        [XpandTest()]
+        [XpandTest()][Ignore(NotImplemented)]
         public void ShowPersistentObjectsInNonPersistentView(){
             
             using var objectSpace =Application.CreateObjectSpace();

@@ -5,6 +5,7 @@ param(
     $DxPipelineBuildId,
     [switch]$Publish
 )
+
 $ErrorActionPreference = "stop"
 & $Root\go.ps1 -InstallModules
 # $VerbosePreference="continue"
