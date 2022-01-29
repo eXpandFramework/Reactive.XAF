@@ -13,7 +13,7 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
             RequiredModuleTypes.Add(typeof(Modules.Windows.WindowsModule));
             RequiredModuleTypes.Add(typeof(Modules.GridListEditor.GridListEditorModule));
             RequiredModuleTypes.Add(typeof(Modules.ModelMapper.ModelMapperModule));
-            RequiredModuleTypes.Add(typeof(Modules.Reactive.Logger.Hub.ReactiveLoggerHubModule));
+            // RequiredModuleTypes.Add(typeof(Modules.Reactive.Logger.Hub.ReactiveLoggerHubModule));
         }
         static ModelEditorWindowsFormsModule(){
             TraceSource=new ReactiveTraceSource(nameof(ModelEditorWindowsFormsModule));

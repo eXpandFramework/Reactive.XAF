@@ -13,6 +13,7 @@ using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
+using DevExpress.ExpressApp.Win;
 using DevExpress.Persistent.Base;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -53,7 +54,8 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
                             throw new CannotRunMEException(model.Project.CannotRunMEMessage);
                         }
                     })
-                    .SelectMany(xafModel => xafModel.DownloadME(((IModelApplicationME)application.Model).ModelEditor).StartMEProcess(xafModel))));
+                    .SelectMany(xafModel => xafModel.DownloadME(((IModelApplicationME)application.Model).ModelEditor,application)
+                        .StartMEProcess(xafModel))));
 
         internal static XafApplication DeleteMESettings(this XafApplication application,bool setup=false) {
             var path = GetMESettingsPath();
@@ -83,13 +85,13 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
         internal static string GetReadyPath() => $"{AppDomain.CurrentDomain.ApplicationPath()}\\Ready.txt";
         internal static string GetMESettingsPath() => $"{MeInstallationPath}\\MESettings.json";
 
-        private static IObservable<string> DownloadME(this XafModel xafModel, IModelME modelME) {
+        private static IObservable<string> DownloadME(this XafModel xafModel, IModelME modelME, XafApplication application) {
             var assemblyPath = xafModel.Project.AssemblyPath;
             if (!File.Exists(assemblyPath)) {
                 throw new UserFriendlyException($"File {assemblyPath} not found, please build the project");
             }
 
-            var versionsGroup = Directory.GetFiles(Path.GetDirectoryName(assemblyPath)!,"DevExpress*.dll")
+            var versionsGroup = Directory.GetFiles(Path.GetDirectoryName(assemblyPath)!,"DevExpress.ExpressApp*.dll")
                 .GroupBy(s => Version.Parse(FileVersionInfo.GetVersionInfo(s).FileVersion!)).ToArray();
             if (versionsGroup.Length > 1) {
                 throw new UserFriendlyException($"Multiple DevExpress versions found in {assemblyPath}");
@@ -98,38 +100,55 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
                 throw new UserFriendlyException($"Cannot find any DevExpress assembly in {assemblyPath}");
             }
 
-            return versionsGroup.First().Key.RXXafReleaseVersion(modelME.DownloadPreRelease, modelME.NoFoundVersion())
-                .SelectMany(version => {
-                    var meType = "WinDesktop";
-                    if (xafModel.Project.TargetFramework.StartsWith("net4")) {
-                        meType = "Win";
-                    }
-
-                    var directory = $"{MeInstallationPath}\\{meType}\\{version}\\";
-                    string filename=$"Xpand.XAF.ModelEditor.{meType}.exe";
-                    var path = $"{directory}{filename}";
-                    if (!File.Exists(path)) {
-                        if (!Directory.Exists(directory)) {
-                            Directory.CreateDirectory(directory);
-                        }
-                        return modelME.DownloadUrl.StringFormat($"{version}",meType).ReturnObservable()
-                                .TraceModelEditorWindowsFormsModule(s => $"Download {s}")
-                            .SelectMany(url => MEBytes(url)
-                                    .ObserveOn(SynchronizationContext.Current!)
-                                    .Do(bytes => {
-                                        var pathToZip = $"{directory}Xpand.XAF.ModelEditor.{meType}.zip";
-                                        bytes.Save(pathToZip);
-                                        using var archive = ZipFile.OpenRead(pathToZip);
-                                        archive.ExtractToDirectory(directory);
-                                    }).To(path));
-                    }
-
-                    return path.ReturnObservable();
-                });
+            var dxVersion = versionsGroup.First().Key;
+            if (new Uri(modelME.DownloadUrl).IsFile) {
+	            return dxVersion.ReturnObservable().DownloadME(xafModel, modelME);
+            }
+            return dxVersion.RXXafReleaseVersion(modelME.DownloadPreRelease, modelME.NoFoundVersion())
+                .Do( version => application.ShowViewStrategy.ShowMessage($"Latest release is {version} downloading..."))
+	            .DownloadME(xafModel,modelME);
         }
 
-        private static IObservable<byte[]> MEBytes(string url) 
-            => File.Exists(url) ? File.ReadAllBytes(url).ReturnObservable() : HttpClient.GetByteArrayAsync(url).ToObservable();
+        private static IObservable<string> DownloadME(this IObservable<Version> source, XafModel xafModel, IModelME modelME)
+	        => source.SelectMany(version => {
+		        var meType = "WinDesktop";
+		        if (xafModel.Project.TargetFramework.StartsWith("net4")) {
+			        meType = "Win";
+		        }
+
+		        var directory = $"{MeInstallationPath}\\{meType}\\{version}\\";
+		        string filename = $"Xpand.XAF.ModelEditor.{meType}.exe";
+		        var path = $"{directory}{filename}";
+		        if (!File.Exists(path)) {
+			        if (!Directory.Exists(directory)) {
+				        Directory.CreateDirectory(directory);
+			        }
+
+			        return modelME.DownloadUrl.StringFormat($"{version}", meType).ReturnObservable()
+				        .TraceModelEditorWindowsFormsModule(s => $"Download {s}")
+				        .SelectMany(url => MEBytes(url)
+					        .ObserveOn(SynchronizationContext.Current!)
+					        .Do(bytes => {
+						        var pathToZip = $"{directory}Xpand.XAF.ModelEditor.{meType}.zip";
+						        bytes.Save(pathToZip);
+						        using var archive = ZipFile.OpenRead(pathToZip);
+						        archive.ExtractToDirectory(directory);
+					        }).To(path));
+		        }
+
+		        return path.ReturnObservable();
+	        });
+
+        private static IObservable<byte[]> MEBytes(string url) {
+	        var uri = new Uri(url);
+	        if (uri.IsFile) {
+		        url = uri.LocalPath;
+	        }
+	        if (File.Exists(url)) {
+		        return File.ReadAllBytes(url).ReturnObservable();
+	        }
+	        return HttpClient.GetByteArrayAsync(url).ToObservable();
+        }
 
         private static Func<Version, IObservable<Version>> NoFoundVersion(this IModelME modelME) 
             => dxVersion =>modelME.DevVersion==null? Observable.Throw<Version>(new VersionNotFoundException(

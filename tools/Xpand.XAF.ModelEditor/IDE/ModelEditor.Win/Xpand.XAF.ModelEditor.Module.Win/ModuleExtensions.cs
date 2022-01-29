@@ -16,6 +16,7 @@ using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
+using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.XAF.ModelEditor.Module.Win.BusinessObjects;
 using Xpand.XAF.Modules.OneView;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -63,7 +64,9 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
 
         private static IObservable<ShowViewParameters> ParseProjects(this IObservable<ShowViewParameters> source, string solutionPath)
             => source.MergeIgnored(parameters => parameters.CreatedView.ObjectSpace.AsNonPersistentObjectSpace()
-                .WhenObjects(t1 => SolutionFile.Parse(solutionPath).Projects().Models(t1.objectSpace).ToObservable()
+                .WhenObjects(t1 => Unit.Default.ReturnObservable()
+	                .Do(_ => parameters.CreatedView.AsObjectView().Application().ShowViewStrategy.ShowMessage(nameof(ParseProjects)))
+	                .SelectMany(_ => SolutionFile.Parse(solutionPath).Projects().Models(t1.objectSpace))
                     .TraceModelEditorWindowsFormsModule(model => model.Name))
                 .Do(_ => MEService.DeleteMESettings(null)));
 
