@@ -27,8 +27,9 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
         public  Task ConnectAsync(){
             ConnectingSubject.OnNext(Unit.Default);
             
-            return _listenerEvents.SelectMany(list => list)
-                .Concat(Observable.Defer(() => ReactiveLoggerService.ListenerEvents))
+            // return _listenerEvents.SelectMany(list => list)
+            //     .Concat(Observable.Defer(() => ReactiveLoggerService.ListenerEvents))
+            return ReactiveLoggerService.ListenerEvents
                 .TakeUntil(DisconnectingSubject)
                 .Select(e => {
                     var message = (TraceEventMessage) e;
@@ -53,8 +54,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
         }
 
         public static void Init(){
-            _listenerEvents = ReactiveLoggerService.ListenerEvents.Buffer(ConnectingSubject).FirstAsync().Replay(1);
-            _listenerEvents.Connect();
+            // _listenerEvents = ReactiveLoggerService.ListenerEvents.Buffer(ConnectingSubject).FirstAsync().Replay(1);
+            // _listenerEvents.Connect();
         }
     }
 }
