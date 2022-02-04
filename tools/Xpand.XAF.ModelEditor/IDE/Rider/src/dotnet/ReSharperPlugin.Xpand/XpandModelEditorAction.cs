@@ -19,7 +19,7 @@ namespace ReSharperPlugin.Xpand{
         public IActionRequirement GetRequirement(IDataContext dataContext) 
             => CommitAllDocumentsRequirement.TryGetInstance(dataContext);
 
-        public bool Update(IDataContext context, ActionPresentation presentation, DelegateUpdate nextUpdate) 
+        bool IExecutableAction.Update(IDataContext context, ActionPresentation presentation, DelegateUpdate nextUpdate) 
             => true;
 
         public async void Execute(IDataContext context, DelegateExecute nextExecute){

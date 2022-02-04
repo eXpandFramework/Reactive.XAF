@@ -245,7 +245,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                                 .Select(notification => (notification.ObjectType.TypeInfo.Type, notification.Criteria))
                                 .ToArray();
                             return SavedTraceEvent.Cast<TraceEvent>()
-                                .SelectMany(traceEvent => rules.Where(t => traceEvent.ObjectSpace.IsObjectFitForCriteria(CriteriaOperator.Parse(t.Criteria)))
+                                .SelectMany(traceEvent => rules.Where(t => traceEvent.ObjectSpace.IsObjectFitForCriteria(CriteriaOperator.Parse(t.Criteria),traceEvent))
                                     .Do(rule => {
                                         var @event = (ISupportNotifications)traceEvent.ObjectSpace.CreateObject(rule.Type);
                                         @event.AlarmTime = DateTime.Now;

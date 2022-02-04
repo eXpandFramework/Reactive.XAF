@@ -22,6 +22,7 @@ using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
+using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -496,8 +497,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         [SuppressMessage("ReSharper", "HeapView.PossibleBoxingAllocation")]
         public static IObservable<T> ReloadViewUpdatedObject<T>(this XafApplication application,IObservable<T> source)
             => application.WhenFrameViewChanged().SelectMany(frame => source.ObserveOnContext()
-                .TakeUntil(frame.WhenDisposingFrame())
-                    .Do(symbol => frame.View.ObjectSpace.ReloadObject(symbol)));
+                    .Do(symbol => frame.View?.ObjectSpace?.ReloadObject(symbol)))
+                .CompleteOnError();
 
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenUpdated<T>(
             this XafApplication application,Func<T,bool> criteria,params string[] modifiedProperties)
@@ -508,6 +509,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             this XafApplication application,Func<T,bool> criteria,params string[] modifiedProperties)
             => application.WhenProviderObjectSpaceCreated()
                 .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed(ObjectModification.Updated,criteria, modifiedProperties).TakeUntil(objectSpace.WhenDisposed()));
+        public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenProviderUpdated<T>(
+            this XafApplication application,params string[] modifiedProperties)
+            => application.WhenProviderObjectSpaceCreated()
+                .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed<T>(ObjectModification.Updated,_ => true,modifiedProperties).TakeUntil(objectSpace.WhenDisposed()));
         
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenCommittedDetailed<T>(
             this XafApplication application,ObjectModification objectModification,Func<T,bool> criteria,params string[] modifiedProperties)
@@ -564,6 +569,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             var whenExist = application.UseObjectSpace(space => space.GetObjectsQuery<T>().Where(criteriaExpression ?? (arg => true)).ToNowObservable());
             return Observable.If(() => existing,whenCommitted.Merge(whenExist),whenCommitted);
         }
+
+        public static IObservable<Unit> PopulateAdditionalObjectSpaces(this XafApplication application) 
+            => application.WhenObjectSpaceCreated().OfType<CompositeObjectSpace>()
+                .Where(space => space.Owner is not CompositeObjectSpace)
+                .Do(space => space.PopulateAdditionalObjectSpaces(application))
+                .ToUnit();
+
     }
 
 
