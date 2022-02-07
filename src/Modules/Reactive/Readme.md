@@ -175,6 +175,21 @@ Below we will add interesting examples. All methods can live in a static class.
     }
 
     ```
+4. Making a `Reactive` ListView that reacts on Bushiness object modifications from external services.
+    In the screencast:
+    1. Create a Product and open a ListView to display it.
+    2. Create an 𝗱𝗶𝗳𝗳𝗲𝗿𝗲𝗻𝘁/external objectspace and set the Product used in the listview as 𝘀𝗼𝗹𝗱.
+    3. Assert that the ListView product is reloaded automatically hence is sold without refreshing the ListView.
+    4. Code the 𝗥𝗲𝗹𝗼𝗮𝗱𝗩𝗶𝗲𝘄𝗨𝗽𝗱𝗮𝘁𝗲𝗱𝗢𝗯𝗷𝗲𝗰𝘁 extension.
+
+    <twitter tags="#RazorView #Blazor">
+
+    [![ReloadViewUpdatedObject](https://user-images.githubusercontent.com/159464/152751896-aa89d471-a0b1-4509-8aab-aec53a4229b9.gif)](https://youtu.be/QMNFarAqwy4)
+
+    </twitter>
+    
+    [![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/QMNFarAqwy4)
+
 
 ##### Working with NonPersistentObjects
 1. Use a NonPersistentObjectSpace to query the members with a persistent type. 
