@@ -1,10 +1,10 @@
 ﻿using System.Data;
-using System.Data.SqlClient;
 using System.Diagnostics;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Xpo;
 using DevExpress.Xpo;
 using DevExpress.Xpo.DB;
+using DevExpress.Xpo.Helpers;
 using Fasterflect;
 
 namespace Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions{
@@ -17,12 +17,17 @@ namespace Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions{
         public static UnitOfWork UnitOfWork(this IObjectSpace objectSpace) => (UnitOfWork) ((XPObjectSpace) objectSpace).Session;
         [DebuggerStepThrough]
         public static IDbConnection Connection(this IObjectSpace objectSpace) {
-            var connectionProvider = ((ThreadSafeDataLayer)objectSpace.UnitOfWork().DataLayer).ConnectionProvider;
+            var dataLayer = objectSpace.UnitOfWork().DataLayer;
+            var connectionProvider = ((BaseDataLayer)dataLayer).ConnectionProvider;
             if (connectionProvider is DataCacheNode) {
                 return (IDbConnection)((DataCacheRoot)connectionProvider.GetPropertyValue("Nested"))
                     .GetPropertyValue("Nested").GetPropertyValue("Connection");
             }
 
+            if (connectionProvider is DataStorePool pool) {
+
+                return ((ConnectionProviderSql)pool.AcquireReadProvider()).Connection;
+            }
             return ((ConnectionProviderSql)connectionProvider).Connection;
         }
     }

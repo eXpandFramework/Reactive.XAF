@@ -37,7 +37,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests {
                 : modelRootNavigationItems.Items["Default"]
                     .Items[application.Model.BOModel.GetClass(typeof(R)).DefaultListView.Id];
 
-            await application.Logon(user).FirstAsync();
+            await application.LogonUser(user).FirstAsync();
             
             testObserver.ItemCount.ShouldBe(active?1:0);
             if (active){

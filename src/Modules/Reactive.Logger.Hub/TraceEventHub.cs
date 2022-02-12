@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -19,7 +18,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
         static readonly ISubject<Unit> ConnectingSubject=Subject.Synchronize(new Subject<Unit>());
         static readonly ISubject<Unit> DisconnectingSubject=Subject.Synchronize(new Subject<Unit>());
         private IGroup _group;
-        private static IConnectableObservable<IList<ITraceEvent>> _listenerEvents;
+        // private static IConnectableObservable<IList<ITraceEvent>> _listenerEvents;
 
 
         public static IObservable<Unit> Connecting => ConnectingSubject;

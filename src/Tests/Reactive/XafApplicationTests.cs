@@ -106,7 +106,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             policyUser.SetPassword("test");
             objectSpace.CommitChanges();
                 
-            await application.Logon(policyUser.Oid).FirstAsync();
+            await application.LogonUser(policyUser.Oid).FirstAsync();
                 
             SecuritySystem.CurrentUserId.ShouldBe(policyUser.Oid);
         }

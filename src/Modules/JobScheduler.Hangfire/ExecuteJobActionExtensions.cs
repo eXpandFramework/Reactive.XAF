@@ -26,7 +26,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
                 .ConcatIgnored(job => {
                     if (job.AuthenticateUserCriteria == null) return job.ReturnObservable();
                     var user = objectSpace.FindObject(SecuritySystem.UserType, CriteriaOperator.Parse(job.AuthenticateUserCriteria));
-                    return user != null ? application.Logon(objectSpace.GetKeyValue(user)).FirstAsync().To(job)
+                    return user != null ? application.LogonUser(objectSpace.GetKeyValue(user)).FirstAsync().To(job)
                         : Observable.Throw<Job>(new Exception($"{nameof(user)} not found"));
                 })
                 .SelectMany(job => application.CreateView(job, application.Model.Views[job.View.Name]).ToUnit()

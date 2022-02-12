@@ -130,11 +130,11 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 			var userId = TypeDescriptor.GetConverter(typeof(Guid)).ConvertFromString(propertiesDictionary["userid"]);
 			var result = await application.AcquireTokenByAuthorizationCode(notification.Code, userId);
 			if (application.Security.IsSecurityStrategyComplex()){
-				await application.Logon(userId).FirstAsync();
+				await application.LogonUser(userId).FirstAsync();
 			}
 
 			application.UpdateUserName(userId, result.Account.Username);
-			notification.HandleCodeRedemption(null, result.IdToken);
+			notification.HandleCodeRedemption(null, result.IdToken); 
 		}
 
 		private static Task RedirectToIdentityProvider(RedirectToIdentityProviderNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> notification){

@@ -52,7 +52,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 	    public static IObservable<T> SelectMany<T>(this XafApplication application, Func<Task<T>> execute) 
             => application.GetPlatform()==Platform.Web?Task.Run(execute).Result.ReturnObservable():Observable.FromAsync(execute);
         
-        public static IObservable<Unit> Logon(this XafApplication application,object userKey) 
+        public static IObservable<Unit> LogonUser(this XafApplication application,object userKey) 
             => SecurityExtensions.AuthenticateSubject.Where(_ => _.authentication== application.Security.GetPropertyValue("Authentication"))
                 .Do(_ => _.args.SetInstance(_ => userKey)).SelectMany(_ => application.WhenLoggedOn().FirstAsync()).ToUnit()
                 .Merge(Unit.Default.ReturnObservable().Do(_ => application.Logon()).IgnoreElements());

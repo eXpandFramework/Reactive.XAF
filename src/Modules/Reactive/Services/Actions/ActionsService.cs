@@ -14,6 +14,7 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
@@ -42,9 +43,21 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 
         public static IObservable<T> WhenExecute<T>(this SimpleAction simpleAction,Func<SimpleActionExecuteEventArgs, IObservable<T>> retriedExecution) 
             => simpleAction.WhenExecute().SelectMany(retriedExecution).Retry(() => simpleAction.Application).TakeUntilDeactivated(simpleAction.Controller);
+        public static IObservable<Unit> WhenExecute(this SimpleAction simpleAction,Action<SimpleActionExecuteEventArgs> retriedExecution) 
+            => simpleAction.WhenExecute(e => {
+                retriedExecution(e);
+                return Observable.Empty<Unit>();
+            });
         
         public static IObservable<T> WhenExecuted<T>(this SimpleAction simpleAction,Func<SimpleActionExecuteEventArgs, IObservable<T>> retriedExecution) 
             => simpleAction.WhenExecuted().SelectMany(retriedExecution).Retry(() => simpleAction.Application).TakeUntilDeactivated(simpleAction.Controller);
+        
+        public static IObservable<Unit> WhenExecuted(this SimpleAction simpleAction,Action<SimpleActionExecuteEventArgs> retriedExecution) 
+            => simpleAction.WhenExecuted(e => {
+                retriedExecution(e);
+                return Observable.Empty<Unit>();
+            });
+        
         public static IObservable<T> WhenExecuted<T>(this SingleChoiceAction simpleAction,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> retriedExecution) 
             => simpleAction.WhenExecuted().SelectMany(retriedExecution).Retry(() => simpleAction.Application).TakeUntilDeactivated(simpleAction.Controller);
         
@@ -142,6 +155,17 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => source.WhenControllerActivated().ConcatIgnored(addItems).WhenActive()
                 .Merge(source.WhenControllerDeActivated().Do(action => action.Items.Clear()).IgnoreElements())
         ;
+
+        public static IObservable<TArgs> CreateDetailView<TArgs>(this IObservable<TArgs> source, Type objectType, TargetWindow? targetWindow =null) where TArgs:ActionBaseEventArgs
+	        => source.Do(e => {
+		        var parameters = e.ShowViewParameters;
+		        parameters.CreatedView = e.Action.Application.NewDetailView(objectType);
+                parameters.CreatedView.CurrentObject = parameters.CreatedView.ObjectSpace.CreateObject(objectType);
+		        if (targetWindow.HasValue) {
+			        parameters.TargetWindow = targetWindow.Value;
+		        }
+	        });
+
         public static IObservable<SingleChoiceActionExecuteEventArgs> WhenExecuted(this SingleChoiceAction action) 
             => Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(
 		        h => action.Executed += h, h => action.Executed -= h, ImmediateScheduler.Instance).Select(_ => (SingleChoiceActionExecuteEventArgs)_.EventArgs);
