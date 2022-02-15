@@ -33,7 +33,10 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
             return requestMessage;
         }
 
-        public static IObservable<T> Send<T>(this HttpMethod httpMethod,string requestUrl,ConcurrentDictionary<object, IConnectableObservable<object>> cache,T obj,string key=null,string secret=null,Func<string,T[]> deserializeResponse=null,TimeSpan? pollInterval=null) where T : class 
+        public static IObservable<T> Send<T>(this HttpMethod httpMethod, string requestUrl,
+            ConcurrentDictionary<object, IConnectableObservable<object>> cache, T obj, string key = null,
+            string secret = null, Func<string, T[]> deserializeResponse = null, TimeSpan? pollInterval = null)
+            where T : class 
             => httpMethod.ReturnObservable()
                 .Cache(cache, requestUrl, method => Observable.FromAsync(() => HttpClient.SendAsync(method.NewHttpRequestMessage( requestUrl,obj, key, secret)))
                         .Do(message => ResponseSubject.OnNext((message, obj)))
@@ -52,8 +55,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
             object obj = null, Func<string, T[]> deserializeResponse = null) where T : class
             => Observable.FromAsync(() => client.SendAsync(httpRequestMessage,HttpCompletionOption.ResponseHeadersRead))
                 .Do(message => ResponseSubject.OnNext((message, obj)))
-                .SelectMany(response => response.Content.ReadAsStringAsync().ToObservable()
-                    .Select(s => new { response, json = s })).Select(e => (e.json, e.response))
+                .SelectMany(response => response.Content.ReadAsStringAsync().ToObservable().Select(s => (s, response)))
                 .Send(obj??typeof(T).CreateInstance(), deserializeResponse);
         
         public static IObservable<(T instance, HttpResponseMessage message)> SendRequest<T>(this HttpClient client, HttpRequestMessage httpRequestMessage, 

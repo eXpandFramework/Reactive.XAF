@@ -29,9 +29,9 @@ namespace Xpand.XAF.Modules.Blazor {
         public override void Setup(ApplicationModulesManager moduleManager) {
             base.Setup(moduleManager);
 
-            moduleManager.Connect()
-                .Merge(moduleManager.HideToolBarConnect())
-                .Subscribe(this);
+            // moduleManager.Connect()
+            //     .Merge(moduleManager.HideToolBarConnect())
+            //     .Subscribe(this);
         }
     }
 }
