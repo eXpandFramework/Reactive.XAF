@@ -1,75 +1,99 @@
-![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.Email.svg?&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.Email.svg?&style=flat)
+![](https://xpandshields.azurewebsites.net/nuget/v/Xpand.XAF.Modules.TenantManager.svg?&style=flat) ![](https://xpandshields.azurewebsites.net/nuget/dt/Xpand.XAF.Modules.TenantManager.svg?&style=flat)
 
-[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/Email.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AEmail) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/Email.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AEmail)
+[![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/TenantManager.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3ATenantManager) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/TenantManager.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3ATenantManager)
 # About 
 
-The `Email` module sends your Business Object as email. 
+The `TenantManager` integrates cloud authentication with dedicated datastore Organizations over a certainly controlled management;
 
 ## Details
-This is a `platform agnostic` module, that generates an `Email` action using predefined model configurations like the next one.
+This is a `Blazor` module, to use it you need:
 
-```xml
-<Application>
-  <ReactiveModules>
-    <Email>
-      <EmailAddress>
-        <EmailAddress Address="mail@gmail.com" Index="0" />
-      </EmailAddress>
-      <Recipients>
-        <EmailRecipient Id="Admins" Index="0" />
-      </Recipients>
-      <Rules>
-        <EmailRule Id="RazorView rules">
-          <ObjectViews>
-            <EmailObjectView Id="Preview" Index="0" />
-            <EmailObjectView Id="Template" Index="0" />
-          </ObjectViews>
-          <ViewRecipients>
-            <EmailViewRecipient Id="Preview to Admins" Index="0" />
-            <EmailViewRecipient Id="Template to Admins" Index="0" />
-          </ViewRecipients>
-        </EmailRule>
-      </Rules>
-      <SmtpClients>
-        <EmailSmtpClient Id="smtp.gmail.com" Index="0">
-          <ReplyTo>
-            <EmailAddressesDep Email="mail@gmail.com" Index="0" />
-          </ReplyTo>
-        </EmailSmtpClient>
-      </SmtpClients>
-    </Email>
-  </ReactiveModules>
-</Application>
-```
+1. An `Organization` and a `User` BO in your solution
+2. A dependency between them. A possible implementation is:
+ ```cs
+    public class ApplicationUser : PermissionPolicyUser, IObjectSpaceLink, ISecurityUserWithLoginInfo {
 
-> To avoid sending email twice use the `IModelEmailObjectView.UniqueSend` attribute, which will result a disabled Email action for the match BO instance.  
-> 
-![image](https://user-images.githubusercontent.com/159464/139561271-138cc53b-41d6-4569-a5e1-2ab65a66aa91.png)
+        [Association("ApplicationOrganization-ApplicationUsers")]
+        public XPCollection<ApplicationOrganization> ApplicationOrganizations => GetCollection<ApplicationOrganization>(nameof(ApplicationOrganizations));
+    }
 
-To customize the sending use the next snippet:
+    public class ApplicationOrganization:BaseObject{
 
-```c#
-Application.WhenSendingEmail()
-    .Do(e => {
-        var smtpClient = e.Instance.client; //configure the client
-        var mailMessage = e.Instance.message; //configure the message
-    }).Subscribe()
-```
+        [Association("ApplicationOrganization-ApplicationUsers")]
+        public XPCollection<ApplicationUser> ApplicationUsers => GetCollection<ApplicationUser>(nameof(ApplicationUsers));
 
-To customize the rendering per `Bussiness object` object use the next snippet:
+        ApplicationUser _owner;
 
+        public ApplicationUser Owner{
+            get => _owner;
+            set => SetPropertyValue(nameof(Owner), ref _owner, value);
+        }
+    }
+ ```
+ 3. A `ConnectionString` property on your `Organization`.
+   ```cs
+    public class ApplicationOrganization:BaseObject{
+
+        string _connectionString;
+
+        [Size(SizeAttribute.Unlimited)]
+        public string ConnectionString{
+            get => _connectionString;
+            set => SetPropertyValue(nameof(ConnectionString), ref _connectionString, value);
+        }
+    }
+   ```
+ 4. A non persistent object to display the Organization lookup.
+   ```cs
+    [DomainComponent]
+    public class SelectOrganization:NonPersistentBaseObject{
+        public string Message{ get; } = "To get a <b>licence</b> contact Sales.";
+        ApplicationOrganization _organization;
+
+        [RuleRequiredField]
+        public ApplicationOrganization Organization{
+            get => _organization;
+            set => SetPropertyValue(nameof(Organization), ref _organization, value);
+        }
+    }
+   ```
+
+5. Register the `Organization` type using the Model Editor and if the design is similar, the rest auto fill (see screencast).
+
+    ![image](https://user-images.githubusercontent.com/159464/154494879-0bf44608-f5cc-4a60-96af-1b0c58946a2a.png)
+  
+### Workflow
+* The `Manager` database controls the User-Organization relationship. The manager admin can assign ownership to a user thus making him Administrator in his own Organization or he can simply allow participation as a DefaultRole. if the user is Owner he can create new users without help is his own Organization. For each new Organization user email a new user is created in the Manager DB and is link to the Organization, so the user is ready for login. 
+* The user can use for e.g. a B2C flow for authentication, registration etc. Once a new user authenticate you are responsible for creating him in the manager db as per Solution Wizard sample code.
+* The module will create an Organization user, using the same email stored in the Manager DB on user first login to the database. The `DefaultRoleCriteria`, `AdminRoleCriteria` model attributes will be used to query and link with a role.
+* It is your responsibility to create initial data for all datastore. The `ModuleUpdater` will be called for all datastores. There are cases e.g. you want to create `Organization` only in the Manager db that you may need to differentiate base on the database name.
+  ```cs
+    if (ObjectSpace.Connection().Database.StartsWith("OrganizationManager")){
+        AddOrganization();
+    }
+  ``` 
+* The module assumes that the `Organization` type is used only from the Manager DB so it hides it from all possible places while an Organization.
 
 ### Examples
 
-In the next screencast we create the previous model configuration resulting in the `Email` action activation. Then we test the action by sending an Email in both the `Blazor and the Windows` platforms.   
+In the screencast:
+1. I modify the project's `ApplicationOrganization`, `ApplicationUser` declaring a dependecy with each other.
+1. I create `SelectOrganization` `prompt` BO/view.
+2.  I make the `TenantManager` package aware of my classes with the ModelEditor.
+3. I start the app.
+1. I attempt to login with my GitHub account and the system responds with `To get a license please contact sales ` markup.
+2. A Manager DB login and makes me Owner of Org.
+3. I attempt login again with my GitHub account, the system prompts me to choose Organization.
+4. I login and confirm that I am Admin and can create users without the need of a Manager Admin.
 
-<twitter tags="#Email #Blazor">
 
-[![Xpand XAF Modules Email](https://user-images.githubusercontent.com/159464/139561334-29a19d4f-085a-43f8-b93f-4c5fdf2aa1a4.gif)](https://youtu.be/Xy3IzZM6HYY)
+<twitter tags="#TenantManager #Blazor">
+
+[![Xpand XAF Modules TenantManager](https://user-images.githubusercontent.com/159464/154432425-48be1979-1651-48d4-8845-702439d21e35.gif)](https://youtu.be/O87JjWc2BU0)
 
 </twitter>
 
-[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/Xy3IzZM6HYY)
+[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/O87JjWc2BU0)
 
 --- 
 
@@ -84,14 +108,14 @@ In the next screencast we create the previous model configuration resulting in t
 ## Installation 
 1. First you need the nuget package so issue this command to the `VS Nuget package console` 
 
-   `Install-Package Xpand.XAF.Modules.MasterDetail`.
+   `Install-Package Xpand.XAF.Modules.TenantManager`.
 
     The above only references the dependencies and nexts steps are mandatory.
 
 2. [Ways to Register a Module](https://documentation.devexpress.com/eXpressAppFramework/118047/Concepts/Application-Solution-Components/Ways-to-Register-a-Module)
 or simply add the next call to your module constructor
     ```cs
-    RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.MasterDetailModule));
+    RequiredModuleTypes.Add(typeof(Xpand.XAF.Modules.TenantManagerModule));
     ```
 ## Versioning
 The module is **not bound** to **DevExpress versioning**, which means you can use the latest version with your old DevExpress projects [Read more](https://github.com/eXpandFramework/XAF/tree/master/tools/Xpand.VersionConverter).
@@ -123,11 +147,11 @@ To `Step in the source code` you need to `enable Source Server support` in your 
 
 If the package is installed in a way that you do not have access to uninstall it, then you can `unload` it with the next call at the constructor of your module.
 ```cs
-Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.MasterDetail.MasterDetailModule))
+Xpand.XAF.Modules.Reactive.ReactiveModuleBase.Unload(typeof(Xpand.XAF.Modules.TenantManager.TenantManagerModule))
 ```
 
 
 ### Tests
-The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.MasterDetail.MasterDetail). 
+The module is tested on Azure for each build with these [tests](https://github.com/eXpandFramework/Packages/tree/master/src/Tests/Xpand.XAF.s.TenantManager.TenantManager). 
 All Tests run as per our [Compatibility Matrix](https://github.com/eXpandFramework/DevExpress.XAF#compatibility-matrix)
 
