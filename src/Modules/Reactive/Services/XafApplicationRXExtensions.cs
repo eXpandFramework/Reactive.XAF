@@ -252,8 +252,16 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T> WhenFrame<T>(this IObservable<T> source, Type objectType = null,
             ViewType viewType = ViewType.Any, Nesting nesting = Nesting.Any) where T:Frame
             => source.Where(frame => frame.Is(nesting))
-                .SelectMany(frame => frame.View != null ? frame.Is(viewType) && frame.Is(objectType) ? frame.ReturnObservable() : Observable.Empty<T>()
-                    : frame.WhenViewChanged().Where(t => t.frame.Is(viewType) && t.frame.Is(objectType)).To(frame));
+                .SelectMany(frame => frame.WhenFrame(viewType, objectType));
+        public static IObservable<T> WhenFrame<T>(this IObservable<T> source, Func<Frame,Type> objectType = null,
+            Func<Frame,ViewType> viewType = null, Nesting nesting = Nesting.Any) where T:Frame
+            => source.Where(frame => frame.Is(nesting))
+                .SelectMany(frame => frame.WhenFrame(viewType?.Invoke(frame)??ViewType.Any, objectType?.Invoke(frame)));
+
+        private static IObservable<T> WhenFrame<T>(this T frame,ViewType viewType, Type types) where T : Frame 
+            => frame.View != null
+                ? frame.Is(viewType) && frame.Is(types) ? frame.ReturnObservable() : Observable.Empty<T>()
+                : frame.WhenViewChanged().Where(t => t.frame.Is(viewType) && t.frame.Is(types)).To(frame);
 
 
         public static IObservable<Frame> WhenFrameViewChanged(this XafApplication application,bool emitDefaultView=false) 
@@ -571,7 +579,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
 
         public static IObservable<Unit> PopulateAdditionalObjectSpaces(this XafApplication application) 
-            => application.WhenObjectSpaceCreated().OfType<CompositeObjectSpace>()
+            => application.WhenObjectSpaceCreated(true).OfType<CompositeObjectSpace>()
                 .Where(space => space.Owner is not CompositeObjectSpace)
                 .Do(space => space.PopulateAdditionalObjectSpaces(application))
                 .ToUnit();
