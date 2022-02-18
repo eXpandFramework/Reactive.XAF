@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
@@ -23,6 +24,7 @@ using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions;
 using Xpand.XAF.Modules.Blazor.Editors;
+using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 using Xpand.XAF.Modules.Reactive.Services.Controllers;
@@ -45,12 +47,19 @@ namespace Xpand.XAF.Modules.TenantManager{
                 if (organizations.Count == 1) {
                     model.StartupViewOrganization.MemberInfo.SetValue(controller.Frame.View.CurrentObject,organizations.First());
                     return Observable.Timer(TimeSpan.FromMilliseconds(100)).ObserveOnContext()
-                        .Do(_ => controller.AcceptAction.DoExecute()).ToUnit();
+                        .Do(_ => controller.AcceptAction.DoExecute())
+                        .TraceTenantManager()
+                        .ToUnit();
                 }
             }
 
             return controller.ReturnObservable().ToUnit();
         }
+        
+        internal static IObservable<TSource> TraceTenantManager<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
+            Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
+            [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
+            => source.Trace(name, TenantManagerModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
 
         private static IObservable<Unit> WhenOrganizationLookupView(this XafApplication application) 
             => application.WhenFrameCreated().WhenFrame(Nesting.Nested).Where(frame => frame.Context==TemplateContext.LookupControl)
@@ -61,6 +70,7 @@ namespace Xpand.XAF.Modules.TenantManager{
                             frame.View.ObjectSpace.ParseCriteria(frame.View.Model.Application.TenantManager().Registration));
                 })
                 .FirstAsync()
+                .TraceTenantManager(t => t.frame?.View?.Id)
                 .ToUnit();
 
 
@@ -70,10 +80,10 @@ namespace Xpand.XAF.Modules.TenantManager{
                 return model.StartupView.Items.OfType<IModelPropertyEditor>().Where(item =>
                         item.ModelMember.MemberInfo == model.StartupViewMessage.MemberInfo).ToNowObservable()
                     .Do(editor => editor.PropertyEditorType = typeof(MarkupContentPropertyEditor));
-            }).ToUnit();
+            }).ToUnit().TraceTenantManager();
         
         private static IObservable<Unit> RegisterOrganizationNonSecured(this IObservable<IModelApplication> source,XafApplication application) 
-            => source.Do(model => application.AddNonSecuredType(model.TenantManager().Organization.TypeInfo.Type)).ToUnit();
+            => source.Do(model => application.AddNonSecuredType(model.TenantManager().Organization.TypeInfo.Type)).TraceTenantManager().ToUnit();
 
         private static IObservable<Unit> WhenStartupView(this XafApplication application) 
             => application.WhenStartupFrame()
@@ -96,7 +106,8 @@ namespace Xpand.XAF.Modules.TenantManager{
                 editor.Visibility = view.ObjectSpace.OrganizationCount(model.Application)>0 ? ViewItemVisibility.Show : ViewItemVisibility.Hide;
                 ((IAppearanceVisibility)view.AsDetailView().GetPropertyEditor(model.StartupViewMessage.Name))
                     .Visibility = editor.Visibility == ViewItemVisibility.Show ? ViewItemVisibility.Hide : ViewItemVisibility.Show;
-            });
+            })
+            .TraceTenantManager();
 
         public static IList<object> Organizations(this IObjectSpace objectSpace, IModelApplication model)
             => objectSpace.GetObjects(model.TenantManager().Organization.TypeInfo.Type,
@@ -118,6 +129,7 @@ namespace Xpand.XAF.Modules.TenantManager{
             => application.WhenViewOnFrame(SecuritySystem.UserType,ViewType.DetailView)
                 .SelectMany(frame => frame.View.AsDetailView().NestedListViews(frame.Application.Model.TenantManager().OrganizationType).Cast<IAppearanceVisibility>()
                     .Do(editor => editor.Visibility=ViewItemVisibility.Hide))
+                .TraceTenantManager()
                 .ToUnit();
         private static IObservable<Unit> HideOrganizationNavigation(this XafApplication application) 
             => application.WhenFrameCreated(TemplateContext.ApplicationWindow)
@@ -126,6 +138,7 @@ namespace Xpand.XAF.Modules.TenantManager{
                     .SelectMany(t => t.e.ActionItems.GetItems<ChoiceActionItem>(item => item.Items))
                     .Where(IsOrganizationItem)
                     .Do(item => item.Active[nameof(TenantManagerService)] = false))
+                .TraceTenantManager()
                 .ToUnit();
 
         static bool IsOrganizationItem(this ChoiceActionItem choiceActionItem)
@@ -154,7 +167,9 @@ namespace Xpand.XAF.Modules.TenantManager{
                     modelTenantManager.Owner.MemberInfo.SetValue(applicationOrganization, userWithRoles);
                     return managerUser;
                 })
-                .ToNowObservable().ToUnit();
+                .ToNowObservable()
+                .TraceTenantManager()
+                .ToUnit();
 
         
 
@@ -163,7 +178,7 @@ namespace Xpand.XAF.Modules.TenantManager{
                 var managerUser = (ISecurityUser)SecuritySystem.CurrentUser;
                 if (((IObjectSpaceLink)managerUser).ObjectSpace.OrganizationCount(e.Action.Model.Application)==0) {
                     e.Action.Application.LogOff();
-                    return Observable.Empty<SimpleActionExecuteEventArgs>();
+                    return controller.ReturnObservable().TraceTenantManager(_ => "LofOff").IgnoreElements().To<SimpleActionExecuteEventArgs>();
                 }
                 e.SetDataStoreProvider();
                 controller.Application.InvokeModuleUpdaters();
