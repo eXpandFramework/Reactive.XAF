@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
@@ -17,6 +18,8 @@ using DevExpress.ExpressApp.Xpo;
 using DevExpress.Persistent.Base;
 using DevExpress.Xpo;
 using Fasterflect;
+using JetBrains.Annotations;
+using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -237,18 +240,18 @@ namespace Xpand.XAF.Modules.TenantManager{
                 var objectSpace = controller.Application.CreateNonSecuredObjectSpace();
                 var model = e.Action.Model.Application.TenantManager();
                 var applicationUser = objectSpace.GetUser(managerUser.UserName, model);
-                applicationUser.UpdateRoles(model,  objectSpace);
+                applicationUser.UpdateRoles(e.Action.Application,  objectSpace);
                 ((IObjectSpaceLink)applicationUser).CommitChanges();
-
                 ((SecurityStrategyBase)SecuritySystem.Instance).Logon(applicationUser);
                 return e.ReturnObservable().TakeUntil(e.Action.Application.WhenLoggedOff().Do(_ => objectSpace.Dispose()));
             });
 
-        private static void UpdateRoles(this ISecurityUserWithRoles applicationUser,IModelTenantManager model, IObjectSpace objectSpace){
-            var roles = ((IList)model.UserRolesMember().GetValue(applicationUser));
+        private static void UpdateRoles(this ISecurityUserWithRoles applicationUser,XafApplication application, IObjectSpace objectSpace){
+            var model = application.Model.TenantManager();
+            var roles = (IList)model.UserRolesMember().GetValue(applicationUser);
             var adminRole = objectSpace.FindRole(model.AdminRoleCriteria);
             var defaultRole = objectSpace.FindRole(model.DefaultRoleCriteria);
-            if (((ISecurityUser)SecuritySystem.CurrentUser).Owns(objectSpace, model)){
+            if (((ISecurityUser)SecuritySystem.CurrentUser).Owns(objectSpace, application)){
                 roles.Add(adminRole);
                 roles.Remove(defaultRole);
             }
@@ -271,15 +274,30 @@ namespace Xpand.XAF.Modules.TenantManager{
             var startupObject = e.SelectedObjects.Cast<object>().First();
             var modelTenantManager = e.Action.Model.Application.TenantManager();
             var organization = modelTenantManager.StartupViewOrganization.MemberInfo.GetValue(startupObject);
-            var connectionString = $"{modelTenantManager.ConnectionString.MemberInfo.GetValue(organization)}";
-            objectSpaceProvider.SetDataStoreProvider(new ConnectionStringDataStoreProvider(connectionString));
+            objectSpaceProvider.SetDataStoreProvider(new ConnectionStringDataStoreProvider(e.Action.Application.ConnectionString(organization)));
         }
 
-        private static bool Owns<T>(this T currentUser, IObjectSpace objectSpace, IModelTenantManager model) where T : ISecurityUser 
-            => ((IObjectSpaceLink)currentUser).ObjectSpace.GetObjects(
-                model.OrganizationType, CriteriaOperator.Parse($"{model.Owner.Name}.{nameof(currentUser.UserName)}=?", currentUser.UserName))
-            .Cast<object>().Select(o => model.ConnectionString.MemberInfo.GetValue(o)).Cast<string>()
-            .Any(connectionString => objectSpace.Connection().ConnectionString==connectionString);
+        private static readonly Subject<GenericEventArgs<(XafApplication application, object organization, string connectionString)>> CustomizeConnectionStringSubject = new();
+        
+        private static bool Owns<T>(this T currentUser, IObjectSpace objectSpace, XafApplication application) where T : ISecurityUser 
+            => ((IObjectSpaceLink)currentUser).ObjectSpace.GetObjects(application.Model.TenantManager().OrganizationType,
+                CriteriaOperator.Parse($"{application.Model.TenantManager().Owner.Name}.{nameof(currentUser.UserName)}=?", currentUser.UserName))
+                .Cast<object>().Select(o => application.ConnectionString(o))
+                .Any(connectionString => objectSpace.Connection().ConnectionString == connectionString);
+
+        [UsedImplicitly]
+        public static IObservable<Unit> WhenCustomizeConnectionString<T>(this XafApplication application,Func<T,string> connectionString) 
+            => CustomizeConnectionStringSubject.AsObservable().Where(e => e.Instance.application == application)
+                .Select(e => e.SetInstance(t => (t.application,t.organization,connectionString((T)t.organization))))
+                .ToUnit();
+
+        private static string ConnectionString(this XafApplication application,object organization) {
+            var args = new GenericEventArgs<(XafApplication application, object organization, string connectionString)>(
+                (application, organization, $"{application.Model.TenantManager().ConnectionString.MemberInfo.GetValue(organization)}"));
+            CustomizeConnectionStringSubject.OnNext(args);
+            
+            return args.Instance.connectionString;
+        }
 
         private static ISecurityUserWithRoles GetUser(this IObjectSpace objectSpace, string userName, IModelTenantManager model){
             var applicationUser = objectSpace.FindObject(SecuritySystem.UserType,CriteriaOperator.FromLambda<ISecurityUser>(user => user.UserName==userName));

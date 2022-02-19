@@ -73,7 +73,17 @@ This is a `Blazor` module, to use it you need:
     }
   ``` 
 * The module assumes that the `Organization` type is used only from the Manager DB so it hides it from all possible places while an Organization.
+* The `Organization` holds its `ConnectionString` in a property configured from the model. To override it mark the property `NonBrowsable`, `NonPersistent` and use a snippet like the next one.
+    ```c#
+    public override void Setup(ApplicationModulesManager moduleManager){
+      base.Setup(moduleManager);
+      moduleManager.WhenApplication(xafApplication => 
+              xafApplication.WhenCustomizeConnectionString<ApplicationOrganization>(organization => organization.ConnectionString))
+          .Subscribe(this);
+    }
 
+    ```
+    
 ### Examples
 
 In the screencast:
