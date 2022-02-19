@@ -63,9 +63,9 @@ This is a `Blazor` module, to use it you need:
     ![image](https://user-images.githubusercontent.com/159464/154494879-0bf44608-f5cc-4a60-96af-1b0c58946a2a.png)
   
 ### Workflow
-* The `Manager` database controls the User-Organization relationship. The manager admin can assign ownership to a user thus making him Administrator in his own Organization or he can simply allow participation as a DefaultRole. if the user is Owner he can create new users without help is his own Organization. For each new Organization user email a new user is created in the Manager DB and is link to the Organization, so the user is ready for login. 
-* The user can use for e.g. a B2C flow for authentication, registration etc. Once a new user authenticate you are responsible for creating him in the manager db as per Solution Wizard sample code.
-* The module will create an Organization user, using the same email stored in the Manager DB on user first login to the database. The `DefaultRoleCriteria`, `AdminRoleCriteria` model attributes will be used to query and link with a role.
+* The `Manager` database controls the User-Organization relationship. The `Manager` admin can assign 1 ownership to a user thus making him `Administrator` in his own `Organization` or he can simply allow participation as a `DefaultRole`. if the user is `Owner` he can create `new users` without help of a Manager Admin. For each new Organization `UserEmail` a new user is created in the Manager DB and is link to the Organization, so the user is ready for login. 
+* The user can use for e.g. a B2C flow for authentication, registration etc. Once a new user is authenticated you are responsible for creating him in the manager db as per Solution Wizard sample code.
+* The module will create an Organization user, using the same email stored in the Manager DB on user first authentication in the Organization database. A new user in the `Manager` database is created when a new `Organization` user is committed. The `DefaultRoleCriteria`, `AdminRoleCriteria` model attributes will be used to query and link with a role. On each authentication in an `Organization` if the user `owns` then the `AdminRole` will be linked else the `DefaultRole`  
 * It is your responsibility to create initial data for all datastore. The `ModuleUpdater` will be called for all datastores. There are cases e.g. you want to create `Organization` only in the Manager db that you may need to differentiate base on the database name.
   ```cs
     if (ObjectSpace.Connection().Database.StartsWith("OrganizationManager")){

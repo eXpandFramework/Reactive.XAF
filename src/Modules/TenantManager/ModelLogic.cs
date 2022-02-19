@@ -48,14 +48,20 @@ namespace Xpand.XAF.Modules.TenantManager{
 		[DefaultValue(true)]
 		bool AutoLogin { get; set; }
 		[Required]
-		[DataSourceProperty(nameof(Users))]
+		[DataSourceProperty(nameof(Owners))]
 		[Category(nameof(Organization))]
 		[ModelReadOnly(typeof(TenantManagerModelReadOnly))]
 		[RefreshProperties(RefreshProperties.All)]
 		IModelMember Owner { get; set; }
+		[Required]
+		[DataSourceProperty(nameof(UsersMembers))]
+		[Category(nameof(Organization))]
+		[ModelReadOnly(typeof(TenantManagerModelReadOnly))]
+		[RefreshProperties(RefreshProperties.All)]
+		IModelMember Users { get; set; }
 		[Required][Category(nameof(Organization))]
 		[ModelReadOnly(typeof(TenantManagerModelReadOnly))]
-		[DefaultValue("[ApplicationUsers][[Oid] = CURRENTUSERID()] Or [Owner.Oid] = CURRENTUSERID()")]
+		
 		[Editor("DevExpress.ExpressApp.Win.Core.ModelEditor.CriteriaModelEditorControl, DevExpress.ExpressApp.Win" +
 		        XafAssemblyInfo.VersionSuffix + XafAssemblyInfo.AssemblyNamePostfix, DevExpress.Utils.ControlConstants.UITypeEditor)]
 		[CriteriaOptions(nameof(OrganizationType))]
@@ -70,7 +76,9 @@ namespace Xpand.XAF.Modules.TenantManager{
 		IModelMember ConnectionString { get; set; }
 		
 		[Browsable(false)]
-		IModelList<IModelMember> Users { get; }
+		IModelList<IModelMember> Owners { get; }
+		[Browsable(false)]
+		IModelList<IModelMember> UsersMembers { get; }
 		[Browsable(false)]
 		IModelList<IModelMember> OrganizationStrings { get; }
 		[Browsable(false)]
@@ -149,13 +157,27 @@ namespace Xpand.XAF.Modules.TenantManager{
 			=> manager.StartupViewStrings.Count==1?manager.StartupViewStrings.First():null;
 		
 		[UsedImplicitly]
-		public static IModelList<IModelMember> Get_Users(IModelTenantManager manager) 
+		public static IModelList<IModelMember> Get_Owners(IModelTenantManager manager) 
 			=> manager.Organization?.AllMembers.Where(member => typeof(ISecurityUser).IsAssignableFrom(member.MemberInfo.MemberType))
 				.ToCalculatedModelNodeList()??new CalculatedModelNodeList<IModelMember>();
+		
+		[UsedImplicitly]
+		public static IModelList<IModelMember> Get_UsersMembers(IModelTenantManager manager) 
+			=> manager.Organization?.AllMembers.Where(member =>member.MemberInfo.IsList&& typeof(ISecurityUser).IsAssignableFrom(member.MemberInfo.ListElementType))
+				.ToCalculatedModelNodeList()??new CalculatedModelNodeList<IModelMember>();
+		
+		[UsedImplicitly]
+		public static IModelMember Get_Users(IModelTenantManager manager) 
+			=> manager.UsersMembers.FirstOrDefault();
+		
+			// "[ApplicationUsers][[Oid] = CURRENTUSERID()] Or [Owner.Oid] = CURRENTUSERID()"
+		[UsedImplicitly]
+		public static string Get_Registration(IModelTenantManager manager) 
+			=> $"[{manager.Users?.Name}][[{manager.Owner?.MemberInfo.MemberTypeInfo.KeyMember.Name}]=CURRENTUSERID()] OR [{manager.Owner?.Name}.{manager.Owner?.MemberInfo.MemberTypeInfo.KeyMember.Name}]=CURRENTUSERID()";
 
 		[UsedImplicitly]
 		public static IModelMember Get_Owner(IModelTenantManager manager)
-			=> manager.Users.Count==1?manager.Users.First():null;
+			=> manager.Owners.Count==1?manager.Owners.First():null;
 
 		[UsedImplicitly]
 		public static IModelList<IModelMember> Get_OrganizationStrings(IModelTenantManager manager) 
