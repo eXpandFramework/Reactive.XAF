@@ -14,7 +14,7 @@ param(
     [string]$DevExpressVersion,
     [string]$targetPath="C:\Work\eXpandFramework\expand\Xpand.dll\"
 )
-
+return
 if (!$referenceFilter){
     $referenceFilter="DevExpress*"
 }
