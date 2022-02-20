@@ -68,6 +68,7 @@ namespace Xpand.XAF.Modules.CloneModelView{
 
 		static void GenerateModel(this IModelViews views, IModelClass classInfo){
 			var cloneViewAttributes = classInfo.TypeInfo.FindAttributes<CloneModelViewAttribute>(false)
+				.Where(attribute => views[attribute.ViewId]==null)
 				.OrderBy(viewAttribute => viewAttribute.ViewType);
 			foreach (var cloneViewAttribute in cloneViewAttributes){
 				var modelView = views.NewModelView( cloneViewAttribute, classInfo);
