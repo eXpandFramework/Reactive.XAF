@@ -9,7 +9,13 @@ using DevExpress.Xpo.Metadata;
 namespace Xpand.Extensions.XAF.Xpo.BaseObjects {
     [NonPersistent]
     public abstract class XPCustomBaseObject: XPCustomObject,IObjectSpaceLink{
-        protected T GetSafe<T>(Func<T> func) => !IsLoading && !IsSaving ? func() : default;
+	    protected XPCustomBaseObject() {
+	    }
+
+	    protected XPCustomBaseObject(Session session, XPClassInfo classInfo) : base(session, classInfo) {
+	    }
+
+	    protected T GetSafe<T>(Func<T> func) => !IsLoading && !IsSaving ? func() : default;
         protected override void OnSaving() {
             if (TruncateStrings)
                 DoTruncateStrings();

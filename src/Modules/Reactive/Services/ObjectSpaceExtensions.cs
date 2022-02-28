@@ -61,9 +61,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<T> WhenObjects<T>(this NonPersistentObjectSpace objectSpace,Func<(NonPersistentObjectSpace objectSpace, ObjectsGettingEventArgs e), IObservable<T>> source,Type objectType=null) where T:class{
             objectType ??= typeof(T);
-#if !XAF192
             objectSpace.AutoSetModifiedOnObjectChange = true;
-#endif
             objectSpace.NonPersistentChangesEnabled = true;
             return objectSpace.WhenObjectsGetting()
                     .Where(t => objectType.IsAssignableFrom(t.e.ObjectType))
@@ -170,12 +168,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => objectSpace.WhenCommiting()
                 .SelectMany(_ => {
                     var modifiedObjects = objectSpace.ModifiedObjects<T>(objectModification).Where(t => criteria==null|| criteria.Invoke(t.instance)).ToArray();
-                    if (modifiedObjects.Any())
-                        return emitAfterCommit
-                            ? objectSpace.WhenCommitted().FirstAsync().Select(space => (space, modifiedObjects))
-                            : (objectSpace, modifiedObjects).ReturnObservable();
-                    else
-                        return Observable.Empty<(IObjectSpace, (T instance, ObjectModification modification)[])>();
+                    return modifiedObjects.Any() ? emitAfterCommit ? objectSpace.WhenCommitted().FirstAsync().Select(space => (space, modifiedObjects))
+                            : (objectSpace, modifiedObjects).ReturnObservable() : Observable.Empty<(IObjectSpace, (T instance, ObjectModification modification)[])>();
                 });
 
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)>

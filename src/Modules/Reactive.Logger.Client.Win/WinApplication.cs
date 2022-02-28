@@ -1,4 +1,5 @@
-﻿using DevExpress.ExpressApp;
+﻿using System;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Win;
 using DevExpress.ExpressApp.Xpo;
 using Xpand.XAF.Modules.GridListEditor;
@@ -38,6 +39,12 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Client.Win {
                 XPObjectSpaceProvider.GetDataStoreProvider(args.ConnectionString, args.Connection, true), true));
             args.ObjectSpaceProviders.Add(new NonPersistentObjectSpaceProvider(TypesInfo, null));
         }
+
+        protected override void OnCustomGetUserModelDifferencesPath(CustomGetUserModelDifferencesPathEventArgs args) {
+            base.OnCustomGetUserModelDifferencesPath(args);
+            args.Path = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\\Xpand.Reactive.Logger.Client";
+        }
+
         private void LanguagesList(object sender, CustomizeLanguagesListEventArgs e) {
             string userLanguageName = System.Threading.Thread.CurrentThread.CurrentUICulture.Name;
             if(userLanguageName != "en-US" && e.Languages.IndexOf(userLanguageName) == -1) {

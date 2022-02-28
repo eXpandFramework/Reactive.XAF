@@ -62,7 +62,7 @@ namespace Xpand.XAF.Modules.TenantManager{
         }
         
         internal static IObservable<TSource> TraceTenantManager<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
-            Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
+            Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
             => source.Trace(name, TenantManagerModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
 
@@ -118,9 +118,9 @@ namespace Xpand.XAF.Modules.TenantManager{
                     .FirstAsync().ToUnit()
                 )
                 .ToController<DialogController>().SelectMany(controller => {
-                    var dataStoreProvider = application.ObjectSpaceProvider.DataStoreProvider();
+                    var managerProvider = application.ObjectSpaceProvider.DataStoreProvider();
                     return controller.Logoff()
-                        .Merge(controller.Logon().HideOrganization().SyncUser(dataStoreProvider));
+                        .Merge(controller.Logon().HideOrganization().SyncUser(managerProvider));
                 })
                 .Merge(application.WhenOrganizationLookupView());
 

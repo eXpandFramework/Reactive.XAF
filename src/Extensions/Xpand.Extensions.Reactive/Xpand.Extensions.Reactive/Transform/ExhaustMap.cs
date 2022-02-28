@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Threading;
 
@@ -26,5 +27,15 @@ namespace Xpand.Extensions.Reactive.Transform{
             });
         
 
+        public static IObservable<TResult> ExhaustMapPerKey<TSource, TKey, TResult>(
+            this IObservable<TSource> source, Func<TSource, TKey> keySelector,
+            Func<TSource, TKey, IObservable<TResult>> function, int maximumConcurrency, IEqualityComparer<TKey> keyComparer = default) 
+            => Observable.Using(() => new SemaphoreSlim(maximumConcurrency, maximumConcurrency), globalSemaphore => source
+                .GroupBy(keySelector, keyComparer ??= EqualityComparer<TKey>.Default)
+                .SelectMany(group => Observable.Using(() => new SemaphoreSlim(1, 1),
+                    localSemaphore => @group.SelectMany(item => Observable.If(() => localSemaphore.Wait(0),
+                        Observable.If(() => globalSemaphore.Wait(0), Observable.Defer(() => function(item, @group.Key))
+                                .Finally(() => globalSemaphore.Release()))
+                            .Finally(() => localSemaphore.Release()))))));
     }
 }

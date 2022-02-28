@@ -12,6 +12,7 @@ namespace Xpand.Extensions.Reactive.Utility{
         None,
         OnNext,
         OnError,
+        OnNextOrOnError,
         All,
         Default,
     }
@@ -33,7 +34,7 @@ namespace Xpand.Extensions.Reactive.Utility{
 
         public static IObservable<TSource> Trace<TSource>(this IObservable<TSource> source, string name = null,TraceSource traceSource=null,
             Func<TSource,string> messageFactory=null,Func<Exception,string> errorMessageFactory=null, Action<string> traceAction = null, 
-            ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
+            ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
              string memberName = "", string sourceFilePath = "", int sourceLineNumber = 0) => Observable.Create<TSource>(observer => {
                 void Action(string m, object v, Action<string> ta){
                     if (traceSource?.Switch.Level == SourceLevels.Off){
@@ -86,8 +87,9 @@ namespace Xpand.Extensions.Reactive.Utility{
                 ObservableTraceStrategy.OnNext => new[]
                     { ObservableTraceStrategy.OnNext, ObservableTraceStrategy.Default }.Contains(target),
                 ObservableTraceStrategy.OnError => new[]
-                    { ObservableTraceStrategy.OnError, ObservableTraceStrategy.Default }.Contains(target),
+                    { ObservableTraceStrategy.OnError, ObservableTraceStrategy.Default,ObservableTraceStrategy.OnNextOrOnError }.Contains(target),
                 ObservableTraceStrategy.None => new[] { ObservableTraceStrategy.None }.Contains(target),
+                ObservableTraceStrategy.OnNextOrOnError => new []{ObservableTraceStrategy.OnNext,ObservableTraceStrategy.OnError, ObservableTraceStrategy.Default }.Contains(target),
                 _ => throw new NotImplementedException()
             };
 

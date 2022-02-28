@@ -52,12 +52,20 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
     public interface IModelTraceSourcedModules:IModelNode,IModelList<IModelTraceSourcedModule>{
         [DefaultValue(false)]
         bool Enabled{ get; set; }
-        [DefaultValue(ObservableTraceStrategy.None)]
+        [DefaultValue(ObservableTraceStrategy.OnError)]
         ObservableTraceStrategy PersistStrategy{ get; set; }
         
-        
+        [CriteriaOptions(nameof(TraceEventType))]
+        [Editor("DevExpress.ExpressApp.Win.Core.ModelEditor.CriteriaModelEditorControl, DevExpress.ExpressApp.Win" + XafAssemblyInfo.VersionSuffix + XafAssemblyInfo.AssemblyNamePostfix, DevExpress.Utils.ControlConstants.UITypeEditor)]
+        string PersistStrategyCriteria { get; set; }
+        [Browsable(false)]
+        Type TraceEventType { get;  }
     }
 
+    [DomainLogic(typeof(IModelTraceSourcedModules))]
+    public class ModelTraceSourcedModulesLogic {
+        public static Type Get_TraceEventType(IModelTraceSourcedModules modules) => typeof(TraceEvent);
+    }
     public interface IModelReactiveLoggerNotifications:IModelList<IModelReactiveLoggerNotification>,IModelNode {
         
     }

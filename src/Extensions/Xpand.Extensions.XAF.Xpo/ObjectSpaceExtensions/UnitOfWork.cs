@@ -25,8 +25,10 @@ namespace Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions{
             }
 
             if (connectionProvider is DataStorePool pool) {
-
-                return ((ConnectionProviderSql)pool.AcquireReadProvider()).Connection;
+                var connectionProviderSql = (ConnectionProviderSql)pool.AcquireReadProvider();
+                var dbConnection = connectionProviderSql.Connection;
+                pool.ReleaseReadProvider(connectionProviderSql);
+                return dbConnection;
             }
             return ((ConnectionProviderSql)connectionProvider).Connection;
         }

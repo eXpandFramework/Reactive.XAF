@@ -129,7 +129,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             => SavedTraceEvent.When(location, rxAction,methods).Cast<TraceEvent>();
 
         internal static IObservable<TSource> TraceLogger<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
-	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.All,
+	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
 	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
             => source.Trace(name, ReactiveLoggerModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
 
@@ -201,24 +201,29 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                     var modelReactiveLogger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>()?.ReactiveLogger;
                     return modelReactiveLogger != null && modelReactiveLogger.GetEnabledSources().Any() ;
                 })
-                .Select(_ => application.Model.ToReactiveModule<IModelReactiveModuleLogger>()?.ReactiveLogger.TraceSources.PersistStrategy).WhenNotDefault()
-                .SelectMany(strategy => events.Where(e => {
-	                if (strategy.HasValue) {
-		                if (e.RXAction == RXAction.OnNext && strategy.Value.Is(ObservableTraceStrategy.OnNext)||e.RXAction == RXAction.OnError &&
-		                    strategy.Value.Is(ObservableTraceStrategy.OnError)) return true;
+                .Select(_ => {
+                    var traceSources = application.Model.ToReactiveModule<IModelReactiveModuleLogger>()?.ReactiveLogger.TraceSources;
+                    return (traceSources?.PersistStrategy,traceSources?.PersistStrategyCriteria);
+                }).WhenNotDefault()
+                .SelectMany(t => events.Where(e => {
+	                if (t.PersistStrategy.HasValue) {
+		                if (e.RXAction == RXAction.OnNext && t.PersistStrategy.Value.Is(ObservableTraceStrategy.OnNext)||e.RXAction == RXAction.OnError &&
+                            t.PersistStrategy.Value.Is(ObservableTraceStrategy.OnError)) return true;
+                        if (e.RXAction == RXAction.OnNext && t.PersistStrategy.Value.Is(ObservableTraceStrategy.OnNextOrOnError)||e.RXAction == RXAction.OnError &&
+                            t.PersistStrategy.Value.Is(ObservableTraceStrategy.OnNextOrOnError)) return true;
 		                if (new[] { RXAction.Dispose, RXAction.Subscribe, RXAction.OnCompleted }
-			                    .Contains(e.RXAction) && strategy.Value.Is(ObservableTraceStrategy.All)) return true;
-		                if (e.RXAction == RXAction.None && strategy.Value.Is(ObservableTraceStrategy.All)) return true;
-	                }
+			                    .Contains(e.RXAction) && t.PersistStrategy.Value.Is(ObservableTraceStrategy.All)) return true;
+		                if (e.RXAction == RXAction.None && t.PersistStrategy.Value.Is(ObservableTraceStrategy.All)) return true;
+                    }
 
 	                return false;
 
-                }))
+                }).Pair(t.PersistStrategyCriteria))
                 .Buffer(TimeSpan.FromSeconds(3)).WhenNotEmpty()
-                .SelectMany(list => application.ObjectSpaceProvider.NewObjectSpace(space => space.SaveTraceEvent(list)))
-                ;
+                .SelectMany(ts => application.ObjectSpaceProvider.NewObjectSpace(space => space.SaveTraceEvent(ts.Select(t => t.source).ToArray(),space.ParseCriteria(ts.First().other))));
 
-        public static IObservable<TraceEvent> SaveTraceEvent(this IObjectSpace objectSpace, IList<ITraceEvent> traceEventMessages){
+        public static IObservable<TraceEvent> SaveTraceEvent(this IObjectSpace objectSpace,
+            IList<ITraceEvent> traceEventMessages, CriteriaOperator criteria){
             var lastEvent = objectSpace.GetObjectsQuery<TraceEvent>().OrderByDescending(_ => _.Timestamp).FirstOrDefault();
             foreach (var traceEventMessage in traceEventMessages){
 	            if (lastEvent != null && traceEventMessage.TraceKey() == lastEvent.TraceKey()){
@@ -230,6 +235,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                 traceEventMessage.MapTo(traceEvent);
             }
             var traceEvents = objectSpace.ModifiedObjects.Cast<TraceEvent>().ToArray();
+            objectSpace.Delete(traceEvents.Where(e => !e.ObjectSpace.IsObjectFitForCriteria(criteria,e)).ToArray());
             objectSpace.CommitChanges();
             return traceEvents.ToNowObservable().Do(traceEvent => SavedTraceEventSubject.OnNext(traceEvent));
         }
