@@ -19,6 +19,7 @@
       <LoggerPorts>
         <LoggerServerPort Id="default server port 61456" Removed="True" />
       </LoggerPorts>
+      <TraceSources PersistStrategy="OnNextOrOnError" PersistStrategyCriteria="[ApplicationTitle] &lt;&gt; 'RXLoggerClient'" />
     </ReactiveLogger>
   </ReactiveModules>
   <SchemaModules>

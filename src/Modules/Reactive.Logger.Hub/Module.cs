@@ -37,7 +37,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub {
 
         public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders){
             base.ExtendModelInterfaces(extenders);
-            extenders.Add<IModelReactiveLogger,IModelServerPorts>();
+            extenders.Add<IModelReactiveLogger,IModelReactiveLoggerHub>();
             
         }
     }

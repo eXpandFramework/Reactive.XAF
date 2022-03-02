@@ -85,11 +85,11 @@ namespace Xpand.Extensions.Reactive.Utility{
         public static bool Is(this ObservableTraceStrategy source,ObservableTraceStrategy target) 
             => source == ObservableTraceStrategy.All || source switch {
                 ObservableTraceStrategy.OnNext => new[]
-                    { ObservableTraceStrategy.OnNext, ObservableTraceStrategy.Default }.Contains(target),
+                    { ObservableTraceStrategy.OnNext, ObservableTraceStrategy.Default,ObservableTraceStrategy.OnNextOrOnError }.Contains(target),
                 ObservableTraceStrategy.OnError => new[]
                     { ObservableTraceStrategy.OnError, ObservableTraceStrategy.Default,ObservableTraceStrategy.OnNextOrOnError }.Contains(target),
                 ObservableTraceStrategy.None => new[] { ObservableTraceStrategy.None }.Contains(target),
-                ObservableTraceStrategy.OnNextOrOnError => new []{ObservableTraceStrategy.OnNext,ObservableTraceStrategy.OnError, ObservableTraceStrategy.Default }.Contains(target),
+                ObservableTraceStrategy.OnNextOrOnError => new []{ObservableTraceStrategy.OnNext,ObservableTraceStrategy.OnError, ObservableTraceStrategy.Default,ObservableTraceStrategy.All }.Contains(target),
                 _ => throw new NotImplementedException()
             };
 

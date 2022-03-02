@@ -548,6 +548,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<T> UseObjectSpace<T>(this XafApplication application,Func<IObjectSpace,IObservable<T>> factory,bool useObjectSpaceProvider=false) 
             => Observable.Using(() => application.CreateObjectSpace(useObjectSpaceProvider),factory);
+        public static IObservable<Unit> UseObjectSpace(this XafApplication application,Action<IObjectSpace> action,bool useObjectSpaceProvider=false) 
+            => Observable.Using(() => application.CreateObjectSpace(useObjectSpaceProvider),space => {
+                action(space);
+                return Observable.Return(Unit.Default);
+            });
 
         public static IObservable<T> WhenObject<T>(this XafApplication application,Expression<Func<T, bool>> criteriaExpression=null,params string[] modifiedProperties)
             => application.WhenObject(ObjectModification.All,criteriaExpression,modifiedProperties);

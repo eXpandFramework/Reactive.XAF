@@ -87,17 +87,31 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 
         private static IObservable<ITraceEventHub> ConnectClient(this XafApplication application) 
 	        => !(application is ILoggerHubClientApplication)? Observable.Empty<ITraceEventHub>()
-		        : application.WhenCompatibilityChecked().FirstAsync().SelectMany(_ => application.DetectServer().ConnectClient());
+		        : application.WhenCompatibilityChecked().FirstAsync()
+			        .SelectMany(_ => {
+				        var deleteViewObjectsWhenClientConnected = ((IModelReactiveLoggerHub)application.Model
+					        .ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger).DeleteViewObjectsWhenClientConnected;
+				        return application.DetectServer()
+					        .ConnectClient().DeleteViewObjectsWhenConnected(deleteViewObjectsWhenClientConnected,application);
+			        })
+			        ;
+
+        public static IObservable<ITraceEventHub> DeleteViewObjectsWhenConnected(this IObservable<ITraceEventHub> source,bool deleteViewObjectsWhenClientConnected,XafApplication application)
+	        => source.MergeIgnored(_ => Observable.If(() => deleteViewObjectsWhenClientConnected, application.UseObjectSpace(space => {
+				        space.Delete(space.GetObjectsQuery<TraceEvent>().ToArray());
+				        space.CommitChanges();
+			        },true)));
 
         public static IObservable<IPEndPoint> DetectServer(this XafApplication application) 
-	        => application.ClientPortsList().ToArray().Select(point => point).ToArray().Listening()
+	        => application.ClientPortsList().Listening()
 		        .TraceRXLoggerHub(point => $"{point.Address}, {point.Port}");
 
         public static IObservable<ITraceEventHub> ConnectClient(this IObservable<IPEndPoint> source) 
 	        => source.SelectMany(point => {
 			        var newClient = point.ToServerPort().NewClient(Receiver);
 			        return newClient.ConnectAsync().ToObservable()
-				        .Merge(Unit.Default.ReturnObservable()).To(newClient);
+				        .Merge(Unit.Default.ReturnObservable()).To(newClient)
+				        .Select(hub => hub);
 		        })
 		        .TraceRXLoggerHub()
 		        .Retry();
@@ -119,10 +133,10 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 		        .SelectMany(ports => ports.LoggerPorts.OfType<IModelLoggerServerPort>()
 			        .ToObservable().SelectMany(_ => IpEndPoint(_.Host,_.Port)));
 
-        private static IObservable<IModelServerPorts> ModelLoggerPorts(this XafApplication application) 
-	        => application.ToReactiveModule<IModelReactiveModuleLogger>().Select(logger => logger.ReactiveLogger).Cast<IModelServerPorts>()
+        private static IObservable<IModelReactiveLoggerHub> ModelLoggerPorts(this XafApplication application) 
+	        => application.ToReactiveModule<IModelReactiveModuleLogger>().Select(logger => logger.ReactiveLogger).Cast<IModelReactiveLoggerHub>()
 		        .Where(ports => ports.LoggerPorts.Enabled)
-		        .Select(logger => logger).Cast<IModelServerPorts>();
+		        .Select(logger => logger).Cast<IModelReactiveLoggerHub>();
 
         public static Server StartServer(this ServerPort serverPort){
 	        var options = new MagicOnionOptions{IsReturnExceptionStackTraceInErrorDetail = true};

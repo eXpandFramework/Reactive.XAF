@@ -40,8 +40,9 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
         }
     }
 
-    public interface IModelServerPorts:IModelReactiveModule{
+    public interface IModelReactiveLoggerHub:IModelReactiveModule{
         IModelLoggerPortsList LoggerPorts{ get; }
+        bool DeleteViewObjectsWhenClientConnected { get; set; }
     }
 
     

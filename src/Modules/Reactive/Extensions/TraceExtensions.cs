@@ -16,11 +16,13 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
             Utility.AddTraceSerialization<ModuleBase>(_ => _.Name);
         }
 
-        internal static IObservable<TSource> TraceRX<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
-	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
-	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
+        internal static IObservable<TSource> TraceRX<TSource>(this IObservable<TSource> source,
+            Func<TSource, string> messageFactory = null, string name = null, Action<string> traceAction = null,
+            Func<Exception, string> errorMessageFactory = null,
+            ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
+            [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0)
             => source.Trace(name, ReactiveModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
-
     }
 
     public class ReactiveTraceSource : TraceSource{

@@ -247,7 +247,7 @@ namespace Xpand.TestsLib.Common{
 
                         var port = ModulePorts.Where(pair => pair.Key == typeof(TModule).Name)
                             .Select(pair => pair.Value).FirstOrDefault();
-                        if (port > 0 && logger is IModelServerPorts modelServerPorts){
+                        if (port > 0 && logger is IModelReactiveLoggerHub modelServerPorts){
                             var modelLoggerPortsList = modelServerPorts.LoggerPorts;
                             var serverPort = modelLoggerPortsList.OfType<IModelLoggerServerPort>().First();
                             serverPort.Port = port;

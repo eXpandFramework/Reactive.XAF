@@ -24,7 +24,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
     [NonParallelizable]
     [Serializable]
-    public class dReactiveLoggerTests : BaseTest{
+    public class ReactiveLoggerTests : BaseTest{
         [XpandTest]
         [TestCase("NoLastEvent")]
         [TestCase("DifferentLastEvent")]
@@ -54,7 +54,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             };
 
             var messages = new ITraceEvent[]{message1,message1,message2};
-            var save = objectSpace.SaveTraceEvent(messages).SubscribeReplay();
+            var save = objectSpace.SaveTraceEvent(messages,null).SubscribeReplay();
 
             var testObserver = save.Test();
             testObserver.ItemCount.ShouldBe(2);

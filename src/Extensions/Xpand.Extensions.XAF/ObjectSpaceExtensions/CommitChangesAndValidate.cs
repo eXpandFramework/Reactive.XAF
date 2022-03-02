@@ -7,7 +7,7 @@ using DevExpress.Persistent.Validation;
 namespace Xpand.Extensions.XAF.ObjectSpaceExtensions {
     public static partial class ObjectSpaceExtensions {
         public static bool IsObjectFitForCriteria(this IObjectSpace objectSpace,CriteriaOperator criteria,params object[] objects) {
-            if (criteria==default) return true;
+            if (ReferenceEquals(criteria,null)) return true;
             return objects.All(o => {
                 var isObjectFitForCriteria = objectSpace.IsObjectFitForCriteria(o, criteria);
                 return isObjectFitForCriteria.HasValue && isObjectFitForCriteria.Value;
