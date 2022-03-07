@@ -132,7 +132,7 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
 						        var pathToZip = $"{directory}Xpand.XAF.ModelEditor.{meType}.zip";
 						        bytes.Save(pathToZip);
 						        using var archive = ZipFile.OpenRead(pathToZip);
-						        archive.ExtractToDirectory(directory);
+						        archive.ExtractToDirectory(directory,true);
 					        }).To(path));
 		        }
 

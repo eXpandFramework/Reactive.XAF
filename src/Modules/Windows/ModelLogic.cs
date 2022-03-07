@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Reactive.Linq;
 using System.Windows.Forms;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.SystemModule;
 using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.XAF.Modules.Windows{
@@ -16,6 +17,11 @@ namespace Xpand.XAF.Modules.Windows{
 	    IModelWindowsExit Exit{ get;  }
         IModelWindowsMainFormBox Form { get; } 
         bool Startup { get; set; }
+        IModelSystemActions SystemActions { get; }
+    }
+
+    public interface IModelSystemActions : IModelNode, IModelList<IModelActionLink> {
+        
     }
 
     public interface IModelNotifyIcon : IModelNode {

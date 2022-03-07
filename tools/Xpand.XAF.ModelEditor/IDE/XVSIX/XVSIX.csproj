@@ -56,8 +56,8 @@
     <Compile Include="XVSIXPackage.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="..\ModelEditor.Win\Xpand.XAF.ModelEditor.Win\bin\Release\net5.0-windows\Xpand.XAF.ModelEditor.Win.4.212.7.0.zip">
-      <Link>Resources\Xpand.XAF.ModelEditor.Win.4.212.7.0.zip</Link>
+    <EmbeddedResource Include="..\ModelEditor.Win\Xpand.XAF.ModelEditor.Win\bin\Release\net5.0-windows\Xpand.XAF.ModelEditor.Win.4.212.7.6.zip">
+      <Link>Resources\Xpand.XAF.ModelEditor.Win.4.212.7.6.zip</Link>
     </EmbeddedResource>
     <None Include=".editorconfig" />
     <None Include="source.extension.vsixmanifest">
@@ -66,9 +66,8 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.VisualStudio.ExtensionManager, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\IDE\PrivateAssemblies\Microsoft.VisualStudio.ExtensionManager.dll</HintPath>
+    <Reference Include="Microsoft.VisualStudio.ExtensionManager">
+      <HintPath>..\..\..\..\..\..\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\PrivateAssemblies\Microsoft.VisualStudio.ExtensionManager.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />

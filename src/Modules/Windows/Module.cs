@@ -9,8 +9,6 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 namespace Xpand.XAF.Modules.Windows {
     [UsedImplicitly]
     public sealed class WindowsModule : ReactiveModuleBase{
-        
-
         static WindowsModule(){
             TraceSource=new ReactiveTraceSource(nameof(WindowsModule));
         }

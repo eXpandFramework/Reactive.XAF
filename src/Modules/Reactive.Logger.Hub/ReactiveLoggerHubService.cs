@@ -31,6 +31,11 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 		        if (!(application is ILoggerHubClientApplication)){
 			        TraceEventHub.Init();
 		        }
+		        else {
+			        Observable.FromEventPattern<EventHandler, EventArgs>(h => GrpcEnvironment.ShuttingDown += h,
+					        h => GrpcEnvironment.ShuttingDown -= h)
+				        .Select(pattern => pattern).IgnoreElements().ToUnit().Subscribe();
+		        }
 		        var startServer = application.StartServer().Publish().RefCount();
 		        var client = Observable.Start(application.ConnectClient).Merge().Publish().RefCount();
 		        application.CleanUpHubResources( startServer);
@@ -53,14 +58,11 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 	        => server.ShutdownAsync().ToObservable().TakeUntil(Observable.Timer(TimeSpan.FromSeconds(5)));
 
         private static IObservable<Unit> LoadTracesToListView(this IObservable<TraceEvent[]> source,Frame frame) 
-	        => source.Select(_ => _)
-		        .ObserveOn(SynchronizationContext.Current)
+	        => source.ObserveOn(SynchronizationContext.Current)
 		        .Select(events => {
 			        if (events.Any()){
-				        var listView = (ListView) frame?.View;
-				        listView?.RefreshDataSource();
+				        ((ListView)frame?.View)?.RefreshDataSource();
 			        }
-
 			        return events;
 		        }).ToUnit();
 
@@ -88,21 +90,11 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
         private static IObservable<ITraceEventHub> ConnectClient(this XafApplication application) 
 	        => !(application is ILoggerHubClientApplication)? Observable.Empty<ITraceEventHub>()
 		        : application.WhenCompatibilityChecked().FirstAsync()
-			        .SelectMany(_ => {
-				        var deleteViewObjectsWhenClientConnected = ((IModelReactiveLoggerHub)application.Model
-					        .ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger).DeleteViewObjectsWhenClientConnected;
-				        return application.DetectServer()
-					        .ConnectClient().DeleteViewObjectsWhenConnected(deleteViewObjectsWhenClientConnected,application);
-			        })
+			        .SelectMany(_ => application.DetectServer().Select(point => point)
+				        .ConnectClient())
 			        ;
 
-        public static IObservable<ITraceEventHub> DeleteViewObjectsWhenConnected(this IObservable<ITraceEventHub> source,bool deleteViewObjectsWhenClientConnected,XafApplication application)
-	        => source.MergeIgnored(_ => Observable.If(() => deleteViewObjectsWhenClientConnected, application.UseObjectSpace(space => {
-				        space.Delete(space.GetObjectsQuery<TraceEvent>().ToArray());
-				        space.CommitChanges();
-			        },true)));
-
-        public static IObservable<IPEndPoint> DetectServer(this XafApplication application) 
+        public static IObservable<IPEndPoint> DetectServer(this XafApplication application)
 	        => application.ClientPortsList().Listening()
 		        .TraceRXLoggerHub(point => $"{point.Address}, {point.Port}");
 

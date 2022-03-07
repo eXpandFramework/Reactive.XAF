@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Application>
+  <ActionDesign>
+    <Actions>
+      <Action Id="Clear" Shortcut="CtrlH" />
+    </Actions>
+  </ActionDesign>
+</Application>

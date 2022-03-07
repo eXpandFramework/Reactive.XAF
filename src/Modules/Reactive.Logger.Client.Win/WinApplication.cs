@@ -5,6 +5,7 @@ using DevExpress.ExpressApp.Xpo;
 using Xpand.XAF.Modules.GridListEditor;
 using Xpand.XAF.Modules.OneView;
 using Xpand.XAF.Modules.Reactive.Logger.Hub;
+using Xpand.XAF.Modules.Windows;
 
 namespace Xpand.XAF.Modules.Reactive.Logger.Client.Win {
     public partial class ReactiveLoggerClientWinApplication : WinApplication,ILoggerHubClientApplication {
@@ -31,7 +32,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Client.Win {
             Modules.AddRange(new ModuleBase[]{
                 new ReactiveLoggerHubModule(),
                 new OneViewModule(),
-                new GridListEditorModule() 
+                new GridListEditorModule(),new WindowsModule() 
             });
         }
         protected override void CreateDefaultObjectSpaceProvider(CreateCustomObjectSpaceProviderEventArgs args) {

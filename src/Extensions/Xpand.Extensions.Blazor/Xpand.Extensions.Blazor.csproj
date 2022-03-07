@@ -22,9 +22,10 @@
     <Compile Include="..\..\Common\AssemblyInfoVersion.cs" Link="Properties\AssemblyInfoVersion.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="21.2.5" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="21.2.5" />
-    <PackageReference Include="DevExpress.ExpressApp" Version="21.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="21.2.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="21.2.6" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="21.2.6" />
+    <PackageReference Include="System.CodeDom" Version="5.0" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.Extensions">

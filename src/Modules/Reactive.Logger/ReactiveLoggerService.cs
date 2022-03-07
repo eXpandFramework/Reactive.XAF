@@ -225,7 +225,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         public static IObservable<TraceEvent> SaveTraceEvent(this IObjectSpace objectSpace,
             IList<ITraceEvent> traceEventMessages, CriteriaOperator criteria){
             var lastEvent = objectSpace.GetObjectsQuery<TraceEvent>().OrderByDescending(_ => _.Timestamp).FirstOrDefault();
-            foreach (var traceEventMessage in traceEventMessages){
+            foreach (var traceEventMessage in traceEventMessages.Where(e => objectSpace.IsObjectFitForCriteria(criteria,e))){
 	            if (lastEvent != null && traceEventMessage.TraceKey() == lastEvent.TraceKey()){
                     lastEvent.Called++;
                     continue;
@@ -235,7 +235,6 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                 traceEventMessage.MapTo(traceEvent);
             }
             var traceEvents = objectSpace.ModifiedObjects.Cast<TraceEvent>().ToArray();
-            objectSpace.Delete(traceEvents.Where(e => !e.ObjectSpace.IsObjectFitForCriteria(criteria,e)).ToArray());
             objectSpace.CommitChanges();
             return traceEvents.ToNowObservable().Do(traceEvent => SavedTraceEventSubject.OnNext(traceEvent));
         }

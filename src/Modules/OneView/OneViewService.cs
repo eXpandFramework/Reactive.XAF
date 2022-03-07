@@ -6,6 +6,8 @@ using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.SystemModule;
+using DevExpress.ExpressApp.Win;
+using DevExpress.Persistent.Base;
 using Fasterflect;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
@@ -98,6 +100,12 @@ namespace Xpand.XAF.Modules.OneView{
     public class OneViewDialogController:DialogController{
 	    public OneViewDialogController() {
 			AcceptAction.ActionMeaning=ActionMeaning.Unknown;
+			var simpleAction = new SimpleAction(this,"DeleteAllObjects",PredefinedCategory.PopupActions){Caption = "Clear"};
+			simpleAction.Executed += SimpleActionOnExecuted;
+	    }
+
+	    private void SimpleActionOnExecuted(object sender, ActionBaseEventArgs e) {
+		    WinApplication.Messaging.Show("a", "a");
 	    }
     }
 }

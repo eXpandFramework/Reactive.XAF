@@ -16,8 +16,8 @@
     <PackageReference Include="JetBrains.Rider.SDK" Version="$(SdkVersion)" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="..\..\..\..\ModelEditor.Win\Xpand.XAF.ModelEditor.Win\bin\release\net5.0-windows\Xpand.XAF.ModelEditor.Win.4.212.7.0.zip">
-      <Link>Resources\Xpand.XAF.ModelEditor.Win.4.212.7.0.zip</Link>
+    <EmbeddedResource Include="..\..\..\..\ModelEditor.Win\Xpand.XAF.ModelEditor.Win\bin\release\net5.0-windows\Xpand.XAF.ModelEditor.Win.4.212.7.6.zip">
+      <Link>Resources\Xpand.XAF.ModelEditor.Win.4.212.7.6.zip</Link>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

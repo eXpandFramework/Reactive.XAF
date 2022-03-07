@@ -13,13 +13,8 @@ namespace Xpand.XAF.ModelEditor.Win {
         [STAThread]
         static void Main(){
             
-            var httpClient = new HttpClient();
-            httpClient.DefaultRequestHeaders.Add("User-Agent","aaa");
-            var @async = httpClient.GetAsync("https://api.github.com/repos/expandframework/reactive.xaf/tags",
-                HttpCompletionOption.ResponseHeadersRead);
-            var httpResponseMessage = async.Result;
-            var result = httpResponseMessage.Content.ReadAsStringAsync().Result;
-            // MessageBox.Show("");
+           
+           
             FrameworkSettings.DefaultSettingsCompatibilityMode = FrameworkSettingsCompatibilityMode.Latest;
 #if EASYTEST
             DevExpress.ExpressApp.Win.EasyTest.EasyTestRemotingRegistration.Register();

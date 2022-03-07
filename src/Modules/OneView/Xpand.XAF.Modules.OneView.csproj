@@ -40,5 +40,8 @@
   <ItemGroup>
     <Compile Include="..\..\Common\AssemblyInfoVersion.cs" Link="AssemblyInfoVersion.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
+  </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

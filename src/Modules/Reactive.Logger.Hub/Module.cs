@@ -29,6 +29,10 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub {
 
         public static ReactiveTraceSource TraceSource{ get; [PublicAPI]set; }
 
+        protected override void Dispose(bool disposing) {
+            base.Dispose(disposing);
+        }
+
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
             moduleManager.Connect()

@@ -21,6 +21,11 @@
       </LoggerPorts>
       <TraceSources PersistStrategy="OnNextOrOnError" PersistStrategyCriteria="[ApplicationTitle] &lt;&gt; 'RXLoggerClient'" />
     </ReactiveLogger>
+    <Windows>
+      <SystemActions>
+        <ActionLink ActionId="Clear" IsNewNode="True" />
+      </SystemActions>
+    </Windows>
   </ReactiveModules>
   <SchemaModules>
     <SchemaModule Name="SystemModule" Version="19.1.5.0" IsNewNode="True" />

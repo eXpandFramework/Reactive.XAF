@@ -21,7 +21,8 @@ namespace Xpand.XAF.Modules.Windows{
                 .OnWindowEscape()
                 .Merge(application.WhenPopupWindows()
                     .ConfigureForm(window => window.Model().Form.PopupWindows)
-                    .OnWindowDeactivation().OnWindowEscape())
+                    .OnWindowDeactivation().OnWindowEscape()).ToUnit()
+                .Merge(application.SystemActionsConnect())
             ).ToUnit();
 
         private static IObservable<Window> WhenPopupWindows(this XafApplication application) 

@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.Extensions.Office.Cloud</id>
-    <version>4.212.7.3</version>
+    <version>4.212.7.6</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -12,17 +12,17 @@
     <description>Xpand.Extensions.Office.Cloud</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.Extensions.Office.Cloud, 21.2.5</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.Extensions.Office.Cloud, 21.2.6</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.Extensions" version="4.212.7.3" />
-        <dependency id="Xpand.Extensions.XAF" version="4.212.7.3" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.212.7.3" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.212.7.3" />
+        <dependency id="Xpand.Extensions" version="4.212.7.6" />
+        <dependency id="Xpand.Extensions.XAF" version="4.212.7.6" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.212.7.6" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.212.7.6" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="JetBrains.Annotations" version="2021.3" />
         <dependency id="System.Reactive" version="5.0" />
-        <dependency id="DevExpress.Persistent.Base" version="21.2.5" />
+        <dependency id="DevExpress.Persistent.Base" version="21.2.6" />
         <dependency id="Newtonsoft.Json" version="13.0.1" />
       </group>
     </dependencies>

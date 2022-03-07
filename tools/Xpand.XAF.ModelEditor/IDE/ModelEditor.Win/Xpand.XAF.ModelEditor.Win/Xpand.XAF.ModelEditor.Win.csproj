@@ -24,7 +24,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xpand.XAF.Win.All" Version="4.212.7.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Notifications" Version="21.2.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Notifications" Version="21.2.6" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Xpand.XAF.ModelEditor.Module.Win\Xpand.XAF.ModelEditor.Module.Win.csproj">
