@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>Xpand.VersionConverter</id>
-    <version>4.212.7.6</version>
+    <version>4.212.8.0</version>
     <title>This package modifies the DevExpress references in all Xpand.XAF.* assemblies to match the target project DevExpress version</title>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>

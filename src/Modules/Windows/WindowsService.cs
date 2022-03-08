@@ -9,6 +9,7 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
+using Xpand.XAF.Modules.Windows.SystemActions;
 
 namespace Xpand.XAF.Modules.Windows{
     internal static class WindowsService{

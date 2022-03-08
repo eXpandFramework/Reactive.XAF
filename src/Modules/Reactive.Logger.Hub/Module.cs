@@ -20,19 +20,15 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub {
             Utility.Serializer = o => $"---------{o.GetType().FullName}--------{Environment.NewLine}{serializer.Serialize(o)}";
             MessagePackSerializer.SetDefaultResolver(ContractlessStandardResolver.Instance);
             TraceSource=new ReactiveTraceSource(nameof(ReactiveLoggerHubModule));
-            
         }
+        
         public ReactiveLoggerHubModule() {
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));
             RequiredModuleTypes.Add(typeof(ReactiveLoggerModule));
         }
 
         public static ReactiveTraceSource TraceSource{ get; [PublicAPI]set; }
-
-        protected override void Dispose(bool disposing) {
-            base.Dispose(disposing);
-        }
-
+        
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
             moduleManager.Connect()

@@ -75,3 +75,4 @@ nuget System.Collections.Concurrent 4.3.0
 nuget System.Memory 4.5.4
 nuget Microsoft.NETCore.Targets 5.0.0
 nuget Xpand.VersionConverter 2.202.11
+nuget Microsoft.VisualBasic 10.3.0

@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
-using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading;
 using akarnokd.reactive_extensions;
@@ -28,21 +26,7 @@ namespace Xpand.Extensions.Tests{
             
             portInUse.Test().ItemCount.ShouldBe(1);
         }
-        [Test]
-        [XpandTest][Apartment(ApartmentState.MTA)]
-        public async System.Threading.Tasks.Task Signal_When_Not_Listening() {
-            var activeTcpListeners = IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners();
-            var port = 10009;
-            var firstOrDefault = activeTcpListeners.FirstOrDefault(point => point.Port==port);
-
-            var tcpListener = new TcpListener(IPAddress.Loopback,port);
-            tcpListener.Start();
-            var listening = new IPEndPoint(IPAddress.Loopback, port).Listening();
-            // await Observable.While(() => !new IPEndPoint(IPAddress.Loopback, port).Listening(), Observable.Empty<Unit>());
-            tcpListener.Stop();
-            
-            
-        }
+        
 
         [Test]
         [XpandTest(tryCount:1)][Apartment(ApartmentState.MTA)]

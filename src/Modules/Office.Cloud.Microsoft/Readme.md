@@ -153,11 +153,11 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |----|----
 |**DevExpress.Persistent.Base**|**Any**
  |**DevExpress.ExpressApp.CodeAnalysis**|**Any**
-|Xpand.Extensions|4.212.5
- |Xpand.Extensions.Office.Cloud|4.212.5
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.212.5
- |Xpand.Extensions.Reactive|4.212.5
- |Xpand.Extensions.XAF|4.212.5
+|Xpand.Extensions|4.212.8
+ |Xpand.Extensions.Office.Cloud|4.212.8
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.212.8
+ |Xpand.Extensions.Reactive|4.212.8
+ |Xpand.Extensions.XAF|4.212.8
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |JetBrains.Annotations|2021.3.0
  |System.Reactive|5.0.0
@@ -167,7 +167,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |Microsoft.Owin.Security.OpenIdConnect|4.2.0
  |Newtonsoft.Json|13.0.1
  |System.Memory|4.5.4
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.212.5
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.212.8
 
 ## Issues-Debugging-Troubleshooting
 

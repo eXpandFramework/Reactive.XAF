@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Win;
+using EnumsNET;
 using JetBrains.Annotations;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
@@ -19,9 +20,7 @@ using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 
-namespace Xpand.XAF.Modules.Windows {
-    
-
+namespace Xpand.XAF.Modules.Windows.SystemActions {
     public static class KeyboardService {
         [SuppressMessage("ReSharper", "InconsistentNaming")] 
         private const int WH_KEYBOARD_LL = 13;
@@ -60,30 +59,41 @@ namespace Xpand.XAF.Modules.Windows {
             => source.WhenDeactivated().WhenSystem().Do(a => a.Keys().UnregisterHotkey());
         
         private static IObservable<ActionBase> ExecuteHotkey(this IObservable<ActionBase> source) 
-            => source.WhenActivated().WhenSystem()
+            => source.SelectMany(a => a.Active?a.ReturnObservable():a.WhenActivated()).Select(a => a).WhenSystem()
                 .Do(a => a.Keys().RegisterHotkey(() => a.DoTheExecute()));
-
-        public static Keys Keys(this ActionBase a) => ShortcutHelper.ParseBarShortcut(a.Shortcut).Key;
+        
+        public static Keys Keys(this ActionBase a) {
+            var shortcut = a.Application.Model.ActionDesign.Actions[a.Id].Shortcut;
+            if (Enums.TryParse<Keys>(shortcut, true, out var keys))
+                return keys;
+            if (Enums.TryParse<Shortcut>(shortcut, true, out var shortcutKeys)) {
+                throw new NotImplementedException(); 
+            }
+            else
+                return ShortcutHelper.ParseBarShortcut(shortcut).Key;
+        }
 
         private static IObservable<ActionBase> WhenSystem(this IObservable<ActionBase> source)
             => source.SelectMany(a => a.Application.ToReactiveModule<IModelReactiveModuleWindows>()
                 .SelectMany(windows => windows.Windows.SystemActions.Select(link => link.Action).WhereNotDefault()
-                    .Where(modelAction => !string.IsNullOrEmpty(modelAction.Shortcut)).Where(modelAction => a.Model==modelAction)
+                    .Where(modelAction => a.Model.Id==modelAction.Id)
+                    .Where(modelAction => !string.IsNullOrEmpty(modelAction.Shortcut))
+                    .Select(action => action)
                     .To(a)));
         
         [SuppressMessage("ReSharper", "UnusedMethodReturnValue.Local")]
-        static Guid RegisterHotkey(this Keys virtualKeyCode, Action action) 
-            => Array.Empty<ModifierKeys>().RegisterHotkey( virtualKeyCode, action);
+        static Guid RegisterHotkey(this Keys keys, Action action) 
+            => Array.Empty<ModifierKeys>().RegisterHotkey( keys, action);
         
         [UsedImplicitly]
-        static Guid RegisterHotkey(this ModifierKeys modifiers, Keys virtualKeyCode, Action action) 
+        static Guid RegisterHotkey(this ModifierKeys modifierKeys, Keys keys, Action action) 
             => Enum.GetValues(typeof(ModifierKeys)).Cast<ModifierKeys>().ToArray()
-                               .Where(modifier => modifiers.HasFlag(modifier)).ToArray()
-                               .RegisterHotkey( virtualKeyCode, action);
+                               .Where(modifier => modifierKeys.HasFlag(modifier)).ToArray()
+                               .RegisterHotkey( keys, action);
 
-        static Guid RegisterHotkey(this ModifierKeys[] modifiers, Keys virtualKeyCode, Action action) {
+        static Guid RegisterHotkey(this ModifierKeys[] modifiers, Keys keys, Action action) {
             var keybindIdentity = Guid.NewGuid();
-            var keybind = new KeyboardStruct(modifiers, virtualKeyCode, keybindIdentity);
+            var keybind = new KeyboardStruct(modifiers, keys, keybindIdentity);
             if (RegisteredCallbacks.ContainsKey(keybind)) {
                 throw new HotkeyAlreadyRegisteredException();
             }

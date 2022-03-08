@@ -14,10 +14,10 @@ if ($lastOfficialVersion -gt $lastVersion){
 }
 
 if ($Branch -eq "master") {
-    $srcVersion=[version](Get-AssemblyInfoVersion "$PSScriptRoot\..\src\Common\AssemblyInfoVersion.cs")
-    if ($srcVersion -gt $lastVersion){
-        $lastVersion=$srcVersion
-    }
+    # $srcVersion=[version](Get-AssemblyInfoVersion "$PSScriptRoot\..\src\Common\AssemblyInfoVersion.cs")
+    # if ($srcVersion -gt $lastVersion){
+    #     $lastVersion=$srcVersion
+    # }
     # $newVersion = (Update-Version $lastVersion -Revision)
     # $lastVersion = ($labPackages | Where-Object { $_.id -eq "Xpand.XAF.Core.All" }).Version
     $lastOfficialVersion = ($officialPackages | Where-Object { $_.id -eq "Xpand.XAF.Core.All" }).Version
