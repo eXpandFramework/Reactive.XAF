@@ -58,19 +58,25 @@
     <Reference Include="Xpand.Extensions.XAF.Xpo">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.Xpo.dll</HintPath>
     </Reference>
+    <Reference Include="Xpand.Extensions.XAF">
+      <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
+    </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive.Logger.Hub">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.Hub.dll</HintPath>
     </Reference>
+    <Reference Include="Xpand.XAF.Modules.Reactive.Logger">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\Common\AssemblyInfoVersion.cs">
+      <Link>Properties\AssemblyInfoVersion.cs</Link>
+    </Compile>
     <None Include="Readme.md" />
     <Compile Update="WinApplication.cs" />
     <Compile Update="WinApplication.Designer.cs">
       <DependentUpon>WinApplication.cs</DependentUpon>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\..\Common\AssemblyInfoVersion.cs" Link="AssemblyInfoVersion.cs" />
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

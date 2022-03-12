@@ -31,13 +31,14 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
         public string Name {
             get => _name;
             private set {
-                if (_name != value)
-                    if (HotKeyShared.IsValidHotkeyName(value)) {
-                        _name = value;
-                    }
-                    else {
-                        throw new HotKeyInvalidNameException("the HotKeyname '" + value + "' is invalid");
-                    }
+                _name = value;
+                // if (_name != value)
+                //     if (HotKeyShared.IsValidHotkeyName(value)) {
+                //         _name = value;
+                //     }
+                //     else {
+                //         throw new HotKeyInvalidNameException("the HotKeyname '" + value + "' is invalid");
+                //     }
             }
         }
 
@@ -234,11 +235,12 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
         public string Name {
             get => _name;
             private set {
-                if (_name != value)
-                    if (HotKeyShared.IsValidHotkeyName(value))
-                        _name = value;
-                    else
-                        throw new HotKeyInvalidNameException("the HotKeyname '" + value + "' is invalid");
+                _name = value;
+                // if (_name != value)
+                //     if (HotKeyShared.IsValidHotkeyName(value))
+                //         _name = value;
+                //     else
+                //         throw new HotKeyInvalidNameException("the HotKeyname '" + value + "' is invalid");
             }
         }
 
@@ -515,11 +517,12 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
         public string Name {
             get => _name;
             private set {
-                if (_name != value)
-                    if (HotKeyShared.IsValidHotkeyName(value))
-                        _name = value;
-                    else
-                        throw new HotKeyInvalidNameException("the HotKeyname '" + value + "' is invalid");
+                // if (_name != value)
+                    _name = value;
+                    // if (HotKeyShared.IsValidHotkeyName(value))
+                    //     _name = value;
+                    // else
+                    //     throw new HotKeyInvalidNameException("the HotKeyname '" + value + "' is invalid");
             }
         }
 

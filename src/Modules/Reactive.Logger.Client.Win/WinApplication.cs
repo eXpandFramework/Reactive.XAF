@@ -2,6 +2,7 @@
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Win;
 using DevExpress.ExpressApp.Xpo;
+using DevExpress.Persistent.Base;
 using Xpand.XAF.Modules.GridListEditor;
 using Xpand.XAF.Modules.OneView;
 using Xpand.XAF.Modules.Reactive.Logger.Hub;
@@ -13,8 +14,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Client.Win {
 
         #region Default XAF configuration options (https://www.devexpress.com/kb=T501418)
         static ReactiveLoggerClientWinApplication() {
-            DevExpress.Persistent.Base.PasswordCryptographer.EnableRfc2898 = true;
-            DevExpress.Persistent.Base.PasswordCryptographer.SupportLegacySha512 = false;
+            PasswordCryptographer.EnableRfc2898 = true;
+            PasswordCryptographer.SupportLegacySha512 = false;
 			DevExpress.ExpressApp.Utils.ImageLoader.Instance.UseSvgImages = true;
         }
         private void InitializeDefaults(){
@@ -22,17 +23,14 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Client.Win {
             LinkNewObjectToParentImmediately = false;
             OptimizedControllersCreation = true;
             UseLightStyle = true;
-//			SplashScreen = new DXSplashScreen(typeof(XafSplashScreen), new DefaultOverlayFormOptions());
-			ExecuteStartupLogicBeforeClosingLogonWindow = true;
+            ExecuteStartupLogicBeforeClosingLogonWindow = true;
         }
         #endregion
         public ReactiveLoggerClientWinApplication() {
             InitializeComponent();
             InitializeDefaults();
-            Modules.AddRange(new ModuleBase[]{
-                new ReactiveLoggerHubModule(),
-                new OneViewModule(),
-                new GridListEditorModule(),new WindowsModule() 
+            Modules.AddRange(new ModuleBase[]{ new ReactiveLoggerHubModule(), new OneViewModule(),
+                new GridListEditorModule(),new WindowsModule(),new ReactiveLoggerClientModule() 
             });
         }
         protected override void CreateDefaultObjectSpaceProvider(CreateCustomObjectSpaceProviderEventArgs args) {

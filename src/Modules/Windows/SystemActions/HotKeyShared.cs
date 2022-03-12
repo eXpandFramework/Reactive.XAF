@@ -5,76 +5,8 @@ using System.Windows.Forms;
 
 namespace Xpand.XAF.Modules.Windows.SystemActions {
     public static class HotKeyShared {
-        /// <summary>Checks if a string is a valid Hotkey name.
-        /// </summary>
-        /// <param name="text">The string to check</param>
-        /// <returns>true if the name is valid.</returns>
-        public static bool IsValidHotkeyName(string text)
-            => !string.IsNullOrEmpty(text) &&
-               (!text.Contains(" ") && !char.IsDigit((char)text.ToCharArray().GetValue(0)!));
+        
 
-        /// <summary>Parses a shortcut string like 'Control + Alt + Shift + V' and returns the key and modifiers.
-        /// </summary>
-        /// <param name="text">The shortcut string to parse.</param>
-        /// <returns>The Modifier in the lower bound and the key in the upper bound.</returns>
-        public static object[] ParseShortcut(string text) {
-            bool hasAlt = false;
-            bool hasControl = false;
-            bool hasShift = false;
-            bool hasWin = false;
-
-            Modifiers modifier = Modifiers.None;
-            int current = 0;
-
-            string[] separators = new string[] { " + " };
-            var result = text.Split(separators, StringSplitOptions.RemoveEmptyEntries);
-
-            //Iterate through the keys and find the modifier.
-            foreach (string entry in result) {
-                //Find the Control Key.
-                if (entry.Trim() == Keys.Control.ToString()) {
-                    hasControl = true;
-                }
-
-                //Find the Alt key.
-                if (entry.Trim() == Keys.Alt.ToString()) {
-                    hasAlt = true;
-                }
-
-                //Find the Shift key.
-                if (entry.Trim() == Keys.Shift.ToString()) {
-                    hasShift = true;
-                }
-
-                //Find the Window key.
-                if (entry.Trim() == Keys.LWin.ToString() && current != result.Length - 1) {
-                    hasWin = true;
-                }
-
-                current++;
-            }
-
-            if (hasControl) {
-                modifier |= Modifiers.Control;
-            }
-
-            if (hasAlt) {
-                modifier |= Modifiers.Alt;
-            }
-
-            if (hasShift) {
-                modifier |= Modifiers.Shift;
-            }
-
-            if (hasWin) {
-                modifier |= Modifiers.Win;
-            }
-
-            KeysConverter keyconverter = new KeysConverter();
-            var key = (Keys)keyconverter.ConvertFrom(result.GetValue(result.Length - 1))!;
-
-            return new object[] { modifier, key };
-        }
 
         /// <summary>Parses a shortcut string like 'Control + Alt + Shift + V' and returns the key and modifiers.
         /// </summary>

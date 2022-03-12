@@ -23,7 +23,7 @@
     </ReactiveLogger>
     <Windows>
       <SystemActions>
-        <ActionLink ActionId="DeleteAllObjects" IsNewNode="True" />
+        <SystemAction ActionId="ClearListView" HotKey="Control + LWin + Delete" IsNewNode="True" />
       </SystemActions>
     </Windows>
   </ReactiveModules>

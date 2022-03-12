@@ -250,27 +250,11 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
         /// <exception cref="HotKeyAlreadyRegisteredException">Thrown is a GlobalHotkey with the same name, and or key and modifier has already been added.</exception>
         /// <exception cref="System.ArgumentNullException">thrown if a the HotKey to be added is null, or the key is not specified.</exception>
         public bool AddGlobalHotKey(GlobalHotKey hotKey) {
-            if (hotKey == null) {
-                if (!SuppressException)
-                    throw new ArgumentNullException(nameof(hotKey));
-
-                return false;
-            }
-
-            if (hotKey.Key == 0) {
-                if (!SuppressException)
-                    throw new ArgumentNullException(nameof(hotKey));
-
-                return false;
-            }
-
             if (_globalHotKeyContainer.Contains(hotKey)) {
                 if (!SuppressException)
                     throw new HotKeyAlreadyRegisteredException("HotKey already registered!", hotKey);
-
                 return false;
             }
-
             int id = IDGen.Next();
             if (hotKey.Enabled)
                 RegisterGlobalHotKey(id, hotKey);
@@ -300,12 +284,8 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
                 return false;
             }
 
-            //Check if a chord already has its BaseKey and BaseModifier.
-            bool chordExits = _chordHotKeyContainer.Exists
-            (
-                f => (f.BaseKey == hotKey.Key && f.BaseModifier == hotKey.Modifier)
-            );
-
+            
+            var chordExits = _chordHotKeyContainer.Exists(f => f.BaseKey == hotKey.Key && f.BaseModifier == hotKey.Modifier);
             if (_localHotKeyContainer.Contains(hotKey) || chordExits) {
                 if (!SuppressException)
                     throw new HotKeyAlreadyRegisteredException("HotKey already registered!", hotKey);
@@ -487,31 +467,32 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
         /// <param name="toCheck">The HotKey type to check.</param>
         /// <returns>True if the HotKey is already registered, false otherwise.</returns>
         public bool HotKeyExists(string shortcut, CheckKey toCheck) {
-            Keys key = (Keys)HotKeyShared.ParseShortcut(shortcut).GetValue(1)!;
-            Modifiers modifier = (Modifiers)HotKeyShared.ParseShortcut(shortcut).GetValue(0)!;
-            switch (toCheck) {
-                case CheckKey.GlobalHotKey:
-                    return _globalHotKeyContainer.Exists
-                    (
-                        g => (g.Key == key && g.Modifier == modifier)
-                    );
-
-                case CheckKey.LocalHotKey:
-                    return (_localHotKeyContainer.Exists
-                            (
-                                l => (l.Key == key && l.Modifier == modifier)
-                            )
-                            |
-                            _chordHotKeyContainer.Exists
-                            (
-                                c => (c.BaseKey == key && c.BaseModifier == modifier)));
-
-                case CheckKey.Both:
-                    return (HotKeyExists(shortcut, CheckKey.GlobalHotKey) ^
-                            HotKeyExists(shortcut, CheckKey.LocalHotKey));
-            }
-
-            return false;
+            throw new NotImplementedException();
+            // Keys key = (Keys)HotKeyShared.ParseShortcut(shortcut).GetValue(1)!;
+            // Modifiers modifier = (Modifiers)HotKeyShared.ParseShortcut(shortcut).GetValue(0)!;
+            // switch (toCheck) {
+            //     case CheckKey.GlobalHotKey:
+            //         return _globalHotKeyContainer.Exists
+            //         (
+            //             g => (g.Key == key && g.Modifier == modifier)
+            //         );
+            //
+            //     case CheckKey.LocalHotKey:
+            //         return (_localHotKeyContainer.Exists
+            //                 (
+            //                     l => (l.Key == key && l.Modifier == modifier)
+            //                 )
+            //                 |
+            //                 _chordHotKeyContainer.Exists
+            //                 (
+            //                     c => (c.BaseKey == key && c.BaseModifier == modifier)));
+            //
+            //     case CheckKey.Both:
+            //         return (HotKeyExists(shortcut, CheckKey.GlobalHotKey) ^
+            //                 HotKeyExists(shortcut, CheckKey.LocalHotKey));
+            // }
+            //
+            // return false;
         }
 
         /// <summary>Checks if a hotkey has already been registered as a Local or Global HotKey.
@@ -526,8 +507,6 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
 
         #endregion
 
-        #region **Listen to Window Messages.
-
         [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
         public bool PreFilterMessage(ref Message m) {
             if (!Enabled) {
@@ -541,12 +520,12 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
                 }
 
             //For LocalHotKeys, determine if modifiers Alt, Shift and Control is pressed.
-            Microsoft.VisualBasic.Devices.Keyboard userKeyBoard = new Microsoft.VisualBasic.Devices.Keyboard();
-            bool altPressed = userKeyBoard.AltKeyDown;
-            bool controlPressed = userKeyBoard.CtrlKeyDown;
-            bool shiftPressed = userKeyBoard.ShiftKeyDown;
+            var userKeyBoard = new Microsoft.VisualBasic.Devices.Keyboard();
+            var altPressed = userKeyBoard.AltKeyDown;
+            var controlPressed = userKeyBoard.CtrlKeyDown;
+            var shiftPressed = userKeyBoard.ShiftKeyDown;
 
-            Modifiers localModifier = Modifiers.None;
+            var localModifier = Modifiers.None;
             if (altPressed) {
                 localModifier = Modifiers.Alt;
             }
@@ -562,60 +541,30 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
             switch ((KeyboardMessages)m.Msg) {
                 case (KeyboardMessages.WmSyskeydown):
                 case (KeyboardMessages.WmKeydown):
-                    Keys keydownCode = (Keys)(int)m.WParam & Keys.KeyCode;
-
+                    var keydownCode = (Keys)(int)m.WParam & Keys.KeyCode;
                     if (KeyPressEvent != null)
                         KeyPressEvent(this, new HotKeyEventArgs(keydownCode, localModifier, RaiseLocalEvent.OnKeyDown));
-
-                    //Check if a chord has started.
                     if (_inChordMode) {
-                        //Check if the Key down is a modifier, we'll have to wait for a real key.
-                        switch (keydownCode) {
-                            case Keys.Control:
-                            case Keys.ControlKey:
-                            case Keys.LControlKey:
-                            case Keys.RControlKey:
-                            case Keys.Shift:
-                            case Keys.ShiftKey:
-                            case Keys.LShiftKey:
-                            case Keys.RShiftKey:
-                            case Keys.Alt:
-                            case Keys.Menu:
-                            case Keys.LMenu:
-                            case Keys.RMenu:
-                            case Keys.LWin:
-                                return true;
-                        }
+                        if (keydownCode.IsModifier()) return true;
 
-                        ChordHotKey chordMain = _chordHotKeyContainer.Find
-                        (
-                            cm => ((cm.BaseKey == _preChordKey) && (cm.BaseModifier == _preChordModifier) &&
-                                   (cm.ChordKey == keydownCode) && (cm.ChordModifier == localModifier))
+                        var chordMain = _chordHotKeyContainer.Find(
+                            cm => cm.BaseKey == _preChordKey && cm.BaseModifier == _preChordModifier &&
+                                  cm.ChordKey == keydownCode && cm.ChordModifier == localModifier
                         );
 
                         if (chordMain != null) {
                             chordMain.RaiseOnHotKeyPressed();
-
                             if (ChordPressed != null && chordMain.Enabled)
                                 ChordPressed(this, new ChordHotKeyEventArgs(chordMain));
-
                             _inChordMode = false;
                             return true;
                         }
 
                         _inChordMode = false;
-                        new Microsoft.VisualBasic.Devices.Computer().Audio.PlaySystemSound(System.Media.SystemSounds
-                            .Exclamation);
+                        new Microsoft.VisualBasic.Devices.Computer().Audio.PlaySystemSound(System.Media.SystemSounds.Exclamation);
                         return true;
                     }
-
-                    //Check for a LocalHotKey.
-                    LocalHotKey keyDownHotkey = _localHotKeyContainer.Find
-                    (
-                        d => ((d.Key == keydownCode) && (d.Modifier == localModifier)
-                                                     && (d.WhenToRaise == RaiseLocalEvent.OnKeyDown))
-                    );
-
+                    var keyDownHotkey = _localHotKeyContainer.Find(d => d.Key == keydownCode && d.Modifier == localModifier && d.WhenToRaise == RaiseLocalEvent.OnKeyDown);
                     if (keyDownHotkey != null) {
                         keyDownHotkey.RaiseOnHotKeyPressed();
                         if (LocalHotKeyPressed != null && keyDownHotkey.Enabled)
@@ -623,17 +572,11 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
 
                         return keyDownHotkey.SuppressKeyPress;
                     }
-
-                    //Check for ChordHotKeys.
-                    ChordHotKey chordBase = _chordHotKeyContainer.Find
-                    (
-                        c => ((c.BaseKey == keydownCode) && (c.BaseModifier == localModifier))
-                    );
-
+                    
+                    var chordBase = _chordHotKeyContainer.Find(c => c.BaseKey == keydownCode && c.BaseModifier == localModifier);
                     if (chordBase != null) {
                         _preChordKey = chordBase.BaseKey;
                         _preChordModifier = chordBase.BaseModifier;
-
                         var e = new PreChordHotKeyEventArgs(new LocalHotKey(chordBase.Name, chordBase.BaseModifier,
                             chordBase.BaseKey));
                         if (ChordStarted != null)
@@ -645,53 +588,38 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
 
                     _inChordMode = false;
                     return false;
-
-                case (KeyboardMessages.WmSyskeyup):
-                case (KeyboardMessages.WmKeyup):
-                    Keys keyupCode = (Keys)(int)m.WParam & Keys.KeyCode;
-
+                case KeyboardMessages.WmSyskeyup:
+                case KeyboardMessages.WmKeyup:
+                    var keyupCode = (Keys)(int)m.WParam & Keys.KeyCode;
                     if (KeyPressEvent != null)
                         KeyPressEvent(this, new HotKeyEventArgs(keyupCode, localModifier, RaiseLocalEvent.OnKeyDown));
-
-                    LocalHotKey keyUpHotkey = _localHotKeyContainer.Find
-                    (
-                        u => ((u.Key == keyupCode) && (u.Modifier == localModifier)
-                                                   && (u.WhenToRaise == RaiseLocalEvent.OnKeyUp))
+                    var keyUpHotkey = _localHotKeyContainer.Find(
+                        u => u.Key == keyupCode && u.Modifier == localModifier && u.WhenToRaise == RaiseLocalEvent.OnKeyUp
                     );
-
                     if (keyUpHotkey != null) {
                         keyUpHotkey.RaiseOnHotKeyPressed();
                         if (LocalHotKeyPressed != null && keyUpHotkey.Enabled)
                             LocalHotKeyPressed(this, new LocalHotKeyEventArgs(keyUpHotkey));
-
                         return keyUpHotkey.SuppressKeyPress;
                     }
 
                     return false;
 
-                case (KeyboardMessages.WmHotKey):
-
-                    int id = (int)m.WParam;
-
-                    GlobalHotKey pressed = _globalHotKeyContainer.Find
-                    (
-                        g => (g.Id == id)
+                case KeyboardMessages.WmHotKey:
+                    var id = (int)m.WParam;
+                    var pressed = _globalHotKeyContainer.Find(
+                        g => g.Id == id
                     );
-
                     pressed?.RaiseOnHotKeyPressed();
                     if (GlobalHotKeyPressed != null)
                         GlobalHotKeyPressed(this, new GlobalHotKeyEventArgs(pressed));
-
                     return true;
 
                 default: return false;
             }
         }
 
-        #endregion
-
-        #region **Keyboard Hook.
-
+        
         private void OnKeyboardKeyDown(KeyboardHookEventArgs e) {
             if (KeyBoardKeyDown != null)
                 KeyBoardKeyDown(this, e);
@@ -763,7 +691,7 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
             return Win32.CallNextHookEx(_hookId, nCode, wParam, lParam);
         }
 
-        #endregion
+
 
         #region **Simulation.
 

@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net461;net5.0-windows7.0</TargetFrameworks>
+    <!--    <TargetFrameworks>net461;net5.0-windows7.0</TargetFrameworks>-->
+    <TargetFramework>net5.0-windows7.0</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <LangVersion>latest</LangVersion>
     <SignAssembly>true</SignAssembly>
@@ -41,6 +42,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\Common\AssemblyInfoVersion.cs" Link="Properties\AssemblyInfoVersion.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

@@ -1,10 +1,13 @@
 using System;
 using System.ComponentModel;
+using System.Drawing.Design;
 using System.Reactive.Linq;
 using System.Windows.Forms;
+using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
 using Xpand.XAF.Modules.Reactive;
+using Xpand.XAF.Modules.Windows.SystemActions;
 
 namespace Xpand.XAF.Modules.Windows{
     public interface IModelReactiveModuleWindows : IModelReactiveModule{
@@ -20,10 +23,41 @@ namespace Xpand.XAF.Modules.Windows{
         IModelSystemActions SystemActions { get; }
     }
 
-    public interface IModelSystemActions : IModelNode, IModelList<IModelActionLink> {
+    public interface IModelSystemActions : IModelNode, IModelList<IModelSystemAction> {
         
     }
 
+    public interface IModelSystemAction:IModelActionLink {
+        [Editor(typeof(HotKeyEditor), typeof(UITypeEditor))]
+        [Required][ReadOnly(true)]
+        string HotKey { get; set; }
+        IModelSystemActionViews Views { get; }
+        
+    }
+
+    public interface IModelSystemActionViews:IModelNode,IModelList<IModelViewLink> { }
+
+    [KeyProperty(nameof(ViewId))]
+    public interface IModelViewLink : IModelNode {
+        [Browsable(false)]
+        string ViewId { get; set; }
+        IModelView View { get; set; }
+    }
+
+    [DomainLogic(typeof(IModelViewLink))]
+    public class ModelViewLinkLogic {
+        public static IModelView Get_View(IModelViewLink link) => link.Application.Views[link.ViewId];
+
+        public static void Set_View(IModelViewLink link, IModelView value) => link.ViewId = value.Id;
+    }
+    public class HotKeyVisibility:IModelIsReadOnly {
+        
+        public bool IsReadOnly(IModelNode node, string propertyName) => ((IModelSystemAction)node).Action == null;
+
+        public bool IsReadOnly(IModelNode node, IModelNode childNode) {
+            throw new NotImplementedException();
+        }
+    }
     public interface IModelNotifyIcon : IModelNode {
         [Category("Menu")][DefaultValue("Show")][Localizable(true)]
         string ShowText { get; set; }
