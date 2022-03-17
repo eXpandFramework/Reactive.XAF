@@ -17,7 +17,7 @@ namespace Xpand.XAF.Modules.TenantManager{
 		IModelTenantManager TenantManager{ get; }
 	}
 
-	internal static class TenantManagerModelExtensions {
+	public static class TenantManagerModelExtensions {
 		public static IModelTenantManager TenantManager(this IModelApplication application) 
 			=> application.ToReactiveModule<IModelReactiveModulesTenantManager>().TenantManager;
 	}

@@ -49,7 +49,7 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate{
 
         private static IEnumerable<PropertyEditor> PropertyEditors(this (Frame listView, Frame detailView) t) 
 	        => t.detailView.View.AsDetailView().GetItems<PropertyEditor>()
-                .Where(editor => ((IAppearanceVisibility)editor).Visibility == ViewItemVisibility.Show&&editor.Model.IsLayout());
+                .Where(editor => ((IAppearanceVisibility)editor).Visibility == ViewItemVisibility.Show&&editor.Model.LayoutItem()!=null);
 
         static IObservable<(Frame listView, Frame detailView)> ShowView(this SingleChoiceAction action) 
             => action.WhenActive()

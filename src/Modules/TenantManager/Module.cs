@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Model;
@@ -8,7 +9,9 @@ using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.Persistent.Base;
 using JetBrains.Annotations;
+using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Conditional;
+using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.Blazor;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
@@ -38,16 +41,15 @@ namespace Xpand.XAF.Modules.TenantManager{
         
         public override IList<PopupWindowShowAction> GetStartupActions() {
             var actions = new List<PopupWindowShowAction>(base.GetStartupActions());
-            if (!((ISecurityUserWithRoles)SecuritySystem.CurrentUser).Roles.Cast<IPermissionPolicyRole>().Any(role => role.IsAdministrative)){
-                var startupAction = new PopupWindowShowAction();
-                startupAction.CustomizePopupWindowParams += (_, e) => {
-                    var model = Application.Model.TenantManager();
-                    var startupType = model.StartupView.ModelClass.TypeInfo.Type;
-                    var objectSpace = Application.CreateObjectSpace(startupType);
-                    e.View = Application.CreateDetailView(objectSpace, model.StartupView,true,objectSpace.CreateObject(startupType));
-		        
-                };
-                actions.Add(startupAction);            
+            if (!((ISecurityUserWithRoles)SecuritySystem.CurrentUser).Roles.Cast<IPermissionPolicyRole>().Any(role => role.IsAdministrative)) {
+                Application.LastOrganization()
+                    .SwitchIfEmpty(Observable.Defer(() => {
+                        var startupAction = new PopupWindowShowAction();
+                        actions.Add(startupAction);
+                        return startupAction.CreateStartupView().To<object>();
+                    }).IgnoreElements())
+                    .SelectMany(org => Application.Logon(org))
+                    .Subscribe(this);
             }
             return actions;
         }

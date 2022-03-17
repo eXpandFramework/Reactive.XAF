@@ -1,9 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Security;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Windows.Forms;
 using akarnokd.reactive_extensions;
@@ -28,6 +33,37 @@ using Xpand.XAF.Modules.Windows.Tests.BOModel;
 namespace Xpand.XAF.Modules.Windows.Tests{
     [NonParallelizable][SuppressMessage("ReSharper", "AccessToDisposedClosure")]
     public class ExitTests : BaseWindowsTest{
+    
+
+    public bool AlwaysAccept(object sender, X509Certificate certification, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+    {
+        return true;
+    }
+            [Test]
+            public void MethodName1(){
+                ServicePointManager.UseNagleAlgorithm = false;
+                ServicePointManager.Expect100Continue = false;
+                ServicePointManager.ServerCertificateValidationCallback = new System.Net.Security.RemoteCertificateValidationCallback(AlwaysAccept);
+
+//... somewhere AlwaysAccept is defined as:
+
+                
+                var webRequest = WebRequest.CreateHttp("https://api.binance.com/");
+                webRequest.Method = HttpMethod.Get.ToString();
+                webRequest.Proxy = null;
+                
+                // webRequest.GetResponse();
+                // webRequest.Proxy = new WebProxy("50.3.83.90", 12345);
+                var stopwatch = new Stopwatch();
+                stopwatch.Start();
+                // webRequest = WebRequest.Create(ExchangeType.Binance.ApiAddress());
+                // webRequest.Method = HttpMethod.Get.ToString();
+                // webRequest.Proxy = null;
+                webRequest.GetResponse();
+                stopwatch.Stop();
+                Console.WriteLine(stopwatch.ElapsedMilliseconds);
+            }
+
         [Test()]
         [XpandTest]
         [Apartment(ApartmentState.STA)]

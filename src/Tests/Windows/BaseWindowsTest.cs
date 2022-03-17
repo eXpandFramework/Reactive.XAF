@@ -14,6 +14,7 @@ using Xpand.XAF.Modules.Reactive.Services.Actions;
 using Xpand.XAF.Modules.Windows.Tests.BOModel;
 
 namespace Xpand.XAF.Modules.Windows.Tests {
+
 	public abstract class BaseWindowsTest:BaseTest {
 		protected WindowsModule WindowsModule(Platform platform=Platform.Win){
 			var application = platform.NewApplication<WindowsModule>();

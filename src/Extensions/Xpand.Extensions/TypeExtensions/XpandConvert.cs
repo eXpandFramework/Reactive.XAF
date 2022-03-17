@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
@@ -162,6 +163,12 @@ namespace Xpand.Extensions.TypeExtensions {
                 if (TryChangeToEnum(value, destinationType, ref result)) {
                     return true;
                 }
+            }
+
+            var typeConverter = TypeDescriptor.GetConverter(value.GetType());
+            if (typeConverter.CanConvertFrom(destinationType)) {
+	            result = typeConverter.ConvertFrom(value);
+	            return true;
             }
 
             if ((options & Conversion.TreatWhitespaceAsDefault) == Conversion.TreatWhitespaceAsDefault) {

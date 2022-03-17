@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Reactive.Linq;
 using System.Threading;
+using Xpand.Extensions.Reactive.Combine;
 
 namespace Xpand.Extensions.Reactive.Transform{
-    public static partial class Transform{
+    public static partial class Transform {
         public static IObservable<TResult> SelectAndOmit<T, TResult>(this IObservable<T> source,
             Func<T, IObservable<TResult>> process,SemaphoreSlim semaphoreSlim=null, Action<T> noProcess=null, int maximumConcurrencyCount = 1){
             semaphoreSlim ??= new SemaphoreSlim(maximumConcurrencyCount, maximumConcurrencyCount);
