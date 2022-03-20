@@ -22,6 +22,7 @@ using Fasterflect;
 using JetBrains.Annotations;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.TypeExtensions;
@@ -230,17 +231,20 @@ namespace Xpand.XAF.Modules.TenantManager{
             }
         }
 
-        internal static IObservable<object> LastOrganization(this XafApplication application) {
-            var model = application.Model.TenantManager();
-            var readCookie = application.ReadCookie("Org");
-            if (!string.IsNullOrEmpty(readCookie)) {
-                using var space = application.CreateObjectSpace(model.OrganizationType);
-                var key = readCookie.Change(model.Organization.TypeInfo.KeyMember.MemberType);
-                return space.GetObjectByKey(model.OrganizationType, key).ReturnObservable();
-            }
-            return Observable.Empty<object>();
-        }
-            
+        internal static IObservable<object> LastOrganization(this XafApplication application) 
+            => Observable.Defer(() => {
+                    var model = application.Model.TenantManager();
+                    var readCookie = application.ReadCookie("Org");
+                    if (!string.IsNullOrEmpty(readCookie)) {
+                        using var space = application.CreateObjectSpace(model.OrganizationType);
+                        var key = readCookie.Change(model.Organization.TypeInfo.KeyMember.MemberType);
+                        return space.GetObjectByKey(model.OrganizationType, key).ReturnObservable();
+                    }
+                    return Observable.Empty<object>();
+                })
+                .TraceTenantManager()
+                .CompleteOnError();
+
         private static IObservable<SimpleActionExecuteEventArgs> OrganizationLogon(this SimpleAction action) 
             => action.WhenExecute(e => {
 	            var application = e.Action.Application;

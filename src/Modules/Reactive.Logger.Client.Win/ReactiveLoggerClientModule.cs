@@ -17,7 +17,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Client.Win {
                     var objectSpace = e.Action.View().ObjectSpace;
                     try {
                         var dbCommand = objectSpace.Connection().CreateCommand();
-                        dbCommand.CommandText = $"Delete * From {nameof(TraceEvent)}";
+                        dbCommand.CommandText = $"Truncate Table {nameof(TraceEvent)}";
                         dbCommand.ExecuteScalar();
                         objectSpace.Refresh();
                     }
