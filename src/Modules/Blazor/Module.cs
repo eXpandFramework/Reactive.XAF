@@ -30,7 +30,6 @@ namespace Xpand.XAF.Modules.Blazor {
             base.Setup(moduleManager);
 
             moduleManager.Connect()
-                .Merge(moduleManager.HideToolBarConnect())
                 .Subscribe(this);
         }
     }
