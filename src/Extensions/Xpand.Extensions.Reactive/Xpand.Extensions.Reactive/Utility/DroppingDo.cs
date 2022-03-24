@@ -11,8 +11,7 @@ namespace Xpand.Extensions.Reactive.Utility {
         /// on the specified scheduler, skipping and dropping elements that are received
         /// during the execution of a previous action, except from the latest element.
         /// </summary>
-        public static IObservable<TSource> DroppingDo<TSource>(this IObservable<TSource> source,
-            Action<TSource> action, IScheduler scheduler = null) 
+        public static IObservable<TSource> DroppingDo<TSource>(this IObservable<TSource> source, Action<TSource> action, IScheduler scheduler = null) 
             => Observable.Defer(() => {
                 Tuple<TSource> latest = null;
                 return source.Select(item => {

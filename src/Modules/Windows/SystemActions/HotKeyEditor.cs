@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Drawing.Design;
 using System.Windows.Forms;
-using System.Windows.Input;
 using DevExpress.LookAndFeel;
 using DevExpress.XtraEditors;
 using KeyEventArgs = System.Windows.Forms.KeyEventArgs;
@@ -65,8 +64,11 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
             foreach (var modifier in e.Modifiers.ToString().Split(new[] { ',' })) {
                 TextEdit.Text += modifier + " + ";
             }
-
-            if (Keyboard.IsKeyDown(Key.LWin)) {
+#if NET461
+            if (e.KeyCode==Keys.LWin) {
+#else
+            if (System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LWin)) {
+#endif
                 TextEdit.Text += "LWin + ";
             }
             if (e.KeyCode == Keys.ShiftKey | e.KeyCode == Keys.ControlKey | e.KeyCode == Keys.Menu||e.KeyCode==Keys.LWin) {
@@ -91,7 +93,7 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
             var hotKeyForm = new HotKeyForm();
             if (provider is ISupportLookAndFeel lookAndFeel)
                 hotKeyForm.LookAndFeel.Assign(lookAndFeel.LookAndFeel);
-            var hotKey = (string)context.PropertyDescriptor!.GetValue(context.Instance);
+            var hotKey = (string)context!.PropertyDescriptor!.GetValue(context.Instance);
             hotKeyForm.TextEdit.Text = hotKey;
             hotKeyForm.ShowDialog((IWin32Window)provider);
             return hotKeyForm.Canceled ? hotKey : hotKeyForm.TextEdit.Text;
