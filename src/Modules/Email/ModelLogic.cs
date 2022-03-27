@@ -28,6 +28,7 @@ namespace Xpand.XAF.Modules.Email{
 	}
 
 	[ModelNodesGenerator(typeof(ModelRecipientTypesNodesGenerator))]
+	[Description("Use the "+nameof(ModelRecipientTypesNodesGenerator)+" to populate this list.")]
 	public interface IModelRecipientTypes:IModelNode,IModelList<IModelEmailRecipientType> { }
 
 	public class ModelRecipientTypesNodesGenerator:ModelNodesGeneratorBase {
@@ -123,14 +124,25 @@ namespace Xpand.XAF.Modules.Email{
 	public interface IModelRecipients:IModelNode,IModelList<IModelEmailRecipient> { }
 
 	public interface IModelEmailRecipient : IModelNode {
-		[Required][RefreshProperties(RefreshProperties.All)]
+		[Required]
+		[RefreshProperties(RefreshProperties.All)]
+		[DataSourceProperty(nameof(RecipientTypes))]
+		
 		IModelEmailRecipientType RecipientType { get; set; }
 		[CriteriaOptions(nameof(RecipientType)+"."+nameof(IModelEmailRecipientType.Type)+"."+nameof(IModelEmailRecipientType.Type.TypeInfo))]
 		[Editor("DevExpress.ExpressApp.Win.Core.ModelEditor.CriteriaModelEditorControl, DevExpress.ExpressApp.Win" + XafAssemblyInfo.VersionSuffix + XafAssemblyInfo.AssemblyNamePostfix, DevExpress.Utils.ControlConstants.UITypeEditor)]
 		string RecipientTypeCriteria { get; set; }
-		
+		[Browsable(false)]
+		IModelList<IModelEmailRecipientType> RecipientTypes { get; }
 	}
 
+
+	[DomainLogic(typeof(IModelEmailRecipient))]
+	public class ModelEmailRecipientLogic {
+		public static IModelList<IModelEmailRecipientType> Get_RecipientTypes(IModelEmailRecipient recipientType) 
+			=> recipientType.GetParent<IModelEmail>().RecipientTypes.ToCalculatedModelNodeList();
+	
+	}
 	public interface IModelEmailObjectViews:IModelNode,IModelList<IModelEmailObjectView> { }
 
 	public interface IModelEmailObjectView : IModelNode {
