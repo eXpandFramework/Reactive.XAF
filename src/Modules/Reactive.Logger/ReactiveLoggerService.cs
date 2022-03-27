@@ -205,22 +205,23 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                     var traceSources = application.Model.ToReactiveModule<IModelReactiveModuleLogger>()?.ReactiveLogger.TraceSources;
                     return (traceSources?.PersistStrategy,traceSources?.PersistStrategyCriteria);
                 }).WhenNotDefault()
-                .SelectMany(t => events.Where(e => {
-	                if (t.PersistStrategy.HasValue) {
-		                if (e.RXAction == RXAction.OnNext && t.PersistStrategy.Value.Is(ObservableTraceStrategy.OnNext)||e.RXAction == RXAction.OnError &&
-                            t.PersistStrategy.Value.Is(ObservableTraceStrategy.OnError)) return true;
-                        if (e.RXAction == RXAction.OnNext && t.PersistStrategy.Value.Is(ObservableTraceStrategy.OnNextOrOnError)||e.RXAction == RXAction.OnError &&
-                            t.PersistStrategy.Value.Is(ObservableTraceStrategy.OnNextOrOnError)) return true;
-		                if (new[] { RXAction.Dispose, RXAction.Subscribe, RXAction.OnCompleted }
-			                    .Contains(e.RXAction) && t.PersistStrategy.Value.Is(ObservableTraceStrategy.All)) return true;
-		                if (e.RXAction == RXAction.None && t.PersistStrategy.Value.Is(ObservableTraceStrategy.All)) return true;
-                    }
-
-	                return false;
-
-                }).Pair(t.PersistStrategyCriteria))
+                .SelectMany(t => events.Where(e => t.PersistStrategy.HasValue && e.Is(t.PersistStrategy.Value)).Pair(t.PersistStrategyCriteria))
                 .Buffer(TimeSpan.FromSeconds(3)).WhenNotEmpty()
                 .SelectMany(ts => application.ObjectSpaceProvider.NewObjectSpace(space => space.SaveTraceEvent(ts.Select(t => t.source).ToArray(),space.ParseCriteria(ts.First().other))));
+
+        private static bool Is(this ITraceEvent e,ObservableTraceStrategy strategy){
+            switch (e.RXAction){
+                case RXAction.OnNext when strategy==ObservableTraceStrategy.OnNext||strategy==ObservableTraceStrategy.OnNextOrOnError:
+                case RXAction.OnError when strategy==ObservableTraceStrategy.OnError||strategy==ObservableTraceStrategy.OnNextOrOnError:
+                case RXAction.Dispose when strategy==ObservableTraceStrategy.All :
+                case RXAction.Subscribe when strategy==ObservableTraceStrategy.All :
+                case RXAction.OnCompleted when strategy==ObservableTraceStrategy.All :
+                case RXAction.None when strategy==ObservableTraceStrategy.All :
+                    return true;
+                default:
+                    return false;
+            }
+        }
 
         public static IObservable<TraceEvent> SaveTraceEvent(this IObjectSpace objectSpace,
             IList<ITraceEvent> traceEventMessages, CriteriaOperator criteria){
