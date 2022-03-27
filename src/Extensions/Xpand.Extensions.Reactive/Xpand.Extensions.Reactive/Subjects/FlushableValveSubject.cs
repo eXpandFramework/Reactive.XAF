@@ -3,6 +3,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
 namespace Xpand.Extensions.Reactive.Subjects {
+
     /// <summary>
     /// Subject with same semantics as <see cref="ValveSubject{T}"/>, but adding flushing out capability 
     /// which allows clearing the valve of any remaining elements before closing.
@@ -50,15 +51,16 @@ namespace Xpand.Extensions.Reactive.Subjects {
             return valve;
         }
     }
+
     public interface IFlushableValveSubject<T> : IValveSubject<T> {
         IObservable<T> FlushAndClose();
     }
 
     public static class FlushableValveExtensions {
-        public static IFlushableValveSubject<T> Synchronize<T>(this IFlushableValveSubject<T> valve) 
+        public static IFlushableValveSubject<T> Synchronize<T>(this IFlushableValveSubject<T> valve)
             => Synchronize(valve, new object());
 
-        public static IFlushableValveSubject<T> Synchronize<T>(this IFlushableValveSubject<T> valve, object gate) 
+        public static IFlushableValveSubject<T> Synchronize<T>(this IFlushableValveSubject<T> valve, object gate)
             => new SynchronizedFlushableValveAdapter<T>(valve, gate);
     }
 
