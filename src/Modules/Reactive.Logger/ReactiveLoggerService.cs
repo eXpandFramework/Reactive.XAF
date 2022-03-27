@@ -201,18 +201,16 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                     var modelReactiveLogger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>()?.ReactiveLogger;
                     return modelReactiveLogger != null && modelReactiveLogger.GetEnabledSources().Any() ;
                 })
-                .Select(_ => {
-                    var traceSources = application.Model.ToReactiveModule<IModelReactiveModuleLogger>()?.ReactiveLogger.TraceSources;
-                    return (traceSources?.PersistStrategy,traceSources?.PersistStrategyCriteria);
-                }).WhenNotDefault()
+                .Select(xafApplication => xafApplication.Model.ToReactiveModule<IModelReactiveModuleLogger>()?.ReactiveLogger.TraceSources)
+                .Select(traceSources => (traceSources?.PersistStrategy,traceSources?.PersistStrategyCriteria)).WhenNotDefault()
                 .SelectMany(t => events.Where(e => t.PersistStrategy.HasValue && e.Is(t.PersistStrategy.Value)).Pair(t.PersistStrategyCriteria))
                 .Buffer(TimeSpan.FromSeconds(3)).WhenNotEmpty()
                 .SelectMany(ts => application.ObjectSpaceProvider.NewObjectSpace(space => space.SaveTraceEvent(ts.Select(t => t.source).ToArray(),space.ParseCriteria(ts.First().other))));
 
         private static bool Is(this ITraceEvent e,ObservableTraceStrategy strategy){
             switch (e.RXAction){
-                case RXAction.OnNext when strategy==ObservableTraceStrategy.OnNext||strategy==ObservableTraceStrategy.OnNextOrOnError:
-                case RXAction.OnError when strategy==ObservableTraceStrategy.OnError||strategy==ObservableTraceStrategy.OnNextOrOnError:
+                case RXAction.OnNext when strategy is ObservableTraceStrategy.OnNext or ObservableTraceStrategy.OnNextOrOnError or ObservableTraceStrategy.All:
+                case RXAction.OnError when strategy is ObservableTraceStrategy.OnError or ObservableTraceStrategy.OnNextOrOnError or ObservableTraceStrategy.All:
                 case RXAction.Dispose when strategy==ObservableTraceStrategy.All :
                 case RXAction.Subscribe when strategy==ObservableTraceStrategy.All :
                 case RXAction.OnCompleted when strategy==ObservableTraceStrategy.All :
