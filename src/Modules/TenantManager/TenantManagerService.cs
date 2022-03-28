@@ -6,6 +6,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
@@ -26,7 +27,6 @@ using Xpand.Extensions.Reactive.ErrorHandling;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.TypeExtensions;
-using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.DetailViewExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -179,8 +179,7 @@ namespace Xpand.XAF.Modules.TenantManager{
                modelObjectView.ModelClass == choiceActionItem.Model.Application.TenantManager().Organization;
         
         private static IObservable<Unit> SyncUser(this IObservable<SimpleActionExecuteEventArgs> source, IXpoDataStoreProvider managerProvider)
-            => source.SelectMany(e => Observable.Using(() => new XPObjectSpaceProvider(managerProvider), managerObjectProvider 
-                => e.SyncWhenUserChanged(managerObjectProvider).Merge(e.SyncWhenUserChanged(managerObjectProvider))));
+            => source.SelectMany(e => Observable.Using(() => new XPObjectSpaceProvider(managerProvider), e.SyncWhenUserChanged));
 
 
         private static IObservable<Unit> SyncWhenUserChanged(this SimpleActionExecuteEventArgs e, XPObjectSpaceProvider managerObjectProvider) 
@@ -234,7 +233,7 @@ namespace Xpand.XAF.Modules.TenantManager{
         internal static IObservable<object> LastOrganization(this XafApplication application) 
             => Observable.Defer(() => {
                     var model = application.Model.TenantManager();
-                    var readCookie = application.ReadCookie("Org");
+                    var readCookie = application.ReadCookie(application.GetType().FullName);
                     if (!string.IsNullOrEmpty(readCookie)) {
                         using var space = application.CreateObjectSpace(model.OrganizationType);
                         var key = readCookie.Change(model.Organization.TypeInfo.KeyMember.MemberType);
@@ -254,8 +253,8 @@ namespace Xpand.XAF.Modules.TenantManager{
                     return action.ReturnObservable().TraceTenantManager(_ => "LogOff").IgnoreElements().To<SimpleActionExecuteEventArgs>();
                 }
                 return e.ReturnObservable().TakeUntil(application.WhenLoggedOff())
-	                .ConcatIgnored(_ => application.Logon( organization)
-		                .Merge(application.SaveCookie("Org",$"{e.Action.View().ObjectSpace.GetKeyValue(organization)}")));
+	                .ConcatIgnored(_ => application.Logon( organization))
+	                .Select(args => args);
             });
 
         internal static IObservable<Unit> Logon(this XafApplication application, object organization) {
@@ -268,7 +267,7 @@ namespace Xpand.XAF.Modules.TenantManager{
 	        applicationUser.UpdateRoles(application, objectSpace);
 	        ((IObjectSpaceLink)applicationUser).CommitChanges();
 	        ((SecurityStrategyBase)SecuritySystem.Instance).Logon(applicationUser);
-	        return application.WhenDisposed().Do(_ => objectSpace.Dispose()).IgnoreElements().ToUnit();
+	        return application.SaveCookie("Org",$"{objectSpace.GetKeyValue(organization)}").ToUnit().Finally(() => {});
         }
 
         private static void UpdateRoles(this ISecurityUserWithRoles applicationUser,XafApplication application, IObjectSpace objectSpace){
@@ -305,10 +304,10 @@ namespace Xpand.XAF.Modules.TenantManager{
         private static readonly Subject<GenericEventArgs<(XafApplication application, object organization, string connectionString)>> CustomizeConnectionStringSubject = new();
         
         private static bool Owns<T>(this T currentUser, IObjectSpace objectSpace, XafApplication application) where T : ISecurityUser 
-            => ((IObjectSpaceLink)currentUser).ObjectSpace.GetObjects(application.Model.TenantManager().OrganizationType,
-                CriteriaOperator.Parse($"{application.Model.TenantManager().Owner.Name}.{nameof(currentUser.UserName)}=?", currentUser.UserName))
-                .Cast<object>().Select(o => application.ConnectionString(o))
-                .Any(connectionString => objectSpace.Connection().ConnectionString == connectionString);
+	        => ((IObjectSpaceLink)currentUser).ObjectSpace.GetObjects(application.Model.TenantManager().OrganizationType,
+		        CriteriaOperator.Parse($"{application.Model.TenantManager().Owner.Name}.{nameof(currentUser.UserName)}=?", currentUser.UserName))
+	        .Cast<object>().Select(o => application.ConnectionString(o))
+	        .Any(connectionString => Regex.IsMatch(connectionString, $@"{objectSpace.Connection().Database}\b", RegexOptions.IgnoreCase));
 
         [UsedImplicitly]
         public static IObservable<Unit> WhenCustomizeConnectionString<T>(this XafApplication application,Func<T,string> connectionString) 
