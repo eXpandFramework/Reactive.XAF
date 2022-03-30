@@ -1,9 +1,7 @@
 ﻿using System.ComponentModel;
 using DevExpress.Xpo;
-using Xpand.XAF.Modules.SequenceGenerator.Tests.BO;
 
-// ReSharper disable once CheckNamespace
-namespace BrokeroTests.SequenceGenerator.BO.BrokeroTests.SequenceGenerator.BO.BrokeroTests.SequenceGenerator.BO.BrokeroTests.SequenceGenerator.BO.BrokeroTests.SequenceGenerator.BO.BrokeroTests.SequenceGenerator.BO.BO.BrokeroTests.SequenceGenerator.BO.BrokeroTests.SequenceGenerator.BO.BrokeroTests.SequenceGenerator.BO{
+namespace Xpand.XAF.Modules.SequenceGenerator.Tests.BO{
     public  class LongFullNameTestObject : TestBaseObject,ISequentialNumber {
         private long _sequentialNumber;
 

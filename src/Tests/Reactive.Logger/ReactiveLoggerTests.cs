@@ -286,7 +286,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
         }
         
         [Test()]
-        [XpandTest]
+        // [XpandTest]
         [Apartment(ApartmentState.STA)][Order(1100)]
         public async Task Customize_OnNext_Message(){
             using var application = Platform.Win.NewApplication<ReactiveLoggerModule>();

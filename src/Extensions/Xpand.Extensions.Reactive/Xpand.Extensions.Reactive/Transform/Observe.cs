@@ -17,14 +17,14 @@ namespace Xpand.Extensions.Reactive.Transform {
         public static IObservable<T> ConcatIgnored<T,T2>(this IObservable<T> source,Func<T,IObservable<T2>> secondSelector,Func<T,bool> merge=null)
             => source.SelectMany(arg => {
                 merge ??= _ => true;
-                return merge(arg) ? secondSelector(arg).IgnoreElements().ConcatValue(arg) : arg.ReturnObservable();
+                return merge(arg) ? secondSelector(arg).IgnoreElements().ConcatIgnoredValue(arg).Finally(() => {}) : arg.ReturnObservable();
             });
         public static IObservable<T> ConcatIgnored<T>(this IObservable<T> source,Action<T> action,Func<T,bool> merge=null)
             => source.SelectMany(arg => {
                 merge ??= _ => true;
                 if (merge(arg)) {
                     action(arg);
-                    return Observable.Empty<T>().ConcatValue(arg);
+                    return Observable.Empty<T>().ConcatIgnoredValue(arg);
                 }
                 return arg.ReturnObservable();
             });
