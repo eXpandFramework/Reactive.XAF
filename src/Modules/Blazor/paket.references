@@ -5,3 +5,4 @@ System.Interactive
 Microsoft.AspNetCore.Hosting.Abstractions
 DevExpress.ExpressApp.Blazor
 DevExpress.ExpressApp.CodeAnalysis
+Microsoft.AspNetCore.WebUtilities

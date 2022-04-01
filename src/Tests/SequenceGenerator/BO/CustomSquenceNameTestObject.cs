@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using BrokeroTests.SequenceGenerator.BO;
 using DevExpress.Xpo;
 
 namespace Xpand.XAF.Modules.SequenceGenerator.Tests.BO{

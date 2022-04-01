@@ -23,7 +23,7 @@ namespace Xpand.Extensions.Office.Cloud.Google.Blazor{
                     if (code != null){
                         var state = context.Request.Query["state"].First();
                         var key = Guid.Parse(state.Substring(0, state.Length - AuthorizationCodeWebApp.StateRandomLength));
-                        app.ApplicationServices.GetService<GlobalItems>()?.TryAdd(key, code);
+                        app.ApplicationServices.GetService<SingletonItems>()?.TryAdd(key, code);
                     }
                     await next2();
                 });

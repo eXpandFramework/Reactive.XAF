@@ -9,3 +9,4 @@ Newtonsoft.Json
 Xpand.Collections
 DevExpress.ExpressApp.CodeAnalysis
 DevExpress.ExpressApp.Blazor
+Microsoft.AspNetCore.WebUtilities

@@ -10,8 +10,18 @@ using Microsoft.JSInterop;
 
 namespace Xpand.XAF.Modules.Blazor.Services {
     public static class StorageService {
-        public static IObservable<Unit> SaveCookie(this XafApplication application, string key, string value,int? days =null) 
-            => new Cookie(application).SetValue(key,value,days).ToObservable();
+	    public static IObservable<Unit> SaveCookie(this XafApplication application, string key, string value,int? days =null) 
+		    => new Cookie(application).SetValue(key,value,days);
+
+        // public static void SaveCookie(this XafApplication application, string key, string value,int? days =null) {
+        //     var httpContextResponse = application.ToBlazor().ServiceProvider.GetRequiredService<IHttpContextAccessor>().HttpContext.Response;
+        //     if (days != null) {
+        //         httpContextResponse.Cookies.Append(key, value, new CookieOptions() { Expires = DateTimeOffset.Now.AddDays(days.Value) });
+        //     }
+        //     else
+        //         httpContextResponse.Cookies.Append(key, value);
+        //
+        // }
 
         public static string ReadCookie(this XafApplication application, string key) 
 	        => application.ToBlazor().ServiceProvider.GetRequiredService<IHttpContextAccessor >()
@@ -47,15 +57,14 @@ namespace Xpand.XAF.Modules.Blazor.Services {
             ExpireDays = 300;
         }
 
-        public async Task SetValue(string key, string value, int? days = null) {
+        public IObservable<Unit> SetValue(string key, string value, int? days = null) {
             var curExp = (days != null) ? (days > 0 ? DateToUtc(days.Value) : "") : _expires;
-            await SetCookie($"{key}={value}; expires={curExp}; path=/");
+            return Observable.FromAsync(() => SetCookie($"{key}={value}; expires={curExp}; path=/"));
         }
 
         public async Task<string> GetValue(string key, string def = "") {
             var cValue = await GetCookie();
             if (string.IsNullOrEmpty(cValue)) return def;
-
             var strings = cValue.Split(';');
             foreach (var val in strings)
                 if (!string.IsNullOrEmpty(val) && val.IndexOf('=') > 0)
@@ -64,9 +73,7 @@ namespace Xpand.XAF.Modules.Blazor.Services {
             return def;
         }
 
-        private async Task SetCookie(string value) {
-            await _jsRuntime.InvokeVoidAsync("eval", $"document.cookie = \"{value}\"");
-        }
+        private Task SetCookie(string value) => _jsRuntime.InvokeVoidAsync("eval", $"document.cookie = \"{value}\"").AsTask();
 
         private async Task<string> GetCookie() {
             return await _jsRuntime.InvokeAsync<string>("eval", "document.cookie");

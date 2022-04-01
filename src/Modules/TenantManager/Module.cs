@@ -9,12 +9,15 @@ using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.Persistent.Base;
 using JetBrains.Annotations;
-using Xpand.Extensions.Reactive.Combine;
+using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.Blazor;
+using Xpand.XAF.Modules.Blazor.Services;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
+using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.TenantManager{
     [UsedImplicitly]
@@ -35,24 +38,12 @@ namespace Xpand.XAF.Modules.TenantManager{
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
             moduleManager.Connect()
+	            .Merge(Application.WhenViewCreated().SelectMany(view => view.WhenEvent(nameof(View.CustomizeViewShortcut)).Select(pattern => pattern)).ToUnit())
                 .TakeUntilDisposed(this)
                 .Subscribe();
         }
         
-        public override IList<PopupWindowShowAction> GetStartupActions() {
-            var actions = new List<PopupWindowShowAction>(base.GetStartupActions());
-            if (!((ISecurityUserWithRoles)SecuritySystem.CurrentUser).Roles.Cast<IPermissionPolicyRole>().Any(role => role.IsAdministrative)) {
-                Application.LastOrganization()
-                    .SwitchIfEmpty(Observable.Defer(() => {
-                        var startupAction = new PopupWindowShowAction();
-                        actions.Add(startupAction);
-                        return startupAction.CreateStartupView().To<object>();
-                    }).IgnoreElements())
-                    .SelectMany(org => Application.Logon(org))
-                    .Subscribe(this);
-            }
-            return actions;
-        }
+        public override IList<PopupWindowShowAction> GetStartupActions() => Application.StartupActions(base.GetStartupActions());
 
         public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders){
             base.ExtendModelInterfaces(extenders);

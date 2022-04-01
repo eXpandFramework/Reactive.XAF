@@ -170,7 +170,7 @@ namespace Xpand.XAF.Modules.TenantManager{
 		public static IModelMember Get_Users(IModelTenantManager manager) 
 			=> manager.UsersMembers.FirstOrDefault();
 		
-			// "[ApplicationUsers][[Oid] = CURRENTUSERID()] Or [Owner.Oid] = CURRENTUSERID()"
+			
 		[UsedImplicitly]
 		public static string Get_Registration(IModelTenantManager manager) 
 			=> $"[{manager.Users?.Name}][[{manager.Owner?.MemberInfo.MemberTypeInfo.KeyMember.Name}]=CURRENTUSERID()] OR [{manager.Owner?.Name}.{manager.Owner?.MemberInfo.MemberTypeInfo.KeyMember.Name}]=CURRENTUSERID()";

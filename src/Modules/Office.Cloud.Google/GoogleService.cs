@@ -140,7 +140,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
 
 
         static string GetCodeFromObject(this XafApplication application){
-            var service = (ConcurrentDictionary<object,object>)application.WhenWeb().Wait().GetService("Xpand.Extensions.Blazor.GlobalItems");
+            var service = (ConcurrentDictionary<object,object>)application.WhenWeb().Wait().GetService("Xpand.Extensions.Blazor.SingletonItems");
             service.TryRemove(application.CurrentUserId(), out var value);
             return (string) value;
         }
