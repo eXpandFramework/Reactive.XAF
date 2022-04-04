@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor;
 using DevExpress.ExpressApp.Blazor.Templates;
@@ -12,7 +11,6 @@ using Fasterflect;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.JSInterop;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.Blazor.Editors;
@@ -39,6 +37,9 @@ namespace Xpand.XAF.Modules.Blazor {
             builder.AddMultipleAttributes(component);
             builder.CloseComponent();
         }
+
+        public static T GetService<T>(this XafApplication application) => application.ToBlazor().ServiceProvider.GetService<T>();
+        public static T GetRequiredService<T>(this XafApplication application) => application.ToBlazor().ServiceProvider.GetRequiredService<T>();
 
         public static BlazorApplication ToBlazor(this XafApplication application) => (BlazorApplication)application;
 

@@ -43,6 +43,10 @@
       <HintPath>..\..\..\bin\net5.0\Xpand.XAF.Modules.Blazor.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
+    <Reference Include="Xpand.Extensions.Blazor">
+      <HintPath>..\..\..\bin\net5.0\Xpand.Extensions.Blazor.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Module.cs" />
