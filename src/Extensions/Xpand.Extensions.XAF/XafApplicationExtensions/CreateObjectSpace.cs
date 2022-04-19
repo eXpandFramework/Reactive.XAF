@@ -23,8 +23,7 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions {
                         nonsecuredObjectSpaceProvider
                         ? nonsecuredObjectSpaceProvider.CreateNonsecuredObjectSpace()
                         : application.ObjectSpaceProvider.CreateUpdatingObjectSpace(false);
-            else
-                return application.CreateObjectSpace();
+            return application.CreateObjectSpace();
         }
     }
     

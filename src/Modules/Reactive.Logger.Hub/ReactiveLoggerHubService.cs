@@ -95,7 +95,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 			        ;
 
         public static IObservable<IPEndPoint> DetectServer(this XafApplication application)
-	        => application.ClientPortsList().Listening()
+	        => application.ClientPortsList().ToNowObservable().ObserveOnDefault().Listening().Take(1)
 		        .TraceRXLoggerHub(point => $"{point.Address}, {point.Port}");
 
         public static IObservable<ITraceEventHub> ConnectClient(this IObservable<IPEndPoint> source) 
@@ -125,10 +125,9 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 		        .SelectMany(ports => ports.LoggerPorts.OfType<IModelLoggerServerPort>()
 			        .ToObservable().SelectMany(_ => IpEndPoint(_.Host,_.Port)));
 
-        private static IObservable<IModelReactiveLoggerHub> ModelLoggerPorts(this XafApplication application) 
+        public static IObservable<IModelReactiveLoggerHub> ModelLoggerPorts(this XafApplication application) 
 	        => application.ToReactiveModule<IModelReactiveModuleLogger>().Select(logger => logger.ReactiveLogger).Cast<IModelReactiveLoggerHub>()
-		        .Where(ports => ports.LoggerPorts.Enabled)
-		        .Select(logger => logger).Cast<IModelReactiveLoggerHub>();
+		        .Where(ports => ports.LoggerPorts.Enabled).Cast<IModelReactiveLoggerHub>();
 
         public static Server StartServer(this ServerPort serverPort){
 	        var options = new MagicOnionOptions{IsReturnExceptionStackTraceInErrorDetail = true};

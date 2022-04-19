@@ -175,7 +175,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
 
         private static Dictionary<string, PropertyInfo> BindablePropertyInfos(this object instance,IModelNodeDisabled modelNodeDisabled){
             try{
-                return instance.GetType().Properties(Flags.Public|Flags.Static|Flags.AllMembers).DistinctBy(info => info.Name).ToDictionary(info => info.Name,info => info);
+                return instance.GetType().Properties(Flags.Public|Flags.Static|Flags.AllMembers).DistinctWith(info => info.Name).ToDictionary(info => info.Name,info => info);
             }
             catch (Exception e){
                 var exception = new Exception($"ModelNode:{((ModelNode) modelNodeDisabled).Path}, object:{instance}",e);

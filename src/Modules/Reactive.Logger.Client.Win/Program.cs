@@ -18,7 +18,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Client.Win {
         [STAThread]
         static void Main() {
 #if EASYTEST
-            DevExpress.ExpressApp.Win.EasyTest.EasyTestRemotingRegistration.Register();
+            DevExpress.ExpressApp.Win.EasyTest.EasyTestRemotingRegistration.Register();l
 #endif
             WindowsFormsSettings.LoadApplicationSettings();
             Application.EnableVisualStyles();

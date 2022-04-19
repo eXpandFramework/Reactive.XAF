@@ -88,15 +88,15 @@
     <Content Include="ExpressApp.ico" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="21.2.6" />
-    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="21.2.6" />
+    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="21.2.7" />
+    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="21.2.7" />
     <PackageReference Include="Google.Apis.People.v1" Version="1.25.0.830" />
     <PackageReference Include="System.ServiceModel.Http" Version="4.8.1" />
     <PackageReference Include="System.Collections.Immutable" Version="5.0" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.8.1" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.8.1" />
     <PackageReference Include="System.ServiceProcess.ServiceController" Version="5.0" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.212.8.1" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.212.8.11" />
     <PackageReference Include="RazorLight" Version="2.0.0-rc.3" />
   </ItemGroup>
   <ItemGroup>

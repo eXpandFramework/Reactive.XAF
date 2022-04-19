@@ -83,7 +83,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             return propertyInfos
                 .Where(_ => !_.PropertyType.IsValueType && typeof(string) != _.PropertyType && _.PropertyType != type)
                 .SelectMany(_ => new []{_.PropertyType,_.PropertyType.GetRealType()}.Distinct())
-                .DistinctBy(_ => $"{(_,type).ModelName()}{_.GetRealType()}")
+                .DistinctWith(_ => $"{(_,type).ModelName()}{_.GetRealType()}")
                 .Where(_ => _!=typeof(object))
                 .ToArray();
         }
@@ -115,7 +115,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                     }
                     return !info.PropertyType.IsGenericType && info.PropertyType != type &&info.PropertyType != typeof(object) ;
                 })
-                .DistinctBy(info => info.Name);
+                .DistinctWith(info => info.Name);
             
             
             return propertyInfos;

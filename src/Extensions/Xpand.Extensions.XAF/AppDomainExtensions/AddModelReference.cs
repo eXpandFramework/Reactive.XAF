@@ -40,6 +40,6 @@ namespace Xpand.Extensions.XAF.AppDomainExtensions{
 
         [UsedImplicitly]
         internal static void ModifyCSCodeCompilerReferences(string sourceCode, ref string[] references, string assemblyFile) 
-	        => references = references.Concat(References).DistinctBy(Path.GetFileName).ToArray();
+	        => references = references.Concat(References).DistinctWith(Path.GetFileName).ToArray();
     }
 }

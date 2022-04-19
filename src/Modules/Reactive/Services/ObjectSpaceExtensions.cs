@@ -168,8 +168,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => objectSpace.WhenCommiting()
                 .SelectMany(_ => {
                     var modifiedObjects = objectSpace.ModifiedObjects<T>(objectModification).Where(t => criteria==null|| criteria.Invoke(t.instance)).ToArray();
-                    return modifiedObjects.Any() ? emitAfterCommit ? objectSpace.WhenCommitted().FirstAsync().Select(space => (space, modifiedObjects))
-                            : (objectSpace, modifiedObjects).ReturnObservable() : Observable.Empty<(IObjectSpace, (T instance, ObjectModification modification)[])>();
+                    if (modifiedObjects.Any())
+                        if (emitAfterCommit)
+                            return objectSpace.WhenCommitted().FirstAsync().Select(space => (space, modifiedObjects));
+                        else
+                            return (objectSpace, modifiedObjects).ReturnObservable();
+                    else
+                        return Observable.Empty<(IObjectSpace, (T instance, ObjectModification modification)[])>();
                 });
 
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)>
@@ -222,28 +227,29 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         static bool HasAnyValue(this ObjectModification value, params ObjectModification[] values) => values.Any(@enum => value == @enum);
 
-        public static IEnumerable<(object instance, ObjectModification modification)> ModifiedObjects(this IObjectSpace objectSpace,ObjectModification objectModification)
-            => objectSpace.ModifiedObjects.Cast<object>().Select(o => {
+        public static IEnumerable<(object instance, ObjectModification modification)> ModifiedObjects(this IObjectSpace objectSpace,ObjectModification objectModification) {
+            var objects =objectSpace.GetObjectsToDelete(true).Cast<object>().Concat(objectSpace.GetObjectsToSave(true).Cast<object>()).Distinct();
+            return objects.Select(o => {
                 if (objectSpace.IsDeletedObject(o) && objectModification.HasAnyValue(ObjectModification.Deleted,
-                    ObjectModification.All, ObjectModification.NewOrDeleted, ObjectModification.UpdatedOrDeleted)) {
+                        ObjectModification.All, ObjectModification.NewOrDeleted, ObjectModification.UpdatedOrDeleted)) {
                     return (o, ObjectModification.Deleted);
                 }
 
                 if (objectSpace.IsNewObject(o) && objectModification.HasAnyValue(ObjectModification.New,
-                    ObjectModification.All, ObjectModification.NewOrDeleted, ObjectModification.NewOrUpdated)) {
+                        ObjectModification.All, ObjectModification.NewOrDeleted, ObjectModification.NewOrUpdated)) {
                     return (o, ObjectModification.New);
                 }
 
                 if (objectSpace.IsUpdated(o) && objectModification.HasAnyValue(ObjectModification.Updated,
-                    ObjectModification.All, ObjectModification.UpdatedOrDeleted, ObjectModification.NewOrUpdated)) {
+                        ObjectModification.All, ObjectModification.UpdatedOrDeleted, ObjectModification.NewOrUpdated)) {
                     return (o, ObjectModification.Updated);
                 }
 
                 return default;
-                
             }).WhereNotDefault();
+        }
 
-        
+
         public static IEnumerable<(T instance, ObjectModification modification)> ModifiedObjects<T>(this IObjectSpace objectSpace, ObjectModification objectModification) 
             => objectSpace.ModifiedObjects(objectModification).Where(t => t.instance is T).Select(t => ((T)t.instance,t.modification));
         
@@ -437,6 +443,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 #endif
 
         
+        public static IObservable<IObjectSpace> WhenRefreshing(this IObjectSpace objectSpace)
+            => Observable.FromEventPattern<EventHandler<CancelEventArgs>, CancelEventArgs>(h => objectSpace.Refreshing += h, h => objectSpace.Refreshing -= h,ImmediateScheduler.Instance)
+                .Select(pattern => (IObjectSpace) pattern.Sender);
         public static IObservable<IObjectSpace> WhenReloaded(this IObjectSpace objectSpace) 
             => Observable.FromEventPattern<EventHandler, EventArgs>(h => objectSpace.Reloaded += h, h => objectSpace.Reloaded -= h,ImmediateScheduler.Instance)
                 .Select(pattern => (IObjectSpace) pattern.Sender);

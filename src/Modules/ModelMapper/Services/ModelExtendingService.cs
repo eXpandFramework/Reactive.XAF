@@ -63,7 +63,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         }
 
         private static IObservable<IModelMapperConfiguration> ModelExtenders(){
-            return ModelMapperConfigurations.DistinctBy(_ => _.TypeToMap).ToObservable().TraceModelMapper();
+            return ModelMapperConfigurations.DistinctWith(_ => _.TypeToMap).ToObservable().TraceModelMapper();
         }
 
         public static void Extend(this ApplicationModulesManager modulesManager, IModelMapperConfiguration configuration){

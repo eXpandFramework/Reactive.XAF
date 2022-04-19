@@ -10,20 +10,21 @@ namespace Xpand.Extensions.Reactive.Transform{
         public static IObservable<T> SampleResponsive<T>(
             this IObservable<T> source, TimeSpan delay, IScheduler scheduler = null) {
             scheduler ??= Scheduler.Default;
-            return source.Publish(src => {
-                var fire = new Subject<T>();
+            return delay == TimeSpan.Zero ? source
+                : source.Publish(src => {
+                    var fire = new Subject<T>();
 
-                var whenCanFire = fire
-                    .Select(_ => new Unit())
-                    .Delay(delay, scheduler)
-                    .StartWith(scheduler, new Unit());
+                    var whenCanFire = fire
+                        .Select(_ => new Unit())
+                        .Delay(delay, scheduler)
+                        .StartWith(scheduler, new Unit());
 
-                var subscription = src
-                    .CombineVeryLatest(whenCanFire, (x, _) => x)
-                    .Subscribe(fire);
+                    var subscription = src
+                        .CombineVeryLatest(whenCanFire, (x, _) => x)
+                        .Subscribe(fire);
 
-                return fire.Finally(subscription.Dispose);
-            });
+                    return fire.Finally(subscription.Dispose);
+                });
         }
     }
 }

@@ -102,7 +102,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks.Tests{
                 },Timeout);
         }
 
-        [Test]
+        // [Test]
         [XpandTest()]
         public override async Task Delete_Two_Tasks(){
             using var application = Platform.Win.TasksModule().Application;
@@ -111,13 +111,14 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks.Tests{
 
             await builder.frame.View.ObjectSpace.Delete_Two_Entities(existingObjects.Select(tuple => tuple.task).ToArray(),
                 space => GoogleTasksService.Updated.When(MapAction.Delete).Select(_ => _.cloud).TakeUntilDisposed(application), async () => {
-                    global::Google.Apis.Tasks.v1.Data.Tasks allTasks =await builder.service.GetTaskList(TasksTestExtensions.TasksFolderName).SelectMany(list => builder.service.Tasks.List(list.Id).ToObservable());
+                    global::Google.Apis.Tasks.v1.Data.Tasks allTasks =await builder.service.GetTaskList(TasksTestExtensions.TasksFolderName)
+                        .SelectMany(list => builder.service.Tasks.List(list.Id).ToObservable());
                     allTasks.Items.ShouldBeNull();
                 }, Timeout,existingObjects.Select(_ => _.cloudTask).ToArray());
         }
         
-        [TestCase(true)]
-        [TestCase(false)]
+        // [TestCase(true)]
+        // [TestCase(false)]
         [XpandTest()]
         public override async Task Customize_Delete_Two_Tasks(bool handleDeletion){
             using var application = Platform.Win.TasksModule().Application;

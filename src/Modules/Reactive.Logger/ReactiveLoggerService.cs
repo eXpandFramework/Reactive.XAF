@@ -104,7 +104,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
 	        => application.WhenTrace(location, RXAction.OnError, methods);
 
         public static IObservable<ITraceEvent> WhenTrace(this XafApplication application, Type location = null,RXAction rxAction = RXAction.All, params string[] methods) 
-            => application.Modules.ToTraceSource().SelectMany(t => t.traceSource.Listeners.OfType<ReactiveTraceListener>()).DistinctBy(listener => listener.Name).ToObservable()
+            => application.Modules.ToTraceSource().SelectMany(t => t.traceSource.Listeners.OfType<ReactiveTraceListener>()).DistinctWith(listener => listener.Name).ToObservable()
 		        .SelectMany(listener => listener.EventTrace)
                 .When(location, rxAction,methods);
 

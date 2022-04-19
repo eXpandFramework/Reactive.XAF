@@ -299,14 +299,14 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions{
             => document.CharacterRanges().Select(_ => _.Key).Distinct()
 		        .SelectMany(s => document.CharacterStyles.Where(style => style.Name() == s)
 		        .SelectMany(style => style.FromHierarchy(characterStyle => characterStyle.Parent))
-		        .DistinctBy(style => style.Name)
+		        .DistinctWith(style => style.Name)
 		        .Select(style => style.ToDocumentStyle(defaultPropertiesProvider,true,document.IsDefaultStyle(style,defaultPropertiesProvider))).Do(style => style.Used=true));
 
         private static IEnumerable<DocumentStyle> UsedParagraphStyles(this Document document,Document defaultPropertiesProvider) 
             => document.Paragraphs.SelectMany(_ => _.Style.FromHierarchy(style => style.Parent)
 		        .Concat(UsedNextStyles(_))
 		        .WhereNotDefault()
-		        .DistinctBy(style => style.Name)
+		        .DistinctWith(style => style.Name)
 		        .Select(style => style.ToDocumentStyle( defaultPropertiesProvider,true,document.IsDefaultStyle(style,defaultPropertiesProvider))).Do(style => style.Used=true));
 
         private static IEnumerable<ParagraphStyle> UsedNextStyles(Paragraph paragraph) 

@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Application>
+  <ReactiveModules Id="ReactiveModules">
+    <ReactiveLogger Id="ReactiveLogger">
+      <LoggerPorts Id="LoggerPorts">
+        <LoggerServerPort Id="default server port 61456" Removed="True" />
+      </LoggerPorts>
+    </ReactiveLogger>
+  </ReactiveModules>
+</Application>

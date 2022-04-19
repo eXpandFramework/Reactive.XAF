@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Office.Cloud.Google.Calendar</id>
-    <version>4.212.8.0</version>
+    <version>4.212.8.11</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -12,24 +12,24 @@
     <description>The `Google.Calendar` package integrates with the Google Calendar cloud service.</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Office.Cloud.Google.Calendar, 21.2.6</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Office.Cloud.Google.Calendar, 21.2.7</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.Extensions" version="4.212.8.0" />
-        <dependency id="Xpand.Extensions.Office.Cloud" version="4.212.8.0" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.212.8.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.212.8.0" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.212.8.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.212.8.0" />
-        <dependency id="Xpand.XAF.Modules.Office.Cloud.Google" version="4.212.8.0" />
-        <dependency id="DevExpress.Persistent.Base" version="21.2.6" />
-        <dependency id="DevExpress.ExpressApp.Xpo" version="21.2.6" />
+        <dependency id="Xpand.Extensions" version="4.212.8.11" />
+        <dependency id="Xpand.Extensions.Office.Cloud" version="4.212.8.11" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.212.8.11" />
+        <dependency id="Xpand.Extensions.XAF" version="4.212.8.11" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.212.8.11" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.212.8.11" />
+        <dependency id="Xpand.XAF.Modules.Office.Cloud.Google" version="4.212.8.11" />
+        <dependency id="DevExpress.Persistent.Base" version="21.2.7" />
+        <dependency id="DevExpress.ExpressApp.Xpo" version="21.2.7" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="System.Reactive" version="5.0" />
         <dependency id="JetBrains.Annotations" version="2021.3" />
         <dependency id="Google.Apis.Calendar.v3" version="1.55.0.2410" />
-        <dependency id="DevExpress.ExpressApp.CodeAnalysis" version="21.2.6" />
-        <dependency id="Xpand.VersionConverter" version="4.212.8.0" />
+        <dependency id="DevExpress.ExpressApp.CodeAnalysis" version="21.2.7" />
+        <dependency id="Xpand.VersionConverter" version="4.212.8.11" />
       </group>
     </dependencies>
   </metadata>

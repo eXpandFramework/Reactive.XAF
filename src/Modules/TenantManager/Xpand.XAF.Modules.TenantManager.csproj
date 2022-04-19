@@ -60,7 +60,5 @@
   <ItemGroup>
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
-  <ItemGroup>
-  </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>

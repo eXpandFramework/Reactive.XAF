@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.TestsLib.Net461</id>
-    <version>4.212.8.0</version>
+    <version>4.212.8.11</version>
     <authors>eXpandFramework</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <license type="expression">MIT</license>
@@ -11,21 +11,21 @@
     <description>Xpand.TestsLib.Net461</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.TestsLib.Net461, 21.2.6</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Xpand.TestsLib.Net461, 21.2.7</tags>
     <dependencies>
       <group targetFramework="net461">
-        <dependency id="Xpand.Extensions" version="4.212.8.0" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.212.8.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.212.8.0" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.212.8.0" />
-        <dependency id="Xpand.TestsLib.Common" version="4.212.8.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.212.8.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.212.8.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.212.8.0" />
-        <dependency id="DevExpress.ExpressApp.Core.All" version="21.2.6" />
-        <dependency id="DevExpress.ExpressApp.EasyTest.WinAdapter" version="21.2.6" />
-        <dependency id="DevExpress.ExpressApp.EasyTest.WebAdapter" version="21.2.6" />
-        <dependency id="DevExpress.ExpressApp.Web" version="21.2.6" />
+        <dependency id="Xpand.Extensions" version="4.212.8.11" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.212.8.11" />
+        <dependency id="Xpand.Extensions.XAF" version="4.212.8.11" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.212.8.11" />
+        <dependency id="Xpand.TestsLib.Common" version="4.212.8.11" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.212.8.11" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger" version="4.212.8.11" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.212.8.11" />
+        <dependency id="DevExpress.ExpressApp.Core.All" version="21.2.7" />
+        <dependency id="DevExpress.ExpressApp.EasyTest.WinAdapter" version="21.2.7" />
+        <dependency id="DevExpress.ExpressApp.EasyTest.WebAdapter" version="21.2.7" />
+        <dependency id="DevExpress.ExpressApp.Web" version="21.2.7" />
         <dependency id="akarnokd.reactive_extensions" version="0.0.27-alpha" />
         <dependency id="Enums.NET" version="4.0" />
         <dependency id="Humanizer.Core" version="2.2" />

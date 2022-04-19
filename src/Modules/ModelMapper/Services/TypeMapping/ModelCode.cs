@@ -221,7 +221,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                     .ToModelMapperPropertyInfo().ToArray();
                 var properties = new List<ModelMapperPropertyInfo>(propertyInfos);
                 _customizeProperties.OnNext((typeToCode,properties));
-                propertiesCode =  String.Join(Environment.NewLine,properties.DistinctBy(info => info.Name).Select(propertyInfo =>(propertyInfo,data.rootType).ModelCode()));
+                propertiesCode =  String.Join(Environment.NewLine,properties.DistinctWith(info => info.Name).Select(propertyInfo =>(propertyInfo,data.rootType).ModelCode()));
             }
             
             string imageCode = null;

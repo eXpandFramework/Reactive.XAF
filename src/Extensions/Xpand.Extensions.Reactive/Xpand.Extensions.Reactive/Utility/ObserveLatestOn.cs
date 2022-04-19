@@ -3,41 +3,28 @@ using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Threading;
 
 namespace Xpand.Extensions.Reactive.Utility{
-    public static partial class Utility{
-        public static IObservable<T> ObserveLatestOn<T>(this IObservable<T> source, IScheduler scheduler) 
-            => Observable.Create<T>(observer => {
-                Notification<T> outsideNotification;
-                var gate = new object();
-                var active = false;
+    public static partial class Utility {
+        public static IObservable<TSource> ObserveLatestOn<TSource>(this IObservable<TSource> source, SynchronizationContext context)
+            => source.ObserveLatestOn(new SynchronizationContextScheduler(context));
+        public static IObservable<TSource> ObserveLatestOnContext<TSource>(this IObservable<TSource> source)
+            => source.ObserveLatestOn(SynchronizationContext.Current);
+        public static IObservable<TSource> ObserveLatestOn<TSource>(this IObservable<TSource> source, IScheduler scheduler) 
+            => Observable.Create<TSource>(observer => {
+                Notification<TSource> pendingNotification = null;
                 var cancelable = new MultipleAssignmentDisposable();
-                var disposable = source.Materialize().Subscribe(thisNotification => {
-                    bool wasNotAlreadyActive;
-                    lock (gate){
-                        wasNotAlreadyActive = !active;
-                        active = true;
-                        outsideNotification = thisNotification;
-                    }
-
-                    if (wasNotAlreadyActive)
-                        cancelable.Disposable = scheduler.Schedule(self => {
-                            Notification<T> localNotification;
-                            lock (gate){
-                                localNotification = outsideNotification;
-                                outsideNotification = null;
-                            }
-
-                            localNotification.Accept(observer);
-                            bool hasPendingNotification;
-                            lock (gate){
-                                hasPendingNotification = active = outsideNotification != null;
-                            }
-
-                            if (hasPendingNotification) self();
+                var sourceSubscription = source.Materialize()
+                    .Subscribe(notification => {
+                        var previousNotification = Interlocked.Exchange(ref pendingNotification, notification);
+                        if (previousNotification != null) return;
+                        cancelable.Disposable = scheduler.Schedule(() => {
+                            var notificationToSend = Interlocked.Exchange(ref pendingNotification, null);
+                            notificationToSend!.Accept(observer);
                         });
-                });
-                return new CompositeDisposable(disposable, cancelable);
+                    });
+                return new CompositeDisposable(sourceSubscription, cancelable);
             });
     }
 }
