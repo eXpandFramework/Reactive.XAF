@@ -52,7 +52,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
                     .Select(s => new { response, json = s })).Select(e => (e.json, e.response))
                 .Send(obj??typeof(T).CreateInstance(), deserializeResponse);
         public static IObservable<T> Send<T>(this HttpClient client, HttpRequestMessage httpRequestMessage, 
-            object obj = null, Func<string, T[]> deserializeResponse = null) where T : class
+            object obj = null, Func<string, T[]> deserializeResponse = null) 
             => Observable.FromAsync(() => client.SendAsync(httpRequestMessage,HttpCompletionOption.ResponseHeadersRead))
                 .Do(message => ResponseSubject.OnNext((message, obj)))
                 .SelectMany(response => response.Content.ReadAsStringAsync().ToObservable().Select(s => (s, response)))

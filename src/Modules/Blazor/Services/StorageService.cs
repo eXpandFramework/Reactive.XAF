@@ -29,7 +29,7 @@ namespace Xpand.XAF.Modules.Blazor.Services {
 
         public static IObservable<string> GetClientItem(this XafApplication application, string name)
             => Observable.FromAsync(async () => {
-                var invokeAsync = await application.ToBlazor().ServiceProvider.GetRequiredService<IJSRuntime>()
+                var invokeAsync = await application.GetRequiredService<IJSRuntime>()
                     .InvokeAsync<object>("localStorage.getItem", name);
                 return $"{invokeAsync}";
             });
@@ -37,13 +37,13 @@ namespace Xpand.XAF.Modules.Blazor.Services {
 
         public static IObservable<Unit> SaveClientItem(this XafApplication application,string name,object value) 
             => Observable.FromAsync(async () => {
-                await application.ToBlazor().ServiceProvider.GetRequiredService<IJSRuntime>()
+                await application.GetRequiredService<IJSRuntime>()
                     .InvokeAsync<object>("localStorage.setItem", name, value);
                 return Unit.Default;
             });
         
         public static IObservable<T> RemoveClientItem<T>(this XafApplication application,string name) 
-            => application.ToBlazor().ServiceProvider.GetRequiredService<IJSRuntime>()
+            => application.GetRequiredService<IJSRuntime>()
                 .InvokeAsync<T>("localStorage.removeItem", name)
                 .AsTask().ToObservable();
 

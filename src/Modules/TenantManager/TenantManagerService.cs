@@ -21,19 +21,13 @@ using DevExpress.ExpressApp.Xpo;
 using DevExpress.Persistent.Base;
 using DevExpress.Xpo;
 using Fasterflect;
-using HarmonyLib;
 using JetBrains.Annotations;
-using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.DependencyInjection;
 using Xpand.Extensions.Blazor;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
-using Xpand.Extensions.StringExtensions;
-using Xpand.Extensions.TypeExtensions;
-using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.Extensions.XAF.DetailViewExtensions;
 using Xpand.Extensions.XAF.ObjectExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
@@ -48,57 +42,40 @@ using Xpand.XAF.Modules.Reactive.Services.Actions;
 using LookupPropertyEditor = DevExpress.ExpressApp.Blazor.Editors.LookupPropertyEditor;
 
 namespace Xpand.XAF.Modules.TenantManager{
+    public class LastOrganization {
+        public string Key { get; set; }
+    }
     public static class TenantManagerService {
         private const string OrganizationQuery = "Organization";
-        [SuppressMessage("ReSharper", "InconsistentNaming")]
-        private static bool NavigateTo(NavigationManager __instance,string uri, bool forceLoad = false) {
-            var org = __instance.QueryStringItemValue(OrganizationQuery);
-            if (org != null) {
-                var t = ValueTuple(uri);
-                if (t==default) {
-                    __instance.NavigateTo($@"{uri}?{OrganizationQuery}={org}",forceLoad);
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        private static (string item, string value) ValueTuple(string uri) 
-            => uri.Split('?').SelectMany(s => s.Split('&').Select(s1 => {
-                var strings = s1.Split('=');
-                return (item: strings.First(), value: strings.Last());
-            })).FirstOrDefault(t => t.item == OrganizationQuery);
         
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => manager.WhenApplication(application => application.WhenStartupView()
 	            .Merge(application.WhenModelChanged().FirstAsync().RegisterOrganizationNonSecured(application))
 	            .Merge(application.LogonLastOrganization())
 	            .Merge(application.HideOrganization())
-	            .PatchNavigation()
-	            .Merge(application.WhenLoggedOff().SelectMany(_ => application.SaveCookie(application.GetType().FullName.CleanCodeName(),"")).ToUnit())
+                .Merge(application.WhenLoggedOff().SelectMany(_ => application.SaveCookie()).ToUnit())
 	            .Merge(application.WhenModelChanged().Skip(1).MarkupMessage()));
 
-        private static IObservable<Unit> PatchNavigation(this IObservable<Unit> source)
-	        => source.Merge(Observable.Defer(() => {
-		        AppDomain.CurrentDomain.Patch(harmony => harmony.Patch(typeof(NavigationManager).Method(nameof(NavigateTo)),
-			        new HarmonyMethod(typeof(TenantManagerService), nameof(NavigateTo))));
-		        return Unit.Default.ReturnObservable();
-	        }));
 
         private static IObservable<Unit> LogonLastOrganization(this XafApplication application) 
 	        => application.WhenLoggedOn()
+                .TraceTenantManager(_ => "Logon")
 		        .SelectMany(_ => application.LastOrganization())
+                .TraceTenantManager(o => $"{o} - {SecuritySystem.CurrentUserName}  ")
 		        .SelectMany(o => {
 			        var managerObjectProvider = application.ObjectSpaceProvider.DataStoreProvider();
 			        application.SetDataStoreProvider(o);
 			        var objectSpace = application.CreateNonSecuredObjectSpace();
-			        var model = application.Model.TenantManager();
-			        var applicationUser = objectSpace.GetUser(SecuritySystem.CurrentUserName, model);
+			        var currentUserName = SecuritySystem.CurrentUserName;
+			        var applicationUser = objectSpace.FindObject(SecuritySystem.UserType,CriteriaOperator.FromLambda<ISecurityUser>(user => user.UserName==currentUserName));
+			        if (applicationUser == null) {
+                        // application.LogOff();
+                        return Observable.Empty<Unit>();
+			        }
 			        ((SecurityStrategyBase)SecuritySystem.Instance).Logon(applicationUser);
 			        return application.SyncUserWhenChanged(managerObjectProvider,o);
-		        }).ToUnit();
-        
 
+                }).ToUnit();
         
         internal static IObservable<TSource> TraceTenantManager<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
@@ -215,9 +192,15 @@ namespace Xpand.XAF.Modules.TenantManager{
                 .TraceTenantManager()
                 .ToUnit();
 
-        public static bool IsTenantManager( this XafApplication application) {
-	        using var objectSpace = application.CreateObjectSpace();
-	        return objectSpace.GetObjectsCount(application.Model.TenantManager().Organization.TypeInfo.Type, null)>0;
+        public static bool IsTenantManager(this IObjectSpace objectSpace, Type organizationType) => objectSpace.GetObjectsCount(organizationType, null) > 0;
+
+        public static bool IsTenantManager( this XafApplication application,IObjectSpace space=null) {
+            var organizationType = application.Model.TenantManager().Organization.TypeInfo.Type;
+            if (space==null) {
+                using var objectSpace = application.CreateObjectSpace();
+                return objectSpace.IsTenantManager(organizationType);
+            }
+            return space.IsTenantManager(organizationType);
         }
 
         private static IObservable<Unit> HideOrganizationNavigation(this XafApplication application) 
@@ -251,6 +234,9 @@ namespace Xpand.XAF.Modules.TenantManager{
                     var managerUser = managerObjectSpace.GetUser(t.user.UserName,modelTenantManager);
                     var managerOrganization = ((IObjectSpaceLink)managerUser).ObjectSpace.GetObject(organization);
                     managerUser.UpdateManagerOrganizationUsers(t.modification, modelTenantManager,managerOrganization);
+                    if (t.modification == ObjectModification.Deleted) {
+                        application.GetService<SingletonItems>().TryRemove(SecuritySystem.CurrentUserName, out _);
+                    }
                     return managerUser;
                 })
                 .ToNowObservable()
@@ -276,19 +262,20 @@ namespace Xpand.XAF.Modules.TenantManager{
         }
 
 
-        internal static IObservable<object> LastOrganization(this XafApplication application) 
+        static IObservable<object> LastOrganization(this XafApplication application) 
             => application.UseObjectSpace(space => {
 	            var organizationTypeInfo = application.Model.TenantManager().Organization.TypeInfo;
-	            return space.GetObjectByKey(organizationTypeInfo.Type,
-			            application.LastOrganizationString().Change(organizationTypeInfo.KeyMember.MemberType))
-		            .ReturnObservable().WhenNotDefault();
-            });
+                var lastOrganizationKey = application.LastOrganizationKey();
+                return space.GetObjectByKey(organizationTypeInfo.Type, lastOrganizationKey)
+                    .ReturnObservable().WhenNotDefault();
+            }).TraceTenantManager(o => $"{o} - {SecuritySystem.CurrentUserName}  ");
 
-        private static string LastOrganizationString(this XafApplication application) {
-	        var organization = application.ReadCookie(application.GetType().FullName.CleanCodeName());
-	        return string.IsNullOrEmpty(organization)
-		        ? BlazorService.ToBlazor(application).ServiceProvider.GetRequiredService<NavigationManager>()
-			        .QueryStringItemValue(OrganizationQuery) : organization;
+        private static object LastOrganizationKey(this XafApplication application) { 
+            application.GetService<SingletonItems>().TryGetValue(SecuritySystem.CurrentUserName,out var value);
+            return value;
+            // var organization = application.ReadCookie(application.GetType().FullName.CleanCodeName());
+            // return string.IsNullOrEmpty(organization) ? application.GetService<NavigationManager>()
+            //   .QueryStringItemValue(OrganizationQuery) : organization;
         }
 
 
@@ -299,7 +286,7 @@ namespace Xpand.XAF.Modules.TenantManager{
 	        }
 
             var managerProvider = application.ObjectSpaceProvider.DataStoreProvider();
-	        application.SetDataStoreProvider(organization);
+            application.SetDataStoreProvider(organization);
             application.InvokeModuleUpdaters();
 	        var objectSpace = application.CreateNonSecuredObjectSpace();
 	        var model = application.Model.TenantManager();
@@ -307,12 +294,24 @@ namespace Xpand.XAF.Modules.TenantManager{
 	        applicationUser.UpdateRoles(application, objectSpace);
 	        ((IObjectSpaceLink)applicationUser).CommitChanges();
 	        ((SecurityStrategyBase)SecuritySystem.Instance).Logon(applicationUser);
-            return application.SaveCookie(application.GetType().FullName.CleanCodeName(),
-                    organization.GetTypeInfo().KeyMember.GetValue(organization).ToString())
+            return application.SaveCookie( organization.GetTypeInfo().KeyMember.GetValue(organization))
 		        .Merge(application.SyncUserWhenChanged(managerProvider,organization));
 
 
         }
+
+        private static IObservable<Unit> SaveCookie(this XafApplication application, object value=null) {
+            var singletonItems = application.GetService<SingletonItems>();
+            if (singletonItems.TryGetValue(SecuritySystem.CurrentUserName,out var id)) {
+                singletonItems.TryUpdate(SecuritySystem.CurrentUserName, value, id);
+            }
+            else {
+                singletonItems.TryAdd(SecuritySystem.CurrentUserName, value);
+            }
+            return Unit.Default.ReturnObservable();
+        }
+        // => application.SaveCookie(application.GetType().FullName.CleanCodeName(), value)
+                // .TraceTenantManager();
 
         private static void UpdateRoles(this ISecurityUserWithRoles applicationUser,XafApplication application, IObjectSpace objectSpace){
             var model = application.Model.TenantManager();
@@ -337,13 +336,16 @@ namespace Xpand.XAF.Modules.TenantManager{
             application.CheckCompatibility();
         }
 
-        [SuppressMessage("ReSharper", "HeapView.CanAvoidClosure")]
+        
         private static void SetDataStoreProvider(this XafApplication application,object organization) {
-	        var provider = application.GetService<SingletonItems>()
-		        .GetOrAdd(organization.GetTypeInfo().KeyMember.GetValue(organization),
-			        _ => new ConnectionStringDataStoreProvider(application.ConnectionString(organization)));
-	        application.ObjectSpaceProviders.OfType<XPObjectSpaceProvider>().First().SetDataStoreProvider((IXpoDataStoreProvider)provider);
+            var provider = application.ManagerDataStoreProvider( organization);
+            application.ObjectSpaceProviders.OfType<XPObjectSpaceProvider>().First().SetDataStoreProvider((IXpoDataStoreProvider)provider);
         }
+
+        [SuppressMessage("ReSharper", "HeapView.CanAvoidClosure")]
+        public static object ManagerDataStoreProvider(this XafApplication application, object organization) 
+            => application.GetService<SingletonItems>().GetOrAdd(organization.GetTypeInfo().KeyMember.GetValue(organization),
+                    _ => new ConnectionStringDataStoreProvider(application.ConnectionString(organization)));
 
         private static object Organization(this XafApplication application,object startupObject) 
             => application.Model.TenantManager().StartupViewOrganization.MemberInfo.GetValue(startupObject);
