@@ -262,7 +262,7 @@ namespace Xpand.XAF.Modules.TenantManager{
                     .ReturnObservable().WhenNotDefault();
             }).TraceTenantManager(o => $"{o} - {SecuritySystem.CurrentUserName}  ");
 
-        private static object LastOrganizationKey(this XafApplication application) { 
+        public static object LastOrganizationKey(this XafApplication application) { 
             application.GetService<SingletonItems>().TryGetValue(SecuritySystem.CurrentUserName,out var value);
             return value;
         }
@@ -329,9 +329,15 @@ namespace Xpand.XAF.Modules.TenantManager{
         }
 
         [SuppressMessage("ReSharper", "HeapView.CanAvoidClosure")]
-        public static object ManagerDataStoreProvider(this XafApplication application, object organization) 
+        static object ManagerDataStoreProvider(this XafApplication application, object organization) 
             => application.GetService<SingletonItems>().GetOrAdd(organization.GetTypeInfo().KeyMember.GetValue(organization),
                     _ => new ConnectionStringDataStoreProvider(application.ConnectionString(organization)));
+        
+        public static IXpoDataStoreProvider ManagerDataStoreProvider(this XafApplication application) {
+            application.GetService<SingletonItems>().TryGetValue(application.LastOrganizationKey(),out var value);
+            return (IXpoDataStoreProvider)value;
+        }
+
         private static object Organization(this XafApplication application,object startupObject) 
             => application.Model.TenantManager().StartupViewOrganization.MemberInfo.GetValue(startupObject);
 
