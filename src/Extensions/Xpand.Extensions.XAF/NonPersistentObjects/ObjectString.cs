@@ -34,7 +34,7 @@ namespace Xpand.Extensions.XAF.NonPersistentObjects {
         }
 
         string _name;
-        [DevExpress.ExpressApp.Data.Key]
+        // [DevExpress.ExpressApp.Data.Key]
         [InvisibleInAllViews]
         public string Name {
             get => _name;
