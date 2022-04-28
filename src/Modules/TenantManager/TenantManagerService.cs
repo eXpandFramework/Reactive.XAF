@@ -41,10 +41,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 using LookupPropertyEditor = DevExpress.ExpressApp.Blazor.Editors.LookupPropertyEditor;
 
-namespace Xpand.XAF.Modules.TenantManager{
-    public class LastOrganization {
-        public string Key { get; set; }
-    }
+namespace Xpand.XAF.Modules.TenantManager{ 
     public static class TenantManagerService {
         private const string OrganizationQuery = "Organization";
         
@@ -53,7 +50,7 @@ namespace Xpand.XAF.Modules.TenantManager{
 	            .Merge(application.WhenModelChanged().FirstAsync().RegisterOrganizationNonSecured(application))
 	            .Merge(application.LogonLastOrganization())
 	            .Merge(application.HideOrganization())
-                .Merge(application.WhenLoggedOff().SelectMany(_ => application.SaveCookie()).ToUnit())
+                .Merge(application.WhenLoggingOff().SelectMany(_ => application.SaveOrganizationKey()).ToUnit())
 	            .Merge(application.WhenModelChanged().Skip(1).MarkupMessage()));
 
 
@@ -69,7 +66,6 @@ namespace Xpand.XAF.Modules.TenantManager{
 			        var currentUserName = SecuritySystem.CurrentUserName;
 			        var applicationUser = objectSpace.FindObject(SecuritySystem.UserType,CriteriaOperator.FromLambda<ISecurityUser>(user => user.UserName==currentUserName));
 			        if (applicationUser == null) {
-                        // application.LogOff();
                         return Observable.Empty<Unit>();
 			        }
 			        ((SecurityStrategyBase)SecuritySystem.Instance).Logon(applicationUser);
@@ -110,8 +106,7 @@ namespace Xpand.XAF.Modules.TenantManager{
 
         internal static IList<PopupWindowShowAction> StartupActions(this XafApplication application, IList<PopupWindowShowAction> actions) {
             if (!((ISecurityUserWithRoles)SecuritySystem.CurrentUser).Roles.Cast<IPermissionPolicyRole>().Any(role => role.IsAdministrative)) {
-
-	            var userOrganizations = application.UserOrganizations();
+                var userOrganizations = application.UserOrganizations();
                 if (userOrganizations.Count > 1||userOrganizations.Count == 0||!application.Model.TenantManager().AutoLogin) {
 	                var startupAction = new PopupWindowShowAction(){Application = application};
 	                actions.Add(startupAction);
@@ -220,14 +215,12 @@ namespace Xpand.XAF.Modules.TenantManager{
 
         private static IObservable<Unit> SyncUserWhenChanged(this XafApplication application,IXpoDataStoreProvider managerProvider,  object organization) 
 	        => Observable.Using(() => new XPObjectSpaceProvider(managerProvider), provider => application.SyncWhenUserChanged(provider, organization));
-
-
+        
         private static IObservable<Unit> SyncWhenUserChanged(this XafApplication application, IObjectSpaceProvider managerObjectProvider,object organization) 
 	        => application.WhenCommittedDetailed<ISecurityUser>(ObjectModification.All)
 		        .SelectMany(t => Observable.Using(managerObjectProvider.CreateObjectSpace, managerObjectSpace
 			        => t.details.SyncUser(managerObjectSpace, application,organization ).Concat(Observable.Defer(managerObjectSpace.Commit))));
-
-
+        
         private static IObservable<Unit> SyncUser(this (ISecurityUser user, ObjectModification modification)[] source, IObjectSpace managerObjectSpace, XafApplication application,object organization) 
             => source.Select(t => {
                     var modelTenantManager = application.Model.TenantManager();
@@ -260,8 +253,7 @@ namespace Xpand.XAF.Modules.TenantManager{
                     break;
             }
         }
-
-
+        
         static IObservable<object> LastOrganization(this XafApplication application) 
             => application.UseObjectSpace(space => {
 	            var organizationTypeInfo = application.Model.TenantManager().Organization.TypeInfo;
@@ -273,11 +265,7 @@ namespace Xpand.XAF.Modules.TenantManager{
         private static object LastOrganizationKey(this XafApplication application) { 
             application.GetService<SingletonItems>().TryGetValue(SecuritySystem.CurrentUserName,out var value);
             return value;
-            // var organization = application.ReadCookie(application.GetType().FullName.CleanCodeName());
-            // return string.IsNullOrEmpty(organization) ? application.GetService<NavigationManager>()
-            //   .QueryStringItemValue(OrganizationQuery) : organization;
         }
-
 
         internal static IObservable<Unit> Logon(this XafApplication application, object organization) {
 	        if (organization == null) {
@@ -294,15 +282,16 @@ namespace Xpand.XAF.Modules.TenantManager{
 	        applicationUser.UpdateRoles(application, objectSpace);
 	        ((IObjectSpaceLink)applicationUser).CommitChanges();
 	        ((SecurityStrategyBase)SecuritySystem.Instance).Logon(applicationUser);
-            return application.SaveCookie( organization.GetTypeInfo().KeyMember.GetValue(organization))
+            return application.SaveOrganizationKey( organization.GetTypeInfo().KeyMember.GetValue(organization))
 		        .Merge(application.SyncUserWhenChanged(managerProvider,organization));
-
-
         }
 
-        private static IObservable<Unit> SaveCookie(this XafApplication application, object value=null) {
+        private static IObservable<Unit> SaveOrganizationKey(this XafApplication application, object value=null) {
             var singletonItems = application.GetService<SingletonItems>();
-            if (singletonItems.TryGetValue(SecuritySystem.CurrentUserName,out var id)) {
+            if (value == null) {
+                singletonItems.TryRemove(SecuritySystem.CurrentUserName, out _);
+            }
+            else if (singletonItems.TryGetValue(SecuritySystem.CurrentUserName,out var id)) {
                 singletonItems.TryUpdate(SecuritySystem.CurrentUserName, value, id);
             }
             else {
@@ -310,8 +299,6 @@ namespace Xpand.XAF.Modules.TenantManager{
             }
             return Unit.Default.ReturnObservable();
         }
-        // => application.SaveCookie(application.GetType().FullName.CleanCodeName(), value)
-                // .TraceTenantManager();
 
         private static void UpdateRoles(this ISecurityUserWithRoles applicationUser,XafApplication application, IObjectSpace objectSpace){
             var model = application.Model.TenantManager();
@@ -335,7 +322,6 @@ namespace Xpand.XAF.Modules.TenantManager{
             application.SetPropertyValue("IsCompatibilityChecked", false);
             application.CheckCompatibility();
         }
-
         
         private static void SetDataStoreProvider(this XafApplication application,object organization) {
             var provider = application.ManagerDataStoreProvider( organization);
@@ -346,7 +332,6 @@ namespace Xpand.XAF.Modules.TenantManager{
         public static object ManagerDataStoreProvider(this XafApplication application, object organization) 
             => application.GetService<SingletonItems>().GetOrAdd(organization.GetTypeInfo().KeyMember.GetValue(organization),
                     _ => new ConnectionStringDataStoreProvider(application.ConnectionString(organization)));
-
         private static object Organization(this XafApplication application,object startupObject) 
             => application.Model.TenantManager().StartupViewOrganization.MemberInfo.GetValue(startupObject);
 
@@ -368,7 +353,6 @@ namespace Xpand.XAF.Modules.TenantManager{
             var args = new GenericEventArgs<(XafApplication application, object organization, string connectionString)>(
                 (application, organization, $"{application.Model.TenantManager().ConnectionString.MemberInfo.GetValue(organization)}"));
             CustomizeConnectionStringSubject.OnNext(args);
-            
             return args.Instance.connectionString;
         }
 
@@ -390,8 +374,6 @@ namespace Xpand.XAF.Modules.TenantManager{
             => controller.CancelAction.WhenExecuting()
                 .Do(t => t.action.Application.LogOff())
                 .ToUnit();
-
-        
     }
 
-    }
+}
