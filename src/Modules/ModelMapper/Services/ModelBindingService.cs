@@ -73,6 +73,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
         private static IObservable<(IModelModelMap modelMap, object control, ObjectView view)> BindLayoutGroupControl(this XafApplication application) 
             => application.WhenDetailViewCreated().ToDetailView()
                 .SelectMany(_ => _.LayoutManager.WhenCustomizeAppearence().Select(pattern => (view: _, pattern.EventArgs)))
+                .WhenNotDefault(t => t.EventArgs.Item)
                 .Where(_ => {
                     var item = _.EventArgs.Item.GetPropertyValue("Item");
                     if (item.GetType().Name != "XafLayoutControlGroup") return false;
