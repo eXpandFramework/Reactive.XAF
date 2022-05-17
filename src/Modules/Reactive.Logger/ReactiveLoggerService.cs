@@ -53,13 +53,16 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                 application.AddNonSecuredType(typeof(TraceEvent));
                 _listener ??= new ReactiveTraceListener(application.Title);
                 ListenerEvents = _listener.EventTrace.Publish().RefCount();
+                return application.RegisterListener(_listener);
                 return 
                     application.BufferUntilCompatibilityChecked(ListenerEvents)
-                    .SaveEvent(application).ToUnit()
-                    .Merge(application.Notifications())
-                    .Merge(ListenerEvents.RefreshViewDataSource(application))
+                    // .SaveEvent(application)
+                    .ToUnit()
+                    // .Merge(application.Notifications())
+                    // .Merge(ListenerEvents.RefreshViewDataSource(application))
                     .Merge(application.RegisterListener(_listener))
-                    .Merge(manager.TraceEventListViewDataAccess());
+                    // .Merge(manager.TraceEventListViewDataAccess())
+                    ;
             })
                 ;
 
@@ -139,17 +142,18 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
 			        .Where(info => typeof(TraceSource).IsAssignableFrom(info.PropertyType))
 			        .Select(info => (module:m,traceSource:(TraceSource)info.GetValue(m)))).Where(o => o.traceSource!=null);
 
-        private static IObservable<Unit> RegisterListener(this XafApplication application, ReactiveTraceListener traceListener) 
+
+        private static IObservable<Unit> RegisterListener(this XafApplication application, ReactiveTraceListener reactiveTraceListener) 
             => application.Modules.WhenListChanged().SelectMany(_ => _.list.ToTraceSource().ToObservable(Scheduler.Immediate))
                 .Do(_ => {
-                    if (!_.traceSource.Listeners.Contains(traceListener)){
-                        _.traceSource.Listeners.Add(traceListener);
+                    if (!_.traceSource.Listeners.Contains(reactiveTraceListener)){
+                        _.traceSource.Listeners.Add(reactiveTraceListener);
                     }
                 })
                 .ToUnit()
-                .Merge(application.ApplyModel( traceListener));
+                .Merge(application.ApplyModel( reactiveTraceListener));
 
-        private static IObservable<Unit> ApplyModel(this XafApplication application, ReactiveTraceListener traceListener) 
+        private static IObservable<Unit> ApplyModel(this XafApplication application, ReactiveTraceListener reactiveTraceListener) 
             => application.WhenModelChanged()
                 .Select(_ => application.Model.ToReactiveModule<IModelReactiveModuleLogger>()?.ReactiveLogger).WhenNotDefault()
                 .Do(model => {
@@ -158,12 +162,12 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                         var tuples = application.Modules.Where(m => m.Name == module.Id()).ToTraceSource();
                         foreach (var tuple in tuples) {
                             tuple.traceSource.Switch.Level = module.Level;
-                            if (!tuple.traceSource.Listeners.Contains(traceListener)) {
-                                tuple.traceSource.Listeners.Add(traceListener);
+                            if (!tuple.traceSource.Listeners.Contains(reactiveTraceListener)) {
+                                tuple.traceSource.Listeners.Add(reactiveTraceListener);
                             }
                             else {
                                 if (module.Level == SourceLevels.Off) {
-                                    tuple.traceSource.Listeners.Remove(traceListener);
+                                    tuple.traceSource.Listeners.Remove(reactiveTraceListener);
                                 }
                             }
                         }
@@ -174,7 +178,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                         foreach (var modelTraceSource in modelTraceSources) {
                             var tuples = application.Modules.Where(m => m.Name == modelTraceSource.Id()).ToTraceSource();
                             foreach (var tuple in tuples) {
-                                tuple.traceSource.Listeners.Remove(traceListener);
+                                tuple.traceSource.Listeners.Remove(reactiveTraceListener);
                             }
                         }
                     }

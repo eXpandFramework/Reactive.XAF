@@ -16,6 +16,8 @@ namespace Xpand.Extensions.XAF.NonPersistentObjects {
         [SuppressMessage("ReSharper", "OptionalParameterHierarchyMismatch")]
         protected override void OnPropertyChanged([CallerMemberName] string memberName = "") => base.OnPropertyChanged(memberName);
 
+        [Browsable(false)]
+        public new IObjectSpace ObjectSpace => base.ObjectSpace; 
         public override string ToString() {
             if(!_isDefaultPropertyAttributeInit) {
                 string defaultPropertyName = string.Empty;

@@ -13,13 +13,12 @@ using Xpand.Extensions.XAF.ViewExtensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class ViewExtensions{
-        public static IObservable<CustomizeShowViewParametersEventArgs> ShowNonModalNestedListViewPopup(
+        public static IObservable<CustomizeShowViewParametersEventArgs> WhenNestedListViewProcessCurrentObject(
             this DetailView detailView, params Type[] objectTypes) 
             => detailView.NestedListViews(objectTypes)
                 .SelectMany(editor => editor.Frame.GetController<ListViewProcessCurrentObjectController>()
                     .WhenEvent(nameof(ListViewProcessCurrentObjectController.CustomizeShowViewParameters))
-                    .Select(pattern => pattern.EventArgs).Cast<CustomizeShowViewParametersEventArgs>()
-                    .Do(e => e.ShowViewParameters.TargetWindow = TargetWindow.NewWindow));
+                    .Select(pattern => pattern.EventArgs).Cast<CustomizeShowViewParametersEventArgs>());
 
         public static IObservable<T> WhenClosing<T>(this T view) where T : View 
             => view.ReturnObservable().WhenNotDefault().Closing();

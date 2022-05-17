@@ -1,6 +1,8 @@
 ﻿using System.IO;
 
 namespace Xpand.Extensions.Tracing {
+
+
     /// <summary>
     /// Interface facade representing the file system and the operations of System.IO.File and System.IO.Directory.
     /// </summary>

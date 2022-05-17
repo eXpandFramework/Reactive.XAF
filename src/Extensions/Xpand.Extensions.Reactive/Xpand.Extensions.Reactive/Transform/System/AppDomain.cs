@@ -26,8 +26,9 @@ namespace Xpand.Extensions.Reactive.Transform.System {
         public static IObservable<string> WhenFileCreated(this AppDomain appDomain,string path,string pattern)
             => Observable.Using(() => new FileSystemWatcher(path, pattern){ EnableRaisingEvents = true }, watcher => watcher
                 .WhenEvent<FileSystemEventArgs>(nameof(FileSystemWatcher.Created))
-                .SelectMany(args => AppDomain.CurrentDomain.WaitFile(args.FullPath)));
-        public static IObservable<string> WaitFile(this AppDomain appDomain,string fileName,FileMode fileMode=FileMode.Open,FileAccess fileAccess=FileAccess.Read,FileShare fileShare=FileShare.Read) 
+                .SelectMany(args => AppDomain.CurrentDomain.OpenFile(args.FullPath)));
+        
+        public static IObservable<string> OpenFile(this AppDomain appDomain,string fileName,FileMode fileMode=FileMode.Open,FileAccess fileAccess=FileAccess.Read,FileShare fileShare=FileShare.Read) 
             => Observable.Defer(() => Observable.Using(() => File.Open(fileName, fileMode, fileAccess, fileShare),
                     _ => {
                         _.Dispose();

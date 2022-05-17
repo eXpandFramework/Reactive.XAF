@@ -9,7 +9,7 @@ namespace Xpand.Extensions.Numeric {
             return decimalPart.RoundToSignificantDigits(length);
         }
 
-        public static int DecimalPartLenght(this decimal d)
+        public static int DecimalPartLength(this decimal d)
             => d.DecimalPart().ToString(CultureInfo.InvariantCulture).Length-2;
     }
 }

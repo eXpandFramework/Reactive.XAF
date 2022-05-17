@@ -26,6 +26,9 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
     }
 
     public class ReactiveTraceSource : TraceSource{
+        static ReactiveTraceSource() {
+            Trace.UseGlobalLock = false;
+        }
         public ReactiveTraceSource(string name) : base(name){
         }
     }

@@ -20,7 +20,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
         
         public static HttpClient HttpClient=new();
 
-        static HttpRequestMessage Sign(this HttpRequestMessage requestMessage,string key,string secret) {
+        static T Sign<T>(this T requestMessage,string key,string secret) where T:HttpRequestMessage{
             if (key != null) {
                 var toSing = requestMessage.RequestUri.PathAndQuery;
                 if (requestMessage.Method != HttpMethod.Get) {
@@ -51,6 +51,15 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
                 .SelectMany(response => response.Content.ReadAsStringAsync().ToObservable()
                     .Select(s => new { response, json = s })).Select(e => (e.json, e.response))
                 .Send(obj??typeof(T).CreateInstance(), deserializeResponse);
+        
+        public static IObservable<T> Send<T>(this HttpClient client, HttpMethod httpMethod, string requestUrl,
+            object obj = null, string key = null, string secret = null, Func<string, IObservable<T>> deserializeResponse = null) where T : class
+            => Observable.FromAsync(() => client.SendAsync(httpMethod.NewHttpRequestMessage(requestUrl,obj, key, secret)))
+                .Do(message => ResponseSubject.OnNext((message, obj)))
+                .SelectMany(response => response.Content.ReadAsStringAsync().ToObservable()
+                    .Select(s => new { response, json = s })).Select(e => (e.json, e.response))
+                .Send(obj??typeof(T).CreateInstance(), deserializeResponse);
+        
         public static IObservable<T> Send<T>(this HttpClient client, HttpRequestMessage httpRequestMessage, 
             object obj = null, Func<string, T[]> deserializeResponse = null) 
             => Observable.FromAsync(() => client.SendAsync(httpRequestMessage,HttpCompletionOption.ResponseHeadersRead))
@@ -58,6 +67,18 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
                 .SelectMany(response => response.Content.ReadAsStringAsync().ToObservable().Select(s => (s, response)))
                 .Send(obj??typeof(T).CreateInstance(), deserializeResponse);
         
+        public static IObservable<T> Send<T>(this HttpClient client, HttpRequestMessage httpRequestMessage, 
+            object obj = null, Func<string, IObservable<T>> deserializeResponse = null) {
+            if (deserializeResponse == null) {
+                
+            }
+            return Observable.FromAsync(() =>
+                    client.SendAsync(httpRequestMessage, HttpCompletionOption.ResponseHeadersRead))
+                .Do(message => ResponseSubject.OnNext((message, obj)))
+                .SelectMany(response => response.Content.ReadAsStringAsync().ToObservable().Select(s => (s, response)))
+                .Send(obj ?? typeof(T).CreateInstance(), deserializeResponse);
+        }
+
         public static IObservable<(T instance, HttpResponseMessage message)> SendRequest<T>(this HttpClient client, HttpRequestMessage httpRequestMessage, 
             T obj = null, Func<string, T[]> deserializeResponse = null) where T : class
             => Observable.FromAsync(() => client.SendAsync(httpRequestMessage,HttpCompletionOption.ResponseHeadersRead))
@@ -103,11 +124,32 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
                 return Observable.Throw<T>(new HttpResponseException(nameof(t.response.StatusCode),t.response));
             });
         }
+        private static IObservable<T> Send<T>(this IObservable<(string json, HttpResponseMessage response)> source,
+            object obj, Func<string,IObservable<T>> deserializeResponse) {
+            deserializeResponse ??= s => (obj is IJsonFactory factory ? new[] { (T)factory.FromJson(s) } : obj.GetType().Deserialize<T>(s)).ToNowObservable();
+            return source.SelectMany(t => {
+                if (t.response.IsSuccessStatusCode)
+                    if (t.response.RequestMessage.Method != HttpMethod.Get && t.json == "true") {
+                        ObjectSentSubject.OnNext((t.response, t.json, obj));
+                        return Observable.Empty<T>();
+                    }
+                    else
+                        return deserializeResponse(t.json)
+                            .Do(obj1 => ObjectSentSubject.OnNext((t.response, t.json, obj1)));
+
+                return Observable.Throw<T>(new HttpResponseException(nameof(t.response.StatusCode),t.response));
+            });
+        }
+
+        public static T SetContent<T>(this T message,  object o , string key = null, string secret = null) where T:HttpRequestMessage{
+            message.Content = message.Method != HttpMethod.Get
+                ? new StringContent(o.Serialize(), Encoding.UTF8, "application/json")
+                : null;
+            return message.Sign(key, secret);
+        }
 
         public static HttpRequestMessage NewHttpRequestMessage(this HttpMethod httpMethod, string requestUri,object o=null, string key=null,string secret=null) 
-            => new HttpRequestMessage(httpMethod,requestUri) {
-                Content = httpMethod == HttpMethod.Get ? null : new StringContent(o.Serialize(), Encoding.UTF8, "application/json")
-            }.Sign(key,secret);
+            => new HttpRequestMessage(httpMethod,requestUri).SetContent(o,key,secret);
 
     }
 

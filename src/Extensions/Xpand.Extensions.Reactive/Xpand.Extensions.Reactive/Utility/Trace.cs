@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.Tracing;
 
 namespace Xpand.Extensions.Reactive.Utility{
     public enum ObservableTraceStrategy{
@@ -30,37 +31,41 @@ namespace Xpand.Extensions.Reactive.Utility{
         public static bool AddTraceSerialization(Type type) => Serialization.TryAdd(type, Serializer);
 
         public static bool AddTraceSerialization<T>(Func<T,string> function) => Serialization.TryAdd(typeof(T), o => function((T) o));
+        
+        
 
-
-        public static IObservable<TSource> Trace<TSource>(this IObservable<TSource> source, string name = null,TraceSource traceSource=null,
-            Func<TSource,string> messageFactory=null,Func<Exception,string> errorMessageFactory=null, Action<string> traceAction = null, 
+        public static IObservable<TSource> Trace<TSource>(this IObservable<TSource> source, string name = null,
+            TraceSource traceSource = null,
+            Func<TSource, string> messageFactory = null, Func<Exception, string> errorMessageFactory = null,
+            Action<string> traceAction = null,
             ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
-             string memberName = "", string sourceFilePath = "", int sourceLineNumber = 0) => Observable.Create<TSource>(observer => {
+            string memberName = "", string sourceFilePath = "", int sourceLineNumber = 0)
+            => Observable.Create<TSource>(observer => { 
                 void Action(string m, object v, Action<string> ta){
                     if (traceSource?.Switch.Level == SourceLevels.Off){
                         return;
                     }
-
+                
                     string value = null;
                     if (v!=null){
                         value = $@"{CalculateValue(v, o => messageFactory.GetMessageValue( errorMessageFactory, o))}";
                     }
-
+                
                     var mName = memberName;
                     if (m == "OnNext"){
                         mName = $"{memberName} =>{GetSourceName<TSource>()}";
                     }
-
+                
                     var message = $"{name}.{Path.GetFileNameWithoutExtension(sourceFilePath)}.{mName}({sourceLineNumber.ToString()}): {m}({value})".TrimStart('.');
                     ta(message);
                 }
                 if (traceStrategy.Is(ObservableTraceStrategy.All))
-                    Action("Subscribe", "", traceAction.TraceInformation(traceSource));
+                    Action("Subscribe", "", traceAction.Push(traceSource));
                 
                 var disposable = source.Subscribe(
                     v => {
                         if (traceStrategy.Is(ObservableTraceStrategy.OnNext)){
-                            Action("OnNext", v, traceAction.TraceInformation(traceSource));
+                            Action("OnNext", v, traceAction.Push(traceSource));
                         }
                         observer.OnNext(v);
                     },
@@ -72,15 +77,15 @@ namespace Xpand.Extensions.Reactive.Utility{
                     },
                     () => {
                         if (traceStrategy.Is(ObservableTraceStrategy.All))
-                            Action("OnCompleted", "", traceAction.TraceInformation(traceSource));
+                            Action("OnCompleted", "", traceAction.Push(traceSource));
                         observer.OnCompleted();
                     });
                 return () => {
                     if (traceStrategy.Is(ObservableTraceStrategy.All))
-                        Action("Dispose", "", traceAction.TraceInformation(traceSource));
+                        Action("Dispose", "", traceAction.Push(traceSource));
                     disposable.Dispose();
                 };
-            });
+        });
 
         public static bool Is(this ObservableTraceStrategy source,ObservableTraceStrategy target) 
             => source == ObservableTraceStrategy.All || source switch {
@@ -124,10 +129,10 @@ namespace Xpand.Extensions.Reactive.Utility{
 	        });
 
 
-        private static Action<string> TraceInformation(this Action<string> traceAction, TraceSource traceSource) =>
+        private static Action<string> Push(this Action<string> traceAction, TraceSource traceSource) =>
 	        traceAction ?? (s => {
 		        if (traceSource != null){
-			        traceSource.TraceEvent(TraceEventType.Information, 0,s);
+			        traceSource.Push(s);
 		        }
 		        else{
 			        System.Diagnostics.Trace.TraceInformation(s);
@@ -135,5 +140,7 @@ namespace Xpand.Extensions.Reactive.Utility{
 
 	        });
     }
+    
+
 
 }

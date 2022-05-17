@@ -52,7 +52,7 @@ nuget Microsoft.Owin.Security.Cookies 4.2
 nuget Microsoft.Owin.Security.OpenIdConnect 4.2
 nuget Microsoft.IdentityModel.Protocols.OpenIdConnect 6.15.0
 nuget System.Reflection.Metadata 5.0.0
-nuget System.Interactive 5.0
+nuget System.Interactive 5.0     
 nuget System.Interactive.Async 5.0
 nuget Unofficial.Microsoft.mshtml 7.0.3300
 nuget Xpand.Patcher 2.0.31

@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace Xpand.TestsLib.Blazor {
 	public abstract class BlazorCommonAppTest : BlazorCommonTest {
-		protected BlazorApplication Application;
+		public BlazorApplication Application { get; set; }
 
 		public override void Dispose() { }
 

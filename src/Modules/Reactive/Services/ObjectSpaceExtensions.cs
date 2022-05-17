@@ -168,13 +168,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => objectSpace.WhenCommiting()
                 .SelectMany(_ => {
                     var modifiedObjects = objectSpace.ModifiedObjects<T>(objectModification).Where(t => criteria==null|| criteria.Invoke(t.instance)).ToArray();
-                    if (modifiedObjects.Any())
-                        if (emitAfterCommit)
-                            return objectSpace.WhenCommitted().FirstAsync().Select(space => (space, modifiedObjects));
-                        else
-                            return (objectSpace, modifiedObjects).ReturnObservable();
-                    else
-                        return Observable.Empty<(IObjectSpace, (T instance, ObjectModification modification)[])>();
+                    return modifiedObjects.Any() ? emitAfterCommit ? objectSpace.WhenCommitted().FirstAsync().Select(space => (space, modifiedObjects))
+                            : (objectSpace, modifiedObjects).ReturnObservable() : Observable.Empty<(IObjectSpace, (T instance, ObjectModification modification)[])>();
                 });
 
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)>
@@ -301,8 +296,18 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static T Reload<T>(this T value,XafApplication application) where T:IObjectSpaceLink
             => value.Reload(application.CreateObjectSpace);
 
-        public static T Reload<T>(this IObjectSpace objectSpace, T value) where T:class
-            => (T)objectSpace.ReloadObject(value);
+        public static T Reload<T>(this IObjectSpace objectSpace, T value) where T:class {
+            if (objectSpace is INestedObjectSpace nos) {  
+                Reload(nos.ParentObjectSpace, value);  
+                nos.Refresh();  
+            }  
+            else {  
+                objectSpace.ReloadObject(value);  
+            }
+
+            return objectSpace.GetObject(value);
+        }
+
         
         public static IObservable<(T theObject, IObjectSpace objectSpace)> FindObject<T>(this XafApplication application,Func<IQueryable<T>,IQueryable<T>> query=null) 
             => Observable.Using(application.CreateObjectSpace, space => space.ExistingObject(query));

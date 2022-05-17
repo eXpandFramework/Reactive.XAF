@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Runtime.InteropServices;
 
 namespace Xpand.Extensions.XAF.Attributes {
@@ -12,10 +11,5 @@ namespace Xpand.Extensions.XAF.Attributes {
         public const string DisplayText = "DisplayText";
         public const string BlazorLookup = "BlazorLookup";
     
-    }
-
-    [AttributeUsage(AttributeTargets.Class)]
-    public class NonPersistentChangesEnabledAttribute:Attribute {
-        
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using Fasterflect;
 using HarmonyLib;

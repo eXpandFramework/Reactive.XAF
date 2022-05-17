@@ -31,29 +31,37 @@ if (!(Test-AzDevops) -and !$SkipIDEBuild){
     $version=[System.Diagnostics.FileVersionInfo]::GetVersionInfo("$(Get-Location)\Xpand.XAF.ModelEditor.Win.exe").FileVersion
     Move-Item $zip "$([System.IO.Path]::GetDirectoryName($zip))\$([System.IO.Path]::GetFileNameWithoutExtension($zip)).$version.zip" -Force
 
-    $proj=Get-Content "$root\tools\Xpand.XAF.ModelEditor\IDE\XVSIX\XVSIX.csproj" -Raw
+    $proj=Get-Content "$root\tools\Xpand.XAF.ModelEditor\IDE\XVSIX64\XVSIX64.csproj" -Raw
     $regex = [regex] 'Xpand\.XAF\.ModelEditor\.Win\..*\.zip'
     $allmatches = $regex.Matches($proj);
     $currentValue=$allmatches[0].Value
     $newValue="Xpand.XAF.ModelEditor.Win.$version.zip"
-    Set-Content "$root\tools\Xpand.XAF.ModelEditor\IDE\XVSIX\XVSIX.csproj" $proj.Replace($currentValue,$newValue)
-    if ($proj -notlike "*$newValue*"){
+    $replacememnt=$proj.Replace($currentValue,$newValue)
+    if ($replacememnt -notlike "*$newValue*"){
         throw "Resource replacement failed $newValue"
     }
+    Set-Content "$root\tools\Xpand.XAF.ModelEditor\IDE\XVSIX64\XVSIX64.csproj" $replacememnt
+    
 
     $proj=Get-Content "$root\tools\Xpand.XAF.ModelEditor\IDE\Rider\src\dotnet\ReSharperPlugin.Xpand\ReSharperPlugin.Xpand.Rider.csproj" -Raw
-    Set-Content       "$root\tools\Xpand.XAF.ModelEditor\IDE\Rider\src\dotnet\ReSharperPlugin.Xpand\ReSharperPlugin.Xpand.Rider.csproj" $proj.Replace($currentValue,$newValue)
-    if ($proj -notlike "*$newValue*"){
+    $allmatches = $regex.Matches($proj);
+    $currentValue=$allmatches[0].Value
+    $replacememnt=$proj.Replace($currentValue,$newValue)
+    if ($replacememnt -notlike "*$newValue*"){
         throw "Resource replacement failed $newValue"
     }
+    Set-Content  "$root\tools\Xpand.XAF.ModelEditor\IDE\Rider\src\dotnet\ReSharperPlugin.Xpand\ReSharperPlugin.Xpand.Rider.csproj" $replacememnt
+    
     $proj=Get-Content "$root\tools\Xpand.XAF.ModelEditor\IDE\Rider\src\dotnet\ReSharperPlugin.Xpand\ReSharperPlugin.Xpand.csproj" -Raw
+    $allmatches = $regex.Matches($proj);
+    $currentValue=$allmatches[0].Value
     Set-Content       "$root\tools\Xpand.XAF.ModelEditor\IDE\Rider\src\dotnet\ReSharperPlugin.Xpand\ReSharperPlugin.Xpand.csproj" $proj.Replace($currentValue,$newValue)
 
     Write-HostFormatted "Building Rider" -Section
     Set-Location "$Root\tools\Xpand.XAF.ModelEditor\IDE\Rider"
     Start-Build
-    Write-HostFormatted "Building XVSIX" -Section
-    Set-Location "$Root\tools\Xpand.XAF.ModelEditor\IDE\XVSIX"
+    Write-HostFormatted "Building XVSIX64" -Section
+    Set-Location "$Root\tools\Xpand.XAF.ModelEditor\IDE\XVSIX64"
     Start-Build
 }
 

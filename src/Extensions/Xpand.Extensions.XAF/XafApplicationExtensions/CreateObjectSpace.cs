@@ -13,17 +13,15 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions {
                 .First();
 
         public static IObjectSpace CreateNonSecuredObjectSpace(this XafApplication application)
-            => application.CreateObjectSpace(true, true);
-        public static IObjectSpace CreateObjectSpace(this XafApplication application, bool useObjectSpaceProvider,bool nonSecuredObjectSpace=false) {
-            if (useObjectSpaceProvider)
-                if (!nonSecuredObjectSpace)
-                    return application.ObjectSpaceProvider.CreateObjectSpace();
-                else
-                    return application.ObjectSpaceProvider is INonsecuredObjectSpaceProvider
-                        nonsecuredObjectSpaceProvider
-                        ? nonsecuredObjectSpaceProvider.CreateNonsecuredObjectSpace()
-                        : application.ObjectSpaceProvider.CreateUpdatingObjectSpace(false);
-            return application.CreateObjectSpace();
+            => application.CreateObjectSpace(true ,typeof(object),true);
+        
+        public static IObjectSpace CreateObjectSpace(this XafApplication application, bool useObjectSpaceProvider,Type type=null,bool nonSecuredObjectSpace=false) {
+            if (!useObjectSpaceProvider)
+                return application.CreateObjectSpace(type ?? typeof(object));
+            var applicationObjectSpaceProvider = application.ObjectSpaceProviders(type ?? typeof(object)).First();
+            return !nonSecuredObjectSpace ? applicationObjectSpaceProvider.CreateObjectSpace()
+                : applicationObjectSpaceProvider is INonsecuredObjectSpaceProvider nonsecuredObjectSpaceProvider
+                    ? nonsecuredObjectSpaceProvider.CreateNonsecuredObjectSpace() : applicationObjectSpaceProvider.CreateUpdatingObjectSpace(false);
         }
     }
     

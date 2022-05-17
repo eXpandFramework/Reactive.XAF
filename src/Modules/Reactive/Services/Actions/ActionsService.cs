@@ -11,6 +11,7 @@ using DevExpress.ExpressApp.Utils;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
@@ -27,13 +28,12 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 			action.Active[key] = value;
 			action.Active.EndUpdate();
 			action.EndUpdate();
-
-	    }
+        }
+        
 	    public static IObservable<(TModule module, Frame frame)> Action<TModule>(
 		    this IObservable<Frame> source) where TModule : ModuleBase 
             => source.Select(frame => frame.Action<TModule>());
 
-         
         public static IObservable<T> WhenExecute<T>(this IObservable<SimpleAction> source,Func<SimpleActionExecuteEventArgs, IObservable<T>> retriedExecution) 
             => source.SelectMany(action => action.WhenExecute(retriedExecution).TakeUntilDeactivated(action.Controller));
         public static IObservable<T> WhenExecuted<T>(this IObservable<SimpleAction> source,Func<SimpleActionExecuteEventArgs, IObservable<T>> retriedExecution) 
@@ -58,10 +58,30 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static IObservable<T> WhenExecuted<T>(this SimpleAction simpleAction,Func<SimpleActionExecuteEventArgs, IObservable<T>> retriedExecution) 
             => simpleAction.WhenExecuted().SelectMany(retriedExecution).Retry(() => simpleAction.Application).TakeUntilDeactivated(simpleAction.Controller);
         
+        public static IObservable<T> WhenExecuted<T>(this ParametrizedAction simpleAction,Func<ParametrizedActionExecuteEventArgs, IObservable<T>> retriedExecution) 
+            => simpleAction.WhenExecuted().SelectMany(retriedExecution).Retry(() => simpleAction.Application).TakeUntilDeactivated(simpleAction.Controller);
+        
         public static IObservable<Unit> WhenExecuted(this SimpleAction simpleAction,Action<SimpleActionExecuteEventArgs> retriedExecution) 
             => simpleAction.WhenExecuted(e => {
                 retriedExecution(e);
                 return Observable.Empty<Unit>();
+            });
+
+        public static IObservable<Unit> WhenConcatExecution(this SimpleAction action,Action<SimpleActionExecuteEventArgs> retriedExecution) 
+            => action.AsSimpleAction().WhenExecuted(e => {
+                e.Action.Enabled[nameof(WhenConcatExecution)] = false;
+                try{
+                    retriedExecution?.Invoke(e);
+                }
+                finally{
+                    e.Action.Enabled[nameof(WhenConcatExecution)] = true;
+                }
+            });
+
+        public static IObservable<T> WhenConcatExecution<T>(this SimpleAction simpleAction,Func<SimpleActionExecuteEventArgs, IObservable<T>> retriedExecution)
+            => simpleAction.WhenExecuted(e => {
+                e.Action.Enabled[nameof(WhenConcatExecution)] = false;
+                return retriedExecution.Invoke(e).ObserveOnContext().Finally(() => e.Action.Enabled[nameof(WhenConcatExecution)] = true);
             });
         
         public static IObservable<T> WhenExecuted<T>(this SingleChoiceAction simpleAction,Func<SingleChoiceActionExecuteEventArgs, IObservable<T>> retriedExecution) 
@@ -99,6 +119,11 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         
         public static IObservable<ParametrizedActionExecuteEventArgs> WhenExecute(this IObservable<ParametrizedAction> source) 
             => source.SelectMany(action => action.WhenExecute());
+        public static IObservable<ParametrizedActionExecuteEventArgs> WhenExecuted(this IObservable<ParametrizedAction> source) 
+            => source.SelectMany(action => action.WhenExecuted());
+        
+        public static IObservable<ParametrizedActionExecuteEventArgs> WhenExecuted<T>(this IObservable<ParametrizedAction> source,Func<ParametrizedActionExecuteEventArgs, IObservable<T>> retriedExecution) 
+            => source.SelectMany(action => action.WhenExecuted());
         
         public static IObservable<PopupWindowShowActionExecuteEventArgs> WhenExecute(this IObservable<PopupWindowShowAction> source) 
             => source.SelectMany(action => action.WhenExecute());
@@ -210,6 +235,8 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => source.SelectMany(a=>a.WhenExecuteFinished(customEmit));
         public static IObservable<ActionBaseEventArgs> WhenExecuteCompleted<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
             => source.SelectMany(a=>a.WhenExecuteCompleted());
+        public static IObservable<ActionBaseEventArgs> WhenExecuted<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
+            => source.SelectMany(a=>a.WhenExecuted());
 
         public static IObservable<SimpleActionExecuteEventArgs> WhenExecuted(this IObservable<SimpleAction> source) 
             => source.SelectMany(a=>a.WhenExecuted()).Cast<SimpleActionExecuteEventArgs>();

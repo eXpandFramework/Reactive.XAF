@@ -25,7 +25,7 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions{
             }
             catch (Exception e){
                 Tracer.LogError(e);
-                throw;
+                throw exception;
             }
         }
     }

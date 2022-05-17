@@ -7,9 +7,9 @@ using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
 
 namespace Xpand.XAF.Modules.Reactive.Logger {
-    public class ReactiveTraceListener : RollingFileTraceListener {
+    public class ReactiveTraceListener : RollingFileTraceListener,IPush {
         private readonly string _applicationTitle;
-        [UsedImplicitly] public static bool DisableFileWriter;
+        [UsedImplicitly] public static bool DisableFileWriter=true;
         static ReactiveTraceListener() {
             Regex = new Regex(@"(?<Location>[^.]*)\.(?<Method>[^(]*)\((?<Ln>[\d]*)\): (?<Action>[^(]*)\((?<Value>.*)\)",
                 RegexOptions.Singleline | RegexOptions.Compiled);
@@ -41,18 +41,23 @@ namespace Xpand.XAF.Modules.Reactive.Logger {
 
         protected override void WriteTrace(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string message,
             Guid? relatedActivityId, object[] data) {
+
+        }
+
+
+        public void Push(string message,string source) {
             if (!_isDisposed&&!DisableFileWriter) {
-                base.WriteTrace(eventCache, message, eventType, id, message, relatedActivityId, data);
+                base.WriteTrace(null, message, TraceEventType.Information, 0, message, Guid.Empty,null);
             }
             var traceEvent = new TraceEventMessage {
-                CallStack = eventCache.Callstack,
-                DateTime = eventCache.DateTime,
+                CallStack = null,
+                DateTime = DateTime.Now,
                 Message = $"{message}",
-                ProcessId = eventCache.ProcessId,
+                ProcessId = 0,
                 Source = source,
-                ThreadId = eventCache.ThreadId,
-                Timestamp = eventCache.Timestamp,
-                TraceEventType = eventType,
+                ThreadId = null,
+                Timestamp = DateTime.Now.Ticks,
+                TraceEventType = TraceEventType.Information,
                 ApplicationTitle = _applicationTitle,
             };
 
@@ -79,8 +84,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger {
                 traceEvent.Line = Convert.ToInt32(value);
             }
 
-            traceEvent.LogicalOperationStack =
-                string.Join(Environment.NewLine, eventCache.LogicalOperationStack.ToArray());
+            
             _eventTraceSubject.OnNext(traceEvent);
 
         }
