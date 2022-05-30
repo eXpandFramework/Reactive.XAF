@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reactive;
@@ -24,6 +25,7 @@ using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.Tracing;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.ObjectExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
@@ -32,16 +34,6 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.Reactive.Logger{
-    [Flags]
-    public enum RXAction{
-        None=0,
-        Subscribe=2,
-        OnNext=4,
-        OnCompleted=8,
-        Dispose=16,
-        OnError=32,
-        All=Subscribe|OnNext|OnCompleted|Dispose|OnError
-    }
     public static class ReactiveLoggerService{
         public static string RXLoggerLogPath{ get; [PublicAPI]set; }=@$"{AppDomain.CurrentDomain.ApplicationPath()}\{AppDomain.CurrentDomain.ApplicationName()}_RXLogger.log";
         private static readonly Subject<ITraceEvent> SavedTraceEventSubject=new();
@@ -53,18 +45,12 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                 application.AddNonSecuredType(typeof(TraceEvent));
                 _listener ??= new ReactiveTraceListener(application.Title);
                 ListenerEvents = _listener.EventTrace.Publish().RefCount();
-                return application.RegisterListener(_listener);
-                return 
-                    application.BufferUntilCompatibilityChecked(ListenerEvents)
-                    // .SaveEvent(application)
-                    .ToUnit()
-                    // .Merge(application.Notifications())
-                    // .Merge(ListenerEvents.RefreshViewDataSource(application))
-                    .Merge(application.RegisterListener(_listener))
-                    // .Merge(manager.TraceEventListViewDataAccess())
-                    ;
-            })
-                ;
+                return application.BufferUntilCompatibilityChecked(ListenerEvents).SaveEvent(application).ToUnit()
+                        .Merge(application.Notifications())
+                        .Merge(ListenerEvents.RefreshViewDataSource(application))
+                        .Merge(application.RegisterListener(_listener))
+                        .Merge(manager.TraceEventListViewDataAccess());
+            });
 
         private static IObservable<Unit> TraceEventListViewDataAccess(this ApplicationModulesManager manager) 
             => manager.WhenGeneratingModelNodes<IModelViews>()
@@ -188,13 +174,31 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         [PublicAPI]
         public static void TraceMessage(this TraceSource traceSource, string value,TraceEventType traceEventType=TraceEventType.Information){
             if (traceSource.Switch.Level != SourceLevels.Off){
-	            var traceEventMessage = new TraceEventMessage {
-		            Location = nameof(ReactiveLoggerService), Method = nameof(TraceMessage), RXAction = RXAction.None, Value = value,
-		            TraceEventType = traceEventType
-	            };
-	            traceSource.TraceEventMessage(traceEventMessage);
+                traceSource.Push(new TraceEventMessage {
+                    Location = nameof(ReactiveLoggerService), Method = nameof(TraceMessage), RXAction = RXAction.None, Message = value,
+                    TraceEventType = traceEventType,Source = traceSource.Name
+                });
             }
         }
+
+        [SuppressMessage("ReSharper", "ForCanBeConvertedToForeach")]
+        public static void Push(this TraceSource source, string message) {
+            var listeneers = source.Listeners.OfType<IPush>().ToArray();
+            for (var index = 0; index < listeneers.Length; index++) {
+                var listeneer = listeneers[index];
+                listeneer.Push(message,source.Name);
+            }
+        }
+        
+        [SuppressMessage("ReSharper", "ForCanBeConvertedToForeach")]
+        public static void Push(this TraceSource source,TraceEventMessage message) {
+            var listeneers = source.Listeners.OfType<IPush>().ToArray();
+            for (var index = 0; index < listeneers.Length; index++) {
+                var listeneer = listeneers[index];
+                listeneer.Push(message);
+            }
+        }
+
 
         public static void TraceEventMessage(this TraceSource traceSource,ITraceEvent traceEvent) 
             => traceSource.TraceEvent(traceEvent.TraceEventType, traceSource.GetHashCode(), $"{traceEvent.Location}.{traceEvent.Method}({traceEvent.Line}): {traceEvent.Action}({traceEvent.Value})");
@@ -248,22 +252,27 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                 var service = xafApplication.Modules.FindModule(moduleType)?.GetPropertyValue("NotificationsService");
                 return service != null ? xafApplication.WhenModelChanged().FirstAsync()
                         .SelectMany(application => {
-                            var rules = application.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger
-                                .Notifications
-                                .Select(notification => (notification.ObjectType.TypeInfo.Type, notification.Criteria))
-                                .ToArray();
+                            var synchronizationContext = SynchronizationContext.Current;
+                            var notifications = application.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger.Notifications;
+                            var rules = notifications.Select(notification => (notification.ObjectType.TypeInfo.Type, notification.Criteria,notification.ShowXafMessage,notification.XafMessageType,notification.MessageDisplayInterval)).ToArray();
                             return SavedTraceEvent.Cast<TraceEvent>()
-                                .SelectMany(traceEvent => rules.Where(t => traceEvent.ObjectSpace.IsObjectFitForCriteria(CriteriaOperator.Parse(t.Criteria),traceEvent))
+                                .SelectMany(traceEvent => rules.Where(t => traceEvent.ObjectSpace.IsObjectFitForCriteria(CriteriaOperator.Parse(t.Criteria), traceEvent))
                                     .Do(rule => {
                                         var @event = (ISupportNotifications)traceEvent.ObjectSpace.CreateObject(rule.Type);
                                         @event.AlarmTime = DateTime.Now;
                                         @event.GetTypeInfo().FindMember(nameof(ISupportNotifications.NotificationMessage)).SetValue(@event, traceEvent.Value);
                                         traceEvent.ObjectSpace.CommitChanges();
-                                    }))
-                                .ObserveOnContext()
-                                .Do(_ => service.CallMethod("Refresh"));
+                                    })
+                                    .ToNowObservable().ObserveOnContext(synchronizationContext)
+                                    .Do(_ => service.CallMethod("Refresh"))
+                                    .ShowXafMessage(xafApplication, traceEvent));
                         }).ToUnit()
                     : Observable.Empty<Unit>();
             });
+
+        public static IObservable<(Type objectType, string criteria, bool showXafMessage, InformationType informationType, int messageDisplayInterval)> 
+            ShowXafMessage(this IObservable<(Type objectType, string criteria, bool showXafMessage, InformationType informationType
+                    , int messageDisplayInterval)> source, XafApplication xafApplication, TraceEvent traceEvent) 
+            => source.Where(t => t.showXafMessage).ShowXafMessage(xafApplication, _ => $"{traceEvent.Location}, {traceEvent.Method}, {traceEvent.Value}",t => t.informationType,t => t.messageDisplayInterval);
     }
 }

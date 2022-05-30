@@ -1,11 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using Xpand.Extensions.Reactive.Filter;
 
 namespace Xpand.Extensions.Reactive.Transform {
     public static partial class Transform {
+        public static IObservable<TSource[]> BufferUntilCompleted<TSource>(this IObservable<TSource> source,bool skipEmpty=false){
+            var allEvents = source.Publish().RefCount();
+            return allEvents.Buffer(allEvents.LastOrDefaultAsync().WhenNotDefault()).Select(list => list.ToArray()).Where(sources => !skipEmpty||sources.Any());
+        }
+
         /// <summary>
         /// Returns a connectable observable, that once connected, will start buffering data until the observer subscribes, at which time it will send all buffered data to the observer and then start sending new data.
         /// Thus the observer may subscribe late to a hot observable yet still see all of the data.  Later observers will not see the buffered events.

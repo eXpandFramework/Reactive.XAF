@@ -6,6 +6,6 @@ namespace Xpand.Extensions.BytesExtensions {
          
         public static string GetHexString(this byte[] buff) 
             => buff.Aggregate(new StringBuilder(),
-                (sb, b) => sb.AppendFormat("{0:x2}", b), sb => sb.ToString());
+                (sb, b) => sb.AppendFormat("{0:X2}", b), sb => sb.ToString());
     }
 }

@@ -1,0 +1,37 @@
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Windows.Forms;
+using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Utils;
+using DevExpress.XtraBars.Alerter;
+using Fasterflect;
+using HarmonyLib;
+using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.XAF.AppDomainExtensions;
+using Xpand.XAF.Modules.Reactive;
+
+namespace Xpand.XAF.Modules.Windows{
+    static class AlertControlService {
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        public static void Show(AlertControl __instance, Form owner, AlertInfo info) {
+            var modelWindows = CaptionHelper.ApplicationModel.ToReactiveModule<IModelReactiveModuleWindows>().Windows;
+            __instance.FormLocation = modelWindows.Alert.FormLocation;
+            if (modelWindows.Alert.FormWidth != null) {
+                __instance.WhenEvent<AlertFormWidthEventArgs>(nameof(AlertControl.GetDesiredAlertFormWidth)).FirstAsync()
+                    .Subscribe(e => e.Width = modelWindows.Alert.FormWidth.Value);
+            }
+            
+        }
+
+        static AlertControlService(){
+            AppDomain.CurrentDomain.Patch(harmony => {
+                var target = typeof(AlertControl).Method(nameof(AlertControl.Show), new[]{ typeof(Form), typeof(AlertInfo) });
+                harmony.Patch(target, new HarmonyMethod(typeof(AlertControlService),nameof(Show)));
+            });
+        }
+
+        public static IObservable<Unit> ConnectAlertForm(this ApplicationModulesManager manager) => Observable.Empty<Unit>();
+    }
+}

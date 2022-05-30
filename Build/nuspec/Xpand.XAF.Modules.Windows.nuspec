@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Windows</id>
-    <version>4.212.9.0</version>
+    <version>4.212.9.5</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -15,10 +15,10 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Windows, 21.2.7</tags>
     <dependencies>
       <group targetFramework="net5.0">
-        <dependency id="Xpand.Extensions.Reactive" version="4.212.9.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.212.9.0" />
-        <dependency id="Xpand.Extensions" version="4.212.9.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.212.9.0" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.212.9.5" />
+        <dependency id="Xpand.Extensions.XAF" version="4.212.9.5" />
+        <dependency id="Xpand.Extensions" version="4.212.9.5" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.212.9.5" />
         <dependency id="DevExpress.ExpressApp.Win" version="21.2.7" />
         <dependency id="System.Reactive" version="5.0" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
@@ -27,9 +27,10 @@
         <dependency id="DevExpress.ExpressApp.CodeAnalysis" version="21.2.7" />
         <dependency id="Enums.NET" version="4.0" />
         <dependency id="Microsoft.VisualBasic" version="10.3" />
+        <dependency id="Xpand.Patcher" version="2.0.31" />
       </group>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.VersionConverter" version="4.212.9.0" />
+        <dependency id="Xpand.VersionConverter" version="4.212.9.5" />
       </group>
     </dependencies>
   </metadata>

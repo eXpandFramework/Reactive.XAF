@@ -8,29 +8,10 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Xpo;
 using Fasterflect;
+using Xpand.Extensions.Tracing;
 using Xpand.Extensions.XAF.SecurityExtensions;
 
 namespace Xpand.XAF.Modules.Reactive.Logger{
-    public interface ITraceEvent{
-        string Source{ get; set; }
-        TraceEventType TraceEventType{ get; set; }
-        string Location{ get; set; }
-        string Method{ get; set; }
-        int Line{ get; set; }
-        string Value{ get; set; }
-        string Action{ get; set; }
-        RXAction RXAction{ get; set; }
-        string Message{ get; set; }
-        string CallStack{ get; set; }
-        string LogicalOperationStack{ get; set; }
-        DateTime DateTime{ get; set; }
-        int ProcessId{ get; set; }
-        string ThreadId{ get; set; }
-        long Timestamp{ get; set; }
-        string ResultType{ get; set; }    
-        string ApplicationTitle{ get; set; }
-        
-    }
 
     public static class TraceEventExtensions{
         private static readonly Dictionary<string, MemberGetter> MemberGetters;

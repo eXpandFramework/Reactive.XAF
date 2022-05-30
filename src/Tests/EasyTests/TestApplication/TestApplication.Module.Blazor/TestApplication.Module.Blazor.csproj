@@ -40,7 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="21.2.7" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="4.212.9.4" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="4.212.9.5" />
     <!-- <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="2.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.8.1" />

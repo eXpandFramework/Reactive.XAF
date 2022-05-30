@@ -1,7 +1,9 @@
-﻿using DevExpress.ExpressApp;
+﻿using DevExpress.Data.Filtering;
+using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using JetBrains.Annotations;
+using Xpand.Extensions.Tracing;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Logger {
@@ -11,6 +13,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger {
         public const string CategoryName = "Xpand.XAF.Modules.Reactive.Logger";
 
         static ReactiveLoggerModule(){
+            EnumProcessingHelper.RegisterEnum(typeof(RXAction),"Xpand.XAF.Modules.Reactive.Logger.RXAction");
             TraceSource=new ReactiveTraceSource(nameof(ReactiveLoggerModule));
         }
         public ReactiveLoggerModule() {

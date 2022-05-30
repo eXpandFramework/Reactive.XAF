@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using Fasterflect;
 using HarmonyLib;
@@ -11,7 +10,6 @@ using Xpand.Extensions.XAF.AppDomainExtensions;
 namespace Xpand.Extensions.XAF.XafApplicationExtensions{
     public static partial class XafApplicationExtensions{
         
-
         public static void AddNonSecuredType(this XafApplication application,params Type[] objectTypes){
             AppDomain.CurrentDomain.Patch(harmony => {
                 if (application.Security != null && application.Security.GetType().FromHierarchy(type => type.BaseType)

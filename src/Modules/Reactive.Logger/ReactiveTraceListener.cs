@@ -7,6 +7,7 @@ using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
 
 namespace Xpand.XAF.Modules.Reactive.Logger {
+    
     public class ReactiveTraceListener : RollingFileTraceListener,IPush {
         private readonly string _applicationTitle;
         [UsedImplicitly] public static bool DisableFileWriter=true;
@@ -39,17 +40,14 @@ namespace Xpand.XAF.Modules.Reactive.Logger {
             }
         }
 
-        protected override void WriteTrace(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string message,
-            Guid? relatedActivityId, object[] data) {
-
+        public void Push(ITraceEvent message) {
+            message.ApplicationTitle = _applicationTitle;
+            message.Value = message.Message;
+            PushMessage(message);
         }
 
-
         public void Push(string message,string source) {
-            if (!_isDisposed&&!DisableFileWriter) {
-                base.WriteTrace(null, message, TraceEventType.Information, 0, message, Guid.Empty,null);
-            }
-            var traceEvent = new TraceEventMessage {
+            var traceEventMessage = new TraceEventMessage {
                 CallStack = null,
                 DateTime = DateTime.Now,
                 Message = $"{message}",
@@ -60,35 +58,34 @@ namespace Xpand.XAF.Modules.Reactive.Logger {
                 TraceEventType = TraceEventType.Information,
                 ApplicationTitle = _applicationTitle,
             };
-
-            var match = Regex.Match(traceEvent.Message);
-            traceEvent.Location = match.Groups["Location"].Value;
-            traceEvent.Method = match.Groups["Method"].Value;
-            traceEvent.Value = match.Groups["Value"].Value;
-            traceEvent.Action = match.Groups["Action"].Value;
-            if (!string.IsNullOrEmpty(traceEvent.Action)) {
-                if (Enum.TryParse(traceEvent.Action, out RXAction rxAction)) {
-                    traceEvent.RXAction = rxAction;
+            var match = Regex.Match(traceEventMessage.Message);
+            traceEventMessage.Location = match.Groups["Location"].Value;
+            traceEventMessage.Method = match.Groups["Method"].Value;
+            var matchGroup = match.Groups["Value"];
+            traceEventMessage.Value = matchGroup.Success ? matchGroup.Value : traceEventMessage.Message;
+            traceEventMessage.Action = match.Groups["Action"].Value;
+            if (!string.IsNullOrEmpty(traceEventMessage.Action)) {
+                if (Enum.TryParse(traceEventMessage.Action, out RXAction rxAction)) {
+                    traceEventMessage.RXAction = rxAction;
                 }
             }
-
-            if (traceEvent.RXAction == RXAction.OnNext) {
-                traceEvent.ResultType =
-                    traceEvent.Method.Substring(traceEvent.Method.IndexOf(">", StringComparison.Ordinal) + 1);
-                traceEvent.Method =
-                    traceEvent.Method.Substring(0, traceEvent.Method.IndexOf(" ", StringComparison.Ordinal));
+            if (traceEventMessage.RXAction == RXAction.OnNext) {
+                traceEventMessage.ResultType = traceEventMessage.Method.Substring(traceEventMessage.Method.IndexOf(">", StringComparison.Ordinal) + 1);
+                traceEventMessage.Method = traceEventMessage.Method.Substring(0, traceEventMessage.Method.IndexOf(" ", StringComparison.Ordinal));
             }
-
             var value = match.Groups["Ln"].Value;
             if (!string.IsNullOrEmpty(value)) {
-                traceEvent.Line = Convert.ToInt32(value);
+                traceEventMessage.Line = Convert.ToInt32(value);
             }
-
-            
-            _eventTraceSubject.OnNext(traceEvent);
-
+            PushMessage(traceEventMessage);
         }
 
+        private void PushMessage(ITraceEvent traceEventMessage) {
+            _eventTraceSubject.OnNext(traceEventMessage);
+            if (!_isDisposed&&!DisableFileWriter) {
+                base.WriteTrace(null, traceEventMessage.Source, traceEventMessage.TraceEventType, 0, traceEventMessage.Message, Guid.Empty,null);
+            }
+        }
     }
 
 }

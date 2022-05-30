@@ -5,10 +5,11 @@ using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using JetBrains.Annotations;
+using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 
 namespace Xpand.Extensions.XAF.NonPersistentObjects {
-    public abstract class NonPersistentBaseObject:DevExpress.ExpressApp.NonPersistentBaseObject {
+    public abstract class NonPersistentBaseObject:DevExpress.ExpressApp.NonPersistentBaseObject,IReloadWhenChange {
         public event EventHandler<EventArgs> ObjectSpaceChanged;
         private bool _isDefaultPropertyAttributeInit;
         private IMemberInfo _defaultPropertyMemberInfo;
@@ -16,7 +17,7 @@ namespace Xpand.Extensions.XAF.NonPersistentObjects {
         [SuppressMessage("ReSharper", "OptionalParameterHierarchyMismatch")]
         protected override void OnPropertyChanged([CallerMemberName] string memberName = "") => base.OnPropertyChanged(memberName);
 
-        [Browsable(false)]
+        [Browsable(false)][Newtonsoft.Json.JsonIgnore]
         public new IObjectSpace ObjectSpace => base.ObjectSpace; 
         public override string ToString() {
             if(!_isDefaultPropertyAttributeInit) {
@@ -55,6 +56,9 @@ namespace Xpand.Extensions.XAF.NonPersistentObjects {
         }
 
         protected virtual void OnObjectSpaceChanged(EventArgs e) => ObjectSpaceChanged?.Invoke(this, e);
+
+        
+        Action<string> IReloadWhenChange.WhenPropertyChanged => OnPropertyChanged;
     }
 
 }

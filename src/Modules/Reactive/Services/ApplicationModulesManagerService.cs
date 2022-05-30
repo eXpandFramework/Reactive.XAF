@@ -21,7 +21,7 @@ using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
-    public static class ApplicationModulesManagerService {
+	public static class ApplicationModulesManagerService {
         public static IObservable<(IMemberInfo memberInfo, T attribute)> AddTypesInfoAttribute<T>(this IObservable<ApplicationModulesManager> source) where T : Attribute
             => source.SelectMany(manager => manager.AddTypesInfoAttribute<T>());
         

@@ -2,9 +2,11 @@
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
+using Xpand.Extensions.ObjectExtensions;
 
 namespace Xpand.Extensions.XAF.FrameExtensions{
-    public partial class FrameExtensions{
+    public partial class FrameExtensions {
+        public static NestedFrame AsNestedFrame(this Frame frame) => frame.As<NestedFrame>(); 
         public static ActionBase Action(this Frame frame, string id) 
             => frame.Actions(id).FirstOrDefault();
 

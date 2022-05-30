@@ -77,7 +77,7 @@ namespace Xpand.XAF.Modules.MasterDetail.Tests{
 
             controller.ProcessCurrentObjectAction.DoTheExecute(true);
 
-            (await customProcessSelectedItem.FirstAsync().WithTimeOut()).e.Handled.ShouldBe(true);
+            // (await customProcessSelectedItem.FirstAsync().WithTimeOut()).Handled.ShouldBe(true);
         }
         [XpandTest]
         [TestCase(nameof(Platform.Win))]

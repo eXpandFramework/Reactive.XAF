@@ -49,7 +49,9 @@ namespace Xpand.XAF.Modules.SuppressConfirmation{
                 .TraceSuppressConfirmationModule(controller => controller.Name);
 
         private static IObservable<Unit> ChangeModificationHandlingMode(this Frame window){
-            window.GetController<ModificationsController>().ModificationsHandlingMode = ModificationsHandlingMode;
+            var modificationsController = window.GetController<ModificationsController>();
+            if (modificationsController != null)
+                modificationsController.ModificationsHandlingMode = ModificationsHandlingMode;
             return Observable.Empty<Unit>();
         }
 

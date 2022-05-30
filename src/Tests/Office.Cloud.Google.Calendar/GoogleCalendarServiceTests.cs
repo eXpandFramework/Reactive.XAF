@@ -18,6 +18,7 @@ using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.TaskExtensions;
+using Xpand.Extensions.Tracing;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;

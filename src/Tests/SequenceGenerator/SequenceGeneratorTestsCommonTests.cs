@@ -28,7 +28,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
         protected  SequenceGeneratorModule SequenceGeneratorModule( XafApplication application=null,Platform platform=Platform.Win){
             application ??= NewApplication(platform);
             var sequenceGeneratorModule = application.AddModule<SequenceGeneratorModule>(typeof(TestObject).Assembly.GetTypes().Where(type => typeof(IXPSimpleObject).IsAssignableFrom(type)).Concat(new []{typeof(CustomSequenceTypeName)}).ToArray());
-            application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger.TraceSources.Enabled = false;
+            // application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger.TraceSources.Enabled = false;
             return sequenceGeneratorModule;
         }
 

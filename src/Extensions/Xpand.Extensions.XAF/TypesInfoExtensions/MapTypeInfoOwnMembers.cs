@@ -7,8 +7,8 @@ namespace Xpand.Extensions.XAF.TypesInfoExtensions {
             => source.GetTypeInfo().OwnMembers
                 .ForEach(info => {
                     var targetMember = target.GetTypeInfo().FindMember(info.Name);
-                    if (info.MemberType == targetMember.MemberType) {
-                        targetMember.SetValue(target, info.GetValue(source));    
+                    if (info.MemberType == targetMember?.MemberType) {
+                        targetMember?.SetValue(target, info.GetValue(source));    
                     }
                 });
     }

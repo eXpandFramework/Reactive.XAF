@@ -14,6 +14,7 @@ using Shouldly;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.TaskExtensions;
+using Xpand.Extensions.Tracing;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Common;
@@ -133,8 +134,9 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             application.CreateViewWindow(() => application.NewListView(typeof(TraceEvent)));
             var testObserver = application.WhenTraceEvent().FirstAsync(e => e.Value.Contains("test")).Test();
 
+            var firstAsync = application.WhenTrace().FirstAsync(e => e.Value.Contains("test")).ReplayConnect();
             ReactiveLoggerModule.TraceSource.TraceMessage("test");
-            await application.WhenTrace().FirstAsync(e => e.Value.Contains("test"));
+            await firstAsync;
 
             testObserver.ItemCount.ShouldBe(0);
             var objectSpace = application.CreateObjectSpace();
@@ -239,6 +241,9 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
                 .Select(_ => {
                     var logger = application.Model.ToReactiveModule<IModelReactiveModuleLogger>().ReactiveLogger;
                     logger.TraceSources.PersistStrategy=ObservableTraceStrategy.All;
+                    logger.TraceSources[nameof(ReactiveLoggerModule)].Level=SourceLevels.All;
+                    logger.TraceSources[nameof(ReactiveModule)].Level=SourceLevels.All;
+                    
                     return Unit.Default;
                 }).Subscribe();
             LoggerModule(application);

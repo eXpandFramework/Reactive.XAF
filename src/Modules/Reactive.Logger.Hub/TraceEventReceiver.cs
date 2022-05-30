@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reactive.Subjects;
+using Xpand.Extensions.Tracing;
 
 namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
     public class TraceEventReceiver:ITraceEventHubReceiver{
@@ -7,8 +8,6 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 
         public static IObservable<ITraceEvent> TraceEvent => TraceEventSubject;
 
-        public void OnTraceEvent(TraceEventMessage traceEvent){
-            TraceEventSubject.OnNext(traceEvent);
-        }
+        public void OnTraceEvent(TraceEventMessage traceEvent) => TraceEventSubject.OnNext(traceEvent);
     }
 }

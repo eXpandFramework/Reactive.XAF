@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
+using DevExpress.XtraBars.Alerter;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Windows.SystemActions;
 
@@ -15,12 +16,20 @@ namespace Xpand.XAF.Modules.Windows{
     }
 
     public interface IModelWindows : IModelNode{
+        
+	    IModelWindowsAlert Alert{ get;  }
 	    IModelNotifyIcon NotifyIcon{ get;  }
 	    IModelWindowsMultiInstance MultiInstance{ get;  }
 	    IModelWindowsExit Exit{ get;  }
         IModelWindowsMainFormBox Form { get; } 
         bool Startup { get; set; }
         IModelSystemActions SystemActions { get; }
+    }
+
+    public interface IModelWindowsAlert : IModelNode {
+        [DefaultValue(AlertFormLocation.BottomRight)]
+        AlertFormLocation FormLocation { get; set; }
+        int? FormWidth { get; set; }
     }
 
     public interface IModelSystemActions : IModelNode, IModelList<IModelSystemAction> {

@@ -8,9 +8,15 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.SystemModule;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.XAF.ActionExtensions;
+using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
+using Xpand.Extensions.XAF.XafApplicationExtensions;
+using Xpand.XAF.Modules.Reactive.Services.Controllers;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class FrameExtensions{
@@ -109,5 +115,17 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.WhenNotDefault().SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(
                 handler => item.Disposing += handler,
                 handler => item.Disposing -= handler,ImmediateScheduler.Instance)).ToUnit();
+
+        public static IObservable<T> SelectUntilViewClosed<T>(this IObservable<Frame> source, Func<Frame, IObservable<T>> selector) 
+            => source.SelectMany(frame => selector(frame).TakeUntilViewClosed(frame));
+        public static IObservable<TFrame> TakeUntilViewClosed<TFrame>(this IObservable<TFrame> source,Frame frame)  
+            => source.TakeUntil(frame.View.WhenClosing());
+
+        public static IObservable<SimpleActionExecuteEventArgs> ShowInstanceDetailView(this IObservable<Frame> source,params  Type[] objectTypes) 
+            => source.WhenFrame(objectTypes).WhenFrame(ViewType.ListView).ToController<ListViewProcessCurrentObjectController>().CustomProcessSelectedItem(true)
+                .DoWhen(e => e.View().ObjectTypeInfo.Type.IsInstanceOfType(e.View().CurrentObject),
+                    e => e.ShowViewParameters.CreatedView = e.Application().NewDetailView(space => space.GetObject(e.Action.View().CurrentObject),
+                        e.View().CurrentObject.GetType().GetModelClass().DefaultDetailView));
+        
     }
 }

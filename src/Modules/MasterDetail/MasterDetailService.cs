@@ -75,7 +75,7 @@ namespace Xpand.XAF.Modules.MasterDetail{
 
         public static IObservable<(DashboardViewItem listViewItem, DashboardViewItem detailViewItem)> WhenMasterDetailDashboardViewItems(this XafApplication application,Type objectType=null) 
 	        => application.WhenMasterDetailDashboardViewCreated()
-                .SelectMany(_ => _.WhenControlsCreated().Do(tuple => {},() => {}))
+                .SelectMany(_ => _.WhenControlsCreated().Do(_ => {},() => {}))
                 .SelectMany(_ => _.GetItems<DashboardViewItem>()
                     .Where(item => item.Model.View is IModelListView&&(objectType==null||item.Model.View.AsObjectView.ModelClass.TypeInfo.Type ==objectType))
                     .SelectMany(listViewItem => _.GetItems<DashboardViewItem>().Where(viewItem 
@@ -94,7 +94,7 @@ namespace Xpand.XAF.Modules.MasterDetail{
                     var dashboardViewItem = _.detailViewItem;
                     var detailView = ((DetailView) dashboardViewItem.InnerView);
                     return listView.WhenSelectionChanged()
-                        .Select(tuple => listView.SelectedObjects.Cast<object>().FirstOrDefault())
+                        .Select(_ => listView.SelectedObjects.Cast<object>().FirstOrDefault())
                         .WhenNotDefault()
                         .DistinctUntilChanged(o => listView.ObjectSpace.GetKeyValue(o))
                         .Select(o => detailView.SynchronizeCurrentObject(o, listView, dashboardViewItem, frame))
@@ -138,16 +138,14 @@ namespace Xpand.XAF.Modules.MasterDetail{
                 return false;
             });
 
-        public static IObservable<((DashboardViewItem detailViewItem, DashboardViewItem listViewItem) masterDetailItem, CustomProcessListViewSelectedItemEventArgs e)> 
-            WhenMasterDetailListViewProcessSelectedItem(this XafApplication application) 
+        public static IObservable<((DashboardViewItem listViewItem, DashboardViewItem detailViewItem) _, SimpleActionExecuteEventArgs)> WhenMasterDetailListViewProcessSelectedItem(this XafApplication application) 
 	        => application.WhenMasterDetailDashboardViewItems()
 		        .SelectMany(tuple => tuple.listViewItem.Frame
 			        .GetController<ListViewProcessCurrentObjectController>()
-			        .WhenCustomProcessSelectedItem()
-			        .Do(_ => _.e.Handled = true)
-			        .Select(_ => (_: tuple, _.e)))
+			        .WhenCustomProcessSelectedItem(true)
+                    .Select(_ => (_: tuple, _)))
 		        .Publish().AutoConnect()
-		        .TraceMasterDetailModule(_ => $"{_._.listViewItem.Id}, {_.e.InnerArgs.CurrentObject}");
+		        .TraceMasterDetailModule(t => $"{t._.listViewItem.Id}, ");
 
 
         static IObservable<ActionBase> RegisterActions(this ApplicationModulesManager applicationModulesManager) 

@@ -38,7 +38,12 @@ namespace Xpand.XAF.Modules.RazorView{
         static bool IsAssembly(string path) {
             using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             using var peReader = new PEReader(fs);
-            return peReader.HasMetadata && peReader.GetMetadataReader().IsAssembly;
+            try {
+                return peReader.HasMetadata && peReader.GetMetadataReader().IsAssembly;
+            }
+            catch  {
+                return false;
+            }
         }
         internal static IObservable<TSource> TraceObjectTemplate<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,

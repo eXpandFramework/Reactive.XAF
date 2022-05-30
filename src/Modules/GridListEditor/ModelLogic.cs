@@ -65,6 +65,20 @@ namespace Xpand.XAF.Modules.GridListEditor{
         IEnumerable<string> RowHandles { get; }
     }
 
+    [ModelDisplayName("LinkSelection")]
+    public interface IModelGridListEditorLinkSelection:IModelGridListEditorRule {
+        [DataSourceProperty("Application.Views")][Required]
+        [DataSourceCriteria("(AsObjectView Is Not Null)")]
+        IModelObjectView SourceView { get; set; }
+        [DataSourceProperty("SourceView.ModelClass.OwnMembers")]
+        IModelMember SourceMember { get; set; }
+        [DataSourceProperty("Application.Views")][Required]
+        [DataSourceCriteria("(AsObjectView Is Not Null)")]
+        IModelObjectView TargetView { get; set; }
+        [DataSourceProperty("TargetView.ModelClass.OwnMembers")]
+        IModelMember TargetMember { get; set; }
+    }
+    
     [DomainLogic(typeof(IModelGridListEditorFocusRow))]
     public static class GridListEditorFocusRow {
         

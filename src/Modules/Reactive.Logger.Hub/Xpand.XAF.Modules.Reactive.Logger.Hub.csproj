@@ -33,6 +33,10 @@
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
       <SpecificVersion>false</SpecificVersion>
     </Reference>
+    <Reference Include="Xpand.Extensions">
+      <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>

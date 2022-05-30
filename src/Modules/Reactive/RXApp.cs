@@ -10,16 +10,22 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Core;
+using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using Fasterflect;
 using HarmonyLib;
 using JetBrains.Annotations;
+using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.TypeExtensions;
 using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
 using Xpand.Extensions.XAF.Attributes;
+using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.ModuleExtensions;
+using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Security;
 
@@ -81,6 +87,7 @@ namespace Xpand.XAF.Modules.Reactive{
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager)
             => manager.Attributes()
                 .Merge(manager.AddNonSecuredTypes())
+                .Merge(manager.LookupPropertyAttribute())
                 .Merge(manager.MergedExtraEmbeddedModels())
                 .Merge(manager.ConnectObjectString())
                 .Merge(manager.WhenApplication(application =>application.WhenNonPersistentPropertyCollectionSource()
@@ -88,10 +95,33 @@ namespace Xpand.XAF.Modules.Reactive{
                     .Merge(application.PatchObjectSpaceProvider())
                     .Merge(application.NonPersistentChangesEnabledAttribute())
                     .Merge(application.PopulateAdditionalObjectSpaces())
+                    .Merge(application.ReloadWhenChanged())
+                    .Merge(application.ShowInstanceDetailView())
                     // .Merge(application.ShowPersistentObjectsInNonPersistentView())
                 .Merge(manager.SetupPropertyEditorParentView())));
 
 
+
+        private static IObservable<Unit> ShowInstanceDetailView(this XafApplication application)
+            => application.WhenSetupComplete().SelectMany(_ => application.WhenViewOnFrame().ShowInstanceDetailView(application.TypesInfo
+                    .PersistentTypes.Attributed<ShowInstanceDetailViewAttribute>().Types().Select(info => info.Type).ToArray())).ToUnit();
+            
+        private static IObservable<Unit> ReloadWhenChanged(this XafApplication application)
+            => application.WhenSetupComplete().SelectMany(_ => {
+                var membersToReload = application.Model.BOModel.TypeInfos().AttributedMembers<ReloadWhenChangeAttribute>().ToArray();
+                return application.WhenFrameViewChanged().WhenFrame(membersToReload.Select(t => t.memberInfo.Owner.Type.RealType()).Distinct().ToArray())
+                    .SelectUntilViewClosed(frame => membersToReload.WhenFrame(frame)
+                        .SelectMany(ts => application.WhenProviderCommitted(ts.Key).ToObjects().To(ts).SelectMany()).ObserveOnContext()
+                        .Select(t => t)
+                        .DoWhen(t => t.attribute.ObjectPropertyChangeMethodName!=null,t => frame.View.CurrentObject.CallMethod(t.attribute.ObjectPropertyChangeMethodName, t.info.Name))
+                        .DoWhen(_ => frame.View.ObjectTypeInfo.Type.Implements("DevExpress.Xpo.IXPReceiveOnChangedFromArbitrarySource"),t => frame.View.CurrentObject.CallMethod("FireChanged",t.info.Name))
+                        .DoWhen(_ => typeof(IReloadWhenChange).IsAssignableFrom(frame.View.ObjectTypeInfo.Type),t => frame.View.CurrentObject.As<IReloadWhenChange>().WhenPropertyChanged(t.info.Name))
+                        .ToUnit());
+            });
+
+        private static IObservable<IGrouping<Type, (ReloadWhenChangeAttribute attribute, IMemberInfo info)>> WhenFrame(
+            this IEnumerable<(ReloadWhenChangeAttribute attribute, IMemberInfo info)> membersToReload, Frame frame) 
+            => membersToReload.Where(t => t.info.Owner == frame.View.ObjectTypeInfo).GroupBy(t => t.info.MemberTypeInfo.Type.RealType()).ToNowObservable();
 
         private static IObservable<Unit> MergedExtraEmbeddedModels(this ApplicationModulesManager manager) 
             => manager.WhereApplication().ToObservable()

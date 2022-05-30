@@ -17,6 +17,7 @@ using JetBrains.Annotations;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ModelExtensions;
+using Xpand.XAF.Modules.Reactive.Services;
 
 
 namespace Xpand.XAF.Modules.Reactive.Logger{
@@ -78,8 +79,21 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         IModelClass ObjectType { get; set; }
         [Browsable(false)]
         Type TraceEventObjectType { get;  }
+
+        [Category("XafMessage")]
+        bool ShowXafMessage { get; set; }
         
         IModelList<IModelClass> Types { get; }
+        [ModelBrowsable(typeof(ShowXafMessageVisibility))][Category("XafMessage")]
+        InformationType XafMessageType { get; set; }
+        [ModelBrowsable(typeof(ShowXafMessageVisibility))]
+        [DefaultValue(XafApplicationRxExtensions.MessageDisplayInterval)]
+        [Category("XafMessage")]
+        int MessageDisplayInterval { get; set; }
+    }
+
+    public class ShowXafMessageVisibility:IModelIsVisible {
+        public bool IsVisible(IModelNode node, string propertyName) => ((IModelReactiveLoggerNotification)node).ShowXafMessage;
     }
 
     [DomainLogic(typeof(IModelReactiveLoggerNotification))]

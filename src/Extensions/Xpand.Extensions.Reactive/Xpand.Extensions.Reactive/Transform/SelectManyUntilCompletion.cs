@@ -14,8 +14,7 @@ namespace Xpand.Extensions.Reactive.Transform {
         /// on their own. Unlike the SelectMany operator, the subsequences are not
         /// unsubscribed when an error occurs.
         /// </summary>
-        public static IObservable<TResult> SelectManyUntilCompletion<TSource, TResult>(
-            this IObservable<TSource> source,
+        public static IObservable<TResult> SelectManyUntilCompletion<TSource, TResult>(this IObservable<TSource> source,
             Func<TSource, CancellationToken, IObservable<TResult>> selector) 
             => Observable.Defer(() => {
                 var cts = new CancellationTokenSource();
