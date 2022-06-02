@@ -9,6 +9,8 @@ namespace Xpand.Extensions.XAF.FrameExtensions{
         public static NestedFrame AsNestedFrame(this Frame frame) => frame.As<NestedFrame>(); 
         public static ActionBase Action(this Frame frame, string id) 
             => frame.Actions(id).FirstOrDefault();
+        public static T Action<T>(this Frame frame, string id) where T:ActionBase
+            => frame.Actions<T>(id).FirstOrDefault();
 
         public static IEnumerable<ActionBase> Actions(this Frame frame,params string[] actionsIds) 
             => frame.Actions<ActionBase>(actionsIds);

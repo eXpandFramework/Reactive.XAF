@@ -35,7 +35,6 @@ using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.Extensions.XAF.Xpo.ObjectSpaceExtensions;
 using Xpand.XAF.Modules.Blazor;
 using Xpand.XAF.Modules.Blazor.Editors;
-using Xpand.XAF.Modules.Blazor.Services;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
@@ -43,8 +42,6 @@ using LookupPropertyEditor = DevExpress.ExpressApp.Blazor.Editors.LookupProperty
 
 namespace Xpand.XAF.Modules.TenantManager{ 
     public static class TenantManagerService {
-        private const string OrganizationQuery = "Organization";
-        
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => manager.WhenApplication(application => application.WhenStartupView()
 	            .Merge(application.WhenModelChanged().FirstAsync().RegisterOrganizationNonSecured(application))
@@ -52,16 +49,14 @@ namespace Xpand.XAF.Modules.TenantManager{
 	            .Merge(application.HideOrganization())
                 .Merge(application.WhenLoggingOff().SelectMany(_ => application.SaveOrganizationKey()).ToUnit())
 	            .Merge(application.WhenModelChanged().Skip(1).MarkupMessage()));
-
-
         private static IObservable<Unit> LogonLastOrganization(this XafApplication application) 
 	        => application.WhenLoggedOn()
                 .TraceTenantManager(_ => "Logon")
 		        .SelectMany(_ => application.LastOrganization())
                 .TraceTenantManager(o => $"{o} - {SecuritySystem.CurrentUserName}  ")
-		        .SelectMany(o => {
+		        .SelectMany(organization => {
 			        var managerObjectProvider = application.ObjectSpaceProvider.DataStoreProvider();
-			        application.SetDataStoreProvider(o);
+			        application.SetDataStoreProvider(organization);
 			        var objectSpace = application.CreateNonSecuredObjectSpace();
 			        var currentUserName = SecuritySystem.CurrentUserName;
 			        var applicationUser = objectSpace.FindObject(SecuritySystem.UserType,CriteriaOperator.FromLambda<ISecurityUser>(user => user.UserName==currentUserName));
@@ -69,7 +64,7 @@ namespace Xpand.XAF.Modules.TenantManager{
                         return Observable.Empty<Unit>();
 			        }
 			        ((SecurityStrategyBase)SecuritySystem.Instance).Logon(applicationUser);
-			        return application.SyncUserWhenChanged(managerObjectProvider,o);
+			        return application.SyncUserWhenChanged(managerObjectProvider,organization);
 
                 }).ToUnit();
         
@@ -84,9 +79,7 @@ namespace Xpand.XAF.Modules.TenantManager{
                     .SelectMany(editor => editor.GetFieldValue("helper").WhenEvent(nameof(LookupEditorHelper.CustomCreateCollectionSource))
                         .Select(pattern => pattern.EventArgs).Cast<CustomCreateCollectionSourceEventArgs>()
                         .Do(e => {
-                            var collectionSourceBase = application.CreateCollectionSource(
-                                application.CreateNonSecuredObjectSpace(), editor.MemberInfo.MemberType,
-                                editor.View.Id);
+                            var collectionSourceBase = application.CreateCollectionSource(application.CreateNonSecuredObjectSpace(), editor.MemberInfo.MemberType, editor.View.Id);
                             collectionSourceBase.Criteria[nameof(TenantManagerService)] = CriteriaOperator.Parse(application.Model.TenantManager().Registration);
                             e.CollectionSource = collectionSourceBase;
                         })))
@@ -132,31 +125,24 @@ namespace Xpand.XAF.Modules.TenantManager{
 
         private static IObservable<Unit> WhenStartupView(this XafApplication application) 
             => application.WhenStartupFrame()
-                .MergeIgnored(frame => frame.View.WhenControlsCreated().ConfigEditorVisibility().ToUnit())
+                .MergeIgnored(frame => frame.View.WhenControlsCreated().ConfigEditorVisibility(application).ToUnit())
                 .ToController<DialogController>()
                 .SelectMany(controller => controller.Logoff()
-	                .Merge(controller.AcceptAction.WhenExecuted(application.ExecuteLogonAction )
-                        .IgnoreElements()
-                        .SelectMany(e => application.NavigateTo(
-                                    $"/?{OrganizationQuery}={e.Action.Application.Model.TenantManager().StartupViewOrganization.MemberInfo.GetValue(e.CurrentObject)}")
-                                .To<SimpleActionExecuteEventArgs>().To(e))
-                        
-                        .ToUnit().Finally(() => {})
-                    )
-                )
+                    .Merge(controller.AcceptAction.WhenExecuted(e => {
+                        var organization = application.Organization(e.SelectedObjects.Cast<object>().First());
+                        return application.Logon(organization).Select(provider => (organization,provider));
+                    })
+                        .SelectMany(t => application.SyncUserWhenChanged(t.provider, t.organization))
+                        .ToUnit()))
                 .Merge(application.WhenOrganizationLookupView());
 
-        private static IObservable<SimpleActionExecuteEventArgs> ExecuteLogonAction(this XafApplication application, SimpleActionExecuteEventArgs e) 
-            => application.Logon(application.Organization(e.SelectedObjects.Cast<object>().First())).To(e );
-
-        
-        
-        static IObservable<View> ConfigEditorVisibility(this IObservable<View> source)
+        static IObservable<View> ConfigEditorVisibility(this IObservable<View> source, XafApplication application)
             => source.Do(view => {
                 var model = view.Model.Application.TenantManager();
                 var editor = ((LookupPropertyEditor)view.AsDetailView().GetPropertyEditor(model.StartupViewOrganization.Name));
                 ((DxComboBoxAdapter)editor.Control).ComponentModel.ChildContent = null;
-                ((IAppearanceVisibility)editor).Visibility = view.ObjectSpace.UserOrganizationCount(model.Application) > 0 ? ViewItemVisibility.Show : ViewItemVisibility.Hide;
+                using var objectSpace = application.CreateNonSecuredObjectSpace();
+                ((IAppearanceVisibility)editor).Visibility = objectSpace.UserOrganizationCount(model.Application) > 0 ? ViewItemVisibility.Show : ViewItemVisibility.Hide;
                 ((IAppearanceVisibility)view.AsDetailView().GetPropertyEditor(model.StartupViewMessage.Name))
                     .Visibility = ((IAppearanceVisibility)editor).Visibility == ViewItemVisibility.Show ? ViewItemVisibility.Hide : ViewItemVisibility.Show;
             })
@@ -174,8 +160,7 @@ namespace Xpand.XAF.Modules.TenantManager{
         private static IObservable<Frame> WhenStartupFrame(this XafApplication application) 
             => application.WhenFrameViewChanged()
                 .WhenFrame(frame => frame.Application.Model.TenantManager().StartupView?.ModelClass.TypeInfo.Type);
-
-
+        
         private static IObservable<Unit> HideOrganization(this XafApplication application) 
             => application.HideOrganizationNavigation().Merge(application.HideUserOrganizations());
 
@@ -267,12 +252,11 @@ namespace Xpand.XAF.Modules.TenantManager{
             return value;
         }
 
-        internal static IObservable<Unit> Logon(this XafApplication application, object organization) {
+        internal static IObservable<IXpoDataStoreProvider> Logon(this XafApplication application, object organization) {
 	        if (organization == null) {
 		        application.LogOff();
-		        return Unit.Default.ReturnObservable();
+		        return Observable.Empty<IXpoDataStoreProvider>();
 	        }
-
             var managerProvider = application.ObjectSpaceProvider.DataStoreProvider();
             application.SetDataStoreProvider(organization);
             application.InvokeModuleUpdaters();
@@ -282,8 +266,7 @@ namespace Xpand.XAF.Modules.TenantManager{
 	        applicationUser.UpdateRoles(application, objectSpace);
 	        ((IObjectSpaceLink)applicationUser).CommitChanges();
 	        ((SecurityStrategyBase)SecuritySystem.Instance).Logon(applicationUser);
-            return application.SaveOrganizationKey( organization.GetTypeInfo().KeyMember.GetValue(organization))
-		        .Merge(application.SyncUserWhenChanged(managerProvider,organization));
+            return application.SaveOrganizationKey( organization.GetTypeInfo().KeyMember.GetValue(organization)).To((managerProvider));
         }
 
         private static IObservable<Unit> SaveOrganizationKey(this XafApplication application, object value=null) {
@@ -333,6 +316,7 @@ namespace Xpand.XAF.Modules.TenantManager{
             => application.GetService<SingletonItems>().GetOrAdd(organization.GetTypeInfo().KeyMember.GetValue(organization),
                     _ => new ConnectionStringDataStoreProvider(application.ConnectionString(organization)));
         
+        [PublicAPI]
         public static IXpoDataStoreProvider ManagerDataStoreProvider(this XafApplication application) {
             application.GetService<SingletonItems>().TryGetValue(application.LastOrganizationKey(),out var value);
             return (IXpoDataStoreProvider)value;
@@ -349,7 +333,7 @@ namespace Xpand.XAF.Modules.TenantManager{
 	        .Cast<object>().Select(o => application.ConnectionString(o))
 	        .Any(connectionString => Regex.IsMatch(connectionString, $@"{objectSpace.Connection().Database}\b", RegexOptions.IgnoreCase));
 
-        [UsedImplicitly]
+        [PublicAPI]
         public static IObservable<Unit> WhenCustomizeConnectionString<T>(this XafApplication application,Func<T,string> connectionString) 
             => CustomizeConnectionStringSubject.AsObservable().Where(e => e.Instance.application == application)
                 .Select(e => e.SetInstance(t => (t.application,t.organization,connectionString((T)t.organization))))
