@@ -26,12 +26,15 @@ namespace Xpand.XAF.Modules.Reactive.Services.Security{
             => application.WhenSetupComplete()
                 .Do(_ => {
                     AppDomain.CurrentDomain.Patch(harmony => {
-                        if (application.Security.IsInstanceOf("DevExpress.ExpressApp.Security.SecurityStrategyBase")){
-                            var methodInfo = application.Security?.GetPropertyValue("Authentication")?.GetType().Methods("Authenticate")
-                                .Last(info =>info.DeclaringType is { IsAbstract: false });
-                            if (methodInfo != null){
-                                harmony.Patch(methodInfo, new HarmonyMethod(GetMethodInfo(nameof(Authenticate))));	
-                            }	
+                        if (harmony.GetPatchedMethods().All(methodBase => methodBase.Name != nameof(Authenticate)) &&
+                            application.Security.IsInstanceOf("DevExpress.ExpressApp.Security.SecurityStrategyBase")){
+                            if (harmony.GetPatchedMethods().Any(methodBase => methodBase.Name == nameof(Authenticate))) {
+                                var methodInfo = application.Security?.GetPropertyValue("Authentication")?.GetType().Methods("Authenticate")
+                                    .Last(info =>info.DeclaringType is { IsAbstract: false });
+                                if (methodInfo != null){
+                                    harmony.Patch(methodInfo, new HarmonyMethod(GetMethodInfo(nameof(Authenticate))));	
+                                }
+                            }
                         }
                     });
                 })
