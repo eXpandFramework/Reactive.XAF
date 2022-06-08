@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using Fasterflect;
 using Xpand.Extensions.ObjectExtensions;
+using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.TypeExtensions;

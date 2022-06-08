@@ -5,8 +5,8 @@ namespace Xpand.Extensions.XAF.Attributes{
         Action<string> WhenPropertyChanged { get; }
     }
     public class ReloadWhenChangeAttribute:Attribute {
-        public ReloadWhenChangeAttribute(){
-        }
+        public Type[] Types{ get; }
+        public ReloadWhenChangeAttribute(params Type[] types) => Types = types;
 
         public string ObjectPropertyChangeMethodName{ get; }
 

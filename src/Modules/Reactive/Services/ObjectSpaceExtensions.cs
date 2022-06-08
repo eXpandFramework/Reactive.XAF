@@ -366,7 +366,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenProviderCommitted<T>(
             this XafApplication application, ObjectModification objectModification = ObjectModification.All) {
-            return application.WhenProviderObjectSpaceCreated().WhenCommitted<T>();
+            return application.WhenProviderObjectSpaceCreated().WhenCommitted<T>(objectModification);
         }
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<object> objects)> WhenProviderCommitted(
             this XafApplication application,Type objectType, ObjectModification objectModification = ObjectModification.All) {

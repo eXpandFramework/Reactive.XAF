@@ -28,6 +28,7 @@ using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
+using Xpand.Extensions.TypeExtensions;
 using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
@@ -108,24 +109,26 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<ActionBaseEventArgs> WhenActionExecuted<TController,TAction>(
             this XafApplication application, Func<TController, TAction> action) where TController : Controller where TAction:ActionBase
-            => application.WhenWindowCreated().ToController<TController>().SelectMany(_ => action(_).WhenExecuted());
+            => application.WhenFrameCreated().ToController<TController>().SelectMany(_ => action(_).WhenExecuted());
         
         public static IObservable<SimpleActionExecuteEventArgs> WhenSimpleActionExecuted<TController>(
             this XafApplication application, Func<TController, SimpleAction> action) where TController : Controller 
-            => application.WhenWindowCreated().ToController<TController>().SelectMany(_ => action(_).WhenExecuted());
+            => application.WhenFrameCreated().ToController<TController>().SelectMany(_ => action(_).WhenExecuted());
 
         public static IObservable<ActionBaseEventArgs> WhenActionExecuted(this XafApplication application,params string[] actions) 
-            => application.WhenWindowCreated().SelectMany(window => window.Actions(actions)).WhenExecuted();
-
-        [PublicAPI]
+            => application.WhenFrameCreated().SelectMany(window => window.Actions(actions)).WhenExecuted();
+        public static IObservable<ActionBaseEventArgs> WhenActionExecuteCompleted(this XafApplication application,params string[] actions) 
+            => application.WhenFrameCreated().SelectMany(window => window.Actions(actions)).WhenExecuteCompleted();
+        public static IObservable<ActionBase> WhenActionExecuteConcat(this XafApplication application,params string[] actions) 
+            => application.WhenFrameCreated().SelectMany(window => window.Actions(actions)).WhenExecuteConcat();
+        
         public static IObservable<(TAction action, CancelEventArgs e)> WhenActionExecuting<TController,TAction>(
             this XafApplication application, Func<TController, TAction> action) where TController : Controller where TAction:ActionBase 
-            => application.WhenWindowCreated().ToController<TController>().SelectMany(_ => action(_).WhenExecuting());
-
-        [PublicAPI]
+            => application.WhenFrameCreated().ToController<TController>().SelectMany(_ => action(_).WhenExecuting());
+        
         public static IObservable<ActionBaseEventArgs> WhenActionExecuteCompleted<TController,TAction>(
             this XafApplication application, Func<TController, TAction> action) where TController : Controller where TAction:ActionBase
-            => application.WhenWindowCreated().ToController<TController>().SelectMany(_ => action(_).WhenExecuteCompleted());
+            => application.WhenFrameCreated().ToController<TController>().SelectMany(_ => action(_).WhenExecuteCompleted());
 
         public static IObservable<Window> WhenWindowCreated(this XafApplication application,bool isMain=false,bool emitIfMainExists=true) {
             var windowCreated = application.WhenFrameCreated().OfType<Window>();
@@ -223,7 +226,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             Func<T,int> displayInterval=null, InformationPosition position = InformationPosition.Left, [CallerMemberName] string memberName = "")
             => source.Do(obj => application.ShowMessage(infoSelector(obj), displayInterval?.Invoke(obj)??MessageDisplayInterval, memberName, messageSelector(obj)));
 
-        public const int MessageDisplayInterval = 10000;
+        public const int MessageDisplayInterval = 5000;
 
         public static IObservable<XafApplication> ShowXafMessage(this IObservable<XafApplication> source,
             InformationType informationType = InformationType.Info, int displayInterval = MessageDisplayInterval,
@@ -295,6 +298,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<View> WhenView<TFrame>(this IObservable<TFrame> source, Type objectType = null,
             ViewType viewType = ViewType.Any, Nesting nesting = Nesting.Any) where TFrame : Frame
             => source.WhenFrame(objectType, viewType, nesting).ToView();
+
+        public static IObservable<View> WhenDetailView<TFrame>(this IObservable<TFrame> source, params Type[] objectTypes) where TFrame : Frame
+            => source.WhenFrame(objectTypes).WhenFrame(ViewType.DetailView).ToView();
+        
         public static IObservable<View> WhenDetailView<TFrame>(this IObservable<TFrame> source, Type objectType = null, Nesting nesting = Nesting.Any) where TFrame : Frame
             => source.WhenFrame(objectType,ViewType.DetailView, nesting).ToView();
         
@@ -512,7 +519,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.WhenCreateCustomPropertyCollectionSource()
                 .Where(e => e.ObjectSpace is NonPersistentObjectSpace)
                 .Select(e => {
-                    e.PropertyCollectionSource = new NonPersistentPropertyCollectionSource(e.ObjectSpace, e.MasterObjectType, e.MasterObject, e.MemberInfo,e.DataAccessMode, e.Mode);
+                    e.PropertyCollectionSource = e.NewSource();
                     return e.PropertyCollectionSource;
                 })
                 .Cast<NonPersistentPropertyCollectionSource>()
@@ -591,7 +598,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.WhenCommittedDetailed<T>(objectModification,null,modifiedProperties);
         
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenProviderCommittedDetailed<T>(
-            this XafApplication application,ObjectModification objectModification,Func<T,bool> criteria,params string[] modifiedProperties)
+            this XafApplication application,ObjectModification objectModification,Func<T,bool> criteria=null,params string[] modifiedProperties)
             => application.WhenProviderObjectSpaceCreated()
                 .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed(objectModification, criteria, modifiedProperties).TakeUntil(objectSpace.WhenDisposed()));
         
@@ -608,7 +615,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T> UseObjectSpace<T>(this XafApplication application,Func<IObjectSpace,IObservable<T>> factory,bool useObjectSpaceProvider=false) 
             => Observable.Using(() => application.CreateObjectSpace(useObjectSpaceProvider),factory);
         public static IObservable<T> UseProviderObjectSpace<T>(this XafApplication application,Func<IObjectSpace,IObservable<T>> factory) 
-            => Observable.Using(() => application.CreateObjectSpace(true,typeof(T)),factory);
+            => Observable.Using(() => application.CreateObjectSpace(true,typeof(T).RealType()),factory);
 
         public static IObservable<Unit> UseObjectSpace(this XafApplication application,Action<IObjectSpace> action,bool useObjectSpaceProvider=false) 
             => Observable.Using(() => application.CreateObjectSpace(useObjectSpaceProvider),space => {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using Xpand.Extensions.Reactive.Combine;
 
 namespace Xpand.Extensions.Reactive.Transform{
     public static partial class Transform{

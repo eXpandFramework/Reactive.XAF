@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive.Linq;
 
 namespace Xpand.Extensions.Reactive.Transform {
@@ -9,6 +10,8 @@ namespace Xpand.Extensions.Reactive.Transform {
         
         public static IObservable<TSource> SelectMany<TSource>(this IObservable<IEnumerable<TSource>> source) 
             => source.SelectMany(source1 => source1.ToNowObservable());
+        public static IObservable<TSource> SelectMany<TSource>(this IObservable<IEnumerable<TSource>> source,int take) 
+            => source.SelectMany(source1 => source1.Take(take).ToNowObservable());
         
         // public static IObservable<object> SelectMany(this IObservable<IEnumerable> source) 
         //     => source.SelectMany(source1 => source1.Cast<object>());

@@ -121,7 +121,7 @@ namespace Xpand.Extensions.Reactive.Utility{
         private static Action<string> TraceError(this Action<string> traceAction, TraceSource traceSource) =>
 	        traceAction ?? (s => {
 		        if (traceSource != null){
-                    // traceSource.Push(s);
+                    traceSource.Push(s);
 		        }
 		        else{
 			        System.Diagnostics.Trace.TraceError(s);

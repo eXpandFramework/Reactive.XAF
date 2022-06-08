@@ -25,7 +25,37 @@ namespace Xpand.Extensions.Reactive.Combine{
         public static IObservable<TValue> MergeWith<TSource, TValue>(this IObservable<TSource> source, TValue value, IScheduler scheduler = null) 
             => source.Merge(default(TSource).ReturnObservable(scheduler ?? CurrentThreadScheduler.Instance)).Select(_ => value);
 
-        public static IObservable<Unit> MergeWith<TSource, TValue>(this IObservable<TSource> source, IObservable<TValue> value, IScheduler scheduler = null) 
+        public static IObservable<Unit> MergeToUnit<TSource, TValue>(this IObservable<TSource> source, IObservable<TValue> value, IScheduler scheduler = null) 
             => source.ToUnit().Merge(value.ToUnit());
+        
+        public static IObservable<T> MergeIgnored<T,T2>(this IObservable<T> source,Func<T,IObservable<T2>> secondSelector,Func<T,bool> merge=null)
+            => source.SelectMany(arg => {
+                merge ??= _ => true;
+                var observable = Observable.Empty<T>();
+                if (merge(arg)) {
+                    observable = secondSelector(arg).IgnoreElements().To(arg);
+                }
+                return observable.StartWith(arg);
+            });
+        public static IObservable<T> MergeIgnored<T,T2>(this IObservable<T> source,Func<T,bool> merge,Func<T,IObservable<T2>> secondSelector)
+            => source.SelectMany(arg => {
+                merge ??= _ => true;
+                var observable = Observable.Empty<T>();
+                if (merge(arg)) {
+                    observable = secondSelector(arg).IgnoreElements().To(arg);
+                }
+                return observable.StartWith(arg);
+            });
+        
+        public static IObservable<T> MergeIgnored<T>(this IObservable<T> source,Func<T,bool> merge,Action<T> @do)
+            => source.SelectMany(arg => {
+                merge ??= _ => true;
+                var observable = Observable.Empty<T>();
+                if (merge(arg)) {
+                    @do(arg);
+                }
+                return observable.StartWith(arg);
+            });
+
     }
 }

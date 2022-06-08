@@ -12,6 +12,7 @@ using DevExpress.ExpressApp.Editors;
 using Fasterflect;
 using Xpand.Extensions.JsonExtensions;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.Collections;

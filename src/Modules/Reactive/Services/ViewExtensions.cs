@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
@@ -111,18 +110,24 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<ListPropertyEditor> NestedListViews<TView>(this IObservable<TView> views, params Type[] objectTypes) where TView : DetailView 
             => views.WhenControlsCreated().SelectMany(detailView => detailView.NestedListViews(objectTypes));
 
-        public static IObservable<ListPropertyEditor> NestedListViews<TView>(this TView view, params Type[] objectTypes ) where TView : DetailView{
-            var lazyListPropertyEditors = view.GetItems<ListPropertyEditor>().Where(editor =>editor.Frame?.View == null).ToNowObservable()
-                .SelectMany(editor => editor.WhenControlCreated().To(editor));
-            var listPropertyEditors = view.GetItems<ListPropertyEditor>().Where(editor =>editor.Frame?.View != null).ToNowObservable()
+        public static IObservable<ListPropertyEditor> NestedListViews<TView>(this TView view, params Type[] objectTypes ) where TView : DetailView 
+            => view.GetItems<ListPropertyEditor>().Where(editor =>editor.Frame?.View == null).ToNowObservable()
+                .SelectMany(editor =>editor.Control==null? editor.WhenControlCreated().To(editor):editor.ReturnObservable()).NestedListViews(view, objectTypes);
+
+        private static IObservable<ListPropertyEditor> NestedListViews<TView>(this IObservable<ListPropertyEditor> lazyListPropertyEditors, TView view, Type[] objectTypes) where TView : DetailView{
+            var listPropertyEditors = view.GetItems<ListPropertyEditor>().Where(editor => editor.Frame?.View != null)
+                .ToNowObservable()
                 .Merge(lazyListPropertyEditors);
-            
+
             var nestedEditors = listPropertyEditors.SelectMany(editor => {
-                var detailView = ((ListView) editor.Frame.View).EditView;
+                var detailView = ((ListView)editor.Frame.View).EditView;
                 return detailView != null ? detailView.NestedListViews(objectTypes) : Observable.Never<ListPropertyEditor>();
             });
-            return listPropertyEditors.Where(editor => objectTypes.Any(type => type.IsAssignableFrom(editor.Frame.View.ObjectTypeInfo.Type))).Merge(nestedEditors);
+            return listPropertyEditors
+                .Where(editor => objectTypes.Any(type => type.IsAssignableFrom(editor.Frame.View.ObjectTypeInfo.Type)))
+                .Merge(nestedEditors);
         }
+
         public static IObservable<TView> When<TView>(this IObservable<TView> source,Type objectType=null,ViewType viewType=ViewType.Any,Nesting nesting=Nesting.Any) where TView:View{
             objectType ??= typeof(object);
             return source.Where(view =>view.Is(viewType,nesting,objectType));

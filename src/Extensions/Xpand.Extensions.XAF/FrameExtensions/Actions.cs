@@ -6,6 +6,7 @@ using Xpand.Extensions.ObjectExtensions;
 
 namespace Xpand.Extensions.XAF.FrameExtensions{
     public partial class FrameExtensions {
+        public static T ParentObject<T>(this Frame frame) => frame.As<NestedFrame>().ViewItem.View.CurrentObject.As<T>(); 
         public static NestedFrame AsNestedFrame(this Frame frame) => frame.As<NestedFrame>(); 
         public static ActionBase Action(this Frame frame, string id) 
             => frame.Actions(id).FirstOrDefault();

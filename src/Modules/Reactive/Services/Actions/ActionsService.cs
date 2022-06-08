@@ -258,6 +258,10 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => Observable.FromEventPattern<EventHandler<ActionBaseEventArgs>, ActionBaseEventArgs>(
 			        h => action.ExecuteCompleted += h, h => action.ExecuteCompleted -= h, ImmediateScheduler.Instance)
 		        .Select(pattern => pattern.EventArgs);
+        
+        public static IObservable<TAction> WhenExecuteConcat<TAction>(this TAction action) where TAction : ActionBase 
+            => action.WhenDisabled().Where(a => a.Enabled.Contains(nameof(WhenConcatExecution)))
+                .SelectMany(a => a.WhenEnabled().Where(ab1 => ab1.Enabled.Contains(nameof(WhenConcatExecution))).To(a));
 
         private static ISubject<ActionBase> _executeFinishedSubject = Subject.Synchronize(new Subject<ActionBase>());
         public static IObservable<TAction> WhenExecuteFinished<TAction>(this TAction action,bool customEmit=false) where TAction : ActionBase
@@ -275,6 +279,9 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => source.SelectMany(a=>a.WhenExecuteFinished(customEmit));
         public static IObservable<ActionBaseEventArgs> WhenExecuteCompleted<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
             => source.SelectMany(a=>a.WhenExecuteCompleted());
+        public static IObservable<TAction> WhenExecuteConcat<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
+            => source.SelectMany(a=>a.WhenExecuteConcat());
+        
         public static IObservable<ActionBaseEventArgs> WhenExecuted<TAction>(this IObservable<TAction> source) where TAction : ActionBase 
             => source.SelectMany(a=>a.WhenExecuted());
 
@@ -356,6 +363,11 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static IObservable<TAction> WhenDeactivated<TAction>(this TAction simpleAction) where TAction : ActionBase 
             => simpleAction.ResultValueChanged(action => action.Active)
 		        .Where(tuple => !tuple.action.Active.ResultValue)
+		        .Select(t => t.action);
+        
+        public static IObservable<TAction> WhenDisabled<TAction>(this TAction simpleAction) where TAction : ActionBase 
+            => simpleAction.ResultValueChanged(action => action.Enabled)
+		        .Where(tuple => !tuple.action.Enabled.ResultValue)
 		        .Select(t => t.action);
 
         public static IObservable<TAction> WhenChanged<TAction>(this IObservable<TAction> source,ActionChangedType? actionChangedType = null)where TAction : ActionBase 

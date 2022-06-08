@@ -48,6 +48,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     h => collectionSourceBase.Disposed += h, h => collectionSourceBase.Disposed -= h,ImmediateScheduler.Instance)
                 .Select(_ => _.Sender).Cast<T>()
                 .TraceRX();
+
+        public static NonPersistentPropertyCollectionSource NewSource(this CreateCustomPropertyCollectionSourceEventArgs e) 
+            => new(e.ObjectSpace, e.MasterObjectType, e.MasterObject, e.MemberInfo, e.DataAccessMode,e.Mode);
     }
     public class NonPersistentPropertyCollectionSource : PropertyCollectionSource{
         readonly Subject<GenericEventArgs<IEnumerable<object>>> _datasourceSubject=new();

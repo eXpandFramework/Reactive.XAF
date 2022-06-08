@@ -1,38 +1,18 @@
-﻿using System;
+using System;
+using System.Reactive;
 using System.Reactive.Linq;
-using Xpand.Extensions.Reactive.Combine;
+using Xpand.Extensions.Reactive.Filter;
 
 namespace Xpand.Extensions.Reactive.Transform {
     public static partial class Transform {
-        public static IObservable<T> MergeIgnored<T,T2>(this IObservable<T> source,Func<T,IObservable<T2>> secondSelector,Func<T,bool> merge=null)
-            => source.SelectMany(arg => {
-                merge ??= _ => true;
-                var observable = Observable.Empty<T>();
-                if (merge(arg)) {
-                    observable = secondSelector(arg).IgnoreElements().To(arg);
-                }
-                return observable.StartWith(arg);
-            });
-        public static IObservable<T> MergeIgnored<T,T2>(this IObservable<T> source,Func<T,bool> merge,Func<T,IObservable<T2>> secondSelector)
-            => source.SelectMany(arg => {
-                merge ??= _ => true;
-                var observable = Observable.Empty<T>();
-                if (merge(arg)) {
-                    observable = secondSelector(arg).IgnoreElements().To(arg);
-                }
-                return observable.StartWith(arg);
-            });
+        public static IObservable<T> ConcatDefer<T>(this IObservable<T> source, Func<IObservable<T>> target)
+            => source.Concat(Observable.Defer(target));
         
-        public static IObservable<T> MergeIgnored<T>(this IObservable<T> source,Func<T,bool> merge,Action<T> @do)
-            => source.SelectMany(arg => {
-                merge ??= _ => true;
-                var observable = Observable.Empty<T>();
-                if (merge(arg)) {
-                    @do(arg);
-                }
-                return observable.StartWith(arg);
-            });
-
+        public static IObservable<Unit> ConcatToUnit<T,T1>(this IObservable<T> source, IObservable<T1> target)
+            => source.ToUnit().Concat(Observable.Defer(target.ToUnit));
+        
+        public static IObservable<TTarget> ConcatIgnoredValue<TSource,TTarget>(this IObservable<TSource> source, TTarget value) 
+            => source.Select(_ => default(TTarget)).WhenNotDefault().Concat(value.ReturnObservable());
         public static IObservable<T> ConcatIgnored<T,T2>(this IObservable<T> source,Func<T,IObservable<T2>> secondSelector,Func<T,bool> merge=null)
             => source.SelectMany(arg => {
                 merge ??= _ => true;
@@ -61,6 +41,5 @@ namespace Xpand.Extensions.Reactive.Transform {
                 return arg.ReturnObservable();
 
             });
-        
     }
 }

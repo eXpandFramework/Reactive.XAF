@@ -16,6 +16,7 @@ using DevExpress.ExpressApp.Model.Core;
 using Fasterflect;
 using HarmonyLib;
 using JetBrains.Annotations;
+using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -109,19 +110,33 @@ namespace Xpand.XAF.Modules.Reactive{
         private static IObservable<Unit> ReloadWhenChanged(this XafApplication application)
             => application.WhenSetupComplete().SelectMany(_ => {
                 var membersToReload = application.Model.BOModel.TypeInfos().AttributedMembers<ReloadWhenChangeAttribute>().ToArray();
-                return application.WhenFrameViewChanged().WhenFrame(membersToReload.Select(t => t.memberInfo.Owner.Type.RealType()).Distinct().ToArray())
+                return application.WhenFrameViewChanged()
+                    .WhenFrame(membersToReload.SelectMany(t =>t.attribute.AttributeTypes(t.memberInfo)).Distinct().ToArray())
                     .SelectUntilViewClosed(frame => membersToReload.WhenFrame(frame)
-                        .SelectMany(ts => application.WhenProviderCommitted(ts.Key).ToObjects().To(ts).SelectMany()).ObserveOnContext()
-                        .Select(t => t)
-                        .DoWhen(t => t.attribute.ObjectPropertyChangeMethodName!=null,t => frame.View.CurrentObject.CallMethod(t.attribute.ObjectPropertyChangeMethodName, t.info.Name))
-                        .DoWhen(_ => frame.View.ObjectTypeInfo.Type.Implements("DevExpress.Xpo.IXPReceiveOnChangedFromArbitrarySource"),t => frame.View.CurrentObject.CallMethod("FireChanged",t.info.Name))
-                        .DoWhen(_ => typeof(IReloadWhenChange).IsAssignableFrom(frame.View.ObjectTypeInfo.Type),t => frame.View.CurrentObject.As<IReloadWhenChange>().WhenPropertyChanged(t.info.Name))
+                        .SelectMany(ts => application.WhenProviderCommitted(ts.Key).To(ts).SelectMany()).ObserveOnContext()
+                        .Do(t => {
+                            if (t.attribute.ObjectPropertyChangeMethodName != null) {
+                                frame.View.CurrentObject.CallMethod(t.attribute.ObjectPropertyChangeMethodName, t.info.Name);      
+                            }
+                            else if (typeof(IReloadWhenChange).IsAssignableFrom(frame.View.ObjectTypeInfo.Type)) {
+                                frame.View.CurrentObject.As<IReloadWhenChange>().WhenPropertyChanged(t.info.Name);
+                            }
+                            else if (frame.View.ObjectTypeInfo.Type.Implements("DevExpress.Xpo.IXPReceiveOnChangedFromArbitrarySource")) {
+                                (frame.View.ObjectTypeInfo.Type.Method("FireChanged") ?? frame.View.ObjectTypeInfo.Type.Method("DevExpress.Xpo.IXPReceiveOnChangedFromArbitrarySource.FireChanged"))
+                                    .Call(frame.View.CurrentObject, t.info.Name);
+                            }
+                        })
                         .ToUnit());
             });
 
-        private static IObservable<IGrouping<Type, (ReloadWhenChangeAttribute attribute, IMemberInfo info)>> WhenFrame(
+        private static IEnumerable<Type> AttributeTypes(this ReloadWhenChangeAttribute attribute, IMemberInfo memberInfo) 
+            => attribute.Types.Any()?attribute.Types: memberInfo.Owner.Type.RealType().YieldItem();
+
+        private static IObservable<IGrouping<Type, (Type key, IMemberInfo info, ReloadWhenChangeAttribute attribute)>> WhenFrame(
             this IEnumerable<(ReloadWhenChangeAttribute attribute, IMemberInfo info)> membersToReload, Frame frame) 
-            => membersToReload.Where(t => t.info.Owner == frame.View.ObjectTypeInfo).GroupBy(t => t.info.MemberTypeInfo.Type.RealType()).ToNowObservable();
+            => membersToReload.Where(t => t.info.Owner == frame.View.ObjectTypeInfo||t.attribute.Types.Any(type => type.IsAssignableFrom(frame.View.ObjectTypeInfo.Type)))
+                .SelectMany(t => t.attribute.AttributeTypes(t.info).Select(type => (key:type,t.info,t.attribute)))
+                .GroupBy(t => t.key).ToNowObservable();
 
         private static IObservable<Unit> MergedExtraEmbeddedModels(this ApplicationModulesManager manager) 
             => manager.WhereApplication().ToObservable()
