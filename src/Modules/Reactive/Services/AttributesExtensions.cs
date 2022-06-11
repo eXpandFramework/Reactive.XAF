@@ -29,9 +29,18 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                     .CustomAttributes().VisibleInAllViewsAttribute()
                     .ToUnit())
                 .Merge(manager.ReadOnlyCollection())
+                .Merge(manager.ReadOnlyProperty())
                 .Merge(manager.XpoAttributes())
             ;
-
+        static IObservable<Unit> ReadOnlyProperty(this ApplicationModulesManager manager)
+            => manager.WhenGeneratingModelNodes<IModelBOModelClassMembers>()
+                .SelectMany(members => members.SelectMany(member => member.MemberInfo.FindAttributes<ReadOnlyPropertyAttribute>()
+                    .Do(attribute => {
+                        member.AllowClear = attribute.AllowClear;
+                        member.AllowEdit = false;
+                    })))
+                .ToUnit();
+        
         static IObservable<Unit> ReadOnlyCollection(this ApplicationModulesManager manager)
             => manager.WhenApplication(application => application.WhenFrameViewChanged().WhenFrame(ViewType.DetailView)
                 .SelectMany(frame => frame.View.AsDetailView().GetItems<ListPropertyEditor>()

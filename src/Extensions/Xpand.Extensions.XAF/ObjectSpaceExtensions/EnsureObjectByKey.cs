@@ -26,7 +26,7 @@ namespace Xpand.Extensions.XAF.ObjectSpaceExtensions {
                 .FirstOrDefault() : default;
 
         public static object EnsureObjectByKey(this IObjectSpace objectSpace, Type objectType, object key)
-            => objectSpace.GetObjectByKey(objectType, key);
+            => objectSpace.GetObjectByKey(objectType, key)??objectSpace.CreateObject(objectType);
         
     }
 }

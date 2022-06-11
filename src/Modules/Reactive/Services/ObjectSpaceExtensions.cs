@@ -201,6 +201,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             WhenCommittedDetailed<T>(this IObjectSpace objectSpace, ObjectModification objectModification,Func<T, bool> criteria=null,params string[] modifiedProperties) 
             => objectSpace.WhenCommitingDetailed(true, objectModification,criteria, modifiedProperties);
 
+        public static IObservable<(IObjectSpace objectSpace, (object instance, ObjectModification modification)[] details)>
+            WhenCommittedDetailed(this IObjectSpace objectSpace, Type objectType, ObjectModification objectModification,
+                Func<object, bool> criteria = null, params string[] modifiedProperties) 
+            => modifiedProperties.Any()?objectSpace.WhenModifiedObjects(objectType,modifiedProperties).Take(1)
+                    .SelectMany(_ => objectSpace.WhenCommitingDetailed(objectModification, true,criteria)):
+                objectSpace.WhenCommitingDetailed(objectModification, true,criteria);
+
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)>
             WhenCommitingDetailed<T>(this IObjectSpace objectSpace, bool emitAfterCommit, ObjectModification objectModification,Func<T, bool> criteria,params string[] modifiedProperties) 
             => modifiedProperties.Any()?objectSpace.WhenModifiedObjects(typeof(T),modifiedProperties).Cast<T>().Take(1)
