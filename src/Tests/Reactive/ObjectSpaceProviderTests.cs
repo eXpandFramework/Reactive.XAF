@@ -1,11 +1,12 @@
-﻿using akarnokd.reactive_extensions;
-using DevExpress.DataAccess.Native;
+﻿using System;
+using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.Security.ClientServer;
 using DevExpress.ExpressApp.Xpo;
+using Moq;
 using NUnit.Framework;
 using Shouldly;
-using Xpand.Extensions.XAF.XafApplicationExtensions;
+using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -59,5 +60,16 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
             testObserver.ItemCount.ShouldBe(1);
         }
 
+        [Test]
+        [XpandTest()]
+        public void When_Secured_MiddleTier() {
+            AppDomain.CurrentDomain.Patch(harmony => { 
+                var objectSpaceProvider = new MiddleTierServerObjectSpaceProvider(Mock.Of<IMiddleTierSerializableObjectLayer>());
+
+                harmony.PatchSchemaUpdated(objectSpaceProvider);
+
+                Should.Throw<NotSupportedException>(() => objectSpaceProvider.UpdateSchema());
+            });
+        }
     }
 }
