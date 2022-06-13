@@ -55,7 +55,7 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
             => // exceptionSelector ??= (exception => Observable.Empty<T>());
             source.Catch<T, Exception>(exception => {
                 if (args != null) args.Cancel = true;
-                application.HandleException( exception);
+                application?.HandleException( exception);
                 return exception.Handle(exceptionSelector);
             });
 
