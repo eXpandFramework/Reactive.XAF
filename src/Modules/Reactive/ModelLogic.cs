@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using Fasterflect;
 using JetBrains.Annotations;
@@ -14,10 +15,18 @@ namespace Xpand.XAF.Modules.Reactive{
     }
 
     public interface IModelReactiveModules : IModelNode{
+        
     }
     public interface IModelReactiveModule : IModelNode{
+        public string StoreToDisk{ get; set; }
     }
 
+
+    [DomainLogic(typeof(IModelReactiveModule))]
+    public class ModelReactiveModuleLogic {
+        public static string Get_StoreToDisk(IModelReactiveModule manager) 
+            => $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}\\{manager.Application.Title}\\{nameof(IModelReactiveModule.StoreToDisk)}";
+    }
     public static class ReactiveModulesExtension{
         [PublicAPI]
         public static IObservable<IModelReactiveModules> ReactiveModulesModel(this IObservable<XafApplication> source){

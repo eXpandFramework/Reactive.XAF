@@ -6,6 +6,7 @@ using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Reflection;
 using Xpand.Extensions.Reactive.ErrorHandling;
+using Xpand.Extensions.StreamExtensions;
 
 namespace Xpand.Extensions.Reactive.Transform.System {
     public static class AppDomainExtensions {
@@ -30,10 +31,21 @@ namespace Xpand.Extensions.Reactive.Transform.System {
                 .SelectMany(args => AppDomain.CurrentDomain.OpenFile(args.FullPath)));
 
 
-        public static IObservable<string> WhenFileReadAsString(this AppDomain appDomain,string fileName,FileMode fileMode=FileMode.Open,FileAccess fileAccess=FileAccess.Read,FileShare fileShare=FileShare.Read)
-            =>File.Exists(fileName)? File.OpenText(fileName).ReadToEndAsync().ToObservable():Observable.Empty<string>()
-                .RetryWithBackoff();
-        
+        public static IObservable<string> WhenFileReadAsString(this AppDomain appDomain,string fileName,FileMode fileMode=FileMode.Open,FileAccess fileAccess=FileAccess.Read,FileShare fileShare=FileShare.Read) 
+            => File.Open(fileName, fileMode, fileAccess, fileShare).ReadToEndAsStringAsync().ToObservable().Where(s => !string.IsNullOrEmpty(s)).RetryWithBackoff();
+
+        public static IObservable<string> WhenDirectory(this AppDomain appDomain,string directory,bool create=true) {
+            if (!Directory.Exists(directory)){
+                if (create) {
+                    Directory.CreateDirectory(directory!);
+                    return directory.ReturnObservable();
+                }
+
+                return Observable.Empty<string>();
+            }
+            return directory.ReturnObservable();
+        }
+
         public static IObservable<string> OpenFile(this AppDomain appDomain,string fileName,FileMode fileMode=FileMode.Open,FileAccess fileAccess=FileAccess.Read,FileShare fileShare=FileShare.Read) 
             => Observable.Defer(() => Observable.Using(() => File.Open(fileName, fileMode, fileAccess, fileShare),
                     _ => {

@@ -7,7 +7,9 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Xpand.Extensions.JsonExtensions {
+    
     public static partial class JsonExtensions {
+        public static JToken ToJToken(this object instance) => instance==null?null:JToken.FromObject(instance);
         public static JToken DeserializeJson(this string json) => JToken.Parse(json);
         public static T[] Deserialize<T>(this Type type, string json) => type.Deserialize(json).Cast<T>().ToArray();
         public static T[] DeserializeJson<T>(this string json) {

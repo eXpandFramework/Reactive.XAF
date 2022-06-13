@@ -88,7 +88,6 @@ namespace Xpand.XAF.Modules.Reactive{
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager)
             => manager.Attributes()
                 .Merge(manager.AddNonSecuredTypes())
-                .Merge(manager.LookupPropertyAttribute())
                 .Merge(manager.MergedExtraEmbeddedModels())
                 .Merge(manager.ConnectObjectString())
                 .Merge(manager.WhenApplication(application =>application.WhenNonPersistentPropertyCollectionSource()

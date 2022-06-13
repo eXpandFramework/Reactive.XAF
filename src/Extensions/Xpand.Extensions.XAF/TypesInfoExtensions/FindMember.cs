@@ -10,6 +10,9 @@ namespace Xpand.Extensions.XAF.TypesInfoExtensions{
 		public static IEnumerable<IMemberInfo> Members<TAttribute>(this IEnumerable<(TAttribute attribute, IMemberInfo memberInfo)> source) where TAttribute : Attribute
 			=> source.Select(t => t.memberInfo);
 		
+		public static IEnumerable<(IMemberInfo info,object value)> MembersValue(this IEnumerable<IMemberInfo> source,object instance)
+			=> source.Select(memberInfo => (memberInfo,value:memberInfo.GetValue(instance)));
+		
 		public static IEnumerable<(TAttribute attribute, IMemberInfo memberInfo)> AttributedMembers<TAttribute>(this IEnumerable<ITypeInfo> source)  where TAttribute:Attribute 
 			=> source.SelectMany(info => info.AttributedMembers<TAttribute>());
 

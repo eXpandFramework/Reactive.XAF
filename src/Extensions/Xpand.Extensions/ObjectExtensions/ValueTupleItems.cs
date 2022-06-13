@@ -6,7 +6,7 @@ namespace Xpand.Extensions.ObjectExtensions {
         public static object[] ValueTupleItems(this object obj) {
             var type = obj.GetType();
             return type.IsGenericType && GetItems.TryGetValue(type.GetGenericTypeDefinition(), out var itemGetter)
-                ? itemGetter(obj) : new object[0];
+                ? itemGetter(obj) : Array.Empty<object>();
         }
 
         static readonly IDictionary<Type,Func<object,object[]>> GetItems = new Dictionary<Type,Func<object,object[]>> {
