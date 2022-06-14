@@ -11,6 +11,7 @@ using HarmonyLib;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
 using Xpand.Extensions.XAF.SecurityExtensions;
@@ -24,25 +25,12 @@ namespace Xpand.XAF.Modules.Reactive.Services.Security{
 
         internal static IObservable<Unit> PatchAuthentication(this XafApplication application) 
             => application.WhenSetupComplete()
-                .Do(_ => {
-                    AppDomain.CurrentDomain.Patch(harmony => {
-                        if (harmony.GetPatchedMethods().All(methodBase => methodBase.Name != nameof(Authenticate)) &&
-                            application.Security.IsInstanceOf("DevExpress.ExpressApp.Security.SecurityStrategyBase")){
-                            if (harmony.GetPatchedMethods().Any(methodBase => methodBase.Name == nameof(Authenticate))) {
-                                var methodInfo = application.Security?.GetPropertyValue("Authentication")?.GetType().Methods("Authenticate")
-                                    .Last(info =>info.DeclaringType is { IsAbstract: false });
-                                if (methodInfo != null){
-                                    harmony.Patch(methodInfo, new HarmonyMethod(GetMethodInfo(nameof(Authenticate))));	
-                                }
-                            }
-                        }
-                    });
-                })
+                .DoWhen(_ => application.Security.IsInstanceOf("DevExpress.ExpressApp.Security.SecurityStrategyBase"),
+                    _ => application.Security.GetPropertyValue("Authentication").GetType().Methods("Authenticate")
+                        .Last(info => info.DeclaringType is { IsAbstract: false })
+                        .PatchWith(new HarmonyMethod(typeof(SecurityExtensions),nameof(Authenticate))))
                 .ToUnit();
-
-        static MethodInfo GetMethodInfo(string methodName) 
-            => typeof(SecurityExtensions).GetMethods(BindingFlags.Static|BindingFlags.NonPublic|BindingFlags.Public).First(info => info.Name == methodName);
-
+        
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         private static bool Authenticate(ref object __result,object __instance,IObjectSpace objectSpace) {
             var args = new GenericEventArgs<object>();

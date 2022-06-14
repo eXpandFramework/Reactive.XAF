@@ -12,14 +12,9 @@ using Xpand.Extensions.LinqExtensions;
 namespace Xpand.Extensions.XAF.AppDomainExtensions{
     public static partial class AppDomainExtensions{
 	    static readonly ConcurrentHashSet<string> References=new();
-        static AppDomainExtensions(){
-	        AppDomain.CurrentDomain.Patch(harmony => {
-                var original = typeof(CSCodeCompiler).GetMethod(nameof(CSCodeCompiler.Compile));
-		        var prefix = typeof(AppDomainExtensions).Method(nameof(ModifyCSCodeCompilerReferences),Flags.Static|Flags.AnyVisibility);
-                harmony.Patch(original, new HarmonyMethod(prefix));
-
-            });
-        }
+        static AppDomainExtensions() 
+	        => typeof(CSCodeCompiler).GetMethod(nameof(CSCodeCompiler.Compile))
+		        .PatchWith(new HarmonyMethod(typeof(AppDomainExtensions).Method(nameof(ModifyCSCodeCompilerReferences),Flags.Static|Flags.AnyVisibility)));
 
         [PublicAPI]
         public static void AddModelReference(this AppDomain appDomain, params string[] name){

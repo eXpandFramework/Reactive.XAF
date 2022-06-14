@@ -25,12 +25,9 @@ namespace Xpand.XAF.Modules.Windows{
             
         }
 
-        static AlertControlService(){
-            AppDomain.CurrentDomain.Patch(harmony => {
-                var target = typeof(AlertControl).Method(nameof(AlertControl.Show), new[]{ typeof(Form), typeof(AlertInfo) });
-                harmony.Patch(target, new HarmonyMethod(typeof(AlertControlService),nameof(Show)));
-            });
-        }
+        static AlertControlService() 
+            => typeof(AlertControl).Method(nameof(AlertControl.Show), new[] { typeof(Form), typeof(AlertInfo) })
+                .PatchWith(new HarmonyMethod(typeof(AlertControlService), nameof(Show)));
 
         public static IObservable<Unit> ConnectAlertForm(this ApplicationModulesManager manager) => Observable.Empty<Unit>();
     }

@@ -50,7 +50,7 @@ namespace Xpand.Extensions.XAF.ActionExtensions{
                     helper.CallMethod("ShowPopupWindow");
                 }
                 else {
-                    popupWindowShowAction?.DoExecute((Window)popupWindowShowAction.Controller.Frame);
+                    popupWindowShowAction.DoExecute((Window)popupWindowShowAction.Controller.Frame);
                 }
             }
 

@@ -19,12 +19,9 @@ using Xpand.Extensions.XAF.SecurityExtensions;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire {
     public class UseHangfire : IStartupFilter {
-        static UseHangfire() {
-            AppDomain.CurrentDomain.Patch(harmony => {
-                var methodInfo = typeof(StartupExtensions).Method(nameof(StartupExtensions.UseXaf),Flags.StaticPublic);
-                harmony.Patch(methodInfo,postfix:new HarmonyMethod(typeof(UseHangfire),nameof(UseXaf)));
-            });
-        }
+        static UseHangfire() =>
+            typeof(StartupExtensions).Method(nameof(StartupExtensions.UseXaf),Flags.StaticPublic)
+                .PatchWith(postFix:new HarmonyMethod(typeof(UseHangfire),nameof(UseXaf)));
 
         public static void UseXaf(IApplicationBuilder builder) => Dashboard?.Invoke(builder);
 

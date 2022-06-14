@@ -37,7 +37,7 @@ namespace Xpand.XAF.Modules.Reactive{
         static readonly Subject<(List<Controller> __result, Type baseType, IModelApplication modelApplication, View view)> WhenControllerCreatedSubject=new();
         
 
-        static RxApp() => AppDomain.CurrentDomain.Patch(PatchXafApplication);
+        static RxApp() => PatchXafApplication();
 
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         static void CreateModuleManager(ApplicationModulesManager __result) => ApplicationModulesManagerSubject.OnNext(__result);
@@ -64,15 +64,16 @@ namespace Xpand.XAF.Modules.Reactive{
             => source.SelectMany(t => t.controllers.Where(controller => controller is T)).Cast<T>();
 
 
-        private static void PatchXafApplication(Harmony harmony){
-            var createModuleManager = typeof(XafApplication).Method(nameof(CreateModuleManager));
-            harmony.Patch(createModuleManager, finalizer: new HarmonyMethod(GetMethodInfo(nameof(CreateModuleManager))));
-            harmony.Patch(typeof(XafApplication).Method(nameof(XafApplication.Exit)),
-                new HarmonyMethod(typeof(XafApplicationRxExtensions), nameof(XafApplicationRxExtensions.Exit)));
+        private static void PatchXafApplication(){
+            var xafApplicationType = typeof(XafApplication);
+            xafApplicationType.Method(nameof(CreateModuleManager))
+                .PatchWith(finalizer: new HarmonyMethod(GetMethodInfo(nameof(CreateModuleManager))));
+            xafApplicationType.Method(nameof(XafApplication.Exit))
+                .PatchWith(new HarmonyMethod(typeof(XafApplicationRxExtensions), nameof(XafApplicationRxExtensions.Exit)));
 
             if (DesignerOnlyCalculator.IsRunTime) {
                 var createController = typeof(ControllersManager).Method(nameof(ControllersManager.CreateControllers),new []{typeof(Type),typeof(IModelApplication),typeof(View)});
-                harmony.Patch(createController, finalizer: new HarmonyMethod(GetMethodInfo(nameof(CreateControllers))));
+                createController.PatchWith(finalizer: new HarmonyMethod(GetMethodInfo(nameof(CreateControllers))));
             }
             
         }

@@ -2,6 +2,7 @@
 using System;
 using System.Reflection;
 using Fasterflect;
+
 namespace Xpand.Extensions.TypeExtensions {
     public static partial class TypeExtensions {
         public static Expression<Action> CallExpression(this Type type, MethodInfo method,

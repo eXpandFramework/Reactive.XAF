@@ -8,6 +8,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reflection;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
 using Fasterflect;
 using HarmonyLib;
@@ -22,12 +23,11 @@ namespace Xpand.XAF.Modules.Reactive{
         static readonly Subject<ApplicationModulesManager> SettingUpSubject=new();
         static ReactiveModuleBase(){
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainOnAssemblyResolve;
-            AppDomain.CurrentDomain.Patch(harmony => {
-                var original = typeof(ApplicationModulesManager).Method("SetupModules");
-                var prefix = typeof(ReactiveModule).Method(nameof(SetupModulesPatch),Flags.StaticAnyVisibility);
-                harmony.Patch(original,  new HarmonyMethod(prefix));
-                AppDomain.CurrentDomain.AddModelReference("netstandard",typeof(FontStyle?).Assembly.GetName().Name);
-            });
+            typeof(ApplicationModulesManager).Method("SetupModules")
+                .PatchWith( new HarmonyMethod(typeof(ReactiveModule).Method(nameof(SetupModulesPatch),Flags.StaticAnyVisibility)));
+            if (DesignerOnlyCalculator.IsRunTime) {
+                AppDomain.CurrentDomain.AddModelReference("netstandard", typeof(FontStyle?).Assembly.GetName().Name);
+            }
         }
 
         private static Assembly CurrentDomainOnAssemblyResolve(object sender, ResolveEventArgs args){

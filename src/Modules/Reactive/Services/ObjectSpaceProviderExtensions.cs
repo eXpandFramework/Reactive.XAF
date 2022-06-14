@@ -27,20 +27,16 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         internal static IObservable<Unit> PatchObjectSpaceProvider(this XafApplication application) 
             => application.WhenSetupComplete()
                 .Do(_ => {
-                    AppDomain.CurrentDomain.Patch(harmony => {
-                        application.PatchSchemaUpdated(harmony);
-                        application.PatchObjectSpaceCreated(harmony);
-                    });
+                    application.PatchSchemaUpdated();
+                    application.PatchObjectSpaceCreated();
                 })
                 .ToUnit();
 
-        private static void PatchObjectSpaceCreated(this XafApplication application, Harmony harmony) {
+        private static void PatchObjectSpaceCreated(this XafApplication application) {
             var name = nameof(IObjectSpaceProvider.CreateObjectSpace);
-            if (harmony.GetPatchedMethods().Select(m => m.Name).All(s => s != name)) {
-                foreach (var provider in application.ObjectSpaceProviders) {
-                    var methodInfo = provider.GetType().Methods(name).First(info => !info.Parameters().Any());
-                    harmony.Patch(methodInfo, postfix: new HarmonyMethod(typeof(ObjectSpaceProviderExtensions), nameof(CreateObjectSpace)));
-                }
+            foreach (var provider in application.ObjectSpaceProviders) {
+                var methodInfo = provider.GetType().Methods(name).First(info => !info.Parameters().Any());
+                methodInfo.PatchWith( postFix: new HarmonyMethod(typeof(ObjectSpaceProviderExtensions), nameof(CreateObjectSpace)));
             }
         }
 
@@ -48,22 +44,17 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         private static void CreateObjectSpace(IObjectSpace __result) 
             => ObjectSpaceCreatedSubject.OnNext(__result);
 
-        private static void PatchSchemaUpdated(this XafApplication application, Harmony harmony) {
-            var methodBases = harmony.GetPatchedMethods().Select(m => m.Name);
-            var name = $"{typeof(IObjectSpaceProvider).FullName}.{nameof(IObjectSpaceProvider.UpdateSchema)}";
-            if (methodBases.All(s => s != name)) {
-                application.ObjectSpaceProviders.Where(provider => provider is not NonPersistentObjectSpaceProvider)
-                    .ForEach(harmony.PatchSchemaUpdated);
-            }
-        }
+        private static void PatchSchemaUpdated(this XafApplication application) 
+            => application.ObjectSpaceProviders.Where(provider => provider is not NonPersistentObjectSpaceProvider)
+                .ForEach(PatchSchemaUpdated);
 
-        public static void PatchSchemaUpdated(this Harmony harmony, IObjectSpaceProvider provider) {
+        public static void PatchSchemaUpdated(this IObjectSpaceProvider provider) {
             if (provider.IsMiddleTier()) return;
             var name = $"{typeof(IObjectSpaceProvider).FullName}.{nameof(IObjectSpaceProvider.UpdateSchema)}";
-            var methodInfos =provider.GetType().Methods(nameof(IObjectSpaceProvider.UpdateSchema),name);
-            var methodInfo = methodInfos.Last(info => info.DeclaringType is { IsAbstract: false });
-            harmony.Patch(methodInfo, new HarmonyMethod(GetMethodInfo(nameof(SchemaUpdating))));
-            harmony.Patch(methodInfo, postfix: new HarmonyMethod(GetMethodInfo(nameof(SchemaUpdated))));
+            provider.GetType().Methods(nameof(IObjectSpaceProvider.UpdateSchema),name)
+                .Last(info => info.DeclaringType is { IsAbstract: false })
+                .PatchWith(new HarmonyMethod(GetMethodInfo(nameof(SchemaUpdating))))
+                .PatchWith(postFix: new HarmonyMethod(GetMethodInfo(nameof(SchemaUpdated))));
         }
 
         [SuppressMessage("ReSharper", "InconsistentNaming")]

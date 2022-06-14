@@ -21,13 +21,10 @@ namespace Xpand.XAF.Modules.ModelViewInheritance {
         public override string ToString() => Name;
     }
     public static class ModelViewInheritanceService {
-        static ModelViewInheritanceService() {
-            AppDomain.CurrentDomain.Patch(harmony => {
-                var original = typeof(ApplicationModelManager).Method("CreateUnchangeableLayer");
-                var prefix = new HarmonyMethod(typeof(ModelViewInheritanceService),nameof(CreateUnchangeableLayer));
-                harmony.Patch(original,prefix);
-            });
-        }
+        static ModelViewInheritanceService() 
+            => typeof(ApplicationModelManager).Method("CreateUnchangeableLayer")
+                .PatchWith(new HarmonyMethod(typeof(ModelViewInheritanceService),nameof(CreateUnchangeableLayer)),
+                    new HarmonyMethod(typeof(ModelViewInheritanceService),nameof(CreateUnchangeableLayer)));
 
         internal static IObservable<ModelInterfaceExtenders> Connect(this ApplicationModulesManager manager) 
             => manager.WhenExtendingModel()

@@ -1,19 +1,23 @@
-﻿using System;
+﻿using System.Collections.Concurrent;
+using System.Reflection;
 using DevExpress.ExpressApp.Model.Core;
 using HarmonyLib;
-using JetBrains.Annotations;
 
 namespace Xpand.Extensions.XAF.AppDomainExtensions {
     public static partial class AppDomainExtensions {
-        private static Harmony _harmony;
-
-        [PublicAPI]
-        public static Harmony Patch(this AppDomain appDomain, Action<Harmony> patch) {
-	        _harmony ??= new Harmony("XAF");
-	        if (DesignerOnlyCalculator.IsRunTime) {
-		        patch(_harmony);
-	        }
-	        return _harmony;
-        }
+	    private static Harmony _harmony;
+	    private static readonly ConcurrentDictionary<string,MethodInfo> PatchedMethods = new();
+	    public static MethodInfo PatchWith(this MethodInfo method, HarmonyMethod prefix = null,
+		    HarmonyMethod postFix = null, HarmonyMethod transpiler = null,HarmonyMethod finalizer = null) {
+		    _harmony ??= new Harmony("XAF");
+		    if (DesignerOnlyCalculator.IsRunTime) {
+			    var methodName = $"{method.DeclaringType?.FullName}{method.Name}";
+			    if (!PatchedMethods.TryGetValue(methodName, out _)) {
+				    PatchedMethods.TryAdd(methodName, method);
+				    _harmony.Patch(method, prefix, postFix, transpiler,finalizer);
+			    }
+		    }
+		    return method;
+	    }
     }
 }
