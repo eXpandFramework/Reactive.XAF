@@ -23,6 +23,7 @@ namespace Xpand.XAF.Modules.Reactive {
             base.ExtendModelInterfaces(extenders);
             _extendingModelSubject.OnNext(extenders);
             extenders.Add<IModelApplication,IModelApplicationReactiveModules>();
+            extenders.Add<IModelReactiveModules,IModelReactiveModule>();
         }
 
         public override void AddGeneratorUpdaters(ModelNodesGeneratorUpdaters updaters){
