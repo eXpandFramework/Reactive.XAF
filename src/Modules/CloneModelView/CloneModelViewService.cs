@@ -4,7 +4,7 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.NodeGenerators;
-using JetBrains.Annotations;
+
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.CloneModelView{
@@ -83,7 +83,7 @@ namespace Xpand.XAF.Modules.CloneModelView{
 			}
 		}
 
-		[PublicAPI]
+		
 		public static Type ModelViewType(this CloneViewType viewType) 
             => viewType == CloneViewType.ListView || viewType == CloneViewType.LookupListView
                 ? typeof(IModelListView)

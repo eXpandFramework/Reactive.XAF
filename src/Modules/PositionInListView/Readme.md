@@ -93,7 +93,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |Xpand.Extensions|4.202.45
  |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/DevExpress.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.202.45
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
- |JetBrains.Annotations|2020.3.0
+ ||2020.3.0
  |System.Reactive|5.0.0
  |System.Configuration.ConfigurationManager|5.0.0
  |Microsoft.CodeAnalysis.CSharp|3.8.0

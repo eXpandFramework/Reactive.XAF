@@ -4,12 +4,12 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
+
 using MagicOnion.Server.Hubs;
 using Xpand.Extensions.Reactive.Transform;
 
 namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
-    [UsedImplicitly]
+    
     public class TraceEventHub : StreamingHubBase<ITraceEventHub, ITraceEventHubReceiver>,ITraceEventHub{
         static readonly ISubject<TraceEventMessage> TraceSubject=new Subject<TraceEventMessage>();
 

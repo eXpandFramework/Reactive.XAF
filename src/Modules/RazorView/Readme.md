@@ -95,7 +95,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |Xpand.Patcher|2.0.31
  |System.Reactive|5.0.0
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
- |JetBrains.Annotations|2021.3.0
+ ||2021.3.0
  |Newtonsoft.Json|13.0.1
  |Xpand.Collections|1.0.4
  |RazorLight|2.0.0-rc.3

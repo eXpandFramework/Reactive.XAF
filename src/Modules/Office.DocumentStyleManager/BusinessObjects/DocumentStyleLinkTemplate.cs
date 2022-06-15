@@ -1,11 +1,11 @@
 ﻿using DevExpress.ExpressApp;
 using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
-using JetBrains.Annotations;
+
 using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
-	[PublicAPI]
+	
 	public class DocumentStyleLinkTemplate:CustomBaseObject{
 		public DocumentStyleLinkTemplate(Session session) : base(session){
 		}

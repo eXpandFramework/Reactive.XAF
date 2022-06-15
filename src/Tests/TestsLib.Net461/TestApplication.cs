@@ -12,7 +12,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Web;
 using DevExpress.ExpressApp.Web.Layout;
 using DevExpress.ExpressApp.Win;
-using JetBrains.Annotations;
+
 using Moq;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Reactive.Transform;
@@ -130,7 +130,7 @@ namespace Xpand.TestsLib {
 
 		protected override bool IsSharedModel => false;
 		public IObservable<Unit> TraceClientConnected { get; set; }
-		[PublicAPI] public Type SUTModule { get; set; }
+		 public Type SUTModule { get; set; }
 
 		protected override LayoutManager CreateLayoutManagerCore(bool simple) {
 			var controlMock = new Mock<Control>() { CallBase = true };
@@ -141,7 +141,7 @@ namespace Xpand.TestsLib {
 		}
 	}
 
-	[PublicAPI]
+	
 	static class TestApplicationExtensions {
 		public static IObservable<Unit> ClientBroadcast(this ITestApplication application) {
 			return Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()
@@ -150,7 +150,7 @@ namespace Xpand.TestsLib {
 				: Unit.Default.ReturnObservable();
 		}
 
-		[PublicAPI]
+		
 		public static IObservable<Unit> ClientConnect(this ITestApplication application) {
 			return Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()
 				? TraceEventHub.Connecting.FirstAsync().SubscribeReplay()

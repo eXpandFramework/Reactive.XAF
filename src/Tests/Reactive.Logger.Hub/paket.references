@@ -5,7 +5,7 @@ Shouldly
 NUnit
 NUnit3TestAdapter
 Fasterflect.Xpand
-JetBrains.Annotations
+
 Microsoft.CodeAnalysis
 Microsoft.NET.Test.Sdk
 DevExpress.Persistent.BaseImpl.Xpo

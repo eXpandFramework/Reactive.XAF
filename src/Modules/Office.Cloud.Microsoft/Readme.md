@@ -159,7 +159,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |Xpand.Extensions.Reactive|4.212.9
  |Xpand.Extensions.XAF|4.212.9
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
- |JetBrains.Annotations|2021.3.0
+ ||2021.3.0
  |System.Reactive|5.0.0
  |Microsoft.Graph.Beta|4.22.0-preview
  |Microsoft.Owin.Host.SystemWeb|4.2.0

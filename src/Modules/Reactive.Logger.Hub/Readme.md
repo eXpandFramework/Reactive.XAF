@@ -73,7 +73,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |System.Interactive.Async|5.0.0
  |System.Reactive|5.0.0
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
- |Jetbrains.Annotations|2021.3.0
+ ||2021.3.0
  |YamlDotNet|11.2.1
  |Xpand.Patcher|2.0.31
  |Xpand.Collections|1.0.4

@@ -4,7 +4,7 @@ using System.Drawing;
 using DevExpress.Xpo;
 using DevExpress.XtraRichEdit.API.Native;
 using DevExpress.XtraRichEdit.Model;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.XAF.Xpo.ValueConverters;
 using Xpand.XAF.Persistent.BaseImpl;
 using ParagraphAlignment = DevExpress.XtraRichEdit.API.Native.ParagraphAlignment;
@@ -394,7 +394,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
 
 		TemplateStyle _parent;
 
-		[PublicAPI]
+		
 		public TemplateStyle Parent{
 			get => _parent;
 			set => SetPropertyValue(nameof(Parent), ref _parent, value);
@@ -403,7 +403,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
 
 		TemplateStyle _next;
 
-		[PublicAPI]
+		
 		public TemplateStyle Next{
 			get => _next;
 			set => SetPropertyValue(nameof(Next), ref _next, value);

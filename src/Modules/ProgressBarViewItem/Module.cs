@@ -3,7 +3,7 @@ using System.Linq;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.SystemModule;
 using Fasterflect;
-using JetBrains.Annotations;
+
 using Microsoft.CodeAnalysis.CSharp;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Compiler;
@@ -13,9 +13,9 @@ using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.ProgressBarViewItem{
-    [UsedImplicitly]
+    
     public sealed class ProgressBarViewItemModule : ReactiveModuleBase{
-        [PublicAPI]
+        
         public const string CategoryName = "Xpand.XAF.Modules.ProgressBarViewItem";
 
         public ProgressBarViewItemModule(){
@@ -23,7 +23,7 @@ namespace Xpand.XAF.Modules.ProgressBarViewItem{
             RequiredModuleTypes.Add(typeof(ReactiveModule));   
         }
 
-        public static ReactiveTraceSource TraceSource{ get; [PublicAPI]set; }
+        public static ReactiveTraceSource TraceSource{ get; set; }
         static ProgressBarViewItemModule(){
             TraceSource=new ReactiveTraceSource(nameof(ProgressBarViewItemModule));
         }

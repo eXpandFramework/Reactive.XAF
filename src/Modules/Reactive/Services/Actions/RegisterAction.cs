@@ -12,10 +12,10 @@ using DevExpress.ExpressApp.Core;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using HarmonyLib;
-using JetBrains.Annotations;
+
 
 namespace Xpand.XAF.Modules.Reactive.Services.Actions{
-    [PublicAPI]
+    
     public static partial class ActionsService{
 	    static readonly ConcurrentDictionary<Type, (string id, Func<(Controller controller, string id), ActionBase> actionBase)> ControllerCtorState;
         static ActionsService(){

@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel;
 using DevExpress.Xpo;
-using JetBrains.Annotations;
+
 
 namespace Xpand.XAF.Modules.SequenceGenerator.Tests.BO{
-    [PublicAPI]
+    
     public  class TestObjectNotRegistered : TestBaseObject ,ISequentialNumber{
         private long _sequentialNumber;
         

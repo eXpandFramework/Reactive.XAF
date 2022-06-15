@@ -17,7 +17,7 @@ using Google.Apis.Auth.OAuth2.Responses;
 using Google.Apis.Auth.OAuth2.Web;
 using Google.Apis.Requests;
 using Google.Apis.Services;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Reactive.Combine;
@@ -36,7 +36,7 @@ using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
 namespace Xpand.XAF.Modules.Office.Cloud.Google{
 
     public static class GoogleService{
-        [PublicAPI]
+        
         public static IObservable<(Frame frame, UserCredential userCredential)> AuthorizeGoogle(this IObservable<Frame> source) 
             => source.SelectMany(frame => Observable.Defer(() => frame.Application.GoogleNeedsAuthentication().WhenDefault()
                 .SelectMany(_ => frame.View.AsObjectView().Application().AuthorizeGoogle()
@@ -51,11 +51,11 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
                 .Publish().RefCount()
                 .TraceGoogleModule();
 
-        [PublicAPI]
+        
         public static SimpleAction ConnectGoogle(this (GoogleModule googleModule, Frame frame) tuple) 
             => tuple.frame.Action(nameof(ConnectGoogle)).As<SimpleAction>();
 
-        [PublicAPI]
+        
         public static SimpleAction DisconnectGoogle(this (GoogleModule googleModule, Frame frame) tuple) 
             => tuple.frame.Action(nameof(DisconnectGoogle)).As<SimpleAction>();
 
@@ -145,7 +145,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
             return (string) value;
         }
 
-        [PublicAPI]
+        
         public static IObservable<T> NewService<T>(this IObservable<UserCredential> source) where T : BaseClientService 
             => source.Select(NewService<T>);
 
@@ -156,13 +156,13 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
             => application.GoogleAuthorizationCodeFlow().AuthorizeGoogle(application,acquireToken)
                 .TraceGoogleModule(credential => credential.UserId);
 
-        [PublicAPI]
+        
         public static IObservable<TResponse> ToObservable<TResponse>(this ClientServiceRequest request) => ((IClientServiceRequest<TResponse>)request).ToObservable();
 
         public static IObservable<TResponse> ToObservable<TResponse>(this IClientServiceRequest<TResponse> request) => Observable.FromAsync(() => request.ExecuteAsync());
 
         static readonly Subject<GenericEventArgs<Func<XafApplication,XafOAuthDataStore>>> CustomizeOathDataStoreSubject=new();
-        [PublicAPI]
+        
         public static IObservable<GenericEventArgs<Func<XafApplication, XafOAuthDataStore>>> CustomizeOathDataStore => CustomizeOathDataStoreSubject.AsObservable();
 
         static XafOAuthDataStore NewXafOAuthDataStore(this XafApplication application){
@@ -174,7 +174,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
             return args.Handled ? args.Instance(application) : new XafOAuthDataStore(application.CreateObjectSpace, application.CurrentUserId(),application.GetPlatform());
         }
         
-        [PublicAPI]
+        
         public static IObservable<GenericEventArgs<IObservable<UserCredential>>> CustomAcquireTokenInteractively 
             => CustomAcquireTokenInteractivelySubject.AsObservable();
 

@@ -2,14 +2,14 @@
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base.General;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.XAF.ModelExtensions.Shapes;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
-    [UsedImplicitly]
+    
     public sealed class GoogleCalendarModule : ReactiveModuleBase{
 
         static GoogleCalendarModule(){
@@ -29,7 +29,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
             extenders.Add<IModelGoogle,IModelGoogleCalendar>();
         }
         
-        [PublicAPI]
+        
         public static ReactiveTraceSource TraceSource{ get; set; }
         public override void Setup(ApplicationModulesManager manager){
             base.Setup(manager);

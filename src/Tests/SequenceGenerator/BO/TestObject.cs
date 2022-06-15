@@ -1,13 +1,13 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
 using DevExpress.Xpo;
-using JetBrains.Annotations;
+
 
 namespace Xpand.XAF.Modules.SequenceGenerator.Tests.BO{
     // ReSharper disable once UseNameofExpression
 
     [DebuggerDisplay("{ToString()}")]
-    [UsedImplicitly]
+    
     public  class TestObject : TestBaseObject, ISequentialNumber{
         private long _sequentialNumber;
 

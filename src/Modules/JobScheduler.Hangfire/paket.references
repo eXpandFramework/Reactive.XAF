@@ -2,7 +2,7 @@ DevExpress.ExpressApp.Validation.Blazor
 DevExpress.ExpressApp.Xpo
 DevExpress.ExpressApp.ConditionalAppearance
 Fasterflect.Xpand
-JetBrains.Annotations
+
 System.Reactive
 System.Interactive
 Hangfire.AspNetCore

@@ -11,7 +11,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.XtraRichEdit;
 using DevExpress.XtraRichEdit.API.Native;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions;
@@ -26,7 +26,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager{
         internal static IModelDocumentStyleManager DocumentStyleManager(this IModelApplication application)
             => application.ToReactiveModule<IModelReactiveModuleOffice>().Office.DocumentStyleManager();
 
-        [PublicAPI]
+        
         public static IObservable<IModelDocumentStyleManager> DocumentStyleManager(this IObservable<IModelOffice> source) 
             => source.Select(modules => modules.DocumentStyleManager());
 
@@ -34,7 +34,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager{
             => ((IModelOfficeDocumentStyleManager) office).DocumentStyleManager;
     }
 
-    [PublicAPI]
+    
     public interface IModelDocumentStyleManager : IModelNode{
         [DataSourceProperty(nameof(DocumentProviders))]
         [Category("DefaultPropertiesProvider")][Required]
@@ -62,7 +62,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager{
 
     [DomainLogic(typeof(IModelDocumentStyleManager))]
     public static class ModelOfficeModuleLogic{
-	    [UsedImplicitly]
+	    
         public static IModelList<IModelClass> Get_DocumentProviders(this IModelDocumentStyleManager modelDocumentStyleManager) 
             => modelDocumentStyleManager.Application.DocumentModelClasses();
 
@@ -70,17 +70,17 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager{
             => new CalculatedModelNodeList<IModelClass>(application.BOModel
 		        .Where(m => m.AllMembers.Any(member => member.Type==typeof(byte[]))&&!m.TypeInfo.Type.IsFromDocumentStyleManager()));
 
-        [UsedImplicitly]
+        
         public static IModelClass Get_DefaultPropertiesProvider(this IModelDocumentStyleManager modelDocumentStyleManager) 
             => modelDocumentStyleManager.ImportStyles.Select(item => item.ModelClass).FirstOrDefault();
         
-        [UsedImplicitly]
+        
         public static IModelMember Get_DefaultPropertiesProviderMember(this IModelDocumentStyleManager modelDocumentStyleManager){
 	        var modelImportStylesItem = modelDocumentStyleManager.ImportStyles.FirstOrDefault(item => item.ModelClass==modelDocumentStyleManager.DefaultPropertiesProvider);
 	        return modelImportStylesItem != null ? modelImportStylesItem.Member : modelDocumentStyleManager.DefaultPropertiesProvider.DocumentModelMembers().FirstOrDefault();
         }
 
-        [UsedImplicitly]
+        
         public static IModelList<IModelMember> Get_DefaultPropertiesProviderMembers(this IModelDocumentStyleManager modelDocumentStyleManager) 
             => modelDocumentStyleManager.DefaultPropertiesProvider.DocumentModelMembers();
 
@@ -107,16 +107,16 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager{
     }
 
     [DomainLogic(typeof(IModelImportStyles))]
-    [UsedImplicitly]
+    
     public class ModelImportStylesDomainLogic{
-	    [UsedImplicitly]
+	    
 	    public static IModelImportStylesItem Get_CurrentItem(IModelImportStyles importStyles) => importStyles.FirstOrDefault();
 
-	    [UsedImplicitly]
+	    
 	    public static IModelList<IModelImportStylesItem> Get_ImportStyleItems(IModelImportStyles importStyles) => importStyles;
     }
 
-    [KeyProperty(nameof(ModelClassId))][PublicAPI]
+    [KeyProperty(nameof(ModelClassId))]
     public interface IModelImportStylesItem:IModelNode{
         [Browsable(false)]
         string ModelClassId{ get; set; }
@@ -143,32 +143,32 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager{
 
     [DomainLogic(typeof(IModelImportStylesItem))]
     public static class ModelImportStylesItemDomainLogic{
-	    [UsedImplicitly]
+	    
 	    public static string Get_Caption(IModelImportStylesItem item) => item.ModelClass?.Caption;
 
-	    [UsedImplicitly]
+	    
 	    public static IModelClass Get_ModelClass(IModelImportStylesItem item) => ((IModelDocumentStyleManager) item.Parent.Parent)
 		    .DocumentProviders.FirstOrDefault(modelClass => modelClass.Id()==item.ModelClassId);
 
-	    [UsedImplicitly]
+	    
 	    public static void Set_ModelClass(IModelImportStylesItem item, IModelClass modelClass) => item.ModelClassId = modelClass.Id();
 
-	    [UsedImplicitly]
+	    
 	    public static IModelMember Get_Member(this IModelImportStylesItem item) => item
 		    .ModelClass?.AllMembers.FirstOrDefault(member => member.Type == typeof(byte[]));
 
-	    [UsedImplicitly]
+	    
 	    public static IModelList<IModelClass> Get_DocumentProviders(this IModelImportStylesItem item) =>
 		    item.Application.DocumentModelClasses();
 
-	    [UsedImplicitly]
+	    
 	    public static IModelList<IModelMember> Get_Members(this IModelImportStylesItem item) => item
 		    .ModelClass.DocumentModelMembers();
     }
     public interface IModelApplyTemplateListViews:IModelList<IModelApplyTemplateListViewItem>,IModelNode{
     }
 
-    [KeyProperty(nameof(ListViewId))][PublicAPI]
+    [KeyProperty(nameof(ListViewId))]
     public interface IModelApplyTemplateListViewItem:IModelNode{
         [Browsable(false)]
         string ListViewId{ get; set; }
@@ -194,7 +194,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager{
     public interface IModelDesignTemplateDetailViews:IModelList<IModelDesignTemplateDetailView>,IModelNode{
     }
 
-    [KeyProperty(nameof(DetailViewId))][PublicAPI]
+    [KeyProperty(nameof(DetailViewId))]
     public interface IModelDesignTemplateDetailView:IModelNode{
         [Browsable(false)]
         string DetailViewId{ get; set; }
@@ -207,11 +207,11 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager{
 
     [DomainLogic(typeof(IModelDesignTemplateDetailView))]
     public static class ModelDesignTemplateDetailViewLogic{
-        [UsedImplicitly]
+        
         public static IModelDetailView Get_DetailView(IModelDesignTemplateDetailView view) 
             => view.DetailViews.FirstOrDefault(viewItem => viewItem.Id==view.DetailViewId);
 
-        [UsedImplicitly]
+        
         public static void Set_DetailView(IModelDesignTemplateDetailView view, IModelDetailView modelDetailView) 
             => view.DetailViewId = modelDetailView.Id;
 
@@ -227,7 +227,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager{
     public interface IModelDesignTemplateContentEditors:IModelList<IModelDesignTemplateContentEditor>,IModelNode{
     }
 
-    [KeyProperty(nameof(ContentEditorId))][PublicAPI]
+    [KeyProperty(nameof(ContentEditorId))]
     public interface IModelDesignTemplateContentEditor:IModelNode{
         [Browsable(false)]
         string ContentEditorId{ get; set; }
@@ -244,24 +244,24 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager{
                 .MemberViewItems(typeof(IRichTextPropertyEditor)).Cast<IModelPropertyEditor>()
                 .ToCalculatedModelNodeList();
 
-        [UsedImplicitly]
+        
         public static IModelPropertyEditor Get_ContentEditor(IModelDesignTemplateContentEditor editor) 
             => editor.ContentEditors.FirstOrDefault(viewItem => viewItem.Id()==editor.ContentEditorId);
 
-        [UsedImplicitly]
+        
         public static void Set_ContentEditor(IModelDesignTemplateContentEditor contentEditor, IModelPropertyEditor propertyEditor) 
             => contentEditor.ContentEditorId = propertyEditor.Id();
     }
 
     [DomainLogic(typeof(IModelApplyTemplateListViewItem))]
     public static class ModelTemplateListViewLogic{
-	    [UsedImplicitly]
+	    
 	    public static IModelList<IModelListView> Get_ListViews(IModelApplyTemplateListViewItem item) 
             => item.Application.Views.OfType<IModelListView>()
                 .Where(view => view.ModelClass.AllMembers.Any(member => member.Type==typeof(byte[]))&&!view.ModelClass.TypeInfo.Type.IsFromDocumentStyleManager())
                 .ToCalculatedModelNodeList();
 
-	    [UsedImplicitly]
+	    
 	    public static IModelMember Get_Content(IModelApplyTemplateListViewItem item) 
             => item.Get_Contents().FirstOrDefault();
 
@@ -269,12 +269,12 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager{
 		    new CalculatedModelNodeList<IModelMember>() :
 		    item.ListView.ModelClass.AllMembers.Where(member => member.Type==typeof(byte[])).ToCalculatedModelNodeList() ;
 	    
-	    [UsedImplicitly]
+	    
 	    public static IModelList<IModelMember> Get_TimeStamps(this IModelApplyTemplateListViewItem item) => item.ListView==null ?
 		    new CalculatedModelNodeList<IModelMember>() :
 		    item.ListView.ModelClass.AllMembers.Where(member => member.Type==typeof(DateTime)).ToCalculatedModelNodeList() ;
 	    
-	    [UsedImplicitly]
+	    
 	    public static IModelMember Get_DefaultMember(IModelApplyTemplateListViewItem item) 
             => item.Get_DefaultMembers().FirstOrDefault();
 
@@ -283,11 +283,11 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager{
                 new[]{item.ListView.ModelClass.AllMembers[item.ListView.ModelClass.DefaultProperty]}.Concat(item.ListView.ModelClass.AllMembers)
                     .Distinct().ToCalculatedModelNodeList();
 
-	    [UsedImplicitly]
+	    
 	    public static IModelListView Get_ListView(IModelApplyTemplateListViewItem item) 
             => item.ListViews.FirstOrDefault(viewItem => viewItem.Id==item.ListViewId);
 
-	    [UsedImplicitly]
+	    
 	    public static void Set_ListView(IModelApplyTemplateListViewItem item, IModelListView modelListView) 
             => item.ListViewId = modelListView.Id;
     }

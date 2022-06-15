@@ -103,7 +103,6 @@ NUGET
       System.Data.SqlClient (>= 4.4) - restriction: || (&& (== net461) (< net45) (>= netstandard2.0)) (&& (== net472) (< net45)) (== net5.0) (== net5.0-windows7.0) (== netstandard2.0) (== netstandard2.1)
     Humanizer.Core (2.2) - restriction: || (&& (== net461) (>= netstandard2.0)) (== net472) (== net5.0) (== net5.0-windows7.0) (== netstandard2.0) (== netstandard2.1)
       NETStandard.Library (>= 1.6.1)
-    JetBrains.Annotations (2021.3)
     MagicOnion (2.6.3)
       Grpc (>= 2.23) - restriction: || (&& (== net461) (>= netstandard2.0)) (== net472) (== net5.0) (== net5.0-windows7.0) (== netstandard2.0) (== netstandard2.1)
       MessagePack (>= 1.7.3.7) - restriction: || (&& (== net461) (>= netstandard2.0)) (== net472) (== net5.0) (== net5.0-windows7.0) (== netstandard2.0) (== netstandard2.1)

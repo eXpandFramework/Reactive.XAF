@@ -2,10 +2,10 @@
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using Fasterflect;
-using JetBrains.Annotations;
+
 
 namespace Xpand.Extensions.XAF.XafApplicationExtensions{
-    [PublicAPI]
+    
     public static partial class XafApplicationExtensions{
         public static DetailView NewDetailView(this XafApplication application,object currentObject,IModelDetailView modelDetailView=null,bool isRoot=true){
             var objectSpace = application.CreateObjectSpace();

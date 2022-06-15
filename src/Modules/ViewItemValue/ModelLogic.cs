@@ -6,7 +6,7 @@ using System.Reactive.Linq;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.XAF.Modules.Reactive;
 
@@ -17,7 +17,7 @@ namespace Xpand.XAF.Modules.ViewItemValue{
 
 	public static class ModelViewItemValueLogic{
 		
-		[PublicAPI]
+		
 		public static IObservable<IModelViewItemValue> ViewItemValue(this IObservable<IModelReactiveModules> source) => source
 			.Select(modules => modules.ViewItemValue());
 
@@ -47,15 +47,15 @@ namespace Xpand.XAF.Modules.ViewItemValue{
 
 	[DomainLogic(typeof(IModelViewItemValueItem))]
 	public class ModelViewItemValueItemLogic{
-		[UsedImplicitly]
+		
 		public IModelList<IModelObjectView> Get_ObjectViews(IModelViewItemValueItem itemValueItem) =>
 			itemValueItem.Application.Views.OfType<IModelDetailView>().Where(view => view.DomainComponentItems().Any()).Cast<IModelObjectView>()
 				.ToCalculatedModelNodeList();
-		[UsedImplicitly]
+		
 		public static IModelObjectView Get_ObjectView(IModelViewItemValueItem itemValueItem) => itemValueItem
 			.ObjectViews.FirstOrDefault(viewItem => viewItem.Id==itemValueItem.ObjectViewId);
 
-		[UsedImplicitly]
+		
 		public static void Set_ObjectView(IModelViewItemValueItem itemValueItem, IModelObjectView modelObjectView) => 
 			itemValueItem.ObjectViewId = modelObjectView.Id;
 	}
@@ -75,15 +75,15 @@ namespace Xpand.XAF.Modules.ViewItemValue{
 	
 	[DomainLogic(typeof(IModelViewItemValueObjectViewItem))]
 	public static class ModelViewItemValueObjectViewIteLogicm{
-		[UsedImplicitly]
+		
 		public static IModelMemberViewItem Get_MemberViewItem(IModelViewItemValueObjectViewItem item) => item
 			.MemberViewItems.FirstOrDefault(viewItem => viewItem.Id==item.MemberViewItemId);
 
-		[UsedImplicitly]
+		
 		public static void Set_MemberViewItem(IModelViewItemValueObjectViewItem item, IModelMemberViewItem memberViewItem) => 
 			item.MemberViewItemId = memberViewItem.Id;
 		
-		[UsedImplicitly]
+		
 		public static IModelList<IModelMemberViewItem> Get_MemberViewItems(this IModelViewItemValueObjectViewItem item) =>
 			item == null ? new CalculatedModelNodeList<IModelMemberViewItem>()
 				: item.GetParent<IModelViewItemValueItem>().ObjectView.DomainComponentItems().ToCalculatedModelNodeList();

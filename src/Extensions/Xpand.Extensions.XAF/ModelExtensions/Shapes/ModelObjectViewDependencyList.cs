@@ -5,11 +5,11 @@ using System.Linq;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
-using JetBrains.Annotations;
+
 
 namespace Xpand.Extensions.XAF.ModelExtensions.Shapes{
     
-    [PublicAPI]
+    
     public interface IModelObjectViewDependency:IModelNode{
         [Required][DataSourceProperty(nameof(ObjectViews))]
         IModelObjectView ObjectView{ get; set; }

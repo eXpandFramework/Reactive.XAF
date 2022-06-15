@@ -8,7 +8,7 @@ using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.Persistent.Base;
-using JetBrains.Annotations;
+
 using Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleManager;
 
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
@@ -64,7 +64,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
 		[Browsable(false)]
 		public List<IDocumentStyle> UnusedStyles{ get;  }
 		
-		[PublicAPI]
+		
 		public int Position{
 			get => _position;
 			set{
@@ -74,7 +74,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
 			}
 		}
 
-		[PublicAPI]
+		
 		public int Paragraph{
 			get => _paragraph;
 			set{
@@ -90,7 +90,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
 		public BindingList<DocumentStyle> ReplacementStyles => new(ImmutableList.CreateRange(UsedStyles.Concat(UnusedStyles).Cast<DocumentStyle>().Distinct()));
 		public event PropertyChangedEventHandler PropertyChanged;
 
-		[NotifyPropertyChangedInvocator]
+		
 		protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null){
 		   PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 		}

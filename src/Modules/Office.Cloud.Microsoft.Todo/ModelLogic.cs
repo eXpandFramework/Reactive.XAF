@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.XAF.ModelExtensions.Shapes;
 
@@ -13,7 +13,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
         IModelTodo Todo{ get; }
     }
 
-    [PublicAPI]
+    
     public interface IModelTodo:IModelNode{
         [DefaultValue(MicrosoftTodoService.DefaultTodoListId)]
         [Required]

@@ -1,7 +1,7 @@
 ﻿using System.Reactive.Linq;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
-using JetBrains.Annotations;
+
 using NUnit.Framework;
 using Shouldly;
 using Xpand.TestsLib;
@@ -10,7 +10,7 @@ using Xpand.TestsLib.Common.Attributes;
 
 namespace Xpand.XAF.Modules.Reactive.Tests{
 	public class ProxyTests:BaseTest{
-		[UsedImplicitly]
+		
 		public virtual object MethodInvocation(IObjectSpace objectSpace) => 0;
 
 		[Test]

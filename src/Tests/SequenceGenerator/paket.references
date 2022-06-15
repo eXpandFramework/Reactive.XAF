@@ -5,7 +5,7 @@ Moq
 Shouldly
 NUnit
 NUnit3TestAdapter
-JetBrains.Annotations
+
 FasterFlect.Xpand
 Microsoft.CodeAnalysis
 Microsoft.NET.Test.Sdk

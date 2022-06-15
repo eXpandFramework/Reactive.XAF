@@ -1,9 +1,9 @@
 ﻿using DevExpress.Persistent.BaseImpl;
 using DevExpress.Xpo;
-using JetBrains.Annotations;
+
 
 namespace Xpand.XAF.Modules.SequenceGenerator.Tests.BO{
-    [PublicAPI]
+    
     public class Parent:BaseObject{
         public Parent(Session session) : base(session){
         }
@@ -23,7 +23,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests.BO{
         }
     }
 
-    [PublicAPI]
+    
     public class ParentSequencial:Parent,ISequentialNumber{
         public ParentSequencial(Session session) : base(session){
         }
@@ -35,7 +35,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests.BO{
             set => SetPropertyValue(nameof(SequentialNumber), ref _sequentialNumber, value);
         }
     }
-    [PublicAPI]
+    
     public class ParentSequencialWithChildOnSaving:ParentSequencial{
         public ParentSequencialWithChildOnSaving(Session session) : base(session){
         }
@@ -47,7 +47,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests.BO{
 
     }
     
-    [PublicAPI]
+    
     public class Child:TestObject{
         public Child(Session session) : base(session){
         }

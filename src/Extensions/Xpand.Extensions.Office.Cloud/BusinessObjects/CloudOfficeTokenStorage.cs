@@ -1,9 +1,9 @@
 ﻿using DevExpress.Xpo;
-using JetBrains.Annotations;
+
 
 namespace Xpand.Extensions.Office.Cloud.BusinessObjects{
     [DeferredDeletion(false)]
-    [UsedImplicitly]
+    
     public class CloudOfficeTokenStorage : CloudOfficeBaseObject{
         public CloudOfficeTokenStorage(Session session) : base(session){
         }
@@ -15,7 +15,7 @@ namespace Xpand.Extensions.Office.Cloud.BusinessObjects{
     }
 
     [DeferredDeletion(false)]
-    [UsedImplicitly]
+    
     public class CloudOfficeToken:CloudOfficeBaseObject,ICloudOfficeToken{
         public CloudOfficeToken(Session session) : base(session){
         }

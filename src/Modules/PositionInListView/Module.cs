@@ -1,17 +1,17 @@
 ﻿using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
-using JetBrains.Annotations;
+
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.PositionInListView {
-    [UsedImplicitly]
+    
     public sealed class PositionInListViewModule : ReactiveModuleBase {
         static PositionInListViewModule(){
             TraceSource=new ReactiveTraceSource(nameof(PositionInListViewModule));
         }
-        [PublicAPI]
+        
         public static ReactiveTraceSource TraceSource{ get; set; }
         public PositionInListViewModule() {
             RequiredModuleTypes.Add(typeof(ReactiveModule));

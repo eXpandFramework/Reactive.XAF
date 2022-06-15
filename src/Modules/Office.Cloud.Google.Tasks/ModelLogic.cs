@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.XAF.ModelExtensions.Shapes;
 
@@ -13,7 +13,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks{
         IModelTasks Tasks{ get; }
     }
 
-    [PublicAPI]
+    
     public interface IModelTasks:IModelNode{
         [DefaultValue(GoogleTasksService.DefaultTasksListId)]
         [Required]
@@ -23,12 +23,12 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks{
 
     [DomainLogic(typeof(IModelTasks))]
     public static class ModelTasksLogic{
-        [PublicAPI]
+        
         public static IObservable<IModelTasks> Tasks(this IObservable<IModelGoogle> source) => source.Select(modules => modules.Tasks());
 
         public static IModelTasks Tasks(this IModelGoogle modelGoogle) => ((IModelGoogleTasks) modelGoogle).Tasks;
 
-        [PublicAPI]
+        
         public static IModelTasks Tasks(this IModelOfficeGoogle reactiveModules) => reactiveModules.Google.Tasks();
     }
 

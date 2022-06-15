@@ -1,6 +1,6 @@
 ﻿using DevExpress.Blazor;
 using DevExpress.ExpressApp.Model;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.XAF.ModelExtensions.Shapes;
 
 namespace Xpand.XAF.Modules.Blazor.Model {
@@ -23,9 +23,9 @@ namespace Xpand.XAF.Modules.Blazor.Model {
         DataGridSelectAllMode? SelectAllMode { get; set; }
         DataGridSelectionMode? SelectionMode { get; set; }
         DataGridEditMode? EditMode { get; set; }
-        [CanBeNull] string PopupEditFormHeaderText { get; set; }
-        [CanBeNull] string KeyFieldName { get; set; }
-        [CanBeNull] string DataRowCssClass { get; set; }
+         string PopupEditFormHeaderText { get; set; }
+         string KeyFieldName { get; set; }
+         string DataRowCssClass { get; set; }
         DataGridNavigationMode? DataNavigationMode { get; set; }
         ScrollBarMode? VerticalScrollBarMode { get; set; }
         ScrollBarMode? HorizontalScrollBarMode { get; set; }

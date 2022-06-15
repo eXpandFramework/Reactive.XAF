@@ -13,7 +13,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Base.General;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ModelExtensions;
@@ -26,7 +26,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
     }
 
     public static class ModelReactiveModuleLogger{
-        [PublicAPI]
+        
         public static IObservable<IModelReactiveLogger> ReactiveLogger(this IObservable<IModelReactiveModules> source){
             return source.Select(modules => modules.ReactiveLogger()).WhenNotDefault();
         }

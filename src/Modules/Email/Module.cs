@@ -3,16 +3,16 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.ExpressApp.Validation;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Email{
-    [UsedImplicitly]
+    
     public sealed class EmailModule : ReactiveModuleBase{
         
-        [PublicAPI]
+        
         public static ReactiveTraceSource TraceSource{ get; set; }
         static EmailModule(){
             TraceSource=new ReactiveTraceSource(nameof(EmailModule));

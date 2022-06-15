@@ -131,7 +131,7 @@ The module follows the Nuget [Version Basics](https://docs.Google.com/en-us/nuge
  |Xpand.Extensions.XAF|4.212.9
  |Xpand.Extensions.XAF.Xpo|4.212.9
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
- |JetBrains.Annotations|2021.3.0
+ ||2021.3.0
  |System.Reactive|5.0.0
  |Newtonsoft.Json|13.0.1
  |System.Interactive|5.0.0

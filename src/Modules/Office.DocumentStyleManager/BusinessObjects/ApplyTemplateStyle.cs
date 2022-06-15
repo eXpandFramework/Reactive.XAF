@@ -5,7 +5,7 @@ using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.Persistent.Base;
-using JetBrains.Annotations;
+
 using Xpand.XAF.Modules.Office.DocumentStyleManager.Services.StyleTemplateService;
 
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
@@ -26,8 +26,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
 		[Browsable(false)]
 		public IObjectSpace ObjectSpace{ get; set; }
 
-		[NotifyPropertyChangedInvocator]
-		[UsedImplicitly]
+		
+		
 		protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null){
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 		}

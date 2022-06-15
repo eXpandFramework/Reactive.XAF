@@ -12,7 +12,7 @@ using DevExpress.Persistent.Base.General;
 using Google;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Calendar.v3.Data;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Office.Cloud.BusinessObjects;

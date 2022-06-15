@@ -12,7 +12,7 @@ using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
 using Fasterflect;
 using HarmonyLib;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.XAF.Modules.Reactive.Extensions;
@@ -56,7 +56,7 @@ namespace Xpand.XAF.Modules.Reactive{
         public static Type[] UnloadedModules { get; private set; }
         
 
-        [PublicAPI]
+        
         public static IDisposable Unload(params Type[] modules) {
             UnloadedModules=modules;
             return SettingUpSubject.Do(_ => {
@@ -75,7 +75,7 @@ namespace Xpand.XAF.Modules.Reactive{
                 .FirstAsync().Subscribe();
         }
 
-        [PublicAPI]
+        
         public IObservable<ReactiveModuleBase> SetupCompleted => Observable.Defer(() => SetupCompletedSubject.Select(module => module)).TraceRX();
 
 

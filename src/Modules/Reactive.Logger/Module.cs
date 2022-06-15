@@ -2,14 +2,14 @@
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.Tracing;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Logger {
-    [UsedImplicitly]
+    
     public sealed class ReactiveLoggerModule : ReactiveModuleBase{
-        [PublicAPI]
+        
         public const string CategoryName = "Xpand.XAF.Modules.Reactive.Logger";
 
         static ReactiveLoggerModule(){
@@ -25,7 +25,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger {
 
         
 
-        [PublicAPI]
+        
         public static ReactiveTraceSource TraceSource{ get; set; }
 
         public override void AddGeneratorUpdaters(ModelNodesGeneratorUpdaters updaters){

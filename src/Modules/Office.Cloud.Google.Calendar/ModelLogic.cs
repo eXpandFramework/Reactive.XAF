@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp.Model;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.Office.Cloud;
 using Xpand.XAF.Modules.Reactive;
 
@@ -21,7 +21,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Calendar{
         public static IModelCalendar Calendar(this IModelGoogle modelGoogle) 
             => ((IModelGoogleCalendar) modelGoogle).Calendar;
 
-        [PublicAPI]
+        
         public static IModelCalendar Calendar(this IModelOfficeGoogle reactiveModules) 
             => reactiveModules.Google.Calendar();
     }

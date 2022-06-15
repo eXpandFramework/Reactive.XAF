@@ -2,14 +2,14 @@
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base.General;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.XAF.ModelExtensions.Shapes;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
-    [UsedImplicitly]
+    
     public sealed class MicrosoftCalendarModule : ReactiveModuleBase{
         static MicrosoftCalendarModule(){
             TraceSource=new ReactiveTraceSource(nameof(MicrosoftCalendarModule));
@@ -27,7 +27,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Calendar{
             extenders.Add<IModelMicrosoft,IModelMicrosoftCalendar>();
         }
         
-        [PublicAPI]
+        
         public static ReactiveTraceSource TraceSource{ get; set; }
         public override void Setup(ApplicationModulesManager manager){
             base.Setup(manager);

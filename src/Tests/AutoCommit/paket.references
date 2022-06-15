@@ -5,7 +5,7 @@ System.Reactive
 NUnit
 NUnit3TestAdapter
 DevExpress.ExpressApp.Core.All
-JetBrains.Annotations
+
 Microsoft.CodeAnalysis
 Microsoft.NET.Test.Sdk
 Microsoft.Reactive.Testing

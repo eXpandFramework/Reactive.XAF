@@ -7,7 +7,7 @@ using DevExpress.XtraRichEdit;
 using DevExpress.XtraRichEdit.API.Layout;
 using DevExpress.XtraRichEdit.API.Native;
 using Fasterflect;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.ExpressionExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
@@ -17,14 +17,14 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions{
     public static class DocumentExtensions{
 	    private const string DefaultDocumentStyleName = "DefaultDocumentStyleName";
 
-	    [PublicAPI]
+	    
         public static IEnumerable<IDocumentStyle> WhenDefaultStyle(this IEnumerable<IDocumentStyle> source) 
             => source.Where(documentStyle => documentStyle.IsDefault);
 
         public static IEnumerable<IDocumentStyle> WhenNotDefaultStyle(this IEnumerable<IDocumentStyle> source) 
             => source.Where(documentStyle => !documentStyle.IsDefault);
 
-        [PublicAPI]
+        
         public static void ApplyStyle(this Document document,IDocumentStyle documentStyle,Document defaultPropertiesProvider=null){
 	        defaultPropertiesProvider ??= document;
             if (documentStyle.DocumentStyleType==DocumentStyleType.Paragraph){
@@ -370,7 +370,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions{
 		        .Do(paragraph => paragraph.Style = paragraphStyle)
 		        .Select(_ => paragraphStyle).Cast<CharacterPropertiesBase>().ToArray();
 
-        [PublicAPI]
+        
         public static void ReplaceStyles(this Document document, IDocumentStyle replacement,params IDocumentStyle[] styles) 
             => document.ReplaceStyles(replacement,null,styles);
 

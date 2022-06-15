@@ -9,7 +9,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Updating;
 using DevExpress.ExpressApp.Validation;
 using DevExpress.ExpressApp.Validation.Blazor;
-using JetBrains.Annotations;
+
 using Xpand.XAF.Modules.Blazor;
 using Xpand.XAF.Modules.Blazor.Editors;
 using Xpand.XAF.Modules.Reactive;
@@ -20,7 +20,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
 
         static JobSchedulerModule() => TraceSource=new ReactiveTraceSource(nameof(JobSchedulerModule));
 
-        [PublicAPI]
+        
         public static ReactiveTraceSource TraceSource{ get; set; }
         public JobSchedulerModule() {
             RequiredModuleTypes.Add(typeof(BlazorModule));

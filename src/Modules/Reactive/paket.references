@@ -3,7 +3,7 @@ System.Interactive
 System.Reactive
 Fasterflect.Xpand
 Xpand.Patcher
-JetBrains.Annotations
+
 Microsoft.CSharp
 Newtonsoft.Json
 Enums.Net

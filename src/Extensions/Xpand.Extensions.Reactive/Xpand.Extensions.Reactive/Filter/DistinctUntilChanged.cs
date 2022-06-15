@@ -2,12 +2,12 @@
 using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.Reactive.Combine;
 
 namespace Xpand.Extensions.Reactive.Filter{
     public static partial class Filter{
-        [PublicAPI]
+        
         public static IObservable<T> DistinctUntilChanged<T>(this IObservable<T> source, TimeSpan duration,
             IScheduler scheduler = null, Func<T, object> keySelector = null, Func<T, object, bool> matchFunc = null){
             scheduler ??= Scheduler.Default;

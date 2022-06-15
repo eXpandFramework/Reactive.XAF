@@ -2,13 +2,13 @@
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.BulkObjectUpdate{
-    [UsedImplicitly]
+    
     public sealed class BulkObjectUpdateModule : ReactiveModuleBase{
         public static ReactiveTraceSource TraceSource{ get; set; }
         static BulkObjectUpdateModule() 

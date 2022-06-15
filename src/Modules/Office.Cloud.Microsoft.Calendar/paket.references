@@ -2,7 +2,7 @@ DevExpress.Persistent.Base
 DevExpress.ExpressApp.Xpo
 Fasterflect.Xpand
 System.Reactive
-JetBrains.Annotations
+
 Microsoft.Graph.Beta
 Newtonsoft.Json
 DevExpress.ExpressApp.CodeAnalysis

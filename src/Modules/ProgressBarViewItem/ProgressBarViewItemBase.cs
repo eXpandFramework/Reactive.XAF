@@ -9,7 +9,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using Fasterflect;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.XAF.AppDomainExtensions;
@@ -59,7 +59,7 @@ namespace Xpand.XAF.Modules.ProgressBarViewItem{
             PollingInterval = 1000;
         }
 
-        [PublicAPI]
+        
         public void ProcessAction(string parameter){
             var script = $"{parameter}.SetPosition('{Position}');";
             if (FinishOptions!=null) {
@@ -78,7 +78,7 @@ namespace Xpand.XAF.Modules.ProgressBarViewItem{
             }
         }
 
-        [PublicAPI]
+        
         public virtual void Start(SynchronizationContext synchronizationContext=null){
             synchronizationContext ??= SynchronizationContext.Current;
             if (synchronizationContext == null){
@@ -129,7 +129,7 @@ console.log('p='+previous);
             }
         }
 
-        [PublicAPI]
+        
         public int PollingInterval{ get; set; }
         string _handlerId; 
         private static MethodInvoker _assignClientHandlerSafe;

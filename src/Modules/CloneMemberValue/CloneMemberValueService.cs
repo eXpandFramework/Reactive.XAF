@@ -8,7 +8,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -16,7 +16,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.CloneMemberValue{
     public static class CloneMemberValueService{
-        [UsedImplicitly]
+        
         internal static IObservable<Unit> Connect(this ApplicationModulesManager modulesManager ) 
             => modulesManager.WhenApplication(application => application.WhenCloneMemberValues().ToUnit());
 

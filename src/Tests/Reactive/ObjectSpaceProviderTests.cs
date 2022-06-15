@@ -63,13 +63,10 @@ namespace Xpand.XAF.Modules.Reactive.Tests{
         [Test]
         [XpandTest()]
         public void When_Secured_MiddleTier() {
-            AppDomain.CurrentDomain.Patch(harmony => { 
-                var objectSpaceProvider = new MiddleTierServerObjectSpaceProvider(Mock.Of<IMiddleTierSerializableObjectLayer>());
+            var objectSpaceProvider = new MiddleTierServerObjectSpaceProvider(Mock.Of<IMiddleTierSerializableObjectLayer>());
 
-                harmony.PatchSchemaUpdated(objectSpaceProvider);
+            objectSpaceProvider.PatchSchemaUpdated();
 
-                Should.Throw<NotSupportedException>(() => objectSpaceProvider.UpdateSchema());
-            });
-        }
+            Should.Throw<NotSupportedException>(() => objectSpaceProvider.UpdateSchema());        }
     }
 }

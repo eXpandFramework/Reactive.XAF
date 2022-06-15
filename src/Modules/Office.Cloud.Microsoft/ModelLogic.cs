@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp.Model;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.Office.Cloud;
 using Xpand.XAF.Modules.Reactive;
 
@@ -19,7 +19,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
         internal static IModelOAuthRedirectUri OAuthMS(this IModelApplication application) 
             => application.ToReactiveModule<IModelReactiveModuleOffice>().Office.Microsoft().OAuth;
 
-        [PublicAPI]
+        
         public static IObservable<IModelMicrosoft> Microsoft(this IObservable<IModelOffice> source) 
             => source.Select(modules => modules.Microsoft());
 
@@ -29,7 +29,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
     
     public interface IModelCloudItem{
         [Required][DefaultValue(SynchronizationType.All)]
-        SynchronizationType SynchronizationType{ get; [UsedImplicitly] set; }
+        SynchronizationType SynchronizationType{ get;  set; }
     }
 
 }

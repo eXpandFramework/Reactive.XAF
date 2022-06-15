@@ -7,7 +7,7 @@ NUnit3TestAdapter
 DevExpress.ExpressApp
 DevExpress.Xpo
 Fasterflect.Xpand
-JetBrains.Annotations
+
 Microsoft.CodeAnalysis
 Microsoft.NET.Test.Sdk
 Microsoft.Reactive.Testing

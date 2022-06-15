@@ -1,17 +1,17 @@
 ﻿using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Validation;
-using JetBrains.Annotations;
+
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.ViewItemValue {
-    [UsedImplicitly]
+    
     public sealed class ViewItemValueModule : ReactiveModuleBase {
         static ViewItemValueModule(){
             TraceSource=new ReactiveTraceSource(nameof(ViewItemValueModule));
         }
-        [PublicAPI]
+        
         public static ReactiveTraceSource TraceSource{ get; set; }
         public ViewItemValueModule() {
             RequiredModuleTypes.Add(typeof(ReactiveModule));

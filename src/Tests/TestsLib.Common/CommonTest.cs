@@ -9,7 +9,7 @@ using System.Reactive.Threading.Tasks;
 using System.Reflection;
 using System.Threading.Tasks;
 using DevExpress.ExpressApp;
-using JetBrains.Annotations;
+
 using Microsoft.Reactive.Testing;
 using NUnit.Framework;
 using Xpand.Extensions.AppDomainExtensions;
@@ -27,10 +27,10 @@ namespace Xpand.TestsLib.Common{
     public abstract class CommonTest:ReactiveTest, IDisposable{
         public readonly TestScheduler TestScheduler=new();
         public const int LongTimeout = 900000;
-        [UsedImplicitly]
+        
         protected Platform GetPlatform(string platformName) => (Platform) Enum.Parse(typeof(Platform), platformName);
 
-        [UsedImplicitly] protected TimeSpan Timeout = TimeSpan.FromSeconds(Debugger.IsAttached ? 120 : 5);
+         protected TimeSpan Timeout = TimeSpan.FromSeconds(Debugger.IsAttached ? 120 : 5);
 
         protected CommonTest() => AssemblyExtensions.EntryAssembly=GetType().Assembly;
         public static string EasyTestTraceLevel = "Verbose";
@@ -49,7 +49,7 @@ namespace Xpand.TestsLib.Common{
             TraceSource.Listeners.Add(TextListener);
             Trace.Listeners.Add(new TextWriterTraceListener($@"{AppDomain.CurrentDomain.ApplicationPath()}\easytest.log"));
         }
-        [UsedImplicitly]
+        
         public static IEnumerable<Platform> PlatformDataSource(){
             yield return Platform.Web;
             yield return Platform.Win;
@@ -97,22 +97,22 @@ namespace Xpand.TestsLib.Common{
                 .Cast<object>().ToArray();
         }
 
-        [PublicAPI]
+        
         protected static object[] ReactiveModules() 
             => AgnosticModules().Concat(WinModules()).Concat(WebModules()).OfType<ReactiveModuleBase>().Cast<object>().ToArray();
 
-        [PublicAPI]
+        
         protected void WriteLine(bool value) => TestContext.WriteLine(value);
 
-        [PublicAPI]
+        
         protected void WriteLine(char value) => TestContext.WriteLine(value);
 
-        [PublicAPI]
+        
         protected void WriteLine(string value) => WriteLine(value.ToCharArray());
 
         protected void WriteLine(char[] value) => TestContext.WriteLine(value);
 
-        [PublicAPI]
+        
         protected void WriteLine(decimal value) => TestContext.WriteLine(value);
 
         protected readonly List<string> LogPaths=new(){ReactiveLoggerService.RXLoggerLogPath,Path.Combine(TestContext.CurrentContext.TestDirectory,"expressappframework.log")};
@@ -122,7 +122,7 @@ namespace Xpand.TestsLib.Common{
         public static TraceSource TraceSource{ get; }
         
 
-        [UsedImplicitly] public const string NotImplemented = "NotImplemented";
+         public const string NotImplemented = "NotImplemented";
 
         [SetUp]
         public virtual void Setup() {

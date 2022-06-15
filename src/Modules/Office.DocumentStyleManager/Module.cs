@@ -4,7 +4,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Office;
-using JetBrains.Annotations;
+
 using Xpand.XAF.Modules.HideToolBar;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.Services;
 using Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleManager;
@@ -15,7 +15,7 @@ using Xpand.XAF.Modules.SuppressConfirmation;
 using Xpand.XAF.Modules.ViewItemValue;
 
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager{
-    [PublicAPI]
+    
     public class DocumentStyleManagerModule:ReactiveModuleBase{
 	    static DocumentStyleManagerModule() => TraceSource=new ReactiveTraceSource(nameof(DocumentStyleManagerModule));
 

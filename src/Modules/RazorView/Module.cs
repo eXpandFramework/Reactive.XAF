@@ -3,16 +3,16 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.ExpressApp.Validation;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.RazorView{
-    [UsedImplicitly]
+    
     public sealed class RazorViewModule : ReactiveModuleBase{
         
-        [PublicAPI]
+        
         public static ReactiveTraceSource TraceSource{ get; set; }
         static RazorViewModule(){
             TraceSource=new ReactiveTraceSource(nameof(RazorViewModule));

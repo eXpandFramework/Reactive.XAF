@@ -78,13 +78,13 @@ Task CompileTests -precondition { return ((Get-VersionPart $DXVersion Minor) -ne
         }
         SyncrhonizePaketVersion
         CompileTestSolution "$Root\src\Tests\Tests.sln"
-        FixNet461DXAssembliesTargetFramework
         
     } -Maximum 3
 
     if (!(Test-AzDevops)) {
         Invoke-Task -taskName BuildNugetConsumers
     }
+    
     Get-ChildItem $root\bin "*xpand*.dll" | Test-AssemblyReference -VersionFilter $DXVersion
     
 }
@@ -135,7 +135,7 @@ Task CompileNugetConsumers -precondition { return $compile } {
     Invoke-Script {
         Update-NugetConsumersPackageVersion
         CompileTestSolution "$Root\src\Tests\\EasyTests\EasyTests.sln"
-
+        FixNet461DXAssembliesTargetFramework
         if ($dxVersion -eq (Get-XAFLatestMinors | Select-Object -First 1)) {
             Invoke-Script {
                 & $root\build\ZipMe.ps1 -SkipIDEBuild

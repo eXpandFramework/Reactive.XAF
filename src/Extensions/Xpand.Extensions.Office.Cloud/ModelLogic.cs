@@ -7,7 +7,7 @@ using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Base.General;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.ModelExtensions.Shapes;
@@ -18,7 +18,7 @@ namespace Xpand.Extensions.Office.Cloud{
 
     [DomainLogic(typeof(IModelOffice))]
     public static class ModelOfficeLogic{
-        [PublicAPI]
+        
         public static IObservable<IModelOffice> Office(this IObservable<IModelReactiveModules> source) 
             => source.Select(modules => modules.Office());
 
@@ -27,7 +27,7 @@ namespace Xpand.Extensions.Office.Cloud{
     }
 
     public enum OAuthPrompt{
-        [SuppressMessage("ReSharper", "InconsistentNaming")] [UsedImplicitly]
+        [SuppressMessage("ReSharper", "InconsistentNaming")] 
         Select_Account,
         Login,
         Consent
@@ -40,9 +40,9 @@ namespace Xpand.Extensions.Office.Cloud{
 
     public interface IModelOAuth:IModelNode{
         [Required][DefaultValue(OAuthPrompt.Consent)]
-        OAuthPrompt Prompt{ get; [UsedImplicitly] set; }
+        OAuthPrompt Prompt{ get;  set; }
         [Description("Space seperated list of scopes")]
-        string Scopes{ get; [UsedImplicitly] set; }
+        string Scopes{ get;  set; }
         [Required]
         string ClientId{ get; set; }
         [Required]
@@ -60,10 +60,10 @@ namespace Xpand.Extensions.Office.Cloud{
 
     public interface IModelSynchronizationType{
         [Required][DefaultValue(SynchronizationType.All)]
-        SynchronizationType SynchronizationType{ get; [UsedImplicitly] set; }
+        SynchronizationType SynchronizationType{ get;  set; }
     }
 
-    [PublicAPI]
+    
     public interface IModelCalendar:IModelNode{
         [Required]
         string DefaultCalendarName{ get; set; }
@@ -78,7 +78,7 @@ namespace Xpand.Extensions.Office.Cloud{
 
     [DomainLogic(typeof(IModelCalendar))]
     public static class ModelCalendarLogic{
-        [PublicAPI]
+        
         public static string Get_DefaultCalendarName(this IModelCalendar modelCalendar){
             var interfaces = modelCalendar.Parent.GetType().GetInterfaces();
             if (interfaces.Any(type => type.Name.Contains("Microsoft"))){
@@ -90,11 +90,11 @@ namespace Xpand.Extensions.Office.Cloud{
             throw new NotImplementedException();
         }
 
-        [UsedImplicitly]
+        
         public static IModelClass Get_NewCloudEvent(this IModelCalendar modelCalendar)
             => modelCalendar.NewCloudEvents.FirstOrDefault();
         
-        [UsedImplicitly]
+        
         public static CalculatedModelNodeList<IModelClass> Get_NewCloudEvents(this IModelCalendar modelCalendar) 
             => modelCalendar.Application.BOModel.Where(c =>c.TypeInfo.IsPersistent&&!c.TypeInfo.IsAbstract&&typeof(IEvent).IsAssignableFrom(c.TypeInfo.Type) ).ToCalculatedModelNodeList();
     }
@@ -106,7 +106,7 @@ namespace Xpand.Extensions.Office.Cloud{
     }
 
     public interface IModelCallDirection{
-        [Required][DefaultValue(CallDirection.Both)][PublicAPI]
+        [Required][DefaultValue(CallDirection.Both)]
         CallDirection CallDirection{ get; set; }
     }
     

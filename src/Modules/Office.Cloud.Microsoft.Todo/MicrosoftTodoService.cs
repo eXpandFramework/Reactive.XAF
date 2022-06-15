@@ -9,7 +9,7 @@ using System.Reactive.Threading.Tasks;
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.Base.General;
-using JetBrains.Annotations;
+
 using Microsoft.Graph;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.Office.Cloud;
@@ -27,7 +27,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
     public static class MicrosoftTodoService{
         private static readonly ISubject<(Frame frame, GraphServiceClient client)> ClientSubject=new Subject<(Frame frame, GraphServiceClient client)>();
 
-        [PublicAPI]
+        
         public static IObservable<(Frame frame, GraphServiceClient client)> Client => ClientSubject.AsObservable();
         
         internal const string DefaultTodoListId = "Tasks";
@@ -38,21 +38,21 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft.Todo{
         public static IObservable<(OutlookTask cloud, MapAction mapAction)> Updated{ get; }=UpdatedSubject.AsObservable();
         static readonly Subject<GenericEventArgs<(IObjectSpace objectSpace, ITask local, OutlookTask cloud, MapAction mapAction)>> CustomizeSynchronizationSubject = new();
 
-        [PublicAPI]
+        
         public static IObservable<GenericEventArgs<(IObjectSpace objectSpace, ITask local, OutlookTask cloud, MapAction mapAction)>> CustomizeSynchronization 
             => CustomizeSynchronizationSubject.AsObservable();
 
-        [PublicAPI]
+        
         public static IObservable<(OutlookTask cloud, MapAction mapAction)> When(this IObservable<(OutlookTask outlookTask, MapAction mapAction)> source, MapAction mapAction)
             => source.Where(_ => _.mapAction == mapAction);
         
-        [PublicAPI]
+        
         public static IObservable<GenericEventArgs<(IObjectSpace objectSpace, ITask local, OutlookTask cloud, MapAction mapAction)>> When(
             this IObservable<GenericEventArgs<(IObjectSpace objectSpace, ITask local, OutlookTask cloud, MapAction mapAction)>> source, MapAction mapAction)
             => source.Where(_ => _.Instance.mapAction == mapAction);
         static readonly Subject<IBaseRequest> CustomizeSubject = new();
 
-        [PublicAPI]
+        
         public static IObservable<IBaseRequest> Customize => CustomizeSubject.AsObservable();
 
         private static IObservable<(OutlookTask serviceObject, MapAction mapAction)> SynchronizeCloud(this IObservable<IOutlookTaskFolderRequestBuilder> source,

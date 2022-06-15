@@ -4,14 +4,14 @@ using System.Reactive.Linq;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using Google.Apis.Auth.OAuth2;
-using JetBrains.Annotations;
+
 using Xpand.TestsLib.Common;
 using Xpand.XAF.Modules.Office.Cloud.Google.BusinessObjects;
 using Xpand.XAF.Modules.Office.Cloud.Tests;
 using Platform = Xpand.Extensions.XAF.XafApplicationExtensions.Platform;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Google.Tests{
-    [UsedImplicitly]
+    
     public class GoogleServiceTests:CloudServiceTests<GoogleAuthentication>{
 
         protected override IObservable<bool> NeedsAuthentication(XafApplication application) => application.GoogleNeedsAuthentication();

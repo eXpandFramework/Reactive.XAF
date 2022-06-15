@@ -9,7 +9,7 @@ using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 using DevExpress.XtraRichEdit.API.Native;
 using DevExpress.XtraRichEdit.Model;
-using JetBrains.Annotations;
+
 using Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions;
 using ParagraphAlignment = DevExpress.XtraRichEdit.API.Native.ParagraphAlignment;
 using ParagraphFirstLineIndent = DevExpress.XtraRichEdit.API.Native.ParagraphFirstLineIndent;
@@ -24,11 +24,11 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
         new Color? BackColor{ get; set; }
         DocumentStyleType DocumentStyleType{ get; set; }
         string StyleName{ get; set; }
-        [PublicAPI]
+        
         bool Used{ get; set; }
-        [PublicAPI]
+        
         bool IsDeleted{ get; set; }
-        [PublicAPI]
+        
         bool IsDefault{ get; set; }
         
         IDocumentStyle Parent{ get; set; }
@@ -740,13 +740,13 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
         [Browsable(false)]
         IDocumentStyle IDocumentStyle.Parent{ get; set; }
         
-        [PublicAPI]
+        
         public DocumentStyle Parent{
 	        get => (DocumentStyle) ((IDocumentStyle) this).Parent;
 	        set => ((IDocumentStyle) this).Parent=value;
         }
         
-        [PublicAPI]
+        
         public DocumentStyle Next{
 	        get => (DocumentStyle) ((IDocumentStyle) this).Next;
 	        set => ((IDocumentStyle) this).Next=value;
@@ -756,7 +756,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
         IDocumentStyle IDocumentStyle.Next{ get; set; }
         public event PropertyChangedEventHandler PropertyChanged;
 
-        [NotifyPropertyChangedInvocator]
+        
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null){
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

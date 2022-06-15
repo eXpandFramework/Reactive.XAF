@@ -11,7 +11,7 @@ using Google;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Tasks.v1;
 using Google.Apis.Tasks.v1.Data;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.DateTimeExtensions;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.Office.Cloud;
@@ -35,15 +35,15 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google.Tasks{
         static readonly Subject<GenericEventArgs<(IObjectSpace objectSpace, ITask local, Task cloud, MapAction mapAction)>> CustomizeSynchronizationSubject =
             new();
         
-        [PublicAPI]
+        
         public static IObservable<GenericEventArgs<(IObjectSpace objectSpace, ITask local, Task cloud, MapAction mapAction)>> CustomizeSynchronization 
             => CustomizeSynchronizationSubject.AsObservable();
 
-        [PublicAPI]
+        
         public static IObservable<(Task cloud, MapAction mapAction)> When(this IObservable<(Task outlookTask, MapAction mapAction)> source, MapAction mapAction)
             => source.Where(_ => _.mapAction == mapAction);
         
-        [PublicAPI]
+        
         public static IObservable<GenericEventArgs<(IObjectSpace objectSpace, ITask local, Task cloud, MapAction mapAction)>> When(
             this IObservable<GenericEventArgs<(IObjectSpace objectSpace, ITask local, Task cloud, MapAction mapAction)>> source, MapAction mapAction)
             => source.Where(_ => _.Instance.mapAction == mapAction);

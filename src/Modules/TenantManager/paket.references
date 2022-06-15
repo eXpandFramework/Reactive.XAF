@@ -4,7 +4,7 @@ System.Reactive
 DevExpress.Persistent.Base
 DevExpress.ExpressApp.Xpo
 Fasterflect.Xpand
-JetBrains.Annotations
+
 Newtonsoft.Json
 Xpand.Collections
 DevExpress.ExpressApp.CodeAnalysis

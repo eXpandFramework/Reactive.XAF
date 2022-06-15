@@ -10,7 +10,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Utils;
 using DevExpress.Persistent.Base;
 using HarmonyLib;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.ConfigurationExtensions;
 using Xpand.Extensions.ExceptionExtensions;
 using Xpand.Extensions.Reactive.Transform;
@@ -26,13 +26,13 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
             return component.WhenDisposed().Do(_ => harmony.UnpatchAll(id)).ToUnit();
         }
 
-        [PublicAPI]
+        
         public static IDisposable Subscribe<T>(this IObservable<T> source, ModuleBase moduleBase){
             var takeUntil = source.TakeUntil(moduleBase.WhenDisposed());
             return moduleBase.Application!=null ? takeUntil.Subscribe(moduleBase.Application) : takeUntil.Subscribe();
         }
         
-        [PublicAPI]
+        
         public static IDisposable Subscribe<T>(this IObservable<T> source, Controller controller) 
             => source.TakeUntil(controller.WhenDeactivated()).Subscribe(controller.Application);
 
@@ -63,7 +63,7 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
         public static IObservable<T> Handle<T>(this Exception exception, Func<Exception, IObservable<T>> exceptionSelector = null) 
             => exception is WarningException ? default(T).ReturnObservable() : exceptionSelector != null ? exceptionSelector(exception) : Observable.Throw<T>(exception);
 
-        [PublicAPI]
+        
         public static IObservable<T> HandleException<T>(this IObservable<T> source,Func<Exception,IObservable<T>> exceptionSelector=null) 
             => source.Catch<T, Exception>(exception => {
                 if (Tracing.IsTracerInitialized) Tracing.Tracer.LogError(exception);

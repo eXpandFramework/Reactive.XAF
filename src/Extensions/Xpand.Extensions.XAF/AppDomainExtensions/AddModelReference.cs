@@ -6,7 +6,7 @@ using ConcurrentCollections;
 using DevExpress.ExpressApp.Utils.CodeGeneration;
 using Fasterflect;
 using HarmonyLib;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.LinqExtensions;
 
 namespace Xpand.Extensions.XAF.AppDomainExtensions{
@@ -16,7 +16,7 @@ namespace Xpand.Extensions.XAF.AppDomainExtensions{
 	        => typeof(CSCodeCompiler).GetMethod(nameof(CSCodeCompiler.Compile))
 		        .PatchWith(new HarmonyMethod(typeof(AppDomainExtensions).Method(nameof(ModifyCSCodeCompilerReferences),Flags.Static|Flags.AnyVisibility)));
 
-        [PublicAPI]
+        
         public static void AddModelReference(this AppDomain appDomain, params string[] name){
 	        var locations = AppDomain.CurrentDomain.GetAssemblies()
                 .Where(assembly => name.Contains(assembly.GetName().Name))
@@ -26,14 +26,14 @@ namespace Xpand.Extensions.XAF.AppDomainExtensions{
 	        }
         }
 
-        [PublicAPI]
+        
         public static void AddModelReference(this AppDomain appDomain, params Assembly[] assemblies){
 	        foreach (var assembly in assemblies){
 		        References.Add(assembly.Location);
 	        }
         }
 
-        [UsedImplicitly]
+        
         internal static void ModifyCSCodeCompilerReferences(string sourceCode, ref string[] references, string assemblyFile) 
 	        => references = references.Concat(References).DistinctWith(Path.GetFileName).ToArray();
     }

@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Reactive.Subjects;
 using System.Text.RegularExpressions;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
 
@@ -10,7 +10,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger {
     
     public class ReactiveTraceListener : RollingFileTraceListener,IPush {
         private readonly string _applicationTitle;
-        [UsedImplicitly] public static bool DisableFileWriter=true;
+         public static bool DisableFileWriter=true;
         static ReactiveTraceListener() {
             Regex = new Regex(@"(?<Location>[^.]*)\.(?<Method>[^(]*)\((?<Ln>[\d]*)\): (?<Action>[^(]*)\((?<Value>.*)\)",
                 RegexOptions.Singleline | RegexOptions.Compiled);

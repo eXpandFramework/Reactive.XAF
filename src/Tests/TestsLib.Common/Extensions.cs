@@ -27,7 +27,7 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 using DevExpress.Xpo;
 using Fasterflect;
-using JetBrains.Annotations;
+
 using Moq;
 using Moq.Protected;
 using NUnit.Framework;
@@ -51,7 +51,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 using EditorsFactory = DevExpress.ExpressApp.Editors.EditorsFactory;
 
 namespace Xpand.TestsLib.Common{
-    [PublicAPI]
+    
     public static class Extensions{
         public static IObservable<Exception> WhenException(this TestTracing tracing) 
             => Observable.FromEventPattern<EventHandler<CreateCustomTracerEventArgs>, CreateCustomTracerEventArgs>(
@@ -473,7 +473,7 @@ namespace Xpand.TestsLib.Common{
                     .SubscribeReplay()
                 : Unit.Default.ReturnObservable();
 
-        [PublicAPI]
+        
         public static IObservable<Unit> ClientConnect(this ITestApplication application) 
             => Process.GetProcessesByName("Xpand.XAF.Modules.Reactive.Logger.Client.Win").Any()
                 ? TraceEventHub.Connecting.FirstAsync().SubscribeReplay()

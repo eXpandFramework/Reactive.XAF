@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.Office.Cloud;
 using Xpand.Extensions.Office.Cloud.BusinessObjects;
 using Xpand.XAF.Modules.Office.Cloud.Microsoft.BusinessObjects;
@@ -26,7 +26,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
             extenders.Add<IModelOffice, IModelOfficeMicrosoft>();
         }
         
-        [PublicAPI]
+        
         public static TraceSource TraceSource{ get; set; }
 
         public static void AddRequirements(ModuleBase module){

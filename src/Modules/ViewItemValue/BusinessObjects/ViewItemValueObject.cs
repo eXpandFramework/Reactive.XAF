@@ -1,11 +1,11 @@
 ﻿using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
-using JetBrains.Annotations;
+
 using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.ViewItemValue.BusinessObjects{
     [RuleCombinationOfPropertiesIsUnique(nameof(ViewItemId)+";"+nameof(ObjectView))]
-    [UsedImplicitly]
+    
     public class ViewItemValueObject:CustomBaseObject{
         public ViewItemValueObject(Session session) : base(session){
         }

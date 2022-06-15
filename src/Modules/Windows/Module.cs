@@ -2,18 +2,18 @@
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Windows {
-    [UsedImplicitly]
+    
     public sealed class WindowsModule : ReactiveModuleBase{
         static WindowsModule(){
             TraceSource=new ReactiveTraceSource(nameof(WindowsModule));
         }
-        public static ReactiveTraceSource TraceSource{ get; [PublicAPI]set; }
+        public static ReactiveTraceSource TraceSource{ get; set; }
         public WindowsModule() {
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.Win.SystemModule.SystemWindowsFormsModule));

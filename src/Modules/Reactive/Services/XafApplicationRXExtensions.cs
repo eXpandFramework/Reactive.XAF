@@ -17,7 +17,7 @@ using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using Fasterflect;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
@@ -71,7 +71,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 ? application.ReturnObservable() : application.WhenObjectSpaceCreated().FirstAsync()
                     .Select(_ => application);
 
-        [PublicAPI]
+        
         public static IObservable<XafApplication> WhenModule(this IObservable<XafApplication> source, Type moduleType) 
             => source.Where(_ => _.Modules.FindModule(moduleType)!=null);
 
@@ -205,7 +205,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .TransformPattern<CreateCustomTemplateEventArgs,XafApplication>()
                 .TraceRX(_ => _.e.Context);
 
-        [PublicAPI]
+        
         public static IObservable<IObjectSpace> WhenObjectSpaceCreated(this IObservable<XafApplication> source) 
             => source.SelectMany(application => application.WhenObjectSpaceCreated());
 
@@ -254,22 +254,22 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Where(_ => includeNonPersistent || !(_.e.ObjectSpace is NonPersistentObjectSpace))
                 .Select(t => t.e.ObjectSpace);
 
-        [PublicAPI]
+        
         public static IObservable<XafApplication> SetupComplete(this IObservable<XafApplication> source) 
             => source.SelectMany(application => application.WhenSetupComplete());
 
-        [PublicAPI]
+        
         public static IObservable<ListView> ToListView(this IObservable<(XafApplication application, ListViewCreatedEventArgs e)> source) 
             => source.Select(_ => _.e.ListView);
 
-        [PublicAPI]
+        
         public static IObservable<TView> ToObjectView<TView>(this IObservable<(ObjectView view, EventArgs e)> source) where TView:View 
             => source.Where(_ => _.view is TView).Select(_ => _.view).Cast<TView>();
 
         public static IObservable<DetailView> ToDetailView(this IObservable<(XafApplication application, DetailViewCreatedEventArgs e)> source) 
             => source.Select(_ => _.e.View);
 
-        [PublicAPI]
+        
         public static IObservable<Frame> WhenViewOnFrame(this IObservable<XafApplication> source, Type objectType = null,
             ViewType viewType = ViewType.Any, Nesting nesting = Nesting.Any) 
             => source.SelectMany(application => application.WhenViewOnFrame(objectType, viewType, nesting));
@@ -336,7 +336,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<Frame> WhenFrameViewControls(this XafApplication application) 
             => application.WhenFrameViewChanged().SelectMany(frame => frame.View.WhenControlsCreated().Select(view => view).To(frame));
 
-        [PublicAPI]
+        
         public static IObservable<(XafApplication application, DetailViewCreatingEventArgs e)> WhenDetailViewCreating(this XafApplication application) 
             => Observable.FromEventPattern<EventHandler<DetailViewCreatingEventArgs>, DetailViewCreatingEventArgs>(
                     h => application.DetailViewCreating += h, h => application.DetailViewCreating -= h, ImmediateScheduler.Instance)
@@ -346,7 +346,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<(XafApplication application, DetailViewCreatedEventArgs e)> WhenDetailViewCreated(this XafApplication application,Type objectType) 
             => application.WhenDetailViewCreated().Where(_ => objectType.IsAssignableFrom(_.e.View.ObjectTypeInfo.Type));
 
-        [PublicAPI]
+        
         public static IObservable<(XafApplication application, ListViewCreatingEventArgs args)> WhenListViewCreating(this IObservable<XafApplication> source,Type objectType=null,bool? isRoot=null) 
             => source.SelectMany(application => application.WhenListViewCreating(objectType,isRoot));
 
@@ -370,7 +370,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Select(pattern => pattern.EventArgs.View)
                 .TraceRX(view => view.Id);
 
-        [PublicAPI]
+        
         public static IObservable<(ListView listView, XafApplication application)> WhenListViewCreated(this IObservable<XafApplication> source,Type objectType=null) 
             => source.SelectMany(application => application.WhenListViewCreated(objectType).Pair(application));
 
@@ -381,11 +381,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Where(view => objectType==null||objectType.IsAssignableFrom(view.ObjectTypeInfo.Type))
                 .TraceRX(view => view.Id);
 
-        [PublicAPI]
+        
         public static IObservable<DashboardView> DashboardViewCreated(this IObservable<XafApplication> source) 
             => source.SelectMany(application => application.WhenDashboardViewCreated());
 
-        [PublicAPI]
+        
         public static IObservable<(XafApplication application, DetailViewCreatedEventArgs e)> WhenDetailViewCreated(this IObservable<XafApplication> source) 
             => source.SelectMany(application => application.WhenDetailViewCreated());
 
@@ -417,7 +417,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     h => application.ViewCreating += h, h => application.ViewCreating -= h, ImmediateScheduler.Instance)
                 .TransformPattern<ViewCreatingEventArgs,XafApplication>();
 
-        [PublicAPI]
+        
         public static IObservable<(Frame SourceFrame, Frame TargetFrame)> WhenViewShown(this XafApplication application) 
             => Observable
                 .FromEventPattern<EventHandler<ViewShownEventArgs>,ViewShownEventArgs>(h => application.ViewShown += h,h => application.ViewShown -= h,ImmediateScheduler.Instance)
@@ -440,7 +440,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .FromEventPattern<EventHandler<DatabaseVersionMismatchEventArgs>,DatabaseVersionMismatchEventArgs>(h => application.DatabaseVersionMismatch += h,h => application.DatabaseVersionMismatch -= h,ImmediateScheduler.Instance)
                 .TransformPattern<DatabaseVersionMismatchEventArgs,XafApplication>();
 
-        [PublicAPI]
+        
         public static IObservable<(XafApplication application, LogonEventArgs e)> WhenLoggedOn(this IObservable<XafApplication> source) 
             => source.SelectMany(application => application.WhenLoggedOn());
 
@@ -450,7 +450,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .TransformPattern<LogonEventArgs,XafApplication>()
                 .TraceRX(_ => $"{_.e.LogonParameters}");
 
-        [PublicAPI]
+        
         public static IObservable<(XafApplication application, LogonEventArgs e)> WhenLoggingOn(this IObservable<XafApplication> source) 
             => source.SelectMany(application => application.WhenLoggingOn());
 
@@ -459,7 +459,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             .TransformPattern<LogonEventArgs,XafApplication>()
             .TraceRX(_ => $"{_.e.LogonParameters}");
         
-        [PublicAPI]
+        
         public static IObservable<(XafApplication application, LoggingOffEventArgs e)> WhenLoggingOff(this IObservable<XafApplication> source) 
             => source.SelectMany(application => application.WhenLoggingOff());
 
@@ -467,7 +467,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => Observable.FromEventPattern<EventHandler<LoggingOffEventArgs>,LoggingOffEventArgs>(h => application.LoggingOff += h,h => application.LoggingOff -= h,ImmediateScheduler.Instance)
             .TransformPattern<LoggingOffEventArgs,XafApplication>();
         
-        [PublicAPI]
+        
         public static IObservable<XafApplication> WhenLoggedOff(this IObservable<XafApplication> source) 
             => source.SelectMany(application => application.WhenLoggedOff());
 
@@ -482,7 +482,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                     .TransformPattern<XafApplication>()
                     .TraceRX();
 
-        [PublicAPI]
+        
         public static IObservable<(XafApplication application, CreateCustomModelDifferenceStoreEventArgs e)> WhenCreateCustomModelDifferenceStore(this XafApplication application) 
             => Observable
                 .FromEventPattern<EventHandler<CreateCustomModelDifferenceStoreEventArgs>,
@@ -491,7 +491,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .TransformPattern<CreateCustomModelDifferenceStoreEventArgs,XafApplication>()
                 .TraceRX(_ => _.e.Store.Name);
 
-        [PublicAPI]
+        
         public static IObservable<(XafApplication application, CreateCustomModelDifferenceStoreEventArgs e)> WhenCreateCustomUserModelDifferenceStore(this XafApplication application) 
             => Observable.FromEventPattern<EventHandler<CreateCustomModelDifferenceStoreEventArgs>,
                     CreateCustomModelDifferenceStoreEventArgs>(h => application.CreateCustomUserModelDifferenceStore += h,
@@ -499,7 +499,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .TransformPattern<CreateCustomModelDifferenceStoreEventArgs,XafApplication>()
                 .TraceRX(_ => _.e.Store?.Name);
 
-        [PublicAPI]
+        
         public static IObservable<(XafApplication application, SetupEventArgs e)> WhenSettingUp(this XafApplication application) 
             => Observable.FromEventPattern<EventHandler<SetupEventArgs>,SetupEventArgs>(h => application.SettingUp += h,h => application.SettingUp -= h,ImmediateScheduler.Instance)
                 .TransformPattern<SetupEventArgs,XafApplication>()
@@ -513,7 +513,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 CreateCustomPropertyCollectionSourceEventArgs>(h => application.CreateCustomPropertyCollectionSource += h,
                 h => application.CreateCustomPropertyCollectionSource += h, Scheduler.Immediate).Select(_ => _.EventArgs);
         
-        [PublicAPI]
+        
         public static IObservable<DatabaseUpdaterEventArgs> 
             WhenDatabaseUpdaterCreating(this XafApplication application) 
             => Observable.FromEventPattern<EventHandler<DatabaseUpdaterEventArgs>,

@@ -1,13 +1,13 @@
 ﻿using System;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.RefreshView {
-    [PublicAPI]
+    
     public sealed class RefreshViewModule : ReactiveModuleBase{
         public const string CategoryName = "Xpand.XAF.Modules.RefreshView";
         public static ReactiveTraceSource TraceSource{ get; set; }

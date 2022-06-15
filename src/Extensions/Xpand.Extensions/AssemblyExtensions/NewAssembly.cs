@@ -3,7 +3,7 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using JetBrains.Annotations;
+
 using Microsoft.CSharp;
 
 namespace Xpand.Extensions.AssemblyExtensions{
@@ -87,7 +87,7 @@ public class {metadata.Name}{{
             return $"{metadata.Attributes.AttributesCode()}{Environment.NewLine}public {metadata.Type.FullName} {metadata.Name} {{get;{(metadata.CanWrite ? "set;" : null)}}}";
         }
     }
-    [PublicAPI]
+    
     public class AssemblyMetadata{
         public AssemblyMetadata(){
             Attributes=new List<Attribute>();
@@ -97,7 +97,7 @@ public class {metadata.Name}{{
         public Version Version{ get; set; }
         public List<Attribute> Attributes{ get;  }
     }
-    [PublicAPI]
+    
     public class TypeMetadata{
         public TypeMetadata(string name,params PropertyMetadata[] propertyParameters){
             Name = name;
@@ -108,7 +108,7 @@ public class {metadata.Name}{{
         public string Name{ get; set; }
         public List<PropertyMetadata> Properties{ get; }
     }
-    [PublicAPI]
+    
     public class PropertyMetadata{
         public PropertyMetadata(string name, Type type, bool canWrite, params Attribute[] attributes){
             Name = name;

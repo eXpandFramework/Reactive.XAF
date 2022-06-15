@@ -7,13 +7,13 @@ using DevExpress.ExpressApp.Utils;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.NonPersistentObjects;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 
 namespace Xpand.XAF.Modules.SequenceGenerator{
-    [PublicAPI]
+    
     public interface ISequenceStorage{
         string Name{ get; set; }
         string CustomSequence{ get; set; }

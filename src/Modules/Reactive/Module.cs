@@ -3,12 +3,12 @@ using System.Reactive.Subjects;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
-using JetBrains.Annotations;
+
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive {
     public sealed class ReactiveModule : ReactiveModuleBase {
-        [PublicAPI]
+        
         public static ReactiveTraceSource TraceSource{ get; set; }
         readonly Subject<ModelInterfaceExtenders> _extendingModelSubject=new();
         static readonly Subject<ModelNodesGeneratorUpdaters> GeneratingModelNodesSubject=new();

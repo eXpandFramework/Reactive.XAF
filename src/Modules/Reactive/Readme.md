@@ -277,7 +277,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |System.Reactive|5.0.0
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |Xpand.Patcher|2.0.31
- |JetBrains.Annotations|2021.3.0
+ ||2021.3.0
  |Microsoft.CSharp|4.7.0
  |Newtonsoft.Json|13.0.1
  |Enums.Net|4.0.0

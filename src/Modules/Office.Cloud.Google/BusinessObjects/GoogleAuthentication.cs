@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using DevExpress.Persistent.Base;
 using DevExpress.Xpo;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.Office.Cloud.BusinessObjects;
 using Xpand.Extensions.XAF.Xpo.ValueConverters;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Google.BusinessObjects{
     [DeferredDeletion(false)]
-    [UsedImplicitly][OptimisticLocking(false)]
+    [OptimisticLocking(false)]
     public class GoogleAuthentication : CloudOfficeBaseObject{
         private Dictionary<string, string> _oAuthToken;
 

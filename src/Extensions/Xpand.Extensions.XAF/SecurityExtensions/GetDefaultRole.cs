@@ -5,11 +5,11 @@ using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Security;
 using DevExpress.Persistent.Base;
 using Fasterflect;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.AppDomainExtensions;
 
 namespace Xpand.Extensions.XAF.SecurityExtensions {
-    [UsedImplicitly]
+    
     public static partial class SecurityExtensions {
         private static readonly Type PermissionSettingHelperType;
         private static readonly Type ActionPermissionRequest;
@@ -21,7 +21,7 @@ namespace Xpand.Extensions.XAF.SecurityExtensions {
             AdministrativePermissionRequest = AppDomain.CurrentDomain.GetAssemblyType("DevExpress.ExpressApp.Security.AdministrativePermissionRequest");
         }
 
-        [PublicAPI]
+        
         public static IPermissionPolicyRole GetDefaultRole(this IObjectSpace objectSpace) => objectSpace.GetDefaultRole("Default");
 
         public static IPermissionPolicyRole GetDefaultRole(this IObjectSpace objectSpace, string roleName) {

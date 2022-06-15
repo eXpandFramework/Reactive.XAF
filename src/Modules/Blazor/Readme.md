@@ -78,7 +78,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |Xpand.Extensions.XAF.Xpo|4.212.9
  |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.212.9
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
- |JetBrains.Annotations|2021.3.0
+ ||2021.3.0
  |System.Reactive|5.0.0
  |System.Interactive|5.0.0
  |Microsoft.AspNetCore.Hosting.Abstractions|2.2.0

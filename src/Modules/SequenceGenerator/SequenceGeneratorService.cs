@@ -20,7 +20,7 @@ using DevExpress.Xpo;
 using DevExpress.Xpo.DB;
 using DevExpress.Xpo.Helpers;
 using Fasterflect;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.ObjectSpaceProviderExtensions;
@@ -34,7 +34,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 namespace Xpand.XAF.Modules.SequenceGenerator{
     public static class SequenceGeneratorService{
         public const int ParallelTransactionExceptionHResult = -2146233079;
-        [PublicAPI]
+        
         public const string ParallelTransactionExceptionMessage = "SqlConnection does not support parallel transactions.";
         
         static readonly Subject<Exception> ExceptionsSubject=new();
@@ -46,10 +46,10 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
 
         static SequenceGeneratorService() => ExceptionsSubject.Do(exception => Tracing.Tracer.LogError(exception)).Subscribe();
 
-        [PublicAPI]
+        
         public static IObservable<Exception> Exceptions => ExceptionsSubject.AsObservable();
 
-        [DebuggerStepThrough][PublicAPI]
+        [DebuggerStepThrough]
         public static void SetSequence(this IObjectSpace objectSpace, Type sequenceType, string sequenceMember,
             Type customSequence = null, long firstSequence = 0, Type sequenceStorageType = null) 
             => objectSpace.SetSequence(sequenceType, sequenceMember, customSequence?.FullName, firstSequence,
@@ -60,7 +60,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
             string customSequence = null, long firstSequence = 0, Type sequenceStorageType = null) 
             => SetSequence(sequenceStorageType, sequenceType, objectSpace.UnitOfWork(), sequenceMember, customSequence, firstSequence);
 
-        [DebuggerStepThrough][PublicAPI]
+        [DebuggerStepThrough]
         public static void SetSequence<T>(this IObjectSpace objectSpace, Expression<Func<T, long>> sequenceMember,
             Type customSequence = null, long firstSequence = 0, Type sequenceStorageType = null)
             where T : class, IXPSimpleObject 
@@ -125,7 +125,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
             }
         }
 
-        [DebuggerStepThrough][PublicAPI]
+        [DebuggerStepThrough]
         public static void SetSequence<T>(this UnitOfWork unitOfWork, Expression<Func<T, long>> sequenceMember,
             string customSequence = null, long firstSequence = 0, Type sequenceStorageType = null)
             where T : class, IXPObject 
@@ -136,7 +136,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
             string customSequence = null, long firstSequence = 0, Type sequenceStorageType = null) 
             => SetSequence(sequenceStorageType, sequenceType, unitOfWork, sequenceMember, customSequence, firstSequence);
 
-        [DebuggerStepThrough][PublicAPI]
+        [DebuggerStepThrough]
         public static ISequenceStorage GetSequenceStorage(this IObjectSpace objectSpace, Type objectType,
             bool customSequenceLookup = true, Type sequenceStorageType = null) 
             => objectSpace.UnitOfWork().GetSequenceStorage(objectType, customSequenceLookup, sequenceStorageType);
@@ -195,7 +195,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
 
         private static readonly ISubject<object> SequenceSubject = Subject.Synchronize(new Subject<object>());
 
-        [PublicAPI]
+        
         public static IObservable<object> Sequence => SequenceSubject.AsObservable();
 
         private static IObservable<IObjectSpace> WhenSupported(this IObservable<IObjectSpace> source) 

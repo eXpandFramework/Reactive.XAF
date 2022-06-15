@@ -1,5 +1,5 @@
 ﻿using DevExpress.ExpressApp;
-using JetBrains.Annotations;
+
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive.Rest{
@@ -8,7 +8,7 @@ namespace Xpand.XAF.Modules.Reactive.Rest{
         static RestModule(){
             TraceSource=new ReactiveTraceSource(nameof(RestModule));
         }
-        [PublicAPI]
+        
         public static ReactiveTraceSource TraceSource{ get; set; }
 		public RestModule(){
 			RequiredModuleTypes.Add(typeof(ReactiveModule));

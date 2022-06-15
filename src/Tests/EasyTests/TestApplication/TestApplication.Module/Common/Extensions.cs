@@ -2,7 +2,6 @@
 using System.IO;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Xpo;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Xpand.Extensions.AppDomainExtensions;
 

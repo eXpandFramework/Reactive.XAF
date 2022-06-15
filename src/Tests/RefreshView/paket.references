@@ -4,7 +4,7 @@ Shouldly
 System.Reactive
 NUnit
 NUnit3TestAdapter
-JetBrains.Annotations
+
 Microsoft.CodeAnalysis
 Microsoft.NET.Test.Sdk
 DevExpress.ExpressApp.Win

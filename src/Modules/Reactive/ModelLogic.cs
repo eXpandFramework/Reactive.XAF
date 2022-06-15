@@ -4,7 +4,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using Fasterflect;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -28,7 +28,7 @@ namespace Xpand.XAF.Modules.Reactive{
             => $"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}\\{manager.Application.Title}\\{nameof(IModelReactiveModule.StoreToDisk)}";
     }
     public static class ReactiveModulesExtension{
-        [PublicAPI]
+        
         public static IObservable<IModelReactiveModules> ReactiveModulesModel(this IObservable<XafApplication> source){
             return source.SelectMany(application => application.ReactiveModulesModel());
         }

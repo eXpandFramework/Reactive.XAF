@@ -4,7 +4,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Security.Cryptography;
 using DevExpress.ExpressApp;
-using JetBrains.Annotations;
+
 using Microsoft.Identity.Client;
 using Xpand.Extensions.BytesExtensions;
 using Xpand.Extensions.StringExtensions;
@@ -32,7 +32,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 
         public static IObservable<TokenCacheNotificationArgs> SynchStorage(this ITokenCache tokenCache, Func<IObjectSpace> objectSpaceFactory, Guid userId) 
             => tokenCache.ReadStorage(objectSpaceFactory, userId).Merge(tokenCache.WriteStorage(objectSpaceFactory, userId));
-        [UsedImplicitly]
+        
         public static IObservable<TokenCacheNotificationArgs> SynchStorage(this ITokenCache tokenCache, string cacheFilePath) 
             => tokenCache.ReadStorage(cacheFilePath).Merge(tokenCache.WriteStorage(cacheFilePath));
 

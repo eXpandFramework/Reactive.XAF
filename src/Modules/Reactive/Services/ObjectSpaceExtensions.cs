@@ -13,7 +13,7 @@ using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.Xpo;
 using Fasterflect;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.Collections;
@@ -237,7 +237,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static bool IsUpdated<T>(this IObjectSpace objectSpace, T t) where T:class 
             => !objectSpace.IsNewObject(t)&&!objectSpace.IsDeletedObject(t);
 
-        [PublicAPI]
+        
         public static IObservable<(IObjectSpace objectSpace, T[] objects)> WhenDeletedObjects<T>(this IObjectSpace objectSpace,bool emitAfterCommit=false) => emitAfterCommit ? objectSpace.WhenCommiting<T>(ObjectModification.Deleted, true)
                     .Select(t => (t.objectSpace, t.objects.Select(t1 => t1).ToArray())).Finally(() => { })
                 : objectSpace.WhenObjectDeleted()
@@ -345,7 +345,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => Observable.Using(application.CreateObjectSpace, space => space.ExistingObject(query));
 
 
-        [PublicAPI]
+        
         public static IObservable<T> WhenObjectCommitted<T>(this IObservable<T> source) where T:IObjectSpaceLink 
             => source.SelectMany(_ => _.ObjectSpace.WhenCommitted().FirstAsync().Select(tuple => _));
 
@@ -411,7 +411,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return objectsQuery.ToObservable().Pair(objectSpace).TraceRX();
         }
 
-        [PublicAPI]
+        
         public static IObservable<(NonPersistentObjectSpace objectSpace,ObjectsGettingEventArgs e)> ObjectsGetting(this IObservable<NonPersistentObjectSpace> source) 
             => source.SelectMany(item => item.WhenObjectsGetting());
 
@@ -419,7 +419,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => Observable.FromEventPattern<EventHandler<ObjectsGettingEventArgs>, ObjectsGettingEventArgs>(h => item.ObjectsGetting += h, h => item.ObjectsGetting -= h,ImmediateScheduler.Instance)
                 .TransformPattern<ObjectsGettingEventArgs, NonPersistentObjectSpace>();
         
-        [PublicAPI]
+        
         public static IObservable<(NonPersistentObjectSpace objectSpace,ObjectGettingEventArgs e)> ObjectGetting(this IObservable<NonPersistentObjectSpace> source) 
             => source.SelectMany(item => item.WhenObjectGetting());
 
@@ -447,7 +447,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .TransformPattern<CancelEventArgs, IObjectSpace>()
                 .TraceRX();
 
-        [PublicAPI]
+        
         public static IObservable<(IObjectSpace objectSpace,ObjectsManipulatingEventArgs e)> ObjectDeleted(this IObservable<IObjectSpace> source) 
             => source.SelectMany(item => item.WhenObjectDeleted());
 
@@ -455,7 +455,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => Observable.FromEventPattern<EventHandler<ObjectsManipulatingEventArgs>, ObjectsManipulatingEventArgs>(h => item.ObjectDeleted += h, h => item.ObjectDeleted -= h,ImmediateScheduler.Instance)
                 .TransformPattern<ObjectsManipulatingEventArgs, IObjectSpace>();
 
-        [PublicAPI]
+        
         public static IObservable<(IObjectSpace objectSpace,ObjectChangedEventArgs e)> ObjectChanged(this IObservable<IObjectSpace> source) 
             => source.SelectMany(item => item.WhenObjectChanged());
 
@@ -470,7 +470,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => Observable.FromEventPattern<EventHandler,EventArgs>(h => objectSpace.Disposed += h, h => objectSpace.Disposed -= h,ImmediateScheduler.Instance)
                 .ToUnit();
 
-        [PublicAPI]
+        
         public static IObservable<IObjectSpace> WhenModifyChanged(this IObjectSpace objectSpace) 
             => Observable.FromEventPattern<EventHandler, EventArgs>(h => objectSpace.ModifiedChanged += h, h => objectSpace.ModifiedChanged -= h,Scheduler.Immediate)
                 .Select(pattern => (IObjectSpace) pattern.Sender);
@@ -479,7 +479,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.SelectMany(item => item.WhenModifyChanged());
 
 #if !XAF192
-        [PublicAPI]
+        
         public static IObservable<(IObjectSpace objectSpace, ObjectSpaceModificationEventArgs e)> WhenModifiedChanging(this IObjectSpace objectSpace) 
             => Observable.FromEventPattern<EventHandler<ObjectSpaceModificationEventArgs>, ObjectSpaceModificationEventArgs>(h => ((BaseObjectSpace) objectSpace).ModifiedChanging += h, h => ((BaseObjectSpace) objectSpace).ModifiedChanging -= h,ImmediateScheduler.Instance)
                 .TransformPattern<ObjectSpaceModificationEventArgs,IObjectSpace>();

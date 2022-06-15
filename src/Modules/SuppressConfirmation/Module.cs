@@ -2,7 +2,7 @@
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.Reactive.Conditional;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
@@ -10,7 +10,7 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 namespace Xpand.XAF.Modules.SuppressConfirmation{
     public sealed class SuppressConfirmationModule : ReactiveModuleBase{
         public const string CategoryName = "Xpand.XAF.Modules.SupressConfirmation";
-        public static ReactiveTraceSource TraceSource{ get; [PublicAPI]set; }
+        public static ReactiveTraceSource TraceSource{ get; set; }
         static SuppressConfirmationModule(){
             TraceSource=new ReactiveTraceSource(nameof(SuppressConfirmationModule));
         }

@@ -5,7 +5,7 @@ using System.Reactive.Linq;
 using System.Threading;
 using DevExpress.ExpressApp;
 using Fasterflect;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
@@ -38,11 +38,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<IXAFAppWebAPI> WhenWeb(this XafApplication application) 
             => application.GetPlatform() == Platform.Win ?  Observable.Empty<IXAFAppWebAPI>():new XAFAppWebAPI(application).ReturnObservable();
 
-        [PublicAPI]
+        
         public static void SetPageError(this IXAFAppWebAPI api, Exception exception) 
             => api.Application.HandleException(exception);
 
-        [PublicAPI]
+        
         public static void Redirect(this IXAFAppWebAPI api, string url,bool endResponse=true){
             if (api.Application.GetPlatform() == Platform.Blazor){
                 api.GetService("Microsoft.AspNetCore.Components.NavigationManager").CallMethod("NavigateTo", url,endResponse);

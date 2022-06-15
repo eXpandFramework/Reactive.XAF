@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp.DC;
-using JetBrains.Annotations;
+
 
 namespace Xpand.XAF.Modules.Reactive.Tests.BOModel{
     [DomainComponent]
@@ -22,7 +22,7 @@ namespace Xpand.XAF.Modules.Reactive.Tests.BOModel{
             }
         }
 
-        [NotifyPropertyChangedInvocator]
+        
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null){
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

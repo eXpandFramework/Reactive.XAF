@@ -2,7 +2,8 @@ Fasterflect.Xpand
 Microsoft.CSharp
 System.CodeDom
 System.Reflection.Emit
-JetBrains.Annotations
+
 System.ValueTuple
 Microsoft.CodeAnalysis.CSharp
 Newtonsoft.Json
+Xpand.Patcher

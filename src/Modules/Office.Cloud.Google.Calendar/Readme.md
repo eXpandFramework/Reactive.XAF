@@ -111,7 +111,7 @@ The module follows the Nuget [Version Basics](https://docs.Google.com/en-us/nuge
  |[Xpand.XAF.Modules.Office.Cloud.Google](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Office.Cloud.Google)|4.212.9
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |System.Reactive|5.0.0
- |JetBrains.Annotations|2021.3.0
+ ||2021.3.0
  |Google.Apis.Calendar.v3|1.55.0.2410
  |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.212.9
 

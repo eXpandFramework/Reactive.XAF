@@ -57,7 +57,6 @@ nuget System.Interactive.Async 5.0
 nuget Unofficial.Microsoft.mshtml 7.0.3300
 nuget Xpand.Patcher 2.0.31
 nuget YamlDotNet 11.2.1
-nuget JetBrains.Annotations 2021.3
 nuget Polly 7.2.2
 nuget Google.Apis.Calendar.v3 1.55.0.2410
 nuget Google.Apis.Tasks.v1 1.55.0.2384

@@ -1,7 +1,7 @@
-﻿using JetBrains.Annotations;
+﻿
 
 namespace Xpand.Extensions.Windows.Manager{
-    [System.Flags][PublicAPI]
+    [System.Flags]
     public enum MsgBoxStyle{
         /// <summary>
         /// OK button only (default). This member is equivalent to the Visual Basic constant <see langword="vbOKOnly" />.</summary>

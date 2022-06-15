@@ -1,4 +1,4 @@
-﻿using JetBrains.Annotations;
+﻿
 
 namespace Xpand.Extensions.Windows.Manager{
     public static class Interaction{
@@ -42,7 +42,7 @@ namespace Xpand.Extensions.Windows.Manager{
             return MsgBox(text, caption);
         }
 
-        [PublicAPI]
+        
         public static MsgBoxResult MsgBox(object objText){
             return MsgBox(objText, null);
         }

@@ -15,7 +15,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using Fasterflect;
 using HarmonyLib;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Transform;
@@ -160,7 +160,7 @@ namespace Xpand.XAF.Modules.Reactive{
         private static IObservable<Unit> SetupPropertyEditorParentView(this ApplicationModulesManager applicationModulesManager) 
             => applicationModulesManager.WhereApplication().ToObservable().SelectMany(_ => _.SetupPropertyEditorParentView());
 
-        [PublicAPI]
+        
         public static IObservable<Unit> UpdateMainWindowStatus<T>(IObservable<T> messages,TimeSpan period=default){
             if (period==default)
                 period=TimeSpan.FromSeconds(5);

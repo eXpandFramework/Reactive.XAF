@@ -7,7 +7,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Templates;
 using Fasterflect;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.Office.Cloud.BusinessObjects;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ActionExtensions;
@@ -36,7 +36,7 @@ namespace Xpand.Extensions.Office.Cloud{
         }
 
         
-        [PublicAPI]
+        
         public static IObservable<T> DeleteObjectSpaceLink<T>(this IObservable<T> source) where T : IObjectSpaceLink 
             => source.Select(link => {
                 link.ObjectSpace.Delete(link);
@@ -91,7 +91,7 @@ namespace Xpand.Extensions.Office.Cloud{
             => source.SelectMany(@event => Observable.Using(objectSpaceFactory, 
                 space => space.NewCloudObject(localId, (string)@event.GetPropertyValue("Id"), @event.GetType().ToCloudObjectType())
                     .Select(_ => @event)));
-        [PublicAPI]
+        
         public static IObservable<CloudOfficeObject> NewCloudObject(this IObjectSpace space, string localId, string cloudId, Type cloudObjectType) 
             => space.NewCloudObject(localId, cloudId, cloudObjectType.ToCloudObjectType());
 
@@ -101,7 +101,7 @@ namespace Xpand.Extensions.Office.Cloud{
             return space.NewCloudObject(localId, cloudId, cloudEntity.GetType().ToCloudObjectType());
         }
 
-        [PublicAPI]
+        
         public static IObservable<CloudOfficeObject> NewCloudObject(this IObjectSpace space, string localId, string cloudId, CloudObjectType cloudObjectType){
             var cloudObject = space.CreateObject<CloudOfficeObject>();
             cloudObject.LocalId = localId;
@@ -111,7 +111,7 @@ namespace Xpand.Extensions.Office.Cloud{
             return cloudObject.ReturnObservable();
         }
 
-        [PublicAPI]
+        
         public static string GetCloudId(this IObjectSpace objectSpace, string localId, Type cloudEntityType) 
             => objectSpace.QueryCloudOfficeObject(localId, cloudEntityType).FirstOrDefault()?.CloudId;
 

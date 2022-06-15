@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 using System.Web;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
-using JetBrains.Annotations;
+
 using Microsoft.Graph;
 using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -97,7 +97,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
 			        .WithRedirectUri(modelOAuth.RedirectUri).Build();
         }
 
-        [UsedImplicitly]
+        
 		public static void Configuration(IAppBuilder app){
 			app.SetDefaultSignInAsAuthenticationType(AuthenticationType);
 	        app.UseCookieAuthentication(CookieAuthenticationOptions());

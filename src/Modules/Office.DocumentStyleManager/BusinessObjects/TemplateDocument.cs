@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
-using JetBrains.Annotations;
+
 
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
 	[DomainComponent]
@@ -11,7 +11,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
 		private object _key;
 		private ApplyTemplateStyle _applyStyleTemplate;
 
-		[PublicAPI]
+		
 		public string Name{
 			get => _name;
 			set{
@@ -46,8 +46,8 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
 		}
 
 
-		[NotifyPropertyChangedInvocator]
-		[UsedImplicitly]
+		
+		
 		protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null){
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 		}

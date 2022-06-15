@@ -11,7 +11,7 @@ using DevExpress.ExpressApp.Editors;
 using DevExpress.XtraRichEdit;
 using DevExpress.XtraRichEdit.API.Native;
 using Fasterflect;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.ExpressionExtensions;
 using Xpand.Extensions.Reactive.Transform;
@@ -20,7 +20,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Extensions{
     public static class RichEditDocumentServerExtensions{
-        [PublicAPI]
+        
         public static IScheduler EventsScheduler=ImmediateScheduler.Instance;
 
         public static IObservable<IRichEditDocumentServer> WhenModifiedChanged(this IRichEditDocumentServer server) =>

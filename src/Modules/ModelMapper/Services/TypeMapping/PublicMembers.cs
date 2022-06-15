@@ -15,7 +15,6 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
 using Fasterflect;
-using JetBrains.Annotations;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.Reactive.Transform;
@@ -27,7 +26,6 @@ using Xpand.XAF.Modules.ModelMapper.Services.Predefined;
 namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     public static partial class TypeMappingService{
         public static string DefaultContainerSuffix="Map";
-        [PublicAPI]
         public static string ModelMapperAssemblyName;
         public static string MapperAssemblyName="ModelMapperAssembly";
         public static string ModelMappersNodeName="ModelMappers";
@@ -209,14 +207,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         public static IObservable<Type> MapToModel(this IObservable<Type> types,Func<Type,IModelMapperConfiguration> configSelector=null) 
             => types.Select(_ => configSelector?.Invoke(_)?? new ModelMapperConfiguration(_)).MapToModel();
 
-        [PublicAPI]
         public static IObservable<Type> MapToModel(this Type type,Func<Type,IModelMapperConfiguration> configSelector=null) 
             => new[]{type}.MapToModel(configSelector);
 
         public static IObservable<Type> MapToModel(this IEnumerable<Type> types,Func<Type,IModelMapperConfiguration> configSelector=null) 
             => types.ToArray().ToObservable().MapToModel(configSelector);
 
-        [PublicAPI]
         internal static IObservable<Type> ModelInterfaces(this IModelMapperConfiguration configuration) 
             => new[]{configuration}.ToObservable(Scheduler.Immediate).ModelInterfaces();
 
@@ -229,7 +225,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         public static string ModelMapContainerName(this Type type, IModelMapperConfiguration configuration=null) 
             => configuration?.ContainerName?? $"{type.Name}{DefaultContainerSuffix}";
 
-        [PublicAPI]
         public static IModelNode MapNode(this IModelNode modelNode,Type type) 
             => modelNode.GetNode(type.Name);
 
@@ -242,7 +237,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             return (type, rootType).ModelName(configuration?.MapName);
         }
 
-        [PublicAPI]
         public static void Reset(bool skipAssemblyValidation=false,Platform? platform=null){
             MappedTypes=Observable.Empty<Type>();
             _skipAssemblyValidation = skipAssemblyValidation;

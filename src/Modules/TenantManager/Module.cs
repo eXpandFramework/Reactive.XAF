@@ -8,7 +8,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Security;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.Persistent.Base;
-using JetBrains.Annotations;
+
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Xpand.Extensions.Reactive.Conditional;
@@ -20,10 +20,10 @@ using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.TenantManager{
-    [UsedImplicitly]
+    
     public sealed class TenantManagerModule : ReactiveModuleBase{
         
-        [PublicAPI]
+        
         public static ReactiveTraceSource TraceSource{ get; set; }
         static TenantManagerModule(){
             TraceSource=new ReactiveTraceSource(nameof(TenantManagerModule));

@@ -17,7 +17,7 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base.General;
 using DevExpress.Utils;
 using Fasterflect;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.ExpressionExtensions;
 using Xpand.Extensions.LinqExtensions;
@@ -35,7 +35,7 @@ using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.Reactive.Logger{
     public static class ReactiveLoggerService{
-        public static string RXLoggerLogPath{ get; [PublicAPI]set; }=@$"{AppDomain.CurrentDomain.ApplicationPath()}\{AppDomain.CurrentDomain.ApplicationName()}_RXLogger.log";
+        public static string RXLoggerLogPath{ get; set; }=@$"{AppDomain.CurrentDomain.ApplicationPath()}\{AppDomain.CurrentDomain.ApplicationName()}_RXLogger.log";
         private static readonly Subject<ITraceEvent> SavedTraceEventSubject=new();
         public static IObservable<ITraceEvent> ListenerEvents{ get; private set; }
         public static IObservable<ITraceEvent> SavedTraceEvent{ get; }=SavedTraceEventSubject;
@@ -76,13 +76,13 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
 			        .TraceLogger(_ => _.Message)
 			        .ToUnit();
 
-        [PublicAPI]
+        
         public static IObservable<TraceEvent> WhenTraceEvent<TLocation>(this XafApplication application, Expression<Func<TLocation, object>> expression, RXAction rxAction = RXAction.All){
             var name = expression.MemberExpressionName();
             return application.WhenTraceEvent(typeof(TLocation), rxAction).Where(_ => _.Method == name);
         }
 
-        [PublicAPI]
+        
         public static IObservable<ITraceEvent> WhenTraceOnNext(this XafApplication application, params string[] methods) 
             => application.WhenTraceOnNext(null, methods);
 
@@ -102,18 +102,18 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
 		        .Where(_ => !methods.Any() || methods.Contains(_.Method))
 		        .Where(_ => rxAction == RXAction.All || _.RXAction.HasAnyFlag(rxAction));
 
-        [PublicAPI]
+        
         public static IObservable<TraceEvent> WhenTraceOnSubscribeEvent(this XafApplication application, params string[] methods) 
             => application.WhenTraceEvent(null, RXAction.Subscribe, methods);
         
-        [PublicAPI]
+        
         public static IObservable<TraceEvent> WhenTraceOnNextEvent(this XafApplication application,params string[] methods) 
             => application.WhenTraceOnNextEvent(null, methods);
 
         public static IObservable<TraceEvent> WhenTraceOnNextEvent(this XafApplication application, Type location = null,params string[] methods) 
             => application.WhenTraceEvent(location, RXAction.OnNext, methods);
 
-        [PublicAPI]
+        
         public static IObservable<TraceEvent> WhenTraceEvent(this XafApplication application,Type location=null,RXAction rxAction=RXAction.All,params string[] methods) 
             => SavedTraceEvent.When(location, rxAction,methods).Cast<TraceEvent>();
 
@@ -171,7 +171,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                 })
                 .ToUnit();
 
-        [PublicAPI]
+        
         public static void TraceMessage(this TraceSource traceSource, string value,TraceEventType traceEventType=TraceEventType.Information){
             if (traceSource.Switch.Level != SourceLevels.Off){
                 traceSource.Push(new TraceEventMessage {

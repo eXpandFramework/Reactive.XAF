@@ -10,7 +10,7 @@ using DevExpress.ExpressApp.Editors;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.Persistent.Base;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -160,7 +160,7 @@ namespace Xpand.XAF.Modules.MasterDetail{
                 return simpleAction;
             }).TraceMasterDetailModule(action => action.Id);
 
-        [PublicAPI]
+        
         public static IModelDashboardView NewMasterDetailModelDashboardView(this IModelApplication modelApplication, Type objectType){
             var modelDashboardView = modelApplication.Views.AddNode<IModelDashboardView>();
             var modelClass = modelApplication.BOModel.GetClass(objectType);

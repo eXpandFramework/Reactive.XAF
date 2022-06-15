@@ -21,7 +21,7 @@ using DevExpress.ExpressApp.Xpo;
 using DevExpress.Persistent.Base;
 using DevExpress.Xpo;
 using Fasterflect;
-using JetBrains.Annotations;
+
 using Xpand.Extensions.Blazor;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.LinqExtensions;
@@ -317,7 +317,7 @@ namespace Xpand.XAF.Modules.TenantManager{
             => application.GetService<SingletonItems>().GetOrAdd(organization.GetTypeInfo().KeyMember.GetValue(organization),
                     _ => new ConnectionStringDataStoreProvider(application.ConnectionString(organization)));
         
-        [PublicAPI]
+        
         public static IXpoDataStoreProvider ManagerDataStoreProvider(this XafApplication application) {
             application.GetService<SingletonItems>().TryGetValue(application.LastOrganizationKey(),out var value);
             return (IXpoDataStoreProvider)value;
@@ -334,7 +334,7 @@ namespace Xpand.XAF.Modules.TenantManager{
 	        .Cast<object>().Select(o => application.ConnectionString(o))
 	        .Any(connectionString => Regex.IsMatch(connectionString, $@"{objectSpace.Connection().Database}\b", RegexOptions.IgnoreCase));
 
-        [PublicAPI]
+        
         public static IObservable<Unit> WhenCustomizeConnectionString<T>(this XafApplication application,Func<T,string> connectionString) 
             => CustomizeConnectionStringSubject.AsObservable().Where(e => e.Instance.application == application)
                 .Select(e => e.SetInstance(t => (t.application,t.organization,connectionString((T)t.organization))))

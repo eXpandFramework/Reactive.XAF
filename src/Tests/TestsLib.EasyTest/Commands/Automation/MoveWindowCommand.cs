@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 using DevExpress.EasyTest.Framework;
-using JetBrains.Annotations;
+
 using Xpand.TestsLib.Common.Win32;
 
 namespace Xpand.TestsLib.EasyTest.Commands.Automation{
@@ -12,7 +12,7 @@ namespace Xpand.TestsLib.EasyTest.Commands.Automation{
         private readonly bool _repaint;
 
         
-        [PublicAPI]
+        
         public MoveWindowCommand():this(0,0,1024,768){
         }
 
