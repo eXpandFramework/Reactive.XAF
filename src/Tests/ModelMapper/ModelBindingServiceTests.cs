@@ -18,11 +18,9 @@ using DevExpress.ExpressApp.Scheduler;
 using DevExpress.ExpressApp.Scheduler.Win;
 using DevExpress.ExpressApp.TreeListEditors;
 using DevExpress.ExpressApp.TreeListEditors.Win;
-using DevExpress.ExpressApp.Web.Editors.ASPx;
 using DevExpress.ExpressApp.Win.Editors;
 using DevExpress.ExpressApp.Win.Layout;
 using DevExpress.Persistent.BaseImpl;
-using DevExpress.Web;
 using DevExpress.XtraCharts;
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Repository;
@@ -180,8 +178,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
         [XpandTest(LongTimeout)]
         [TestCase(nameof(Platform.Win),new[]{PredefinedMap.XafLayoutControl },new[]{typeof(XafLayoutControl)},new Type[0],1)]
-        [TestCase(nameof(Platform.Web),new[]{PredefinedMap.ASPxPopupControl },new[]{typeof(ASPxPopupControl)},new Type[0],0)]
-        // [TestCase(nameof(Platform.Win),new[]{PredefinedMap.LayoutControlGroup },new[]{typeof(LayoutControlGroup)},new Type[0],1)]
         public async Task Bind_DetailView_Maps(string platformName,PredefinedMap[] predefinedMaps,Type[] controlTypes,Type[] extraModules,int boundTypes) {
             var platform = GetPlatform(platformName);
             controlTypes.ToObservable().Do(type => Assembly.LoadFile(type.Assembly.Location)).Subscribe();
@@ -219,7 +215,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
             var bound = ModelBindingService.ControlBind.FirstAsync().SubscribeReplay();
             application.Logon();
             application.CreateObjectSpace();
-            application.EditorFactory=new DevExpress.ExpressApp.Editors.EditorsFactory();
+            application.EditorFactory=new EditorsFactory();
             var listView = application.NewObjectView<ListView>(typeof(MM));
             listView.CreateControls();
             await bound;
@@ -232,11 +228,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
 
         [TestCase(nameof(Platform.Win),new[]{PredefinedMap.GridColumn , PredefinedMap.GridView},new[]{typeof(XafGridView),typeof(GridColumn),typeof(GridListEditor)},new Type[0],3)]
-        [TestCase(nameof(Platform.Web),new[]{PredefinedMap.GridViewDataColumn , PredefinedMap.ASPxGridView},new[]{typeof(ASPxGridView),typeof(GridViewDataColumn),typeof(ASPxGridListEditor)},new Type[0],3)]
         [TestCase(nameof(Platform.Win),new[]{PredefinedMap.BandedGridColumn , PredefinedMap.AdvBandedGridView},new[]{typeof(XafAdvBandedGridView),typeof(BandedGridColumn),typeof(GridListEditor)},new Type[0],3)]
         [TestCase(nameof(Platform.Win),new[]{PredefinedMap.LayoutViewColumn , PredefinedMap.LayoutView},new[]{typeof(XafLayoutView),typeof(LayoutViewColumn),typeof(CustomGridListEditor)},new Type[0],3)]
         [TestCase(nameof(Platform.Win),new[]{PredefinedMap.SplitContainerControl },new[]{typeof(SplitContainerControl)},new Type[0],1)]
-        [TestCase(nameof(Platform.Web),new[]{PredefinedMap.ASPxPopupControl },new[]{typeof(ASPxPopupControl)},new Type[0],0)]
         [TestCase(nameof(Platform.Win),new[]{PredefinedMap.TreeListColumn , PredefinedMap.TreeList},new[]{typeof(TreeList),typeof(TreeListColumn),typeof(TreeListEditor)},new[]{typeof(TreeListEditorsModuleBase),typeof(TreeListEditorsWindowsFormsModule)},3)]
         [TestCase(nameof(Platform.Win),new[]{PredefinedMap.DashboardDesigner },new[]{typeof(DashboardDesigner)},new[]{typeof(DashboardsModule),typeof(DashboardsWindowsFormsModule)},0)]
         [TestCase(nameof(Platform.Win), new[]{PredefinedMap.PivotGridField, PredefinedMap.PivotGridControl},new[]{typeof(PivotGridControl), typeof(PivotGridListEditor)},new[]{typeof(PivotGridModule), typeof(PivotGridWindowsFormsModule)}, 3)]
@@ -286,7 +280,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         [TestCase(nameof(Platform.Win))]
         public void Bind_PropertyEditor_Control(string platformName){
             var platform = GetPlatform(platformName);
-            var maps = EnumsNET.Enums.GetValues<PredefinedMap>().Where(map => map.IsPropertyEditor() && map.Attribute<MapPlatformAttribute>().Platform == platform);
+            var maps = EnumsNET.Enums.GetValues<PredefinedMap>()
+                .Where(map => map.IsPropertyEditor() && map.Attribute<MapPlatformAttribute>().Platform == platform);
             foreach (var predefinedMap in maps){
                 try{
                     InitializeMapperService(platform);
@@ -405,7 +400,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                     listEditor = platform == Platform.Win
                         ? (ListEditor) new CustomGridListEditor(view, controlTypes.First(),
                             controlTypes.Skip(1).First(),repositoryItemTextEdit)
-                        : new ASPxGridListEditor(view);
+                        : throw new NotImplementedException();
 
                 if (listEditor is IComplexListEditor complexListEditor){
                     complexListEditor.Setup(collectionSource, application);

@@ -13,7 +13,6 @@ using DevExpress.ExpressApp.Model.Core;
 using DevExpress.ExpressApp.SystemModule;
 using DevExpress.Persistent.Base;
 using Fasterflect;
-using JetBrains.Annotations;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -87,14 +86,17 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
                 _chartControlAssembly = assemblies.GetAssembly($"DevExpress.XtraCharts{versionSuffix}");
                 _chartCoreAssembly = assemblies.GetAssembly($"DevExpress.Charts{versionSuffix}.Core");
             }
+            else if (ModelExtendingService.Platform == Extensions.XAF.XafApplicationExtensions.Platform.Web) {
+                _dashboardWebWebFormsAssembly = assemblies.GetAssembly($"DevExpress.Dashboard{versionSuffix}.Web.WebForms");
+                _xafWebAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.Web{versionSuffix}");
+                _dxWebAssembly = assemblies.GetAssembly($"DevExpress.Web{versionSuffix}");
+                _dxHtmlEditorWebAssembly = assemblies.GetAssembly($"DevExpress.Web.ASPxHtmlEditor{versionSuffix}");
+                _dxSchedulerWebAssembly = assemblies.GetAssembly($"DevExpress.Web.ASPxScheduler{versionSuffix}");
+                _xafHtmlEditorWebAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.HtmlPropertyEditor.Web{versionSuffix}");
+                _xafSchedulerWebAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.Scheduler.Web{versionSuffix}");    
+            }
 
-            _dashboardWebWebFormsAssembly = assemblies.GetAssembly($"DevExpress.Dashboard{versionSuffix}.Web.WebForms");
-            _xafWebAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.Web{versionSuffix}");
-            _dxWebAssembly = assemblies.GetAssembly($"DevExpress.Web{versionSuffix}");
-            _dxHtmlEditorWebAssembly = assemblies.GetAssembly($"DevExpress.Web.ASPxHtmlEditor{versionSuffix}");
-            _dxSchedulerWebAssembly = assemblies.GetAssembly($"DevExpress.Web.ASPxScheduler{versionSuffix}");
-            _xafHtmlEditorWebAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.HtmlPropertyEditor.Web{versionSuffix}");
-            _xafSchedulerWebAssembly = assemblies.GetAssembly($"DevExpress.ExpressApp.Scheduler.Web{versionSuffix}");
+            
 
         }
 
@@ -122,7 +124,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             return assembly;
         }
 
-        [PublicAPI]
         public static void Extend(this ApplicationModulesManager modulesManager,IEnumerable<PredefinedMap> maps, Action<ModelMapperConfiguration> configure = null){
             foreach (var map in maps){
                 modulesManager.Extend(map,configure);
@@ -155,14 +156,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
 				        .Select(_ => (extenders, type))))
 		        .FirstAsync();
 
-        [PublicAPI]
         public static void Extend(this ApplicationModulesManager modulesManager,params PredefinedMap[] maps){
             foreach (var map in maps){
                 modulesManager.Extend(map);
             }
         }
 
-        [PublicAPI]
         public static void Extend(this ApplicationModulesManager modulesManager,Action<PredefinedMap,ModelMapperConfiguration> configure = null, params PredefinedMap[] maps){
             foreach (var map in maps){
                 modulesManager.Extend(map,configuration => configure?.Invoke(map, configuration));
@@ -248,7 +247,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             return mapperConfiguration;
         }
 
-        [PublicAPI]
         public static IModelNode AddControlsNode(this IModelNode modelNode, PredefinedMap predefinedMap,string id = null){
             return AddViewItemNode(modelNode, predefinedMap, id, ViewItemService.PropertyEditorControlMapName);
         }
@@ -271,7 +269,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             return ViewItemNode(modelNode, predefinedMap, ViewItemService.RepositoryItemsMapName);
         }
 
-        [PublicAPI]
         public static IModelNode GetControlsItemNode(this IModelNode modelNode, PredefinedMap predefinedMap){
             return ViewItemNode(modelNode, predefinedMap, ViewItemService.PropertyEditorControlMapName);
         }

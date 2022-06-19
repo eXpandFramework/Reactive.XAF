@@ -9,7 +9,6 @@ using System.Reflection;
 using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
-using JetBrains.Annotations;
 using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ReflectionExtensions;
@@ -282,7 +281,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                 .ToObservable(ImmediateScheduler.Instance)
                 .Select(_ => (_.code.code, _.references));
 
-        [PublicAPI]
         public static IScheduler ModelCodeScheduler{ get; set; }=Scheduler.Default;
     }
 }

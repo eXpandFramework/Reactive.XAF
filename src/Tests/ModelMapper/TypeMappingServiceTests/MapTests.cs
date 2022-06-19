@@ -6,21 +6,14 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using DevExpress.DashboardWeb;
 using DevExpress.DashboardWin;
 using DevExpress.ExpressApp.Chart.Win;
-using DevExpress.ExpressApp.HtmlPropertyEditor.Web;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.PivotGrid.Win;
-using DevExpress.ExpressApp.Scheduler.Web;
 using DevExpress.ExpressApp.Scheduler.Win;
 using DevExpress.ExpressApp.TreeListEditors.Win;
-using DevExpress.ExpressApp.Web.Editors.ASPx;
 using DevExpress.ExpressApp.Win.Editors;
 using DevExpress.ExpressApp.Win.Layout;
-using DevExpress.Web;
-using DevExpress.Web.ASPxHtmlEditor;
-using DevExpress.Web.ASPxScheduler;
 using DevExpress.XtraCharts;
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Columns;
@@ -205,26 +198,13 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [TestCase(PredefinedMap.LayoutView,new[]{typeof(LayoutView),typeof(GridListEditor)},nameof(Platform.Win),new[]{nameof(LayoutView.FormatRules)})]
         [TestCase(PredefinedMap.BandedGridColumn,new[]{typeof(BandedGridColumn),typeof(GridListEditor)},nameof(Platform.Win),new[]{nameof(BandedGridColumn.Summary)})]
         [TestCase(PredefinedMap.AdvBandedGridView,new[]{typeof(AdvBandedGridView),typeof(GridListEditor)},nameof(Platform.Win),new[]{nameof(AdvBandedGridView.FormatRules)})]
-        [TestCase(PredefinedMap.ASPxGridView,new[]{typeof(ASPxGridView),typeof(ASPxGridListEditor)},nameof(Platform.Web),new[]{nameof(ASPxGridView.Columns)})]
-        [TestCase(PredefinedMap.GridViewDataColumn,new[]{typeof(GridViewDataColumn),typeof(ASPxGridListEditor)},nameof(Platform.Web),new[]{nameof(GridViewDataColumn.Columns)})]
-        [TestCase(PredefinedMap.ASPxHtmlEditor,new[]{typeof(ASPxHtmlEditor),typeof(ASPxHtmlPropertyEditor)},nameof(Platform.Web),new string[0])]
         [TestCase(PredefinedMap.TreeList,new[]{typeof(TreeList),typeof(TreeListEditor)},nameof(Platform.Win),new string[0])]
         [TestCase(PredefinedMap.TreeListColumn,new[]{typeof(TreeListColumn),typeof(TreeListEditor)},nameof(Platform.Win),new string[0])]
         [TestCase(PredefinedMap.SchedulerControl,new[]{typeof(SchedulerControl),typeof(SchedulerListEditor)},nameof(Platform.Win),new[]{nameof(SchedulerControl.DataBindings)})]
-        [TestCase(PredefinedMap.ASPxScheduler,new[]{typeof(ASPxScheduler),typeof(ASPxSchedulerListEditor)},nameof(Platform.Web),new string[0])]
         [TestCase(PredefinedMap.XafLayoutControl,new[]{typeof(XafLayoutControl)},nameof(Platform.Win),new string[0])]
         [TestCase(PredefinedMap.SplitContainerControl,new[]{typeof(SplitContainerControl)},nameof(Platform.Win),new string[0])]
         [TestCase(PredefinedMap.DashboardDesigner,new[]{typeof(DashboardDesigner)},nameof(Platform.Win),new string[0])]
-        [TestCase(PredefinedMap.ASPxPopupControl,new[]{typeof(ASPxPopupControl)},nameof(Platform.Web),new string[0])]
         [TestCase(PredefinedMap.DashboardViewer,new[]{typeof(DashboardViewer)},nameof(Platform.Win),new string[0])]
-        [TestCase(PredefinedMap.ASPxDashboard,new[]{typeof(ASPxDashboard)},nameof(Platform.Web),new string[0])]
-        [TestCase(PredefinedMap.ASPxDateEdit,new[]{typeof(ASPxDateEdit)},nameof(Platform.Web),new string[0])]
-        [TestCase(PredefinedMap.ASPxHyperLink,new[]{typeof(ASPxHyperLink)},nameof(Platform.Web),new string[0])]
-        [TestCase(PredefinedMap.ASPxLookupDropDownEdit,new[]{typeof(ASPxLookupDropDownEdit)},nameof(Platform.Web),new string[0])]
-        [TestCase(PredefinedMap.ASPxLookupFindEdit,new[]{typeof(ASPxLookupFindEdit)},nameof(Platform.Web),new string[0])]
-        [TestCase(PredefinedMap.ASPxSpinEdit,new[]{typeof(ASPxSpinEdit)},nameof(Platform.Web),new string[0])]
-        [TestCase(PredefinedMap.ASPxTokenBox,new[]{typeof(ASPxTokenBox)},nameof(Platform.Web),new string[0])]
-        [TestCase(PredefinedMap.ASPxComboBox,new[]{typeof(ASPxComboBox)},nameof(Platform.Web),new string[0])]
         [TestCase(PredefinedMap.LabelControl,new[]{typeof(LabelControl)},nameof(Platform.Win),new string[0])]
         [TestCase(PredefinedMap.RichEditControl,new[]{typeof(RichEditControl)},nameof(Platform.Win),new string[0])]
         public async Task Map_Predefined_Configurations(PredefinedMap predefinedMap, Type[] assembliesToLoad,string platformName, string[] collectionNames){
@@ -311,7 +291,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
         [XpandTest]
         [TestCase(nameof(Platform.Win))]
-        [TestCase(nameof(Platform.Web))]
         public async Task Map_PredefinedMap_PropertyEditor_Controls(string platformName){
             var platform = GetPlatform(platformName);
             var predefinedMaps = Enums.GetValues<PredefinedMap>().Where(map => map.IsPropertyEditor())
@@ -345,7 +324,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
                 var propertyInfo = propertyInfos.FirstOrDefault(info => info.Name == $"{nameof(ChartControl.Diagram)}s");
                 propertyInfo.ShouldNotBeNull();
                 var type = modelType.Assembly.GetType(typeof(Diagram).ModelTypeName(typeof(ChartControl)));
-                propertyInfo.PropertyType.GetInterfaces().ShouldContain(typeof(IModelList<>).MakeGenericType(type));
+                propertyInfo.PropertyType.GetInterfaces().ShouldContain(typeof(IModelList<>).MakeGenericType(type!));
             }
         }
 
@@ -377,7 +356,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
 
         [XpandTest(120000)]
-        [TestCase(nameof(Platform.Web))]
         [TestCase(nameof(Platform.Win))]
         public void Map_All_PredefinedConfigurations(string platformName){
             var platform = GetPlatform(platformName);

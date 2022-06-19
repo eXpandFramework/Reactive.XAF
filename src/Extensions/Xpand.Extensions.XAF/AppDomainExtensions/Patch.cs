@@ -7,7 +7,7 @@ namespace Xpand.Extensions.XAF.AppDomainExtensions {
     public static partial class AppDomainExtensions {
 	    private static Harmony _harmony;
 	    private static readonly ConcurrentDictionary<string,MethodInfo> PatchedMethods = new();
-	    public static MethodInfo PatchWith(this MethodInfo method, HarmonyMethod prefix = null,
+	    public static void PatchWith(this MethodInfo method, HarmonyMethod prefix = null,
 		    HarmonyMethod postFix = null, HarmonyMethod transpiler = null,HarmonyMethod finalizer = null) {
 		    _harmony ??= new Harmony("XAF");
 		    if (DesignerOnlyCalculator.IsRunTime) {
@@ -17,7 +17,6 @@ namespace Xpand.Extensions.XAF.AppDomainExtensions {
 				    _harmony.Patch(method, prefix, postFix, transpiler,finalizer);
 			    }
 		    }
-		    return method;
 	    }
     }
 }

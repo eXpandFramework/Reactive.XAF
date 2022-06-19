@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor;
+using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.TypeExtensions;
@@ -23,7 +24,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification {
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => manager.GenerateModelNodes()
-                .Merge(manager.WhenApplication(application => application.WhenObjectSpaceCreated().FirstAsync().Where(_ => !application.IsInternal())
+                .Merge(manager.WhenApplication(application => application.WhenSetupComplete().WhenDefault(_ => application.IsInternal())
                         .SelectMany(_ => application.WhenNotificationJobModification(application.Model.NotificationTypes())))
                     .ToUnit());
 
@@ -79,7 +80,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification {
         
         private static IObservable<object> WhenNotificationJobModification(this XafApplication application, NotificationType[] modelNotificationTypes) 
             => Observable.Using(application.CreateNonSecuredObjectSpace,objectSpace => objectSpace.SaveIndexes(modelNotificationTypes))
-                .Merge(application.WhenCommittedDetailed<ObjectStateNotification>(ObjectModification.NewOrUpdated)
+                .Merge(application.WhenCommittedDetailed<ObjectStateNotification>(ObjectModification.All)
                     .SelectMany(t => application.SaveIndexes(t.details.Select(t1 =>t1.instance ).ToArray(),modelNotificationTypes)
                             .TraceNotificationModule(job => $"{ObjectModification.NewOrUpdated}-{job}")));
 

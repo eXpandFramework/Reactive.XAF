@@ -19,6 +19,7 @@ using Fasterflect;
 using Moq;
 using NUnit.Framework;
 using Shouldly;
+using Tests.SequenceGenerator.BO.Tests.SequenceGenerator.BO.Tests.SequenceGenerator.BO.Tests.SequenceGenerator.BO.Tests.SequenceGenerator.BO.Tests.SequenceGenerator.BO.BO.Tests.SequenceGenerator.BO.Tests.SequenceGenerator.BO.Tests.SequenceGenerator.BO;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.XafApplicationExtensions;

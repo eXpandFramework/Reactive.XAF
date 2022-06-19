@@ -17,15 +17,13 @@ $nuspec.Save($versionConverterPath)
 
 $allProjects = Get-ChildItem $root *.csproj -Recurse | Select-Object -ExpandProperty BaseName
 $filter="test|Maintenance"
-if ($dxVersion -lt "20.2.0"){
-    $filter += "|Blazor|Hangfire|Xpand.XAF.Modules.Reactive.Logger.Client.Win"
-}
+
 $filteredProjects=Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notmatch $filter} 
-$filteredProjects+=Get-ChildItem "$root\src\" -Include "*Xpand.TestsLib*.csproj" -Recurse  |Where-Object{$dxVersion -gt "20.2.0" -or $_.BaseName -notmatch "Blazor"}
+$filteredProjects+=Get-ChildItem "$root\src\" -Include "*Xpand.TestsLib*.csproj" -Recurse  |Where-Object{$_.BaseName -notmatch "Blazor"}
 $dxVersionBuild=Get-VersionPart $dxVersion Build
 $filteredProjects| Invoke-Parallel -StepInterval 500 -VariablesToImport @("allProjects", "root", "Release","dxVersionBuild") -Script {
 
-# $filteredProjects|where{$_.BaseName -eq "Xpand.XAF.Modules.Windows"}| foreach {
+# $filteredProjects|where{$_.BaseName -eq "Xpand.XAF.Modules.Windows"}| foreach {lin
 # $filteredProjects| foreach {
     $addTargets = {
         param (

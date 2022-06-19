@@ -1,18 +1,19 @@
 ﻿using System;
-using System.CodeDom.Compiler;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using DevExpress.ExpressApp;
 using Fasterflect;
-using Microsoft.CSharp;
+using Microsoft.CodeAnalysis.CSharp;
 using NUnit.Framework;
 using Xpand.Extensions.AppDomainExtensions;
+using Xpand.Extensions.BytesExtensions;
+using Xpand.Extensions.Compiler;
+using Xpand.Extensions.StreamExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Common;
-using Xpand.TestsLib.Net461;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.ModelMapper.Tests.BOModel;
@@ -53,14 +54,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         internal Type CreateDynamicType(string name,string version="1.0.0.0"){
-            var compilerParameters = new CompilerParameters{
-                CompilerOptions = "/t:library",
-                OutputAssembly = $@"{Path.GetDirectoryName(typeof(ModelMapperModule).Assembly.Location)}\DynamicType{name}{version.Substring(0,1)}.dll"
-            };
+            // var compilerParameters = new CompilerParameters{
+            //     CompilerOptions = "/t:library",
+            //     OutputAssembly = $@"{Path.GetDirectoryName(typeof(ModelMapperModule).Assembly.Location)}\DynamicType{name}{version.Substring(0,1)}.dll"
+            // };
             
-            var codeProvider = new CSharpCodeProvider();
-            compilerParameters.ReferencedAssemblies.Add(typeof(object).Assembly.Location);
-            compilerParameters.ReferencedAssemblies.Add(typeof(AssemblyVersionAttribute).Assembly.Location);
+            
 
             string code=$@"
 [assembly:{typeof(AssemblyVersionAttribute).FullName}(""{version}"")]
@@ -69,8 +68,10 @@ public class {DynamicTypeName}{{
     public string Test{{ get; set; }}
 }}
 ";
-            var compilerResults = codeProvider.CompileAssemblyFromSource(compilerParameters, code);
-            return compilerResults.CompiledAssembly.GetType(DynamicTypeName);
+            using var st= CSharpSyntaxTree.ParseText(code).Compile(typeof(object).Assembly.Location,typeof(AssemblyVersionAttribute).Assembly.Location);
+            var path = $@"{Path.GetDirectoryName(typeof(ModelMapperModule).Assembly.Location)}\DynamicType{name}{version.Substring(0,1)}.dll";
+            st.Bytes().Save(path);
+            return Assembly.LoadFrom(path).GetType(DynamicTypeName);
         }
 
         internal string InitializeMapperService(Platform platform=Platform.Agnostic,bool newAssemblyName=true ){

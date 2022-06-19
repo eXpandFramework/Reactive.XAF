@@ -8,7 +8,7 @@ NUnit
 NUnit3TestAdapter
 Fasterflect.Xpand
 Xpand.Collections
-JetBrains.Annotations
+Microsoft.NET.Test.SDK
 DevExpress.ExpressApp.Win.All
-DevExpress.ExpressApp.Web.All
 Microsoft.Reactive.Testing
+Xpand.Patcher

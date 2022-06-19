@@ -2,7 +2,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputPath>..\..\..\bin</OutputPath>
-    <TargetFramework>net461</TargetFramework>
+    <TargetFramework>net5.0-windows7.0</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
     <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
     <LangVersion>latest</LangVersion>
     <SignAssembly>true</SignAssembly>
@@ -11,20 +12,17 @@
     <DebugType>full</DebugType>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
-    <CopyLocalLockFileAssemblie>true</CopyLocalLockFileAssemblie>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <WarningsAsErrors>;NU1605</WarningsAsErrors>
     <NoWarn>1701;1702;NU1608</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System.Design" />
-    <Reference Include="System.Web" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="Xpand.TestsLib.Net461">
-      <HintPath>..\..\..\bin\net461\Xpand.TestsLib.Net461.dll</HintPath>
+    <Reference Include="Xpand.TestsLib">
+      <HintPath>..\..\..\bin\net5.0-windows7.0\Xpand.TestsLib.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.TestsLib.Common">
       <HintPath>..\..\..\bin\Xpand.TestsLib.Common.dll</HintPath>

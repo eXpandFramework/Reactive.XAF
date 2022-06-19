@@ -23,7 +23,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
     public static partial class TypeMappingService{
         public static string CustomAssemblyNameSuffix = "Custom";
         private static bool _skipAssemblyValidation;
-        static readonly Subject<GenericEventArgs<(string code,IEnumerable<string> references,string outputAssembly)>> CustomCompileSubject=new Subject<GenericEventArgs<(string code, IEnumerable<string> references, string outputAssembly)>>();
+        static readonly Subject<GenericEventArgs<(string code,IEnumerable<string> references,string outputAssembly)>> CustomCompileSubject=new();
 
         public static IObservable<GenericEventArgs<(string code, IEnumerable<string> references, string outputAssembly)>> CustomCompile1 => CustomCompileSubject.AsObservable();
 
@@ -126,7 +126,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
             => string.Join(Environment.NewLine, PropertyMappingRules.Select(_ => _.key)
                     .Concat(TypeMappingRules.Select(_ => _.key))
                     .Concat(AdditionalTypesList.Select(_ => _.FullName))
-                    .Concat(ReservedPropertyTypes.Select(type => type.FullName))
+                    .Concat(ReservedPropertyTypes.WhereNotDefault().Select(type => type.FullName))
                     .Concat(ReservedPropertyNames)
                     .Concat(ReservedPropertyInstances.Select(_ => _.FullName))
                     .Concat(new[]{ModelMappersNodeName, MapperAssemblyName, ModelMapperAssemblyName, DefaultContainerSuffix}).OrderBy(s => s))

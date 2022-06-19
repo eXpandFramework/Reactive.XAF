@@ -4,7 +4,6 @@ System.CodeDom
 DevExpress.ExpressApp
 System.Reactive
 Fasterflect.Xpand
-JetBrains.Annotations
 Xpand.Collections
 System.Interactive
 Newtonsoft.Json

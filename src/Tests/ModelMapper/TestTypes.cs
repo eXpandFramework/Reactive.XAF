@@ -42,6 +42,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         public string Name{ get; set; }
         
     }
+    public class TestModelMapper2{
+        public string Name{ get; set; }
+        
+    }
     public class TestModelMapperCommonType1{
         public int Age{ get; set; }
         public TestModelMapperCommon TestModelMapperCommon{ get;  }    =new TestModelMapperCommon();

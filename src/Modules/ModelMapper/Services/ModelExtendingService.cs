@@ -8,7 +8,6 @@ using ConcurrentCollections;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using Fasterflect;
-using JetBrains.Annotations;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -83,13 +82,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
             }
         }
         
-        [PublicAPI]
         public static void Extend<TTargetInterface>(this ApplicationModulesManager modulesManager,Type extenderType) 
             where TTargetInterface : IModelNode {
             modulesManager.Extend(new ModelMapperConfiguration(extenderType,typeof(TTargetInterface)));
         }
 
-        [PublicAPI]
         public static void Extend<TTargetInterface, TExtenderType>(this ApplicationModulesManager modulesManager) where TTargetInterface : IModelNode where TExtenderType:class{
             modulesManager.Extend(new ModelMapperConfiguration(typeof(TExtenderType),typeof(TTargetInterface)));
         }

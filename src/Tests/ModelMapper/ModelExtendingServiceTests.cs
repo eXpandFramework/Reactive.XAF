@@ -9,8 +9,6 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Win.Editors;
 using DevExpress.ExpressApp.Win.Layout;
 using DevExpress.Utils;
-using DevExpress.Web;
-using DevExpress.Web.ASPxScheduler;
 using DevExpress.XtraCharts;
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Columns;
@@ -41,12 +39,10 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
     public class ModelMapperExtenderServiceTests : ModelMapperCommonTest{
         [XpandTest]
         [TestCase(typeof(TestModelMapper),nameof(Platform.Win))]
-        [TestCase(typeof(TestModelMapper),nameof(Platform.Web))]
         [TestCase(typeof(RootType),nameof(Platform.Win))]
-        [TestCase(typeof(RootType),nameof(Platform.Web))]
-        public void ExtendModel_Any_Type(Type typeToMap,string platformName){
+        public void ExtendModel_Any_Type(Type typeToMap,string platformName) {
             var platform = GetPlatform(platformName);
-            InitializeMapperService();
+            InitializeMapperService(platform);
 
             var module = typeToMap.Extend<IModelListView>();
             using var application = DefaultModelMapperModule( platform, module).Application;
@@ -111,15 +107,11 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         [TestCase(PredefinedMap.LayoutView, typeof(LayoutView),nameof(Platform.Win),MMListViewNodePath)]
         [TestCase(PredefinedMap.BandedGridColumn, typeof(BandedGridColumn),nameof(Platform.Win),MMListViewNodePath+"/Columns/Test")]
         [TestCase(PredefinedMap.AdvBandedGridView, typeof(AdvBandedGridView),nameof(Platform.Win),MMListViewNodePath)]
-        [TestCase(PredefinedMap.GridViewDataColumn, typeof(GridViewDataColumn),nameof(Platform.Web),MMListViewNodePath+"/Columns/Test")]
-        [TestCase(PredefinedMap.ASPxGridView, typeof(ASPxGridView),nameof(Platform.Web),MMListViewNodePath)]
         [TestCase(PredefinedMap.TreeList, typeof(TreeList),nameof(Platform.Win),MMListViewNodePath+",NavigationItems")]
         [TestCase(PredefinedMap.TreeListColumn, typeof(TreeListColumn),nameof(Platform.Win),MMListViewTestItemNodePath)]
-        [TestCase(PredefinedMap.ASPxScheduler, typeof(ASPxScheduler),nameof(Platform.Web),MMListViewNodePath)]
         [TestCase(PredefinedMap.XafLayoutControl, typeof(XafLayoutControl),nameof(Platform.Win),MMDetailViewNodePath)]
         [TestCase(PredefinedMap.SplitContainerControl, typeof(SplitContainerControl),nameof(Platform.Win),MMListViewNodePath+"/SplitLayout")]
         [TestCase(PredefinedMap.DashboardDesigner, typeof(DashboardDesigner),nameof(Platform.Win),MMDetailViewTestItemNodePath)]
-        [TestCase(PredefinedMap.ASPxPopupControl, typeof(ASPxPopupControl),nameof(Platform.Web),MMListViewNodePath+","+MMDetailViewNodePath)]
         public void ExtendModel_Predefined_Type(PredefinedMap configuration,Type typeToMap,string platformName,string nodePath){
 
             var platform = GetPlatform(platformName);
@@ -136,8 +128,9 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                 var modelNode = application.Model.GetNodeByPath(s);
                 modelNode.GetNode(typeToMap.Name).ShouldNotBeNull();
             }
-            
-            var typeInfo = XafTypesInfo.Instance.FindTypeInfo(typeof(IModelModelMap)).Descendants.FirstOrDefault(info => info.Name.EndsWith(typeToMap.Name));
+
+            var typeInfos = XafTypesInfo.Instance.FindTypeInfo(typeof(IModelModelMap)).Descendants.ToArray();
+            var typeInfo = typeInfos.FirstOrDefault(info => info.Name.EndsWith(typeToMap.Name));
             typeInfo.ShouldNotBeNull();
             typeInfo.Name.ShouldBe(mapName);
             var defaultContext =((IModelApplicationModelMapper) application.Model).ModelMapper.MapperContexts.GetNode(ModelMapperContextNodeGenerator.Default);
@@ -168,7 +161,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
         protected static object[] RepositoryItems(){
             return Enums.GetValues<PredefinedMap>()
-                .Where(map => map.IsRepositoryItem()).Cast<object>().ToArray();
+                .Where(map => map.IsRepositoryItem()&&map.Platform()==Platform.Win).Cast<object>().ToArray();
         }
 
         protected static object[] WinPropertyEditorControls(){
@@ -176,13 +169,8 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
                 .Where(map => map.IsPropertyEditor()&&map.Platform()==Platform.Win).Cast<object>().ToArray();
         }
 
-        protected static object[] WebPropertyEditorControls(){
-            return Enums.GetValues<PredefinedMap>()
-                .Where(map => map.IsPropertyEditor()&&map.Platform()==Platform.Web).Cast<object>().ToArray();
-        }
 
         [XpandTest()]
-        [TestCaseSource(nameof(WebPropertyEditorControls))]
         [TestCaseSource(nameof(WinPropertyEditorControls))]
         public void Extend_Predefined_PropertyEditorControls(PredefinedMap predefinedMap){
             InitializeMapperService( predefinedMap.Platform());
@@ -262,7 +250,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
         [XpandTest(LongTimeout)]
         [TestCase(nameof(Platform.Win))]
-        [TestCase(nameof(Platform.Web))]
         public void ExtendModel_All_Predefined_Maps(string platformName){
             
             var platform = GetPlatform(platformName);
@@ -296,7 +283,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
         }
 
         [XpandTest]
-        [TestCase(nameof(Platform.Web),PredefinedMap.ASPxHyperLink)]
         [TestCase(nameof(Platform.Win),PredefinedMap.RichEditControl)]
         [TestCase(nameof(Platform.Win),PredefinedMap.RepositoryItem)]
         public void Extend_Existing_ViewItemMap(string platformName,PredefinedMap predefinedMap){
@@ -341,7 +327,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
         [XpandTest]
         [TestCase(nameof(Platform.Win))]
-        [TestCase(nameof(Platform.Web))]
         public void ModelMapperContexts(string platformName){
             var platform = GetPlatform(platformName);
             InitializeMapperService();
@@ -356,7 +341,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests{
 
         [XpandTest]
         [TestCase(nameof(Platform.Win))]
-        [TestCase(nameof(Platform.Web))]
         public void Container_ModelMapperContexts(string platformName){
             var platform = GetPlatform(platformName);
             InitializeMapperService();

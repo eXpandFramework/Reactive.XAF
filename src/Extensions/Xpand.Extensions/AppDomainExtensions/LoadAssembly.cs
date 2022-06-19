@@ -6,7 +6,7 @@ using Xpand.Extensions.StreamExtensions;
 namespace Xpand.Extensions.AppDomainExtensions{
     public static partial class AppDomainExtensions{
         public static Assembly LoadAssembly(this AppDomain appDomain, string assemblyPath) 
-	        => Assembly.LoadFile(Path.GetFullPath(assemblyPath));
+	        => Assembly.LoadFrom(Path.GetFullPath(assemblyPath));
 
         public static Assembly LoadAssembly(this AppDomain appDomain, Stream stream) 
 	        => Assembly.Load(stream.Bytes());

@@ -100,7 +100,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
                         .SelectMany(configurations => {
                             var skipCompilation = configurations
                                 .All(configuration =>_skipAssemblyValidation || configuration.TypeFromPath(!obs.Key) );
-                            return configurations.ToObservable(ImmediateScheduler.Instance).GetMappedTypes(skipCompilation, !obs.Key);
+                            return configurations.ToNowObservable().GetMappedTypes(skipCompilation, !obs.Key);
                         })))
                 .Finally(() => _skipAssemblyValidation=false);
 

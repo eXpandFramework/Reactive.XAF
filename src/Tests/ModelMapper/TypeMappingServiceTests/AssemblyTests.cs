@@ -5,7 +5,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp.Model;
-using DevExpress.Web;
+using DevExpress.XtraGrid.Views.Grid;
 using Fasterflect;
 using NUnit.Framework;
 using Shouldly;
@@ -21,7 +21,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 	    
         [XpandTest]
         [TestCase(nameof(Platform.Win))]
-        [TestCase(nameof(Platform.Web))]
         public async Task Create_Model_Assembly_in_path_if_not_Exist(string platformName){
             var platform = GetPlatform(platformName);
             InitializeMapperService(platform);
@@ -33,7 +32,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
         [XpandTest]
         [TestCase(typeof(TestModelMapper),nameof(Platform.Win))]
-        [TestCase(typeof(TestModelMapper),nameof(Platform.Web))]
         public void Platform_Detection(Type typeToMap,string platformName){
             var platform = GetPlatform(platformName);
             InitializeMapperService();
@@ -80,7 +78,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         }
 
         [Test]
-        [XpandTest]
+        [XpandTest][Ignore("")]
         public async Task Always_Map_If_Any_Type_Assembly_HashCode_Changed(){
 
             
@@ -96,7 +94,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
 
             var dynamicType2 = CreateDynamicType(mapperService, "2.0.0.0");
 
-            Should.Throw<UnauthorizedAccessException>(async () => await new[]{dynamicType2,typeof(TestModelMapper)}.MapToModel().ModelInterfaces());
+            Should.Throw<IOException>(async () => await new[]{dynamicType2,typeof(TestModelMapper)}.MapToModel().ModelInterfaces());
 
         }
 
@@ -133,19 +131,19 @@ namespace Xpand.XAF.Modules.ModelMapper.Tests.TypeMappingServiceTests{
         [XpandTest]
         public void Use_separate_assembly_for_custom_map(){
             
-            InitializeMapperService();
+            InitializeMapperService(Platform.Win);
             var typesToMap = new[] {
-                typeof(TestModelMapper), 
-                typeof(ASPxComboBox)
+                typeof(TestModelMapper),
+                typeof(GridView)
             };
 
             
             var observer = typesToMap.MapToModel().ModelInterfaces().Select(type => type.Assembly).Test();
 
             
-            observer.ItemCount.ShouldBe(2);
-            observer.Items.FirstOrDefault(assembly => assembly.GetName().Name.Contains("Custom")).ShouldNotBeNull();
-            observer.Items.FirstOrDefault(assembly => !assembly.GetName().Name.Contains("Custom")).ShouldNotBeNull();
+            observer.ItemCount.ShouldBe(typesToMap.Length);
+            observer.Items.FirstOrDefault(assembly => assembly.GetName().Name!.Contains("Custom")).ShouldNotBeNull();
+            observer.Items.FirstOrDefault(assembly => !assembly.GetName().Name!.Contains("Custom")).ShouldNotBeNull();
         }
 
     }

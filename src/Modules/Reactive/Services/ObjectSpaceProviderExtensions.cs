@@ -51,10 +51,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static void PatchSchemaUpdated(this IObjectSpaceProvider provider) {
             if (provider.IsMiddleTier()) return;
             var name = $"{typeof(IObjectSpaceProvider).FullName}.{nameof(IObjectSpaceProvider.UpdateSchema)}";
-            provider.GetType().Methods(nameof(IObjectSpaceProvider.UpdateSchema),name)
-                .Last(info => info.DeclaringType is { IsAbstract: false })
-                .PatchWith(new HarmonyMethod(GetMethodInfo(nameof(SchemaUpdating))))
-                .PatchWith(postFix: new HarmonyMethod(GetMethodInfo(nameof(SchemaUpdated))));
+            var methodInfo = provider.GetType().Methods(nameof(IObjectSpaceProvider.UpdateSchema),name)
+                .Last(info => info.DeclaringType is { IsAbstract: false });
+            methodInfo.PatchWith(new HarmonyMethod(GetMethodInfo(nameof(SchemaUpdating))),new HarmonyMethod(GetMethodInfo(nameof(SchemaUpdated))));
         }
 
         [SuppressMessage("ReSharper", "InconsistentNaming")]

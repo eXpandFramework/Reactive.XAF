@@ -26,7 +26,8 @@ namespace Xpand.XAF.Modules.Blazor {
                 .Merge(manager.CheckBlazor(typeof(BlazorStartup).FullName, typeof(BlazorModule).Namespace))
                 .Merge(manager.WhenApplication(application => application.UseCustomNestedFrameTemplate()
                     .Merge(application.ApplyDxDataGridModel())).ToUnit());
-
+        
+        
         private static IObservable<Unit> UseCustomNestedFrameTemplate(this XafApplication application) 
             => application.WhenCreateCustomTemplate().Where(t => t.e.Context==TemplateContext.NestedFrame)
                 .Do(t => t.e.Template=new NestedFrameTemplate()).ToUnit();

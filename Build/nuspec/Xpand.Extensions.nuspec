@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.Extensions</id>
-    <version>4.212.9.7</version>
+    <version>4.212.9.8</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -19,10 +19,10 @@
         <dependency id="Microsoft.CSharp" version="4.7" />
         <dependency id="System.CodeDom" version="5.0" />
         <dependency id="System.Reflection.Emit" version="4.7" />
-        <dependency id="JetBrains.Annotations" version="2021.3" />
         <dependency id="System.ValueTuple" version="4.5" />
         <dependency id="Microsoft.CodeAnalysis.CSharp" version="4.0.1" />
         <dependency id="Newtonsoft.Json" version="13.0.1" />
+        <dependency id="Xpand.Patcher" version="2.0.31" />
       </group>
     </dependencies>
   </metadata>

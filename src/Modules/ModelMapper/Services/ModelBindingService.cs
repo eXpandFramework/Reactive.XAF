@@ -11,7 +11,6 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
 using Fasterflect;
-using JetBrains.Annotations;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
@@ -37,7 +36,6 @@ namespace Xpand.XAF.Modules.ModelMapper.Services{
     public static class ModelBindingService{
         static readonly Subject<Parameter> ControlBindSubject=new();
 
-        [PublicAPI]
         public static IObservable<Parameter> ControlBind => ControlBindSubject;
 
         internal static IObservable<Unit> BindConnect(this ApplicationModulesManager manager) 

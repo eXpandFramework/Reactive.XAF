@@ -20,10 +20,11 @@ namespace Xpand.Extensions.Reactive.Transform.System {
                     h => appDomain.AssemblyLoad += h, h => appDomain.AssemblyLoad -= h,ImmediateScheduler.Instance)
                 .Select(pattern => pattern.EventArgs.LoadedAssembly);
 
-        public static IObservable<ResolveEventArgs> WhenAssemblyResolve(this AppDomain appDomain) 
-            => Observable.FromEventPattern<ResolveEventHandler, ResolveEventArgs>(
-                    h => appDomain.AssemblyResolve += h, h => appDomain.AssemblyResolve -= h,ImmediateScheduler.Instance)
-                .Select(pattern => pattern.EventArgs);
+        public static IObservable<ResolveEventArgs> WhenAssemblyResolve(this AppDomain appDomain)
+	        => appDomain.WhenEvent<ResolveEventArgs>(nameof(AppDomain.AssemblyResolve));
+            // => Observable.FromEventPattern<ResolveEventHandler, ResolveEventArgs>(
+            //         h => appDomain.AssemblyResolve += h, h => appDomain.AssemblyResolve -= h,ImmediateScheduler.Instance)
+            //     .Select(pattern => pattern.EventArgs);
         
         public static IObservable<string> WhenFileCreated(this AppDomain appDomain,string path,string pattern)
             => Observable.Using(() => new FileSystemWatcher(path, pattern){ EnableRaisingEvents = true }, watcher => watcher

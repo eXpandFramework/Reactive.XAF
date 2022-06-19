@@ -10,6 +10,7 @@ using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.NonPersistentObjects;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 using Xpand.TestsLib.Common;
+using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.BusinessObjects;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Tests.BO;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -33,7 +34,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Tests.Common {
             return notificationJob;
         }
 
-        public static IObservable<Unit> NotificationJob(this BlazorApplication application,ObjectStateNotification notificationJob) 
+        public static IObservable<Unit> NotificationJob(this BlazorApplication application,JobWorker notificationJob) 
             => Unit.Default.ReturnObservable().Delay(TimeSpan.FromMilliseconds(300))
                 .SelectMany(_ => ((IObservable<Unit>)typeof(NotificationService).Method("JobNotification", Flags.StaticPrivate)
                     .Call(new object[] { application, notificationJob.Id })).Select(unit => unit));
@@ -45,7 +46,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.Tests.Common {
                     for (int i = 0; i < 2; i++) {
                         var jsne = notificationJob.ObjectSpace.CreateObject<T>();
                         jsne.Name = i.ToString();
-                    }
+                    } 
 
                     notificationJob.ObjectSpace.CommitChanges();
                 });
