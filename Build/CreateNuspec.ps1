@@ -19,11 +19,11 @@ $allProjects = Get-ChildItem $root *.csproj -Recurse | Select-Object -ExpandProp
 $filter="test|Maintenance"
 
 $filteredProjects=Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notmatch $filter} 
-$filteredProjects+=Get-ChildItem "$root\src\" -Include "*Xpand.TestsLib*.csproj" -Recurse  |Where-Object{$_.BaseName -notmatch "Blazor"}
+$filteredProjects+=Get-ChildItem "$root\src\" -Include "*Xpand.TestsLib*.csproj" -Recurse # |Where-Object{$_.BaseName -notmatch "Blazor"}
 $dxVersionBuild=Get-VersionPart $dxVersion Build
 $filteredProjects| Invoke-Parallel -StepInterval 500 -VariablesToImport @("allProjects", "root", "Release","dxVersionBuild") -Script {
 
-# $filteredProjects|where{$_.BaseName -eq "Xpand.XAF.Modules.Windows"}| foreach {lin
+# $filteredProjects|where{$_.BaseName -eq "Xpand.TestsLib.Blazor"}| foreach {
 # $filteredProjects| foreach {
     $addTargets = {
         param (

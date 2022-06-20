@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.ViewWizard</id>
-    <version>4.212.9.8</version>
+    <version>4.212.10.0</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -15,11 +15,11 @@
     <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, ViewWizard, 21.2.8</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.Extensions.Reactive" version="4.212.9.8" />
-        <dependency id="Xpand.Extensions.XAF" version="4.212.9.8" />
-        <dependency id="Xpand.Extensions" version="4.212.9.8" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.212.9.8" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.212.9.8" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.212.10.0" />
+        <dependency id="Xpand.Extensions.XAF" version="4.212.10.0" />
+        <dependency id="Xpand.Extensions" version="4.212.10.0" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.212.10.0" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.212.10.0" />
         <dependency id="DevExpress.ExpressApp" version="21.2.8" />
         <dependency id="DevExpress.Xpo" version="21.2.8" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
@@ -27,7 +27,7 @@
         <dependency id="System.Interactive" version="5.0" />
         <dependency id="Newtonsoft.Json" version="13.0.1" />
         <dependency id="DevExpress.ExpressApp.CodeAnalysis" version="21.2.8" />
-        <dependency id="Xpand.VersionConverter" version="4.212.9.8" />
+        <dependency id="Xpand.VersionConverter" version="4.212.10.0" />
       </group>
     </dependencies>
   </metadata>
