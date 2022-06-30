@@ -40,6 +40,8 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests{
             else {
                 testJob.Provider.ShouldBeNull();
             }
+
+            await WebHost.StopAsync();
         }
 
         [TestCase(false)] 

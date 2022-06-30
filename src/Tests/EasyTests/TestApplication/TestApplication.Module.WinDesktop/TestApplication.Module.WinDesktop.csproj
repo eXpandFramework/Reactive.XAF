@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net5.0-windows7.0</TargetFramework>
+    <TargetFramework>net6.0-windows7.0</TargetFramework>
     <Deterministic>false</Deterministic>
     <AssemblyVersion>1.0.*</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
@@ -38,6 +38,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="22.1.3" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0" />
     <!-- <PackageReference Include="Microsoft.Extensions.Options" Version="5.0" />
     <PackageReference Include="Microsoft.Win32.Registry" Version="5.0" />
     <PackageReference Include="System.ServiceProcess.ServiceController" Version="5.0" />
@@ -46,11 +47,11 @@
     <PackageReference Include="System.Data.SqlClient" Version="4.8.1" />
     <PackageReference Include="System.ServiceModel.Security" Version="4.8.1" />
     <PackageReference Include="System.ServiceModel.NetTcp" Version="4.8.1" /> -->
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.212.10.0" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.212.10.1" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="TestApplication.Module">
-      <HintPath>..\TestApplication.Module\bin\Debug\net5.0\TestApplication.Module.dll</HintPath>
+      <HintPath>..\TestApplication.Module\bin\Debug\net6.0\TestApplication.Module.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

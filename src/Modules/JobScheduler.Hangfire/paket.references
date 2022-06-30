@@ -3,3 +3,4 @@ System.Reactive
 Xpand.Patcher
 Hangfire.Core
 Hangfire.AspNetCore
+Microsoft.CodeAnalysis

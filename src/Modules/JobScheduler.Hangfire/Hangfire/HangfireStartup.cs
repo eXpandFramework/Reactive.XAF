@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Linq;
 using DevExpress.Data.Filtering;
-using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Security;
 using DevExpress.Persistent.Base;
 using Fasterflect;
@@ -32,9 +31,12 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire {
                 next(app);
             };
 
+
+        public static readonly Action<IApplicationBuilder> Server = builder 
 #pragma warning disable CS0618
-        public static readonly Action<IApplicationBuilder> Server = builder => builder.UseHangfireServer();
+            => builder.UseHangfireServer();
 #pragma warning restore CS0618
+
         public static readonly Action<IApplicationBuilder> Dashboard = builder 
             => builder.UseHangfireDashboard(options:new DashboardOptions {
                 Authorization = new[] {new DashboardAuthorization()}
@@ -46,23 +48,18 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire {
             var httpContext = context.GetHttpContext();
             var userIdentity = httpContext.User.Identity;
             Debug.Assert(userIdentity != null, nameof(userIdentity) + " != null");
-            if (userIdentity.IsAuthenticated) {
-                return httpContext.RequestServices.RunWithStorageAsync(application => {
-                    var security = application.Security;
-                    if (security.IsSecurityStrategyComplex()) {
-                        if (!security.IsActionPermissionGranted(nameof(JobSchedulerService.JobDashboard)) && !security.IsAdminPermissionGranted()) {
-                            using var objectSpace = application.CreateObjectSpace(security?.UserType);
-                            var user = (ISecurityUserWithRoles)objectSpace.FindObject(security?.UserType,
-                                CriteriaOperator.Parse($"{nameof(ISecurityUser.UserName)}=?", userIdentity.Name));
-                            return user.Roles.Cast<IPermissionPolicyRole>().Any(role => role.IsAdministrative).ReturnObservable();
-                        }
-                        return true.ReturnObservable();
-                    }
-                    return true.ReturnObservable();
-                }).Wait(TimeSpan.FromSeconds(10));
-                
-            }
-            return false;
+            return userIdentity.IsAuthenticated && httpContext.RequestServices.RunWithStorageAsync(application => {
+                var security = application.Security;
+                if (!security.IsSecurityStrategyComplex()) return true.ReturnObservable();
+                if (security.IsActionPermissionGranted(nameof(JobSchedulerService.JobDashboard)) ||
+                    security.IsAdminPermissionGranted()) return true.ReturnObservable();
+                using var objectSpace = application.CreateObjectSpace(security?.UserType);
+                var user = (ISecurityUserWithRoles)objectSpace.FindObject(security?.UserType,
+                    CriteriaOperator.Parse($"{nameof(ISecurityUser.UserName)}=?", userIdentity.Name));
+                return user.Roles.Cast<IPermissionPolicyRole>().Any(role => role.IsAdministrative)
+                    .ReturnObservable();
+
+            }).Wait(TimeSpan.FromSeconds(10));
         }
     }
 
@@ -82,7 +79,11 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire {
                 .UseActivator(new ServiceJobActivator(provider.GetService<IServiceScopeFactory>()))
                 .UseFilter(provider.GetService<IHangfireJobFilter>())
                 .UseFilter(new AutomaticRetryAttribute() { Attempts = 0 });
+            
             GlobalStateHandlers.Handlers.Add(new ChainJobState.Handler());
         }
     }
+    
+
+
 }

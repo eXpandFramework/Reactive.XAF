@@ -50,6 +50,7 @@ namespace Xpand.XAF.Modules.TenantManager{
 	            .Merge(application.HideOrganization())
                 .Merge(application.WhenLoggingOff().SelectMany(_ => application.SaveOrganizationKey()).ToUnit())
 	            .Merge(application.WhenModelChanged().Skip(1).MarkupMessage()));
+
         private static IObservable<Unit> LogonLastOrganization(this XafApplication application) 
 	        => application.WhenLoggedOn()
                 .TraceTenantManager(_ => "Logon")
@@ -58,7 +59,7 @@ namespace Xpand.XAF.Modules.TenantManager{
 		        .SelectMany(organization => {
 			        var managerObjectProvider = application.ObjectSpaceProvider.DataStoreProvider();
 			        application.SetDataStoreProvider(organization);
-			        var objectSpace = application.CreateNonSecuredObjectSpace();
+			        var objectSpace = application.CreateNonSecuredObjectSpace(SecuritySystem.UserType);
 			        var currentUserName = SecuritySystem.CurrentUserName;
 			        var applicationUser = objectSpace.FindObject(SecuritySystem.UserType,CriteriaOperator.FromLambda<ISecurityUser>(user => user.UserName==currentUserName));
 			        if (applicationUser == null) {
@@ -80,7 +81,7 @@ namespace Xpand.XAF.Modules.TenantManager{
                     .SelectMany(editor => editor.GetFieldValue("helper").WhenEvent(nameof(LookupEditorHelper.CustomCreateCollectionSource))
                         .Select(pattern => pattern.EventArgs).Cast<CustomCreateCollectionSourceEventArgs>()
                         .Do(e => {
-                            var collectionSourceBase = application.CreateCollectionSource(application.CreateNonSecuredObjectSpace(), editor.MemberInfo.MemberType, editor.View.Id);
+                            var collectionSourceBase = application.CreateCollectionSource(application.CreateNonSecuredObjectSpace(editor.MemberInfo.MemberType), editor.MemberInfo.MemberType, editor.View.Id);
                             collectionSourceBase.Criteria[nameof(TenantManagerService)] = CriteriaOperator.Parse(application.Model.TenantManager().Registration);
                             e.CollectionSource = collectionSourceBase;
                         })))
@@ -142,7 +143,7 @@ namespace Xpand.XAF.Modules.TenantManager{
                 var model = view.Model.Application.TenantManager();
                 var editor = ((LookupPropertyEditor)view.AsDetailView().GetPropertyEditor(model.StartupViewOrganization.Name));
                 ((DxComboBoxAdapter)editor.Control).ComponentModel.ChildContent = null;
-                using var objectSpace = application.CreateNonSecuredObjectSpace();
+                using var objectSpace = application.CreateNonSecuredObjectSpace(model.Organization.TypeInfo.Type);
                 ((IAppearanceVisibility)editor).Visibility = objectSpace.UserOrganizationCount(model.Application) > 0 ? ViewItemVisibility.Show : ViewItemVisibility.Hide;
                 ((IAppearanceVisibility)view.AsDetailView().GetPropertyEditor(model.StartupViewMessage.Name))
                     .Visibility = ((IAppearanceVisibility)editor).Visibility == ViewItemVisibility.Show ? ViewItemVisibility.Hide : ViewItemVisibility.Show;
@@ -150,8 +151,8 @@ namespace Xpand.XAF.Modules.TenantManager{
             .TraceTenantManager();
 
         public static IList<object> UserOrganizations(this XafApplication application) {
-            using var objectSpace = application.CreateNonSecuredObjectSpace();
-            var model = application.Model.TenantManager();
+	        var model = application.Model.TenantManager();
+            using var objectSpace = application.CreateNonSecuredObjectSpace(model.Organization.TypeInfo.Type);
             return objectSpace.GetObjects(model.Organization.TypeInfo.Type,CriteriaOperator.Parse(model.Registration)).Cast<object>().ToArray();
         }
 
@@ -261,7 +262,7 @@ namespace Xpand.XAF.Modules.TenantManager{
             var managerProvider = application.ObjectSpaceProvider.DataStoreProvider();
             application.SetDataStoreProvider(organization);
             application.InvokeModuleUpdaters();
-	        var objectSpace = application.CreateNonSecuredObjectSpace();
+	        var objectSpace = application.CreateNonSecuredObjectSpace(SecuritySystem.UserType);
 	        var model = application.Model.TenantManager();
 	        var applicationUser = objectSpace.GetUser(SecuritySystem.CurrentUserName, model);
 	        applicationUser.UpdateRoles(application, objectSpace);

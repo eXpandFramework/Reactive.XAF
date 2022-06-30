@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.RazorView</id>
-    <version>4.212.10.0</version>
+    <version>4.212.10.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -12,32 +12,32 @@
     <description>The `RazorView` module uses the Razor c</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, RazorView, 21.2.8</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, RazorView, 22.1.3</tags>
     <dependencies>
-      <group targetFramework="net5.0">
-        <dependency id="Xpand.Extensions.Reactive" version="4.212.10.0" />
-        <dependency id="Xpand.Extensions" version="4.212.10.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.212.10.0" />
-        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.212.10.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.212.10.0" />
+      <group targetFramework="net6.0">
+        <dependency id="Xpand.Extensions.Reactive" version="4.212.10.1" />
+        <dependency id="Xpand.Extensions" version="4.212.10.1" />
+        <dependency id="Xpand.Extensions.XAF" version="4.212.10.1" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.212.10.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.212.10.1" />
         <dependency id="Xpand.Patcher" version="2.0.31" />
         <dependency id="System.Reactive" version="5.0" />
-        <dependency id="DevExpress.ExpressApp.Validation" version="21.2.8" />
+        <dependency id="DevExpress.ExpressApp.Validation" version="22.1.3" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="Newtonsoft.Json" version="13.0.1" />
         <dependency id="Xpand.Collections" version="1.0.4" />
         <dependency id="RazorLight" version="2.0.0-rc.3" />
-        <dependency id="DevExpress.ExpressApp.CodeAnalysis" version="21.2.8" />
+        <dependency id="DevExpress.ExpressApp.CodeAnalysis" version="22.1.3" />
         <dependency id="System.Reflection.Metadata" version="5.0" />
       </group>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.VersionConverter" version="4.212.10.0" />
+        <dependency id="Xpand.VersionConverter" version="4.212.10.1" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="net5.0\Xpand.XAF.Modules.RazorView.dll" target="lib\net5.0\Xpand.XAF.Modules.RazorView.dll" />
-    <file src="net5.0\Xpand.XAF.Modules.RazorView.pdb" target="lib\net5.0\Xpand.XAF.Modules.RazorView.pdb" />
+    <file src="net6.0\Xpand.XAF.Modules.RazorView.dll" target="lib\net6.0\Xpand.XAF.Modules.RazorView.dll" />
+    <file src="net6.0\Xpand.XAF.Modules.RazorView.pdb" target="lib\net6.0\Xpand.XAF.Modules.RazorView.pdb" />
     <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.XAF.Modules.RazorView.targets" />
     <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
   </files>

@@ -17,6 +17,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
         public override void Setup() {
             base.Setup();
             GlobalConfiguration.Configuration.UseMemoryStorage(new MemoryStorageOptions());
+            
         }
 
         public override void Dispose() {
@@ -51,11 +52,11 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Tests.Common {
             return module;
         }
 
-        protected IObservable<Job> MockHangfire(Type testJobType = null, string testName = null) {
-            testJobType ??= typeof(TestJobDI);
-            testName ??= nameof(TestJob.Test);
-
-            return JobSchedulerService.CustomJobSchedule.ScheduleImmediate(testJobType.CallExpression(testName));
-        }
+        // protected IObservable<Job> MockHangfire(Type testJobType = null, string testName = null) {
+        //     testJobType ??= typeof(TestJobDI);
+        //     testName ??= nameof(TestJob.Test);
+        //
+        //     return JobSchedulerService.CustomJobSchedule.ScheduleImmediate(testJobType.CallExpression(testName));
+        // }
     }
 }

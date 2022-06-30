@@ -29,7 +29,7 @@ namespace TestApplication.GoogleService{
 
 		public static IObservable<Unit> PersistToken(this IObservable<SimpleActionExecuteEventArgs> source) 
 			=> source.Do(e => {
-                    using var objectSpace = e.Action.Application.CreateObjectSpace();
+                    using var objectSpace = e.Action.Application.CreateObjectSpace(typeof(GoogleAuthentication));
                     var authentication = objectSpace.GetObjectByKey<GoogleAuthentication>(SecuritySystem.CurrentUserId);
                     if (authentication == null){
                         authentication = objectSpace.CreateObject<GoogleAuthentication>();
@@ -59,15 +59,15 @@ namespace TestApplication.GoogleService{
 
                     if (AppDomain.CurrentDomain.IsHosted()){
                         if (t.modelOAuth != null){
-                            t.modelOAuth.ClientId = json.web.client_id;
-                            t.modelOAuth.ClientSecret = json.web.client_secret;
-                            t.modelOAuth.RedirectUri = json.web.redirect_uris[0];
+                            t.modelOAuth.ClientId = json?.web.client_id;
+                            t.modelOAuth.ClientSecret = json?.web.client_secret;
+                            t.modelOAuth.RedirectUri = json?.web.redirect_uris[0];
                         }
                     }
                     else{
                         if (t.modelOAuth != null){
-                            t.modelOAuth.ClientId = json.installed.client_id;
-                            t.modelOAuth.ClientSecret = json.installed.client_secret;
+                            t.modelOAuth.ClientId = json?.installed.client_id;
+                            t.modelOAuth.ClientSecret = json?.installed.client_secret;
                         }
                     }
 					

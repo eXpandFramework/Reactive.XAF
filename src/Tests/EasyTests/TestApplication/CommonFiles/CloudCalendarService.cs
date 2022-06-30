@@ -33,10 +33,10 @@ namespace ALL.Tests{
             => config().initializeModule
                 .Merge(manager.WhenApplication(application
                     => application.WhenViewOnFrame(typeof(Event),ViewType.DetailView)
-                        .SelectMany(frame => frame.View.ObjectSpace.WhenCommiting().SelectMany(t => config().updated.TakeUntil(frame.WhenDisposingFrame()))
+                        .SelectMany(frame => frame.View.ObjectSpace.WhenCommiting().SelectMany(_ => config().updated.TakeUntil(frame.WhenDisposingFrame()))
 	                        .Where(t => t.mapAction!=MapAction.Delete)
                             .Do(tuple => {
-	                            using var objectSpace = frame.Application.CreateObjectSpace();
+	                            using var objectSpace = frame.Application.CreateObjectSpace(typeof(CloudOfficeObject));
                                 var cloudOfficeObject = objectSpace.QueryCloudOfficeObject(tuple.cloud.GetPropertyValue("Id").ToString(), CloudObjectType.Event).First();
                                 var @event = objectSpace.GetObjectByKey<Event>(Guid.Parse(cloudOfficeObject.LocalId));
                                 @event.Description = tuple.mapAction.ToString();
@@ -80,13 +80,13 @@ namespace ALL.Tests{
                 .SelectMany(e => {
                     var authorizeService = authorize();
                     if (e.SelectedChoiceActionItem.Caption == "New"){
-                        return newOperation(authorizeService).ObserveOn(SynchronizationContext.Current).ToUnit();
+                        return newOperation(authorizeService).ObserveOn(SynchronizationContext.Current!).ToUnit();
                     }
-                    var objectSpace = e.Action.Application.CreateObjectSpace();
+                    var objectSpace = e.Action.Application.CreateObjectSpace(typeof(Event));
                     var cloudOfficeObject = objectSpace.QueryCloudOfficeObject(cloudEntityType,objectSpace.GetObjects<Event>().First()).First();
                     return e.SelectedChoiceActionItem.Caption == "Update"
-                        ? update(authorizeService,cloudOfficeObject).ObserveOn(SynchronizationContext.Current).ToUnit()
-                        : delete(authorizeService,cloudOfficeObject).ObserveOn(SynchronizationContext.Current);
+                        ? update(authorizeService,cloudOfficeObject).ObserveOn(SynchronizationContext.Current!).ToUnit()
+                        : delete(authorizeService,cloudOfficeObject).ObserveOn(SynchronizationContext.Current!);
                 });
 
     }

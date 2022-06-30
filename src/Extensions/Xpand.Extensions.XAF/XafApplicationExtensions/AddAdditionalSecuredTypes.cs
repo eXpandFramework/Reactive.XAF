@@ -9,8 +9,7 @@ using Xpand.Extensions.XAF.AppDomainExtensions;
 
 namespace Xpand.Extensions.XAF.XafApplicationExtensions{
     public static partial class XafApplicationExtensions{
-        
-        public static void AddNonSecuredType(this XafApplication application,params Type[] objectTypes){
+	    public static void AddNonSecuredType(this XafApplication application,params Type[] objectTypes){
             if (application.Security != null && application.Security.GetType().FromHierarchy(type => type.BaseType)
                     .Any(type => type.Name == "SecurityStrategy")){
                 application.Security.GetType().Method("IsSecuredType",Flags.Static|Flags.Public)

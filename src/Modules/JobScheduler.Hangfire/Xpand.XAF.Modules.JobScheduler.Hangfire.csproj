@@ -55,7 +55,6 @@
     </Reference>
     <PackageReference Include="Microsoft.NETCore.Platforms" Version="6.0.4" />
     <PackageReference Include="System.CodeDom" Version="6.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis" Version="4.2.0" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="DevExpress.ExpressApp" Version="22.1.3" />

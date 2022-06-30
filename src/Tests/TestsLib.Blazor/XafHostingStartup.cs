@@ -1,17 +1,19 @@
 ﻿using System;
+using System.Threading;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor;
 using DevExpress.ExpressApp.Blazor.AmbientContext;
-using DevExpress.ExpressApp.Blazor.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Security;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.PermissionPolicy;
+using Fasterflect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Blazor;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.Common;
@@ -54,13 +56,10 @@ namespace Xpand.TestsLib.Blazor {
 			// 	var blazorApplication = Platform.Blazor.NewXafApplication<TModule>().ToBlazor();
 			// 	return blazorApplication;
 			// });
-			services.AddXaf(Configuration, builder => {
-				
-				builder.ApplicationFactory = provider => {
-					var blazorApplication = Platform.Blazor.NewXafApplication<TModule>().ToBlazor();
-					blazorApplication.ServiceProvider = provider;
-					return blazorApplication.Configure<TModule>(Platform.Blazor).ToBlazor();
-				};
+			services.AddXaf(Configuration, builder => builder.ApplicationFactory = provider => {
+				var blazorApplication = Platform.Blazor.NewXafApplication<TModule>().ToBlazor();	
+				blazorApplication.ServiceProvider = provider;
+				return blazorApplication.Configure<TModule>(Platform.Blazor).ToBlazor();
 			});
 			services.AddXafSecurity(options => {
 					options.RoleType = typeof(PermissionPolicyRole);
@@ -120,13 +119,12 @@ namespace Xpand.TestsLib.Blazor {
 		}
 
 		private BlazorApplication CreateApplication() {
-			ValueManager.GetValueManager<bool>("ApplicationCreationMarker").Value =
-				!ValueManager.GetValueManager<bool>("ApplicationCreationMarker").Value
-					? true
-					: throw new InvalidOperationException(
-						"Application has been already created and cannot be created again in current logical call context.");
+			var valueManager = ValueManager.GetValueManager<bool>("ApplicationCreationMarker");
+			var message = "Application has been already created and cannot be created again in current logical call context.";
+			valueManager.Value = !valueManager.Value ? true : throw new InvalidOperationException(message);
 			ValueManager.GetValueManager<string>("ApplicationContextId").Value = Guid.NewGuid().ToString();
 			var application = _applicationFactory.CreateApplication();
+			// application.Setup();
 			return application;
 		}
 

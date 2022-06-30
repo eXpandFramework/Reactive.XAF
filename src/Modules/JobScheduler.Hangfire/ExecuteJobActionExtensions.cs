@@ -22,7 +22,7 @@ using ObjectSpaceExtensions = Xpand.Extensions.XAF.ObjectSpaceExtensions.ObjectS
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
     static class ExecuteJobActionExtensions {
         internal static IObservable<Unit> ExecuteAction(this XafApplication application,string jobId) 
-            => Observable.Using(application.CreateNonSecuredObjectSpace, objectSpace 
+            => Observable.Using(() => application.CreateNonSecuredObjectSpace(typeof(ExecuteActionJob)), objectSpace 
                 => objectSpace.GetObjectsQuery<ExecuteActionJob>().Where(actionJob => actionJob.Id == jobId).ToArray().ToNowObservable()
                 .ConcatIgnored(job => {
                     if (job.AuthenticateUserCriteria == null) return job.ReturnObservable();

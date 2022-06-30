@@ -72,11 +72,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
 
         
         private static IObservable<bool> WhenNeedTrigger(this IObservable<StateHistoryDto> source) 
-            => source.Select(dto => {
-                    if (!dto.Data.ContainsKey("Result")) return false;
-                    var result = dto.Data["Result"];
-                    return result == "true" ;
-                }).WhenNotDefault();
+            => source.Select(dto => dto.Data.ContainsKey("Result") && dto.Data["Result"] == "true").WhenNotDefault();
 
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager)
             => manager.CheckBlazor(typeof(HangfireStartup).FullName, typeof(JobSchedulerModule).Namespace)
@@ -111,14 +107,14 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire {
             => JobStorage.Current.GetMonitoringApi().JobDetails(job.Id);
 
         public static void ApplyPaused(this PerformingContext context, BlazorApplication application) {
-            using var objectSpace = application.CreateNonSecuredObjectSpace();
+            using var objectSpace = application.CreateNonSecuredObjectSpace(typeof(Job));
             var recurringJobId = context.Connection.RecurringJobId(context.BackgroundJob.Id);
             var scheduledJob = objectSpace.GetObjectsQuery<Job>().FirstOrDefault(job1 => job1.Id==recurringJobId);
             context.Canceled= scheduledJob == null || scheduledJob.IsPaused;
         }
         
         public static void ApplyJobState(this ApplyStateContext context,BlazorApplication application) {
-            using var objectSpace = application.CreateNonSecuredObjectSpace();
+            using var objectSpace = application.CreateNonSecuredObjectSpace(typeof(Job));
             var recurringJobId = context.Connection.RecurringJobId(context.BackgroundJob.Id);
             var scheduledJob = objectSpace.GetObjectsQuery<Job>().FirstOrDefault(job1 => job1.Id==recurringJobId);
             if (scheduledJob!=null) {

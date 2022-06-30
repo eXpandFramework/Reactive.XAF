@@ -19,14 +19,13 @@ namespace ALL.Tests{
             => config().initializeModule
                 .Merge(manager.WhenApplication(application
                     => application.WhenViewOnFrame(typeof(Task),ViewType.DetailView)
-                        .SelectMany(frame => frame.View.ObjectSpace.WhenCommiting().SelectMany(t => config().updated)
+                        .SelectMany(frame => frame.View.ObjectSpace.WhenCommiting().SelectMany(_ => config().updated)
                             .Do(tuple => {
-                                using (var objectSpace = frame.Application.CreateObjectSpace()) {
-                                    var cloudOfficeObject = objectSpace.QueryCloudOfficeObject(tuple.cloud.GetPropertyValue("Id").ToString(), CloudObjectType.Task).First();
-                                    var task = objectSpace.GetObjectByKey<Task>(Guid.Parse(cloudOfficeObject.LocalId));
-                                    task.Description = tuple.mapAction.ToString();
-                                    objectSpace.CommitChanges();
-                                }
+	                            using var objectSpace = frame.Application.CreateObjectSpace(typeof(CloudOfficeObject));
+	                            var cloudOfficeObject = objectSpace.QueryCloudOfficeObject(tuple.cloud.GetPropertyValue("Id").ToString(), CloudObjectType.Task).First();
+	                            var task = objectSpace.GetObjectByKey<Task>(Guid.Parse(cloudOfficeObject.LocalId));
+	                            task.Description = tuple.mapAction.ToString();
+	                            objectSpace.CommitChanges();
                             }))
                         .ToUnit()
                         .Merge(application.DeleteAllEntities<Task>(config().deleteAll))).ToUnit());

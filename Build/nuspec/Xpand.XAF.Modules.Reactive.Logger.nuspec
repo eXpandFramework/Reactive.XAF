@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Xpand.XAF.Modules.Reactive.Logger</id>
-    <version>4.212.10.0</version>
+    <version>4.212.10.1</version>
     <authors>eXpandFramework</authors>
     <owners>eXpandFramework</owners>
     <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
@@ -12,20 +12,20 @@
     <description>The `Reactive.Logger` module monitors calls to the RX delegates OnNext, OnSubscribe, OnDispose, OnCompleted, OnError</description>
     <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
     <copyright>eXpandFramework.com</copyright>
-    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Reactive.Logger, 21.2.8</tags>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Reactive.Logger, 22.1.3</tags>
     <dependencies>
       <group targetFramework="netstandard2.0">
-        <dependency id="Xpand.Extensions" version="4.212.10.0" />
-        <dependency id="Xpand.Extensions.Reactive" version="4.212.10.0" />
-        <dependency id="Xpand.Extensions.XAF" version="4.212.10.0" />
-        <dependency id="Xpand.XAF.Modules.Reactive" version="4.212.10.0" />
-        <dependency id="DevExpress.ExpressApp.ConditionalAppearance" version="21.2.8" />
+        <dependency id="Xpand.Extensions" version="4.212.10.1" />
+        <dependency id="Xpand.Extensions.Reactive" version="4.212.10.1" />
+        <dependency id="Xpand.Extensions.XAF" version="4.212.10.1" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.212.10.1" />
+        <dependency id="DevExpress.ExpressApp.ConditionalAppearance" version="22.1.3" />
         <dependency id="System.Reactive" version="5.0" />
         <dependency id="Fasterflect.Xpand" version="2.0.7" />
         <dependency id="Xpand.Patcher" version="2.0.31" />
         <dependency id="Newtonsoft.Json" version="13.0.1" />
-        <dependency id="DevExpress.ExpressApp.CodeAnalysis" version="21.2.8" />
-        <dependency id="Xpand.VersionConverter" version="4.212.10.0" />
+        <dependency id="DevExpress.ExpressApp.CodeAnalysis" version="22.1.3" />
+        <dependency id="Xpand.VersionConverter" version="4.212.10.1" />
       </group>
     </dependencies>
   </metadata>

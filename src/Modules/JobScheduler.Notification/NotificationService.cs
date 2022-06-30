@@ -39,7 +39,7 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification {
         }
 
         internal static IObservable<Unit> JobNotification(this BlazorApplication application, string workerId) 
-            => Observable.Using(application.CreateNonSecuredObjectSpace, objectSpace => {
+            => Observable.Using(() => application.CreateNonSecuredObjectSpace(typeof(JobWorker)),objectSpace => {
                 var jobWorker = objectSpace.GetObjectsQuery<JobWorker>().FirstOrDefault(job => job.Id==workerId);
                 if (jobWorker != null) {
                     var job = ((ObjectStateNotification)jobWorker.Job);
@@ -80,14 +80,14 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification {
         }
         
         private static IObservable<object> WhenNotificationJobModification(this XafApplication application, NotificationType[] modelNotificationTypes) 
-            => Observable.Using(application.CreateNonSecuredObjectSpace,objectSpace => objectSpace.SaveIndexes(modelNotificationTypes))
+            => Observable.Using(() => application.CreateNonSecuredObjectSpace(typeof(ObjectStateNotification)),objectSpace => objectSpace.SaveIndexes(modelNotificationTypes))
                 .Merge(application.WhenCommittedDetailed<ObjectStateNotification>(ObjectModification.All)
                     .SelectMany(t => application.SaveIndexes(t.details.Select(t1 =>t1.instance ).ToArray(),modelNotificationTypes)
                             .TraceNotificationModule(job => $"{ObjectModification.NewOrUpdated}-{job}")));
 
         private static IObservable<ObjectStateNotification> SaveIndexes(this XafApplication application,
             ObjectStateNotification[] jobs, NotificationType[] modelNotificationTypes) 
-            => Observable.Using(application.CreateNonSecuredObjectSpace, objectSpace => jobs.Do(notificationJob => {
+            => Observable.Using(() => application.CreateNonSecuredObjectSpace(typeof(ObjectStateNotification)),objectSpace => jobs.Do(notificationJob => {
                 notificationJob = objectSpace.GetObject(notificationJob)
                     .CreateOrUpdateIndex(modelNotificationTypes);
                 notificationJob.ObjectSpace.CommitChanges();

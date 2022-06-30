@@ -7,7 +7,6 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.BaseImpl;
-using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 using TestApplication.Module;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.Office.Cloud;
@@ -32,25 +31,24 @@ namespace TestApplication{
                 .ActivateInUserDetails().FirstAsync()
                 .WhenExecute(e => {
 #if !NETCOREAPP3_1
-                    using (var objectSpace = e.Action.Application.CreateObjectSpace()) {
-                        var authentication = objectSpace.GetObjectByKey<TObject>(SecuritySystem.CurrentUserId);
-                        var token = tokenFactory(authentication);
+	                using var objectSpace = e.Action.Application.CreateObjectSpace(typeof(TObject));
+	                var authentication = objectSpace.GetObjectByKey<TObject>(SecuritySystem.CurrentUserId);
+	                var token = tokenFactory(authentication);
 
-                        var fullPath = Path.GetFullPath($"{AppDomain.CurrentDomain.ApplicationPath()}\\..\\PushToken.ps1");
-                        File.WriteAllText($"{Path.GetDirectoryName(fullPath)}\\{serviceName}Token.txt",token);
-                        var processStartInfo = new ProcessStartInfo("powershell.exe",$@"""{fullPath}"" '{serviceName}' -SkipPushToken"){WorkingDirectory = Directory.GetCurrentDirectory()};
-                        var process = new Process(){StartInfo = processStartInfo};
-                        process.StartWithEvents(createNoWindow:false);
-                        var output = process.WhenOutputDataReceived().Buffer(process.WhenExited).WhenNotEmpty().Do(t => {
-                            Tracing.Tracer.LogSeparator("PushToken");
-                            Tracing.Tracer.LogText(t.Join(Environment.NewLine));
-                        }).Publish();
-                        output.Connect();
-                        process.WaitForExit();
-                        return output.ToUnit();
-                    }
+	                var fullPath = Path.GetFullPath($"{AppDomain.CurrentDomain.ApplicationPath()}\\..\\PushToken.ps1");
+	                File.WriteAllText($"{Path.GetDirectoryName(fullPath)}\\{serviceName}Token.txt",token);
+	                var processStartInfo = new ProcessStartInfo("powershell.exe",$@"""{fullPath}"" '{serviceName}' -SkipPushToken"){WorkingDirectory = Directory.GetCurrentDirectory()};
+	                var process = new Process(){StartInfo = processStartInfo};
+	                process.StartWithEvents(createNoWindow:false);
+	                var output = process.WhenOutputDataReceived().Buffer(process.WhenExited).WhenNotEmpty().Do(t => {
+		                Tracing.Tracer.LogSeparator("PushToken");
+		                Tracing.Tracer.LogText(t.Join(Environment.NewLine));
+	                }).Publish();
+	                output.Connect();
+	                process.WaitForExit();
+	                return output.ToUnit();
 
-                    
+
 #else
                    return Observable.Empty<Unit>();
 #endif
@@ -78,7 +76,7 @@ namespace TestApplication{
             this ApplicationModulesManager manager, string serviceName, string platform,
             Func<IModelOffice, TModelOauth> oauthFactory) where TModelOauth : IModelOAuth 
             => manager.WhenGeneratingModelNodes(application => application.Views)
-                .Where(views => DesignerOnlyCalculator.IsRunTime)
+                .Where(_ => DesignerOnlyCalculator.IsRunTime)
                 .SelectMany(views => {
                     string parentFolder = null;
                     if (manager.Modules.OfType<IWebModule>().Any()){
@@ -100,10 +98,9 @@ namespace TestApplication{
             => deleteAll.Switch().ToUnit()
                 .Merge(application.WhenWindowCreated().When(TemplateContext.ApplicationWindow).FirstAsync()
                     .Do(window => {
-                        using (var objectSpace = window.Application.CreateObjectSpace()) {
-                            objectSpace.Delete(objectSpace.GetObjects<TLocalEntity>());
-                            objectSpace.CommitChanges();
-                        }
+	                    using var objectSpace = window.Application.CreateObjectSpace(typeof(TLocalEntity));
+	                    objectSpace.Delete(objectSpace.GetObjects<TLocalEntity>());
+	                    objectSpace.CommitChanges();
                     }).ToUnit());
     }
 }

@@ -7,7 +7,7 @@
 //
 // <Project Sdk="Microsoft.NET.Sdk.Web">
 //  <PropertyGroup>
-//    <TargetFramework>net5.0</TargetFramework>
+//    <TargetFramework>net6.0</TargetFramework>
 //    <DxExtendStartupHost>False</DxExtendStartupHost>
 //  </PropertyGroup>
 //</auto-generated>

@@ -12,8 +12,8 @@ namespace Xpand.Extensions.XAF.XafApplicationExtensions {
                     : provider.CreateObjectSpace())
                 .First();
 
-        public static IObjectSpace CreateNonSecuredObjectSpace(this XafApplication application)
-            => application.CreateObjectSpace(true ,typeof(object),true);
+        public static IObjectSpace CreateNonSecuredObjectSpace(this XafApplication application,Type objectType)
+            => application.CreateObjectSpace(true ,objectType,true);
         
         public static IObjectSpace CreateObjectSpace(this XafApplication application, bool useObjectSpaceProvider,Type type=null,bool nonSecuredObjectSpace=false) {
             if (!useObjectSpaceProvider)

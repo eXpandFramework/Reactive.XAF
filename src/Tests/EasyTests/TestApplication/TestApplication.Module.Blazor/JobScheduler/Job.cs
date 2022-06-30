@@ -19,7 +19,7 @@ namespace TestApplication.Module.Blazor.JobScheduler {
         [JobProvider]
         public async Task<bool> ImportOrders() 
             => await ServiceProvider.RunWithStorageAsync(application => Observable.Using(
-                application.CreateNonSecuredObjectSpace, objectSpace 
+                () => application.CreateNonSecuredObjectSpace(typeof(Order)),objectSpace 
                     => Observable.Range(0, 10).Do(i => {
                         var order = objectSpace.CreateObject<Order>();
                         order.OrderID = i;
