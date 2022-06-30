@@ -19,7 +19,7 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <DefineConstants>TRACE;XAF212</DefineConstants>
+    <DefineConstants>TRACE;XAF221</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Diagnostics\**" />

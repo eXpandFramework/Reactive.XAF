@@ -16,6 +16,7 @@ using Xpand.Extensions.Blazor;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.Extensions.XAF.SecurityExtensions;
+using StartupExtensions = DevExpress.ExpressApp.Blazor.Services.StartupExtensions;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire {
     public class UseHangfire : IStartupFilter {
@@ -31,7 +32,9 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Hangfire {
                 next(app);
             };
 
+#pragma warning disable CS0618
         public static readonly Action<IApplicationBuilder> Server = builder => builder.UseHangfireServer();
+#pragma warning restore CS0618
         public static readonly Action<IApplicationBuilder> Dashboard = builder 
             => builder.UseHangfireDashboard(options:new DashboardOptions {
                 Authorization = new[] {new DashboardAuthorization()}

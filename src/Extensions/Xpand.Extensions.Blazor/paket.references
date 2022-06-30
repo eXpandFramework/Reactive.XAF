@@ -1,6 +1,4 @@
 Fasterflect.Xpand
-
-Microsoft.AspNetCore.Hosting.Abstractions
 Microsoft.CodeAnalysis.CSharp
 System.Configuration.ConfigurationManager
 System.Reactive

@@ -292,66 +292,71 @@ namespace Xpand.TestsLib.Common{
 
         public static Type ApplicationType { get; set; }
         public static XafApplication NewApplication<TModule>(this Platform platform, bool transmitMessage = true,bool handleExceptions=true,bool usePersistentStorage=false)
-            where TModule : ModuleBase {
-            Tracing.Initialize(AppDomain.CurrentDomain.ApplicationPath(),TraceLevel.Verbose.ToString());
-            XafApplication application;
-            ApplicationModulesManager.UseStaticCache = false;
-            string applicationTypeName;
-            if (platform == Platform.Web) {
-                applicationTypeName = "Xpand.TestsLib.TestWebApplication";
-                application = (XafApplication) AppDomain.CurrentDomain.CreateTypeInstance(applicationTypeName, typeof(TModule), transmitMessage);
-            }
-            else if (platform == Platform.Win){
-                applicationTypeName = "Xpand.TestsLib.TestWinApplication";
-                application = (XafApplication) AppDomain.CurrentDomain.CreateTypeInstance(applicationTypeName, typeof(TModule), transmitMessage, handleExceptions);
-                var userModelPath = $"{AppDomain.CurrentDomain.ApplicationPath()}Model.User.xafml";
-                if (File.Exists(userModelPath)) {
-                    File.Delete(userModelPath);
-                }
-            }
-            else if (platform == Platform.Blazor){
-                application = (XafApplication) ApplicationType.CreateInstance(typeof(TModule), transmitMessage, handleExceptions);
-                application.WhenWindowCreated()
-                    .Do(window => {
-                        var windowTemplate = (IWindowTemplate) AppDomain.CurrentDomain
-                            .CreateTypeInstance("DevExpress.ExpressApp.Blazor.Templates.ApplicationWindowTemplate");
-                        window.SetTemplate(windowTemplate);
-                    })
-                    .Subscribe(application);
-            }
-            else{
-                throw new NotSupportedException(
-                    "if implemented make sure all tests pass with TestExplorer and live testing");
-            }
-            
-            
-            application.Title = TestContext.CurrentContext.Test.FullName;
-            application.ConnectionString =usePersistentStorage?
-                @$"Integrated Security=SSPI;Pooling=false;Data Source=(localdb)\mssqllocaldb;Initial Catalog={typeof(TModule).Name}":InMemoryDataStoreProvider.ConnectionString;
-            application.DatabaseUpdateMode=DatabaseUpdateMode.UpdateDatabaseAlways;
-            application.CheckCompatibilityType=CheckCompatibilityType.DatabaseSchema;
-            application.ConfigureModel<TModule>(transmitMessage).SubscribeReplay();
-            application.MockEditorsFactory();
+            where TModule : ModuleBase 
+	        => platform.NewXafApplication<TModule>(transmitMessage, handleExceptions).Configure<TModule>(platform, transmitMessage, usePersistentStorage);
 
-            if (platform==Platform.Web){
-                var frameTemplateFactoryMock = new Mock<IFrameTemplateFactory>();
-                var frameTemplateMock = new Mock<IFrameTemplate>(){CallBase = true};
-                frameTemplateMock.Setup(template => template.GetContainers()).Returns(new ActionContainerCollection());
-                frameTemplateFactoryMock.Setup(factory => factory.CreateTemplate(It.IsAny<TemplateContext>())).Returns(
-                    (TemplateContext context) => {
-                        if (context == TemplateContext.NestedFrame){
-                            return (IFrameTemplate) frameTemplateMock.As<ISupportActionsToolbarVisibility>().Object;
-                        }
+        public static XafApplication Configure<TModule>(this XafApplication application,Platform platform, bool transmitMessage = true, bool usePersistentStorage=false) where TModule : ModuleBase {
+	        application.ConnectionString = usePersistentStorage
+		        ? @$"Integrated Security=SSPI;Pooling=false;Data Source=(localdb)\mssqllocaldb;Initial Catalog={typeof(TModule).Name}"
+		        : InMemoryDataStoreProvider.ConnectionString;
+	        application.DatabaseUpdateMode = DatabaseUpdateMode.UpdateDatabaseAlways;
+	        application.CheckCompatibilityType = CheckCompatibilityType.DatabaseSchema;
+	        application.ConfigureModel<TModule>(transmitMessage).SubscribeReplay();
+	        application.MockEditorsFactory();
 
-                        return frameTemplateMock.Object;
-                    });
-                application.SetPropertyValue("FrameTemplateFactory",frameTemplateFactoryMock.Object) ;
-            }
-            else if(platform==Platform.Win) {
-                application.SetPropertyValue("UseLightStyle", true);
-            }
+	        if (platform == Platform.Web) {
+		        var frameTemplateFactoryMock = new Mock<IFrameTemplateFactory>();
+		        var frameTemplateMock = new Mock<IFrameTemplate>() { CallBase = true };
+		        frameTemplateMock.Setup(template => template.GetContainers()).Returns(new ActionContainerCollection());
+		        frameTemplateFactoryMock.Setup(factory => factory.CreateTemplate(It.IsAny<TemplateContext>())).Returns(
+			        (TemplateContext context) => context == TemplateContext.NestedFrame
+				        ? (IFrameTemplate)frameTemplateMock.As<ISupportActionsToolbarVisibility>().Object
+				        : frameTemplateMock.Object);
+		        application.SetPropertyValue("FrameTemplateFactory", frameTemplateFactoryMock.Object);
+	        }
+	        else if (platform == Platform.Win) {
+		        application.SetPropertyValue("UseLightStyle", true);
+	        }
 
-            return application;
+	        return application;
+        }
+
+        public static XafApplication NewXafApplication<TModule>(this Platform platform, bool transmitMessage=true, bool handleExceptions=true)
+	        where TModule : ModuleBase {
+	        Tracing.Initialize(AppDomain.CurrentDomain.ApplicationPath(), TraceLevel.Verbose.ToString());
+	        XafApplication application;
+	        ApplicationModulesManager.UseStaticCache = false;
+	        string applicationTypeName;
+	        if (platform == Platform.Web) {
+		        applicationTypeName = "Xpand.TestsLib.TestWebApplication";
+		        application = (XafApplication)AppDomain.CurrentDomain.CreateTypeInstance(applicationTypeName, typeof(TModule), transmitMessage);
+	        }
+	        else if (platform == Platform.Win) {
+		        applicationTypeName = "Xpand.TestsLib.TestWinApplication";
+		        application = (XafApplication)AppDomain.CurrentDomain.CreateTypeInstance(applicationTypeName, typeof(TModule),
+			        transmitMessage, handleExceptions);
+		        var userModelPath = $"{AppDomain.CurrentDomain.ApplicationPath()}Model.User.xafml";
+		        if (File.Exists(userModelPath)) {
+			        File.Delete(userModelPath);
+		        }
+	        }
+	        else if (platform == Platform.Blazor) {
+		        application =
+			        (XafApplication)ApplicationType.CreateInstance(typeof(TModule), transmitMessage, handleExceptions);
+		        application.WhenWindowCreated()
+			        .Do(window => {
+				        var windowTemplate = (IWindowTemplate)AppDomain.CurrentDomain
+					        .CreateTypeInstance("DevExpress.ExpressApp.Blazor.Templates.ApplicationWindowTemplate");
+				        window.SetTemplate(windowTemplate);
+			        })
+			        .Subscribe(application);
+	        }
+	        else {
+		        throw new NotSupportedException(
+			        "if implemented make sure all tests pass with TestExplorer and live testing");
+	        }
+	        application.Title = TestContext.CurrentContext.Test.FullName;
+	        return application;
         }
 
         static void MockEditorsFactory(this XafApplication application){

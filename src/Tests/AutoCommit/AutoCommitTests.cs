@@ -12,6 +12,7 @@ using Xpand.XAF.Modules.AutoCommit.Tests.BOModel;
 
 
 namespace Xpand.XAF.Modules.AutoCommit.Tests{
+    
     [NonParallelizable]
     public class AutoCommitTests : BaseTest{
 
@@ -20,7 +21,6 @@ namespace Xpand.XAF.Modules.AutoCommit.Tests{
         public async Task Signal_When_AutoCommit_Enabled_ObjectView_Created(){
             using var application = DefaultAutoCommitModule(Platform.Win,nameof(Signal_When_AutoCommit_Enabled_ObjectView_Created)).Application;
             var objectViews = application.WhenAutoCommitObjectViewCreated().SubscribeReplay();
-                
             var listView = application.NewObjectView<ListView>(typeof(AC));
             var detailView = application.NewObjectView<DetailView>(typeof(AC));
 

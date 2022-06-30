@@ -22,6 +22,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Client.Win {
 #endif
             WindowsFormsSettings.LoadApplicationSettings();
             Application.EnableVisualStyles();
+            Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
             Application.SetCompatibleTextRenderingDefault(false);
             // EditModelPermission.AlwaysGranted = System.Diagnostics.Debugger.IsAttached;
             if(Tracing.GetFileLocationFromSettings() == FileLocation.CurrentUserApplicationDataFolder) {

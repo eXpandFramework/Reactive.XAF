@@ -122,7 +122,7 @@ namespace Xpand.XAF.Modules.MasterDetail{
             detailView.Close();
             dashboardViewItem.Frame.SetView(null);
             var application = dashboardViewItem.Frame.Application;
-            var objectSpace = application.CreateObjectSpace();
+            var objectSpace = application.CreateObjectSpace(objectTypeLink.DetailView.ModelClass.TypeInfo.Type);
             detailView = application.CreateDetailView(objectSpace, objectTypeLink.DetailView.Id, true, dashboardViewItem.InnerView);
             dashboardViewItem.Frame.SetView(detailView, true, frame);
             return detailView;

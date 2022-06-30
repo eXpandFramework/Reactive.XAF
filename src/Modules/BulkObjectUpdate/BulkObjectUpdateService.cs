@@ -56,8 +56,8 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate{
                 .WhenExecuted(e => {
                     var showViewParameters = e.ShowViewParameters;
                     var application = e.Action.Application;
-                    var objectSpace = application.CreateObjectSpace();
                     var modelDetailView = ((IModelBulkObjectUpdateRule)e.SelectedChoiceActionItem.Data).DetailView;
+                    var objectSpace = application.CreateObjectSpace(modelDetailView.ModelClass.TypeInfo.Type);
                     showViewParameters.CreatedView = application.CreateDetailView(objectSpace, modelDetailView.Id, true,
                         objectSpace.CreateObject(modelDetailView.ModelClass.TypeInfo.Type));
                     showViewParameters.TargetWindow=TargetWindow.NewModalWindow;

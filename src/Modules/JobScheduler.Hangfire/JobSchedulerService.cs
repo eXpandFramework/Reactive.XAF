@@ -26,6 +26,7 @@ using Microsoft.JSInterop;
 using Newtonsoft.Json;
 using Xpand.Extensions.Blazor;
 using Xpand.Extensions.EventArgExtensions;
+using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;

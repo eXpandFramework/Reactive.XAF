@@ -120,7 +120,7 @@ namespace Xpand.XAF.Modules.ViewWizard{
                 });
 
         private static void NewWizardView(this XafApplication application, IModelWizardView modelWizardView, ShowViewParameters parameters, IModelDetailView modelDetailView){
-            var objectSpace = application.CreateObjectSpace();
+            var objectSpace = application.CreateObjectSpace(modelDetailView.ModelClass.TypeInfo.Type);
             var obj = objectSpace.FindObject(modelDetailView.ModelClass.TypeInfo.Type, CriteriaOperator.Parse(modelWizardView.Criteria));
             parameters.CreatedView = application.CreateDetailView(objectSpace, modelDetailView, true, obj);
         }

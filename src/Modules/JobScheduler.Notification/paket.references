@@ -2,7 +2,6 @@ DevExpress.ExpressApp.ConditionalAppearance
 Fasterflect.Xpand
 
 System.Reactive
-System.Interactive
 Hangfire.AspNetCore
 Xpand.Patcher
 DevExpress.ExpressApp.CodeAnalysis

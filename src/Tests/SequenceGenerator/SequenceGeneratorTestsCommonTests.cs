@@ -13,8 +13,6 @@ using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib;
 using Xpand.TestsLib.Common;
-using Xpand.XAF.Modules.Reactive;
-using Xpand.XAF.Modules.Reactive.Logger;
 using Xpand.XAF.Modules.SequenceGenerator.Tests.BO;
 
 namespace Xpand.XAF.Modules.SequenceGenerator.Tests{

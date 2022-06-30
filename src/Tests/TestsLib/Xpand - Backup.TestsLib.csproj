@@ -1,50 +1,63 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputPath>..\..\..\bin</OutputPath>
     <TargetFramework>net6.0-windows7.0</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
-    <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
+    <FileUpgradeFlags />
+    <UpgradeBackupLocation />
     <LangVersion>latest</LangVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+    <OutputPath>..\..\..\bin</OutputPath>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
+    <OutputPathSuffix>net</OutputPathSuffix>
+    <DebugType>full</DebugType>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;XAF221</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="AppDomainExtensions.cs" />
+    <Compile Include="..\..\Common\AssemblyInfoVersion.cs">
+      <Link>Properties\AssemblyInfoVersion.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Xpand.Extensions">
+      <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
     <Reference Include="Xpand.Extensions.Reactive">
       <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.dll</HintPath>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="Xpand.Extensions.XAF">
+      <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="Xpand.Extensions.XAF.Xpo">
+      <HintPath>..\..\..\bin\Xpand.Extensions.XAF.Xpo.dll</HintPath>
     </Reference>
     <Reference Include="Xpand.TestsLib.Common">
       <HintPath>..\..\..\bin\Xpand.TestsLib.Common.dll</HintPath>
     </Reference>
-    <Reference Include="Xpand.Extensions">
-      <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
-    </Reference>
-    <Reference Include="Xpand.Extensions.XAF">
-      <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
-    </Reference>
-    <Reference Include="Xpand.XAF.Modules.Windows">
-      <HintPath>..\..\..\bin\net6.0-windows7.0\Xpand.XAF.Modules.Windows.dll</HintPath>
-    </Reference>
-    <Reference Include="Xpand.TestsLib">
-      <HintPath>..\..\..\bin\net6.0-windows7.0\Xpand.TestsLib.dll</HintPath>
-    </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
+      <SpecificVersion>false</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive.Logger">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.dll</HintPath>
+      <SpecificVersion>false</SpecificVersion>
     </Reference>
     <Reference Include="Xpand.XAF.Modules.Reactive.Logger.Hub">
       <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.Hub.dll</HintPath>
-    </Reference>
-    <Reference Include="Xpand.Extensions.XAF.Xpo">
-      <HintPath>..\..\..\bin\Xpand.Extensions.XAF.Xpo.dll</HintPath>
+      <SpecificVersion>false</SpecificVersion>
     </Reference>
   </ItemGroup>
   <Import Project="..\..\..\.paket\Paket.Restore.targets" />

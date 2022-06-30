@@ -45,7 +45,7 @@ The module is **not bound** to **DevExpress versioning**, which means you can us
 
 The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/nuget/reference/package-versioning#version-basics).
 ## Dependencies
-`.NetFramework: net5.0-windows7.0`
+`.NetFramework: net6.0-windows7.0`
 
 |<!-- -->|<!-- -->
 |----|----

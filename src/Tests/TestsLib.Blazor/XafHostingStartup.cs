@@ -2,11 +2,11 @@
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor;
 using DevExpress.ExpressApp.Blazor.AmbientContext;
+using DevExpress.ExpressApp.Blazor.ApplicationBuilder;
 using DevExpress.ExpressApp.Blazor.Services;
 using DevExpress.ExpressApp.Security;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.PermissionPolicy;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -50,7 +50,18 @@ namespace Xpand.TestsLib.Blazor {
 			services.AddHttpContextAccessor();
 			services.AddSingleton<XpoDataStoreProviderAccessor>();
 			// services.AddScoped<CircuitHandler, CircuitHandlerProxy>();
-			services.AddXaf(Configuration, () => Platform.Blazor.NewApplication<TModule>().ToBlazor());
+			// services.AddXaf(Configuration, () => {
+			// 	var blazorApplication = Platform.Blazor.NewXafApplication<TModule>().ToBlazor();
+			// 	return blazorApplication;
+			// });
+			services.AddXaf(Configuration, builder => {
+				
+				builder.ApplicationFactory = provider => {
+					var blazorApplication = Platform.Blazor.NewXafApplication<TModule>().ToBlazor();
+					blazorApplication.ServiceProvider = provider;
+					return blazorApplication.Configure<TModule>(Platform.Blazor).ToBlazor();
+				};
+			});
 			services.AddXafSecurity(options => {
 					options.RoleType = typeof(PermissionPolicyRole);
 					options.UserType = UserType();

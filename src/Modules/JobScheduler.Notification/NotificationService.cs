@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Blazor;
+using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
@@ -95,8 +96,8 @@ namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification {
         private static IObservable<ObjectStateNotification> SaveIndexes(this IObjectSpace objectSpace, NotificationType[] modelNotificationTypes) 
             => objectSpace.GetObjectsQuery<ObjectStateNotification>().ToArray()
                 .Do(job => job.CreateOrUpdateIndex(modelNotificationTypes))
-                .Finally(objectSpace.CommitChanges)
-                .ToArray().ToObservable().TraceNotificationModule();
+                .ToArray().ToObservable().Finally(objectSpace.CommitChanges)
+                .TraceNotificationModule();
 
         private static ObjectStateNotification CreateOrUpdateIndex(this ObjectStateNotification job,NotificationType[] modelNotificationTypes) {
             var objectSpace = job.ObjectSpace;

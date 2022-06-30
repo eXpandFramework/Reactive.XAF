@@ -178,7 +178,7 @@ namespace Xpand.XAF.Modules.TenantManager{
         public static bool IsTenantManager( this XafApplication application,IObjectSpace space=null) {
             var organizationType = application.Model.TenantManager().Organization.TypeInfo.Type;
             if (space==null) {
-                using var objectSpace = application.CreateObjectSpace();
+                using var objectSpace = application.CreateObjectSpace(organizationType);
                 return objectSpace.IsTenantManager(organizationType);
             }
             return space.IsTenantManager(organizationType);

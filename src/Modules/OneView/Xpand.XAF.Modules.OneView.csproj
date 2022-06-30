@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{4C3ED41A-EB50-4A59-9A38-0BDBC1967C06}</ProjectGuid>
-    <TargetFramework>net5.0-windows7.0</TargetFramework>
+    <TargetFramework>net6.0-windows7.0</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <LangVersion>latest</LangVersion>
     <SignAssembly>true</SignAssembly>
@@ -11,8 +11,8 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <OutputPath>..\..\..\bin</OutputPath>
-    <AssemblyTitle>Xpand.XAF.Modules.OneView</AssemblyTitle>
-    <Product>Xpand.XAF.Modules.OneView</Product>
+    <AssemblyTitle>Xpand.XAF.Modules.RefreshView</AssemblyTitle>
+    <Product>Xpand.XAF.Modules.RefreshView</Product>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
     <DebugType>full</DebugType>

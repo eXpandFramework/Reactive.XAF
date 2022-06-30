@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Xpand.Extensions.Blazor": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:50101;http://localhost:50102"
+    }
+  }
+}

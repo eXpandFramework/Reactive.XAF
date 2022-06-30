@@ -1,10 +1,5 @@
-DevExpress.ExpressApp.Validation.Blazor
-DevExpress.ExpressApp.Xpo
-DevExpress.ExpressApp.ConditionalAppearance
 Fasterflect.Xpand
-
 System.Reactive
-System.Interactive
-Hangfire.AspNetCore
 Xpand.Patcher
-DevExpress.ExpressApp.CodeAnalysis
+Hangfire.Core
+Hangfire.AspNetCore

@@ -61,7 +61,7 @@ namespace Xpand.XAF.Modules.ViewItemValue{
                 => space.GetObjectsQuery<ViewItemValueObject>()
                     .FirstOrDefault(o => o.ViewItemId == memberInfo.Name && o.ObjectView == view.Id);
             if (!view.ObjectTypeInfo.IsPersistent) {
-                using var space = view.Application().CreateObjectSpace();
+                using var space = view.Application().CreateObjectSpace(typeof(ViewItemValueObject));
                 return Query(space);
             }
             return Query(view.ObjectSpace);
@@ -71,7 +71,7 @@ namespace Xpand.XAF.Modules.ViewItemValue{
             .WhenExecute()
             .Select(e => {
                 var item = ((IModelViewItemValueObjectViewItem) e.SelectedChoiceActionItem.Data);
-                using var objectSpace = e.Action.Application.CreateObjectSpace();
+                using var objectSpace = e.Action.Application.CreateObjectSpace(typeof(ViewItemValueObject));
                 var defaultObjectItem = item.GetParent<IModelViewItemValueItem>();
                 var memberInfo = item.MemberViewItem.ModelMember.MemberInfo;
                 var memberName = memberInfo.Name;

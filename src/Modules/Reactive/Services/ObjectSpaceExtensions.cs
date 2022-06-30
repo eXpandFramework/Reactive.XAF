@@ -497,11 +497,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<T> ToObjects<T>(this IObservable<(IObjectSpace objectSpace, T obj)> source)
             => source.Select(t => t.obj);
         
-        public static IObservable<(IObjectSpace objectSpace, object obj)> WhenObjectReloaded(this IObjectSpace objectSpace) 
-            => ReloadObjectSubject.Where(t => t.objectSpace==objectSpace).AsObservable();
+        public static IObservable<(IObjectSpace objectSpace, object obj)> WhenObjectReloaded(this IObjectSpace objectSpace,object obj=null) 
+            => ReloadObjectSubject.Where(t => t.objectSpace==objectSpace&& (obj == null||obj==t.obj)).AsObservable();
         
-        public static IObservable<(IObjectSpace objectSpace, T obj)> WhenObjectReloaded<T>(this IObjectSpace objectSpace) 
-            => ReloadObjectSubject.Where(t => t.objectSpace==objectSpace&&t.obj is T).Select(t => (t.objectSpace,(T)t.obj)).AsObservable();
+        public static IObservable<(IObjectSpace objectSpace, T obj)> WhenObjectReloaded<T>(this IObjectSpace objectSpace,T obj=null) where T:class
+            => ReloadObjectSubject.Where(t => t.objectSpace==objectSpace&&t.obj is T tObj&&(obj==null||obj==tObj)).Select(t => (t.objectSpace,(T)t.obj)).AsObservable();
 
         public static IObservable<IObjectSpace> WhenRefreshing(this IObjectSpace objectSpace)
             => Observable.FromEventPattern<EventHandler<CancelEventArgs>, CancelEventArgs>(h => objectSpace.Refreshing += h, h => objectSpace.Refreshing -= h,ImmediateScheduler.Instance)

@@ -1,6 +1,4 @@
 Fasterflect.Xpand
-
-Microsoft.AspNetCore.Hosting.Abstractions
 Microsoft.CodeAnalysis.CSharp
 Google.Apis.Auth
 System.Configuration.ConfigurationManager

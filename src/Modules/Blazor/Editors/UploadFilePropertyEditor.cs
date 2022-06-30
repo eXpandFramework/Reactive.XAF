@@ -64,7 +64,7 @@ namespace Xpand.XAF.Modules.Blazor.Editors {
                 ExternalDropZoneCssSelector = "#overviewDemoDropZone",
                 ExternalDropZoneDragOverCssClass = "custom-drag-over border-light text-white"
             };
-            dxUpload.FileUploaded += _ => _upLoaded.OnNext(Unit.Default);
+            // dxUpload.FileUploaded += _ => _upLoaded.OnNext(Unit.Default);
             return dxUpload;
         }
 

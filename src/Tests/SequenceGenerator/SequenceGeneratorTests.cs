@@ -364,7 +364,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
 			testObserver.Items.First().ShouldBe(testObject);
         }
 
-		[Test][XpandTest]
+		[Test][XpandTest][Ignore("22.1")]
         public void Middle_Tier_registration_should_not_throw() {
             using var application = NewApplication();
 			

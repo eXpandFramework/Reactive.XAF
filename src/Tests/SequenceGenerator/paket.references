@@ -5,7 +5,6 @@ Moq
 Shouldly
 NUnit
 NUnit3TestAdapter
-
 FasterFlect.Xpand
 Microsoft.CodeAnalysis
 Microsoft.NET.Test.Sdk
