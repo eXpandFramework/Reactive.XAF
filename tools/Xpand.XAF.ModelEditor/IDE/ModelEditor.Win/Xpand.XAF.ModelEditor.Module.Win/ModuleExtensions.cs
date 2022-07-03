@@ -12,6 +12,7 @@ using DevExpress.ExpressApp;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Xpand.Extensions.IntPtrExtensions;
+using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;

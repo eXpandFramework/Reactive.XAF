@@ -1,4 +1,6 @@
-﻿using System;
+﻿
+
+using System;
 using System.Data;
 using System.Diagnostics;
 using System.IO;
@@ -6,19 +8,19 @@ using System.IO.Compression;
 using System.Linq;
 using System.Management;
 using System.Net.Http;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading;
-using akarnokd.reactive_extensions;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.SystemModule;
-using DevExpress.ExpressApp.Win;
 using DevExpress.Persistent.Base;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.BytesExtensions;
+using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.System.Diagnostics;
@@ -26,8 +28,6 @@ using Xpand.Extensions.StringExtensions;
 using Xpand.XAF.ModelEditor.Module.Win.BusinessObjects;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Controllers;
-using Unit = System.Reactive.Unit;
-using Window = DevExpress.ExpressApp.Window;
 
 namespace Xpand.XAF.ModelEditor.Module.Win {
     public static class MEService {
@@ -42,20 +42,20 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
 
         private static IObservable<XafApplication> RunME(this IObservable<XafApplication> source)  
             => source.MergeIgnored(application => application.WhenViewOnFrame().WhenFrame(ViewType.ListView)
-                .SelectMany(frame => frame.GetController<ListViewProcessCurrentObjectController>()
-                    .WhenCustomProcessSelectedItem(true)
-                    .Do(_ => {
-                        _.controller.View.ObjectSpace.CommitChanges();
-                        ((Window) frame).Close();
-                    })
-                    .Select(t => t.e.InnerArgs.SelectedObjects.Cast<XafModel>().First())
-                    .Do(model => {
-                        if (model.Project.CannotRunMEMessage != null) {
-                            throw new CannotRunMEException(model.Project.CannotRunMEMessage);
-                        }
-                    })
-                    .SelectMany(xafModel => xafModel.DownloadME(((IModelApplicationME)application.Model).ModelEditor,application)
-                        .StartMEProcess(xafModel))));
+                .Select(frame => frame.GetController<ListViewProcessCurrentObjectController>())
+                .SelectMany(controller => controller.WhenCustomProcessSelectedItem(true)
+	                .Do(_ => {
+		                controller.View.ObjectSpace.CommitChanges();
+		                ((Window) controller.Frame).Close();
+	                })
+	                .Select(e => e.SelectedObjects.Cast<XafModel>().First())
+	                .Do(model => {
+		                if (model.Project.CannotRunMEMessage != null) {
+			                throw new CannotRunMEException(model.Project.CannotRunMEMessage);
+		                }
+	                })
+	                .SelectMany(xafModel => xafModel.DownloadME(((IModelApplicationME)application.Model).ModelEditor,application)
+		                .StartMEProcess(xafModel))));
 
         internal static XafApplication DeleteMESettings(this XafApplication application,bool setup=false) {
             var path = GetMESettingsPath();

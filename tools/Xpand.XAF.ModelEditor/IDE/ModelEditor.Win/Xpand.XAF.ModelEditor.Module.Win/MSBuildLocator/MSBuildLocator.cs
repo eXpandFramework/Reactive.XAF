@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
-using JetBrains.Annotations;
 
 namespace Xpand.XAF.ModelEditor.Module.Win.MSBuildLocator {
     public static class MSBuildLocator {
@@ -133,7 +132,7 @@ namespace Xpand.XAF.ModelEditor.Module.Win.MSBuildLocator {
         }
 
         class CannotRegisterException:InvalidOperationException {
-            public CannotRegisterException([CanBeNull] string message) : base(message) {
+            public CannotRegisterException(string message) : base(message) {
             }
         }
         /// <summary>
