@@ -28,13 +28,13 @@ if ($GithubToken){
     Remove-Item $env:TEMP\storage -Force -Recurse -ErrorAction SilentlyContinue
     Set-Location $env:TEMP
     Set-Content ".\GitUserEmail.json" $GitUserEmail
-    if (!(Test-Path "$PSScriptRoot\..\bin\net5.0")){
-        New-Item "$PSScriptRoot\..\bin\net5.0" -ItemType Directory
+    if (!(Test-Path "$PSScriptRoot\..\bin\net6.0")){
+        New-Item "$PSScriptRoot\..\bin\net6.0" -ItemType Directory
     }
     if (!$SkipPushToken){
         ".\GitUserEmail.json","$PSScriptRoot\PushToken.ps1","$PSScriptRoot\DownloadCloudCreds.ps1"|ForEach-Object{
             Copy-Item -Destination "$PSScriptRoot\..\bin" -Force -Path "$_" 
-            Copy-Item -Destination "$PSScriptRoot\..\bin\net5.0" -Force -Path "$_" 
+            Copy-Item -Destination "$PSScriptRoot\..\bin\net6.0" -Force -Path "$_" 
             # Copy-Item -Destination "$PSScriptRoot\..\bin\netcoreapp3.1" -Force -Path "$_" -Verbose
             Copy-Item -Destination "$PSScriptRoot\..\bin\net461" -Force -Path "$_" 
             Copy-Item -Destination "$PSScriptRoot\..\src\Tests\EasyTests\TestApplication" -Force -Path "$_" 
@@ -45,7 +45,7 @@ if ($GithubToken){
     Set-Location $env:TEMP\storage\Azure
     "MicrosoftAppCredentials.json","MicrosoftAuthenticationDataWin.json","MicrosoftAuthenticationDataWeb.json","dxmailpass.json"|ForEach-Object{
         Copy-Item -Destination "$PSScriptRoot\..\bin" -Force -Path ".\$_" 
-        Copy-Item -Destination "$PSScriptRoot\..\bin\net5.0" -Force -Path ".\$_" 
+        Copy-Item -Destination "$PSScriptRoot\..\bin\net6.0" -Force -Path ".\$_" 
         # Copy-Item -Destination "$PSScriptRoot\..\bin\netcoreapp3.1" -Force -Path ".\$_" -Verbose
         Copy-Item -Destination "$PSScriptRoot\..\bin\net461" -Force -Path ".\$_" 
         Copy-Item -Destination "$PSScriptRoot\..\src\Tests\EasyTests\TestApplication" -Force -Path ".\$_" 
@@ -58,7 +58,7 @@ if ($GithubToken){
         }
         Copy-Item -Destination "$PSScriptRoot\..\bin\$name" -Force -Path ".\$_" 
         Copy-Item -Destination "$PSScriptRoot\..\bin\net461\$name" -Force -Path ".\$_" 
-        Copy-Item -Destination "$PSScriptRoot\..\bin\net5.0\$name" -Force -Path ".\$_" 
+        Copy-Item -Destination "$PSScriptRoot\..\bin\net6.0\$name" -Force -Path ".\$_" 
         # Copy-Item -Destination "$PSScriptRoot\..\bin\netcoreapp3.1\$name" -Force -Path ".\$_" -Verbose
         Copy-Item -Destination "$PSScriptRoot\..\src\Tests\EasyTests\TestApplication\$name" -Force -Path ".\$_" 
         $name=$null

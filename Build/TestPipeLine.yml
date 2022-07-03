@@ -75,7 +75,7 @@ jobs:
       enabled: true
       continueOnError: true
       inputs:
-        searchFolder: '$(System.DefaultWorkingDirectory)\bin\net5.0-windows7.0'
+        searchFolder: '$(System.DefaultWorkingDirectory)\bin\net6.0-windows7.0'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
           **\Xpand.XAF.Modules.ModelMapper.Tests.dll
@@ -89,7 +89,7 @@ jobs:
         runSettingsFile: $(System.DefaultWorkingDirectory)\build\Tests.runsettings
         runTestsInIsolation: false
         collectDumpOn: never
-- job: TestNet5_1
+- job: TestNet6_1
   dependsOn: 
     - TestStageBaseOnExecutionTime
   strategy: 
@@ -185,9 +185,9 @@ jobs:
         runTestsInIsolation: false
         otherConsoleOptions: '/Framework:.NETCoreApp,Version=v5.0 /logger:console;verbosity="normal"'
         collectDumpOn: never
-- job: TestNet5_2
+- job: TestNet6_2
   dependsOn: 
-    - TestNet5_1
+    - TestNet6_1
   strategy: 
     parallel: 10
   pool:
@@ -261,7 +261,7 @@ jobs:
         searchFolder: '$(System.DefaultWorkingDirectory)\bin\'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
-          **\Xpand.XAF.Modules.Reactive.Logger.Hub.Tests.dll
+          **\net6.0-windows7.0\Xpand.XAF.Modules.Reactive.Logger.Hub.Tests.dll
           **\Xpand.XAF.Modules.Reactive.Logger.Tests.dll
           **\Xpand.XAF.Modules.Reactive.Tests.dll
           **\Xpand.XAF.Modules.Reactive.Rest.Tests.dll
@@ -285,7 +285,7 @@ jobs:
         collectDumpOn: never
 
 - job: CheckTests
-  dependsOn: TestNet5_2
+  dependsOn: TestNet6_2
   strategy: 
     parallel: 1
   pool:

@@ -11,7 +11,7 @@ Write-HostFormatted "Building Xpand.XAF.ModelEditor.WinDesktop" -Section
 Push-Location "$Root\Tools\Xpand.XAF.ModelEditor\"
 dotnet publish -p:PublishProfile="Folderprofile.pubxml" ".\Xpand.XAF.ModelEditor.WinDesktop.csproj" 
 
-Set-Location ".\bin\Release\net5.0-windows7.0\publish"
+Set-Location ".\bin\Release\net6.0-windows7.0\publish"
 $zip=[System.IO.Path]::GetFullPath("$(Get-Location)\..\Xpand.XAF.ModelEditor.WinDesktop.zip")
 Compress-Files -zipfileName $zip -Force
 if (!(Test-Path "$root\bin\zip")){
@@ -24,7 +24,7 @@ if (!(Test-AzDevops) -and !$SkipIDEBuild){
     Write-HostFormatted "Building Xpand.XAF.ModelEditor.Win" -Section
     Set-Location "$Root\tools\Xpand.XAF.ModelEditor\IDE\ModelEditor.Win\Xpand.XAF.ModelEditor.Win"
     dotnet publish -p:PublishProfile="Folderprofile.pubxml" ".\Xpand.XAF.ModelEditor.Win.csproj"
-    Set-Location "$(Get-Location)\bin\Release\net5.0-windows\publish"
+    Set-Location "$(Get-Location)\bin\Release\net6.0-windows\publish"
     Get-ChildItem|Copy-Item -Destination "$env:APPDATA\Xpand.XAF.ModelEditor.Win\Xpand.XAF.ModelEditor.Win" -Force -Recurse
     $zip="$(Get-Location)\..\Xpand.XAF.ModelEditor.Win.zip"
     Compress-Files -zipfileName $zip -Force 

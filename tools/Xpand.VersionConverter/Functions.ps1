@@ -435,7 +435,7 @@ function AddXmlElement {
 
 function UpdateBlazor {
     # [xml]$proj=Get-Content $ProjectFile
-    # if ($proj.Project.Sdk -eq "Microsoft.NET.Sdk.Web" -and $proj.Project.PropertyGroup.TargetFramework -eq "net5.0"){
+    # if ($proj.Project.Sdk -eq "Microsoft.NET.Sdk.Web" -and $proj.Project.PropertyGroup.TargetFramework -eq "net6.0"){
     #     $enable=$proj.Project.PropertyGroup.EnableUnsafeBinaryFormatterSerialization|Where-Object{$_}
     #     if (!$enable){   
     #         AddXmlElement $proj EnableUnsafeBinaryFormatterSerialization  PropertyGroup -InnerText "true"|Out-Null
