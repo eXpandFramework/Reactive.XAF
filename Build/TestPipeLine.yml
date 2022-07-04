@@ -261,7 +261,7 @@ jobs:
         searchFolder: '$(System.DefaultWorkingDirectory)\bin\'
         testSelector: 'testAssemblies'
         testAssemblyVer2: |
-          **\net6.0-windows7.0\Xpand.XAF.Modules.Reactive.Logger.Hub.Tests.dll
+          # **\net6.0-windows7.0\Xpand.XAF.Modules.Reactive.Logger.Hub.Tests.dll
           **\Xpand.XAF.Modules.Reactive.Logger.Tests.dll
           **\Xpand.XAF.Modules.Reactive.Tests.dll
           **\Xpand.XAF.Modules.Reactive.Rest.Tests.dll
