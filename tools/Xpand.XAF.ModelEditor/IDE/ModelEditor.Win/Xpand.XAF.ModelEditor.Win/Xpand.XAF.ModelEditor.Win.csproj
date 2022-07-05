@@ -29,7 +29,7 @@
     <EmbeddedResource Include="Images\Logo.svg" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.212.10.2" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.221.0.0" />
     <PackageReference Include="DevExpress.ExpressApp.Notifications" Version="22.1.3" />
   </ItemGroup>
   <ItemGroup>
