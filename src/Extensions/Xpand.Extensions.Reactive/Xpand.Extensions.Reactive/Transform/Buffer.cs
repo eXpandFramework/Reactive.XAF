@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -8,6 +9,23 @@ using Xpand.Extensions.Reactive.Filter;
 
 namespace Xpand.Extensions.Reactive.Transform {
     public static partial class Transform {
+        public static IObservable<T[]> RollingBuffer<T>(this IObservable<T> source, TimeSpan buffering, IScheduler scheduler = null) {
+            scheduler ??= TaskPoolScheduler.Default;
+            return Observable.Create<T[]>(o => {
+                var list = new LinkedList<Timestamped<T>>();
+                return source.Timestamp(scheduler).Subscribe(tx => {
+                    list.AddLast(tx);
+                    while (scheduler.Now.Ticks > buffering.Ticks &&
+                           (list.First.Value.Timestamp < scheduler.Now.Subtract(buffering)))
+                        list.RemoveFirst();
+                    o.OnNext(list.Select(tx2 => tx2.Value).ToArray());
+                }, o.OnError, o.OnCompleted);
+            });
+        }
+
+        public static IObservable<IList<T>> BufferUntilInactive<T>(this IObservable<T> source, TimeSpan delay)
+            => source.Publish(obs => obs.Window(() => obs.Throttle(delay)).SelectMany(window => window.ToList()));
+        
         public static IObservable<TSource[]> BufferUntilCompleted<TSource>(this IObservable<TSource> source,bool skipEmpty=false){
             var allEvents = source.Publish().RefCount();
             return allEvents.Buffer(allEvents.LastOrDefaultAsync().WhenNotDefault()).Select(list => list.ToArray()).Where(sources => !skipEmpty||sources.Any());

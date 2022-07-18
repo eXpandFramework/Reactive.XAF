@@ -371,6 +371,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             this XafApplication application, ObjectModification objectModification = ObjectModification.All) where T : class 
             => application.WhenObjectSpaceCreated().SelectMany(objectSpace => objectSpace.WhenCommiting<T>(objectModification));
         
+        public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenProviderCommiting<T>(
+            this XafApplication application, ObjectModification objectModification = ObjectModification.All) where T : class 
+            => application.WhenProviderObjectSpaceCreated().SelectMany(objectSpace => objectSpace.WhenCommiting<T>(objectModification));
+        
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenProviderCommitted<T>(
             this XafApplication application, ObjectModification objectModification = ObjectModification.All) {
             return application.WhenProviderObjectSpaceCreated().WhenCommitted<T>(objectModification);
@@ -385,9 +389,12 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenCommitted<T>(
             this IObservable<IObjectSpace> source, ObjectModification objectModification = ObjectModification.All) 
-            => source.SelectMany(objectSpace => objectSpace.WhenModifiedObjectsDetailed<T>(true,objectModification)
-                .Select(t => (t.objectSpace,t.details.Select(t1 => t1.instance))));
-        
+            => source.SelectMany(objectSpace => objectSpace.WhenCommitted<T>(objectModification));
+
+        public static IObservable<(IObjectSpace objectSpace, IEnumerable<T> objects)> WhenCommitted<T>(
+            this IObjectSpace objectSpace, ObjectModification objectModification = ObjectModification.All) 
+            => objectSpace.WhenModifiedObjectsDetailed<T>(true,objectModification).Select(t => (t.objectSpace,t.details.Select(t1 => t1.instance)));
+
         public static IObservable<(IObjectSpace objectSpace, IEnumerable<object> objects)> WhenCommitted(
             this IObservable<IObjectSpace> source,Type objectType, ObjectModification objectModification = ObjectModification.All) 
             => source.SelectMany(objectSpace => objectSpace.WhenModifiedObjectsDetailed(objectType, true,objectModification)

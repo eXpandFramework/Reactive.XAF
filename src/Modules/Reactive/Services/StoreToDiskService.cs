@@ -30,7 +30,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                             .SelectMany(objects =>objects.Where(o => t.keyMember.Match(t3.token,o)).Take(1).ToNowObservable()
                                 .SelectMany(o => t.memberInfos.ToNowObservable().WhenDefault(info => info.GetValue(o))
                                     .Do(info => info.SetValue(o, ((string)t3.token[info.Name]).Change(info.MemberType))))
-                                .IgnoreElements()).ConcatToUnit(Observable.Defer(space.Commit)))) ))
+                                .IgnoreElements().ConcatToUnit(Observable.Defer(space.Commit))),t.typeInfo.Type)) ))
                 .ToUnit();
 
         public static IObservable<Unit> StoreToDisk(this XafApplication application, string directory) 
@@ -49,26 +49,18 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .SelectManySequential(objects => AppDomain.CurrentDomain.WhenFileReadAsString(filePath)
                     .Select(s1 => string.IsNullOrEmpty(s1) ? "[]" : s1).Select(text => text.DeserializeJson())
                     .SelectMany(deserializeJson => objects.ToNowObservable().SelectMany(instance => {
-                        
-                        var jtoken = deserializeJson.FirstOrDefault(token => keyMember.Match( token, instance) );
-                        if (jtoken == null) {
-                            jtoken = JObject.FromObject(memberInfos.NameValues(instance).AddItem((keyMember.Name, instance)).ToDictionary());
-                        }
-
+                        var jtoken = deserializeJson.FirstOrDefault(token => keyMember.Match( token, instance) ) ??
+                                     JObject.FromObject(memberInfos.NameValues(instance).AddItem((keyMember.Name, keyMember.GetValue(instance).ToJToken())).ToDictionary());
                         return memberInfos.ToNowObservable().Do(memberInfo => jtoken[memberInfo.Name] = memberInfo.GetValue(instance).ToJToken())
                             .FinallySafe(() => {
                                 var jTokens = deserializeJson.ToArray();
                                 var enumerable = jTokens.Where(token => !keyMember.Match(token, instance)).ToArray();
-                                if (jTokens.Length != enumerable.Length + 1) {
-                                    
-                                }
                                 new JArray(enumerable.AddItem(jtoken)).ToString().Bytes().Save(filePath);
                             });
                     })));
 
-        private static bool Match(this IMemberInfo keyMember, JToken token, object instance){
-            return token[keyMember.Name].ToObject(keyMember.MemberType)!.Equals(keyMember.GetValue(instance));
-        }
+        private static bool Match(this IMemberInfo keyMember, JToken token, object instance) 
+            => token[keyMember.Name].ToObject(keyMember.MemberType)!.Equals(keyMember.GetValue(instance));
 
         private static string EnsureFile(this  ITypeInfo typeInfo,string directory){
             var filePath = $"{directory}\\{typeInfo.FullName.CleanCodeName()}.json";

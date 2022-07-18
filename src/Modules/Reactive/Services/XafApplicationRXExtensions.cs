@@ -16,6 +16,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
+using DevExpress.ExpressApp.SystemModule;
 using Fasterflect;
 
 using Xpand.Extensions.EventArgExtensions;
@@ -39,6 +40,7 @@ using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
+using Xpand.XAF.Modules.Reactive.Services.Controllers;
 using AssemblyExtensions = Xpand.Extensions.AssemblyExtensions.AssemblyExtensions;
 using ListView = DevExpress.ExpressApp.ListView;
 using SecurityExtensions = Xpand.XAF.Modules.Reactive.Services.Security.SecurityExtensions;
@@ -626,8 +628,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<T> UseObjectSpace<T>(this XafApplication application,Func<IObjectSpace,IObservable<T>> factory,bool useObjectSpaceProvider=false) 
             => Observable.Using(() => application.CreateObjectSpace(useObjectSpaceProvider),factory);
-        public static IObservable<T> UseProviderObjectSpace<T>(this XafApplication application,Func<IObjectSpace,IObservable<T>> factory) 
-            => Observable.Using(() => application.CreateObjectSpace(true,typeof(T).RealType()),factory);
+        public static IObservable<T> UseProviderObjectSpace<T>(this XafApplication application,Func<IObjectSpace,IObservable<T>> factory,Type objectType=null) {
+            var type =objectType?? typeof(T).RealType();
+            if (!application.TypesInfo.PersistentTypes.Select(info => info.Type).Contains(type)) {
+                type = typeof(object);
+            }
+            return Observable.Using(() => application.CreateObjectSpace(true, type), factory);
+        }
 
         public static IObservable<Unit> UseObjectSpace(this XafApplication application,Action<IObjectSpace> action,bool useObjectSpaceProvider=false) 
             => Observable.Using(() => application.CreateObjectSpace(useObjectSpaceProvider),space => {
@@ -701,6 +708,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                             .Select((targetObject, targetIndex) => objectSelector(sourceObject, targetObject)
                                 ? (t.source, t.target, sourceObject, targetObject, targetIndex) : default))))
                 .WhenNotDefault();
+        
+        public static IObservable<SimpleActionExecuteEventArgs> WhenListViewProcessSelectedItem<T>(this XafApplication application,Nesting nesting=Nesting.Any)  
+            => application.WhenFrameViewChanged().WhenFrame(typeof(T),ViewType.ListView,nesting)
+                .SelectMany(frame => frame.GetController<ListViewProcessCurrentObjectController>().WhenCustomProcessSelectedItem(true));
+
     }
 
 
