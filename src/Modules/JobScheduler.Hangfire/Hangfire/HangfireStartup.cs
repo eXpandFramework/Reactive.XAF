@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Xpand.Extensions.Blazor;
+using Xpand.Extensions.Harmony;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.Extensions.XAF.SecurityExtensions;

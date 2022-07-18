@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Reflection;
 using DevExpress.ExpressApp;
 using Fasterflect;
 using HarmonyLib;
@@ -12,8 +11,8 @@ using Xpand.Extensions.EventArgExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
-using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
+using Xpand.Extensions.XAF.Harmony;
 using Xpand.Extensions.XAF.SecurityExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Extensions;
@@ -26,9 +25,10 @@ namespace Xpand.XAF.Modules.Reactive.Services.Security{
         internal static IObservable<Unit> PatchAuthentication(this XafApplication application) 
             => application.WhenSetupComplete()
                 .DoWhen(_ => application.Security.IsInstanceOf("DevExpress.ExpressApp.Security.SecurityStrategyBase"),
-                    _ => application.Security.GetPropertyValue("Authentication").GetType().Methods("Authenticate")
-                        .Last(info => info.DeclaringType is { IsAbstract: false })
-                        .PatchWith(new HarmonyMethod(typeof(SecurityExtensions),nameof(Authenticate))))
+                    _ => new HarmonyMethod(typeof(SecurityExtensions),nameof(Authenticate))
+                        .PreFix(application.Security.GetPropertyValue("Authentication").GetType().Methods("Authenticate")
+                            .Last(info => info.DeclaringType is { IsAbstract: false }),true)
+                        )
                 .ToUnit();
         
         [SuppressMessage("ReSharper", "InconsistentNaming")]

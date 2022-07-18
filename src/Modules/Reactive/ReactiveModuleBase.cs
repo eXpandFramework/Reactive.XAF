@@ -12,9 +12,9 @@ using DevExpress.ExpressApp.Model.Core;
 using DevExpress.Persistent.Base;
 using Fasterflect;
 using HarmonyLib;
-
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.XAF.AppDomainExtensions;
+using Xpand.Extensions.XAF.Harmony;
 using Xpand.XAF.Modules.Reactive.Extensions;
 
 namespace Xpand.XAF.Modules.Reactive{
@@ -23,8 +23,8 @@ namespace Xpand.XAF.Modules.Reactive{
         static readonly Subject<ApplicationModulesManager> SettingUpSubject=new();
         static ReactiveModuleBase(){
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainOnAssemblyResolve;
-            typeof(ApplicationModulesManager).Method("SetupModules")
-                .PatchWith( new HarmonyMethod(typeof(ReactiveModule).Method(nameof(SetupModulesPatch),Flags.StaticAnyVisibility)));
+            new HarmonyMethod(typeof(ReactiveModule).Method(nameof(SetupModulesPatch),Flags.StaticAnyVisibility))
+                .PreFix(typeof(ApplicationModulesManager).Method("SetupModules"),true);
             if (DesignerOnlyCalculator.IsRunTime) {
                 AppDomain.CurrentDomain.AddModelReference("netstandard", typeof(FontStyle?).Assembly.GetName().Name);
             }

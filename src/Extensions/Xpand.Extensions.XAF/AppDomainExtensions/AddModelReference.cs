@@ -6,15 +6,15 @@ using ConcurrentCollections;
 using DevExpress.ExpressApp.Utils.CodeGeneration;
 using Fasterflect;
 using HarmonyLib;
-
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.XAF.Harmony;
 
 namespace Xpand.Extensions.XAF.AppDomainExtensions{
     public static partial class AppDomainExtensions{
 	    static readonly ConcurrentHashSet<string> References=new();
         static AppDomainExtensions() 
-	        => typeof(CSCodeCompiler).GetMethod(nameof(CSCodeCompiler.Compile))
-		        .PatchWith(new HarmonyMethod(typeof(AppDomainExtensions).Method(nameof(ModifyCSCodeCompilerReferences),Flags.Static|Flags.AnyVisibility)));
+	        => new HarmonyMethod(typeof(AppDomainExtensions).Method(nameof(ModifyCSCodeCompilerReferences),Flags.Static|Flags.AnyVisibility))
+		        .PreFix(typeof(CSCodeCompiler).GetMethod(nameof(CSCodeCompiler.Compile)),true);
 
         
         public static void AddModelReference(this AppDomain appDomain, params string[] name){

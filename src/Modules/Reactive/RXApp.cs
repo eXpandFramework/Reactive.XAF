@@ -15,15 +15,14 @@ using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
 using Fasterflect;
 using HarmonyLib;
-
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.TypeExtensions;
-using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
 using Xpand.Extensions.XAF.Attributes;
+using Xpand.Extensions.XAF.Harmony;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.ModuleExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
@@ -66,14 +65,14 @@ namespace Xpand.XAF.Modules.Reactive{
 
         private static void PatchXafApplication(){
             var xafApplicationType = typeof(XafApplication);
-            xafApplicationType.Method(nameof(CreateModuleManager))
-                .PatchWith(finalizer: new HarmonyMethod(GetMethodInfo(nameof(CreateModuleManager))));
-            xafApplicationType.Method(nameof(XafApplication.Exit))
-                .PatchWith(new HarmonyMethod(typeof(XafApplicationRxExtensions), nameof(XafApplicationRxExtensions.Exit)));
+            new HarmonyMethod(GetMethodInfo(nameof(CreateModuleManager)))
+                .Finalize(xafApplicationType.Method(nameof(CreateModuleManager)),true);
+            new HarmonyMethod(typeof(XafApplicationRxExtensions), nameof(XafApplicationRxExtensions.Exit))
+                .PreFix(xafApplicationType.Method(nameof(XafApplication.Exit)),true);
 
             if (DesignerOnlyCalculator.IsRunTime) {
-                var createController = typeof(ControllersManager).Method(nameof(ControllersManager.CreateControllers),new []{typeof(Type),typeof(IModelApplication),typeof(View)});
-                createController.PatchWith(finalizer: new HarmonyMethod(GetMethodInfo(nameof(CreateControllers))));
+                new HarmonyMethod(GetMethodInfo(nameof(CreateControllers)))
+                    .Finalize(typeof(ControllersManager).Method(nameof(ControllersManager.CreateControllers),new []{typeof(Type),typeof(IModelApplication),typeof(View)}),true);
             }
             
         }

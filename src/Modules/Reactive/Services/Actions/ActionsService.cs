@@ -263,17 +263,17 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => action.WhenDisabled().Where(a => a.Enabled.Contains(nameof(WhenConcatExecution)))
                 .SelectMany(a => a.WhenEnabled().Where(ab1 => ab1.Enabled.Contains(nameof(WhenConcatExecution))).To(a));
 
-        private static ISubject<ActionBase> _executeFinishedSubject = Subject.Synchronize(new Subject<ActionBase>());
+        private static readonly ISubject<ActionBase> ExecuteFinishedSubject = Subject.Synchronize(new Subject<ActionBase>());
         public static IObservable<TAction> WhenExecuteFinished<TAction>(this TAction action,bool customEmit=false) where TAction : ActionBase
             => customEmit || (action.Data.ContainsKey(nameof(ExecutionFinished)) && (bool)action.Data[nameof(ExecutionFinished)])
-                ? _executeFinishedSubject.Where(a => a == action).Cast<TAction>() : action.WhenExecuteCompleted().To(action);
+                ? ExecuteFinishedSubject.Where(a => a == action).Cast<TAction>() : action.WhenExecuteCompleted().To(action);
 
         public static void CustomizeExecutionFinished<TAction>(this TAction action, bool enable=true)
             where TAction : ActionBase
             => action.Data[nameof(ExecutionFinished)] = enable;
         
         public static void ExecutionFinished<TAction>(this TAction action) where TAction:ActionBase 
-            => _executeFinishedSubject.OnNext(action);
+            => ExecuteFinishedSubject.OnNext(action);
 
         public static IObservable<TAction> WhenExecuteFinished<TAction>(this IObservable<TAction> source,bool customEmit=false) where TAction : ActionBase 
             => source.SelectMany(a=>a.WhenExecuteFinished(customEmit));

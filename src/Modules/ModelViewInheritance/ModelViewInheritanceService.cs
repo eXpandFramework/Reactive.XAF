@@ -10,6 +10,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using Fasterflect;
 using HarmonyLib;
+using Xpand.Extensions.Harmony;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.XAF.Modules.Reactive.Services;

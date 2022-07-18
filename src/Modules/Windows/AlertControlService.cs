@@ -9,7 +9,7 @@ using DevExpress.XtraBars.Alerter;
 using Fasterflect;
 using HarmonyLib;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.Extensions.XAF.AppDomainExtensions;
+using Xpand.Extensions.XAF.Harmony;
 using Xpand.XAF.Modules.Reactive;
 
 namespace Xpand.XAF.Modules.Windows{
@@ -26,8 +26,8 @@ namespace Xpand.XAF.Modules.Windows{
         }
 
         static AlertControlService() 
-            => typeof(AlertControl).Method(nameof(AlertControl.Show), new[] { typeof(Form), typeof(AlertInfo) })
-                .PatchWith(new HarmonyMethod(typeof(AlertControlService), nameof(Show)));
+            => new HarmonyMethod(typeof(AlertControlService), nameof(Show))
+                .PreFix(typeof(AlertControl).Method(nameof(AlertControl.Show), new[] { typeof(Form), typeof(AlertInfo) }),true);
 
         public static IObservable<Unit> ConnectAlertForm(this ApplicationModulesManager manager) => Observable.Empty<Unit>();
     }

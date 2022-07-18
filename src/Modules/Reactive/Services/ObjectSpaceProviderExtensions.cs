@@ -8,8 +8,9 @@ using System.Reflection;
 using DevExpress.ExpressApp;
 using Fasterflect;
 using HarmonyLib;
+using Xpand.Extensions.Harmony;
 using Xpand.Extensions.Reactive.Transform;
-using Xpand.Extensions.XAF.AppDomainExtensions;
+using Xpand.Extensions.XAF.Harmony;
 using Xpand.Extensions.XAF.ObjectSpaceProviderExtensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
@@ -35,8 +36,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         private static void PatchObjectSpaceCreated(this XafApplication application) {
             var name = nameof(IObjectSpaceProvider.CreateObjectSpace);
             foreach (var provider in application.ObjectSpaceProviders) {
-                var methodInfo = provider.GetType().Methods(name).First(info => !info.Parameters().Any());
-                methodInfo.PatchWith( postFix: new HarmonyMethod(typeof(ObjectSpaceProviderExtensions), nameof(CreateObjectSpace)));
+                new HarmonyMethod(typeof(ObjectSpaceProviderExtensions), nameof(CreateObjectSpace))
+                    .PostFix(provider.GetType().Methods(name).First(info => !info.Parameters().Any()),true);
             }
         }
 

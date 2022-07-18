@@ -6,14 +6,17 @@ using Fasterflect;
 using HarmonyLib;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.XAF.AppDomainExtensions;
+using Xpand.Extensions.XAF.Harmony;
 
 namespace Xpand.Extensions.XAF.XafApplicationExtensions{
     public static partial class XafApplicationExtensions{
 	    public static void AddNonSecuredType(this XafApplication application,params Type[] objectTypes){
             if (application.Security != null && application.Security.GetType().FromHierarchy(type => type.BaseType)
                     .Any(type => type.Name == "SecurityStrategy")){
-                application.Security.GetType().Method("IsSecuredType",Flags.Static|Flags.Public)
-                    .PatchWith(new HarmonyMethod(typeof(XafApplicationExtensions),nameof(IsSecuredType)));
+                new HarmonyMethod(typeof(XafApplicationExtensions),nameof(IsSecuredType))
+                    .PreFix(application.Security.GetType().Method("IsSecuredType",Flags.Static|Flags.Public),true);
+                // application.Security.GetType().Method("IsSecuredType",Flags.Static|Flags.Public)
+                    // .PatchWith(new HarmonyMethod(typeof(XafApplicationExtensions),nameof(IsSecuredType)));
                 foreach (var securedType in objectTypes){
                     _securedTypes.Add(securedType);   
                 }
