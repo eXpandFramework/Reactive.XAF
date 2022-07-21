@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive;
@@ -15,7 +14,6 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.PermissionPolicy;
 using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
-using Fasterflect;
 using Moq;
 using NUnit.Framework;
 using Shouldly;
@@ -369,7 +367,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator.Tests{
             using var application = NewApplication();
 			
             SequenceGeneratorModule( application);
-            var applicationObjectSpaceProviders = ((IList<IObjectSpaceProvider>) application.GetFieldValue("objectSpaceProviders"));
+            var applicationObjectSpaceProviders = application.ObjectSpaceProviders();
             applicationObjectSpaceProviders.Clear();
 			applicationObjectSpaceProviders.Add(new MiddleTierServerObjectSpaceProvider(Mock.Of<IMiddleTierSerializableObjectLayer>()));
             application.CreateObjectSpace();
