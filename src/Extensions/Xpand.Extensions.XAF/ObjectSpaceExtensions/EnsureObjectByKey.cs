@@ -3,6 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
+using Xpand.Extensions.XAF.TypesInfoExtensions;
 
 namespace Xpand.Extensions.XAF.ObjectSpaceExtensions {
     public static partial class ObjectSpaceExtensions {
@@ -25,8 +26,12 @@ namespace Xpand.Extensions.XAF.ObjectSpaceExtensions {
                     .Parse($"{objectSpace.TypesInfo.FindTypeInfo(typeof(T)).KeyMember.Name}=?", key), true)
                 .FirstOrDefault() : default;
 
-        public static object EnsureObjectByKey(this IObjectSpace objectSpace, Type objectType, object key)
-            => objectSpace.GetObjectByKey(objectType, key)??objectSpace.CreateObject(objectType);
-        
+        public static object EnsureObjectByKey(this IObjectSpace objectSpace, Type objectType, object key) {
+            if (objectSpace.GetObjectByKey(objectType, key) != null)
+                return objectSpace.GetObjectByKey(objectType, key);
+            var ensureObjectByKey = objectSpace.CreateObject(objectType);
+            objectType.ToTypeInfo().KeyMember.SetValue(ensureObjectByKey,key);
+            return ensureObjectByKey;
+        }
     }
 }

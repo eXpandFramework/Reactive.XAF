@@ -20,7 +20,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         private static readonly ISubject<IObjectSpaceProvider> SchemaUpdatingSubject=Subject.Synchronize(new Subject<IObjectSpaceProvider>());
         private static readonly ISubject<IObjectSpaceProvider> SchemaUpdatedSubject=Subject.Synchronize(new Subject<IObjectSpaceProvider>());
-        private static readonly ISubject<IObjectSpace> ObjectSpaceCreatedSubject=Subject.Synchronize(new Subject<IObjectSpace>());
+        private static readonly ISubject<(IObjectSpace objectSpace,IObjectSpaceProvider objectSpaceProvider)> ObjectSpaceCreatedSubject=Subject.Synchronize(new Subject<(IObjectSpace objectSpace,IObjectSpaceProvider objectSpaceProvider)>());
 
         private static MethodInfo GetMethodInfo(string methodName) 
             => typeof(ObjectSpaceProviderExtensions).GetMethods(BindingFlags.Static|BindingFlags.NonPublic).First(info => info.Name == methodName);
@@ -42,8 +42,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
 
         [SuppressMessage("ReSharper", "InconsistentNaming")]
-        private static void CreateObjectSpace(IObjectSpace __result) 
-            => ObjectSpaceCreatedSubject.OnNext(__result);
+        private static void CreateObjectSpace(IObjectSpaceProvider __instance,IObjectSpace __result) 
+            => ObjectSpaceCreatedSubject.OnNext((__result, __instance));
 
         private static void PatchSchemaUpdated(this XafApplication application) 
             => application.ObjectSpaceProviders.Where(provider => provider is not NonPersistentObjectSpaceProvider)
@@ -68,13 +68,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => SchemaUpdatedSubject.OnNext(__instance);
 
         public static IObservable<TProvider> WhenSchemaUpdating<TProvider>(this TProvider provider) where TProvider:IObjectSpaceProvider 
-            => SchemaUpdatingSubject.AsObservable().Cast<TProvider>();
+            => SchemaUpdatingSubject.AsObservable().Where(spaceProvider => spaceProvider==(IObjectSpaceProvider)provider).Cast<TProvider>();
 
         public static IObservable<TProvider> WhenSchemaUpdated<TProvider>(this TProvider provider) where TProvider:IObjectSpaceProvider 
-            => SchemaUpdatedSubject.AsObservable().Cast<TProvider>();
+            => SchemaUpdatedSubject.AsObservable().Where(spaceProvider => spaceProvider==(IObjectSpaceProvider)provider).Cast<TProvider>();
         
         public static IObservable<IObjectSpace> WhenObjectSpaceCreated<TProvider>(this TProvider provider) where TProvider:IObjectSpaceProvider 
-            => ObjectSpaceCreatedSubject.AsObservable();
+            => ObjectSpaceCreatedSubject.AsObservable().Where(t=>t.objectSpaceProvider==(IObjectSpaceProvider)provider).Select(t => t.objectSpace);
 
     }
 }
