@@ -3,7 +3,7 @@
 [![image](https://xpandshields.azurewebsites.net/badge/Exclusive%20services%3F-Head%20to%20the%20dashboard-Blue)](https://github.com/sponsors/apobekiaris) ![GitHub stars](https://xpandshields.azurewebsites.net/github/stars/expandframework/devexpress.xaf?label=Star%20the%20project%20if%20you%20think%20it%20deserves%20it&style=social) ![GitHub forks](https://xpandshields.azurewebsites.net/github/forks/expandframework/Devexpress.Xaf?label=Fork%20the%20project%20to%20extend%20and%20contribute&style=social)
 
 
-![Visual Studio Marketplace Downloads](https://xpandshields.azurewebsites.net/visual-studio-marketplace/d/eXpandFramework.XVSIX-x86?label=Visual%20Studio) ![JetBrains plugins](https://xpandshields.azurewebsites.net/jetbrains/plugin/d/17687-xpand?label=Jetbrains%20Rider)
+![Visual Studio Marketplace Downloads](https://xpandshields.azurewebsites.net/visual-studio-marketplace/d/eXpandFramework.XVSIX64?label=Visual%20Studio) ![JetBrains plugins](https://xpandshields.azurewebsites.net/jetbrains/plugin/d/17687-xpand?label=Jetbrains%20Rider)
 
 # About
 
@@ -11,7 +11,7 @@ The `Xpand.XAF.ModelEditor.Win` is a XAF application which integrates both `MS V
 
 ## Installation
 
-The application is distributed from [Visual Studio](https://marketplace.visualstudio.com/items?itemName=eXpandFramework.XVSIX-x86) and [JetBrains](https://plugins.jetbrains.com/plugin/17687-xpand) market place. You can install it from within Visual Studio or Rider as per the next screencast. Both IDE will handle effortless future version updates, so you do not need to worry about them.
+The application is distributed from [Visual Studio](https://marketplace.visualstudio.com/items?itemName=eXpandFramework.XVSIX64) and [JetBrains](https://plugins.jetbrains.com/plugin/17687-xpand) market place. You can install it from within Visual Studio or Rider as per the next screencast. Both IDE will handle effortless future version updates, so you do not need to worry about them.
 
 ![Xpand XAF ModelEditor Win](https://user-images.githubusercontent.com/159464/134785037-e40fe22e-a9c6-4ee5-9f4a-70101f318f7d.gif)
 
