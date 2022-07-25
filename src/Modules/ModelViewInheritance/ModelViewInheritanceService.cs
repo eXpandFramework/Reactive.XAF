@@ -12,7 +12,6 @@ using Fasterflect;
 using HarmonyLib;
 using Xpand.Extensions.Harmony;
 using Xpand.Extensions.LinqExtensions;
-using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.ModelViewInheritance {
@@ -23,9 +22,8 @@ namespace Xpand.XAF.Modules.ModelViewInheritance {
     }
     public static class ModelViewInheritanceService {
         static ModelViewInheritanceService() 
-            => typeof(ApplicationModelManager).Method("CreateUnchangeableLayer")
-                .PatchWith(new HarmonyMethod(typeof(ModelViewInheritanceService),nameof(CreateUnchangeableLayer)),
-                    new HarmonyMethod(typeof(ModelViewInheritanceService),nameof(CreateUnchangeableLayer)));
+            => new HarmonyMethod(typeof(ModelViewInheritanceService),nameof(CreateUnchangeableLayer))
+                .PreFix(typeof(ApplicationModelManager).Method("CreateUnchangeableLayer"));
 
         internal static IObservable<ModelInterfaceExtenders> Connect(this ApplicationModulesManager manager) 
             => manager.WhenExtendingModel()
