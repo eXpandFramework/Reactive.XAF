@@ -10,8 +10,8 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using Fasterflect;
 using HarmonyLib;
-using Xpand.Extensions.Harmony;
 using Xpand.Extensions.LinqExtensions;
+using Xpand.Extensions.XAF.Harmony;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.ModelViewInheritance {
@@ -23,7 +23,7 @@ namespace Xpand.XAF.Modules.ModelViewInheritance {
     public static class ModelViewInheritanceService {
         static ModelViewInheritanceService() 
             => new HarmonyMethod(typeof(ModelViewInheritanceService),nameof(CreateUnchangeableLayer))
-                .PreFix(typeof(ApplicationModelManager).Method("CreateUnchangeableLayer"));
+                .PreFix(typeof(ApplicationModelManager).Method("CreateUnchangeableLayer"),true);
 
         internal static IObservable<ModelInterfaceExtenders> Connect(this ApplicationModulesManager manager) 
             => manager.WhenExtendingModel()
