@@ -1,3 +1,4 @@
+#THIS SCRIPT RUNS THE AzDevOps CI/CD pipeline, consider the QuickBuild.ps1 instead.
 param(
     
     [string]$packageSources = $env:DxFeed, #"C:\Program Files (x86)\DevExpress 18.2\Components\System\Components\packages",
