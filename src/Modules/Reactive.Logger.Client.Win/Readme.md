@@ -66,19 +66,19 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |**DevExpress.ExpressApp.Win**|**Any**
  |**DevExpress.ExpressApp.Xpo**|**Any**
  |**DevExpress.ExpressApp.CodeAnalysis**|**Any**
-|[Xpand.XAF.Modules.GridListEditor](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.GridListEditor)|4.221.1
- |[Xpand.XAF.Modules.OneView](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.OneView)|4.221.1
- |[Xpand.XAF.Modules.Windows](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Windows)|4.221.1
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.221.1
- |Xpand.Extensions.XAF.Xpo|4.221.1
- |Xpand.Extensions.XAF|4.221.1
- |[Xpand.XAF.Modules.Reactive.Logger.Hub](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Logger.Hub)|4.221.1
- |[Xpand.XAF.Modules.Reactive.Logger](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Logger)|4.221.1
+|[Xpand.XAF.Modules.GridListEditor](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.GridListEditor)|4.221.2
+ |[Xpand.XAF.Modules.OneView](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.OneView)|4.221.2
+ |[Xpand.XAF.Modules.Windows](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Windows)|4.221.2
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.221.2
+ |Xpand.Extensions.XAF.Xpo|4.221.2
+ |Xpand.Extensions.XAF|4.221.2
+ |[Xpand.XAF.Modules.Reactive.Logger.Hub](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Logger.Hub)|4.221.2
+ |[Xpand.XAF.Modules.Reactive.Logger](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive.Logger)|4.221.2
  |MagicOnion|2.6.3
  |System.Reactive|5.0.0
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |Newtonsoft.Json|13.0.1
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.221.1
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.221.2
 
 ## Issues-Debugging-Troubleshooting
 
