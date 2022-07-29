@@ -29,6 +29,7 @@ using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.DetailViewExtensions;
 using Xpand.Extensions.XAF.ObjectExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;

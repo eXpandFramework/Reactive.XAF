@@ -22,10 +22,7 @@ namespace Xpand.Extensions.Reactive.Transform.System {
 
         public static IObservable<ResolveEventArgs> WhenAssemblyResolve(this AppDomain appDomain)
 	        => appDomain.WhenEvent<ResolveEventArgs>(nameof(AppDomain.AssemblyResolve));
-            // => Observable.FromEventPattern<ResolveEventHandler, ResolveEventArgs>(
-            //         h => appDomain.AssemblyResolve += h, h => appDomain.AssemblyResolve -= h,ImmediateScheduler.Instance)
-            //     .Select(pattern => pattern.EventArgs);
-        
+
         public static IObservable<string> WhenFileCreated(this AppDomain appDomain,string path,string pattern)
             => Observable.Using(() => new FileSystemWatcher(path, pattern){ EnableRaisingEvents = true }, watcher => watcher
                 .WhenEvent<FileSystemEventArgs>(nameof(FileSystemWatcher.Created))
@@ -33,7 +30,7 @@ namespace Xpand.Extensions.Reactive.Transform.System {
 
 
         public static IObservable<string> WhenFileReadAsString(this AppDomain appDomain,string fileName,FileMode fileMode=FileMode.Open,FileAccess fileAccess=FileAccess.Read,FileShare fileShare=FileShare.Read) 
-            => File.Open(fileName, fileMode, fileAccess, fileShare).ReadToEndAsStringAsync().ToObservable().Where(s => !string.IsNullOrEmpty(s)).RetryWithBackoff();
+            => File.Open(fileName, fileMode, fileAccess, fileShare).ReadToEndAsStringAsync().ToObservable().RetryWithBackoff();
 
         public static IObservable<string> WhenDirectory(this AppDomain appDomain,string directory,bool create=true) {
             if (!Directory.Exists(directory)){

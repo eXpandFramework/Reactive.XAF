@@ -122,6 +122,11 @@ namespace Xpand.Extensions.TypeExtensions {
                 }
                 return true;
             }
+
+            if (destinationType == typeof(string)) {
+                result = value.ToString();
+                return true;
+            }
             Type coreDestinationType = destinationType.IsGenericType ? destinationType.UnderlyingSystemType : destinationType;
             object tmpResult = null;
             if (TryChangeCore(value, coreDestinationType, ref tmpResult, culture, options)) {

@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.DC;
 using HarmonyLib;
@@ -18,15 +19,18 @@ using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.TypeExtensions;
 using Xpand.Extensions.XAF.Attributes;
+using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
     public static class StoreToDiskService{
-        private static IObservable<Unit> LoadFromDisk(this IObservable<(IMemberInfo keyMember, IMemberInfo[] memberInfos, ITypeInfo typeInfo, string filePath)> source, XafApplication application)
-            => source.SelectMany(t => application.WhenProviderCommitted(t.typeInfo.Type,ObjectModification.New)
-                    .SelectManySequential(t2 => AppDomain.CurrentDomain.WhenFileReadAsString(t.filePath).SelectMany(json=>json.DeserializeJson())
+        private static IObservable<Unit> LoadFromDisk(this IObservable<(IMemberInfo keyMember, IMemberInfo[] memberInfos, ITypeInfo typeInfo, string filePath,StoreToDiskAttribute attribute)> source, XafApplication application)
+            => source.SelectMany(t => application.WhenProviderCommittedDetailed(t.typeInfo.Type,t.attribute.ObjectModification,true)
+                    .Select(tv => tv.details.Select(t2 => t2.instance).Where(o => tv.objectSpace.IsObjectFitForCriteria(CriteriaOperator.Parse(t.attribute.Criteria),o)).ToArray())
+                    .SelectManySequential(t2 => AppDomain.CurrentDomain.WhenFileReadAsString(t.filePath).Where(s => !string.IsNullOrWhiteSpace(s))
+                        .SelectMany(json=>json.DeserializeJson())
                         .Select(token => (token, keyValue: token[t.keyMember.Name]))
-                        .SelectMany(t3 => application.UseProviderObjectSpace(space => t2.objects.Select(space.GetObject).ToNowObservable().BufferUntilCompleted()
+                        .SelectMany(t3 => application.UseProviderObjectSpace(space => t2.Select(space.GetObject).ToNowObservable().BufferUntilCompleted()
                             .SelectMany(objects =>objects.Where(o => t.keyMember.Match(t3.token,o)).Take(1).ToNowObservable()
                                 .SelectMany(o => t.memberInfos.ToNowObservable().WhenDefault(info => info.GetValue(o))
                                     .Do(info => info.SetValue(o, ((string)t3.token[info.Name]).Change(info.MemberType))))
@@ -37,11 +41,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.StoreToDiskData(directory).Publish(source => source.LoadFromDisk( application)
                     .MergeToUnit(source.SelectMany(t=>application.StoreToDisk(t.keyMember, t.memberInfos, t.typeInfo, t.filePath))));
 
-        private static IObservable<(IMemberInfo keyMember, IMemberInfo[] memberInfos, ITypeInfo typeInfo, string filePath)> StoreToDiskData(this XafApplication application, string directory)
+        private static IObservable<(IMemberInfo keyMember, IMemberInfo[] memberInfos, ITypeInfo typeInfo, string filePath,StoreToDiskAttribute attribute)> StoreToDiskData(this XafApplication application, string directory)
             => application.TypesInfo.PersistentTypes.Attributed<StoreToDiskAttribute>().ToNowObservable()
                 .Select(t => (keyMember:t.typeInfo.FindMember(t.attribute.Key),memberInfos:t.attribute.Properties.Select(property =>t.typeInfo.FindMember(property)).ToArray(),t.attribute,t.typeInfo))
                 .SelectMany(t => AppDomain.CurrentDomain.WhenDirectory(directory).Select(_ => t.typeInfo.EnsureFile(directory))
-                    .Select(filePath => ( t.keyMember, t.memberInfos, t.typeInfo, filePath)));
+                    .Select(filePath => ( t.keyMember, t.memberInfos, t.typeInfo, filePath,t.attribute)));
 
         private static IObservable<IMemberInfo> StoreToDisk(this XafApplication application, IMemberInfo keyMember, IMemberInfo[] memberInfos, ITypeInfo typeInfo, string filePath)
             => application.WhenProviderCommittedDetailed(typeInfo.Type, ObjectModification.Updated, modifiedProperties: memberInfos.Select(info => info.Name).ToArray())

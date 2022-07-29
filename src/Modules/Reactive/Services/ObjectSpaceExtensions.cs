@@ -18,6 +18,7 @@ using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.Collections;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -206,7 +207,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 Func<object, bool> criteria = null, params string[] modifiedProperties) 
             => modifiedProperties.Any()?objectSpace.WhenModifiedObjects(objectType,modifiedProperties).Take(1)
                     .SelectMany(_ => objectSpace.WhenCommitingDetailed(objectModification, true,criteria)):
-                objectSpace.WhenCommitingDetailed(objectModification, true,criteria);
+                objectSpace.WhenCommitingDetailed(objectType,objectModification, true,criteria);
 
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)>
             WhenCommitingDetailed<T>(this IObjectSpace objectSpace, bool emitAfterCommit, ObjectModification objectModification,Func<T, bool> criteria,params string[] modifiedProperties) 
@@ -539,16 +540,4 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
 
     }
-
-    
-    public enum ObjectModification{
-        All,
-        New,
-        NewOrUpdated,
-        NewOrDeleted,
-        Updated,
-        UpdatedOrDeleted,
-        Deleted
-    }
-
 }

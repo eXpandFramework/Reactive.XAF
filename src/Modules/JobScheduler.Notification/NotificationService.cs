@@ -12,6 +12,7 @@ using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.TypeExtensions;
+using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.JobScheduler.Hangfire.BusinessObjects;

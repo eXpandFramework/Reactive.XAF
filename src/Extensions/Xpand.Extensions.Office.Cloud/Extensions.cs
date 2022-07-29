@@ -11,6 +11,7 @@ using Fasterflect;
 using Xpand.Extensions.Office.Cloud.BusinessObjects;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ActionExtensions;
+using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Services;

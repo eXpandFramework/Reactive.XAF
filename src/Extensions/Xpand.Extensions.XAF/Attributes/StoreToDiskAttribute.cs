@@ -10,5 +10,8 @@ namespace Xpand.Extensions.XAF.Attributes{
             Key = key;
             Properties = properties;
         }
+        
+        public ObjectModification ObjectModification { get; set; }=ObjectModification.New;
+        public string Criteria { get; set; }
     }
 }

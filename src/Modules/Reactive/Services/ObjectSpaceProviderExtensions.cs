@@ -20,7 +20,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         private static readonly ISubject<IObjectSpaceProvider> SchemaUpdatingSubject=Subject.Synchronize(new Subject<IObjectSpaceProvider>());
         private static readonly ISubject<IObjectSpaceProvider> SchemaUpdatedSubject=Subject.Synchronize(new Subject<IObjectSpaceProvider>());
-        private static readonly ISubject<(IObjectSpace objectSpace,IObjectSpaceProvider objectSpaceProvider)> ObjectSpaceCreatedSubject=Subject.Synchronize(new Subject<(IObjectSpace objectSpace,IObjectSpaceProvider objectSpaceProvider)>());
+
+        private static readonly ISubject<(IObjectSpace objectSpace, IObjectSpaceProvider objectSpaceProvider,bool updating)>
+            ObjectSpaceCreatedSubject = Subject.Synchronize(new Subject<(IObjectSpace objectSpace, IObjectSpaceProvider objectSpaceProvider,bool updating)>());
 
         private static MethodInfo GetMethodInfo(string methodName) 
             => typeof(ObjectSpaceProviderExtensions).GetMethods(BindingFlags.Static|BindingFlags.NonPublic).First(info => info.Name == methodName);
@@ -30,20 +32,32 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .Do(_ => {
                     application.PatchSchemaUpdated();
                     application.PatchObjectSpaceCreated();
+                    application.PatchUpdatingObjectSpaceCreated();
                 })
                 .ToUnit();
 
-        private static void PatchObjectSpaceCreated(this XafApplication application) {
-            var name = nameof(IObjectSpaceProvider.CreateObjectSpace);
-            foreach (var provider in application.ObjectSpaceProviders) {
-                new HarmonyMethod(typeof(ObjectSpaceProviderExtensions), nameof(CreateObjectSpace))
-                    .PostFix(provider.GetType().Methods(name).First(info => !info.Parameters().Any()),true);
-            }
-        }
+        private static void PatchObjectSpaceCreated(this XafApplication application) 
+            => application.PatchProviderObjectSpaceCreated( nameof(IObjectSpaceProvider.CreateObjectSpace),info => !info.Parameters().Any(),nameof(CreateObjectSpace));
+
+        private static void PatchUpdatingObjectSpaceCreated(this XafApplication application) 
+            => application.PatchProviderObjectSpaceCreated( nameof(IObjectSpaceProvider.CreateUpdatingObjectSpace),info => {
+                var parameterInfos = info.Parameters();
+                return info.DeclaringType != typeof(NonPersistentObjectSpaceProvider) && info.IsPublic && parameterInfos.Count == 1 &&
+                       parameterInfos.Any(parameterInfo => parameterInfo.ParameterType == typeof(bool));
+            },nameof(CreateUpdatingObjectSpace));
+
+        private static void PatchProviderObjectSpaceCreated(this XafApplication application, string targetMethodName,Func<MethodInfo,bool> match,string patchMethodName) 
+            => application.ObjectSpaceProviders.SelectMany(provider => provider.GetType().Methods(targetMethodName).Where(match)).Take(1)
+                .ForEach(methodInfo => new HarmonyMethod(typeof(ObjectSpaceProviderExtensions), patchMethodName)
+                    .PostFix(methodInfo, true));
 
         [SuppressMessage("ReSharper", "InconsistentNaming")]
         private static void CreateObjectSpace(IObjectSpaceProvider __instance,IObjectSpace __result) 
-            => ObjectSpaceCreatedSubject.OnNext((__result, __instance));
+            => ObjectSpaceCreatedSubject.OnNext((__result, __instance,false));
+        
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        private static void CreateUpdatingObjectSpace(IObjectSpaceProvider __instance,IObjectSpace __result) 
+            => ObjectSpaceCreatedSubject.OnNext((__result, __instance,true));
 
         private static void PatchSchemaUpdated(this XafApplication application) 
             => application.ObjectSpaceProviders.Where(provider => provider is not NonPersistentObjectSpaceProvider)
@@ -73,8 +87,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<TProvider> WhenSchemaUpdated<TProvider>(this TProvider provider) where TProvider:IObjectSpaceProvider 
             => SchemaUpdatedSubject.AsObservable().Where(spaceProvider => spaceProvider==(IObjectSpaceProvider)provider).Cast<TProvider>();
         
-        public static IObservable<IObjectSpace> WhenObjectSpaceCreated<TProvider>(this TProvider provider) where TProvider:IObjectSpaceProvider 
-            => ObjectSpaceCreatedSubject.AsObservable().Where(t=>t.objectSpaceProvider==(IObjectSpaceProvider)provider).Select(t => t.objectSpace);
+        public static IObservable<IObjectSpace> WhenObjectSpaceCreated<TProvider>(this TProvider provider,bool emitUpdatingObjectSpace=false) where TProvider:IObjectSpaceProvider 
+            => ObjectSpaceCreatedSubject.AsObservable().Where(t => emitUpdatingObjectSpace||!t.updating)
+                .Where(t=>t.objectSpaceProvider==(IObjectSpaceProvider)provider).Select(t => t.objectSpace);
 
     }
 }

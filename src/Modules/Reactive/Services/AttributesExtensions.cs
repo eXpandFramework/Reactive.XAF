@@ -32,7 +32,7 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                 .Merge(manager.ReadOnlyProperty())
                 .Merge(manager.LookupPropertyAttribute())
                 .Merge(manager.XpoAttributes())
-                .Merge(manager.WhenApplication(application => application.WhenProviderObjectSpaceCreated().Take(1)
+                .Merge(manager.WhenApplication(application => application.WhenSetupComplete()
                     .SelectMany(_ =>application.StoreToDisk(application.Model.ToReactiveModule<IModelReactiveModule>().StoreToDisk) )
                     .ToUnit()))
             ;

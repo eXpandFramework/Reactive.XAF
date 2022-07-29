@@ -31,6 +31,7 @@ using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
 using Xpand.Extensions.TypeExtensions;
 using Xpand.Extensions.XAF.ApplicationModulesManagerExtensions;
+using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.CollectionSourceExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ObjectSpaceProviderExtensions;
@@ -219,6 +220,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             var objectSpaceProvider = provider?.Invoke()??application.ObjectSpaceProvider;
             return application.ObjectSpaceProviders.Where(spaceProvider => spaceProvider == objectSpaceProvider).ToNowObservable()
                 .SelectMany(spaceProvider => spaceProvider.WhenObjectSpaceCreated());
+        }
+        public static IObservable<IObjectSpace> WhenProviderObjectSpaceCreated(this XafApplication application,bool emitUpdatingObjectSpace) {
+            return application.ObjectSpaceProviders.ToNowObservable()
+                .SelectMany(spaceProvider => spaceProvider.WhenObjectSpaceCreated(emitUpdatingObjectSpace));
         }
 
         public static IObservable<T> ShowXafMessage<T>(this IObservable<T> source, XafApplication application,InformationType informationType=InformationType.Info,int displayInterval=MessageDisplayInterval,InformationPosition position=InformationPosition.Left, [CallerMemberName] string memberName = "")
@@ -607,7 +612,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<(IObjectSpace objectSpace, (object instance, ObjectModification modification)[] details)> WhenProviderCommittedDetailed(
             this XafApplication application,Type objectType,ObjectModification objectModification,Func<object,bool> criteria=null,params string[] modifiedProperties)
-            => application.WhenProviderObjectSpaceCreated()
+            => application.WhenProviderCommittedDetailed(objectType, objectModification,false,criteria,modifiedProperties);
+        
+        public static IObservable<(IObjectSpace objectSpace, (object instance, ObjectModification modification)[] details)> WhenProviderCommittedDetailed(
+            this XafApplication application,Type objectType,ObjectModification objectModification,bool emitUpdatingObjectSpace,Func<object,bool> criteria=null,params string[] modifiedProperties)
+            => application.WhenProviderObjectSpaceCreated(emitUpdatingObjectSpace)
                 .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed(objectType, objectModification, criteria, modifiedProperties).TakeUntil(objectSpace.WhenDisposed()));
         
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenProviderCommittedDetailed<T>(
