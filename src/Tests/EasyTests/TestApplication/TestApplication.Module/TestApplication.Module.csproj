@@ -16,12 +16,15 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DefineConstants>TRACE;DEBUG;XAF221</DefineConstants>
+    <NoWarn>1701;1702;XAF0017</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DefineConstants>TRACE;XAF221</DefineConstants>
+    <NoWarn>1701;1702;XAF0017</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'EasyTest|AnyCPU' ">
     <DefineConstants>TRACE;DEBUG;EASYTEST;XAF221</DefineConstants>
+    <NoWarn>1701;1702;XAF0017</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Common\**" />
@@ -62,11 +65,11 @@
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="22.1.3" />
-    <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="22.1.3" />
-    <PackageReference Include="DevExpress.Xpo" Version="22.1.3" />
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="22.1.4" />
+    <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="22.1.4" />
+    <PackageReference Include="DevExpress.Xpo" Version="22.1.4" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0" />
-    <PackageReference Include="Xpand.XAF.Core.All" Version="4.221.2.0" />
+    <PackageReference Include="Xpand.XAF.Core.All" Version="4.221.2.1" />
     <!-- <PackageReference Include="Xpand.XAF.Modules.BulkObjectUpdate" Version="4.212.2.1" /> -->
     <PackageReference Include="Google.Apis.People.v1" Version="1.25.0.830" />
     <!-- <PackageReference Include="System.ServiceModel.Security" Version="4.8.1" />

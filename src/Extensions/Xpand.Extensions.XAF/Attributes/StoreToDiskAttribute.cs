@@ -13,5 +13,6 @@ namespace Xpand.Extensions.XAF.Attributes{
         
         public ObjectModification ObjectModification { get; set; }=ObjectModification.New;
         public string Criteria { get; set; }
+        public bool SameLogonProtection { get; set; }
     }
 }

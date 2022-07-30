@@ -1,8 +1,8 @@
 <%@ Page Language="C#" AutoEventWireup="true" Inherits="Default" EnableViewState="false"
     ValidateRequest="false" CodeBehind="Default.aspx.cs" Async="true"  %>
-<%@ Register Assembly="DevExpress.ExpressApp.Web.v22.1, Version=22.1.3.0-beta.0-beta.0-beta.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" 
+<%@ Register Assembly="DevExpress.ExpressApp.Web.v22.1, Version=22.1.4.0-beta.0-beta.0-beta.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" 
     Namespace="DevExpress.ExpressApp.Web.Templates" TagPrefix="cc3" %>
-<%@ Register Assembly="DevExpress.ExpressApp.Web.v22.1, Version=22.1.3.0-beta.0-beta.0-beta.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a"
+<%@ Register Assembly="DevExpress.ExpressApp.Web.v22.1, Version=22.1.4.0-beta.0-beta.0-beta.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a"
     Namespace="DevExpress.ExpressApp.Web.Controls" TagPrefix="cc4" %>
 <!DOCTYPE html>
 <html>
