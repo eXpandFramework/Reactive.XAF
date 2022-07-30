@@ -1,4 +1,7 @@
-﻿using System.Linq;
+﻿
+
+
+using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
 using akarnokd.reactive_extensions;
@@ -9,7 +12,7 @@ using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.TestsLib.Common;
 using Xpand.TestsLib.Common.Attributes;
-using Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleManager;
+using Xpand.XAF.Modules.Office.DocumentStyleManager.Services.StyleTemplateService;
 using Xpand.XAF.Modules.Reactive.Services;
 using Xpand.XAF.Modules.Reactive.Services.Actions;
 
@@ -21,13 +24,13 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.ApplyTemplateStyle
 			var window = application.CreateViewWindow();
 			window.SetView(application.NewView(ViewType.ListView, typeof(DataObject)));
 
-			Services.StyleTemplateService.ShowService.ShowApplyStylesTemplate(window.Action<DocumentStyleManagerModule>()).Active[nameof(ShowService)].ShouldBeFalse();
+			window.Action<DocumentStyleManagerModule>().ShowApplyStylesTemplate().Active[nameof(ShowService)].ShouldBeFalse();
             var item = application.Model.DocumentStyleManager().ApplyTemplateListViews.AddNode<IModelApplyTemplateListViewItem>();
 			item.ListView = application.Model.BOModel.GetClass(typeof(DataObject)).DefaultListView;
 			
 			window.SetView(application.NewView(ViewType.ListView, typeof(DataObject)));
 			
-			Services.StyleTemplateService.ShowService.ShowApplyStylesTemplate(window.Action<DocumentStyleManagerModule>()).Active[nameof(ShowService)].ShouldBeTrue();
+			window.Action<DocumentStyleManagerModule>().ShowApplyStylesTemplate().Active[nameof(ShowService)].ShouldBeTrue();
 		}
 
 		[Test][Apartment(ApartmentState.STA)][XpandTest()]
@@ -37,7 +40,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.ApplyTemplateStyle
 			var item = application.Model.DocumentStyleManager().ApplyTemplateListViews.AddNode<IModelApplyTemplateListViewItem>();
 			item.ListView = application.Model.BOModel.GetClass(typeof(DataObject)).DefaultListView;
 			window.SetView(application.NewView(ViewType.ListView, typeof(DataObject)));
-			var action = Services.StyleTemplateService.ShowService.ShowApplyStylesTemplate(window.Action<DocumentStyleManagerModule>());
+			var action = window.Action<DocumentStyleManagerModule>().ShowApplyStylesTemplate();
 			action.WhenExecuted().FirstAsync()
 				.Do(e => e.ShowViewParameters.TargetWindow = TargetWindow.NewWindow).Test();
 			var testObserver = application.WhenViewOnFrame(typeof(BusinessObjects.ApplyTemplateStyle), ViewType.DetailView).Test();
@@ -46,7 +49,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Tests.ApplyTemplateStyle
 			dataObject.Name = nameof(DataObject);
 			dataObject.ObjectSpace.CommitChanges();
 			
-			action.DoExecute(space => new object[]{dataObject});
+			action.DoExecute(_ => new object[]{dataObject});
 			
 			testObserver.ItemCount.ShouldBe(1);
 			var applyTemplateStyle = ((BusinessObjects.ApplyTemplateStyle) testObserver.Items.First().View.CurrentObject);

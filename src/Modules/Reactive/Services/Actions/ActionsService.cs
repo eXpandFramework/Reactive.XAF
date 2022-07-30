@@ -332,7 +332,7 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
             => Disposing(simpleAction.ReturnObservable());
 
         public static IObservable<TAction> WhenControllerActivated<TAction>(this IObservable<TAction> source,bool emitWhenActive=false) where TAction : ActionBase 
-            => source.SelectMany(a =>a.Controller.WhenActivated(emitWhenActive).TakeUntil(a.Controller.WhenDeactivated()).To(a) );
+            => source.SelectMany(a =>a.Controller.WhenActivated(emitWhenActive).To(a) );
         
         public static IObservable<TAction> WhenControllerDeActivated<TAction>(this IObservable<TAction> source,bool emitWhenActive=false) where TAction : ActionBase 
             => source.SelectMany(a =>a.Controller.WhenDeactivated().To(a) );
