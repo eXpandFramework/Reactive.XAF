@@ -71,12 +71,12 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 |----|----
 |**DevExpress.ExpressApp.Blazor**|**Any**
  |**DevExpress.ExpressApp.Validation.Blazor**|**Any**
-|Xpand.Extensions.Blazor|4.221.2
- |Xpand.Extensions.Reactive|4.221.2
- |Xpand.Extensions.XAF|4.221.2
- |Xpand.Extensions|4.221.2
- |Xpand.Extensions.XAF.Xpo|4.221.2
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.221.2
+|Xpand.Extensions.Blazor|4.221.3
+ |Xpand.Extensions.Reactive|4.221.3
+ |Xpand.Extensions.XAF|4.221.3
+ |Xpand.Extensions|4.221.3
+ |Xpand.Extensions.XAF.Xpo|4.221.3
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.221.3
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |System.Reactive|5.0.0
  |System.Interactive|5.0.0
@@ -86,7 +86,7 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |System.CodeDom|6.0.0
  |System.Configuration.ConfigurationManager|6.0.0
  |Newtonsoft.Json|13.0.1
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.221.2
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.221.3
 
 ## Issues-Debugging-Troubleshooting
 
