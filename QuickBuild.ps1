@@ -80,10 +80,22 @@ Push-Location .\src\extensions
 Write-HostFormatted "Build Extensions" -section
 Start-Build
 Pop-Location
+
 Write-HostFormatted "Build modules" -section
 Push-Location .\src\modules
 Start-Build
 Pop-Location
+
+Write-HostFormatted "Build tests" -section
+Push-Location .\src\tests
+Start-Build
+Pop-Location
+
+Write-HostFormatted "Build EasyTests" -section
+Push-Location .\src\tests\EasyTests
+Start-Build
+Pop-Location
+
 Pop-Location
 
 

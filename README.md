@@ -46,3 +46,10 @@ Use main project [issues](https://github.com/eXpandFramework/eXpand/issues/new?a
 ### Efficient Package Management
 
 Working with many nuget packages may be counter productive. So if you want to boost your productivity make sure you go through the [Efficient Package Management](https://github.com/eXpandFramework/DevExpress.XAF/wiki/Efficient-package-management) wiki page.
+
+### Build-Modify-Contribute
+
+Detailed instruction on how to build can be found in [QuickBuild.ps1](https://github.com/eXpandFramework/Reactive.XAF/blob/master/QuickBuild.ps1).
+
+Related discusions are [QuickBuild](https://github.com/eXpandFramework/eXpand/labels/Quickbuild) `labeled`
+
