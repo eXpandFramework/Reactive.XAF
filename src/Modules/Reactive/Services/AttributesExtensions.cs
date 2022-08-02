@@ -32,10 +32,7 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                 .Merge(manager.ReadOnlyProperty())
                 .Merge(manager.LookupPropertyAttribute())
                 .Merge(manager.XpoAttributes())
-                .Merge(manager.WhenApplication(application => application.WhenSetupComplete()
-                    .SelectMany(_ =>application.StoreToDisk(application.Model.ToReactiveModule<IModelReactiveModule>().StoreToDisk) )
-                    .ToUnit()))
-            ;
+        ;
         static IObservable<Unit> ReadOnlyProperty(this ApplicationModulesManager manager)
             => manager.WhenGeneratingModelNodes<IModelBOModelClassMembers>()
                 .SelectMany(members => members.SelectMany(member => member.MemberInfo.FindAttributes<ReadOnlyPropertyAttribute>()

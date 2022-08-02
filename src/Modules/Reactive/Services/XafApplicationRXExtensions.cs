@@ -718,9 +718,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                                 ? (t.source, t.target, sourceObject, targetObject, targetIndex) : default))))
                 .WhenNotDefault();
         
-        public static IObservable<SimpleActionExecuteEventArgs> WhenListViewProcessSelectedItem<T>(this XafApplication application,Nesting nesting=Nesting.Any)  
+        public static IObservable<SimpleActionExecuteEventArgs> WhenListViewProcessSelectedItem<T>(this XafApplication application,Nesting nesting=Nesting.Any,bool handled=true)  
             => application.WhenFrameViewChanged().WhenFrame(typeof(T),ViewType.ListView,nesting)
-                .SelectMany(frame => frame.GetController<ListViewProcessCurrentObjectController>().WhenCustomProcessSelectedItem(true));
+                .SelectMany(frame => frame.GetController<ListViewProcessCurrentObjectController>().WhenCustomProcessSelectedItem(handled));
 
     }
 

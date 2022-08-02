@@ -57,6 +57,9 @@ namespace Xpand.XAF.Modules.Reactive.Services.Controllers{
         public static IObservable<T> WhenActivated<T>(this T controller, bool emitWhenActive = false)
             where T : Controller => controller.ReturnObservable().Activated(emitWhenActive);
         
+        public static IObservable<T2> SelectManyUntilDeactivated<T,T2>(this IObservable<T> source,Func<T,IObservable<T2>> selector) where T:Controller
+            => source.SelectMany(controller => selector(controller).TakeUntilDeactivated(controller));
+        
         public static IObservable<Frame> WhenFrameAssigned(this Controller controller)
             => Observable.FromEventPattern<EventHandler,EventArgs>(h => controller.FrameAssigned+=h,h => controller.FrameAssigned-=h )
                 .Select(_ => controller.Frame);
