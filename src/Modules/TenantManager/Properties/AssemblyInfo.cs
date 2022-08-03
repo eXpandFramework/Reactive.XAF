@@ -6,7 +6,7 @@ using Xpand.XAF.Modules.TenantManager;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Xpand.XAF.Modules.TenantManager")]
-[assembly: AssemblyMetadata("Platform","Core")]
+[assembly: AssemblyMetadata("Platform","Web")]
 [assembly: AssemblyMetadata("Module",nameof(TenantManagerModule))]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
