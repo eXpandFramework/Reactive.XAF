@@ -272,7 +272,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
 
         public static IObservable<(Type objectType, string criteria, bool showXafMessage, InformationType informationType, int messageDisplayInterval)> 
             ShowXafMessage(this IObservable<(Type objectType, string criteria, bool showXafMessage, InformationType informationType
-                    , int messageDisplayInterval)> source, XafApplication xafApplication, TraceEvent traceEvent) 
-            => source.Where(t => t.showXafMessage).ShowXafMessage(xafApplication, _ => $"{traceEvent.Location}, {traceEvent.Method}, {traceEvent.Value}",t => t.informationType,t => t.messageDisplayInterval);
+                    , int messageDisplayInterval)> source, XafApplication xafApplication, TraceEvent traceEvent) => source.Where(t => t.showXafMessage)
+                .ShowXafMessage(xafApplication, _ => $"{traceEvent.Location}, {traceEvent.Method}, {traceEvent.Value}",t => t.informationType,t => t.messageDisplayInterval);
     }
 }

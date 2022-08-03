@@ -3,14 +3,14 @@
 [![GitHub issues](https://xpandshields.azurewebsites.net/github/issues/eXpandFramework/expand/StoreToDisk.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AStoreToDisk) [![GitHub close issues](https://xpandshields.azurewebsites.net/github/issues-closed/eXpandFramework/eXpand/StoreToDisk.svg)](https://github.com/eXpandFramework/eXpand/issues?utf8=%E2%9C%93&q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc+label%3AReactive.XAF+label%3AStoreToDisk)
 # About 
 
-The `StoreToDisk` package provides partial and secured serializion for your Bussiness Object
+The `StoreToDisk` package provides partial and secured serialization for your Business Object
 
 ## Details
 This is a `platform agnostic` module.
 
 Possible use case: it is common practice when developing with Xaf to drop the database on each major change and let Xaf recreate from scratch. What if you want to add initial secured data? 
 
-You could use the updater and somehome code it there e.g. Azure Vaults or Enviromental Variables that point to a file exist only locally etc. But there are many problems with this approach. Think for example that your objects maybe created later and not in the Updater by parsing the results of a web service.
+You could use the updater and somehome code it there e.g. Azure Vaults or Environmental Variables that point to a file exist only locally etc. But there are many problems with this approach. Think for example that your objects maybe created later and not in the Updater by parsing the results of a web service.
 
 To save your self from such headaches and have your objects initialized correctly you can use the `StoreToDisk` package.
 
@@ -49,21 +49,21 @@ To save your self from such headaches and have your objects initialized correctl
 
 In the screencast:
 1. We create an `Account` that derives from `BaseObject` and already has a Guid `Oid key`. Additionaly we add a `Name` and a `Secret` property.
-1. We decorate with the `StoreToDiskAttirbute` to serialize the Secret
-2. We run the Windows app (Blazor is exactly the same), create a new Account and set its Name and Secret.
-3. We modify the app.config to use a new database and start the app again.
-4. We examine the json folder and we see that the data are protected for our Machine.
-4. We create a `new Account` and set `only its Name`.
-5. The StoreDisk detects the existing record from the name and assings the Secret property
+2. We decorate with the `StoreToDiskAttirbute` to serialize the Secret
+3. We run the Windows app (Blazor is exactly the same), create a new Account and set its Name and Secret.
+4. We modify the app.config to use a new database and start the app again.
+5. We examine the json folder and we see that the data are protected for our Machine.
+6. We create a `new Account` and set `only its Name`.
+7. The StoreDisk detects the existing record from the name and assigns the Secret property
 
 
 <twitter tags="#StoreToDisk #Blazor">
 
-[![Xpand XAF Modules StoreToDisk](https://user-images.githubusercontent.com/159464/154432425-48be1979-1651-48d4-8845-702439d21e35.gif)](https://youtu.be/O87JjWc2BU0)
+[![StoreToDisk](https://user-images.githubusercontent.com/159464/182446841-7261e245-524b-45ab-80df-52079b28b24d.gif)](https://youtu.be/cEku_01kt9M)
 
 </twitter>
 
-[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/O87JjWc2BU0)
+[![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/cEku_01kt9M)
 
 --- 
 
@@ -96,24 +96,23 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
 
 |<!-- -->|<!-- -->
 |----|----
-|**DevExpress.ExpressApp.Security**|**Any**
- |**DevExpress.Persistent.Base**|**Any**
+|**DevExpress.Persistent.Base**|**Any**
  |**DevExpress.ExpressApp.Xpo**|**Any**
  |**DevExpress.ExpressApp.CodeAnalysis**|**Any**
- |**DevExpress.ExpressApp.Blazor**|**Any**
-|Xpand.Extensions.Reactive|4.221.3
- |Xpand.Extensions|4.221.3
- |Xpand.Extensions.XAF|4.221.3
- |Xpand.Extensions.XAF.Xpo|4.221.3
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.221.3
- |[Xpand.XAF.Modules.Blazor](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Blazor)|4.221.3
- |Xpand.Extensions.Blazor|4.221.3
+|Xpand.Extensions.Reactive|4.221.4
+ |Xpand.Extensions|4.221.4
+ |Xpand.Extensions.XAF|4.221.4
+ |Xpand.Extensions.XAF.Xpo|4.221.4
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.221.4
+ |[Xpand.XAF.Modules.Blazor](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Blazor)|4.221.4
+ |Xpand.Extensions.Blazor|4.221.4
  |Xpand.Patcher|2.0.31
  |System.Reactive|5.0.0
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |Newtonsoft.Json|13.0.1
  |Xpand.Collections|1.0.4
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.221.3
+ |System.Security.Cryptography.ProtectedData|6.0.0
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.221.4
 
 ## Issues-Debugging-Troubleshooting
 

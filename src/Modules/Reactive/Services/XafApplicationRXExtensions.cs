@@ -233,7 +233,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<T> ShowXafMessage<T>(this IObservable<T> source, XafApplication application, Func<T, string> messageSelector, Func<T, InformationType> infoSelector,
             Func<T,int> displayInterval=null, InformationPosition position = InformationPosition.Left, [CallerMemberName] string memberName = "")
-            => source.Do(obj => application.ShowMessage(infoSelector(obj), displayInterval?.Invoke(obj)??MessageDisplayInterval, memberName, messageSelector(obj)));
+            => source.Do(obj => application.ShowMessage(infoSelector(obj), displayInterval?.Invoke(obj)??MessageDisplayInterval, memberName, messageSelector?.Invoke(obj)??memberName));
 
         public const int MessageDisplayInterval = 5000;
 
