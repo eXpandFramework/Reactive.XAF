@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
@@ -107,6 +108,11 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => source.SelectMany(item => Observable.FromEventPattern<EventHandler, EventArgs>(
                 handler => item.TemplateViewChanged += handler,
                 handler => item.TemplateViewChanged -= handler,ImmediateScheduler.Instance).Select(_ => item));
+
+        public static IObservable<TFrame> DisableSimultaneousModificationsException<TFrame>(this TFrame frame) where TFrame : Frame 
+            => frame.Controllers.Cast<Controller>().Where(controller1 => controller1.Name=="DevExpress.ExpressApp.Win.SystemModule.LockController").Take(1).ToNowObservable()
+                .SelectMany(controller1 => controller1.WhenEvent<HandledEventArgs>("CustomProcessSimultaneousModificationsException").Do(args => args.Handled=true))
+                .To(frame);
 
         public static IObservable<Unit> WhenDisposingFrame<TFrame>(this TFrame source) where TFrame : Frame 
             => DisposingFrame(source.ReturnObservable());

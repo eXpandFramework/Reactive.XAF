@@ -10,7 +10,7 @@ namespace Xpand.Extensions.Reactive.Transform {
 
         public static IObservable<Unit> ConcatDeferToUnit<T>(this IObservable<T> source, Func<IObservable<T>> target)
             => source.ToUnit().Concat(Observable.Defer(target).ToUnit());
-        public static IObservable<Unit> ConcatDeferToUnit<T>(this IObservable<T> source, Func<IObservable<Unit>> target)
+        public static IObservable<Unit> ConcatDeferToUnit<T>(this IObservable<T> source, Func<IObservable<object>> target)
             => source.ToUnit().Concat(Observable.Defer(target).ToUnit());
         
         public static IObservable<Unit> ConcatToUnit<T,T1>(this IObservable<T> source, IObservable<T1> target)

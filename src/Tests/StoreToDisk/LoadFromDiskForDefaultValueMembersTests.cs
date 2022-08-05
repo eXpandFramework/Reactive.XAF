@@ -33,18 +33,7 @@ namespace Xpand.XAF.Modules.StoreToDisk.Tests {
         }
 
         private async Task WhenObjectSpaceCommitsNewObjects(string name,IObjectSpace objectSpace,bool protect=true) {
-            var folder = Application.Model.ToReactiveModule<IModelReactiveModulesStoreToDisk>().StoreToDisk.Folder;
-            if (Directory.Exists(folder)) {
-                Directory.Delete(folder, true);
-                Directory.CreateDirectory(folder);
-                var data = new[] { new { Secret = $"{name}secret", Name = name } }
-                    .Serialize();
-                var bytes = data.Bytes();
-                if (protect) {
-                    bytes = data.Protect();
-                }
-                bytes.Save($"{folder}\\{typeof(STD).StoreToDiskFileName()}");
-            }
+            CreateStorage(name, protect);
             
             var std = objectSpace.CreateObject<STD>();
             std.Name = name;
@@ -61,6 +50,20 @@ namespace Xpand.XAF.Modules.StoreToDisk.Tests {
                 return std.Commit();
             });
             
+        }
+
+        private void CreateStorage(string name, bool protect=false) {
+            var folder = Application.Model.ToReactiveModule<IModelReactiveModulesStoreToDisk>().StoreToDisk.Folder;
+            if (Directory.Exists(folder)) {
+                Directory.Delete(folder, true);
+                Directory.CreateDirectory(folder);
+                var data = new[] { new { Secret = $"{name}secret", Name = name } }.Serialize();
+                var bytes = data.Bytes();
+                if (protect) {
+                    bytes = data.Protect();
+                }
+                bytes.Save($"{folder}\\{typeof(STD).StoreToDiskFileName()}");
+            }
         }
     }
 }

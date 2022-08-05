@@ -221,10 +221,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             return application.ObjectSpaceProviders.Where(spaceProvider => spaceProvider == objectSpaceProvider).ToNowObservable()
                 .SelectMany(spaceProvider => spaceProvider.WhenObjectSpaceCreated());
         }
-        public static IObservable<IObjectSpace> WhenProviderObjectSpaceCreated(this XafApplication application,bool emitUpdatingObjectSpace) {
-            return application.ObjectSpaceProviders.ToNowObservable()
+        public static IObservable<IObjectSpace> WhenProviderObjectSpaceCreated(this XafApplication application,bool emitUpdatingObjectSpace) 
+            => application.ObjectSpaceProviders.ToNowObservable()
                 .SelectMany(spaceProvider => spaceProvider.WhenObjectSpaceCreated(emitUpdatingObjectSpace));
-        }
 
         public static IObservable<T> ShowXafMessage<T>(this IObservable<T> source, XafApplication application,InformationType informationType=InformationType.Info,int displayInterval=MessageDisplayInterval,InformationPosition position=InformationPosition.Left, [CallerMemberName] string memberName = "")
             => source.Do(obj => application.ShowMessage(informationType, displayInterval, memberName, $"{obj}"));
@@ -601,10 +600,35 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             => application.WhenObjectSpaceCreated()
                 .SelectMany(objectSpace => objectSpace.WhenCommittedDetailed(objectModification, criteria, modifiedProperties).TakeUntil(objectSpace.WhenDisposed()));
         
+        public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenCommittingDetailed<T>(this IObservable<IObjectSpace> source,
+            ObjectModification objectModification,Func<T,bool> criteria,params string[] modifiedProperties)
+            => source.SelectMany(objectSpace => 
+                objectSpace.WhenCommitingDetailed(false, objectModification,criteria, modifiedProperties).TakeUntil(objectSpace.WhenDisposed()));
+        
+        public static IObservable<(IObjectSpace objectSpace, (object instance, ObjectModification modification)[] details)> WhenCommittingDetailed(this IObservable<IObjectSpace> source,
+            Type objectType,ObjectModification objectModification,Func<object,bool> criteria,params string[] modifiedProperties)
+            => source.SelectMany(objectSpace => 
+                objectSpace.WhenCommitingDetailed(objectType,objectModification,false,criteria,modifiedProperties).TakeUntil(objectSpace.WhenDisposed()));
+        
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenCommittingDetailed<T>(
-            this XafApplication application,ObjectModification objectModification,Func<T,bool> criteria=null,params string[] modifiedProperties)
-            => application.WhenObjectSpaceCreated()
-                .SelectMany(objectSpace => objectSpace.WhenCommitingDetailed(false, objectModification,criteria, modifiedProperties).TakeUntil(objectSpace.WhenDisposed()));
+            this XafApplication application,ObjectModification objectModification,Func<T,bool> criteria,params string[] modifiedProperties)
+            => application.WhenObjectSpaceCreated().WhenCommittingDetailed(objectModification, criteria,modifiedProperties);
+        
+        public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenProviderCommittingDetailed<T>(
+            this XafApplication application,ObjectModification objectModification,Func<T,bool> criteria,params string[] modifiedProperties)
+            => application.WhenProviderObjectSpaceCreated().WhenCommittingDetailed(objectModification, criteria,modifiedProperties);
+
+        public static IObservable<(IObjectSpace objectSpace, (object instance, ObjectModification modification)[] details)> WhenProviderCommittingDetailed(
+            this XafApplication application,Type objectType,ObjectModification objectModification,Func<object,bool> criteria=null,params string[] modifiedProperties)
+            => application.WhenProviderObjectSpaceCreated().WhenCommittingDetailed(objectType,objectModification, criteria,modifiedProperties);
+        
+        public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenCommittingDetailed<T>(
+            this XafApplication application,ObjectModification objectModification,params string[] modifiedProperties)
+            => application.WhenCommittingDetailed<T>(objectModification,null,modifiedProperties);
+        
+        public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenProviderCommittingDetailed<T>(
+            this XafApplication application,ObjectModification objectModification,params string[] modifiedProperties)
+            => application.WhenCommittingDetailed<T>(objectModification,null,modifiedProperties);
         
         public static IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> WhenCommittedDetailed<T>(
             this XafApplication application,ObjectModification objectModification,params string[] modifiedProperties)

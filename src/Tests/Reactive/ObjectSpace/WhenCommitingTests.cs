@@ -1,4 +1,5 @@
-﻿using akarnokd.reactive_extensions;
+﻿using System.Linq;
+using akarnokd.reactive_extensions;
 using NUnit.Framework;
 using Shouldly;
 using Xpand.Extensions.XAF.Attributes;
@@ -32,12 +33,33 @@ namespace Xpand.XAF.Modules.Reactive.Tests.ObjectSpace {
             var testObserver = Application.WhenProviderCommitted<R>(ObjectModification.New).Test();
 
             var objectSpace = Application.CreateObjectSpace();
-            var o = objectSpace.CreateObject<R>();
+            var r = objectSpace.CreateObject<R>();
             objectSpace.CommitChanges();
-            o.Test = "test";
+            r.Test = "test";
             objectSpace.CommitChanges();
             
+            var o = objectSpace.CreateObject<R2>();
+            objectSpace.CommitChanges();
+            // o.Test = "test";
+            // objectSpace.CommitChanges();
+            
             testObserver.ItemCount.ShouldBe(1);
+        }
+        [Test]
+        public void WhenProviderCommittedDetailed() {
+            var testObserver = Application.WhenProviderCommittedDetailed(typeof(R),ObjectModification.NewOrUpdated).ToObjects().Test();
+
+            var objectSpace = Application.ObjectSpaceProvider.CreateObjectSpace();
+            var r = objectSpace.CreateObject<R>();
+            objectSpace.CommitChanges();
+            r.Test = "test";
+            objectSpace.CommitChanges();
+            
+            objectSpace.CreateObject<R2>();
+            objectSpace.CommitChanges();
+
+            testObserver.Items.All(o1 => o1 is R).ShouldBeTrue();
+            testObserver.ItemCount.ShouldBe(2);
         }
 
     }
