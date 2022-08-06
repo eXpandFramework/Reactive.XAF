@@ -8,10 +8,10 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>1701;1702;CA1416</NoWarn>
+    <NoWarn>1701;1702;CA1416;XAF0017</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>1701;1702;CA1416</NoWarn>
+    <NoWarn>1701;1702;CA1416;XAF0017</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Model.xafml" />
@@ -29,7 +29,7 @@
     <EmbeddedResource Include="Images\Logo.svg" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.221.4.0" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.221.4.1" />
     <PackageReference Include="DevExpress.ExpressApp.Notifications" Version="22.1.4" />
   </ItemGroup>
   <ItemGroup>

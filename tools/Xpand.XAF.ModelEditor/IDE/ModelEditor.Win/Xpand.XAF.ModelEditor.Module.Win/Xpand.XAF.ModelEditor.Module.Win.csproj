@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net6.0-windows7.0</TargetFramework>
     <DisableMSBuildAssemblyCopyCheck>true</DisableMSBuildAssemblyCopyCheck>
@@ -9,16 +9,16 @@
     <OutputPath>..\..\..\..\..\bin\net6.0-windows7.0\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>1701;1702;CA1416</NoWarn>
+    <NoWarn>1701;1702;CA1416;XAF0017</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>1701;1702;CA1416</NoWarn>
+    <NoWarn>1701;1702;CA1416;XAF0017</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Build" Version="16.10.0" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="16.10.0" />
     <PackageReference Include="System.Management" Version="5.0.0" />
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.221.4.0" />
+    <PackageReference Include="Xpand.XAF.Win.All" Version="4.221.4.1" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Model.DesignedDiffs.xafml" />
