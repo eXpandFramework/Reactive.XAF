@@ -12,6 +12,7 @@ using DevExpress.ExpressApp.SystemModule;
 using DevExpress.Persistent.Base;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.Tracing;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
@@ -125,7 +126,7 @@ namespace Xpand.XAF.Modules.ViewWizard{
             parameters.CreatedView = application.CreateDetailView(objectSpace, modelDetailView, true, obj);
         }
 
-        internal static IObservable<TSource> TraceViewWizardModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
+        internal static IObservable<TSource> TraceViewWizardModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) =>
             source.Trace(name, ViewWizardModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);

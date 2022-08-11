@@ -14,6 +14,7 @@ using DevExpress.Xpo;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.Tracing;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -29,7 +30,7 @@ namespace Xpand.XAF.Modules.PositionInListView{
                     .Merge(application.ReturnObservable().PositionNewObjects());
             });
 
-        internal static IObservable<TSource> TracePositionInListView<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
+        internal static IObservable<TSource> TracePositionInListView<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,
 	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
 	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
             => source.Trace(name, PositionInListViewModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);

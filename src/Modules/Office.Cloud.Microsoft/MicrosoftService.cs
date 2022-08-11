@@ -36,6 +36,7 @@ using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
+using Xpand.Extensions.Tracing;
 using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.SecurityExtensions;
@@ -74,7 +75,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Microsoft{
                 => application.MicrosoftNeedsAuthentication(), application 
                 => application.AuthorizeMS((_, app) => app.AcquireTokenInteractively(application)).ToUnit());
 
-        internal static IObservable<TSource> TraceMicrosoftModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
+        internal static IObservable<TSource> TraceMicrosoftModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,
 	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
 	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
             => source.Trace(name, MicrosoftModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);

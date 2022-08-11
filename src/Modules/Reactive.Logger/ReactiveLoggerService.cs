@@ -36,9 +36,9 @@ using Xpand.XAF.Modules.Reactive.Services;
 namespace Xpand.XAF.Modules.Reactive.Logger{
     public static class ReactiveLoggerService{
         public static string RXLoggerLogPath{ get; set; }=@$"{AppDomain.CurrentDomain.ApplicationPath()}\{AppDomain.CurrentDomain.ApplicationName()}_RXLogger.log";
-        private static readonly Subject<ITraceEvent> SavedTraceEventSubject=new();
+        private static readonly ISubject<ITraceEvent> SavedTraceEventSubject=Subject.Synchronize(new Subject<ITraceEvent>());
         public static IObservable<ITraceEvent> ListenerEvents{ get; private set; }
-        public static IObservable<ITraceEvent> SavedTraceEvent{ get; }=SavedTraceEventSubject;
+        public static IObservable<ITraceEvent> SavedTraceEvent => SavedTraceEventSubject;
         private static ReactiveTraceListener _listener;
         internal static IObservable<Unit> Connect(this ApplicationModulesManager manager) 
             => manager.WhenApplication(application => {
@@ -63,7 +63,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
 		        : application.WhenViewOnFrame(typeof(TraceEvent), ViewType.ListView)
                     .SelectMany(frame => events.Throttle(TimeSpan.FromSeconds(1))
 				        .TakeUntil(frame.WhenDisposingFrame())
-				        .DistinctUntilChanged(_ => _.TraceKey())
+				        .DistinctUntilChanged(traceEvent => traceEvent.Key())
                         .ObserveOn(SynchronizationContext.Current)
 				        .SelectMany(e => {
 					        if (e.Method != nameof(RefreshViewDataSource)){
@@ -117,7 +117,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         public static IObservable<TraceEvent> WhenTraceEvent(this XafApplication application,Type location=null,RXAction rxAction=RXAction.All,params string[] methods) 
             => SavedTraceEvent.When(location, rxAction,methods).Cast<TraceEvent>();
 
-        internal static IObservable<TSource> TraceLogger<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
+        internal static IObservable<TSource> TraceLogger<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,
 	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
 	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
             => source.Trace(name, ReactiveLoggerModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
@@ -181,14 +181,6 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             }
         }
 
-        [SuppressMessage("ReSharper", "ForCanBeConvertedToForeach")]
-        public static void Push(this TraceSource source, string message) {
-            var listeneers = source.Listeners.OfType<IPush>().ToArray();
-            for (var index = 0; index < listeneers.Length; index++) {
-                var listeneer = listeneers[index];
-                listeneer.Push(message,source.Name);
-            }
-        }
         
         [SuppressMessage("ReSharper", "ForCanBeConvertedToForeach")]
         public static void Push(this TraceSource source,TraceEventMessage message) {
@@ -233,13 +225,13 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             IList<ITraceEvent> traceEventMessages, CriteriaOperator criteria){
             var lastEvent = objectSpace.GetObjectsQuery<TraceEvent>().OrderByDescending(_ => _.Timestamp).FirstOrDefault();
             foreach (var traceEventMessage in traceEventMessages.Where(e => objectSpace.IsObjectFitForCriteria(criteria,e))){
-	            if (lastEvent != null && traceEventMessage.TraceKey() == lastEvent.TraceKey()){
+	            if (lastEvent != null && traceEventMessage.Key() == lastEvent.Key()){
                     lastEvent.Called++;
                     continue;
                 }
                 var traceEvent = objectSpace.CreateObject<TraceEvent>();
                 lastEvent = traceEvent;
-                traceEventMessage.MapTo(traceEvent);
+                traceEventMessage.MapProperties(traceEvent);
             }
             var traceEvents = objectSpace.ModifiedObjects.Cast<TraceEvent>().ToArray();
             objectSpace.CommitChanges();

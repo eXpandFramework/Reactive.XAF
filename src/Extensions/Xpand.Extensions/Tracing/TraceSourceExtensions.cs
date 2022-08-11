@@ -6,7 +6,7 @@ using System.Linq;
 namespace Xpand.Extensions.Tracing{
     public interface IPush{
         void Push(ITraceEvent message);
-        void Push(string message,string source);
+        
     }
     [Flags]
     public enum RXAction{
@@ -19,6 +19,10 @@ namespace Xpand.Extensions.Tracing{
         All=Subscribe|OnNext|OnCompleted|Dispose|OnError
     }
 
+    public static class TraceEventExtensions {
+        public static string Key(this ITraceEvent traceEvent) 
+            => $"{traceEvent.Location}{traceEvent.Action}{traceEvent.Value}{traceEvent.Source}{traceEvent.Method}{traceEvent.Value}";
+    }
     public interface ITraceEvent{
         RXAction RXAction { get; set; }
         string Source{ get; set; }
@@ -33,7 +37,7 @@ namespace Xpand.Extensions.Tracing{
         string LogicalOperationStack{ get; set; }
         DateTime DateTime{ get; set; }
         int ProcessId{ get; set; }
-        string ThreadId{ get; set; }
+        int Thread{ get; set; }
         long Timestamp{ get; set; }
         string ResultType{ get; set; }    
         string ApplicationTitle{ get; set; }
@@ -42,11 +46,11 @@ namespace Xpand.Extensions.Tracing{
 
     public static class TraceSourceExtensions {
         [SuppressMessage("ReSharper", "ForCanBeConvertedToForeach")]
-        public static void Push(this TraceSource source,string message) {
+        public static void Push(this TraceSource source,ITraceEvent message) {
             var listeneers = source.Listeners.OfType<IPush>().ToArray();
             for (var index = 0; index < listeneers.Length; index++) {
                 var listeneer = listeneers[index];
-                listeneer.Push(message, source.Name);
+                listeneer.Push(message);
             }
         }
 

@@ -1,75 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
 using DevExpress.Xpo;
-using Fasterflect;
 using Xpand.Extensions.Tracing;
 using Xpand.Extensions.XAF.SecurityExtensions;
 
 namespace Xpand.XAF.Modules.Reactive.Logger{
 
-    public static class TraceEventExtensions{
-        private static readonly Dictionary<string, MemberGetter> MemberGetters;
-        private static readonly Dictionary<string, MemberSetter> MemberSetters;
-
-        static TraceEventExtensions(){
-            MemberGetters=typeof(TraceEventMessage).GetProperties()
-                .ToDictionary(info => info.Name,info => info.DelegateForGetPropertyValue());
-            MemberSetters=typeof(TraceEventMessage).GetProperties()
-                .ToDictionary(info => info.Name,info => info.DelegateForSetPropertyValue());
-        }
-
-        public static void MapTo(this TraceEvent traceEvent, TraceEventMessage mapToEvent){
-            foreach (var memberSetter in MemberSetters){
-                var propertyValue = traceEvent.GetPropertyValue(memberSetter.Key);
-                memberSetter.Value.Invoke(mapToEvent,propertyValue);
-            }
-        }
-
-        public static string TraceKey(this ITraceEvent _){
-            return $"{_.Location}{_.Action}{_.Value}{_.Source}{_.Method}{_.Value}";
-        }
-
-        public static void MapTo(this ITraceEvent traceEvent,TraceEvent mapToEvent){
-            foreach (var memberGetter in MemberGetters){
-                var value = memberGetter.Value.Invoke(traceEvent);
-                mapToEvent.SetPropertyValue(memberGetter.Key, value);
-            }
-        }
-    }
-    [DebuggerDisplay("{" + nameof(ApplicationTitle) + "}-{" + nameof(Location) + "}-{" + nameof(RXAction) + ("}-{" + nameof(Method) + "}{"+nameof(Value)+"}"))]
-    public class TraceEventMessage:ITraceEvent{
-        public TraceEventMessage(TraceEvent traceEvent){
-            traceEvent.MapTo(this);
-        }
-
-        public TraceEventMessage(){
-            
-        }
-
-        public string ApplicationTitle{ get; set; }
-        public string Source{ get; set; }
-        public TraceEventType TraceEventType{ get; set; }
-        public string Location{ get; set; }
-        public string Method{ get; set; }
-        public int Line{ get; set; }
-        public string Value{ get; set; }
-        public string Action{ get; set; }
-        public RXAction RXAction{ get; set; }
-        public string Message{ get; set; }
-        public string CallStack{ get; set; }
-        public string LogicalOperationStack{ get; set; }
-        public DateTime DateTime{ get; set; }
-        public int ProcessId{ get; set; }
-        public string ThreadId{ get; set; }
-        public long Timestamp{ get; set; }
-        public string ResultType{ get; set; }
-    }
+   
 
     [NavigationItem("Settings")]
     [DebuggerDisplay("{" + nameof(Location) + "}-{" + nameof(RXAction) + ("}-{" + nameof(Method) + "}"))]
@@ -194,11 +135,11 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             set => SetPropertyValue(nameof(ProcessId), ref _processId, value);
         }
 
-        string _threadId;
+        int _threadId;
 
-        public string ThreadId{
+        public int Thread{
             get => _threadId;
-            set => SetPropertyValue(nameof(ThreadId), ref _threadId, value);
+            set => SetPropertyValue(nameof(Thread), ref _threadId, value);
         }
 
         long _timestamp;

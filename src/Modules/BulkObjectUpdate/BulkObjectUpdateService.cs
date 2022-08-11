@@ -11,6 +11,7 @@ using DevExpress.ExpressApp.SystemModule;
 using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.Tracing;
 using Xpand.Extensions.XAF.ActionExtensions;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
@@ -83,7 +84,7 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate{
                 .Select(rule => new ChoiceActionItem(rule.Caption, rule)).ToNowObservable()
                 .Do(item => action.Items.Add(item)).TraceObjectStateManager(item => item.Caption);
         
-        internal static IObservable<TSource> TraceObjectStateManager<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
+        internal static IObservable<TSource> TraceObjectStateManager<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
             => source.Trace(name, BulkObjectUpdateModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);

@@ -9,6 +9,7 @@ using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.Tracing;
 using Xpand.Extensions.TypeExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.XAF.Modules.Reactive;
@@ -62,7 +63,7 @@ namespace Xpand.XAF.Modules.GridListEditor{
 		        .Where(row =>row.ListView == frame.View.Model &&((ListView) frame.View).Editor.GetType().InheritsFrom(ListEditorTypeName) )
 		        .TraceGridListEditor(row => row.ListView.Id);
 
-        internal static IObservable<TSource> TraceGridListEditor<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
+        internal static IObservable<TSource> TraceGridListEditor<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
             => source.Trace(name, GridListEditorModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);

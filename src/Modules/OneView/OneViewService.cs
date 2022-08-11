@@ -10,6 +10,7 @@ using Fasterflect;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.Tracing;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
@@ -59,7 +60,7 @@ namespace Xpand.XAF.Modules.OneView{
 		        .ToUnit()
 		        .TakeUntil(application.ToReactiveModule<IModelReactiveModuleOneView>().Where(view => view.OneView.View==null));
         
-        internal static IObservable<TSource> TraceOneView<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
+        internal static IObservable<TSource> TraceOneView<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,
 	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
 	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
 	        => source.Trace(name, OneViewModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);

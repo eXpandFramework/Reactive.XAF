@@ -6,6 +6,7 @@ using DevExpress.ExpressApp;
 using Fasterflect;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.Tracing;
 using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -22,7 +23,7 @@ namespace Xpand.XAF.Modules.AutoCommit{
                 .Where(objectView => ((IModelObjectViewAutoCommit) objectView.Model).AutoCommit)
                 .TraceAutoCommit(view => view.Id);
 
-        internal static IObservable<TSource> TraceAutoCommit<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
+        internal static IObservable<TSource> TraceAutoCommit<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) =>
             source.Trace(name, AutoCommitModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reactive.Subjects;
+using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.Tracing;
 
 namespace Xpand.XAF.Modules.Reactive.Logger.Hub{

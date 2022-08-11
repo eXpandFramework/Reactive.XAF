@@ -17,6 +17,7 @@ using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.System.Net;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.Tracing;
 using Xpand.XAF.Modules.Reactive.Services;
 using ListView = DevExpress.ExpressApp.ListView;
 
@@ -76,7 +77,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
 			        return space.SaveTraceEvent(list, criteriaOperator);
 		        }).ToEnumerable().ToArray());
 
-        internal static IObservable<TSource> TraceRXLoggerHub<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
+        internal static IObservable<TSource> TraceRXLoggerHub<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,
 	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
 	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
 	        => source.Trace(name, ReactiveLoggerHubModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);

@@ -175,14 +175,13 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
                     if (strategy == ObservableTraceStrategy.OnError) {
                         throw new NotImplementedException();
                     }
-                }).FirstAsync().Test();
+                }).FirstAsync().Trace(traceSource:ReactiveLoggerModule.TraceSource).Test();
             var eventObserver = application.WhenTraceEvent(rxAction:EnumsNET.Enums.Parse<RXAction>(strategy.ToString())).FirstAsync().Test();
             application.CreateObjectSpace();
             testObserver.AwaitDone(Timeout);
-            eventObserver.AwaitDone(Timeout);
+            eventObserver.AwaitDone(Timeout).ItemCount.ShouldBe(1);
 
-            objectSpace = application.CreateObjectSpace();
-            objectSpace.GetObjectsQuery<TraceEvent>().FirstOrDefault(_ => _.RXAction != RXAction.OnNext).ShouldBeNull();
+            
         }
 
         [Test]

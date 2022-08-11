@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 using MagicOnion.Server.Hubs;
 using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.Reactive.Utility;
 
 namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
     

@@ -8,13 +8,14 @@ using DevExpress.ExpressApp.Templates;
 using Fasterflect;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.Tracing;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.XafApplicationExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.HideToolBar{
     public static class HideToolBarService{
-        internal static IObservable<TSource> TraceHideToolBarModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
+        internal static IObservable<TSource> TraceHideToolBarModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
             => source.Trace(name, HideToolBarModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
@@ -28,8 +29,7 @@ namespace Xpand.XAF.Modules.HideToolBar{
                 .Where(_ => _.Template is ISupportActionsToolbarVisibility)
                 .TemplateViewChanged()
                 .Where(frame => frame.View is ListView &&
-                                frame.View.Model is IModelListViewHideToolBar modelListViewHideToolBar &&
-                                (modelListViewHideToolBar.HideToolBar.HasValue&&modelListViewHideToolBar.HideToolBar.Value))
+                                frame.View.Model is IModelListViewHideToolBar { HideToolBar: { } } modelListViewHideToolBar && modelListViewHideToolBar.HideToolBar.Value)
                 .TraceHideToolBarModule(frame => $"{frame.ViewItem?.View.Id}, {frame.View.Id}")
                 .Publish().RefCount();
 

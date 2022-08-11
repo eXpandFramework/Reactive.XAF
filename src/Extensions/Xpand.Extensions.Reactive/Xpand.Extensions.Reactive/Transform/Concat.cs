@@ -18,6 +18,9 @@ namespace Xpand.Extensions.Reactive.Transform {
         
         public static IObservable<TTarget> ConcatIgnoredValue<TSource,TTarget>(this IObservable<TSource> source, TTarget value) 
             => source.Select(_ => default(TTarget)).WhenNotDefault().Concat(value.ReturnObservable());
+        
+        public static IObservable<Unit> ConcatIgnoredUnit<TSource>(this IObservable<TSource> source) 
+            => source.ConcatIgnoredValue(Unit.Default);
         public static IObservable<T> ConcatIgnored<T,T2>(this IObservable<T> source,Func<T,IObservable<T2>> secondSelector,Func<T,bool> merge=null)
             => source.SelectMany(arg => {
                 merge ??= _ => true;

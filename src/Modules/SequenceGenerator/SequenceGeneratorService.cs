@@ -23,6 +23,7 @@ using Fasterflect;
 
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.Tracing;
 using Xpand.Extensions.XAF.ObjectSpaceProviderExtensions;
 using Xpand.Extensions.XAF.SecurityExtensions;
 using Xpand.Extensions.XAF.TypesInfoExtensions;
@@ -39,7 +40,7 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         
         static readonly Subject<Exception> ExceptionsSubject=new();
         [SuppressMessage("ReSharper", "ExplicitCallerInfoArgument")]
-        internal static IObservable<TSource> TraceSequenceGeneratorModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
+        internal static IObservable<TSource> TraceSequenceGeneratorModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) =>
             source.Trace(name, SequenceGeneratorModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);

@@ -24,6 +24,7 @@ using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Filter;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.Tracing;
 using Xpand.Extensions.XAF.FrameExtensions;
 using Xpand.Extensions.XAF.SecurityExtensions;
 using Xpand.Extensions.XAF.ViewExtensions;
@@ -68,7 +69,7 @@ namespace Xpand.XAF.Modules.Office.Cloud.Google{
                 .Merge(manager.CheckBlazor("Xpand.Extensions.Office.Cloud.Google.Blazor.GoogleCodeStateStartup", "Xpand.Extensions.Office.Cloud.Google.Blazor"))
                 ;
 
-        internal static IObservable<TSource> TraceGoogleModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
+        internal static IObservable<TSource> TraceGoogleModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,
 	        Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
 	        [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
             => source.Trace(name, GoogleModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);

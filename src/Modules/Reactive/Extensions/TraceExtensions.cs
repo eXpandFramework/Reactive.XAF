@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using DevExpress.ExpressApp;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.Tracing;
 
 namespace Xpand.XAF.Modules.Reactive.Extensions{
     public static class TraceExtensions{
@@ -17,7 +18,7 @@ namespace Xpand.XAF.Modules.Reactive.Extensions{
         }
 
         internal static IObservable<TSource> TraceRX<TSource>(this IObservable<TSource> source,
-            Func<TSource, string> messageFactory = null, string name = null, Action<string> traceAction = null,
+            Func<TSource, string> messageFactory = null, string name = null, Action<ITraceEvent> traceAction = null,
             Func<Exception, string> errorMessageFactory = null,
             ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
             [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "",

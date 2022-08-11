@@ -110,8 +110,7 @@ namespace Xpand.Extensions.Reactive.Transform {
             /// </summary>
             /// <returns></returns>
             private IEnumerable<IObservable<T>> GetBuffers() {
-                Queue<T> buffer;
-                while ((buffer = GetAndReplaceBuffer()) != null) {
+                while (GetAndReplaceBuffer() is{ } buffer) {
                     yield return buffer.ToObservable(_scheduler);
                 }
             }
@@ -127,5 +126,14 @@ namespace Xpand.Extensions.Reactive.Transform {
                 _liveEvents.OnNext(item);
             }
         }
+        
+        /// <summary>
+        /// Emits a list every interval that contains all the currently buffered elements.
+        /// </summary>
+        public static IObservable<IList<TSource>> BufferHistorical<TSource>(this IObservable<TSource> source, TimeSpan interval, TimeSpan replayDuration) 
+            => source.Replay(replayed => Observable.Interval(interval)
+                .SelectMany(_ => replayed.TakeUntil(Observable.Return(Unit.Default, Scheduler.CurrentThread)).ToList())
+                .TakeUntil(replayed.LastOrDefaultAsync()), replayDuration, Scheduler.Immediate);
     }
+    
 }

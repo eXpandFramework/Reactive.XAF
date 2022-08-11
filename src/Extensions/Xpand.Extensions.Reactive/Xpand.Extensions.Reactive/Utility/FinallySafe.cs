@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Xpand.Extensions.Reactive.Utility {
     public static partial class Utility {
@@ -11,7 +12,7 @@ namespace Xpand.Extensions.Reactive.Utility {
         /// propagated to the observer. The action is also invoked if the observer
         /// is unsubscribed before the termination of the source sequence.
         /// </summary>
-        public static IObservable<T> FinallySafe<T>(this IObservable<T> source, Action finallyAction) 
+        public static IObservable<T> FinallySafe<T>(this IObservable<T> source, Action finallyAction,[CallerMemberName]string caller="" ) 
             => Observable.Create<T>(observer => {
                 var finallyOnce = Disposable.Create(finallyAction);
                 var subscription = source.Subscribe(observer.OnNext, error => {
@@ -29,6 +30,7 @@ namespace Xpand.Extensions.Reactive.Utility {
                         finallyOnce.Dispose();
                     }
                     catch (Exception ex) {
+                        ex.Source = caller;
                         observer.OnError(ex);
                         return;
                     }

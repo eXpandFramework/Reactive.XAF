@@ -12,6 +12,7 @@ using DevExpress.ExpressApp.Model;
 using Xpand.Extensions.Reactive.Combine;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
+using Xpand.Extensions.Tracing;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.CloneMemberValue{
@@ -20,7 +21,7 @@ namespace Xpand.XAF.Modules.CloneMemberValue{
         internal static IObservable<Unit> Connect(this ApplicationModulesManager modulesManager ) 
             => modulesManager.WhenApplication(application => application.WhenCloneMemberValues().ToUnit());
 
-        internal static IObservable<TSource> TraceCloneMemberValueModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
+        internal static IObservable<TSource> TraceCloneMemberValueModule<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
             => source.Trace(name, CloneMemberValueModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);

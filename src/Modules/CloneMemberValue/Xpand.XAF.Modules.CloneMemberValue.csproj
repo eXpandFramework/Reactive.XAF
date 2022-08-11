@@ -27,6 +27,9 @@
     <Compile Update="Module.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Xpand.Extensions">
+      <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
+    </Reference>
     <None Include="Readme.md" />
   </ItemGroup>
   <ItemGroup>

@@ -22,6 +22,7 @@ using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.StringExtensions;
+using Xpand.Extensions.Tracing;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.XAF.Modules.RazorView.Template;
 using Xpand.XAF.Modules.Reactive.Services;
@@ -45,7 +46,7 @@ namespace Xpand.XAF.Modules.RazorView{
                 return false;
             }
         }
-        internal static IObservable<TSource> TraceObjectTemplate<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<string> traceAction = null,
+        internal static IObservable<TSource> TraceObjectTemplate<TSource>(this IObservable<TSource> source, Func<TSource,string> messageFactory=null,string name = null, Action<ITraceEvent> traceAction = null,
             Func<Exception,string> errorMessageFactory=null, ObservableTraceStrategy traceStrategy = ObservableTraceStrategy.OnNextOrOnError,
             [CallerMemberName] string memberName = "",[CallerFilePath] string sourceFilePath = "",[CallerLineNumber] int sourceLineNumber = 0) 
             => source.Trace(name, RazorViewModule.TraceSource,messageFactory,errorMessageFactory, traceAction, traceStrategy, memberName,sourceFilePath,sourceLineNumber);
