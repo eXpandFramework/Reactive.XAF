@@ -142,7 +142,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
         }
 
         public static T SetContent<T>(this T message,  string content, string key = null, string secret = null,bool formDataContent=false) where T:HttpRequestMessage {
-            if (message.Method != HttpMethod.Get&&!string.IsNullOrEmpty(content) &&content!="{}")
+            if (message.Method != HttpMethod.Get&&!string.IsNullOrEmpty(content) )
                 message.Content = new StringContent(content, Encoding.UTF8, formDataContent ? "application/x-www-form-urlencoded" : "application/json");
             
             return message.Sign(key, secret);

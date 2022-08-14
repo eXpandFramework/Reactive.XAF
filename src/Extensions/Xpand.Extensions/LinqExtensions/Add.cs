@@ -1,9 +1,18 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Xpand.Extensions.ObjectExtensions;
 
 namespace Xpand.Extensions.LinqExtensions{
     public static partial class LinqExtensions{
+        public static IEnumerable<T> DoWhen<T>(this IEnumerable<T> source, Func<T,bool> when,Action<T> action) 
+            => source.Do(obj => {
+                if (when(obj)) {
+                    action(obj);
+                }
+            });
+
         public static T[] AddRange<T>(this IEnumerable<T> source,IEnumerable<T> enumerable,bool ignoreDuplicates=false) 
             => source is IList<T> list
                     ? enumerable.Where(arg => !ignoreDuplicates || !source.Contains(arg)).Execute(list.Add).ToArray()
