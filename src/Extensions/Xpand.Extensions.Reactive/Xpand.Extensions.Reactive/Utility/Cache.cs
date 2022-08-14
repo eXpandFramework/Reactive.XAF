@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
 namespace Xpand.Extensions.Reactive.Utility {
     public static partial class Utility {
+        
         public static IObservable<T2> Cache<T, T2>(this IObservable<T> source,
             ConcurrentDictionary<object, IConnectableObservable<object>> storage, object key,
             Func<T, IObservable<T2>> secondSelector, TimeSpan? interval) where T2 : class

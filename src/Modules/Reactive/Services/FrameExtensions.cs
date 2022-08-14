@@ -122,7 +122,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 handler => item.Disposing += handler,
                 handler => item.Disposing -= handler,ImmediateScheduler.Instance)).ToUnit();
 
-        public static IObservable<T> SelectUntilViewClosed<T>(this IObservable<Frame> source, Func<Frame, IObservable<T>> selector) 
+        public static IObservable<T> SelectUntilViewClosed<T,TFrame>(this IObservable<TFrame> source, Func<TFrame, IObservable<T>> selector) where TFrame:Frame 
             => source.SelectMany(frame => selector(frame).TakeUntilViewClosed(frame));
         public static IObservable<TFrame> TakeUntilViewClosed<TFrame>(this IObservable<TFrame> source,Frame frame)  
             => source.TakeUntil(frame.View.WhenClosing());

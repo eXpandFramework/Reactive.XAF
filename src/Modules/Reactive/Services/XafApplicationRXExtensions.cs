@@ -48,7 +48,7 @@ using SecurityExtensions = Xpand.XAF.Modules.Reactive.Services.Security.Security
 using View = DevExpress.ExpressApp.View;
 
 namespace Xpand.XAF.Modules.Reactive.Services{
-    public static class XafApplicationRxExtensions{
+    public static class XafApplicationRxExtensions {
 
         public static IObservable<T> SelectMany<T>(this XafApplication application, IObservable<T> execute) 
             => application.SelectMany(execute.ToTask);

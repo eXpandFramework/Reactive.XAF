@@ -150,7 +150,7 @@ namespace Xpand.Extensions.Reactive.Transform.System.Net {
 
         public static HttpRequestMessage NewHttpRequestMessage(this HttpMethod httpMethod, string requestUri,object o=null, string key=null,string secret=null) 
             => new HttpRequestMessage(httpMethod,requestUri).SetContent(o.Serialize(),key,secret);
-
+        
     }
 
     public class HttpResponseException:HttpRequestException {
