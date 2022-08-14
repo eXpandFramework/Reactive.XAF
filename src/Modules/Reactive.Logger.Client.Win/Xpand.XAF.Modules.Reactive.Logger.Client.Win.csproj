@@ -7,21 +7,18 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
     <DebugSymbols>true</DebugSymbols>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+    
     <OutputPathSuffix>ReactiveLoggerClient</OutputPathSuffix>
     <OutputPath>..\..\..\bin\ReactiveLoggerClient</OutputPath>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
     <DebugType>full</DebugType>
     <OutputType>WinExe</OutputType>
-    <ApplicationManifest>app1.manifest</ApplicationManifest>
-    <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
-    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+    
+    
+    
     <StartupObject>Xpand.XAF.Modules.Reactive.Logger.Client.Win.Program</StartupObject>
-    <CopyLocalLockFileAssemblie>true</CopyLocalLockFileAssemblie>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>1701;1702;CA1416</NoWarn>

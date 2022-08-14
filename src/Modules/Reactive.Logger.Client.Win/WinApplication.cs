@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Windows;
-using System.Windows.Forms;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Win;
 using DevExpress.ExpressApp.Xpo;
@@ -9,7 +7,6 @@ using Xpand.XAF.Modules.GridListEditor;
 using Xpand.XAF.Modules.OneView;
 using Xpand.XAF.Modules.Reactive.Logger.Hub;
 using Xpand.XAF.Modules.Windows;
-using Application = System.Windows.Forms.Application;
 
 namespace Xpand.XAF.Modules.Reactive.Logger.Client.Win {
     public partial class ReactiveLoggerClientWinApplication : WinApplication,ILoggerHubClientApplication {

@@ -26,7 +26,9 @@ namespace Xpand.XAF.Modules.Reactive.Services {
             => manager.ReadOnlyObjectViewAttribute()
                 .Merge(manager.WhenCustomizeTypesInfo()
                     .InvisibleInAllViewsAttribute()
-                    .CustomAttributes().VisibleInAllViewsAttribute()
+                    .InvisibleInAllListViewsAttribute()
+                    .CustomAttributes()
+                    .VisibleInAllViewsAttribute()
                     .ToUnit())
                 .Merge(manager.ReadOnlyCollection())
                 .Merge(manager.ReadOnlyProperty())
@@ -88,23 +90,29 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                     }).ToObservable(Scheduler.Immediate))
                 .ToUnit()
                 .Merge(manager.WhenCustomizeTypesInfo()
-                    .SelectMany(t => t.e.TypesInfo.PersistentTypeMembers<ReadOnlyObjectViewAttribute>().ToObservable()
+                    .SelectMany(t => t.e.TypesInfo.Members<ReadOnlyObjectViewAttribute>().ToObservable()
                         .Where(t1 => t1.info.IsList)
                         .GroupBy(t2 => t2.info.ListElementTypeInfo).Select(tuples => tuples.Key)
                         .Do(info => ((TypeInfo) info).AddAttribute(new ReadOnlyObjectViewAttribute()))
                         .ToUnit()));
 
         static IObservable<Unit> VisibleInAllViewsAttribute(this IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> source)
-            => source.ConcatIgnored(t => t.e.TypesInfo.PersistentTypeMembers<VisibleInAllViewsAttribute>().ToArray().ToObservable()
-                    .SelectMany(t1 => new Attribute[] {
-                        new VisibleInDetailViewAttribute(true), new VisibleInListViewAttribute(true), new VisibleInLookupListViewAttribute(true)
-                    }.Execute(attribute => t1.info.AddAttribute(attribute))))
+            => source.ConcatIgnored(t => t.e.TypesInfo.Members<VisibleInAllViewsAttribute>().ToArray().ToObservable()
+                    .SelectMany(t1 => new Attribute[] { new VisibleInDetailViewAttribute(true), new VisibleInListViewAttribute(true), new VisibleInLookupListViewAttribute(true) }
+                        .Execute(attribute => t1.info.AddAttribute(attribute))))
                 .ToUnit();
 
         static IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> InvisibleInAllViewsAttribute(this IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> source)
-            => source.ConcatIgnored(t => t.e.TypesInfo.PersistentTypeMembers<InvisibleInAllViewsAttribute>().ToArray().ToObservable()
+            => source.ConcatIgnored(t => t.e.TypesInfo.Members<InvisibleInAllViewsAttribute>().ToArray().ToObservable()
                     .SelectMany(t1 => new Attribute[] {
                         new VisibleInDetailViewAttribute(false), new VisibleInListViewAttribute(false),
+                        new VisibleInLookupListViewAttribute(false)
+                    }.Execute(attribute => t1.info.AddAttribute(attribute))));
+        
+        static IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> InvisibleInAllListViewsAttribute(this IObservable<(ApplicationModulesManager manager, CustomizeTypesInfoEventArgs e)> source)
+            => source.ConcatIgnored(t => t.e.TypesInfo.Members<InvisibleInAllListViewsAttribute>().ToArray().ToObservable()
+                    .SelectMany(t1 => new Attribute[] {
+                        new VisibleInListViewAttribute(false),
                         new VisibleInLookupListViewAttribute(false)
                     }.Execute(attribute => t1.info.AddAttribute(attribute))));
 
