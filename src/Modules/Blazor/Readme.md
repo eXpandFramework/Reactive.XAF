@@ -41,6 +41,23 @@ This `Blazor only` module currently contains:
 [![image](https://user-images.githubusercontent.com/159464/87556331-2fba1980-c6bf-11ea-8a10-e525dda86364.png)](https://youtu.be/VyP53DkIgTc)
 
 
+3. Additional Attributes to help you geneate powerful UI without much coding are the [ImgPropertyAttribute](https://github.com/eXpandFramework/Reactive.XAF/blob/master/src/Extensions/Xpand.Extensions.XAF/Attributes/ImgPropertyAttribute.cs), [ReadOnlyObjectViewAttribute](https://github.com/eXpandFramework/Reactive.XAF/blob/master/src/Extensions/Xpand.Extensions.XAF/Attributes/ReadOnlyObjectViewAttribute.cs), [UrlPropertyAttribute](https://github.com/eXpandFramework/Reactive.XAF/blob/master/src/Extensions/Xpand.Extensions.XAF/Attributes/UrlPropertyAttribute.cs) and all attributes that live in the [Xpand.Extensions.XAF.Attributes/](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Extensions/Xpand.Extensions.XAF/Attributes) namespace.
+
+See them applied to a listview `ImgPropertyAttribute`, `UrlPropertyAttribute`
+
+![image](https://user-images.githubusercontent.com/159464/184247680-7217af87-c637-45b5-ad59-b787b11dca6a.png)
+
+`ReadOnlyObjectViewAttribute`
+
+![image](https://user-images.githubusercontent.com/159464/184247883-db757729-e6e9-4e40-8090-af692a87a9dd.png)
+
+Screenshot taken from the [Reactive.Rest](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Reactive.Rest) package.
+
+4. Model configuration for the DxDataGrid
+
+![image](https://user-images.githubusercontent.com/159464/184248412-0f2bac55-ef0f-49da-a92e-aa15f5b4b483.png)
+
+
 **Possible future improvements:**
 
 [Let me know](https://github.com/sponsors/apobekiaris) if you want me to implement them for you.
