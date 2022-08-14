@@ -298,7 +298,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger.Tests{
             application.Logon();
             application.CreateObjectSpace();
             
-            var testTrace = application.WhenTraceEvent().FirstAsync(_ => _.Value.Contains("test")).SubscribeReplay();
+            var testTrace = application.WhenTraceEvent().FirstAsync(traceEvent => traceEvent.Message=="test").SubscribeReplay();
             application.WhenObjectSpaceCreated().Trace(traceSource:ReactiveLoggerModule.TraceSource, messageFactory:_ => "test").Test();
             application.CreateObjectSpace();
 

@@ -55,10 +55,13 @@ namespace Xpand.Extensions.Reactive.Utility{
                     if (m == "OnNext"){
                         mName = $"{memberName} =>{GetSourceName<TSource>()}";
                     }
+
+                    var fullValue = $"{name}.{Path.GetFileNameWithoutExtension(sourceFilePath)}.{mName}({sourceLineNumber.ToString()}): {m}({value})".TrimStart('.');
                     var traceEventMessage = new TraceEventMessage() {
                         Action = m, RXAction = RXActions[m], Line = sourceLineNumber, DateTime = DateTime.Now,
-                        Method = mName, Location = Path.GetFileNameWithoutExtension(sourceFilePath), Source = traceSource?.Name,Value = value,
-                        Message = $"{name}.{Path.GetFileNameWithoutExtension(sourceFilePath)}.{mName}({sourceLineNumber.ToString()}): {m}({value})".TrimStart('.'),
+                        Method = mName, Location = Path.GetFileNameWithoutExtension(sourceFilePath), Source = traceSource?.Name,
+                        Value = fullValue,
+                        Message = value??fullValue,
                         Timestamp =DateTime.Now.Ticks,Thread = Thread.CurrentThread.ManagedThreadId,TraceEventType =TraceEventType.Information 
                     };
                     if (traceEventMessage.RXAction == RXAction.OnNext) {
