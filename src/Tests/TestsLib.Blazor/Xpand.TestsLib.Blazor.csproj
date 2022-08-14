@@ -28,20 +28,11 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp.EasyTest.BlazorAdapter" Version="22.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="22.1.4" />
     <PackageReference Include="DevExpress.EasyTest" Version="22.1.4" />
     <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="22.1.4" />
-    <PackageReference Include="Fasterflect.Xpand" Version="2.0.7" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.2" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0" />
-    <PackageReference Include="System.Reactive" Version="5.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.2" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0" />
-    <PackageReference Include="System.ServiceProcess.ServiceController" Version="6.0" />
-    <PackageReference Include="System.ServiceModel.Http" Version="4.9" />
-    <PackageReference Include="System.ServiceModel.NetTcp" Version="4.9" />
-    <PackageReference Include="System.ServiceModel.Security" Version="4.9" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.Extensions">
