@@ -28,6 +28,7 @@ namespace Xpand.Extensions.Tracing{
         string Source{ get; set; }
         TraceEventType TraceEventType{ get; set; }
         string Location{ get; set; }
+        string SourceFilePath{ get; set; }
         string Method{ get; set; }
         int Line{ get; set; }
         string Value{ get; set; }

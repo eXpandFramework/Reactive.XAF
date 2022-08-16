@@ -20,6 +20,14 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         public TraceEvent(Session session) : base(session){
         }
 
+        string _sourceFilePath;
+
+        [Size(SizeAttribute.Unlimited)]
+        public string SourceFilePath {
+            get => _sourceFilePath;
+            set => SetPropertyValue(nameof(SourceFilePath), ref _sourceFilePath, value);
+        }
+        
         public override void AfterConstruction(){
             base.AfterConstruction();
             Called = 1;

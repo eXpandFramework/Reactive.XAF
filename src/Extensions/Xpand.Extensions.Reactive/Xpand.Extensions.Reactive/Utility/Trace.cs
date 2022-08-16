@@ -60,8 +60,7 @@ namespace Xpand.Extensions.Reactive.Utility{
                     var traceEventMessage = new TraceEventMessage() {
                         Action = m, RXAction = RXActions[m], Line = sourceLineNumber, DateTime = DateTime.Now,
                         Method = mName, Location = Path.GetFileNameWithoutExtension(sourceFilePath), Source = traceSource?.Name,
-                        Value = fullValue,
-                        Message = value??fullValue,
+                        Value = fullValue,SourceFilePath=sourceFilePath, Message = value??fullValue,
                         Timestamp =DateTime.Now.Ticks,Thread = Thread.CurrentThread.ManagedThreadId,TraceEventType =TraceEventType.Information 
                     };
                     if (traceEventMessage.RXAction == RXAction.OnNext) {
@@ -141,8 +140,8 @@ namespace Xpand.Extensions.Reactive.Utility{
 	        });
 
 
-        private static Action<ITraceEvent> Push(this Action<ITraceEvent> traceAction, TraceSource traceSource) =>
-	        traceAction ?? (s => {
+        private static Action<ITraceEvent> Push(this Action<ITraceEvent> traceAction, TraceSource traceSource) 
+            => traceAction ?? (s => {
 		        if (traceSource != null){
 			        traceSource.Push(s);
 		        }
@@ -155,26 +154,7 @@ namespace Xpand.Extensions.Reactive.Utility{
     }
     [DebuggerDisplay("{" + nameof(ApplicationTitle) + "}-{" + nameof(Location) + "}-{" + nameof(RXAction) + ("}-{" + nameof(Method) + "}{"+nameof(Value)+"}"))]
     public class TraceEventMessage:ITraceEvent{
-        public TraceEventMessage(ITraceEvent traceEvent) {
-            traceEvent.MapProperties(this);
-            // ApplicationTitle = traceEvent.ApplicationTitle;
-            // Source = traceEvent.Source;
-            // TraceEventType = traceEvent.TraceEventType;
-            // Location = traceEvent.Location;
-            // Method = traceEvent.Method;
-            // Line = traceEvent.Line;
-            // Value = traceEvent.Value;
-            // Action = traceEvent.Action;
-            // RXAction = traceEvent.RXAction;
-            // Message=traceEvent.Message;
-            // CallStack = traceEvent.CallStack;
-            // LogicalOperationStack = traceEvent.LogicalOperationStack;
-            // DateTime = traceEvent.DateTime;
-            // ProcessId = traceEvent.ProcessId;
-            // Thread = traceEvent.Thread;
-            // Timestamp = traceEvent.Timestamp;
-            // ResultType = traceEvent.ResultType;
-        }
+        public TraceEventMessage(ITraceEvent traceEvent) => traceEvent.MapProperties(this);
 
         public TraceEventMessage(){
             
@@ -197,6 +177,7 @@ namespace Xpand.Extensions.Reactive.Utility{
         public int Thread{ get; set; }
         public long Timestamp{ get; set; }
         public string ResultType{ get; set; }
+        public string SourceFilePath { get; set; }
     }
 
 
