@@ -569,6 +569,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         
         public static IObservable<T> ToObjects<T>(this IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> source) 
             => source.SelectMany(t => t.details.Select(t1 => t1.instance));
+        public static IObservable<T[]> ToObjectsList<T>(this IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> source) 
+            => source.Select(t => t.details.Select(t1 => t1.instance).ToArray());
         
         public static IObservable<T[]> ToObjectsGroup<T>(this IObservable<(IObjectSpace objectSpace, (T instance, ObjectModification modification)[] details)> source) 
             => source.Select(t => t.details.Select(t1 => t1.instance).ToArray());
