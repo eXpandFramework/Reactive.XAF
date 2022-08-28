@@ -320,6 +320,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<View> WhenListView<TFrame>(this IObservable<TFrame> source, Type objectType = null, Nesting nesting = Nesting.Any) where TFrame : Frame
             => source.WhenFrame(objectType,ViewType.ListView, nesting).ToView();
         
+        public static IObservable<T> WhenDetailView<T,TObject>(this IObservable<T> source, Func<TObject,bool> criteria) where T:Frame
+            => source.WhenFrame(typeof(TObject),ViewType.DetailView).Where(frame => criteria(frame.View.CurrentObject.As<TObject>()));
+        
         public static IObservable<T> WhenFrame<T>(this IObservable<T> source, Type objectType = null,
             ViewType viewType = ViewType.Any, Nesting nesting = Nesting.Any) where T:Frame
             => source.Where(frame => frame.Is(nesting))

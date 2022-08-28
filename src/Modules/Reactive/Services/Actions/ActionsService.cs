@@ -7,6 +7,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
+using DevExpress.ExpressApp.SystemModule;
 using DevExpress.ExpressApp.Utils;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Filter;
@@ -157,6 +158,9 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
         public static IObservable<ParametrizedActionExecuteEventArgs> WhenExecuted(this IObservable<ParametrizedAction> source) 
             => source.SelectMany(action => action.WhenExecuted());
         public static IObservable<Unit> WhenConcatExecution(this IObservable<ParametrizedAction> source,Action<ParametrizedActionExecuteEventArgs> retriedExecution) 
+            => source.SelectMany(action => action.WhenConcatExecution(retriedExecution));
+        
+        public static IObservable<Unit> WhenConcatExecution(this IObservable<SimpleAction> source,Action<SimpleActionExecuteEventArgs> retriedExecution) 
             => source.SelectMany(action => action.WhenConcatExecution(retriedExecution));
         
         public static IObservable<T> WhenConcatExecution<T>(this IObservable<ParametrizedAction> source,Func<ParametrizedActionExecuteEventArgs,IObservable<T>> selector) 
@@ -420,5 +424,12 @@ namespace Xpand.XAF.Modules.Reactive.Services.Actions{
 			        h => action.CustomizeControl += h, h => action.CustomizeControl -= h, ImmediateScheduler.Instance)
 		        .TransformPattern<CustomizeControlEventArgs, TAction>()
 		        .TraceRX();
+        
+        public static IObservable<T2> WhenUpdating<T2>(this SimpleAction simpleAction,Func<UpdateActionEventArgs,IObservable<T2>> selector) 
+            => simpleAction.Controller.WhenActivated()
+                .SelectManyUntilDeactivated(controller => controller.Frame.GetController<ActionsCriteriaViewController>()
+                    .WhenEvent<UpdateActionEventArgs>(nameof(ActionsCriteriaViewController.ActionUpdating)).Where(e => e.Active&&e.NeedUpdateEnabled)
+                    .SelectMany(selector));
+
     }
 }

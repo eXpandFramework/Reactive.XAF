@@ -6,10 +6,12 @@ using System.Reactive;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
+using Fasterflect;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.Extensions.XAF.NonPersistentObjects;
+using NonPersistentBaseObject = DevExpress.ExpressApp.NonPersistentBaseObject;
 
 namespace Xpand.XAF.Modules.Reactive.Services {
     public static class NonPersistentObjectsExtensions {
@@ -47,5 +49,7 @@ namespace Xpand.XAF.Modules.Reactive.Services {
                 return objectString;
             }).ToList().ToBindingList();
 
+        public static void MarkChanged(this NonPersistentBaseObject baseObject,params string[] memberNames) 
+            => memberNames.ForEach(s => baseObject.CallMethod("OnPropertyChanged", s));
     }
 }
