@@ -2,7 +2,7 @@
 
 namespace Xpand.Extensions.XAF.ModelExtensions{
     public static partial class ModelExtensions{
-        public static TNode GetParent<TNode>(this IModelNode modelNode) where TNode : class, IModelNode{
+        public static TNode GetParent<TNode>(this IModelNode modelNode) where TNode : class{
             if (modelNode is TNode node)
                 return node;
             var parent = modelNode.Parent;
