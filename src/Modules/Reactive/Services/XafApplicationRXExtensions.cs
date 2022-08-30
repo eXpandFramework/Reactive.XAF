@@ -729,8 +729,8 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         }
 
         public static IObservable<Unit> PopulateAdditionalObjectSpaces(this XafApplication application) 
-            => application.WhenObjectSpaceCreated(true).OfType<CompositeObjectSpace>()
-                .Where(space => space.Owner is not CompositeObjectSpace)
+            => application.ObjectSpaceProviders.OfType<NonPersistentObjectSpaceProvider>().ToNowObservable()
+                .SelectMany(provider => provider.WhenObjectSpaceCreated()).Cast<NonPersistentObjectSpace>()
                 .Do(space => space.PopulateAdditionalObjectSpaces(application))
                 .ToUnit();
 

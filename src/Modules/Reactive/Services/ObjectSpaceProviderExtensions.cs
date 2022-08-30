@@ -47,7 +47,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
             },nameof(CreateUpdatingObjectSpace));
 
         private static void PatchProviderObjectSpaceCreated(this XafApplication application, string targetMethodName,Func<MethodInfo,bool> match,string patchMethodName) 
-            => application.ObjectSpaceProviders.SelectMany(provider => provider.GetType().Methods(targetMethodName).Where(match)).Take(1)
+            => application.ObjectSpaceProviders.SelectMany(provider => provider.GetType().Methods(targetMethodName).Where(match).Take(1))
                 .ForEach(methodInfo => new HarmonyMethod(typeof(ObjectSpaceProviderExtensions), patchMethodName)
                     .PostFix(methodInfo, true));
 

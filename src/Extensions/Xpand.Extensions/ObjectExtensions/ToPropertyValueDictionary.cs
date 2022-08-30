@@ -12,8 +12,7 @@ namespace Xpand.Extensions.ObjectExtensions {
             }
             return source.GetType().GetProperties()
                 .Where(info => !info.GetCustomAttributes(typeof(JsonIgnoreAttribute), false).Any())
-                .Where(info => info.GetCustomAttributes(typeof(BrowsableAttribute), false).Cast<BrowsableAttribute>()
-                    .All(attribute => attribute.Browsable))
+                .Where(info => info.GetCustomAttributes(typeof(BrowsableAttribute), false).Cast<BrowsableAttribute>().All(attribute => attribute.Browsable))
                 .Where(info => !skipDefaultValues || !info.GetValue(source, null).IsDefaultValue())
                 .Where(info => includeReadOnly || info.CanWrite)
                 .ToDictionary(info => info.InfoName(), info => info.GetValue(source, null));
