@@ -12,6 +12,8 @@ namespace Xpand.Extensions.LinqExtensions{
                     action(obj);
                 }
             });
+        public static IEnumerable<T> ExactType<T>(this IEnumerable<T> source) 
+            => source.Where(arg => arg.GetType()==typeof(T));
 
         public static T[] AddRange<T>(this IEnumerable<T> source,IEnumerable<T> enumerable,bool ignoreDuplicates=false) 
             => source is IList<T> list

@@ -117,6 +117,9 @@ namespace Xpand.XAF.Modules.Reactive{
                             if (t.attribute.ObjectPropertyChangeMethodName != null) {
                                 frame.View.CurrentObject.CallMethod(t.attribute.ObjectPropertyChangeMethodName, t.info.Name);      
                             }
+                            else if (frame.View == null) {
+                                
+                            }
                             else if (typeof(IReloadWhenChange).IsAssignableFrom(frame.View.ObjectTypeInfo.Type)) {
                                 frame.View.CurrentObject.As<IReloadWhenChange>().WhenPropertyChanged(t.info.Name);
                             }

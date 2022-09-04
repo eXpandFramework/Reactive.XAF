@@ -109,6 +109,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
     public class TraceEventAppearanceRulesGenerator:ModelNodesGeneratorUpdater<AppearanceRulesModelNodesGenerator>{
         private const string Reactive = "Reactive";
         private const string Data = "Data";
+        private const string Azure = "Azure";
         private const string Network = "Network";
         private const string Editors = "Editors";
         private const string Model = "Model";
@@ -117,6 +118,7 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
         public static readonly Dictionary<string, Color> Colors=new() {
             {Reactive,Color.Black},
             {Data,Color.DimGray},
+            {Azure,Color.DimGray},
             {Network,Color.Olive},
             {Editors,Color.DarkOrange},
             {Model,Color.Blue},
@@ -160,7 +162,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
             {"GoogleCalendarModule",Colors[Office]},
             {"DocumentStyleManagerModule",Colors[Office]},
             {"RazorViewModule",Colors[Office]},
-            {"TenantManagerModule",Colors[Data]},
+            {"TenantManagerModule",Colors[Azure]},
+            {"SpeechModule",Colors[Azure]},
             {"EmailModule",Colors[Office]},
             {"ViewEditModule",Colors[View]}
             

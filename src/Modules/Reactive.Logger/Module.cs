@@ -20,12 +20,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger {
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.ConditionalAppearance.ConditionalAppearanceModule));
             RequiredModuleTypes.Add(typeof(ReactiveModule));
-            
         }
 
-        
-
-        
         public static ReactiveTraceSource TraceSource{ get; set; }
 
         public override void AddGeneratorUpdaters(ModelNodesGeneratorUpdaters updaters){

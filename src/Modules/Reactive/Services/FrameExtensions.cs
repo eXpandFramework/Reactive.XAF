@@ -124,6 +124,7 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
         public static IObservable<T> SelectUntilViewClosed<T,TFrame>(this IObservable<TFrame> source, Func<TFrame, IObservable<T>> selector) where TFrame:Frame 
             => source.SelectMany(frame => selector(frame).TakeUntilViewClosed(frame));
+        
         public static IObservable<TFrame> TakeUntilViewClosed<TFrame>(this IObservable<TFrame> source,Frame frame)  
             => source.TakeUntil(frame.View.WhenClosing());
 

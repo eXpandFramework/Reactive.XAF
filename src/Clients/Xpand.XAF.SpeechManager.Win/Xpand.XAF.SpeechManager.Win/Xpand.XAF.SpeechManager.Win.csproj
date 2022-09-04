@@ -1,0 +1,56 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>ExpressApp.ico</ApplicationIcon>
+    <Deterministic>false</Deterministic>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <NoWarn>1701;1702;XAF0017</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <NoWarn>1701;1702;XAF0017</NoWarn>
+  </PropertyGroup>
+  
+  <ItemGroup>
+	<Using Include="DevExpress.ExpressApp.ListView" Alias="ListView" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Model.xafml" />
+    <None Remove="Images\Logo.svg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Model.xafml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\..\Common\AssemblyInfoVersion.cs" Link="Properties\AssemblyInfoVersion.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Images\Logo.svg" />
+  </ItemGroup>
+  <ItemGroup>
+    
+    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="22.1.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="22.1.4" />
+    <PackageReference Include="DevExpress.Persistent.Base" Version="22.1.4" />
+    <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="22.1.4" />
+    <PackageReference Include="DevExpress.RichEdit.Export" Version="22.1.4" />
+    <PackageReference Include="DevExpress.Win.Design" Version="22.1.4" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Xpand.XAF.SpeechManager.Module\Xpand.XAF.SpeechManager.Module.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.23.0" />
+    <Reference Include="Xpand.XAF.Modules.Speech">
+      <HintPath>..\..\..\..\bin\net6.0-windows7.0\Xpand.XAF.Modules.Speech.dll</HintPath>
+    </Reference>
+    <PackageReference Include="xpand.xaf.Win.all" Version="4.221.4.2" />
+  </ItemGroup>
+</Project>

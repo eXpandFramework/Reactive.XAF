@@ -4,7 +4,7 @@ using DevExpress.ExpressApp.Model.Core;
 
 namespace Xpand.XAF.Modules.Reactive.Logger.Hub{
     public interface IModelLoggerClientRange:IModelLoggerPort{
-        [DefaultValue(61496)]
+        [DefaultValue(61497)]
         int EndPort{ get; set; }
         [Required]
         [DefaultValue("localhost")]

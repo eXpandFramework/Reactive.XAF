@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0-windows7.0</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <LangVersion>latest</LangVersion>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
+    <DebugSymbols>true</DebugSymbols>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+    <OutputPath>..\..\..\bin</OutputPath>
+    <AssemblyTitle>Xpand.XAF.Modules.Speech</AssemblyTitle>
+    <Product>Xpand.XAF.Modules.Speech</Product>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
+    <DebugType>full</DebugType>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0-windows7.0|AnyCPU'">
+    <NoWarn>1701;1702;CA1416</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0-windows7.0|AnyCPU'">
+    <NoWarn>1701;1702;CA1416</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Xpand.Extensions.Reactive">
+      <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions.XAF">
+      <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions.XAF.Xpo">
+      <HintPath>..\..\..\bin\Xpand.Extensions.XAF.Xpo.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.Extensions">
+      <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Reactive">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.CloneModelView">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.CloneModelView.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.HideToolBar">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.HideToolBar.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Windows">
+      <HintPath>..\..\..\bin\net6.0-windows7.0\Xpand.XAF.Modules.Windows.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Reactive.Logger.Hub">
+      <HintPath>..\..\..\bin\Xpand.XAF.Modules.Reactive.Logger.Hub.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Module.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\Common\AssemblyInfoVersion.cs" Link="Properties\AssemblyInfoVersion.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.23.0" />
+  </ItemGroup>
+  <Import Project="..\..\..\.paket\Paket.Restore.targets" />
+</Project>

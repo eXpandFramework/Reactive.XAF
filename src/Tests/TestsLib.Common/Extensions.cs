@@ -211,6 +211,7 @@ namespace Xpand.TestsLib.Common{
             {"RazorViewModule", 61491},
             {"EmailModule", 61492},
             {"TenantManagerModule", 61493},
+            {"SpeechManagerModule", 61494},
         };
 
         public static TestObserver<T> StartTest<T>(this XafApplication application,IObservable<T> test,int delay=200) {

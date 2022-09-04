@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Deterministic>false</Deterministic>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <CopyLocalLockFileAssemblies>True</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Model.DesignedDiffs.xafml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\..\Common\AssemblyInfoVersion.cs" Link="Properties\AssemblyInfoVersion.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="DevExpress.ExpressApp" Version="22.1.4" />
+    <PackageReference Include="DevExpress.ExpressApp.CodeAnalysis" Version="22.1.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Objects" Version="22.1.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="22.1.4" />
+    <PackageReference Include="DevExpress.Persistent.Base" Version="22.1.4" />
+    <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="22.1.4" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Xpand.XAF.Modules.Speech">
+      <HintPath>..\..\..\..\bin\net6.0-windows7.0\Xpand.XAF.Modules.Speech.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,43 @@
+﻿using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.ConditionalAppearance;
+using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.Validation;
+using DevExpress.ExpressApp.ViewVariantsModule;
+using Xpand.XAF.Modules.CloneModelView;
+using Xpand.XAF.Modules.HideToolBar;
+using Xpand.XAF.Modules.Reactive;
+using Xpand.XAF.Modules.Reactive.Extensions;
+using Xpand.XAF.Modules.Reactive.Logger.Hub;
+using Xpand.XAF.Modules.Windows;
+
+namespace Xpand.XAF.Modules.Speech {
+    
+    public sealed class SpeechModule : ReactiveModuleBase{
+        static SpeechModule(){
+            TraceSource=new ReactiveTraceSource(nameof(SpeechModule));
+        }
+        public static ReactiveTraceSource TraceSource{ get; set; }
+        public SpeechModule() {
+            RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));
+            RequiredModuleTypes.Add(typeof(ConditionalAppearanceModule));
+            RequiredModuleTypes.Add(typeof(ReactiveModule));
+            RequiredModuleTypes.Add(typeof(ReactiveLoggerHubModule));
+            RequiredModuleTypes.Add(typeof(ValidationModule));
+            RequiredModuleTypes.Add(typeof(CloneModelViewModule));
+            RequiredModuleTypes.Add(typeof(HideToolBarModule));
+            RequiredModuleTypes.Add(typeof(WindowsModule));
+            RequiredModuleTypes.Add(typeof(ViewVariantsModule));
+        }
+
+        public override void Setup(ApplicationModulesManager moduleManager){
+            base.Setup(moduleManager);
+            moduleManager.Connect()
+                .Subscribe(this);
+        }
+
+        public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders){
+            base.ExtendModelInterfaces(extenders);
+            extenders.Add<IModelReactiveModules,IModelReactiveModuleSpeech>();
+        }
+    }
+}
