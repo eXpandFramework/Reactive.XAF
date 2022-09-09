@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using DevExpress.Persistent.Base;
 using DevExpress.Xpo;
 
@@ -7,7 +8,7 @@ using Xpand.Extensions.XAF.Xpo.ValueConverters;
 
 namespace Xpand.XAF.Modules.Office.Cloud.Google.BusinessObjects{
     [DeferredDeletion(false)]
-    [OptimisticLocking(false)]
+    [OptimisticLocking(false)][SuppressMessage("Design", "XAF0023:Do not implement IObjectSpaceLink in the XPO types")]
     public class GoogleAuthentication : CloudOfficeBaseObject{
         private Dictionary<string, string> _oAuthToken;
 

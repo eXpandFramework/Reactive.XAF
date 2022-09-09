@@ -49,9 +49,9 @@
     <Compile Include="..\..\CommonFiles\SequenceGeneratorService.cs" Link="SequenceGeneratorService.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.EasyTest.BlazorAdapter" Version="22.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="22.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="22.1.4" />
+    <PackageReference Include="DevExpress.ExpressApp.EasyTest.BlazorAdapter" Version="22.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="22.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor.All" Version="22.1.5" />
     <PackageReference Include="Microsoft.NETCore.Platforms" Version="6.0.4" />
     <PackageReference Include="System.CodeDom" Version="6.0" />
     <PackageReference Include="Microsoft.CodeAnalysis" Version="4.2" />
@@ -63,7 +63,7 @@
     <PackageReference Include="Shouldly" Version="4.0.3" />
     <PackageReference Include="NUnit" Version="3.13.2" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.0" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="4.221.4.1" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="4.221.4.5" />
     <PackageReference Include="Selenium.WebDriver" Version="4.1" />
     <PackageReference Include="Microsoft.Reactive.Testing" Version="5.0" />
   </ItemGroup>

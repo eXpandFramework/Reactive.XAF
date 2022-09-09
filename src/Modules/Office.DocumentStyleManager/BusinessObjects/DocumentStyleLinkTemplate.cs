@@ -1,11 +1,12 @@
-﻿using DevExpress.ExpressApp;
+﻿using System.Diagnostics.CodeAnalysis;
+using DevExpress.ExpressApp;
 using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
 
 using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
-	
+	[SuppressMessage("Design", "XAF0023:Do not implement IObjectSpaceLink in the XPO types")]
 	public class DocumentStyleLinkTemplate:CustomBaseObject{
 		public DocumentStyleLinkTemplate(Session session) : base(session){
 		}
@@ -26,6 +27,6 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
 
 		[Association("DocumentStyleLinkTemplate-DocumentStyleLinks")][Aggregated]
 		[CollectionOperationSet(AllowAdd = false)]
-		public XPCollection<DocumentStyleLink> DocumentStyleLinks => GetCollection<DocumentStyleLink>(nameof(DocumentStyleLinks));
+		public XPCollection<DocumentStyleLink> DocumentStyleLinks => GetCollection<DocumentStyleLink>();
 	}
 }

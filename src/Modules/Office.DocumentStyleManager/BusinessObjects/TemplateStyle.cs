@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using DevExpress.Xpo;
 using DevExpress.XtraRichEdit.API.Native;
@@ -14,7 +15,7 @@ using StrikeoutType = DevExpress.XtraRichEdit.API.Native.StrikeoutType;
 using UnderlineType = DevExpress.XtraRichEdit.API.Native.UnderlineType;
 
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
-	[DefaultProperty(nameof(StyleName))]
+	[DefaultProperty(nameof(StyleName))][SuppressMessage("Design", "XAF0023:Do not implement IObjectSpaceLink in the XPO types")]
 	public class TemplateStyle:CustomBaseObject,IDocumentStyle{
 		public TemplateStyle(Session session) : base(session){
 		}

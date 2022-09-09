@@ -20,9 +20,6 @@
     <NoWarn>1701;1702;NU1608;RAZORSDK1006</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\TestsLib.Blazor\Xpand.TestsLib.Blazor.csproj" />
   </ItemGroup>
   <ItemGroup>

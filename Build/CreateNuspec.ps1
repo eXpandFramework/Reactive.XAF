@@ -16,7 +16,7 @@ $nuspec.package.metadata.version = "$modulesVersion"
 $nuspec.Save($versionConverterPath)
 
 $allProjects = Get-ChildItem $root *.csproj -Recurse | Select-Object -ExpandProperty BaseName
-$filter="test|Maintenance"
+$filter="test|Maintenance|SpeechManager"
 
 $filteredProjects=Get-ChildItem "$root\src\" -Include "*.csproj" -Recurse | Where-Object { $_ -notmatch $filter} 
 $filteredProjects+=Get-ChildItem "$root\src\" -Include "*Xpand.TestsLib*.csproj" -Recurse # |Where-Object{$_.BaseName -notmatch "Blazor"}
@@ -61,7 +61,10 @@ $filteredProjects| Invoke-Parallel -StepInterval 500 -VariablesToImport @("allPr
     }
     if (!(Test-Path $uArgs.NuspecFilename)) {
         Set-Location $root\build\nuspec
-        & (Get-NugetPath) spec $_.BaseName
+        if ($_.BaseName -notmatch "SpeechManager"){
+            & (Get-NugetPath) spec $_.BaseName
+        }
+        
     }
     if ($Release) {
         $uArgs.PublishedSource = (Get-PackageFeed -Nuget)

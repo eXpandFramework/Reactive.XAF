@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.DC;
@@ -12,6 +13,7 @@ using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.Office.DocumentStyleManager.BusinessObjects{
 	[Appearance("Used",AppearanceItemType.ViewItem,"["+nameof(Count)+"] > 0",Context = nameof(ViewType.ListView),TargetItems = "*",FontColor = "DarkGreen")]
+	[SuppressMessage("Design", "XAF0023:Do not implement IObjectSpaceLink in the XPO types")]
 	public class DocumentStyleLink:CustomBaseObject{
 
 		public DocumentStyleLink(Session session) : base(session){

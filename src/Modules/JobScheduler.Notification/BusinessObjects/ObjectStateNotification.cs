@@ -13,7 +13,7 @@ using Xpand.XAF.Modules.Reactive;
 using EditorAliases = DevExpress.ExpressApp.Editors.EditorAliases;
 
 namespace Xpand.XAF.Modules.JobScheduler.Hangfire.Notification.BusinessObjects {
-    
+	[System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "XAF0023:Do not implement IObjectSpaceLink in the XPO types", Justification = "<Pending>")]
     public class ObjectStateNotification : Job {
         public ObjectStateNotification(Session session) : base(session) {
         }

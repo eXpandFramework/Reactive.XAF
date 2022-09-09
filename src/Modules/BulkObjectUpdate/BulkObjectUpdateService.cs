@@ -62,7 +62,7 @@ namespace Xpand.XAF.Modules.BulkObjectUpdate{
                     showViewParameters.CreatedView = application.CreateDetailView(objectSpace, modelDetailView.Id, true,
                         objectSpace.CreateObject(modelDetailView.ModelClass.TypeInfo.Type));
                     showViewParameters.TargetWindow=TargetWindow.NewModalWindow;
-                    var dialogController = new DialogController();
+                    var dialogController = e.Application().CreateController<DialogController>();
                     dialogController.SaveOnAccept = false;
                     showViewParameters.Controllers.Add(dialogController);
                     return application.WhenViewOnFrame(modelDetailView.ModelClass.TypeInfo.Type).WhenFrame(ViewType.DetailView).FirstAsync()

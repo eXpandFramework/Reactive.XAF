@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>Xpand.XAF.Modules.Speech</id>
+    <version>4.221.4.5</version>
+    <authors>eXpandFramework</authors>
+    <owners>eXpandFramework</owners>
+    <licenseUrl>https://github.com/eXpandFramework/DevExpress.XAF/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/eXpandFramework/Reactive.XAF/blob/master/src/Modules/Speech</projectUrl>
+    <iconUrl>http://sign.expandframework.com</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Xpand.XAF.Modules.Speech</description>
+    <releaseNotes>https://github.com/eXpandFramework/Reactive.XAF/releases</releaseNotes>
+    <copyright>eXpandFramework.com</copyright>
+    <tags>DevExpress XAF modules, eXpandFramework, XAF, eXpressApp, Speech, 22.1.5</tags>
+    <dependencies>
+      <group targetFramework="net6.0">
+        <dependency id="Xpand.Extensions.Reactive" version="4.221.4.5" />
+        <dependency id="Xpand.Extensions.XAF" version="4.221.4.5" />
+        <dependency id="Xpand.Extensions.XAF.Xpo" version="4.221.4.5" />
+        <dependency id="Xpand.Extensions" version="4.221.4.5" />
+        <dependency id="Xpand.XAF.Modules.Reactive" version="4.221.4.5" />
+        <dependency id="Xpand.XAF.Modules.CloneModelView" version="4.221.4.5" />
+        <dependency id="Xpand.XAF.Modules.HideToolBar" version="4.221.4.5" />
+        <dependency id="Xpand.XAF.Modules.Windows" version="4.221.4.5" />
+        <dependency id="Xpand.XAF.Modules.Reactive.Logger.Hub" version="4.221.4.5" />
+        <dependency id="System.Reactive" version="5.0" />
+        <dependency id="Fasterflect.Xpand" version="2.0.7" />
+        <dependency id="Newtonsoft.Json" version="13.0.1" />
+        <dependency id="DevExpress.ExpressApp.CodeAnalysis" version="22.1.5" />
+        <dependency id="Enums.NET" version="4.0" />
+        <dependency id="DevExpress.ExpressApp" version="22.1.5" />
+        <dependency id="DevExpress.ExpressApp.Validation" version="22.1.5" />
+        <dependency id="DevExpress.ExpressApp.Notifications" version="22.1.5" />
+        <dependency id="DevExpress.ExpressApp.ViewVariantsModule" version="22.1.5" />
+        <dependency id="DevExpress.ExpressApp.ConditionalAppearance" version="22.1.5" />
+        <dependency id="DevExpress.ExpressApp.Xpo" version="22.1.5" />
+        <dependency id="Xpand.Patcher" version="2.0.31" />
+        <dependency id="Xpand.Collections" version="1.0.4" />
+        <dependency id="Microsoft.CognitiveServices.Speech" version="1.23.0" />
+      </group>
+      <group targetFramework="netstandard2.0">
+        <dependency id="Xpand.VersionConverter" version="4.221.4.5" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="net6.0-windows7.0\Xpand.XAF.Modules.Speech.dll" target="lib\net6.0\Xpand.XAF.Modules.Speech.dll" />
+    <file src="net6.0-windows7.0\Xpand.XAF.Modules.Speech.pdb" target="lib\net6.0\Xpand.XAF.Modules.Speech.pdb" />
+    <file src="..\build\Targets\CopySymbols.targets" target="build\Xpand.XAF.Modules.Speech.targets" />
+    <file src="..\build\Targets\CopySymbols.ps1" target="build\CopySymbols.ps1" />
+  </files>
+</package>

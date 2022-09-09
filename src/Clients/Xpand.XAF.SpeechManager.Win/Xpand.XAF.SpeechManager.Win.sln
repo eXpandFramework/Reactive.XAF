@@ -23,6 +23,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xpand.Extensions", "..\..\E
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Xpand", "Xpand", "{8C6E809E-4B11-4103-BA74-C3869FA5D63A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xpand.Extensions.XAF.Xpo", "..\..\Extensions\Xpand.Extensions.XAF.Xpo\Xpand.Extensions.XAF.Xpo.csproj", "{B7A6CDB8-E15F-4E21-90E9-C54E0ED95FF8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Debug = Debug|Debug
@@ -77,6 +79,12 @@ Global
 		{622E2D94-30AE-45CE-BBF8-7E4B1738BFF9}.EasyTest|Debug.Build.0 = Debug|Any CPU
 		{622E2D94-30AE-45CE-BBF8-7E4B1738BFF9}.Release|Debug.ActiveCfg = Release|Any CPU
 		{622E2D94-30AE-45CE-BBF8-7E4B1738BFF9}.Release|Debug.Build.0 = Release|Any CPU
+		{B7A6CDB8-E15F-4E21-90E9-C54E0ED95FF8}.Debug|Debug.ActiveCfg = Debug|Any CPU
+		{B7A6CDB8-E15F-4E21-90E9-C54E0ED95FF8}.Debug|Debug.Build.0 = Debug|Any CPU
+		{B7A6CDB8-E15F-4E21-90E9-C54E0ED95FF8}.EasyTest|Debug.ActiveCfg = Debug|Any CPU
+		{B7A6CDB8-E15F-4E21-90E9-C54E0ED95FF8}.EasyTest|Debug.Build.0 = Debug|Any CPU
+		{B7A6CDB8-E15F-4E21-90E9-C54E0ED95FF8}.Release|Debug.ActiveCfg = Release|Any CPU
+		{B7A6CDB8-E15F-4E21-90E9-C54E0ED95FF8}.Release|Debug.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -89,6 +97,7 @@ Global
 		{B8352CC6-6D20-419C-B03A-DD177B6B6FE3} = {8C6E809E-4B11-4103-BA74-C3869FA5D63A}
 		{ED03FDE9-8AB7-4B04-BA94-E817E3834833} = {8C6E809E-4B11-4103-BA74-C3869FA5D63A}
 		{622E2D94-30AE-45CE-BBF8-7E4B1738BFF9} = {8C6E809E-4B11-4103-BA74-C3869FA5D63A}
+		{B7A6CDB8-E15F-4E21-90E9-C54E0ED95FF8} = {8C6E809E-4B11-4103-BA74-C3869FA5D63A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AB325AE6-D4D9-4CAF-9F10-1E31052BF6BC}

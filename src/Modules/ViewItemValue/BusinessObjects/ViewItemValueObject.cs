@@ -5,7 +5,7 @@ using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.ViewItemValue.BusinessObjects{
     [RuleCombinationOfPropertiesIsUnique(nameof(ViewItemId)+";"+nameof(ObjectView))]
-    
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "XAF0023:Do not implement IObjectSpaceLink in the XPO types", Justification = "<Pending>")]
     public class ViewItemValueObject:CustomBaseObject{
         public ViewItemValueObject(Session session) : base(session){
         }

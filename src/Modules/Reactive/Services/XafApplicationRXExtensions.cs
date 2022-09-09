@@ -226,39 +226,40 @@ namespace Xpand.XAF.Modules.Reactive.Services{
                 .SelectMany(spaceProvider => spaceProvider.WhenObjectSpaceCreated(emitUpdatingObjectSpace));
 
         public static IObservable<T> ShowXafMessage<T>(this IObservable<T> source, XafApplication application,InformationType informationType=InformationType.Info,int displayInterval=MessageDisplayInterval,InformationPosition position=InformationPosition.Left, [CallerMemberName] string memberName = "")
-            => source.Do(obj => application.ShowMessage(informationType, displayInterval, memberName, $"{obj}"));
+            => source.Do(obj => application.ShowMessage(obj, informationType, displayInterval, memberName, $"{obj}"));
         public static IObservable<T> ShowXafMessage<T>(this IObservable<T> source, XafApplication application,Func<T,string> messageSelector,InformationType informationType=InformationType.Info,int displayInterval=MessageDisplayInterval,InformationPosition position=InformationPosition.Left, [CallerMemberName] string memberName = "")
-            => source.Do(obj => application.ShowMessage(informationType, displayInterval, "", messageSelector(obj)));
+            => source.Do(obj => application.ShowMessage(obj, informationType, displayInterval, "", messageSelector(obj)));
 
         public static IObservable<T> ShowXafMessage<T>(this IObservable<T> source, XafApplication application,
             Func<T,int, string> messageSelector, InformationType informationType = InformationType.Info, int displayInterval = MessageDisplayInterval, InformationPosition position = InformationPosition.Left,
             [CallerMemberName] string memberName = "")
             => source.Select((arg1, i) => {
-                application.ShowMessage(informationType, displayInterval, "", messageSelector(arg1, i));
+                application.ShowMessage(arg1,informationType, displayInterval, "", messageSelector(arg1, i));
                 return arg1;
             });
 
         public static IObservable<T> ShowXafMessage<T>(this IObservable<T> source, XafApplication application, Func<T, string> messageSelector, Func<T, InformationType> infoSelector,
-            Func<T,int> displayInterval=null, InformationPosition position = InformationPosition.Left, [CallerMemberName] string memberName = "")
-            => source.Do(obj => application.ShowMessage(infoSelector(obj), displayInterval?.Invoke(obj)??MessageDisplayInterval, memberName, messageSelector?.Invoke(obj)??memberName));
+            Func<T,int> displayInterval=null, InformationPosition position = InformationPosition.Left,Action<T> onOk = null, Action<T> onCancel = null,[CallerMemberName] string memberName = "")
+            => source.Do(obj => application.ShowMessage(obj,infoSelector(obj), displayInterval?.Invoke(obj)??MessageDisplayInterval, memberName, messageSelector?.Invoke(obj)??memberName,onOk:onOk,onCancel:onCancel));
 
         public const int MessageDisplayInterval = 5000;
 
         public static IObservable<XafApplication> ShowXafMessage(this IObservable<XafApplication> source,
             InformationType informationType = InformationType.Info, int displayInterval = MessageDisplayInterval,
             InformationPosition position = InformationPosition.Left, [CallerMemberName] string memberName = "")
-            => source.Do(obj => obj.ShowMessage(informationType, displayInterval, memberName, null));
+            => source.Do(application => application.ShowMessage(default(object),informationType, displayInterval, memberName, null));
 
         public static IObservable<Frame> ShowXafMessage(this IObservable<Frame> source,
             InformationType informationType = InformationType.Info, int displayInterval = MessageDisplayInterval,
             InformationPosition position = InformationPosition.Left, [CallerMemberName] string memberName = "")
-            => source.Do(obj => obj.Application.ShowMessage(informationType, displayInterval, memberName,  $"{obj}"));
+            => source.Do(frame => frame.Application.ShowMessage(frame,informationType, displayInterval, memberName,  $"{frame}"));
 
-        private static void ShowMessage(this XafApplication application,InformationType informationType, int displayInterval, string memberName,  string message,WinMessageType winMessageType=WinMessageType.Alert) {
+        private static void ShowMessage<T>(this XafApplication application,T obj, InformationType informationType, int displayInterval, string memberName, string message,
+            WinMessageType winMessageType = WinMessageType.Alert, Action<T> onOk = null, Action<T> onCancel = null) {
             if (message != null) {
                 application.ShowViewStrategy?.ShowMessage(new MessageOptions() {
                     Duration = displayInterval, Message = $"{memberName}{Environment.NewLine}{message}",
-                    Type = informationType, Win = { Type = winMessageType }
+                    Type = informationType, Win = { Type = winMessageType },OkDelegate = () => onOk?.Invoke(obj),CancelDelegate = () => onCancel?.Invoke(obj)
                 });   
             }
         }

@@ -67,7 +67,8 @@ namespace Xpand.XAF.Modules.Windows.SystemActions {
 #if NET461
             if (e.KeyCode==Keys.LWin) {
 #else
-            if (System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LWin)) {
+            // if (System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LWin)) {
+            if (e.KeyCode==Keys.LWin){
 #endif
                 TextEdit.Text += "LWin + ";
             }

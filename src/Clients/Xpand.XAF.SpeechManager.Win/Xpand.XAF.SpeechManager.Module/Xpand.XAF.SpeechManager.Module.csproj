@@ -1,10 +1,17 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <Deterministic>false</Deterministic>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <ImplicitUsings>enable</ImplicitUsings>
-    <CopyLocalLockFileAssemblies>True</CopyLocalLockFileAssemblies>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
+    <LangVersion>latest</LangVersion>
+    <DebugSymbols>true</DebugSymbols>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <DebugType>full</DebugType>
+    <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Model.DesignedDiffs.xafml" />
@@ -16,12 +23,12 @@
     <EmbeddedResource Include="Model.DesignedDiffs.xafml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp" Version="22.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.CodeAnalysis" Version="22.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Objects" Version="22.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="22.1.4" />
-    <PackageReference Include="DevExpress.Persistent.Base" Version="22.1.4" />
-    <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="22.1.4" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="22.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.CodeAnalysis" Version="22.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Objects" Version="22.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="22.1.5" />
+    <PackageReference Include="DevExpress.Persistent.Base" Version="22.1.5" />
+    <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="22.1.5" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.XAF.Modules.Speech">

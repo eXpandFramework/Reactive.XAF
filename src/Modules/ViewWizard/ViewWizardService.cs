@@ -113,7 +113,7 @@ namespace Xpand.XAF.Modules.ViewWizard{
                     var parameters = e.ShowViewParameters;
                     e.Action.Application.NewWizardView( modelWizardView, parameters, modelWizardView.DetailView);
                     parameters.CreateAllControllers = true;
-                    var dialogController = new DialogController();
+                    var dialogController = e.Action.Application.CreateController<DialogController>();
                     
                     parameters.Controllers.Add(dialogController);
                     parameters.TargetWindow=TargetWindow.NewModalWindow;

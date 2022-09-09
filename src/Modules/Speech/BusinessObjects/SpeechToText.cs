@@ -8,15 +8,14 @@ using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
 using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.XAF.Attributes;
-using Xpand.Extensions.XAF.Xpo.BaseObjects;
 using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.Speech.BusinessObjects {
     [NavigationItem("Speech")][DefaultClassOptions]
-    [FileAttachment(nameof(File))]
+    
     [DeferredDeletion(false)][DefaultProperty(nameof(Name))]
     [ImageName(("Action_Change_State"))]
-    [OptimisticLocking(OptimisticLockingBehavior.LockModified)]
+    [OptimisticLocking(OptimisticLockingBehavior.LockModified)][SuppressMessage("Design", "XAF0023:Do not implement IObjectSpaceLink in the XPO types")]
     public class SpeechToText:CustomBaseObject {
         public SpeechToText(Session session) : base(session) { }
 
@@ -27,7 +26,7 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
         public BindingList<SSML> TranslationSSMLs { get; } = new();
         [SuppressMessage("ReSharper", "CollectionNeverQueried.Global")][CollectionOperationSet(AllowAdd = false,AllowRemove = false)]
         public BindingList<SpeechTextInfo> SpeechInfo { get; } = new();
-        [CollectionOperationSet(AllowAdd = false,AllowRemove = false)]
+        [CollectionOperationSet(AllowAdd = false)]
         public BindingList<SSMLFile> SSMLFiles => Texts.SelectMany(text => text.SSMLFiles).ToBindingList();
 
         SSML _ssml;
@@ -37,6 +36,21 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
             set => SetPropertyValue(nameof(SSML), ref _ssml, value);
         }
 
+        int _rate;
+        [NonPersistent]
+        public int Rate {
+            get => _rate;
+            set => SetPropertyValue(nameof(Rate), ref _rate, value);
+        }
+
+        SpeechSource _speechSource;
+
+        [RuleRequiredField]
+        public SpeechSource SpeechSource {
+            get => _speechSource;
+            set => SetPropertyValue(nameof(SpeechSource), ref _speechSource, value);
+        }
+        
         [CollectionOperationSet(AllowAdd = false)][ReloadWhenChange()]
         public BindingList<SpeechText> SpeechTexts => Texts.ExactType().ToBindingList();
         SpeechAccount _speechAccount;
@@ -63,14 +77,6 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
         public SpeechAccount Account {
             get => _speechAccount;
             set => SetPropertyValue(nameof(SpeechAccount), ref _speechAccount, value);
-        }
-
-        FileLinkObject _file;
-        [RuleRequiredField]
-        [FileTypeFilter("Audio files", 1, "*.wav")]
-        public FileLinkObject File {
-            get => _file;
-            set => SetPropertyValue(nameof(File), ref _file, value);
         }
 
         string _name;

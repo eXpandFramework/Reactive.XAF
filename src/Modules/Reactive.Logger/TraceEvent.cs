@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
 using DevExpress.Persistent.Base;
@@ -15,7 +16,8 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
     [NavigationItem("Settings")]
     [DebuggerDisplay("{" + nameof(Location) + "}-{" + nameof(RXAction) + ("}-{" + nameof(Method) + "}"))]
     [DeferredDeletion(false)][OptimisticLocking(OptimisticLockingBehavior.NoLocking)]
-    [NonSecuredType]
+    [NonSecuredType][CreatableItem(false)]
+    [SuppressMessage("Design", "XAF0023:Do not implement IObjectSpaceLink in the XPO types")]
     public class TraceEvent : XPCustomObject,IObjectSpaceLink , ITraceEvent{
         public TraceEvent(Session session) : base(session){
         }

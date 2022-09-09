@@ -1,6 +1,7 @@
 ﻿using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.ConditionalAppearance;
 using DevExpress.ExpressApp.Model;
+using DevExpress.ExpressApp.Notifications;
 using DevExpress.ExpressApp.Validation;
 using DevExpress.ExpressApp.ViewVariantsModule;
 using Xpand.XAF.Modules.CloneModelView;
@@ -20,12 +21,14 @@ namespace Xpand.XAF.Modules.Speech {
         public SpeechModule() {
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));
             RequiredModuleTypes.Add(typeof(ConditionalAppearanceModule));
+            RequiredModuleTypes.Add(typeof(NotificationsModule));
             RequiredModuleTypes.Add(typeof(ReactiveModule));
             RequiredModuleTypes.Add(typeof(ReactiveLoggerHubModule));
             RequiredModuleTypes.Add(typeof(ValidationModule));
             RequiredModuleTypes.Add(typeof(CloneModelViewModule));
             RequiredModuleTypes.Add(typeof(HideToolBarModule));
             RequiredModuleTypes.Add(typeof(WindowsModule));
+            // RequiredModuleTypes.Add(typeof(ModelMapperModule));
             RequiredModuleTypes.Add(typeof(ViewVariantsModule));
         }
 
@@ -33,6 +36,8 @@ namespace Xpand.XAF.Modules.Speech {
             base.Setup(moduleManager);
             moduleManager.Connect()
                 .Subscribe(this);
+            // moduleManager.Extend(PredefinedMap.GridView);
+            moduleManager.Modules.FindModule<NotificationsModule>().ShowNotificationsWindow = false;
         }
 
         public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders){

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
@@ -8,12 +9,13 @@ using Xpand.XAF.Persistent.BaseImpl;
 namespace Xpand.XAF.Modules.Speech.BusinessObjects {
     [DeferredDeletion(false)] [CreatableItem(false)][OptimisticLocking(OptimisticLockingBehavior.LockModified)]
     [DefaultProperty(nameof(ShortName))][ImageName("BO_Department")]
+    [SuppressMessage("Design", "XAF0023:Do not implement IObjectSpaceLink in the XPO types")]
     public class SpeechVoice:CustomBaseObject {
         public SpeechVoice(Session session) : base(session) { }
         string _name;
 
         [Association("SpeechToText-SpeechVoices")]
-        public XPCollection<SpeechToText> SpeechToTexts => GetCollection<SpeechToText>(nameof(SpeechToTexts));
+        public XPCollection<SpeechToText> SpeechToTexts => GetCollection<SpeechToText>();
         SpeechAccount _speechAccount;
 
         [Association("SpeechAccount-SpeechVoices")][RuleRequiredField]

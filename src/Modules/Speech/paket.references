@@ -5,6 +5,7 @@ DevExpress.ExpressApp.CodeAnalysis
 Enums.NET
 DevExpress.ExpressApp
 DevExpress.ExpressApp.Validation
+DevExpress.ExpressApp.Notifications
 DevExpress.ExpressApp.ViewVariantsModule
 DevExpress.ExpressApp.ConditionalAppearance
 DevExpress.ExpressApp.Xpo

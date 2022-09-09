@@ -17,7 +17,6 @@
     <PreserveCompilationContext>true</PreserveCompilationContext>
   </PropertyGroup>
   <ItemGroup>
-    
     <ProjectReference Include="..\TestsLib.Blazor\Xpand.TestsLib.Blazor.csproj" />
     <Reference Include="Xpand.TestsLib.Common">
       <HintPath>..\..\..\bin\Xpand.TestsLib.Common.dll</HintPath>

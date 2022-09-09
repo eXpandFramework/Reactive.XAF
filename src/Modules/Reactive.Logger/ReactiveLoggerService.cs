@@ -249,11 +249,12 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                             var rules = notifications.Select(notification => (notification.ObjectType.TypeInfo.Type, notification.Criteria,notification.ShowXafMessage,notification.XafMessageType,notification.MessageDisplayInterval)).ToArray();
                             return SavedTraceEvent.Cast<TraceEvent>()
                                 .SelectMany(traceEvent => rules.Where(t => traceEvent.ObjectSpace.IsObjectFitForCriteria(CriteriaOperator.Parse(t.Criteria), traceEvent))
-                                    .Do(rule => {
-                                        var @event = (ISupportNotifications)traceEvent.ObjectSpace.CreateObject(rule.Type);
-                                        @event.AlarmTime = DateTime.Now;
-                                        @event.GetTypeInfo().FindMember(nameof(ISupportNotifications.NotificationMessage)).SetValue(@event, traceEvent.Value);
+                                    .Select(rule => {
+                                        var supportNotifications = (ISupportNotifications)traceEvent.ObjectSpace.CreateObject(rule.Type);
+                                        supportNotifications.AlarmTime = DateTime.Now;
+                                        supportNotifications.GetTypeInfo().FindMember(nameof(ISupportNotifications.NotificationMessage)).SetValue(supportNotifications, traceEvent.Value);
                                         traceEvent.ObjectSpace.CommitChanges();
+                                        return (supportNotifications,rule);
                                     })
                                     .ToNowObservable().ObserveOnContext(synchronizationContext)
                                     .Do(_ => service.CallMethod("Refresh"))
@@ -262,12 +263,15 @@ namespace Xpand.XAF.Modules.Reactive.Logger{
                     : Observable.Empty<Unit>();
             });
 
-        public static IObservable<(Type objectType, string criteria, bool showXafMessage, InformationType informationType, int messageDisplayInterval)> 
-            ShowXafMessage(this IObservable<(Type objectType, string criteria, bool showXafMessage, InformationType informationType
-                    , int messageDisplayInterval)> source, XafApplication xafApplication, TraceEvent traceEvent, [CallerMemberName] string memberName = "") {
-            return source.Where(t => t.showXafMessage)
-                .ShowXafMessage(xafApplication, _ => $"{traceEvent.Location}, {traceEvent.Method}, {traceEvent.Value}",
-                    t => t.informationType, t => t.messageDisplayInterval,memberName:memberName);
-        }
+        public static IObservable<(ISupportNotifications supportNotifications, (Type objectType, string criteria, bool
+                showXafMessage, InformationType informationType, int messageDisplayInterval))> 
+            ShowXafMessage(this IObservable<(ISupportNotifications supportNotifications, (Type objectType, string
+                criteria, bool showXafMessage, InformationType informationType
+                , int messageDisplayInterval) rule)> source, XafApplication application, TraceEvent traceEvent,Action onOk = null, Action onCancel = null, [CallerMemberName] string memberName = "") 
+            => source.Where(t => t.rule.showXafMessage).ShowXafMessage(application, _ => $"{traceEvent.Location}, {traceEvent.Method}, {traceEvent.Value}",
+                    t => t.rule.informationType, t => t.rule.messageDisplayInterval,memberName:memberName,onOk: t => {
+                        var detailView = application.NewDetailView(t.supportNotifications);
+                        application.ShowViewStrategy.ShowViewInPopupWindow(detailView);
+                    });
     }
 }

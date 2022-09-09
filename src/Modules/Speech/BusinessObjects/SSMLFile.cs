@@ -1,8 +1,10 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using DevExpress.Persistent.Base;
 using DevExpress.Persistent.Validation;
 using DevExpress.Xpo;
+using Xpand.Extensions.XAF.Attributes.Custom;
 using Xpand.Extensions.XAF.Xpo.BaseObjects;
 using Xpand.Extensions.XAF.Xpo.ValueConverters;
 using Xpand.XAF.Persistent.BaseImpl;
@@ -11,7 +13,7 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
     
     [FileAttachment(nameof(File))]
     [DeferredDeletion(false)][DefaultProperty(nameof(File))]
-    [ImageName(("Action_Change_State"))]
+    [ImageName(("Action_Change_State"))][SuppressMessage("Design", "XAF0023:Do not implement IObjectSpaceLink in the XPO types")]
     [OptimisticLocking(OptimisticLockingBehavior.LockModified)]
     public class SSMLFile:CustomBaseObject,ISelectInExplorer {
         public SSMLFile(Session session) : base(session) { }
@@ -35,6 +37,7 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
 
         TimeSpan _duration;
         [ValueConverter(typeof(TimeSpanSecondsValueConverter))]
+        [DisplayDateAndTime(DisplayDateType.None,DisplayTimeType.mm_ss)]
         public TimeSpan Duration {
             get => _duration;
             set => SetPropertyValue(nameof(Duration), ref _duration, value);

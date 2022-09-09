@@ -15,6 +15,16 @@
     </Class>
   </BOModel>
   <NavigationItems NavigationStyle="Accordion" />
+  <ReactiveModules>
+    <ReactiveLogger>
+      <Notifications>
+        <ReactiveLoggerNotification Id="Errors" Criteria="[RXAction] = ##Enum#Xpand.XAF.Modules.Reactive.Logger.RXAction,OnError#" ObjectType="Xpand.Extensions.XAF.Xpo.BaseObjects.ErrorEvent" ShowXafMessage="True" XafMessageType="Error" MessageDisplayInterval="10000" IsNewNode="True" />
+      </Notifications>
+    </ReactiveLogger>
+    <Windows>
+      <Alert FormWidth="650" FormLocation="BottomLeft" />
+    </Windows>
+  </ReactiveModules>
   <SchemaModules>
     <SchemaModule Name="SystemModule" Version="22.1.4.0" IsNewNode="True" />
     <SchemaModule Name="SystemWindowsFormsModule" Version="22.1.4.0" IsNewNode="True" />
@@ -113,36 +123,39 @@
       </Items>
       <Layout IsNewNode="True" Removed="True">
         <LayoutGroup Id="Main" Index="0" ShowCaption="False" RelativeSize="100" TextAlignMode="UseParentOptions" Direction="Vertical" Caption="Main" IsNewNode="True">
-          <LayoutGroup Id="SimpleEditors" ShowCaption="False" Direction="Vertical" Index="0" RelativeSize="11.292073832790445" IsNewNode="True">
+          <LayoutGroup Id="SimpleEditors" ShowCaption="False" Direction="Vertical" Index="0" RelativeSize="11.954022988505747" IsNewNode="True">
             <LayoutGroup Id="Autoab9c72e5-0555-4cb4-8a1e-4ad7d521aa4b" ShowCaption="False" Caption="Autoab9c72e5-0555-4cb4-8a1e-4ad7d521aa4b(6)" Direction="Horizontal" Index="0" RelativeSize="100" TextAlignMode="AlignWithChildren" IsNewNode="True">
-              <LayoutGroup Id="Item2" ShowCaption="False" CaptionLocation="Top" Index="0" RelativeSize="38.285714285714285" Caption=" " GroupStyle="Light" IsNewNode="True">
+              <LayoutGroup Id="Item2" ShowCaption="False" CaptionLocation="Top" Index="0" RelativeSize="39.44444444444444" Caption=" " GroupStyle="Light" IsNewNode="True">
                 <LayoutGroup Id="Auto4244820a-3cd7-48ba-a572-3c5f4728dac7" ShowCaption="False" Caption="Auto4244820a-3cd7-48ba-a572-3c5f4728dac7(5)" Direction="Horizontal" Index="0" RelativeSize="33.65384615384615" IsNewNode="True">
-                  <LayoutItem Id="Name" ViewItem="Name" Index="0" RelativeSize="49.50248756218905" IsNewNode="True" />
-                  <LayoutItem Id="Account" ViewItem="Account" Index="1" RelativeSize="50.49751243781095" IsNewNode="True" />
+                  <LayoutItem Id="Name" ViewItem="Name" Index="0" RelativeSize="50.70422535211268" IsNewNode="True" />
+                  <LayoutItem Id="Account" ViewItem="Account" Index="1" RelativeSize="49.29577464788732" IsNewNode="True" />
                 </LayoutGroup>
                 <LayoutGroup Id="Auto6736dd12-f6c6-4caa-a907-b5ab61c4e066" ShowCaption="False" Caption="Auto6736dd12-f6c6-4caa-a907-b5ab61c4e066(8)" Direction="Horizontal" Index="1" RelativeSize="33.65384615384615" IsNewNode="True">
-                  <LayoutItem Id="File" ViewItem="File" Index="0" RelativeSize="78.60696517412936" IsNewNode="True" />
-                  <LayoutItem Id="SpeechToText" TextAlignMode="CustomSize" ViewItem="SpeechToText" Index="1" RelativeSize="21.393034825870647" IsNewNode="True" />
+                  <LayoutItem Id="SpeechSource" ViewItem="SpeechSource" Index="0" RelativeSize="75.77464788732394" IsNewNode="True" />
+                  <LayoutItem Id="SpeechToText" TextAlignMode="CustomSize" ViewItem="SpeechToText" Index="1" RelativeSize="24.225352112676056" IsNewNode="True" />
                 </LayoutGroup>
-                <LayoutItem Id="RecognitionLanguage" ViewItem="RecognitionLanguage" Index="2" RelativeSize="23.076923076923077" IsNewNode="True" />
+                <LayoutGroup Id="Autod4f71c1e-3885-419c-be2f-1347e673780a" ShowCaption="False" Caption="" Direction="Horizontal" Index="2" RelativeSize="23.076923076923077" IsNewNode="True">
+                  <LayoutItem Id="RecognitionLanguage" ViewItem="RecognitionLanguage" Index="0" RelativeSize="50.70422535211268" IsNewNode="True" />
+                  <LayoutItem Id="Rate" ViewItem="Rate" SizeConstraintsType="Custom" MinSize="175, 24" Index="1" RelativeSize="49.29577464788732" IsNewNode="True" />
+                </LayoutGroup>
                 <LayoutItem Id="Item3" Index="3" RelativeSize="9.615384615384615" IsNewNode="True" />
               </LayoutGroup>
-              <LayoutItem Id="SpeechInfo" ShowCaption="False" ViewItem="SpeechInfo" Index="1" RelativeSize="33.61904761904762" IsNewNode="True" />
-              <LayoutItem Id="SSMLFiles" ViewItem="SSMLFiles" Index="2" RelativeSize="28.095238095238095" TextAlignMode="CustomSize" IsNewNode="True" />
+              <LayoutItem Id="SpeechInfo" ShowCaption="False" ViewItem="SpeechInfo" Index="1" RelativeSize="38.111111111111114" IsNewNode="True" />
+              <LayoutItem Id="SSMLFiles" ViewItem="SSMLFiles" Index="2" RelativeSize="22.444444444444443" TextAlignMode="CustomSize" IsNewNode="True" />
             </LayoutGroup>
           </LayoutGroup>
-          <TabbedGroup Id="Tabs" Index="1" RelativeSize="88.70792616720955" IsNewNode="True">
+          <TabbedGroup Id="Tabs" Index="1" RelativeSize="88.04597701149426" IsNewNode="True">
             <LayoutGroup Id="SpeechTexts" ShowCaption="True" Caption="Speech Texts" TextAlignMode="AlignWithChildren" Index="0" RelativeSize="100" IsNewNode="True">
-              <LayoutGroup Id="Autoad629944-d407-43fa-95da-26b18f14e0e4" ShowCaption="False" Caption="Autoad629944-d407-43fa-95da-26b18f14e0e4(11)" TextAlignMode="AlignWithChildren" Index="0" RelativeSize="47.61904761904762" IsNewNode="True">
+              <LayoutGroup Id="Autoad629944-d407-43fa-95da-26b18f14e0e4" ShowCaption="False" Caption="Autoad629944-d407-43fa-95da-26b18f14e0e4(11)" TextAlignMode="AlignWithChildren" Index="0" RelativeSize="47.65840220385675" IsNewNode="True">
                 <LayoutItem Id="SpeechTexts" TextAlignMode="AutoSize" ViewItem="SpeechTexts" SizeConstraintsType="Custom" MinSize="65, 38" Index="0" RelativeSize="100" IsNewNode="True" />
               </LayoutGroup>
-              <SplitterItem Id="SplitterItem1" Index="1" RelativeSize="1.287001287001287" IsNewNode="True" />
-              <LayoutItem Id="SpeechTranslations" ViewItem="SpeechTranslations" SizeConstraintsType="Custom" MinSize="20, 30" Index="2" RelativeSize="51.09395109395109" IsNewNode="True" />
+              <SplitterItem Id="SplitterItem1" Index="1" RelativeSize="1.3774104683195592" IsNewNode="True" />
+              <LayoutItem Id="SpeechTranslations" ViewItem="SpeechTranslations" SizeConstraintsType="Custom" MinSize="20, 30" Index="2" RelativeSize="50.964187327823694" IsNewNode="True" />
             </LayoutGroup>
             <LayoutGroup Id="Item1" ShowCaption="True" Caption="Translations" CaptionLocation="Top" Index="1" RelativeSize="100" IsNewNode="True">
               <LayoutGroup Id="Auto1465952f-c065-474c-bfbf-66ce9288c364" ShowCaption="False" Caption="Auto1465952f-c065-474c-bfbf-66ce9288c364(14)" TextAlignMode="AlignWithChildren" Direction="Horizontal" Index="0" RelativeSize="100" IsNewNode="True">
-                <LayoutItem Id="TargetLanguages" ViewItem="TargetLanguages" CaptionLocation="Top" Index="0" RelativeSize="49.61089494163424" IsNewNode="True" />
-                <LayoutItem Id="SpeechVoices" ViewItem="SpeechVoices" Index="1" RelativeSize="50.38910505836576" IsNewNode="True" />
+                <LayoutItem Id="TargetLanguages" ViewItem="TargetLanguages" CaptionLocation="Top" Index="0" RelativeSize="49.54441913439636" IsNewNode="True" />
+                <LayoutItem Id="SpeechVoices" ViewItem="SpeechVoices" Index="1" RelativeSize="50.45558086560364" IsNewNode="True" />
               </LayoutGroup>
             </LayoutGroup>
           </TabbedGroup>
@@ -152,10 +165,14 @@
     <ListView Id="SpeechToText_SpeechInfo_ListView" HideToolBar="True">
       <Columns>
         <ColumnInfo Id="SpeechType" OwnerBand="@e747572a-d281-4ad7-9a1c-8cd215294b93" />
-        <ColumnInfo Id="SelectedLines" OwnerBand="@e747572a-d281-4ad7-9a1c-8cd215294b93" Width="60" />
+        <ColumnInfo Id="SelectedLines" Width="60" OwnerBand="@e747572a-d281-4ad7-9a1c-8cd215294b93" />
         <ColumnInfo Id="TotalLines" OwnerBand="@e747572a-d281-4ad7-9a1c-8cd215294b93" />
         <ColumnInfo Id="Duration" OwnerBand="@e747572a-d281-4ad7-9a1c-8cd215294b93" />
+        <ColumnInfo Id="AudioDuration" OwnerBand="@e747572a-d281-4ad7-9a1c-8cd215294b93" />
         <ColumnInfo Id="SSMLDuration" OwnerBand="@e747572a-d281-4ad7-9a1c-8cd215294b93" />
+        <ColumnInfo Id="SSMLAudioDuration" OwnerBand="@e747572a-d281-4ad7-9a1c-8cd215294b93" />
+        <ColumnInfo Id="SpareTime" OwnerBand="@e747572a-d281-4ad7-9a1c-8cd215294b93" />
+        <ColumnInfo Id="OverTime" OwnerBand="@e747572a-d281-4ad7-9a1c-8cd215294b93" />
       </Columns>
       <BandsLayout Enable="True" ShowBands="False" ShowColumnHeaders="True">
         <Band Id="@e747572a-d281-4ad7-9a1c-8cd215294b93" AutoFillDown="False" IsNewNode="True" />

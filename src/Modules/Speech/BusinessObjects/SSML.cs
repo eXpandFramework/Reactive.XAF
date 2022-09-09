@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using DevExpress.ExpressApp.DC;
 using DevExpress.Persistent.Base;
 using DevExpress.Xpo;
@@ -6,6 +7,7 @@ using Xpand.Extensions.XAF.NonPersistentObjects;
 
 namespace Xpand.XAF.Modules.Speech.BusinessObjects {
     [DomainComponent][ImageName("OutlookNavigation_Reading")][CreatableItem(false)]
+    [SuppressMessage("Design", "XAF0023:Do not implement IObjectSpaceLink in the XPO types")]
     public class SSML:NonPersistentBaseObject {
         string _text;
 

@@ -1,12 +1,20 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net6.0-windows7.0</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>ExpressApp.ico</ApplicationIcon>
     <Deterministic>false</Deterministic>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <ImplicitUsings>enable</ImplicitUsings>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
+    <LangVersion>latest</LangVersion>
+    <DebugSymbols>true</DebugSymbols>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <DebugType>full</DebugType>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <NoWarn>1701;1702;XAF0017</NoWarn>
@@ -14,9 +22,8 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <NoWarn>1701;1702;XAF0017</NoWarn>
   </PropertyGroup>
-  
   <ItemGroup>
-	<Using Include="DevExpress.ExpressApp.ListView" Alias="ListView" />
+    <Using Include="DevExpress.ExpressApp.ListView" Alias="ListView" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Model.xafml" />
@@ -26,7 +33,6 @@
     <Content Include="Model.xafml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\..\Common\AssemblyInfoVersion.cs" Link="Properties\AssemblyInfoVersion.cs" />
@@ -35,13 +41,12 @@
     <EmbeddedResource Include="Images\Logo.svg" />
   </ItemGroup>
   <ItemGroup>
-    
-    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="22.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="22.1.4" />
-    <PackageReference Include="DevExpress.Persistent.Base" Version="22.1.4" />
-    <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="22.1.4" />
-    <PackageReference Include="DevExpress.RichEdit.Export" Version="22.1.4" />
-    <PackageReference Include="DevExpress.Win.Design" Version="22.1.4" />
+    <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="22.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="22.1.5" />
+    <PackageReference Include="DevExpress.Persistent.Base" Version="22.1.5" />
+    <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="22.1.5" />
+    <PackageReference Include="DevExpress.RichEdit.Export" Version="22.1.5" />
+    <PackageReference Include="DevExpress.Win.Design" Version="22.1.5" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Xpand.XAF.SpeechManager.Module\Xpand.XAF.SpeechManager.Module.csproj" />

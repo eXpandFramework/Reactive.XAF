@@ -27,9 +27,9 @@
     <NoWarn>1701;1702;CS8002</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="DevExpress.ExpressApp.EasyTest.BlazorAdapter" Version="22.1.4" />
-    <PackageReference Include="DevExpress.EasyTest" Version="22.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="22.1.4" />
+    <PackageReference Include="DevExpress.ExpressApp.EasyTest.BlazorAdapter" Version="22.1.5" />
+    <PackageReference Include="DevExpress.EasyTest" Version="22.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Blazor" Version="22.1.5" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.2" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0" />

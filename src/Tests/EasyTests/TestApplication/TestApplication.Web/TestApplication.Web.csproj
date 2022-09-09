@@ -77,7 +77,7 @@
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0" />
     <PackageReference Include="Unofficial.Microsoft.mshtml" Version="7.0.3300" />
     <PackageReference Include="Xpand.XAF.Web.All">
-      <Version>4.221.4.1</Version>
+      <Version>4.221.4.5</Version>
     </PackageReference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="mscorlib">
@@ -134,15 +134,15 @@
     <Reference Include="System.Xml.Linq">
       <Private>False</Private>
     </Reference>
-    <PackageReference Include="DevExpress.ExpressApp.Web.All" Version="22.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Web" Version="22.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp" Version="22.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WebAdapter" Version="22.1.4" />
-    <PackageReference Include="DevExpress.EasyTest" Version="22.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="22.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="22.1.4" />
-    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="22.1.4" />
-    <PackageReference Include="Xpand.XAF.Web.All" Version="4.221.4.1">
+    <PackageReference Include="DevExpress.ExpressApp.Web.All" Version="22.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Web" Version="22.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="22.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.EasyTest.WebAdapter" Version="22.1.5" />
+    <PackageReference Include="DevExpress.EasyTest" Version="22.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Security.Xpo" Version="22.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="22.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Core.All" Version="22.1.5" />
+    <PackageReference Include="Xpand.XAF.Web.All" Version="4.221.4.5">
     </PackageReference>
     <PackageReference Include="Google.Apis.People.v1" Version="1.25.0.830" />
     <Reference Include="TestApplication.Module">

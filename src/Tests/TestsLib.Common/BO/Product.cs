@@ -1,9 +1,11 @@
 ﻿using DevExpress.Persistent.Base;
 using DevExpress.Xpo;
+using System.Diagnostics.CodeAnalysis;
 using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.TestsLib.Common.BO{
     [FriendlyKeyProperty(nameof(ProductName))][DefaultClassOptions]
+    [SuppressMessage("Design", "XAF0023:Do not implement IObjectSpaceLink in the XPO types")]
     public class Product : CustomBaseObject{
         
         public Product(Session session) : base(session){

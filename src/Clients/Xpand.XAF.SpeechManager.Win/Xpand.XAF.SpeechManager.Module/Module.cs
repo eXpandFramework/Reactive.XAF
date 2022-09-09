@@ -5,6 +5,7 @@ using DevExpress.ExpressApp.Xpo;
 using Xpand.XAF.Modules.Speech;
 
 namespace Xpand.XAF.SpeechManager.Module {
+    
     public sealed class SpeechManagerModule : ModuleBase {
         public SpeechManagerModule() {
             RequiredModuleTypes.Add(typeof(DevExpress.ExpressApp.SystemModule.SystemModule));

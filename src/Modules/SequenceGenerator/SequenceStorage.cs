@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Utils;
@@ -33,9 +34,10 @@ namespace Xpand.XAF.Modules.SequenceGenerator{
         public static Type FindConsumer(Type sequenceType) 
             => XafTypesInfo.Instance.PersistentTypes.SelectMany(info => info
                 .FindAttributes<SequenceStorageKeyNameAttribute>()
-                .Where(attribute => attribute.Type == sequenceType).Select(attribute => info.Type)).FirstOrDefault()??sequenceType;
+                .Where(attribute => attribute.Type == sequenceType).Select(_ => info.Type)).FirstOrDefault()??sequenceType;
     }
     [DeferredDeletion(false)][DefaultProperty(nameof(Name))][ImageName("PageSetup")]
+    [SuppressMessage("Design", "XAF0023:Do not implement IObjectSpaceLink in the XPO types")]
     public class SequenceStorage : XPBaseObject, ISequenceStorage,IObjectSpaceLink{
         private long _nextSequence;
         public SequenceStorage(Session session)

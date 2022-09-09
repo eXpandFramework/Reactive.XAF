@@ -7,18 +7,15 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\Xpand.key\xpand.snk</AssemblyOriginatorKeyFile>
     <DebugSymbols>true</DebugSymbols>
-    
     <OutputPathSuffix>ReactiveLoggerClient</OutputPathSuffix>
     <OutputPath>..\..\..\bin\ReactiveLoggerClient</OutputPath>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
     <DebugType>full</DebugType>
     <OutputType>WinExe</OutputType>
-    
-    
-    
     <StartupObject>Xpand.XAF.Modules.Reactive.Logger.Client.Win.Program</StartupObject>
-    
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>1701;1702;CA1416</NoWarn>

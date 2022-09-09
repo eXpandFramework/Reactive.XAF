@@ -1,10 +1,12 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using DevExpress.ExpressApp;
 using DevExpress.Xpo;
 
 namespace Xpand.XAF.Modules.Email.BusinessObjects{
     [OptimisticLocking(false)][DeferredDeletion(false)]
+    [SuppressMessage("Design", "XAF0023:Do not implement IObjectSpaceLink in the XPO types")]
     public class EmailStorage : XPCustomObject, IObjectSpaceLink{
         public EmailStorage(Session session) : base(session){
         }

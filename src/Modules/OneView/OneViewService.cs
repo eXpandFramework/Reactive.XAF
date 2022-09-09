@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -90,6 +91,7 @@ namespace Xpand.XAF.Modules.OneView{
             return Observable.Empty<ShowViewParameters>();
         }
 
+        [SuppressMessage("Usage", "XAF0022:Avoid calling the ShowViewStrategyBase.ShowView() method")]
         public static IObservable<ShowViewParameters> ShowOneView(this IObservable<ShowViewParameters> source) 
             => source.Do(parameters => ((CompositeView) parameters.CreatedView).Application().ShowViewStrategy
                 .ShowView(parameters, new ShowViewSource(null, null)))

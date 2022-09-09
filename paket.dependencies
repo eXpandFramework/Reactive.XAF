@@ -8,18 +8,18 @@ copy_local:true
 specific_version : false
 framework:net461,net472,net6.0,net6.0-windows,netstandard2.0,netstandard2.1
 
-nuget DevExpress.ExpressApp.Office 22.1.4
-nuget DevExpress.ExpressApp.Core.All 22.1.4
-nuget DevExpress.ExpressApp.Win.All 22.1.4
-nuget DevExpress.ExpressApp.Web.All 22.1.4
-nuget DevExpress.ExpressApp.Blazor.All 22.1.4
-nuget DevExpress.ExpressApp.Blazor 22.1.4
-nuget DevExpress.ExpressApp.Validation.Blazor 22.1.4
-nuget DevExpress.EasyTest 22.1.4  
-nuget DevExpress.ExpressApp.CodeAnalysis 22.1.4
-nuget DevExpress.ExpressApp.EasyTest.WebAdapter 22.1.4  
-nuget DevExpress.ExpressApp.EasyTest.WinAdapter 22.1.4  
-nuget DevExpress.ExpressApp.Security.Xpo 22.1.4  
+nuget DevExpress.ExpressApp.Office 22.1.5
+nuget DevExpress.ExpressApp.Core.All 22.1.5
+nuget DevExpress.ExpressApp.Win.All 22.1.5
+nuget DevExpress.ExpressApp.Web.All 22.1.5
+nuget DevExpress.ExpressApp.Blazor.All 22.1.5
+nuget DevExpress.ExpressApp.Blazor 22.1.5
+nuget DevExpress.ExpressApp.Validation.Blazor 22.1.5
+nuget DevExpress.EasyTest 22.1.5  
+nuget DevExpress.ExpressApp.CodeAnalysis 22.1.5
+nuget DevExpress.ExpressApp.EasyTest.WebAdapter 22.1.5  
+nuget DevExpress.ExpressApp.EasyTest.WinAdapter 22.1.5  
+nuget DevExpress.ExpressApp.Security.Xpo 22.1.5  
 nuget System.CodeDom == 6.0.0
 nuget System.ServiceModel.NetTcp 4.9
 nuget System.ServiceModel.Security 4.9
@@ -27,6 +27,7 @@ nuget System.ServiceModel.Http 4.9
 nuget System.ServiceModel.Duplex 4.9
 nuget System.Security.Cryptography.Xml 6.0.0
 nuget System.Security.Cryptography.ProtectedData 6.0.0
+nuget Microsoft.CognitiveServices.Speech 1.23.0
 nuget System.Configuration.ConfigurationManager 6.0.0
 nuget Mono.Cecil 0.11.4
 nuget MagicOnion 2.6.3

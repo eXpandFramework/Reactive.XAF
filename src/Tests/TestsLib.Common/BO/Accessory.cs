@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using DevExpress.Persistent.Base;
 using DevExpress.Xpo;
 using Xpand.XAF.Persistent.BaseImpl;
@@ -6,6 +7,7 @@ using Xpand.XAF.Persistent.BaseImpl;
 namespace Xpand.TestsLib.Common.BO{
     [FriendlyKeyProperty(nameof(AccessoryName))]
     [DefaultProperty(nameof(AccessoryName))]
+    [SuppressMessage("Design", "XAF0023:Do not implement IObjectSpaceLink in the XPO types")]
     public class Accessory : CustomBaseObject{
         private string _accessoryName;
         private long _accessoryID;

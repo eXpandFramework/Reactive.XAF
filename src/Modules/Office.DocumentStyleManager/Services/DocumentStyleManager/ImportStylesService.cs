@@ -144,7 +144,7 @@ namespace Xpand.XAF.Modules.Office.DocumentStyleManager.Services.DocumentStyleMa
                 var application = e.Action.Application;
                 showViewParameters.CreatedView = application.NewView(application.FindListViewId(typeof(DocumentStyle)));
                 showViewParameters.TargetWindow = TargetWindow.NewModalWindow;
-                var dialogController = new DialogController();
+                var dialogController=e.Application().CreateController<DialogController>();
                 var controllerType = application.Model.ActionDesign.Actions[nameof(FilterImportStyles)].Controller
                     .ControllerType(application.ControllersManager());
                 showViewParameters.Controllers.Add(application.CreateController(controllerType));
