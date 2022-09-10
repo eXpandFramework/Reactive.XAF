@@ -6,6 +6,9 @@ using DevExpress.ExpressApp.Validation;
 using DevExpress.ExpressApp.ViewVariantsModule;
 using Xpand.XAF.Modules.CloneModelView;
 using Xpand.XAF.Modules.HideToolBar;
+using Xpand.XAF.Modules.ModelMapper;
+using Xpand.XAF.Modules.ModelMapper.Configuration;
+using Xpand.XAF.Modules.ModelMapper.Services;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Logger.Hub;
@@ -28,7 +31,7 @@ namespace Xpand.XAF.Modules.Speech {
             RequiredModuleTypes.Add(typeof(CloneModelViewModule));
             RequiredModuleTypes.Add(typeof(HideToolBarModule));
             RequiredModuleTypes.Add(typeof(WindowsModule));
-            // RequiredModuleTypes.Add(typeof(ModelMapperModule));
+            RequiredModuleTypes.Add(typeof(ModelMapperModule));
             RequiredModuleTypes.Add(typeof(ViewVariantsModule));
         }
 
@@ -36,7 +39,7 @@ namespace Xpand.XAF.Modules.Speech {
             base.Setup(moduleManager);
             moduleManager.Connect()
                 .Subscribe(this);
-            // moduleManager.Extend(PredefinedMap.GridView);
+            moduleManager.Extend(PredefinedMap.GridView);
             moduleManager.Modules.FindModule<NotificationsModule>().ShowNotificationsWindow = false;
         }
 

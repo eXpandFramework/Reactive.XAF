@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Configuration;
-using System.Net.Http;
 using System.Windows.Forms;
 using DevExpress.ExpressApp;
 using DevExpress.Persistent.Base;
 using DevExpress.XtraEditors;
-using Xpand.Extensions.JsonExtensions;
-using Xpand.XAF.ModelEditor.Module.Win;
 
 namespace Xpand.XAF.ModelEditor.Win {
     static class Program {

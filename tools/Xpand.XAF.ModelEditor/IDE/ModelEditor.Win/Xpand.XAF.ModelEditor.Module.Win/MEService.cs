@@ -172,7 +172,8 @@ namespace Xpand.XAF.ModelEditor.Module.Win {
 	            var assemblyDir = Path.GetDirectoryName(xafModel.Project.AssemblyPath);
 	            var destFileName = $"{assemblyDir}\\{Path.GetFileName(mePath)}";
                 KillProcess(destFileName);
-                return Directory.GetFiles(Path.GetDirectoryName(mePath)!,"*.*").Do(s => File.Copy(s,$"{assemblyDir}\\{Path.GetFileName(s)}",true)).ToArray()
+                return Directory.GetFiles(Path.GetDirectoryName(mePath)!,"*.*").Where(s => !File.Exists($"{assemblyDir}\\{Path.GetFileName(s)}"))
+	                .Do(s => File.Copy(s,$"{assemblyDir}\\{Path.GetFileName(s)}",true)).ToArray()
 	                .ToObservable().ToUnit().Concat(xafModel.StartME(xafModel.Project.Path, destFileName));
             }).ToUnit();
 

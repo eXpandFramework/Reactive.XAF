@@ -29,8 +29,9 @@
     <EmbeddedResource Include="Images\Logo.svg" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Xpand.XAF.Win.All" Version="4.221.5.0" />
-    <PackageReference Include="DevExpress.ExpressApp.Notifications" Version="22.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp" Version="22.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Win" Version="22.1.5" />
+    <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="22.1.5" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Xpand.XAF.ModelEditor.Module.Win\Xpand.XAF.ModelEditor.Module.Win.csproj">
