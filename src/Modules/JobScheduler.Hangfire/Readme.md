@@ -213,23 +213,22 @@ The module follows the Nuget [Version Basics](https://docs.microsoft.com/en-us/n
  |**DevExpress.ExpressApp.Validation.Blazor**|**Any**
  |**DevExpress.ExpressApp.Xpo**|**Any**
  |**DevExpress.Persistent.Base**|**Any**
-|Xpand.Extensions.Blazor|4.221.4
- |Xpand.Extensions.Reactive|4.221.4
- |Xpand.Extensions.XAF|4.221.4
- |Xpand.Extensions|4.221.4
- |Xpand.Extensions.XAF.Xpo|4.221.4
- |[Xpand.XAF.Modules.Blazor](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Blazor)|4.221.4
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.221.4
+|Xpand.Extensions.Blazor|4.221.5
+ |Xpand.Extensions.Reactive|4.221.5
+ |Xpand.Extensions.XAF|4.221.5
+ |Xpand.Extensions|4.221.5
+ |Xpand.Extensions.XAF.Xpo|4.221.5
+ |[Xpand.XAF.Modules.Blazor](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Blazor)|4.221.5
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.221.5
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |System.Reactive|5.0.0
  |Xpand.Patcher|2.0.31
  |Hangfire.Core|1.7.30
  |Hangfire.AspNetCore|1.7.30
  |Microsoft.CodeAnalysis|4.2.0
- |Microsoft.NETCore.Platforms|6.0.4
  |System.CodeDom|6.0.0
  |System.Configuration.ConfigurationManager|6.0.0
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.221.4
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.221.5
 
 ## Issues-Debugging-Troubleshooting
 

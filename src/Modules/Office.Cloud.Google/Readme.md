@@ -157,16 +157,16 @@ The module follows the Nuget [Version Basics](https://docs.Google.com/en-us/nuge
 |----|----
 |**DevExpress.Persistent.Base**|**Any**
  |**DevExpress.ExpressApp.CodeAnalysis**|**Any**
-|Xpand.Extensions|4.221.4
- |Xpand.Extensions.Office.Cloud|4.221.4
- |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.221.4
- |Xpand.Extensions.Reactive|4.221.4
- |Xpand.Extensions.XAF|4.221.4
- |Xpand.Extensions.XAF.Xpo|4.221.4
+|Xpand.Extensions|4.221.5
+ |Xpand.Extensions.Office.Cloud|4.221.5
+ |[Xpand.XAF.Modules.Reactive](https://github.com/eXpandFramework/Reactive.XAF/tree/master/src/Modules/Xpand.XAF.Modules.Reactive)|4.221.5
+ |Xpand.Extensions.Reactive|4.221.5
+ |Xpand.Extensions.XAF|4.221.5
+ |Xpand.Extensions.XAF.Xpo|4.221.5
  |[Fasterflect.Xpand](https://github.com/eXpandFramework/Fasterflect)|2.0.7
  |System.Reactive|5.0.0
  |Google.Apis.Auth|1.55.0
- |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.221.4
+ |[Xpand.VersionConverter](https://github.com/eXpandFramework/Reactive.XAF/tree/master/tools/Xpand.VersionConverter)|4.221.5
 
 ## Issues-Debugging-Troubleshooting
 
