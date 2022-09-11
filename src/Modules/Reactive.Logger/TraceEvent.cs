@@ -10,10 +10,6 @@ using Xpand.Extensions.Tracing;
 using Xpand.Extensions.XAF.SecurityExtensions;
 
 namespace Xpand.XAF.Modules.Reactive.Logger{
-
-   
-
-    [NavigationItem("Settings")]
     [DebuggerDisplay("{" + nameof(Location) + "}-{" + nameof(RXAction) + ("}-{" + nameof(Method) + "}"))]
     [DeferredDeletion(false)][OptimisticLocking(OptimisticLockingBehavior.NoLocking)]
     [NonSecuredType][CreatableItem(false)]

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
@@ -15,6 +16,7 @@ using Xpand.Extensions.LinqExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.StreamExtensions;
 using Xpand.Extensions.StringExtensions;
+using Xpand.Extensions.XAF.AppDomainExtensions;
 using Xpand.XAF.Modules.ModelMapper.Configuration;
 
 
@@ -43,7 +45,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         private static string FormatOutputAssembly(bool isCustom) {
-            var outputAssembly = string.Format(OutputAssembly, ModelExtendingService.Platform);
+            var outputAssembly = string.Format(OutputAssembly, Debugger.IsAttached||AppDomain.CurrentDomain.IsDesignTime()?$"{ModelExtendingService.Platform}{DateTime.Now.Ticks}":ModelExtendingService.Platform);
             return isCustom?$"{Path.Combine(Path.GetDirectoryName(outputAssembly)!,$"{Path.GetFileNameWithoutExtension(outputAssembly)}{CustomAssemblyNameSuffix}.dll")}":outputAssembly;
         }
 

@@ -1,12 +1,10 @@
 ﻿using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.ConditionalAppearance;
-using DevExpress.ExpressApp.DC;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Notifications;
 using DevExpress.ExpressApp.Validation;
 using DevExpress.ExpressApp.ViewVariantsModule;
-using DevExpress.ExpressApp.Xpo;
 using Xpand.XAF.Modules.CloneModelView;
 using Xpand.XAF.Modules.HideToolBar;
 using Xpand.XAF.Modules.ModelMapper;
@@ -16,8 +14,7 @@ using Xpand.XAF.Modules.ModelViewInheritance;
 using Xpand.XAF.Modules.Reactive;
 using Xpand.XAF.Modules.Reactive.Extensions;
 using Xpand.XAF.Modules.Reactive.Logger.Hub;
-using Xpand.XAF.Modules.Reactive.Services;
-using Xpand.XAF.Modules.Speech.BusinessObjects;
+using Xpand.XAF.Modules.Speech.Services;
 using Xpand.XAF.Modules.Windows;
 
 namespace Xpand.XAF.Modules.Speech {
@@ -44,9 +41,12 @@ namespace Xpand.XAF.Modules.Speech {
 
         public override void Setup(ApplicationModulesManager moduleManager){
             base.Setup(moduleManager);
-            moduleManager.Connect()
+            moduleManager.ConnectTextToSpeech()
+                .Merge(moduleManager.ConnectAccount())
+                .Merge(moduleManager.ConnectSpeech())
+                .Merge(moduleManager.ConnectSpeechToText())
                 .Subscribe(this);
-            moduleManager.Extend(PredefinedMap.GridView);
+            moduleManager.Extend(PredefinedMap.GridView,PredefinedMap.AdvBandedGridView);
             moduleManager.Modules.FindModule<NotificationsModule>().ShowNotificationsWindow = false;
         }
 

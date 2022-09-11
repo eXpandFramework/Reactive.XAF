@@ -14,7 +14,7 @@
       </OwnMembers>
     </Class>
   </BOModel>
-  <NavigationItems NavigationStyle="Accordion" />
+  <NavigationItems NavigationStyle="Accordion" StartupNavigationItem="FileSpeechToText_ListView" />
   <ReactiveModules>
     <Windows>
       <Alert FormWidth="650" FormLocation="BottomLeft" />
@@ -25,9 +25,50 @@
     <SchemaModule Name="SystemWindowsFormsModule" Version="22.1.4.0" IsNewNode="True" />
   </SchemaModules>
   <Views>
-    <ListView Id="CommonGridView_ListView">
-      <GridView BorderStyle="Simple" />
-    </ListView>
+    <DetailView Id="FileSpeechToText_DetailView">
+      <Layout>
+        <LayoutGroup Id="Main">
+          <LayoutGroup Id="SimpleEditors" RelativeSize="10.566762728146013">
+            <LayoutGroup Id="Autoab9c72e5-0555-4cb4-8a1e-4ad7d521aa4b">
+              <LayoutGroup Id="Item2" RelativeSize="33.8417540514776">
+                <LayoutGroup Id="Auto4244820a-3cd7-48ba-a572-3c5f4728dac7" RelativeSize="31.818181818181817">
+                  <LayoutItem Id="Name" RelativeSize="50.70422535211268" />
+                  <LayoutItem Id="Account" RelativeSize="49.29577464788732" />
+                </LayoutGroup>
+                <LayoutGroup Id="Auto6736dd12-f6c6-4caa-a907-b5ab61c4e066" RelativeSize="29.09090909090909">
+                  <LayoutItem Id="File" ViewItem="File" Index="0" RelativeSize="37.74647887323944" IsNewNode="True" />
+                  <LayoutItem Id="Item4" Index="1" RelativeSize="38.028169014084504" />
+                  <LayoutItem Id="SpeechToText" Index="2" RelativeSize="24.225352112676056" />
+                </LayoutGroup>
+                <LayoutGroup Id="Autod4f71c1e-3885-419c-be2f-1347e673780a" RelativeSize="30">
+                  <LayoutItem Id="RecognitionLanguage" RelativeSize="50.70422535211268" />
+                  <LayoutItem Id="Rate" RelativeSize="49.29577464788732" />
+                </LayoutGroup>
+                <LayoutItem Id="Item3" RelativeSize="9.090909090909092" />
+              </LayoutGroup>
+              <LayoutItem Id="SpeechInfo" RelativeSize="41.08674928503336" />
+              <LayoutItem Id="SSMLFiles" RelativeSize="25.071496663489036" />
+            </LayoutGroup>
+          </LayoutGroup>
+          <TabbedGroup Id="Tabs" RelativeSize="89.43323727185398">
+            <LayoutGroup Id="SpeechTexts">
+              <LayoutGroup Id="Autoad629944-d407-43fa-95da-26b18f14e0e4" RelativeSize="47.69921436588103" />
+              <SplitterItem Id="SplitterItem1" RelativeSize="1.122334455667789" />
+              <LayoutItem Id="SpeechTranslations" RelativeSize="51.178451178451176" />
+            </LayoutGroup>
+            <LayoutGroup Id="Item1">
+              <LayoutGroup Id="Auto1465952f-c065-474c-bfbf-66ce9288c364">
+                <LayoutItem Id="TargetLanguages" RelativeSize="49.17234664070107" />
+                <LayoutItem Id="SpeechVoices" RelativeSize="50.82765335929893" />
+              </LayoutGroup>
+            </LayoutGroup>
+          </TabbedGroup>
+        </LayoutGroup>
+      </Layout>
+      <MergedDifferences>
+        <MergedDifference Id="SpeechToText_DetailView" View="SpeechToText_DetailView" IsNewNode="True" />
+      </MergedDifferences>
+    </DetailView>
     <ListView Id="SpeechAccount_Voices_ListView" IsFooterVisible="True" FreezeColumnIndices="True">
       <Columns>
         <ColumnInfo Id="Account" Index="-1" />
@@ -121,39 +162,39 @@
       </Items>
       <Layout IsNewNode="True" Removed="True">
         <LayoutGroup Id="Main" Index="0" ShowCaption="False" RelativeSize="100" TextAlignMode="UseParentOptions" Direction="Vertical" Caption="Main" IsNewNode="True">
-          <LayoutGroup Id="SimpleEditors" ShowCaption="False" Direction="Vertical" Index="0" RelativeSize="11.954022988505747" IsNewNode="True">
+          <LayoutGroup Id="SimpleEditors" ShowCaption="False" Direction="Vertical" Index="0" RelativeSize="9.74188176519567" IsNewNode="True">
             <LayoutGroup Id="Autoab9c72e5-0555-4cb4-8a1e-4ad7d521aa4b" ShowCaption="False" Caption="Autoab9c72e5-0555-4cb4-8a1e-4ad7d521aa4b(6)" Direction="Horizontal" Index="0" RelativeSize="100" TextAlignMode="AlignWithChildren" IsNewNode="True">
-              <LayoutGroup Id="Item2" ShowCaption="False" CaptionLocation="Top" Index="0" RelativeSize="39.44444444444444" Caption=" " GroupStyle="Light" IsNewNode="True">
-                <LayoutGroup Id="Auto4244820a-3cd7-48ba-a572-3c5f4728dac7" ShowCaption="False" Caption="Auto4244820a-3cd7-48ba-a572-3c5f4728dac7(5)" Direction="Horizontal" Index="0" RelativeSize="33.65384615384615" IsNewNode="True">
-                  <LayoutItem Id="Name" ViewItem="Name" Index="0" RelativeSize="50.70422535211268" IsNewNode="True" />
-                  <LayoutItem Id="Account" ViewItem="Account" Index="1" RelativeSize="49.29577464788732" IsNewNode="True" />
+              <LayoutGroup Id="Item2" ShowCaption="False" CaptionLocation="Top" Index="0" RelativeSize="33.8235294117647" Caption=" " GroupStyle="Light" IsNewNode="True">
+                <LayoutGroup Id="Auto4244820a-3cd7-48ba-a572-3c5f4728dac7" ShowCaption="False" Caption="Auto4244820a-3cd7-48ba-a572-3c5f4728dac7(5)" Direction="Horizontal" Index="0" RelativeSize="32.47863247863248" IsNewNode="True">
+                  <LayoutItem Id="Name" ViewItem="Name" Index="0" RelativeSize="50.72463768115942" IsNewNode="True" />
+                  <LayoutItem Id="Account" ViewItem="Account" Index="1" RelativeSize="49.27536231884058" IsNewNode="True" />
                 </LayoutGroup>
-                <LayoutGroup Id="Auto6736dd12-f6c6-4caa-a907-b5ab61c4e066" ShowCaption="False" Caption="Auto6736dd12-f6c6-4caa-a907-b5ab61c4e066(8)" Direction="Horizontal" Index="1" RelativeSize="33.65384615384615" IsNewNode="True">
-                  <LayoutItem Id="SpeechSource" ViewItem="SpeechSource" Index="0" RelativeSize="75.77464788732394" IsNewNode="True" />
-                  <LayoutItem Id="SpeechToText" TextAlignMode="CustomSize" ViewItem="SpeechToText" Index="1" RelativeSize="24.225352112676056" IsNewNode="True" />
+                <LayoutGroup Id="Auto6736dd12-f6c6-4caa-a907-b5ab61c4e066" ShowCaption="False" Caption="Auto6736dd12-f6c6-4caa-a907-b5ab61c4e066(8)" Direction="Horizontal" Index="1" RelativeSize="29.05982905982906" TextAlignMode="AlignWithChildren" IsNewNode="True">
+                  <LayoutItem Id="Item4" Index="0" RelativeSize="75.84541062801932" IsNewNode="True" />
+                  <LayoutItem Id="SpeechToText" TextAlignMode="CustomSize" ViewItem="SpeechToText" Index="1" RelativeSize="24.154589371980677" IsNewNode="True" />
                 </LayoutGroup>
-                <LayoutGroup Id="Autod4f71c1e-3885-419c-be2f-1347e673780a" ShowCaption="False" Caption="" Direction="Horizontal" Index="2" RelativeSize="23.076923076923077" IsNewNode="True">
-                  <LayoutItem Id="RecognitionLanguage" ViewItem="RecognitionLanguage" Index="0" RelativeSize="50.70422535211268" IsNewNode="True" />
-                  <LayoutItem Id="Rate" ViewItem="Rate" SizeConstraintsType="Custom" MinSize="175, 24" Index="1" RelativeSize="49.29577464788732" IsNewNode="True" />
+                <LayoutGroup Id="Autod4f71c1e-3885-419c-be2f-1347e673780a" ShowCaption="False" Caption="Autod4f71c1e-3885-419c-be2f-1347e673780a(11)" Direction="Horizontal" Index="2" RelativeSize="29.914529914529915" IsNewNode="True">
+                  <LayoutItem Id="RecognitionLanguage" ViewItem="RecognitionLanguage" Index="0" RelativeSize="50.72463768115942" IsNewNode="True" />
+                  <LayoutItem Id="Rate" ViewItem="Rate" SizeConstraintsType="Custom" MinSize="175, 24" Index="1" RelativeSize="49.27536231884058" IsNewNode="True" />
                 </LayoutGroup>
-                <LayoutItem Id="Item3" Index="3" RelativeSize="9.615384615384615" IsNewNode="True" />
+                <LayoutItem Id="Item3" Index="3" RelativeSize="8.547008547008547" IsNewNode="True" />
               </LayoutGroup>
-              <LayoutItem Id="SpeechInfo" ShowCaption="False" ViewItem="SpeechInfo" Index="1" RelativeSize="38.111111111111114" IsNewNode="True" />
-              <LayoutItem Id="SSMLFiles" ViewItem="SSMLFiles" Index="2" RelativeSize="22.444444444444443" TextAlignMode="CustomSize" IsNewNode="True" />
+              <LayoutItem Id="SpeechInfo" ShowCaption="False" ViewItem="SpeechInfo" Index="1" RelativeSize="41.25816993464052" IsNewNode="True" />
+              <LayoutItem Id="SSMLFiles" ViewItem="SSMLFiles" Index="2" RelativeSize="24.91830065359477" TextAlignMode="CustomSize" IsNewNode="True" />
             </LayoutGroup>
           </LayoutGroup>
-          <TabbedGroup Id="Tabs" Index="1" RelativeSize="88.04597701149426" IsNewNode="True">
+          <TabbedGroup Id="Tabs" Index="1" RelativeSize="90.25811823480433" IsNewNode="True">
             <LayoutGroup Id="SpeechTexts" ShowCaption="True" Caption="Speech Texts" TextAlignMode="AlignWithChildren" Index="0" RelativeSize="100" IsNewNode="True">
-              <LayoutGroup Id="Autoad629944-d407-43fa-95da-26b18f14e0e4" ShowCaption="False" Caption="Autoad629944-d407-43fa-95da-26b18f14e0e4(11)" TextAlignMode="AlignWithChildren" Index="0" RelativeSize="47.65840220385675" IsNewNode="True">
+              <LayoutGroup Id="Autoad629944-d407-43fa-95da-26b18f14e0e4" ShowCaption="False" Caption="Autoad629944-d407-43fa-95da-26b18f14e0e4(11)" TextAlignMode="AlignWithChildren" Index="0" RelativeSize="47.79270633397313" IsNewNode="True">
                 <LayoutItem Id="SpeechTexts" TextAlignMode="AutoSize" ViewItem="SpeechTexts" SizeConstraintsType="Custom" MinSize="65, 38" Index="0" RelativeSize="100" IsNewNode="True" />
               </LayoutGroup>
-              <SplitterItem Id="SplitterItem1" Index="1" RelativeSize="1.3774104683195592" IsNewNode="True" />
-              <LayoutItem Id="SpeechTranslations" ViewItem="SpeechTranslations" SizeConstraintsType="Custom" MinSize="20, 30" Index="2" RelativeSize="50.964187327823694" IsNewNode="True" />
+              <SplitterItem Id="SplitterItem1" Index="1" RelativeSize="0.9596928982725528" IsNewNode="True" />
+              <LayoutItem Id="SpeechTranslations" ViewItem="SpeechTranslations" SizeConstraintsType="Custom" MinSize="20, 30" Index="2" RelativeSize="51.24760076775432" IsNewNode="True" />
             </LayoutGroup>
             <LayoutGroup Id="Item1" ShowCaption="True" Caption="Translations" CaptionLocation="Top" Index="1" RelativeSize="100" IsNewNode="True">
               <LayoutGroup Id="Auto1465952f-c065-474c-bfbf-66ce9288c364" ShowCaption="False" Caption="Auto1465952f-c065-474c-bfbf-66ce9288c364(14)" TextAlignMode="AlignWithChildren" Direction="Horizontal" Index="0" RelativeSize="100" IsNewNode="True">
-                <LayoutItem Id="TargetLanguages" ViewItem="TargetLanguages" CaptionLocation="Top" Index="0" RelativeSize="49.54441913439636" IsNewNode="True" />
-                <LayoutItem Id="SpeechVoices" ViewItem="SpeechVoices" Index="1" RelativeSize="50.45558086560364" IsNewNode="True" />
+                <LayoutItem Id="TargetLanguages" ViewItem="TargetLanguages" CaptionLocation="Top" Index="0" RelativeSize="49.3322203672788" IsNewNode="True" />
+                <LayoutItem Id="SpeechVoices" ViewItem="SpeechVoices" Index="1" RelativeSize="50.6677796327212" IsNewNode="True" />
               </LayoutGroup>
             </LayoutGroup>
           </TabbedGroup>
@@ -271,6 +312,9 @@
       <BandsLayout Enable="True" ShowBands="False">
         <Band Id="Columns" IsNewNode="True" />
       </BandsLayout>
+      <AdvBandedGridView>
+        <OptionsCustomization AllowSort="False" />
+      </AdvBandedGridView>
       <HiddenActions>
         <ActionLink ActionId="New" IsNewNode="True" />
         <ActionLink ActionId="NextObject" IsNewNode="True" />
@@ -326,6 +370,9 @@
         <ColumnInfo Id="File" Index="4" />
         <ColumnInfo Id="Text" Index="5" SortIndex="-1" SortOrder="None" />
       </Columns>
+      <GridView>
+        <OptionsCustomization AllowSort="False" />
+      </GridView>
       <HiddenActions>
         <ActionLink ActionId="New" IsNewNode="True" />
         <ActionLink ActionId="NextObject" IsNewNode="True" />

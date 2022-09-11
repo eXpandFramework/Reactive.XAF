@@ -3,9 +3,5 @@
   <Options FormStyle="Ribbon" Skin="Office 2019 Black" UIType="TabbedMDI" ShowTabImage="True">
     <LayoutManagerOptions EnableLayoutGroupImages="False" />
   </Options>
-  <Views>
-    <ListView Id="CommonGridView_ListView">
-      <GridView AccessibleRole="TitleBar" />
-    </ListView>
-  </Views>
+  
 </Application>

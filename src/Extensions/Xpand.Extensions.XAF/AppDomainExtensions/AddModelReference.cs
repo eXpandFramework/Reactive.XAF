@@ -16,7 +16,6 @@ namespace Xpand.Extensions.XAF.AppDomainExtensions{
 	        => new HarmonyMethod(typeof(AppDomainExtensions).Method(nameof(ModifyCSCodeCompilerReferences),Flags.Static|Flags.AnyVisibility))
 		        .PreFix(typeof(CSCodeCompiler).GetMethod(nameof(CSCodeCompiler.Compile)),false);
 
-        
         public static void AddModelReference(this AppDomain appDomain, params string[] name){
 	        var locations = AppDomain.CurrentDomain.GetAssemblies()
                 .Where(assembly => name.Contains(assembly.GetName().Name))

@@ -11,12 +11,17 @@ using Xpand.Extensions.XAF.Attributes;
 using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.Speech.BusinessObjects {
-    [NavigationItem("Speech")][DefaultClassOptions]
+    
     [DeferredDeletion(false)][DefaultProperty(nameof(Name))]
     [ImageName(("Action_Change_State"))]
     [OptimisticLocking(OptimisticLockingBehavior.LockModified)]
     public abstract class SpeechToText:CustomBaseObject {
         protected SpeechToText(Session session) : base(session) { }
+
+        [InvisibleInAllViews]
+        public bool IsValid => GetIsValid();
+
+        protected abstract bool GetIsValid();
 
         [Association("SpeechToText-SpeechTexts")][Aggregated][InvisibleInAllViews]
         public XPCollection<SpeechText> Texts => GetCollection<SpeechText>();
@@ -41,14 +46,7 @@ namespace Xpand.XAF.Modules.Speech.BusinessObjects {
             get => _rate;
             set => SetPropertyValue(nameof(Rate), ref _rate, value);
         }
-
-        SpeechSource _speechSource;
-
-        [RuleRequiredField]
-        public SpeechSource SpeechSource {
-            get => _speechSource;
-            set => SetPropertyValue(nameof(SpeechSource), ref _speechSource, value);
-        }
+        
         
         [CollectionOperationSet(AllowAdd = false)][ReloadWhenChange()]
         public BindingList<SpeechText> SpeechTexts => Texts.ExactType().ToBindingList();
