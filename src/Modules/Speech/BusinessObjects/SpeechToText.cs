@@ -12,12 +12,11 @@ using Xpand.XAF.Persistent.BaseImpl;
 
 namespace Xpand.XAF.Modules.Speech.BusinessObjects {
     [NavigationItem("Speech")][DefaultClassOptions]
-    
     [DeferredDeletion(false)][DefaultProperty(nameof(Name))]
     [ImageName(("Action_Change_State"))]
-    [OptimisticLocking(OptimisticLockingBehavior.LockModified)][SuppressMessage("Design", "XAF0023:Do not implement IObjectSpaceLink in the XPO types")]
-    public class SpeechToText:CustomBaseObject {
-        public SpeechToText(Session session) : base(session) { }
+    [OptimisticLocking(OptimisticLockingBehavior.LockModified)]
+    public abstract class SpeechToText:CustomBaseObject {
+        protected SpeechToText(Session session) : base(session) { }
 
         [Association("SpeechToText-SpeechTexts")][Aggregated][InvisibleInAllViews]
         public XPCollection<SpeechText> Texts => GetCollection<SpeechText>();

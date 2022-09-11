@@ -30,6 +30,9 @@
     <Reference Include="Xpand.Extensions">
       <HintPath>..\..\..\bin\Xpand.Extensions.dll</HintPath>
     </Reference>
+    <Reference Include="Xpand.Extensions.Reactive">
+      <HintPath>..\..\..\bin\Xpand.Extensions.Reactive.dll</HintPath>
+    </Reference>
     <Reference Include="Xpand.Extensions.XAF">
       <HintPath>..\..\..\bin\Xpand.Extensions.XAF.dll</HintPath>
     </Reference>

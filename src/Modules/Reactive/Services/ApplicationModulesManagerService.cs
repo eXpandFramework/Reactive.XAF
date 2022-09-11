@@ -70,6 +70,9 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 	    public static IObservable<T> WhenGeneratingModelNodes<T>(this ApplicationModulesManager manager,bool emitCached) where T : IEnumerable<IModelNode> 
 		    => ReactiveModule.GeneratingModelNodes.WhenNotDefault()
 			    .SelectMany(updaters => {
+				    if (typeof(T).FullName == "IModelMergedDifferences") {
+					    throw new NotImplementedException("Use the model editor instead and add nodes manually see #946");
+				    }
 				    var updaterType = (Type)typeof(T).GetCustomAttributesData().First(data => data.AttributeType==typeof(ModelNodesGeneratorAttribute)).ConstructorArguments.First().Value;
 				    var updater = typeof(NodesUpdater<>).MakeGenericType(updaterType).CreateInstance();
 				    updaters.Add((IModelNodesGeneratorUpdater) updater);
@@ -87,9 +90,15 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 		    public IObservable<ModelNode> Update => _updateSubject;
 		    public IObservable<ModelNode> UpdateCached => _updateCachedSubject;
 
-		    public override void UpdateNode(ModelNode node) => _updateSubject.OnNext(node);
+		    public override void UpdateNode(ModelNode node) {
+			    _updateSubject.OnNext(node);
+			    _updateSubject.OnCompleted();
+		    }
 
-		    public override void UpdateCachedNode(ModelNode node) => _updateCachedSubject.OnNext(node);
+		    public override void UpdateCachedNode(ModelNode node) {
+			    _updateCachedSubject.OnNext(node);
+			    _updateCachedSubject.OnCompleted();
+		    }
 	    }
 
     }

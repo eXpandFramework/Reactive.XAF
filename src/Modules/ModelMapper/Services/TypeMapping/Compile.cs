@@ -26,14 +26,12 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         static readonly Subject<GenericEventArgs<(string code,IEnumerable<string> references,string outputAssembly)>> CustomCompileSubject=new();
 
         public static IObservable<GenericEventArgs<(string code, IEnumerable<string> references, string outputAssembly)>> CustomCompile1 => CustomCompileSubject.AsObservable();
-
+        
         private static IObservable<Assembly> Compile(this IEnumerable<string> references, string code,bool isCustom){
-	        
-	        var outputAssembly = FormatOutputAssembly(isCustom);
+            var outputAssembly = FormatOutputAssembly(isCustom);
 	        if (File.Exists(outputAssembly)){
                 File.Delete(outputAssembly);
 	        }
-
             var args = new GenericEventArgs<(string code, IEnumerable<string> references,string outputAssembly)>();
             CustomCompileSubject.OnNext(args);
             if (!args.Handled) {

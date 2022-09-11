@@ -26,19 +26,21 @@
     <Using Include="DevExpress.ExpressApp.ListView" Alias="ListView" />
   </ItemGroup>
   <ItemGroup>
-    <None Remove="Model.xafml" />
     <None Remove="Images\Logo.svg" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Model.xafml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <None Remove="Model.DesignedDiffs.xafml" />
+    <None Remove="Model.xafml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\..\Common\AssemblyInfoVersion.cs" Link="Properties\AssemblyInfoVersion.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Images\Logo.svg" />
+    <Content Include="Model.xafml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <EmbeddedResource Include="Model.DesignedDiffs.xafml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DevExpress.ExpressApp.Win.All" Version="22.1.5" />
@@ -52,10 +54,7 @@
     <ProjectReference Include="..\Xpand.XAF.SpeechManager.Module\Xpand.XAF.SpeechManager.Module.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.23.0" />
-    <Reference Include="Xpand.XAF.Modules.Speech">
-      <HintPath>..\..\..\..\bin\net6.0-windows7.0\Xpand.XAF.Modules.Speech.dll</HintPath>
-    </Reference>
-    <PackageReference Include="xpand.xaf.Win.all" Version="4.221.4.2" />
+    
+    <PackageReference Include="xpand.xaf.Win.all" Version="4.221.5.1" />
   </ItemGroup>
 </Project>

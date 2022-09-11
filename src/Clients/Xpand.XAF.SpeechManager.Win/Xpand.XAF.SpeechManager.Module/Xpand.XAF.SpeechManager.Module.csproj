@@ -29,10 +29,24 @@
     <PackageReference Include="DevExpress.ExpressApp.Xpo" Version="22.1.5" />
     <PackageReference Include="DevExpress.Persistent.Base" Version="22.1.5" />
     <PackageReference Include="DevExpress.Persistent.BaseImpl.Xpo" Version="22.1.5" />
+    <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
+    <PackageReference Include="System.Reactive" Version="5.0.0" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xpand.XAF.Modules.Speech">
       <HintPath>..\..\..\..\bin\net6.0-windows7.0\Xpand.XAF.Modules.Speech.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.ModelMapper">
+      <HintPath>..\..\..\..\bin\Xpand.XAF.Modules.ModelMapper.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.CloneModelView">
+      <HintPath>..\..\..\..\bin\Xpand.XAF.Modules.CloneModelView.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.Reactive">
+      <HintPath>..\..\..\..\bin\Xpand.XAF.Modules.Reactive.dll</HintPath>
+    </Reference>
+    <Reference Include="Xpand.XAF.Modules.ModelViewInheritance">
+      <HintPath>..\..\..\..\bin\Xpand.XAF.Modules.ModelViewInheritance.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

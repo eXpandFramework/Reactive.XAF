@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp.Model;
 using DevExpress.ExpressApp.Model.Core;
+using DevExpress.ExpressApp.Model.NodeGenerators;
 
 namespace Xpand.Extensions.XAF.ModelExtensions {
     public static partial class ModelExtensions {

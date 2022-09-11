@@ -12,7 +12,7 @@ namespace Xpand.Extensions.Reactive.Transform{
         public static IObservable<T> WaitUntilInactive<T>(this IObservable<T> source, TimeSpan timeSpan,int count =1) 
             => timeSpan == TimeSpan.Zero ? source : source.BufferUntilInactive(timeSpan).SelectMany(list => list.TakeLast(count));
         
-        public static IObservable<T> WaitUntilInactive<T>(this IObservable<T> source, TimeSpan timeSpan,SynchronizationContext context=null,int count =1) 
+        public static IObservable<T> WaitUntilInactive<T>(this IObservable<T> source, TimeSpan timeSpan,SynchronizationContext context,int count =1) 
             => timeSpan == TimeSpan.Zero ? source : source.BufferUntilInactive(timeSpan).ObserveOn(context!).SelectMany(list => list.TakeLast(count));
 
         public static IObservable<T> WaitUntilInactive<T>(this IObservable<T> source, int seconds, int count = 1)

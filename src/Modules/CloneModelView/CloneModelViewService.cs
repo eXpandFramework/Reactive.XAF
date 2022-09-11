@@ -3,27 +3,23 @@ using System.Linq;
 using System.Reactive.Linq;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Model;
-using DevExpress.ExpressApp.Model.NodeGenerators;
-
+using Xpand.Extensions.Reactive.Transform;
+using Xpand.Extensions.XAF.ModelExtensions;
 using Xpand.XAF.Modules.Reactive.Services;
 
 namespace Xpand.XAF.Modules.CloneModelView{
 	public static class CloneModelViewService{
-        internal static IObservable<IModelViews> Connect(this ApplicationModulesManager manager) 
+        internal static IObservable<IModelClass> Connect(this ApplicationModulesManager manager) 
 			=> manager.WhenGeneratingModelNodes(modelApplication => modelApplication.Views)
-				.Do(views => {
-					foreach (var bo in views.Application.BOModel.Where(m =>
-						m.TypeInfo.FindAttributes<CloneModelViewAttribute>(false).Any())){
-						views.GenerateModel(bo);
-					}
-				});
+				.SelectMany(views => views.Application.BOModel.Where(m =>
+						m.TypeInfo.FindAttributes<CloneModelViewAttribute>(false).Any()).ToNowObservable()
+					.Do(views.GenerateModel));
 
-		private static IModelObjectView NewModelView(this IModelViews modelViews, CloneModelViewAttribute cloneViewAttribute,
-			IModelClass modelClass){
+		private static IModelObjectView NewModelView(this IModelViews modelViews, CloneModelViewAttribute cloneViewAttribute, IModelClass modelClass){
 			if (cloneViewAttribute.ViewType == CloneViewType.ListView){
 				var listView = modelViews.AddNode<IModelListView>(cloneViewAttribute.ViewId);
 				listView.ModelClass = modelClass;
-				ModelListViewNodesGenerator.GenerateNodes(listView, modelClass);
+				listView.GenerateNodes();
 				return listView;
 			}
 

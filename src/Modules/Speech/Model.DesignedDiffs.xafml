@@ -16,11 +16,6 @@
   </BOModel>
   <NavigationItems NavigationStyle="Accordion" />
   <ReactiveModules>
-    <ReactiveLogger>
-      <Notifications>
-        <ReactiveLoggerNotification Id="Errors" Criteria="[RXAction] = ##Enum#Xpand.XAF.Modules.Reactive.Logger.RXAction,OnError#" ObjectType="Xpand.Extensions.XAF.Xpo.BaseObjects.ErrorEvent" ShowXafMessage="True" XafMessageType="Error" MessageDisplayInterval="10000" IsNewNode="True" />
-      </Notifications>
-    </ReactiveLogger>
     <Windows>
       <Alert FormWidth="650" FormLocation="BottomLeft" />
     </Windows>
@@ -30,6 +25,9 @@
     <SchemaModule Name="SystemWindowsFormsModule" Version="22.1.4.0" IsNewNode="True" />
   </SchemaModules>
   <Views>
+    <ListView Id="CommonGridView_ListView">
+      <GridView BorderStyle="Simple" />
+    </ListView>
     <ListView Id="SpeechAccount_Voices_ListView" IsFooterVisible="True" FreezeColumnIndices="True">
       <Columns>
         <ColumnInfo Id="Account" Index="-1" />
@@ -162,6 +160,9 @@
         </LayoutGroup>
       </Layout>
     </DetailView>
+    <ListView Id="SpeechToText_ListView">
+      <GridView ViewCaption="test" />
+    </ListView>
     <ListView Id="SpeechToText_SpeechInfo_ListView" HideToolBar="True">
       <Columns>
         <ColumnInfo Id="SpeechType" OwnerBand="@e747572a-d281-4ad7-9a1c-8cd215294b93" />
