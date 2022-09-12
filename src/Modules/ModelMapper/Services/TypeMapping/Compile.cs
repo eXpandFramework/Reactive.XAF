@@ -45,7 +45,7 @@ namespace Xpand.XAF.Modules.ModelMapper.Services.TypeMapping{
         }
 
         private static string FormatOutputAssembly(bool isCustom) {
-            var outputAssembly = string.Format(OutputAssembly, Debugger.IsAttached||AppDomain.CurrentDomain.IsDesignTime()?$"{ModelExtendingService.Platform}{DateTime.Now.Ticks}":ModelExtendingService.Platform);
+            var outputAssembly = string.Format(OutputAssembly,ModelExtendingService.Platform);
             return isCustom?$"{Path.Combine(Path.GetDirectoryName(outputAssembly)!,$"{Path.GetFileNameWithoutExtension(outputAssembly)}{CustomAssemblyNameSuffix}.dll")}":outputAssembly;
         }
 

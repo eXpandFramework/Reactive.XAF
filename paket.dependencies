@@ -11,12 +11,12 @@ framework:net461,net472,net6.0,net6.0-windows,netstandard2.0,netstandard2.1
 nuget DevExpress.ExpressApp.Office 22.1.5
 nuget DevExpress.ExpressApp.Core.All 22.1.5
 nuget DevExpress.ExpressApp.Win.All 22.1.5
+nuget DevExpress.ExpressApp.CodeAnalysis 22.1.5
 nuget DevExpress.ExpressApp.Web.All 22.1.5
 nuget DevExpress.ExpressApp.Blazor.All 22.1.5
 nuget DevExpress.ExpressApp.Blazor 22.1.5
 nuget DevExpress.ExpressApp.Validation.Blazor 22.1.5
 nuget DevExpress.EasyTest 22.1.5  
-nuget  22.1.5
 nuget DevExpress.ExpressApp.EasyTest.WebAdapter 22.1.5  
 nuget DevExpress.ExpressApp.EasyTest.WinAdapter 22.1.5  
 nuget DevExpress.ExpressApp.Security.Xpo 22.1.5  
@@ -54,9 +54,9 @@ nuget FasterFlect.Xpand 2.0.7
 nuget akarnokd.reactive_extensions 0.0.27-alpha
 nuget Microsoft.AspNetCore.Razor.Runtime 2.2
 nuget Microsoft.AspNetCore.Hosting 2.2.7
-nuget Microsoft.Owin.Host.SystemWeb 4.2
-nuget Microsoft.Owin.Security.Cookies 4.2
-nuget Microsoft.Owin.Security.OpenIdConnect 4.2
+nuget Microsoft.Owin.Host.SystemWeb 4.2.2
+nuget Microsoft.Owin.Security.Cookies 4.2.2
+nuget Microsoft.Owin.Security.OpenIdConnect 4.2.2
 nuget Microsoft.IdentityModel.Protocols.OpenIdConnect 6.15.0
 nuget System.Reflection.Metadata 5.0.0
 nuget System.Interactive 5.0     

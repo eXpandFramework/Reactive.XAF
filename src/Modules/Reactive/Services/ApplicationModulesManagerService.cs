@@ -92,12 +92,10 @@ namespace Xpand.XAF.Modules.Reactive.Services{
 
 		    public override void UpdateNode(ModelNode node) {
 			    _updateSubject.OnNext(node);
-			    _updateSubject.OnCompleted();
 		    }
 
 		    public override void UpdateCachedNode(ModelNode node) {
 			    _updateCachedSubject.OnNext(node);
-			    _updateCachedSubject.OnCompleted();
 		    }
 	    }
 

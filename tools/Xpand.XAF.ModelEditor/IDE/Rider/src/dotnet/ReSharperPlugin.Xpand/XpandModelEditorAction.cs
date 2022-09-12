@@ -32,6 +32,7 @@ namespace ReSharperPlugin.Xpand{
                 await XpandModelEditor.ExtractMEAsync();
                 Notify(notifications,nameof(XpandModelEditor.StartMEAsync));
                 await XpandModelEditor.StartMEAsync();
+                
             }
             catch (Exception e){
                 Log.Root.Log(LoggingLevel.ERROR, e.ToString());

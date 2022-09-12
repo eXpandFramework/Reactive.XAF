@@ -4,6 +4,8 @@ using DevExpress.ExpressApp.Win;
 using DevExpress.ExpressApp.Xpo;
 using Xpand.XAF.ModelEditor.Module.Win;
 
+// using Xpand.XAF.ModelEditor.Module.Win;
+
 namespace Xpand.XAF.ModelEditor.Win {
     public partial class ModelEditorWindowsFormsApplication : WinApplication {
         public ModelEditorWindowsFormsApplication() => InitializeComponent();

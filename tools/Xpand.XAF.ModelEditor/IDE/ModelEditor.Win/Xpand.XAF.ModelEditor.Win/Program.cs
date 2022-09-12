@@ -8,11 +8,8 @@ using DevExpress.XtraEditors;
 namespace Xpand.XAF.ModelEditor.Win {
     static class Program {
         [STAThread]
-        static void Main(){
-            
-           
-           
-            FrameworkSettings.DefaultSettingsCompatibilityMode = FrameworkSettingsCompatibilityMode.Latest;
+        static void Main() {
+	        FrameworkSettings.DefaultSettingsCompatibilityMode = FrameworkSettingsCompatibilityMode.Latest;
 #if EASYTEST
             DevExpress.ExpressApp.Win.EasyTest.EasyTestRemotingRegistration.Register();
 #endif

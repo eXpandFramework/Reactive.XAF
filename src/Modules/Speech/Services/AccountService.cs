@@ -5,25 +5,33 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using System.Windows.Forms;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
+using DevExpress.ExpressApp.SystemModule;
 using Microsoft.CognitiveServices.Speech;
 using Xpand.Extensions.AppDomainExtensions;
+using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Utility;
 using Xpand.Extensions.XAF.Attributes;
 using Xpand.Extensions.XAF.ObjectSpaceExtensions;
 using Xpand.Extensions.XAF.Xpo.BaseObjects;
 using Xpand.XAF.Modules.Reactive.Services;
+using Xpand.XAF.Modules.Reactive.Services.Actions;
 using Xpand.XAF.Modules.Speech.BusinessObjects;
 
 namespace Xpand.XAF.Modules.Speech.Services {
     public static class AccountService {
-        public static IObservable<Unit> ConnectAccount(this ApplicationModulesManager manager) {
-            return manager.UpdateAccounts();
-        }
+        public static IObservable<Unit> ConnectAccount(this ApplicationModulesManager manager) 
+            => manager.UpdateVoices();
+
+        private static IObservable<Unit> UpdateVoices(this ApplicationModulesManager manager) 
+            => manager.UpdateVoicesOnViewRefresh();
+
+        private static IObservable<Unit> UpdateVoicesOnViewRefresh(this ApplicationModulesManager manager) 
+            => manager.WhenApplication(application => application.WhenFrameViewChanged().WhenFrame(typeof(SpeechAccount),ViewType.DetailView)
+                .SelectUntilViewClosed(frame => frame.GetController<RefreshController>().RefreshAction.WhenConcatRetriedExecution(_ =>frame.View.CurrentObject.To<SpeechAccount>().UpdateVoices() )).ToUnit());
 
         public static SpeechAccount DefaultAccount(this IObjectSpace space,XafApplication application) 
             => space.FindObject<SpeechAccount>(CriteriaOperator.Parse(application.Model.SpeechModel().DefaultAccountCriteria));
@@ -62,7 +70,7 @@ namespace Xpand.XAF.Modules.Speech.Services {
         public static SpeechTranslationConfig TranslationConfig(this SpeechAccount account) 
             => SpeechTranslationConfig.FromSubscription(account.Subscription, account.Region);
         
-        private static void NewVoice(this SpeechAccount account,VoiceInfo voiceInfo) {
+        private static void EnsureVoice(this SpeechAccount account,VoiceInfo voiceInfo) {
             var speechVoice = account.ObjectSpace.EnsureObject<SpeechVoice>(voice => voice.Account!=null&& voice.Account.Oid==account.Oid&&voice.Name==voiceInfo.Name,inTransaction:true);
             speechVoice.Gender = voiceInfo.Gender;
             speechVoice.Language=account.ObjectSpace.EnsureObject<SpeechLanguage>(language => language.Name==voiceInfo.Locale,language => language.Name=voiceInfo.Locale,true);
@@ -73,14 +81,17 @@ namespace Xpand.XAF.Modules.Speech.Services {
             speechVoice.Account=account;
         }
 
-        private static IObservable<Unit> UpdateAccounts(this ApplicationModulesManager manager) 
-            => manager.WhenSpeechApplication(application => application.WhenCommitted<SpeechAccount>(ObjectModification.New)
-                    .ToObjects().Select(account => (account,SynchronizationContext.Current))
-                    .SelectMany(t => Observable.Using(() => new SpeechSynthesizer(t.account.SpeechConfig()),synthesizer => synthesizer.GetVoicesAsync().ToObservable()
-                        .ObserveOnContext(t.Current).SelectMany(result => result.Voices.ToNowObservable()
-                            .Do(info =>t.account.NewVoice(info) ).BufferUntilCompleted().Do(_ => t.account.CommitChanges())))))
+        private static IObservable<Unit> UpdateVoicesOnCommit(this ApplicationModulesManager manager) 
+            => manager.WhenSpeechApplication(application => application.WhenCommitted<SpeechAccount>(ObjectModification.New).ToObjects()
+                    .SelectMany(UpdateVoices))
                 .ToUnit();
 
-
+        private static IObservable<VoiceInfo[]> UpdateVoices(this SpeechAccount account) 
+            => Observable.Using(() => new SpeechSynthesizer(account.SpeechConfig()),synthesizer => synthesizer.GetVoicesAsync().ToObservable()
+                .ObserveOnContext().SelectMany(result => result.Voices.ToNowObservable()
+                    .Do(account.EnsureVoice ).BufferUntilCompleted().Do(_ => {
+                        account.CommitChanges();
+                        account.ObjectSpace.Refresh();
+                    })));
     }
 }
