@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net6.0-windows7.0</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>ExpressApp.ico</ApplicationIcon>
     <Deterministic>false</Deterministic>
@@ -14,7 +14,6 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
     <DebugType>full</DebugType>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    
     <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
     <ToolCommandName>Speech</ToolCommandName>
     <PackageOutputPath>$(MSBuildThisFileDirectory)nupkgs</PackageOutputPath>

@@ -15,7 +15,6 @@ using DevExpress.Xpo;
 using Fasterflect;
 using Xpand.Extensions.AppDomainExtensions;
 using Xpand.Extensions.LinqExtensions;
-using Xpand.Extensions.ObjectExtensions;
 using Xpand.Extensions.Reactive.Transform;
 using Xpand.Extensions.Reactive.Transform.Collections;
 using Xpand.Extensions.Reactive.Utility;
@@ -508,17 +507,13 @@ namespace Xpand.XAF.Modules.Reactive.Services{
         public static IObservable<TLink> ReloadNotifyObject<TLink>(this TLink link) where  TLink:IObjectSpaceLink 
             => link.Defer(() => {
                     if (link.GetType().Implements(XPInvalidateableObjectType)) {
-                        
+
                         if (!(bool)link.GetPropertyValue("IsInvalidated") && !(bool)link.GetPropertyValue("Session").GetPropertyValue("IsObjectsLoading"))
                             return link.ReloadObject().ReturnObservable();
-                        else
-                            return link.GetPropertyValue("Session").WhenEvent("ObjectLoaded").FirstAsync()
-                                .Do(_ => link.ReloadObject()).To(link);
+                        return link.GetPropertyValue("Session").WhenEvent("ObjectLoaded").FirstAsync()
+                            .Do(_ => link.ReloadObject()).To(link);
                     }
-
                     throw new NotImplementedException();
-                    link.ReloadObject();
-                    return link.ReturnObservable();
                 })
                 .Do(spaceLink => ReloadObjectSubject.OnNext((spaceLink.ObjectSpace, spaceLink)));
 
